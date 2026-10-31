@@ -1813,13 +1813,13 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.Remove`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.Delete`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithDeleteQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.ForceDelete`
 - `github.com/JSYoo5B/go-openstacksdk/resource.ID`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithMissingError`
 - `github.com/JSYoo5B/go-openstacksdk/resource.IgnoreMissing`
 
-- Remove ignores 404 by default and WithMissingError reports NotFound; Delete with WithDeleteQuery reproduces Python's cascade=False&force=False (or True) query and ForceDelete posts os-force_delete for the pre-3.23 force path.
+- Remove ignores 404 by default and WithMissingError reports NotFound; Delete with request.Query reproduces Python's cascade=False&force=False (or True) query and ForceDelete posts os-force_delete for the pre-3.23 force path.
   Tests: `blockstorage/v3/volumes/python_parity_test.go:TestPythonVolumeDeleteDefaultsCascadeForceAndMissing`.
 - Wrapping the direct delete in resource.IgnoreMissing turns a plain HTTP 404 into success like Python's default ignore_missing=True, keeps other failures such as 409 as errors, and leaves the DELETE request unchanged.
   Tests: `resource/missing_test.go:TestIgnoreMissingDropsOnlyPlain404`, `blockstorage/v3/volumes/python_ignore_missing_test.go:TestPythonDeleteIgnoreMissingVolume`.
@@ -1861,12 +1861,12 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.API.Remove`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.API.Delete`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.WithDeleteQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/resource.ID`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithMissingError`
 - `github.com/JSYoo5B/go-openstacksdk/resource.IgnoreMissing`
 
-- Delete with WithDeleteQuery sends Python's force=False or force=True query; Remove ignores 404 and WithMissingError reports NotFound.
+- Delete with request.Query sends Python's force=False or force=True query; Remove ignores 404 and WithMissingError reports NotFound.
   Tests: `blockstorage/v3/qos/python_parity_test.go:TestPythonQoSCrudMatchesProxyRequests`, `blockstorage/v3/qos/python_parity_test.go:TestPythonQoSDeleteMissingPolicies`.
 - Wrapping the direct delete in resource.IgnoreMissing turns a plain HTTP 404 into success like Python's default ignore_missing=True, keeps other failures such as 409 as errors, and leaves the DELETE request unchanged.
   Tests: `resource/missing_test.go:TestIgnoreMissingDropsOnlyPlain404`, `blockstorage/v3/qos/python_ignore_missing_test.go:TestPythonDeleteIgnoreMissingQoSSpec`.

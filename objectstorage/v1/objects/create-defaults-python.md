@@ -15,8 +15,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCreateOptions`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCreateBytes`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCreateQuery`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCreateHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 
 - Create retains native escaped object PUT, core/extension headers and query, default content MD5, explicit ETag with NoETag, native201/202 status and actual PUT header decoding. Final plain-nil Content creates an empty object rather than invoking the upstream nil-reader MD5 panic; typed-nil supplied Content is ErrInvalidOption before HTTP under every ETag mode.
   Tests: `objectstorage/v1/objects/create_defaults_test.go:TestNativeObjectCreateEmptyDefaults`, `objectstorage/v1/objects/create_defaults_test.go:TestNativeObjectCreateTypedNilReadersAndPreflight`, `objectstorage/v1/objects/native_contracts_test.go:TestNativeObjectCreateUpdateDeleteHeadersAndEscaping`, `objectstorage/v1/objects/native_contracts_test.go:TestNativeObjectStatusesNamesAndPreflight`, `objectstorage/v1/objects/native_contracts_test.go:TestNativeObjectCreateNilContentUsesEmptyBody`.
@@ -65,7 +65,7 @@ func main() {
     for _, name := range []string{"first.txt", "second.txt"} {
         result, err := swift.Objects.Create(ctx, "backups", name,
             objects.CreateOpts{ContentType: "text/plain"}, body,
-            objects.WithCreateHeader("X-Object-Meta-Category", "example"))
+            request.Header("X-Object-Meta-Category", "example"))
         if err != nil { log.Fatal(err) }
         fmt.Printf("%s PUT ETag=%q\n", name, result.ETag)
     }

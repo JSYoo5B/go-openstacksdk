@@ -24,14 +24,14 @@ func secretPayload(ctx context.Context, conn *openstack.Connection, secretID str
         secrets.WithGetPayloadOptions(secrets.GetPayloadOpts{
             PayloadContentType: "application/octet-stream",
         }),
-        secrets.WithGetPayloadHeader("X-Trace", "payload"))
+        request.Header("X-Trace", "payload"))
 }
 ```
 
 With no options, the request sends `Accept: text/plain`.
 `WithGetPayloadOptions` selects the native concrete `GetPayloadOpts`; its
 nonempty `PayloadContentType` changes `Accept`. An empty value keeps the native
-default. `WithGetPayloadHeader` adds an ordinary extra header; it cannot replace
+default. `request.Header` adds an ordinary extra header; it cannot replace
 `Accept`, which is a declared typed input. Body, query, and argument extensions
 are unsupported.
 

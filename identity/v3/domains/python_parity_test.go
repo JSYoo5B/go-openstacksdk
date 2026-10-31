@@ -41,7 +41,7 @@ const (
 )
 
 // Native request fixtures use the "domain" resource_key and explicit PATCH
-// fields. WithUpdateField("id", ...) adds the ID only when requested by Go;
+// fields. request.Field("id", ...) adds the ID only when requested by Go;
 // pinned Source Resource.commit removes the ID from its dirty body.
 func TestPythonDomainCreateGetUpdateRequests(t *testing.T) {
 	ctx := context.Background()

@@ -94,7 +94,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.GroupRecord.Clone`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.API.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.API.AllRecords`
@@ -111,7 +111,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithRecordListJMESPath`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithRecordListLocation`
 
-- List sends the single GET groups that Python groups() sends without arguments, maps the Python query names domain_id and name through ListOpts or WithListQuery, sends a limit without a marker follow-up, and rejects local Body filters before HTTP.
+- List sends the single GET groups that Python groups() sends without arguments, maps the Python query names domain_id and name through ListOpts or request.Query, sends a limit without a marker follow-up, and rejects local Body filters before HTTP.
   Tests: `identity/v3/groups/python_parity_test.go:TestPythonGroupListRequests`.
 - Lazy Group records classify limit/marker/domain_id/name as server query, description/id as ordered local Body filters, discard unknown before marshaling and keep nullable raw Body separate from original independent Wire/Envelope/header/status.
   Tests: `identity/v3/groups/python_records_test.go:TestPythonGroupRecordsLazyUntypedDeclaredViewAndEvidence`.
@@ -133,8 +133,8 @@ Go API:
 Python/Go differences:
 
 - Python reads the Keystone links dict without a rel key and never follows links.next; the native pager follows links.next when Keystone sets it.
-- Python sends bool query values as True/False text; typed Go ListOpts send true/false, and WithListQuery reproduces the Python text.
-- Python drops unknown query names; Go sends every WithListQuery key to the server.
+- Python sends bool query values as True/False text; typed Go ListOpts send true/false, and request.Query reproduces the Python text.
+- Python drops unknown query names; Go sends every request.Query key to the server.
 - groups.ListOpts.Filters adds a stray "-" query key next to the comparator filters; Python cannot send comparator filters at all.
 - Concrete Go options own request/defaults, nullable raw Resource and independent actual response channels. Existing native List/Get/FindIdentity semantics are unchanged.
 - Already selected Keystone v3 API required; no automatic v2 ensure_service_version conversion or Connection current location inference. Explicit immutable CloudLocation retains current project because Group declares no project_id/zone.

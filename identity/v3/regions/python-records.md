@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.API.List`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.API.All`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithQuery`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.API.ListRecords`

@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/trusts.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/trusts.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/trusts.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create POSTs {"trust":{...}} to OS-TRUST/trusts always sending impersonation (false included), formatting expires_at with a literal Z and no UTC conversion, keeping roles and extensions inside the envelope, requires trustee and trustor user IDs and rejects a core-key collision before HTTP, decodes RFC3339 times and accepts only 201.
   Tests: `identity/v3/trusts/native_contracts_test.go:TestNativeTrustRoutesBodiesPagingAndDecode`, `identity/v3/trusts/native_contracts_test.go:TestNativeTrustStatusesAndPreflight`.
@@ -48,7 +48,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/trusts.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/trusts.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/trusts.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs OS-TRUST/trusts with trustor/trustee filters and extension query values, follows the Keystone links.next string until null and rejects a nil option before HTTP.
   Tests: `identity/v3/trusts/native_contracts_test.go:TestNativeTrustRoutesBodiesPagingAndDecode`, `identity/v3/trusts/native_contracts_test.go:TestNativeTrustStatusesAndPreflight`.
@@ -146,7 +146,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.ChangePassword`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithChangePasswordOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithChangePasswordField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - ChangePassword POSTs {"user":{"original_password":...,"password":...}} to users/{user}/password always sending both values (empty included) with extensions inside the envelope, rejects a core-key collision and nil option before HTTP, and accepts only 204.
   Tests: `identity/v3/projects/native_available_test.go:TestNativeUserChangePassword`.

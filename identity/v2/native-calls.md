@@ -94,7 +94,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v2/tenants.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v2/tenants.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v2/tenants.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create is an admin call that sends POST tenants with {"tenant":{...}} requiring name and omitting empty description and enabled, rejects missing name, core-field extensions and nil options before HTTP, decodes the tenant envelope and accepts HTTP 200 or 201.
   Tests: `identity/v2/tenants/native_contracts_test.go:TestNativeV2TenantRoutesBodiesPagingAndDecode`, `identity/v2/tenants/native_contracts_test.go:TestNativeV2TenantStatusesAndPreflight`.
@@ -144,7 +144,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v2/tenants.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v2/tenants.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v2/tenants.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List sends GET tenants with marker and limit plus extra query values, follows only tenants_links rel=next and ignores links.next, rejects nil options and blank query keys before HTTP, ends cleanly on an empty page, fails 404 with Expected [200,204,300] and yields io.EOF for a bodyless 204.
   Tests: `identity/v2/tenants/native_contracts_test.go:TestNativeV2TenantRoutesBodiesPagingAndDecode`, `identity/v2/tenants/native_contracts_test.go:TestNativeV2TenantStatusesAndPreflight`.
@@ -162,7 +162,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v2/tenants.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v2/tenants.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v2/tenants.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Update is an admin call that sends PUT tenants/{id} with {"tenant":{...}} omitting empty fields (an empty UpdateOpts sends {"tenant":{}} and a pointer description may send an empty string), rejects core-field extensions and nil options before HTTP and accepts only HTTP 200.
   Tests: `identity/v2/tenants/native_contracts_test.go:TestNativeV2TenantRoutesBodiesPagingAndDecode`, `identity/v2/tenants/native_contracts_test.go:TestNativeV2TenantStatusesAndPreflight`.
@@ -180,7 +180,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v2/tokens.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v2/tokens.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v2/tokens.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create sends POST tokens with {"auth":{"passwordCredentials":{username,password}}} when Password is set (dropping TokenID) or {"auth":{"token":{"id"}}} otherwise plus non-empty tenantId and tenantName, rejects a missing username or token, core-field and passwordCredentials extensions and nil options before HTTP, still sends an existing provider X-Auth-Token because native OmitHeaders runs before token injection, decodes access.token (RFC3339Milli expires with a literal Z), access.serviceCatalog and access.user into Authentication, and accepts HTTP 200 or 203.
   Tests: `identity/v2/tokens/native_contracts_test.go:TestNativeV2TokenRoutesBodiesAndAccessDecode`, `identity/v2/tokens/native_contracts_test.go:TestNativeV2TokenStatusesDecodeAndPreflight`.
@@ -246,7 +246,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v2/users.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v2/users.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v2/users.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create is an admin-only call that sends POST users with {"user":{...}} omitting empty fields, requires name or username with gophercloud.ErrMissingInput before HTTP, rejects core-field extensions and nil options, decodes the user envelope where TenantID reads only tenant_id although the request sends tenantId, and accepts HTTP 200 or 201.
   Tests: `identity/v2/users/native_contracts_test.go:TestNativeV2UserRoutesBodiesAndDecode`, `identity/v2/users/native_contracts_test.go:TestNativeV2UserStatusesAndPreflight`.
@@ -344,7 +344,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v2/users.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v2/users.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v2/users.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Update is an admin-only call that sends PUT users/{id} with {"user":{...}} omitting empty fields (an empty UpdateOpts sends {"user":{}}), rejects core-field extensions and nil options before HTTP and accepts only HTTP 200.
   Tests: `identity/v2/users/native_contracts_test.go:TestNativeV2UserRoutesBodiesAndDecode`, `identity/v2/users/native_contracts_test.go:TestNativeV2UserStatusesAndPreflight`.

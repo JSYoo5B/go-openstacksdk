@@ -15,7 +15,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors.API.All`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors.WithListQueryValues`
 - `github.com/JSYoo5B/go-openstacksdk/request.WithQueryValues`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithQuery`
@@ -33,7 +33,7 @@ Go API:
 
 Python/Go differences:
 
-- Python sends only declared query keys (name, project_id, sort_key, sort_dir, fields, limit, marker), filters other Body attributes such as port_id locally and drops unknown keys; Go forwards every WithListQuery, WithListQueryValues or resource.WithQuery key to the server.
+- Python sends only declared query keys (name, project_id, sort_key, sort_dir, fields, limit, marker), filters other Body attributes such as port_id locally and drops unknown keys; Go forwards every request.Query, WithListQueryValues or resource.WithQuery key to the server.
 - Repeated query keys are available only through API.List; API.All and resource.WithQuery still send one value per key, so combining repeated fields with max_items means stopping the List iterator after that many rows.
 - Python continues with marker=<last id> after a limit page without links; Go follows only tap_mirrors_links.
 - Python returns TapMirror Resources whose project_id falls back to tenant_id; Go yields *tapmirrors.TapMirror with separate ProjectID and TenantID, and List HTTP errors are Gophercloud errors.
@@ -46,7 +46,7 @@ Examples use the surrounding guide's service object and context unless they decl
 
 ```go
 for mirror, err := range api.List(ctx,
-	tapmirrors.WithListQuery("name", "mirror"),
+	request.Query("name", "mirror"),
 	tapmirrors.WithListQueryValues("fields", "id", "name"),
 	tapmirrors.WithListQueryValues("sort_key", "name", "id"),
 	tapmirrors.WithListQueryValues("sort_dir", "asc", "desc"),

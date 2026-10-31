@@ -84,7 +84,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.API.Delete`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithDeleteOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithDeleteQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - Native Delete issues one bodyless DELETE directly at the selected prefixed os-keypairs/{name} route. Omitted options send no query; the library-owned concrete DeleteOpts builder escapes an explicit owner as user_id and binds an escaped vendor query extension alongside it. Live token, configured source headers and both selected Compute2.55 version headers reach the actual request.
   Tests: `api/compute_keypair_delete_test.go:TestComputeKeypairDeleteOwnedDefaultsOwnerAndNativeCompatibility`.
@@ -93,7 +93,7 @@ Go API:
 
 Python/Go differences:
 
-- The upstream DeleteOptsBuilder interface is replaced by concrete DeleteOption/WithDeleteOptions and a library-owned query serializer with WithDeleteQuery extensions. API.Delete returns ExtractErr with operation context; native direct-name route, owner omission, strict202/204 and strict404 behavior are preserved. New DeleteKeypair's default-ignore/broad-status policy is an independent Python operation mapping and is not applied to this native function.
+- The upstream DeleteOptsBuilder interface is replaced by concrete DeleteOption/WithDeleteOptions and a library-owned query serializer with request.Query extensions. API.Delete returns ExtractErr with operation context; native direct-name route, owner omission, strict202/204 and strict404 behavior are preserved. New DeleteKeypair's default-ignore/broad-status policy is an independent Python operation mapping and is not applied to this native function.
 
 ### `python:compute/v2/create_keypair`
 
@@ -137,7 +137,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Native Create preserves required Name preflight and sends one authenticated POST to the selected prefixed os-keypairs collection without query or lookup. Concrete CreateOpts binds Name, UserID, Type and PublicKey together with a vendor object extension in the actual keypair body. A protected user_id extension and omitted required Name fail before HTTP; the application need not implement CreateOptsBuilder.
   Tests: `api/compute_keypair_create_test.go:TestComputeKeypairCreateDirtyBodyAliasesAndNativeCompatibility`.
@@ -148,7 +148,7 @@ Go API:
 
 Python/Go differences:
 
-- The upstream CreateOptsBuilder interface is replaced by concrete CreateOpts/CreateOption and a library-owned serializer with WithCreateOptions/WithCreateField. API.Create returns the extracted native KeyPair and wraps failures with operation context. Native required Name, optional string fields, strict200/201 and partial/null extraction remain intact; source-shaped nullable attributes, view-only ssh and Resource/Wire belong to the independent Python CreateKeypair mapping.
+- The upstream CreateOptsBuilder interface is replaced by concrete CreateOpts/CreateOption and a library-owned serializer with WithCreateOptions/request.Field. API.Create returns the extracted native KeyPair and wraps failures with operation context. Native required Name, optional string fields, strict200/201 and partial/null extraction remain intact; source-shaped nullable attributes, view-only ssh and Resource/Wire belong to the independent Python CreateKeypair mapping.
 
 ### `python:compute/v2/keypairs`
 
@@ -216,7 +216,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - The unchanged native List binding serializes typed UserID then applies raw wire overrides/extensions using its SDK-owned concrete builder. GET retains selected ResourceBase, live token, source header and both2.55 version headers, with no body. Raw limit is a request extension rather than a native ListOpts field.
   Tests: `api/compute_keypair_records_test.go:TestComputeKeypairListNativeBindingKeepsTypedSinglePageABI`.

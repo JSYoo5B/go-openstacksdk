@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/usage.API.SingleTenant`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/usage.WithSingleTenantOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/usage.WithSingleTenantQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - SingleTenant GETs os-simple-tenant-usage/{tenantID} with offset-less wall-clock start/end, limit, marker and extension query, yields one tenant_usage per page following tenant_usage_links next, treats a missing tenant_usage as empty, surfaces io.EOF for a bodyless 204, rejects a nil option before HTTP and returns native pager status errors without operation context.
   Tests: `compute/v2/usage/native_contracts_test.go:TestNativeSingleTenantUsageQueryPagingAndDecode`, `compute/v2/usage/native_contracts_test.go:TestNativeSingleTenantUsageStatusesAndPreflight`.

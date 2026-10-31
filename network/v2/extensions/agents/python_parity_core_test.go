@@ -40,7 +40,7 @@ const pythonParityCoreAgentBase = "/neutron/v2.0/agents"
 
 // Python agents(**query) transposes is_alive/is_admin_state_up to alive and
 // admin_state_up and follows agents_links; Go sends the same wire keys through
-// ListOpts and WithListQuery and follows the same link.
+// ListOpts and request.Query and follows the same link.
 func TestPythonParityCoreAgentListQueryAndLinks(t *testing.T) {
 	ctx := context.Background()
 	var calls []pythonParityCoreAgentCall

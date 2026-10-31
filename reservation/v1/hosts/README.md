@@ -10,7 +10,7 @@
 | `Delete` | `DELETE /os-hosts/{id}` | 204 only | 200 and 202 are rejected; native 404 stays an HTTP response error |
 | `List` | `GET /os-hosts` | 200 | `ListOpts` has no fields; the response is one page and any `next` value is ignored |
 
-Extension inputs use `WithCreateField`, `WithUpdateField` and `WithListQuery`. A field extension that names a core field (`name`) or a capability already in `ExtraCapabilities`, and nil options, fail with `resource.ErrInvalidOption` before any request. A capability named like a core field in `ExtraCapabilities` itself fails in the native builder, also before any request.
+Extension inputs use `request.Field`, `request.Field` and `request.Query`. A field extension that names a core field (`name`) or a capability already in `ExtraCapabilities`, and nil options, fail with `resource.ErrInvalidOption` before any request. A capability named like a core field in `ExtraCapabilities` itself fails in the native builder, also before any request.
 
 `Find`, `All`, `Remove`, `WaitFor` and `WaitForDeletion` use the common `resource.Collection`: ID lookup, ignore-missing deletion by default (`Remove` returns nil for a 404, other errors are kept) and `Collection.Get` mapping 404 to `resource.ErrNotFound`. `All` filters `status` locally instead of sending it on the wire. `API.Get` and `API.Delete` keep the native 404 error.
 

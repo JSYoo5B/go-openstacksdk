@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create POSTs {"transfer":{...}} to os-volume-transfer, requires volume_id and rejects a core-key extension collision before HTTP, decodes the transfer key including the auth_key secret and links, and accepts only 202.
   Tests: `blockstorage/v3/transfers/native_contracts_test.go:TestNativeTransferRoutesBodiesPagingAndDecode`, `blockstorage/v3/transfers/native_contracts_test.go:TestNativeTransferStrictStatusesDecodeAndPreflight`.
@@ -32,7 +32,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.API.Accept`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithAcceptOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithAcceptField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Accept POSTs {"accept":{"auth_key":...}} to os-volume-transfer/{id}/accept with extensions inside the accept object, requires auth_key and rejects a nil option before HTTP, decodes the transfer key and accepts only 202.
   Tests: `blockstorage/v3/transfers/native_contracts_test.go:TestNativeTransferRoutesBodiesPagingAndDecode`, `blockstorage/v3/transfers/native_contracts_test.go:TestNativeTransferStrictStatusesDecodeAndPreflight`.
@@ -66,7 +66,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs os-volume-transfer/detail with ListOpts (all_tenants included) and extension query values, follows transfers_links next hrefs as received, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.
   Tests: `blockstorage/v3/transfers/native_contracts_test.go:TestNativeTransferRoutesBodiesPagingAndDecode`, `blockstorage/v3/transfers/native_contracts_test.go:TestNativeTransferStrictStatusesDecodeAndPreflight`.
@@ -132,7 +132,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/transfers.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/transfers.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/transfers.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create POSTs {"transfer":{...}} to os-volume-transfer, requires volume_id and rejects a core-key extension collision before HTTP, decodes the transfer key including the auth_key secret and links, and accepts only 202.
   Tests: `blockstorage/v2/transfers/native_contracts_test.go:TestNativeTransferRoutesBodiesPagingAndDecode`, `blockstorage/v2/transfers/native_contracts_test.go:TestNativeTransferStrictStatusesDecodeAndPreflight`.
@@ -150,7 +150,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/transfers.API.Accept`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/transfers.WithAcceptOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/transfers.WithAcceptField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Accept POSTs {"accept":{"auth_key":...}} to os-volume-transfer/{id}/accept with extensions inside the accept object, requires auth_key and rejects a nil option before HTTP, decodes the transfer key and accepts only 202.
   Tests: `blockstorage/v2/transfers/native_contracts_test.go:TestNativeTransferRoutesBodiesPagingAndDecode`, `blockstorage/v2/transfers/native_contracts_test.go:TestNativeTransferStrictStatusesDecodeAndPreflight`.
@@ -184,7 +184,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/transfers.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/transfers.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/transfers.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs os-volume-transfer/detail with ListOpts (all_tenants included) and extension query values, follows transfers_links next hrefs as received, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.
   Tests: `blockstorage/v2/transfers/native_contracts_test.go:TestNativeTransferRoutesBodiesPagingAndDecode`, `blockstorage/v2/transfers/native_contracts_test.go:TestNativeTransferStrictStatusesDecodeAndPreflight`.

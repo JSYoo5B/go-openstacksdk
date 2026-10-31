@@ -8,7 +8,7 @@
 | `Get` | `GET /certificates/{cluster}` | 200 | Typed `Certificate` (PEM, CSR, links); unknown response fields are not retained |
 | `Update` | `PATCH /certificates/{cluster}` | 202 only | Rotates the CA certificate; sends no request body |
 
-Extension inputs use `WithCreateField`. A field extension that names a core input field, or a nil option, fails with `resource.ErrInvalidOption` before any request. There is no list, delete or common `Collection`; 404 responses stay native HTTP response errors.
+Extension inputs use `request.Field`. A field extension that names a core input field, or a nil option, fails with `resource.ErrInvalidOption` before any request. There is no list, delete or common `Collection`; 404 responses stay native HTTP response errors.
 
 `Update` decodes the response body even though the operation returns only an acknowledgement. A 202 with an empty body therefore returns an EOF error although the server accepted the rotation; check the certificate with `Get` before retrying instead of replaying blindly.
 

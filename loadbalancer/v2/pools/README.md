@@ -16,7 +16,7 @@
 | `ListMembers` | `GET .../{pool}/members` | 200 | Follows `members_links` next links |
 | `BatchUpdateMembers` | `PUT .../{pool}/members` | 202 only | Replaces the member set with `{"members":[...]}`; a nil or empty slice sends `{"members":[]}`; an empty `SubnetID` is sent as `null` |
 
-Extension inputs use `WithCreateField`, `WithUpdateField`, `WithListQuery`, `WithCreateMemberField`, `WithUpdateMemberField` and `WithListMembersQuery`. A field extension that names a core input field fails with `resource.ErrInvalidOption` before any request; nil options fail the same way. `Delete`, `Get`, `GetMember`, `DeleteMember` and `BatchUpdateMembers` take no extensions.
+Extension inputs use `request.Field`, `request.Field`, `request.Query`, `request.Field`, `request.Field` and `request.Query`. A field extension that names a core input field fails with `resource.ErrInvalidOption` before any request; nil options fail the same way. `Delete`, `Get`, `GetMember`, `DeleteMember` and `BatchUpdateMembers` take no extensions.
 
 `Find`, `All`, `Remove`, `WaitFor` and `WaitForDeletion` use the common `resource.Collection` for pools. `API.Members(ctx, parent)` returns a `MemberScope` bound to one pool: an explicit `resource.ID` parent needs no lookup request, and the scope offers `Create`, `Update`, `FindIdentity` and the common collection operations (ignore-missing `Delete`). The native methods (`API.Delete`, `API.DeleteMember`) do not ignore a missing object.
 

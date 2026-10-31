@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - For this API among all nine native facades, actual HTTP Update retains PUT, effective ResourceBase route, native JSON envelope, description and extension body values, auth and ordinary source headers. Typed RevisionNumber nil/zero/positive/signed emits no header or exact revision_number=N respectively, never a JSON revision field, and returns the native typed response ID without source-client mutation.
   Tests: `api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsAllNativeUpdates`.
@@ -44,7 +44,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.API.UpdateWithAttributes`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithIfMatch`
@@ -86,7 +86,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - For this API among all nine native facades, actual HTTP Update retains PUT, effective ResourceBase route, native JSON envelope, description and extension body values, auth and ordinary source headers. Typed RevisionNumber nil/zero/positive/signed emits no header or exact revision_number=N respectively, never a JSON revision field, and returns the native typed response ID without source-client mutation.
   Tests: `api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsAllNativeUpdates`.
@@ -112,7 +112,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.UpdateWithAttributes`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithIfMatch`
@@ -150,7 +150,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - For this API among all nine native facades, actual HTTP Update retains PUT, effective ResourceBase route, native JSON envelope, description and extension body values, auth and ordinary source headers. Typed RevisionNumber nil/zero/positive/signed emits no header or exact revision_number=N respectively, never a JSON revision field, and returns the native typed response ID without source-client mutation.
   Tests: `api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsAllNativeUpdates`.
@@ -176,7 +176,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.API.UpdateWithAttributes`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithIfMatch`
@@ -214,7 +214,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - For this API among all nine native facades, actual HTTP Update retains PUT, effective ResourceBase route, native JSON envelope, description and extension body values, auth and ordinary source headers. Typed RevisionNumber nil/zero/positive/signed emits no header or exact revision_number=N respectively, never a JSON revision field, and returns the native typed response ID without source-client mutation.
   Tests: `api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsAllNativeUpdates`.
@@ -240,7 +240,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - The concrete Go update for this operation emits exact revision_number=N for typed zero/positive/signed values, omits a nil generated condition and preserves the native route/body/response envelope. This all-nine Go matrix is evidence of Go behavior; Python conditional similarity or difference is established from the pinned class/helper sources.
   Tests: `api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsAllNativeUpdates`.
@@ -268,7 +268,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - For this API among all nine native facades, actual HTTP Update retains PUT, effective ResourceBase route, native JSON envelope, description and extension body values, auth and ordinary source headers. Typed RevisionNumber nil/zero/positive/signed emits no header or exact revision_number=N respectively, never a JSON revision field, and returns the native typed response ID without source-client mutation.
   Tests: `api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsAllNativeUpdates`.
@@ -294,7 +294,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.API.UpdateRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithRecordMutationOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithRecordAttribute`
@@ -345,7 +345,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - For this API among all nine native facades, actual HTTP Update retains PUT, effective ResourceBase route, native JSON envelope, description and extension body values, auth and ordinary source headers. Typed RevisionNumber nil/zero/positive/signed emits no header or exact revision_number=N respectively, never a JSON revision field, and returns the native typed response ID without source-client mutation.
   Tests: `api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsAllNativeUpdates`.
@@ -371,7 +371,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.API.UpdateWithAttributes`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithIfMatch`
@@ -409,7 +409,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - For this API among all nine native facades, actual HTTP Update retains PUT, effective ResourceBase route, native JSON envelope, description and extension body values, auth and ordinary source headers. Typed RevisionNumber nil/zero/positive/signed emits no header or exact revision_number=N respectively, never a JSON revision field, and returns the native typed response ID without source-client mutation.
   Tests: `api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsAllNativeUpdates`.
@@ -435,7 +435,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.API.UpdateWithAttributes`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.WithAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.WithIfMatch`
@@ -473,7 +473,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - For this API among all nine native facades, actual HTTP Update retains PUT, effective ResourceBase route, native JSON envelope, description and extension body values, auth and ordinary source headers. Typed RevisionNumber nil/zero/positive/signed emits no header or exact revision_number=N respectively, never a JSON revision field, and returns the native typed response ID without source-client mutation.
   Tests: `api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsAllNativeUpdates`.
@@ -499,7 +499,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.UpdateRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordUpdateAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordUpdateOpts`
@@ -532,7 +532,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - For this API among all nine native facades, actual HTTP Update retains PUT, effective ResourceBase route, native JSON envelope, description and extension body values, auth and ordinary source headers. Typed RevisionNumber nil/zero/positive/signed emits no header or exact revision_number=N respectively, never a JSON revision field, and returns the native typed response ID without source-client mutation.
   Tests: `api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsAllNativeUpdates`.
@@ -558,7 +558,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.API.UpdateWithAttributes`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithIfMatch`

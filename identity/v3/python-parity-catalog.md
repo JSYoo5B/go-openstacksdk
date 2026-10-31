@@ -55,7 +55,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.API.Create`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create sends POST endpoints with only the given interface/enabled/service_id/url keys plus region_id through WithCreateField in the {"endpoint": {...}} envelope, the request Python create_endpoint sends, and decodes id, interface, region_id, service_id, url and enabled.
   Tests: `identity/v3/endpoints/python_parity_test.go:TestPythonEndpointCreateGetUpdateRequests`.
@@ -65,7 +65,7 @@ Python/Go differences:
 - Python accepts any status below 400 through raise_from_response; the native call accepts only its Gophercloud OkCodes listed in identity/v3/native-admin-b.md.
 - Python takes an ID string or Resource and returns a mutable Resource; Go takes an ID string and returns the native Gophercloud model pointer.
 - Keystone v3 catalog resources declare no microversion, so neither side negotiates or sends one.
-- Go CreateOpts.Region sends the legacy region key; the region_id key Python sends is added with endpoints.WithCreateField("region_id", id).
+- Go CreateOpts.Region sends the legacy region key; the region_id key Python sends is added with request.Field("region_id", id).
 - Go requires interface, url and service_id before HTTP, while Python sends whatever attributes were given and lets Keystone reject the request.
 - Python drops attributes Endpoint does not declare, such as description; Go CreateOpts can send description.
 
@@ -88,7 +88,7 @@ Python/Go differences:
 - Keystone v3 catalog resources declare no microversion, so neither side negotiates or sends one.
 - Go returns the whole decoded slice; Python keeps only the first response row.
 - Go requires service_id and resource_name before HTTP and always sends resource_limit, even 0, while Python sends only the given attributes.
-- Go extension fields from WithBatchCreateField land beside the limits array, not inside the row.
+- Go extension fields from request.Field land beside the limits array, not inside the row.
 
 ### `python:identity/v3/create_region`
 
@@ -128,7 +128,7 @@ Python/Go differences:
 - Keystone v3 catalog resources declare no microversion, so neither side negotiates or sends one.
 - Go returns the whole decoded slice; Python keeps only the first response row.
 - Go requires service_id and resource_name before HTTP and always sends default_limit, even 0, while Python sends only the given attributes.
-- Go extension fields from WithBatchCreateField land beside the registered_limits array, not inside the row.
+- Go extension fields from request.Field land beside the registered_limits array, not inside the row.
 
 ### `python:identity/v3/create_service`
 
@@ -493,7 +493,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/limits.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/limits.API.List`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/limits.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/limits.API.All`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithQuery`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/limits.API.ListRecords`
@@ -547,7 +547,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.API.List`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.API.All`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithQuery`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.API.ListRecords`
@@ -602,7 +602,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.API.List`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.API.All`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithQuery`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.API.ListRecords`
@@ -655,7 +655,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.API.List`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.API.All`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithQuery`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.ServiceRecord.Clone`
@@ -735,7 +735,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.API.Update`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Update sends PATCH endpoints/{id} with only the changed keys in the {"endpoint": {...}} envelope, region_id through WithUpdateField, the request Python update_endpoint sends.
   Tests: `identity/v3/endpoints/python_parity_test.go:TestPythonEndpointCreateGetUpdateRequests`.
@@ -746,7 +746,7 @@ Python/Go differences:
 - Python takes an ID string or Resource and returns a mutable Resource; Go takes an ID string and returns the native Gophercloud model pointer.
 - Keystone v3 catalog resources declare no microversion, so neither side negotiates or sends one.
 - Python commit sends no request when no attribute changed and never puts id in the PATCH body; Go Update always sends PATCH, with an empty envelope for empty options.
-- region_id is sent with endpoints.WithUpdateField("region_id", id) because UpdateOpts.Region sends the legacy region key.
+- region_id is sent with request.Field("region_id", id) because UpdateOpts.Region sends the legacy region key.
 - Go UpdateOpts omits empty strings and WithUpdateField cannot override typed keys, so Python None or empty values for interface, url or service_id cannot be sent.
 
 ### `python:identity/v3/update_limit`
@@ -914,7 +914,7 @@ err = regions.New(client).Remove(ctx, resource.ID("RegionOne"), resource.WithMis
 disabled := false
 ep, err := endpoints.New(client).Create(ctx,
 	endpoints.CreateOpts{Availability: gophercloud.AvailabilityPublic, URL: "https://nova", ServiceID: "svc-1", Enabled: &disabled},
-	endpoints.WithCreateField("region_id", "RegionOne"))
+	request.Field("region_id", "RegionOne"))
 ```
 
 ```go

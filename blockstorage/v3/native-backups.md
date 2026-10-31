@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create POSTs {"backup":{...}} to backups sending incremental/force only when true, requires volume_id and rejects a core-key extension collision before HTTP, decodes project, pointer metadata/availability zone and data timestamp, and accepts only 202.
   Tests: `blockstorage/v3/backups/native_crud_contracts_test.go:TestNativeBackupRoutesBodiesPagingAndDecode`, `blockstorage/v3/backups/native_crud_contracts_test.go:TestNativeBackupStrictStatusesDecodeAndPreflight`.
@@ -48,7 +48,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs the summary backups route with ListOpts (all_tenants included) and extension query values, follows backups_links next hrefs as received, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.
   Tests: `blockstorage/v3/backups/native_crud_contracts_test.go:TestNativeBackupRoutesBodiesPagingAndDecode`, `blockstorage/v3/backups/native_crud_contracts_test.go:TestNativeBackupStrictStatusesDecodeAndPreflight`.
@@ -66,7 +66,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.API.ListDetail`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.WithListDetailOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.WithListDetailQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - ListDetail GETs backups/detail with the separate ListDetailOpts (with_count, sort, all_tenants) and extension query values, follows backups_links next hrefs as received, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.
   Tests: `blockstorage/v3/backups/native_crud_contracts_test.go:TestNativeBackupRoutesBodiesPagingAndDecode`, `blockstorage/v3/backups/native_crud_contracts_test.go:TestNativeBackupStrictStatusesDecodeAndPreflight`.
@@ -84,7 +84,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Update PUTs to backups/{id} with the SDK adapter moving native flat name/description/metadata into {"backup":{...}} together with extension fields, keeps nil omission and explicit empty metadata, and accepts only 200.
   Tests: `blockstorage/v3/backups/native_crud_contracts_test.go:TestNativeBackupStrictStatusesDecodeAndPreflight`, `blockstorage/v3/backups/update_contract_test.go:TestBackupUpdateTypedFieldsKeepNilOmissionAndExplicitEmptyMetadata`, `blockstorage/v3/backups/update_contract_test.go:TestBackupUpdateExtensionsStayInsideOwnedBackupEnvelopeAndProtectCoreInputs`, `blockstorage/v3/backups/update_contract_test.go:TestBackupUpdateExtractsActualSummaryAndKeepsNativeAndOptionFailures`.
@@ -102,7 +102,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.API.RestoreFromBackup`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.WithRestoreFromBackupOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.WithRestoreFromBackupField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - RestoreFromBackup POSTs {"restore":{...}} (empty object for empty options) to backups/{id}/restore with extensions inside it, rejects a nil option before HTTP, decodes the restore key and accepts only 202.
   Tests: `blockstorage/v3/backups/native_crud_contracts_test.go:TestNativeBackupRoutesBodiesPagingAndDecode`, `blockstorage/v3/backups/native_crud_contracts_test.go:TestNativeBackupStrictStatusesDecodeAndPreflight`.
@@ -136,7 +136,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create POSTs {"backup":{...}} to backups sending incremental/force only when true, requires volume_id and rejects a core-key extension collision before HTTP, decodes project, pointer metadata/availability zone and data timestamp, and accepts only 202.
   Tests: `blockstorage/v2/backups/native_crud_contracts_test.go:TestNativeBackupRoutesBodiesPagingAndDecode`, `blockstorage/v2/backups/native_crud_contracts_test.go:TestNativeBackupStrictStatusesDecodeAndPreflight`.
@@ -170,7 +170,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs the summary backups route with ListOpts (all_tenants included) and extension query values, follows backups_links next hrefs as received, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.
   Tests: `blockstorage/v2/backups/native_crud_contracts_test.go:TestNativeBackupRoutesBodiesPagingAndDecode`, `blockstorage/v2/backups/native_crud_contracts_test.go:TestNativeBackupStrictStatusesDecodeAndPreflight`.
@@ -188,7 +188,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.API.ListDetail`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.WithListDetailOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.WithListDetailQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - ListDetail GETs backups/detail with the separate ListDetailOpts (with_count, sort, all_tenants) and extension query values, follows backups_links next hrefs as received, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.
   Tests: `blockstorage/v2/backups/native_crud_contracts_test.go:TestNativeBackupRoutesBodiesPagingAndDecode`, `blockstorage/v2/backups/native_crud_contracts_test.go:TestNativeBackupStrictStatusesDecodeAndPreflight`.
@@ -206,7 +206,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.API.RestoreFromBackup`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.WithRestoreFromBackupOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.WithRestoreFromBackupField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - RestoreFromBackup POSTs {"restore":{...}} (empty object for empty options) to backups/{id}/restore with extensions inside it, rejects a nil option before HTTP, decodes the restore key and accepts only 202.
   Tests: `blockstorage/v2/backups/native_crud_contracts_test.go:TestNativeBackupRoutesBodiesPagingAndDecode`, `blockstorage/v2/backups/native_crud_contracts_test.go:TestNativeBackupStrictStatusesDecodeAndPreflight`.
@@ -256,7 +256,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.API.Import`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.WithImportOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.WithImportField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Import POSTs {"backup-record":{...}} to backups/import_record re-encoding backup_url bytes as base64 with extensions inside the record, rejects a core-key collision before HTTP, decodes the backup ID and name and accepts only 201.
   Tests: `blockstorage/v3/backups/native_admin_contracts_test.go:TestNativeBackupAdminCalls`, `blockstorage/v3/backups/native_admin_contracts_test.go:TestNativeBackupAdminStatusesAndDecode`.
@@ -274,7 +274,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.API.ResetStatus`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.WithResetStatusOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.WithResetStatusField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - ResetStatus POSTs {"os-reset_status":{"status":...}} to backups/{id}/action, rejects a nil option before HTTP and accepts only 202.
   Tests: `blockstorage/v3/backups/native_admin_contracts_test.go:TestNativeBackupAdminCalls`, `blockstorage/v3/backups/native_admin_contracts_test.go:TestNativeBackupAdminStatusesAndDecode`.
@@ -324,7 +324,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.API.Import`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.WithImportOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.WithImportField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Import POSTs {"backup-record":{...}} to backups/import_record re-encoding backup_url bytes as base64 with extensions inside the record, rejects a core-key collision before HTTP, decodes the backup ID and name and accepts only 201.
   Tests: `blockstorage/v2/backups/native_admin_contracts_test.go:TestNativeBackupAdminCalls`, `blockstorage/v2/backups/native_admin_contracts_test.go:TestNativeBackupAdminStatusesAndDecode`.
@@ -342,7 +342,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.API.ResetStatus`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.WithResetStatusOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.WithResetStatusField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - ResetStatus POSTs {"os-reset_status":{"status":...}} to backups/{id}/action, rejects a nil option before HTTP and accepts only 202.
   Tests: `blockstorage/v2/backups/native_admin_contracts_test.go:TestNativeBackupAdminCalls`, `blockstorage/v2/backups/native_admin_contracts_test.go:TestNativeBackupAdminStatusesAndDecode`.

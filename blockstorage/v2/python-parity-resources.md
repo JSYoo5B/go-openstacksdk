@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.API.ListDetail`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.API.List`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.WithListDetailQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.WithListDetailOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.WithListOptions`
 
@@ -23,8 +23,8 @@ Go API:
 
 Python/Go differences:
 
-- ListDetailOpts has no typed name, status, volume_id, project_id, sort_key or sort_dir filters; WithListDetailQuery adds them.
-- Python all_tenants=True sends all_tenants=True; typed Go AllTenants sends all_tenants=true, so WithListDetailQuery("all_tenants", "True") is needed for the identical string.
+- ListDetailOpts has no typed name, status, volume_id, project_id, sort_key or sort_dir filters; request.Query adds them.
+- Python all_tenants=True sends all_tenants=True; typed Go AllTenants sends all_tenants=true, so request.Query("all_tenants", "True") is needed for the identical string.
 - Python filters returned rows locally for Body attributes outside the query mapping; Go sends only query parameters and leaves local filtering to the caller.
 - Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud typed model, so response fields outside that model are dropped.
 - Cinder v2 has no microversion: neither Python v2 Resources nor the Go v2 client send a volume version header unless a session default or client Microversion is configured.
@@ -71,7 +71,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.API.Create`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create posts the backup envelope with incremental, name and volume_id like Backup._transform_create_request renames is_incremental.
   Tests: `blockstorage/v2/backups/python_parity_test.go:TestPythonBackupGetCreateRestoreExportImportAndReset`.
@@ -207,7 +207,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/transfers.API.Create`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/transfers.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create posts the transfer envelope with volume_id and name to os-volume-transfer and decodes id, auth_key, links and created_at.
   Tests: `blockstorage/v2/transfers/python_parity_test.go:TestPythonTransferCreateGetAcceptMatchProxyRequests`.
@@ -352,7 +352,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/quotasets.API.Update`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/quotasets.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/quotasets.WithUpdateOptions`
 
 - Update puts the quota_set envelope with the given limits and extra per-type keys to os-quota-sets/{project} and decodes the response.
@@ -402,7 +402,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/schedulerstats.API.List`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/schedulerstats.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/schedulerstats.WithListOptions`
 
 - List with WithListQuery("detail", "True") sends scheduler-stats/get_pools?detail=True, the typed Detail option sends detail=true, and pool names and typed capabilities decode.

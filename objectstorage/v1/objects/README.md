@@ -145,8 +145,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.Copy`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.ObjectScope.Copy`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCopyOptions`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCopyHeader`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCopyQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - The existing ObjectScope.Copy resolves its literal resource reference under the bound container and delegates native COPY. Its fixture asserts one source COPY, Destination /target/copy, version-id=version,201 and returned ETag=checksum; this verifies Go capability only. This one fixture is separate native-capability evidence, not a Python parity or full COPY policy matrix.
   Tests: `api/swift_resources_contracts_test.go:TestSwiftScopeBindsUploadMetadataUpdateAndDownload`.

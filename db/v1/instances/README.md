@@ -15,7 +15,7 @@
 | `DetachConfigurationGroup` | `PUT /instances/{id}` `{"instance":{}}` | 202 only | |
 | `EnableRootUser` | `POST /instances/{id}/root` | 200 only | No request body; returns the generated root user, including its password, in the native `users.User` model |
 
-Extension inputs use `WithCreateField`, merged into the `instance` object. A field extension that names an input already set (for example `name`, `flavorRef`, `volume`, `datastore` or `nics`) fails with `resource.ErrInvalidOption` before any request; nil options fail the same way. Gophercloud offers no extension point for the action, attach/detach, list or delete requests.
+Extension inputs use `request.Field`, merged into the `instance` object. A field extension that names an input already set (for example `name`, `flavorRef`, `volume`, `datastore` or `nics`) fails with `resource.ErrInvalidOption` before any request; nil options fail the same way. Gophercloud offers no extension point for the action, attach/detach, list or delete requests.
 
 `Find`, `All`, `Remove`, `WaitFor` and `WaitForDeletion` use the common `resource.Collection`: exact name lookup over the full list (`resource.ErrAmbiguous` for duplicates, `resource.ErrNotFound` when missing), a local `resource.WithStatus` filter that is not sent to Trove, `resource.ErrUnsupported` for `resource.WithQuery`, and ignore-missing deletion by default (`Remove` returns nil for a 404 unless `resource.WithMissingError()` is passed). `API.Delete` itself does not ignore a missing instance.
 

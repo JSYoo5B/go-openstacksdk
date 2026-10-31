@@ -187,7 +187,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.Name`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.API.Create`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - create_endpoint resolves the service by ID or name, then POSTs one /v3/endpoints body per URL with url, interface, service_id, enabled true and region_id (JSON null when region is not given) sent through WithCreateField("region_id", ...).
   Tests: `identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityEndpointHelpers`.
@@ -211,7 +211,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.API.Update`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - update_endpoint(endpoint_id, ...) is PATCH /v3/endpoints/<id> with service_name_or_id sent as service_id without lookup and region sent as region_id through WithUpdateField.
   Tests: `identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityEndpointHelpers`.
@@ -391,7 +391,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.All`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.List`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/identity.NewDomainReadCloud`
 - `github.com/JSYoo5B/go-openstacksdk/identity.DomainReadCloud.ListDomains`
 - `github.com/JSYoo5B/go-openstacksdk/identity.DomainReadCloud.SearchDomains`
@@ -669,7 +669,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.All`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.List`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/identity.NewRoleReadCloud`
 - `github.com/JSYoo5B/go-openstacksdk/identity.RoleReadCloud.ListRoles`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithRecordListOpts`
@@ -864,7 +864,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.ListAssignments`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithListAssignmentsOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithListAssignmentsQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - list_role_assignments sends GET /v3/role_assignments with user.id, group.id, role.id, scope.project.id, scope.domain.id, scope.system, effective and scope.OS-INHERIT:inherited_to exactly as the Python filter renaming produces, and decodes role, scope and actor IDs.
   Tests: `identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityDomainGroupRoleHelpers`.
@@ -873,7 +873,7 @@ Python/Go differences:
 
 - Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.
 - Python accepts dict or Resource values and reduces them to their id; Go takes ID strings.
-- Python encodes effective=True as the string True; ListAssignmentsOpts.Effective encodes true, so the exact Python spelling needs WithListAssignmentsQuery("effective", "True"), and inherited_to has no typed field and needs WithListAssignmentsQuery("scope.OS-INHERIT:inherited_to", ...).
+- Python encodes effective=True as the string True; ListAssignmentsOpts.Effective encodes true, so the exact Python spelling needs request.Query("effective", "True"), and inherited_to has no typed field and needs request.Query("scope.OS-INHERIT:inherited_to", ...).
 - Python Resource.list sends one GET without a limit and ignores the Keystone links dict; Go All/List follows a non-null links.next URL.
 - Python returns openstacksdk identity Resource objects; Go returns the Gophercloud identity v3 model pointers (enabled is Enabled, and unknown Keystone fields are only in Extra where the model declares it).
 
@@ -952,7 +952,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.All`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/identity.NewProjectReadCloud`
 - `github.com/JSYoo5B/go-openstacksdk/identity.ProjectReadCloud.ListProjects`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.ListProjects`

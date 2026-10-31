@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/secgroups.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/secgroups.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/secgroups.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create POSTs {"security_group":{...}} to os-security-groups, requires name and rejects a core-key collision before HTTP, decodes numeric or string group/rule IDs as strings and accepts only 200.
   Tests: `compute/v2/secgroups/native_contracts_test.go:TestNativeSecurityGroupRoutesBodiesAndDecode`, `compute/v2/secgroups/native_contracts_test.go:TestNativeSecurityGroupStatusesAndPreflight`.
@@ -48,7 +48,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/secgroups.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/secgroups.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/secgroups.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Update PUTs {"security_group":{...}} to os-security-groups/{id} sending an explicit empty pointer description and accepts only 200.
   Tests: `compute/v2/secgroups/native_contracts_test.go:TestNativeSecurityGroupRoutesBodiesAndDecode`, `compute/v2/secgroups/native_contracts_test.go:TestNativeSecurityGroupStatusesAndPreflight`.
@@ -114,7 +114,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/secgroups.API.CreateRule`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/secgroups.WithCreateRuleOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/secgroups.WithCreateRuleField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - CreateRule POSTs {"security_group_rule":{...}} to os-security-group-rules always sending from/to ports (zero included), requires parent group and protocol plus at least one of CIDR or group_id before HTTP, decodes numeric or string rule/parent IDs and accepts only 200.
   Tests: `compute/v2/secgroups/native_contracts_test.go:TestNativeSecurityGroupRoutesBodiesAndDecode`, `compute/v2/secgroups/native_contracts_test.go:TestNativeSecurityGroupStatusesAndPreflight`.

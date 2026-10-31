@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.New`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.API.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.API.AllRecords`

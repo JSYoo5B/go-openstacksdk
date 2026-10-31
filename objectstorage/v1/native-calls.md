@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.API.Get`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.WithGetOptions`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.WithGetHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 
 - Get HEADs the normalized client Endpoint (not ResourceBase) with X-Newest only when true and extension headers, rejects a core-header collision before HTTP, decodes numeric-string counters, nil absent quota and RFC1123 Date (malformed values fail) and accepts only 204.
   Tests: `objectstorage/v1/accounts/native_contracts_test.go:TestNativeAccountGetHeadsTheEndpointAndDecodesHeaders`, `objectstorage/v1/accounts/native_contracts_test.go:TestNativeAccountStatusesDecodeAndPreflight`.
@@ -32,7 +32,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.WithUpdateHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 
 - Update POSTs to the normalized Endpoint with X-Account-Meta-*, X-Remove-Account-Meta-*: remove, explicit pointer content-type/detect headers and temp URL key headers, rejects an invalid extension header before HTTP, decodes the response headers and accepts only 201/202/204.
   Tests: `objectstorage/v1/accounts/native_contracts_test.go:TestNativeAccountUpdatePostsMetadataHeaders`, `objectstorage/v1/accounts/native_contracts_test.go:TestNativeAccountStatusesDecodeAndPreflight`.
@@ -50,7 +50,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithCreateHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 
 - Create PUTs the path-escaped container under ResourceBase with metadata and system headers (bool headers only when true), rejects empty or slash names and core-header collisions before HTTP, decodes response headers and accepts only 201/202/204.
   Tests: `objectstorage/v1/containers/native_contracts_test.go:TestNativeContainerHeaderCallsAndEscaping`, `objectstorage/v1/containers/native_contracts_test.go:TestNativeContainerStatusesNamesAndPreflight`.
@@ -68,7 +68,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.API.Get`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithGetOptions`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithGetHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 
 - Get HEADs the path-escaped container with X-Newest only when true, decodes counters, comma-split ACLs ([""] when absent), ParseBool versions flag (malformed fails), timestamp and storage policy, rejects slash names before HTTP and accepts only 200/204.
   Tests: `objectstorage/v1/containers/native_contracts_test.go:TestNativeContainerHeaderCallsAndEscaping`, `objectstorage/v1/containers/native_contracts_test.go:TestNativeContainerStatusesNamesAndPreflight`.
@@ -86,7 +86,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithUpdateHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 
 - Update POSTs to the path-escaped container with metadata, remove-metadata and explicit pointer empty/false headers, rejects a nil option before HTTP and accepts only 201/202/204.
   Tests: `objectstorage/v1/containers/native_contracts_test.go:TestNativeContainerHeaderCallsAndEscaping`, `objectstorage/v1/containers/native_contracts_test.go:TestNativeContainerStatusesNamesAndPreflight`.
@@ -120,7 +120,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs the account Endpoint with JSON Accept/Content-Type headers, ListOpts and extension query values, repeats the request with marker set to the last name until an empty page, treats a bodyless 204 as an empty listing and reports native page status errors without operation context.
   Tests: `objectstorage/v1/containers/native_contracts_test.go:TestNativeContainerListMarkerPagingAndBulkDelete`, `objectstorage/v1/containers/native_contracts_test.go:TestNativeContainerStatusesNamesAndPreflight`.
@@ -155,8 +155,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCreateOptions`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCreateBytes`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCreateQuery`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCreateHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 
 - Create retains native escaped object PUT, core/extension headers and query, default content MD5, explicit ETag with NoETag, native201/202 status and actual PUT header decoding. Final plain-nil Content creates an empty object rather than invoking the upstream nil-reader MD5 panic; typed-nil supplied Content is ErrInvalidOption before HTTP under every ETag mode.
   Tests: `objectstorage/v1/objects/create_defaults_test.go:TestNativeObjectCreateEmptyDefaults`, `objectstorage/v1/objects/create_defaults_test.go:TestNativeObjectCreateTypedNilReadersAndPreflight`, `objectstorage/v1/objects/native_contracts_test.go:TestNativeObjectCreateUpdateDeleteHeadersAndEscaping`, `objectstorage/v1/objects/native_contracts_test.go:TestNativeObjectStatusesNamesAndPreflight`, `objectstorage/v1/objects/native_contracts_test.go:TestNativeObjectCreateNilContentUsesEmptyBody`.
@@ -178,8 +178,8 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.Get`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithGetOptions`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithGetQuery`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithGetHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 
 - Get HEADs the path-escaped object with X-Newest only when true and version-id/temp URL query values, decodes static-large-object bool and Unix delete-at headers, rejects empty names before HTTP and accepts only 200/204.
   Tests: `objectstorage/v1/objects/native_contracts_test.go:TestNativeObjectGetDownloadAndCopy`, `objectstorage/v1/objects/native_contracts_test.go:TestNativeObjectStatusesNamesAndPreflight`.
@@ -197,8 +197,8 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.Download`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithDownloadOptions`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithDownloadQuery`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithDownloadHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 
 - Download GETs the path-escaped object with range, If-Match and RFC1123 conditional time headers plus query values, returns a caller-owned body with decoded headers (closing the body on header errors) and accepts only 200/206/304.
   Tests: `objectstorage/v1/objects/native_contracts_test.go:TestNativeObjectGetDownloadAndCopy`, `objectstorage/v1/objects/native_contracts_test.go:TestNativeObjectStatusesNamesAndPreflight`.
@@ -216,7 +216,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithUpdateHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 
 - Update POSTs to the path-escaped object with metadata, remove-metadata and explicit pointer empty/false/integer headers, rejects a nil option before HTTP and accepts only 201/202.
   Tests: `objectstorage/v1/objects/native_contracts_test.go:TestNativeObjectCreateUpdateDeleteHeadersAndEscaping`, `objectstorage/v1/objects/native_contracts_test.go:TestNativeObjectStatusesNamesAndPreflight`.
@@ -234,7 +234,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.Delete`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithDeleteOptions`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithDeleteQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - Delete DELETEs the path-escaped object with multipart-manifest/version-id query values and accepts only 202/204.
   Tests: `objectstorage/v1/objects/native_contracts_test.go:TestNativeObjectCreateUpdateDeleteHeadersAndEscaping`, `objectstorage/v1/objects/native_contracts_test.go:TestNativeObjectStatusesNamesAndPreflight`.
@@ -252,8 +252,8 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.Copy`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCopyOptions`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCopyQuery`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCopyHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 
 - Copy sends COPY to the path-escaped object with a required Destination that must start with a slash and contain a container/object separator, path-escaping each of its first three split segments, sends version-id query values and accepts only 201.
   Tests: `objectstorage/v1/objects/native_contracts_test.go:TestNativeObjectGetDownloadAndCopy`, `objectstorage/v1/objects/native_contracts_test.go:TestNativeObjectStatusesNamesAndPreflight`.
@@ -271,7 +271,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs the path-escaped container with JSON Accept/Content-Type headers, ListOpts (versions, delimiter) and extension query values, repeats with marker set to the last name or subdir until an empty page, and rejects a slash container name.
   Tests: `objectstorage/v1/objects/native_contracts_test.go:TestNativeObjectListAndBulkDelete`, `objectstorage/v1/objects/native_contracts_test.go:TestNativeObjectStatusesNamesAndPreflight`.

@@ -30,7 +30,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.Update`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Volumes.Update sends PUT volumes/{id} with the supplied name, description and extension fields inside the volume envelope, and still sends an empty envelope when nothing is supplied.
   Tests: `blockstorage/v2/volumes/python_parity_test.go:TestPythonVolumeGetUpdateMatchProxyRequests`.
@@ -49,21 +49,21 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.Delete`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithDeleteQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.Remove`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.ForceDelete`
 - `github.com/JSYoo5B/go-openstacksdk/resource.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/resource.ID`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithMissingError`
 
-- resource.IgnoreMissing around Volumes.Delete with WithDeleteQuery(cascade, False) sends DELETE volumes/{id}?cascade=False and turns only 404 into success while 409 stays an error, and Remove ignores 404 unless WithMissingError is given.
+- resource.IgnoreMissing around Volumes.Delete with request.Query(cascade, False) sends DELETE volumes/{id}?cascade=False and turns only 404 into success while 409 stays an error, and Remove ignores 404 unless WithMissingError is given.
   Tests: `blockstorage/v2/volumes/python_parity_test.go:TestPythonVolumeDeleteDefaultsCascadeForceAndMissing`.
-- WithDeleteQuery(cascade, True) sends cascade=True and ForceDelete posts os-force_delete to volumes/{id}/action for force=True.
+- request.Query(cascade, True) sends cascade=True and ForceDelete posts os-force_delete to volumes/{id}/action for force=True.
   Tests: `blockstorage/v2/volumes/python_parity_test.go:TestPythonVolumeDeleteDefaultsCascadeForceAndMissing`.
 
 Python/Go differences:
 
-- Python always sends cascade=False or cascade=True; Remove sends no query and DeleteOpts{Cascade: true} sends lowercase cascade=true, so the exact Python query needs WithDeleteQuery.
+- Python always sends cascade=False or cascade=True; Remove sends no query and DeleteOpts{Cascade: true} sends lowercase cascade=true, so the exact Python query needs request.Query.
 - Python ignore_missing=True is the default; Go selects it with Remove or by wrapping Delete in resource.IgnoreMissing, and the bare Delete returns the 404 like ignore_missing=False.
 - ForceDelete sends {"os-force_delete": ""} where Python sends null; Python's force path catches NotFound but its v2 action never raises, whereas Go ForceDelete returns HTTP errors.
 - Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud v2 typed model, so response fields outside that model are dropped.
@@ -76,7 +76,7 @@ Status: `unsupported`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.Create`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Volumes.Create posts the volume envelope with size, name, snapshot_id, imageRef and WithCreateField keys such as multiattach and OS-SCH-HNT:scheduler_hints inside it, but always sends size (0 when unset) and rejects a size override before HTTP.
   Tests: `blockstorage/v2/volumes/python_parity_test.go:TestPythonVolumeCreateEnvelopeAlwaysSendsSize`.
@@ -98,7 +98,7 @@ Status: `unsupported`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.List`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - Volumes.List sends GET volumes/detail with the Python query mapping (all_tenants=True, name, status, project_id) and follows volumes_links like the default details=True call.
   Tests: `blockstorage/v2/volumes/python_parity_test.go:TestPythonVolumeListDetailDefaultOnly`.
@@ -373,7 +373,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots.API.Create`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Snapshots.Create posts the snapshot envelope with volume_id, name, description, force and metadata, omits a false force and rejects force as an extension field before HTTP.
   Tests: `blockstorage/v2/snapshots/python_parity_test.go:TestPythonSnapshotGetCreateMatchProxyRequests`.
@@ -414,7 +414,7 @@ Status: `unsupported`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots.API.List`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - Snapshots.List sends GET snapshots with the Python query mapping (all_tenants=True, name, volume_id) but reads only one page and ignores snapshots_links.
   Tests: `blockstorage/v2/snapshots/python_parity_test.go:TestPythonSnapshotListAndFindUseSummaryRoute`.

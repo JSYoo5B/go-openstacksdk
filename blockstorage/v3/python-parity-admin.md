@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - Services.List sends GET os-services with no query by default, binary/host from ListOpts and limit/marker through WithListQuery exactly as the Service QueryParameters do, carries the configured microversion header, and decodes the service fields Python exposes.
   Tests: `blockstorage/v3/services/python_parity_test.go:TestPythonServicesListMatchesProxyQuery`.
@@ -35,7 +35,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/schedulerstats.API.List`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/schedulerstats.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/schedulerstats.WithListOptions`
 
 - SchedulerStats.List with WithListQuery("detail", "True") sends Python's exact GET scheduler-stats/get_pools?detail=True (ListOpts.Detail sends detail=true, the Go default omits detail), adds limit/marker as query, and decodes pool name and typed capabilities.

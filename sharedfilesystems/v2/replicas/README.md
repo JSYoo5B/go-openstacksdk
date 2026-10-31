@@ -17,7 +17,7 @@ The caller owns the service client, including its Manila microversion. When `Ser
 | `ResetState` | `POST .../{id}/action` | 202 only | Body `{"reset_replica_state":{"replica_state":...}}`; `State` is required |
 | `ListExportLocations`, `GetExportLocation` | `GET .../{id}/export-locations[/{location}]` | 200 | Typed `ExportLocation` models |
 
-Extension inputs use `WithCreateField`, `WithPromoteField`, `WithResetStatusField`, `WithResetStateField`, `WithListQuery` and `WithListDetailQuery`. A field extension that names a core input field (including one whose typed value is omitted) fails with `resource.ErrInvalidOption` before any request; nil options fail the same way. A query extension with the same key as a typed filter replaces the typed value. `ForceDelete`, `Resync`, `Delete`, `Get` and the export-location reads take no options.
+Extension inputs use `request.Field`, `request.Field`, `request.Field`, `request.Field`, `request.Query` and `request.Query`. A field extension that names a core input field (including one whose typed value is omitted) fails with `resource.ErrInvalidOption` before any request; nil options fail the same way. A query extension with the same key as a typed filter replaces the typed value. `ForceDelete`, `Resync`, `Delete`, `Get` and the export-location reads take no options.
 
 `Find`, `All`, `Remove`, `WaitFor` and `WaitForDeletion` use the common `resource.Collection`. Replicas have no name, so lookups are by ID. `All` reads `/share-replicas/detail`; a `WithStatus` filter is applied locally and is not sent as a `status` query parameter. `Remove` ignores a 404 by default; `API.Delete`, `API.Get` and the other native calls keep a 404 as `gophercloud.ErrUnexpectedResponseCode`.
 

@@ -167,7 +167,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.API.UpdateRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithRecordMutationOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithRecordAttribute`

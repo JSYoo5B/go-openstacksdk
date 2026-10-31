@@ -90,7 +90,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.ProjectQuotaScope.Update`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithUpdateForce`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithVolumeTypeQuota`
 
 - PUT updates only supplied limits: nil omits, zero and -1 remain explicit, native force=true is retained and WithUpdateForce(false) sends false with last-option precedence.
@@ -255,14 +255,14 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.ProjectQuotaScope.Update`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithUpdateForce`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithVolumeTypeQuota`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.API.InProject`
 
 - Typed limit omission/zero/-1, force false and exact per-type keys have concrete Go options with detached request data.
   Tests: `api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaUpdateDistinguishesOmittedFalseZeroAndUnlimited`, `api/cinder_project_quotas_responses_test.go:TestCinderProjectQuotaDeepOptionSnapshotAndCoreCollisions`, `api/cinder_project_quotas_responses_test.go:TestCinderProjectQuotaTypedLimitsRetainIntegerPrecision`.
-- update_quota_set(project, volumes=5, gigabytes=0, volumes_lvm=3, force=True) maps to ProjectQuotaScope.Update with typed limits, WithVolumeTypeQuota and WithUpdateForce(true) (or WithUpdateField for other keys), sending PUT /os-quota-sets/<project> {"quota_set":{...}} with only those keys.
+- update_quota_set(project, volumes=5, gigabytes=0, volumes_lvm=3, force=True) maps to ProjectQuotaScope.Update with typed limits, WithVolumeTypeQuota and WithUpdateForce(true) (or request.Field for other keys), sending PUT /os-quota-sets/<project> {"quota_set":{...}} with only those keys.
   Tests: `blockstorage/v3/quotasets/python_rejudge_test.go:TestPythonRejudgeQuotaSetUpdate`.
 
 Python/Go differences:

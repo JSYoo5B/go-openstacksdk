@@ -36,7 +36,7 @@ const pythonParityCorePortBase = "/neutron/v2.0/ports"
 
 // Python ports(**query) transposes is_admin_state_up and security_group_ids,
 // repeats fixed_ips and security_groups, and follows ports_links. Go sends the
-// same wire keys through ListOpts and WithListQuery.
+// same wire keys through ListOpts and request.Query.
 func TestPythonParityCorePortListQueryAndLinks(t *testing.T) {
 	ctx := context.Background()
 	var calls []pythonParityCorePortCall

@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/instanceactions.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/instanceactions.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/instanceactions.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs servers/{id}/os-instance-actions with limit, marker, RFC3339 changes-since/before keeping the caller offset and extension query as one single page ignoring links, decodes zone-less start_time, yields nothing for an empty array, surfaces io.EOF for a bodyless 204 and returns native pager status errors without operation context.
   Tests: `compute/v2/instanceactions/native_contracts_test.go:TestNativeInstanceActionsRoutesQueryAndDecode`, `compute/v2/instanceactions/native_contracts_test.go:TestNativeInstanceActionsStatusesAndDecodeErrors`.

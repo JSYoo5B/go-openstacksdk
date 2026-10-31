@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create POSTs types with a volume_type envelope (required name, omitempty description and extra_specs, os-volume-type-access:is_public pointer) plus extension fields inside the envelope, rejects a missing name, core-key extensions and nil options before HTTP, decodes the volume_type key (zero value for {}) and accepts only 200.
   Tests: `blockstorage/v3/volumetypes/native_admin_contracts_test.go:TestNativeVolumeTypeAdminRoutesBodiesAndDecode`, `blockstorage/v3/volumetypes/native_admin_contracts_test.go:TestNativeVolumeTypeAdminStatusesDecodeAndPreflight`.
@@ -32,7 +32,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Update PUTs types/{id} with a volume_type envelope of pointer name/description/is_public (nil omitted, empty strings kept, {} when unset; is_public rather than the access-prefixed create key) plus extension fields, rejects core-key extensions before HTTP, decodes the volume_type key and accepts only 200.
   Tests: `blockstorage/v3/volumetypes/native_admin_contracts_test.go:TestNativeVolumeTypeAdminRoutesBodiesAndDecode`, `blockstorage/v3/volumetypes/native_admin_contracts_test.go:TestNativeVolumeTypeAdminStatusesDecodeAndPreflight`.
@@ -66,7 +66,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.API.CreateExtraSpecs`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.WithCreateExtraSpecsOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.WithCreateExtraSpecsField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - CreateExtraSpecs POSTs {"extra_specs": map} (null for a nil map) to types/{id}/extra_specs with extension fields placed beside the string-map envelope, rejects an extra_specs extension before HTTP, returns the extra_specs string map (nil when absent) and accepts only 200.
   Tests: `blockstorage/v3/volumetypes/native_admin_contracts_test.go:TestNativeVolumeTypeAdminRoutesBodiesAndDecode`, `blockstorage/v3/volumetypes/native_admin_contracts_test.go:TestNativeVolumeTypeAdminStatusesDecodeAndPreflight`.
@@ -85,7 +85,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.API.UpdateExtraSpec`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.WithUpdateExtraSpecOptions`
 
-- UpdateExtraSpec PUTs the single {key: value} pair without an envelope to types/{id}/extra_specs/{unescaped key}, rejects zero or several pairs and any body extension (including the shared WithCreateExtraSpecsField option) before HTTP, returns the envelope-free string map with a wrapped decode error for non-string values and accepts only 200.
+- UpdateExtraSpec PUTs the single {key: value} pair without an envelope to types/{id}/extra_specs/{unescaped key}, rejects zero or several pairs and any body extension (including the shared request.Field option) before HTTP, returns the envelope-free string map with a wrapped decode error for non-string values and accepts only 200.
   Tests: `blockstorage/v3/volumetypes/native_admin_contracts_test.go:TestNativeVolumeTypeAdminRoutesBodiesAndDecode`, `blockstorage/v3/volumetypes/native_admin_contracts_test.go:TestNativeVolumeTypeAdminStatusesDecodeAndPreflight`.
 
 Python/Go differences:
@@ -117,7 +117,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.API.AddAccess`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.WithAddAccessOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.WithAddAccessField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - AddAccess POSTs {"addProjectAccess": {"project": ...}} to types/{id}/action without requiring the project (an empty string is sent), merges extension fields inside the action, rejects a project extension before HTTP, ignores the response body and accepts only 202.
   Tests: `blockstorage/v3/volumetypes/native_admin_contracts_test.go:TestNativeVolumeTypeAdminRoutesBodiesAndDecode`, `blockstorage/v3/volumetypes/native_admin_contracts_test.go:TestNativeVolumeTypeAdminStatusesDecodeAndPreflight`.
@@ -135,7 +135,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.API.RemoveAccess`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.WithRemoveAccessOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.WithRemoveAccessField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - RemoveAccess POSTs {"removeProjectAccess": {"project": ...}} to types/{id}/action with extension fields inside the action, rejects nil options before HTTP, ignores the response body and accepts only 202.
   Tests: `blockstorage/v3/volumetypes/native_admin_contracts_test.go:TestNativeVolumeTypeAdminRoutesBodiesAndDecode`, `blockstorage/v3/volumetypes/native_admin_contracts_test.go:TestNativeVolumeTypeAdminStatusesDecodeAndPreflight`.
@@ -169,7 +169,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.API.CreateEncryption`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.WithCreateEncryptionOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.WithCreateEncryptionField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - CreateEncryption POSTs an encryption envelope with required provider and non-omitempty key_size/control_location/cipher (zero values sent) plus extension fields to types/{id}/encryption, rejects a missing provider and core-key extensions before HTTP, decodes the encryption key (zero value for {}) and accepts only 200.
   Tests: `blockstorage/v3/volumetypes/native_admin_contracts_test.go:TestNativeVolumeTypeAdminRoutesBodiesAndDecode`, `blockstorage/v3/volumetypes/native_admin_contracts_test.go:TestNativeVolumeTypeAdminStatusesDecodeAndPreflight`.
@@ -219,7 +219,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.API.UpdateEncryption`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.WithUpdateEncryptionOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.WithUpdateEncryptionField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - UpdateEncryption PUTs an encryption envelope that always carries key_size, provider, control_location and cipher (zero values included) plus extension fields to types/{id}/encryption/{encryptionID}, rejects core-key extensions before HTTP, decodes the encryption key and accepts only 200.
   Tests: `blockstorage/v3/volumetypes/native_admin_contracts_test.go:TestNativeVolumeTypeAdminRoutesBodiesAndDecode`, `blockstorage/v3/volumetypes/native_admin_contracts_test.go:TestNativeVolumeTypeAdminStatusesDecodeAndPreflight`.
@@ -253,7 +253,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/manageablevolumes.API.ManageExisting`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/manageablevolumes.WithManageExistingOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/manageablevolumes.WithManageExistingField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - ManageExisting POSTs an all-omitempty volume envelope (host, cluster, ref, name, availability_zone, description, volume_type, bootable, metadata; nothing required, {} when empty) plus extension fields to manageable_volumes, rejects core-key extensions and nil options before HTTP, decodes the volume key into a v3 Volume with zone-less millisecond timestamps (a Z suffix fails) and accepts only 202.
   Tests: `blockstorage/v3/manageablevolumes/native_contracts_test.go:TestNativeManageableVolumeRouteBodyAndDecode`, `blockstorage/v3/manageablevolumes/native_contracts_test.go:TestNativeManageableVolumeStatusesDecodeAndPreflight`.
@@ -271,7 +271,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/schedulerstats.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/schedulerstats.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/schedulerstats.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs scheduler-stats/get_pools with tenant_id, detail only when true and extension query values as a single page of pools without following pools_links, decodes capacity numbers with "infinite" as +Inf and other strings as zero and max_over_subscription_ratio as a string, fails on mistyped capability fields, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.
   Tests: `blockstorage/v2/schedulerstats/native_contracts_test.go:TestNativeSchedulerStatsListRouteAndDecode`, `blockstorage/v2/schedulerstats/native_contracts_test.go:TestNativeSchedulerStatsListStatusesAndPreflight`.
@@ -289,7 +289,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/services.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/services.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/services.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs os-services with binary, host and extension query values as a single page without following services_links, decodes updated_at in the zone-less millisecond layout (null as zero, a Z suffix fails), yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.
   Tests: `blockstorage/v2/services/native_contracts_test.go:TestNativeCinderServiceListRouteAndDecode`, `blockstorage/v2/services/native_contracts_test.go:TestNativeCinderServiceListStatusesAndPreflight`.
@@ -307,7 +307,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/schedulerstats.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/schedulerstats.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/schedulerstats.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs scheduler-stats/get_pools with tenant_id, detail only when true and extension query values as a single page of pools without following pools_links, decodes capacity numbers with "infinite" as +Inf and other strings as zero and max_over_subscription_ratio as a string, fails on mistyped capability fields, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.
   Tests: `blockstorage/v3/schedulerstats/native_contracts_test.go:TestNativeSchedulerStatsListRouteAndDecode`, `blockstorage/v3/schedulerstats/native_contracts_test.go:TestNativeSchedulerStatsListStatusesAndPreflight`.
@@ -325,7 +325,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs os-services with binary, host and extension query values as a single page without following services_links, decodes updated_at in the zone-less millisecond layout (null as zero, a Z suffix fails), yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.
   Tests: `blockstorage/v3/services/native_contracts_test.go:TestNativeCinderServiceListRouteAndDecode`, `blockstorage/v3/services/native_contracts_test.go:TestNativeCinderServiceListStatusesAndPreflight`.
@@ -391,7 +391,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/quotasets.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/quotasets.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/quotasets.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Update PUTs a quota_set envelope of pointer limits (nil omitted, 0 and -1 kept), force only when true and Extra keys merged afterwards so they override typed limits, plus extension fields; it rejects extensions colliding with typed keys (even omitted) or Extra keys and nil options before HTTP, decodes the quota_set key (nil when missing) and accepts only 200.
   Tests: `blockstorage/v2/quotasets/native_contracts_test.go:TestNativeQuotaSetV2RoutesBodiesAndDecode`, `blockstorage/v2/quotasets/native_contracts_test.go:TestNativeQuotaSetV2StatusesDecodeAndPreflight`.

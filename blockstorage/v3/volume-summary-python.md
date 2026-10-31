@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.ListWithDetails`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.ListSummary`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.ListSummaryWithControl`

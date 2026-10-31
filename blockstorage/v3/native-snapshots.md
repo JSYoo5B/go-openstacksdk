@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create POSTs {"snapshot":{...}} to snapshots sending force only when true, requires volume_id and rejects a core-key extension collision before HTTP, decodes extended progress/project attributes and accepts only 202.
   Tests: `blockstorage/v3/snapshots/native_contracts_test.go:TestNativeSnapshotRoutesBodiesPagingAndDecode`, `blockstorage/v3/snapshots/native_contracts_test.go:TestNativeSnapshotStrictStatusesDecodeAndPreflight`.
@@ -48,7 +48,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs the summary snapshots route with ListOpts (all_tenants included) and extension query values, follows snapshots_links next hrefs as received, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.
   Tests: `blockstorage/v3/snapshots/native_contracts_test.go:TestNativeSnapshotRoutesBodiesPagingAndDecode`, `blockstorage/v3/snapshots/native_contracts_test.go:TestNativeSnapshotStrictStatusesDecodeAndPreflight`.
@@ -66,7 +66,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.API.ListDetail`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithListDetailOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithListDetailQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - ListDetail GETs snapshots/detail with ListOpts (all_tenants included) and extension query values, follows snapshots_links next hrefs as received, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.
   Tests: `blockstorage/v3/snapshots/native_contracts_test.go:TestNativeSnapshotRoutesBodiesPagingAndDecode`, `blockstorage/v3/snapshots/native_contracts_test.go:TestNativeSnapshotStrictStatusesDecodeAndPreflight`.
@@ -84,7 +84,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Update PUTs {"snapshot":{...}} to snapshots/{id} sending explicit empty pointer name/description with extensions inside the envelope, rejects a nil option before HTTP and accepts only 200.
   Tests: `blockstorage/v3/snapshots/native_contracts_test.go:TestNativeSnapshotRoutesBodiesPagingAndDecode`, `blockstorage/v3/snapshots/native_contracts_test.go:TestNativeSnapshotStrictStatusesDecodeAndPreflight`.
@@ -135,7 +135,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create POSTs {"snapshot":{...}} to snapshots sending force only when true, requires volume_id and rejects a core-key extension collision before HTTP and accepts only 202.
   Tests: `blockstorage/v2/snapshots/native_contracts_test.go:TestNativeSnapshotRoutesBodiesSinglePageAndDecode`, `blockstorage/v2/snapshots/native_contracts_test.go:TestNativeSnapshotStrictStatusesDecodeAndPreflight`.
@@ -169,7 +169,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs the summary snapshots route with ListOpts (all_tenants included) and extension query values as a single page that never follows snapshots_links, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.
   Tests: `blockstorage/v2/snapshots/native_contracts_test.go:TestNativeSnapshotRoutesBodiesSinglePageAndDecode`, `blockstorage/v2/snapshots/native_contracts_test.go:TestNativeSnapshotStrictStatusesDecodeAndPreflight`.
@@ -236,7 +236,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.API.ResetStatus`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithResetStatusOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithResetStatusField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - ResetStatus POSTs {"os-reset_status":{"status":...}} to snapshots/{id}/action with extensions inside the action object, rejects a status extension collision before HTTP and accepts only 202.
   Tests: `blockstorage/v3/snapshots/native_admin_contracts_test.go:TestNativeSnapshotAdminActions`.
@@ -254,7 +254,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.API.UpdateStatus`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithUpdateStatusOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithUpdateStatusField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - UpdateStatus POSTs {"os-update_snapshot_status":{"status":...,"progress":...}} to snapshots/{id}/action always sending status (empty included) and omitting empty progress, rejects a nil option before HTTP and accepts only 202.
   Tests: `blockstorage/v3/snapshots/native_admin_contracts_test.go:TestNativeSnapshotAdminActions`.

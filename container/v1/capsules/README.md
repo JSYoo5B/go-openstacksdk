@@ -11,7 +11,7 @@
 
 `Create` returns the same `any` (`*Capsule` or `*CapsuleV132`). `List` always decodes rows as `*CapsuleV132`, so a page in the legacy shape (string `restart_policy`) fails with a decode error and yields no rows; use a client whose microversion returns 1.32-shaped capsules for listing. `AllProjects` is a plain bool: `false` is omitted from the query, not sent as `all_projects=false`.
 
-Extension inputs use `WithCreateField` and `WithListQuery`. A field extension that names `template`, or a nil option, fails with `resource.ErrInvalidOption` before any request; a missing template or an unparsable template (`capsules.ErrInvalidDataFormat`) also fails before any request. There is no update route and no common `Collection`; the package has no `Find` or wait helpers.
+Extension inputs use `request.Field` and `request.Query`. A field extension that names `template`, or a nil option, fails with `resource.ErrInvalidOption` before any request; a missing template or an unparsable template (`capsules.ErrInvalidDataFormat`) also fails before any request. There is no update route and no common `Collection`; the package has no `Find` or wait helpers.
 
 Zun selects its microversion through the `OpenStack-API-Version: container <version>` header. The package sends it only when the `ServiceClient` has a `Microversion` (for example `1.32`); it does not choose a version, and the response shape follows what the server returns.
 

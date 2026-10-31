@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create POSTs {"server_group":{...}} to os-server-groups omitting empty fields, places extensions inside the envelope, rejects a missing name, a core-key extension collision and a nil option before HTTP, decodes the response and accepts only 200.
   Tests: `compute/v2/servergroups/native_contracts_test.go:TestNativeServerGroupsRoutesBodiesAndDecode`, `compute/v2/servergroups/native_contracts_test.go:TestNativeServerGroupsStrictStatusesAndPreflight`.
@@ -48,7 +48,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs os-server-groups with all_projects/limit/offset and extension query as one single page that ignores links, yields nothing for an empty array, surfaces io.EOF for a bodyless 204 and returns native pager status errors (200/204/300) without operation context.
   Tests: `compute/v2/servergroups/native_contracts_test.go:TestNativeServerGroupsRoutesBodiesAndDecode`, `compute/v2/servergroups/native_contracts_test.go:TestNativeServerGroupsStrictStatusesAndPreflight`.

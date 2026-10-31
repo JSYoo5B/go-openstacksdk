@@ -15,7 +15,7 @@
 
 `UpdateOpts` is a slice of patches. `UpdateOperation` always serializes `op`, `path` and `value`: an explicit `false`, `""` or empty map is sent as is, and a `remove` operation without a value sends `"value": null`. `WithUpdateOptions` replaces the initial patch list rather than appending to it.
 
-Extension inputs use `WithCreateField`, `WithListQuery` and `WithListDetailQuery`. A field extension that names a core create field fails with `resource.ErrInvalidOption` before any request, even when the core field is unset; nil options and empty query keys fail the same way. `CreateOpts` uses `omitempty` for strings and maps, so an empty `PhysicalNetwork` or `Extra` is not sent on create; use a JSON Patch update to set empty values.
+Extension inputs use `request.Field`, `request.Query` and `request.Query`. A field extension that names a core create field fails with `resource.ErrInvalidOption` before any request, even when the core field is unset; nil options and empty query keys fail the same way. `CreateOpts` uses `omitempty` for strings and maps, so an empty `PhysicalNetwork` or `Extra` is not sent on create; use a JSON Patch update to set empty values.
 
 `Find`, `All` and `Remove` use the common `resource.Collection`. Collection lookups use the detail route (`/ports/detail`), so they cannot use field selection. Ports declare no status attribute, so `resource.WithStatus` returns `resource.ErrUnsupported` without HTTP. `Remove` with an ID reference sends `DELETE` directly and ignores a 404 by default; `resource.WithMissingError()` turns it into `resource.ErrNotFound`. `API.Delete` and `API.Get` keep the native 404 error.
 

@@ -46,7 +46,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/quotas.ProjectQuotaScope.Update`
 - `github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/quotas.WithQuotaOptions`
 - `github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/quotas.WithDefaultLimit`
-- `github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/quotas.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/quotas.WithLegacyQuotaKeys`
 
 - PUT binds the official /lbaas/quotas/{project} route and sends omitted/nil, zero and -1 native limits distinctly; WithDefaultLimit sends explicit null inheritance and extension values preserve creation-time JSON snapshots.
@@ -184,7 +184,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/quotas.ProjectQuotaScope.Update`
 - `github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/quotas.WithQuotaOptions`
 - `github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/quotas.WithDefaultLimit`
-- `github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/quotas.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - The fixed-project PUT uses official /lbaas/quotas/{project} with a quota envelope; native nil/zero/-1 limits stay distinct, explicit null inheritance and creation-time extension snapshots are serialized, and the updated native/raw result retains ProjectID and response metadata.
   Tests: `api/octavia_project_quotas_contracts_test.go:TestOctaviaProjectQuotasUseOfficialPathsAndGlobalDefaults`, `api/octavia_project_quotas_list_test.go:TestOctaviaQuotaDefaultInheritanceDuplicateAndForgedArgument`.

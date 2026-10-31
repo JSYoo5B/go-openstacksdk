@@ -10,7 +10,7 @@
 | `Delete` | `DELETE /zones/tasks/transfer_requests/{id}` | 204 only | Native 404 stays an HTTP response error |
 | `List` | `GET /zones/tasks/transfer_requests` | 200 | Filter `status`; follows `links.next` |
 
-Extension inputs use `WithCreateField`, `WithUpdateField` and `WithListQuery`; values `false` and `nil` (JSON `null`) are sent as given. There are no header options. A field extension that names a core JSON field and nil options fail with `resource.ErrInvalidOption` before any request.
+Extension inputs use `request.Field`, `request.Field` and `request.Query`; values `false` and `nil` (JSON `null`) are sent as given. There are no header options. A field extension that names a core JSON field and nil options fail with `resource.ErrInvalidOption` before any request.
 
 `All`, `Find`, `Remove`, `WaitFor` and `WaitForDeletion` use the common `resource.Collection`, with ignore-missing deletion by default (`Remove` returns nil for a 404).
 

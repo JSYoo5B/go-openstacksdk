@@ -23,7 +23,7 @@ The client must be a Shared File System service client. When `ServiceClient.Micr
 | `DeleteMetadatum` | `DELETE .../metadata/{key}` | 200 only | 202 and 204 are rejected |
 | `ListExportLocations`, `GetExportLocation` | `GET .../export_locations[/{id}]` | 200 | `IsAdminOnly` and `Preferred` decode explicit `false` |
 
-Extension inputs are body fields: `WithCreateField`, `WithUpdateField`, `WithExtendField`, `WithShrinkField`, `WithRevertField`, `WithResetStatusField`, `WithGrantAccessField`, `WithRevokeAccessField`. A field that names a core input field, and any nil option, fails with `resource.ErrInvalidOption` before any request. `WithListDetailQuery` appends a query parameter and replaces a typed filter that uses the same key rather than rejecting the collision.
+Extension inputs are body fields: `request.Field`, `request.Field`, `request.Field`, `request.Field`, `request.Field`, `request.Field`, `request.Field`, `request.Field`. A field that names a core input field, and any nil option, fails with `resource.ErrInvalidOption` before any request. `request.Query` appends a query parameter and replaces a typed filter that uses the same key rather than rejecting the collision.
 
 Known limitations:
 

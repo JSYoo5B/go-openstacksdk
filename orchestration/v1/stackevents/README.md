@@ -56,7 +56,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stackevents.StackEventScope.List`
 - `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stackevents.StackEventScope.All`
 - `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stackevents.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stackevents.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stackevents.WithListHeader`
 - `github.com/JSYoo5B/go-openstacksdk/resource.Pages`
 
@@ -86,7 +86,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stackevents.ResourceEventScope.List`
 - `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stackevents.ResourceEventScope.All`
 - `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stackevents.WithListResourceEventsOptions`
-- `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stackevents.WithListResourceEventsQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stackevents.WithListResourceEventsHeader`
 - `github.com/JSYoo5B/go-openstacksdk/resource.Pages`
 
@@ -166,7 +166,7 @@ func main() {
 
     for event, err := range events.List(ctx,
         stackevents.WithListOptions(stackevents.ListOpts{Limit: 100}),
-        stackevents.WithListQuery("nested_depth", "1")) {
+        request.Query("nested_depth", "1")) {
         if err != nil { panic(err) }
         fmt.Println(event.ID, event.ResourceName, event.ResourceStatus)
     }

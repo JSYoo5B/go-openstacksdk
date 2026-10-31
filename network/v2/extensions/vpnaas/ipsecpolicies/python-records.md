@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ipsecpolicies.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ipsecpolicies.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ipsecpolicies.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ipsecpolicies.New`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ipsecpolicies.API.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ipsecpolicies.API.AllRecords`
@@ -31,7 +31,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ipsecpolicies.WithRecordListJMESPath`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ipsecpolicies.WithRecordListConflictingAttrs`
 
-- List sends GET vpn/ipsecpolicies with WithListOptions and WithListQuery values as query and follows the ipsecpolicies_links next href.
+- List sends GET vpn/ipsecpolicies with WithListOptions and request.Query values as query and follows the ipsecpolicies_links next href.
   Tests: `network/v2/extensions/vpnaas/ipsecpolicies/python_parity_test.go:TestPythonIPsecPolicyListQueryAndLinks`.
 - Owned nullable Source policy descriptors keep lifetime nested values raw, units separate and value integer; unknown/tenant/tag/revision fields do not leak into Resource while actual Wire/Envelope remain unmodified.
   Tests: `network/v2/extensions/vpnaas/ipsecpolicies/python_record_contracts_test.go:TestVPNPolicyRecordsDescriptorDefaultsAndActualProof`.

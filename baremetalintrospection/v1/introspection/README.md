@@ -13,7 +13,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/baremetalintrospection/v1/introspection.API.StartIntrospection`
-- `github.com/JSYoo5B/go-openstacksdk/baremetalintrospection/v1/introspection.WithStartIntrospectionQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - Omitted, false and true manage_boot and escaped extension query values reach the POST URL.
   Tests: `api/introspection_start_contracts_test.go:TestIntrospectionStartPreservesBootQueryAndEscapedExtensions`.
@@ -32,7 +32,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/baremetalintrospection/v1/introspection.API.StartAndGet`
 - `github.com/JSYoo5B/go-openstacksdk/baremetalintrospection/v1/introspection.API.StartIntrospection`
-- `github.com/JSYoo5B/go-openstacksdk/baremetalintrospection/v1/introspection.WithStartIntrospectionQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - POST /introspection/{node}?manage_boot=... (omitted, false, true) then one GET of the status; a rejected start is not followed by a read and nothing is replayed.
   Tests: `api/py_cloud_ironic_introspection_test.go:TestPyCloudIronicIntrospectionStartAndGetPostsThenReadsOnceWithoutReplay`, `api/introspection_start_contracts_test.go:TestIntrospectionStartPreservesBootQueryAndEscapedExtensions`.
@@ -63,7 +63,7 @@ fmt.Println(value.UUID, value.Finished, value.State)
 manageBoot := false
 err = service.Introspection.StartIntrospection(ctx, "node-uuid",
     introspection.StartOpts{ManageBoot: &manageBoot},
-    introspection.WithStartIntrospectionQuery("vendor", "a&b"))
+    request.Query("vendor", "a&b"))
 if err != nil { return err }
 ```
 

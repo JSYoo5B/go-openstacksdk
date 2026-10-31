@@ -25,7 +25,7 @@ See the [support ledger](../../docs/sdk-support-ledger.md) for status definition
 | `share_types` | `sharetypes.API.List` | `/types`; `is_public` and JSON-encoded `extra_specs` go through `WithListQuery` |
 | `user_messages` | `messages.API.List` | `/messages` |
 | `services` | `services.API.List` | `/services`; the pinned native typed filters are not encoded, so use `WithListQuery("binary"\|"zone"\|"host"\|"state"\|"status", value)` (Python aliases `name` to `binary` and `availability_zone` to `zone`) |
-| `storage_pools(details)` | `schedulerstats.API.ListDetail` (default) and `List` | `/scheduler-stats/pools/detail` and `/scheduler-stats/pools`; filters `pool`, `backend`, `host`, `capabilities`, `share_type` use `WithListQuery`/`WithListDetailQuery` |
+| `storage_pools(details)` | `schedulerstats.API.ListDetail` (default) and `List` | `/scheduler-stats/pools/detail` and `/scheduler-stats/pools`; filters `pool`, `backend`, `host`, `capabilities`, `share_type` use `WithListQuery`/`request.Query` |
 
 `shares.API.List`, `snapshots.API.List` and `sharenetworks.API.List` are SDK additions that return the summary view (identifier, name and links on current Manila releases); the absent fields are zero values, not server-reported zeros.
 

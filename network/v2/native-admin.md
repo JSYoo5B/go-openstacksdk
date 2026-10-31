@@ -30,7 +30,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Update PUTs {"agent":{...}} with pointer description/admin_state_up (empty and false sent explicitly) and extensions inside the envelope to agents/{id}, rejects a core-key extension and nil option before HTTP, and accepts only 200.
   Tests: `network/v2/extensions/agents/native_admin_test.go:TestNativeAgentRoutesBodiesPagingAndDecode`, `network/v2/extensions/agents/native_admin_test.go:TestNativeAgentStrictStatusesDecodeAndPreflight`.
@@ -64,7 +64,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs agents with ListOpts (pointer alive including false) and extension query values, follows agents_links rel=next hrefs while ignoring a links.next string, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.
   Tests: `network/v2/extensions/agents/native_admin_test.go:TestNativeAgentRoutesBodiesPagingAndDecode`, `network/v2/extensions/agents/native_admin_test.go:TestNativeAgentStrictStatusesDecodeAndPreflight`.
@@ -98,7 +98,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.API.ScheduleDHCPNetwork`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.WithScheduleDHCPNetworkOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.WithScheduleDHCPNetworkField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - ScheduleDHCPNetwork POSTs an unenveloped {"network_id":...} body with top-level extensions to agents/{id}/dhcp-networks, rejects an empty network_id, a core-key extension and nil option before HTTP, ignores the response body, and accepts only 201.
   Tests: `network/v2/extensions/agents/native_admin_test.go:TestNativeAgentRoutesBodiesPagingAndDecode`, `network/v2/extensions/agents/native_admin_test.go:TestNativeAgentStrictStatusesDecodeAndPreflight`.
@@ -148,7 +148,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.API.ScheduleL3Router`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.WithScheduleL3RouterOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.WithScheduleL3RouterField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - ScheduleL3Router POSTs an unenveloped {"router_id":...} body with top-level extensions to agents/{id}/l3-routers, rejects an empty router_id, a core-key extension and nil option before HTTP, ignores the response body, and accepts only 201.
   Tests: `network/v2/extensions/agents/native_admin_test.go:TestNativeAgentRoutesBodiesPagingAndDecode`, `network/v2/extensions/agents/native_admin_test.go:TestNativeAgentStrictStatusesDecodeAndPreflight`.
@@ -198,7 +198,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.API.ScheduleBGPSpeaker`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.WithScheduleBGPSpeakerOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.WithScheduleBGPSpeakerField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - ScheduleBGPSpeaker POSTs an unenveloped {"bgp_speaker_id":...} body with top-level extensions to agents/{agentID}/bgp-drinstances, rejects an empty speaker ID, a core-key extension and nil option before HTTP, ignores the response body, and accepts only 201.
   Tests: `network/v2/extensions/agents/native_admin_test.go:TestNativeAgentRoutesBodiesPagingAndDecode`, `network/v2/extensions/agents/native_admin_test.go:TestNativeAgentStrictStatusesDecodeAndPreflight`.
@@ -248,7 +248,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/segments.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/segments.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/segments.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create POSTs {"segment":{...}} to segments with extensions inside the envelope, omits empty optional fields including segmentation_id 0, rejects empty network_id/network_type, a core-key extension and nil option before HTTP, and accepts only 201/202.
   Tests: `network/v2/extensions/segments/native_admin_test.go:TestNativeSegmentRoutesBodiesPagingAndDecode`, `network/v2/extensions/segments/native_admin_test.go:TestNativeSegmentStrictStatusesDecodeAndPreflight`.
@@ -282,7 +282,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/segments.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/segments.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/segments.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Update PUTs {"segment":{...}} with pointer name/description/segmentation_id (empty and 0 sent explicitly) and extensions inside the envelope to segments/{id}, rejects a core-key extension and nil option before HTTP, and accepts only 200.
   Tests: `network/v2/extensions/segments/native_admin_test.go:TestNativeSegmentRoutesBodiesPagingAndDecode`, `network/v2/extensions/segments/native_admin_test.go:TestNativeSegmentStrictStatusesDecodeAndPreflight`.
@@ -316,7 +316,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/segments.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/segments.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/segments.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs segments with ListOpts (integer filters omitted at 0) and extension query values, ignores the Neutron segments_links array and follows only a links.next string because SegmentPage defines no NextPageURL, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.
   Tests: `network/v2/extensions/segments/native_admin_test.go:TestNativeSegmentRoutesBodiesPagingAndDecode`, `network/v2/extensions/segments/native_admin_test.go:TestNativeSegmentStrictStatusesDecodeAndPreflight`.
@@ -350,7 +350,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs network-ip-availabilities with ListOpts and extension query values as a single page that follows no links, decodes counts into exact decimal strings with a native page error for a missing count, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.
   Tests: `network/v2/extensions/networkipavailabilities/native_admin_test.go:TestNativeIPAvailabilityRoutesSinglePageAndDecode`, `network/v2/extensions/networkipavailabilities/native_admin_test.go:TestNativeIPAvailabilityStrictStatusesDecodeAndPreflight`.

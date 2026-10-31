@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.API.List`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.API.All`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithQuery`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.ServiceRecord.Clone`

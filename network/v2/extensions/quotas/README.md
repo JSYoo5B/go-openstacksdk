@@ -69,7 +69,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/quotas.ProjectQuotaScope.Update`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/quotas.WithQuotaOptions`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/quotas.WithUpdateCheckLimit`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/quotas.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Nil limits omit, zero/-1 remain explicit and check_limit omission/true/false are distinct with last-option precedence; integer values stay exact and the serialized body is unchanged across 401 reauthentication.
   Tests: `api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaUpdateOmittedFalseZeroAndSnapshotAcrossReauth`, `api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaOperationsKeepTargetRawJSONAndMetadata`.
@@ -147,18 +147,18 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/quotas.ProjectQuotaScope.Update`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/quotas.WithQuotaOptions`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/quotas.WithUpdateCheckLimit`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/quotas.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/quotas.API.InProject`
 
 - Optional limits and check_limit have concrete Go equivalents with exact/retry-stable request bodies and construction-time typed snapshots.
   Tests: `api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaUpdateOmittedFalseZeroAndSnapshotAcrossReauth`, `api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaOptionsSnapshotAtCreationAndRemainReusable`, `api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaOperationsKeepTargetRawJSONAndMetadata`.
-- update_quota(project, networks=10, ports=0, health_monitors=7, check_limit=False) maps to ProjectQuotaScope.Update with typed Network/Port, WithUpdateField("healthmonitor", 7) and WithUpdateCheckLimit(false), sending PUT /quotas/<project> {"quota":{...}} with only those keys and no id.
+- update_quota(project, networks=10, ports=0, health_monitors=7, check_limit=False) maps to ProjectQuotaScope.Update with typed Network/Port, request.Field("healthmonitor", 7) and WithUpdateCheckLimit(false), sending PUT /quotas/<project> {"quota":{...}} with only those keys and no id.
   Tests: `network/v2/extensions/quotas/python_rejudge_test.go:TestPythonRejudgeQuotaUpdate`.
 
 Python/Go differences:
 
 - Go uses fixed scopes, protected native fields and optional explicit check_limit booleans rather than mutating a dirty Python Quota object.
-- Python accepts plural attribute names or wire keys; Go uses typed UpdateOpts fields for the native limits and WithUpdateField with the wire key (healthmonitor, listener, loadbalancer, l7policy, pool, router_route) for the others.
+- Python accepts plural attribute names or wire keys; Go uses typed UpdateOpts fields for the native limits and request.Field with the wire key (healthmonitor, listener, loadbalancer, l7policy, pool, router_route) for the others.
 - Python skips the PUT when no attribute is dirty; Go Update with empty options still sends PUT {"quota":{}}.
 - Go cannot send JSON null for a typed limit; Neutron rejects null limits.
 - Python translates the response into a Quota Resource (descriptor type coercion, project_id alternate ID with tenant_id alias, unknown attributes kept through _allow_unknown_attrs_in_body); Go decodes the native typed limits, keeps every quota field as raw JSON in Body and fixes ProjectID to the requested project.

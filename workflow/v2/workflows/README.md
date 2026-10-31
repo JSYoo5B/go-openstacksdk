@@ -9,7 +9,7 @@
 | `Delete` | `DELETE /workflows/{id}` | 202, 204 | Native 404 stays an HTTP response error |
 | `List` | `GET /workflows` | 200, 204 | Follows the body `next` URL; `Tags` are comma-joined; `ListFilter` and `ListDateFilter` render `op:value` (dates as `YYYY-MM-DD HH:MM:SS`) |
 
-Create has no JSON body, so it accepts `WithCreateOptions` and `WithCreateQuery` only; List accepts `WithListOptions` and `WithListQuery`. Nil options fail with `resource.ErrInvalidOption` before any request.
+Create has no JSON body, so it accepts `WithCreateOptions` and `request.Query` only; List accepts `WithListOptions` and `request.Query`. Nil options fail with `resource.ErrInvalidOption` before any request.
 
 `Remove`, `All`, `Find`, `WaitFor` and `WaitForDeletion` use the common `resource.Collection`. `Remove` ignores a missing workflow by default and returns `resource.ErrNotFound` with `resource.WithMissingError()`; `API.Delete` itself does not ignore 404.
 

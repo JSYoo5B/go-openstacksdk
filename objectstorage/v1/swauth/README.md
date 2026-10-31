@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/swauth.API.Auth`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/swauth.WithAuthOptions`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/swauth.WithAuthHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 
 - Auth GETs auth/v1.0 under the provider IdentityBase with required X-Auth-User and X-Auth-Key headers plus the provider X-Auth-Token and extension headers, accepts only 200, and reads Token, StorageURL and CDNURL from the X-Auth-Token, X-Storage-Url and X-CDN-Management-Url response headers; missing credentials, core-header extensions and nil options fail before HTTP.
   Tests: `objectstorage/v1/swauth/native_contracts_test.go:TestNativeSwauthAuthHeadersAndResult`, `objectstorage/v1/swauth/native_contracts_test.go:TestNativeSwauthStatusesAndPreflight`.

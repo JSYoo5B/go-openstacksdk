@@ -8,7 +8,7 @@
 | `List` | `GET /octavia/amphorae` | 200 | Follows `amphorae_links`; typed filters are `LoadbalancerID`, `ImageID`, `Role`, `Status`, `HAPortID`, `VRRPPortID` plus paging/sort keys |
 | `Failover` | `PUT .../{id}/failover` | 202 only | No request body |
 
-Extension queries use `WithListQuery`; a nil option fails with `resource.ErrInvalidOption` before any request. There are no create, update or delete operations.
+Extension queries use `request.Query`; a nil option fails with `resource.ErrInvalidOption` before any request. There are no create, update or delete operations.
 
 `Find`, `All`, `WaitFor` and `WaitForDeletion` use the common `resource.Collection` with `status` as the wait status. Amphorae have no native delete, so `Remove` is not a supported deletion path.
 

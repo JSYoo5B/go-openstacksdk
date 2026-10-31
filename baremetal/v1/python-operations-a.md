@@ -47,7 +47,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/baremetal/v1/allocations.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/baremetal/v1/allocations.API.All`
 - `github.com/JSYoo5B/go-openstacksdk/baremetal/v1/allocations.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/baremetal/v1/allocations.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - GET /allocations sends node, resource_class, state, extension queries, comma-separated fields, limit and sort keys and follows links.
   Tests: `api/ironic_allocations_test.go:TestIronicAllocationListFiltersFollowLinksAndExtensionQuery`
@@ -66,7 +66,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/baremetal/v1/nodes.API.AttachVirtualInterface`
 - `github.com/JSYoo5B/go-openstacksdk/baremetal/v1/nodes.WithAttachVirtualInterfaceOptions`
-- `github.com/JSYoo5B/go-openstacksdk/baremetal/v1/nodes.WithAttachVirtualInterfaceField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - POST /nodes/{id}/vifs sends id with optional port_uuid or portgroup_uuid plus explicit extension fields.
   Tests: `api/ironic_nodes_related_test.go:TestIronicNodeVirtualInterfacesListAttachDetach`
@@ -87,7 +87,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/baremetal/v1/nodes.API.AttachVirtualMedia`
 - `github.com/JSYoo5B/go-openstacksdk/baremetal/v1/nodes.WithAttachVirtualMediaOptions`
-- `github.com/JSYoo5B/go-openstacksdk/baremetal/v1/nodes.WithAttachVirtualMediaField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - POST /nodes/{id}/vmedia sends device_type and image_url, includes image_download_source only when set, and keeps explicit extension fields.
   Tests: `api/ironic_nodes_related_test.go:TestIronicNodeVirtualMediaAttachDetachAndGetKeepsRawBody`
@@ -156,7 +156,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/baremetal/v1/conductors.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/baremetal/v1/conductors.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/baremetal/v1/conductors.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - GET /conductors sends detail, comma-separated fields, limit and sort queries plus extension queries and follows conductor_links.
   Tests: `api/ironic_drivers_conductors_test.go:TestIronicConductorListFiltersFollowLinksAndRejectDetailWithFields`
@@ -175,7 +175,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/baremetal/v1/allocations.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/baremetal/v1/allocations.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/baremetal/v1/allocations.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - POST /allocations sends the flat body with extension fields; a 202 acknowledgement returns the allocating state and is not completion.
   Tests: `api/ironic_allocations_test.go:TestIronicAllocationCreateSendsBodyAndReturnsAcknowledgementState`
@@ -256,7 +256,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/baremetal/v1/ports.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/baremetal/v1/ports.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/baremetal/v1/ports.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - POST /ports sends the flat body with explicit false values and extension fields.
   Tests: `api/ironic_ports_test.go:TestIronicPortCreateKeepsExplicitFalseAndExtensionFields`
@@ -507,7 +507,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/baremetal/v1/nodes.API.DetachVirtualMedia`
 - `github.com/JSYoo5B/go-openstacksdk/baremetal/v1/nodes.WithDetachVirtualMediaOptions`
-- `github.com/JSYoo5B/go-openstacksdk/baremetal/v1/nodes.WithDetachVirtualMediaQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - DELETE /nodes/{id}/vmedia sends the comma-separated device_types query when set, accepts only 204 and cancellation makes no request.
   Tests: `api/ironic_nodes_related_test.go:TestIronicNodeVirtualMediaAttachDetachAndGetKeepsRawBody`, `api/ironic_nodes_related_test.go:TestIronicNodeSuccessCodesAreExactForRelatedReadsAndWrites`, `api/ironic_nodes_related_test.go:TestIronicNodeRelatedCallsHonorPreCanceledContextAndDeadlineCause`
@@ -547,7 +547,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/baremetal/v1/drivers.API.ListDrivers`
 - `github.com/JSYoo5B/go-openstacksdk/baremetal/v1/drivers.WithListDriversOptions`
-- `github.com/JSYoo5B/go-openstacksdk/baremetal/v1/drivers.WithListDriversQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - GET /drivers sends detail=true only when requested (Python details=True maps to the detail query), the driver type and extension queries, and follows drivers_links next links.
   Tests: `api/ironic_drivers_conductors_test.go:TestIronicDriverListFiltersFollowLinksAndExtensionQuery`

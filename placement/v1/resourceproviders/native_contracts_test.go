@@ -434,7 +434,7 @@ func TestNativeResourceProvidersStatusesAndPreflight(t *testing.T) {
 	t.Run("list query replaces native keys", func(t *testing.T) {
 		var calls []nativeRPCall
 		api := nativeRPAPI(t, "1.39", &calls, func(*http.Request) *http.Response { return nativeRPWire(200, `{"resource_providers":[]}`) })
-		// ListOpts carries one member_of and one required string; WithListQuery replaces rather than appends.
+		// ListOpts carries one member_of and one required string; request.Query replaces rather than appends.
 		for range api.List(ctx, resourceproviders.WithListOptions(resourceproviders.ListOpts{MemberOf: "agg-1", Required: "CUSTOM_A"}), request.Query("member_of", "agg-2")) {
 		}
 		if len(calls) != 1 || calls[0].query != "member_of=agg-2&required=CUSTOM_A" {

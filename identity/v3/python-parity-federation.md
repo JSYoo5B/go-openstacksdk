@@ -101,7 +101,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/policies.API.Update`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/policies.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Update sends PATCH policies/{id} with {"policy": {...}} holding only the given type, blob and Extra keys, including an empty blob via WithUpdateField and null via Extra, and decodes the updated policy.
   Tests: `identity/v3/policies/python_parity_test.go:TestPythonPolicyCreateGetUpdate`.

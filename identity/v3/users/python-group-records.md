@@ -15,7 +15,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.ListInGroup`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithListInGroupOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithListInGroupQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.ListUsersInGroupRecords`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.AllUsersInGroupRecords`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.ProxyUsersInGroupRecords`

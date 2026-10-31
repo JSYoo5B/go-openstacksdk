@@ -8,7 +8,7 @@
 | `Get` | `GET /zones/tasks/transfer_accepts/{id}` | 200 | Typed model; native 404 stays an HTTP response error |
 | `List` | `GET /zones/tasks/transfer_accepts` | 200 | Filter `status`; follows `links.next` |
 
-There is no Update or Delete for transfer accepts. Extension inputs use `WithCreateField` and `WithListQuery`; values `false` and `nil` (JSON `null`) are sent as given. There are no header options. A field extension that names a core JSON field and nil options fail with `resource.ErrInvalidOption` before any request.
+There is no Update or Delete for transfer accepts. Extension inputs use `request.Field` and `request.Query`; values `false` and `nil` (JSON `null`) are sent as given. There are no header options. A field extension that names a core JSON field and nil options fail with `resource.ErrInvalidOption` before any request.
 
 `All` and `Find` use the common `resource.Collection`.
 

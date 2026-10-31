@@ -91,7 +91,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.API.InProject`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.ProjectQuotaScope.Update`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithUpdateForce`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithQuotaOptions`
 
@@ -321,7 +321,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.ProjectQuotaScope.Update`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithUpdateForce`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.ProjectQuotaScope.InUser`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.UserQuotaScope.Update`

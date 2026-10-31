@@ -10,7 +10,7 @@
 | `Delete` | `DELETE .../nodegroups/{id}` | 202, 204 | Native 404 stays an HTTP response error; 200 is rejected |
 | `List` | `GET .../nodegroups` | 200 | `ListOpts` (`Marker` is numeric, `Limit`, `SortKey`, `SortDir`, `Role`); follows the response `next` link |
 
-Extension inputs use `WithCreateField` and `WithListQuery`. A field extension that names a core input field, or a nil option, fails with `resource.ErrInvalidOption` before any request; missing required inputs and a patch without `Op` or `Path` also fail before any request.
+Extension inputs use `request.Field` and `request.Query`. A field extension that names a core input field, or a nil option, fails with `resource.ErrInvalidOption` before any request; missing required inputs and a patch without `Op` or `Path` also fail before any request.
 
 The scope's `Find`, `All`, `Delete`, `WaitFor` and `WaitForDeletion` use the common `resource.Collection`: exact name lookup, duplicate-name errors and ignore-missing deletion by default (the scope's `Delete` returns nil for a 404). `API.Get` and `API.Delete` keep the native 404 error.
 

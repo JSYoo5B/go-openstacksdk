@@ -10,7 +10,7 @@
 | `Delete` | `DELETE /tsigkeys/{id}` | 204 only | Native 404 stays an HTTP response error |
 | `List` | `GET /tsigkeys` | 200 | Filters `name`, `algorithm`, `scope`, `limit`, `marker`; follows `links.next` |
 
-Extension inputs use `WithCreateField`, `WithUpdateField` and `WithListQuery`; values `false` and `nil` (JSON `null`) are sent as given. There are no header options. A field extension that names a core JSON field and nil options fail with `resource.ErrInvalidOption` before any request.
+Extension inputs use `request.Field`, `request.Field` and `request.Query`; values `false` and `nil` (JSON `null`) are sent as given. There are no header options. A field extension that names a core JSON field and nil options fail with `resource.ErrInvalidOption` before any request.
 
 `Find`, `All` and `Remove` use the common `resource.Collection`: exact name lookup through the `name` query, duplicate-name errors, and ignore-missing deletion by default (`Remove` returns nil for a 404). TSIG keys have no status, so the common status list filter fails with `resource.ErrUnsupported` before HTTP.
 

@@ -30,7 +30,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs types always sending is_public=None when visibility is unset (true/false otherwise) with ListOpts and extension query values, follows only the singular volume_type_links next href (not volume_types_links), yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.
   Tests: `blockstorage/v3/volumetypes/native_read_contracts_test.go:TestNativeVolumeTypeReadRoutesPagingAndDecode`, `blockstorage/v3/volumetypes/native_read_contracts_test.go:TestNativeVolumeTypeReadStatusesDecodeAndPreflight`.

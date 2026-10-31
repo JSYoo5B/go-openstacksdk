@@ -26,10 +26,10 @@ fmt.Println(order.OrderRef)
 no `omitempty`, so empty values are sent; `name` and `payload_content_type`
 are omitted when empty. `Meta.Expiration` is formatted without a zone, and
 response times decode with the native RFC3339-without-zone parser.
-`WithCreateField` adds extension JSON beside `type` and `meta` and rejects
+`request.Field` adds extension JSON beside `type` and `meta` and rejects
 keys already in the body. IDs are joined into the path without escaping.
 
-`List` serializes `ListOpts` plus `WithListQuery` values, follows the body
+`List` serializes `ListOpts` plus `request.Query` values, follows the body
 `next` link exactly as returned and stops on an empty page. Other statuses
 keep the native `gophercloud.ErrUnexpectedResponseCode`; the SDK adds only
 `resource.OperationError{Resource: "orders"}` context.

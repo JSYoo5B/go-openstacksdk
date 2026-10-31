@@ -14,7 +14,7 @@
 | `ListDatastoreParams`, `GetDatastoreParam` | `GET /datastores/{datastore}/versions/{version}/parameters[/{name}]` | 200 | `Param.Min`/`Max` are floats; zero cannot be told apart from absent |
 | `ListGlobalParams`, `GetGlobalParam` | `GET /datastores/versions/{version}/parameters[/{name}]` | 200 | Same `Param` model |
 
-Extension inputs use `WithCreateField`, `WithUpdateField` and `WithReplaceField`, merged into the `configuration` object. A field extension that names an input already set fails with `resource.ErrInvalidOption` before any request; nil options fail the same way. Gophercloud has no extension point for list or delete queries, so none is offered.
+Extension inputs use `request.Field`, `request.Field` and `request.Field`, merged into the `configuration` object. A field extension that names an input already set fails with `resource.ErrInvalidOption` before any request; nil options fail the same way. Gophercloud has no extension point for list or delete queries, so none is offered.
 
 `Find`, `All`, `Remove`, `WaitFor` and `WaitForDeletion` use the common `resource.Collection`: exact name lookup over the full list, duplicate-name errors (`resource.ErrAmbiguous`), `resource.ErrNotFound` for a missing reference, and ignore-missing deletion by default (`Remove` returns nil for a 404 unless `resource.WithMissingError()` is passed). Configurations have no status attribute, so `resource.WithStatus` and `resource.WithQuery` on `All` return `resource.ErrUnsupported` before any request. `API.Delete` itself does not ignore a missing configuration.
 

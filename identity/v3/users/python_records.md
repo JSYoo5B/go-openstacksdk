@@ -15,7 +15,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.UserRecord.Clone`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.AllRecords`
@@ -32,7 +32,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithRecordListMaxItems`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithRecordListPaginated`
 
-- List sends the single GET users that Python users() sends without arguments, maps the Python query names domain_id, enabled, idp_id, name, password_expires_at, protocol_id and unique_id through ListOpts or WithListQuery, sends a limit without a marker follow-up, and rejects local Body filters before HTTP.
+- List sends the single GET users that Python users() sends without arguments, maps the Python query names domain_id, enabled, idp_id, name, password_expires_at, protocol_id and unique_id through ListOpts or request.Query, sends a limit without a marker follow-up, and rejects local Body filters before HTTP.
   Tests: `identity/v3/users/python_parity_test.go:TestPythonUserListRequests`.
 - Pinned User nullable declarations/casts/defaults, canonical/wire response last-member order, untyped large password-expiration values, options missing{} vs explicitnull, federated scalar wrapping, unknown discard and independent view/wire/page/header/status/Clone match owned Source policy.
   Tests: `identity/v3/users/python_records_test.go:TestPythonUserListRecordsExactDescriptorDefaultsAndResponseAliasOrder`, `identity/v3/users/python_records_test.go:TestPythonUserListRecordsLazyQueryAndUntypedView`, `identity/v3/users/python_records_test.go:TestPythonUserListRecordsOptionsDefaultNullAndNestedLoadedLocal`.
@@ -52,8 +52,8 @@ Go API:
 Python/Go differences:
 
 - Python reads the Keystone links dict without a rel key and never follows links.next; the native pager follows links.next when Keystone sets it.
-- Python sends bool query values as True/False text; typed Go ListOpts send true/false, and WithListQuery reproduces the Python text.
-- Python drops unknown query names; Go sends every WithListQuery key to the server.
+- Python sends bool query values as True/False text; typed Go ListOpts send true/false, and request.Query reproduces the Python text.
+- Python drops unknown query names; Go sends every request.Query key to the server.
 - users.ListOpts.Filters adds a stray "-" query key next to the comparator filters; Python cannot send comparator filters at all.
 - Go owns immutable JSON descriptor records, fixed source/context/options, detached actual evidence and explicit polymorphic result instead of mutable Python Resource/session/subclass objects. Native User/List/All/membership APIs retain their current contracts.
 - Direct leaf/selected v3 factory has no Python Connection: computed location defaults null and immutable explicit CloudLocation is a Go convenience. No default_project_id authorization or automatic client/scope/name inference is introduced. Whole SDK-R1/C1/S1 mutable Resource/cache/session/Connection/version configuration remain tracked separately.

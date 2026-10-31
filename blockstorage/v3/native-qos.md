@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create POSTs {"qos_specs":{...}} to qos-specs always sending name, merging Specs keys after typed fields (a name spec overrides Name) and extensions inside the object, rejects a core-key collision before HTTP and accepts only 200.
   Tests: `blockstorage/v3/qos/native_contracts_test.go:TestNativeQoSRoutesBodiesPagingAndDecode`, `blockstorage/v3/qos/native_contracts_test.go:TestNativeQoSStatusesAndPreflight`.
@@ -48,7 +48,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs qos-specs with sort/marker/limit and extension query values and follows qos_specs_links next hrefs as received.
   Tests: `blockstorage/v3/qos/native_contracts_test.go:TestNativeQoSRoutesBodiesPagingAndDecode`, `blockstorage/v3/qos/native_contracts_test.go:TestNativeQoSStatusesAndPreflight`.
@@ -66,7 +66,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Update PUTs {"qos_specs":{...}} to qos-specs/{id} with consumer and merged Specs keys, returns the response spec map and accepts only 200.
   Tests: `blockstorage/v3/qos/native_contracts_test.go:TestNativeQoSRoutesBodiesPagingAndDecode`, `blockstorage/v3/qos/native_contracts_test.go:TestNativeQoSStatusesAndPreflight`.
@@ -84,7 +84,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.API.Delete`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.WithDeleteOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.WithDeleteQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - Delete DELETEs qos-specs/{id} with force=true only when requested and accepts only 202/204.
   Tests: `blockstorage/v3/qos/native_contracts_test.go:TestNativeQoSRoutesBodiesPagingAndDecode`, `blockstorage/v3/qos/native_contracts_test.go:TestNativeQoSStatusesAndPreflight`.
@@ -102,7 +102,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.API.DeleteKeys`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.WithDeleteKeysOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.WithDeleteKeysField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - DeleteKeys PUTs {"keys":[...]} (null without keys) to qos-specs/{id}/delete_keys, rejects a keys extension before HTTP and accepts only 202.
   Tests: `blockstorage/v3/qos/native_contracts_test.go:TestNativeQoSRoutesBodiesPagingAndDecode`, `blockstorage/v3/qos/native_contracts_test.go:TestNativeQoSStatusesAndPreflight`.
@@ -120,7 +120,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.API.Associate`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.WithAssociateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.WithAssociateQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - Associate GETs qos-specs/{id}/associate with the required vol_type_id query (rejected before HTTP when empty) and accepts only 202.
   Tests: `blockstorage/v3/qos/native_contracts_test.go:TestNativeQoSRoutesBodiesPagingAndDecode`, `blockstorage/v3/qos/native_contracts_test.go:TestNativeQoSStatusesAndPreflight`.
@@ -138,7 +138,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.API.Disassociate`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.WithDisassociateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.WithDisassociateQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - Disassociate GETs qos-specs/{id}/disassociate with the required vol_type_id query (rejected before HTTP when empty) and accepts only 202.
   Tests: `blockstorage/v3/qos/native_contracts_test.go:TestNativeQoSRoutesBodiesPagingAndDecode`, `blockstorage/v3/qos/native_contracts_test.go:TestNativeQoSStatusesAndPreflight`.

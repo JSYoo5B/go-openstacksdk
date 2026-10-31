@@ -38,7 +38,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/dns/v2/quotas.ProjectQuotaScope.Update`
 - `github.com/JSYoo5B/go-openstacksdk/dns/v2/quotas.WithQuotaOptions`
-- `github.com/JSYoo5B/go-openstacksdk/dns/v2/quotas.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - PATCH sends an unwrapped partial quota object: nil typed pointers omit fields, zero/large native integer values are exact, WithQuotaOptions snapshots pointers, extensions snapshot JSON, and core identity/capability collisions fail before HTTP.
   Tests: `api/designate_project_quotas_contracts_test.go:TestDesignateProjectQuotasUseRootObjectAndOfficialMethods`, `api/designate_project_quotas_contracts_test.go:TestDesignateQuotaInvalidOptionsAndZeroScopeFailBeforeHTTP`, `api/designate_project_quotas_transport_test.go:TestDesignateQuotaRetriesAndReauthKeepFixedProjectAndSnapshottedBody`.

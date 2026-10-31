@@ -10,9 +10,9 @@
 | `Delete` | `DELETE /security-services/{id}` | 202, 204 | Native 404 stays an HTTP response error |
 | `List` | `GET /security-services/detail` | 200 | Single page; `ListOpts` filters, with false/empty filters omitted |
 
-`UpdateOpts.Name` is the one field where omission is not expressible through typed options: leaving it nil sends `"name": null`. Use `WithUpdateField` only for non-core fields. `UpdateOpts.Type` is a plain string and is omitted when empty.
+`UpdateOpts.Name` is the one field where omission is not expressible through typed options: leaving it nil sends `"name": null`. Use `request.Field` only for non-core fields. `UpdateOpts.Type` is a plain string and is omitted when empty.
 
-Extension inputs use `WithCreateField`, `WithUpdateField` and `WithListQuery`. A field extension that names a core input field fails with `resource.ErrInvalidOption` before any request; nil options fail the same way. A missing `Type` fails local validation before any request.
+Extension inputs use `request.Field`, `request.Field` and `request.Query`. A field extension that names a core input field fails with `resource.ErrInvalidOption` before any request; nil options fail the same way. A missing `Type` fails local validation before any request.
 
 `Find`, `All`, `Remove`, `WaitFor` and `WaitForDeletion` use the common `resource.Collection`: exact name lookup, duplicate-name errors, and ignore-missing deletion by default. `API.Get` and `API.Delete` do not add `resource.ErrNotFound` or ignore a missing security service.
 

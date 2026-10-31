@@ -10,7 +10,7 @@
 | `Delete` | `DELETE .../{id}` | 202, 204 | No query options; native 404 stays an HTTP response error |
 | `List` | `GET /lbaas/healthmonitors` | 200 | Follows `healthmonitors_links` next links; `ListOpts.AdminStateUp` is a pointer; `Tags` repeat the query key |
 
-Extension inputs use `WithCreateField`, `WithUpdateField` and `WithListQuery`. A field extension that names a core input field fails with `resource.ErrInvalidOption` before any request; nil options fail the same way. Required Create inputs (`Type`) and a non-numeric `HTTPVersion` also fail locally without a request. A zero `Delay`, `Timeout` or `MaxRetries` is not rejected locally and is sent as `0`.
+Extension inputs use `request.Field`, `request.Field` and `request.Query`. A field extension that names a core input field fails with `resource.ErrInvalidOption` before any request; nil options fail the same way. Required Create inputs (`Type`) and a non-numeric `HTTPVersion` also fail locally without a request. A zero `Delay`, `Timeout` or `MaxRetries` is not rejected locally and is sent as `0`.
 
 `Find`, `All`, `Remove`, `WaitFor` and `WaitForDeletion` use the common `resource.Collection`: exact name lookup, duplicate-name errors, ignore-missing removal by default (`Remove` returns nil for a 404) and `provisioning_status` as the wait status. `API.Delete` itself does not ignore a missing monitor.
 

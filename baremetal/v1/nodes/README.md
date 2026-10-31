@@ -32,12 +32,12 @@ Consult the [support ledger](../../../docs/sdk-support-ledger.md) and [operation
 | `ListVirtualInterfaces`, `AttachVirtualInterface`, `DetachVirtualInterface` | `/nodes/{id}/vifs[/{vif}]` | 200 / 204 / 204 | `PortUUID` with `PortgroupUUID` fails before any request |
 | `WaitForProvisionState` | repeated `GET /nodes/{id}` | n/a | Polls about once per second until `provision_state` matches |
 
-Extension inputs: `WithCreateField`, `WithChangeProvisionStateField`, `WithChangePowerStateField`, `WithSetMaintenanceField`, `WithSetBootDeviceField`, `WithSetRAIDConfigField`, `WithAttachVirtualInterfaceField`, `WithAttachVirtualMediaField` add JSON fields; `WithListQuery`, `WithListDetailQuery`, `WithListBIOSSettingsQuery`, `WithDetachVirtualMediaQuery` add query values. A field extension that names a core input fails with `resource.ErrInvalidOption` before any request; nil options fail the same way. `Update` has no field extension.
+Extension inputs: `request.Field`, `request.Field`, `request.Field`, `request.Field`, `request.Field`, `request.Field`, `request.Field`, `request.Field` add JSON fields; `request.Query`, `request.Query`, `request.Query`, `request.Query` add query values. A field extension that names a core input fails with `resource.ErrInvalidOption` before any request; nil options fail the same way. `Update` has no field extension.
 
 Limits and exact behavior:
 
 - Microversions: the generated API never chooses one. Gophercloud sends `X-OpenStack-Ironic-API-Version` only when the `ServiceClient.Microversion` it wraps is set. Several options need newer versions (for example BIOS `Detail`/`Fields` 1.74, virtual media read 1.93, structured configdrive 1.56, deploy steps 1.69, node `Health` filter 1.109); the API does not check this and the server decides.
-- Typed `ListOpts` booleans (`Maintenance`, `Associated`) are plain `bool`: `false` is omitted. Send an explicit `maintenance=false` through `WithListQuery`.
+- Typed `ListOpts` booleans (`Maintenance`, `Associated`) are plain `bool`: `false` is omitted. Send an explicit `maintenance=false` through `request.Query`.
 - Provision-state, power-state and maintenance calls return on the 202 acknowledgement only. They do not poll and acknowledgement does not mean completion; read `provision_state`, `power_state` or the node afterwards. `WaitForProvisionState` does not treat failed states (for example `deploy failed`) as terminal; bound it with a context deadline.
 - A cancelled or expired context stops the local call and does not roll back remote work. Failed or uncertain mutations (including 409 and 503 responses) are never replayed automatically.
 - `GetBIOSSetting` decodes the body from a `setting` key as Gophercloud does; a body keyed by the setting name decodes to an empty setting.

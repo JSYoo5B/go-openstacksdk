@@ -274,7 +274,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk.WithoutDefaultNetwork`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithCreateHintOpts`
 
 - Ordered NICs preserve network UUID and port combinations, literal fixed IP, fixed-IP-only/tag-only/empty objects, and omitted versus explicit empty or null tag values in the HTTP body. IDs bypass Neutron lookup and need no Network endpoint.
@@ -618,7 +618,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.FloatingIPs.EnsurePrepared`
 - `github.com/JSYoo5B/go-openstacksdk/network.FloatingIPPlan.Selection`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - The high-level fresh-allocation paths invoke the native concrete Create adapter and emit the floatingip JSON envelope with selected floating_network_id, port_id/fixed_ip_address and project_id when selected; 201 responses return the native typed FloatingIP. Reuse=false can omit project_id rather than guessing the owner.
   Tests: `network/floating_ip_ensure_test.go:TestFloatingIPEnsurePrefersAlreadyAttachedAndAllocatesOnlyWhenNeeded`, `connectiontest/connection_floating_ip_ensure_test.go:TestConnectionFloatingIPEnsureWithoutReuseLetsNeutronChooseProject`.

@@ -58,7 +58,7 @@ func TestPythonAllocationCandidatesRepeatedQueryValues(t *testing.T) {
 	if len(pages) != 1 || len(pages[0].AllocationRequests) != 2 || len(pages[0].ProviderSummaries) != 3 {
 		t.Fatal(pages)
 	}
-	// A later WithListQuery for the key wins.
+	// A later request.Query for the key wins.
 	calls = nil
 	for range api.List(context.Background(), allocationcandidates.WithListQueryValues("member_of1", "agg-4", "agg-5"), request.Query("member_of1", "agg-6")) {
 	}

@@ -100,7 +100,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stackresources.WithHealthReason`
 - `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stackresources.API.MarkUnhealthy`
 - `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stackresources.WithMarkUnhealthyOptions`
-- `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stackresources.WithMarkUnhealthyField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - A health mutation preserves false and its optional reason, preflights resource_name/owner, blocks unknown or different nested owners, and requires an explicit owning ResourceIdentity to target a child.
   Tests: `api/heat_stackresources_contracts_test.go:TestHeatStackResourcesNestedOwnerCannotMutateRoot`, `api/heat_stackresources_contracts_test.go:TestHeatStackResourcesUnknownOwnerAndPhysicalFallbackAreBlocked`, `api/heat_stackresources_contracts_test.go:TestHeatStackResourcesValidationBeforeHTTP`, `api/heat_stackresources_contracts_test.go:TestHeatStackResourcesHealthHTTPErrorsAndMetadataDecodeCause`.

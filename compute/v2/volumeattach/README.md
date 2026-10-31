@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/volumeattach.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/volumeattach.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/volumeattach.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create POSTs {"volumeAttachment":{...}} to servers/{id}/os-volume_attachments omitting empty fields, places extensions inside the envelope, rejects a missing volumeId, a core-key extension collision and a nil option before HTTP, decodes the response and accepts only 200.
   Tests: `compute/v2/volumeattach/native_contracts_test.go:TestNativeVolumeAttachRoutesBodiesAndDecode`, `compute/v2/volumeattach/native_contracts_test.go:TestNativeVolumeAttachStrictStatusesAndPreflight`.

@@ -63,9 +63,9 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/members.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/members.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/members.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
-- Update PUTs {"status": opts.Status}, including an empty status, appends non-colliding WithUpdateField extensions, rejects status collisions and nil options before HTTP, returns the decoded server Member and accepts only 200.
+- Update PUTs {"status": opts.Status}, including an empty status, appends non-colliding request.Field extensions, rejects status collisions and nil options before HTTP, returns the decoded server Member and accepts only 200.
   Tests: `image/v2/members/contracts_test.go:TestNativeImageMembersRoutesBodiesAndDecode`, `image/v2/members/contracts_test.go:TestNativeImageMembersStrictStatusesAndPreflight`.
 
 Python/Go differences:

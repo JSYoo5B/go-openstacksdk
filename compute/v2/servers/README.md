@@ -288,7 +288,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs servers/detail with the ListOpts query including all_tenants and extension values, follows the servers_links next href verbatim and sends no further page after the caller stops.
   Tests: `compute/v2/servers/native_crud_contracts_test.go:TestNativeServerListsQueryPagingAndStop`.
@@ -306,7 +306,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.ListSimple`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithListSimpleOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithListSimpleQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - ListSimple GETs servers with the same ListOpts query and follows the servers_links next href verbatim.
   Tests: `compute/v2/servers/native_crud_contracts_test.go:TestNativeServerListsQueryPagingAndStop`.

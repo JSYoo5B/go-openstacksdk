@@ -9,6 +9,6 @@
 
 Both return a single page and a 204 response yields no items. Capacity fields (`TotalCapacityGB`, `FreeCapacityGB`, `AllocatedCapacityGB`) are float64: the string `"infinite"` decodes to positive infinity and missing, null or other values decode to zero, so zero does not prove the backend reported zero.
 
-Known upstream limitation: the pinned Gophercloud `ListOpts` and `ListDetailOpts` fields are tagged for JSON rather than query encoding, so typed filters (`PoolName`, `HostName`, `BackendName`, `Capabilities`, `ShareType`, `ProjectID`) are not sent. Use `WithListQuery` or `WithListDetailQuery` with the Manila query names `pool`, `host`, `backend`, `capabilities`, `share_type` instead. Nil options fail with `resource.ErrInvalidOption` before any request.
+Known upstream limitation: the pinned Gophercloud `ListOpts` and `ListDetailOpts` fields are tagged for JSON rather than query encoding, so typed filters (`PoolName`, `HostName`, `BackendName`, `Capabilities`, `ShareType`, `ProjectID`) are not sent. Use `request.Query` or `request.Query` with the Manila query names `pool`, `host`, `backend`, `capabilities`, `share_type` instead. Nil options fail with `resource.ErrInvalidOption` before any request.
 
 Cancelling a context stops the local call.

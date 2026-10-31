@@ -13,7 +13,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/services.API.Create`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/services.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create sends POST vpn/vpnservices with {"vpnservice": {...}} containing the given attributes and decodes the returned resource.
   Tests: `network/v2/extensions/vpnaas/services/python_parity_test.go:TestPythonVPNServiceProxyRequests`.
@@ -76,7 +76,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/services.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/services.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/services.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/services.API.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/services.API.AllRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/services.API.ProxyListRecords`
@@ -103,7 +103,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/services.API.Update`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/services.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Update sends PUT vpn/vpnservices/{id} with {"vpnservice": {...}} including explicit empty name or description pointers and decodes the result.
   Tests: `network/v2/extensions/vpnaas/services/python_parity_test.go:TestPythonVPNServiceProxyRequests`.
@@ -120,7 +120,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/endpointgroups.API.Create`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/endpointgroups.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create sends POST vpn/endpoint-groups with {"endpoint_group": {...}} containing the given attributes and decodes the returned resource.
   Tests: `network/v2/extensions/vpnaas/endpointgroups/python_parity_test.go:TestPythonEndpointGroupProxyRequests`.
@@ -183,7 +183,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/endpointgroups.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/endpointgroups.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/endpointgroups.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/endpointgroups.API.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/endpointgroups.API.AllRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/endpointgroups.API.ProxyListRecords`
@@ -210,7 +210,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/endpointgroups.API.Update`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/endpointgroups.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Update sends PUT vpn/endpoint-groups/{id} with {"endpoint_group": {...}} including explicit empty name or description pointers and decodes the result.
   Tests: `network/v2/extensions/vpnaas/endpointgroups/python_parity_test.go:TestPythonEndpointGroupProxyRequests`.
@@ -227,7 +227,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ikepolicies.API.Create`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ikepolicies.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create sends POST vpn/ikepolicies with {"ikepolicy": {...}} containing the given attributes and decodes the returned resource.
   Tests: `network/v2/extensions/vpnaas/ikepolicies/python_parity_test.go:TestPythonIKEPolicyProxyRequests`.
@@ -290,7 +290,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ikepolicies.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ikepolicies.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ikepolicies.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ikepolicies.New`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ikepolicies.API.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ikepolicies.API.AllRecords`
@@ -334,7 +334,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ikepolicies.API.Update`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ikepolicies.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Update sends PUT vpn/ikepolicies/{id} with {"ikepolicy": {...}} including explicit empty name or description pointers and decodes the result.
   Tests: `network/v2/extensions/vpnaas/ikepolicies/python_parity_test.go:TestPythonIKEPolicyProxyRequests`.
@@ -353,7 +353,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ipsecpolicies.API.Create`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ipsecpolicies.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create sends POST vpn/ipsecpolicies with {"ipsecpolicy": {...}} containing the given attributes and decodes the returned resource.
   Tests: `network/v2/extensions/vpnaas/ipsecpolicies/python_parity_test.go:TestPythonIPsecPolicyProxyRequests`.
@@ -416,7 +416,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ipsecpolicies.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ipsecpolicies.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ipsecpolicies.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ipsecpolicies.New`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ipsecpolicies.API.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ipsecpolicies.API.AllRecords`
@@ -459,7 +459,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ipsecpolicies.API.Update`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ipsecpolicies.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Update sends PUT vpn/ipsecpolicies/{id} with {"ipsecpolicy": {...}} including explicit empty name or description pointers and decodes the result.
   Tests: `network/v2/extensions/vpnaas/ipsecpolicies/python_parity_test.go:TestPythonIPsecPolicyProxyRequests`.
@@ -477,7 +477,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/siteconnections.API.Create`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/siteconnections.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create sends POST vpn/ipsec-site-connections with {"ipsec_site_connection": {...}} containing the given attributes and decodes the returned resource.
   Tests: `network/v2/extensions/vpnaas/siteconnections/python_parity_test.go:TestPythonSiteConnectionProxyRequests`.
@@ -540,7 +540,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/siteconnections.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/siteconnections.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/siteconnections.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/siteconnections.API.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/siteconnections.API.AllRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/siteconnections.API.ProxyListRecords`
@@ -972,7 +972,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.API.Update`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Update sends PUT bgpvpn/bgpvpns/{id} with pointer fields, so an empty name, an empty target list and local_pref 0 are sent explicitly.
   Tests: `network/v2/extensions/bgpvpns/python_parity_test.go:TestPythonBGPVPNProxyRequests`.
@@ -989,7 +989,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.API.CreateNetworkAssociation`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.WithCreateNetworkAssociationField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - CreateNetworkAssociation sends POST bgpvpn/bgpvpns/{bgpvpn}/network_associations with {"network_association": {...}} and decodes the association.
   Tests: `network/v2/extensions/bgpvpns/python_parity_test.go:TestPythonBGPVPNAssociationRequests`.
@@ -1052,7 +1052,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.API.ListNetworkAssociations`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.WithListNetworkAssociationsOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.WithListNetworkAssociationsQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - ListNetworkAssociations sends GET bgpvpn/bgpvpns/{bgpvpn}/network_associations with fields, limit and extension query values and continues with the last ID as marker while limit is set.
   Tests: `network/v2/extensions/bgpvpns/python_parity_test.go:TestPythonBGPVPNAssociationRequests`.
@@ -1069,7 +1069,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.API.CreatePortAssociation`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.WithCreatePortAssociationField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - CreatePortAssociation sends POST bgpvpn/bgpvpns/{bgpvpn}/port_associations with {"port_association": {...}} and decodes the association.
   Tests: `network/v2/extensions/bgpvpns/python_parity_test.go:TestPythonBGPVPNAssociationRequests`.
@@ -1132,7 +1132,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.API.ListPortAssociations`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.WithListPortAssociationsOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.WithListPortAssociationsQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - ListPortAssociations sends GET bgpvpn/bgpvpns/{bgpvpn}/port_associations with fields, limit and extension query values and continues with the last ID as marker while limit is set.
   Tests: `network/v2/extensions/bgpvpns/python_parity_test.go:TestPythonBGPVPNAssociationRequests`.
@@ -1149,7 +1149,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.API.UpdatePortAssociation`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.WithUpdatePortAssociationField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - UpdatePortAssociation sends PUT bgpvpn/bgpvpns/{bgpvpn}/port_associations/{id} with pointer fields, including explicit false flags and an empty routes list.
   Tests: `network/v2/extensions/bgpvpns/python_parity_test.go:TestPythonBGPVPNAssociationRequests`.
@@ -1166,7 +1166,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.API.CreateRouterAssociation`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.WithCreateRouterAssociationField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - CreateRouterAssociation sends POST bgpvpn/bgpvpns/{bgpvpn}/router_associations with {"router_association": {...}} and decodes the association.
   Tests: `network/v2/extensions/bgpvpns/python_parity_test.go:TestPythonBGPVPNAssociationRequests`.
@@ -1229,7 +1229,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.API.ListRouterAssociations`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.WithListRouterAssociationsOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.WithListRouterAssociationsQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - ListRouterAssociations sends GET bgpvpn/bgpvpns/{bgpvpn}/router_associations with fields, limit and extension query values and continues with the last ID as marker while limit is set.
   Tests: `network/v2/extensions/bgpvpns/python_parity_test.go:TestPythonBGPVPNAssociationRequests`.
@@ -1246,7 +1246,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.API.UpdateRouterAssociation`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.WithUpdateRouterAssociationField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - UpdateRouterAssociation sends PUT bgpvpn/bgpvpns/{bgpvpn}/router_associations/{id} with pointer fields, including explicit false flags.
   Tests: `network/v2/extensions/bgpvpns/python_parity_test.go:TestPythonBGPVPNAssociationRequests`.

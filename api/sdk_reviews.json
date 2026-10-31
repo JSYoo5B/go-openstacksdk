@@ -17685,7 +17685,7 @@
         "The corrected SDK return type is map[string]any; callers expecting *Snapshot must read metadata directly. Other declared Snapshot-returning operations retain their own result types.",
         "Pinned ExtractMetadata uses unchecked object assertions. The SDK returns an envelope error for invalid accepted shapes while preserving original native errors first; it does not invent raw body, header or status evidence absent from the native Result.",
         "This review maps only the declared native PUT operation. Pinned Python set_snapshot_metadata performs POST merge and cached Resource update; its explicit metadata envelope, metadata GET/delete family and broader session/cache/lifecycle contracts are separate.",
-        "Typed Metadata maps remain caller-owned references through WithUpdateMetadataOptions; extension values are JSON snapshots. Populated metadata retains the existing envelope nesting for extension fields, and the core metadata key cannot be supplied through WithUpdateMetadataField even when omitted."
+        "Typed Metadata maps remain caller-owned references through WithUpdateMetadataOptions; extension values are JSON snapshots. Populated metadata retains the existing envelope nesting for extension fields, and the core metadata key cannot be supplied through request.Field even when omitted."
       ]
     },
     {
@@ -17771,7 +17771,7 @@
         "The corrected SDK return type is map[string]any; callers expecting *Snapshot must read metadata directly. Other declared Snapshot-returning operations retain their own result types.",
         "Pinned ExtractMetadata uses unchecked object assertions. The SDK returns an envelope error for invalid accepted shapes while preserving original native errors first; it does not invent raw body, header or status evidence absent from the native Result.",
         "This review maps only the declared native PUT operation. Pinned Python set_snapshot_metadata performs POST merge and cached Resource update; its explicit metadata envelope, metadata GET/delete family and broader session/cache/lifecycle contracts are separate.",
-        "Typed Metadata maps remain caller-owned references through WithUpdateMetadataOptions; extension values are JSON snapshots. Populated metadata retains the existing envelope nesting for extension fields, and the core metadata key cannot be supplied through WithUpdateMetadataField even when omitted."
+        "Typed Metadata maps remain caller-owned references through WithUpdateMetadataOptions; extension values are JSON snapshots. Populated metadata retains the existing envelope nesting for extension fields, and the core metadata key cannot be supplied through request.Field even when omitted."
       ]
     },
     {
@@ -49127,7 +49127,7 @@
         "compute/v2/keypairs/README.md"
       ],
       "differences": [
-        "The upstream DeleteOptsBuilder interface is replaced by concrete DeleteOption/WithDeleteOptions and a library-owned query serializer with WithDeleteQuery extensions. API.Delete returns ExtractErr with operation context; native direct-name route, owner omission, strict202/204 and strict404 behavior are preserved. New DeleteKeypair's default-ignore/broad-status policy is an independent Python operation mapping and is not applied to this native function."
+        "The upstream DeleteOptsBuilder interface is replaced by concrete DeleteOption/WithDeleteOptions and a library-owned query serializer with request.Query extensions. API.Delete returns ExtractErr with operation context; native direct-name route, owner omission, strict202/204 and strict404 behavior are preserved. New DeleteKeypair's default-ignore/broad-status policy is an independent Python operation mapping and is not applied to this native function."
       ],
       "remaining": []
     },
@@ -65986,7 +65986,7 @@
       ],
       "contracts": [
         {
-          "behavior": "UpdateExtraSpec PUTs the single {key: value} pair without an envelope to types/{id}/extra_specs/{unescaped key}, rejects zero or several pairs and any body extension (including the shared WithCreateExtraSpecsField option) before HTTP, returns the envelope-free string map with a wrapped decode error for non-string values and accepts only 200.",
+          "behavior": "UpdateExtraSpec PUTs the single {key: value} pair without an envelope to types/{id}/extra_specs/{unescaped key}, rejects zero or several pairs and any body extension (including the shared request.Field option) before HTTP, returns the envelope-free string map with a wrapped decode error for non-string values and accepts only 200.",
           "tests": [
             "blockstorage/v3/volumetypes/native_admin_contracts_test.go:TestNativeVolumeTypeAdminRoutesBodiesAndDecode",
             "blockstorage/v3/volumetypes/native_admin_contracts_test.go:TestNativeVolumeTypeAdminStatusesDecodeAndPreflight"
@@ -67141,7 +67141,7 @@
       ],
       "contracts": [
         {
-          "behavior": "BatchCreate POSTs an envelope-free row array {\"limits\":[...]} to limits requiring service_id and resource_name per row (ErrMissingInput before HTTP), always sending resource_limit (0 included), sending an empty array for an empty or nil batch, placing WithBatchCreateField keys at the root beside limits and rejecting a limits key or nil option before HTTP, decodes the limits array (nil when absent), and accepts only 201.",
+          "behavior": "BatchCreate POSTs an envelope-free row array {\"limits\":[...]} to limits requiring service_id and resource_name per row (ErrMissingInput before HTTP), always sending resource_limit (0 included), sending an empty array for an empty or nil batch, placing request.Field keys at the root beside limits and rejecting a limits key or nil option before HTTP, decodes the limits array (nil when absent), and accepts only 201.",
           "tests": [
             "identity/v3/limits/native_contracts_test.go:TestNativeLimitRoutesBodiesPagingAndDecode",
             "identity/v3/limits/native_contracts_test.go:TestNativeLimitStatusesDecodeAndPreflight"
@@ -67297,7 +67297,7 @@
       ],
       "contracts": [
         {
-          "behavior": "BatchCreate POSTs an envelope-free row array {\"registered_limits\":[...]} to registered_limits requiring service_id and resource_name per row while the numeric required default_limit accepts and always sends 0, sending an empty array for an empty batch, placing WithBatchCreateField keys at the root and rejecting a registered_limits key or nil option before HTTP, decodes the array (nil when absent), and accepts only 201.",
+          "behavior": "BatchCreate POSTs an envelope-free row array {\"registered_limits\":[...]} to registered_limits requiring service_id and resource_name per row while the numeric required default_limit accepts and always sends 0, sending an empty array for an empty batch, placing request.Field keys at the root and rejecting a registered_limits key or nil option before HTTP, decodes the array (nil when absent), and accepts only 201.",
           "tests": [
             "identity/v3/registeredlimits/native_contracts_test.go:TestNativeRegisteredLimitRoutesBodiesPagingAndDecode",
             "identity/v3/registeredlimits/native_contracts_test.go:TestNativeRegisteredLimitStatusesDecodeAndPreflight"
@@ -67503,7 +67503,7 @@
       ],
       "contracts": [
         {
-          "behavior": "CreateMapping PUTs {\"mapping\":{\"rules\":[...]}} to OS-FEDERATION/mappings/{id} sending null for nil rules and nil local/remote arrays and always sending remote type, omitting other empty rule fields, placing WithCreateMappingField keys inside the envelope while rejecting a rules key or nil option before HTTP, decodes the rule tree, and accepts only 201.",
+          "behavior": "CreateMapping PUTs {\"mapping\":{\"rules\":[...]}} to OS-FEDERATION/mappings/{id} sending null for nil rules and nil local/remote arrays and always sending remote type, omitting other empty rule fields, placing request.Field keys inside the envelope while rejecting a rules key or nil option before HTTP, decodes the rule tree, and accepts only 201.",
           "tests": [
             "identity/v3/federation/native_contracts_test.go:TestNativeMappingRoutesBodiesPagingAndDecode",
             "identity/v3/federation/native_contracts_test.go:TestNativeMappingStatusesDecodeAndPreflight"
@@ -67580,7 +67580,7 @@
       ],
       "contracts": [
         {
-          "behavior": "UpdateMapping PATCHes {\"mapping\":{\"rules\":[...]}} to OS-FEDERATION/mappings/{id} with the same rule serialization as CreateMapping, WithUpdateMappingField keys inside the envelope, a rules key or nil option rejected before HTTP, and accepts only 200.",
+          "behavior": "UpdateMapping PATCHes {\"mapping\":{\"rules\":[...]}} to OS-FEDERATION/mappings/{id} with the same rule serialization as CreateMapping, request.Field keys inside the envelope, a rules key or nil option rejected before HTTP, and accepts only 200.",
           "tests": [
             "identity/v3/federation/native_contracts_test.go:TestNativeMappingRoutesBodiesPagingAndDecode",
             "identity/v3/federation/native_contracts_test.go:TestNativeMappingStatusesDecodeAndPreflight"
@@ -71323,7 +71323,7 @@
         "Python accepts any status below 400 through raise_from_response; the native call accepts only its Gophercloud OkCodes listed in identity/v2/native-calls.md.",
         "Python takes an ID string or Resource and returns a mutable Resource; Go takes an ID string and returns the native Gophercloud model pointer.",
         "Go UpdateOpts omits an empty name and nil pointers and WithUpdateField cannot override typed fields, so Python name=\"\" or description=None values cannot be sent.",
-        "The id body key is added explicitly with tenants.WithUpdateField; Keystone ignores it."
+        "The id body key is added explicitly with request.Field; Keystone ignores it."
       ],
       "remaining": []
     },
@@ -71491,7 +71491,7 @@
         "Python accepts any status below 400 through raise_from_response; the native call accepts only its Gophercloud OkCodes listed in identity/v2/native-calls.md.",
         "Python takes an ID string or Resource and returns a mutable Resource; Go takes an ID string and returns the native Gophercloud model pointer.",
         "Go UpdateOpts omits empty strings and nil pointers and WithUpdateField cannot override typed fields, so Python empty or None attribute values cannot be sent.",
-        "The id body key is added explicitly with users.WithUpdateField; Keystone ignores it."
+        "The id body key is added explicitly with request.Field; Keystone ignores it."
       ],
       "remaining": []
     },
@@ -72413,7 +72413,7 @@
       ],
       "contracts": [
         {
-          "behavior": "Remove ignores 404 by default and WithMissingError reports NotFound; Delete with WithDeleteQuery reproduces Python's cascade=False&force=False (or True) query and ForceDelete posts os-force_delete for the pre-3.23 force path.",
+          "behavior": "Remove ignores 404 by default and WithMissingError reports NotFound; Delete with request.Query reproduces Python's cascade=False&force=False (or True) query and ForceDelete posts os-force_delete for the pre-3.23 force path.",
           "tests": [
             "blockstorage/v3/volumes/python_parity_test.go:TestPythonVolumeDeleteDefaultsCascadeForceAndMissing"
           ]
@@ -72910,7 +72910,7 @@
         "blockstorage/v3/python-parity.md"
       ],
       "differences": [
-        "ListDetailOpts has no typed name, status or volume_id filters; WithListDetailQuery adds them.",
+        "ListDetailOpts has no typed name, status or volume_id filters; request.Query adds them.",
         "Python all_projects=True sends all_tenants=True; typed Go AllTenants sends all_tenants=true, so WithListQuery(\"all_tenants\", \"True\") is needed for the identical string.",
         "Python filters returned rows locally for Body attributes outside the query mapping; Go sends only query parameters and leaves local filtering to the caller.",
         "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud typed model, so response fields outside that model are dropped.",
@@ -74455,7 +74455,7 @@
       ],
       "contracts": [
         {
-          "behavior": "Delete with WithDeleteQuery sends Python's force=False or force=True query; Remove ignores 404 and WithMissingError reports NotFound.",
+          "behavior": "Delete with request.Query sends Python's force=False or force=True query; Remove ignores 404 and WithMissingError reports NotFound.",
           "tests": [
             "blockstorage/v3/qos/python_parity_test.go:TestPythonQoSCrudMatchesProxyRequests",
             "blockstorage/v3/qos/python_parity_test.go:TestPythonQoSDeleteMissingPolicies"
@@ -74713,7 +74713,7 @@
       ],
       "contracts": [
         {
-          "behavior": "Rebuild sends only imageRef plus the given typed keys, and WithRebuildField adds preserve_ephemeral, user_data, hostname and explicit null key_name or description inside the rebuild action; the response server is returned.",
+          "behavior": "Rebuild sends only imageRef plus the given typed keys, and request.Field adds preserve_ephemeral, user_data, hostname and explicit null key_name or description inside the rebuild action; the response server is returned.",
           "tests": [
             "compute/v2/servers/python_parity_test.go:TestPythonServerRebuildSendsPassedKeysAndReturnsServer"
           ]
@@ -74724,7 +74724,7 @@
       ],
       "differences": [
         "Python accepts a Server and an Image resource or IDs; Go takes the server ID and RebuildOpts.ImageRef.",
-        "name, adminPass, accessIPv4, accessIPv6 and metadata are typed RebuildOpts keys that omit empty values and cannot be overridden by WithRebuildField, so Go cannot send null or empty strings for them; Nova does not accept null for those keys.",
+        "name, adminPass, accessIPv4, accessIPv6 and metadata are typed RebuildOpts keys that omit empty values and cannot be overridden by request.Field, so Go cannot send null or empty strings for them; Nova does not accept null for those keys.",
         "RebuildOpts.Metadata holds string values only.",
         "Python updates the mutable Server from the response; Go returns a new servers.Server model.",
         "Python sends min(resource _max_microversion 2.100, server maximum) discovered per request; Go sends the one microversion configured or negotiated on the Connection client.",
@@ -78147,7 +78147,7 @@
       ],
       "differences": [
         "Python sends start.isoformat() including any offset; Go sends the wall-clock time without the offset, so callers pass UTC values.",
-        "Go Detailed true sends detailed=1; other Python query values go through WithAllTenantsQuery.",
+        "Go Detailed true sends detailed=1; other Python query values go through request.Query.",
         "Python sends min(Usage _max_microversion 2.75, server maximum) discovered per request; Go sends the one microversion configured or negotiated on the Connection client."
       ],
       "remaining": []
@@ -87424,7 +87424,7 @@
       ],
       "contracts": [
         {
-          "behavior": "CreateMapping sends PUT OS-FEDERATION/mappings/{id} with id and schema_version in the mapping envelope via WithCreateMappingField, as Python does, but the decoded Mapping drops schema_version and unknown rule keys.",
+          "behavior": "CreateMapping sends PUT OS-FEDERATION/mappings/{id} with id and schema_version in the mapping envelope via request.Field, as Python does, but the decoded Mapping drops schema_version and unknown rule keys.",
           "tests": [
             "identity/v3/federation/python_parity_test.go:TestPythonMappingRequestsAndDecodeGaps"
           ]
@@ -92686,7 +92686,7 @@
         "Python accepts any status below 400 through raise_from_response; the native call accepts only its Gophercloud OkCodes listed in identity/v3/native-admin-b.md.",
         "Python takes an ID string or Resource and returns a mutable Resource; Go takes an ID string and returns the native Gophercloud model pointer.",
         "Keystone v3 catalog resources declare no microversion, so neither side negotiates or sends one.",
-        "Go CreateOpts.Region sends the legacy region key; the region_id key Python sends is added with endpoints.WithCreateField(\"region_id\", id).",
+        "Go CreateOpts.Region sends the legacy region key; the region_id key Python sends is added with request.Field(\"region_id\", id).",
         "Go requires interface, url and service_id before HTTP, while Python sends whatever attributes were given and lets Keystone reject the request.",
         "Python drops attributes Endpoint does not declare, such as description; Go CreateOpts can send description."
       ],
@@ -92745,7 +92745,7 @@
         "Keystone v3 catalog resources declare no microversion, so neither side negotiates or sends one.",
         "Go returns the whole decoded slice; Python keeps only the first response row.",
         "Go requires service_id and resource_name before HTTP and always sends resource_limit, even 0, while Python sends only the given attributes.",
-        "Go extension fields from WithBatchCreateField land beside the limits array, not inside the row."
+        "Go extension fields from request.Field land beside the limits array, not inside the row."
       ],
       "remaining": []
     },
@@ -92801,7 +92801,7 @@
         "Keystone v3 catalog resources declare no microversion, so neither side negotiates or sends one.",
         "Go returns the whole decoded slice; Python keeps only the first response row.",
         "Go requires service_id and resource_name before HTTP and always sends default_limit, even 0, while Python sends only the given attributes.",
-        "Go extension fields from WithBatchCreateField land beside the registered_limits array, not inside the row."
+        "Go extension fields from request.Field land beside the registered_limits array, not inside the row."
       ],
       "remaining": []
     },
@@ -94174,7 +94174,7 @@
         "Python takes an ID string or Resource and returns a mutable Resource; Go takes an ID string and returns the native Gophercloud model pointer.",
         "Keystone v3 catalog resources declare no microversion, so neither side negotiates or sends one.",
         "Python commit sends no request when no attribute changed and never puts id in the PATCH body; Go Update always sends PATCH, with an empty envelope for empty options.",
-        "region_id is sent with endpoints.WithUpdateField(\"region_id\", id) because UpdateOpts.Region sends the legacy region key.",
+        "region_id is sent with request.Field(\"region_id\", id) because UpdateOpts.Region sends the legacy region key.",
         "Go UpdateOpts omits empty strings and WithUpdateField cannot override typed keys, so Python None or empty values for interface, url or service_id cannot be sent."
       ],
       "remaining": []
@@ -94514,13 +94514,13 @@
       ],
       "contracts": [
         {
-          "behavior": "resource.IgnoreMissing around Volumes.Delete with WithDeleteQuery(cascade, False) sends DELETE volumes/{id}?cascade=False and turns only 404 into success while 409 stays an error, and Remove ignores 404 unless WithMissingError is given.",
+          "behavior": "resource.IgnoreMissing around Volumes.Delete with request.Query(cascade, False) sends DELETE volumes/{id}?cascade=False and turns only 404 into success while 409 stays an error, and Remove ignores 404 unless WithMissingError is given.",
           "tests": [
             "blockstorage/v2/volumes/python_parity_test.go:TestPythonVolumeDeleteDefaultsCascadeForceAndMissing"
           ]
         },
         {
-          "behavior": "WithDeleteQuery(cascade, True) sends cascade=True and ForceDelete posts os-force_delete to volumes/{id}/action for force=True.",
+          "behavior": "request.Query(cascade, True) sends cascade=True and ForceDelete posts os-force_delete to volumes/{id}/action for force=True.",
           "tests": [
             "blockstorage/v2/volumes/python_parity_test.go:TestPythonVolumeDeleteDefaultsCascadeForceAndMissing"
           ]
@@ -94530,7 +94530,7 @@
         "blockstorage/v2/python-parity-volumes.md"
       ],
       "differences": [
-        "Python always sends cascade=False or cascade=True; Remove sends no query and DeleteOpts{Cascade: true} sends lowercase cascade=true, so the exact Python query needs WithDeleteQuery.",
+        "Python always sends cascade=False or cascade=True; Remove sends no query and DeleteOpts{Cascade: true} sends lowercase cascade=true, so the exact Python query needs request.Query.",
         "Python ignore_missing=True is the default; Go selects it with Remove or by wrapping Delete in resource.IgnoreMissing, and the bare Delete returns the 404 like ignore_missing=False.",
         "ForceDelete sends {\"os-force_delete\": \"\"} where Python sends null; Python's force path catches NotFound but its v2 action never raises, whereas Go ForceDelete returns HTTP errors.",
         "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud v2 typed model, so response fields outside that model are dropped.",
@@ -95510,7 +95510,7 @@
         "Legacy native Create returns a Gophercloud model pointer rather than the mutable Python Resource; the new sibling CreateRecord returns an independently owned DomainRecord with options and original response evidence.",
         "Legacy native Create/Update: Python accepts any status below 400; the native Create accepts only 201.",
         "Legacy native Create/Update: domains.CreateOpts requires Name, so Go rejects before HTTP a Python create_domain without a name.",
-        "Legacy native Create/Update: Domain options have no typed CreateOpts field and are sent with domains.WithCreateField(\"options\", ...).",
+        "Legacy native Create/Update: Domain options have no typed CreateOpts field and are sent with request.Field(\"options\", ...).",
         "New owned mutation APIs leave native Create/Update untouched. They take finite UTF-8 JSON attributes and safe string IDs in a freshly seeded Domain operation, return independent DomainRecord views plus physical Wire/Envelope/header/status, retain Domain.options and explicit null and drop unknown Body attributes. Request values remain raw; descriptor casts apply only to the returned view.",
         "The fixed Domain collection/member route deliberately rejects raw base_path with ErrUnsupported/ErrInvalidOption rather than reproducing Source arbitrary URI overrides or formatter/runtime objects. Headers, Microversion and Location are explicit Go conveniences; configured location is copied, unknown server project_id/location is not trusted. Class/session/adapter injection and caller custom transport cache bypass are not claimed.",
         "Ordered attribute helpers use last canonical/wire alias occurrence; bulk Attributes maps use sorted keys as a deterministic Go adaptation. Mutable existing Resource baseline/equality/recommit state is not modeled. SDK-R1/C1/S1, authenticated cloud acceptance and release verification remain separately tracked whole-SDK goals."
@@ -96771,7 +96771,7 @@
       "differences": [
         "Python accepts an ID string or a Resource instance and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer.",
         "Python accepts any status below 400; the native Update accepts only 200.",
-        "Python Proxy._update leaves the id dirty, so the PATCH body carries it; Go adds it with groups.WithUpdateField(\"id\", id) and Keystone ignores it.",
+        "Python Proxy._update leaves the id dirty, so the PATCH body carries it; Go adds it with request.Field(\"id\", id) and Keystone ignores it.",
         "Typed UpdateOpts omit empty strings and nil pointers; a Python None value is sent as null only through the Extra map (for example Extra{\"description\": nil})."
       ],
       "remaining": []
@@ -96824,7 +96824,7 @@
       "differences": [
         "Python accepts an ID string or a Resource instance and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer.",
         "Python accepts any status below 400; the native Update accepts only 200.",
-        "Python Proxy._update leaves the id dirty, so the PATCH body carries it; Go adds it with projects.WithUpdateField(\"id\", id) and Keystone ignores it.",
+        "Python Proxy._update leaves the id dirty, so the PATCH body carries it; Go adds it with request.Field(\"id\", id) and Keystone ignores it.",
         "Typed UpdateOpts omit empty strings and nil pointers; a Python None value is sent as null only through the Extra map (for example Extra{\"description\": nil})."
       ],
       "remaining": []
@@ -96852,7 +96852,7 @@
       "differences": [
         "Python accepts an ID string or a Resource instance and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer.",
         "Python accepts any status below 400; the native Update accepts only 200.",
-        "Python Proxy._update leaves the id dirty, so the PATCH body carries it; Go adds it with roles.WithUpdateField(\"id\", id) and Keystone ignores it.",
+        "Python Proxy._update leaves the id dirty, so the PATCH body carries it; Go adds it with request.Field(\"id\", id) and Keystone ignores it.",
         "Typed UpdateOpts omit empty strings and nil pointers; a Python None value is sent as null only through the Extra map (for example Extra{\"description\": nil})."
       ],
       "remaining": []
@@ -96880,7 +96880,7 @@
       "differences": [
         "Python accepts an ID string or a Resource instance and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer.",
         "Python accepts any status below 400; the native Update accepts only 200.",
-        "Python Proxy._update leaves the id dirty, so the PATCH body carries it; Go adds it with users.WithUpdateField(\"id\", id) and Keystone ignores it.",
+        "Python Proxy._update leaves the id dirty, so the PATCH body carries it; Go adds it with request.Field(\"id\", id) and Keystone ignores it.",
         "Typed UpdateOpts omit empty strings and nil pointers; a Python None value is sent as null only through the Extra map (for example Extra{\"description\": nil})."
       ],
       "remaining": []
@@ -98246,7 +98246,7 @@
       ],
       "contracts": [
         {
-          "behavior": "ScheduleL3Router(agentID, {RouterID}) sends POST /agents/{agent_id}/l3-routers with {\"router_id\": id}, WithScheduleL3RouterField adds ha_chassis_priority only when given, and a 404 is returned as an error.",
+          "behavior": "ScheduleL3Router(agentID, {RouterID}) sends POST /agents/{agent_id}/l3-routers with {\"router_id\": id}, request.Field adds ha_chassis_priority only when given, and a 404 is returned as an error.",
           "tests": [
             "network/v2/extensions/agents/python_parity_test.go:TestPythonL3AgentRouterScheduling"
           ]
@@ -101671,8 +101671,8 @@
         "blockstorage/v2/python-parity-resources.md"
       ],
       "differences": [
-        "ListDetailOpts has no typed name, status, volume_id, project_id, sort_key or sort_dir filters; WithListDetailQuery adds them.",
-        "Python all_tenants=True sends all_tenants=True; typed Go AllTenants sends all_tenants=true, so WithListDetailQuery(\"all_tenants\", \"True\") is needed for the identical string.",
+        "ListDetailOpts has no typed name, status, volume_id, project_id, sort_key or sort_dir filters; request.Query adds them.",
+        "Python all_tenants=True sends all_tenants=True; typed Go AllTenants sends all_tenants=true, so request.Query(\"all_tenants\", \"True\") is needed for the identical string.",
         "Python filters returned rows locally for Body attributes outside the query mapping; Go sends only query parameters and leaves local filtering to the caller.",
         "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud typed model, so response fields outside that model are dropped.",
         "Cinder v2 has no microversion: neither Python v2 Resources nor the Go v2 client send a volume version header unless a session default or client Microversion is configured."
@@ -116489,7 +116489,7 @@
       "differences": [
         "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
         "Python accepts dict or Resource values and reduces them to their id; Go takes ID strings.",
-        "Python encodes effective=True as the string True; ListAssignmentsOpts.Effective encodes true, so the exact Python spelling needs WithListAssignmentsQuery(\"effective\", \"True\"), and inherited_to has no typed field and needs WithListAssignmentsQuery(\"scope.OS-INHERIT:inherited_to\", ...).",
+        "Python encodes effective=True as the string True; ListAssignmentsOpts.Effective encodes true, so the exact Python spelling needs request.Query(\"effective\", \"True\"), and inherited_to has no typed field and needs request.Query(\"scope.OS-INHERIT:inherited_to\", ...).",
         "Python Resource.list sends one GET without a limit and ignores the Keystone links dict; Go All/List follows a non-null links.next URL.",
         "Python returns openstacksdk identity Resource objects; Go returns the Gophercloud identity v3 model pointers (enabled is Enabled, and unknown Keystone fields are only in Extra where the model declares it)."
       ],
@@ -118876,7 +118876,7 @@
         }
       ],
       "differences": [
-        "Typed booleans are plain bools; use WithListRulesQuery for false. Wrapped errors keep the native error as the cause; the SDK adds operation/resource context and context cancellation/deadline causes remain observable."
+        "Typed booleans are plain bools; use request.Query for false. Wrapped errors keep the native error as the cause; the SDK adds operation/resource context and context cancellation/deadline causes remain observable."
       ],
       "documentation": [
         "loadbalancer/v2/l7policies/README.md"
@@ -135573,7 +135573,7 @@
         }
       ],
       "differences": [
-        "Python always sends clear_access_rules, including false; Go omits false (the server default is also false) because AcceptOpts.ClearAccessRules is a plain bool and the field cannot be forced through WithAcceptField without colliding with the typed field.",
+        "Python always sends clear_access_rules, including false; Go omits false (the server default is also false) because AcceptOpts.ClearAccessRules is a plain bool and the field cannot be forced through request.Field without colliding with the typed field.",
         "Python returns the ShareTransfer Resource translated from the response; Go returns only an error because the 202 acknowledgement carries no usable body.",
         "Python accepts any HTTP status below 400 through raise_from_response; Go accepts only the documented success codes of the native call and reports others as the native unexpected-code error.",
         "Python returns a mutable Resource and forwards arbitrary **attrs/**query; Go uses concrete typed options with library-owned request builders and returns typed snapshots. Python negotiates each resource microversion up to its _max_microversion through the adapter; Go sends exactly the microversion configured on the service client (or Connection range discovery) and never silently upgrades."
@@ -136540,7 +136540,7 @@
       "differences": [
         "Python proxy methods accept an ID string or a Resource and return mutable Resource objects with descriptors, dirty-state tracking and an optional response cache; Go takes explicit resource.Ref or ID values and returns the native typed model, keeping the declared model separate from HTTP evidence.",
         "Python find_*/delete_* default to ignore_missing=True (find with a deprecation warning); Go Find is strict by default and needs resource.WithIgnoreMissing for the Python default, Remove ignores a missing object by default (WithMissingError selects strict) and native API.Delete keeps a 404 as a response error.",
-        "Python cascade is a keyword flag; Go uses DeleteOpts{Cascade: true} or WithDeleteQuery. A success acknowledgement is not completion; callers must wait on provisioning_status explicitly and uncertain mutations are never replayed automatically."
+        "Python cascade is a keyword flag; Go uses DeleteOpts{Cascade: true} or request.Query. A success acknowledgement is not completion; callers must wait on provisioning_status explicitly and uncertain mutations are never replayed automatically."
       ],
       "documentation": [
         "loadbalancer/v2/loadbalancers/README.md",

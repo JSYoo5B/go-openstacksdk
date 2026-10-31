@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.API.UpdateWithAttributes`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithIfMatch`

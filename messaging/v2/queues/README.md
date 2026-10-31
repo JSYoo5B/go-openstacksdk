@@ -13,7 +13,7 @@
 | `Share` | `POST /v2/queues/{name}/share` | 200 | Returns the signed `QueueShare` |
 | `Update` | `PATCH /v2/queues/{name}` | 200, 201, 204 | Sends `Content-Type: application/openstack-messaging-v2.0-json-patch` |
 
-Extension inputs use `WithCreateField`, `WithPurgeField`, `WithShareField` and `WithListQuery`. A field extension that names a core input fails with `resource.ErrInvalidOption` before any request; nil options fail the same way. `Update` accepts only `WithUpdateOptions`.
+Extension inputs use `request.Field`, `request.Field`, `request.Field` and `request.Query`. A field extension that names a core input fails with `resource.ErrInvalidOption` before any request; nil options fail the same way. `Update` accepts only `WithUpdateOptions`.
 
 `Update` sends the `BatchUpdateOpts` patch list as the JSON array body (for example `[{"op":"replace","path":"/metadata/x","value":0}]`), preserving zero and false values. The pinned native call reflects over its builder argument and would send `{}` for the SDK builder, so the SDK serializes the list through `ToQueueUpdateMap` and keeps the native URL, content type, accepted codes and result. The upstream builder requires `op`, `path` and `value`: a nil `Value` (including on a `remove` operation) or an empty field fails locally with `Missing input` before any request, so pass a non-nil placeholder value for `remove`. `WithUpdateOptions` replaces the whole batch; there are no field extensions for the patch list, and an empty batch sends `[]`.
 

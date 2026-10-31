@@ -72,7 +72,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - The unchanged native List binding serializes typed UserID then applies raw wire overrides/extensions using its SDK-owned concrete builder. GET retains selected ResourceBase, live token, source header and both2.55 version headers, with no body. Raw limit is a request extension rather than a native ListOpts field.
   Tests: `api/compute_keypair_records_test.go:TestComputeKeypairListNativeBindingKeepsTypedSinglePageABI`.

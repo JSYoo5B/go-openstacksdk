@@ -146,9 +146,9 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
-- Create posts {"method":{"name","uri"}} including empty values to images/{raw imageID}/import, merges non-colliding WithCreateField values inside the single method object, rejects name/uri collisions and nil options before HTTP, drains the accepted body and accepts only 202.
+- Create posts {"method":{"name","uri"}} including empty values to images/{raw imageID}/import, merges non-colliding request.Field values inside the single method object, rejects name/uri collisions and nil options before HTTP, drains the accepted body and accepts only 202.
   Tests: `image/v2/imageimport/native_contracts_test.go:TestNativeImageImportCreateBodyExtensionsAndStatus`.
 
 Python/Go differences:

@@ -164,7 +164,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.API.Create`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create sends POST flavors with name, ram, vcpus, disk, id, os-flavor-access:is_public, OS-FLV-EXT-DATA:ephemeral and description, carries other keys through WithCreateField and decodes the flavor.
   Tests: `compute/v2/flavors/python_parity_test.go:TestPythonFlavorCreateDeleteMatchProxyRequests`.
@@ -424,7 +424,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/services.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/services.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/services.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List sends GET os-services without a query by default and maps Python's name/binary and host to binary and host query keys.
   Tests: `compute/v2/services/python_parity_test.go:TestPythonComputeServiceListMapsNameToBinary`.
@@ -531,7 +531,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/migrations.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/migrations.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/migrations.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List sends GET os-migrations, maps every Python query key including changes-since, changes-before and instance_uuid, and decodes the migration fields from one page.
   Tests: `compute/v2/migrations/python_parity_test.go:TestPythonMigrationListMapsQueryAndReadsOnePage`.
@@ -694,7 +694,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/usage.API.AllTenants`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/usage.WithAllTenantsQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - AllTenants sends GET os-simple-tenant-usage without a query by default and with start, end and detailed=1 when set.
   Tests: `compute/v2/usage/python_parity_test.go:TestPythonUsageAllTenantsMatchesProxyQuery`.
@@ -702,7 +702,7 @@ Go API:
 Python/Go differences:
 
 - Python sends start.isoformat() including any offset; Go sends the wall-clock time without the offset, so callers pass UTC values.
-- Go Detailed true sends detailed=1; other Python query values go through WithAllTenantsQuery.
+- Go Detailed true sends detailed=1; other Python query values go through request.Query.
 - Python sends min(Usage _max_microversion 2.75, server maximum) discovered per request; Go sends the one microversion configured or negotiated on the Connection client.
 
 ### `python:compute/v2/get_usage`
@@ -712,7 +712,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/usage.API.SingleTenant`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/usage.WithSingleTenantQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - SingleTenant sends GET os-simple-tenant-usage/{project} with start and end, and stopping after the first value keeps it to Python's single fetch.
   Tests: `compute/v2/usage/python_parity_test.go:TestPythonUsageSingleProjectFirstPageMatchesFetch`.

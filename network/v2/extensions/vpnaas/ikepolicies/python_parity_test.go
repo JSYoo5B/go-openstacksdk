@@ -74,7 +74,7 @@ func TestPythonIKEPolicyProxyRequests(t *testing.T) {
 		t.Fatal(got, err)
 	}
 	// update_vpn_ike_policy("ike-1", name="", phase1_negotiation_mode="aggressive"): the typed
-	// Phase1NegotiationMode sends phase_1_negotiation_mode, so the Python key needs WithUpdateField.
+	// Phase1NegotiationMode sends phase_1_negotiation_mode, so the Python key needs request.Field.
 	empty := ""
 	if _, err := api.Update(ctx, "ike-1", ikepolicies.UpdateOpts{Name: &empty}, request.Field("phase1_negotiation_mode", "aggressive")); err != nil {
 		t.Fatal(err)

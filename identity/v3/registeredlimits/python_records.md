@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.API.List`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.API.All`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithQuery`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.API.ListRecords`

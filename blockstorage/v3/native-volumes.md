@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithCreateHintOpts`
 
 - Create POSTs {"volume":{...}} to volumes (imageRef for ImageID) with extensions inside the envelope and non-empty scheduler hints as top-level OS-SCH-HNT:scheduler_hints, rejects non-UUID host/instance hints and core-key extension collisions before HTTP, decodes the volume key and accepts only 202.
@@ -49,7 +49,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs volumes/detail with ListOpts (Python-dict-like metadata string, all_tenants, pointer bootable including false) and extension query values, follows volumes_links next hrefs as received, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.
   Tests: `blockstorage/v3/volumes/native_crud_contracts_test.go:TestNativeVolumeRoutesBodiesPagingAndDecode`, `blockstorage/v3/volumes/native_crud_contracts_test.go:TestNativeVolumeStrictStatusesDecodeAndPreflight`.
@@ -67,7 +67,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Update PUTs {"volume":{...}} to volumes/{id} sending explicit empty pointer name/description and non-empty metadata with extensions inside the envelope, rejects a nil option before HTTP and accepts only 200.
   Tests: `blockstorage/v3/volumes/native_crud_contracts_test.go:TestNativeVolumeRoutesBodiesPagingAndDecode`, `blockstorage/v3/volumes/native_crud_contracts_test.go:TestNativeVolumeStrictStatusesDecodeAndPreflight`.
@@ -85,7 +85,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.Delete`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithDeleteOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithDeleteQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - Delete DELETEs volumes/{raw id} with cascade=true only when requested plus extension query values, rejects an empty query key before HTTP and accepts only 202/204.
   Tests: `blockstorage/v3/volumes/native_crud_contracts_test.go:TestNativeVolumeRoutesBodiesPagingAndDecode`, `blockstorage/v3/volumes/native_crud_contracts_test.go:TestNativeVolumeStrictStatusesDecodeAndPreflight`.
@@ -119,7 +119,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.Attach`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithAttachOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithAttachField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Attach POSTs to volumes/{id}/action {"os-attach":{...}} with extensions inside the action object, rejects a core-key extension collision before HTTP and accepts only 202.
   Tests: `blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionRoutesAndBodies`, `blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionStrictStatuses`, `blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionPreflightAndDecode`.
@@ -153,7 +153,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.Detach`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithDetachOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithDetachField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Detach POSTs to volumes/{id}/action {"os-detach":{...}} (empty object without an attachment ID), rejects a nil option before HTTP and accepts only 202.
   Tests: `blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionRoutesAndBodies`, `blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionStrictStatuses`, `blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionPreflightAndDecode`.
@@ -203,7 +203,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.InitializeConnection`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithInitializeConnectionOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithInitializeConnectionField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - InitializeConnection POSTs to volumes/{id}/action {"os-initialize_connection":{"connector":{...}}} with explicit false multipath and extensions beside connector, returns the raw connection_info map (nil without error when absent) and accepts only 200/201/202.
   Tests: `blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionRoutesAndBodies`, `blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionStrictStatuses`, `blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionPreflightAndDecode`.
@@ -221,7 +221,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.TerminateConnection`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithTerminateConnectionOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithTerminateConnectionField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - TerminateConnection POSTs to volumes/{id}/action {"os-terminate_connection":{"connector":{...}}} and accepts only 202.
   Tests: `blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionRoutesAndBodies`, `blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionStrictStatuses`, `blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionPreflightAndDecode`.
@@ -239,7 +239,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.ExtendSize`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithExtendSizeOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithExtendSizeField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - ExtendSize POSTs to volumes/{id}/action {"os-extend":{"new_size":N}} sending a zero size because the native required tag does not reject integer zero, and accepts only 202.
   Tests: `blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionRoutesAndBodies`, `blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionStrictStatuses`, `blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionPreflightAndDecode`.
@@ -257,7 +257,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.UploadImage`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithUploadImageOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithUploadImageField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - UploadImage POSTs to volumes/{id}/action {"os-volume_upload_image":{...}}, decodes VolumeImage with its volume type (zero value when the key is absent, error for zoned timestamps) and accepts only 202.
   Tests: `blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionRoutesAndBodies`, `blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionStrictStatuses`, `blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionPreflightAndDecode`.
@@ -275,7 +275,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.SetImageMetadata`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithSetImageMetadataOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithSetImageMetadataField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - SetImageMetadata POSTs to volumes/{id}/action {"os-set_image_metadata":{"metadata":...}} sending nil metadata as null and accepts only 200.
   Tests: `blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionRoutesAndBodies`, `blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionStrictStatuses`, `blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionPreflightAndDecode`.
@@ -293,7 +293,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.SetBootable`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithSetBootableOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithSetBootableField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - SetBootable POSTs to volumes/{id}/action {"os-set_bootable":{"bootable":...}} sending false explicitly and accepts only 200.
   Tests: `blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionRoutesAndBodies`, `blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionStrictStatuses`, `blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionPreflightAndDecode`.
@@ -311,7 +311,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.ChangeType`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithChangeTypeOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithChangeTypeField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - ChangeType POSTs to volumes/{id}/action {"os-retype":{"new_type":...,"migration_policy":...}}, rejects an empty new type before HTTP and accepts only 202.
   Tests: `blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionRoutesAndBodies`, `blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionStrictStatuses`, `blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionPreflightAndDecode`.
@@ -329,7 +329,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.ReImage`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithReImageOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithReImageField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - ReImage POSTs to volumes/{id}/action {"os-reimage":{"image_id":...,"reimage_reserved":...}} always sending both fields and accepts only 202.
   Tests: `blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionRoutesAndBodies`, `blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionStrictStatuses`, `blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionPreflightAndDecode`.
@@ -347,7 +347,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithCreateHintOpts`
 
 - Create POSTs {"volume":{...}} to volumes (imageRef for ImageID) with extensions inside the envelope and non-empty scheduler hints as top-level OS-SCH-HNT:scheduler_hints, rejects non-UUID host/instance hints and core-key extension collisions before HTTP, decodes the volume key and accepts only 202. In v2 the size field has no omitempty, so zero is sent as "size":0 and the required tag does not reject it.
@@ -382,7 +382,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs volumes/detail with ListOpts (Python-dict-like metadata string, all_tenants) and extension query values, follows volumes_links next hrefs as received, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP. v2 ListOpts has no bootable filter.
   Tests: `blockstorage/v2/volumes/native_crud_contracts_test.go:TestNativeVolumeRoutesBodiesPagingAndDecode`, `blockstorage/v2/volumes/native_crud_contracts_test.go:TestNativeVolumeStrictStatusesDecodeAndPreflight`.
@@ -400,7 +400,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Update PUTs {"volume":{...}} to volumes/{id} sending explicit empty pointer name/description and non-empty metadata with extensions inside the envelope, rejects a nil option before HTTP and accepts only 200.
   Tests: `blockstorage/v2/volumes/native_crud_contracts_test.go:TestNativeVolumeRoutesBodiesPagingAndDecode`, `blockstorage/v2/volumes/native_crud_contracts_test.go:TestNativeVolumeStrictStatusesDecodeAndPreflight`.
@@ -418,7 +418,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.Delete`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithDeleteOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithDeleteQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - Delete DELETEs volumes/{raw id} with cascade=true only when requested plus extension query values, rejects an empty query key before HTTP and accepts only 202/204.
   Tests: `blockstorage/v2/volumes/native_crud_contracts_test.go:TestNativeVolumeRoutesBodiesPagingAndDecode`, `blockstorage/v2/volumes/native_crud_contracts_test.go:TestNativeVolumeStrictStatusesDecodeAndPreflight`.
@@ -452,7 +452,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.Attach`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithAttachOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithAttachField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Attach POSTs to volumes/{id}/action {"os-attach":{...}} with extensions inside the action object, rejects a core-key extension collision before HTTP and accepts only 202.
   Tests: `blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionRoutesAndBodies`, `blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionStrictStatuses`, `blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionPreflightAndDecode`.
@@ -486,7 +486,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.Detach`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithDetachOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithDetachField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Detach POSTs to volumes/{id}/action {"os-detach":{...}} (empty object without an attachment ID), rejects a nil option before HTTP and accepts only 202.
   Tests: `blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionRoutesAndBodies`, `blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionStrictStatuses`, `blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionPreflightAndDecode`.
@@ -536,7 +536,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.InitializeConnection`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithInitializeConnectionOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithInitializeConnectionField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - InitializeConnection POSTs to volumes/{id}/action {"os-initialize_connection":{"connector":{...}}} with explicit false multipath and extensions beside connector, returns the raw connection_info map (nil without error when absent) and accepts only 200/201/202.
   Tests: `blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionRoutesAndBodies`, `blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionStrictStatuses`, `blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionPreflightAndDecode`.
@@ -554,7 +554,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.TerminateConnection`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithTerminateConnectionOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithTerminateConnectionField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - TerminateConnection POSTs to volumes/{id}/action {"os-terminate_connection":{"connector":{...}}} and accepts only 202.
   Tests: `blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionRoutesAndBodies`, `blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionStrictStatuses`, `blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionPreflightAndDecode`.
@@ -572,7 +572,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.ExtendSize`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithExtendSizeOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithExtendSizeField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - ExtendSize POSTs to volumes/{id}/action {"os-extend":{"new_size":N}} sending a zero size because the native required tag does not reject integer zero, and accepts only 202.
   Tests: `blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionRoutesAndBodies`, `blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionStrictStatuses`, `blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionPreflightAndDecode`.
@@ -590,7 +590,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.UploadImage`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithUploadImageOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithUploadImageField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - UploadImage POSTs to volumes/{id}/action {"os-volume_upload_image":{...}}, decodes VolumeImage with its volume type (zero value when the key is absent, error for zoned timestamps) and accepts only 202.
   Tests: `blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionRoutesAndBodies`, `blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionStrictStatuses`, `blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionPreflightAndDecode`.
@@ -608,7 +608,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.SetImageMetadata`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithSetImageMetadataOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithSetImageMetadataField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - SetImageMetadata POSTs to volumes/{id}/action {"os-set_image_metadata":{"metadata":...}} sending nil metadata as null and accepts only 200.
   Tests: `blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionRoutesAndBodies`, `blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionStrictStatuses`, `blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionPreflightAndDecode`.
@@ -626,7 +626,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.SetBootable`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithSetBootableOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithSetBootableField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - SetBootable POSTs to volumes/{id}/action {"os-set_bootable":{"bootable":...}} sending false explicitly and accepts only 200.
   Tests: `blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionRoutesAndBodies`, `blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionStrictStatuses`, `blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionPreflightAndDecode`.
@@ -644,7 +644,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.ChangeType`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithChangeTypeOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithChangeTypeField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - ChangeType POSTs to volumes/{id}/action {"os-retype":{"new_type":...,"migration_policy":...}}, rejects an empty new type before HTTP and accepts only 202.
   Tests: `blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionRoutesAndBodies`, `blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionStrictStatuses`, `blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionPreflightAndDecode`.
@@ -662,7 +662,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.ReImage`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithReImageOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithReImageField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - ReImage POSTs to volumes/{id}/action {"os-reimage":{"image_id":...,"reimage_reserved":...}} always sending both fields and accepts only 202.
   Tests: `blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionRoutesAndBodies`, `blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionStrictStatuses`, `blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionPreflightAndDecode`.
@@ -696,7 +696,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.ResetStatus`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithResetStatusOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithResetStatusField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - ResetStatus POSTs {"os-reset_status":{"status":...}} to volumes/{id}/action always sending status (empty included) and omitting empty migration/attach status, keeps extensions inside the action object, rejects a status extension collision before HTTP and accepts only 202.
   Tests: `blockstorage/v3/volumes/native_admin_contracts_test.go:TestNativeVolumeAdminActionRoutesBodiesAndStatuses`.
@@ -746,7 +746,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.ResetStatus`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithResetStatusOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithResetStatusField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - ResetStatus POSTs {"os-reset_status":{"status":...}} to volumes/{id}/action always sending status (empty included) and omitting empty migration/attach status, keeps extensions inside the action object, rejects a status extension collision before HTTP and accepts only 202.
   Tests: `blockstorage/v2/volumes/native_admin_contracts_test.go:TestNativeVolumeAdminActionRoutesBodiesAndStatuses`.

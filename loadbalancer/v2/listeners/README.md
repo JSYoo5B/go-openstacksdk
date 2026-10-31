@@ -10,7 +10,7 @@
 | `Delete` | `DELETE .../{id}` | 202, 204 | No options; native 404 stays an HTTP response error |
 | `List` | `GET /lbaas/listeners` | 200 | Follows `listeners_links` next links; `ListOpts` booleans and timeouts use pointers so `false` and `0` are sent |
 
-Extension inputs use `WithCreateField`, `WithUpdateField` and `WithListQuery`. A field extension that names a core input field fails with `resource.ErrInvalidOption` before any request; nil options fail the same way. `Delete`, `Get` and `GetStats` take no extensions.
+Extension inputs use `request.Field`, `request.Field` and `request.Query`. A field extension that names a core input field fails with `resource.ErrInvalidOption` before any request; nil options fail the same way. `Delete`, `Get` and `GetStats` take no extensions.
 
 `Find`, `All`, `Remove`, `WaitFor` and `WaitForDeletion` use the common `resource.Collection`: exact name lookup, duplicate-name errors, and ignore-missing deletion by default (`Remove` returns nil for a 404). `API.Delete` itself does not ignore a missing listener.
 

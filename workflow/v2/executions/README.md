@@ -9,7 +9,7 @@
 | `Delete` | `DELETE /executions/{id}` | 202, 204 | Native 404 stays an HTTP response error |
 | `List` | `GET /executions` | 200, 204 | Follows the body `next` URL; `Input`, `Output`, `Params` are sent as JSON; `State` uses `op:value` filters |
 
-`Create` accepts `WithCreateField`, `List` accepts `WithListQuery`. A field extension that names a core input fails with `resource.ErrInvalidOption` before any request; nil options fail the same way.
+`Create` accepts `request.Field`, `List` accepts `request.Query`. A field extension that names a core input fails with `resource.ErrInvalidOption` before any request; nil options fail the same way.
 
 Pinned Gophercloud sets `include_output=1` for `IncludeOutput` and also emits a stray `-=true` query parameter.
 

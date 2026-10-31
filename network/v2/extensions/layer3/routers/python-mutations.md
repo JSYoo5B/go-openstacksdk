@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.API.UpdateWithAttributes`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithIfMatch`

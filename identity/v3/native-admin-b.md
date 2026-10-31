@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create POSTs {"region":{...}} to regions omitting empty fields (empty options send an empty envelope), spreads Extra and WithCreateField keys inside the envelope while rejecting core-tag or Extra key collisions and nil options before HTTP, decodes Extra from an explicit extra object or unknown keys, and accepts only 201.
   Tests: `identity/v3/regions/native_contracts_test.go:TestNativeRegionRoutesBodiesPagingAndDecode`, `identity/v3/regions/native_contracts_test.go:TestNativeRegionStatusesDecodeAndPreflight`.
@@ -48,7 +48,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs regions with parent_region_id and WithListQuery parameters, follows the links.next string (null stops), accepts native pager 200/204/300 on the first page, returns io.EOF for a bodyless 204 and ends cleanly on an empty page, and rejects a nil option before HTTP.
   Tests: `identity/v3/regions/native_contracts_test.go:TestNativeRegionRoutesBodiesPagingAndDecode`, `identity/v3/regions/native_contracts_test.go:TestNativeRegionStatusesDecodeAndPreflight`.
@@ -66,7 +66,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Update PATCHes {"region":{...}} to regions/{id} with the Description pointer able to send an empty string, no native Extra, WithUpdateField keys inside the envelope and core-key collisions or nil options rejected before HTTP, and accepts only 200.
   Tests: `identity/v3/regions/native_contracts_test.go:TestNativeRegionRoutesBodiesPagingAndDecode`, `identity/v3/regions/native_contracts_test.go:TestNativeRegionStatusesDecodeAndPreflight`.
@@ -100,7 +100,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create POSTs {"service":{...}} to services always sending type (an empty string included) and the Enabled pointer, spreads Extra and WithCreateField keys inside the envelope while rejecting core-tag or Extra collisions and nil options before HTTP, decodes Extra with unknown keys plus name and description copies unless an extra object is present, and accepts only 201.
   Tests: `identity/v3/services/native_contracts_test.go:TestNativeServiceRoutesBodiesPagingAndDecode`, `identity/v3/services/native_contracts_test.go:TestNativeServiceStatusesDecodeAndPreflight`.
@@ -134,7 +134,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs services with type and name filters plus WithListQuery parameters, follows the links.next string (null stops), accepts native pager 200/204/300 on the first page, returns io.EOF for a bodyless 204 and ends cleanly on an empty page, and rejects a nil option before HTTP.
   Tests: `identity/v3/services/native_contracts_test.go:TestNativeServiceRoutesBodiesPagingAndDecode`, `identity/v3/services/native_contracts_test.go:TestNativeServiceStatusesDecodeAndPreflight`.
@@ -152,7 +152,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Update PATCHes {"service":{...}} to services/{id} with Name, Description and Enabled pointers able to send empty or false values, Extra and WithUpdateField keys inside the envelope, core-key collisions rejected before HTTP, and accepts only 200.
   Tests: `identity/v3/services/native_contracts_test.go:TestNativeServiceRoutesBodiesPagingAndDecode`, `identity/v3/services/native_contracts_test.go:TestNativeServiceStatusesDecodeAndPreflight`.
@@ -186,7 +186,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create POSTs {"endpoint":{...}} to endpoints requiring interface, url and service_id, sending the Enabled pointer and WithCreateField keys inside the envelope, rejecting missing fields, core-key collisions and nil options before HTTP, decoding region_id, and accepting the POST default 201 or 202.
   Tests: `identity/v3/endpoints/native_contracts_test.go:TestNativeEndpointRoutesBodiesPagingAndDecode`, `identity/v3/endpoints/native_contracts_test.go:TestNativeEndpointStatusesDecodeAndPreflight`.
@@ -239,7 +239,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Update PATCHes {"endpoint":{...}} to endpoints/{id} omitting empty fields, sending the Enabled pointer and WithUpdateField keys inside the envelope, rejecting core-key collisions and nil options before HTTP, and accepts the PATCH default 200, 202 or 204 where a bodyless 204 returns a nil endpoint without an error.
   Tests: `identity/v3/endpoints/native_contracts_test.go:TestNativeEndpointRoutesBodiesPagingAndDecode`, `identity/v3/endpoints/native_contracts_test.go:TestNativeEndpointStatusesDecodeAndPreflight`.
@@ -273,7 +273,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/policies.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/policies.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/policies.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create POSTs {"policy":{...}} to policies requiring type and a non-nil blob (an empty slice sends ""), always sending blob as a string, rejecting a type over 255 characters with StringFieldLengthExceedsLimit, missing fields, a blob or core-tag extension collision and nil options before HTTP, spreading Extra inside the envelope, and accepts only 201.
   Tests: `identity/v3/policies/native_contracts_test.go:TestNativePolicyRoutesBodiesPagingAndDecode`, `identity/v3/policies/native_contracts_test.go:TestNativePolicyStatusesDecodeAndPreflight`.
@@ -307,7 +307,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/policies.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/policies.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/policies.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs policies with type, TYPE__COMPARATOR Filters (also leaking a "-" Python dict parameter from the q:"-" map) and WithListQuery parameters, returns an unwrapped InvalidListFilter before HTTP for a malformed filter key, follows the links.next string (null stops), accepts native pager 200/204/300 on the first page, returns io.EOF for a bodyless 204 and ends cleanly on an empty page, and rejects a nil option before HTTP.
   Tests: `identity/v3/policies/native_contracts_test.go:TestNativePolicyRoutesBodiesPagingAndDecode`, `identity/v3/policies/native_contracts_test.go:TestNativePolicyStatusesDecodeAndPreflight`.
@@ -325,7 +325,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/policies.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/policies.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/policies.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Update PATCHes {"policy":{...}} to policies/{id} omitting an empty type and blob so a WithUpdateField blob is accepted, rejecting a type over 255 characters, core-key collisions and nil options before HTTP, spreading Extra inside the envelope, and accepts only 200.
   Tests: `identity/v3/policies/native_contracts_test.go:TestNativePolicyRoutesBodiesPagingAndDecode`, `identity/v3/policies/native_contracts_test.go:TestNativePolicyStatusesDecodeAndPreflight`.
@@ -359,9 +359,9 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/limits.API.BatchCreate`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/limits.WithBatchCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/limits.WithBatchCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
-- BatchCreate POSTs an envelope-free row array {"limits":[...]} to limits requiring service_id and resource_name per row (ErrMissingInput before HTTP), always sending resource_limit (0 included), sending an empty array for an empty or nil batch, placing WithBatchCreateField keys at the root beside limits and rejecting a limits key or nil option before HTTP, decodes the limits array (nil when absent), and accepts only 201.
+- BatchCreate POSTs an envelope-free row array {"limits":[...]} to limits requiring service_id and resource_name per row (ErrMissingInput before HTTP), always sending resource_limit (0 included), sending an empty array for an empty or nil batch, placing request.Field keys at the root beside limits and rejecting a limits key or nil option before HTTP, decodes the limits array (nil when absent), and accepts only 201.
   Tests: `identity/v3/limits/native_contracts_test.go:TestNativeLimitRoutesBodiesPagingAndDecode`, `identity/v3/limits/native_contracts_test.go:TestNativeLimitStatusesDecodeAndPreflight`.
 
 Python/Go differences:
@@ -409,7 +409,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/limits.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/limits.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/limits.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs limits with region_id, project_id, domain_id, service_id and resource_name filters plus WithListQuery parameters, follows the links.next string (null stops), accepts native pager 200/204/300 on the first page, returns io.EOF for a bodyless 204 and ends cleanly on an empty page, and rejects a nil option before HTTP.
   Tests: `identity/v3/limits/native_contracts_test.go:TestNativeLimitRoutesBodiesPagingAndDecode`, `identity/v3/limits/native_contracts_test.go:TestNativeLimitStatusesDecodeAndPreflight`.
@@ -427,7 +427,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/limits.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/limits.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/limits.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Update PATCHes {"limit":{...}} to limits/{id} with Description and ResourceLimit pointers able to send "" and 0, WithUpdateField keys inside the envelope, core-key collisions rejected before HTTP, and accepts only 200.
   Tests: `identity/v3/limits/native_contracts_test.go:TestNativeLimitRoutesBodiesPagingAndDecode`, `identity/v3/limits/native_contracts_test.go:TestNativeLimitStatusesDecodeAndPreflight`.
@@ -461,9 +461,9 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.API.BatchCreate`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.WithBatchCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.WithBatchCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
-- BatchCreate POSTs an envelope-free row array {"registered_limits":[...]} to registered_limits requiring service_id and resource_name per row while the numeric required default_limit accepts and always sends 0, sending an empty array for an empty batch, placing WithBatchCreateField keys at the root and rejecting a registered_limits key or nil option before HTTP, decodes the array (nil when absent), and accepts only 201.
+- BatchCreate POSTs an envelope-free row array {"registered_limits":[...]} to registered_limits requiring service_id and resource_name per row while the numeric required default_limit accepts and always sends 0, sending an empty array for an empty batch, placing request.Field keys at the root and rejecting a registered_limits key or nil option before HTTP, decodes the array (nil when absent), and accepts only 201.
   Tests: `identity/v3/registeredlimits/native_contracts_test.go:TestNativeRegisteredLimitRoutesBodiesPagingAndDecode`, `identity/v3/registeredlimits/native_contracts_test.go:TestNativeRegisteredLimitStatusesDecodeAndPreflight`.
 
 Python/Go differences:
@@ -495,7 +495,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs registered_limits with region_id, service_id and resource_name filters plus WithListQuery parameters, follows the links.next string (null stops), accepts native pager 200/204/300 on the first page, returns io.EOF for a bodyless 204 and ends cleanly on an empty page, and rejects a nil option before HTTP.
   Tests: `identity/v3/registeredlimits/native_contracts_test.go:TestNativeRegisteredLimitRoutesBodiesPagingAndDecode`, `identity/v3/registeredlimits/native_contracts_test.go:TestNativeRegisteredLimitStatusesDecodeAndPreflight`.
@@ -513,7 +513,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Update PATCHes {"registered_limit":{...}} to registered_limits/{id} with Description and DefaultLimit pointers able to send "" and 0, optional region_id, service_id and resource_name, WithUpdateField keys inside the envelope, core-key collisions and nil options rejected before HTTP, and accepts only 200.
   Tests: `identity/v3/registeredlimits/native_contracts_test.go:TestNativeRegisteredLimitRoutesBodiesPagingAndDecode`, `identity/v3/registeredlimits/native_contracts_test.go:TestNativeRegisteredLimitStatusesDecodeAndPreflight`.
@@ -595,9 +595,9 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/federation.API.CreateMapping`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/federation.WithCreateMappingOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/federation.WithCreateMappingField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
-- CreateMapping PUTs {"mapping":{"rules":[...]}} to OS-FEDERATION/mappings/{id} sending null for nil rules and nil local/remote arrays and always sending remote type, omitting other empty rule fields, placing WithCreateMappingField keys inside the envelope while rejecting a rules key or nil option before HTTP, decodes the rule tree, and accepts only 201.
+- CreateMapping PUTs {"mapping":{"rules":[...]}} to OS-FEDERATION/mappings/{id} sending null for nil rules and nil local/remote arrays and always sending remote type, omitting other empty rule fields, placing request.Field keys inside the envelope while rejecting a rules key or nil option before HTTP, decodes the rule tree, and accepts only 201.
   Tests: `identity/v3/federation/native_contracts_test.go:TestNativeMappingRoutesBodiesPagingAndDecode`, `identity/v3/federation/native_contracts_test.go:TestNativeMappingStatusesDecodeAndPreflight`.
 
 Python/Go differences:
@@ -645,9 +645,9 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/federation.API.UpdateMapping`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/federation.WithUpdateMappingOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/federation.WithUpdateMappingField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
-- UpdateMapping PATCHes {"mapping":{"rules":[...]}} to OS-FEDERATION/mappings/{id} with the same rule serialization as CreateMapping, WithUpdateMappingField keys inside the envelope, a rules key or nil option rejected before HTTP, and accepts only 200.
+- UpdateMapping PATCHes {"mapping":{"rules":[...]}} to OS-FEDERATION/mappings/{id} with the same rule serialization as CreateMapping, request.Field keys inside the envelope, a rules key or nil option rejected before HTTP, and accepts only 200.
   Tests: `identity/v3/federation/native_contracts_test.go:TestNativeMappingRoutesBodiesPagingAndDecode`, `identity/v3/federation/native_contracts_test.go:TestNativeMappingStatusesDecodeAndPreflight`.
 
 Python/Go differences:

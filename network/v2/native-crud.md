@@ -19,7 +19,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.FloatingIPs.EnsurePrepared`
 - `github.com/JSYoo5B/go-openstacksdk/network.FloatingIPPlan.Selection`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - The high-level fresh-allocation paths invoke the native concrete Create adapter and emit the floatingip JSON envelope with selected floating_network_id, port_id/fixed_ip_address and project_id when selected; 201 responses return the native typed FloatingIP. Reuse=false can omit project_id rather than guessing the owner.
   Tests: `network/floating_ip_ensure_test.go:TestFloatingIPEnsurePrefersAlreadyAttachedAndAllocatesOnlyWhenNeeded`, `connectiontest/connection_floating_ip_ensure_test.go:TestConnectionFloatingIPEnsureWithoutReuseLetsNeutronChooseProject`.
@@ -58,7 +58,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create POSTs {"network":{...}} to networks with extensions inside the envelope, rejects a core-key extension collision and nil option before HTTP, decodes the response and accepts only 201/202.
   Tests: `network/v2/networks/native_contracts_test.go:TestNativeNetworkRoutesBodiesPagingAndDecode`, `network/v2/networks/native_contracts_test.go:TestNativeNetworkStrictStatusesAndPreflight`.
@@ -92,7 +92,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs networks with ListOpts and extension query, follows networks_links next as received, yields nothing for an empty array, surfaces io.EOF for a bodyless 204, rejects nil options before HTTP and returns native pager status errors (200/204/300) without operation context.
   Tests: `network/v2/networks/native_contracts_test.go:TestNativeNetworkRoutesBodiesPagingAndDecode`, `network/v2/networks/native_contracts_test.go:TestNativeNetworkStrictStatusesAndPreflight`.
@@ -126,7 +126,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create POSTs {"subnet":{...}} to subnets with extensions inside the envelope, requires network_id and sends an empty GatewayIP pointer as gateway_ip null, rejects a core-key extension collision and nil option before HTTP, decodes the response and accepts only 201/202.
   Tests: `network/v2/subnets/native_contracts_test.go:TestNativeSubnetRoutesBodiesPagingAndDecode`, `network/v2/subnets/native_contracts_test.go:TestNativeSubnetStrictStatusesAndPreflight`.
@@ -160,7 +160,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs subnets with ListOpts and extension query, follows subnets_links next as received, yields nothing for an empty array, surfaces io.EOF for a bodyless 204, rejects nil options before HTTP and returns native pager status errors (200/204/300) without operation context.
   Tests: `network/v2/subnets/native_contracts_test.go:TestNativeSubnetRoutesBodiesPagingAndDecode`, `network/v2/subnets/native_contracts_test.go:TestNativeSubnetStrictStatusesAndPreflight`.
@@ -194,7 +194,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create POSTs {"port":{...}} to ports with extensions inside the envelope, requires network_id, flattens value_specs into the port while rejecting banned shared/tenant_id and overwriting keys, rejects a core-key extension collision and nil option before HTTP, decodes the response and accepts only 201/202.
   Tests: `network/v2/ports/native_contracts_test.go:TestNativePortRoutesBodiesPagingAndDecode`, `network/v2/ports/native_contracts_test.go:TestNativePortStrictStatusesAndPreflight`.
@@ -228,7 +228,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs ports with ListOpts and extension query, repeating fixed_ips conditions and security_groups keys, follows ports_links next as received, yields nothing for an empty array, surfaces io.EOF for a bodyless 204, rejects nil options before HTTP and returns native pager status errors (200/204/300) without operation context.
   Tests: `network/v2/ports/native_contracts_test.go:TestNativePortRoutesBodiesPagingAndDecode`, `network/v2/ports/native_contracts_test.go:TestNativePortStrictStatusesAndPreflight`.
@@ -262,7 +262,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create POSTs {"security_group":{...}} to security-groups with extensions inside the envelope, requires name and sends an explicit false stateful pointer, rejects a core-key extension collision and nil option before HTTP, decodes the response and accepts only 201/202.
   Tests: `network/v2/extensions/security/groups/native_contracts_test.go:TestNativeSecGroupRoutesBodiesPagingAndDecode`, `network/v2/extensions/security/groups/native_contracts_test.go:TestNativeSecGroupStrictStatusesAndPreflight`.
@@ -329,7 +329,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create POSTs {"security_group_rule":{...}} to security-group-rules with extensions inside the envelope, requires direction, ethertype and security_group_id and omits zero port ranges, rejects a core-key extension collision and nil option before HTTP, decodes the response and accepts only 201/202.
   Tests: `network/v2/extensions/security/rules/native_contracts_test.go:TestNativeRuleRoutesBodiesPagingAndDecode`, `network/v2/extensions/security/rules/native_contracts_test.go:TestNativeRuleStrictStatusesAndPreflight`.
@@ -363,7 +363,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs security-group-rules with ListOpts and extension query, follows security-group-rules_links next as received, yields nothing for an empty array, surfaces io.EOF for a bodyless 204, rejects nil options before HTTP and returns native pager status errors (200/204/300) without operation context.
   Tests: `network/v2/extensions/security/rules/native_contracts_test.go:TestNativeRuleRoutesBodiesPagingAndDecode`, `network/v2/extensions/security/rules/native_contracts_test.go:TestNativeRuleStrictStatusesAndPreflight`.
@@ -413,7 +413,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs floatingips with ListOpts and extension query, follows floatingips_links next as received, yields nothing for an empty array, surfaces io.EOF for a bodyless 204, rejects nil options before HTTP and returns native pager status errors (200/204/300) without operation context.
   Tests: `network/v2/extensions/layer3/floatingips/native_contracts_test.go:TestNativeFloatingIPRoutesBodiesPagingAndDecode`, `network/v2/extensions/layer3/floatingips/native_contracts_test.go:TestNativeFloatingIPStrictStatusesAndPreflight`.
@@ -463,7 +463,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create POSTs {"router":{...}} to routers with extensions inside the envelope, omitting empty fields while keeping explicit false pointers, rejects a core-key extension collision and nil option before HTTP, decodes the response and accepts only 201/202.
   Tests: `network/v2/extensions/layer3/routers/native_contracts_test.go:TestNativeRouterRoutesBodiesPagingAndDecode`, `network/v2/extensions/layer3/routers/native_contracts_test.go:TestNativeRouterStrictStatusesAndPreflight`.
@@ -497,7 +497,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs routers with ListOpts and extension query, follows routers_links next as received, yields nothing for an empty array, surfaces io.EOF for a bodyless 204, rejects nil options before HTTP and returns native pager status errors (200/204/300) without operation context.
   Tests: `network/v2/extensions/layer3/routers/native_contracts_test.go:TestNativeRouterRoutesBodiesPagingAndDecode`, `network/v2/extensions/layer3/routers/native_contracts_test.go:TestNativeRouterStrictStatusesAndPreflight`.
@@ -531,7 +531,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.API.AddInterface`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithAddInterfaceOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithAddInterfaceField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - AddInterface PUTs routers/{id}/add_router_interface with an envelope-less subnet_id or port_id body (extensions beside it), requires exactly one of them before HTTP, decodes InterfaceInfo and accepts only 200.
   Tests: `network/v2/extensions/layer3/routers/native_contracts_test.go:TestNativeRouterInterfacesAndExternalGateways`.
@@ -549,7 +549,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.API.RemoveInterface`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRemoveInterfaceOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRemoveInterfaceField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - RemoveInterface PUTs routers/{id}/remove_router_interface with subnet_id and/or port_id, requires at least one before HTTP, decodes InterfaceInfo and accepts only 200.
   Tests: `network/v2/extensions/layer3/routers/native_contracts_test.go:TestNativeRouterInterfacesAndExternalGateways`.
@@ -567,7 +567,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.API.AddExternalGateways`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithAddExternalGatewaysOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithAddExternalGatewaysField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - AddExternalGateways PUTs {"router":{"external_gateways":[...]}} to routers/{id}/add_external_gateways with extensions inside the envelope, rejects nil gateways, a core-key collision or nil option before HTTP, decodes the router and accepts only 200.
   Tests: `network/v2/extensions/layer3/routers/native_contracts_test.go:TestNativeRouterInterfacesAndExternalGateways`.
@@ -585,7 +585,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.API.UpdateExternalGateways`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithUpdateExternalGatewaysOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithUpdateExternalGatewaysField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - UpdateExternalGateways PUTs {"router":{"external_gateways":[...]}} to routers/{id}/update_external_gateways, rejects nil gateways, a core-key collision or nil option before HTTP, decodes the router and accepts only 200.
   Tests: `network/v2/extensions/layer3/routers/native_contracts_test.go:TestNativeRouterInterfacesAndExternalGateways`.
@@ -603,7 +603,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.API.RemoveExternalGateways`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRemoveExternalGatewaysOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRemoveExternalGatewaysField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - RemoveExternalGateways PUTs {"router":{"external_gateways":[...]}} to routers/{id}/remove_external_gateways sending an empty slice as [], rejects nil gateways before HTTP, decodes the router and accepts only 200.
   Tests: `network/v2/extensions/layer3/routers/native_contracts_test.go:TestNativeRouterInterfacesAndExternalGateways`.
@@ -621,7 +621,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/extraroutes.API.Add`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/extraroutes.WithAddOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/extraroutes.WithAddField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Add PUTs {"router":{"routes":[...]}} to routers/{id}/add_extraroutes (nil routes as an empty router object) with extensions inside the envelope, rejects a routes collision or nil option before HTTP, decodes the router and accepts only 200.
   Tests: `network/v2/extensions/layer3/extraroutes/native_contracts_test.go:TestNativeExtraRoutesAddRemoveBodiesAndStatuses`.
@@ -639,7 +639,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/extraroutes.API.Remove`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/extraroutes.WithRemoveOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/extraroutes.WithRemoveField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Remove PUTs {"router":{"routes":[...]}} to routers/{id}/remove_extraroutes, rejects nil options before HTTP, decodes the router and accepts only 200.
   Tests: `network/v2/extensions/layer3/extraroutes/native_contracts_test.go:TestNativeExtraRoutesAddRemoveBodiesAndStatuses`.
@@ -657,7 +657,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create POSTs {"subnetpool":{...}} to subnetpools with extensions inside the envelope, always sending name and prefixes (nil prefixes as null) while omitting other empty fields, rejects a core-key extension collision and nil option before HTTP, decodes numeric or numeric-string prefix lengths and accepts only 201.
   Tests: `network/v2/extensions/subnetpools/native_contracts_test.go:TestNativeSubnetPoolRoutesBodiesPagingAndDecode`, `network/v2/extensions/subnetpools/native_contracts_test.go:TestNativeSubnetPoolStrictStatusesAndPreflight`.
@@ -691,7 +691,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs subnetpools with ListOpts and extension query values, follows subnetpools_links next hrefs as received, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.
   Tests: `network/v2/extensions/subnetpools/native_contracts_test.go:TestNativeSubnetPoolRoutesBodiesPagingAndDecode`, `network/v2/extensions/subnetpools/native_contracts_test.go:TestNativeSubnetPoolStrictStatusesAndPreflight`.
@@ -725,7 +725,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.API.AddPrefixes`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithAddPrefixesOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithAddPrefixesField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - AddPrefixes PUTs an envelope-free {"prefixes":[...]} body (nil prefixes as {}) to subnetpools/{id}/add_prefixes with extensions at top level, rejects a prefixes extension collision before HTTP, returns the top-level prefixes list and accepts only 200.
   Tests: `network/v2/extensions/subnetpools/native_contracts_test.go:TestNativeSubnetPoolPrefixOperations`, `network/v2/extensions/subnetpools/native_contracts_test.go:TestNativeSubnetPoolStrictStatusesAndPreflight`.
@@ -743,7 +743,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.API.RemovePrefixes`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithRemovePrefixesOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithRemovePrefixesField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - RemovePrefixes PUTs an envelope-free {"prefixes":[...]} body to subnetpools/{id}/remove_prefixes, rejects a nil option before HTTP, returns the top-level prefixes list and accepts only 200.
   Tests: `network/v2/extensions/subnetpools/native_contracts_test.go:TestNativeSubnetPoolPrefixOperations`, `network/v2/extensions/subnetpools/native_contracts_test.go:TestNativeSubnetPoolStrictStatusesAndPreflight`.
@@ -761,7 +761,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/addressscopes.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/addressscopes.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/addressscopes.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create POSTs {"address_scope":{...}} to address-scopes with extensions inside the envelope, always sending name and ip_version (zero values included), rejects a core-key extension collision before HTTP, decodes the response and accepts only 201.
   Tests: `network/v2/extensions/layer3/addressscopes/native_contracts_test.go:TestNativeAddressScopeRoutesBodiesPagingAndDecode`, `network/v2/extensions/layer3/addressscopes/native_contracts_test.go:TestNativeAddressScopeStrictStatusesAndPreflight`.
@@ -795,7 +795,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/addressscopes.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/addressscopes.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/addressscopes.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs address-scopes with ListOpts and extension query values, follows address_scopes_links next hrefs as received, decodes null name/shared as zero values, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.
   Tests: `network/v2/extensions/layer3/addressscopes/native_contracts_test.go:TestNativeAddressScopeRoutesBodiesPagingAndDecode`, `network/v2/extensions/layer3/addressscopes/native_contracts_test.go:TestNativeAddressScopeStrictStatusesAndPreflight`.
@@ -813,7 +813,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/addressscopes.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/addressscopes.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/addressscopes.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Update PUTs {"address_scope":{...}} to address-scopes/{id} sending explicit pointer name/shared values including false and an empty envelope when both are nil, keeps extensions inside the envelope, rejects a nil option before HTTP and accepts only 200.
   Tests: `network/v2/extensions/layer3/addressscopes/native_contracts_test.go:TestNativeAddressScopeRoutesBodiesPagingAndDecode`, `network/v2/extensions/layer3/addressscopes/native_contracts_test.go:TestNativeAddressScopeStrictStatusesAndPreflight`.
@@ -847,7 +847,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create POSTs {"trunk":{...}} to trunks with extensions inside the envelope, sends nil sub_ports as [] and explicit false admin_state_up, rejects a missing parent port_id, subport missing segmentation_type, core-key extension collision and nil option before HTTP, decodes RFC3339 timestamps and accepts only 201/202.
   Tests: `network/v2/extensions/trunks/native_contracts_test.go:TestNativeTrunkRoutesBodiesSinglePageAndDecode`, `network/v2/extensions/trunks/native_contracts_test.go:TestNativeTrunkStrictStatusesDecodeAndPreflight`.
@@ -881,7 +881,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs trunks with ListOpts (string revision_number including "0") and extension query values, ignores the Neutron trunks_links array and follows only a links.next string because TrunkPage defines no NextPageURL, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.
   Tests: `network/v2/extensions/trunks/native_contracts_test.go:TestNativeTrunkRoutesBodiesSinglePageAndDecode`, `network/v2/extensions/trunks/native_contracts_test.go:TestNativeTrunkStrictStatusesDecodeAndPreflight`.
@@ -931,7 +931,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.API.AddSubports`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithAddSubportsOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithAddSubportsField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - AddSubports PUTs an envelope-free {"sub_ports":[...]} body with top-level extensions to trunks/{id}/add_subports, sends segmentation_id 0 and an empty list as [], rejects nil subports, a subport missing segmentation_type and a sub_ports extension before HTTP, decodes the envelope-free trunk response and accepts only 200.
   Tests: `network/v2/extensions/trunks/native_contracts_test.go:TestNativeTrunkSubportOperations`, `network/v2/extensions/trunks/native_contracts_test.go:TestNativeTrunkStrictStatusesDecodeAndPreflight`.
@@ -949,7 +949,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.API.RemoveSubports`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithRemoveSubportsOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithRemoveSubportsField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - RemoveSubports PUTs an envelope-free {"sub_ports":[{"port_id":...}]} body (nil as null) to trunks/{id}/remove_subports, rejects an empty subport port_id and nil option before HTTP, decodes the envelope-free trunk response and accepts only 200.
   Tests: `network/v2/extensions/trunks/native_contracts_test.go:TestNativeTrunkSubportOperations`, `network/v2/extensions/trunks/native_contracts_test.go:TestNativeTrunkStrictStatusesDecodeAndPreflight`.
@@ -967,7 +967,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/portforwarding.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/portforwarding.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/portforwarding.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create POSTs {"port_forwarding":{...}} to floatingips/{fip}/port_forwardings, always sending internal_port_id, internal_ip_address and protocol while omitting empty or zero port fields, keeps extensions inside the envelope, rejects a core-key extension collision before HTTP and accepts only 201/202.
   Tests: `network/v2/extensions/layer3/portforwarding/native_contracts_test.go:TestNativePortForwardingRoutesBodiesPagingAndDecode`, `network/v2/extensions/layer3/portforwarding/native_contracts_test.go:TestNativePortForwardingStrictStatusesDecodeAndPreflight`.
@@ -1001,7 +1001,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/portforwarding.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/portforwarding.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/portforwarding.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs floatingips/{fip}/port_forwardings with ListOpts and extension query values, follows only singular port_forwarding_links next hrefs as received (not plural port_forwardings_links), yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.
   Tests: `network/v2/extensions/layer3/portforwarding/native_contracts_test.go:TestNativePortForwardingRoutesBodiesPagingAndDecode`, `network/v2/extensions/layer3/portforwarding/native_contracts_test.go:TestNativePortForwardingStrictStatusesDecodeAndPreflight`.
@@ -1019,7 +1019,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/portforwarding.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/portforwarding.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/portforwarding.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Update PUTs {"port_forwarding":{...}} to floatingips/{fip}/port_forwardings/{id} sending an explicit empty description pointer, omitting other empty values (an empty envelope when all are empty), keeps extensions inside the envelope, rejects a nil option before HTTP and accepts only 200.
   Tests: `network/v2/extensions/layer3/portforwarding/native_contracts_test.go:TestNativePortForwardingRoutesBodiesPagingAndDecode`, `network/v2/extensions/layer3/portforwarding/native_contracts_test.go:TestNativePortForwardingStrictStatusesDecodeAndPreflight`.
@@ -1053,7 +1053,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create POSTs {"policy":{...}} to qos/policies with extensions inside the envelope, always sending name and omitting false bool flags, rejects a core-key extension collision and nil option before HTTP, decodes rules as raw maps and accepts only 201.
   Tests: `network/v2/extensions/qos/policies/native_contracts_test.go:TestNativeQoSPolicyRoutesBodiesPagingAndDecode`, `network/v2/extensions/qos/policies/native_contracts_test.go:TestNativeQoSPolicyStrictStatusesDecodeAndPreflight`.
@@ -1087,7 +1087,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs qos/policies with ListOpts (pointer revision_number including 0) and extension query values, follows policies_links next hrefs as received, decodes null rules/description as zero values, yields nothing for an empty page, reports a non-array policies decode error, io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.
   Tests: `network/v2/extensions/qos/policies/native_contracts_test.go:TestNativeQoSPolicyRoutesBodiesPagingAndDecode`, `network/v2/extensions/qos/policies/native_contracts_test.go:TestNativeQoSPolicyStrictStatusesDecodeAndPreflight`.
@@ -1121,7 +1121,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.CreateBandwidthLimitRule`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithCreateBandwidthLimitRuleOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithCreateBandwidthLimitRuleField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - CreateBandwidthLimitRule POSTs {"bandwidth_limit_rule":{...}} to qos/policies/{policy}/bandwidth_limit_rules, always sending max_kbps including 0 and omitting empty optional fields, keeps extensions inside the envelope, rejects a max_kbps extension collision before HTTP, decodes the rule and accepts only 201.
   Tests: `network/v2/extensions/qos/rules/native_contracts_test.go:TestNativeQoSRuleRoutesBodiesAndDecode`, `network/v2/extensions/qos/rules/native_contracts_test.go:TestNativeQoSRuleStrictStatusesAndPreflight`.
@@ -1155,7 +1155,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.UpdateBandwidthLimitRule`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithUpdateBandwidthLimitRuleOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithUpdateBandwidthLimitRuleField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - UpdateBandwidthLimitRule PUTs {"bandwidth_limit_rule":{...}} to qos/policies/{policy}/bandwidth_limit_rules/{id}, sending pointer MaxKBps/MaxBurstKBps values including 0 and an empty envelope when nothing is set, keeps extensions inside the envelope, rejects a nil option before HTTP and accepts only 200.
   Tests: `network/v2/extensions/qos/rules/native_contracts_test.go:TestNativeQoSRuleRoutesBodiesAndDecode`, `network/v2/extensions/qos/rules/native_contracts_test.go:TestNativeQoSRuleStrictStatusesAndPreflight`.
@@ -1189,7 +1189,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ListBandwidthLimitRules`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithListBandwidthLimitRulesOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithListBandwidthLimitRulesQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - ListBandwidthLimitRules GETs qos/policies/{policy}/bandwidth_limit_rules with list options and extension query values, ignores the Neutron bandwidth_limit_rules_links array and follows only a links.next string because the page defines no NextPageURL, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.
   Tests: `network/v2/extensions/qos/rules/native_contracts_test.go:TestNativeQoSRuleRoutesBodiesAndDecode`, `network/v2/extensions/qos/rules/native_contracts_test.go:TestNativeQoSRuleStrictStatusesAndPreflight`.
@@ -1207,7 +1207,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.CreateDSCPMarkingRule`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithCreateDSCPMarkingRuleOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithCreateDSCPMarkingRuleField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - CreateDSCPMarkingRule POSTs {"dscp_marking_rule":{...}} to qos/policies/{policy}/dscp_marking_rules, always sending dscp_mark including 0 and omitting empty optional fields, keeps extensions inside the envelope, rejects a dscp_mark extension collision before HTTP, decodes the rule and accepts only 201.
   Tests: `network/v2/extensions/qos/rules/native_contracts_test.go:TestNativeQoSRuleRoutesBodiesAndDecode`, `network/v2/extensions/qos/rules/native_contracts_test.go:TestNativeQoSRuleStrictStatusesAndPreflight`.
@@ -1241,7 +1241,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.UpdateDSCPMarkingRule`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithUpdateDSCPMarkingRuleOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithUpdateDSCPMarkingRuleField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - UpdateDSCPMarkingRule PUTs {"dscp_marking_rule":{...}} to qos/policies/{policy}/dscp_marking_rules/{id}, sending pointer DSCPMark values including 0 and an empty envelope when nothing is set, keeps extensions inside the envelope, rejects a nil option before HTTP and accepts only 200.
   Tests: `network/v2/extensions/qos/rules/native_contracts_test.go:TestNativeQoSRuleRoutesBodiesAndDecode`, `network/v2/extensions/qos/rules/native_contracts_test.go:TestNativeQoSRuleStrictStatusesAndPreflight`.
@@ -1275,7 +1275,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ListDSCPMarkingRules`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithListDSCPMarkingRulesOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithListDSCPMarkingRulesQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - ListDSCPMarkingRules GETs qos/policies/{policy}/dscp_marking_rules with list options and extension query values, ignores the Neutron dscp_marking_rules_links array and follows only a links.next string because the page defines no NextPageURL, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.
   Tests: `network/v2/extensions/qos/rules/native_contracts_test.go:TestNativeQoSRuleRoutesBodiesAndDecode`, `network/v2/extensions/qos/rules/native_contracts_test.go:TestNativeQoSRuleStrictStatusesAndPreflight`.
@@ -1293,7 +1293,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.CreateMinimumBandwidthRule`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithCreateMinimumBandwidthRuleOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithCreateMinimumBandwidthRuleField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - CreateMinimumBandwidthRule POSTs {"minimum_bandwidth_rule":{...}} to qos/policies/{policy}/minimum_bandwidth_rules, always sending min_kbps including 0 and omitting empty optional fields, keeps extensions inside the envelope, rejects a min_kbps extension collision before HTTP, decodes the rule and accepts only 201.
   Tests: `network/v2/extensions/qos/rules/native_contracts_test.go:TestNativeQoSRuleRoutesBodiesAndDecode`, `network/v2/extensions/qos/rules/native_contracts_test.go:TestNativeQoSRuleStrictStatusesAndPreflight`.
@@ -1327,7 +1327,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.UpdateMinimumBandwidthRule`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithUpdateMinimumBandwidthRuleOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithUpdateMinimumBandwidthRuleField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - UpdateMinimumBandwidthRule PUTs {"minimum_bandwidth_rule":{...}} to qos/policies/{policy}/minimum_bandwidth_rules/{id}, sending pointer MinKBps values including 0 and an empty envelope when nothing is set, keeps extensions inside the envelope, rejects a nil option before HTTP and accepts only 200.
   Tests: `network/v2/extensions/qos/rules/native_contracts_test.go:TestNativeQoSRuleRoutesBodiesAndDecode`, `network/v2/extensions/qos/rules/native_contracts_test.go:TestNativeQoSRuleStrictStatusesAndPreflight`.
@@ -1361,7 +1361,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ListMinimumBandwidthRules`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithListMinimumBandwidthRulesOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithListMinimumBandwidthRulesQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - ListMinimumBandwidthRules GETs qos/policies/{policy}/minimum_bandwidth_rules with list options and extension query values, ignores the Neutron minimum_bandwidth_rules_links array and follows only a links.next string because the page defines no NextPageURL, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.
   Tests: `network/v2/extensions/qos/rules/native_contracts_test.go:TestNativeQoSRuleRoutesBodiesAndDecode`, `network/v2/extensions/qos/rules/native_contracts_test.go:TestNativeQoSRuleStrictStatusesAndPreflight`.
@@ -1411,7 +1411,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create POSTs {"address_group":{...}} to address-groups with extensions inside the envelope, sending an optional caller ID and an empty address list as [], rejects nil addresses before HTTP, decodes null description as empty and accepts only 201/202.
   Tests: `network/v2/extensions/security/addressgroups/native_contracts_test.go:TestNativeAddressGroupRoutesBodiesPagingAndDecode`, `network/v2/extensions/security/addressgroups/native_contracts_test.go:TestNativeAddressGroupStrictStatusesAndPreflight`.
@@ -1445,7 +1445,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs address-groups with ListOpts (repeated addresses query per value) and extension query values, follows address_groups_links next hrefs as received, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.
   Tests: `network/v2/extensions/security/addressgroups/native_contracts_test.go:TestNativeAddressGroupRoutesBodiesPagingAndDecode`, `network/v2/extensions/security/addressgroups/native_contracts_test.go:TestNativeAddressGroupStrictStatusesAndPreflight`.
@@ -1463,7 +1463,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Update PUTs {"address_group":{...}} to address-groups/{id} sending explicit empty pointer name/description values with extensions inside the envelope, rejects a core-key extension collision before HTTP and accepts only 200.
   Tests: `network/v2/extensions/security/addressgroups/native_contracts_test.go:TestNativeAddressGroupRoutesBodiesPagingAndDecode`, `network/v2/extensions/security/addressgroups/native_contracts_test.go:TestNativeAddressGroupStrictStatusesAndPreflight`.
@@ -1497,7 +1497,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.API.AddAddresses`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithAddAddressesOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithAddAddressesField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - AddAddresses PUTs an envelope-free {"addresses":[...]} body with top-level extensions to address-groups/{id}/add_addresses, rejects nil addresses and an addresses extension before HTTP, decodes the address_group envelope and accepts only 200.
   Tests: `network/v2/extensions/security/addressgroups/native_contracts_test.go:TestNativeAddressGroupAddressOperations`, `network/v2/extensions/security/addressgroups/native_contracts_test.go:TestNativeAddressGroupStrictStatusesAndPreflight`.
@@ -1515,7 +1515,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.API.RemoveAddresses`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithRemoveAddressesOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithRemoveAddressesField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - RemoveAddresses PUTs an envelope-free {"addresses":[...]} body (empty list as []) to address-groups/{id}/remove_addresses, rejects nil addresses before HTTP, decodes the address_group envelope and accepts only 200.
   Tests: `network/v2/extensions/security/addressgroups/native_contracts_test.go:TestNativeAddressGroupAddressOperations`, `network/v2/extensions/security/addressgroups/native_contracts_test.go:TestNativeAddressGroupStrictStatusesAndPreflight`.
@@ -1533,7 +1533,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create POSTs {"rbac_policy":{...}} to rbac-policies with extensions inside the envelope, rejects missing action/object_type/object_id/target_tenant and a core-key extension collision before HTTP, decodes the rbac_policy key and accepts only 201/202.
   Tests: `network/v2/extensions/rbacpolicies/native_contracts_test.go:TestNativeRBACPolicyRoutesBodiesPagingAndDecode`, `network/v2/extensions/rbacpolicies/native_contracts_test.go:TestNativeRBACPolicyStrictStatusesDecodeAndPreflight`.
@@ -1567,7 +1567,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs rbac-policies with ListOpts and extension query values, ignores the Neutron rbac_policies_links array and follows only a links.next string because the page defines no NextPageURL, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.
   Tests: `network/v2/extensions/rbacpolicies/native_contracts_test.go:TestNativeRBACPolicyRoutesBodiesPagingAndDecode`, `network/v2/extensions/rbacpolicies/native_contracts_test.go:TestNativeRBACPolicyStrictStatusesDecodeAndPreflight`.
@@ -1585,7 +1585,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Update PUTs {"rbac_policy":{"target_tenant":...}} to rbac-policies/{id} with extensions inside the envelope, rejects an empty target_tenant and nil option before HTTP, and accepts only 200/201.
   Tests: `network/v2/extensions/rbacpolicies/native_contracts_test.go:TestNativeRBACPolicyRoutesBodiesPagingAndDecode`, `network/v2/extensions/rbacpolicies/native_contracts_test.go:TestNativeRBACPolicyStrictStatusesDecodeAndPreflight`.
@@ -1619,7 +1619,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/attributestags.API.ReplaceAll`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/attributestags.WithReplaceAllOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/attributestags.WithReplaceAllField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - ReplaceAll PUTs an envelope-free {"tags":[...]} body (empty list as []) with top-level extensions to {type}/{id}/tags, rejects nil tags, a tags extension and nil option before HTTP, returns the tags list and accepts only 200.
   Tests: `network/v2/extensions/attributestags/native_contracts_test.go:TestNativeAttributeTagRoutesAndBodies`, `network/v2/extensions/attributestags/native_contracts_test.go:TestNativeAttributeTagStatusesAndPreflight`.
@@ -1781,7 +1781,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create POSTs {"firewall_group":{...}} to fwaas/firewall_groups with extensions inside the envelope, sending explicit false pointer flags and decoding null policy IDs as empty, rejects a core-key extension collision before HTTP and accepts only 201/202.
   Tests: `network/v2/extensions/fwaas_v2/groups/native_contracts_test.go:TestNativeFirewallGroupRoutesBodiesPagingAndDecode`, `network/v2/extensions/fwaas_v2/groups/native_contracts_test.go:TestNativeFirewallGroupStrictStatusesAndPreflight`.
@@ -1815,7 +1815,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs fwaas/firewall_groups with ListOpts (repeated ports query per value) and extension query values, follows firewall_groups_links next hrefs as received, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.
   Tests: `network/v2/extensions/fwaas_v2/groups/native_contracts_test.go:TestNativeFirewallGroupRoutesBodiesPagingAndDecode`, `network/v2/extensions/fwaas_v2/groups/native_contracts_test.go:TestNativeFirewallGroupStrictStatusesAndPreflight`.
@@ -1833,7 +1833,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Update PUTs {"firewall_group":{...}} to fwaas/firewall_groups/{id} sending explicit empty pointer strings and an empty ports list as [] with extensions inside the envelope, rejects a nil option before HTTP and accepts only 200.
   Tests: `network/v2/extensions/fwaas_v2/groups/native_contracts_test.go:TestNativeFirewallGroupRoutesBodiesPagingAndDecode`, `network/v2/extensions/fwaas_v2/groups/native_contracts_test.go:TestNativeFirewallGroupStrictStatusesAndPreflight`.
@@ -1899,7 +1899,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create POSTs {"firewall_policy":{...}} to fwaas/firewall_policies with extensions inside the envelope, sending explicit false audited/shared pointers and the rule list, rejects a core-key extension collision before HTTP and accepts only 201/202.
   Tests: `network/v2/extensions/fwaas_v2/policies/native_contracts_test.go:TestNativeFirewallPolicyRoutesBodiesPagingAndDecode`, `network/v2/extensions/fwaas_v2/policies/native_contracts_test.go:TestNativeFirewallPolicyStrictStatusesAndPreflight`.
@@ -1933,7 +1933,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs fwaas/firewall_policies with ListOpts and extension query values, follows firewall_policies_links next hrefs as received, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.
   Tests: `network/v2/extensions/fwaas_v2/policies/native_contracts_test.go:TestNativeFirewallPolicyRoutesBodiesPagingAndDecode`, `network/v2/extensions/fwaas_v2/policies/native_contracts_test.go:TestNativeFirewallPolicyStrictStatusesAndPreflight`.
@@ -1951,7 +1951,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Update PUTs {"firewall_policy":{...}} to fwaas/firewall_policies/{id} sending an empty firewall_rules list as [] and explicit false pointers with extensions inside the envelope, rejects a nil option before HTTP and accepts only 200.
   Tests: `network/v2/extensions/fwaas_v2/policies/native_contracts_test.go:TestNativeFirewallPolicyRoutesBodiesPagingAndDecode`, `network/v2/extensions/fwaas_v2/policies/native_contracts_test.go:TestNativeFirewallPolicyStrictStatusesAndPreflight`.
@@ -1985,7 +1985,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.API.InsertRule`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.WithInsertRuleOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.WithInsertRuleField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - InsertRule PUTs an envelope-free {"firewall_rule_id":...,"insert_before"|"insert_after":...} body with top-level extensions to fwaas/firewall_policies/{id}/insert_rule, requires the rule ID and exactly one position before HTTP, rejects a firewall_rule_id extension, decodes the envelope-free policy and accepts only 200.
   Tests: `network/v2/extensions/fwaas_v2/policies/native_contracts_test.go:TestNativeFirewallPolicyRuleOperations`, `network/v2/extensions/fwaas_v2/policies/native_contracts_test.go:TestNativeFirewallPolicyStrictStatusesAndPreflight`.
@@ -2019,7 +2019,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create POSTs {"firewall_rule":{...}} to fwaas/firewall_rules with extensions inside the envelope, requiring protocol and action, sending protocol any as null and explicit false enabled, decoding firewall_policy_id only as a list, rejects a core-key extension collision before HTTP and accepts only 201/202.
   Tests: `network/v2/extensions/fwaas_v2/rules/native_contracts_test.go:TestNativeFirewallRuleRoutesBodiesPagingAndDecode`, `network/v2/extensions/fwaas_v2/rules/native_contracts_test.go:TestNativeFirewallRuleStrictStatusesDecodeAndPreflight`.
@@ -2053,7 +2053,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs fwaas/firewall_rules with ListOpts and extension query values, follows firewall_rules_links next hrefs as received, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.
   Tests: `network/v2/extensions/fwaas_v2/rules/native_contracts_test.go:TestNativeFirewallRuleRoutesBodiesPagingAndDecode`, `network/v2/extensions/fwaas_v2/rules/native_contracts_test.go:TestNativeFirewallRuleStrictStatusesDecodeAndPreflight`.
@@ -2071,7 +2071,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Update PUTs {"firewall_rule":{...}} to fwaas/firewall_rules/{id} sending explicit empty pointer strings with extensions inside the envelope, rejects a nil option before HTTP and accepts only 200.
   Tests: `network/v2/extensions/fwaas_v2/rules/native_contracts_test.go:TestNativeFirewallRuleRoutesBodiesPagingAndDecode`, `network/v2/extensions/fwaas_v2/rules/native_contracts_test.go:TestNativeFirewallRuleStrictStatusesDecodeAndPreflight`.
@@ -2105,7 +2105,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/endpointgroups.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/endpointgroups.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/endpointgroups.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create POSTs {"endpoint_group":{...}} to vpn/endpoint-groups with extensions inside the envelope, sending nil endpoints as null, rejects a core-key extension collision before HTTP and accepts only 201/202.
   Tests: `network/v2/extensions/vpnaas/endpointgroups/native_contracts_test.go:TestNativeVPNEndpointGroupRoutesBodiesPagingAndDecode`, `network/v2/extensions/vpnaas/endpointgroups/native_contracts_test.go:TestNativeVPNEndpointGroupStrictStatusesAndPreflight`.
@@ -2139,7 +2139,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/endpointgroups.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/endpointgroups.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/endpointgroups.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs vpn/endpoint-groups with ListOpts and extension query values, follows endpoint_groups_links next hrefs as received, decodes null names as empty, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.
   Tests: `network/v2/extensions/vpnaas/endpointgroups/native_contracts_test.go:TestNativeVPNEndpointGroupRoutesBodiesPagingAndDecode`, `network/v2/extensions/vpnaas/endpointgroups/native_contracts_test.go:TestNativeVPNEndpointGroupStrictStatusesAndPreflight`.
@@ -2157,7 +2157,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/endpointgroups.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/endpointgroups.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/endpointgroups.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Update PUTs {"endpoint_group":{...}} to vpn/endpoint-groups/{id} sending explicit empty pointer name/description with extensions inside the envelope, rejects a nil option before HTTP and accepts only 200.
   Tests: `network/v2/extensions/vpnaas/endpointgroups/native_contracts_test.go:TestNativeVPNEndpointGroupRoutesBodiesPagingAndDecode`, `network/v2/extensions/vpnaas/endpointgroups/native_contracts_test.go:TestNativeVPNEndpointGroupStrictStatusesAndPreflight`.
@@ -2191,7 +2191,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ikepolicies.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ikepolicies.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ikepolicies.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create POSTs {"ikepolicy":{...}} to vpn/ikepolicies with extensions inside the envelope, sending the phase1_negotiation_mode key and a nested lifetime object (empty when pointed but unset), rejects a core-key extension collision before HTTP and accepts only 201/202.
   Tests: `network/v2/extensions/vpnaas/ikepolicies/native_contracts_test.go:TestNativeVPNPolicyRoutesBodiesPagingAndDecode`, `network/v2/extensions/vpnaas/ikepolicies/native_contracts_test.go:TestNativeVPNPolicyStrictStatusesAndPreflight`.
@@ -2225,7 +2225,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ikepolicies.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ikepolicies.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ikepolicies.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs vpn/ikepolicies with ListOpts (phase_1_negotiation_mode filter key) and extension query values, follows ikepolicies_links next hrefs as received, decodes null names as empty, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.
   Tests: `network/v2/extensions/vpnaas/ikepolicies/native_contracts_test.go:TestNativeVPNPolicyRoutesBodiesPagingAndDecode`, `network/v2/extensions/vpnaas/ikepolicies/native_contracts_test.go:TestNativeVPNPolicyStrictStatusesAndPreflight`.
@@ -2243,7 +2243,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ikepolicies.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ikepolicies.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ikepolicies.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Update PUTs {"ikepolicy":{...}} to vpn/ikepolicies/{id} sending the differently spelled phase_1_negotiation_mode key and explicit empty pointer name with extensions inside the envelope, rejects a nil option before HTTP and accepts only 200.
   Tests: `network/v2/extensions/vpnaas/ikepolicies/native_contracts_test.go:TestNativeVPNPolicyRoutesBodiesPagingAndDecode`, `network/v2/extensions/vpnaas/ikepolicies/native_contracts_test.go:TestNativeVPNPolicyStrictStatusesAndPreflight`.
@@ -2277,7 +2277,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ipsecpolicies.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ipsecpolicies.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ipsecpolicies.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create POSTs {"ipsecpolicy":{...}} to vpn/ipsecpolicies with extensions inside the envelope, omitting every empty optional field and nesting lifetime, rejects a core-key extension collision before HTTP and accepts only 201/202.
   Tests: `network/v2/extensions/vpnaas/ipsecpolicies/native_contracts_test.go:TestNativeVPNPolicyRoutesBodiesPagingAndDecode`, `network/v2/extensions/vpnaas/ipsecpolicies/native_contracts_test.go:TestNativeVPNPolicyStrictStatusesAndPreflight`.
@@ -2311,7 +2311,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ipsecpolicies.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ipsecpolicies.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ipsecpolicies.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs vpn/ipsecpolicies with ListOpts and extension query values, follows ipsecpolicies_links next hrefs as received, decodes null names as empty, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.
   Tests: `network/v2/extensions/vpnaas/ipsecpolicies/native_contracts_test.go:TestNativeVPNPolicyRoutesBodiesPagingAndDecode`, `network/v2/extensions/vpnaas/ipsecpolicies/native_contracts_test.go:TestNativeVPNPolicyStrictStatusesAndPreflight`.
@@ -2329,7 +2329,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ipsecpolicies.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ipsecpolicies.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ipsecpolicies.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Update PUTs {"ipsecpolicy":{...}} to vpn/ipsecpolicies/{id} sending explicit empty pointer description and a partial lifetime with extensions inside the envelope, rejects a nil option before HTTP and accepts only 200.
   Tests: `network/v2/extensions/vpnaas/ipsecpolicies/native_contracts_test.go:TestNativeVPNPolicyRoutesBodiesPagingAndDecode`, `network/v2/extensions/vpnaas/ipsecpolicies/native_contracts_test.go:TestNativeVPNPolicyStrictStatusesAndPreflight`.
@@ -2363,7 +2363,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/services.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/services.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/services.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create POSTs {"vpnservice":{...}} to vpn/vpnservices with extensions inside the envelope, requiring router_id before HTTP, sending explicit false and nil admin_state_up as null, decoding null subnet_id as empty, rejects a core-key extension collision before HTTP and accepts only 201/202.
   Tests: `network/v2/extensions/vpnaas/services/native_contracts_test.go:TestNativeVPNServiceRoutesBodiesPagingAndDecode`, `network/v2/extensions/vpnaas/services/native_contracts_test.go:TestNativeVPNServiceStrictStatusesAndPreflight`.
@@ -2397,7 +2397,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/services.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/services.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/services.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs vpn/vpnservices with ListOpts and extension query values, follows vpnservices_links next hrefs as received, decodes null names as empty, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.
   Tests: `network/v2/extensions/vpnaas/services/native_contracts_test.go:TestNativeVPNServiceRoutesBodiesPagingAndDecode`, `network/v2/extensions/vpnaas/services/native_contracts_test.go:TestNativeVPNServiceStrictStatusesAndPreflight`.
@@ -2415,7 +2415,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/services.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/services.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/services.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Update PUTs {"vpnservice":{...}} to vpn/vpnservices/{id} sending explicit empty pointer name and admin_state_up with extensions inside the envelope, rejects a nil option before HTTP and accepts only 200.
   Tests: `network/v2/extensions/vpnaas/services/native_contracts_test.go:TestNativeVPNServiceRoutesBodiesPagingAndDecode`, `network/v2/extensions/vpnaas/services/native_contracts_test.go:TestNativeVPNServiceStrictStatusesAndPreflight`.
@@ -2449,7 +2449,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/siteconnections.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/siteconnections.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/siteconnections.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create POSTs {"ipsec_site_connection":{...}} to vpn/ipsec-site-connections with extensions inside the envelope, always sending policy, service, peer and psk fields even when empty, nesting dpd and decoding psk/dpd/route_mode, rejects a core-key extension collision before HTTP and accepts only 201/202.
   Tests: `network/v2/extensions/vpnaas/siteconnections/native_contracts_test.go:TestNativeVPNConnectionRoutesBodiesPagingAndDecode`, `network/v2/extensions/vpnaas/siteconnections/native_contracts_test.go:TestNativeVPNConnectionStrictStatusesAndPreflight`.
@@ -2483,7 +2483,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/siteconnections.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/siteconnections.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/siteconnections.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs vpn/ipsec-site-connections with ListOpts (psk filter sent in the query string) and extension query values, follows ipsec_site_connections_links next hrefs as received, decodes null names as empty, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.
   Tests: `network/v2/extensions/vpnaas/siteconnections/native_contracts_test.go:TestNativeVPNConnectionRoutesBodiesPagingAndDecode`, `network/v2/extensions/vpnaas/siteconnections/native_contracts_test.go:TestNativeVPNConnectionStrictStatusesAndPreflight`.
@@ -2501,7 +2501,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/siteconnections.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/siteconnections.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/siteconnections.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Update PUTs {"ipsec_site_connection":{...}} to vpn/ipsec-site-connections/{id} sending explicit empty pointer name, false admin_state_up and mtu with extensions inside the envelope, rejects a nil option before HTTP and accepts only 200.
   Tests: `network/v2/extensions/vpnaas/siteconnections/native_contracts_test.go:TestNativeVPNConnectionRoutesBodiesPagingAndDecode`, `network/v2/extensions/vpnaas/siteconnections/native_contracts_test.go:TestNativeVPNConnectionStrictStatusesAndPreflight`.
@@ -2535,7 +2535,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create POSTs {"tap_mirror":{...}} to taas/tap_mirrors with extensions inside the envelope, always sending name, port_id, mirror_type, remote_ip and directions (zero as {}) with string-quoted IN/OUT tunnel IDs, rejects a core-key extension collision before HTTP and accepts only 201/202.
   Tests: `network/v2/extensions/taas/tapmirrors/native_contracts_test.go:TestNativeTapMirrorRoutesBodiesPagingAndDecode`, `network/v2/extensions/taas/tapmirrors/native_contracts_test.go:TestNativeTapMirrorStrictStatusesDecodeAndPreflight`.
@@ -2569,7 +2569,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs taas/tap_mirrors with ListOpts and extension query values, follows tap_mirrors_links next hrefs as received, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.
   Tests: `network/v2/extensions/taas/tapmirrors/native_contracts_test.go:TestNativeTapMirrorRoutesBodiesPagingAndDecode`, `network/v2/extensions/taas/tapmirrors/native_contracts_test.go:TestNativeTapMirrorStrictStatusesDecodeAndPreflight`.
@@ -2587,7 +2587,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Update PUTs {"tap_mirror":{...}} to taas/tap_mirrors/{id} sending explicit empty pointer name/description with extensions inside the envelope, rejects a nil option before HTTP and accepts only 200.
   Tests: `network/v2/extensions/taas/tapmirrors/native_contracts_test.go:TestNativeTapMirrorRoutesBodiesPagingAndDecode`, `network/v2/extensions/taas/tapmirrors/native_contracts_test.go:TestNativeTapMirrorStrictStatusesDecodeAndPreflight`.

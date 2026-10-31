@@ -194,9 +194,9 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/images.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/images.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/images.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
-- Generated API.List serializes ListOpts through the pinned ToImageListQuery, omitting zero values, repeating tag, formatting created/updated date filters and silently dropping int64 SizeMin/SizeMax in BuildQueryString, then appends WithListQuery extension values; zero options send no query.
+- Generated API.List serializes ListOpts through the pinned ToImageListQuery, omitting zero values, repeating tag, formatting created/updated date filters and silently dropping int64 SizeMin/SizeMax in BuildQueryString, then appends request.Query extension values; zero options send no query.
   Tests: `image/v2/images/list_contracts_test.go:TestNativeImageListQueryAndExtensions`.
 - The lazy SDK stream follows native next links rebased onto the client ServiceURL path, stops on an empty images page even with next, surfaces the native EOF for a bodyless 204, yields earlier rows before a late native HTTP error, returns row decode errors and sends no further page after the caller stops.
   Tests: `image/v2/images/list_contracts_test.go:TestNativeImageListPagingStopsAndErrors`.
@@ -204,7 +204,7 @@ Go API:
 Python/Go differences:
 
 - This declaration maps Gophercloud native List only; it is not Python images() descriptor/local-filter/location parity or Cloud list_images behavior.
-- The SDK exposes the native pager as iter.Seq2 and keeps native query construction, including the int64 size filter omission; callers can send size_min/size_max with WithListQuery. Iteration errors are native and only option preparation errors receive List/images context.
+- The SDK exposes the native pager as iter.Seq2 and keeps native query construction, including the int64 size filter omission; callers can send size_min/size_max with request.Query. Iteration errors are native and only option preparation errors receive List/images context.
 
 ### `gophercloud:image/v2/images.Create`
 
@@ -214,9 +214,9 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/images.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/images.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/images.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
-- Generated API.Create serializes CreateOpts with the pinned BuildRequestBody, omitting zero values while sending explicit pointer false, then copies Properties over declared keys and appends non-colliding WithCreateField extension JSON with exact raw bytes before one POST to native images with JSON headers and service MoreHeaders.
+- Generated API.Create serializes CreateOpts with the pinned BuildRequestBody, omitting zero values while sending explicit pointer false, then copies Properties over declared keys and appends non-colliding request.Field extension JSON with exact raw bytes before one POST to native images with JSON headers and service MoreHeaders.
   Tests: `image/v2/images/create_contracts_test.go:TestNativeImageCreateBodyPropertiesExtensionsAndProjection`.
 - A 201 response uses the shared Extract header merge and Image.UnmarshalJSON projection. Missing required name, nil options and extensions colliding with core or existing body keys fail before HTTP; other statuses keep native ErrUnexpectedResponseCode with Expected [201] under Create/images context without an owned receipt.
   Tests: `image/v2/images/create_contracts_test.go:TestNativeImageCreateBodyPropertiesExtensionsAndProjection`, `image/v2/images/create_contracts_test.go:TestNativeImageCreatePreflightAndStrictStatus`.
@@ -224,7 +224,7 @@ Go API:
 Python/Go differences:
 
 - This declaration maps Gophercloud native metadata Create only; it is not Python create_image parity, which CreateImageRecord and CreateCloudImageRecord cover.
-- WithCreateField is a Go extension that rejects collisions instead of overwriting; native body construction, OkCodes and response projection are unchanged.
+- request.Field is a Go extension that rejects collisions instead of overwriting; native body construction, OkCodes and response projection are unchanged.
 
 ## References
 

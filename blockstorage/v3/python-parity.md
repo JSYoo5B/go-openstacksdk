@@ -29,7 +29,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.Create`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithCreateHintOpts`
 
 - Volumes.Create posts the volume envelope with wire names such as imageRef and multiattach and puts OS-SCH-HNT:scheduler_hints outside it, as Volume._prepare_request_body does.
@@ -49,7 +49,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.Update`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Volumes.Update sends PUT volumes/{id} with only the supplied name and description in the volume envelope.
   Tests: `blockstorage/v3/volumes/python_parity_test.go:TestPythonVolumeGetCreateUpdateMatchProxyRequests`.
@@ -69,13 +69,13 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.Remove`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.Delete`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithDeleteQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.ForceDelete`
 - `github.com/JSYoo5B/go-openstacksdk/resource.ID`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithMissingError`
 - `github.com/JSYoo5B/go-openstacksdk/resource.IgnoreMissing`
 
-- Remove ignores 404 by default and WithMissingError reports NotFound; Delete with WithDeleteQuery reproduces Python's cascade=False&force=False (or True) query and ForceDelete posts os-force_delete for the pre-3.23 force path.
+- Remove ignores 404 by default and WithMissingError reports NotFound; Delete with request.Query reproduces Python's cascade=False&force=False (or True) query and ForceDelete posts os-force_delete for the pre-3.23 force path.
   Tests: `blockstorage/v3/volumes/python_parity_test.go:TestPythonVolumeDeleteDefaultsCascadeForceAndMissing`.
 - Wrapping the direct delete in resource.IgnoreMissing turns a plain HTTP 404 into success like Python's default ignore_missing=True, keeps other failures such as 409 as errors, and leaves the DELETE request unchanged.
   Tests: `resource/missing_test.go:TestIgnoreMissingDropsOnlyPlain404`, `blockstorage/v3/volumes/python_ignore_missing_test.go:TestPythonDeleteIgnoreMissingVolume`.
@@ -97,7 +97,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.ListWithDetails`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.ListSummary`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.ListSummaryWithControl`
@@ -190,7 +190,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.API.ListDetail`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithListDetailOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithListDetailQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithListOptions`
 
 - ListDetail (details=True) and List (details=False) send the Python routes with name, volume_id, limit and all_tenants=True queries and follow snapshots_links.
@@ -210,7 +210,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.API.Create`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Snapshots.Create posts the snapshot envelope with volume_id, name, description, force and metadata.
   Tests: `blockstorage/v3/snapshots/python_parity_test.go:TestPythonSnapshotGetCreateUpdateMatchProxyRequests`.
@@ -228,7 +228,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.API.Update`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Snapshots.Update sends PUT snapshots/{id} with only the supplied fields.
   Tests: `blockstorage/v3/snapshots/python_parity_test.go:TestPythonSnapshotGetCreateUpdateMatchProxyRequests`.
@@ -316,7 +316,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.API.ListDetail`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.API.List`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.WithListDetailQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.WithListOptions`
 
 - ListDetail (details=True) and List (details=False) send the Python routes with name, status, volume_id and all_tenants=True queries and follow backups_links.
@@ -324,7 +324,7 @@ Go API:
 
 Python/Go differences:
 
-- ListDetailOpts has no typed name, status or volume_id filters; WithListDetailQuery adds them.
+- ListDetailOpts has no typed name, status or volume_id filters; request.Query adds them.
 - Python all_projects=True sends all_tenants=True; typed Go AllTenants sends all_tenants=true, so WithListQuery("all_tenants", "True") is needed for the identical string.
 - Python filters returned rows locally for Body attributes outside the query mapping; Go sends only query parameters and leaves local filtering to the caller.
 - Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud typed model, so response fields outside that model are dropped.
@@ -353,7 +353,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.API.Create`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Backups.Create posts the backup envelope with incremental (Python's renamed is_incremental), force, container, snapshot_id, metadata and availability_zone.
   Tests: `blockstorage/v3/backups/python_parity_test.go:TestPythonBackupGetCreateUpdateMatchProxyRequests`.
@@ -371,7 +371,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.API.Update`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Backups.Update sends PUT backups/{id} with only the supplied fields.
   Tests: `blockstorage/v3/backups/python_parity_test.go:TestPythonBackupGetCreateUpdateMatchProxyRequests`.
@@ -523,7 +523,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments.API.Update`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Attachments.Update sends PUT attachments/{id} with the connector envelope.
   Tests: `blockstorage/v3/attachments/python_parity_test.go:TestPythonAttachmentCrudAndCompleteMatchProxyRequests`.
@@ -685,7 +685,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - VolumeTypes.List sends is_public=true with VisibilityPublic (Cinder's meaning of an absent is_public), is_public=None by default, and forwards is_public=none, all_tenants=True and sort.
   Tests: `blockstorage/v3/volumetypes/python_parity_test.go:TestPythonTypeListVisibilityAndQuery`.
@@ -704,7 +704,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.API.Create`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - VolumeTypes.Create posts the volume_type envelope with name, description, extra_specs and os-volume-type-access:is_public.
   Tests: `blockstorage/v3/volumetypes/python_parity_test.go:TestPythonTypeCrudAndExtraSpecsMatchProxyRequests`.
@@ -721,7 +721,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.API.Update`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - VolumeTypes.Update sends PUT types/{id} with only the supplied fields.
   Tests: `blockstorage/v3/volumetypes/python_parity_test.go:TestPythonTypeCrudAndExtraSpecsMatchProxyRequests`.
@@ -875,7 +875,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.API.Create`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - QoS.Create posts the qos_specs envelope with name, consumer and spec keys flattened, as Python's unknown body attributes are.
   Tests: `blockstorage/v3/qos/python_parity_test.go:TestPythonQoSCrudMatchesProxyRequests`.
@@ -910,7 +910,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - QoS.List sends qos-specs with the given limit and follows qos_specs_links.
   Tests: `blockstorage/v3/qos/python_parity_test.go:TestPythonQoSAssociationsKeysAndList`.
@@ -928,7 +928,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.API.Update`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - QoS.Update sends PUT qos-specs/{id} with the flattened specs and returns the response qos_specs map.
   Tests: `blockstorage/v3/qos/python_parity_test.go:TestPythonQoSCrudMatchesProxyRequests`.
@@ -946,12 +946,12 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.API.Remove`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.API.Delete`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.WithDeleteQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/resource.ID`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithMissingError`
 - `github.com/JSYoo5B/go-openstacksdk/resource.IgnoreMissing`
 
-- Delete with WithDeleteQuery sends Python's force=False or force=True query; Remove ignores 404 and WithMissingError reports NotFound.
+- Delete with request.Query sends Python's force=False or force=True query; Remove ignores 404 and WithMissingError reports NotFound.
   Tests: `blockstorage/v3/qos/python_parity_test.go:TestPythonQoSCrudMatchesProxyRequests`, `blockstorage/v3/qos/python_parity_test.go:TestPythonQoSDeleteMissingPolicies`.
 - Wrapping the direct delete in resource.IgnoreMissing turns a plain HTTP 404 into success like Python's default ignore_missing=True, keeps other failures such as 409 as errors, and leaves the DELETE request unchanged.
   Tests: `resource/missing_test.go:TestIgnoreMissingDropsOnlyPlain404`, `blockstorage/v3/qos/python_ignore_missing_test.go:TestPythonDeleteIgnoreMissingQoSSpec`.

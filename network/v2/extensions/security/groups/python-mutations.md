@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.API.UpdateWithAttributes`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithIfMatch`

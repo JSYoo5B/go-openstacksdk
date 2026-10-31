@@ -13,7 +13,7 @@
 
 `ListDetail` pages by offset. With `ListOpts.Limit` set, the next request uses `offset = offset + limit` and stops at the first empty page. Without a limit the pager still issues one more request at the maximum integer offset and expects an empty page. Paging follows no `next` links.
 
-Extension inputs use `WithCreateField`, `WithUpdateField`, `WithAddSecurityServiceField`, `WithRemoveSecurityServiceField` and `WithListDetailQuery`. A field extension that names a core input field fails with `resource.ErrInvalidOption` before any request; nil options fail the same way.
+Extension inputs use `request.Field`, `request.Field`, `request.Field`, `request.Field` and `request.Query`. A field extension that names a core input field fails with `resource.ErrInvalidOption` before any request; nil options fail the same way.
 
 `Find`, `All`, `Remove`, `WaitFor` and `WaitForDeletion` use the common `resource.Collection`: exact name lookup, duplicate-name errors, and ignore-missing deletion by default. `API.Get` and `API.Delete` do not add `resource.ErrNotFound` or ignore a missing share network.
 

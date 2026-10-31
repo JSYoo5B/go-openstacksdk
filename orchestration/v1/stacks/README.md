@@ -101,7 +101,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithPageSize`
 - `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - Exact local name lookup covers relative next links, avoids additional detail GETs, preserves canonical name/ID and distinguishes summaries from detailed ID GETs.
   Tests: `api/heat_stacks_contracts_test.go:TestHeatStackScopeNameLookupUsesAllPagesAndDistinguishesDetails`.
@@ -125,7 +125,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.StackScope.Update`
 - `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.API.Update`
-- `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Update sends PUT with the required template, environment, parameters (including false), timeout, comma-joined tags, referenced child-template files and extension fields; omitted options stay omitted; 201/202 succeed; 200/204/400/403/409/500 fail with their code; a missing template, unparseable template, protected-field override and canceled context fail before HTTP.
   Tests: `api/heat_native_stacks_test.go:TestHeatNativeStacksUpdateSendsPUTTemplateEnvironmentFilesAndExtensions`.
@@ -142,7 +142,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.StackScope.UpdatePatch`
 - `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.API.UpdatePatch`
-- `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.WithUpdatePatchField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - PATCH can omit a template and sends parameters, comma-joined tags and explicit false extension at the fixed name/ID endpoint; 204 succeeds.
   Tests: `api/heat_stacks_contracts_test.go:TestHeatStackScopeMutationsUseFixedIdentityAndMissingPolicy`.
@@ -299,7 +299,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithQuery`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithPageSize`
 - `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.API.List`
-- `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.WithListOptions`
 
 - Exact local name lookup covers relative next links, avoids additional detail GETs, preserves canonical name/ID and distinguishes summaries from detailed ID GETs.
@@ -316,7 +316,7 @@ Go API:
 Python/Go differences:
 
 - Go returns typed summaries with Detailed=false rather than mutable Stack Resources; query names are HTTP names and Python project_id/tag aliases are not automatic Go aliases.
-- Python Stack query mapping accepts action, name, status, project_id (sent as tenant_id), owner_id, username and CSV tags/any_tags/not_tags/not_any_tags (sent as tags, tags_any, not_tags, not_tags_any) plus limit and marker; Go has typed fields for the Heat names it declares and sends other documented filters (action, owner_id, username) only through explicit WithQuery/WithListQuery values, without Python aliases.
+- Python Stack query mapping accepts action, name, status, project_id (sent as tenant_id), owner_id, username and CSV tags/any_tags/not_tags/not_any_tags (sent as tags, tags_any, not_tags, not_tags_any) plus limit and marker; Go has typed fields for the Heat names it declares and sends other documented filters (action, owner_id, username) only through explicit WithQuery/request.Query values, without Python aliases.
 - Python Resource.list discards unknown keywords and turns declared Body attributes (for example status_reason or description) into client filters; Go does not discard: unknown names are sent only when the caller supplies an explicit query, and there is no implicit local Body filtering for stacks.
 - Python rows pass through Stack descriptors with defaults (tags defaults to an empty list, added/deleted/replaced fields and others); Go list summaries are typed ListedStack/StackResource values with Detailed=false and carry no Python defaults.
 - Python also honors per-call base_path and jmespath_filters through Proxy._list; Go does not expose either.
@@ -329,7 +329,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.StackScope.Update`
 - `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.API.Update`
-- `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.WithUpdateOptions`
 
 - PUT /stacks/{name}/{id} sends template, environment, parameters (including false), timeout, tags and an explicit false extension; a template is required, omitted optional values stay omitted and referenced child templates merge into files.

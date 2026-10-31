@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.Create`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.CreateRecord`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordMutationOpts`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordMutationAttribute`
@@ -34,7 +34,7 @@ Python/Go differences:
 - Legacy native Create returns a Gophercloud model pointer rather than the mutable Python Resource; the new sibling CreateRecord returns an independently owned DomainRecord with options and original response evidence.
 - Legacy native Create/Update: Python accepts any status below 400; the native Create accepts only 201.
 - Legacy native Create/Update: domains.CreateOpts requires Name, so Go rejects before HTTP a Python create_domain without a name.
-- Legacy native Create/Update: Domain options have no typed CreateOpts field and are sent with domains.WithCreateField("options", ...).
+- Legacy native Create/Update: Domain options have no typed CreateOpts field and are sent with request.Field("options", ...).
 - New owned mutation APIs leave native Create/Update untouched. They take finite UTF-8 JSON attributes and safe string IDs in a freshly seeded Domain operation, return independent DomainRecord views plus physical Wire/Envelope/header/status, retain Domain.options and explicit null and drop unknown Body attributes. Request values remain raw; descriptor casts apply only to the returned view.
 - The fixed Domain collection/member route deliberately rejects raw base_path with ErrUnsupported/ErrInvalidOption rather than reproducing Source arbitrary URI overrides or formatter/runtime objects. Headers, Microversion and Location are explicit Go conveniences; configured location is copied, unknown server project_id/location is not trusted. Class/session/adapter injection and caller custom transport cache bypass are not claimed.
 - Ordered attribute helpers use last canonical/wire alias occurrence; bulk Attributes maps use sorted keys as a deterministic Go adaptation. Mutable existing Resource baseline/equality/recommit state is not modeled. SDK-R1/C1/S1, authenticated cloud acceptance and release verification remain separately tracked whole-SDK goals.
@@ -47,7 +47,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.Update`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.UpdateRecord`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordMutationOpts`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordMutationAttribute`
@@ -55,7 +55,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordMutationMicroversion`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordMutationLocation`
 
-- Legacy native Update sends PATCH domains/{id} with the {"domain": {...}} envelope and optional explicit WithUpdateField("id", id); the old fixture documents that opt-in native body, not pinned Resource.commit dirty-id behavior.
+- Legacy native Update sends PATCH domains/{id} with the {"domain": {...}} envelope and optional explicit request.Field("id", id); the old fixture documents that opt-in native body, not pinned Resource.commit dirty-id behavior.
   Tests: `identity/v3/domains/python_parity_test.go:TestPythonDomainCreateGetUpdateRequests`.
 - Owned scalar-ID UpdateRecord sends PATCH with explicit raw declared attributes including nullable description/enabled/options; constructor ID is seeded but never dirty or sent. Existing response overlays seed and retains options plus physical response proof; duplicate attrs id is rejected before HTTP.
   Tests: `identity/v3/domains/python_record_mutations_test.go:TestPythonDomainUpdateRecordPATCHPreservesSeedAndActualResponse`, `identity/v3/domains/python_record_mutations_test.go:TestPythonDomainUpdateRecordExplicitNullIsSentAsDirty`, `identity/v3/domains/python_record_mutations_test.go:TestPythonDomainRecordMutationsPreflightAndOptionLifecycle`.
@@ -68,7 +68,7 @@ Python/Go differences:
 
 - Legacy native Create/Update: Python accepts an ID string or a Resource instance and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer.
 - Legacy native Create/Update: Python accepts any status below 400; the native Update accepts only 200.
-- Legacy native Update permits an explicitly added id body field through WithUpdateField("id", id). The pinned Resource.commit actually discards dirty id before preparing PATCH; the new owned UpdateRecord follows that behavior instead of the older fixture comment.
+- Legacy native Update permits an explicitly added id body field through request.Field("id", id). The pinned Resource.commit actually discards dirty id before preparing PATCH; the new owned UpdateRecord follows that behavior instead of the older fixture comment.
 - New owned mutation APIs leave native Create/Update untouched. They take finite UTF-8 JSON attributes and safe string IDs in a freshly seeded Domain operation, return independent DomainRecord views plus physical Wire/Envelope/header/status, retain Domain.options and explicit null and drop unknown Body attributes. Request values remain raw; descriptor casts apply only to the returned view.
 - The fixed Domain collection/member route deliberately rejects raw base_path with ErrUnsupported/ErrInvalidOption rather than reproducing Source arbitrary URI overrides or formatter/runtime objects. Headers, Microversion and Location are explicit Go conveniences; configured location is copied, unknown server project_id/location is not trusted. Class/session/adapter injection and caller custom transport cache bypass are not claimed.
 - Ordered attribute helpers use last canonical/wire alias occurrence; bulk Attributes maps use sorted keys as a deterministic Go adaptation. Mutable existing Resource baseline/equality/recommit state is not modeled. SDK-R1/C1/S1, authenticated cloud acceptance and release verification remain separately tracked whole-SDK goals.

@@ -274,7 +274,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk.WithoutDefaultNetwork`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithCreateHintOpts`
 
 - Ordered NICs preserve network UUID and port combinations, literal fixed IP, fixed-IP-only/tag-only/empty objects, and omitted versus explicit empty or null tag values in the HTTP body. IDs bypass Neutron lookup and need no Network endpoint.

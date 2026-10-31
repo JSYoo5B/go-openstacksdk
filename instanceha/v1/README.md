@@ -8,7 +8,7 @@ instanceha/v1 is implemented by this SDK because pinned Gophercloud does not pro
 |---|---|---|
 | Service access | `conn.instance_ha` | `conn.InstanceHAV1(ctx)` |
 | Optional arguments and defaults | keyword arguments | concrete options and operation-specific `With...Options` |
-| Extension inputs | `**attrs`, `**query` | supported `With...Field/Query/Header` options |
+| Extension inputs | `**attrs`, `**query` | `request.Field`, `request.Query` and `request.Header` where the operation supports them |
 | Results | Resource or generator | typed values and errors, or `iter.Seq2` |
 
 Native API coverage and openstacksdk Resource/workflow coverage are tracked separately. Python input aliases are not automatically applied to Go fields. SDK-owned typed responses preserve original fields, HTTP headers and status codes. Each endpoint validates its declared object envelope rather than using Python's permissive flat/empty response fallback. Editing a returned response does not automatically persist it.
@@ -45,7 +45,7 @@ Common Collections provide exact name lookup, duplicate-name errors, pagination,
 
 ## Mutation requests
 
-Pass concrete options to resource Create/Update APIs. Use typed options for standard fields and With...Field for extension fields. Queries and headers use the operation's With... functions. Standard-field/header overrides and unsupported extension mechanisms are rejected before requests. The SDK implements request-builder interfaces.
+Pass concrete options to resource Create/Update APIs. Use typed options for standard fields and `request.Field` for extension fields; extension queries and headers use `request.Query` and `request.Header`. Each generated option type is a `request` call category, so an extension mechanism the operation does not support does not compile. Standard-field/header overrides are rejected before requests. The SDK implements request-builder interfaces.
 
 Operations requiring parents use [scope objects](../../docs/scoped-resources.md), whose Create/Update methods accept the same concrete options. This API reference does not imply support for response tracking or every composite Python cloud operation.
 

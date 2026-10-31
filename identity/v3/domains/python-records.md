@@ -15,7 +15,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.AllRecords`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.ProxyListRecords`
@@ -32,7 +32,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordListJMESPath`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordListLocation`
 
-- List sends the single GET domains that Python domains() sends without arguments, maps the Python query names name and enabled through ListOpts or WithListQuery, sends a limit without a marker follow-up, and rejects local Body filters before HTTP.
+- List sends the single GET domains that Python domains() sends without arguments, maps the Python query names name and enabled through ListOpts or request.Query, sends a limit without a marker follow-up, and rejects local Body filters before HTTP.
   Tests: `identity/v3/domains/python_parity_test.go:TestPythonDomainListRequests`.
 - Source Domain declares raw description/links/id/name, nullable CPython bool is_enabled from enabled and dict options (nonobject {}, null preserved), unknown Body discarded from declared view but complete Wire/Envelope/header/status retained; canonical server query alias is_enabled wins enabled presence and unknown kwargs are dropped before marshal.
   Tests: `identity/v3/domains/python_records_test.go:TestPythonDomainRecordsDeclaredDescriptorsQueryAliasesAndOwnedProof`.
@@ -56,8 +56,8 @@ Go API:
 Python/Go differences:
 
 - Python reads the Keystone links dict without a rel key and never follows links.next; the native pager follows links.next when Keystone sets it.
-- Python sends bool query values as True/False text; typed Go ListOpts send true/false, and WithListQuery reproduces the Python text.
-- Python drops unknown query names; Go sends every WithListQuery key to the server.
+- Python sends bool query values as True/False text; typed Go ListOpts send true/false, and request.Query reproduces the Python text.
+- Python drops unknown query names; Go sends every request.Query key to the server.
 - SDK-owned concrete record/options API preserves actual Wire/Envelope/metadata without builder interfaces; original native API is unchanged.
 - Already selected Keystone v3 API required; no implicit arbitrary-v2 ensure_service_version conversion or automatic Connection current-location bridge. Explicit CloudLocation is cloned and current project retained because Domain declares no project/zone.
 - Fixed origin/collection/query/headers/version bounds reject foreign route/traversal/cycles and malformed markers with actual receipt; amounts are nonnegative Go integers.
@@ -74,7 +74,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.All`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.List`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/identity.NewDomainReadCloud`
 - `github.com/JSYoo5B/go-openstacksdk/identity.DomainReadCloud.ListDomains`
 - `github.com/JSYoo5B/go-openstacksdk/identity.DomainReadCloud.SearchDomains`

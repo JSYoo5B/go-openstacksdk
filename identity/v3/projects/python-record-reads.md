@@ -82,7 +82,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.AllRecords`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.ProxyListRecords`
@@ -91,7 +91,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.WithRecordListBasePath`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.WithRecordListJMESPath`
 
-- List sends the single GET projects that Python projects() sends without arguments, maps the Python query names domain_id, enabled, is_domain, name, parent_id, tags, tags-any, not-tags and not-tags-any through ListOpts or WithListQuery, sends a limit without a marker follow-up, and rejects local Body filters before HTTP.
+- List sends the single GET projects that Python projects() sends without arguments, maps the Python query names domain_id, enabled, is_domain, name, parent_id, tags, tags-any, not-tags and not-tags-any through ListOpts or request.Query, sends a limit without a marker follow-up, and rejects local Body filters before HTTP.
   Tests: `identity/v3/projects/python_parity_test.go:TestPythonProjectListRequests`.
 - Default bodyless /projects GET, selected identity role, Source Body aliases/casts/defaults and explicit-null presence retain independent Resource/Wire/page/header/status evidence including large integer extensions.
   Tests: `identity/v3/projects/python_records_test.go:TestPythonProjectRecordsDeclaredViewKeepsPhysicalEvidenceAndPresence`.
@@ -111,8 +111,8 @@ Go API:
 Python/Go differences:
 
 - Python reads the Keystone links dict without a rel key and never follows links.next; the native pager follows links.next when Keystone sets it.
-- Python sends bool query values as True/False text; typed Go ListOpts send true/false, and WithListQuery reproduces the Python text.
-- Python drops unknown query names; Go sends every WithListQuery key to the server.
+- Python sends bool query values as True/False text; typed Go ListOpts send true/false, and request.Query reproduces the Python text.
+- Python drops unknown query names; Go sends every request.Query key to the server.
 - projects.ListOpts.Filters adds a stray "-" query key next to the comparator filters; Python cannot send comparator filters at all.
 - Concrete functional options own defaults and defensive copies. Runtime Resource class/session builders are SDK-owned; safe UTF-8 routes, nonnegative Go pagination caps, same-origin/path/filter continuation and stronger cycle bounds are deliberate Go policies.
 - Source-selected literal link precedence, ignored Keystone dictionary links and limit-on-short-page marker fallback are enabled for this new Project profile without changing existing native List or older engine profiles. Valid RFC HTTP Link remains a documented Go interoperability correction of the pinned Requests uri/url failure.
@@ -127,7 +127,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.All`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/identity.NewProjectReadCloud`
 - `github.com/JSYoo5B/go-openstacksdk/identity.ProjectReadCloud.ListProjects`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.ListProjects`

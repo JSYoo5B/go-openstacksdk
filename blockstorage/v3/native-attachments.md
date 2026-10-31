@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create POSTs {"attachment":{...}} to attachments with the caller microversion header, always sending volume_uuid and instance_uuid (empty included) with extensions inside the envelope, rejects a core-key extension collision before HTTP, decodes the attachment key and accepts only 200/202.
   Tests: `blockstorage/v3/attachments/native_contracts_test.go:TestNativeAttachmentRoutesBodiesPagingAndDecode`, `blockstorage/v3/attachments/native_contracts_test.go:TestNativeAttachmentStrictStatusesDecodeAndPreflight`.
@@ -48,7 +48,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs attachments/detail with ListOpts (all_tenants included) and extension query values, ignores the Cinder attachments_links array and follows only a links.next string because the page defines no NextPageURL, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.
   Tests: `blockstorage/v3/attachments/native_contracts_test.go:TestNativeAttachmentRoutesBodiesPagingAndDecode`, `blockstorage/v3/attachments/native_contracts_test.go:TestNativeAttachmentStrictStatusesDecodeAndPreflight`.
@@ -66,7 +66,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Update PUTs {"attachment":{"connector":...}} to attachments/{id} sending a nil connector as null with extensions inside the envelope, rejects a nil option before HTTP and accepts only 200.
   Tests: `blockstorage/v3/attachments/native_contracts_test.go:TestNativeAttachmentRoutesBodiesPagingAndDecode`, `blockstorage/v3/attachments/native_contracts_test.go:TestNativeAttachmentStrictStatusesDecodeAndPreflight`.

@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.API.UpdateMetadata`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithUpdateMetadataOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithUpdateMetadataField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - PUT snapshots/{id}/metadata accepts native HTTP 200 and returns the actual lowercase metadata object as map[string]any, rather than selecting a promoted Snapshot extractor. A snapshot sibling is ignored; no seeded Snapshot, read/merge/write sequence or follow-up request is added.
   Tests: `api/snapshot_metadata_results_test.go:TestSnapshotMetadataResultsReturnOnlyMetadataAndExactNativeNumbers`, `api/snapshot_metadata_results_test.go:TestSnapshotMetadataResultsKeepLiveNativeClientAndSnapshotGet`, `internal/cmd/sdkgen/snapshot_metadata_extractors_test.go:TestSnapshotMetadataExtractorAllowlistChoosesOwnMapWithoutChangingSnapshotCRUD`.
@@ -38,7 +38,7 @@ Python/Go differences:
 - The corrected SDK return type is map[string]any; callers expecting *Snapshot must read metadata directly. Other declared Snapshot-returning operations retain their own result types.
 - Pinned ExtractMetadata uses unchecked object assertions. The SDK returns an envelope error for invalid accepted shapes while preserving original native errors first; it does not invent raw body, header or status evidence absent from the native Result.
 - This review maps only the declared native PUT operation. Pinned Python set_snapshot_metadata performs POST merge and cached Resource update; its explicit metadata envelope, metadata GET/delete family and broader session/cache/lifecycle contracts are separate.
-- Typed Metadata maps remain caller-owned references through WithUpdateMetadataOptions; extension values are JSON snapshots. Populated metadata retains the existing envelope nesting for extension fields, and the core metadata key cannot be supplied through WithUpdateMetadataField even when omitted.
+- Typed Metadata maps remain caller-owned references through WithUpdateMetadataOptions; extension values are JSON snapshots. Populated metadata retains the existing envelope nesting for extension fields, and the core metadata key cannot be supplied through request.Field even when omitted.
 
 ### `python:block_storage/v3/delete_snapshot_metadata`
 

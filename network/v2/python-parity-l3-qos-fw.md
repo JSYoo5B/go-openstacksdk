@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create sends POST /fwaas/firewall_groups with the {"firewall_group": {...}} envelope holding the supplied attributes and extension keys, and decodes the created firewall_group.
   Tests: `network/v2/extensions/fwaas_v2/groups/python_parity_test.go:TestPythonFirewallGroupProxyParity`.
@@ -32,7 +32,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups.API.RemoveIngressPolicy`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups.API.RemoveEgressPolicy`
 
@@ -120,7 +120,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups.API.All`
 
 - List with WithListOptions(ListOpts{Name, Status, ProjectID, Ports}) and WithListQuery for shared and fields sends the Python query mapping keys, repeats ports per value, follows firewall_groups_links, and All sends no query for firewall_groups().
@@ -142,7 +142,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create sends POST /fwaas/firewall_policies with the {"firewall_policy": {...}} envelope holding the supplied attributes and extension keys, and decodes the created firewall_policy.
   Tests: `network/v2/extensions/fwaas_v2/policies/python_parity_test.go:TestPythonFirewallPolicyProxyParity`.
@@ -160,7 +160,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Update sends PUT /fwaas/firewall_policies/{id} with only the set pointer fields in the firewall_policy envelope, including explicit empty strings, false and empty lists.
   Tests: `network/v2/extensions/fwaas_v2/policies/python_parity_test.go:TestPythonFirewallPolicyProxyParity`.
@@ -245,7 +245,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.API.All`
 
 - List with WithListOptions(ListOpts{Name, ProjectID}) and WithListQuery for shared, firewall_rules and fields sends the Python query mapping keys, and All sends no query for firewall_policies().
@@ -267,7 +267,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create sends POST /fwaas/firewall_rules with the {"firewall_rule": {...}} envelope holding the supplied attributes and extension keys, and decodes the created firewall_rule. Omitting protocol or action fails before HTTP, while ProtocolAny with ActionDeny sends protocol null and action deny.
   Tests: `network/v2/extensions/fwaas_v2/rules/python_parity_test.go:TestPythonFirewallRuleProxyParity`.
@@ -286,7 +286,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Update sends PUT /fwaas/firewall_rules/{id} with only the set pointer fields in the firewall_rule envelope, including explicit empty strings, false and empty lists.
   Tests: `network/v2/extensions/fwaas_v2/rules/python_parity_test.go:TestPythonFirewallRuleProxyParity`.
@@ -371,7 +371,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.API.All`
 
 - List with WithListOptions(ListOpts{Protocol, Action, IPVersion, FirewallPolicyID}) and WithListQuery for enabled sends the Python query mapping keys, and All sends no query for firewall_rules().
@@ -433,7 +433,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.CreateBandwidthLimitRule`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithCreateBandwidthLimitRuleOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithCreateBandwidthLimitRuleField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - CreateBandwidthLimitRule(policyID, opts) sends POST /qos/policies/{policy_id}/bandwidth_limit_rules with the bandwidth_limit_rule envelope, keeps the policy ID out of the body, carries extension keys and decodes the created rule.
   Tests: `network/v2/extensions/qos/rules/python_parity_test.go:TestPythonQoSRuleParityCreateUpdate`.
@@ -453,7 +453,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.UpdateBandwidthLimitRule`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithUpdateBandwidthLimitRuleOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithUpdateBandwidthLimitRuleField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - UpdateBandwidthLimitRule(policyID, ruleID, opts) sends PUT /qos/policies/{policy_id}/bandwidth_limit_rules/{rule_id} with only the set fields, including an explicit 0, and returns HTTP errors such as 409.
   Tests: `network/v2/extensions/qos/rules/python_parity_test.go:TestPythonQoSRuleParityCreateUpdate`.
@@ -490,7 +490,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.CreateDSCPMarkingRule`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithCreateDSCPMarkingRuleOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithCreateDSCPMarkingRuleField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - CreateDSCPMarkingRule(policyID, opts) sends POST /qos/policies/{policy_id}/dscp_marking_rules with the dscp_marking_rule envelope, keeps the policy ID out of the body, carries extension keys and decodes the created rule.
   Tests: `network/v2/extensions/qos/rules/python_parity_test.go:TestPythonQoSRuleParityCreateUpdate`.
@@ -510,7 +510,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.UpdateDSCPMarkingRule`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithUpdateDSCPMarkingRuleOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithUpdateDSCPMarkingRuleField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - UpdateDSCPMarkingRule(policyID, ruleID, opts) sends PUT /qos/policies/{policy_id}/dscp_marking_rules/{rule_id} with only the set fields, including an explicit 0, and returns HTTP errors such as 409.
   Tests: `network/v2/extensions/qos/rules/python_parity_test.go:TestPythonQoSRuleParityCreateUpdate`.
@@ -547,7 +547,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.CreateMinimumBandwidthRule`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithCreateMinimumBandwidthRuleOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithCreateMinimumBandwidthRuleField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - CreateMinimumBandwidthRule(policyID, opts) sends POST /qos/policies/{policy_id}/minimum_bandwidth_rules with the minimum_bandwidth_rule envelope, keeps the policy ID out of the body, carries extension keys and decodes the created rule.
   Tests: `network/v2/extensions/qos/rules/python_parity_test.go:TestPythonQoSRuleParityCreateUpdate`.
@@ -567,7 +567,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.UpdateMinimumBandwidthRule`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithUpdateMinimumBandwidthRuleOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithUpdateMinimumBandwidthRuleField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - UpdateMinimumBandwidthRule(policyID, ruleID, opts) sends PUT /qos/policies/{policy_id}/minimum_bandwidth_rules/{rule_id} with only the set fields, including an explicit 0, and returns HTTP errors such as 409.
   Tests: `network/v2/extensions/qos/rules/python_parity_test.go:TestPythonQoSRuleParityCreateUpdate`.
@@ -604,9 +604,9 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.API.ScheduleL3Router`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.WithScheduleL3RouterOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.WithScheduleL3RouterField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
-- ScheduleL3Router(agentID, {RouterID}) sends POST /agents/{agent_id}/l3-routers with {"router_id": id}, WithScheduleL3RouterField adds ha_chassis_priority only when given, and a 404 is returned as an error.
+- ScheduleL3Router(agentID, {RouterID}) sends POST /agents/{agent_id}/l3-routers with {"router_id": id}, request.Field adds ha_chassis_priority only when given, and a 404 is returned as an error.
   Tests: `network/v2/extensions/agents/python_parity_test.go:TestPythonL3AgentRouterScheduling`.
 
 Python/Go differences:

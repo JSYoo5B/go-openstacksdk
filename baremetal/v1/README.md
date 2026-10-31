@@ -8,7 +8,7 @@ Use Gophercloud v2.15.0's baremetal/v1 API through one authenticated service obj
 |---|---|---|
 | Service access | `conn.baremetal` | `conn.BareMetalV1(ctx)` |
 | Optional arguments and defaults | keyword arguments | concrete options and operation-specific `With...Options` |
-| Extension inputs | `**attrs`, `**query` | supported `With...Field/Query/Header` options |
+| Extension inputs | `**attrs`, `**query` | `request.Field`, `request.Query` and `request.Header` where the operation supports them |
 | Results | Resource or generator | typed values and errors, or `iter.Seq2` |
 
 Native API coverage and openstacksdk Resource/workflow coverage are tracked separately. Python input aliases are not automatically applied to Go fields. Default responses use Gophercloud models; SDK-owned additions are documented per service. Editing a returned response does not automatically persist it.
@@ -52,7 +52,7 @@ Native-pager `Resources.List/All` and parent-scope `List/All` accept `resource.W
 
 ## Mutation requests
 
-Pass concrete options to resource Create/Update APIs. Use typed options for standard fields and With...Field for extension fields. Queries and headers use the operation's With... functions. Standard-field/header overrides and unsupported extension mechanisms are rejected before requests. The SDK implements request-builder interfaces.
+Pass concrete options to resource Create/Update APIs. Use typed options for standard fields and `request.Field` for extension fields; extension queries and headers use `request.Query` and `request.Header`. Each generated option type is a `request` call category, so an extension mechanism the operation does not support does not compile. Standard-field/header overrides are rejected before requests. The SDK implements request-builder interfaces.
 
 Operations requiring parents use [scope objects](../../docs/scoped-resources.md), whose Create/Update methods accept the same concrete options. This API reference does not imply support for response tracking or every composite Python cloud operation.
 

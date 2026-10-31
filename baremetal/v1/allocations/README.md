@@ -11,7 +11,7 @@
 
 `ListOpts` filters are `Node`, `ResourceClass`, `State`, `Fields` (comma-separated), `Limit`, `Marker`, `SortKey` and `SortDir`. Zero values are omitted, so an empty string cannot be sent as a filter.
 
-Extension inputs use `WithCreateField` and `WithListQuery`. A field extension that names a core create field fails with `resource.ErrInvalidOption` before any request, even when the core field is unset; nil options and empty query keys fail the same way. A missing `ResourceClass` is rejected before HTTP by the native builder.
+Extension inputs use `request.Field` and `request.Query`. A field extension that names a core create field fails with `resource.ErrInvalidOption` before any request, even when the core field is unset; nil options and empty query keys fail the same way. A missing `ResourceClass` is rejected before HTTP by the native builder.
 
 `CreateOpts` uses `omitempty` for every optional field, so an explicitly empty `Name`, `CandidateNodes`, `Traits` or `Extra` is not sent. There is no update operation in the pinned Gophercloud package.
 

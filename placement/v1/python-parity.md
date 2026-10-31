@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/placement/v1/allocationcandidates.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/placement/v1/allocationcandidates.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/placement/v1/allocationcandidates.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/placement/v1/allocationcandidates.WithListQueryValues`
 - `github.com/JSYoo5B/go-openstacksdk/request.WithQueryValues`
 
@@ -56,7 +56,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/placement/v1/allocations.API.Update`
-- `github.com/JSYoo5B/go-openstacksdk/placement/v1/allocations.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - At placement 1.38 Update sends PUT allocations/{consumer} with allocations, project_id, user_id, consumer_generation as null for a new consumer, and consumer_type.
   Tests: `placement/v1/allocations/python_parity_test.go:TestPythonAllocationProxyCalls`.
@@ -216,7 +216,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.Create`
-- `github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - At placement 1.20 Create sends POST resource_providers with name, uuid and parent_provider_uuid and decodes the 200 provider body.
   Tests: `placement/v1/resourceproviders/python_parity_test.go:TestPythonResourceProviderProxyCRUD`.
@@ -254,7 +254,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.Update`
-- `github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - At placement 1.20 Update sends PUT resource_providers/{id} with name, and an empty ParentProviderUUID pointer sends parent_provider_uuid null like parent_provider_id=None.
   Tests: `placement/v1/resourceproviders/python_parity_test.go:TestPythonResourceProviderProxyCRUD`.
@@ -314,7 +314,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.All`
 - `github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithName`
 
 - At placement 1.20 List with ListOpts sends name, uuid, member_of, resources, in_tree and required as one value each, and no query when unset.
@@ -601,7 +601,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/placement/v1/traits.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/placement/v1/traits.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/placement/v1/traits.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - At placement 1.6 List sends GET traits with name and associated and yields each trait name string.
   Tests: `placement/v1/traits/python_parity_test.go:TestPythonTraitProxyCalls`.

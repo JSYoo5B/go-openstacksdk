@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create POSTs resource_providers with an unwrapped body that always sends name, omits empty uuid/parent_provider_uuid and merges root extensions (core-key collision or nil option fails before HTTP), sends the caller's OpenStack-API-Version placement header, accepts only 200 (so the pre-1.20 bodyless 201 is an error) and decodes the unwrapped provider.
   Tests: `placement/v1/resourceproviders/native_contracts_test.go:TestNativeResourceProvidersRoutesBodiesAndDecode`, `placement/v1/resourceproviders/native_contracts_test.go:TestNativeResourceProvidersStatusesAndPreflight`.
@@ -48,7 +48,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs resource_providers as one SinglePageBase page with name/uuid/member_of/resources/in_tree/required single-string filters percent-encoded (WithListQuery replaces a native key; ListOpts139 repeated keys are not reachable), yields the resource_providers rows, treats an empty or missing array as no rows, returns the native pager error unwrapped for 404 and io.EOF for a bodyless 204.
   Tests: `placement/v1/resourceproviders/native_contracts_test.go:TestNativeResourceProvidersRoutesBodiesAndDecode`, `placement/v1/resourceproviders/native_contracts_test.go:TestNativeResourceProvidersStatusesAndPreflight`.
@@ -66,7 +66,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Update PUTs resource_providers/{id} with pointer name/parent_provider_uuid omitted when nil, rewrites an empty parent pointer to JSON null, rejects reserved-key extensions or nil options before HTTP, accepts only 200 and decodes the unwrapped provider.
   Tests: `placement/v1/resourceproviders/native_contracts_test.go:TestNativeResourceProvidersRoutesBodiesAndDecode`, `placement/v1/resourceproviders/native_contracts_test.go:TestNativeResourceProvidersStatusesAndPreflight`.
@@ -148,7 +148,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.UpdateInventories`
 - `github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.WithUpdateInventoriesOptions`
-- `github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.WithUpdateInventoriesField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - UpdateInventories PUTs resource_providers/{id}/inventories with {resource_provider_generation, inventories} where every inventory number including zero is sent, rejects reserved-key extensions before HTTP, accepts only 200 (a generation conflict 409 stays native) and decodes the inventories response.
   Tests: `placement/v1/resourceproviders/native_contracts_test.go:TestNativeResourceProvidersRoutesBodiesAndDecode`, `placement/v1/resourceproviders/native_contracts_test.go:TestNativeResourceProvidersStatusesAndPreflight`.
@@ -198,7 +198,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.UpdateInventory`
 - `github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.WithUpdateInventoryOptions`
-- `github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.WithUpdateInventoryField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - UpdateInventory PUTs resource_providers/{id}/inventories/{class} with the embedded inventory fields flattened beside resource_provider_generation, treats those flattened keys as reserved for extensions, accepts only 200 and decodes the flattened inventory.
   Tests: `placement/v1/resourceproviders/native_contracts_test.go:TestNativeResourceProvidersRoutesBodiesAndDecode`, `placement/v1/resourceproviders/native_contracts_test.go:TestNativeResourceProvidersStatusesAndPreflight`.
@@ -248,7 +248,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.UpdateTraits`
 - `github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.WithUpdateTraitsOptions`
-- `github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.WithUpdateTraitsField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - UpdateTraits PUTs resource_providers/{id}/traits with {resource_provider_generation, traits} where nil traits are sent as null, rejects reserved-key extensions before HTTP, accepts only 200 and decodes the traits response.
   Tests: `placement/v1/resourceproviders/native_contracts_test.go:TestNativeResourceProvidersRoutesBodiesAndDecode`, `placement/v1/resourceproviders/native_contracts_test.go:TestNativeResourceProvidersStatusesAndPreflight`.
@@ -298,7 +298,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.UpdateAggregates`
 - `github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.WithUpdateAggregatesOptions`
-- `github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.WithUpdateAggregatesField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - UpdateAggregates PUTs resource_providers/{id}/aggregates with the {aggregates, resource_provider_generation} object when the client microversion is empty or minor >= 19 and with only the bare aggregates array (generation and extensions dropped, nil list sends no body) when minor < 19, fails before HTTP for an unparsable microversion such as latest, accepts only 200 and decodes the aggregates response.
   Tests: `placement/v1/resourceproviders/native_contracts_test.go:TestNativeResourceProvidersRoutesBodiesAndDecode`, `placement/v1/resourceproviders/native_contracts_test.go:TestNativeResourceProvidersMicroversionAndAggregatesBody`, `placement/v1/resourceproviders/native_contracts_test.go:TestNativeResourceProvidersStatusesAndPreflight`.
@@ -316,7 +316,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceclasses.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceclasses.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceclasses.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create POSTs resource_classes with {name} where an empty name fails the native required check before HTTP, merges root extensions with core-key protection, accepts only 201 and returns no value.
   Tests: `placement/v1/resourceclasses/native_contracts_test.go:TestNativeResourceClassesRoutesBodiesAndDecode`, `placement/v1/resourceclasses/native_contracts_test.go:TestNativeResourceClassesStatusesAndPreflight`.
@@ -430,7 +430,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/placement/v1/traits.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/placement/v1/traits.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/placement/v1/traits.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs traits as one SinglePageBase page with name (startswith:/in: kept verbatim and percent-encoded) and a pointer associated filter that sends false, yields trait name strings, treats an empty array as no rows, returns the native pager error unwrapped for 404 and io.EOF for a bodyless 204.
   Tests: `placement/v1/traits/native_contracts_test.go:TestNativeTraitsRoutesQueryAndDecode`, `placement/v1/traits/native_contracts_test.go:TestNativeTraitsStatusesAndPreflight`.
@@ -480,7 +480,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/placement/v1/allocations.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/placement/v1/allocations.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/placement/v1/allocations.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Update PUTs allocations/{consumer} with an unwrapped body that always sends allocations, project_id, user_id and consumer_generation (nil as null for a new consumer) and omits empty consumer_type, rejects reserved-key extensions (even omitted ones) or nil options before HTTP, and accepts only 204 so a consumer generation 409 stays native.
   Tests: `placement/v1/allocations/native_contracts_test.go:TestNativeAllocationsRoutesBodiesAndDecode`, `placement/v1/allocations/native_contracts_test.go:TestNativeAllocationsStatusesAndPreflight`.
@@ -498,7 +498,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/placement/v1/allocations.API.Manage`
 - `github.com/JSYoo5B/go-openstacksdk/placement/v1/allocations.WithManageOptions`
-- `github.com/JSYoo5B/go-openstacksdk/placement/v1/allocations.WithManageField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Manage POSTs allocations with the consumer-keyed UpdateOpts map serialized as is (nil map sends null), places extensions inside the only consumer when exactly one is present and at the root otherwise, and accepts only 204.
   Tests: `placement/v1/allocations/native_contracts_test.go:TestNativeAllocationsRoutesBodiesAndDecode`, `placement/v1/allocations/native_contracts_test.go:TestNativeAllocationsStatusesAndPreflight`.
@@ -532,7 +532,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/placement/v1/allocationcandidates.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/placement/v1/allocationcandidates.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/placement/v1/allocationcandidates.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs allocation_candidates with repeated required/member_of/same_subtree keys, single resources/in_tree/group_policy/limit/root_required values and suffixed resource group keys, all sorted and percent-encoded, yields one value per non-empty SinglePageBase page and decodes it with the current ExtractAllocationCandidates provider-keyed shape, including 1.34 mappings and 1.17/1.29 summary fields, while 1.10-1.11 array allocations fail with a JSON type error.
   Tests: `placement/v1/allocationcandidates/native_contracts_test.go:TestNativeAllocationCandidatesQueryAndDecode`, `placement/v1/allocationcandidates/native_contracts_test.go:TestNativeAllocationCandidatesStatusesAndPreflight`.
@@ -553,7 +553,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/placement/v1/usages.API.Get`
 - `github.com/JSYoo5B/go-openstacksdk/placement/v1/usages.WithGetOptions`
-- `github.com/JSYoo5B/go-openstacksdk/placement/v1/usages.WithGetQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - Get GETs usages with project_id/user_id/consumer_type query values (an empty project_id is omitted because it has no required tag), accepts only 200 and decodes the 1.38+ consumer-type grouped usages with native Extract, so the flat 1.9-1.37 shape is a decode error.
   Tests: `placement/v1/usages/native_contracts_test.go:TestNativeUsagesQueryAndDecode`, `placement/v1/usages/native_contracts_test.go:TestNativeUsagesStatusesAndPreflight`.

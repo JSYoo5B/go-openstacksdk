@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create POSTs domains with a domain envelope, requires name, omits empty optional fields, sends a non-nil enabled false, merges extension fields inside the envelope while rejecting core-key collisions and nil options before HTTP, decodes the domain envelope and accepts only 201.
   Tests: `identity/v3/domains/native_contracts_test.go:TestNativeDomainRoutesBodiesPagingAndDecode`, `identity/v3/domains/native_contracts_test.go:TestNativeDomainStatusesAndPreflight`.
@@ -48,7 +48,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Update PATCHes domains/{id} with a domain envelope (an empty update sends an empty envelope and a pointer to an empty description clears it), merges extension fields inside the envelope, rejects core-key collisions and nil options before HTTP and accepts only 200.
   Tests: `identity/v3/domains/native_contracts_test.go:TestNativeDomainRoutesBodiesPagingAndDecode`, `identity/v3/domains/native_contracts_test.go:TestNativeDomainStatusesAndPreflight`.
@@ -82,7 +82,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs domains with sorted enabled, name, limit and extension query values, follows the Keystone links.next string until null, yields nothing for an empty page, ends bodyless 204 with io.EOF, reports 404 as the native pager error and rejects a nil option before HTTP.
   Tests: `identity/v3/domains/native_contracts_test.go:TestNativeDomainRoutesBodiesPagingAndDecode`, `identity/v3/domains/native_contracts_test.go:TestNativeDomainStatusesAndPreflight`.
@@ -116,7 +116,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create POSTs groups with a group envelope, requires name, flattens Extra keys into the envelope, merges extension fields there while rejecting core-key or Extra collisions and nil options before HTTP, collects unknown response keys into Extra and accepts only 201.
   Tests: `identity/v3/groups/native_contracts_test.go:TestNativeGroupRoutesBodiesPagingAndDecode`, `identity/v3/groups/native_contracts_test.go:TestNativeGroupStatusesAndPreflight`.
@@ -150,7 +150,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Update PATCHes groups/{id} with a group envelope, sends a pointer to an empty description, flattens Extra keys (nil as null) and extension fields into the envelope, rejects nil options before HTTP and accepts only 200.
   Tests: `identity/v3/groups/native_contracts_test.go:TestNativeGroupRoutesBodiesPagingAndDecode`, `identity/v3/groups/native_contracts_test.go:TestNativeGroupStatusesAndPreflight`.
@@ -184,7 +184,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs groups with sorted domain_id, name and extension query values, follows the Keystone links.next string until null, yields nothing for an empty page, ends bodyless 204 with io.EOF, reports 404 as the native pager error and rejects a nil option before HTTP. A non-empty Filters map adds NAME__COMPARATOR keys (malformed keys fail before HTTP with an unwrapped InvalidListFilter) but native BuildQueryString also leaks a stray '-' parameter holding the map's text.
   Tests: `identity/v3/groups/native_contracts_test.go:TestNativeGroupRoutesBodiesPagingAndDecode`, `identity/v3/groups/native_contracts_test.go:TestNativeGroupStatusesAndPreflight`.
@@ -202,7 +202,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create POSTs projects with a project envelope, requires name, sends enabled/is_domain pointers, tags and options, flattens Extra keys and extension fields into the envelope while rejecting core-key or Extra collisions and nil options before HTTP, collects unknown keys including links into Extra and accepts the native 201 or 202 POST default.
   Tests: `identity/v3/projects/native_admin_test.go:TestNativeProjectAdminRoutesBodiesPagingAndDecode`, `identity/v3/projects/native_admin_test.go:TestNativeProjectAdminStatusesAndPreflight`.
@@ -236,7 +236,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Update PATCHes projects/{id} with a project envelope where a pointer to an empty tag list sends tags [] and a pointer to an empty description clears it, merges Extra and extension fields into the envelope, rejects nil options before HTTP and accepts only 200.
   Tests: `identity/v3/projects/native_admin_test.go:TestNativeProjectAdminRoutesBodiesPagingAndDecode`, `identity/v3/projects/native_admin_test.go:TestNativeProjectAdminStatusesAndPreflight`.
@@ -270,7 +270,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs projects with sorted domain_id, enabled, is_domain, name, parent_id, tags, tags-any, not-tags, not-tags-any, limit and extension query values, follows the Keystone links.next string until null, yields nothing for an empty page, ends bodyless 204 with io.EOF, reports 404 as the native pager error and rejects a nil option before HTTP. A non-empty Filters map adds NAME__COMPARATOR keys (malformed keys fail before HTTP with an unwrapped InvalidListFilter) but native BuildQueryString also leaks a stray '-' parameter holding the map's text.
   Tests: `identity/v3/projects/native_admin_test.go:TestNativeProjectAdminRoutesBodiesPagingAndDecode`, `identity/v3/projects/native_admin_test.go:TestNativeProjectAdminStatusesAndPreflight`.
@@ -304,7 +304,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.ModifyTags`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.WithModifyTagsOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.WithModifyTagsField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - ModifyTags PUTs projects/{id}/tags with an unwrapped tags body (an empty list is omitted, so it sends {}) and top-level extension fields, rejects a core tags extension before HTTP, decodes only top-level projects and links, accepts only 200 and returns a non-nil zero ProjectTags together with an error.
   Tests: `identity/v3/projects/native_admin_test.go:TestNativeProjectAdminRoutesBodiesPagingAndDecode`, `identity/v3/projects/native_admin_test.go:TestNativeProjectAdminStatusesAndPreflight`.
@@ -338,7 +338,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create POSTs users with a user envelope, requires name, sends password, options and enabled pointers, flattens Extra keys and extension fields into the envelope while rejecting core-key collisions and nil options before HTTP, decodes string enabled values and the zone-less password_expires_at layout and accepts only 201.
   Tests: `identity/v3/users/native_admin_test.go:TestNativeUserAdminRoutesBodiesPagingAndDecode`, `identity/v3/users/native_admin_test.go:TestNativeUserAdminStatusesAndPreflight`.
@@ -372,7 +372,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Update PATCHes users/{id} with a user envelope including a pointer to an empty description, enabled false and password, flattens Extra (nil as null) and extension fields into the envelope while rejecting Extra collisions and nil options before HTTP and accepts only 200.
   Tests: `identity/v3/users/native_admin_test.go:TestNativeUserAdminRoutesBodiesPagingAndDecode`, `identity/v3/users/native_admin_test.go:TestNativeUserAdminStatusesAndPreflight`.
@@ -406,7 +406,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs users with sorted domain_id, enabled, idp_id, name, password_expires_at, protocol_id, unique_id and extension query values, follows the Keystone links.next string until null, yields nothing for an empty page, ends bodyless 204 with io.EOF, reports 404 as the native pager error and rejects a nil option before HTTP. A non-empty Filters map adds NAME__COMPARATOR keys (malformed keys fail before HTTP with an unwrapped InvalidListFilter) but native BuildQueryString also leaks a stray '-' parameter holding the map's text.
   Tests: `identity/v3/users/native_admin_test.go:TestNativeUserAdminRoutesBodiesPagingAndDecode`, `identity/v3/users/native_admin_test.go:TestNativeUserAdminStatusesAndPreflight`.
@@ -424,7 +424,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.ListInGroup`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithListInGroupOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithListInGroupQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - ListInGroup GETs groups/{group}/users with the users ListOpts and extension query values, follows the Keystone links.next string until null, yields nothing for an empty page, ends bodyless 204 with io.EOF, reports 404 as the native pager error and rejects nil options before HTTP while malformed filter keys fail with an unwrapped InvalidListFilter.
   Tests: `identity/v3/users/native_admin_test.go:TestNativeUserAdminRoutesBodiesPagingAndDecode`, `identity/v3/users/native_admin_test.go:TestNativeUserAdminStatusesAndPreflight`.
@@ -490,7 +490,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create POSTs roles with a role envelope, requires name, sends domain_id, description and options, flattens Extra and extension fields into the envelope while rejecting core-key collisions and nil options before HTTP, decodes null domain_id as empty, copies description into Extra alongside remaining keys and accepts only 201.
   Tests: `identity/v3/roles/native_contracts_test.go:TestNativeRoleRoutesBodiesPagingAndDecode`, `identity/v3/roles/native_contracts_test.go:TestNativeRoleStatusesAndPreflight`.
@@ -524,7 +524,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Update PATCHes roles/{id} with a role envelope including a pointer to an empty description, options and Extra (nil as null) plus extension fields, rejects nil options before HTTP and accepts only 200.
   Tests: `identity/v3/roles/native_contracts_test.go:TestNativeRoleRoutesBodiesPagingAndDecode`, `identity/v3/roles/native_contracts_test.go:TestNativeRoleStatusesAndPreflight`.
@@ -558,7 +558,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs roles with sorted domain_id, name and extension query values, follows the Keystone links.next string until null, yields nothing for an empty page, ends bodyless 204 with io.EOF, reports 404 as the native pager error and rejects a nil option before HTTP. A non-empty Filters map adds NAME__COMPARATOR keys (malformed keys fail before HTTP with an unwrapped InvalidListFilter) but native BuildQueryString also leaks a stray '-' parameter holding the map's text.
   Tests: `identity/v3/roles/native_contracts_test.go:TestNativeRoleRoutesBodiesPagingAndDecode`, `identity/v3/roles/native_contracts_test.go:TestNativeRoleStatusesAndPreflight`.
@@ -644,7 +644,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.ListAssignments`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithListAssignmentsOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithListAssignmentsQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - ListAssignments GETs role_assignments with sorted group.id, role.id, scope.domain.id, scope.project.id, scope.system, user.id, effective, include_names, include_subtree (pointer booleans sent as true/false text) and extension query values, follows the Keystone links.next string, decodes role, scope (System only for system scope), user and group, ends bodyless 204 with io.EOF and rejects a nil option before HTTP.
   Tests: `identity/v3/roles/native_contracts_test.go:TestNativeRoleAssignmentRoutesQueryAndDecode`, `identity/v3/roles/native_contracts_test.go:TestNativeRoleStatusesAndPreflight`.

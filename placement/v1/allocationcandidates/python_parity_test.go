@@ -90,7 +90,7 @@ func TestPythonAllocationCandidatesQueryAndCandidates(t *testing.T) {
 }
 
 // Python forwards member_of1=["agg-4", "agg-5"] as a repeated key.
-// Go ResourceGroup.MemberOf holds one value and WithListQuery replaces rather than appends.
+// Go ResourceGroup.MemberOf holds one value and request.Query replaces rather than appends.
 func TestPythonAllocationCandidatesSuffixedMemberOfIsSingle(t *testing.T) {
 	var calls []pythonCandidateCall
 	api := pythonCandidateAPI(t, &calls, `{"allocation_requests":[],"provider_summaries":{}}`)

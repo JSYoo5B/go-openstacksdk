@@ -86,7 +86,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/pools.API.ListMembers`
-- `github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/pools.WithListMembersQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/pools.WithListMembersOptions`
 - `github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/pools.API.Members`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithMaxItems`

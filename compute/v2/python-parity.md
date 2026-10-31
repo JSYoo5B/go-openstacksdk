@@ -30,7 +30,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.Update`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Update sends PUT servers/{id} with only the given name plus a WithUpdateField description inside the server envelope.
   Tests: `compute/v2/servers/python_parity_test.go:TestPythonServerGetUpdateDeleteMatchProxyRequests`.
@@ -69,15 +69,15 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.Rebuild`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRebuildField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
-- Rebuild sends only imageRef plus the given typed keys, and WithRebuildField adds preserve_ephemeral, user_data, hostname and explicit null key_name or description inside the rebuild action; the response server is returned.
+- Rebuild sends only imageRef plus the given typed keys, and request.Field adds preserve_ephemeral, user_data, hostname and explicit null key_name or description inside the rebuild action; the response server is returned.
   Tests: `compute/v2/servers/python_parity_test.go:TestPythonServerRebuildSendsPassedKeysAndReturnsServer`.
 
 Python/Go differences:
 
 - Python accepts a Server and an Image resource or IDs; Go takes the server ID and RebuildOpts.ImageRef.
-- name, adminPass, accessIPv4, accessIPv6 and metadata are typed RebuildOpts keys that omit empty values and cannot be overridden by WithRebuildField, so Go cannot send null or empty strings for them; Nova does not accept null for those keys.
+- name, adminPass, accessIPv4, accessIPv6 and metadata are typed RebuildOpts keys that omit empty values and cannot be overridden by request.Field, so Go cannot send null or empty strings for them; Nova does not accept null for those keys.
 - RebuildOpts.Metadata holds string values only.
 - Python updates the mutable Server from the response; Go returns a new servers.Server model.
 - Python sends min(resource _max_microversion 2.100, server maximum) discovered per request; Go sends the one microversion configured or negotiated on the Connection client.
@@ -556,7 +556,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.API.Create`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create posts the server_group envelope with policy and rules or with policies, and decodes policy, rules and members.
   Tests: `compute/v2/servergroups/python_parity_test.go:TestPythonServerGroupCreateGetDeleteMatchProxyRequests`.
@@ -609,7 +609,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List sends GET os-server-groups without a query by default and carries all_projects=True, limit and marker through WithListQuery and ListOpts.
   Tests: `compute/v2/servergroups/python_parity_test.go:TestPythonServerGroupListAllProjectsAndQuery`.
@@ -627,7 +627,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/attachinterfaces.API.Create`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/attachinterfaces.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create posts the interfaceAttachment envelope with port_id or net_id and fixed_ips, plus a WithCreateField tag, and decodes the interface.
   Tests: `compute/v2/attachinterfaces/python_parity_test.go:TestPythonServerInterfaceCreateGetListDeleteMatchProxyRequests`.

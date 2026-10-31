@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.UpdateWithAttributes`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithIfMatch`

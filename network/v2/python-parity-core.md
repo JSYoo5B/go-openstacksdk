@@ -54,7 +54,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.API.Update`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Update sends PUT agents/{id} with only the given description and admin_state_up inside the agent envelope and decodes the returned agent.
   Tests: `network/v2/extensions/agents/python_parity_core_test.go:TestPythonParityCoreAgentUpdateAndDelete`.
@@ -135,7 +135,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/segments.API.Create`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/segments.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create sends POST segments with the given fields inside the segment envelope; a missing network_type fails before HTTP.
   Tests: `network/v2/extensions/segments/python_parity_core_test.go:TestPythonParityCoreSegmentCreateUpdate`.
@@ -193,7 +193,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/segments.API.Update`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/segments.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Update sends PUT segments/{id} with name, empty description, segmentation_id 0 and extension keys inside the segment envelope.
   Tests: `network/v2/extensions/segments/python_parity_core_test.go:TestPythonParityCoreSegmentCreateUpdate`.
@@ -303,7 +303,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.New`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.API.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.API.AllRecords`
@@ -405,7 +405,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.All`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.AllRecords`

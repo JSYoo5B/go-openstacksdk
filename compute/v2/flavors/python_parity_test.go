@@ -62,7 +62,7 @@ func TestPythonFlavorCreateDeleteMatchProxyRequests(t *testing.T) {
 	if err != nil || created.ID != "f1" || created.Name != "m1" || created.RAM != 512 || created.VCPUs != 1 || created.Disk != 10 || created.IsPublic || created.Ephemeral != 5 || created.RxTxFactor != 1.0 || created.Description != "d" {
 		t.Fatal(created, err)
 	}
-	// Keys outside CreateOpts go through WithCreateField.
+	// Keys outside CreateOpts go through request.Field.
 	if _, err := api.Create(ctx, flavors.CreateOpts{Name: "m2", RAM: 256, VCPUs: 2, Disk: pythonFlavorInt(0)}, request.Field("x_extension", 1)); err != nil {
 		t.Fatal(err)
 	}

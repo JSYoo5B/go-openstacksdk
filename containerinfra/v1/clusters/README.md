@@ -12,7 +12,7 @@
 | `Delete` | `DELETE /clusters/{id}` | 202, 204 | Native 404 stays an HTTP response error; 200 is rejected |
 | `List`, `ListDetail` | `GET /clusters`, `GET /clusters/detail` | 200 | `ListOpts` (`Marker`, `Limit`, `SortKey`, `SortDir`); follows the response `next` link |
 
-Extension inputs use `WithCreateField`, `WithResizeField`, `WithUpgradeField`, `WithListQuery` and `WithListDetailQuery`. A field extension that names a core input field, or a nil option, fails with `resource.ErrInvalidOption` before any request. Missing required inputs (`ClusterTemplateID`, `NodeCount`, `ClusterTemplate`, patch `Op`/`Path`) also fail before any request. An extension query replaces a typed query value of the same name.
+Extension inputs use `request.Field`, `request.Field`, `request.Field`, `request.Query` and `request.Query`. A field extension that names a core input field, or a nil option, fails with `resource.ErrInvalidOption` before any request. Missing required inputs (`ClusterTemplateID`, `NodeCount`, `ClusterTemplate`, patch `Op`/`Path`) also fail before any request. An extension query replaces a typed query value of the same name.
 
 `Find`, `All`, `Remove`, `WaitFor` and `WaitForDeletion` use the common `resource.Collection`: exact name lookup, duplicate-name errors, ignore-missing deletion by default, and `Collection.Get` mapping 404 to `resource.ErrNotFound`. Collection listing uses the `/clusters/detail` route and filters `status` locally instead of sending it on the wire. `API.Get` and `API.Delete` themselves keep the native 404 error.
 

@@ -14,14 +14,14 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/endpointgroups.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/endpointgroups.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/endpointgroups.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/endpointgroups.API.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/endpointgroups.API.AllRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/endpointgroups.API.ProxyListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/endpointgroups.WithRecordListQuery`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/endpointgroups.WithRecordListOpts`
 
-- List sends GET vpn/endpoint-groups with WithListOptions and WithListQuery values as query and follows the endpoint_groups_links next href.
+- List sends GET vpn/endpoint-groups with WithListOptions and request.Query values as query and follows the endpoint_groups_links next href.
   Tests: `network/v2/extensions/vpnaas/endpointgroups/python_parity_test.go:TestPythonEndpointGroupListQueryAndLinks`.
 - SDK-owned record listing owns all-page iteration and classifies declared QueryParameters/aliases as server query versus declared Body-only local descriptor filters. Missing/null, project alias, raw unknown fields and class-specific boolean/list projection are separate from original page evidence.
   Tests: `network/v2/extensions/vpnaas/endpointgroups/python_record_contracts_test.go:TestVPNEndpointGroupRecordsAllPagesServerQueryAndLocalFilter`, `network/v2/extensions/vpnaas/endpointgroups/python_record_contracts_test.go:TestVPNEndpointGroupRecordsProjectionDefaultsAndUnknownFields`.

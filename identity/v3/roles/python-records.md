@@ -15,7 +15,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.AllRecords`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.ProxyListRecords`
@@ -25,7 +25,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithRecordListLocation`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithRecordListJMESPath`
 
-- List sends the single GET roles that Python roles() sends without arguments, maps the Python query names domain_id and name through ListOpts or WithListQuery, sends a limit without a marker follow-up, and rejects local Body filters before HTTP.
+- List sends the single GET roles that Python roles() sends without arguments, maps the Python query names domain_id and name through ListOpts or request.Query, sends a limit without a marker follow-up, and rejects local Body filters before HTTP.
   Tests: `identity/v3/roles/python_parity_test.go:TestPythonRoleListRequests`.
 - Bodyless default roles GET and explicit SourceStatusPolicy accept actual199. Six Role Body descriptors/default/null/options-dict cast discard unknowns only from declared view and retain all actual Wire/page/header/status evidence; Clone channels are independent.
   Tests: `identity/v3/roles/python_records_test.go:TestPythonRoleRecordsDefaultProjectionPresenceAndIndependentPhysicalEvidence`.
@@ -45,8 +45,8 @@ Go API:
 Python/Go differences:
 
 - Python reads the Keystone links dict without a rel key and never follows links.next; the native pager follows links.next when Keystone sets it.
-- Python sends bool query values as True/False text; typed Go ListOpts send true/false, and WithListQuery reproduces the Python text.
-- Python drops unknown query names; Go sends every WithListQuery key to the server.
+- Python sends bool query values as True/False text; typed Go ListOpts send true/false, and request.Query reproduces the Python text.
+- Python drops unknown query names; Go sends every request.Query key to the server.
 - roles.ListOpts.Filters adds a stray "-" query key next to the comparator filters; Python cannot send comparator filters at all.
 - Existing native Role/List/All/Get/FindIdentity remain unchanged. Concrete functional options and SDK-owned profile descriptors/defaults/decoders avoid caller builders; declared Resource JSON and separate actual Wire/Envelope/header/status are defensively owned.
 - Selected Keystone v3 API is required; automatic v2 ensure_service_version conversion is not added. Standalone native client computed location is null; explicit immutable location supplies cloud/region/current project without inference. Role has no project_id/zone descriptors, unknown response facts do not replace that scope and the typed convenience normalizes zone to null.
@@ -62,7 +62,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.All`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.List`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/identity.NewRoleReadCloud`
 - `github.com/JSYoo5B/go-openstacksdk/identity.RoleReadCloud.ListRoles`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithRecordListOpts`

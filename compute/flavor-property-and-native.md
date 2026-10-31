@@ -78,7 +78,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.API.ListDetail`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithListDetailOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithListDetailQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - ListDetail owns a concrete request.Options builder while preserving the fixed flavors/detail native route. Default typed options omit is_public and all other query values. All eight native ListOpts fields reach their original wire spelling, raw limit/is_public extensions override typed values, and vendor query is retained. Options execute once at sequence construction while HTTP remains lazy; bodyless requests use the selected token and both version headers.
   Tests: `api/compute_flavor_property_native_test.go:TestComputeFlavorListDetailNativeBindingEagerOptionsLazyLinkedPages`.

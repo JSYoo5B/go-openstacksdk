@@ -4,7 +4,7 @@
 
 The response is a single page of `Service` (`ID`, `Binary`, `Host`, `Zone`, `State`, `Status`, `UpdatedAt`); `updated_at` null decodes to the zero time and `next` links are not followed. A 204 response yields no items.
 
-Known upstream limitation: the pinned Gophercloud `ListOpts` fields are tagged for JSON rather than query encoding, so `WithListOptions` filters such as `Host` or `State` are not sent. Use `WithListQuery("host", value)` (or the other query names `binary`, `zone`, `state`, `status`) to filter on the server. Nil options fail with `resource.ErrInvalidOption` before any request.
+Known upstream limitation: the pinned Gophercloud `ListOpts` fields are tagged for JSON rather than query encoding, so `WithListOptions` filters such as `Host` or `State` are not sent. Use `request.Query("host", value)` (or the other query names `binary`, `zone`, `state`, `status`) to filter on the server. Nil options fail with `resource.ErrInvalidOption` before any request.
 
 There is no `Collection`, get, enable or disable operation in this package. Cancelling a context stops the local call.
 

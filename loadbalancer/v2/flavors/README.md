@@ -10,9 +10,9 @@
 | `Delete` | `DELETE .../{id}` | 202, 204 | Native 404 stays an HTTP response error |
 | `List` | `GET /lbaas/flavors` | 200 | Follows `flavors_links`; `ListOpts.Enabled` is a pointer so `false` is sent; `Fields` repeat the query key |
 
-Limitation: `CreateOpts.Enabled` and `UpdateOpts.Enabled` are plain bools with omit-empty, so `Enabled: false` is never sent (the server default applies on create, and an update cannot disable a flavor). `WithUpdateField("enabled", false)` is rejected with `resource.ErrInvalidOption` because `enabled` is a core field. Empty `Name` and `Description` strings are likewise omitted.
+Limitation: `CreateOpts.Enabled` and `UpdateOpts.Enabled` are plain bools with omit-empty, so `Enabled: false` is never sent (the server default applies on create, and an update cannot disable a flavor). `request.Field("enabled", false)` is rejected with `resource.ErrInvalidOption` because `enabled` is a core field. Empty `Name` and `Description` strings are likewise omitted.
 
-Extension inputs use `WithCreateField`, `WithUpdateField` and `WithListQuery`. A field extension that names a core input field fails before any request; nil options fail the same way.
+Extension inputs use `request.Field`, `request.Field` and `request.Query`. A field extension that names a core input field fails before any request; nil options fail the same way.
 
 `Find`, `All`, `Remove`, `WaitFor` and `WaitForDeletion` use the common `resource.Collection` (exact name lookup, ignore-missing removal by default). `API.Delete` itself does not ignore a missing flavor.
 

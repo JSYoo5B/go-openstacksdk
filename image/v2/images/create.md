@@ -14,9 +14,9 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/images.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/images.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/images.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
-- Generated API.Create serializes CreateOpts with the pinned BuildRequestBody, omitting zero values while sending explicit pointer false, then copies Properties over declared keys and appends non-colliding WithCreateField extension JSON with exact raw bytes before one POST to native images with JSON headers and service MoreHeaders.
+- Generated API.Create serializes CreateOpts with the pinned BuildRequestBody, omitting zero values while sending explicit pointer false, then copies Properties over declared keys and appends non-colliding request.Field extension JSON with exact raw bytes before one POST to native images with JSON headers and service MoreHeaders.
   Tests: `image/v2/images/create_contracts_test.go:TestNativeImageCreateBodyPropertiesExtensionsAndProjection`.
 - A 201 response uses the shared Extract header merge and Image.UnmarshalJSON projection. Missing required name, nil options and extensions colliding with core or existing body keys fail before HTTP; other statuses keep native ErrUnexpectedResponseCode with Expected [201] under Create/images context without an owned receipt.
   Tests: `image/v2/images/create_contracts_test.go:TestNativeImageCreateBodyPropertiesExtensionsAndProjection`, `image/v2/images/create_contracts_test.go:TestNativeImageCreatePreflightAndStrictStatus`.
@@ -24,7 +24,7 @@ Go API:
 Python/Go differences:
 
 - This declaration maps Gophercloud native metadata Create only; it is not Python create_image parity, which CreateImageRecord and CreateCloudImageRecord cover.
-- WithCreateField is a Go extension that rejects collisions instead of overwriting; native body construction, OkCodes and response projection are unchanged.
+- request.Field is a Go extension that rejects collisions instead of overwriting; native body construction, OkCodes and response projection are unchanged.
 
 ## Usage examples
 
@@ -36,7 +36,7 @@ image, err := service.API.Images.Create(ctx, images.CreateOpts{
     Name: "ubuntu-24.04", DiskFormat: "qcow2", ContainerFormat: "bare",
     Visibility: &visibility, Tags: []string{"base"},
     Properties: map[string]string{"os_distro": "ubuntu"},
-}, images.WithCreateField("hw_qemu_guest_agent", "yes"))
+}, request.Field("hw_qemu_guest_agent", "yes"))
 if err != nil {
     return err
 }

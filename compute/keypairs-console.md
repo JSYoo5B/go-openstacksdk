@@ -48,7 +48,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Native Create preserves required Name preflight and sends one authenticated POST to the selected prefixed os-keypairs collection without query or lookup. Concrete CreateOpts binds Name, UserID, Type and PublicKey together with a vendor object extension in the actual keypair body. A protected user_id extension and omitted required Name fail before HTTP; the application need not implement CreateOptsBuilder.
   Tests: `api/compute_keypair_create_test.go:TestComputeKeypairCreateDirtyBodyAliasesAndNativeCompatibility`.

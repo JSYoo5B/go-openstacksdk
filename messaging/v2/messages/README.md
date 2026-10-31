@@ -13,7 +13,7 @@
 | `PopMessages` | `DELETE .../messages?pop=N` | 200, 204 | 204 yields no messages; results include `ClaimID` and `ClaimCount` |
 | `DeleteMessageURL` | none | none | Returns the absolute single-message URL without a request |
 
-`Create` accepts `WithCreateField`; the `messages` envelope key is protected. `Delete`, `DeleteMessages`, `GetMessages`, `List` and `PopMessages` accept their `With...Query` extensions. Collisions and nil options fail with `resource.ErrInvalidOption` before any request. Message bodies are `map[string]any`; non-object bodies are not supported by the native model.
+`Create` accepts `request.Field`; the `messages` envelope key is protected. `Delete`, `DeleteMessages`, `GetMessages`, `List` and `PopMessages` accept their `With...Query` extensions. Collisions and nil options fail with `resource.ErrInvalidOption` before any request. Message bodies are `map[string]any`; non-object bodies are not supported by the native model.
 
 The native wrappers do not add a `Client-ID` header. Deployments that require one must receive it from the caller's client configuration.
 

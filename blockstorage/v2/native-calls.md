@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithCreateHintOpts`
 
 - Create POSTs {"volume":{...}} to volumes (imageRef for ImageID) with extensions inside the envelope and non-empty scheduler hints as top-level OS-SCH-HNT:scheduler_hints, rejects non-UUID host/instance hints and core-key extension collisions before HTTP, decodes the volume key and accepts only 202. In v2 the size field has no omitempty, so zero is sent as "size":0 and the required tag does not reject it.
@@ -49,7 +49,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs volumes/detail with ListOpts (Python-dict-like metadata string, all_tenants) and extension query values, follows volumes_links next hrefs as received, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP. v2 ListOpts has no bootable filter.
   Tests: `blockstorage/v2/volumes/native_crud_contracts_test.go:TestNativeVolumeRoutesBodiesPagingAndDecode`, `blockstorage/v2/volumes/native_crud_contracts_test.go:TestNativeVolumeStrictStatusesDecodeAndPreflight`.
@@ -67,7 +67,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Update PUTs {"volume":{...}} to volumes/{id} sending explicit empty pointer name/description and non-empty metadata with extensions inside the envelope, rejects a nil option before HTTP and accepts only 200.
   Tests: `blockstorage/v2/volumes/native_crud_contracts_test.go:TestNativeVolumeRoutesBodiesPagingAndDecode`, `blockstorage/v2/volumes/native_crud_contracts_test.go:TestNativeVolumeStrictStatusesDecodeAndPreflight`.
@@ -85,7 +85,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.Delete`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithDeleteOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithDeleteQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - Delete DELETEs volumes/{raw id} with cascade=true only when requested plus extension query values, rejects an empty query key before HTTP and accepts only 202/204.
   Tests: `blockstorage/v2/volumes/native_crud_contracts_test.go:TestNativeVolumeRoutesBodiesPagingAndDecode`, `blockstorage/v2/volumes/native_crud_contracts_test.go:TestNativeVolumeStrictStatusesDecodeAndPreflight`.
@@ -119,7 +119,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.Attach`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithAttachOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithAttachField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Attach POSTs to volumes/{id}/action {"os-attach":{...}} with extensions inside the action object, rejects a core-key extension collision before HTTP and accepts only 202.
   Tests: `blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionRoutesAndBodies`, `blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionStrictStatuses`, `blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionPreflightAndDecode`.
@@ -153,7 +153,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.Detach`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithDetachOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithDetachField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Detach POSTs to volumes/{id}/action {"os-detach":{...}} (empty object without an attachment ID), rejects a nil option before HTTP and accepts only 202.
   Tests: `blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionRoutesAndBodies`, `blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionStrictStatuses`, `blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionPreflightAndDecode`.
@@ -203,7 +203,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.InitializeConnection`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithInitializeConnectionOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithInitializeConnectionField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - InitializeConnection POSTs to volumes/{id}/action {"os-initialize_connection":{"connector":{...}}} with explicit false multipath and extensions beside connector, returns the raw connection_info map (nil without error when absent) and accepts only 200/201/202.
   Tests: `blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionRoutesAndBodies`, `blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionStrictStatuses`, `blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionPreflightAndDecode`.
@@ -221,7 +221,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.TerminateConnection`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithTerminateConnectionOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithTerminateConnectionField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - TerminateConnection POSTs to volumes/{id}/action {"os-terminate_connection":{"connector":{...}}} and accepts only 202.
   Tests: `blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionRoutesAndBodies`, `blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionStrictStatuses`, `blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionPreflightAndDecode`.
@@ -239,7 +239,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.ExtendSize`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithExtendSizeOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithExtendSizeField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - ExtendSize POSTs to volumes/{id}/action {"os-extend":{"new_size":N}} sending a zero size because the native required tag does not reject integer zero, and accepts only 202.
   Tests: `blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionRoutesAndBodies`, `blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionStrictStatuses`, `blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionPreflightAndDecode`.
@@ -257,7 +257,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.UploadImage`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithUploadImageOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithUploadImageField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - UploadImage POSTs to volumes/{id}/action {"os-volume_upload_image":{...}}, decodes VolumeImage with its volume type (zero value when the key is absent, error for zoned timestamps) and accepts only 202.
   Tests: `blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionRoutesAndBodies`, `blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionStrictStatuses`, `blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionPreflightAndDecode`.
@@ -275,7 +275,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.SetImageMetadata`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithSetImageMetadataOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithSetImageMetadataField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - SetImageMetadata POSTs to volumes/{id}/action {"os-set_image_metadata":{"metadata":...}} sending nil metadata as null and accepts only 200.
   Tests: `blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionRoutesAndBodies`, `blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionStrictStatuses`, `blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionPreflightAndDecode`.
@@ -293,7 +293,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.SetBootable`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithSetBootableOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithSetBootableField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - SetBootable POSTs to volumes/{id}/action {"os-set_bootable":{"bootable":...}} sending false explicitly and accepts only 200.
   Tests: `blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionRoutesAndBodies`, `blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionStrictStatuses`, `blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionPreflightAndDecode`.
@@ -311,7 +311,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.ChangeType`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithChangeTypeOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithChangeTypeField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - ChangeType POSTs to volumes/{id}/action {"os-retype":{"new_type":...,"migration_policy":...}}, rejects an empty new type before HTTP and accepts only 202.
   Tests: `blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionRoutesAndBodies`, `blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionStrictStatuses`, `blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionPreflightAndDecode`.
@@ -329,7 +329,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.ReImage`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithReImageOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithReImageField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - ReImage POSTs to volumes/{id}/action {"os-reimage":{"image_id":...,"reimage_reserved":...}} always sending both fields and accepts only 202.
   Tests: `blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionRoutesAndBodies`, `blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionStrictStatuses`, `blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionPreflightAndDecode`.
@@ -347,7 +347,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create POSTs {"snapshot":{...}} to snapshots sending force only when true, requires volume_id and rejects a core-key extension collision before HTTP and accepts only 202.
   Tests: `blockstorage/v2/snapshots/native_contracts_test.go:TestNativeSnapshotRoutesBodiesSinglePageAndDecode`, `blockstorage/v2/snapshots/native_contracts_test.go:TestNativeSnapshotStrictStatusesDecodeAndPreflight`.
@@ -381,7 +381,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs the summary snapshots route with ListOpts (all_tenants included) and extension query values as a single page that never follows snapshots_links, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.
   Tests: `blockstorage/v2/snapshots/native_contracts_test.go:TestNativeSnapshotRoutesBodiesSinglePageAndDecode`, `blockstorage/v2/snapshots/native_contracts_test.go:TestNativeSnapshotStrictStatusesDecodeAndPreflight`.
@@ -432,7 +432,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create POSTs {"backup":{...}} to backups sending incremental/force only when true, requires volume_id and rejects a core-key extension collision before HTTP, decodes project, pointer metadata/availability zone and data timestamp, and accepts only 202.
   Tests: `blockstorage/v2/backups/native_crud_contracts_test.go:TestNativeBackupRoutesBodiesPagingAndDecode`, `blockstorage/v2/backups/native_crud_contracts_test.go:TestNativeBackupStrictStatusesDecodeAndPreflight`.
@@ -466,7 +466,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs the summary backups route with ListOpts (all_tenants included) and extension query values, follows backups_links next hrefs as received, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.
   Tests: `blockstorage/v2/backups/native_crud_contracts_test.go:TestNativeBackupRoutesBodiesPagingAndDecode`, `blockstorage/v2/backups/native_crud_contracts_test.go:TestNativeBackupStrictStatusesDecodeAndPreflight`.
@@ -484,7 +484,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.API.ListDetail`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.WithListDetailOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.WithListDetailQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - ListDetail GETs backups/detail with the separate ListDetailOpts (with_count, sort, all_tenants) and extension query values, follows backups_links next hrefs as received, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.
   Tests: `blockstorage/v2/backups/native_crud_contracts_test.go:TestNativeBackupRoutesBodiesPagingAndDecode`, `blockstorage/v2/backups/native_crud_contracts_test.go:TestNativeBackupStrictStatusesDecodeAndPreflight`.
@@ -502,7 +502,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.API.RestoreFromBackup`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.WithRestoreFromBackupOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.WithRestoreFromBackupField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - RestoreFromBackup POSTs {"restore":{...}} (empty object for empty options) to backups/{id}/restore with extensions inside it, rejects a nil option before HTTP, decodes the restore key and accepts only 202.
   Tests: `blockstorage/v2/backups/native_crud_contracts_test.go:TestNativeBackupRoutesBodiesPagingAndDecode`, `blockstorage/v2/backups/native_crud_contracts_test.go:TestNativeBackupStrictStatusesDecodeAndPreflight`.
@@ -536,7 +536,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - The v2 facade forwards the native flat name/description/metadata body to PUT backups/{id} without the SDK backup-envelope repair applied to v3; the generator test pins that only the v3 package receives the repair.
   Tests: `internal/cmd/sdkgen/backup_update_body_test.go:TestBackupUpdateBodyRepairHasExactPackageAndBuilderScope`.
@@ -557,7 +557,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/transfers.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/transfers.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/transfers.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create POSTs {"transfer":{...}} to os-volume-transfer, requires volume_id and rejects a core-key extension collision before HTTP, decodes the transfer key including the auth_key secret and links, and accepts only 202.
   Tests: `blockstorage/v2/transfers/native_contracts_test.go:TestNativeTransferRoutesBodiesPagingAndDecode`, `blockstorage/v2/transfers/native_contracts_test.go:TestNativeTransferStrictStatusesDecodeAndPreflight`.
@@ -575,7 +575,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/transfers.API.Accept`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/transfers.WithAcceptOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/transfers.WithAcceptField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Accept POSTs {"accept":{"auth_key":...}} to os-volume-transfer/{id}/accept with extensions inside the accept object, requires auth_key and rejects a nil option before HTTP, decodes the transfer key and accepts only 202.
   Tests: `blockstorage/v2/transfers/native_contracts_test.go:TestNativeTransferRoutesBodiesPagingAndDecode`, `blockstorage/v2/transfers/native_contracts_test.go:TestNativeTransferStrictStatusesDecodeAndPreflight`.
@@ -609,7 +609,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/transfers.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/transfers.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/transfers.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs os-volume-transfer/detail with ListOpts (all_tenants included) and extension query values, follows transfers_links next hrefs as received, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.
   Tests: `blockstorage/v2/transfers/native_contracts_test.go:TestNativeTransferRoutesBodiesPagingAndDecode`, `blockstorage/v2/transfers/native_contracts_test.go:TestNativeTransferStrictStatusesDecodeAndPreflight`.
@@ -675,7 +675,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.ResetStatus`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithResetStatusOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithResetStatusField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - ResetStatus POSTs {"os-reset_status":{"status":...}} to volumes/{id}/action always sending status (empty included) and omitting empty migration/attach status, keeps extensions inside the action object, rejects a status extension collision before HTTP and accepts only 202.
   Tests: `blockstorage/v2/volumes/native_admin_contracts_test.go:TestNativeVolumeAdminActionRoutesBodiesAndStatuses`.
@@ -709,7 +709,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.API.Import`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.WithImportOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.WithImportField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Import POSTs {"backup-record":{...}} to backups/import_record re-encoding backup_url bytes as base64 with extensions inside the record, rejects a core-key collision before HTTP, decodes the backup ID and name and accepts only 201.
   Tests: `blockstorage/v2/backups/native_admin_contracts_test.go:TestNativeBackupAdminCalls`, `blockstorage/v2/backups/native_admin_contracts_test.go:TestNativeBackupAdminStatusesAndDecode`.
@@ -727,7 +727,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.API.ResetStatus`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.WithResetStatusOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.WithResetStatusField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - ResetStatus POSTs {"os-reset_status":{"status":...}} to backups/{id}/action, rejects a nil option before HTTP and accepts only 202.
   Tests: `blockstorage/v2/backups/native_admin_contracts_test.go:TestNativeBackupAdminCalls`, `blockstorage/v2/backups/native_admin_contracts_test.go:TestNativeBackupAdminStatusesAndDecode`.

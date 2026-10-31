@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create POSTs taas/tap_mirrors with a tap_mirror envelope holding name, description, port_id, mirror_type, remote_ip, string-quoted directions and project_id or other extension keys added through WithCreateField, decodes the created mirror, and rejects an extension that collides with a core key before HTTP.
   Tests: `network/v2/extensions/taas/tapmirrors/python_parity_test.go:TestPythonTapMirrorCreateBody`.
@@ -64,7 +64,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors.API.All`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors.WithListQueryValues`
 - `github.com/JSYoo5B/go-openstacksdk/request.WithQueryValues`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithQuery`
@@ -97,7 +97,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Update PUTs taas/tap_mirrors/{id} with a tap_mirror envelope holding the pointer name and description values and extension keys from WithUpdateField, and decodes the updated mirror.
   Tests: `network/v2/extensions/taas/tapmirrors/python_parity_test.go:TestPythonTapMirrorUpdateBody`.

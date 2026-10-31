@@ -77,7 +77,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.API.Delete`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithDeleteOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithDeleteQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - Native Delete issues one bodyless DELETE directly at the selected prefixed os-keypairs/{name} route. Omitted options send no query; the library-owned concrete DeleteOpts builder escapes an explicit owner as user_id and binds an escaped vendor query extension alongside it. Live token, configured source headers and both selected Compute2.55 version headers reach the actual request.
   Tests: `api/compute_keypair_delete_test.go:TestComputeKeypairDeleteOwnedDefaultsOwnerAndNativeCompatibility`.
@@ -86,7 +86,7 @@ Go API:
 
 Python/Go differences:
 
-- The upstream DeleteOptsBuilder interface is replaced by concrete DeleteOption/WithDeleteOptions and a library-owned query serializer with WithDeleteQuery extensions. API.Delete returns ExtractErr with operation context; native direct-name route, owner omission, strict202/204 and strict404 behavior are preserved. New DeleteKeypair's default-ignore/broad-status policy is an independent Python operation mapping and is not applied to this native function.
+- The upstream DeleteOptsBuilder interface is replaced by concrete DeleteOption/WithDeleteOptions and a library-owned query serializer with request.Query extensions. API.Delete returns ExtractErr with operation context; native direct-name route, owner omission, strict202/204 and strict404 behavior are preserved. New DeleteKeypair's default-ignore/broad-status policy is an independent Python operation mapping and is not applied to this native function.
 
 ### `gophercloud:compute/v2/remoteconsoles.Create`
 
@@ -95,7 +95,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/remoteconsoles.API.Create`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/remoteconsoles.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Native Create rejects omitted protocol or type before HTTP, retaining both required concrete inputs. The library-owned builder binds a URL field extension with the exact remote_console body and sends one authenticated POST to the selected prefixed servers/{serverID}/remote-consoles route without query or lookup.
   Tests: `api/compute_remote_console_test.go:TestComputeRemoteConsoleResponseEvidenceSourceAndNativeCompatibility`.

@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/attachinterfaces.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/attachinterfaces.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/attachinterfaces.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create POSTs {"interfaceAttachment":{...}} to servers/{id}/os-interface omitting empty fields, places extensions inside the envelope, rejects a core-key extension collision and a nil option before HTTP, decodes the response and accepts only 200.
   Tests: `compute/v2/attachinterfaces/native_contracts_test.go:TestNativeAttachInterfacesRoutesBodiesAndDecode`, `compute/v2/attachinterfaces/native_contracts_test.go:TestNativeAttachInterfacesStrictStatusesAndPreflight`.

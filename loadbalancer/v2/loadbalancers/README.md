@@ -11,7 +11,7 @@
 | `Failover` | `PUT .../{id}/failover` | 202 only | No request body |
 | `List` | `GET /lbaas/loadbalancers` | 200 | Follows `loadbalancers_links` next links; `ListOpts` booleans use pointers |
 
-Extension inputs use `WithCreateField`, `WithUpdateField`, `WithListQuery` and `WithDeleteQuery`. A field extension that names a core input field fails with `resource.ErrInvalidOption` before any request; nil options fail the same way.
+Extension inputs use `request.Field`, `request.Field`, `request.Query` and `request.Query`. A field extension that names a core input field fails with `resource.ErrInvalidOption` before any request; nil options fail the same way.
 
 `Find`, `All`, `Remove`, `WaitFor` and `WaitForDeletion` use the common `resource.Collection`: exact name lookup, duplicate-name errors, `status` mapped to `provisioning_status`, and ignore-missing deletion by default (`Remove` returns nil for a 404). `API.Delete` itself does not ignore a missing load balancer.
 

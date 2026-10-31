@@ -20,7 +20,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk.WithoutDefaultNetwork`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithCreateHintOpts`
 
 - Ordered NICs preserve network UUID and port combinations, literal fixed IP, fixed-IP-only/tag-only/empty objects, and omitted versus explicit empty or null tag values in the HTTP body. IDs bypass Neutron lookup and need no Network endpoint.
@@ -87,7 +87,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs servers/detail with the ListOpts query including all_tenants and extension values, follows the servers_links next href verbatim and sends no further page after the caller stops.
   Tests: `compute/v2/servers/native_crud_contracts_test.go:TestNativeServerListsQueryPagingAndStop`.
@@ -105,7 +105,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.ListSimple`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithListSimpleOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithListSimpleQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - ListSimple GETs servers with the same ListOpts query and follows the servers_links next href verbatim.
   Tests: `compute/v2/servers/native_crud_contracts_test.go:TestNativeServerListsQueryPagingAndStop`.
@@ -188,7 +188,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.ResetMetadata`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithResetMetadataOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithResetMetadataField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - ResetMetadata PUTs {"metadata": opts} replacing every item, returns the server metadata map, rejects a metadata key collision and accepts only 200.
   Tests: `compute/v2/servers/native_metadata_contracts_test.go:TestNativeServerMetadataRoutesBodiesAndDecode`, `compute/v2/servers/native_metadata_contracts_test.go:TestNativeServerMetadataStrictStatusesAndPreflight`.
@@ -206,7 +206,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.UpdateMetadata`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithUpdateMetadataOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithUpdateMetadataField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - UpdateMetadata POSTs {"metadata": opts} merging items, adds extension fields beside metadata because the typed map is not a generic envelope, rejects nil options and accepts only 200.
   Tests: `compute/v2/servers/native_metadata_contracts_test.go:TestNativeServerMetadataRoutesBodiesAndDecode`, `compute/v2/servers/native_metadata_contracts_test.go:TestNativeServerMetadataStrictStatusesAndPreflight`.
@@ -224,7 +224,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.CreateMetadatum`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithCreateMetadatumOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithCreateMetadatumField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - CreateMetadatum requires exactly one pair before HTTP, PUTs {"meta": opts} to servers/{id}/metadata/{key}, returns the server meta map and accepts only 200.
   Tests: `compute/v2/servers/native_metadata_contracts_test.go:TestNativeServerMetadataRoutesBodiesAndDecode`, `compute/v2/servers/native_metadata_contracts_test.go:TestNativeServerMetadataStrictStatusesAndPreflight`.
@@ -274,7 +274,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.Reboot`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRebootOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRebootField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Reboot POSTs {"reboot":{"type":...}} with extensions inside the action object, rejects a missing type, a type extension collision before HTTP and accepts only 201/202.
   Tests: `compute/v2/servers/native_action_contracts_test.go:TestNativeServerActionsRoutesBodiesAndDecode`, `compute/v2/servers/native_action_contracts_test.go:TestNativeServerActionsStrictStatuses`, `compute/v2/servers/native_action_contracts_test.go:TestNativeServerActionsPreflight`.
@@ -292,7 +292,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.Rebuild`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRebuildOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRebuildField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Rebuild POSTs {"rebuild":{...}} always including imageRef, validates DiskConfig before HTTP, decodes the response server and accepts only 201/202.
   Tests: `compute/v2/servers/native_action_contracts_test.go:TestNativeServerActionsRoutesBodiesAndDecode`, `compute/v2/servers/native_action_contracts_test.go:TestNativeServerActionsStrictStatuses`, `compute/v2/servers/native_action_contracts_test.go:TestNativeServerActionsPreflight`.
@@ -310,7 +310,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.Resize`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithResizeOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithResizeField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Resize POSTs {"resize":{"flavorRef":...}} with optional OS-DCF:diskConfig, rejects a missing flavor or invalid DiskConfig before HTTP and accepts only 201/202.
   Tests: `compute/v2/servers/native_action_contracts_test.go:TestNativeServerActionsRoutesBodiesAndDecode`, `compute/v2/servers/native_action_contracts_test.go:TestNativeServerActionsStrictStatuses`, `compute/v2/servers/native_action_contracts_test.go:TestNativeServerActionsPreflight`.
@@ -360,7 +360,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.CreateImage`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithCreateImageOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithCreateImageField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - CreateImage POSTs {"createImage":{...}}, requires a name before HTTP, accepts only 202 and extracts the image ID from Location before microversion 2.45 or from a JSON body image_id from 2.45, returning an empty ID for a non-JSON body and an error after 202 for a missing or bad version header or Location.
   Tests: `compute/v2/servers/native_action_contracts_test.go:TestNativeServerActionsRoutesBodiesAndDecode`, `compute/v2/servers/native_action_contracts_test.go:TestNativeServerActionsStrictStatuses`, `compute/v2/servers/native_action_contracts_test.go:TestNativeServerCreateImageIDByMicroversion`, `compute/v2/servers/native_action_contracts_test.go:TestNativeServerActionsPreflight`.
@@ -378,7 +378,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.Rescue`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRescueOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRescueField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Rescue POSTs {"rescue":{...}}, returns the response adminPass, rejects nil options before HTTP and accepts only 200.
   Tests: `compute/v2/servers/native_action_contracts_test.go:TestNativeServerActionsRoutesBodiesAndDecode`, `compute/v2/servers/native_action_contracts_test.go:TestNativeServerActionsStrictStatuses`, `compute/v2/servers/native_action_contracts_test.go:TestNativeServerActionsPreflight`.
@@ -572,7 +572,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.Unshelve`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithUnshelveOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithUnshelveField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Unshelve POSTs {"unshelve":null} without an availability zone (extensions beside it) or {"unshelve":{"availability_zone":...}} (extensions inside), rejects an availability_zone extension collision before HTTP and accepts only 201/202.
   Tests: `compute/v2/servers/native_action_contracts_test.go:TestNativeServerActionsRoutesBodiesAndDecode`, `compute/v2/servers/native_action_contracts_test.go:TestNativeServerActionsStrictStatuses`, `compute/v2/servers/native_action_contracts_test.go:TestNativeServerActionsPreflight`.
@@ -622,7 +622,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.ShowConsoleOutput`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithShowConsoleOutputOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithShowConsoleOutputField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - ShowConsoleOutput POSTs {"os-getConsoleOutput":{...}} omitting a zero length, places extensions inside the action object, rejects a length collision or nil option before HTTP, returns the output string and accepts only 200.
   Tests: `compute/v2/servers/native_address_console_contracts_test.go:TestNativeServerConsoleOutput`.

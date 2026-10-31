@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.All`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.AllRecords`
@@ -90,9 +90,9 @@ Go API:
 
 Python/Go differences:
 
-- Python transposes is_admin_state_up, is_port_security_enabled, security_group_ids and tenant_id; Go callers use the wire names through ListOpts or WithListQuery.
+- Python transposes is_admin_state_up, is_port_security_enabled, security_group_ids and tenant_id; Go callers use the wire names through ListOpts or request.Query.
 - Go ListOpts sends tags filters as one comma-separated value, while Python repeats list values.
-- Python filters keyword arguments that are Body attributes but not QueryParameters locally after each page; Go sends WithListQuery keys to the server and the caller filters the returned rows.
+- Python filters keyword arguments that are Body attributes but not QueryParameters locally after each page; Go sends request.Query keys to the server and the caller filters the returned rows.
 - The native ports.Port model has no binding:*, dns_*, extra_dhcp_opts, port_security_enabled, qos_*, resource_request, trunk_details or several other Python Body fields, so those values are not returned and cannot be filtered by the caller.
 - Python merges the next link's query into its own query parameters; Go requests the next href exactly as Neutron returned it.
 - Concrete Go records expose owned declared Resource view and independent actual Wire/Envelope/Header/StatusCode. Full mutable Python Resource/cache/dirty-state/runtime subclass handling remains tracked shared SDK-R1/C1/S1, not counted as generated transport parity.

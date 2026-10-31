@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/hypervisors.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/hypervisors.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/hypervisors.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs os-hypervisors/detail with pointer limit, marker, hypervisor_hostname_pattern and with_servers (false still sent) plus extension query, follows hypervisors_links next, decodes mixed-microversion rows, fails the whole page on a row without hypervisor_version, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native pager status errors without operation context, and rejects a nil option before HTTP. The hypervisor decoder turns integer (pre-2.53) or UUID ids into strings, accepts cpu_info as a JSON string (pre-2.28), an object or absent (2.88+), converts scientific-notation versions, and fails when id or hypervisor_version is missing or the envelope is null, while a body without the envelope yields a zero value.
   Tests: `compute/v2/hypervisors/native_contracts_test.go:TestNativeHypervisorRoutesPagingAndDecode`, `compute/v2/hypervisors/native_contracts_test.go:TestNativeHypervisorStatusesDecodeAndPreflight`.
@@ -48,7 +48,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/hypervisors.API.GetExt`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/hypervisors.WithGetExtOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/hypervisors.WithGetExtQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - GetExt GETs os-hypervisors/{id} with the with_servers pointer query and extension query (none when unset), decodes the 2.53+ servers list or leaves it nil, accepts only 200 and rejects a nil option or empty query key before HTTP. The hypervisor decoder turns integer (pre-2.53) or UUID ids into strings, accepts cpu_info as a JSON string (pre-2.28), an object or absent (2.88+), converts scientific-notation versions, and fails when id or hypervisor_version is missing or the envelope is null, while a body without the envelope yields a zero value.
   Tests: `compute/v2/hypervisors/native_contracts_test.go:TestNativeHypervisorRoutesPagingAndDecode`, `compute/v2/hypervisors/native_contracts_test.go:TestNativeHypervisorStatusesDecodeAndPreflight`.
@@ -114,7 +114,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create POSTs os-aggregates with {"aggregate":{name, omitempty availability_zone, extensions}}, rejects an empty name, a nil option or an extension colliding with a core key (even an omitted availability_zone) before HTTP, accepts only 200 and returns a nil aggregate without error when the envelope is missing or null.
   Tests: `compute/v2/aggregates/native_contracts_test.go:TestNativeAggregateRoutesBodiesAndDecode`, `compute/v2/aggregates/native_contracts_test.go:TestNativeAggregateStatusesDecodeAndPreflight`.
@@ -148,7 +148,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Update PUTs os-aggregates/{id} with {"aggregate":{omitempty name/availability_zone, extensions}} (an empty UpdateOpts sends an empty object), rejects core-key extensions and nil options before HTTP and accepts only 200.
   Tests: `compute/v2/aggregates/native_contracts_test.go:TestNativeAggregateRoutesBodiesAndDecode`, `compute/v2/aggregates/native_contracts_test.go:TestNativeAggregateStatusesDecodeAndPreflight`.
@@ -233,7 +233,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/services.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/services.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/services.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs os-services with omitempty binary/host and extension query as one SinglePageBase page that ignores services_links, decodes integer or UUID ids as strings, fails the page on a row without id, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native pager status errors without operation context, and rejects a nil option before HTTP.
   Tests: `compute/v2/services/native_contracts_test.go:TestNativeComputeServiceRoutesBodiesAndDecode`, `compute/v2/services/native_contracts_test.go:TestNativeComputeServiceStatusesDecodeAndPreflight`.
@@ -251,7 +251,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/services.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/services.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/services.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Update PUTs os-services/{id} with an unwrapped body of omitempty status, disabled_reason and forced_down (false cannot be sent) plus root-level extensions, rejects core-key extensions (including forced_down) and nil options before HTTP, accepts only 200, and decodes the service envelope where a missing envelope is zero but a null or id-less object fails.
   Tests: `compute/v2/services/native_contracts_test.go:TestNativeComputeServiceRoutesBodiesAndDecode`, `compute/v2/services/native_contracts_test.go:TestNativeComputeServiceStatusesDecodeAndPreflight`.
@@ -285,7 +285,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/migrations.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/migrations.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/migrations.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs os-migrations with pointer filters (a zero limit is still sent), offset-preserving RFC3339 changes-since/changes-before and extension query, reads one SinglePageBase page without following 2.59 migrations_links, decodes int64 ids and zone-less timestamps, fails the page on bad rows, yields nothing for an empty or missing array, reports io.EOF for a bodyless 204 and native pager status errors without operation context, and rejects a nil option before HTTP.
   Tests: `compute/v2/migrations/native_contracts_test.go:TestNativeMigrationListQueryAndDecode`, `compute/v2/migrations/native_contracts_test.go:TestNativeMigrationListStatusesAndPreflight`.
@@ -336,7 +336,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/usage.API.AllTenants`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/usage.WithAllTenantsOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/usage.WithAllTenantsQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - AllTenants GETs os-simple-tenant-usage with detailed=1 only when Detailed is true, offset-less wall-clock start/end, omitempty limit/marker and extension query, follows tenant_usages_links next, decodes TenantUsage rows with zone-less timestamps, yields nothing for an empty or missing array, reports io.EOF for a bodyless 204 and native pager status or decode errors without operation context, and rejects a nil option before HTTP.
   Tests: `compute/v2/usage/native_all_tenants_test.go:TestNativeAllTenantsUsageQueryPagingAndDecode`, `compute/v2/usage/native_all_tenants_test.go:TestNativeAllTenantsUsageStatusesAndPreflight`.

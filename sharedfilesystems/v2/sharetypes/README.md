@@ -16,7 +16,7 @@
 
 Limits inherited from Gophercloud: `CreateOpts.ExtraSpecs.DriverHandlesShareServers` is required, so its zero value `false` fails local validation before any request and cannot be sent through the typed options. `SnapshotSupport` is a pointer, so an explicit `false` is sent when `DriverHandlesShareServers` is true. `Get`, `GetDefault`, `Create` and `Update` decode a `share_type` envelope; a body without it is not a supported response. Unknown response fields are not retained.
 
-Extension inputs use `WithCreateField`, `WithUpdateField`, `WithSetExtraSpecsField`, `WithAddAccessField`, `WithRemoveAccessField` and `WithListQuery`. A field extension that names a core input field fails with `resource.ErrInvalidOption` before any request; nil options fail the same way. For `SetExtraSpecs` an extension field is merged into the `extra_specs` map, so it adds a spec key and collides only with a key already in `ExtraSpecs`.
+Extension inputs use `request.Field`, `request.Field`, `request.Field`, `request.Field`, `request.Field` and `request.Query`. A field extension that names a core input field fails with `resource.ErrInvalidOption` before any request; nil options fail the same way. For `SetExtraSpecs` an extension field is merged into the `extra_specs` map, so it adds a spec key and collides only with a key already in `ExtraSpecs`.
 
 `Find`, `All`, `Remove`, `WaitFor` and `WaitForDeletion` use the common `resource.Collection`: exact name lookup, and ignore-missing deletion by default (`Remove` returns nil for a 404). `API.Get` and `API.Delete` do not add `resource.ErrNotFound` or ignore a missing share type.
 

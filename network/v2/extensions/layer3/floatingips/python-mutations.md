@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.API.UpdateWithAttributes`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.WithAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.WithIfMatch`

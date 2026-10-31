@@ -62,7 +62,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/tags.API.ReplaceAll`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/tags.WithReplaceAllOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/tags.WithReplaceAllField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - ReplaceAll PUTs {"tags":[...]} with extensions beside the array, rejects nil tags, a tags override or nil option before HTTP, returns the server-ordered tags and accepts only 200.
   Tests: `compute/v2/tags/native_contracts_test.go:TestNativeTagsRoutesBodiesAndDecode`, `compute/v2/tags/native_contracts_test.go:TestNativeTagsStrictStatusesCheckAndPreflight`.

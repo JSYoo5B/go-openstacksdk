@@ -9,7 +9,7 @@
 | `Update` | `PATCH .../claims/{id}` | 204 only | Body `ttl`/`grace` only when non-zero |
 | `Delete` | `DELETE .../claims/{id}` | 204 only | Native 404 stays an HTTP response error |
 
-`Create` accepts `WithCreateField` and `WithCreateQuery`; `Update` accepts `WithUpdateField`. A field extension that names `ttl` or `grace` fails with `resource.ErrInvalidOption` before any request; nil options fail the same way.
+`Create` accepts `request.Field` and `request.Query`; `Update` accepts `request.Field`. A field extension that names `ttl` or `grace` fails with `resource.ErrInvalidOption` before any request; nil options fail the same way.
 
 The native wrappers do not add a `Client-ID` header. Deployments that require one must receive it from the caller's client configuration.
 

@@ -48,7 +48,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/remoteconsoles.API.Create`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/remoteconsoles.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Native Create rejects omitted protocol or type before HTTP, retaining both required concrete inputs. The library-owned builder binds a URL field extension with the exact remote_console body and sends one authenticated POST to the selected prefixed servers/{serverID}/remote-consoles route without query or lookup.
   Tests: `api/compute_remote_console_test.go:TestComputeRemoteConsoleResponseEvidenceSourceAndNativeCompatibility`.
@@ -59,7 +59,7 @@ Go API:
 
 Python/Go differences:
 
-- The upstream CreateOptsBuilder interface is replaced by concrete CreateOpts/CreateOption and a library-owned body serializer with WithCreateField extensions. API.Create returns extracted native RemoteConsole and wraps failures with operation context; native protocol/type requirements, strict200 status and partial/null extraction remain unchanged. Protocol derivation, selected-version gates and seeded Resource/Wire belong to the independent Python CreateConsole mapping.
+- The upstream CreateOptsBuilder interface is replaced by concrete CreateOpts/CreateOption and a library-owned body serializer with request.Field extensions. API.Create returns extracted native RemoteConsole and wraps failures with operation context; native protocol/type requirements, strict200 status and partial/null extraction remain unchanged. Protocol derivation, selected-version gates and seeded Resource/Wire belong to the independent Python CreateConsole mapping.
 
 ## References
 

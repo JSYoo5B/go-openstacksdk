@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/applicationcredentials.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/applicationcredentials.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/applicationcredentials.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create POSTs {"application_credential":{...}} to users/{user}/application_credentials always sending unrestricted (false included), formatting expires_at without a zone in the time's own location, keeping roles/access rules and extensions inside the envelope, rejects a missing name and core-key collision before HTTP, decodes the one-time secret and accepts only 201.
   Tests: `identity/v3/applicationcredentials/native_contracts_test.go:TestNativeApplicationCredentialRoutesBodiesPagingAndDecode`, `identity/v3/applicationcredentials/native_contracts_test.go:TestNativeApplicationCredentialStatusesDecodeAndPreflight`.
@@ -48,7 +48,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/applicationcredentials.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/applicationcredentials.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/applicationcredentials.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs users/{user}/application_credentials with the name filter and extension query values, follows the Keystone links.next string until null, reports native page status errors without operation context and rejects a nil option before HTTP.
   Tests: `identity/v3/applicationcredentials/native_contracts_test.go:TestNativeApplicationCredentialRoutesBodiesPagingAndDecode`, `identity/v3/applicationcredentials/native_contracts_test.go:TestNativeApplicationCredentialStatusesDecodeAndPreflight`.
@@ -130,7 +130,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/credentials.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/credentials.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/credentials.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create POSTs {"credential":{...}} to credentials with the JSON blob string, requires blob, type and user_id and rejects a core-key collision before HTTP, and accepts only 201.
   Tests: `identity/v3/credentials/native_contracts_test.go:TestNativeCredentialRoutesBodiesPagingAndDecode`, `identity/v3/credentials/native_contracts_test.go:TestNativeCredentialStatusesDecodeAndPreflight`.
@@ -164,7 +164,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/credentials.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/credentials.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/credentials.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List GETs credentials with user_id/type filters and extension query values, follows the Keystone links.next string until null, and rejects a nil option before HTTP.
   Tests: `identity/v3/credentials/native_contracts_test.go:TestNativeCredentialRoutesBodiesPagingAndDecode`, `identity/v3/credentials/native_contracts_test.go:TestNativeCredentialStatusesDecodeAndPreflight`.
@@ -182,7 +182,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/credentials.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/credentials.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/credentials.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Update PATCHes {"credential":{...}} to credentials/{id} omitting empty fields with extensions inside the envelope, rejects a nil option before HTTP and accepts only 200.
   Tests: `identity/v3/credentials/native_contracts_test.go:TestNativeCredentialRoutesBodiesPagingAndDecode`, `identity/v3/credentials/native_contracts_test.go:TestNativeCredentialStatusesDecodeAndPreflight`.
@@ -216,7 +216,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/ec2credentials.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/ec2credentials.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/ec2credentials.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create POSTs an envelope-free {"tenant_id":...} body with top-level extensions to users/{user}/credentials/OS-EC2, requires tenant_id and rejects a tenant_id extension before HTTP, decodes the credential access/secret and accepts only 201.
   Tests: `identity/v3/ec2credentials/native_contracts_test.go:TestNativeEC2CredentialRoutesBodiesPagingAndDecode`, `identity/v3/ec2credentials/native_contracts_test.go:TestNativeEC2CredentialStatusesAndPreflight`.

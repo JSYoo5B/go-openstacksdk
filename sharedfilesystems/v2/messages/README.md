@@ -8,7 +8,7 @@
 | `List` | `GET /messages` | 200 | Single page; `ListOpts` filters (`ID`, `ActionID`, `DetailID`, `MessageLevel`, `RequestID`, `ResourceID`, `ResourceType`, `SortKey`, `SortDir`, `Limit`); empty/zero filters are omitted; `next` links are not followed |
 | `Delete` | `DELETE /messages/{id}` | 202, 204 | Native 404 stays an HTTP response error |
 
-Extension inputs use `WithListQuery`; nil options fail with `resource.ErrInvalidOption` before any request.
+Extension inputs use `request.Query`; nil options fail with `resource.ErrInvalidOption` before any request.
 
 `Find`, `All`, `Remove`, `WaitFor` and `WaitForDeletion` use the common `resource.Collection`, including ignore-missing deletion by default (`Remove` returns nil for a 404). `API.Get` and `API.Delete` do not add `resource.ErrNotFound` or ignore a missing message.
 

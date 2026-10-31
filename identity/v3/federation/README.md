@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/federation.API.CreateSourceMappingRecord`
 
-- CreateMapping sends PUT OS-FEDERATION/mappings/{id} with id and schema_version in the mapping envelope via WithCreateMappingField, as Python does, but the decoded Mapping drops schema_version and unknown rule keys.
+- CreateMapping sends PUT OS-FEDERATION/mappings/{id} with id and schema_version in the mapping envelope via request.Field, as Python does, but the decoded Mapping drops schema_version and unknown rule keys.
   Tests: `identity/v3/federation/python_parity_test.go:TestPythonMappingRequestsAndDecodeGaps`.
 - Owned member PUT preserves arbitrary raw rule keys/schema writes, required wire ID and ignored constructor name and nullable/list/string Resource views; actual response overrides seed and retains independent Wire evidence.
   Tests: `identity/v3/federation/python_source_mapping_test.go:TestSourceMappingCreatePreservesRawRulesAndNullableDescriptorView`, `identity/v3/federation/python_source_mapping_test.go:TestSourceMappingCreateIgnoresNameDefaultsAndStatusPolicy`, `identity/v3/federation/python_source_mapping_test.go:TestSourceMappingOwnershipAndCallbackGuards`, `identity/v3/federation/python_source_mapping_test.go:TestSourceMappingPreflightCollisionsAndInvalidBodies`.

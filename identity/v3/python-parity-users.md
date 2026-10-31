@@ -174,7 +174,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.Create`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.CreateRecord`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordMutationOpts`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordMutationAttribute`
@@ -194,7 +194,7 @@ Python/Go differences:
 - Legacy native Create returns a Gophercloud model pointer rather than the mutable Python Resource; the new sibling CreateRecord returns an independently owned DomainRecord with options and original response evidence.
 - Legacy native Create/Update: Python accepts any status below 400; the native Create accepts only 201.
 - Legacy native Create/Update: domains.CreateOpts requires Name, so Go rejects before HTTP a Python create_domain without a name.
-- Legacy native Create/Update: Domain options have no typed CreateOpts field and are sent with domains.WithCreateField("options", ...).
+- Legacy native Create/Update: Domain options have no typed CreateOpts field and are sent with request.Field("options", ...).
 - New owned mutation APIs leave native Create/Update untouched. They take finite UTF-8 JSON attributes and safe string IDs in a freshly seeded Domain operation, return independent DomainRecord views plus physical Wire/Envelope/header/status, retain Domain.options and explicit null and drop unknown Body attributes. Request values remain raw; descriptor casts apply only to the returned view.
 - The fixed Domain collection/member route deliberately rejects raw base_path with ErrUnsupported/ErrInvalidOption rather than reproducing Source arbitrary URI overrides or formatter/runtime objects. Headers, Microversion and Location are explicit Go conveniences; configured location is copied, unknown server project_id/location is not trusted. Class/session/adapter injection and caller custom transport cache bypass are not claimed.
 - Ordered attribute helpers use last canonical/wire alias occurrence; bulk Attributes maps use sorted keys as a deterministic Go adaptation. Mutable existing Resource baseline/equality/recommit state is not modeled. SDK-R1/C1/S1, authenticated cloud acceptance and release verification remain separately tracked whole-SDK goals.
@@ -207,7 +207,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.API.Create`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create sends POST groups with the {"group": {...}} envelope that Python create_group sends and decodes the fields Python exposes.
   Tests: `identity/v3/groups/python_parity_test.go:TestPythonGroupCreateGetUpdateRequests`.
@@ -227,7 +227,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.Create`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create sends POST projects with the {"project": {...}} envelope that Python create_project sends and decodes the fields Python exposes.
   Tests: `identity/v3/projects/python_parity_test.go:TestPythonProjectCreateGetUpdateRequests`.
@@ -248,7 +248,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.Create`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create sends POST roles with the {"role": {...}} envelope that Python create_role sends and decodes the fields Python exposes.
   Tests: `identity/v3/roles/python_parity_test.go:TestPythonRoleCreateGetUpdateRequests`.
@@ -268,7 +268,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.Create`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Create sends POST users with the {"user": {...}} envelope that Python create_user sends and decodes the fields Python exposes.
   Tests: `identity/v3/users/python_parity_test.go:TestPythonUserCreateGetUpdateRequests`.
@@ -390,7 +390,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.AllRecords`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.ProxyListRecords`
@@ -555,7 +555,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.ListInGroup`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithListInGroupOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithListInGroupQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.ListUsersInGroupRecords`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.AllUsersInGroupRecords`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.ProxyUsersInGroupRecords`
@@ -610,7 +610,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.GroupRecord.Clone`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.API.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.API.AllRecords`
@@ -668,7 +668,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.AllRecords`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.ProxyListRecords`
@@ -752,7 +752,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.AllRecords`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.ProxyListRecords`
@@ -923,7 +923,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.Update`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.UpdateRecord`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordMutationOpts`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordMutationAttribute`
@@ -957,7 +957,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.API.Update`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Update sends PATCH groups/{id} with the {"group": {...}} envelope including the dirty id that Python update_group sends and decodes the response.
   Tests: `identity/v3/groups/python_parity_test.go:TestPythonGroupCreateGetUpdateRequests`.
@@ -966,7 +966,7 @@ Python/Go differences:
 
 - Python accepts an ID string or a Resource instance and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer.
 - Python accepts any status below 400; the native Update accepts only 200.
-- Python Proxy._update leaves the id dirty, so the PATCH body carries it; Go adds it with groups.WithUpdateField("id", id) and Keystone ignores it.
+- Python Proxy._update leaves the id dirty, so the PATCH body carries it; Go adds it with request.Field("id", id) and Keystone ignores it.
 - Typed UpdateOpts omit empty strings and nil pointers; a Python None value is sent as null only through the Extra map (for example Extra{"description": nil}).
 
 ### `python:identity/v3/update_password`
@@ -994,7 +994,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.Update`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Update sends PATCH projects/{id} with the {"project": {...}} envelope including the dirty id that Python update_project sends and decodes the response.
   Tests: `identity/v3/projects/python_parity_test.go:TestPythonProjectCreateGetUpdateRequests`.
@@ -1003,7 +1003,7 @@ Python/Go differences:
 
 - Python accepts an ID string or a Resource instance and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer.
 - Python accepts any status below 400; the native Update accepts only 200.
-- Python Proxy._update leaves the id dirty, so the PATCH body carries it; Go adds it with projects.WithUpdateField("id", id) and Keystone ignores it.
+- Python Proxy._update leaves the id dirty, so the PATCH body carries it; Go adds it with request.Field("id", id) and Keystone ignores it.
 - Typed UpdateOpts omit empty strings and nil pointers; a Python None value is sent as null only through the Extra map (for example Extra{"description": nil}).
 
 ### `python:identity/v3/update_role`
@@ -1014,7 +1014,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.Update`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Update sends PATCH roles/{id} with the {"role": {...}} envelope including the dirty id that Python update_role sends and decodes the response.
   Tests: `identity/v3/roles/python_parity_test.go:TestPythonRoleCreateGetUpdateRequests`.
@@ -1023,7 +1023,7 @@ Python/Go differences:
 
 - Python accepts an ID string or a Resource instance and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer.
 - Python accepts any status below 400; the native Update accepts only 200.
-- Python Proxy._update leaves the id dirty, so the PATCH body carries it; Go adds it with roles.WithUpdateField("id", id) and Keystone ignores it.
+- Python Proxy._update leaves the id dirty, so the PATCH body carries it; Go adds it with request.Field("id", id) and Keystone ignores it.
 - Typed UpdateOpts omit empty strings and nil pointers; a Python None value is sent as null only through the Extra map (for example Extra{"description": nil}).
 
 ### `python:identity/v3/update_user`
@@ -1034,7 +1034,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.Update`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Update sends PATCH users/{id} with the {"user": {...}} envelope including the dirty id that Python update_user sends and decodes the response.
   Tests: `identity/v3/users/python_parity_test.go:TestPythonUserCreateGetUpdateRequests`.
@@ -1043,7 +1043,7 @@ Python/Go differences:
 
 - Python accepts an ID string or a Resource instance and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer.
 - Python accepts any status below 400; the native Update accepts only 200.
-- Python Proxy._update leaves the id dirty, so the PATCH body carries it; Go adds it with users.WithUpdateField("id", id) and Keystone ignores it.
+- Python Proxy._update leaves the id dirty, so the PATCH body carries it; Go adds it with request.Field("id", id) and Keystone ignores it.
 - Typed UpdateOpts omit empty strings and nil pointers; a Python None value is sent as null only through the Extra map (for example Extra{"description": nil}).
 
 ### `python:identity/v3/users`
@@ -1055,7 +1055,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.UserRecord.Clone`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.AllRecords`
@@ -1234,7 +1234,7 @@ project, err := projects.New(client).Create(ctx, projects.CreateOpts{Name: "demo
 empty := []string{}
 project, err = projects.New(client).Update(ctx, "p-1",
     projects.UpdateOpts{Tags: &empty, Extra: map[string]any{"description": nil}},
-    projects.WithUpdateField("id", "p-1"))
+    request.Field("id", "p-1"))
 ```
 
 ```go
