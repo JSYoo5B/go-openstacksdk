@@ -130,7 +130,7 @@ func minimumPacketRateParentQuery(policy neutronfind.Options, parent string, inj
 
 // FindMinimumPacketRateRecord matches pinned GET-first Find within one literal
 // parent policy. Only clean member400/403/404 permit a complete ID/name search.
-func (a *API) FindMinimumPacketRateRecord(ctx context.Context, policyID, identity string, opts MinimumPacketRateFindOpts, calls ...request.ReadCall) (*MinimumPacketRateRecord, error) {
+func (a *API) FindMinimumPacketRateRecord(ctx context.Context, policyID, identity string, opts MinimumPacketRateFindOpts, calls ...request.FindCall) (*MinimumPacketRateRecord, error) {
 	engine, err := a.minimumPacketRateEngine(ctx, policyID)
 	if err != nil {
 		return nil, minimumPacketRateWrap(ctx, "FindMinimumPacketRateRecord", err)
@@ -150,7 +150,7 @@ func (a *API) FindMinimumPacketRateRecord(ctx context.Context, policyID, identit
 // GetMinimumPacketRateRecord performs one literal member GET, with no parent
 // lookup, Find fallback or ignore-missing behavior. Header/version options are
 // explicit Go conveniences; pinned get_qos_minimum_packet_rate_rule has no kwargs.
-func (a *API) GetMinimumPacketRateRecord(ctx context.Context, policyID, identity string, calls ...request.ReadCall) (*MinimumPacketRateRecord, error) {
+func (a *API) GetMinimumPacketRateRecord(ctx context.Context, policyID, identity string, calls ...request.GetCall) (*MinimumPacketRateRecord, error) {
 	engine, err := a.minimumPacketRateEngine(ctx, policyID)
 	if err != nil {
 		return nil, minimumPacketRateWrap(ctx, "GetMinimumPacketRateRecord", err)

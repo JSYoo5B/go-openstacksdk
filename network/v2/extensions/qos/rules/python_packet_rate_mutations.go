@@ -42,7 +42,7 @@ func copyPacketRateMutation(v packetRateMutationState) packetRateMutationState {
 	v.Fields, v.Headers, v.Microversion, v.order = owned.Query, owned.Headers, owned.Microversion, owned.Order
 	return v
 }
-func packetRateMutationCalls(calls []request.MutationCall) []func(*packetRateMutationState) error {
+func packetRateMutationCalls(calls []request.WriteCall) []func(*packetRateMutationState) error {
 	return qosCalls(calls, func(s *packetRateMutationState) qosCallFields {
 		return qosCallFields{headers: &s.Headers, microversion: &s.Microversion}
 	}, packetRateRuleField, false)
@@ -82,7 +82,7 @@ func copyPacketRateDelete(v packetRateDeleteState) packetRateDeleteState {
 	v.IgnoreMissing, v.Headers, v.Microversion = owned.IgnoreMissing, owned.Headers, owned.Microversion
 	return v
 }
-func packetRateDeleteCalls(calls []request.MutationCall) []func(*packetRateDeleteState) error {
+func packetRateDeleteCalls(calls []request.DeleteCall) []func(*packetRateDeleteState) error {
 	return qosCalls(calls, func(s *packetRateDeleteState) qosCallFields {
 		return qosCallFields{headers: &s.Headers, microversion: &s.Microversion, ignore: &s.IgnoreMissing}
 	}, nil, false)
@@ -174,12 +174,12 @@ func packetRateTransportPolicy(policy neutronfind.Options) neutronfind.Options {
 	return owned
 }
 
-func packetRateMutationOptions(ctx context.Context, engine *neutronfind.Engine, opts PacketRateRuleMutationOpts, calls []request.MutationCall) (neutronfind.Options, error) {
+func packetRateMutationOptions(ctx context.Context, engine *neutronfind.Engine, opts PacketRateRuleMutationOpts, calls []request.WriteCall) (neutronfind.Options, error) {
 	policy, err := applyMinimumPacketRateOptions(ctx, engine, packetRateMutationState{Fields: opts.Fields}, copyPacketRateMutation, packetRateMutationCalls(calls))
 	return packetRateMutationPolicy(policy), err
 }
 
-func packetRateCreate(ctx context.Context, engine *neutronfind.Engine, profile neutronfind.Profile, opts PacketRateRuleMutationOpts, calls []request.MutationCall) (*neutronfind.Record, error) {
+func packetRateCreate(ctx context.Context, engine *neutronfind.Engine, profile neutronfind.Profile, opts PacketRateRuleMutationOpts, calls []request.WriteCall) (*neutronfind.Record, error) {
 	prepared, err := packetRateMutationOptions(ctx, engine, opts, calls)
 	if err != nil {
 		return nil, err
@@ -191,7 +191,7 @@ func packetRateCreate(ctx context.Context, engine *neutronfind.Engine, profile n
 	return engine.Mutate(ctx, http.MethodPost, "", body, seed, packetRateTransportPolicy(prepared))
 }
 
-func packetRateUpdate(ctx context.Context, engine *neutronfind.Engine, profile neutronfind.Profile, id string, opts PacketRateRuleMutationOpts, calls []request.MutationCall) (*neutronfind.Record, error) {
+func packetRateUpdate(ctx context.Context, engine *neutronfind.Engine, profile neutronfind.Profile, id string, opts PacketRateRuleMutationOpts, calls []request.WriteCall) (*neutronfind.Record, error) {
 	prepared, err := packetRateMutationOptions(ctx, engine, opts, calls)
 	if err != nil {
 		return nil, err
@@ -210,7 +210,7 @@ func packetRateUpdate(ctx context.Context, engine *neutronfind.Engine, profile n
 	return engine.Mutate(ctx, http.MethodPut, id, body, seed, packetRateTransportPolicy(prepared))
 }
 
-func packetRateDelete(ctx context.Context, engine *neutronfind.Engine, id string, calls []request.MutationCall) (*PacketRateRuleDeleteResult, error) {
+func packetRateDelete(ctx context.Context, engine *neutronfind.Engine, id string, calls []request.DeleteCall) (*PacketRateRuleDeleteResult, error) {
 	policy, err := applyMinimumPacketRateOptions(ctx, engine, packetRateDeleteState{}, copyPacketRateDelete, packetRateDeleteCalls(calls))
 	if err == nil {
 		err = packetRateMutationID(id)
@@ -236,7 +236,7 @@ func packetRateDelete(ctx context.Context, engine *neutronfind.Engine, id string
 // CreateMinimumPacketRateRecord POSTs the provided attributes under
 // minimum_packet_rate_rule for a literal QoS policy, as
 // create_qos_minimum_packet_rate_rule(qos_policy, **attrs).
-func (a *API) CreateMinimumPacketRateRecord(ctx context.Context, policyID string, opts PacketRateRuleMutationOpts, calls ...request.MutationCall) (*MinimumPacketRateRecord, error) {
+func (a *API) CreateMinimumPacketRateRecord(ctx context.Context, policyID string, opts PacketRateRuleMutationOpts, calls ...request.WriteCall) (*MinimumPacketRateRecord, error) {
 	const op = "CreateMinimumPacketRateRecord"
 	engine, err := a.minimumPacketRateEngine(ctx, policyID)
 	if err != nil {
@@ -248,7 +248,7 @@ func (a *API) CreateMinimumPacketRateRecord(ctx context.Context, policyID string
 
 // UpdateMinimumPacketRateRecord PUTs only the provided attributes. No
 // attribute returns the seed view without HTTP, as Resource.commit does.
-func (a *API) UpdateMinimumPacketRateRecord(ctx context.Context, policyID, ruleID string, opts PacketRateRuleMutationOpts, calls ...request.MutationCall) (*MinimumPacketRateRecord, error) {
+func (a *API) UpdateMinimumPacketRateRecord(ctx context.Context, policyID, ruleID string, opts PacketRateRuleMutationOpts, calls ...request.WriteCall) (*MinimumPacketRateRecord, error) {
 	const op = "UpdateMinimumPacketRateRecord"
 	engine, err := a.minimumPacketRateEngine(ctx, policyID)
 	if err != nil {
@@ -260,7 +260,7 @@ func (a *API) UpdateMinimumPacketRateRecord(ctx context.Context, policyID, ruleI
 
 // DeleteMinimumPacketRateRecord sends a bodyless DELETE and ignores only a
 // clean actual 404 by default.
-func (a *API) DeleteMinimumPacketRateRecord(ctx context.Context, policyID, ruleID string, calls ...request.MutationCall) (*PacketRateRuleDeleteResult, error) {
+func (a *API) DeleteMinimumPacketRateRecord(ctx context.Context, policyID, ruleID string, calls ...request.DeleteCall) (*PacketRateRuleDeleteResult, error) {
 	const op = "DeleteMinimumPacketRateRecord"
 	engine, err := a.minimumPacketRateEngine(ctx, policyID)
 	if err != nil {
@@ -273,7 +273,7 @@ func (a *API) DeleteMinimumPacketRateRecord(ctx context.Context, policyID, ruleI
 // CreatePacketRateLimitRecord POSTs the provided attributes under
 // packet_rate_limit_rule for a literal QoS policy, as
 // create_qos_packet_rate_limit_rule(qos_policy, **attrs).
-func (a *API) CreatePacketRateLimitRecord(ctx context.Context, policyID string, opts PacketRateRuleMutationOpts, calls ...request.MutationCall) (*PacketRateLimitRecord, error) {
+func (a *API) CreatePacketRateLimitRecord(ctx context.Context, policyID string, opts PacketRateRuleMutationOpts, calls ...request.WriteCall) (*PacketRateLimitRecord, error) {
 	const op = "CreatePacketRateLimitRecord"
 	engine, err := a.packetRateLimitEngine(ctx, policyID)
 	if err != nil {
@@ -285,7 +285,7 @@ func (a *API) CreatePacketRateLimitRecord(ctx context.Context, policyID string, 
 
 // UpdatePacketRateLimitRecord PUTs only the provided attributes. No attribute
 // returns the seed view without HTTP, as Resource.commit does.
-func (a *API) UpdatePacketRateLimitRecord(ctx context.Context, policyID, ruleID string, opts PacketRateRuleMutationOpts, calls ...request.MutationCall) (*PacketRateLimitRecord, error) {
+func (a *API) UpdatePacketRateLimitRecord(ctx context.Context, policyID, ruleID string, opts PacketRateRuleMutationOpts, calls ...request.WriteCall) (*PacketRateLimitRecord, error) {
 	const op = "UpdatePacketRateLimitRecord"
 	engine, err := a.packetRateLimitEngine(ctx, policyID)
 	if err != nil {
@@ -297,7 +297,7 @@ func (a *API) UpdatePacketRateLimitRecord(ctx context.Context, policyID, ruleID 
 
 // DeletePacketRateLimitRecord sends a bodyless DELETE and ignores only a
 // clean actual 404 by default.
-func (a *API) DeletePacketRateLimitRecord(ctx context.Context, policyID, ruleID string, calls ...request.MutationCall) (*PacketRateRuleDeleteResult, error) {
+func (a *API) DeletePacketRateLimitRecord(ctx context.Context, policyID, ruleID string, calls ...request.DeleteCall) (*PacketRateRuleDeleteResult, error) {
 	const op = "DeletePacketRateLimitRecord"
 	engine, err := a.packetRateLimitEngine(ctx, policyID)
 	if err != nil {

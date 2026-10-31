@@ -44,7 +44,7 @@ func copyMinimumBandwidthFind(v minimumBandwidthFindState) minimumBandwidthFindS
 	}
 	return v
 }
-func minimumBandwidthFindCalls(calls []request.ReadCall) []func(*minimumBandwidthFindState) error {
+func minimumBandwidthFindCalls(calls []request.FindCall) []func(*minimumBandwidthFindState) error {
 	return qosCalls(calls, func(s *minimumBandwidthFindState) qosCallFields {
 		return qosCallFields{headers: &s.Headers, microversion: &s.Microversion, ignore: &s.IgnoreMissing}
 	}, minimumBandwidthFindQuery, false)
@@ -166,7 +166,7 @@ func copyMinimumBandwidthGet(v minimumBandwidthGetState) minimumBandwidthGetStat
 	}
 	return v
 }
-func minimumBandwidthGetCalls(calls []request.ReadCall) []func(*minimumBandwidthGetState) error {
+func minimumBandwidthGetCalls(calls []request.GetCall) []func(*minimumBandwidthGetState) error {
 	return qosCalls(calls, func(s *minimumBandwidthGetState) qosCallFields {
 		return qosCallFields{headers: &s.Headers, microversion: &s.Microversion}
 	}, nil, false)

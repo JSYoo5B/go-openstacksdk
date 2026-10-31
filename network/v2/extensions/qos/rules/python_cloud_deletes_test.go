@@ -16,18 +16,18 @@ import (
 
 type qosDeleteTestKind struct {
 	name, path string
-	delete     func(context.Context, *rules.API, string, string, ...request.MutationCall) (*rules.QoSRuleDeleteReceipt, error)
+	delete     func(context.Context, *rules.API, string, string, ...request.DeleteCall) (*rules.QoSRuleDeleteReceipt, error)
 }
 
 func qosDeleteTestKinds() []qosDeleteTestKind {
 	return []qosDeleteTestKind{
-		{"DeleteBandwidthLimitRecord", "bandwidth_limit_rules", func(ctx context.Context, a *rules.API, p, id string, o ...request.MutationCall) (*rules.QoSRuleDeleteReceipt, error) {
+		{"DeleteBandwidthLimitRecord", "bandwidth_limit_rules", func(ctx context.Context, a *rules.API, p, id string, o ...request.DeleteCall) (*rules.QoSRuleDeleteReceipt, error) {
 			return a.DeleteBandwidthLimitRecord(ctx, p, id, o...)
 		}},
-		{"DeleteDSCPMarkingRecord", "dscp_marking_rules", func(ctx context.Context, a *rules.API, p, id string, o ...request.MutationCall) (*rules.QoSRuleDeleteReceipt, error) {
+		{"DeleteDSCPMarkingRecord", "dscp_marking_rules", func(ctx context.Context, a *rules.API, p, id string, o ...request.DeleteCall) (*rules.QoSRuleDeleteReceipt, error) {
 			return a.DeleteDSCPMarkingRecord(ctx, p, id, o...)
 		}},
-		{"DeleteMinimumBandwidthRecord", "minimum_bandwidth_rules", func(ctx context.Context, a *rules.API, p, id string, o ...request.MutationCall) (*rules.QoSRuleDeleteReceipt, error) {
+		{"DeleteMinimumBandwidthRecord", "minimum_bandwidth_rules", func(ctx context.Context, a *rules.API, p, id string, o ...request.DeleteCall) (*rules.QoSRuleDeleteReceipt, error) {
 			return a.DeleteMinimumBandwidthRecord(ctx, p, id, o...)
 		}},
 	}
@@ -63,7 +63,7 @@ func TestQoSRuleDeleteDefaultMissingAndStrictRejectionsKeepActualReceipt(t *test
 					response.Header.Set("X-Request-Id", "reject")
 					return response
 				})
-				var options []request.MutationCall
+				var options []request.DeleteCall
 				if strict {
 					options = append(options, request.IgnoreMissing(false))
 				}
@@ -137,7 +137,7 @@ func TestQoSRuleDeleteOwnedHeadersVersionCallbacksAndGuardCauses(t *testing.T) {
 		if cancelled {
 			cancel(cause)
 		}
-		receipt, err := api.DeleteBandwidthLimitRecord(ctx, "parent", "rule", request.Field("vendor", true))
+		receipt, err := api.DeleteBandwidthLimitRecord(ctx, "parent", "rule", request.Custom(func(*struct{}) error { return nil }))
 		cancel(nil)
 		if receipt != nil || len(calls) != 0 || cancelled && !errors.Is(err, cause) || !cancelled && !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(receipt, err, calls)

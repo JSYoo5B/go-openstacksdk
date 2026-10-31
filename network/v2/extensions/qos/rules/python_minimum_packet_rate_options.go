@@ -37,7 +37,7 @@ func copyMinimumPacketRateFind(v minimumPacketRateFindState) minimumPacketRateFi
 	v.IgnoreMissing, v.Microversion, v.Query, v.Headers, v.order = owned.IgnoreMissing, owned.Microversion, owned.Query, owned.Headers, owned.Order
 	return v
 }
-func minimumPacketRateFindCalls(calls []request.ReadCall) []func(*minimumPacketRateFindState) error {
+func minimumPacketRateFindCalls(calls []request.FindCall) []func(*minimumPacketRateFindState) error {
 	return qosCalls(calls, func(s *minimumPacketRateFindState) qosCallFields {
 		return qosCallFields{headers: &s.Headers, microversion: &s.Microversion, ignore: &s.IgnoreMissing}
 	}, minimumPacketRateFindQuery, false)
@@ -148,7 +148,7 @@ func copyMinimumPacketRateGet(v minimumPacketRateGetState) minimumPacketRateGetS
 	v.Microversion, v.Headers = owned.Microversion, owned.Headers
 	return v
 }
-func minimumPacketRateGetCalls(calls []request.ReadCall) []func(*minimumPacketRateGetState) error {
+func minimumPacketRateGetCalls(calls []request.GetCall) []func(*minimumPacketRateGetState) error {
 	return qosCalls(calls, func(s *minimumPacketRateGetState) qosCallFields {
 		return qosCallFields{headers: &s.Headers, microversion: &s.Microversion}
 	}, nil, false)

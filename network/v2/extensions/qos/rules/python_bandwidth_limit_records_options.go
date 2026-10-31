@@ -37,7 +37,7 @@ func copyBandwidthLimitFind(v bandwidthLimitFindState) bandwidthLimitFindState {
 	v.IgnoreMissing, v.Microversion, v.Query, v.Headers, v.order = owned.IgnoreMissing, owned.Microversion, owned.Query, owned.Headers, owned.Order
 	return v
 }
-func bandwidthLimitFindCalls(calls []request.ReadCall) []func(*bandwidthLimitFindState) error {
+func bandwidthLimitFindCalls(calls []request.FindCall) []func(*bandwidthLimitFindState) error {
 	return qosCalls(calls, func(s *bandwidthLimitFindState) qosCallFields {
 		return qosCallFields{headers: &s.Headers, microversion: &s.Microversion, ignore: &s.IgnoreMissing}
 	}, bandwidthLimitFindQuery, false)
@@ -150,7 +150,7 @@ func copyBandwidthLimitGet(v bandwidthLimitGetState) bandwidthLimitGetState {
 	v.Microversion, v.Headers = owned.Microversion, owned.Headers
 	return v
 }
-func bandwidthLimitGetCalls(calls []request.ReadCall) []func(*bandwidthLimitGetState) error {
+func bandwidthLimitGetCalls(calls []request.GetCall) []func(*bandwidthLimitGetState) error {
 	return qosCalls(calls, func(s *bandwidthLimitGetState) qosCallFields {
 		return qosCallFields{headers: &s.Headers, microversion: &s.Microversion}
 	}, nil, false)

@@ -135,7 +135,7 @@ func minimumBandwidthParentQuery(policy neutronfind.Options, parent string, inje
 
 // FindMinimumBandwidthRecord matches pinned GET-first Find within one literal
 // parent policy. Only clean member400/403/404 permit a complete ID/name search.
-func (a *API) FindMinimumBandwidthRecord(ctx context.Context, policyID, identity string, opts MinimumBandwidthFindOpts, calls ...request.ReadCall) (*MinimumBandwidthRecord, error) {
+func (a *API) FindMinimumBandwidthRecord(ctx context.Context, policyID, identity string, opts MinimumBandwidthFindOpts, calls ...request.FindCall) (*MinimumBandwidthRecord, error) {
 	engine, err := a.minimumBandwidthEngine(ctx, policyID)
 	if err != nil {
 		return nil, minimumBandwidthWrap(ctx, "FindMinimumBandwidthRecord", err)
@@ -155,7 +155,7 @@ func (a *API) FindMinimumBandwidthRecord(ctx context.Context, policyID, identity
 // GetMinimumBandwidthRecord performs one literal member GET, with no parent
 // lookup, Find fallback or ignore-missing behavior. Header/version options are
 // explicit Go conveniences; pinned get_qos_minimum_bandwidth_rule has no kwargs.
-func (a *API) GetMinimumBandwidthRecord(ctx context.Context, policyID, identity string, calls ...request.ReadCall) (*MinimumBandwidthRecord, error) {
+func (a *API) GetMinimumBandwidthRecord(ctx context.Context, policyID, identity string, calls ...request.GetCall) (*MinimumBandwidthRecord, error) {
 	engine, err := a.minimumBandwidthEngine(ctx, policyID)
 	if err != nil {
 		return nil, minimumBandwidthWrap(ctx, "GetMinimumBandwidthRecord", err)

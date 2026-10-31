@@ -364,7 +364,7 @@ func (s *Service) GetQoSBandwidthLimitRule(ctx context.Context, policy, ruleID s
 	if err != nil {
 		return result, qosBandwidthWrap(ctx, op, err)
 	}
-	opts := []request.ReadCall{request.Headers(cfg.Headers)}
+	opts := []request.GetCall{request.Headers(cfg.Headers)}
 	if cfg.Microversion != nil {
 		opts = append(opts, request.Microversion(*cfg.Microversion))
 	}

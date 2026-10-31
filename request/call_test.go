@@ -13,10 +13,79 @@ import (
 // Category membership is the compile-time contract; these assignments fail
 // to build when a constructor gains or loses a category.
 var (
-	_ []request.ReadCall     = []request.ReadCall{request.Header("k", "v"), request.Headers(nil), request.Microversion("2.1"), request.Query("k", 1), request.BasePath("p"), request.IgnoreMissing(true)}
-	_ []request.ListCall     = []request.ListCall{request.Header("k", "v"), request.Headers(nil), request.Microversion("2.1"), request.Query("k", 1), request.BasePath("p"), request.Limit(1), request.Marker("m"), request.MaxItems(1), request.Paginated(false)}
-	_ []request.MutationCall = []request.MutationCall{request.Header("k", "v"), request.Headers(nil), request.Microversion("2.1"), request.IgnoreMissing(false), request.Field("k", 1)}
+	_ []request.GetCall    = []request.GetCall{request.Header("k", "v"), request.Headers(nil), request.Microversion("2.1"), request.Custom(func(*struct{}) error { return nil })}
+	_ []request.FindCall   = []request.FindCall{request.Header("k", "v"), request.Headers(nil), request.Microversion("2.1"), request.Query("k", 1), request.IgnoreMissing(true), request.Custom(func(*struct{}) error { return nil })}
+	_ []request.ListCall   = []request.ListCall{request.Header("k", "v"), request.Headers(nil), request.Microversion("2.1"), request.Query("k", 1), request.BasePath("p"), request.Limit(1), request.Marker("m"), request.MaxItems(1), request.Paginated(false), request.Custom(func(*struct{}) error { return nil })}
+	_ []request.DeleteCall = []request.DeleteCall{request.Header("k", "v"), request.Headers(nil), request.Microversion("2.1"), request.IgnoreMissing(false), request.Custom(func(*struct{}) error { return nil })}
+	_ []request.WriteCall  = []request.WriteCall{request.Header("k", "v"), request.Headers(nil), request.Microversion("2.1"), request.Field("k", 1), request.Custom(func(*struct{}) error { return nil })}
 )
+
+// Constructors return the narrowest union they belong to, so the reverse
+// combinations (BasePath on Find/Get, Query on Get or Delete, IgnoreMissing on
+// Get/List/Write, Field on Delete, paging outside List) do not compile. This
+// test pins that each constructor implements exactly its documented
+// categories.
+func TestCallCategoriesAreExact(t *testing.T) {
+	type cats struct{ get, find, list, del, write bool }
+	of := func(c request.Call) cats {
+		_, g := c.(request.GetCall)
+		_, f := c.(request.FindCall)
+		_, l := c.(request.ListCall)
+		_, d := c.(request.DeleteCall)
+		_, w := c.(request.WriteCall)
+		return cats{g, f, l, d, w}
+	}
+	all := cats{true, true, true, true, true}
+	for name, tc := range map[string]struct {
+		call request.Call
+		want cats
+	}{
+		"Header":        {request.Header("k", "v"), all},
+		"Headers":       {request.Headers(nil), all},
+		"Microversion":  {request.Microversion("2.1"), all},
+		"Custom":        {request.Custom(func(*struct{}) error { return nil }), all},
+		"Query":         {request.Query("k", 1), cats{find: true, list: true}},
+		"IgnoreMissing": {request.IgnoreMissing(true), cats{find: true, del: true}},
+		"BasePath":      {request.BasePath("p"), cats{list: true}},
+		"Limit":         {request.Limit(1), cats{list: true}},
+		"Marker":        {request.Marker("m"), cats{list: true}},
+		"MaxItems":      {request.MaxItems(1), cats{list: true}},
+		"Paginated":     {request.Paginated(true), cats{list: true}},
+		"Field":         {request.Field("k", 1), cats{write: true}},
+	} {
+		if got := of(tc.call); got != tc.want {
+			t.Fatalf("%s: categories %+v, want %+v", name, got, tc.want)
+		}
+	}
+}
+
+type customState struct{ N int }
+
+func TestCustomCallCarriesTypedFunction(t *testing.T) {
+	entry, err := request.Entry(request.Custom(func(s *customState) error { s.N++; return nil }))
+	if err != nil || entry.Kind != request.CallCustom || entry.Kind.String() != "Custom" {
+		t.Fatal(entry, err)
+	}
+	fn, ok := request.CustomFunc[customState](entry)
+	if !ok || fn == nil {
+		t.Fatal(fn != nil, ok)
+	}
+	var s customState
+	if err := fn(&s); err != nil || s.N != 1 {
+		t.Fatal(s, err)
+	}
+	if fn, ok := request.CustomFunc[struct{ N int }](entry); ok || fn != nil {
+		t.Fatal("custom function matched a different state type")
+	}
+	header, _ := request.Entry(request.Header("k", "v"))
+	if fn, ok := request.CustomFunc[customState](header); ok || fn != nil {
+		t.Fatal("non-custom entry produced a function")
+	}
+	entry, err = request.Entry(request.Custom[customState](nil))
+	if fn, ok := request.CustomFunc[customState](entry); err != nil || !ok || fn != nil {
+		t.Fatal(fn != nil, ok, err)
+	}
+}
 
 func TestCallEntriesSnapshotInputs(t *testing.T) {
 	headers := map[string]string{"X-Trace": "owned"}

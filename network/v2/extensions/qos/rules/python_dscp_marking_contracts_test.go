@@ -96,12 +96,12 @@ func TestPythonDSCPMarkingGetPartialReceiptsWithoutQuerySeedsOrFallback(t *testi
 	for _, body := range []string{"", "broken", `{}`, `{"dscp_marking_rule":{}}`} {
 		t.Run(body, func(t *testing.T) {
 			api, calls := dscpRecordAPI(t, func(r *http.Request) *http.Response {
-				if r.URL.Query().Get("name") != "wire-only" || r.URL.Query().Get("dscp_mark") != "0" || r.URL.Query().Has("qos_policy_id") {
+				if r.URL.RawQuery != "" {
 					t.Fatal(r.URL)
 				}
 				return dscpRecordWire(204, body)
 			})
-			value, err := api.GetDSCPMarkingRecord(context.Background(), "policy", "literal", request.Query("name", "wire-only"), request.Query("dscp_mark", 0))
+			value, err := api.GetDSCPMarkingRecord(context.Background(), "policy", "literal")
 			if err != nil || value == nil || value.PolicyID != "policy" || value.StatusCode != 204 || string(value.Envelope) != body || len(*calls) != 1 || len(value.Resource.Body) != 4 {
 				t.Fatal(err, value, *calls)
 			}
@@ -199,7 +199,7 @@ func TestPythonDSCPMarkingFindCompletesUniquenessAndMissingSearch(t *testing.T) 
 				}
 				return dscpRecordWire(200, `{"dscp_marking_rules":[]}`)
 			})
-			var options []request.ReadCall
+			var options []request.FindCall
 			if mode == "missing strict" {
 				options = append(options, request.IgnoreMissing(false))
 			}
@@ -596,7 +596,7 @@ func TestPythonDSCPMarkingPreflightBoundControlsCancellationAndSnapshots(t *test
 	headers := map[string]string{"X-Probe": "original"}
 	version := "2.1"
 	cfg := rules.DSCPMarkingFindOpts{Query: map[string]json.RawMessage{"x_seed": raw}}
-	owned := []request.ReadCall{request.Headers(headers), request.Microversion(version)}
+	owned := []request.FindCall{request.Headers(headers), request.Microversion(version)}
 	headers["X-Probe"] = "changed"
 	version = "bad\n"
 	api, calls = dscpRecordAPI(t, func(r *http.Request) *http.Response {

@@ -139,7 +139,7 @@ func bandwidthLimitParentQuery(policy neutronfind.Options, parent string, inject
 
 // FindBandwidthLimitRecord matches pinned GET-first Find within one literal
 // parent policy. Only clean member400/403/404 permit a complete ID/name search.
-func (a *API) FindBandwidthLimitRecord(ctx context.Context, policyID, identity string, opts BandwidthLimitFindOpts, calls ...request.ReadCall) (*BandwidthLimitRecord, error) {
+func (a *API) FindBandwidthLimitRecord(ctx context.Context, policyID, identity string, opts BandwidthLimitFindOpts, calls ...request.FindCall) (*BandwidthLimitRecord, error) {
 	engine, err := a.bandwidthLimitEngine(ctx, policyID)
 	if err != nil {
 		return nil, bandwidthLimitWrap(ctx, "FindBandwidthLimitRecord", err)
@@ -159,7 +159,7 @@ func (a *API) FindBandwidthLimitRecord(ctx context.Context, policyID, identity s
 // GetBandwidthLimitRecord performs one literal member GET, with no parent
 // lookup, Find fallback or ignore-missing behavior. Header/version options are
 // explicit Go conveniences; pinned get_qos_bandwidth_limit_rule has no kwargs.
-func (a *API) GetBandwidthLimitRecord(ctx context.Context, policyID, identity string, calls ...request.ReadCall) (*BandwidthLimitRecord, error) {
+func (a *API) GetBandwidthLimitRecord(ctx context.Context, policyID, identity string, calls ...request.GetCall) (*BandwidthLimitRecord, error) {
 	engine, err := a.bandwidthLimitEngine(ctx, policyID)
 	if err != nil {
 		return nil, bandwidthLimitWrap(ctx, "GetBandwidthLimitRecord", err)

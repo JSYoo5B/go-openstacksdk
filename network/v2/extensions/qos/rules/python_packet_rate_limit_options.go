@@ -44,7 +44,7 @@ func copyPacketRateLimitFind(v packetRateLimitFindState) packetRateLimitFindStat
 	}
 	return v
 }
-func packetRateLimitFindCalls(calls []request.ReadCall) []func(*packetRateLimitFindState) error {
+func packetRateLimitFindCalls(calls []request.FindCall) []func(*packetRateLimitFindState) error {
 	return qosCalls(calls, func(s *packetRateLimitFindState) qosCallFields {
 		return qosCallFields{headers: &s.Headers, microversion: &s.Microversion, ignore: &s.IgnoreMissing}
 	}, packetRateLimitFindQuery, false)
@@ -164,7 +164,7 @@ func copyPacketRateLimitGet(v packetRateLimitGetState) packetRateLimitGetState {
 	}
 	return v
 }
-func packetRateLimitGetCalls(calls []request.ReadCall) []func(*packetRateLimitGetState) error {
+func packetRateLimitGetCalls(calls []request.GetCall) []func(*packetRateLimitGetState) error {
 	return qosCalls(calls, func(s *packetRateLimitGetState) qosCallFields {
 		return qosCallFields{headers: &s.Headers, microversion: &s.Microversion}
 	}, nil, false)

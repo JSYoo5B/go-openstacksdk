@@ -37,7 +37,7 @@ func copyDSCPMarkingFind(v dscpMarkingFindState) dscpMarkingFindState {
 	v.IgnoreMissing, v.Microversion, v.Query, v.Headers, v.order = owned.IgnoreMissing, owned.Microversion, owned.Query, owned.Headers, owned.Order
 	return v
 }
-func dscpMarkingFindCalls(calls []request.ReadCall) []func(*dscpMarkingFindState) error {
+func dscpMarkingFindCalls(calls []request.FindCall) []func(*dscpMarkingFindState) error {
 	return qosCalls(calls, func(s *dscpMarkingFindState) qosCallFields {
 		return qosCallFields{headers: &s.Headers, microversion: &s.Microversion, ignore: &s.IgnoreMissing}
 	}, dscpMarkingFindQuery, false)
@@ -152,7 +152,7 @@ func copyDSCPMarkingGet(v dscpMarkingGetState) dscpMarkingGetState {
 	v.Microversion, v.Query, v.Headers, v.order = owned.Microversion, owned.Query, owned.Headers, owned.Order
 	return v
 }
-func dscpMarkingGetCalls(calls []request.ReadCall) []func(*dscpMarkingGetState) error {
+func dscpMarkingGetCalls(calls []request.GetCall) []func(*dscpMarkingGetState) error {
 	return qosCalls(calls, func(s *dscpMarkingGetState) qosCallFields {
 		return qosCallFields{headers: &s.Headers, microversion: &s.Microversion}
 	}, dscpMarkingGetQuery, false)

@@ -133,7 +133,7 @@ func packetRateLimitParentQuery(policy neutronfind.Options, parent string, injec
 
 // FindPacketRateLimitRecord matches pinned GET-first Find within one literal
 // parent policy. Only clean member400/403/404 permit a complete ID/name search.
-func (a *API) FindPacketRateLimitRecord(ctx context.Context, policyID, identity string, opts PacketRateLimitFindOpts, calls ...request.ReadCall) (*PacketRateLimitRecord, error) {
+func (a *API) FindPacketRateLimitRecord(ctx context.Context, policyID, identity string, opts PacketRateLimitFindOpts, calls ...request.FindCall) (*PacketRateLimitRecord, error) {
 	engine, err := a.packetRateLimitEngine(ctx, policyID)
 	if err != nil {
 		return nil, packetRateLimitWrap(ctx, "FindPacketRateLimitRecord", err)
@@ -153,7 +153,7 @@ func (a *API) FindPacketRateLimitRecord(ctx context.Context, policyID, identity 
 // GetPacketRateLimitRecord performs one literal member GET, with no parent
 // lookup, Find fallback or ignore-missing behavior. Header/version options are
 // explicit Go conveniences; pinned get_qos_packet_rate_limit_rule has no kwargs.
-func (a *API) GetPacketRateLimitRecord(ctx context.Context, policyID, identity string, calls ...request.ReadCall) (*PacketRateLimitRecord, error) {
+func (a *API) GetPacketRateLimitRecord(ctx context.Context, policyID, identity string, calls ...request.GetCall) (*PacketRateLimitRecord, error) {
 	engine, err := a.packetRateLimitEngine(ctx, policyID)
 	if err != nil {
 		return nil, packetRateLimitWrap(ctx, "GetPacketRateLimitRecord", err)

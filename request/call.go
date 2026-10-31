@@ -16,46 +16,72 @@ import (
 //
 // The interface is sealed: only constructors in this package implement it.
 // Operations accept one of the category interfaces below, so passing, for
-// example, a paging limit to a Get does not compile.
+// example, a paging limit to a Get or a body field to a Delete does not
+// compile. Categories follow what operations of that shape support:
+//
+//   - GetCall: Header, Headers, Microversion
+//   - FindCall: Header, Headers, Microversion, Query, IgnoreMissing
+//   - ListCall: Header, Headers, Microversion, Query, BasePath, Limit, Marker,
+//     MaxItems, Paginated
+//   - DeleteCall: Header, Headers, Microversion, IgnoreMissing
+//   - WriteCall (create, update and actions): Header, Headers, Microversion,
+//     Field
+//
+// Custom implements every category. An operation may still reject a call of
+// its category that it does not implement; it documents those exceptions.
 type Call interface {
 	applyCall(*CallConfig) error
 }
 
-// ReadCall is accepted by Get and Find operations.
-type ReadCall interface {
+// GetCall is accepted by Get operations.
+type GetCall interface {
 	Call
-	readCall()
+	getCall()
 }
 
-// ListCall is accepted by List, All and Search operations.
+// FindCall is accepted by Find operations.
+type FindCall interface {
+	Call
+	findCall()
+}
+
+// ListCall is accepted by List, All, Search and Proxy list operations.
 type ListCall interface {
 	Call
 	listCall()
 }
 
-// MutationCall is accepted by Create, Update, Delete and action operations.
-type MutationCall interface {
+// DeleteCall is accepted by Delete operations.
+type DeleteCall interface {
 	Call
-	mutationCall()
+	deleteCall()
+}
+
+// WriteCall is accepted by Create, Update and action operations.
+type WriteCall interface {
+	Call
+	writeCall()
 }
 
 // AnyCall is accepted by every operation category.
 type AnyCall interface {
-	ReadCall
+	GetCall
+	FindCall
 	ListCall
-	MutationCall
+	DeleteCall
+	WriteCall
 }
 
-// ReadListCall is accepted by read and list operations.
-type ReadListCall interface {
-	ReadCall
+// FindListCall is accepted by Find and List operations.
+type FindListCall interface {
+	FindCall
 	ListCall
 }
 
-// ReadMutationCall is accepted by read and mutation operations.
-type ReadMutationCall interface {
-	ReadCall
-	MutationCall
+// FindDeleteCall is accepted by Find and Delete operations.
+type FindDeleteCall interface {
+	FindCall
+	DeleteCall
 }
 
 // CallKind identifies the control carried by a CallEntry.
@@ -73,6 +99,7 @@ const (
 	CallMaxItems
 	CallPaginated
 	CallField
+	CallCustom
 )
 
 func (k CallKind) String() string {
@@ -99,6 +126,8 @@ func (k CallKind) String() string {
 		return "Paginated"
 	case CallField:
 		return "Field"
+	case CallCustom:
+		return "Custom"
 	}
 	return fmt.Sprintf("CallKind(%d)", uint8(k))
 }
@@ -112,6 +141,7 @@ func (k CallKind) String() string {
 //   - IgnoreMissing, Paginated: Bool
 //   - Limit, MaxItems: Int
 //   - Query, Field: Key, JSON and JSONErr
+//   - Custom: Func, read with CustomFunc
 //
 // JSONErr retains a marshal failure. The operation decides whether and how to
 // report it, so an operation that discards a key can also discard its error.
@@ -124,6 +154,7 @@ type CallEntry struct {
 	Int     int
 	JSON    json.RawMessage
 	JSONErr error
+	Func    any
 }
 
 func (e CallEntry) clone() CallEntry {
@@ -170,27 +201,29 @@ func (c entryCall) applyCall(cfg *CallConfig) error {
 
 type anyCall struct{ entryCall }
 
-func (anyCall) readCall()     {}
-func (anyCall) listCall()     {}
-func (anyCall) mutationCall() {}
+func (anyCall) getCall()    {}
+func (anyCall) findCall()   {}
+func (anyCall) listCall()   {}
+func (anyCall) deleteCall() {}
+func (anyCall) writeCall()  {}
 
-type readListCall struct{ entryCall }
+type findListCall struct{ entryCall }
 
-func (readListCall) readCall() {}
-func (readListCall) listCall() {}
+func (findListCall) findCall() {}
+func (findListCall) listCall() {}
 
-type readMutationCall struct{ entryCall }
+type findDeleteCall struct{ entryCall }
 
-func (readMutationCall) readCall()     {}
-func (readMutationCall) mutationCall() {}
+func (findDeleteCall) findCall()   {}
+func (findDeleteCall) deleteCall() {}
 
 type listCall struct{ entryCall }
 
 func (listCall) listCall() {}
 
-type mutationCall struct{ entryCall }
+type writeCall struct{ entryCall }
 
-func (mutationCall) mutationCall() {}
+func (writeCall) writeCall() {}
 
 func jsonEntry(kind CallKind, key string, value any) CallEntry {
 	raw, err := json.Marshal(value)
@@ -217,19 +250,19 @@ func Microversion(version string) AnyCall {
 
 // Query sets one query or keyword value. The value is marshaled to JSON when
 // the call is constructed; a marshal failure is kept for the operation.
-func Query(key string, value any) ReadListCall {
-	return readListCall{entryCall{jsonEntry(CallQuery, key, value)}}
+func Query(key string, value any) FindListCall {
+	return findListCall{entryCall{jsonEntry(CallQuery, key, value)}}
 }
 
 // BasePath overrides an operation's service-relative collection route.
-func BasePath(path string) ReadListCall {
-	return readListCall{entryCall{CallEntry{Kind: CallBasePath, Text: path}}}
+func BasePath(path string) ListCall {
+	return listCall{entryCall{CallEntry{Kind: CallBasePath, Text: path}}}
 }
 
 // IgnoreMissing selects whether Find or Delete treat a missing resource as a
 // non-error result. Each operation documents its own default.
-func IgnoreMissing(ignore bool) ReadMutationCall {
-	return readMutationCall{entryCall{CallEntry{Kind: CallIgnoreMissing, Bool: ignore}}}
+func IgnoreMissing(ignore bool) FindDeleteCall {
+	return findDeleteCall{entryCall{CallEntry{Kind: CallIgnoreMissing, Bool: ignore}}}
 }
 
 // Limit sets the server page size.
@@ -252,9 +285,30 @@ func Paginated(paginated bool) ListCall {
 	return listCall{entryCall{CallEntry{Kind: CallPaginated, Bool: paginated}}}
 }
 
-// Field sets one additional JSON body attribute of a mutation. The value is
-// marshaled when the call is constructed; operations reject collisions with
-// fields they own.
-func Field(key string, value any) MutationCall {
-	return mutationCall{entryCall{jsonEntry(CallField, key, value)}}
+// Field sets one additional JSON body attribute of a create, update or action.
+// The value is marshaled when the call is constructed; operations reject
+// collisions with fields they own.
+func Field(key string, value any) WriteCall {
+	return writeCall{entryCall{jsonEntry(CallField, key, value)}}
+}
+
+// Custom wraps a function over an operation's exported options struct T, for
+// example a package's ...Opts type. It implements every category; an
+// operation whose options type is not T rejects it with
+// resource.ErrInvalidOption before HTTP. The function runs at its position
+// among the other calls, and the operation snapshots its state around it. A
+// nil function is reported by the operation as a nil option.
+func Custom[T any](fn func(*T) error) AnyCall {
+	return anyCall{entryCall{CallEntry{Kind: CallCustom, Func: fn}}}
+}
+
+// CustomFunc returns the function of a Custom entry built for T. ok is false
+// when the entry is not a Custom call over T; fn is nil when Custom was given
+// a nil function.
+func CustomFunc[T any](entry CallEntry) (fn func(*T) error, ok bool) {
+	if entry.Kind != CallCustom {
+		return nil, false
+	}
+	fn, ok = entry.Func.(func(*T) error)
+	return fn, ok
 }

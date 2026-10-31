@@ -485,7 +485,7 @@ func TestPythonMinimumBandwidthOptionSnapshotsAndPreflight(t *testing.T) {
 	opts := rules.MinimumBandwidthFindOpts{Query: map[string]json.RawMessage{"x_seed": raw}}
 	headers := map[string]string{"X-Trace": "owned"}
 	version := "2.0"
-	options := []request.ReadCall{request.Headers(headers), request.Microversion(version)}
+	options := []request.FindCall{request.Headers(headers), request.Microversion(version)}
 	headers["X-Trace"] = "changed"
 	version = "changed"
 	var calls []nativeRuleCall
@@ -553,11 +553,8 @@ func TestPythonMinimumBandwidthOptionSnapshotsAndPreflight(t *testing.T) {
 		t.Fatal(composeErr, composed)
 	}
 	// Sealed calls cannot run caller code; the option-phase client guard is
-	// covered by TestQoSRuleApplyLoopsGuardCallbacks. Get rejects Query.
-	_, err = api.GetMinimumBandwidthRecord(context.Background(), "parent", "target", request.Query("x_seed", true))
-	if !errors.Is(err, resource.ErrInvalidOption) || len(calls) != before {
-		t.Fatal(err, calls)
-	}
+	// covered by TestQoSRuleApplyLoopsGuardCallbacks. request.Query is not a
+	// request.GetCall, so Query on Get does not compile.
 }
 
 func TestPythonMinimumBandwidthVersionPhasesCleanRetryAndOwnedHeaderPolicy(t *testing.T) {

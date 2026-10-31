@@ -44,7 +44,7 @@ func copyQoSRuleDelete(v qosRuleDeleteState) qosRuleDeleteState {
 	}
 	return v
 }
-func qosRuleDeleteCalls(calls []request.MutationCall) []func(*qosRuleDeleteState) error {
+func qosRuleDeleteCalls(calls []request.DeleteCall) []func(*qosRuleDeleteState) error {
 	return qosCalls(calls, func(s *qosRuleDeleteState) qosCallFields {
 		return qosCallFields{headers: &s.Headers, microversion: &s.Microversion, ignore: &s.IgnoreMissing}
 	}, nil, false)
@@ -84,7 +84,7 @@ func applyQoSRuleDelete(ctx context.Context, engine *neutronfind.Engine, callbac
 	}
 	return cfg, nil
 }
-func (a *API) qosRuleDelete(ctx context.Context, parent, id, kind, op string, calls []request.MutationCall) (*QoSRuleDeleteReceipt, error) {
+func (a *API) qosRuleDelete(ctx context.Context, parent, id, kind, op string, calls []request.DeleteCall) (*QoSRuleDeleteReceipt, error) {
 	var engine *neutronfind.Engine
 	var err error
 	switch kind {
@@ -115,12 +115,12 @@ func (a *API) qosRuleDelete(ctx context.Context, parent, id, kind, op string, ca
 	}
 	return receipt, bandwidthLimitWrap(ctx, op, err)
 }
-func (a *API) DeleteBandwidthLimitRecord(ctx context.Context, parent, id string, calls ...request.MutationCall) (*QoSRuleDeleteReceipt, error) {
+func (a *API) DeleteBandwidthLimitRecord(ctx context.Context, parent, id string, calls ...request.DeleteCall) (*QoSRuleDeleteReceipt, error) {
 	return a.qosRuleDelete(ctx, parent, id, "bandwidth_limit_rules", "DeleteBandwidthLimitRecord", calls)
 }
-func (a *API) DeleteDSCPMarkingRecord(ctx context.Context, parent, id string, calls ...request.MutationCall) (*QoSRuleDeleteReceipt, error) {
+func (a *API) DeleteDSCPMarkingRecord(ctx context.Context, parent, id string, calls ...request.DeleteCall) (*QoSRuleDeleteReceipt, error) {
 	return a.qosRuleDelete(ctx, parent, id, "dscp_marking_rules", "DeleteDSCPMarkingRecord", calls)
 }
-func (a *API) DeleteMinimumBandwidthRecord(ctx context.Context, parent, id string, calls ...request.MutationCall) (*QoSRuleDeleteReceipt, error) {
+func (a *API) DeleteMinimumBandwidthRecord(ctx context.Context, parent, id string, calls ...request.DeleteCall) (*QoSRuleDeleteReceipt, error) {
 	return a.qosRuleDelete(ctx, parent, id, "minimum_bandwidth_rules", "DeleteMinimumBandwidthRecord", calls)
 }

@@ -137,8 +137,8 @@ func applyDSCPMarkingOptions[T any, O ~func(*T) error](ctx context.Context, engi
 
 // GetDSCPMarkingRecord performs one literal member GET with the bound policy,
 // without parent lookup, find fallback, or missing suppression. Calls:
-// request.Query, request.Microversion, request.Header and request.Headers.
-func (a *API) GetDSCPMarkingRecord(ctx context.Context, policyID, id string, calls ...request.ReadCall) (*DSCPMarkingRecord, error) {
+// request.Microversion, request.Header and request.Headers.
+func (a *API) GetDSCPMarkingRecord(ctx context.Context, policyID, id string, calls ...request.GetCall) (*DSCPMarkingRecord, error) {
 	const operation = "GetDSCPMarkingRecord"
 	engine, err := a.dscpMarkingEngine(ctx, policyID)
 	if err != nil {
@@ -159,7 +159,7 @@ func (a *API) GetDSCPMarkingRecord(ctx context.Context, policyID, id string, cal
 // FindDSCPMarkingRecord is GET-first with clean400/403/404 list fallback and
 // complete exact ID/name uniqueness. IgnoreMissing defaults true. Per-call
 // microversion controls the GET; fallback retains selected service default.
-func (a *API) FindDSCPMarkingRecord(ctx context.Context, policyID, identity string, opts DSCPMarkingFindOpts, calls ...request.ReadCall) (*DSCPMarkingRecord, error) {
+func (a *API) FindDSCPMarkingRecord(ctx context.Context, policyID, identity string, opts DSCPMarkingFindOpts, calls ...request.FindCall) (*DSCPMarkingRecord, error) {
 	const operation = "FindDSCPMarkingRecord"
 	engine, err := a.dscpMarkingEngine(ctx, policyID)
 	if err != nil {
