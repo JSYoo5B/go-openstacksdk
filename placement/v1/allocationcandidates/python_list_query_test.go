@@ -3,11 +3,9 @@ package allocationcandidates_test
 import (
 	"context"
 	"errors"
-	"io"
 	"net/http"
 	"net/url"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
@@ -19,10 +17,10 @@ import (
 func pythonCandidateStatusAPI(t *testing.T, calls *[]pythonCandidateCall, status int, body string) *allocationcandidates.API {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = pythonCandidateTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		*calls = append(*calls, pythonCandidateCall{req.Method, req.URL.Path, req.URL.RawQuery, req.Header.Get("OpenStack-API-Version")})
-		return &http.Response{StatusCode: status, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}, nil
-	})
+		return testcloud.Response(status, body, http.Header{"Content-Type": {"application/json"}}), nil
+	}))
 	client := cloud.Client("placement", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/placement/"
 	client.Microversion = "1.34"

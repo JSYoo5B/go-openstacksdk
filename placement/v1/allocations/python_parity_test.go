@@ -7,7 +7,6 @@ import (
 	"io"
 	"net/http"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
@@ -15,18 +14,8 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type pythonAllocationTransport func(*http.Request) (*http.Response, error)
-
-func (transport pythonAllocationTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func pythonAllocationWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}})
 }
 
 type pythonAllocationCall struct{ method, path, query, body, version string }
@@ -35,7 +24,7 @@ type pythonAllocationCall struct{ method, path, query, body, version string }
 func pythonAllocationAPI(t *testing.T, calls *[]pythonAllocationCall, reply func(*http.Request) *http.Response) *allocations.API {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = pythonAllocationTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -43,7 +32,7 @@ func pythonAllocationAPI(t *testing.T, calls *[]pythonAllocationCall, reply func
 		}
 		*calls = append(*calls, pythonAllocationCall{req.Method, req.URL.Path, req.URL.RawQuery, raw, req.Header.Get("OpenStack-API-Version")})
 		return reply(req), nil
-	})
+	}))
 	client := cloud.Client("placement", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/placement/"
 	client.Microversion = "1.38"

@@ -17,18 +17,8 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type nativeRPTransport func(*http.Request) (*http.Response, error)
-
-func (transport nativeRPTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func nativeRPWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}})
 }
 
 type nativeRPCall struct{ method, path, query, body, version string }
@@ -36,7 +26,7 @@ type nativeRPCall struct{ method, path, query, body, version string }
 func nativeRPAPI(t *testing.T, microversion string, calls *[]nativeRPCall, reply func(*http.Request) *http.Response) *resourceproviders.API {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = nativeRPTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -44,7 +34,7 @@ func nativeRPAPI(t *testing.T, microversion string, calls *[]nativeRPCall, reply
 		}
 		*calls = append(*calls, nativeRPCall{req.Method, req.URL.Path, req.URL.RawQuery, raw, req.Header.Get("OpenStack-API-Version")})
 		return reply(req), nil
-	})
+	}))
 	client := cloud.Client("placement", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/placement/"
 	client.Microversion = microversion

@@ -6,7 +6,6 @@ import (
 	"io"
 	"net/http"
 	"reflect"
-	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -17,18 +16,8 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type pythonRCTransport func(*http.Request) (*http.Response, error)
-
-func (transport pythonRCTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func pythonRCWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}})
 }
 
 type pythonRCCall struct{ method, path, query, body, version string }
@@ -48,7 +37,7 @@ func (r *pythonRCRecorder) snapshot() []pythonRCCall {
 func pythonRCAPI(t *testing.T, recorder *pythonRCRecorder, reply func(*http.Request) *http.Response) *resourceclasses.API {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = pythonRCTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -58,7 +47,7 @@ func pythonRCAPI(t *testing.T, recorder *pythonRCRecorder, reply func(*http.Requ
 		recorder.calls = append(recorder.calls, pythonRCCall{req.Method, req.URL.Path, req.URL.RawQuery, raw, req.Header.Get("OpenStack-API-Version")})
 		recorder.mu.Unlock()
 		return reply(req), nil
-	})
+	}))
 	client := cloud.Client("placement", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/placement/"
 	client.Microversion = "1.2"

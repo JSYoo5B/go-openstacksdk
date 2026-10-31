@@ -2,26 +2,14 @@ package allocationcandidates_test
 
 import (
 	"context"
-	"io"
 	"net/http"
 	"net/url"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/placement/v1/allocationcandidates"
 )
-
-type pythonCandidateTransport func(*http.Request) (*http.Response, error)
-
-func (transport pythonCandidateTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
 
 type pythonCandidateCall struct{ method, path, query, version string }
 
@@ -29,10 +17,10 @@ type pythonCandidateCall struct{ method, path, query, version string }
 func pythonCandidateAPI(t *testing.T, calls *[]pythonCandidateCall, body string) *allocationcandidates.API {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = pythonCandidateTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		*calls = append(*calls, pythonCandidateCall{req.Method, req.URL.Path, req.URL.RawQuery, req.Header.Get("OpenStack-API-Version")})
-		return &http.Response{StatusCode: 200, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}, nil
-	})
+		return testcloud.Response(200, body, http.Header{"Content-Type": {"application/json"}}), nil
+	}))
 	client := cloud.Client("placement", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/placement/"
 	client.Microversion = "1.34"
