@@ -49,7 +49,7 @@ Go API:
 - ReuseSourceaccepted100..399 guardedrawGET, pinnedheaderdefaults/encoding policy andincrementalgzip/xgzip/zlib/rawdeflate/zstd decoderhelpers; originalcompressedHeader remainsdistinct fromdecodedtext/filebytes. Cleancompressed404 requiresdecoder success, corruptcompressed404 stayserror with actualraw nativeproof andnoMissing.
   Tests: `objectstorage/v1/objects/python_cloud_get_test.go:TestPythonCloudObjectGetSharedCodecsAndCompressedMissingFaults`.
 - Eager Connection text/output handling shares the cached Swift facade and retained actual receipt, preserving cancellation and invalid-call failures before discovery.
-  Tests: `connectiontest/connection_cycle7_records_test.go:TestConnectionObjectGetTextSharesCachedSwiftAndRetainsReceipt`, `connectiontest/connection_cycle7_records_test.go:TestConnectionCycle7PreflightPreservesCancellationBeforeDiscovery`.
+  Tests: `connectiontest/connection_record_service_cache_test.go:TestConnectionObjectGetTextSharesCachedSwiftAndRetainsReceipt`, `connectiontest/connection_record_service_cache_test.go:TestConnectionCycle7PreflightPreservesCancellationBeforeDiscovery`.
 
 Python/Go differences:
 

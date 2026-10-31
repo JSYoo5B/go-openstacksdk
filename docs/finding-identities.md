@@ -1587,9 +1587,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.WithUpdateRecordAvailabilityZone`
 
 - get_aggregate(name_or_id) is GET os-aggregates/{value} then the list; UpdateAggregate performs it strictly and sends one PUT with only supplied attributes, including availability_zone null.
-  Tests: `connectiontest/connection_py_cloud_compute_aggregates_test.go:TestPyCloudComputeUpdateAggregateFindsThenSendsOnlySuppliedNull`.
+  Tests: `connectiontest/connection_compute_aggregates_test.go:TestPyCloudComputeUpdateAggregateFindsThenSendsOnlySuppliedNull`.
 - A missing aggregate returns ErrNotFound and no PUT is sent.
-  Tests: `connectiontest/connection_py_cloud_compute_aggregates_test.go:TestPyCloudComputeUpdateAggregateMissingSendsNoPut`.
+  Tests: `connectiontest/connection_compute_aggregates_test.go:TestPyCloudComputeUpdateAggregateMissingSendsNoPut`.
 - The delegated proxy update (null availability zone, empty name, extension attributes, no-op without attributes) is mapped.
   Tests: `compute/v2/aggregates/python_update_record_test.go:TestPythonAggregateUpdateRecordSendsNullAndEmptyValues`.
 
@@ -1611,9 +1611,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.API.Delete`
 
 - A digit-only identity is deleted with one DELETE and no lookup, and a 404 on it is false; a 500 is an error.
-  Tests: `connectiontest/connection_py_cloud_compute_aggregates_test.go:TestPyCloudComputeDeleteAggregateDigitsSkipLookupAndMapMissingToFalse`, `connectiontest/connection_py_cloud_compute_aggregates_test.go:TestPyCloudComputeDeleteAggregateByNameAndFailures`.
+  Tests: `connectiontest/connection_compute_aggregates_test.go:TestPyCloudComputeDeleteAggregateDigitsSkipLookupAndMapMissingToFalse`, `connectiontest/connection_compute_aggregates_test.go:TestPyCloudComputeDeleteAggregateByNameAndFailures`.
 - A name is found first (GET then list), a missing aggregate returns false with no DELETE, and cancellation or a blank identity fails before any request.
-  Tests: `connectiontest/connection_py_cloud_compute_aggregates_test.go:TestPyCloudComputeDeleteAggregateByNameAndFailures`.
+  Tests: `connectiontest/connection_compute_aggregates_test.go:TestPyCloudComputeDeleteAggregateByNameAndFailures`.
 
 Python/Go differences:
 

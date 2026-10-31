@@ -240,9 +240,9 @@ Go API:
 - All reproduces the unfiltered GET os-aggregates request that search_aggregates starts with.
   Tests: `compute/v2/python_parity_test.go:TestPythonCloudAggregateCreateAndList`.
 - SearchAggregates lists every aggregate then applies exact/glob/ID name-or-ID plus dictionary or JMESPath filters locally with no Nova query, and rejects server-only options before HTTP.
-  Tests: `connectiontest/connection_r2_cloud_compute_aggregates_test.go:TestR2CloudComputeSearchAggregatesFiltersLocally`, `connectiontest/connection_r2_cloud_compute_aggregates_test.go:TestR2CloudComputeSearchAggregatesRejectsServerOnlyOptionsBeforeHTTP`.
+  Tests: `connectiontest/connection_aggregate_search_test.go:TestR2CloudComputeSearchAggregatesFiltersLocally`, `connectiontest/connection_aggregate_search_test.go:TestR2CloudComputeSearchAggregatesRejectsServerOnlyOptionsBeforeHTTP`.
 - Filters run over the Source Aggregate attribute view built from each row Nova returned: Python names (deleted as is_deleted), absent members and null values as null, the original timestamp strings, the hosts/metadata/is_deleted conversions of openstack/fields.py, and the computed location whose zone is the aggregate's availability_zone.
-  Tests: `connectiontest/connection_r2_cloud_compute_aggregates_test.go:TestR2CloudComputeSearchAggregatesFilterRawSourceView`, `connection_r2_cloud_compute_aggregates_view_test.go:TestCloudAggregateViewFollowsSourceTypeConversions`.
+  Tests: `connectiontest/connection_aggregate_search_test.go:TestR2CloudComputeSearchAggregatesFilterRawSourceView`, `connection_aggregate_search_view_test.go:TestCloudAggregateViewFollowsSourceTypeConversions`.
 
 Python/Go differences:
 
@@ -338,7 +338,7 @@ Go API:
 - New Source opt-in closes finite JSON float loading in local mapping, loaded falsey first selection and exact binary finite operands for JMES comparisons without rounding arbitrary integers. Source two-float9007199254740992.0/9007199254740993.0 comparison is supported; this does not claim full arithmetic, serialization, nonfinite or Resource class equality/function namespace.
   Tests: `compute/cloud_server_group_reads_test.go:TestCloudServerGroupReadsLoadedNumericMappingAndJMESPredicate`, `compute/cloud_server_group_reads_test.go:TestCloudServerGroupReadsJMESArbitraryJSONAndFilteredGetIndexSemantics`.
 - Connection exposes this cloud read through its cached service and SDK-owned location defaults. Cancellation is checked before catalog discovery. Only Neutron list helpers turn clean missing catalog endpoints into [] before evaluating options; searches retain catalog errors. Caller-provided options retain their explicit values.
-  Tests: `connectiontest/connection_cycle8_reads_test.go:TestConnectionCycle8CancelledReadsNeverDiscover`.
+  Tests: `connectiontest/connection_cloud_list_reads_test.go:TestConnectionCycle8CancelledReadsNeverDiscover`.
 
 Python/Go differences:
 
@@ -387,7 +387,7 @@ Go API:
 - New Source opt-in closes finite JSON float loading in local mapping, loaded falsey first selection and exact binary finite operands for JMES comparisons without rounding arbitrary integers. Source two-float9007199254740992.0/9007199254740993.0 comparison is supported; this does not claim full arithmetic, serialization, nonfinite or Resource class equality/function namespace.
   Tests: `compute/cloud_server_group_reads_test.go:TestCloudServerGroupReadsLoadedNumericMappingAndJMESPredicate`, `compute/cloud_server_group_reads_test.go:TestCloudServerGroupReadsJMESArbitraryJSONAndFilteredGetIndexSemantics`.
 - Connection exposes this cloud read through its cached service and SDK-owned location defaults. Cancellation is checked before catalog discovery. Only Neutron list helpers turn clean missing catalog endpoints into [] before evaluating options; searches retain catalog errors. Caller-provided options retain their explicit values.
-  Tests: `connectiontest/connection_cycle8_reads_test.go:TestConnectionCycle8CancelledReadsNeverDiscover`.
+  Tests: `connectiontest/connection_cloud_list_reads_test.go:TestConnectionCycle8CancelledReadsNeverDiscover`.
 
 Python/Go differences:
 
@@ -528,7 +528,7 @@ Go API:
 - FindRecord reproduces the find_server(details=True) lookup that get_server performs before expansion.
   Tests: `compute/v2/python_parity_test.go:TestPythonCloudServerLookupHelpers`.
 - The deprecated filters branch maps to SearchServerRecords (local filters over a complete list, bare, one match required by the caller); expansion of found servers shares GetServerByID's tested ExpandServerInterfaces path.
-  Tests: `connectiontest/connection_r2_cloud_compute_servers_test.go:TestR2CloudComputeSearchServerRecordsFiltersLocally`, `connectiontest/connection_r2_cloud_compute_servers_test.go:TestR2CloudComputeGetServerByIDReturnsNilOnNotFoundAndExpandsFound`.
+  Tests: `connectiontest/connection_server_records_test.go:TestR2CloudComputeSearchServerRecordsFiltersLocally`, `connectiontest/connection_server_records_test.go:TestR2CloudComputeGetServerByIDReturnsNilOnNotFoundAndExpandsFound`.
 - GetServer finds with FindRecord forcing details=True (a 404 identity falls back to the detailed list; a missing server is nil), then applies the interface expansion by default, the hostvars with WithCloudServerDetailed and none with WithCloudServerBare. With deprecated filters it lists bare, selects locally, expands the single match, returns nil for none, AmbiguousError for several and rejects a JMESPath value.
   Tests: `connectiontest/connection_cloud_server_hostvars_test.go:TestCloudServerGetServerFindsWithDetailsAndExpands`.
 
@@ -554,7 +554,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk.WithCloudServerDetailed`
 
 - GetServerByID returns nil for a 404, a server expanded with ExpandServerInterfaces by default, skips expansion with the bare option and returns other failures.
-  Tests: `connectiontest/connection_r2_cloud_compute_servers_test.go:TestR2CloudComputeGetServerByIDReturnsNilOnNotFoundAndExpandsFound`.
+  Tests: `connectiontest/connection_server_records_test.go:TestR2CloudComputeGetServerByIDReturnsNilOnNotFoundAndExpandsFound`.
 - GetServerByID rejects WithCloudServerDetailed before HTTP because get_server_by_id only adds interfaces.
   Tests: `connectiontest/connection_cloud_server_hostvars_test.go:TestCloudServerGetServerFindsWithDetailsAndExpands`.
 
@@ -583,7 +583,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk.WithCloudServerBare`
 
 - ListServerRecords streams GET servers/detail (or servers without details), sends all_tenants=True only for the all-projects option, pushes explicit query and applies no local filter.
-  Tests: `connectiontest/connection_r2_cloud_compute_servers_test.go:TestR2CloudComputeListServerRecordsUsesDetailPathAndAllProjects`, `connectiontest/connection_r2_cloud_compute_servers_test.go:TestR2CloudComputeListServerRecordsWithoutDetailsAndQueryPushdown`, `connectiontest/connection_r2_cloud_compute_servers_test.go:TestR2CloudComputeServerReadsHonorCancellationBeforeHTTP`.
+  Tests: `connectiontest/connection_server_records_test.go:TestR2CloudComputeListServerRecordsUsesDetailPathAndAllProjects`, `connectiontest/connection_server_records_test.go:TestR2CloudComputeListServerRecordsWithoutDetailsAndQueryPushdown`, `connectiontest/connection_server_records_test.go:TestR2CloudComputeServerReadsHonorCancellationBeforeHTTP`.
 - ListServers applies the default bare=False expansion to every row in order (interfaces by default, hostvars with WithCloudServerDetailed, none with WithCloudServerBare), forwards all_tenants=True only for the all-projects option and keeps the Source record of each row.
   Tests: `connectiontest/connection_cloud_server_hostvars_test.go:TestCloudServerListAndSearchServersExpandEveryRow`.
 - Rows come from servers.API.ListCloudRecords, whose Proxy.servers query mapping, client Body filters, paging fallbacks and per-call controls are covered by its own fixtures.
@@ -617,7 +617,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk.WithCloudServerBare`
 
 - SearchServerRecords lists every server then applies exact/glob name-or-ID plus ordered dictionary or JMESPath filters locally, returns expression output without records, keeps consumed rows on a page failure and rejects invalid filters before HTTP.
-  Tests: `connectiontest/connection_r2_cloud_compute_servers_test.go:TestR2CloudComputeSearchServerRecordsFiltersLocally`, `connectiontest/connection_r2_cloud_compute_servers_test.go:TestR2CloudComputeSearchServerRecordsExpressionAndInvalidFilters`, `connectiontest/connection_r2_cloud_compute_servers_test.go:TestR2CloudComputeSearchServerRecordsKeepsConsumedRowsOnPageFailure`.
+  Tests: `connectiontest/connection_server_records_test.go:TestR2CloudComputeSearchServerRecordsFiltersLocally`, `connectiontest/connection_server_records_test.go:TestR2CloudComputeSearchServerRecordsExpressionAndInvalidFilters`, `connectiontest/connection_server_records_test.go:TestR2CloudComputeSearchServerRecordsKeepsConsumedRowsOnPageFailure`.
 - SearchServers lists with the default expansion, then filters locally over CloudServerResultView so dictionary filters see expansion keys such as public_v4 and JMESPath sees the detailed flavor name; filters never reach Nova.
   Tests: `connectiontest/connection_cloud_server_hostvars_test.go:TestCloudServerListAndSearchServersExpandEveryRow`.
 - Rows come from servers.API.ListCloudRecords, whose Proxy.servers query mapping, client Body filters, paging fallbacks and per-call controls are covered by its own fixtures.
@@ -646,7 +646,7 @@ Go API:
 - The find and PUT parts match the proxy calls update_server delegates to.
   Tests: `compute/v2/servers/python_parity_test.go:TestPythonServerGetUpdateDeleteMatchProxyRequests`.
 - UpdateServer finds strictly, sends one PUT with only the supplied name/description (explicit null description), sends nothing for no attributes, rejects empty/null names before HTTP and returns ErrNotFound for a missing server without PUT.
-  Tests: `connectiontest/connection_r2_cloud_compute_servers_test.go:TestR2CloudComputeUpdateServerFindsStrictlyAndSendsOnlySuppliedAttributes`, `connectiontest/connection_r2_cloud_compute_servers_test.go:TestR2CloudComputeUpdateServerRejectsBadInputBeforeHTTPAndMissingServer`.
+  Tests: `connectiontest/connection_server_records_test.go:TestR2CloudComputeUpdateServerFindsStrictlyAndSendsOnlySuppliedAttributes`, `connectiontest/connection_server_records_test.go:TestR2CloudComputeUpdateServerRejectsBadInputBeforeHTTPAndMissingServer`.
 - UpdateServer expands the PUT response with interfaces by default and with hostvars that describe the updated server under WithCloudServerDetailed.
   Tests: `connectiontest/connection_cloud_server_hostvars_test.go:TestCloudServerUpdateAndRebuildApplyDefaultAndDetailedExpansion`.
 
@@ -676,7 +676,7 @@ Go API:
 - The rebuild action matches the proxy rebuild_server request.
   Tests: `compute/v2/servers/python_parity_test.go:TestPythonServerRebuildSendsPassedKeysAndReturnsServer`.
 - RebuildServer sends imageRef and a nonempty adminPass, rejects an empty image before HTTP, waits for ACTIVE with ERROR failure, restores the returned or supplied admin password on the waited server and never replays the rebuild on a failed wait.
-  Tests: `connectiontest/connection_r2_cloud_compute_lifecycle_test.go:TestR2CloudComputeRebuildServerSendsImageAndPasswordAndRejectsEmptyImage`, `connectiontest/connection_r2_cloud_compute_lifecycle_test.go:TestR2CloudComputeRebuildServerWaitRestoresAdminPasswordOnActiveServer`, `connectiontest/connection_r2_cloud_compute_lifecycle_test.go:TestR2CloudComputeRebuildServerWaitFailureKeepsActionResultWithoutReplay`.
+  Tests: `connectiontest/connection_server_lifecycle_test.go:TestR2CloudComputeRebuildServerSendsImageAndPasswordAndRejectsEmptyImage`, `connectiontest/connection_server_lifecycle_test.go:TestR2CloudComputeRebuildServerWaitRestoresAdminPasswordOnActiveServer`, `connectiontest/connection_server_lifecycle_test.go:TestR2CloudComputeRebuildServerWaitFailureKeepsActionResultWithoutReplay`.
 - Without bare the rebuild action response is expanded with interfaces, or with hostvars under WithCloudServerActionDetailed, keeping the returned admin password; each call sends the rebuild once.
   Tests: `connectiontest/connection_cloud_server_hostvars_test.go:TestCloudServerUpdateAndRebuildApplyDefaultAndDetailedExpansion`.
 
@@ -709,9 +709,9 @@ Go API:
 - With wait=False and delete_ips=False, FindRecord and Remove reproduce the find_server lookup and the DELETE that ignores 404.
   Tests: `compute/v2/python_parity_test.go:TestPythonCloudServerDeleteAndConsolePartialPaths`.
 - DeleteServer returns false without DELETE for a missing server, maps a DELETE 404 to false, never replays a failed DELETE, observes absence with wait, keeps (true, err) after an accepted DELETE whose wait times out and rejects a non-positive timeout before HTTP.
-  Tests: `connectiontest/connection_r2_cloud_compute_lifecycle_test.go:TestR2CloudComputeDeleteServerMissingServerSendsNoDelete`, `connectiontest/connection_r2_cloud_compute_lifecycle_test.go:TestR2CloudComputeDeleteServerFoundSendsOneDeleteAndMaps404ToFalse`, `connectiontest/connection_r2_cloud_compute_lifecycle_test.go:TestR2CloudComputeDeleteServerDeleteErrorIsNotReplayed`, `connectiontest/connection_r2_cloud_compute_lifecycle_test.go:TestR2CloudComputeDeleteServerWaitObservesAbsence`, `connectiontest/connection_r2_cloud_compute_lifecycle_test.go:TestR2CloudComputeDeleteServerWaitTimeoutKeepsAcceptedDelete`, `connectiontest/connection_r2_cloud_compute_lifecycle_test.go:TestR2CloudComputeDeleteServerRejectsNonPositiveTimeoutBeforeHTTP`.
+  Tests: `connectiontest/connection_server_lifecycle_test.go:TestR2CloudComputeDeleteServerMissingServerSendsNoDelete`, `connectiontest/connection_server_lifecycle_test.go:TestR2CloudComputeDeleteServerFoundSendsOneDeleteAndMaps404ToFalse`, `connectiontest/connection_server_lifecycle_test.go:TestR2CloudComputeDeleteServerDeleteErrorIsNotReplayed`, `connectiontest/connection_server_lifecycle_test.go:TestR2CloudComputeDeleteServerWaitObservesAbsence`, `connectiontest/connection_server_lifecycle_test.go:TestR2CloudComputeDeleteServerWaitTimeoutKeepsAcceptedDelete`, `connectiontest/connection_server_lifecycle_test.go:TestR2CloudComputeDeleteServerRejectsNonPositiveTimeoutBeforeHTTP`.
 - With delete_ips the floating addresses found in the server addresses are looked up and deleted before the server DELETE, a floating IP that is not deleted aborts the server DELETE, and without the option no Neutron call is made.
-  Tests: `connectiontest/connection_r2_cloud_compute_lifecycle_test.go:TestR2CloudComputeDeleteServerDeleteIPsRemovesFloatingBeforeServer`, `connectiontest/connection_r2_cloud_compute_lifecycle_test.go:TestR2CloudComputeDeleteServerDeleteIPsFailureAbortsServerDelete`, `connectiontest/connection_r2_cloud_compute_lifecycle_test.go:TestR2CloudComputeDeleteServerWithoutDeleteIPsLeavesFloatingAlone`.
+  Tests: `connectiontest/connection_server_lifecycle_test.go:TestR2CloudComputeDeleteServerDeleteIPsRemovesFloatingBeforeServer`, `connectiontest/connection_server_lifecycle_test.go:TestR2CloudComputeDeleteServerDeleteIPsFailureAbortsServerDelete`, `connectiontest/connection_server_lifecycle_test.go:TestR2CloudComputeDeleteServerWithoutDeleteIPsLeavesFloatingAlone`.
 - The _has_floating_ips gate skips floating-IP cleanup without any request when floating_ip_source is none; a lookup raising NotFound continues with the next address; the find_server defaults look up by identity and then name=<name> on the detail list; the Nova floating source lists and deletes through os-floating-ips without Neutron.
   Tests: `connectiontest/connection_cloud_server_delete_gates_test.go:TestCloudDeleteServerFloatingSourceNoneSkipsFloatingCleanup`, `connectiontest/connection_cloud_server_delete_gates_test.go:TestCloudDeleteServerFloatingLookupNotFoundContinues`, `connectiontest/connection_cloud_server_delete_gates_test.go:TestCloudDeleteServerFindServerDefaults`, `connectiontest/connection_cloud_server_delete_gates_test.go:TestCloudDeleteServerNovaFloatingSourceDeletesThroughNova`.
 
@@ -758,7 +758,7 @@ Go API:
 - The remaining unmarked/unknown-codec Requests JSON-decoding and nonfinite numeric branches stay unsupported with actual response proof. Explicit supported charset normalization is covered by the added contract below. Existing Source68 actualCloud/Proxy/Server/Requests2.34.2/urllib32.8.0/CPython3.14.8 observations are reused, not extended; fixedfind adapter and memoryHTTP post remain distinct from live lookup/auth/retry proof.
   Tests: `compute/v2/servers/python_cloud_console_test.go:TestPythonCloudConsoleRecordRequestsDecodingAndNonFiniteGapStayExplicit`.
 - Connection exposes this cloud read through its cached service and SDK-owned location defaults. Cancellation is checked before catalog discovery. Only Neutron list helpers turn clean missing catalog endpoints into [] before evaluating options; searches retain catalog errors. Caller-provided options retain their explicit values.
-  Tests: `connectiontest/connection_cycle8_reads_test.go:TestConnectionCycle8CancelledReadsNeverDiscover`, `connectiontest/connection_cycle8_reads_test.go:TestConnectionCycle8ConsoleUsesCachedComputeAndSuppliedDictionary`.
+  Tests: `connectiontest/connection_cloud_list_reads_test.go:TestConnectionCycle8CancelledReadsNeverDiscover`, `connectiontest/connection_cloud_list_reads_test.go:TestConnectionCycle8ConsoleUsesCachedComputeAndSuppliedDictionary`.
 - Accepted100..399 remains original source policy; selectedversion retained, undiscoveredversion uses Server2.100 ceiling. FixedemptyAccept/version/request JSON/origin and copiedsourceheaders surviveclean retry/reauth; faults at200/400/401/403/404/429/500/777 keep physicalheaders/body/status and block new action hooks. ErrUnable original401 receipt is recovered explicitly without dropping ErrReauth. Cloud options pre-capture private readerheaders for both lookup/action while original selected bindings remain guarded. Console discovery explicitly copies NovaProfile with StopFaultRetryCallbacks=true; physicaldiscovery503 read+Close faults preserve actual native proof without a POST or hooks; global profile baseline remains unchanged.
   Tests: `compute/v2/servers/python_cloud_console_test.go:TestPythonCloudConsoleRecordOriginalStatusAndInformationalPolicy`, `compute/v2/servers/python_cloud_console_test.go:TestPythonCloudConsoleRecordDiscoveryUsesServerCeilingAndSelectedShortcut`, `compute/v2/servers/python_cloud_console_test.go:TestPythonCloudConsoleRecordPhysicalFaultsRetainActualProofAndStopActionRetry`, `compute/v2/servers/python_cloud_console_test.go:TestPythonCloudConsoleRecordRetryOwnershipAndNativeReauthentication`, `compute/v2/servers/python_cloud_console_test.go:TestPythonCloudConsoleRecordOwnedSourceHeadersAndIndependentReceipt`, `compute/v2/servers/python_cloud_console_test.go:TestPythonCloudConsoleRecordFailedReauthReceiptKeepsOriginalAndCause`, `compute/cloud_server_console_test.go:TestCloudServerConsoleCapturesHeadersBeforeOptionsAndAcrossLookupAction`, `compute/v2/servers/python_cloud_console_test.go:TestPythonCloudConsoleRecordDiscoveryFaultOptInStopsCallbacksBeforeAction`.
 - Shared responsejson.Normalize decodes explicit UTF16(BOM/LE/BE), UTF32(BOM/LE/BE), ISO8859-1/latin1 before output parsing. Representative Latin1/UTF16-BOM/UTF32BE accepted202 output values are UTF8 JSON while Envelope/Header remain independent actual wire proof. Unknown/malformed charset and supported-charset malformed JSON preserve original203 ResponseError.Body/Header with distinct Unsupported/InvalidOption causes; shared decoder matrix is root owned.
@@ -792,7 +792,7 @@ Go API:
 - The addSecurityGroup action matches the proxy request once the group name is known.
   Tests: `compute/v2/secgroups/python_parity_test.go:TestPythonSecGroupServerFetchAddRemoveMatchProxyRequests`.
 - AddServerSecurityGroups finds the server, resolves every group before any action, sends one addSecurityGroup per group in order using name else ID, and returns false without actions for a missing server/group or empty list.
-  Tests: `connectiontest/connection_r2_cloud_compute_secgroups_test.go:TestR2CloudComputeAddServerSecurityGroupsResolvesAllThenSendsInOrder`, `connectiontest/connection_r2_cloud_compute_secgroups_test.go:TestR2CloudComputeSecurityGroupsMissingServerOrGroupSendsNoAction`, `connectiontest/connection_r2_cloud_compute_secgroups_test.go:TestR2CloudComputeSecurityGroupsRejectEmptyIdentitiesBeforeHTTP`, `connectiontest/connection_r2_cloud_compute_secgroups_test.go:TestR2CloudComputeSecurityGroupActionFailureStopsSequenceWithoutReplay`.
+  Tests: `connectiontest/connection_server_security_groups_test.go:TestR2CloudComputeAddServerSecurityGroupsResolvesAllThenSendsInOrder`, `connectiontest/connection_server_security_groups_test.go:TestR2CloudComputeSecurityGroupsMissingServerOrGroupSendsNoAction`, `connectiontest/connection_server_security_groups_test.go:TestR2CloudComputeSecurityGroupsRejectEmptyIdentitiesBeforeHTTP`, `connectiontest/connection_server_security_groups_test.go:TestR2CloudComputeSecurityGroupActionFailureStopsSequenceWithoutReplay`.
 - The _has_secgroups gate: a secgroup_source other than neutron or nova in any casing (including null or empty) returns network.ErrUnavailableSecurityGroups before any request; only the exact source 'neutron' with the network service enabled uses Neutron, so 'nova', 'Neutron' or has_network false resolve groups through Nova; clouds.yaml secgroup_source is read and WithSecurityGroupSource overrides it.
   Tests: `connectiontest/connection_cloud_secgroup_source_test.go:TestCloudServerSecurityGroupsUnavailableSourceFailsBeforeHTTP`, `connectiontest/connection_cloud_secgroup_source_test.go:TestCloudServerSecurityGroupsNovaSelection`, `connectiontest/connection_endpoint_discovery_test.go:TestCloudsYAMLServiceFlagsAndSecurityGroupSource`.
 
@@ -817,7 +817,7 @@ Go API:
 - The removeSecurityGroup action matches the proxy request once the group name is known.
   Tests: `compute/v2/secgroups/python_parity_test.go:TestPythonSecGroupServerFetchAddRemoveMatchProxyRequests`.
 - RemoveServerSecurityGroups shares the lookup phase, continues after a 404 removeSecurityGroup and returns false, stops on other errors and never replays an action.
-  Tests: `connectiontest/connection_r2_cloud_compute_secgroups_test.go:TestR2CloudComputeRemoveServerSecurityGroupsContinuesPast404AndReportsFalse`, `connectiontest/connection_r2_cloud_compute_secgroups_test.go:TestR2CloudComputeSecurityGroupsMissingServerOrGroupSendsNoAction`, `connectiontest/connection_r2_cloud_compute_secgroups_test.go:TestR2CloudComputeSecurityGroupActionFailureStopsSequenceWithoutReplay`.
+  Tests: `connectiontest/connection_server_security_groups_test.go:TestR2CloudComputeRemoveServerSecurityGroupsContinuesPast404AndReportsFalse`, `connectiontest/connection_server_security_groups_test.go:TestR2CloudComputeSecurityGroupsMissingServerOrGroupSendsNoAction`, `connectiontest/connection_server_security_groups_test.go:TestR2CloudComputeSecurityGroupActionFailureStopsSequenceWithoutReplay`.
 - The _has_secgroups gate: a secgroup_source other than neutron or nova in any casing (including null or empty) returns network.ErrUnavailableSecurityGroups before any request; only the exact source 'neutron' with the network service enabled uses Neutron, so 'nova', 'Neutron' or has_network false resolve groups through Nova; clouds.yaml secgroup_source is read and WithSecurityGroupSource overrides it.
   Tests: `connectiontest/connection_cloud_secgroup_source_test.go:TestCloudServerSecurityGroupsUnavailableSourceFailsBeforeHTTP`, `connectiontest/connection_cloud_secgroup_source_test.go:TestCloudServerSecurityGroupsNovaSelection`, `connectiontest/connection_endpoint_discovery_test.go:TestCloudsYAMLServiceFlagsAndSecurityGroupSource`.
 
@@ -837,9 +837,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/limits.ProjectLimitsScope.Get`
 
 - Without a name no Identity request and no tenant query is sent; with a name the project is strict-found by GET then name list and the ID is sent as tenant_id.
-  Tests: `connectiontest/connection_py_cloud_compute_project_reads_test.go:TestPyCloudComputeGetLimitsWithoutProjectSendsNoIdentityOrTenant`, `connectiontest/connection_py_cloud_compute_project_reads_test.go:TestPyCloudComputeGetLimitsResolvesProjectToTenantQuery`.
+  Tests: `connectiontest/connection_compute_project_reads_test.go:TestPyCloudComputeGetLimitsWithoutProjectSendsNoIdentityOrTenant`, `connectiontest/connection_compute_project_reads_test.go:TestPyCloudComputeGetLimitsResolvesProjectToTenantQuery`.
 - Cancellation sends nothing; native absolute/rate decoding is the mapped get_limits contract.
-  Tests: `connectiontest/connection_py_cloud_compute_project_reads_test.go:TestPyCloudComputeUsageDateParsingAndFailures`, `api/nova_project_limits_contracts_test.go:TestNovaLimitsFetchAndProjectGetPreserveLegacyRateAndRawResponse`.
+  Tests: `connectiontest/connection_compute_project_reads_test.go:TestPyCloudComputeUsageDateParsingAndFailures`, `api/nova_project_limits_contracts_test.go:TestNovaLimitsFetchAndProjectGetPreserveLegacyRateAndRawResponse`.
 
 Python/Go differences:
 
@@ -857,9 +857,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/usage.API.SingleTenant`
 
 - The project is strict-found, then one os-simple-tenant-usage/{id} GET is sent with UTC start/end only when supplied; zero range sends no query.
-  Tests: `connectiontest/connection_py_cloud_compute_project_reads_test.go:TestPyCloudComputeGetUsageResolvesProjectAndSendsUTCRange`.
+  Tests: `connectiontest/connection_compute_project_reads_test.go:TestPyCloudComputeGetUsageResolvesProjectAndSendsUTCRange`.
 - Invalid dates, blank or missing projects fail before any usage request; the date parser accepts the documented ISO 8601 subset and rejects the rest.
-  Tests: `connectiontest/connection_py_cloud_compute_project_reads_test.go:TestPyCloudComputeUsageDateParsingAndFailures`.
+  Tests: `connectiontest/connection_compute_project_reads_test.go:TestPyCloudComputeUsageDateParsingAndFailures`.
 
 Python/Go differences:
 

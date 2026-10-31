@@ -2019,8 +2019,8 @@
         {
           "behavior": "delete_compute_quotas strict-finds the project and calls revert_quota_set (bodyless DELETE os-quota-sets/{project}); DeleteComputeQuotas does the same lookup and one DELETE, returning copied response headers.",
           "tests": [
-            "connectiontest/connection_py_cloud_compute_quotas_test.go:TestPyCloudComputeDeleteQuotasReturnsResetAndVolumeSideWorks",
-            "connectiontest/connection_py_cloud_compute_quotas_test.go:TestPyCloudComputeQuotaHelpersMissingProjectStopsBeforeService"
+            "connectiontest/connection_project_quota_helpers_test.go:TestPyCloudComputeDeleteQuotasReturnsResetAndVolumeSideWorks",
+            "connectiontest/connection_project_quota_helpers_test.go:TestPyCloudComputeQuotaHelpersMissingProjectStopsBeforeService"
           ]
         },
         {
@@ -2056,9 +2056,9 @@
         {
           "behavior": "get_compute_quotas(name_or_id) looks the project up with find_project(ignore_missing=False) and then fetches the quota set without usage; GetComputeQuotas performs the same strict lookup before one quota GET and stops with resource.ErrNotFound and no quota request for a missing project.",
           "tests": [
-            "connectiontest/connection_py_cloud_compute_quotas_test.go:TestPyCloudComputeQuotaHelpersLookUpIDThenName",
-            "connectiontest/connection_py_cloud_compute_quotas_test.go:TestPyCloudComputeQuotaHelpersMissingProjectStopsBeforeService",
-            "connectiontest/connection_py_cloud_compute_quotas_test.go:TestPyCloudComputeQuotaHelpersHonorCanceledContext"
+            "connectiontest/connection_project_quota_helpers_test.go:TestPyCloudComputeQuotaHelpersLookUpIDThenName",
+            "connectiontest/connection_project_quota_helpers_test.go:TestPyCloudComputeQuotaHelpersMissingProjectStopsBeforeService",
+            "connectiontest/connection_project_quota_helpers_test.go:TestPyCloudComputeQuotaHelpersHonorCanceledContext"
           ]
         },
         {
@@ -2095,8 +2095,8 @@
         {
           "behavior": "set_compute_quotas strict-finds the project, forces force=True over any caller value and sends update_quota_set; SetComputeQuotas looks up once and appends force=true after the caller's options, preserving zero values and omitting unset limits.",
           "tests": [
-            "connectiontest/connection_py_cloud_compute_quotas_test.go:TestPyCloudComputeSetQuotasForcesTrueAndKeepsZero",
-            "connectiontest/connection_py_cloud_compute_quotas_test.go:TestPyCloudComputeQuotaHelpersMissingProjectStopsBeforeService"
+            "connectiontest/connection_project_quota_helpers_test.go:TestPyCloudComputeSetQuotasForcesTrueAndKeepsZero",
+            "connectiontest/connection_project_quota_helpers_test.go:TestPyCloudComputeQuotaHelpersMissingProjectStopsBeforeService"
           ]
         },
         {
@@ -4026,8 +4026,8 @@
         {
           "behavior": "get_volume_quotas strict-finds the project then reads the quota set without usage; GetBlockStorageQuotas looks up once and sends one GET, failing before Cinder for a missing project.",
           "tests": [
-            "connectiontest/connection_py_cloud_compute_quotas_test.go:TestPyCloudComputeDeleteQuotasReturnsResetAndVolumeSideWorks",
-            "connectiontest/connection_py_cloud_compute_quotas_test.go:TestPyCloudComputeQuotaHelpersMissingProjectStopsBeforeService"
+            "connectiontest/connection_project_quota_helpers_test.go:TestPyCloudComputeDeleteQuotasReturnsResetAndVolumeSideWorks",
+            "connectiontest/connection_project_quota_helpers_test.go:TestPyCloudComputeQuotaHelpersMissingProjectStopsBeforeService"
           ]
         },
         {
@@ -4063,8 +4063,8 @@
         {
           "behavior": "set_volume_quotas strict-finds the project and sends update_quota_set without a force flag; SetBlockStorageQuotas looks up once, sends one PUT and adds no force.",
           "tests": [
-            "connectiontest/connection_py_cloud_compute_quotas_test.go:TestPyCloudComputeDeleteQuotasReturnsResetAndVolumeSideWorks",
-            "connectiontest/connection_py_cloud_compute_quotas_test.go:TestPyCloudComputeQuotaHelpersMissingProjectStopsBeforeService"
+            "connectiontest/connection_project_quota_helpers_test.go:TestPyCloudComputeDeleteQuotasReturnsResetAndVolumeSideWorks",
+            "connectiontest/connection_project_quota_helpers_test.go:TestPyCloudComputeQuotaHelpersMissingProjectStopsBeforeService"
           ]
         },
         {
@@ -4101,8 +4101,8 @@
         {
           "behavior": "delete_volume_quotas strict-finds the project and calls revert_quota_set; DeleteBlockStorageQuotas looks up once and sends one DELETE.",
           "tests": [
-            "connectiontest/connection_py_cloud_compute_quotas_test.go:TestPyCloudComputeDeleteQuotasReturnsResetAndVolumeSideWorks",
-            "connectiontest/connection_py_cloud_compute_quotas_test.go:TestPyCloudComputeQuotaHelpersMissingProjectStopsBeforeService"
+            "connectiontest/connection_project_quota_helpers_test.go:TestPyCloudComputeDeleteQuotasReturnsResetAndVolumeSideWorks",
+            "connectiontest/connection_project_quota_helpers_test.go:TestPyCloudComputeQuotaHelpersMissingProjectStopsBeforeService"
           ]
         },
         {
@@ -4140,8 +4140,8 @@
           "behavior": "A project name resolves once through a separate Identity client and is then reused; Get reads GET /quotas/{project} and Detail reads the usage endpoint for the resolved ID.",
           "tests": [
             "connectiontest/connection_project_quotas_test.go:TestConnectionServiceQuotaNamesUseSeparateIdentityClient",
-            "connectiontest/connection_py_cloud_net_quotas_test.go:TestPyCloudNetNetworkQuotasGetDetailAndNamedProjectLookup",
-            "connectiontest/connection_py_cloud_net_quotas_test.go:TestPyCloudNetNetworkQuotasMissingNamedProjectFailsBeforeNeutron"
+            "connectiontest/connection_network_project_quotas_test.go:TestPyCloudNetNetworkQuotasGetDetailAndNamedProjectLookup",
+            "connectiontest/connection_network_project_quotas_test.go:TestPyCloudNetNetworkQuotasMissingNamedProjectFailsBeforeNeutron"
           ]
         },
         {
@@ -4176,14 +4176,14 @@
           "behavior": "Named project lookup happens once through a separate Identity client; a missing named project fails before any Neutron request.",
           "tests": [
             "connectiontest/connection_project_quotas_test.go:TestConnectionServiceQuotaNamesUseSeparateIdentityClient",
-            "connectiontest/connection_py_cloud_net_quotas_test.go:TestPyCloudNetNetworkQuotasGetDetailAndNamedProjectLookup",
-            "connectiontest/connection_py_cloud_net_quotas_test.go:TestPyCloudNetNetworkQuotasMissingNamedProjectFailsBeforeNeutron"
+            "connectiontest/connection_network_project_quotas_test.go:TestPyCloudNetNetworkQuotasGetDetailAndNamedProjectLookup",
+            "connectiontest/connection_network_project_quotas_test.go:TestPyCloudNetNetworkQuotasMissingNamedProjectFailsBeforeNeutron"
           ]
         },
         {
           "behavior": "Update sends PUT /quotas/{project} with a quota envelope that keeps zero, -1 and an explicit check_limit=false and omits unset limits.",
           "tests": [
-            "connectiontest/connection_py_cloud_net_quotas_test.go:TestPyCloudNetNetworkQuotasUpdateBodyKeepsZeroUnlimitedAndCheckLimit",
+            "connectiontest/connection_network_project_quotas_test.go:TestPyCloudNetNetworkQuotasUpdateBodyKeepsZeroUnlimitedAndCheckLimit",
             "api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaUpdateOmittedFalseZeroAndSnapshotAcrossReauth",
             "api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaOptionsSnapshotAtCreationAndRemainReusable"
           ]
@@ -4214,14 +4214,14 @@
           "behavior": "Named project lookup happens once through a separate Identity client; a missing named project fails before any Neutron request.",
           "tests": [
             "connectiontest/connection_project_quotas_test.go:TestConnectionServiceQuotaNamesUseSeparateIdentityClient",
-            "connectiontest/connection_py_cloud_net_quotas_test.go:TestPyCloudNetNetworkQuotasGetDetailAndNamedProjectLookup",
-            "connectiontest/connection_py_cloud_net_quotas_test.go:TestPyCloudNetNetworkQuotasMissingNamedProjectFailsBeforeNeutron"
+            "connectiontest/connection_network_project_quotas_test.go:TestPyCloudNetNetworkQuotasGetDetailAndNamedProjectLookup",
+            "connectiontest/connection_network_project_quotas_test.go:TestPyCloudNetNetworkQuotasMissingNamedProjectFailsBeforeNeutron"
           ]
         },
         {
           "behavior": "Delete sends DELETE /quotas/{project} without a body; strict versus ignore-missing handling is explicit.",
           "tests": [
-            "connectiontest/connection_py_cloud_net_quotas_test.go:TestPyCloudNetNetworkQuotasDeleteSendsNoBody",
+            "connectiontest/connection_network_project_quotas_test.go:TestPyCloudNetNetworkQuotasDeleteSendsNoBody",
             "api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaHTTPFailuresAndStrictMissingPolicy"
           ]
         }
@@ -105787,15 +105787,15 @@
         {
           "behavior": "SearchAggregates lists every aggregate then applies exact/glob/ID name-or-ID plus dictionary or JMESPath filters locally with no Nova query, and rejects server-only options before HTTP.",
           "tests": [
-            "connectiontest/connection_r2_cloud_compute_aggregates_test.go:TestR2CloudComputeSearchAggregatesFiltersLocally",
-            "connectiontest/connection_r2_cloud_compute_aggregates_test.go:TestR2CloudComputeSearchAggregatesRejectsServerOnlyOptionsBeforeHTTP"
+            "connectiontest/connection_aggregate_search_test.go:TestR2CloudComputeSearchAggregatesFiltersLocally",
+            "connectiontest/connection_aggregate_search_test.go:TestR2CloudComputeSearchAggregatesRejectsServerOnlyOptionsBeforeHTTP"
           ]
         },
         {
           "behavior": "Filters run over the Source Aggregate attribute view built from each row Nova returned: Python names (deleted as is_deleted), absent members and null values as null, the original timestamp strings, the hosts/metadata/is_deleted conversions of openstack/fields.py, and the computed location whose zone is the aggregate's availability_zone.",
           "tests": [
-            "connectiontest/connection_r2_cloud_compute_aggregates_test.go:TestR2CloudComputeSearchAggregatesFilterRawSourceView",
-            "connection_r2_cloud_compute_aggregates_view_test.go:TestCloudAggregateViewFollowsSourceTypeConversions"
+            "connectiontest/connection_aggregate_search_test.go:TestR2CloudComputeSearchAggregatesFilterRawSourceView",
+            "connection_aggregate_search_view_test.go:TestCloudAggregateViewFollowsSourceTypeConversions"
           ]
         }
       ],
@@ -105852,13 +105852,13 @@
         {
           "behavior": "get_aggregate(name_or_id) is GET os-aggregates/{value} then the list; UpdateAggregate performs it strictly and sends one PUT with only supplied attributes, including availability_zone null.",
           "tests": [
-            "connectiontest/connection_py_cloud_compute_aggregates_test.go:TestPyCloudComputeUpdateAggregateFindsThenSendsOnlySuppliedNull"
+            "connectiontest/connection_compute_aggregates_test.go:TestPyCloudComputeUpdateAggregateFindsThenSendsOnlySuppliedNull"
           ]
         },
         {
           "behavior": "A missing aggregate returns ErrNotFound and no PUT is sent.",
           "tests": [
-            "connectiontest/connection_py_cloud_compute_aggregates_test.go:TestPyCloudComputeUpdateAggregateMissingSendsNoPut"
+            "connectiontest/connection_compute_aggregates_test.go:TestPyCloudComputeUpdateAggregateMissingSendsNoPut"
           ]
         },
         {
@@ -105892,14 +105892,14 @@
         {
           "behavior": "A digit-only identity is deleted with one DELETE and no lookup, and a 404 on it is false; a 500 is an error.",
           "tests": [
-            "connectiontest/connection_py_cloud_compute_aggregates_test.go:TestPyCloudComputeDeleteAggregateDigitsSkipLookupAndMapMissingToFalse",
-            "connectiontest/connection_py_cloud_compute_aggregates_test.go:TestPyCloudComputeDeleteAggregateByNameAndFailures"
+            "connectiontest/connection_compute_aggregates_test.go:TestPyCloudComputeDeleteAggregateDigitsSkipLookupAndMapMissingToFalse",
+            "connectiontest/connection_compute_aggregates_test.go:TestPyCloudComputeDeleteAggregateByNameAndFailures"
           ]
         },
         {
           "behavior": "A name is found first (GET then list), a missing aggregate returns false with no DELETE, and cancellation or a blank identity fails before any request.",
           "tests": [
-            "connectiontest/connection_py_cloud_compute_aggregates_test.go:TestPyCloudComputeDeleteAggregateByNameAndFailures"
+            "connectiontest/connection_compute_aggregates_test.go:TestPyCloudComputeDeleteAggregateByNameAndFailures"
           ]
         }
       ],
@@ -106200,7 +106200,7 @@
         {
           "behavior": "Connection exposes this cloud read through its cached service and SDK-owned location defaults. Cancellation is checked before catalog discovery. Only Neutron list helpers turn clean missing catalog endpoints into [] before evaluating options; searches retain catalog errors. Caller-provided options retain their explicit values.",
           "tests": [
-            "connectiontest/connection_cycle8_reads_test.go:TestConnectionCycle8CancelledReadsNeverDiscover"
+            "connectiontest/connection_cloud_list_reads_test.go:TestConnectionCycle8CancelledReadsNeverDiscover"
           ]
         }
       ],
@@ -106309,7 +106309,7 @@
         {
           "behavior": "Connection exposes this cloud read through its cached service and SDK-owned location defaults. Cancellation is checked before catalog discovery. Only Neutron list helpers turn clean missing catalog endpoints into [] before evaluating options; searches retain catalog errors. Caller-provided options retain their explicit values.",
           "tests": [
-            "connectiontest/connection_cycle8_reads_test.go:TestConnectionCycle8CancelledReadsNeverDiscover"
+            "connectiontest/connection_cloud_list_reads_test.go:TestConnectionCycle8CancelledReadsNeverDiscover"
           ]
         }
       ],
@@ -106512,8 +106512,8 @@
         {
           "behavior": "The deprecated filters branch maps to SearchServerRecords (local filters over a complete list, bare, one match required by the caller); expansion of found servers shares GetServerByID's tested ExpandServerInterfaces path.",
           "tests": [
-            "connectiontest/connection_r2_cloud_compute_servers_test.go:TestR2CloudComputeSearchServerRecordsFiltersLocally",
-            "connectiontest/connection_r2_cloud_compute_servers_test.go:TestR2CloudComputeGetServerByIDReturnsNilOnNotFoundAndExpandsFound"
+            "connectiontest/connection_server_records_test.go:TestR2CloudComputeSearchServerRecordsFiltersLocally",
+            "connectiontest/connection_server_records_test.go:TestR2CloudComputeGetServerByIDReturnsNilOnNotFoundAndExpandsFound"
           ]
         },
         {
@@ -106551,7 +106551,7 @@
         {
           "behavior": "GetServerByID returns nil for a 404, a server expanded with ExpandServerInterfaces by default, skips expansion with the bare option and returns other failures.",
           "tests": [
-            "connectiontest/connection_r2_cloud_compute_servers_test.go:TestR2CloudComputeGetServerByIDReturnsNilOnNotFoundAndExpandsFound"
+            "connectiontest/connection_server_records_test.go:TestR2CloudComputeGetServerByIDReturnsNilOnNotFoundAndExpandsFound"
           ]
         },
         {
@@ -106592,9 +106592,9 @@
         {
           "behavior": "ListServerRecords streams GET servers/detail (or servers without details), sends all_tenants=True only for the all-projects option, pushes explicit query and applies no local filter.",
           "tests": [
-            "connectiontest/connection_r2_cloud_compute_servers_test.go:TestR2CloudComputeListServerRecordsUsesDetailPathAndAllProjects",
-            "connectiontest/connection_r2_cloud_compute_servers_test.go:TestR2CloudComputeListServerRecordsWithoutDetailsAndQueryPushdown",
-            "connectiontest/connection_r2_cloud_compute_servers_test.go:TestR2CloudComputeServerReadsHonorCancellationBeforeHTTP"
+            "connectiontest/connection_server_records_test.go:TestR2CloudComputeListServerRecordsUsesDetailPathAndAllProjects",
+            "connectiontest/connection_server_records_test.go:TestR2CloudComputeListServerRecordsWithoutDetailsAndQueryPushdown",
+            "connectiontest/connection_server_records_test.go:TestR2CloudComputeServerReadsHonorCancellationBeforeHTTP"
           ]
         },
         {
@@ -106646,9 +106646,9 @@
         {
           "behavior": "SearchServerRecords lists every server then applies exact/glob name-or-ID plus ordered dictionary or JMESPath filters locally, returns expression output without records, keeps consumed rows on a page failure and rejects invalid filters before HTTP.",
           "tests": [
-            "connectiontest/connection_r2_cloud_compute_servers_test.go:TestR2CloudComputeSearchServerRecordsFiltersLocally",
-            "connectiontest/connection_r2_cloud_compute_servers_test.go:TestR2CloudComputeSearchServerRecordsExpressionAndInvalidFilters",
-            "connectiontest/connection_r2_cloud_compute_servers_test.go:TestR2CloudComputeSearchServerRecordsKeepsConsumedRowsOnPageFailure"
+            "connectiontest/connection_server_records_test.go:TestR2CloudComputeSearchServerRecordsFiltersLocally",
+            "connectiontest/connection_server_records_test.go:TestR2CloudComputeSearchServerRecordsExpressionAndInvalidFilters",
+            "connectiontest/connection_server_records_test.go:TestR2CloudComputeSearchServerRecordsKeepsConsumedRowsOnPageFailure"
           ]
         },
         {
@@ -106699,8 +106699,8 @@
         {
           "behavior": "UpdateServer finds strictly, sends one PUT with only the supplied name/description (explicit null description), sends nothing for no attributes, rejects empty/null names before HTTP and returns ErrNotFound for a missing server without PUT.",
           "tests": [
-            "connectiontest/connection_r2_cloud_compute_servers_test.go:TestR2CloudComputeUpdateServerFindsStrictlyAndSendsOnlySuppliedAttributes",
-            "connectiontest/connection_r2_cloud_compute_servers_test.go:TestR2CloudComputeUpdateServerRejectsBadInputBeforeHTTPAndMissingServer"
+            "connectiontest/connection_server_records_test.go:TestR2CloudComputeUpdateServerFindsStrictlyAndSendsOnlySuppliedAttributes",
+            "connectiontest/connection_server_records_test.go:TestR2CloudComputeUpdateServerRejectsBadInputBeforeHTTPAndMissingServer"
           ]
         },
         {
@@ -106746,9 +106746,9 @@
         {
           "behavior": "RebuildServer sends imageRef and a nonempty adminPass, rejects an empty image before HTTP, waits for ACTIVE with ERROR failure, restores the returned or supplied admin password on the waited server and never replays the rebuild on a failed wait.",
           "tests": [
-            "connectiontest/connection_r2_cloud_compute_lifecycle_test.go:TestR2CloudComputeRebuildServerSendsImageAndPasswordAndRejectsEmptyImage",
-            "connectiontest/connection_r2_cloud_compute_lifecycle_test.go:TestR2CloudComputeRebuildServerWaitRestoresAdminPasswordOnActiveServer",
-            "connectiontest/connection_r2_cloud_compute_lifecycle_test.go:TestR2CloudComputeRebuildServerWaitFailureKeepsActionResultWithoutReplay"
+            "connectiontest/connection_server_lifecycle_test.go:TestR2CloudComputeRebuildServerSendsImageAndPasswordAndRejectsEmptyImage",
+            "connectiontest/connection_server_lifecycle_test.go:TestR2CloudComputeRebuildServerWaitRestoresAdminPasswordOnActiveServer",
+            "connectiontest/connection_server_lifecycle_test.go:TestR2CloudComputeRebuildServerWaitFailureKeepsActionResultWithoutReplay"
           ]
         },
         {
@@ -106797,20 +106797,20 @@
         {
           "behavior": "DeleteServer returns false without DELETE for a missing server, maps a DELETE 404 to false, never replays a failed DELETE, observes absence with wait, keeps (true, err) after an accepted DELETE whose wait times out and rejects a non-positive timeout before HTTP.",
           "tests": [
-            "connectiontest/connection_r2_cloud_compute_lifecycle_test.go:TestR2CloudComputeDeleteServerMissingServerSendsNoDelete",
-            "connectiontest/connection_r2_cloud_compute_lifecycle_test.go:TestR2CloudComputeDeleteServerFoundSendsOneDeleteAndMaps404ToFalse",
-            "connectiontest/connection_r2_cloud_compute_lifecycle_test.go:TestR2CloudComputeDeleteServerDeleteErrorIsNotReplayed",
-            "connectiontest/connection_r2_cloud_compute_lifecycle_test.go:TestR2CloudComputeDeleteServerWaitObservesAbsence",
-            "connectiontest/connection_r2_cloud_compute_lifecycle_test.go:TestR2CloudComputeDeleteServerWaitTimeoutKeepsAcceptedDelete",
-            "connectiontest/connection_r2_cloud_compute_lifecycle_test.go:TestR2CloudComputeDeleteServerRejectsNonPositiveTimeoutBeforeHTTP"
+            "connectiontest/connection_server_lifecycle_test.go:TestR2CloudComputeDeleteServerMissingServerSendsNoDelete",
+            "connectiontest/connection_server_lifecycle_test.go:TestR2CloudComputeDeleteServerFoundSendsOneDeleteAndMaps404ToFalse",
+            "connectiontest/connection_server_lifecycle_test.go:TestR2CloudComputeDeleteServerDeleteErrorIsNotReplayed",
+            "connectiontest/connection_server_lifecycle_test.go:TestR2CloudComputeDeleteServerWaitObservesAbsence",
+            "connectiontest/connection_server_lifecycle_test.go:TestR2CloudComputeDeleteServerWaitTimeoutKeepsAcceptedDelete",
+            "connectiontest/connection_server_lifecycle_test.go:TestR2CloudComputeDeleteServerRejectsNonPositiveTimeoutBeforeHTTP"
           ]
         },
         {
           "behavior": "With delete_ips the floating addresses found in the server addresses are looked up and deleted before the server DELETE, a floating IP that is not deleted aborts the server DELETE, and without the option no Neutron call is made.",
           "tests": [
-            "connectiontest/connection_r2_cloud_compute_lifecycle_test.go:TestR2CloudComputeDeleteServerDeleteIPsRemovesFloatingBeforeServer",
-            "connectiontest/connection_r2_cloud_compute_lifecycle_test.go:TestR2CloudComputeDeleteServerDeleteIPsFailureAbortsServerDelete",
-            "connectiontest/connection_r2_cloud_compute_lifecycle_test.go:TestR2CloudComputeDeleteServerWithoutDeleteIPsLeavesFloatingAlone"
+            "connectiontest/connection_server_lifecycle_test.go:TestR2CloudComputeDeleteServerDeleteIPsRemovesFloatingBeforeServer",
+            "connectiontest/connection_server_lifecycle_test.go:TestR2CloudComputeDeleteServerDeleteIPsFailureAbortsServerDelete",
+            "connectiontest/connection_server_lifecycle_test.go:TestR2CloudComputeDeleteServerWithoutDeleteIPsLeavesFloatingAlone"
           ]
         },
         {
@@ -106909,8 +106909,8 @@
         {
           "behavior": "Connection exposes this cloud read through its cached service and SDK-owned location defaults. Cancellation is checked before catalog discovery. Only Neutron list helpers turn clean missing catalog endpoints into [] before evaluating options; searches retain catalog errors. Caller-provided options retain their explicit values.",
           "tests": [
-            "connectiontest/connection_cycle8_reads_test.go:TestConnectionCycle8CancelledReadsNeverDiscover",
-            "connectiontest/connection_cycle8_reads_test.go:TestConnectionCycle8ConsoleUsesCachedComputeAndSuppliedDictionary"
+            "connectiontest/connection_cloud_list_reads_test.go:TestConnectionCycle8CancelledReadsNeverDiscover",
+            "connectiontest/connection_cloud_list_reads_test.go:TestConnectionCycle8ConsoleUsesCachedComputeAndSuppliedDictionary"
           ]
         },
         {
@@ -106973,10 +106973,10 @@
         {
           "behavior": "AddServerSecurityGroups finds the server, resolves every group before any action, sends one addSecurityGroup per group in order using name else ID, and returns false without actions for a missing server/group or empty list.",
           "tests": [
-            "connectiontest/connection_r2_cloud_compute_secgroups_test.go:TestR2CloudComputeAddServerSecurityGroupsResolvesAllThenSendsInOrder",
-            "connectiontest/connection_r2_cloud_compute_secgroups_test.go:TestR2CloudComputeSecurityGroupsMissingServerOrGroupSendsNoAction",
-            "connectiontest/connection_r2_cloud_compute_secgroups_test.go:TestR2CloudComputeSecurityGroupsRejectEmptyIdentitiesBeforeHTTP",
-            "connectiontest/connection_r2_cloud_compute_secgroups_test.go:TestR2CloudComputeSecurityGroupActionFailureStopsSequenceWithoutReplay"
+            "connectiontest/connection_server_security_groups_test.go:TestR2CloudComputeAddServerSecurityGroupsResolvesAllThenSendsInOrder",
+            "connectiontest/connection_server_security_groups_test.go:TestR2CloudComputeSecurityGroupsMissingServerOrGroupSendsNoAction",
+            "connectiontest/connection_server_security_groups_test.go:TestR2CloudComputeSecurityGroupsRejectEmptyIdentitiesBeforeHTTP",
+            "connectiontest/connection_server_security_groups_test.go:TestR2CloudComputeSecurityGroupActionFailureStopsSequenceWithoutReplay"
           ]
         },
         {
@@ -107019,9 +107019,9 @@
         {
           "behavior": "RemoveServerSecurityGroups shares the lookup phase, continues after a 404 removeSecurityGroup and returns false, stops on other errors and never replays an action.",
           "tests": [
-            "connectiontest/connection_r2_cloud_compute_secgroups_test.go:TestR2CloudComputeRemoveServerSecurityGroupsContinuesPast404AndReportsFalse",
-            "connectiontest/connection_r2_cloud_compute_secgroups_test.go:TestR2CloudComputeSecurityGroupsMissingServerOrGroupSendsNoAction",
-            "connectiontest/connection_r2_cloud_compute_secgroups_test.go:TestR2CloudComputeSecurityGroupActionFailureStopsSequenceWithoutReplay"
+            "connectiontest/connection_server_security_groups_test.go:TestR2CloudComputeRemoveServerSecurityGroupsContinuesPast404AndReportsFalse",
+            "connectiontest/connection_server_security_groups_test.go:TestR2CloudComputeSecurityGroupsMissingServerOrGroupSendsNoAction",
+            "connectiontest/connection_server_security_groups_test.go:TestR2CloudComputeSecurityGroupActionFailureStopsSequenceWithoutReplay"
           ]
         },
         {
@@ -107055,14 +107055,14 @@
         {
           "behavior": "Without a name no Identity request and no tenant query is sent; with a name the project is strict-found by GET then name list and the ID is sent as tenant_id.",
           "tests": [
-            "connectiontest/connection_py_cloud_compute_project_reads_test.go:TestPyCloudComputeGetLimitsWithoutProjectSendsNoIdentityOrTenant",
-            "connectiontest/connection_py_cloud_compute_project_reads_test.go:TestPyCloudComputeGetLimitsResolvesProjectToTenantQuery"
+            "connectiontest/connection_compute_project_reads_test.go:TestPyCloudComputeGetLimitsWithoutProjectSendsNoIdentityOrTenant",
+            "connectiontest/connection_compute_project_reads_test.go:TestPyCloudComputeGetLimitsResolvesProjectToTenantQuery"
           ]
         },
         {
           "behavior": "Cancellation sends nothing; native absolute/rate decoding is the mapped get_limits contract.",
           "tests": [
-            "connectiontest/connection_py_cloud_compute_project_reads_test.go:TestPyCloudComputeUsageDateParsingAndFailures",
+            "connectiontest/connection_compute_project_reads_test.go:TestPyCloudComputeUsageDateParsingAndFailures",
             "api/nova_project_limits_contracts_test.go:TestNovaLimitsFetchAndProjectGetPreserveLegacyRateAndRawResponse"
           ]
         }
@@ -107089,13 +107089,13 @@
         {
           "behavior": "The project is strict-found, then one os-simple-tenant-usage/{id} GET is sent with UTC start/end only when supplied; zero range sends no query.",
           "tests": [
-            "connectiontest/connection_py_cloud_compute_project_reads_test.go:TestPyCloudComputeGetUsageResolvesProjectAndSendsUTCRange"
+            "connectiontest/connection_compute_project_reads_test.go:TestPyCloudComputeGetUsageResolvesProjectAndSendsUTCRange"
           ]
         },
         {
           "behavior": "Invalid dates, blank or missing projects fail before any usage request; the date parser accepts the documented ISO 8601 subset and rejects the rest.",
           "tests": [
-            "connectiontest/connection_py_cloud_compute_project_reads_test.go:TestPyCloudComputeUsageDateParsingAndFailures"
+            "connectiontest/connection_compute_project_reads_test.go:TestPyCloudComputeUsageDateParsingAndFailures"
           ]
         }
       ],
@@ -107465,9 +107465,9 @@
         {
           "behavior": "Connection exposes this cloud read through its cached service and SDK-owned location defaults. Cancellation is checked before catalog discovery. Only Neutron list helpers turn clean missing catalog endpoints into [] before evaluating options; searches retain catalog errors. Caller-provided options retain their explicit values.",
           "tests": [
-            "connectiontest/connection_cycle8_reads_test.go:TestConnectionCycle8CancelledReadsNeverDiscover",
-            "connectiontest/connection_cycle8_reads_test.go:TestConnectionCycle8MissingNeutronOnlyListsSkipOptions",
-            "connectiontest/connection_cycle8_reads_test.go:TestConnectionCycle8NetworkReadsCacheServiceAndForwardNameQuery"
+            "connectiontest/connection_cloud_list_reads_test.go:TestConnectionCycle8CancelledReadsNeverDiscover",
+            "connectiontest/connection_cloud_list_reads_test.go:TestConnectionCycle8MissingNeutronOnlyListsSkipOptions",
+            "connectiontest/connection_cloud_list_reads_test.go:TestConnectionCycle8NetworkReadsCacheServiceAndForwardNameQuery"
           ]
         },
         {
@@ -107561,9 +107561,9 @@
         {
           "behavior": "Connection exposes this cloud read through its cached service and SDK-owned location defaults. Cancellation is checked before catalog discovery. Only Neutron list helpers turn clean missing catalog endpoints into [] before evaluating options; searches retain catalog errors. Caller-provided options retain their explicit values.",
           "tests": [
-            "connectiontest/connection_cycle8_reads_test.go:TestConnectionCycle8CancelledReadsNeverDiscover",
-            "connectiontest/connection_cycle8_reads_test.go:TestConnectionCycle8MissingNeutronOnlyListsSkipOptions",
-            "connectiontest/connection_cycle8_reads_test.go:TestConnectionCycle8NetworkReadsCacheServiceAndForwardNameQuery"
+            "connectiontest/connection_cloud_list_reads_test.go:TestConnectionCycle8CancelledReadsNeverDiscover",
+            "connectiontest/connection_cloud_list_reads_test.go:TestConnectionCycle8MissingNeutronOnlyListsSkipOptions",
+            "connectiontest/connection_cloud_list_reads_test.go:TestConnectionCycle8NetworkReadsCacheServiceAndForwardNameQuery"
           ]
         },
         {
@@ -107703,9 +107703,9 @@
         {
           "behavior": "Connection exposes this cloud read through its cached service and SDK-owned location defaults. Cancellation is checked before catalog discovery. Only Neutron list helpers turn clean missing catalog endpoints into [] before evaluating options; searches retain catalog errors. Caller-provided options retain their explicit values.",
           "tests": [
-            "connectiontest/connection_cycle8_reads_test.go:TestConnectionCycle8CancelledReadsNeverDiscover",
-            "connectiontest/connection_cycle8_reads_test.go:TestConnectionCycle8MissingNeutronOnlyListsSkipOptions",
-            "connectiontest/connection_cycle8_reads_test.go:TestConnectionCycle8NetworkReadsCacheServiceAndForwardNameQuery"
+            "connectiontest/connection_cloud_list_reads_test.go:TestConnectionCycle8CancelledReadsNeverDiscover",
+            "connectiontest/connection_cloud_list_reads_test.go:TestConnectionCycle8MissingNeutronOnlyListsSkipOptions",
+            "connectiontest/connection_cloud_list_reads_test.go:TestConnectionCycle8NetworkReadsCacheServiceAndForwardNameQuery"
           ]
         },
         {
@@ -107843,9 +107843,9 @@
         {
           "behavior": "Connection exposes this cloud read through its cached service and SDK-owned location defaults. Cancellation is checked before catalog discovery. Only Neutron list helpers turn clean missing catalog endpoints into [] before evaluating options; searches retain catalog errors. Caller-provided options retain their explicit values.",
           "tests": [
-            "connectiontest/connection_cycle8_reads_test.go:TestConnectionCycle8CancelledReadsNeverDiscover",
-            "connectiontest/connection_cycle8_reads_test.go:TestConnectionCycle8MissingNeutronOnlyListsSkipOptions",
-            "connectiontest/connection_cycle8_reads_test.go:TestConnectionCycle8NetworkReadsCacheServiceAndForwardNameQuery"
+            "connectiontest/connection_cloud_list_reads_test.go:TestConnectionCycle8CancelledReadsNeverDiscover",
+            "connectiontest/connection_cloud_list_reads_test.go:TestConnectionCycle8MissingNeutronOnlyListsSkipOptions",
+            "connectiontest/connection_cloud_list_reads_test.go:TestConnectionCycle8NetworkReadsCacheServiceAndForwardNameQuery"
           ]
         },
         {
@@ -110490,32 +110490,32 @@
         {
           "behavior": "Nova reuse: available IP selection, exact-address attach, address wait and interface IP; the caller server is not mutated.",
           "tests": [
-            "connectiontest/connection_r2_cloud_net_ip_test.go:TestR2CloudNetAddAutoIPNovaReuseAttachesAndWaits"
+            "connectiontest/connection_floating_ip_attach_detach_test.go:TestR2CloudNetAddAutoIPNovaReuseAttachesAndWaits"
           ]
         },
         {
           "behavior": "A server already showing the floating address is not attached again.",
           "tests": [
-            "connectiontest/connection_r2_cloud_net_ip_test.go:TestR2CloudNetAddAutoIPAlreadyAttachedSkipsAttach"
+            "connectiontest/connection_floating_ip_attach_detach_test.go:TestR2CloudNetAddAutoIPAlreadyAttachedSkipsAttach"
           ]
         },
         {
           "behavior": "Neutron allocation (reuse=false) skips the attach, waits for the address and does not delete on success.",
           "tests": [
-            "connectiontest/connection_r2_cloud_net_ip_test.go:TestR2CloudNetAddAutoIPNeutronCreateSkipsAttachAndWaits"
+            "connectiontest/connection_floating_ip_attach_detach_test.go:TestR2CloudNetAddAutoIPNeutronCreateSkipsAttachAndWaits"
           ]
         },
         {
           "behavior": "A wait timeout is a deadline error; a Neutron IP created by the call is deleted once unless cleanup is disabled, and Nova IPs are never deleted.",
           "tests": [
-            "connectiontest/connection_r2_cloud_net_ip_test.go:TestR2CloudNetAddAutoIPNeutronCreateTimeoutDeletesOnceUnlessDisabled",
-            "connectiontest/connection_r2_cloud_net_ip_test.go:TestR2CloudNetAddAutoIPWaitTimeoutOnNovaReportsDeadlineWithoutCleanup"
+            "connectiontest/connection_floating_ip_attach_detach_test.go:TestR2CloudNetAddAutoIPNeutronCreateTimeoutDeletesOnceUnlessDisabled",
+            "connectiontest/connection_floating_ip_attach_detach_test.go:TestR2CloudNetAddAutoIPWaitTimeoutOnNovaReportsDeadlineWithoutCleanup"
           ]
         },
         {
           "behavior": "Invalid server/options and canceled contexts send nothing.",
           "tests": [
-            "connectiontest/connection_r2_cloud_net_ip_test.go:TestR2CloudNetAddAutoIPValidation"
+            "connectiontest/connection_floating_ip_attach_detach_test.go:TestR2CloudNetAddAutoIPValidation"
           ]
         },
         {
@@ -110571,34 +110571,34 @@
         {
           "behavior": "Neutron: lookup, then exactly one PUT floatingips/{id} with port_id null; the result records Detached and the accepted response.",
           "tests": [
-            "connectiontest/connection_r2_cloud_net_ip_test.go:TestR2CloudNetDetachNeutronSendsOneNullPortUpdate"
+            "connectiontest/connection_floating_ip_attach_detach_test.go:TestR2CloudNetDetachNeutronSendsOneNullPortUpdate"
           ]
         },
         {
           "behavior": "Neutron: an absent row or a null/empty port_id returns not_attached with no mutation.",
           "tests": [
-            "connectiontest/connection_r2_cloud_net_ip_test.go:TestR2CloudNetDetachNeutronReturnsFalseWithoutMutation"
+            "connectiontest/connection_floating_ip_attach_detach_test.go:TestR2CloudNetDetachNeutronReturnsFalseWithoutMutation"
           ]
         },
         {
           "behavior": "Neutron update failures (404/409/500) are wrapped, retain the response and never fall back to Nova or replay the PUT.",
           "tests": [
-            "connectiontest/connection_r2_cloud_net_ip_test.go:TestR2CloudNetDetachNeutronUpdateFailureNeverFallsBackToNova"
+            "connectiontest/connection_floating_ip_attach_detach_test.go:TestR2CloudNetDetachNeutronUpdateFailureNeverFallsBackToNova"
           ]
         },
         {
           "behavior": "Nova: one removeFloatingIp action with the row address; a missing IP fails before the action; a rejected action is reported once.",
           "tests": [
-            "connectiontest/connection_r2_cloud_net_ip_test.go:TestR2CloudNetDetachNovaSendsRemoveFloatingIPAction",
-            "connectiontest/connection_r2_cloud_net_ip_test.go:TestR2CloudNetDetachNovaMissingIPFailsBeforeAction",
-            "connectiontest/connection_r2_cloud_net_ip_test.go:TestR2CloudNetDetachNovaActionRejectionIsReportedOnce"
+            "connectiontest/connection_floating_ip_attach_detach_test.go:TestR2CloudNetDetachNovaSendsRemoveFloatingIPAction",
+            "connectiontest/connection_floating_ip_attach_detach_test.go:TestR2CloudNetDetachNovaMissingIPFailsBeforeAction",
+            "connectiontest/connection_floating_ip_attach_detach_test.go:TestR2CloudNetDetachNovaActionRejectionIsReportedOnce"
           ]
         },
         {
           "behavior": "Invalid IDs, a nil connection and pre-canceled contexts send nothing; cancellation during the PUT does not replay it.",
           "tests": [
-            "connectiontest/connection_r2_cloud_net_ip_test.go:TestR2CloudNetDetachValidatesInputsAndContextBeforeHTTP",
-            "connectiontest/connection_r2_cloud_net_ip_test.go:TestR2CloudNetDetachCancellationDuringUpdateDoesNotReplay"
+            "connectiontest/connection_floating_ip_attach_detach_test.go:TestR2CloudNetDetachValidatesInputsAndContextBeforeHTTP",
+            "connectiontest/connection_floating_ip_attach_detach_test.go:TestR2CloudNetDetachCancellationDuringUpdateDoesNotReplay"
           ]
         },
         {
@@ -111582,8 +111582,8 @@
         {
           "behavior": "Connection supplies cached Neutron and an owned default current location without caller builders; explicit location remains selectable and invalid/cancelled calls do not discover a service.",
           "tests": [
-            "connectiontest/connection_cycle7_records_test.go:TestConnectionRouterCreateOwnsDefaultLocationAndCachedService",
-            "connectiontest/connection_cycle7_records_test.go:TestConnectionCycle7PreflightPreservesCancellationBeforeDiscovery"
+            "connectiontest/connection_record_service_cache_test.go:TestConnectionRouterCreateOwnsDefaultLocationAndCachedService",
+            "connectiontest/connection_record_service_cache_test.go:TestConnectionCycle7PreflightPreservesCancellationBeforeDiscovery"
           ]
         }
       ],
@@ -111711,8 +111711,8 @@
         {
           "behavior": "Connection supplies cached Neutron and an owned default location for lookup/create while the service invalidates only actual accepted topology mutations.",
           "tests": [
-            "connectiontest/connection_cycle7_records_test.go:TestConnectionSubnetCreateSharesNetworkCacheAndLocation",
-            "connectiontest/connection_cycle7_records_test.go:TestConnectionCycle7PreflightPreservesCancellationBeforeDiscovery"
+            "connectiontest/connection_record_service_cache_test.go:TestConnectionSubnetCreateSharesNetworkCacheAndLocation",
+            "connectiontest/connection_record_service_cache_test.go:TestConnectionCycle7PreflightPreservesCancellationBeforeDiscovery"
           ]
         }
       ],
@@ -113898,8 +113898,8 @@
         {
           "behavior": "Eager Connection text/output handling shares the cached Swift facade and retained actual receipt, preserving cancellation and invalid-call failures before discovery.",
           "tests": [
-            "connectiontest/connection_cycle7_records_test.go:TestConnectionObjectGetTextSharesCachedSwiftAndRetainsReceipt",
-            "connectiontest/connection_cycle7_records_test.go:TestConnectionCycle7PreflightPreservesCancellationBeforeDiscovery"
+            "connectiontest/connection_record_service_cache_test.go:TestConnectionObjectGetTextSharesCachedSwiftAndRetainsReceipt",
+            "connectiontest/connection_record_service_cache_test.go:TestConnectionCycle7PreflightPreservesCancellationBeforeDiscovery"
           ]
         }
       ],
@@ -114169,13 +114169,13 @@
         {
           "behavior": "The request ID is applied to every request of the derived Connection and never to the receiver.",
           "tests": [
-            "connectiontest/connection_r2_misc_derive_test.go:TestR2MiscGlobalRequestHeaderOnDerivedConnectionOnly"
+            "connectiontest/connection_derived_connections_test.go:TestR2MiscGlobalRequestHeaderOnDerivedConnectionOnly"
           ]
         },
         {
           "behavior": "Invalid IDs are rejected.",
           "tests": [
-            "connectiontest/connection_r2_misc_derive_test.go:TestR2MiscGlobalRequestRejectsUnsafeIDs"
+            "connectiontest/connection_derived_connections_test.go:TestR2MiscGlobalRequestRejectsUnsafeIDs"
           ]
         }
       ],
@@ -114199,19 +114199,19 @@
         {
           "behavior": "The derived Connection shares the provider token and sends the request ID header on compute and network requests, while the parent and already obtained services send none; a derived Connection can be re-derived.",
           "tests": [
-            "connectiontest/connection_r2_misc_derive_test.go:TestR2MiscGlobalRequestHeaderOnDerivedConnectionOnly"
+            "connectiontest/connection_derived_connections_test.go:TestR2MiscGlobalRequestHeaderOnDerivedConnectionOnly"
           ]
         },
         {
           "behavior": "Empty, spaced, control, non-ASCII and nil-receiver inputs are rejected before anything is built.",
           "tests": [
-            "connectiontest/connection_r2_misc_derive_test.go:TestR2MiscGlobalRequestRejectsUnsafeIDs"
+            "connectiontest/connection_derived_connections_test.go:TestR2MiscGlobalRequestRejectsUnsafeIDs"
           ]
         },
         {
           "behavior": "Custom service clients of a derived Connection carry the header with their own client.",
           "tests": [
-            "connectiontest/connection_r2_misc_endpoint_test.go:TestR2MiscAddServiceBuildsLazyClientOncePerConnection"
+            "connectiontest/connection_endpoint_custom_services_test.go:TestR2MiscAddServiceBuildsLazyClientOncePerConnection"
           ]
         }
       ],
@@ -114498,8 +114498,8 @@
         {
           "behavior": "HasService reports catalog or override presence without a request and returns errors for lookup failures.",
           "tests": [
-            "connectiontest/connection_r2_misc_endpoint_test.go:TestR2MiscEndpointForCatalogSelectionAndOverride",
-            "connectiontest/connection_r2_misc_endpoint_test.go:TestR2MiscEndpointForInvalidAndUnrecordedCatalog"
+            "connectiontest/connection_endpoint_custom_services_test.go:TestR2MiscEndpointForCatalogSelectionAndOverride",
+            "connectiontest/connection_endpoint_custom_services_test.go:TestR2MiscEndpointForInvalidAndUnrecordedCatalog"
           ]
         },
         {
@@ -114514,7 +114514,7 @@
           "tests": [
             "connectiontest/connection_endpoint_discovery_test.go:TestHasServiceVersionAndServiceFlags",
             "connectiontest/connection_endpoint_discovery_test.go:TestCloudsYAMLServiceFlagsAndSecurityGroupSource",
-            "connectiontest/connection_r2_misc_endpoint_test.go:TestR2MiscEndpointForInvalidAndUnrecordedCatalog"
+            "connectiontest/connection_endpoint_custom_services_test.go:TestR2MiscEndpointForInvalidAndUnrecordedCatalog"
           ]
         }
       ],
@@ -114544,7 +114544,7 @@
         {
           "behavior": "Override or catalog endpoint with region, interface and service name; false when absent.",
           "tests": [
-            "connectiontest/connection_r2_misc_endpoint_test.go:TestR2MiscEndpointForCatalogSelectionAndOverride"
+            "connectiontest/connection_endpoint_custom_services_test.go:TestR2MiscEndpointForCatalogSelectionAndOverride"
           ]
         },
         {
@@ -114585,13 +114585,13 @@
         {
           "behavior": "A WithEndpoint override of the type wins; otherwise the first matching catalog endpoint by interface (URL suffix ignored) and region is returned, the bool is false when absent, and no request is made.",
           "tests": [
-            "connectiontest/connection_r2_misc_endpoint_test.go:TestR2MiscEndpointForCatalogSelectionAndOverride"
+            "connectiontest/connection_endpoint_custom_services_test.go:TestR2MiscEndpointForCatalogSelectionAndOverride"
           ]
         },
         {
           "behavior": "Without a recorded token catalog the provider endpoint locator is used with the type, region, interface and name, absence maps to not found, and invalid arguments or other failures are errors.",
           "tests": [
-            "connectiontest/connection_r2_misc_endpoint_test.go:TestR2MiscEndpointForInvalidAndUnrecordedCatalog"
+            "connectiontest/connection_endpoint_custom_services_test.go:TestR2MiscEndpointForInvalidAndUnrecordedCatalog"
           ]
         }
       ],
@@ -114625,14 +114625,14 @@
         {
           "behavior": "The derived Connection authenticates once with the recorded options overridden by typed settings, applies the user/project discard rules and project domain inheritance, keeps endpoint/region/location facts, and uses its own token.",
           "tests": [
-            "connectiontest/connection_r2_misc_derive_test.go:TestR2MiscConnectAsOverridesAuthAndSharesNothing"
+            "connectiontest/connection_derived_connections_test.go:TestR2MiscConnectAsOverridesAuthAndSharesNothing"
           ]
         },
         {
           "behavior": "Invalid overrides, nil options, canceled contexts and FromProvider connections make no token request; authentication failures wrap the native cause; a derived Connection does not inherit the global request ID.",
           "tests": [
-            "connectiontest/connection_r2_misc_derive_test.go:TestR2MiscConnectAsInvalidInputsMakeNoRequest",
-            "connectiontest/connection_r2_misc_derive_test.go:TestR2MiscConnectAsDoesNotInheritGlobalRequestID"
+            "connectiontest/connection_derived_connections_test.go:TestR2MiscConnectAsInvalidInputsMakeNoRequest",
+            "connectiontest/connection_derived_connections_test.go:TestR2MiscConnectAsDoesNotInheritGlobalRequestID"
           ]
         }
       ],
@@ -114659,13 +114659,13 @@
         {
           "behavior": "A project by name and project domain ID is scoped with the inherited project fields discarded; a project ID selects the ID scope.",
           "tests": [
-            "connectiontest/connection_r2_misc_derive_test.go:TestR2MiscConnectAsOverridesAuthAndSharesNothing"
+            "connectiontest/connection_derived_connections_test.go:TestR2MiscConnectAsOverridesAuthAndSharesNothing"
           ]
         },
         {
           "behavior": "An empty project reference is rejected without a request.",
           "tests": [
-            "connectiontest/connection_r2_misc_derive_test.go:TestR2MiscConnectAsInvalidInputsMakeNoRequest"
+            "connectiontest/connection_derived_connections_test.go:TestR2MiscConnectAsInvalidInputsMakeNoRequest"
           ]
         }
       ],
@@ -114690,13 +114690,13 @@
         {
           "behavior": "Registration performs no request; the client is built lazily once from the shared provider, endpoint override or locator, and cached; duplicates, built-in names and invalid input are rejected; canceled contexts fail.",
           "tests": [
-            "connectiontest/connection_r2_misc_endpoint_test.go:TestR2MiscAddServiceBuildsLazyClientOncePerConnection"
+            "connectiontest/connection_endpoint_custom_services_test.go:TestR2MiscAddServiceBuildsLazyClientOncePerConnection"
           ]
         },
         {
           "behavior": "Factory errors and nil clients are reported and a locator is required without an endpoint.",
           "tests": [
-            "connectiontest/connection_r2_misc_endpoint_test.go:TestR2MiscAddServiceWithoutEndpointUsesLocatorAndReportsFactoryErrors"
+            "connectiontest/connection_endpoint_custom_services_test.go:TestR2MiscAddServiceWithoutEndpointUsesLocatorAndReportsFactoryErrors"
           ]
         }
       ],
@@ -114788,15 +114788,15 @@
         {
           "behavior": "Servers of every cloud are listed in order with all_tenants on request; a failing cloud contributes nothing; the default aborts and keeps earlier hosts; continue mode records failures; cancellation aborts without requests.",
           "tests": [
-            "connectiontest/connection_r2_misc_inventory_test.go:TestR2MiscInventoryListsEveryCloudInOrderWithAllProjectsQuery",
-            "connectiontest/connection_r2_misc_inventory_test.go:TestR2MiscInventoryFailurePolicyKeepsEarlierHostsAndNeverRetries",
-            "connectiontest/connection_r2_misc_inventory_test.go:TestR2MiscInventoryCancellationAlwaysAborts"
+            "connectiontest/connection_inventory_test.go:TestR2MiscInventoryListsEveryCloudInOrderWithAllProjectsQuery",
+            "connectiontest/connection_inventory_test.go:TestR2MiscInventoryFailurePolicyKeepsEarlierHostsAndNeverRetries",
+            "connectiontest/connection_inventory_test.go:TestR2MiscInventoryCancellationAlwaysAborts"
           ]
         },
         {
           "behavior": "Clouds are enumerated from the first clouds.yaml in file order and connected lazily.",
           "tests": [
-            "connectiontest/connection_r2_misc_inventory_test.go:TestR2MiscInventoryValidationAndCloudNames"
+            "connectiontest/connection_inventory_test.go:TestR2MiscInventoryValidationAndCloudNames"
           ]
         },
         {
@@ -114811,7 +114811,7 @@
           "behavior": "Hosts are listed through the cloud list_servers path (servers.API.ListCloudRecords): GET /servers/detail with the Python Accept header, all_tenants=True only for all projects, continuation links followed, and each InventoryHost keeps the Source Record row.",
           "tests": [
             "connectiontest/connection_cloud_inventory_proxy_listing_test.go:TestInventoryListsThroughCloudListServersProxyPath",
-            "connectiontest/connection_r2_misc_inventory_test.go:TestR2MiscInventoryListsEveryCloudInOrderWithAllProjectsQuery"
+            "connectiontest/connection_inventory_test.go:TestR2MiscInventoryListsEveryCloudInOrderWithAllProjectsQuery"
           ]
         }
       ],
@@ -114852,7 +114852,7 @@
         {
           "behavior": "Glob identifier selection, nested filters and JMESPath string filters over server records.",
           "tests": [
-            "connectiontest/connection_r2_misc_inventory_test.go:TestR2MiscInventorySearchAndGetHost"
+            "connectiontest/connection_inventory_test.go:TestR2MiscInventorySearchAndGetHost"
           ]
         },
         {
@@ -114866,7 +114866,7 @@
           "behavior": "Hosts are listed through the cloud list_servers path (servers.API.ListCloudRecords): GET /servers/detail with the Python Accept header, all_tenants=True only for all projects, continuation links followed, and each InventoryHost keeps the Source Record row.",
           "tests": [
             "connectiontest/connection_cloud_inventory_proxy_listing_test.go:TestInventoryListsThroughCloudListServersProxyPath",
-            "connectiontest/connection_r2_misc_inventory_test.go:TestR2MiscInventoryListsEveryCloudInOrderWithAllProjectsQuery"
+            "connectiontest/connection_inventory_test.go:TestR2MiscInventoryListsEveryCloudInOrderWithAllProjectsQuery"
           ]
         }
       ],
@@ -114907,7 +114907,7 @@
         {
           "behavior": "Single match, nil for none, AmbiguousError for several, invalid expression results.",
           "tests": [
-            "connectiontest/connection_r2_misc_inventory_test.go:TestR2MiscInventorySearchAndGetHost"
+            "connectiontest/connection_inventory_test.go:TestR2MiscInventorySearchAndGetHost"
           ]
         },
         {
@@ -114920,7 +114920,7 @@
           "behavior": "Hosts are listed through the cloud list_servers path (servers.API.ListCloudRecords): GET /servers/detail with the Python Accept header, all_tenants=True only for all projects, continuation links followed, and each InventoryHost keeps the Source Record row.",
           "tests": [
             "connectiontest/connection_cloud_inventory_proxy_listing_test.go:TestInventoryListsThroughCloudListServersProxyPath",
-            "connectiontest/connection_r2_misc_inventory_test.go:TestR2MiscInventoryListsEveryCloudInOrderWithAllProjectsQuery"
+            "connectiontest/connection_inventory_test.go:TestR2MiscInventoryListsEveryCloudInOrderWithAllProjectsQuery"
           ]
         }
       ],
@@ -115623,19 +115623,19 @@
         {
           "behavior": "With a domain ID no lookup is made and one PATCH carries only supplied attributes; Enabled=false and an empty description are sent.",
           "tests": [
-            "connectiontest/connection_py_cloud_compute_identity_updates_test.go:TestPyCloudComputeUpdateDomainIDSkipsLookupAndDropsEmptyName"
+            "connectiontest/connection_identity_updates_test.go:TestPyCloudComputeUpdateDomainIDSkipsLookupAndDropsEmptyName"
           ]
         },
         {
           "behavior": "With a name the domain is found by GET then name list, a missing domain returns ErrNotFound with no PATCH, and a call with nothing to change sends no PATCH.",
           "tests": [
-            "connectiontest/connection_py_cloud_compute_identity_updates_test.go:TestPyCloudComputeUpdateDomainByNameLooksUpAndNoopSendsNothing"
+            "connectiontest/connection_identity_updates_test.go:TestPyCloudComputeUpdateDomainByNameLooksUpAndNoopSendsNothing"
           ]
         },
         {
           "behavior": "A canceled context sends nothing.",
           "tests": [
-            "connectiontest/connection_py_cloud_compute_identity_updates_test.go:TestPyCloudComputeUpdateGroupMissingAndCanceled"
+            "connectiontest/connection_identity_updates_test.go:TestPyCloudComputeUpdateGroupMissingAndCanceled"
           ]
         }
       ],
@@ -116090,13 +116090,13 @@
         {
           "behavior": "The group is found strictly by GET then name list (extra queries such as domain_id pass to both), and only attributes that differ from the found group are sent; an unchanged call sends no PATCH, matching Resource dirty tracking.",
           "tests": [
-            "connectiontest/connection_py_cloud_compute_identity_updates_test.go:TestPyCloudComputeUpdateGroupSendsOnlyChangedAttributes"
+            "connectiontest/connection_identity_updates_test.go:TestPyCloudComputeUpdateGroupSendsOnlyChangedAttributes"
           ]
         },
         {
           "behavior": "A missing group returns ErrNotFound with no PATCH and cancellation sends nothing.",
           "tests": [
-            "connectiontest/connection_py_cloud_compute_identity_updates_test.go:TestPyCloudComputeUpdateGroupMissingAndCanceled"
+            "connectiontest/connection_identity_updates_test.go:TestPyCloudComputeUpdateGroupMissingAndCanceled"
           ]
         }
       ],
@@ -116515,20 +116515,20 @@
         {
           "behavior": "_get_grant_revoke_params resolves the domain first, then the role without a domain filter, then user, group and project filtered by the domain ID, each strictly; GrantRole sends exactly that GET/list sequence, then HEAD and one PUT.",
           "tests": [
-            "connectiontest/connection_py_cloud_compute_role_grants_test.go:TestPyCloudComputeGrantRoleProjectUserChecksThenAssigns"
+            "connectiontest/connection_role_grants_test.go:TestPyCloudComputeGrantRoleProjectUserChecksThenAssigns"
           ]
         },
         {
           "behavior": "An existing assignment returns false and writes nothing; invalid target combinations fail before any request; a missing row stops before the assignment requests; a canceled context sends nothing.",
           "tests": [
-            "connectiontest/connection_py_cloud_compute_role_grants_test.go:TestPyCloudComputeGrantRoleExistingAssignmentWritesNothing",
-            "connectiontest/connection_py_cloud_compute_role_grants_test.go:TestPyCloudComputeGrantRoleRejectsBadTargetsAndMissingRows"
+            "connectiontest/connection_role_grants_test.go:TestPyCloudComputeGrantRoleExistingAssignmentWritesNothing",
+            "connectiontest/connection_role_grants_test.go:TestPyCloudComputeGrantRoleRejectsBadTargetsAndMissingRows"
           ]
         },
         {
           "behavior": "Non-404 validation failures and failed writes are surfaced rather than treated as absent or successful.",
           "tests": [
-            "connectiontest/connection_py_cloud_compute_role_grants_test.go:TestPyCloudComputeGrantRoleSurfacesNon404ValidationAndWriteFailures"
+            "connectiontest/connection_role_grants_test.go:TestPyCloudComputeGrantRoleSurfacesNon404ValidationAndWriteFailures"
           ]
         }
       ],
@@ -116566,15 +116566,15 @@
         {
           "behavior": "RevokeRole performs the same strict lookups, then HEAD and one DELETE for project, domain or system scope, using the OS-INHERIT route for inherited project/domain assignments.",
           "tests": [
-            "connectiontest/connection_py_cloud_compute_role_grants_test.go:TestPyCloudComputeRevokeRoleSystemInheritedAndAbsent",
-            "connectiontest/connection_py_cloud_compute_role_grants_test.go:TestPyCloudComputeGrantRoleProjectUserChecksThenAssigns"
+            "connectiontest/connection_role_grants_test.go:TestPyCloudComputeRevokeRoleSystemInheritedAndAbsent",
+            "connectiontest/connection_role_grants_test.go:TestPyCloudComputeGrantRoleProjectUserChecksThenAssigns"
           ]
         },
         {
           "behavior": "An absent assignment returns false and sends no DELETE; invalid input and missing rows fail before assignment requests; cancellation sends nothing.",
           "tests": [
-            "connectiontest/connection_py_cloud_compute_role_grants_test.go:TestPyCloudComputeRevokeRoleSystemInheritedAndAbsent",
-            "connectiontest/connection_py_cloud_compute_role_grants_test.go:TestPyCloudComputeGrantRoleRejectsBadTargetsAndMissingRows"
+            "connectiontest/connection_role_grants_test.go:TestPyCloudComputeRevokeRoleSystemInheritedAndAbsent",
+            "connectiontest/connection_role_grants_test.go:TestPyCloudComputeGrantRoleRejectsBadTargetsAndMissingRows"
           ]
         }
       ],

@@ -548,7 +548,7 @@ Go API:
 - ReuseSourceaccepted100..399 guardedrawGET, pinnedheaderdefaults/encoding policy andincrementalgzip/xgzip/zlib/rawdeflate/zstd decoderhelpers; originalcompressedHeader remainsdistinct fromdecodedtext/filebytes. Cleancompressed404 requiresdecoder success, corruptcompressed404 stayserror with actualraw nativeproof andnoMissing.
   Tests: `objectstorage/v1/objects/python_cloud_get_test.go:TestPythonCloudObjectGetSharedCodecsAndCompressedMissingFaults`.
 - Eager Connection text/output handling shares the cached Swift facade and retained actual receipt, preserving cancellation and invalid-call failures before discovery.
-  Tests: `connectiontest/connection_cycle7_records_test.go:TestConnectionObjectGetTextSharesCachedSwiftAndRetainsReceipt`, `connectiontest/connection_cycle7_records_test.go:TestConnectionCycle7PreflightPreservesCancellationBeforeDiscovery`.
+  Tests: `connectiontest/connection_record_service_cache_test.go:TestConnectionObjectGetTextSharesCachedSwiftAndRetainsReceipt`, `connectiontest/connection_record_service_cache_test.go:TestConnectionCycle7PreflightPreservesCancellationBeforeDiscovery`.
 
 Python/Go differences:
 
@@ -722,9 +722,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk.Connection.GlobalRequest`
 
 - The request ID is applied to every request of the derived Connection and never to the receiver.
-  Tests: `connectiontest/connection_r2_misc_derive_test.go:TestR2MiscGlobalRequestHeaderOnDerivedConnectionOnly`.
+  Tests: `connectiontest/connection_derived_connections_test.go:TestR2MiscGlobalRequestHeaderOnDerivedConnectionOnly`.
 - Invalid IDs are rejected.
-  Tests: `connectiontest/connection_r2_misc_derive_test.go:TestR2MiscGlobalRequestRejectsUnsafeIDs`.
+  Tests: `connectiontest/connection_derived_connections_test.go:TestR2MiscGlobalRequestRejectsUnsafeIDs`.
 
 Python/Go differences:
 
@@ -741,11 +741,11 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk.Connection.CustomServiceClient`
 
 - The derived Connection shares the provider token and sends the request ID header on compute and network requests, while the parent and already obtained services send none; a derived Connection can be re-derived.
-  Tests: `connectiontest/connection_r2_misc_derive_test.go:TestR2MiscGlobalRequestHeaderOnDerivedConnectionOnly`.
+  Tests: `connectiontest/connection_derived_connections_test.go:TestR2MiscGlobalRequestHeaderOnDerivedConnectionOnly`.
 - Empty, spaced, control, non-ASCII and nil-receiver inputs are rejected before anything is built.
-  Tests: `connectiontest/connection_r2_misc_derive_test.go:TestR2MiscGlobalRequestRejectsUnsafeIDs`.
+  Tests: `connectiontest/connection_derived_connections_test.go:TestR2MiscGlobalRequestRejectsUnsafeIDs`.
 - Custom service clients of a derived Connection carry the header with their own client.
-  Tests: `connectiontest/connection_r2_misc_endpoint_test.go:TestR2MiscAddServiceBuildsLazyClientOncePerConnection`.
+  Tests: `connectiontest/connection_endpoint_custom_services_test.go:TestR2MiscAddServiceBuildsLazyClientOncePerConnection`.
 
 Python/Go differences:
 
@@ -895,11 +895,11 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk.WithServiceEnabled`
 
 - HasService reports catalog or override presence without a request and returns errors for lookup failures.
-  Tests: `connectiontest/connection_r2_misc_endpoint_test.go:TestR2MiscEndpointForCatalogSelectionAndOverride`, `connectiontest/connection_r2_misc_endpoint_test.go:TestR2MiscEndpointForInvalidAndUnrecordedCatalog`.
+  Tests: `connectiontest/connection_endpoint_custom_services_test.go:TestR2MiscEndpointForCatalogSelectionAndOverride`, `connectiontest/connection_endpoint_custom_services_test.go:TestR2MiscEndpointForInvalidAndUnrecordedCatalog`.
 - HasServiceVersion asks SessionEndpointContext for min_version=version and max_version='<major>.latest', so a catalog URL of that major needs no request, other majors consult the version document, and an absent version is false.
   Tests: `connectiontest/connection_endpoint_discovery_test.go:TestHasServiceVersionAndServiceFlags`, `connectiontest/connection_endpoint_discovery_test.go:TestSessionEndpointContextProjectPeekWithoutTokenProject`.
 - has_<service> flags from clouds.yaml or WithServiceEnabled (explicit options win) disable a service before any lookup; unset flags default to official os-service-types types, so aliases such as volumev3 are false unless enabled; non-boolean flags are rejected.
-  Tests: `connectiontest/connection_endpoint_discovery_test.go:TestHasServiceVersionAndServiceFlags`, `connectiontest/connection_endpoint_discovery_test.go:TestCloudsYAMLServiceFlagsAndSecurityGroupSource`, `connectiontest/connection_r2_misc_endpoint_test.go:TestR2MiscEndpointForInvalidAndUnrecordedCatalog`.
+  Tests: `connectiontest/connection_endpoint_discovery_test.go:TestHasServiceVersionAndServiceFlags`, `connectiontest/connection_endpoint_discovery_test.go:TestCloudsYAMLServiceFlagsAndSecurityGroupSource`, `connectiontest/connection_endpoint_custom_services_test.go:TestR2MiscEndpointForInvalidAndUnrecordedCatalog`.
 
 Python/Go differences:
 
@@ -922,7 +922,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk.WithEndpointMaxVersion`
 
 - Override or catalog endpoint with region, interface and service name; false when absent.
-  Tests: `connectiontest/connection_r2_misc_endpoint_test.go:TestR2MiscEndpointForCatalogSelectionAndOverride`.
+  Tests: `connectiontest/connection_endpoint_custom_services_test.go:TestR2MiscEndpointForCatalogSelectionAndOverride`.
 - SessionEndpointContext follows keystoneauth discovery: an override or a catalog URL already within the bounds and major is returned without a request; otherwise unauthenticated GETs (a 401 retried with the token) of the unversioned URL, matched versioned URL, identity hack and catalog URL select the newest CURRENT/SUPPORTED/STABLE/DEPRECATED version in range by its self link (relative and foreign-host links repaired, project suffix restored); no match is not found and no document falls back to the catalog URL.
   Tests: `connectiontest/connection_endpoint_discovery_test.go:TestSessionEndpointContextVersionDiscovery`, `connectiontest/connection_endpoint_discovery_test.go:TestSessionEndpointContextProjectPeekWithoutTokenProject`.
 - Invalid, contradictory or alias-mismatched versions are errors before HTTP, overrides skip discovery, version bounds are rejected by the context-free SessionEndpoint, and cancellation stops discovery.
@@ -947,9 +947,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk.WithEndpointServiceName`
 
 - A WithEndpoint override of the type wins; otherwise the first matching catalog endpoint by interface (URL suffix ignored) and region is returned, the bool is false when absent, and no request is made.
-  Tests: `connectiontest/connection_r2_misc_endpoint_test.go:TestR2MiscEndpointForCatalogSelectionAndOverride`.
+  Tests: `connectiontest/connection_endpoint_custom_services_test.go:TestR2MiscEndpointForCatalogSelectionAndOverride`.
 - Without a recorded token catalog the provider endpoint locator is used with the type, region, interface and name, absence maps to not found, and invalid arguments or other failures are errors.
-  Tests: `connectiontest/connection_r2_misc_endpoint_test.go:TestR2MiscEndpointForInvalidAndUnrecordedCatalog`.
+  Tests: `connectiontest/connection_endpoint_custom_services_test.go:TestR2MiscEndpointForInvalidAndUnrecordedCatalog`.
 
 Python/Go differences:
 
@@ -976,9 +976,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk.AsAuthOptions`
 
 - The derived Connection authenticates once with the recorded options overridden by typed settings, applies the user/project discard rules and project domain inheritance, keeps endpoint/region/location facts, and uses its own token.
-  Tests: `connectiontest/connection_r2_misc_derive_test.go:TestR2MiscConnectAsOverridesAuthAndSharesNothing`.
+  Tests: `connectiontest/connection_derived_connections_test.go:TestR2MiscConnectAsOverridesAuthAndSharesNothing`.
 - Invalid overrides, nil options, canceled contexts and FromProvider connections make no token request; authentication failures wrap the native cause; a derived Connection does not inherit the global request ID.
-  Tests: `connectiontest/connection_r2_misc_derive_test.go:TestR2MiscConnectAsInvalidInputsMakeNoRequest`, `connectiontest/connection_r2_misc_derive_test.go:TestR2MiscConnectAsDoesNotInheritGlobalRequestID`.
+  Tests: `connectiontest/connection_derived_connections_test.go:TestR2MiscConnectAsInvalidInputsMakeNoRequest`, `connectiontest/connection_derived_connections_test.go:TestR2MiscConnectAsDoesNotInheritGlobalRequestID`.
 
 Python/Go differences:
 
@@ -998,9 +998,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk.Connection.ConnectAs`
 
 - A project by name and project domain ID is scoped with the inherited project fields discarded; a project ID selects the ID scope.
-  Tests: `connectiontest/connection_r2_misc_derive_test.go:TestR2MiscConnectAsOverridesAuthAndSharesNothing`.
+  Tests: `connectiontest/connection_derived_connections_test.go:TestR2MiscConnectAsOverridesAuthAndSharesNothing`.
 - An empty project reference is rejected without a request.
-  Tests: `connectiontest/connection_r2_misc_derive_test.go:TestR2MiscConnectAsInvalidInputsMakeNoRequest`.
+  Tests: `connectiontest/connection_derived_connections_test.go:TestR2MiscConnectAsInvalidInputsMakeNoRequest`.
 
 Python/Go differences:
 
@@ -1018,9 +1018,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk.Connection.CustomServiceClient`
 
 - Registration performs no request; the client is built lazily once from the shared provider, endpoint override or locator, and cached; duplicates, built-in names and invalid input are rejected; canceled contexts fail.
-  Tests: `connectiontest/connection_r2_misc_endpoint_test.go:TestR2MiscAddServiceBuildsLazyClientOncePerConnection`.
+  Tests: `connectiontest/connection_endpoint_custom_services_test.go:TestR2MiscAddServiceBuildsLazyClientOncePerConnection`.
 - Factory errors and nil clients are reported and a locator is required without an endpoint.
-  Tests: `connectiontest/connection_r2_misc_endpoint_test.go:TestR2MiscAddServiceWithoutEndpointUsesLocatorAndReportsFactoryErrors`.
+  Tests: `connectiontest/connection_endpoint_custom_services_test.go:TestR2MiscAddServiceWithoutEndpointUsesLocatorAndReportsFactoryErrors`.
 
 Python/Go differences:
 
@@ -1081,13 +1081,13 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.ListCloudRecords`
 
 - Servers of every cloud are listed in order with all_tenants on request; a failing cloud contributes nothing; the default aborts and keeps earlier hosts; continue mode records failures; cancellation aborts without requests.
-  Tests: `connectiontest/connection_r2_misc_inventory_test.go:TestR2MiscInventoryListsEveryCloudInOrderWithAllProjectsQuery`, `connectiontest/connection_r2_misc_inventory_test.go:TestR2MiscInventoryFailurePolicyKeepsEarlierHostsAndNeverRetries`, `connectiontest/connection_r2_misc_inventory_test.go:TestR2MiscInventoryCancellationAlwaysAborts`.
+  Tests: `connectiontest/connection_inventory_test.go:TestR2MiscInventoryListsEveryCloudInOrderWithAllProjectsQuery`, `connectiontest/connection_inventory_test.go:TestR2MiscInventoryFailurePolicyKeepsEarlierHostsAndNeverRetries`, `connectiontest/connection_inventory_test.go:TestR2MiscInventoryCancellationAlwaysAborts`.
 - Clouds are enumerated from the first clouds.yaml in file order and connected lazily.
-  Tests: `connectiontest/connection_r2_misc_inventory_test.go:TestR2MiscInventoryValidationAndCloudNames`.
+  Tests: `connectiontest/connection_inventory_test.go:TestR2MiscInventoryValidationAndCloudNames`.
 - ListHosts expands every host into hostvars by default, keeps only the interface expansion with WithInventoryExpand(false), skips expansion with WithInventoryBare, maps private to the private interface address, and fails a cloud whose expansion lookup fails while recording swallowed security group failures.
   Tests: `connectiontest/connection_cloud_inventory_hostvars_test.go:TestInventoryHostsDefaultToHostvarsExpansion`, `connectiontest/connection_cloud_inventory_hostvars_test.go:TestInventoryExpandFalseBareAndPrivate`, `connectiontest/connection_cloud_inventory_hostvars_test.go:TestInventoryHostvarsSwallowSecurityGroupFailureButFailCloudOnLookupError`.
 - Hosts are listed through the cloud list_servers path (servers.API.ListCloudRecords): GET /servers/detail with the Python Accept header, all_tenants=True only for all projects, continuation links followed, and each InventoryHost keeps the Source Record row.
-  Tests: `connectiontest/connection_cloud_inventory_proxy_listing_test.go:TestInventoryListsThroughCloudListServersProxyPath`, `connectiontest/connection_r2_misc_inventory_test.go:TestR2MiscInventoryListsEveryCloudInOrderWithAllProjectsQuery`.
+  Tests: `connectiontest/connection_cloud_inventory_proxy_listing_test.go:TestInventoryListsThroughCloudListServersProxyPath`, `connectiontest/connection_inventory_test.go:TestR2MiscInventoryListsEveryCloudInOrderWithAllProjectsQuery`.
 
 Python/Go differences:
 
@@ -1119,11 +1119,11 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.ListCloudRecords`
 
 - Glob identifier selection, nested filters and JMESPath string filters over server records.
-  Tests: `connectiontest/connection_r2_misc_inventory_test.go:TestR2MiscInventorySearchAndGetHost`.
+  Tests: `connectiontest/connection_inventory_test.go:TestR2MiscInventorySearchAndGetHost`.
 - SearchHosts filters InventoryHostView rows, so filters see hostvars keys such as public_v4, interface_ip and flavor.name, and the private flag changes interface_ip and access_ipv4.
   Tests: `connectiontest/connection_cloud_inventory_hostvars_test.go:TestInventoryHostsDefaultToHostvarsExpansion`, `connectiontest/connection_cloud_inventory_hostvars_test.go:TestInventoryExpandFalseBareAndPrivate`.
 - Hosts are listed through the cloud list_servers path (servers.API.ListCloudRecords): GET /servers/detail with the Python Accept header, all_tenants=True only for all projects, continuation links followed, and each InventoryHost keeps the Source Record row.
-  Tests: `connectiontest/connection_cloud_inventory_proxy_listing_test.go:TestInventoryListsThroughCloudListServersProxyPath`, `connectiontest/connection_r2_misc_inventory_test.go:TestR2MiscInventoryListsEveryCloudInOrderWithAllProjectsQuery`.
+  Tests: `connectiontest/connection_cloud_inventory_proxy_listing_test.go:TestInventoryListsThroughCloudListServersProxyPath`, `connectiontest/connection_inventory_test.go:TestR2MiscInventoryListsEveryCloudInOrderWithAllProjectsQuery`.
 
 Python/Go differences:
 
@@ -1155,11 +1155,11 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.ListCloudRecords`
 
 - Single match, nil for none, AmbiguousError for several, invalid expression results.
-  Tests: `connectiontest/connection_r2_misc_inventory_test.go:TestR2MiscInventorySearchAndGetHost`.
+  Tests: `connectiontest/connection_inventory_test.go:TestR2MiscInventorySearchAndGetHost`.
 - GetHost selects one expanded host by identifier and hostvars filters and rejects a JMESPath value.
   Tests: `connectiontest/connection_cloud_inventory_hostvars_test.go:TestInventoryHostsDefaultToHostvarsExpansion`.
 - Hosts are listed through the cloud list_servers path (servers.API.ListCloudRecords): GET /servers/detail with the Python Accept header, all_tenants=True only for all projects, continuation links followed, and each InventoryHost keeps the Source Record row.
-  Tests: `connectiontest/connection_cloud_inventory_proxy_listing_test.go:TestInventoryListsThroughCloudListServersProxyPath`, `connectiontest/connection_r2_misc_inventory_test.go:TestR2MiscInventoryListsEveryCloudInOrderWithAllProjectsQuery`.
+  Tests: `connectiontest/connection_cloud_inventory_proxy_listing_test.go:TestInventoryListsThroughCloudListServersProxyPath`, `connectiontest/connection_inventory_test.go:TestR2MiscInventoryListsEveryCloudInOrderWithAllProjectsQuery`.
 
 Python/Go differences:
 

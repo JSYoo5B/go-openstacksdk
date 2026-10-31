@@ -45,7 +45,7 @@ Go API:
 - Physical accepted/rejected200/401/404/503 read/Close faults, custom cancel and source change preserve actual receipts/all causes with zero retry/reauth hooks. Native401 value ErrOriginal and ErrReauth remain available. Restored source cannot erase observed mismatch; clean503 retry and401 token renewal preserve owned route/body/headers. Changed route aborts before resend with original503 receipt.
   Tests: `network/cloud_router_create_test.go:TestCloudRouterCreatePhysicalReadCloseCancellationSourceAndNative401NoHooks`, `network/cloud_router_create_test.go:TestCloudRouterCreateAZPhysicalFailureHasExtensionProofAndNoPostReceipt`, `network/v2/extensions/layer3/routers/python_cloud_create_test.go:TestPythonCloudRouterCreateNativeRejectionsAndStickyRestoredSourceProof`, `network/cloud_router_create_test.go:TestCloudRouterCreateCleanRetryTokenRenewalAndHeaderVersionCapture`.
 - Connection supplies cached Neutron and an owned default current location without caller builders; explicit location remains selectable and invalid/cancelled calls do not discover a service.
-  Tests: `connectiontest/connection_cycle7_records_test.go:TestConnectionRouterCreateOwnsDefaultLocationAndCachedService`, `connectiontest/connection_cycle7_records_test.go:TestConnectionCycle7PreflightPreservesCancellationBeforeDiscovery`.
+  Tests: `connectiontest/connection_record_service_cache_test.go:TestConnectionRouterCreateOwnsDefaultLocationAndCachedService`, `connectiontest/connection_record_service_cache_test.go:TestConnectionCycle7PreflightPreservesCancellationBeforeDiscovery`.
 
 Python/Go differences:
 

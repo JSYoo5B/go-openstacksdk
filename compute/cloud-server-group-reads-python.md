@@ -41,7 +41,7 @@ Go API:
 - New Source opt-in closes finite JSON float loading in local mapping, loaded falsey first selection and exact binary finite operands for JMES comparisons without rounding arbitrary integers. Source two-float9007199254740992.0/9007199254740993.0 comparison is supported; this does not claim full arithmetic, serialization, nonfinite or Resource class equality/function namespace.
   Tests: `compute/cloud_server_group_reads_test.go:TestCloudServerGroupReadsLoadedNumericMappingAndJMESPredicate`, `compute/cloud_server_group_reads_test.go:TestCloudServerGroupReadsJMESArbitraryJSONAndFilteredGetIndexSemantics`.
 - Connection exposes this cloud read through its cached service and SDK-owned location defaults. Cancellation is checked before catalog discovery. Only Neutron list helpers turn clean missing catalog endpoints into [] before evaluating options; searches retain catalog errors. Caller-provided options retain their explicit values.
-  Tests: `connectiontest/connection_cycle8_reads_test.go:TestConnectionCycle8CancelledReadsNeverDiscover`.
+  Tests: `connectiontest/connection_cloud_list_reads_test.go:TestConnectionCycle8CancelledReadsNeverDiscover`.
 
 Python/Go differences:
 
@@ -90,7 +90,7 @@ Go API:
 - New Source opt-in closes finite JSON float loading in local mapping, loaded falsey first selection and exact binary finite operands for JMES comparisons without rounding arbitrary integers. Source two-float9007199254740992.0/9007199254740993.0 comparison is supported; this does not claim full arithmetic, serialization, nonfinite or Resource class equality/function namespace.
   Tests: `compute/cloud_server_group_reads_test.go:TestCloudServerGroupReadsLoadedNumericMappingAndJMESPredicate`, `compute/cloud_server_group_reads_test.go:TestCloudServerGroupReadsJMESArbitraryJSONAndFilteredGetIndexSemantics`.
 - Connection exposes this cloud read through its cached service and SDK-owned location defaults. Cancellation is checked before catalog discovery. Only Neutron list helpers turn clean missing catalog endpoints into [] before evaluating options; searches retain catalog errors. Caller-provided options retain their explicit values.
-  Tests: `connectiontest/connection_cycle8_reads_test.go:TestConnectionCycle8CancelledReadsNeverDiscover`.
+  Tests: `connectiontest/connection_cloud_list_reads_test.go:TestConnectionCycle8CancelledReadsNeverDiscover`.
 
 Python/Go differences:
 

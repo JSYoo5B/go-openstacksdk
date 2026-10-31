@@ -286,7 +286,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.ProjectQuotaScope.Get`
 
 - get_volume_quotas strict-finds the project then reads the quota set without usage; GetBlockStorageQuotas looks up once and sends one GET, failing before Cinder for a missing project.
-  Tests: `connectiontest/connection_py_cloud_compute_quotas_test.go:TestPyCloudComputeDeleteQuotasReturnsResetAndVolumeSideWorks`, `connectiontest/connection_py_cloud_compute_quotas_test.go:TestPyCloudComputeQuotaHelpersMissingProjectStopsBeforeService`.
+  Tests: `connectiontest/connection_project_quota_helpers_test.go:TestPyCloudComputeDeleteQuotasReturnsResetAndVolumeSideWorks`, `connectiontest/connection_project_quota_helpers_test.go:TestPyCloudComputeQuotaHelpersMissingProjectStopsBeforeService`.
 - Normalized known and unknown quota fields and usage/limit triples are the mapped block storage get_quota_set contract.
   Tests: `api/cinder_project_quotas_responses_test.go:TestCinderProjectQuotaLimitsDefaultsUsageUpdateAndResetKeepFixedTarget`.
 
@@ -310,7 +310,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.ProjectQuotaScope.Update`
 
 - set_volume_quotas strict-finds the project and sends update_quota_set without a force flag; SetBlockStorageQuotas looks up once, sends one PUT and adds no force.
-  Tests: `connectiontest/connection_py_cloud_compute_quotas_test.go:TestPyCloudComputeDeleteQuotasReturnsResetAndVolumeSideWorks`, `connectiontest/connection_py_cloud_compute_quotas_test.go:TestPyCloudComputeQuotaHelpersMissingProjectStopsBeforeService`.
+  Tests: `connectiontest/connection_project_quota_helpers_test.go:TestPyCloudComputeDeleteQuotasReturnsResetAndVolumeSideWorks`, `connectiontest/connection_project_quota_helpers_test.go:TestPyCloudComputeQuotaHelpersMissingProjectStopsBeforeService`.
 - Cinder update body building and error evidence are the mapped update_quota_set contract.
   Tests: `api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaHTTPFailuresPreserveStatusBodyHeaderAndNotFound`.
 
@@ -335,7 +335,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.ProjectQuotaScope.Reset`
 
 - delete_volume_quotas strict-finds the project and calls revert_quota_set; DeleteBlockStorageQuotas looks up once and sends one DELETE.
-  Tests: `connectiontest/connection_py_cloud_compute_quotas_test.go:TestPyCloudComputeDeleteQuotasReturnsResetAndVolumeSideWorks`, `connectiontest/connection_py_cloud_compute_quotas_test.go:TestPyCloudComputeQuotaHelpersMissingProjectStopsBeforeService`.
+  Tests: `connectiontest/connection_project_quota_helpers_test.go:TestPyCloudComputeDeleteQuotasReturnsResetAndVolumeSideWorks`, `connectiontest/connection_project_quota_helpers_test.go:TestPyCloudComputeQuotaHelpersMissingProjectStopsBeforeService`.
 - The reset 404/HTTP cause contract is the mapped revert_quota_set behavior.
   Tests: `api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaHTTPFailuresPreserveStatusBodyHeaderAndNotFound`.
 

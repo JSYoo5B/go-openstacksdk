@@ -123,7 +123,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.ProjectQuotaScope.Reset`
 
 - delete_compute_quotas strict-finds the project and calls revert_quota_set (bodyless DELETE os-quota-sets/{project}); DeleteComputeQuotas does the same lookup and one DELETE, returning copied response headers.
-  Tests: `connectiontest/connection_py_cloud_compute_quotas_test.go:TestPyCloudComputeDeleteQuotasReturnsResetAndVolumeSideWorks`, `connectiontest/connection_py_cloud_compute_quotas_test.go:TestPyCloudComputeQuotaHelpersMissingProjectStopsBeforeService`.
+  Tests: `connectiontest/connection_project_quota_helpers_test.go:TestPyCloudComputeDeleteQuotasReturnsResetAndVolumeSideWorks`, `connectiontest/connection_project_quota_helpers_test.go:TestPyCloudComputeQuotaHelpersMissingProjectStopsBeforeService`.
 - The strict 404 and HTTP cause preservation of the reset are the mapped revert_quota_set contract.
   Tests: `api/project_quotas_contracts_test.go:TestProjectQuotaHTTPFailuresPreserveStatusBodyHeaderAndNotFound`.
 
@@ -147,7 +147,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.ProjectQuotaScope.Get`
 
 - get_compute_quotas(name_or_id) looks the project up with find_project(ignore_missing=False) and then fetches the quota set without usage; GetComputeQuotas performs the same strict lookup before one quota GET and stops with resource.ErrNotFound and no quota request for a missing project.
-  Tests: `connectiontest/connection_py_cloud_compute_quotas_test.go:TestPyCloudComputeQuotaHelpersLookUpIDThenName`, `connectiontest/connection_py_cloud_compute_quotas_test.go:TestPyCloudComputeQuotaHelpersMissingProjectStopsBeforeService`, `connectiontest/connection_py_cloud_compute_quotas_test.go:TestPyCloudComputeQuotaHelpersHonorCanceledContext`.
+  Tests: `connectiontest/connection_project_quota_helpers_test.go:TestPyCloudComputeQuotaHelpersLookUpIDThenName`, `connectiontest/connection_project_quota_helpers_test.go:TestPyCloudComputeQuotaHelpersMissingProjectStopsBeforeService`, `connectiontest/connection_project_quota_helpers_test.go:TestPyCloudComputeQuotaHelpersHonorCanceledContext`.
 - The delegated compute get_quota_set (usage=False route, normalized known and unknown quota fields, microversion selection) is separately mapped and the helper reuses it.
   Tests: `connectiontest/connection_quotas_test.go:TestConnectionProjectQuotasSuppliesSeparateIdentityClient`, `api/project_quotas_contracts_test.go:TestProjectQuotaLimitsDetailUpdateAndResetPreserveTargetAndResponse`.
 
@@ -171,7 +171,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithUpdateForce`
 
 - set_compute_quotas strict-finds the project, forces force=True over any caller value and sends update_quota_set; SetComputeQuotas looks up once and appends force=true after the caller's options, preserving zero values and omitting unset limits.
-  Tests: `connectiontest/connection_py_cloud_compute_quotas_test.go:TestPyCloudComputeSetQuotasForcesTrueAndKeepsZero`, `connectiontest/connection_py_cloud_compute_quotas_test.go:TestPyCloudComputeQuotaHelpersMissingProjectStopsBeforeService`.
+  Tests: `connectiontest/connection_project_quota_helpers_test.go:TestPyCloudComputeSetQuotasForcesTrueAndKeepsZero`, `connectiontest/connection_project_quota_helpers_test.go:TestPyCloudComputeQuotaHelpersMissingProjectStopsBeforeService`.
 - Quota update body building (omission, zero, unlimited, explicit extension fields, protected-key rejection) is the mapped update_quota_set contract.
   Tests: `api/project_quotas_contracts_test.go:TestProjectQuotaUpdateDistinguishesOmittedFalseZeroAndUnlimited`, `api/project_quotas_contracts_test.go:TestProjectQuotaInvalidOptionsFailBeforeHTTP`.
 

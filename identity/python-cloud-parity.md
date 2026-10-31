@@ -340,11 +340,11 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.FindIdentity`
 
 - With a domain ID no lookup is made and one PATCH carries only supplied attributes; Enabled=false and an empty description are sent.
-  Tests: `connectiontest/connection_py_cloud_compute_identity_updates_test.go:TestPyCloudComputeUpdateDomainIDSkipsLookupAndDropsEmptyName`.
+  Tests: `connectiontest/connection_identity_updates_test.go:TestPyCloudComputeUpdateDomainIDSkipsLookupAndDropsEmptyName`.
 - With a name the domain is found by GET then name list, a missing domain returns ErrNotFound with no PATCH, and a call with nothing to change sends no PATCH.
-  Tests: `connectiontest/connection_py_cloud_compute_identity_updates_test.go:TestPyCloudComputeUpdateDomainByNameLooksUpAndNoopSendsNothing`.
+  Tests: `connectiontest/connection_identity_updates_test.go:TestPyCloudComputeUpdateDomainByNameLooksUpAndNoopSendsNothing`.
 - A canceled context sends nothing.
-  Tests: `connectiontest/connection_py_cloud_compute_identity_updates_test.go:TestPyCloudComputeUpdateGroupMissingAndCanceled`.
+  Tests: `connectiontest/connection_identity_updates_test.go:TestPyCloudComputeUpdateGroupMissingAndCanceled`.
 
 Python/Go differences:
 
@@ -624,9 +624,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery`
 
 - The group is found strictly by GET then name list (extra queries such as domain_id pass to both), and only attributes that differ from the found group are sent; an unchanged call sends no PATCH, matching Resource dirty tracking.
-  Tests: `connectiontest/connection_py_cloud_compute_identity_updates_test.go:TestPyCloudComputeUpdateGroupSendsOnlyChangedAttributes`.
+  Tests: `connectiontest/connection_identity_updates_test.go:TestPyCloudComputeUpdateGroupSendsOnlyChangedAttributes`.
 - A missing group returns ErrNotFound with no PATCH and cancellation sends nothing.
-  Tests: `connectiontest/connection_py_cloud_compute_identity_updates_test.go:TestPyCloudComputeUpdateGroupMissingAndCanceled`.
+  Tests: `connectiontest/connection_identity_updates_test.go:TestPyCloudComputeUpdateGroupMissingAndCanceled`.
 
 Python/Go differences:
 
@@ -895,11 +895,11 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.FindIdentity`
 
 - _get_grant_revoke_params resolves the domain first, then the role without a domain filter, then user, group and project filtered by the domain ID, each strictly; GrantRole sends exactly that GET/list sequence, then HEAD and one PUT.
-  Tests: `connectiontest/connection_py_cloud_compute_role_grants_test.go:TestPyCloudComputeGrantRoleProjectUserChecksThenAssigns`.
+  Tests: `connectiontest/connection_role_grants_test.go:TestPyCloudComputeGrantRoleProjectUserChecksThenAssigns`.
 - An existing assignment returns false and writes nothing; invalid target combinations fail before any request; a missing row stops before the assignment requests; a canceled context sends nothing.
-  Tests: `connectiontest/connection_py_cloud_compute_role_grants_test.go:TestPyCloudComputeGrantRoleExistingAssignmentWritesNothing`, `connectiontest/connection_py_cloud_compute_role_grants_test.go:TestPyCloudComputeGrantRoleRejectsBadTargetsAndMissingRows`.
+  Tests: `connectiontest/connection_role_grants_test.go:TestPyCloudComputeGrantRoleExistingAssignmentWritesNothing`, `connectiontest/connection_role_grants_test.go:TestPyCloudComputeGrantRoleRejectsBadTargetsAndMissingRows`.
 - Non-404 validation failures and failed writes are surfaced rather than treated as absent or successful.
-  Tests: `connectiontest/connection_py_cloud_compute_role_grants_test.go:TestPyCloudComputeGrantRoleSurfacesNon404ValidationAndWriteFailures`.
+  Tests: `connectiontest/connection_role_grants_test.go:TestPyCloudComputeGrantRoleSurfacesNon404ValidationAndWriteFailures`.
 
 Python/Go differences:
 
@@ -929,9 +929,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.FindIdentity`
 
 - RevokeRole performs the same strict lookups, then HEAD and one DELETE for project, domain or system scope, using the OS-INHERIT route for inherited project/domain assignments.
-  Tests: `connectiontest/connection_py_cloud_compute_role_grants_test.go:TestPyCloudComputeRevokeRoleSystemInheritedAndAbsent`, `connectiontest/connection_py_cloud_compute_role_grants_test.go:TestPyCloudComputeGrantRoleProjectUserChecksThenAssigns`.
+  Tests: `connectiontest/connection_role_grants_test.go:TestPyCloudComputeRevokeRoleSystemInheritedAndAbsent`, `connectiontest/connection_role_grants_test.go:TestPyCloudComputeGrantRoleProjectUserChecksThenAssigns`.
 - An absent assignment returns false and sends no DELETE; invalid input and missing rows fail before assignment requests; cancellation sends nothing.
-  Tests: `connectiontest/connection_py_cloud_compute_role_grants_test.go:TestPyCloudComputeRevokeRoleSystemInheritedAndAbsent`, `connectiontest/connection_py_cloud_compute_role_grants_test.go:TestPyCloudComputeGrantRoleRejectsBadTargetsAndMissingRows`.
+  Tests: `connectiontest/connection_role_grants_test.go:TestPyCloudComputeRevokeRoleSystemInheritedAndAbsent`, `connectiontest/connection_role_grants_test.go:TestPyCloudComputeGrantRoleRejectsBadTargetsAndMissingRows`.
 
 Python/Go differences:
 
