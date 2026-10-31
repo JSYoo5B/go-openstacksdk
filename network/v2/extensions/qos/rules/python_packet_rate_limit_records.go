@@ -178,7 +178,6 @@ func (a *API) GetPacketRateLimitRecord(ctx context.Context, policyID, identity s
 //
 // Calls: request.Header, request.Headers, request.Microversion, request.Query,
 // request.Limit, request.Marker, request.MaxItems and request.Paginated.
-// request.BasePath fails with resource.ErrInvalidOption before HTTP.
 func (a *API) ListPacketRateLimitRecords(ctx context.Context, policyID string, options ...PacketRateLimitListOption) iter.Seq2[*PacketRateLimitRecord, error] {
 	snapshot := slices.Clone(options)
 	return func(yield func(*PacketRateLimitRecord, error) bool) {
@@ -210,7 +209,6 @@ func (a *API) ListPacketRateLimitRecords(ctx context.Context, policyID string, o
 //
 // Calls: request.Header, request.Headers, request.Microversion, request.Query,
 // request.Limit, request.Marker, request.MaxItems and request.Paginated.
-// request.BasePath fails with resource.ErrInvalidOption before HTTP.
 func (a *API) AllPacketRateLimitRecords(ctx context.Context, policyID string, options ...PacketRateLimitListOption) ([]*PacketRateLimitRecord, error) {
 	var values []*PacketRateLimitRecord
 	for value, err := range a.ListPacketRateLimitRecords(ctx, policyID, options...) {

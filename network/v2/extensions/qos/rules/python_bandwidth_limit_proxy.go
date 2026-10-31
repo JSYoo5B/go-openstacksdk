@@ -146,7 +146,7 @@ func bandwidthLimitProxyIgnores(key string) bool {
 }
 
 // bandwidthLimitProxyCalls translates the options of one call into BandwidthLimitListOpts callbacks.
-func bandwidthLimitProxyCalls(calls []request.ListCall) []func(*BandwidthLimitListOpts) error {
+func bandwidthLimitProxyCalls(calls []request.ListBasePathCall) []func(*BandwidthLimitListOpts) error {
 	return qosCalls(calls, func(s *BandwidthLimitListOpts) qosCallFields {
 		return qosCallFields{headers: &s.Headers, microversion: &s.Microversion, basePath: &s.BasePath}
 	}, bandwidthLimitProxyQuery, true)

@@ -138,8 +138,8 @@ func applyDSCPMarkingOptions[T any, O ~func(*T) error](ctx context.Context, engi
 // GetDSCPMarkingRecord performs one literal member GET with the bound policy,
 // without parent lookup, find fallback, or missing suppression.
 //
-// Calls: request.Header, request.Headers and request.Microversion. Member
-// query values use the operation-specific WithDSCPMarkingGetQuery.
+// Calls: request.Header, request.Headers, request.Microversion and
+// request.Query (member query values).
 func (a *API) GetDSCPMarkingRecord(ctx context.Context, policyID, id string, options ...DSCPMarkingGetOption) (*DSCPMarkingRecord, error) {
 	const operation = "GetDSCPMarkingRecord"
 	engine, err := a.dscpMarkingEngine(ctx, policyID)

@@ -175,7 +175,6 @@ func (a *API) GetMinimumPacketRateRecord(ctx context.Context, policyID, identity
 //
 // Calls: request.Header, request.Headers, request.Microversion, request.Query,
 // request.Limit, request.Marker, request.MaxItems and request.Paginated.
-// request.BasePath fails with resource.ErrInvalidOption before HTTP.
 func (a *API) ListMinimumPacketRateRecords(ctx context.Context, policyID string, options ...MinimumPacketRateListOption) iter.Seq2[*MinimumPacketRateRecord, error] {
 	snapshot := slices.Clone(options)
 	return func(yield func(*MinimumPacketRateRecord, error) bool) {
@@ -207,7 +206,6 @@ func (a *API) ListMinimumPacketRateRecords(ctx context.Context, policyID string,
 //
 // Calls: request.Header, request.Headers, request.Microversion, request.Query,
 // request.Limit, request.Marker, request.MaxItems and request.Paginated.
-// request.BasePath fails with resource.ErrInvalidOption before HTTP.
 func (a *API) AllMinimumPacketRateRecords(ctx context.Context, policyID string, options ...MinimumPacketRateListOption) ([]*MinimumPacketRateRecord, error) {
 	var values []*MinimumPacketRateRecord
 	for value, err := range a.ListMinimumPacketRateRecords(ctx, policyID, options...) {

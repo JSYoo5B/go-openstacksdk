@@ -94,9 +94,9 @@ type BandwidthLimitListOpts struct {
 
 // BandwidthLimitListOption is one option of an operation over
 // BandwidthLimitListOpts: a With* function of this package, request.Custom
-// over *BandwidthLimitListOpts, or a shared request.ListCall value. A nil
+// over *BandwidthLimitListOpts, or a shared request.ListBasePathCall value. A nil
 // option fails with resource.ErrInvalidOption before HTTP.
-type BandwidthLimitListOption = request.ListCall
+type BandwidthLimitListOption = request.ListBasePathCall
 
 func bandwidthLimitListOptions(v BandwidthLimitListOpts) neutronfind.Options {
 	return neutronfind.Options{BasePath: v.BasePath, Microversion: v.Microversion, Query: v.Query, Headers: v.Headers, Order: v.order}
@@ -248,7 +248,7 @@ func bandwidthLimitFindCalls(calls []request.FindCall) []func(*BandwidthLimitFin
 }
 
 // bandwidthLimitListCalls translates the options of one call into BandwidthLimitListOpts callbacks.
-func bandwidthLimitListCalls(calls []request.ListCall) []func(*BandwidthLimitListOpts) error {
+func bandwidthLimitListCalls(calls []request.ListBasePathCall) []func(*BandwidthLimitListOpts) error {
 	return qosCalls(calls, func(s *BandwidthLimitListOpts) qosCallFields {
 		return qosCallFields{headers: &s.Headers, microversion: &s.Microversion, basePath: &s.BasePath}
 	}, bandwidthLimitListQuery, true)

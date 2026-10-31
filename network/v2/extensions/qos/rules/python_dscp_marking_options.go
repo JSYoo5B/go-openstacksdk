@@ -94,9 +94,9 @@ type DSCPMarkingListOpts struct {
 
 // DSCPMarkingListOption is one option of an operation over
 // DSCPMarkingListOpts: a With* function of this package, request.Custom over
-// *DSCPMarkingListOpts, or a shared request.ListCall value. A nil option fails
+// *DSCPMarkingListOpts, or a shared request.ListBasePathCall value. A nil option fails
 // with resource.ErrInvalidOption before HTTP.
-type DSCPMarkingListOption = request.ListCall
+type DSCPMarkingListOption = request.ListBasePathCall
 
 func dscpMarkingListOptions(v DSCPMarkingListOpts) neutronfind.Options {
 	return neutronfind.Options{BasePath: v.BasePath, Microversion: v.Microversion, Query: v.Query, Headers: v.Headers, Order: v.order}
@@ -210,9 +210,9 @@ type DSCPMarkingGetOpts struct {
 
 // DSCPMarkingGetOption is one option of an operation over DSCPMarkingGetOpts:
 // a With* function of this package, request.Custom over *DSCPMarkingGetOpts,
-// or a shared request.GetCall value. A nil option fails with
+// or a shared request.GetQueryCall value. A nil option fails with
 // resource.ErrInvalidOption before HTTP.
-type DSCPMarkingGetOption = request.GetCall
+type DSCPMarkingGetOption = request.GetQueryCall
 
 func dscpMarkingGetOptions(v DSCPMarkingGetOpts) neutronfind.Options {
 	return neutronfind.Options{Microversion: v.Microversion, Query: v.Query, Headers: v.Headers, Order: v.order}
@@ -228,8 +228,13 @@ func WithDSCPMarkingGetOpts(v DSCPMarkingGetOpts) DSCPMarkingGetOption {
 }
 func WithDSCPMarkingGetQuery(key string, value any) DSCPMarkingGetOption {
 	raw, err := json.Marshal(value)
-	owned := bytes.Clone(raw)
-	return request.Custom(func(c *DSCPMarkingGetOpts) error {
+	return request.Custom(dscpMarkingGetQuery(key, bytes.Clone(raw), err))
+}
+
+// dscpMarkingGetQuery applies one marshaled member query value for
+// WithDSCPMarkingGetQuery and request.Query.
+func dscpMarkingGetQuery(key string, owned json.RawMessage, err error) func(*DSCPMarkingGetOpts) error {
+	return func(c *DSCPMarkingGetOpts) error {
 		if err != nil {
 			return err
 		}
@@ -241,7 +246,7 @@ func WithDSCPMarkingGetQuery(key string, value any) DSCPMarkingGetOption {
 		}
 		c.Query[key] = bytes.Clone(owned)
 		return nil
-	})
+	}
 }
 
 // Deprecated: use request.Microversion.
@@ -270,15 +275,15 @@ func dscpMarkingFindCalls(calls []request.FindCall) []func(*DSCPMarkingFindOpts)
 }
 
 // dscpMarkingListCalls translates the options of one call into DSCPMarkingListOpts callbacks.
-func dscpMarkingListCalls(calls []request.ListCall) []func(*DSCPMarkingListOpts) error {
+func dscpMarkingListCalls(calls []request.ListBasePathCall) []func(*DSCPMarkingListOpts) error {
 	return qosCalls(calls, func(s *DSCPMarkingListOpts) qosCallFields {
 		return qosCallFields{headers: &s.Headers, microversion: &s.Microversion, basePath: &s.BasePath}
 	}, dscpMarkingListQuery, true)
 }
 
 // dscpMarkingGetCalls translates the options of one call into DSCPMarkingGetOpts callbacks.
-func dscpMarkingGetCalls(calls []request.GetCall) []func(*DSCPMarkingGetOpts) error {
+func dscpMarkingGetCalls(calls []request.GetQueryCall) []func(*DSCPMarkingGetOpts) error {
 	return qosCalls(calls, func(s *DSCPMarkingGetOpts) qosCallFields {
 		return qosCallFields{headers: &s.Headers, microversion: &s.Microversion}
-	}, nil, false)
+	}, dscpMarkingGetQuery, false)
 }

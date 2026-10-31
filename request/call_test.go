@@ -4,57 +4,104 @@ import (
 	"encoding/json"
 	"errors"
 	"reflect"
+	"slices"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
+func custom() request.AnyCall { return request.Custom(func(*struct{}) error { return nil }) }
+
 // Category membership is the compile-time contract; these assignments fail
-// to build when a constructor gains or loses a category.
+// to build when a constructor loses a category.
 var (
-	_ []request.GetCall    = []request.GetCall{request.Header("k", "v"), request.Headers(nil), request.Microversion("2.1"), request.Custom(func(*struct{}) error { return nil })}
-	_ []request.FindCall   = []request.FindCall{request.Header("k", "v"), request.Headers(nil), request.Microversion("2.1"), request.Query("k", 1), request.IgnoreMissing(true), request.Custom(func(*struct{}) error { return nil })}
-	_ []request.ListCall   = []request.ListCall{request.Header("k", "v"), request.Headers(nil), request.Microversion("2.1"), request.Query("k", 1), request.BasePath("p"), request.Limit(1), request.Marker("m"), request.MaxItems(1), request.Paginated(false), request.Custom(func(*struct{}) error { return nil })}
-	_ []request.DeleteCall = []request.DeleteCall{request.Header("k", "v"), request.Headers(nil), request.Microversion("2.1"), request.IgnoreMissing(false), request.Custom(func(*struct{}) error { return nil })}
-	_ []request.WriteCall  = []request.WriteCall{request.Header("k", "v"), request.Headers(nil), request.Microversion("2.1"), request.Field("k", 1), request.Custom(func(*struct{}) error { return nil })}
+	_ = []request.GetCall{request.Header("k", "v"), request.Headers(nil), request.Microversion("2.1"), custom()}
+	_ = []request.GetQueryCall{request.Header("k", "v"), request.Headers(nil), request.Microversion("2.1"), request.Query("k", 1), custom()}
+	_ = []request.FindCall{request.Header("k", "v"), request.Headers(nil), request.Microversion("2.1"), request.Query("k", 1), request.IgnoreMissing(true), custom()}
+	_ = []request.DeleteCall{request.Header("k", "v"), request.Headers(nil), request.Microversion("2.1"), request.IgnoreMissing(false), custom()}
+	_ = []request.ListCall{request.Header("k", "v"), request.Headers(nil), request.Microversion("2.1"), request.Query("k", 1), request.Limit(1), request.Marker("m"), request.MaxItems(1), request.Paginated(false), custom()}
+	_ = []request.ListBasePathCall{request.Header("k", "v"), request.Headers(nil), request.Microversion("2.1"), request.Query("k", 1), request.BasePath("p"), request.Limit(1), request.Marker("m"), request.MaxItems(1), request.Paginated(false), custom()}
+	_ = []request.WriteCall{request.Header("k", "v"), request.Headers(nil), request.Microversion("2.1"), request.Field("k", 1), custom()}
+	_ = []request.NativeCall{custom()}
+	_ = []request.NativeHeaderCall{request.Header("k", "v"), custom()}
+	_ = []request.NativeQueryCall{request.Query("k", "v"), custom()}
+	_ = []request.NativeQueryHeaderCall{request.Query("k", "v"), request.Header("k", "v"), custom()}
+	_ = []request.NativeFieldCall{request.Field("k", 1), custom()}
+	_ = []request.NativeFieldHeaderCall{request.Field("k", 1), request.Header("k", "v"), custom()}
+	_ = []request.NativeFieldQueryCall{request.Field("k", 1), request.Query("k", "v"), custom()}
 )
 
-// Constructors return the narrowest union they belong to, so the reverse
-// combinations (BasePath on Find/Get, Query on Get or Delete, IgnoreMissing on
-// Get/List/Write, Field on Delete, paging outside List) do not compile. This
-// test pins that each constructor implements exactly its documented
-// categories.
-func TestCallCategoriesAreExact(t *testing.T) {
-	type cats struct{ get, find, list, del, write bool }
-	of := func(c request.Call) cats {
-		_, g := c.(request.GetCall)
-		_, f := c.(request.FindCall)
-		_, l := c.(request.ListCall)
-		_, d := c.(request.DeleteCall)
-		_, w := c.(request.WriteCall)
-		return cats{g, f, l, d, w}
+// callCategories is the package documentation's table: for each category,
+// the shared constructors it accepts besides Custom.
+var callCategories = map[string][]string{
+	"GetCall":               {"Header", "Headers", "Microversion"},
+	"GetQueryCall":          {"Header", "Headers", "Microversion", "Query"},
+	"FindCall":              {"Header", "Headers", "Microversion", "Query", "IgnoreMissing"},
+	"DeleteCall":            {"Header", "Headers", "Microversion", "IgnoreMissing"},
+	"ListCall":              {"Header", "Headers", "Microversion", "Query", "Limit", "Marker", "MaxItems", "Paginated"},
+	"ListBasePathCall":      {"Header", "Headers", "Microversion", "Query", "BasePath", "Limit", "Marker", "MaxItems", "Paginated"},
+	"WriteCall":             {"Header", "Headers", "Microversion", "Field"},
+	"NativeCall":            {},
+	"NativeHeaderCall":      {"Header"},
+	"NativeQueryCall":       {"Query"},
+	"NativeQueryHeaderCall": {"Query", "Header"},
+	"NativeFieldCall":       {"Field"},
+	"NativeFieldHeaderCall": {"Field", "Header"},
+	"NativeFieldQueryCall":  {"Field", "Query"},
+}
+
+func categoriesOf(c request.Call) map[string]bool {
+	_, get := c.(request.GetCall)
+	_, getQuery := c.(request.GetQueryCall)
+	_, find := c.(request.FindCall)
+	_, del := c.(request.DeleteCall)
+	_, list := c.(request.ListCall)
+	_, listBase := c.(request.ListBasePathCall)
+	_, write := c.(request.WriteCall)
+	_, native := c.(request.NativeCall)
+	_, nativeHeader := c.(request.NativeHeaderCall)
+	_, nativeQuery := c.(request.NativeQueryCall)
+	_, nativeQueryHeader := c.(request.NativeQueryHeaderCall)
+	_, nativeField := c.(request.NativeFieldCall)
+	_, nativeFieldHeader := c.(request.NativeFieldHeaderCall)
+	_, nativeFieldQuery := c.(request.NativeFieldQueryCall)
+	return map[string]bool{
+		"GetCall": get, "GetQueryCall": getQuery, "FindCall": find, "DeleteCall": del,
+		"ListCall": list, "ListBasePathCall": listBase, "WriteCall": write,
+		"NativeCall": native, "NativeHeaderCall": nativeHeader, "NativeQueryCall": nativeQuery,
+		"NativeQueryHeaderCall": nativeQueryHeader, "NativeFieldCall": nativeField,
+		"NativeFieldHeaderCall": nativeFieldHeader, "NativeFieldQueryCall": nativeFieldQuery,
 	}
-	all := cats{true, true, true, true, true}
-	for name, tc := range map[string]struct {
-		call request.Call
-		want cats
-	}{
-		"Header":        {request.Header("k", "v"), all},
-		"Headers":       {request.Headers(nil), all},
-		"Microversion":  {request.Microversion("2.1"), all},
-		"Custom":        {request.Custom(func(*struct{}) error { return nil }), all},
-		"Query":         {request.Query("k", 1), cats{find: true, list: true}},
-		"IgnoreMissing": {request.IgnoreMissing(true), cats{find: true, del: true}},
-		"BasePath":      {request.BasePath("p"), cats{list: true}},
-		"Limit":         {request.Limit(1), cats{list: true}},
-		"Marker":        {request.Marker("m"), cats{list: true}},
-		"MaxItems":      {request.MaxItems(1), cats{list: true}},
-		"Paginated":     {request.Paginated(true), cats{list: true}},
-		"Field":         {request.Field("k", 1), cats{write: true}},
+}
+
+// Each constructor implements exactly the categories whose combination
+// allows its control, so every other combination does not compile. Custom
+// implements every category.
+func TestCallCategoriesAreExact(t *testing.T) {
+	for name, call := range map[string]request.Call{
+		"Header":        request.Header("k", "v"),
+		"Headers":       request.Headers(nil),
+		"Microversion":  request.Microversion("2.1"),
+		"Query":         request.Query("k", 1),
+		"IgnoreMissing": request.IgnoreMissing(true),
+		"BasePath":      request.BasePath("p"),
+		"Limit":         request.Limit(1),
+		"Marker":        request.Marker("m"),
+		"MaxItems":      request.MaxItems(1),
+		"Paginated":     request.Paginated(true),
+		"Field":         request.Field("k", 1),
 	} {
-		if got := of(tc.call); got != tc.want {
-			t.Fatalf("%s: categories %+v, want %+v", name, got, tc.want)
+		got := categoriesOf(call)
+		for category, allowed := range callCategories {
+			if want := slices.Contains(allowed, name); got[category] != want {
+				t.Fatalf("%s in %s: %v, want %v", name, category, got[category], want)
+			}
+		}
+	}
+	for category, ok := range categoriesOf(custom()) {
+		if !ok {
+			t.Fatalf("Custom is not a %s", category)
 		}
 	}
 }
@@ -90,8 +137,10 @@ func TestCustomCallCarriesTypedFunction(t *testing.T) {
 func TestCallEntriesSnapshotInputs(t *testing.T) {
 	headers := map[string]string{"X-Trace": "owned"}
 	raw := json.RawMessage(`"owned"`)
-	headerCall, queryCall, fieldCall := request.Headers(headers), request.Query("q", raw), request.Field("f", raw)
+	values := []string{"a", "b"}
+	headerCall, queryCall, fieldCall, valuesCall := request.Headers(headers), request.Query("q", raw), request.Field("f", raw), request.Query("v", values)
 	headers["X-Trace"] = "changed"
+	values[0] = "changed"
 	raw[1] = 'X'
 	for _, tc := range []struct {
 		call request.Call
@@ -102,6 +151,8 @@ func TestCallEntriesSnapshotInputs(t *testing.T) {
 		{request.Headers(nil), request.CallEntry{Kind: request.CallHeaders}},
 		{request.Microversion("2.1"), request.CallEntry{Kind: request.CallMicroversion, Text: "2.1"}},
 		{queryCall, request.CallEntry{Kind: request.CallQuery, Key: "q", JSON: json.RawMessage(`"owned"`)}},
+		{request.Query("t", "text"), request.CallEntry{Kind: request.CallQuery, Key: "t", Form: request.QueryText, Text: "text", JSON: json.RawMessage(`"text"`)}},
+		{valuesCall, request.CallEntry{Kind: request.CallQuery, Key: "v", Form: request.QueryList, Values: []string{"a", "b"}, JSON: json.RawMessage(`["a","b"]`)}},
 		{request.BasePath("alt"), request.CallEntry{Kind: request.CallBasePath, Text: "alt"}},
 		{request.IgnoreMissing(false), request.CallEntry{Kind: request.CallIgnoreMissing}},
 		{request.Limit(3), request.CallEntry{Kind: request.CallLimit, Int: 3}},
@@ -119,6 +170,9 @@ func TestCallEntriesSnapshotInputs(t *testing.T) {
 		}
 		if got.JSON != nil {
 			got.JSON[1] = 'Y'
+		}
+		if got.Values != nil {
+			got.Values[0] = "escaped"
 		}
 		again, _ := request.Entry(tc.call)
 		if !reflect.DeepEqual(again, tc.want) {

@@ -233,7 +233,7 @@ func minimumBandwidthProxyPath(path, parent string, attrs map[string]json.RawMes
 }
 
 // minimumBandwidthProxyCalls translates the options of one call into MinimumBandwidthListOpts callbacks.
-func minimumBandwidthProxyCalls(calls []request.ListCall) []func(*MinimumBandwidthListOpts) error {
+func minimumBandwidthProxyCalls(calls []request.ListBasePathCall) []func(*MinimumBandwidthListOpts) error {
 	return qosCalls(calls, func(s *MinimumBandwidthListOpts) qosCallFields {
 		return qosCallFields{headers: &s.Headers, microversion: &s.Microversion, basePath: &s.BasePath}
 	}, minimumBandwidthProxyQuery, true)

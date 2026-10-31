@@ -78,6 +78,7 @@ func qosRun[T request.Call](calls []request.Call, run func([]T) error) (error, b
 var (
 	qosFindCalls   = []string{"Header", "Headers", "Microversion", "Query", "IgnoreMissing"}
 	qosGetCalls    = []string{"Header", "Headers", "Microversion"}
+	qosGetQuery    = []string{"Header", "Headers", "Microversion", "Query"}
 	qosListCalls   = []string{"Header", "Headers", "Microversion", "Query", "BasePath", "Limit", "Marker", "MaxItems", "Paginated"}
 	qosRateLists   = []string{"Header", "Headers", "Microversion", "Query", "Limit", "Marker", "MaxItems", "Paginated"}
 	qosDeleteCalls = []string{"Header", "Headers", "Microversion", "IgnoreMissing"}
@@ -128,7 +129,7 @@ func qosCallOperations() []qosCallOperation {
 				return err
 			})
 		}},
-		{"GetDSCPMarkingRecord", "dscp_marking_rules", qosGetCalls, func(a *rules.API, c []request.Call) (error, bool) {
+		{"GetDSCPMarkingRecord", "dscp_marking_rules", qosGetQuery, func(a *rules.API, c []request.Call) (error, bool) {
 			return qosRun(c, func(o []rules.DSCPMarkingGetOption) error {
 				_, err := a.GetDSCPMarkingRecord(ctx, "parent", "rule", o...)
 				return err

@@ -67,6 +67,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingGetMicroversion`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - One query-free named default GET at the bound policy/member path; no parent lookup, fallback or404 ignore. Optional Go transport query does not seed Body: accepted blank/malformed JSON keeps identity/defaults while actual null/scalar/wrong singular/invalidUTF8 are response evidence errors. Source getter has no kwargs; wider Go query/Header/version extensions are explicit.
   Tests: `network/v2/extensions/qos/rules/python_dscp_marking_contracts_test.go:TestPythonDSCPMarkingGetLiteralPolicyRouteRawProjectionAndDefaults`, `network/v2/extensions/qos/rules/python_dscp_marking_contracts_test.go:TestPythonDSCPMarkingGetPartialReceiptsWithoutQuerySeedsOrFallback`.

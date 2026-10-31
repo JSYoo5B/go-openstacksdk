@@ -101,9 +101,9 @@ type MinimumBandwidthListOpts struct {
 
 // MinimumBandwidthListOption is one option of an operation over
 // MinimumBandwidthListOpts: a With* function of this package, request.Custom
-// over *MinimumBandwidthListOpts, or a shared request.ListCall value. A nil
+// over *MinimumBandwidthListOpts, or a shared request.ListBasePathCall value. A nil
 // option fails with resource.ErrInvalidOption before HTTP.
-type MinimumBandwidthListOption = request.ListCall
+type MinimumBandwidthListOption = request.ListBasePathCall
 
 func minimumBandwidthListOptions(v MinimumBandwidthListOpts) neutronfind.Options {
 	return neutronfind.Options{BasePath: v.BasePath, Microversion: v.Microversion, Query: v.Query, Headers: v.Headers, Order: v.order}
@@ -267,7 +267,7 @@ func minimumBandwidthFindCalls(calls []request.FindCall) []func(*MinimumBandwidt
 }
 
 // minimumBandwidthListCalls translates the options of one call into MinimumBandwidthListOpts callbacks.
-func minimumBandwidthListCalls(calls []request.ListCall) []func(*MinimumBandwidthListOpts) error {
+func minimumBandwidthListCalls(calls []request.ListBasePathCall) []func(*MinimumBandwidthListOpts) error {
 	return qosCalls(calls, func(s *MinimumBandwidthListOpts) qosCallFields {
 		return qosCallFields{headers: &s.Headers, microversion: &s.Microversion, basePath: &s.BasePath}
 	}, minimumBandwidthListQuery, true)

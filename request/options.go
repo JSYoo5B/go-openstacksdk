@@ -1,5 +1,3 @@
-// Package request implements SDK-owned request configuration and extension
-// serialization for generated APIs. Callers supply concrete options, never builders.
 package request
 
 import (

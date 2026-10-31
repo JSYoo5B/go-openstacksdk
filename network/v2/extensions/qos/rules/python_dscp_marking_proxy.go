@@ -230,7 +230,7 @@ func dscpMarkingProxyPath(path, parent string, attrs map[string]json.RawMessage)
 }
 
 // dscpMarkingProxyCalls translates the options of one call into DSCPMarkingListOpts callbacks.
-func dscpMarkingProxyCalls(calls []request.ListCall) []func(*DSCPMarkingListOpts) error {
+func dscpMarkingProxyCalls(calls []request.ListBasePathCall) []func(*DSCPMarkingListOpts) error {
 	return qosCalls(calls, func(s *DSCPMarkingListOpts) qosCallFields {
 		return qosCallFields{headers: &s.Headers, microversion: &s.Microversion, basePath: &s.BasePath}
 	}, dscpMarkingProxyQuery, true)
