@@ -247,6 +247,27 @@ func HeaderMap[S any](target func(*S) *map[string]string) (header func(*S, strin
 	return header, headers
 }
 
+// MergeHeader returns a Header handler for an operation whose own headers
+// option merges a map into the headers collected so far (a request.Custom
+// over S, such as an object storage With<Op>Headers). One shared Header call
+// is applied as that option over a one-entry map, so it is validated and
+// merged exactly like the operation's own map form. Such an operation keeps
+// its merging map option and leaves Spec.Headers nil, because request.Headers
+// replaces rather than merges.
+func MergeHeader[S any, C request.Call](headers func(map[string]string) C) func(*S, string, string) error {
+	return func(s *S, key, value string) error {
+		entry, err := request.Entry(headers(map[string]string{key: value}))
+		if err != nil {
+			return err
+		}
+		fn, ok := request.CustomFunc[S](entry)
+		if !ok || fn == nil {
+			return request.UnsupportedCall(entry)
+		}
+		return fn(s)
+	}
+}
+
 // Pointer returns a handler that stores a copy of the value through the
 // pointer field that target points at.
 func Pointer[S, V any](target func(*S) **V) func(*S, V) error {

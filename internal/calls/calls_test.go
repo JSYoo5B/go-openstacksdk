@@ -169,3 +169,37 @@ func TestConfigQueryForms(t *testing.T) {
 		t.Fatalf("empty key = %v", err)
 	}
 }
+
+func TestMergeHeaderUsesTheOperationMapOption(t *testing.T) {
+	merge := func(values map[string]string) request.GetCall {
+		return request.Custom(func(s *state) error {
+			if _, bad := values["Bad"]; bad {
+				return resource.ErrInvalidOption
+			}
+			if s.Headers == nil {
+				s.Headers = map[string]string{}
+			}
+			for k, v := range values {
+				s.Headers[k] = v
+			}
+			return nil
+		})
+	}
+	spec := Spec[state]{Header: MergeHeader[state](merge)}
+	var s state
+	for _, apply := range Translate([]request.GetCall{merge(map[string]string{"A": "1"}), request.Header("B", "2"), request.Header("A", "3")}, spec) {
+		if err := apply(&s); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if !reflect.DeepEqual(s.Headers, map[string]string{"A": "3", "B": "2"}) {
+		t.Fatal(s.Headers)
+	}
+	if err := Translate([]request.GetCall{request.Header("Bad", "x")}, spec)[0](&s); !errors.Is(err, resource.ErrInvalidOption) {
+		t.Fatal(err)
+	}
+	other := Spec[state]{Header: MergeHeader[state](func(map[string]string) request.GetCall { return request.Header("X", "y") })}
+	if err := Translate([]request.GetCall{request.Header("A", "1")}, other)[0](&s); !errors.Is(err, resource.ErrInvalidOption) || !strings.Contains(err.Error(), "Header call option is unsupported") {
+		t.Fatal(err)
+	}
+}
