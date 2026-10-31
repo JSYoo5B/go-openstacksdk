@@ -12,6 +12,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/ruletypes"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
@@ -22,7 +23,7 @@ import (
 func recordAPI(t *testing.T, calls *[]nativeRuleTypeCall, reply func(*http.Request, int) *http.Response) *ruletypes.API {
 	t.Helper()
 	api := nativeRuleTypeAPI(t, calls, 200, `{}`)
-	api.RawClient().ProviderClient.HTTPClient.Transport = nativeRuleTypeTransport(func(req *http.Request) (*http.Response, error) {
+	api.RawClient().ProviderClient.HTTPClient.Transport = testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		*calls = append(*calls, nativeRuleTypeCall{req.Method, req.URL.EscapedPath(), req.URL.RawQuery})
 		if req.Method != "GET" || req.Header.Get("X-Auth-Token") == "" {
 			t.Fatal(req)
@@ -32,7 +33,7 @@ func recordAPI(t *testing.T, calls *[]nativeRuleTypeCall, reply func(*http.Reque
 	return api
 }
 func recordWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"X-Request-Id": []string{"rule-type-proof"}}}
+	return testcloud.Response(code, body, http.Header{"X-Request-Id": []string{"rule-type-proof"}})
 }
 func recordField(t *testing.T, v *ruletypes.QoSRuleTypeRecord, key, want string) {
 	t.Helper()

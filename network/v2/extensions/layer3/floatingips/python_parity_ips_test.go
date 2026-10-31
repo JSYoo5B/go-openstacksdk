@@ -19,14 +19,14 @@ type pythonIPsCall struct{ method, path, query, accept string }
 func pythonIPsAPI(t *testing.T, calls *[]pythonIPsCall, reply func(*http.Request) (int, string)) *floatingips.API {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = nativeFloatingIPTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		if req.Body != nil {
 			_, _ = io.Copy(io.Discard, req.Body)
 		}
 		*calls = append(*calls, pythonIPsCall{req.Method, req.URL.Path, req.URL.RawQuery, req.Header.Get("Accept")})
 		code, body := reply(req)
 		return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}, Request: req}, nil
-	})
+	}))
 	return floatingips.New(nativeFloatingIPClient(cloud))
 }
 

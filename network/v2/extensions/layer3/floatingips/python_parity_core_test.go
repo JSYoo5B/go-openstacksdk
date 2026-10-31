@@ -12,30 +12,20 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips"
 )
 
-type pythonParityCoreFloatingIPTransport func(*http.Request) (*http.Response, error)
-
-func (transport pythonParityCoreFloatingIPTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 type pythonParityCoreFloatingIPCall struct{ method, path, query, body string }
 
 func pythonParityCoreFloatingIPAPI(t *testing.T, calls *[]pythonParityCoreFloatingIPCall, reply func(*http.Request) string) (*floatingips.API, *testcloud.Cloud) {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = pythonParityCoreFloatingIPTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
 			raw = string(data)
 		}
 		*calls = append(*calls, pythonParityCoreFloatingIPCall{req.Method, req.URL.Path, req.URL.RawQuery, raw})
-		return &http.Response{StatusCode: 200, Body: io.NopCloser(strings.NewReader(reply(req))), Header: http.Header{"Content-Type": {"application/json"}}}, nil
-	})
+		return testcloud.Response(200, reply(req), http.Header{"Content-Type": {"application/json"}}), nil
+	}))
 	client := cloud.Client("network", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/neutron/v2.0/"
 	return floatingips.New(client), cloud

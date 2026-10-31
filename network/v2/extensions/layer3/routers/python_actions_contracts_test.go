@@ -384,7 +384,7 @@ func TestPythonRouterActionsCaptureBeforeCallbacksAndRejectInvalidInputs(t *test
 				}}
 			}
 			calls := 0
-			cloud.Provider.HTTPClient.Transport = nativeRouterTransport(func(*http.Request) (*http.Response, error) { calls++; return nativeRouterWire(200, `{}`), nil })
+			cloud.SetTransport(testcloud.LinkRequest(func(*http.Request) (*http.Response, error) { calls++; return nativeRouterWire(200, `{}`), nil }))
 			value, err := api.AddExternalGatewaysRecord(actualCtx, id, body, options...)
 			nativeRouterOperation(t, err, "AddExternalGatewaysRecord")
 			if err == nil || value != nil || calls != 0 {
@@ -491,7 +491,7 @@ func TestPythonRouterActionsReusableOptionsOwnIndependentConcurrentRecords(t *te
 	option := routers.WithRouterActionOpts(routers.RouterActionOpts{Headers: headers, Seed: seed})
 	headers["X-Action"] = "changed"
 	seed.Body["x_cached"] = json.RawMessage(`null`)
-	cloud.Provider.HTTPClient.Transport = nativeRouterTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		if req.Header.Get("X-Action") != "owned" {
 			return nil, errors.New("lost option snapshot")
 		}
@@ -500,7 +500,7 @@ func TestPythonRouterActionsReusableOptionsOwnIndependentConcurrentRecords(t *te
 			return nil, err
 		}
 		return nativeRouterWire(200, string(raw)), nil
-	})
+	}))
 	const count = 8
 	values := make([]*routers.RouterActionRecord, count)
 	failures := make([]error, count)

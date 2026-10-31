@@ -344,7 +344,7 @@ func TestPythonRouterInterfacesOptionsOwnSnapshotsAndContextSourcePreflight(t *t
 				var actual context.Context = ctx
 				cause := errors.New("option cause")
 				calls := 0
-				cloud.Provider.HTTPClient.Transport = nativeRouterTransport(func(*http.Request) (*http.Response, error) { calls++; return nativeRouterWire(200, `{}`), nil })
+				cloud.SetTransport(testcloud.LinkRequest(func(*http.Request) (*http.Response, error) { calls++; return nativeRouterWire(200, `{}`), nil }))
 				var err error
 				if gateway {
 					options := []routers.RouterGatewayOption{routers.WithRouterGatewayField("network_id", "external")}
@@ -451,13 +451,13 @@ func TestPythonRouterInterfacesRetryReauthAndConcurrentInputsKeepOwnership(t *te
 	cloud := testcloud.New(t)
 	api := routers.New(nativeRouterClient(cloud))
 	option := routers.WithRouterInterfacePort("shared-port")
-	cloud.Provider.HTTPClient.Transport = nativeRouterTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw, err := io.ReadAll(req.Body)
 		if err != nil {
 			return nil, err
 		}
 		return nativeRouterWire(200, string(raw)), nil
-	})
+	}))
 	values := make([]*routers.RouterJSONResult, 8)
 	failures := make([]error, 8)
 	var workers sync.WaitGroup

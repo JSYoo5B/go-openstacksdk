@@ -5,7 +5,6 @@ import (
 	"io"
 	"net/http"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
@@ -13,30 +12,20 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type pythonRouterL3Transport func(*http.Request) (*http.Response, error)
-
-func (transport pythonRouterL3Transport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 type pythonRouterL3Call struct{ method, path, query, body string }
 
 func pythonRouterL3API(t *testing.T, calls *[]pythonRouterL3Call, code int, body string) *routers.API {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = pythonRouterL3Transport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
 			raw = string(data)
 		}
 		*calls = append(*calls, pythonRouterL3Call{req.Method, req.URL.Path, req.URL.RawQuery, raw})
-		return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}, nil
-	})
+		return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}}), nil
+	}))
 	client := cloud.Client("network", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/neutron/v2.0/"
 	return routers.New(client)

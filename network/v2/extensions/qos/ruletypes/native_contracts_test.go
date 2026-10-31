@@ -6,7 +6,6 @@ import (
 	"io"
 	"net/http"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
@@ -15,25 +14,15 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type nativeRuleTypeTransport func(*http.Request) (*http.Response, error)
-
-func (transport nativeRuleTypeTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 type nativeRuleTypeCall struct{ method, path, query string }
 
 func nativeRuleTypeAPI(t *testing.T, calls *[]nativeRuleTypeCall, code int, body string) *ruletypes.API {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = nativeRuleTypeTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		*calls = append(*calls, nativeRuleTypeCall{req.Method, req.URL.Path, req.URL.RawQuery})
-		return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}, nil
-	})
+		return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}}), nil
+	}))
 	client := cloud.Client("network", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/neutron/v2.0/"
 	return ruletypes.New(client)

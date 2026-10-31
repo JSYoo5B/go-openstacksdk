@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"net/url"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
@@ -17,18 +16,8 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type nativeFloatingIPTransport func(*http.Request) (*http.Response, error)
-
-func (transport nativeFloatingIPTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func nativeFloatingIPWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}})
 }
 
 func nativeFloatingIPClient(cloud *testcloud.Cloud) *gophercloud.ServiceClient {
@@ -48,7 +37,7 @@ func nativeFloatingIPOperation(t *testing.T, err error, operation string) {
 type nativeFloatingIPCall struct{ method, path, query, body string }
 
 func nativeFloatingIPRecorder(cloud *testcloud.Cloud, calls *[]nativeFloatingIPCall, reply func(*http.Request) *http.Response) {
-	cloud.Provider.HTTPClient.Transport = nativeFloatingIPTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -56,7 +45,7 @@ func nativeFloatingIPRecorder(cloud *testcloud.Cloud, calls *[]nativeFloatingIPC
 		}
 		*calls = append(*calls, nativeFloatingIPCall{req.Method, req.URL.Path, req.URL.RawQuery, raw})
 		return reply(req), nil
-	})
+	}))
 }
 
 const nativeFloatingIPRow = `{"id":"id-1","floating_network_id":"ext","floating_ip_address":"203.0.113.5","port_id":"p1","fixed_ip_address":"10.0.0.5","router_id":"r1","status":"ACTIVE","created_at":"2026-10-10T01:02:03Z"}`

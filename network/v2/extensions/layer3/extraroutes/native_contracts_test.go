@@ -16,23 +16,17 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type nativeRouteTransport func(*http.Request) (*http.Response, error)
-
-func (transport nativeRouteTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	return transport(req)
-}
-
 type nativeRouteCall struct{ method, path, body string }
 
 func nativeRouteAPI(t *testing.T, code int, calls *[]nativeRouteCall) *extraroutes.API {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = nativeRouteTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 		raw, _ := io.ReadAll(req.Body)
 		*calls = append(*calls, nativeRouteCall{req.Method, req.URL.Path, string(raw)})
 		body := `{"router":{"id":"r1","routes":[{"destination":"10.1.0.0/24","nexthop":"10.0.0.9"}]}}`
 		return &http.Response{StatusCode: code, Request: req, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}, nil
-	})
+	}))
 	client := cloud.Client("network", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/neutron/v2.0/"
 	return extraroutes.New(client)

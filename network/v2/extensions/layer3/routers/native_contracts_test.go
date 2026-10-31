@@ -17,18 +17,8 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type nativeRouterTransport func(*http.Request) (*http.Response, error)
-
-func (transport nativeRouterTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func nativeRouterWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}})
 }
 
 func nativeRouterClient(cloud *testcloud.Cloud) *gophercloud.ServiceClient {
@@ -48,7 +38,7 @@ func nativeRouterOperation(t *testing.T, err error, operation string) {
 type nativeRouterCall struct{ method, path, query, body string }
 
 func nativeRouterRecorder(cloud *testcloud.Cloud, calls *[]nativeRouterCall, reply func(*http.Request) *http.Response) {
-	cloud.Provider.HTTPClient.Transport = nativeRouterTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -56,7 +46,7 @@ func nativeRouterRecorder(cloud *testcloud.Cloud, calls *[]nativeRouterCall, rep
 		}
 		*calls = append(*calls, nativeRouterCall{req.Method, req.URL.Path, req.URL.RawQuery, raw})
 		return reply(req), nil
-	})
+	}))
 }
 
 const nativeRouterRow = `{"id":"id-1","name":"edge","status":"ACTIVE","admin_state_up":true,"distributed":false,"external_gateway_info":{"network_id":"ext"},"routes":[{"destination":"10.1.0.0/24","nexthop":"10.0.0.9"}],"created_at":"2026-10-10T01:02:03Z"}`
