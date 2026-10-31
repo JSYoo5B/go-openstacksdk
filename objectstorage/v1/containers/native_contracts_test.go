@@ -16,16 +16,6 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type nativeContainerTransport func(*http.Request) (*http.Response, error)
-
-func (transport nativeContainerTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 type nativeContainerCall struct {
 	method, path, query, body string
 	header                    http.Header
@@ -51,7 +41,7 @@ type nativeContainerReply struct {
 func nativeContainerAPI(t *testing.T, calls *[]nativeContainerCall, reply func(*http.Request) nativeContainerReply) *containers.API {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = nativeContainerTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -62,8 +52,8 @@ func nativeContainerAPI(t *testing.T, calls *[]nativeContainerCall, reply func(*
 		if r.header == nil {
 			r.header = http.Header{}
 		}
-		return &http.Response{StatusCode: r.code, Body: io.NopCloser(strings.NewReader(r.body)), Header: r.header}, nil
-	})
+		return testcloud.Response(r.code, r.body, r.header), nil
+	}))
 	client := cloud.Client("object-store", "/swift/v1/AUTH_project")
 	// Item calls use ResourceBase; the account-level list and bulk delete use Endpoint.
 	client.ResourceBase = cloud.Server.URL + "/swift/v1/AUTH_project/"

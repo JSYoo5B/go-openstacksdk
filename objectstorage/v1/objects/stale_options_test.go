@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -21,7 +22,7 @@ func TestObjectStaleOptionsSnapshotsAndReplacement(t *testing.T) {
 	c.MoreHeaders = map[string]string{"X-Source": "captured"}
 	callbacks, calls := 0, 0
 	var retained *IsObjectStaleOpts
-	c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		calls++
 		if r.Method != "HEAD" || r.Header.Get("X-Call") != "overlay" || r.Header.Get("X-Source") != "captured" {
 			t.Error("stale snapshot changed", r.Method, r.Header)
@@ -63,7 +64,7 @@ func TestObjectStaleOptionsSnapshotsAndReplacement(t *testing.T) {
 func TestObjectStaleOptionsPreflightAndCauses(t *testing.T) {
 	c := objectMetadataClient()
 	calls := 0
-	c.HTTPClient.Transport = objectMetadataTransport(func(*http.Request) (*http.Response, error) { calls++; return nil, errors.New("unexpected HTTP") })
+	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(*http.Request) (*http.Response, error) { calls++; return nil, errors.New("unexpected HTTP") })
 	for _, filename := range []string{"", "bad\x00file", "bad\xfffile"} {
 		callbacks := 0
 		result, err := New(c).IsObjectStale(context.Background(), "box", "key", filename, func(*IsObjectStaleOpts) error { callbacks++; return nil })
@@ -114,7 +115,7 @@ func TestObjectStaleOptionsNativeSnapshotAndProof(t *testing.T) {
 		opts.MoreHeaders = map[string]string{"X-Native": "override"}
 		return nil
 	}
-	c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		calls++
 		if r.Method != "HEAD" || r.Body != nil {
 			t.Error("stale retry body", r.Method, r.Body)
@@ -143,7 +144,7 @@ func TestObjectStaleOptionsNativeSnapshotAndProof(t *testing.T) {
 		native.ResponseHeader.Set("X-Proof", "changed")
 		return nil
 	}
-	c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		calls++
 		code := 503
 		if calls == 2 {

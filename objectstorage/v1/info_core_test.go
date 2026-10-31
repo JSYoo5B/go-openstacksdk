@@ -10,6 +10,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -57,7 +58,7 @@ func TestInfoCoreModelFailuresAndAcceptedEvidence(t *testing.T) {
 		t.Run(body, func(t *testing.T) {
 			c := tempURLKeyTestClient()
 			calls, retries := 0, 0
-			c.HTTPClient.Transport = tempURLKeyTestTransport(func(r *http.Request) (*http.Response, error) {
+			c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls++
 				return tempURLKeyTestWire(r, 200, http.Header{"X-Proof": {"kept"}}, io.NopCloser(strings.NewReader(body))), nil
 			})
@@ -102,7 +103,7 @@ func TestInfoCoreSegmentSelection(t *testing.T) {
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			c := tempURLKeyTestClient()
-			c.HTTPClient.Transport = tempURLKeyTestTransport(func(r *http.Request) (*http.Response, error) {
+			c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				if r.Method != "GET" || r.URL.EscapedPath() != "/reverse%20proxy/info" || r.Body != nil {
 					t.Fatal("capability read changed request", r.Method, r.URL, r.Body)
 				}
@@ -129,7 +130,7 @@ func TestInfoCoreSegmentBoundsAtomic(t *testing.T) {
 					body = `{"swift":{"max_file_size":100},"slo":{"min_segment_size":` + bound + `}}`
 				}
 				c := tempURLKeyTestClient()
-				c.HTTPClient.Transport = tempURLKeyTestTransport(func(r *http.Request) (*http.Response, error) {
+				c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					return tempURLKeyTestWire(r, 200, http.Header{"X-Proof": {"kept"}}, io.NopCloser(strings.NewReader(body))), nil
 				})
 				result, err := New(c).GetObjectSegmentSize(context.Background(), WithObjectSegmentSize(20))
@@ -152,7 +153,7 @@ func TestInfoCorePhysicalFallbackAndDirtyResponses(t *testing.T) {
 		for _, size := range []int64{0, 1073741824, 2684354562} {
 			c := tempURLKeyTestClient()
 			body := "opaque fallback \xff"
-			c.HTTPClient.Transport = tempURLKeyTestTransport(func(r *http.Request) (*http.Response, error) {
+			c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				return tempURLKeyTestWire(r, code, http.Header{"X-Proof": {"kept"}}, io.NopCloser(strings.NewReader(body))), nil
 			})
 			result, err := New(c).GetObjectSegmentSize(context.Background(), WithObjectSegmentSize(size))
@@ -180,7 +181,7 @@ func TestInfoCorePhysicalFallbackAndDirtyResponses(t *testing.T) {
 					return copy(p, "opaque"), errors.Join(io.EOF, fault)
 				})
 			}
-			c.HTTPClient.Transport = tempURLKeyTestTransport(func(r *http.Request) (*http.Response, error) {
+			c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				return tempURLKeyTestWire(r, code, http.Header{"X-Proof": {"kept"}}, body), nil
 			})
 			result, err := New(c).GetObjectSegmentSize(context.Background())
@@ -197,7 +198,7 @@ func TestInfoCoreCallbackAndWireGuards(t *testing.T) {
 		c := tempURLKeyTestClient()
 		cause := errors.New("callback cause")
 		later, calls := 0, 0
-		c.HTTPClient.Transport = tempURLKeyTestTransport(func(*http.Request) (*http.Response, error) { calls++; return nil, cause })
+		c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(*http.Request) (*http.Response, error) { calls++; return nil, cause })
 		result, err := New(c).GetInfo(context.Background(), func(*GetInfoOpts) error { c.ResourceBase = "changed"; return cause }, func(*GetInfoOpts) error { later++; return nil })
 		if result != nil || !errors.Is(err, cause) || !errors.Is(err, resource.ErrInvalidOption) || later != 0 || calls != 0 {
 			t.Fatal(result, err, later, calls)
@@ -207,7 +208,7 @@ func TestInfoCoreCallbackAndWireGuards(t *testing.T) {
 		c := tempURLKeyTestClient()
 		original := c.Endpoint
 		body := &tempURLKeyTestBody{Reader: strings.NewReader(`{"swift":{}}`)}
-		c.HTTPClient.Transport = tempURLKeyTestTransport(func(r *http.Request) (*http.Response, error) {
+		c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			c.Endpoint = "http://cloud.invalid/changed"
 			if restore {
 				body.onClose = func() { c.Endpoint = original }
@@ -225,7 +226,7 @@ func TestInfoCoreCallbackAndWireGuards(t *testing.T) {
 		cause := errors.New("close cancellation")
 		ctx, cancel := context.WithCancelCause(context.Background())
 		body := &tempURLKeyTestBody{Reader: strings.NewReader("opaque"), onClose: func() { cancel(cause) }}
-		c.HTTPClient.Transport = tempURLKeyTestTransport(func(r *http.Request) (*http.Response, error) {
+		c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			return tempURLKeyTestWire(r, 404, http.Header{"X-Proof": {"kept"}}, body), nil
 		})
 		result, err := New(c).GetObjectSegmentSize(ctx)

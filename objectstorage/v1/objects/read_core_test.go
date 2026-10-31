@@ -11,20 +11,18 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type readTestTransport func(*http.Request) (*http.Response, error)
-
-func (f readTestTransport) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
-func readTestAPI(f readTestTransport) (*API, *gophercloud.ServiceClient) {
+func readTestAPI(f testcloud.RoundTripperFunc) (*API, *gophercloud.ServiceClient) {
 	provider := &gophercloud.ProviderClient{TokenID: "live-token", HTTPClient: http.Client{Transport: f}}
 	source := &gophercloud.ServiceClient{ProviderClient: provider, Endpoint: "https://storage.test/reverse%20proxy/v1/a/", Type: "object-store"}
 	return New(source), source
 }
 func readTestResponse(code int, headers http.Header, body io.ReadCloser) *http.Response {
-	return &http.Response{StatusCode: code, Header: headers, Body: body}
+	return testcloud.StreamResponse(code, body, headers)
 }
 func readTestProof(t *testing.T, err error, status int) *resource.ResponseError {
 	t.Helper()

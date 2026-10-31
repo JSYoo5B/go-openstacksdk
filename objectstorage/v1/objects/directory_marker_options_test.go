@@ -10,6 +10,7 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -23,7 +24,7 @@ func TestDirectoryMarkerOptionsFactoryAndCallbackSnapshots(t *testing.T) {
 	for n := 0; n < 2; n++ {
 		c := objectMetadataClient()
 		var retained *DirectoryMarkerOpts
-		c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+		c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			if r.Header.Get("X-Call") != "overlay" || r.Header.Get("X-Object-Meta-Tag") != "overlay" || r.Header.Get("Content-Type") != "application/directory" {
 				t.Error("factory or callback maps aliased", r.Header)
 			}
@@ -48,7 +49,7 @@ func TestDirectoryMarkerOptionsReplacementAndOverlay(t *testing.T) {
 	for _, reset := range []bool{false, true} {
 		c := objectMetadataClient()
 		calls := 0
-		c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+		c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			calls++
 			if r.Header.Get("X-Drop") != "" || r.Header.Get("X-Object-Meta-Drop") != "" || r.Header.Get("Content-Type") != "application/directory" {
 				t.Error("full opts did not replace", r.Header)
@@ -84,7 +85,7 @@ func TestDirectoryMarkerOptionsReplacementAndOverlay(t *testing.T) {
 func TestDirectoryMarkerOptionsPreflightAndJoinedCauses(t *testing.T) {
 	c := objectMetadataClient()
 	calls := 0
-	c.HTTPClient.Transport = objectMetadataTransport(func(*http.Request) (*http.Response, error) { calls++; return nil, errors.New("unexpected wire") })
+	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(*http.Request) (*http.Response, error) { calls++; return nil, errors.New("unexpected wire") })
 	for _, option := range []DirectoryMarkerOption{
 		nil,
 		WithDirectoryMarkerOpts(DirectoryMarkerOpts{Headers: map[string]string{"Content-Type": "one", "content-type": "two"}}),
@@ -139,7 +140,7 @@ func TestDirectoryMarkerOptionsPreflightAndJoinedCauses(t *testing.T) {
 func TestDirectoryMarkerOptionsParallelReuse(t *testing.T) {
 	c := objectMetadataClient()
 	var calls, callbacks atomic.Int32
-	c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		calls.Add(1)
 		if r.Method != "PUT" || r.Header.Get("Content-Type") != "application/directory" || r.Header.Get("X-Call") != "factory" || r.Header.Get("X-Object-Meta-Tag") != "factory" {
 			t.Error("parallel marker factory changed", r.Method, r.Header)

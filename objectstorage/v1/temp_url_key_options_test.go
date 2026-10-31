@@ -10,6 +10,7 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -31,7 +32,7 @@ func TestTempURLKeyOptionsSnapshotsAndReplacement(t *testing.T) {
 			retained = cfg
 			return nil
 		}
-		c.HTTPClient.Transport = tempURLKeyTestTransport(func(r *http.Request) (*http.Response, error) {
+		c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			calls++
 			if r.Header.Get("X-Trace") != "owned" || len(r.Header.Values("X-Trace")) != 1 || r.Header.Get("X-Newest") != "false" {
 				t.Fatal("callback alias/last overwrite", r.Header)
@@ -78,7 +79,7 @@ func TestTempURLKeyOptionsSnapshotsAndReplacement(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			c := tempURLKeyTestClient()
 			calls := 0
-			c.HTTPClient.Transport = tempURLKeyTestTransport(func(r *http.Request) (*http.Response, error) {
+			c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls++
 				if r.URL.String() != c.Endpoint || r.Header.Get("X-Trace") != "" || r.Header.Get("X-Newest") != tc.newest || (len(r.Header.Values("X-Newest")) == 1) != tc.present {
 					t.Fatal("replacement/clear lost", r.URL, r.Header)
@@ -95,7 +96,7 @@ func TestTempURLKeyOptionsSnapshotsAndReplacement(t *testing.T) {
 func TestTempURLKeyOptionsParallelReuseAndPreflight(t *testing.T) {
 	c := tempURLKeyTestClient()
 	var calls atomic.Int32
-	c.HTTPClient.Transport = tempURLKeyTestTransport(func(r *http.Request) (*http.Response, error) {
+	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		calls.Add(1)
 		if r.Method != "HEAD" || r.Header.Get("X-Trace") != "stable" || r.Header.Get("X-Newest") != "false" {
 			t.Error("shared option mutated", r.Header)

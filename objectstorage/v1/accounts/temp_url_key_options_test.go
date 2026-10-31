@@ -10,6 +10,7 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -20,7 +21,7 @@ func TestAccountTempURLKeyOptionsSnapshotsAndReplacement(t *testing.T) {
 	headers["x-trace"] = "outside"
 	var retained *SetTempURLKeyOpts
 	calls := 0
-	c.HTTPClient.Transport = accountMetadataTransport(func(r *http.Request) (*http.Response, error) {
+	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		calls++
 		if r.Header.Get("X-Trace") != "owned" || len(r.Header.Values("X-Trace")) != 1 || len(r.Header.Values("X-Account-Meta-Temp-URL-Key-2")) != 1 {
 			t.Fatal("snapshot/overwrite", r.Header)
@@ -45,7 +46,7 @@ func TestAccountTempURLKeyOptionsSnapshotsAndReplacement(t *testing.T) {
 	if calls != 2 {
 		t.Fatal(calls)
 	}
-	c.HTTPClient.Transport = accountMetadataTransport(func(r *http.Request) (*http.Response, error) {
+	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		if len(r.Header.Values("X-Account-Meta-Temp-URL-Key")) != 1 || len(r.Header.Values("X-Account-Meta-Temp-URL-Key-2")) != 0 || r.Header.Get("X-Trace") != "" {
 			t.Fatal("FullOpts did not replace", r.Header)
 		}
@@ -59,7 +60,7 @@ func TestAccountTempURLKeyOptionsSnapshotsAndReplacement(t *testing.T) {
 func TestAccountTempURLKeyOptionsParallelAndInvalidHeaders(t *testing.T) {
 	c := accountMetadataClient("http://cloud.invalid/v1/AUTH_x/")
 	var calls atomic.Int32
-	c.HTTPClient.Transport = accountMetadataTransport(func(r *http.Request) (*http.Response, error) {
+	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		calls.Add(1)
 		if r.Header.Get("X-Trace") != "stable" || len(r.Header.Values("X-Account-Meta-Temp-URL-Key-2")) != 1 {
 			t.Error("shared options mutated", r.Header)

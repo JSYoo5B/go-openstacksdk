@@ -11,6 +11,7 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -36,7 +37,7 @@ func TestObjectDeleteOptionsSnapshots(t *testing.T) {
 		}
 		return nil
 	}
-	c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		calls++
 		if r.URL.EscapedPath() != "/reverse%2Fprefix/v1/a/"+url.PathEscape(objectMetadataContainer)+"/"+url.PathEscape(objectMetadataName) || r.URL.Query().Get("version-id") != version || r.URL.Query().Get("multipart-manifest") != "" || r.Header.Get("X-Newest") != "false" || r.Header.Get("X-Call") != "final" || r.Header.Get("X-Source") != "captured" {
 			t.Fatal("owned route/header lost", r.URL, r.Header)
@@ -67,7 +68,7 @@ func TestObjectDeleteOptionsSnapshots(t *testing.T) {
 		{WithDeleteObjectStaticLargeObject(true), WithoutDeleteObjectStaticLargeObject(), WithDeleteObjectNewest(true), WithoutDeleteObjectNewest(), WithDeleteObjectIgnoreMissing(false), WithoutDeleteObjectIgnoreMissing()},
 		{WithDeleteObjectStaticLargeObject(true), WithDeleteObjectVersionID("discard"), WithDeleteObjectHeader("X-Call", "discard"), WithDeleteObjectOpts(DeleteObjectOpts{})},
 	} {
-		c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+		c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			if r.Method != "HEAD" || r.URL.RawQuery != "" || r.Header.Get("X-Newest") != "" || r.Header.Get("X-Call") != "" {
 				t.Fatal("clear/full replacement failed", r.Method, r.URL, r.Header)
 			}
@@ -82,7 +83,7 @@ func TestObjectDeleteOptionsSnapshots(t *testing.T) {
 func TestObjectDeleteOptionsPreflight(t *testing.T) {
 	c := objectMetadataClient()
 	calls := 0
-	c.HTTPClient.Transport = objectMetadataTransport(func(*http.Request) (*http.Response, error) { calls++; return nil, errors.New("unexpected HTTP") })
+	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(*http.Request) (*http.Response, error) { calls++; return nil, errors.New("unexpected HTTP") })
 	for _, headers := range []map[string]string{{"X-Call": "one", "x-call": "two"}, {"X-K": "value"}, {"X-Call": "bad\nvalue"}, {"Cookie": "auth"}, {"X-Service-Token": "auth"}, {"X-Static-Large-Object": "true"}, {"X-Newest": "true"}, {"Authorization": "auth"}, {"X-Object-Meta-Field": "owned"}} {
 		if result, err := New(c).DeleteObject(context.Background(), "box", "key", WithDeleteObjectHeaders(headers)); result != nil || !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal("invalid headers accepted", headers, result, err)
@@ -116,7 +117,7 @@ func TestObjectDeleteOptionsPreflight(t *testing.T) {
 func TestObjectDeleteOptionsParallelReuse(t *testing.T) {
 	c := objectMetadataClient()
 	var calls atomic.Int32
-	c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		calls.Add(1)
 		if r.Method != "DELETE" || r.Header.Get("X-Call") != "stable" || r.Header.Get("X-Newest") != "false" || r.URL.Query().Get("version-id") != "v% ?#" {
 			t.Error("parallel factory changed", r.Method, r.URL, r.Header)
@@ -162,7 +163,7 @@ func TestObjectDeleteOptionsNativeRetrySnapshots(t *testing.T) {
 		options.MoreHeaders = map[string]string{"Accept": "text/xml", "accept": "text/plain", "X-Native": "override"}
 		return nil
 	}
-	c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		calls++
 		if r.Method != "DELETE" || r.URL.Query().Get("multipart-manifest") != "delete" || r.URL.Query().Get("version-id") != "v% ?#" || r.Body != nil {
 			t.Fatal("retry target/body changed", r.Method, r.URL)

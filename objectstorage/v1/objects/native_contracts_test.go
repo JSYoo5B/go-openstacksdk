@@ -21,16 +21,6 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type nativeObjectTransport func(*http.Request) (*http.Response, error)
-
-func (transport nativeObjectTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 type nativeObjectCall struct {
 	method, path, query, body string
 	header                    http.Header
@@ -58,7 +48,7 @@ type nativeObjectReply struct {
 func nativeObjectAPI(t *testing.T, calls *[]nativeObjectCall, reply func(*http.Request) nativeObjectReply) *objects.API {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = nativeObjectTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -69,8 +59,8 @@ func nativeObjectAPI(t *testing.T, calls *[]nativeObjectCall, reply func(*http.R
 		if r.header == nil {
 			r.header = http.Header{}
 		}
-		return &http.Response{StatusCode: r.code, Body: io.NopCloser(strings.NewReader(r.body)), Header: r.header}, nil
-	})
+		return testcloud.Response(r.code, r.body, r.header), nil
+	}))
 	client := cloud.Client("object-store", "/swift/v1/AUTH_project")
 	client.ResourceBase = cloud.Server.URL + "/swift/v1/AUTH_project/"
 	return objects.New(client)

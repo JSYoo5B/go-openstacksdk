@@ -19,10 +19,6 @@ import (
 const objectMetadataContainer = "컨테이너 %?#:"
 const objectMetadataName = "폴더/file %2F?#:"
 
-type objectMetadataTransport func(*http.Request) (*http.Response, error)
-
-func (f objectMetadataTransport) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
-
 type objectMetadataBody struct {
 	io.Reader
 	closeErr error
@@ -144,7 +140,7 @@ func TestObjectMetadataCoreEmptyWritesAndNineHeaders(t *testing.T) {
 			t.Run(strconv.FormatBool(remove)+strconv.FormatBool(empty), func(t *testing.T) {
 				c := objectMetadataClient()
 				calls := 0
-				c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+				c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					calls++
 					if calls == 1 {
 						return objectMetadataOK(r, 200, observed), nil
@@ -194,7 +190,7 @@ func TestObjectMetadataCoreAtomicProjection(t *testing.T) {
 			body := &objectMetadataBody{Reader: strings.NewReader("raw")}
 			c := objectMetadataClient()
 			calls := 0
-			c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+			c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls++
 				return objectMetadataWire(r, 200, h, body), nil
 			})
@@ -217,7 +213,7 @@ func TestObjectMetadataCoreAtomicProjection(t *testing.T) {
 		})
 	}
 	c := objectMetadataClient()
-	c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		return objectMetadataOK(r, 200, http.Header{"Content-Length": {"-2"}, "X-Object-Meta-Temp-URL-Key": {"literal%20"}, "Last-Modified": {""}, "X-Unknown": {"one", "two"}}), nil
 	})
 	got, err := New(c).GetMetadata(context.Background(), "container", "object")
@@ -235,7 +231,7 @@ func TestObjectMetadataCoreSymlinkAndStrictStatus(t *testing.T) {
 		h.Set("X-Proof", "kept")
 		c := objectMetadataClient()
 		calls := 0
-		c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) { calls++; return objectMetadataOK(r, 200, h), nil })
+		c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) { calls++; return objectMetadataOK(r, 200, h), nil })
 		got, err := New(c).DeleteMetadata(context.Background(), "container", "object", nil)
 		if err == nil || got == nil || got.Before.Metadata != nil || got.Acknowledgement != nil || calls != 1 {
 			t.Fatalf("link accepted %#v %v", got, err)
@@ -247,7 +243,7 @@ func TestObjectMetadataCoreSymlinkAndStrictStatus(t *testing.T) {
 	}
 	for _, code := range []int{201, 204, 404} {
 		c := objectMetadataClient()
-		c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) { return objectMetadataOK(r, code, http.Header{}), nil })
+		c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) { return objectMetadataOK(r, code, http.Header{}), nil })
 		got, err := New(c).GetMetadata(context.Background(), "container", "object")
 		if got != nil || !gophercloud.ResponseCodeIs(err, code) {
 			t.Fatalf("unexpected HEAD accepted%d %#v %v", code, got, err)
@@ -256,7 +252,7 @@ func TestObjectMetadataCoreSymlinkAndStrictStatus(t *testing.T) {
 	for _, code := range []int{200, 201, 204, 404} {
 		c := objectMetadataClient()
 		calls := 0
-		c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+		c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			calls++
 			if calls == 1 {
 				return objectMetadataOK(r, 200, http.Header{"X-Object-Meta-Key": {"old"}}), nil
@@ -281,7 +277,7 @@ func TestObjectMetadataCorePhaseFailuresAndCauses(t *testing.T) {
 			body := &objectMetadataBody{Reader: objectMetadataReader(func(p []byte) (int, error) { return copy(p, "raw"), readErr }), closeErr: closeErr, onClose: func() { cancel(cause) }}
 			c := objectMetadataClient()
 			calls := 0
-			c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+			c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls++
 				if r.Method != phase {
 					return objectMetadataOK(r, 200, http.Header{"X-Object-Meta-Key": {"old"}}), nil
@@ -318,7 +314,7 @@ func TestObjectMetadataCorePhaseFailuresAndCauses(t *testing.T) {
 func TestObjectMetadataCoreSourceAndLiveAuth(t *testing.T) {
 	c := objectMetadataClient()
 	var calls atomic.Int32
-	c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		n := calls.Add(1)
 		if n == 1 {
 			if r.Header.Get("X-Auth-Token") != "token" {
@@ -338,7 +334,7 @@ func TestObjectMetadataCoreSourceAndLiveAuth(t *testing.T) {
 		c := objectMetadataClient()
 		body := &objectMetadataBody{Reader: strings.NewReader("raw"), onClose: func() { retarget(c) }}
 		calls := 0
-		c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+		c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			calls++
 			return objectMetadataWire(r, 200, http.Header{"X-Proof": {"kept"}}, body), nil
 		})

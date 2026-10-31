@@ -14,6 +14,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -127,7 +128,7 @@ func TestObjectCreateCoreChecksumDecisions(t *testing.T) {
 			c := objectMetadataClient()
 			c.MoreHeaders = map[string]string{"X-Source": "captured"}
 			calls, puts := 0, 0
-			c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+			c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls++
 				if r.Method != "PUT" && (r.Header.Get("Content-Type") != "" || r.Header.Get("X-Object-Meta-Tag") != "") {
 					t.Error("upload headers leaked into discovery", r.Header)
@@ -168,7 +169,7 @@ func TestObjectCreateCoreChecksumDecisions(t *testing.T) {
 		})
 	}
 	c := objectMetadataClient()
-	c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		if r.Method != "PUT" || r.Header.Get("X-Object-Meta-X-Sdk-Md5") != "literal" {
 			t.Error("byte mode calculated a digest", r.Method, r.Header)
 		}
@@ -197,7 +198,7 @@ func TestObjectCreateCoreCapabilityProjection(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			c := objectMetadataClient()
 			calls := 0
-			c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+			c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls++
 				if r.Method != "GET" || r.URL.Path != "/info" {
 					t.Error("capability route", r.Method, r.URL)
@@ -225,7 +226,7 @@ func TestObjectCreateCoreCapabilityProjection(t *testing.T) {
 	for _, code := range []int{404, 412, 500} {
 		c := objectMetadataClient()
 		fault := errors.New("capability close")
-		c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+		c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			return objectMetadataWire(r, code, http.Header{"X-Proof": {"kept"}}, &objectMetadataBody{Reader: strings.NewReader("raw"), closeErr: fault}), nil
 		})
 		p, err := New(c).captureCreateObject(context.Background(), "box", "key")
@@ -254,7 +255,7 @@ func TestObjectCreateCoreEmptyAndZeroBounds(t *testing.T) {
 	for _, data := range []string{"", "nonempty"} {
 		c := objectMetadataClient()
 		puts := 0
-		c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+		c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			switch r.Method {
 			case "GET":
 				return objectMetadataWire(r, 200, http.Header{"X-Proof": {"kept"}}, io.NopCloser(strings.NewReader(`{"swift":{"max_file_size":0},"slo":{"min_segment_size":0}}`))), nil

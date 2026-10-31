@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -15,7 +16,7 @@ import (
 func TestImageImportContainerOuterGuardChecksBeforeOptionsAndHTTP(t *testing.T) {
 	outer := errors.New("image source changed")
 	calls, options := 0, 0
-	api, _ := lifecycleAPI(lifecycleTransport(func(*http.Request) (*http.Response, error) { calls++; return nil, errors.New("forbidden") }))
+	api, _ := lifecycleAPI(testcloud.RoundTripperFunc(func(*http.Request) (*http.Response, error) { calls++; return nil, errors.New("forbidden") }))
 	ctx := rest.WithOperationGuard(context.Background(), func(context.Context) error { return outer })
 	result, err := api.CreateContainer(ctx, "images", func(*CreateContainerOpts) error { options++; return nil })
 	if result != nil || !errors.Is(err, outer) || calls != 0 || options != 0 {
@@ -29,9 +30,9 @@ func TestImageImportContainerMetadataOuterGuardStopsNativeReplay(t *testing.T) {
 			calls, hooks := 0, 0
 			changed := false
 			outer := errors.New("image source changed in retry")
-			api, c := lifecycleAPI(lifecycleTransport(func(r *http.Request) (*http.Response, error) {
+			api, c := lifecycleAPI(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls++
-				return lifecycleWire(r, 503, &lifecycleBody{data: "rejected"}), nil
+				return lifecycleWire(r, 503, &testcloud.Body{Data: "rejected"}), nil
 			}))
 			c.RetryFunc = func(context.Context, string, string, *gophercloud.RequestOpts, error, uint) error {
 				hooks++
@@ -67,12 +68,12 @@ func TestImageImportContainerOuterGuardReadFailureRemainsAfterCloseRestore(t *te
 			outer := errors.New("image source changed during read")
 			changed := false
 			calls := 0
-			body := &lifecycleBody{data: "actual", onRead: func() { changed = true }, onClose: func() { changed = false }}
+			body := &testcloud.Body{Data: "actual", OnRead: func() { changed = true }, OnClose: func() { changed = false }}
 			code := 204
 			if operation == "PUT" {
 				code = 201
 			}
-			api, _ := lifecycleAPI(lifecycleTransport(func(r *http.Request) (*http.Response, error) { calls++; return lifecycleWire(r, code, body), nil }))
+			api, _ := lifecycleAPI(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) { calls++; return lifecycleWire(r, code, body), nil }))
 			ctx := rest.WithOperationSources(rest.WithOperationGuard(context.Background(), func(context.Context) error {
 				if changed {
 					return outer
@@ -96,8 +97,8 @@ func TestImageImportContainerOuterGuardReadFailureRemainsAfterCloseRestore(t *te
 				lifecycleProof(t, result, err, code, "actual")
 			}
 			var proof *resource.ResponseError
-			if !errors.Is(err, outer) || !errors.As(err, &proof) || proof.StatusCode != code || string(proof.Body) != "actual" || calls != 1 || body.closes != 1 || changed {
-				t.Fatal(err, proof, calls, body.closes, changed)
+			if !errors.Is(err, outer) || !errors.As(err, &proof) || proof.StatusCode != code || string(proof.Body) != "actual" || calls != 1 || body.Closes() != 1 || changed {
+				t.Fatal(err, proof, calls, body.Closes(), changed)
 			}
 		})
 	}
@@ -114,7 +115,7 @@ func TestImageImportContainerSourceOnlyRegistrationPersistsWithoutRecursion(t *t
 				}
 				return nil
 			}))
-			api, c := lifecycleAPI(lifecycleTransport(func(r *http.Request) (*http.Response, error) {
+			api, c := lifecycleAPI(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				return lifecycleWire(r, 201, io.NopCloser(http.NoBody)), nil
 			}))
 			result, err := api.CreateContainer(ctx, "images")

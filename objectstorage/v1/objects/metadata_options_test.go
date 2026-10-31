@@ -8,6 +8,7 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 	swift "github.com/gophercloud/gophercloud/v2/openstack/objectstorage/v1"
@@ -20,7 +21,7 @@ func TestObjectMetadataOptionsFactorySnapshots(t *testing.T) {
 	option := WithGetMetadataOpts(GetMetadataOpts{Headers: headers, Newest: &flag})
 	headers["x-call"] = "changed"
 	flag = true
-	c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		if r.Header.Get("X-Call") != "new" || r.Header.Get("X-Newest") != "false" {
 			t.Errorf("factory/overwrite %#v", r.Header)
 		}
@@ -33,7 +34,7 @@ func TestObjectMetadataOptionsFactorySnapshots(t *testing.T) {
 	writeHeaders := map[string]string{"x-call": "factory"}
 	moption := WithMetadataOpts(MetadataOpts{Headers: writeHeaders})
 	writeHeaders["x-call"] = "changed"
-	c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		if r.Method == "HEAD" {
 			return objectMetadataOK(r, 200, http.Header{"X-Object-Meta-Keep": {"before"}}), nil
 		}
@@ -46,7 +47,7 @@ func TestObjectMetadataOptionsFactorySnapshots(t *testing.T) {
 		t.Fatal(err)
 	}
 	keys := []string{"Key"}
-	c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		if r.Method == "HEAD" {
 			return objectMetadataOK(r, 200, http.Header{"X-Object-Meta-Key": {"before"}, "X-Object-Meta-Keep": {"safe"}}), nil
 		}
@@ -64,7 +65,7 @@ func TestObjectMetadataOptionsReplacementAndRetainedHandles(t *testing.T) {
 	c := objectMetadataClient()
 	var first, last *GetMetadataOpts
 	invoked := 0
-	c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		if r.Header.Get("X-Call") != "owned" || r.Header.Get("X-Newest") != "false" {
 			t.Errorf("retained handle %#v", r.Header)
 		}
@@ -92,7 +93,7 @@ func TestObjectMetadataOptionsReplacementAndRetainedHandles(t *testing.T) {
 	}
 	last.Headers["X-Call"] = "after"
 	*last.Newest = true
-	c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		if r.Header.Get("X-Old") != "" || len(r.Header.Values("X-Newest")) != 0 || r.Header.Get("X-New") != "final" {
 			t.Errorf("replacement %#v", r.Header)
 		}
@@ -102,7 +103,7 @@ func TestObjectMetadataOptionsReplacementAndRetainedHandles(t *testing.T) {
 		t.Fatal(err)
 	}
 	var retained *MetadataOpts
-	c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		code := 200
 		if r.Method == "POST" {
 			code = 202
@@ -120,7 +121,7 @@ func TestObjectMetadataOptionsReplacementAndRetainedHandles(t *testing.T) {
 func TestObjectMetadataOptionsCompletePreflightAndCauses(t *testing.T) {
 	c := objectMetadataClient()
 	var requests atomic.Int32
-	c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		requests.Add(1)
 		return objectMetadataOK(r, 200, http.Header{}), nil
 	})
@@ -194,7 +195,7 @@ func TestObjectMetadataOptionsParallelReuseAndHeaderBoundaries(t *testing.T) {
 	c := objectMetadataClient()
 	c.MoreHeaders = map[string]string{"X-Call": "source", "Content-Type": "application/source"}
 	var calls atomic.Int32
-	c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		calls.Add(1)
 		code := 200
 		if r.Method == "HEAD" {

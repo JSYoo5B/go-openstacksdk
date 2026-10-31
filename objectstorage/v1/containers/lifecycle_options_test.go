@@ -10,6 +10,7 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -20,7 +21,7 @@ func TestContainerLifecycleOptionsSnapshotsAndOverwrite(t *testing.T) {
 	values := map[string]string{"Final": "literal"}
 	replace := WithCreateContainerMetadata(values)
 	headers["x-call"], metadata["Old"], values["Final"] = "changed", "changed", "changed"
-	a, _ := lifecycleAPI(lifecycleTransport(func(r *http.Request) (*http.Response, error) {
+	a, _ := lifecycleAPI(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		calls.Add(1)
 		if r.Header.Get("X-Call") != "last" || r.Header.Get("X-Container-Meta-Final") != "literal" || r.Header.Get("X-Container-Meta-Old") != "" || r.Header.Get("X-Stage") != "kept" {
 			t.Errorf("owned headers%v", r.Header)
@@ -73,7 +74,7 @@ func TestContainerLifecycleOptionsReplacementAndDefaults(t *testing.T) {
 	if err == nil {
 		t.Fatal("retained pointer changed current config")
 	}
-	a, _ = lifecycleAPI(lifecycleTransport(func(r *http.Request) (*http.Response, error) {
+	a, _ = lifecycleAPI(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		if r.Header.Get("X-Discard") != "" || r.Header.Get("X-Container-Meta-Discard") != "" {
 			t.Error("full config failed replacement")
 		}
@@ -118,7 +119,7 @@ func TestContainerLifecycleOptionsInvalidInputs(t *testing.T) {
 
 func TestContainerLifecycleOptionsParallelReuse(t *testing.T) {
 	var calls atomic.Int32
-	a, _ := lifecycleAPI(lifecycleTransport(func(r *http.Request) (*http.Response, error) {
+	a, _ := lifecycleAPI(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		calls.Add(1)
 		code := 201
 		if r.Header.Get("X-Call") != "shared" {

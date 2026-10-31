@@ -9,6 +9,7 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -60,7 +61,7 @@ func TestFormSignatureOptionsSnapshotsAndReplacement(t *testing.T) {
 	t.Run("full replacement clear newest and owned read preferences", func(t *testing.T) {
 		c := tempURLKeyTestClient()
 		calls := 0
-		c.HTTPClient.Transport = tempURLKeyTestTransport(func(r *http.Request) (*http.Response, error) {
+		c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			calls++
 			if r.Header.Get("X-Removed") != "" || r.Header.Get("X-Trace") != "owned" || r.Header.Get("X-Newest") != "false" || len(r.Header.Values("X-Newest")) != 1 {
 				t.Fatal("replacement or canonical overwrite lost", r.Header)
@@ -104,7 +105,7 @@ func TestFormSignatureOptionsParallelReuseAndInvalidValues(t *testing.T) {
 	} {
 		client := tempURLKeyTestClient()
 		calls := 0
-		client.HTTPClient.Transport = tempURLKeyTestTransport(func(*http.Request) (*http.Response, error) { calls++; return nil, errors.New("HTTP") })
+		client.HTTPClient.Transport = testcloud.RoundTripperFunc(func(*http.Request) (*http.Response, error) { calls++; return nil, errors.New("HTTP") })
 		result, err := New(client).GenerateFormSignature(context.Background(), "box", signingTestInput(), options...)
 		if result != nil || !errors.Is(err, resource.ErrInvalidOption) || calls != 0 {
 			t.Fatal(result, err, calls)

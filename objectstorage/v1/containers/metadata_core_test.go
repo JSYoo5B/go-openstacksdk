@@ -19,10 +19,6 @@ import (
 
 const containerMetadataName = "한 %?#: 컨테이너"
 
-type containerMetadataTransport func(*http.Request) (*http.Response, error)
-
-func (f containerMetadataTransport) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
-
 type containerMetadataBody struct {
 	io.Reader
 	closeErr error
@@ -155,7 +151,7 @@ func TestContainerMetadataCoreAtomicHeaderProjection(t *testing.T) {
 			body := &containerMetadataBody{Reader: strings.NewReader("wire")}
 			header.Set("X-Proof", "kept")
 			c := containerMetadataClient("http://account.invalid/v1/AUTH_x/")
-			c.HTTPClient.Transport = containerMetadataTransport(func(r *http.Request) (*http.Response, error) { return containerMetadataWire(r, 204, header, body), nil })
+			c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) { return containerMetadataWire(r, 204, header, body), nil })
 			got, err := New(c).GetMetadata(context.Background(), containerMetadataName)
 			if got == nil || got.Metadata != nil || got.StatusCode != 204 || string(got.Body) != "wire" || body.closes.Load() != 1 {
 				t.Fatalf("non-atomic result %+v %v", got, err)
@@ -178,7 +174,7 @@ func TestContainerMetadataCoreAtomicHeaderProjection(t *testing.T) {
 func TestContainerMetadataCoreCompletePreflight(t *testing.T) {
 	var calls atomic.Int32
 	c := containerMetadataClient("http://account.invalid/v1/AUTH_x/")
-	c.HTTPClient.Transport = containerMetadataTransport(func(r *http.Request) (*http.Response, error) {
+	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		calls.Add(1)
 		return containerMetadataWire(r, 204, http.Header{}, io.NopCloser(strings.NewReader(""))), nil
 	})
@@ -254,7 +250,7 @@ func TestContainerMetadataCoreAcceptedFailures(t *testing.T) {
 			body := &containerMetadataBody{Reader: containerMetadataReader(func(p []byte) (int, error) { cancel(cause); return copy(p, "part"), readErr }), closeErr: closeErr}
 			var calls atomic.Int32
 			c := containerMetadataClient("http://account.invalid/v1/AUTH_x/")
-			c.HTTPClient.Transport = containerMetadataTransport(func(r *http.Request) (*http.Response, error) {
+			c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls.Add(1)
 				return containerMetadataWire(r, 204, http.Header{"X-Proof": {"kept"}}, body), nil
 			})
@@ -288,7 +284,7 @@ func TestContainerMetadataCoreAcceptedFailures(t *testing.T) {
 func TestContainerMetadataCoreSourceAndTargetBoundaries(t *testing.T) {
 	var calls atomic.Int32
 	c := containerMetadataClient("http://account.invalid/v1/AUTH_x/")
-	c.HTTPClient.Transport = containerMetadataTransport(func(r *http.Request) (*http.Response, error) {
+	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		calls.Add(1)
 		return containerMetadataWire(r, 204, http.Header{"X-Proof": {"kept"}}, &containerMetadataBody{Reader: strings.NewReader("ack"), onClose: func() { c.Endpoint = "http://else.invalid/" }}), nil
 	})
@@ -327,7 +323,7 @@ func TestContainerMetadataCoreSourceAndTargetBoundaries(t *testing.T) {
 func TestContainerMetadataCoreNativePolicyAndCompatibility(t *testing.T) {
 	c := containerMetadataClient("http://account.invalid/v1/AUTH_x/")
 	var calls atomic.Int32
-	c.HTTPClient.Transport = containerMetadataTransport(func(r *http.Request) (*http.Response, error) {
+	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		code := 503
 		if calls.Add(1) > 1 {
 			code = 202
@@ -344,7 +340,7 @@ func TestContainerMetadataCoreNativePolicyAndCompatibility(t *testing.T) {
 		t.Fatalf("expanded status accepted %+v %v %#v", got, err, code)
 	}
 	c.RetryFunc = nil
-	c.HTTPClient.Transport = containerMetadataTransport(func(r *http.Request) (*http.Response, error) {
+	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		return containerMetadataWire(r, 201, http.Header{}, io.NopCloser(strings.NewReader(""))), nil
 	})
 	if _, err := New(c).Update(context.Background(), containerMetadataName, UpdateOpts{Metadata: map[string]string{"legacy": "kept"}}, WithUpdateHeader("X-Trace", "old")); err != nil {

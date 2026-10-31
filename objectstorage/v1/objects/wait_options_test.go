@@ -11,6 +11,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -30,7 +31,7 @@ func TestObjectWaitOptionsSnapshots(t *testing.T) {
 		c := objectMetadataClient()
 		calls := 0
 		var retained *ObjectWaitOpts
-		c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+		c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			calls++
 			if r.Header.Get("X-Call") != "overlay" {
 				t.Error("option headers drifted", r.Header)
@@ -97,7 +98,7 @@ func TestObjectWaitOptionsDefaultsSelectorsAndResets(t *testing.T) {
 	}
 	// Disabling failures permits an ERROR observation to remain nonterminal.
 	calls, callbacks := 0, 0
-	c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		calls++
 		state := "ERROR"
 		if calls == 2 {
@@ -114,7 +115,7 @@ func TestObjectWaitOptionsDefaultsSelectorsAndResets(t *testing.T) {
 func TestObjectWaitOptionsPreflightAndCauses(t *testing.T) {
 	c := objectMetadataClient()
 	calls := 0
-	c.HTTPClient.Transport = objectMetadataTransport(func(*http.Request) (*http.Response, error) { calls++; return nil, errors.New("unexpected HTTP") })
+	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(*http.Request) (*http.Response, error) { calls++; return nil, errors.New("unexpected HTTP") })
 	zero, negative := time.Duration(0), -time.Second
 	for _, option := range []ObjectWaitOption{
 		nil, WithObjectWaitPollInterval(0), WithObjectWaitPollInterval(-1), WithObjectWaitTimeout(0), WithObjectWaitTimeout(-1), WithObjectWaitOpts(ObjectWaitOpts{Interval: &zero}), WithObjectWaitOpts(ObjectWaitOpts{Timeout: &negative}),
@@ -160,7 +161,7 @@ func TestObjectWaitOptionsPreflightAndCauses(t *testing.T) {
 		t.Fatal("preflight causes lost", result, err, calls)
 	}
 	c.MoreHeaders = nil
-	c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		calls++
 		return objectMetadataOK(r, 404, http.Header{}), nil
 	})
@@ -177,7 +178,7 @@ func TestObjectWaitOptionsPreflightAndCauses(t *testing.T) {
 func TestObjectWaitOptionsParallelReuse(t *testing.T) {
 	c := objectMetadataClient()
 	var calls, callbacks atomic.Int32
-	c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		calls.Add(1)
 		if r.Method != "HEAD" || r.Header.Get("X-Call") != "factory" {
 			t.Error(r.Method, r.Header)

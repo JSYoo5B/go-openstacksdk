@@ -15,10 +15,6 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type accountMetadataTransport func(*http.Request) (*http.Response, error)
-
-func (f accountMetadataTransport) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
-
 type accountMetadataBody struct {
 	io.Reader
 	closeErr error
@@ -140,7 +136,7 @@ func TestAccountMetadataCoreAtomicHeaderProjection(t *testing.T) {
 			body := &accountMetadataBody{Reader: strings.NewReader("wire")}
 			header.Set("X-Proof", "kept")
 			c := accountMetadataClient("http://account.invalid/v1/AUTH_x/")
-			c.HTTPClient.Transport = accountMetadataTransport(func(r *http.Request) (*http.Response, error) { return accountMetadataWire(r, 204, header, body), nil })
+			c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) { return accountMetadataWire(r, 204, header, body), nil })
 			got, err := New(c).GetMetadata(context.Background())
 			if got == nil || got.Metadata != nil || got.StatusCode != 204 || string(got.Body) != "wire" || body.closes.Load() != 1 {
 				t.Fatalf("non-atomic result %+v %v", got, err)
@@ -163,7 +159,7 @@ func TestAccountMetadataCoreAtomicHeaderProjection(t *testing.T) {
 func TestAccountMetadataCoreCompletePreflight(t *testing.T) {
 	var calls atomic.Int32
 	c := accountMetadataClient("http://account.invalid/v1/AUTH_x/")
-	c.HTTPClient.Transport = accountMetadataTransport(func(r *http.Request) (*http.Response, error) {
+	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		calls.Add(1)
 		return accountMetadataWire(r, 204, http.Header{}, io.NopCloser(strings.NewReader(""))), nil
 	})
@@ -220,7 +216,7 @@ func TestAccountMetadataCoreAcceptedFailures(t *testing.T) {
 			body := &accountMetadataBody{Reader: accountMetadataReader(func(p []byte) (int, error) { cancel(cause); return copy(p, "part"), readErr }), closeErr: closeErr}
 			var calls atomic.Int32
 			c := accountMetadataClient("http://account.invalid/v1/AUTH_x/")
-			c.HTTPClient.Transport = accountMetadataTransport(func(r *http.Request) (*http.Response, error) {
+			c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls.Add(1)
 				return accountMetadataWire(r, 204, http.Header{"X-Proof": {"kept"}}, body), nil
 			})
@@ -254,7 +250,7 @@ func TestAccountMetadataCoreAcceptedFailures(t *testing.T) {
 func TestAccountMetadataCoreSourceAndTargetBoundaries(t *testing.T) {
 	var calls atomic.Int32
 	c := accountMetadataClient("http://account.invalid/v1/AUTH_x/")
-	c.HTTPClient.Transport = accountMetadataTransport(func(r *http.Request) (*http.Response, error) {
+	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		calls.Add(1)
 		return accountMetadataWire(r, 204, http.Header{"X-Proof": {"kept"}}, &accountMetadataBody{Reader: strings.NewReader("ack"), onClose: func() { c.Endpoint = "http://else.invalid/" }}), nil
 	})
@@ -275,7 +271,7 @@ func TestAccountMetadataCoreSourceAndTargetBoundaries(t *testing.T) {
 func TestAccountMetadataCoreNativePolicyAndCompatibility(t *testing.T) {
 	c := accountMetadataClient("http://account.invalid/v1/AUTH_x/")
 	var calls atomic.Int32
-	c.HTTPClient.Transport = accountMetadataTransport(func(r *http.Request) (*http.Response, error) {
+	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		code := 503
 		if calls.Add(1) > 1 {
 			code = 202
@@ -292,7 +288,7 @@ func TestAccountMetadataCoreNativePolicyAndCompatibility(t *testing.T) {
 		t.Fatalf("expanded status accepted %+v %v %#v", got, err, code)
 	}
 	c.RetryFunc = nil
-	c.HTTPClient.Transport = accountMetadataTransport(func(r *http.Request) (*http.Response, error) {
+	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		return accountMetadataWire(r, 201, http.Header{}, io.NopCloser(strings.NewReader(""))), nil
 	})
 	if _, err := New(c).Update(context.Background(), UpdateOpts{Metadata: map[string]string{"legacy": "kept"}}, WithUpdateHeader("X-Trace", "old")); err != nil {

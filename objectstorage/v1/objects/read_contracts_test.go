@@ -21,10 +21,6 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type objectReadTransport func(*http.Request) (*http.Response, error)
-
-func (f objectReadTransport) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
-
 type objectReadReader func([]byte) (int, error)
 
 func (f objectReadReader) Read(p []byte) (int, error) { return f(p) }
@@ -79,7 +75,7 @@ func (w *objectReadWriter) ReadFrom(io.Reader) (int64, error) {
 	w.shortcuts++
 	return 0, errors.New("unexpected ReaderFrom shortcut")
 }
-func objectReadClient(f objectReadTransport) *gophercloud.ServiceClient {
+func objectReadClient(f testcloud.RoundTripperFunc) *gophercloud.ServiceClient {
 	p := &gophercloud.ProviderClient{HTTPClient: http.Client{Transport: f}}
 	p.UseTokenLock()
 	p.SetToken("initial-token")
@@ -271,7 +267,7 @@ func TestObjectReadContractsOptionsAndPreflight(t *testing.T) {
 		var held *objects.ObjectReadOpts
 		callbacks := 0
 		client.MoreHeaders = map[string]string{"X-Source": "captured"}
-		client.HTTPClient.Transport = objectReadTransport(func(r *http.Request) (*http.Response, error) {
+		client.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			if r.Header.Get("X-Call") != "before-copy" || r.Header.Get("X-Source") != "captured" {
 				t.Errorf("callback headers=%v", r.Header)
 			}

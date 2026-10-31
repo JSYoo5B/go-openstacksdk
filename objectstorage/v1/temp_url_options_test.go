@@ -9,6 +9,7 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -65,7 +66,7 @@ func TestTempURLOptionsSnapshotsAndReplacement(t *testing.T) {
 		headers["X-Trace"] = "outside"
 		calls := 0
 		var retained *GenerateTempURLOpts
-		c.HTTPClient.Transport = tempURLKeyTestTransport(func(r *http.Request) (*http.Response, error) {
+		c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			calls++
 			if r.Header.Get("X-Trace") != "last" || len(r.Header.Values("X-Trace")) != 1 || r.Header.Get("X-Newest") != "false" || r.URL.String() != c.Endpoint {
 				t.Fatal("read snapshot lost", r.Header, r.URL)
@@ -108,7 +109,7 @@ func TestTempURLOptionsParallelReuseAndCallbackCauses(t *testing.T) {
 	for _, option := range []GenerateTempURLOption{nil, WithGenerateTempURLKey(make([]byte, 0)), WithGenerateTempURLOpts(GenerateTempURLOpts{Key: []byte{}}), WithGenerateTempURLHeaders(map[string]string{"x-trace": "one", "X-Trace": "two"})} {
 		client := tempURLKeyTestClient()
 		calls := 0
-		client.HTTPClient.Transport = tempURLKeyTestTransport(func(*http.Request) (*http.Response, error) { calls++; return nil, errors.New("HTTP") })
+		client.HTTPClient.Transport = testcloud.RoundTripperFunc(func(*http.Request) (*http.Response, error) { calls++; return nil, errors.New("HTTP") })
 		result, err := New(client).GenerateTempURL(context.Background(), "/v1/a/c/o", 1, "GET", option)
 		if result != nil || !errors.Is(err, resource.ErrInvalidOption) || calls != 0 {
 			t.Fatal(result, err, calls)

@@ -11,6 +11,7 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -31,7 +32,7 @@ func TestObjectCreateUploadNativePhysicalReplay(t *testing.T) {
 			c.MoreHeaders = map[string]string{"X-Source": "captured"}
 			calls, hooks := 0, 0
 			var prior io.ReadCloser
-			c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+			c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls++
 				if r.Method != "PUT" || r.ContentLength != 6 || len(r.TransferEncoding) != 0 || r.GetBody == nil {
 					t.Error("owned physical framing", r.Method, r.ContentLength, r.TransferEncoding, r.GetBody == nil)
@@ -134,7 +135,7 @@ func TestObjectCreateUploadNativeOwnershipGuards(t *testing.T) {
 			c := objectMetadataClient()
 			calls, hooks := 0, 0
 			cause := errors.New("native callback cause")
-			c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+			c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls++
 				return objectMetadataWire(r, 503, http.Header{"X-Proof": {"kept"}}, io.NopCloser(strings.NewReader("rejected"))), nil
 			})
@@ -166,7 +167,7 @@ func TestObjectCreateUploadNativeOwnershipGuards(t *testing.T) {
 		t.Run("redirect "+tc.name, func(t *testing.T) {
 			c := objectMetadataClient()
 			calls := 0
-			c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+			c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls++
 				return objectMetadataWire(r, 307, http.Header{"Location": {r.URL.String()}}, io.NopCloser(strings.NewReader("redirect"))), nil
 			})
@@ -194,7 +195,7 @@ func TestObjectCreateUploadPhysicalFaultEvidence(t *testing.T) {
 			c := objectMetadataClient()
 			readCause, closeCause, transportCause := errors.New("read cause"), errors.New("close cause"), errors.New("transport cause")
 			calls, hooks := 0, 0
-			c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+			c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls++
 				body := &readTestBody{data: []byte("raw")}
 				if tc.read {
@@ -247,7 +248,7 @@ func TestObjectCreateUploadSegmentRoundsAndExactCleanup(t *testing.T) {
 		var mu sync.Mutex
 		puts, deletes := map[int]int{}, map[int]int{}
 		cleanupCause := errors.New("cleanup ordering cause")
-		c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+		c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			name := r.URL.Path[strings.LastIndex(r.URL.Path, "/")+1:]
 			index, err := strconv.Atoi(name)
 			if err != nil {
@@ -329,7 +330,7 @@ func TestObjectCreateUploadManifestAttemptsAndAmbiguity(t *testing.T) {
 			var mu sync.Mutex
 			manifests, deletes := 0, 0
 			transportCause := errors.New("manifest transport cause")
-			c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+			c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				mu.Lock()
 				defer mu.Unlock()
 				if r.Method == "DELETE" {
@@ -368,7 +369,7 @@ func TestObjectCreateUploadManifestAttemptsAndAmbiguity(t *testing.T) {
 	ctx, cancel := context.WithCancelCause(context.Background())
 	cause := errors.New("manifest canceled")
 	manifests, deletes := 0, 0
-	c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		if r.Method == "DELETE" {
 			deletes++
 			return objectMetadataOK(r, 204, http.Header{}), nil

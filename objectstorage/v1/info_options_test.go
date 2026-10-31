@@ -10,6 +10,7 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -33,7 +34,7 @@ func TestInfoOptionsFactoryAndCallbackOwnership(t *testing.T) {
 		c.MoreHeaders["X-Source"] = "valid change"
 		return nil
 	}
-	c.HTTPClient.Transport = tempURLKeyTestTransport(func(r *http.Request) (*http.Response, error) {
+	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		calls++
 		if r.Header.Get("X-Trace") != "owned" || len(r.Header.Values("X-Trace")) != 1 || r.Header.Get("X-Source") != "captured" {
 			t.Fatal("request alias or source snapshot lost", r.Header)
@@ -54,7 +55,7 @@ func TestInfoOptionsFactoryAndCallbackOwnership(t *testing.T) {
 	if string(second.Info.Swift["max_file_size"]) != "100" {
 		t.Fatal("reused options alias responses")
 	}
-	c.HTTPClient.Transport = tempURLKeyTestTransport(func(r *http.Request) (*http.Response, error) {
+	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		if r.Header.Get("X-Trace") != "factory" {
 			t.Fatal("GetInfo factory aliases", r.Header)
 		}
@@ -67,7 +68,7 @@ func TestInfoOptionsFactoryAndCallbackOwnership(t *testing.T) {
 		{WithObjectSegmentSize(0), WithoutObjectSegmentSize()},
 		{WithObjectSegmentSize(0), WithObjectSegmentSizeHeaders(map[string]string{"X-Trace": "discarded"}), WithObjectSegmentSizeOpts(ObjectSegmentSizeOpts{})},
 	} {
-		c.HTTPClient.Transport = tempURLKeyTestTransport(func(r *http.Request) (*http.Response, error) {
+		c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			if r.Header.Get("X-Trace") != "" {
 				t.Fatal("full replacement retained headers")
 			}
@@ -82,7 +83,7 @@ func TestInfoOptionsFactoryAndCallbackOwnership(t *testing.T) {
 func TestInfoOptionsHeaderValidationAndPreflight(t *testing.T) {
 	c := tempURLKeyTestClient()
 	calls := 0
-	c.HTTPClient.Transport = tempURLKeyTestTransport(func(*http.Request) (*http.Response, error) { calls++; return nil, errors.New("unexpected HTTP") })
+	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(*http.Request) (*http.Response, error) { calls++; return nil, errors.New("unexpected HTTP") })
 	for _, headers := range []map[string]string{
 		{"X-Trace": "one", "x-trace": "two"}, {"X-K": "value"}, {"X-Trace": "bad\nvalue"}, {"Authorization": "auth"}, {"X-Auth-Token": "auth"},
 		{"Cookie": "auth"}, {"X-Service-Token": "auth"}, {"Host": "other"}, {"Content-Length": "0"}, {"X-Newest": "true"}, {"X-Account-Meta-Key": "value"},
@@ -121,7 +122,7 @@ func TestInfoOptionsHeaderValidationAndPreflight(t *testing.T) {
 func TestInfoOptionsParallelReuse(t *testing.T) {
 	c := tempURLKeyTestClient()
 	var calls atomic.Int32
-	c.HTTPClient.Transport = tempURLKeyTestTransport(func(r *http.Request) (*http.Response, error) {
+	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		calls.Add(1)
 		if r.Header.Get("X-Trace") != "stable" {
 			t.Error("shared header option changed", r.Header)
@@ -171,7 +172,7 @@ func TestInfoOptionsNativeRetrySnapshots(t *testing.T) {
 		c.SetToken("fresh")
 		return nil
 	}
-	c.HTTPClient.Transport = tempURLKeyTestTransport(func(r *http.Request) (*http.Response, error) {
+	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		calls++
 		if calls == 1 {
 			if r.Header.Get("X-Trace") != "owned" || r.Header.Get("X-Auth-Token") != "token" {

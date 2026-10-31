@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -20,7 +21,7 @@ func TestImageImportObjectBorrowedDataUsesOnlyOneOrdinaryPUT(t *testing.T) {
 			c := objectMetadataClient()
 			borrowed := &createCoreBorrowed{reader: strings.NewReader(content)}
 			calls := 0
-			c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+			c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls++
 				if calls != 1 || borrowed.reads != 0 || r.Method != "PUT" || r.URL.EscapedPath() != "/v1/AUTH_a/box/dir%2Fimage" || r.GetBody != nil || r.ContentLength != -1 {
 					t.Fatalf("unexpected borrowed request: calls=%d reads=%d request=%+v", calls, borrowed.reads, r)
@@ -49,7 +50,7 @@ func TestImageImportObjectBorrowedDataUsesOnlyOneOrdinaryPUT(t *testing.T) {
 func TestImageImportObjectPresentNilDataIsEmptyPUT(t *testing.T) {
 	c := objectMetadataClient()
 	calls := 0
-	c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		calls++
 		data, err := io.ReadAll(r.Body)
 		if err != nil || len(data) != 0 || r.GetBody != nil || r.ContentLength != 0 || r.Method != "PUT" {
@@ -77,7 +78,7 @@ func TestImageImportObjectBorrowedDataNeverRunsNativeReplayPolicies(t *testing.T
 			c.MaxBackoffRetries = 3
 			c.ReauthFunc = func(context.Context) error { hooks++; return nil }
 			c.HTTPClient.CheckRedirect = func(*http.Request, []*http.Request) error { hooks++; return nil }
-			c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+			c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls++
 				data, err := io.ReadAll(r.Body)
 				if err != nil || string(data) != "once" || r.GetBody != nil {
@@ -120,7 +121,7 @@ func TestImageImportObjectPreflightRejectsConflictAndOwnedHeaderInputs(t *testin
 		t.Run(tc.name, func(t *testing.T) {
 			c := objectMetadataClient()
 			calls := 0
-			c.HTTPClient.Transport = objectMetadataTransport(func(*http.Request) (*http.Response, error) { calls++; return nil, errors.New("HTTP forbidden") })
+			c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(*http.Request) (*http.Response, error) { calls++; return nil, errors.New("HTTP forbidden") })
 			tc.request.Container, tc.request.Name = "box", "image"
 			result, err := New(c).CreateImageImportObject(context.Background(), tc.request)
 			if result != nil || !errors.Is(err, resource.ErrInvalidOption) || calls != 0 {
@@ -144,7 +145,7 @@ func TestImageImportObjectFilenameReusesStaleAndArbitraryHashPolicy(t *testing.T
 			c := objectMetadataClient()
 			methods := []string{}
 			puts := 0
-			c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+			c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				methods = append(methods, r.Method)
 				switch r.Method {
 				case "GET":
@@ -181,7 +182,7 @@ func TestImageImportObjectFilenameReusesStaleAndArbitraryHashPolicy(t *testing.T
 	}
 	c := objectMetadataClient()
 	calls := 0
-	c.HTTPClient.Transport = objectMetadataTransport(func(*http.Request) (*http.Response, error) { calls++; return nil, errors.New("forbidden") })
+	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(*http.Request) (*http.Response, error) { calls++; return nil, errors.New("forbidden") })
 	_, err := New(c).CreateObject(context.Background(), "box", "image", CreateObjectInput{Filename: "unopened"}, WithCreateObjectMD5("md5 value"))
 	if !errors.Is(err, resource.ErrInvalidOption) || calls != 0 {
 		t.Fatal("standalone hash policy changed", err, calls)
@@ -192,7 +193,7 @@ func TestImageImportObjectAbsentDataFallsBackToNameFilename(t *testing.T) {
 	filename := createCoreFile(t, "inferred source")
 	c := objectMetadataClient()
 	puts := 0
-	c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		switch r.Method {
 		case "GET":
 			return objectMetadataWire(r, 200, http.Header{}, io.NopCloser(strings.NewReader(`{"swift":{"max_file_size":100}}`))), nil
@@ -218,7 +219,7 @@ func TestImageImportObjectFilenameReusesSLOWithBroadSourceAcknowledgements(t *te
 	c := objectMetadataClient()
 	var mu sync.Mutex
 	segments, manifests := 0, 0
-	c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		switch r.Method {
 		case "GET":
 			return objectMetadataWire(r, 200, http.Header{}, io.NopCloser(strings.NewReader(`{"swift":{"max_file_size":2},"slo":{"min_segment_size":1}}`))), nil
@@ -292,7 +293,7 @@ func TestImageImportObjectOuterGuardRetainsRequestReadAndAcceptedResponseEvidenc
 			if during == "response Close" {
 				response.onClose = func() { changed = true }
 			}
-			c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+			c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls++
 				_, readErr := io.ReadAll(r.Body)
 				if during == "request Read" && !errors.Is(readErr, outer) {
@@ -326,7 +327,7 @@ func TestImageImportObjectRegistersOnlySourceGuardAndKeepsBindingAfterReturn(t *
 				}
 				return nil
 			}))
-			c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) { return objectMetadataOK(r, 201, http.Header{}), nil })
+			c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) { return objectMetadataOK(r, 201, http.Header{}), nil })
 			result, err := a.CreateImageImportObject(ctx, ImageImportObjectRequest{Container: "box", Name: "image", DataPresent: true})
 			if err != nil || result == nil || outerCalls == 0 {
 				t.Fatal(result, err, outerCalls)
@@ -365,7 +366,7 @@ func TestImageImportObjectFilenameNativeRetryCannotReplaceImageControls(t *testi
 				opts.MoreHeaders[header] = "changed"
 				return nil
 			}
-			c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+			c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				switch r.Method {
 				case "GET":
 					return objectMetadataWire(r, 200, http.Header{}, io.NopCloser(strings.NewReader(`{"swift":{"max_file_size":100}}`))), nil

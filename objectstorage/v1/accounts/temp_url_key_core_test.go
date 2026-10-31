@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -25,7 +26,7 @@ func TestAccountTempURLKeyCoreWireAndStatus(t *testing.T) {
 			c := accountMetadataClient("http://cloud.invalid/reverse%20proxy/v1/AUTH_x/")
 			c.ResourceBase = "http://cloud.invalid/data%25/v1/AUTH_x/"
 			calls := 0
-			c.HTTPClient.Transport = accountMetadataTransport(func(r *http.Request) (*http.Response, error) {
+			c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls++
 				if r.Method != "POST" || r.URL.EscapedPath() != "/reverse%20proxy/v1/AUTH_x/" || r.URL.RawQuery != "" {
 					t.Fatalf("wrong request %s %s", r.Method, r.URL)
@@ -73,7 +74,7 @@ func TestAccountTempURLKeyCorePreflightAndCallbackCause(t *testing.T) {
 	for _, key := range []string{"bad\nkey", "bad\rkey", "bad\x00key", "bad\x7fkey", string([]byte{255})} {
 		c := accountMetadataClient("http://cloud.invalid/v1/AUTH_x/")
 		calls, callbacks := 0, 0
-		c.HTTPClient.Transport = accountMetadataTransport(func(*http.Request) (*http.Response, error) { calls++; t.Fatal("invalid key sent"); return nil, nil })
+		c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(*http.Request) (*http.Response, error) { calls++; t.Fatal("invalid key sent"); return nil, nil })
 		result, err := New(c).SetTempURLKey(context.Background(), key, func(*SetTempURLKeyOpts) error { callbacks++; return nil })
 		if result != nil || !errors.Is(err, resource.ErrInvalidOption) || calls != 0 || callbacks != 0 {
 			t.Fatalf("key preflight failed %#v %v %d/%d", result, err, calls, callbacks)
@@ -105,7 +106,7 @@ func TestAccountTempURLKeyCoreAcceptedFailuresAndNativeHooks(t *testing.T) {
 		ctx, cancel := context.WithCancelCause(context.Background())
 		defer cancel(nil)
 		body := &accountMetadataBody{Reader: accountMetadataReader(func(p []byte) (int, error) { return copy(p, "x"), readErr }), closeErr: closeErr, onClose: func() { c.Endpoint += "changed/"; cancel(cause) }}
-		c.HTTPClient.Transport = accountMetadataTransport(func(r *http.Request) (*http.Response, error) {
+		c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			return accountMetadataWire(r, 204, http.Header{"X-Proof": {"kept"}}, body), nil
 		})
 		result, err := New(c).SetTempURLKey(ctx, "key")
@@ -133,7 +134,7 @@ func TestAccountTempURLKeyCoreAcceptedFailuresAndNativeHooks(t *testing.T) {
 		calls := 0
 		nested := &gophercloud.ErrUnexpectedResponseCode{Actual: 404}
 		c.RetryFunc = func(context.Context, string, string, *gophercloud.RequestOpts, error, uint) error { return nested }
-		c.HTTPClient.Transport = accountMetadataTransport(func(r *http.Request) (*http.Response, error) {
+		c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			calls++
 			return accountMetadataWire(r, 503, http.Header{}, io.NopCloser(strings.NewReader("native"))), nil
 		})

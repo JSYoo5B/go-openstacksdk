@@ -18,7 +18,7 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-func infoContractClient(f tempKeyTransport) *gophercloud.ServiceClient {
+func infoContractClient(f func(*http.Request) (*http.Response, error)) *gophercloud.ServiceClient {
 	c := tempKeyClient(f)
 	c.Endpoint = "https://swift.invalid/api%2Fproxy/v1/AUTH_account/"
 	c.ResourceBase = "unused resource base"

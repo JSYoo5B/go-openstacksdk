@@ -14,9 +14,6 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type lifecycleTransport func(*http.Request) (*http.Response, error)
-
-func (f lifecycleTransport) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
 func lifecycleAPI(transport http.RoundTripper) (*API, *gophercloud.ServiceClient) {
 	provider := &gophercloud.ProviderClient{HTTPClient: http.Client{Transport: transport}, TokenID: "live-token"}
 	provider.UseTokenLock()
@@ -26,38 +23,13 @@ func lifecycleAPI(transport http.RoundTripper) (*API, *gophercloud.ServiceClient
 func lifecycleWire(r *http.Request, code int, body io.ReadCloser) *http.Response {
 	return &http.Response{StatusCode: code, Header: http.Header{"X-Proof": {"actual"}}, Body: body, Request: r}
 }
-func lifecycleStatic(code int, body string, calls *atomic.Int32) lifecycleTransport {
+func lifecycleStatic(code int, body string, calls *atomic.Int32) testcloud.RoundTripperFunc {
 	return func(r *http.Request) (*http.Response, error) {
 		calls.Add(1)
 		return lifecycleWire(r, code, io.NopCloser(strings.NewReader(body))), nil
 	}
 }
 
-type lifecycleBody struct {
-	data              string
-	readErr, closeErr error
-	onRead, onClose   func()
-	read              bool
-	closes            int
-}
-
-func (b *lifecycleBody) Read(p []byte) (int, error) {
-	if b.read {
-		return 0, io.EOF
-	}
-	b.read = true
-	if b.onRead != nil {
-		b.onRead()
-	}
-	return copy(p, b.data), b.readErr
-}
-func (b *lifecycleBody) Close() error {
-	b.closes++
-	if b.onClose != nil {
-		b.onClose()
-	}
-	return b.closeErr
-}
 func lifecycleProof(t *testing.T, result *ContainerResponse, err error, code int, text string) *resource.ResponseError {
 	t.Helper()
 	var proof *resource.ResponseError
@@ -212,8 +184,8 @@ func TestContainerLifecycleCoreAcceptedResponseFailures(t *testing.T) {
 			readCause, closeCause, cancelCause := errors.New("read failed"), errors.New("close failed"), errors.New("caller cause")
 			ctx, cancel := context.WithCancelCause(context.Background())
 			defer cancel(nil)
-			body := &lifecycleBody{data: "partial", readErr: readCause, closeErr: closeCause, onRead: func() { cancel(cancelCause) }}
-			a, _ := lifecycleAPI(lifecycleTransport(func(r *http.Request) (*http.Response, error) { return lifecycleWire(r, code, body), nil }))
+			body := &testcloud.Body{Data: "partial", ReadErr: readCause, CloseErr: closeCause, OnRead: func() { cancel(cancelCause) }}
+			a, _ := lifecycleAPI(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) { return lifecycleWire(r, code, body), nil }))
 			var result *ContainerResponse
 			var err error
 			if code < 204 {
@@ -227,16 +199,16 @@ func TestContainerLifecycleCoreAcceptedResponseFailures(t *testing.T) {
 					t.Fatalf("lost cause%v: %v", cause, err)
 				}
 			}
-			if body.closes != 1 {
-				t.Fatalf("body closes%d", body.closes)
+			if body.Closes() != 1 {
+				t.Fatalf("body closes%d", body.Closes())
 			}
 		})
 	}
-	body := &lifecycleBody{data: "complete", closeErr: errors.New("close only")}
-	a, _ := lifecycleAPI(lifecycleTransport(func(r *http.Request) (*http.Response, error) { return lifecycleWire(r, 404, body), nil }))
+	body := &testcloud.Body{Data: "complete", CloseErr: errors.New("close only")}
+	a, _ := lifecycleAPI(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) { return lifecycleWire(r, 404, body), nil }))
 	r, err := a.DeleteContainer(context.Background(), "name")
 	lifecycleProof(t, r, err, 404, "complete")
-	if !errors.Is(err, body.closeErr) || body.closes != 1 {
+	if !errors.Is(err, body.CloseErr) || body.Closes() != 1 {
 		t.Fatal("404 close failure lost")
 	}
 }
@@ -260,12 +232,12 @@ func TestContainerLifecycleCoreSourceAndContext(t *testing.T) {
 	if calls.Load() != 0 {
 		t.Fatal("retargeted callback sent HTTP")
 	}
-	body := &lifecycleBody{data: "actual"}
-	a, client = lifecycleAPI(lifecycleTransport(func(r *http.Request) (*http.Response, error) { return lifecycleWire(r, 404, body), nil }))
-	body.onClose = func() { client.ResourceBase = client.Endpoint }
+	body := &testcloud.Body{Data: "actual"}
+	a, client = lifecycleAPI(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) { return lifecycleWire(r, 404, body), nil }))
+	body.OnClose = func() { client.ResourceBase = client.Endpoint }
 	r, err := a.DeleteContainer(context.Background(), "name")
 	lifecycleProof(t, r, err, 404, "actual")
-	if !errors.Is(err, resource.ErrInvalidOption) || body.closes != 1 {
+	if !errors.Is(err, resource.ErrInvalidOption) || body.Closes() != 1 {
 		t.Fatalf("postresponse source%v", err)
 	}
 }
@@ -283,13 +255,13 @@ func TestContainerLifecycleCoreNativePolicy(t *testing.T) {
 		t.Fatalf("handled404 %+v %v hooks%d", r, err, hooks)
 	}
 	transportCause := gophercloud.ErrUnexpectedResponseCode{Actual: 404}
-	a, _ = lifecycleAPI(lifecycleTransport(func(*http.Request) (*http.Response, error) { return nil, transportCause }))
+	a, _ = lifecycleAPI(testcloud.RoundTripperFunc(func(*http.Request) (*http.Response, error) { return nil, transportCause }))
 	r, err = a.DeleteContainer(context.Background(), "name")
 	if r != nil || err == nil || !errors.As(err, &transportCause) {
 		t.Fatalf("transport404 %+v %v", r, err)
 	}
 	calls.Store(0)
-	a, client = lifecycleAPI(lifecycleTransport(func(r *http.Request) (*http.Response, error) {
+	a, client = lifecycleAPI(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		n := calls.Add(1)
 		code := 503
 		if n > 1 {

@@ -11,14 +11,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 	nativeobjects "github.com/gophercloud/gophercloud/v2/openstack/objectstorage/v1/objects"
 )
-
-type tempURLKeyTestTransport func(*http.Request) (*http.Response, error)
-
-func (f tempURLKeyTestTransport) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
 
 type tempURLKeyTestBody struct {
 	io.Reader
@@ -79,7 +76,7 @@ func TestTempURLKeyCoreSelectionAndProof(t *testing.T) {
 			if !tc.container {
 				c.ResourceBase = "not a URL: unused"
 			}
-			c.HTTPClient.Transport = tempURLKeyTestTransport(func(r *http.Request) (*http.Response, error) {
+			c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls++
 				phase, prefix, keys := "account", "X-Account-Meta-", tc.accountKeys
 				wantPath := "/reverse%20proxy/v1/AUTH_x/"
@@ -167,7 +164,7 @@ func TestTempURLKeyCoreStopsOnErrors(t *testing.T) {
 			c := tempURLKeyTestClient()
 			calls := 0
 			fault := &gophercloud.ErrUnexpectedResponseCode{Actual: 404}
-			c.HTTPClient.Transport = tempURLKeyTestTransport(func(r *http.Request) (*http.Response, error) {
+			c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls++
 				if tc.second && calls == 1 {
 					return tempURLKeyTestWire(r, 204, http.Header{"X-Proof": {"kept"}}, io.NopCloser(strings.NewReader("container"))), nil
@@ -261,7 +258,7 @@ func TestTempURLKeyCorePreflightAndAcceptedSourceGuard(t *testing.T) {
 		for _, name := range []string{".", "..", "slash/name", "back\\name", "bad\nname", string([]byte{255})} {
 			c := tempURLKeyTestClient()
 			calls := 0
-			c.HTTPClient.Transport = tempURLKeyTestTransport(func(*http.Request) (*http.Response, error) { calls++; return nil, errors.New("unexpected HTTP") })
+			c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(*http.Request) (*http.Response, error) { calls++; return nil, errors.New("unexpected HTTP") })
 			if result, err := New(c).GetTempURLKey(context.Background(), WithGetTempURLKeyContainer(name)); result != nil || !errors.Is(err, resource.ErrInvalidOption) || calls != 0 {
 				t.Fatal(name, result, err, calls)
 			}
@@ -306,7 +303,7 @@ func TestTempURLKeyCorePreflightAndAcceptedSourceGuard(t *testing.T) {
 			s := New(c)
 			calls := 0
 			b := &tempURLKeyTestBody{Reader: strings.NewReader("observed"), onClose: func() { tc.change(s, c) }}
-			c.HTTPClient.Transport = tempURLKeyTestTransport(func(r *http.Request) (*http.Response, error) {
+			c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls++
 				return tempURLKeyTestWire(r, 204, http.Header{"X-Proof": {"kept"}, "X-Container-Meta-Temp-URL-Key-2": {"usable"}}, b), nil
 			})
@@ -328,7 +325,7 @@ func TestTempURLKeyCorePreflightAndAcceptedSourceGuard(t *testing.T) {
 		ctx, cancel := context.WithCancelCause(context.Background())
 		defer cancel(nil)
 		b := &tempURLKeyTestBody{Reader: tempURLKeyTestReader(func(p []byte) (int, error) { return copy(p, "x"), readErr }), closeErr: closeErr, onClose: func() { c.Endpoint += "changed/"; cancel(cause) }}
-		c.HTTPClient.Transport = tempURLKeyTestTransport(func(r *http.Request) (*http.Response, error) {
+		c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			return tempURLKeyTestWire(r, 204, http.Header{"X-Proof": {"kept"}}, b), nil
 		})
 		result, err := New(c).GetTempURLKey(ctx, WithGetTempURLKeyContainer("box"))
@@ -349,7 +346,7 @@ func TestTempURLKeyCoreCapturedHeadersAndNativeSigner(t *testing.T) {
 		c := tempURLKeyTestClient()
 		c.MoreHeaders = map[string]string{"X-Source": "captured"}
 		calls := 0
-		c.HTTPClient.Transport = tempURLKeyTestTransport(func(r *http.Request) (*http.Response, error) {
+		c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			calls++
 			token := "token"
 			if calls == 2 {
@@ -376,7 +373,7 @@ func TestTempURLKeyCoreCapturedHeadersAndNativeSigner(t *testing.T) {
 	t.Run("native primary discovery remains separate", func(t *testing.T) {
 		c := tempURLKeyTestClient()
 		calls := 0
-		c.HTTPClient.Transport = tempURLKeyTestTransport(func(r *http.Request) (*http.Response, error) {
+		c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			calls++
 			return tempURLKeyTestWire(r, 204, http.Header{"X-Container-Meta-Temp-Url-Key": {"primary"}, "X-Container-Meta-Temp-Url-Key-2": {"secondary"}}, io.NopCloser(strings.NewReader(""))), nil
 		})

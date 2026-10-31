@@ -12,22 +12,13 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
 const accountMetadataEndpoint = "https://swift.invalid/reverse/a%20b/v1/AUTH_account"
-
-type accountMetadataTransport func(*http.Request) (*http.Response, error)
-
-func (f accountMetadataTransport) RoundTrip(r *http.Request) (*http.Response, error) {
-	response, err := f(r)
-	if response != nil && response.Request == nil {
-		response.Request = r
-	}
-	return response, err
-}
 
 type accountMetadataBody struct {
 	io.Reader
@@ -48,15 +39,15 @@ type accountMetadataReader func([]byte) (int, error)
 
 func (f accountMetadataReader) Read(p []byte) (int, error) { return f(p) }
 
-func accountMetadataClient(f accountMetadataTransport) *gophercloud.ServiceClient {
-	p := &gophercloud.ProviderClient{HTTPClient: http.Client{Transport: f}}
+func accountMetadataClient(f func(*http.Request) (*http.Response, error)) *gophercloud.ServiceClient {
+	p := &gophercloud.ProviderClient{HTTPClient: http.Client{Transport: testcloud.LinkRequest(f)}}
 	p.UseTokenLock()
 	p.SetToken("original-token")
 	return &gophercloud.ServiceClient{ProviderClient: p, Type: "object-store", Endpoint: accountMetadataEndpoint}
 }
 
 func accountMetadataWire(status int, body *accountMetadataBody) *http.Response {
-	return &http.Response{StatusCode: status, Header: http.Header{"Content-Type": {"application/json"}, "X-Trans-Id": {"actual-account"}}, Body: body}
+	return testcloud.StreamResponse(status, body, http.Header{"Content-Type": {"application/json"}, "X-Trans-Id": {"actual-account"}})
 }
 
 func accountMetadataResponse(status int, body string) *http.Response {
@@ -184,7 +175,7 @@ func TestAccountMetadataContractsWireAndPresence(t *testing.T) {
 		if m.BytesUsed == nil || *m.BytesUsed != 9007199254740993 || m.ContainerCount == nil || *m.ContainerCount != 0 || m.ObjectCount == nil || *m.ObjectCount != -1 || m.Timestamp == nil || *m.Timestamp != "" || m.Values["book"] != "%2F + literal" || m.Values["temp-url-key"] != "secret" || m.Values["temp-url-key-2"] != "second" || string(result.Body) != "non-json" || !reflect.DeepEqual(result.Header["X-Vendor"], []string{"one", "two"}) {
 			t.Fatalf("metadata=%+v raw=%+v", m, result)
 		}
-		client.ProviderClient.HTTPClient.Transport = accountMetadataTransport(func(*http.Request) (*http.Response, error) { return accountMetadataResponse(204, ""), nil })
+		client.ProviderClient.HTTPClient.Transport = testcloud.LinkRequest(func(*http.Request) (*http.Response, error) { return accountMetadataResponse(204, ""), nil })
 		missing, err := accounts.New(client).GetMetadata(context.Background())
 		if err != nil || missing.Metadata.BytesUsed != nil || missing.Metadata.ContainerCount != nil || missing.Metadata.ObjectCount != nil || missing.Metadata.Timestamp != nil || missing.Metadata.Values == nil {
 			t.Fatalf("missing=%+v err=%v", missing, err)
@@ -287,7 +278,7 @@ func TestAccountMetadataContractsPreflightAndSnapshots(t *testing.T) {
 			t.Fatal(err)
 		}
 		payload := map[string]string{"Book": "before callback"}
-		client.ProviderClient.HTTPClient.Transport = accountMetadataTransport(func(r *http.Request) (*http.Response, error) {
+		client.ProviderClient.HTTPClient.Transport = testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 			calls++
 			if r.Header.Get("X-Trace") != "final" || r.Header.Get("X-Account-Meta-Book") != "before callback" {
 				t.Errorf("set snapshot=%v", r.Header)
@@ -304,7 +295,7 @@ func TestAccountMetadataContractsPreflightAndSnapshots(t *testing.T) {
 			t.Fatal(err)
 		}
 		keys := []string{"Book"}
-		client.ProviderClient.HTTPClient.Transport = accountMetadataTransport(func(r *http.Request) (*http.Response, error) {
+		client.ProviderClient.HTTPClient.Transport = testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 			calls++
 			if !reflect.DeepEqual(r.Header.Values("X-Account-Meta-Book"), []string{""}) || r.Header.Get("X-Account-Meta-Mutated") != "" {
 				t.Errorf("delete snapshot=%v", r.Header)
@@ -337,7 +328,7 @@ func TestAccountMetadataContractsPreflightAndSnapshots(t *testing.T) {
 		if err != nil || callbacks != 2 {
 			t.Fatalf("err=%v callbacks=%d", err, callbacks)
 		}
-		client.ProviderClient.HTTPClient.Transport = accountMetadataTransport(func(r *http.Request) (*http.Response, error) {
+		client.ProviderClient.HTTPClient.Transport = testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 			if r.Header.Get("X-Discarded") != "" || len(r.Header.Values("X-Newest")) != 0 {
 				t.Errorf("full reset headers=%v", r.Header)
 			}

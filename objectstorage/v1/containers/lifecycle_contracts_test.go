@@ -349,7 +349,7 @@ func TestContainerLifecycleContractsPreflightAndOptions(t *testing.T) {
 		deleteFull := containers.WithDeleteContainerOpts(containers.DeleteContainerOpts{Headers: original, IgnoreMissing: &flag})
 		flag = false
 		original["x-call"] = "mutated"
-		client.HTTPClient.Transport = containerMetadataTransport(func(r *http.Request) (*http.Response, error) {
+		client.HTTPClient.Transport = testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 			containerLifecycleRequest(t, r, "DELETE")
 			if r.Header.Get("X-Call") != "final" || len(r.Header.Values("X-Call")) != 1 {
 				t.Errorf("headers=%v", r.Header)
@@ -362,7 +362,7 @@ func TestContainerLifecycleContractsPreflightAndOptions(t *testing.T) {
 		}
 		containerLifecycleResult(t, result, 404, "missing", true)
 		for _, create := range []bool{true, false} {
-			client.HTTPClient.Transport = containerMetadataTransport(func(r *http.Request) (*http.Response, error) {
+			client.HTTPClient.Transport = testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 				if r.Header.Get("X-Gone") != "" || len(r.Header.Values("X-Container-Meta-Old")) != 0 {
 					t.Errorf("full reset retained previous fields=%v", r.Header)
 				}
@@ -737,7 +737,7 @@ func TestContainerLifecycleContractsSourceAndNativePolicy(t *testing.T) {
 			}
 			client = containerMetadataClient(nil)
 			body := &containerMetadataBody{Reader: strings.NewReader("accepted"), onClose: func() { change(client) }}
-			client.HTTPClient.Transport = containerMetadataTransport(func(r *http.Request) (*http.Response, error) {
+			client.HTTPClient.Transport = testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 				containerLifecycleRequest(t, r, "PUT")
 				return containerMetadataWire(201, body), nil
 			})

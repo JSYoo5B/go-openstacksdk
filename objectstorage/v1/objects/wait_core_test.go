@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -20,7 +21,7 @@ func TestObjectWaitCoreFreshPollingAndCallbacks(t *testing.T) {
 		c.ResourceBase = "http://swift.invalid/reverse%2Fprefix/v1/a/"
 		c.MoreHeaders = map[string]string{"X-Source": "captured"}
 		calls, callbacks := 0, 0
-		c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+		c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			calls++
 			want := "/reverse%2Fprefix/v1/a/" + url.PathEscape(objectMetadataContainer) + "/" + url.PathEscape(objectMetadataName)
 			if r.Method != "HEAD" || r.Body != nil || r.URL.EscapedPath() != want || r.URL.RawQuery != "" || r.Header.Get("X-Source") != "captured" {
@@ -93,7 +94,7 @@ func TestObjectWaitCoreSelectorsAndUnsupported(t *testing.T) {
 			if tc.attribute == "container" {
 				target = "literal-box"
 			}
-			c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+			c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls++
 				h := http.Header{}
 				if tc.header != "" {
@@ -109,7 +110,7 @@ func TestObjectWaitCoreSelectorsAndUnsupported(t *testing.T) {
 	}
 	c := objectMetadataClient()
 	calls := 0
-	c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		calls++
 		return objectMetadataWire(r, 200, http.Header{"X-Proof": {"kept"}}, io.NopCloser(strings.NewReader("selected missing"))), nil
 	})
@@ -146,7 +147,7 @@ func TestObjectWaitCoreProjectionAndTerminalStates(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			c := objectMetadataClient()
 			calls, callbacks := 0, 0
-			c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+			c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls++
 				h := tc.headers.Clone()
 				h.Set("X-Proof", "kept")
@@ -193,7 +194,7 @@ func TestObjectWaitCoreFailureEvidenceAndCallbackCauses(t *testing.T) {
 				retries++
 				return nil
 			}
-			c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+			c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls++
 				code := 404
 				var body io.ReadCloser
@@ -236,7 +237,7 @@ func TestObjectWaitCoreFailureEvidenceAndCallbackCauses(t *testing.T) {
 	ctx, cancel := context.WithCancelCause(context.Background())
 	callbackCause, cancelCause := errors.New("callback cause"), errors.New("callback canceled")
 	calls, callbacks := 0, 0
-	c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		calls++
 		return objectMetadataWire(r, 200, http.Header{"X-State": {"BUILD"}, "X-Proof": {"kept"}}, io.NopCloser(strings.NewReader("callback proof"))), nil
 	})
@@ -281,7 +282,7 @@ func TestObjectWaitCoreTimersAndLastActualPhase(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
 	defer cancel()
 	calls := 0
-	c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		calls++
 		return objectMetadataWire(r, 200, http.Header{"X-Proof": {"kept"}}, io.NopCloser(strings.NewReader("last clean"))), nil
 	})
@@ -298,7 +299,7 @@ func TestObjectWaitCoreTimersAndLastActualPhase(t *testing.T) {
 	jar := &waitCoreCancelJar{cancel: cancelCause, cause: cause}
 	c.HTTPClient.Jar = jar
 	calls, callbacks := 0, 0
-	c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		calls++
 		return objectMetadataWire(r, 200, http.Header{"X-State": {"BUILD"}, "X-Proof": {"kept"}}, io.NopCloser(strings.NewReader("actual first phase"))), nil
 	})
@@ -318,7 +319,7 @@ func TestObjectWaitCoreHeaderPolicyIsolation(t *testing.T) {
 			opts.MoreHeaders["Range"] = "bytes=0-0"
 			return nil
 		}
-		c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+		c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			calls++
 			code := 503
 			if calls == 2 {

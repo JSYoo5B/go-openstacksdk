@@ -11,6 +11,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -29,7 +30,7 @@ func TestTempURLCoreVectorsAndEscapedOutput(t *testing.T) {
 			c := tempURLKeyTestClient()
 			c.ResourceBase = "invalid unused URL"
 			calls := 0
-			c.HTTPClient.Transport = tempURLKeyTestTransport(func(*http.Request) (*http.Response, error) { calls++; return nil, errors.New("HTTP") })
+			c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(*http.Request) (*http.Response, error) { calls++; return nil, errors.New("HTTP") })
 			options := []GenerateTempURLOption{WithGenerateTempURLKey([]byte("\xffsecret")), WithGenerateTempURLTimestamp(signingTestTimestamp().In(time.FixedZone("nonUTC", -3600)))}
 			options = append(options, tc.options...)
 			result, err := New(c).GenerateTempURL(context.Background(), tc.path, tc.seconds, tc.method, options...)
@@ -67,7 +68,7 @@ func TestTempURLCorePreflightAndTimeBoundaries(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			c := tempURLKeyTestClient()
 			calls := 0
-			c.HTTPClient.Transport = tempURLKeyTestTransport(func(*http.Request) (*http.Response, error) { calls++; return nil, errors.New("HTTP") })
+			c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(*http.Request) (*http.Response, error) { calls++; return nil, errors.New("HTTP") })
 			options := []GenerateTempURLOption{WithGenerateTempURLKey([]byte("key")), WithGenerateTempURLTimestamp(signingTestTimestamp())}
 			options = append(options, tc.options...)
 			result, err := New(c).GenerateTempURL(context.Background(), tc.path, tc.seconds, tc.method, options...)
@@ -99,7 +100,7 @@ func TestTempURLCoreDiscoveryAndNativePolicy(t *testing.T) {
 		c := tempURLKeyTestClient()
 		c.ResourceBase = "bad unused"
 		calls := 0
-		c.HTTPClient.Transport = tempURLKeyTestTransport(func(r *http.Request) (*http.Response, error) {
+		c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			calls++
 			if r.Method != "HEAD" || r.URL.String() != c.Endpoint {
 				t.Fatal("not account-only", r.URL)
@@ -115,7 +116,7 @@ func TestTempURLCoreDiscoveryAndNativePolicy(t *testing.T) {
 		c := tempURLKeyTestClient()
 		body := &tempURLKeyTestBody{Reader: strings.NewReader("accepted"), onClose: func() { c.ResourceBase += "changed" }}
 		calls := 0
-		c.HTTPClient.Transport = tempURLKeyTestTransport(func(r *http.Request) (*http.Response, error) {
+		c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			calls++
 			return tempURLKeyTestWire(r, 204, http.Header{"X-Proof": {"kept"}, "X-Account-Meta-Temp-URL-Key-2": {"key"}}, body), nil
 		})
@@ -127,7 +128,7 @@ func TestTempURLCoreDiscoveryAndNativePolicy(t *testing.T) {
 	})
 	t.Run("atomic projection rejects original invalid suffix", func(t *testing.T) {
 		c := tempURLKeyTestClient()
-		c.HTTPClient.Transport = tempURLKeyTestTransport(func(r *http.Request) (*http.Response, error) {
+		c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			return tempURLKeyTestWire(r, 204, http.Header{"X-Proof": {"kept"}, "X-Account-Meta-Temp-URL-Key-2": {"key"}, "X-Account-Meta-K": {"invalid"}}, io.NopCloser(strings.NewReader("raw"))), nil
 		})
 		result, err := New(c).GenerateTempURL(context.Background(), "/v1/a/c/o", 1, "GET")
@@ -140,7 +141,7 @@ func TestTempURLCoreDiscoveryAndNativePolicy(t *testing.T) {
 		c := tempURLKeyTestClient()
 		calls, hooks := 0, 0
 		cause := errors.New("hook stop")
-		c.HTTPClient.Transport = tempURLKeyTestTransport(func(r *http.Request) (*http.Response, error) {
+		c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			calls++
 			return tempURLKeyTestWire(r, 503, http.Header{}, io.NopCloser(strings.NewReader("rejected"))), nil
 		})
@@ -157,7 +158,7 @@ func TestTempURLCoreDiscoveryAndNativePolicy(t *testing.T) {
 		c := tempURLKeyTestClient()
 		calls := 0
 		closeErr := errors.New("wrong status close")
-		c.HTTPClient.Transport = tempURLKeyTestTransport(func(r *http.Request) (*http.Response, error) {
+		c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			calls++
 			code := 503
 			if calls == 2 {

@@ -9,6 +9,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -75,7 +76,7 @@ func TestObjectStaleCoreLazyFilesAndComparison(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			c := objectMetadataClient()
 			calls := 0
-			c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+			c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls++
 				if r.Method != "HEAD" || r.Body != nil || r.URL.RawQuery != "" {
 					t.Error("stale started an extra phase", r.Method, r.URL)
@@ -122,7 +123,7 @@ func TestObjectStaleCoreAcceptedFailuresAndStickyGuards(t *testing.T) {
 			cause := errors.New("accepted boundary cause")
 			calls := 0
 			endpoint := c.Endpoint
-			c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+			c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls++
 				code := 404
 				h := http.Header{"X-Proof": {"kept"}}

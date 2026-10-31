@@ -11,6 +11,7 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -44,7 +45,7 @@ func TestObjectCreateOptionsFactorySnapshots(t *testing.T) {
 		*cfg.SegmentSize = 88
 	}
 	data := []byte("before")
-	c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		body, err := io.ReadAll(r.Body)
 		if err != nil || string(body) != "before" {
 			t.Error("Data snapshot occurred after callback", string(body), err)
@@ -86,7 +87,7 @@ func TestObjectCreateOptionsDefaultsAndReplacement(t *testing.T) {
 func TestObjectCreateOptionsPreflightAndCallbackCauses(t *testing.T) {
 	c := objectMetadataClient()
 	calls := 0
-	c.HTTPClient.Transport = objectMetadataTransport(func(*http.Request) (*http.Response, error) { calls++; return nil, errors.New("unexpected HTTP") })
+	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(*http.Request) (*http.Response, error) { calls++; return nil, errors.New("unexpected HTTP") })
 	var nilReader *bytes.Reader
 	for _, input := range []CreateObjectInput{{}, {Data: []byte{}, Reader: strings.NewReader("other")}, {Reader: nilReader}, {Filename: "bad\x00file"}} {
 		callbacks := 0
@@ -128,7 +129,7 @@ func TestObjectCreateOptionsPreflightAndCallbackCauses(t *testing.T) {
 func TestObjectCreateOptionsParallelReuse(t *testing.T) {
 	c := objectMetadataClient()
 	var calls atomic.Int32
-	c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		calls.Add(1)
 		data, err := io.ReadAll(r.Body)
 		if err != nil || string(data) != "stable" || r.Header.Get("X-Call") != "factory" || r.Header.Get("X-Object-Meta-Tag") != "factory" {

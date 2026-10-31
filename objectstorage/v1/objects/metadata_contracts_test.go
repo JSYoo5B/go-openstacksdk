@@ -26,16 +26,6 @@ const objectMetadataKey = "folder/ 한글:%2F?# /leaf"
 
 var objectMetadataEndpoint = objectMetadataBase + url.PathEscape(objectMetadataContainer) + "/" + url.PathEscape(objectMetadataKey)
 
-type objectMetadataTransport func(*http.Request) (*http.Response, error)
-
-func (f objectMetadataTransport) RoundTrip(r *http.Request) (*http.Response, error) {
-	response, err := f(r)
-	if response != nil && response.Request == nil {
-		response.Request = r
-	}
-	return response, err
-}
-
 type objectMetadataBody struct {
 	io.Reader
 	closes   atomic.Int32
@@ -54,14 +44,14 @@ func (b *objectMetadataBody) Close() error {
 type objectMetadataReader func([]byte) (int, error)
 
 func (f objectMetadataReader) Read(p []byte) (int, error) { return f(p) }
-func objectMetadataClient(f objectMetadataTransport) *gophercloud.ServiceClient {
-	p := &gophercloud.ProviderClient{HTTPClient: http.Client{Transport: f}}
+func objectMetadataClient(f func(*http.Request) (*http.Response, error)) *gophercloud.ServiceClient {
+	p := &gophercloud.ProviderClient{HTTPClient: http.Client{Transport: testcloud.LinkRequest(f)}}
 	p.UseTokenLock()
 	p.SetToken("original-token")
 	return &gophercloud.ServiceClient{ProviderClient: p, Type: "object-store", Endpoint: objectMetadataBase}
 }
 func objectMetadataWire(status int, body *objectMetadataBody) *http.Response {
-	return &http.Response{StatusCode: status, Header: http.Header{"Content-Type": {"application/json"}, "X-Trans-Id": {"actual-object"}}, Body: body}
+	return testcloud.StreamResponse(status, body, http.Header{"Content-Type": {"application/json"}, "X-Trans-Id": {"actual-object"}})
 }
 func objectMetadataResponse(status int, body string) *http.Response {
 	return objectMetadataWire(status, &objectMetadataBody{Reader: strings.NewReader(body)})
@@ -454,7 +444,7 @@ func TestObjectMetadataContractsPreflightAndOptions(t *testing.T) {
 			{[]objects.GetMetadataOption{objects.WithGetMetadataNewest(true), objects.WithoutGetMetadataNewest()}, "", false},
 			{[]objects.GetMetadataOption{objects.WithGetMetadataNewest(true), objects.WithGetMetadataOpts(objects.GetMetadataOpts{})}, "", false},
 		} {
-			client.ProviderClient.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+			client.ProviderClient.HTTPClient.Transport = testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 				_, present := r.Header["X-Newest"]
 				if present != tc.present || r.Header.Get("X-Newest") != tc.want {
 					t.Errorf("newest=%v", r.Header)
@@ -466,7 +456,7 @@ func TestObjectMetadataContractsPreflightAndOptions(t *testing.T) {
 			}
 		}
 		mutation := objects.WithMetadataOpts(objects.MetadataOpts{Headers: map[string]string{"x-call": "old"}})
-		client.ProviderClient.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+		client.ProviderClient.HTTPClient.Transport = testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 			if r.Method == "HEAD" {
 				if r.Header.Get("X-Call") != "" {
 					t.Errorf("write option on read=%v", r.Header)
@@ -508,7 +498,7 @@ func TestObjectMetadataContractsPreflightAndOptions(t *testing.T) {
 			t.Fatalf("snapshot err=%v HTTP=%d", err, calls)
 		}
 		calls = 0
-		client.ProviderClient.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+		client.ProviderClient.HTTPClient.Transport = testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 			calls++
 			if r.Method == "HEAD" {
 				response := objectMetadataResponse(200, "")
@@ -563,7 +553,7 @@ func TestObjectMetadataContractsAtomicHeaders(t *testing.T) {
 			t.Fatalf("raw/lowercase=%+v header=%v", m, result.Header)
 		}
 		for _, value := range []string{"", "0", "-7"} {
-			client.ProviderClient.HTTPClient.Transport = objectMetadataTransport(func(*http.Request) (*http.Response, error) {
+			client.ProviderClient.HTTPClient.Transport = testcloud.LinkRequest(func(*http.Request) (*http.Response, error) {
 				response := objectMetadataResponse(200, "")
 				response.Header.Del("Content-Type")
 				if value != "" {
@@ -956,7 +946,7 @@ func TestObjectMetadataContractsSourceAndNativePolicy(t *testing.T) {
 		if err != nil || result == nil || calls != 2 || client.MoreHeaders["X-Source"] != "during read" || client.MoreHeaders["Content-Type"] != "source/type" || client.ProviderClient != provider {
 			t.Fatalf("result=%+v err=%v HTTP=%d source=%v", result, err, calls, client.MoreHeaders)
 		}
-		client.ProviderClient.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+		client.ProviderClient.HTTPClient.Transport = testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 			if r.Header.Get("X-Source") != "during read" || r.Header.Get("X-Only-Write") != "" || r.Header.Get("X-Object-Meta-Keep") != "" || r.URL.RawQuery != "" {
 				t.Errorf("future call leaked=%v URL=%s", r.Header, r.URL)
 			}

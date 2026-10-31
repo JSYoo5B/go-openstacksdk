@@ -31,7 +31,7 @@ func containerListAPI(t *testing.T, reply func(*http.Request) *http.Response) (*
 	t.Helper()
 	cloud := testcloud.New(t)
 	calls := new([]containerListCall)
-	cloud.Provider.HTTPClient.Transport = containerMetadataTransport(func(r *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 		body := ""
 		if r.Body != nil {
 			data, err := io.ReadAll(r.Body)
@@ -42,7 +42,7 @@ func containerListAPI(t *testing.T, reply func(*http.Request) *http.Response) (*
 		}
 		*calls = append(*calls, containerListCall{r.Method, r.URL.Path, r.URL.EscapedPath(), body, r.URL.Query(), r.Header.Clone()})
 		return reply(r), nil
-	})
+	}))
 	client := cloud.Client("object-store", "/catalog/v1/")
 	client.ResourceBase = cloud.Server.URL + "/reverse/a%20b/v1/AUTH_owner/"
 	return containers.New(client), calls
@@ -420,7 +420,7 @@ func TestPythonContainerListPhysicalReadCloseFailuresAndStickySource(t *testing.
 				client = containerMetadataClient(func(*http.Request) (*http.Response, error) { return containerMetadataWire(status, body), nil })
 				calls, retries := 0, 0
 				originalTransport := client.HTTPClient.Transport
-				client.HTTPClient.Transport = containerMetadataTransport(func(r *http.Request) (*http.Response, error) { calls++; return originalTransport.RoundTrip(r) })
+				client.HTTPClient.Transport = testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) { calls++; return originalTransport.RoundTrip(r) })
 				client.RetryFunc = func(context.Context, string, string, *gophercloud.RequestOpts, error, uint) error {
 					retries++
 					return nil
@@ -552,13 +552,13 @@ func TestPythonContainerListPreflightCancellationAndRetainedOptionOwnership(t *t
 func TestPythonContainerListConcurrentOwnedOptionReuse(t *testing.T) {
 	cloud := testcloud.New(t)
 	var requests atomic.Int32
-	cloud.Provider.HTTPClient.Transport = containerMetadataTransport(func(r *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 		requests.Add(1)
 		if r.URL.Query().Get("prefix") != "owned" || r.Header.Get("X-Probe") != "owned" {
 			t.Error(r.URL, r.Header)
 		}
 		return containerMetadataResponse(200, `[{"name":"a","count":0}]`), nil
-	})
+	}))
 	api := containers.New(cloud.Client("object-store", "/v1/AUTH_owner/"))
 	option := containers.WithRecordListOpts(containers.RecordListOpts{Query: map[string]json.RawMessage{"prefix": json.RawMessage(`"owned"`)}, Headers: map[string]string{"X-Probe": "owned"}})
 	var wait sync.WaitGroup

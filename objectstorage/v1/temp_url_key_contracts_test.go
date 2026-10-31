@@ -26,16 +26,6 @@ const tempKeyAccount = "https://swift.invalid/reverse/v1/AUTH_account/"
 const tempKeyBase = "https://swift.invalid/reverse/a%20b/v1/AUTH_account/"
 const tempKeyName = "한글 space:%2F?#"
 
-type tempKeyTransport func(*http.Request) (*http.Response, error)
-
-func (f tempKeyTransport) RoundTrip(r *http.Request) (*http.Response, error) {
-	response, err := f(r)
-	if response != nil && response.Request == nil {
-		response.Request = r
-	}
-	return response, err
-}
-
 type tempKeyBody struct {
 	io.Reader
 	closes   atomic.Int32
@@ -55,8 +45,8 @@ type tempKeyReader func([]byte) (int, error)
 
 func (f tempKeyReader) Read(p []byte) (int, error) { return f(p) }
 
-func tempKeyClient(f tempKeyTransport) *gophercloud.ServiceClient {
-	p := &gophercloud.ProviderClient{HTTPClient: http.Client{Transport: f}}
+func tempKeyClient(f func(*http.Request) (*http.Response, error)) *gophercloud.ServiceClient {
+	p := &gophercloud.ProviderClient{HTTPClient: http.Client{Transport: testcloud.LinkRequest(f)}}
 	p.UseTokenLock()
 	p.SetToken("token-one")
 	return &gophercloud.ServiceClient{ProviderClient: p, Type: "object-store", Endpoint: tempKeyAccount, ResourceBase: tempKeyBase}
@@ -69,7 +59,7 @@ func tempKeyResponse(status int, body *tempKeyBody, headers http.Header) *http.R
 	}
 	h.Set("Content-Type", "application/json")
 	h.Set("X-Trans-Id", "actual-key-phase")
-	return &http.Response{StatusCode: status, Header: h, Body: body}
+	return testcloud.StreamResponse(status, body, h)
 }
 
 func tempKeyWire(status int, body string, headers http.Header) *http.Response {

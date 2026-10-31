@@ -3,7 +3,6 @@ package accounts_test
 import (
 	"context"
 	"errors"
-	"io"
 	"net/http"
 	"reflect"
 	"strings"
@@ -15,16 +14,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
-
-type nativeAccountTransport func(*http.Request) (*http.Response, error)
-
-func (transport nativeAccountTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
 
 type nativeAccountCall struct {
 	method, path string
@@ -45,10 +34,10 @@ func nativeAccountHeaders(h http.Header) http.Header {
 func nativeAccountAPI(t *testing.T, calls *[]nativeAccountCall, code int, header http.Header) *accounts.API {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = nativeAccountTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		*calls = append(*calls, nativeAccountCall{req.Method, req.URL.Path, nativeAccountHeaders(req.Header)})
-		return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader("")), Header: header}, nil
-	})
+		return testcloud.Response(code, "", header), nil
+	}))
 	client := cloud.Client("object-store", "/swift/v1/AUTH_project")
 	// The account calls use Endpoint itself, never ResourceBase.
 	client.ResourceBase = cloud.Server.URL + "/unused/"

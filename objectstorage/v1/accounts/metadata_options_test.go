@@ -10,6 +10,7 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -24,7 +25,7 @@ func TestAccountMetadataOptionsFactorySnapshots(t *testing.T) {
 	headers["X-Trace"] = "changed"
 	flag = true
 	c := accountMetadataClient("http://account.invalid/v1/AUTH_x/")
-	c.HTTPClient.Transport = accountMetadataTransport(func(r *http.Request) (*http.Response, error) {
+	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		if r.Header.Get("X-Trace") != "factory" || r.Header.Get("X-Newest") != "false" {
 			t.Errorf("factory alias %#v", r.Header)
 		}
@@ -35,7 +36,7 @@ func TestAccountMetadataOptionsFactorySnapshots(t *testing.T) {
 	}
 	metadata := map[string]string{"Key": "before"}
 	keys := []string{"Key"}
-	c.HTTPClient.Transport = accountMetadataTransport(func(r *http.Request) (*http.Response, error) {
+	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		if r.Header.Get("X-Account-Meta-Key") != "before" {
 			t.Errorf("input alias %#v", r.Header)
 		}
@@ -44,7 +45,7 @@ func TestAccountMetadataOptionsFactorySnapshots(t *testing.T) {
 	if _, err := New(c).SetMetadata(context.Background(), metadata, func(*MetadataOpts) error { metadata["Key"] = "changed"; return nil }); err != nil {
 		t.Fatal(err)
 	}
-	c.HTTPClient.Transport = accountMetadataTransport(func(r *http.Request) (*http.Response, error) {
+	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		if _, ok := r.Header["X-Account-Meta-Key"]; !ok {
 			t.Errorf("keys alias %#v", r.Header)
 		}
@@ -133,7 +134,7 @@ func TestAccountMetadataOptionsParallelReuseAndSourceHeaders(t *testing.T) {
 	c := accountMetadataClient("http://account.invalid/v1/AUTH_x/")
 	c.MoreHeaders = map[string]string{"X-Trace": "source", "Content-Type": "text/plain"}
 	var calls atomic.Int32
-	c.HTTPClient.Transport = accountMetadataTransport(func(r *http.Request) (*http.Response, error) {
+	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		calls.Add(1)
 		if r.Header.Get("X-Trace") != "option" || r.Header.Get("Content-Type") != "text/plain" {
 			t.Errorf("ordinary headers %#v", r.Header)

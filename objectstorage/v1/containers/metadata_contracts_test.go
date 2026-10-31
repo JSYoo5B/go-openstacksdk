@@ -25,16 +25,6 @@ const containerMetadataName = "한글 space:%2F?#"
 
 var containerMetadataEndpoint = containerMetadataBase + url.PathEscape(containerMetadataName)
 
-type containerMetadataTransport func(*http.Request) (*http.Response, error)
-
-func (f containerMetadataTransport) RoundTrip(r *http.Request) (*http.Response, error) {
-	response, err := f(r)
-	if response != nil && response.Request == nil {
-		response.Request = r
-	}
-	return response, err
-}
-
 type containerMetadataBody struct {
 	io.Reader
 	closes   atomic.Int32
@@ -54,15 +44,15 @@ type containerMetadataReader func([]byte) (int, error)
 
 func (f containerMetadataReader) Read(p []byte) (int, error) { return f(p) }
 
-func containerMetadataClient(f containerMetadataTransport) *gophercloud.ServiceClient {
-	p := &gophercloud.ProviderClient{HTTPClient: http.Client{Transport: f}}
+func containerMetadataClient(f func(*http.Request) (*http.Response, error)) *gophercloud.ServiceClient {
+	p := &gophercloud.ProviderClient{HTTPClient: http.Client{Transport: testcloud.LinkRequest(f)}}
 	p.UseTokenLock()
 	p.SetToken("original-token")
 	return &gophercloud.ServiceClient{ProviderClient: p, Type: "object-store", Endpoint: containerMetadataBase}
 }
 
 func containerMetadataWire(status int, body *containerMetadataBody) *http.Response {
-	return &http.Response{StatusCode: status, Header: http.Header{"Content-Type": {"application/json"}, "X-Trans-Id": {"actual-container"}}, Body: body}
+	return testcloud.StreamResponse(status, body, http.Header{"Content-Type": {"application/json"}, "X-Trans-Id": {"actual-container"}})
 }
 
 func containerMetadataResponse(status int, body string) *http.Response {
@@ -261,7 +251,7 @@ func TestContainerMetadataContractsWireAndIdentity(t *testing.T) {
 		if m.BytesUsed == nil || *m.BytesUsed != 9007199254740993 || m.ObjectCount == nil || *m.ObjectCount != -1 || m.Timestamp == nil || *m.Timestamp != "" || m.LastModified == nil || *m.LastModified != "not a date" || m.Values["book"] != "%2F + literal" || m.Values["temp-url-key"] != "secret" || m.Values["temp-url-key-2"] != "second" || string(result.Body) != "non-json" || !reflect.DeepEqual(result.Header["X-Vendor"], []string{"one", "two"}) {
 			t.Fatalf("metadata=%+v raw=%+v", m, result)
 		}
-		client.ProviderClient.HTTPClient.Transport = containerMetadataTransport(func(*http.Request) (*http.Response, error) { return containerMetadataResponse(204, ""), nil })
+		client.ProviderClient.HTTPClient.Transport = testcloud.LinkRequest(func(*http.Request) (*http.Response, error) { return containerMetadataResponse(204, ""), nil })
 		missing, err := containers.New(client).GetMetadata(context.Background(), containerMetadataName)
 		if err != nil || missing.Metadata.BytesUsed != nil || missing.Metadata.ObjectCount != nil || missing.Metadata.Timestamp != nil || missing.Metadata.LastModified != nil || missing.Metadata.Values == nil {
 			t.Fatalf("missing=%+v err=%v", missing, err)
@@ -389,7 +379,7 @@ func TestContainerMetadataContractsPreflightAndOptions(t *testing.T) {
 			t.Fatal(err)
 		}
 		payload := map[string]string{"Book": "before callback"}
-		client.ProviderClient.HTTPClient.Transport = containerMetadataTransport(func(r *http.Request) (*http.Response, error) {
+		client.ProviderClient.HTTPClient.Transport = testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 			calls++
 			if r.Header.Get("X-Trace") != "final" || r.Header.Get("X-Container-Meta-Book") != "before callback" {
 				t.Errorf("set snapshot=%v", r.Header)
@@ -406,7 +396,7 @@ func TestContainerMetadataContractsPreflightAndOptions(t *testing.T) {
 			t.Fatal(err)
 		}
 		keys := []string{"Book"}
-		client.ProviderClient.HTTPClient.Transport = containerMetadataTransport(func(r *http.Request) (*http.Response, error) {
+		client.ProviderClient.HTTPClient.Transport = testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 			calls++
 			if !reflect.DeepEqual(r.Header.Values("X-Container-Meta-Book"), []string{""}) || r.Header.Get("X-Container-Meta-Mutated") != "" {
 				t.Errorf("delete snapshot=%v", r.Header)
@@ -439,7 +429,7 @@ func TestContainerMetadataContractsPreflightAndOptions(t *testing.T) {
 		if err != nil || callbacks != 2 {
 			t.Fatalf("err=%v callbacks=%d", err, callbacks)
 		}
-		client.ProviderClient.HTTPClient.Transport = containerMetadataTransport(func(r *http.Request) (*http.Response, error) {
+		client.ProviderClient.HTTPClient.Transport = testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 			if r.Header.Get("X-Discarded") != "" || len(r.Header.Values("X-Newest")) != 0 {
 				t.Errorf("full reset headers=%v", r.Header)
 			}
@@ -686,7 +676,7 @@ func TestContainerMetadataContractsSourceAndNativePolicy(t *testing.T) {
 		if err != nil || client.MoreHeaders["X-Trace"] != "source" || client.ProviderClient != original {
 			t.Fatalf("err=%v source=%v", err, client.MoreHeaders)
 		}
-		client.ProviderClient.HTTPClient.Transport = containerMetadataTransport(func(r *http.Request) (*http.Response, error) {
+		client.ProviderClient.HTTPClient.Transport = testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 			if r.Header.Get("X-Source") != "later" || r.Header.Get("X-Trace") != "source" || len(r.Header.Values("X-Newest")) != 0 || len(r.Header.Values("X-Container-Meta-Book")) != 0 {
 				t.Errorf("future request leaked previous headers=%v", r.Header)
 			}
@@ -917,7 +907,7 @@ func TestContainerMetadataContractsSourceAndNativePolicy(t *testing.T) {
 		if err != nil || record == nil || record.Name != containerMetadataName || record.Details == nil || record.Details.Timestamp != 123.5 || record.Metadata["Native"] != "preserved" {
 			t.Fatalf("native Resource=%+v err=%v", record, err)
 		}
-		client.ProviderClient.HTTPClient.Transport = containerMetadataTransport(func(r *http.Request) (*http.Response, error) {
+		client.ProviderClient.HTTPClient.Transport = testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 			response := containerMetadataResponse(200, "")
 			response.Header.Set("Date", "Fri, 17 Jan 2014 16:09:56 GMT")
 			return response, nil

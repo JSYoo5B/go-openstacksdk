@@ -9,6 +9,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -30,7 +31,7 @@ func TestObjectDeleteCoreWorkflowAndAcknowledgements(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			c := objectMetadataClient()
 			calls := 0
-			c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+			c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls++
 				if r.Body != nil {
 					t.Fatal("delete workflow sent a body")
@@ -94,7 +95,7 @@ func TestObjectDeleteCoreSLOFlagProjection(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			c := objectMetadataClient()
 			calls := 0
-			c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+			c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls++
 				if calls == 1 {
 					h := tc.headers.Clone()
@@ -124,7 +125,7 @@ func TestObjectDeleteCoreMissingAndPhaseProofs(t *testing.T) {
 		for _, ignore := range []bool{true, false} {
 			c := objectMetadataClient()
 			calls := 0
-			c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+			c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls++
 				code := 404
 				if !headMissing && r.Method == "HEAD" {
@@ -152,7 +153,7 @@ func TestObjectDeleteCoreMissingAndPhaseProofs(t *testing.T) {
 		c := objectMetadataClient()
 		fault := errors.New("dirty404 close")
 		calls := 0
-		c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+		c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			calls++
 			if !headMissing && r.Method == "HEAD" {
 				return objectMetadataOK(r, 200, http.Header{}), nil
@@ -198,7 +199,7 @@ func TestObjectDeleteCoreBulkDecoderAndFailure(t *testing.T) {
 		`{"Response Status":"200 OK","Response Body":"partial","Number Deleted":1,"Number Not Found":0,"Errors":[["/box/key%20encoded","arbitrary lookup message"]]}`,
 	} {
 		c := objectMetadataClient()
-		c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+		c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			return objectMetadataWire(r, 200, http.Header{"X-Proof": {"kept"}}, io.NopCloser(strings.NewReader(body))), nil
 		})
 		result, err := New(c).DeleteObject(context.Background(), "box", "key", WithDeleteObjectStaticLargeObject(true))
@@ -222,7 +223,7 @@ func TestObjectDeleteCoreBulkDecoderAndFailure(t *testing.T) {
 	}
 	for _, body := range []string{"null", strings.Replace(valid, `"Errors":[]`, `"Errors":false`, 1)} {
 		c := objectMetadataClient()
-		c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+		c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			return objectMetadataWire(r, 200, http.Header{"X-Proof": {"kept"}}, io.NopCloser(strings.NewReader(body))), nil
 		})
 		result, err := New(c).DeleteObject(context.Background(), "box", "key", WithDeleteObjectStaticLargeObject(true))
@@ -242,7 +243,7 @@ func TestObjectDeleteCoreBodyAndSourceFailures(t *testing.T) {
 		if driftInRead {
 			body.Reader = objectMetadataReader(func(p []byte) (int, error) { c.Endpoint += "changed"; return copy(p, "head bytes"), io.EOF })
 		}
-		c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+		c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			calls++
 			if !driftInRead {
 				c.Endpoint += "changed"
@@ -261,7 +262,7 @@ func TestObjectDeleteCoreBodyAndSourceFailures(t *testing.T) {
 	readErr, closeErr, cause := errors.New("read fault"), errors.New("close fault"), errors.New("caller cancellation")
 	calls, retries := 0, 0
 	body := &objectMetadataBody{Reader: objectMetadataReader(func(p []byte) (int, error) { return copy(p, "partial delete"), errors.Join(io.EOF, readErr) }), closeErr: closeErr, onClose: func() { c.ResourceBase = "changed"; cancel(cause) }}
-	c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		calls++
 		if r.Method == "HEAD" {
 			return objectMetadataOK(r, 200, http.Header{}), nil
@@ -292,7 +293,7 @@ func TestObjectDeleteCoreNativePolicyGuards(t *testing.T) {
 			calls, hooks := 0, 0
 			mutate := func() error { hooks++; c.ResourceBase = "changed"; return cause }
 			code := map[string]int{"retry": 503, "backoff": 429, "reauth": 401, "redirect": 307}[hook]
-			c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+			c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls++
 				h := http.Header{}
 				if hook == "redirect" {
@@ -331,7 +332,7 @@ func TestObjectDeleteCoreNativePolicyGuards(t *testing.T) {
 			next.Header = http.Header{"Accept": {"text/xml"}, "accept": {"text/plain"}, "X-Trace": {"redirect"}}
 			return nil
 		}
-		c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+		c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			calls++
 			if calls == 1 {
 				return objectMetadataWire(r, 307, http.Header{"Location": {r.URL.String()}}, io.NopCloser(strings.NewReader(""))), nil

@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -31,7 +32,7 @@ func TestImageImportObjectMetadataOuterGuardStopsNativeRetryAndReauthentication(
 				status = 401
 				c.ReauthFunc = func(context.Context) error { hooks++; changed = true; return nil }
 			}
-			c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+			c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls++
 				return objectMetadataWire(r, status, http.Header{"X-Proof": {"kept"}}, io.NopCloser(strings.NewReader("rejected"))), nil
 			})
@@ -74,7 +75,7 @@ func TestImageImportObjectMetadataReadGuardKeepsAcceptedEvidenceBeforeCloseResto
 		changed = true
 		return copy(data, "actual"), io.EOF
 	}), onClose: func() { changed = false }}
-	c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		calls++
 		return objectMetadataWire(r, 200, http.Header{"X-Proof": {"kept"}}, body), nil
 	})
@@ -103,7 +104,7 @@ func TestImageImportObjectSourceReadMutationRemainsRegisteredAfterCloseRestores(
 		c.Endpoint = "http://changed.invalid/v1/AUTH_a/"
 		return copy(data, "actual"), io.EOF
 	}), onClose: func() { c.Endpoint = endpoint }}
-	c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		return objectMetadataWire(r, 200, http.Header{"X-Proof": {"kept"}}, body), nil
 	})
 	ctx := rest.WithOperationSources(context.Background())

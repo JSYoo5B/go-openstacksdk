@@ -10,6 +10,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -20,7 +21,7 @@ func TestDirectoryMarkerCoreWireAndMetadata(t *testing.T) {
 		c.ResourceBase = "http://swift.invalid/reverse%20proxy/v1/AUTH_a/"
 		c.MoreHeaders = map[string]string{"content-type": "source/type", "X-Source": "captured"}
 		calls := 0
-		c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+		c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			calls++
 			data, err := io.ReadAll(r.Body)
 			if err != nil || len(data) != 0 || r.Body != http.NoBody || r.ContentLength != 0 || len(r.TransferEncoding) != 0 || len(r.Trailer) != 0 {
@@ -76,7 +77,7 @@ func TestDirectoryMarkerCoreAcceptedFaultProof(t *testing.T) {
 				body.afterRead = func() { c.MoreHeaders = map[string]string{"x-detect-content-type": "true"} }
 				body.afterClose = func() { c.MoreHeaders = nil }
 			}
-			c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+			c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls++
 				return objectMetadataWire(r, 201, http.Header{"X-Proof": {"kept"}}, body), nil
 			})
@@ -112,7 +113,7 @@ func TestDirectoryMarkerCoreNativeReplay(t *testing.T) {
 			c := objectMetadataClient()
 			c.MoreHeaders = map[string]string{"Content-Type": "source/type", "X-Source": "captured"}
 			calls, hooks := 0, 0
-			c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+			c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls++
 				if r.Method != "PUT" || r.Body != http.NoBody || r.ContentLength != 0 || len(r.TransferEncoding) != 0 || r.Header.Get("Content-Type") != "application/directory" || r.Header.Get("X-Source") != "captured" || r.Header.Get("X-Object-Meta-Tag") != "owned" {
 					t.Error("physical marker replay changed", r.Method, r.Header, r.Body, r.ContentLength)
@@ -186,7 +187,7 @@ func TestDirectoryMarkerCoreNativeOwnership(t *testing.T) {
 			c := objectMetadataClient()
 			calls, hooks := 0, 0
 			cause := errors.New("native marker policy cause")
-			c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+			c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls++
 				return objectMetadataWire(r, 503, http.Header{"X-Proof": {"kept"}}, io.NopCloser(strings.NewReader("rejected"))), nil
 			})
@@ -223,7 +224,7 @@ func TestDirectoryMarkerCoreRedirectOwnership(t *testing.T) {
 			c := objectMetadataClient()
 			calls := 0
 			cause := errors.New("redirect marker policy cause")
-			c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+			c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls++
 				return objectMetadataWire(r, 307, http.Header{"Location": {r.URL.String()}, "X-Proof": {"kept"}}, io.NopCloser(strings.NewReader("redirect"))), nil
 			})
@@ -240,7 +241,7 @@ func TestDirectoryMarkerCoreOrdinaryPolicyIsolation(t *testing.T) {
 	c := objectMetadataClient()
 	c.MoreHeaders = map[string]string{"Content-Type": "source/type", "X-Detect-Content-Type": "true"}
 	calls, callbacks := 0, 0
-	c.HTTPClient.Transport = objectMetadataTransport(func(r *http.Request) (*http.Response, error) {
+	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		calls++
 		if r.Header.Get("Content-Type") != "ordinary/type" || r.Header.Get("X-Detect-Content-Type") != "true" || r.Header.Get("X-Object-Meta-Tag") != "ordinary" {
 			t.Error("marker changed ordinary producer policy", r.Header)

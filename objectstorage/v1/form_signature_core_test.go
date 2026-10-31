@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -29,7 +30,7 @@ func TestFormSignatureCoreVectorsAndLiteralPaths(t *testing.T) {
 			c := tempURLKeyTestClient()
 			c.ResourceBase = "unused invalid URL"
 			calls := 0
-			c.HTTPClient.Transport = tempURLKeyTestTransport(func(*http.Request) (*http.Response, error) { calls++; return nil, errors.New("unexpected HTTP") })
+			c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(*http.Request) (*http.Response, error) { calls++; return nil, errors.New("unexpected HTTP") })
 			input := FormSignatureInput{ObjectPrefix: "prefix/책%2F?#", RedirectURL: "https://app.example/result?x=%2F#ok", MaxFileSize: 1048576, MaxUploadCount: 3, Timeout: 123}
 			result, err := New(c).GenerateFormSignature(context.Background(), "백업 %2F?#", input,
 				WithGenerateFormSignatureKey([]byte("\xffsecret")), WithGenerateFormSignatureDigest(digest), WithGenerateFormSignatureTimestamp(signingTestTimestamp().In(time.FixedZone("local", 3600))))
@@ -58,7 +59,7 @@ func TestFormSignatureCoreDiscoveryAndPhaseProof(t *testing.T) {
 			c := tempURLKeyTestClient()
 			c.MoreHeaders = map[string]string{"X-Capture": "original"}
 			calls := 0
-			c.HTTPClient.Transport = tempURLKeyTestTransport(func(r *http.Request) (*http.Response, error) {
+			c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls++
 				if r.Method != "HEAD" || r.Body != nil || r.URL.RawQuery != "" || r.Header.Get("X-Capture") != "original" || r.Header.Get("X-Trace") != "owned" || r.Header.Get("X-Newest") != "false" {
 					t.Fatal("wrong metadata read", r.URL, r.Header)
@@ -100,7 +101,7 @@ func TestFormSignatureCoreDiscoveryAndPhaseProof(t *testing.T) {
 	t.Run("missing key retains both actual phases", func(t *testing.T) {
 		c := tempURLKeyTestClient()
 		calls := 0
-		c.HTTPClient.Transport = tempURLKeyTestTransport(func(r *http.Request) (*http.Response, error) {
+		c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			calls++
 			return tempURLKeyTestWire(r, 204, http.Header{"X-Account-Meta-Temp-URL-Key": {""}}, io.NopCloser(strings.NewReader("raw"))), nil
 		})
@@ -113,7 +114,7 @@ func TestFormSignatureCoreDiscoveryAndPhaseProof(t *testing.T) {
 	t.Run("unexpected fallback preserves container only", func(t *testing.T) {
 		c := tempURLKeyTestClient()
 		calls := 0
-		c.HTTPClient.Transport = tempURLKeyTestTransport(func(r *http.Request) (*http.Response, error) {
+		c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			calls++
 			code := 204
 			if calls == 2 {
@@ -147,7 +148,7 @@ func TestFormSignatureCorePreflightAndAcceptedFailures(t *testing.T) {
 					c.Endpoint = tc.endpoint
 				}
 				calls, callbacks := 0, 0
-				c.HTTPClient.Transport = tempURLKeyTestTransport(func(*http.Request) (*http.Response, error) { calls++; return nil, errors.New("HTTP") })
+				c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(*http.Request) (*http.Response, error) { calls++; return nil, errors.New("HTTP") })
 				result, err := New(c).GenerateFormSignature(context.Background(), tc.container, tc.input, func(*GenerateFormSignatureOpts) error { callbacks++; return nil })
 				if result != nil || !errors.Is(err, resource.ErrInvalidOption) || calls != 0 || callbacks != 0 {
 					t.Fatal(result, err, calls, callbacks)
@@ -179,7 +180,7 @@ func TestFormSignatureCorePreflightAndAcceptedFailures(t *testing.T) {
 		defer cancel(nil)
 		body := &tempURLKeyTestBody{Reader: tempURLKeyTestReader(func(p []byte) (int, error) { return copy(p, "x"), readErr }), closeErr: closeErr, onClose: func() { s.Swauth = nil; cancel(cause) }}
 		calls := 0
-		c.HTTPClient.Transport = tempURLKeyTestTransport(func(r *http.Request) (*http.Response, error) {
+		c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			calls++
 			return tempURLKeyTestWire(r, 204, http.Header{"X-Proof": {"kept"}, "X-Container-Meta-Temp-URL-Key-2": {"usable"}}, body), nil
 		})
