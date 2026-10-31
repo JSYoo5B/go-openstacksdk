@@ -10,6 +10,7 @@ import (
 
 	accelerator "github.com/JSYoo5B/go-openstacksdk/accelerator/v2"
 	imageapi "github.com/JSYoo5B/go-openstacksdk/image/v2"
+	"github.com/JSYoo5B/go-openstacksdk/internal/microversions"
 
 	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/openstack"
@@ -339,10 +340,10 @@ func newSDKOwnedV1(provider *gophercloud.ProviderClient, options gophercloud.End
 	}
 	parts := strings.Split(strings.TrimRight(u.EscapedPath(), "/"), "/")
 	index := len(parts) - 1
-	if index > 0 && !discoveryPathVersion.MatchString(parts[index]) && discoveryPathVersion.MatchString(parts[index-1]) {
+	if index > 0 && !microversions.IsPathVersion(parts[index]) && microversions.IsPathVersion(parts[index-1]) {
 		index--
 	}
-	if discoveryPathVersion.MatchString(parts[index]) {
+	if microversions.IsPathVersion(parts[index]) {
 		version := parts[index]
 		if version != "v1" && !strings.HasPrefix(version, "v1.") {
 			return nil, unsupported(string(service), "endpoint version "+version)

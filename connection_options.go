@@ -9,6 +9,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/compute"
 	"github.com/JSYoo5B/go-openstacksdk/image"
+	"github.com/JSYoo5B/go-openstacksdk/internal/microversions"
 	"github.com/JSYoo5B/go-openstacksdk/network"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
@@ -219,8 +220,6 @@ func WithMessagingClientID(id string) ConnectionOption {
 	}
 }
 
-var microversionPattern = regexp.MustCompile(`^[1-9][0-9]*\.[0-9]+$`)
-
 // WithMicroversion selects an exact version without discovery. It takes
 // precedence over WithMicroversionRange and WithLatestMicroversion regardless
 // of option order. Extension compatibility remains subject to the cloud API.
@@ -230,7 +229,7 @@ func WithMicroversion(service Service, version string) ConnectionOption {
 		if major == "" {
 			return unsupported(string(service), "microversions")
 		}
-		if _, err := parseMicroversion(version); err != nil {
+		if _, err := microversions.ParseNumber(version); err != nil {
 			return invalid("invalid microversion %q", version)
 		}
 		if !strings.HasPrefix(version, major+".") {
