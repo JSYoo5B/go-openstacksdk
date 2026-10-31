@@ -59,7 +59,7 @@ Go API:
 - Missing/multiple sources, typed-nil Reader, invalid filename/digest/segment size, nil options/context and reserved/alias headers reject before Reader consumption or HTTP. Callback cancellation/source/body-ownership causes remain joined and terminal.
   Tests: `objectstorage/v1/objects/create_options_test.go:TestObjectCreateOptionsPreflightAndCallbackCauses`, `objectstorage/v1/objects/create_upload_test.go:TestObjectCreateUploadNativeOwnershipGuards`.
 - Connection exposes CreateObject and IsObjectStale through the shared service client, with fresh capture and independent phase/result proof.
-  Tests: `connection_objectstorage_create_object_test.go:TestConnectionObjectCreateSharesClientAndOwnsSources`.
+  Tests: `connectiontest/connection_objectstorage_create_object_test.go:TestConnectionObjectCreateSharesClientAndOwnsSources`.
 - Swift generated native/service files remain byte-exact, accounts/containers/objects gain no generated Collections, and the service guide references CreateObject/IsObjectStale plus SegmentPrefix/SLO-DLO policy.
   Tests: `internal/cmd/sdkgen/swift_object_create_test.go:TestSwiftObjectCreatePreservesNativeAndRegistry`.
 
@@ -101,7 +101,7 @@ Go API:
 - Native HEAD retry preserves captured option/source headers until permitted native overrides, uses live auth, does not rerun callbacks, and snapshots rejected error proof before callback mutation. Accepted source/context faults stay sticky and do not commit a decision.
   Tests: `objectstorage/v1/objects/stale_contracts_test.go:TestIsObjectStaleContractsDirtyMissingAndLiveGuards`, `objectstorage/v1/objects/stale_options_test.go:TestObjectStaleOptionsNativeSnapshotAndProof`, `objectstorage/v1/objects/stale_core_test.go:TestObjectStaleCoreAcceptedFailuresAndStickyGuards`.
 - Connection exposes CreateObject and IsObjectStale through the shared service client, with fresh capture and independent phase/result proof.
-  Tests: `connection_objectstorage_create_object_test.go:TestConnectionObjectCreateSharesClientAndOwnsSources`.
+  Tests: `connectiontest/connection_objectstorage_create_object_test.go:TestConnectionObjectCreateSharesClientAndOwnsSources`.
 - Swift generated native/service files remain byte-exact, accounts/containers/objects gain no generated Collections, and the service guide references CreateObject/IsObjectStale plus SegmentPrefix/SLO-DLO policy.
   Tests: `internal/cmd/sdkgen/swift_object_create_test.go:TestSwiftObjectCreatePreservesNativeAndRegistry`.
 - IsObjectStale HEADs the object, compares x-sdk-md5 and x-sdk-sha256 metadata with the local file hashes and reports a missing object as stale, as Python does.
@@ -285,5 +285,5 @@ stale = conn.object_store.is_object_stale("backups", "archive.tar", local_filena
 - [stale core](stale_core_test.go)
 - [stale options](stale_options_test.go)
 - [Stale Contracts Test](stale_contracts_test.go)
-- [Connection](../../../connection_objectstorage_create_object_test.go)
+- [Connection](../../../connectiontest/connection_objectstorage_create_object_test.go)
 - [generator](../../../internal/cmd/sdkgen/swift_object_create_test.go)

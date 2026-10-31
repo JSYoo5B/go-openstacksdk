@@ -28,7 +28,7 @@ Go API:
 - Every port page is collected before the Source discriminator. None/false/zero/underflow/empty values select both buckets; exact internal/external select their owner families; other truthy values yield empty success after I/O. Internal owners precede gateway owners with stable within-bucket order and no duplicate removal.
   Tests: `network/cloud_router_interfaces_test.go:TestCloudRouterInterfacesCollectsEveryPageBeforeStableOwnerBuckets`, `network/cloud_router_interfaces_test.go:TestCloudRouterInterfacesFalseyExactUnknownAndNonstringTypes`.
 - Actual normalized Port Resource/raw Wire/envelope/header/status, selected Ports and partial Inventory/LastPort/JSON Value are independently owned. CurrentLocation is injected by Connection with loaded project semantics and no forged wire zone. Headers/microversion/JSON pointers are snapshots and source/API/context guards span callbacks, collection and selection.
-  Tests: `network/cloud_router_interfaces_test.go:TestCloudRouterInterfacesOwnedInputsLocationHeadersAndRawReceipt`, `network/cloud_router_interfaces_test.go:TestCloudRouterInterfacesSourceGuardCancellationAndPreflight`, `connection_router_interface_records_test.go:TestConnectionRouterInterfacesClassifyCompletePortsWithConfiguredLocation`.
+  Tests: `network/cloud_router_interfaces_test.go:TestCloudRouterInterfacesOwnedInputsLocationHeadersAndRawReceipt`, `network/cloud_router_interfaces_test.go:TestCloudRouterInterfacesSourceGuardCancellationAndPreflight`, `connectiontest/connection_router_interface_records_test.go:TestConnectionRouterInterfacesClassifyCompletePortsWithConfiguredLocation`.
 - Late physical pages at 200/203/401/404/429/503 preserve real response body/header/status and native pointer401 ErrOriginal VALUE receipt/ErrReauth, stop fault retry/backoff/reauth callbacks and prevent successful partial Ports/Value even for unknown interface_type.
   Tests: `network/cloud_router_interfaces_test.go:TestCloudRouterInterfacesLatePagesPreventPartialSuccessAndKeepPhysicalFaults`.
 
@@ -91,4 +91,4 @@ func main(){
 - [list_router_interfaces Source](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L2205)
 - [Port](https://github.com/openstack/neutron/blob/27.0.0/neutron/conf/policies/port.py)
 - [Cloud Router Interfaces Test](cloud_router_interfaces_test.go)
-- [Connection Router Interface Records Test](../connection_router_interface_records_test.go)
+- [Connection Router Interface Records Test](../connectiontest/connection_router_interface_records_test.go)

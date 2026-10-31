@@ -19,7 +19,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.WithSetTempURLKeySecondary`
 
 - One bodyless exact-account-Endpoint POST204 sends only selected primary or secondary X-Account-Meta-Temp-URL-Key header, transmits empty key literally, and performs no implicit HEAD/refresh.
-  Tests: `objectstorage/v1/temp_url_key_contracts_test.go:TestTempURLKeyContractsWireAndSelection`, `objectstorage/v1/accounts/temp_url_key_core_test.go:TestAccountTempURLKeyCoreWireAndStatus`, `connection_objectstorage_temp_url_key_test.go:TestConnectionTempURLKeySharesClientAndSnapshotsEachWorkflow`.
+  Tests: `objectstorage/v1/temp_url_key_contracts_test.go:TestTempURLKeyContractsWireAndSelection`, `objectstorage/v1/accounts/temp_url_key_core_test.go:TestAccountTempURLKeyCoreWireAndStatus`, `connectiontest/connection_objectstorage_temp_url_key_test.go:TestConnectionTempURLKeySharesClientAndSnapshotsEachWorkflow`.
 - Concrete full/header/header-map/secondary options own factory and callback snapshots, replace full configuration and apply canonical header overwrite; default false selects primary.
   Tests: `objectstorage/v1/temp_url_key_contracts_test.go:TestTempURLKeyContractsPresenceAndOptions`, `objectstorage/v1/accounts/temp_url_key_options_test.go:TestAccountTempURLKeyOptionsSnapshotsAndReplacement`, `objectstorage/v1/accounts/temp_url_key_options_test.go:TestAccountTempURLKeyOptionsParallelAndInvalidHeaders`.
 - Source/context/literal key preflight preserves invalid-option and cancellation causes before HTTP; setter never sends a body or asks consumer builders.
@@ -51,7 +51,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithSetTempURLKeySecondary`
 
 - One bodyless literal container POST204 uses captured effective ResourceBase with once-escaped Unicode/percent/space/colon/question/hash name and correct X-Container-Meta-Temp-URL-Key slot; no account prefix/discovery/implicit HEAD.
-  Tests: `objectstorage/v1/temp_url_key_contracts_test.go:TestTempURLKeyContractsWireAndSelection`, `objectstorage/v1/containers/temp_url_key_core_test.go:TestContainerTempURLKeyCoreWireAndStatus`, `connection_objectstorage_temp_url_key_test.go:TestConnectionTempURLKeySharesClientAndSnapshotsEachWorkflow`.
+  Tests: `objectstorage/v1/temp_url_key_contracts_test.go:TestTempURLKeyContractsWireAndSelection`, `objectstorage/v1/containers/temp_url_key_core_test.go:TestContainerTempURLKeyCoreWireAndStatus`, `connectiontest/connection_objectstorage_temp_url_key_test.go:TestConnectionTempURLKeySharesClientAndSnapshotsEachWorkflow`.
 - Concrete full/header/header-map/secondary options own factory and callback snapshots, replace full configuration and apply canonical header overwrite; default false selects primary.
   Tests: `objectstorage/v1/temp_url_key_contracts_test.go:TestTempURLKeyContractsPresenceAndOptions`, `objectstorage/v1/containers/temp_url_key_options_test.go:TestContainerTempURLKeyOptionsSnapshotsAndReplacement`, `objectstorage/v1/containers/temp_url_key_options_test.go:TestContainerTempURLKeyOptionsParallelAndInvalidHeaders`.
 - Source/context/literal key preflight preserves invalid-option and cancellation causes before HTTP; setter never sends a body or asks consumer builders.
@@ -85,7 +85,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithoutGetTempURLKeyNewest`
 
 - Fresh container HEAD204 prefers nonempty secondary then primary; only successful absent/empty keys cause account HEAD204 with same preference. Account-only omits container HTTP and any HTTP failure stops fallback.
-  Tests: `objectstorage/v1/temp_url_key_contracts_test.go:TestTempURLKeyContractsWireAndSelection`, `objectstorage/v1/temp_url_key_contracts_test.go:TestTempURLKeyContractsPhaseEvidence`, `objectstorage/v1/temp_url_key_core_test.go:TestTempURLKeyCoreSelectionAndProof`, `objectstorage/v1/temp_url_key_core_test.go:TestTempURLKeyCoreStopsOnErrors`, `connection_objectstorage_temp_url_key_test.go:TestConnectionTempURLKeySharesClientAndSnapshotsEachWorkflow`.
+  Tests: `objectstorage/v1/temp_url_key_contracts_test.go:TestTempURLKeyContractsWireAndSelection`, `objectstorage/v1/temp_url_key_contracts_test.go:TestTempURLKeyContractsPhaseEvidence`, `objectstorage/v1/temp_url_key_core_test.go:TestTempURLKeyCoreSelectionAndProof`, `objectstorage/v1/temp_url_key_core_test.go:TestTempURLKeyCoreStopsOnErrors`, `connectiontest/connection_objectstorage_temp_url_key_test.go:TestConnectionTempURLKeySharesClientAndSnapshotsEachWorkflow`.
 - No usable key gives nil Key/zero selection flags, while raw full metadata distinguishes absent versus explicit empty; whitespace and Unicode remain literal selected UTF8 bytes.
   Tests: `objectstorage/v1/temp_url_key_contracts_test.go:TestTempURLKeyContractsPresenceAndOptions`, `objectstorage/v1/temp_url_key_core_test.go:TestTempURLKeyCoreSelectionAndProof`.
 - Full/header/header-map/container/newest/without-newest options own maps and pointers, replace final configuration, preserve explicitfalse/true on both phases and emptyContainer account-only reset.
@@ -93,7 +93,7 @@ Go API:
 - Joint account/container custom/remove prefixes and auth/framing/newest are protected; original ASCII tokens/aliases/UTF8 values and source/context/name validation precede HTTP.
   Tests: `objectstorage/v1/temp_url_key_contracts_test.go:TestTempURLKeyContractsPreflightAndSource`, `objectstorage/v1/temp_url_key_core_test.go:TestTempURLKeyCorePreflightAndAcceptedSourceGuard`, `objectstorage/v1/temp_url_key_options_test.go:TestTempURLKeyOptionsParallelReuseAndPreflight`.
 - Original Service/API/client/provider/Endpoint/rawResourceBase/type/version identities stay fixed across callbacks and accepted responses; late drift clears current Metadata, retains rawproof and prevents account fallback. Captured ordinary headers and original live auth persist.
-  Tests: `objectstorage/v1/temp_url_key_contracts_test.go:TestTempURLKeyContractsPreflightAndSource`, `objectstorage/v1/temp_url_key_core_test.go:TestTempURLKeyCorePreflightAndAcceptedSourceGuard`, `objectstorage/v1/temp_url_key_core_test.go:TestTempURLKeyCoreCapturedHeadersAndNativeSigner`, `connection_objectstorage_temp_url_key_test.go:TestConnectionTempURLKeySharesClientAndSnapshotsEachWorkflow`.
+  Tests: `objectstorage/v1/temp_url_key_contracts_test.go:TestTempURLKeyContractsPreflightAndSource`, `objectstorage/v1/temp_url_key_core_test.go:TestTempURLKeyCorePreflightAndAcceptedSourceGuard`, `objectstorage/v1/temp_url_key_core_test.go:TestTempURLKeyCoreCapturedHeadersAndNativeSigner`, `connectiontest/connection_objectstorage_temp_url_key_test.go:TestConnectionTempURLKeySharesClientAndSnapshotsEachWorkflow`.
 - Full atomic metadata projection rejects malformed unrelated metadata/counters/duplicate recognized fields even with usable key; signed int64/literal dates/unknown opaque body evidence are preserved.
   Tests: `objectstorage/v1/temp_url_key_contracts_test.go:TestTempURLKeyContractsPhaseEvidence`, `objectstorage/v1/temp_url_key_core_test.go:TestTempURLKeyCoreStopsOnErrors`.
 - Result allocation follows first accepted raw proof only; later account native/transport or accepted handling failure retains earlier container proof and any currentaccepted proof, with Key/selection flags zero and underlying causes retained.
@@ -196,5 +196,5 @@ func main() {}
 - [getter core](temp_url_key_core_test.go)
 - [options](temp_url_key_options_test.go)
 - [Temp Url Key Contracts Test](temp_url_key_contracts_test.go)
-- [Connection Objectstorage Temp Url Key Test](../../connection_objectstorage_temp_url_key_test.go)
+- [Connection Objectstorage Temp Url Key Test](../../connectiontest/connection_objectstorage_temp_url_key_test.go)
 - [Swift Temp Url Key Test](../../internal/cmd/sdkgen/swift_temp_url_key_test.go)

@@ -17,9 +17,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/quotas.ProjectQuotaScope.Get`
 
 - Explicit project IDs perform no lookup; exact names are resolved once with a separate Keystone v3 client across pages, retaining missing/duplicate/invalid-ID/403 failures and selected Network-client headers.
-  Tests: `api/neutron_project_quotas_projects_test.go:TestNeutronProjectQuotaResolvesNameOnceUsingSeparateIdentityClient`, `api/neutron_project_quotas_projects_test.go:TestNeutronProjectQuotaLookupFailuresPreventNetworkRequests`, `connection_project_quotas_test.go:TestConnectionServiceQuotaNamesUseSeparateIdentityClient`.
+  Tests: `api/neutron_project_quotas_projects_test.go:TestNeutronProjectQuotaResolvesNameOnceUsingSeparateIdentityClient`, `api/neutron_project_quotas_projects_test.go:TestNeutronProjectQuotaLookupFailuresPreventNetworkRequests`, `connectiontest/connection_project_quotas_test.go:TestConnectionServiceQuotaNamesUseSeparateIdentityClient`.
 - CurrentProject freezes the recorded Keystone v2/v3 project ID; later auth changes do not move the target, and missing/unsupported/typed-nil/system/domain/malformed auth results fail before HTTP.
-  Tests: `api/neutron_project_quotas_projects_test.go:TestNeutronProjectQuotaCurrentProjectUsesRecordedV3AndV2Auth`, `api/neutron_project_quotas_projects_test.go:TestNeutronProjectQuotaCurrentProjectRejectsMissingOrMalformedAuth`, `connection_project_quotas_test.go:TestConnectionServiceQuotasIDAuthAndCancellation`.
+  Tests: `api/neutron_project_quotas_projects_test.go:TestNeutronProjectQuotaCurrentProjectUsesRecordedV3AndV2Auth`, `api/neutron_project_quotas_projects_test.go:TestNeutronProjectQuotaCurrentProjectRejectsMissingOrMalformedAuth`, `connectiontest/connection_project_quotas_test.go:TestConnectionServiceQuotasIDAuthAndCancellation`.
 - GET uses /quotas/{fixedProject}, keeps native zero/unlimited limits, exact raw extension/null/large-integer fields, selected ResourceBase/configured headers and independent response metadata.
   Tests: `api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaOperationsKeepTargetRawJSONAndMetadata`.
 - Missing/null/array/scalar quota envelopes and wrong known field types fail; Detail accepts native integer-string reserved values but rejects malformed integer strings.
@@ -44,9 +44,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/quotas.ProjectQuotaScope.Detail`
 
 - Explicit project IDs perform no lookup; exact names are resolved once with a separate Keystone v3 client across pages, retaining missing/duplicate/invalid-ID/403 failures and selected Network-client headers.
-  Tests: `api/neutron_project_quotas_projects_test.go:TestNeutronProjectQuotaResolvesNameOnceUsingSeparateIdentityClient`, `api/neutron_project_quotas_projects_test.go:TestNeutronProjectQuotaLookupFailuresPreventNetworkRequests`, `connection_project_quotas_test.go:TestConnectionServiceQuotaNamesUseSeparateIdentityClient`.
+  Tests: `api/neutron_project_quotas_projects_test.go:TestNeutronProjectQuotaResolvesNameOnceUsingSeparateIdentityClient`, `api/neutron_project_quotas_projects_test.go:TestNeutronProjectQuotaLookupFailuresPreventNetworkRequests`, `connectiontest/connection_project_quotas_test.go:TestConnectionServiceQuotaNamesUseSeparateIdentityClient`.
 - CurrentProject freezes the recorded Keystone v2/v3 project ID; later auth changes do not move the target, and missing/unsupported/typed-nil/system/domain/malformed auth results fail before HTTP.
-  Tests: `api/neutron_project_quotas_projects_test.go:TestNeutronProjectQuotaCurrentProjectUsesRecordedV3AndV2Auth`, `api/neutron_project_quotas_projects_test.go:TestNeutronProjectQuotaCurrentProjectRejectsMissingOrMalformedAuth`, `connection_project_quotas_test.go:TestConnectionServiceQuotasIDAuthAndCancellation`.
+  Tests: `api/neutron_project_quotas_projects_test.go:TestNeutronProjectQuotaCurrentProjectUsesRecordedV3AndV2Auth`, `api/neutron_project_quotas_projects_test.go:TestNeutronProjectQuotaCurrentProjectRejectsMissingOrMalformedAuth`, `connectiontest/connection_project_quotas_test.go:TestConnectionServiceQuotasIDAuthAndCancellation`.
 - GET uses native /quotas/{fixedProject}/details.json, retains Used/Reserved/Limit values and exact nested raw fields including integer-string reserved compatibility.
   Tests: `api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaOperationsKeepTargetRawJSONAndMetadata`.
 - Missing/null/array/scalar quota envelopes and wrong known field types fail; Detail accepts native integer-string reserved values but rejects malformed integer strings.
@@ -262,7 +262,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/quotas.ProjectQuotaScope.Detail`
 
 - A project name resolves once through a separate Identity client and is then reused; Get reads GET /quotas/{project} and Detail reads the usage endpoint for the resolved ID.
-  Tests: `connection_project_quotas_test.go:TestConnectionServiceQuotaNamesUseSeparateIdentityClient`, `connection_py_cloud_net_quotas_test.go:TestPyCloudNetNetworkQuotasGetDetailAndNamedProjectLookup`, `connection_py_cloud_net_quotas_test.go:TestPyCloudNetNetworkQuotasMissingNamedProjectFailsBeforeNeutron`.
+  Tests: `connectiontest/connection_project_quotas_test.go:TestConnectionServiceQuotaNamesUseSeparateIdentityClient`, `connectiontest/connection_py_cloud_net_quotas_test.go:TestPyCloudNetNetworkQuotasGetDetailAndNamedProjectLookup`, `connectiontest/connection_py_cloud_net_quotas_test.go:TestPyCloudNetNetworkQuotasMissingNamedProjectFailsBeforeNeutron`.
 - Limit and detail endpoints preserve fixed project identity and native/raw result fields.
   Tests: `api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaOperationsKeepTargetRawJSONAndMetadata`.
 
@@ -284,9 +284,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/quotas.WithUpdateCheckLimit`
 
 - Named project lookup happens once through a separate Identity client; a missing named project fails before any Neutron request.
-  Tests: `connection_project_quotas_test.go:TestConnectionServiceQuotaNamesUseSeparateIdentityClient`, `connection_py_cloud_net_quotas_test.go:TestPyCloudNetNetworkQuotasGetDetailAndNamedProjectLookup`, `connection_py_cloud_net_quotas_test.go:TestPyCloudNetNetworkQuotasMissingNamedProjectFailsBeforeNeutron`.
+  Tests: `connectiontest/connection_project_quotas_test.go:TestConnectionServiceQuotaNamesUseSeparateIdentityClient`, `connectiontest/connection_py_cloud_net_quotas_test.go:TestPyCloudNetNetworkQuotasGetDetailAndNamedProjectLookup`, `connectiontest/connection_py_cloud_net_quotas_test.go:TestPyCloudNetNetworkQuotasMissingNamedProjectFailsBeforeNeutron`.
 - Update sends PUT /quotas/{project} with a quota envelope that keeps zero, -1 and an explicit check_limit=false and omits unset limits.
-  Tests: `connection_py_cloud_net_quotas_test.go:TestPyCloudNetNetworkQuotasUpdateBodyKeepsZeroUnlimitedAndCheckLimit`, `api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaUpdateOmittedFalseZeroAndSnapshotAcrossReauth`, `api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaOptionsSnapshotAtCreationAndRemainReusable`.
+  Tests: `connectiontest/connection_py_cloud_net_quotas_test.go:TestPyCloudNetNetworkQuotasUpdateBodyKeepsZeroUnlimitedAndCheckLimit`, `api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaUpdateOmittedFalseZeroAndSnapshotAcrossReauth`, `api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaOptionsSnapshotAtCreationAndRemainReusable`.
 
 Python/Go differences:
 
@@ -306,9 +306,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/quotas.WithDeleteIgnoreMissing`
 
 - Named project lookup happens once through a separate Identity client; a missing named project fails before any Neutron request.
-  Tests: `connection_project_quotas_test.go:TestConnectionServiceQuotaNamesUseSeparateIdentityClient`, `connection_py_cloud_net_quotas_test.go:TestPyCloudNetNetworkQuotasGetDetailAndNamedProjectLookup`, `connection_py_cloud_net_quotas_test.go:TestPyCloudNetNetworkQuotasMissingNamedProjectFailsBeforeNeutron`.
+  Tests: `connectiontest/connection_project_quotas_test.go:TestConnectionServiceQuotaNamesUseSeparateIdentityClient`, `connectiontest/connection_py_cloud_net_quotas_test.go:TestPyCloudNetNetworkQuotasGetDetailAndNamedProjectLookup`, `connectiontest/connection_py_cloud_net_quotas_test.go:TestPyCloudNetNetworkQuotasMissingNamedProjectFailsBeforeNeutron`.
 - Delete sends DELETE /quotas/{project} without a body; strict versus ignore-missing handling is explicit.
-  Tests: `connection_py_cloud_net_quotas_test.go:TestPyCloudNetNetworkQuotasDeleteSendsNoBody`, `api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaHTTPFailuresAndStrictMissingPolicy`.
+  Tests: `connectiontest/connection_py_cloud_net_quotas_test.go:TestPyCloudNetNetworkQuotasDeleteSendsNoBody`, `api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaHTTPFailuresAndStrictMissingPolicy`.
 
 Python/Go differences:
 

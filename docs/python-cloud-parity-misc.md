@@ -48,7 +48,7 @@ Go API:
 - Source is captured before callbacks; recorded/configured location is owned before HTTP and remote Wire location cannot replace it. AllRecords, selected Records, Envelope and Value are independent; late paging and guarded cancellation/source failures leave receipts without successful partial selection. Actual HTTP Content-Length faults at the second 200/203/401/404/429/503 page preserve physical body/header/status, pointer ErrOriginal/ErrReauth and zero fault retry/backoff/reauth callbacks.
   Tests: `objectstorage/cloud_container_search_test.go:TestSwiftCloudContainerSearchLocationIsOwnedAndRemoteWireCannotReplaceIt`, `objectstorage/cloud_container_search_test.go:TestSwiftCloudContainerSearchMalformedLatePagePreventsSuccessfulPartialResult`, `objectstorage/cloud_container_search_test.go:TestSwiftCloudContainerSearchSourceCapturePrecedesOptionsAndKeepsCancellationCause`, `objectstorage/cloud_container_search_test.go:TestSwiftCloudContainerSearchOwnsRawFiltersAndHeaderNilReset`, `objectstorage/cloud_container_search_test.go:TestSwiftCloudContainerSearchPhysicalLatePageKeepsNative401AndStopsHooks`.
 - Connection shares the generated Swift Cloud facade and cached service client, supplies configured location before local selection, retains explicit owned per-call location, and handles DTO reset and callbacks once. Invalid/canceled connection fails without discovery or invented response.
-  Tests: `connection_swift_container_records_test.go:TestConnectionSwiftContainerSearchSharesFacadeAndAutomaticLocationBeforeSelection`, `connection_swift_container_records_test.go:TestConnectionSwiftContainerSearchPerCallLocationRemainsOwnedAndCallbackRunsOnce`, `connection_swift_container_records_test.go:TestConnectionSwiftContainerSearchPreflightDoesNotDiscoverOrFabricateResponse`.
+  Tests: `connectiontest/connection_swift_container_records_test.go:TestConnectionSwiftContainerSearchSharesFacadeAndAutomaticLocationBeforeSelection`, `connectiontest/connection_swift_container_records_test.go:TestConnectionSwiftContainerSearchPerCallLocationRemainsOwnedAndCallbackRunsOnce`, `connectiontest/connection_swift_container_records_test.go:TestConnectionSwiftContainerSearchPreflightDoesNotDiscoverOrFabricateResponse`.
 
 Python/Go differences:
 
@@ -361,9 +361,9 @@ Go API:
 - Full JMESPath returns null/scalar/object/list as independent Value with Expression=true and no invented Records correlation; malformed expressions on empty name selection preserve errors.
   Tests: `objectstorage/cloud_object_search_test.go:TestSwiftCloudObjectSearchExpressionsReturnArbitraryJSONWithoutRowAssociation`.
 - Direct Source Object location remains null while Connection automatically supplies configured CurrentLocation before selection; explicit overrides and whole DTO reset own all pointers/bytes and cannot accept forged remote location.
-  Tests: `objectstorage/cloud_object_search_test.go:TestSwiftCloudObjectSearchLocationIsOwnedAndRemoteWireCannotReplaceIt`, `objectstorage/cloud_object_search_test.go:TestSwiftCloudObjectSearchUsesDefaultNullAndKeepsURIAndMetadataOutsideCloudView`, `connection_swift_object_search_test.go:TestConnectionSwiftObjectSearchSharesFacadeAndAutomaticLocationBeforeSelection`, `connection_swift_object_search_test.go:TestConnectionSwiftObjectSearchPerCallLocationRemainsOwnedAndCallbackRunsOnce`.
+  Tests: `objectstorage/cloud_object_search_test.go:TestSwiftCloudObjectSearchLocationIsOwnedAndRemoteWireCannotReplaceIt`, `objectstorage/cloud_object_search_test.go:TestSwiftCloudObjectSearchUsesDefaultNullAndKeepsURIAndMetadataOutsideCloudView`, `connectiontest/connection_swift_object_search_test.go:TestConnectionSwiftObjectSearchSharesFacadeAndAutomaticLocationBeforeSelection`, `connectiontest/connection_swift_object_search_test.go:TestConnectionSwiftObjectSearchPerCallLocationRemainsOwnedAndCallbackRunsOnce`.
 - Late page or physical handling/source/cancellation failures retain partial AllRecords and actual LastPage without a successful Value/Records. Real HTTP Content-Length faults at 200/203/401/404/429/503 preserve native pointer401 ErrOriginal/ErrReauth and block fault hooks. Source is captured before callbacks and preflight errors perform no discovery or fabricated response.
-  Tests: `objectstorage/cloud_object_search_test.go:TestSwiftCloudObjectSearchMalformedLatePagePreventsSuccessfulPartialResult`, `objectstorage/cloud_object_search_test.go:TestSwiftCloudObjectSearchSourceCapturePrecedesOptionsAndKeepsCancellationCause`, `objectstorage/cloud_object_search_test.go:TestSwiftCloudObjectSearchOwnsRawFiltersAndHeaderNilReset`, `objectstorage/cloud_object_search_test.go:TestSwiftCloudObjectSearchPhysicalLatePageKeepsNative401AndStopsHooks`, `connection_swift_object_search_test.go:TestConnectionSwiftObjectSearchPreflightDoesNotDiscoverOrFabricateResponse`.
+  Tests: `objectstorage/cloud_object_search_test.go:TestSwiftCloudObjectSearchMalformedLatePagePreventsSuccessfulPartialResult`, `objectstorage/cloud_object_search_test.go:TestSwiftCloudObjectSearchSourceCapturePrecedesOptionsAndKeepsCancellationCause`, `objectstorage/cloud_object_search_test.go:TestSwiftCloudObjectSearchOwnsRawFiltersAndHeaderNilReset`, `objectstorage/cloud_object_search_test.go:TestSwiftCloudObjectSearchPhysicalLatePageKeepsNative401AndStopsHooks`, `connectiontest/connection_swift_object_search_test.go:TestConnectionSwiftObjectSearchPreflightDoesNotDiscoverOrFabricateResponse`.
 
 Python/Go differences:
 
@@ -479,13 +479,13 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCloudStreamQueryString`
 
 - Library-owned factory returns a lazy, single-use closeable binary chunk iterator; default1024 and query_string ignored even when malformed. No discovery/options/GET before iteration; connection supplies the cached Swift Cloud facade. Receipt is actual status/header and each returned chunk is independently owned.
-  Tests: `objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamLazyDefaultBinaryChunksAndSingleUse`, `objectstorage/cloud_object_stream_test.go:TestSwiftCloudObjectStreamLazyAliasIgnoredQueryAndCleanMissing`, `connection_swift_object_stream_test.go:TestConnectionSwiftChunkStreamDiscoversLazilyAndSharesCachedFacade`.
+  Tests: `objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamLazyDefaultBinaryChunksAndSingleUse`, `objectstorage/cloud_object_stream_test.go:TestSwiftCloudObjectStreamLazyAliasIgnoredQueryAndCleanMissing`, `connectiontest/connection_swift_object_stream_test.go:TestConnectionSwiftChunkStreamDiscoversLazilyAndSharesCachedFacade`.
 - Typed concrete ChunkSize/QueryString options and pointer snapshots require no application interface builder. Short physical reads are assembled into bounded owned chunks, nil default and explicit sizes are copied before mutation; nil/cancelled context/client/options and unsafe literal names fail without HTTP.
-  Tests: `objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamChunkSizeSnapshotShortReadsAndValidation`, `objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamNilCancelledAndOptionSourceMutationBeforeHTTP`, `objectstorage/cloud_object_stream_test.go:TestSwiftCloudObjectStreamNilCancelledAndClosedHandleStayLazy`, `connection_swift_object_stream_test.go:TestConnectionSwiftChunkStreamPreflightAndClosedHandleNeverDiscover`.
+  Tests: `objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamChunkSizeSnapshotShortReadsAndValidation`, `objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamNilCancelledAndOptionSourceMutationBeforeHTTP`, `objectstorage/cloud_object_stream_test.go:TestSwiftCloudObjectStreamNilCancelledAndClosedHandleStayLazy`, `connectiontest/connection_swift_object_stream_test.go:TestConnectionSwiftChunkStreamPreflightAndClosedHandleNeverDiscover`.
 - Source-valid physical100..399 status range includes199/203/204/206 and provided304 body; native400+ errors retain actual status/header/body. Only a clean404 after successful physicalRead/Close and encoded-body validation becomes empty success, retaining receipt404; mixed404 physical/decode failures remain errors.
-  Tests: `objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamSourceSuccessStatusAnd304Body`, `objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamClean404OnlyEmptyAndOtherNativeStatuses`, `objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamMissingReadCloseFaultsAreNotSuppressed`, `objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamCompressedRejectionsValidateBeforeIgnoring404`, `connection_swift_object_stream_test.go:TestConnectionSwiftChunkStreamMissingReturnsActualReceipt`.
+  Tests: `objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamSourceSuccessStatusAnd304Body`, `objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamClean404OnlyEmptyAndOtherNativeStatuses`, `objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamMissingReadCloseFaultsAreNotSuppressed`, `objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamCompressedRejectionsValidateBeforeIgnoring404`, `connectiontest/connection_swift_object_stream_test.go:TestConnectionSwiftChunkStreamMissingReturnsActualReceipt`.
 - EOF/error/break/consumerClose cleans physical body once; callbackClose prevents GET; Close during GET adopts and closes late unread body plus actual receipt. Check Err/Close for early-break cleanup failure; consumerClose prevents next Read; private receipt and unary/native error snapshots resist caller header/body mutation.
-  Tests: `objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamBreakClosesOnceAndRetainsCleanupFailure`, `objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamCloseFromOptionsAndConsumerStopsBeforeAnotherRead`, `objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamConcurrentCloseDuringGETOwnsLateBody`, `objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamPartialReadCloseAndImmutableCurrentChunkProof`, `objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamNativePolicyErrorCopiesUnaryActualReceipt`, `connection_swift_object_stream_test.go:TestConnectionSwiftChunkStreamCleanupErrorsKeepPrivateProof`.
+  Tests: `objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamBreakClosesOnceAndRetainsCleanupFailure`, `objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamCloseFromOptionsAndConsumerStopsBeforeAnotherRead`, `objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamConcurrentCloseDuringGETOwnsLateBody`, `objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamPartialReadCloseAndImmutableCurrentChunkProof`, `objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamNativePolicyErrorCopiesUnaryActualReceipt`, `connectiontest/connection_swift_object_stream_test.go:TestConnectionSwiftChunkStreamCleanupErrorsKeepPrivateProof`.
 - Bodyless GET pins selected source/provider/account route/version/header facts through options, read, Close, auth/retry. Restored source plus custom cancellation/read/Close retain actual physical partial proof; native401 physical fault keeps ErrOriginal+ErrReauth and suppresses all retry/reauth/backoff hooks. Clean401 renewal and429/498 backoff reuse fixed request.
   Tests: `objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamStickyRestoredSourceAndCancellationAfterActualRead`, `objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamNative401PhysicalFaultDoesNotInvokeHooks`, `objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamCleanNativeRenewalAndBackoffReuseFixedRoute`.
 - Requests baseline Accept:*/* and explicit Accept-Encoding:gzip, deflate, zstd fix request defaults without X-Newest. Owned caller override is snapshotted and native retry cannot change it. Real default Go transport preserves actual compressed Content-Encoding/Content-Length while bytes stream decoded, with no accidental auto-gzip double decoding.
@@ -548,7 +548,7 @@ Go API:
 - ReuseSourceaccepted100..399 guardedrawGET, pinnedheaderdefaults/encoding policy andincrementalgzip/xgzip/zlib/rawdeflate/zstd decoderhelpers; originalcompressedHeader remainsdistinct fromdecodedtext/filebytes. Cleancompressed404 requiresdecoder success, corruptcompressed404 stayserror with actualraw nativeproof andnoMissing.
   Tests: `objectstorage/v1/objects/python_cloud_get_test.go:TestPythonCloudObjectGetSharedCodecsAndCompressedMissingFaults`.
 - Eager Connection text/output handling shares the cached Swift facade and retained actual receipt, preserving cancellation and invalid-call failures before discovery.
-  Tests: `connection_cycle7_records_test.go:TestConnectionObjectGetTextSharesCachedSwiftAndRetainsReceipt`, `connection_cycle7_records_test.go:TestConnectionCycle7PreflightPreservesCancellationBeforeDiscovery`.
+  Tests: `connectiontest/connection_cycle7_records_test.go:TestConnectionObjectGetTextSharesCachedSwiftAndRetainsReceipt`, `connectiontest/connection_cycle7_records_test.go:TestConnectionCycle7PreflightPreservesCancellationBeforeDiscovery`.
 
 Python/Go differences:
 
@@ -572,7 +572,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk.Connection.CurrentLocation`
 
 - CurrentLocation returns cloud, region_name, null zone and the project id from the recorded token scope with project name and domain from configuration, encoded with the Python key names, without any request beyond the initial authentication.
-  Tests: `python_parity_test.go:TestPythonConnectionCurrentLocationProjectAndName`.
+  Tests: `connectiontest/python_parity_test.go:TestPythonConnectionCurrentLocationProjectAndName`.
 
 Python/Go differences:
 
@@ -590,7 +590,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk.Connection.CurrentLocation`
 
 - CurrentLocation returns cloud, region_name, null zone and the project id from the recorded token scope with project name and domain from configuration, encoded with the Python key names, without any request beyond the initial authentication.
-  Tests: `python_parity_test.go:TestPythonConnectionCurrentLocationProjectAndName`.
+  Tests: `connectiontest/python_parity_test.go:TestPythonConnectionCurrentLocationProjectAndName`.
 
 Python/Go differences:
 
@@ -606,9 +606,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk.Connection.CurrentLocation`
 
 - CurrentLocation returns cloud, region_name, null zone and the project id from the recorded token scope with project name and domain from configuration, encoded with the Python key names, without any request beyond the initial authentication.
-  Tests: `python_parity_test.go:TestPythonConnectionCurrentLocationProjectAndName`.
+  Tests: `connectiontest/python_parity_test.go:TestPythonConnectionCurrentLocationProjectAndName`.
 - An unscoped token yields a nil CurrentLocation().Project.ID, matching Python None.
-  Tests: `python_parity_test.go:TestPythonConnectionCurrentProjectIDUnscopedIsNull`.
+  Tests: `connectiontest/python_parity_test.go:TestPythonConnectionCurrentProjectIDUnscopedIsNull`.
 
 Python/Go differences:
 
@@ -624,7 +624,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk.Connection.CurrentLocation`
 
 - CurrentLocation returns cloud, region_name, null zone and the project id from the recorded token scope with project name and domain from configuration, encoded with the Python key names, without any request beyond the initial authentication.
-  Tests: `python_parity_test.go:TestPythonConnectionCurrentLocationProjectAndName`.
+  Tests: `connectiontest/python_parity_test.go:TestPythonConnectionCurrentLocationProjectAndName`.
 
 Python/Go differences:
 
@@ -722,9 +722,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk.Connection.GlobalRequest`
 
 - The request ID is applied to every request of the derived Connection and never to the receiver.
-  Tests: `connection_r2_misc_derive_test.go:TestR2MiscGlobalRequestHeaderOnDerivedConnectionOnly`.
+  Tests: `connectiontest/connection_r2_misc_derive_test.go:TestR2MiscGlobalRequestHeaderOnDerivedConnectionOnly`.
 - Invalid IDs are rejected.
-  Tests: `connection_r2_misc_derive_test.go:TestR2MiscGlobalRequestRejectsUnsafeIDs`.
+  Tests: `connectiontest/connection_r2_misc_derive_test.go:TestR2MiscGlobalRequestRejectsUnsafeIDs`.
 
 Python/Go differences:
 
@@ -741,11 +741,11 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk.Connection.CustomServiceClient`
 
 - The derived Connection shares the provider token and sends the request ID header on compute and network requests, while the parent and already obtained services send none; a derived Connection can be re-derived.
-  Tests: `connection_r2_misc_derive_test.go:TestR2MiscGlobalRequestHeaderOnDerivedConnectionOnly`.
+  Tests: `connectiontest/connection_r2_misc_derive_test.go:TestR2MiscGlobalRequestHeaderOnDerivedConnectionOnly`.
 - Empty, spaced, control, non-ASCII and nil-receiver inputs are rejected before anything is built.
-  Tests: `connection_r2_misc_derive_test.go:TestR2MiscGlobalRequestRejectsUnsafeIDs`.
+  Tests: `connectiontest/connection_r2_misc_derive_test.go:TestR2MiscGlobalRequestRejectsUnsafeIDs`.
 - Custom service clients of a derived Connection carry the header with their own client.
-  Tests: `connection_r2_misc_endpoint_test.go:TestR2MiscAddServiceBuildsLazyClientOncePerConnection`.
+  Tests: `connectiontest/connection_r2_misc_endpoint_test.go:TestR2MiscAddServiceBuildsLazyClientOncePerConnection`.
 
 Python/Go differences:
 
@@ -804,39 +804,39 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/projectcleanup.WithAllowIncompletePlan`
 
 - PlanProjectCleanup sends only project-scoped GETs (no all_tenants/all_projects), fixes the token project (ID, name, domain), orders compute servers before server groups with the server stage waiting for absence, keeps raw rows and times, excludes rows owned by another project and server groups with members that are not server candidates, and reports missing core services as not in catalog and disabled ones as disabled; orchestration, load_balancer and dns are examined only when they have an endpoint, and because every service that Python's project_cleanup cleans is implemented, no service is reported as not yet supported.
-  Tests: `connection_project_cleanup_test.go:TestProjectCleanupPlanDiscoversWithoutMutation`, `connection_project_cleanup_test.go:TestProjectCleanupReportsDisabledCoreServices`.
+  Tests: `connectiontest/connection_project_cleanup_test.go:TestProjectCleanupPlanDiscoversWithoutMutation`, `connectiontest/connection_project_cleanup_test.go:TestProjectCleanupReportsDisabledCoreServices`.
 - Without a filter or selector PlanProjectCleanup fails before HTTP unless WithAllResources is given; unknown skip names are rejected; an unscoped token cannot plan; ExecuteProjectCleanup refuses a modified or hand-built plan and a Connection whose token project differs from the plan's.
-  Tests: `connection_project_cleanup_test.go:TestProjectCleanupRequiresSelectionScopeAndUnchangedPlan`.
+  Tests: `connectiontest/connection_project_cleanup_test.go:TestProjectCleanupRequiresSelectionScopeAndUnchangedPlan`.
 - WithCreatedBefore/WithUpdatedBefore keep resources at or before the cutoff (ISO 8601, no offset means UTC); missing, null or empty times and kinds without the attribute are excluded, and unparsable values are excluded with a reason.
-  Tests: `connection_project_cleanup_test.go:TestProjectCleanupTimeFiltersExcludeMissingAndUnparsableTimes`, `projectcleanup/timefilter_test.go:TestTimeFilterFollowsPythonISO8601Rules`.
+  Tests: `connectiontest/connection_project_cleanup_test.go:TestProjectCleanupTimeFiltersExcludeMissingAndUnparsableTimes`, `projectcleanup/timefilter_test.go:TestTimeFilterFollowsPythonISO8601Rules`.
 - WithSelector sees copies of filtered resources and can include or exclude them, a selector error fails the plan, and WithSkip uses Python's names (compute.server also skips server groups, as in Python).
-  Tests: `connection_project_cleanup_test.go:TestProjectCleanupSelectorAndSkipNames`.
+  Tests: `connectiontest/connection_project_cleanup_test.go:TestProjectCleanupSelectorAndSkipNames`.
 - ExecuteProjectCleanup sends each DELETE once without a prior GET and reports Deleted (absence observed), Accepted, AlreadyMissing (404), Failed with status, headers and body, Uncertain (no response, not retried) and NotAttempted for dependents of failed or uncertain candidates, returning the full Result with an error.
-  Tests: `connection_project_cleanup_test.go:TestProjectCleanupExecuteReportsEveryState`.
+  Tests: `connectiontest/connection_project_cleanup_test.go:TestProjectCleanupExecuteReportsEveryState`.
 - A waiting stage observes every accepted server as absent before the next stage; a polling error is returned at once as WaitErr and makes dependents NotAttempted.
-  Tests: `connection_project_cleanup_test.go:TestProjectCleanupWaitsForServerAbsenceBeforeDependents`.
+  Tests: `connectiontest/connection_project_cleanup_test.go:TestProjectCleanupWaitsForServerAbsenceBeforeDependents`.
 - A progress callback error or context cancellation stops new DELETEs; already-sent candidates keep their observed state and later ones are NotAttempted.
-  Tests: `connection_project_cleanup_test.go:TestProjectCleanupStopsOnProgressErrorAndCancellation`.
+  Tests: `connectiontest/connection_project_cleanup_test.go:TestProjectCleanupStopsOnProgressErrorAndCancellation`.
 - Execution is sequential by default and WithParallelism(n) bounds concurrent DELETEs within a stage while progress callbacks never overlap.
-  Tests: `connection_project_cleanup_test.go:TestProjectCleanupParallelismWithinStage`.
+  Tests: `connectiontest/connection_project_cleanup_test.go:TestProjectCleanupParallelismWithinStage`.
 - A service discovery failure returns the partial plan with a ServiceError naming the service; ExecuteProjectCleanup refuses it unless WithAllowIncompletePlan is given.
-  Tests: `connection_project_cleanup_test.go:TestProjectCleanupDiscoveryErrorNeedsExplicitPartialExecution`.
+  Tests: `connectiontest/connection_project_cleanup_test.go:TestProjectCleanupDiscoveryErrorNeedsExplicitPartialExecution`.
 - Project cleanup discovers block storage backups, snapshots and volumes of the plan's project only (owner attributes excluded), orders backups by levels so that possible dependent backups (later incremental backups of the same volume) are deleted and observed absent first, excludes backups whose possible dependents are not candidates or cannot be ordered, waits for backup and snapshot absence, deletes volumes after their snapshot and attached server candidates without waiting, applies created_at/updated_at filters and the selector to every kind, honours each block_storage skip name, sends each DELETE at most once and reports Deleted, Accepted, AlreadyMissing, Failed, Uncertain and NotAttempted outcomes.
-  Tests: `connection_project_cleanup_blockstorage_test.go:TestProjectCleanupBlockStoragePlansBackupLevelsSnapshotsAndVolumes`, `connection_project_cleanup_blockstorage_test.go:TestProjectCleanupBlockStorageKeepsBackupsWithKeptDependents`, `connection_project_cleanup_blockstorage_test.go:TestProjectCleanupBlockStorageTimeFiltersAndSkipNames`, `connection_project_cleanup_blockstorage_test.go:TestProjectCleanupBlockStorageExecutesLevelsAndWaits`, `connection_project_cleanup_blockstorage_test.go:TestProjectCleanupBlockStorageReportsEveryOutcome`.
+  Tests: `connectiontest/connection_project_cleanup_blockstorage_test.go:TestProjectCleanupBlockStoragePlansBackupLevelsSnapshotsAndVolumes`, `connectiontest/connection_project_cleanup_blockstorage_test.go:TestProjectCleanupBlockStorageKeepsBackupsWithKeptDependents`, `connectiontest/connection_project_cleanup_blockstorage_test.go:TestProjectCleanupBlockStorageTimeFiltersAndSkipNames`, `connectiontest/connection_project_cleanup_blockstorage_test.go:TestProjectCleanupBlockStorageExecutesLevelsAndWaits`, `connectiontest/connection_project_cleanup_blockstorage_test.go:TestProjectCleanupBlockStorageReportsEveryOutcome`.
 - network project cleanup follows openstack/network/v2/_proxy.py _service_cleanup: VPN resources only with a VPN service provider, floating IPs by fip_cleanup_evaluation, security groups except default, networks whose project ports are unused (DHCP and unowned ports ignored, compute server candidates followed, and the Octavia VIP port of a load balancer candidate (device_owner Octavia, device_id lb-<load balancer id>) not planned while the network and its subnets depend on that load balancer; a VIP port of a load balancer that is not a candidate keeps the network) with route removal, interface removal, router, unowned port, subnet and network deletion in dependency order, then routers without ports; shared, external and foreign rows are excluded
-  Tests: `connection_project_cleanup_network_test.go:TestProjectCleanupNetworkPlanFollowsPythonConditions`, `connection_project_cleanup_network_test.go:TestProjectCleanupNetworkExecutesInPythonOrder`, `connection_project_cleanup_network_test.go:TestProjectCleanupNetworkOutcomesBlockDependents`, `connection_project_cleanup_network_test.go:TestProjectCleanupNetworkTimeFiltersFollowPython`, `connection_project_cleanup_network_test.go:TestProjectCleanupNetworkSelectorAndSkipNames`, `connection_project_cleanup_network_test.go:TestProjectCleanupNetworkRouterConditions`, `connection_project_cleanup_loadbalancer_test.go:TestProjectCleanupLoadBalancerVIPPortFollowsCandidate`, `connection_project_cleanup_loadbalancer_test.go:TestProjectCleanupLoadBalancerFailureBlocksVIPNetwork`.
+  Tests: `connectiontest/connection_project_cleanup_network_test.go:TestProjectCleanupNetworkPlanFollowsPythonConditions`, `connectiontest/connection_project_cleanup_network_test.go:TestProjectCleanupNetworkExecutesInPythonOrder`, `connectiontest/connection_project_cleanup_network_test.go:TestProjectCleanupNetworkOutcomesBlockDependents`, `connectiontest/connection_project_cleanup_network_test.go:TestProjectCleanupNetworkTimeFiltersFollowPython`, `connectiontest/connection_project_cleanup_network_test.go:TestProjectCleanupNetworkSelectorAndSkipNames`, `connectiontest/connection_project_cleanup_network_test.go:TestProjectCleanupNetworkRouterConditions`, `connectiontest/connection_project_cleanup_loadbalancer_test.go:TestProjectCleanupLoadBalancerVIPPortFollowsCandidate`, `connectiontest/connection_project_cleanup_loadbalancer_test.go:TestProjectCleanupLoadBalancerFailureBlocksVIPNetwork`.
 - Image project cleanup lists images with owner=<project ID> as Python does, follows Glance next paging, excludes rows not reporting the plan's project as owner or lacking an ID, applies created_at/updated_at filters and the selector, and deletes each planned image with one DELETE after the compute stages without waiting, reporting accepted, already_missing, failed and uncertain outcomes; skip name image.image prevents listing; a list error is an image ServiceError that blocks execution unless partial execution is allowed.
-  Tests: `connection_project_cleanup_image_test.go:TestProjectCleanupImageDiscoversOnlyOwnedImages`, `connection_project_cleanup_image_test.go:TestProjectCleanupImageFiltersAndSkipName`, `connection_project_cleanup_image_test.go:TestProjectCleanupImageExecuteReportsEveryState`, `connection_project_cleanup_image_test.go:TestProjectCleanupImageListErrorIsServiceError`.
+  Tests: `connectiontest/connection_project_cleanup_image_test.go:TestProjectCleanupImageDiscoversOnlyOwnedImages`, `connectiontest/connection_project_cleanup_image_test.go:TestProjectCleanupImageFiltersAndSkipName`, `connectiontest/connection_project_cleanup_image_test.go:TestProjectCleanupImageExecuteReportsEveryState`, `connectiontest/connection_project_cleanup_image_test.go:TestProjectCleanupImageListErrorIsServiceError`.
 - object_store project cleanup follows openstack/object_store/v1/_proxy.py _service_cleanup: objects of each container are evaluated (updated_at = listing last_modified, no created_at), a container is evaluated only when all its objects are candidates and depends on them, containers have no time attributes, either object_store skip name skips the service, names are path-escaped, listings page by marker with the Swift count header, and each object/container DELETE is sent once with Accepted/AlreadyMissing/Failed/Uncertain/NotAttempted outcomes.
-  Tests: `connection_project_cleanup_objectstore_test.go:TestProjectCleanupObjectStoreDiscovery`, `connection_project_cleanup_objectstore_test.go:TestProjectCleanupObjectStoreTimeFilters`, `connection_project_cleanup_objectstore_test.go:TestProjectCleanupObjectStoreSkipNames`, `connection_project_cleanup_objectstore_test.go:TestProjectCleanupObjectStoreListingErrors`, `connection_project_cleanup_objectstore_test.go:TestProjectCleanupObjectStoreExecuteReportsEveryState`.
+  Tests: `connectiontest/connection_project_cleanup_objectstore_test.go:TestProjectCleanupObjectStoreDiscovery`, `connectiontest/connection_project_cleanup_objectstore_test.go:TestProjectCleanupObjectStoreTimeFilters`, `connectiontest/connection_project_cleanup_objectstore_test.go:TestProjectCleanupObjectStoreSkipNames`, `connectiontest/connection_project_cleanup_objectstore_test.go:TestProjectCleanupObjectStoreListingErrors`, `connectiontest/connection_project_cleanup_objectstore_test.go:TestProjectCleanupObjectStoreExecuteReportsEveryState`.
 - Project cleanup plans key_manager containers then secrets from project-scoped Barbican lists (top-level next offset paging, no acl_only/all-projects query), derives IDs from the last path component of container_ref/secret_ref like Python's HREFToUUID, excludes rows without a usable reference or reporting another project_id, applies created/updated filters, selector and the key_manager.container/key_manager.secret skip names, and executes one DELETE per candidate without waits or dependencies, reporting Accepted, AlreadyMissing, Failed, Uncertain and NotAttempted.
-  Tests: `connection_project_cleanup_keymanager_test.go:TestProjectCleanupKeyManagerDiscoversContainersThenSecrets`, `connection_project_cleanup_keymanager_test.go:TestProjectCleanupKeyManagerFiltersSelectorAndSkipNames`, `connection_project_cleanup_keymanager_test.go:TestProjectCleanupKeyManagerExecuteReportsEveryState`.
+  Tests: `connectiontest/connection_project_cleanup_keymanager_test.go:TestProjectCleanupKeyManagerDiscoversContainersThenSecrets`, `connectiontest/connection_project_cleanup_keymanager_test.go:TestProjectCleanupKeyManagerFiltersSelectorAndSkipNames`, `connectiontest/connection_project_cleanup_keymanager_test.go:TestProjectCleanupKeyManagerExecuteReportsEveryState`.
 - orchestration project cleanup follows openstack/orchestration/v1/_proxy.py _service_cleanup: it lists stacks with Heat's default project-scoped query (top-level stacks only), excludes rows without a usable stack_name and id or reporting another project, applies creation_time/updated_time filters and the selector, is discovered and executed before compute and network, sends one DELETE per stack to stacks/{stack_name}/{id}, then waits for each accepted stack with the shared wait engine (404 or DELETE_COMPLETE is Deleted, DELETE_FAILED is an ErrFailedState wait error, other states keep polling until WithDeletionWait), reports AlreadyMissing for 404 and Failed with response evidence for refusals, lets compute run after a failed stack as Python's dependency walk does, and the orchestration.stack skip name prevents listing.
-  Tests: `connection_project_cleanup_orchestration_test.go:TestProjectCleanupOrchestrationPlansTopLevelStacksBeforeCompute`, `connection_project_cleanup_orchestration_test.go:TestProjectCleanupOrchestrationFiltersAndSkip`, `connection_project_cleanup_orchestration_test.go:TestProjectCleanupOrchestrationExecutesStacksThenCompute`, `connection_project_cleanup_orchestration_test.go:TestProjectCleanupOrchestrationWaitTimeoutKeepsAcceptedStack`.
+  Tests: `connectiontest/connection_project_cleanup_orchestration_test.go:TestProjectCleanupOrchestrationPlansTopLevelStacksBeforeCompute`, `connectiontest/connection_project_cleanup_orchestration_test.go:TestProjectCleanupOrchestrationFiltersAndSkip`, `connectiontest/connection_project_cleanup_orchestration_test.go:TestProjectCleanupOrchestrationExecutesStacksThenCompute`, `connectiontest/connection_project_cleanup_orchestration_test.go:TestProjectCleanupOrchestrationWaitTimeoutKeepsAcceptedStack`.
 - load_balancer project cleanup follows openstack/load_balancer/v2/_proxy.py _service_cleanup: it lists lbaas/loadbalancers without a query as Python does, excludes rows without a usable id, reporting another project_id/tenant_id or not reporting project_id, applies created_at/updated_at filters and the selector, is discovered and executed after orchestration and before compute and network, sends one DELETE lbaas/loadbalancers/{id}?cascade=true per load balancer, then waits for each accepted load balancer with the shared wait engine (404 or provisioning_status DELETED is Deleted, ERROR is an ErrFailedState wait error, other states keep polling until WithDeletionWait), reports AlreadyMissing for 404, Failed with response evidence for refusals and Uncertain for a lost response, lets compute run after a failed load balancer as Python's dependency walk does, makes a network that holds the Octavia VIP port of a load balancer candidate (and its subnets) depend on that load balancer so it is NotAttempted unless the load balancer is Deleted or AlreadyMissing, and the load_balancer.load_balancer skip name prevents listing.
-  Tests: `connection_project_cleanup_loadbalancer_test.go:TestProjectCleanupLoadBalancerPlansBeforeComputeAndNetwork`, `connection_project_cleanup_loadbalancer_test.go:TestProjectCleanupLoadBalancerFiltersSelectorAndSkip`, `connection_project_cleanup_loadbalancer_test.go:TestProjectCleanupLoadBalancerExecutesCascadeDeletesThenCompute`, `connection_project_cleanup_loadbalancer_test.go:TestProjectCleanupLoadBalancerWaitTimeoutKeepsAcceptedLoadBalancer`, `connection_project_cleanup_loadbalancer_test.go:TestProjectCleanupLoadBalancerVIPPortFollowsCandidate`, `connection_project_cleanup_loadbalancer_test.go:TestProjectCleanupLoadBalancerFailureBlocksVIPNetwork`.
+  Tests: `connectiontest/connection_project_cleanup_loadbalancer_test.go:TestProjectCleanupLoadBalancerPlansBeforeComputeAndNetwork`, `connectiontest/connection_project_cleanup_loadbalancer_test.go:TestProjectCleanupLoadBalancerFiltersSelectorAndSkip`, `connectiontest/connection_project_cleanup_loadbalancer_test.go:TestProjectCleanupLoadBalancerExecutesCascadeDeletesThenCompute`, `connectiontest/connection_project_cleanup_loadbalancer_test.go:TestProjectCleanupLoadBalancerWaitTimeoutKeepsAcceptedLoadBalancer`, `connectiontest/connection_project_cleanup_loadbalancer_test.go:TestProjectCleanupLoadBalancerVIPPortFollowsCandidate`, `connectiontest/connection_project_cleanup_loadbalancer_test.go:TestProjectCleanupLoadBalancerFailureBlocksVIPNetwork`.
 - dns project cleanup follows openstack/dns/v2/_proxy.py _service_cleanup: it lists zones and then floating IP PTR records (reverse/floatingips) without a query and without X-Auth-All-Projects or X-Auth-Sudo-Project-ID headers, follows Designate's links.next, excludes zones reporting another project_id (including zones shared with the project) or no project_id and rows without a usable id, applies created_at/updated_at filters to zones while any time filter excludes every PTR record (the Python resource has neither attribute), applies the selector, is discovered and executed after load_balancer and before compute and network, sends one DELETE zones/{id} without X-Designate-Delete-Shares per zone and then one PATCH reverse/floatingips/{region}:{id} with {"ptrdname": null} per PTR record without waiting for either, reports 202/200 as Accepted, 404 as AlreadyMissing, refusals as Failed with response evidence and a lost response as Uncertain, makes a network floating IP candidate depend on the PTR record candidate of the same floating IP so it is NotAttempted when the unset did not succeed, and the dns.zone and dns.floating_ip skip names each prevent their own list.
-  Tests: `connection_project_cleanup_dns_test.go:TestProjectCleanupDNSPlansZonesAndPTRRecordsBeforeCompute`, `connection_project_cleanup_dns_test.go:TestProjectCleanupDNSFiltersSelectorAndSkip`, `connection_project_cleanup_dns_test.go:TestProjectCleanupDNSExecutesZoneDeletesThenPTRUnsets`, `connection_project_cleanup_dns_test.go:TestProjectCleanupDNSPTRFailureKeepsNetworkFloatingIP`.
+  Tests: `connectiontest/connection_project_cleanup_dns_test.go:TestProjectCleanupDNSPlansZonesAndPTRRecordsBeforeCompute`, `connectiontest/connection_project_cleanup_dns_test.go:TestProjectCleanupDNSFiltersSelectorAndSkip`, `connectiontest/connection_project_cleanup_dns_test.go:TestProjectCleanupDNSExecutesZoneDeletesThenPTRUnsets`, `connectiontest/connection_project_cleanup_dns_test.go:TestProjectCleanupDNSPTRFailureKeepsNetworkFloatingIP`.
 
 Python/Go differences:
 
@@ -895,11 +895,11 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk.WithServiceEnabled`
 
 - HasService reports catalog or override presence without a request and returns errors for lookup failures.
-  Tests: `connection_r2_misc_endpoint_test.go:TestR2MiscEndpointForCatalogSelectionAndOverride`, `connection_r2_misc_endpoint_test.go:TestR2MiscEndpointForInvalidAndUnrecordedCatalog`.
+  Tests: `connectiontest/connection_r2_misc_endpoint_test.go:TestR2MiscEndpointForCatalogSelectionAndOverride`, `connectiontest/connection_r2_misc_endpoint_test.go:TestR2MiscEndpointForInvalidAndUnrecordedCatalog`.
 - HasServiceVersion asks SessionEndpointContext for min_version=version and max_version='<major>.latest', so a catalog URL of that major needs no request, other majors consult the version document, and an absent version is false.
-  Tests: `connection_endpoint_discovery_test.go:TestHasServiceVersionAndServiceFlags`, `connection_endpoint_discovery_test.go:TestSessionEndpointContextProjectPeekWithoutTokenProject`.
+  Tests: `connectiontest/connection_endpoint_discovery_test.go:TestHasServiceVersionAndServiceFlags`, `connectiontest/connection_endpoint_discovery_test.go:TestSessionEndpointContextProjectPeekWithoutTokenProject`.
 - has_<service> flags from clouds.yaml or WithServiceEnabled (explicit options win) disable a service before any lookup; unset flags default to official os-service-types types, so aliases such as volumev3 are false unless enabled; non-boolean flags are rejected.
-  Tests: `connection_endpoint_discovery_test.go:TestHasServiceVersionAndServiceFlags`, `connection_endpoint_discovery_test.go:TestCloudsYAMLServiceFlagsAndSecurityGroupSource`, `connection_r2_misc_endpoint_test.go:TestR2MiscEndpointForInvalidAndUnrecordedCatalog`.
+  Tests: `connectiontest/connection_endpoint_discovery_test.go:TestHasServiceVersionAndServiceFlags`, `connectiontest/connection_endpoint_discovery_test.go:TestCloudsYAMLServiceFlagsAndSecurityGroupSource`, `connectiontest/connection_r2_misc_endpoint_test.go:TestR2MiscEndpointForInvalidAndUnrecordedCatalog`.
 
 Python/Go differences:
 
@@ -922,11 +922,11 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk.WithEndpointMaxVersion`
 
 - Override or catalog endpoint with region, interface and service name; false when absent.
-  Tests: `connection_r2_misc_endpoint_test.go:TestR2MiscEndpointForCatalogSelectionAndOverride`.
+  Tests: `connectiontest/connection_r2_misc_endpoint_test.go:TestR2MiscEndpointForCatalogSelectionAndOverride`.
 - SessionEndpointContext follows keystoneauth discovery: an override or a catalog URL already within the bounds and major is returned without a request; otherwise unauthenticated GETs (a 401 retried with the token) of the unversioned URL, matched versioned URL, identity hack and catalog URL select the newest CURRENT/SUPPORTED/STABLE/DEPRECATED version in range by its self link (relative and foreign-host links repaired, project suffix restored); no match is not found and no document falls back to the catalog URL.
-  Tests: `connection_endpoint_discovery_test.go:TestSessionEndpointContextVersionDiscovery`, `connection_endpoint_discovery_test.go:TestSessionEndpointContextProjectPeekWithoutTokenProject`.
+  Tests: `connectiontest/connection_endpoint_discovery_test.go:TestSessionEndpointContextVersionDiscovery`, `connectiontest/connection_endpoint_discovery_test.go:TestSessionEndpointContextProjectPeekWithoutTokenProject`.
 - Invalid, contradictory or alias-mismatched versions are errors before HTTP, overrides skip discovery, version bounds are rejected by the context-free SessionEndpoint, and cancellation stops discovery.
-  Tests: `connection_endpoint_discovery_test.go:TestSessionEndpointContextOverrideInvalidAndCanceled`.
+  Tests: `connectiontest/connection_endpoint_discovery_test.go:TestSessionEndpointContextOverrideInvalidAndCanceled`.
 
 Python/Go differences:
 
@@ -947,9 +947,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk.WithEndpointServiceName`
 
 - A WithEndpoint override of the type wins; otherwise the first matching catalog endpoint by interface (URL suffix ignored) and region is returned, the bool is false when absent, and no request is made.
-  Tests: `connection_r2_misc_endpoint_test.go:TestR2MiscEndpointForCatalogSelectionAndOverride`.
+  Tests: `connectiontest/connection_r2_misc_endpoint_test.go:TestR2MiscEndpointForCatalogSelectionAndOverride`.
 - Without a recorded token catalog the provider endpoint locator is used with the type, region, interface and name, absence maps to not found, and invalid arguments or other failures are errors.
-  Tests: `connection_r2_misc_endpoint_test.go:TestR2MiscEndpointForInvalidAndUnrecordedCatalog`.
+  Tests: `connectiontest/connection_r2_misc_endpoint_test.go:TestR2MiscEndpointForInvalidAndUnrecordedCatalog`.
 
 Python/Go differences:
 
@@ -976,9 +976,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk.AsAuthOptions`
 
 - The derived Connection authenticates once with the recorded options overridden by typed settings, applies the user/project discard rules and project domain inheritance, keeps endpoint/region/location facts, and uses its own token.
-  Tests: `connection_r2_misc_derive_test.go:TestR2MiscConnectAsOverridesAuthAndSharesNothing`.
+  Tests: `connectiontest/connection_r2_misc_derive_test.go:TestR2MiscConnectAsOverridesAuthAndSharesNothing`.
 - Invalid overrides, nil options, canceled contexts and FromProvider connections make no token request; authentication failures wrap the native cause; a derived Connection does not inherit the global request ID.
-  Tests: `connection_r2_misc_derive_test.go:TestR2MiscConnectAsInvalidInputsMakeNoRequest`, `connection_r2_misc_derive_test.go:TestR2MiscConnectAsDoesNotInheritGlobalRequestID`.
+  Tests: `connectiontest/connection_r2_misc_derive_test.go:TestR2MiscConnectAsInvalidInputsMakeNoRequest`, `connectiontest/connection_r2_misc_derive_test.go:TestR2MiscConnectAsDoesNotInheritGlobalRequestID`.
 
 Python/Go differences:
 
@@ -998,9 +998,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk.Connection.ConnectAs`
 
 - A project by name and project domain ID is scoped with the inherited project fields discarded; a project ID selects the ID scope.
-  Tests: `connection_r2_misc_derive_test.go:TestR2MiscConnectAsOverridesAuthAndSharesNothing`.
+  Tests: `connectiontest/connection_r2_misc_derive_test.go:TestR2MiscConnectAsOverridesAuthAndSharesNothing`.
 - An empty project reference is rejected without a request.
-  Tests: `connection_r2_misc_derive_test.go:TestR2MiscConnectAsInvalidInputsMakeNoRequest`.
+  Tests: `connectiontest/connection_r2_misc_derive_test.go:TestR2MiscConnectAsInvalidInputsMakeNoRequest`.
 
 Python/Go differences:
 
@@ -1018,9 +1018,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk.Connection.CustomServiceClient`
 
 - Registration performs no request; the client is built lazily once from the shared provider, endpoint override or locator, and cached; duplicates, built-in names and invalid input are rejected; canceled contexts fail.
-  Tests: `connection_r2_misc_endpoint_test.go:TestR2MiscAddServiceBuildsLazyClientOncePerConnection`.
+  Tests: `connectiontest/connection_r2_misc_endpoint_test.go:TestR2MiscAddServiceBuildsLazyClientOncePerConnection`.
 - Factory errors and nil clients are reported and a locator is required without an endpoint.
-  Tests: `connection_r2_misc_endpoint_test.go:TestR2MiscAddServiceWithoutEndpointUsesLocatorAndReportsFactoryErrors`.
+  Tests: `connectiontest/connection_r2_misc_endpoint_test.go:TestR2MiscAddServiceWithoutEndpointUsesLocatorAndReportsFactoryErrors`.
 
 Python/Go differences:
 
@@ -1081,13 +1081,13 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.ListCloudRecords`
 
 - Servers of every cloud are listed in order with all_tenants on request; a failing cloud contributes nothing; the default aborts and keeps earlier hosts; continue mode records failures; cancellation aborts without requests.
-  Tests: `connection_r2_misc_inventory_test.go:TestR2MiscInventoryListsEveryCloudInOrderWithAllProjectsQuery`, `connection_r2_misc_inventory_test.go:TestR2MiscInventoryFailurePolicyKeepsEarlierHostsAndNeverRetries`, `connection_r2_misc_inventory_test.go:TestR2MiscInventoryCancellationAlwaysAborts`.
+  Tests: `connectiontest/connection_r2_misc_inventory_test.go:TestR2MiscInventoryListsEveryCloudInOrderWithAllProjectsQuery`, `connectiontest/connection_r2_misc_inventory_test.go:TestR2MiscInventoryFailurePolicyKeepsEarlierHostsAndNeverRetries`, `connectiontest/connection_r2_misc_inventory_test.go:TestR2MiscInventoryCancellationAlwaysAborts`.
 - Clouds are enumerated from the first clouds.yaml in file order and connected lazily.
-  Tests: `connection_r2_misc_inventory_test.go:TestR2MiscInventoryValidationAndCloudNames`.
+  Tests: `connectiontest/connection_r2_misc_inventory_test.go:TestR2MiscInventoryValidationAndCloudNames`.
 - ListHosts expands every host into hostvars by default, keeps only the interface expansion with WithInventoryExpand(false), skips expansion with WithInventoryBare, maps private to the private interface address, and fails a cloud whose expansion lookup fails while recording swallowed security group failures.
-  Tests: `connection_cloud_inventory_hostvars_test.go:TestInventoryHostsDefaultToHostvarsExpansion`, `connection_cloud_inventory_hostvars_test.go:TestInventoryExpandFalseBareAndPrivate`, `connection_cloud_inventory_hostvars_test.go:TestInventoryHostvarsSwallowSecurityGroupFailureButFailCloudOnLookupError`.
+  Tests: `connectiontest/connection_cloud_inventory_hostvars_test.go:TestInventoryHostsDefaultToHostvarsExpansion`, `connectiontest/connection_cloud_inventory_hostvars_test.go:TestInventoryExpandFalseBareAndPrivate`, `connectiontest/connection_cloud_inventory_hostvars_test.go:TestInventoryHostvarsSwallowSecurityGroupFailureButFailCloudOnLookupError`.
 - Hosts are listed through the cloud list_servers path (servers.API.ListCloudRecords): GET /servers/detail with the Python Accept header, all_tenants=True only for all projects, continuation links followed, and each InventoryHost keeps the Source Record row.
-  Tests: `connection_cloud_inventory_proxy_listing_test.go:TestInventoryListsThroughCloudListServersProxyPath`, `connection_r2_misc_inventory_test.go:TestR2MiscInventoryListsEveryCloudInOrderWithAllProjectsQuery`.
+  Tests: `connectiontest/connection_cloud_inventory_proxy_listing_test.go:TestInventoryListsThroughCloudListServersProxyPath`, `connectiontest/connection_r2_misc_inventory_test.go:TestR2MiscInventoryListsEveryCloudInOrderWithAllProjectsQuery`.
 
 Python/Go differences:
 
@@ -1119,11 +1119,11 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.ListCloudRecords`
 
 - Glob identifier selection, nested filters and JMESPath string filters over server records.
-  Tests: `connection_r2_misc_inventory_test.go:TestR2MiscInventorySearchAndGetHost`.
+  Tests: `connectiontest/connection_r2_misc_inventory_test.go:TestR2MiscInventorySearchAndGetHost`.
 - SearchHosts filters InventoryHostView rows, so filters see hostvars keys such as public_v4, interface_ip and flavor.name, and the private flag changes interface_ip and access_ipv4.
-  Tests: `connection_cloud_inventory_hostvars_test.go:TestInventoryHostsDefaultToHostvarsExpansion`, `connection_cloud_inventory_hostvars_test.go:TestInventoryExpandFalseBareAndPrivate`.
+  Tests: `connectiontest/connection_cloud_inventory_hostvars_test.go:TestInventoryHostsDefaultToHostvarsExpansion`, `connectiontest/connection_cloud_inventory_hostvars_test.go:TestInventoryExpandFalseBareAndPrivate`.
 - Hosts are listed through the cloud list_servers path (servers.API.ListCloudRecords): GET /servers/detail with the Python Accept header, all_tenants=True only for all projects, continuation links followed, and each InventoryHost keeps the Source Record row.
-  Tests: `connection_cloud_inventory_proxy_listing_test.go:TestInventoryListsThroughCloudListServersProxyPath`, `connection_r2_misc_inventory_test.go:TestR2MiscInventoryListsEveryCloudInOrderWithAllProjectsQuery`.
+  Tests: `connectiontest/connection_cloud_inventory_proxy_listing_test.go:TestInventoryListsThroughCloudListServersProxyPath`, `connectiontest/connection_r2_misc_inventory_test.go:TestR2MiscInventoryListsEveryCloudInOrderWithAllProjectsQuery`.
 
 Python/Go differences:
 
@@ -1155,11 +1155,11 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.ListCloudRecords`
 
 - Single match, nil for none, AmbiguousError for several, invalid expression results.
-  Tests: `connection_r2_misc_inventory_test.go:TestR2MiscInventorySearchAndGetHost`.
+  Tests: `connectiontest/connection_r2_misc_inventory_test.go:TestR2MiscInventorySearchAndGetHost`.
 - GetHost selects one expanded host by identifier and hostvars filters and rejects a JMESPath value.
-  Tests: `connection_cloud_inventory_hostvars_test.go:TestInventoryHostsDefaultToHostvarsExpansion`.
+  Tests: `connectiontest/connection_cloud_inventory_hostvars_test.go:TestInventoryHostsDefaultToHostvarsExpansion`.
 - Hosts are listed through the cloud list_servers path (servers.API.ListCloudRecords): GET /servers/detail with the Python Accept header, all_tenants=True only for all projects, continuation links followed, and each InventoryHost keeps the Source Record row.
-  Tests: `connection_cloud_inventory_proxy_listing_test.go:TestInventoryListsThroughCloudListServersProxyPath`, `connection_r2_misc_inventory_test.go:TestR2MiscInventoryListsEveryCloudInOrderWithAllProjectsQuery`.
+  Tests: `connectiontest/connection_cloud_inventory_proxy_listing_test.go:TestInventoryListsThroughCloudListServersProxyPath`, `connectiontest/connection_r2_misc_inventory_test.go:TestR2MiscInventoryListsEveryCloudInOrderWithAllProjectsQuery`.
 
 Python/Go differences:
 
@@ -1184,7 +1184,7 @@ Python/Go differences:
 - [Cloud Container Search Python](../objectstorage/cloud-container-search-python.md)
 - [Cloud Object Search Python](../objectstorage/cloud-object-search-python.md)
 - [Cloud Object Search Test](../objectstorage/cloud_object_search_test.go)
-- [Connection Swift Object Search Test](../connection_swift_object_search_test.go)
+- [Connection Swift Object Search Test](../connectiontest/connection_swift_object_search_test.go)
 - [objectstorage/v1/containers/python_parity_test.go](../objectstorage/v1/containers/python_parity_test.go)
 - [objectstorage/v1/objects/python_parity_test.go](../objectstorage/v1/objects/python_parity_test.go)
-- [python_parity_test.go](../python_parity_test.go)
+- [python_parity_test.go](../connectiontest/python_parity_test.go)

@@ -24,7 +24,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.WithFindImageMemberRecordIgnoreMissing`
 
 - All methods require an explicit parent image Ref; direct imageID has only fixed member endpoint, explicit parentName uses unchanged native exact-name resolver. No Member parent recovery, memberName/project lookup, response-ID synthesis or response-driven routes.
-  Tests: `image/members_contracts_test.go:TestImageMembersFixedParentRoutesAndBodies`, `image/members_core_test.go:TestImageMembersCoreFixedRoutesAndActualEvidence`, `connection_image_members_test.go:TestConnectionImageMembersShareClientAndConcreteDefaults`, `internal/cmd/sdkgen/glance_members_test.go:TestGlanceMemberWorkflowsPreserveNativeScopeAndConcreteDefaults`.
+  Tests: `image/members_contracts_test.go:TestImageMembersFixedParentRoutesAndBodies`, `image/members_core_test.go:TestImageMembersCoreFixedRoutesAndActualEvidence`, `connectiontest/connection_image_members_test.go:TestConnectionImageMembersShareClientAndConcreteDefaults`, `internal/cmd/sdkgen/glance_members_test.go:TestGlanceMemberWorkflowsPreserveNativeScopeAndConcreteDefaults`.
 - Canonical ImageMember requires validUTF8 nonnull JSON object. Optional image_id/member_id/status/schema/created_at/updated_at are strict nullable strings; missing/null nil, empty present, literal dates unparsed. Unknown/case-decoy/large extension numbers are independent raw fields, links passive/nil typed. Mismatched response IDs and arbitrary response status remain passive; atomic schema errors retain original actual200 proof.
   Tests: `image/members_contracts_test.go:TestImageMembersCanonicalRawModelsAndFiniteList`, `image/members_core_test.go:TestImageMembersCoreCanonicalPresenceAndAtomicDecoder`.
 - Source/context/client/provider/prefix/ordinary headers captured before usercallbacks. MemberID is nonempty safeUTF8 single unescaped segment; status input exactly pending/accepted/rejected; invalid inputs/protectedheaders/nilerrorcallbacks fail before parentName/memberHTTP. ParentName failures remain errors despite missing defaults.
@@ -48,7 +48,7 @@ Go API:
 - One operation captures source, headers, options and current location before callbacks and shares the prepared parent/client between GET and fallback pages. Callback ownership and original provider/token are preserved; current source changes are checked at each physical and yield boundary.
   Tests: `image/member_record_find_test.go:TestFindImageMemberRecordOptionsLocationAndFallbackSnapshot`, `image/member_records_test.go:TestImageMemberRecordsReadCloseAndStickyGuardEvidence`.
 - Cached Connection Image and ImageV2 calls share native clients, option factory snapshots and location across the complete GET-list search; selected rows retain actual page status/proof. Existing literal FindImageMember and generated scoped Members remain unchanged.
-  Tests: `connection_image_member_records_test.go:TestConnectionImageMemberRecordsShareLocationAndFallback`, `image/member_record_find_test.go:TestFindImageMemberRecordPreflightAndLegacyBoundaries`.
+  Tests: `connectiontest/connection_image_member_records_test.go:TestConnectionImageMemberRecordsShareLocationAndFallback`, `image/member_record_find_test.go:TestFindImageMemberRecordPreflightAndLegacyBoundaries`.
 
 Python/Go differences:
 
@@ -82,7 +82,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordListFilters`
 
 - All methods require an explicit parent image Ref; direct imageID has only fixed member endpoint, explicit parentName uses unchanged native exact-name resolver. No Member parent recovery, memberName/project lookup, response-ID synthesis or response-driven routes.
-  Tests: `image/members_contracts_test.go:TestImageMembersFixedParentRoutesAndBodies`, `image/members_core_test.go:TestImageMembersCoreFixedRoutesAndActualEvidence`, `connection_image_members_test.go:TestConnectionImageMembersShareClientAndConcreteDefaults`, `internal/cmd/sdkgen/glance_members_test.go:TestGlanceMemberWorkflowsPreserveNativeScopeAndConcreteDefaults`.
+  Tests: `image/members_contracts_test.go:TestImageMembersFixedParentRoutesAndBodies`, `image/members_core_test.go:TestImageMembersCoreFixedRoutesAndActualEvidence`, `connectiontest/connection_image_members_test.go:TestConnectionImageMembersShareClientAndConcreteDefaults`, `internal/cmd/sdkgen/glance_members_test.go:TestGlanceMemberWorkflowsPreserveNativeScopeAndConcreteDefaults`.
 - Finite collection requires whole validUTF8 nonnull JSONobject and canonical nonnull membersarray. Consumed ImageMember rows atomically decode nullable string fields/literaldates and own independent raw unknownfields/header/status; unusedrowcanonical errors skipped oncap/earlybreak. No envelope/schema/link pagination or response-ID routing.
   Tests: `image/members_contracts_test.go:TestImageMembersCanonicalRawModelsAndFiniteList`, `image/members_core_test.go:TestImageMembersCoreCanonicalPresenceAndAtomicDecoder`, `image/members_core_test.go:TestImageMembersCoreFiniteLazyListAndConsumedRows`.
 - Source/context/client/provider/prefix/ordinary headers captured before usercallbacks. MemberID is nonempty safeUTF8 single unescaped segment; status input exactly pending/accepted/rejected; invalid inputs/protectedheaders/nilerrorcallbacks fail before parentName/memberHTTP. ParentName failures remain errors despite missing defaults.
@@ -106,7 +106,7 @@ Go API:
 - Options/helpers and iteration slices snapshot maps and pointers, full options replace and merge helpers use last-wins. Each lazy iteration captures source and headers before callbacks/location, resolves an explicit parent once, retains live provider token, and makes observed source faults sticky across Read and Close.
   Tests: `image/member_records_test.go:TestImageMemberRecordsLazyRepeatedOptionSnapshots`, `image/member_records_test.go:TestImageMemberRecordsPreflightAndExtensionFilters`, `image/member_records_test.go:TestImageMemberRecordsReadCloseAndStickyGuardEvidence`.
 - Both Connection Image/ImageV2 entries retain the same native service client and current location through owned list and GET-list fallback. Legacy finite member list, literal Find and generated native member ABI remain separate and unchanged.
-  Tests: `connection_image_member_records_test.go:TestConnectionImageMemberRecordsShareLocationAndFallback`, `image/member_records_test.go:TestImageMemberRecordsPreserveLegacyFiniteMemberList`, `image/member_record_find_test.go:TestFindImageMemberRecordPreflightAndLegacyBoundaries`.
+  Tests: `connectiontest/connection_image_member_records_test.go:TestConnectionImageMemberRecordsShareLocationAndFallback`, `image/member_records_test.go:TestImageMemberRecordsPreserveLegacyFiniteMemberList`, `image/member_record_find_test.go:TestFindImageMemberRecordPreflightAndLegacyBoundaries`.
 
 Python/Go differences:
 

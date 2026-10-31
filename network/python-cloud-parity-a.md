@@ -334,7 +334,7 @@ Go API:
 - Physical accepted/rejected200/401/404/503 read/Close faults, custom cancel and source change preserve actual receipts/all causes with zero retry/reauth hooks. Native401 value ErrOriginal and ErrReauth remain available. Restored source cannot erase observed mismatch; clean503 retry and401 token renewal preserve owned route/body/headers. Changed route aborts before resend with original503 receipt.
   Tests: `network/cloud_router_create_test.go:TestCloudRouterCreatePhysicalReadCloseCancellationSourceAndNative401NoHooks`, `network/cloud_router_create_test.go:TestCloudRouterCreateAZPhysicalFailureHasExtensionProofAndNoPostReceipt`, `network/v2/extensions/layer3/routers/python_cloud_create_test.go:TestPythonCloudRouterCreateNativeRejectionsAndStickyRestoredSourceProof`, `network/cloud_router_create_test.go:TestCloudRouterCreateCleanRetryTokenRenewalAndHeaderVersionCapture`.
 - Connection supplies cached Neutron and an owned default current location without caller builders; explicit location remains selectable and invalid/cancelled calls do not discover a service.
-  Tests: `connection_cycle7_records_test.go:TestConnectionRouterCreateOwnsDefaultLocationAndCachedService`, `connection_cycle7_records_test.go:TestConnectionCycle7PreflightPreservesCancellationBeforeDiscovery`.
+  Tests: `connectiontest/connection_cycle7_records_test.go:TestConnectionRouterCreateOwnsDefaultLocationAndCachedService`, `connectiontest/connection_cycle7_records_test.go:TestConnectionCycle7PreflightPreservesCancellationBeforeDiscovery`.
 
 Python/Go differences:
 
@@ -399,7 +399,7 @@ Go API:
 - An actual accepted subnet POST100..399 invalidates the original private successful network role/subnet-gateway topology cache even when response decode/Read/Close/cancel/source handling subsequently fails. Rejected POST and pre-POST lookup/validation errors do not invalidate success cache. Replacing public Service.Roles does not redirect the private mutation cache target.
   Tests: `network/cloud_subnet_create_test.go:TestCloudSubnetCreateAcceptedMutationInvalidatesOnlyPrivateSuccessfulRoleCache`.
 - Connection supplies cached Neutron and an owned default location for lookup/create while the service invalidates only actual accepted topology mutations.
-  Tests: `connection_cycle7_records_test.go:TestConnectionSubnetCreateSharesNetworkCacheAndLocation`, `connection_cycle7_records_test.go:TestConnectionCycle7PreflightPreservesCancellationBeforeDiscovery`.
+  Tests: `connectiontest/connection_cycle7_records_test.go:TestConnectionSubnetCreateSharesNetworkCacheAndLocation`, `connectiontest/connection_cycle7_records_test.go:TestConnectionCycle7PreflightPreservesCancellationBeforeDiscovery`.
 
 Python/Go differences:
 

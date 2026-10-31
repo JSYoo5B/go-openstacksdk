@@ -40,7 +40,7 @@ Go API:
 - Native retry/backoff/reauth can create multiple physical attempts within one logical poll without rerunning option callbacks. Captured ordinary headers remain stable, live auth refreshes, and rejected callback-mutable response bodies/headers do not alias retained proof. Native/body/redirect guards reject conditional headers, changed accepted codes and injected bodies; the waiter-specific Range policy does not change ordinary CreateObject retry behavior.
   Tests: `objectstorage/v1/objects/wait_contracts_test.go:TestObjectWaitContractsNativeReplaySnapshotsAndLiveGuards`, `objectstorage/v1/objects/wait_core_test.go:TestObjectWaitCoreHeaderPolicyIsolation`.
 - Connection ObjectStorage/ObjectStorageV1 exposes the same objects facade and original service client, captures configuration afresh per workflow, refreshes live auth between polls and owns acknowledgement/attempt evidence independently.
-  Tests: `connection_objectstorage_wait_test.go:TestConnectionSwiftObjectWaitSharesClientAndFreshCapture`.
+  Tests: `connectiontest/connection_objectstorage_wait_test.go:TestConnectionSwiftObjectWaitSharesClientAndFreshCapture`.
 - Generated Swift native/service/registry files remain byte-exact and accounts/containers/objects gain no generated Collections; the service guide references both concrete waiters, HEAD, delete120s and objects/wait.md.
   Tests: `internal/cmd/sdkgen/swift_object_wait_test.go:TestSwiftObjectWaitPreservesNativeAndSharedWaiters`.
 
@@ -92,7 +92,7 @@ Go API:
 - Native retry/backoff/reauth can create multiple physical attempts within one logical poll without rerunning option callbacks. Captured ordinary headers remain stable, live auth refreshes, and rejected callback-mutable response bodies/headers do not alias retained proof. Native/body/redirect guards reject conditional headers, changed accepted codes and injected bodies; the waiter-specific Range policy does not change ordinary CreateObject retry behavior.
   Tests: `objectstorage/v1/objects/wait_contracts_test.go:TestObjectWaitContractsNativeReplaySnapshotsAndLiveGuards`, `objectstorage/v1/objects/wait_core_test.go:TestObjectWaitCoreHeaderPolicyIsolation`.
 - Connection ObjectStorage/ObjectStorageV1 exposes the same objects facade and original service client, captures configuration afresh per workflow, refreshes live auth between polls and owns acknowledgement/attempt evidence independently.
-  Tests: `connection_objectstorage_wait_test.go:TestConnectionSwiftObjectWaitSharesClientAndFreshCapture`.
+  Tests: `connectiontest/connection_objectstorage_wait_test.go:TestConnectionSwiftObjectWaitSharesClientAndFreshCapture`.
 - Generated Swift native/service/registry files remain byte-exact and accounts/containers/objects gain no generated Collections; the service guide references both concrete waiters, HEAD, delete120s and objects/wait.md.
   Tests: `internal/cmd/sdkgen/swift_object_wait_test.go:TestSwiftObjectWaitPreservesNativeAndSharedWaiters`.
 

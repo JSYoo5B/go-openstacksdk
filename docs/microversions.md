@@ -123,7 +123,7 @@ against discovered bounds. A Python exact request such as
 existing exact-pin behavior and makes automatic cloud intersection a separate,
 explicit option; it does not claim identical Python discovery defaults.
 
-The HTTP tests in [microversion_test.go](../microversion_test.go) verify catalog and
+The HTTP tests in [microversion_test.go](../connectiontest/microversion_test.go) verify catalog and
 proxy URL shapes, authentication, numeric ordering, request headers, exact pin
 precedence, shared concurrent clients, cancellation, retries, unsupported services,
 invalid ranges, non-overlap, malformed responses, and root fallbacks.

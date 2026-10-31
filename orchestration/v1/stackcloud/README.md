@@ -116,5 +116,5 @@ entries, an unhashable `rel`, a non-string stack reference) are errors.
   Go does not.
 
 Evidence is HTTP fixture tests in `api/heat_cloud_stack_workflows_test.go` and
-`connection_orchestration_stacks_test.go`; no deployment acceptance is
+`connectiontest/connection_orchestration_stacks_test.go`; no deployment acceptance is
 claimed.

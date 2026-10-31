@@ -19,11 +19,11 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.Info.UnmarshalJSON`
 
 - Fresh fixed GET derives the escaped catalog prefix/version path, ignores ResourceBase for routing and preserves actual200 capabilities and header evidence.
-  Tests: `objectstorage/v1/info_contracts_test.go:TestObjectInfoContractsRoutesAndModels`, `connection_objectstorage_info_test.go:TestConnectionSwiftInfoSharesClientAndCapturesEachWorkflow`.
+  Tests: `objectstorage/v1/info_contracts_test.go:TestObjectInfoContractsRoutesAndModels`, `connectiontest/connection_objectstorage_info_test.go:TestConnectionSwiftInfoSharesClientAndCapturesEachWorkflow`.
 - UTF8 nonnull root object and five nullable object sections project atomically; unknown plugin/large-number/raw inherited metadata remain exact and canonical section bytes own storage independently.
   Tests: `objectstorage/v1/info_contracts_test.go:TestObjectInfoContractsRoutesAndModels`, `objectstorage/v1/info_contracts_test.go:TestObjectInfoContractsAcceptedResponse`, `objectstorage/v1/info_core_test.go:TestInfoCoreModelAtomicRawSections`, `objectstorage/v1/info_core_test.go:TestInfoCoreModelFailuresAndAcceptedEvidence`.
 - Full options replace config; header factories/callbacks own maps, last canonical overlay wins, valid ordinary source drift leaves the captured request unchanged and original live auth remains active.
-  Tests: `objectstorage/v1/info_contracts_test.go:TestObjectInfoContractsOptionsAndSource`, `objectstorage/v1/info_contracts_test.go:TestObjectInfoContractsNativePolicy`, `connection_objectstorage_info_test.go:TestConnectionSwiftInfoSharesClientAndCapturesEachWorkflow`, `objectstorage/v1/info_options_test.go:TestInfoOptionsFactoryAndCallbackOwnership`, `objectstorage/v1/info_options_test.go:TestInfoOptionsParallelReuse`, `objectstorage/v1/info_options_test.go:TestInfoOptionsNativeRetrySnapshots`.
+  Tests: `objectstorage/v1/info_contracts_test.go:TestObjectInfoContractsOptionsAndSource`, `objectstorage/v1/info_contracts_test.go:TestObjectInfoContractsNativePolicy`, `connectiontest/connection_objectstorage_info_test.go:TestConnectionSwiftInfoSharesClientAndCapturesEachWorkflow`, `objectstorage/v1/info_options_test.go:TestInfoOptionsFactoryAndCallbackOwnership`, `objectstorage/v1/info_options_test.go:TestInfoOptionsParallelReuse`, `objectstorage/v1/info_options_test.go:TestInfoOptionsNativeRetrySnapshots`.
 - Original source/API/provider/Endpoint/ResourceBase/Type/Microversion changes and reserved/malformed header aliases fail before another HTTP attempt; retries cannot inject body or broaden the public actual200 status gate.
   Tests: `objectstorage/v1/info_contracts_test.go:TestObjectInfoContractsOptionsAndSource`, `objectstorage/v1/info_contracts_test.go:TestObjectInfoContractsNativePolicy`, `objectstorage/v1/info_contracts_test.go:TestObjectInfoContractsAcceptedResponse`, `objectstorage/v1/info_options_test.go:TestInfoOptionsHeaderValidationAndPreflight`, `objectstorage/v1/info_core_test.go:TestInfoCoreCallbackAndWireGuards`.
 - Accepted read/Close/custom context/source failures preserve partial raw response proof and joined causes, clear typed Info and never replay accepted processing; returned data cannot mutate the owned error proof.
@@ -56,9 +56,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithoutObjectSegmentSize`
 
 - Fresh actual200 capabilities select exact int64 requested/default1073741824/explicit0 sizes using maximum first then minimum, preserve inverted-bound ordering and use0 for absent/null sections or bounds.
-  Tests: `objectstorage/v1/info_contracts_test.go:TestObjectInfoContractsSegmentBounds`, `connection_objectstorage_info_test.go:TestConnectionSwiftInfoSharesClientAndCapturesEachWorkflow`, `objectstorage/v1/info_core_test.go:TestInfoCoreSegmentSelection`.
+  Tests: `objectstorage/v1/info_contracts_test.go:TestObjectInfoContractsSegmentBounds`, `connectiontest/connection_objectstorage_info_test.go:TestConnectionSwiftInfoSharesClientAndCapturesEachWorkflow`, `objectstorage/v1/info_core_test.go:TestInfoCoreSegmentSelection`.
 - Reusable full/header/size/reset options own maps/pointers and preserve callback/source snapshots; each workflow captures the shared Connection client and live authentication separately.
-  Tests: `objectstorage/v1/info_contracts_test.go:TestObjectInfoContractsOptionsAndSource`, `connection_objectstorage_info_test.go:TestConnectionSwiftInfoSharesClientAndCapturesEachWorkflow`, `objectstorage/v1/info_options_test.go:TestInfoOptionsFactoryAndCallbackOwnership`, `objectstorage/v1/info_options_test.go:TestInfoOptionsParallelReuse`.
+  Tests: `objectstorage/v1/info_contracts_test.go:TestObjectInfoContractsOptionsAndSource`, `connectiontest/connection_objectstorage_info_test.go:TestConnectionSwiftInfoSharesClientAndCapturesEachWorkflow`, `objectstorage/v1/info_options_test.go:TestInfoOptionsFactoryAndCallbackOwnership`, `objectstorage/v1/info_options_test.go:TestInfoOptionsParallelReuse`.
 - Negative requested size, nil option/context, malformed/case-alias/reserved source or caller headers fail before HTTP; invalid source headers are checked before callbacks.
   Tests: `objectstorage/v1/info_options_test.go:TestInfoOptionsHeaderValidationAndPreflight`.
 - Only clean physically accepted404/412 bypass retry and set fallback maximum2684354561/minimum0; result retains requested/selected size, actual status/header/raw body and nil Info.
@@ -187,5 +187,5 @@ print("large selection:", conn.object_store.get_object_segment_size(8 * 1024**3)
 - [Info Core Test](info_core_test.go)
 - [Info Options Test](info_options_test.go)
 - [public HTTP·native retry·fallback](info_contracts_test.go)
-- [Connection Objectstorage Info Test](../../connection_objectstorage_info_test.go)
+- [Connection Objectstorage Info Test](../../connectiontest/connection_objectstorage_info_test.go)
 - [Swift Info Test](../../internal/cmd/sdkgen/swift_info_test.go)

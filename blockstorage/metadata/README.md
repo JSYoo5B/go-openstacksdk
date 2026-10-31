@@ -148,7 +148,7 @@ Leaf guides: [v2 Volume](../v2/volumes/README.md),
 The [four-binding HTTP tests](../../api/cinder_metadata_scopes_test.go) cover
 actual response ownership, empty-map and deletion branches, Name lookup,
 header/ETag errors, fixed routes, live auth and native API isolation.
-[Connection tests](../../connection_metadata_test.go) cover the cached v3
+[Connection tests](../../connectiontest/connection_metadata_test.go) cover the cached v3
 Volume/Snapshot client, and [generator tests](../../internal/cmd/sdkgen/cinder_metadata_scopes_test.go)
 check that scope discovery supplements exactly the four existing collections.
 

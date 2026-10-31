@@ -23,7 +23,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithoutGenerateFormSignatureNewest`
 
 - Explicit nonempty arbitrary binary key signs decoded endpoint/container/prefix path plus literal redirect, positive size/count and captured expiry as five newline-separated fields, returning owned FormSignatureResult without HTTP upload.
-  Tests: `objectstorage/v1/temp_url_signing_contracts_test.go:TestTempURLSigningContractsKnownVectorsAndPaths`, `objectstorage/v1/form_signature_core_test.go:TestFormSignatureCoreVectorsAndLiteralPaths`, `connection_objectstorage_signing_test.go:TestConnectionSwiftSigningSharesClientAndCapturesEachWorkflow`.
+  Tests: `objectstorage/v1/temp_url_signing_contracts_test.go:TestTempURLSigningContractsKnownVectorsAndPaths`, `objectstorage/v1/form_signature_core_test.go:TestFormSignatureCoreVectorsAndLiteralPaths`, `connectiontest/connection_objectstorage_signing_test.go:TestConnectionSwiftSigningSharesClientAndCapturesEachWorkflow`.
 - Nil key uses fresh container secondary then primary followed only on successful unusable keys by account secondary then primary; HTTP/atomic metadata/source errors stop fallback and missing key is semantic ErrNotFound without fabricated HTTP404.
   Tests: `objectstorage/v1/temp_url_signing_contracts_test.go:TestTempURLSigningContractsDiscoveryAndEvidence`, `objectstorage/v1/form_signature_core_test.go:TestFormSignatureCoreDiscoveryAndPhaseProof`.
 - Time is captured before discovery; explicit time.Time epoch and checked int64 relative expiry require nonnegative epochs, positive timeout/limits and no numeric/string coercion or overflow.
@@ -73,7 +73,7 @@ Go API:
 - IP restriction accepts untrimmed address or masked CIDR, rejects address zones and host-bit prefixes before HEAD, and does not rewrite accepted caller spelling.
   Tests: `objectstorage/v1/temp_url_signing_contracts_test.go:TestTempURLSigningContractsOptionsAndPreflight`, `objectstorage/v1/temp_url_core_test.go:TestTempURLCorePreflightAndTimeBoundaries`.
 - Nil key auto-discovers account-only even when the URL path names a container; nonnil empty bytes are invalid and nonempty arbitrary binary bytes skip all metadata HTTP.
-  Tests: `objectstorage/v1/temp_url_signing_contracts_test.go:TestTempURLSigningContractsDiscoveryAndEvidence`, `objectstorage/v1/temp_url_core_test.go:TestTempURLCoreDiscoveryAndNativePolicy`, `connection_objectstorage_signing_test.go:TestConnectionSwiftSigningSharesClientAndCapturesEachWorkflow`.
+  Tests: `objectstorage/v1/temp_url_signing_contracts_test.go:TestTempURLSigningContractsDiscoveryAndEvidence`, `objectstorage/v1/temp_url_core_test.go:TestTempURLCoreDiscoveryAndNativePolicy`, `connectiontest/connection_objectstorage_signing_test.go:TestConnectionSwiftSigningSharesClientAndCapturesEachWorkflow`.
 - Concrete option factories/callbacks own binary key, header maps and timestamp/newest pointers; fullopts replacement and WithoutNewest preserve nil versus explicit bool while SHA1default and SHA256/SHA512 emit raw lowercase hex.
   Tests: `objectstorage/v1/temp_url_signing_contracts_test.go:TestTempURLSigningContractsOptionsAndPreflight`, `objectstorage/v1/temp_url_options_test.go:TestTempURLOptionsSnapshotsAndReplacement`, `objectstorage/v1/temp_url_options_test.go:TestTempURLOptionsParallelReuseAndCallbackCauses`.
 - Actual fresh HEAD204 evidence survives accepted failures and missing key; all errors stop selection/signing, Discovery key/flags clear on failure and phase metadata clears on outer original-source drift without fabricating status.
@@ -128,5 +128,5 @@ temp_path = conn.object_store.generate_temp_url(
 - [TempURL core](temp_url_core_test.go)
 - [Temp Url Options Test](temp_url_options_test.go)
 - [Temp Url Signing Contracts Test](temp_url_signing_contracts_test.go)
-- [Connection Objectstorage Signing Test](../../connection_objectstorage_signing_test.go)
+- [Connection Objectstorage Signing Test](../../connectiontest/connection_objectstorage_signing_test.go)
 - [Swift Signing Test](../../internal/cmd/sdkgen/swift_signing_test.go)

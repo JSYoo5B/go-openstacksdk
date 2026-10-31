@@ -85,7 +85,7 @@ Go API:
 - PATCH202 action cancellation sends {action:{status:CANCELLED}} at numeric microversion>=1.12, optional force is a query parameter, and original accepted Body/Header/StatusCode are retained without assuming an Action response schema.
   Tests: `api/clustering_action_update_test.go:TestClusteringActionUpdateForceQueryAndUnspecifiedResponseBody`, `api/clustering_action_update_test.go:TestClusteringActionUpdateFreezesBodyQueryAndHeadersBeforeNameLookup`, `api/clustering_action_update_test.go:TestClusteringActionUpdatePreflightAndVersionRecheck`, `api/clustering_action_update_test.go:TestClusteringActionUpdateOnlyAcceptsPublished202AndPreservesNativeErrors`.
 - Connection shares the selected Senlin client, current authentication token, numeric version and reverse-proxy prefix across cluster scale-out, node check and action cancellation, without implicit action fetch or resubmission.
-  Tests: `connection_senlin_async_test.go:TestConnectionSenlinAsyncResourcesShareVersionTokenAndActionRoutes`.
+  Tests: `connectiontest/connection_senlin_async_test.go:TestConnectionSenlinAsyncResourcesShareVersionTokenAndActionRoutes`.
 
 Python/Go differences:
 

@@ -36,7 +36,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCloudGetWriter`
 
 - One fixed literal GET returns raw binary bytes; no HEAD/list/cache before content
-  Tests: `objectstorage/v1/objects/read_contracts_test.go:TestObjectReadContractsWireAndBytes`, `objectstorage/v1/objects/read_core_test.go:TestObjectReadCoreWireAndStatus`, `connection_objectstorage_object_read_test.go:TestConnectionObjectReadSharesClientAndOwnsTransfer`.
+  Tests: `objectstorage/v1/objects/read_contracts_test.go:TestObjectReadContractsWireAndBytes`, `objectstorage/v1/objects/read_core_test.go:TestObjectReadCoreWireAndStatus`, `connectiontest/connection_objectstorage_object_read_test.go:TestConnectionObjectReadSharesClientAndOwnsTransfer`.
 - Literal Range/conditional headers, UTC dates and four actual query names; all option maps/pointers owned
   Tests: `objectstorage/v1/objects/read_contracts_test.go:TestObjectReadContractsWireAndBytes`, `objectstorage/v1/objects/read_contracts_test.go:TestObjectReadContractsOptionsAndPreflight`, `objectstorage/v1/objects/read_options_test.go:TestObjectReadOptionsSnapshots`, `objectstorage/v1/objects/read_options_test.go:TestObjectReadOptionsHeaderAndDateInputs`, `objectstorage/v1/objects/read_options_test.go:TestObjectReadOptionsCallbacksAndDefaults`.
 - Ordinary/source reserved headers and complete preflight fail before HTTP
@@ -44,7 +44,7 @@ Go API:
 - 200/206 opaque body and 304 NotModified/no read; no multipart/checksum/contentlength inference
   Tests: `objectstorage/v1/objects/read_contracts_test.go:TestObjectReadContractsWireAndBytes`, `objectstorage/v1/objects/read_core_test.go:TestObjectReadCoreWireAndStatus`.
 - Nullable exact-int64 and literal metadata projection, raw headers and buffers independently owned
-  Tests: `objectstorage/v1/objects/read_contracts_test.go:TestObjectReadContractsMetadataAndEvidence`, `objectstorage/v1/objects/read_core_test.go:TestObjectReadCoreResponseAndSource`, `connection_objectstorage_object_read_test.go:TestConnectionObjectReadSharesClientAndOwnsTransfer`.
+  Tests: `objectstorage/v1/objects/read_contracts_test.go:TestObjectReadContractsMetadataAndEvidence`, `objectstorage/v1/objects/read_core_test.go:TestObjectReadCoreResponseAndSource`, `connectiontest/connection_objectstorage_object_read_test.go:TestConnectionObjectReadSharesClientAndOwnsTransfer`.
 - Read/Close/custom context faults preserve accepted status/header and actual partial bytes; Complete tracks observed EOF
   Tests: `objectstorage/v1/objects/read_contracts_test.go:TestObjectReadContractsMetadataAndEvidence`, `objectstorage/v1/objects/read_contracts_test.go:TestObjectReadContractsWriterAndStreamOwnership`, `objectstorage/v1/objects/read_core_test.go:TestObjectReadCoreResponseAndSource`.
 - Opening source drift retains accepted proof; native rejected payload/error cleanup ABI preserved
@@ -92,7 +92,7 @@ Go API:
 - Borrowed writer receives binary content through one GET, no HEAD/no lifecycle ownership
   Tests: `objectstorage/v1/objects/read_contracts_test.go:TestObjectReadContractsWireAndBytes`, `objectstorage/v1/objects/read_contracts_test.go:TestObjectReadContractsWriterAndStreamOwnership`, `objectstorage/v1/objects/read_core_test.go:TestObjectReadCoreBorrowedWriter`, `objectstorage/v1/objects/read_options_test.go:TestObjectReadOptionsSnapshots`, `objectstorage/v1/objects/read_options_test.go:TestObjectReadOptionsPreflight`, `objectstorage/v1/objects/read_options_test.go:TestObjectReadOptionsCallbacksAndDefaults`.
 - 304 writes nothing; accepted initial metadata/header/status and projection errors remain observable
-  Tests: `objectstorage/v1/objects/read_contracts_test.go:TestObjectReadContractsWireAndBytes`, `objectstorage/v1/objects/read_contracts_test.go:TestObjectReadContractsMetadataAndEvidence`, `objectstorage/v1/objects/read_core_test.go:TestObjectReadCoreWireAndStatus`, `connection_objectstorage_object_read_test.go:TestConnectionObjectReadSharesClientAndOwnsTransfer`.
+  Tests: `objectstorage/v1/objects/read_contracts_test.go:TestObjectReadContractsWireAndBytes`, `objectstorage/v1/objects/read_contracts_test.go:TestObjectReadContractsMetadataAndEvidence`, `objectstorage/v1/objects/read_core_test.go:TestObjectReadCoreWireAndStatus`, `connectiontest/connection_objectstorage_object_read_test.go:TestConnectionObjectReadSharesClientAndOwnsTransfer`.
 - Bounded copy uses configured buffers and excludes ReaderFrom/WriterTo shortcuts
   Tests: `objectstorage/v1/objects/read_contracts_test.go:TestObjectReadContractsWriterAndStreamOwnership`, `objectstorage/v1/objects/read_core_test.go:TestObjectReadCoreBorrowedWriter`.
 - Successful Write n defines BytesWritten; short/invalid counts and simultaneous Read+Write errors retained
@@ -148,7 +148,7 @@ Go API:
 - Early/idempotent Close exposes stable cleanup cause once; later Read/Close never reopens body
   Tests: `objectstorage/v1/objects/read_contracts_test.go:TestObjectReadContractsWriterAndStreamOwnership`, `objectstorage/v1/objects/read_stream_test.go:TestObjectReadStreamOwnershipAndCleanup`, `objectstorage/v1/objects/read_stream_test.go:TestObjectReadStreamGuards`.
 - Initial raw header/status error proof remains immutable despite exported result mutation; later underlying/context/source causes and counts preserved
-  Tests: `objectstorage/v1/objects/read_contracts_test.go:TestObjectReadContractsWriterAndStreamOwnership`, `objectstorage/v1/objects/read_stream_test.go:TestObjectReadStreamOwnershipAndCleanup`, `objectstorage/v1/objects/read_stream_test.go:TestObjectReadStreamGuards`, `connection_objectstorage_object_read_test.go:TestConnectionObjectReadSharesClientAndOwnsTransfer`.
+  Tests: `objectstorage/v1/objects/read_contracts_test.go:TestObjectReadContractsWriterAndStreamOwnership`, `objectstorage/v1/objects/read_stream_test.go:TestObjectReadStreamOwnershipAndCleanup`, `objectstorage/v1/objects/read_stream_test.go:TestObjectReadStreamGuards`, `connectiontest/connection_objectstorage_object_read_test.go:TestConnectionObjectReadSharesClientAndOwnsTransfer`.
 - Prebody retry/actual status guard cannot retarget or resend exposed body; existing native Download status/header/query ABI remains exact
   Tests: `objectstorage/v1/objects/read_contracts_test.go:TestObjectReadContractsNativePolicy`, `objectstorage/v1/objects/read_options_test.go:TestObjectReadOptionsSnapshots`, `objectstorage/v1/objects/read_options_test.go:TestObjectReadOptionsHeaderAndDateInputs`, `objectstorage/v1/objects/read_options_test.go:TestObjectReadOptionsCallbacksAndDefaults`, `objectstorage/v1/objects/read_stream_test.go:TestObjectReadStreamBoundaries`, `internal/cmd/sdkgen/swift_object_read_test.go:TestSwiftObjectReadPreservesNativeAndRegistry`.
 
@@ -279,5 +279,5 @@ for chunk in chunks:
 - [Read Stream Test](read_stream_test.go)
 - [concrete options](read_options_test.go)
 - [Read Contracts Test](read_contracts_test.go)
-- [Connection Objectstorage Object Read Test](../../../connection_objectstorage_object_read_test.go)
+- [Connection Objectstorage Object Read Test](../../../connectiontest/connection_objectstorage_object_read_test.go)
 - [Swift Object Read Test](../../../internal/cmd/sdkgen/swift_object_read_test.go)

@@ -17,9 +17,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.ProjectQuotaScope.Get`
 
 - Explicit project IDs bind without HTTP; exact project names resolve once through a separate Keystone v3 client across all pages, with missing, ambiguous, invalid-ID and authorization failures stopping Cinder calls.
-  Tests: `api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaResolvesExactProjectNameWithSeparateKeystoneClientOnce`, `api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaProjectLookupFailuresPreventCinderRequests`, `connection_project_quotas_test.go:TestConnectionServiceQuotaNamesUseSeparateIdentityClient`.
+  Tests: `api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaResolvesExactProjectNameWithSeparateKeystoneClientOnce`, `api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaProjectLookupFailuresPreventCinderRequests`, `connectiontest/connection_project_quotas_test.go:TestConnectionServiceQuotaNamesUseSeparateIdentityClient`.
 - Recorded Keystone v2 tenant or v3 project IDs are frozen when the scope is created; manual, unsupported, typed-nil, system/domain and malformed authentication results are rejected without quota requests or token disclosure.
-  Tests: `api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaCurrentProjectUsesRecordedV3AndV2AuthenticationAndFreezesID`, `api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaCurrentProjectRejectsUnscopedManualAndInvalidAuthResults`, `connection_project_quotas_test.go:TestConnectionServiceQuotasIDAuthAndCancellation`.
+  Tests: `api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaCurrentProjectUsesRecordedV3AndV2AuthenticationAndFreezesID`, `api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaCurrentProjectRejectsUnscopedManualAndInvalidAuthResults`, `connectiontest/connection_project_quotas_test.go:TestConnectionServiceQuotasIDAuthAndCancellation`.
 - GET uses /os-quota-sets/{fixedProject}, preserves native zero/unlimited limits, separate response ID, per-type Extra, exact raw extension/null/large-integer fields and copied response headers.
   Tests: `api/cinder_project_quotas_responses_test.go:TestCinderProjectQuotaLimitsDefaultsUsageUpdateAndResetKeepFixedTarget`.
 - Missing, null, array/scalar quota_set envelopes and invalid known field types return decoding errors rather than zero-valued quota objects.
@@ -42,9 +42,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.ProjectQuotaScope.Defaults`
 
 - Explicit project IDs bind without HTTP; exact project names resolve once through a separate Keystone v3 client across all pages, with missing, ambiguous, invalid-ID and authorization failures stopping Cinder calls.
-  Tests: `api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaResolvesExactProjectNameWithSeparateKeystoneClientOnce`, `api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaProjectLookupFailuresPreventCinderRequests`, `connection_project_quotas_test.go:TestConnectionServiceQuotaNamesUseSeparateIdentityClient`.
+  Tests: `api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaResolvesExactProjectNameWithSeparateKeystoneClientOnce`, `api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaProjectLookupFailuresPreventCinderRequests`, `connectiontest/connection_project_quotas_test.go:TestConnectionServiceQuotaNamesUseSeparateIdentityClient`.
 - Recorded Keystone v2 tenant or v3 project IDs are frozen when the scope is created; manual, unsupported, typed-nil, system/domain and malformed authentication results are rejected without quota requests or token disclosure.
-  Tests: `api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaCurrentProjectUsesRecordedV3AndV2AuthenticationAndFreezesID`, `api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaCurrentProjectRejectsUnscopedManualAndInvalidAuthResults`, `connection_project_quotas_test.go:TestConnectionServiceQuotasIDAuthAndCancellation`.
+  Tests: `api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaCurrentProjectUsesRecordedV3AndV2AuthenticationAndFreezesID`, `api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaCurrentProjectRejectsUnscopedManualAndInvalidAuthResults`, `connectiontest/connection_project_quotas_test.go:TestConnectionServiceQuotasIDAuthAndCancellation`.
 - GET uses the distinct /os-quota-sets/{fixedProject}/defaults endpoint, retains server defaults and raw per-type/large-integer fields, and leaves configured overrides unchanged.
   Tests: `api/cinder_project_quotas_responses_test.go:TestCinderProjectQuotaLimitsDefaultsUsageUpdateAndResetKeepFixedTarget`.
 - Missing, null, array/scalar quota_set envelopes and invalid known field types return decoding errors rather than zero-valued quota objects.
@@ -67,9 +67,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.ProjectQuotaScope.Usage`
 
 - Explicit project IDs bind without HTTP; exact project names resolve once through a separate Keystone v3 client across all pages, with missing, ambiguous, invalid-ID and authorization failures stopping Cinder calls.
-  Tests: `api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaResolvesExactProjectNameWithSeparateKeystoneClientOnce`, `api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaProjectLookupFailuresPreventCinderRequests`, `connection_project_quotas_test.go:TestConnectionServiceQuotaNamesUseSeparateIdentityClient`.
+  Tests: `api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaResolvesExactProjectNameWithSeparateKeystoneClientOnce`, `api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaProjectLookupFailuresPreventCinderRequests`, `connectiontest/connection_project_quotas_test.go:TestConnectionServiceQuotaNamesUseSeparateIdentityClient`.
 - Recorded Keystone v2 tenant or v3 project IDs are frozen when the scope is created; manual, unsupported, typed-nil, system/domain and malformed authentication results are rejected without quota requests or token disclosure.
-  Tests: `api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaCurrentProjectUsesRecordedV3AndV2AuthenticationAndFreezesID`, `api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaCurrentProjectRejectsUnscopedManualAndInvalidAuthResults`, `connection_project_quotas_test.go:TestConnectionServiceQuotasIDAuthAndCancellation`.
+  Tests: `api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaCurrentProjectUsesRecordedV3AndV2AuthenticationAndFreezesID`, `api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaCurrentProjectRejectsUnscopedManualAndInvalidAuthResults`, `connectiontest/connection_project_quotas_test.go:TestConnectionServiceQuotasIDAuthAndCancellation`.
 - GET uses ?usage=true on the project endpoint, retains native Limit/InUse/Reserved/Allocated values and exact raw nested extension fields rather than Nova detail routing.
   Tests: `api/cinder_project_quotas_responses_test.go:TestCinderProjectQuotaLimitsDefaultsUsageUpdateAndResetKeepFixedTarget`.
 - Missing, null, array/scalar quota_set envelopes and invalid known field types return decoding errors rather than zero-valued quota objects.
@@ -286,7 +286,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.ProjectQuotaScope.Get`
 
 - get_volume_quotas strict-finds the project then reads the quota set without usage; GetBlockStorageQuotas looks up once and sends one GET, failing before Cinder for a missing project.
-  Tests: `connection_py_cloud_compute_quotas_test.go:TestPyCloudComputeDeleteQuotasReturnsResetAndVolumeSideWorks`, `connection_py_cloud_compute_quotas_test.go:TestPyCloudComputeQuotaHelpersMissingProjectStopsBeforeService`.
+  Tests: `connectiontest/connection_py_cloud_compute_quotas_test.go:TestPyCloudComputeDeleteQuotasReturnsResetAndVolumeSideWorks`, `connectiontest/connection_py_cloud_compute_quotas_test.go:TestPyCloudComputeQuotaHelpersMissingProjectStopsBeforeService`.
 - Normalized known and unknown quota fields and usage/limit triples are the mapped block storage get_quota_set contract.
   Tests: `api/cinder_project_quotas_responses_test.go:TestCinderProjectQuotaLimitsDefaultsUsageUpdateAndResetKeepFixedTarget`.
 
@@ -310,7 +310,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.ProjectQuotaScope.Update`
 
 - set_volume_quotas strict-finds the project and sends update_quota_set without a force flag; SetBlockStorageQuotas looks up once, sends one PUT and adds no force.
-  Tests: `connection_py_cloud_compute_quotas_test.go:TestPyCloudComputeDeleteQuotasReturnsResetAndVolumeSideWorks`, `connection_py_cloud_compute_quotas_test.go:TestPyCloudComputeQuotaHelpersMissingProjectStopsBeforeService`.
+  Tests: `connectiontest/connection_py_cloud_compute_quotas_test.go:TestPyCloudComputeDeleteQuotasReturnsResetAndVolumeSideWorks`, `connectiontest/connection_py_cloud_compute_quotas_test.go:TestPyCloudComputeQuotaHelpersMissingProjectStopsBeforeService`.
 - Cinder update body building and error evidence are the mapped update_quota_set contract.
   Tests: `api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaHTTPFailuresPreserveStatusBodyHeaderAndNotFound`.
 
@@ -335,7 +335,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.ProjectQuotaScope.Reset`
 
 - delete_volume_quotas strict-finds the project and calls revert_quota_set; DeleteBlockStorageQuotas looks up once and sends one DELETE.
-  Tests: `connection_py_cloud_compute_quotas_test.go:TestPyCloudComputeDeleteQuotasReturnsResetAndVolumeSideWorks`, `connection_py_cloud_compute_quotas_test.go:TestPyCloudComputeQuotaHelpersMissingProjectStopsBeforeService`.
+  Tests: `connectiontest/connection_py_cloud_compute_quotas_test.go:TestPyCloudComputeDeleteQuotasReturnsResetAndVolumeSideWorks`, `connectiontest/connection_py_cloud_compute_quotas_test.go:TestPyCloudComputeQuotaHelpersMissingProjectStopsBeforeService`.
 - The reset 404/HTTP cause contract is the mapped revert_quota_set behavior.
   Tests: `api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaHTTPFailuresPreserveStatusBodyHeaderAndNotFound`.
 

@@ -42,7 +42,7 @@ Go API:
 - Marker source X-Detect-Content-Type rejects before callbacks, while the existing ordinary CreateObject still accepts its separate valid media/detect/metadata policy.
   Tests: `objectstorage/v1/objects/directory_marker_core_test.go:TestDirectoryMarkerCoreOrdinaryPolicyIsolation`.
 - Connection ObjectStorage/ObjectStorageV1 shares the original service client and marker facade; each workflow freshly captures ordinary source headers and auth. Reused factory maps stay owned,201/202 are returned as raw acknowledgements and result snapshots do not mutate the source or another observation.
-  Tests: `connection_objectstorage_directory_marker_test.go:TestConnectionSwiftDirectoryMarkerOwnsMediaAndFreshCapture`.
+  Tests: `connectiontest/connection_objectstorage_directory_marker_test.go:TestConnectionSwiftDirectoryMarkerOwnsMediaAndFreshCapture`.
 - Swift generated native/service files remain byte-exact, accounts/containers/objects gain no generated Collections and generated guidance includes the dedicated marker method/media/guide together with existing CreateObject, WaitForDelete and DeleteObject.
   Tests: `internal/cmd/sdkgen/swift_directory_marker_test.go:TestSwiftDirectoryMarkerPreservesNativeAPIs`.
 - CreateDirectoryMarkerObject sends one PUT with an empty body and Content-Type application/directory, the request the Python cloud helper sends through create_object(data='').

@@ -171,11 +171,11 @@ Go API:
 - Configured CloudLocation is cloned and computed per actual resource before filtering; foreign project clears scope names, keeps original project/zone, and never fabricates Wire location.
   Tests: `network/v2/ports/python_list_records_test.go:TestPythonPortSearchRecordsCloudLocationOwnsForeignProjectAndZone`.
 - Connection uses cached Neutron service; owned per-row CurrentLocation is applied before local selection without changing actual Wire, and callbacks execute once.
-  Tests: `connection_network_record_lists_test.go:TestConnectionPortRecordsCachedServiceAndAutomaticPerRowLocation`.
+  Tests: `connectiontest/connection_network_record_lists_test.go:TestConnectionPortRecordsCachedServiceAndAutomaticPerRowLocation`.
 - Clean absent catalog returns nonnil empty list before list options; search still evaluates loaded local filters and expressions on [], including scalar/null and invalid expressions, with zero HTTP. Mixed catalog errors and cancellation remain failures.
-  Tests: `connection_network_record_lists_test.go:TestConnectionPortRecordsCatalogAbsencePrecedesListOptionsButSearchStillEvaluatesEmpty`, `connection_network_record_lists_test.go:TestConnectionPortRecordsMixedCatalogFailureAndCancellationDoNotClaimEmpty`.
+  Tests: `connectiontest/connection_network_record_lists_test.go:TestConnectionPortRecordsCatalogAbsencePrecedesListOptionsButSearchStillEvaluatesEmpty`, `connectiontest/connection_network_record_lists_test.go:TestConnectionPortRecordsMixedCatalogFailureAndCancellationDoNotClaimEmpty`.
 - Invalid Connection/context fails before discovery; late-page failure preserves actual response error evidence and prevents a fabricated successful selection.
-  Tests: `connection_network_record_lists_test.go:TestConnectionPortRecordsPreflightAndLatePageFailureRetainActualEvidence`.
+  Tests: `connectiontest/connection_network_record_lists_test.go:TestConnectionPortRecordsPreflightAndLatePageFailureRetainActualEvidence`.
 - Source list() on literal arrays, objects, Unicode strings and empty iterables preserves JSON values without fake PortRecord or receipt; JSON object key order is explicitly Go lexical.
   Tests: `network/v2/ports/python_list_records_values_test.go:TestSourceCloudPortListLiteralIterablesDoNotFabricateResources`.
 - Null/scalar noniterable and opaque-generator JMES function/syntax failures return before HTTP; result JSON is never fabricated.
@@ -191,9 +191,9 @@ Go API:
 - A later page physical fault preserves only observed actual Inventory; successful cloud Values/Ports/JSON are absent on failure.
   Tests: `network/v2/ports/python_list_records_values_test.go:TestSourceCloudPortListLateFaultRetainsOnlyActualInventory`.
 - Clean absent network service returns nonnil [] before filter expansion or option callbacks; endpoint errors and context remain errors.
-  Tests: `connection_port_values_test.go:TestConnectionListPortValuesAbsentServiceSkipsFilterExpansion`.
+  Tests: `connectiontest/connection_port_values_test.go:TestConnectionListPortValuesAbsentServiceSkipsFilterExpansion`.
 - Whole Connection shares cached network client and injects current location for actual records, preserves literal values without HTTP/fake records, and retains existing typed ListPorts compatibility.
-  Tests: `connection_port_values_test.go:TestConnectionListPortValuesCachedClientLocationAndTypedListCompatibility`.
+  Tests: `connectiontest/connection_port_values_test.go:TestConnectionListPortValuesCachedClientLocationAndTypedListCompatibility`.
 
 Python/Go differences:
 

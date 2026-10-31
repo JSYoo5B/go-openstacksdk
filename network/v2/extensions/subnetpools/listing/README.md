@@ -258,5 +258,5 @@ The source is pinned to
 and [Gophercloud v2.15.0](https://github.com/gophercloud/gophercloud/blob/v2.15.0/openstack/networking/v2/extensions/subnetpools/results.go).
 See [common listing options](../../../../../docs/listing.md),
 [seven API HTTP groups](../../../../../api/subnet_pool_list_filters_test.go),
-and [the Connection integration](../../../../../connection_subnet_pool_filters_test.go).
+and [the Connection integration](../../../../../connectiontest/connection_subnet_pool_filters_test.go).
 The HTTP proofs use mock servers, not a live Neutron cloud.

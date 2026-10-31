@@ -252,4 +252,4 @@ and native
 [Router results](https://github.com/gophercloud/gophercloud/blob/v2.15.0/openstack/networking/v2/extensions/layer3/routers/results.go).
 See the [common list options](../../../../../../docs/listing.md),
 [seven API HTTP groups](../../../../../../api/router_list_filters_test.go)
-and [root Connection evidence](../../../../../../connection_router_filters_test.go).
+and [root Connection evidence](../../../../../../connectiontest/connection_router_filters_test.go).

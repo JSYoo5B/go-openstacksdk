@@ -146,7 +146,7 @@ Go API:
 - Captured source headers predate callbacks and remain fixed through actual late503; callback executes once, prior physically exposed Inventory remains, actual response proof and custom cancellation survive.
   Tests: `identity/project_record_cloud_test.go:TestPythonProjectCloudSourceHeaderSnapshotCallbackCancellationAndLatePageEvidence`.
 - Connection uses cached IdentityV3 Projects client, injects configured CurrentLocation before selection and after opts/nil reset, and preserves owned per-call location. Nil/canceled/missing catalog returns real configuration/cancel causes without fake HTTP receipt.
-  Tests: `connection_project_record_lists_test.go:TestConnectionProjectReadsShareCachedIdentityAndInjectLocationBeforeSelection`, `connection_project_record_lists_test.go:TestConnectionProjectReadsPerCallLocationSnapshotAndNoNamePushdownForSearch`, `connection_project_record_lists_test.go:TestConnectionProjectReadsPreflightAndMissingEndpointPreserveRealConfigurationCause`.
+  Tests: `connectiontest/connection_project_record_lists_test.go:TestConnectionProjectReadsShareCachedIdentityAndInjectLocationBeforeSelection`, `connectiontest/connection_project_record_lists_test.go:TestConnectionProjectReadsPerCallLocationSnapshotAndNoNamePushdownForSearch`, `connectiontest/connection_project_record_lists_test.go:TestConnectionProjectReadsPreflightAndMissingEndpointPreserveRealConfigurationCause`.
 
 Python/Go differences:
 
@@ -178,7 +178,7 @@ Go API:
 - Typed owned location is supplied before local selection, foreign project IDs clear current names, response location remains untouched in Wire, and caller mutation cannot change location options.
   Tests: `identity/project_record_cloud_test.go:TestPythonProjectCloudLocationBeforeLocalSelectionAndOwnedOverrides`.
 - Connection cache and CurrentLocation defaults are applied before filtering; per-call location stays owned, Source list-only name option is not pushed from Search, and preflight/catalog failures preserve actual configuration causes.
-  Tests: `connection_project_record_lists_test.go:TestConnectionProjectReadsShareCachedIdentityAndInjectLocationBeforeSelection`, `connection_project_record_lists_test.go:TestConnectionProjectReadsPerCallLocationSnapshotAndNoNamePushdownForSearch`, `connection_project_record_lists_test.go:TestConnectionProjectReadsPreflightAndMissingEndpointPreserveRealConfigurationCause`.
+  Tests: `connectiontest/connection_project_record_lists_test.go:TestConnectionProjectReadsShareCachedIdentityAndInjectLocationBeforeSelection`, `connectiontest/connection_project_record_lists_test.go:TestConnectionProjectReadsPerCallLocationSnapshotAndNoNamePushdownForSearch`, `connectiontest/connection_project_record_lists_test.go:TestConnectionProjectReadsPreflightAndMissingEndpointPreserveRealConfigurationCause`.
 
 Python/Go differences:
 

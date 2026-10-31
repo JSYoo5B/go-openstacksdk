@@ -36,8 +36,8 @@ Matches the pool branch of `add_ips_to_server` (`_add_ip_from_pool`) and returns
 - `WithPoolIPWait(true)` polls the server for the address within the remaining budget and ends with `*AddAutoIPTimeoutError`. Nothing is deleted on timeout. Mutations are never replayed.
 - `AddIPsToServer` with a pool selector keeps its Ensure-based selection, which prefers an IP already attached to the target; use `AddIPFromPool` for the source pool behavior.
 
-Behavior is covered by `connection_add_ip_from_pool_test.go`.
+Behavior is covered by `connectiontest/connection_add_ip_from_pool_test.go`.
 
 With a Connection, `WithServiceEnabled("network", false)` or `has_network: false` in clouds.yaml makes the helpers use the Nova lane even with the Neutron source, as Python's `_use_neutron_floating` does.
 
-Behavior is covered by `connection_r2_cloud_net_ip_test.go` and, for the Neutron-to-Nova fallback edges, `connection_cloud_net_ip_fallback_test.go` and `connection_cloud_net_auto_ip_fallback_test.go`; the disabled network service by `connection_network_service_disable_test.go`.
+Behavior is covered by `connectiontest/connection_r2_cloud_net_ip_test.go` and, for the Neutron-to-Nova fallback edges, `connectiontest/connection_cloud_net_ip_fallback_test.go` and `connectiontest/connection_cloud_net_auto_ip_fallback_test.go`; the disabled network service by `connectiontest/connection_network_service_disable_test.go`.

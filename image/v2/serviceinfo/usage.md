@@ -73,5 +73,5 @@ def get_usage_http(image_endpoint, token):
 - [usage controller·serializer](https://github.com/openstack/glance/blob/57f7dd9e76ef24e1e9013eceaa703bd442469a24/glance/api/v2/discovery.py#L197-L213)
 - [Usage Core Test](usage_core_test.go)
 - [Usage Contracts Test](usage_contracts_test.go)
-- [Connection Image Usage Test](../../../connection_image_usage_test.go)
+- [Connection Image Usage Test](../../../connectiontest/connection_image_usage_test.go)
 - [Glance Serviceinfo Test](../../../internal/cmd/sdkgen/glance_serviceinfo_test.go)

@@ -22,7 +22,7 @@ Go API:
 - AllCloudImageRecords eagerly consumes the complete default owned image list once, keeps every consumed row in Inventory and removes rows whose Python-lowered string status equals deleted unless FilterDeleted is false. Value is the completed JSON array of kept declared views, [] for an empty result, and Images aligns with it.
   Tests: `image/image_record_cloud_test.go:TestCloudImageRecordListDeletedFilterShowAllAndLocation`.
 - ShowAll true overrides filter_deleted before the v2 query choice and adds only member_status=all; explicit false keeps the query-free default. The shared Connection location is projected into every Resource while actual Wire location is retained.
-  Tests: `image/image_record_cloud_test.go:TestCloudImageRecordListDeletedFilterShowAllAndLocation`, `connection_image_cloud_records_test.go:TestConnectionCloudImageRecordsShareSourceLocationAndLiveToken`.
+  Tests: `image/image_record_cloud_test.go:TestCloudImageRecordListDeletedFilterShowAllAndLocation`, `connectiontest/connection_image_cloud_records_test.go:TestConnectionCloudImageRecordsShareSourceLocationAndLiveToken`.
 - With the status filter enabled a null, numeric or array status fails with the actual list-page ResponseError and retains Inventory through the failing row without completed Value/Images; disabled filtering never inspects status. A late native page failure retains consumed Inventory.
   Tests: `image/image_record_cloud_test.go:TestCloudImageRecordListStatusAndPageFailuresKeepPartialInventory`.
 - Present filters, including explicit null or malformed JSON, invalid headers and nil options fail before HTTP; nil clears an earlier filter. A cancelling option stops later callbacks and HTTP while retaining the caller cause.
@@ -48,7 +48,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeaders`
 
 - SearchImageRecords completes the default list_images inventory, including the deleted-status filter and no member query, before the shared Cloud identifier exact-or-fnmatch phase. No name or filter is forwarded as a server query or Proxy Body filter; deleted rows are never selectable.
-  Tests: `image/image_record_cloud_test.go:TestCloudImageRecordSearchSelectionAndExpressions`, `connection_image_cloud_records_test.go:TestConnectionCloudImageRecordsShareSourceLocationAndLiveToken`.
+  Tests: `image/image_record_cloud_test.go:TestCloudImageRecordSearchSelectionAndExpressions`, `connectiontest/connection_image_cloud_records_test.go:TestConnectionCloudImageRecordsShareSourceLocationAndLiveToken`.
 - Ordered dictionary filters inspect the 65 declared Image fields plus location, including nested location dictionaries; declared null attributes match while an unknown top-level key is a local error after inventory with retained Inventory. Falsey filters keep the identifier selection.
   Tests: `image/image_record_cloud_test.go:TestCloudImageRecordSearchSelectionAndExpressions`.
 - A JSON string filter runs the shared JMESPath engine on the selected views and returns arbitrary JSON in Value without inventing Images. Show_all/filter_deleted arguments, malformed filters and nil options fail before HTTP.
@@ -74,9 +74,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeaders`
 
 - Omitted or JSON-null filters delegate to the owned Proxy find_image engine with ignore_missing true: literal GET, clean 400/403/404 fallback to the visible and hidden name lists, no Cloud deleted-status filter, nil Value/Image when missing and terminal native errors. Value is the found declared view.
-  Tests: `image/image_record_cloud_test.go:TestCloudImageRecordGetFindPathAndMissing`, `connection_image_cloud_records_test.go:TestConnectionCloudImageRecordsShareSourceLocationAndLiveToken`.
+  Tests: `image/image_record_cloud_test.go:TestCloudImageRecordGetFindPathAndMissing`, `connectiontest/connection_image_cloud_records_test.go:TestConnectionCloudImageRecordsShareSourceLocationAndLiveToken`.
 - Every other filter value, including falsey JSON, uses search_images and then Python truthiness, len and index-0 selection. More than one element, including string code-point length, is ImageRecordSelectionError wrapping ErrAmbiguous; objects have no index 0; a selected JSON null or empty result is missing; Image is set only for one ordinary selected row while expression values stay raw.
-  Tests: `image/image_record_cloud_test.go:TestCloudImageRecordGetFilteredSelection`, `connection_image_cloud_records_test.go:TestConnectionCloudImageRecordsShareSourceLocationAndLiveToken`.
+  Tests: `image/image_record_cloud_test.go:TestCloudImageRecordGetFilteredSelection`, `connectiontest/connection_image_cloud_records_test.go:TestConnectionCloudImageRecordsShareSourceLocationAndLiveToken`.
 - Filter_deleted/show_all arguments and an invalid find identity fail before HTTP.
   Tests: `image/image_record_cloud_test.go:TestCloudImageRecordArgumentsFailBeforeHTTP`.
 
@@ -98,7 +98,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeaders`
 
 - GetImageRecordByID delegates to one strict literal GetImageRecord without query, Find fallback, missing-as-nil or deleted filtering; native 404 remains an error named GetImageRecordByID without nesting the delegated operation, and the Connection location is projected.
-  Tests: `image/image_record_cloud_test.go:TestCloudImageRecordGetByIDIsStrictLiteralGet`, `connection_image_cloud_records_test.go:TestConnectionCloudImageRecordsShareSourceLocationAndLiveToken`.
+  Tests: `image/image_record_cloud_test.go:TestCloudImageRecordGetByIDIsStrictLiteralGet`, `connectiontest/connection_image_cloud_records_test.go:TestConnectionCloudImageRecordsShareSourceLocationAndLiveToken`.
 - Only headers are accepted. Filters, show_all, blank IDs and nil options fail before HTTP, and each option runs as one checked Get option so cancellation stops later callbacks.
   Tests: `image/image_record_cloud_test.go:TestCloudImageRecordArgumentsFailBeforeHTTP`, `image/image_record_cloud_test.go:TestCloudImageRecordOptionsCancelBeforeLaterCallbacks`.
 
@@ -297,13 +297,13 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCreateOpts`
 
 - Without a volume CreateCloudImageRecord runs the owned CreateImageRecord graph with one prepared option snapshot and returns its Record when wait is falsey; with a volume it maps truthy allow_duplicates to force and Python-falsey container/disk formats to the Cinder Proxy defaults before CreateVolumeImageRecord.
-  Tests: `connection_cloud_image_create_test.go:TestConnectionCloudImageCreateBranchesAndWait`, `connection_cloud_image_create_test.go:TestConnectionCloudImageCreateVolumeBodyAndPreflight`.
+  Tests: `connectiontest/connection_cloud_image_create_test.go:TestConnectionCloudImageCreateBranchesAndWait`, `connectiontest/connection_cloud_image_create_test.go:TestConnectionCloudImageCreateVolumeBodyAndPreflight`.
 - A truthy wait repeats Cloud get_image on the created id: missing images keep polling, a found status other than exact queued or saving, including null, is returned, and WaitLookups/WaitLast keep the evidence.
-  Tests: `connection_cloud_image_create_test.go:TestConnectionCloudImageCreateBranchesAndWait`.
+  Tests: `connectiontest/connection_cloud_image_create_test.go:TestConnectionCloudImageCreateBranchesAndWait`.
 - The iterate_timeout deadline uses the raw create timeout (default 3600 seconds, null unlimited); on timeout the image is deleted through Cloud delete_image with wait and the DeadlineExceeded error keeps the cleanup result and created record.
-  Tests: `connection_cloud_image_create_test.go:TestConnectionCloudImageCreateBranchesAndWait`.
+  Tests: `connectiontest/connection_cloud_image_create_test.go:TestConnectionCloudImageCreateBranchesAndWait`.
 - Truthy non-string volume formats, non-numeric timeouts with wait, nil options and negative poll intervals fail before HTTP.
-  Tests: `connection_cloud_image_create_test.go:TestConnectionCloudImageCreateVolumeBodyAndPreflight`.
+  Tests: `connectiontest/connection_cloud_image_create_test.go:TestConnectionCloudImageCreateVolumeBodyAndPreflight`.
 
 Python/Go differences:
 

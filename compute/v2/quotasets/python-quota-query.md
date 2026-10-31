@@ -27,7 +27,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.UserQuotaScope.GetRecord`
 
 - Explicit project IDs bind without a lookup; exact names resolve once with a separate Keystone v3 client and do not replace the target with response quota IDs.
-  Tests: `api/project_quotas_contracts_test.go:TestProjectQuotaResolvesExactProjectNameWithSeparateKeystoneClientOnce`, `api/project_quotas_contracts_test.go:TestProjectQuotaProjectLookupFailuresPreventNovaRequests`, `connection_quotas_test.go:TestConnectionProjectQuotasSuppliesSeparateIdentityClient`, `connection_quotas_test.go:TestConnectionProjectQuotasNeedsNoIdentityForIDOrAuthScope`.
+  Tests: `api/project_quotas_contracts_test.go:TestProjectQuotaResolvesExactProjectNameWithSeparateKeystoneClientOnce`, `api/project_quotas_contracts_test.go:TestProjectQuotaProjectLookupFailuresPreventNovaRequests`, `connectiontest/connection_quotas_test.go:TestConnectionProjectQuotasSuppliesSeparateIdentityClient`, `connectiontest/connection_quotas_test.go:TestConnectionProjectQuotasNeedsNoIdentityForIDOrAuthScope`.
 - Python usage=False and usage=True endpoint choices have Go Get and Detail counterparts; the native detail triple remains intact.
   Tests: `api/project_quotas_contracts_test.go:TestProjectQuotaLimitsDetailUpdateAndResetPreserveTargetAndResponse`.
 - The original HTTP status, body and response header remain in the error chain; 404 is additionally ErrNotFound and context cancellation/deadlines remain observable.

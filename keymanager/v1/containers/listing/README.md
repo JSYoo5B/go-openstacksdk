@@ -212,6 +212,6 @@ The seven
 verify both leaf and cached Connection paths, all ten properties, passive IDs,
 exact arrays/numbers, ownership/preflight, native decoding/statuses, controls,
 pagination, and unchanged native operations. Two separate
-[Connection groups](../../../../connection_keymanager_container_filters_test.go)
+[Connection groups](../../../../connectiontest/connection_keymanager_container_filters_test.go)
 provide high-level cached service integration evidence. These tests use local
 servers and custom transports, not a live cloud.

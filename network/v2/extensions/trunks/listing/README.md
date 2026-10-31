@@ -232,4 +232,4 @@ native [Trunk results](https://github.com/gophercloud/gophercloud/blob/v2.15.0/o
 and [LinkedPageBase](https://github.com/gophercloud/gophercloud/blob/v2.15.0/pagination/linked.go).
 See the [common list options](../../../../../docs/listing.md),
 [seven HTTP groups](../../../../../api/trunk_list_filters_test.go) and
-[two Connection groups](../../../../../connection_trunk_filters_test.go).
+[two Connection groups](../../../../../connectiontest/connection_trunk_filters_test.go).

@@ -39,7 +39,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.ProjectQuotaScope.Get`
 
 - Explicit project IDs bind without a lookup; exact names resolve once with a separate Keystone v3 client and do not replace the target with response quota IDs.
-  Tests: `api/project_quotas_contracts_test.go:TestProjectQuotaResolvesExactProjectNameWithSeparateKeystoneClientOnce`, `api/project_quotas_contracts_test.go:TestProjectQuotaProjectLookupFailuresPreventNovaRequests`, `connection_quotas_test.go:TestConnectionProjectQuotasSuppliesSeparateIdentityClient`, `connection_quotas_test.go:TestConnectionProjectQuotasNeedsNoIdentityForIDOrAuthScope`.
+  Tests: `api/project_quotas_contracts_test.go:TestProjectQuotaResolvesExactProjectNameWithSeparateKeystoneClientOnce`, `api/project_quotas_contracts_test.go:TestProjectQuotaProjectLookupFailuresPreventNovaRequests`, `connectiontest/connection_quotas_test.go:TestConnectionProjectQuotasSuppliesSeparateIdentityClient`, `connectiontest/connection_quotas_test.go:TestConnectionProjectQuotasNeedsNoIdentityForIDOrAuthScope`.
 - Recorded Keystone v2/v3 authentication supplies a frozen project ID; manual, unscoped and malformed results fail without Nova requests.
   Tests: `api/project_quotas_contracts_test.go:TestProjectQuotaCurrentProjectUsesRecordedV3AndV2AuthenticationAndFreezesID`, `api/project_quotas_contracts_test.go:TestProjectQuotaCurrentProjectRejectsUnscopedManualAndInvalidAuthResults`.
 - GET /os-quota-sets/{projectID} retains all native limits, zero/unlimited values, the separate request ProjectID and response ID, extension/null fields and independent response headers.
@@ -66,7 +66,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.ProjectQuotaScope.Detail`
 
 - Explicit project IDs bind without a lookup; exact names resolve once with a separate Keystone v3 client and do not replace the target with response quota IDs.
-  Tests: `api/project_quotas_contracts_test.go:TestProjectQuotaResolvesExactProjectNameWithSeparateKeystoneClientOnce`, `api/project_quotas_contracts_test.go:TestProjectQuotaProjectLookupFailuresPreventNovaRequests`, `connection_quotas_test.go:TestConnectionProjectQuotasSuppliesSeparateIdentityClient`, `connection_quotas_test.go:TestConnectionProjectQuotasNeedsNoIdentityForIDOrAuthScope`.
+  Tests: `api/project_quotas_contracts_test.go:TestProjectQuotaResolvesExactProjectNameWithSeparateKeystoneClientOnce`, `api/project_quotas_contracts_test.go:TestProjectQuotaProjectLookupFailuresPreventNovaRequests`, `connectiontest/connection_quotas_test.go:TestConnectionProjectQuotasSuppliesSeparateIdentityClient`, `connectiontest/connection_quotas_test.go:TestConnectionProjectQuotasNeedsNoIdentityForIDOrAuthScope`.
 - Recorded Keystone v2/v3 authentication supplies a frozen project ID; manual, unscoped and malformed results fail without Nova requests.
   Tests: `api/project_quotas_contracts_test.go:TestProjectQuotaCurrentProjectUsesRecordedV3AndV2AuthenticationAndFreezesID`, `api/project_quotas_contracts_test.go:TestProjectQuotaCurrentProjectRejectsUnscopedManualAndInvalidAuthResults`.
 - GET /os-quota-sets/{projectID}/detail retains native limit/in_use/reserved values, raw nested extensions and independent response headers.
@@ -123,7 +123,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.ProjectQuotaScope.Reset`
 
 - delete_compute_quotas strict-finds the project and calls revert_quota_set (bodyless DELETE os-quota-sets/{project}); DeleteComputeQuotas does the same lookup and one DELETE, returning copied response headers.
-  Tests: `connection_py_cloud_compute_quotas_test.go:TestPyCloudComputeDeleteQuotasReturnsResetAndVolumeSideWorks`, `connection_py_cloud_compute_quotas_test.go:TestPyCloudComputeQuotaHelpersMissingProjectStopsBeforeService`.
+  Tests: `connectiontest/connection_py_cloud_compute_quotas_test.go:TestPyCloudComputeDeleteQuotasReturnsResetAndVolumeSideWorks`, `connectiontest/connection_py_cloud_compute_quotas_test.go:TestPyCloudComputeQuotaHelpersMissingProjectStopsBeforeService`.
 - The strict 404 and HTTP cause preservation of the reset are the mapped revert_quota_set contract.
   Tests: `api/project_quotas_contracts_test.go:TestProjectQuotaHTTPFailuresPreserveStatusBodyHeaderAndNotFound`.
 
@@ -147,9 +147,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.ProjectQuotaScope.Get`
 
 - get_compute_quotas(name_or_id) looks the project up with find_project(ignore_missing=False) and then fetches the quota set without usage; GetComputeQuotas performs the same strict lookup before one quota GET and stops with resource.ErrNotFound and no quota request for a missing project.
-  Tests: `connection_py_cloud_compute_quotas_test.go:TestPyCloudComputeQuotaHelpersLookUpIDThenName`, `connection_py_cloud_compute_quotas_test.go:TestPyCloudComputeQuotaHelpersMissingProjectStopsBeforeService`, `connection_py_cloud_compute_quotas_test.go:TestPyCloudComputeQuotaHelpersHonorCanceledContext`.
+  Tests: `connectiontest/connection_py_cloud_compute_quotas_test.go:TestPyCloudComputeQuotaHelpersLookUpIDThenName`, `connectiontest/connection_py_cloud_compute_quotas_test.go:TestPyCloudComputeQuotaHelpersMissingProjectStopsBeforeService`, `connectiontest/connection_py_cloud_compute_quotas_test.go:TestPyCloudComputeQuotaHelpersHonorCanceledContext`.
 - The delegated compute get_quota_set (usage=False route, normalized known and unknown quota fields, microversion selection) is separately mapped and the helper reuses it.
-  Tests: `connection_quotas_test.go:TestConnectionProjectQuotasSuppliesSeparateIdentityClient`, `api/project_quotas_contracts_test.go:TestProjectQuotaLimitsDetailUpdateAndResetPreserveTargetAndResponse`.
+  Tests: `connectiontest/connection_quotas_test.go:TestConnectionProjectQuotasSuppliesSeparateIdentityClient`, `api/project_quotas_contracts_test.go:TestProjectQuotaLimitsDetailUpdateAndResetPreserveTargetAndResponse`.
 
 Python/Go differences:
 
@@ -171,7 +171,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithUpdateForce`
 
 - set_compute_quotas strict-finds the project, forces force=True over any caller value and sends update_quota_set; SetComputeQuotas looks up once and appends force=true after the caller's options, preserving zero values and omitting unset limits.
-  Tests: `connection_py_cloud_compute_quotas_test.go:TestPyCloudComputeSetQuotasForcesTrueAndKeepsZero`, `connection_py_cloud_compute_quotas_test.go:TestPyCloudComputeQuotaHelpersMissingProjectStopsBeforeService`.
+  Tests: `connectiontest/connection_py_cloud_compute_quotas_test.go:TestPyCloudComputeSetQuotasForcesTrueAndKeepsZero`, `connectiontest/connection_py_cloud_compute_quotas_test.go:TestPyCloudComputeQuotaHelpersMissingProjectStopsBeforeService`.
 - Quota update body building (omission, zero, unlimited, explicit extension fields, protected-key rejection) is the mapped update_quota_set contract.
   Tests: `api/project_quotas_contracts_test.go:TestProjectQuotaUpdateDistinguishesOmittedFalseZeroAndUnlimited`, `api/project_quotas_contracts_test.go:TestProjectQuotaInvalidOptionsFailBeforeHTTP`.
 
@@ -205,7 +205,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.UserQuotaScope.GetRecord`
 
 - Explicit project IDs bind without a lookup; exact names resolve once with a separate Keystone v3 client and do not replace the target with response quota IDs.
-  Tests: `api/project_quotas_contracts_test.go:TestProjectQuotaResolvesExactProjectNameWithSeparateKeystoneClientOnce`, `api/project_quotas_contracts_test.go:TestProjectQuotaProjectLookupFailuresPreventNovaRequests`, `connection_quotas_test.go:TestConnectionProjectQuotasSuppliesSeparateIdentityClient`, `connection_quotas_test.go:TestConnectionProjectQuotasNeedsNoIdentityForIDOrAuthScope`.
+  Tests: `api/project_quotas_contracts_test.go:TestProjectQuotaResolvesExactProjectNameWithSeparateKeystoneClientOnce`, `api/project_quotas_contracts_test.go:TestProjectQuotaProjectLookupFailuresPreventNovaRequests`, `connectiontest/connection_quotas_test.go:TestConnectionProjectQuotasSuppliesSeparateIdentityClient`, `connectiontest/connection_quotas_test.go:TestConnectionProjectQuotasNeedsNoIdentityForIDOrAuthScope`.
 - Python usage=False and usage=True endpoint choices have Go Get and Detail counterparts; the native detail triple remains intact.
   Tests: `api/project_quotas_contracts_test.go:TestProjectQuotaLimitsDetailUpdateAndResetPreserveTargetAndResponse`.
 - The original HTTP status, body and response header remain in the error chain; 404 is additionally ErrNotFound and context cancellation/deadlines remain observable.

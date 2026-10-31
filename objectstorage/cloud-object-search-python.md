@@ -29,9 +29,9 @@ Go API:
 - Full JMESPath returns null/scalar/object/list as independent Value with Expression=true and no invented Records correlation; malformed expressions on empty name selection preserve errors.
   Tests: `objectstorage/cloud_object_search_test.go:TestSwiftCloudObjectSearchExpressionsReturnArbitraryJSONWithoutRowAssociation`.
 - Direct Source Object location remains null while Connection automatically supplies configured CurrentLocation before selection; explicit overrides and whole DTO reset own all pointers/bytes and cannot accept forged remote location.
-  Tests: `objectstorage/cloud_object_search_test.go:TestSwiftCloudObjectSearchLocationIsOwnedAndRemoteWireCannotReplaceIt`, `objectstorage/cloud_object_search_test.go:TestSwiftCloudObjectSearchUsesDefaultNullAndKeepsURIAndMetadataOutsideCloudView`, `connection_swift_object_search_test.go:TestConnectionSwiftObjectSearchSharesFacadeAndAutomaticLocationBeforeSelection`, `connection_swift_object_search_test.go:TestConnectionSwiftObjectSearchPerCallLocationRemainsOwnedAndCallbackRunsOnce`.
+  Tests: `objectstorage/cloud_object_search_test.go:TestSwiftCloudObjectSearchLocationIsOwnedAndRemoteWireCannotReplaceIt`, `objectstorage/cloud_object_search_test.go:TestSwiftCloudObjectSearchUsesDefaultNullAndKeepsURIAndMetadataOutsideCloudView`, `connectiontest/connection_swift_object_search_test.go:TestConnectionSwiftObjectSearchSharesFacadeAndAutomaticLocationBeforeSelection`, `connectiontest/connection_swift_object_search_test.go:TestConnectionSwiftObjectSearchPerCallLocationRemainsOwnedAndCallbackRunsOnce`.
 - Late page or physical handling/source/cancellation failures retain partial AllRecords and actual LastPage without a successful Value/Records. Real HTTP Content-Length faults at 200/203/401/404/429/503 preserve native pointer401 ErrOriginal/ErrReauth and block fault hooks. Source is captured before callbacks and preflight errors perform no discovery or fabricated response.
-  Tests: `objectstorage/cloud_object_search_test.go:TestSwiftCloudObjectSearchMalformedLatePagePreventsSuccessfulPartialResult`, `objectstorage/cloud_object_search_test.go:TestSwiftCloudObjectSearchSourceCapturePrecedesOptionsAndKeepsCancellationCause`, `objectstorage/cloud_object_search_test.go:TestSwiftCloudObjectSearchOwnsRawFiltersAndHeaderNilReset`, `objectstorage/cloud_object_search_test.go:TestSwiftCloudObjectSearchPhysicalLatePageKeepsNative401AndStopsHooks`, `connection_swift_object_search_test.go:TestConnectionSwiftObjectSearchPreflightDoesNotDiscoverOrFabricateResponse`.
+  Tests: `objectstorage/cloud_object_search_test.go:TestSwiftCloudObjectSearchMalformedLatePagePreventsSuccessfulPartialResult`, `objectstorage/cloud_object_search_test.go:TestSwiftCloudObjectSearchSourceCapturePrecedesOptionsAndKeepsCancellationCause`, `objectstorage/cloud_object_search_test.go:TestSwiftCloudObjectSearchOwnsRawFiltersAndHeaderNilReset`, `objectstorage/cloud_object_search_test.go:TestSwiftCloudObjectSearchPhysicalLatePageKeepsNative401AndStopsHooks`, `connectiontest/connection_swift_object_search_test.go:TestConnectionSwiftObjectSearchPreflightDoesNotDiscoverOrFabricateResponse`.
 
 Python/Go differences:
 
@@ -90,4 +90,4 @@ func main() {
 ## References
 
 - [Cloud Object Search Test](cloud_object_search_test.go)
-- [Connection Swift Object Search Test](../connection_swift_object_search_test.go)
+- [Connection Swift Object Search Test](../connectiontest/connection_swift_object_search_test.go)

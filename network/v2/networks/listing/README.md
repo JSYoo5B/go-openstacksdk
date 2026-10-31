@@ -261,4 +261,4 @@ Sources: pinned
 and [field conversion](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/fields.py#L86).
 See the [common list options](../../../../docs/listing.md),
 [seven API HTTP groups](../../../../api/network_list_filters_test.go) and
-[root Connection evidence](../../../../connection_network_filters_test.go).
+[root Connection evidence](../../../../connectiontest/connection_network_filters_test.go).

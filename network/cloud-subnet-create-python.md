@@ -60,7 +60,7 @@ Go API:
 - An actual accepted subnet POST100..399 invalidates the original private successful network role/subnet-gateway topology cache even when response decode/Read/Close/cancel/source handling subsequently fails. Rejected POST and pre-POST lookup/validation errors do not invalidate success cache. Replacing public Service.Roles does not redirect the private mutation cache target.
   Tests: `network/cloud_subnet_create_test.go:TestCloudSubnetCreateAcceptedMutationInvalidatesOnlyPrivateSuccessfulRoleCache`.
 - Connection supplies cached Neutron and an owned default location for lookup/create while the service invalidates only actual accepted topology mutations.
-  Tests: `connection_cycle7_records_test.go:TestConnectionSubnetCreateSharesNetworkCacheAndLocation`, `connection_cycle7_records_test.go:TestConnectionCycle7PreflightPreservesCancellationBeforeDiscovery`.
+  Tests: `connectiontest/connection_cycle7_records_test.go:TestConnectionSubnetCreateSharesNetworkCacheAndLocation`, `connectiontest/connection_cycle7_records_test.go:TestConnectionCycle7PreflightPreservesCancellationBeforeDiscovery`.
 
 Python/Go differences:
 

@@ -240,4 +240,4 @@ and [Rule results](https://github.com/gophercloud/gophercloud/blob/v2.15.0/opens
 See the [common list options](../../../../../../docs/listing.md),
 [seven API HTTP groups](../../../../../../api/security_group_list_filters_test.go),
 [four raw iterator HTTP groups](../../../../../../internal/nativefind/security_group_bodies_test.go)
-and [root Connection evidence](../../../../../../connection_security_group_filters_test.go).
+and [root Connection evidence](../../../../../../connectiontest/connection_security_group_filters_test.go).

@@ -218,7 +218,7 @@ metadata, ownership/collisions, native decoding, controls, and pagination.
 The two separate
 [`TestKeyManagerOrderIdentity` groups](../../../../api/keymanager_order_identity_test.go)
 prove fixed explicit-ID routes and unsupported Name operations. Two
-[Connection groups](../../../../connection_keymanager_order_filters_test.go)
+[Connection groups](../../../../connectiontest/connection_keymanager_order_filters_test.go)
 exercise the shared service facade and raw-name namespace. These are local
 HTTP/transport tests, not live-cloud validation or a claim that a prior wrong
 HTTP route was reproduced.

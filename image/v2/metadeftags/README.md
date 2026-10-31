@@ -228,5 +228,5 @@ def resource_namespace_tags(conn, namespace, names):
 - [Core Test](core_test.go)
 - [Options Test](options_test.go)
 - [Contracts Test](contracts_test.go)
-- [Connection Image Metadef Tags Test](../../../connection_image_metadef_tags_test.go)
+- [Connection Image Metadef Tags Test](../../../connectiontest/connection_image_metadef_tags_test.go)
 - [Glance Metadef Tags Test](../../../internal/cmd/sdkgen/glance_metadef_tags_test.go)
