@@ -1,8 +1,9 @@
 // Package cloudserver implements the cloud-layer server reads and actions of
 // Connection (openstack/cloud/_compute.py list/search/get/update/delete/
-// rebuild_server) over the compute result and option types. Connection
-// supplies its guard, lazy Nova service, location, expansions and floating-IP
-// helpers through Dependencies, so this package never imports the root.
+// rebuild_server and add/remove_server_security_groups) over the compute
+// result and option types. Connection supplies its guard, lazy Nova service,
+// location, expansions, floating-IP and security-group helpers through
+// Dependencies, so this package never imports the root.
 package cloudserver
 
 import (
@@ -21,6 +22,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/serverview"
+	"github.com/JSYoo5B/go-openstacksdk/network"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 
@@ -47,6 +49,12 @@ type Dependencies struct {
 	// helpers used by the delete_ips cleanup.
 	GetFloatingIP    func(context.Context, compute.GetFloatingIPRequest, ...compute.FloatingIPQueryOption) (*compute.GetFloatingIPResult, error)
 	DeleteFloatingIP func(context.Context, compute.DeleteFloatingIPRequest, ...compute.FloatingIPDeleteOption) (*compute.DeleteFloatingIPResult, error)
+	// HasSecurityGroups reports whether secgroup_source selects Neutron or
+	// Nova (_has_secgroups).
+	HasSecurityGroups func() bool
+	// GetSecurityGroup is the Connection security-group lookup used by the
+	// server security-group actions; a nil Group means not found.
+	GetSecurityGroup func(context.Context, string) (*network.SecurityGroupReadResult, error)
 }
 
 // ApplyReadOptions applies the read options in order and validates the filters.
@@ -66,9 +74,9 @@ func ApplyReadOptions(options []compute.CloudServerReadOption) (compute.CloudSer
 	return cfg, nil
 }
 
-// ApplyActionOptions applies the action options over the 180-second default
+// applyActionOptions applies the action options over the 180-second default
 // and validates the wait budget.
-func ApplyActionOptions(options []compute.CloudServerActionOption) (compute.CloudServerActionOpts, error) {
+func applyActionOptions(options []compute.CloudServerActionOption) (compute.CloudServerActionOpts, error) {
 	cfg := compute.CloudServerActionOpts{Timeout: 180 * time.Second}
 	for _, apply := range slices.Clone(options) {
 		if apply == nil {
@@ -92,9 +100,9 @@ func waitOptions(cfg compute.CloudServerActionOpts) []resource.WaitOption {
 	return append([]resource.WaitOption{first}, cfg.WaitOptions...)
 }
 
-// RecordString returns the string value of key in the record's Resource
+// recordString returns the string value of key in the record's Resource
 // view, or "" when it is absent or not a string.
-func RecordString(record *servers.ServerFindRecord, key string) string {
+func recordString(record *servers.ServerFindRecord, key string) string {
 	if record == nil || record.Resource == nil {
 		return ""
 	}
@@ -314,7 +322,7 @@ func Get(ctx context.Context, deps Dependencies, nameOrID string, options []comp
 		default:
 			ids := make([]string, len(search.Records))
 			for i, row := range search.Records {
-				ids[i] = RecordString(row, "id")
+				ids[i] = recordString(row, "id")
 			}
 			return nil, wrap(&resource.AmbiguousError{Resource: "servers", Name: nameOrID, IDs: ids})
 		}
@@ -465,7 +473,7 @@ func deleteFloatingIPs(ctx context.Context, deps Dependencies, record *servers.S
 	if cfg.DeleteIPRetry != nil {
 		retries = *cfg.DeleteIPRetry
 	}
-	serverID := RecordString(record, "id")
+	serverID := recordString(record, "id")
 	for _, address := range floating {
 		filter, _ := json.Marshal(map[string]string{"floating_ip_address": address})
 		query := append(slices.Clone(cfg.FloatingIPQuery), compute.WithFloatingIPQueryFilters(filter))
@@ -500,7 +508,7 @@ func Delete(ctx context.Context, deps Dependencies, nameOrID string, options []c
 	wrap := func(err error) error {
 		return request.Wrap("DeleteServer", "compute", cloudread.ContextError(ctx, err))
 	}
-	cfg, err := ApplyActionOptions(options)
+	cfg, err := applyActionOptions(options)
 	if err != nil {
 		return false, wrap(err)
 	}
@@ -522,7 +530,7 @@ func Delete(ctx context.Context, deps Dependencies, nameOrID string, options []c
 	if record == nil {
 		return false, nil
 	}
-	id := RecordString(record, "id")
+	id := recordString(record, "id")
 	if id == "" {
 		return false, wrap(fmt.Errorf("%w: found server has no string ID", resource.ErrInvalidOption))
 	}
@@ -549,7 +557,7 @@ func Rebuild(ctx context.Context, deps Dependencies, serverID, imageID string, o
 	wrap := func(err error) error {
 		return request.Wrap("RebuildServer", "compute", cloudread.ContextError(ctx, err))
 	}
-	cfg, err := ApplyActionOptions(options)
+	cfg, err := applyActionOptions(options)
 	if err != nil {
 		return nil, wrap(err)
 	}

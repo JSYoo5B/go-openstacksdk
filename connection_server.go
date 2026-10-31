@@ -10,6 +10,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/compute"
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudserver"
+	"github.com/JSYoo5B/go-openstacksdk/network"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -83,14 +84,18 @@ type CloudServerActionOption = compute.CloudServerActionOption
 // server reads and actions.
 func (c *Connection) cloudServerDependencies() cloudserver.Dependencies {
 	return cloudserver.Dependencies{
-		Guard:            c.recordListContext,
-		Compute:          c.ComputeV2,
-		Location:         c.CurrentLocation,
-		ExpandInterfaces: c.ExpandServerInterfaces,
-		Hostvars:         c.cloudServerHostvars,
-		FloatingIPSource: func() compute.FloatingIPSource { return c.options.serverAddresses.FloatingIPSource() },
-		GetFloatingIP:    c.GetFloatingIP,
-		DeleteFloatingIP: c.DeleteFloatingIP,
+		Guard:             c.recordListContext,
+		Compute:           c.ComputeV2,
+		Location:          c.CurrentLocation,
+		ExpandInterfaces:  c.ExpandServerInterfaces,
+		Hostvars:          c.cloudServerHostvars,
+		FloatingIPSource:  func() compute.FloatingIPSource { return c.options.serverAddresses.FloatingIPSource() },
+		GetFloatingIP:     c.GetFloatingIP,
+		DeleteFloatingIP:  c.DeleteFloatingIP,
+		HasSecurityGroups: c.hasSecurityGroups,
+		GetSecurityGroup: func(ctx context.Context, group string) (*network.SecurityGroupReadResult, error) {
+			return c.GetSecurityGroupRecord(ctx, group)
+		},
 	}
 }
 

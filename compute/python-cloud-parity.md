@@ -242,7 +242,7 @@ Go API:
 - SearchAggregates lists every aggregate then applies exact/glob/ID name-or-ID plus dictionary or JMESPath filters locally with no Nova query, and rejects server-only options before HTTP.
   Tests: `connectiontest/connection_aggregate_search_test.go:TestR2CloudComputeSearchAggregatesFiltersLocally`, `connectiontest/connection_aggregate_search_test.go:TestR2CloudComputeSearchAggregatesRejectsServerOnlyOptionsBeforeHTTP`.
 - Filters run over the Source Aggregate attribute view built from each row Nova returned: Python names (deleted as is_deleted), absent members and null values as null, the original timestamp strings, the hosts/metadata/is_deleted conversions of openstack/fields.py, and the computed location whose zone is the aggregate's availability_zone.
-  Tests: `connectiontest/connection_aggregate_search_test.go:TestR2CloudComputeSearchAggregatesFilterRawSourceView`, `connection_aggregate_search_view_test.go:TestCloudAggregateViewFollowsSourceTypeConversions`.
+  Tests: `connectiontest/connection_aggregate_search_test.go:TestR2CloudComputeSearchAggregatesFilterRawSourceView`, `internal/cloudcompute/aggregate_view_test.go:TestCloudAggregateViewFollowsSourceTypeConversions`.
 
 Python/Go differences:
 
