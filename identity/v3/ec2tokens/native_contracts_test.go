@@ -23,22 +23,12 @@ import (
 	upstream "github.com/gophercloud/gophercloud/v2/openstack/identity/v3/ec2tokens"
 )
 
-type nativeEC2Transport func(*http.Request) (*http.Response, error)
-
-func (transport nativeEC2Transport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 type nativeEC2Call struct{ method, path, query, body, authToken, vendor string }
 
 func nativeEC2API(t *testing.T, calls *[]nativeEC2Call, reply func(*http.Request) (int, string)) (*ec2tokens.API, *testcloud.Cloud) {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = nativeEC2Transport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -47,8 +37,8 @@ func nativeEC2API(t *testing.T, calls *[]nativeEC2Call, reply func(*http.Request
 		*calls = append(*calls, nativeEC2Call{req.Method, req.URL.Path, req.URL.RawQuery, raw, req.Header.Get("X-Auth-Token"), req.Header.Get("X-Vendor")})
 		code, body := reply(req)
 		header := http.Header{"Content-Type": {"application/json"}, "X-Subject-Token": {"issued"}}
-		return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: header}, nil
-	})
+		return testcloud.Response(code, body, header), nil
+	}))
 	client := cloud.Client("identity", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/keystone/v3/"
 	return ec2tokens.New(client), cloud

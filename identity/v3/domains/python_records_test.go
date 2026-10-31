@@ -20,13 +20,13 @@ import (
 func domainRecordAPI(t *testing.T, reply func(*http.Request) *http.Response) (*domains.API, *testcloud.Cloud) {
 	t.Helper()
 	fixture := testcloud.New(t)
-	fixture.Provider.HTTPClient.Transport = nativeDomainTransport(func(r *http.Request) (*http.Response, error) { return reply(r), nil })
+	fixture.SetTransport(testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) { return reply(r), nil }))
 	client := fixture.Client("identity", "/catalog/")
 	client.ResourceBase = fixture.Server.URL + "/keystone/v3/"
 	return domains.New(client), fixture
 }
 func domainRecordWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Header: http.Header{"Content-Type": {"application/json"}, "X-Request-Id": {"domain-proof"}}, Body: io.NopCloser(strings.NewReader(body))}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}, "X-Request-Id": {"domain-proof"}})
 }
 func domainRecordField(t *testing.T, r *domains.DomainRecord, key, want string) {
 	t.Helper()

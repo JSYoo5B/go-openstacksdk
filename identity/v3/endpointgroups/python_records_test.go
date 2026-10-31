@@ -17,16 +17,6 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type pythonEndpointGroupTransport func(*http.Request) (*http.Response, error)
-
-func (transport pythonEndpointGroupTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 type pythonEndpointGroupCall struct {
 	method, path, query, body string
 	header                    http.Header
@@ -35,7 +25,7 @@ type pythonEndpointGroupCall struct {
 func pythonEndpointGroupAPI(t *testing.T, calls *[]pythonEndpointGroupCall, reply func(*http.Request) (int, string)) *endpointgroups.API {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = pythonEndpointGroupTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -43,8 +33,8 @@ func pythonEndpointGroupAPI(t *testing.T, calls *[]pythonEndpointGroupCall, repl
 		}
 		*calls = append(*calls, pythonEndpointGroupCall{req.Method, req.URL.EscapedPath(), req.URL.RawQuery, raw, req.Header.Clone()})
 		code, body := reply(req)
-		return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}, nil
-	})
+		return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}}), nil
+	}))
 	client := cloud.Client("identity", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/keystone/v3/"
 	return endpointgroups.New(client)

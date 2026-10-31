@@ -18,22 +18,12 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type nativeAppCredTransport func(*http.Request) (*http.Response, error)
-
-func (transport nativeAppCredTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 type nativeAppCredCall struct{ method, path, query, body string }
 
 func nativeAppCredAPI(t *testing.T, calls *[]nativeAppCredCall, reply func(*http.Request) (int, string)) (*applicationcredentials.API, *testcloud.Cloud) {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = nativeAppCredTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -41,8 +31,8 @@ func nativeAppCredAPI(t *testing.T, calls *[]nativeAppCredCall, reply func(*http
 		}
 		*calls = append(*calls, nativeAppCredCall{req.Method, req.URL.Path, req.URL.RawQuery, raw})
 		code, body := reply(req)
-		return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}, nil
-	})
+		return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}}), nil
+	}))
 	client := cloud.Client("identity", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/keystone/v3/"
 	return applicationcredentials.New(client), cloud

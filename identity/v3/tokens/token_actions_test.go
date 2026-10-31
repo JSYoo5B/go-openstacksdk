@@ -6,11 +6,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"maps"
 	"net/http"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/tokens"
@@ -305,7 +303,7 @@ func TestPythonTokenTransportCancellationAndAcceptedBodyErrors(t *testing.T) {
 	client := cloud.Client("identity", "/v3/")
 	api := tokens.New(client)
 	transportCause := errors.New("transport failed")
-	client.HTTPClient.Transport = nativeTokenTransport(func(*http.Request) (*http.Response, error) { return nil, transportCause })
+	client.HTTPClient.Transport = testcloud.LinkRequest(func(*http.Request) (*http.Response, error) { return nil, transportCause })
 	if got, err := api.CheckToken(context.Background(), "s"); got || !errors.Is(err, transportCause) {
 		t.Fatal(got, err)
 	}
@@ -317,8 +315,8 @@ func TestPythonTokenTransportCancellationAndAcceptedBodyErrors(t *testing.T) {
 	}
 	readCause := errors.New("read failed")
 	closeCause := errors.New("close failed")
-	client.HTTPClient.Transport = nativeTokenTransport(func(*http.Request) (*http.Response, error) {
-		return &http.Response{StatusCode: 200, Header: http.Header{"X-Request-Id": {"partial"}}, Body: &tokenActionFaultBody{data: []byte(`{"token":`), read: readCause, close: closeCause}}, nil
+	client.HTTPClient.Transport = testcloud.LinkRequest(func(*http.Request) (*http.Response, error) {
+		return testcloud.StreamResponse(200, &testcloud.Body{Data: `{"token":`, ReadErr: readCause, CloseErr: closeCause}, http.Header{"X-Request-Id": {"partial"}}), nil
 	})
 	value, err := api.ValidateToken(context.Background(), "s")
 	var proof *resource.ResponseError
@@ -327,31 +325,16 @@ func TestPythonTokenTransportCancellationAndAcceptedBodyErrors(t *testing.T) {
 	}
 }
 
-type tokenActionFaultBody struct {
-	data        []byte
-	read, close error
-}
-
-func (b *tokenActionFaultBody) Read(p []byte) (int, error) {
-	if len(b.data) != 0 {
-		n := copy(p, b.data)
-		b.data = b.data[n:]
-		return n, nil
-	}
-	return 0, b.read
-}
-func (b *tokenActionFaultBody) Close() error { return b.close }
-
 func TestPythonTokenSelectedHeaderCannotChangeDuringRetry(t *testing.T) {
 	cloud := testcloud.New(t)
 	client := cloud.Client("identity", "/v3/")
 	attempts := 0
-	client.HTTPClient.Transport = nativeTokenTransport(func(req *http.Request) (*http.Response, error) {
+	client.HTTPClient.Transport = testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		attempts++
 		if req.Header.Get("X-Subject-Token") != "selected" {
 			t.Error("subject retargeted")
 		}
-		return &http.Response{StatusCode: 503, Header: http.Header{}, Body: io.NopCloser(strings.NewReader("original"))}, nil
+		return testcloud.Response(503, "original", http.Header{}), nil
 	})
 	client.RetryFunc = func(_ context.Context, _ string, _ string, opts *gophercloud.RequestOpts, _ error, _ uint) error {
 		opts.MoreHeaders["X-Subject-Token"] = "different"

@@ -22,16 +22,6 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type nativeOAuth1Transport func(*http.Request) (*http.Response, error)
-
-func (transport nativeOAuth1Transport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 type nativeOAuth1Call struct{ method, path, query, body string }
 
 type nativeOAuth1Reply struct {
@@ -48,7 +38,7 @@ func nativeOAuth1JSON(code int, body string) nativeOAuth1Reply {
 func nativeOAuth1API(t *testing.T, calls *[]nativeOAuth1Call, headers *[]http.Header, reply func(*http.Request) nativeOAuth1Reply) (*oauth1.API, *testcloud.Cloud) {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = nativeOAuth1Transport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -59,8 +49,8 @@ func nativeOAuth1API(t *testing.T, calls *[]nativeOAuth1Call, headers *[]http.He
 			*headers = append(*headers, req.Header.Clone())
 		}
 		r := reply(req)
-		return &http.Response{StatusCode: r.code, Body: io.NopCloser(strings.NewReader(r.body)), Header: r.header}, nil
-	})
+		return testcloud.Response(r.code, r.body, r.header), nil
+	}))
 	client := cloud.Client("identity", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/keystone/v3/"
 	return oauth1.New(client), cloud

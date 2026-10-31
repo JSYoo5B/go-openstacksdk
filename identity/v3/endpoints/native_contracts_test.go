@@ -9,7 +9,6 @@ import (
 	"net/url"
 	"reflect"
 	"slices"
-	"strings"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints"
@@ -20,18 +19,8 @@ import (
 	upstream "github.com/gophercloud/gophercloud/v2/openstack/identity/v3/endpoints"
 )
 
-type nativeEndpointTransport func(*http.Request) (*http.Response, error)
-
-func (transport nativeEndpointTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func nativeEndpointWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}})
 }
 
 type nativeEndpointCall struct{ method, path, query, body string }
@@ -39,7 +28,7 @@ type nativeEndpointCall struct{ method, path, query, body string }
 func nativeEndpointAPI(t *testing.T, calls *[]nativeEndpointCall, reply func(*http.Request) *http.Response) (*endpoints.API, *testcloud.Cloud) {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = nativeEndpointTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -47,7 +36,7 @@ func nativeEndpointAPI(t *testing.T, calls *[]nativeEndpointCall, reply func(*ht
 		}
 		*calls = append(*calls, nativeEndpointCall{req.Method, req.URL.Path, req.URL.RawQuery, raw})
 		return reply(req), nil
-	})
+	}))
 	client := cloud.Client("identity", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/keystone/v3/"
 	return endpoints.New(client), cloud

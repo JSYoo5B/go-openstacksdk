@@ -7,7 +7,6 @@ import (
 	"io"
 	"net/http"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/identityproviders"
@@ -16,16 +15,6 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type idpTransport func(*http.Request) (*http.Response, error)
-
-func (transport idpTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 type idpCall struct{ method, path, query, body, accept string }
 
 const idpBase = "/keystone/v3/OS-FEDERATION/identity_providers"
@@ -33,7 +22,7 @@ const idpBase = "/keystone/v3/OS-FEDERATION/identity_providers"
 func idpAPI(t *testing.T, calls *[]idpCall, reply func(*http.Request) (int, string)) (*identityproviders.API, *testcloud.Cloud) {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = idpTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -41,8 +30,8 @@ func idpAPI(t *testing.T, calls *[]idpCall, reply func(*http.Request) (int, stri
 		}
 		*calls = append(*calls, idpCall{req.Method, req.URL.EscapedPath(), req.URL.RawQuery, raw, req.Header.Get("Accept")})
 		code, body := reply(req)
-		return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}, nil
-	})
+		return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}}), nil
+	}))
 	client := cloud.Client("identity", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/keystone/v3/"
 	return identityproviders.New(client), cloud

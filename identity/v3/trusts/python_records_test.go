@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/trusts"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -507,10 +508,10 @@ func TestPythonTrustPhysicalAcceptedAndRejectedFailures(t *testing.T) {
 						body.onClose = func() { api.RawClient().Endpoint = endpoint }
 					}
 					attempts := 0
-					cloud.Provider.HTTPClient.Transport = nativeTrustTransport(func(*http.Request) (*http.Response, error) {
+					cloud.SetTransport(testcloud.LinkRequest(func(*http.Request) (*http.Response, error) {
 						attempts++
-						return &http.Response{StatusCode: status, Header: http.Header{"X-Request-Id": {"physical-proof"}}, Body: body}, nil
-					})
+						return testcloud.StreamResponse(status, body, http.Header{"X-Request-Id": {"physical-proof"}}), nil
+					}))
 					var err error
 					switch operation {
 					case "get":

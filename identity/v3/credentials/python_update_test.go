@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/credentials"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -264,13 +265,13 @@ func TestPythonCredentialUpdatePhysicalResponseFailures(t *testing.T) {
 					body.onClose = func() { api.RawClient().Endpoint = endpoint }
 				}
 				attempts := 0
-				cloud.Provider.HTTPClient.Transport = nativeCredTransport(func(req *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 					attempts++
 					if req.Method != http.MethodPatch {
 						t.Error(req.Method)
 					}
-					return &http.Response{StatusCode: status, Header: http.Header{"X-Request-Id": {"physical-proof"}}, Body: body}, nil
-				})
+					return testcloud.StreamResponse(status, body, http.Header{"X-Request-Id": {"physical-proof"}}), nil
+				}))
 				value, err := api.UpdateRecord(ctx, "a", credentials.WithRecordUpdateField("blob", "updated"))
 				if err == nil || attempts != 1 || body.closes != 1 {
 					t.Fatal(value, err, attempts, body.closes)
@@ -366,7 +367,7 @@ func TestPythonCredentialUpdateNativeRetryPolicyAndOwnership(t *testing.T) {
 		api, cloud := nativeCredAPI(t, &serverCalls, func(*http.Request) (int, string) { return 200, `{}` })
 		cause := errors.New("physical transport")
 		attempts := 0
-		cloud.Provider.HTTPClient.Transport = nativeCredTransport(func(*http.Request) (*http.Response, error) { attempts++; return nil, cause })
+		cloud.SetTransport(testcloud.LinkRequest(func(*http.Request) (*http.Response, error) { attempts++; return nil, cause }))
 		_, err := api.UpdateRecord(context.Background(), "a", credentials.WithRecordUpdateField("blob", "new"))
 		if !errors.Is(err, cause) || attempts != 1 {
 			t.Fatal(err, attempts)

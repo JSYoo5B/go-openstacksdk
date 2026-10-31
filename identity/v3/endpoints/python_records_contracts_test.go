@@ -451,7 +451,7 @@ func TestEndpointRecordsPhysicalFaultsRetainActualProofWithoutHooks(t *testing.T
 				cause := errors.New(lane + " fault")
 				closed := &atomic.Int32{}
 				base := cloud.Provider.HTTPClient.Transport
-				cloud.Provider.HTTPClient.Transport = nativeEndpointTransport(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 					response, err := base.RoundTrip(r)
 					if response != nil {
 						b := &endpointRecordsFaultBody{ReadCloser: response.Body, closes: closed}
@@ -463,7 +463,7 @@ func TestEndpointRecordsPhysicalFaultsRetainActualProofWithoutHooks(t *testing.T
 						response.Body = b
 					}
 					return response, err
-				})
+				}))
 				hooks := 0
 				cloud.Provider.RetryFunc = func(context.Context, string, string, *gophercloud.RequestOpts, error, uint) error {
 					hooks++

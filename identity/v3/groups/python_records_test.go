@@ -21,13 +21,13 @@ import (
 func groupRecordAPI(t *testing.T, reply func(*http.Request) *http.Response) (*groups.API, *testcloud.Cloud) {
 	t.Helper()
 	fixture := testcloud.New(t)
-	fixture.Provider.HTTPClient.Transport = nativeGroupTransport(func(r *http.Request) (*http.Response, error) { return reply(r), nil })
+	fixture.SetTransport(testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) { return reply(r), nil }))
 	client := fixture.Client("identity", "/catalog/")
 	client.ResourceBase = fixture.Server.URL + "/keystone/v3/"
 	return groups.New(client), fixture
 }
 func groupRecordWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Header: http.Header{"Content-Type": {"application/json"}, "X-Request-Id": {"group-proof"}}, Body: io.NopCloser(strings.NewReader(body))}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}, "X-Request-Id": {"group-proof"}})
 }
 func groupRecordField(t *testing.T, r *groups.GroupRecord, key, want string) {
 	t.Helper()

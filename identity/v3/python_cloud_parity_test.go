@@ -22,16 +22,6 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type pythonCloudIdentityTransport func(*http.Request) (*http.Response, error)
-
-func (transport pythonCloudIdentityTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 // pythonCloudIdentityCall records one request relative to the identity v3 root.
 type pythonCloudIdentityCall struct{ method, path, query, body string }
 
@@ -47,7 +37,7 @@ const pythonCloudIdentityRoot = "/keystone/v3"
 func pythonCloudIdentityService(t *testing.T, calls *[]pythonCloudIdentityCall, replies pythonCloudIdentityReplies) *v3.Service {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = pythonCloudIdentityTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -59,8 +49,8 @@ func pythonCloudIdentityService(t *testing.T, calls *[]pythonCloudIdentityCall, 
 		if reply, ok := replies[req.Method+" "+path]; ok {
 			code, body = reply.code, reply.body
 		}
-		return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}, nil
-	})
+		return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}}), nil
+	}))
 	client := cloud.Client("identity", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + pythonCloudIdentityRoot + "/"
 	return v3.New(client)

@@ -6,7 +6,6 @@ import (
 	"io"
 	"net/http"
 	"reflect"
-	"strings"
 	"testing"
 	"time"
 
@@ -17,16 +16,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
-
-type nativeTokenTransport func(*http.Request) (*http.Response, error)
-
-func (transport nativeTokenTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
 
 type nativeTokenCall struct{ method, path, body, authToken, subjectToken string }
 
@@ -39,7 +28,7 @@ type nativeTokenReply struct {
 func nativeTokenClient(t *testing.T, calls *[]nativeTokenCall, reply func(*http.Request) nativeTokenReply) *gophercloud.ServiceClient {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = nativeTokenTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -51,8 +40,8 @@ func nativeTokenClient(t *testing.T, calls *[]nativeTokenCall, reply func(*http.
 			r.header = http.Header{}
 		}
 		r.header.Set("Content-Type", "application/json")
-		return &http.Response{StatusCode: r.code, Body: io.NopCloser(strings.NewReader(r.body)), Header: r.header}, nil
-	})
+		return testcloud.Response(r.code, r.body, r.header), nil
+	}))
 	client := cloud.Client("identity", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/keystone/v3/"
 	return client

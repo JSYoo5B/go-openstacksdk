@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"strings"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders"
@@ -15,16 +14,6 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type spTransport func(*http.Request) (*http.Response, error)
-
-func (transport spTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 type spCall struct{ method, path, query, body, accept string }
 
 const spBase = "/keystone/v3/OS-FEDERATION/service_providers"
@@ -32,7 +21,7 @@ const spBase = "/keystone/v3/OS-FEDERATION/service_providers"
 func spAPI(t *testing.T, calls *[]spCall, reply func(*http.Request) (int, string)) (*serviceproviders.API, *testcloud.Cloud) {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = spTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -40,8 +29,8 @@ func spAPI(t *testing.T, calls *[]spCall, reply func(*http.Request) (int, string
 		}
 		*calls = append(*calls, spCall{req.Method, req.URL.EscapedPath(), req.URL.RawQuery, raw, req.Header.Get("Accept")})
 		code, body := reply(req)
-		return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}, nil
-	})
+		return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}}), nil
+	}))
 	client := cloud.Client("identity", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/keystone/v3/"
 	return serviceproviders.New(client), cloud

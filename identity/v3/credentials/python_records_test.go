@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/credentials"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -199,7 +200,7 @@ func TestPythonCredentialListPagingLazinessAndWireMarker(t *testing.T) {
 		var calls []nativeCredCall
 		api, cloud := nativeCredAPI(t, &calls, func(*http.Request) (int, string) { return 200, `{}` })
 		attempts := 0
-		cloud.Provider.HTTPClient.Transport = nativeCredTransport(func(*http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.LinkRequest(func(*http.Request) (*http.Response, error) {
 			attempts++
 			body := `{"credentials":[{"id":"a"}]}`
 			header := http.Header{"Link": {`<?marker=next>; rel="next"`}}
@@ -207,8 +208,8 @@ func TestPythonCredentialListPagingLazinessAndWireMarker(t *testing.T) {
 				body = `{"credentials":[]}`
 				header = http.Header{}
 			}
-			return &http.Response{StatusCode: 200, Header: header, Body: io.NopCloser(strings.NewReader(body))}, nil
-		})
+			return testcloud.Response(200, body, header), nil
+		}))
 		ids, err := credentialRecordIDs(t, api)
 		if err != nil || !reflect.DeepEqual(ids, []string{"a"}) || attempts != 2 {
 			t.Fatal(ids, err, attempts)
@@ -509,9 +510,9 @@ func TestPythonCredentialAcceptedResponseProofAndEscapedMember(t *testing.T) {
 		var calls []nativeCredCall
 		api, cloud := nativeCredAPI(t, &calls, func(*http.Request) (int, string) { return 200, `{}` })
 		readErr, closeErr := errors.New("read failed"), errors.New("close failed")
-		cloud.Provider.HTTPClient.Transport = nativeCredTransport(func(*http.Request) (*http.Response, error) {
-			return &http.Response{StatusCode: 200, Header: http.Header{"X-Request-Id": {"partial"}}, Body: &credentialRecordFaultBody{data: []byte(`{"credential":`), read: readErr, close: closeErr}}, nil
-		})
+		cloud.SetTransport(testcloud.LinkRequest(func(*http.Request) (*http.Response, error) {
+			return testcloud.StreamResponse(200, &credentialRecordFaultBody{data: []byte(`{"credential":`), read: readErr, close: closeErr}, http.Header{"X-Request-Id": {"partial"}}), nil
+		}))
 		v, err := api.GetRecord(context.Background(), "a")
 		var proof *resource.ResponseError
 		if v == nil || !errors.Is(err, readErr) || !errors.Is(err, closeErr) || !errors.As(err, &proof) || proof.StatusCode != 200 || proof.Header.Get("X-Request-Id") != "partial" || string(v.Envelope) != `{"credential":` {
@@ -599,13 +600,13 @@ func TestPythonCredentialRejectedResponseFailuresStopDeleteAndFind(t *testing.T)
 						body.onRead = func() { api.RawClient().Endpoint = originalEndpoint + "changed/" }
 						body.onClose = func() { api.RawClient().Endpoint = originalEndpoint }
 					}
-					cloud.Provider.HTTPClient.Transport = nativeCredTransport(func(*http.Request) (*http.Response, error) {
+					cloud.SetTransport(testcloud.LinkRequest(func(*http.Request) (*http.Response, error) {
 						calls++
 						if calls > 1 {
-							return &http.Response{StatusCode: 200, Header: make(http.Header), Body: io.NopCloser(strings.NewReader(`{"credentials":[{"id":"found","name":"ci"}]}`))}, nil
+							return testcloud.Response(200, `{"credentials":[{"id":"found","name":"ci"}]}`, make(http.Header)), nil
 						}
-						return &http.Response{StatusCode: status, Header: http.Header{"X-Request-Id": {"rejected-proof"}}, Body: body}, nil
-					})
+						return testcloud.StreamResponse(status, body, http.Header{"X-Request-Id": {"rejected-proof"}}), nil
+					}))
 					var err error
 					if operation == "find" {
 						value, findErr := api.FindRecord(ctx, "ci")
@@ -671,13 +672,13 @@ func TestPythonCredentialCleanRejectionsRemainEligibleAfterNativeRetryHook(t *te
 					retries++
 					return original
 				}
-				cloud.Provider.HTTPClient.Transport = nativeCredTransport(func(*http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.LinkRequest(func(*http.Request) (*http.Response, error) {
 					calls++
 					if calls == 1 {
-						return &http.Response{StatusCode: status, Header: http.Header{"X-Request-Id": {"clean-proof"}}, Body: body}, nil
+						return testcloud.StreamResponse(status, body, http.Header{"X-Request-Id": {"clean-proof"}}), nil
 					}
-					return &http.Response{StatusCode: 200, Header: make(http.Header), Body: io.NopCloser(strings.NewReader(`{"credentials":[{"id":"found","name":"ci"}]}`))}, nil
-				})
+					return testcloud.Response(200, `{"credentials":[{"id":"found","name":"ci"}]}`, make(http.Header)), nil
+				}))
 				if operation == "find" {
 					value, err := api.FindRecord(ctx, "ci")
 					if err != nil || calls != 2 {
