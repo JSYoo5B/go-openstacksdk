@@ -424,13 +424,13 @@ func TestPythonSecurityRuleFindRecordConcurrentOptionAndRecordOwnership(t *testi
 	var calls []nativeRuleCall
 	api, cloud := findAPI(t, &calls, func(*http.Request) *http.Response { return nativeRuleWire(200, `{}`) })
 	var attempts atomic.Int64
-	cloud.Provider.HTTPClient.Transport = nativeRuleTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		attempts.Add(1)
 		if req.Header.Get("X-Trace") != "owned" {
 			t.Error(req.Header)
 		}
 		return nativeRuleWire(200, `{"security_group_rule":{"id":"wanted","x_row":{"value":0}}}`), nil
-	})
+	}))
 	option := rules.WithRecordFindOpts(rules.RecordFindOpts{Query: map[string]json.RawMessage{"x_cached": json.RawMessage(`false`)}, Headers: map[string]string{"X-Trace": "owned"}})
 	var wg sync.WaitGroup
 	for i := 0; i < 8; i++ {
@@ -516,13 +516,13 @@ func TestPythonSecurityRuleFindRecordPhysicalAcceptedRejectedAndListErrors(t *te
 						physical.onClose = func() { client.ResourceBase = original }
 					}
 					attempts := 0
-					cloud.Provider.HTTPClient.Transport = nativeRuleTransport(func(req *http.Request) (*http.Response, error) {
+					cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 						attempts++
 						if phase == "list" && req.URL.Path != findBase {
 							return nativeRuleWire(404, `{}`), nil
 						}
-						return &http.Response{StatusCode: status, Header: http.Header{"X-Request-Id": {"physical"}}, Body: physical}, nil
-					})
+						return testcloud.StreamResponse(status, physical, http.Header{"X-Request-Id": {"physical"}}), nil
+					}))
 					record, err := api.FindRecord(ctx, "wanted")
 					want := 1
 					if phase == "list" {

@@ -13,6 +13,7 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
@@ -496,13 +497,13 @@ func TestPythonAddressGroupListOptionsPreflightSnapshotsAndConcurrentReuse(t *te
 	var unused []nativeGroupCall
 	api, cloud := nativeGroupAPI(t, &unused, func(*http.Request) *http.Response { panic("replaced transport") })
 	var observed atomic.Int32
-	cloud.Provider.HTTPClient.Transport = nativeGroupTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		observed.Add(1)
 		if req.URL.Query().Get("name") != "owned" {
 			return nil, fmt.Errorf("unowned query: %s", req.URL)
 		}
 		return nativeGroupWire(200, `{"address_groups":[{"id":"one","x_raw":[false,0,null]}]}`), nil
-	})
+	}))
 	shared := addressgroups.WithRecordListQuery("name", "owned")
 	values := make([][]*addressgroups.AddressGroupListRecord, 8)
 	failures := make([]error, 8)

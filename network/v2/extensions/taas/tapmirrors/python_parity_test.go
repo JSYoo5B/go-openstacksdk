@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"net/url"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
@@ -17,16 +16,6 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type pythonTapMirrorTransport func(*http.Request) (*http.Response, error)
-
-func (transport pythonTapMirrorTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 type pythonTapMirrorCall struct {
 	method, path string
 	query        url.Values
@@ -34,13 +23,13 @@ type pythonTapMirrorCall struct {
 }
 
 func pythonTapMirrorWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}})
 }
 
 func pythonTapMirrorAPI(t *testing.T, calls *[]pythonTapMirrorCall, reply func(*http.Request) *http.Response) (*tapmirrors.API, *testcloud.Cloud) {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = pythonTapMirrorTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -48,7 +37,7 @@ func pythonTapMirrorAPI(t *testing.T, calls *[]pythonTapMirrorCall, reply func(*
 		}
 		*calls = append(*calls, pythonTapMirrorCall{req.Method, req.URL.Path, req.URL.Query(), raw})
 		return reply(req), nil
-	})
+	}))
 	client := cloud.Client("network", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/neutron/v2.0/"
 	return tapmirrors.New(client), cloud

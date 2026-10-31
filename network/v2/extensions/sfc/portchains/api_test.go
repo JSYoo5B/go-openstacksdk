@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"strings"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
@@ -15,16 +14,6 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type pcTransport func(*http.Request) (*http.Response, error)
-
-func (transport pcTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 type pcCall struct{ method, path, query, body, accept string }
 
 const pcBase = "/neutron/v2.0/sfc/port_chains"
@@ -32,7 +21,7 @@ const pcBase = "/neutron/v2.0/sfc/port_chains"
 func pcAPI(t *testing.T, calls *[]pcCall, reply func(*http.Request) (int, string)) *portchains.API {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = pcTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -40,8 +29,8 @@ func pcAPI(t *testing.T, calls *[]pcCall, reply func(*http.Request) (int, string
 		}
 		*calls = append(*calls, pcCall{req.Method, req.URL.EscapedPath(), req.URL.RawQuery, raw, req.Header.Get("Accept")})
 		code, body := reply(req)
-		return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}, nil
-	})
+		return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}}), nil
+	}))
 	client := cloud.Client("network", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/neutron/v2.0/"
 	return portchains.New(client)

@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"net/url"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
@@ -19,25 +18,15 @@ import (
 // pythonSiteConnectionCall records the wire request openstacksdk would also send.
 type pythonSiteConnectionCall struct{ method, path, query, body string }
 
-type pythonSiteConnectionTransport func(*http.Request) (*http.Response, error)
-
-func (transport pythonSiteConnectionTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func pythonSiteConnectionWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}})
 }
 
 func pythonSiteConnectionAPI(t *testing.T, reply func(*http.Request) *http.Response) (*siteconnections.API, *[]pythonSiteConnectionCall, *testcloud.Cloud) {
 	t.Helper()
 	calls := &[]pythonSiteConnectionCall{}
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = pythonSiteConnectionTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -45,7 +34,7 @@ func pythonSiteConnectionAPI(t *testing.T, reply func(*http.Request) *http.Respo
 		}
 		*calls = append(*calls, pythonSiteConnectionCall{req.Method, req.URL.Path, req.URL.RawQuery, raw})
 		return reply(req), nil
-	})
+	}))
 	client := cloud.Client("network", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/neutron/v2.0/"
 	return siteconnections.New(client), calls, cloud

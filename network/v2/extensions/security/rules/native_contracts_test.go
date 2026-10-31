@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"net/url"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
@@ -17,18 +16,8 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type nativeRuleTransport func(*http.Request) (*http.Response, error)
-
-func (transport nativeRuleTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func nativeRuleWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}})
 }
 
 func nativeRuleClient(cloud *testcloud.Cloud) *gophercloud.ServiceClient {
@@ -48,7 +37,7 @@ func nativeRuleOperation(t *testing.T, err error, operation string) {
 type nativeRuleCall struct{ method, path, query, body string }
 
 func nativeRuleRecorder(cloud *testcloud.Cloud, calls *[]nativeRuleCall, reply func(*http.Request) *http.Response) {
-	cloud.Provider.HTTPClient.Transport = nativeRuleTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -56,7 +45,7 @@ func nativeRuleRecorder(cloud *testcloud.Cloud, calls *[]nativeRuleCall, reply f
 		}
 		*calls = append(*calls, nativeRuleCall{req.Method, req.URL.Path, req.URL.RawQuery, raw})
 		return reply(req), nil
-	})
+	}))
 }
 
 const nativeRuleRow = `{"id":"id-1","direction":"ingress","ethertype":"IPv4","security_group_id":"sg","protocol":"tcp","port_range_min":22,"port_range_max":22,"remote_ip_prefix":"0.0.0.0/0","remote_group_id":null}`

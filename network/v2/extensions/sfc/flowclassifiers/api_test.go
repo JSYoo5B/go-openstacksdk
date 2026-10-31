@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"strings"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
@@ -15,16 +14,6 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type fcTransport func(*http.Request) (*http.Response, error)
-
-func (transport fcTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 type fcCall struct{ method, path, query, body, accept, contentType, version string }
 
 const fcBase = "/neutron/v2.0/sfc/flow_classifiers"
@@ -32,7 +21,7 @@ const fcBase = "/neutron/v2.0/sfc/flow_classifiers"
 func fcAPI(t *testing.T, calls *[]fcCall, reply func(*http.Request) (int, string)) (*flowclassifiers.API, *gophercloud.ServiceClient) {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = fcTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -40,8 +29,8 @@ func fcAPI(t *testing.T, calls *[]fcCall, reply func(*http.Request) (int, string
 		}
 		*calls = append(*calls, fcCall{req.Method, req.URL.EscapedPath(), req.URL.RawQuery, raw, req.Header.Get("Accept"), req.Header.Get("Content-Type"), req.Header.Get("OpenStack-API-Version")})
 		code, body := reply(req)
-		return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}, "X-Request-Id": {"req-1"}}}, nil
-	})
+		return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}, "X-Request-Id": {"req-1"}}), nil
+	}))
 	client := cloud.Client("network", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/neutron/v2.0/"
 	return flowclassifiers.New(client), client

@@ -348,10 +348,10 @@ func TestPythonSecurityGroupListRecordsLazySnapshotsAndConcurrentReuse(t *testin
 		t.Fatal(calls, applied, header)
 	}
 	var attempts atomic.Int32
-	cloud.Provider.HTTPClient.Transport = nativeSecGroupTransport(func(*http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(*http.Request) (*http.Response, error) {
 		attempts.Add(1)
 		return listRecordWire(200, `{"security_groups":[{"id":"one","x_new":{"x":false}}]}`), nil
-	})
+	}))
 	shared := groups.WithRecordListHeaders(map[string]string{"X-Trace": "owned"})
 	var wg sync.WaitGroup
 	for i := 0; i < 8; i++ {

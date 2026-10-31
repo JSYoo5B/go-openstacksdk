@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"net/url"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
@@ -17,18 +16,8 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type nativeSecGroupTransport func(*http.Request) (*http.Response, error)
-
-func (transport nativeSecGroupTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func nativeSecGroupWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}})
 }
 
 func nativeSecGroupClient(cloud *testcloud.Cloud) *gophercloud.ServiceClient {
@@ -48,7 +37,7 @@ func nativeSecGroupOperation(t *testing.T, err error, operation string) {
 type nativeSecGroupCall struct{ method, path, query, body string }
 
 func nativeSecGroupRecorder(cloud *testcloud.Cloud, calls *[]nativeSecGroupCall, reply func(*http.Request) *http.Response) {
-	cloud.Provider.HTTPClient.Transport = nativeSecGroupTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -56,7 +45,7 @@ func nativeSecGroupRecorder(cloud *testcloud.Cloud, calls *[]nativeSecGroupCall,
 		}
 		*calls = append(*calls, nativeSecGroupCall{req.Method, req.URL.Path, req.URL.RawQuery, raw})
 		return reply(req), nil
-	})
+	}))
 }
 
 const nativeSecGroupRow = `{"id":"id-1","name":"web","stateful":true,"security_group_rules":[{"id":"r1","direction":"egress"}],"tags":["t"],"created_at":"2026-10-10T01:02:03Z"}`
