@@ -20,25 +20,15 @@ import (
 // pythonBGPSpeakerCall records the wire request openstacksdk would also send.
 type pythonBGPSpeakerCall struct{ method, path, query, body string }
 
-type pythonBGPSpeakerTransport func(*http.Request) (*http.Response, error)
-
-func (transport pythonBGPSpeakerTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func pythonBGPSpeakerWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}})
 }
 
 func pythonBGPSpeakerAPI(t *testing.T, reply func(*http.Request) *http.Response) (*speakers.API, *agents.API, *[]pythonBGPSpeakerCall, *testcloud.Cloud) {
 	t.Helper()
 	calls := &[]pythonBGPSpeakerCall{}
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = pythonBGPSpeakerTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -46,7 +36,7 @@ func pythonBGPSpeakerAPI(t *testing.T, reply func(*http.Request) *http.Response)
 		}
 		*calls = append(*calls, pythonBGPSpeakerCall{req.Method, req.URL.Path, req.URL.RawQuery, raw})
 		return reply(req), nil
-	})
+	}))
 	client := cloud.Client("network", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/neutron/v2.0/"
 	return speakers.New(client), agents.New(client), calls, cloud
