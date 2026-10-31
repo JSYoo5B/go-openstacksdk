@@ -32,17 +32,7 @@ type MinimumBandwidthProxyResult struct {
 	JSON  json.RawMessage
 }
 
-// WithMinimumBandwidthProxyQuery consumes Source formal values at their option
-// position, so later concrete headers/version/base-path choices remain last-win.
-//
-// Deprecated: use request.Query.
-func WithMinimumBandwidthProxyQuery(key string, value any) MinimumBandwidthListOption {
-	raw, err := json.Marshal(value)
-	return request.Custom(minimumBandwidthProxyQuery(key, bytes.Clone(raw), err))
-}
-
-// minimumBandwidthProxyQuery applies one marshaled value for WithMinimumBandwidthProxyQuery and the shared
-// request calls that carry the same key.
+// minimumBandwidthProxyQuery applies one marshaled request.Query value.
 func minimumBandwidthProxyQuery(key string, owned json.RawMessage, err error) func(*MinimumBandwidthListOpts) error {
 	return func(c *MinimumBandwidthListOpts) error {
 		if err != nil {

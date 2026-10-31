@@ -133,7 +133,7 @@ func TestPythonMinimumPacketRateGetNoFallbackAndFindMissingCompleteSearch(t *tes
 			t.Fatal(value, err, calls)
 		}
 		calls = nil
-		value, err = api.FindMinimumPacketRateRecord(context.Background(), "parent", "target", rules.WithMinimumPacketRateFindIgnoreMissing(false))
+		value, err = api.FindMinimumPacketRateRecord(context.Background(), "parent", "target", request.IgnoreMissing(false))
 		if value != nil || !errors.Is(err, resource.ErrNotFound) || len(calls) != 2 {
 			t.Fatal(value, err, calls)
 		}
@@ -155,7 +155,7 @@ func TestPythonMinimumPacketRateFindBodySeedsAndListLocalFilters(t *testing.T) {
 		}
 		return nativeRuleWire(200, `{"minimum_packet_rate_rules":[{"id":"no","name":"target","min_kpps":0,"direction":"egress","x_unknown":{"nested":null}},{"id":"yes","name":"target","min_kpps":1,"direction":"egress","x_unknown":{"nested":null},"qos_policy_id":"foreign"}]}`)
 	})
-	value, err := api.FindMinimumPacketRateRecord(context.Background(), "parent", "target", rules.WithMinimumPacketRateFindQuery("name", "target"), rules.WithMinimumPacketRateFindQuery("min_kpps", true), rules.WithMinimumPacketRateFindQuery("x_unknown", map[string]any{"nested": nil}), rules.WithMinimumPacketRateFindQuery("direction", "egress"), rules.WithMinimumPacketRateFindQuery("x_seed", "keep"), rules.WithMinimumPacketRateFindQuery("fields", []string{"id", "direction"}))
+	value, err := api.FindMinimumPacketRateRecord(context.Background(), "parent", "target", request.Query("name", "target"), request.Query("min_kpps", true), request.Query("x_unknown", map[string]any{"nested": nil}), request.Query("direction", "egress"), request.Query("x_seed", "keep"), request.Query("fields", []string{"id", "direction"}))
 	if err != nil || value == nil || len(calls) != 2 || value.Resource.Body["qos_policy_id"] != nil {
 		t.Fatal(value, err, calls)
 	}
@@ -165,7 +165,7 @@ func TestPythonMinimumPacketRateFindBodySeedsAndListLocalFilters(t *testing.T) {
 	}
 	calls = nil
 	seeded := pythonMinimumPacketRateAPI(t, &calls, func(*http.Request) *http.Response { return nativeRuleWire(204, "") })
-	value, err = seeded.FindMinimumPacketRateRecord(context.Background(), "parent", "target", rules.WithMinimumPacketRateFindQuery("min_kpps", "untyped"), rules.WithMinimumPacketRateFindQuery("x_seed", false))
+	value, err = seeded.FindMinimumPacketRateRecord(context.Background(), "parent", "target", request.Query("min_kpps", "untyped"), request.Query("x_seed", false))
 	if err != nil || value.Wire != nil || value.Resource.Body["qos_policy_id"] != nil {
 		t.Fatal(value, err)
 	}
@@ -220,7 +220,7 @@ func TestPythonMinimumPacketRateListLazyQueryLocalFiltersAndUnknowns(t *testing.
 		response.Header.Set("If-Match", "HTTP-only")
 		return response
 	})
-	seq := api.ListMinimumPacketRateRecords(context.Background(), "parent", rules.WithMinimumPacketRateListQuery("name", "demo"), rules.WithMinimumPacketRateListQuery("min_kpps", true), rules.WithMinimumPacketRateListQuery("direction", "egress"), rules.WithMinimumPacketRateListQuery("fields", func() {}), rules.WithMinimumPacketRateListQuery("tags", func() {}), rules.WithMinimumPacketRateListOpts(rules.MinimumPacketRateListOpts{Query: map[string]json.RawMessage{"name": json.RawMessage(`"demo"`), "min_kpps": json.RawMessage(`true`), "direction": json.RawMessage(`"egress"`), "ignored": json.RawMessage(`[`)}}))
+	seq := api.ListMinimumPacketRateRecords(context.Background(), "parent", request.Query("name", "demo"), request.Query("min_kpps", true), request.Query("direction", "egress"), request.Query("fields", func() {}), request.Query("tags", func() {}), rules.WithMinimumPacketRateListOpts(rules.MinimumPacketRateListOpts{Query: map[string]json.RawMessage{"name": json.RawMessage(`"demo"`), "min_kpps": json.RawMessage(`true`), "direction": json.RawMessage(`"egress"`), "ignored": json.RawMessage(`[`)}}))
 	if len(calls) != 0 {
 		t.Fatal("eager list", calls)
 	}
@@ -254,10 +254,10 @@ func TestPythonMinimumPacketRateListRawCapSinglePageAndEarlyStop(t *testing.T) {
 		})
 		opts := []rules.MinimumPacketRateListOption{}
 		if mode == "cap" {
-			opts = append(opts, rules.WithMinimumPacketRateListLimit(0), rules.WithMinimumPacketRateListMaxItems(1), rules.WithMinimumPacketRateListQuery("direction", "egress"))
+			opts = append(opts, request.Limit(0), request.MaxItems(1), request.Query("direction", "egress"))
 		}
 		if mode == "single" {
-			opts = append(opts, rules.WithMinimumPacketRateListPaginated(false))
+			opts = append(opts, request.Paginated(false))
 		}
 		count := 0
 		for value, err := range api.ListMinimumPacketRateRecords(context.Background(), "parent", opts...) {
@@ -294,7 +294,7 @@ func TestPythonMinimumPacketRateListContinuationCannotChangeParentOrFilters(t *t
 			}
 			return nativeRuleWire(200, `{"minimum_packet_rate_rules":[]}`)
 		})
-		values, err := api.AllMinimumPacketRateRecords(context.Background(), "parent", rules.WithMinimumPacketRateListLimit(1))
+		values, err := api.AllMinimumPacketRateRecords(context.Background(), "parent", request.Limit(1))
 		safe := href == "?marker=one" || strings.HasPrefix(href, "/v2.0/qos/policies/parent/")
 		if safe {
 			if err != nil || len(values) != 1 || len(calls) != 2 {
@@ -320,7 +320,7 @@ func TestPythonMinimumPacketRateListMarkerFallbackAndFalseyNumericNext(t *testin
 		}
 		return nativeRuleWire(200, `{"minimum_packet_rate_rules":[]}`)
 	})
-	values, err := api.AllMinimumPacketRateRecords(context.Background(), "parent", rules.WithMinimumPacketRateListLimit(3))
+	values, err := api.AllMinimumPacketRateRecords(context.Background(), "parent", request.Limit(3))
 	if err != nil || len(values) != 1 || len(calls) != 2 {
 		t.Fatal(values, err, calls)
 	}
@@ -514,12 +514,12 @@ func TestPythonMinimumPacketRateOptionSnapshotsAndPreflight(t *testing.T) {
 	}
 	for _, key := range []string{"qos_policy_id", "qos_policy", "qos_rule_id", "qos_rule", "ignore_missing", "name_or_id", "cls", "base_path", "connection", "location", "__conflicting_attrs", "headers", "microversion", "id"} {
 		before := len(calls)
-		_, err := api.FindMinimumPacketRateRecord(context.Background(), "parent", "target", rules.WithMinimumPacketRateFindQuery(key, nil))
+		_, err := api.FindMinimumPacketRateRecord(context.Background(), "parent", "target", request.Query(key, nil))
 		if !errors.Is(err, resource.ErrInvalidOption) || len(calls) != before {
 			t.Fatal(key, err, calls)
 		}
 		if key != "id" {
-			values, err := api.AllMinimumPacketRateRecords(context.Background(), "parent", rules.WithMinimumPacketRateListQuery(key, nil))
+			values, err := api.AllMinimumPacketRateRecords(context.Background(), "parent", request.Query(key, nil))
 			if values != nil || !errors.Is(err, resource.ErrInvalidOption) || len(calls) != before {
 				t.Fatal(key, values, err, calls)
 			}
@@ -552,7 +552,7 @@ func TestPythonMinimumPacketRateVersionPhasesCleanRetryAndOwnedHeaderPolicy(t *t
 	source := api.RawClient()
 	source.Microversion = "2.0"
 	source.MoreHeaders = map[string]string{"Openstack-Api-Version": "network 2.0"}
-	value, err := api.FindMinimumPacketRateRecord(context.Background(), "parent", "target", rules.WithMinimumPacketRateFindMicroversion("2.1"))
+	value, err := api.FindMinimumPacketRateRecord(context.Background(), "parent", "target", request.Microversion("2.1"))
 	if err != nil || value == nil || !reflect.DeepEqual(versions, []string{"network 2.1", "network 2.0"}) || source.MoreHeaders["Openstack-Api-Version"] != "network 2.0" || source.Microversion != "2.0" {
 		t.Fatal(value, err, versions, source)
 	}
@@ -700,7 +700,7 @@ func TestPythonMinimumPacketRateNoneQuerySeedsAndLocalDescriptorFilters(t *testi
 		}
 		return nativeRuleWire(204, "")
 	})
-	value, err := api.FindMinimumPacketRateRecord(context.Background(), "parent", "target", rules.WithMinimumPacketRateFindQuery("limit", nil), rules.WithMinimumPacketRateFindQuery("min_kpps", nil), rules.WithMinimumPacketRateFindQuery("x_future", nil), rules.WithMinimumPacketRateFindQuery("name", false), rules.WithMinimumPacketRateFindQuery("fields", []string{"id", "direction"}))
+	value, err := api.FindMinimumPacketRateRecord(context.Background(), "parent", "target", request.Query("limit", nil), request.Query("min_kpps", nil), request.Query("x_future", nil), request.Query("name", false), request.Query("fields", []string{"id", "direction"}))
 	if err != nil || value == nil || value.Wire != nil || len(calls) != 1 || value.StatusCode != 204 || len(value.Envelope) != 0 {
 		t.Fatal(value, err, calls)
 	}
@@ -716,12 +716,12 @@ func TestPythonMinimumPacketRateNoneQuerySeedsAndLocalDescriptorFilters(t *testi
 		}
 		return nativeRuleWire(200, `{"minimum_packet_rate_rules":[{"id":"missing"},{"id":"zero","min_kpps":0,"direction":false},{"id":"null","min_kpps":null},{"id":"one","min_kpps":1}]}`)
 	})
-	values, err := api.AllMinimumPacketRateRecords(context.Background(), "parent", rules.WithMinimumPacketRateListQuery("min_kpps", nil), rules.WithMinimumPacketRateListQuery("fields", func() {}))
+	values, err := api.AllMinimumPacketRateRecords(context.Background(), "parent", request.Query("min_kpps", nil), request.Query("fields", func() {}))
 	if err != nil || len(values) != 2 || len(calls) != 1 {
 		t.Fatal(values, err, calls)
 	}
 	calls = nil
-	values, err = api.AllMinimumPacketRateRecords(context.Background(), "parent", rules.WithMinimumPacketRateListQuery("min_kpps", false), rules.WithMinimumPacketRateListQuery("direction", false))
+	values, err = api.AllMinimumPacketRateRecords(context.Background(), "parent", request.Query("min_kpps", false), request.Query("direction", false))
 	if err != nil || len(values) != 1 || len(calls) != 1 {
 		t.Fatal(values, err, calls)
 	}
@@ -756,7 +756,7 @@ func TestPythonMinimumPacketRateListConstructorCollisionsAndDictionaryFilters(t 
 		var calls []nativeRuleCall
 		body := `{"minimum_packet_rate_rules":[{"id":"target","min_kpps":` + actual + `}]}`
 		api := pythonMinimumPacketRateAPI(t, &calls, func(*http.Request) *http.Response { return nativeRuleWire(200, body) })
-		values, err := api.AllMinimumPacketRateRecords(context.Background(), "parent", rules.WithMinimumPacketRateListQuery("min_kpps", map[string]any{}))
+		values, err := api.AllMinimumPacketRateRecords(context.Background(), "parent", request.Query("min_kpps", map[string]any{}))
 		want := 0
 		if actual == `"truthy"` || strings.HasPrefix(actual, `{"nested"`) {
 			want = 1
@@ -769,7 +769,7 @@ func TestPythonMinimumPacketRateListConstructorCollisionsAndDictionaryFilters(t 
 		var calls []nativeRuleCall
 		body := `{"minimum_packet_rate_rules":[{"id":"target","min_kpps":` + actual + `}]}`
 		api := pythonMinimumPacketRateAPI(t, &calls, func(*http.Request) *http.Response { return nativeRuleWire(200, body) })
-		values, err := api.AllMinimumPacketRateRecords(context.Background(), "parent", rules.WithMinimumPacketRateListQuery("min_kpps", map[string]any{"nested": map[string]any{"on": true}}))
+		values, err := api.AllMinimumPacketRateRecords(context.Background(), "parent", request.Query("min_kpps", map[string]any{"nested": map[string]any{"on": true}}))
 		if strings.HasPrefix(actual, `{"nested"`) {
 			if err != nil || len(values) != 1 {
 				t.Fatal(values, err)
@@ -976,7 +976,7 @@ func TestPythonMinimumPacketRateExplicitListVersionAppliesToEveryPage(t *testing
 		source := api.RawClient()
 		source.Microversion = "2.0"
 		source.MoreHeaders = map[string]string{"Openstack-Api-Version": "network 2.0", "Accept": "source/default"}
-		values, err := api.AllMinimumPacketRateRecords(context.Background(), "parent", rules.WithMinimumPacketRateListMicroversion(override))
+		values, err := api.AllMinimumPacketRateRecords(context.Background(), "parent", request.Microversion(override))
 		if err != nil || len(values) != 1 || len(calls) != 2 || source.Microversion != "2.0" || source.MoreHeaders["Openstack-Api-Version"] != "network 2.0" || source.MoreHeaders["Accept"] != "source/default" {
 			t.Fatal(values, err, calls, source)
 		}

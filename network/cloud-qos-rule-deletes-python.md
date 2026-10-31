@@ -22,9 +22,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleDeleteMicroversion`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.DeleteBandwidthLimitRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithQoSRuleDeleteOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithQoSRuleDeleteIgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithQoSRuleDeleteHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithQoSRuleDeleteMicroversion`
 - `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
@@ -86,9 +83,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleDeleteMicroversion`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.DeleteDSCPMarkingRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithQoSRuleDeleteOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithQoSRuleDeleteIgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithQoSRuleDeleteHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithQoSRuleDeleteMicroversion`
 - `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
@@ -150,9 +144,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleDeleteMicroversion`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.DeleteMinimumBandwidthRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithQoSRuleDeleteOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithQoSRuleDeleteIgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithQoSRuleDeleteHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithQoSRuleDeleteMicroversion`
 - `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`

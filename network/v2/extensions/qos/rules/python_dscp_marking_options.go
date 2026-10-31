@@ -3,7 +3,6 @@ package rules
 import (
 	"bytes"
 	"encoding/json"
-	"maps"
 	"slices"
 	"strings"
 	"unicode"
@@ -42,19 +41,7 @@ func WithDSCPMarkingFindOpts(v DSCPMarkingFindOpts) DSCPMarkingFindOption {
 	return request.Custom(func(c *DSCPMarkingFindOpts) error { *c = copyDSCPMarkingFind(owned); return nil })
 }
 
-// Deprecated: use request.IgnoreMissing.
-func WithDSCPMarkingFindIgnoreMissing(v bool) DSCPMarkingFindOption {
-	return request.Custom(func(c *DSCPMarkingFindOpts) error { x := v; c.IgnoreMissing = &x; return nil })
-}
-
-// Deprecated: use request.Query.
-func WithDSCPMarkingFindQuery(key string, value any) DSCPMarkingFindOption {
-	raw, err := json.Marshal(value)
-	return request.Custom(dscpMarkingFindQuery(key, bytes.Clone(raw), err))
-}
-
-// dscpMarkingFindQuery applies one marshaled value for WithDSCPMarkingFindQuery and the shared
-// request calls that carry the same key.
+// dscpMarkingFindQuery applies one marshaled request.Query value.
 func dscpMarkingFindQuery(key string, owned json.RawMessage, err error) func(*DSCPMarkingFindOpts) error {
 	return func(c *DSCPMarkingFindOpts) error {
 		if err != nil {
@@ -69,17 +56,6 @@ func dscpMarkingFindQuery(key string, owned json.RawMessage, err error) func(*DS
 		c.Query[key] = bytes.Clone(owned)
 		return nil
 	}
-}
-
-// Deprecated: use request.Microversion.
-func WithDSCPMarkingFindMicroversion(v string) DSCPMarkingFindOption {
-	return request.Custom(func(c *DSCPMarkingFindOpts) error { x := v; c.Microversion = &x; return nil })
-}
-
-// Deprecated: use request.Headers.
-func WithDSCPMarkingFindHeaders(v map[string]string) DSCPMarkingFindOption {
-	owned := maps.Clone(v)
-	return request.Custom(func(c *DSCPMarkingFindOpts) error { c.Headers = maps.Clone(owned); return nil })
 }
 
 // DSCPMarkingListOpts owns list kwargs. Query includes declared server fields,
@@ -137,18 +113,7 @@ func dscpMarkingListIgnores(key string) bool {
 	return true
 }
 
-// Deprecated: use request.Query.
-func WithDSCPMarkingListQuery(key string, value any) DSCPMarkingListOption {
-	// Source discards unknown kwargs before evaluating their transport value.
-	if dscpMarkingListIgnores(key) {
-		return request.Custom(func(*DSCPMarkingListOpts) error { return nil })
-	}
-	raw, err := json.Marshal(value)
-	return request.Custom(dscpMarkingListQuery(key, bytes.Clone(raw), err))
-}
-
-// dscpMarkingListQuery applies one marshaled value for WithDSCPMarkingListQuery and the shared
-// request calls that carry the same key.
+// dscpMarkingListQuery applies one marshaled request.Query value.
 func dscpMarkingListQuery(key string, owned json.RawMessage, err error) func(*DSCPMarkingListOpts) error {
 	if dscpMarkingListIgnores(key) {
 		return func(*DSCPMarkingListOpts) error { return nil }
@@ -166,37 +131,6 @@ func dscpMarkingListQuery(key string, owned json.RawMessage, err error) func(*DS
 		c.Query[key] = bytes.Clone(owned)
 		return nil
 	}
-}
-
-// Deprecated: use request.Microversion.
-func WithDSCPMarkingListMicroversion(v string) DSCPMarkingListOption {
-	return request.Custom(func(c *DSCPMarkingListOpts) error { x := v; c.Microversion = &x; return nil })
-}
-
-// Deprecated: use request.Headers.
-func WithDSCPMarkingListHeaders(v map[string]string) DSCPMarkingListOption {
-	owned := maps.Clone(v)
-	return request.Custom(func(c *DSCPMarkingListOpts) error { c.Headers = maps.Clone(owned); return nil })
-}
-
-// Deprecated: use request.Limit.
-func WithDSCPMarkingListLimit(v int) DSCPMarkingListOption {
-	return WithDSCPMarkingListQuery("limit", v)
-}
-
-// Deprecated: use request.Marker.
-func WithDSCPMarkingListMarker(v string) DSCPMarkingListOption {
-	return WithDSCPMarkingListQuery("marker", v)
-}
-
-// Deprecated: use request.MaxItems.
-func WithDSCPMarkingListMaxItems(v int) DSCPMarkingListOption {
-	return WithDSCPMarkingListQuery("max_items", v)
-}
-
-// Deprecated: use request.Paginated.
-func WithDSCPMarkingListPaginated(v bool) DSCPMarkingListOption {
-	return WithDSCPMarkingListQuery("paginated", v)
 }
 
 // DSCPMarkingGetOpts owns optional member transport extensions. Query does
@@ -226,13 +160,8 @@ func WithDSCPMarkingGetOpts(v DSCPMarkingGetOpts) DSCPMarkingGetOption {
 	owned := copyDSCPMarkingGet(v)
 	return request.Custom(func(c *DSCPMarkingGetOpts) error { *c = copyDSCPMarkingGet(owned); return nil })
 }
-func WithDSCPMarkingGetQuery(key string, value any) DSCPMarkingGetOption {
-	raw, err := json.Marshal(value)
-	return request.Custom(dscpMarkingGetQuery(key, bytes.Clone(raw), err))
-}
 
-// dscpMarkingGetQuery applies one marshaled member query value for
-// WithDSCPMarkingGetQuery and request.Query.
+// dscpMarkingGetQuery applies one marshaled request.Query member value.
 func dscpMarkingGetQuery(key string, owned json.RawMessage, err error) func(*DSCPMarkingGetOpts) error {
 	return func(c *DSCPMarkingGetOpts) error {
 		if err != nil {
@@ -247,24 +176,6 @@ func dscpMarkingGetQuery(key string, owned json.RawMessage, err error) func(*DSC
 		c.Query[key] = bytes.Clone(owned)
 		return nil
 	}
-}
-
-// Deprecated: use request.Microversion.
-func WithDSCPMarkingGetMicroversion(v string) DSCPMarkingGetOption {
-	return request.Custom(func(c *DSCPMarkingGetOpts) error { x := v; c.Microversion = &x; return nil })
-}
-
-// Deprecated: use request.Headers.
-func WithDSCPMarkingGetHeaders(v map[string]string) DSCPMarkingGetOption {
-	owned := maps.Clone(v)
-	return request.Custom(func(c *DSCPMarkingGetOpts) error { c.Headers = maps.Clone(owned); return nil })
-}
-
-// WithDSCPMarkingListBasePath owns a service-relative route override for Proxy lists.
-//
-// Deprecated: use request.BasePath.
-func WithDSCPMarkingListBasePath(v string) DSCPMarkingListOption {
-	return request.Custom(func(c *DSCPMarkingListOpts) error { x := v; c.BasePath = &x; return nil })
 }
 
 // dscpMarkingFindCalls translates the options of one call into DSCPMarkingFindOpts callbacks.

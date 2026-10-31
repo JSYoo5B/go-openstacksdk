@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"maps"
 	"net/http"
 	"net/url"
 	"slices"
@@ -53,22 +52,6 @@ func copyQoSRuleDelete(v QoSRuleDeleteOpts) QoSRuleDeleteOpts {
 func WithQoSRuleDeleteOpts(v QoSRuleDeleteOpts) QoSRuleDeleteOption {
 	owned := copyQoSRuleDelete(v)
 	return request.Custom(func(c *QoSRuleDeleteOpts) error { *c = copyQoSRuleDelete(owned); return nil })
-}
-
-// Deprecated: use request.IgnoreMissing.
-func WithQoSRuleDeleteIgnoreMissing(value bool) QoSRuleDeleteOption {
-	return request.Custom(func(c *QoSRuleDeleteOpts) error { v := value; c.IgnoreMissing = &v; return nil })
-}
-
-// Deprecated: use request.Headers.
-func WithQoSRuleDeleteHeaders(value map[string]string) QoSRuleDeleteOption {
-	owned := maps.Clone(value)
-	return request.Custom(func(c *QoSRuleDeleteOpts) error { c.Headers = maps.Clone(owned); return nil })
-}
-
-// Deprecated: use request.Microversion.
-func WithQoSRuleDeleteMicroversion(value string) QoSRuleDeleteOption {
-	return request.Custom(func(c *QoSRuleDeleteOpts) error { v := value; c.Microversion = &v; return nil })
 }
 
 func qosRuleDeleteReceipt(value *neutronfind.Record, err error, target string) *QoSRuleDeleteReceipt {

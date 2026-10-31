@@ -101,7 +101,7 @@ func TestPythonDSCPMarkingGetPartialReceiptsWithoutQuerySeedsOrFallback(t *testi
 				}
 				return dscpRecordWire(204, body)
 			})
-			value, err := api.GetDSCPMarkingRecord(context.Background(), "policy", "literal", rules.WithDSCPMarkingGetQuery("name", "wire-only"), rules.WithDSCPMarkingGetQuery("dscp_mark", 0))
+			value, err := api.GetDSCPMarkingRecord(context.Background(), "policy", "literal", request.Query("name", "wire-only"), request.Query("dscp_mark", 0))
 			if err != nil || value == nil || value.PolicyID != "policy" || value.StatusCode != 204 || string(value.Envelope) != body || len(*calls) != 1 || len(value.Resource.Body) != 4 {
 				t.Fatal(err, value, *calls)
 			}
@@ -138,7 +138,7 @@ func TestPythonDSCPMarkingFindBoundRequiredKwargsAndUnknownConstructorSeeds(t *t
 		}
 		return dscpRecordWire(200, raw)
 	})
-	value, err := api.FindDSCPMarkingRecord(context.Background(), "policy", "target", rules.WithDSCPMarkingFindQuery("name", "constructor"), rules.WithDSCPMarkingFindQuery("x_seed", []any{0, false, nil}), rules.WithDSCPMarkingFindQuery("all_projects", true))
+	value, err := api.FindDSCPMarkingRecord(context.Background(), "policy", "target", request.Query("name", "constructor"), request.Query("x_seed", []any{0, false, nil}), request.Query("all_projects", true))
 	if err != nil || value == nil || len(*calls) != 1 || value.PolicyID != "policy" || value.Resource.Body["qos_policy_id"] != nil {
 		t.Fatal(err, value, *calls)
 	}
@@ -160,7 +160,7 @@ func TestPythonDSCPMarkingFindCleanFallbackLocalFiltersAndNoNameHint(t *testing.
 				listed = r.URL.Query()
 				return dscpRecordWire(200, `{"dscp_marking_rules":[{"id":"skip","name":"target","dscp_mark":1},{"id":"match","name":"target","dscp_mark":false,"qos_policy_id":"foreign","x_new":null}]}`)
 			})
-			value, err := api.FindDSCPMarkingRecord(context.Background(), "policy", "target", rules.WithDSCPMarkingFindQuery("dscp_mark", 0), rules.WithDSCPMarkingFindQuery("x_unknown", false), rules.WithDSCPMarkingFindQuery("fields", []string{"id"}), rules.WithDSCPMarkingFindQuery("all_projects", true))
+			value, err := api.FindDSCPMarkingRecord(context.Background(), "policy", "target", request.Query("dscp_mark", 0), request.Query("x_unknown", false), request.Query("fields", []string{"id"}), request.Query("all_projects", true))
 			if err != nil || value == nil || value.PolicyID != "policy" || len(*calls) != 2 || len(listed) != 0 || (*calls)[1].path != dscpRecordPath || value.Resource.Body["qos_policy_id"] != nil {
 				t.Fatal(err, value, *calls, listed)
 			}
@@ -201,7 +201,7 @@ func TestPythonDSCPMarkingFindCompletesUniquenessAndMissingSearch(t *testing.T) 
 			})
 			var options []rules.DSCPMarkingFindOption
 			if mode == "missing strict" {
-				options = append(options, rules.WithDSCPMarkingFindIgnoreMissing(false))
+				options = append(options, request.IgnoreMissing(false))
 			}
 			value, err := api.FindDSCPMarkingRecord(context.Background(), "policy", "target", options...)
 			switch mode {
@@ -238,7 +238,7 @@ func TestPythonDSCPMarkingListServerClassificationRawCapAndOwnedURI(t *testing.T
 		}
 		return dscpRecordWire(200, raw)
 	})
-	seq := api.ListDSCPMarkingRecords(context.Background(), "policy", rules.WithDSCPMarkingListMaxItems(2), rules.WithDSCPMarkingListMarker("start"), rules.WithDSCPMarkingListQuery("name", "wanted"), rules.WithDSCPMarkingListQuery("dscp_mark", 0), rules.WithDSCPMarkingListQuery("fields", make(chan int)), rules.WithDSCPMarkingListQuery("unknown", make(chan int)))
+	seq := api.ListDSCPMarkingRecords(context.Background(), "policy", request.MaxItems(2), request.Marker("start"), request.Query("name", "wanted"), request.Query("dscp_mark", 0), request.Query("fields", make(chan int)), request.Query("unknown", make(chan int)))
 	if len(*calls) != 0 {
 		t.Fatal("list not lazy")
 	}
@@ -259,15 +259,15 @@ func TestPythonDSCPMarkingListOrderedDictionaryFiltersAndExactNumbers(t *testing
 			failure := false
 			switch mode {
 			case "false first":
-				options = []rules.DSCPMarkingListOption{rules.WithDSCPMarkingListQuery("name", "no"), rules.WithDSCPMarkingListQuery("id", map[string]any{"x": true})}
+				options = []rules.DSCPMarkingListOption{request.Query("name", "no"), request.Query("id", map[string]any{"x": true})}
 			case "scalar fault first":
-				options = []rules.DSCPMarkingListOption{rules.WithDSCPMarkingListQuery("id", map[string]any{"x": true}), rules.WithDSCPMarkingListQuery("name", "no")}
+				options = []rules.DSCPMarkingListOption{request.Query("id", map[string]any{"x": true}), request.Query("name", "no")}
 				failure = true
 			case "empty predicate":
-				options = []rules.DSCPMarkingListOption{rules.WithDSCPMarkingListQuery("id", map[string]any{})}
+				options = []rules.DSCPMarkingListOption{request.Query("id", map[string]any{})}
 				want = 1
 			case "exact decimal":
-				options = []rules.DSCPMarkingListOption{rules.WithDSCPMarkingListQuery("dscp_mark", json.RawMessage("9007199254740993.0"))}
+				options = []rules.DSCPMarkingListOption{request.Query("dscp_mark", json.RawMessage("9007199254740993.0"))}
 			}
 			values, err := collectDSCPRecords(api.ListDSCPMarkingRecords(context.Background(), "policy", options...))
 			if (err != nil) != failure || len(values) != want || len(*calls) != 1 {
@@ -322,12 +322,12 @@ func TestPythonDSCPMarkingListPagingBoundsAndConstructorProof(t *testing.T) {
 				}
 				return dscpRecordWire(lastStatus, lastBody)
 			})
-			options := []rules.DSCPMarkingListOption{rules.WithDSCPMarkingListMarker("initial")}
+			options := []rules.DSCPMarkingListOption{request.Marker("initial")}
 			if mode == "marker short page" || mode == "single page" {
-				options = append(options, rules.WithDSCPMarkingListLimit(2))
+				options = append(options, request.Limit(2))
 			}
 			if mode == "single page" {
-				options = append(options, rules.WithDSCPMarkingListPaginated(false))
+				options = append(options, request.Paginated(false))
 			}
 			values, err := collectDSCPRecords(api.ListDSCPMarkingRecords(context.Background(), "policy", options...))
 			success := mode == "versioned link" || mode == "marker short page" || mode == "single page" || mode == "singleton"
@@ -489,11 +489,11 @@ func TestPythonDSCPMarkingVersionsAndRetryHeadersRemainSelected(t *testing.T) {
 			var err error
 			switch operation {
 			case "get":
-				_, err = api.GetDSCPMarkingRecord(context.Background(), "policy", "target", rules.WithDSCPMarkingGetMicroversion("2.1"))
+				_, err = api.GetDSCPMarkingRecord(context.Background(), "policy", "target", request.Microversion("2.1"))
 			case "find":
-				_, err = api.FindDSCPMarkingRecord(context.Background(), "policy", "target", rules.WithDSCPMarkingFindMicroversion("2.1"))
+				_, err = api.FindDSCPMarkingRecord(context.Background(), "policy", "target", request.Microversion("2.1"))
 			case "list":
-				_, err = collectDSCPRecords(api.ListDSCPMarkingRecords(context.Background(), "policy", rules.WithDSCPMarkingListMicroversion("2.1")))
+				_, err = collectDSCPRecords(api.ListDSCPMarkingRecords(context.Background(), "policy", request.Microversion("2.1")))
 			}
 			want := []string{"network 2.1", "network 2.1"}
 			if operation == "find" {
@@ -549,20 +549,20 @@ func TestPythonDSCPMarkingPreflightBoundControlsCancellationAndSnapshots(t *test
 			t.Fatal(err)
 		}
 	}
-	_, err := api.FindDSCPMarkingRecord(context.Background(), "policy", "target", rules.WithDSCPMarkingFindQuery("qos_policy_id", nil))
+	_, err := api.FindDSCPMarkingRecord(context.Background(), "policy", "target", request.Query("qos_policy_id", nil))
 	if !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
-	_, err = api.FindDSCPMarkingRecord(context.Background(), "policy", "target", rules.WithDSCPMarkingFindQuery("qos_rule_id", "target"))
+	_, err = api.FindDSCPMarkingRecord(context.Background(), "policy", "target", request.Query("qos_rule_id", "target"))
 	if !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
-	_, err = collectDSCPRecords(api.ListDSCPMarkingRecords(context.Background(), "policy", rules.WithDSCPMarkingListQuery("qos_policy_id", false)))
+	_, err = collectDSCPRecords(api.ListDSCPMarkingRecords(context.Background(), "policy", request.Query("qos_policy_id", false)))
 	if !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
 	for _, key := range []string{"cls", "connection", "microversion", "base_path", "location", "id"} {
-		_, err = api.FindDSCPMarkingRecord(context.Background(), "policy", "target", rules.WithDSCPMarkingFindQuery(key, nil))
+		_, err = api.FindDSCPMarkingRecord(context.Background(), "policy", "target", request.Query(key, nil))
 		if !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(key, err)
 		}
@@ -627,7 +627,7 @@ func TestPythonDSCPMarkingPublicFixtureAndConcurrentOwnedReuse(t *testing.T) {
 	client.ResourceBase = cloud.Server.URL + "/neutron/v2.0/"
 	api := rules.New(client)
 	headers := map[string]string{"X-Probe": "owned"}
-	option := rules.WithDSCPMarkingGetHeaders(headers)
+	option := request.Headers(headers)
 	headers["X-Probe"] = "changed"
 	var wait sync.WaitGroup
 	for i := 0; i < 8; i++ {

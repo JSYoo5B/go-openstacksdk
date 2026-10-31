@@ -391,7 +391,7 @@ func qosCallDocs(t *testing.T) map[string][]string {
 }
 
 // TestQoSRuleCustomCallsRunOverOwnOptions shows request.Custom over the
-// exported options struct runs at its position among With* options and
+// exported options struct runs at its position among other options and
 // shared calls, with the same snapshot rules as the With* functions.
 func TestQoSRuleCustomCallsRunOverOwnOptions(t *testing.T) {
 	var calls []nativeRuleCall
@@ -403,17 +403,17 @@ func TestQoSRuleCustomCallsRunOverOwnOptions(t *testing.T) {
 	var retained *rules.DSCPMarkingListOpts
 	_, err := api.AllDSCPMarkingRecords(context.Background(), "parent",
 		request.Header("X-First", "shared"),
-		rules.WithDSCPMarkingListHeaders(map[string]string{"X-Second": "legacy"}),
+		request.Headers(map[string]string{"X-Second": "replaced"}),
 		request.Custom(func(o *rules.DSCPMarkingListOpts) error {
 			retained = o
-			if o.Headers["X-Second"] != "legacy" || o.Headers["X-First"] != "" {
+			if o.Headers["X-Second"] != "replaced" || o.Headers["X-First"] != "" {
 				t.Fatal("custom ran out of order", o.Headers)
 			}
 			o.Headers["X-Third"] = "custom"
 			return nil
 		}),
 		request.Header("X-Fourth", "shared"))
-	if err != nil || len(calls) != 1 || seen.Get("X-Second") != "legacy" || seen.Get("X-Third") != "custom" || seen.Get("X-Fourth") != "shared" || seen.Get("X-First") != "" {
+	if err != nil || len(calls) != 1 || seen.Get("X-Second") != "replaced" || seen.Get("X-Third") != "custom" || seen.Get("X-Fourth") != "shared" || seen.Get("X-First") != "" {
 		t.Fatal(err, calls, seen)
 	}
 	retained.Headers["X-Third"] = "escaped"
@@ -433,95 +433,20 @@ func TestQoSRuleCustomCallsRunOverOwnOptions(t *testing.T) {
 	}
 }
 
-// TestQoSRuleSharedAndLegacyCallsSendSameRequests shows a deprecated With*
-// option and its shared replacement produce the same HTTP request.
-func TestQoSRuleSharedAndLegacyCallsSendSameRequests(t *testing.T) {
-	capture := func(run func(*rules.API) error) (nativeRuleCall, http.Header) {
-		var calls []nativeRuleCall
-		var seen http.Header
-		api, _ := nativeRuleAPI(t, &calls, func(req *http.Request) *http.Response {
-			seen = req.Header.Clone()
-			return qosCallReply(req)
-		})
-		if err := run(api); err != nil || len(calls) != 1 {
-			t.Fatal(err, calls)
-		}
-		seen.Del("X-Auth-Token")
-		return calls[0], seen
-	}
-	ctx := context.Background()
-	for _, tc := range []struct {
-		name           string
-		legacy, shared func(*rules.API) error
-	}{
-		{"list", func(a *rules.API) error {
-			_, err := a.AllBandwidthLimitRecords(ctx, "parent", rules.WithBandwidthLimitListLimit(2), rules.WithBandwidthLimitListMarker("m"), rules.WithBandwidthLimitListQuery("unknown", 1), rules.WithBandwidthLimitListMicroversion("2.1"), rules.WithBandwidthLimitListHeaders(map[string]string{"X-Trace": "t"}), rules.WithBandwidthLimitListPaginated(false))
-			return err
-		}, func(a *rules.API) error {
-			_, err := a.AllBandwidthLimitRecords(ctx, "parent", request.Limit(2), request.Marker("m"), request.Query("unknown", 1), request.Microversion("2.1"), request.Headers(map[string]string{"X-Trace": "t"}), request.Paginated(false))
-			return err
-		}},
-		{"get", func(a *rules.API) error {
-			_, err := a.GetMinimumBandwidthRecord(ctx, "parent", "rule", rules.WithMinimumBandwidthGetMicroversion("2.1"), rules.WithMinimumBandwidthGetHeaders(map[string]string{"X-Trace": "t"}))
-			return err
-		}, func(a *rules.API) error {
-			_, err := a.GetMinimumBandwidthRecord(ctx, "parent", "rule", request.Microversion("2.1"), request.Headers(map[string]string{"X-Trace": "t"}))
-			return err
-		}},
-		{"delete", func(a *rules.API) error {
-			_, err := a.DeletePacketRateLimitRecord(ctx, "parent", "rule", rules.WithPacketRateRuleDeleteIgnoreMissing(false), rules.WithPacketRateRuleDeleteHeaders(map[string]string{"X-Trace": "t"}))
-			return err
-		}, func(a *rules.API) error {
-			_, err := a.DeletePacketRateLimitRecord(ctx, "parent", "rule", request.IgnoreMissing(false), request.Headers(map[string]string{"X-Trace": "t"}))
-			return err
-		}},
-		{"create", func(a *rules.API) error {
-			_, err := a.CreatePacketRateLimitRecord(ctx, "parent", rules.WithPacketRateRuleField("max_kpps", 5), rules.WithPacketRateRuleMicroversion("2.1"))
-			return err
-		}, func(a *rules.API) error {
-			_, err := a.CreatePacketRateLimitRecord(ctx, "parent", request.Field("max_kpps", 5), request.Microversion("2.1"))
-			return err
-		}},
-	} {
-		legacyCall, legacyHeader := capture(tc.legacy)
-		sharedCall, sharedHeader := capture(tc.shared)
-		if legacyCall != sharedCall || !equalHeaders(legacyHeader, sharedHeader) {
-			t.Fatalf("%s: legacy %+v %v, shared %+v %v", tc.name, legacyCall, legacyHeader, sharedCall, sharedHeader)
-		}
-	}
-}
-
-func equalHeaders(a, b http.Header) bool {
-	if len(a) != len(b) {
-		return false
-	}
-	for key, values := range a {
-		if !slices.Equal(values, b[key]) {
-			return false
-		}
-	}
-	return true
-}
-
-// TestQoSRuleSharedQueryMarshalsWhenConstructed documents the one difference
-// between request.Query and the deprecated list Query options: the shared
-// call marshals its value when constructed, while WithXListQuery discards an
-// unknown kwarg before evaluating it. Neither reports the discarded failure.
+// TestQoSRuleSharedQueryMarshalsWhenConstructed documents that request.Query
+// marshals its value when constructed, so a list kwarg that the operation
+// then discards is still evaluated once. Its failure is never reported.
 func TestQoSRuleSharedQueryMarshalsWhenConstructed(t *testing.T) {
 	marshaled := 0
 	value := qosCountingValue{count: &marshaled}
-	legacy := rules.WithDSCPMarkingListQuery("unknown", value)
-	if marshaled != 0 {
-		t.Fatal("legacy list query marshaled a discarded kwarg", marshaled)
-	}
 	shared := request.Query("unknown", value)
 	if marshaled != 1 {
 		t.Fatal("shared query did not marshal when constructed", marshaled)
 	}
 	var calls []nativeRuleCall
 	api, _ := nativeRuleAPI(t, &calls, qosCallReply)
-	for _, option := range []rules.DSCPMarkingListOption{legacy, shared} {
-		if _, err := api.AllDSCPMarkingRecords(context.Background(), "parent", option); err != nil {
+	for range 2 {
+		if _, err := api.AllDSCPMarkingRecords(context.Background(), "parent", shared); err != nil {
 			t.Fatal(err)
 		}
 	}

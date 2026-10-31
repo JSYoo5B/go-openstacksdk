@@ -13,6 +13,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -171,7 +172,7 @@ func TestCloudQoSDSCPMarkingSourceProxyLiteralsBasePathAndOldTypedBoundary(t *te
 	if err != nil || len(result.Rules) != 1 || len(calls()) != 3 || calls()[2].path != "/v2.0/alternate" {
 		t.Fatal(result, err, calls())
 	}
-	_, err = network.New(client).API.QoSRules.AllDSCPMarkingRecords(context.Background(), "parent", rules.WithDSCPMarkingListQuery("base_path", "alternate"))
+	_, err = network.New(client).API.QoSRules.AllDSCPMarkingRecords(context.Background(), "parent", request.Query("base_path", "alternate"))
 	if !errors.Is(err, resource.ErrInvalidOption) || len(calls()) != 3 {
 		t.Fatal(err, calls())
 	}

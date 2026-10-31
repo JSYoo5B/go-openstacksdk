@@ -30,20 +30,7 @@ type BandwidthLimitProxyResult struct {
 	JSON  json.RawMessage
 }
 
-// WithBandwidthLimitProxyQuery consumes Source formal values at their option
-// position, so later concrete headers/version/base-path choices remain last-win.
-//
-// Deprecated: use request.Query.
-func WithBandwidthLimitProxyQuery(key string, value any) BandwidthLimitListOption {
-	if bandwidthLimitProxyIgnores(key) {
-		return request.Custom(func(*BandwidthLimitListOpts) error { return nil })
-	}
-	raw, err := json.Marshal(value)
-	return request.Custom(bandwidthLimitProxyQuery(key, bytes.Clone(raw), err))
-}
-
-// bandwidthLimitProxyQuery applies one marshaled value for WithBandwidthLimitProxyQuery and the shared
-// request calls that carry the same key.
+// bandwidthLimitProxyQuery applies one marshaled request.Query value.
 func bandwidthLimitProxyQuery(key string, owned json.RawMessage, err error) func(*BandwidthLimitListOpts) error {
 	if bandwidthLimitProxyIgnores(key) {
 		return func(*BandwidthLimitListOpts) error { return nil }

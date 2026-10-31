@@ -14,10 +14,6 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.FindBandwidthLimitRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitFindOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitFindIgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitFindQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitFindMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitFindHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
@@ -55,8 +51,6 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.GetBandwidthLimitRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitGetOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitGetMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitGetHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 
@@ -91,13 +85,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ListBandwidthLimitRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.AllBandwidthLimitRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitListQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitListMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitListPaginated`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
@@ -106,7 +93,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
 - `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 
-- Lazy list uses fixed literal parent without lookup. Only default limit/marker transpose to server query; Body id/name/direction/bandwidth fields filter locally. Unknown kwargs including fields/tags are discarded before transport-value evaluation by the list Query option, even function/malformed unknown values; request.Query marshals each value once when constructed and never reports a discarded failure.
+- Lazy list uses fixed literal parent without lookup. Only default limit/marker transpose to server query; Body id/name/direction/bandwidth fields filter locally. Unknown kwargs including fields/tags are discarded, even function/malformed unknown values; request.Query marshals each value once when constructed and never reports a discarded failure.
   Tests: `network/v2/extensions/qos/rules/python_bandwidth_limit_records_contracts_test.go:TestPythonBandwidthLimitListLazyQueryLocalFiltersAndUnknowns`, `network/v2/extensions/qos/rules/python_bandwidth_limit_records_contracts_test.go:TestPythonBandwidthLimitListRawCapSinglePageAndEarlyStop`.
 - Source list injects URI parent then consumes it outside Body; Wire owns foreign original row value and whole page proof. Positive raw cap counts before filtering, limit=0 plus cap creates limit hint; single page and early break avoid another request.
   Tests: `network/v2/extensions/qos/rules/python_bandwidth_limit_records_contracts_test.go:TestPythonBandwidthLimitListLazyQueryLocalFiltersAndUnknowns`, `network/v2/extensions/qos/rules/python_bandwidth_limit_records_contracts_test.go:TestPythonBandwidthLimitListRawCapSinglePageAndEarlyStop`.
@@ -142,8 +129,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSBandwidthLimitHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSBandwidthLimitMicroversion`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ProxyBandwidthLimitRecords`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitProxyQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitListBasePath`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/request.BasePath`
 
@@ -181,8 +166,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSBandwidthLimitHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSBandwidthLimitMicroversion`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ProxyBandwidthLimitRecords`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitProxyQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitListBasePath`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/request.BasePath`
 

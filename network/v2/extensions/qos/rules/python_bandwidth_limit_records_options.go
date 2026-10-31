@@ -3,7 +3,6 @@ package rules
 import (
 	"bytes"
 	"encoding/json"
-	"maps"
 	"slices"
 	"strings"
 	"unicode"
@@ -42,19 +41,7 @@ func WithBandwidthLimitFindOpts(v BandwidthLimitFindOpts) BandwidthLimitFindOpti
 	return request.Custom(func(c *BandwidthLimitFindOpts) error { *c = copyBandwidthLimitFind(owned); return nil })
 }
 
-// Deprecated: use request.IgnoreMissing.
-func WithBandwidthLimitFindIgnoreMissing(v bool) BandwidthLimitFindOption {
-	return request.Custom(func(c *BandwidthLimitFindOpts) error { x := v; c.IgnoreMissing = &x; return nil })
-}
-
-// Deprecated: use request.Query.
-func WithBandwidthLimitFindQuery(key string, value any) BandwidthLimitFindOption {
-	raw, err := json.Marshal(value)
-	return request.Custom(bandwidthLimitFindQuery(key, bytes.Clone(raw), err))
-}
-
-// bandwidthLimitFindQuery applies one marshaled value for WithBandwidthLimitFindQuery and the shared
-// request calls that carry the same key.
+// bandwidthLimitFindQuery applies one marshaled request.Query value.
 func bandwidthLimitFindQuery(key string, owned json.RawMessage, err error) func(*BandwidthLimitFindOpts) error {
 	return func(c *BandwidthLimitFindOpts) error {
 		if err != nil {
@@ -69,17 +56,6 @@ func bandwidthLimitFindQuery(key string, owned json.RawMessage, err error) func(
 		c.Query[key] = bytes.Clone(owned)
 		return nil
 	}
-}
-
-// Deprecated: use request.Microversion.
-func WithBandwidthLimitFindMicroversion(v string) BandwidthLimitFindOption {
-	return request.Custom(func(c *BandwidthLimitFindOpts) error { x := v; c.Microversion = &x; return nil })
-}
-
-// Deprecated: use request.Headers.
-func WithBandwidthLimitFindHeaders(v map[string]string) BandwidthLimitFindOption {
-	owned := maps.Clone(v)
-	return request.Custom(func(c *BandwidthLimitFindOpts) error { c.Headers = maps.Clone(owned); return nil })
 }
 
 // BandwidthLimitListOpts owns list kwargs. Query includes declared server fields,
@@ -136,18 +112,7 @@ func bandwidthLimitListIgnores(key string) bool {
 	return true
 }
 
-// Deprecated: use request.Query.
-func WithBandwidthLimitListQuery(key string, value any) BandwidthLimitListOption {
-	// Source discards unknown kwargs before evaluating their transport value.
-	if bandwidthLimitListIgnores(key) {
-		return request.Custom(func(*BandwidthLimitListOpts) error { return nil })
-	}
-	raw, err := json.Marshal(value)
-	return request.Custom(bandwidthLimitListQuery(key, bytes.Clone(raw), err))
-}
-
-// bandwidthLimitListQuery applies one marshaled value for WithBandwidthLimitListQuery and the shared
-// request calls that carry the same key.
+// bandwidthLimitListQuery applies one marshaled request.Query value.
 func bandwidthLimitListQuery(key string, owned json.RawMessage, err error) func(*BandwidthLimitListOpts) error {
 	if bandwidthLimitListIgnores(key) {
 		return func(*BandwidthLimitListOpts) error { return nil }
@@ -165,42 +130,6 @@ func bandwidthLimitListQuery(key string, owned json.RawMessage, err error) func(
 		c.Query[key] = bytes.Clone(owned)
 		return nil
 	}
-}
-
-// Deprecated: use request.BasePath.
-func WithBandwidthLimitListBasePath(v string) BandwidthLimitListOption {
-	return request.Custom(func(c *BandwidthLimitListOpts) error { x := v; c.BasePath = &x; return nil })
-}
-
-// Deprecated: use request.Microversion.
-func WithBandwidthLimitListMicroversion(v string) BandwidthLimitListOption {
-	return request.Custom(func(c *BandwidthLimitListOpts) error { x := v; c.Microversion = &x; return nil })
-}
-
-// Deprecated: use request.Headers.
-func WithBandwidthLimitListHeaders(v map[string]string) BandwidthLimitListOption {
-	owned := maps.Clone(v)
-	return request.Custom(func(c *BandwidthLimitListOpts) error { c.Headers = maps.Clone(owned); return nil })
-}
-
-// Deprecated: use request.Limit.
-func WithBandwidthLimitListLimit(v int) BandwidthLimitListOption {
-	return WithBandwidthLimitListQuery("limit", v)
-}
-
-// Deprecated: use request.Marker.
-func WithBandwidthLimitListMarker(v string) BandwidthLimitListOption {
-	return WithBandwidthLimitListQuery("marker", v)
-}
-
-// Deprecated: use request.MaxItems.
-func WithBandwidthLimitListMaxItems(v int) BandwidthLimitListOption {
-	return WithBandwidthLimitListQuery("max_items", v)
-}
-
-// Deprecated: use request.Paginated.
-func WithBandwidthLimitListPaginated(v bool) BandwidthLimitListOption {
-	return WithBandwidthLimitListQuery("paginated", v)
 }
 
 // BandwidthLimitGetOpts adds operation-owned safe headers and microversion.
@@ -227,17 +156,6 @@ func copyBandwidthLimitGet(v BandwidthLimitGetOpts) BandwidthLimitGetOpts {
 func WithBandwidthLimitGetOpts(v BandwidthLimitGetOpts) BandwidthLimitGetOption {
 	owned := copyBandwidthLimitGet(v)
 	return request.Custom(func(c *BandwidthLimitGetOpts) error { *c = copyBandwidthLimitGet(owned); return nil })
-}
-
-// Deprecated: use request.Microversion.
-func WithBandwidthLimitGetMicroversion(v string) BandwidthLimitGetOption {
-	return request.Custom(func(c *BandwidthLimitGetOpts) error { x := v; c.Microversion = &x; return nil })
-}
-
-// Deprecated: use request.Headers.
-func WithBandwidthLimitGetHeaders(v map[string]string) BandwidthLimitGetOption {
-	owned := maps.Clone(v)
-	return request.Custom(func(c *BandwidthLimitGetOpts) error { c.Headers = maps.Clone(owned); return nil })
 }
 
 // bandwidthLimitFindCalls translates the options of one call into BandwidthLimitFindOpts callbacks.

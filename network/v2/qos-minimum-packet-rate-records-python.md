@@ -14,10 +14,6 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.FindMinimumPacketRateRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumPacketRateFindOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumPacketRateFindIgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumPacketRateFindQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumPacketRateFindMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumPacketRateFindHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
@@ -65,8 +61,6 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.GetMinimumPacketRateRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumPacketRateGetOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumPacketRateGetMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumPacketRateGetHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 
@@ -113,13 +107,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ListMinimumPacketRateRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.AllMinimumPacketRateRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumPacketRateListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumPacketRateListQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumPacketRateListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumPacketRateListMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumPacketRateListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumPacketRateListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumPacketRateListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumPacketRateListPaginated`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`

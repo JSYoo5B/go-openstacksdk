@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"maps"
 	"net/http"
 	"slices"
 	"strings"
@@ -47,17 +46,7 @@ func WithPacketRateRuleMutationOpts(v PacketRateRuleMutationOpts) PacketRateRule
 	return request.Custom(func(c *PacketRateRuleMutationOpts) error { *c = copyPacketRateMutation(owned); return nil })
 }
 
-// WithPacketRateRuleField sets one attribute. Both rule classes allow unknown
-// Body attributes, so undeclared names are sent unchanged.
-//
-// Deprecated: use request.Field.
-func WithPacketRateRuleField(key string, value any) PacketRateRuleMutationOption {
-	raw, err := json.Marshal(value)
-	return request.Custom(packetRateRuleField(key, bytes.Clone(raw), err))
-}
-
-// packetRateRuleField applies one marshaled value for WithPacketRateRuleField and the shared
-// request calls that carry the same key.
+// packetRateRuleField applies one marshaled request.Field value.
 func packetRateRuleField(key string, owned json.RawMessage, err error) func(*PacketRateRuleMutationOpts) error {
 	return func(c *PacketRateRuleMutationOpts) error {
 		if err != nil {
@@ -72,17 +61,6 @@ func packetRateRuleField(key string, owned json.RawMessage, err error) func(*Pac
 		c.Fields[key] = bytes.Clone(owned)
 		return nil
 	}
-}
-
-// Deprecated: use request.Headers.
-func WithPacketRateRuleHeaders(v map[string]string) PacketRateRuleMutationOption {
-	owned := maps.Clone(v)
-	return request.Custom(func(c *PacketRateRuleMutationOpts) error { c.Headers = maps.Clone(owned); return nil })
-}
-
-// Deprecated: use request.Microversion.
-func WithPacketRateRuleMicroversion(v string) PacketRateRuleMutationOption {
-	return request.Custom(func(c *PacketRateRuleMutationOpts) error { x := v; c.Microversion = &x; return nil })
 }
 
 // PacketRateRuleDeleteOpts defaults IgnoreMissing to true, as both Source
@@ -106,22 +84,6 @@ func copyPacketRateDelete(v PacketRateRuleDeleteOpts) PacketRateRuleDeleteOpts {
 	owned := neutronfind.CloneOptions(packetRateDeletePolicy(v))
 	v.IgnoreMissing, v.Headers, v.Microversion = owned.IgnoreMissing, owned.Headers, owned.Microversion
 	return v
-}
-
-// Deprecated: use request.IgnoreMissing.
-func WithPacketRateRuleDeleteIgnoreMissing(v bool) PacketRateRuleDeleteOption {
-	return request.Custom(func(c *PacketRateRuleDeleteOpts) error { x := v; c.IgnoreMissing = &x; return nil })
-}
-
-// Deprecated: use request.Headers.
-func WithPacketRateRuleDeleteHeaders(v map[string]string) PacketRateRuleDeleteOption {
-	owned := maps.Clone(v)
-	return request.Custom(func(c *PacketRateRuleDeleteOpts) error { c.Headers = maps.Clone(owned); return nil })
-}
-
-// Deprecated: use request.Microversion.
-func WithPacketRateRuleDeleteMicroversion(v string) PacketRateRuleDeleteOption {
-	return request.Custom(func(c *PacketRateRuleDeleteOpts) error { x := v; c.Microversion = &x; return nil })
 }
 
 // PacketRateRuleDeleteResult exposes the actual bodyless DELETE receipt,

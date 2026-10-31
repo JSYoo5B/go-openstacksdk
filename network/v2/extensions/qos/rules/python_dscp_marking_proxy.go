@@ -32,17 +32,7 @@ type DSCPMarkingProxyResult struct {
 	JSON  json.RawMessage
 }
 
-// WithDSCPMarkingProxyQuery consumes Source formal values at their option
-// position, so later concrete headers/version/base-path choices remain last-win.
-//
-// Deprecated: use request.Query.
-func WithDSCPMarkingProxyQuery(key string, value any) DSCPMarkingListOption {
-	raw, err := json.Marshal(value)
-	return request.Custom(dscpMarkingProxyQuery(key, bytes.Clone(raw), err))
-}
-
-// dscpMarkingProxyQuery applies one marshaled value for WithDSCPMarkingProxyQuery and the shared
-// request calls that carry the same key.
+// dscpMarkingProxyQuery applies one marshaled request.Query value.
 func dscpMarkingProxyQuery(key string, owned json.RawMessage, err error) func(*DSCPMarkingListOpts) error {
 	return func(c *DSCPMarkingListOpts) error {
 		if err != nil {

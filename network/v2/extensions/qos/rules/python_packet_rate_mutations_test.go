@@ -11,6 +11,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -68,7 +69,7 @@ func TestPythonMinimumPacketRateCreateUpdateDelete(t *testing.T) {
 	api := pythonRateMutationAPI(t, &calls, func(*http.Request) (int, string) {
 		return 201, `{"minimum_packet_rate_rule":{"id":"m1","min_kpps":1000,"direction":"any","qos_policy_id":"foreign"}}`
 	})
-	v, err := api.CreateMinimumPacketRateRecord(context.Background(), "p/1", rules.WithPacketRateRuleField("min_kpps", 1000), rules.WithPacketRateRuleField("direction", "any"), rules.WithPacketRateRuleField("x_extension", nil))
+	v, err := api.CreateMinimumPacketRateRecord(context.Background(), "p/1", request.Field("min_kpps", 1000), request.Field("direction", "any"), request.Field("x_extension", nil))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -81,14 +82,14 @@ func TestPythonMinimumPacketRateCreateUpdateDelete(t *testing.T) {
 		t.Fatal(v.Resource.Body, v)
 	}
 	calls = nil
-	if _, err := api.CreateMinimumPacketRateRecord(context.Background(), "p/1", rules.WithPacketRateRuleField("qos_policy_id", "x")); !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
+	if _, err := api.CreateMinimumPacketRateRecord(context.Background(), "p/1", request.Field("qos_policy_id", "x")); !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
 		t.Fatal("qos_policy_id duplicates the bound argument", err, calls)
 	}
 
 	api = pythonRateMutationAPI(t, &calls, func(*http.Request) (int, string) {
 		return 200, `{"minimum_packet_rate_rule":{"id":"m1","min_kpps":2000}}`
 	})
-	v, err = api.UpdateMinimumPacketRateRecord(context.Background(), "p/1", "m1", rules.WithPacketRateRuleField("min_kpps", 2000), rules.WithPacketRateRuleField("if_revision", 1))
+	v, err = api.UpdateMinimumPacketRateRecord(context.Background(), "p/1", "m1", request.Field("min_kpps", 2000), request.Field("if_revision", 1))
 	if err != nil || len(calls) != 1 || calls[0].method != http.MethodPut || calls[0].path != pythonMinimumPacketRateBase+"/m1" || calls[0].header.Get("If-Match") != "" {
 		t.Fatal(err, calls)
 	}
@@ -100,19 +101,19 @@ func TestPythonMinimumPacketRateCreateUpdateDelete(t *testing.T) {
 	if v, err := api.UpdateMinimumPacketRateRecord(context.Background(), "p/1", "m1"); err != nil || len(calls) != 0 || string(v.Resource.Body["id"]) != `"m1"` {
 		t.Fatal("no changed attribute sends nothing", v, err, calls)
 	}
-	if _, err := api.UpdateMinimumPacketRateRecord(context.Background(), "p/1", "m1", rules.WithPacketRateRuleField("id", "x")); !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
+	if _, err := api.UpdateMinimumPacketRateRecord(context.Background(), "p/1", "m1", request.Field("id", "x")); !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
 		t.Fatal(err, calls)
 	}
 
 	api = pythonRateMutationAPI(t, &calls, func(*http.Request) (int, string) { return 404, `{}` })
-	_, err = api.UpdateMinimumPacketRateRecord(context.Background(), "p/1", "m1", rules.WithPacketRateRuleField("min_kpps", 1))
+	_, err = api.UpdateMinimumPacketRateRecord(context.Background(), "p/1", "m1", request.Field("min_kpps", 1))
 	pythonRateMutationFailure(t, err, "UpdateMinimumPacketRateRecord", 404)
 	calls = nil
 	result, err := api.DeleteMinimumPacketRateRecord(context.Background(), "p/1", "m1")
 	if err != nil || !result.IgnoredMissing || len(calls) != 1 || calls[0].method != http.MethodDelete || calls[0].path != pythonMinimumPacketRateBase+"/m1" || calls[0].body != "" {
 		t.Fatal(result, err, calls)
 	}
-	_, err = api.DeleteMinimumPacketRateRecord(context.Background(), "p/1", "m1", rules.WithPacketRateRuleDeleteIgnoreMissing(false))
+	_, err = api.DeleteMinimumPacketRateRecord(context.Background(), "p/1", "m1", request.IgnoreMissing(false))
 	pythonRateMutationFailure(t, err, "DeleteMinimumPacketRateRecord", 404)
 	api = pythonRateMutationAPI(t, &calls, func(*http.Request) (int, string) { return 409, `{}` })
 	_, err = api.CreateMinimumPacketRateRecord(context.Background(), "p/1")
@@ -124,7 +125,7 @@ func TestPythonPacketRateLimitCreateUpdateDelete(t *testing.T) {
 	api := pythonRateMutationAPI(t, &calls, func(*http.Request) (int, string) {
 		return 201, `{"packet_rate_limit_rule":{"id":"l1","max_kpps":500,"max_burst_kpps":0,"direction":"egress"}}`
 	})
-	v, err := api.CreatePacketRateLimitRecord(context.Background(), "p/1", rules.WithPacketRateRuleField("max_kpps", 500), rules.WithPacketRateRuleField("max_burst_kpps", 0), rules.WithPacketRateRuleField("direction", "egress"))
+	v, err := api.CreatePacketRateLimitRecord(context.Background(), "p/1", request.Field("max_kpps", 500), request.Field("max_burst_kpps", 0), request.Field("direction", "egress"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -138,7 +139,7 @@ func TestPythonPacketRateLimitCreateUpdateDelete(t *testing.T) {
 
 	api = pythonRateMutationAPI(t, &calls, func(*http.Request) (int, string) { return 200, `` })
 	calls = nil
-	v, err = api.UpdatePacketRateLimitRecord(context.Background(), "p/1", "l1", rules.WithPacketRateRuleField("max_kpps", 600))
+	v, err = api.UpdatePacketRateLimitRecord(context.Background(), "p/1", "l1", request.Field("max_kpps", 600))
 	if err != nil || len(calls) != 1 || calls[0].method != http.MethodPut || calls[0].path != pythonPacketRateLimitBase+"/l1" || calls[0].body != `{"packet_rate_limit_rule":{"max_kpps":600}}` {
 		t.Fatal(err, calls)
 	}
@@ -154,9 +155,9 @@ func TestPythonPacketRateLimitCreateUpdateDelete(t *testing.T) {
 		}
 	}
 	api = pythonRateMutationAPI(t, &calls, func(*http.Request) (int, string) { return 400, `{}` })
-	_, err = api.CreatePacketRateLimitRecord(context.Background(), "p/1", rules.WithPacketRateRuleField("max_kpps", -1))
+	_, err = api.CreatePacketRateLimitRecord(context.Background(), "p/1", request.Field("max_kpps", -1))
 	pythonRateMutationFailure(t, err, "CreatePacketRateLimitRecord", 400)
-	_, err = api.UpdatePacketRateLimitRecord(context.Background(), "p/1", "l1", rules.WithPacketRateRuleField("max_kpps", -1))
+	_, err = api.UpdatePacketRateLimitRecord(context.Background(), "p/1", "l1", request.Field("max_kpps", -1))
 	pythonRateMutationFailure(t, err, "UpdatePacketRateLimitRecord", 400)
 	_, err = api.DeletePacketRateLimitRecord(context.Background(), "p/1", "l1")
 	pythonRateMutationFailure(t, err, "DeletePacketRateLimitRecord", 400)

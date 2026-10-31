@@ -45,7 +45,7 @@ func TestQoSRuleDeleteSourceOpaqueACKAndStatusOptIn(t *testing.T) {
 					response.Header.Set("X-Request-Id", "ack")
 					return response
 				})
-				receipt, err := kind.delete(context.Background(), api, "parent", "rule", rules.WithQoSRuleDeleteIgnoreMissing(false))
+				receipt, err := kind.delete(context.Background(), api, "parent", "rule", request.IgnoreMissing(false))
 				if err != nil || receipt == nil || receipt.StatusCode != status || string(receipt.Envelope) != "opaque ACK" || receipt.Header.Get("X-Request-Id") != "ack" || receipt.IgnoredMissing || len(calls) != 1 || calls[0].path != "/neutron/v2.0/qos/policies/parent/"+kind.path+"/rule" || calls[0].body != "" {
 					t.Fatal(receipt, err, calls)
 				}
@@ -65,7 +65,7 @@ func TestQoSRuleDeleteDefaultMissingAndStrictRejectionsKeepActualReceipt(t *test
 				})
 				var options []rules.QoSRuleDeleteOption
 				if strict {
-					options = append(options, rules.WithQoSRuleDeleteIgnoreMissing(false))
+					options = append(options, request.IgnoreMissing(false))
 				}
 				receipt, err := kind.delete(context.Background(), api, "parent", "rule", options...)
 				if receipt == nil || receipt.StatusCode != status || string(receipt.Envelope) != `{"error":"actual"}` || receipt.Header.Get("X-Request-Id") != "reject" || len(calls) != 1 {
@@ -113,7 +113,7 @@ func TestQoSRuleDeleteSafeLiteralIdentityAndPreflightNoReceipt(t *testing.T) {
 }
 func TestQoSRuleDeleteOwnedHeadersVersionCallbacksAndGuardCauses(t *testing.T) {
 	headers := map[string]string{"X-Trace": "owned"}
-	option := rules.WithQoSRuleDeleteHeaders(headers)
+	option := request.Headers(headers)
 	headers["X-Trace"] = "changed"
 	var calls []nativeRuleCall
 	api, _ := nativeRuleAPI(t, &calls, func(r *http.Request) *http.Response {
@@ -122,7 +122,7 @@ func TestQoSRuleDeleteOwnedHeadersVersionCallbacksAndGuardCauses(t *testing.T) {
 		}
 		return nativeRuleWire(204, "")
 	})
-	receipt, err := api.DeleteBandwidthLimitRecord(context.Background(), "parent", "rule", rules.WithQoSRuleDeleteHeaders(nil), option, rules.WithQoSRuleDeleteMicroversion("2.1"), request.Custom(func(c *rules.QoSRuleDeleteOpts) error { c.Headers["X-Callback"] = "yes"; return nil }))
+	receipt, err := api.DeleteBandwidthLimitRecord(context.Background(), "parent", "rule", request.Headers(nil), option, request.Microversion("2.1"), request.Custom(func(c *rules.QoSRuleDeleteOpts) error { c.Headers["X-Callback"] = "yes"; return nil }))
 	if err != nil || receipt == nil || len(calls) != 1 {
 		t.Fatal(receipt, err, calls)
 	}
@@ -232,7 +232,7 @@ func TestQoSRuleDeleteCleanRetryAndAuthenticationKeepFixedBodylessPolicy(t *test
 			retry++
 			return nil
 		}
-		receipt, err := api.DeleteBandwidthLimitRecord(context.Background(), "parent", "rule", rules.WithQoSRuleDeleteIgnoreMissing(false), rules.WithQoSRuleDeleteHeaders(map[string]string{"If-Match": "selected"}), rules.WithQoSRuleDeleteMicroversion("2.1"))
+		receipt, err := api.DeleteBandwidthLimitRecord(context.Background(), "parent", "rule", request.IgnoreMissing(false), request.Headers(map[string]string{"If-Match": "selected"}), request.Microversion("2.1"))
 		if err != nil || receipt == nil || receipt.StatusCode != 204 || len(calls) != 2 || status == 401 && (reauth != 1 || retry != 0 || !reflect.DeepEqual(tokens, []string{"test-token", "renewed"})) || status == 503 && (retry != 1 || reauth != 0) {
 			t.Fatal(receipt, err, calls, tokens, reauth, retry)
 		}

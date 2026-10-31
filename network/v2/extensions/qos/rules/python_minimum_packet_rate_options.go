@@ -3,7 +3,6 @@ package rules
 import (
 	"bytes"
 	"encoding/json"
-	"maps"
 	"slices"
 	"strings"
 	"unicode"
@@ -42,19 +41,7 @@ func WithMinimumPacketRateFindOpts(v MinimumPacketRateFindOpts) MinimumPacketRat
 	return request.Custom(func(c *MinimumPacketRateFindOpts) error { *c = copyMinimumPacketRateFind(owned); return nil })
 }
 
-// Deprecated: use request.IgnoreMissing.
-func WithMinimumPacketRateFindIgnoreMissing(v bool) MinimumPacketRateFindOption {
-	return request.Custom(func(c *MinimumPacketRateFindOpts) error { x := v; c.IgnoreMissing = &x; return nil })
-}
-
-// Deprecated: use request.Query.
-func WithMinimumPacketRateFindQuery(key string, value any) MinimumPacketRateFindOption {
-	raw, err := json.Marshal(value)
-	return request.Custom(minimumPacketRateFindQuery(key, bytes.Clone(raw), err))
-}
-
-// minimumPacketRateFindQuery applies one marshaled value for WithMinimumPacketRateFindQuery and the shared
-// request calls that carry the same key.
+// minimumPacketRateFindQuery applies one marshaled request.Query value.
 func minimumPacketRateFindQuery(key string, owned json.RawMessage, err error) func(*MinimumPacketRateFindOpts) error {
 	return func(c *MinimumPacketRateFindOpts) error {
 		if err != nil {
@@ -69,17 +56,6 @@ func minimumPacketRateFindQuery(key string, owned json.RawMessage, err error) fu
 		c.Query[key] = bytes.Clone(owned)
 		return nil
 	}
-}
-
-// Deprecated: use request.Microversion.
-func WithMinimumPacketRateFindMicroversion(v string) MinimumPacketRateFindOption {
-	return request.Custom(func(c *MinimumPacketRateFindOpts) error { x := v; c.Microversion = &x; return nil })
-}
-
-// Deprecated: use request.Headers.
-func WithMinimumPacketRateFindHeaders(v map[string]string) MinimumPacketRateFindOption {
-	owned := maps.Clone(v)
-	return request.Custom(func(c *MinimumPacketRateFindOpts) error { c.Headers = maps.Clone(owned); return nil })
 }
 
 // MinimumPacketRateListOpts owns list kwargs. Query includes declared server fields,
@@ -135,18 +111,7 @@ func minimumPacketRateListIgnores(key string) bool {
 	return true
 }
 
-// Deprecated: use request.Query.
-func WithMinimumPacketRateListQuery(key string, value any) MinimumPacketRateListOption {
-	// Source discards unknown kwargs before evaluating their transport value.
-	if minimumPacketRateListIgnores(key) {
-		return request.Custom(func(*MinimumPacketRateListOpts) error { return nil })
-	}
-	raw, err := json.Marshal(value)
-	return request.Custom(minimumPacketRateListQuery(key, bytes.Clone(raw), err))
-}
-
-// minimumPacketRateListQuery applies one marshaled value for WithMinimumPacketRateListQuery and the shared
-// request calls that carry the same key.
+// minimumPacketRateListQuery applies one marshaled request.Query value.
 func minimumPacketRateListQuery(key string, owned json.RawMessage, err error) func(*MinimumPacketRateListOpts) error {
 	if minimumPacketRateListIgnores(key) {
 		return func(*MinimumPacketRateListOpts) error { return nil }
@@ -164,37 +129,6 @@ func minimumPacketRateListQuery(key string, owned json.RawMessage, err error) fu
 		c.Query[key] = bytes.Clone(owned)
 		return nil
 	}
-}
-
-// Deprecated: use request.Microversion.
-func WithMinimumPacketRateListMicroversion(v string) MinimumPacketRateListOption {
-	return request.Custom(func(c *MinimumPacketRateListOpts) error { x := v; c.Microversion = &x; return nil })
-}
-
-// Deprecated: use request.Headers.
-func WithMinimumPacketRateListHeaders(v map[string]string) MinimumPacketRateListOption {
-	owned := maps.Clone(v)
-	return request.Custom(func(c *MinimumPacketRateListOpts) error { c.Headers = maps.Clone(owned); return nil })
-}
-
-// Deprecated: use request.Limit.
-func WithMinimumPacketRateListLimit(v int) MinimumPacketRateListOption {
-	return WithMinimumPacketRateListQuery("limit", v)
-}
-
-// Deprecated: use request.Marker.
-func WithMinimumPacketRateListMarker(v string) MinimumPacketRateListOption {
-	return WithMinimumPacketRateListQuery("marker", v)
-}
-
-// Deprecated: use request.MaxItems.
-func WithMinimumPacketRateListMaxItems(v int) MinimumPacketRateListOption {
-	return WithMinimumPacketRateListQuery("max_items", v)
-}
-
-// Deprecated: use request.Paginated.
-func WithMinimumPacketRateListPaginated(v bool) MinimumPacketRateListOption {
-	return WithMinimumPacketRateListQuery("paginated", v)
 }
 
 // MinimumPacketRateGetOpts adds operation-owned safe headers and microversion.
@@ -221,17 +155,6 @@ func copyMinimumPacketRateGet(v MinimumPacketRateGetOpts) MinimumPacketRateGetOp
 func WithMinimumPacketRateGetOpts(v MinimumPacketRateGetOpts) MinimumPacketRateGetOption {
 	owned := copyMinimumPacketRateGet(v)
 	return request.Custom(func(c *MinimumPacketRateGetOpts) error { *c = copyMinimumPacketRateGet(owned); return nil })
-}
-
-// Deprecated: use request.Microversion.
-func WithMinimumPacketRateGetMicroversion(v string) MinimumPacketRateGetOption {
-	return request.Custom(func(c *MinimumPacketRateGetOpts) error { x := v; c.Microversion = &x; return nil })
-}
-
-// Deprecated: use request.Headers.
-func WithMinimumPacketRateGetHeaders(v map[string]string) MinimumPacketRateGetOption {
-	owned := maps.Clone(v)
-	return request.Custom(func(c *MinimumPacketRateGetOpts) error { c.Headers = maps.Clone(owned); return nil })
 }
 
 // minimumPacketRateFindCalls translates the options of one call into MinimumPacketRateFindOpts callbacks.

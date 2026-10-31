@@ -132,7 +132,7 @@ func TestPythonMinimumBandwidthGetNoFallbackAndFindMissingCompleteSearch(t *test
 			t.Fatal(value, err, calls)
 		}
 		calls = nil
-		value, err = api.FindMinimumBandwidthRecord(context.Background(), "parent", "target", rules.WithMinimumBandwidthFindIgnoreMissing(false))
+		value, err = api.FindMinimumBandwidthRecord(context.Background(), "parent", "target", request.IgnoreMissing(false))
 		if value != nil || !errors.Is(err, resource.ErrNotFound) || len(calls) != 2 {
 			t.Fatal(value, err, calls)
 		}
@@ -154,7 +154,7 @@ func TestPythonMinimumBandwidthFindBodySeedsAndListLocalFilters(t *testing.T) {
 		}
 		return nativeRuleWire(200, `{"minimum_bandwidth_rules":[{"id":"no","name":"target","min_kbps":0,"direction":"egress"},{"id":"yes","name":"target","min_kbps":1,"direction":"egress","qos_policy_id":"foreign"}]}`)
 	})
-	value, err := api.FindMinimumBandwidthRecord(context.Background(), "parent", "target", rules.WithMinimumBandwidthFindQuery("name", "target"), rules.WithMinimumBandwidthFindQuery("min_kbps", true), rules.WithMinimumBandwidthFindQuery("direction", "egress"), rules.WithMinimumBandwidthFindQuery("x_seed", "keep"), rules.WithMinimumBandwidthFindQuery("fields", []string{"id", "direction"}))
+	value, err := api.FindMinimumBandwidthRecord(context.Background(), "parent", "target", request.Query("name", "target"), request.Query("min_kbps", true), request.Query("direction", "egress"), request.Query("x_seed", "keep"), request.Query("fields", []string{"id", "direction"}))
 	if err != nil || value == nil || len(calls) != 2 || value.Resource.Body["qos_policy_id"] != nil {
 		t.Fatal(value, err, calls)
 	}
@@ -164,7 +164,7 @@ func TestPythonMinimumBandwidthFindBodySeedsAndListLocalFilters(t *testing.T) {
 	}
 	calls = nil
 	seeded := pythonMinimumBandwidthAPI(t, &calls, func(*http.Request) *http.Response { return nativeRuleWire(204, "") })
-	value, err = seeded.FindMinimumBandwidthRecord(context.Background(), "parent", "target", rules.WithMinimumBandwidthFindQuery("min_kbps", "untyped"), rules.WithMinimumBandwidthFindQuery("x_seed", false))
+	value, err = seeded.FindMinimumBandwidthRecord(context.Background(), "parent", "target", request.Query("min_kbps", "untyped"), request.Query("x_seed", false))
 	if err != nil || value.Wire != nil || value.Resource.Body["qos_policy_id"] != nil {
 		t.Fatal(value, err)
 	}
@@ -219,7 +219,7 @@ func TestPythonMinimumBandwidthListLazyQueryLocalFiltersAndUnknowns(t *testing.T
 		response.Header.Set("If-Match", "HTTP-only")
 		return response
 	})
-	seq := api.ListMinimumBandwidthRecords(context.Background(), "parent", rules.WithMinimumBandwidthListQuery("name", "demo"), rules.WithMinimumBandwidthListQuery("min_kbps", true), rules.WithMinimumBandwidthListQuery("direction", "egress"), rules.WithMinimumBandwidthListQuery("fields", func() {}), rules.WithMinimumBandwidthListQuery("tags", func() {}), rules.WithMinimumBandwidthListOpts(rules.MinimumBandwidthListOpts{Query: map[string]json.RawMessage{"name": json.RawMessage(`"demo"`), "min_kbps": json.RawMessage(`true`), "direction": json.RawMessage(`"egress"`), "ignored": json.RawMessage(`[`)}}))
+	seq := api.ListMinimumBandwidthRecords(context.Background(), "parent", request.Query("name", "demo"), request.Query("min_kbps", true), request.Query("direction", "egress"), request.Query("fields", func() {}), request.Query("tags", func() {}), rules.WithMinimumBandwidthListOpts(rules.MinimumBandwidthListOpts{Query: map[string]json.RawMessage{"name": json.RawMessage(`"demo"`), "min_kbps": json.RawMessage(`true`), "direction": json.RawMessage(`"egress"`), "ignored": json.RawMessage(`[`)}}))
 	if len(calls) != 0 {
 		t.Fatal("eager list", calls)
 	}
@@ -253,10 +253,10 @@ func TestPythonMinimumBandwidthListRawCapSinglePageAndEarlyStop(t *testing.T) {
 		})
 		opts := []rules.MinimumBandwidthListOption{}
 		if mode == "cap" {
-			opts = append(opts, rules.WithMinimumBandwidthListLimit(0), rules.WithMinimumBandwidthListMaxItems(1), rules.WithMinimumBandwidthListQuery("direction", "egress"))
+			opts = append(opts, request.Limit(0), request.MaxItems(1), request.Query("direction", "egress"))
 		}
 		if mode == "single" {
-			opts = append(opts, rules.WithMinimumBandwidthListPaginated(false))
+			opts = append(opts, request.Paginated(false))
 		}
 		count := 0
 		for value, err := range api.ListMinimumBandwidthRecords(context.Background(), "parent", opts...) {
@@ -293,7 +293,7 @@ func TestPythonMinimumBandwidthListContinuationCannotChangeParentOrFilters(t *te
 			}
 			return nativeRuleWire(200, `{"minimum_bandwidth_rules":[]}`)
 		})
-		values, err := api.AllMinimumBandwidthRecords(context.Background(), "parent", rules.WithMinimumBandwidthListLimit(1))
+		values, err := api.AllMinimumBandwidthRecords(context.Background(), "parent", request.Limit(1))
 		safe := href == "?marker=one" || strings.HasPrefix(href, "/v2.0/qos/policies/parent/")
 		if safe {
 			if err != nil || len(values) != 1 || len(calls) != 2 {
@@ -319,7 +319,7 @@ func TestPythonMinimumBandwidthListMarkerFallbackAndFalseyNumericNext(t *testing
 		}
 		return nativeRuleWire(200, `{"minimum_bandwidth_rules":[]}`)
 	})
-	values, err := api.AllMinimumBandwidthRecords(context.Background(), "parent", rules.WithMinimumBandwidthListLimit(3))
+	values, err := api.AllMinimumBandwidthRecords(context.Background(), "parent", request.Limit(3))
 	if err != nil || len(values) != 1 || len(calls) != 2 {
 		t.Fatal(values, err, calls)
 	}
@@ -513,12 +513,12 @@ func TestPythonMinimumBandwidthOptionSnapshotsAndPreflight(t *testing.T) {
 	}
 	for _, key := range []string{"qos_policy_id", "qos_policy", "qos_rule_id", "qos_rule", "ignore_missing", "name_or_id", "allow_unknown_params", "jmespath_filters", "cls", "base_path", "connection", "location", "__conflicting_attrs", "headers", "microversion", "id"} {
 		before := len(calls)
-		_, err := api.FindMinimumBandwidthRecord(context.Background(), "parent", "target", rules.WithMinimumBandwidthFindQuery(key, nil))
+		_, err := api.FindMinimumBandwidthRecord(context.Background(), "parent", "target", request.Query(key, nil))
 		if !errors.Is(err, resource.ErrInvalidOption) || len(calls) != before {
 			t.Fatal(key, err, calls)
 		}
 		if key != "id" {
-			values, err := api.AllMinimumBandwidthRecords(context.Background(), "parent", rules.WithMinimumBandwidthListQuery(key, nil))
+			values, err := api.AllMinimumBandwidthRecords(context.Background(), "parent", request.Query(key, nil))
 			if values != nil || !errors.Is(err, resource.ErrInvalidOption) || len(calls) != before {
 				t.Fatal(key, values, err, calls)
 			}
@@ -579,7 +579,7 @@ func TestPythonMinimumBandwidthVersionPhasesCleanRetryAndOwnedHeaderPolicy(t *te
 	source := api.RawClient()
 	source.Microversion = "2.0"
 	source.MoreHeaders = map[string]string{"Openstack-Api-Version": "network 2.0"}
-	value, err := api.FindMinimumBandwidthRecord(context.Background(), "parent", "target", rules.WithMinimumBandwidthFindMicroversion("2.1"))
+	value, err := api.FindMinimumBandwidthRecord(context.Background(), "parent", "target", request.Microversion("2.1"))
 	if err != nil || value == nil || !reflect.DeepEqual(versions, []string{"network 2.1", "network 2.0"}) || source.MoreHeaders["Openstack-Api-Version"] != "network 2.0" || source.Microversion != "2.0" {
 		t.Fatal(value, err, versions, source)
 	}
@@ -721,7 +721,7 @@ func TestPythonMinimumBandwidthComputedLocationCannotBeForgedInResponse(t *testi
 		return nativeRuleWire(200, `{"minimum_bandwidth_rule":{"microversion":"foreign","location":false}}`)
 	})
 	api.RawClient().Microversion = "2.2"
-	value, err := api.GetMinimumBandwidthRecord(context.Background(), "parent", "target", rules.WithMinimumBandwidthGetMicroversion("2.4"))
+	value, err := api.GetMinimumBandwidthRecord(context.Background(), "parent", "target", request.Microversion("2.4"))
 	if err != nil || value == nil || api.RawClient().Microversion != "2.2" {
 		t.Fatal(value, err)
 	}
@@ -766,7 +766,7 @@ func TestPythonMinimumBandwidthListConstructorAndUntypedDictionaryFilters(t *tes
 			}
 			return nativeRuleWire(200, body)
 		})
-		values, err := api.AllMinimumBandwidthRecords(context.Background(), "parent", rules.WithMinimumBandwidthListQuery("min_kbps", json.RawMessage(tc.filter)))
+		values, err := api.AllMinimumBandwidthRecords(context.Background(), "parent", request.Query("min_kbps", json.RawMessage(tc.filter)))
 		if tc.fault {
 			var proof *resource.ResponseError
 			if values != nil || !errors.As(err, &proof) || string(proof.Body) != body {
@@ -797,19 +797,21 @@ func TestPythonMinimumBandwidthKnownMarshalCausesPreflightAndUnknownDiscard(t *t
 	cause := errors.New("caller marshaler cause")
 	conversions := 0
 	value := pythonMinimumBandwidthMarshalValue{cause: cause, calls: &conversions}
-	find := rules.WithMinimumBandwidthFindQuery("min_kbps", value)
+	find := request.Query("min_kbps", value)
 	_, err := api.FindMinimumBandwidthRecord(context.Background(), "parent", "target", find)
 	var marshal *json.MarshalerError
 	if !errors.Is(err, resource.ErrInvalidOption) || !errors.Is(err, cause) || !errors.As(err, &marshal) || conversions != 1 || len(calls) != 0 {
 		t.Fatal(err, marshal, conversions, calls)
 	}
-	list := rules.WithMinimumBandwidthListQuery("min_kbps", value)
+	list := request.Query("min_kbps", value)
 	rows, err := api.AllMinimumBandwidthRecords(context.Background(), "parent", list)
 	if rows != nil || !errors.Is(err, resource.ErrInvalidOption) || !errors.Is(err, cause) || !errors.As(err, &marshal) || conversions != 2 || len(calls) != 0 {
 		t.Fatal(rows, err, conversions, calls)
 	}
-	rows, err = api.AllMinimumBandwidthRecords(context.Background(), "parent", rules.WithMinimumBandwidthListQuery("max_kbps", value), rules.WithMinimumBandwidthListQuery("tags", func() {}))
-	if err != nil || len(rows) != 0 || conversions != 2 || len(calls) != 1 {
+	// request.Query marshals when constructed, so an unknown kwarg is
+	// marshaled once even though the list then discards it and its failure.
+	rows, err = api.AllMinimumBandwidthRecords(context.Background(), "parent", request.Query("max_kbps", value), request.Query("tags", func() {}))
+	if err != nil || len(rows) != 0 || conversions != 3 || len(calls) != 1 {
 		t.Fatal(rows, err, conversions, calls)
 	}
 }

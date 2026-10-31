@@ -18,8 +18,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSBandwidthLimitHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSBandwidthLimitMicroversion`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ProxyBandwidthLimitRecords`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitProxyQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitListBasePath`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/request.BasePath`
 
@@ -57,8 +55,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSBandwidthLimitHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSBandwidthLimitMicroversion`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ProxyBandwidthLimitRecords`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitProxyQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitListBasePath`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/request.BasePath`
 

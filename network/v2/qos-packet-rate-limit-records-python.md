@@ -14,10 +14,6 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.FindPacketRateLimitRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateLimitFindOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateLimitFindIgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateLimitFindQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateLimitFindMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateLimitFindHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
@@ -63,8 +59,6 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.GetPacketRateLimitRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateLimitGetOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateLimitGetMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateLimitGetHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 
@@ -107,13 +101,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ListPacketRateLimitRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.AllPacketRateLimitRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateLimitListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateLimitListQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateLimitListMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateLimitListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateLimitListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateLimitListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateLimitListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateLimitListPaginated`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
@@ -122,7 +109,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
 - `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 
-- Lazy list uses fixed literal parent without lookup. Only default limit/marker transpose to server query; Body id/name/direction/bandwidth fields filter locally. Unknown kwargs including fields/tags are discarded before transport-value evaluation by the list Query option, even function/malformed unknown values; request.Query marshals each value once when constructed and never reports a discarded failure.
+- Lazy list uses fixed literal parent without lookup. Only default limit/marker transpose to server query; Body id/name/direction/bandwidth fields filter locally. Unknown kwargs including fields/tags are discarded, even function/malformed unknown values; request.Query marshals each value once when constructed and never reports a discarded failure.
   Tests: `network/v2/extensions/qos/rules/python_packet_rate_limit_contracts_test.go:TestPythonPacketRateLimitListLazyQueryLocalFiltersAndUnknowns`, `network/v2/extensions/qos/rules/python_packet_rate_limit_contracts_test.go:TestPythonPacketRateLimitListRawCapSinglePageAndEarlyStop`.
 - Source list injects URI parent then consumes it outside Body; Wire owns foreign original row value and whole page proof. Positive raw cap counts before filtering, limit=0 plus cap creates limit hint; single page and early break avoid another request.
   Tests: `network/v2/extensions/qos/rules/python_packet_rate_limit_contracts_test.go:TestPythonPacketRateLimitListLazyQueryLocalFiltersAndUnknowns`, `network/v2/extensions/qos/rules/python_packet_rate_limit_contracts_test.go:TestPythonPacketRateLimitListRawCapSinglePageAndEarlyStop`.

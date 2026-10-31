@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"maps"
 	"slices"
 	"strings"
 	"unicode"
@@ -49,19 +48,7 @@ func WithPacketRateLimitFindOpts(v PacketRateLimitFindOpts) PacketRateLimitFindO
 	return request.Custom(func(c *PacketRateLimitFindOpts) error { *c = copyPacketRateLimitFind(owned); return nil })
 }
 
-// Deprecated: use request.IgnoreMissing.
-func WithPacketRateLimitFindIgnoreMissing(v bool) PacketRateLimitFindOption {
-	return request.Custom(func(c *PacketRateLimitFindOpts) error { x := v; c.IgnoreMissing = &x; return nil })
-}
-
-// Deprecated: use request.Query.
-func WithPacketRateLimitFindQuery(key string, value any) PacketRateLimitFindOption {
-	raw, err := json.Marshal(value)
-	return request.Custom(packetRateLimitFindQuery(key, bytes.Clone(raw), err))
-}
-
-// packetRateLimitFindQuery applies one marshaled value for WithPacketRateLimitFindQuery and the shared
-// request calls that carry the same key.
+// packetRateLimitFindQuery applies one marshaled request.Query value.
 func packetRateLimitFindQuery(key string, owned json.RawMessage, err error) func(*PacketRateLimitFindOpts) error {
 	return func(c *PacketRateLimitFindOpts) error {
 		if err != nil {
@@ -76,17 +63,6 @@ func packetRateLimitFindQuery(key string, owned json.RawMessage, err error) func
 		c.Query[key] = bytes.Clone(owned)
 		return nil
 	}
-}
-
-// Deprecated: use request.Microversion.
-func WithPacketRateLimitFindMicroversion(v string) PacketRateLimitFindOption {
-	return request.Custom(func(c *PacketRateLimitFindOpts) error { x := v; c.Microversion = &x; return nil })
-}
-
-// Deprecated: use request.Headers.
-func WithPacketRateLimitFindHeaders(v map[string]string) PacketRateLimitFindOption {
-	owned := maps.Clone(v)
-	return request.Custom(func(c *PacketRateLimitFindOpts) error { c.Headers = maps.Clone(owned); return nil })
 }
 
 // PacketRateLimitListOpts owns list kwargs. Query includes declared server fields,
@@ -148,18 +124,7 @@ func packetRateLimitListIgnores(key string) bool {
 	return true
 }
 
-// Deprecated: use request.Query.
-func WithPacketRateLimitListQuery(key string, value any) PacketRateLimitListOption {
-	// Source discards unknown kwargs before evaluating their transport value.
-	if packetRateLimitListIgnores(key) {
-		return request.Custom(func(*PacketRateLimitListOpts) error { return nil })
-	}
-	raw, err := json.Marshal(value)
-	return request.Custom(packetRateLimitListQuery(key, bytes.Clone(raw), err))
-}
-
-// packetRateLimitListQuery applies one marshaled value for WithPacketRateLimitListQuery and the shared
-// request calls that carry the same key.
+// packetRateLimitListQuery applies one marshaled request.Query value.
 func packetRateLimitListQuery(key string, owned json.RawMessage, err error) func(*PacketRateLimitListOpts) error {
 	if packetRateLimitListIgnores(key) {
 		return func(*PacketRateLimitListOpts) error { return nil }
@@ -177,37 +142,6 @@ func packetRateLimitListQuery(key string, owned json.RawMessage, err error) func
 		c.Query[key] = bytes.Clone(owned)
 		return nil
 	}
-}
-
-// Deprecated: use request.Microversion.
-func WithPacketRateLimitListMicroversion(v string) PacketRateLimitListOption {
-	return request.Custom(func(c *PacketRateLimitListOpts) error { x := v; c.Microversion = &x; return nil })
-}
-
-// Deprecated: use request.Headers.
-func WithPacketRateLimitListHeaders(v map[string]string) PacketRateLimitListOption {
-	owned := maps.Clone(v)
-	return request.Custom(func(c *PacketRateLimitListOpts) error { c.Headers = maps.Clone(owned); return nil })
-}
-
-// Deprecated: use request.Limit.
-func WithPacketRateLimitListLimit(v int) PacketRateLimitListOption {
-	return WithPacketRateLimitListQuery("limit", v)
-}
-
-// Deprecated: use request.Marker.
-func WithPacketRateLimitListMarker(v string) PacketRateLimitListOption {
-	return WithPacketRateLimitListQuery("marker", v)
-}
-
-// Deprecated: use request.MaxItems.
-func WithPacketRateLimitListMaxItems(v int) PacketRateLimitListOption {
-	return WithPacketRateLimitListQuery("max_items", v)
-}
-
-// Deprecated: use request.Paginated.
-func WithPacketRateLimitListPaginated(v bool) PacketRateLimitListOption {
-	return WithPacketRateLimitListQuery("paginated", v)
 }
 
 // PacketRateLimitGetOpts adds operation-owned safe headers and microversion.
@@ -237,17 +171,6 @@ func copyPacketRateLimitGet(v PacketRateLimitGetOpts) PacketRateLimitGetOpts {
 func WithPacketRateLimitGetOpts(v PacketRateLimitGetOpts) PacketRateLimitGetOption {
 	owned := copyPacketRateLimitGet(v)
 	return request.Custom(func(c *PacketRateLimitGetOpts) error { *c = copyPacketRateLimitGet(owned); return nil })
-}
-
-// Deprecated: use request.Microversion.
-func WithPacketRateLimitGetMicroversion(v string) PacketRateLimitGetOption {
-	return request.Custom(func(c *PacketRateLimitGetOpts) error { x := v; c.Microversion = &x; return nil })
-}
-
-// Deprecated: use request.Headers.
-func WithPacketRateLimitGetHeaders(v map[string]string) PacketRateLimitGetOption {
-	owned := maps.Clone(v)
-	return request.Custom(func(c *PacketRateLimitGetOpts) error { c.Headers = maps.Clone(owned); return nil })
 }
 
 // packetRateLimitFindCalls translates the options of one call into PacketRateLimitFindOpts callbacks.
