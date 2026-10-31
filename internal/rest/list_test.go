@@ -546,7 +546,7 @@ func TestListResponseAndTransportErrorsKeepEvidence(t *testing.T) {
 		t.Fatal(err)
 	}
 	spec.Client.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
-		return &http.Response{StatusCode: 200, Header: http.Header{"X-Evidence": {"kept"}}, Body: &failedListBody{prefix: []byte(`{"items":`), cause: cause}, Request: r}, nil
+		return &http.Response{StatusCode: 200, Header: http.Header{"X-Evidence": {"kept"}}, Body: &testcloud.Body{Data: `{"items":`, ReadErr: cause}, Request: r}, nil
 	})
 	_, err := collectList(context.Background(), spec, nil)
 	var response *resource.ResponseError
@@ -554,21 +554,6 @@ func TestListResponseAndTransportErrorsKeepEvidence(t *testing.T) {
 		t.Fatalf("partial read lost: %v", err)
 	}
 }
-
-type failedListBody struct {
-	prefix []byte
-	cause  error
-}
-
-func (b *failedListBody) Read(p []byte) (int, error) {
-	n := copy(p, b.prefix)
-	b.prefix = b.prefix[n:]
-	if len(b.prefix) == 0 {
-		return n, b.cause
-	}
-	return n, nil
-}
-func (*failedListBody) Close() error { return nil }
 
 func TestListPreflightEveryPageAndCancellationStopsHTTP(t *testing.T) {
 	var calls atomic.Int32
