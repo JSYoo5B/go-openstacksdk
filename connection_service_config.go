@@ -29,12 +29,6 @@ var officialServiceTypes = map[string]bool{
 	"root-cause-analysis": true, "search": true, "shared-file-system": true, "workflow": true,
 }
 
-// knownServiceTypeAliases lists the aliases of the same data that end in a
-// version digit. keystoneauth derives an implied major version from them.
-var knownServiceTypeAliases = map[string]bool{
-	"volumev2": true, "volumev3": true, "sharev2": true, "workflowv2": true,
-}
-
 // serviceFlagKey mirrors CloudRegion.has_service's key normalization.
 func serviceFlagKey(serviceType string) string {
 	return strings.ReplaceAll(strings.ToLower(serviceType), "-", "_")
