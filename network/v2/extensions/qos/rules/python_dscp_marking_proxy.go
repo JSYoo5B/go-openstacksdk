@@ -32,10 +32,19 @@ type DSCPMarkingProxyResult struct {
 	JSON  json.RawMessage
 }
 
-// dscpMarkingProxyQuery consumes Source formal values (request.Query) at their call
+// WithDSCPMarkingProxyQuery consumes Source formal values at their option
 // position, so later concrete headers/version/base-path choices remain last-win.
-func dscpMarkingProxyQuery(key string, owned json.RawMessage, err error) func(*dscpMarkingListState) error {
-	return func(c *dscpMarkingListState) error {
+//
+// Deprecated: use request.Query.
+func WithDSCPMarkingProxyQuery(key string, value any) DSCPMarkingListOption {
+	raw, err := json.Marshal(value)
+	return request.Custom(dscpMarkingProxyQuery(key, bytes.Clone(raw), err))
+}
+
+// dscpMarkingProxyQuery applies one marshaled value for WithDSCPMarkingProxyQuery and the shared
+// request calls that carry the same key.
+func dscpMarkingProxyQuery(key string, owned json.RawMessage, err error) func(*DSCPMarkingListOpts) error {
+	return func(c *DSCPMarkingListOpts) error {
 		if err != nil {
 			return err
 		}
@@ -66,22 +75,21 @@ func dscpMarkingProxyQuery(key string, owned json.RawMessage, err error) func(*d
 	}
 }
 
-func dscpMarkingProxyCalls(calls []request.ListCall) []func(*dscpMarkingListState) error {
-	return qosCalls(calls, dscpMarkingListFields, dscpMarkingProxyQuery, true)
-}
-
 // ProxyDSCPMarkingRecords preserves Source Proxy's formal kwargs and opaque
 // generator JMESPath evaluation. Existing typed list keeps its legacy policy.
-// Here request.Query, request.Limit, request.Marker, request.MaxItems and
-// request.Paginated are Proxy kwargs; Query "headers", "microversion" and
-// "base_path" values replace those controls at their call position.
-func (a *API) ProxyDSCPMarkingRecords(ctx context.Context, parent string, opts DSCPMarkingListOpts, calls ...request.ListCall) (*DSCPMarkingProxyResult, error) {
+//
+// Calls: request.Header, request.Headers, request.Microversion, request.Query,
+// request.BasePath, request.Limit, request.Marker, request.MaxItems and
+// request.Paginated. Here request.Query and the paging calls are Proxy kwargs,
+// so Query "headers", "microversion" and "base_path" replace those controls at
+// their position.
+func (a *API) ProxyDSCPMarkingRecords(ctx context.Context, parent string, options ...DSCPMarkingListOption) (*DSCPMarkingProxyResult, error) {
 	const op = "ProxyDSCPMarkingRecords"
 	engine, err := a.dscpMarkingEnginePolicy(ctx, parent, true)
 	if err != nil {
 		return nil, dscpMarkingWrap(ctx, op, err)
 	}
-	cfg, err := applyDSCPMarkingOptions(ctx, engine, dscpMarkingListState{Query: opts.Query}, copyDSCPMarkingList, dscpMarkingProxyCalls(slices.Clone(calls)))
+	cfg, err := applyDSCPMarkingOptions(ctx, engine, DSCPMarkingListOpts{}, copyDSCPMarkingList, dscpMarkingProxyCalls(slices.Clone(options)))
 	if err != nil {
 		return nil, dscpMarkingWrap(ctx, op, err)
 	}
@@ -219,4 +227,11 @@ func dscpMarkingProxyPath(path, parent string, attrs map[string]json.RawMessage)
 		i = end + 2
 	}
 	return out.String(), nil
+}
+
+// dscpMarkingProxyCalls translates the options of one call into DSCPMarkingListOpts callbacks.
+func dscpMarkingProxyCalls(calls []request.ListCall) []func(*DSCPMarkingListOpts) error {
+	return qosCalls(calls, func(s *DSCPMarkingListOpts) qosCallFields {
+		return qosCallFields{headers: &s.Headers, microversion: &s.Microversion, basePath: &s.BasePath}
+	}, dscpMarkingProxyQuery, true)
 }

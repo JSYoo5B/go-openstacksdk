@@ -15,6 +15,11 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.New`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.RawClient`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.FindDSCPMarkingRecord`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingFindOpts`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingFindQuery`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingFindHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingFindMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingFindIgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
@@ -56,7 +61,10 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.New`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.RawClient`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.GetDSCPMarkingRecord`
-- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingGetOpts`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingGetQuery`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingGetHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingGetMicroversion`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
@@ -92,6 +100,15 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.New`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.RawClient`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ListDSCPMarkingRecords`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingListOpts`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingListHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingListMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingListLimit`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingListMarker`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingListMaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.AllDSCPMarkingRecords`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
@@ -99,7 +116,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.Marker`
 - `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
 - `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.AllDSCPMarkingRecords`
 
 - Lazy bound policy list defaults Accept application/json. Only inherited limit/marker are server queries; class-declared id/name/dscp_mark filter locally and unknowns are discarded before marshaling. Raw MaxItems includes filtered rows and supplies falsey-limit hint; Source URI is fixed independently of physical row qos_policy_id. Declared DSCP mark is untyped and exact false/null/zero/large extension values remain owned.
   Tests: `network/v2/extensions/qos/rules/python_dscp_marking_contracts_test.go:TestPythonDSCPMarkingListServerClassificationRawCapAndOwnedURI`, `network/v2/extensions/qos/rules/python_dscp_marking_contracts_test.go:TestPythonDSCPMarkingListOrderedDictionaryFiltersAndExactNumbers`.
@@ -212,18 +228,18 @@ func main() {
         show(record)
     case "find":
         record, err := network.QoSRules.FindDSCPMarkingRecord(ctx, *policy, *rule,
-            rules.DSCPMarkingFindOpts{}, request.IgnoreMissing(!*strict))
+            request.IgnoreMissing(!*strict))
         if err != nil { log.Fatal(err) }
         show(record)
     case "list":
-        options := []request.ListCall{
+        options := []rules.DSCPMarkingListOption{
             request.Limit(*pageSize),
             request.MaxItems(*maxItems),
         }
         if *mark >= 0 {
             options = append(options, request.Query("dscp_mark", *mark))
         }
-        for record, err := range network.QoSRules.ListDSCPMarkingRecords(ctx, *policy, rules.DSCPMarkingListOpts{}, options...) {
+        for record, err := range network.QoSRules.ListDSCPMarkingRecords(ctx, *policy, options...) {
             if err != nil { log.Fatal(err) }
             show(record)
         }

@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"maps"
 	"net/http"
 	"slices"
 	"strings"
@@ -19,38 +20,46 @@ import (
 
 // PacketRateRuleMutationOpts owns the provided Source attributes of a
 // minimum-packet-rate or packet-rate-limit rule create/update. Absent attrs
-// are not sent. Fields apply in sorted key order before ordered request.Field
-// calls, which win on collision. Both rule classes allow unknown Body
-// attributes, so undeclared names are sent unchanged. request.Header(s) and
-// request.Microversion are explicit Go conveniences.
+// are not sent; Headers and Microversion are explicit Go conveniences.
 type PacketRateRuleMutationOpts struct {
-	Fields map[string]json.RawMessage
-}
-
-type packetRateMutationState struct {
 	Fields       map[string]json.RawMessage
 	Headers      map[string]string
 	Microversion *string
 	order        []string
 }
 
-func packetRateMutationPolicy(v packetRateMutationState) neutronfind.Options {
+// PacketRateRuleMutationOption is one option of an operation over
+// PacketRateRuleMutationOpts: a With* function of this package, request.Custom
+// over *PacketRateRuleMutationOpts, or a shared request.WriteCall value. A nil
+// option fails with resource.ErrInvalidOption before HTTP.
+type PacketRateRuleMutationOption = request.WriteCall
+
+func packetRateMutationPolicy(v PacketRateRuleMutationOpts) neutronfind.Options {
 	return neutronfind.Options{Query: v.Fields, Headers: v.Headers, Microversion: v.Microversion, Order: v.order}
 }
-func copyPacketRateMutation(v packetRateMutationState) packetRateMutationState {
+func copyPacketRateMutation(v PacketRateRuleMutationOpts) PacketRateRuleMutationOpts {
 	owned := neutronfind.CloneOptions(packetRateMutationPolicy(v))
 	v.Fields, v.Headers, v.Microversion, v.order = owned.Query, owned.Headers, owned.Microversion, owned.Order
 	return v
 }
-func packetRateMutationCalls(calls []request.WriteCall) []func(*packetRateMutationState) error {
-	return qosCalls(calls, func(s *packetRateMutationState) qosCallFields {
-		return qosCallFields{headers: &s.Headers, microversion: &s.Microversion}
-	}, packetRateRuleField, false)
+func WithPacketRateRuleMutationOpts(v PacketRateRuleMutationOpts) PacketRateRuleMutationOption {
+	owned := copyPacketRateMutation(v)
+	return request.Custom(func(c *PacketRateRuleMutationOpts) error { *c = copyPacketRateMutation(owned); return nil })
 }
 
-// packetRateRuleField sets one attribute from request.Field.
-func packetRateRuleField(key string, owned json.RawMessage, err error) func(*packetRateMutationState) error {
-	return func(c *packetRateMutationState) error {
+// WithPacketRateRuleField sets one attribute. Both rule classes allow unknown
+// Body attributes, so undeclared names are sent unchanged.
+//
+// Deprecated: use request.Field.
+func WithPacketRateRuleField(key string, value any) PacketRateRuleMutationOption {
+	raw, err := json.Marshal(value)
+	return request.Custom(packetRateRuleField(key, bytes.Clone(raw), err))
+}
+
+// packetRateRuleField applies one marshaled value for WithPacketRateRuleField and the shared
+// request calls that carry the same key.
+func packetRateRuleField(key string, owned json.RawMessage, err error) func(*PacketRateRuleMutationOpts) error {
+	return func(c *PacketRateRuleMutationOpts) error {
 		if err != nil {
 			return errors.Join(packetRateMutationInvalid("attribute %q is not JSON", key), err)
 		}
@@ -65,27 +74,54 @@ func packetRateRuleField(key string, owned json.RawMessage, err error) func(*pac
 	}
 }
 
-// packetRateDeleteState defaults IgnoreMissing to true, as both Source
-// delete_qos_*_rule methods do. Calls: request.IgnoreMissing,
-// request.Microversion, request.Header(s).
-type packetRateDeleteState struct {
+// Deprecated: use request.Headers.
+func WithPacketRateRuleHeaders(v map[string]string) PacketRateRuleMutationOption {
+	owned := maps.Clone(v)
+	return request.Custom(func(c *PacketRateRuleMutationOpts) error { c.Headers = maps.Clone(owned); return nil })
+}
+
+// Deprecated: use request.Microversion.
+func WithPacketRateRuleMicroversion(v string) PacketRateRuleMutationOption {
+	return request.Custom(func(c *PacketRateRuleMutationOpts) error { x := v; c.Microversion = &x; return nil })
+}
+
+// PacketRateRuleDeleteOpts defaults IgnoreMissing to true, as both Source
+// delete_qos_*_rule methods do.
+type PacketRateRuleDeleteOpts struct {
 	IgnoreMissing *bool
 	Headers       map[string]string
 	Microversion  *string
 }
 
-func packetRateDeletePolicy(v packetRateDeleteState) neutronfind.Options {
+// PacketRateRuleDeleteOption is one option of an operation over
+// PacketRateRuleDeleteOpts: a With* function of this package, request.Custom
+// over *PacketRateRuleDeleteOpts, or a shared request.DeleteCall value. A nil
+// option fails with resource.ErrInvalidOption before HTTP.
+type PacketRateRuleDeleteOption = request.DeleteCall
+
+func packetRateDeletePolicy(v PacketRateRuleDeleteOpts) neutronfind.Options {
 	return neutronfind.Options{IgnoreMissing: v.IgnoreMissing, Headers: v.Headers, Microversion: v.Microversion}
 }
-func copyPacketRateDelete(v packetRateDeleteState) packetRateDeleteState {
+func copyPacketRateDelete(v PacketRateRuleDeleteOpts) PacketRateRuleDeleteOpts {
 	owned := neutronfind.CloneOptions(packetRateDeletePolicy(v))
 	v.IgnoreMissing, v.Headers, v.Microversion = owned.IgnoreMissing, owned.Headers, owned.Microversion
 	return v
 }
-func packetRateDeleteCalls(calls []request.DeleteCall) []func(*packetRateDeleteState) error {
-	return qosCalls(calls, func(s *packetRateDeleteState) qosCallFields {
-		return qosCallFields{headers: &s.Headers, microversion: &s.Microversion, ignore: &s.IgnoreMissing}
-	}, nil, false)
+
+// Deprecated: use request.IgnoreMissing.
+func WithPacketRateRuleDeleteIgnoreMissing(v bool) PacketRateRuleDeleteOption {
+	return request.Custom(func(c *PacketRateRuleDeleteOpts) error { x := v; c.IgnoreMissing = &x; return nil })
+}
+
+// Deprecated: use request.Headers.
+func WithPacketRateRuleDeleteHeaders(v map[string]string) PacketRateRuleDeleteOption {
+	owned := maps.Clone(v)
+	return request.Custom(func(c *PacketRateRuleDeleteOpts) error { c.Headers = maps.Clone(owned); return nil })
+}
+
+// Deprecated: use request.Microversion.
+func WithPacketRateRuleDeleteMicroversion(v string) PacketRateRuleDeleteOption {
+	return request.Custom(func(c *PacketRateRuleDeleteOpts) error { x := v; c.Microversion = &x; return nil })
 }
 
 // PacketRateRuleDeleteResult exposes the actual bodyless DELETE receipt,
@@ -174,13 +210,14 @@ func packetRateTransportPolicy(policy neutronfind.Options) neutronfind.Options {
 	return owned
 }
 
-func packetRateMutationOptions(ctx context.Context, engine *neutronfind.Engine, opts PacketRateRuleMutationOpts, calls []request.WriteCall) (neutronfind.Options, error) {
-	policy, err := applyMinimumPacketRateOptions(ctx, engine, packetRateMutationState{Fields: opts.Fields}, copyPacketRateMutation, packetRateMutationCalls(calls))
+func packetRateMutationOptions(ctx context.Context, engine *neutronfind.Engine, options []PacketRateRuleMutationOption) (neutronfind.Options, error) {
+	callbacks := packetRateMutationCalls(options)
+	policy, err := applyMinimumPacketRateOptions(ctx, engine, PacketRateRuleMutationOpts{}, copyPacketRateMutation, callbacks)
 	return packetRateMutationPolicy(policy), err
 }
 
-func packetRateCreate(ctx context.Context, engine *neutronfind.Engine, profile neutronfind.Profile, opts PacketRateRuleMutationOpts, calls []request.WriteCall) (*neutronfind.Record, error) {
-	prepared, err := packetRateMutationOptions(ctx, engine, opts, calls)
+func packetRateCreate(ctx context.Context, engine *neutronfind.Engine, profile neutronfind.Profile, options []PacketRateRuleMutationOption) (*neutronfind.Record, error) {
+	prepared, err := packetRateMutationOptions(ctx, engine, options)
 	if err != nil {
 		return nil, err
 	}
@@ -191,8 +228,8 @@ func packetRateCreate(ctx context.Context, engine *neutronfind.Engine, profile n
 	return engine.Mutate(ctx, http.MethodPost, "", body, seed, packetRateTransportPolicy(prepared))
 }
 
-func packetRateUpdate(ctx context.Context, engine *neutronfind.Engine, profile neutronfind.Profile, id string, opts PacketRateRuleMutationOpts, calls []request.WriteCall) (*neutronfind.Record, error) {
-	prepared, err := packetRateMutationOptions(ctx, engine, opts, calls)
+func packetRateUpdate(ctx context.Context, engine *neutronfind.Engine, profile neutronfind.Profile, id string, options []PacketRateRuleMutationOption) (*neutronfind.Record, error) {
+	prepared, err := packetRateMutationOptions(ctx, engine, options)
 	if err != nil {
 		return nil, err
 	}
@@ -210,8 +247,9 @@ func packetRateUpdate(ctx context.Context, engine *neutronfind.Engine, profile n
 	return engine.Mutate(ctx, http.MethodPut, id, body, seed, packetRateTransportPolicy(prepared))
 }
 
-func packetRateDelete(ctx context.Context, engine *neutronfind.Engine, id string, calls []request.DeleteCall) (*PacketRateRuleDeleteResult, error) {
-	policy, err := applyMinimumPacketRateOptions(ctx, engine, packetRateDeleteState{}, copyPacketRateDelete, packetRateDeleteCalls(calls))
+func packetRateDelete(ctx context.Context, engine *neutronfind.Engine, id string, options []PacketRateRuleDeleteOption) (*PacketRateRuleDeleteResult, error) {
+	callbacks := packetRateDeleteCalls(options)
+	policy, err := applyMinimumPacketRateOptions(ctx, engine, PacketRateRuleDeleteOpts{}, copyPacketRateDelete, callbacks)
 	if err == nil {
 		err = packetRateMutationID(id)
 	}
@@ -236,73 +274,105 @@ func packetRateDelete(ctx context.Context, engine *neutronfind.Engine, id string
 // CreateMinimumPacketRateRecord POSTs the provided attributes under
 // minimum_packet_rate_rule for a literal QoS policy, as
 // create_qos_minimum_packet_rate_rule(qos_policy, **attrs).
-func (a *API) CreateMinimumPacketRateRecord(ctx context.Context, policyID string, opts PacketRateRuleMutationOpts, calls ...request.WriteCall) (*MinimumPacketRateRecord, error) {
+//
+// Calls: request.Header, request.Headers, request.Microversion and
+// request.Field.
+func (a *API) CreateMinimumPacketRateRecord(ctx context.Context, policyID string, options ...PacketRateRuleMutationOption) (*MinimumPacketRateRecord, error) {
 	const op = "CreateMinimumPacketRateRecord"
 	engine, err := a.minimumPacketRateEngine(ctx, policyID)
 	if err != nil {
 		return nil, minimumPacketRateWrap(ctx, op, err)
 	}
-	value, err := packetRateCreate(ctx, engine, minimumPacketRateRecordProfile, opts, slices.Clone(calls))
+	value, err := packetRateCreate(ctx, engine, minimumPacketRateRecordProfile, slices.Clone(options))
 	return minimumPacketRateRecord(value, policyID), minimumPacketRateWrap(ctx, op, err)
 }
 
 // UpdateMinimumPacketRateRecord PUTs only the provided attributes. No
 // attribute returns the seed view without HTTP, as Resource.commit does.
-func (a *API) UpdateMinimumPacketRateRecord(ctx context.Context, policyID, ruleID string, opts PacketRateRuleMutationOpts, calls ...request.WriteCall) (*MinimumPacketRateRecord, error) {
+//
+// Calls: request.Header, request.Headers, request.Microversion and
+// request.Field.
+func (a *API) UpdateMinimumPacketRateRecord(ctx context.Context, policyID, ruleID string, options ...PacketRateRuleMutationOption) (*MinimumPacketRateRecord, error) {
 	const op = "UpdateMinimumPacketRateRecord"
 	engine, err := a.minimumPacketRateEngine(ctx, policyID)
 	if err != nil {
 		return nil, minimumPacketRateWrap(ctx, op, err)
 	}
-	value, err := packetRateUpdate(ctx, engine, minimumPacketRateRecordProfile, ruleID, opts, slices.Clone(calls))
+	value, err := packetRateUpdate(ctx, engine, minimumPacketRateRecordProfile, ruleID, slices.Clone(options))
 	return minimumPacketRateRecord(value, policyID), minimumPacketRateWrap(ctx, op, err)
 }
 
 // DeleteMinimumPacketRateRecord sends a bodyless DELETE and ignores only a
 // clean actual 404 by default.
-func (a *API) DeleteMinimumPacketRateRecord(ctx context.Context, policyID, ruleID string, calls ...request.DeleteCall) (*PacketRateRuleDeleteResult, error) {
+//
+// Calls: request.Header, request.Headers, request.Microversion and
+// request.IgnoreMissing.
+func (a *API) DeleteMinimumPacketRateRecord(ctx context.Context, policyID, ruleID string, options ...PacketRateRuleDeleteOption) (*PacketRateRuleDeleteResult, error) {
 	const op = "DeleteMinimumPacketRateRecord"
 	engine, err := a.minimumPacketRateEngine(ctx, policyID)
 	if err != nil {
 		return nil, minimumPacketRateWrap(ctx, op, err)
 	}
-	result, err := packetRateDelete(ctx, engine, ruleID, slices.Clone(calls))
+	result, err := packetRateDelete(ctx, engine, ruleID, slices.Clone(options))
 	return result, minimumPacketRateWrap(ctx, op, err)
 }
 
 // CreatePacketRateLimitRecord POSTs the provided attributes under
 // packet_rate_limit_rule for a literal QoS policy, as
 // create_qos_packet_rate_limit_rule(qos_policy, **attrs).
-func (a *API) CreatePacketRateLimitRecord(ctx context.Context, policyID string, opts PacketRateRuleMutationOpts, calls ...request.WriteCall) (*PacketRateLimitRecord, error) {
+//
+// Calls: request.Header, request.Headers, request.Microversion and
+// request.Field.
+func (a *API) CreatePacketRateLimitRecord(ctx context.Context, policyID string, options ...PacketRateRuleMutationOption) (*PacketRateLimitRecord, error) {
 	const op = "CreatePacketRateLimitRecord"
 	engine, err := a.packetRateLimitEngine(ctx, policyID)
 	if err != nil {
 		return nil, packetRateLimitWrap(ctx, op, err)
 	}
-	value, err := packetRateCreate(ctx, engine, packetRateLimitRecordProfile, opts, slices.Clone(calls))
+	value, err := packetRateCreate(ctx, engine, packetRateLimitRecordProfile, slices.Clone(options))
 	return packetRateLimitRecord(value, policyID), packetRateLimitWrap(ctx, op, err)
 }
 
 // UpdatePacketRateLimitRecord PUTs only the provided attributes. No attribute
 // returns the seed view without HTTP, as Resource.commit does.
-func (a *API) UpdatePacketRateLimitRecord(ctx context.Context, policyID, ruleID string, opts PacketRateRuleMutationOpts, calls ...request.WriteCall) (*PacketRateLimitRecord, error) {
+//
+// Calls: request.Header, request.Headers, request.Microversion and
+// request.Field.
+func (a *API) UpdatePacketRateLimitRecord(ctx context.Context, policyID, ruleID string, options ...PacketRateRuleMutationOption) (*PacketRateLimitRecord, error) {
 	const op = "UpdatePacketRateLimitRecord"
 	engine, err := a.packetRateLimitEngine(ctx, policyID)
 	if err != nil {
 		return nil, packetRateLimitWrap(ctx, op, err)
 	}
-	value, err := packetRateUpdate(ctx, engine, packetRateLimitRecordProfile, ruleID, opts, slices.Clone(calls))
+	value, err := packetRateUpdate(ctx, engine, packetRateLimitRecordProfile, ruleID, slices.Clone(options))
 	return packetRateLimitRecord(value, policyID), packetRateLimitWrap(ctx, op, err)
 }
 
 // DeletePacketRateLimitRecord sends a bodyless DELETE and ignores only a
 // clean actual 404 by default.
-func (a *API) DeletePacketRateLimitRecord(ctx context.Context, policyID, ruleID string, calls ...request.DeleteCall) (*PacketRateRuleDeleteResult, error) {
+//
+// Calls: request.Header, request.Headers, request.Microversion and
+// request.IgnoreMissing.
+func (a *API) DeletePacketRateLimitRecord(ctx context.Context, policyID, ruleID string, options ...PacketRateRuleDeleteOption) (*PacketRateRuleDeleteResult, error) {
 	const op = "DeletePacketRateLimitRecord"
 	engine, err := a.packetRateLimitEngine(ctx, policyID)
 	if err != nil {
 		return nil, packetRateLimitWrap(ctx, op, err)
 	}
-	result, err := packetRateDelete(ctx, engine, ruleID, slices.Clone(calls))
+	result, err := packetRateDelete(ctx, engine, ruleID, slices.Clone(options))
 	return result, packetRateLimitWrap(ctx, op, err)
+}
+
+// packetRateMutationCalls translates the options of one call into PacketRateRuleMutationOpts callbacks.
+func packetRateMutationCalls(calls []request.WriteCall) []func(*PacketRateRuleMutationOpts) error {
+	return qosCalls(calls, func(s *PacketRateRuleMutationOpts) qosCallFields {
+		return qosCallFields{headers: &s.Headers, microversion: &s.Microversion}
+	}, packetRateRuleField, false)
+}
+
+// packetRateDeleteCalls translates the options of one call into PacketRateRuleDeleteOpts callbacks.
+func packetRateDeleteCalls(calls []request.DeleteCall) []func(*PacketRateRuleDeleteOpts) error {
+	return qosCalls(calls, func(s *PacketRateRuleDeleteOpts) qosCallFields {
+		return qosCallFields{headers: &s.Headers, microversion: &s.Microversion, ignore: &s.IgnoreMissing}
+	}, nil, false)
 }

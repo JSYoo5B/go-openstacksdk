@@ -32,10 +32,19 @@ type MinimumBandwidthProxyResult struct {
 	JSON  json.RawMessage
 }
 
-// minimumBandwidthProxyQuery consumes Source formal values (request.Query) at their call
+// WithMinimumBandwidthProxyQuery consumes Source formal values at their option
 // position, so later concrete headers/version/base-path choices remain last-win.
-func minimumBandwidthProxyQuery(key string, owned json.RawMessage, err error) func(*minimumBandwidthListState) error {
-	return func(c *minimumBandwidthListState) error {
+//
+// Deprecated: use request.Query.
+func WithMinimumBandwidthProxyQuery(key string, value any) MinimumBandwidthListOption {
+	raw, err := json.Marshal(value)
+	return request.Custom(minimumBandwidthProxyQuery(key, bytes.Clone(raw), err))
+}
+
+// minimumBandwidthProxyQuery applies one marshaled value for WithMinimumBandwidthProxyQuery and the shared
+// request calls that carry the same key.
+func minimumBandwidthProxyQuery(key string, owned json.RawMessage, err error) func(*MinimumBandwidthListOpts) error {
+	return func(c *MinimumBandwidthListOpts) error {
 		if err != nil {
 			return err
 		}
@@ -66,22 +75,22 @@ func minimumBandwidthProxyQuery(key string, owned json.RawMessage, err error) fu
 	}
 }
 
-func minimumBandwidthProxyCalls(calls []request.ListCall) []func(*minimumBandwidthListState) error {
-	return qosCalls(calls, minimumBandwidthListFields, minimumBandwidthProxyQuery, true)
-}
-
 // ProxyMinimumBandwidthRecords preserves Source Proxy's formal kwargs and opaque
 // generator JMESPath evaluation. Existing typed list keeps its legacy policy.
-// Here request.Query, request.Limit, request.Marker, request.MaxItems and
-// request.Paginated are Proxy kwargs; Query "headers", "microversion" and
-// "base_path" values replace those controls at their call position.
-func (a *API) ProxyMinimumBandwidthRecords(ctx context.Context, parent string, opts MinimumBandwidthListOpts, calls ...request.ListCall) (*MinimumBandwidthProxyResult, error) {
+//
+// Calls: request.Header, request.Headers, request.Microversion, request.Query,
+// request.BasePath, request.Limit, request.Marker, request.MaxItems and
+// request.Paginated. Here request.Query and the paging calls are Proxy kwargs,
+// so Query "headers", "microversion" and "base_path" replace those controls at
+// their position.
+func (a *API) ProxyMinimumBandwidthRecords(ctx context.Context, parent string, options ...MinimumBandwidthListOption) (*MinimumBandwidthProxyResult, error) {
 	const op = "ProxyMinimumBandwidthRecords"
 	engine, err := a.minimumBandwidthEnginePolicy(ctx, parent, true)
 	if err != nil {
 		return nil, minimumBandwidthWrap(ctx, op, err)
 	}
-	cfg, err := applyMinimumBandwidthOptions(ctx, engine, minimumBandwidthListState{Query: opts.Query}, copyMinimumBandwidthList, minimumBandwidthProxyCalls(slices.Clone(calls)))
+	callbacks := minimumBandwidthProxyCalls(slices.Clone(options))
+	cfg, err := applyMinimumBandwidthOptions(ctx, engine, MinimumBandwidthListOpts{}, copyMinimumBandwidthList, callbacks)
 	if err != nil {
 		return nil, minimumBandwidthWrap(ctx, op, err)
 	}
@@ -221,4 +230,11 @@ func minimumBandwidthProxyPath(path, parent string, attrs map[string]json.RawMes
 		i = end + 2
 	}
 	return out.String(), nil
+}
+
+// minimumBandwidthProxyCalls translates the options of one call into MinimumBandwidthListOpts callbacks.
+func minimumBandwidthProxyCalls(calls []request.ListCall) []func(*MinimumBandwidthListOpts) error {
+	return qosCalls(calls, func(s *MinimumBandwidthListOpts) qosCallFields {
+		return qosCallFields{headers: &s.Headers, microversion: &s.Microversion, basePath: &s.BasePath}
+	}, minimumBandwidthProxyQuery, true)
 }

@@ -139,12 +139,16 @@ func bandwidthLimitParentQuery(policy neutronfind.Options, parent string, inject
 
 // FindBandwidthLimitRecord matches pinned GET-first Find within one literal
 // parent policy. Only clean member400/403/404 permit a complete ID/name search.
-func (a *API) FindBandwidthLimitRecord(ctx context.Context, policyID, identity string, opts BandwidthLimitFindOpts, calls ...request.FindCall) (*BandwidthLimitRecord, error) {
+//
+// Calls: request.Header, request.Headers, request.Microversion, request.Query
+// and request.IgnoreMissing.
+func (a *API) FindBandwidthLimitRecord(ctx context.Context, policyID, identity string, options ...BandwidthLimitFindOption) (*BandwidthLimitRecord, error) {
 	engine, err := a.bandwidthLimitEngine(ctx, policyID)
 	if err != nil {
 		return nil, bandwidthLimitWrap(ctx, "FindBandwidthLimitRecord", err)
 	}
-	policy, err := applyBandwidthLimitOptions(ctx, engine, bandwidthLimitFindState{Query: opts.Query}, copyBandwidthLimitFind, bandwidthLimitFindCalls(slices.Clone(calls)))
+	callbacks := bandwidthLimitFindCalls(slices.Clone(options))
+	policy, err := applyBandwidthLimitOptions(ctx, engine, BandwidthLimitFindOpts{}, copyBandwidthLimitFind, callbacks)
 	if err != nil {
 		return nil, bandwidthLimitWrap(ctx, "FindBandwidthLimitRecord", err)
 	}
@@ -159,12 +163,15 @@ func (a *API) FindBandwidthLimitRecord(ctx context.Context, policyID, identity s
 // GetBandwidthLimitRecord performs one literal member GET, with no parent
 // lookup, Find fallback or ignore-missing behavior. Header/version options are
 // explicit Go conveniences; pinned get_qos_bandwidth_limit_rule has no kwargs.
-func (a *API) GetBandwidthLimitRecord(ctx context.Context, policyID, identity string, calls ...request.GetCall) (*BandwidthLimitRecord, error) {
+//
+// Calls: request.Header, request.Headers and request.Microversion.
+func (a *API) GetBandwidthLimitRecord(ctx context.Context, policyID, identity string, options ...BandwidthLimitGetOption) (*BandwidthLimitRecord, error) {
 	engine, err := a.bandwidthLimitEngine(ctx, policyID)
 	if err != nil {
 		return nil, bandwidthLimitWrap(ctx, "GetBandwidthLimitRecord", err)
 	}
-	policy, err := applyBandwidthLimitOptions(ctx, engine, bandwidthLimitGetState{}, copyBandwidthLimitGet, bandwidthLimitGetCalls(slices.Clone(calls)))
+	callbacks := bandwidthLimitGetCalls(slices.Clone(options))
+	policy, err := applyBandwidthLimitOptions(ctx, engine, BandwidthLimitGetOpts{}, copyBandwidthLimitGet, callbacks)
 	if err != nil {
 		return nil, bandwidthLimitWrap(ctx, "GetBandwidthLimitRecord", err)
 	}
@@ -174,15 +181,20 @@ func (a *API) GetBandwidthLimitRecord(ctx context.Context, policyID, identity st
 
 // ListBandwidthLimitRecords lazily yields rules within one literal parent.
 // Only limit/marker are server query fields; known Body kwargs filter locally.
-func (a *API) ListBandwidthLimitRecords(ctx context.Context, policyID string, opts BandwidthLimitListOpts, calls ...request.ListCall) iter.Seq2[*BandwidthLimitRecord, error] {
-	initial, snapshot := copyBandwidthLimitList(bandwidthLimitListState{Query: opts.Query}), slices.Clone(calls)
+//
+// Calls: request.Header, request.Headers, request.Microversion, request.Query,
+// request.BasePath, request.Limit, request.Marker, request.MaxItems and
+// request.Paginated.
+func (a *API) ListBandwidthLimitRecords(ctx context.Context, policyID string, options ...BandwidthLimitListOption) iter.Seq2[*BandwidthLimitRecord, error] {
+	snapshot := slices.Clone(options)
 	return func(yield func(*BandwidthLimitRecord, error) bool) {
 		engine, err := a.bandwidthLimitEngine(ctx, policyID)
 		if err != nil {
 			yield(nil, bandwidthLimitWrap(ctx, "ListBandwidthLimitRecords", err))
 			return
 		}
-		policy, err := applyBandwidthLimitOptions(ctx, engine, initial, copyBandwidthLimitList, bandwidthLimitListCalls(snapshot))
+		callbacks := bandwidthLimitListCalls(snapshot)
+		policy, err := applyBandwidthLimitOptions(ctx, engine, BandwidthLimitListOpts{}, copyBandwidthLimitList, callbacks)
 		if err != nil {
 			yield(nil, bandwidthLimitWrap(ctx, "ListBandwidthLimitRecords", err))
 			return
@@ -200,9 +212,14 @@ func (a *API) ListBandwidthLimitRecords(ctx context.Context, policyID string, op
 	}
 }
 
-func (a *API) AllBandwidthLimitRecords(ctx context.Context, policyID string, opts BandwidthLimitListOpts, calls ...request.ListCall) ([]*BandwidthLimitRecord, error) {
+// AllBandwidthLimitRecords accepts its operation-specific options and shared calls.
+//
+// Calls: request.Header, request.Headers, request.Microversion, request.Query,
+// request.BasePath, request.Limit, request.Marker, request.MaxItems and
+// request.Paginated.
+func (a *API) AllBandwidthLimitRecords(ctx context.Context, policyID string, options ...BandwidthLimitListOption) ([]*BandwidthLimitRecord, error) {
 	var values []*BandwidthLimitRecord
-	for value, err := range a.ListBandwidthLimitRecords(ctx, policyID, opts, calls...) {
+	for value, err := range a.ListBandwidthLimitRecords(ctx, policyID, options...) {
 		if err != nil {
 			return nil, err
 		}

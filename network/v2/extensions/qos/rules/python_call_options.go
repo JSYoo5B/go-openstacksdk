@@ -16,9 +16,12 @@ type qosCallFields struct {
 	basePath     **string
 }
 
-// qosCalls translates shared request calls into per-operation state callbacks
-// in caller order. A nil call stays nil so each operation's apply loop reports
-// its own nil-option error at the same position. value interprets Query and
+// qosCalls translates one call's options into per-operation callbacks over the
+// operation's exported options struct T, in caller order. Operation-specific
+// With* options and request.Custom over T yield their own function; any other
+// Custom is rejected. A nil option (or a Custom with a nil function) stays nil
+// so each operation's apply loop reports its own nil-option error at the same
+// position. value interprets Query and
 // Field entries (and paging entries when paging is true) with the operation's
 // own key rules; a nil value rejects them.
 func qosCalls[T any, C request.Call](calls []C, fields func(*T) qosCallFields, value func(string, json.RawMessage, error) func(*T) error, paging bool) []func(*T) error {
@@ -41,6 +44,12 @@ func qosCalls[T any, C request.Call](calls []C, fields func(*T) qosCallFields, v
 func qosCall[T any](entry request.CallEntry, probe qosCallFields, fields func(*T) qosCallFields, value func(string, json.RawMessage, error) func(*T) error, paging bool) func(*T) error {
 	unsupported := func(*T) error { return request.UnsupportedCall(entry) }
 	switch entry.Kind {
+	case request.CallCustom:
+		fn, ok := request.CustomFunc[T](entry)
+		if !ok {
+			return unsupported
+		}
+		return fn
 	case request.CallHeader:
 		if probe.headers == nil {
 			return unsupported

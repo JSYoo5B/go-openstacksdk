@@ -118,7 +118,7 @@ func (s *Service) readQoSDSCPMarking(ctx context.Context, policyNameOrID, ruleID
 	if err = json.Unmarshal(result.Policy.Resource.Body["id"], &id); err != nil {
 		return fail(dscpMarkingCloudPolicyProof(result.Policy, fmt.Errorf("%w: policy identity must be string: %v", resource.ErrInvalidOption, err)))
 	}
-	var leaf []request.ListCall
+	var leaf []rules.DSCPMarkingListOption
 	if cfg.Filters != nil {
 		truthy, e := cloudfilter.PythonJSONTruthy(*cfg.Filters)
 		if e != nil {
@@ -134,7 +134,7 @@ func (s *Service) readQoSDSCPMarking(ctx context.Context, policyNameOrID, ruleID
 			}
 		}
 	}
-	proxy, e := state.API.QoSRules.ProxyDSCPMarkingRecords(ctx, id, rules.DSCPMarkingListOpts{}, leaf...)
+	proxy, e := state.API.QoSRules.ProxyDSCPMarkingRecords(ctx, id, leaf...)
 	if e = errors.Join(e, state.Check(ctx)); e != nil {
 		return fail(e)
 	}

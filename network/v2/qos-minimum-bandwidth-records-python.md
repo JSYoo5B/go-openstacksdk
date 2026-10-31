@@ -13,6 +13,11 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.FindMinimumBandwidthRecord`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumBandwidthFindOpts`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumBandwidthFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumBandwidthFindQuery`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumBandwidthFindMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumBandwidthFindHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
@@ -57,6 +62,9 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.GetMinimumBandwidthRecord`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumBandwidthGetOpts`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumBandwidthGetMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumBandwidthGetHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 
@@ -94,6 +102,14 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ListMinimumBandwidthRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.AllMinimumBandwidthRecords`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumBandwidthListOpts`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumBandwidthListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumBandwidthListMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumBandwidthListHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumBandwidthListLimit`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumBandwidthListMarker`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumBandwidthListMaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumBandwidthListPaginated`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
@@ -102,7 +118,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
 - `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 
-- Lazy list uses fixed literal parent without lookup. Only default limit/marker transpose to server query; Body id/name/direction/bandwidth fields filter locally. Unknown kwargs including fields/tags are discarded with any transport-value failure, even function/malformed unknown values; request.Query marshals each value once when constructed.
+- Lazy list uses fixed literal parent without lookup. Only default limit/marker transpose to server query; Body id/name/direction/bandwidth fields filter locally. Unknown kwargs including fields/tags are discarded before transport-value evaluation by the list Query option, even function/malformed unknown values; request.Query marshals each value once when constructed and never reports a discarded failure.
   Tests: `network/v2/extensions/qos/rules/python_minimum_bandwidth_contracts_test.go:TestPythonMinimumBandwidthListLazyQueryLocalFiltersAndUnknowns`, `network/v2/extensions/qos/rules/python_minimum_bandwidth_contracts_test.go:TestPythonMinimumBandwidthListRawCapSinglePageAndEarlyStop`.
 - Source list injects URI parent then consumes it outside Body; Wire owns foreign original row value and whole page proof. Positive raw cap counts before filtering, limit=0 plus cap creates limit hint; single page and early break avoid another request.
   Tests: `network/v2/extensions/qos/rules/python_minimum_bandwidth_contracts_test.go:TestPythonMinimumBandwidthListLazyQueryLocalFiltersAndUnknowns`, `network/v2/extensions/qos/rules/python_minimum_bandwidth_contracts_test.go:TestPythonMinimumBandwidthListRawCapSinglePageAndEarlyStop`.
@@ -178,7 +194,6 @@ import (
     "time"
 
     sdk "github.com/JSYoo5B/go-openstacksdk"
-    "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules"
     "github.com/JSYoo5B/go-openstacksdk/request"
     "github.com/JSYoo5B/go-openstacksdk/resource"
 )
@@ -191,7 +206,7 @@ func run(ctx context.Context, cloud, mode, parent, identity string) (any, error)
     switch mode {
     case "find":
         value, err := network.QoSRules.FindMinimumBandwidthRecord(
-            ctx, parent, identity, rules.MinimumBandwidthFindOpts{}, request.IgnoreMissing(false),
+            ctx, parent, identity, request.IgnoreMissing(false),
         )
         if err != nil || value == nil { return nil, err }
         return value.Resource, nil
@@ -201,7 +216,7 @@ func run(ctx context.Context, cloud, mode, parent, identity string) (any, error)
         return value.Resource, nil
     case "list":
         values, err := network.QoSRules.AllMinimumBandwidthRecords(
-            ctx, parent, rules.MinimumBandwidthListOpts{}, request.Query("direction", "egress"),
+            ctx, parent, request.Query("direction", "egress"),
             request.MaxItems(100),
         )
         if err != nil { return nil, err }

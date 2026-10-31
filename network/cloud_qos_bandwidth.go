@@ -126,8 +126,8 @@ func qosBandwidthParent(result *QoSBandwidthLimitResult) (string, error) {
 	}
 	return id, nil
 }
-func qosBandwidthListOptions(cfg QoSBandwidthLimitOpts) ([]request.ListCall, error) {
-	options := make([]request.ListCall, 0)
+func qosBandwidthListOptions(cfg QoSBandwidthLimitOpts) ([]rules.BandwidthLimitListOption, error) {
+	options := make([]rules.BandwidthLimitListOption, 0)
 	if cfg.Filters != nil {
 		truthy, err := cloudfilter.PythonJSONTruthy(*cfg.Filters)
 		if err != nil {
@@ -223,7 +223,7 @@ func (s *Service) qosBandwidthList(ctx context.Context, policy string, options [
 		result.filters = &raw
 	}
 	ctx = rest.WithOperationGuard(ctx, state.Check)
-	proxy, err := state.API.QoSRules.ProxyBandwidthLimitRecords(ctx, parent, rules.BandwidthLimitListOpts{}, listOptions...)
+	proxy, err := state.API.QoSRules.ProxyBandwidthLimitRecords(ctx, parent, listOptions...)
 	if err = errors.Join(err, state.Check(ctx)); err != nil {
 		return result, state, err
 	}
@@ -364,7 +364,7 @@ func (s *Service) GetQoSBandwidthLimitRule(ctx context.Context, policy, ruleID s
 	if err != nil {
 		return result, qosBandwidthWrap(ctx, op, err)
 	}
-	opts := []request.GetCall{request.Headers(cfg.Headers)}
+	opts := []rules.BandwidthLimitGetOption{request.Headers(cfg.Headers)}
 	if cfg.Microversion != nil {
 		opts = append(opts, request.Microversion(*cfg.Microversion))
 	}

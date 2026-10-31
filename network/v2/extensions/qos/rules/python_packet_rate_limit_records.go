@@ -133,12 +133,16 @@ func packetRateLimitParentQuery(policy neutronfind.Options, parent string, injec
 
 // FindPacketRateLimitRecord matches pinned GET-first Find within one literal
 // parent policy. Only clean member400/403/404 permit a complete ID/name search.
-func (a *API) FindPacketRateLimitRecord(ctx context.Context, policyID, identity string, opts PacketRateLimitFindOpts, calls ...request.FindCall) (*PacketRateLimitRecord, error) {
+//
+// Calls: request.Header, request.Headers, request.Microversion, request.Query
+// and request.IgnoreMissing.
+func (a *API) FindPacketRateLimitRecord(ctx context.Context, policyID, identity string, options ...PacketRateLimitFindOption) (*PacketRateLimitRecord, error) {
 	engine, err := a.packetRateLimitEngine(ctx, policyID)
 	if err != nil {
 		return nil, packetRateLimitWrap(ctx, "FindPacketRateLimitRecord", err)
 	}
-	policy, err := applyPacketRateLimitOptions(ctx, engine, packetRateLimitFindState{Query: opts.Query}, copyPacketRateLimitFind, packetRateLimitFindCalls(slices.Clone(calls)))
+	callbacks := packetRateLimitFindCalls(slices.Clone(options))
+	policy, err := applyPacketRateLimitOptions(ctx, engine, PacketRateLimitFindOpts{}, copyPacketRateLimitFind, callbacks)
 	if err != nil {
 		return nil, packetRateLimitWrap(ctx, "FindPacketRateLimitRecord", err)
 	}
@@ -153,12 +157,15 @@ func (a *API) FindPacketRateLimitRecord(ctx context.Context, policyID, identity 
 // GetPacketRateLimitRecord performs one literal member GET, with no parent
 // lookup, Find fallback or ignore-missing behavior. Header/version options are
 // explicit Go conveniences; pinned get_qos_packet_rate_limit_rule has no kwargs.
-func (a *API) GetPacketRateLimitRecord(ctx context.Context, policyID, identity string, calls ...request.GetCall) (*PacketRateLimitRecord, error) {
+//
+// Calls: request.Header, request.Headers and request.Microversion.
+func (a *API) GetPacketRateLimitRecord(ctx context.Context, policyID, identity string, options ...PacketRateLimitGetOption) (*PacketRateLimitRecord, error) {
 	engine, err := a.packetRateLimitEngine(ctx, policyID)
 	if err != nil {
 		return nil, packetRateLimitWrap(ctx, "GetPacketRateLimitRecord", err)
 	}
-	policy, err := applyPacketRateLimitOptions(ctx, engine, packetRateLimitGetState{}, copyPacketRateLimitGet, packetRateLimitGetCalls(slices.Clone(calls)))
+	callbacks := packetRateLimitGetCalls(slices.Clone(options))
+	policy, err := applyPacketRateLimitOptions(ctx, engine, PacketRateLimitGetOpts{}, copyPacketRateLimitGet, callbacks)
 	if err != nil {
 		return nil, packetRateLimitWrap(ctx, "GetPacketRateLimitRecord", err)
 	}
@@ -168,15 +175,20 @@ func (a *API) GetPacketRateLimitRecord(ctx context.Context, policyID, identity s
 
 // ListPacketRateLimitRecords lazily yields rules within one literal parent.
 // Only limit/marker are server query fields; known Body kwargs filter locally.
-func (a *API) ListPacketRateLimitRecords(ctx context.Context, policyID string, opts PacketRateLimitListOpts, calls ...request.ListCall) iter.Seq2[*PacketRateLimitRecord, error] {
-	initial, snapshot := copyPacketRateLimitList(packetRateLimitListState{Query: opts.Query}), slices.Clone(calls)
+//
+// Calls: request.Header, request.Headers, request.Microversion, request.Query,
+// request.Limit, request.Marker, request.MaxItems and request.Paginated.
+// request.BasePath fails with resource.ErrInvalidOption before HTTP.
+func (a *API) ListPacketRateLimitRecords(ctx context.Context, policyID string, options ...PacketRateLimitListOption) iter.Seq2[*PacketRateLimitRecord, error] {
+	snapshot := slices.Clone(options)
 	return func(yield func(*PacketRateLimitRecord, error) bool) {
 		engine, err := a.packetRateLimitEngine(ctx, policyID)
 		if err != nil {
 			yield(nil, packetRateLimitWrap(ctx, "ListPacketRateLimitRecords", err))
 			return
 		}
-		policy, err := applyPacketRateLimitOptions(ctx, engine, initial, copyPacketRateLimitList, packetRateLimitListCalls(snapshot))
+		callbacks := packetRateLimitListCalls(snapshot)
+		policy, err := applyPacketRateLimitOptions(ctx, engine, PacketRateLimitListOpts{}, copyPacketRateLimitList, callbacks)
 		if err != nil {
 			yield(nil, packetRateLimitWrap(ctx, "ListPacketRateLimitRecords", err))
 			return
@@ -194,9 +206,14 @@ func (a *API) ListPacketRateLimitRecords(ctx context.Context, policyID string, o
 	}
 }
 
-func (a *API) AllPacketRateLimitRecords(ctx context.Context, policyID string, opts PacketRateLimitListOpts, calls ...request.ListCall) ([]*PacketRateLimitRecord, error) {
+// AllPacketRateLimitRecords accepts its operation-specific options and shared calls.
+//
+// Calls: request.Header, request.Headers, request.Microversion, request.Query,
+// request.Limit, request.Marker, request.MaxItems and request.Paginated.
+// request.BasePath fails with resource.ErrInvalidOption before HTTP.
+func (a *API) AllPacketRateLimitRecords(ctx context.Context, policyID string, options ...PacketRateLimitListOption) ([]*PacketRateLimitRecord, error) {
 	var values []*PacketRateLimitRecord
-	for value, err := range a.ListPacketRateLimitRecords(ctx, policyID, opts, calls...) {
+	for value, err := range a.ListPacketRateLimitRecords(ctx, policyID, options...) {
 		if err != nil {
 			return nil, packetRateLimitWrap(ctx, "AllPacketRateLimitRecords", err)
 		}

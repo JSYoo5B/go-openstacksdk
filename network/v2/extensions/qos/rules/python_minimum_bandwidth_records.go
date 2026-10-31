@@ -135,12 +135,16 @@ func minimumBandwidthParentQuery(policy neutronfind.Options, parent string, inje
 
 // FindMinimumBandwidthRecord matches pinned GET-first Find within one literal
 // parent policy. Only clean member400/403/404 permit a complete ID/name search.
-func (a *API) FindMinimumBandwidthRecord(ctx context.Context, policyID, identity string, opts MinimumBandwidthFindOpts, calls ...request.FindCall) (*MinimumBandwidthRecord, error) {
+//
+// Calls: request.Header, request.Headers, request.Microversion, request.Query
+// and request.IgnoreMissing.
+func (a *API) FindMinimumBandwidthRecord(ctx context.Context, policyID, identity string, options ...MinimumBandwidthFindOption) (*MinimumBandwidthRecord, error) {
 	engine, err := a.minimumBandwidthEngine(ctx, policyID)
 	if err != nil {
 		return nil, minimumBandwidthWrap(ctx, "FindMinimumBandwidthRecord", err)
 	}
-	policy, err := applyMinimumBandwidthOptions(ctx, engine, minimumBandwidthFindState{Query: opts.Query}, copyMinimumBandwidthFind, minimumBandwidthFindCalls(slices.Clone(calls)))
+	callbacks := minimumBandwidthFindCalls(slices.Clone(options))
+	policy, err := applyMinimumBandwidthOptions(ctx, engine, MinimumBandwidthFindOpts{}, copyMinimumBandwidthFind, callbacks)
 	if err != nil {
 		return nil, minimumBandwidthWrap(ctx, "FindMinimumBandwidthRecord", err)
 	}
@@ -155,12 +159,15 @@ func (a *API) FindMinimumBandwidthRecord(ctx context.Context, policyID, identity
 // GetMinimumBandwidthRecord performs one literal member GET, with no parent
 // lookup, Find fallback or ignore-missing behavior. Header/version options are
 // explicit Go conveniences; pinned get_qos_minimum_bandwidth_rule has no kwargs.
-func (a *API) GetMinimumBandwidthRecord(ctx context.Context, policyID, identity string, calls ...request.GetCall) (*MinimumBandwidthRecord, error) {
+//
+// Calls: request.Header, request.Headers and request.Microversion.
+func (a *API) GetMinimumBandwidthRecord(ctx context.Context, policyID, identity string, options ...MinimumBandwidthGetOption) (*MinimumBandwidthRecord, error) {
 	engine, err := a.minimumBandwidthEngine(ctx, policyID)
 	if err != nil {
 		return nil, minimumBandwidthWrap(ctx, "GetMinimumBandwidthRecord", err)
 	}
-	policy, err := applyMinimumBandwidthOptions(ctx, engine, minimumBandwidthGetState{}, copyMinimumBandwidthGet, minimumBandwidthGetCalls(slices.Clone(calls)))
+	callbacks := minimumBandwidthGetCalls(slices.Clone(options))
+	policy, err := applyMinimumBandwidthOptions(ctx, engine, MinimumBandwidthGetOpts{}, copyMinimumBandwidthGet, callbacks)
 	if err != nil {
 		return nil, minimumBandwidthWrap(ctx, "GetMinimumBandwidthRecord", err)
 	}
@@ -170,15 +177,20 @@ func (a *API) GetMinimumBandwidthRecord(ctx context.Context, policyID, identity 
 
 // ListMinimumBandwidthRecords lazily yields rules within one literal parent.
 // Only limit/marker are server query fields; known Body kwargs filter locally.
-func (a *API) ListMinimumBandwidthRecords(ctx context.Context, policyID string, opts MinimumBandwidthListOpts, calls ...request.ListCall) iter.Seq2[*MinimumBandwidthRecord, error] {
-	initial, snapshot := copyMinimumBandwidthList(minimumBandwidthListState{Query: opts.Query}), slices.Clone(calls)
+//
+// Calls: request.Header, request.Headers, request.Microversion, request.Query,
+// request.BasePath, request.Limit, request.Marker, request.MaxItems and
+// request.Paginated.
+func (a *API) ListMinimumBandwidthRecords(ctx context.Context, policyID string, options ...MinimumBandwidthListOption) iter.Seq2[*MinimumBandwidthRecord, error] {
+	snapshot := slices.Clone(options)
 	return func(yield func(*MinimumBandwidthRecord, error) bool) {
 		engine, err := a.minimumBandwidthEngine(ctx, policyID)
 		if err != nil {
 			yield(nil, minimumBandwidthWrap(ctx, "ListMinimumBandwidthRecords", err))
 			return
 		}
-		policy, err := applyMinimumBandwidthOptions(ctx, engine, initial, copyMinimumBandwidthList, minimumBandwidthListCalls(snapshot))
+		callbacks := minimumBandwidthListCalls(snapshot)
+		policy, err := applyMinimumBandwidthOptions(ctx, engine, MinimumBandwidthListOpts{}, copyMinimumBandwidthList, callbacks)
 		if err != nil {
 			yield(nil, minimumBandwidthWrap(ctx, "ListMinimumBandwidthRecords", err))
 			return
@@ -196,9 +208,14 @@ func (a *API) ListMinimumBandwidthRecords(ctx context.Context, policyID string, 
 	}
 }
 
-func (a *API) AllMinimumBandwidthRecords(ctx context.Context, policyID string, opts MinimumBandwidthListOpts, calls ...request.ListCall) ([]*MinimumBandwidthRecord, error) {
+// AllMinimumBandwidthRecords accepts its operation-specific options and shared calls.
+//
+// Calls: request.Header, request.Headers, request.Microversion, request.Query,
+// request.BasePath, request.Limit, request.Marker, request.MaxItems and
+// request.Paginated.
+func (a *API) AllMinimumBandwidthRecords(ctx context.Context, policyID string, options ...MinimumBandwidthListOption) ([]*MinimumBandwidthRecord, error) {
 	var values []*MinimumBandwidthRecord
-	for value, err := range a.ListMinimumBandwidthRecords(ctx, policyID, opts, calls...) {
+	for value, err := range a.ListMinimumBandwidthRecords(ctx, policyID, options...) {
 		if err != nil {
 			return nil, err
 		}

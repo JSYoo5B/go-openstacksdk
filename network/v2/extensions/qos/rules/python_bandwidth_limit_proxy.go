@@ -30,13 +30,25 @@ type BandwidthLimitProxyResult struct {
 	JSON  json.RawMessage
 }
 
-// bandwidthLimitProxyQuery consumes Source formal values (request.Query) at their call
+// WithBandwidthLimitProxyQuery consumes Source formal values at their option
 // position, so later concrete headers/version/base-path choices remain last-win.
-func bandwidthLimitProxyQuery(key string, owned json.RawMessage, err error) func(*bandwidthLimitListState) error {
-	if key != "jmespath_filters" && bandwidthLimitListIgnores(key) {
-		return func(*bandwidthLimitListState) error { return nil }
+//
+// Deprecated: use request.Query.
+func WithBandwidthLimitProxyQuery(key string, value any) BandwidthLimitListOption {
+	if bandwidthLimitProxyIgnores(key) {
+		return request.Custom(func(*BandwidthLimitListOpts) error { return nil })
 	}
-	return func(c *bandwidthLimitListState) error {
+	raw, err := json.Marshal(value)
+	return request.Custom(bandwidthLimitProxyQuery(key, bytes.Clone(raw), err))
+}
+
+// bandwidthLimitProxyQuery applies one marshaled value for WithBandwidthLimitProxyQuery and the shared
+// request calls that carry the same key.
+func bandwidthLimitProxyQuery(key string, owned json.RawMessage, err error) func(*BandwidthLimitListOpts) error {
+	if bandwidthLimitProxyIgnores(key) {
+		return func(*BandwidthLimitListOpts) error { return nil }
+	}
+	return func(c *BandwidthLimitListOpts) error {
 		if err != nil {
 			return err
 		}
@@ -67,22 +79,22 @@ func bandwidthLimitProxyQuery(key string, owned json.RawMessage, err error) func
 	}
 }
 
-func bandwidthLimitProxyCalls(calls []request.ListCall) []func(*bandwidthLimitListState) error {
-	return qosCalls(calls, bandwidthLimitListFields, bandwidthLimitProxyQuery, true)
-}
-
 // ProxyBandwidthLimitRecords preserves Source Proxy's formal kwargs and opaque
 // generator JMESPath evaluation. Existing typed list keeps its legacy policy.
-// Here request.Query, request.Limit, request.Marker, request.MaxItems and
-// request.Paginated are Proxy kwargs; Query "headers", "microversion" and
-// "base_path" values replace those controls at their call position.
-func (a *API) ProxyBandwidthLimitRecords(ctx context.Context, parent string, opts BandwidthLimitListOpts, calls ...request.ListCall) (*BandwidthLimitProxyResult, error) {
+//
+// Calls: request.Header, request.Headers, request.Microversion, request.Query,
+// request.BasePath, request.Limit, request.Marker, request.MaxItems and
+// request.Paginated. Here request.Query and the paging calls are Proxy kwargs,
+// so Query "headers", "microversion" and "base_path" replace those controls at
+// their position.
+func (a *API) ProxyBandwidthLimitRecords(ctx context.Context, parent string, options ...BandwidthLimitListOption) (*BandwidthLimitProxyResult, error) {
 	const op = "ProxyBandwidthLimitRecords"
 	engine, err := a.bandwidthLimitEnginePolicy(ctx, parent, true)
 	if err != nil {
 		return nil, bandwidthLimitWrap(ctx, op, err)
 	}
-	cfg, err := applyBandwidthLimitOptions(ctx, engine, bandwidthLimitListState{Query: opts.Query}, copyBandwidthLimitList, bandwidthLimitProxyCalls(slices.Clone(calls)))
+	callbacks := bandwidthLimitProxyCalls(slices.Clone(options))
+	cfg, err := applyBandwidthLimitOptions(ctx, engine, BandwidthLimitListOpts{}, copyBandwidthLimitList, callbacks)
 	if err != nil {
 		return nil, bandwidthLimitWrap(ctx, op, err)
 	}
@@ -125,4 +137,17 @@ func (a *API) ProxyBandwidthLimitRecords(ctx context.Context, parent string, opt
 		return nil, bandwidthLimitWrap(ctx, op, err)
 	}
 	return result, nil
+}
+
+// bandwidthLimitProxyIgnores reports whether Proxy discards a kwarg before
+// evaluating its value; jmespath_filters is a formal Proxy argument.
+func bandwidthLimitProxyIgnores(key string) bool {
+	return key != "jmespath_filters" && bandwidthLimitListIgnores(key)
+}
+
+// bandwidthLimitProxyCalls translates the options of one call into BandwidthLimitListOpts callbacks.
+func bandwidthLimitProxyCalls(calls []request.ListCall) []func(*BandwidthLimitListOpts) error {
+	return qosCalls(calls, func(s *BandwidthLimitListOpts) qosCallFields {
+		return qosCallFields{headers: &s.Headers, microversion: &s.Microversion, basePath: &s.BasePath}
+	}, bandwidthLimitProxyQuery, true)
 }

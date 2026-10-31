@@ -34,9 +34,9 @@ func pythonBandwidthRead(ctx context.Context, api *rules.API, op string) (*rules
 	case "get":
 		return api.GetBandwidthLimitRecord(ctx, "parent", "target")
 	case "find":
-		return api.FindBandwidthLimitRecord(ctx, "parent", "target", rules.BandwidthLimitFindOpts{})
+		return api.FindBandwidthLimitRecord(ctx, "parent", "target")
 	default:
-		values, err := api.AllBandwidthLimitRecords(ctx, "parent", rules.BandwidthLimitListOpts{})
+		values, err := api.AllBandwidthLimitRecords(ctx, "parent")
 		if len(values) > 0 {
 			return values[0], err
 		}
@@ -75,7 +75,7 @@ func TestPythonBandwidthLimitMemberLiteralRoutesSourceQueryAndURIView(t *testing
 				if op == "get" {
 					value, err = api.GetBandwidthLimitRecord(context.Background(), parent, identity)
 				} else {
-					value, err = api.FindBandwidthLimitRecord(context.Background(), parent, identity, rules.BandwidthLimitFindOpts{})
+					value, err = api.FindBandwidthLimitRecord(context.Background(), parent, identity)
 				}
 				if err != nil || value == nil || value.QoSPolicyID != parent || value.StatusCode != 203 || string(value.Envelope) != body || value.Header.Get("X-Request-Id") != "receipt" || len(calls) != 1 || calls[0].body != "" {
 					t.Fatal(value, err, calls)
@@ -127,12 +127,12 @@ func TestPythonBandwidthLimitGetNoFallbackAndFindMissingCompleteSearch(t *testin
 			t.Fatal(value, err, calls)
 		}
 		calls = nil
-		value, err = api.FindBandwidthLimitRecord(context.Background(), "parent", "target", rules.BandwidthLimitFindOpts{})
+		value, err = api.FindBandwidthLimitRecord(context.Background(), "parent", "target")
 		if value != nil || err != nil || len(calls) != 2 {
 			t.Fatal(value, err, calls)
 		}
 		calls = nil
-		value, err = api.FindBandwidthLimitRecord(context.Background(), "parent", "target", rules.BandwidthLimitFindOpts{}, request.IgnoreMissing(false))
+		value, err = api.FindBandwidthLimitRecord(context.Background(), "parent", "target", rules.WithBandwidthLimitFindIgnoreMissing(false))
 		if value != nil || !errors.Is(err, resource.ErrNotFound) || len(calls) != 2 {
 			t.Fatal(value, err, calls)
 		}
@@ -154,7 +154,7 @@ func TestPythonBandwidthLimitFindBodySeedsAndListLocalFilters(t *testing.T) {
 		}
 		return nativeRuleWire(200, `{"bandwidth_limit_rules":[{"id":"no","name":"target","max_kbps":0,"direction":"egress","max_burst_kbps":{"nested":null}},{"id":"yes","name":"target","max_kbps":1,"direction":"egress","max_burst_kbps":{"nested":null},"qos_policy_id":"foreign"}]}`)
 	})
-	value, err := api.FindBandwidthLimitRecord(context.Background(), "parent", "target", rules.BandwidthLimitFindOpts{}, request.Query("name", "target"), request.Query("max_kbps", true), request.Query("max_burst_kbps", map[string]any{"nested": nil}), request.Query("direction", "egress"), request.Query("x_seed", "keep"), request.Query("fields", []string{"id", "direction"}))
+	value, err := api.FindBandwidthLimitRecord(context.Background(), "parent", "target", rules.WithBandwidthLimitFindQuery("name", "target"), rules.WithBandwidthLimitFindQuery("max_kbps", true), rules.WithBandwidthLimitFindQuery("max_burst_kbps", map[string]any{"nested": nil}), rules.WithBandwidthLimitFindQuery("direction", "egress"), rules.WithBandwidthLimitFindQuery("x_seed", "keep"), rules.WithBandwidthLimitFindQuery("fields", []string{"id", "direction"}))
 	if err != nil || value == nil || len(calls) != 2 || value.Resource.Body["qos_policy_id"] != nil {
 		t.Fatal(value, err, calls)
 	}
@@ -164,7 +164,7 @@ func TestPythonBandwidthLimitFindBodySeedsAndListLocalFilters(t *testing.T) {
 	}
 	calls = nil
 	seeded := pythonBandwidthAPI(t, &calls, func(*http.Request) *http.Response { return nativeRuleWire(204, "") })
-	value, err = seeded.FindBandwidthLimitRecord(context.Background(), "parent", "target", rules.BandwidthLimitFindOpts{}, request.Query("max_kbps", "untyped"), request.Query("x_seed", false))
+	value, err = seeded.FindBandwidthLimitRecord(context.Background(), "parent", "target", rules.WithBandwidthLimitFindQuery("max_kbps", "untyped"), rules.WithBandwidthLimitFindQuery("x_seed", false))
 	if err != nil || value.Wire != nil || value.Resource.Body["qos_policy_id"] != nil {
 		t.Fatal(value, err)
 	}
@@ -191,7 +191,7 @@ func TestPythonBandwidthLimitFindLaterDuplicateAndListFailureRemainTerminal(t *t
 				return nativeRuleWire(403, `{"error":"rule access denied despite shared policy"}`)
 			}
 		})
-		value, err := api.FindBandwidthLimitRecord(context.Background(), "parent", "target", rules.BandwidthLimitFindOpts{})
+		value, err := api.FindBandwidthLimitRecord(context.Background(), "parent", "target")
 		if value != nil || err == nil || len(calls) != 3 {
 			t.Fatal(value, err, calls)
 		}
@@ -219,7 +219,7 @@ func TestPythonBandwidthLimitListLazyQueryLocalFiltersAndUnknowns(t *testing.T) 
 		response.Header.Set("If-Match", "HTTP-only")
 		return response
 	})
-	seq := api.ListBandwidthLimitRecords(context.Background(), "parent", rules.BandwidthLimitListOpts{Query: map[string]json.RawMessage{"name": json.RawMessage(`"demo"`), "max_kbps": json.RawMessage(`true`), "direction": json.RawMessage(`"egress"`), "ignored": json.RawMessage(`[`)}}, request.Query("name", "demo"), request.Query("max_kbps", true), request.Query("direction", "egress"), request.Query("fields", func() {}), request.Query("tags", func() {}))
+	seq := api.ListBandwidthLimitRecords(context.Background(), "parent", rules.WithBandwidthLimitListQuery("name", "demo"), rules.WithBandwidthLimitListQuery("max_kbps", true), rules.WithBandwidthLimitListQuery("direction", "egress"), rules.WithBandwidthLimitListQuery("fields", func() {}), rules.WithBandwidthLimitListQuery("tags", func() {}), rules.WithBandwidthLimitListOpts(rules.BandwidthLimitListOpts{Query: map[string]json.RawMessage{"name": json.RawMessage(`"demo"`), "max_kbps": json.RawMessage(`true`), "direction": json.RawMessage(`"egress"`), "ignored": json.RawMessage(`[`)}}))
 	if len(calls) != 0 {
 		t.Fatal("eager list", calls)
 	}
@@ -251,15 +251,15 @@ func TestPythonBandwidthLimitListRawCapSinglePageAndEarlyStop(t *testing.T) {
 			}
 			return nativeRuleWire(200, `{"bandwidth_limit_rules":[{"id":"filtered","direction":"ingress"},{"id":"kept","direction":"egress"}],"bandwidth_limit_rules_links":[{"rel":"next","href":"?marker=kept"}]}`)
 		})
-		opts := []request.ListCall{}
+		opts := []rules.BandwidthLimitListOption{}
 		if mode == "cap" {
-			opts = append(opts, request.Limit(0), request.MaxItems(1), request.Query("direction", "egress"))
+			opts = append(opts, rules.WithBandwidthLimitListLimit(0), rules.WithBandwidthLimitListMaxItems(1), rules.WithBandwidthLimitListQuery("direction", "egress"))
 		}
 		if mode == "single" {
-			opts = append(opts, request.Paginated(false))
+			opts = append(opts, rules.WithBandwidthLimitListPaginated(false))
 		}
 		count := 0
-		for value, err := range api.ListBandwidthLimitRecords(context.Background(), "parent", rules.BandwidthLimitListOpts{}, opts...) {
+		for value, err := range api.ListBandwidthLimitRecords(context.Background(), "parent", opts...) {
 			if err != nil || value == nil {
 				t.Fatal(value, err)
 			}
@@ -293,7 +293,7 @@ func TestPythonBandwidthLimitListContinuationCannotChangeParentOrFilters(t *test
 			}
 			return nativeRuleWire(200, `{"bandwidth_limit_rules":[]}`)
 		})
-		values, err := api.AllBandwidthLimitRecords(context.Background(), "parent", rules.BandwidthLimitListOpts{}, request.Limit(1))
+		values, err := api.AllBandwidthLimitRecords(context.Background(), "parent", rules.WithBandwidthLimitListLimit(1))
 		safe := href == "?marker=one" || strings.HasPrefix(href, "/v2.0/qos/policies/parent/")
 		if safe {
 			if err != nil || len(values) != 1 || len(calls) != 2 {
@@ -319,7 +319,7 @@ func TestPythonBandwidthLimitListMarkerFallbackAndFalseyNumericNext(t *testing.T
 		}
 		return nativeRuleWire(200, `{"bandwidth_limit_rules":[]}`)
 	})
-	values, err := api.AllBandwidthLimitRecords(context.Background(), "parent", rules.BandwidthLimitListOpts{}, request.Limit(3))
+	values, err := api.AllBandwidthLimitRecords(context.Background(), "parent", rules.WithBandwidthLimitListLimit(3))
 	if err != nil || len(values) != 1 || len(calls) != 2 {
 		t.Fatal(values, err, calls)
 	}
@@ -328,7 +328,7 @@ func TestPythonBandwidthLimitListMarkerFallbackAndFalseyNumericNext(t *testing.T
 		api = pythonBandwidthAPI(t, &calls, func(*http.Request) *http.Response {
 			return nativeRuleWire(200, `{"bandwidth_limit_rules":[{"id":"one"}],"next":`+token+`}`)
 		})
-		values, err = api.AllBandwidthLimitRecords(context.Background(), "parent", rules.BandwidthLimitListOpts{})
+		values, err = api.AllBandwidthLimitRecords(context.Background(), "parent")
 		if token == "1" {
 			var proof *resource.ResponseError
 			if values != nil || !errors.As(err, &proof) {
@@ -482,23 +482,24 @@ func TestPythonBandwidthLimitPhysicalReadCloseCancelAndSourceProof(t *testing.T)
 
 func TestPythonBandwidthLimitOptionSnapshotsAndPreflight(t *testing.T) {
 	raw := json.RawMessage(`"owned"`)
-	opts := rules.BandwidthLimitFindOpts{Query: map[string]json.RawMessage{"x_seed": raw}}
+	query := map[string]json.RawMessage{"x_seed": raw}
 	headers := map[string]string{"X-Trace": "owned"}
 	version := "2.0"
-	options := []request.FindCall{request.Headers(headers), request.Microversion(version)}
+	option := rules.WithBandwidthLimitFindOpts(rules.BandwidthLimitFindOpts{Query: query, Headers: headers, Microversion: &version})
+	raw[1] = 'x'
 	headers["X-Trace"] = "changed"
 	version = "changed"
+	var escaped *rules.BandwidthLimitFindOpts
 	var calls []nativeRuleCall
 	api := pythonBandwidthAPI(t, &calls, func(req *http.Request) *http.Response {
 		if req.URL.Query().Get("x_seed") != "owned" || req.Header.Get("X-Trace") != "owned" || req.Header.Get("OpenStack-API-Version") != "network 2.0" {
 			t.Fatal(req.URL, req.Header)
 		}
-		// The operation owns its copy of the caller's Opts during the call.
-		raw[1] = 'z'
-		headers["X-Trace"] = "late"
+		escaped.Query["x_seed"][1] = 'z'
+		escaped.Headers["X-Trace"] = "late"
 		return nativeRuleWire(200, `{"bandwidth_limit_rule":{}}`)
 	})
-	value, err := api.FindBandwidthLimitRecord(context.Background(), "parent", "target", opts, options...)
+	value, err := api.FindBandwidthLimitRecord(context.Background(), "parent", "target", option, request.Custom(func(c *rules.BandwidthLimitFindOpts) error { escaped = c; return nil }))
 	if err != nil || value == nil {
 		t.Fatal(value, err)
 	}
@@ -512,12 +513,12 @@ func TestPythonBandwidthLimitOptionSnapshotsAndPreflight(t *testing.T) {
 	}
 	for _, key := range []string{"qos_policy_id", "qos_policy", "qos_rule_id", "qos_rule", "ignore_missing", "name_or_id", "cls", "base_path", "connection", "location", "__conflicting_attrs", "headers", "microversion", "id"} {
 		before := len(calls)
-		_, err := api.FindBandwidthLimitRecord(context.Background(), "parent", "target", rules.BandwidthLimitFindOpts{}, request.Query(key, nil))
+		_, err := api.FindBandwidthLimitRecord(context.Background(), "parent", "target", rules.WithBandwidthLimitFindQuery(key, nil))
 		if !errors.Is(err, resource.ErrInvalidOption) || len(calls) != before {
 			t.Fatal(key, err, calls)
 		}
 		if key != "id" {
-			values, err := api.AllBandwidthLimitRecords(context.Background(), "parent", rules.BandwidthLimitListOpts{}, request.Query(key, nil))
+			values, err := api.AllBandwidthLimitRecords(context.Background(), "parent", rules.WithBandwidthLimitListQuery(key, nil))
 			if values != nil || !errors.Is(err, resource.ErrInvalidOption) || len(calls) != before {
 				t.Fatal(key, values, err, calls)
 			}
@@ -528,9 +529,10 @@ func TestPythonBandwidthLimitOptionSnapshotsAndPreflight(t *testing.T) {
 	if !errors.Is(err, resource.ErrInvalidOption) || len(calls) != before {
 		t.Fatal(err, calls)
 	}
-	// Sealed calls cannot run caller code; the option-phase client guard is
-	// covered by TestQoSRuleApplyLoopsGuardCallbacks. request.Query is not a
-	// request.GetCall, so Query on Get does not compile.
+	_, err = api.GetBandwidthLimitRecord(context.Background(), "parent", "target", request.Custom(func(*rules.BandwidthLimitGetOpts) error { api.RawClient().ResourceBase += "changed/"; return nil }))
+	if !errors.Is(err, resource.ErrInvalidOption) || len(calls) != before {
+		t.Fatal(err, calls)
+	}
 }
 
 func TestPythonBandwidthLimitVersionPhasesCleanRetryAndOwnedHeaderPolicy(t *testing.T) {
@@ -549,7 +551,7 @@ func TestPythonBandwidthLimitVersionPhasesCleanRetryAndOwnedHeaderPolicy(t *test
 	source := api.RawClient()
 	source.Microversion = "2.0"
 	source.MoreHeaders = map[string]string{"Openstack-Api-Version": "network 2.0"}
-	value, err := api.FindBandwidthLimitRecord(context.Background(), "parent", "target", rules.BandwidthLimitFindOpts{}, request.Microversion("2.1"))
+	value, err := api.FindBandwidthLimitRecord(context.Background(), "parent", "target", rules.WithBandwidthLimitFindMicroversion("2.1"))
 	if err != nil || value == nil || !reflect.DeepEqual(versions, []string{"network 2.1", "network 2.0"}) || source.MoreHeaders["Openstack-Api-Version"] != "network 2.0" || source.Microversion != "2.0" {
 		t.Fatal(value, err, versions, source)
 	}
@@ -606,7 +608,7 @@ func TestPythonBandwidthLimitVersionPhasesCleanRetryAndOwnedHeaderPolicy(t *test
 			}
 			return nil
 		}
-		_, err = api.AllBandwidthLimitRecords(context.Background(), "parent", rules.BandwidthLimitListOpts{})
+		_, err = api.AllBandwidthLimitRecords(context.Background(), "parent")
 		var native gophercloud.ErrUnexpectedResponseCode
 		if !errors.As(err, &native) || native.Actual != 503 || native.ResponseHeader.Get("X-Request-Id") != "retry-proof" {
 			t.Fatal(mutation, err, native)
@@ -629,7 +631,7 @@ func TestPythonBandwidthLimitListPartialIterationAndAllDropLateError(t *testing.
 		return nativeRuleWire(500, `{"error":"late"}`)
 	})
 	count, failures := 0, 0
-	for value, err := range api.ListBandwidthLimitRecords(context.Background(), "parent", rules.BandwidthLimitListOpts{}) {
+	for value, err := range api.ListBandwidthLimitRecords(context.Background(), "parent") {
 		if err != nil {
 			failures++
 			continue
@@ -643,7 +645,7 @@ func TestPythonBandwidthLimitListPartialIterationAndAllDropLateError(t *testing.
 		t.Fatal(count, failures, calls)
 	}
 	calls = nil
-	values, err := api.AllBandwidthLimitRecords(context.Background(), "parent", rules.BandwidthLimitListOpts{})
+	values, err := api.AllBandwidthLimitRecords(context.Background(), "parent")
 	if values != nil || err == nil || len(calls) != 2 {
 		t.Fatal(values, err, calls)
 	}

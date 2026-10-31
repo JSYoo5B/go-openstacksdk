@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"maps"
 	"net/http"
 	"net/url"
 	"slices"
@@ -24,19 +25,24 @@ type QoSRuleDeleteReceipt struct {
 	IgnoredMissing bool
 }
 
-// qosRuleDeleteState defaults IgnoreMissing to true, as the Source proxy. Cloud
+// QoSRuleDeleteOpts defaults IgnoreMissing to true, as the Source proxy. Cloud
 // helpers always choose false and decide their own bool conversion afterward.
-// Calls: request.IgnoreMissing, request.Microversion, request.Header(s).
-type qosRuleDeleteState struct {
+type QoSRuleDeleteOpts struct {
 	IgnoreMissing *bool
 	Headers       map[string]string
 	Microversion  *string
 }
 
-func qosRuleDeletePolicy(v qosRuleDeleteState) neutronfind.Options {
+// QoSRuleDeleteOption is one option of an operation over QoSRuleDeleteOpts: a
+// With* function of this package, request.Custom over *QoSRuleDeleteOpts, or a
+// shared request.DeleteCall value. A nil option fails with
+// resource.ErrInvalidOption before HTTP.
+type QoSRuleDeleteOption = request.DeleteCall
+
+func qosRuleDeletePolicy(v QoSRuleDeleteOpts) neutronfind.Options {
 	return neutronfind.Options{IgnoreMissing: v.IgnoreMissing, Headers: v.Headers, Microversion: v.Microversion}
 }
-func copyQoSRuleDelete(v qosRuleDeleteState) qosRuleDeleteState {
+func copyQoSRuleDelete(v QoSRuleDeleteOpts) QoSRuleDeleteOpts {
 	owned := neutronfind.CloneOptions(qosRuleDeletePolicy(v))
 	v.IgnoreMissing, v.Headers, v.Microversion = owned.IgnoreMissing, owned.Headers, owned.Microversion
 	if v.Headers == nil {
@@ -44,10 +50,25 @@ func copyQoSRuleDelete(v qosRuleDeleteState) qosRuleDeleteState {
 	}
 	return v
 }
-func qosRuleDeleteCalls(calls []request.DeleteCall) []func(*qosRuleDeleteState) error {
-	return qosCalls(calls, func(s *qosRuleDeleteState) qosCallFields {
-		return qosCallFields{headers: &s.Headers, microversion: &s.Microversion, ignore: &s.IgnoreMissing}
-	}, nil, false)
+func WithQoSRuleDeleteOpts(v QoSRuleDeleteOpts) QoSRuleDeleteOption {
+	owned := copyQoSRuleDelete(v)
+	return request.Custom(func(c *QoSRuleDeleteOpts) error { *c = copyQoSRuleDelete(owned); return nil })
+}
+
+// Deprecated: use request.IgnoreMissing.
+func WithQoSRuleDeleteIgnoreMissing(value bool) QoSRuleDeleteOption {
+	return request.Custom(func(c *QoSRuleDeleteOpts) error { v := value; c.IgnoreMissing = &v; return nil })
+}
+
+// Deprecated: use request.Headers.
+func WithQoSRuleDeleteHeaders(value map[string]string) QoSRuleDeleteOption {
+	owned := maps.Clone(value)
+	return request.Custom(func(c *QoSRuleDeleteOpts) error { c.Headers = maps.Clone(owned); return nil })
+}
+
+// Deprecated: use request.Microversion.
+func WithQoSRuleDeleteMicroversion(value string) QoSRuleDeleteOption {
+	return request.Custom(func(c *QoSRuleDeleteOpts) error { v := value; c.Microversion = &v; return nil })
 }
 
 func qosRuleDeleteReceipt(value *neutronfind.Record, err error, target string) *QoSRuleDeleteReceipt {
@@ -67,24 +88,7 @@ func qosRuleDeleteReceipt(value *neutronfind.Record, err error, target string) *
 	}
 	return nil
 }
-func applyQoSRuleDelete(ctx context.Context, engine *neutronfind.Engine, callbacks []func(*qosRuleDeleteState) error) (qosRuleDeleteState, error) {
-	cfg := copyQoSRuleDelete(qosRuleDeleteState{})
-	for _, apply := range callbacks {
-		if err := engine.Check(ctx); err != nil {
-			return cfg, err
-		}
-		if apply == nil {
-			return cfg, bandwidthLimitInvalid("nil QoS rule delete option")
-		}
-		next := copyQoSRuleDelete(cfg)
-		if err := errors.Join(apply(&next), engine.Check(ctx)); err != nil {
-			return cfg, err
-		}
-		cfg = copyQoSRuleDelete(next)
-	}
-	return cfg, nil
-}
-func (a *API) qosRuleDelete(ctx context.Context, parent, id, kind, op string, calls []request.DeleteCall) (*QoSRuleDeleteReceipt, error) {
+func (a *API) qosRuleDelete(ctx context.Context, parent, id, kind, op string, options []QoSRuleDeleteOption) (*QoSRuleDeleteReceipt, error) {
 	var engine *neutronfind.Engine
 	var err error
 	switch kind {
@@ -99,9 +103,19 @@ func (a *API) qosRuleDelete(ctx context.Context, parent, id, kind, op string, ca
 		return nil, bandwidthLimitWrap(ctx, op, err)
 	}
 	target := a.client.ServiceURL("qos/policies/"+url.PathEscape(parent)+"/"+kind, url.PathEscape(id))
-	cfg, err := applyQoSRuleDelete(ctx, engine, qosRuleDeleteCalls(slices.Clone(calls)))
-	if err != nil {
-		return nil, bandwidthLimitWrap(ctx, op, err)
+	cfg := copyQoSRuleDelete(QoSRuleDeleteOpts{})
+	for _, apply := range qosRuleDeleteCalls(slices.Clone(options)) {
+		if err := engine.Check(ctx); err != nil {
+			return nil, bandwidthLimitWrap(ctx, op, err)
+		}
+		if apply == nil {
+			return nil, bandwidthLimitWrap(ctx, op, bandwidthLimitInvalid("nil QoS rule delete option"))
+		}
+		next := copyQoSRuleDelete(cfg)
+		if err := errors.Join(apply(&next), engine.Check(ctx)); err != nil {
+			return nil, bandwidthLimitWrap(ctx, op, err)
+		}
+		cfg = copyQoSRuleDelete(next)
 	}
 	value, err := engine.Mutate(ctx, http.MethodDelete, id, nil, nil, qosRuleDeletePolicy(cfg))
 	receipt := qosRuleDeleteReceipt(value, err, target)
@@ -115,12 +129,34 @@ func (a *API) qosRuleDelete(ctx context.Context, parent, id, kind, op string, ca
 	}
 	return receipt, bandwidthLimitWrap(ctx, op, err)
 }
-func (a *API) DeleteBandwidthLimitRecord(ctx context.Context, parent, id string, calls ...request.DeleteCall) (*QoSRuleDeleteReceipt, error) {
-	return a.qosRuleDelete(ctx, parent, id, "bandwidth_limit_rules", "DeleteBandwidthLimitRecord", calls)
+
+// DeleteBandwidthLimitRecord accepts its operation-specific options and shared calls.
+//
+// Calls: request.Header, request.Headers, request.Microversion and
+// request.IgnoreMissing.
+func (a *API) DeleteBandwidthLimitRecord(ctx context.Context, parent, id string, options ...QoSRuleDeleteOption) (*QoSRuleDeleteReceipt, error) {
+	return a.qosRuleDelete(ctx, parent, id, "bandwidth_limit_rules", "DeleteBandwidthLimitRecord", options)
 }
-func (a *API) DeleteDSCPMarkingRecord(ctx context.Context, parent, id string, calls ...request.DeleteCall) (*QoSRuleDeleteReceipt, error) {
-	return a.qosRuleDelete(ctx, parent, id, "dscp_marking_rules", "DeleteDSCPMarkingRecord", calls)
+
+// DeleteDSCPMarkingRecord accepts its operation-specific options and shared calls.
+//
+// Calls: request.Header, request.Headers, request.Microversion and
+// request.IgnoreMissing.
+func (a *API) DeleteDSCPMarkingRecord(ctx context.Context, parent, id string, options ...QoSRuleDeleteOption) (*QoSRuleDeleteReceipt, error) {
+	return a.qosRuleDelete(ctx, parent, id, "dscp_marking_rules", "DeleteDSCPMarkingRecord", options)
 }
-func (a *API) DeleteMinimumBandwidthRecord(ctx context.Context, parent, id string, calls ...request.DeleteCall) (*QoSRuleDeleteReceipt, error) {
-	return a.qosRuleDelete(ctx, parent, id, "minimum_bandwidth_rules", "DeleteMinimumBandwidthRecord", calls)
+
+// DeleteMinimumBandwidthRecord accepts its operation-specific options and shared calls.
+//
+// Calls: request.Header, request.Headers, request.Microversion and
+// request.IgnoreMissing.
+func (a *API) DeleteMinimumBandwidthRecord(ctx context.Context, parent, id string, options ...QoSRuleDeleteOption) (*QoSRuleDeleteReceipt, error) {
+	return a.qosRuleDelete(ctx, parent, id, "minimum_bandwidth_rules", "DeleteMinimumBandwidthRecord", options)
+}
+
+// qosRuleDeleteCalls translates the options of one call into QoSRuleDeleteOpts callbacks.
+func qosRuleDeleteCalls(calls []request.DeleteCall) []func(*QoSRuleDeleteOpts) error {
+	return qosCalls(calls, func(s *QoSRuleDeleteOpts) qosCallFields {
+		return qosCallFields{headers: &s.Headers, microversion: &s.Microversion, ignore: &s.IgnoreMissing}
+	}, nil, false)
 }

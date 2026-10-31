@@ -84181,6 +84181,11 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.FindBandwidthLimitRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitFindOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitFindIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitFindQuery",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitFindMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitFindHeaders",
         "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing",
         "github.com/JSYoo5B/go-openstacksdk/request.Query",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
@@ -84252,6 +84257,11 @@
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.New",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.RawClient",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.FindDSCPMarkingRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingFindOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingFindQuery",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingFindHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingFindMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingFindIgnoreMissing",
         "github.com/JSYoo5B/go-openstacksdk/request.Query",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
@@ -84399,6 +84409,9 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.GetBandwidthLimitRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitGetOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitGetMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitGetHeaders",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers"
       ],
@@ -84460,7 +84473,10 @@
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.New",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.RawClient",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.GetDSCPMarkingRecord",
-        "github.com/JSYoo5B/go-openstacksdk/request.Query",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingGetOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingGetQuery",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingGetHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingGetMicroversion",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion"
       ],
@@ -84581,6 +84597,14 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ListBandwidthLimitRecords",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.AllBandwidthLimitRecords",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitListOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitListMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitListHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitListLimit",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitListMarker",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitListMaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitListPaginated",
         "github.com/JSYoo5B/go-openstacksdk/request.Query",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
@@ -84591,7 +84615,7 @@
       ],
       "contracts": [
         {
-          "behavior": "Lazy list uses fixed literal parent without lookup. Only default limit/marker transpose to server query; Body id/name/direction/bandwidth fields filter locally. Unknown kwargs including fields/tags are discarded with any transport-value failure, even function/malformed unknown values; request.Query marshals each value once when constructed.",
+          "behavior": "Lazy list uses fixed literal parent without lookup. Only default limit/marker transpose to server query; Body id/name/direction/bandwidth fields filter locally. Unknown kwargs including fields/tags are discarded before transport-value evaluation by the list Query option, even function/malformed unknown values; request.Query marshals each value once when constructed and never reports a discarded failure.",
           "tests": [
             "network/v2/extensions/qos/rules/python_bandwidth_limit_records_contracts_test.go:TestPythonBandwidthLimitListLazyQueryLocalFiltersAndUnknowns",
             "network/v2/extensions/qos/rules/python_bandwidth_limit_records_contracts_test.go:TestPythonBandwidthLimitListRawCapSinglePageAndEarlyStop"
@@ -84656,14 +84680,22 @@
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.New",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.RawClient",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ListDSCPMarkingRecords",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingListOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingListHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingListMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingListLimit",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingListMarker",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingListMaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingListPaginated",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.AllDSCPMarkingRecords",
         "github.com/JSYoo5B/go-openstacksdk/request.Query",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
         "github.com/JSYoo5B/go-openstacksdk/request.Limit",
         "github.com/JSYoo5B/go-openstacksdk/request.Marker",
         "github.com/JSYoo5B/go-openstacksdk/request.MaxItems",
-        "github.com/JSYoo5B/go-openstacksdk/request.Paginated",
-        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.AllDSCPMarkingRecords"
+        "github.com/JSYoo5B/go-openstacksdk/request.Paginated"
       ],
       "contracts": [
         {
@@ -85897,6 +85929,11 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.FindMinimumBandwidthRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumBandwidthFindOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumBandwidthFindIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumBandwidthFindQuery",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumBandwidthFindMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumBandwidthFindHeaders",
         "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing",
         "github.com/JSYoo5B/go-openstacksdk/request.Query",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
@@ -85990,6 +86027,11 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.FindMinimumPacketRateRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumPacketRateFindOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumPacketRateFindIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumPacketRateFindQuery",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumPacketRateFindMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumPacketRateFindHeaders",
         "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing",
         "github.com/JSYoo5B/go-openstacksdk/request.Query",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
@@ -86110,6 +86152,11 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.FindPacketRateLimitRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateLimitFindOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateLimitFindIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateLimitFindQuery",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateLimitFindMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateLimitFindHeaders",
         "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing",
         "github.com/JSYoo5B/go-openstacksdk/request.Query",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
@@ -86277,6 +86324,9 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.GetMinimumBandwidthRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumBandwidthGetOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumBandwidthGetMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumBandwidthGetHeaders",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers"
       ],
@@ -86348,6 +86398,9 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.GetMinimumPacketRateRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumPacketRateGetOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumPacketRateGetMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumPacketRateGetHeaders",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers"
       ],
@@ -86466,6 +86519,9 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.GetPacketRateLimitRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateLimitGetOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateLimitGetMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateLimitGetHeaders",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers"
       ],
@@ -86617,6 +86673,14 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ListMinimumBandwidthRecords",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.AllMinimumBandwidthRecords",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumBandwidthListOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumBandwidthListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumBandwidthListMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumBandwidthListHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumBandwidthListLimit",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumBandwidthListMarker",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumBandwidthListMaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumBandwidthListPaginated",
         "github.com/JSYoo5B/go-openstacksdk/request.Query",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
@@ -86627,7 +86691,7 @@
       ],
       "contracts": [
         {
-          "behavior": "Lazy list uses fixed literal parent without lookup. Only default limit/marker transpose to server query; Body id/name/direction/bandwidth fields filter locally. Unknown kwargs including fields/tags are discarded with any transport-value failure, even function/malformed unknown values; request.Query marshals each value once when constructed.",
+          "behavior": "Lazy list uses fixed literal parent without lookup. Only default limit/marker transpose to server query; Body id/name/direction/bandwidth fields filter locally. Unknown kwargs including fields/tags are discarded before transport-value evaluation by the list Query option, even function/malformed unknown values; request.Query marshals each value once when constructed and never reports a discarded failure.",
           "tests": [
             "network/v2/extensions/qos/rules/python_minimum_bandwidth_contracts_test.go:TestPythonMinimumBandwidthListLazyQueryLocalFiltersAndUnknowns",
             "network/v2/extensions/qos/rules/python_minimum_bandwidth_contracts_test.go:TestPythonMinimumBandwidthListRawCapSinglePageAndEarlyStop"
@@ -86715,6 +86779,14 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ListMinimumPacketRateRecords",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.AllMinimumPacketRateRecords",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumPacketRateListOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumPacketRateListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumPacketRateListHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumPacketRateListMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumPacketRateListLimit",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumPacketRateListMarker",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumPacketRateListMaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumPacketRateListPaginated",
         "github.com/JSYoo5B/go-openstacksdk/request.Query",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
@@ -86839,6 +86911,14 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ListPacketRateLimitRecords",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.AllPacketRateLimitRecords",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateLimitListOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateLimitListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateLimitListMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateLimitListHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateLimitListLimit",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateLimitListMarker",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateLimitListMaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateLimitListPaginated",
         "github.com/JSYoo5B/go-openstacksdk/request.Query",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
@@ -86849,7 +86929,7 @@
       ],
       "contracts": [
         {
-          "behavior": "Lazy list uses fixed literal parent without lookup. Only default limit/marker transpose to server query; Body id/name/direction/bandwidth fields filter locally. Unknown kwargs including fields/tags are discarded with any transport-value failure, even function/malformed unknown values; request.Query marshals each value once when constructed.",
+          "behavior": "Lazy list uses fixed literal parent without lookup. Only default limit/marker transpose to server query; Body id/name/direction/bandwidth fields filter locally. Unknown kwargs including fields/tags are discarded before transport-value evaluation by the list Query option, even function/malformed unknown values; request.Query marshals each value once when constructed and never reports a discarded failure.",
           "tests": [
             "network/v2/extensions/qos/rules/python_packet_rate_limit_contracts_test.go:TestPythonPacketRateLimitListLazyQueryLocalFiltersAndUnknowns",
             "network/v2/extensions/qos/rules/python_packet_rate_limit_contracts_test.go:TestPythonPacketRateLimitListRawCapSinglePageAndEarlyStop"
@@ -98040,6 +98120,10 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.CreateMinimumPacketRateRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleMutationOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleField",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleMicroversion",
         "github.com/JSYoo5B/go-openstacksdk/request.Field",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion"
@@ -98070,6 +98154,10 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.UpdateMinimumPacketRateRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleMutationOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleField",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleMicroversion",
         "github.com/JSYoo5B/go-openstacksdk/request.Field",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion"
@@ -98100,13 +98188,16 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.DeleteMinimumPacketRateRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleDeleteIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleDeleteHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleDeleteMicroversion",
         "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion"
       ],
       "contracts": [
         {
-          "behavior": "Bodyless DELETE /qos/policies/{policy_id}/minimum_packet_rate_rules/{rule_id} ignores a clean 404 by default (IgnoredMissing), request.IgnoreMissing(false) or other rejections return the native status with operation context.",
+          "behavior": "Bodyless DELETE /qos/policies/{policy_id}/minimum_packet_rate_rules/{rule_id} ignores a clean 404 by default (IgnoredMissing), request.IgnoreMissing(false) or the deprecated WithPacketRateRuleDeleteIgnoreMissing(false), or other rejections return the native status with operation context.",
           "tests": [
             "network/v2/extensions/qos/rules/python_packet_rate_mutations_test.go:TestPythonMinimumPacketRateCreateUpdateDelete"
           ]
@@ -98131,6 +98222,10 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.CreatePacketRateLimitRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleMutationOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleField",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleMicroversion",
         "github.com/JSYoo5B/go-openstacksdk/request.Field",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion"
@@ -98161,6 +98256,10 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.UpdatePacketRateLimitRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleMutationOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleField",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleMicroversion",
         "github.com/JSYoo5B/go-openstacksdk/request.Field",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion"
@@ -98191,13 +98290,16 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.DeletePacketRateLimitRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleDeleteIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleDeleteHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleDeleteMicroversion",
         "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion"
       ],
       "contracts": [
         {
-          "behavior": "Bodyless DELETE /qos/policies/{policy_id}/packet_rate_limit_rules/{rule_id} ignores a clean 404 by default (IgnoredMissing), request.IgnoreMissing(false) or other rejections return the native status with operation context.",
+          "behavior": "Bodyless DELETE /qos/policies/{policy_id}/packet_rate_limit_rules/{rule_id} ignores a clean 404 by default (IgnoredMissing), request.IgnoreMissing(false) or the deprecated WithPacketRateRuleDeleteIgnoreMissing(false), or other rejections return the native status with operation context.",
           "tests": [
             "network/v2/extensions/qos/rules/python_packet_rate_mutations_test.go:TestPythonPacketRateLimitCreateUpdateDelete"
           ]
@@ -108982,6 +109084,8 @@
         "github.com/JSYoo5B/go-openstacksdk/network.WithQoSBandwidthLimitHeaders",
         "github.com/JSYoo5B/go-openstacksdk/network.WithQoSBandwidthLimitMicroversion",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ProxyBandwidthLimitRecords",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitProxyQuery",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitListBasePath",
         "github.com/JSYoo5B/go-openstacksdk/request.Query",
         "github.com/JSYoo5B/go-openstacksdk/request.BasePath"
       ],
@@ -109048,6 +109152,8 @@
         "github.com/JSYoo5B/go-openstacksdk/network.WithQoSBandwidthLimitHeaders",
         "github.com/JSYoo5B/go-openstacksdk/network.WithQoSBandwidthLimitMicroversion",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ProxyBandwidthLimitRecords",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitProxyQuery",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitListBasePath",
         "github.com/JSYoo5B/go-openstacksdk/request.Query",
         "github.com/JSYoo5B/go-openstacksdk/request.BasePath"
       ],
@@ -109222,6 +109328,7 @@
         "github.com/JSYoo5B/go-openstacksdk/network.WithDSCPMarkingCloudCurrentLocation",
         "github.com/JSYoo5B/go-openstacksdk/network.WithDSCPMarkingCloudFiltersJSON",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ProxyDSCPMarkingRecords",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingProxyQuery",
         "github.com/JSYoo5B/go-openstacksdk/request.Query"
       ],
       "contracts": [
@@ -109303,6 +109410,7 @@
         "github.com/JSYoo5B/go-openstacksdk/network.WithDSCPMarkingCloudCurrentLocation",
         "github.com/JSYoo5B/go-openstacksdk/network.WithDSCPMarkingCloudFiltersJSON",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ProxyDSCPMarkingRecords",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingProxyQuery",
         "github.com/JSYoo5B/go-openstacksdk/request.Query"
       ],
       "contracts": [
@@ -109494,6 +109602,7 @@
         "github.com/JSYoo5B/go-openstacksdk/network.WithMinimumBandwidthCloudCurrentLocation",
         "github.com/JSYoo5B/go-openstacksdk/network.WithMinimumBandwidthCloudFiltersJSON",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ProxyMinimumBandwidthRecords",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumBandwidthProxyQuery",
         "github.com/JSYoo5B/go-openstacksdk/request.Query"
       ],
       "contracts": [
@@ -109575,6 +109684,7 @@
         "github.com/JSYoo5B/go-openstacksdk/network.WithMinimumBandwidthCloudCurrentLocation",
         "github.com/JSYoo5B/go-openstacksdk/network.WithMinimumBandwidthCloudFiltersJSON",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ProxyMinimumBandwidthRecords",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumBandwidthProxyQuery",
         "github.com/JSYoo5B/go-openstacksdk/request.Query"
       ],
       "contracts": [
@@ -112167,6 +112277,10 @@
         "github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleDeleteHeaders",
         "github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleDeleteMicroversion",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.DeleteBandwidthLimitRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithQoSRuleDeleteOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithQoSRuleDeleteIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithQoSRuleDeleteHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithQoSRuleDeleteMicroversion",
         "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion"
@@ -112459,6 +112573,10 @@
         "github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleDeleteHeaders",
         "github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleDeleteMicroversion",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.DeleteDSCPMarkingRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithQoSRuleDeleteOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithQoSRuleDeleteIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithQoSRuleDeleteHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithQoSRuleDeleteMicroversion",
         "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion"
@@ -112752,6 +112870,10 @@
         "github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleDeleteHeaders",
         "github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleDeleteMicroversion",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.DeleteMinimumBandwidthRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithQoSRuleDeleteOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithQoSRuleDeleteIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithQoSRuleDeleteHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithQoSRuleDeleteMicroversion",
         "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion"

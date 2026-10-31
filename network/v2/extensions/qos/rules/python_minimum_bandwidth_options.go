@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"maps"
 	"slices"
 	"strings"
 	"unicode"
@@ -13,16 +14,9 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
-// MinimumBandwidthFindOpts owns Source find kwargs as JSON. Query is member
-// query/constructor input; fallback maps aliases separately. Its keys apply in
-// sorted order before ordered request.Query calls, which win on collision.
-// Calls: request.IgnoreMissing (omitted is true), request.Query,
-// request.Microversion, request.Header and request.Headers.
+// MinimumBandwidthFindOpts owns Source kwargs as JSON. Omitted IgnoreMissing is true.
+// Query is member query/constructor input; fallback maps aliases separately.
 type MinimumBandwidthFindOpts struct {
-	Query map[string]json.RawMessage
-}
-
-type minimumBandwidthFindState struct {
 	IgnoreMissing *bool
 	Microversion  *string
 	Query         map[string]json.RawMessage
@@ -30,10 +24,16 @@ type minimumBandwidthFindState struct {
 	order         []string
 }
 
-func minimumBandwidthFindOptions(v minimumBandwidthFindState) neutronfind.Options {
+// MinimumBandwidthFindOption is one option of an operation over
+// MinimumBandwidthFindOpts: a With* function of this package, request.Custom
+// over *MinimumBandwidthFindOpts, or a shared request.FindCall value. A nil
+// option fails with resource.ErrInvalidOption before HTTP.
+type MinimumBandwidthFindOption = request.FindCall
+
+func minimumBandwidthFindOptions(v MinimumBandwidthFindOpts) neutronfind.Options {
 	return neutronfind.Options{IgnoreMissing: v.IgnoreMissing, Microversion: v.Microversion, Query: v.Query, Headers: v.Headers, Order: v.order}
 }
-func copyMinimumBandwidthFind(v minimumBandwidthFindState) minimumBandwidthFindState {
+func copyMinimumBandwidthFind(v MinimumBandwidthFindOpts) MinimumBandwidthFindOpts {
 	owned := neutronfind.CloneOptions(minimumBandwidthFindOptions(v))
 	v.IgnoreMissing, v.Microversion, v.Query, v.Headers, v.order = owned.IgnoreMissing, owned.Microversion, owned.Query, owned.Headers, owned.Order
 	if v.Query == nil {
@@ -44,13 +44,26 @@ func copyMinimumBandwidthFind(v minimumBandwidthFindState) minimumBandwidthFindS
 	}
 	return v
 }
-func minimumBandwidthFindCalls(calls []request.FindCall) []func(*minimumBandwidthFindState) error {
-	return qosCalls(calls, func(s *minimumBandwidthFindState) qosCallFields {
-		return qosCallFields{headers: &s.Headers, microversion: &s.Microversion, ignore: &s.IgnoreMissing}
-	}, minimumBandwidthFindQuery, false)
+func WithMinimumBandwidthFindOpts(v MinimumBandwidthFindOpts) MinimumBandwidthFindOption {
+	owned := copyMinimumBandwidthFind(v)
+	return request.Custom(func(c *MinimumBandwidthFindOpts) error { *c = copyMinimumBandwidthFind(owned); return nil })
 }
-func minimumBandwidthFindQuery(key string, owned json.RawMessage, err error) func(*minimumBandwidthFindState) error {
-	return func(c *minimumBandwidthFindState) error {
+
+// Deprecated: use request.IgnoreMissing.
+func WithMinimumBandwidthFindIgnoreMissing(v bool) MinimumBandwidthFindOption {
+	return request.Custom(func(c *MinimumBandwidthFindOpts) error { x := v; c.IgnoreMissing = &x; return nil })
+}
+
+// Deprecated: use request.Query.
+func WithMinimumBandwidthFindQuery(key string, value any) MinimumBandwidthFindOption {
+	raw, err := json.Marshal(value)
+	return request.Custom(minimumBandwidthFindQuery(key, bytes.Clone(raw), err))
+}
+
+// minimumBandwidthFindQuery applies one marshaled value for WithMinimumBandwidthFindQuery and the shared
+// request calls that carry the same key.
+func minimumBandwidthFindQuery(key string, owned json.RawMessage, err error) func(*MinimumBandwidthFindOpts) error {
+	return func(c *MinimumBandwidthFindOpts) error {
 		if err != nil {
 			return errors.Join(minimumBandwidthInvalid("query %q must be JSON", key), err)
 		}
@@ -65,16 +78,20 @@ func minimumBandwidthFindQuery(key string, owned json.RawMessage, err error) fun
 	}
 }
 
-// MinimumBandwidthListOpts owns list kwargs. Query includes declared server fields,
-// nonquery Body filters and paginated/max_items controls; its keys apply in
-// sorted order before ordered calls. request.Query, request.Limit,
-// request.Marker, request.MaxItems and request.Paginated ignore unknown kwargs.
-// Other calls: request.BasePath, request.Microversion, request.Header(s).
-type MinimumBandwidthListOpts struct {
-	Query map[string]json.RawMessage
+// Deprecated: use request.Microversion.
+func WithMinimumBandwidthFindMicroversion(v string) MinimumBandwidthFindOption {
+	return request.Custom(func(c *MinimumBandwidthFindOpts) error { x := v; c.Microversion = &x; return nil })
 }
 
-type minimumBandwidthListState struct {
+// Deprecated: use request.Headers.
+func WithMinimumBandwidthFindHeaders(v map[string]string) MinimumBandwidthFindOption {
+	owned := maps.Clone(v)
+	return request.Custom(func(c *MinimumBandwidthFindOpts) error { c.Headers = maps.Clone(owned); return nil })
+}
+
+// MinimumBandwidthListOpts owns list kwargs. Query includes declared server fields,
+// nonquery Body filters and paginated/max_items controls. Unknowns are ignored.
+type MinimumBandwidthListOpts struct {
 	BasePath     *string
 	Microversion *string
 	Query        map[string]json.RawMessage
@@ -82,10 +99,16 @@ type minimumBandwidthListState struct {
 	order        []string
 }
 
-func minimumBandwidthListOptions(v minimumBandwidthListState) neutronfind.Options {
+// MinimumBandwidthListOption is one option of an operation over
+// MinimumBandwidthListOpts: a With* function of this package, request.Custom
+// over *MinimumBandwidthListOpts, or a shared request.ListCall value. A nil
+// option fails with resource.ErrInvalidOption before HTTP.
+type MinimumBandwidthListOption = request.ListCall
+
+func minimumBandwidthListOptions(v MinimumBandwidthListOpts) neutronfind.Options {
 	return neutronfind.Options{BasePath: v.BasePath, Microversion: v.Microversion, Query: v.Query, Headers: v.Headers, Order: v.order}
 }
-func copyMinimumBandwidthList(v minimumBandwidthListState) minimumBandwidthListState {
+func copyMinimumBandwidthList(v MinimumBandwidthListOpts) MinimumBandwidthListOpts {
 	owned := neutronfind.CloneOptions(minimumBandwidthListOptions(v))
 	v.BasePath = owned.BasePath
 	v.Microversion, v.Query, v.Headers, v.order = owned.Microversion, owned.Query, owned.Headers, owned.Order
@@ -97,11 +120,9 @@ func copyMinimumBandwidthList(v minimumBandwidthListState) minimumBandwidthListS
 	}
 	return v
 }
-func minimumBandwidthListFields(s *minimumBandwidthListState) qosCallFields {
-	return qosCallFields{headers: &s.Headers, microversion: &s.Microversion, basePath: &s.BasePath}
-}
-func minimumBandwidthListCalls(calls []request.ListCall) []func(*minimumBandwidthListState) error {
-	return qosCalls(calls, minimumBandwidthListFields, minimumBandwidthListQuery, true)
+func WithMinimumBandwidthListOpts(v MinimumBandwidthListOpts) MinimumBandwidthListOption {
+	owned := copyMinimumBandwidthList(v)
+	return request.Custom(func(c *MinimumBandwidthListOpts) error { *c = copyMinimumBandwidthList(owned); return nil })
 }
 func minimumBandwidthListIgnores(key string) bool {
 	if strings.TrimSpace(key) == "" || !utf8.ValidString(key) {
@@ -128,12 +149,24 @@ func minimumBandwidthListIgnores(key string) bool {
 	}
 	return true
 }
-func minimumBandwidthListQuery(key string, owned json.RawMessage, err error) func(*minimumBandwidthListState) error {
-	// Source discards unknown kwargs together with any transport-value error.
+
+// Deprecated: use request.Query.
+func WithMinimumBandwidthListQuery(key string, value any) MinimumBandwidthListOption {
+	// Source discards unknown kwargs before evaluating their transport value.
 	if minimumBandwidthListIgnores(key) {
-		return func(*minimumBandwidthListState) error { return nil }
+		return request.Custom(func(*MinimumBandwidthListOpts) error { return nil })
 	}
-	return func(c *minimumBandwidthListState) error {
+	raw, err := json.Marshal(value)
+	return request.Custom(minimumBandwidthListQuery(key, bytes.Clone(raw), err))
+}
+
+// minimumBandwidthListQuery applies one marshaled value for WithMinimumBandwidthListQuery and the shared
+// request calls that carry the same key.
+func minimumBandwidthListQuery(key string, owned json.RawMessage, err error) func(*MinimumBandwidthListOpts) error {
+	if minimumBandwidthListIgnores(key) {
+		return func(*MinimumBandwidthListOpts) error { return nil }
+	}
+	return func(c *MinimumBandwidthListOpts) error {
 		if err != nil {
 			return errors.Join(minimumBandwidthInvalid("query %q must be JSON", key), err)
 		}
@@ -148,17 +181,54 @@ func minimumBandwidthListQuery(key string, owned json.RawMessage, err error) fun
 	}
 }
 
-// minimumBandwidthGetState adds operation-owned safe headers and microversion. The pinned
-// proxy exposes no member query kwargs, so request.Query is rejected.
-type minimumBandwidthGetState struct {
+// Deprecated: use request.Microversion.
+func WithMinimumBandwidthListMicroversion(v string) MinimumBandwidthListOption {
+	return request.Custom(func(c *MinimumBandwidthListOpts) error { x := v; c.Microversion = &x; return nil })
+}
+
+// Deprecated: use request.Headers.
+func WithMinimumBandwidthListHeaders(v map[string]string) MinimumBandwidthListOption {
+	owned := maps.Clone(v)
+	return request.Custom(func(c *MinimumBandwidthListOpts) error { c.Headers = maps.Clone(owned); return nil })
+}
+
+// Deprecated: use request.Limit.
+func WithMinimumBandwidthListLimit(v int) MinimumBandwidthListOption {
+	return WithMinimumBandwidthListQuery("limit", v)
+}
+
+// Deprecated: use request.Marker.
+func WithMinimumBandwidthListMarker(v string) MinimumBandwidthListOption {
+	return WithMinimumBandwidthListQuery("marker", v)
+}
+
+// Deprecated: use request.MaxItems.
+func WithMinimumBandwidthListMaxItems(v int) MinimumBandwidthListOption {
+	return WithMinimumBandwidthListQuery("max_items", v)
+}
+
+// Deprecated: use request.Paginated.
+func WithMinimumBandwidthListPaginated(v bool) MinimumBandwidthListOption {
+	return WithMinimumBandwidthListQuery("paginated", v)
+}
+
+// MinimumBandwidthGetOpts adds operation-owned safe headers and microversion.
+// The pinned proxy exposes no member query kwargs; no Find options are reused.
+type MinimumBandwidthGetOpts struct {
 	Microversion *string
 	Headers      map[string]string
 }
 
-func minimumBandwidthGetOptions(v minimumBandwidthGetState) neutronfind.Options {
+// MinimumBandwidthGetOption is one option of an operation over
+// MinimumBandwidthGetOpts: a With* function of this package, request.Custom
+// over *MinimumBandwidthGetOpts, or a shared request.GetCall value. A nil
+// option fails with resource.ErrInvalidOption before HTTP.
+type MinimumBandwidthGetOption = request.GetCall
+
+func minimumBandwidthGetOptions(v MinimumBandwidthGetOpts) neutronfind.Options {
 	return neutronfind.Options{Microversion: v.Microversion, Headers: v.Headers}
 }
-func copyMinimumBandwidthGet(v minimumBandwidthGetState) minimumBandwidthGetState {
+func copyMinimumBandwidthGet(v MinimumBandwidthGetOpts) MinimumBandwidthGetOpts {
 	owned := neutronfind.CloneOptions(minimumBandwidthGetOptions(v))
 	v.Microversion, v.Headers = owned.Microversion, owned.Headers
 	if v.Headers == nil {
@@ -166,8 +236,46 @@ func copyMinimumBandwidthGet(v minimumBandwidthGetState) minimumBandwidthGetStat
 	}
 	return v
 }
-func minimumBandwidthGetCalls(calls []request.GetCall) []func(*minimumBandwidthGetState) error {
-	return qosCalls(calls, func(s *minimumBandwidthGetState) qosCallFields {
+func WithMinimumBandwidthGetOpts(v MinimumBandwidthGetOpts) MinimumBandwidthGetOption {
+	owned := copyMinimumBandwidthGet(v)
+	return request.Custom(func(c *MinimumBandwidthGetOpts) error { *c = copyMinimumBandwidthGet(owned); return nil })
+}
+
+// Deprecated: use request.Microversion.
+func WithMinimumBandwidthGetMicroversion(v string) MinimumBandwidthGetOption {
+	return request.Custom(func(c *MinimumBandwidthGetOpts) error { x := v; c.Microversion = &x; return nil })
+}
+
+// Deprecated: use request.Headers.
+func WithMinimumBandwidthGetHeaders(v map[string]string) MinimumBandwidthGetOption {
+	owned := maps.Clone(v)
+	return request.Custom(func(c *MinimumBandwidthGetOpts) error { c.Headers = maps.Clone(owned); return nil })
+}
+
+// WithMinimumBandwidthListBasePath owns a service-relative route override for Proxy lists.
+//
+// Deprecated: use request.BasePath.
+func WithMinimumBandwidthListBasePath(v string) MinimumBandwidthListOption {
+	return request.Custom(func(c *MinimumBandwidthListOpts) error { x := v; c.BasePath = &x; return nil })
+}
+
+// minimumBandwidthFindCalls translates the options of one call into MinimumBandwidthFindOpts callbacks.
+func minimumBandwidthFindCalls(calls []request.FindCall) []func(*MinimumBandwidthFindOpts) error {
+	return qosCalls(calls, func(s *MinimumBandwidthFindOpts) qosCallFields {
+		return qosCallFields{headers: &s.Headers, microversion: &s.Microversion, ignore: &s.IgnoreMissing}
+	}, minimumBandwidthFindQuery, false)
+}
+
+// minimumBandwidthListCalls translates the options of one call into MinimumBandwidthListOpts callbacks.
+func minimumBandwidthListCalls(calls []request.ListCall) []func(*MinimumBandwidthListOpts) error {
+	return qosCalls(calls, func(s *MinimumBandwidthListOpts) qosCallFields {
+		return qosCallFields{headers: &s.Headers, microversion: &s.Microversion, basePath: &s.BasePath}
+	}, minimumBandwidthListQuery, true)
+}
+
+// minimumBandwidthGetCalls translates the options of one call into MinimumBandwidthGetOpts callbacks.
+func minimumBandwidthGetCalls(calls []request.GetCall) []func(*MinimumBandwidthGetOpts) error {
+	return qosCalls(calls, func(s *MinimumBandwidthGetOpts) qosCallFields {
 		return qosCallFields{headers: &s.Headers, microversion: &s.Microversion}
 	}, nil, false)
 }
