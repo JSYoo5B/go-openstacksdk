@@ -405,7 +405,7 @@ func TestKeyManagerOwnedMetadataFetchAcceptedFailuresRetainRawEvidence(t *testin
 				if base == nil {
 					base = http.DefaultTransport
 				}
-				c.Provider.HTTPClient.Transport = secretFetchRoundTripFunc(func(r *http.Request) (*http.Response, error) {
+				c.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					response, err := base.RoundTrip(r)
 					if err != nil {
 						return response, err
@@ -424,7 +424,7 @@ func TestKeyManagerOwnedMetadataFetchAcceptedFailuresRetainRawEvidence(t *testin
 						cancel(cause)
 					}
 					return response, nil
-				})
+				}))
 			}
 			var view, wire *resource.RawResource
 			var envelope json.RawMessage

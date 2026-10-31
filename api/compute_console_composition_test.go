@@ -379,7 +379,7 @@ func TestComputeConsoleCompositionGuardsDiscoveryFailuresAndNoErrorFallback(t *t
 				if base == nil {
 					base = http.DefaultTransport
 				}
-				cloud.Provider.HTTPClient.Transport = secretFetchRoundTripFunc(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					response, err := base.RoundTrip(r)
 					if err == nil {
 						if mode == "source after discovery" {
@@ -389,7 +389,7 @@ func TestComputeConsoleCompositionGuardsDiscoveryFailuresAndNoErrorFallback(t *t
 						}
 					}
 					return response, err
-				})
+				}))
 			}
 			var gets, posts, retries atomic.Int32
 			cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {

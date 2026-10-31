@@ -26,10 +26,6 @@ import (
 const glanceTask396 = "Image cannot be imported. Error code: '396'"
 const glanceTaskPrefix = "/reverse/glance/v2/"
 
-type glanceTaskRoundTrip func(*http.Request) (*http.Response, error)
-
-func (f glanceTaskRoundTrip) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
-
 func glanceTaskJSON(id, status, message, input string) string {
 	return fmt.Sprintf(`{"id":%q,"type":"import","status":%q,"message":%q,"input":%s,"self":"https://foreign.invalid/tasks/decoy","schema":"https://foreign.invalid/schema","result":{"precise":9007199254740993}}`, id, status, message, input)
 }
@@ -55,7 +51,7 @@ func glanceTaskNumber(t *testing.T, raw json.RawMessage) any {
 }
 
 func glanceTaskHTTP(status int, body io.ReadCloser) *http.Response {
-	return &http.Response{StatusCode: status, Header: http.Header{"Content-Type": {"application/json"}, "X-Evidence": {"actual"}}, Body: body}
+	return testcloud.StreamResponse(status, body, http.Header{"Content-Type": {"application/json"}, "X-Evidence": {"actual"}})
 }
 
 func glanceTaskFast() tasks.TaskWaitOption { return tasks.WithTaskWaitPollInterval(time.Millisecond) }
@@ -69,12 +65,12 @@ func TestGlanceTaskWaitFreshReadsAndDefaults(t *testing.T) {
 	var deadlines []time.Time
 	var deadlineSet []bool
 	transport := cloud.Provider.HTTPClient.Transport
-	cloud.Provider.HTTPClient.Transport = glanceTaskRoundTrip(func(r *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		d, set := r.Context().Deadline()
 		deadlines = append(deadlines, d)
 		deadlineSet = append(deadlineSet, set)
 		return transport.RoundTrip(r)
-	})
+	}))
 	cloud.Mux.HandleFunc(glanceTaskPrefix+"tasks/original", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet || r.URL.RawQuery != "" {
 			t.Error("unexpected task request", r.Method, r.URL.String())
@@ -188,14 +184,14 @@ func TestGlanceTaskWaitRepeated396KeepsBudgetAndPausesAfterCreate(t *testing.T) 
 		var calls, posts atomic.Int32
 		var deadlines []time.Time
 		transport := cloud.Provider.HTTPClient.Transport
-		cloud.Provider.HTTPClient.Transport = glanceTaskRoundTrip(func(r *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			d, ok := r.Context().Deadline()
 			if !ok {
 				t.Error("bounded budget absent", r.Method, r.URL.Path)
 			}
 			deadlines = append(deadlines, d)
 			return transport.RoundTrip(r)
-		})
+		}))
 		cloud.Mux.HandleFunc(glanceTaskPrefix+"tasks/", func(w http.ResponseWriter, r *http.Request) {
 			calls.Add(1)
 			id := strings.TrimPrefix(r.URL.Path, glanceTaskPrefix+"tasks/")
@@ -413,7 +409,7 @@ func TestGlanceTaskWaitTerminalReadsAndCancellationNeverReplay(t *testing.T) {
 					testcloud.JSON(w, 200, glanceTaskJSON("old", "failure", glanceTask396, `{}`))
 				})
 				transport := cloud.Provider.HTTPClient.Transport
-				cloud.Provider.HTTPClient.Transport = glanceTaskRoundTrip(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					if r.Method != phase {
 						return transport.RoundTrip(r)
 					}
@@ -437,7 +433,7 @@ func TestGlanceTaskWaitTerminalReadsAndCancellationNeverReplay(t *testing.T) {
 						cancel()
 						return glanceTaskHTTP(code, io.NopCloser(strings.NewReader(glanceTaskJSON("new", "success", "", `{}`)))), nil
 					}
-				})
+				}))
 				// Native status failures retain configured retry policy; accepted
 				// read failures happen after it and must not trigger a resend.
 				cloud.Provider.RetryFunc = func(_ context.Context, _, _ string, _ *gophercloud.RequestOpts, err error, _ uint) error {
@@ -475,10 +471,10 @@ func TestGlanceTaskWaitTerminalReadsAndCancellationNeverReplay(t *testing.T) {
 func TestGlanceTaskWaitPreflightAndClosedOptions(t *testing.T) {
 	cloud := testcloud.New(t)
 	var calls atomic.Int32
-	cloud.Provider.HTTPClient.Transport = glanceTaskRoundTrip(func(r *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		calls.Add(1)
 		return glanceTaskHTTP(200, io.NopCloser(strings.NewReader(glanceTaskJSON("old", "success", "", `{}`)))), nil
-	})
+	}))
 	client := cloud.Client("image", glanceTaskPrefix)
 	a := tasks.New(client)
 	for _, ref := range []resource.Ref{resource.Ref{}, resource.ID("bad/id"), resource.ID("%2F"), resource.ID(".."), resource.Name("named")} {
@@ -585,10 +581,10 @@ func TestGlanceTaskWaitOptionSnapshotsAndConcurrentReuse(t *testing.T) {
 		return nil
 	})
 	transport := cloud.Provider.HTTPClient.Transport
-	cloud.Provider.HTTPClient.Transport = glanceTaskRoundTrip(func(r *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		retained.Headers["X-Trace"] = "late mutation"
 		return transport.RoundTrip(r)
-	})
+	}))
 	if v, err := a.WaitForTaskState(context.Background(), resource.ID("old"), "failure", custom); err != nil || v == nil {
 		t.Fatal(v, err)
 	}
@@ -605,13 +601,13 @@ func TestGlanceTaskWaitLiveSourceFixedRoutesAndReauthentication(t *testing.T) {
 		var gets, posts, middleware, reauth, retries atomic.Int32
 		type key struct{}
 		transport := cloud.Provider.HTTPClient.Transport
-		cloud.Provider.HTTPClient.Transport = glanceTaskRoundTrip(func(r *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			middleware.Add(1)
 			if r.Context().Value(key{}) != "caller" || r.Header.Get("X-Source") != "configured" || r.Header.Get("X-Trace") != "final" || r.Header.Get("OpenStack-API-Version") != "image 2.17" {
 				t.Error("shared client policy lost", r.Header)
 			}
 			return transport.RoundTrip(r)
-		})
+		}))
 		cloud.Provider.ReauthFunc = func(context.Context) error { reauth.Add(1); cloud.Provider.SetToken("reauthenticated"); return nil }
 		cloud.Provider.RetryFunc = func(_ context.Context, method, target string, _ *gophercloud.RequestOpts, err error, _ uint) error {
 			retries.Add(1)
@@ -677,11 +673,11 @@ func TestGlanceTaskWaitLiveSourceFixedRoutesAndReauthentication(t *testing.T) {
 					opts = append(opts, func(*tasks.TaskWaitOpts) error { client.Type = "compute"; return nil })
 				} else {
 					transport := cloud.Provider.HTTPClient.Transport
-					cloud.Provider.HTTPClient.Transport = glanceTaskRoundTrip(func(r *http.Request) (*http.Response, error) {
+					cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 						response, err := transport.RoundTrip(r)
 						client.Type = "compute"
 						return response, err
-					})
+					}))
 				}
 				v, err := tasks.New(client).WaitForTask(context.Background(), resource.ID("old"), opts...)
 				if !errors.Is(err, resource.ErrUnsupported) || (when == "option" && (v != nil || calls.Load() != 0)) || (when == "after GET" && (v == nil || v.Task.Status != "failure" || calls.Load() != 1)) {

@@ -468,12 +468,6 @@ func TestClusteringFindIdentityAcceptedMalformedAndConsumedRowEvidence(t *testin
 	t.Run("read-and-transport-failures", clusteringFindIdentityReadAndTransportFailures)
 }
 
-type clusteringFindIdentityTransport func(*http.Request) (*http.Response, error)
-
-func (run clusteringFindIdentityTransport) RoundTrip(r *http.Request) (*http.Response, error) {
-	return run(r)
-}
-
 type clusteringFindIdentityReadFailure struct {
 	body  []byte
 	cause error
@@ -493,7 +487,7 @@ func clusteringFindIdentityReadAndTransportFailures(t *testing.T) {
 			cause := errors.New("native-find-transport-or-read-failure")
 			var calls atomic.Int32
 			body := `{"profile":{"id":"valid"}}`
-			cloud.Provider.HTTPClient.Transport = clusteringFindIdentityTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls.Add(1)
 				if r.URL.Path != clusteringFindIdentityPrefix+"/profiles/input" || r.Method != http.MethodGet {
 					t.Error("failure restarted lookup", r.Method, r.URL)
@@ -502,7 +496,7 @@ func clusteringFindIdentityReadAndTransportFailures(t *testing.T) {
 					return nil, cause
 				}
 				return &http.Response{StatusCode: 200, Header: http.Header{"X-Request-Id": {"read-failed"}}, Body: &clusteringFindIdentityReadFailure{[]byte(body), cause}, Request: r}, nil
-			})
+			}))
 			value, err := profiles.New(client).FindIdentity(context.Background(), "input")
 			if value != nil || !errors.Is(err, cause) || calls.Load() != 1 {
 				t.Fatal(value, err, calls.Load())
@@ -545,7 +539,7 @@ func TestClusteringFindIdentityOptionsSnapshotsLastWinsAndConcurrentReuse(t *tes
 		if native == nil {
 			native = http.DefaultTransport
 		}
-		cloud.Provider.HTTPClient.Transport = clusteringFindIdentityTransport(func(r *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			response, err := native.RoundTrip(r)
 			if r.URL.Path == path+"/missing" {
 				captured["X-Trace"] = "changed-config"
@@ -553,7 +547,7 @@ func TestClusteringFindIdentityOptionsSnapshotsLastWinsAndConcurrentReuse(t *tes
 				client.MoreHeaders["x-trace"] = "changed-source"
 			}
 			return response, err
-		})
+		}))
 		api := profiles.New(client)
 		for attempt := 0; attempt < 2; attempt++ {
 			value, err := api.FindIdentity(context.Background(), "missing", options...)
@@ -716,7 +710,7 @@ func TestClusteringFindIdentityPhasesFreezeSelectionAndReadLiveToken(t *testing.
 			if native == nil {
 				native = http.DefaultTransport
 			}
-			cloud.Provider.HTTPClient.Transport = clusteringFindIdentityTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				response, err := native.RoundTrip(r)
 				if r.URL.Path == path+"/input" {
 					cloud.Provider.SetToken("rotated-first")
@@ -726,7 +720,7 @@ func TestClusteringFindIdentityPhasesFreezeSelectionAndReadLiveToken(t *testing.
 					client.Microversion = "1.0"
 				}
 				return response, err
-			})
+			}))
 			var options []profiles.FindOption
 			if selection != "inherited" {
 				options = []profiles.FindOption{profiles.WithFindHeader("X-Selected", "stable"), profiles.WithFindMicroversion(selection)}
@@ -757,7 +751,7 @@ func TestClusteringFindIdentitySourceAndContextRecheckedBeforeFallbackAndContinu
 				if native == nil {
 					native = http.DefaultTransport
 				}
-				cloud.Provider.HTTPClient.Transport = clusteringFindIdentityTransport(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					response, err := native.RoundTrip(r)
 					if boundary == "fallback" && r.URL.Path == path+"/input" || boundary == "continuation" && r.URL.Path == path {
 						switch invalid {
@@ -772,7 +766,7 @@ func TestClusteringFindIdentitySourceAndContextRecheckedBeforeFallbackAndContinu
 						}
 					}
 					return response, err
-				})
+				}))
 				value, err := profiles.New(client).FindIdentity(ctx, "input", profiles.WithFindHeader("X-Selected", "owned"), profiles.WithFindMicroversion("1.7"))
 				want := resource.ErrInvalidOption
 				if invalid == "cancel" {

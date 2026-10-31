@@ -16,10 +16,6 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type novaLimitsTransport func(*http.Request) (*http.Response, error)
-
-func (f novaLimitsTransport) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
-
 func TestNovaLimitsRetriesAndReauthKeepSingleTenantQueryAndSourceTransport(t *testing.T) {
 	for _, mode := range []string{"reauth", "backoff", "retry"} {
 		t.Run(mode, func(t *testing.T) {
@@ -44,7 +40,7 @@ func TestNovaLimitsRetriesAndReauthKeepSingleTenantQueryAndSourceTransport(t *te
 			})
 			cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) { t.Errorf("retry changed route=%s", r.URL) })
 			original := cloud.Provider.HTTPClient.Transport
-			cloud.Provider.HTTPClient.Transport = novaLimitsTransport(func(r *http.Request) (*http.Response, error) { transports.Add(1); return original.RoundTrip(r) })
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) { transports.Add(1); return original.RoundTrip(r) }))
 			switch mode {
 			case "reauth":
 				cloud.Provider.ReauthFunc = func(context.Context) error {
@@ -106,7 +102,7 @@ func TestNovaLimitsRedirectCannotDropProjectChangeOriginOrMethod(t *testing.T) {
 				}
 			})
 			original := cloud.Provider.HTTPClient.Transport
-			cloud.Provider.HTTPClient.Transport = novaLimitsTransport(func(r *http.Request) (*http.Response, error) { transports.Add(1); return original.RoundTrip(r) })
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) { transports.Add(1); return original.RoundTrip(r) }))
 			cloud.Provider.HTTPClient.CheckRedirect = func(next *http.Request, via []*http.Request) error {
 				policy.Add(1)
 				if target == "policy method" {
@@ -185,13 +181,13 @@ func TestNovaLimitsRetryAndTransportFailuresPreserveSourceErrorsWithoutFallback(
 		cloud := testcloud.New(t)
 		var calls atomic.Int32
 		sentinel := errors.New("source transport rejected limits")
-		cloud.Provider.HTTPClient.Transport = novaLimitsTransport(func(r *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			calls.Add(1)
 			if r.URL.Query().Get("tenant_id") != "project-fixed" {
 				t.Error(r.URL)
 			}
 			return nil, sentinel
-		})
+		}))
 		if value, err := newNovaLimitsScope(t, cloud).Get(context.Background()); value != nil || !errors.Is(err, sentinel) || calls.Load() != 1 {
 			t.Fatal(value, err, calls.Load())
 		}

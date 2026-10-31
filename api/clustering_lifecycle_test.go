@@ -640,7 +640,7 @@ func TestClusteringTrackedCommitFailureKeepsDirtyAndResponseEvidence(t *testing.
 			}
 			original := errors.New("original tracked transport error")
 			var requests atomic.Int32
-			cloud.Provider.HTTPClient.Transport = clusteringWaitTransport(func(r *http.Request) (*http.Response, error) { requests.Add(1); return nil, original })
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) { requests.Add(1); return nil, original }))
 			if _, err := handle.commit(context.Background(), nil); !errors.Is(err, original) || !handle.dirty() || requests.Load() != 1 {
 				t.Fatal(err, handle.dirty(), requests.Load())
 			}

@@ -377,11 +377,11 @@ func TestCinderMetadataScopesNameBindingAndRequestSnapshots(t *testing.T) {
 		if transport == nil {
 			transport = http.DefaultTransport
 		}
-		cloud.Provider.HTTPClient.Transport = cinderMetadataRoundTrip(func(r *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			response, err := transport.RoundTrip(r)
 			client.Type = "compute" // same call goroutine, before resolution returns
 			return response, err
-		})
+		}))
 		if scope, err := f.bind(context.Background(), client, resource.Name("target")); scope != nil || !errors.Is(err, resource.ErrInvalidOption) || localCalls.Load() != 1 {
 			t.Fatal("lookup changed source without revalidation", scope, err, localCalls.Load())
 		}
@@ -432,10 +432,10 @@ func TestCinderMetadataScopesMalformedAcceptedAndOriginalErrors(t *testing.T) {
 		cloud := testcloud.New(t)
 		var calls atomic.Int32
 		cause := errors.New("metadata stream interrupted")
-		cloud.Provider.HTTPClient.Transport = cinderMetadataRoundTrip(func(r *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			calls.Add(1)
 			return &http.Response{StatusCode: 200, Header: http.Header{"X-Read": {"partial"}}, Body: &cinderMetadataReadFailure{cause: cause}, Request: r}, nil
-		})
+		}))
 		v, err := cinderMetadataBind(t, f, cloud.Client("block-storage", f.prefix())).Get(context.Background())
 		var accepted *resource.ResponseError
 		if v != nil || !errors.Is(err, cause) || !errors.As(err, &accepted) || string(accepted.Body) != `{"metadata":` || accepted.StatusCode != 200 || accepted.Header.Get("X-Read") != "partial" || calls.Load() != 1 {
@@ -541,13 +541,13 @@ func TestCinderMetadataScopesFixedTargetLiveProviderAndContext(t *testing.T) {
 			transport = http.DefaultTransport
 		}
 		type contextKey struct{}
-		cloud.Provider.HTTPClient.Transport = cinderMetadataRoundTrip(func(r *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			middleware.Add(1)
 			if r.Context().Value(contextKey{}) != "owned" {
 				t.Error("caller context was replaced")
 			}
 			return transport.RoundTrip(r)
-		})
+		}))
 		cloud.Provider.ReauthFunc = func(context.Context) error { reauth.Add(1); cloud.Provider.SetToken("reauthenticated"); return nil }
 		cloud.Provider.RetryFunc = func(_ context.Context, method, target string, options *gophercloud.RequestOpts, err error, _ uint) error {
 			retries.Add(1)
@@ -717,10 +717,6 @@ func TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation(t *testing
 		}
 	})
 }
-
-type cinderMetadataRoundTrip func(*http.Request) (*http.Response, error)
-
-func (f cinderMetadataRoundTrip) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
 
 type cinderMetadataReadFailure struct {
 	cause error

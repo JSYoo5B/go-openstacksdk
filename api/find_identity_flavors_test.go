@@ -281,7 +281,7 @@ func TestNativeFindIdentityFlavorsEnrichmentFailuresAreTerminal(t *testing.T) {
 				if transport == nil {
 					transport = http.DefaultTransport
 				}
-				cloud.Provider.HTTPClient.Transport = nativeIdentityFindTransport(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					if strings.HasSuffix(r.URL.Path, "/os-extra_specs") && (mode == "transport" || mode == "read") {
 						extras.Add(1)
 						if mode == "transport" {
@@ -290,7 +290,7 @@ func TestNativeFindIdentityFlavorsEnrichmentFailuresAreTerminal(t *testing.T) {
 						return &http.Response{StatusCode: 200, Header: http.Header{"Content-Type": {"application/json"}}, Body: flavorIdentityReadFailure{origin}, Request: r}, nil
 					}
 					return transport.RoundTrip(r)
-				})
+				}))
 				cloud.Mux.HandleFunc("GET "+flavorIdentityPath+"/lookup", func(w http.ResponseWriter, r *http.Request) {
 					gets.Add(1)
 					testcloud.JSON(w, 200, `{"flavor":{"id":"7","name":"found"}}`)
@@ -480,7 +480,7 @@ func TestNativeFindIdentityFlavorsKeepsLiveProviderVersionAndContext(t *testing.
 				transport = http.DefaultTransport
 			}
 			var calls atomic.Int32
-			cloud.Provider.HTTPClient.Transport = nativeIdentityFindTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls.Add(1)
 				if r.Context().Value(flavorIdentityContextKey{}) != "caller" {
 					t.Error("caller context lost")
@@ -488,7 +488,7 @@ func TestNativeFindIdentityFlavorsKeepsLiveProviderVersionAndContext(t *testing.
 				copy := r.Clone(r.Context())
 				copy.Header.Set("X-Flavor-Middleware", "source")
 				return transport.RoundTrip(copy)
-			})
+			}))
 			check := func(r *http.Request, token string) {
 				if r.Header.Get("X-Auth-Token") != token || r.Header.Get("X-Configured") != "source" || r.Header.Get("X-Flavor-Middleware") != "source" || r.Header.Get("X-OpenStack-Nova-API-Version") != "2.1" {
 					t.Error(r.URL, r.Header)

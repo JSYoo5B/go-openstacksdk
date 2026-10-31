@@ -45,7 +45,7 @@ func testClusteringMutationLocationHeaders(t *testing.T, collection string) {
 				if operation == "Delete" {
 					method = http.MethodDelete
 				}
-				client.ProviderClient.HTTPClient.Transport = clusterRoundTrip(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					calls.Add(1)
 					if r.Method != method || r.URL.Path != path || r.Header.Get("X-Auth-Token") != "test-token" {
 						t.Error(r.Method, r.URL, r.Header)
@@ -58,7 +58,7 @@ func testClusteringMutationLocationHeaders(t *testing.T, collection string) {
 						header["location"] = []string{""}
 					}
 					return &http.Response{StatusCode: code, Header: header, Body: io.NopCloser(strings.NewReader(body)), Request: r}, nil
-				})
+				}))
 				api := clusters.New(client)
 				var submission *actions.Submission
 				var err error

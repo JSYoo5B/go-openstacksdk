@@ -180,13 +180,13 @@ func TestClusteringClustersNamedDeleteFreezesHeadersForceAndRechecksSource(t *te
 				if parent == nil {
 					parent = http.DefaultTransport
 				}
-				client.ProviderClient.HTTPClient.Transport = clusterRoundTrip(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					response, err := parent.RoundTrip(r)
 					if r.Method == "GET" {
 						client.Type = "compute"
 					}
 					return response, err
-				})
+				}))
 			}
 			capture := func(config *request.Config[clusters.DeleteOpts]) error { captured = config; return nil }
 			value, err := clusters.New(client).Delete(context.Background(), resource.Name("selected"), clusters.WithDeleteForce(true), clusters.WithDeleteHeader("X-Custom", "original"), capture)

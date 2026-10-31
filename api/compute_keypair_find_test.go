@@ -487,13 +487,13 @@ func TestComputeFindKeypairOwnedOptionsPreflightAndPhysicalTerminalErrors(t *tes
 				if base == nil {
 					base = http.DefaultTransport
 				}
-				cloud.Provider.HTTPClient.Transport = secretFetchRoundTripFunc(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					response, err := base.RoundTrip(r)
 					if err == nil {
 						client.ResourceBase = cloud.Server.URL + "/changed/"
 					}
 					return response, err
-				})
+				}))
 			} else if mode == "accepted member close404" {
 				track = payloadContractTrack(cloud, nil, nested)
 			} else {

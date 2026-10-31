@@ -371,13 +371,13 @@ func TestComputeConsoleAuthTokenPreflightAcceptedFaultsAndLiveNativePolicy(t *te
 				if base == nil {
 					base = http.DefaultTransport
 				}
-				cloud.Provider.HTTPClient.Transport = secretFetchRoundTripFunc(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					response, err := base.RoundTrip(r)
 					if err == nil {
 						client.ResourceBase = cloud.Server.URL + "/changed/"
 					}
 					return response, err
-				})
+				}))
 			} else if tc.close {
 				track = payloadContractTrack(cloud, nil, nested)
 			} else {

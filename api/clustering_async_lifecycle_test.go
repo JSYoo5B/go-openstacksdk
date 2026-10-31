@@ -886,7 +886,7 @@ func TestClusteringAsyncTrackedFailuresKeepDirtyAndAcceptedEvidence(t *testing.T
 					cause := errors.New("original async lifecycle I/O failure")
 					body := clusteringAsyncTrackedObject(kind, `{"name":"Server"}`)
 					var calls atomic.Int32
-					cloud.Provider.HTTPClient.Transport = clusteringAsyncTrackedTransport(func(r *http.Request) (*http.Response, error) {
+					cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 						calls.Add(1)
 						if r.Method != http.MethodPatch {
 							t.Error(r.Method)
@@ -895,7 +895,7 @@ func TestClusteringAsyncTrackedFailuresKeepDirtyAndAcceptedEvidence(t *testing.T
 							return nil, cause
 						}
 						return &http.Response{StatusCode: 202, Header: http.Header{"Location": {"actions/accepted"}, "X-Request-Id": {"read-failure"}}, Body: &clusteringAsyncTrackedReadFailure{[]byte(body), cause}, Request: r}, nil
-					})
+					}))
 					_, err := handle.commit(context.Background(), nil)
 					if !errors.Is(err, cause) || !handle.dirty() || calls.Load() != 1 || handle.response().operation != nil {
 						t.Fatal(err, handle.dirty(), calls.Load())
@@ -910,12 +910,6 @@ func TestClusteringAsyncTrackedFailuresKeepDirtyAndAcceptedEvidence(t *testing.T
 			}
 		})
 	}
-}
-
-type clusteringAsyncTrackedTransport func(*http.Request) (*http.Response, error)
-
-func (run clusteringAsyncTrackedTransport) RoundTrip(r *http.Request) (*http.Response, error) {
-	return run(r)
 }
 
 type clusteringAsyncTrackedReadFailure struct {

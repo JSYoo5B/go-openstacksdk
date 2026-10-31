@@ -62,13 +62,13 @@ func TestComputeCloudFlavorEagerInventoryDefaultsAndPartialEvidence(t *testing.T
 			if tc.failure == "childClose" {
 				track = payloadContractTrack(cloud, nil, nil)
 				base := cloud.Provider.HTTPClient.Transport
-				cloud.Provider.HTTPClient.Transport = secretFetchRoundTripFunc(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					response, err := base.RoundTrip(r)
 					if err == nil && r.URL.Path == flavorIdentityPath+"/7/os-extra_specs" {
 						response.Body.(*payloadContractBody).closeErr = nested
 					}
 					return response, err
-				})
+				}))
 			}
 			cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 				calls.Add(1)

@@ -382,12 +382,6 @@ func TestClusteringNodeAdoptHTTPFailuresRetainNativeErrors(t *testing.T) {
 	}
 }
 
-type nodeAdoptTransportFunc func(*http.Request) (*http.Response, error)
-
-func (f nodeAdoptTransportFunc) RoundTrip(request *http.Request) (*http.Response, error) {
-	return f(request)
-}
-
 type nodeAdoptReadErrorBody struct {
 	reader io.Reader
 	cause  error
@@ -411,7 +405,7 @@ func TestClusteringNodeAdoptTransportAndAcceptedReadErrorsPreserveCauses(t *test
 				partial := `{"partial":`
 				body := &nodeAdoptReadErrorBody{reader: strings.NewReader(partial), cause: cause}
 				var calls atomic.Int32
-				provider := &gophercloud.ProviderClient{HTTPClient: http.Client{Transport: nodeAdoptTransportFunc(func(r *http.Request) (*http.Response, error) {
+				provider := &gophercloud.ProviderClient{HTTPClient: http.Client{Transport: testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					calls.Add(1)
 					if !accepted {
 						return nil, cause

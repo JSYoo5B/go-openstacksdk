@@ -17,10 +17,6 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type designateQuotaTransport func(*http.Request) (*http.Response, error)
-
-func (f designateQuotaTransport) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
-
 func TestDesignateQuotaRetriesAndReauthKeepFixedProjectAndSnapshottedBody(t *testing.T) {
 	for _, mode := range []string{"reauth", "backoff", "retry"} {
 		for _, operation := range []string{"Get", "Update", "Reset"} {
@@ -60,10 +56,10 @@ func TestDesignateQuotaRetriesAndReauthKeepFixedProjectAndSnapshottedBody(t *tes
 				})
 				cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) { t.Errorf("retry escaped target: %s %s", r.Method, r.URL) })
 				original := cloud.Provider.HTTPClient.Transport
-				cloud.Provider.HTTPClient.Transport = designateQuotaTransport(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					transports.Add(1)
 					return original.RoundTrip(r)
-				})
+				}))
 				mutateInputs := func() {
 					callbacks.Add(1)
 					zero, large = 555, 666
@@ -132,7 +128,7 @@ func TestDesignateQuotaRedirectCannotResetAnotherProjectOrCurrentProject(t *test
 				}
 			})
 			original := cloud.Provider.HTTPClient.Transport
-			cloud.Provider.HTTPClient.Transport = designateQuotaTransport(func(r *http.Request) (*http.Response, error) { transports.Add(1); return original.RoundTrip(r) })
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) { transports.Add(1); return original.RoundTrip(r) }))
 			cloud.Provider.HTTPClient.CheckRedirect = func(next *http.Request, via []*http.Request) error {
 				policy.Add(1)
 				if tc.mutate != nil {

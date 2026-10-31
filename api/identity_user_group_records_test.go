@@ -247,13 +247,13 @@ func TestIdentityUserGroupRecordsPreflightFaultsAndPartialResults(t *testing.T) 
 				if base == nil {
 					base = http.DefaultTransport
 				}
-				cloud.Provider.HTTPClient.Transport = secretFetchRoundTripFunc(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					response, err := base.RoundTrip(r)
 					if err == nil && (mode == "source transport" || calls.Load() == 2) {
 						client.ResourceBase = cloud.Server.URL + "/changed/identity/v3/"
 					}
 					return response, err
-				})
+				}))
 			}
 			sequence := api.ListGroupRecords(ctx, userID)
 			if calls.Load() != 0 {

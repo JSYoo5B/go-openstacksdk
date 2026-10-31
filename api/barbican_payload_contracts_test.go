@@ -21,10 +21,6 @@ import (
 const payloadContractBase = "/reverse/barbican/v1/"
 const payloadContractPath = payloadContractBase + "secrets/secret-id/payload"
 
-type payloadContractTransport func(*http.Request) (*http.Response, error)
-
-func (f payloadContractTransport) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
-
 type payloadContractBody struct {
 	io.ReadCloser
 	reads, closes     atomic.Int32
@@ -60,7 +56,7 @@ func payloadContractTrack(cloud *testcloud.Cloud, readErr, closeErr error) *payl
 	if base == nil {
 		base = http.DefaultTransport
 	}
-	cloud.Provider.HTTPClient.Transport = payloadContractTransport(func(r *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		track.calls.Add(1)
 		response, err := base.RoundTrip(r)
 		if err == nil {
@@ -71,7 +67,7 @@ func payloadContractTrack(cloud *testcloud.Cloud, readErr, closeErr error) *payl
 			track.mu.Unlock()
 		}
 		return response, err
-	})
+	}))
 	return track
 }
 func (track *payloadContractTracking) last(t *testing.T) *payloadContractBody {
@@ -373,12 +369,12 @@ func TestBarbicanPayloadContractsNativeReplay(t *testing.T) {
 		if base == nil {
 			base = http.DefaultTransport
 		}
-		cloud.Provider.HTTPClient.Transport = payloadContractTransport(func(r *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			if attempts.Add(1) == 1 {
 				return nil, failure
 			}
 			return base.RoundTrip(r)
-		})
+		}))
 		cloud.Provider.RetryFunc = func(_ context.Context, _, _ string, _ *gophercloud.RequestOpts, err error, count uint) error {
 			retries.Add(1)
 			if !errors.Is(err, failure) || count != 1 {

@@ -167,10 +167,6 @@ func TestInstanceHAWaitDeletionUsesStatusOrAbsenceWithoutDELETE(t *testing.T) {
 	}
 }
 
-type instanceHAWaitTransport func(*http.Request) (*http.Response, error)
-
-func (fn instanceHAWaitTransport) RoundTrip(r *http.Request) (*http.Response, error) { return fn(r) }
-
 func TestInstanceHAWaitDeadlineDefaultsAndOverrides(t *testing.T) {
 	for _, operation := range []string{"status-unlimited", "delete-default", "status-override", "delete-unlimited", "delete-parent", "common-wait"} {
 		t.Run(operation, func(t *testing.T) {
@@ -180,7 +176,7 @@ func TestInstanceHAWaitDeadlineDefaultsAndOverrides(t *testing.T) {
 			api := instanceHAWaitAPIs(t, client)[0]
 			original := client.ProviderClient.HTTPClient.Transport
 			var calls atomic.Int32
-			client.ProviderClient.HTTPClient.Transport = instanceHAWaitTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls.Add(1)
 				deadline, has := r.Context().Deadline()
 				want := time.Duration(0)
@@ -198,7 +194,7 @@ func TestInstanceHAWaitDeadlineDefaultsAndOverrides(t *testing.T) {
 					t.Errorf("%s deadline exists=%v remaining=%v want=%v", operation, has, time.Until(deadline), want)
 				}
 				return original.RoundTrip(r)
-			})
+			}))
 			cloud.Mux.HandleFunc("/v1/"+api.path, func(w http.ResponseWriter, r *http.Request) {
 				if operation == "delete-default" || operation == "delete-unlimited" || operation == "delete-parent" {
 					testcloud.JSON(w, 404, `{"error":"gone"}`)

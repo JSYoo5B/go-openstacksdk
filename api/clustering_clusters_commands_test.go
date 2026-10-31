@@ -356,25 +356,19 @@ func TestClusteringClusterCommandsPreflightErrorsAndCancellation(t *testing.T) {
 	}
 }
 
-type clusterCommandTransport func(*http.Request) (*http.Response, error)
-
-func (f clusterCommandTransport) RoundTrip(request *http.Request) (*http.Response, error) {
-	return f(request)
-}
-
 func TestClusteringClusterCommandsCustomTransportSubmissionOwnership(t *testing.T) {
 	cloud := testcloud.New(t)
 	client := cloud.Client("clustering", "/senlin/v1")
 	header := http.Header{"location": {"actions/transport-action"}, "X-Request-Id": {"transport-evidence"}}
 	responseBody := `{"action":"transport-action","extra":{"exact":9007199254740993}}`
 	var calls atomic.Int32
-	client.HTTPClient.Transport = clusterCommandTransport(func(r *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		calls.Add(1)
 		if r.Method != http.MethodPost || r.URL.Path != "/senlin/v1/clusters/id/actions" || r.Header.Get("X-Auth-Token") != "test-token" {
 			t.Error(r.Method, r.URL, r.Header)
 		}
 		return &http.Response{StatusCode: 202, Header: header, Body: io.NopCloser(strings.NewReader(responseBody)), Request: r}, nil
-	})
+	}))
 	value, err := clusters.New(client).ScaleOut(context.Background(), resource.ID("id"), clusters.ScaleOutOpts{}, clusters.WithScaleOutCount(1))
 	if err != nil || value == nil {
 		t.Fatal(value, err)

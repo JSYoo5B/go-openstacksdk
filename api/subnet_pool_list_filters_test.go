@@ -616,7 +616,7 @@ func TestSubnetPoolListFiltersPagingLiveSourceAndNativeStatus(t *testing.T) {
 				c.MoreHeaders, c.Microversion = map[string]string{"X-Configured": "kept"}, "2.0"
 				c.ProviderClient.SetToken("first-token")
 				base := c.ProviderClient.HTTPClient.Transport
-				c.ProviderClient.HTTPClient.Transport = secretFetchRoundTripFunc(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					middleware.Add(1)
 					resp, err := base.RoundTrip(r)
 					if r.URL.Query().Get("marker") == "" {
@@ -626,7 +626,7 @@ func TestSubnetPoolListFiltersPagingLiveSourceAndNativeStatus(t *testing.T) {
 						}
 					}
 					return resp, err
-				})
+				}))
 				cloud.Mux.HandleFunc("GET "+subnetPoolListPath, func(w http.ResponseWriter, r *http.Request) {
 					calls.Add(1)
 					if r.Header.Get("X-Configured") != "kept" || r.Header.Get("OpenStack-API-Version") != "network 2.0" || r.URL.Query().Get("shared") != "false" || r.URL.Query().Get("status") != "vendor-status" || !reflect.DeepEqual(r.URL.Query()["fields"], []string{"id", "name"}) {

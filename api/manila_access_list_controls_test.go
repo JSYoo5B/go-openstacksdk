@@ -224,7 +224,7 @@ func TestManilaAccessListControlsRecheckSourceAfterOptionsAndLookup(t *testing.T
 			})
 			client := shareAccessClient(cloud, "2.82")
 			transport := client.HTTPClient.Transport
-			client.HTTPClient.Transport = manilaAccessControlTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				response, err := transport.RoundTrip(r)
 				if parentLookup {
 					client.Microversion = "2.44"
@@ -232,7 +232,7 @@ func TestManilaAccessListControlsRecheckSourceAfterOptionsAndLookup(t *testing.T
 					client.Microversion = "2.81"
 				}
 				return response, err
-			})
+			}))
 			var err error
 			if parentLookup {
 				_, err = shareaccessrules.New(client).InShare(context.Background(), resource.Name("team.prod"))
@@ -338,7 +338,3 @@ func TestManilaAccessListControlsTerminalCancellation(t *testing.T) {
 		}
 	})
 }
-
-type manilaAccessControlTransport func(*http.Request) (*http.Response, error)
-
-func (f manilaAccessControlTransport) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }

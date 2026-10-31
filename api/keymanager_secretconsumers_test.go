@@ -130,15 +130,15 @@ func TestKeyManagerSecretConsumersMutationSnapshotsAndMissingPolicy(t *testing.T
 		return nil
 	}
 	original := client.HTTPClient.Transport
-	client.HTTPClient.Transport = secretConsumerRoundTripFunc(func(r *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		retained.Headers["X-Call"] = "mutated"
 		retained.Fields["vendor"][0] = 'x'
 		return original.RoundTrip(r)
-	})
+	}))
 	if _, err := scope.Create(context.Background(), input, option, custom); err != nil {
 		t.Fatal(err)
 	}
-	client.HTTPClient.Transport = original
+	cloud.SetTransport(original)
 	mode.Store(404)
 	if value, err := scope.Delete(context.Background(), input); value != nil || err != nil {
 		t.Fatal(value, err)
@@ -162,7 +162,7 @@ func TestKeyManagerSecretConsumersMutationSnapshotsAndMissingPolicy(t *testing.T
 		t.Fatal(err)
 	}
 	transportFailure := &gophercloud.ErrUnexpectedResponseCode{Actual: 404}
-	client.HTTPClient.Transport = secretConsumerRoundTripFunc(func(r *http.Request) (*http.Response, error) { return nil, transportFailure })
+	cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) { return nil, transportFailure }))
 	if _, err := scope.Delete(context.Background(), input); !errors.Is(err, transportFailure) {
 		t.Fatal("transport404 was ignored", err)
 	} else {
@@ -171,7 +171,7 @@ func TestKeyManagerSecretConsumersMutationSnapshotsAndMissingPolicy(t *testing.T
 			t.Fatal("transport cause lost", err)
 		}
 	}
-	client.HTTPClient.Transport = original
+	cloud.SetTransport(original)
 	if calls.Load() != 7 {
 		t.Fatal(calls.Load())
 	}
@@ -184,11 +184,11 @@ func TestKeyManagerSecretConsumersMutationSnapshotsAndMissingPolicy(t *testing.T
 			defer cancel()
 			var requests atomic.Int32
 			body := secretConsumerMutation
-			client.HTTPClient.Transport = secretConsumerRoundTripFunc(func(r *http.Request) (*http.Response, error) {
+			observed.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				requests.Add(1)
 				cancel()
 				return &http.Response{StatusCode: status, Header: http.Header{"X-Request-Id": {"canceled-status"}}, Body: io.NopCloser(strings.NewReader(body)), Request: r}, nil
-			})
+			}))
 			value, err := scope.Delete(ctx, input)
 			if value != nil || !errors.Is(err, context.Canceled) || requests.Load() != 1 {
 				t.Fatal("canceled response was suppressed or resent", value, err, requests.Load())
@@ -252,13 +252,13 @@ func TestKeyManagerSecretConsumersNameScopeAndFixedIdentity(t *testing.T) {
 			})
 			if kind == "changed-source" {
 				original := client.HTTPClient.Transport
-				client.HTTPClient.Transport = secretConsumerRoundTripFunc(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					response, err := original.RoundTrip(r)
 					if lists.Load() == 2 {
 						client.Type = "compute"
 					}
 					return response, err
-				})
+				}))
 			}
 			scope, err := secretconsumers.New(client).InSecret(context.Background(), resource.Name("exact name"))
 			if kind == "duplicate" {
@@ -497,11 +497,11 @@ func TestKeyManagerSecretConsumersContinuationGuardsAndTerminalFailures(t *testi
 			})
 			if mode == "source-recheck" {
 				original := client.HTTPClient.Transport
-				client.HTTPClient.Transport = secretConsumerRoundTripFunc(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					response, err := original.RoundTrip(r)
 					client.Type = "compute"
 					return response, err
-				})
+				}))
 			}
 			scope := secretConsumersScope(t, client)
 			options := []secretconsumers.ListOption{secretconsumers.WithListOptions(secretconsumers.ListOpts{Offset: 2}), secretconsumers.WithListQuery("vendor", "fixed")}
@@ -628,10 +628,10 @@ func TestKeyManagerSecretConsumersLiveSourceAndLazyPreflight(t *testing.T) {
 		}
 	})
 	original := client.HTTPClient.Transport
-	client.HTTPClient.Transport = secretConsumerRoundTripFunc(func(r *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		r.Header.Set("X-Middleware", "original")
 		return original.RoundTrip(r)
-	})
+	}))
 	scope := secretConsumersScope(t, client)
 	if values, err := scope.All(context.Background()); err != nil || len(values) != 2 || calls.Load() != 2 || scope.RawClient() != client || scope.RawClient().ProviderClient != cloud.Provider {
 		t.Fatal(values, err, calls.Load())
@@ -711,9 +711,9 @@ func TestKeyManagerSecretConsumersLiveSourceAndLazyPreflight(t *testing.T) {
 		t.Fatal(calls.Load(), client.MoreHeaders)
 	}
 	readFailure := fmt.Errorf("original read failure")
-	client.HTTPClient.Transport = secretConsumerRoundTripFunc(func(r *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		return &http.Response{StatusCode: 200, Header: http.Header{"X-Request-Id": {"read-failure"}}, Body: &secretConsumerFailingRead{cause: readFailure}, Request: r}, nil
-	})
+	}))
 	_, err := scope.Delete(context.Background(), input)
 	var accepted *resource.ResponseError
 	if !errors.Is(err, readFailure) || !errors.As(err, &accepted) || accepted.StatusCode != 200 || accepted.Header.Get("X-Request-ID") != "read-failure" {
@@ -725,7 +725,3 @@ type secretConsumerFailingRead struct{ cause error }
 
 func (r *secretConsumerFailingRead) Read([]byte) (int, error) { return 0, r.cause }
 func (r *secretConsumerFailingRead) Close() error             { return nil }
-
-type secretConsumerRoundTripFunc func(*http.Request) (*http.Response, error)
-
-func (f secretConsumerRoundTripFunc) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }

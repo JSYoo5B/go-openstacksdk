@@ -39,13 +39,13 @@ func TestAcceleratorRequestAcceptedBodyCancellationRetainsResponse(t *testing.T)
 	if transport == nil {
 		transport = http.DefaultTransport
 	}
-	cloud.Provider.HTTPClient.Transport = acceleratorResponseBoundaryTransport(func(r *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		response, err := transport.RoundTrip(r)
 		if err == nil {
 			response.Body = &acceleratorResponseBoundaryBody{ReadCloser: response.Body, cancel: cancel, closes: &closes}
 		}
 		return response, err
-	})
+	}))
 	cloud.Provider.RetryFunc = func(context.Context, string, string, *gophercloud.RequestOpts, error, uint) error {
 		retries.Add(1)
 		return errors.New("accepted body cancellation must not retry creation")
@@ -90,12 +90,6 @@ func TestAcceleratorRequestMalformedAcceptedJSONBypassesRetryHook(t *testing.T) 
 	if calls.Load() != 1 || retries.Load() != 0 {
 		t.Fatalf("accepted creation was retried: calls=%d retries=%d", calls.Load(), retries.Load())
 	}
-}
-
-type acceleratorResponseBoundaryTransport func(*http.Request) (*http.Response, error)
-
-func (f acceleratorResponseBoundaryTransport) RoundTrip(r *http.Request) (*http.Response, error) {
-	return f(r)
 }
 
 type acceleratorResponseBoundaryBody struct {

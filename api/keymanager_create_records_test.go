@@ -238,15 +238,15 @@ func TestKeyManagerCreateRecordOwnedOptionsAliasesAndIndependentProof(t *testing
 		return nil
 	}
 	base := c.Provider.HTTPClient.Transport
-	c.Provider.HTTPClient.Transport = secretFetchRoundTripFunc(func(r *http.Request) (*http.Response, error) {
+	c.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		retained.Options.Attributes["name"] = "late"
 		retained.Options.Attributes["secret_refs"] = "late"
 		retained.Fields["vendor"][0] = 'x'
 		retained.Headers["X-Call"] = "late"
 		return base.RoundTrip(r)
-	})
+	}))
 	value, err := a.CreateRecord(context.Background(), append(append([]containers.CreateRecordOption(nil), options...), custom)...)
-	c.Provider.HTTPClient.Transport = base
+	c.SetTransport(base)
 	if err != nil || value == nil || value.Resource == nil || value.Wire == nil || value.ContainerID == nil || *value.ContainerID != "raw%2Fid" || callbacks.Load() != 1 || calls.Load() != 1 {
 		t.Fatal(value, err, callbacks.Load(), calls.Load())
 	}
@@ -547,7 +547,7 @@ func TestKeyManagerCreateRecordPreflightSourceContextAndNativeReplay(t *testing.
 			defer cancel(nil)
 			cause := errors.New("accepted create cancelled")
 			base := c.Provider.HTTPClient.Transport
-			c.Provider.HTTPClient.Transport = secretFetchRoundTripFunc(func(r *http.Request) (*http.Response, error) {
+			c.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				response, err := base.RoundTrip(r)
 				if err != nil {
 					return response, err
@@ -564,7 +564,7 @@ func TestKeyManagerCreateRecordPreflightSourceContextAndNativeReplay(t *testing.
 					cancel(cause)
 				}
 				return response, nil
-			})
+			}))
 			c.Provider.RetryFunc = func(_ context.Context, _, _ string, _ *gophercloud.RequestOpts, err error, _ uint) error {
 				retries.Add(1)
 				return err

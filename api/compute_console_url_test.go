@@ -239,7 +239,7 @@ func TestComputeConsoleURLSourceContextAndAcceptedFailures(t *testing.T) {
 				if base == nil {
 					base = http.DefaultTransport
 				}
-				cloud.Provider.HTTPClient.Transport = secretFetchRoundTripFunc(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					response, err := base.RoundTrip(r)
 					if err != nil {
 						return response, err
@@ -256,7 +256,7 @@ func TestComputeConsoleURLSourceContextAndAcceptedFailures(t *testing.T) {
 						cancel(cause)
 					}
 					return response, nil
-				})
+				}))
 			}
 			var calls, retries atomic.Int32
 			cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {

@@ -504,13 +504,13 @@ func TestComputeFlavorGetExtraSpecsPropertyPreflightAndBindingTerminalReceipts(t
 				if base == nil {
 					base = http.DefaultTransport
 				}
-				cloud.Provider.HTTPClient.Transport = secretFetchRoundTripFunc(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					response, err := base.RoundTrip(r)
 					if err == nil {
 						client.Microversion = "2.99"
 					}
 					return response, err
-				})
+				}))
 			}
 			var calls, retries atomic.Int32
 			cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {

@@ -262,7 +262,7 @@ func TestComputeCloudKeypairCreateAndDeleteOutcomes(t *testing.T) {
 				if base == nil {
 					base = http.DefaultTransport
 				}
-				cloud.Provider.HTTPClient.Transport = secretFetchRoundTripFunc(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					response, err := base.RoundTrip(r)
 					if err == nil {
 						if tc.name == "missing with source failure is terminal" {
@@ -272,7 +272,7 @@ func TestComputeCloudKeypairCreateAndDeleteOutcomes(t *testing.T) {
 						}
 					}
 					return response, err
-				})
+				}))
 			}
 			if tc.name != "ordinary missing" {
 				cloud.Provider.RetryFunc = func(_ context.Context, _, _ string, _ *gophercloud.RequestOpts, err error, _ uint) error {

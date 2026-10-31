@@ -214,7 +214,7 @@ func TestKeyManagerOwnedMetadataDeleteAcceptedFailuresStayTerminal(t *testing.T)
 				if base == nil {
 					base = http.DefaultTransport
 				}
-				c.Provider.HTTPClient.Transport = secretFetchRoundTripFunc(func(r *http.Request) (*http.Response, error) {
+				c.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					response, err := base.RoundTrip(r)
 					if err != nil {
 						return response, err
@@ -231,7 +231,7 @@ func TestKeyManagerOwnedMetadataDeleteAcceptedFailuresStayTerminal(t *testing.T)
 						cancel(cause)
 					}
 					return response, nil
-				})
+				}))
 			}
 			c.Provider.RetryFunc = func(_ context.Context, _, _ string, _ *gophercloud.RequestOpts, err error, _ uint) error {
 				retries.Add(1)

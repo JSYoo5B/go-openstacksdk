@@ -186,13 +186,13 @@ func TestClusteringClustersNameUpdateFreezesBodyHeadersAndVersionGate(t *testing
 				if parent == nil {
 					parent = http.DefaultTransport
 				}
-				client.ProviderClient.HTTPClient.Transport = clusterRoundTrip(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					response, err := parent.RoundTrip(r)
 					if r.Method == "GET" {
 						client.Microversion = "1.5"
 					}
 					return response, err
-				})
+				}))
 			}
 			capture := func(config *request.Config[clusters.UpdateOpts]) error { captured = config; return nil }
 			value, err := clusters.New(client).Update(context.Background(), resource.Name("cluster.a"), clusters.UpdateOpts{Metadata: json.RawMessage(`{"label":"original"}`)}, clusters.WithUpdateProfileOnly(false), clusters.WithUpdateHeader("X-Custom", "original"), capture)
@@ -206,10 +206,6 @@ func TestClusteringClustersNameUpdateFreezesBodyHeadersAndVersionGate(t *testing
 		})
 	}
 }
-
-type clusterRoundTrip func(*http.Request) (*http.Response, error)
-
-func (run clusterRoundTrip) RoundTrip(r *http.Request) (*http.Response, error) { return run(r) }
 
 func TestClusteringClustersDeleteNormalForceBodiesAndSubmission(t *testing.T) {
 	for _, force := range []bool{false, true} {

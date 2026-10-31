@@ -213,11 +213,11 @@ func TestMessagingSubscriptionsPythonMarkerPagingIgnoresLinksAndKeepsSource(t *t
 				testcloud.JSON(w, 200, `{"subscriptions":[`+rows+`],"links":[{"rel":"next","href":"https://never-follow.invalid/decoy"}],"next":"https://never-follow.invalid/decoy"}`)
 			})
 			original := c.HTTPClient.Transport
-			c.HTTPClient.Transport = subscriptionRoundTrip(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				res, err := original.RoundTrip(r)
 				cloud.Provider.SetToken("rotated")
 				return res, err
-			})
+			}))
 			opts := []subscriptions.ListOption{subscriptions.WithListHeader("X-Trace", "frozen"), func(cfg *request.Config[subscriptions.ListOpts]) error {
 				cfg.Query["tag"] = []string{"first", "second"}
 				return nil
@@ -487,10 +487,10 @@ func TestMessagingSubscriptionsMutationAndReadEvidenceNeverResend(t *testing.T) 
 			if operation == "create" {
 				code = 201
 			}
-			client.HTTPClient.Transport = subscriptionRoundTrip(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls.Add(1)
 				return &http.Response{StatusCode: code, Header: http.Header{"X-Request-Id": {"read-evidence"}}, Body: io.NopCloser(io.MultiReader(strings.NewReader("prefix"), subscriptionErrorReader{cause})), Request: r}, nil
-			})
+			}))
 			var err error
 			switch operation {
 			case "create":
@@ -575,13 +575,13 @@ func TestMessagingSubscriptionsMutationAndReadEvidenceNeverResend(t *testing.T) 
 	for _, accepted := range []bool{false, true} {
 		var sent atomic.Int32
 		native := gophercloud.ErrUnexpectedResponseCode{Actual: 404, Expected: []int{204}}
-		c.HTTPClient.Transport = subscriptionRoundTrip(func(r *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			sent.Add(1)
 			if !accepted {
 				return nil, native
 			}
 			return &http.Response{StatusCode: 204, Header: http.Header{"X-Request-Id": {"accepted"}}, Body: io.NopCloser(io.MultiReader(strings.NewReader("prefix"), subscriptionErrorReader{native})), Request: r}, nil
-		})
+		}))
 		err := scope.Delete(context.Background(), "id")
 		if err == nil || !gophercloud.ResponseCodeIs(err, 404) || sent.Load() != 1 {
 			t.Fatal("wrapped404 ignored", err, sent.Load())
@@ -599,16 +599,17 @@ func TestMessagingSubscriptionsMutationAndReadEvidenceNeverResend(t *testing.T) 
 		}
 	}
 	t.Run("canceled-native404-is-not-ignored", func(t *testing.T) {
-		client := subscriptionClient(testcloud.New(t))
+		cloud := testcloud.New(t)
+		client := subscriptionClient(cloud)
 		scope := subscriptionScope(t, client, "queue")
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
 		var sent atomic.Int32
-		client.HTTPClient.Transport = subscriptionRoundTrip(func(r *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			sent.Add(1)
 			cancel()
 			return &http.Response{StatusCode: 404, Header: http.Header{}, Body: io.NopCloser(strings.NewReader("absent")), Request: r}, nil
-		})
+		}))
 		if err := scope.Delete(ctx, "id"); !errors.Is(err, context.Canceled) || sent.Load() != 1 {
 			t.Fatal(err, sent.Load())
 		}
@@ -652,11 +653,11 @@ func TestMessagingSubscriptionsListTerminalErrorsAndSourceCancellation(t *testin
 			})
 			if mode == "source" {
 				original := c.HTTPClient.Transport
-				c.HTTPClient.Transport = subscriptionRoundTrip(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					response, err := original.RoundTrip(r)
 					c.Type = "compute"
 					return response, err
-				})
+				}))
 			}
 			values, err := scope.All(ctx)
 			if values != nil || err == nil {
@@ -712,10 +713,6 @@ func TestMessagingSubscriptionsListTerminalErrorsAndSourceCancellation(t *testin
 		t.Fatal(calls.Load())
 	}
 }
-
-type subscriptionRoundTrip func(*http.Request) (*http.Response, error)
-
-func (f subscriptionRoundTrip) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
 
 type subscriptionErrorReader struct{ err error }
 

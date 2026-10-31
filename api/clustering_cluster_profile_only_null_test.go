@@ -389,13 +389,13 @@ func TestClusteringClusterProfileOnlyNullBoolCompatibilityAndLookupGate(t *testi
 		if parent == nil {
 			parent = http.DefaultTransport
 		}
-		client.ProviderClient.HTTPClient.Transport = clusterRoundTrip(func(r *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			response, err := parent.RoundTrip(r)
 			if r.Method == http.MethodGet {
 				client.Microversion = "1.5"
 			}
 			return response, err
-		})
+		}))
 		if _, err := clusters.New(client).Update(context.Background(), resource.Name("Selected"), clusters.UpdateOpts{}, clusters.WithUpdateProfileOnlyNull()); !errors.Is(err, resource.ErrUnsupported) || lookups.Load() != 1 || patches.Load() != 0 {
 			t.Fatal(err, lookups.Load(), patches.Load())
 		}

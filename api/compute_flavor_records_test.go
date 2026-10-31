@@ -625,13 +625,13 @@ func TestComputeFlavorRecordsConditionalExtraSpecsEnrichment(t *testing.T) {
 			if mode == "accepted specs Close404 is terminal" {
 				track = payloadContractTrack(cloud, nil, nil)
 				base := cloud.Provider.HTTPClient.Transport
-				cloud.Provider.HTTPClient.Transport = secretFetchRoundTripFunc(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					response, err := base.RoundTrip(r)
 					if err == nil && r.URL.Path == flavorExtraSpecsFetchPath {
 						response.Body.(*payloadContractBody).closeErr = nested
 					}
 					return response, err
-				})
+				}))
 			}
 			var lists, specs atomic.Int32
 			const row = `{"id":"7"}`

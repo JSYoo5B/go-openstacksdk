@@ -325,14 +325,14 @@ func TestKeyManagerSecretFindPreparedOptionsAndConcurrentReuse(t *testing.T) {
 	if transport == nil {
 		transport = http.DefaultTransport
 	}
-	cloud.Provider.HTTPClient.Transport = secretFetchRoundTripFunc(func(r *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		response, err := transport.RoundTrip(r)
 		if r.URL.Path == secretFetchPath {
 			*retained.IgnoreMissing = false
 			retained.Fallback = resource.FindFallbackNever
 		}
 		return response, err
-	})
+	}))
 	cloud.Mux.HandleFunc(secretFetchPath, func(w http.ResponseWriter, r *http.Request) { gets.Add(1); testcloud.JSON(w, 404, `{}`) })
 	cloud.Mux.HandleFunc(secretFindCollectionPath, func(w http.ResponseWriter, r *http.Request) {
 		lists.Add(1)
@@ -415,7 +415,7 @@ func TestKeyManagerSecretFindFetchFailuresAreTerminal(t *testing.T) {
 			readCause := errors.New("actual read failure")
 			transportCause := &gophercloud.ErrUnexpectedResponseCode{Actual: 404}
 			if mode == "read" || mode == "transport404" || mode == "canceled404" {
-				cloud.Provider.HTTPClient.Transport = secretFetchRoundTripFunc(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					gets.Add(1)
 					if mode == "transport404" {
 						return nil, transportCause
@@ -425,7 +425,7 @@ func TestKeyManagerSecretFindFetchFailuresAreTerminal(t *testing.T) {
 						return &http.Response{StatusCode: 404, Header: http.Header{"X-Phase": {"metadata"}}, Body: io.NopCloser(strings.NewReader(`{"error":"actual"}`)), Request: r}, nil
 					}
 					return &http.Response{StatusCode: 200, Header: http.Header{"X-Phase": {"metadata"}}, Body: &secretFetchReadFailure{cause: readCause}, Request: r}, nil
-				})
+				}))
 			}
 			value, err := secrets.New(client).FindIdentity(ctx, "secret-alpha")
 			if value != nil || err == nil || gets.Load() != 1 || lists.Load() != 0 {
@@ -478,7 +478,7 @@ func TestKeyManagerSecretFindSourceSnapshotAndPageRevalidation(t *testing.T) {
 		if transport == nil {
 			transport = http.DefaultTransport
 		}
-		cloud.Provider.HTTPClient.Transport = secretFetchRoundTripFunc(func(r *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			middleware.Add(1)
 			response, err := transport.RoundTrip(r)
 			if r.URL.Path == secretFetchPath {
@@ -488,7 +488,7 @@ func TestKeyManagerSecretFindSourceSnapshotAndPageRevalidation(t *testing.T) {
 				client.ProviderClient = foreign.Provider
 			}
 			return response, err
-		})
+		}))
 		cloud.Mux.HandleFunc(secretFetchPath, func(w http.ResponseWriter, r *http.Request) { gets.Add(1); testcloud.JSON(w, 404, `{}`) })
 		cloud.Mux.HandleFunc(secretFindCollectionPath, func(w http.ResponseWriter, r *http.Request) {
 			lists.Add(1)
@@ -514,7 +514,7 @@ func TestKeyManagerSecretFindSourceSnapshotAndPageRevalidation(t *testing.T) {
 			if transport == nil {
 				transport = http.DefaultTransport
 			}
-			cloud.Provider.HTTPClient.Transport = secretFetchRoundTripFunc(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				response, err := transport.RoundTrip(r)
 				if r.URL.Path == secretFindCollectionPath {
 					if mode == "source changes" {
@@ -524,7 +524,7 @@ func TestKeyManagerSecretFindSourceSnapshotAndPageRevalidation(t *testing.T) {
 					}
 				}
 				return response, err
-			})
+			}))
 			cloud.Mux.HandleFunc(secretFetchPath, func(w http.ResponseWriter, r *http.Request) { gets.Add(1); testcloud.JSON(w, 404, `{}`) })
 			cloud.Mux.HandleFunc(secretFindCollectionPath, func(w http.ResponseWriter, r *http.Request) {
 				lists.Add(1)

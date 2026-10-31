@@ -548,12 +548,6 @@ func TestClusteringClusterMetadataReadModifyWriteDoesNotClaimConcurrencyOrComple
 	}
 }
 
-type clusterMetadataRoundTripper func(*http.Request) (*http.Response, error)
-
-func (transport clusterMetadataRoundTripper) RoundTrip(r *http.Request) (*http.Response, error) {
-	return transport(r)
-}
-
 type clusterMetadataCancelReader struct {
 	reader io.Reader
 	cancel context.CancelFunc
@@ -573,7 +567,7 @@ func TestClusteringClusterMetadataCancellationAfterAcceptanceRetainsEvidence(t *
 	defer cancel()
 	var gets, patches atomic.Int32
 	body := `{"cluster":{"metadata":{"new":true}}}`
-	cloud.Provider.HTTPClient.Transport = clusterMetadataRoundTripper(func(r *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		if r.URL.Path != "/reverse/senlin/v1/clusters/selected" {
 			t.Fatal(r.Method, r.URL)
 		}
@@ -583,7 +577,7 @@ func TestClusteringClusterMetadataCancellationAfterAcceptanceRetainsEvidence(t *
 		}
 		patches.Add(1)
 		return &http.Response{StatusCode: 202, Header: http.Header{"Location": {"/reverse/senlin/v1/actions/queued"}, "X-Request-Id": {"cancelled-acceptance"}}, Body: &clusterMetadataCancelReader{reader: strings.NewReader(body), cancel: cancel}, Request: r}, nil
-	})
+	}))
 	result, err := clusters.New(clusterMetadataClient(cloud)).SetMetadata(ctx, resource.ID("selected"), map[string]any{"new": true})
 	var proof *resource.ResponseError
 	if result != nil || !errors.Is(err, context.Canceled) || !errors.As(err, &proof) || proof.StatusCode != 202 || string(proof.Body) != body || proof.Header.Get("X-Request-ID") != "cancelled-acceptance" || gets.Load() != 1 || patches.Load() != 1 {

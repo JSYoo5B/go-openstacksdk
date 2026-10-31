@@ -234,7 +234,7 @@ func TestNeutronPythonGetFieldsKeepsNativeDecodeStatusAndWireCauses(t *testing.T
 				t.Fatal("native typed decode failure was lost", err)
 			}
 			wireFailure := errors.New("member GET wire failure")
-			cloud.Provider.HTTPClient.Transport = clusterRoundTrip(func(*http.Request) (*http.Response, error) { return nil, wireFailure })
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(*http.Request) (*http.Response, error) { return nil, wireFailure }))
 			_, err = fixture.get(context.Background(), neutronPythonMemberClient(cloud), "target", "id")
 			if !errors.Is(err, wireFailure) {
 				t.Fatal("GET transport cause was lost", err)
@@ -251,7 +251,7 @@ func TestNeutronPythonGetFieldsCancellationStopsBeforeHTTP(t *testing.T) {
 					cloud := testcloud.New(t)
 					var calls atomic.Int32
 					base := cloud.Provider.HTTPClient.Transport
-					cloud.Provider.HTTPClient.Transport = clusterRoundTrip(func(r *http.Request) (*http.Response, error) { calls.Add(1); return base.RoundTrip(r) })
+					cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) { calls.Add(1); return base.RoundTrip(r) }))
 					ctx, cancel := context.WithCancelCause(context.Background())
 					cause := errors.New("member GET custom cancellation")
 					if withCause {
@@ -283,7 +283,7 @@ func TestNeutronPythonGetFieldsCancellationStopsBeforeHTTP(t *testing.T) {
 						defer cancel(nil)
 						cause, wireFailure := errors.New("member GET canceled after response"), errors.New("member GET concurrent wire failure")
 						base := cloud.Provider.HTTPClient.Transport
-						cloud.Provider.HTTPClient.Transport = clusterRoundTrip(func(r *http.Request) (*http.Response, error) {
+						cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 							if mode == "wire" {
 								cancel(cause)
 								return nil, wireFailure
@@ -298,7 +298,7 @@ func TestNeutronPythonGetFieldsCancellationStopsBeforeHTTP(t *testing.T) {
 								cancel(cause)
 							}
 							return response, nil
-						})
+						}))
 						value, err := fixture.get(ctx, neutronPythonMemberClient(cloud), "target", "id")
 						if !errors.Is(err, context.Canceled) || !errors.Is(err, cause) {
 							t.Fatal("GET response/transport cancellation lost cause", value, err)
@@ -338,17 +338,17 @@ func TestNeutronPythonGetFieldsSnapshotAndConcurrentReuse(t *testing.T) {
 				testcloud.JSON(w, 200, `{"`+fixture.envelope+`":{"id":"wire-id"}}`)
 			})
 			base := cloud.Provider.HTTPClient.Transport
-			cloud.Provider.HTTPClient.Transport = clusterRoundTrip(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				// Mutate caller memory only after request construction. A successful
 				// response must not trigger another evaluation or overwrite that input.
 				input[0] = "caller-after-request"
 				return base.RoundTrip(r)
-			})
+			}))
 			value, err := fixture.get(context.Background(), neutronPythonMemberClient(cloud), "target", input...)
 			if err != nil || neutronPythonReadID(t, value) != "wire-id" || input[0] != "caller-after-request" {
 				t.Fatal(value, input, err)
 			}
-			cloud.Provider.HTTPClient.Transport = base
+			cloud.SetTransport(base)
 			input[0] = "id"
 			client := neutronPythonMemberClient(cloud)
 			var wait sync.WaitGroup
@@ -554,15 +554,15 @@ func TestNeutronPythonDeleteOptionsFreezeCallbacksAndReusableBulk(t *testing.T) 
 				return nil
 			})
 			base := cloud.Provider.HTTPClient.Transport
-			cloud.Provider.HTTPClient.Transport = clusterRoundTrip(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				*retained.Revision = 99
 				*retained.IgnoreMissing = false
 				return base.RoundTrip(r)
-			})
+			}))
 			if err := fixture.remove(context.Background(), client, "target", custom); err != nil {
 				t.Fatal("retained custom option changed in-flight missing policy", err)
 			}
-			cloud.Provider.HTTPClient.Transport = base
+			cloud.SetTransport(base)
 			revision, ignored := int64(4), true
 			bulk := fixture.bulk(request.NeutronDeleteOpts{Revision: &revision, IgnoreMissing: &ignored})
 			revision, ignored = 99, false
@@ -612,15 +612,15 @@ func TestNeutronPythonDeleteCancellationWireFailuresAndInvalidOptions(t *testing
 				t.Fatal("canceled/invalid calls reached HTTP", calls.Load())
 			}
 			wireFailure := errors.New("DELETE wire failure")
-			cloud.Provider.HTTPClient.Transport = clusterRoundTrip(func(*http.Request) (*http.Response, error) { return nil, wireFailure })
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(*http.Request) (*http.Response, error) { return nil, wireFailure }))
 			if err := fixture.remove(context.Background(), client, "target"); !errors.Is(err, wireFailure) {
 				t.Fatal("DELETE transport failure was lost", err)
 			}
 			ctx, cancel = context.WithCancel(context.Background())
-			cloud.Provider.HTTPClient.Transport = clusterRoundTrip(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				cancel()
 				return &http.Response{StatusCode: 404, Header: http.Header{"X-Request-Proof": {"cancel-and-404"}}, Body: io.NopCloser(strings.NewReader(`{"error":"gone"}`)), Request: r}, nil
-			})
+			}))
 			if err := fixture.remove(ctx, client, "target"); !errors.Is(err, context.Canceled) {
 				t.Fatal("default ignore-missing suppressed caller cancellation", err)
 			}

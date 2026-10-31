@@ -486,7 +486,7 @@ func TestNativeFindIdentityModesPreserveSourceClientAndContext(t *testing.T) {
 				original = http.DefaultTransport
 			}
 			var calls atomic.Int32
-			cloud.Provider.HTTPClient.Transport = nativeIdentityFindTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls.Add(1)
 				if r.Context().Value(identityModesContextKey{}) != "caller" {
 					t.Error("caller context lost")
@@ -494,7 +494,7 @@ func TestNativeFindIdentityModesPreserveSourceClientAndContext(t *testing.T) {
 				copy := r.Clone(r.Context())
 				copy.Header.Set("X-Mode-Middleware", "source")
 				return original.RoundTrip(copy)
-			})
+			}))
 			check := func(r *http.Request, token string) {
 				if r.Header.Get("X-Configured") != "source" || r.Header.Get("X-Mode-Middleware") != "source" || r.Header.Get("X-Auth-Token") != token || r.URL.Query().Get("vendor") != "kept" {
 					t.Error(r.URL, r.Header)

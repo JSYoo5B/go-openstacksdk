@@ -351,7 +351,7 @@ func TestComputeConsoleOutputSourceContextAndAcceptedBodyBoundaries(t *testing.T
 			if base == nil {
 				base = http.DefaultTransport
 			}
-			cloud.Provider.HTTPClient.Transport = secretFetchRoundTripFunc(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				response, err := base.RoundTrip(r)
 				if err != nil {
 					return response, err
@@ -368,7 +368,7 @@ func TestComputeConsoleOutputSourceContextAndAcceptedBodyBoundaries(t *testing.T
 					cancel(cause)
 				}
 				return response, nil
-			})
+			}))
 			value, err := servers.New(client).ConsoleOutput(ctx, "server-id")
 			var proof *resource.ResponseError
 			if value != "" || !errors.As(err, &proof) || proof.StatusCode != 200 || string(proof.Body) != body || proof.Header.Get("X-Console-Proof") != mode || calls.Load() != 1 {

@@ -444,7 +444,7 @@ func TestNativeFindIdentityNetworkPoolsTrunksLiveSourceAndCancellation(t *testin
 				transport = http.DefaultTransport
 			}
 			var calls atomic.Int32
-			cloud.Provider.HTTPClient.Transport = nativeIdentityFindTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls.Add(1)
 				if r.Context().Value(networkExtensionContextKey{}) != "caller" {
 					t.Error("caller context lost")
@@ -452,7 +452,7 @@ func TestNativeFindIdentityNetworkPoolsTrunksLiveSourceAndCancellation(t *testin
 				copy := r.Clone(r.Context())
 				copy.Header.Set("X-Network-Middleware", "source")
 				return transport.RoundTrip(copy)
-			})
+			}))
 			check := func(r *http.Request, token string) {
 				if r.Header.Get("X-Auth-Token") != token || r.Header.Get("X-Configured") != "source" || r.Header.Get("X-Network-Middleware") != "source" || r.Header.Get("OpenStack-API-Version") != "network 2.0" || r.URL.Query().Get("vendor") != "both-phases" {
 					t.Error(r.URL, r.Header)

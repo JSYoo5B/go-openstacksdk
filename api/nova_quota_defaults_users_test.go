@@ -438,10 +438,6 @@ func TestNovaQuotaUserResetAccepts202And204WithoutFollowUp(t *testing.T) {
 	}
 }
 
-type novaQuotaTransport func(*http.Request) (*http.Response, error)
-
-func (f novaQuotaTransport) RoundTrip(req *http.Request) (*http.Response, error) { return f(req) }
-
 func TestNovaQuotaUserRetryAndReauthKeepOneQueryAndExactBody(t *testing.T) {
 	if strconv.IntSize < 64 {
 		t.Skip("large native int limit needs a 64-bit platform")
@@ -492,10 +488,10 @@ func TestNovaQuotaUserRetryAndReauthKeepOneQueryAndExactBody(t *testing.T) {
 					}
 				})
 				originalTransport := cloud.Provider.HTTPClient.Transport
-				cloud.Provider.HTTPClient.Transport = novaQuotaTransport(func(req *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 					transportCalls.Add(1)
 					return originalTransport.RoundTrip(req)
-				})
+				}))
 				switch mode {
 				case "reauth":
 					cloud.Provider.ReauthFunc = func(ctx context.Context) error {
@@ -568,10 +564,10 @@ func TestNovaQuotaUserRedirectCannotChangeProjectUserOriginOrMethod(t *testing.T
 				w.WriteHeader(202)
 			})
 			originalTransport := cloud.Provider.HTTPClient.Transport
-			cloud.Provider.HTTPClient.Transport = novaQuotaTransport(func(req *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 				transport.Add(1)
 				return originalTransport.RoundTrip(req)
-			})
+			}))
 			cloud.Provider.HTTPClient.CheckRedirect = func(next *http.Request, via []*http.Request) error { policy.Add(1); return nil }
 			value, err := newNovaUserQuotaScope(t, cloud, "chosen-user").Reset(context.Background())
 			if value != nil || !errors.Is(err, resource.ErrInvalidOption) || initial.Load() != 1 || unsafe.Load() != 0 || policy.Load() != 1 || transport.Load() != 1 {
@@ -846,10 +842,10 @@ func TestNovaQuotaUserRedirectRetainsCallerAndHTTPTimeoutContexts(t *testing.T) 
 				if transport == nil {
 					transport = http.DefaultTransport
 				}
-				cloud.Provider.HTTPClient.Transport = novaQuotaTransport(func(req *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 					sentContexts = append(sentContexts, req.Context())
 					return transport.RoundTrip(req)
-				})
+				}))
 			} else {
 				// A long deadline also checks deadline ownership. Cancellation
 				// is triggered by redirect arrival, rather than elapsed time.

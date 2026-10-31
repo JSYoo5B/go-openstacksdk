@@ -386,7 +386,7 @@ func TestComputeAvailabilityZoneNamesTruthinessSuppressionAndPartialInventory(t 
 				if base == nil {
 					base = http.DefaultTransport
 				}
-				cloud.Provider.HTTPClient.Transport = secretFetchRoundTripFunc(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					response, err := base.RoundTrip(r)
 					if err == nil {
 						if mode == "source failure beside actual500 is not suppressed" {
@@ -396,7 +396,7 @@ func TestComputeAvailabilityZoneNamesTruthinessSuppressionAndPartialInventory(t 
 						}
 					}
 					return response, err
-				})
+				}))
 			}
 			var calls, retries atomic.Int32
 			cloud.Provider.RetryFunc = func(_ context.Context, _, _ string, _ *gophercloud.RequestOpts, err error, _ uint) error {

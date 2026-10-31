@@ -453,12 +453,6 @@ func TestNativeFindIdentityQuerySnapshotsRepeatedValuesAndConcurrentReuse(t *tes
 	}
 }
 
-type nativeIdentityFindTransport func(*http.Request) (*http.Response, error)
-
-func (transport nativeIdentityFindTransport) RoundTrip(r *http.Request) (*http.Response, error) {
-	return transport(r)
-}
-
 func TestNativeFindIdentityDecodeAndTransportFailuresNeverFallback(t *testing.T) {
 	for _, fixture := range nativeIdentityFindFixtures() {
 		for _, withQuery := range []bool{false, true} {
@@ -488,10 +482,10 @@ func TestNativeFindIdentityDecodeAndTransportFailuresNeverFallback(t *testing.T)
 			client := nativeIdentityFindClient(cloud, fixture)
 			original := &gophercloud.ErrUnexpectedResponseCode{Actual: 404}
 			var calls atomic.Int32
-			cloud.Provider.HTTPClient.Transport = nativeIdentityFindTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls.Add(1)
 				return nil, &url.Error{Op: "GET", URL: r.URL.String(), Err: original}
-			})
+			}))
 			var options []resource.IdentityFindOption
 			if withQuery {
 				options = append(options, resource.WithIdentityFindQuery("fields", "id"))

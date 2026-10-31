@@ -408,7 +408,7 @@ func TestKeyManagerOrderListFiltersPagingAndLiveSource(t *testing.T) {
 				if transport == nil {
 					transport = http.DefaultTransport
 				}
-				c.Provider.HTTPClient.Transport = secretFetchRoundTripFunc(func(r *http.Request) (*http.Response, error) {
+				c.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					middleware.Add(1)
 					resp, err := transport.RoundTrip(r)
 					if !r.URL.Query().Has("offset") {
@@ -418,7 +418,7 @@ func TestKeyManagerOrderListFiltersPagingAndLiveSource(t *testing.T) {
 						}
 					}
 					return resp, err
-				})
+				}))
 				c.Mux.HandleFunc(orderListPath, func(w http.ResponseWriter, r *http.Request) {
 					calls.Add(1)
 					if !reflect.DeepEqual(r.URL.Query()["marker"], []string{"one", "two"}) || r.Header.Get("X-Configured") != "preserved" || r.Header.Get("OpenStack-API-Version") != "key-manager 1.0" {

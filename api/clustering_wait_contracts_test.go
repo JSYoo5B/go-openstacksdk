@@ -260,10 +260,6 @@ func TestClusteringWaitContractsDeletionStatusAndExplicitAttribute(t *testing.T)
 	}
 }
 
-type clusteringWaitTransport func(*http.Request) (*http.Response, error)
-
-func (run clusteringWaitTransport) RoundTrip(r *http.Request) (*http.Response, error) { return run(r) }
-
 func TestClusteringWaitContractsDeadlineDefaultsAndCallerOverrides(t *testing.T) {
 	tests := []struct {
 		name    string
@@ -296,7 +292,7 @@ func TestClusteringWaitContractsDeadlineDefaultsAndCallerOverrides(t *testing.T)
 				}
 			})
 			transport := cloud.Provider.HTTPClient.Transport
-			cloud.Provider.HTTPClient.Transport = clusteringWaitTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				requests.Add(1)
 				deadline, ok := r.Context().Deadline()
 				if test.want == 0 {
@@ -307,7 +303,7 @@ func TestClusteringWaitContractsDeadlineDefaultsAndCallerOverrides(t *testing.T)
 					t.Error("wrong request deadline", ok, time.Until(deadline), test.want)
 				}
 				return transport.RoundTrip(r)
-			})
+			}))
 			ctx := context.Background()
 			if test.parent > 0 {
 				var cancel context.CancelFunc
@@ -370,13 +366,13 @@ func TestClusteringWaitContractsNameOnceStableIDAndFreshAuth(t *testing.T) {
 			if deleted {
 				// Delete wait does not report the name-list result. Rotate before its first GET.
 				transport := cloud.Provider.HTTPClient.Transport
-				cloud.Provider.HTTPClient.Transport = clusteringWaitTransport(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					response, err := transport.RoundTrip(r)
 					if r.URL.Path == "/reverse/senlin/v1/nodes" {
 						client.ProviderClient.SetToken("rotated-token")
 					}
 					return response, err
-				})
+				}))
 				err = api.WaitForDelete(context.Background(), resource.Name(name), opts...)
 			} else {
 				value, waitErr := api.WaitForStatus(context.Background(), resource.Name(name), "ACTIVE", opts...)
@@ -574,14 +570,14 @@ func TestClusteringWaitContractsTransportAndInFlightContextFailures(t *testing.T
 				cloud := testcloud.New(t)
 				var calls atomic.Int32
 				failure := errors.New("original transport failure")
-				cloud.Provider.HTTPClient.Transport = clusteringWaitTransport(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					calls.Add(1)
 					if mode == "transport" {
 						return nil, failure
 					}
 					<-r.Context().Done()
 					return nil, r.Context().Err()
-				})
+				}))
 				ctx := context.Background()
 				opts := []resource.WaitOption(nil)
 				if mode == "parent-timeout" {

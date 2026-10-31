@@ -31,10 +31,6 @@ func secretFetchClient(cloud *testcloud.Cloud) *gophercloud.ServiceClient {
 	return client
 }
 
-type secretFetchRoundTripFunc func(*http.Request) (*http.Response, error)
-
-func (f secretFetchRoundTripFunc) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
-
 func TestKeyManagerSecretFetchCompositionFixedTargetsAndEvidence(t *testing.T) {
 	cloud, foreign := testcloud.New(t), testcloud.New(t)
 	var metadataCalls, payloadCalls, followed, middleware atomic.Int32
@@ -45,7 +41,7 @@ func TestKeyManagerSecretFetchCompositionFixedTargetsAndEvidence(t *testing.T) {
 	if transport == nil {
 		transport = http.DefaultTransport
 	}
-	cloud.Provider.HTTPClient.Transport = secretFetchRoundTripFunc(func(r *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		middleware.Add(1)
 		response, err := transport.RoundTrip(r)
 		if r.URL.Path == secretFetchPath {
@@ -54,7 +50,7 @@ func TestKeyManagerSecretFetchCompositionFixedTargetsAndEvidence(t *testing.T) {
 			client.ResourceBase = cloud.Server.URL + "/changed/v1/"
 		}
 		return response, err
-	})
+	}))
 	api := secrets.New(client)
 	cloud.Mux.HandleFunc(secretFetchPath, func(w http.ResponseWriter, r *http.Request) {
 		metadataCalls.Add(1)
@@ -360,7 +356,7 @@ func TestKeyManagerSecretFetchReadTransportAndCancellation(t *testing.T) {
 				cause := errors.New("actual read failure")
 				transportCause := &gophercloud.ErrUnexpectedResponseCode{Actual: 404}
 				var calls atomic.Int32
-				cloud.Provider.HTTPClient.Transport = secretFetchRoundTripFunc(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					calls.Add(1)
 					isPayload := strings.HasSuffix(r.URL.Path, "/payload")
 					if phase == "payload" && !isPayload {
@@ -378,7 +374,7 @@ func TestKeyManagerSecretFetchReadTransportAndCancellation(t *testing.T) {
 						}
 					}
 					return &http.Response{StatusCode: code, Header: http.Header{"X-Evidence": {"actual"}}, Body: body, Request: r}, nil
-				})
+				}))
 				value, err := secrets.New(client).Fetch(ctx, resource.ID("secret-alpha"))
 				if err == nil || (value != nil) != (phase == "payload") || calls.Load() != map[string]int32{"metadata": 1, "payload": 2}[phase] {
 					t.Fatal(value, err, calls.Load())
@@ -517,11 +513,11 @@ func TestKeyManagerSecretFetchSourceAndOptionPreflight(t *testing.T) {
 		if transport == nil {
 			transport = http.DefaultTransport
 		}
-		fixture.Provider.HTTPClient.Transport = secretFetchRoundTripFunc(func(r *http.Request) (*http.Response, error) {
+		fixture.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			response, err := transport.RoundTrip(r)
 			client.Type = "compute"
 			return response, err
-		})
+		}))
 		api := secrets.New(client)
 		value, err := api.Fetch(context.Background(), resource.ID("secret-alpha"))
 		if value == nil || value.Name != "actual" || !errors.Is(err, resource.ErrUnsupported) || metadata.Load() != 1 || payload.Load() != 0 {

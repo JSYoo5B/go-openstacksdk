@@ -161,7 +161,7 @@ func TestNativeFindIdentityDualPhaseQueryKeepsLiveProviderAndHTTPClient(t *testi
 				originalTransport = http.DefaultTransport
 			}
 			var middlewareCalls, gets, lists atomic.Int32
-			cloud.Provider.HTTPClient.Transport = nativeIdentityFindTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				middlewareCalls.Add(1)
 				if r.Context().Value(nativeIdentityFindContextKey{}) != "caller-context" {
 					t.Error("query GET or List lost caller context")
@@ -169,7 +169,7 @@ func TestNativeFindIdentityDualPhaseQueryKeepsLiveProviderAndHTTPClient(t *testi
 				owned := r.Clone(r.Context())
 				owned.Header.Set("X-Identity-Middleware", "source-transport")
 				return originalTransport.RoundTrip(owned)
-			})
+			}))
 			check := func(r *http.Request, token string) {
 				if r.Header.Get("X-Auth-Token") != token || r.Header.Get("X-Configured") != "source-header" || r.Header.Get("X-Identity-Middleware") != "source-transport" || !reflect.DeepEqual(r.URL.Query()["fields"], []string{"id", "name"}) {
 					t.Error("query request lost live source configuration", r.URL, r.Header)

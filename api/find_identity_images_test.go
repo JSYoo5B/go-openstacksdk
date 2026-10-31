@@ -485,7 +485,7 @@ func TestNativeFindIdentityImagesKeepsLiveProviderHeadersAndCallerContext(t *tes
 				transport = http.DefaultTransport
 			}
 			var calls, lists atomic.Int32
-			cloud.Provider.HTTPClient.Transport = nativeIdentityFindTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls.Add(1)
 				if r.Context().Value(imageIdentityContextKey{}) != "caller" {
 					t.Error("caller context lost")
@@ -493,7 +493,7 @@ func TestNativeFindIdentityImagesKeepsLiveProviderHeadersAndCallerContext(t *tes
 				copy := r.Clone(r.Context())
 				copy.Header.Set("X-Image-Middleware", "source")
 				return transport.RoundTrip(copy)
-			})
+			}))
 			check := func(r *http.Request, token string) {
 				if r.Header.Get("X-Auth-Token") != token || r.Header.Get("X-Configured") != "source" || r.Header.Get("X-Image-Middleware") != "source" || r.URL.Query().Get("vendor") != "kept" {
 					t.Error(r.URL, r.Header)

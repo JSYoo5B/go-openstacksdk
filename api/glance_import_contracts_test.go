@@ -25,11 +25,8 @@ import (
 // are documented Go policies; HTTP202 acknowledges asynchronous submission.
 const glanceImportPrefix = "/reverse/glance/v2/"
 
-type glanceImportRoundTrip func(*http.Request) (*http.Response, error)
-
-func (f glanceImportRoundTrip) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
 func glanceImportHTTP(code int, body io.ReadCloser) *http.Response {
-	return &http.Response{StatusCode: code, Header: http.Header{"Content-Type": {"application/json"}, "X-Evidence": {"actual"}}, Body: body}
+	return testcloud.StreamResponse(code, body, http.Header{"Content-Type": {"application/json"}, "X-Evidence": {"actual"}})
 }
 
 func glanceImportKnown() *images.Image {
@@ -159,10 +156,10 @@ func TestGlanceImportMethodsAndRootStoreControls(t *testing.T) {
 	} {
 		cloud := testcloud.New(t)
 		var calls atomic.Int32
-		cloud.Provider.HTTPClient.Transport = glanceImportRoundTrip(func(r *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			calls.Add(1)
 			return glanceImportHTTP(500, io.NopCloser(strings.NewReader(`{}`))), nil
-		})
+		}))
 		if v, err := imageimport.New(cloud.Client("image", glanceImportPrefix)).ImportImage(context.Background(), resource.ID("selected"), opts...); v != nil || !errors.Is(err, resource.ErrInvalidOption) || calls.Load() != 0 {
 			t.Fatal("invalid selectors reached fresh GET", v, err, calls.Load())
 		}
@@ -311,7 +308,7 @@ func TestGlanceImportOptionSnapshotsReplacementAndReuse(t *testing.T) {
 			retained = o
 			return nil
 		})
-		cloud.Provider.HTTPClient.Transport = glanceImportRoundTrip(func(r *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			calls.Add(1)
 			retained.Headers["X-Trace"] = "late"
 			*retained.Store = "late"
@@ -324,7 +321,7 @@ func TestGlanceImportOptionSnapshotsReplacementAndReuse(t *testing.T) {
 				t.Error(fields)
 			}
 			return glanceImportHTTP(202, io.NopCloser(strings.NewReader(`{}`))), nil
-		})
+		}))
 		if v, err := imageimport.New(cloud.Client("image", glanceImportPrefix)).ImportKnownImage(context.Background(), seed, option); err != nil || v == nil || v.ImageID != "selected" || calls.Load() != 1 {
 			t.Fatal(v, err, calls.Load())
 		}
@@ -369,10 +366,10 @@ func TestGlanceImportExtensionsAndPreflightAreSDKOwned(t *testing.T) {
 	})
 	cloud := testcloud.New(t)
 	var calls atomic.Int32
-	cloud.Provider.HTTPClient.Transport = glanceImportRoundTrip(func(r *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		calls.Add(1)
 		return glanceImportHTTP(500, io.NopCloser(strings.NewReader(`{}`))), nil
-	})
+	}))
 	client := cloud.Client("image", glanceImportPrefix)
 	a := imageimport.New(client)
 	for _, option := range []imageimport.ImportOption{
@@ -502,7 +499,7 @@ func TestGlanceImportReadTransportAndCancellationAreTerminal(t *testing.T) {
 					testcloud.JSON(w, 200, glanceImportJSON("selected"))
 				})
 				transport := cloud.Provider.HTTPClient.Transport
-				cloud.Provider.HTTPClient.Transport = glanceImportRoundTrip(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					if r.Method != phase {
 						return transport.RoundTrip(r)
 					}
@@ -523,7 +520,7 @@ func TestGlanceImportReadTransportAndCancellationAreTerminal(t *testing.T) {
 						cancel()
 						return glanceImportHTTP(code, io.NopCloser(strings.NewReader(`{}`))), nil
 					}
-				})
+				}))
 				cloud.Provider.RetryFunc = func(_ context.Context, _, _ string, _ *gophercloud.RequestOpts, err error, _ uint) error {
 					retries.Add(1)
 					return err
@@ -567,13 +564,13 @@ func TestGlanceImportLiveProviderFixedRoutesAndSourceRechecks(t *testing.T) {
 		var gets, posts, middleware, reauth, retries atomic.Int32
 		type key struct{}
 		transport := cloud.Provider.HTTPClient.Transport
-		cloud.Provider.HTTPClient.Transport = glanceImportRoundTrip(func(r *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			middleware.Add(1)
 			if r.Context().Value(key{}) != "caller" || r.Header.Get("X-Source") != "configured" || r.Header.Get("X-Trace") != "final" || r.Header.Get("OpenStack-API-Version") != "image 2.7" {
 				t.Error("original client context/headers lost", r.Header)
 			}
 			return transport.RoundTrip(r)
-		})
+		}))
 		cloud.Provider.ReauthFunc = func(context.Context) error { reauth.Add(1); cloud.Provider.SetToken("reauthenticated"); return nil }
 		cloud.Provider.RetryFunc = func(_ context.Context, method, target string, _ *gophercloud.RequestOpts, err error, _ uint) error {
 			retries.Add(1)
@@ -632,11 +629,11 @@ func TestGlanceImportLiveProviderFixedRoutesAndSourceRechecks(t *testing.T) {
 				opts = append(opts, func(*imageimport.ImportOpts) error { client.Type = "compute"; return nil })
 			} else {
 				transport := cloud.Provider.HTTPClient.Transport
-				cloud.Provider.HTTPClient.Transport = glanceImportRoundTrip(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					response, err := transport.RoundTrip(r)
 					client.Type = "compute"
 					return response, err
-				})
+				}))
 			}
 			v, err := imageimport.New(client).ImportImage(context.Background(), resource.ID("selected"), opts...)
 			wantCalls := int32(1)

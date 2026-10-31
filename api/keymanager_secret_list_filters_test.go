@@ -559,7 +559,7 @@ func TestKeyManagerSecretListFiltersPagingSourceAndNativeIsolation(t *testing.T)
 				if transport == nil {
 					transport = http.DefaultTransport
 				}
-				cloud.Provider.HTTPClient.Transport = secretFetchRoundTripFunc(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					middleware.Add(1)
 					response, err := transport.RoundTrip(r)
 					if !r.URL.Query().Has("offset") {
@@ -569,7 +569,7 @@ func TestKeyManagerSecretListFiltersPagingSourceAndNativeIsolation(t *testing.T)
 						}
 					}
 					return response, err
-				})
+				}))
 				cloud.Mux.HandleFunc(secretFindCollectionPath, func(w http.ResponseWriter, r *http.Request) {
 					calls.Add(1)
 					if !reflect.DeepEqual(r.URL.Query()["mode"], []string{"one", "two"}) || r.Header.Get("X-Configured") != "preserved" || r.Header.Get("OpenStack-API-Version") != "key-manager 1.0" {

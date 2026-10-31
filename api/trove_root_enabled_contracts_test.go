@@ -22,10 +22,6 @@ import (
 const troveRootContractBase = "/reverse/trove/project/"
 const troveRootContractPath = troveRootContractBase + "instances/selected/root"
 
-type troveRootContractTransport func(*http.Request) (*http.Response, error)
-
-func (f troveRootContractTransport) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
-
 func troveRootContractClient(cloud *testcloud.Cloud) *gophercloud.ServiceClient {
 	client := cloud.Client("database", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + troveRootContractBase
@@ -176,11 +172,11 @@ func TestTroveRootEnabledContractsTransportAndContext(t *testing.T) {
 		cloud := testcloud.New(t)
 		cause := errors.New("root transport failure")
 		var calls atomic.Int32
-		cloud.Provider.HTTPClient.Transport = troveRootContractTransport(func(r *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			calls.Add(1)
 			troveRootContractWire(t, r, troveRootContractPath, "test-token")
 			return nil, cause
-		})
+		}))
 		enabled, err := instances.New(troveRootContractClient(cloud)).IsRootEnabled(context.Background(), "selected")
 		var envelope *troveroot.EnvelopeError
 		if enabled || !errors.Is(err, cause) || errors.As(err, &envelope) || calls.Load() != 1 {
@@ -272,12 +268,12 @@ func TestTroveRootEnabledContractsNativeDecodeAndTransportRetry(t *testing.T) {
 			if base == nil {
 				base = http.DefaultTransport
 			}
-			cloud.Provider.HTTPClient.Transport = troveRootContractTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				if attempts.Add(1) == 1 && mode == "transport" {
 					return nil, cause
 				}
 				return base.RoundTrip(r)
-			})
+			}))
 			cloud.Provider.RetryFunc = func(_ context.Context, method, target string, options *gophercloud.RequestOpts, err error, count uint) error {
 				retries.Add(1)
 				want := cause

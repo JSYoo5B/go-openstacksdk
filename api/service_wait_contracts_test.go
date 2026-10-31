@@ -158,11 +158,11 @@ func TestServiceWaitContractsDefaultDeadlinesAndConvenienceTargets(t *testing.T)
 			if transport == nil {
 				transport = http.DefaultTransport
 			}
-			cloud.Provider.HTTPClient.Transport = serviceWaitRoundTrip(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				d, ok := r.Context().Deadline()
 				observed <- serviceWaitDeadline{d, ok}
 				return transport.RoundTrip(r)
-			})
+			}))
 			cloud.Mux.HandleFunc(f.path("selected"), func(w http.ResponseWriter, r *http.Request) {
 				if r.Method != http.MethodGet {
 					t.Error("wait mutated a resource", r.Method)
@@ -291,13 +291,13 @@ func TestServiceWaitContractsNameBindingLiveClientAndProgress(t *testing.T) {
 			if transport == nil {
 				transport = http.DefaultTransport
 			}
-			cloud.Provider.HTTPClient.Transport = serviceWaitRoundTrip(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				middleware.Add(1)
 				if r.Context().Value(contextKey{}) != "caller" {
 					t.Error("caller context was replaced")
 				}
 				return transport.RoundTrip(r)
-			})
+			}))
 			cloud.Mux.HandleFunc(f.listPath(), func(w http.ResponseWriter, r *http.Request) {
 				lists.Add(1)
 				name := "worker"
@@ -408,7 +408,7 @@ func TestServiceWaitContractsDeletionOnlyObservesAndRejectsTerminalErrors(t *tes
 				var transportCause error
 				if outcome == "transport404" {
 					transportCause = &gophercloud.ErrUnexpectedResponseCode{Actual: 404}
-					cloud.Provider.HTTPClient.Transport = serviceWaitRoundTrip(func(r *http.Request) (*http.Response, error) { calls.Add(1); return nil, transportCause })
+					cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) { calls.Add(1); return nil, transportCause }))
 				}
 				err := f.bind(cloud.Client(f.service, f.prefix)).delete(context.Background(), resource.ID("selected"))
 				if err == nil || calls.Load() != 1 {
@@ -555,11 +555,11 @@ func TestServiceWaitContractsLegacyAndNativeSignaturesStayUnchanged(t *testing.T
 			if transport == nil {
 				transport = http.DefaultTransport
 			}
-			cloud.Provider.HTTPClient.Transport = serviceWaitRoundTrip(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				d, ok := r.Context().Deadline()
 				observed <- serviceWaitDeadline{d, ok}
 				return transport.RoundTrip(r)
-			})
+			}))
 			var code atomic.Int32
 			code.Store(200)
 			var status atomic.Value
@@ -594,7 +594,7 @@ func TestServiceWaitContractsLegacyAndNativeSignaturesStayUnchanged(t *testing.T
 			var calls atomic.Int32
 			ctx, cancel := context.WithCancel(context.Background())
 			cancel()
-			cloud.Provider.HTTPClient.Transport = serviceWaitRoundTrip(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls.Add(1)
 				if r.Context().Err() != context.Canceled || r.Method != http.MethodGet || r.URL.Path != f.path("selected") {
 					t.Error("native first predicate lost caller context or route", r.Context().Err(), r.Method, r.URL)
@@ -602,7 +602,7 @@ func TestServiceWaitContractsLegacyAndNativeSignaturesStayUnchanged(t *testing.T
 				// A custom transport can complete the native first predicate even
 				// with canceled context. Preserve that native predicate-first ABI.
 				return &http.Response{StatusCode: 200, Header: make(http.Header), Body: io.NopCloser(strings.NewReader(f.body("selected", "worker", "ACTIVE", 100))), Request: r}, nil
-			})
+			}))
 			bound := f.bind(cloud.Client(f.service, f.prefix))
 			var native func(context.Context, string, string) error = bound.native
 			if err := native(ctx, "selected", "ACTIVE"); err != nil || calls.Load() != 1 {
@@ -614,7 +614,3 @@ func TestServiceWaitContractsLegacyAndNativeSignaturesStayUnchanged(t *testing.T
 		})
 	}
 }
-
-type serviceWaitRoundTrip func(*http.Request) (*http.Response, error)
-
-func (f serviceWaitRoundTrip) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }

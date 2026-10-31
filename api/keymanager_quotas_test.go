@@ -259,7 +259,7 @@ func TestKeyManagerQuotasMissingDeleteAndNativeFailures(t *testing.T) {
 			var calls atomic.Int32
 			client := &gophercloud.ServiceClient{ProviderClient: &gophercloud.ProviderClient{}, Type: "key-manager", Endpoint: "https://barbican.invalid/v1/"}
 			native := gophercloud.ErrUnexpectedResponseCode{Actual: 404, Expected: []int{204}, Method: "DELETE", Body: []byte("not-an-http-404-response")}
-			client.ProviderClient.HTTPClient.Transport = quotaRoundTrip(func(r *http.Request) (*http.Response, error) {
+			client.ProviderClient.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls.Add(1)
 				if !accepted {
 					return nil, native
@@ -373,7 +373,7 @@ func TestKeyManagerQuotasStrictGetEnvelopesStatusAndReadEvidence(t *testing.T) {
 	}
 	client := &gophercloud.ServiceClient{ProviderClient: &gophercloud.ProviderClient{}, Type: "key-manager", Endpoint: "https://barbican.invalid/v1/"}
 	var reads atomic.Int32
-	client.ProviderClient.HTTPClient.Transport = quotaRoundTrip(func(r *http.Request) (*http.Response, error) {
+	client.ProviderClient.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		reads.Add(1)
 		return &http.Response{StatusCode: 200, Header: http.Header{"X-Request-Id": {"partial"}}, Body: &quotaPartialReader{}, Request: r}, nil
 	})
@@ -447,7 +447,7 @@ func TestKeyManagerQuotasUpdateAcknowledgementAndTerminalFailures(t *testing.T) 
 	}
 	var calls atomic.Int32
 	client := &gophercloud.ServiceClient{ProviderClient: &gophercloud.ProviderClient{}, Type: "key-manager", Endpoint: "https://barbican.invalid/v1/"}
-	client.ProviderClient.HTTPClient.Transport = quotaRoundTrip(func(r *http.Request) (*http.Response, error) {
+	client.ProviderClient.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		calls.Add(1)
 		return &http.Response{StatusCode: 204, Header: http.Header{"X-Request-Id": {"accepted"}}, Body: io.NopCloser(strings.NewReader("opaque-ack")), Request: r}, nil
 	})
@@ -455,7 +455,7 @@ func TestKeyManagerQuotasUpdateAcknowledgementAndTerminalFailures(t *testing.T) 
 	if err != nil || result.StatusCode != 204 || string(result.Body) != "opaque-ack" || result.Header.Get("X-Request-ID") != "accepted" || calls.Load() != 1 {
 		t.Fatal(result, err, calls.Load())
 	}
-	client.ProviderClient.HTTPClient.Transport = quotaRoundTrip(func(r *http.Request) (*http.Response, error) {
+	client.ProviderClient.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		calls.Add(1)
 		return &http.Response{StatusCode: 204, Header: http.Header{"X-Request-Id": {"partial"}}, Body: &quotaPartialReader{}, Request: r}, nil
 	})
@@ -465,7 +465,7 @@ func TestKeyManagerQuotasUpdateAcknowledgementAndTerminalFailures(t *testing.T) 
 		t.Fatal(result, err, evidence, calls.Load())
 	}
 	sentinel := errors.New("transport failed")
-	client.ProviderClient.HTTPClient.Transport = quotaRoundTrip(func(r *http.Request) (*http.Response, error) { calls.Add(1); return nil, sentinel })
+	client.ProviderClient.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) { calls.Add(1); return nil, sentinel })
 	if result, err := quotaScope(t, client, "project").Update(context.Background(), quotas.UpdateOpts{}); result != nil || !errors.Is(err, sentinel) || calls.Load() != 3 {
 		t.Fatal(result, err, calls.Load())
 	}
@@ -526,10 +526,6 @@ func TestKeyManagerQuotasHeadersSnapshotReuseAndCancellation(t *testing.T) {
 		t.Fatal("canceled/changed-source operation submitted HTTP", calls.Load())
 	}
 }
-
-type quotaRoundTrip func(*http.Request) (*http.Response, error)
-
-func (f quotaRoundTrip) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
 
 type quotaPartialReader struct{ read bool }
 

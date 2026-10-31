@@ -220,10 +220,10 @@ func TestKeyManagerSecretStoresStrictSingletonErrorsAndAcceptedEvidence(t *testi
 		client := secretStoresClient(cloud)
 		native := gophercloud.ErrUnexpectedResponseCode{Actual: 404, Expected: []int{200}, Body: []byte(`{"message":"transport cause"}`)}
 		var calls atomic.Int32
-		client.HTTPClient.Transport = secretStoreRoundTripper(func(r *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			calls.Add(1)
 			return nil, native
-		})
+		}))
 		value, err := secretstores.New(client).GetPreferred(context.Background())
 		var transport *url.Error
 		var cause gophercloud.ErrUnexpectedResponseCode
@@ -464,11 +464,11 @@ func TestKeyManagerSecretStoresContinuationGuardsAndTerminalFailures(t *testing.
 			})
 			if mode == "changed-type" {
 				original := client.HTTPClient.Transport
-				client.HTTPClient.Transport = secretStoreRoundTripper(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					response, err := original.RoundTrip(r)
 					client.Type = "network"
 					return response, err
-				})
+				}))
 			}
 			values, err := secretstores.New(client).All(ctx, secretstores.WithListQuery("vendor", "retained"))
 			wantCalls := int32(2)
@@ -506,10 +506,6 @@ func TestKeyManagerSecretStoresContinuationGuardsAndTerminalFailures(t *testing.
 	}
 }
 
-type secretStoreRoundTripper func(*http.Request) (*http.Response, error)
-
-func (f secretStoreRoundTripper) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
-
 type secretStoreReadFailure struct{ cause error }
 
 func (r secretStoreReadFailure) Read([]byte) (int, error) { return 0, r.cause }
@@ -535,13 +531,13 @@ func TestKeyManagerSecretStoresLiveSourcePreflightAndReadFailures(t *testing.T) 
 		testcloud.JSON(w, 200, secretStorePage(rows, next))
 	})
 	original := client.HTTPClient.Transport
-	client.HTTPClient.Transport = secretStoreRoundTripper(func(r *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		middleware.Add(1)
 		r.Header.Set("X-Middleware", "original-provider")
 		response, err := original.RoundTrip(r)
 		client.ProviderClient.SetToken("new-token")
 		return response, err
-	})
+	}))
 	a := secretstores.New(client)
 	values, err := a.All(context.Background())
 	secretStoreWantIDs(t, values, err, "one", "two")
@@ -594,7 +590,7 @@ func TestKeyManagerSecretStoresLiveSourcePreflightAndReadFailures(t *testing.T) 
 	}
 	client.Type = "key-manager"
 	cause := errors.New("accepted response read failed")
-	client.HTTPClient.Transport = secretStoreRoundTripper(func(r *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		r.Header.Set("X-Middleware", "original-provider")
 		response, err := original.RoundTrip(r)
 		if err == nil {
@@ -602,7 +598,7 @@ func TestKeyManagerSecretStoresLiveSourcePreflightAndReadFailures(t *testing.T) 
 			response.Body = io.NopCloser(secretStoreReadFailure{cause})
 		}
 		return response, err
-	})
+	}))
 	values, err = a.All(context.Background())
 	var evidence *resource.ResponseError
 	if values != nil || !errors.As(err, &evidence) || !errors.Is(err, cause) || evidence.StatusCode != 200 || calls.Load() != before+1 {

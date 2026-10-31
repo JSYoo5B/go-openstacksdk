@@ -25,11 +25,8 @@ import (
 // response proof and deliberately avoid Python filename/size inference/cache.
 const glanceStagePrefix = "/reverse/glance/v2/"
 
-type glanceStageRoundTrip func(*http.Request) (*http.Response, error)
-
-func (f glanceStageRoundTrip) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
 func glanceStageHTTP(code int, body io.ReadCloser) *http.Response {
-	return &http.Response{StatusCode: code, Header: http.Header{"Content-Type": {"application/json"}, "X-Evidence": {"actual"}}, Body: body}
+	return testcloud.StreamResponse(code, body, http.Header{"Content-Type": {"application/json"}, "X-Evidence": {"actual"}})
 }
 func glanceStageKnown() *images.Image {
 	return &images.Image{ID: "selected", Status: images.ImageStatusQueued}
@@ -193,7 +190,7 @@ func TestGlanceStageSizeAndOptionSnapshots(t *testing.T) {
 			retained = o
 			return nil
 		})
-		cloud.Provider.HTTPClient.Transport = glanceStageRoundTrip(func(r *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			retained.Headers["X-Trace"] = "late"
 			*retained.Size = 999
 			if r.Header.Get("X-Trace") != "captured" {
@@ -212,7 +209,7 @@ func TestGlanceStageSizeAndOptionSnapshots(t *testing.T) {
 				t.Error(r.URL.String())
 			}
 			return glanceStageHTTP(200, io.NopCloser(strings.NewReader(glanceStageJSON("selected", "uploading")))), nil
-		})
+		}))
 		if v, err := imagedata.New(cloud.Client("image", glanceStagePrefix)).StageKnownImage(context.Background(), seed, strings.NewReader("payload"), option); err != nil || v == nil || v.ImageID != "selected" || puts.Load() != 1 || gets.Load() != 1 {
 			t.Fatal(v, err, puts.Load(), gets.Load())
 		}
@@ -400,14 +397,14 @@ func TestGlanceStageStreamFailuresAndCallerCancellation(t *testing.T) {
 			callbacks.Add(1)
 			return nil
 		}
-		cloud.Provider.HTTPClient.Transport = glanceStageRoundTrip(func(r *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			attempts.Add(1)
 			body, err := io.ReadAll(r.Body)
 			if r.Method != http.MethodPut || string(body) != "prefix" || !errors.Is(err, cause) || r.GetBody != nil {
 				t.Error(r.Method, string(body), err, r.GetBody != nil)
 			}
 			return nil, err
-		})
+		}))
 		v, err := imagedata.New(cloud.Client("image", glanceStagePrefix)).StageKnownImage(context.Background(), glanceStageKnown(), data)
 		if v != nil || !errors.Is(err, cause) || attempts.Load() != 1 || callbacks.Load() != 0 || data.closes.Load() != 0 || data.seeks.Load() != 0 {
 			t.Fatal(v, err, attempts.Load(), callbacks.Load(), data.closes.Load(), data.seeks.Load())
@@ -417,7 +414,7 @@ func TestGlanceStageStreamFailuresAndCallerCancellation(t *testing.T) {
 		cloud := testcloud.New(t)
 		cause := &gophercloud.ErrUnexpectedResponseCode{Actual: 404}
 		var attempts atomic.Int32
-		cloud.Provider.HTTPClient.Transport = glanceStageRoundTrip(func(r *http.Request) (*http.Response, error) { attempts.Add(1); return nil, cause })
+		cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) { attempts.Add(1); return nil, cause }))
 		v, err := imagedata.New(cloud.Client("image", glanceStagePrefix)).StageKnownImage(context.Background(), glanceStageKnown(), strings.NewReader("payload"))
 		if v != nil || !errors.Is(err, cause) || errors.Is(err, resource.ErrNotFound) || attempts.Load() != 1 {
 			t.Fatal(v, err, attempts.Load())
@@ -499,7 +496,7 @@ func TestGlanceStageAcceptedAndFollowupEvidence(t *testing.T) {
 				retries.Add(1)
 				return err
 			}
-			cloud.Provider.HTTPClient.Transport = glanceStageRoundTrip(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				code, body := tc.getCode, tc.body
 				phase := "GET"
 				if r.Method == http.MethodPut {
@@ -528,7 +525,7 @@ func TestGlanceStageAcceptedAndFollowupEvidence(t *testing.T) {
 					getHeader = wire.Header
 				}
 				return wire, nil
-			})
+			}))
 			v, err := imagedata.New(cloud.Client("image", glanceStagePrefix)).StageKnownImage(context.Background(), glanceStageKnown(), strings.NewReader("payload"))
 			if puts.Load() != 1 {
 				t.Fatal(v, err, puts.Load())
@@ -601,7 +598,7 @@ func TestGlanceStageAcceptedAndFollowupEvidence(t *testing.T) {
 				defer cancel(nil)
 				cause := errors.New("caller canceled at response")
 				var calls atomic.Int32
-				cloud.Provider.HTTPClient.Transport = glanceStageRoundTrip(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					calls.Add(1)
 					if r.Method == http.MethodPut {
 						_, _ = io.Copy(io.Discard, r.Body)
@@ -617,7 +614,7 @@ func TestGlanceStageAcceptedAndFollowupEvidence(t *testing.T) {
 						}
 					}
 					return glanceStageHTTP(code, io.NopCloser(strings.NewReader(body))), nil
-				})
+				}))
 				v, err := imagedata.New(cloud.Client("image", glanceStagePrefix)).StageKnownImage(ctx, glanceStageKnown(), strings.NewReader("payload"))
 				if !errors.Is(err, context.Canceled) || !errors.Is(err, cause) {
 					t.Fatal(v, err)
@@ -729,10 +726,10 @@ func TestGlanceStageClosedOptionsAndPreflight(t *testing.T) {
 			cloud := testcloud.New(t)
 			var calls atomic.Int32
 			data := glanceStageData("payload")
-			cloud.Provider.HTTPClient.Transport = glanceStageRoundTrip(func(*http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(*http.Request) (*http.Response, error) {
 				calls.Add(1)
 				return glanceStageHTTP(500, io.NopCloser(strings.NewReader(`{}`))), nil
-			})
+			}))
 			v, err := tc.call(cloud, data)
 			if v != nil || !errors.Is(err, tc.want) || calls.Load() != 0 || data.reads.Load() != 0 || data.closes.Load() != 0 {
 				t.Fatal(v, err, calls.Load(), data.reads.Load(), data.closes.Load())
@@ -744,10 +741,10 @@ func TestGlanceStageClosedOptionsAndPreflight(t *testing.T) {
 			cloud := testcloud.New(t)
 			var calls atomic.Int32
 			data := glanceStageData("payload")
-			cloud.Provider.HTTPClient.Transport = glanceStageRoundTrip(func(*http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(*http.Request) (*http.Response, error) {
 				calls.Add(1)
 				return glanceStageHTTP(500, io.NopCloser(strings.NewReader(`{}`))), nil
-			})
+			}))
 			v, err := imagedata.New(cloud.Client("image", glanceStagePrefix)).StageImage(context.Background(), resource.ID(id), data)
 			if v != nil || !errors.Is(err, resource.ErrInvalidOption) || calls.Load() != 0 || data.reads.Load() != 0 {
 				t.Fatal(v, err, calls.Load(), data.reads.Load())
@@ -774,10 +771,10 @@ func TestGlanceStageClosedOptionsAndPreflight(t *testing.T) {
 			cloud := testcloud.New(t)
 			var calls atomic.Int32
 			data := glanceStageData("payload")
-			cloud.Provider.HTTPClient.Transport = glanceStageRoundTrip(func(*http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(*http.Request) (*http.Response, error) {
 				calls.Add(1)
 				return glanceStageHTTP(500, io.NopCloser(strings.NewReader(`{}`))), nil
-			})
+			}))
 			v, err := imagedata.New(cloud.Client("image", glanceStagePrefix)).StageImage(context.Background(), resource.ID("selected"), data, tc.values...)
 			if v != nil || !errors.Is(err, resource.ErrInvalidOption) || calls.Load() != 0 || data.reads.Load() != 0 {
 				t.Fatal(v, err, calls.Load(), data.reads.Load())
@@ -791,10 +788,10 @@ func TestGlanceStageClosedOptionsAndPreflight(t *testing.T) {
 		cancel(cause)
 		var calls atomic.Int32
 		data := glanceStageData("payload")
-		cloud.Provider.HTTPClient.Transport = glanceStageRoundTrip(func(*http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.RoundTripperFunc(func(*http.Request) (*http.Response, error) {
 			calls.Add(1)
 			return glanceStageHTTP(500, io.NopCloser(strings.NewReader(`{}`))), nil
-		})
+		}))
 		v, err := imagedata.New(cloud.Client("image", glanceStagePrefix)).StageImage(ctx, resource.ID("selected"), data)
 		if v != nil || !errors.Is(err, context.Canceled) || !errors.Is(err, cause) || calls.Load() != 0 || data.reads.Load() != 0 {
 			t.Fatal(v, err, calls.Load(), data.reads.Load())
@@ -813,13 +810,13 @@ func TestGlanceStageLiveProviderFixedRoutesAndNativeABI(t *testing.T) {
 		var gets, puts, middleware, reauth, retries atomic.Int32
 		type callerKey struct{}
 		transport := cloud.Provider.HTTPClient.Transport
-		cloud.Provider.HTTPClient.Transport = glanceStageRoundTrip(func(r *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			middleware.Add(1)
 			if r.Context().Value(callerKey{}) != "caller" || r.Header.Get("X-Source") != "configured" || r.Header.Get("X-Trace") != "final" || r.Header.Get("OpenStack-API-Version") != "image 2.6" {
 				t.Error(r.Context(), r.Header)
 			}
 			return transport.RoundTrip(r)
-		})
+		}))
 		cloud.Provider.ReauthFunc = func(context.Context) error { reauth.Add(1); cloud.Provider.SetToken("reauthenticated"); return nil }
 		cloud.Provider.RetryFunc = func(_ context.Context, method, target string, _ *gophercloud.RequestOpts, err error, _ uint) error {
 			retries.Add(1)
@@ -883,7 +880,7 @@ func TestGlanceStageLiveProviderFixedRoutesAndNativeABI(t *testing.T) {
 		client.MoreHeaders = map[string]string{"X-Source": "captured"}
 		client.Microversion = "2.6"
 		var gets, puts atomic.Int32
-		cloud.Provider.HTTPClient.Transport = glanceStageRoundTrip(func(r *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			if r.Header.Get("X-Source") != "captured" || r.Header.Get("OpenStack-API-Version") != "image 2.6" {
 				t.Error(r.Header)
 			}
@@ -907,7 +904,7 @@ func TestGlanceStageLiveProviderFixedRoutesAndNativeABI(t *testing.T) {
 				client.Microversion = "2.9"
 			}
 			return glanceStageHTTP(200, io.NopCloser(strings.NewReader(glanceStageJSON("decoy", status)))), nil
-		})
+		}))
 		v, err := imagedata.New(client).StageImage(context.Background(), resource.ID("selected"), strings.NewReader("payload"))
 		if err != nil || v == nil || gets.Load() != 2 || puts.Load() != 1 || client.ResourceBase != cloud.Server.URL+"/changed/v2/" || client.MoreHeaders["X-Source"] != "later" {
 			t.Fatal(v, err, gets.Load(), puts.Load(), client)
@@ -918,7 +915,7 @@ func TestGlanceStageLiveProviderFixedRoutesAndNativeABI(t *testing.T) {
 			cloud := testcloud.New(t)
 			client := cloud.Client("image", glanceStagePrefix)
 			var gets, puts atomic.Int32
-			cloud.Provider.HTTPClient.Transport = glanceStageRoundTrip(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				if r.Method == http.MethodPut {
 					puts.Add(1)
 					_, _ = io.Copy(io.Discard, r.Body)
@@ -930,7 +927,7 @@ func TestGlanceStageLiveProviderFixedRoutesAndNativeABI(t *testing.T) {
 					client.Type = "compute"
 				}
 				return glanceStageHTTP(200, io.NopCloser(strings.NewReader(glanceStageJSON("selected", "queued")))), nil
-			})
+			}))
 			v, err := imagedata.New(client).StageImage(context.Background(), resource.ID("selected"), strings.NewReader("payload"))
 			if !errors.Is(err, resource.ErrUnsupported) || gets.Load() != 1 {
 				t.Fatal(v, err, gets.Load(), puts.Load())
@@ -954,7 +951,7 @@ func TestGlanceStageLiveProviderFixedRoutesAndNativeABI(t *testing.T) {
 		size = -1
 		headers["X-Trace"] = "changed"
 		var puts, gets atomic.Int32
-		cloud.Provider.HTTPClient.Transport = glanceStageRoundTrip(func(r *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			if r.Header.Get("X-Source") != "equal" || r.Header.Get("X-Trace") != "snapshot" {
 				t.Error(r.Header)
 			}
@@ -968,7 +965,7 @@ func TestGlanceStageLiveProviderFixedRoutesAndNativeABI(t *testing.T) {
 			}
 			gets.Add(1)
 			return glanceStageHTTP(200, io.NopCloser(strings.NewReader(glanceStageJSON("selected", "uploading")))), nil
-		})
+		}))
 		a := imagedata.New(client)
 		done := make(chan error, 2)
 		for range 2 {

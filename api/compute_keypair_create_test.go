@@ -360,13 +360,13 @@ func TestComputeKeypairCreateOwnedOptionsSourceAndAcceptedFailures(t *testing.T)
 				if base == nil {
 					base = http.DefaultTransport
 				}
-				cloud.Provider.HTTPClient.Transport = secretFetchRoundTripFunc(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					response, err := base.RoundTrip(r)
 					if err == nil {
 						client.ResourceBase = cloud.Server.URL + "/changed/"
 					}
 					return response, err
-				})
+				}))
 			}
 			var calls, retries atomic.Int32
 			cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
