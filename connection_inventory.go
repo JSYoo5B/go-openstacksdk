@@ -124,6 +124,15 @@ const (
 	InventoryExpandNone
 )
 
+// The inventory options are converted to cloudinventory.Expansion by value.
+// Each constant index must be 0, so the build fails if the two constant lists
+// drift apart.
+var (
+	_ = [1]struct{}{}[cloudinventory.Expansion(InventoryExpandHostvars)-cloudinventory.ExpandHostvars]
+	_ = [1]struct{}{}[cloudinventory.Expansion(InventoryExpandInterfaces)-cloudinventory.ExpandInterfaces]
+	_ = [1]struct{}{}[cloudinventory.Expansion(InventoryExpandNone)-cloudinventory.ExpandNone]
+)
+
 // InventoryFailure records a cloud that could not be listed.
 type InventoryFailure struct {
 	Cloud string
