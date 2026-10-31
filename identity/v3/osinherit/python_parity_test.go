@@ -5,7 +5,6 @@ import (
 	"io"
 	"net/http"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/osinherit"
@@ -13,30 +12,20 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type pythonInheritTransport func(*http.Request) (*http.Response, error)
-
-func (transport pythonInheritTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 type pythonInheritCall struct{ method, path, query, body string }
 
 func pythonInheritAPI(t *testing.T, calls *[]pythonInheritCall, status int) *osinherit.API {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = pythonInheritTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
 			raw = string(data)
 		}
 		*calls = append(*calls, pythonInheritCall{req.Method, req.URL.Path, req.URL.RawQuery, raw})
-		return &http.Response{StatusCode: status, Body: io.NopCloser(strings.NewReader("")), Header: http.Header{}}, nil
-	})
+		return testcloud.Response(status, "", http.Header{}), nil
+	}))
 	client := cloud.Client("identity", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/keystone/v3/"
 	return osinherit.New(client)

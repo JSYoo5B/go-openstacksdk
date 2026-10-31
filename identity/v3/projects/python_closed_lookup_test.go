@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/projects"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 	"net/http"
@@ -110,7 +111,7 @@ func TestClosedProjectPhysicalFaultKeepsNative401ValueAndAllCauses(t *testing.T)
 		calls, hooks := 0, 0
 		cause := errors.New("physical close")
 		body := `{"project":{"id":"one"}}`
-		b := &projectRecordFaultBody{text: body, close: cause}
+		b := &testcloud.Body{Data: body, CloseErr: cause}
 		api, fixture := projectRecordAPI(t, func(*http.Request) *http.Response {
 			calls++
 			r := projectRecordWire(status, body)
@@ -124,8 +125,8 @@ func TestClosedProjectPhysicalFaultKeepsNative401ValueAndAllCauses(t *testing.T)
 		fixture.Provider.ReauthFunc = func(context.Context) error { hooks++; return nil }
 		fixture.Provider.RetryBackoffFunc = func(context.Context, *gophercloud.ErrUnexpectedResponseCode, error, uint) error { hooks++; return nil }
 		row, err := api.ResolveRecord(context.Background(), "one")
-		if row != nil || err == nil || !errors.Is(err, cause) || calls != 1 || hooks != 0 || b.closed != 1 {
-			t.Fatal(row, err, calls, hooks, b.closed)
+		if row != nil || err == nil || !errors.Is(err, cause) || calls != 1 || hooks != 0 || b.Closes() != 1 {
+			t.Fatal(row, err, calls, hooks, b.Closes())
 		}
 		if status < 400 {
 			var proof *resource.ResponseError

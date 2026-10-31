@@ -6,7 +6,6 @@ import (
 	"io"
 	"net/http"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/roles"
@@ -15,22 +14,12 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type pythonRoleTransport func(*http.Request) (*http.Response, error)
-
-func (transport pythonRoleTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 type pythonRoleCall struct{ method, path, query, body string }
 
 func pythonRoleAPI(t *testing.T, calls *[]pythonRoleCall, reply func(*http.Request) (int, string)) *roles.API {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = pythonRoleTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -38,8 +27,8 @@ func pythonRoleAPI(t *testing.T, calls *[]pythonRoleCall, reply func(*http.Reque
 		}
 		*calls = append(*calls, pythonRoleCall{req.Method, req.URL.Path, req.URL.RawQuery, raw})
 		code, body := reply(req)
-		return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}, nil
-	})
+		return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}}), nil
+	}))
 	client := cloud.Client("identity", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/keystone/v3/"
 	return roles.New(client)

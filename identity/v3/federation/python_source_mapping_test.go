@@ -4,12 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"io"
 	"net/http"
 	"strings"
 	"testing"
 
 	sdk "github.com/JSYoo5B/go-openstacksdk/identity/v3/federation"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -255,26 +255,6 @@ func TestSourceMappingPreflightCollisionsAndInvalidBodies(t *testing.T) {
 	}
 }
 
-type sourceMappingFaultBody struct {
-	io.Reader
-	cause      error
-	closeCause error
-	close      func()
-}
-
-func (b *sourceMappingFaultBody) Read(p []byte) (int, error) {
-	n, err := b.Reader.Read(p)
-	if err == io.EOF && b.cause != nil {
-		return n, b.cause
-	}
-	return n, err
-}
-func (b *sourceMappingFaultBody) Close() error {
-	if b.close != nil {
-		b.close()
-	}
-	return b.closeCause
-}
 func TestSourceMappingPhysicalFaultsPreserveProofAndStopFallback(t *testing.T) {
 	for _, mode := range []string{"read", "close", "cancel", "accepted-shape"} {
 		t.Run(mode, func(t *testing.T) {
@@ -284,7 +264,7 @@ func TestSourceMappingPhysicalFaultsPreserveProofAndStopFallback(t *testing.T) {
 			ctx, cancel := context.WithCancelCause(context.Background())
 			defer cancel(nil)
 			count := 0
-			api.RawClient().HTTPClient.Transport = pyMappingRecordTransport(func(r *http.Request) (*http.Response, error) {
+			api.RawClient().HTTPClient.Transport = testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 				count++
 				status := 404
 				raw := `{"error":"physical"}`
@@ -292,17 +272,17 @@ func TestSourceMappingPhysicalFaultsPreserveProofAndStopFallback(t *testing.T) {
 					status = 203
 					raw = `[]`
 				}
-				body := &sourceMappingFaultBody{Reader: strings.NewReader(raw)}
+				body := &testcloud.Body{Data: raw}
 				if mode == "read" {
-					body.cause = cause
+					body.ReadErr = cause
 				}
 				if mode == "close" {
-					body.closeCause = cause
+					body.CloseErr = cause
 				}
 				if mode == "cancel" {
-					body.close = func() { cancel(cause) }
+					body.OnClose = func() { cancel(cause) }
 				}
-				return &http.Response{StatusCode: status, Body: body, Header: http.Header{"Content-Type": {"application/json"}, "X-Request-Id": {"physical-proof"}}}, nil
+				return testcloud.StreamResponse(status, body, http.Header{"Content-Type": {"application/json"}, "X-Request-Id": {"physical-proof"}}), nil
 			})
 			row, err := api.FindSourceMappingRecord(ctx, "m")
 			if err == nil || count != 1 {

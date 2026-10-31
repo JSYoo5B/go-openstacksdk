@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -21,13 +20,13 @@ import (
 func projectRecordAPI(t *testing.T, reply func(*http.Request) *http.Response) (*projects.API, *testcloud.Cloud) {
 	t.Helper()
 	fixture := testcloud.New(t)
-	fixture.Provider.HTTPClient.Transport = pythonProjectTransport(func(req *http.Request) (*http.Response, error) { return reply(req), nil })
+	fixture.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) { return reply(req), nil }))
 	client := fixture.Client("identity", "/catalog/")
 	client.ResourceBase = fixture.Server.URL + "/keystone/v3/"
 	return projects.New(client), fixture
 }
 func projectRecordWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Header: http.Header{"Content-Type": {"application/json"}, "X-Request-Id": {"project-proof"}}, Body: io.NopCloser(strings.NewReader(body))}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}, "X-Request-Id": {"project-proof"}})
 }
 func projectRecordField(t *testing.T, r *projects.ProjectRecord, key, want string) {
 	t.Helper()
@@ -338,29 +337,6 @@ func TestPythonProjectRecordsOptionsSnapshotAndSourceCancellationPreflight(t *te
 	}
 }
 
-type projectRecordFaultBody struct {
-	text        string
-	read, close error
-	hook        func()
-	closed      int
-	done        bool
-}
-
-func (b *projectRecordFaultBody) Read(p []byte) (int, error) {
-	if b.done {
-		return 0, io.EOF
-	}
-	b.done = true
-	n := copy(p, b.text)
-	if b.hook != nil {
-		b.hook()
-	}
-	if b.read != nil {
-		return n, b.read
-	}
-	return n, io.EOF
-}
-func (b *projectRecordFaultBody) Close() error { b.closed++; return b.close }
 func TestPythonProjectRecordsPhysicalReadCloseNative401AndCanceledGuardNeverFallback(t *testing.T) {
 	for _, status := range []int{200, 400, 403, 404, 401, 429, 498, 503} {
 		for _, mode := range []string{"read", "close", "both", "restore cancel"} {
@@ -371,24 +347,24 @@ func TestPythonProjectRecordsPhysicalReadCloseNative401AndCanceledGuardNeverFall
 				cancelCause := errors.New("project caller cancel")
 				ctx, cancel := context.WithCancelCause(context.Background())
 				defer cancel(nil)
-				body := &projectRecordFaultBody{text: `{"project":{"id":"a"}}`}
+				body := &testcloud.Body{Data: `{"project":{"id":"a"}}`}
 				if mode == "read" || mode == "both" {
-					body.read = readCause
+					body.ReadErr = readCause
 				}
 				if mode == "close" || mode == "both" {
-					body.close = closeCause
+					body.CloseErr = closeCause
 				}
 				var api *projects.API
 				api, fixture := projectRecordAPI(t, func(r *http.Request) *http.Response {
 					calls++
-					response := projectRecordWire(status, body.text)
+					response := projectRecordWire(status, body.Data)
 					response.Body = body
 					return response
 				})
 				if mode == "restore cancel" {
 					old := api.RawClient().Endpoint
-					body.hook = func() { api.RawClient().Endpoint = "https://changed.invalid/"; cancel(cancelCause) }
-					body.close = closeCause
+					body.OnRead = func() { api.RawClient().Endpoint = "https://changed.invalid/"; cancel(cancelCause) }
+					body.CloseErr = closeCause
 					defer func() { api.RawClient().Endpoint = old }()
 				}
 				fixture.Provider.RetryFunc = func(context.Context, string, string, *gophercloud.RequestOpts, error, uint) error {
@@ -401,12 +377,12 @@ func TestPythonProjectRecordsPhysicalReadCloseNative401AndCanceledGuardNeverFall
 					return nil
 				}
 				row, err := api.FindRecord(ctx, "a")
-				if err == nil || row != nil || calls != 1 || body.closed != 1 || retries != 0 || reauth != 0 || backoff != 0 {
-					t.Fatal(row, err, calls, body.closed, retries, reauth, backoff)
+				if err == nil || row != nil || calls != 1 || body.Closes() != 1 || retries != 0 || reauth != 0 || backoff != 0 {
+					t.Fatal(row, err, calls, body.Closes(), retries, reauth, backoff)
 				}
 				if status < 400 {
 					var proof *resource.ResponseError
-					if !errors.As(err, &proof) || proof.StatusCode != status || string(proof.Body) != body.text || proof.Header.Get("X-Request-Id") != "project-proof" {
+					if !errors.As(err, &proof) || proof.StatusCode != status || string(proof.Body) != body.Data || proof.Header.Get("X-Request-Id") != "project-proof" {
 						t.Fatal(err, proof)
 					}
 				} else {
@@ -419,14 +395,14 @@ func TestPythonProjectRecordsPhysicalReadCloseNative401AndCanceledGuardNeverFall
 						original = native.ErrOriginal
 					}
 					var proof gophercloud.ErrUnexpectedResponseCode
-					if !errors.As(original, &proof) || proof.Actual != status || string(proof.Body) != body.text || proof.ResponseHeader.Get("X-Request-Id") != "project-proof" || proof.Method != http.MethodGet || !strings.Contains(proof.URL, "/keystone/v3/projects/a") {
+					if !errors.As(original, &proof) || proof.Actual != status || string(proof.Body) != body.Data || proof.ResponseHeader.Get("X-Request-Id") != "project-proof" || proof.Method != http.MethodGet || !strings.Contains(proof.URL, "/keystone/v3/projects/a") {
 						t.Fatal(err, proof)
 					}
 				}
-				if body.read != nil && !errors.Is(err, readCause) {
+				if body.ReadErr != nil && !errors.Is(err, readCause) {
 					t.Fatal(err)
 				}
-				if body.close != nil && !errors.Is(err, closeCause) {
+				if body.CloseErr != nil && !errors.Is(err, closeCause) {
 					t.Fatal(err)
 				}
 				if mode == "restore cancel" && (!errors.Is(err, cancelCause) || !errors.Is(err, context.Canceled) || !errors.Is(err, resource.ErrInvalidOption)) {

@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -21,13 +20,13 @@ import (
 func roleRecordAPI(t *testing.T, reply func(*http.Request) *http.Response) (*roles.API, *testcloud.Cloud) {
 	t.Helper()
 	fixture := testcloud.New(t)
-	fixture.Provider.HTTPClient.Transport = pythonRoleTransport(func(r *http.Request) (*http.Response, error) { return reply(r), nil })
+	fixture.SetTransport(testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) { return reply(r), nil }))
 	client := fixture.Client("identity", "/catalog/")
 	client.ResourceBase = fixture.Server.URL + "/keystone/v3/"
 	return roles.New(client), fixture
 }
 func roleRecordWire(status int, body string) *http.Response {
-	return &http.Response{StatusCode: status, Header: http.Header{"Content-Type": {"application/json"}, "X-Request-Id": {"role-proof"}}, Body: io.NopCloser(strings.NewReader(body))}
+	return testcloud.Response(status, body, http.Header{"Content-Type": {"application/json"}, "X-Request-Id": {"role-proof"}})
 }
 func roleRecordIDs(t *testing.T, rows []*roles.RoleRecord) []string {
 	t.Helper()
@@ -286,35 +285,6 @@ func TestPythonRoleRecordsMalformedRowsAndLocalFilterFaultRetainAcceptedPage(t *
 	}
 }
 
-type roleRecordFaultBody struct {
-	data            string
-	read, close     error
-	onRead, onClose func()
-	used            bool
-	closed          int
-}
-
-func (b *roleRecordFaultBody) Read(p []byte) (int, error) {
-	if b.used {
-		return 0, io.EOF
-	}
-	b.used = true
-	n := copy(p, b.data)
-	if b.onRead != nil {
-		b.onRead()
-	}
-	if b.read != nil {
-		return n, b.read
-	}
-	return n, io.EOF
-}
-func (b *roleRecordFaultBody) Close() error {
-	b.closed++
-	if b.onClose != nil {
-		b.onClose()
-	}
-	return b.close
-}
 func TestPythonRoleRecordsPhysicalFaultsKeepNative401AndActualReceiptWithoutCallbacks(t *testing.T) {
 	for _, status := range []int{200, 400, 403, 404, 401, 429, 498, 503} {
 		for _, mode := range []string{"read", "close", "both", "restore cancel"} {
@@ -325,24 +295,24 @@ func TestPythonRoleRecordsPhysicalFaultsKeepNative401AndActualReceiptWithoutCall
 				cancelCause := errors.New("role caller canceled")
 				ctx, cancel := context.WithCancelCause(context.Background())
 				defer cancel(nil)
-				body := &roleRecordFaultBody{data: `{"roles":[{"id":"a"}]}`}
+				body := &testcloud.Body{Data: `{"roles":[{"id":"a"}]}`}
 				if mode == "read" || mode == "both" {
-					body.read = readCause
+					body.ReadErr = readCause
 				}
 				if mode == "close" || mode == "both" {
-					body.close = closeCause
+					body.CloseErr = closeCause
 				}
 				api, fixture := roleRecordAPI(t, func(r *http.Request) *http.Response {
 					calls++
-					response := roleRecordWire(status, body.data)
+					response := roleRecordWire(status, body.Data)
 					response.Body = body
 					return response
 				})
 				if mode == "restore cancel" {
 					old := api.RawClient().Endpoint
-					body.onRead = func() { api.RawClient().Endpoint = "https://changed.invalid/"; cancel(cancelCause) }
-					body.onClose = func() { api.RawClient().Endpoint = old }
-					body.close = closeCause
+					body.OnRead = func() { api.RawClient().Endpoint = "https://changed.invalid/"; cancel(cancelCause) }
+					body.OnClose = func() { api.RawClient().Endpoint = old }
+					body.CloseErr = closeCause
 				}
 				fixture.Provider.RetryFunc = func(context.Context, string, string, *gophercloud.RequestOpts, error, uint) error {
 					retries++
@@ -354,12 +324,12 @@ func TestPythonRoleRecordsPhysicalFaultsKeepNative401AndActualReceiptWithoutCall
 					return nil
 				}
 				rows, err := api.AllRecords(ctx)
-				if rows != nil || err == nil || calls != 1 || body.closed != 1 || retries != 0 || reauth != 0 || backoff != 0 {
-					t.Fatal(rows, err, calls, body.closed, retries, reauth, backoff)
+				if rows != nil || err == nil || calls != 1 || body.Closes() != 1 || retries != 0 || reauth != 0 || backoff != 0 {
+					t.Fatal(rows, err, calls, body.Closes(), retries, reauth, backoff)
 				}
 				if status < 400 {
 					var proof *resource.ResponseError
-					if !errors.As(err, &proof) || proof.StatusCode != status || string(proof.Body) != body.data || proof.Header.Get("X-Request-Id") != "role-proof" {
+					if !errors.As(err, &proof) || proof.StatusCode != status || string(proof.Body) != body.Data || proof.Header.Get("X-Request-Id") != "role-proof" {
 						t.Fatal(err, proof)
 					}
 				} else {
@@ -372,14 +342,14 @@ func TestPythonRoleRecordsPhysicalFaultsKeepNative401AndActualReceiptWithoutCall
 						original = failure.ErrOriginal
 					}
 					var proof gophercloud.ErrUnexpectedResponseCode
-					if !errors.As(original, &proof) || proof.Actual != status || string(proof.Body) != body.data || proof.ResponseHeader.Get("X-Request-Id") != "role-proof" || proof.Method != http.MethodGet || !strings.Contains(proof.URL, pythonRoleBase) {
+					if !errors.As(original, &proof) || proof.Actual != status || string(proof.Body) != body.Data || proof.ResponseHeader.Get("X-Request-Id") != "role-proof" || proof.Method != http.MethodGet || !strings.Contains(proof.URL, pythonRoleBase) {
 						t.Fatal(err, proof)
 					}
 				}
-				if body.read != nil && !errors.Is(err, readCause) {
+				if body.ReadErr != nil && !errors.Is(err, readCause) {
 					t.Fatal(err)
 				}
-				if body.close != nil && !errors.Is(err, closeCause) {
+				if body.CloseErr != nil && !errors.Is(err, closeCause) {
 					t.Fatal(err)
 				}
 				if mode == "restore cancel" && (!errors.Is(err, cancelCause) || !errors.Is(err, context.Canceled) || !errors.Is(err, resource.ErrInvalidOption)) {

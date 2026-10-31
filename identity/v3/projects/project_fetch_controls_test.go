@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/projects"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -178,25 +179,25 @@ func TestPythonProjectFindRecordFetchControlsPhysicalFaultsNeverFallback(t *test
 			cause := errors.New("project controlled physical " + mode)
 			ctx, cancel := context.WithCancelCause(context.Background())
 			defer cancel(nil)
-			body := &projectRecordFaultBody{text: `{"error":{"message":"unclean missing"}}`}
+			body := &testcloud.Body{Data: `{"error":{"message":"unclean missing"}}`}
 			if mode == "read" {
-				body.read = cause
+				body.ReadErr = cause
 			}
 			if mode == "close" {
-				body.close = cause
+				body.CloseErr = cause
 			}
 			if mode == "cancel" {
-				body.hook = func() { cancel(cause) }
+				body.OnRead = func() { cancel(cause) }
 			}
 			api, _ := projectRecordAPI(t, func(r *http.Request) *http.Response {
 				calls++
-				response := projectRecordWire(404, body.text)
+				response := projectRecordWire(404, body.Data)
 				response.Body = body
 				return response
 			})
 			row, err := api.FindRecord(ctx, "demo", projects.WithRecordFindQuery("requires_id", false), projects.WithRecordFindQuery("skip_cache", true), projects.WithRecordFindQuery("error_message", "controlled project lookup"))
-			if row != nil || calls != 1 || body.closed != 1 || !errors.Is(err, cause) {
-				t.Fatal(row, err, calls, body.closed)
+			if row != nil || calls != 1 || body.Closes() != 1 || !errors.Is(err, cause) {
+				t.Fatal(row, err, calls, body.Closes())
 			}
 		})
 	}

@@ -21,7 +21,7 @@ import (
 func closedUserFixture(t *testing.T, reply func(*http.Request) *http.Response) (*users.API, *testcloud.Cloud) {
 	t.Helper()
 	fixture := testcloud.New(t)
-	fixture.Provider.HTTPClient.Transport = pythonUserTransport(func(q *http.Request) (*http.Response, error) { return reply(q), nil })
+	fixture.SetTransport(testcloud.LinkRequest(func(q *http.Request) (*http.Response, error) { return reply(q), nil }))
 	client := fixture.Client("identity", "/unused/catalog/")
 	client.ResourceBase = fixture.Server.URL + "/keystone/v3/"
 	return users.New(client), fixture
@@ -237,12 +237,12 @@ func TestPythonUserClosedLookupPhysicalFaultStopsFallbackAndNativeCallbacks(t *t
 				readCause := errors.New("closed read")
 				closeCause := errors.New("closed close")
 				payload := `{"user":{"id":"one"}}`
-				body := &recordFaultBody{data: payload, onClose: func() { closed++ }}
+				body := &testcloud.Body{Data: payload, OnClose: func() { closed++ }}
 				if mode == "read" || mode == "both" {
-					body.read = readCause
+					body.ReadErr = readCause
 				}
 				if mode == "close" || mode == "both" {
-					body.close = closeCause
+					body.CloseErr = closeCause
 				}
 				api, fixture := closedUserFixture(t, func(*http.Request) *http.Response {
 					calls++
@@ -263,10 +263,10 @@ func TestPythonUserClosedLookupPhysicalFaultStopsFallbackAndNativeCallbacks(t *t
 				if row != nil || err == nil || calls != 1 || closed != 1 || retries != 0 || reauth != 0 || backoff != 0 {
 					t.Fatal(row, err, calls, closed, retries, reauth, backoff)
 				}
-				if body.read != nil && !errors.Is(err, readCause) {
+				if body.ReadErr != nil && !errors.Is(err, readCause) {
 					t.Fatal(err)
 				}
-				if body.close != nil && !errors.Is(err, closeCause) {
+				if body.CloseErr != nil && !errors.Is(err, closeCause) {
 					t.Fatal(err)
 				}
 				if status < 400 {

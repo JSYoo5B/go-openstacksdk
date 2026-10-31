@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"reflect"
 	"slices"
-	"strings"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/regions"
@@ -17,18 +16,8 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type nativeRegionTransport func(*http.Request) (*http.Response, error)
-
-func (transport nativeRegionTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func nativeRegionWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}})
 }
 
 type nativeRegionCall struct{ method, path, query, body string }
@@ -36,7 +25,7 @@ type nativeRegionCall struct{ method, path, query, body string }
 func nativeRegionAPI(t *testing.T, calls *[]nativeRegionCall, reply func(*http.Request) *http.Response) (*regions.API, *testcloud.Cloud) {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = nativeRegionTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -44,7 +33,7 @@ func nativeRegionAPI(t *testing.T, calls *[]nativeRegionCall, reply func(*http.R
 		}
 		*calls = append(*calls, nativeRegionCall{req.Method, req.URL.Path, req.URL.RawQuery, raw})
 		return reply(req), nil
-	})
+	}))
 	client := cloud.Client("identity", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/keystone/v3/"
 	return regions.New(client), cloud

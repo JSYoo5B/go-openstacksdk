@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/roles"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -199,15 +200,15 @@ func TestPythonRoleFindRecordPhysicalFaultsNeverFallback(t *testing.T) {
 			cause := errors.New("role controlled physical " + mode)
 			ctx, cancel := context.WithCancelCause(context.Background())
 			defer cancel(nil)
-			body := &roleRecordFaultBody{data: `{}`}
+			body := &testcloud.Body{Data: `{}`}
 			if mode == "read" {
-				body.read = cause
+				body.ReadErr = cause
 			}
 			if mode == "close" {
-				body.close = cause
+				body.CloseErr = cause
 			}
 			if mode == "cancel" {
-				body.onClose = func() { cancel(cause) }
+				body.OnClose = func() { cancel(cause) }
 			}
 
 			api, _ := roleRecordAPI(t, func(r *http.Request) *http.Response {
@@ -217,8 +218,8 @@ func TestPythonRoleFindRecordPhysicalFaultsNeverFallback(t *testing.T) {
 				return response
 			})
 			row, err := api.FindRecord(ctx, "demo", roles.WithRecordFindQuery("requires_id", false), roles.WithRecordFindQuery("skip_cache", true), roles.WithRecordFindQuery("error_message", "controlled role lookup"))
-			if row != nil || calls != 1 || body.closed != 1 || !errors.Is(err, cause) {
-				t.Fatal(row, err, calls, body.closed)
+			if row != nil || calls != 1 || body.Closes() != 1 || !errors.Is(err, cause) {
+				t.Fatal(row, err, calls, body.Closes())
 			}
 		})
 	}

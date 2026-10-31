@@ -6,7 +6,6 @@ import (
 	"io"
 	"net/http"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/projects"
@@ -16,22 +15,12 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type nativeSelfTransport func(*http.Request) (*http.Response, error)
-
-func (transport nativeSelfTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 type nativeSelfCall struct{ method, path, query, body string }
 
 func nativeSelfClient(t *testing.T, calls *[]nativeSelfCall, reply func(*http.Request) (int, string)) (*gophercloud.ServiceClient, *testcloud.Cloud) {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = nativeSelfTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -39,8 +28,8 @@ func nativeSelfClient(t *testing.T, calls *[]nativeSelfCall, reply func(*http.Re
 		}
 		*calls = append(*calls, nativeSelfCall{req.Method, req.URL.Path, req.URL.RawQuery, raw})
 		code, body := reply(req)
-		return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}, nil
-	})
+		return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}}), nil
+	}))
 	client := cloud.Client("identity", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/keystone/v3/"
 	return client, cloud

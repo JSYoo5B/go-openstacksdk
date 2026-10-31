@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"reflect"
 	"slices"
-	"strings"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/services"
@@ -17,18 +16,8 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type nativeServiceTransport func(*http.Request) (*http.Response, error)
-
-func (transport nativeServiceTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func nativeServiceWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}})
 }
 
 type nativeServiceCall struct{ method, path, query, body string }
@@ -36,7 +25,7 @@ type nativeServiceCall struct{ method, path, query, body string }
 func nativeServiceAPI(t *testing.T, calls *[]nativeServiceCall, reply func(*http.Request) *http.Response) (*services.API, *testcloud.Cloud) {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = nativeServiceTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -44,7 +33,7 @@ func nativeServiceAPI(t *testing.T, calls *[]nativeServiceCall, reply func(*http
 		}
 		*calls = append(*calls, nativeServiceCall{req.Method, req.URL.Path, req.URL.RawQuery, raw})
 		return reply(req), nil
-	})
+	}))
 	client := cloud.Client("identity", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/keystone/v3/"
 	return services.New(client), cloud

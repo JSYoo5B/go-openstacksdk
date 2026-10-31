@@ -20,13 +20,13 @@ import (
 func regionRecordAPI(t *testing.T, reply func(*http.Request) *http.Response) (*regions.API, *testcloud.Cloud) {
 	t.Helper()
 	fixture := testcloud.New(t)
-	fixture.Provider.HTTPClient.Transport = nativeRegionTransport(func(r *http.Request) (*http.Response, error) { return reply(r), nil })
+	fixture.SetTransport(testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) { return reply(r), nil }))
 	client := fixture.Client("identity", "/catalog/")
 	client.ResourceBase = fixture.Server.URL + "/keystone/v3/"
 	return regions.New(client), fixture
 }
 func regionRecordWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Header: http.Header{"Content-Type": {"application/json"}, "X-Request-Id": {"region-proof"}}, Body: io.NopCloser(strings.NewReader(body))}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}, "X-Request-Id": {"region-proof"}})
 }
 func regionRecordField(t *testing.T, r *regions.RegionRecord, key, want string) {
 	t.Helper()

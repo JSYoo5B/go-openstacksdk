@@ -13,6 +13,7 @@ import (
 	"testing"
 
 	sdk "github.com/JSYoo5B/go-openstacksdk/identity/v3/users"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -22,7 +23,7 @@ import (
 func recordAPI(t *testing.T, calls *[]pythonUserCall, reply func(*http.Request) *http.Response) *sdk.API {
 	t.Helper()
 	api := pythonUserAPI(t, calls, func(*http.Request) (int, string) { t.Fatal("base fixture unexpectedly used"); return 500, "" })
-	api.RawClient().HTTPClient.Transport = pythonUserTransport(func(req *http.Request) (*http.Response, error) {
+	api.RawClient().HTTPClient.Transport = testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -34,7 +35,7 @@ func recordAPI(t *testing.T, calls *[]pythonUserCall, reply func(*http.Request) 
 	return api
 }
 func recordUserWire(status int, body string) *http.Response {
-	return &http.Response{StatusCode: status, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}
+	return testcloud.Response(status, body, http.Header{"Content-Type": {"application/json"}})
 }
 func recordListOperation(t *testing.T, err error, operation string) {
 	t.Helper()
@@ -421,29 +422,6 @@ func TestPythonUserListRecordsIteratorKeepsYieldedRowsAndAllDiscards(t *testing.
 	}
 }
 
-type recordFaultBody struct {
-	data        string
-	read, close error
-	onClose     func()
-}
-
-func (v *recordFaultBody) Read(p []byte) (int, error) {
-	if v.data == "" {
-		return 0, io.EOF
-	}
-	n := copy(p, v.data)
-	v.data = v.data[n:]
-	if v.data == "" && v.read != nil {
-		return n, v.read
-	}
-	return n, nil
-}
-func (v *recordFaultBody) Close() error {
-	if v.onClose != nil {
-		v.onClose()
-	}
-	return v.close
-}
 func TestPythonUserListRecordsPhysicalFailuresPreserveNative401AndStopCallbacks(t *testing.T) {
 	for _, status := range []int{200, 203, 401, 404, 429, 503} {
 		for _, fault := range []string{"read", "close", "mixed"} {
@@ -454,12 +432,12 @@ func TestPythonUserListRecordsPhysicalFailuresPreserveNative401AndStopCallbacks(
 					raw = `{"error":{"message":"physical rejection"}}`
 				}
 				closed := 0
-				body := &recordFaultBody{data: raw, onClose: func() { closed++ }}
+				body := &testcloud.Body{Data: raw, OnClose: func() { closed++ }}
 				if fault != "close" {
-					body.read = readCause
+					body.ReadErr = readCause
 				}
 				if fault != "read" {
-					body.close = closeCause
+					body.CloseErr = closeCause
 				}
 				var calls []pythonUserCall
 				api := recordAPI(t, &calls, func(*http.Request) *http.Response {
@@ -606,7 +584,7 @@ func TestPythonUserListRecordsCloseCancellationKeepsReceiptAndCause(t *testing.T
 	api := recordAPI(t, &calls, func(*http.Request) *http.Response {
 		response := recordUserWire(203, raw)
 		response.Header.Set("X-Request-Id", "cancel-close")
-		response.Body = &recordFaultBody{data: raw, onClose: func() { closed++; cancel(cause) }}
+		response.Body = &testcloud.Body{Data: raw, OnClose: func() { closed++; cancel(cause) }}
 		return response
 	})
 	rows, err := api.AllRecords(ctx)

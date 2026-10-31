@@ -20,13 +20,13 @@ import (
 func groupUserAPI(t *testing.T, reply func(*http.Request) *http.Response) (*sdk.API, *testcloud.Cloud) {
 	t.Helper()
 	f := testcloud.New(t)
-	f.Provider.HTTPClient.Transport = pythonUserTransport(func(r *http.Request) (*http.Response, error) { return reply(r), nil })
+	f.SetTransport(testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) { return reply(r), nil }))
 	client := f.Client("identity", "/catalog/")
 	client.ResourceBase = f.Server.URL + "/keystone/v3/"
 	return sdk.New(client), f
 }
 func groupUserWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Header: http.Header{"Content-Type": {"application/json"}, "X-Request-Id": {"group-user-proof"}}, Body: io.NopCloser(strings.NewReader(body))}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}, "X-Request-Id": {"group-user-proof"}})
 }
 func TestPythonGroupUserRecordsFullUserProfileAndFixedGroupScope(t *testing.T) {
 	calls, encoded := 0, 0

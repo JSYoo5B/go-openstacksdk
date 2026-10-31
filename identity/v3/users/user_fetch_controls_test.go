@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	sdk "github.com/JSYoo5B/go-openstacksdk/identity/v3/users"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -163,17 +164,17 @@ func TestPythonUserFindRecordFetchControlsPhysicalFailuresNeverFallback(t *testi
 			closed := 0
 			api := recordAPI(t, &calls, func(r *http.Request) *http.Response {
 				reply := recordUserWire(404, `{"error":{"message":"not clean"}}`)
-				body := &recordFaultBody{data: `{"error":{"message":"not clean"}}`, onClose: func() {
+				body := &testcloud.Body{Data: `{"error":{"message":"not clean"}}`, OnClose: func() {
 					closed++
 					if mode == "cancel" {
 						cancel(cause)
 					}
 				}}
 				if mode == "read" {
-					body.read = cause
+					body.ReadErr = cause
 				}
 				if mode == "close" {
-					body.close = cause
+					body.CloseErr = cause
 				}
 				reply.Body = body
 				return reply

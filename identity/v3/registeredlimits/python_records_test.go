@@ -6,13 +6,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
 	"reflect"
 	"strings"
 	"testing"
 
 	sdk "github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -414,29 +414,6 @@ func TestPythonRegisteredLimitListRecordsIteratorKeepsYieldedRowsAndAllDiscards(
 	}
 }
 
-type recordFaultBody struct {
-	data        string
-	read, close error
-	onClose     func()
-}
-
-func (v *recordFaultBody) Read(p []byte) (int, error) {
-	if v.data == "" {
-		return 0, io.EOF
-	}
-	n := copy(p, v.data)
-	v.data = v.data[n:]
-	if v.data == "" && v.read != nil {
-		return n, v.read
-	}
-	return n, nil
-}
-func (v *recordFaultBody) Close() error {
-	if v.onClose != nil {
-		v.onClose()
-	}
-	return v.close
-}
 func TestPythonRegisteredLimitListRecordsPhysicalFailuresPreserveNative401AndStopCallbacks(t *testing.T) {
 	for _, status := range []int{200, 203, 401, 404, 429, 503} {
 		for _, fault := range []string{"read", "close", "mixed"} {
@@ -447,12 +424,12 @@ func TestPythonRegisteredLimitListRecordsPhysicalFailuresPreserveNative401AndSto
 					raw = `{"error":{"message":"physical rejection"}}`
 				}
 				closed := 0
-				body := &recordFaultBody{data: raw, onClose: func() { closed++ }}
+				body := &testcloud.Body{Data: raw, OnClose: func() { closed++ }}
 				if fault != "close" {
-					body.read = readCause
+					body.ReadErr = readCause
 				}
 				if fault != "read" {
-					body.close = closeCause
+					body.CloseErr = closeCause
 				}
 				var calls []nativeRegisteredLimitCall
 				api := recordAPI(t, &calls, func(*http.Request) *http.Response {
@@ -601,7 +578,7 @@ func TestPythonRegisteredLimitListRecordsCloseCancellationKeepsReceiptAndCause(t
 	api := recordAPI(t, &calls, func(*http.Request) *http.Response {
 		response := nativeRegisteredLimitWire(203, raw)
 		response.Header.Set("X-Request-Id", "cancel-close")
-		response.Body = &recordFaultBody{data: raw, onClose: func() { closed++; cancel(cause) }}
+		response.Body = &testcloud.Body{Data: raw, OnClose: func() { closed++; cancel(cause) }}
 		return response
 	})
 	rows, err := api.AllRecords(ctx)

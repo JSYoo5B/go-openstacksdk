@@ -6,7 +6,6 @@ import (
 	"io"
 	"net/http"
 	"reflect"
-	"strings"
 	"testing"
 	"time"
 
@@ -16,22 +15,12 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type pythonRegionTransport func(*http.Request) (*http.Response, error)
-
-func (transport pythonRegionTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 type pythonRegionCall struct{ method, path, query, body string }
 
 func pythonRegionAPI(t *testing.T, calls *[]pythonRegionCall, reply func(*http.Request) (int, string)) (*regions.API, *testcloud.Cloud) {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = pythonRegionTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -39,8 +28,8 @@ func pythonRegionAPI(t *testing.T, calls *[]pythonRegionCall, reply func(*http.R
 		}
 		*calls = append(*calls, pythonRegionCall{req.Method, req.URL.Path, req.URL.RawQuery, raw})
 		code, body := reply(req)
-		return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}, nil
-	})
+		return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}}), nil
+	}))
 	client := cloud.Client("identity", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/keystone/v3/"
 	return regions.New(client), cloud

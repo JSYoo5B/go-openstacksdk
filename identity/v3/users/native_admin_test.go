@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"reflect"
 	"slices"
-	"strings"
 	"testing"
 	"time"
 
@@ -18,22 +17,12 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type nativeUserTransport func(*http.Request) (*http.Response, error)
-
-func (transport nativeUserTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 type nativeUserCall struct{ method, path, query, body string }
 
 func nativeUserAPI(t *testing.T, calls *[]nativeUserCall, reply func(*http.Request) (int, string)) (*users.API, *testcloud.Cloud) {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = nativeUserTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -41,8 +30,8 @@ func nativeUserAPI(t *testing.T, calls *[]nativeUserCall, reply func(*http.Reque
 		}
 		*calls = append(*calls, nativeUserCall{req.Method, req.URL.Path, req.URL.RawQuery, raw})
 		code, body := reply(req)
-		return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}, nil
-	})
+		return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}}), nil
+	}))
 	client := cloud.Client("identity", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/keystone/v3/"
 	return users.New(client), cloud

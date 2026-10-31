@@ -3,9 +3,7 @@ package projectendpoints_test
 import (
 	"context"
 	"errors"
-	"io"
 	"net/http"
-	"strings"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/projectendpoints"
@@ -14,26 +12,16 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type pyProjectEndpointRecordTransport func(*http.Request) (*http.Response, error)
-
-func (transport pyProjectEndpointRecordTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 type pyProjectEndpointRecordCall struct{ method, path, query, accept string }
 
 func pyProjectEndpointRecordAPI(t *testing.T, calls *[]pyProjectEndpointRecordCall, reply func(*http.Request) (int, string)) *projectendpoints.API {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = pyProjectEndpointRecordTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		*calls = append(*calls, pyProjectEndpointRecordCall{req.Method, req.URL.EscapedPath(), req.URL.RawQuery, req.Header.Get("Accept")})
 		code, body := reply(req)
-		return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}, nil
-	})
+		return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}}), nil
+	}))
 	client := cloud.Client("identity", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/keystone/v3/"
 	return projectendpoints.New(client)
