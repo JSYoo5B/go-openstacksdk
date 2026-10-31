@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -67,7 +68,7 @@ func TestNativeAddressGroupRoutesBodiesPagingAndDecode(t *testing.T) {
 		}
 		return nativeGroupWire(200, `{"address_group":`+nativeGroupRow+`}`)
 	})
-	created, err := api.Create(ctx, addressgroups.CreateOpts{Name: "web", Addresses: []string{"10.0.0.0/24"}}, addressgroups.WithCreateField("x_extension", 1))
+	created, err := api.Create(ctx, addressgroups.CreateOpts{Name: "web", Addresses: []string{"10.0.0.0/24"}}, request.Field("x_extension", 1))
 	if err != nil || !(created.ID == "ag-1" && created.Description == "" && len(created.Addresses) == 2) {
 		t.Fatal(created, err)
 	}
@@ -80,11 +81,11 @@ func TestNativeAddressGroupRoutesBodiesPagingAndDecode(t *testing.T) {
 		t.Fatal(got, err)
 	}
 	description := ""
-	if _, err := api.Update(ctx, "ag-1", addressgroups.UpdateOpts{Description: &description}, addressgroups.WithUpdateField("x_extension", 1)); err != nil {
+	if _, err := api.Update(ctx, "ag-1", addressgroups.UpdateOpts{Description: &description}, request.Field("x_extension", 1)); err != nil {
 		t.Fatal(err)
 	}
 	var rows []*addressgroups.AddressGroup
-	for value, err := range api.List(ctx, addressgroups.WithListOptions(addressgroups.ListOpts{Name: "web", Addresses: []string{"10.0.0.0/24", "10.1.0.0/24"}, Limit: 1}), addressgroups.WithListQuery("extra", "1")) {
+	for value, err := range api.List(ctx, addressgroups.WithListOptions(addressgroups.ListOpts{Name: "web", Addresses: []string{"10.0.0.0/24", "10.1.0.0/24"}, Limit: 1}), request.Query("extra", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -122,7 +123,7 @@ func TestNativeAddressGroupAddressOperations(t *testing.T) {
 	api, _ := nativeGroupAPI(t, &calls, func(*http.Request) *http.Response {
 		return nativeGroupWire(200, `{"address_group":`+nativeGroupRow+`}`)
 	})
-	added, err := api.AddAddresses(ctx, "ag-1", addressgroups.UpdateAddressesOpts{Addresses: []string{"2001:db8::/64"}}, addressgroups.WithAddAddressesField("x_extension", 1))
+	added, err := api.AddAddresses(ctx, "ag-1", addressgroups.UpdateAddressesOpts{Addresses: []string{"2001:db8::/64"}}, request.Field("x_extension", 1))
 	if err != nil || added.ID != "ag-1" || len(added.Addresses) != 2 {
 		t.Fatal(added, err)
 	}
@@ -151,7 +152,7 @@ func TestNativeAddressGroupAddressOperations(t *testing.T) {
 			return err
 		}()},
 		"addresses extension": {"AddAddresses", func() error {
-			_, err := api.AddAddresses(ctx, "ag-1", addressgroups.UpdateAddressesOpts{Addresses: []string{}}, addressgroups.WithAddAddressesField("addresses", nil))
+			_, err := api.AddAddresses(ctx, "ag-1", addressgroups.UpdateAddressesOpts{Addresses: []string{}}, request.Field("addresses", nil))
 			return err
 		}()},
 	} {
@@ -232,7 +233,7 @@ func TestNativeAddressGroupStrictStatusesAndPreflight(t *testing.T) {
 		for operation, err := range map[string]error{
 			"Create": func() error { _, err := api.Create(ctx, addressgroups.CreateOpts{Name: "web"}); return err }(),
 			"Update": func() error {
-				_, err := api.Update(ctx, "ag-1", addressgroups.UpdateOpts{}, addressgroups.WithUpdateField("name", "x"))
+				_, err := api.Update(ctx, "ag-1", addressgroups.UpdateOpts{}, request.Field("name", "x"))
 				return err
 			}(),
 		} {

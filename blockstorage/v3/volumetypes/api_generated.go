@@ -59,11 +59,10 @@ const VisibilityPublic = upstream.VisibilityPublic
 type VolumeType = upstream.VolumeType
 type VolumeTypeAccess = upstream.VolumeTypeAccess
 type VolumeTypePage = upstream.VolumeTypePage
-type AddAccessOption = request.Option[AddAccessOpts]
+type AddAccessOption = request.NativeFieldCall
 
-func WithAddAccessOptions(value AddAccessOpts) AddAccessOption { return request.WithOptions(value) }
-func WithAddAccessField(key string, value any) AddAccessOption {
-	return request.WithField[AddAccessOpts](key, value)
+func WithAddAccessOptions(value AddAccessOpts) AddAccessOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type addAccessOptsBuilder struct {
@@ -87,12 +86,8 @@ func (b addAccessOptsBuilder) ToVolumeTypeAddAccessMap() (map[string]any, error)
 
 // AddAccess invokes the upstream API with library-owned builders and result handling.
 func (a *API) AddAccess(ctx context.Context, id string, opts AddAccessOpts, options ...AddAccessOption) error {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("AddAccess", "volumetypes", err)
-		return err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("AddAccess", "volumetypes", err)
 		return err
 	}
@@ -100,11 +95,10 @@ func (a *API) AddAccess(ctx context.Context, id string, opts AddAccessOpts, opti
 	return request.Wrap("AddAccess", "volumetypes", upstream.AddAccess(ctx, a.client, id, _opts).ExtractErr())
 }
 
-type CreateOption = request.Option[CreateOpts]
+type CreateOption = request.NativeFieldCall
 
-func WithCreateOptions(value CreateOpts) CreateOption { return request.WithOptions(value) }
-func WithCreateField(key string, value any) CreateOption {
-	return request.WithField[CreateOpts](key, value)
+func WithCreateOptions(value CreateOpts) CreateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type createOptsBuilder struct {
@@ -128,13 +122,8 @@ func (b createOptsBuilder) ToVolumeTypeCreateMap() (map[string]any, error) {
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*VolumeType, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Create", "volumetypes", err)
-		var zero0 *VolumeType
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Create", "volumetypes", err)
 		var zero0 *VolumeType
 		return zero0, err
@@ -146,13 +135,10 @@ func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOpti
 	return value0, err
 }
 
-type CreateEncryptionOption = request.Option[CreateEncryptionOpts]
+type CreateEncryptionOption = request.NativeFieldCall
 
 func WithCreateEncryptionOptions(value CreateEncryptionOpts) CreateEncryptionOption {
-	return request.WithOptions(value)
-}
-func WithCreateEncryptionField(key string, value any) CreateEncryptionOption {
-	return request.WithField[CreateEncryptionOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type createEncryptionOptsBuilder struct {
@@ -176,13 +162,8 @@ func (b createEncryptionOptsBuilder) ToEncryptionCreateMap() (map[string]any, er
 
 // CreateEncryption invokes the upstream API with library-owned builders and result handling.
 func (a *API) CreateEncryption(ctx context.Context, id string, opts CreateEncryptionOpts, options ...CreateEncryptionOption) (*EncryptionType, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("CreateEncryption", "volumetypes", err)
-		var zero0 *EncryptionType
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("CreateEncryption", "volumetypes", err)
 		var zero0 *EncryptionType
 		return zero0, err
@@ -194,13 +175,10 @@ func (a *API) CreateEncryption(ctx context.Context, id string, opts CreateEncryp
 	return value0, err
 }
 
-type CreateExtraSpecsOption = request.Option[ExtraSpecsOpts]
+type CreateExtraSpecsOption = request.NativeFieldCall
 
 func WithCreateExtraSpecsOptions(value ExtraSpecsOpts) CreateExtraSpecsOption {
-	return request.WithOptions(value)
-}
-func WithCreateExtraSpecsField(key string, value any) CreateExtraSpecsOption {
-	return request.WithField[ExtraSpecsOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type createExtraSpecsOptsBuilder struct {
@@ -224,13 +202,8 @@ func (b createExtraSpecsOptsBuilder) ToVolumeTypeExtraSpecsCreateMap() (map[stri
 
 // CreateExtraSpecs invokes the upstream API with library-owned builders and result handling.
 func (a *API) CreateExtraSpecs(ctx context.Context, volumeTypeID string, opts ExtraSpecsOpts, options ...CreateExtraSpecsOption) (map[string]string, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("CreateExtraSpecs", "volumetypes", err)
-		var zero0 map[string]string
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("CreateExtraSpecs", "volumetypes", err)
 		var zero0 map[string]string
 		return zero0, err
@@ -289,10 +262,9 @@ func (a *API) GetExtraSpec(ctx context.Context, volumeTypeID string, key string)
 	return value0, err
 }
 
-type ListOption = request.Option[ListOpts]
+type ListOption = request.NativeQueryCall
 
-func WithListOptions(value ListOpts) ListOption  { return request.WithOptions(value) }
-func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
+func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
 	base   ListOpts
@@ -320,12 +292,8 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Volume
 
 func (a *API) listWithControl(ctx context.Context, control resource.ListControl, options ...ListOption) iter.Seq2[*VolumeType, error] {
 	var opts ListOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("List", "volumetypes", err)
-		return func(yield func(*VolumeType, error) bool) { var zero *VolumeType; yield(zero, err) }
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("List", "volumetypes", err)
 		return func(yield func(*VolumeType, error) bool) { var zero *VolumeType; yield(zero, err) }
 	}
@@ -352,13 +320,10 @@ func (a *API) ListExtraSpecs(ctx context.Context, volumeTypeID string) (map[stri
 	return value0, err
 }
 
-type RemoveAccessOption = request.Option[RemoveAccessOpts]
+type RemoveAccessOption = request.NativeFieldCall
 
 func WithRemoveAccessOptions(value RemoveAccessOpts) RemoveAccessOption {
-	return request.WithOptions(value)
-}
-func WithRemoveAccessField(key string, value any) RemoveAccessOption {
-	return request.WithField[RemoveAccessOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type removeAccessOptsBuilder struct {
@@ -382,12 +347,8 @@ func (b removeAccessOptsBuilder) ToVolumeTypeRemoveAccessMap() (map[string]any, 
 
 // RemoveAccess invokes the upstream API with library-owned builders and result handling.
 func (a *API) RemoveAccess(ctx context.Context, id string, opts RemoveAccessOpts, options ...RemoveAccessOption) error {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("RemoveAccess", "volumetypes", err)
-		return err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("RemoveAccess", "volumetypes", err)
 		return err
 	}
@@ -395,11 +356,10 @@ func (a *API) RemoveAccess(ctx context.Context, id string, opts RemoveAccessOpts
 	return request.Wrap("RemoveAccess", "volumetypes", upstream.RemoveAccess(ctx, a.client, id, _opts).ExtractErr())
 }
 
-type UpdateOption = request.Option[UpdateOpts]
+type UpdateOption = request.NativeFieldCall
 
-func WithUpdateOptions(value UpdateOpts) UpdateOption { return request.WithOptions(value) }
-func WithUpdateField(key string, value any) UpdateOption {
-	return request.WithField[UpdateOpts](key, value)
+func WithUpdateOptions(value UpdateOpts) UpdateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type updateOptsBuilder struct {
@@ -423,13 +383,8 @@ func (b updateOptsBuilder) ToVolumeTypeUpdateMap() (map[string]any, error) {
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ...UpdateOption) (*VolumeType, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Update", "volumetypes", err)
-		var zero0 *VolumeType
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Update", "volumetypes", err)
 		var zero0 *VolumeType
 		return zero0, err
@@ -441,13 +396,10 @@ func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ..
 	return value0, err
 }
 
-type UpdateEncryptionOption = request.Option[UpdateEncryptionOpts]
+type UpdateEncryptionOption = request.NativeFieldCall
 
 func WithUpdateEncryptionOptions(value UpdateEncryptionOpts) UpdateEncryptionOption {
-	return request.WithOptions(value)
-}
-func WithUpdateEncryptionField(key string, value any) UpdateEncryptionOption {
-	return request.WithField[UpdateEncryptionOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type updateEncryptionOptsBuilder struct {
@@ -471,13 +423,8 @@ func (b updateEncryptionOptsBuilder) ToUpdateEncryptionMap() (map[string]any, er
 
 // UpdateEncryption invokes the upstream API with library-owned builders and result handling.
 func (a *API) UpdateEncryption(ctx context.Context, id string, encryptionID string, opts UpdateEncryptionOpts, options ...UpdateEncryptionOption) (*EncryptionType, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("UpdateEncryption", "volumetypes", err)
-		var zero0 *EncryptionType
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("UpdateEncryption", "volumetypes", err)
 		var zero0 *EncryptionType
 		return zero0, err
@@ -489,10 +436,10 @@ func (a *API) UpdateEncryption(ctx context.Context, id string, encryptionID stri
 	return value0, err
 }
 
-type UpdateExtraSpecOption = request.Option[ExtraSpecsOpts]
+type UpdateExtraSpecOption = request.NativeCall
 
 func WithUpdateExtraSpecOptions(value ExtraSpecsOpts) UpdateExtraSpecOption {
-	return request.WithOptions(value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type updateExtraSpecOptsBuilder struct {
@@ -506,13 +453,8 @@ func (b updateExtraSpecOptsBuilder) ToVolumeTypeExtraSpecUpdateMap() (map[string
 
 // UpdateExtraSpec invokes the upstream API with library-owned builders and result handling.
 func (a *API) UpdateExtraSpec(ctx context.Context, volumeTypeID string, opts ExtraSpecsOpts, options ...UpdateExtraSpecOption) (map[string]string, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{}, options...)
 	if err != nil {
-		err = request.Wrap("UpdateExtraSpec", "volumetypes", err)
-		var zero0 map[string]string
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, false, false, false); err != nil {
 		err = request.Wrap("UpdateExtraSpec", "volumetypes", err)
 		var zero0 map[string]string
 		return zero0, err

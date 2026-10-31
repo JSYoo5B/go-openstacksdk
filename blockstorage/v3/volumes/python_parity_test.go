@@ -10,6 +10,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -60,7 +61,7 @@ func TestPythonVolumeGetCreateUpdateMatchProxyRequests(t *testing.T) {
 	// create_volume(name=..., size=1, image_id=..., volume_type=..., is_multiattach=True,
 	// scheduler_hints={"same_host": [...]}) keeps the hints outside the volume envelope.
 	created, err := api.Create(ctx, volumes.CreateOpts{Name: "data", Size: 1, ImageID: "img", VolumeType: "fast"},
-		volumes.WithCreateField("multiattach", true),
+		request.Field("multiattach", true),
 		volumes.WithCreateHintOpts(volumes.SchedulerHintOpts{SameHost: []string{"0b3c1a3e-5f4d-4c8e-9a51-1f2e3d4c5b6a"}}))
 	if err != nil || created.ID != "vol-1" {
 		t.Fatal(created, err)
@@ -98,12 +99,12 @@ func TestPythonVolumeDeleteDefaultsCascadeForceAndMissing(t *testing.T) {
 	}
 	// With microversion 3.23 Python always sends cascade and force; API.Delete reproduces the query
 	// but keeps the 404, which the caller drops to match ignore_missing=True.
-	err := api.Delete(ctx, "vol-1", volumes.WithDeleteQuery("cascade", "False"), volumes.WithDeleteQuery("force", "False"))
+	err := api.Delete(ctx, "vol-1", request.Query("cascade", "False"), request.Query("force", "False"))
 	if !gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 		t.Fatal(err)
 	}
 	status = http.StatusAccepted
-	if err := api.Delete(ctx, "vol-1", volumes.WithDeleteQuery("cascade", "True"), volumes.WithDeleteQuery("force", "True")); err != nil {
+	if err := api.Delete(ctx, "vol-1", request.Query("cascade", "True"), request.Query("force", "True")); err != nil {
 		t.Fatal(err)
 	}
 	// delete_volume(volume, force=True) below microversion 3.23 posts os-force_delete; Python sends null, Gophercloud "".
@@ -135,7 +136,7 @@ func TestPythonVolumeListDefaultUsesDetailRouteOnly(t *testing.T) {
 	})
 	// volumes(all_projects=True, name="data", status="available")
 	var ids []string
-	for value, err := range api.List(ctx, volumes.WithListOptions(volumes.ListOpts{Name: "data", Status: "available"}), volumes.WithListQuery("all_tenants", "True")) {
+	for value, err := range api.List(ctx, volumes.WithListOptions(volumes.ListOpts{Name: "data", Status: "available"}), request.Query("all_tenants", "True")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -174,10 +175,10 @@ func TestPythonVolumeConnectionActionsOnlyTypedConnectorKeys(t *testing.T) {
 	}
 	terminating = false
 	// An extension field lands beside "connector", so connector keys such as nqn cannot be sent.
-	if _, err := api.InitializeConnection(ctx, "vol-1", connector, volumes.WithInitializeConnectionField("nqn", "nqn.x")); err != nil {
+	if _, err := api.InitializeConnection(ctx, "vol-1", connector, request.Field("nqn", "nqn.x")); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := api.InitializeConnection(ctx, "vol-1", connector, volumes.WithInitializeConnectionField("connector", map[string]any{"nqn": "nqn.x"})); err == nil {
+	if _, err := api.InitializeConnection(ctx, "vol-1", connector, request.Field("connector", map[string]any{"nqn": "nqn.x"})); err == nil {
 		t.Fatal("connector replacement accepted")
 	}
 	typed := `{"host":"compute-1","initiator":"iqn.x","ip":"10.0.0.1","multipath":false,"os_type":"linux2","platform":"x86_64"}`

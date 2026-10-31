@@ -125,7 +125,7 @@ func emitSubnetBodyRecordAdapter(e *emitter, plan *collectionPlan) {
 	e.printf("case \"allocation_pools\",\"created_at\",\"dns_nameservers\",\"host_routes\",\"prefixlen\",\"service_types\",\"tenant_id\",\"updated_at\":return resource.BodyRecordField(record.Fields,key,resource.BodyFieldJSON)\n")
 	e.printf("default:return nil,fmt.Errorf(\"%%w: unsupported body filter field %%q\",resource.ErrInvalidOption,key)\n}},\n")
 	e.printf("IterateBodyControlled:func(ctx context.Context,q url.Values,control resource.ListControl)iter.Seq2[*resource.BodyRecord[%s],error]{\n", plan.modelName)
-	e.printf("options:=[]ListOption{func(config *request.Config[ListOpts])error{config.Query=make(url.Values,len(q));for key,values:=range q{config.Query[key]=append([]string(nil),values...)};return nil}}\nreturn a.listBodyWithControl(ctx,control,options...)\n},\n")
+	e.printf("options:=[]ListOption{request.Custom(func(config *request.Config[ListOpts])error{config.Query=make(url.Values,len(q));for key,values:=range q{config.Query[key]=append([]string(nil),values...)};return nil})}\nreturn a.listBodyWithControl(ctx,control,options...)\n},\n")
 }
 
 // Called once after newResources is closed, so the raw-row helper remains a
@@ -190,7 +190,7 @@ func emitBodyFilterList(e *emitter, plan *collectionPlan) {
 	e.use("github.com/JSYoo5B/go-openstacksdk/request")
 	e.use(upstreamModule + "/pagination")
 	e.use(e.pkg.Path())
-	e.printf("func(a *API)listBodyWithControl(ctx context.Context,control resource.ListControl,options ...ListOption)iter.Seq2[*resource.BodyRecord[%s],error]{\nvar opts ListOpts\ncfg,err:=request.Apply(opts,options...)\n", plan.modelName)
-	e.printf("if err==nil{err=request.ValidateCapabilities(cfg,false,true,false)}\nif err!=nil{err=request.Wrap(\"List\",\"subnets\",err);return func(yield func(*resource.BodyRecord[%s],error)bool){yield(nil,err)}}\n", plan.modelName)
+	e.printf("func(a *API)listBodyWithControl(ctx context.Context,control resource.ListControl,options ...ListOption)iter.Seq2[*resource.BodyRecord[%s],error]{\nvar opts ListOpts\ncfg,err:=request.ApplyCalls(opts,request.Capabilities{Query:true},options...)\n", plan.modelName)
+	e.printf("if err!=nil{err=request.Wrap(\"List\",\"subnets\",err);return func(yield func(*resource.BodyRecord[%s],error)bool){yield(nil,err)}}\n", plan.modelName)
 	e.printf("_opts:=listOptsBuilder{base:cfg.Options,config:cfg}\nreturn resource.BodyStreamWithControl(ctx,upstream.List(a.client,_opts),func(page pagination.Page)([]%s,error){values,err:=upstream.ExtractSubnets(page);return []%s(values),err},\"subnets\",control)\n}\n", plan.modelName, plan.modelName)
 }

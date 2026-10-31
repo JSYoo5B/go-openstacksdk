@@ -20,17 +20,17 @@ const scopeForceArgument = "project_quota_force"
 // WithUpdateForce makes force explicit, including false. This option belongs
 // to the project/user scope Update; lower-level API.Update retains native opts.
 func WithUpdateForce(force bool) UpdateOption {
-	return request.WithArgument[UpdateOpts](scopeForceArgument, force)
+	return request.Custom(request.WithArgument[UpdateOpts](scopeForceArgument, force))
 }
 
 // WithQuotaOptions snapshots every typed limit at option construction. It
 // replaces the entire concrete update input and can be reused across calls.
 func WithQuotaOptions(value UpdateOpts) UpdateOption {
 	snapshot := snapshotOptions(value)
-	return func(config *request.Config[UpdateOpts]) error {
+	return request.Custom(func(config *request.Config[UpdateOpts]) error {
 		config.Options = snapshotOptions(snapshot)
 		return nil
-	}
+	})
 }
 
 func snapshotOptions(value UpdateOpts) UpdateOpts {
@@ -67,11 +67,8 @@ func (s *ProjectQuotaScope) Update(ctx context.Context, opts UpdateOpts, options
 }
 
 func prepareQuotaUpdate(opts UpdateOpts, options ...UpdateOption) (map[string]any, error) {
-	config, err := request.Apply(opts, options...)
+	config, err := request.ApplyCalls(opts, request.Capabilities{Body: true, Arguments: []string{scopeForceArgument}}, options...)
 	if err != nil {
-		return nil, err
-	}
-	if err := request.ValidateCapabilities(config, true, false, false, scopeForceArgument); err != nil {
 		return nil, err
 	}
 	config.Options = snapshotOptions(config.Options)

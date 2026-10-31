@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/federation"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -114,7 +115,7 @@ func TestPythonMappingRequestsAndDecodeGaps(t *testing.T) {
 	})
 	// create_mapping(id="ACME", rules=[...], schema_version="2.0") keeps id in the body.
 	created, err := api.CreateMapping(ctx, "ACME", federation.CreateMappingOpts{Rules: pythonMappingRules()},
-		federation.WithCreateMappingField("id", "ACME"), federation.WithCreateMappingField("schema_version", "2.0"))
+		request.Field("id", "ACME"), request.Field("schema_version", "2.0"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -123,7 +124,7 @@ func TestPythonMappingRequestsAndDecodeGaps(t *testing.T) {
 		t.Fatal(err)
 	}
 	// update_mapping("ACME", schema_version="2.0") sends only schema_version in Python.
-	updated, err := api.UpdateMapping(ctx, "ACME", federation.UpdateMappingOpts{}, federation.WithUpdateMappingField("schema_version", "2.0"))
+	updated, err := api.UpdateMapping(ctx, "ACME", federation.UpdateMappingOpts{}, request.Field("schema_version", "2.0"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -153,7 +154,7 @@ func TestPythonMappingRequestsAndDecodeGaps(t *testing.T) {
 		t.Fatal("Mapping now exposes schema_version")
 	}
 	// rules is a core field, so Python's raw rule list cannot be sent as JSON.
-	if _, err := api.UpdateMapping(ctx, "ACME", federation.UpdateMappingOpts{}, federation.WithUpdateMappingField("rules", []any{map[string]any{"remote": []any{}}})); err == nil {
+	if _, err := api.UpdateMapping(ctx, "ACME", federation.UpdateMappingOpts{}, request.Field("rules", []any{map[string]any{"remote": []any{}}})); err == nil {
 		t.Fatal("raw rules accepted")
 	}
 	rules := `[{"local":[{"group":{"id":"g-1"}}],"remote":[{"type":"REMOTE_USER"}]}]`

@@ -186,7 +186,7 @@ func TestNovaQuotaUserOperationsKeepQueryTargetAndRawResponse(t *testing.T) {
 	}
 	zero, unlimited := 0, -1
 	extra := map[string]any{"counter": json.Number("9007199254740993"), "tier": "original"}
-	field := quotasets.WithUpdateField("vendor", extra)
+	field := request.Field("vendor", extra)
 	extra["tier"] = "changed"
 	updated, err := scope.Update(context.Background(), quotasets.UpdateOpts{}, quotasets.WithQuotaOptions(quotasets.UpdateOpts{Cores: &unlimited, Instances: &zero, Force: true}), quotasets.WithUpdateForce(false), field)
 	if err != nil || updated == nil || updated.ProjectID != "project-fixed" || updated.UserID != userID || updated.ID != "wire-other" || updated.Cores != -1 || updated.Instances != 0 || string(updated.Body["counter"]) != "9007199254740993" || updated.Header.Get("X-Openstack-Request-Id") != "user-PUT" {
@@ -340,7 +340,7 @@ func TestNovaQuotaUserInvalidInputsAndZeroScopeCannotResetProject(t *testing.T) 
 		t.Fatal(err)
 	}
 	negative := -2
-	for _, options := range [][]quotasets.UpdateOption{{nil}, {quotasets.WithQuotaOptions(quotasets.UpdateOpts{Cores: &negative})}, {quotasets.WithUpdateField("cores", 0)}, {quotasets.WithUpdateField("force", false)}, {request.WithQuery[quotasets.UpdateOpts]("user_id", "other-user")}, {request.WithHeader[quotasets.UpdateOpts]("X-Vendor", "value")}} {
+	for _, options := range [][]quotasets.UpdateOption{{nil}, {quotasets.WithQuotaOptions(quotasets.UpdateOpts{Cores: &negative})}, {request.Field("cores", 0)}, {request.Field("force", false)}, {request.Custom(request.WithQuery[quotasets.UpdateOpts]("user_id", "other-user"))}, {request.Custom(request.WithHeader[quotasets.UpdateOpts]("X-Vendor", "value"))}} {
 		if value, err := scope.Update(context.Background(), quotasets.UpdateOpts{}, options...); value != nil || !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatalf("invalid update=%v err=%v", value, err)
 		}

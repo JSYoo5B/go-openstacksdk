@@ -109,7 +109,7 @@ func TestComputeKeypairCreateDirtyBodyAliasesAndNativeCompatibility(t *testing.T
 				w.Header().Set("X-Keypair-Proof", tc.name)
 				testcloud.JSON(w, tc.status, tc.body)
 			})
-			value, err := keypairs.New(flavorIdentityClient(cloud)).Create(context.Background(), keypairs.CreateOpts{Name: "native-name", UserID: "owner+team", Type: "x509", PublicKey: "import-public"}, keypairs.WithCreateField("vendor", map[string]any{"enabled": true}))
+			value, err := keypairs.New(flavorIdentityClient(cloud)).Create(context.Background(), keypairs.CreateOpts{Name: "native-name", UserID: "owner+team", Type: "x509", PublicKey: "import-public"}, request.Field("vendor", map[string]any{"enabled": true}))
 			if !reflect.DeepEqual(value, tc.want) || calls.Load() != 1 || (err != nil) != (tc.typed || tc.status == 202) {
 				t.Fatal(value, tc.want, err, calls.Load())
 			}
@@ -135,7 +135,7 @@ func TestComputeKeypairCreateDirtyBodyAliasesAndNativeCompatibility(t *testing.T
 		if value, err := api.Create(context.Background(), keypairs.CreateOpts{}); err == nil || value != nil {
 			t.Fatal("native Name requirement changed", value, err)
 		}
-		if value, err := api.Create(context.Background(), keypairs.CreateOpts{Name: "native"}, keypairs.WithCreateField("user_id", "overwritten")); !errors.Is(err, resource.ErrInvalidOption) || value != nil || calls.Load() != 0 {
+		if value, err := api.Create(context.Background(), keypairs.CreateOpts{Name: "native"}, request.Field("user_id", "overwritten")); !errors.Is(err, resource.ErrInvalidOption) || value != nil || calls.Load() != 0 {
 			t.Fatal("native core field protection changed", value, err, calls.Load())
 		}
 	})

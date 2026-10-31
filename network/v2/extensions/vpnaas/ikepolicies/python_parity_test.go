@@ -11,6 +11,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ikepolicies"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -75,7 +76,7 @@ func TestPythonIKEPolicyProxyRequests(t *testing.T) {
 	// update_vpn_ike_policy("ike-1", name="", phase1_negotiation_mode="aggressive"): the typed
 	// Phase1NegotiationMode sends phase_1_negotiation_mode, so the Python key needs WithUpdateField.
 	empty := ""
-	if _, err := api.Update(ctx, "ike-1", ikepolicies.UpdateOpts{Name: &empty}, ikepolicies.WithUpdateField("phase1_negotiation_mode", "aggressive")); err != nil {
+	if _, err := api.Update(ctx, "ike-1", ikepolicies.UpdateOpts{Name: &empty}, request.Field("phase1_negotiation_mode", "aggressive")); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := api.Update(ctx, "ike-1", ikepolicies.UpdateOpts{Phase1NegotiationMode: "aggressive"}); err != nil {
@@ -123,7 +124,7 @@ func TestPythonIKEPolicyListQueryAndLinks(t *testing.T) {
 	// vpn_ike_policies(pfs="group14", phase1_negotiation_mode="main", limit=1); the typed
 	// ListOpts field would send phase_1_negotiation_mode, so the Python key is a raw query.
 	var ids []string
-	for value, err := range api.List(ctx, ikepolicies.WithListOptions(ikepolicies.ListOpts{PFS: "group14"}), ikepolicies.WithListQuery("phase1_negotiation_mode", "main"), ikepolicies.WithListQuery("limit", "1")) {
+	for value, err := range api.List(ctx, ikepolicies.WithListOptions(ikepolicies.ListOpts{PFS: "group14"}), request.Query("phase1_negotiation_mode", "main"), request.Query("limit", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}

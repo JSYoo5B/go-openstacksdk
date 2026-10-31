@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/policies"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -107,7 +108,7 @@ func TestPythonPolicyCreateGetUpdate(t *testing.T) {
 		t.Fatal(err)
 	}
 	// update_policy("pol-1", type="text/plain", blob="", user_id=None)
-	updated, err := api.Update(ctx, "pol-1", policies.UpdateOpts{Type: "text/plain", Extra: map[string]any{"user_id": nil}}, policies.WithUpdateField("blob", ""))
+	updated, err := api.Update(ctx, "pol-1", policies.UpdateOpts{Type: "text/plain", Extra: map[string]any{"user_id": nil}}, request.Field("blob", ""))
 	if err != nil {
 		t.Fatal(err)
 	}

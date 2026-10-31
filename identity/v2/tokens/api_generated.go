@@ -26,11 +26,10 @@ type ServiceCatalog = upstream.ServiceCatalog
 type Token = upstream.Token
 type TokenCredentialsV2 = upstream.TokenCredentialsV2
 type User = upstream.User
-type CreateOption = request.Option[AuthOptions]
+type CreateOption = request.NativeFieldCall
 
-func WithCreateOptions(value AuthOptions) CreateOption { return request.WithOptions(value) }
-func WithCreateField(key string, value any) CreateOption {
-	return request.WithField[AuthOptions](key, value)
+func WithCreateOptions(value AuthOptions) CreateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type createAuthBuilder struct {
@@ -57,12 +56,8 @@ func (b createAuthBuilder) ToTokenV2CreateMap() (map[string]any, error) {
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, auth AuthOptions, options ...CreateOption) (*Authentication, error) {
-	cfg, err := request.Apply(auth, options...)
+	cfg, err := request.ApplyCalls(auth, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Create", "tokens", err)
-		return nil, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Create", "tokens", err)
 		return nil, err
 	}

@@ -11,6 +11,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stackevents"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 func TestHeatNativeStackEventsFindFollowsNameRedirectAndKeepsErrors(t *testing.T) {
@@ -104,7 +105,7 @@ func TestHeatNativeStackEventsResourceListSerializesEveryTypedOption(t *testing.
 			SortKey:          stackevents.SortKey("created_at"),
 			SortDir:          stackevents.SortDir("desc"),
 		}),
-		stackevents.WithListResourceEventsQuery("nested_depth", "2"),
+		request.Query("nested_depth", "2"),
 		stackevents.WithListResourceEventsHeader("X-Events", "full"))
 	if err != nil || len(values) != 1 || values[0].ID != "e1" || len(queries) != 2 {
 		t.Fatalf("values=%v err=%v queries=%v", values, err, queries)

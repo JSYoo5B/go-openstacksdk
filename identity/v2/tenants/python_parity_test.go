@@ -11,6 +11,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v2/tenants"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -61,7 +62,7 @@ func TestPythonTenantCreateGetUpdateRequests(t *testing.T) {
 	if err != nil || !reflect.DeepEqual(*got, want) {
 		t.Fatal(got, err)
 	}
-	updated, err := api.Update(ctx, "t-1", tenants.UpdateOpts{Name: "renamed", Enabled: &disabled}, tenants.WithUpdateField("id", "t-1"))
+	updated, err := api.Update(ctx, "t-1", tenants.UpdateOpts{Name: "renamed", Enabled: &disabled}, request.Field("id", "t-1"))
 	if err != nil || updated.Name != "renamed" || updated.Enabled {
 		t.Fatal(updated, err)
 	}

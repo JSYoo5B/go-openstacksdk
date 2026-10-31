@@ -14,6 +14,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/flavorprofiles"
 	"github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/flavors"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -66,7 +67,7 @@ func TestOctaviaFlavorCreateEnvelopeExtensionsAndFalseLimitation(t *testing.T) {
 	})
 	api := newOctaviaFlavors(t, cloud)
 	ctx := context.Background()
-	value, err := api.Create(ctx, flavors.CreateOpts{Name: "small", FlavorProfileId: "fp-1", Description: "d", Enabled: true}, flavors.WithCreateField("vendor", map[string]bool{"x": false}))
+	value, err := api.Create(ctx, flavors.CreateOpts{Name: "small", FlavorProfileId: "fp-1", Description: "d", Enabled: true}, request.Field("vendor", map[string]bool{"x": false}))
 	if err != nil || value == nil || value.ID != "fl-1" || value.Enabled || value.FlavorProfileId != "fp-1" {
 		t.Fatalf("value=%+v error=%v", value, err)
 	}
@@ -110,13 +111,13 @@ func TestOctaviaFlavorRejectsInvalidInputsBeforeHTTP(t *testing.T) {
 	validFlavor := flavors.CreateOpts{Name: "n", FlavorProfileId: "p"}
 	validProfile := flavorprofiles.CreateOpts{Name: "n", ProviderName: "amphora", FlavorData: "{}"}
 	errs := map[string]error{}
-	_, errs["flavor protected create"] = fl.Create(ctx, validFlavor, flavors.WithCreateField("name", "x"))
-	_, errs["flavor protected update"] = fl.Update(ctx, "fl-1", flavors.UpdateOpts{}, flavors.WithUpdateField("description", "x"))
-	_, errs["flavor false enabled extension collides"] = fl.Update(ctx, "fl-1", flavors.UpdateOpts{}, flavors.WithUpdateField("enabled", false))
+	_, errs["flavor protected create"] = fl.Create(ctx, validFlavor, request.Field("name", "x"))
+	_, errs["flavor protected update"] = fl.Update(ctx, "fl-1", flavors.UpdateOpts{}, request.Field("description", "x"))
+	_, errs["flavor false enabled extension collides"] = fl.Update(ctx, "fl-1", flavors.UpdateOpts{}, request.Field("enabled", false))
 	_, errs["flavor nil create"] = fl.Create(ctx, validFlavor, nil)
 	_, errs["flavor nil update"] = fl.Update(ctx, "fl-1", flavors.UpdateOpts{}, nil)
-	_, errs["profile protected create"] = fp.Create(ctx, validProfile, flavorprofiles.WithCreateField("provider_name", "x"))
-	_, errs["profile protected update"] = fp.Update(ctx, "fp-1", flavorprofiles.UpdateOpts{}, flavorprofiles.WithUpdateField("flavor_data", "x"))
+	_, errs["profile protected create"] = fp.Create(ctx, validProfile, request.Field("provider_name", "x"))
+	_, errs["profile protected update"] = fp.Update(ctx, "fp-1", flavorprofiles.UpdateOpts{}, request.Field("flavor_data", "x"))
 	_, errs["profile nil create"] = fp.Create(ctx, validProfile, nil)
 	_, errs["profile nil update"] = fp.Update(ctx, "fp-1", flavorprofiles.UpdateOpts{}, nil)
 	for name, err := range errs {
@@ -152,7 +153,7 @@ func TestOctaviaFlavorUpdateSendsEmptyStringsAcceptsOnly200AndCannotSendFalse(t 
 			}
 			testcloud.JSON(w, status, octaviaFlavorBody)
 		})
-		value, err := newOctaviaFlavors(t, cloud).Update(context.Background(), "fl-1", flavors.UpdateOpts{Name: "n2", Description: "", Enabled: false}, flavors.WithUpdateField("vendor", nil))
+		value, err := newOctaviaFlavors(t, cloud).Update(context.Background(), "fl-1", flavors.UpdateOpts{Name: "n2", Description: "", Enabled: false}, request.Field("vendor", nil))
 		if (status == 200) != (err == nil) || (err == nil && value.ID != "fl-1") {
 			t.Fatalf("status %d value=%+v error=%v", status, value, err)
 		}
@@ -219,7 +220,7 @@ func TestOctaviaFlavorListFiltersFollowLinksAndPreserveFalse(t *testing.T) {
 	var ids []string
 	for value, err := range api.List(context.Background(),
 		flavors.WithListOptions(flavors.ListOpts{FlavorProfileID: "fp-1", Enabled: octaviaFlavorBool(false), Fields: []string{"id", "name"}}),
-		flavors.WithListQuery("vendor", "x")) {
+		request.Query("vendor", "x")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -267,7 +268,7 @@ func TestOctaviaFlavorProfileCreateEnvelopeAndExtensionFields(t *testing.T) {
 		})
 		value, err := newOctaviaFlavorProfiles(t, cloud).Create(context.Background(),
 			flavorprofiles.CreateOpts{Name: "prof", ProviderName: "amphora", FlavorData: `{"compute_flavor":"c1"}`},
-			flavorprofiles.WithCreateField("vendor", false))
+			request.Field("vendor", false))
 		if tc.success != (err == nil) || (tc.success && (value.ID != "fp-1" || value.ProviderName != "amphora" || value.FlavorData != `{"compute_flavor":"c1"}`)) {
 			t.Fatalf("status %d value=%+v error=%v", tc.status, value, err)
 		}
@@ -293,7 +294,7 @@ func TestOctaviaFlavorProfileUpdateAccepts200Or202AndOmitsEmptyStrings(t *testin
 			}
 			testcloud.JSON(w, tc.status, octaviaFlavorProfileBody)
 		})
-		value, err := newOctaviaFlavorProfiles(t, cloud).Update(context.Background(), "fp-1", flavorprofiles.UpdateOpts{Name: "p2"}, flavorprofiles.WithUpdateField("vendor", nil))
+		value, err := newOctaviaFlavorProfiles(t, cloud).Update(context.Background(), "fp-1", flavorprofiles.UpdateOpts{Name: "p2"}, request.Field("vendor", nil))
 		if tc.success != (err == nil) || (tc.success && value.ID != "fp-1") {
 			t.Fatalf("status %d value=%+v error=%v", tc.status, value, err)
 		}
@@ -356,7 +357,7 @@ func TestOctaviaFlavorProfileGetDeleteListAndFind(t *testing.T) {
 		t.Fatalf("Remove ignores missing by default: %v", err)
 	}
 	var ids []string
-	for value, err := range api.List(ctx, flavorprofiles.WithListOptions(flavorprofiles.ListOpts{ProviderName: "amphora", Fields: []string{"id", "name"}}), flavorprofiles.WithListQuery("vendor", "x")) {
+	for value, err := range api.List(ctx, flavorprofiles.WithListOptions(flavorprofiles.ListOpts{ProviderName: "amphora", Fields: []string{"id", "name"}}), request.Query("vendor", "x")) {
 		if err != nil {
 			t.Fatal(err)
 		}

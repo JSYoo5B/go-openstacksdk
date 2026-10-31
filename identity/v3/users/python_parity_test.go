@@ -11,6 +11,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/users"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -74,7 +75,7 @@ func TestPythonUserCreateGetUpdateRequests(t *testing.T) {
 		t.Fatalf("%#v %v", got, err)
 	}
 	// Python update_user(u, is_enabled=False, email=None).
-	updated, err := api.Update(ctx, "u-1", users.UpdateOpts{Enabled: &disabled, Extra: map[string]any{"email": nil}}, users.WithUpdateField("id", "u-1"))
+	updated, err := api.Update(ctx, "u-1", users.UpdateOpts{Enabled: &disabled, Extra: map[string]any{"email": nil}}, request.Field("id", "u-1"))
 	if err != nil || updated.Enabled || updated.Extra["email"] != nil {
 		t.Fatalf("%#v %v", updated, err)
 	}
@@ -150,7 +151,7 @@ func TestPythonUserListRequests(t *testing.T) {
 		// protocol_id=..., is_enabled=True).
 		pythonUserIDs(t, api.List(ctx,
 			users.WithListOptions(users.ListOpts{DomainID: "dom-1", Name: "alice", UniqueID: "uq", IdPID: "idp", ProtocolID: "saml2"}),
-			users.WithListQuery("enabled", "True")))
+			request.Query("enabled", "True")))
 		want := "domain_id=dom-1&enabled=True&idp_id=idp&name=alice&protocol_id=saml2&unique_id=uq"
 		if len(calls) != 1 || calls[0].query != want {
 			t.Fatalf("%+v", calls)
@@ -162,7 +163,7 @@ func TestPythonUserListRequests(t *testing.T) {
 			return 200, `{"users":[` + pythonUserRow + `],"links":{"next":null}}`
 		})
 		// Python follows with GET ?limit=1&marker=u-1 until an empty page.
-		pythonUserIDs(t, api.List(ctx, users.WithListQuery("limit", "1")))
+		pythonUserIDs(t, api.List(ctx, request.Query("limit", "1")))
 		if !reflect.DeepEqual(calls, []pythonUserCall{{http.MethodGet, pythonUserBase, "limit=1", ""}}) {
 			t.Fatalf("%+v", calls)
 		}
@@ -187,7 +188,7 @@ func TestPythonUserGroupUsersRequests(t *testing.T) {
 	ids := pythonUserIDs(t, api.ListInGroup(ctx, "g-1"))
 	pythonUserIDs(t, api.ListInGroup(ctx, "g-1", users.WithListInGroupOptions(users.ListOpts{PasswordExpiresAt: "lt:2026-12-01T00:00:00Z"})))
 	// Python group_users(g, limit=1) would add GET ?limit=1&marker=u-1.
-	pythonUserIDs(t, api.ListInGroup(ctx, "g-1", users.WithListInGroupQuery("limit", "1")))
+	pythonUserIDs(t, api.ListInGroup(ctx, "g-1", request.Query("limit", "1")))
 	want := []pythonUserCall{
 		{http.MethodGet, "/keystone/v3/groups/g-1/users", "", ""},
 		{http.MethodGet, "/keystone/v3/groups/g-1/users", "password_expires_at=lt%3A2026-12-01T00%3A00%3A00Z", ""},

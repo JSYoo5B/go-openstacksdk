@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -106,7 +107,7 @@ func TestNativeFirewallPolicyRoutesBodiesPagingAndDecode(t *testing.T) {
 		}
 		return nativeFWWire(200, `{"firewall_policy":`+nativePolicyRow+`}`)
 	})
-	created, err := api.Create(ctx, policies.CreateOpts{Name: "web", Audited: gophercloud.Enabled, Shared: gophercloud.Disabled, FirewallRules: []string{"r1", "r2"}}, policies.WithCreateField("x_extension", 1))
+	created, err := api.Create(ctx, policies.CreateOpts{Name: "web", Audited: gophercloud.Enabled, Shared: gophercloud.Disabled, FirewallRules: []string{"r1", "r2"}}, request.Field("x_extension", 1))
 	if err != nil || !(created.ID == "fp-1" && created.Audited && reflect.DeepEqual(created.Rules, []string{"r1", "r2"})) {
 		t.Fatal(created, err)
 	}
@@ -115,11 +116,11 @@ func TestNativeFirewallPolicyRoutesBodiesPagingAndDecode(t *testing.T) {
 		t.Fatal(got, err)
 	}
 	rules := []string{}
-	if _, err := api.Update(ctx, "fp-1", policies.UpdateOpts{FirewallRules: &rules, Audited: gophercloud.Disabled}, policies.WithUpdateField("x_extension", 1)); err != nil {
+	if _, err := api.Update(ctx, "fp-1", policies.UpdateOpts{FirewallRules: &rules, Audited: gophercloud.Disabled}, request.Field("x_extension", 1)); err != nil {
 		t.Fatal(err)
 	}
 	var rows []*policies.Policy
-	for value, err := range api.List(ctx, policies.WithListOptions(policies.ListOpts{Name: "web", Audited: gophercloud.Enabled, Limit: 1}), policies.WithListQuery("extra", "1")) {
+	for value, err := range api.List(ctx, policies.WithListOptions(policies.ListOpts{Name: "web", Audited: gophercloud.Enabled, Limit: 1}), request.Query("extra", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -157,7 +158,7 @@ func TestNativeFirewallPolicyRuleOperations(t *testing.T) {
 		// Rule insertion and removal return the policy without an envelope.
 		return nativeFWWire(200, nativePolicyRow)
 	})
-	inserted, err := api.InsertRule(ctx, "fp-1", policies.InsertRuleOpts{ID: "r3", InsertAfter: "r2"}, policies.WithInsertRuleField("x_extension", 1))
+	inserted, err := api.InsertRule(ctx, "fp-1", policies.InsertRuleOpts{ID: "r3", InsertAfter: "r2"}, request.Field("x_extension", 1))
 	if err != nil || inserted.ID != "fp-1" || len(inserted.Rules) != 2 {
 		t.Fatal(inserted, err)
 	}
@@ -190,7 +191,7 @@ func TestNativeFirewallPolicyRuleOperations(t *testing.T) {
 		}
 		nativeFWOperation(t, err, "InsertRule")
 	}
-	_, err = api.InsertRule(ctx, "fp-1", policies.InsertRuleOpts{ID: "r3", InsertAfter: "r2"}, policies.WithInsertRuleField("firewall_rule_id", "x"))
+	_, err = api.InsertRule(ctx, "fp-1", policies.InsertRuleOpts{ID: "r3", InsertAfter: "r2"}, request.Field("firewall_rule_id", "x"))
 	nativeFWOperation(t, err, "InsertRule")
 	if len(calls) != 0 {
 		t.Fatal(calls)
@@ -229,7 +230,7 @@ func TestNativeFirewallPolicyStrictStatusesAndPreflight(t *testing.T) {
 		api, _ := nativeFWAPI(t, &calls, func(*http.Request) *http.Response { return nativeFWWire(201, `{}`) })
 		for operation, err := range map[string]error{
 			"Create": func() error {
-				_, err := api.Create(ctx, policies.CreateOpts{}, policies.WithCreateField("firewall_rules", nil))
+				_, err := api.Create(ctx, policies.CreateOpts{}, request.Field("firewall_rules", nil))
 				return err
 			}(),
 			"Update": func() error { _, err := api.Update(ctx, "fp-1", policies.UpdateOpts{}, nil); return err }(),

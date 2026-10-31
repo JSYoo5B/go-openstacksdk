@@ -11,6 +11,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/endpointgroups"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -113,7 +114,7 @@ func TestPythonEndpointGroupListQueryAndLinks(t *testing.T) {
 	})
 	// vpn_endpoint_groups(name="peers", type="cidr", limit=1); Python maps type to endpoint_type.
 	var ids []string
-	for value, err := range api.List(ctx, endpointgroups.WithListOptions(endpointgroups.ListOpts{Name: "peers"}), endpointgroups.WithListQuery("endpoint_type", "cidr"), endpointgroups.WithListQuery("limit", "1")) {
+	for value, err := range api.List(ctx, endpointgroups.WithListOptions(endpointgroups.ListOpts{Name: "peers"}), request.Query("endpoint_type", "cidr"), request.Query("limit", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}

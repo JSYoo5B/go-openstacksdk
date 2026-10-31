@@ -18,10 +18,9 @@ type Absolute = upstream.Absolute
 type GetOpts = upstream.GetOpts
 type GetResult = upstream.GetResult
 type Limits = upstream.Limits
-type GetOption = request.Option[GetOpts]
+type GetOption = request.NativeQueryCall
 
-func WithGetOptions(value GetOpts) GetOption   { return request.WithOptions(value) }
-func WithGetQuery(key, value string) GetOption { return request.WithQuery[GetOpts](key, value) }
+func WithGetOptions(value GetOpts) GetOption { return request.Custom(request.WithOptions(value)) }
 
 type getOptsBuilder struct {
 	base   GetOpts
@@ -45,13 +44,8 @@ func (b getOptsBuilder) ToLimitsQuery() (string, error) {
 // Get invokes the upstream API with library-owned builders and result handling.
 func (a *API) Get(ctx context.Context, options ...GetOption) (*Limits, error) {
 	var opts GetOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("Get", "limits", err)
-		var zero0 *Limits
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("Get", "limits", err)
 		var zero0 *Limits
 		return zero0, err

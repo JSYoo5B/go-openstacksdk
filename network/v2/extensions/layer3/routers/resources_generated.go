@@ -25,13 +25,13 @@ func (a *API) newResources() *resource.Collection[Router] {
 			return routerBodyFilterValue(record, key)
 		},
 		IterateBodyControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*resource.BodyRecord[Router], error] {
-			options := []ListOption{func(config *request.Config[ListOpts]) error {
+			options := []ListOption{request.Custom(func(config *request.Config[ListOpts]) error {
 				config.Query = make(url.Values, len(q))
 				for key, values := range q {
 					config.Query[key] = append([]string(nil), values...)
 				}
 				return nil
-			}}
+			})}
 			return a.listBodyWithControl(ctx, control, options...)
 		},
 		FilterDescriptor: &resource.FilterDescriptor{Query: map[string]string{"any_tags": "tags-any", "description": "description", "fields": "fields", "flavor_id": "flavor_id", "id": "id", "is_admin_state_up": "admin_state_up", "is_distributed": "distributed", "is_ha": "ha", "limit": "limit", "marker": "marker", "name": "name", "not_any_tags": "not-tags-any", "not_tags": "not-tags", "project_id": "project_id", "sort_dir": "sort_dir", "sort_key": "sort_key", "status": "status", "tags": "tags"}, Body: map[string]string{"availability_zone_hints": "availability_zone_hints", "availability_zones": "availability_zones", "created_at": "created_at", "enable_ndp_proxy": "enable_ndp_proxy", "evpn_vni": "evpn_vni", "external_gateway_info": "external_gateway_info", "revision_number": "revision", "routes": "routes", "tenant_id": "tenant_id", "updated_at": "updated_at"}, Reserved: []string{"allow_unknown_params", "base_path", "headers", "jmespath_filters", "max_items", "microversion", "paginated", "resource_type", "session"}},
@@ -53,22 +53,19 @@ func (a *API) newResources() *resource.Collection[Router] {
 		Delete: func(ctx context.Context, id string) error { return a.Delete(ctx, string(id)) },
 		IterateControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*Router, error] {
 			q = maps.Clone(q)
-			options := []ListOption{func(config *request.Config[ListOpts]) error {
+			options := []ListOption{request.Custom(func(config *request.Config[ListOpts]) error {
 				config.Query = make(url.Values, len(q))
 				for key, values := range q {
 					config.Query[key] = append([]string(nil), values...)
 				}
 				return nil
-			}}
+			})}
 			return a.listWithControl(ctx, control, options...)
 		}})
 }
 func (a *API) listBodyWithControl(ctx context.Context, control resource.ListControl, options ...ListOption) iter.Seq2[*resource.BodyRecord[Router], error] {
 	var opts ListOpts
-	cfg, err := request.Apply(opts, options...)
-	if err == nil {
-		err = request.ValidateCapabilities(cfg, false, true, false)
-	}
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
 		err = request.Wrap("List", "routers", err)
 		return func(yield func(*resource.BodyRecord[Router], error) bool) { yield(nil, err) }

@@ -42,16 +42,16 @@ type neutronRevisionFixture struct {
 // The shared adapter calls each actual public API.Update with concrete native
 // opts. Generic request options also exercise the existing capability boundary.
 func neutronRevisionCall[O, R any](ctx context.Context, opts O, replacement *O, invalid string,
-	call func(context.Context, string, O, ...request.Option[O]) (*R, error)) (*R, error) {
-	options := []request.Option[O]{request.WithField[O]("vendor_mode", map[string]any{"enabled": false, "label": "space: %2F?# 한글"})}
+	call func(context.Context, string, O, ...request.NativeFieldCall) (*R, error)) (*R, error) {
+	options := []request.NativeFieldCall{request.Field("vendor_mode", map[string]any{"enabled": false, "label": "space: %2F?# 한글"})}
 	if replacement != nil {
-		options = append(options, request.WithOptions(*replacement))
+		options = append(options, request.Custom(request.WithOptions(*replacement)))
 	}
 	switch invalid {
 	case "query":
-		options = append(options, request.WithQuery[O]("vendor", "query"))
+		options = append(options, request.Custom(request.WithQuery[O]("vendor", "query")))
 	case "header":
-		options = append(options, request.WithHeader[O]("X-Vendor", "header"))
+		options = append(options, request.Custom(request.WithHeader[O]("X-Vendor", "header")))
 	case "nil":
 		options = append(options, nil)
 	}

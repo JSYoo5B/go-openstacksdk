@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/baremetal/v1/allocations"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -96,7 +97,7 @@ func TestIronicAllocationCreateSendsBodyAndReturnsAcknowledgementState(t *testin
 	value, err := newIronicAllocations(t, cloud, "1.52").Create(context.Background(), allocations.CreateOpts{
 		ResourceClass: "baremetal", Name: "web", UUID: "alloc-1", CandidateNodes: []string{"n1"},
 		Traits: []string{"CUSTOM_A"}, Extra: map[string]string{"k": "v"},
-	}, allocations.WithCreateField("vendor", map[string]bool{"enabled": false}))
+	}, request.Field("vendor", map[string]bool{"enabled": false}))
 	if err != nil || value == nil || value.UUID != "alloc-1" || calls.Load() != 1 {
 		t.Fatalf("value=%+v error=%v calls=%d", value, err, calls.Load())
 	}
@@ -139,10 +140,10 @@ func TestIronicAllocationRejectsInvalidInputBeforeHTTP(t *testing.T) {
 	ironicForbidHTTP(t, cloud)
 	api := newIronicAllocations(t, cloud, "")
 	ctx := context.Background()
-	if _, err := api.Create(ctx, allocations.CreateOpts{ResourceClass: "baremetal"}, allocations.WithCreateField("name", "shadow")); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := api.Create(ctx, allocations.CreateOpts{ResourceClass: "baremetal"}, request.Field("name", "shadow")); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatalf("core field collision: %v", err)
 	}
-	if _, err := api.Create(ctx, allocations.CreateOpts{ResourceClass: "baremetal"}, allocations.WithCreateField("resource_class", "other")); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := api.Create(ctx, allocations.CreateOpts{ResourceClass: "baremetal"}, request.Field("resource_class", "other")); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatalf("required field collision: %v", err)
 	}
 	if _, err := api.Create(ctx, allocations.CreateOpts{ResourceClass: "baremetal"}, nil); !errors.Is(err, resource.ErrInvalidOption) {
@@ -156,7 +157,7 @@ func TestIronicAllocationRejectsInvalidInputBeforeHTTP(t *testing.T) {
 			t.Fatalf("nil list option: %v", err)
 		}
 	}
-	for _, err := range api.List(ctx, allocations.WithListQuery(" ", "x")) {
+	for _, err := range api.List(ctx, request.Query(" ", "x")) {
 		if !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatalf("empty query key: %v", err)
 		}
@@ -249,7 +250,7 @@ func TestIronicAllocationListFiltersFollowLinksAndExtensionQuery(t *testing.T) {
 	var ids []string
 	for value, err := range api.List(context.Background(),
 		allocations.WithListOptions(allocations.ListOpts{Node: "n1", ResourceClass: "baremetal", State: allocations.AllocationState("allocating"), Fields: []string{"uuid", "name"}, Limit: 1, SortKey: "name", SortDir: "desc"}),
-		allocations.WithListQuery("vendor", "x")) {
+		request.Query("vendor", "x")) {
 		if err != nil {
 			t.Fatal(err)
 		}

@@ -326,7 +326,7 @@ func TestBodyFilterCollectionSelectorsMarshalOnlyTheSelectedNativeField(t *testi
 						}
 					}
 					helper := controlledEmittedMethod(t, source, "listBodyWithControl")
-					requireControlledCalls(t, helper, "request.Apply(opts, options...)", "request.ValidateCapabilities(cfg, false, true, false)", `request.Wrap("List", "groups", err)`, "nativefind.IterateSecurityGroupBodies(ctx, a.RawClient(), cfg.Query, control)")
+					requireControlledCalls(t, helper, "request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)", `request.Wrap("List", "groups", err)`, "nativefind.IterateSecurityGroupBodies(ctx, a.RawClient(), cfg.Query, control)")
 					return
 				}
 				if identity.model == "AddressGroup" || identity.model == "Policy" || identity.model == "SubnetPool" || identity.model == "Network" || identity.model == "Router" || identity.model == "Trunk" {
@@ -354,7 +354,7 @@ func TestBodyFilterCollectionSelectorsMarshalOnlyTheSelectedNativeField(t *testi
 						}
 					}
 					helper := controlledEmittedMethod(t, source, "listBodyWithControl")
-					requireControlledCalls(t, helper, "request.Apply(opts, options...)", "request.ValidateCapabilities(cfg, false, true, false)", `request.Wrap("List", "`+kind+`", err)`, "upstream.List(a.client, _opts)", "upstream."+extractor+"(page)")
+					requireControlledCalls(t, helper, "request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)", `request.Wrap("List", "`+kind+`", err)`, "upstream.List(a.client, _opts)", "upstream."+extractor+"(page)")
 					return
 				}
 				if fields["BodyFilterValue"] != nil {
@@ -386,7 +386,7 @@ func TestBodyFilterCollectionSelectorsMarshalOnlyTheSelectedNativeField(t *testi
 				if len(helper.Type.Params.List) != 3 || nodeText(helper.Type.Params.List[2].Type) != "...ListOption" {
 					t.Fatal("native List option signature was not reused", nodeText(helper.Type))
 				}
-				requireControlledCalls(t, helper, "request.Apply(opts, options...)", "request.ValidateCapabilities(cfg, false, true, false)", `request.Wrap("List", "subnets", err)`, "upstream.List(a.client, _opts)", "upstream.ExtractSubnets(page)", `resource.BodyStreamWithControl(ctx, upstream.List(a.client, _opts)`, `"subnets", control)`)
+				requireControlledCalls(t, helper, "request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)", `request.Wrap("List", "subnets", err)`, "upstream.List(a.client, _opts)", "upstream.ExtractSubnets(page)", `resource.BodyStreamWithControl(ctx, upstream.List(a.client, _opts)`, `"subnets", control)`)
 				return
 			}
 			if fields["BodyFilterRecordValue"] != nil || fields["IterateBodyControlled"] != nil {

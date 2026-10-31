@@ -9,6 +9,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -155,7 +156,7 @@ func TestPythonAggregateUpdateCannotSendNullAvailabilityZone(t *testing.T) {
 	}
 	// update_aggregate(7, availability_zone=None) removes the zone in Nova; the
 	// typed key is omitted when empty and cannot be replaced by an extension.
-	if _, err := api.Update(ctx, 7, aggregates.UpdateOpts{}, aggregates.WithUpdateField("availability_zone", nil)); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := api.Update(ctx, 7, aggregates.UpdateOpts{}, request.Field("availability_zone", nil)); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
 	want := []pythonAggregateCall{

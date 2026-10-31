@@ -78,7 +78,7 @@ func TestNativeEndpointRoutesBodiesPagingAndDecode(t *testing.T) {
 	enabled := false
 	create := nativeEndpointCreate
 	create.Enabled, create.Region, create.Name, create.Description = &enabled, "RegionOne", "nova", "d"
-	created, err := api.Create(ctx, create, endpoints.WithCreateField("x_extension", 1))
+	created, err := api.Create(ctx, create, request.Field("x_extension", 1))
 	if err != nil || !(created.ID == "ep-1" && created.Availability == gophercloud.AvailabilityPublic && created.RegionID == "RegionOne" && created.Enabled) {
 		t.Fatal(created, err)
 	}
@@ -86,7 +86,7 @@ func TestNativeEndpointRoutesBodiesPagingAndDecode(t *testing.T) {
 	if err != nil || got.URL != "https://nova" {
 		t.Fatal(got, err)
 	}
-	updated, err := api.Update(ctx, "ep-1", endpoints.UpdateOpts{Availability: gophercloud.AvailabilityInternal, Enabled: &enabled}, endpoints.WithUpdateField("x_extension", 2))
+	updated, err := api.Update(ctx, "ep-1", endpoints.UpdateOpts{Availability: gophercloud.AvailabilityInternal, Enabled: &enabled}, request.Field("x_extension", 2))
 	if err != nil || updated != nil {
 		t.Fatal(updated, err)
 	}
@@ -202,11 +202,11 @@ func TestNativeEndpointStatusesDecodeAndPreflight(t *testing.T) {
 			"create url":       {"Create", missing(func(o *endpoints.CreateOpts) { o.URL = "" })},
 			"create service":   {"Create", missing(func(o *endpoints.CreateOpts) { o.ServiceID = "" })},
 			"create core extension": {"Create", func() error {
-				_, err := api.Create(ctx, nativeEndpointCreate, endpoints.WithCreateField("region", "x"))
+				_, err := api.Create(ctx, nativeEndpointCreate, request.Field("region", "x"))
 				return err
 			}()},
 			"update core extension": {"Update", func() error {
-				_, err := api.Update(ctx, "ep-1", endpoints.UpdateOpts{}, endpoints.WithUpdateField("url", "x"))
+				_, err := api.Update(ctx, "ep-1", endpoints.UpdateOpts{}, request.Field("url", "x"))
 				return err
 			}()},
 			"update nil option": {"Update", func() error {
@@ -257,7 +257,7 @@ func TestNativeEndpointListFiltersMatchNativeQuery(t *testing.T) {
 		config.Query = url.Values{"extra": {"1"}}
 		return nil
 	}
-	for _, err := range api.List(ctx, extension) {
+	for _, err := range api.List(ctx, request.Custom(extension)) {
 		nativeEndpointOperation(t, err, "List")
 		if !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(err)

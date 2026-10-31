@@ -14,6 +14,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -67,7 +68,7 @@ func TestNativeSnapshotRoutesBodiesSinglePageAndDecode(t *testing.T) {
 		}
 		return nativeSnapWire(200, `{"snapshot":`+nativeSnapRow+`}`)
 	})
-	created, err := api.Create(ctx, snapshots.CreateOpts{VolumeID: "vol-1", Name: "daily", Force: true, Metadata: map[string]string{"k": "v"}}, snapshots.WithCreateField("x_extension", 1))
+	created, err := api.Create(ctx, snapshots.CreateOpts{VolumeID: "vol-1", Name: "daily", Force: true, Metadata: map[string]string{"k": "v"}}, request.Field("x_extension", 1))
 	if err != nil || !(created.ID == "snap-1" && created.Size == 10 && created.CreatedAt.Second() == 3 && created.UpdatedAt.IsZero()) {
 		t.Fatal(created, err)
 	}
@@ -76,7 +77,7 @@ func TestNativeSnapshotRoutesBodiesSinglePageAndDecode(t *testing.T) {
 		t.Fatal(got, err)
 	}
 	var ids []string
-	for value, err := range api.List(ctx, snapshots.WithListOptions(snapshots.ListOpts{VolumeID: "vol-1", AllTenants: true}), snapshots.WithListQuery("extra", "1")) {
+	for value, err := range api.List(ctx, snapshots.WithListOptions(snapshots.ListOpts{VolumeID: "vol-1", AllTenants: true}), request.Query("extra", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -179,7 +180,7 @@ func TestNativeSnapshotStrictStatusesDecodeAndPreflight(t *testing.T) {
 		for name, err := range map[string]error{
 			"volume id": func() error { _, err := api.Create(ctx, snapshots.CreateOpts{}); return err }(),
 			"core extension": func() error {
-				_, err := api.Create(ctx, snapshots.CreateOpts{VolumeID: "vol-1"}, snapshots.WithCreateField("force", true))
+				_, err := api.Create(ctx, snapshots.CreateOpts{VolumeID: "vol-1"}, request.Field("force", true))
 				return err
 			}(),
 		} {

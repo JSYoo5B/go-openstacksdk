@@ -10,6 +10,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/dns/v2/zones"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -33,7 +34,7 @@ func TestZoneShareBodySendsTargetProjectAndExtensionFields(t *testing.T) {
 		t.Fatalf("share=%+v error=%v", share, err)
 	}
 	want = map[string]string{"target_project_id": `"p"`, "flag": `false`, "nothing": `null`}
-	if _, err = api.Share(context.Background(), "zone-1", zones.ShareZoneOpts{TargetProjectID: "p"}, zones.WithShareField("flag", false), zones.WithShareField("nothing", nil)); err != nil {
+	if _, err = api.Share(context.Background(), "zone-1", zones.ShareZoneOpts{TargetProjectID: "p"}, request.Field("flag", false), request.Field("nothing", nil)); err != nil {
 		t.Fatal(err)
 	}
 	if calls.Load() != 2 {
@@ -48,7 +49,7 @@ func TestZoneShareBodyRejectsProtectedFieldBeforeRequest(t *testing.T) {
 		calls.Add(1)
 		testcloud.JSON(w, 201, zoneShareBodyResponse)
 	})
-	_, err := newDesignateZones(t, cloud).Share(context.Background(), "zone-1", zones.ShareZoneOpts{TargetProjectID: "p"}, zones.WithShareField("target_project_id", "other"))
+	_, err := newDesignateZones(t, cloud).Share(context.Background(), "zone-1", zones.ShareZoneOpts{TargetProjectID: "p"}, request.Field("target_project_id", "other"))
 	if !errors.Is(err, resource.ErrInvalidOption) || calls.Load() != 0 {
 		t.Fatalf("error=%v calls=%d", err, calls.Load())
 	}

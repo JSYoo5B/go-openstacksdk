@@ -4,6 +4,7 @@ package replicas
 import (
 	context "context"
 	fmt "fmt"
+	request "github.com/JSYoo5B/go-openstacksdk/request"
 	resource "github.com/JSYoo5B/go-openstacksdk/resource"
 	iter "iter"
 	maps "maps"
@@ -29,7 +30,7 @@ func (a *API) newResources() *resource.Collection[Replica] {
 			options := make([]ListDetailOption, 0, len(q))
 			for key, values := range q {
 				for _, value := range values {
-					options = append(options, WithListDetailQuery(key, value))
+					options = append(options, request.Query(key, value))
 				}
 			}
 			return a.listDetailWithControl(ctx, control, options...)

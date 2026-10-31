@@ -46,11 +46,10 @@ type ListFilter = upstream.ListFilter
 type ListOpts = upstream.ListOpts
 type Workflow = upstream.Workflow
 type WorkflowPage = upstream.WorkflowPage
-type CreateOption = request.Option[CreateOpts]
+type CreateOption = request.NativeQueryCall
 
-func WithCreateOptions(value CreateOpts) CreateOption { return request.WithOptions(value) }
-func WithCreateQuery(key, value string) CreateOption {
-	return request.WithQuery[CreateOpts](key, value)
+func WithCreateOptions(value CreateOpts) CreateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type createOptsBuilder struct {
@@ -76,13 +75,8 @@ func (b createOptsBuilder) ToWorkflowCreateParams() (io.Reader, string, error) {
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) ([]Workflow, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("Create", "workflows", err)
-		var zero0 []Workflow
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("Create", "workflows", err)
 		var zero0 []Workflow
 		return zero0, err
@@ -107,10 +101,9 @@ func (a *API) Get(ctx context.Context, id string) (*Workflow, error) {
 	return value0, err
 }
 
-type ListOption = request.Option[ListOpts]
+type ListOption = request.NativeQueryCall
 
-func WithListOptions(value ListOpts) ListOption  { return request.WithOptions(value) }
-func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
+func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
 	base   ListOpts
@@ -138,12 +131,8 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Workfl
 
 func (a *API) listWithControl(ctx context.Context, control resource.ListControl, options ...ListOption) iter.Seq2[*Workflow, error] {
 	var opts ListOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("List", "workflows", err)
-		return func(yield func(*Workflow, error) bool) { var zero *Workflow; yield(zero, err) }
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("List", "workflows", err)
 		return func(yield func(*Workflow, error) bool) { var zero *Workflow; yield(zero, err) }
 	}

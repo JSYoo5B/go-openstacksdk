@@ -312,7 +312,7 @@ func TestOctaviaQuotaDefaultInheritanceDuplicateAndForgedArgument(t *testing.T) 
 	}
 	for _, forged := range []quotas.QuotaLimit{"unknown", "project_id", "id"} {
 		option := request.WithArgument[quotas.UpdateOpts]("quota_default_limits", []quotas.QuotaLimit{forged})
-		if value, err := scope.Update(context.Background(), quotas.UpdateOpts{}, option); value != nil || !errors.Is(err, resource.ErrInvalidOption) || calls.Load() != 1 {
+		if value, err := scope.Update(context.Background(), quotas.UpdateOpts{}, request.Custom(option)); value != nil || !errors.Is(err, resource.ErrInvalidOption) || calls.Load() != 1 {
 			t.Fatal(value, err, calls.Load())
 		}
 	}

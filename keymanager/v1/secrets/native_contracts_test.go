@@ -14,6 +14,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -76,14 +77,14 @@ func TestNativeSecretGetCreateDeleteUpdateRoutesAndBodies(t *testing.T) {
 		t.Fatal(got, err)
 	}
 	expiration := time.Date(2027, 1, 2, 3, 4, 5, 0, time.UTC)
-	created, err := api.Create(ctx, secrets.CreateOpts{Name: "n", Payload: "p", PayloadContentType: "text/plain", SecretType: secrets.OpaqueSecret, Expiration: &expiration}, secrets.WithCreateField("x_extension", true))
+	created, err := api.Create(ctx, secrets.CreateOpts{Name: "n", Payload: "p", PayloadContentType: "text/plain", SecretType: secrets.OpaqueSecret, Expiration: &expiration}, request.Field("x_extension", true))
 	if err != nil || created.SecretRef != "https://kms/v1/secrets/s1" {
 		t.Fatal(created, err)
 	}
 	if _, err := api.Create(ctx, secrets.CreateOpts{}); err != nil {
 		t.Fatal(err)
 	}
-	if err := api.Update(ctx, "s1", secrets.UpdateOpts{ContentType: "text/plain", Payload: "new"}, secrets.WithUpdateHeader("X-Extra", "1")); err != nil {
+	if err := api.Update(ctx, "s1", secrets.UpdateOpts{ContentType: "text/plain", Payload: "new"}, request.Header("X-Extra", "1")); err != nil {
 		t.Fatal(err)
 	}
 	if err := api.Delete(ctx, "a/b"); err != nil {
@@ -141,11 +142,11 @@ func TestNativeSecretStrictStatusesAndPreflight(t *testing.T) {
 			return nativeSecretWire(201, `{}`), nil
 		}))
 		api := secrets.New(nativeSecretClient(cloud))
-		for _, option := range []secrets.CreateOption{secrets.WithCreateField("name", "x"), nil} {
+		for _, option := range []secrets.CreateOption{request.Field("name", "x"), nil} {
 			_, err := api.Create(ctx, secrets.CreateOpts{Name: "n"}, option)
 			nativeSecretOperation(t, err, "Create")
 		}
-		for _, option := range []secrets.UpdateOption{secrets.WithUpdateHeader("Content-Type", "x"), nil} {
+		for _, option := range []secrets.UpdateOption{request.Header("Content-Type", "x"), nil} {
 			err := api.Update(ctx, "s1", secrets.UpdateOpts{ContentType: "text/plain"}, option)
 			nativeSecretOperation(t, err, "Update")
 		}
@@ -172,7 +173,7 @@ func TestNativeSecretListQueryPagingAndStop(t *testing.T) {
 	created := time.Date(2026, 10, 10, 1, 2, 3, 0, time.UTC)
 	acl := true
 	var names []string
-	for secret, err := range secrets.New(nativeSecretClient(cloud)).List(context.Background(), secrets.WithListOptions(secrets.ListOpts{Limit: 1, Name: "n", Bits: 256, SecretType: secrets.OpaqueSecret, ACLOnly: &acl, CreatedQuery: &secrets.DateQuery{Date: created, Filter: secrets.DateFilterGTE}, Sort: "name:asc"}), secrets.WithListQuery("extra", "1")) {
+	for secret, err := range secrets.New(nativeSecretClient(cloud)).List(context.Background(), secrets.WithListOptions(secrets.ListOpts{Limit: 1, Name: "n", Bits: 256, SecretType: secrets.OpaqueSecret, ACLOnly: &acl, CreatedQuery: &secrets.DateQuery{Date: created, Filter: secrets.DateFilterGTE}, Sort: "name:asc"}), request.Query("extra", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -192,7 +193,7 @@ func TestNativeSecretListQueryPagingAndStop(t *testing.T) {
 			return nativeSecretWire(200, `{"secrets":[{"name":"a"},{"name":"b"}],"next":"`+cloud.Server.URL+`/barbican/v1/secrets?offset=2"}`), nil
 		}))
 		api := secrets.New(nativeSecretClient(cloud))
-		for value, err := range api.List(context.Background(), secrets.WithListQuery("name", "empty")) {
+		for value, err := range api.List(context.Background(), request.Query("name", "empty")) {
 			t.Fatal("empty page yielded", value, err)
 		}
 		for value, err := range api.List(context.Background()) {

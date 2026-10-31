@@ -52,11 +52,10 @@ func (a *API) List(ctx context.Context, serverID string) ([]string, error) {
 	return value0, err
 }
 
-type ReplaceAllOption = request.Option[ReplaceAllOpts]
+type ReplaceAllOption = request.NativeFieldCall
 
-func WithReplaceAllOptions(value ReplaceAllOpts) ReplaceAllOption { return request.WithOptions(value) }
-func WithReplaceAllField(key string, value any) ReplaceAllOption {
-	return request.WithField[ReplaceAllOpts](key, value)
+func WithReplaceAllOptions(value ReplaceAllOpts) ReplaceAllOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type replaceAllOptsBuilder struct {
@@ -80,13 +79,8 @@ func (b replaceAllOptsBuilder) ToTagsReplaceAllMap() (map[string]any, error) {
 
 // ReplaceAll invokes the upstream API with library-owned builders and result handling.
 func (a *API) ReplaceAll(ctx context.Context, serverID string, opts ReplaceAllOpts, options ...ReplaceAllOption) ([]string, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("ReplaceAll", "tags", err)
-		var zero0 []string
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("ReplaceAll", "tags", err)
 		var zero0 []string
 		return zero0, err

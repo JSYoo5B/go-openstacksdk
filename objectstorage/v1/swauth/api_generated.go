@@ -17,10 +17,9 @@ func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 type AuthOpts = upstream.AuthOpts
 type AuthResult = upstream.AuthResult
 type GetAuthResult = upstream.GetAuthResult
-type AuthOption = request.Option[AuthOpts]
+type AuthOption = request.NativeHeaderCall
 
-func WithAuthOptions(value AuthOpts) AuthOption   { return request.WithOptions(value) }
-func WithAuthHeader(key, value string) AuthOption { return request.WithHeader[AuthOpts](key, value) }
+func WithAuthOptions(value AuthOpts) AuthOption { return request.Custom(request.WithOptions(value)) }
 
 type authOptsBuilder struct {
 	base   AuthOpts
@@ -43,13 +42,8 @@ func (b authOptsBuilder) ToAuthOptsMap() (map[string]string, error) {
 
 // Auth invokes the upstream API with library-owned builders and result handling.
 func (a *API) Auth(ctx context.Context, opts AuthOpts, options ...AuthOption) (*AuthResult, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Headers: true}, options...)
 	if err != nil {
-		err = request.Wrap("Auth", "swauth", err)
-		var zero0 *AuthResult
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, false, false, true); err != nil {
 		err = request.Wrap("Auth", "swauth", err)
 		var zero0 *AuthResult
 		return zero0, err
@@ -61,21 +55,16 @@ func (a *API) Auth(ctx context.Context, opts AuthOpts, options ...AuthOption) (*
 	return value0, err
 }
 
-type NewObjectStorageV1Option = request.Option[AuthOpts]
+type NewObjectStorageV1Option = request.NativeCall
 
 func WithNewObjectStorageV1Options(value AuthOpts) NewObjectStorageV1Option {
-	return request.WithOptions(value)
+	return request.Custom(request.WithOptions(value))
 }
 
 // NewObjectStorageV1 invokes the upstream API with library-owned builders and result handling.
 func (a *API) NewObjectStorageV1(ctx context.Context, authOpts AuthOpts, options ...NewObjectStorageV1Option) (*gophercloud.ServiceClient, error) {
-	cfg, err := request.Apply(authOpts, options...)
+	cfg, err := request.ApplyCalls(authOpts, request.Capabilities{}, options...)
 	if err != nil {
-		err = request.Wrap("NewObjectStorageV1", "swauth", err)
-		var zero0 *gophercloud.ServiceClient
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, false, false, false); err != nil {
 		err = request.Wrap("NewObjectStorageV1", "swauth", err)
 		var zero0 *gophercloud.ServiceClient
 		return zero0, err

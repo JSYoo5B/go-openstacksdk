@@ -37,11 +37,10 @@ const TaskStatusPending = upstream.TaskStatusPending
 const TaskStatusProcessing = upstream.TaskStatusProcessing
 const TaskStatusSuccess = upstream.TaskStatusSuccess
 
-type CreateOption = request.Option[CreateOpts]
+type CreateOption = request.NativeFieldCall
 
-func WithCreateOptions(value CreateOpts) CreateOption { return request.WithOptions(value) }
-func WithCreateField(key string, value any) CreateOption {
-	return request.WithField[CreateOpts](key, value)
+func WithCreateOptions(value CreateOpts) CreateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type createOptsBuilder struct {
@@ -65,13 +64,8 @@ func (b createOptsBuilder) ToTaskCreateMap() (map[string]any, error) {
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*Task, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Create", "tasks", err)
-		var zero0 *Task
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Create", "tasks", err)
 		var zero0 *Task
 		return zero0, err
@@ -91,10 +85,9 @@ func (a *API) Get(ctx context.Context, taskID string) (*Task, error) {
 	return value0, err
 }
 
-type ListOption = request.Option[ListOpts]
+type ListOption = request.NativeQueryCall
 
-func WithListOptions(value ListOpts) ListOption  { return request.WithOptions(value) }
-func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
+func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
 	base   ListOpts
@@ -122,12 +115,8 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Task, 
 
 func (a *API) listWithControl(ctx context.Context, control resource.ListControl, options ...ListOption) iter.Seq2[*Task, error] {
 	var opts ListOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("List", "tasks", err)
-		return func(yield func(*Task, error) bool) { var zero *Task; yield(zero, err) }
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("List", "tasks", err)
 		return func(yield func(*Task, error) bool) { var zero *Task; yield(zero, err) }
 	}

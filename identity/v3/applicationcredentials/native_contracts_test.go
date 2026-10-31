@@ -14,6 +14,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/applicationcredentials"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -70,7 +71,7 @@ func TestNativeApplicationCredentialRoutesBodiesPagingAndDecode(t *testing.T) {
 		return 200, `{"application_credential":` + nativeAppCredRow + `}`
 	})
 	expires := time.Date(2026, 10, 11, 1, 2, 3, 500000000, time.FixedZone("KST", 9*3600))
-	created, err := api.Create(ctx, "u1", applicationcredentials.CreateOpts{Name: "ci", Secret: "s3cr3t", Roles: []applicationcredentials.Role{{Name: "member"}}, AccessRules: []applicationcredentials.AccessRule{{Path: "/v2.1/servers", Method: "GET", Service: "compute"}}, ExpiresAt: &expires}, applicationcredentials.WithCreateField("x_extension", 1))
+	created, err := api.Create(ctx, "u1", applicationcredentials.CreateOpts{Name: "ci", Secret: "s3cr3t", Roles: []applicationcredentials.Role{{Name: "member"}}, AccessRules: []applicationcredentials.AccessRule{{Path: "/v2.1/servers", Method: "GET", Service: "compute"}}, ExpiresAt: &expires}, request.Field("x_extension", 1))
 	if err != nil || !(created.ID == "ac-1" && created.Secret == "s3cr3t" && created.Roles[0].ID == "r1" && created.AccessRules[0].ID == "ar-1" && created.ExpiresAt.Second() == 3) {
 		t.Fatal(created, err)
 	}
@@ -83,7 +84,7 @@ func TestNativeApplicationCredentialRoutesBodiesPagingAndDecode(t *testing.T) {
 		t.Fatal(got, err)
 	}
 	var ids []string
-	for value, err := range api.List(ctx, "u1", applicationcredentials.WithListOptions(applicationcredentials.ListOpts{Name: "ci"}), applicationcredentials.WithListQuery("extra", "1")) {
+	for value, err := range api.List(ctx, "u1", applicationcredentials.WithListOptions(applicationcredentials.ListOpts{Name: "ci"}), request.Query("extra", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -201,7 +202,7 @@ func TestNativeApplicationCredentialStatusesDecodeAndPreflight(t *testing.T) {
 		for name, err := range map[string]error{
 			"name": func() error { _, err := api.Create(ctx, "u1", applicationcredentials.CreateOpts{}); return err }(),
 			"core extension": func() error {
-				_, err := api.Create(ctx, "u1", applicationcredentials.CreateOpts{Name: "ci"}, applicationcredentials.WithCreateField("secret", "x"))
+				_, err := api.Create(ctx, "u1", applicationcredentials.CreateOpts{Name: "ci"}, request.Field("secret", "x"))
 				return err
 			}(),
 		} {

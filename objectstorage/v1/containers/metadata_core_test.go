@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 	swift "github.com/gophercloud/gophercloud/v2/openstack/objectstorage/v1"
@@ -343,7 +344,7 @@ func TestContainerMetadataCoreNativePolicyAndCompatibility(t *testing.T) {
 	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		return containerMetadataWire(r, 201, http.Header{}, io.NopCloser(strings.NewReader(""))), nil
 	})
-	if _, err := New(c).Update(context.Background(), containerMetadataName, UpdateOpts{Metadata: map[string]string{"legacy": "kept"}}, WithUpdateHeader("X-Trace", "old")); err != nil {
+	if _, err := New(c).Update(context.Background(), containerMetadataName, UpdateOpts{Metadata: map[string]string{"legacy": "kept"}}, request.Header("X-Trace", "old")); err != nil {
 		t.Fatalf("native Update compatibility %v", err)
 	}
 }

@@ -45,13 +45,10 @@ type RouterPage = upstream.RouterPage
 type UpdateExternalGatewaysOpts = upstream.UpdateExternalGatewaysOpts
 type UpdateOpts = upstream.UpdateOpts
 type UpdateResult = upstream.UpdateResult
-type AddExternalGatewaysOption = request.Option[AddExternalGatewaysOpts]
+type AddExternalGatewaysOption = request.NativeFieldCall
 
 func WithAddExternalGatewaysOptions(value AddExternalGatewaysOpts) AddExternalGatewaysOption {
-	return request.WithOptions(value)
-}
-func WithAddExternalGatewaysField(key string, value any) AddExternalGatewaysOption {
-	return request.WithField[AddExternalGatewaysOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type addExternalGatewaysOptsBuilder struct {
@@ -75,13 +72,8 @@ func (b addExternalGatewaysOptsBuilder) ToRouterAddExternalGatewaysMap() (map[st
 
 // AddExternalGateways invokes the upstream API with library-owned builders and result handling.
 func (a *API) AddExternalGateways(ctx context.Context, id string, opts AddExternalGatewaysOpts, options ...AddExternalGatewaysOption) (*Router, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("AddExternalGateways", "routers", err)
-		var zero0 *Router
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("AddExternalGateways", "routers", err)
 		var zero0 *Router
 		return zero0, err
@@ -93,13 +85,10 @@ func (a *API) AddExternalGateways(ctx context.Context, id string, opts AddExtern
 	return value0, err
 }
 
-type AddInterfaceOption = request.Option[AddInterfaceOpts]
+type AddInterfaceOption = request.NativeFieldCall
 
 func WithAddInterfaceOptions(value AddInterfaceOpts) AddInterfaceOption {
-	return request.WithOptions(value)
-}
-func WithAddInterfaceField(key string, value any) AddInterfaceOption {
-	return request.WithField[AddInterfaceOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type addInterfaceOptsBuilder struct {
@@ -123,13 +112,8 @@ func (b addInterfaceOptsBuilder) ToRouterAddInterfaceMap() (map[string]any, erro
 
 // AddInterface invokes the upstream API with library-owned builders and result handling.
 func (a *API) AddInterface(ctx context.Context, id string, opts AddInterfaceOpts, options ...AddInterfaceOption) (*InterfaceInfo, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("AddInterface", "routers", err)
-		var zero0 *InterfaceInfo
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("AddInterface", "routers", err)
 		var zero0 *InterfaceInfo
 		return zero0, err
@@ -141,11 +125,10 @@ func (a *API) AddInterface(ctx context.Context, id string, opts AddInterfaceOpts
 	return value0, err
 }
 
-type CreateOption = request.Option[CreateOpts]
+type CreateOption = request.NativeFieldCall
 
-func WithCreateOptions(value CreateOpts) CreateOption { return request.WithOptions(value) }
-func WithCreateField(key string, value any) CreateOption {
-	return request.WithField[CreateOpts](key, value)
+func WithCreateOptions(value CreateOpts) CreateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type createOptsBuilder struct {
@@ -169,13 +152,8 @@ func (b createOptsBuilder) ToRouterCreateMap() (map[string]any, error) {
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*Router, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Create", "routers", err)
-		var zero0 *Router
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Create", "routers", err)
 		var zero0 *Router
 		return zero0, err
@@ -200,10 +178,9 @@ func (a *API) Get(ctx context.Context, id string) (*Router, error) {
 	return value0, err
 }
 
-type ListOption = request.Option[ListOpts]
+type ListOption = request.NativeQueryCall
 
-func WithListOptions(value ListOpts) ListOption  { return request.WithOptions(value) }
-func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
+func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
 	base   ListOpts
@@ -231,12 +208,8 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Router
 
 func (a *API) listWithControl(ctx context.Context, control resource.ListControl, options ...ListOption) iter.Seq2[*Router, error] {
 	var opts ListOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("List", "routers", err)
-		return func(yield func(*Router, error) bool) { var zero *Router; yield(zero, err) }
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("List", "routers", err)
 		return func(yield func(*Router, error) bool) { var zero *Router; yield(zero, err) }
 	}
@@ -255,13 +228,10 @@ func (a *API) ListL3Agents(ctx context.Context, id string) iter.Seq2[*L3Agent, e
 	})
 }
 
-type RemoveExternalGatewaysOption = request.Option[RemoveExternalGatewaysOpts]
+type RemoveExternalGatewaysOption = request.NativeFieldCall
 
 func WithRemoveExternalGatewaysOptions(value RemoveExternalGatewaysOpts) RemoveExternalGatewaysOption {
-	return request.WithOptions(value)
-}
-func WithRemoveExternalGatewaysField(key string, value any) RemoveExternalGatewaysOption {
-	return request.WithField[RemoveExternalGatewaysOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type removeExternalGatewaysOptsBuilder struct {
@@ -285,13 +255,8 @@ func (b removeExternalGatewaysOptsBuilder) ToRouterRemoveExternalGatewaysMap() (
 
 // RemoveExternalGateways invokes the upstream API with library-owned builders and result handling.
 func (a *API) RemoveExternalGateways(ctx context.Context, id string, opts RemoveExternalGatewaysOpts, options ...RemoveExternalGatewaysOption) (*Router, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("RemoveExternalGateways", "routers", err)
-		var zero0 *Router
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("RemoveExternalGateways", "routers", err)
 		var zero0 *Router
 		return zero0, err
@@ -303,13 +268,10 @@ func (a *API) RemoveExternalGateways(ctx context.Context, id string, opts Remove
 	return value0, err
 }
 
-type RemoveInterfaceOption = request.Option[RemoveInterfaceOpts]
+type RemoveInterfaceOption = request.NativeFieldCall
 
 func WithRemoveInterfaceOptions(value RemoveInterfaceOpts) RemoveInterfaceOption {
-	return request.WithOptions(value)
-}
-func WithRemoveInterfaceField(key string, value any) RemoveInterfaceOption {
-	return request.WithField[RemoveInterfaceOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type removeInterfaceOptsBuilder struct {
@@ -333,13 +295,8 @@ func (b removeInterfaceOptsBuilder) ToRouterRemoveInterfaceMap() (map[string]any
 
 // RemoveInterface invokes the upstream API with library-owned builders and result handling.
 func (a *API) RemoveInterface(ctx context.Context, id string, opts RemoveInterfaceOpts, options ...RemoveInterfaceOption) (*InterfaceInfo, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("RemoveInterface", "routers", err)
-		var zero0 *InterfaceInfo
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("RemoveInterface", "routers", err)
 		var zero0 *InterfaceInfo
 		return zero0, err
@@ -351,11 +308,10 @@ func (a *API) RemoveInterface(ctx context.Context, id string, opts RemoveInterfa
 	return value0, err
 }
 
-type UpdateOption = request.Option[UpdateOpts]
+type UpdateOption = request.NativeFieldCall
 
-func WithUpdateOptions(value UpdateOpts) UpdateOption { return request.WithOptions(value) }
-func WithUpdateField(key string, value any) UpdateOption {
-	return request.WithField[UpdateOpts](key, value)
+func WithUpdateOptions(value UpdateOpts) UpdateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type updateOptsBuilder struct {
@@ -380,13 +336,8 @@ func (b updateOptsBuilder) ToRouterUpdateMap() (map[string]any, error) {
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ...UpdateOption) (*Router, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Update", "routers", err)
-		var zero0 *Router
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Update", "routers", err)
 		var zero0 *Router
 		return zero0, err
@@ -398,13 +349,10 @@ func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ..
 	return value0, err
 }
 
-type UpdateExternalGatewaysOption = request.Option[UpdateExternalGatewaysOpts]
+type UpdateExternalGatewaysOption = request.NativeFieldCall
 
 func WithUpdateExternalGatewaysOptions(value UpdateExternalGatewaysOpts) UpdateExternalGatewaysOption {
-	return request.WithOptions(value)
-}
-func WithUpdateExternalGatewaysField(key string, value any) UpdateExternalGatewaysOption {
-	return request.WithField[UpdateExternalGatewaysOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type updateExternalGatewaysOptsBuilder struct {
@@ -428,13 +376,8 @@ func (b updateExternalGatewaysOptsBuilder) ToRouterUpdateExternalGatewaysMap() (
 
 // UpdateExternalGateways invokes the upstream API with library-owned builders and result handling.
 func (a *API) UpdateExternalGateways(ctx context.Context, id string, opts UpdateExternalGatewaysOpts, options ...UpdateExternalGatewaysOption) (*Router, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("UpdateExternalGateways", "routers", err)
-		var zero0 *Router
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("UpdateExternalGateways", "routers", err)
 		var zero0 *Router
 		return zero0, err

@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/endpointgroups"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -106,7 +107,7 @@ func TestNativeVPNEndpointGroupRoutesBodiesPagingAndDecode(t *testing.T) {
 		}
 		return nativeVPNWire(200, `{"endpoint_group":`+nativeVPNRow+`}`)
 	})
-	created, err := api.Create(ctx, endpointgroups.CreateOpts{Name: "local", Type: endpointgroups.TypeSubnet, Endpoints: []string{"sn-1"}}, endpointgroups.WithCreateField("x_extension", 1))
+	created, err := api.Create(ctx, endpointgroups.CreateOpts{Name: "local", Type: endpointgroups.TypeSubnet, Endpoints: []string{"sn-1"}}, request.Field("x_extension", 1))
 	if err != nil || !(created.ID == "x-1" && created.Type == "subnet" && created.Endpoints[0] == "sn-1") {
 		t.Fatal(created, err)
 	}
@@ -118,11 +119,11 @@ func TestNativeVPNEndpointGroupRoutesBodiesPagingAndDecode(t *testing.T) {
 		t.Fatal(got, err)
 	}
 	empty := ""
-	if _, err := api.Update(ctx, "x-1", endpointgroups.UpdateOpts{Name: &empty}, endpointgroups.WithUpdateField("x_extension", 1)); err != nil {
+	if _, err := api.Update(ctx, "x-1", endpointgroups.UpdateOpts{Name: &empty}, request.Field("x_extension", 1)); err != nil {
 		t.Fatal(err)
 	}
 	var ids []string
-	for value, err := range api.List(ctx, endpointgroups.WithListOptions(endpointgroups.ListOpts{Name: "local", Type: "subnet"}), endpointgroups.WithListQuery("extra", "1")) {
+	for value, err := range api.List(ctx, endpointgroups.WithListOptions(endpointgroups.ListOpts{Name: "local", Type: "subnet"}), request.Query("extra", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -178,7 +179,7 @@ func TestNativeVPNEndpointGroupStrictStatusesAndPreflight(t *testing.T) {
 		api, _ := nativeVPNAPI(t, &calls, func(*http.Request) *http.Response { return nativeVPNWire(201, `{}`) })
 		for name, err := range map[string]error{
 			"core extension": func() error {
-				_, err := api.Create(ctx, endpointgroups.CreateOpts{}, endpointgroups.WithCreateField("endpoints", nil))
+				_, err := api.Create(ctx, endpointgroups.CreateOpts{}, request.Field("endpoints", nil))
 				return err
 			}(),
 			"nil option": func() error { _, err := api.Update(ctx, "x-1", endpointgroups.UpdateOpts{}, nil); return err }(),

@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -108,7 +109,7 @@ func TestNativeBGPVPNRoutesBodiesPagingAndDecode(t *testing.T) {
 		}
 		return nativeBGPVPNWire(200, `{"bgpvpn":`+nativeBGPVPNRow+`}`)
 	})
-	created, err := api.Create(ctx, bgpvpns.CreateOpts{Name: "vpn", Type: "l3", RouteTargets: []string{"64512:1"}, LocalPref: 100}, bgpvpns.WithCreateField("x_extension", 1))
+	created, err := api.Create(ctx, bgpvpns.CreateOpts{Name: "vpn", Type: "l3", RouteTargets: []string{"64512:1"}, LocalPref: 100}, request.Field("x_extension", 1))
 	if err != nil || !(created.ID == "vpn-1" && created.LocalPref == nil && created.Ports == nil && reflect.DeepEqual(created.Routers, []string{})) {
 		t.Fatal(created, err)
 	}
@@ -120,7 +121,7 @@ func TestNativeBGPVPNRoutesBodiesPagingAndDecode(t *testing.T) {
 	if err != nil || !reflect.DeepEqual(got.Networks, []string{"n-1"}) {
 		t.Fatal(got, err)
 	}
-	updated, err := api.Update(ctx, "vpn-1", bgpvpns.UpdateOpts{Name: nativeBGPVPNPtr(""), RouteTargets: &[]string{}, LocalPref: nativeBGPVPNPtr(0)}, bgpvpns.WithUpdateField("x_extension", 1))
+	updated, err := api.Update(ctx, "vpn-1", bgpvpns.UpdateOpts{Name: nativeBGPVPNPtr(""), RouteTargets: &[]string{}, LocalPref: nativeBGPVPNPtr(0)}, request.Field("x_extension", 1))
 	if err != nil || updated.LocalPref == nil || *updated.LocalPref != 0 {
 		t.Fatal(updated, err)
 	}
@@ -128,7 +129,7 @@ func TestNativeBGPVPNRoutesBodiesPagingAndDecode(t *testing.T) {
 		t.Fatal(err)
 	}
 	var ids []string
-	for value, err := range api.List(ctx, bgpvpns.WithListOptions(bgpvpns.ListOpts{Networks: []string{"n-1", "n-2"}, Fields: []string{"id"}, Limit: 1}), bgpvpns.WithListQuery("extra", "1")) {
+	for value, err := range api.List(ctx, bgpvpns.WithListOptions(bgpvpns.ListOpts{Networks: []string{"n-1", "n-2"}, Fields: []string{"id"}, Limit: 1}), request.Query("extra", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -144,7 +145,7 @@ func TestNativeBGPVPNRoutesBodiesPagingAndDecode(t *testing.T) {
 	if !reflect.DeepEqual(ids, []string{"vpn-1", "vpn-2", "vpn-1"}) {
 		t.Fatal(ids)
 	}
-	network, err := api.CreateNetworkAssociation(ctx, "vpn-1", bgpvpns.CreateNetworkAssociationOpts{NetworkID: "n-1"}, bgpvpns.WithCreateNetworkAssociationField("x_extension", 1))
+	network, err := api.CreateNetworkAssociation(ctx, "vpn-1", bgpvpns.CreateNetworkAssociationOpts{NetworkID: "n-1"}, request.Field("x_extension", 1))
 	if err != nil || network.ID != "na-1" || network.NetworkID != "n-1" {
 		t.Fatal(network, err)
 	}
@@ -152,7 +153,7 @@ func TestNativeBGPVPNRoutesBodiesPagingAndDecode(t *testing.T) {
 		t.Fatal(got, err)
 	}
 	var associations []string
-	for value, err := range api.ListNetworkAssociations(ctx, "vpn-1", bgpvpns.WithListNetworkAssociationsOptions(bgpvpns.ListNetworkAssociationsOpts{Limit: 1}), bgpvpns.WithListNetworkAssociationsQuery("extra", "1")) {
+	for value, err := range api.ListNetworkAssociations(ctx, "vpn-1", bgpvpns.WithListNetworkAssociationsOptions(bgpvpns.ListNetworkAssociationsOpts{Limit: 1}), request.Query("extra", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -168,7 +169,7 @@ func TestNativeBGPVPNRoutesBodiesPagingAndDecode(t *testing.T) {
 	if _, err := api.GetRouterAssociation(ctx, "vpn-1", "ra-1"); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := api.UpdateRouterAssociation(ctx, "vpn-1", "ra-1", bgpvpns.UpdateRouterAssociationOpts{AdvertiseExtraRoutes: nativeBGPVPNPtr(true)}, bgpvpns.WithUpdateRouterAssociationField("x_extension", 1)); err != nil {
+	if _, err := api.UpdateRouterAssociation(ctx, "vpn-1", "ra-1", bgpvpns.UpdateRouterAssociationOpts{AdvertiseExtraRoutes: nativeBGPVPNPtr(true)}, request.Field("x_extension", 1)); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := api.UpdateRouterAssociation(ctx, "vpn-1", "ra-1", bgpvpns.UpdateRouterAssociationOpts{}); err != nil {
@@ -186,14 +187,14 @@ func TestNativeBGPVPNRoutesBodiesPagingAndDecode(t *testing.T) {
 	port, err := api.CreatePortAssociation(ctx, "vpn-1", bgpvpns.CreatePortAssociationOpts{PortID: "pt-1", AdvertiseFixedIPs: nativeBGPVPNPtr(false), Routes: []bgpvpns.PortRoutes{
 		{Type: "prefix", Prefix: "10.0.0.0/24", LocalPref: nativeBGPVPNPtr(100)},
 		{Type: "bgpvpn", BGPVPNID: "vpn-2"},
-	}}, bgpvpns.WithCreatePortAssociationField("x_extension", 1))
+	}}, request.Field("x_extension", 1))
 	if err != nil || port.PortID != "pt-1" || len(port.Routes) != 1 || *port.Routes[0].LocalPref != 100 {
 		t.Fatal(port, err)
 	}
 	if _, err := api.GetPortAssociation(ctx, "vpn-1", "pa-1"); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := api.UpdatePortAssociation(ctx, "vpn-1", "pa-1", bgpvpns.UpdatePortAssociationOpts{Routes: &[]bgpvpns.PortRoutes{}}, bgpvpns.WithUpdatePortAssociationField("x_extension", 1)); err != nil {
+	if _, err := api.UpdatePortAssociation(ctx, "vpn-1", "pa-1", bgpvpns.UpdatePortAssociationOpts{Routes: &[]bgpvpns.PortRoutes{}}, request.Field("x_extension", 1)); err != nil {
 		t.Fatal(err)
 	}
 	for value, err := range api.ListPortAssociations(ctx, "vpn-1") {
@@ -421,12 +422,12 @@ func TestNativeBGPVPNStatusesDecodeAndPreflight(t *testing.T) {
 			err       error
 		}{
 			"create extension": {"Create", func() error {
-				_, err := api.Create(ctx, bgpvpns.CreateOpts{}, bgpvpns.WithCreateField("name", "x"))
+				_, err := api.Create(ctx, bgpvpns.CreateOpts{}, request.Field("name", "x"))
 				return err
 			}()},
 			"create nil option": {"Create", func() error { _, err := api.Create(ctx, bgpvpns.CreateOpts{}, nil); return err }()},
 			"update extension": {"Update", func() error {
-				_, err := api.Update(ctx, "vpn-1", bgpvpns.UpdateOpts{}, bgpvpns.WithUpdateField("route_targets", nil))
+				_, err := api.Update(ctx, "vpn-1", bgpvpns.UpdateOpts{}, request.Field("route_targets", nil))
 				return err
 			}()},
 			"network required": {"CreateNetworkAssociation", func() error {
@@ -434,7 +435,7 @@ func TestNativeBGPVPNStatusesDecodeAndPreflight(t *testing.T) {
 				return err
 			}()},
 			"network extension": {"CreateNetworkAssociation", func() error {
-				_, err := api.CreateNetworkAssociation(ctx, "vpn-1", bgpvpns.CreateNetworkAssociationOpts{NetworkID: "n-1"}, bgpvpns.WithCreateNetworkAssociationField("network_id", "x"))
+				_, err := api.CreateNetworkAssociation(ctx, "vpn-1", bgpvpns.CreateNetworkAssociationOpts{NetworkID: "n-1"}, request.Field("network_id", "x"))
 				return err
 			}()},
 			"router required": {"CreateRouterAssociation", func() error {
@@ -442,7 +443,7 @@ func TestNativeBGPVPNStatusesDecodeAndPreflight(t *testing.T) {
 				return err
 			}()},
 			"router update extension": {"UpdateRouterAssociation", func() error {
-				_, err := api.UpdateRouterAssociation(ctx, "vpn-1", "ra-1", bgpvpns.UpdateRouterAssociationOpts{}, bgpvpns.WithUpdateRouterAssociationField("advertise_extra_routes", true))
+				_, err := api.UpdateRouterAssociation(ctx, "vpn-1", "ra-1", bgpvpns.UpdateRouterAssociationOpts{}, request.Field("advertise_extra_routes", true))
 				return err
 			}()},
 			"port required": {"CreatePortAssociation", func() error {
@@ -454,7 +455,7 @@ func TestNativeBGPVPNStatusesDecodeAndPreflight(t *testing.T) {
 				return err
 			}()},
 			"port update extension": {"UpdatePortAssociation", func() error {
-				_, err := api.UpdatePortAssociation(ctx, "vpn-1", "pa-1", bgpvpns.UpdatePortAssociationOpts{}, bgpvpns.WithUpdatePortAssociationField("routes", nil))
+				_, err := api.UpdatePortAssociation(ctx, "vpn-1", "pa-1", bgpvpns.UpdatePortAssociationOpts{}, request.Field("routes", nil))
 				return err
 			}()},
 			"port update route type": {"UpdatePortAssociation", func() error {

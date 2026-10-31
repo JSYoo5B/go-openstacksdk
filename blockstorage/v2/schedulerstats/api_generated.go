@@ -21,10 +21,9 @@ type Capabilities = upstream.Capabilities
 type ListOpts = upstream.ListOpts
 type StoragePool = upstream.StoragePool
 type StoragePoolPage = upstream.StoragePoolPage
-type ListOption = request.Option[ListOpts]
+type ListOption = request.NativeQueryCall
 
-func WithListOptions(value ListOpts) ListOption  { return request.WithOptions(value) }
-func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
+func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
 	base   ListOpts
@@ -48,12 +47,8 @@ func (b listOptsBuilder) ToStoragePoolsListQuery() (string, error) {
 // List invokes the upstream API with library-owned builders and result handling.
 func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*StoragePool, error] {
 	var opts ListOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("List", "schedulerstats", err)
-		return func(yield func(*StoragePool, error) bool) { var zero *StoragePool; yield(zero, err) }
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("List", "schedulerstats", err)
 		return func(yield func(*StoragePool, error) bool) { var zero *StoragePool; yield(zero, err) }
 	}

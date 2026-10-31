@@ -14,6 +14,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/loadbalancers"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -57,7 +58,7 @@ func TestOctaviaLoadBalancerCreateKeepsExplicitFalseAndExtensionFields(t *testin
 	})
 	value, err := newOctaviaLoadBalancers(t, cloud).Create(context.Background(), loadbalancers.CreateOpts{
 		Name: "web", AdminStateUp: octaviaLoadBalancerFalse(), VipSubnetID: "subnet-1", Tags: []string{"blue"},
-	}, loadbalancers.WithCreateField("vendor", map[string]bool{"enabled": false}))
+	}, request.Field("vendor", map[string]bool{"enabled": false}))
 	if err != nil || value == nil || value.ID != "lb-1" || value.AdminStateUp || value.ProvisioningStatus != "PENDING_CREATE" || value.CreatedAt.IsZero() {
 		t.Fatalf("value=%+v error=%v", value, err)
 	}
@@ -74,10 +75,10 @@ func TestOctaviaLoadBalancerRejectsProtectedOrUnsupportedExtensionsBeforeHTTP(t 
 	})
 	api := newOctaviaLoadBalancers(t, cloud)
 	ctx := context.Background()
-	if _, err := api.Create(ctx, loadbalancers.CreateOpts{VipSubnetID: "subnet-1"}, loadbalancers.WithCreateField("name", "shadow")); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := api.Create(ctx, loadbalancers.CreateOpts{VipSubnetID: "subnet-1"}, request.Field("name", "shadow")); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatalf("protected create field: %v", err)
 	}
-	if _, err := api.Update(ctx, "lb-1", loadbalancers.UpdateOpts{}, loadbalancers.WithUpdateField("admin_state_up", true)); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := api.Update(ctx, "lb-1", loadbalancers.UpdateOpts{}, request.Field("admin_state_up", true)); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatalf("protected update field: %v", err)
 	}
 	if _, err := api.Create(ctx, loadbalancers.CreateOpts{}, nil); !errors.Is(err, resource.ErrInvalidOption) {
@@ -138,7 +139,7 @@ func TestOctaviaLoadBalancerDeleteCascadeQueryAndMissingPolicies(t *testing.T) {
 	})
 	api := newOctaviaLoadBalancers(t, cloud)
 	ctx := context.Background()
-	if err := api.Delete(ctx, "lb-1", loadbalancers.WithDeleteOptions(loadbalancers.DeleteOpts{Cascade: true}), loadbalancers.WithDeleteQuery("vendor", "x")); err != nil {
+	if err := api.Delete(ctx, "lb-1", loadbalancers.WithDeleteOptions(loadbalancers.DeleteOpts{Cascade: true}), request.Query("vendor", "x")); err != nil {
 		t.Fatal(err)
 	}
 	if err := api.Delete(ctx, "lb-2"); err != nil {
@@ -222,7 +223,7 @@ func TestOctaviaLoadBalancerListFiltersFollowLinksAndPreserveFalse(t *testing.T)
 	var ids []string
 	for value, err := range api.List(context.Background(),
 		loadbalancers.WithListOptions(loadbalancers.ListOpts{AdminStateUp: octaviaLoadBalancerFalse(), Tags: []string{"a", "b"}, Limit: 1}),
-		loadbalancers.WithListQuery("vendor", "x")) {
+		request.Query("vendor", "x")) {
 		if err != nil {
 			t.Fatal(err)
 		}

@@ -14,6 +14,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -82,7 +83,7 @@ func nativeRuleKinds() []nativeRuleKind {
 			name: "BandwidthLimitRule", collection: "bandwidth_limit_rules", envelope: "bandwidth_limit_rule",
 			row: `{"id":"r-1","max_kbps":1000,"max_burst_kbps":0,"direction":"egress","tags":null}`,
 			create: func(ctx context.Context, api *rules.API) (string, error) {
-				v, err := api.CreateBandwidthLimitRule(ctx, "qp", rules.CreateBandwidthLimitRuleOpts{MaxKBps: 1000, MaxBurstKBps: 100, Direction: "egress"}, rules.WithCreateBandwidthLimitRuleField("x_extension", 1))
+				v, err := api.CreateBandwidthLimitRule(ctx, "qp", rules.CreateBandwidthLimitRuleOpts{MaxKBps: 1000, MaxBurstKBps: 100, Direction: "egress"}, request.Field("x_extension", 1))
 				return idOf(v, err, func() string { return fmt.Sprint(v.ID, v.MaxKBps, v.Direction) })
 			},
 			createZero: func(ctx context.Context, api *rules.API) (string, error) {
@@ -94,7 +95,7 @@ func nativeRuleKinds() []nativeRuleKind {
 				return idOf(v, err, func() string { return fmt.Sprint(v.ID, v.MaxKBps, v.Direction) })
 			},
 			update: func(ctx context.Context, api *rules.API) (string, error) {
-				_, err := api.UpdateBandwidthLimitRule(ctx, "qp", "r-1", rules.UpdateBandwidthLimitRuleOpts{MaxKBps: &one, MaxBurstKBps: &zero}, rules.WithUpdateBandwidthLimitRuleField("x_extension", 1))
+				_, err := api.UpdateBandwidthLimitRule(ctx, "qp", "r-1", rules.UpdateBandwidthLimitRuleOpts{MaxKBps: &one, MaxBurstKBps: &zero}, request.Field("x_extension", 1))
 				return "", err
 			},
 			updateEmpty: func(ctx context.Context, api *rules.API) (string, error) {
@@ -105,7 +106,7 @@ func nativeRuleKinds() []nativeRuleKind {
 			list: func(ctx context.Context, api *rules.API, filtered bool) ([]string, []error) {
 				var options []rules.ListBandwidthLimitRulesOption
 				if filtered {
-					options = append(options, rules.WithListBandwidthLimitRulesOptions(rules.BandwidthLimitRulesListOpts{MaxKBps: 1000, Direction: "egress", Limit: 1}), rules.WithListBandwidthLimitRulesQuery("extra", "1"))
+					options = append(options, rules.WithListBandwidthLimitRulesOptions(rules.BandwidthLimitRulesListOpts{MaxKBps: 1000, Direction: "egress", Limit: 1}), request.Query("extra", "1"))
 				}
 				return collect(api.ListBandwidthLimitRules(ctx, "qp", options...), func(v *rules.BandwidthLimitRule) string { return v.ID })
 			},
@@ -114,7 +115,7 @@ func nativeRuleKinds() []nativeRuleKind {
 			updateBody:     `{"bandwidth_limit_rule":{"max_burst_kbps":0,"max_kbps":1,"x_extension":1}}`,
 			query:          "direction=egress&extra=1&limit=1&max_kbps=1000",
 			collision: func(ctx context.Context, api *rules.API) error {
-				_, err := api.CreateBandwidthLimitRule(ctx, "qp", rules.CreateBandwidthLimitRuleOpts{}, rules.WithCreateBandwidthLimitRuleField("max_kbps", 1))
+				_, err := api.CreateBandwidthLimitRule(ctx, "qp", rules.CreateBandwidthLimitRuleOpts{}, request.Field("max_kbps", 1))
 				return err
 			},
 		},
@@ -122,7 +123,7 @@ func nativeRuleKinds() []nativeRuleKind {
 			name: "DSCPMarkingRule", collection: "dscp_marking_rules", envelope: "dscp_marking_rule",
 			row: `{"id":"r-1","dscp_mark":26}`,
 			create: func(ctx context.Context, api *rules.API) (string, error) {
-				v, err := api.CreateDSCPMarkingRule(ctx, "qp", rules.CreateDSCPMarkingRuleOpts{DSCPMark: 26}, rules.WithCreateDSCPMarkingRuleField("x_extension", 1))
+				v, err := api.CreateDSCPMarkingRule(ctx, "qp", rules.CreateDSCPMarkingRuleOpts{DSCPMark: 26}, request.Field("x_extension", 1))
 				return idOf(v, err, func() string { return fmt.Sprint(v.ID, v.DSCPMark) })
 			},
 			createZero: func(ctx context.Context, api *rules.API) (string, error) {
@@ -134,7 +135,7 @@ func nativeRuleKinds() []nativeRuleKind {
 				return idOf(v, err, func() string { return fmt.Sprint(v.ID, v.DSCPMark) })
 			},
 			update: func(ctx context.Context, api *rules.API) (string, error) {
-				_, err := api.UpdateDSCPMarkingRule(ctx, "qp", "r-1", rules.UpdateDSCPMarkingRuleOpts{DSCPMark: &zero}, rules.WithUpdateDSCPMarkingRuleField("x_extension", 1))
+				_, err := api.UpdateDSCPMarkingRule(ctx, "qp", "r-1", rules.UpdateDSCPMarkingRuleOpts{DSCPMark: &zero}, request.Field("x_extension", 1))
 				return "", err
 			},
 			updateEmpty: func(ctx context.Context, api *rules.API) (string, error) {
@@ -145,7 +146,7 @@ func nativeRuleKinds() []nativeRuleKind {
 			list: func(ctx context.Context, api *rules.API, filtered bool) ([]string, []error) {
 				var options []rules.ListDSCPMarkingRulesOption
 				if filtered {
-					options = append(options, rules.WithListDSCPMarkingRulesOptions(rules.DSCPMarkingRulesListOpts{DSCPMark: 26, Limit: 1}), rules.WithListDSCPMarkingRulesQuery("extra", "1"))
+					options = append(options, rules.WithListDSCPMarkingRulesOptions(rules.DSCPMarkingRulesListOpts{DSCPMark: 26, Limit: 1}), request.Query("extra", "1"))
 				}
 				return collect(api.ListDSCPMarkingRules(ctx, "qp", options...), func(v *rules.DSCPMarkingRule) string { return v.ID })
 			},
@@ -154,7 +155,7 @@ func nativeRuleKinds() []nativeRuleKind {
 			updateBody:     `{"dscp_marking_rule":{"dscp_mark":0,"x_extension":1}}`,
 			query:          "dscp_mark=26&extra=1&limit=1",
 			collision: func(ctx context.Context, api *rules.API) error {
-				_, err := api.CreateDSCPMarkingRule(ctx, "qp", rules.CreateDSCPMarkingRuleOpts{}, rules.WithCreateDSCPMarkingRuleField("dscp_mark", 1))
+				_, err := api.CreateDSCPMarkingRule(ctx, "qp", rules.CreateDSCPMarkingRuleOpts{}, request.Field("dscp_mark", 1))
 				return err
 			},
 		},
@@ -162,7 +163,7 @@ func nativeRuleKinds() []nativeRuleKind {
 			name: "MinimumBandwidthRule", collection: "minimum_bandwidth_rules", envelope: "minimum_bandwidth_rule",
 			row: `{"id":"r-1","min_kbps":500,"direction":"ingress"}`,
 			create: func(ctx context.Context, api *rules.API) (string, error) {
-				v, err := api.CreateMinimumBandwidthRule(ctx, "qp", rules.CreateMinimumBandwidthRuleOpts{MinKBps: 500, Direction: "ingress"}, rules.WithCreateMinimumBandwidthRuleField("x_extension", 1))
+				v, err := api.CreateMinimumBandwidthRule(ctx, "qp", rules.CreateMinimumBandwidthRuleOpts{MinKBps: 500, Direction: "ingress"}, request.Field("x_extension", 1))
 				return idOf(v, err, func() string { return fmt.Sprint(v.ID, v.MinKBps, v.Direction) })
 			},
 			createZero: func(ctx context.Context, api *rules.API) (string, error) {
@@ -174,7 +175,7 @@ func nativeRuleKinds() []nativeRuleKind {
 				return idOf(v, err, func() string { return fmt.Sprint(v.ID, v.MinKBps, v.Direction) })
 			},
 			update: func(ctx context.Context, api *rules.API) (string, error) {
-				_, err := api.UpdateMinimumBandwidthRule(ctx, "qp", "r-1", rules.UpdateMinimumBandwidthRuleOpts{MinKBps: &zero, Direction: "egress"}, rules.WithUpdateMinimumBandwidthRuleField("x_extension", 1))
+				_, err := api.UpdateMinimumBandwidthRule(ctx, "qp", "r-1", rules.UpdateMinimumBandwidthRuleOpts{MinKBps: &zero, Direction: "egress"}, request.Field("x_extension", 1))
 				return "", err
 			},
 			updateEmpty: func(ctx context.Context, api *rules.API) (string, error) {
@@ -187,7 +188,7 @@ func nativeRuleKinds() []nativeRuleKind {
 			list: func(ctx context.Context, api *rules.API, filtered bool) ([]string, []error) {
 				var options []rules.ListMinimumBandwidthRulesOption
 				if filtered {
-					options = append(options, rules.WithListMinimumBandwidthRulesOptions(rules.MinimumBandwidthRulesListOpts{MinKBps: 500, Direction: "ingress", Limit: 1}), rules.WithListMinimumBandwidthRulesQuery("extra", "1"))
+					options = append(options, rules.WithListMinimumBandwidthRulesOptions(rules.MinimumBandwidthRulesListOpts{MinKBps: 500, Direction: "ingress", Limit: 1}), request.Query("extra", "1"))
 				}
 				return collect(api.ListMinimumBandwidthRules(ctx, "qp", options...), func(v *rules.MinimumBandwidthRule) string { return v.ID })
 			},
@@ -196,7 +197,7 @@ func nativeRuleKinds() []nativeRuleKind {
 			updateBody:     `{"minimum_bandwidth_rule":{"direction":"egress","min_kbps":0,"x_extension":1}}`,
 			query:          "direction=ingress&extra=1&limit=1&min_kbps=500",
 			collision: func(ctx context.Context, api *rules.API) error {
-				_, err := api.CreateMinimumBandwidthRule(ctx, "qp", rules.CreateMinimumBandwidthRuleOpts{}, rules.WithCreateMinimumBandwidthRuleField("min_kbps", 1))
+				_, err := api.CreateMinimumBandwidthRule(ctx, "qp", rules.CreateMinimumBandwidthRuleOpts{}, request.Field("min_kbps", 1))
 				return err
 			},
 		},

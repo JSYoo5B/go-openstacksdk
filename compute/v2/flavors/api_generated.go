@@ -53,11 +53,10 @@ type RemoveAccessResult = upstream.RemoveAccessResult
 type UpdateExtraSpecResult = upstream.UpdateExtraSpecResult
 type UpdateOpts = upstream.UpdateOpts
 type UpdateResult = upstream.UpdateResult
-type AddAccessOption = request.Option[AddAccessOpts]
+type AddAccessOption = request.NativeFieldCall
 
-func WithAddAccessOptions(value AddAccessOpts) AddAccessOption { return request.WithOptions(value) }
-func WithAddAccessField(key string, value any) AddAccessOption {
-	return request.WithField[AddAccessOpts](key, value)
+func WithAddAccessOptions(value AddAccessOpts) AddAccessOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type addAccessOptsBuilder struct {
@@ -81,13 +80,8 @@ func (b addAccessOptsBuilder) ToFlavorAddAccessMap() (map[string]any, error) {
 
 // AddAccess invokes the upstream API with library-owned builders and result handling.
 func (a *API) AddAccess(ctx context.Context, id string, opts AddAccessOpts, options ...AddAccessOption) ([]FlavorAccess, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("AddAccess", "flavors", err)
-		var zero0 []FlavorAccess
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("AddAccess", "flavors", err)
 		var zero0 []FlavorAccess
 		return zero0, err
@@ -99,11 +93,10 @@ func (a *API) AddAccess(ctx context.Context, id string, opts AddAccessOpts, opti
 	return value0, err
 }
 
-type CreateOption = request.Option[CreateOpts]
+type CreateOption = request.NativeFieldCall
 
-func WithCreateOptions(value CreateOpts) CreateOption { return request.WithOptions(value) }
-func WithCreateField(key string, value any) CreateOption {
-	return request.WithField[CreateOpts](key, value)
+func WithCreateOptions(value CreateOpts) CreateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type createOptsBuilder struct {
@@ -127,13 +120,8 @@ func (b createOptsBuilder) ToFlavorCreateMap() (map[string]any, error) {
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*Flavor, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Create", "flavors", err)
-		var zero0 *Flavor
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Create", "flavors", err)
 		var zero0 *Flavor
 		return zero0, err
@@ -145,13 +133,10 @@ func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOpti
 	return value0, err
 }
 
-type CreateExtraSpecsOption = request.Option[ExtraSpecsOpts]
+type CreateExtraSpecsOption = request.NativeFieldCall
 
 func WithCreateExtraSpecsOptions(value ExtraSpecsOpts) CreateExtraSpecsOption {
-	return request.WithOptions(value)
-}
-func WithCreateExtraSpecsField(key string, value any) CreateExtraSpecsOption {
-	return request.WithField[ExtraSpecsOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type createExtraSpecsOptsBuilder struct {
@@ -175,13 +160,8 @@ func (b createExtraSpecsOptsBuilder) ToFlavorExtraSpecsCreateMap() (map[string]a
 
 // CreateExtraSpecs invokes the upstream API with library-owned builders and result handling.
 func (a *API) CreateExtraSpecs(ctx context.Context, flavorID string, opts ExtraSpecsOpts, options ...CreateExtraSpecsOption) (map[string]string, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("CreateExtraSpecs", "flavors", err)
-		var zero0 map[string]string
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("CreateExtraSpecs", "flavors", err)
 		var zero0 map[string]string
 		return zero0, err
@@ -227,11 +207,10 @@ func (a *API) ListAccesses(ctx context.Context, id string) iter.Seq2[*FlavorAcce
 	})
 }
 
-type ListDetailOption = request.Option[ListOpts]
+type ListDetailOption = request.NativeQueryCall
 
-func WithListDetailOptions(value ListOpts) ListDetailOption { return request.WithOptions(value) }
-func WithListDetailQuery(key, value string) ListDetailOption {
-	return request.WithQuery[ListOpts](key, value)
+func WithListDetailOptions(value ListOpts) ListDetailOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type listDetailOptsBuilder struct {
@@ -260,12 +239,8 @@ func (a *API) ListDetail(ctx context.Context, options ...ListDetailOption) iter.
 
 func (a *API) listDetailWithControl(ctx context.Context, control resource.ListControl, options ...ListDetailOption) iter.Seq2[*Flavor, error] {
 	var opts ListOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("ListDetail", "flavors", err)
-		return func(yield func(*Flavor, error) bool) { var zero *Flavor; yield(zero, err) }
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("ListDetail", "flavors", err)
 		return func(yield func(*Flavor, error) bool) { var zero *Flavor; yield(zero, err) }
 	}
@@ -284,13 +259,10 @@ func (a *API) ListExtraSpecs(ctx context.Context, flavorID string) (map[string]s
 	return value0, err
 }
 
-type RemoveAccessOption = request.Option[RemoveAccessOpts]
+type RemoveAccessOption = request.NativeFieldCall
 
 func WithRemoveAccessOptions(value RemoveAccessOpts) RemoveAccessOption {
-	return request.WithOptions(value)
-}
-func WithRemoveAccessField(key string, value any) RemoveAccessOption {
-	return request.WithField[RemoveAccessOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type removeAccessOptsBuilder struct {
@@ -314,13 +286,8 @@ func (b removeAccessOptsBuilder) ToFlavorRemoveAccessMap() (map[string]any, erro
 
 // RemoveAccess invokes the upstream API with library-owned builders and result handling.
 func (a *API) RemoveAccess(ctx context.Context, id string, opts RemoveAccessOpts, options ...RemoveAccessOption) ([]FlavorAccess, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("RemoveAccess", "flavors", err)
-		var zero0 []FlavorAccess
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("RemoveAccess", "flavors", err)
 		var zero0 []FlavorAccess
 		return zero0, err
@@ -332,11 +299,10 @@ func (a *API) RemoveAccess(ctx context.Context, id string, opts RemoveAccessOpts
 	return value0, err
 }
 
-type UpdateOption = request.Option[UpdateOpts]
+type UpdateOption = request.NativeFieldCall
 
-func WithUpdateOptions(value UpdateOpts) UpdateOption { return request.WithOptions(value) }
-func WithUpdateField(key string, value any) UpdateOption {
-	return request.WithField[UpdateOpts](key, value)
+func WithUpdateOptions(value UpdateOpts) UpdateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type updateOptsBuilder struct {
@@ -360,13 +326,8 @@ func (b updateOptsBuilder) ToFlavorUpdateMap() (map[string]any, error) {
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ...UpdateOption) (*Flavor, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Update", "flavors", err)
-		var zero0 *Flavor
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Update", "flavors", err)
 		var zero0 *Flavor
 		return zero0, err
@@ -378,10 +339,10 @@ func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ..
 	return value0, err
 }
 
-type UpdateExtraSpecOption = request.Option[ExtraSpecsOpts]
+type UpdateExtraSpecOption = request.NativeCall
 
 func WithUpdateExtraSpecOptions(value ExtraSpecsOpts) UpdateExtraSpecOption {
-	return request.WithOptions(value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type updateExtraSpecOptsBuilder struct {
@@ -395,13 +356,8 @@ func (b updateExtraSpecOptsBuilder) ToFlavorExtraSpecUpdateMap() (map[string]str
 
 // UpdateExtraSpec invokes the upstream API with library-owned builders and result handling.
 func (a *API) UpdateExtraSpec(ctx context.Context, flavorID string, opts ExtraSpecsOpts, options ...UpdateExtraSpecOption) (map[string]string, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{}, options...)
 	if err != nil {
-		err = request.Wrap("UpdateExtraSpec", "flavors", err)
-		var zero0 map[string]string
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, false, false, false); err != nil {
 		err = request.Wrap("UpdateExtraSpec", "flavors", err)
 		var zero0 map[string]string
 		return zero0, err

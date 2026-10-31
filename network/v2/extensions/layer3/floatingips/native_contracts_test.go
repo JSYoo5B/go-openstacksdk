@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -68,7 +69,7 @@ func TestNativeFloatingIPRoutesBodiesPagingAndDecode(t *testing.T) {
 	})
 	api := floatingips.New(nativeFloatingIPClient(cloud))
 	ctx := context.Background()
-	created, err := api.Create(ctx, floatingips.CreateOpts{FloatingNetworkID: "ext", PortID: "p1"}, floatingips.WithCreateField("x_extension", 1))
+	created, err := api.Create(ctx, floatingips.CreateOpts{FloatingNetworkID: "ext", PortID: "p1"}, request.Field("x_extension", 1))
 	if err != nil || !(created.ID == "id-1" && created.FloatingIP == "203.0.113.5" && created.RouterID == "r1") {
 		t.Fatal(created, err)
 	}
@@ -77,7 +78,7 @@ func TestNativeFloatingIPRoutesBodiesPagingAndDecode(t *testing.T) {
 		t.Fatal(got, err)
 	}
 	var rows []*floatingips.FloatingIP
-	for value, err := range api.List(ctx, floatingips.WithListOptions(floatingips.ListOpts{FloatingNetworkID: "ext", PortID: "p1", Status: "ACTIVE", Limit: 1}), floatingips.WithListQuery("extra", "1")) {
+	for value, err := range api.List(ctx, floatingips.WithListOptions(floatingips.ListOpts{FloatingNetworkID: "ext", PortID: "p1", Status: "ACTIVE", Limit: 1}), request.Query("extra", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -167,7 +168,7 @@ func TestNativeFloatingIPStrictStatusesAndPreflight(t *testing.T) {
 		for name, check := range map[string]func() error{
 			"missing network": func() error { _, err := api.Create(ctx, floatingips.CreateOpts{PortID: "p"}); return err },
 			"network extension": func() error {
-				_, err := api.Create(ctx, floatingips.CreateOpts{FloatingNetworkID: "e"}, floatingips.WithCreateField("floating_network_id", "x"))
+				_, err := api.Create(ctx, floatingips.CreateOpts{FloatingNetworkID: "e"}, request.Field("floating_network_id", "x"))
 				return err
 			},
 			"nil option": func() error {
@@ -209,7 +210,7 @@ func TestNativeFloatingIPCreateFullOptionsReplacementAndDecode(t *testing.T) {
 	// WithCreateOptions replaces the positional options entirely.
 	created, err := api.Create(context.Background(), floatingips.CreateOpts{FloatingNetworkID: "ignored", Description: "ignored"},
 		floatingips.WithCreateOptions(floatingips.CreateOpts{FloatingNetworkID: "ext", Description: "d", FloatingIP: "203.0.113.5", PortID: "p1", FixedIP: "10.0.0.5", SubnetID: "sn", TenantID: "t", ProjectID: "p"}),
-		floatingips.WithCreateField("dns_name", "vm"))
+		request.Field("dns_name", "vm"))
 	if err != nil || created.ID != "f1" || created.PortID != "" || created.FixedIP != "" || created.Status != "DOWN" || created.CreatedAt.Second() != 3 {
 		t.Fatal(created, err)
 	}

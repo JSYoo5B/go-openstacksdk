@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
@@ -25,7 +26,7 @@ func nativeVolumeActions() []nativeVolumeAction {
 	multipath := false
 	return []nativeVolumeAction{
 		{"Attach", func(ctx context.Context, api *volumes.API) error {
-			return api.Attach(ctx, "vol-1", volumes.AttachOpts{InstanceUUID: "srv", MountPoint: "/dev/vdb", Mode: volumes.ReadOnly}, volumes.WithAttachField("x_extension", 1))
+			return api.Attach(ctx, "vol-1", volumes.AttachOpts{InstanceUUID: "srv", MountPoint: "/dev/vdb", Mode: volumes.ReadOnly}, request.Field("x_extension", 1))
 		}, `{"os-attach":{"instance_uuid":"srv","mode":"ro","mountpoint":"/dev/vdb","x_extension":1}}`, []int{202}},
 		{"BeginDetaching", func(ctx context.Context, api *volumes.API) error { return api.BeginDetaching(ctx, "vol-1") },
 			`{"os-begin_detaching":{}}`, []int{202}},
@@ -39,7 +40,7 @@ func nativeVolumeActions() []nativeVolumeAction {
 		{"Unreserve", func(ctx context.Context, api *volumes.API) error { return api.Unreserve(ctx, "vol-1") },
 			`{"os-unreserve":{}}`, []int{200, 201, 202}},
 		{"InitializeConnection", func(ctx context.Context, api *volumes.API) error {
-			info, err := api.InitializeConnection(ctx, "vol-1", volumes.InitializeConnectionOpts{Host: "compute-1", Initiator: "iqn", Wwpns: []string{"w1"}, Multipath: &multipath}, volumes.WithInitializeConnectionField("x_extension", 1))
+			info, err := api.InitializeConnection(ctx, "vol-1", volumes.InitializeConnectionOpts{Host: "compute-1", Initiator: "iqn", Wwpns: []string{"w1"}, Multipath: &multipath}, request.Field("x_extension", 1))
 			if err == nil && (info["driver_volume_type"] != "iscsi" || info["data"].(map[string]any)["target_lun"] != float64(1)) {
 				return fmt.Errorf("connection info %v", info)
 			}
@@ -130,7 +131,7 @@ func TestNativeVolumeActionPreflightAndDecode(t *testing.T) {
 		err       error
 	}{
 		"retype type":           {"ChangeType", api.ChangeType(ctx, "vol-1", volumes.ChangeTypeOpts{})},
-		"attach core extension": {"Attach", api.Attach(ctx, "vol-1", volumes.AttachOpts{}, volumes.WithAttachField("mode", "rw"))},
+		"attach core extension": {"Attach", api.Attach(ctx, "vol-1", volumes.AttachOpts{}, request.Field("mode", "rw"))},
 		"detach nil option":     {"Detach", api.Detach(ctx, "vol-1", volumes.DetachOpts{}, nil)},
 	} {
 		if check.err == nil {

@@ -30,13 +30,13 @@ func (a *API) newResources() *resource.Collection[Policy] {
 		Delete:    func(ctx context.Context, id string) error { return a.Delete(ctx, string(id)) },
 		IterateControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*Policy, error] {
 			q = maps.Clone(q)
-			options := []ListOption{func(config *request.Config[ListOpts]) error {
+			options := []ListOption{request.Custom(func(config *request.Config[ListOpts]) error {
 				config.Query = make(url.Values, len(q))
 				for key, values := range q {
 					config.Query[key] = append([]string(nil), values...)
 				}
 				return nil
-			}}
+			})}
 			return a.listWithControl(ctx, control, options...)
 		}})
 }

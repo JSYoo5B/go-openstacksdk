@@ -78,11 +78,10 @@ func (a *API) BatchUpdateMembers(ctx context.Context, poolID string, opts []Batc
 	return request.Wrap("BatchUpdateMembers", "pools", upstream.BatchUpdateMembers(ctx, a.client, poolID, opts).ExtractErr())
 }
 
-type CreateOption = request.Option[CreateOpts]
+type CreateOption = request.NativeFieldCall
 
-func WithCreateOptions(value CreateOpts) CreateOption { return request.WithOptions(value) }
-func WithCreateField(key string, value any) CreateOption {
-	return request.WithField[CreateOpts](key, value)
+func WithCreateOptions(value CreateOpts) CreateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type createOptsBuilder struct {
@@ -106,13 +105,8 @@ func (b createOptsBuilder) ToPoolCreateMap() (map[string]any, error) {
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*Pool, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Create", "pools", err)
-		var zero0 *Pool
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Create", "pools", err)
 		var zero0 *Pool
 		return zero0, err
@@ -124,13 +118,10 @@ func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOpti
 	return value0, err
 }
 
-type CreateMemberOption = request.Option[CreateMemberOpts]
+type CreateMemberOption = request.NativeFieldCall
 
 func WithCreateMemberOptions(value CreateMemberOpts) CreateMemberOption {
-	return request.WithOptions(value)
-}
-func WithCreateMemberField(key string, value any) CreateMemberOption {
-	return request.WithField[CreateMemberOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type createMemberOptsBuilder struct {
@@ -154,13 +145,8 @@ func (b createMemberOptsBuilder) ToMemberCreateMap() (map[string]any, error) {
 
 // CreateMember invokes the upstream API with library-owned builders and result handling.
 func (a *API) CreateMember(ctx context.Context, poolID string, opts CreateMemberOpts, options ...CreateMemberOption) (*Member, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("CreateMember", "pools", err)
-		var zero0 *Member
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("CreateMember", "pools", err)
 		var zero0 *Member
 		return zero0, err
@@ -198,10 +184,9 @@ func (a *API) GetMember(ctx context.Context, poolID string, memberID string) (*M
 	return value0, err
 }
 
-type ListOption = request.Option[ListOpts]
+type ListOption = request.NativeQueryCall
 
-func WithListOptions(value ListOpts) ListOption  { return request.WithOptions(value) }
-func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
+func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
 	base   ListOpts
@@ -229,12 +214,8 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Pool, 
 
 func (a *API) listWithControl(ctx context.Context, control resource.ListControl, options ...ListOption) iter.Seq2[*Pool, error] {
 	var opts ListOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("List", "pools", err)
-		return func(yield func(*Pool, error) bool) { var zero *Pool; yield(zero, err) }
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("List", "pools", err)
 		return func(yield func(*Pool, error) bool) { var zero *Pool; yield(zero, err) }
 	}
@@ -245,13 +226,10 @@ func (a *API) listWithControl(ctx context.Context, control resource.ListControl,
 	}, control)
 }
 
-type ListMembersOption = request.Option[ListMembersOpts]
+type ListMembersOption = request.NativeQueryCall
 
 func WithListMembersOptions(value ListMembersOpts) ListMembersOption {
-	return request.WithOptions(value)
-}
-func WithListMembersQuery(key, value string) ListMembersOption {
-	return request.WithQuery[ListMembersOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type listMembersOptsBuilder struct {
@@ -280,12 +258,8 @@ func (a *API) ListMembers(ctx context.Context, poolID string, options ...ListMem
 
 func (a *API) listMembersWithControl(ctx context.Context, poolID string, control resource.ListControl, options ...ListMembersOption) iter.Seq2[*Member, error] {
 	var opts ListMembersOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("ListMembers", "pools", err)
-		return func(yield func(*Member, error) bool) { var zero *Member; yield(zero, err) }
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("ListMembers", "pools", err)
 		return func(yield func(*Member, error) bool) { var zero *Member; yield(zero, err) }
 	}
@@ -296,11 +270,10 @@ func (a *API) listMembersWithControl(ctx context.Context, poolID string, control
 	}, control)
 }
 
-type UpdateOption = request.Option[UpdateOpts]
+type UpdateOption = request.NativeFieldCall
 
-func WithUpdateOptions(value UpdateOpts) UpdateOption { return request.WithOptions(value) }
-func WithUpdateField(key string, value any) UpdateOption {
-	return request.WithField[UpdateOpts](key, value)
+func WithUpdateOptions(value UpdateOpts) UpdateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type updateOptsBuilder struct {
@@ -324,13 +297,8 @@ func (b updateOptsBuilder) ToPoolUpdateMap() (map[string]any, error) {
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ...UpdateOption) (*Pool, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Update", "pools", err)
-		var zero0 *Pool
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Update", "pools", err)
 		var zero0 *Pool
 		return zero0, err
@@ -342,13 +310,10 @@ func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ..
 	return value0, err
 }
 
-type UpdateMemberOption = request.Option[UpdateMemberOpts]
+type UpdateMemberOption = request.NativeFieldCall
 
 func WithUpdateMemberOptions(value UpdateMemberOpts) UpdateMemberOption {
-	return request.WithOptions(value)
-}
-func WithUpdateMemberField(key string, value any) UpdateMemberOption {
-	return request.WithField[UpdateMemberOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type updateMemberOptsBuilder struct {
@@ -372,13 +337,8 @@ func (b updateMemberOptsBuilder) ToMemberUpdateMap() (map[string]any, error) {
 
 // UpdateMember invokes the upstream API with library-owned builders and result handling.
 func (a *API) UpdateMember(ctx context.Context, poolID string, memberID string, opts UpdateMemberOpts, options ...UpdateMemberOption) (*Member, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("UpdateMember", "pools", err)
-		var zero0 *Member
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("UpdateMember", "pools", err)
 		var zero0 *Member
 		return zero0, err

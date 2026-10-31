@@ -22,10 +22,9 @@ type ListDetailOpts = upstream.ListDetailOpts
 type ListOpts = upstream.ListOpts
 type Pool = upstream.Pool
 type PoolPage = upstream.PoolPage
-type ListOption = request.Option[ListOpts]
+type ListOption = request.NativeQueryCall
 
-func WithListOptions(value ListOpts) ListOption  { return request.WithOptions(value) }
-func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
+func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
 	base   ListOpts
@@ -49,12 +48,8 @@ func (b listOptsBuilder) ToPoolsListQuery() (string, error) {
 // List invokes the upstream API with library-owned builders and result handling.
 func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Pool, error] {
 	var opts ListOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("List", "schedulerstats", err)
-		return func(yield func(*Pool, error) bool) { var zero *Pool; yield(zero, err) }
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("List", "schedulerstats", err)
 		return func(yield func(*Pool, error) bool) { var zero *Pool; yield(zero, err) }
 	}
@@ -65,11 +60,10 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Pool, 
 	})
 }
 
-type ListDetailOption = request.Option[ListDetailOpts]
+type ListDetailOption = request.NativeQueryCall
 
-func WithListDetailOptions(value ListDetailOpts) ListDetailOption { return request.WithOptions(value) }
-func WithListDetailQuery(key, value string) ListDetailOption {
-	return request.WithQuery[ListDetailOpts](key, value)
+func WithListDetailOptions(value ListDetailOpts) ListDetailOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type listDetailOptsBuilder struct {
@@ -94,12 +88,8 @@ func (b listDetailOptsBuilder) ToPoolsListQuery() (string, error) {
 // ListDetail invokes the upstream API with library-owned builders and result handling.
 func (a *API) ListDetail(ctx context.Context, options ...ListDetailOption) iter.Seq2[*Pool, error] {
 	var opts ListDetailOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("ListDetail", "schedulerstats", err)
-		return func(yield func(*Pool, error) bool) { var zero *Pool; yield(zero, err) }
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("ListDetail", "schedulerstats", err)
 		return func(yield func(*Pool, error) bool) { var zero *Pool; yield(zero, err) }
 	}

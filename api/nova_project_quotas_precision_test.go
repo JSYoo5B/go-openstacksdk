@@ -49,9 +49,9 @@ func TestNovaProjectQuotaTypedLimitsPreserveIntegerPrecision(t *testing.T) {
 	large := int(integer)
 	opts := quotasets.UpdateOpts{FixedIPs: &large, FloatingIPs: &large, InjectedFileContentBytes: &large, InjectedFilePathBytes: &large, InjectedFiles: &large, KeyPairs: &large, MetadataItems: &large, RAM: &large, SecurityGroupRules: &large, SecurityGroups: &large, Cores: &large, Instances: &large, ServerGroups: &large, ServerGroupMembers: &large, Force: true}
 	for _, options := range [][]quotasets.UpdateOption{
-		{quotasets.WithUpdateForce(false), quotasets.WithUpdateField("vendor_counter", json.Number("9007199254740993"))},
-		{quotasets.WithQuotaOptions(opts), quotasets.WithUpdateForce(true), quotasets.WithUpdateForce(false), quotasets.WithUpdateField("vendor_counter", json.Number("9007199254740993"))},
-		{quotasets.WithUpdateOptions(opts), quotasets.WithUpdateForce(false), quotasets.WithUpdateField("vendor_counter", json.Number("9007199254740993"))},
+		{quotasets.WithUpdateForce(false), request.Field("vendor_counter", json.Number("9007199254740993"))},
+		{quotasets.WithQuotaOptions(opts), quotasets.WithUpdateForce(true), quotasets.WithUpdateForce(false), request.Field("vendor_counter", json.Number("9007199254740993"))},
+		{quotasets.WithUpdateOptions(opts), quotasets.WithUpdateForce(false), request.Field("vendor_counter", json.Number("9007199254740993"))},
 	} {
 		value, err := scope.Update(context.Background(), opts, options...)
 		if err != nil || value == nil || value.ProjectID != "project-fixed" || value.ID != "wire-project" || value.Cores != large || string(value.Body["cores"]) != "9007199254740993" || string(value.Body["vendor_counter"]) != "9007199254740993" || value.Header.Get("X-Openstack-Request-Id") != "exact-quota" {
@@ -100,7 +100,7 @@ func TestNovaProjectQuotaOptionsCapturePointersAndAreReusable(t *testing.T) {
 	}
 	for range 3 {
 		// Reapplying replaces this mutable copy with another independent copy.
-		value, err := scope.Update(context.Background(), quotasets.UpdateOpts{SecurityGroups: &baseOnly}, option, mutateCopy, option)
+		value, err := scope.Update(context.Background(), quotasets.UpdateOpts{SecurityGroups: &baseOnly}, option, request.Custom(mutateCopy), option)
 		if err != nil || value == nil || value.Cores != 7 || value.Instances != -1 || value.RAM != 0 {
 			t.Fatalf("quota=%+v err=%v", value, err)
 		}
@@ -123,11 +123,11 @@ func TestNovaProjectQuotaSnapshotPreservesPreHTTPValidation(t *testing.T) {
 	invalid = 0
 	for _, options := range [][]quotasets.UpdateOption{
 		{snapshot},
-		{quotasets.WithQuotaOptions(quotasets.UpdateOpts{}), quotasets.WithUpdateField("cores", 0)},
-		{quotasets.WithQuotaOptions(quotasets.UpdateOpts{}), quotasets.WithUpdateField("force", false)},
-		{quotasets.WithQuotaOptions(quotasets.UpdateOpts{}), request.WithQuery[quotasets.UpdateOpts]("user_id", "user")},
-		{quotasets.WithQuotaOptions(quotasets.UpdateOpts{}), request.WithHeader[quotasets.UpdateOpts]("X-Vendor", "value")},
-		{quotasets.WithQuotaOptions(quotasets.UpdateOpts{}), request.WithArgument[quotasets.UpdateOpts]("unsupported", true)},
+		{quotasets.WithQuotaOptions(quotasets.UpdateOpts{}), request.Field("cores", 0)},
+		{quotasets.WithQuotaOptions(quotasets.UpdateOpts{}), request.Field("force", false)},
+		{quotasets.WithQuotaOptions(quotasets.UpdateOpts{}), request.Custom(request.WithQuery[quotasets.UpdateOpts]("user_id", "user"))},
+		{quotasets.WithQuotaOptions(quotasets.UpdateOpts{}), request.Custom(request.WithHeader[quotasets.UpdateOpts]("X-Vendor", "value"))},
+		{quotasets.WithQuotaOptions(quotasets.UpdateOpts{}), request.Custom(request.WithArgument[quotasets.UpdateOpts]("unsupported", true))},
 	} {
 		if value, err := scope.Update(context.Background(), quotasets.UpdateOpts{}, options...); value != nil || !errors.Is(err, resource.ErrInvalidOption) || calls.Load() != 0 {
 			t.Fatalf("quota=%v calls=%d err=%v", value, calls.Load(), err)

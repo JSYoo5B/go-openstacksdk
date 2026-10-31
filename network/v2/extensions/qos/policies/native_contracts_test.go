@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -67,7 +68,7 @@ func TestNativeQoSPolicyRoutesBodiesPagingAndDecode(t *testing.T) {
 		}
 		return nativePolicyWire(200, `{"policy":`+nativePolicyRow+`}`)
 	})
-	created, err := api.Create(ctx, policies.CreateOpts{Name: "gold", Shared: true, Description: "d"}, policies.WithCreateField("x_extension", 1))
+	created, err := api.Create(ctx, policies.CreateOpts{Name: "gold", Shared: true, Description: "d"}, request.Field("x_extension", 1))
 	if err != nil || !(created.ID == "qp-1" && created.Shared && created.RevisionNumber == 4 && created.Rules[0]["max_kbps"] == float64(1000) && created.CreatedAt.Year() == 2026) {
 		t.Fatal(created, err)
 	}
@@ -81,7 +82,7 @@ func TestNativeQoSPolicyRoutesBodiesPagingAndDecode(t *testing.T) {
 	}
 	revision := 0
 	var rows []*policies.Policy
-	for value, err := range api.List(ctx, policies.WithListOptions(policies.ListOpts{Name: "gold", Shared: gophercloud.Disabled, RevisionNumber: &revision, Limit: 1}), policies.WithListQuery("extra", "1")) {
+	for value, err := range api.List(ctx, policies.WithListOptions(policies.ListOpts{Name: "gold", Shared: gophercloud.Disabled, RevisionNumber: &revision, Limit: 1}), request.Query("extra", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -174,7 +175,7 @@ func TestNativeQoSPolicyStrictStatusesDecodeAndPreflight(t *testing.T) {
 		api, _ := nativePolicyAPI(t, &calls, func(*http.Request) *http.Response { return nativePolicyWire(201, `{}`) })
 		for name, check := range map[string]func() error{
 			"name extension": func() error {
-				_, err := api.Create(ctx, policies.CreateOpts{}, policies.WithCreateField("name", "x"))
+				_, err := api.Create(ctx, policies.CreateOpts{}, request.Field("name", "x"))
 				return err
 			},
 			"nil option": func() error { _, err := api.Create(ctx, policies.CreateOpts{}, nil); return err },

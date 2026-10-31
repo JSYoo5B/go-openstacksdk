@@ -11,6 +11,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -65,7 +66,7 @@ func TestPythonAttachmentCrudAndCompleteMatchProxyRequests(t *testing.T) {
 	if _, err := api.Create(ctx, attachments.CreateOpts{VolumeUUID: "vol-1"}); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := api.Create(ctx, attachments.CreateOpts{VolumeUUID: "vol-1"}, attachments.WithCreateField("instance_uuid", nil)); err == nil {
+	if _, err := api.Create(ctx, attachments.CreateOpts{VolumeUUID: "vol-1"}, request.Field("instance_uuid", nil)); err == nil {
 		t.Fatal("core instance_uuid was replaced")
 	}
 	// get_attachment(attachment)
@@ -122,7 +123,7 @@ func TestPythonAttachmentListUsesDetailFirstPage(t *testing.T) {
 	})
 	// attachments(volume_id="vol-1", all_projects=True): Python lists GET /attachments and follows attachments_links.
 	var ids []string
-	for value, err := range api.List(ctx, attachments.WithListOptions(attachments.ListOpts{VolumeID: "vol-1"}), attachments.WithListQuery("all_tenants", "True")) {
+	for value, err := range api.List(ctx, attachments.WithListOptions(attachments.ListOpts{VolumeID: "vol-1"}), request.Query("all_tenants", "True")) {
 		if err != nil {
 			t.Fatal(err)
 		}

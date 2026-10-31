@@ -11,6 +11,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ipsecpolicies"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -117,7 +118,7 @@ func TestPythonIPsecPolicyListQueryAndLinks(t *testing.T) {
 	})
 	// vpn_ipsec_policies(transform_protocol="esp", limit=1)
 	var ids []string
-	for value, err := range api.List(ctx, ipsecpolicies.WithListOptions(ipsecpolicies.ListOpts{TransformProtocol: "esp"}), ipsecpolicies.WithListQuery("limit", "1")) {
+	for value, err := range api.List(ctx, ipsecpolicies.WithListOptions(ipsecpolicies.ListOpts{TransformProtocol: "esp"}), request.Query("limit", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}

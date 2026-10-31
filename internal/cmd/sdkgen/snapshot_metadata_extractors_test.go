@@ -262,7 +262,7 @@ func TestSnapshotMetadataExtractorEmitsSafeMapAndPreservesBuildersAndInventoryPo
 			t.Fatal(err)
 		}
 		out := e.body.String()
-		for _, want := range []string{"(map[string]any,error)", "snapshotmetadata.Extract(result.Result)", "request.Apply(", "request.ValidateCapabilities", "ToSnapshotUpdateMetadataMap", "Metadata", "upstream.UpdateMetadata("} {
+		for _, want := range []string{"(map[string]any,error)", "snapshotmetadata.Extract(result.Result)", "request.ApplyCalls(", "request.Capabilities{Body:true}", "ToSnapshotUpdateMetadataMap", "Metadata", "upstream.UpdateMetadata("} {
 			if !strings.Contains(out, want) {
 				t.Fatalf("missing %q: %s", want, out)
 			}

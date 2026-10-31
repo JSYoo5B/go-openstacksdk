@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/baremetalintrospection/v1/introspection"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -136,7 +137,7 @@ func TestIronicIntrospectionListFiltersFollowLinksAndExtensionQuery(t *testing.T
 	var seen []string
 	for value, err := range api.ListIntrospections(context.Background(),
 		introspection.WithListIntrospectionsOptions(introspection.ListIntrospectionsOpts{Limit: 1}),
-		introspection.WithListIntrospectionsQuery("vendor", "x")) {
+		request.Query("vendor", "x")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -163,7 +164,7 @@ func TestIronicIntrospectionRejectsInvalidOptionsBeforeHTTP(t *testing.T) {
 			t.Fatalf("nil option: %v", err)
 		}
 	}
-	for _, err := range api.ListIntrospections(context.Background(), introspection.WithListIntrospectionsQuery(" ", "x")) {
+	for _, err := range api.ListIntrospections(context.Background(), request.Query(" ", "x")) {
 		if !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatalf("empty query key: %v", err)
 		}

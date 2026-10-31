@@ -10,6 +10,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/services"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -113,7 +114,7 @@ func TestPythonVPNServiceListQueryAndLinks(t *testing.T) {
 	})
 	// vpn_services(router_id="r1", is_admin_state_up=True, limit=1)
 	var ids []string
-	for value, err := range api.List(ctx, services.WithListOptions(services.ListOpts{RouterID: "r1", AdminStateUp: gophercloud.Enabled}), services.WithListQuery("limit", "1")) {
+	for value, err := range api.List(ctx, services.WithListOptions(services.ListOpts{RouterID: "r1", AdminStateUp: gophercloud.Enabled}), request.Query("limit", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}

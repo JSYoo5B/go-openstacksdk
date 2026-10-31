@@ -14,6 +14,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/image/v2/images"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
@@ -49,7 +50,7 @@ func TestNativeImageListQueryAndExtensions(t *testing.T) {
 		Owner: "o", Status: images.ImageStatusActive, SizeMin: 1, SizeMax: 9, Sort: "name:asc", SortKey: "id", SortDir: "desc", Tags: []string{"a", "b"},
 		CreatedAtQuery: &images.ImageDateQuery{Date: created, Filter: images.FilterGTE}, UpdatedAtQuery: &images.ImageDateQuery{Date: created},
 		ContainerFormat: "bare", DiskFormat: "raw"}
-	ids, err := nativeListIDs(t, images.New(client).List(context.Background(), images.WithListOptions(opts), images.WithListQuery("os_distro", "ubuntu")))
+	ids, err := nativeListIDs(t, images.New(client).List(context.Background(), images.WithListOptions(opts), request.Query("os_distro", "ubuntu")))
 	want := url.Values{"limit": {"2"}, "marker": {"m"}, "name": {"n"}, "visibility": {"shared"}, "os_hidden": {"true"}, "member_status": {"all"},
 		"owner": {"o"}, "status": {"active"}, "sort": {"name:asc"}, "sort_key": {"id"}, "sort_dir": {"desc"},
 		"tag": {"a", "b"}, "created_at": {"gte:2026-10-10T01:02:03Z"}, "updated_at": {"2026-10-10T01:02:03Z"}, "container_format": {"bare"}, "disk_format": {"raw"}, "os_distro": {"ubuntu"}}

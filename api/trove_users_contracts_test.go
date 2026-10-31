@@ -17,6 +17,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
@@ -87,7 +88,7 @@ func TestTroveUserScopeCreateSingleAndBatch(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := scope.Create(context.Background(), users.CreateOpts{Name: "reader", Password: "fixture-password", Databases: databases.BatchCreateOpts{{Name: "logs"}}, Host: "192.0.2.10"}, users.WithCreateField("vendor_hint", false)); err != nil {
+	if err := scope.Create(context.Background(), users.CreateOpts{Name: "reader", Password: "fixture-password", Databases: databases.BatchCreateOpts{{Name: "logs"}}, Host: "192.0.2.10"}, request.Field("vendor_hint", false)); err != nil {
 		t.Fatal(err)
 	}
 	if err := scope.CreateBatch(context.Background(), users.BatchCreateOpts{
@@ -132,7 +133,7 @@ func TestTroveUserScopeValidationAndUnsupportedPoliciesBeforeHTTP(t *testing.T) 
 	if err := scope.Create(context.Background(), valid, users.WithCreateOptions(users.BatchCreateOpts{valid, {Name: "writer", Password: "other"}})); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
-	if err := scope.Create(context.Background(), valid, users.WithCreateField("users", []any{})); !errors.Is(err, resource.ErrInvalidOption) {
+	if err := scope.Create(context.Background(), valid, request.Field("users", []any{})); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
 	if _, err := scope.All(context.Background(), resource.WithPageSize(1)); !errors.Is(err, resource.ErrUnsupported) {

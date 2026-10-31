@@ -27,13 +27,13 @@ func (a *API) newResources() *resource.Collection[Secret] {
 		IterateBodyControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*resource.BodyRecord[Secret], error] {
 			q = maps.Clone(q)
 			q.Del("status")
-			options := []ListOption{func(config *request.Config[ListOpts]) error {
+			options := []ListOption{request.Custom(func(config *request.Config[ListOpts]) error {
 				config.Query = make(url.Values, len(q))
 				for key, values := range q {
 					config.Query[key] = append([]string(nil), values...)
 				}
 				return nil
-			}}
+			})}
 			return a.listBodyWithControl(ctx, control, options...)
 		},
 		FilterDescriptor: &resource.FilterDescriptor{Query: map[string]string{"acl_only": "acl_only", "algorithm": "alg", "bits": "bits", "created": "created", "expiration": "expiration", "limit": "limit", "marker": "marker", "mode": "mode", "name": "name", "secret_type": "secret_type", "sort": "sort", "updated": "updated"}, Body: map[string]string{"bit_length": "bit_length", "content_types": "content_types", "created_at": "created_at", "expires_at": "expires_at", "id": "id", "payload": "payload", "payload_content_encoding": "payload_content_encoding", "payload_content_type": "payload_content_type", "secret_id": "secret_id", "secret_ref": "secret_ref", "status": "status", "updated_at": "updated_at"}, Reserved: []string{"allow_unknown_params", "base_path", "headers", "jmespath_filters", "max_items", "microversion", "paginated", "resource_type", "session"}},
@@ -56,22 +56,19 @@ func (a *API) newResources() *resource.Collection[Secret] {
 		IterateControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*Secret, error] {
 			q = maps.Clone(q)
 			q.Del("status")
-			options := []ListOption{func(config *request.Config[ListOpts]) error {
+			options := []ListOption{request.Custom(func(config *request.Config[ListOpts]) error {
 				config.Query = make(url.Values, len(q))
 				for key, values := range q {
 					config.Query[key] = append([]string(nil), values...)
 				}
 				return nil
-			}}
+			})}
 			return a.listWithControl(ctx, control, options...)
 		}})
 }
 func (a *API) listBodyWithControl(ctx context.Context, control resource.ListControl, options ...ListOption) iter.Seq2[*resource.BodyRecord[Secret], error] {
 	var opts ListOpts
-	cfg, err := request.Apply(opts, options...)
-	if err == nil {
-		err = request.ValidateCapabilities(cfg, false, true, false)
-	}
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
 		err = request.Wrap("List", "secrets", err)
 		return func(yield func(*resource.BodyRecord[Secret], error) bool) { yield(nil, err) }

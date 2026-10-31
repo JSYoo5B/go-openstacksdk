@@ -16,10 +16,10 @@ import (
 // option can be reused and gives each call its own copy of those values.
 func WithQuotaOptions(options UpdateOpts) UpdateOption {
 	snapshot := cloneQuotaOptions(options)
-	return func(config *request.Config[UpdateOpts]) error {
+	return request.Custom(func(config *request.Config[UpdateOpts]) error {
 		config.Options = cloneQuotaOptions(snapshot)
 		return nil
-	}
+	})
 }
 
 func cloneQuotaOptions(options UpdateOpts) UpdateOpts {
@@ -41,10 +41,7 @@ func (s *ProjectQuotaScope) Update(ctx context.Context, options UpdateOpts, with
 	if err := s.validate(ctx); err != nil {
 		return nil, quotaError("Update", s.ProjectID(), err)
 	}
-	config, err := request.Apply(options, with...)
-	if err == nil {
-		err = request.ValidateCapabilities(config, true, false, false)
-	}
+	config, err := request.ApplyCalls(options, request.Capabilities{Body: true}, with...)
 	if err != nil {
 		return nil, quotaError("Update", s.projectID, err)
 	}

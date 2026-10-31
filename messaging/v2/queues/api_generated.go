@@ -56,11 +56,10 @@ type Stats = upstream.Stats
 type UpdateOp = upstream.UpdateOp
 type UpdateOpts = upstream.UpdateOpts
 type UpdateResult = upstream.UpdateResult
-type CreateOption = request.Option[CreateOpts]
+type CreateOption = request.NativeFieldCall
 
-func WithCreateOptions(value CreateOpts) CreateOption { return request.WithOptions(value) }
-func WithCreateField(key string, value any) CreateOption {
-	return request.WithField[CreateOpts](key, value)
+func WithCreateOptions(value CreateOpts) CreateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type createOptsBuilder struct {
@@ -84,12 +83,8 @@ func (b createOptsBuilder) ToQueueCreateMap() (map[string]any, error) {
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) error {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Create", "queues", err)
-		return err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Create", "queues", err)
 		return err
 	}
@@ -118,10 +113,9 @@ func (a *API) GetStats(ctx context.Context, queueName string) (Stats, error) {
 	return value0, err
 }
 
-type ListOption = request.Option[ListOpts]
+type ListOption = request.NativeQueryCall
 
-func WithListOptions(value ListOpts) ListOption  { return request.WithOptions(value) }
-func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
+func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
 	base   ListOpts
@@ -145,12 +139,8 @@ func (b listOptsBuilder) ToQueueListQuery() (string, error) {
 // List invokes the upstream API with library-owned builders and result handling.
 func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Queue, error] {
 	var opts ListOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("List", "queues", err)
-		return func(yield func(*Queue, error) bool) { var zero *Queue; yield(zero, err) }
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("List", "queues", err)
 		return func(yield func(*Queue, error) bool) { var zero *Queue; yield(zero, err) }
 	}
@@ -161,12 +151,9 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Queue,
 	})
 }
 
-type PurgeOption = request.Option[PurgeOpts]
+type PurgeOption = request.NativeFieldCall
 
-func WithPurgeOptions(value PurgeOpts) PurgeOption { return request.WithOptions(value) }
-func WithPurgeField(key string, value any) PurgeOption {
-	return request.WithField[PurgeOpts](key, value)
-}
+func WithPurgeOptions(value PurgeOpts) PurgeOption { return request.Custom(request.WithOptions(value)) }
 
 type purgeOptsBuilder struct {
 	base   PurgeOpts
@@ -189,12 +176,8 @@ func (b purgeOptsBuilder) ToQueuePurgeMap() (map[string]any, error) {
 
 // Purge invokes the upstream API with library-owned builders and result handling.
 func (a *API) Purge(ctx context.Context, queueName string, opts PurgeOpts, options ...PurgeOption) error {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Purge", "queues", err)
-		return err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Purge", "queues", err)
 		return err
 	}
@@ -202,12 +185,9 @@ func (a *API) Purge(ctx context.Context, queueName string, opts PurgeOpts, optio
 	return request.Wrap("Purge", "queues", upstream.Purge(ctx, a.client, queueName, _opts).ExtractErr())
 }
 
-type ShareOption = request.Option[ShareOpts]
+type ShareOption = request.NativeFieldCall
 
-func WithShareOptions(value ShareOpts) ShareOption { return request.WithOptions(value) }
-func WithShareField(key string, value any) ShareOption {
-	return request.WithField[ShareOpts](key, value)
-}
+func WithShareOptions(value ShareOpts) ShareOption { return request.Custom(request.WithOptions(value)) }
 
 type shareOptsBuilder struct {
 	base   ShareOpts
@@ -230,13 +210,8 @@ func (b shareOptsBuilder) ToQueueShareMap() (map[string]any, error) {
 
 // Share invokes the upstream API with library-owned builders and result handling.
 func (a *API) Share(ctx context.Context, queueName string, opts ShareOpts, options ...ShareOption) (QueueShare, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Share", "queues", err)
-		var zero0 QueueShare
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Share", "queues", err)
 		var zero0 QueueShare
 		return zero0, err
@@ -248,9 +223,11 @@ func (a *API) Share(ctx context.Context, queueName string, opts ShareOpts, optio
 	return value0, err
 }
 
-type UpdateOption = request.Option[BatchUpdateOpts]
+type UpdateOption = request.NativeCall
 
-func WithUpdateOptions(value BatchUpdateOpts) UpdateOption { return request.WithOptions(value) }
+func WithUpdateOptions(value BatchUpdateOpts) UpdateOption {
+	return request.Custom(request.WithOptions(value))
+}
 
 type updateOptsBuilder struct {
 	base   BatchUpdateOpts
@@ -263,13 +240,8 @@ func (b updateOptsBuilder) ToQueueUpdateMap() ([]map[string]any, error) {
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, queueName string, opts BatchUpdateOpts, options ...UpdateOption) (QueueDetails, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{}, options...)
 	if err != nil {
-		err = request.Wrap("Update", "queues", err)
-		var zero0 QueueDetails
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, false, false, false); err != nil {
 		err = request.Wrap("Update", "queues", err)
 		var zero0 QueueDetails
 		return zero0, err

@@ -19,6 +19,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/networks"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/ports"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -673,7 +674,7 @@ func TestNetworkListFiltersNativeAndIdentitySurfaceIsolation(t *testing.T) {
 			var native []networks.ListOption
 			for k, v := range want {
 				raw = append(raw, resource.WithQuery(k, v[0]))
-				native = append(native, networks.WithListQuery(k, v[0]))
+				native = append(native, request.Query(k, v[0]))
 			}
 			v, e := a.collection.All(context.Background(), append(append([]resource.ListOption(nil), raw...), resource.WithFilter("subnet_ids", []any{}))...)
 			networkListWant(t, v, e, "target")

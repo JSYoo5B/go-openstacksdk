@@ -18,6 +18,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/services"
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/users"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -224,7 +225,7 @@ func TestPythonCloudIdentityEndpointHelpers(t *testing.T) {
 		if err != nil || service == nil {
 			t.Fatal(service, err)
 		}
-		created, err := svc.Endpoints.Create(ctx, endpoints.CreateOpts{Availability: gophercloud.AvailabilityPublic, URL: "https://nova", ServiceID: service.ID, Enabled: &enabled}, endpoints.WithCreateField("region_id", nil))
+		created, err := svc.Endpoints.Create(ctx, endpoints.CreateOpts{Availability: gophercloud.AvailabilityPublic, URL: "https://nova", ServiceID: service.ID, Enabled: &enabled}, request.Field("region_id", nil))
 		if err != nil || created.ID != "ep-1" || created.ServiceID != "svc-1" {
 			t.Fatal(created, err)
 		}
@@ -248,7 +249,7 @@ func TestPythonCloudIdentityEndpointHelpers(t *testing.T) {
 		want := []pythonCloudIdentityCall{{"GET", "/services/svc-1", "", ""}}
 		for _, iface := range []gophercloud.Availability{gophercloud.AvailabilityPublic, gophercloud.AvailabilityInternal, gophercloud.AvailabilityAdmin} {
 			endpointURL := "https://" + string(iface)
-			if _, err := svc.Endpoints.Create(ctx, endpoints.CreateOpts{Availability: iface, URL: endpointURL, ServiceID: service.ID, Enabled: &enabled}, endpoints.WithCreateField("region_id", "RegionOne")); err != nil {
+			if _, err := svc.Endpoints.Create(ctx, endpoints.CreateOpts{Availability: iface, URL: endpointURL, ServiceID: service.ID, Enabled: &enabled}, request.Field("region_id", "RegionOne")); err != nil {
 				t.Fatal(err)
 			}
 			want = append(want, pythonCloudIdentityCall{"POST", "/endpoints", "", `{"endpoint":{"enabled":true,"interface":"` + string(iface) + `","region_id":"RegionOne","service_id":"svc-1","url":"` + endpointURL + `"}}`})
@@ -259,7 +260,7 @@ func TestPythonCloudIdentityEndpointHelpers(t *testing.T) {
 	t.Run("update_endpoint", func(t *testing.T) {
 		var calls []pythonCloudIdentityCall
 		svc := pythonCloudIdentityService(t, &calls, pythonCloudIdentityReplies{"PATCH /endpoints/ep-1": {200, `{"endpoint":` + pythonCloudIdentityEndpointRow + `}`}})
-		if _, err := svc.Endpoints.Update(ctx, "ep-1", endpoints.UpdateOpts{ServiceID: "svc-2", Enabled: &disabled, URL: "https://new"}, endpoints.WithUpdateField("region_id", "R2")); err != nil {
+		if _, err := svc.Endpoints.Update(ctx, "ep-1", endpoints.UpdateOpts{ServiceID: "svc-2", Enabled: &disabled, URL: "https://new"}, request.Field("region_id", "R2")); err != nil {
 			t.Fatal(err)
 		}
 		pythonCloudIdentityExpect(t, calls, pythonCloudIdentityCall{"PATCH", "/endpoints/ep-1", "", `{"endpoint":{"enabled":false,"region_id":"R2","service_id":"svc-2","url":"https://new"}}`})
@@ -400,8 +401,8 @@ func TestPythonCloudIdentityDomainGroupRoleHelpers(t *testing.T) {
 			{"no filters", nil, url.Values{}},
 			{"user project role effective inherited_to", []roles.ListAssignmentsOption{
 				roles.WithListAssignmentsOptions(roles.ListAssignmentsOpts{UserID: "u-1", ScopeProjectID: "p-1", RoleID: "r-1"}),
-				roles.WithListAssignmentsQuery("effective", "True"),
-				roles.WithListAssignmentsQuery("scope.OS-INHERIT:inherited_to", "projects"),
+				request.Query("effective", "True"),
+				request.Query("scope.OS-INHERIT:inherited_to", "projects"),
 			}, url.Values{"user.id": {"u-1"}, "scope.project.id": {"p-1"}, "role.id": {"r-1"}, "effective": {"True"}, "scope.OS-INHERIT:inherited_to": {"projects"}}},
 			{"group domain", []roles.ListAssignmentsOption{roles.WithListAssignmentsOptions(roles.ListAssignmentsOpts{GroupID: "g-1", ScopeDomainID: "dom-1"})}, url.Values{"group.id": {"g-1"}, "scope.domain.id": {"dom-1"}}},
 			{"system", []roles.ListAssignmentsOption{roles.WithListAssignmentsOptions(roles.ListAssignmentsOpts{UserID: "u-1", ScopeSystem: "all"})}, url.Values{"user.id": {"u-1"}, "scope.system": {"all"}}},

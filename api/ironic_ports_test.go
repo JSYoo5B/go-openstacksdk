@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/baremetal/v1/ports"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -55,7 +56,7 @@ func TestIronicPortCreateKeepsExplicitFalseAndExtensionFields(t *testing.T) {
 		NodeUUID: "node-1", Address: "52:54:00:aa:bb:cc", PortGroupUUID: "pg-1",
 		LocalLinkConnection: map[string]any{"switch_id": "aa"}, PXEEnabled: ironicPortBool(false),
 		PhysicalNetwork: "physnet", Extra: map[string]any{"k": false}, IsSmartNIC: ironicPortBool(false),
-	}, ports.WithCreateField("vendor", map[string]bool{"enabled": false}))
+	}, request.Field("vendor", map[string]bool{"enabled": false}))
 	if err != nil || value == nil || value.UUID != "port-1" || calls.Load() != 1 {
 		t.Fatalf("value=%+v error=%v calls=%d", value, err, calls.Load())
 	}
@@ -99,7 +100,7 @@ func TestIronicPortRejectsInvalidInputBeforeHTTP(t *testing.T) {
 	ironicForbidHTTP(t, cloud)
 	api := newIronicPorts(t, cloud, "")
 	ctx := context.Background()
-	if _, err := api.Create(ctx, ports.CreateOpts{}, ports.WithCreateField("address", "shadow")); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := api.Create(ctx, ports.CreateOpts{}, request.Field("address", "shadow")); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatalf("core field collision: %v", err)
 	}
 	if _, err := api.Create(ctx, ports.CreateOpts{}, nil); !errors.Is(err, resource.ErrInvalidOption) {
@@ -274,7 +275,7 @@ func TestIronicPortListAndListDetailFiltersFollowLinks(t *testing.T) {
 	opts := ports.ListOpts{Node: "n1", NodeUUID: "u1", PortGroup: "pg", Address: "aa", Limit: 1, SortKey: "address", SortDir: "asc"}
 	listOpts := opts
 	listOpts.Fields = []string{"uuid", "address"}
-	ids := collect(api.List(context.Background(), ports.WithListOptions(listOpts), ports.WithListQuery("vendor", "x")))
+	ids := collect(api.List(context.Background(), ports.WithListOptions(listOpts), request.Query("vendor", "x")))
 	if !reflect.DeepEqual(ids, []string{"port-1", "port-2"}) || len(plain) != 2 {
 		t.Fatalf("list ids=%v requests=%v", ids, plain)
 	}
@@ -282,7 +283,7 @@ func TestIronicPortListAndListDetailFiltersFollowLinks(t *testing.T) {
 	if !reflect.DeepEqual(plain[0], wantPlain) || plain[1].Get("marker") != "port-1" {
 		t.Fatalf("list queries=%v", plain)
 	}
-	ids = collect(api.ListDetail(context.Background(), ports.WithListDetailOptions(opts), ports.WithListDetailQuery("vendor", "y")))
+	ids = collect(api.ListDetail(context.Background(), ports.WithListDetailOptions(opts), request.Query("vendor", "y")))
 	if !reflect.DeepEqual(ids, []string{"port-1", "port-2"}) || len(detail) != 2 {
 		t.Fatalf("detail ids=%v requests=%v", ids, detail)
 	}

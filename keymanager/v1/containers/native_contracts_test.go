@@ -15,6 +15,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -82,7 +83,7 @@ func TestNativeContainerRoutesBodiesAndDecode(t *testing.T) {
 	if err != nil || !reflect.DeepEqual(got, want) {
 		t.Fatal(got, err)
 	}
-	created, err := api.Create(ctx, containers.CreateOpts{Type: containers.GenericContainer, SecretRefs: []containers.SecretRef{{Name: "s", SecretRef: "ref"}}}, containers.WithCreateField("x_extension", 1))
+	created, err := api.Create(ctx, containers.CreateOpts{Type: containers.GenericContainer, SecretRefs: []containers.SecretRef{{Name: "s", SecretRef: "ref"}}}, request.Field("x_extension", 1))
 	if err != nil || created.ContainerRef != "https://kms/v1/containers/c1" {
 		t.Fatal(created, err)
 	}
@@ -171,11 +172,11 @@ func TestNativeContainerStrictStatusesAndPreflight(t *testing.T) {
 		checks := map[string]func() error{
 			"missing type": func() error { _, err := api.Create(ctx, containers.CreateOpts{Name: "n"}); return err },
 			"create collision": func() error {
-				_, err := api.Create(ctx, containers.CreateOpts{Type: containers.GenericContainer}, containers.WithCreateField("type", "x"))
+				_, err := api.Create(ctx, containers.CreateOpts{Type: containers.GenericContainer}, request.Field("type", "x"))
 				return err
 			},
 			"consumer collision": func() error {
-				_, err := api.CreateConsumer(ctx, "c1", containers.CreateConsumerOpts{}, containers.WithCreateConsumerField("URL", "x"))
+				_, err := api.CreateConsumer(ctx, "c1", containers.CreateConsumerOpts{}, request.Field("URL", "x"))
 				return err
 			},
 			"nil option": func() error { return api.DeleteSecretRef(ctx, "c1", nil) },
@@ -213,7 +214,7 @@ func TestNativeContainerListsQueryPagingAndStop(t *testing.T) {
 	}))
 	api := containers.New(nativeContainerClient(cloud))
 	var names []string
-	for value, err := range api.List(context.Background(), containers.WithListOptions(containers.ListOpts{Limit: 1, Name: "n"}), containers.WithListQuery("extra", "1")) {
+	for value, err := range api.List(context.Background(), containers.WithListOptions(containers.ListOpts{Limit: 1, Name: "n"}), request.Query("extra", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}

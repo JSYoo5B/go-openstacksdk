@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/placement/v1/allocations"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -67,7 +68,7 @@ func TestNativeAllocationsRoutesBodiesAndDecode(t *testing.T) {
 	}
 	allocation := map[string]allocations.ProviderAllocationsOpts{"rp-1": {Resources: map[string]int{"VCPU": 1}}}
 	// A nil consumer generation is sent as null to claim a new consumer.
-	if err := api.Update(ctx, "c-1", allocations.UpdateOpts{Allocations: allocation, ProjectID: "p-1", UserID: "u-1", ConsumerType: "INSTANCE"}, allocations.WithUpdateField("x_extension", 1)); err != nil {
+	if err := api.Update(ctx, "c-1", allocations.UpdateOpts{Allocations: allocation, ProjectID: "p-1", UserID: "u-1", ConsumerType: "INSTANCE"}, request.Field("x_extension", 1)); err != nil {
 		t.Fatal(err)
 	}
 	if err := api.Update(ctx, "c-1", allocations.UpdateOpts{Allocations: map[string]allocations.ProviderAllocationsOpts{}, ConsumerGeneration: nativeAllocInt(3)}); err != nil {
@@ -109,7 +110,7 @@ func TestNativeAllocationsRoutesBodiesAndDecode(t *testing.T) {
 		two := allocations.ManageOpts{"c-1": {ProjectID: "p", UserID: "u"}, "c-2": {ProjectID: "p", UserID: "u"}}
 		// With exactly one consumer the extension lands inside that consumer object; otherwise it is a root key.
 		for _, opts := range []allocations.ManageOpts{one, two} {
-			if err := api.Manage(ctx, opts, allocations.WithManageField("x_extension", 1)); err != nil {
+			if err := api.Manage(ctx, opts, request.Field("x_extension", 1)); err != nil {
 				t.Fatal(err)
 			}
 		}
@@ -118,7 +119,7 @@ func TestNativeAllocationsRoutesBodiesAndDecode(t *testing.T) {
 			t.Fatal(err)
 		}
 		// A single consumer protects its own keys from extensions.
-		err := api.Manage(ctx, one, allocations.WithManageField("project_id", "x"))
+		err := api.Manage(ctx, one, request.Field("project_id", "x"))
 		nativeAllocOperation(t, err, "Manage")
 		bodies := []string{}
 		for _, call := range calls {
@@ -186,11 +187,11 @@ func TestNativeAllocationsStatusesAndPreflight(t *testing.T) {
 			operation string
 			err       error
 		}{
-			"update core extension": {"Update", api.Update(ctx, "c-1", allocations.UpdateOpts{}, allocations.WithUpdateField("allocations", nil))},
+			"update core extension": {"Update", api.Update(ctx, "c-1", allocations.UpdateOpts{}, request.Field("allocations", nil))},
 			// consumer_type is omitted when empty but still reserved.
-			"update omitted core extension": {"Update", api.Update(ctx, "c-1", allocations.UpdateOpts{}, allocations.WithUpdateField("consumer_type", "x"))},
+			"update omitted core extension": {"Update", api.Update(ctx, "c-1", allocations.UpdateOpts{}, request.Field("consumer_type", "x"))},
 			"update nil option":             {"Update", api.Update(ctx, "c-1", allocations.UpdateOpts{}, nil)},
-			"update empty extension key":    {"Update", api.Update(ctx, "c-1", allocations.UpdateOpts{}, allocations.WithUpdateField(" ", 1))},
+			"update empty extension key":    {"Update", api.Update(ctx, "c-1", allocations.UpdateOpts{}, request.Field(" ", 1))},
 			"manage nil option":             {"Manage", api.Manage(ctx, allocations.ManageOpts{}, nil)},
 		} {
 			if check.err == nil {

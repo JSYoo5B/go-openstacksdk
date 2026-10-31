@@ -16,6 +16,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
@@ -257,7 +258,7 @@ func TestHeatNativeStacksListSerializesEveryTypedFilter(t *testing.T) {
 		AllTenants: true, ShowDeleted: true, ShowNested: true, ShowHidden: true,
 		Tags: "a,b", TagsAny: "c,d", NotTags: "e", NotTagsAny: "f,g",
 	}
-	if _, err := collect(stacks.WithListOptions(full), stacks.WithListQuery("vendor", "a&b")); err != nil {
+	if _, err := collect(stacks.WithListOptions(full), request.Query("vendor", "a&b")); err != nil {
 		t.Fatal(err)
 	}
 	want := map[string][]string{
@@ -279,14 +280,14 @@ func TestHeatNativeStacksListSerializesEveryTypedFilter(t *testing.T) {
 	if got := map[string][]string(last.Load().(url.Values)); !reflect.DeepEqual(got, map[string][]string{"name": {"only"}}) {
 		t.Fatalf("false booleans leaked: %v", got)
 	}
-	values, err = collect(stacks.WithListQuery("mode", "empty"))
+	values, err = collect(request.Query("mode", "empty"))
 	if err != nil || len(values) != 0 {
 		t.Fatalf("204 list=%v err=%v", values, err)
 	}
-	if _, err := collect(stacks.WithListQuery("mode", "bad")); err == nil {
+	if _, err := collect(request.Query("mode", "bad")); err == nil {
 		t.Fatal("malformed stacks array was accepted")
 	}
-	_, err = collect(stacks.WithListQuery("mode", "denied"))
+	_, err = collect(request.Query("mode", "denied"))
 	heatNativeRequireStatus(t, err, 403)
 	before := calls.Load()
 	for _, err := range api.List(heatNativeCanceled()) {
@@ -337,7 +338,7 @@ func TestHeatNativeStacksUpdateSendsPUTTemplateEnvironmentFilesAndExtensions(t *
 	}
 	for _, code := range []int32{201, 202} {
 		status.Store(code)
-		if err := api.Update(context.Background(), "app", "fixed", opts, stacks.WithUpdateField("disable_rollback", false)); err != nil {
+		if err := api.Update(context.Background(), "app", "fixed", opts, request.Field("disable_rollback", false)); err != nil {
 			t.Fatalf("update %d: %v", code, err)
 		}
 		body := <-bodies
@@ -373,7 +374,7 @@ func TestHeatNativeStacksUpdateSendsPUTTemplateEnvironmentFilesAndExtensions(t *
 	if err := api.Update(context.Background(), "app", "fixed", stacks.UpdateOpts{Parameters: map[string]any{"a": 1}}); !errors.As(err, &tmplErr) {
 		t.Fatalf("missing template err=%v", err)
 	}
-	if err := api.Update(context.Background(), "app", "fixed", minimal, stacks.WithUpdateField("template", "override")); err == nil {
+	if err := api.Update(context.Background(), "app", "fixed", minimal, request.Field("template", "override")); err == nil {
 		t.Fatal("protected template field override was accepted")
 	}
 	bad := stacks.UpdateOpts{TemplateOpts: &stacks.Template{TE: stacks.TE{Bin: []byte(`{"x":`)}}}
@@ -440,7 +441,7 @@ func TestHeatNativeStacksUpdatePatchAcceptsSuccessCodesAndPreservesEmptyTags(t *
 			Timeout:         9,
 		}, map[string]any{"template": heatNativeTemplate, "environment": `{"parameters":{"e":"1"}}`, "timeout_mins": float64(9)}},
 	} {
-		if err := api.UpdatePatch(context.Background(), "app", "fixed", tc.opts, stacks.WithUpdatePatchField("disable_rollback", false)); err != nil {
+		if err := api.UpdatePatch(context.Background(), "app", "fixed", tc.opts, request.Field("disable_rollback", false)); err != nil {
 			t.Fatalf("%s: %v", tc.name, err)
 		}
 		tc.want["disable_rollback"] = false
@@ -472,7 +473,7 @@ func TestHeatNativeStacksUpdatePatchAcceptsSuccessCodesAndPreservesEmptyTags(t *
 	if err := api.UpdatePatch(context.Background(), "app", "fixed", stacks.UpdateOpts{TemplateOpts: &stacks.Template{TE: stacks.TE{Bin: []byte(`{"x":`)}}}); err == nil {
 		t.Fatal("unparseable template was accepted")
 	}
-	if err := api.UpdatePatch(context.Background(), "app", "fixed", patch, stacks.WithUpdatePatchField("parameters", 1)); err == nil {
+	if err := api.UpdatePatch(context.Background(), "app", "fixed", patch, request.Field("parameters", 1)); err == nil {
 		t.Fatal("protected parameters field override was accepted")
 	}
 	if err := api.UpdatePatch(heatNativeCanceled(), "app", "fixed", patch); !errors.Is(err, context.Canceled) {

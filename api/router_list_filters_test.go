@@ -18,6 +18,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/ports"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -713,7 +714,7 @@ func TestRouterListFiltersNativeAndIdentitySurfaceIsolation(t *testing.T) {
 			var native []routers.ListOption
 			for k, v := range want {
 				raw = append(raw, resource.WithQuery(k, v[0]))
-				native = append(native, routers.WithListQuery(k, v[0]))
+				native = append(native, request.Query(k, v[0]))
 			}
 			rows, e := a.collection.All(context.Background(), append(append([]resource.ListOption(nil), raw...), resource.WithFilter("routes", []any{}))...)
 			routerListWant(t, rows, e, "target")

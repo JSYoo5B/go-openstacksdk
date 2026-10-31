@@ -33,11 +33,10 @@ func (a *API) Get(ctx context.Context, projectID string) (*Quota, error) {
 	return value0, err
 }
 
-type UpdateOption = request.Option[UpdateOpts]
+type UpdateOption = request.NativeFieldCall
 
-func WithUpdateOptions(value UpdateOpts) UpdateOption { return request.WithOptions(value) }
-func WithUpdateField(key string, value any) UpdateOption {
-	return request.WithField[UpdateOpts](key, value)
+func WithUpdateOptions(value UpdateOpts) UpdateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type updateOptsBuilder struct {
@@ -61,13 +60,8 @@ func (b updateOptsBuilder) ToQuotaUpdateMap() (map[string]any, error) {
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, projectID string, opts UpdateOpts, options ...UpdateOption) (*Quota, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Update", "quotas", err)
-		var zero0 *Quota
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Update", "quotas", err)
 		var zero0 *Quota
 		return zero0, err

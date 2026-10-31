@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/domains"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -66,7 +67,7 @@ func TestNativeDomainRoutesBodiesPagingAndDecode(t *testing.T) {
 		return 200, `{"domain":` + nativeDomainRow + `}`
 	})
 	disabled, enabled, blank := false, true, ""
-	created, err := api.Create(ctx, domains.CreateOpts{Name: "dom", Description: "desc", Enabled: &disabled}, domains.WithCreateField("x_extension", 1))
+	created, err := api.Create(ctx, domains.CreateOpts{Name: "dom", Description: "desc", Enabled: &disabled}, request.Field("x_extension", 1))
 	if err != nil || !(created.ID == "d-1" && created.Name == "dom" && created.Enabled && created.Links["self"] == "x") {
 		t.Fatal(created, err)
 	}
@@ -79,14 +80,14 @@ func TestNativeDomainRoutesBodiesPagingAndDecode(t *testing.T) {
 		t.Fatal(got, err)
 	}
 	// A pointer to an empty description clears it; an empty update still sends the envelope.
-	if _, err := api.Update(ctx, "d-1", domains.UpdateOpts{Name: "new", Description: &blank, Enabled: &enabled}, domains.WithUpdateField("x_extension", "v")); err != nil {
+	if _, err := api.Update(ctx, "d-1", domains.UpdateOpts{Name: "new", Description: &blank, Enabled: &enabled}, request.Field("x_extension", "v")); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := api.Update(ctx, "d-1", domains.UpdateOpts{}); err != nil {
 		t.Fatal(err)
 	}
 	var ids []string
-	for value, err := range api.List(ctx, domains.WithListOptions(domains.ListOpts{Enabled: &disabled, Name: "dom", Limit: 2}), domains.WithListQuery("x", "1")) {
+	for value, err := range api.List(ctx, domains.WithListOptions(domains.ListOpts{Enabled: &disabled, Name: "dom", Limit: 2}), request.Query("x", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -219,11 +220,11 @@ func TestNativeDomainStatusesAndPreflight(t *testing.T) {
 		}{
 			"create name": {"Create", func() error { _, err := api.Create(ctx, domains.CreateOpts{Description: "d"}); return err }()},
 			"create core extension": {"Create", func() error {
-				_, err := api.Create(ctx, domains.CreateOpts{Name: "dom"}, domains.WithCreateField("enabled", true))
+				_, err := api.Create(ctx, domains.CreateOpts{Name: "dom"}, request.Field("enabled", true))
 				return err
 			}()},
 			"update core extension": {"Update", func() error {
-				_, err := api.Update(ctx, "d-1", domains.UpdateOpts{}, domains.WithUpdateField("description", "x"))
+				_, err := api.Update(ctx, "d-1", domains.UpdateOpts{}, request.Field("description", "x"))
 				return err
 			}()},
 			"update nil option": {"Update", func() error {

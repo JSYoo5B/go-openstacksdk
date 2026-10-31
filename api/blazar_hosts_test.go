@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/reservation/v1/hosts"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
@@ -62,7 +63,7 @@ func TestBlazarHostCreateSendsFlatBodyWithExplicitCapabilitiesAndRequires201(t *
 		api := newBlazarHosts(t, cloud)
 		value, err := api.Create(context.Background(), hosts.CreateOpts{
 			Name: "node1", ExtraCapabilities: map[string]any{"gpu": false, "slots": 0, "note": "", "unset": nil},
-		}, hosts.WithCreateField("vendor", false))
+		}, request.Field("vendor", false))
 		if (status == 201) != (err == nil) || (status == 201 && (value == nil || value.ID != "h-1")) {
 			t.Fatalf("status %d value=%+v error=%v", status, value, err)
 		}
@@ -98,10 +99,10 @@ func TestBlazarHostRejectsInvalidInputsBeforeHTTP(t *testing.T) {
 	if _, err := api.Create(ctx, hosts.CreateOpts{Name: "n", ExtraCapabilities: map[string]any{"name": "shadow"}}); err == nil {
 		t.Fatal("capability named like a core field must fail locally")
 	}
-	if _, err := api.Create(ctx, hosts.CreateOpts{Name: "n"}, hosts.WithCreateField("name", "shadow")); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := api.Create(ctx, hosts.CreateOpts{Name: "n"}, request.Field("name", "shadow")); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatalf("core field extension: %v", err)
 	}
-	if _, err := api.Create(ctx, hosts.CreateOpts{Name: "n", ExtraCapabilities: map[string]any{"gpu": true}}, hosts.WithCreateField("gpu", false)); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := api.Create(ctx, hosts.CreateOpts{Name: "n", ExtraCapabilities: map[string]any{"gpu": true}}, request.Field("gpu", false)); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatalf("extension colliding with a capability: %v", err)
 	}
 	if _, err := api.Create(ctx, hosts.CreateOpts{Name: "n"}, nil); !errors.Is(err, resource.ErrInvalidOption) {
@@ -134,7 +135,7 @@ func TestBlazarHostUpdateSendsFlatCapabilitiesAndRequires200(t *testing.T) {
 			testcloud.JSON(w, status, blazarHostBody)
 		})
 		api := newBlazarHosts(t, cloud)
-		value, err := api.Update(context.Background(), "h-1", hosts.UpdateOpts{ExtraCapabilities: map[string]any{"gpu": false, "slots": 0, "note": ""}}, hosts.WithUpdateField("vendor", nil))
+		value, err := api.Update(context.Background(), "h-1", hosts.UpdateOpts{ExtraCapabilities: map[string]any{"gpu": false, "slots": 0, "note": ""}}, request.Field("vendor", nil))
 		if (status == 200) != (err == nil) || (status == 200 && (value == nil || value.ID != "h-1")) {
 			t.Fatalf("status %d value=%+v error=%v", status, value, err)
 		}
@@ -175,7 +176,7 @@ func TestBlazarHostGetListAndCollectionPolicies(t *testing.T) {
 		t.Fatalf("Collection.Get maps 404 to ErrNotFound: %v", err)
 	}
 	var ids []string
-	for value, err := range api.List(ctx, hosts.WithListQuery("vendor", "x")) {
+	for value, err := range api.List(ctx, request.Query("vendor", "x")) {
 		if err != nil {
 			t.Fatal(err)
 		}

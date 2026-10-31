@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/credentials"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -63,7 +64,7 @@ func TestNativeCredentialRoutesBodiesPagingAndDecode(t *testing.T) {
 		}
 		return 200, `{"credential":` + nativeCredRow + `}`
 	})
-	created, err := api.Create(ctx, credentials.CreateOpts{Blob: `{"access":"a"}`, Type: "ec2", UserID: "u1", ProjectID: "p"}, credentials.WithCreateField("x_extension", 1))
+	created, err := api.Create(ctx, credentials.CreateOpts{Blob: `{"access":"a"}`, Type: "ec2", UserID: "u1", ProjectID: "p"}, request.Field("x_extension", 1))
 	if err != nil || created.ID != "c-1" || created.Blob != `{"access":"a"}` {
 		t.Fatal(created, err)
 	}
@@ -71,11 +72,11 @@ func TestNativeCredentialRoutesBodiesPagingAndDecode(t *testing.T) {
 	if err != nil || got.Type != "ec2" {
 		t.Fatal(got, err)
 	}
-	if _, err := api.Update(ctx, "c-1", credentials.UpdateOpts{Blob: "new"}, credentials.WithUpdateField("x_extension", 1)); err != nil {
+	if _, err := api.Update(ctx, "c-1", credentials.UpdateOpts{Blob: "new"}, request.Field("x_extension", 1)); err != nil {
 		t.Fatal(err)
 	}
 	var ids []string
-	for value, err := range api.List(ctx, credentials.WithListOptions(credentials.ListOpts{UserID: "u1", Type: "ec2"}), credentials.WithListQuery("extra", "1")) {
+	for value, err := range api.List(ctx, credentials.WithListOptions(credentials.ListOpts{UserID: "u1", Type: "ec2"}), request.Query("extra", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -150,7 +151,7 @@ func TestNativeCredentialStatusesDecodeAndPreflight(t *testing.T) {
 			"blob":           {"Create", func() error { _, err := api.Create(ctx, credentials.CreateOpts{Type: "ec2", UserID: "u1"}); return err }()},
 			"type":           {"Create", func() error { _, err := api.Create(ctx, credentials.CreateOpts{Blob: "b", UserID: "u1"}); return err }()},
 			"user":           {"Create", func() error { _, err := api.Create(ctx, credentials.CreateOpts{Blob: "b", Type: "ec2"}); return err }()},
-			"core extension": {"Create", func() error { _, err := api.Create(ctx, valid, credentials.WithCreateField("blob", "x")); return err }()},
+			"core extension": {"Create", func() error { _, err := api.Create(ctx, valid, request.Field("blob", "x")); return err }()},
 			"update nil":     {"Update", func() error { _, err := api.Update(ctx, "c-1", credentials.UpdateOpts{}, nil); return err }()},
 		} {
 			if check.err == nil {

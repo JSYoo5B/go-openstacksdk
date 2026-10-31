@@ -109,8 +109,8 @@ func(ListOpts)ToListQuery()(string,error){return "",nil}`
 	}
 	requireControlledCalls(t, public, "a.listWithControl(ctx, resource.ListControl{}, options...)")
 	private := controlledEmittedMethod(t, emitted, "listWithControl")
-	requireControlledCalls(t, private, "request.Apply(opts, options...)", "request.ValidateCapabilities(cfg, false, true, false)", `request.Wrap("List", "fixture", err)`, "upstream.List(a.client, _opts)", "upstream.ExtractModels(page)", "resource.StreamWithControl(ctx,")
-	if strings.Count(string(emitted), "request.Apply(") != 1 || nodeText(private.Type.Params.List[1].Type) != "resource.ListControl" {
+	requireControlledCalls(t, private, "request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)", `request.Wrap("List", "fixture", err)`, "upstream.List(a.client, _opts)", "upstream.ExtractModels(page)", "resource.StreamWithControl(ctx,")
+	if strings.Count(string(emitted), "request.ApplyCalls(") != 1 || nodeText(private.Type.Params.List[1].Type) != "resource.ListControl" {
 		t.Fatalf("options duplicated or control signature changed: %s", emitted)
 	}
 	for _, fragment := range []string{`regexp.QuoteMeta(name)`, `IterateControlled:`, `config.Query[key] = append([]string(nil), values...)`, `a.listWithControl(ctx, control, options...)`, `q = maps.Clone(q)`} {
@@ -135,8 +135,8 @@ func(ListOpts)ToZoneListHeaders()(map[string]string,error){return nil,nil}`
 	}
 	emitted, adapter := emitControlledListFixture(t, pkg, decls, plan, nil, "a", nil)
 	private := controlledEmittedMethod(t, emitted, "listWithControl")
-	requireControlledCalls(t, private, "request.ValidateCapabilities(cfg, false, true, true)", "upstream.List(a.client, _opts)")
-	for _, fragment := range []string{"func WithListHeader(", "ToZoneListHeaders()", "b.base.ToZoneListHeaders()", "request.MergeHeadersFor(value0, b.config.Headers, b.base)", "request.ExtendQuery(value0, b.config.Query)"} {
+	requireControlledCalls(t, private, "request.ApplyCalls(opts, request.Capabilities{Query: true, Headers: true}, options...)", "upstream.List(a.client, _opts)")
+	for _, fragment := range []string{"type ListOption = request.NativeQueryHeaderCall", "ToZoneListHeaders()", "b.base.ToZoneListHeaders()", "request.MergeHeadersFor(value0, b.config.Headers, b.base)", "request.ExtendQuery(value0, b.config.Query)"} {
 		if !strings.Contains(string(emitted), fragment) {
 			t.Fatalf("Designate lost %q:\n%s", fragment, emitted)
 		}
@@ -160,7 +160,7 @@ func(ListMembersOpts)ToMembersListQuery()(string,error){return "",nil}`
 	public := controlledEmittedMethod(t, emitted, "ListMembers")
 	requireControlledCalls(t, public, "a.listMembersWithControl(ctx, poolID, resource.ListControl{}, options...)")
 	private := controlledEmittedMethod(t, emitted, "listMembersWithControl")
-	requireControlledCalls(t, private, "request.Apply(opts, options...)", "upstream.ListMembers(a.client, poolID, _opts)", "resource.StreamWithControl(ctx,")
+	requireControlledCalls(t, private, "request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)", "upstream.ListMembers(a.client, poolID, _opts)", "resource.StreamWithControl(ctx,")
 	if nodeText(private.Type.Params.List[1].Type) != "string" || nodeText(private.Type.Params.List[2].Type) != "resource.ListControl" {
 		t.Fatalf("parent/control signature changed:\n%s", emitted)
 	}
@@ -196,7 +196,7 @@ func TestControlledNativeCollectionsPreserveConcreteAndOptionlessLists(t *testin
 						t.Fatalf("concrete options lost %q:\n%s", fragment, adapter)
 					}
 				}
-				requireControlledCalls(t, private, "request.Apply(opts, options...)", "upstream.List(a.client, cfg.Options)")
+				requireControlledCalls(t, private, "request.ApplyCalls(opts, request.Capabilities{}, options...)", "upstream.List(a.client, cfg.Options)")
 			} else {
 				requireControlledCalls(t, controlledEmittedMethod(t, emitted, "List"), "a.listWithControl(ctx, resource.ListControl{})")
 				requireControlledCalls(t, private, "upstream.List(a.client)")

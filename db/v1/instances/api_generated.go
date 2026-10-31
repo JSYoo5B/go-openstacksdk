@@ -48,11 +48,10 @@ func (a *API) AttachConfigurationGroup(ctx context.Context, instanceID string, c
 	return request.Wrap("AttachConfigurationGroup", "instances", upstream.AttachConfigurationGroup(ctx, a.client, instanceID, configID).ExtractErr())
 }
 
-type CreateOption = request.Option[CreateOpts]
+type CreateOption = request.NativeFieldCall
 
-func WithCreateOptions(value CreateOpts) CreateOption { return request.WithOptions(value) }
-func WithCreateField(key string, value any) CreateOption {
-	return request.WithField[CreateOpts](key, value)
+func WithCreateOptions(value CreateOpts) CreateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type createOptsBuilder struct {
@@ -76,13 +75,8 @@ func (b createOptsBuilder) ToInstanceCreateMap() (map[string]any, error) {
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*Instance, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Create", "instances", err)
-		var zero0 *Instance
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Create", "instances", err)
 		var zero0 *Instance
 		return zero0, err

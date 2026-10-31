@@ -14,6 +14,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	swift "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1"
 	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -180,7 +181,7 @@ func TestSwiftScopeBindsUploadMetadataUpdateAndDownload(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	header, err := scope.Create(context.Background(), "folder/file.txt", objects.CreateOpts{Content: strings.NewReader("hello"), Metadata: map[string]string{"Owner": "sdk"}}, objects.WithCreateHeader("X-Vendor-Flag", "false"))
+	header, err := scope.Create(context.Background(), "folder/file.txt", objects.CreateOpts{Content: strings.NewReader("hello"), Metadata: map[string]string{"Owner": "sdk"}}, request.Header("X-Vendor-Flag", "false"))
 	if err != nil || header.ETag != "checksum" || puts != 1 {
 		t.Fatalf("header=%v err=%v puts=%d", header, err, puts)
 	}

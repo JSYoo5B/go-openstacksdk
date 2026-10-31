@@ -10,6 +10,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -87,7 +88,7 @@ func TestQoSRuleCRUDExtractsCorrectEnvelopeAndPreservesHTTPError(t *testing.T) {
 	cloud.Mux.HandleFunc("/v2.0/qos/policies/policy/bandwidth_limit_rules/forbidden", func(w http.ResponseWriter, r *http.Request) { testcloud.JSON(w, 403, "{}") })
 	api := rules.New(cloud.Client("network", "/v2.0"))
 	ctx := context.Background()
-	bandwidth, err := api.CreateBandwidthLimitRule(ctx, "policy", rules.CreateBandwidthLimitRuleOpts{MaxKBps: 123}, rules.WithCreateBandwidthLimitRuleField("vendor:enabled", false))
+	bandwidth, err := api.CreateBandwidthLimitRule(ctx, "policy", rules.CreateBandwidthLimitRuleOpts{MaxKBps: 123}, request.Field("vendor:enabled", false))
 	if err != nil || bandwidth.ID != "rule" || bandwidth.MaxKBps != 123 {
 		t.Fatalf("rule=%v err=%v", bandwidth, err)
 	}
@@ -99,11 +100,11 @@ func TestQoSRuleCRUDExtractsCorrectEnvelopeAndPreservesHTTPError(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	bandwidth, err = scope.Update(ctx, resource.ID("rule"), rules.UpdateBandwidthLimitRuleOpts{}, rules.WithUpdateBandwidthLimitRuleField("vendor:enabled", false))
+	bandwidth, err = scope.Update(ctx, resource.ID("rule"), rules.UpdateBandwidthLimitRuleOpts{}, request.Field("vendor:enabled", false))
 	if err != nil || bandwidth.MaxKBps != 123 {
 		t.Fatalf("rule=%v err=%v", bandwidth, err)
 	}
-	dscp, err := api.CreateDSCPMarkingRule(ctx, "policy", rules.CreateDSCPMarkingRuleOpts{DSCPMark: 16}, rules.WithCreateDSCPMarkingRuleField("vendor:enabled", false))
+	dscp, err := api.CreateDSCPMarkingRule(ctx, "policy", rules.CreateDSCPMarkingRuleOpts{DSCPMark: 16}, request.Field("vendor:enabled", false))
 	if err != nil || dscp.ID != "rule" || dscp.DSCPMark != 16 {
 		t.Fatalf("rule=%v err=%v", dscp, err)
 	}
@@ -111,11 +112,11 @@ func TestQoSRuleCRUDExtractsCorrectEnvelopeAndPreservesHTTPError(t *testing.T) {
 	if err != nil || dscp.DSCPMark != 16 {
 		t.Fatalf("rule=%v err=%v", dscp, err)
 	}
-	dscp, err = api.UpdateDSCPMarkingRule(ctx, "policy", "rule", rules.UpdateDSCPMarkingRuleOpts{}, rules.WithUpdateDSCPMarkingRuleField("vendor:enabled", false))
+	dscp, err = api.UpdateDSCPMarkingRule(ctx, "policy", "rule", rules.UpdateDSCPMarkingRuleOpts{}, request.Field("vendor:enabled", false))
 	if err != nil || dscp.DSCPMark != 16 {
 		t.Fatalf("rule=%v err=%v", dscp, err)
 	}
-	minimum, err := api.CreateMinimumBandwidthRule(ctx, "policy", rules.CreateMinimumBandwidthRuleOpts{MinKBps: 99}, rules.WithCreateMinimumBandwidthRuleField("vendor:enabled", false))
+	minimum, err := api.CreateMinimumBandwidthRule(ctx, "policy", rules.CreateMinimumBandwidthRuleOpts{MinKBps: 99}, request.Field("vendor:enabled", false))
 	if err != nil || minimum.ID != "rule" || minimum.MinKBps != 99 {
 		t.Fatalf("rule=%v err=%v", minimum, err)
 	}
@@ -123,7 +124,7 @@ func TestQoSRuleCRUDExtractsCorrectEnvelopeAndPreservesHTTPError(t *testing.T) {
 	if err != nil || minimum.MinKBps != 99 {
 		t.Fatalf("rule=%v err=%v", minimum, err)
 	}
-	minimum, err = api.UpdateMinimumBandwidthRule(ctx, "policy", "rule", rules.UpdateMinimumBandwidthRuleOpts{}, rules.WithUpdateMinimumBandwidthRuleField("vendor:enabled", false))
+	minimum, err = api.UpdateMinimumBandwidthRule(ctx, "policy", "rule", rules.UpdateMinimumBandwidthRuleOpts{}, request.Field("vendor:enabled", false))
 	if err != nil || minimum.MinKBps != 99 {
 		t.Fatalf("rule=%v err=%v", minimum, err)
 	}

@@ -33,11 +33,10 @@ const ReplaceOp = upstream.ReplaceOp
 type UpdateOp = upstream.UpdateOp
 type UpdateOpts = upstream.UpdateOpts
 type UpdateResult = upstream.UpdateResult
-type CreateOption = request.Option[CreateOpts]
+type CreateOption = request.NativeFieldCall
 
-func WithCreateOptions(value CreateOpts) CreateOption { return request.WithOptions(value) }
-func WithCreateField(key string, value any) CreateOption {
-	return request.WithField[CreateOpts](key, value)
+func WithCreateOptions(value CreateOpts) CreateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type createOptsBuilder struct {
@@ -61,13 +60,8 @@ func (b createOptsBuilder) ToNodeGroupCreateMap() (map[string]any, error) {
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, clusterID string, opts CreateOpts, options ...CreateOption) (*NodeGroup, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Create", "nodegroups", err)
-		var zero0 *NodeGroup
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Create", "nodegroups", err)
 		var zero0 *NodeGroup
 		return zero0, err
@@ -92,10 +86,9 @@ func (a *API) Get(ctx context.Context, clusterID string, nodeGroupID string) (*N
 	return value0, err
 }
 
-type ListOption = request.Option[ListOpts]
+type ListOption = request.NativeQueryCall
 
-func WithListOptions(value ListOpts) ListOption  { return request.WithOptions(value) }
-func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
+func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
 	base   ListOpts
@@ -123,12 +116,8 @@ func (a *API) List(ctx context.Context, clusterID string, options ...ListOption)
 
 func (a *API) listWithControl(ctx context.Context, clusterID string, control resource.ListControl, options ...ListOption) iter.Seq2[*NodeGroup, error] {
 	var opts ListOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("List", "nodegroups", err)
-		return func(yield func(*NodeGroup, error) bool) { var zero *NodeGroup; yield(zero, err) }
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("List", "nodegroups", err)
 		return func(yield func(*NodeGroup, error) bool) { var zero *NodeGroup; yield(zero, err) }
 	}

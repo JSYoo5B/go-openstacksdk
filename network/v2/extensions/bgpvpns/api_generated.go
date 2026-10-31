@@ -59,11 +59,10 @@ type UpdatePortAssociationResult = upstream.UpdatePortAssociationResult
 type UpdateResult = upstream.UpdateResult
 type UpdateRouterAssociationOpts = upstream.UpdateRouterAssociationOpts
 type UpdateRouterAssociationResult = upstream.UpdateRouterAssociationResult
-type CreateOption = request.Option[CreateOpts]
+type CreateOption = request.NativeFieldCall
 
-func WithCreateOptions(value CreateOpts) CreateOption { return request.WithOptions(value) }
-func WithCreateField(key string, value any) CreateOption {
-	return request.WithField[CreateOpts](key, value)
+func WithCreateOptions(value CreateOpts) CreateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type createOptsBuilder struct {
@@ -87,13 +86,8 @@ func (b createOptsBuilder) ToBGPVPNCreateMap() (map[string]any, error) {
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*BGPVPN, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Create", "bgpvpns", err)
-		var zero0 *BGPVPN
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Create", "bgpvpns", err)
 		var zero0 *BGPVPN
 		return zero0, err
@@ -105,13 +99,10 @@ func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOpti
 	return value0, err
 }
 
-type CreateNetworkAssociationOption = request.Option[CreateNetworkAssociationOpts]
+type CreateNetworkAssociationOption = request.NativeFieldCall
 
 func WithCreateNetworkAssociationOptions(value CreateNetworkAssociationOpts) CreateNetworkAssociationOption {
-	return request.WithOptions(value)
-}
-func WithCreateNetworkAssociationField(key string, value any) CreateNetworkAssociationOption {
-	return request.WithField[CreateNetworkAssociationOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type createNetworkAssociationOptsBuilder struct {
@@ -135,13 +126,8 @@ func (b createNetworkAssociationOptsBuilder) ToNetworkAssociationCreateMap() (ma
 
 // CreateNetworkAssociation invokes the upstream API with library-owned builders and result handling.
 func (a *API) CreateNetworkAssociation(ctx context.Context, id string, opts CreateNetworkAssociationOpts, options ...CreateNetworkAssociationOption) (*NetworkAssociation, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("CreateNetworkAssociation", "bgpvpns", err)
-		var zero0 *NetworkAssociation
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("CreateNetworkAssociation", "bgpvpns", err)
 		var zero0 *NetworkAssociation
 		return zero0, err
@@ -153,13 +139,10 @@ func (a *API) CreateNetworkAssociation(ctx context.Context, id string, opts Crea
 	return value0, err
 }
 
-type CreatePortAssociationOption = request.Option[CreatePortAssociationOpts]
+type CreatePortAssociationOption = request.NativeFieldCall
 
 func WithCreatePortAssociationOptions(value CreatePortAssociationOpts) CreatePortAssociationOption {
-	return request.WithOptions(value)
-}
-func WithCreatePortAssociationField(key string, value any) CreatePortAssociationOption {
-	return request.WithField[CreatePortAssociationOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type createPortAssociationOptsBuilder struct {
@@ -183,13 +166,8 @@ func (b createPortAssociationOptsBuilder) ToPortAssociationCreateMap() (map[stri
 
 // CreatePortAssociation invokes the upstream API with library-owned builders and result handling.
 func (a *API) CreatePortAssociation(ctx context.Context, id string, opts CreatePortAssociationOpts, options ...CreatePortAssociationOption) (*PortAssociation, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("CreatePortAssociation", "bgpvpns", err)
-		var zero0 *PortAssociation
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("CreatePortAssociation", "bgpvpns", err)
 		var zero0 *PortAssociation
 		return zero0, err
@@ -201,13 +179,10 @@ func (a *API) CreatePortAssociation(ctx context.Context, id string, opts CreateP
 	return value0, err
 }
 
-type CreateRouterAssociationOption = request.Option[CreateRouterAssociationOpts]
+type CreateRouterAssociationOption = request.NativeFieldCall
 
 func WithCreateRouterAssociationOptions(value CreateRouterAssociationOpts) CreateRouterAssociationOption {
-	return request.WithOptions(value)
-}
-func WithCreateRouterAssociationField(key string, value any) CreateRouterAssociationOption {
-	return request.WithField[CreateRouterAssociationOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type createRouterAssociationOptsBuilder struct {
@@ -231,13 +206,8 @@ func (b createRouterAssociationOptsBuilder) ToRouterAssociationCreateMap() (map[
 
 // CreateRouterAssociation invokes the upstream API with library-owned builders and result handling.
 func (a *API) CreateRouterAssociation(ctx context.Context, id string, opts CreateRouterAssociationOpts, options ...CreateRouterAssociationOption) (*RouterAssociation, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("CreateRouterAssociation", "bgpvpns", err)
-		var zero0 *RouterAssociation
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("CreateRouterAssociation", "bgpvpns", err)
 		var zero0 *RouterAssociation
 		return zero0, err
@@ -301,10 +271,9 @@ func (a *API) GetRouterAssociation(ctx context.Context, bgpVpnID string, id stri
 	return value0, err
 }
 
-type ListOption = request.Option[ListOpts]
+type ListOption = request.NativeQueryCall
 
-func WithListOptions(value ListOpts) ListOption  { return request.WithOptions(value) }
-func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
+func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
 	base   ListOpts
@@ -332,12 +301,8 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*BGPVPN
 
 func (a *API) listWithControl(ctx context.Context, control resource.ListControl, options ...ListOption) iter.Seq2[*BGPVPN, error] {
 	var opts ListOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("List", "bgpvpns", err)
-		return func(yield func(*BGPVPN, error) bool) { var zero *BGPVPN; yield(zero, err) }
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("List", "bgpvpns", err)
 		return func(yield func(*BGPVPN, error) bool) { var zero *BGPVPN; yield(zero, err) }
 	}
@@ -348,13 +313,10 @@ func (a *API) listWithControl(ctx context.Context, control resource.ListControl,
 	}, control)
 }
 
-type ListNetworkAssociationsOption = request.Option[ListNetworkAssociationsOpts]
+type ListNetworkAssociationsOption = request.NativeQueryCall
 
 func WithListNetworkAssociationsOptions(value ListNetworkAssociationsOpts) ListNetworkAssociationsOption {
-	return request.WithOptions(value)
-}
-func WithListNetworkAssociationsQuery(key, value string) ListNetworkAssociationsOption {
-	return request.WithQuery[ListNetworkAssociationsOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type listNetworkAssociationsOptsBuilder struct {
@@ -379,12 +341,8 @@ func (b listNetworkAssociationsOptsBuilder) ToNetworkAssociationsListQuery() (st
 // ListNetworkAssociations invokes the upstream API with library-owned builders and result handling.
 func (a *API) ListNetworkAssociations(ctx context.Context, id string, options ...ListNetworkAssociationsOption) iter.Seq2[*NetworkAssociation, error] {
 	var opts ListNetworkAssociationsOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("ListNetworkAssociations", "bgpvpns", err)
-		return func(yield func(*NetworkAssociation, error) bool) { var zero *NetworkAssociation; yield(zero, err) }
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("ListNetworkAssociations", "bgpvpns", err)
 		return func(yield func(*NetworkAssociation, error) bool) { var zero *NetworkAssociation; yield(zero, err) }
 	}
@@ -395,13 +353,10 @@ func (a *API) ListNetworkAssociations(ctx context.Context, id string, options ..
 	})
 }
 
-type ListPortAssociationsOption = request.Option[ListPortAssociationsOpts]
+type ListPortAssociationsOption = request.NativeQueryCall
 
 func WithListPortAssociationsOptions(value ListPortAssociationsOpts) ListPortAssociationsOption {
-	return request.WithOptions(value)
-}
-func WithListPortAssociationsQuery(key, value string) ListPortAssociationsOption {
-	return request.WithQuery[ListPortAssociationsOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type listPortAssociationsOptsBuilder struct {
@@ -426,12 +381,8 @@ func (b listPortAssociationsOptsBuilder) ToPortAssociationsListQuery() (string, 
 // ListPortAssociations invokes the upstream API with library-owned builders and result handling.
 func (a *API) ListPortAssociations(ctx context.Context, id string, options ...ListPortAssociationsOption) iter.Seq2[*PortAssociation, error] {
 	var opts ListPortAssociationsOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("ListPortAssociations", "bgpvpns", err)
-		return func(yield func(*PortAssociation, error) bool) { var zero *PortAssociation; yield(zero, err) }
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("ListPortAssociations", "bgpvpns", err)
 		return func(yield func(*PortAssociation, error) bool) { var zero *PortAssociation; yield(zero, err) }
 	}
@@ -442,13 +393,10 @@ func (a *API) ListPortAssociations(ctx context.Context, id string, options ...Li
 	})
 }
 
-type ListRouterAssociationsOption = request.Option[ListRouterAssociationsOpts]
+type ListRouterAssociationsOption = request.NativeQueryCall
 
 func WithListRouterAssociationsOptions(value ListRouterAssociationsOpts) ListRouterAssociationsOption {
-	return request.WithOptions(value)
-}
-func WithListRouterAssociationsQuery(key, value string) ListRouterAssociationsOption {
-	return request.WithQuery[ListRouterAssociationsOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type listRouterAssociationsOptsBuilder struct {
@@ -473,12 +421,8 @@ func (b listRouterAssociationsOptsBuilder) ToRouterAssociationsListQuery() (stri
 // ListRouterAssociations invokes the upstream API with library-owned builders and result handling.
 func (a *API) ListRouterAssociations(ctx context.Context, id string, options ...ListRouterAssociationsOption) iter.Seq2[*RouterAssociation, error] {
 	var opts ListRouterAssociationsOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("ListRouterAssociations", "bgpvpns", err)
-		return func(yield func(*RouterAssociation, error) bool) { var zero *RouterAssociation; yield(zero, err) }
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("ListRouterAssociations", "bgpvpns", err)
 		return func(yield func(*RouterAssociation, error) bool) { var zero *RouterAssociation; yield(zero, err) }
 	}
@@ -489,11 +433,10 @@ func (a *API) ListRouterAssociations(ctx context.Context, id string, options ...
 	})
 }
 
-type UpdateOption = request.Option[UpdateOpts]
+type UpdateOption = request.NativeFieldCall
 
-func WithUpdateOptions(value UpdateOpts) UpdateOption { return request.WithOptions(value) }
-func WithUpdateField(key string, value any) UpdateOption {
-	return request.WithField[UpdateOpts](key, value)
+func WithUpdateOptions(value UpdateOpts) UpdateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type updateOptsBuilder struct {
@@ -517,13 +460,8 @@ func (b updateOptsBuilder) ToBGPVPNUpdateMap() (map[string]any, error) {
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ...UpdateOption) (*BGPVPN, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Update", "bgpvpns", err)
-		var zero0 *BGPVPN
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Update", "bgpvpns", err)
 		var zero0 *BGPVPN
 		return zero0, err
@@ -535,13 +473,10 @@ func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ..
 	return value0, err
 }
 
-type UpdatePortAssociationOption = request.Option[UpdatePortAssociationOpts]
+type UpdatePortAssociationOption = request.NativeFieldCall
 
 func WithUpdatePortAssociationOptions(value UpdatePortAssociationOpts) UpdatePortAssociationOption {
-	return request.WithOptions(value)
-}
-func WithUpdatePortAssociationField(key string, value any) UpdatePortAssociationOption {
-	return request.WithField[UpdatePortAssociationOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type updatePortAssociationOptsBuilder struct {
@@ -565,13 +500,8 @@ func (b updatePortAssociationOptsBuilder) ToPortAssociationUpdateMap() (map[stri
 
 // UpdatePortAssociation invokes the upstream API with library-owned builders and result handling.
 func (a *API) UpdatePortAssociation(ctx context.Context, bgpVpnID string, id string, opts UpdatePortAssociationOpts, options ...UpdatePortAssociationOption) (*PortAssociation, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("UpdatePortAssociation", "bgpvpns", err)
-		var zero0 *PortAssociation
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("UpdatePortAssociation", "bgpvpns", err)
 		var zero0 *PortAssociation
 		return zero0, err
@@ -583,13 +513,10 @@ func (a *API) UpdatePortAssociation(ctx context.Context, bgpVpnID string, id str
 	return value0, err
 }
 
-type UpdateRouterAssociationOption = request.Option[UpdateRouterAssociationOpts]
+type UpdateRouterAssociationOption = request.NativeFieldCall
 
 func WithUpdateRouterAssociationOptions(value UpdateRouterAssociationOpts) UpdateRouterAssociationOption {
-	return request.WithOptions(value)
-}
-func WithUpdateRouterAssociationField(key string, value any) UpdateRouterAssociationOption {
-	return request.WithField[UpdateRouterAssociationOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type updateRouterAssociationOptsBuilder struct {
@@ -613,13 +540,8 @@ func (b updateRouterAssociationOptsBuilder) ToRouterAssociationUpdateMap() (map[
 
 // UpdateRouterAssociation invokes the upstream API with library-owned builders and result handling.
 func (a *API) UpdateRouterAssociation(ctx context.Context, bgpVpnID string, id string, opts UpdateRouterAssociationOpts, options ...UpdateRouterAssociationOption) (*RouterAssociation, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("UpdateRouterAssociation", "bgpvpns", err)
-		var zero0 *RouterAssociation
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("UpdateRouterAssociation", "bgpvpns", err)
 		var zero0 *RouterAssociation
 		return zero0, err

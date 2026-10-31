@@ -27,14 +27,10 @@ type RecordSet = upstream.RecordSet
 type RecordSetPage = upstream.RecordSetPage
 type UpdateOpts = upstream.UpdateOpts
 type UpdateResult = upstream.UpdateResult
-type CreateOption = request.Option[CreateOpts]
+type CreateOption = request.NativeFieldHeaderCall
 
-func WithCreateOptions(value CreateOpts) CreateOption { return request.WithOptions(value) }
-func WithCreateField(key string, value any) CreateOption {
-	return request.WithField[CreateOpts](key, value)
-}
-func WithCreateHeader(key, value string) CreateOption {
-	return request.WithHeader[CreateOpts](key, value)
+func WithCreateOptions(value CreateOpts) CreateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type createOptsBuilder struct {
@@ -71,13 +67,8 @@ func (b createOptsBuilder) ToRecordSetRequestHeaders() (map[string]string, error
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, zoneID string, opts CreateOpts, options ...CreateOption) (*RecordSet, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true, Headers: true}, options...)
 	if err != nil {
-		err = request.Wrap("Create", "recordsets", err)
-		var zero0 *RecordSet
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, true); err != nil {
 		err = request.Wrap("Create", "recordsets", err)
 		var zero0 *RecordSet
 		return zero0, err
@@ -94,13 +85,10 @@ func (a *API) Delete(ctx context.Context, zoneID string, rrsetID string) error {
 	return request.Wrap("Delete", "recordsets", upstream.Delete(ctx, a.client, zoneID, rrsetID).ExtractErr())
 }
 
-type DeleteWithOptsOption = request.Option[DeleteOpts]
+type DeleteWithOptsOption = request.NativeHeaderCall
 
 func WithDeleteWithOptsOptions(value DeleteOpts) DeleteWithOptsOption {
-	return request.WithOptions(value)
-}
-func WithDeleteWithOptsHeader(key, value string) DeleteWithOptsOption {
-	return request.WithHeader[DeleteOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type deleteWithOptsOptsBuilder struct {
@@ -125,12 +113,8 @@ func (b deleteWithOptsOptsBuilder) ToRecordSetDeleteHeaders() (map[string]string
 // DeleteWithOpts invokes the upstream API with library-owned builders and result handling.
 func (a *API) DeleteWithOpts(ctx context.Context, zoneID string, rrsetID string, options ...DeleteWithOptsOption) error {
 	var opts DeleteOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Headers: true}, options...)
 	if err != nil {
-		err = request.Wrap("DeleteWithOpts", "recordsets", err)
-		return err
-	}
-	if err = request.ValidateCapabilities(cfg, false, false, true); err != nil {
 		err = request.Wrap("DeleteWithOpts", "recordsets", err)
 		return err
 	}
@@ -146,14 +130,10 @@ func (a *API) Get(ctx context.Context, zoneID string, rrsetID string) (*RecordSe
 	return value0, err
 }
 
-type ListAllOption = request.Option[ListOpts]
+type ListAllOption = request.NativeQueryHeaderCall
 
-func WithListAllOptions(value ListOpts) ListAllOption { return request.WithOptions(value) }
-func WithListAllQuery(key, value string) ListAllOption {
-	return request.WithQuery[ListOpts](key, value)
-}
-func WithListAllHeader(key, value string) ListAllOption {
-	return request.WithHeader[ListOpts](key, value)
+func WithListAllOptions(value ListOpts) ListAllOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type listAllOptsBuilder struct {
@@ -191,12 +171,8 @@ func (b listAllOptsBuilder) ToRecordSetListQuery() (string, error) {
 // ListAll invokes the upstream API with library-owned builders and result handling.
 func (a *API) ListAll(ctx context.Context, options ...ListAllOption) iter.Seq2[*RecordSet, error] {
 	var opts ListOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true, Headers: true}, options...)
 	if err != nil {
-		err = request.Wrap("ListAll", "recordsets", err)
-		return func(yield func(*RecordSet, error) bool) { var zero *RecordSet; yield(zero, err) }
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, true); err != nil {
 		err = request.Wrap("ListAll", "recordsets", err)
 		return func(yield func(*RecordSet, error) bool) { var zero *RecordSet; yield(zero, err) }
 	}
@@ -207,14 +183,10 @@ func (a *API) ListAll(ctx context.Context, options ...ListAllOption) iter.Seq2[*
 	})
 }
 
-type ListByZoneOption = request.Option[ListOpts]
+type ListByZoneOption = request.NativeQueryHeaderCall
 
-func WithListByZoneOptions(value ListOpts) ListByZoneOption { return request.WithOptions(value) }
-func WithListByZoneQuery(key, value string) ListByZoneOption {
-	return request.WithQuery[ListOpts](key, value)
-}
-func WithListByZoneHeader(key, value string) ListByZoneOption {
-	return request.WithHeader[ListOpts](key, value)
+func WithListByZoneOptions(value ListOpts) ListByZoneOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type listByZoneOptsBuilder struct {
@@ -256,12 +228,8 @@ func (a *API) ListByZone(ctx context.Context, zoneID string, options ...ListByZo
 
 func (a *API) listByZoneWithControl(ctx context.Context, zoneID string, control resource.ListControl, options ...ListByZoneOption) iter.Seq2[*RecordSet, error] {
 	var opts ListOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true, Headers: true}, options...)
 	if err != nil {
-		err = request.Wrap("ListByZone", "recordsets", err)
-		return func(yield func(*RecordSet, error) bool) { var zero *RecordSet; yield(zero, err) }
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, true); err != nil {
 		err = request.Wrap("ListByZone", "recordsets", err)
 		return func(yield func(*RecordSet, error) bool) { var zero *RecordSet; yield(zero, err) }
 	}
@@ -272,14 +240,10 @@ func (a *API) listByZoneWithControl(ctx context.Context, zoneID string, control 
 	}, control)
 }
 
-type UpdateOption = request.Option[UpdateOpts]
+type UpdateOption = request.NativeFieldHeaderCall
 
-func WithUpdateOptions(value UpdateOpts) UpdateOption { return request.WithOptions(value) }
-func WithUpdateField(key string, value any) UpdateOption {
-	return request.WithField[UpdateOpts](key, value)
-}
-func WithUpdateHeader(key, value string) UpdateOption {
-	return request.WithHeader[UpdateOpts](key, value)
+func WithUpdateOptions(value UpdateOpts) UpdateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type updateOptsBuilder struct {
@@ -316,13 +280,8 @@ func (b updateOptsBuilder) ToRecordSetUpdateMap() (map[string]any, error) {
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, zoneID string, rrsetID string, opts UpdateOpts, options ...UpdateOption) (*RecordSet, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true, Headers: true}, options...)
 	if err != nil {
-		err = request.Wrap("Update", "recordsets", err)
-		var zero0 *RecordSet
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, true); err != nil {
 		err = request.Wrap("Update", "recordsets", err)
 		var zero0 *RecordSet
 		return zero0, err

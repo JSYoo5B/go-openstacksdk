@@ -52,13 +52,10 @@ type TokenExt = upstream.TokenExt
 type TokenResult = upstream.TokenResult
 type UpdateConsumerOpts = upstream.UpdateConsumerOpts
 type UpdateConsumerResult = upstream.UpdateConsumerResult
-type AuthorizeTokenOption = request.Option[AuthorizeTokenOpts]
+type AuthorizeTokenOption = request.NativeFieldCall
 
 func WithAuthorizeTokenOptions(value AuthorizeTokenOpts) AuthorizeTokenOption {
-	return request.WithOptions(value)
-}
-func WithAuthorizeTokenField(key string, value any) AuthorizeTokenOption {
-	return request.WithField[AuthorizeTokenOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type authorizeTokenOptsBuilder struct {
@@ -82,13 +79,8 @@ func (b authorizeTokenOptsBuilder) ToOAuth1AuthorizeTokenMap() (map[string]any, 
 
 // AuthorizeToken invokes the upstream API with library-owned builders and result handling.
 func (a *API) AuthorizeToken(ctx context.Context, id string, opts AuthorizeTokenOpts, options ...AuthorizeTokenOption) (*AuthorizedToken, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("AuthorizeToken", "oauth1", err)
-		var zero0 *AuthorizedToken
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("AuthorizeToken", "oauth1", err)
 		var zero0 *AuthorizedToken
 		return zero0, err
@@ -100,14 +92,10 @@ func (a *API) AuthorizeToken(ctx context.Context, id string, opts AuthorizeToken
 	return value0, err
 }
 
-type CreateOption = request.Option[AuthOptions]
+type CreateOption = request.NativeFieldHeaderCall
 
-func WithCreateOptions(value AuthOptions) CreateOption { return request.WithOptions(value) }
-func WithCreateField(key string, value any) CreateOption {
-	return request.WithField[AuthOptions](key, value)
-}
-func WithCreateHeader(key, value string) CreateOption {
-	return request.WithHeader[AuthOptions](key, value)
+func WithCreateOptions(value AuthOptions) CreateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type createOptsBuilder struct {
@@ -150,13 +138,8 @@ func (b createOptsBuilder) ToTokenV3ScopeMap() (map[string]any, error) {
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts AuthOptions, options ...CreateOption) (*tokens.Token, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true, Headers: true}, options...)
 	if err != nil {
-		err = request.Wrap("Create", "oauth1", err)
-		var zero0 *tokens.Token
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, true); err != nil {
 		err = request.Wrap("Create", "oauth1", err)
 		var zero0 *tokens.Token
 		return zero0, err
@@ -168,13 +151,10 @@ func (a *API) Create(ctx context.Context, opts AuthOptions, options ...CreateOpt
 	return value0, err
 }
 
-type CreateAccessTokenOption = request.Option[CreateAccessTokenOpts]
+type CreateAccessTokenOption = request.NativeHeaderCall
 
 func WithCreateAccessTokenOptions(value CreateAccessTokenOpts) CreateAccessTokenOption {
-	return request.WithOptions(value)
-}
-func WithCreateAccessTokenHeader(key, value string) CreateAccessTokenOption {
-	return request.WithHeader[CreateAccessTokenOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type createAccessTokenOptsBuilder struct {
@@ -198,13 +178,8 @@ func (b createAccessTokenOptsBuilder) ToOAuth1CreateAccessTokenHeaders(arg0 stri
 
 // CreateAccessToken invokes the upstream API with library-owned builders and result handling.
 func (a *API) CreateAccessToken(ctx context.Context, opts CreateAccessTokenOpts, options ...CreateAccessTokenOption) (*Token, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Headers: true}, options...)
 	if err != nil {
-		err = request.Wrap("CreateAccessToken", "oauth1", err)
-		var zero0 *Token
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, false, false, true); err != nil {
 		err = request.Wrap("CreateAccessToken", "oauth1", err)
 		var zero0 *Token
 		return zero0, err
@@ -216,13 +191,10 @@ func (a *API) CreateAccessToken(ctx context.Context, opts CreateAccessTokenOpts,
 	return value0, err
 }
 
-type CreateConsumerOption = request.Option[CreateConsumerOpts]
+type CreateConsumerOption = request.NativeFieldCall
 
 func WithCreateConsumerOptions(value CreateConsumerOpts) CreateConsumerOption {
-	return request.WithOptions(value)
-}
-func WithCreateConsumerField(key string, value any) CreateConsumerOption {
-	return request.WithField[CreateConsumerOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type createConsumerOptsBuilder struct {
@@ -246,13 +218,8 @@ func (b createConsumerOptsBuilder) ToOAuth1CreateConsumerMap() (map[string]any, 
 
 // CreateConsumer invokes the upstream API with library-owned builders and result handling.
 func (a *API) CreateConsumer(ctx context.Context, opts CreateConsumerOpts, options ...CreateConsumerOption) (*Consumer, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("CreateConsumer", "oauth1", err)
-		var zero0 *Consumer
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("CreateConsumer", "oauth1", err)
 		var zero0 *Consumer
 		return zero0, err
@@ -317,13 +284,10 @@ func (a *API) ListConsumers(ctx context.Context) iter.Seq2[*Consumer, error] {
 	})
 }
 
-type RequestTokenOption = request.Option[RequestTokenOpts]
+type RequestTokenOption = request.NativeHeaderCall
 
 func WithRequestTokenOptions(value RequestTokenOpts) RequestTokenOption {
-	return request.WithOptions(value)
-}
-func WithRequestTokenHeader(key, value string) RequestTokenOption {
-	return request.WithHeader[RequestTokenOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type requestTokenOptsBuilder struct {
@@ -347,13 +311,8 @@ func (b requestTokenOptsBuilder) ToOAuth1RequestTokenHeaders(arg0 string, arg1 s
 
 // RequestToken invokes the upstream API with library-owned builders and result handling.
 func (a *API) RequestToken(ctx context.Context, opts RequestTokenOpts, options ...RequestTokenOption) (*Token, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Headers: true}, options...)
 	if err != nil {
-		err = request.Wrap("RequestToken", "oauth1", err)
-		var zero0 *Token
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, false, false, true); err != nil {
 		err = request.Wrap("RequestToken", "oauth1", err)
 		var zero0 *Token
 		return zero0, err
@@ -370,13 +329,10 @@ func (a *API) RevokeAccessToken(ctx context.Context, userID string, id string) e
 	return request.Wrap("RevokeAccessToken", "oauth1", upstream.RevokeAccessToken(ctx, a.client, userID, id).ExtractErr())
 }
 
-type UpdateConsumerOption = request.Option[UpdateConsumerOpts]
+type UpdateConsumerOption = request.NativeFieldCall
 
 func WithUpdateConsumerOptions(value UpdateConsumerOpts) UpdateConsumerOption {
-	return request.WithOptions(value)
-}
-func WithUpdateConsumerField(key string, value any) UpdateConsumerOption {
-	return request.WithField[UpdateConsumerOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type updateConsumerOptsBuilder struct {
@@ -400,13 +356,8 @@ func (b updateConsumerOptsBuilder) ToOAuth1UpdateConsumerMap() (map[string]any, 
 
 // UpdateConsumer invokes the upstream API with library-owned builders and result handling.
 func (a *API) UpdateConsumer(ctx context.Context, id string, opts UpdateConsumerOpts, options ...UpdateConsumerOption) (*Consumer, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("UpdateConsumer", "oauth1", err)
-		var zero0 *Consumer
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("UpdateConsumer", "oauth1", err)
 		var zero0 *Consumer
 		return zero0, err

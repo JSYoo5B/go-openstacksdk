@@ -15,6 +15,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/dns/v2/recordsets"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/pools"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -322,8 +323,8 @@ func TestGeneratedListPublicZeroControlKeepsDesignateHeaderBuilder(t *testing.T)
 	seen := 0
 	for _, err := range recordsets.New(client).ListByZone(context.Background(), "parent",
 		recordsets.WithListByZoneOptions(recordsets.ListOpts{Limit: 3, AllProjects: true, SudoTenantID: "project"}),
-		recordsets.WithListByZoneHeader("X-Vendor", "retained"),
-		recordsets.WithListByZoneQuery("vendor", "value")) {
+		request.Header("X-Vendor", "retained"),
+		request.Query("vendor", "value")) {
 		if err != nil {
 			t.Fatal(err)
 		}

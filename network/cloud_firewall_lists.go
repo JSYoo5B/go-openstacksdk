@@ -223,14 +223,14 @@ func firewallListAll[T any](spec firewallListSpec, plan *firewallListPlan, list 
 	return result, nil
 }
 
-func firewallQueryOption[O any](query url.Values) request.Option[O] {
-	return func(config *request.Config[O]) error {
+func firewallQueryOption[O any](query url.Values) request.AnyCall {
+	return request.Custom(func(config *request.Config[O]) error {
 		config.Query = make(url.Values, len(query))
 		for key, values := range query {
 			config.Query[key] = slices.Clone(values)
 		}
 		return nil
-	}
+	})
 }
 
 func (s *Service) firewallListSource(op string) error {

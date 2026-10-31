@@ -65,11 +65,10 @@ const SymmetricSecret = upstream.SymmetricSecret
 
 type UpdateOpts = upstream.UpdateOpts
 type UpdateResult = upstream.UpdateResult
-type CreateOption = request.Option[CreateOpts]
+type CreateOption = request.NativeFieldCall
 
-func WithCreateOptions(value CreateOpts) CreateOption { return request.WithOptions(value) }
-func WithCreateField(key string, value any) CreateOption {
-	return request.WithField[CreateOpts](key, value)
+func WithCreateOptions(value CreateOpts) CreateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type createOptsBuilder struct {
@@ -93,13 +92,8 @@ func (b createOptsBuilder) ToSecretCreateMap() (map[string]any, error) {
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*Secret, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Create", "secrets", err)
-		var zero0 *Secret
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Create", "secrets", err)
 		var zero0 *Secret
 		return zero0, err
@@ -111,13 +105,10 @@ func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOpti
 	return value0, err
 }
 
-type CreateMetadataOption = request.Option[MetadataOpts]
+type CreateMetadataOption = request.NativeFieldCall
 
 func WithCreateMetadataOptions(value MetadataOpts) CreateMetadataOption {
-	return request.WithOptions(value)
-}
-func WithCreateMetadataField(key string, value any) CreateMetadataOption {
-	return request.WithField[MetadataOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type createMetadataOptsBuilder struct {
@@ -141,13 +132,8 @@ func (b createMetadataOptsBuilder) ToMetadataCreateMap() (map[string]any, error)
 
 // CreateMetadata invokes the upstream API with library-owned builders and result handling.
 func (a *API) CreateMetadata(ctx context.Context, secretID string, opts MetadataOpts, options ...CreateMetadataOption) (map[string]string, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("CreateMetadata", "secrets", err)
-		var zero0 map[string]string
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("CreateMetadata", "secrets", err)
 		var zero0 map[string]string
 		return zero0, err
@@ -159,13 +145,10 @@ func (a *API) CreateMetadata(ctx context.Context, secretID string, opts Metadata
 	return value0, err
 }
 
-type CreateMetadatumOption = request.Option[MetadatumOpts]
+type CreateMetadatumOption = request.NativeFieldCall
 
 func WithCreateMetadatumOptions(value MetadatumOpts) CreateMetadatumOption {
-	return request.WithOptions(value)
-}
-func WithCreateMetadatumField(key string, value any) CreateMetadatumOption {
-	return request.WithField[MetadatumOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type createMetadatumOptsBuilder struct {
@@ -189,12 +172,8 @@ func (b createMetadatumOptsBuilder) ToMetadatumCreateMap() (map[string]any, erro
 
 // CreateMetadatum invokes the upstream API with library-owned builders and result handling.
 func (a *API) CreateMetadatum(ctx context.Context, secretID string, opts MetadatumOpts, options ...CreateMetadatumOption) error {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("CreateMetadatum", "secrets", err)
-		return err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("CreateMetadatum", "secrets", err)
 		return err
 	}
@@ -236,11 +215,10 @@ func (a *API) GetMetadatum(ctx context.Context, secretID string, key string) (*M
 	return value0, err
 }
 
-type GetPayloadOption = request.Option[GetPayloadOpts]
+type GetPayloadOption = request.NativeHeaderCall
 
-func WithGetPayloadOptions(value GetPayloadOpts) GetPayloadOption { return request.WithOptions(value) }
-func WithGetPayloadHeader(key, value string) GetPayloadOption {
-	return request.WithHeader[GetPayloadOpts](key, value)
+func WithGetPayloadOptions(value GetPayloadOpts) GetPayloadOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type getPayloadOptsBuilder struct {
@@ -265,13 +243,8 @@ func (b getPayloadOptsBuilder) ToSecretPayloadGetParams() (map[string]string, er
 // GetPayload invokes the upstream API with library-owned builders and result handling.
 func (a *API) GetPayload(ctx context.Context, id string, options ...GetPayloadOption) ([]byte, error) {
 	var opts GetPayloadOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Headers: true}, options...)
 	if err != nil {
-		err = request.Wrap("GetPayload", "secrets", err)
-		var zero0 []byte
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, false, false, true); err != nil {
 		err = request.Wrap("GetPayload", "secrets", err)
 		var zero0 []byte
 		return zero0, err
@@ -283,10 +256,9 @@ func (a *API) GetPayload(ctx context.Context, id string, options ...GetPayloadOp
 	return value0, err
 }
 
-type ListOption = request.Option[ListOpts]
+type ListOption = request.NativeQueryCall
 
-func WithListOptions(value ListOpts) ListOption  { return request.WithOptions(value) }
-func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
+func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
 	base   ListOpts
@@ -314,12 +286,8 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Secret
 
 func (a *API) listWithControl(ctx context.Context, control resource.ListControl, options ...ListOption) iter.Seq2[*Secret, error] {
 	var opts ListOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("List", "secrets", err)
-		return func(yield func(*Secret, error) bool) { var zero *Secret; yield(zero, err) }
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("List", "secrets", err)
 		return func(yield func(*Secret, error) bool) { var zero *Secret; yield(zero, err) }
 	}
@@ -330,11 +298,10 @@ func (a *API) listWithControl(ctx context.Context, control resource.ListControl,
 	}, control)
 }
 
-type UpdateOption = request.Option[UpdateOpts]
+type UpdateOption = request.NativeHeaderCall
 
-func WithUpdateOptions(value UpdateOpts) UpdateOption { return request.WithOptions(value) }
-func WithUpdateHeader(key, value string) UpdateOption {
-	return request.WithHeader[UpdateOpts](key, value)
+func WithUpdateOptions(value UpdateOpts) UpdateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type updateOptsBuilder struct {
@@ -360,12 +327,8 @@ func (b updateOptsBuilder) ToSecretUpdateRequest() (string, map[string]string, e
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ...UpdateOption) error {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Headers: true}, options...)
 	if err != nil {
-		err = request.Wrap("Update", "secrets", err)
-		return err
-	}
-	if err = request.ValidateCapabilities(cfg, false, false, true); err != nil {
 		err = request.Wrap("Update", "secrets", err)
 		return err
 	}
@@ -373,13 +336,10 @@ func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ..
 	return request.Wrap("Update", "secrets", upstream.Update(ctx, a.client, id, _opts).ExtractErr())
 }
 
-type UpdateMetadatumOption = request.Option[MetadatumOpts]
+type UpdateMetadatumOption = request.NativeFieldCall
 
 func WithUpdateMetadatumOptions(value MetadatumOpts) UpdateMetadatumOption {
-	return request.WithOptions(value)
-}
-func WithUpdateMetadatumField(key string, value any) UpdateMetadatumOption {
-	return request.WithField[MetadatumOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type updateMetadatumOptsBuilder struct {
@@ -405,13 +365,8 @@ func (b updateMetadatumOptsBuilder) ToMetadatumUpdateMap() (map[string]any, stri
 
 // UpdateMetadatum invokes the upstream API with library-owned builders and result handling.
 func (a *API) UpdateMetadatum(ctx context.Context, secretID string, opts MetadatumOpts, options ...UpdateMetadatumOption) (*Metadatum, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("UpdateMetadatum", "secrets", err)
-		var zero0 *Metadatum
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("UpdateMetadatum", "secrets", err)
 		var zero0 *Metadatum
 		return zero0, err

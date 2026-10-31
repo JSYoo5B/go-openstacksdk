@@ -20,54 +20,48 @@ type UnassignOpts = upstream.UnassignOpts
 type UnassignmentResult = upstream.UnassignmentResult
 type ValidateOpts = upstream.ValidateOpts
 type ValidateResult = upstream.ValidateResult
-type AssignOption = request.Option[AssignOpts]
+type AssignOption = request.NativeCall
 
-func WithAssignOptions(value AssignOpts) AssignOption { return request.WithOptions(value) }
+func WithAssignOptions(value AssignOpts) AssignOption {
+	return request.Custom(request.WithOptions(value))
+}
 
 // Assign invokes the upstream API with library-owned builders and result handling.
 func (a *API) Assign(ctx context.Context, roleID string, opts AssignOpts, options ...AssignOption) error {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{}, options...)
 	if err != nil {
-		err = request.Wrap("Assign", "osinherit", err)
-		return err
-	}
-	if err = request.ValidateCapabilities(cfg, false, false, false); err != nil {
 		err = request.Wrap("Assign", "osinherit", err)
 		return err
 	}
 	return request.Wrap("Assign", "osinherit", upstream.Assign(ctx, a.client, roleID, cfg.Options).ExtractErr())
 }
 
-type UnassignOption = request.Option[UnassignOpts]
+type UnassignOption = request.NativeCall
 
-func WithUnassignOptions(value UnassignOpts) UnassignOption { return request.WithOptions(value) }
+func WithUnassignOptions(value UnassignOpts) UnassignOption {
+	return request.Custom(request.WithOptions(value))
+}
 
 // Unassign invokes the upstream API with library-owned builders and result handling.
 func (a *API) Unassign(ctx context.Context, roleID string, opts UnassignOpts, options ...UnassignOption) error {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{}, options...)
 	if err != nil {
-		err = request.Wrap("Unassign", "osinherit", err)
-		return err
-	}
-	if err = request.ValidateCapabilities(cfg, false, false, false); err != nil {
 		err = request.Wrap("Unassign", "osinherit", err)
 		return err
 	}
 	return request.Wrap("Unassign", "osinherit", upstream.Unassign(ctx, a.client, roleID, cfg.Options).ExtractErr())
 }
 
-type ValidateOption = request.Option[ValidateOpts]
+type ValidateOption = request.NativeCall
 
-func WithValidateOptions(value ValidateOpts) ValidateOption { return request.WithOptions(value) }
+func WithValidateOptions(value ValidateOpts) ValidateOption {
+	return request.Custom(request.WithOptions(value))
+}
 
 // Validate invokes the upstream API with library-owned builders and result handling.
 func (a *API) Validate(ctx context.Context, roleID string, opts ValidateOpts, options ...ValidateOption) error {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{}, options...)
 	if err != nil {
-		err = request.Wrap("Validate", "osinherit", err)
-		return err
-	}
-	if err = request.ValidateCapabilities(cfg, false, false, false); err != nil {
 		err = request.Wrap("Validate", "osinherit", err)
 		return err
 	}

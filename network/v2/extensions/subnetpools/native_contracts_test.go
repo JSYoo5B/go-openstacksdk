@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -67,7 +68,7 @@ func TestNativeSubnetPoolRoutesBodiesPagingAndDecode(t *testing.T) {
 		}
 		return nativePoolWire(200, `{"subnetpool":`+nativePoolRow+`}`)
 	})
-	created, err := api.Create(ctx, subnetpools.CreateOpts{Name: "pool", Prefixes: []string{"10.0.0.0/16"}, DefaultPrefixLen: 24, IsDefault: true}, subnetpools.WithCreateField("x_extension", 1))
+	created, err := api.Create(ctx, subnetpools.CreateOpts{Name: "pool", Prefixes: []string{"10.0.0.0/16"}, DefaultPrefixLen: 24, IsDefault: true}, request.Field("x_extension", 1))
 	if err != nil || !(created.ID == "sp-1" && created.DefaultPrefixLen == 24 && created.MinPrefixLen == 8 && created.AddressScopeID == "" && created.IsDefault && created.RevisionNumber == 3) {
 		t.Fatal(created, err)
 	}
@@ -80,7 +81,7 @@ func TestNativeSubnetPoolRoutesBodiesPagingAndDecode(t *testing.T) {
 		t.Fatal(got, err)
 	}
 	var rows []*subnetpools.SubnetPool
-	for value, err := range api.List(ctx, subnetpools.WithListOptions(subnetpools.ListOpts{Name: "pool", IPVersion: 4, Shared: gophercloud.Disabled, Limit: 1}), subnetpools.WithListQuery("extra", "1")) {
+	for value, err := range api.List(ctx, subnetpools.WithListOptions(subnetpools.ListOpts{Name: "pool", IPVersion: 4, Shared: gophercloud.Disabled, Limit: 1}), request.Query("extra", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -137,7 +138,7 @@ func TestNativeSubnetPoolPrefixOperations(t *testing.T) {
 	api, _ := nativePoolAPI(t, &calls, func(*http.Request) *http.Response {
 		return nativePoolWire(200, `{"prefixes":["10.0.0.0/16","10.2.0.0/16"]}`)
 	})
-	added, err := api.AddPrefixes(ctx, "sp-1", subnetpools.PrefixesOpsOpts{Prefixes: []string{"10.2.0.0/16"}}, subnetpools.WithAddPrefixesField("x_extension", 1))
+	added, err := api.AddPrefixes(ctx, "sp-1", subnetpools.PrefixesOpsOpts{Prefixes: []string{"10.2.0.0/16"}}, request.Field("x_extension", 1))
 	if err != nil || !reflect.DeepEqual(added, []string{"10.0.0.0/16", "10.2.0.0/16"}) {
 		t.Fatal(added, err)
 	}
@@ -159,7 +160,7 @@ func TestNativeSubnetPoolPrefixOperations(t *testing.T) {
 	calls = nil
 	for operation, err := range map[string]error{
 		"AddPrefixes": func() error {
-			_, err := api.AddPrefixes(ctx, "sp-1", subnetpools.PrefixesOpsOpts{}, subnetpools.WithAddPrefixesField("prefixes", nil))
+			_, err := api.AddPrefixes(ctx, "sp-1", subnetpools.PrefixesOpsOpts{}, request.Field("prefixes", nil))
 			return err
 		}(),
 		"RemovePrefixes": func() error {
@@ -234,7 +235,7 @@ func TestNativeSubnetPoolStrictStatusesAndPreflight(t *testing.T) {
 		api, _ := nativePoolAPI(t, &calls, func(*http.Request) *http.Response { return nativePoolWire(201, `{}`) })
 		for name, check := range map[string]func() error{
 			"prefixes extension": func() error {
-				_, err := api.Create(ctx, subnetpools.CreateOpts{}, subnetpools.WithCreateField("prefixes", []string{}))
+				_, err := api.Create(ctx, subnetpools.CreateOpts{}, request.Field("prefixes", []string{}))
 				return err
 			},
 			"nil option": func() error { _, err := api.Create(ctx, subnetpools.CreateOpts{}, nil); return err },

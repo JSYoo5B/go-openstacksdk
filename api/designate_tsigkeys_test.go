@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/dns/v2/tsigkeys"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -37,7 +38,7 @@ func TestDesignateTSIGKeyCreateSendsFlatBodyAndExtensionValues(t *testing.T) {
 	})
 	value, err := newDesignateTSIGKeys(t, cloud).Create(context.Background(), tsigkeys.CreateOpts{
 		Name: "transfer", Algorithm: "hmac-sha256", Secret: "c2VjcmV0", Scope: "ZONE", ResourceID: "zone-1",
-	}, tsigkeys.WithCreateField("flag", false), tsigkeys.WithCreateField("nothing", nil))
+	}, request.Field("flag", false), request.Field("nothing", nil))
 	if err != nil || value == nil || value.ID != "key-1" || value.Secret != "c2VjcmV0" || value.ResourceID != "zone-1" || value.CreatedAt.IsZero() {
 		t.Fatalf("value=%+v error=%v", value, err)
 	}
@@ -71,7 +72,7 @@ func TestDesignateTSIGKeyUpdateSendsOnlySetFieldsAndAcceptsOnly200(t *testing.T)
 			}
 			testcloud.JSON(w, status, designateTSIGKeyBody)
 		})
-		value, err := newDesignateTSIGKeys(t, cloud).Update(context.Background(), "key-1", tsigkeys.UpdateOpts{Name: "renamed"}, tsigkeys.WithUpdateField("flag", false))
+		value, err := newDesignateTSIGKeys(t, cloud).Update(context.Background(), "key-1", tsigkeys.UpdateOpts{Name: "renamed"}, request.Field("flag", false))
 		if (status == 200) != (err == nil) || (err == nil && value.ID != "key-1") {
 			t.Fatalf("status %d value=%+v error=%v", status, value, err)
 		}
@@ -120,10 +121,10 @@ func TestDesignateTSIGKeyRejectsProtectedOrUnsupportedExtensionsBeforeHTTP(t *te
 	api := newDesignateTSIGKeys(t, cloud)
 	ctx := context.Background()
 	create := tsigkeys.CreateOpts{Name: "n", Algorithm: "a", Secret: "s", Scope: "POOL", ResourceID: "r"}
-	if _, err := api.Create(ctx, create, tsigkeys.WithCreateField("secret", "shadow")); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := api.Create(ctx, create, request.Field("secret", "shadow")); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatalf("protected create field: %v", err)
 	}
-	if _, err := api.Update(ctx, "key-1", tsigkeys.UpdateOpts{}, tsigkeys.WithUpdateField("resource_id", "x")); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := api.Update(ctx, "key-1", tsigkeys.UpdateOpts{}, request.Field("resource_id", "x")); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatalf("protected update field: %v", err)
 	}
 	if _, err := api.Create(ctx, create, nil); !errors.Is(err, resource.ErrInvalidOption) {
@@ -159,7 +160,7 @@ func TestDesignateTSIGKeyListFiltersFollowLinksNextAndRejectStatusFilter(t *test
 	api := newDesignateTSIGKeys(t, cloud)
 	var ids []string
 	for value, err := range api.List(context.Background(),
-		tsigkeys.WithListOptions(tsigkeys.ListOpts{Name: "one", Algorithm: "hmac-sha256", Scope: "ZONE", Limit: 1}), tsigkeys.WithListQuery("vendor", "x")) {
+		tsigkeys.WithListOptions(tsigkeys.ListOpts{Name: "one", Algorithm: "hmac-sha256", Scope: "ZONE", Limit: 1}), request.Query("vendor", "x")) {
 		if err != nil {
 			t.Fatal(err)
 		}

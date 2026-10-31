@@ -11,6 +11,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -72,10 +73,10 @@ func TestPythonQoSCrudMatchesProxyRequests(t *testing.T) {
 		t.Fatal(updated, err)
 	}
 	// delete_qos_spec(qos_spec) always sends force=False; force=True sends force=True.
-	if err := api.Delete(ctx, "qos-1", qos.WithDeleteQuery("force", "False")); err != nil {
+	if err := api.Delete(ctx, "qos-1", request.Query("force", "False")); err != nil {
 		t.Fatal(err)
 	}
-	if err := api.Delete(ctx, "qos-1", qos.WithDeleteQuery("force", "True")); err != nil {
+	if err := api.Delete(ctx, "qos-1", request.Query("force", "True")); err != nil {
 		t.Fatal(err)
 	}
 	want := []pythonQoSCall{
@@ -102,7 +103,7 @@ func TestPythonQoSDeleteMissingPolicies(t *testing.T) {
 	if err := api.Remove(ctx, resource.ID("qos-1"), resource.WithMissingError()); !errors.Is(err, resource.ErrNotFound) {
 		t.Fatal(err)
 	}
-	if err := api.Delete(ctx, "qos-1", qos.WithDeleteQuery("force", "True")); !gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
+	if err := api.Delete(ctx, "qos-1", request.Query("force", "True")); !gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 		t.Fatal(err)
 	}
 	if calls.Len() != 3 || pythonQoSCalls(calls)[0].query != "" || pythonQoSCalls(calls)[2].query != "force=True" {

@@ -15,6 +15,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -85,11 +86,11 @@ func TestNativeAgentRoutesBodiesPagingAndDecode(t *testing.T) {
 		t.Fatal(got, err)
 	}
 	empty, disabled := "", false
-	if _, err := api.Update(ctx, "ag-1", agents.UpdateOpts{Description: &empty, AdminStateUp: &disabled}, agents.WithUpdateField("x_extension", 1)); err != nil {
+	if _, err := api.Update(ctx, "ag-1", agents.UpdateOpts{Description: &empty, AdminStateUp: &disabled}, request.Field("x_extension", 1)); err != nil {
 		t.Fatal(err)
 	}
 	var rows []*agents.Agent
-	for value, err := range api.List(ctx, agents.WithListOptions(agents.ListOpts{AgentType: "L3 agent", Alive: &disabled, Limit: 1}), agents.WithListQuery("extra", "1")) {
+	for value, err := range api.List(ctx, agents.WithListOptions(agents.ListOpts{AgentType: "L3 agent", Alive: &disabled, Limit: 1}), request.Query("extra", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -105,7 +106,7 @@ func TestNativeAgentRoutesBodiesPagingAndDecode(t *testing.T) {
 	if err != nil || len(networks) != 1 || networks[0].ID != "net-1" {
 		t.Fatal(networks, err)
 	}
-	if err := api.ScheduleDHCPNetwork(ctx, "ag-1", agents.ScheduleDHCPNetworkOpts{NetworkID: "net-1"}, agents.WithScheduleDHCPNetworkField("x_extension", 1)); err != nil {
+	if err := api.ScheduleDHCPNetwork(ctx, "ag-1", agents.ScheduleDHCPNetworkOpts{NetworkID: "net-1"}, request.Field("x_extension", 1)); err != nil {
 		t.Fatal(err)
 	}
 	if err := api.RemoveDHCPNetwork(ctx, "ag-1", "net-1"); err != nil {
@@ -301,13 +302,13 @@ func TestNativeAgentStrictStatusesDecodeAndPreflight(t *testing.T) {
 			"l3 router required":    {"ScheduleL3Router", api.ScheduleL3Router(ctx, "ag-1", agents.ScheduleL3RouterOpts{})},
 			"bgp speaker required":  {"ScheduleBGPSpeaker", api.ScheduleBGPSpeaker(ctx, "ag-1", agents.ScheduleBGPSpeakerOpts{})},
 			"dhcp network extension": {"ScheduleDHCPNetwork", api.ScheduleDHCPNetwork(ctx, "ag-1", agents.ScheduleDHCPNetworkOpts{NetworkID: "n"},
-				agents.WithScheduleDHCPNetworkField("network_id", "x"))},
+				request.Field("network_id", "x"))},
 			"l3 router extension": {"ScheduleL3Router", api.ScheduleL3Router(ctx, "ag-1", agents.ScheduleL3RouterOpts{RouterID: "r"},
-				agents.WithScheduleL3RouterField("router_id", "x"))},
+				request.Field("router_id", "x"))},
 			"bgp speaker extension": {"ScheduleBGPSpeaker", api.ScheduleBGPSpeaker(ctx, "ag-1", agents.ScheduleBGPSpeakerOpts{SpeakerID: "s"},
-				agents.WithScheduleBGPSpeakerField("bgp_speaker_id", "x"))},
+				request.Field("bgp_speaker_id", "x"))},
 			"update extension": {"Update", func() error {
-				_, err := api.Update(ctx, "ag-1", agents.UpdateOpts{}, agents.WithUpdateField("description", "x"))
+				_, err := api.Update(ctx, "ag-1", agents.UpdateOpts{}, request.Field("description", "x"))
 				return err
 			}()},
 			"update nil option": {"Update", func() error { _, err := api.Update(ctx, "ag-1", agents.UpdateOpts{}, nil); return err }()},

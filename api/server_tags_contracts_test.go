@@ -209,7 +209,7 @@ func TestServerTagsScopeEmptyReplacementAndExplicitFalseExtension(t *testing.T) 
 	if values, err := scope.Replace(ctx, []string{"original"}, tags.WithReplaceAllOptions(tags.ReplaceAllOpts{})); err != nil || values == nil || len(values) != 0 {
 		t.Fatalf("replace selected empty concrete options=%v err=%v", values, err)
 	}
-	if _, err := scope.Replace(ctx, nil, tags.WithReplaceAllField("vendor:enabled", false)); err != nil {
+	if _, err := scope.Replace(ctx, nil, request.Field("vendor:enabled", false)); err != nil {
 		t.Fatal(err)
 	}
 	if values, err := scope.List(ctx); err != nil || values == nil || len(values) != 0 {
@@ -324,10 +324,10 @@ func TestServerTagsScopePreflightRejectsInvalidInputsWithoutHTTP(t *testing.T) {
 	}
 	for _, option := range []tags.ReplaceAllOption{
 		nil,
-		tags.WithReplaceAllField("tags", []string{"overwrite"}),
-		request.WithQuery[tags.ReplaceAllOpts]("tags", "one"),
-		request.WithHeader[tags.ReplaceAllOpts]("X-Vendor", "value"),
-		request.WithArgument[tags.ReplaceAllOpts]("ignored", false),
+		request.Field("tags", []string{"overwrite"}),
+		request.Custom(request.WithQuery[tags.ReplaceAllOpts]("tags", "one")),
+		request.Custom(request.WithHeader[tags.ReplaceAllOpts]("X-Vendor", "value")),
+		request.Custom(request.WithArgument[tags.ReplaceAllOpts]("ignored", false)),
 		tags.WithReplaceAllOptions(tags.ReplaceAllOpts{Tags: []string{"bad/tag"}}),
 	} {
 		if _, err := scope.Replace(ctx, nil, option); !errors.Is(err, resource.ErrInvalidOption) {

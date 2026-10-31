@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/snapshots"
 	"github.com/gophercloud/gophercloud/v2"
@@ -72,7 +73,7 @@ func TestManilaSnapshotCreateBodyExtensionsAndSuccessCodes(t *testing.T) {
 		})
 		value, err := newManilaSnapshots(t, cloud).Create(context.Background(),
 			snapshots.CreateOpts{ShareID: "share-1", Name: "nightly", DisplayName: "legacy"},
-			snapshots.WithCreateField("vendor", map[string]bool{"enabled": false}))
+			request.Field("vendor", map[string]bool{"enabled": false}))
 		if calls.Load() != 1 || tc.success != (err == nil) {
 			t.Fatalf("status %d calls=%d value=%+v error=%v", tc.status, calls.Load(), value, err)
 		}
@@ -118,12 +119,12 @@ func TestManilaSnapshotRejectsCoreFieldCollisionsAndNilOptionsBeforeHTTP(t *test
 	api := newManilaSnapshots(t, cloud)
 	ctx := context.Background()
 	checks := map[string]error{}
-	_, checks["create core"] = api.Create(ctx, snapshots.CreateOpts{ShareID: "s"}, snapshots.WithCreateField("share_id", "other"))
-	_, checks["create omitted core"] = api.Create(ctx, snapshots.CreateOpts{ShareID: "s"}, snapshots.WithCreateField("description", "d"))
+	_, checks["create core"] = api.Create(ctx, snapshots.CreateOpts{ShareID: "s"}, request.Field("share_id", "other"))
+	_, checks["create omitted core"] = api.Create(ctx, snapshots.CreateOpts{ShareID: "s"}, request.Field("description", "d"))
 	_, checks["create nil"] = api.Create(ctx, snapshots.CreateOpts{ShareID: "s"}, nil)
-	_, checks["update core"] = api.Update(ctx, "snap-1", snapshots.UpdateOpts{}, snapshots.WithUpdateField("display_name", "x"))
+	_, checks["update core"] = api.Update(ctx, "snap-1", snapshots.UpdateOpts{}, request.Field("display_name", "x"))
 	_, checks["update nil"] = api.Update(ctx, "snap-1", snapshots.UpdateOpts{}, nil)
-	checks["reset core"] = api.ResetStatus(ctx, "snap-1", snapshots.ResetStatusOpts{Status: "error"}, snapshots.WithResetStatusField("status", "x"))
+	checks["reset core"] = api.ResetStatus(ctx, "snap-1", snapshots.ResetStatusOpts{Status: "error"}, request.Field("status", "x"))
 	checks["reset nil"] = api.ResetStatus(ctx, "snap-1", snapshots.ResetStatusOpts{Status: "error"}, nil)
 	for name, err := range checks {
 		if !errors.Is(err, resource.ErrInvalidOption) {
@@ -153,7 +154,7 @@ func TestManilaSnapshotUpdateSendsEmptyStringsAndAcceptsOnly200(t *testing.T) {
 		})
 		value, err := newManilaSnapshots(t, cloud).Update(context.Background(), "snap-1",
 			snapshots.UpdateOpts{DisplayName: manilaSnapshotStr(""), DisplayDescription: manilaSnapshotStr("")},
-			snapshots.WithUpdateField("vendor", nil))
+			request.Field("vendor", nil))
 		if tc.success != (err == nil) || (tc.success && (value == nil || value.ID != "snap-1")) {
 			t.Fatalf("status %d value=%+v error=%v", tc.status, value, err)
 		}
@@ -181,7 +182,7 @@ func TestManilaSnapshotActionsSendNamedBodiesAndRequire202(t *testing.T) {
 		call func(*snapshots.API) error
 	}{
 		{"reset status", `{"reset_status":{"status":"error","vendor":1}}`, func(a *snapshots.API) error {
-			return a.ResetStatus(context.Background(), "snap-1", snapshots.ResetStatusOpts{Status: "error"}, snapshots.WithResetStatusField("vendor", 1))
+			return a.ResetStatus(context.Background(), "snap-1", snapshots.ResetStatusOpts{Status: "error"}, request.Field("vendor", 1))
 		}},
 		{"reset status empty", `{"reset_status":{"status":""}}`, func(a *snapshots.API) error {
 			return a.ResetStatus(context.Background(), "snap-1", snapshots.ResetStatusOpts{})
@@ -279,7 +280,7 @@ func TestManilaSnapshotListDetailFiltersOmitFalseAndFollowOffsetPaging(t *testin
 	var ids []string
 	for value, err := range api.ListDetail(context.Background(),
 		snapshots.WithListDetailOptions(snapshots.ListOpts{AllTenants: true, Name: "a", NamePattern: "n", ShareID: "share-1", Size: 1, Status: "available", Limit: 1, SortKey: "created_at", SortDir: "desc", ProjectID: "proj-1", Description: "d", DescriptionPattern: "dp"}),
-		snapshots.WithListDetailQuery("vendor", "x")) {
+		request.Query("vendor", "x")) {
 		if err != nil {
 			t.Fatal(err)
 		}

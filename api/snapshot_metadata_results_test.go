@@ -16,6 +16,7 @@ import (
 	snapshots3 "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots"
 	"github.com/JSYoo5B/go-openstacksdk/internal/snapshotmetadata"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -34,13 +35,13 @@ func snapshotMetadataFixtures() []snapshotMetadataFixture {
 		{version: "v2", prepare: func(metadata map[string]any, vendor any) snapshotMetadataCall {
 			options := []snapshots2.UpdateMetadataOption{snapshots2.WithUpdateMetadataOptions(snapshots2.UpdateMetadataOpts{Metadata: metadata})}
 			if vendor != nil {
-				options = append(options, snapshots2.WithUpdateMetadataField("vendor", vendor))
+				options = append(options, request.Field("vendor", vendor))
 			}
 			return func(ctx context.Context, client *gophercloud.ServiceClient, id string) (map[string]any, error) {
 				return snapshots2.New(client).UpdateMetadata(ctx, id, snapshots2.UpdateMetadataOpts{}, options...)
 			}
 		}, protectedMetadata: func(ctx context.Context, client *gophercloud.ServiceClient, id string) (map[string]any, error) {
-			return snapshots2.New(client).UpdateMetadata(ctx, id, snapshots2.UpdateMetadataOpts{}, snapshots2.WithUpdateMetadataField("metadata", map[string]any{}))
+			return snapshots2.New(client).UpdateMetadata(ctx, id, snapshots2.UpdateMetadataOpts{}, request.Field("metadata", map[string]any{}))
 		}, getID: func(ctx context.Context, client *gophercloud.ServiceClient, id string) (string, error) {
 			value, err := snapshots2.New(client).Get(ctx, id)
 			if value == nil {
@@ -51,13 +52,13 @@ func snapshotMetadataFixtures() []snapshotMetadataFixture {
 		{version: "v3", prepare: func(metadata map[string]any, vendor any) snapshotMetadataCall {
 			options := []snapshots3.UpdateMetadataOption{snapshots3.WithUpdateMetadataOptions(snapshots3.UpdateMetadataOpts{Metadata: metadata})}
 			if vendor != nil {
-				options = append(options, snapshots3.WithUpdateMetadataField("vendor", vendor))
+				options = append(options, request.Field("vendor", vendor))
 			}
 			return func(ctx context.Context, client *gophercloud.ServiceClient, id string) (map[string]any, error) {
 				return snapshots3.New(client).UpdateMetadata(ctx, id, snapshots3.UpdateMetadataOpts{}, options...)
 			}
 		}, protectedMetadata: func(ctx context.Context, client *gophercloud.ServiceClient, id string) (map[string]any, error) {
-			return snapshots3.New(client).UpdateMetadata(ctx, id, snapshots3.UpdateMetadataOpts{}, snapshots3.WithUpdateMetadataField("metadata", map[string]any{}))
+			return snapshots3.New(client).UpdateMetadata(ctx, id, snapshots3.UpdateMetadataOpts{}, request.Field("metadata", map[string]any{}))
 		}, getID: func(ctx context.Context, client *gophercloud.ServiceClient, id string) (string, error) {
 			value, err := snapshots3.New(client).Get(ctx, id)
 			if value == nil {

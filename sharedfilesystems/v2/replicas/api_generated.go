@@ -42,11 +42,10 @@ type ResetStateResult = upstream.ResetStateResult
 type ResetStatusOpts = upstream.ResetStatusOpts
 type ResetStatusResult = upstream.ResetStatusResult
 type ResyncResult = upstream.ResyncResult
-type CreateOption = request.Option[CreateOpts]
+type CreateOption = request.NativeFieldCall
 
-func WithCreateOptions(value CreateOpts) CreateOption { return request.WithOptions(value) }
-func WithCreateField(key string, value any) CreateOption {
-	return request.WithField[CreateOpts](key, value)
+func WithCreateOptions(value CreateOpts) CreateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type createOptsBuilder struct {
@@ -70,13 +69,8 @@ func (b createOptsBuilder) ToReplicaCreateMap() (map[string]any, error) {
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*Replica, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Create", "replicas", err)
-		var zero0 *Replica
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Create", "replicas", err)
 		var zero0 *Replica
 		return zero0, err
@@ -114,10 +108,9 @@ func (a *API) GetExportLocation(ctx context.Context, replicaID string, id string
 	return value0, err
 }
 
-type ListOption = request.Option[ListOpts]
+type ListOption = request.NativeQueryCall
 
-func WithListOptions(value ListOpts) ListOption  { return request.WithOptions(value) }
-func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
+func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
 	base   ListOpts
@@ -141,12 +134,8 @@ func (b listOptsBuilder) ToReplicaListQuery() (string, error) {
 // List invokes the upstream API with library-owned builders and result handling.
 func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Replica, error] {
 	var opts ListOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("List", "replicas", err)
-		return func(yield func(*Replica, error) bool) { var zero *Replica; yield(zero, err) }
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("List", "replicas", err)
 		return func(yield func(*Replica, error) bool) { var zero *Replica; yield(zero, err) }
 	}
@@ -157,11 +146,10 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Replic
 	})
 }
 
-type ListDetailOption = request.Option[ListOpts]
+type ListDetailOption = request.NativeQueryCall
 
-func WithListDetailOptions(value ListOpts) ListDetailOption { return request.WithOptions(value) }
-func WithListDetailQuery(key, value string) ListDetailOption {
-	return request.WithQuery[ListOpts](key, value)
+func WithListDetailOptions(value ListOpts) ListDetailOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type listDetailOptsBuilder struct {
@@ -190,12 +178,8 @@ func (a *API) ListDetail(ctx context.Context, options ...ListDetailOption) iter.
 
 func (a *API) listDetailWithControl(ctx context.Context, control resource.ListControl, options ...ListDetailOption) iter.Seq2[*Replica, error] {
 	var opts ListOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("ListDetail", "replicas", err)
-		return func(yield func(*Replica, error) bool) { var zero *Replica; yield(zero, err) }
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("ListDetail", "replicas", err)
 		return func(yield func(*Replica, error) bool) { var zero *Replica; yield(zero, err) }
 	}
@@ -214,11 +198,10 @@ func (a *API) ListExportLocations(ctx context.Context, id string) ([]ExportLocat
 	return value0, err
 }
 
-type PromoteOption = request.Option[PromoteOpts]
+type PromoteOption = request.NativeFieldCall
 
-func WithPromoteOptions(value PromoteOpts) PromoteOption { return request.WithOptions(value) }
-func WithPromoteField(key string, value any) PromoteOption {
-	return request.WithField[PromoteOpts](key, value)
+func WithPromoteOptions(value PromoteOpts) PromoteOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type promoteOptsBuilder struct {
@@ -242,12 +225,8 @@ func (b promoteOptsBuilder) ToReplicaPromoteMap() (map[string]any, error) {
 
 // Promote invokes the upstream API with library-owned builders and result handling.
 func (a *API) Promote(ctx context.Context, id string, opts PromoteOpts, options ...PromoteOption) error {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Promote", "replicas", err)
-		return err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Promote", "replicas", err)
 		return err
 	}
@@ -255,11 +234,10 @@ func (a *API) Promote(ctx context.Context, id string, opts PromoteOpts, options 
 	return request.Wrap("Promote", "replicas", upstream.Promote(ctx, a.client, id, _opts).ExtractErr())
 }
 
-type ResetStateOption = request.Option[ResetStateOpts]
+type ResetStateOption = request.NativeFieldCall
 
-func WithResetStateOptions(value ResetStateOpts) ResetStateOption { return request.WithOptions(value) }
-func WithResetStateField(key string, value any) ResetStateOption {
-	return request.WithField[ResetStateOpts](key, value)
+func WithResetStateOptions(value ResetStateOpts) ResetStateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type resetStateOptsBuilder struct {
@@ -283,12 +261,8 @@ func (b resetStateOptsBuilder) ToReplicaResetStateMap() (map[string]any, error) 
 
 // ResetState invokes the upstream API with library-owned builders and result handling.
 func (a *API) ResetState(ctx context.Context, id string, opts ResetStateOpts, options ...ResetStateOption) error {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("ResetState", "replicas", err)
-		return err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("ResetState", "replicas", err)
 		return err
 	}
@@ -296,13 +270,10 @@ func (a *API) ResetState(ctx context.Context, id string, opts ResetStateOpts, op
 	return request.Wrap("ResetState", "replicas", upstream.ResetState(ctx, a.client, id, _opts).ExtractErr())
 }
 
-type ResetStatusOption = request.Option[ResetStatusOpts]
+type ResetStatusOption = request.NativeFieldCall
 
 func WithResetStatusOptions(value ResetStatusOpts) ResetStatusOption {
-	return request.WithOptions(value)
-}
-func WithResetStatusField(key string, value any) ResetStatusOption {
-	return request.WithField[ResetStatusOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type resetStatusOptsBuilder struct {
@@ -326,12 +297,8 @@ func (b resetStatusOptsBuilder) ToReplicaResetStatusMap() (map[string]any, error
 
 // ResetStatus invokes the upstream API with library-owned builders and result handling.
 func (a *API) ResetStatus(ctx context.Context, id string, opts ResetStatusOpts, options ...ResetStatusOption) error {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("ResetStatus", "replicas", err)
-		return err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("ResetStatus", "replicas", err)
 		return err
 	}

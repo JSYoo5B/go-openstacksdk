@@ -11,6 +11,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/regions"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -81,7 +82,7 @@ func TestPythonRegionCreateGetUpdateRequests(t *testing.T) {
 	// Python update_region(parent_region_id=None) sends null; the typed field
 	// omits it and the extension key is rejected before HTTP.
 	calls = nil
-	if _, err := api.Update(ctx, "RegionOne", regions.UpdateOpts{}, regions.WithUpdateField("parent_region_id", nil)); err == nil || len(calls) != 0 {
+	if _, err := api.Update(ctx, "RegionOne", regions.UpdateOpts{}, request.Field("parent_region_id", nil)); err == nil || len(calls) != 0 {
 		t.Fatal(err, calls)
 	}
 }

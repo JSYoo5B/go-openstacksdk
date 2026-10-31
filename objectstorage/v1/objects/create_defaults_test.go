@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -38,7 +39,7 @@ func TestNativeObjectCreateEmptyDefaults(t *testing.T) {
 					return nativeObjectReply{code, http.Header{"Etag": {"server-etag"}, "X-Trans-Id": {"actual-put"}}, "ack"}
 				})
 				opts := append([]objects.CreateOption{}, tc.options...)
-				opts = append(opts, objects.WithCreateQuery("version-id", "v+1"), objects.WithCreateHeader("X-Extra", "extension"))
+				opts = append(opts, request.Query("version-id", "v+1"), request.Header("X-Extra", "extension"))
 				result, err := api.Create(context.Background(), "my box", "dir/file?", tc.opts, opts...)
 				if err != nil || result == nil || result.ETag != "server-etag" || result.TransID != "actual-put" {
 					t.Fatalf("result=%+v err=%v", result, err)
@@ -100,7 +101,7 @@ func TestNativeObjectCreateTypedNilReadersAndPreflight(t *testing.T) {
 			}
 		})
 	}
-	for _, options := range [][]objects.CreateOption{{nil}, {objects.WithCreateHeader("Content-Type", "collision")}} {
+	for _, options := range [][]objects.CreateOption{{nil}, {request.Header("Content-Type", "collision")}} {
 		var calls []nativeObjectCall
 		api := nativeObjectAPI(t, &calls, func(*http.Request) nativeObjectReply { return nativeObjectReply{201, nil, ""} })
 		_, err := api.Create(context.Background(), "c", "o", objects.CreateOpts{}, options...)

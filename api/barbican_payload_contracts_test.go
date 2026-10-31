@@ -159,7 +159,7 @@ func TestBarbicanPayloadContractsMediaAndExtensions(t *testing.T) {
 				w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 				_, _ = w.Write(want)
 			})
-			options := append(append([]secrets.GetPayloadOption(nil), f.options...), secrets.WithGetPayloadHeader("X-Vendor-Setting", "false"))
+			options := append(append([]secrets.GetPayloadOption(nil), f.options...), request.Header("X-Vendor-Setting", "false"))
 			got, err := secrets.New(client).GetPayload(context.Background(), "secret-id", options...)
 			if err != nil || !bytes.Equal(got, want) || calls.Load() != 1 || client.MoreHeaders["X-Source"] != "source" {
 				t.Fatalf("bytes=%x err=%v calls=%d source=%v", got, err, calls.Load(), client.MoreHeaders)
@@ -176,13 +176,13 @@ func TestBarbicanPayloadContractsPreflight(t *testing.T) {
 		cause  error
 	}{
 		{"nil", nil, resource.ErrInvalidOption},
-		{"field", request.WithField[secrets.GetPayloadOpts]("vendor", false), resource.ErrInvalidOption},
-		{"query", request.WithQuery[secrets.GetPayloadOpts]("vendor", "a&b"), resource.ErrInvalidOption},
-		{"argument", request.WithArgument[secrets.GetPayloadOpts]("vendor", "value"), resource.ErrInvalidOption},
-		{"reserved accept", secrets.WithGetPayloadHeader("aCcEpT", "extension/media"), resource.ErrInvalidOption},
-		{"bad name", secrets.WithGetPayloadHeader("Bad Header", "value"), resource.ErrInvalidOption},
-		{"bad value", secrets.WithGetPayloadHeader("X-Vendor", "line\nvalue"), resource.ErrInvalidOption},
-		{"callback error", func(*request.Config[secrets.GetPayloadOpts]) error { return sentinel }, sentinel},
+		{"field", request.Custom(request.WithField[secrets.GetPayloadOpts]("vendor", false)), resource.ErrInvalidOption},
+		{"query", request.Custom(request.WithQuery[secrets.GetPayloadOpts]("vendor", "a&b")), resource.ErrInvalidOption},
+		{"argument", request.Custom(request.WithArgument[secrets.GetPayloadOpts]("vendor", "value")), resource.ErrInvalidOption},
+		{"reserved accept", request.Header("aCcEpT", "extension/media"), resource.ErrInvalidOption},
+		{"bad name", request.Header("Bad Header", "value"), resource.ErrInvalidOption},
+		{"bad value", request.Header("X-Vendor", "line\nvalue"), resource.ErrInvalidOption},
+		{"callback error", request.Custom(func(*request.Config[secrets.GetPayloadOpts]) error { return sentinel }), sentinel},
 	} {
 		t.Run(f.name, func(t *testing.T) {
 			cloud := testcloud.New(t)
@@ -197,7 +197,7 @@ func TestBarbicanPayloadContractsPreflight(t *testing.T) {
 	t.Run("typed accept is reserved too", func(t *testing.T) {
 		cloud := testcloud.New(t)
 		track := payloadContractTrack(cloud, nil, nil)
-		got, err := secrets.New(payloadContractClient(cloud)).GetPayload(context.Background(), "secret-id", secrets.WithGetPayloadOptions(secrets.GetPayloadOpts{PayloadContentType: "typed/media"}), secrets.WithGetPayloadHeader("Accept", "extension/media"))
+		got, err := secrets.New(payloadContractClient(cloud)).GetPayload(context.Background(), "secret-id", secrets.WithGetPayloadOptions(secrets.GetPayloadOpts{PayloadContentType: "typed/media"}), request.Header("Accept", "extension/media"))
 		if got != nil || !errors.Is(err, resource.ErrInvalidOption) || track.calls.Load() != 0 {
 			t.Fatalf("bytes=%x err=%v calls=%d", got, err, track.calls.Load())
 		}
@@ -319,7 +319,7 @@ func TestBarbicanPayloadContractsNativeReplay(t *testing.T) {
 				_, _ = w.Write(want)
 			}
 		})
-		got, err := secrets.New(payloadContractClient(cloud)).GetPayload(context.Background(), "secret-id", secrets.WithGetPayloadOptions(secrets.GetPayloadOpts{PayloadContentType: "application/octet-stream"}), secrets.WithGetPayloadHeader("X-Vendor", "false"))
+		got, err := secrets.New(payloadContractClient(cloud)).GetPayload(context.Background(), "secret-id", secrets.WithGetPayloadOptions(secrets.GetPayloadOpts{PayloadContentType: "application/octet-stream"}), request.Header("X-Vendor", "false"))
 		if err != nil || !bytes.Equal(got, want) || attempts.Load() != 4 || track.calls.Load() != 4 || reauths.Load() != 1 || backoffs.Load() != 1 || retries.Load() != 1 || track.last(t).closes.Load() != 1 {
 			t.Fatalf("bytes=%x err=%v attempts=%d callbacks=%d/%d/%d", got, err, attempts.Load(), reauths.Load(), backoffs.Load(), retries.Load())
 		}

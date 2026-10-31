@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
@@ -87,7 +88,7 @@ func TestPythonL3AgentRouterScheduling(t *testing.T) {
 			t.Fatal(err)
 		}
 		// add_router_to_agent("a-1", "r-1", ha_chassis_priority=5)
-		if err := api.ScheduleL3Router(ctx, "a-1", agents.ScheduleL3RouterOpts{RouterID: "r-1"}, agents.WithScheduleL3RouterField("ha_chassis_priority", 5)); err != nil {
+		if err := api.ScheduleL3Router(ctx, "a-1", agents.ScheduleL3RouterOpts{RouterID: "r-1"}, request.Field("ha_chassis_priority", 5)); err != nil {
 			t.Fatal(err)
 		}
 		// Python returns the error body as a dict because the proxy does not raise; Go returns the 404.

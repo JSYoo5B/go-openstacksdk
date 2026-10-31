@@ -33,11 +33,10 @@ type GetResult = upstream.GetResult
 type ListOpts = upstream.ListOpts
 type Transfer = upstream.Transfer
 type TransferPage = upstream.TransferPage
-type AcceptOption = request.Option[AcceptOpts]
+type AcceptOption = request.NativeFieldCall
 
-func WithAcceptOptions(value AcceptOpts) AcceptOption { return request.WithOptions(value) }
-func WithAcceptField(key string, value any) AcceptOption {
-	return request.WithField[AcceptOpts](key, value)
+func WithAcceptOptions(value AcceptOpts) AcceptOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type acceptOptsBuilder struct {
@@ -61,12 +60,8 @@ func (b acceptOptsBuilder) ToAcceptMap() (map[string]any, error) {
 
 // Accept invokes the upstream API with library-owned builders and result handling.
 func (a *API) Accept(ctx context.Context, id string, opts AcceptOpts, options ...AcceptOption) error {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Accept", "sharetransfers", err)
-		return err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Accept", "sharetransfers", err)
 		return err
 	}
@@ -74,11 +69,10 @@ func (a *API) Accept(ctx context.Context, id string, opts AcceptOpts, options ..
 	return request.Wrap("Accept", "sharetransfers", upstream.Accept(ctx, a.client, id, _opts).ExtractErr())
 }
 
-type CreateOption = request.Option[CreateOpts]
+type CreateOption = request.NativeFieldCall
 
-func WithCreateOptions(value CreateOpts) CreateOption { return request.WithOptions(value) }
-func WithCreateField(key string, value any) CreateOption {
-	return request.WithField[CreateOpts](key, value)
+func WithCreateOptions(value CreateOpts) CreateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type createOptsBuilder struct {
@@ -102,13 +96,8 @@ func (b createOptsBuilder) ToTransferCreateMap() (map[string]any, error) {
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*Transfer, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Create", "sharetransfers", err)
-		var zero0 *Transfer
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Create", "sharetransfers", err)
 		var zero0 *Transfer
 		return zero0, err
@@ -133,10 +122,9 @@ func (a *API) Get(ctx context.Context, id string) (*Transfer, error) {
 	return value0, err
 }
 
-type ListOption = request.Option[ListOpts]
+type ListOption = request.NativeQueryCall
 
-func WithListOptions(value ListOpts) ListOption  { return request.WithOptions(value) }
-func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
+func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
 	base   ListOpts
@@ -160,12 +148,8 @@ func (b listOptsBuilder) ToTransferListQuery() (string, error) {
 // List invokes the upstream API with library-owned builders and result handling.
 func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Transfer, error] {
 	var opts ListOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("List", "sharetransfers", err)
-		return func(yield func(*Transfer, error) bool) { var zero *Transfer; yield(zero, err) }
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("List", "sharetransfers", err)
 		return func(yield func(*Transfer, error) bool) { var zero *Transfer; yield(zero, err) }
 	}
@@ -176,11 +160,10 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Transf
 	})
 }
 
-type ListDetailOption = request.Option[ListOpts]
+type ListDetailOption = request.NativeQueryCall
 
-func WithListDetailOptions(value ListOpts) ListDetailOption { return request.WithOptions(value) }
-func WithListDetailQuery(key, value string) ListDetailOption {
-	return request.WithQuery[ListOpts](key, value)
+func WithListDetailOptions(value ListOpts) ListDetailOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type listDetailOptsBuilder struct {
@@ -209,12 +192,8 @@ func (a *API) ListDetail(ctx context.Context, options ...ListDetailOption) iter.
 
 func (a *API) listDetailWithControl(ctx context.Context, control resource.ListControl, options ...ListDetailOption) iter.Seq2[*Transfer, error] {
 	var opts ListOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("ListDetail", "sharetransfers", err)
-		return func(yield func(*Transfer, error) bool) { var zero *Transfer; yield(zero, err) }
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("ListDetail", "sharetransfers", err)
 		return func(yield func(*Transfer, error) bool) { var zero *Transfer; yield(zero, err) }
 	}

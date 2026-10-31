@@ -27,11 +27,10 @@ func (a *API) Get(ctx context.Context, stackName string, stackID string) ([]byte
 	return value0, err
 }
 
-type ValidateOption = request.Option[ValidateOpts]
+type ValidateOption = request.NativeFieldCall
 
-func WithValidateOptions(value ValidateOpts) ValidateOption { return request.WithOptions(value) }
-func WithValidateField(key string, value any) ValidateOption {
-	return request.WithField[ValidateOpts](key, value)
+func WithValidateOptions(value ValidateOpts) ValidateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type validateOptsBuilder struct {
@@ -55,13 +54,8 @@ func (b validateOptsBuilder) ToStackTemplateValidateMap() (map[string]any, error
 
 // Validate invokes the upstream API with library-owned builders and result handling.
 func (a *API) Validate(ctx context.Context, opts ValidateOpts, options ...ValidateOption) (*ValidatedTemplate, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Validate", "stacktemplates", err)
-		var zero0 *ValidatedTemplate
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Validate", "stacktemplates", err)
 		var zero0 *ValidatedTemplate
 		return zero0, err

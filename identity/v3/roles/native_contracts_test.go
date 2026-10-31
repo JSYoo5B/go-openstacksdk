@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/roles"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -65,7 +66,7 @@ func TestNativeRoleRoutesBodiesPagingAndDecode(t *testing.T) {
 		return 200, `{"role":` + nativeRoleRow + `}`
 	})
 	blank := ""
-	created, err := api.Create(ctx, roles.CreateOpts{Name: "reader", DomainID: "default", Description: "desc", Options: map[roles.Option]any{roles.Immutable: true}, Extra: map[string]any{"color": "blue"}}, roles.WithCreateField("x_extension", 1))
+	created, err := api.Create(ctx, roles.CreateOpts{Name: "reader", DomainID: "default", Description: "desc", Options: map[roles.Option]any{roles.Immutable: true}, Extra: map[string]any{"color": "blue"}}, request.Field("x_extension", 1))
 	// Remaining keys feed Extra, and description is copied there although it also has a field.
 	if err != nil || !(created.ID == "r-1" && created.DomainID == "" && created.Description == "desc" && created.Options[roles.Immutable] == true && reflect.DeepEqual(created.Extra, map[string]any{"color": "blue", "description": "desc"})) {
 		t.Fatal(created, err)
@@ -74,11 +75,11 @@ func TestNativeRoleRoutesBodiesPagingAndDecode(t *testing.T) {
 	if err != nil || got.Name != "reader" {
 		t.Fatal(got, err)
 	}
-	if _, err := api.Update(ctx, "r-1", roles.UpdateOpts{Name: "viewer", Description: &blank, Options: map[roles.Option]any{roles.Immutable: false}, Extra: map[string]any{"color": nil}}, roles.WithUpdateField("x_extension", 2)); err != nil {
+	if _, err := api.Update(ctx, "r-1", roles.UpdateOpts{Name: "viewer", Description: &blank, Options: map[roles.Option]any{roles.Immutable: false}, Extra: map[string]any{"color": nil}}, request.Field("x_extension", 2)); err != nil {
 		t.Fatal(err)
 	}
 	var rows []*roles.Role
-	for value, err := range api.List(ctx, roles.WithListOptions(roles.ListOpts{DomainID: "default", Name: "reader", Filters: map[string]string{"name__contains": "ea"}}), roles.WithListQuery("x", "1")) {
+	for value, err := range api.List(ctx, roles.WithListOptions(roles.ListOpts{DomainID: "default", Name: "reader", Filters: map[string]string{"name__contains": "ea"}}), request.Query("x", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -151,7 +152,7 @@ func TestNativeRoleAssignmentRoutesQueryAndDecode(t *testing.T) {
 	}
 	effective, yes := false, true
 	var assignments []*roles.RoleAssignment
-	for value, err := range api.ListAssignments(ctx, roles.WithListAssignmentsOptions(roles.ListAssignmentsOpts{GroupID: "g-1", RoleID: "r-1", ScopeDomainID: "d-1", ScopeProjectID: "p-1", ScopeSystem: "all", UserID: "u-1", Effective: &effective, IncludeNames: &yes, IncludeSubtree: &yes}), roles.WithListAssignmentsQuery("x", "1")) {
+	for value, err := range api.ListAssignments(ctx, roles.WithListAssignmentsOptions(roles.ListAssignmentsOpts{GroupID: "g-1", RoleID: "r-1", ScopeDomainID: "d-1", ScopeProjectID: "p-1", ScopeSystem: "all", UserID: "u-1", Effective: &effective, IncludeNames: &yes, IncludeSubtree: &yes}), request.Query("x", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -327,7 +328,7 @@ func TestNativeRoleStatusesAndPreflight(t *testing.T) {
 		}{
 			"create name": {"Create", func() error { _, err := api.Create(ctx, roles.CreateOpts{DomainID: "d"}); return err }()},
 			"create core extension": {"Create", func() error {
-				_, err := api.Create(ctx, roles.CreateOpts{Name: "r"}, roles.WithCreateField("options", map[string]any{}))
+				_, err := api.Create(ctx, roles.CreateOpts{Name: "r"}, request.Field("options", map[string]any{}))
 				return err
 			}()},
 			"update nil option": {"Update", func() error {

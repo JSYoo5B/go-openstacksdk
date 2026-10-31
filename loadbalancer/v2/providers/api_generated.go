@@ -26,10 +26,9 @@ type ListFlavorCapabilitiesResult = upstream.ListFlavorCapabilitiesResult
 type ListOpts = upstream.ListOpts
 type Provider = upstream.Provider
 type ProviderPage = upstream.ProviderPage
-type ListOption = request.Option[ListOpts]
+type ListOption = request.NativeQueryCall
 
-func WithListOptions(value ListOpts) ListOption  { return request.WithOptions(value) }
-func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
+func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
 	base   ListOpts
@@ -53,12 +52,8 @@ func (b listOptsBuilder) ToProviderListQuery() (string, error) {
 // List invokes the upstream API with library-owned builders and result handling.
 func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Provider, error] {
 	var opts ListOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("List", "providers", err)
-		return func(yield func(*Provider, error) bool) { var zero *Provider; yield(zero, err) }
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("List", "providers", err)
 		return func(yield func(*Provider, error) bool) { var zero *Provider; yield(zero, err) }
 	}
@@ -69,13 +64,10 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Provid
 	})
 }
 
-type ListAvailabilityZoneCapabilitiesOption = request.Option[ListAvailabilityZoneCapabilitiesOpts]
+type ListAvailabilityZoneCapabilitiesOption = request.NativeQueryCall
 
 func WithListAvailabilityZoneCapabilitiesOptions(value ListAvailabilityZoneCapabilitiesOpts) ListAvailabilityZoneCapabilitiesOption {
-	return request.WithOptions(value)
-}
-func WithListAvailabilityZoneCapabilitiesQuery(key, value string) ListAvailabilityZoneCapabilitiesOption {
-	return request.WithQuery[ListAvailabilityZoneCapabilitiesOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type listAvailabilityZoneCapabilitiesOptsBuilder struct {
@@ -100,13 +92,8 @@ func (b listAvailabilityZoneCapabilitiesOptsBuilder) ToAvailabilityZoneCapabilit
 // ListAvailabilityZoneCapabilities invokes the upstream API with library-owned builders and result handling.
 func (a *API) ListAvailabilityZoneCapabilities(ctx context.Context, provider string, options ...ListAvailabilityZoneCapabilitiesOption) ([]Capability, error) {
 	var opts ListAvailabilityZoneCapabilitiesOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("ListAvailabilityZoneCapabilities", "providers", err)
-		var zero0 []Capability
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("ListAvailabilityZoneCapabilities", "providers", err)
 		var zero0 []Capability
 		return zero0, err
@@ -118,13 +105,10 @@ func (a *API) ListAvailabilityZoneCapabilities(ctx context.Context, provider str
 	return value0, err
 }
 
-type ListFlavorCapabilitiesOption = request.Option[ListFlavorCapabilitiesOpts]
+type ListFlavorCapabilitiesOption = request.NativeQueryCall
 
 func WithListFlavorCapabilitiesOptions(value ListFlavorCapabilitiesOpts) ListFlavorCapabilitiesOption {
-	return request.WithOptions(value)
-}
-func WithListFlavorCapabilitiesQuery(key, value string) ListFlavorCapabilitiesOption {
-	return request.WithQuery[ListFlavorCapabilitiesOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type listFlavorCapabilitiesOptsBuilder struct {
@@ -149,13 +133,8 @@ func (b listFlavorCapabilitiesOptsBuilder) ToFlavorCapabilitiesListQuery() (stri
 // ListFlavorCapabilities invokes the upstream API with library-owned builders and result handling.
 func (a *API) ListFlavorCapabilities(ctx context.Context, provider string, options ...ListFlavorCapabilitiesOption) ([]Capability, error) {
 	var opts ListFlavorCapabilitiesOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("ListFlavorCapabilities", "providers", err)
-		var zero0 []Capability
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("ListFlavorCapabilities", "providers", err)
 		var zero0 []Capability
 		return zero0, err

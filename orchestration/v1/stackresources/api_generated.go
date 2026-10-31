@@ -47,10 +47,9 @@ func (a *API) Get(ctx context.Context, stackName string, stackID string, resourc
 	return value0, err
 }
 
-type ListOption = request.Option[ListOpts]
+type ListOption = request.NativeQueryCall
 
-func WithListOptions(value ListOpts) ListOption  { return request.WithOptions(value) }
-func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
+func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
 	base   ListOpts
@@ -74,12 +73,8 @@ func (b listOptsBuilder) ToStackResourceListQuery() (string, error) {
 // List invokes the upstream API with library-owned builders and result handling.
 func (a *API) List(ctx context.Context, stackName string, stackID string, options ...ListOption) iter.Seq2[*Resource, error] {
 	var opts ListOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("List", "stackresources", err)
-		return func(yield func(*Resource, error) bool) { var zero *Resource; yield(zero, err) }
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("List", "stackresources", err)
 		return func(yield func(*Resource, error) bool) { var zero *Resource; yield(zero, err) }
 	}
@@ -98,13 +93,10 @@ func (a *API) ListTypes(ctx context.Context) iter.Seq2[*string, error] {
 	})
 }
 
-type MarkUnhealthyOption = request.Option[MarkUnhealthyOpts]
+type MarkUnhealthyOption = request.NativeFieldCall
 
 func WithMarkUnhealthyOptions(value MarkUnhealthyOpts) MarkUnhealthyOption {
-	return request.WithOptions(value)
-}
-func WithMarkUnhealthyField(key string, value any) MarkUnhealthyOption {
-	return request.WithField[MarkUnhealthyOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type markUnhealthyOptsBuilder struct {
@@ -128,12 +120,8 @@ func (b markUnhealthyOptsBuilder) ToMarkUnhealthyMap() (map[string]any, error) {
 
 // MarkUnhealthy invokes the upstream API with library-owned builders and result handling.
 func (a *API) MarkUnhealthy(ctx context.Context, stackName string, stackID string, resourceName string, opts MarkUnhealthyOpts, options ...MarkUnhealthyOption) error {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("MarkUnhealthy", "stackresources", err)
-		return err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("MarkUnhealthy", "stackresources", err)
 		return err
 	}

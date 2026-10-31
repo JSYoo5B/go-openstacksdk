@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/shares"
 )
 
@@ -22,11 +23,11 @@ func manilaShareActionCases() []manilaShareActionCase {
 	return []manilaShareActionCase{
 		{"Extend", `{"extend":{"new_size":0}}`, []int{202}, func(a *shares.API) error { return a.Extend(ctx, "share-1", shares.ExtendOpts{}) }},
 		{"ExtendExtension", `{"extend":{"new_size":5,"vendor":false}}`, []int{202}, func(a *shares.API) error {
-			return a.Extend(ctx, "share-1", shares.ExtendOpts{NewSize: 5}, shares.WithExtendField("vendor", false))
+			return a.Extend(ctx, "share-1", shares.ExtendOpts{NewSize: 5}, request.Field("vendor", false))
 		}},
 		{"Shrink", `{"shrink":{"new_size":0}}`, []int{202}, func(a *shares.API) error { return a.Shrink(ctx, "share-1", shares.ShrinkOpts{}) }},
 		{"ShrinkExtension", `{"shrink":{"new_size":1,"vendor":[]}}`, []int{202}, func(a *shares.API) error {
-			return a.Shrink(ctx, "share-1", shares.ShrinkOpts{NewSize: 1}, shares.WithShrinkField("vendor", []string{}))
+			return a.Shrink(ctx, "share-1", shares.ShrinkOpts{NewSize: 1}, request.Field("vendor", []string{}))
 		}},
 		{"Revert", `{"revert":{"snapshot_id":"snap-1"}}`, []int{202}, func(a *shares.API) error {
 			return a.Revert(ctx, "share-1", shares.RevertOpts{SnapshotID: "snap-1"})
@@ -36,7 +37,7 @@ func manilaShareActionCases() []manilaShareActionCase {
 			return a.ResetStatus(ctx, "share-1", shares.ResetStatusOpts{Status: "error"})
 		}},
 		{"ResetStatusExtension", `{"reset_status":{"status":"","vendor":null}}`, []int{202}, func(a *shares.API) error {
-			return a.ResetStatus(ctx, "share-1", shares.ResetStatusOpts{}, shares.WithResetStatusField("vendor", nil))
+			return a.ResetStatus(ctx, "share-1", shares.ResetStatusOpts{}, request.Field("vendor", nil))
 		}},
 		{"ForceDelete", `{"force_delete":null}`, []int{202}, func(a *shares.API) error { return a.ForceDelete(ctx, "share-1") }},
 		{"Unmanage", `{"unmanage":null}`, []int{202}, func(a *shares.API) error { return a.Unmanage(ctx, "share-1") }},
@@ -44,7 +45,7 @@ func manilaShareActionCases() []manilaShareActionCase {
 			return a.RevokeAccess(ctx, "share-1", shares.RevokeAccessOpts{AccessID: "rule-1"})
 		}},
 		{"RevokeAccessExtension", `{"deny_access":{"access_id":"","vendor":{"a":false}}}`, []int{200, 202}, func(a *shares.API) error {
-			return a.RevokeAccess(ctx, "share-1", shares.RevokeAccessOpts{}, shares.WithRevokeAccessField("vendor", map[string]bool{"a": false}))
+			return a.RevokeAccess(ctx, "share-1", shares.RevokeAccessOpts{}, request.Field("vendor", map[string]bool{"a": false}))
 		}},
 	}
 }

@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -106,7 +107,7 @@ func TestNativeFirewallRuleRoutesBodiesPagingAndDecode(t *testing.T) {
 		}
 		return nativeFWWire(200, `{"firewall_rule":`+nativeRuleRow+`}`)
 	})
-	created, err := api.Create(ctx, rules.CreateOpts{Protocol: rules.ProtocolTCP, Action: rules.ActionAllow, IPVersion: gophercloud.IPv4, DestinationPort: "22", Enabled: gophercloud.Disabled}, rules.WithCreateField("x_extension", 1))
+	created, err := api.Create(ctx, rules.CreateOpts{Protocol: rules.ProtocolTCP, Action: rules.ActionAllow, IPVersion: gophercloud.IPv4, DestinationPort: "22", Enabled: gophercloud.Disabled}, request.Field("x_extension", 1))
 	if err != nil || !(created.ID == "fr-1" && created.Protocol == "tcp" && created.IPVersion == 4 && reflect.DeepEqual(created.FirewallPolicyID, []string{"fp-1"})) {
 		t.Fatal(created, err)
 	}
@@ -119,11 +120,11 @@ func TestNativeFirewallRuleRoutesBodiesPagingAndDecode(t *testing.T) {
 		t.Fatal(got, err)
 	}
 	protocol, empty := rules.ProtocolUDP, ""
-	if _, err := api.Update(ctx, "fr-1", rules.UpdateOpts{Protocol: &protocol, SourcePort: &empty, Enabled: gophercloud.Enabled}, rules.WithUpdateField("x_extension", 1)); err != nil {
+	if _, err := api.Update(ctx, "fr-1", rules.UpdateOpts{Protocol: &protocol, SourcePort: &empty, Enabled: gophercloud.Enabled}, request.Field("x_extension", 1)); err != nil {
 		t.Fatal(err)
 	}
 	var rows []*rules.Rule
-	for value, err := range api.List(ctx, rules.WithListOptions(rules.ListOpts{Protocol: rules.ProtocolTCP, Action: rules.ActionAllow, IPVersion: 4, Enabled: gophercloud.Enabled, Limit: 1}), rules.WithListQuery("extra", "1")) {
+	for value, err := range api.List(ctx, rules.WithListOptions(rules.ListOpts{Protocol: rules.ProtocolTCP, Action: rules.ActionAllow, IPVersion: 4, Enabled: gophercloud.Enabled, Limit: 1}), request.Query("extra", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -191,7 +192,7 @@ func TestNativeFirewallRuleStrictStatusesDecodeAndPreflight(t *testing.T) {
 			"missing protocol": {"Create", func() error { _, err := api.Create(ctx, rules.CreateOpts{Action: rules.ActionAllow}); return err }()},
 			"missing action":   {"Create", func() error { _, err := api.Create(ctx, rules.CreateOpts{Protocol: rules.ProtocolTCP}); return err }()},
 			"protocol extension": {"Create", func() error {
-				_, err := api.Create(ctx, valid, rules.WithCreateField("protocol", "icmp"))
+				_, err := api.Create(ctx, valid, request.Field("protocol", "icmp"))
 				return err
 			}()},
 			"update nil option": {"Update", func() error { _, err := api.Update(ctx, "fr-1", rules.UpdateOpts{}, nil); return err }()},

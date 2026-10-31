@@ -37,11 +37,10 @@ func (a *API) Get(ctx context.Context, consumerUUID string) (*Allocations, error
 	return value0, err
 }
 
-type ManageOption = request.Option[ManageOpts]
+type ManageOption = request.NativeFieldCall
 
-func WithManageOptions(value ManageOpts) ManageOption { return request.WithOptions(value) }
-func WithManageField(key string, value any) ManageOption {
-	return request.WithField[ManageOpts](key, value)
+func WithManageOptions(value ManageOpts) ManageOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type manageOptsBuilder struct {
@@ -65,12 +64,8 @@ func (b manageOptsBuilder) ToAllocationManageMap() (map[string]any, error) {
 
 // Manage invokes the upstream API with library-owned builders and result handling.
 func (a *API) Manage(ctx context.Context, opts ManageOpts, options ...ManageOption) error {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Manage", "allocations", err)
-		return err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Manage", "allocations", err)
 		return err
 	}
@@ -78,11 +73,10 @@ func (a *API) Manage(ctx context.Context, opts ManageOpts, options ...ManageOpti
 	return request.Wrap("Manage", "allocations", upstream.Manage(ctx, a.client, _opts).ExtractErr())
 }
 
-type UpdateOption = request.Option[UpdateOpts]
+type UpdateOption = request.NativeFieldCall
 
-func WithUpdateOptions(value UpdateOpts) UpdateOption { return request.WithOptions(value) }
-func WithUpdateField(key string, value any) UpdateOption {
-	return request.WithField[UpdateOpts](key, value)
+func WithUpdateOptions(value UpdateOpts) UpdateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type updateOptsBuilder struct {
@@ -106,12 +100,8 @@ func (b updateOptsBuilder) ToAllocationUpdateMap() (map[string]any, error) {
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, consumerUUID string, opts UpdateOpts, options ...UpdateOption) error {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Update", "allocations", err)
-		return err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Update", "allocations", err)
 		return err
 	}

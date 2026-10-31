@@ -57,13 +57,10 @@ func (a *API) GetIntrospectionStatus(ctx context.Context, nodeID string) (*Intro
 	return value0, err
 }
 
-type ListIntrospectionsOption = request.Option[ListIntrospectionsOpts]
+type ListIntrospectionsOption = request.NativeQueryCall
 
 func WithListIntrospectionsOptions(value ListIntrospectionsOpts) ListIntrospectionsOption {
-	return request.WithOptions(value)
-}
-func WithListIntrospectionsQuery(key, value string) ListIntrospectionsOption {
-	return request.WithQuery[ListIntrospectionsOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type listIntrospectionsOptsBuilder struct {
@@ -92,12 +89,8 @@ func (a *API) ListIntrospections(ctx context.Context, options ...ListIntrospecti
 
 func (a *API) listIntrospectionsWithControl(ctx context.Context, control resource.ListControl, options ...ListIntrospectionsOption) iter.Seq2[*Introspection, error] {
 	var opts ListIntrospectionsOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("ListIntrospections", "introspection", err)
-		return func(yield func(*Introspection, error) bool) { var zero *Introspection; yield(zero, err) }
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("ListIntrospections", "introspection", err)
 		return func(yield func(*Introspection, error) bool) { var zero *Introspection; yield(zero, err) }
 	}
@@ -113,13 +106,10 @@ func (a *API) ReApplyIntrospection(ctx context.Context, nodeID string) error {
 	return request.Wrap("ReApplyIntrospection", "introspection", upstream.ReApplyIntrospection(ctx, a.client, nodeID).ExtractErr())
 }
 
-type StartIntrospectionOption = request.Option[StartOpts]
+type StartIntrospectionOption = request.NativeQueryCall
 
 func WithStartIntrospectionOptions(value StartOpts) StartIntrospectionOption {
-	return request.WithOptions(value)
-}
-func WithStartIntrospectionQuery(key, value string) StartIntrospectionOption {
-	return request.WithQuery[StartOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type startIntrospectionOptsBuilder struct {
@@ -143,12 +133,8 @@ func (b startIntrospectionOptsBuilder) ToStartIntrospectionQuery() (string, erro
 
 // StartIntrospection invokes the upstream API with library-owned builders and result handling.
 func (a *API) StartIntrospection(ctx context.Context, nodeID string, opts StartOpts, options ...StartIntrospectionOption) error {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("StartIntrospection", "introspection", err)
-		return err
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("StartIntrospection", "introspection", err)
 		return err
 	}

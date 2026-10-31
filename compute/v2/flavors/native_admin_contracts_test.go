@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -79,7 +80,7 @@ func TestNativeFlavorAdminRoutesBodiesAndDecode(t *testing.T) {
 	created, err := api.Create(ctx, flavors.CreateOpts{
 		Name: "m1", RAM: 512, VCPUs: 1, Disk: nativeFlavorAdminInt(10), ID: "f1", Swap: nativeFlavorAdminInt(0),
 		RxTxFactor: 1.5, IsPublic: &public, Ephemeral: nativeFlavorAdminInt(0), Description: "d",
-	}, flavors.WithCreateField("x_extension", 1))
+	}, request.Field("x_extension", 1))
 	// The string swap "" decodes to 0 through Flavor.UnmarshalJSON.
 	if err != nil || !(created.ID == "f1" && created.RAM == 512 && created.Disk == 10 && created.Swap == 0 && !created.IsPublic &&
 		created.RxTxFactor == 1.5 && created.ExtraSpecs["hw:cpu_policy"] == "dedicated") {
@@ -89,7 +90,7 @@ func TestNativeFlavorAdminRoutesBodiesAndDecode(t *testing.T) {
 	if _, err := api.Create(ctx, flavors.CreateOpts{Name: "m0", Disk: nativeFlavorAdminInt(0)}); err != nil {
 		t.Fatal(err)
 	}
-	updated, err := api.Update(ctx, "f1", flavors.UpdateOpts{Description: "new"}, flavors.WithUpdateField("x_extension", true))
+	updated, err := api.Update(ctx, "f1", flavors.UpdateOpts{Description: "new"}, request.Field("x_extension", true))
 	if err != nil || updated.Description != "new" || updated.Swap != 512 {
 		t.Fatal(updated, err)
 	}
@@ -100,7 +101,7 @@ func TestNativeFlavorAdminRoutesBodiesAndDecode(t *testing.T) {
 	if err := api.Delete(ctx, "f1"); err != nil {
 		t.Fatal(err)
 	}
-	added, err := api.AddAccess(ctx, "f1", flavors.AddAccessOpts{Tenant: "p1"}, flavors.WithAddAccessField("x_extension", "a"))
+	added, err := api.AddAccess(ctx, "f1", flavors.AddAccessOpts{Tenant: "p1"}, request.Field("x_extension", "a"))
 	if err != nil || !reflect.DeepEqual(added, []flavors.FlavorAccess{{FlavorID: "f1", TenantID: "p1"}, {FlavorID: "f1", TenantID: "p2"}}) {
 		t.Fatal(added, err)
 	}
@@ -122,7 +123,7 @@ func TestNativeFlavorAdminRoutesBodiesAndDecode(t *testing.T) {
 	if !reflect.DeepEqual(accesses, []string{"f1/p1", "f1/p2"}) {
 		t.Fatal(accesses)
 	}
-	specs, err := api.CreateExtraSpecs(ctx, "f1", flavors.ExtraSpecsOpts{"hw:cpu_policy": "dedicated", "hw:numa_nodes": "1"}, flavors.WithCreateExtraSpecsField("x_extension", "1"))
+	specs, err := api.CreateExtraSpecs(ctx, "f1", flavors.ExtraSpecsOpts{"hw:cpu_policy": "dedicated", "hw:numa_nodes": "1"}, request.Field("x_extension", "1"))
 	if err != nil || !reflect.DeepEqual(specs, map[string]string{"hw:cpu_policy": "dedicated", "hw:numa_nodes": "1"}) {
 		t.Fatal(specs, err)
 	}
@@ -218,22 +219,22 @@ func TestNativeFlavorAdminStatusesAndPreflight(t *testing.T) {
 			"create name": {"Create", create(flavors.CreateOpts{RAM: 1, VCPUs: 1, Disk: nativeFlavorAdminInt(1)})},
 			"create disk": {"Create", create(flavors.CreateOpts{Name: "m", RAM: 1, VCPUs: 1})},
 			// Omitted optional keys are still reserved for typed input.
-			"create core extension": {"Create", create(createOpts, flavors.WithCreateField("swap", 1))},
+			"create core extension": {"Create", create(createOpts, request.Field("swap", 1))},
 			"create nil option":     {"Create", create(createOpts, nil)},
 			"update core extension": {"Update", func() error {
-				_, err := api.Update(ctx, "f1", flavors.UpdateOpts{}, flavors.WithUpdateField("description", "x"))
+				_, err := api.Update(ctx, "f1", flavors.UpdateOpts{}, request.Field("description", "x"))
 				return err
 			}()},
 			"add tenant extension": {"AddAccess", func() error {
-				_, err := api.AddAccess(ctx, "f1", flavors.AddAccessOpts{Tenant: "p"}, flavors.WithAddAccessField("tenant", "q"))
+				_, err := api.AddAccess(ctx, "f1", flavors.AddAccessOpts{Tenant: "p"}, request.Field("tenant", "q"))
 				return err
 			}()},
 			"remove tenant extension": {"RemoveAccess", func() error {
-				_, err := api.RemoveAccess(ctx, "f1", flavors.RemoveAccessOpts{Tenant: "p"}, flavors.WithRemoveAccessField("tenant", "q"))
+				_, err := api.RemoveAccess(ctx, "f1", flavors.RemoveAccessOpts{Tenant: "p"}, request.Field("tenant", "q"))
 				return err
 			}()},
 			"extra_specs extension": {"CreateExtraSpecs", func() error {
-				_, err := api.CreateExtraSpecs(ctx, "f1", flavors.ExtraSpecsOpts{"k": "v"}, flavors.WithCreateExtraSpecsField("extra_specs", nil))
+				_, err := api.CreateExtraSpecs(ctx, "f1", flavors.ExtraSpecsOpts{"k": "v"}, request.Field("extra_specs", nil))
 				return err
 			}()},
 			"update spec none": {"UpdateExtraSpec", updateSpec(flavors.ExtraSpecsOpts{})},

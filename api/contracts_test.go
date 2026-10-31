@@ -52,14 +52,14 @@ func TestPortExtensionsTypedPaginationAndErrors(t *testing.T) {
 	})
 	cloud.Mux.HandleFunc("/network/v2.0/ports/forbidden", func(w http.ResponseWriter, r *http.Request) { testcloud.JSON(w, 403, `{"error":"forbidden"}`) })
 	api := ports.New(cloud.Client("network", "/network/v2.0"))
-	port, err := api.Create(context.Background(), ports.CreateOpts{NetworkID: "net-id", Name: "port"}, ports.WithCreateField("binding:host_id", "node"), ports.WithCreateField("vendor:flag", false))
+	port, err := api.Create(context.Background(), ports.CreateOpts{NetworkID: "net-id", Name: "port"}, request.Field("binding:host_id", "node"), request.Field("vendor:flag", false))
 	if err != nil || port.ID != "port-id" {
 		t.Fatalf("port=%v err=%v", port, err)
 	}
-	if _, err := api.Create(context.Background(), ports.CreateOpts{NetworkID: "net-id"}, ports.WithCreateField("name", "smuggled")); !errors.Is(err, resource.ErrInvalidOption) || posts != 1 {
+	if _, err := api.Create(context.Background(), ports.CreateOpts{NetworkID: "net-id"}, request.Field("name", "smuggled")); !errors.Is(err, resource.ErrInvalidOption) || posts != 1 {
 		t.Fatalf("posts=%d err=%v", posts, err)
 	}
-	opts := []ports.ListOption{ports.WithListOptions(ports.ListOpts{Limit: 5}), ports.WithListQuery("vendor:filter", "a&b")}
+	opts := []ports.ListOption{ports.WithListOptions(ports.ListOpts{Limit: 5}), request.Query("vendor:filter", "a&b")}
 	for value, err := range api.List(context.Background(), opts...) {
 		if err != nil || value.ID != "one" {
 			t.Fatalf("value=%v err=%v", value, err)
@@ -112,7 +112,7 @@ func TestServerSecondaryBuilderAndTypedList(t *testing.T) {
 	if err != nil || server.ID != "server-id" {
 		t.Fatalf("server=%v err=%v", server, err)
 	}
-	if _, err := api.Create(context.Background(), servers.CreateOpts{Name: "vm", ImageRef: "image-id", FlavorRef: "flavor-id"}, request.WithArgument[servers.CreateOpts]("hintOpts", 123)); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := api.Create(context.Background(), servers.CreateOpts{Name: "vm", ImageRef: "image-id", FlavorRef: "flavor-id"}, request.Custom(request.WithArgument[servers.CreateOpts]("hintOpts", 123))); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
 	count := 0
@@ -176,10 +176,10 @@ func TestSwiftUploadAndDownloadPreserveContent(t *testing.T) {
 	if err != nil || header.ETag != "etag" {
 		t.Fatalf("header=%v err=%v", header, err)
 	}
-	if _, err := api.Download(context.Background(), "container", "hello.txt", request.WithField[objects.DownloadOpts]("ignored", true)); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := api.Download(context.Background(), "container", "hello.txt", request.Custom(request.WithField[objects.DownloadOpts]("ignored", true))); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
-	download, err := api.Download(context.Background(), "container", "hello.txt", objects.WithDownloadHeader("X-Vendor-Setting", "false"), objects.WithDownloadQuery("vendor", "a&b"))
+	download, err := api.Download(context.Background(), "container", "hello.txt", request.Header("X-Vendor-Setting", "false"), request.Query("vendor", "a&b"))
 	if err != nil {
 		t.Fatal(err)
 	}

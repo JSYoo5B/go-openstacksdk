@@ -311,7 +311,7 @@ func TestComputeRemoteConsoleResponseEvidenceSourceAndNativeCompatibility(t *tes
 			}
 		}
 		opts := remoteconsoles.CreateOpts{Protocol: remoteconsoles.ConsoleProtocolVNC, Type: remoteconsoles.ConsoleTypeNoVNC}
-		option := remoteconsoles.WithCreateField("url", "native-request-extension")
+		option := request.Field("url", "native-request-extension")
 		value, err := api.Create(context.Background(), "server-id", opts, option)
 		if err != nil || value == nil || value.Protocol != "vnc" || value.Type != "novnc" || value.URL != "native" || calls.Load() != 1 {
 			t.Fatal(value, err, calls.Load())

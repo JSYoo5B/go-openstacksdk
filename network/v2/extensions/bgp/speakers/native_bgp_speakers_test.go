@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/speakers"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -79,7 +80,7 @@ func TestNativeBGPSpeakerRoutesBodiesActionsAndDecode(t *testing.T) {
 		return nativeBGPSpeakerWire(200, `{"bgp_speaker":`+nativeBGPSpeakerRow+`}`)
 	})
 	// LocalAS is a string on input and an integer on output.
-	created, err := api.Create(ctx, speakers.CreateOpts{Name: "spk", IPVersion: 4, LocalAS: "65000", AdvertiseTenantNetworks: true, Networks: []string{"n-1"}}, speakers.WithCreateField("x_extension", 1))
+	created, err := api.Create(ctx, speakers.CreateOpts{Name: "spk", IPVersion: 4, LocalAS: "65000", AdvertiseTenantNetworks: true, Networks: []string{"n-1"}}, request.Field("x_extension", 1))
 	if err != nil || !(created.ID == "bs-1" && created.LocalAS == 65000 && created.IPVersion == 4 && reflect.DeepEqual(created.Peers, []string{"bp-1"})) {
 		t.Fatal(created, err)
 	}
@@ -91,21 +92,21 @@ func TestNativeBGPSpeakerRoutesBodiesActionsAndDecode(t *testing.T) {
 		t.Fatal(got, err)
 	}
 	// The advertise flags have no omitempty, so a name-only update also sends false for both.
-	if _, err := api.Update(ctx, "bs-1", speakers.UpdateOpts{Name: "spk-2"}, speakers.WithUpdateField("x_extension", 1)); err != nil {
+	if _, err := api.Update(ctx, "bs-1", speakers.UpdateOpts{Name: "spk-2"}, request.Field("x_extension", 1)); err != nil {
 		t.Fatal(err)
 	}
-	peer, err := api.AddBGPPeer(ctx, "bs-1", speakers.AddBGPPeerOpts{BGPPeerID: "bp-1"}, speakers.WithAddBGPPeerField("x_extension", 1))
+	peer, err := api.AddBGPPeer(ctx, "bs-1", speakers.AddBGPPeerOpts{BGPPeerID: "bp-1"}, request.Field("x_extension", 1))
 	if err != nil || peer.BGPPeerID != "bp-1" {
 		t.Fatal(peer, err)
 	}
-	if err := api.RemoveBGPPeer(ctx, "bs-1", speakers.RemoveBGPPeerOpts{BGPPeerID: "bp-1"}, speakers.WithRemoveBGPPeerField("x_extension", 1)); err != nil {
+	if err := api.RemoveBGPPeer(ctx, "bs-1", speakers.RemoveBGPPeerOpts{BGPPeerID: "bp-1"}, request.Field("x_extension", 1)); err != nil {
 		t.Fatal(err)
 	}
-	network, err := api.AddGatewayNetwork(ctx, "bs-1", speakers.AddGatewayNetworkOpts{NetworkID: "n-1"}, speakers.WithAddGatewayNetworkField("x_extension", 1))
+	network, err := api.AddGatewayNetwork(ctx, "bs-1", speakers.AddGatewayNetworkOpts{NetworkID: "n-1"}, request.Field("x_extension", 1))
 	if err != nil || network.NetworkID != "n-1" {
 		t.Fatal(network, err)
 	}
-	if err := api.RemoveGatewayNetwork(ctx, "bs-1", speakers.RemoveGatewayNetworkOpts{NetworkID: "n-1"}, speakers.WithRemoveGatewayNetworkField("x_extension", 1)); err != nil {
+	if err := api.RemoveGatewayNetwork(ctx, "bs-1", speakers.RemoveGatewayNetworkOpts{NetworkID: "n-1"}, request.Field("x_extension", 1)); err != nil {
 		t.Fatal(err)
 	}
 	// Empty IDs are sent as empty strings; Neutron decides validity.
@@ -286,24 +287,24 @@ func TestNativeBGPSpeakerStatusesDecodeAndPreflight(t *testing.T) {
 			err       error
 		}{
 			"create extension": {"Create", func() error {
-				_, err := api.Create(ctx, speakers.CreateOpts{}, speakers.WithCreateField("local_as", 1))
+				_, err := api.Create(ctx, speakers.CreateOpts{}, request.Field("local_as", 1))
 				return err
 			}()},
 			"create nil option": {"Create", func() error { _, err := api.Create(ctx, speakers.CreateOpts{}, nil); return err }()},
 			"update extension": {"Update", func() error {
-				_, err := api.Update(ctx, "bs-1", speakers.UpdateOpts{}, speakers.WithUpdateField("advertise_tenant_networks", true))
+				_, err := api.Update(ctx, "bs-1", speakers.UpdateOpts{}, request.Field("advertise_tenant_networks", true))
 				return err
 			}()},
 			"add peer extension": {"AddBGPPeer", func() error {
-				_, err := api.AddBGPPeer(ctx, "bs-1", speakers.AddBGPPeerOpts{}, speakers.WithAddBGPPeerField("bgp_peer_id", "x"))
+				_, err := api.AddBGPPeer(ctx, "bs-1", speakers.AddBGPPeerOpts{}, request.Field("bgp_peer_id", "x"))
 				return err
 			}()},
-			"remove peer extension": {"RemoveBGPPeer", api.RemoveBGPPeer(ctx, "bs-1", speakers.RemoveBGPPeerOpts{}, speakers.WithRemoveBGPPeerField("bgp_peer_id", "x"))},
+			"remove peer extension": {"RemoveBGPPeer", api.RemoveBGPPeer(ctx, "bs-1", speakers.RemoveBGPPeerOpts{}, request.Field("bgp_peer_id", "x"))},
 			"add network nil option": {"AddGatewayNetwork", func() error {
 				_, err := api.AddGatewayNetwork(ctx, "bs-1", speakers.AddGatewayNetworkOpts{}, nil)
 				return err
 			}()},
-			"remove network extension": {"RemoveGatewayNetwork", api.RemoveGatewayNetwork(ctx, "bs-1", speakers.RemoveGatewayNetworkOpts{}, speakers.WithRemoveGatewayNetworkField("network_id", "x"))},
+			"remove network extension": {"RemoveGatewayNetwork", api.RemoveGatewayNetwork(ctx, "bs-1", speakers.RemoveGatewayNetworkOpts{}, request.Field("network_id", "x"))},
 		} {
 			if check.err == nil {
 				t.Fatal(name, "accepted")

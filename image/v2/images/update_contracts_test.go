@@ -141,10 +141,10 @@ func TestNativeImageUpdateEmptyReplacementAndInheritedPatchInterface(t *testing.
 		{"nil opts", nil, nil, `[]`}, {"allocated empty opts", images.UpdateOpts{}, nil, `[]`},
 		{"WithUpdateOptions replaces base", images.UpdateOpts{images.ReplaceImageName{NewName: "discard"}}, []images.UpdateOption{images.WithUpdateOptions(images.UpdateOpts{images.ReplaceImageProtected{NewProtected: false}})}, `[{"op":"replace","path":"/protected","value":false}]`},
 		{"WithUpdateOptions nil clears base", images.UpdateOpts{images.ReplaceImageName{NewName: "discard"}}, []images.UpdateOption{images.WithUpdateOptions(nil)}, `[]`},
-		{"nil-error option mutates typed patch set", nil, []images.UpdateOption{func(config *request.Config[images.UpdateOpts]) error {
+		{"nil-error option mutates typed patch set", nil, []images.UpdateOption{request.Custom(func(config *request.Config[images.UpdateOpts]) error {
 			config.Options = images.UpdateOpts{images.ReplaceImageMinRam{NewMinRam: 0}}
 			return nil
-		}}, `[{"op":"replace","path":"/min_ram","value":0}]`},
+		})}, `[{"op":"replace","path":"/min_ram","value":0}]`},
 		{"custom inherited Patch preserves extension", images.UpdateOpts{nativeUpdateCustomPatch{"op": "test", "path": "/custom", "value": json.RawMessage(`{"nested":[false,null]}`)}}, nil, `[{"op":"test","path":"/custom","value":{"nested":[false,null]}}]`},
 	} {
 		t.Run(test.name, func(t *testing.T) {
@@ -172,11 +172,11 @@ func TestNativeImageUpdateRejectsRequestExtensionsAndMarshalFailuresBeforeHTTP(t
 		cause   error
 	}{
 		{"nil option", nil, []images.UpdateOption{nil}, resource.ErrInvalidOption},
-		{"JSON extension", nil, []images.UpdateOption{request.WithField[images.UpdateOpts]("extra", false)}, resource.ErrInvalidOption},
-		{"query extension", nil, []images.UpdateOption{request.WithQuery[images.UpdateOpts]("extra", "x")}, resource.ErrInvalidOption},
-		{"header extension", nil, []images.UpdateOption{request.WithHeader[images.UpdateOpts]("X-Extra", "x")}, resource.ErrInvalidOption},
-		{"argument extension", nil, []images.UpdateOption{request.WithArgument[images.UpdateOpts]("extra", false)}, resource.ErrInvalidOption},
-		{"option error", nil, []images.UpdateOption{func(*request.Config[images.UpdateOpts]) error { return marker }}, marker},
+		{"JSON extension", nil, []images.UpdateOption{request.Custom(request.WithField[images.UpdateOpts]("extra", false))}, resource.ErrInvalidOption},
+		{"query extension", nil, []images.UpdateOption{request.Custom(request.WithQuery[images.UpdateOpts]("extra", "x"))}, resource.ErrInvalidOption},
+		{"header extension", nil, []images.UpdateOption{request.Custom(request.WithHeader[images.UpdateOpts]("X-Extra", "x"))}, resource.ErrInvalidOption},
+		{"argument extension", nil, []images.UpdateOption{request.Custom(request.WithArgument[images.UpdateOpts]("extra", false))}, resource.ErrInvalidOption},
+		{"option error", nil, []images.UpdateOption{request.Custom(func(*request.Config[images.UpdateOpts]) error { return marker })}, marker},
 		{"custom patch marshal error", images.UpdateOpts{nativeUpdateCustomPatch{"op": "test", "path": "/custom", "value": nativeUpdateMarshalFailure{cause: marker}}}, nil, marker},
 	} {
 		t.Run(test.name, func(t *testing.T) {

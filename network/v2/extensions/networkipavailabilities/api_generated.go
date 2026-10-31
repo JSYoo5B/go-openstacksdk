@@ -31,10 +31,9 @@ func (a *API) Get(ctx context.Context, id string) (*NetworkIPAvailability, error
 	return value0, err
 }
 
-type ListOption = request.Option[ListOpts]
+type ListOption = request.NativeQueryCall
 
-func WithListOptions(value ListOpts) ListOption  { return request.WithOptions(value) }
-func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
+func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
 	base   ListOpts
@@ -58,15 +57,8 @@ func (b listOptsBuilder) ToNetworkIPAvailabilityListQuery() (string, error) {
 // List invokes the upstream API with library-owned builders and result handling.
 func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*NetworkIPAvailability, error] {
 	var opts ListOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("List", "networkipavailabilities", err)
-		return func(yield func(*NetworkIPAvailability, error) bool) {
-			var zero *NetworkIPAvailability
-			yield(zero, err)
-		}
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("List", "networkipavailabilities", err)
 		return func(yield func(*NetworkIPAvailability, error) bool) {
 			var zero *NetworkIPAvailability

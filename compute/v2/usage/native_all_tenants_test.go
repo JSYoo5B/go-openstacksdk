@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/usage"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -28,7 +29,7 @@ func TestNativeAllTenantsUsageQueryPagingAndDecode(t *testing.T) {
 	start := time.Date(2026, 10, 1, 9, 0, 0, 0, time.FixedZone("KST", 9*3600))
 	end := time.Date(2026, 10, 10, 0, 0, 0, 0, time.UTC)
 	var rows []*usage.TenantUsage
-	for value, err := range api.AllTenants(context.Background(), usage.AllTenantsOpts{Detailed: true, Start: &start, End: &end, Limit: 1}, usage.WithAllTenantsQuery("extra", "1")) {
+	for value, err := range api.AllTenants(context.Background(), usage.AllTenantsOpts{Detailed: true, Start: &start, End: &end, Limit: 1}, request.Query("extra", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}

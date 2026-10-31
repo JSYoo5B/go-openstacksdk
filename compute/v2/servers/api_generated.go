@@ -160,14 +160,13 @@ func (a *API) ConfirmResize(ctx context.Context, id string) error {
 	return request.Wrap("ConfirmResize", "servers", upstream.ConfirmResize(ctx, a.client, id).ExtractErr())
 }
 
-type CreateOption = request.Option[CreateOpts]
+type CreateOption = request.NativeFieldCall
 
-func WithCreateOptions(value CreateOpts) CreateOption { return request.WithOptions(value) }
-func WithCreateField(key string, value any) CreateOption {
-	return request.WithField[CreateOpts](key, value)
+func WithCreateOptions(value CreateOpts) CreateOption {
+	return request.Custom(request.WithOptions(value))
 }
 func WithCreateHintOpts(value SchedulerHintOpts) CreateOption {
-	return request.WithArgument[CreateOpts]("hintOpts", value)
+	return request.Custom(request.WithArgument[CreateOpts]("hintOpts", value))
 }
 
 type createOptsBuilder struct {
@@ -210,13 +209,8 @@ func (b createHintOptsBuilder) ToSchedulerHintsMap() (map[string]any, error) {
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*Server, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true, Arguments: []string{"hintOpts"}}, options...)
 	if err != nil {
-		err = request.Wrap("Create", "servers", err)
-		var zero0 *Server
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false, "hintOpts"); err != nil {
 		err = request.Wrap("Create", "servers", err)
 		var zero0 *Server
 		return zero0, err
@@ -240,13 +234,10 @@ func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOpti
 	return value0, err
 }
 
-type CreateImageOption = request.Option[CreateImageOpts]
+type CreateImageOption = request.NativeFieldCall
 
 func WithCreateImageOptions(value CreateImageOpts) CreateImageOption {
-	return request.WithOptions(value)
-}
-func WithCreateImageField(key string, value any) CreateImageOption {
-	return request.WithField[CreateImageOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type createImageOptsBuilder struct {
@@ -270,13 +261,8 @@ func (b createImageOptsBuilder) ToServerCreateImageMap() (map[string]any, error)
 
 // CreateImage invokes the upstream API with library-owned builders and result handling.
 func (a *API) CreateImage(ctx context.Context, id string, opts CreateImageOpts, options ...CreateImageOption) (string, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("CreateImage", "servers", err)
-		var zero0 string
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("CreateImage", "servers", err)
 		var zero0 string
 		return zero0, err
@@ -288,13 +274,10 @@ func (a *API) CreateImage(ctx context.Context, id string, opts CreateImageOpts, 
 	return value0, err
 }
 
-type CreateMetadatumOption = request.Option[MetadatumOpts]
+type CreateMetadatumOption = request.NativeFieldCall
 
 func WithCreateMetadatumOptions(value MetadatumOpts) CreateMetadatumOption {
-	return request.WithOptions(value)
-}
-func WithCreateMetadatumField(key string, value any) CreateMetadatumOption {
-	return request.WithField[MetadatumOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type createMetadatumOptsBuilder struct {
@@ -320,13 +303,8 @@ func (b createMetadatumOptsBuilder) ToMetadatumCreateMap() (map[string]any, stri
 
 // CreateMetadatum invokes the upstream API with library-owned builders and result handling.
 func (a *API) CreateMetadatum(ctx context.Context, id string, opts MetadatumOpts, options ...CreateMetadatumOption) (map[string]string, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("CreateMetadatum", "servers", err)
-		var zero0 map[string]string
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("CreateMetadatum", "servers", err)
 		var zero0 map[string]string
 		return zero0, err
@@ -348,11 +326,10 @@ func (a *API) DeleteMetadatum(ctx context.Context, id string, key string) error 
 	return request.Wrap("DeleteMetadatum", "servers", upstream.DeleteMetadatum(ctx, a.client, id, key).ExtractErr())
 }
 
-type EvacuateOption = request.Option[EvacuateOpts]
+type EvacuateOption = request.NativeFieldCall
 
-func WithEvacuateOptions(value EvacuateOpts) EvacuateOption { return request.WithOptions(value) }
-func WithEvacuateField(key string, value any) EvacuateOption {
-	return request.WithField[EvacuateOpts](key, value)
+func WithEvacuateOptions(value EvacuateOpts) EvacuateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type evacuateOptsBuilder struct {
@@ -376,13 +353,8 @@ func (b evacuateOptsBuilder) ToEvacuateMap() (map[string]any, error) {
 
 // Evacuate invokes the upstream API with library-owned builders and result handling.
 func (a *API) Evacuate(ctx context.Context, id string, opts EvacuateOpts, options ...EvacuateOption) (string, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Evacuate", "servers", err)
-		var zero0 string
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Evacuate", "servers", err)
 		var zero0 string
 		return zero0, err
@@ -424,10 +396,9 @@ func (a *API) InjectNetworkInfo(ctx context.Context, id string) error {
 	return request.Wrap("InjectNetworkInfo", "servers", upstream.InjectNetworkInfo(ctx, a.client, id).ExtractErr())
 }
 
-type ListOption = request.Option[ListOpts]
+type ListOption = request.NativeQueryCall
 
-func WithListOptions(value ListOpts) ListOption  { return request.WithOptions(value) }
-func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
+func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
 	base   ListOpts
@@ -455,12 +426,8 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Server
 
 func (a *API) listWithControl(ctx context.Context, control resource.ListControl, options ...ListOption) iter.Seq2[*Server, error] {
 	var opts ListOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("List", "servers", err)
-		return func(yield func(*Server, error) bool) { var zero *Server; yield(zero, err) }
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("List", "servers", err)
 		return func(yield func(*Server, error) bool) { var zero *Server; yield(zero, err) }
 	}
@@ -484,11 +451,10 @@ func (a *API) ListAddressesByNetwork(ctx context.Context, id string, network str
 	})
 }
 
-type ListSimpleOption = request.Option[ListOpts]
+type ListSimpleOption = request.NativeQueryCall
 
-func WithListSimpleOptions(value ListOpts) ListSimpleOption { return request.WithOptions(value) }
-func WithListSimpleQuery(key, value string) ListSimpleOption {
-	return request.WithQuery[ListOpts](key, value)
+func WithListSimpleOptions(value ListOpts) ListSimpleOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type listSimpleOptsBuilder struct {
@@ -513,12 +479,8 @@ func (b listSimpleOptsBuilder) ToServerListQuery() (string, error) {
 // ListSimple invokes the upstream API with library-owned builders and result handling.
 func (a *API) ListSimple(ctx context.Context, options ...ListSimpleOption) iter.Seq2[*Server, error] {
 	var opts ListOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("ListSimple", "servers", err)
-		return func(yield func(*Server, error) bool) { var zero *Server; yield(zero, err) }
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("ListSimple", "servers", err)
 		return func(yield func(*Server, error) bool) { var zero *Server; yield(zero, err) }
 	}
@@ -529,13 +491,10 @@ func (a *API) ListSimple(ctx context.Context, options ...ListSimpleOption) iter.
 	})
 }
 
-type LiveMigrateOption = request.Option[LiveMigrateOpts]
+type LiveMigrateOption = request.NativeFieldCall
 
 func WithLiveMigrateOptions(value LiveMigrateOpts) LiveMigrateOption {
-	return request.WithOptions(value)
-}
-func WithLiveMigrateField(key string, value any) LiveMigrateOption {
-	return request.WithField[LiveMigrateOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type liveMigrateOptsBuilder struct {
@@ -559,12 +518,8 @@ func (b liveMigrateOptsBuilder) ToLiveMigrateMap() (map[string]any, error) {
 
 // LiveMigrate invokes the upstream API with library-owned builders and result handling.
 func (a *API) LiveMigrate(ctx context.Context, id string, opts LiveMigrateOpts, options ...LiveMigrateOption) error {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("LiveMigrate", "servers", err)
-		return err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("LiveMigrate", "servers", err)
 		return err
 	}
@@ -603,11 +558,10 @@ func (a *API) Pause(ctx context.Context, id string) error {
 	return request.Wrap("Pause", "servers", upstream.Pause(ctx, a.client, id).ExtractErr())
 }
 
-type RebootOption = request.Option[RebootOpts]
+type RebootOption = request.NativeFieldCall
 
-func WithRebootOptions(value RebootOpts) RebootOption { return request.WithOptions(value) }
-func WithRebootField(key string, value any) RebootOption {
-	return request.WithField[RebootOpts](key, value)
+func WithRebootOptions(value RebootOpts) RebootOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type rebootOptsBuilder struct {
@@ -631,12 +585,8 @@ func (b rebootOptsBuilder) ToServerRebootMap() (map[string]any, error) {
 
 // Reboot invokes the upstream API with library-owned builders and result handling.
 func (a *API) Reboot(ctx context.Context, id string, opts RebootOpts, options ...RebootOption) error {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Reboot", "servers", err)
-		return err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Reboot", "servers", err)
 		return err
 	}
@@ -644,11 +594,10 @@ func (a *API) Reboot(ctx context.Context, id string, opts RebootOpts, options ..
 	return request.Wrap("Reboot", "servers", upstream.Reboot(ctx, a.client, id, _opts).ExtractErr())
 }
 
-type RebuildOption = request.Option[RebuildOpts]
+type RebuildOption = request.NativeFieldCall
 
-func WithRebuildOptions(value RebuildOpts) RebuildOption { return request.WithOptions(value) }
-func WithRebuildField(key string, value any) RebuildOption {
-	return request.WithField[RebuildOpts](key, value)
+func WithRebuildOptions(value RebuildOpts) RebuildOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type rebuildOptsBuilder struct {
@@ -672,13 +621,8 @@ func (b rebuildOptsBuilder) ToServerRebuildMap() (map[string]any, error) {
 
 // Rebuild invokes the upstream API with library-owned builders and result handling.
 func (a *API) Rebuild(ctx context.Context, id string, opts RebuildOpts, options ...RebuildOption) (*Server, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Rebuild", "servers", err)
-		var zero0 *Server
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Rebuild", "servers", err)
 		var zero0 *Server
 		return zero0, err
@@ -690,11 +634,10 @@ func (a *API) Rebuild(ctx context.Context, id string, opts RebuildOpts, options 
 	return value0, err
 }
 
-type RescueOption = request.Option[RescueOpts]
+type RescueOption = request.NativeFieldCall
 
-func WithRescueOptions(value RescueOpts) RescueOption { return request.WithOptions(value) }
-func WithRescueField(key string, value any) RescueOption {
-	return request.WithField[RescueOpts](key, value)
+func WithRescueOptions(value RescueOpts) RescueOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type rescueOptsBuilder struct {
@@ -718,13 +661,8 @@ func (b rescueOptsBuilder) ToServerRescueMap() (map[string]any, error) {
 
 // Rescue invokes the upstream API with library-owned builders and result handling.
 func (a *API) Rescue(ctx context.Context, id string, opts RescueOpts, options ...RescueOption) (string, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Rescue", "servers", err)
-		var zero0 string
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Rescue", "servers", err)
 		var zero0 string
 		return zero0, err
@@ -736,13 +674,10 @@ func (a *API) Rescue(ctx context.Context, id string, opts RescueOpts, options ..
 	return value0, err
 }
 
-type ResetMetadataOption = request.Option[MetadataOpts]
+type ResetMetadataOption = request.NativeFieldCall
 
 func WithResetMetadataOptions(value MetadataOpts) ResetMetadataOption {
-	return request.WithOptions(value)
-}
-func WithResetMetadataField(key string, value any) ResetMetadataOption {
-	return request.WithField[MetadataOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type resetMetadataOptsBuilder struct {
@@ -766,13 +701,8 @@ func (b resetMetadataOptsBuilder) ToMetadataResetMap() (map[string]any, error) {
 
 // ResetMetadata invokes the upstream API with library-owned builders and result handling.
 func (a *API) ResetMetadata(ctx context.Context, id string, opts MetadataOpts, options ...ResetMetadataOption) (map[string]string, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("ResetMetadata", "servers", err)
-		var zero0 map[string]string
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("ResetMetadata", "servers", err)
 		var zero0 map[string]string
 		return zero0, err
@@ -794,11 +724,10 @@ func (a *API) ResetState(ctx context.Context, id string, state ServerState) erro
 	return request.Wrap("ResetState", "servers", upstream.ResetState(ctx, a.client, id, state).ExtractErr())
 }
 
-type ResizeOption = request.Option[ResizeOpts]
+type ResizeOption = request.NativeFieldCall
 
-func WithResizeOptions(value ResizeOpts) ResizeOption { return request.WithOptions(value) }
-func WithResizeField(key string, value any) ResizeOption {
-	return request.WithField[ResizeOpts](key, value)
+func WithResizeOptions(value ResizeOpts) ResizeOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type resizeOptsBuilder struct {
@@ -822,12 +751,8 @@ func (b resizeOptsBuilder) ToServerResizeMap() (map[string]any, error) {
 
 // Resize invokes the upstream API with library-owned builders and result handling.
 func (a *API) Resize(ctx context.Context, id string, opts ResizeOpts, options ...ResizeOption) error {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Resize", "servers", err)
-		return err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Resize", "servers", err)
 		return err
 	}
@@ -855,13 +780,10 @@ func (a *API) ShelveOffload(ctx context.Context, id string) error {
 	return request.Wrap("ShelveOffload", "servers", upstream.ShelveOffload(ctx, a.client, id).ExtractErr())
 }
 
-type ShowConsoleOutputOption = request.Option[ShowConsoleOutputOpts]
+type ShowConsoleOutputOption = request.NativeFieldCall
 
 func WithShowConsoleOutputOptions(value ShowConsoleOutputOpts) ShowConsoleOutputOption {
-	return request.WithOptions(value)
-}
-func WithShowConsoleOutputField(key string, value any) ShowConsoleOutputOption {
-	return request.WithField[ShowConsoleOutputOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type showConsoleOutputOptsBuilder struct {
@@ -885,13 +807,8 @@ func (b showConsoleOutputOptsBuilder) ToServerShowConsoleOutputMap() (map[string
 
 // ShowConsoleOutput invokes the upstream API with library-owned builders and result handling.
 func (a *API) ShowConsoleOutput(ctx context.Context, id string, opts ShowConsoleOutputOpts, options ...ShowConsoleOutputOption) (string, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("ShowConsoleOutput", "servers", err)
-		var zero0 string
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("ShowConsoleOutput", "servers", err)
 		var zero0 string
 		return zero0, err
@@ -933,11 +850,10 @@ func (a *API) Unrescue(ctx context.Context, id string) error {
 	return request.Wrap("Unrescue", "servers", upstream.Unrescue(ctx, a.client, id).ExtractErr())
 }
 
-type UnshelveOption = request.Option[UnshelveOpts]
+type UnshelveOption = request.NativeFieldCall
 
-func WithUnshelveOptions(value UnshelveOpts) UnshelveOption { return request.WithOptions(value) }
-func WithUnshelveField(key string, value any) UnshelveOption {
-	return request.WithField[UnshelveOpts](key, value)
+func WithUnshelveOptions(value UnshelveOpts) UnshelveOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type unshelveOptsBuilder struct {
@@ -961,12 +877,8 @@ func (b unshelveOptsBuilder) ToUnshelveMap() (map[string]any, error) {
 
 // Unshelve invokes the upstream API with library-owned builders and result handling.
 func (a *API) Unshelve(ctx context.Context, id string, opts UnshelveOpts, options ...UnshelveOption) error {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Unshelve", "servers", err)
-		return err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Unshelve", "servers", err)
 		return err
 	}
@@ -974,11 +886,10 @@ func (a *API) Unshelve(ctx context.Context, id string, opts UnshelveOpts, option
 	return request.Wrap("Unshelve", "servers", upstream.Unshelve(ctx, a.client, id, _opts).ExtractErr())
 }
 
-type UpdateOption = request.Option[UpdateOpts]
+type UpdateOption = request.NativeFieldCall
 
-func WithUpdateOptions(value UpdateOpts) UpdateOption { return request.WithOptions(value) }
-func WithUpdateField(key string, value any) UpdateOption {
-	return request.WithField[UpdateOpts](key, value)
+func WithUpdateOptions(value UpdateOpts) UpdateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type updateOptsBuilder struct {
@@ -1002,13 +913,8 @@ func (b updateOptsBuilder) ToServerUpdateMap() (map[string]any, error) {
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ...UpdateOption) (*Server, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Update", "servers", err)
-		var zero0 *Server
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Update", "servers", err)
 		var zero0 *Server
 		return zero0, err
@@ -1020,13 +926,10 @@ func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ..
 	return value0, err
 }
 
-type UpdateMetadataOption = request.Option[MetadataOpts]
+type UpdateMetadataOption = request.NativeFieldCall
 
 func WithUpdateMetadataOptions(value MetadataOpts) UpdateMetadataOption {
-	return request.WithOptions(value)
-}
-func WithUpdateMetadataField(key string, value any) UpdateMetadataOption {
-	return request.WithField[MetadataOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type updateMetadataOptsBuilder struct {
@@ -1050,13 +953,8 @@ func (b updateMetadataOptsBuilder) ToMetadataUpdateMap() (map[string]any, error)
 
 // UpdateMetadata invokes the upstream API with library-owned builders and result handling.
 func (a *API) UpdateMetadata(ctx context.Context, id string, opts MetadataOpts, options ...UpdateMetadataOption) (map[string]string, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("UpdateMetadata", "servers", err)
-		var zero0 map[string]string
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("UpdateMetadata", "servers", err)
 		var zero0 map[string]string
 		return zero0, err

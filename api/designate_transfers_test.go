@@ -14,6 +14,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/dns/v2/transfer/accept"
 	transferrequest "github.com/JSYoo5B/go-openstacksdk/dns/v2/transfer/request"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -52,7 +53,7 @@ func TestDesignateTransferRequestCreateSendsZoneRouteFlatBodyAndExtensions(t *te
 	})
 	api := newDesignateTransferRequests(t, cloud)
 	value, err := api.Create(context.Background(), "zone-1", transferrequest.CreateOpts{TargetProjectID: "p2", Description: "handoff"},
-		transferrequest.WithCreateField("flag", false), transferrequest.WithCreateField("nothing", nil))
+		request.Field("flag", false), request.Field("nothing", nil))
 	if err != nil || value == nil || value.ID != "tr-1" || value.Key != "SECRETKEY" || value.Status != "ACTIVE" || value.ZoneName != "example.org." || value.CreatedAt.IsZero() || calls.Load() != 1 {
 		t.Fatalf("value=%+v error=%v calls=%d", value, err, calls.Load())
 	}
@@ -70,7 +71,7 @@ func TestDesignateTransferRequestUpdateOmitsEmptyValuesAndKeepsExtensions(t *tes
 	})
 	api := newDesignateTransferRequests(t, cloud)
 	ctx := context.Background()
-	if _, err := api.Update(ctx, "tr-1", transferrequest.UpdateOpts{Description: "new"}, transferrequest.WithUpdateField("flag", false)); err != nil {
+	if _, err := api.Update(ctx, "tr-1", transferrequest.UpdateOpts{Description: "new"}, request.Field("flag", false)); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := api.Update(ctx, "tr-1", transferrequest.UpdateOpts{}); err != nil {
@@ -144,7 +145,7 @@ func TestDesignateTransferAcceptCreateSendsFlatBodyAndRequiresCoreFields(t *test
 		testcloud.JSON(w, 201, designateTransferAcceptBody)
 	})
 	api := newDesignateTransferAccepts(t, cloud)
-	value, err := api.Create(context.Background(), accept.CreateOpts{Key: "SECRETKEY", ZoneTransferRequestID: "tr-1"}, accept.WithCreateField("flag", false))
+	value, err := api.Create(context.Background(), accept.CreateOpts{Key: "SECRETKEY", ZoneTransferRequestID: "tr-1"}, request.Field("flag", false))
 	if err != nil || value == nil || value.ID != "ta-1" || value.Status != "COMPLETE" || value.ZoneID != "zone-1" || value.ZoneTransferRequestID != "tr-1" || value.CreatedAt.IsZero() {
 		t.Fatalf("value=%+v error=%v", value, err)
 	}
@@ -171,15 +172,15 @@ func TestDesignateTransferRejectsProtectedOrUnsupportedExtensionsBeforeHTTP(t *t
 			t.Fatalf("%s: %v", name, err)
 		}
 	}
-	_, err := requests.Create(ctx, "zone-1", transferrequest.CreateOpts{}, transferrequest.WithCreateField("description", "x"))
+	_, err := requests.Create(ctx, "zone-1", transferrequest.CreateOpts{}, request.Field("description", "x"))
 	invalid("protected request create field", err)
 	_, err = requests.Create(ctx, "zone-1", transferrequest.CreateOpts{}, nil)
 	invalid("nil request create option", err)
-	_, err = requests.Update(ctx, "tr-1", transferrequest.UpdateOpts{}, transferrequest.WithUpdateField("target_project_id", "x"))
+	_, err = requests.Update(ctx, "tr-1", transferrequest.UpdateOpts{}, request.Field("target_project_id", "x"))
 	invalid("protected request update field", err)
 	_, err = requests.Update(ctx, "tr-1", transferrequest.UpdateOpts{}, nil)
 	invalid("nil request update option", err)
-	_, err = accepts.Create(ctx, accept.CreateOpts{Key: "k", ZoneTransferRequestID: "tr-1"}, accept.WithCreateField("key", "x"))
+	_, err = accepts.Create(ctx, accept.CreateOpts{Key: "k", ZoneTransferRequestID: "tr-1"}, request.Field("key", "x"))
 	invalid("protected accept create field", err)
 	_, err = accepts.Create(ctx, accept.CreateOpts{Key: "k", ZoneTransferRequestID: "tr-1"}, nil)
 	invalid("nil accept create option", err)
@@ -234,7 +235,7 @@ func TestDesignateTransferRequestReadsListsAndDeletes(t *testing.T) {
 		t.Fatalf("Remove ignores missing by default: %v", err)
 	}
 	var ids []string
-	for item, err := range api.List(ctx, transferrequest.WithListOptions(transferrequest.ListOpts{Status: "ACTIVE"}), transferrequest.WithListQuery("vendor", "x")) {
+	for item, err := range api.List(ctx, transferrequest.WithListOptions(transferrequest.ListOpts{Status: "ACTIVE"}), request.Query("vendor", "x")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -272,7 +273,7 @@ func TestDesignateTransferAcceptReadsAndLists(t *testing.T) {
 		t.Fatalf("native get keeps the 404 response error: %v", err)
 	}
 	var ids []string
-	for item, err := range api.List(ctx, accept.WithListOptions(accept.ListOpts{Status: "COMPLETE"}), accept.WithListQuery("vendor", "x")) {
+	for item, err := range api.List(ctx, accept.WithListOptions(accept.ListOpts{Status: "COMPLETE"}), request.Query("vendor", "x")) {
 		if err != nil {
 			t.Fatal(err)
 		}

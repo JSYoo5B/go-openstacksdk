@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -76,7 +77,7 @@ func TestNativeQoSRoutesBodiesPagingAndDecode(t *testing.T) {
 		}
 		return nativeQoSWire(200, `{"qos_specs":`+nativeQoSRow+`}`)
 	})
-	created, err := api.Create(ctx, qos.CreateOpts{Name: "gold", Consumer: qos.ConsumerBack, Specs: map[string]string{"read_iops_sec": "1000"}}, qos.WithCreateField("x_extension", 1))
+	created, err := api.Create(ctx, qos.CreateOpts{Name: "gold", Consumer: qos.ConsumerBack, Specs: map[string]string{"read_iops_sec": "1000"}}, request.Field("x_extension", 1))
 	if err != nil || !(created.ID == "q-1" && created.Consumer == "back-end" && created.Specs["read_iops_sec"] == "1000") {
 		t.Fatal(created, err)
 	}
@@ -116,7 +117,7 @@ func TestNativeQoSRoutesBodiesPagingAndDecode(t *testing.T) {
 		associations = append(associations, value.ID+"/"+value.AssociationType)
 	}
 	var ids []string
-	for value, err := range api.List(ctx, qos.WithListOptions(qos.ListOpts{Limit: 1, Sort: "name"}), qos.WithListQuery("extra", "1")) {
+	for value, err := range api.List(ctx, qos.WithListOptions(qos.ListOpts{Limit: 1, Sort: "name"}), request.Query("extra", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -195,10 +196,10 @@ func TestNativeQoSStatusesAndPreflight(t *testing.T) {
 			"associate type":    {"Associate", api.Associate(ctx, "q-1", qos.AssociateOpts{})},
 			"disassociate type": {"Disassociate", api.Disassociate(ctx, "q-1", qos.DisassociateOpts{})},
 			"core extension": {"Create", func() error {
-				_, err := api.Create(ctx, qos.CreateOpts{Name: "gold"}, qos.WithCreateField("name", "x"))
+				_, err := api.Create(ctx, qos.CreateOpts{Name: "gold"}, request.Field("name", "x"))
 				return err
 			}()},
-			"keys extension": {"DeleteKeys", api.DeleteKeys(ctx, "q-1", qos.WithDeleteKeysField("keys", nil))},
+			"keys extension": {"DeleteKeys", api.DeleteKeys(ctx, "q-1", request.Field("keys", nil))},
 		} {
 			if check.err == nil {
 				t.Fatal(name, "accepted")

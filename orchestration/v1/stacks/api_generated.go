@@ -63,12 +63,9 @@ func (a *API) Abandon(ctx context.Context, stackName string, stackID string) (*A
 	return value0, err
 }
 
-type AdoptOption = request.Option[AdoptOpts]
+type AdoptOption = request.NativeFieldCall
 
-func WithAdoptOptions(value AdoptOpts) AdoptOption { return request.WithOptions(value) }
-func WithAdoptField(key string, value any) AdoptOption {
-	return request.WithField[AdoptOpts](key, value)
-}
+func WithAdoptOptions(value AdoptOpts) AdoptOption { return request.Custom(request.WithOptions(value)) }
 
 type adoptOptsBuilder struct {
 	base   AdoptOpts
@@ -91,13 +88,8 @@ func (b adoptOptsBuilder) ToStackAdoptMap() (map[string]any, error) {
 
 // Adopt invokes the upstream API with library-owned builders and result handling.
 func (a *API) Adopt(ctx context.Context, opts AdoptOpts, options ...AdoptOption) (*CreatedStack, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Adopt", "stacks", err)
-		var zero0 *CreatedStack
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Adopt", "stacks", err)
 		var zero0 *CreatedStack
 		return zero0, err
@@ -109,11 +101,10 @@ func (a *API) Adopt(ctx context.Context, opts AdoptOpts, options ...AdoptOption)
 	return value0, err
 }
 
-type CreateOption = request.Option[CreateOpts]
+type CreateOption = request.NativeFieldCall
 
-func WithCreateOptions(value CreateOpts) CreateOption { return request.WithOptions(value) }
-func WithCreateField(key string, value any) CreateOption {
-	return request.WithField[CreateOpts](key, value)
+func WithCreateOptions(value CreateOpts) CreateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type createOptsBuilder struct {
@@ -137,13 +128,8 @@ func (b createOptsBuilder) ToStackCreateMap() (map[string]any, error) {
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*CreatedStack, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Create", "stacks", err)
-		var zero0 *CreatedStack
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Create", "stacks", err)
 		var zero0 *CreatedStack
 		return zero0, err
@@ -176,10 +162,9 @@ func (a *API) Get(ctx context.Context, stackName string, stackID string) (*Retri
 	return value0, err
 }
 
-type ListOption = request.Option[ListOpts]
+type ListOption = request.NativeQueryCall
 
-func WithListOptions(value ListOpts) ListOption  { return request.WithOptions(value) }
-func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
+func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
 	base   ListOpts
@@ -203,12 +188,8 @@ func (b listOptsBuilder) ToStackListQuery() (string, error) {
 // List invokes the upstream API with library-owned builders and result handling.
 func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*ListedStack, error] {
 	var opts ListOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("List", "stacks", err)
-		return func(yield func(*ListedStack, error) bool) { var zero *ListedStack; yield(zero, err) }
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("List", "stacks", err)
 		return func(yield func(*ListedStack, error) bool) { var zero *ListedStack; yield(zero, err) }
 	}
@@ -219,11 +200,10 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Listed
 	})
 }
 
-type PreviewOption = request.Option[PreviewOpts]
+type PreviewOption = request.NativeFieldCall
 
-func WithPreviewOptions(value PreviewOpts) PreviewOption { return request.WithOptions(value) }
-func WithPreviewField(key string, value any) PreviewOption {
-	return request.WithField[PreviewOpts](key, value)
+func WithPreviewOptions(value PreviewOpts) PreviewOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type previewOptsBuilder struct {
@@ -247,13 +227,8 @@ func (b previewOptsBuilder) ToStackPreviewMap() (map[string]any, error) {
 
 // Preview invokes the upstream API with library-owned builders and result handling.
 func (a *API) Preview(ctx context.Context, opts PreviewOpts, options ...PreviewOption) (*PreviewedStack, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Preview", "stacks", err)
-		var zero0 *PreviewedStack
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Preview", "stacks", err)
 		var zero0 *PreviewedStack
 		return zero0, err
@@ -265,11 +240,10 @@ func (a *API) Preview(ctx context.Context, opts PreviewOpts, options ...PreviewO
 	return value0, err
 }
 
-type UpdateOption = request.Option[UpdateOpts]
+type UpdateOption = request.NativeFieldCall
 
-func WithUpdateOptions(value UpdateOpts) UpdateOption { return request.WithOptions(value) }
-func WithUpdateField(key string, value any) UpdateOption {
-	return request.WithField[UpdateOpts](key, value)
+func WithUpdateOptions(value UpdateOpts) UpdateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type updateOptsBuilder struct {
@@ -293,12 +267,8 @@ func (b updateOptsBuilder) ToStackUpdateMap() (map[string]any, error) {
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, stackName string, stackID string, opts UpdateOpts, options ...UpdateOption) error {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Update", "stacks", err)
-		return err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Update", "stacks", err)
 		return err
 	}
@@ -306,11 +276,10 @@ func (a *API) Update(ctx context.Context, stackName string, stackID string, opts
 	return request.Wrap("Update", "stacks", upstream.Update(ctx, a.client, stackName, stackID, _opts).ExtractErr())
 }
 
-type UpdatePatchOption = request.Option[UpdateOpts]
+type UpdatePatchOption = request.NativeFieldCall
 
-func WithUpdatePatchOptions(value UpdateOpts) UpdatePatchOption { return request.WithOptions(value) }
-func WithUpdatePatchField(key string, value any) UpdatePatchOption {
-	return request.WithField[UpdateOpts](key, value)
+func WithUpdatePatchOptions(value UpdateOpts) UpdatePatchOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type updatePatchOptsBuilder struct {
@@ -334,12 +303,8 @@ func (b updatePatchOptsBuilder) ToStackUpdatePatchMap() (map[string]any, error) 
 
 // UpdatePatch invokes the upstream API with library-owned builders and result handling.
 func (a *API) UpdatePatch(ctx context.Context, stackName string, stackID string, opts UpdateOpts, options ...UpdatePatchOption) error {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("UpdatePatch", "stacks", err)
-		return err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("UpdatePatch", "stacks", err)
 		return err
 	}

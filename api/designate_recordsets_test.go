@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/dns/v2/recordsets"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -40,7 +41,7 @@ func TestDesignateRecordSetCreateSendsFlatBodyHeadersAndExtensions(t *testing.T)
 	})
 	value, err := newDesignateRecordSets(t, cloud).Create(context.Background(), "zone-1", recordsets.CreateOpts{
 		Name: "www.example.org.", Type: "A", Records: []string{"192.0.2.1"}, TTL: 300, Description: "web", AllProjects: true, SudoTenantID: "p9",
-	}, recordsets.WithCreateField("flag", false), recordsets.WithCreateField("nothing", nil), recordsets.WithCreateHeader("X-Vendor", "h"))
+	}, request.Field("flag", false), request.Field("nothing", nil), request.Header("X-Vendor", "h"))
 	if err != nil || value == nil || value.ID != "rr-1" || value.ZoneName != "example.org." || value.Status != "PENDING" || value.Action != "CREATE" || value.CreatedAt.IsZero() || len(value.Links) != 1 {
 		t.Fatalf("value=%+v error=%v", value, err)
 	}
@@ -62,7 +63,7 @@ func TestDesignateRecordSetUpdatePreservesEmptyZeroAndNullValues(t *testing.T) {
 	empty, zero, ttl := "", 0, 60
 	ctx := context.Background()
 	if _, err := api.Update(ctx, "zone-1", "rr-1", recordsets.UpdateOpts{Description: &empty, TTL: &zero, Records: []string{"192.0.2.2"}, AllProjects: true},
-		recordsets.WithUpdateField("flag", false), recordsets.WithUpdateHeader("X-Vendor", "h")); err != nil {
+		request.Field("flag", false), request.Header("X-Vendor", "h")); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := api.Update(ctx, "zone-1", "rr-1", recordsets.UpdateOpts{TTL: &ttl}); err != nil {
@@ -149,7 +150,7 @@ func TestDesignateRecordSetDeleteHeadersAndMissingPolicies(t *testing.T) {
 	})
 	api := newDesignateRecordSets(t, cloud)
 	ctx := context.Background()
-	if err := api.DeleteWithOpts(ctx, "zone-1", "rr-1", recordsets.WithDeleteWithOptsOptions(recordsets.DeleteOpts{AllProjects: true, SudoTenantID: "p9"}), recordsets.WithDeleteWithOptsHeader("X-Vendor", "h")); err != nil {
+	if err := api.DeleteWithOpts(ctx, "zone-1", "rr-1", recordsets.WithDeleteWithOptsOptions(recordsets.DeleteOpts{AllProjects: true, SudoTenantID: "p9"}), request.Header("X-Vendor", "h")); err != nil {
 		t.Fatal(err)
 	}
 	if err := api.Delete(ctx, "zone-1", "rr-2"); err != nil {
@@ -188,24 +189,24 @@ func TestDesignateRecordSetRejectsProtectedOrUnsupportedExtensionsBeforeHTTP(t *
 			t.Fatalf("%s: %v", name, err)
 		}
 	}
-	_, err := api.Create(ctx, "zone-1", recordsets.CreateOpts{Name: "a."}, recordsets.WithCreateField("records", []string{"x"}))
+	_, err := api.Create(ctx, "zone-1", recordsets.CreateOpts{Name: "a."}, request.Field("records", []string{"x"}))
 	invalid("protected create field", err)
-	_, err = api.Create(ctx, "zone-1", recordsets.CreateOpts{Name: "a."}, recordsets.WithCreateHeader("x-auth-all-projects", "true"))
+	_, err = api.Create(ctx, "zone-1", recordsets.CreateOpts{Name: "a."}, request.Header("x-auth-all-projects", "true"))
 	invalid("protected create header", err)
 	_, err = api.Create(ctx, "zone-1", recordsets.CreateOpts{Name: "a."}, nil)
 	invalid("nil create option", err)
-	_, err = api.Update(ctx, "zone-1", "rr-1", recordsets.UpdateOpts{}, recordsets.WithUpdateField("ttl", 1))
+	_, err = api.Update(ctx, "zone-1", "rr-1", recordsets.UpdateOpts{}, request.Field("ttl", 1))
 	invalid("protected update field", err)
-	_, err = api.Update(ctx, "zone-1", "rr-1", recordsets.UpdateOpts{}, recordsets.WithUpdateHeader("X-Auth-Sudo-Tenant-ID", "p"))
+	_, err = api.Update(ctx, "zone-1", "rr-1", recordsets.UpdateOpts{}, request.Header("X-Auth-Sudo-Tenant-ID", "p"))
 	invalid("protected update header", err)
 	_, err = api.Update(ctx, "zone-1", "rr-1", recordsets.UpdateOpts{}, nil)
 	invalid("nil update option", err)
 	invalid("nil delete option", api.DeleteWithOpts(ctx, "zone-1", "rr-1", nil))
-	invalid("protected delete header", api.DeleteWithOpts(ctx, "zone-1", "rr-1", recordsets.WithDeleteWithOptsHeader("X-Auth-All-Projects", "true")))
+	invalid("protected delete header", api.DeleteWithOpts(ctx, "zone-1", "rr-1", request.Header("X-Auth-All-Projects", "true")))
 	for _, err := range api.ListAll(ctx, nil) {
 		invalid("nil list-all option", err)
 	}
-	for _, err := range api.ListByZone(ctx, "zone-1", recordsets.WithListByZoneHeader("X-Auth-All-Projects", "true")) {
+	for _, err := range api.ListByZone(ctx, "zone-1", request.Header("X-Auth-All-Projects", "true")) {
 		invalid("list header collision", err)
 	}
 }
@@ -235,7 +236,7 @@ func TestDesignateRecordSetListsUseZoneAndGlobalRoutesFiltersAndLinksNext(t *tes
 	var ids []string
 	for value, err := range api.ListByZone(context.Background(), "zone-1",
 		recordsets.WithListByZoneOptions(recordsets.ListOpts{Name: "a.", Type: "A", Data: "192.0.2.1", Status: "ACTIVE", TTL: 60, Limit: 1, SudoTenantID: "p9"}),
-		recordsets.WithListByZoneQuery("vendor", "x")) {
+		request.Query("vendor", "x")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -252,7 +253,7 @@ func TestDesignateRecordSetListsUseZoneAndGlobalRoutesFiltersAndLinksNext(t *tes
 		t.Fatalf("headers=%v", zoneHeaders[0])
 	}
 	ids = nil
-	for value, err := range api.ListAll(context.Background(), recordsets.WithListAllOptions(recordsets.ListOpts{ZoneID: "zone-9", AllProjects: true}), recordsets.WithListAllQuery("vendor", "y")) {
+	for value, err := range api.ListAll(context.Background(), recordsets.WithListAllOptions(recordsets.ListOpts{ZoneID: "zone-9", AllProjects: true}), request.Query("vendor", "y")) {
 		if err != nil {
 			t.Fatal(err)
 		}

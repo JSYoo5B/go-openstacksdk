@@ -75,14 +75,14 @@ func emitKeyManagerBodyRecordAdapter(e *emitter, plan *collectionPlan, selector 
 	e.printf("},\nBodyFilterRecordValue:func(record *resource.BodyRecord[%s],key string)(json.RawMessage,error){return %s(record,key)},\n", plan.modelName, selector)
 	e.printf("IterateBodyControlled:func(ctx context.Context,q url.Values,control resource.ListControl)iter.Seq2[*resource.BodyRecord[%s],error]{\n", plan.modelName)
 	e.printf("q=maps.Clone(q)\nq.Del(\"status\")\n")
-	e.printf("options:=[]ListOption{func(config *request.Config[ListOpts])error{config.Query=make(url.Values,len(q));for key,values:=range q{config.Query[key]=append([]string(nil),values...)};return nil}}\nreturn a.listBodyWithControl(ctx,control,options...)\n},\n")
+	e.printf("options:=[]ListOption{request.Custom(func(config *request.Config[ListOpts])error{config.Query=make(url.Values,len(q));for key,values:=range q{config.Query[key]=append([]string(nil),values...)};return nil})}\nreturn a.listBodyWithControl(ctx,control,options...)\n},\n")
 }
 
 func emitKeyManagerBodyFilterList(e *emitter, plan *collectionPlan, envelope, extractor string) {
 	e.use("github.com/JSYoo5B/go-openstacksdk/request")
 	e.use(upstreamModule + "/pagination")
 	e.use(e.pkg.Path())
-	e.printf("func(a *API)listBodyWithControl(ctx context.Context,control resource.ListControl,options ...ListOption)iter.Seq2[*resource.BodyRecord[%s],error]{\nvar opts ListOpts\ncfg,err:=request.Apply(opts,options...)\n", plan.modelName)
-	e.printf("if err==nil{err=request.ValidateCapabilities(cfg,false,true,false)}\nif err!=nil{err=request.Wrap(\"List\",%q,err);return func(yield func(*resource.BodyRecord[%s],error)bool){yield(nil,err)}}\n", envelope, plan.modelName)
+	e.printf("func(a *API)listBodyWithControl(ctx context.Context,control resource.ListControl,options ...ListOption)iter.Seq2[*resource.BodyRecord[%s],error]{\nvar opts ListOpts\ncfg,err:=request.ApplyCalls(opts,request.Capabilities{Query:true},options...)\n", plan.modelName)
+	e.printf("if err!=nil{err=request.Wrap(\"List\",%q,err);return func(yield func(*resource.BodyRecord[%s],error)bool){yield(nil,err)}}\n", envelope, plan.modelName)
 	e.printf("_opts:=listOptsBuilder{base:cfg.Options,config:cfg}\nreturn resource.BodyStreamWithControl(ctx,upstream.List(a.client,_opts),func(page pagination.Page)([]%s,error){values,err:=upstream.%s(page);return []%s(values),err},%q,control)\n}\n", plan.modelName, extractor, plan.modelName, envelope)
 }

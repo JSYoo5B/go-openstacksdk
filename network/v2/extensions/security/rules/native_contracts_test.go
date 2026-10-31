@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -68,7 +69,7 @@ func TestNativeRuleRoutesBodiesPagingAndDecode(t *testing.T) {
 	})
 	api := rules.New(nativeRuleClient(cloud))
 	ctx := context.Background()
-	created, err := api.Create(ctx, rules.CreateOpts{Direction: rules.DirIngress, EtherType: rules.EtherType4, SecGroupID: "sg", Protocol: rules.ProtocolTCP, PortRangeMin: 22, PortRangeMax: 22, RemoteIPPrefix: "0.0.0.0/0"}, rules.WithCreateField("x_extension", 1))
+	created, err := api.Create(ctx, rules.CreateOpts{Direction: rules.DirIngress, EtherType: rules.EtherType4, SecGroupID: "sg", Protocol: rules.ProtocolTCP, PortRangeMin: 22, PortRangeMax: 22, RemoteIPPrefix: "0.0.0.0/0"}, request.Field("x_extension", 1))
 	if err != nil || !(created.ID == "id-1" && created.PortRangeMin == 22 && created.RemoteGroupID == "") {
 		t.Fatal(created, err)
 	}
@@ -77,7 +78,7 @@ func TestNativeRuleRoutesBodiesPagingAndDecode(t *testing.T) {
 		t.Fatal(got, err)
 	}
 	var rows []*rules.SecGroupRule
-	for value, err := range api.List(ctx, rules.WithListOptions(rules.ListOpts{SecGroupID: "sg", Direction: "ingress", PortRangeMin: 22, Limit: 1}), rules.WithListQuery("extra", "1")) {
+	for value, err := range api.List(ctx, rules.WithListOptions(rules.ListOpts{SecGroupID: "sg", Direction: "ingress", PortRangeMin: 22, Limit: 1}), request.Query("extra", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -178,7 +179,7 @@ func TestNativeRuleStrictStatusesAndPreflight(t *testing.T) {
 				return err
 			},
 			"direction extension": func() error {
-				_, err := api.Create(ctx, rules.CreateOpts{Direction: rules.DirIngress, EtherType: rules.EtherType4, SecGroupID: "sg"}, rules.WithCreateField("direction", "egress"))
+				_, err := api.Create(ctx, rules.CreateOpts{Direction: rules.DirIngress, EtherType: rules.EtherType4, SecGroupID: "sg"}, request.Field("direction", "egress"))
 				return err
 			},
 			"nil option": func() error {

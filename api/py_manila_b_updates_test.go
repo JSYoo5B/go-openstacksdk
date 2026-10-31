@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/sharenetworks"
 	"github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/shares"
@@ -36,11 +37,11 @@ func TestPyManilaBUpdateOperationsPutResourceEnvelopeWithEmptyAndFalseValues(t *
 		"PUT /v2/types/ty-1":          {status: 200, body: `{"share_type":{"id":"ty-1","name":"renamed"}}`},
 	})
 	client := cloud.client(pyManilaBVersion)
-	share, err := shares.New(client).Update(ctx, "share-1", shares.UpdateOpts{DisplayName: &name, DisplayDescription: &empty, IsPublic: &no}, shares.WithUpdateField("description", ""))
+	share, err := shares.New(client).Update(ctx, "share-1", shares.UpdateOpts{DisplayName: &name, DisplayDescription: &empty, IsPublic: &no}, request.Field("description", ""))
 	if err != nil || share.ID != "share-1" || share.IsPublic {
 		t.Fatalf("share=%+v error=%v", share, err)
 	}
-	snapshot, err := snapshots.New(client).Update(ctx, "snap-1", snapshots.UpdateOpts{DisplayName: &name, DisplayDescription: &empty}, snapshots.WithUpdateField("description", ""))
+	snapshot, err := snapshots.New(client).Update(ctx, "snap-1", snapshots.UpdateOpts{DisplayName: &name, DisplayDescription: &empty}, request.Field("description", ""))
 	if err != nil || snapshot.ID != "snap-1" {
 		t.Fatalf("snapshot=%+v error=%v", snapshot, err)
 	}

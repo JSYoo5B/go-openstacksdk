@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
@@ -45,7 +46,7 @@ func TestNativeServerActionsRoutesBodiesAndDecode(t *testing.T) {
 	}{
 		{`{"changePassword":{"adminPass":"pw"}}`, func() error { return api.ChangeAdminPassword(ctx, "s1", "pw") }},
 		{`{"reboot":{"type":"SOFT","x_extension":1}}`, func() error {
-			return api.Reboot(ctx, "s1", servers.RebootOpts{Type: servers.SoftReboot}, servers.WithRebootField("x_extension", 1))
+			return api.Reboot(ctx, "s1", servers.RebootOpts{Type: servers.SoftReboot}, request.Field("x_extension", 1))
 		}},
 		{`{"rebuild":{"OS-DCF:diskConfig":"AUTO","adminPass":"p","imageRef":"img","metadata":{"k":"v"},"name":"vm2"}}`, func() error {
 			server, err := api.Rebuild(ctx, "s1", servers.RebuildOpts{ImageRef: "img", Name: "vm2", AdminPass: "p", Metadata: map[string]string{"k": "v"}, DiskConfig: servers.Auto})
@@ -89,10 +90,10 @@ func TestNativeServerActionsRoutesBodiesAndDecode(t *testing.T) {
 		{`{"unshelve":null}`, func() error { return api.Unshelve(ctx, "s1", servers.UnshelveOpts{}) }},
 		// Without an availability zone the action value is null, so an extension sits beside it.
 		{`{"unshelve":null,"x_extension":1}`, func() error {
-			return api.Unshelve(ctx, "s1", servers.UnshelveOpts{}, servers.WithUnshelveField("x_extension", 1))
+			return api.Unshelve(ctx, "s1", servers.UnshelveOpts{}, request.Field("x_extension", 1))
 		}},
 		{`{"unshelve":{"availability_zone":"az1","x_extension":1}}`, func() error {
-			return api.Unshelve(ctx, "s1", servers.UnshelveOpts{AvailabilityZone: "az1"}, servers.WithUnshelveField("x_extension", 1))
+			return api.Unshelve(ctx, "s1", servers.UnshelveOpts{AvailabilityZone: "az1"}, request.Field("x_extension", 1))
 		}},
 	}
 	for i, step := range steps {
@@ -235,14 +236,14 @@ func TestNativeServerActionsPreflight(t *testing.T) {
 	checks := map[string]func() error{
 		"reboot without type": func() error { return api.Reboot(ctx, "s1", servers.RebootOpts{}) },
 		"reboot type extension": func() error {
-			return api.Reboot(ctx, "s1", servers.RebootOpts{Type: servers.SoftReboot}, servers.WithRebootField("type", "HARD"))
+			return api.Reboot(ctx, "s1", servers.RebootOpts{Type: servers.SoftReboot}, request.Field("type", "HARD"))
 		},
 		"rebuild bad disk config": func() error {
 			_, err := api.Rebuild(ctx, "s1", servers.RebuildOpts{ImageRef: "i", DiskConfig: "BAD"})
 			return err
 		},
 		"rebuild name extension": func() error {
-			_, err := api.Rebuild(ctx, "s1", servers.RebuildOpts{ImageRef: "i"}, servers.WithRebuildField("name", "x"))
+			_, err := api.Rebuild(ctx, "s1", servers.RebuildOpts{ImageRef: "i"}, request.Field("name", "x"))
 			return err
 		},
 		"resize without flavor":     func() error { return api.Resize(ctx, "s1", servers.ResizeOpts{}) },
@@ -250,7 +251,7 @@ func TestNativeServerActionsPreflight(t *testing.T) {
 		"create image without name": func() error { _, err := api.CreateImage(ctx, "s1", servers.CreateImageOpts{}); return err },
 		"rescue nil option":         func() error { _, err := api.Rescue(ctx, "s1", servers.RescueOpts{}, nil); return err },
 		"unshelve zone extension": func() error {
-			return api.Unshelve(ctx, "s1", servers.UnshelveOpts{}, servers.WithUnshelveField("availability_zone", "az"))
+			return api.Unshelve(ctx, "s1", servers.UnshelveOpts{}, request.Field("availability_zone", "az"))
 		},
 	}
 	for name, check := range checks {

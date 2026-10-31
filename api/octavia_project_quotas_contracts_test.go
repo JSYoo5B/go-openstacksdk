@@ -134,7 +134,7 @@ func TestOctaviaProjectQuotasUseOfficialPathsAndGlobalDefaults(t *testing.T) {
 	}
 	zero, unlimited := 0, -1
 	vendor := map[string]bool{"enabled": false}
-	extension := quotas.WithUpdateField("vendor", vendor)
+	extension := request.Field("vendor", vendor)
 	vendor["enabled"] = true
 	updated, err := scope.Update(context.Background(), quotas.UpdateOpts{Loadbalancer: &unlimited, Listener: &zero}, quotas.WithDefaultLimit(quotas.LimitMembers), extension)
 	if err != nil || updated == nil || updated.StatusCode != 202 || updated.ProjectID != "project-fixed" || updated.Header.Get("X-Openstack-Request-Id") != "update-quota" {
@@ -221,7 +221,7 @@ func TestOctaviaQuotaSnapshotOmissionExactIntegersAndRetry(t *testing.T) {
 	}
 	var prior *int
 	capture := func(config *request.Config[quotas.UpdateOpts]) error { prior = config.Options.Listener; return nil }
-	if _, err := scope.Update(context.Background(), quotas.UpdateOpts{}, option, capture); err != nil {
+	if _, err := scope.Update(context.Background(), quotas.UpdateOpts{}, option, request.Custom(capture)); err != nil {
 		t.Fatal(err)
 	}
 	*prior = 100
@@ -243,12 +243,12 @@ func TestOctaviaQuotaInvalidOptionsFailBeforeHTTP(t *testing.T) {
 		options []quotas.UpdateOption
 	}{
 		{"negative", quotas.UpdateOpts{Pool: &bad}, nil}, {"nil", quotas.UpdateOpts{}, []quotas.UpdateOption{nil}},
-		{"core", quotas.UpdateOpts{}, []quotas.UpdateOption{quotas.WithUpdateField("listener", 0)}}, {"legacy core", quotas.UpdateOpts{}, []quotas.UpdateOption{quotas.WithUpdateField("load_balancer", 0)}},
-		{"project", quotas.UpdateOpts{}, []quotas.UpdateOption{quotas.WithUpdateField("project_id", "other")}},
-		{"nonserializable", quotas.UpdateOpts{}, []quotas.UpdateOption{quotas.WithUpdateField("vendor", make(chan bool))}},
-		{"query", quotas.UpdateOpts{}, []quotas.UpdateOption{request.WithQuery[quotas.UpdateOpts]("vendor", "x")}},
-		{"header", quotas.UpdateOpts{}, []quotas.UpdateOption{request.WithHeader[quotas.UpdateOpts]("X-Vendor", "x")}},
-		{"argument", quotas.UpdateOpts{}, []quotas.UpdateOption{request.WithArgument[quotas.UpdateOpts]("unknown", true)}},
+		{"core", quotas.UpdateOpts{}, []quotas.UpdateOption{request.Field("listener", 0)}}, {"legacy core", quotas.UpdateOpts{}, []quotas.UpdateOption{request.Field("load_balancer", 0)}},
+		{"project", quotas.UpdateOpts{}, []quotas.UpdateOption{request.Field("project_id", "other")}},
+		{"nonserializable", quotas.UpdateOpts{}, []quotas.UpdateOption{request.Field("vendor", make(chan bool))}},
+		{"query", quotas.UpdateOpts{}, []quotas.UpdateOption{request.Custom(request.WithQuery[quotas.UpdateOpts]("vendor", "x"))}},
+		{"header", quotas.UpdateOpts{}, []quotas.UpdateOption{request.Custom(request.WithHeader[quotas.UpdateOpts]("X-Vendor", "x"))}},
+		{"argument", quotas.UpdateOpts{}, []quotas.UpdateOption{request.Custom(request.WithArgument[quotas.UpdateOpts]("unknown", true))}},
 		{"unknown default", quotas.UpdateOpts{}, []quotas.UpdateOption{quotas.WithDefaultLimit("unknown")}},
 		{"value/default conflict", quotas.UpdateOpts{Listener: &zero}, []quotas.UpdateOption{quotas.WithDefaultLimit(quotas.LimitListeners)}},
 	} {

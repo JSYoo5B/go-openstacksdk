@@ -10,6 +10,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -79,7 +80,7 @@ func TestPythonRegisteredLimitCreateGetUpdateRequests(t *testing.T) {
 	// Python update_registered_limit(region_id=None) sends null; Go omits the
 	// empty typed field and rejects the extension key before HTTP.
 	calls = nil
-	if _, err := api.Update(ctx, "rl-1", registeredlimits.UpdateOpts{}, registeredlimits.WithUpdateField("region_id", nil)); err == nil || len(calls) != 0 {
+	if _, err := api.Update(ctx, "rl-1", registeredlimits.UpdateOpts{}, request.Field("region_id", nil)); err == nil || len(calls) != 0 {
 		t.Fatal(err, calls)
 	}
 }

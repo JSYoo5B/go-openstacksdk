@@ -20,6 +20,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/ports"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -763,7 +764,7 @@ func TestSubnetPoolListFiltersNativeAndIdentitySurfaceIsolation(t *testing.T) {
 			var native []subnetpools.ListOption
 			for key, values := range want {
 				raw = append(raw, resource.WithQuery(key, values[0]))
-				native = append(native, subnetpools.WithListQuery(key, values[0]))
+				native = append(native, request.Query(key, values[0]))
 			}
 			values, err := a.Resources.All(context.Background(), append(append([]resource.ListOption(nil), raw...), resource.WithFilter("prefixes", []any{}), resource.WithFilter("id", "target"))...)
 			subnetPoolListWant(t, values, err, "target")

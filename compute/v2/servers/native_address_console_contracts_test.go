@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
@@ -145,7 +146,7 @@ func TestNativeServerConsoleOutput(t *testing.T) {
 		return nativeServerWire(200, `{"output":"line1\nline2"}`)
 	})
 	api := servers.New(nativeServerClient(cloud))
-	output, err := api.ShowConsoleOutput(ctx, "s1", servers.ShowConsoleOutputOpts{Length: 50}, servers.WithShowConsoleOutputField("x_extension", 1))
+	output, err := api.ShowConsoleOutput(ctx, "s1", servers.ShowConsoleOutputOpts{Length: 50}, request.Field("x_extension", 1))
 	if err != nil || output != "line1\nline2" {
 		t.Fatal(output, err)
 	}
@@ -186,7 +187,7 @@ func TestNativeServerConsoleOutput(t *testing.T) {
 		api := servers.New(nativeServerClient(cloud))
 		for name, err := range map[string]error{
 			"length collision": func() error {
-				_, err := api.ShowConsoleOutput(ctx, "s1", servers.ShowConsoleOutputOpts{}, servers.WithShowConsoleOutputField("length", 1))
+				_, err := api.ShowConsoleOutput(ctx, "s1", servers.ShowConsoleOutputOpts{}, request.Field("length", 1))
 				return err
 			}(),
 			"nil option": func() error {

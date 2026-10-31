@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -67,7 +68,7 @@ func TestPythonTapMirrorCreateBody(t *testing.T) {
 	created, err := api.Create(context.Background(), tapmirrors.CreateOpts{
 		Name: "mirror", Description: "d", PortID: "p1", MirrorType: tapmirrors.MirrorTypeGre,
 		RemoteIP: "192.0.2.9", Directions: tapmirrors.Directions{In: 101, Out: 102},
-	}, tapmirrors.WithCreateField("project_id", "proj"), tapmirrors.WithCreateField("x_extra", true))
+	}, request.Field("project_id", "proj"), request.Field("x_extra", true))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -94,7 +95,7 @@ func TestPythonTapMirrorCreateBody(t *testing.T) {
 		t.Fatalf("body %s", calls[0].body)
 	}
 	// A core key cannot be replaced by an extension field.
-	if _, err := api.Create(context.Background(), tapmirrors.CreateOpts{}, tapmirrors.WithCreateField("directions", map[string]int{"IN": 1})); !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 1 {
+	if _, err := api.Create(context.Background(), tapmirrors.CreateOpts{}, request.Field("directions", map[string]int{"IN": 1})); !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 1 {
 		t.Fatal(err, len(calls))
 	}
 }
@@ -130,7 +131,7 @@ func TestPythonTapMirrorUpdateBody(t *testing.T) {
 		return pythonTapMirrorWire(200, `{"tap_mirror":`+pythonTapMirrorRow+`}`)
 	})
 	name, description := "mirror", ""
-	updated, err := api.Update(context.Background(), "tm-1", tapmirrors.UpdateOpts{Name: &name, Description: &description}, tapmirrors.WithUpdateField("x_extra", 1))
+	updated, err := api.Update(context.Background(), "tm-1", tapmirrors.UpdateOpts{Name: &name, Description: &description}, request.Field("x_extra", 1))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -293,7 +294,7 @@ func TestPythonTapMirrorListQueryAndPaging(t *testing.T) {
 		if _, err := api.All(ctx, resource.WithQuery("fields", "id"), resource.WithQuery("fields", "name")); err != nil {
 			t.Fatal(err)
 		}
-		for range api.List(ctx, tapmirrors.WithListQuery("sort_key", "name"), tapmirrors.WithListQuery("sort_key", "id")) {
+		for range api.List(ctx, request.Query("sort_key", "name"), request.Query("sort_key", "id")) {
 		}
 		want := []url.Values{{"fields": {"name"}}, {"sort_key": {"id"}}}
 		if len(calls) != 2 || !reflect.DeepEqual([]url.Values{calls[0].query, calls[1].query}, want) {

@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -88,7 +89,7 @@ func TestPythonSnapshotGetCreateMatchProxyRequests(t *testing.T) {
 	pythonSnapshotExpect(t, calls[0], http.MethodGet, "/cinder/v2/project/snapshots/snap-1", "", "")
 
 	// create_snapshot(volume_id=..., name=..., description=..., is_forced=True, metadata=...)
-	created, err := api.Create(ctx, snapshots.CreateOpts{VolumeID: "vol-1", Name: "nightly", Description: "d", Force: true, Metadata: map[string]string{"k": "v"}}, snapshots.WithCreateField("x_extension", 1))
+	created, err := api.Create(ctx, snapshots.CreateOpts{VolumeID: "vol-1", Name: "nightly", Description: "d", Force: true, Metadata: map[string]string{"k": "v"}}, request.Field("x_extension", 1))
 	if err != nil || created.ID != "snap-1" {
 		t.Fatal(created, err)
 	}
@@ -99,7 +100,7 @@ func TestPythonSnapshotGetCreateMatchProxyRequests(t *testing.T) {
 		t.Fatal(err)
 	}
 	pythonSnapshotExpect(t, calls[2], http.MethodPost, "/cinder/v2/project/snapshots", "", `{"snapshot":{"volume_id":"vol-1"}}`)
-	if _, err := api.Create(ctx, snapshots.CreateOpts{VolumeID: "vol-1"}, snapshots.WithCreateField("force", false)); !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 3 {
+	if _, err := api.Create(ctx, snapshots.CreateOpts{VolumeID: "vol-1"}, request.Field("force", false)); !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 3 {
 		t.Fatal(err, len(calls))
 	}
 }
@@ -137,7 +138,7 @@ func TestPythonSnapshotListAndFindUseSummaryRoute(t *testing.T) {
 		return pythonSnapshotWire(200, `{"snapshots":[`+pythonSnapshotRow+`],"snapshots_links":[{"rel":"next","href":"`+cloud.Server.URL+`/next"}]}`)
 	})
 	var ids []string
-	for value, err := range api.List(ctx, snapshots.WithListQuery("all_tenants", "True"), snapshots.WithListQuery("name", "nightly"), snapshots.WithListQuery("volume_id", "vol-1")) {
+	for value, err := range api.List(ctx, request.Query("all_tenants", "True"), request.Query("name", "nightly"), request.Query("volume_id", "vol-1")) {
 		if err != nil {
 			t.Fatal(err)
 		}

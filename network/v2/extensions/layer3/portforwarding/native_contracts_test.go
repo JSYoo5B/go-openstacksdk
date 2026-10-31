@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/portforwarding"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -68,7 +69,7 @@ func TestNativePortForwardingRoutesBodiesPagingAndDecode(t *testing.T) {
 		}
 		return nativeForwardWire(200, `{"port_forwarding":`+nativeForwardRow+`}`)
 	})
-	created, err := api.Create(ctx, "fip-1", portforwarding.CreateOpts{InternalPortID: "port", InternalIPAddress: "10.0.0.5", InternalPort: 22, ExternalPort: 2222, Protocol: "tcp"}, portforwarding.WithCreateField("x_extension", 1))
+	created, err := api.Create(ctx, "fip-1", portforwarding.CreateOpts{InternalPortID: "port", InternalIPAddress: "10.0.0.5", InternalPort: 22, ExternalPort: 2222, Protocol: "tcp"}, request.Field("x_extension", 1))
 	if err != nil || !(created.ID == "pf-1" && created.ExternalPort == 2222 && created.Description == "") {
 		t.Fatal(created, err)
 	}
@@ -81,14 +82,14 @@ func TestNativePortForwardingRoutesBodiesPagingAndDecode(t *testing.T) {
 		t.Fatal(got, err)
 	}
 	description := ""
-	if _, err := api.Update(ctx, "fip-1", "pf-1", portforwarding.UpdateOpts{Description: &description, ExternalPort: 2223}, portforwarding.WithUpdateField("x_extension", 1)); err != nil {
+	if _, err := api.Update(ctx, "fip-1", "pf-1", portforwarding.UpdateOpts{Description: &description, ExternalPort: 2223}, request.Field("x_extension", 1)); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := api.Update(ctx, "fip-1", "pf-1", portforwarding.UpdateOpts{}); err != nil {
 		t.Fatal(err)
 	}
 	var rows []*portforwarding.PortForwarding
-	for value, err := range api.List(ctx, "fip-1", portforwarding.WithListOptions(portforwarding.ListOpts{Protocol: "tcp", ExternalPort: "2222", Limit: 1}), portforwarding.WithListQuery("extra", "1")) {
+	for value, err := range api.List(ctx, "fip-1", portforwarding.WithListOptions(portforwarding.ListOpts{Protocol: "tcp", ExternalPort: "2222", Limit: 1}), request.Query("extra", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -201,7 +202,7 @@ func TestNativePortForwardingStrictStatusesDecodeAndPreflight(t *testing.T) {
 		api, _ := nativeForwardAPI(t, &calls, func(*http.Request) *http.Response { return nativeForwardWire(201, `{}`) })
 		for operation, err := range map[string]error{
 			"Create": func() error {
-				_, err := api.Create(ctx, "fip-1", portforwarding.CreateOpts{}, portforwarding.WithCreateField("protocol", "udp"))
+				_, err := api.Create(ctx, "fip-1", portforwarding.CreateOpts{}, request.Field("protocol", "udp"))
 				return err
 			}(),
 			"Update": func() error {

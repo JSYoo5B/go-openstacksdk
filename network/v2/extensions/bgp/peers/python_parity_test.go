@@ -11,6 +11,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/peers"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -110,7 +111,7 @@ func TestPythonBGPPeerUpdateCannotClearName(t *testing.T) {
 	if _, err := api.Update(ctx, "bp-1", peers.UpdateOpts{Name: ""}); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := api.Update(ctx, "bp-1", peers.UpdateOpts{}, peers.WithUpdateField("name", "")); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := api.Update(ctx, "bp-1", peers.UpdateOpts{}, request.Field("name", "")); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
 	want := []pythonBGPPeerCall{

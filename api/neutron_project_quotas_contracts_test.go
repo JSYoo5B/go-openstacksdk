@@ -93,7 +93,7 @@ func TestNeutronProjectQuotaOperationsKeepTargetRawJSONAndMetadata(t *testing.T)
 	}
 	zero, unlimited := 0, -1
 	extension := map[string]string{"tier": "requested"}
-	field := quotas.WithUpdateField("vendor", extension)
+	field := request.Field("vendor", extension)
 	extension["tier"] = "caller-change"
 	updated, err := scope.Update(context.Background(), quotas.UpdateOpts{Network: &unlimited, Port: &zero}, field, quotas.WithUpdateCheckLimit(false))
 	if err != nil || updated == nil || updated.ProjectID != "project-fixed" || updated.Header.Get("X-Openstack-Request-Id") != "update-quota" || updated.StatusCode != 200 || string(updated.Body["vendor"]) != `{"big":9007199254740993}` {
@@ -184,7 +184,7 @@ func TestNeutronProjectQuotaOptionsSnapshotAtCreationAndRemainReusable(t *testin
 		return nil
 	}
 	scope := newNeutronQuotaScope(t, cloud)
-	if _, err := scope.Update(context.Background(), quotas.UpdateOpts{}, option, capture); err != nil {
+	if _, err := scope.Update(context.Background(), quotas.UpdateOpts{}, option, request.Custom(capture)); err != nil {
 		t.Fatal(err)
 	}
 	// Mutating one application's private pointer must not change the stored
@@ -208,12 +208,12 @@ func TestNeutronProjectQuotaOptionsFailBeforeHTTP(t *testing.T) {
 	}{
 		{"invalid limit", quotas.UpdateOpts{FloatingIP: &bad}, nil},
 		{"nil option", quotas.UpdateOpts{}, []quotas.UpdateOption{nil}},
-		{"core collision", quotas.UpdateOpts{}, []quotas.UpdateOption{quotas.WithUpdateField("port", 0)}},
-		{"check limit collision", quotas.UpdateOpts{}, []quotas.UpdateOption{quotas.WithUpdateField("check_limit", false)}},
-		{"unserializable field", quotas.UpdateOpts{}, []quotas.UpdateOption{quotas.WithUpdateField("vendor", make(chan bool))}},
-		{"query", quotas.UpdateOpts{}, []quotas.UpdateOption{request.WithQuery[quotas.UpdateOpts]("fields", "port")}},
-		{"header", quotas.UpdateOpts{}, []quotas.UpdateOption{request.WithHeader[quotas.UpdateOpts]("X-Vendor", "value")}},
-		{"unknown argument", quotas.UpdateOpts{}, []quotas.UpdateOption{request.WithArgument[quotas.UpdateOpts]("unknown", true)}},
+		{"core collision", quotas.UpdateOpts{}, []quotas.UpdateOption{request.Field("port", 0)}},
+		{"check limit collision", quotas.UpdateOpts{}, []quotas.UpdateOption{request.Field("check_limit", false)}},
+		{"unserializable field", quotas.UpdateOpts{}, []quotas.UpdateOption{request.Field("vendor", make(chan bool))}},
+		{"query", quotas.UpdateOpts{}, []quotas.UpdateOption{request.Custom(request.WithQuery[quotas.UpdateOpts]("fields", "port"))}},
+		{"header", quotas.UpdateOpts{}, []quotas.UpdateOption{request.Custom(request.WithHeader[quotas.UpdateOpts]("X-Vendor", "value"))}},
+		{"unknown argument", quotas.UpdateOpts{}, []quotas.UpdateOption{request.Custom(request.WithArgument[quotas.UpdateOpts]("unknown", true))}},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			if value, err := scope.Update(context.Background(), tc.opts, tc.with...); value != nil || !errors.Is(err, resource.ErrInvalidOption) || calls.Load() != 0 {

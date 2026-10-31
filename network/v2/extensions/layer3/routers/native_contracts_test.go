@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -69,7 +70,7 @@ func TestNativeRouterRoutesBodiesPagingAndDecode(t *testing.T) {
 	})
 	api := routers.New(nativeRouterClient(cloud))
 	ctx := context.Background()
-	created, err := api.Create(ctx, routers.CreateOpts{Name: "edge", AdminStateUp: gophercloud.Enabled, Distributed: gophercloud.Disabled, GatewayInfo: &routers.GatewayInfo{NetworkID: "ext", EnableSNAT: gophercloud.Enabled}, AvailabilityZoneHints: []string{"az1"}}, routers.WithCreateField("x_extension", 1))
+	created, err := api.Create(ctx, routers.CreateOpts{Name: "edge", AdminStateUp: gophercloud.Enabled, Distributed: gophercloud.Disabled, GatewayInfo: &routers.GatewayInfo{NetworkID: "ext", EnableSNAT: gophercloud.Enabled}, AvailabilityZoneHints: []string{"az1"}}, request.Field("x_extension", 1))
 	if err != nil || !(created.ID == "id-1" && created.GatewayInfo.NetworkID == "ext" && created.Routes[0].NextHop == "10.0.0.9") {
 		t.Fatal(created, err)
 	}
@@ -78,7 +79,7 @@ func TestNativeRouterRoutesBodiesPagingAndDecode(t *testing.T) {
 		t.Fatal(got, err)
 	}
 	var rows []*routers.Router
-	for value, err := range api.List(ctx, routers.WithListOptions(routers.ListOpts{Name: "edge", Distributed: gophercloud.Disabled, Limit: 1}), routers.WithListQuery("extra", "1")) {
+	for value, err := range api.List(ctx, routers.WithListOptions(routers.ListOpts{Name: "edge", Distributed: gophercloud.Disabled, Limit: 1}), request.Query("extra", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -164,7 +165,7 @@ func TestNativeRouterStrictStatusesAndPreflight(t *testing.T) {
 		api := routers.New(nativeRouterClient(cloud))
 		for name, check := range map[string]func() error{
 			"name extension": func() error {
-				_, err := api.Create(ctx, routers.CreateOpts{}, routers.WithCreateField("name", "x"))
+				_, err := api.Create(ctx, routers.CreateOpts{}, request.Field("name", "x"))
 				return err
 			},
 			"nil option": func() error { _, err := api.Create(ctx, routers.CreateOpts{}, nil); return err },
@@ -204,7 +205,7 @@ func TestNativeRouterInterfacesAndExternalGateways(t *testing.T) {
 		return nativeRouterWire(200, `{"router":{"id":"r1","external_gateway_info":{"network_id":"ext","enable_snat":true,"external_fixed_ips":[{"ip_address":"203.0.113.2","subnet_id":"esn"}]}}}`)
 	})
 	api := routers.New(nativeRouterClient(cloud))
-	info, err := api.AddInterface(ctx, "r1", routers.AddInterfaceOpts{SubnetID: "sn"}, routers.WithAddInterfaceField("x_extension", 1))
+	info, err := api.AddInterface(ctx, "r1", routers.AddInterfaceOpts{SubnetID: "sn"}, request.Field("x_extension", 1))
 	if err != nil || info.PortID != "p1" || info.SubnetID != "sn" {
 		t.Fatal(info, err)
 	}
@@ -212,7 +213,7 @@ func TestNativeRouterInterfacesAndExternalGateways(t *testing.T) {
 		t.Fatal(err)
 	}
 	gateways := []routers.GatewayInfo{{NetworkID: "ext", EnableSNAT: gophercloud.Disabled, ExternalFixedIPs: []routers.ExternalFixedIP{{SubnetID: "esn"}}}}
-	router, err := api.AddExternalGateways(ctx, "r1", routers.AddExternalGatewaysOpts{ExternalGateways: gateways}, routers.WithAddExternalGatewaysField("x_extension", 1))
+	router, err := api.AddExternalGateways(ctx, "r1", routers.AddExternalGatewaysOpts{ExternalGateways: gateways}, request.Field("x_extension", 1))
 	if err != nil || router.GatewayInfo.NetworkID != "ext" || router.GatewayInfo.ExternalFixedIPs[0].IPAddress != "203.0.113.2" {
 		t.Fatal(router, err)
 	}
@@ -292,11 +293,11 @@ func TestNativeRouterInterfacesAndExternalGateways(t *testing.T) {
 				return err
 			}()},
 			"gateways extension": {"UpdateExternalGateways", func() error {
-				_, err := api.UpdateExternalGateways(ctx, "r1", routers.UpdateExternalGatewaysOpts{ExternalGateways: gateways}, routers.WithUpdateExternalGatewaysField("external_gateways", nil))
+				_, err := api.UpdateExternalGateways(ctx, "r1", routers.UpdateExternalGatewaysOpts{ExternalGateways: gateways}, request.Field("external_gateways", nil))
 				return err
 			}()},
 			"subnet extension": {"AddInterface", func() error {
-				_, err := api.AddInterface(ctx, "r1", routers.AddInterfaceOpts{PortID: "p"}, routers.WithAddInterfaceField("subnet_id", "s"))
+				_, err := api.AddInterface(ctx, "r1", routers.AddInterfaceOpts{PortID: "p"}, request.Field("subnet_id", "s"))
 				return err
 			}()},
 		} {

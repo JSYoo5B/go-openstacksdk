@@ -9,6 +9,40 @@ import (
 
 type extensionCapabilities struct{ body, query, headers bool }
 
+// category names the request call interface that accepts exactly the shared
+// calls these capabilities can serialize.
+func (c extensionCapabilities) category() string {
+	name := "Native"
+	if c.body {
+		name += "Field"
+	}
+	if c.query {
+		name += "Query"
+	}
+	if c.headers {
+		name += "Header"
+	}
+	return name + "Call"
+}
+
+// literal renders a request.Capabilities composite literal.
+func (c extensionCapabilities) literal(requestAlias string, arguments []string) string {
+	fields := []string{}
+	if c.body {
+		fields = append(fields, "Body:true")
+	}
+	if c.query {
+		fields = append(fields, "Query:true")
+	}
+	if c.headers {
+		fields = append(fields, "Headers:true")
+	}
+	if len(arguments) > 0 {
+		fields = append(fields, "Arguments:[]string{"+strings.Join(arguments, ",")+"}")
+	}
+	return requestAlias + ".Capabilities{" + strings.Join(fields, ",") + "}"
+}
+
 func isStringMap(t types.Type) bool {
 	value, ok := t.Underlying().(*types.Map)
 	return ok && isString(value.Key()) && isString(value.Elem())

@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/securityservices"
 )
@@ -41,7 +42,7 @@ func TestManilaSecurityServiceCreateSendsTypeOmitsEmptyAndAcceptsOnly200(t *test
 		})
 		value, err := securityservices.New(newManilaSupportClient(cloud)).Create(context.Background(),
 			securityservices.CreateOpts{Type: securityservices.LDAP, Name: "dir", Description: "", DNSIP: "192.0.2.53"},
-			securityservices.WithCreateField("vendor", false))
+			request.Field("vendor", false))
 		if tc.success != (err == nil) || calls.Load() != 1 {
 			t.Fatalf("status %d value=%+v error=%v calls=%d", tc.status, value, err, calls.Load())
 		}
@@ -67,7 +68,7 @@ func TestManilaSecurityServiceRejectsMissingTypeProtectedOrNilOptionsBeforeHTTP(
 	}
 	for name, err := range map[string]error{
 		"create type": func() error {
-			_, err := api.Create(ctx, securityservices.CreateOpts{Type: securityservices.Kerberos}, securityservices.WithCreateField("type", "ldap"))
+			_, err := api.Create(ctx, securityservices.CreateOpts{Type: securityservices.Kerberos}, request.Field("type", "ldap"))
 			return err
 		}(),
 		"create nil": func() error {
@@ -75,7 +76,7 @@ func TestManilaSecurityServiceRejectsMissingTypeProtectedOrNilOptionsBeforeHTTP(
 			return err
 		}(),
 		"update name": func() error {
-			_, err := api.Update(ctx, "ss-1", securityservices.UpdateOpts{}, securityservices.WithUpdateField("name", "x"))
+			_, err := api.Update(ctx, "ss-1", securityservices.UpdateOpts{}, request.Field("name", "x"))
 			return err
 		}(),
 		"update nil": func() error { _, err := api.Update(ctx, "ss-1", securityservices.UpdateOpts{}, nil); return err }(),
@@ -111,7 +112,7 @@ func TestManilaSecurityServiceUpdateSendsNullNameAndEmptyStringsAndAcceptsOnly20
 		empty := ""
 		value, err := securityservices.New(newManilaSupportClient(cloud)).Update(context.Background(), "ss-1",
 			securityservices.UpdateOpts{Description: &empty, OU: &empty, Password: &empty},
-			securityservices.WithUpdateField("vendor", []string{}))
+			request.Field("vendor", []string{}))
 		if tc.success != (err == nil) || (tc.success && value.ID != "ss-1") {
 			t.Fatalf("status %d value=%+v error=%v", tc.status, value, err)
 		}
@@ -185,7 +186,7 @@ func TestManilaSecurityServiceListUsesDetailRouteFiltersAndSinglePage(t *testing
 	var ids []string
 	for value, err := range api.List(ctx,
 		securityservices.WithListOptions(securityservices.ListOpts{AllTenants: true, Type: securityservices.ActiveDirectory, ShareNetworkID: "sn-1", Name: "one"}),
-		securityservices.WithListQuery("vendor", "x")) {
+		request.Query("vendor", "x")) {
 		if err != nil {
 			t.Fatal(err)
 		}

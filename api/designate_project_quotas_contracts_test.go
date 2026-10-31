@@ -91,9 +91,9 @@ func TestDesignateProjectQuotasUseRootObjectAndOfficialMethods(t *testing.T) {
 	option := quotas.WithQuotaOptions(quotas.UpdateOpts{Zones: &zero, ZoneRecords: &large})
 	zero, large = 77, 88
 	vendor := map[string]any{"enabled": false, "counter": json.Number("9007199254740993")}
-	extension := quotas.WithUpdateField("vendor", vendor)
+	extension := request.Field("vendor", vendor)
 	vendor["enabled"] = true
-	updated, err := scope.Update(context.Background(), quotas.UpdateOpts{}, option, extension, quotas.WithUpdateField("optional", nil))
+	updated, err := scope.Update(context.Background(), quotas.UpdateOpts{}, option, extension, request.Field("optional", nil))
 	if err != nil || updated == nil || updated.ProjectID != "project-fixed" || updated.StatusCode != 200 || updated.Header.Get("X-Openstack-Request-Id") != "quota-PATCH" {
 		t.Fatalf("updated=%+v err=%v", updated, err)
 	}
@@ -174,12 +174,12 @@ func TestDesignateQuotaInvalidOptionsAndZeroScopeFailBeforeHTTP(t *testing.T) {
 	cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) { calls.Add(1); testcloud.JSON(w, 200, `{}`) })
 	scope := newDesignateQuotaScope(t, cloud)
 	for _, with := range [][]quotas.UpdateOption{
-		{nil}, {quotas.WithUpdateField("zones", 0)}, {quotas.WithUpdateField("id", "other")},
-		{quotas.WithUpdateField("project", "other")}, {quotas.WithUpdateField("project_id", "other")},
-		{quotas.WithUpdateField("vendor", make(chan bool))},
-		{request.WithQuery[quotas.UpdateOpts]("project", "other")},
-		{request.WithHeader[quotas.UpdateOpts]("X-Auth-Sudo-Project-ID", "other")},
-		{request.WithArgument[quotas.UpdateOpts]("unknown", true)},
+		{nil}, {request.Field("zones", 0)}, {request.Field("id", "other")},
+		{request.Field("project", "other")}, {request.Field("project_id", "other")},
+		{request.Field("vendor", make(chan bool))},
+		{request.Custom(request.WithQuery[quotas.UpdateOpts]("project", "other"))},
+		{request.Custom(request.WithHeader[quotas.UpdateOpts]("X-Auth-Sudo-Project-ID", "other"))},
+		{request.Custom(request.WithArgument[quotas.UpdateOpts]("unknown", true))},
 	} {
 		if value, err := scope.Update(context.Background(), quotas.UpdateOpts{}, with...); value != nil || !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(value, err)

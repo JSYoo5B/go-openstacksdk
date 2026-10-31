@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/ports"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -55,7 +56,7 @@ func TestPythonParityCorePortListQueryAndLinks(t *testing.T) {
 			SecurityGroups: []string{"sg-1", "sg-2"},
 			FixedIPs:       []ports.FixedIPOpts{{SubnetID: "sub-1"}, {IPAddress: "10.0.0.5"}},
 		}),
-		ports.WithListQuery("binding:host_id", "compute-1")) {
+		request.Query("binding:host_id", "compute-1")) {
 		if err != nil {
 			t.Fatal(err)
 		}

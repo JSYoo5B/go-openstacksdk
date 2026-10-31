@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/groups"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -65,7 +66,7 @@ func TestNativeGroupRoutesBodiesPagingAndDecode(t *testing.T) {
 		return 200, `{"group":` + nativeGroupRow + `}`
 	})
 	blank := ""
-	created, err := api.Create(ctx, groups.CreateOpts{Name: "ops", Description: "desc", DomainID: "default", Extra: map[string]any{"email": "ops@example.com"}}, groups.WithCreateField("x_extension", 1))
+	created, err := api.Create(ctx, groups.CreateOpts{Name: "ops", Description: "desc", DomainID: "default", Extra: map[string]any{"email": "ops@example.com"}}, request.Field("x_extension", 1))
 	// Unknown response keys are collected into Extra.
 	if err != nil || !(created.ID == "g-1" && created.DomainID == "default" && reflect.DeepEqual(created.Extra, map[string]any{"email": "ops@example.com"})) {
 		t.Fatal(created, err)
@@ -74,11 +75,11 @@ func TestNativeGroupRoutesBodiesPagingAndDecode(t *testing.T) {
 	if err != nil || got.Name != "ops" {
 		t.Fatal(got, err)
 	}
-	if _, err := api.Update(ctx, "g-1", groups.UpdateOpts{Description: &blank, Extra: map[string]any{"email": nil}}, groups.WithUpdateField("x_extension", 2)); err != nil {
+	if _, err := api.Update(ctx, "g-1", groups.UpdateOpts{Description: &blank, Extra: map[string]any{"email": nil}}, request.Field("x_extension", 2)); err != nil {
 		t.Fatal(err)
 	}
 	var rows []*groups.Group
-	for value, err := range api.List(ctx, groups.WithListOptions(groups.ListOpts{DomainID: "default", Name: "ops", Filters: map[string]string{"name__contains": "o p"}}), groups.WithListQuery("x", "1")) {
+	for value, err := range api.List(ctx, groups.WithListOptions(groups.ListOpts{DomainID: "default", Name: "ops", Filters: map[string]string{"name__contains": "o p"}}), request.Query("x", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -167,12 +168,12 @@ func TestNativeGroupStatusesAndPreflight(t *testing.T) {
 		}{
 			"create name": {"Create", func() error { _, err := api.Create(ctx, groups.CreateOpts{DomainID: "d"}); return err }()},
 			"create core extension": {"Create", func() error {
-				_, err := api.Create(ctx, groups.CreateOpts{Name: "ops"}, groups.WithCreateField("domain_id", "x"))
+				_, err := api.Create(ctx, groups.CreateOpts{Name: "ops"}, request.Field("domain_id", "x"))
 				return err
 			}()},
 			// Extra keys are already in the envelope, so an extension with the same key collides.
 			"create extra collision": {"Create", func() error {
-				_, err := api.Create(ctx, groups.CreateOpts{Name: "ops", Extra: map[string]any{"email": "a"}}, groups.WithCreateField("email", "b"))
+				_, err := api.Create(ctx, groups.CreateOpts{Name: "ops", Extra: map[string]any{"email": "a"}}, request.Field("email", "b"))
 				return err
 			}()},
 			"update nil option": {"Update", func() error {

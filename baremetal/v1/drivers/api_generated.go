@@ -36,21 +36,16 @@ type ListDriversOpts = upstream.ListDriversOpts
 type ListVendorPassthruMethodsResult = upstream.ListVendorPassthruMethodsResult
 type VendorPassthruCallOpts = upstream.VendorPassthruCallOpts
 type VendorPassthruMethod = upstream.VendorPassthruMethod
-type CallVendorPassthruOption = request.Option[VendorPassthruCallOpts]
+type CallVendorPassthruOption = request.NativeCall
 
 func WithCallVendorPassthruOptions(value VendorPassthruCallOpts) CallVendorPassthruOption {
-	return request.WithOptions(value)
+	return request.Custom(request.WithOptions(value))
 }
 
 // CallVendorPassthru invokes the upstream API with library-owned builders and result handling.
 func (a *API) CallVendorPassthru(ctx context.Context, driverName string, httpMethod string, opts VendorPassthruCallOpts, options ...CallVendorPassthruOption) (map[string]any, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{}, options...)
 	if err != nil {
-		err = request.Wrap("CallVendorPassthru", "drivers", err)
-		var zero0 map[string]any
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, false, false, false); err != nil {
 		err = request.Wrap("CallVendorPassthru", "drivers", err)
 		var zero0 map[string]any
 		return zero0, err
@@ -85,13 +80,10 @@ func (a *API) GetDriverProperties(ctx context.Context, driverName string) (*Driv
 	return value0, err
 }
 
-type ListDriversOption = request.Option[ListDriversOpts]
+type ListDriversOption = request.NativeQueryCall
 
 func WithListDriversOptions(value ListDriversOpts) ListDriversOption {
-	return request.WithOptions(value)
-}
-func WithListDriversQuery(key, value string) ListDriversOption {
-	return request.WithQuery[ListDriversOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type listDriversOptsBuilder struct {
@@ -120,12 +112,8 @@ func (a *API) ListDrivers(ctx context.Context, options ...ListDriversOption) ite
 
 func (a *API) listDriversWithControl(ctx context.Context, control resource.ListControl, options ...ListDriversOption) iter.Seq2[*Driver, error] {
 	var opts ListDriversOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("ListDrivers", "drivers", err)
-		return func(yield func(*Driver, error) bool) { var zero *Driver; yield(zero, err) }
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("ListDrivers", "drivers", err)
 		return func(yield func(*Driver, error) bool) { var zero *Driver; yield(zero, err) }
 	}

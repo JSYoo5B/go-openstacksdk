@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
@@ -20,7 +21,7 @@ func nativeVolumeAdminActions() []nativeVolumeAction {
 		{"ForceDelete", func(ctx context.Context, api *volumes.API) error { return api.ForceDelete(ctx, "vol-1") },
 			`{"os-force_delete":""}`, []int{201, 202}},
 		{"ResetStatus", func(ctx context.Context, api *volumes.API) error {
-			return api.ResetStatus(ctx, "vol-1", volumes.ResetStatusOpts{Status: "available", AttachStatus: "detached"}, volumes.WithResetStatusField("x_extension", 1))
+			return api.ResetStatus(ctx, "vol-1", volumes.ResetStatusOpts{Status: "available", AttachStatus: "detached"}, request.Field("x_extension", 1))
 		}, `{"os-reset_status":{"attach_status":"detached","status":"available","x_extension":1}}`, []int{202}},
 		{"Unmanage", func(ctx context.Context, api *volumes.API) error { return api.Unmanage(ctx, "vol-1") },
 			`{"os-unmanage":{}}`, []int{202}},
@@ -63,7 +64,7 @@ func TestNativeVolumeAdminActionRoutesBodiesAndStatuses(t *testing.T) {
 		if err := api.ResetStatus(ctx, "vol-1", volumes.ResetStatusOpts{}); err != nil || calls[0].body != `{"os-reset_status":{"status":""}}` {
 			t.Fatal(err, calls)
 		}
-		err := api.ResetStatus(ctx, "vol-1", volumes.ResetStatusOpts{}, volumes.WithResetStatusField("status", "x"))
+		err := api.ResetStatus(ctx, "vol-1", volumes.ResetStatusOpts{}, request.Field("status", "x"))
 		nativeVolumeOperation(t, err, "ResetStatus")
 		if len(calls) != 1 {
 			t.Fatal(calls)

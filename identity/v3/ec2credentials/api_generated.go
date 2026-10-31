@@ -23,11 +23,10 @@ type Credential = upstream.Credential
 type CredentialPage = upstream.CredentialPage
 type DeleteResult = upstream.DeleteResult
 type GetResult = upstream.GetResult
-type CreateOption = request.Option[CreateOpts]
+type CreateOption = request.NativeFieldCall
 
-func WithCreateOptions(value CreateOpts) CreateOption { return request.WithOptions(value) }
-func WithCreateField(key string, value any) CreateOption {
-	return request.WithField[CreateOpts](key, value)
+func WithCreateOptions(value CreateOpts) CreateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type createOptsBuilder struct {
@@ -51,13 +50,8 @@ func (b createOptsBuilder) ToCredentialCreateMap() (map[string]any, error) {
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, userID string, opts CreateOpts, options ...CreateOption) (*Credential, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Create", "ec2credentials", err)
-		var zero0 *Credential
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Create", "ec2credentials", err)
 		var zero0 *Credential
 		return zero0, err

@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/volumeattach"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -60,7 +61,7 @@ func TestNativeVolumeAttachRoutesBodiesAndDecode(t *testing.T) {
 	}))
 	api := volumeattach.New(nativeVolumeClient(cloud))
 	ctx := context.Background()
-	created, err := api.Create(ctx, "s1", volumeattach.CreateOpts{VolumeID: "v1", Device: "/dev/vdb", Tag: "data", DeleteOnTermination: true}, volumeattach.WithCreateField("x_extension", 1))
+	created, err := api.Create(ctx, "s1", volumeattach.CreateOpts{VolumeID: "v1", Device: "/dev/vdb", Tag: "data", DeleteOnTermination: true}, request.Field("x_extension", 1))
 	if err != nil || created.ID != "v1" || created.ServerID != "s1" || *created.Tag != "data" || !*created.DeleteOnTermination {
 		t.Fatal(created, err)
 	}
@@ -171,7 +172,7 @@ func TestNativeVolumeAttachStrictStatusesAndPreflight(t *testing.T) {
 		for name, check := range map[string]func() error{
 			"missing volume": func() error { _, err := api.Create(ctx, "s1", volumeattach.CreateOpts{}); return err },
 			"volumeId extension": func() error {
-				_, err := api.Create(ctx, "s1", volumeattach.CreateOpts{VolumeID: "v"}, volumeattach.WithCreateField("volumeId", "x"))
+				_, err := api.Create(ctx, "s1", volumeattach.CreateOpts{VolumeID: "v"}, request.Field("volumeId", "x"))
 				return err
 			},
 			"nil option": func() error { _, err := api.Create(ctx, "s1", volumeattach.CreateOpts{VolumeID: "v"}, nil); return err },

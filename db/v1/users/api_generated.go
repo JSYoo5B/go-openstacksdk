@@ -23,11 +23,10 @@ type CreateResult = upstream.CreateResult
 type DeleteResult = upstream.DeleteResult
 type User = upstream.User
 type UserPage = upstream.UserPage
-type CreateOption = request.Option[BatchCreateOpts]
+type CreateOption = request.NativeFieldCall
 
-func WithCreateOptions(value BatchCreateOpts) CreateOption { return request.WithOptions(value) }
-func WithCreateField(key string, value any) CreateOption {
-	return request.WithField[BatchCreateOpts](key, value)
+func WithCreateOptions(value BatchCreateOpts) CreateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type createOptsBuilder struct {
@@ -51,12 +50,8 @@ func (b createOptsBuilder) ToUserCreateMap() (map[string]any, error) {
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, instanceID string, opts BatchCreateOpts, options ...CreateOption) error {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Create", "users", err)
-		return err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Create", "users", err)
 		return err
 	}

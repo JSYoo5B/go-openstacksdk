@@ -20,6 +20,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/l7policies"
 	"github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/pools"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/portforwarding"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -289,12 +290,12 @@ func TestScopedRecordSetCreateAndUpdateKeepExtensionsAndDefaultTTL(t *testing.T)
 	if err != nil {
 		t.Fatal(err)
 	}
-	value, err := scope.Create(ctx, recordsets.CreateOpts{Name: "www.example.org.", Type: "A", Records: []string{"192.0.2.1"}}, recordsets.WithCreateField("vendor:enabled", false))
+	value, err := scope.Create(ctx, recordsets.CreateOpts{Name: "www.example.org.", Type: "A", Records: []string{"192.0.2.1"}}, request.Field("vendor:enabled", false))
 	if err != nil || value.ID != "record-id" {
 		t.Fatalf("value=%v err=%v", value, err)
 	}
 	ttl := 0
-	value, err = scope.Update(ctx, resource.Name("www.example.org."), recordsets.UpdateOpts{TTL: &ttl}, recordsets.WithUpdateField("vendor:enabled", false))
+	value, err = scope.Update(ctx, resource.Name("www.example.org."), recordsets.UpdateOpts{TTL: &ttl}, request.Field("vendor:enabled", false))
 	if err != nil || value.ID != "record-id" {
 		t.Fatalf("value=%v err=%v", value, err)
 	}

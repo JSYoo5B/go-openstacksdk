@@ -11,6 +11,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -81,12 +82,12 @@ func TestPythonAdminServerMigrationActionArgumentGaps(t *testing.T) {
 		t.Fatal(err)
 	}
 	// live_migrate_server(server, host="cmp2", force=True, block_migration=True) at 2.30.
-	if err := api.LiveMigrate(ctx, "s1", servers.LiveMigrateOpts{Host: &host, BlockMigration: &enabled}, servers.WithLiveMigrateField("force", true)); err != nil {
+	if err := api.LiveMigrate(ctx, "s1", servers.LiveMigrateOpts{Host: &host, BlockMigration: &enabled}, request.Field("force", true)); err != nil {
 		t.Fatal(err)
 	}
 	// live_migrate_server(server) defaults block_migration to "auto" from 2.25;
 	// the typed key cannot carry a string.
-	if err := api.LiveMigrate(ctx, "s1", servers.LiveMigrateOpts{}, servers.WithLiveMigrateField("block_migration", "auto")); !errors.Is(err, resource.ErrInvalidOption) {
+	if err := api.LiveMigrate(ctx, "s1", servers.LiveMigrateOpts{}, request.Field("block_migration", "auto")); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
 	action := "/nova/v2.1/servers/s1/action"

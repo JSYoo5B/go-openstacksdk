@@ -14,6 +14,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/container/v1/capsules"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -61,7 +62,7 @@ func TestZunCapsuleCreateSendsTemplateStringAndRequires202(t *testing.T) {
 			testcloud.JSON(w, status, zunCapsuleV132Body)
 		})
 		api := newZunCapsules(t, cloud, "1.32")
-		value, err := api.Create(context.Background(), capsules.CreateOpts{TemplateOpts: zunTemplate()}, capsules.WithCreateField("vendor", false))
+		value, err := api.Create(context.Background(), capsules.CreateOpts{TemplateOpts: zunTemplate()}, request.Field("vendor", false))
 		if (status == 202) != (err == nil) {
 			t.Fatalf("status %d value=%v error=%v", status, value, err)
 		}
@@ -140,7 +141,7 @@ func TestZunCapsuleRejectsInvalidInputsBeforeHTTP(t *testing.T) {
 	if _, err := api.Create(ctx, capsules.CreateOpts{TemplateOpts: &capsules.Template{Bin: []byte("{not: [valid")}}); !errors.As(err, &invalid) {
 		t.Fatalf("invalid template must fail locally: %v", err)
 	}
-	if _, err := api.Create(ctx, capsules.CreateOpts{TemplateOpts: zunTemplate()}, capsules.WithCreateField("template", "shadow")); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := api.Create(ctx, capsules.CreateOpts{TemplateOpts: zunTemplate()}, request.Field("template", "shadow")); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatalf("template collision: %v", err)
 	}
 	if _, err := api.Create(ctx, capsules.CreateOpts{TemplateOpts: zunTemplate()}, nil); !errors.Is(err, resource.ErrInvalidOption) {
@@ -191,7 +192,7 @@ func TestZunCapsuleListQueriesPagingAndV132Rows(t *testing.T) {
 	var ids []string
 	for value, err := range api.List(context.Background(),
 		capsules.WithListOptions(capsules.ListOpts{Limit: 1, SortKey: "name", SortDir: "desc", AllProjects: true}),
-		capsules.WithListQuery("vendor", "x")) {
+		request.Query("vendor", "x")) {
 		if err != nil {
 			t.Fatal(err)
 		}

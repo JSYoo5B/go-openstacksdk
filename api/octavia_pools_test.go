@@ -14,6 +14,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/pools"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -97,7 +98,7 @@ func TestOctaviaPoolCreateKeepsExplicitFalseZeroNestedMembersAndExtensionFields(
 			AdminStateUp: octaviaPoolBool(false), Persistence: &pools.SessionPersistence{Type: "HTTP_COOKIE"},
 			Members: []pools.CreateMemberOpts{{Address: "192.0.2.10", ProtocolPort: 8080, Weight: octaviaPoolInt(0), AdminStateUp: octaviaPoolBool(false)}},
 			Tags:    []string{"blue"},
-		}, pools.WithCreateField("vendor", map[string]bool{"enabled": false}))
+		}, request.Field("vendor", map[string]bool{"enabled": false}))
 		octaviaPoolWantStatus(t, tc.status, tc.success, err)
 		if calls.Load() != 1 {
 			t.Fatalf("calls=%d", calls.Load())
@@ -119,10 +120,10 @@ func TestOctaviaPoolRejectsProtectedOrUnsupportedExtensionsBeforeHTTP(t *testing
 	create := pools.CreateOpts{LBMethod: pools.LBMethodRoundRobin, Protocol: pools.ProtocolHTTP}
 	member := pools.CreateMemberOpts{Address: "192.0.2.10", ProtocolPort: 8080}
 	cases := map[string]error{}
-	_, cases["protected create field"] = api.Create(ctx, create, pools.WithCreateField("protocol", "TCP"))
-	_, cases["protected update field"] = api.Update(ctx, "pool-1", pools.UpdateOpts{}, pools.WithUpdateField("admin_state_up", true))
-	_, cases["protected member create field"] = api.CreateMember(ctx, "pool-1", member, pools.WithCreateMemberField("address", "x"))
-	_, cases["protected member update field"] = api.UpdateMember(ctx, "pool-1", "m-1", pools.UpdateMemberOpts{}, pools.WithUpdateMemberField("weight", 1))
+	_, cases["protected create field"] = api.Create(ctx, create, request.Field("protocol", "TCP"))
+	_, cases["protected update field"] = api.Update(ctx, "pool-1", pools.UpdateOpts{}, request.Field("admin_state_up", true))
+	_, cases["protected member create field"] = api.CreateMember(ctx, "pool-1", member, request.Field("address", "x"))
+	_, cases["protected member update field"] = api.UpdateMember(ctx, "pool-1", "m-1", pools.UpdateMemberOpts{}, request.Field("weight", 1))
 	_, cases["nil create option"] = api.Create(ctx, create, nil)
 	_, cases["nil update option"] = api.Update(ctx, "pool-1", pools.UpdateOpts{}, nil)
 	_, cases["nil member create option"] = api.CreateMember(ctx, "pool-1", member, nil)
@@ -171,7 +172,7 @@ func TestOctaviaPoolUpdateSendsEmptyValuesAndNullsAndAcceptsOnly200(t *testing.T
 		value, err := newOctaviaPools(t, cloud).Update(context.Background(), "pool-1", pools.UpdateOpts{
 			Name: &empty, Description: &empty, AdminStateUp: octaviaPoolBool(false), TLSEnabled: &tlsEnabled,
 			Persistence: &pools.SessionPersistence{}, Tags: &tags, ALPNProtocols: &alpn, TLSVersions: &versions,
-		}, pools.WithUpdateField("vendor", 1))
+		}, request.Field("vendor", 1))
 		octaviaPoolWantStatus(t, tc.status, tc.success, err)
 		if tc.success && (value == nil || value.ID != "pool-1") {
 			t.Fatalf("value=%+v", value)
@@ -242,7 +243,7 @@ func TestOctaviaPoolListFiltersFollowLinksAndPreserveFalse(t *testing.T) {
 	var ids []string
 	for value, err := range newOctaviaPools(t, cloud).List(context.Background(),
 		pools.WithListOptions(pools.ListOpts{AdminStateUp: octaviaPoolBool(false), LBMethod: "ROUND_ROBIN", LoadbalancerID: "lb-1", Tags: []string{"a", "b"}, Limit: 1}),
-		pools.WithListQuery("vendor", "x")) {
+		request.Query("vendor", "x")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -310,7 +311,7 @@ func TestOctaviaPoolCreateMemberKeepsExplicitFalseZeroAndAcceptsOnly201Or202(t *
 		value, err := newOctaviaPools(t, cloud).CreateMember(context.Background(), "pool-1", pools.CreateMemberOpts{
 			Address: "192.0.2.10", ProtocolPort: 8080, Weight: octaviaPoolInt(0), AdminStateUp: octaviaPoolBool(false),
 			Backup: octaviaPoolBool(false), MonitorPort: octaviaPoolInt(0), Tags: []string{"blue"},
-		}, pools.WithCreateMemberField("vendor", map[string]bool{"enabled": false}))
+		}, request.Field("vendor", map[string]bool{"enabled": false}))
 		octaviaPoolWantStatus(t, tc.status, tc.success, err)
 		if tc.success && (value == nil || value.ID != "m-1" || value.Weight != 0 || value.AdminStateUp || value.Address != "192.0.2.10") {
 			t.Fatalf("value=%+v", value)
@@ -341,7 +342,7 @@ func TestOctaviaPoolUpdateMemberSendsEmptyValuesAndAcceptsOnly200To202(t *testin
 		value, err := newOctaviaPools(t, cloud).UpdateMember(context.Background(), "pool-1", "m-1", pools.UpdateMemberOpts{
 			Name: &empty, Weight: octaviaPoolInt(0), AdminStateUp: octaviaPoolBool(false), Backup: octaviaPoolBool(false),
 			MonitorAddress: &empty, MonitorPort: octaviaPoolInt(0), Tags: []string{},
-		}, pools.WithUpdateMemberField("vendor", 1))
+		}, request.Field("vendor", 1))
 		octaviaPoolWantStatus(t, tc.status, tc.success, err)
 		if tc.success && (value == nil || value.ID != "m-1") {
 			t.Fatalf("value=%+v", value)
@@ -403,7 +404,7 @@ func TestOctaviaPoolListMembersFiltersFollowLinksAndPreserveFalse(t *testing.T) 
 	var ids []string
 	for value, err := range newOctaviaPools(t, cloud).ListMembers(context.Background(), "pool-1",
 		pools.WithListMembersOptions(pools.ListMembersOpts{AdminStateUp: octaviaPoolBool(false), Address: "192.0.2.10", ProtocolPort: 8080, Limit: 1}),
-		pools.WithListMembersQuery("vendor", "x")) {
+		request.Query("vendor", "x")) {
 		if err != nil {
 			t.Fatal(err)
 		}

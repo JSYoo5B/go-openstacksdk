@@ -51,11 +51,10 @@ type ListOpts = upstream.ListOpts
 const RSAContainer = upstream.RSAContainer
 
 type SecretRef = upstream.SecretRef
-type CreateOption = request.Option[CreateOpts]
+type CreateOption = request.NativeFieldCall
 
-func WithCreateOptions(value CreateOpts) CreateOption { return request.WithOptions(value) }
-func WithCreateField(key string, value any) CreateOption {
-	return request.WithField[CreateOpts](key, value)
+func WithCreateOptions(value CreateOpts) CreateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type createOptsBuilder struct {
@@ -79,13 +78,8 @@ func (b createOptsBuilder) ToContainerCreateMap() (map[string]any, error) {
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*Container, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Create", "containers", err)
-		var zero0 *Container
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Create", "containers", err)
 		var zero0 *Container
 		return zero0, err
@@ -97,13 +91,10 @@ func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOpti
 	return value0, err
 }
 
-type CreateConsumerOption = request.Option[CreateConsumerOpts]
+type CreateConsumerOption = request.NativeFieldCall
 
 func WithCreateConsumerOptions(value CreateConsumerOpts) CreateConsumerOption {
-	return request.WithOptions(value)
-}
-func WithCreateConsumerField(key string, value any) CreateConsumerOption {
-	return request.WithField[CreateConsumerOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type createConsumerOptsBuilder struct {
@@ -127,13 +118,8 @@ func (b createConsumerOptsBuilder) ToContainerConsumerCreateMap() (map[string]an
 
 // CreateConsumer invokes the upstream API with library-owned builders and result handling.
 func (a *API) CreateConsumer(ctx context.Context, containerID string, opts CreateConsumerOpts, options ...CreateConsumerOption) (*Container, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("CreateConsumer", "containers", err)
-		var zero0 *Container
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("CreateConsumer", "containers", err)
 		var zero0 *Container
 		return zero0, err
@@ -145,13 +131,10 @@ func (a *API) CreateConsumer(ctx context.Context, containerID string, opts Creat
 	return value0, err
 }
 
-type CreateSecretRefOption = request.Option[SecretRef]
+type CreateSecretRefOption = request.NativeFieldCall
 
 func WithCreateSecretRefOptions(value SecretRef) CreateSecretRefOption {
-	return request.WithOptions(value)
-}
-func WithCreateSecretRefField(key string, value any) CreateSecretRefOption {
-	return request.WithField[SecretRef](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type createSecretRefOptsBuilder struct {
@@ -175,13 +158,8 @@ func (b createSecretRefOptsBuilder) ToContainerSecretRefMap() (map[string]any, e
 
 // CreateSecretRef invokes the upstream API with library-owned builders and result handling.
 func (a *API) CreateSecretRef(ctx context.Context, containerID string, opts SecretRef, options ...CreateSecretRefOption) (*Container, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("CreateSecretRef", "containers", err)
-		var zero0 *Container
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("CreateSecretRef", "containers", err)
 		var zero0 *Container
 		return zero0, err
@@ -198,13 +176,10 @@ func (a *API) Delete(ctx context.Context, id string) error {
 	return request.Wrap("Delete", "containers", upstream.Delete(ctx, a.client, id).ExtractErr())
 }
 
-type DeleteConsumerOption = request.Option[DeleteConsumerOpts]
+type DeleteConsumerOption = request.NativeFieldCall
 
 func WithDeleteConsumerOptions(value DeleteConsumerOpts) DeleteConsumerOption {
-	return request.WithOptions(value)
-}
-func WithDeleteConsumerField(key string, value any) DeleteConsumerOption {
-	return request.WithField[DeleteConsumerOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type deleteConsumerOptsBuilder struct {
@@ -229,13 +204,8 @@ func (b deleteConsumerOptsBuilder) ToContainerConsumerDeleteMap() (map[string]an
 // DeleteConsumer invokes the upstream API with library-owned builders and result handling.
 func (a *API) DeleteConsumer(ctx context.Context, containerID string, options ...DeleteConsumerOption) (*Container, error) {
 	var opts DeleteConsumerOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("DeleteConsumer", "containers", err)
-		var zero0 *Container
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("DeleteConsumer", "containers", err)
 		var zero0 *Container
 		return zero0, err
@@ -247,13 +217,10 @@ func (a *API) DeleteConsumer(ctx context.Context, containerID string, options ..
 	return value0, err
 }
 
-type DeleteSecretRefOption = request.Option[SecretRef]
+type DeleteSecretRefOption = request.NativeFieldCall
 
 func WithDeleteSecretRefOptions(value SecretRef) DeleteSecretRefOption {
-	return request.WithOptions(value)
-}
-func WithDeleteSecretRefField(key string, value any) DeleteSecretRefOption {
-	return request.WithField[SecretRef](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type deleteSecretRefOptsBuilder struct {
@@ -278,12 +245,8 @@ func (b deleteSecretRefOptsBuilder) ToContainerSecretRefMap() (map[string]any, e
 // DeleteSecretRef invokes the upstream API with library-owned builders and result handling.
 func (a *API) DeleteSecretRef(ctx context.Context, containerID string, options ...DeleteSecretRefOption) error {
 	var opts SecretRef
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("DeleteSecretRef", "containers", err)
-		return err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("DeleteSecretRef", "containers", err)
 		return err
 	}
@@ -299,10 +262,9 @@ func (a *API) Get(ctx context.Context, id string) (*Container, error) {
 	return value0, err
 }
 
-type ListOption = request.Option[ListOpts]
+type ListOption = request.NativeQueryCall
 
-func WithListOptions(value ListOpts) ListOption  { return request.WithOptions(value) }
-func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
+func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
 	base   ListOpts
@@ -330,12 +292,8 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Contai
 
 func (a *API) listWithControl(ctx context.Context, control resource.ListControl, options ...ListOption) iter.Seq2[*Container, error] {
 	var opts ListOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("List", "containers", err)
-		return func(yield func(*Container, error) bool) { var zero *Container; yield(zero, err) }
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("List", "containers", err)
 		return func(yield func(*Container, error) bool) { var zero *Container; yield(zero, err) }
 	}
@@ -346,11 +304,10 @@ func (a *API) listWithControl(ctx context.Context, control resource.ListControl,
 	}, control)
 }
 
-type ListConsumersOption = request.Option[ListOpts]
+type ListConsumersOption = request.NativeQueryCall
 
-func WithListConsumersOptions(value ListOpts) ListConsumersOption { return request.WithOptions(value) }
-func WithListConsumersQuery(key, value string) ListConsumersOption {
-	return request.WithQuery[ListOpts](key, value)
+func WithListConsumersOptions(value ListOpts) ListConsumersOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type listConsumersOptsBuilder struct {
@@ -375,12 +332,8 @@ func (b listConsumersOptsBuilder) ToContainerListConsumersQuery() (string, error
 // ListConsumers invokes the upstream API with library-owned builders and result handling.
 func (a *API) ListConsumers(ctx context.Context, containerID string, options ...ListConsumersOption) iter.Seq2[*Consumer, error] {
 	var opts ListOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("ListConsumers", "containers", err)
-		return func(yield func(*Consumer, error) bool) { var zero *Consumer; yield(zero, err) }
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("ListConsumers", "containers", err)
 		return func(yield func(*Consumer, error) bool) { var zero *Consumer; yield(zero, err) }
 	}

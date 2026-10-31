@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/JSYoo5B/go-openstacksdk/workflow/v2/crontriggers"
 	"github.com/JSYoo5B/go-openstacksdk/workflow/v2/executions"
@@ -79,7 +80,7 @@ func TestMistralWorkflowCreateSendsTextDefinitionAndScopeQuery(t *testing.T) {
 		})
 		got, err := workflows.New(cloud.Client("workflowv2", "/mistral/v2")).Create(context.Background(),
 			workflows.CreateOpts{Scope: "public", Namespace: "ns", Definition: strings.NewReader("version: '2.0'\nflag: false\n")},
-			workflows.WithCreateQuery("vendor", "x"))
+			request.Query("vendor", "x"))
 		if tc.success != (err == nil) || calls.Load() != 1 {
 			t.Fatalf("status %d error=%v calls=%d", tc.status, err, calls.Load())
 		}
@@ -174,7 +175,7 @@ func TestMistralWorkflowListFiltersFollowNextLinkAndPreserveFilters(t *testing.T
 			CreatedAt: &workflows.ListDateFilter{Filter: workflows.FilterGTE, Value: when},
 			Namespace: &workflows.ListFilter{Value: ""},
 		}),
-		workflows.WithListQuery("vendor", "x")) {
+		request.Query("vendor", "x")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -257,7 +258,7 @@ func TestMistralExecutionCreateSendsFlatBodyAndPreservesNestedValues(t *testing.
 		got, err := executions.New(mistralClient(cloud)).Create(context.Background(), executions.CreateOpts{
 			WorkflowName: "deploy", WorkflowNamespace: "ns", Description: "run",
 			Input: map[string]any{"flag": false, "n": 0}, Params: map[string]any{"env": map[string]any{}},
-		}, executions.WithCreateField("vendor", nil))
+		}, request.Field("vendor", nil))
 		if tc.success != (err == nil) || calls.Load() != 1 {
 			t.Fatalf("status %d error=%v calls=%d", tc.status, err, calls.Load())
 		}
@@ -276,7 +277,7 @@ func TestMistralExecutionRejectsInvalidInputBeforeHTTP(t *testing.T) {
 	api := executions.New(mistralClient(cloud))
 	ctx := context.Background()
 	opts := executions.CreateOpts{WorkflowID: "wf-1"}
-	if _, err := api.Create(ctx, opts, executions.WithCreateField("workflow_id", "other")); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := api.Create(ctx, opts, request.Field("workflow_id", "other")); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatalf("protected field: %v", err)
 	}
 	if _, err := api.Create(ctx, opts, nil); !errors.Is(err, resource.ErrInvalidOption) {
@@ -356,7 +357,7 @@ func TestMistralExecutionListFiltersAndJSONQueriesFollowNextLink(t *testing.T) {
 			Input: map[string]any{"flag": false}, Output: map[string]any{}, Params: map[string]any{"env": nil},
 			UpdatedAt: &executions.ListDateFilter{Filter: executions.FilterLT, Value: when},
 		}),
-		executions.WithListQuery("vendor", "x")) {
+		request.Query("vendor", "x")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -445,7 +446,7 @@ func TestMistralCronTriggerCreateSendsFormattedFirstExecutionAndRequires201Or202
 		got, err := crontriggers.New(mistralClient(cloud)).Create(context.Background(), crontriggers.CreateOpts{
 			Name: "nightly", Pattern: "0 0 * * *", WorkflowName: "deploy", FirstExecutionTime: &first,
 			WorkflowInput: map[string]any{"flag": false}, WorkflowParams: map[string]any{"env": map[string]any{}},
-		}, crontriggers.WithCreateField("vendor", false))
+		}, request.Field("vendor", false))
 		if tc.success != (err == nil) || calls.Load() != 1 {
 			t.Fatalf("status %d error=%v calls=%d", tc.status, err, calls.Load())
 		}
@@ -464,7 +465,7 @@ func TestMistralCronTriggerRejectsInvalidInputBeforeHTTP(t *testing.T) {
 	api := crontriggers.New(mistralClient(cloud))
 	ctx := context.Background()
 	opts := crontriggers.CreateOpts{Name: "n", Pattern: "* * * * *", WorkflowID: "wf-1"}
-	if _, err := api.Create(ctx, opts, crontriggers.WithCreateField("pattern", "x")); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := api.Create(ctx, opts, request.Field("pattern", "x")); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatalf("protected field: %v", err)
 	}
 	if _, err := api.Create(ctx, opts, nil); !errors.Is(err, resource.ErrInvalidOption) {
@@ -545,7 +546,7 @@ func TestMistralCronTriggerListFiltersAndTypedFiltersFollowNextLink(t *testing.T
 			NextExecutionTime:   &crontriggers.ListDateFilter{Filter: crontriggers.FilterGT, Value: when},
 			WorkflowInput:       map[string]any{"flag": false},
 		}),
-		crontriggers.WithListQuery("vendor", "x")) {
+		request.Query("vendor", "x")) {
 		if err != nil {
 			t.Fatal(err)
 		}

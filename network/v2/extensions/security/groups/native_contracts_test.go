@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -68,7 +69,7 @@ func TestNativeSecGroupRoutesBodiesPagingAndDecode(t *testing.T) {
 	})
 	api := groups.New(nativeSecGroupClient(cloud))
 	ctx := context.Background()
-	created, err := api.Create(ctx, groups.CreateOpts{Name: "web", Description: "d", Stateful: gophercloud.Disabled, ProjectID: "p"}, groups.WithCreateField("x_extension", 1))
+	created, err := api.Create(ctx, groups.CreateOpts{Name: "web", Description: "d", Stateful: gophercloud.Disabled, ProjectID: "p"}, request.Field("x_extension", 1))
 	if err != nil || !(created.ID == "id-1" && created.Stateful && created.Rules[0].Direction == "egress") {
 		t.Fatal(created, err)
 	}
@@ -164,7 +165,7 @@ func TestNativeSecGroupStrictStatusesAndPreflight(t *testing.T) {
 		for name, check := range map[string]func() error{
 			"missing name": func() error { _, err := api.Create(ctx, groups.CreateOpts{}); return err },
 			"name extension": func() error {
-				_, err := api.Create(ctx, groups.CreateOpts{Name: "w"}, groups.WithCreateField("name", "x"))
+				_, err := api.Create(ctx, groups.CreateOpts{Name: "w"}, request.Field("name", "x"))
 				return err
 			},
 			"nil option": func() error { _, err := api.Create(ctx, groups.CreateOpts{Name: "w"}, nil); return err },

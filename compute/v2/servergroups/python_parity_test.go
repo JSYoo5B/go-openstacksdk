@@ -9,6 +9,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -111,7 +112,7 @@ func TestPythonServerGroupListAllProjectsAndQuery(t *testing.T) {
 		t.Fatal(ids)
 	}
 	// server_groups(all_projects=True, limit=1, marker="g0")
-	if ids := collect(servergroups.WithListQuery("all_projects", "True"), servergroups.WithListOptions(servergroups.ListOpts{Limit: 1}), servergroups.WithListQuery("marker", "g0")); !reflect.DeepEqual(ids, []string{"g1"}) {
+	if ids := collect(request.Query("all_projects", "True"), servergroups.WithListOptions(servergroups.ListOpts{Limit: 1}), request.Query("marker", "g0")); !reflect.DeepEqual(ids, []string{"g1"}) {
 		t.Fatal(ids)
 	}
 	want := []pythonServerGroupCall{

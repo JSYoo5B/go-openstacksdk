@@ -14,6 +14,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/segments"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -71,7 +72,7 @@ func TestNativeSegmentRoutesBodiesPagingAndDecode(t *testing.T) {
 		}
 		return nativeSegmentWire(200, `{"segment":`+nativeSegmentRow+`}`)
 	})
-	created, err := api.Create(ctx, nativeSegmentCreate, segments.WithCreateField("x_extension", 1))
+	created, err := api.Create(ctx, nativeSegmentCreate, request.Field("x_extension", 1))
 	if err != nil || !(created.ID == "seg-1" && created.SegmentationID == 2016 && created.RevisionNumber == 3 &&
 		created.CreatedAt.Equal(time.Date(2026, 10, 10, 1, 2, 3, 0, time.UTC))) {
 		t.Fatal(created, err)
@@ -81,11 +82,11 @@ func TestNativeSegmentRoutesBodiesPagingAndDecode(t *testing.T) {
 		t.Fatal(got, err)
 	}
 	name, zero := "", 0
-	if _, err := api.Update(ctx, "seg-1", segments.UpdateOpts{Name: &name, SegmentationID: &zero}, segments.WithUpdateField("x_extension", 1)); err != nil {
+	if _, err := api.Update(ctx, "seg-1", segments.UpdateOpts{Name: &name, SegmentationID: &zero}, request.Field("x_extension", 1)); err != nil {
 		t.Fatal(err)
 	}
 	var rows []*segments.Segment
-	for value, err := range api.List(ctx, segments.WithListOptions(segments.ListOpts{NetworkID: "net-1", NetworkType: "vlan", SegmentationID: 0, SortKey: "name"}), segments.WithListQuery("limit", "1")) {
+	for value, err := range api.List(ctx, segments.WithListOptions(segments.ListOpts{NetworkID: "net-1", NetworkType: "vlan", SegmentationID: 0, SortKey: "name"}), request.Query("limit", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -197,11 +198,11 @@ func TestNativeSegmentStrictStatusesDecodeAndPreflight(t *testing.T) {
 			"create network type": {"Create", func() error { _, err := api.Create(ctx, noType); return err }()},
 			"create network id":   {"Create", func() error { _, err := api.Create(ctx, noNetwork); return err }()},
 			"create extension": {"Create", func() error {
-				_, err := api.Create(ctx, nativeSegmentCreate, segments.WithCreateField("description", "x"))
+				_, err := api.Create(ctx, nativeSegmentCreate, request.Field("description", "x"))
 				return err
 			}()},
 			"update extension": {"Update", func() error {
-				_, err := api.Update(ctx, "seg-1", segments.UpdateOpts{}, segments.WithUpdateField("segmentation_id", 1))
+				_, err := api.Update(ctx, "seg-1", segments.UpdateOpts{}, request.Field("segmentation_id", 1))
 				return err
 			}()},
 			"create nil option": {"Create", func() error { _, err := api.Create(ctx, nativeSegmentCreate, nil); return err }()},

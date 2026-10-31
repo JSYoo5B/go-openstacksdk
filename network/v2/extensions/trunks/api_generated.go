@@ -46,13 +46,10 @@ type TrunkPage = upstream.TrunkPage
 type UpdateOpts = upstream.UpdateOpts
 type UpdateResult = upstream.UpdateResult
 type UpdateSubportsResult = upstream.UpdateSubportsResult
-type AddSubportsOption = request.Option[AddSubportsOpts]
+type AddSubportsOption = request.NativeFieldCall
 
 func WithAddSubportsOptions(value AddSubportsOpts) AddSubportsOption {
-	return request.WithOptions(value)
-}
-func WithAddSubportsField(key string, value any) AddSubportsOption {
-	return request.WithField[AddSubportsOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type addSubportsOptsBuilder struct {
@@ -76,13 +73,8 @@ func (b addSubportsOptsBuilder) ToTrunkAddSubportsMap() (map[string]any, error) 
 
 // AddSubports invokes the upstream API with library-owned builders and result handling.
 func (a *API) AddSubports(ctx context.Context, id string, opts AddSubportsOpts, options ...AddSubportsOption) (*Trunk, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("AddSubports", "trunks", err)
-		var zero0 *Trunk
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("AddSubports", "trunks", err)
 		var zero0 *Trunk
 		return zero0, err
@@ -94,11 +86,10 @@ func (a *API) AddSubports(ctx context.Context, id string, opts AddSubportsOpts, 
 	return value0, err
 }
 
-type CreateOption = request.Option[CreateOpts]
+type CreateOption = request.NativeFieldCall
 
-func WithCreateOptions(value CreateOpts) CreateOption { return request.WithOptions(value) }
-func WithCreateField(key string, value any) CreateOption {
-	return request.WithField[CreateOpts](key, value)
+func WithCreateOptions(value CreateOpts) CreateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type createOptsBuilder struct {
@@ -122,13 +113,8 @@ func (b createOptsBuilder) ToTrunkCreateMap() (map[string]any, error) {
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*Trunk, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Create", "trunks", err)
-		var zero0 *Trunk
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Create", "trunks", err)
 		var zero0 *Trunk
 		return zero0, err
@@ -161,10 +147,9 @@ func (a *API) GetSubports(ctx context.Context, id string) ([]Subport, error) {
 	return value0, err
 }
 
-type ListOption = request.Option[ListOpts]
+type ListOption = request.NativeQueryCall
 
-func WithListOptions(value ListOpts) ListOption  { return request.WithOptions(value) }
-func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
+func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
 	base   ListOpts
@@ -192,12 +177,8 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Trunk,
 
 func (a *API) listWithControl(ctx context.Context, control resource.ListControl, options ...ListOption) iter.Seq2[*Trunk, error] {
 	var opts ListOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("List", "trunks", err)
-		return func(yield func(*Trunk, error) bool) { var zero *Trunk; yield(zero, err) }
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("List", "trunks", err)
 		return func(yield func(*Trunk, error) bool) { var zero *Trunk; yield(zero, err) }
 	}
@@ -208,13 +189,10 @@ func (a *API) listWithControl(ctx context.Context, control resource.ListControl,
 	}, control)
 }
 
-type RemoveSubportsOption = request.Option[RemoveSubportsOpts]
+type RemoveSubportsOption = request.NativeFieldCall
 
 func WithRemoveSubportsOptions(value RemoveSubportsOpts) RemoveSubportsOption {
-	return request.WithOptions(value)
-}
-func WithRemoveSubportsField(key string, value any) RemoveSubportsOption {
-	return request.WithField[RemoveSubportsOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type removeSubportsOptsBuilder struct {
@@ -238,13 +216,8 @@ func (b removeSubportsOptsBuilder) ToTrunkRemoveSubportsMap() (map[string]any, e
 
 // RemoveSubports invokes the upstream API with library-owned builders and result handling.
 func (a *API) RemoveSubports(ctx context.Context, id string, opts RemoveSubportsOpts, options ...RemoveSubportsOption) (*Trunk, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("RemoveSubports", "trunks", err)
-		var zero0 *Trunk
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("RemoveSubports", "trunks", err)
 		var zero0 *Trunk
 		return zero0, err
@@ -256,11 +229,10 @@ func (a *API) RemoveSubports(ctx context.Context, id string, opts RemoveSubports
 	return value0, err
 }
 
-type UpdateOption = request.Option[UpdateOpts]
+type UpdateOption = request.NativeFieldCall
 
-func WithUpdateOptions(value UpdateOpts) UpdateOption { return request.WithOptions(value) }
-func WithUpdateField(key string, value any) UpdateOption {
-	return request.WithField[UpdateOpts](key, value)
+func WithUpdateOptions(value UpdateOpts) UpdateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type updateOptsBuilder struct {
@@ -285,13 +257,8 @@ func (b updateOptsBuilder) ToTrunkUpdateMap() (map[string]any, error) {
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ...UpdateOption) (*Trunk, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Update", "trunks", err)
-		var zero0 *Trunk
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Update", "trunks", err)
 		var zero0 *Trunk
 		return zero0, err

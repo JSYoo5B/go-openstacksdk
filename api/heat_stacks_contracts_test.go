@@ -14,6 +14,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
@@ -273,7 +274,7 @@ func TestHeatStackScopeMutationsUseFixedIdentityAndMissingPolicy(t *testing.T) {
 	if requests.Load() != 0 {
 		t.Fatal("ForStack must not request")
 	}
-	if err := scope.UpdatePatch(context.Background(), stacks.UpdateOpts{Parameters: map[string]any{"size": "large"}, Tags: []string{"ops", "test"}}, stacks.WithUpdatePatchField("vendor_hint", false)); err != nil {
+	if err := scope.UpdatePatch(context.Background(), stacks.UpdateOpts{Parameters: map[string]any{"size": "large"}, Tags: []string{"ops", "test"}}, request.Field("vendor_hint", false)); err != nil {
 		t.Fatal(err)
 	}
 	if err := scope.Delete(context.Background()); err != nil {

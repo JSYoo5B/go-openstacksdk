@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/policies"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -71,7 +72,7 @@ func TestNativePolicyRoutesBodiesPagingAndDecode(t *testing.T) {
 	})
 	create := nativePolicyCreate
 	create.Extra = map[string]any{"project_id": "p"}
-	created, err := api.Create(ctx, create, policies.WithCreateField("x_extension", 1))
+	created, err := api.Create(ctx, create, request.Field("x_extension", 1))
 	if err != nil || !(created.ID == "pol-1" && created.Blob == `{"rule":"x"}` && reflect.DeepEqual(created.Extra, map[string]any{"project_id": "p"})) {
 		t.Fatal(created, err)
 	}
@@ -87,11 +88,11 @@ func TestNativePolicyRoutesBodiesPagingAndDecode(t *testing.T) {
 		t.Fatal(err)
 	}
 	// Update omits an empty blob, so an extension may carry a blob key.
-	if _, err := api.Update(ctx, "pol-1", policies.UpdateOpts{}, policies.WithUpdateField("blob", "raw")); err != nil {
+	if _, err := api.Update(ctx, "pol-1", policies.UpdateOpts{}, request.Field("blob", "raw")); err != nil {
 		t.Fatal(err)
 	}
 	var rows []*policies.Policy
-	for value, err := range api.List(ctx, policies.WithListOptions(policies.ListOpts{Type: "application/json", Filters: map[string]string{"type__contains": "json"}}), policies.WithListQuery("extra", "1")) {
+	for value, err := range api.List(ctx, policies.WithListOptions(policies.ListOpts{Type: "application/json", Filters: map[string]string{"type__contains": "json"}}), request.Query("extra", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -209,11 +210,11 @@ func TestNativePolicyStatusesDecodeAndPreflight(t *testing.T) {
 			}()},
 			// blob is not a tagged core field, but it is already in the create body.
 			"create blob extension": {"Create", func() error {
-				_, err := api.Create(ctx, nativePolicyCreate, policies.WithCreateField("blob", "x"))
+				_, err := api.Create(ctx, nativePolicyCreate, request.Field("blob", "x"))
 				return err
 			}()},
 			"update core extension": {"Update", func() error {
-				_, err := api.Update(ctx, "pol-1", policies.UpdateOpts{}, policies.WithUpdateField("type", "x"))
+				_, err := api.Update(ctx, "pol-1", policies.UpdateOpts{}, request.Field("type", "x"))
 				return err
 			}()},
 			"create nil option": {"Create", func() error {

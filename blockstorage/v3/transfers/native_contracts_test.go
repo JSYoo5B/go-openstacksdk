@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -67,11 +68,11 @@ func TestNativeTransferRoutesBodiesPagingAndDecode(t *testing.T) {
 		}
 		return nativeTransferWire(200, `{"transfer":`+nativeTransferRow+`}`)
 	})
-	created, err := api.Create(ctx, transfers.CreateOpts{VolumeID: "vol-1", Name: "handoff"}, transfers.WithCreateField("x_extension", 1))
+	created, err := api.Create(ctx, transfers.CreateOpts{VolumeID: "vol-1", Name: "handoff"}, request.Field("x_extension", 1))
 	if err != nil || !(created.ID == "tr-1" && created.AuthKey == "secret" && created.Links[0]["rel"] == "self" && created.CreatedAt.Second() == 3) {
 		t.Fatal(created, err)
 	}
-	accepted, err := api.Accept(ctx, "tr-1", transfers.AcceptOpts{AuthKey: "secret"}, transfers.WithAcceptField("x_extension", 1))
+	accepted, err := api.Accept(ctx, "tr-1", transfers.AcceptOpts{AuthKey: "secret"}, request.Field("x_extension", 1))
 	if err != nil || accepted.VolumeID != "vol-1" {
 		t.Fatal(accepted, err)
 	}
@@ -80,7 +81,7 @@ func TestNativeTransferRoutesBodiesPagingAndDecode(t *testing.T) {
 		t.Fatal(got, err)
 	}
 	var ids []string
-	for value, err := range api.List(ctx, transfers.WithListOptions(transfers.ListOpts{AllTenants: true, Limit: 1}), transfers.WithListQuery("extra", "1")) {
+	for value, err := range api.List(ctx, transfers.WithListOptions(transfers.ListOpts{AllTenants: true, Limit: 1}), request.Query("extra", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -194,7 +195,7 @@ func TestNativeTransferStrictStatusesDecodeAndPreflight(t *testing.T) {
 			"volume id": {"Create", func() error { _, err := api.Create(ctx, transfers.CreateOpts{}); return err }()},
 			"auth key":  {"Accept", func() error { _, err := api.Accept(ctx, "tr-1", transfers.AcceptOpts{}); return err }()},
 			"core extension": {"Create", func() error {
-				_, err := api.Create(ctx, transfers.CreateOpts{VolumeID: "vol-1"}, transfers.WithCreateField("name", "x"))
+				_, err := api.Create(ctx, transfers.CreateOpts{VolumeID: "vol-1"}, request.Field("name", "x"))
 				return err
 			}()},
 			"accept nil option": {"Accept", func() error {

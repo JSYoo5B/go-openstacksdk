@@ -237,13 +237,10 @@ const VirtualMediaDisk = upstream.VirtualMediaDisk
 const VirtualMediaFloppy = upstream.VirtualMediaFloppy
 
 type VirtualMediaGetResult = upstream.VirtualMediaGetResult
-type AttachVirtualInterfaceOption = request.Option[VirtualInterfaceOpts]
+type AttachVirtualInterfaceOption = request.NativeFieldCall
 
 func WithAttachVirtualInterfaceOptions(value VirtualInterfaceOpts) AttachVirtualInterfaceOption {
-	return request.WithOptions(value)
-}
-func WithAttachVirtualInterfaceField(key string, value any) AttachVirtualInterfaceOption {
-	return request.WithField[VirtualInterfaceOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type attachVirtualInterfaceOptsBuilder struct {
@@ -267,12 +264,8 @@ func (b attachVirtualInterfaceOptsBuilder) ToVirtualInterfaceMap() (map[string]a
 
 // AttachVirtualInterface invokes the upstream API with library-owned builders and result handling.
 func (a *API) AttachVirtualInterface(ctx context.Context, id string, opts VirtualInterfaceOpts, options ...AttachVirtualInterfaceOption) error {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("AttachVirtualInterface", "nodes", err)
-		return err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("AttachVirtualInterface", "nodes", err)
 		return err
 	}
@@ -280,13 +273,10 @@ func (a *API) AttachVirtualInterface(ctx context.Context, id string, opts Virtua
 	return request.Wrap("AttachVirtualInterface", "nodes", upstream.AttachVirtualInterface(ctx, a.client, id, _opts).ExtractErr())
 }
 
-type AttachVirtualMediaOption = request.Option[AttachVirtualMediaOpts]
+type AttachVirtualMediaOption = request.NativeFieldCall
 
 func WithAttachVirtualMediaOptions(value AttachVirtualMediaOpts) AttachVirtualMediaOption {
-	return request.WithOptions(value)
-}
-func WithAttachVirtualMediaField(key string, value any) AttachVirtualMediaOption {
-	return request.WithField[AttachVirtualMediaOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type attachVirtualMediaOptsBuilder struct {
@@ -310,12 +300,8 @@ func (b attachVirtualMediaOptsBuilder) ToAttachVirtualMediaMap() (map[string]any
 
 // AttachVirtualMedia invokes the upstream API with library-owned builders and result handling.
 func (a *API) AttachVirtualMedia(ctx context.Context, id string, opts AttachVirtualMediaOpts, options ...AttachVirtualMediaOption) error {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("AttachVirtualMedia", "nodes", err)
-		return err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("AttachVirtualMedia", "nodes", err)
 		return err
 	}
@@ -323,21 +309,16 @@ func (a *API) AttachVirtualMedia(ctx context.Context, id string, opts AttachVirt
 	return request.Wrap("AttachVirtualMedia", "nodes", upstream.AttachVirtualMedia(ctx, a.client, id, _opts).ExtractErr())
 }
 
-type CallVendorPassthruOption = request.Option[VendorPassthruCallOpts]
+type CallVendorPassthruOption = request.NativeCall
 
 func WithCallVendorPassthruOptions(value VendorPassthruCallOpts) CallVendorPassthruOption {
-	return request.WithOptions(value)
+	return request.Custom(request.WithOptions(value))
 }
 
 // CallVendorPassthru invokes the upstream API with library-owned builders and result handling.
 func (a *API) CallVendorPassthru(ctx context.Context, id string, httpMethod string, opts VendorPassthruCallOpts, options ...CallVendorPassthruOption) (map[string]any, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{}, options...)
 	if err != nil {
-		err = request.Wrap("CallVendorPassthru", "nodes", err)
-		var zero0 map[string]any
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, false, false, false); err != nil {
 		err = request.Wrap("CallVendorPassthru", "nodes", err)
 		var zero0 map[string]any
 		return zero0, err
@@ -348,13 +329,10 @@ func (a *API) CallVendorPassthru(ctx context.Context, id string, httpMethod stri
 	return value0, err
 }
 
-type ChangePowerStateOption = request.Option[PowerStateOpts]
+type ChangePowerStateOption = request.NativeFieldCall
 
 func WithChangePowerStateOptions(value PowerStateOpts) ChangePowerStateOption {
-	return request.WithOptions(value)
-}
-func WithChangePowerStateField(key string, value any) ChangePowerStateOption {
-	return request.WithField[PowerStateOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type changePowerStateOptsBuilder struct {
@@ -378,12 +356,8 @@ func (b changePowerStateOptsBuilder) ToPowerStateMap() (map[string]any, error) {
 
 // ChangePowerState invokes the upstream API with library-owned builders and result handling.
 func (a *API) ChangePowerState(ctx context.Context, id string, opts PowerStateOpts, options ...ChangePowerStateOption) error {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("ChangePowerState", "nodes", err)
-		return err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("ChangePowerState", "nodes", err)
 		return err
 	}
@@ -391,13 +365,10 @@ func (a *API) ChangePowerState(ctx context.Context, id string, opts PowerStateOp
 	return request.Wrap("ChangePowerState", "nodes", upstream.ChangePowerState(ctx, a.client, id, _opts).ExtractErr())
 }
 
-type ChangeProvisionStateOption = request.Option[ProvisionStateOpts]
+type ChangeProvisionStateOption = request.NativeFieldCall
 
 func WithChangeProvisionStateOptions(value ProvisionStateOpts) ChangeProvisionStateOption {
-	return request.WithOptions(value)
-}
-func WithChangeProvisionStateField(key string, value any) ChangeProvisionStateOption {
-	return request.WithField[ProvisionStateOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type changeProvisionStateOptsBuilder struct {
@@ -421,12 +392,8 @@ func (b changeProvisionStateOptsBuilder) ToProvisionStateMap() (map[string]any, 
 
 // ChangeProvisionState invokes the upstream API with library-owned builders and result handling.
 func (a *API) ChangeProvisionState(ctx context.Context, id string, opts ProvisionStateOpts, options ...ChangeProvisionStateOption) error {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("ChangeProvisionState", "nodes", err)
-		return err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("ChangeProvisionState", "nodes", err)
 		return err
 	}
@@ -434,11 +401,10 @@ func (a *API) ChangeProvisionState(ctx context.Context, id string, opts Provisio
 	return request.Wrap("ChangeProvisionState", "nodes", upstream.ChangeProvisionState(ctx, a.client, id, _opts).ExtractErr())
 }
 
-type CreateOption = request.Option[CreateOpts]
+type CreateOption = request.NativeFieldCall
 
-func WithCreateOptions(value CreateOpts) CreateOption { return request.WithOptions(value) }
-func WithCreateField(key string, value any) CreateOption {
-	return request.WithField[CreateOpts](key, value)
+func WithCreateOptions(value CreateOpts) CreateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type createOptsBuilder struct {
@@ -462,13 +428,8 @@ func (b createOptsBuilder) ToNodeCreateMap() (map[string]any, error) {
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*Node, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Create", "nodes", err)
-		var zero0 *Node
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Create", "nodes", err)
 		var zero0 *Node
 		return zero0, err
@@ -480,21 +441,16 @@ func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOpti
 	return value0, err
 }
 
-type CreateSubscriptionOption = request.Option[CallVendorPassthruOpts]
+type CreateSubscriptionOption = request.NativeCall
 
 func WithCreateSubscriptionOptions(value CallVendorPassthruOpts) CreateSubscriptionOption {
-	return request.WithOptions(value)
+	return request.Custom(request.WithOptions(value))
 }
 
 // CreateSubscription invokes the upstream API with library-owned builders and result handling.
 func (a *API) CreateSubscription(ctx context.Context, id string, method CallVendorPassthruOpts, subscriptionOpts CreateSubscriptionOpts, options ...CreateSubscriptionOption) (*SubscriptionVendorPassthru, error) {
-	cfg, err := request.Apply(method, options...)
+	cfg, err := request.ApplyCalls(method, request.Capabilities{}, options...)
 	if err != nil {
-		err = request.Wrap("CreateSubscription", "nodes", err)
-		var zero0 *SubscriptionVendorPassthru
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, false, false, false); err != nil {
 		err = request.Wrap("CreateSubscription", "nodes", err)
 		var zero0 *SubscriptionVendorPassthru
 		return zero0, err
@@ -510,21 +466,17 @@ func (a *API) Delete(ctx context.Context, id string) error {
 	return request.Wrap("Delete", "nodes", upstream.Delete(ctx, a.client, id).ExtractErr())
 }
 
-type DeleteSubscriptionOption = request.Option[CallVendorPassthruOpts]
+type DeleteSubscriptionOption = request.NativeCall
 
 func WithDeleteSubscriptionOptions(value CallVendorPassthruOpts) DeleteSubscriptionOption {
-	return request.WithOptions(value)
+	return request.Custom(request.WithOptions(value))
 }
 
 // DeleteSubscription invokes the upstream API with library-owned builders and result handling.
 func (a *API) DeleteSubscription(ctx context.Context, id string, subscriptionOpts DeleteSubscriptionOpts, options ...DeleteSubscriptionOption) error {
 	var method CallVendorPassthruOpts
-	cfg, err := request.Apply(method, options...)
+	cfg, err := request.ApplyCalls(method, request.Capabilities{}, options...)
 	if err != nil {
-		err = request.Wrap("DeleteSubscription", "nodes", err)
-		return err
-	}
-	if err = request.ValidateCapabilities(cfg, false, false, false); err != nil {
 		err = request.Wrap("DeleteSubscription", "nodes", err)
 		return err
 	}
@@ -536,13 +488,10 @@ func (a *API) DetachVirtualInterface(ctx context.Context, id string, vifID strin
 	return request.Wrap("DetachVirtualInterface", "nodes", upstream.DetachVirtualInterface(ctx, a.client, id, vifID).ExtractErr())
 }
 
-type DetachVirtualMediaOption = request.Option[DetachVirtualMediaOpts]
+type DetachVirtualMediaOption = request.NativeQueryCall
 
 func WithDetachVirtualMediaOptions(value DetachVirtualMediaOpts) DetachVirtualMediaOption {
-	return request.WithOptions(value)
-}
-func WithDetachVirtualMediaQuery(key, value string) DetachVirtualMediaOption {
-	return request.WithQuery[DetachVirtualMediaOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type detachVirtualMediaOptsBuilder struct {
@@ -566,12 +515,8 @@ func (b detachVirtualMediaOptsBuilder) ToDetachVirtualMediaOptsQuery() (string, 
 
 // DetachVirtualMedia invokes the upstream API with library-owned builders and result handling.
 func (a *API) DetachVirtualMedia(ctx context.Context, id string, opts DetachVirtualMediaOpts, options ...DetachVirtualMediaOption) error {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("DetachVirtualMedia", "nodes", err)
-		return err
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("DetachVirtualMedia", "nodes", err)
 		return err
 	}
@@ -587,22 +532,17 @@ func (a *API) Get(ctx context.Context, id string) (*Node, error) {
 	return value0, err
 }
 
-type GetAllSubscriptionsOption = request.Option[CallVendorPassthruOpts]
+type GetAllSubscriptionsOption = request.NativeCall
 
 func WithGetAllSubscriptionsOptions(value CallVendorPassthruOpts) GetAllSubscriptionsOption {
-	return request.WithOptions(value)
+	return request.Custom(request.WithOptions(value))
 }
 
 // GetAllSubscriptions invokes the upstream API with library-owned builders and result handling.
 func (a *API) GetAllSubscriptions(ctx context.Context, id string, options ...GetAllSubscriptionsOption) (*GetAllSubscriptionsVendorPassthru, error) {
 	var method CallVendorPassthruOpts
-	cfg, err := request.Apply(method, options...)
+	cfg, err := request.ApplyCalls(method, request.Capabilities{}, options...)
 	if err != nil {
-		err = request.Wrap("GetAllSubscriptions", "nodes", err)
-		var zero0 *GetAllSubscriptionsVendorPassthru
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, false, false, false); err != nil {
 		err = request.Wrap("GetAllSubscriptions", "nodes", err)
 		var zero0 *GetAllSubscriptionsVendorPassthru
 		return zero0, err
@@ -637,22 +577,17 @@ func (a *API) GetInventory(ctx context.Context, id string) (*InventoryData, erro
 	return value0, err
 }
 
-type GetSubscriptionOption = request.Option[CallVendorPassthruOpts]
+type GetSubscriptionOption = request.NativeCall
 
 func WithGetSubscriptionOptions(value CallVendorPassthruOpts) GetSubscriptionOption {
-	return request.WithOptions(value)
+	return request.Custom(request.WithOptions(value))
 }
 
 // GetSubscription invokes the upstream API with library-owned builders and result handling.
 func (a *API) GetSubscription(ctx context.Context, id string, subscriptionOpts GetSubscriptionOpts, options ...GetSubscriptionOption) (*SubscriptionVendorPassthru, error) {
 	var method CallVendorPassthruOpts
-	cfg, err := request.Apply(method, options...)
+	cfg, err := request.ApplyCalls(method, request.Capabilities{}, options...)
 	if err != nil {
-		err = request.Wrap("GetSubscription", "nodes", err)
-		var zero0 *SubscriptionVendorPassthru
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, false, false, false); err != nil {
 		err = request.Wrap("GetSubscription", "nodes", err)
 		var zero0 *SubscriptionVendorPassthru
 		return zero0, err
@@ -691,10 +626,9 @@ func (a *API) InjectNMI(ctx context.Context, id string) error {
 	return request.Wrap("InjectNMI", "nodes", upstream.InjectNMI(ctx, a.client, id).ExtractErr())
 }
 
-type ListOption = request.Option[ListOpts]
+type ListOption = request.NativeQueryCall
 
-func WithListOptions(value ListOpts) ListOption  { return request.WithOptions(value) }
-func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
+func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
 	base   ListOpts
@@ -731,12 +665,8 @@ func (b listOptsBuilder) ToNodeListQuery() (string, error) {
 // List invokes the upstream API with library-owned builders and result handling.
 func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Node, error] {
 	var opts ListOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("List", "nodes", err)
-		return func(yield func(*Node, error) bool) { var zero *Node; yield(zero, err) }
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("List", "nodes", err)
 		return func(yield func(*Node, error) bool) { var zero *Node; yield(zero, err) }
 	}
@@ -747,13 +677,10 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Node, 
 	})
 }
 
-type ListBIOSSettingsOption = request.Option[ListBIOSSettingsOpts]
+type ListBIOSSettingsOption = request.NativeQueryCall
 
 func WithListBIOSSettingsOptions(value ListBIOSSettingsOpts) ListBIOSSettingsOption {
-	return request.WithOptions(value)
-}
-func WithListBIOSSettingsQuery(key, value string) ListBIOSSettingsOption {
-	return request.WithQuery[ListBIOSSettingsOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type listBIOSSettingsOptsBuilder struct {
@@ -778,13 +705,8 @@ func (b listBIOSSettingsOptsBuilder) ToListBIOSSettingsOptsQuery() (string, erro
 // ListBIOSSettings invokes the upstream API with library-owned builders and result handling.
 func (a *API) ListBIOSSettings(ctx context.Context, id string, options ...ListBIOSSettingsOption) ([]BIOSSetting, error) {
 	var opts ListBIOSSettingsOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("ListBIOSSettings", "nodes", err)
-		var zero0 []BIOSSetting
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("ListBIOSSettings", "nodes", err)
 		var zero0 []BIOSSetting
 		return zero0, err
@@ -796,11 +718,10 @@ func (a *API) ListBIOSSettings(ctx context.Context, id string, options ...ListBI
 	return value0, err
 }
 
-type ListDetailOption = request.Option[ListOpts]
+type ListDetailOption = request.NativeQueryCall
 
-func WithListDetailOptions(value ListOpts) ListDetailOption { return request.WithOptions(value) }
-func WithListDetailQuery(key, value string) ListDetailOption {
-	return request.WithQuery[ListOpts](key, value)
+func WithListDetailOptions(value ListOpts) ListDetailOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type listDetailOptsBuilder struct {
@@ -842,12 +763,8 @@ func (a *API) ListDetail(ctx context.Context, options ...ListDetailOption) iter.
 
 func (a *API) listDetailWithControl(ctx context.Context, control resource.ListControl, options ...ListDetailOption) iter.Seq2[*Node, error] {
 	var opts ListOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("ListDetail", "nodes", err)
-		return func(yield func(*Node, error) bool) { var zero *Node; yield(zero, err) }
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("ListDetail", "nodes", err)
 		return func(yield func(*Node, error) bool) { var zero *Node; yield(zero, err) }
 	}
@@ -882,13 +799,10 @@ func (a *API) ListVirtualInterfaces(ctx context.Context, id string) ([]VIF, erro
 	return value0, err
 }
 
-type SetBootDeviceOption = request.Option[BootDeviceOpts]
+type SetBootDeviceOption = request.NativeFieldCall
 
 func WithSetBootDeviceOptions(value BootDeviceOpts) SetBootDeviceOption {
-	return request.WithOptions(value)
-}
-func WithSetBootDeviceField(key string, value any) SetBootDeviceOption {
-	return request.WithField[BootDeviceOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type setBootDeviceBootDeviceBuilder struct {
@@ -912,12 +826,8 @@ func (b setBootDeviceBootDeviceBuilder) ToBootDeviceMap() (map[string]any, error
 
 // SetBootDevice invokes the upstream API with library-owned builders and result handling.
 func (a *API) SetBootDevice(ctx context.Context, id string, bootDevice BootDeviceOpts, options ...SetBootDeviceOption) error {
-	cfg, err := request.Apply(bootDevice, options...)
+	cfg, err := request.ApplyCalls(bootDevice, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("SetBootDevice", "nodes", err)
-		return err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("SetBootDevice", "nodes", err)
 		return err
 	}
@@ -925,13 +835,10 @@ func (a *API) SetBootDevice(ctx context.Context, id string, bootDevice BootDevic
 	return request.Wrap("SetBootDevice", "nodes", upstream.SetBootDevice(ctx, a.client, id, _bootDevice).ExtractErr())
 }
 
-type SetMaintenanceOption = request.Option[MaintenanceOpts]
+type SetMaintenanceOption = request.NativeFieldCall
 
 func WithSetMaintenanceOptions(value MaintenanceOpts) SetMaintenanceOption {
-	return request.WithOptions(value)
-}
-func WithSetMaintenanceField(key string, value any) SetMaintenanceOption {
-	return request.WithField[MaintenanceOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type setMaintenanceOptsBuilder struct {
@@ -955,12 +862,8 @@ func (b setMaintenanceOptsBuilder) ToMaintenanceMap() (map[string]any, error) {
 
 // SetMaintenance invokes the upstream API with library-owned builders and result handling.
 func (a *API) SetMaintenance(ctx context.Context, id string, opts MaintenanceOpts, options ...SetMaintenanceOption) error {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("SetMaintenance", "nodes", err)
-		return err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("SetMaintenance", "nodes", err)
 		return err
 	}
@@ -968,13 +871,10 @@ func (a *API) SetMaintenance(ctx context.Context, id string, opts MaintenanceOpt
 	return request.Wrap("SetMaintenance", "nodes", upstream.SetMaintenance(ctx, a.client, id, _opts).ExtractErr())
 }
 
-type SetRAIDConfigOption = request.Option[RAIDConfigOpts]
+type SetRAIDConfigOption = request.NativeFieldCall
 
 func WithSetRAIDConfigOptions(value RAIDConfigOpts) SetRAIDConfigOption {
-	return request.WithOptions(value)
-}
-func WithSetRAIDConfigField(key string, value any) SetRAIDConfigOption {
-	return request.WithField[RAIDConfigOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type setRAIDConfigRaidConfigOptsBuilderBuilder struct {
@@ -998,12 +898,8 @@ func (b setRAIDConfigRaidConfigOptsBuilderBuilder) ToRAIDConfigMap() (map[string
 
 // SetRAIDConfig invokes the upstream API with library-owned builders and result handling.
 func (a *API) SetRAIDConfig(ctx context.Context, id string, raidConfigOptsBuilder RAIDConfigOpts, options ...SetRAIDConfigOption) error {
-	cfg, err := request.Apply(raidConfigOptsBuilder, options...)
+	cfg, err := request.ApplyCalls(raidConfigOptsBuilder, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("SetRAIDConfig", "nodes", err)
-		return err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("SetRAIDConfig", "nodes", err)
 		return err
 	}
@@ -1016,19 +912,16 @@ func (a *API) UnsetMaintenance(ctx context.Context, id string) error {
 	return request.Wrap("UnsetMaintenance", "nodes", upstream.UnsetMaintenance(ctx, a.client, id).ExtractErr())
 }
 
-type UpdateOption = request.Option[UpdateOpts]
+type UpdateOption = request.NativeCall
 
-func WithUpdateOptions(value UpdateOpts) UpdateOption { return request.WithOptions(value) }
+func WithUpdateOptions(value UpdateOpts) UpdateOption {
+	return request.Custom(request.WithOptions(value))
+}
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ...UpdateOption) (*Node, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{}, options...)
 	if err != nil {
-		err = request.Wrap("Update", "nodes", err)
-		var zero0 *Node
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, false, false, false); err != nil {
 		err = request.Wrap("Update", "nodes", err)
 		var zero0 *Node
 		return zero0, err

@@ -75,7 +75,7 @@ func TestNativeTokenCreateBodiesScopesAndSubjectHeader(t *testing.T) {
 		}
 	}
 	// An extension field goes into the auth object only, never into the scope.
-	if _, err := api.Create(ctx, &tokens.AuthOptions{Username: "u", Password: "p", DomainID: "d"}, tokens.WithCreateField("x_extension", 1)); err != nil {
+	if _, err := api.Create(ctx, &tokens.AuthOptions{Username: "u", Password: "p", DomainID: "d"}, request.Field("x_extension", 1)); err != nil {
 		t.Fatal(err)
 	}
 	want := []string{
@@ -185,10 +185,10 @@ func TestNativeTokenStatusesAndPreflight(t *testing.T) {
 			"no method":   func() error { _, err := api.Create(ctx, &tokens.AuthOptions{}); return err }(),
 			// Native Create never calls ToTokenV3HeadersMap, so header extensions are unsupported.
 			"header extension": func() error {
-				_, err := api.Create(ctx, &tokens.AuthOptions{TokenID: "old"}, func(config *request.Config[*tokens.AuthOptions]) error {
+				_, err := api.Create(ctx, &tokens.AuthOptions{TokenID: "old"}, request.Custom(func(config *request.Config[*tokens.AuthOptions]) error {
 					config.Headers = map[string]string{"X-Vendor": "1"}
 					return nil
-				})
+				}))
 				if !errors.Is(err, resource.ErrInvalidOption) {
 					return nil
 				}

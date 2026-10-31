@@ -46,10 +46,9 @@ func (a *API) Get(ctx context.Context, hypervisorID string) (*Hypervisor, error)
 	return value0, err
 }
 
-type GetExtOption = request.Option[GetOpts]
+type GetExtOption = request.NativeQueryCall
 
-func WithGetExtOptions(value GetOpts) GetExtOption   { return request.WithOptions(value) }
-func WithGetExtQuery(key, value string) GetExtOption { return request.WithQuery[GetOpts](key, value) }
+func WithGetExtOptions(value GetOpts) GetExtOption { return request.Custom(request.WithOptions(value)) }
 
 type getExtOptsBuilder struct {
 	base   GetOpts
@@ -73,13 +72,8 @@ func (b getExtOptsBuilder) ToHypervisorGetQuery() (string, error) {
 // GetExt invokes the upstream API with library-owned builders and result handling.
 func (a *API) GetExt(ctx context.Context, hypervisorID string, options ...GetExtOption) (*Hypervisor, error) {
 	var opts GetOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("GetExt", "hypervisors", err)
-		var zero0 *Hypervisor
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("GetExt", "hypervisors", err)
 		var zero0 *Hypervisor
 		return zero0, err
@@ -107,10 +101,9 @@ func (a *API) GetUptime(ctx context.Context, hypervisorID string) (*Uptime, erro
 	return value0, err
 }
 
-type ListOption = request.Option[ListOpts]
+type ListOption = request.NativeQueryCall
 
-func WithListOptions(value ListOpts) ListOption  { return request.WithOptions(value) }
-func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
+func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
 	base   ListOpts
@@ -138,12 +131,8 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Hyperv
 
 func (a *API) listWithControl(ctx context.Context, control resource.ListControl, options ...ListOption) iter.Seq2[*Hypervisor, error] {
 	var opts ListOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("List", "hypervisors", err)
-		return func(yield func(*Hypervisor, error) bool) { var zero *Hypervisor; yield(zero, err) }
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("List", "hypervisors", err)
 		return func(yield func(*Hypervisor, error) bool) { var zero *Hypervisor; yield(zero, err) }
 	}

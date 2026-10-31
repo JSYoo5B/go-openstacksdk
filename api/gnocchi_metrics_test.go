@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/metric/v1/metrics"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -42,7 +43,7 @@ func TestGnocchiMetricQuerySendsTypedAndExtensionQueries(t *testing.T) {
 		testcloud.JSON(w, 200, `{"status":"success","data":{"resultType":"vector","result":[{"metric":{"__name__":"up","job":"node"},"value":[1700000000,"1"]}]}}`)
 	})
 	api := newGnocchiMetrics(t, cloud)
-	data, err := api.Query(context.Background(), metrics.QueryOpts{Query: `up{job="node"}`, Time: "2026-01-02T03:04:05Z", Timeout: "5s"}, metrics.WithQueryQuery("vendor", "x"))
+	data, err := api.Query(context.Background(), metrics.QueryOpts{Query: `up{job="node"}`, Time: "2026-01-02T03:04:05Z", Timeout: "5s"}, request.Query("vendor", "x"))
 	if err != nil || data == nil || data.ResultType != "vector" || len(data.Result) != 1 || data.Result[0].Metric["job"] != "node" || len(data.Result[0].Value) != 2 {
 		t.Fatalf("data=%+v error=%v", data, err)
 	}
@@ -58,7 +59,7 @@ func TestGnocchiMetricQuerySendsTypedAndExtensionQueries(t *testing.T) {
 		t.Fatalf("minimal query=%v", queries[1])
 	}
 	// An extension query replaces a typed value of the same name.
-	if _, err := api.Query(context.Background(), metrics.QueryOpts{Query: "up"}, metrics.WithQueryQuery("query", "down")); err != nil {
+	if _, err := api.Query(context.Background(), metrics.QueryOpts{Query: "up"}, request.Query("query", "down")); err != nil {
 		t.Fatal(err)
 	}
 	if queries[2].Get("query") != "down" {
@@ -83,28 +84,28 @@ func TestGnocchiMetricReadOperationsSendRepeatedMatchersAndDecode(t *testing.T) 
 	api := newGnocchiMetrics(t, cloud)
 	ctx := context.Background()
 	match := []string{`up`, `{job="node"}`}
-	labels, err := api.Labels(ctx, metrics.LabelsOpts{Match: match, Start: "s", End: "e"}, metrics.WithLabelsQuery("vendor", "x"))
+	labels, err := api.Labels(ctx, metrics.LabelsOpts{Match: match, Start: "s", End: "e"}, request.Query("vendor", "x"))
 	if err != nil || !reflect.DeepEqual(labels, []string{"__name__", "job"}) {
 		t.Fatalf("labels=%v error=%v", labels, err)
 	}
 	if want := (url.Values{"match[]": match, "start": {"s"}, "end": {"e"}, "vendor": {"x"}}); !reflect.DeepEqual(seen["labels"], want) {
 		t.Fatalf("labels query=%v", seen["labels"])
 	}
-	values, err := api.LabelValues(ctx, "job", metrics.LabelValuesOpts{Match: match, Start: "s"}, metrics.WithLabelValuesQuery("vendor", "y"))
+	values, err := api.LabelValues(ctx, "job", metrics.LabelValuesOpts{Match: match, Start: "s"}, request.Query("vendor", "y"))
 	if err != nil || !reflect.DeepEqual(values, []string{"node", "api"}) {
 		t.Fatalf("values=%v error=%v", values, err)
 	}
 	if want := (url.Values{"match[]": match, "start": {"s"}, "vendor": {"y"}}); !reflect.DeepEqual(seen["label/job/values"], want) {
 		t.Fatalf("label values query=%v", seen["label/job/values"])
 	}
-	series, err := api.Series(ctx, metrics.SeriesOpts{Match: match, End: "e"}, metrics.WithSeriesQuery("vendor", "z"))
+	series, err := api.Series(ctx, metrics.SeriesOpts{Match: match, End: "e"}, request.Query("vendor", "z"))
 	if err != nil || !reflect.DeepEqual(series, []map[string]string{{"__name__": "up", "job": "node"}}) {
 		t.Fatalf("series=%v error=%v", series, err)
 	}
 	if want := (url.Values{"match[]": match, "end": {"e"}, "vendor": {"z"}}); !reflect.DeepEqual(seen["series"], want) {
 		t.Fatalf("series query=%v", seen["series"])
 	}
-	targets, err := api.Targets(ctx, metrics.TargetsOpts{State: "active"}, metrics.WithTargetsQuery("vendor", "t"))
+	targets, err := api.Targets(ctx, metrics.TargetsOpts{State: "active"}, request.Query("vendor", "t"))
 	if err != nil || len(targets.ActiveTargets) != 1 || targets.ActiveTargets[0].Health != "up" || targets.ActiveTargets[0].LastScrapeDuration != 0.5 || len(targets.DroppedTargets) != 1 {
 		t.Fatalf("targets=%+v error=%v", targets, err)
 	}
@@ -208,7 +209,7 @@ func TestGnocchiMetricAdminMutationsUseExactStatusesAndNeverReplay(t *testing.T)
 		match := []string{"up", `{job="node"}`}
 		errs := []error{
 			api.CleanTombstones(ctx),
-			api.DeleteSeries(ctx, metrics.WithDeleteSeriesOptions(metrics.DeleteSeriesOpts{Match: match, Start: "s", End: "e"}), metrics.WithDeleteSeriesQuery("vendor", "x")),
+			api.DeleteSeries(ctx, metrics.WithDeleteSeriesOptions(metrics.DeleteSeriesOpts{Match: match, Start: "s", End: "e"}), request.Query("vendor", "x")),
 		}
 		for i, err := range errs {
 			if (status == 204) != (err == nil) || (status != 204 && gnocchiUnexpected(err) != status) {

@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/monitors"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -55,7 +56,7 @@ func TestOctaviaMonitorCreateKeepsExplicitFalseHTTPVersionAndExtensionFields(t *
 	value, err := newOctaviaMonitors(t, cloud).Create(context.Background(), monitors.CreateOpts{
 		PoolID: "pool-1", Type: monitors.TypeHTTP, Delay: 5, Timeout: 3, MaxRetries: 2, HTTPVersion: "1.1",
 		AdminStateUp: octaviaMonitorBool(false), Tags: []string{"blue"},
-	}, monitors.WithCreateField("vendor", map[string]bool{"enabled": false}))
+	}, request.Field("vendor", map[string]bool{"enabled": false}))
 	if err != nil || value == nil || value.ID != "hm-1" || value.AdminStateUp || value.HTTPVersion != "1.1" || len(value.Pools) != 1 || value.Pools[0].ID != "pool-1" {
 		t.Fatalf("value=%+v error=%v", value, err)
 	}
@@ -99,10 +100,10 @@ func TestOctaviaMonitorRejectsInvalidInputsBeforeHTTP(t *testing.T) {
 	api := newOctaviaMonitors(t, cloud)
 	ctx := context.Background()
 	valid := monitors.CreateOpts{Type: monitors.TypeTCP, Delay: 1, Timeout: 1, MaxRetries: 1}
-	if _, err := api.Create(ctx, valid, monitors.WithCreateField("type", "PING")); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := api.Create(ctx, valid, request.Field("type", "PING")); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatalf("protected create field: %v", err)
 	}
-	if _, err := api.Update(ctx, "hm-1", monitors.UpdateOpts{}, monitors.WithUpdateField("admin_state_up", true)); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := api.Update(ctx, "hm-1", monitors.UpdateOpts{}, request.Field("admin_state_up", true)); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatalf("protected update field: %v", err)
 	}
 	if _, err := api.Create(ctx, valid, nil); !errors.Is(err, resource.ErrInvalidOption) {
@@ -168,7 +169,7 @@ func TestOctaviaMonitorUpdateWithNoFieldsSendsEmptyEnvelopeAndExtensions(t *test
 	if _, err := api.Update(context.Background(), "hm-1", monitors.UpdateOpts{}); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := api.Update(context.Background(), "hm-1", monitors.UpdateOpts{Delay: 9}, monitors.WithUpdateField("vendor", nil)); err != nil {
+	if _, err := api.Update(context.Background(), "hm-1", monitors.UpdateOpts{Delay: 9}, request.Field("vendor", nil)); err != nil {
 		t.Fatal(err)
 	}
 	want := []map[string]string{{}, {"delay": `9`, "vendor": `null`}}
@@ -245,7 +246,7 @@ func TestOctaviaMonitorListFiltersFollowLinksAndPreserveFalse(t *testing.T) {
 	var ids []string
 	for value, err := range api.List(context.Background(),
 		monitors.WithListOptions(monitors.ListOpts{PoolID: "pool-1", AdminStateUp: octaviaMonitorBool(false), Tags: []string{"a", "b"}, Limit: 1}),
-		monitors.WithListQuery("vendor", "x")) {
+		request.Query("vendor", "x")) {
 		if err != nil {
 			t.Fatal(err)
 		}

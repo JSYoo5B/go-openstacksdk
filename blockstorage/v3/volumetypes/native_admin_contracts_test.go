@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -81,14 +82,14 @@ func TestNativeVolumeTypeAdminRoutesBodiesAndDecode(t *testing.T) {
 	})
 	private, public := false, true
 	name, description := "gold", ""
-	created, err := api.Create(ctx, volumetypes.CreateOpts{Name: "ssd", Description: "d", IsPublic: &private, ExtraSpecs: map[string]string{"a": "b"}}, volumetypes.WithCreateField("x_extension", 1))
+	created, err := api.Create(ctx, volumetypes.CreateOpts{Name: "ssd", Description: "d", IsPublic: &private, ExtraSpecs: map[string]string{"a": "b"}}, request.Field("x_extension", 1))
 	if err != nil || !(created.ID == "vt-1" && !created.IsPublic && !created.PublicAccess && created.QosSpecID == "q-1" && created.ExtraSpecs["a"] == "b") {
 		t.Fatal(created, err)
 	}
 	if _, err := api.Create(ctx, volumetypes.CreateOpts{Name: "ssd"}); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := api.Update(ctx, "vt-1", volumetypes.UpdateOpts{Name: &name, Description: &description, IsPublic: &public}, volumetypes.WithUpdateField("x_extension", "y")); err != nil {
+	if _, err := api.Update(ctx, "vt-1", volumetypes.UpdateOpts{Name: &name, Description: &description, IsPublic: &public}, request.Field("x_extension", "y")); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := api.Update(ctx, "vt-1", volumetypes.UpdateOpts{}); err != nil {
@@ -97,7 +98,7 @@ func TestNativeVolumeTypeAdminRoutesBodiesAndDecode(t *testing.T) {
 	if err := api.Delete(ctx, "vt-1"); err != nil {
 		t.Fatal(err)
 	}
-	specs, err := api.CreateExtraSpecs(ctx, "vt-1", volumetypes.ExtraSpecsOpts{"a": "b"}, volumetypes.WithCreateExtraSpecsField("x_extension", 1))
+	specs, err := api.CreateExtraSpecs(ctx, "vt-1", volumetypes.ExtraSpecsOpts{"a": "b"}, request.Field("x_extension", 1))
 	if err != nil || !reflect.DeepEqual(specs, map[string]string{"a": "b"}) {
 		t.Fatal(specs, err)
 	}
@@ -117,7 +118,7 @@ func TestNativeVolumeTypeAdminRoutesBodiesAndDecode(t *testing.T) {
 	if err := api.AddAccess(ctx, "vt-1", volumetypes.AddAccessOpts{}); err != nil {
 		t.Fatal(err)
 	}
-	if err := api.RemoveAccess(ctx, "vt-1", volumetypes.RemoveAccessOpts{Project: "p-1"}, volumetypes.WithRemoveAccessField("x_extension", true)); err != nil {
+	if err := api.RemoveAccess(ctx, "vt-1", volumetypes.RemoveAccessOpts{Project: "p-1"}, request.Field("x_extension", true)); err != nil {
 		t.Fatal(err)
 	}
 	var accesses []string
@@ -127,7 +128,7 @@ func TestNativeVolumeTypeAdminRoutesBodiesAndDecode(t *testing.T) {
 		}
 		accesses = append(accesses, value.VolumeTypeID+"/"+value.ProjectID)
 	}
-	encryption, err := api.CreateEncryption(ctx, "vt-1", volumetypes.CreateEncryptionOpts{Provider: "luks"}, volumetypes.WithCreateEncryptionField("x_extension", 1))
+	encryption, err := api.CreateEncryption(ctx, "vt-1", volumetypes.CreateEncryptionOpts{Provider: "luks"}, request.Field("x_extension", 1))
 	if err != nil || !reflect.DeepEqual(*encryption, volumetypes.EncryptionType{VolumeTypeID: "vt-1", EncryptionID: "e-1", KeySize: 256, Provider: "luks", ControlLocation: "front-end", Cipher: "aes-xts-plain64"}) {
 		t.Fatal(encryption, err)
 	}
@@ -307,22 +308,22 @@ func TestNativeVolumeTypeAdminStatusesDecodeAndPreflight(t *testing.T) {
 			err       error
 		}{
 			"create name":       {"Create", value(api.Create(ctx, volumetypes.CreateOpts{}))},
-			"create core field": {"Create", value(api.Create(ctx, volumetypes.CreateOpts{Name: "ssd"}, volumetypes.WithCreateField("extra_specs", map[string]string{})))},
+			"create core field": {"Create", value(api.Create(ctx, volumetypes.CreateOpts{Name: "ssd"}, request.Field("extra_specs", map[string]string{})))},
 			"create nil option": {"Create", value(api.Create(ctx, volumetypes.CreateOpts{Name: "ssd"}, nil))},
-			"update core field": {"Update", value(api.Update(ctx, "vt-1", volumetypes.UpdateOpts{}, volumetypes.WithUpdateField("is_public", true)))},
+			"update core field": {"Update", value(api.Update(ctx, "vt-1", volumetypes.UpdateOpts{}, request.Field("is_public", true)))},
 			"extra specs envelope": {"CreateExtraSpecs", value(api.CreateExtraSpecs(ctx, "vt-1", volumetypes.ExtraSpecsOpts{"a": "b"},
-				volumetypes.WithCreateExtraSpecsField("extra_specs", map[string]string{"c": "d"})))},
+				request.Field("extra_specs", map[string]string{"c": "d"})))},
 			"update spec empty": {"UpdateExtraSpec", value(api.UpdateExtraSpec(ctx, "vt-1", volumetypes.ExtraSpecsOpts{}))},
 			"update spec pair":  {"UpdateExtraSpec", value(api.UpdateExtraSpec(ctx, "vt-1", volumetypes.ExtraSpecsOpts{"a": "b", "c": "d"}))},
-			// The update option shares the create option type, but body extensions are rejected.
-			"update spec field":   {"UpdateExtraSpec", value(api.UpdateExtraSpec(ctx, "vt-1", volumetypes.ExtraSpecsOpts{"a": "b"}, volumetypes.WithCreateExtraSpecsField("x", 1)))},
-			"add access core":     {"AddAccess", api.AddAccess(ctx, "vt-1", volumetypes.AddAccessOpts{Project: "p-1"}, volumetypes.WithAddAccessField("project", "p-2"))},
+			// request.Field does not compile here; a generic field option still fails before HTTP.
+			"update spec field":   {"UpdateExtraSpec", value(api.UpdateExtraSpec(ctx, "vt-1", volumetypes.ExtraSpecsOpts{"a": "b"}, request.Custom(request.WithField[volumetypes.ExtraSpecsOpts]("x", 1))))},
+			"add access core":     {"AddAccess", api.AddAccess(ctx, "vt-1", volumetypes.AddAccessOpts{Project: "p-1"}, request.Field("project", "p-2"))},
 			"remove access nil":   {"RemoveAccess", api.RemoveAccess(ctx, "vt-1", volumetypes.RemoveAccessOpts{Project: "p-1"}, nil)},
 			"encryption provider": {"CreateEncryption", value(api.CreateEncryption(ctx, "vt-1", volumetypes.CreateEncryptionOpts{KeySize: 256}))},
 			"encryption core field": {"CreateEncryption", value(api.CreateEncryption(ctx, "vt-1", volumetypes.CreateEncryptionOpts{Provider: "luks"},
-				volumetypes.WithCreateEncryptionField("cipher", "x")))},
+				request.Field("cipher", "x")))},
 			"update encryption core": {"UpdateEncryption", value(api.UpdateEncryption(ctx, "vt-1", "e-1", volumetypes.UpdateEncryptionOpts{},
-				volumetypes.WithUpdateEncryptionField("provider", "x")))},
+				request.Field("provider", "x")))},
 		} {
 			if check.err == nil {
 				t.Fatal(name, "accepted")

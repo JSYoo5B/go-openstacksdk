@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -69,7 +70,7 @@ func TestNativeRegisteredLimitRoutesBodiesPagingAndDecode(t *testing.T) {
 		return nativeRegisteredLimitWire(200, `{"registered_limit":`+nativeRegisteredLimitRow+`}`)
 	})
 	second := registeredlimits.CreateOpts{ServiceID: "svc-1", ResourceName: "ram", RegionID: "RegionOne", Description: "x", DefaultLimit: 5}
-	created, err := api.BatchCreate(ctx, registeredlimits.BatchCreateOpts{nativeRegisteredLimitCreate, second}, registeredlimits.WithBatchCreateField("x_extension", 1))
+	created, err := api.BatchCreate(ctx, registeredlimits.BatchCreateOpts{nativeRegisteredLimitCreate, second}, request.Field("x_extension", 1))
 	if err != nil || !(len(created) == 2 && created[0].ID == "rl-1" && created[0].DefaultLimit == 10 && created[1].ID == "rl-2") {
 		t.Fatal(created, err)
 	}
@@ -81,11 +82,11 @@ func TestNativeRegisteredLimitRoutesBodiesPagingAndDecode(t *testing.T) {
 		t.Fatal(got, err)
 	}
 	zero, empty := 0, ""
-	if _, err := api.Update(ctx, "rl-1", registeredlimits.UpdateOpts{Description: &empty, DefaultLimit: &zero, RegionID: "RegionTwo", ServiceID: "svc-2", ResourceName: "ram"}, registeredlimits.WithUpdateField("x_extension", 2)); err != nil {
+	if _, err := api.Update(ctx, "rl-1", registeredlimits.UpdateOpts{Description: &empty, DefaultLimit: &zero, RegionID: "RegionTwo", ServiceID: "svc-2", ResourceName: "ram"}, request.Field("x_extension", 2)); err != nil {
 		t.Fatal(err)
 	}
 	var ids []string
-	for value, err := range api.List(ctx, registeredlimits.WithListOptions(registeredlimits.ListOpts{RegionID: "RegionOne", ServiceID: "svc-1", ResourceName: "cores"}), registeredlimits.WithListQuery("extra", "1")) {
+	for value, err := range api.List(ctx, registeredlimits.WithListOptions(registeredlimits.ListOpts{RegionID: "RegionOne", ServiceID: "svc-1", ResourceName: "cores"}), request.Query("extra", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -205,11 +206,11 @@ func TestNativeRegisteredLimitStatusesDecodeAndPreflight(t *testing.T) {
 				return err
 			}()},
 			"registered_limits extension": {"BatchCreate", func() error {
-				_, err := api.BatchCreate(ctx, registeredlimits.BatchCreateOpts{nativeRegisteredLimitCreate}, registeredlimits.WithBatchCreateField("registered_limits", nil))
+				_, err := api.BatchCreate(ctx, registeredlimits.BatchCreateOpts{nativeRegisteredLimitCreate}, request.Field("registered_limits", nil))
 				return err
 			}()},
 			"update core extension": {"Update", func() error {
-				_, err := api.Update(ctx, "rl-1", registeredlimits.UpdateOpts{}, registeredlimits.WithUpdateField("default_limit", 1))
+				_, err := api.Update(ctx, "rl-1", registeredlimits.UpdateOpts{}, request.Field("default_limit", 1))
 				return err
 			}()},
 			"update nil option": {"Update", func() error {

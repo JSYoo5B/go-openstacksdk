@@ -11,6 +11,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -125,7 +126,7 @@ func TestPythonTypeListVisibilityAndQuery(t *testing.T) {
 		// Without options Go asks for public and private types.
 		{"go default", nil, url.Values{"is_public": {"None"}}},
 		// types(is_public="none", all_projects=True, sort="name:asc")
-		{"query", []volumetypes.ListOption{volumetypes.WithListQuery("is_public", "none"), volumetypes.WithListQuery("all_tenants", "True"), volumetypes.WithListOptions(volumetypes.ListOpts{Sort: "name:asc"})}, url.Values{"is_public": {"none"}, "all_tenants": {"True"}, "sort": {"name:asc"}}},
+		{"query", []volumetypes.ListOption{request.Query("is_public", "none"), request.Query("all_tenants", "True"), volumetypes.WithListOptions(volumetypes.ListOpts{Sort: "name:asc"})}, url.Values{"is_public": {"none"}, "all_tenants": {"True"}, "sort": {"name:asc"}}},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			api, calls := pythonTypeAPI(t, func(*http.Request) *http.Response {

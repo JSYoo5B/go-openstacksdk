@@ -96,7 +96,7 @@ func (s *DatabaseScope) create(ctx context.Context, opts BatchCreateOpts, single
 	if err := ctx.Err(); err != nil {
 		return err
 	}
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Unchecked: true}, options...)
 	if err != nil {
 		return request.Wrap("create", "databases", err)
 	}

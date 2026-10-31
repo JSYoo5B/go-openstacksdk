@@ -217,10 +217,7 @@ func (a *API) CreateWithProvisionState(ctx context.Context, state CreateProvisio
 	if state == CreateAvailable {
 		maximum = "1.10"
 	}
-	cfg, err := request.Apply(opts, options...)
-	if err == nil {
-		err = request.ValidateCapabilities(cfg, true, false, false)
-	}
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
 		return nil, request.Wrap(op, "nodes", err)
 	}

@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/messages"
 	"github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/replicas"
@@ -171,7 +172,7 @@ func TestPyManilaBListOperationsUsePythonRoutesAndFilterNames(t *testing.T) {
 	})
 	t.Run("share_snapshots details=True", func(t *testing.T) {
 		run(t, "/v2/snapshots/detail", sum("snapshots"), func(c *gophercloud.ServiceClient) []string {
-			return pyManilaBIDs(t, snapshots.New(c).ListDetail(ctx, snapshots.WithListDetailQuery("snapshot_id", "snap-9")), func(s *snapshots.Snapshot) string { return s.ID })
+			return pyManilaBIDs(t, snapshots.New(c).ListDetail(ctx, request.Query("snapshot_id", "snap-9")), func(s *snapshots.Snapshot) string { return s.ID })
 		}, "snapshot_id=snap-9")
 	})
 	t.Run("share_snapshots details=False", func(t *testing.T) {
@@ -196,7 +197,7 @@ func TestPyManilaBListOperationsUsePythonRoutesAndFilterNames(t *testing.T) {
 	})
 	t.Run("share_types with is_public and JSON extra_specs", func(t *testing.T) {
 		run(t, "/v2/types", sum("share_types"), func(c *gophercloud.ServiceClient) []string {
-			return pyManilaBIDs(t, sharetypes.New(c).List(ctx, sharetypes.WithListQuery("is_public", "True"), sharetypes.WithListQuery("extra_specs", `{"snapshot_support":"True"}`)), func(s *sharetypes.ShareType) string { return s.ID })
+			return pyManilaBIDs(t, sharetypes.New(c).List(ctx, request.Query("is_public", "True"), request.Query("extra_specs", `{"snapshot_support":"True"}`)), func(s *sharetypes.ShareType) string { return s.ID })
 		}, "is_public=True&extra_specs="+`%7B%22snapshot_support%22%3A%22True%22%7D`)
 	})
 	t.Run("user_messages", func(t *testing.T) {
@@ -206,17 +207,17 @@ func TestPyManilaBListOperationsUsePythonRoutesAndFilterNames(t *testing.T) {
 	})
 	t.Run("services with Python name and availability_zone aliases", func(t *testing.T) {
 		run(t, "/v2/services", `{"services":[{"id":1},{"id":2}]}`, func(c *gophercloud.ServiceClient) []string {
-			return pyManilaBIDs(t, services.New(c).List(ctx, services.WithListQuery("binary", "manila-share"), services.WithListQuery("zone", "nova"), services.WithListQuery("host", "h1")), func(s *services.Service) string { return string(rune('a' + s.ID - 1)) })
+			return pyManilaBIDs(t, services.New(c).List(ctx, request.Query("binary", "manila-share"), request.Query("zone", "nova"), request.Query("host", "h1")), func(s *services.Service) string { return string(rune('a' + s.ID - 1)) })
 		}, "binary=manila-share&zone=nova&host=h1")
 	})
 	t.Run("storage_pools details=True", func(t *testing.T) {
 		run(t, "/v2/scheduler-stats/pools/detail", `{"pools":[{"name":"a"},{"name":"b"}]}`, func(c *gophercloud.ServiceClient) []string {
-			return pyManilaBIDs(t, schedulerstats.New(c).ListDetail(ctx, schedulerstats.WithListDetailQuery("pool", "p"), schedulerstats.WithListDetailQuery("share_type", "gold")), func(s *schedulerstats.Pool) string { return s.Name })
+			return pyManilaBIDs(t, schedulerstats.New(c).ListDetail(ctx, request.Query("pool", "p"), request.Query("share_type", "gold")), func(s *schedulerstats.Pool) string { return s.Name })
 		}, "pool=p&share_type=gold")
 	})
 	t.Run("storage_pools details=False", func(t *testing.T) {
 		run(t, "/v2/scheduler-stats/pools", `{"pools":[{"name":"a"},{"name":"b"}]}`, func(c *gophercloud.ServiceClient) []string {
-			return pyManilaBIDs(t, schedulerstats.New(c).List(ctx, schedulerstats.WithListQuery("backend", "b")), func(s *schedulerstats.Pool) string { return s.Name })
+			return pyManilaBIDs(t, schedulerstats.New(c).List(ctx, request.Query("backend", "b")), func(s *schedulerstats.Pool) string { return s.Name })
 		}, "backend=b")
 	})
 }

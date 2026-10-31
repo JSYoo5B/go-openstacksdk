@@ -15,6 +15,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/db/v1/instances"
 	"github.com/JSYoo5B/go-openstacksdk/db/v1/users"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -59,7 +60,7 @@ func TestTroveInstanceCreateSendsCompleteBodyAndAcknowledgesWithoutWaiting(t *te
 		Networks:  []instances.NetworkOpts{{UUID: "net-1", V4FixedIP: "192.0.2.9"}},
 		Databases: databases.BatchCreateOpts{{Name: "app", CharSet: "utf8"}},
 		Users:     users.BatchCreateOpts{{Name: "writer", Password: "example-password"}},
-	}, instances.WithCreateField("vendor", map[string]bool{"enabled": false}))
+	}, request.Field("vendor", map[string]bool{"enabled": false}))
 	if err != nil || value == nil || value.ID != "inst-1" || value.Status != "BUILD" || value.Flavor.ID != "7" || value.Volume.Size != 0 || value.Volume.Used != 0.5 ||
 		value.Datastore.VersionID != "ver-1" || value.Created.IsZero() || len(value.Addresses) != 1 || value.Addresses[0].Address != "198.51.100.1" {
 		t.Fatalf("value=%+v error=%v", value, err)
@@ -109,13 +110,13 @@ func TestTroveInstanceCreateRejectsInvalidInputsAndExtensionsBeforeHTTP(t *testi
 	if _, err := api.Create(ctx, instances.CreateOpts{Size: 1}); !errors.As(err, &missing) {
 		t.Fatalf("missing flavor: %v", err)
 	}
-	if _, err := api.Create(ctx, instances.CreateOpts{FlavorRef: "1", Size: 1, Name: "db"}, instances.WithCreateField("name", "shadow")); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := api.Create(ctx, instances.CreateOpts{FlavorRef: "1", Size: 1, Name: "db"}, request.Field("name", "shadow")); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatalf("protected name: %v", err)
 	}
-	if _, err := api.Create(ctx, instances.CreateOpts{FlavorRef: "1", Size: 1}, instances.WithCreateField("flavorRef", "2")); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := api.Create(ctx, instances.CreateOpts{FlavorRef: "1", Size: 1}, request.Field("flavorRef", "2")); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatalf("protected flavorRef: %v", err)
 	}
-	if _, err := api.Create(ctx, instances.CreateOpts{FlavorRef: "1", Size: 1}, instances.WithCreateField("volume", map[string]int{"size": 9})); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := api.Create(ctx, instances.CreateOpts{FlavorRef: "1", Size: 1}, request.Field("volume", map[string]int{"size": 9})); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatalf("protected volume: %v", err)
 	}
 	if _, err := api.Create(ctx, instances.CreateOpts{FlavorRef: "1", Size: 1}, nil); !errors.Is(err, resource.ErrInvalidOption) {

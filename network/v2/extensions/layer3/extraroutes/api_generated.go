@@ -18,10 +18,9 @@ func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 type AddResult = upstream.AddResult
 type Opts = upstream.Opts
 type RemoveResult = upstream.RemoveResult
-type AddOption = request.Option[Opts]
+type AddOption = request.NativeFieldCall
 
-func WithAddOptions(value Opts) AddOption          { return request.WithOptions(value) }
-func WithAddField(key string, value any) AddOption { return request.WithField[Opts](key, value) }
+func WithAddOptions(value Opts) AddOption { return request.Custom(request.WithOptions(value)) }
 
 type addOptsBuilder struct {
 	base   Opts
@@ -44,13 +43,8 @@ func (b addOptsBuilder) ToExtraRoutesUpdateMap() (map[string]any, error) {
 
 // Add invokes the upstream API with library-owned builders and result handling.
 func (a *API) Add(ctx context.Context, id string, opts Opts, options ...AddOption) (*routers.Router, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Add", "extraroutes", err)
-		var zero0 *routers.Router
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Add", "extraroutes", err)
 		var zero0 *routers.Router
 		return zero0, err
@@ -62,10 +56,9 @@ func (a *API) Add(ctx context.Context, id string, opts Opts, options ...AddOptio
 	return value0, err
 }
 
-type RemoveOption = request.Option[Opts]
+type RemoveOption = request.NativeFieldCall
 
-func WithRemoveOptions(value Opts) RemoveOption          { return request.WithOptions(value) }
-func WithRemoveField(key string, value any) RemoveOption { return request.WithField[Opts](key, value) }
+func WithRemoveOptions(value Opts) RemoveOption { return request.Custom(request.WithOptions(value)) }
 
 type removeOptsBuilder struct {
 	base   Opts
@@ -88,13 +81,8 @@ func (b removeOptsBuilder) ToExtraRoutesUpdateMap() (map[string]any, error) {
 
 // Remove invokes the upstream API with library-owned builders and result handling.
 func (a *API) Remove(ctx context.Context, id string, opts Opts, options ...RemoveOption) (*routers.Router, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Remove", "extraroutes", err)
-		var zero0 *routers.Router
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Remove", "extraroutes", err)
 		var zero0 *routers.Router
 		return zero0, err

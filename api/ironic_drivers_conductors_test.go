@@ -14,6 +14,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/baremetal/v1/conductors"
 	"github.com/JSYoo5B/go-openstacksdk/baremetal/v1/drivers"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -123,7 +124,7 @@ func TestIronicDriverListFiltersFollowLinksAndExtensionQuery(t *testing.T) {
 	var names []string
 	for value, err := range newIronicDrivers(t, cloud, "").ListDrivers(context.Background(),
 		drivers.WithListDriversOptions(drivers.ListDriversOpts{Detail: true, Type: "dynamic"}),
-		drivers.WithListDriversQuery("vendor", "x")) {
+		request.Query("vendor", "x")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -161,7 +162,7 @@ func TestIronicDriverListOmitsFalseDetailAndRejectsInvalidOptionsBeforeHTTP(t *t
 			t.Fatalf("nil option: %v", err)
 		}
 	}
-	for _, err := range api.ListDrivers(context.Background(), drivers.WithListDriversQuery(" ", "x")) {
+	for _, err := range api.ListDrivers(context.Background(), request.Query(" ", "x")) {
 		if !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatalf("empty query key: %v", err)
 		}
@@ -394,7 +395,7 @@ func TestIronicConductorListFiltersFollowLinksAndRejectDetailWithFields(t *testi
 	var names []string
 	for value, err := range api.List(context.Background(),
 		conductors.WithListOptions(conductors.ListOpts{Fields: []string{"hostname", "alive"}, Limit: 1, SortKey: "hostname", SortDir: "asc"}),
-		conductors.WithListQuery("vendor", "x")) {
+		request.Query("vendor", "x")) {
 		if err != nil {
 			t.Fatal(err)
 		}

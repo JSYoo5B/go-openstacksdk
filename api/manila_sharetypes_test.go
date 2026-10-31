@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/sharetypes"
 	"github.com/gophercloud/gophercloud/v2"
@@ -101,7 +102,7 @@ func TestManilaShareTypeCreateKeepsFalseAndExtensionsAndAccepts200Or202(t *testi
 		value, err := sharetypes.New(newManilaSupportClient(cloud)).Create(context.Background(), sharetypes.CreateOpts{
 			Name: "gold", IsPublic: false,
 			ExtraSpecs: sharetypes.ExtraSpecsOpts{DriverHandlesShareServers: true, SnapshotSupport: manilaSupportFalse()},
-		}, sharetypes.WithCreateField("vendor", map[string]bool{"enabled": false}))
+		}, request.Field("vendor", map[string]bool{"enabled": false}))
 		if tc.success != (err == nil) || calls.Load() != 1 {
 			t.Fatalf("status %d value=%+v error=%v calls=%d", tc.status, value, err, calls.Load())
 		}
@@ -156,7 +157,7 @@ func TestManilaShareTypeRejectsProtectedOrNilOptionsBeforeHTTP(t *testing.T) {
 	ctx := context.Background()
 	for name, err := range map[string]error{
 		"create name": func() error {
-			_, err := api.Create(ctx, sharetypes.CreateOpts{Name: "x", ExtraSpecs: sharetypes.ExtraSpecsOpts{DriverHandlesShareServers: true}}, sharetypes.WithCreateField("name", "shadow"))
+			_, err := api.Create(ctx, sharetypes.CreateOpts{Name: "x", ExtraSpecs: sharetypes.ExtraSpecsOpts{DriverHandlesShareServers: true}}, request.Field("name", "shadow"))
 			return err
 		}(),
 		"create nil": func() error {
@@ -164,12 +165,12 @@ func TestManilaShareTypeRejectsProtectedOrNilOptionsBeforeHTTP(t *testing.T) {
 			return err
 		}(),
 		"update is_public": func() error {
-			_, err := api.Update(ctx, "st-1", sharetypes.UpdateOpts{}, sharetypes.WithUpdateField("description", "x"))
+			_, err := api.Update(ctx, "st-1", sharetypes.UpdateOpts{}, request.Field("description", "x"))
 			return err
 		}(),
 		"update nil": func() error { _, err := api.Update(ctx, "st-1", sharetypes.UpdateOpts{}, nil); return err }(),
 		"set extra specs": func() error {
-			_, err := api.SetExtraSpecs(ctx, "st-1", sharetypes.SetExtraSpecsOpts{ExtraSpecs: map[string]any{"a": 1}}, sharetypes.WithSetExtraSpecsField("a", 2))
+			_, err := api.SetExtraSpecs(ctx, "st-1", sharetypes.SetExtraSpecsOpts{ExtraSpecs: map[string]any{"a": 1}}, request.Field("a", 2))
 			return err
 		}(),
 		"set extra specs nil": func() error {
@@ -177,11 +178,11 @@ func TestManilaShareTypeRejectsProtectedOrNilOptionsBeforeHTTP(t *testing.T) {
 			return err
 		}(),
 		"add access project": func() error {
-			return api.AddAccess(ctx, "st-1", sharetypes.AccessOpts{Project: "p"}, sharetypes.WithAddAccessField("project", "q"))
+			return api.AddAccess(ctx, "st-1", sharetypes.AccessOpts{Project: "p"}, request.Field("project", "q"))
 		}(),
 		"add access nil": func() error { return api.AddAccess(ctx, "st-1", sharetypes.AccessOpts{}, nil) }(),
 		"remove access": func() error {
-			return api.RemoveAccess(ctx, "st-1", sharetypes.AccessOpts{}, sharetypes.WithRemoveAccessField("project", "q"))
+			return api.RemoveAccess(ctx, "st-1", sharetypes.AccessOpts{}, request.Field("project", "q"))
 		}(),
 		"remove access nil": func() error { return api.RemoveAccess(ctx, "st-1", sharetypes.AccessOpts{}, nil) }(),
 	} {
@@ -215,7 +216,7 @@ func TestManilaShareTypeUpdateSendsEmptyValuesAndAcceptsOnly200(t *testing.T) {
 		empty := ""
 		value, err := sharetypes.New(newManilaSupportClient(cloud)).Update(context.Background(), "st-1", sharetypes.UpdateOpts{
 			Name: &empty, Description: &empty, IsPublic: manilaSupportFalse(),
-		}, sharetypes.WithUpdateField("vendor", nil))
+		}, request.Field("vendor", nil))
 		if tc.success != (err == nil) || (tc.success && value.ID != "st-1") {
 			t.Fatalf("status %d value=%+v error=%v", tc.status, value, err)
 		}
@@ -329,7 +330,7 @@ func TestManilaShareTypeExtraSpecsReadSetAndUnset(t *testing.T) {
 		t.Fatalf("specs=%v error=%v", specs, err)
 	}
 	set, err := api.SetExtraSpecs(ctx, "st-1", sharetypes.SetExtraSpecsOpts{ExtraSpecs: map[string]any{"flag": false, "empty": "", "none": nil}},
-		sharetypes.WithSetExtraSpecsField("vendor", []string{}))
+		request.Field("vendor", []string{}))
 	if err != nil || set["flag"] != false || set["empty"] != "" {
 		t.Fatalf("set=%v error=%v", set, err)
 	}
@@ -396,10 +397,10 @@ func TestManilaShareTypeAccessShowAddRemove(t *testing.T) {
 	if err != nil || !reflect.DeepEqual(access, []sharetypes.ShareTypeAccess{{ShareTypeID: "st-1", ProjectID: "p1"}, {ShareTypeID: "st-1", ProjectID: "p2"}}) {
 		t.Fatalf("access=%v error=%v", access, err)
 	}
-	if err := api.AddAccess(ctx, "st-1", sharetypes.AccessOpts{Project: "p1"}, sharetypes.WithAddAccessField("vendor", 1)); err != nil {
+	if err := api.AddAccess(ctx, "st-1", sharetypes.AccessOpts{Project: "p1"}, request.Field("vendor", 1)); err != nil {
 		t.Fatal(err)
 	}
-	if err := api.RemoveAccess(ctx, "st-1", sharetypes.AccessOpts{}, sharetypes.WithRemoveAccessField("vendor", 2)); err != nil {
+	if err := api.RemoveAccess(ctx, "st-1", sharetypes.AccessOpts{}, request.Field("vendor", 2)); err != nil {
 		t.Fatal(err)
 	}
 	want := []map[string]string{
@@ -433,7 +434,7 @@ func TestManilaShareTypeListQueriesSinglePageAndCommonLookup(t *testing.T) {
 	api := sharetypes.New(newManilaSupportClient(cloud))
 	ctx := context.Background()
 	var ids []string
-	for value, err := range api.List(ctx, sharetypes.WithListOptions(sharetypes.ListOpts{IsPublic: "false"}), sharetypes.WithListQuery("vendor", "x")) {
+	for value, err := range api.List(ctx, sharetypes.WithListOptions(sharetypes.ListOpts{IsPublic: "false"}), request.Query("vendor", "x")) {
 		if err != nil {
 			t.Fatal(err)
 		}

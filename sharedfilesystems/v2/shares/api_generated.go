@@ -58,11 +58,10 @@ type UnmanageResult = upstream.UnmanageResult
 type UpdateMetadataOpts = upstream.UpdateMetadataOpts
 type UpdateOpts = upstream.UpdateOpts
 type UpdateResult = upstream.UpdateResult
-type CreateOption = request.Option[CreateOpts]
+type CreateOption = request.NativeFieldCall
 
-func WithCreateOptions(value CreateOpts) CreateOption { return request.WithOptions(value) }
-func WithCreateField(key string, value any) CreateOption {
-	return request.WithField[CreateOpts](key, value)
+func WithCreateOptions(value CreateOpts) CreateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type createOptsBuilder struct {
@@ -86,13 +85,8 @@ func (b createOptsBuilder) ToShareCreateMap() (map[string]any, error) {
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*Share, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Create", "shares", err)
-		var zero0 *Share
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Create", "shares", err)
 		var zero0 *Share
 		return zero0, err
@@ -114,11 +108,10 @@ func (a *API) DeleteMetadatum(ctx context.Context, id string, key string) error 
 	return request.Wrap("DeleteMetadatum", "shares", upstream.DeleteMetadatum(ctx, a.client, id, key).ExtractErr())
 }
 
-type ExtendOption = request.Option[ExtendOpts]
+type ExtendOption = request.NativeFieldCall
 
-func WithExtendOptions(value ExtendOpts) ExtendOption { return request.WithOptions(value) }
-func WithExtendField(key string, value any) ExtendOption {
-	return request.WithField[ExtendOpts](key, value)
+func WithExtendOptions(value ExtendOpts) ExtendOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type extendOptsBuilder struct {
@@ -142,12 +135,8 @@ func (b extendOptsBuilder) ToShareExtendMap() (map[string]any, error) {
 
 // Extend invokes the upstream API with library-owned builders and result handling.
 func (a *API) Extend(ctx context.Context, id string, opts ExtendOpts, options ...ExtendOption) error {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Extend", "shares", err)
-		return err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Extend", "shares", err)
 		return err
 	}
@@ -192,13 +181,10 @@ func (a *API) GetMetadatum(ctx context.Context, id string, key string) (map[stri
 	return value0, err
 }
 
-type GrantAccessOption = request.Option[GrantAccessOpts]
+type GrantAccessOption = request.NativeFieldCall
 
 func WithGrantAccessOptions(value GrantAccessOpts) GrantAccessOption {
-	return request.WithOptions(value)
-}
-func WithGrantAccessField(key string, value any) GrantAccessOption {
-	return request.WithField[GrantAccessOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type grantAccessOptsBuilder struct {
@@ -222,13 +208,8 @@ func (b grantAccessOptsBuilder) ToGrantAccessMap() (map[string]any, error) {
 
 // GrantAccess invokes the upstream API with library-owned builders and result handling.
 func (a *API) GrantAccess(ctx context.Context, id string, opts GrantAccessOpts, options ...GrantAccessOption) (*AccessRight, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("GrantAccess", "shares", err)
-		var zero0 *AccessRight
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("GrantAccess", "shares", err)
 		var zero0 *AccessRight
 		return zero0, err
@@ -248,11 +229,10 @@ func (a *API) ListAccessRights(ctx context.Context, id string) ([]AccessRight, e
 	return value0, err
 }
 
-type ListDetailOption = request.Option[ListOpts]
+type ListDetailOption = request.NativeQueryCall
 
-func WithListDetailOptions(value ListOpts) ListDetailOption { return request.WithOptions(value) }
-func WithListDetailQuery(key, value string) ListDetailOption {
-	return request.WithQuery[ListOpts](key, value)
+func WithListDetailOptions(value ListOpts) ListDetailOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type listDetailOptsBuilder struct {
@@ -281,12 +261,8 @@ func (a *API) ListDetail(ctx context.Context, options ...ListDetailOption) iter.
 
 func (a *API) listDetailWithControl(ctx context.Context, control resource.ListControl, options ...ListDetailOption) iter.Seq2[*Share, error] {
 	var opts ListOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("ListDetail", "shares", err)
-		return func(yield func(*Share, error) bool) { var zero *Share; yield(zero, err) }
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("ListDetail", "shares", err)
 		return func(yield func(*Share, error) bool) { var zero *Share; yield(zero, err) }
 	}
@@ -305,13 +281,10 @@ func (a *API) ListExportLocations(ctx context.Context, id string) ([]ExportLocat
 	return value0, err
 }
 
-type ResetStatusOption = request.Option[ResetStatusOpts]
+type ResetStatusOption = request.NativeFieldCall
 
 func WithResetStatusOptions(value ResetStatusOpts) ResetStatusOption {
-	return request.WithOptions(value)
-}
-func WithResetStatusField(key string, value any) ResetStatusOption {
-	return request.WithField[ResetStatusOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type resetStatusOptsBuilder struct {
@@ -335,12 +308,8 @@ func (b resetStatusOptsBuilder) ToShareResetStatusMap() (map[string]any, error) 
 
 // ResetStatus invokes the upstream API with library-owned builders and result handling.
 func (a *API) ResetStatus(ctx context.Context, id string, opts ResetStatusOpts, options ...ResetStatusOption) error {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("ResetStatus", "shares", err)
-		return err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("ResetStatus", "shares", err)
 		return err
 	}
@@ -348,11 +317,10 @@ func (a *API) ResetStatus(ctx context.Context, id string, opts ResetStatusOpts, 
 	return request.Wrap("ResetStatus", "shares", upstream.ResetStatus(ctx, a.client, id, _opts).ExtractErr())
 }
 
-type RevertOption = request.Option[RevertOpts]
+type RevertOption = request.NativeFieldCall
 
-func WithRevertOptions(value RevertOpts) RevertOption { return request.WithOptions(value) }
-func WithRevertField(key string, value any) RevertOption {
-	return request.WithField[RevertOpts](key, value)
+func WithRevertOptions(value RevertOpts) RevertOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type revertOptsBuilder struct {
@@ -376,12 +344,8 @@ func (b revertOptsBuilder) ToShareRevertMap() (map[string]any, error) {
 
 // Revert invokes the upstream API with library-owned builders and result handling.
 func (a *API) Revert(ctx context.Context, id string, opts RevertOpts, options ...RevertOption) error {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Revert", "shares", err)
-		return err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Revert", "shares", err)
 		return err
 	}
@@ -389,13 +353,10 @@ func (a *API) Revert(ctx context.Context, id string, opts RevertOpts, options ..
 	return request.Wrap("Revert", "shares", upstream.Revert(ctx, a.client, id, _opts).ExtractErr())
 }
 
-type RevokeAccessOption = request.Option[RevokeAccessOpts]
+type RevokeAccessOption = request.NativeFieldCall
 
 func WithRevokeAccessOptions(value RevokeAccessOpts) RevokeAccessOption {
-	return request.WithOptions(value)
-}
-func WithRevokeAccessField(key string, value any) RevokeAccessOption {
-	return request.WithField[RevokeAccessOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type revokeAccessOptsBuilder struct {
@@ -419,12 +380,8 @@ func (b revokeAccessOptsBuilder) ToRevokeAccessMap() (map[string]any, error) {
 
 // RevokeAccess invokes the upstream API with library-owned builders and result handling.
 func (a *API) RevokeAccess(ctx context.Context, id string, opts RevokeAccessOpts, options ...RevokeAccessOption) error {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("RevokeAccess", "shares", err)
-		return err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("RevokeAccess", "shares", err)
 		return err
 	}
@@ -432,13 +389,10 @@ func (a *API) RevokeAccess(ctx context.Context, id string, opts RevokeAccessOpts
 	return request.Wrap("RevokeAccess", "shares", upstream.RevokeAccess(ctx, a.client, id, _opts).ExtractErr())
 }
 
-type SetMetadataOption = request.Option[SetMetadataOpts]
+type SetMetadataOption = request.NativeFieldCall
 
 func WithSetMetadataOptions(value SetMetadataOpts) SetMetadataOption {
-	return request.WithOptions(value)
-}
-func WithSetMetadataField(key string, value any) SetMetadataOption {
-	return request.WithField[SetMetadataOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type setMetadataOptsBuilder struct {
@@ -462,13 +416,8 @@ func (b setMetadataOptsBuilder) ToSetMetadataMap() (map[string]any, error) {
 
 // SetMetadata invokes the upstream API with library-owned builders and result handling.
 func (a *API) SetMetadata(ctx context.Context, id string, opts SetMetadataOpts, options ...SetMetadataOption) (map[string]string, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("SetMetadata", "shares", err)
-		var zero0 map[string]string
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("SetMetadata", "shares", err)
 		var zero0 map[string]string
 		return zero0, err
@@ -480,11 +429,10 @@ func (a *API) SetMetadata(ctx context.Context, id string, opts SetMetadataOpts, 
 	return value0, err
 }
 
-type ShrinkOption = request.Option[ShrinkOpts]
+type ShrinkOption = request.NativeFieldCall
 
-func WithShrinkOptions(value ShrinkOpts) ShrinkOption { return request.WithOptions(value) }
-func WithShrinkField(key string, value any) ShrinkOption {
-	return request.WithField[ShrinkOpts](key, value)
+func WithShrinkOptions(value ShrinkOpts) ShrinkOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type shrinkOptsBuilder struct {
@@ -508,12 +456,8 @@ func (b shrinkOptsBuilder) ToShareShrinkMap() (map[string]any, error) {
 
 // Shrink invokes the upstream API with library-owned builders and result handling.
 func (a *API) Shrink(ctx context.Context, id string, opts ShrinkOpts, options ...ShrinkOption) error {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Shrink", "shares", err)
-		return err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Shrink", "shares", err)
 		return err
 	}
@@ -526,11 +470,10 @@ func (a *API) Unmanage(ctx context.Context, id string) error {
 	return request.Wrap("Unmanage", "shares", upstream.Unmanage(ctx, a.client, id).ExtractErr())
 }
 
-type UpdateOption = request.Option[UpdateOpts]
+type UpdateOption = request.NativeFieldCall
 
-func WithUpdateOptions(value UpdateOpts) UpdateOption { return request.WithOptions(value) }
-func WithUpdateField(key string, value any) UpdateOption {
-	return request.WithField[UpdateOpts](key, value)
+func WithUpdateOptions(value UpdateOpts) UpdateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type updateOptsBuilder struct {
@@ -554,13 +497,8 @@ func (b updateOptsBuilder) ToShareUpdateMap() (map[string]any, error) {
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ...UpdateOption) (*Share, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Update", "shares", err)
-		var zero0 *Share
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Update", "shares", err)
 		var zero0 *Share
 		return zero0, err
@@ -572,13 +510,10 @@ func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ..
 	return value0, err
 }
 
-type UpdateMetadataOption = request.Option[UpdateMetadataOpts]
+type UpdateMetadataOption = request.NativeFieldCall
 
 func WithUpdateMetadataOptions(value UpdateMetadataOpts) UpdateMetadataOption {
-	return request.WithOptions(value)
-}
-func WithUpdateMetadataField(key string, value any) UpdateMetadataOption {
-	return request.WithField[UpdateMetadataOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type updateMetadataOptsBuilder struct {
@@ -602,13 +537,8 @@ func (b updateMetadataOptsBuilder) ToUpdateMetadataMap() (map[string]any, error)
 
 // UpdateMetadata invokes the upstream API with library-owned builders and result handling.
 func (a *API) UpdateMetadata(ctx context.Context, id string, opts UpdateMetadataOpts, options ...UpdateMetadataOption) (map[string]string, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("UpdateMetadata", "shares", err)
-		var zero0 map[string]string
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("UpdateMetadata", "shares", err)
 		var zero0 map[string]string
 		return zero0, err

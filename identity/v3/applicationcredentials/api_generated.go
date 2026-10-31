@@ -28,11 +28,10 @@ type GetAccessRuleResult = upstream.GetAccessRuleResult
 type GetResult = upstream.GetResult
 type ListOpts = upstream.ListOpts
 type Role = upstream.Role
-type CreateOption = request.Option[CreateOpts]
+type CreateOption = request.NativeFieldCall
 
-func WithCreateOptions(value CreateOpts) CreateOption { return request.WithOptions(value) }
-func WithCreateField(key string, value any) CreateOption {
-	return request.WithField[CreateOpts](key, value)
+func WithCreateOptions(value CreateOpts) CreateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type createOptsBuilder struct {
@@ -56,13 +55,8 @@ func (b createOptsBuilder) ToApplicationCredentialCreateMap() (map[string]any, e
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, userID string, opts CreateOpts, options ...CreateOption) (*ApplicationCredential, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Create", "applicationcredentials", err)
-		var zero0 *ApplicationCredential
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Create", "applicationcredentials", err)
 		var zero0 *ApplicationCredential
 		return zero0, err
@@ -100,10 +94,9 @@ func (a *API) GetAccessRule(ctx context.Context, userID string, id string) (*Acc
 	return value0, err
 }
 
-type ListOption = request.Option[ListOpts]
+type ListOption = request.NativeQueryCall
 
-func WithListOptions(value ListOpts) ListOption  { return request.WithOptions(value) }
-func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
+func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
 	base   ListOpts
@@ -131,15 +124,8 @@ func (a *API) List(ctx context.Context, userID string, options ...ListOption) it
 
 func (a *API) listWithControl(ctx context.Context, userID string, control resource.ListControl, options ...ListOption) iter.Seq2[*ApplicationCredential, error] {
 	var opts ListOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("List", "applicationcredentials", err)
-		return func(yield func(*ApplicationCredential, error) bool) {
-			var zero *ApplicationCredential
-			yield(zero, err)
-		}
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("List", "applicationcredentials", err)
 		return func(yield func(*ApplicationCredential, error) bool) {
 			var zero *ApplicationCredential

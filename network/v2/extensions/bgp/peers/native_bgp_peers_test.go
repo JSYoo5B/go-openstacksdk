@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/peers"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -67,7 +68,7 @@ func TestNativeBGPPeerRoutesBodiesListAndDecode(t *testing.T) {
 		}
 		return nativeBGPPeerWire(200, `{"bgp_peer":`+nativeBGPPeerRow+`}`)
 	})
-	created, err := api.Create(ctx, peers.CreateOpts{Name: "edge", AuthType: "md5", Password: "secret", PeerIP: "192.0.2.1", RemoteAS: 65001}, peers.WithCreateField("x_extension", 1))
+	created, err := api.Create(ctx, peers.CreateOpts{Name: "edge", AuthType: "md5", Password: "secret", PeerIP: "192.0.2.1", RemoteAS: 65001}, request.Field("x_extension", 1))
 	if err != nil || !(created.ID == "bp-1" && created.RemoteAS == 65001 && created.PeerIP == "192.0.2.1" && created.ProjectID == "p") {
 		t.Fatal(created, err)
 	}
@@ -79,7 +80,7 @@ func TestNativeBGPPeerRoutesBodiesListAndDecode(t *testing.T) {
 	if err != nil || got.AuthType != "md5" {
 		t.Fatal(got, err)
 	}
-	updated, err := api.Update(ctx, "bp-1", peers.UpdateOpts{Name: "edge-2"}, peers.WithUpdateField("x_extension", 1))
+	updated, err := api.Update(ctx, "bp-1", peers.UpdateOpts{Name: "edge-2"}, request.Field("x_extension", 1))
 	if err != nil || updated.Name != "edge-2" {
 		t.Fatal(updated, err)
 	}
@@ -193,12 +194,12 @@ func TestNativeBGPPeerStatusesDecodeAndPreflight(t *testing.T) {
 			err       error
 		}{
 			"create extension": {"Create", func() error {
-				_, err := api.Create(ctx, peers.CreateOpts{Name: "edge"}, peers.WithCreateField("peer_ip", "x"))
+				_, err := api.Create(ctx, peers.CreateOpts{Name: "edge"}, request.Field("peer_ip", "x"))
 				return err
 			}()},
 			"create nil option": {"Create", func() error { _, err := api.Create(ctx, peers.CreateOpts{}, nil); return err }()},
 			"update extension": {"Update", func() error {
-				_, err := api.Update(ctx, "bp-1", peers.UpdateOpts{}, peers.WithUpdateField("password", "x"))
+				_, err := api.Update(ctx, "bp-1", peers.UpdateOpts{}, request.Field("password", "x"))
 				return err
 			}()},
 			"update nil option": {"Update", func() error { _, err := api.Update(ctx, "bp-1", peers.UpdateOpts{}, nil); return err }()},

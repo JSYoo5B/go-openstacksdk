@@ -11,6 +11,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -64,7 +65,7 @@ func TestNativeAccountGetHeadsTheEndpointAndDecodesHeaders(t *testing.T) {
 		"X-Trans-Id":                  {"tx1"},
 		"Date":                        {"Sun, 11 Oct 2026 01:02:03 GMT"},
 	})
-	got, err := api.Get(ctx, accounts.WithGetOptions(accounts.GetOpts{Newest: true}), accounts.WithGetHeader("X-Extra", "1"))
+	got, err := api.Get(ctx, accounts.WithGetOptions(accounts.GetOpts{Newest: true}), request.Header("X-Extra", "1"))
 	if err != nil || !(got.BytesUsed == 1024 && got.ContainerCount == 3 && got.ObjectCount == 7 && *got.QuotaBytes == 4096 && got.TempURLKey == "secret" && got.TransID == "tx1" && got.Date.Equal(time.Date(2026, 10, 11, 1, 2, 3, 0, time.UTC))) {
 		t.Fatal(got, err)
 	}
@@ -86,7 +87,7 @@ func TestNativeAccountUpdatePostsMetadataHeaders(t *testing.T) {
 	var calls []nativeAccountCall
 	api := nativeAccountAPI(t, &calls, 204, http.Header{"X-Trans-Id": {"tx2"}, "Date": {"Sun, 11 Oct 2026 01:02:03 GMT"}})
 	contentType, detect := "text/plain", false
-	got, err := api.Update(ctx, accounts.UpdateOpts{Metadata: map[string]string{"Color": "blue"}, RemoveMetadata: []string{"Old"}, ContentType: &contentType, DetectContentType: &detect, TempURLKey: "k1", TempURLKey2: "k2"}, accounts.WithUpdateHeader("X-Extra", "1"))
+	got, err := api.Update(ctx, accounts.UpdateOpts{Metadata: map[string]string{"Color": "blue"}, RemoveMetadata: []string{"Old"}, ContentType: &contentType, DetectContentType: &detect, TempURLKey: "k1", TempURLKey2: "k2"}, request.Header("X-Extra", "1"))
 	if err != nil || got.TransID != "tx2" || got.Date.Day() != 11 {
 		t.Fatal(got, err)
 	}
@@ -139,9 +140,9 @@ func TestNativeAccountStatusesDecodeAndPreflight(t *testing.T) {
 	var calls []nativeAccountCall
 	api := nativeAccountAPI(t, &calls, 204, http.Header{})
 	for operation, err := range map[string]error{
-		"Get": func() error { _, err := api.Get(ctx, accounts.WithGetHeader("X-Newest", "false")); return err }(),
+		"Get": func() error { _, err := api.Get(ctx, request.Header("X-Newest", "false")); return err }(),
 		"Update": func() error {
-			_, err := api.Update(ctx, accounts.UpdateOpts{}, accounts.WithUpdateHeader("bad header", "x"))
+			_, err := api.Update(ctx, accounts.UpdateOpts{}, request.Header("bad header", "x"))
 			return err
 		}(),
 	} {

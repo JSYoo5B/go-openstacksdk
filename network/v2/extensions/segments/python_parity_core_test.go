@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/segments"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -56,7 +57,7 @@ func TestPythonParityCoreSegmentCreateUpdate(t *testing.T) {
 		t.Fatal(created, err)
 	}
 	name, empty, vlan := "rack2", "", 0
-	if _, err := api.Update(ctx, "seg-1", segments.UpdateOpts{Name: &name, Description: &empty, SegmentationID: &vlan}, segments.WithUpdateField("x_extension", true)); err != nil {
+	if _, err := api.Update(ctx, "seg-1", segments.UpdateOpts{Name: &name, Description: &empty, SegmentationID: &vlan}, request.Field("x_extension", true)); err != nil {
 		t.Fatal(err)
 	}
 	want := []pythonParityCoreSegmentCall{
@@ -103,7 +104,7 @@ func TestPythonParityCoreSegmentListAndGet(t *testing.T) {
 	}
 	rows := collect(
 		segments.WithListOptions(segments.ListOpts{NetworkID: "net-1", NetworkType: "vlan", SortKey: "name", SortDir: "asc"}),
-		segments.WithListQuery("segmentation_id", "0"))
+		request.Query("segmentation_id", "0"))
 	if len(rows) != 1 || rows[0].PhysicalNetwork != "physnet1" || len(calls) != 1 {
 		t.Fatalf("%+v %+v", rows, calls)
 	}
@@ -111,7 +112,7 @@ func TestPythonParityCoreSegmentListAndGet(t *testing.T) {
 	if !reflect.DeepEqual(first, url.Values{"network_id": {"net-1"}, "network_type": {"vlan"}, "sort_key": {"name"}, "sort_dir": {"asc"}, "segmentation_id": {"0"}}) {
 		t.Fatalf("%+v", calls)
 	}
-	rows = collect(segments.WithListQuery("marker", "seg-1"))
+	rows = collect(request.Query("marker", "seg-1"))
 	// A null segmentation_id decodes to 0 where Python keeps None.
 	if len(rows) != 1 || rows[0].ID != "seg-2" || rows[0].SegmentationID != 0 || calls[1].query != "marker=seg-1" {
 		t.Fatalf("%+v %+v", rows, calls)

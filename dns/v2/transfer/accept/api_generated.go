@@ -30,11 +30,10 @@ type GetResult = upstream.GetResult
 type ListOpts = upstream.ListOpts
 type TransferAccept = upstream.TransferAccept
 type TransferAcceptPage = upstream.TransferAcceptPage
-type CreateOption = request.Option[CreateOpts]
+type CreateOption = request.NativeFieldCall
 
-func WithCreateOptions(value CreateOpts) CreateOption { return request.WithOptions(value) }
-func WithCreateField(key string, value any) CreateOption {
-	return request.WithField[CreateOpts](key, value)
+func WithCreateOptions(value CreateOpts) CreateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type createOptsBuilder struct {
@@ -58,13 +57,8 @@ func (b createOptsBuilder) ToTransferAcceptCreateMap() (map[string]any, error) {
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*TransferAccept, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Create", "accept", err)
-		var zero0 *TransferAccept
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Create", "accept", err)
 		var zero0 *TransferAccept
 		return zero0, err
@@ -84,10 +78,9 @@ func (a *API) Get(ctx context.Context, transferAcceptID string) (*TransferAccept
 	return value0, err
 }
 
-type ListOption = request.Option[ListOpts]
+type ListOption = request.NativeQueryCall
 
-func WithListOptions(value ListOpts) ListOption  { return request.WithOptions(value) }
-func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
+func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
 	base   ListOpts
@@ -115,12 +108,8 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Transf
 
 func (a *API) listWithControl(ctx context.Context, control resource.ListControl, options ...ListOption) iter.Seq2[*TransferAccept, error] {
 	var opts ListOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("List", "accept", err)
-		return func(yield func(*TransferAccept, error) bool) { var zero *TransferAccept; yield(zero, err) }
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("List", "accept", err)
 		return func(yield func(*TransferAccept, error) bool) { var zero *TransferAccept; yield(zero, err) }
 	}

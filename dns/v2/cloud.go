@@ -38,7 +38,7 @@ func (s *Service) zoneCollection() *resource.Collection[zones.Zone] {
 			options := make([]zones.ListOption, 0, len(q))
 			for key, values := range q {
 				for _, value := range values {
-					options = append(options, zones.WithListQuery(key, value))
+					options = append(options, request.Query(key, value))
 				}
 			}
 			return api.List(ctx, options...)

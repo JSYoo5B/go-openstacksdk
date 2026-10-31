@@ -11,6 +11,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -50,7 +51,7 @@ func TestNativeCinderServiceListRouteAndDecode(t *testing.T) {
 			"services_links":[{"rel":"next","href":"`+cloud.Server.URL+`/never"}]}`)
 	})
 	var rows []services.Service
-	for value, err := range api.List(ctx, services.WithListOptions(services.ListOpts{Binary: "cinder-volume", Host: "h@lvm"}), services.WithListQuery("extra", "1")) {
+	for value, err := range api.List(ctx, services.WithListOptions(services.ListOpts{Binary: "cinder-volume", Host: "h@lvm"}), request.Query("extra", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}

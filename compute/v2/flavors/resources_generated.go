@@ -33,13 +33,13 @@ func (a *API) newResources() *resource.Collection[Flavor] {
 		Delete: func(ctx context.Context, id string) error { return a.Delete(ctx, string(id)) },
 		IterateControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*Flavor, error] {
 			q = maps.Clone(q)
-			options := []ListDetailOption{func(config *request.Config[ListOpts]) error {
+			options := []ListDetailOption{request.Custom(func(config *request.Config[ListOpts]) error {
 				config.Query = make(url.Values, len(q))
 				for key, values := range q {
 					config.Query[key] = append([]string(nil), values...)
 				}
 				return nil
-			}}
+			})}
 			return a.listDetailWithControl(ctx, control, options...)
 		}})
 }

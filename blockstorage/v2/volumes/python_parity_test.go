@@ -13,6 +13,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes"
 	"github.com/JSYoo5B/go-openstacksdk/image"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -101,7 +102,7 @@ func TestPythonVolumeGetUpdateMatchProxyRequests(t *testing.T) {
 	}
 
 	name, description := "renamed", ""
-	updated, err := api.Update(ctx, "vol-1", volumes.UpdateOpts{Name: &name, Description: &description}, volumes.WithUpdateField("x_extension", true))
+	updated, err := api.Update(ctx, "vol-1", volumes.UpdateOpts{Name: &name, Description: &description}, request.Field("x_extension", true))
 	if err != nil || updated.ID != "vol-1" {
 		t.Fatal(updated, err)
 	}
@@ -122,7 +123,7 @@ func TestPythonVolumeCreateEnvelopeAlwaysSendsSize(t *testing.T) {
 	})
 	hints := map[string]any{"same_host": []string{"vol-0"}}
 	created, err := api.Create(ctx, volumes.CreateOpts{Size: 10, Name: "data", SnapshotID: "snap-1", ImageID: "img"},
-		volumes.WithCreateField("multiattach", true), volumes.WithCreateField("OS-SCH-HNT:scheduler_hints", hints))
+		request.Field("multiattach", true), request.Field("OS-SCH-HNT:scheduler_hints", hints))
 	if err != nil || created.ID != "vol-1" {
 		t.Fatal(created, err)
 	}
@@ -134,7 +135,7 @@ func TestPythonVolumeCreateEnvelopeAlwaysSendsSize(t *testing.T) {
 		t.Fatal(err)
 	}
 	pythonVolumeExpect(t, calls[1], http.MethodPost, "/cinder/v2/project/volumes", "", `{"volume":{"size":0,"snapshot_id":"snap-1"}}`)
-	if _, err := api.Create(ctx, volumes.CreateOpts{SnapshotID: "snap-1"}, volumes.WithCreateField("size", nil)); !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 2 {
+	if _, err := api.Create(ctx, volumes.CreateOpts{SnapshotID: "snap-1"}, request.Field("size", nil)); !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 2 {
 		t.Fatal("size override must be rejected before HTTP", err, len(calls))
 	}
 }
@@ -150,7 +151,7 @@ func TestPythonVolumeDeleteDefaultsCascadeForceAndMissing(t *testing.T) {
 			var calls []pythonVolumeCall
 			api, _ := pythonVolumeAPI(t, &calls, func(*http.Request) *http.Response { return pythonVolumeWire(tc.status, `{}`) })
 
-			err := resource.IgnoreMissing(api.Delete(ctx, "vol-1", volumes.WithDeleteQuery("cascade", "False")))
+			err := resource.IgnoreMissing(api.Delete(ctx, "vol-1", request.Query("cascade", "False")))
 			if (err == nil) != tc.ignore {
 				t.Fatal(err)
 			}
@@ -171,7 +172,7 @@ func TestPythonVolumeDeleteDefaultsCascadeForceAndMissing(t *testing.T) {
 
 	var calls []pythonVolumeCall
 	api, _ := pythonVolumeAPI(t, &calls, func(*http.Request) *http.Response { return pythonVolumeWire(202, ``) })
-	if err := api.Delete(ctx, "vol-1", volumes.WithDeleteQuery("cascade", "True")); err != nil {
+	if err := api.Delete(ctx, "vol-1", request.Query("cascade", "True")); err != nil {
 		t.Fatal(err)
 	}
 	pythonVolumeExpect(t, calls[0], http.MethodDelete, "/cinder/v2/project/volumes/vol-1", "cascade=True", "")
@@ -193,7 +194,7 @@ func TestPythonVolumeListDetailDefaultOnly(t *testing.T) {
 		return pythonVolumeWire(200, `{"volumes":[`+pythonVolumeRow+`],"volumes_links":[{"rel":"next","href":"`+cloud.Server.URL+`/next/volumes/detail?marker=vol-1"}]}`)
 	})
 	var ids []string
-	for value, err := range api.List(ctx, volumes.WithListQuery("all_tenants", "True"), volumes.WithListQuery("name", "data"), volumes.WithListQuery("status", "available"), volumes.WithListQuery("project_id", "project")) {
+	for value, err := range api.List(ctx, request.Query("all_tenants", "True"), request.Query("name", "data"), request.Query("status", "available"), request.Query("project_id", "project")) {
 		if err != nil {
 			t.Fatal(err)
 		}

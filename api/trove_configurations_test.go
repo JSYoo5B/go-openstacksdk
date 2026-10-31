@@ -15,6 +15,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/db/v1/configurations"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -110,7 +111,7 @@ func TestTroveConfigurationCreatePreservesFalseZeroAndExtensionFields(t *testing
 		Name:      "web",
 		Values:    map[string]any{"autocommit": false, "max_connections": 0},
 		Datastore: &configurations.DatastoreOpts{Type: "mysql"},
-	}, configurations.WithCreateField("vendor", map[string]bool{"enabled": false}))
+	}, request.Field("vendor", map[string]bool{"enabled": false}))
 	if err != nil || value == nil || value.ID != "cfg-1" || value.DatastoreName != "mysql" || value.DatastoreVersionID != "ver-1" ||
 		value.Description != "" || value.Created.IsZero() || value.Values["autocommit"] != false || value.Values["max_connections"] != float64(0) {
 		t.Fatalf("value=%+v error=%v", value, err)
@@ -142,19 +143,19 @@ func TestTroveConfigurationRejectsInvalidInputsAndExtensionsBeforeHTTP(t *testin
 	if _, err := api.Create(ctx, configurations.CreateOpts{Name: "web"}); !errors.As(err, &missing) {
 		t.Fatalf("missing values: %v", err)
 	}
-	if _, err := api.Create(ctx, configurations.CreateOpts{Name: "web", Values: map[string]any{}}, configurations.WithCreateField("name", "shadow")); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := api.Create(ctx, configurations.CreateOpts{Name: "web", Values: map[string]any{}}, request.Field("name", "shadow")); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatalf("protected create field: %v", err)
 	}
 	if _, err := api.Create(ctx, configurations.CreateOpts{Name: "web", Values: map[string]any{}}, nil); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatalf("nil create option: %v", err)
 	}
-	if err := api.Update(ctx, "cfg-1", configurations.UpdateOpts{Name: "a"}, configurations.WithUpdateField("name", "shadow")); !errors.Is(err, resource.ErrInvalidOption) {
+	if err := api.Update(ctx, "cfg-1", configurations.UpdateOpts{Name: "a"}, request.Field("name", "shadow")); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatalf("protected update field: %v", err)
 	}
 	if err := api.Update(ctx, "cfg-1", configurations.UpdateOpts{}, nil); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatalf("nil update option: %v", err)
 	}
-	if err := api.Replace(ctx, "cfg-1", configurations.UpdateOpts{Values: map[string]any{"a": 1}}, configurations.WithReplaceField("values", 1)); !errors.Is(err, resource.ErrInvalidOption) {
+	if err := api.Replace(ctx, "cfg-1", configurations.UpdateOpts{Values: map[string]any{"a": 1}}, request.Field("values", 1)); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatalf("protected replace field: %v", err)
 	}
 	if err := api.Replace(ctx, "cfg-1", configurations.UpdateOpts{}, nil); !errors.Is(err, resource.ErrInvalidOption) {
@@ -174,10 +175,10 @@ func TestTroveConfigurationUpdateAndReplaceBodiesAndStatusCodes(t *testing.T) {
 	api := troveConfigurationAPI(cloud)
 	empty := ""
 	opts := configurations.UpdateOpts{Values: map[string]any{"autocommit": false}, Description: &empty}
-	if err := api.Update(context.Background(), "cfg-1", opts, configurations.WithUpdateField("vendor", false)); err != nil {
+	if err := api.Update(context.Background(), "cfg-1", opts, request.Field("vendor", false)); err != nil {
 		t.Fatal(err)
 	}
-	if err := api.Replace(context.Background(), "cfg-1", opts, configurations.WithReplaceField("vendor", false)); err != nil {
+	if err := api.Replace(context.Background(), "cfg-1", opts, request.Field("vendor", false)); err != nil {
 		t.Fatal(err)
 	}
 	want := map[string]string{"values": `{"autocommit":false}`, "description": `""`, "vendor": `false`}

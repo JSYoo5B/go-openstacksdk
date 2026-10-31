@@ -11,6 +11,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -86,7 +87,7 @@ func TestPythonRejudgeQuotaSetUpdate(t *testing.T) {
 	if err != nil || got.ProjectID != "proj" || got.Volumes != 10 || string(got.Body["volumes_lvm"]) != "-1" {
 		t.Fatal(got, err)
 	}
-	if _, err := scope.Update(context.Background(), quotasets.UpdateOpts{Snapshots: &five}, quotasets.WithUpdateField("backups_extra", 2)); err != nil {
+	if _, err := scope.Update(context.Background(), quotasets.UpdateOpts{Snapshots: &five}, request.Field("backups_extra", 2)); err != nil {
 		t.Fatal(err)
 	}
 	want := []pythonRejudgeCall{

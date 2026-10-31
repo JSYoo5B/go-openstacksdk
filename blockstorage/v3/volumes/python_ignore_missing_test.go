@@ -8,6 +8,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -20,7 +21,7 @@ func TestPythonDeleteIgnoreMissingVolume(t *testing.T) {
 		want string
 	}{
 		{"delete_volume cascade", func(api *volumes.API) error {
-			return api.Delete(context.Background(), "v-1", volumes.WithDeleteOptions(volumes.DeleteOpts{Cascade: true}), volumes.WithDeleteQuery("force", "true"))
+			return api.Delete(context.Background(), "v-1", volumes.WithDeleteOptions(volumes.DeleteOpts{Cascade: true}), request.Query("force", "true"))
 		}, "DELETE /svc/volumes/v-1?cascade=true&force=true"},
 	} {
 		for _, code := range []int{204, 404, 409} {

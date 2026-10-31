@@ -14,6 +14,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/subnets"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -376,7 +377,7 @@ func TestNetworkSubnetSemanticFiltersRawAndNativeSurfaceIsolation(t *testing.T) 
 			var native []subnets.ListOption
 			for _, item := range [][2]string{{"prefix_length", "wire-alias"}, {"prefixlen", "wire-prefix"}, {"revision_number", "wire-revision"}, {"tenant_id", "wire-tenant"}, {"status", "vendor-status"}} {
 				raw = append(raw, resource.WithQuery(item[0], item[1]))
-				native = append(native, subnets.WithListQuery(item[0], item[1]))
+				native = append(native, request.Query(item[0], item[1]))
 			}
 			values, err := a.Resources.All(context.Background(), append(append([]resource.ListOption(nil), raw...), resource.WithFilter("prefix_length", 24))...)
 			subnetRawBodyWant(t, values, err, "target")

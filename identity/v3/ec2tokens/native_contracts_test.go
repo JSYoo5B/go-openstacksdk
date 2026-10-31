@@ -70,14 +70,14 @@ func TestNativeEC2TokenBodiesSignaturesAndSubjectToken(t *testing.T) {
 	expires := time.Date(2026, 10, 11, 1, 2, 3, 0, time.UTC)
 
 	// An explicit signature skips signing, so every untagged-omitempty field is sent as-is.
-	token, err := api.Create(ctx, &ec2tokens.AuthOptions{Access: "a", Signature: "sig", Token: []byte("t")}, ec2tokens.WithCreateField("x_extension", 1))
+	token, err := api.Create(ctx, &ec2tokens.AuthOptions{Access: "a", Signature: "sig", Token: []byte("t")}, request.Field("x_extension", 1))
 	if err != nil || token.ID != "issued" || !token.ExpiresAt.Equal(expires) {
 		t.Fatal(token, err)
 	}
 	if cloud.Provider.Token() != "test-token" || cloud.Provider.ReauthFunc != nil {
 		t.Fatal("provider token changed", cloud.Provider.Token())
 	}
-	if _, err := api.ValidateS3Token(ctx, &ec2tokens.AuthOptions{Access: "a", Signature: []byte("sig"), Token: []byte("t"), Host: "h"}, ec2tokens.WithValidateS3TokenField("x_extension", 1)); err != nil {
+	if _, err := api.ValidateS3Token(ctx, &ec2tokens.AuthOptions{Access: "a", Signature: []byte("sig"), Token: []byte("t"), Host: "h"}, request.Field("x_extension", 1)); err != nil {
 		t.Fatal(err)
 	}
 
@@ -163,8 +163,8 @@ func TestNativeEC2TokenHeaderExtensionIsRejected(t *testing.T) {
 		config.Headers = map[string]string{"X-Vendor": "1"}
 		return nil
 	}
-	_, createErr := api.Create(ctx, &ec2tokens.AuthOptions{Access: "a", Signature: "sig"}, header)
-	_, validateErr := api.ValidateS3Token(ctx, &ec2tokens.AuthOptions{Access: "a", Signature: "sig"}, header)
+	_, createErr := api.Create(ctx, &ec2tokens.AuthOptions{Access: "a", Signature: "sig"}, request.Custom(header))
+	_, validateErr := api.ValidateS3Token(ctx, &ec2tokens.AuthOptions{Access: "a", Signature: "sig"}, request.Custom(header))
 	for operation, err := range map[string]error{"Create": createErr, "ValidateS3Token": validateErr} {
 		nativeEC2Operation(t, err, operation)
 		if !errors.Is(err, resource.ErrInvalidOption) {
@@ -229,18 +229,18 @@ func TestNativeEC2TokenStatusesAndPreflight(t *testing.T) {
 				return err
 			}()},
 			"core extension": {"Create", func() error {
-				_, err := api.Create(ctx, valid(), ec2tokens.WithCreateField("signature", "x"))
+				_, err := api.Create(ctx, valid(), request.Field("signature", "x"))
 				return err
 			}()},
 			// token is reserved by its json tag even though Create deletes it from the body.
 			"token extension": {"Create", func() error {
-				_, err := api.Create(ctx, valid(), ec2tokens.WithCreateField("token", "x"))
+				_, err := api.Create(ctx, valid(), request.Field("token", "x"))
 				return err
 			}()},
 			"validate access":      {"ValidateS3Token", func() error { _, err := api.ValidateS3Token(ctx, &ec2tokens.AuthOptions{}); return err }()},
 			"validate nil options": {"ValidateS3Token", func() error { _, err := api.ValidateS3Token(ctx, nil); return err }()},
 			"validate core extension": {"ValidateS3Token", func() error {
-				_, err := api.ValidateS3Token(ctx, valid(), ec2tokens.WithValidateS3TokenField("access", "x"))
+				_, err := api.ValidateS3Token(ctx, valid(), request.Field("access", "x"))
 				return err
 			}()},
 		} {

@@ -17,6 +17,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	qospolicies "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/subnets"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -374,7 +375,7 @@ func TestNetworkSubnetRawBodyFiltersWireAndNativeIsolation(t *testing.T) {
 			phase.Store("native")
 			var nativeOpts []subnets.ListOption
 			for _, item := range [][2]string{{"prefixlen", "wire-prefix"}, {"prefix_length", "wire-alias"}, {"revision_number", "wire-revision"}, {"tenant_id", "wire-tenant"}, {"status", "vendor-status"}, {"vendor", "a&b"}} {
-				nativeOpts = append(nativeOpts, subnets.WithListQuery(item[0], item[1]))
+				nativeOpts = append(nativeOpts, request.Query(item[0], item[1]))
 			}
 			var ids []string
 			for value, err := range a.List(context.Background(), nativeOpts...) {

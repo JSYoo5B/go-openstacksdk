@@ -36,7 +36,7 @@ func TestSwiftObjectCreatePreservesNativeAndRegistry(t *testing.T) {
 	}
 	prepared := string(objectSource)
 	normalized := strings.Index(prepared, "cfg.Options, err = normalizeCreateDefaults(cfg.Options)")
-	capability := strings.LastIndex(prepared[:max(normalized, 0)], "request.ValidateCapabilities(cfg, false, true, true)")
+	capability := strings.LastIndex(prepared[:max(normalized, 0)], "request.ApplyCalls(opts, request.Capabilities{Query: true, Headers: true}, options...)")
 	builder := strings.Index(prepared[max(normalized, 0):], "_opts := createOptsBuilder{base: cfg.Options, config: cfg}")
 	if normalized < 0 || capability < 0 || builder < 0 || strings.Count(prepared, "normalizeCreateDefaults(cfg.Options)") != 1 {
 		t.Fatal("empty Swift content normalization missing, duplicated or ordered before validated options")

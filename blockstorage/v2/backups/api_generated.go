@@ -46,11 +46,10 @@ type RestoreOpts = upstream.RestoreOpts
 type RestoreResult = upstream.RestoreResult
 type UpdateOpts = upstream.UpdateOpts
 type UpdateResult = upstream.UpdateResult
-type CreateOption = request.Option[CreateOpts]
+type CreateOption = request.NativeFieldCall
 
-func WithCreateOptions(value CreateOpts) CreateOption { return request.WithOptions(value) }
-func WithCreateField(key string, value any) CreateOption {
-	return request.WithField[CreateOpts](key, value)
+func WithCreateOptions(value CreateOpts) CreateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type createOptsBuilder struct {
@@ -74,13 +73,8 @@ func (b createOptsBuilder) ToBackupCreateMap() (map[string]any, error) {
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*Backup, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Create", "backups", err)
-		var zero0 *Backup
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Create", "backups", err)
 		var zero0 *Backup
 		return zero0, err
@@ -118,11 +112,10 @@ func (a *API) Get(ctx context.Context, id string) (*Backup, error) {
 	return value0, err
 }
 
-type ImportOption = request.Option[ImportOpts]
+type ImportOption = request.NativeFieldCall
 
-func WithImportOptions(value ImportOpts) ImportOption { return request.WithOptions(value) }
-func WithImportField(key string, value any) ImportOption {
-	return request.WithField[ImportOpts](key, value)
+func WithImportOptions(value ImportOpts) ImportOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type importOptsBuilder struct {
@@ -146,13 +139,8 @@ func (b importOptsBuilder) ToBackupImportMap() (map[string]any, error) {
 
 // Import invokes the upstream API with library-owned builders and result handling.
 func (a *API) Import(ctx context.Context, opts ImportOpts, options ...ImportOption) (*ImportResponse, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Import", "backups", err)
-		var zero0 *ImportResponse
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Import", "backups", err)
 		var zero0 *ImportResponse
 		return zero0, err
@@ -164,10 +152,9 @@ func (a *API) Import(ctx context.Context, opts ImportOpts, options ...ImportOpti
 	return value0, err
 }
 
-type ListOption = request.Option[ListOpts]
+type ListOption = request.NativeQueryCall
 
-func WithListOptions(value ListOpts) ListOption  { return request.WithOptions(value) }
-func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
+func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
 	base   ListOpts
@@ -191,12 +178,8 @@ func (b listOptsBuilder) ToBackupListQuery() (string, error) {
 // List invokes the upstream API with library-owned builders and result handling.
 func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Backup, error] {
 	var opts ListOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("List", "backups", err)
-		return func(yield func(*Backup, error) bool) { var zero *Backup; yield(zero, err) }
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("List", "backups", err)
 		return func(yield func(*Backup, error) bool) { var zero *Backup; yield(zero, err) }
 	}
@@ -207,11 +190,10 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Backup
 	})
 }
 
-type ListDetailOption = request.Option[ListDetailOpts]
+type ListDetailOption = request.NativeQueryCall
 
-func WithListDetailOptions(value ListDetailOpts) ListDetailOption { return request.WithOptions(value) }
-func WithListDetailQuery(key, value string) ListDetailOption {
-	return request.WithQuery[ListDetailOpts](key, value)
+func WithListDetailOptions(value ListDetailOpts) ListDetailOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type listDetailOptsBuilder struct {
@@ -240,12 +222,8 @@ func (a *API) ListDetail(ctx context.Context, options ...ListDetailOption) iter.
 
 func (a *API) listDetailWithControl(ctx context.Context, control resource.ListControl, options ...ListDetailOption) iter.Seq2[*Backup, error] {
 	var opts ListDetailOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("ListDetail", "backups", err)
-		return func(yield func(*Backup, error) bool) { var zero *Backup; yield(zero, err) }
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("ListDetail", "backups", err)
 		return func(yield func(*Backup, error) bool) { var zero *Backup; yield(zero, err) }
 	}
@@ -256,13 +234,10 @@ func (a *API) listDetailWithControl(ctx context.Context, control resource.ListCo
 	}, control)
 }
 
-type ResetStatusOption = request.Option[ResetStatusOpts]
+type ResetStatusOption = request.NativeFieldCall
 
 func WithResetStatusOptions(value ResetStatusOpts) ResetStatusOption {
-	return request.WithOptions(value)
-}
-func WithResetStatusField(key string, value any) ResetStatusOption {
-	return request.WithField[ResetStatusOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type resetStatusOptsBuilder struct {
@@ -286,12 +261,8 @@ func (b resetStatusOptsBuilder) ToBackupResetStatusMap() (map[string]any, error)
 
 // ResetStatus invokes the upstream API with library-owned builders and result handling.
 func (a *API) ResetStatus(ctx context.Context, id string, opts ResetStatusOpts, options ...ResetStatusOption) error {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("ResetStatus", "backups", err)
-		return err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("ResetStatus", "backups", err)
 		return err
 	}
@@ -299,13 +270,10 @@ func (a *API) ResetStatus(ctx context.Context, id string, opts ResetStatusOpts, 
 	return request.Wrap("ResetStatus", "backups", upstream.ResetStatus(ctx, a.client, id, _opts).ExtractErr())
 }
 
-type RestoreFromBackupOption = request.Option[RestoreOpts]
+type RestoreFromBackupOption = request.NativeFieldCall
 
 func WithRestoreFromBackupOptions(value RestoreOpts) RestoreFromBackupOption {
-	return request.WithOptions(value)
-}
-func WithRestoreFromBackupField(key string, value any) RestoreFromBackupOption {
-	return request.WithField[RestoreOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type restoreFromBackupOptsBuilder struct {
@@ -329,13 +297,8 @@ func (b restoreFromBackupOptsBuilder) ToRestoreMap() (map[string]any, error) {
 
 // RestoreFromBackup invokes the upstream API with library-owned builders and result handling.
 func (a *API) RestoreFromBackup(ctx context.Context, id string, opts RestoreOpts, options ...RestoreFromBackupOption) (*Restore, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("RestoreFromBackup", "backups", err)
-		var zero0 *Restore
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("RestoreFromBackup", "backups", err)
 		var zero0 *Restore
 		return zero0, err
@@ -347,11 +310,10 @@ func (a *API) RestoreFromBackup(ctx context.Context, id string, opts RestoreOpts
 	return value0, err
 }
 
-type UpdateOption = request.Option[UpdateOpts]
+type UpdateOption = request.NativeFieldCall
 
-func WithUpdateOptions(value UpdateOpts) UpdateOption { return request.WithOptions(value) }
-func WithUpdateField(key string, value any) UpdateOption {
-	return request.WithField[UpdateOpts](key, value)
+func WithUpdateOptions(value UpdateOpts) UpdateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type updateOptsBuilder struct {
@@ -375,13 +337,8 @@ func (b updateOptsBuilder) ToBackupUpdateMap() (map[string]any, error) {
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ...UpdateOption) (*Backup, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Update", "backups", err)
-		var zero0 *Backup
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Update", "backups", err)
 		var zero0 *Backup
 		return zero0, err

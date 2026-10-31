@@ -23,11 +23,10 @@ type ServerUsage = upstream.ServerUsage
 type SingleTenantOpts = upstream.SingleTenantOpts
 type SingleTenantPage = upstream.SingleTenantPage
 type TenantUsage = upstream.TenantUsage
-type AllTenantsOption = request.Option[AllTenantsOpts]
+type AllTenantsOption = request.NativeQueryCall
 
-func WithAllTenantsOptions(value AllTenantsOpts) AllTenantsOption { return request.WithOptions(value) }
-func WithAllTenantsQuery(key, value string) AllTenantsOption {
-	return request.WithQuery[AllTenantsOpts](key, value)
+func WithAllTenantsOptions(value AllTenantsOpts) AllTenantsOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type allTenantsOptsBuilder struct {
@@ -51,12 +50,8 @@ func (b allTenantsOptsBuilder) ToUsageAllTenantsQuery() (string, error) {
 
 // AllTenants invokes the upstream API with library-owned builders and result handling.
 func (a *API) AllTenants(ctx context.Context, opts AllTenantsOpts, options ...AllTenantsOption) iter.Seq2[*TenantUsage, error] {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("AllTenants", "usage", err)
-		return func(yield func(*TenantUsage, error) bool) { var zero *TenantUsage; yield(zero, err) }
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("AllTenants", "usage", err)
 		return func(yield func(*TenantUsage, error) bool) { var zero *TenantUsage; yield(zero, err) }
 	}
@@ -67,13 +62,10 @@ func (a *API) AllTenants(ctx context.Context, opts AllTenantsOpts, options ...Al
 	})
 }
 
-type SingleTenantOption = request.Option[SingleTenantOpts]
+type SingleTenantOption = request.NativeQueryCall
 
 func WithSingleTenantOptions(value SingleTenantOpts) SingleTenantOption {
-	return request.WithOptions(value)
-}
-func WithSingleTenantQuery(key, value string) SingleTenantOption {
-	return request.WithQuery[SingleTenantOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type singleTenantOptsBuilder struct {
@@ -97,12 +89,8 @@ func (b singleTenantOptsBuilder) ToUsageSingleTenantQuery() (string, error) {
 
 // SingleTenant invokes the upstream API with library-owned builders and result handling.
 func (a *API) SingleTenant(ctx context.Context, tenantID string, opts SingleTenantOpts, options ...SingleTenantOption) iter.Seq2[*TenantUsage, error] {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("SingleTenant", "usage", err)
-		return func(yield func(*TenantUsage, error) bool) { var zero *TenantUsage; yield(zero, err) }
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("SingleTenant", "usage", err)
 		return func(yield func(*TenantUsage, error) bool) { var zero *TenantUsage; yield(zero, err) }
 	}

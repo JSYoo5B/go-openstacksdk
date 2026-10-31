@@ -14,6 +14,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -66,7 +67,7 @@ func TestNativeTrunkRoutesBodiesSinglePageAndDecode(t *testing.T) {
 		}
 		return nativeTrunkWire(200, `{"trunk":`+nativeTrunkRow+`}`)
 	})
-	created, err := api.Create(ctx, trunks.CreateOpts{PortID: "parent", Name: "trunk", AdminStateUp: gophercloud.Disabled, Subports: []trunks.Subport{{PortID: "child", SegmentationType: "vlan", SegmentationID: 100}}}, trunks.WithCreateField("x_extension", 1))
+	created, err := api.Create(ctx, trunks.CreateOpts{PortID: "parent", Name: "trunk", AdminStateUp: gophercloud.Disabled, Subports: []trunks.Subport{{PortID: "child", SegmentationType: "vlan", SegmentationID: 100}}}, request.Field("x_extension", 1))
 	if err != nil || !(created.ID == "tr-1" && created.Subports[0].SegmentationID == 100 && created.AdminStateUp && created.CreatedAt.Year() == 2026) {
 		t.Fatal(created, err)
 	}
@@ -79,7 +80,7 @@ func TestNativeTrunkRoutesBodiesSinglePageAndDecode(t *testing.T) {
 		t.Fatal(got, err)
 	}
 	var rows []*trunks.Trunk
-	for value, err := range api.List(ctx, trunks.WithListOptions(trunks.ListOpts{Name: "trunk", AdminStateUp: gophercloud.Enabled, RevisionNumber: "0"}), trunks.WithListQuery("extra", "1")) {
+	for value, err := range api.List(ctx, trunks.WithListOptions(trunks.ListOpts{Name: "trunk", AdminStateUp: gophercloud.Enabled, RevisionNumber: "0"}), request.Query("extra", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -123,7 +124,7 @@ func TestNativeTrunkSubportOperations(t *testing.T) {
 	if err != nil || !reflect.DeepEqual(subports, []trunks.Subport{{PortID: "child", SegmentationType: "inherit"}}) {
 		t.Fatal(subports, err)
 	}
-	added, err := api.AddSubports(ctx, "tr-1", trunks.AddSubportsOpts{Subports: []trunks.Subport{{PortID: "child", SegmentationType: "inherit"}}}, trunks.WithAddSubportsField("x_extension", 1))
+	added, err := api.AddSubports(ctx, "tr-1", trunks.AddSubportsOpts{Subports: []trunks.Subport{{PortID: "child", SegmentationType: "inherit"}}}, request.Field("x_extension", 1))
 	if err != nil || added.ID != "tr-1" || added.Subports[0].PortID != "child" {
 		t.Fatal(added, err)
 	}
@@ -163,7 +164,7 @@ func TestNativeTrunkSubportOperations(t *testing.T) {
 			return err
 		}()},
 		"add extension": {"AddSubports", func() error {
-			_, err := api.AddSubports(ctx, "tr-1", trunks.AddSubportsOpts{Subports: []trunks.Subport{}}, trunks.WithAddSubportsField("sub_ports", nil))
+			_, err := api.AddSubports(ctx, "tr-1", trunks.AddSubportsOpts{Subports: []trunks.Subport{}}, request.Field("sub_ports", nil))
 			return err
 		}()},
 		"remove nil option": {"RemoveSubports", func() error {
@@ -277,7 +278,7 @@ func TestNativeTrunkStrictStatusesDecodeAndPreflight(t *testing.T) {
 				return err
 			},
 			"sub_ports extension": func() error {
-				_, err := api.Create(ctx, trunks.CreateOpts{PortID: "parent"}, trunks.WithCreateField("sub_ports", nil))
+				_, err := api.Create(ctx, trunks.CreateOpts{PortID: "parent"}, request.Field("sub_ports", nil))
 				return err
 			},
 			"nil option": func() error { _, err := api.Create(ctx, trunks.CreateOpts{PortID: "parent"}, nil); return err },

@@ -11,6 +11,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/placement/v1/allocationcandidates"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -77,7 +78,7 @@ func TestNativeAllocationCandidatesQueryAndDecode(t *testing.T) {
 		ResourceGroups: map[string]allocationcandidates.ResourceGroup{
 			"_NIC": {Resources: "NET_BW_EGR_KILOBIT_PER_SEC:10", Required: []string{"CUSTOM_PHYSNET", ""}, MemberOf: "agg-4", InTree: "nic-root"},
 		},
-	}), allocationcandidates.WithListQuery("extra", "1"))
+	}), request.Query("extra", "1"))
 	// The facade decodes the 1.12+ dictionary shape; one page yields one value.
 	if len(errs) != 0 || len(values) != 1 || values[0].AllocationRequests[0].Allocations["rp-1"].Resources["MEMORY_MB"] != 512 ||
 		(*values[0].AllocationRequests[0].Mappings)["_NIC"][0] != "rp-1" || values[0].ProviderSummaries["rp-1"].Resources["VCPU"].Capacity != 8 ||
@@ -139,7 +140,7 @@ func TestNativeAllocationCandidatesStatusesAndPreflight(t *testing.T) {
 		var calls []nativeACCall
 		api := nativeACAPI(t, "1.39", &calls, func(*http.Request) *http.Response { return nativeACWire(200, nativeACBody) })
 		for name, options := range map[string][]allocationcandidates.ListOption{
-			"empty query key": {allocationcandidates.WithListQuery("", "x")},
+			"empty query key": {request.Query("", "x")},
 			"nil option":      {nil},
 		} {
 			values, errs := nativeACCollect(api, options...)

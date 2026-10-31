@@ -14,6 +14,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -64,7 +65,7 @@ func TestNativeOrderRoutesBodiesAndDecode(t *testing.T) {
 		t.Fatal(got, err)
 	}
 	expiration := time.Date(2027, 1, 2, 3, 4, 5, 0, time.UTC)
-	created, err := api.Create(ctx, orders.CreateOpts{Type: orders.KeyOrder, Meta: orders.MetaOpts{Algorithm: "aes", BitLength: 256, Mode: "cbc", Expiration: &expiration}}, orders.WithCreateField("x_extension", 1))
+	created, err := api.Create(ctx, orders.CreateOpts{Type: orders.KeyOrder, Meta: orders.MetaOpts{Algorithm: "aes", BitLength: 256, Mode: "cbc", Expiration: &expiration}}, request.Field("x_extension", 1))
 	if err != nil || created.OrderRef != "https://kms/v1/orders/o1" {
 		t.Fatal(created, err)
 	}
@@ -128,7 +129,7 @@ func TestNativeOrderStrictStatusesListAndPreflight(t *testing.T) {
 			return nativeOrderWire(202, `{}`), nil
 		}))
 		api := orders.New(nativeOrderClient(cloud))
-		for _, option := range []orders.CreateOption{orders.WithCreateField("meta", map[string]any{}), nil} {
+		for _, option := range []orders.CreateOption{request.Field("meta", map[string]any{}), nil} {
 			if _, err := api.Create(ctx, orders.CreateOpts{Type: orders.KeyOrder}, option); err == nil {
 				t.Fatal("accepted")
 			}
@@ -150,7 +151,7 @@ func TestNativeOrderStrictStatusesListAndPreflight(t *testing.T) {
 			return nativeOrderWire(200, `{"orders":[]}`), nil
 		}))
 		var refs []string
-		for value, err := range orders.New(nativeOrderClient(cloud)).List(ctx, orders.WithListOptions(orders.ListOpts{Limit: 1}), orders.WithListQuery("extra", "1")) {
+		for value, err := range orders.New(nativeOrderClient(cloud)).List(ctx, orders.WithListOptions(orders.ListOpts{Limit: 1}), request.Query("extra", "1")) {
 			if err != nil {
 				t.Fatal(err)
 			}

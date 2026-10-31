@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/quotas"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -143,7 +144,7 @@ func TestPythonRejudgeQuotaUpdate(t *testing.T) {
 	})
 	scope := pythonRejudgeScope(t, api)
 	ten, zero := 10, 0
-	got, err := scope.Update(context.Background(), quotas.UpdateOpts{Network: &ten, Port: &zero}, quotas.WithUpdateField("healthmonitor", 7), quotas.WithUpdateCheckLimit(false))
+	got, err := scope.Update(context.Background(), quotas.UpdateOpts{Network: &ten, Port: &zero}, request.Field("healthmonitor", 7), quotas.WithUpdateCheckLimit(false))
 	if err != nil || got.ProjectID != "proj" || got.Network != 10 || string(got.Body["healthmonitor"]) != "7" {
 		t.Fatal(got, err)
 	}

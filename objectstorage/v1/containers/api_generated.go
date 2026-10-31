@@ -49,11 +49,10 @@ func (a *API) BulkDelete(ctx context.Context, containers []string) (*BulkDeleteR
 	return value0, err
 }
 
-type CreateOption = request.Option[CreateOpts]
+type CreateOption = request.NativeHeaderCall
 
-func WithCreateOptions(value CreateOpts) CreateOption { return request.WithOptions(value) }
-func WithCreateHeader(key, value string) CreateOption {
-	return request.WithHeader[CreateOpts](key, value)
+func WithCreateOptions(value CreateOpts) CreateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type createOptsBuilder struct {
@@ -77,13 +76,8 @@ func (b createOptsBuilder) ToContainerCreateMap() (map[string]string, error) {
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, containerName string, opts CreateOpts, options ...CreateOption) (*CreateHeader, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Headers: true}, options...)
 	if err != nil {
-		err = request.Wrap("Create", "containers", err)
-		var zero0 *CreateHeader
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, false, false, true); err != nil {
 		err = request.Wrap("Create", "containers", err)
 		var zero0 *CreateHeader
 		return zero0, err
@@ -103,10 +97,9 @@ func (a *API) Delete(ctx context.Context, containerName string) (*DeleteHeader, 
 	return value0, err
 }
 
-type GetOption = request.Option[GetOpts]
+type GetOption = request.NativeHeaderCall
 
-func WithGetOptions(value GetOpts) GetOption    { return request.WithOptions(value) }
-func WithGetHeader(key, value string) GetOption { return request.WithHeader[GetOpts](key, value) }
+func WithGetOptions(value GetOpts) GetOption { return request.Custom(request.WithOptions(value)) }
 
 type getOptsBuilder struct {
 	base   GetOpts
@@ -130,13 +123,8 @@ func (b getOptsBuilder) ToContainerGetMap() (map[string]string, error) {
 // Get invokes the upstream API with library-owned builders and result handling.
 func (a *API) Get(ctx context.Context, containerName string, options ...GetOption) (*GetHeader, error) {
 	var opts GetOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Headers: true}, options...)
 	if err != nil {
-		err = request.Wrap("Get", "containers", err)
-		var zero0 *GetHeader
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, false, false, true); err != nil {
 		err = request.Wrap("Get", "containers", err)
 		var zero0 *GetHeader
 		return zero0, err
@@ -148,10 +136,9 @@ func (a *API) Get(ctx context.Context, containerName string, options ...GetOptio
 	return value0, err
 }
 
-type ListOption = request.Option[ListOpts]
+type ListOption = request.NativeQueryCall
 
-func WithListOptions(value ListOpts) ListOption  { return request.WithOptions(value) }
-func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
+func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
 	base   ListOpts
@@ -175,12 +162,8 @@ func (b listOptsBuilder) ToContainerListParams() (string, error) {
 // List invokes the upstream API with library-owned builders and result handling.
 func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Container, error] {
 	var opts ListOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("List", "containers", err)
-		return func(yield func(*Container, error) bool) { var zero *Container; yield(zero, err) }
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("List", "containers", err)
 		return func(yield func(*Container, error) bool) { var zero *Container; yield(zero, err) }
 	}
@@ -191,11 +174,10 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Contai
 	})
 }
 
-type UpdateOption = request.Option[UpdateOpts]
+type UpdateOption = request.NativeHeaderCall
 
-func WithUpdateOptions(value UpdateOpts) UpdateOption { return request.WithOptions(value) }
-func WithUpdateHeader(key, value string) UpdateOption {
-	return request.WithHeader[UpdateOpts](key, value)
+func WithUpdateOptions(value UpdateOpts) UpdateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type updateOptsBuilder struct {
@@ -219,13 +201,8 @@ func (b updateOptsBuilder) ToContainerUpdateMap() (map[string]string, error) {
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, containerName string, opts UpdateOpts, options ...UpdateOption) (*UpdateHeader, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Headers: true}, options...)
 	if err != nil {
-		err = request.Wrap("Update", "containers", err)
-		var zero0 *UpdateHeader
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, false, false, true); err != nil {
 		err = request.Wrap("Update", "containers", err)
 		var zero0 *UpdateHeader
 		return zero0, err

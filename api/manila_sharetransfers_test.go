@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/sharetransfers"
 	"github.com/gophercloud/gophercloud/v2"
@@ -65,7 +66,7 @@ func TestManilaTransferCreateBodyExtensionsAndRequires202(t *testing.T) {
 			testcloud.JSON(w, tc.status, `{"transfer":`+manilaTransferJSON+`}`)
 		})
 		value, err := newManilaTransfers(t, cloud).Create(context.Background(),
-			sharetransfers.CreateOpts{ShareID: "share-1", Name: "handoff"}, sharetransfers.WithCreateField("vendor", false))
+			sharetransfers.CreateOpts{ShareID: "share-1", Name: "handoff"}, request.Field("vendor", false))
 		if calls.Load() != 1 || tc.success != (err == nil) {
 			t.Fatalf("status %d calls=%d value=%+v error=%v", tc.status, calls.Load(), value, err)
 		}
@@ -111,11 +112,11 @@ func TestManilaTransferRejectsCoreFieldCollisionsAndNilOptionsBeforeHTTP(t *test
 	api := newManilaTransfers(t, cloud)
 	ctx := context.Background()
 	checks := map[string]error{}
-	_, checks["create core"] = api.Create(ctx, sharetransfers.CreateOpts{ShareID: "s"}, sharetransfers.WithCreateField("share_id", "other"))
-	_, checks["create omitted core"] = api.Create(ctx, sharetransfers.CreateOpts{ShareID: "s"}, sharetransfers.WithCreateField("name", "n"))
+	_, checks["create core"] = api.Create(ctx, sharetransfers.CreateOpts{ShareID: "s"}, request.Field("share_id", "other"))
+	_, checks["create omitted core"] = api.Create(ctx, sharetransfers.CreateOpts{ShareID: "s"}, request.Field("name", "n"))
 	_, checks["create nil"] = api.Create(ctx, sharetransfers.CreateOpts{ShareID: "s"}, nil)
-	checks["accept core"] = api.Accept(ctx, "tr-1", sharetransfers.AcceptOpts{AuthKey: "k"}, sharetransfers.WithAcceptField("auth_key", "other"))
-	checks["accept omitted false core"] = api.Accept(ctx, "tr-1", sharetransfers.AcceptOpts{AuthKey: "k"}, sharetransfers.WithAcceptField("clear_access_rules", false))
+	checks["accept core"] = api.Accept(ctx, "tr-1", sharetransfers.AcceptOpts{AuthKey: "k"}, request.Field("auth_key", "other"))
+	checks["accept omitted false core"] = api.Accept(ctx, "tr-1", sharetransfers.AcceptOpts{AuthKey: "k"}, request.Field("clear_access_rules", false))
 	checks["accept nil"] = api.Accept(ctx, "tr-1", sharetransfers.AcceptOpts{AuthKey: "k"}, nil)
 	for name, err := range checks {
 		if !errors.Is(err, resource.ErrInvalidOption) {
@@ -155,7 +156,7 @@ func TestManilaTransferAcceptSendsNamedBodyOmitsFalseAndRequires202(t *testing.T
 				manilaTransferRequest(t, r, tc.want)
 				w.WriteHeader(status)
 			})
-			err := newManilaTransfers(t, cloud).Accept(context.Background(), "tr-1", tc.opts, sharetransfers.WithAcceptField("vendor", nil))
+			err := newManilaTransfers(t, cloud).Accept(context.Background(), "tr-1", tc.opts, request.Field("vendor", nil))
 			if calls.Load() != 1 || (status == 202) != (err == nil) {
 				t.Fatalf("%s status %d calls=%d error=%v", tc.name, status, calls.Load(), err)
 			}
@@ -237,10 +238,10 @@ func TestManilaTransferListAndListDetailFiltersFollowOffsetPaging(t *testing.T) 
 		call func(*sharetransfers.API) func(func(*sharetransfers.Transfer, error) bool)
 	}{
 		{"list", "/v2/share-transfers", func(a *sharetransfers.API) func(func(*sharetransfers.Transfer, error) bool) {
-			return a.List(context.Background(), sharetransfers.WithListOptions(opts), sharetransfers.WithListQuery("vendor", "x"))
+			return a.List(context.Background(), sharetransfers.WithListOptions(opts), request.Query("vendor", "x"))
 		}},
 		{"detail", "/v2/share-transfers/detail", func(a *sharetransfers.API) func(func(*sharetransfers.Transfer, error) bool) {
-			return a.ListDetail(context.Background(), sharetransfers.WithListDetailOptions(opts), sharetransfers.WithListDetailQuery("vendor", "x"))
+			return a.ListDetail(context.Background(), sharetransfers.WithListDetailOptions(opts), request.Query("vendor", "x"))
 		}},
 	} {
 		cloud := testcloud.New(t)

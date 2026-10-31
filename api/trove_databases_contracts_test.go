@@ -15,6 +15,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
@@ -150,7 +151,7 @@ func TestTroveDatabaseScopeCreateSingleAndBatch(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := scope.Create(context.Background(), databases.CreateOpts{Name: "app", CharSet: "utf8mb4", Collate: "utf8mb4_unicode_ci"}, databases.WithCreateField("vendor_hint", false)); err != nil {
+	if err := scope.Create(context.Background(), databases.CreateOpts{Name: "app", CharSet: "utf8mb4", Collate: "utf8mb4_unicode_ci"}, request.Field("vendor_hint", false)); err != nil {
 		t.Fatal(err)
 	}
 	if err := scope.CreateBatch(context.Background(), databases.BatchCreateOpts{{Name: "app"}, {Name: "logs"}}); err != nil {
@@ -180,7 +181,7 @@ func TestTroveDatabaseScopeValidationAndUnsupportedPoliciesBeforeHTTP(t *testing
 	if err := scope.Create(context.Background(), databases.CreateOpts{Name: "app"}, databases.WithCreateOptions(databases.BatchCreateOpts{{Name: "one"}, {Name: "two"}})); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
-	if err := scope.Create(context.Background(), databases.CreateOpts{Name: "app"}, databases.WithCreateField("databases", []any{})); !errors.Is(err, resource.ErrInvalidOption) {
+	if err := scope.Create(context.Background(), databases.CreateOpts{Name: "app"}, request.Field("databases", []any{})); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
 	if _, err := scope.All(context.Background(), resource.WithStatus("ACTIVE")); !errors.Is(err, resource.ErrUnsupported) {

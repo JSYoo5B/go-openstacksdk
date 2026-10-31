@@ -412,12 +412,13 @@ func emitCollectionAdapterValue(e *emitter, plan *collectionPlan, receiver strin
 	} else if plan.listQueryBuilder {
 		if identityCollectionEnabled(e.pkg, plan, len(parents)) || sdkPath(e.pkg.Path()) == "keymanager/v1/secrets" || sdkPath(e.pkg.Path()) == "keymanager/v1/containers" || sdkPath(e.pkg.Path()) == "keymanager/v1/orders" {
 			// FindIdentity can retain repeated query values and a present nil
-			// name key. A sequence of WithQuery options would Set each value
+			// name key. A sequence of request.Query calls would Set each value
 			// and collapse that input before the native builder sees it.
 			e.use("github.com/JSYoo5B/go-openstacksdk/request")
-			e.printf("options:=[]%sOption{func(config *request.Config[%s])error{config.Query=make(url.Values,len(q));for key,values:=range q{config.Query[key]=append([]string(nil),values...)};return nil}}\nreturn %s.%s(%s,options...)\n", list, e.typ(plan.listInput), receiver, controlledListName(list), listArgs)
+			e.printf("options:=[]%sOption{request.Custom(func(config *request.Config[%s])error{config.Query=make(url.Values,len(q));for key,values:=range q{config.Query[key]=append([]string(nil),values...)};return nil})}\nreturn %s.%s(%s,options...)\n", list, e.typ(plan.listInput), receiver, controlledListName(list), listArgs)
 		} else {
-			e.printf("options:=make([]%sOption,0,len(q))\nfor key,values:=range q{for _,value:=range values{options=append(options,With%sQuery(key,value))}}\nreturn %s.%s(%s,options...)\n", list, list, receiver, controlledListName(list), listArgs)
+			e.use("github.com/JSYoo5B/go-openstacksdk/request")
+			e.printf("options:=make([]%sOption,0,len(q))\nfor key,values:=range q{for _,value:=range values{options=append(options,request.Query(key,value))}}\nreturn %s.%s(%s,options...)\n", list, receiver, controlledListName(list), listArgs)
 		}
 	} else {
 		e.use("github.com/JSYoo5B/go-openstacksdk/request")

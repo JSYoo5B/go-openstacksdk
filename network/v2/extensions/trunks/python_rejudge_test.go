@@ -10,6 +10,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 // update_trunk(trunk, **attrs) PUTs the passed attributes under their wire
@@ -38,7 +39,7 @@ func TestPythonRejudgeTrunkUpdate(t *testing.T) {
 	api := trunks.New(client)
 
 	name, description, down := "t2", "", false
-	got, err := api.Update(context.Background(), "t-1", trunks.UpdateOpts{Name: &name, Description: &description, AdminStateUp: &down}, trunks.WithUpdateField("x_vendor", 1))
+	got, err := api.Update(context.Background(), "t-1", trunks.UpdateOpts{Name: &name, Description: &description, AdminStateUp: &down}, request.Field("x_vendor", 1))
 	if err != nil || got.ID != "t-1" || got.Name != "t2" || got.Description != "" || got.AdminStateUp || got.PortID != "p-1" || got.Status != "DOWN" || got.ProjectID != "proj" {
 		t.Fatal(got, err)
 	}

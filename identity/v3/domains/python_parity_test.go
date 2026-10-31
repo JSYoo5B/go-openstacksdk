@@ -10,6 +10,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/domains"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -58,7 +59,7 @@ func TestPythonDomainCreateGetUpdateRequests(t *testing.T) {
 	// The native Domain has no Options field, so the options object Python
 	// exposes as Domain.options is dropped.
 	want := domains.Domain{ID: "d-1", Name: "dom", Description: "desc", Enabled: true, Links: map[string]any{"self": "https://keystone.invalid/v3/domains/d-1"}}
-	created, err := api.Create(ctx, domains.CreateOpts{Name: "dom", Description: "desc", Enabled: &disabled}, domains.WithCreateField("options", map[string]any{"immutable": true}))
+	created, err := api.Create(ctx, domains.CreateOpts{Name: "dom", Description: "desc", Enabled: &disabled}, request.Field("options", map[string]any{"immutable": true}))
 	if err != nil || !reflect.DeepEqual(*created, want) {
 		t.Fatal(created, err)
 	}
@@ -66,7 +67,7 @@ func TestPythonDomainCreateGetUpdateRequests(t *testing.T) {
 	if err != nil || !reflect.DeepEqual(*got, want) {
 		t.Fatal(got, err)
 	}
-	updated, err := api.Update(ctx, "d-1", domains.UpdateOpts{Description: &description, Enabled: &disabled}, domains.WithUpdateField("id", "d-1"))
+	updated, err := api.Update(ctx, "d-1", domains.UpdateOpts{Description: &description, Enabled: &disabled}, request.Field("id", "d-1"))
 	if err != nil || !reflect.DeepEqual(*updated, domains.Domain{ID: "d-1", Name: "dom", Description: "new"}) {
 		t.Fatal(updated, err)
 	}
@@ -86,7 +87,7 @@ func TestPythonDomainCreateGetUpdateRequests(t *testing.T) {
 	if _, err := api.Create(ctx, domains.CreateOpts{Description: "desc"}); err == nil || len(calls) != 0 {
 		t.Fatal(err, calls)
 	}
-	if _, err := api.Update(ctx, "d-1", domains.UpdateOpts{}, domains.WithUpdateField("description", nil)); err == nil || len(calls) != 0 {
+	if _, err := api.Update(ctx, "d-1", domains.UpdateOpts{}, request.Field("description", nil)); err == nil || len(calls) != 0 {
 		t.Fatal(err, calls)
 	}
 }
@@ -147,7 +148,7 @@ func TestPythonDomainListRequests(t *testing.T) {
 		enabled := true
 		collect(t, api, domains.WithListOptions(domains.ListOpts{Name: "dom", Enabled: &enabled}))
 		// Python domains(name="dom", is_enabled=True) sends enabled=True.
-		collect(t, api, domains.WithListOptions(domains.ListOpts{Name: "dom"}), domains.WithListQuery("enabled", "True"))
+		collect(t, api, domains.WithListOptions(domains.ListOpts{Name: "dom"}), request.Query("enabled", "True"))
 		if calls[0].query != "enabled=true&name=dom" || calls[1].query != "enabled=True&name=dom" {
 			t.Fatalf("%+v", calls)
 		}

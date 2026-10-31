@@ -86,7 +86,7 @@ func TestBackupUpdateExtensionsStayInsideOwnedBackupEnvelopeAndProtectCoreInputs
 	api := bueAPI(cloud)
 	labels := []string{"original"}
 	extension := map[string]any{"enabled": false, "labels": labels}
-	field := backups.WithUpdateField("vendor:setting", extension)
+	field := request.Field("vendor:setting", extension)
 	extension["enabled"] = true
 	labels[0] = "caller changed"
 	oldName, oldDescription, replacement := "old name", "old description", "replacement"
@@ -120,7 +120,7 @@ func TestBackupUpdateExtensionsStayInsideOwnedBackupEnvelopeAndProtectCoreInputs
 			if present {
 				opts = original
 			}
-			actual, err = api.Update(bueContext(t), "id", opts, backups.WithUpdateField(key, "smuggled core"))
+			actual, err = api.Update(bueContext(t), "id", opts, request.Field(key, "smuggled core"))
 			bueOperation(t, err)
 			if !errors.Is(err, resource.ErrInvalidOption) || calls.Load() != 2 {
 				t.Fatal("core field replaced typed input or omission", key, present, actual, err, calls.Load())
@@ -206,7 +206,7 @@ func TestBackupUpdateExtractsActualSummaryAndKeepsNativeAndOptionFailures(t *tes
 			want := resource.ErrInvalidOption
 			if kind == "callback error" {
 				want = failure
-				option = func(config *request.Config[backups.UpdateOpts]) error { originals.Add(1); return failure }
+				option = request.Custom(func(config *request.Config[backups.UpdateOpts]) error { originals.Add(1); return failure })
 			}
 			actual, err := api.Update(bueContext(t), "id", backups.UpdateOpts{}, option)
 			bueOperation(t, err)

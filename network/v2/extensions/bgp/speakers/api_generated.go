@@ -42,11 +42,10 @@ type RemoveGatewayNetworkOpts = upstream.RemoveGatewayNetworkOpts
 type RemoveGatewayNetworkResult = upstream.RemoveGatewayNetworkResult
 type UpdateOpts = upstream.UpdateOpts
 type UpdateResult = upstream.UpdateResult
-type AddBGPPeerOption = request.Option[AddBGPPeerOpts]
+type AddBGPPeerOption = request.NativeFieldCall
 
-func WithAddBGPPeerOptions(value AddBGPPeerOpts) AddBGPPeerOption { return request.WithOptions(value) }
-func WithAddBGPPeerField(key string, value any) AddBGPPeerOption {
-	return request.WithField[AddBGPPeerOpts](key, value)
+func WithAddBGPPeerOptions(value AddBGPPeerOpts) AddBGPPeerOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type addBGPPeerOptsBuilder struct {
@@ -70,13 +69,8 @@ func (b addBGPPeerOptsBuilder) ToBGPSpeakerAddBGPPeerMap() (map[string]any, erro
 
 // AddBGPPeer invokes the upstream API with library-owned builders and result handling.
 func (a *API) AddBGPPeer(ctx context.Context, bgpSpeakerID string, opts AddBGPPeerOpts, options ...AddBGPPeerOption) (*AddBGPPeerOpts, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("AddBGPPeer", "speakers", err)
-		var zero0 *AddBGPPeerOpts
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("AddBGPPeer", "speakers", err)
 		var zero0 *AddBGPPeerOpts
 		return zero0, err
@@ -88,13 +82,10 @@ func (a *API) AddBGPPeer(ctx context.Context, bgpSpeakerID string, opts AddBGPPe
 	return value0, err
 }
 
-type AddGatewayNetworkOption = request.Option[AddGatewayNetworkOpts]
+type AddGatewayNetworkOption = request.NativeFieldCall
 
 func WithAddGatewayNetworkOptions(value AddGatewayNetworkOpts) AddGatewayNetworkOption {
-	return request.WithOptions(value)
-}
-func WithAddGatewayNetworkField(key string, value any) AddGatewayNetworkOption {
-	return request.WithField[AddGatewayNetworkOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type addGatewayNetworkOptsBuilder struct {
@@ -118,13 +109,8 @@ func (b addGatewayNetworkOptsBuilder) ToBGPSpeakerAddGatewayNetworkMap() (map[st
 
 // AddGatewayNetwork invokes the upstream API with library-owned builders and result handling.
 func (a *API) AddGatewayNetwork(ctx context.Context, bgpSpeakerID string, opts AddGatewayNetworkOpts, options ...AddGatewayNetworkOption) (*AddGatewayNetworkOpts, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("AddGatewayNetwork", "speakers", err)
-		var zero0 *AddGatewayNetworkOpts
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("AddGatewayNetwork", "speakers", err)
 		var zero0 *AddGatewayNetworkOpts
 		return zero0, err
@@ -136,11 +122,10 @@ func (a *API) AddGatewayNetwork(ctx context.Context, bgpSpeakerID string, opts A
 	return value0, err
 }
 
-type CreateOption = request.Option[CreateOpts]
+type CreateOption = request.NativeFieldCall
 
-func WithCreateOptions(value CreateOpts) CreateOption { return request.WithOptions(value) }
-func WithCreateField(key string, value any) CreateOption {
-	return request.WithField[CreateOpts](key, value)
+func WithCreateOptions(value CreateOpts) CreateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type createOptsBuilder struct {
@@ -164,13 +149,8 @@ func (b createOptsBuilder) ToSpeakerCreateMap() (map[string]any, error) {
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*BGPSpeaker, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Create", "speakers", err)
-		var zero0 *BGPSpeaker
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Create", "speakers", err)
 		var zero0 *BGPSpeaker
 		return zero0, err
@@ -215,13 +195,10 @@ func (a *API) listWithControl(ctx context.Context, control resource.ListControl)
 	}, control)
 }
 
-type RemoveBGPPeerOption = request.Option[RemoveBGPPeerOpts]
+type RemoveBGPPeerOption = request.NativeFieldCall
 
 func WithRemoveBGPPeerOptions(value RemoveBGPPeerOpts) RemoveBGPPeerOption {
-	return request.WithOptions(value)
-}
-func WithRemoveBGPPeerField(key string, value any) RemoveBGPPeerOption {
-	return request.WithField[RemoveBGPPeerOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type removeBGPPeerOptsBuilder struct {
@@ -245,12 +222,8 @@ func (b removeBGPPeerOptsBuilder) ToBGPSpeakerRemoveBGPPeerMap() (map[string]any
 
 // RemoveBGPPeer invokes the upstream API with library-owned builders and result handling.
 func (a *API) RemoveBGPPeer(ctx context.Context, bgpSpeakerID string, opts RemoveBGPPeerOpts, options ...RemoveBGPPeerOption) error {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("RemoveBGPPeer", "speakers", err)
-		return err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("RemoveBGPPeer", "speakers", err)
 		return err
 	}
@@ -258,13 +231,10 @@ func (a *API) RemoveBGPPeer(ctx context.Context, bgpSpeakerID string, opts Remov
 	return request.Wrap("RemoveBGPPeer", "speakers", upstream.RemoveBGPPeer(ctx, a.client, bgpSpeakerID, _opts).ExtractErr())
 }
 
-type RemoveGatewayNetworkOption = request.Option[RemoveGatewayNetworkOpts]
+type RemoveGatewayNetworkOption = request.NativeFieldCall
 
 func WithRemoveGatewayNetworkOptions(value RemoveGatewayNetworkOpts) RemoveGatewayNetworkOption {
-	return request.WithOptions(value)
-}
-func WithRemoveGatewayNetworkField(key string, value any) RemoveGatewayNetworkOption {
-	return request.WithField[RemoveGatewayNetworkOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type removeGatewayNetworkOptsBuilder struct {
@@ -288,12 +258,8 @@ func (b removeGatewayNetworkOptsBuilder) ToBGPSpeakerRemoveGatewayNetworkMap() (
 
 // RemoveGatewayNetwork invokes the upstream API with library-owned builders and result handling.
 func (a *API) RemoveGatewayNetwork(ctx context.Context, bgpSpeakerID string, opts RemoveGatewayNetworkOpts, options ...RemoveGatewayNetworkOption) error {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("RemoveGatewayNetwork", "speakers", err)
-		return err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("RemoveGatewayNetwork", "speakers", err)
 		return err
 	}
@@ -301,11 +267,10 @@ func (a *API) RemoveGatewayNetwork(ctx context.Context, bgpSpeakerID string, opt
 	return request.Wrap("RemoveGatewayNetwork", "speakers", upstream.RemoveGatewayNetwork(ctx, a.client, bgpSpeakerID, _opts).ExtractErr())
 }
 
-type UpdateOption = request.Option[UpdateOpts]
+type UpdateOption = request.NativeFieldCall
 
-func WithUpdateOptions(value UpdateOpts) UpdateOption { return request.WithOptions(value) }
-func WithUpdateField(key string, value any) UpdateOption {
-	return request.WithField[UpdateOpts](key, value)
+func WithUpdateOptions(value UpdateOpts) UpdateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type updateOptsBuilder struct {
@@ -329,13 +294,8 @@ func (b updateOptsBuilder) ToSpeakerUpdateMap() (map[string]any, error) {
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, speakerID string, opts UpdateOpts, options ...UpdateOption) (*BGPSpeaker, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Update", "speakers", err)
-		var zero0 *BGPSpeaker
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Update", "speakers", err)
 		var zero0 *BGPSpeaker
 		return zero0, err

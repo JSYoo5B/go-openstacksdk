@@ -10,6 +10,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/groups"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -64,7 +65,7 @@ func TestPythonGroupCreateGetUpdateRequests(t *testing.T) {
 		t.Fatalf("%#v %v", got, err)
 	}
 	// Python update_group(g, name="renamed", description=None) sends null.
-	updated, err := api.Update(ctx, "g-1", groups.UpdateOpts{Name: "renamed", Extra: map[string]any{"description": nil}}, groups.WithUpdateField("id", "g-1"))
+	updated, err := api.Update(ctx, "g-1", groups.UpdateOpts{Name: "renamed", Extra: map[string]any{"description": nil}}, request.Field("id", "g-1"))
 	if err != nil || updated.Name != "renamed" || updated.Description != "" {
 		t.Fatalf("%#v %v", updated, err)
 	}
@@ -146,7 +147,7 @@ func TestPythonGroupListRequests(t *testing.T) {
 			return 200, `{"groups":[` + pythonGroupRow + `],"links":{"next":null}}`
 		})
 		// Python follows with GET ?limit=1&marker=g-1 until an empty page.
-		collect(t, api, groups.WithListQuery("limit", "1"))
+		collect(t, api, request.Query("limit", "1"))
 		if !reflect.DeepEqual(calls, []pythonGroupCall{{http.MethodGet, pythonGroupBase, "limit=1", ""}}) {
 			t.Fatalf("%+v", calls)
 		}

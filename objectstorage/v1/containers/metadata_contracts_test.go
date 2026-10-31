@@ -15,6 +15,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 	swift "github.com/gophercloud/gophercloud/v2/openstack/objectstorage/v1"
@@ -899,7 +900,7 @@ func TestContainerMetadataContractsSourceAndNativePolicy(t *testing.T) {
 			t.Fatalf("native Get=%+v err=%v", get, err)
 		}
 		var update *containers.UpdateHeader
-		update, err = api.Update(context.Background(), containerMetadataName, containers.UpdateOpts{Metadata: map[string]string{"Book": "native"}}, containers.WithUpdateHeader("X-Trace", "native"))
+		update, err = api.Update(context.Background(), containerMetadataName, containers.UpdateOpts{Metadata: map[string]string{"Book": "native"}}, request.Header("X-Trace", "native"))
 		if err != nil || update == nil {
 			t.Fatalf("native202 Update=%+v err=%v", update, err)
 		}

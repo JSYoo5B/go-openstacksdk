@@ -8,5 +8,5 @@ import "github.com/JSYoo5B/go-openstacksdk/request"
 // WithListQuery or WithListQueryValues for the key wins, and no values drop
 // only this extension.
 func WithListQueryValues(key string, values ...string) ListOption {
-	return request.WithQueryValues[ListOpts](key, values...)
+	return request.Custom(request.WithQueryValues[ListOpts](key, values...))
 }

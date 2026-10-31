@@ -166,18 +166,18 @@ func TestComputeFlavorListDetailNativeBindingEagerOptionsLazyLinkedPages(t *test
 			cloud.Provider.SetToken("list-detail-live")
 			cause := errors.New("native detail option cause")
 			var calls, callbacks atomic.Int32
-			options := []flavors.ListDetailOption{func(_ *request.Config[flavors.ListOpts]) error {
+			options := []flavors.ListDetailOption{request.Custom(func(_ *request.Config[flavors.ListOpts]) error {
 				callbacks.Add(1)
 				if mode == "option error before HTTP" {
 					return cause
 				}
 				return nil
-			}}
+			})}
 			wantQuery := url.Values{}
 			if mode == "typed query with raw overrides" {
 				options = append(options,
 					flavors.WithListDetailOptions(flavors.ListOpts{ChangesSince: "2026-01-01T00:00:00Z", MinDisk: 12, MinRAM: 1024, SortDir: "asc", SortKey: "name", Marker: "start", Limit: 2, AccessType: flavors.AllAccess}),
-					flavors.WithListDetailQuery("limit", "1"), flavors.WithListDetailQuery("is_public", "false"), flavors.WithListDetailQuery("vendor", "literal"))
+					request.Query("limit", "1"), request.Query("is_public", "false"), request.Query("vendor", "literal"))
 				wantQuery = url.Values{"changes-since": {"2026-01-01T00:00:00Z"}, "minDisk": {"12"}, "minRam": {"1024"}, "sort_dir": {"asc"}, "sort_key": {"name"}, "marker": {"start"}, "limit": {"1"}, "is_public": {"false"}, "vendor": {"literal"}}
 			}
 			linked := mode == "two linked pages" || mode == "late403" || mode == "break before second page"

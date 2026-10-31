@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/shares"
 	"github.com/gophercloud/gophercloud/v2"
@@ -83,7 +84,7 @@ func TestManilaShareCreateSendsExactBodyAndAcceptsOnly200Or201(t *testing.T) {
 		value, err := newManilaShares(cloud, "2.82").Create(context.Background(), shares.CreateOpts{
 			ShareProto: "NFS", Size: 1, IsPublic: manilaShareFalse(), Metadata: map[string]string{"empty": ""},
 			SchedulerHints: &shares.SchedulerHints{SameHost: "share-0"},
-		}, shares.WithCreateField("vendor", map[string]bool{"enabled": false}))
+		}, request.Field("vendor", map[string]bool{"enabled": false}))
 		if tc.success != (err == nil) || calls.Load() != 1 {
 			t.Fatalf("status %d value=%+v error=%v calls=%d", tc.status, value, err, calls.Load())
 		}
@@ -124,33 +125,33 @@ func TestManilaShareRejectsProtectedAndNilOptionsBeforeHTTP(t *testing.T) {
 			t.Fatalf("%s: %v", name, err)
 		}
 	}
-	_, err := api.Create(ctx, shares.CreateOpts{ShareProto: "NFS", Size: 1}, shares.WithCreateField("share_proto", "CIFS"))
+	_, err := api.Create(ctx, shares.CreateOpts{ShareProto: "NFS", Size: 1}, request.Field("share_proto", "CIFS"))
 	check("create protected", err)
 	_, err = api.Create(ctx, shares.CreateOpts{}, nil)
 	check("create nil", err)
-	_, err = api.Update(ctx, "share-1", shares.UpdateOpts{}, shares.WithUpdateField("is_public", true))
+	_, err = api.Update(ctx, "share-1", shares.UpdateOpts{}, request.Field("is_public", true))
 	check("update protected", err)
 	_, err = api.Update(ctx, "share-1", shares.UpdateOpts{}, nil)
 	check("update nil", err)
-	check("extend protected", api.Extend(ctx, "share-1", shares.ExtendOpts{NewSize: 2}, shares.WithExtendField("new_size", 3)))
+	check("extend protected", api.Extend(ctx, "share-1", shares.ExtendOpts{NewSize: 2}, request.Field("new_size", 3)))
 	check("extend nil", api.Extend(ctx, "share-1", shares.ExtendOpts{}, nil))
-	check("shrink protected", api.Shrink(ctx, "share-1", shares.ShrinkOpts{NewSize: 1}, shares.WithShrinkField("new_size", 3)))
+	check("shrink protected", api.Shrink(ctx, "share-1", shares.ShrinkOpts{NewSize: 1}, request.Field("new_size", 3)))
 	check("shrink nil", api.Shrink(ctx, "share-1", shares.ShrinkOpts{}, nil))
-	check("revert protected", api.Revert(ctx, "share-1", shares.RevertOpts{SnapshotID: "s"}, shares.WithRevertField("snapshot_id", "x")))
+	check("revert protected", api.Revert(ctx, "share-1", shares.RevertOpts{SnapshotID: "s"}, request.Field("snapshot_id", "x")))
 	check("revert nil", api.Revert(ctx, "share-1", shares.RevertOpts{}, nil))
-	check("reset protected", api.ResetStatus(ctx, "share-1", shares.ResetStatusOpts{Status: "error"}, shares.WithResetStatusField("status", "active")))
+	check("reset protected", api.ResetStatus(ctx, "share-1", shares.ResetStatusOpts{Status: "error"}, request.Field("status", "active")))
 	check("reset nil", api.ResetStatus(ctx, "share-1", shares.ResetStatusOpts{}, nil))
-	_, err = api.GrantAccess(ctx, "share-1", shares.GrantAccessOpts{}, shares.WithGrantAccessField("access_to", "x"))
+	_, err = api.GrantAccess(ctx, "share-1", shares.GrantAccessOpts{}, request.Field("access_to", "x"))
 	check("grant protected", err)
 	_, err = api.GrantAccess(ctx, "share-1", shares.GrantAccessOpts{}, nil)
 	check("grant nil", err)
-	check("revoke protected", api.RevokeAccess(ctx, "share-1", shares.RevokeAccessOpts{}, shares.WithRevokeAccessField("access_id", "x")))
+	check("revoke protected", api.RevokeAccess(ctx, "share-1", shares.RevokeAccessOpts{}, request.Field("access_id", "x")))
 	check("revoke nil", api.RevokeAccess(ctx, "share-1", shares.RevokeAccessOpts{}, nil))
-	_, err = api.SetMetadata(ctx, "share-1", shares.SetMetadataOpts{}, shares.WithSetMetadataField("metadata", 1))
+	_, err = api.SetMetadata(ctx, "share-1", shares.SetMetadataOpts{}, request.Field("metadata", 1))
 	check("set metadata protected", err)
 	_, err = api.SetMetadata(ctx, "share-1", shares.SetMetadataOpts{}, nil)
 	check("set metadata nil", err)
-	_, err = api.UpdateMetadata(ctx, "share-1", shares.UpdateMetadataOpts{}, shares.WithUpdateMetadataField("metadata", 1))
+	_, err = api.UpdateMetadata(ctx, "share-1", shares.UpdateMetadataOpts{}, request.Field("metadata", 1))
 	check("update metadata protected", err)
 	_, err = api.UpdateMetadata(ctx, "share-1", shares.UpdateMetadataOpts{}, nil)
 	check("update metadata nil", err)
@@ -179,7 +180,7 @@ func TestManilaShareUpdateSendsEmptyValuesAndAcceptsOnly200(t *testing.T) {
 		empty := ""
 		value, err := newManilaShares(cloud, "2.82").Update(context.Background(), "share-1", shares.UpdateOpts{
 			DisplayName: &empty, DisplayDescription: &empty, IsPublic: manilaShareFalse(),
-		}, shares.WithUpdateField("vendor", nil))
+		}, request.Field("vendor", nil))
 		if tc.success != (err == nil) || (tc.success && (value == nil || value.ID != "share-1")) {
 			t.Fatalf("status %d value=%+v error=%v", tc.status, value, err)
 		}
@@ -280,7 +281,7 @@ func TestManilaShareListDetailSendsFiltersAndFollowsOffsetPages(t *testing.T) {
 	var ids []string
 	for value, err := range api.ListDetail(context.Background(),
 		shares.WithListDetailOptions(shares.ListOpts{Name: "n", Status: "available", IsPublic: manilaShareFalse(), Limit: 1, AllTenants: true, ProjectID: "p1"}),
-		shares.WithListDetailQuery("vendor", "x")) {
+		request.Query("vendor", "x")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -331,7 +332,7 @@ func TestManilaShareListDetailExtensionQueryReplacesTypedFilter(t *testing.T) {
 		testcloud.JSON(w, 200, `{"shares":[]}`)
 	})
 	for _, err := range newManilaShares(cloud, "").ListDetail(context.Background(),
-		shares.WithListDetailOptions(shares.ListOpts{Name: "typed"}), shares.WithListDetailQuery("name", "override")) {
+		shares.WithListDetailOptions(shares.ListOpts{Name: "typed"}), request.Query("name", "override")) {
 		if err != nil {
 			t.Fatal(err)
 		}

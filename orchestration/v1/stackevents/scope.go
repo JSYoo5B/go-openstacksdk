@@ -92,10 +92,10 @@ type GetOption = request.Option[GetOpts]
 
 func WithGetHeader(key, value string) GetOption { return request.WithHeader[GetOpts](key, value) }
 func WithListHeader(key, value string) ListOption {
-	return request.WithHeader[ListOpts](key, value)
+	return request.Custom(request.WithHeader[ListOpts](key, value))
 }
 func WithListResourceEventsHeader(key, value string) ListResourceEventsOption {
-	return request.WithHeader[ListResourceEventsOpts](key, value)
+	return request.Custom(request.WithHeader[ListResourceEventsOpts](key, value))
 }
 
 func eventHeaders[T any](cfg request.Config[T]) (map[string]string, error) {
@@ -164,10 +164,7 @@ func (s *StackEventScope) List(ctx context.Context, options ...ListOption) iter.
 			yield(nil, err)
 			return
 		}
-		cfg, err := request.Apply(ListOpts{}, options...)
-		if err == nil {
-			err = request.ValidateCapabilities(cfg, false, true, true)
-		}
+		cfg, err := request.ApplyCalls(ListOpts{}, request.Capabilities{Query: true, Headers: true}, options...)
 		var query string
 		if err == nil {
 			query, err = cfg.Options.ToStackEventListQuery()
@@ -193,10 +190,7 @@ func (s *ResourceEventScope) List(ctx context.Context, options ...ListResourceEv
 			yield(nil, err)
 			return
 		}
-		cfg, err := request.Apply(ListResourceEventsOpts{}, options...)
-		if err == nil {
-			err = request.ValidateCapabilities(cfg, false, true, true)
-		}
+		cfg, err := request.ApplyCalls(ListResourceEventsOpts{}, request.Capabilities{Query: true, Headers: true}, options...)
 		var query string
 		if err == nil {
 			query, err = cfg.Options.ToResourceEventListQuery()

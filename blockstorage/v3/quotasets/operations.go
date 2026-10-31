@@ -19,14 +19,14 @@ const scopeForceArgument = "project_quota_force"
 // WithUpdateForce preserves an explicit false. It belongs to scope.Update;
 // the lower-level API.Update retains native Force bool omission semantics.
 func WithUpdateForce(force bool) UpdateOption {
-	return request.WithArgument[UpdateOpts](scopeForceArgument, force)
+	return request.Custom(request.WithArgument[UpdateOpts](scopeForceArgument, force))
 }
 
 // WithQuotaOptions snapshots every typed limit and nested Extra value when the
 // option is constructed. It replaces the update's entire concrete input.
 func WithQuotaOptions(value UpdateOpts) UpdateOption {
 	snapshot, err := snapshotOptions(value)
-	return func(config *request.Config[UpdateOpts]) error {
+	return request.Custom(func(config *request.Config[UpdateOpts]) error {
 		if err != nil {
 			return err
 		}
@@ -36,7 +36,7 @@ func WithQuotaOptions(value UpdateOpts) UpdateOption {
 		}
 		config.Options = copy
 		return nil
-	}
+	})
 }
 
 // VolumeTypeQuota selects one of Cinder's per-volume-type quota families.
@@ -51,8 +51,8 @@ const (
 // WithVolumeTypeQuota sends a limit for an exact volume type name. It does not
 // resolve a volume type ID: Cinder quota keys contain the type's name.
 func WithVolumeTypeQuota(quota VolumeTypeQuota, name string, limit int) UpdateOption {
-	field := WithUpdateField(string(quota)+"_"+name, limit)
-	return func(config *request.Config[UpdateOpts]) error {
+	field := request.WithField[UpdateOpts](string(quota)+"_"+name, limit)
+	return request.Custom(func(config *request.Config[UpdateOpts]) error {
 		if quota != VolumeTypeVolumes && quota != VolumeTypeSnapshots && quota != VolumeTypeGigabytes {
 			return fmt.Errorf("%w: unsupported volume type quota %q", resource.ErrInvalidOption, quota)
 		}
@@ -60,7 +60,7 @@ func WithVolumeTypeQuota(quota VolumeTypeQuota, name string, limit int) UpdateOp
 			return fmt.Errorf("%w: volume type quota requires a name and a limit of -1 or greater", resource.ErrInvalidOption)
 		}
 		return field(config)
-	}
+	})
 }
 
 func snapshotOptions(value UpdateOpts) (UpdateOpts, error) {
@@ -109,11 +109,8 @@ func (s *ProjectQuotaScope) Update(ctx context.Context, opts UpdateOpts, options
 	if err := s.api.validateQuotaClient(ctx); err != nil {
 		return nil, quotaError("Update", s.projectID, err)
 	}
-	config, err := request.Apply(opts, options...)
+	config, err := request.ApplyCalls(opts, request.Capabilities{Body: true, Arguments: []string{scopeForceArgument}}, options...)
 	if err != nil {
-		return nil, quotaError("Update", s.projectID, err)
-	}
-	if err := request.ValidateCapabilities(config, true, false, false, scopeForceArgument); err != nil {
 		return nil, quotaError("Update", s.projectID, err)
 	}
 	config.Options, err = snapshotOptions(config.Options)

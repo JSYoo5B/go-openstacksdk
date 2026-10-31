@@ -123,7 +123,7 @@ func TestReflectedHeadersActualNineNativeAdapters(t *testing.T) {
 					t.Fatalf("generated declaration differs from stored facade: %s", key)
 				}
 			}
-			for _, public := range []string{"UpdateOption", "WithUpdateOptions", "WithUpdateField", "API.Update"} {
+			for _, public := range []string{"UpdateOption", "WithUpdateOptions", "API.Update"} {
 				if generated[public] == nil {
 					t.Fatal("existing public declaration lost", public)
 				}
@@ -146,7 +146,7 @@ func TestReflectedHeadersActualNineNativeAdapters(t *testing.T) {
 			for _, statement := range update.Body.List {
 				ast.Inspect(statement, func(node ast.Node) bool {
 					if call, ok := node.(*ast.CallExpr); ok {
-						if selector, ok := call.Fun.(*ast.SelectorExpr); ok && selector.Sel.Name == "ValidateCapabilities" {
+						if selector, ok := call.Fun.(*ast.SelectorExpr); ok && selector.Sel.Name == "ApplyCalls" {
 							validated = true
 						}
 					}

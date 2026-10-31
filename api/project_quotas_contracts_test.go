@@ -90,7 +90,7 @@ func TestProjectQuotaLimitsDetailUpdateAndResetPreserveTargetAndResponse(t *test
 	}
 	zero, unlimited := 0, -1
 	extension := map[string]string{"tier": "requested"}
-	option := quotasets.WithUpdateField("vendor", extension)
+	option := request.Field("vendor", extension)
 	extension["tier"] = "caller-change"
 	updated, err := scope.Update(context.Background(), quotasets.UpdateOpts{Cores: &unlimited, Instances: &zero, Force: true}, option, quotasets.WithUpdateForce(false))
 	if err != nil || updated == nil || updated.ProjectID != "project-fixed" || updated.ID != "wire-project" || updated.Cores != -1 || updated.Header.Get("X-Openstack-Request-Id") != "req-update" || string(updated.Body["networks"]) != "8" {
@@ -334,12 +334,12 @@ func TestProjectQuotaInvalidOptionsFailBeforeHTTP(t *testing.T) {
 	}{
 		{name: "invalid limit", opts: quotasets.UpdateOpts{Cores: &negative}},
 		{name: "nil update option", with: []quotasets.UpdateOption{nil}},
-		{name: "core collision", with: []quotasets.UpdateOption{quotasets.WithUpdateField("instances", 0)}},
-		{name: "force collision", with: []quotasets.UpdateOption{quotasets.WithUpdateField("force", false)}},
-		{name: "unserializable extension", with: []quotasets.UpdateOption{quotasets.WithUpdateField("vendor", make(chan bool))}},
-		{name: "unsupported query", with: []quotasets.UpdateOption{request.WithQuery[quotasets.UpdateOpts]("user_id", "user")}},
-		{name: "unsupported header", with: []quotasets.UpdateOption{request.WithHeader[quotasets.UpdateOpts]("X-Vendor", "value")}},
-		{name: "unknown argument", with: []quotasets.UpdateOption{request.WithArgument[quotasets.UpdateOpts]("unknown", false)}},
+		{name: "core collision", with: []quotasets.UpdateOption{request.Field("instances", 0)}},
+		{name: "force collision", with: []quotasets.UpdateOption{request.Field("force", false)}},
+		{name: "unserializable extension", with: []quotasets.UpdateOption{request.Field("vendor", make(chan bool))}},
+		{name: "unsupported query", with: []quotasets.UpdateOption{request.Custom(request.WithQuery[quotasets.UpdateOpts]("user_id", "user"))}},
+		{name: "unsupported header", with: []quotasets.UpdateOption{request.Custom(request.WithHeader[quotasets.UpdateOpts]("X-Vendor", "value"))}},
+		{name: "unknown argument", with: []quotasets.UpdateOption{request.Custom(request.WithArgument[quotasets.UpdateOpts]("unknown", false))}},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			value, err := scope.Update(context.Background(), tc.opts, tc.with...)

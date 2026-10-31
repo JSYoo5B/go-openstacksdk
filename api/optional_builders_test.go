@@ -9,6 +9,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/dns/v2/zones"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 func TestOptionalDNSHeadersSurviveLibraryOwnedBuilders(t *testing.T) {
@@ -30,16 +31,16 @@ func TestOptionalDNSHeadersSurviveLibraryOwnedBuilders(t *testing.T) {
 		testcloud.JSON(w, 201, "{\"id\":\"record-id\"}")
 	})
 	ctx := context.Background()
-	for _, err := range zones.New(cloud.Client("dns", "/v2")).List(ctx, zones.WithListOptions(zones.ListOpts{AllProjects: true, SudoTenantID: "project-id"}), zones.WithListHeader("X-Vendor-Setting", "false")) {
+	for _, err := range zones.New(cloud.Client("dns", "/v2")).List(ctx, zones.WithListOptions(zones.ListOpts{AllProjects: true, SudoTenantID: "project-id"}), request.Header("X-Vendor-Setting", "false")) {
 		if err != nil {
 			t.Fatal(err)
 		}
 	}
 	api := recordsets.New(cloud.Client("dns", "/v2"))
-	if _, err := api.Create(ctx, "zone-id", recordsets.CreateOpts{Name: "www.example.org.", Type: "A", Records: []string{"192.0.2.1"}, AllProjects: true, SudoTenantID: "project-id"}, recordsets.WithCreateHeader("X-Vendor-Setting", "false")); err != nil {
+	if _, err := api.Create(ctx, "zone-id", recordsets.CreateOpts{Name: "www.example.org.", Type: "A", Records: []string{"192.0.2.1"}, AllProjects: true, SudoTenantID: "project-id"}, request.Header("X-Vendor-Setting", "false")); err != nil {
 		t.Fatal(err)
 	}
-	for _, err := range api.ListByZone(ctx, "zone-id", recordsets.WithListByZoneOptions(recordsets.ListOpts{AllProjects: true, SudoTenantID: "project-id"}), recordsets.WithListByZoneHeader("X-Vendor-Setting", "false")) {
+	for _, err := range api.ListByZone(ctx, "zone-id", recordsets.WithListByZoneOptions(recordsets.ListOpts{AllProjects: true, SudoTenantID: "project-id"}), request.Header("X-Vendor-Setting", "false")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -54,7 +55,7 @@ func TestOptionalSwiftCopyQuerySurvivesLibraryOwnedBuilder(t *testing.T) {
 		}
 		w.WriteHeader(201)
 	})
-	_, err := objects.New(cloud.Client("object-store", "/v1/AUTH_project")).Copy(context.Background(), "source", "object", objects.CopyOpts{Destination: "/target/object", ObjectVersionID: "version"}, objects.WithCopyQuery("vendor", "a&b"))
+	_, err := objects.New(cloud.Client("object-store", "/v1/AUTH_project")).Copy(context.Background(), "source", "object", objects.CopyOpts{Destination: "/target/object", ObjectVersionID: "version"}, request.Query("vendor", "a&b"))
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/regions"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -67,7 +68,7 @@ func TestNativeRegionRoutesBodiesPagingAndDecode(t *testing.T) {
 		}
 		return nativeRegionWire(200, `{"region":`+nativeRegionRow+`}`)
 	})
-	created, err := api.Create(ctx, regions.CreateOpts{ID: "RegionOne", Description: "main", ParentRegionID: "Root", Extra: map[string]any{"location": "seoul"}}, regions.WithCreateField("x_extension", 1))
+	created, err := api.Create(ctx, regions.CreateOpts{ID: "RegionOne", Description: "main", ParentRegionID: "Root", Extra: map[string]any{"location": "seoul"}}, request.Field("x_extension", 1))
 	if err != nil || !(created.ID == "RegionOne" && created.ParentRegionID == "Root" && reflect.DeepEqual(created.Extra, map[string]any{"location": "seoul"})) {
 		t.Fatal(created, err)
 	}
@@ -80,11 +81,11 @@ func TestNativeRegionRoutesBodiesPagingAndDecode(t *testing.T) {
 		t.Fatal(got, err)
 	}
 	empty := ""
-	if _, err := api.Update(ctx, "RegionOne", regions.UpdateOpts{Description: &empty, ParentRegionID: "Root"}, regions.WithUpdateField("location", "busan")); err != nil {
+	if _, err := api.Update(ctx, "RegionOne", regions.UpdateOpts{Description: &empty, ParentRegionID: "Root"}, request.Field("location", "busan")); err != nil {
 		t.Fatal(err)
 	}
 	var rows []*regions.Region
-	for value, err := range api.List(ctx, regions.WithListOptions(regions.ListOpts{ParentRegionID: "Root"}), regions.WithListQuery("extra", "1")) {
+	for value, err := range api.List(ctx, regions.WithListOptions(regions.ListOpts{ParentRegionID: "Root"}), request.Query("extra", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -186,15 +187,15 @@ func TestNativeRegionStatusesDecodeAndPreflight(t *testing.T) {
 			err       error
 		}{
 			"create core extension": {"Create", func() error {
-				_, err := api.Create(ctx, regions.CreateOpts{}, regions.WithCreateField("id", "x"))
+				_, err := api.Create(ctx, regions.CreateOpts{}, request.Field("id", "x"))
 				return err
 			}()},
 			"create extra collision": {"Create", func() error {
-				_, err := api.Create(ctx, regions.CreateOpts{Extra: map[string]any{"location": "a"}}, regions.WithCreateField("location", "b"))
+				_, err := api.Create(ctx, regions.CreateOpts{Extra: map[string]any{"location": "a"}}, request.Field("location", "b"))
 				return err
 			}()},
 			"update core extension": {"Update", func() error {
-				_, err := api.Update(ctx, "r", regions.UpdateOpts{}, regions.WithUpdateField("description", "x"))
+				_, err := api.Update(ctx, "r", regions.UpdateOpts{}, request.Field("description", "x"))
 				return err
 			}()},
 			"update nil option": {"Update", func() error {

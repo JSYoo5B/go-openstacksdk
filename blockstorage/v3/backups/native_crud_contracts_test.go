@@ -14,6 +14,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -70,7 +71,7 @@ func TestNativeBackupRoutesBodiesPagingAndDecode(t *testing.T) {
 		}
 		return nativeBackupWire(200, `{"backup":`+nativeBackupRow+`}`)
 	})
-	created, err := api.Create(ctx, backups.CreateOpts{VolumeID: "vol-1", Name: "nightly", Incremental: true, Container: "c", Metadata: map[string]string{"k": "v"}}, backups.WithCreateField("x_extension", 1))
+	created, err := api.Create(ctx, backups.CreateOpts{VolumeID: "vol-1", Name: "nightly", Incremental: true, Container: "c", Metadata: map[string]string{"k": "v"}}, request.Field("x_extension", 1))
 	if err != nil || !(created.ID == "bk-1" && created.IsIncremental && created.ProjectID == "project" && (*created.Metadata)["k"] == "v" && created.AvailabilityZone == nil && created.DataTimestamp.Second() == 0 && created.CreatedAt.Second() == 3) {
 		t.Fatal(created, err)
 	}
@@ -78,7 +79,7 @@ func TestNativeBackupRoutesBodiesPagingAndDecode(t *testing.T) {
 	if err != nil || got.ObjectCount != 2 {
 		t.Fatal(got, err)
 	}
-	restored, err := api.RestoreFromBackup(ctx, "bk-1", backups.RestoreOpts{Name: "restored"}, backups.WithRestoreFromBackupField("x_extension", 1))
+	restored, err := api.RestoreFromBackup(ctx, "bk-1", backups.RestoreOpts{Name: "restored"}, request.Field("x_extension", 1))
 	if err != nil || *restored != (backups.Restore{BackupID: "bk-1", VolumeID: "vol-2", VolumeName: "restored"}) {
 		t.Fatal(restored, err)
 	}
@@ -96,8 +97,8 @@ func TestNativeBackupRoutesBodiesPagingAndDecode(t *testing.T) {
 		}
 		return ids
 	}
-	listed := collect(api.List(ctx, backups.WithListOptions(backups.ListOpts{VolumeID: "vol-1", AllTenants: true, Limit: 1}), backups.WithListQuery("extra", "1")))
-	detailed := collect(api.ListDetail(ctx, backups.WithListDetailOptions(backups.ListDetailOpts{WithCount: true, Sort: "created_at:desc"}), backups.WithListDetailQuery("extra", "1")))
+	listed := collect(api.List(ctx, backups.WithListOptions(backups.ListOpts{VolumeID: "vol-1", AllTenants: true, Limit: 1}), request.Query("extra", "1")))
+	detailed := collect(api.ListDetail(ctx, backups.WithListDetailOptions(backups.ListDetailOpts{WithCount: true, Sort: "created_at:desc"}), request.Query("extra", "1")))
 	if !reflect.DeepEqual(listed, []string{"bk-1", "bk-2"}) || !reflect.DeepEqual(detailed, []string{"bk-1", "bk-2"}) {
 		t.Fatal(listed, detailed)
 	}
@@ -226,7 +227,7 @@ func TestNativeBackupStrictStatusesDecodeAndPreflight(t *testing.T) {
 		}{
 			"volume id": {"Create", func() error { _, err := api.Create(ctx, backups.CreateOpts{}); return err }()},
 			"core extension": {"Create", func() error {
-				_, err := api.Create(ctx, backups.CreateOpts{VolumeID: "vol-1"}, backups.WithCreateField("incremental", true))
+				_, err := api.Create(ctx, backups.CreateOpts{VolumeID: "vol-1"}, request.Field("incremental", true))
 				return err
 			}()},
 			"restore nil option": {"RestoreFromBackup", func() error {

@@ -19,6 +19,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	qospolicies "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/ports"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -621,7 +622,7 @@ func TestQoSPolicyListFiltersNativeAndIdentitySurfaceIsolation(t *testing.T) {
 			var native []qospolicies.ListOption
 			for key, values := range want {
 				raw = append(raw, resource.WithQuery(key, values[0]))
-				native = append(native, qospolicies.WithListQuery(key, values[0]))
+				native = append(native, request.Query(key, values[0]))
 			}
 			values, err := a.Resources.All(context.Background(), append(append([]resource.ListOption(nil), raw...), resource.WithFilter("rules", []any{}))...)
 			qosPolicyListWant(t, values, err, "target")

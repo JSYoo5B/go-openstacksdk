@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -84,7 +85,7 @@ func TestNativeResourceProvidersRoutesBodiesAndDecode(t *testing.T) {
 		}
 		return nativeRPWire(500, `{}`)
 	})
-	created, err := api.Create(ctx, resourceproviders.CreateOpts{Name: "compute-1", UUID: "rp-1", ParentProviderUUID: "root-1"}, resourceproviders.WithCreateField("x_extension", 1))
+	created, err := api.Create(ctx, resourceproviders.CreateOpts{Name: "compute-1", UUID: "rp-1", ParentProviderUUID: "root-1"}, request.Field("x_extension", 1))
 	if err != nil || !(created.UUID == "rp-1" && created.Generation == 1 && created.RootProviderUUID == "root-1" && created.Links[0].Rel == "self") {
 		t.Fatal(created, err)
 	}
@@ -154,7 +155,7 @@ func TestNativeResourceProvidersRoutesBodiesAndDecode(t *testing.T) {
 	var names []string
 	for value, err := range api.List(ctx, resourceproviders.WithListOptions(resourceproviders.ListOpts{
 		Name: "compute-1", UUID: "rp-1", MemberOf: "in:agg-1,agg-2", Resources: "VCPU:1,MEMORY_MB:512", InTree: "root-1", Required: "CUSTOM_A,!CUSTOM_B",
-	}), resourceproviders.WithListQuery("extra", "1")) {
+	}), request.Query("extra", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -227,7 +228,7 @@ func TestNativeResourceProvidersMicroversionAndAggregatesBody(t *testing.T) {
 		api := nativeRPAPI(t, tc.microversion, &calls, func(*http.Request) *http.Response {
 			return nativeRPWire(200, `{"aggregates":["agg-1"]}`)
 		})
-		got, err := api.UpdateAggregates(ctx, "rp-1", resourceproviders.UpdateAggregatesOpts{ResourceProviderGeneration: nativeRPInt(2), Aggregates: []string{"agg-1"}}, resourceproviders.WithUpdateAggregatesField("x_extension", 1))
+		got, err := api.UpdateAggregates(ctx, "rp-1", resourceproviders.UpdateAggregatesOpts{ResourceProviderGeneration: nativeRPInt(2), Aggregates: []string{"agg-1"}}, request.Field("x_extension", 1))
 		// The pre-1.19 response has no generation, which decodes as a nil pointer.
 		if err != nil || got.ResourceProviderGeneration != nil || len(calls) != 1 || calls[0].body != tc.body || calls[0].version != tc.version {
 			t.Fatal(tc.microversion, got, err, calls)
@@ -374,7 +375,7 @@ func TestNativeResourceProvidersStatusesAndPreflight(t *testing.T) {
 			err       error
 		}{
 			"create core extension": {"Create", func() error {
-				_, err := api.Create(ctx, resourceproviders.CreateOpts{Name: "rp"}, resourceproviders.WithCreateField("uuid", "x"))
+				_, err := api.Create(ctx, resourceproviders.CreateOpts{Name: "rp"}, request.Field("uuid", "x"))
 				return err
 			}()},
 			"create nil option": {"Create", func() error {
@@ -383,24 +384,24 @@ func TestNativeResourceProvidersStatusesAndPreflight(t *testing.T) {
 			}()},
 			// Omitted pointer fields are still reserved.
 			"update core extension": {"Update", func() error {
-				_, err := api.Update(ctx, "rp-1", resourceproviders.UpdateOpts{}, resourceproviders.WithUpdateField("parent_provider_uuid", nil))
+				_, err := api.Update(ctx, "rp-1", resourceproviders.UpdateOpts{}, request.Field("parent_provider_uuid", nil))
 				return err
 			}()},
 			"inventories core extension": {"UpdateInventories", func() error {
-				_, err := api.UpdateInventories(ctx, "rp-1", resourceproviders.UpdateInventoriesOpts{}, resourceproviders.WithUpdateInventoriesField("inventories", nil))
+				_, err := api.UpdateInventories(ctx, "rp-1", resourceproviders.UpdateInventoriesOpts{}, request.Field("inventories", nil))
 				return err
 			}()},
 			// Embedded Inventory keys are reserved as well.
 			"inventory embedded extension": {"UpdateInventory", func() error {
-				_, err := api.UpdateInventory(ctx, "rp-1", "VCPU", resourceproviders.UpdateInventoryOpts{}, resourceproviders.WithUpdateInventoryField("total", 1))
+				_, err := api.UpdateInventory(ctx, "rp-1", "VCPU", resourceproviders.UpdateInventoryOpts{}, request.Field("total", 1))
 				return err
 			}()},
 			"traits core extension": {"UpdateTraits", func() error {
-				_, err := api.UpdateTraits(ctx, "rp-1", resourceproviders.UpdateTraitsOpts{}, resourceproviders.WithUpdateTraitsField("traits", nil))
+				_, err := api.UpdateTraits(ctx, "rp-1", resourceproviders.UpdateTraitsOpts{}, request.Field("traits", nil))
 				return err
 			}()},
 			"aggregates core extension": {"UpdateAggregates", func() error {
-				_, err := api.UpdateAggregates(ctx, "rp-1", resourceproviders.UpdateAggregatesOpts{}, resourceproviders.WithUpdateAggregatesField("resource_provider_generation", 1))
+				_, err := api.UpdateAggregates(ctx, "rp-1", resourceproviders.UpdateAggregatesOpts{}, request.Field("resource_provider_generation", 1))
 				return err
 			}()},
 			"aggregates nil option": {"UpdateAggregates", func() error {
@@ -414,7 +415,7 @@ func TestNativeResourceProvidersStatusesAndPreflight(t *testing.T) {
 			nativeRPOperation(t, check.err, check.operation)
 		}
 		for name, options := range map[string][]resourceproviders.ListOption{
-			"empty query key": {resourceproviders.WithListQuery(" ", "x")},
+			"empty query key": {request.Query(" ", "x")},
 			"nil option":      {nil},
 		} {
 			var errs []error
@@ -434,7 +435,7 @@ func TestNativeResourceProvidersStatusesAndPreflight(t *testing.T) {
 		var calls []nativeRPCall
 		api := nativeRPAPI(t, "1.39", &calls, func(*http.Request) *http.Response { return nativeRPWire(200, `{"resource_providers":[]}`) })
 		// ListOpts carries one member_of and one required string; WithListQuery replaces rather than appends.
-		for range api.List(ctx, resourceproviders.WithListOptions(resourceproviders.ListOpts{MemberOf: "agg-1", Required: "CUSTOM_A"}), resourceproviders.WithListQuery("member_of", "agg-2")) {
+		for range api.List(ctx, resourceproviders.WithListOptions(resourceproviders.ListOpts{MemberOf: "agg-1", Required: "CUSTOM_A"}), request.Query("member_of", "agg-2")) {
 		}
 		if len(calls) != 1 || calls[0].query != "member_of=agg-2&required=CUSTOM_A" {
 			t.Fatal(calls)

@@ -15,6 +15,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -88,7 +89,7 @@ func TestNativeServerCRUDRoutesBodiesAndDecode(t *testing.T) {
 	}
 	config := true
 	created, err := api.Create(ctx, servers.CreateOpts{Name: "vm", ImageRef: "img", FlavorRef: "f1", Networks: "auto", SecurityGroups: []string{"default"}, UserData: []byte("#!/bin/sh"), ConfigDrive: &config, Min: 1, Max: 2},
-		servers.WithCreateField("x_extension", 1), servers.WithCreateHintOpts(servers.SchedulerHintOpts{Query: []any{"=", "$free_ram_mb", 1024}}))
+		request.Field("x_extension", 1), servers.WithCreateHintOpts(servers.SchedulerHintOpts{Query: []any{"=", "$free_ram_mb", 1024}}))
 	if err != nil || created.ID != "s1" || created.AdminPass != "secret" {
 		t.Fatal(created, err)
 	}
@@ -165,7 +166,7 @@ func TestNativeServerCRUDStrictStatusesAndPreflight(t *testing.T) {
 				return err
 			},
 			"envelope collision": func() error {
-				_, err := api.Create(ctx, servers.CreateOpts{Name: "vm"}, servers.WithCreateField("name", "x"))
+				_, err := api.Create(ctx, servers.CreateOpts{Name: "vm"}, request.Field("name", "x"))
 				return err
 			},
 			"invalid group hint": func() error {
@@ -202,9 +203,9 @@ func TestNativeServerListsQueryPagingAndStop(t *testing.T) {
 			opts := servers.ListOpts{Name: "x", Status: "ACTIVE", Limit: 1, Tags: "t", AllTenants: true}
 			var seq func(func(*servers.Server, error) bool)
 			if simple {
-				seq = api.ListSimple(context.Background(), servers.WithListSimpleOptions(opts), servers.WithListSimpleQuery("extra", "1"))
+				seq = api.ListSimple(context.Background(), servers.WithListSimpleOptions(opts), request.Query("extra", "1"))
 			} else {
-				seq = api.List(context.Background(), servers.WithListOptions(opts), servers.WithListQuery("extra", "1"))
+				seq = api.List(context.Background(), servers.WithListOptions(opts), request.Query("extra", "1"))
 			}
 			var ids []string
 			for value, err := range seq {

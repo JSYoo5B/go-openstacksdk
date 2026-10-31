@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ikepolicies"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -106,7 +107,7 @@ func TestNativeVPNPolicyRoutesBodiesPagingAndDecode(t *testing.T) {
 		}
 		return nativeVPNWire(200, `{"ikepolicy":`+nativeVPNRow+`}`)
 	})
-	created, err := api.Create(ctx, ikepolicies.CreateOpts{Name: "ike", AuthAlgorithm: ikepolicies.AuthAlgorithmSHA256, IKEVersion: ikepolicies.IKEVersionv2, Phase1NegotiationMode: ikepolicies.Phase1NegotiationModeMain, Lifetime: &ikepolicies.LifetimeCreateOpts{Units: ikepolicies.UnitSeconds, Value: 3600}}, ikepolicies.WithCreateField("x_extension", 1))
+	created, err := api.Create(ctx, ikepolicies.CreateOpts{Name: "ike", AuthAlgorithm: ikepolicies.AuthAlgorithmSHA256, IKEVersion: ikepolicies.IKEVersionv2, Phase1NegotiationMode: ikepolicies.Phase1NegotiationModeMain, Lifetime: &ikepolicies.LifetimeCreateOpts{Units: ikepolicies.UnitSeconds, Value: 3600}}, request.Field("x_extension", 1))
 	if err != nil || !(created.ID == "x-1" && created.Lifetime.Value == 3600 && created.Phase1NegotiationMode == "main") {
 		t.Fatal(created, err)
 	}
@@ -118,11 +119,11 @@ func TestNativeVPNPolicyRoutesBodiesPagingAndDecode(t *testing.T) {
 		t.Fatal(got, err)
 	}
 	empty := ""
-	if _, err := api.Update(ctx, "x-1", ikepolicies.UpdateOpts{Name: &empty, Phase1NegotiationMode: ikepolicies.Phase1NegotiationModeMain}, ikepolicies.WithUpdateField("x_extension", 1)); err != nil {
+	if _, err := api.Update(ctx, "x-1", ikepolicies.UpdateOpts{Name: &empty, Phase1NegotiationMode: ikepolicies.Phase1NegotiationModeMain}, request.Field("x_extension", 1)); err != nil {
 		t.Fatal(err)
 	}
 	var ids []string
-	for value, err := range api.List(ctx, ikepolicies.WithListOptions(ikepolicies.ListOpts{Name: "ike", Phase1NegotiationMode: "main"}), ikepolicies.WithListQuery("extra", "1")) {
+	for value, err := range api.List(ctx, ikepolicies.WithListOptions(ikepolicies.ListOpts{Name: "ike", Phase1NegotiationMode: "main"}), request.Query("extra", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -178,7 +179,7 @@ func TestNativeVPNPolicyStrictStatusesAndPreflight(t *testing.T) {
 		api, _ := nativeVPNAPI(t, &calls, func(*http.Request) *http.Response { return nativeVPNWire(201, `{}`) })
 		for name, err := range map[string]error{
 			"core extension": func() error {
-				_, err := api.Create(ctx, ikepolicies.CreateOpts{Lifetime: &ikepolicies.LifetimeCreateOpts{}}, ikepolicies.WithCreateField("lifetime", nil))
+				_, err := api.Create(ctx, ikepolicies.CreateOpts{Lifetime: &ikepolicies.LifetimeCreateOpts{}}, request.Field("lifetime", nil))
 				return err
 			}(),
 			"nil option": func() error { _, err := api.Update(ctx, "x-1", ikepolicies.UpdateOpts{}, nil); return err }(),

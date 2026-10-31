@@ -9,6 +9,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/attachinterfaces"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -64,7 +65,7 @@ func TestPythonServerInterfaceCreateGetListDeleteMatchProxyRequests(t *testing.T
 	}
 	// create_server_interface(server, net_id="n1", fixed_ips=[{"ip_address": ...}], tag="nic1")
 	created, err := api.Create(ctx, "s1", attachinterfaces.CreateOpts{NetworkID: "n1", FixedIPs: []attachinterfaces.FixedIP{{IPAddress: "10.0.0.5"}}},
-		attachinterfaces.WithCreateField("tag", "nic1"))
+		request.Field("tag", "nic1"))
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -16,6 +16,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/containerinfra/v1/clustertemplates"
 	"github.com/JSYoo5B/go-openstacksdk/containerinfra/v1/nodegroups"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -48,7 +49,7 @@ func TestMagnumTemplateCreateKeepsExplicitFalseAndRequires201(t *testing.T) {
 		value, err := api.Create(context.Background(), clustertemplates.CreateOpts{
 			COE: "kubernetes", ImageID: "img-1", Public: magnumFalse(), FloatingIPEnabled: magnumFalse(), TLSDisabled: magnumFalse(), Hidden: magnumFalse(),
 			DockerVolumeSize: magnumIntPtr(0), Labels: map[string]string{"k": ""},
-		}, clustertemplates.WithCreateField("vendor", nil))
+		}, request.Field("vendor", nil))
 		if (status == 201) != (err == nil) || (status == 201 && (value == nil || value.UUID != "tpl-1" || value.Public || value.FloatingIPEnabled || value.CreatedAt.IsZero())) {
 			t.Fatalf("status %d value=%+v error=%v", status, value, err)
 		}
@@ -75,7 +76,7 @@ func TestMagnumTemplateRejectsInvalidInputsBeforeHTTP(t *testing.T) {
 		t.Fatal("missing image must fail locally")
 	}
 	for _, key := range []string{"coe", "image_id", "public", "hidden"} {
-		if _, err := api.Create(ctx, ok, clustertemplates.WithCreateField(key, "x")); !errors.Is(err, resource.ErrInvalidOption) {
+		if _, err := api.Create(ctx, ok, request.Field(key, "x")); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatalf("extension %q: %v", key, err)
 		}
 	}
@@ -121,7 +122,7 @@ func TestMagnumTemplateGetListAndCollectionPolicies(t *testing.T) {
 		t.Fatalf("native get keeps the 404 response error: %v", err)
 	}
 	var ids []string
-	for value, err := range api.List(ctx, clustertemplates.WithListOptions(clustertemplates.ListOpts{Limit: 1, SortKey: "name", SortDir: "asc"}), clustertemplates.WithListQuery("vendor", "x")) {
+	for value, err := range api.List(ctx, clustertemplates.WithListOptions(clustertemplates.ListOpts{Limit: 1, SortKey: "name", SortDir: "asc"}), request.Query("vendor", "x")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -270,7 +271,7 @@ func TestMagnumNodeGroupCreateKeepsZeroFalseAndRequires202(t *testing.T) {
 		}
 		value, err := scope.Create(context.Background(), nodegroups.CreateOpts{
 			Name: "workers", NodeCount: magnumIntPtr(0), MaxNodeCount: magnumIntPtr(0), DockerVolumeSize: magnumIntPtr(0), MergeLabels: magnumFalse(),
-		}, nodegroups.WithCreateField("vendor", false))
+		}, request.Field("vendor", false))
 		if (status == 202) != (err == nil) || (status == 202 && (value == nil || value.UUID != "ng-1" || value.MaxNodeCount == nil || *value.MaxNodeCount != 0 || value.DockerVolumeSize != nil)) {
 			t.Fatalf("status %d value=%+v error=%v", status, value, err)
 		}
@@ -305,7 +306,7 @@ func TestMagnumNodeGroupRejectsInvalidInputsBeforeHTTP(t *testing.T) {
 		t.Fatal("missing name must fail locally")
 	}
 	for _, key := range []string{"name", "node_count", "max_node_count", "role"} {
-		if _, err := api.Create(ctx, "cl-1", nodegroups.CreateOpts{Name: "n"}, nodegroups.WithCreateField(key, 1)); !errors.Is(err, resource.ErrInvalidOption) {
+		if _, err := api.Create(ctx, "cl-1", nodegroups.CreateOpts{Name: "n"}, request.Field(key, 1)); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatalf("extension %q: %v", key, err)
 		}
 	}
@@ -378,7 +379,7 @@ func TestMagnumNodeGroupGetListUpdateDeleteUseClusterRoutes(t *testing.T) {
 		t.Fatalf("native get keeps the 404 response error: %v", err)
 	}
 	var ids []string
-	for value, err := range api.List(ctx, "cl-1", nodegroups.WithListOptions(nodegroups.ListOpts{Limit: 1, Role: "worker", SortKey: "name", SortDir: "desc"}), nodegroups.WithListQuery("vendor", "x")) {
+	for value, err := range api.List(ctx, "cl-1", nodegroups.WithListOptions(nodegroups.ListOpts{Limit: 1, Role: "worker", SortKey: "name", SortDir: "desc"}), request.Query("vendor", "x")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -513,7 +514,7 @@ func TestMagnumCertificateCreateGetAndUpdateStatusContracts(t *testing.T) {
 	})
 	_, _, api, _ := newMagnumPieces(t, cloud, "1.10")
 	ctx := context.Background()
-	cert, err := api.Create(ctx, certificates.CreateOpts{ClusterUUID: "cl-1", CSR: "CSR"}, certificates.WithCreateField("vendor", false))
+	cert, err := api.Create(ctx, certificates.CreateOpts{ClusterUUID: "cl-1", CSR: "CSR"}, request.Field("vendor", false))
 	if err != nil || cert == nil || cert.PEM != "PEM" || cert.ClusterUUID != "cl-1" {
 		t.Fatalf("cert=%+v error=%v", cert, err)
 	}
@@ -572,7 +573,7 @@ func TestMagnumCertificateRejectsInvalidInputsAndOtherStatusesBeforeReplay(t *te
 		}
 	}
 	for _, key := range []string{"csr", "cluster_uuid", "bay_uuid"} {
-		if _, err := api.Create(ctx, certificates.CreateOpts{ClusterUUID: "cl-1", CSR: "c"}, certificates.WithCreateField(key, "x")); !errors.Is(err, resource.ErrInvalidOption) {
+		if _, err := api.Create(ctx, certificates.CreateOpts{ClusterUUID: "cl-1", CSR: "c"}, request.Field(key, "x")); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatalf("extension %q: %v", key, err)
 		}
 	}

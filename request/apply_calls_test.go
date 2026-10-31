@@ -160,3 +160,16 @@ func TestApplyCallsAcceptsCategorySlices(t *testing.T) {
 		t.Fatal(cfg, err)
 	}
 }
+
+// Unchecked is Apply alone: no capability or argument check after the calls.
+func TestApplyCallsUncheckedMatchesApply(t *testing.T) {
+	generic := []request.Option[parityOpts]{request.WithField[parityOpts]("k", 1), request.WithHeader[parityOpts]("x-a", "v"), request.WithQuery[parityOpts]("q", "v"), request.WithArgument[parityOpts]("any", 1)}
+	shared := []request.Call{request.Field("k", 1), request.Header("x-a", "v"), request.Query("q", "v"), request.Custom(request.WithArgument[parityOpts]("any", 1))}
+	wantCfg, wantErr := request.Apply(parityOpts{}, generic...)
+	gotCfg, gotErr := request.ApplyCalls(parityOpts{}, request.Capabilities{Unchecked: true}, shared...)
+	sameResult(t, "unchecked", wantCfg, wantErr, gotCfg, gotErr)
+	_, err := request.ApplyCalls(parityOpts{}, request.Capabilities{Unchecked: true}, request.Query("limit", 5))
+	if err == nil || err.Error() != `invalid option: query "limit" needs a string or []string value for this operation` {
+		t.Fatal(err)
+	}
+}

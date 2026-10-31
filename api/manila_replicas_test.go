@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/replicas"
 	"github.com/gophercloud/gophercloud/v2"
@@ -77,7 +78,7 @@ func TestManilaReplicaCreateSendsEnvelopeAndRequires202(t *testing.T) {
 		})
 		value, err := newManilaReplicas(t, cloud).Create(context.Background(), replicas.CreateOpts{
 			ShareID: "share-1", ShareNetworkID: "net-1", AvailabilityZone: "az1", SchedulerHints: map[string]string{"only_host": "h1"},
-		}, replicas.WithCreateField("vendor", map[string]bool{"enabled": false}))
+		}, request.Field("vendor", map[string]bool{"enabled": false}))
 		if calls.Load() != 1 || tc.success != (err == nil) {
 			t.Fatalf("status %d calls=%d value=%+v error=%v", tc.status, calls.Load(), value, err)
 		}
@@ -123,14 +124,14 @@ func TestManilaReplicaRejectsCoreFieldCollisionsAndNilOptionsBeforeHTTP(t *testi
 	api := newManilaReplicas(t, cloud)
 	ctx := context.Background()
 	checks := map[string]error{}
-	_, checks["create core"] = api.Create(ctx, replicas.CreateOpts{ShareID: "s"}, replicas.WithCreateField("share_id", "other"))
-	_, checks["create omitted core"] = api.Create(ctx, replicas.CreateOpts{ShareID: "s"}, replicas.WithCreateField("availability_zone", "az"))
+	_, checks["create core"] = api.Create(ctx, replicas.CreateOpts{ShareID: "s"}, request.Field("share_id", "other"))
+	_, checks["create omitted core"] = api.Create(ctx, replicas.CreateOpts{ShareID: "s"}, request.Field("availability_zone", "az"))
 	_, checks["create nil"] = api.Create(ctx, replicas.CreateOpts{ShareID: "s"}, nil)
-	checks["promote core"] = api.Promote(ctx, "rep-1", replicas.PromoteOpts{}, replicas.WithPromoteField("quiesce_wait_time", 5))
+	checks["promote core"] = api.Promote(ctx, "rep-1", replicas.PromoteOpts{}, request.Field("quiesce_wait_time", 5))
 	checks["promote nil"] = api.Promote(ctx, "rep-1", replicas.PromoteOpts{}, nil)
-	checks["reset state core"] = api.ResetState(ctx, "rep-1", replicas.ResetStateOpts{State: "in_sync"}, replicas.WithResetStateField("replica_state", "x"))
+	checks["reset state core"] = api.ResetState(ctx, "rep-1", replicas.ResetStateOpts{State: "in_sync"}, request.Field("replica_state", "x"))
 	checks["reset state nil"] = api.ResetState(ctx, "rep-1", replicas.ResetStateOpts{State: "in_sync"}, nil)
-	checks["reset status core"] = api.ResetStatus(ctx, "rep-1", replicas.ResetStatusOpts{Status: "error"}, replicas.WithResetStatusField("status", "x"))
+	checks["reset status core"] = api.ResetStatus(ctx, "rep-1", replicas.ResetStatusOpts{Status: "error"}, request.Field("status", "x"))
 	checks["reset status nil"] = api.ResetStatus(ctx, "rep-1", replicas.ResetStatusOpts{Status: "error"}, nil)
 	for name, err := range checks {
 		if !errors.Is(err, resource.ErrInvalidOption) {
@@ -172,12 +173,12 @@ func TestManilaReplicaActionsSendNamedBodiesAndRequire202(t *testing.T) {
 			return a.Promote(context.Background(), "rep-1", replicas.PromoteOpts{})
 		}},
 		{"promote quiesce and extension", `{"promote":{"quiesce_wait_time":30,"vendor":false}}`, func(a *replicas.API) error {
-			return a.Promote(context.Background(), "rep-1", replicas.PromoteOpts{QuiesceWaitTime: 30}, replicas.WithPromoteField("vendor", false))
+			return a.Promote(context.Background(), "rep-1", replicas.PromoteOpts{QuiesceWaitTime: 30}, request.Field("vendor", false))
 		}},
 		{"resync", `{"resync":null}`, func(a *replicas.API) error { return a.Resync(context.Background(), "rep-1") }},
 		{"force delete", `{"force_delete":null}`, func(a *replicas.API) error { return a.ForceDelete(context.Background(), "rep-1") }},
 		{"reset status", `{"reset_status":{"status":"error","vendor":{}}}`, func(a *replicas.API) error {
-			return a.ResetStatus(context.Background(), "rep-1", replicas.ResetStatusOpts{Status: "error"}, replicas.WithResetStatusField("vendor", struct{}{}))
+			return a.ResetStatus(context.Background(), "rep-1", replicas.ResetStatusOpts{Status: "error"}, request.Field("vendor", struct{}{}))
 		}},
 		{"reset state", `{"reset_replica_state":{"replica_state":"out_of_sync"}}`, func(a *replicas.API) error {
 			return a.ResetState(context.Background(), "rep-1", replicas.ResetStateOpts{State: "out_of_sync"})
@@ -304,10 +305,10 @@ func TestManilaReplicaListAndListDetailFiltersFollowOffsetPaging(t *testing.T) {
 		call func(*replicas.API) func(func(*replicas.Replica, error) bool)
 	}{
 		{"list", "/v2/share-replicas", func(a *replicas.API) func(func(*replicas.Replica, error) bool) {
-			return a.List(context.Background(), replicas.WithListOptions(replicas.ListOpts{ShareID: "share-1", Limit: 1}), replicas.WithListQuery("vendor", "x"))
+			return a.List(context.Background(), replicas.WithListOptions(replicas.ListOpts{ShareID: "share-1", Limit: 1}), request.Query("vendor", "x"))
 		}},
 		{"detail", "/v2/share-replicas/detail", func(a *replicas.API) func(func(*replicas.Replica, error) bool) {
-			return a.ListDetail(context.Background(), replicas.WithListDetailOptions(replicas.ListOpts{ShareID: "share-1", Limit: 1}), replicas.WithListDetailQuery("vendor", "x"))
+			return a.ListDetail(context.Background(), replicas.WithListDetailOptions(replicas.ListOpts{ShareID: "share-1", Limit: 1}), request.Query("vendor", "x"))
 		}},
 	} {
 		cloud := testcloud.New(t)
@@ -351,7 +352,7 @@ func TestManilaReplicaListQueryExtensionReplacesTypedFilter(t *testing.T) {
 		query = r.URL.Query()
 		testcloud.JSON(w, 200, `{"share_replicas":[]}`)
 	})
-	for range newManilaReplicas(t, cloud).List(context.Background(), replicas.WithListOptions(replicas.ListOpts{ShareID: "typed"}), replicas.WithListQuery("share_id", "extension")) {
+	for range newManilaReplicas(t, cloud).List(context.Background(), replicas.WithListOptions(replicas.ListOpts{ShareID: "typed"}), request.Query("share_id", "extension")) {
 	}
 	if !reflect.DeepEqual(query["share_id"], []string{"extension"}) {
 		t.Fatalf("query=%v", query)

@@ -9,6 +9,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 // pythonServiceCall records the wire request openstacksdk would also send.
@@ -68,7 +69,7 @@ func TestPythonServicesListMatchesProxyQuery(t *testing.T) {
 		// services(binary=..., host=...) uses the two declared QueryParameters.
 		{"binary and host", []services.ListOption{services.WithListOptions(services.ListOpts{Binary: "cinder-volume", Host: "node@lvm"})}, "binary=cinder-volume&host=node%40lvm"},
 		// services(limit=..., marker=...) uses the default pagination QueryParameters.
-		{"pagination keys", []services.ListOption{services.WithListQuery("limit", "1"), services.WithListQuery("marker", "m")}, "limit=1&marker=m"},
+		{"pagination keys", []services.ListOption{request.Query("limit", "1"), request.Query("marker", "m")}, "limit=1&marker=m"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			api, calls := pythonServiceAPI(t, "3.32", func(*http.Request) *http.Response { return pythonServiceWire(200, pythonServiceRows) })

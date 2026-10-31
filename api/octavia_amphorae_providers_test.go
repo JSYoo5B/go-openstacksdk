@@ -15,6 +15,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/amphorae"
 	"github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/apiversions"
 	"github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/providers"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -95,7 +96,7 @@ func TestOctaviaAmphoraListFiltersFollowLinksAndExtensionQuery(t *testing.T) {
 	var ids []string
 	for value, err := range api.List(context.Background(),
 		amphorae.WithListOptions(amphorae.ListOpts{LoadbalancerID: "lb-1", Role: "MASTER", Status: "ALLOCATED", Limit: 1}),
-		amphorae.WithListQuery("vendor", "x")) {
+		request.Query("vendor", "x")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -157,7 +158,7 @@ func TestOctaviaProviderListFieldsFollowLinksAndExtensionQuery(t *testing.T) {
 	})
 	var names []string
 	for value, err := range newOctaviaProviders(t, cloud).List(context.Background(),
-		providers.WithListOptions(providers.ListOpts{Fields: []string{"name", "description"}}), providers.WithListQuery("vendor", "x")) {
+		providers.WithListOptions(providers.ListOpts{Fields: []string{"name", "description"}}), request.Query("vendor", "x")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -191,12 +192,12 @@ func TestOctaviaProviderCapabilitiesUseProviderPathFieldsAndExtensionQuery(t *te
 	api := newOctaviaProviders(t, cloud)
 	ctx := context.Background()
 	flavorCaps, err := api.ListFlavorCapabilities(ctx, "amphora",
-		providers.WithListFlavorCapabilitiesOptions(providers.ListFlavorCapabilitiesOpts{Fields: []string{"name"}}), providers.WithListFlavorCapabilitiesQuery("vendor", "x"))
+		providers.WithListFlavorCapabilitiesOptions(providers.ListFlavorCapabilitiesOpts{Fields: []string{"name"}}), request.Query("vendor", "x"))
 	if err != nil || len(flavorCaps) != 1 || flavorCaps[0].Name != "loadbalancer_topology" || flavorCaps[0].Description != "t" {
 		t.Fatalf("caps=%+v error=%v", flavorCaps, err)
 	}
 	zoneCaps, err := api.ListAvailabilityZoneCapabilities(ctx, "amphora",
-		providers.WithListAvailabilityZoneCapabilitiesOptions(providers.ListAvailabilityZoneCapabilitiesOpts{Fields: []string{"name"}}), providers.WithListAvailabilityZoneCapabilitiesQuery("vendor", "y"))
+		providers.WithListAvailabilityZoneCapabilitiesOptions(providers.ListAvailabilityZoneCapabilitiesOpts{Fields: []string{"name"}}), request.Query("vendor", "y"))
 	if err != nil || len(zoneCaps) != 1 || zoneCaps[0].Name != "compute_zone" {
 		t.Fatalf("caps=%+v error=%v", zoneCaps, err)
 	}

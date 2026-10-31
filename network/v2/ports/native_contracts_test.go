@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/ports"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -68,7 +69,7 @@ func TestNativePortRoutesBodiesPagingAndDecode(t *testing.T) {
 	})
 	api := ports.New(nativePortClient(cloud))
 	ctx := context.Background()
-	created, err := api.Create(ctx, ports.CreateOpts{NetworkID: "n1", Name: "p", FixedIPs: []ports.IP{{SubnetID: "sn", IPAddress: "10.0.0.5"}}, SecurityGroups: &[]string{"sg"}, ValueSpecs: &map[string]string{"binding:host_id": "h"}}, ports.WithCreateField("x_extension", 1))
+	created, err := api.Create(ctx, ports.CreateOpts{NetworkID: "n1", Name: "p", FixedIPs: []ports.IP{{SubnetID: "sn", IPAddress: "10.0.0.5"}}, SecurityGroups: &[]string{"sg"}, ValueSpecs: &map[string]string{"binding:host_id": "h"}}, request.Field("x_extension", 1))
 	if err != nil || !(created.ID == "id-1" && created.MACAddress == "fa:16:3e:00:00:01" && created.FixedIPs[0].IPAddress == "10.0.0.5") {
 		t.Fatal(created, err)
 	}
@@ -77,7 +78,7 @@ func TestNativePortRoutesBodiesPagingAndDecode(t *testing.T) {
 		t.Fatal(got, err)
 	}
 	var rows []*ports.Port
-	for value, err := range api.List(ctx, ports.WithListOptions(ports.ListOpts{NetworkID: "n1", DeviceOwner: "compute:nova", FixedIPs: []ports.FixedIPOpts{{IPAddress: "10.0.0.5", SubnetID: "sn"}}, SecurityGroups: []string{"sg1", "sg2"}}), ports.WithListQuery("extra", "1")) {
+	for value, err := range api.List(ctx, ports.WithListOptions(ports.ListOpts{NetworkID: "n1", DeviceOwner: "compute:nova", FixedIPs: []ports.FixedIPOpts{{IPAddress: "10.0.0.5", SubnetID: "sn"}}, SecurityGroups: []string{"sg1", "sg2"}}), request.Query("extra", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -172,7 +173,7 @@ func TestNativePortStrictStatusesAndPreflight(t *testing.T) {
 				return err
 			},
 			"network_id extension": func() error {
-				_, err := api.Create(ctx, ports.CreateOpts{NetworkID: "n"}, ports.WithCreateField("network_id", "x"))
+				_, err := api.Create(ctx, ports.CreateOpts{NetworkID: "n"}, request.Field("network_id", "x"))
 				return err
 			},
 			"nil option": func() error { _, err := api.Create(ctx, ports.CreateOpts{NetworkID: "n"}, nil); return err },

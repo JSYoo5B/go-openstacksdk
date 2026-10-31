@@ -96,7 +96,7 @@ func WithFloatingIPAddress(address string) CreateFloatingIPOption {
 // WithFloatingIPField adds an extension inside the floatingip object. Values
 // are snapshotted, and core input fields cannot overwrite workflow selections.
 func WithFloatingIPField(key string, value any) CreateFloatingIPOption {
-	field := floatingipapi.WithCreateField(key, value)
+	field := request.Field(key, value)
 	return func(o *createFloatingIPOptions) error {
 		o.fields = append(o.fields, field)
 		return nil
@@ -123,7 +123,7 @@ func floatingIPInvalid(format string, args ...any) error {
 }
 
 func (o *createFloatingIPOptions) validateFields() error {
-	configuration, err := request.Apply(o.base, o.fields...)
+	configuration, err := request.ApplyCalls(o.base, request.Capabilities{Unchecked: true}, o.fields...)
 	if err != nil {
 		return err
 	}

@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v2/tokens"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -62,7 +63,7 @@ func TestNativeV2TokenRoutesBodiesAndAccessDecode(t *testing.T) {
 		}
 		return 200, nativeV2TokenAccess
 	})
-	password, err := api.Create(ctx, tokens.AuthOptions{Username: "alice", Password: "secret", TenantID: "t-1", TokenID: "dropped"}, tokens.WithCreateField("x_extension", 1))
+	password, err := api.Create(ctx, tokens.AuthOptions{Username: "alice", Password: "secret", TenantID: "t-1", TokenID: "dropped"}, request.Field("x_extension", 1))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -183,9 +184,9 @@ func TestNativeV2TokenStatusesDecodeAndPreflight(t *testing.T) {
 		for name, err := range map[string]error{
 			"password without username": func() error { _, err := api.Create(ctx, tokens.AuthOptions{Password: "secret"}); return err }(),
 			"no password or token":      func() error { _, err := api.Create(ctx, tokens.AuthOptions{Username: "alice"}); return err }(),
-			"core extension":            func() error { _, err := api.Create(ctx, valid, tokens.WithCreateField("tenantName", "x")); return err }(),
+			"core extension":            func() error { _, err := api.Create(ctx, valid, request.Field("tenantName", "x")); return err }(),
 			"envelope collision": func() error {
-				_, err := api.Create(ctx, valid, tokens.WithCreateField("passwordCredentials", map[string]string{}))
+				_, err := api.Create(ctx, valid, request.Field("passwordCredentials", map[string]string{}))
 				return err
 			}(),
 			"nil option": func() error { _, err := api.Create(ctx, valid, nil); return err }(),
@@ -199,7 +200,7 @@ func TestNativeV2TokenStatusesDecodeAndPreflight(t *testing.T) {
 			t.Fatal(calls)
 		}
 		// token is not a declared AuthOptions field, so it may be merged beside passwordCredentials.
-		if _, err := api.Create(ctx, valid, tokens.WithCreateField("token", map[string]string{"id": "x"})); err != nil {
+		if _, err := api.Create(ctx, valid, request.Field("token", map[string]string{"id": "x"})); err != nil {
 			t.Fatal(err)
 		}
 		if len(calls) != 1 || calls[0].body != `{"auth":{"passwordCredentials":{"password":"secret","username":"alice"},"token":{"id":"x"}}}` {

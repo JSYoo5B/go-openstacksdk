@@ -44,11 +44,10 @@ type UpdateOpts = upstream.UpdateOpts
 type UpdateResult = upstream.UpdateResult
 type UpgradeOpts = upstream.UpgradeOpts
 type UpgradeResult = upstream.UpgradeResult
-type CreateOption = request.Option[CreateOpts]
+type CreateOption = request.NativeFieldCall
 
-func WithCreateOptions(value CreateOpts) CreateOption { return request.WithOptions(value) }
-func WithCreateField(key string, value any) CreateOption {
-	return request.WithField[CreateOpts](key, value)
+func WithCreateOptions(value CreateOpts) CreateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type createOptsBuilder struct {
@@ -72,13 +71,8 @@ func (b createOptsBuilder) ToClusterCreateMap() (map[string]any, error) {
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (string, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Create", "clusters", err)
-		var zero0 string
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Create", "clusters", err)
 		var zero0 string
 		return zero0, err
@@ -103,10 +97,9 @@ func (a *API) Get(ctx context.Context, id string) (*Cluster, error) {
 	return value0, err
 }
 
-type ListOption = request.Option[ListOpts]
+type ListOption = request.NativeQueryCall
 
-func WithListOptions(value ListOpts) ListOption  { return request.WithOptions(value) }
-func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
+func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
 	base   ListOpts
@@ -130,12 +123,8 @@ func (b listOptsBuilder) ToClustersListQuery() (string, error) {
 // List invokes the upstream API with library-owned builders and result handling.
 func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Cluster, error] {
 	var opts ListOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("List", "clusters", err)
-		return func(yield func(*Cluster, error) bool) { var zero *Cluster; yield(zero, err) }
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("List", "clusters", err)
 		return func(yield func(*Cluster, error) bool) { var zero *Cluster; yield(zero, err) }
 	}
@@ -146,11 +135,10 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Cluste
 	})
 }
 
-type ListDetailOption = request.Option[ListOpts]
+type ListDetailOption = request.NativeQueryCall
 
-func WithListDetailOptions(value ListOpts) ListDetailOption { return request.WithOptions(value) }
-func WithListDetailQuery(key, value string) ListDetailOption {
-	return request.WithQuery[ListOpts](key, value)
+func WithListDetailOptions(value ListOpts) ListDetailOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type listDetailOptsBuilder struct {
@@ -179,12 +167,8 @@ func (a *API) ListDetail(ctx context.Context, options ...ListDetailOption) iter.
 
 func (a *API) listDetailWithControl(ctx context.Context, control resource.ListControl, options ...ListDetailOption) iter.Seq2[*Cluster, error] {
 	var opts ListOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("ListDetail", "clusters", err)
-		return func(yield func(*Cluster, error) bool) { var zero *Cluster; yield(zero, err) }
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("ListDetail", "clusters", err)
 		return func(yield func(*Cluster, error) bool) { var zero *Cluster; yield(zero, err) }
 	}
@@ -195,11 +179,10 @@ func (a *API) listDetailWithControl(ctx context.Context, control resource.ListCo
 	}, control)
 }
 
-type ResizeOption = request.Option[ResizeOpts]
+type ResizeOption = request.NativeFieldCall
 
-func WithResizeOptions(value ResizeOpts) ResizeOption { return request.WithOptions(value) }
-func WithResizeField(key string, value any) ResizeOption {
-	return request.WithField[ResizeOpts](key, value)
+func WithResizeOptions(value ResizeOpts) ResizeOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type resizeOptsBuilder struct {
@@ -223,13 +206,8 @@ func (b resizeOptsBuilder) ToClusterResizeMap() (map[string]any, error) {
 
 // Resize invokes the upstream API with library-owned builders and result handling.
 func (a *API) Resize(ctx context.Context, id string, opts ResizeOpts, options ...ResizeOption) (string, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Resize", "clusters", err)
-		var zero0 string
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Resize", "clusters", err)
 		var zero0 string
 		return zero0, err
@@ -249,11 +227,10 @@ func (a *API) Update(ctx context.Context, id string, opts []UpdateOpts) (string,
 	return value0, err
 }
 
-type UpgradeOption = request.Option[UpgradeOpts]
+type UpgradeOption = request.NativeFieldCall
 
-func WithUpgradeOptions(value UpgradeOpts) UpgradeOption { return request.WithOptions(value) }
-func WithUpgradeField(key string, value any) UpgradeOption {
-	return request.WithField[UpgradeOpts](key, value)
+func WithUpgradeOptions(value UpgradeOpts) UpgradeOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type upgradeOptsBuilder struct {
@@ -277,13 +254,8 @@ func (b upgradeOptsBuilder) ToClustersUpgradeMap() (map[string]any, error) {
 
 // Upgrade invokes the upstream API with library-owned builders and result handling.
 func (a *API) Upgrade(ctx context.Context, id string, opts UpgradeOpts, options ...UpgradeOption) (string, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Upgrade", "clusters", err)
-		var zero0 string
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Upgrade", "clusters", err)
 		var zero0 string
 		return zero0, err

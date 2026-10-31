@@ -24,11 +24,10 @@ const EC2CredentialsHmacSha1V2 = upstream.EC2CredentialsHmacSha1V2
 const EC2CredentialsHmacSha256V2 = upstream.EC2CredentialsHmacSha256V2
 const EC2CredentialsTimestampFormatV4 = upstream.EC2CredentialsTimestampFormatV4
 
-type CreateOption = request.Option[*AuthOptions]
+type CreateOption = request.NativeFieldCall
 
-func WithCreateOptions(value *AuthOptions) CreateOption { return request.WithOptions(value) }
-func WithCreateField(key string, value any) CreateOption {
-	return request.WithField[*AuthOptions](key, value)
+func WithCreateOptions(value *AuthOptions) CreateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type createOptsBuilder struct {
@@ -71,13 +70,8 @@ func (b createOptsBuilder) ToTokenV3ScopeMap() (map[string]any, error) {
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts *AuthOptions, options ...CreateOption) (*tokens.Token, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Create", "ec2tokens", err)
-		var zero0 *tokens.Token
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Create", "ec2tokens", err)
 		var zero0 *tokens.Token
 		return zero0, err
@@ -89,13 +83,10 @@ func (a *API) Create(ctx context.Context, opts *AuthOptions, options ...CreateOp
 	return value0, err
 }
 
-type ValidateS3TokenOption = request.Option[*AuthOptions]
+type ValidateS3TokenOption = request.NativeFieldCall
 
 func WithValidateS3TokenOptions(value *AuthOptions) ValidateS3TokenOption {
-	return request.WithOptions(value)
-}
-func WithValidateS3TokenField(key string, value any) ValidateS3TokenOption {
-	return request.WithField[*AuthOptions](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type validateS3TokenOptsBuilder struct {
@@ -138,13 +129,8 @@ func (b validateS3TokenOptsBuilder) ToTokenV3ScopeMap() (map[string]any, error) 
 
 // ValidateS3Token invokes the upstream API with library-owned builders and result handling.
 func (a *API) ValidateS3Token(ctx context.Context, opts *AuthOptions, options ...ValidateS3TokenOption) (*tokens.Token, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("ValidateS3Token", "ec2tokens", err)
-		var zero0 *tokens.Token
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("ValidateS3Token", "ec2tokens", err)
 		var zero0 *tokens.Token
 		return zero0, err

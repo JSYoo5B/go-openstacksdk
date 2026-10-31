@@ -62,13 +62,10 @@ const TemplateTypeCFn = upstream.TemplateTypeCFn
 const TemplateTypeHOT = upstream.TemplateTypeHOT
 const UntypedProperty = upstream.UntypedProperty
 
-type GenerateTemplateOption = request.Option[GenerateTemplateOpts]
+type GenerateTemplateOption = request.NativeQueryCall
 
 func WithGenerateTemplateOptions(value GenerateTemplateOpts) GenerateTemplateOption {
-	return request.WithOptions(value)
-}
-func WithGenerateTemplateQuery(key, value string) GenerateTemplateOption {
-	return request.WithQuery[GenerateTemplateOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type generateTemplateOptsBuilder struct {
@@ -92,13 +89,8 @@ func (b generateTemplateOptsBuilder) ToGenerateTemplateQuery() (string, error) {
 
 // GenerateTemplate invokes the upstream API with library-owned builders and result handling.
 func (a *API) GenerateTemplate(ctx context.Context, resourceType string, opts GenerateTemplateOpts, options ...GenerateTemplateOption) (map[string]any, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("GenerateTemplate", "resourcetypes", err)
-		var zero0 map[string]any
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("GenerateTemplate", "resourcetypes", err)
 		var zero0 map[string]any
 		return zero0, err
@@ -118,10 +110,9 @@ func (a *API) GetSchema(ctx context.Context, resourceType string) (ResourceSchem
 	return value0, err
 }
 
-type ListOption = request.Option[ListOpts]
+type ListOption = request.NativeQueryCall
 
-func WithListOptions(value ListOpts) ListOption  { return request.WithOptions(value) }
-func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
+func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
 	base   ListOpts
@@ -145,13 +136,8 @@ func (b listOptsBuilder) ToResourceTypeListQuery() (string, error) {
 // List invokes the upstream API with library-owned builders and result handling.
 func (a *API) List(ctx context.Context, options ...ListOption) ([]ResourceTypeSummary, error) {
 	var opts ListOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("List", "resourcetypes", err)
-		var zero0 []ResourceTypeSummary
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("List", "resourcetypes", err)
 		var zero0 []ResourceTypeSummary
 		return zero0, err

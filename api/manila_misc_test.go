@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/apiversions"
 	"github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/availabilityzones"
@@ -35,7 +36,7 @@ func TestManilaMiscServicesListUsesQueryExtensionBecauseTypedFiltersAreNotEncode
 	// are not serialized; WithListQuery is the working filter path.
 	for value, err := range api.List(context.Background(),
 		services.WithListOptions(services.ListOpts{Host: "typed-host", Binary: "typed-binary", State: "up"}),
-		services.WithListQuery("host", "h1@lvm")) {
+		request.Query("host", "h1@lvm")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -90,12 +91,12 @@ func TestManilaMiscSchedulerStatsListAndDetailRoutesParseCapacity(t *testing.T) 
 	})
 	api := schedulerstats.New(newManilaSupportClient(cloud))
 	ctx := context.Background()
-	for value, err := range api.List(ctx, schedulerstats.WithListOptions(schedulerstats.ListOpts{PoolName: "typed"}), schedulerstats.WithListQuery("pool_name", "pool")) {
+	for value, err := range api.List(ctx, schedulerstats.WithListOptions(schedulerstats.ListOpts{PoolName: "typed"}), request.Query("pool_name", "pool")) {
 		if err != nil || value.Name != "h1@lvm#pool" || value.Backend != "lvm" || value.Capabilities.VendorName != "" {
 			t.Fatalf("value=%+v error=%v", value, err)
 		}
 	}
-	for value, err := range api.ListDetail(ctx, schedulerstats.WithListDetailQuery("backend_name", "lvm")) {
+	for value, err := range api.ListDetail(ctx, request.Query("backend_name", "lvm")) {
 		c := value.Capabilities
 		if err != nil || c.Qos || c.SnapshotSupport || !math.IsInf(c.TotalCapacityGB, 1) || c.FreeCapacityGB != 12.5 || c.AllocatedCapacityGB != 0 || c.ReservedPercentage != 5 || c.VendorName != "Open Source" {
 			t.Fatalf("value=%+v error=%v", value, err)
@@ -213,7 +214,7 @@ func TestManilaMiscMessagesGetListDeleteAndMissingPolicies(t *testing.T) {
 	_, err = api.Get(ctx, "missing")
 	manilaSupportUnexpected(t, err, 404)
 	var ids []string
-	for value, err := range api.List(ctx, messages.WithListOptions(messages.ListOpts{ResourceType: "SHARE", SortKey: "created_at", SortDir: "desc", Limit: 5}), messages.WithListQuery("vendor", "x")) {
+	for value, err := range api.List(ctx, messages.WithListOptions(messages.ListOpts{ResourceType: "SHARE", SortKey: "created_at", SortDir: "desc", Limit: 5}), request.Query("vendor", "x")) {
 		if err != nil {
 			t.Fatal(err)
 		}

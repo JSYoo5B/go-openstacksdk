@@ -15,10 +15,10 @@ import (
 
 func WithQuotaOptions(options UpdateOpts) UpdateOption {
 	snapshot := cloneQuotaOptions(options)
-	return func(config *request.Config[UpdateOpts]) error {
+	return request.Custom(func(config *request.Config[UpdateOpts]) error {
 		config.Options = cloneQuotaOptions(snapshot)
 		return nil
-	}
+	})
 }
 func cloneQuotaOptions(options UpdateOpts) UpdateOpts {
 	value := reflect.ValueOf(&options).Elem()
@@ -49,7 +49,7 @@ const defaultLimitsArgument = "quota_default_limits"
 // WithDefaultLimit sends explicit null for one limit, inheriting deployment
 // defaults. A supplied typed value for the same limit is a conflicting input.
 func WithDefaultLimit(limit QuotaLimit) UpdateOption {
-	return func(config *request.Config[UpdateOpts]) error {
+	return request.Custom(func(config *request.Config[UpdateOpts]) error {
 		if err := validateQuotaLimit(limit); err != nil {
 			return err
 		}
@@ -64,7 +64,7 @@ func WithDefaultLimit(limit QuotaLimit) UpdateOption {
 		}
 		config.Arguments[defaultLimitsArgument] = append(append([]QuotaLimit(nil), limits...), limit)
 		return nil
-	}
+	})
 }
 
 func validateQuotaLimit(limit QuotaLimit) error {
@@ -80,10 +80,7 @@ func (s *ProjectQuotaScope) Update(ctx context.Context, options UpdateOpts, with
 	if err := s.api.validateQuotaClient(ctx); err != nil {
 		return nil, quotaError("Update", s.projectID, err)
 	}
-	config, err := request.Apply(options, with...)
-	if err == nil {
-		err = request.ValidateCapabilities(config, true, false, false, defaultLimitsArgument, legacyKeysArgument)
-	}
+	config, err := request.ApplyCalls(options, request.Capabilities{Body: true, Arguments: []string{defaultLimitsArgument, legacyKeysArgument}}, with...)
 	if err != nil {
 		return nil, quotaError("Update", s.projectID, err)
 	}

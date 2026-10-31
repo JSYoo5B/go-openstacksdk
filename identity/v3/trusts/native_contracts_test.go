@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/trusts"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -71,7 +72,7 @@ func TestNativeTrustRoutesBodiesPagingAndDecode(t *testing.T) {
 		return 200, `{"trust":` + nativeTrustRow + `}`
 	})
 	expires := time.Date(2026, 10, 11, 1, 2, 3, 0, time.UTC)
-	created, err := api.Create(ctx, trusts.CreateOpts{TrusteeUserID: "bob", TrustorUserID: "alice", Impersonation: true, ProjectID: "p", RemainingUses: 3, Roles: []trusts.Role{{Name: "member"}}, ExpiresAt: &expires}, trusts.WithCreateField("x_extension", 1))
+	created, err := api.Create(ctx, trusts.CreateOpts{TrusteeUserID: "bob", TrustorUserID: "alice", Impersonation: true, ProjectID: "p", RemainingUses: 3, Roles: []trusts.Role{{Name: "member"}}, ExpiresAt: &expires}, request.Field("x_extension", 1))
 	if err != nil || !(created.ID == "tr-1" && created.Impersonation && created.RemainingUses == 3 && created.ExpiresAt.Equal(expires) && created.DeletedAt.IsZero()) {
 		t.Fatal(created, err)
 	}
@@ -85,7 +86,7 @@ func TestNativeTrustRoutesBodiesPagingAndDecode(t *testing.T) {
 		t.Fatal(got, err)
 	}
 	var ids []string
-	for value, err := range api.List(ctx, trusts.WithListOptions(trusts.ListOpts{TrustorUserID: "alice"}), trusts.WithListQuery("extra", "1")) {
+	for value, err := range api.List(ctx, trusts.WithListOptions(trusts.ListOpts{TrustorUserID: "alice"}), request.Query("extra", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -166,7 +167,7 @@ func TestNativeTrustStatusesAndPreflight(t *testing.T) {
 			"trustee": func() error { _, err := api.Create(ctx, trusts.CreateOpts{TrustorUserID: "alice"}); return err }(),
 			"trustor": func() error { _, err := api.Create(ctx, trusts.CreateOpts{TrusteeUserID: "bob"}); return err }(),
 			"core extension": func() error {
-				_, err := api.Create(ctx, valid, trusts.WithCreateField("impersonation", true))
+				_, err := api.Create(ctx, valid, request.Field("impersonation", true))
 				return err
 			}(),
 		} {

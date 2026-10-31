@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/hypervisors"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -75,7 +76,7 @@ func TestNativeHypervisorRoutesPagingAndDecode(t *testing.T) {
 	})
 	limit, marker, pattern, withServers := 1, "m", "cmp", false
 	var rows []*hypervisors.Hypervisor
-	for value, err := range api.List(ctx, hypervisors.WithListOptions(hypervisors.ListOpts{Limit: &limit, Marker: &marker, HypervisorHostnamePattern: &pattern, WithServers: &withServers}), hypervisors.WithListQuery("extra", "1")) {
+	for value, err := range api.List(ctx, hypervisors.WithListOptions(hypervisors.ListOpts{Limit: &limit, Marker: &marker, HypervisorHostnamePattern: &pattern, WithServers: &withServers}), request.Query("extra", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -96,7 +97,7 @@ func TestNativeHypervisorRoutesPagingAndDecode(t *testing.T) {
 		t.Fatal(got, err)
 	}
 	withServers = true
-	ext, err := api.GetExt(ctx, "hv-uuid", hypervisors.WithGetExtOptions(hypervisors.GetOpts{WithServers: &withServers}), hypervisors.WithGetExtQuery("extra", "1"))
+	ext, err := api.GetExt(ctx, "hv-uuid", hypervisors.WithGetExtOptions(hypervisors.GetOpts{WithServers: &withServers}), request.Query("extra", "1"))
 	if err != nil || ext.CPUInfo.Vendor != "Intel" || !reflect.DeepEqual(ext.CPUInfo.Features, []string{"vmx"}) {
 		t.Fatal(ext, err)
 	}
@@ -228,7 +229,7 @@ func TestNativeHypervisorStatusesDecodeAndPreflight(t *testing.T) {
 		api, _ := nativeHypervisorAPI(t, &calls, func(*http.Request) *http.Response { return nativeHypervisorWire(200, `{}`) })
 		_, err := api.GetExt(ctx, "hv", nil)
 		nativeHypervisorOperation(t, err, "GetExt")
-		_, err = api.GetExt(ctx, "hv", hypervisors.WithGetExtQuery(" ", "x"))
+		_, err = api.GetExt(ctx, "hv", request.Query(" ", "x"))
 		nativeHypervisorOperation(t, err, "GetExt")
 		for _, err := range api.List(ctx, nil) {
 			nativeHypervisorOperation(t, err, "List")

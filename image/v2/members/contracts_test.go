@@ -14,6 +14,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/image/v2/members"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -94,7 +95,7 @@ func TestNativeImageMembersRoutesBodiesAndDecode(t *testing.T) {
 	if err != nil || updated.Status != "pending" {
 		t.Fatal("native Update returns the decoded response, not the request", updated, err)
 	}
-	if _, err := api.Update(ctx, "img", "project", members.UpdateOpts{}, members.WithUpdateField("note", map[string]any{"n": 1})); err != nil {
+	if _, err := api.Update(ctx, "img", "project", members.UpdateOpts{}, request.Field("note", map[string]any{"n": 1})); err != nil {
 		t.Fatal(err)
 	}
 	if err := api.Delete(ctx, "img", "project"); err != nil {
@@ -185,7 +186,7 @@ func TestNativeImageMembersStrictStatusesAndPreflight(t *testing.T) {
 			return memberWire(200, memberRow), nil
 		}))
 		api := members.New(memberClient(cloud))
-		for _, option := range []members.UpdateOption{members.WithUpdateField("status", "x"), nil} {
+		for _, option := range []members.UpdateOption{request.Field("status", "x"), nil} {
 			_, err := api.Update(ctx, "img", "p", members.UpdateOpts{Status: "accepted"}, option)
 			memberOperation(t, err, "Update")
 			if requests.Load() != 0 {

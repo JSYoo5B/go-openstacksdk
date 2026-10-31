@@ -34,11 +34,10 @@ type Snapshot = upstream.Snapshot
 type SnapshotPage = upstream.SnapshotPage
 type UpdateMetadataOpts = upstream.UpdateMetadataOpts
 type UpdateMetadataResult = upstream.UpdateMetadataResult
-type CreateOption = request.Option[CreateOpts]
+type CreateOption = request.NativeFieldCall
 
-func WithCreateOptions(value CreateOpts) CreateOption { return request.WithOptions(value) }
-func WithCreateField(key string, value any) CreateOption {
-	return request.WithField[CreateOpts](key, value)
+func WithCreateOptions(value CreateOpts) CreateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type createOptsBuilder struct {
@@ -62,13 +61,8 @@ func (b createOptsBuilder) ToSnapshotCreateMap() (map[string]any, error) {
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*Snapshot, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Create", "snapshots", err)
-		var zero0 *Snapshot
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Create", "snapshots", err)
 		var zero0 *Snapshot
 		return zero0, err
@@ -93,10 +87,9 @@ func (a *API) Get(ctx context.Context, id string) (*Snapshot, error) {
 	return value0, err
 }
 
-type ListOption = request.Option[ListOpts]
+type ListOption = request.NativeQueryCall
 
-func WithListOptions(value ListOpts) ListOption  { return request.WithOptions(value) }
-func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
+func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
 	base   ListOpts
@@ -124,12 +117,8 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Snapsh
 
 func (a *API) listWithControl(ctx context.Context, control resource.ListControl, options ...ListOption) iter.Seq2[*Snapshot, error] {
 	var opts ListOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("List", "snapshots", err)
-		return func(yield func(*Snapshot, error) bool) { var zero *Snapshot; yield(zero, err) }
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("List", "snapshots", err)
 		return func(yield func(*Snapshot, error) bool) { var zero *Snapshot; yield(zero, err) }
 	}
@@ -140,13 +129,10 @@ func (a *API) listWithControl(ctx context.Context, control resource.ListControl,
 	}, control)
 }
 
-type UpdateMetadataOption = request.Option[UpdateMetadataOpts]
+type UpdateMetadataOption = request.NativeFieldCall
 
 func WithUpdateMetadataOptions(value UpdateMetadataOpts) UpdateMetadataOption {
-	return request.WithOptions(value)
-}
-func WithUpdateMetadataField(key string, value any) UpdateMetadataOption {
-	return request.WithField[UpdateMetadataOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type updateMetadataOptsBuilder struct {
@@ -170,13 +156,8 @@ func (b updateMetadataOptsBuilder) ToSnapshotUpdateMetadataMap() (map[string]any
 
 // UpdateMetadata invokes the upstream API with library-owned builders and result handling.
 func (a *API) UpdateMetadata(ctx context.Context, id string, opts UpdateMetadataOpts, options ...UpdateMetadataOption) (map[string]any, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("UpdateMetadata", "snapshots", err)
-		var zero0 map[string]any
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("UpdateMetadata", "snapshots", err)
 		var zero0 map[string]any
 		return zero0, err

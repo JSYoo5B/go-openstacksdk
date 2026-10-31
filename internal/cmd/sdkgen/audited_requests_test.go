@@ -103,7 +103,7 @@ func TestAuditedStartCallPreservesOnlyTheInspectedRequestPolicy(t *testing.T) {
 	for _, expected := range []string{
 		"startIntrospection(ctx,a.client,nodeID,_opts).ExtractErr()",
 		"upstream.AbortIntrospection(ctx,a.client,nodeID).ExtractErr()",
-		"ValidateCapabilities(cfg,false,true,false)",
+		"ApplyCalls(opts,request.Capabilities{Query:true},options...)",
 	} {
 		if !strings.Contains(generated, expected) {
 			t.Fatalf("missing %q in %s", expected, generated)

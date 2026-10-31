@@ -34,11 +34,10 @@ type GetResult = upstream.GetResult
 type KeyPair = upstream.KeyPair
 type KeyPairPage = upstream.KeyPairPage
 type ListOpts = upstream.ListOpts
-type CreateOption = request.Option[CreateOpts]
+type CreateOption = request.NativeFieldCall
 
-func WithCreateOptions(value CreateOpts) CreateOption { return request.WithOptions(value) }
-func WithCreateField(key string, value any) CreateOption {
-	return request.WithField[CreateOpts](key, value)
+func WithCreateOptions(value CreateOpts) CreateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type createOptsBuilder struct {
@@ -62,13 +61,8 @@ func (b createOptsBuilder) ToKeyPairCreateMap() (map[string]any, error) {
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*KeyPair, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Create", "keypairs", err)
-		var zero0 *KeyPair
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Create", "keypairs", err)
 		var zero0 *KeyPair
 		return zero0, err
@@ -80,11 +74,10 @@ func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOpti
 	return value0, err
 }
 
-type DeleteOption = request.Option[DeleteOpts]
+type DeleteOption = request.NativeQueryCall
 
-func WithDeleteOptions(value DeleteOpts) DeleteOption { return request.WithOptions(value) }
-func WithDeleteQuery(key, value string) DeleteOption {
-	return request.WithQuery[DeleteOpts](key, value)
+func WithDeleteOptions(value DeleteOpts) DeleteOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type deleteOptsBuilder struct {
@@ -109,12 +102,8 @@ func (b deleteOptsBuilder) ToKeyPairDeleteQuery() (string, error) {
 // Delete invokes the upstream API with library-owned builders and result handling.
 func (a *API) Delete(ctx context.Context, name string, options ...DeleteOption) error {
 	var opts DeleteOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("Delete", "keypairs", err)
-		return err
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("Delete", "keypairs", err)
 		return err
 	}
@@ -122,10 +111,9 @@ func (a *API) Delete(ctx context.Context, name string, options ...DeleteOption) 
 	return request.Wrap("Delete", "keypairs", upstream.Delete(ctx, a.client, name, _opts).ExtractErr())
 }
 
-type GetOption = request.Option[GetOpts]
+type GetOption = request.NativeQueryCall
 
-func WithGetOptions(value GetOpts) GetOption   { return request.WithOptions(value) }
-func WithGetQuery(key, value string) GetOption { return request.WithQuery[GetOpts](key, value) }
+func WithGetOptions(value GetOpts) GetOption { return request.Custom(request.WithOptions(value)) }
 
 type getOptsBuilder struct {
 	base   GetOpts
@@ -149,13 +137,8 @@ func (b getOptsBuilder) ToKeyPairGetQuery() (string, error) {
 // Get invokes the upstream API with library-owned builders and result handling.
 func (a *API) Get(ctx context.Context, name string, options ...GetOption) (*KeyPair, error) {
 	var opts GetOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("Get", "keypairs", err)
-		var zero0 *KeyPair
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("Get", "keypairs", err)
 		var zero0 *KeyPair
 		return zero0, err
@@ -167,10 +150,9 @@ func (a *API) Get(ctx context.Context, name string, options ...GetOption) (*KeyP
 	return value0, err
 }
 
-type ListOption = request.Option[ListOpts]
+type ListOption = request.NativeQueryCall
 
-func WithListOptions(value ListOpts) ListOption  { return request.WithOptions(value) }
-func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
+func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
 	base   ListOpts
@@ -198,12 +180,8 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*KeyPai
 
 func (a *API) listWithControl(ctx context.Context, control resource.ListControl, options ...ListOption) iter.Seq2[*KeyPair, error] {
 	var opts ListOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("List", "keypairs", err)
-		return func(yield func(*KeyPair, error) bool) { var zero *KeyPair; yield(zero, err) }
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("List", "keypairs", err)
 		return func(yield func(*KeyPair, error) bool) { var zero *KeyPair; yield(zero, err) }
 	}

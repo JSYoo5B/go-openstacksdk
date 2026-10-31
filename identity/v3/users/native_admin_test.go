@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/users"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -68,7 +69,7 @@ func TestNativeUserAdminRoutesBodiesPagingAndDecode(t *testing.T) {
 		return 200, `{"user":` + nativeUserRow + `}`
 	})
 	disabled, blank := false, ""
-	created, err := api.Create(ctx, users.CreateOpts{Name: "alice", DefaultProjectID: "p-1", Description: "desc", DomainID: "default", Enabled: &disabled, Password: "secret", Options: map[users.Option]any{users.IgnorePasswordExpiry: true}, Extra: map[string]any{"email": "a@example.com"}}, users.WithCreateField("x_extension", 1))
+	created, err := api.Create(ctx, users.CreateOpts{Name: "alice", DefaultProjectID: "p-1", Description: "desc", DomainID: "default", Enabled: &disabled, Password: "secret", Options: map[users.Option]any{users.IgnorePasswordExpiry: true}, Extra: map[string]any{"email": "a@example.com"}}, request.Field("x_extension", 1))
 	expires := time.Date(2026, 10, 11, 1, 2, 3, 0, time.UTC)
 	// password_expires_at is removed from Extra, while links has its own field.
 	if err != nil || !(created.ID == "u-1" && created.Enabled && created.PasswordExpiresAt.Equal(expires) && created.Options["ignore_password_expiry"] == true && reflect.DeepEqual(created.Extra, map[string]any{"email": "a@example.com"})) {
@@ -78,17 +79,17 @@ func TestNativeUserAdminRoutesBodiesPagingAndDecode(t *testing.T) {
 	if err != nil || got.DefaultProjectID != "p-1" {
 		t.Fatal(got, err)
 	}
-	if _, err := api.Update(ctx, "u-1", users.UpdateOpts{Description: &blank, Enabled: &disabled, Password: "new", Extra: map[string]any{"email": nil}}, users.WithUpdateField("x_extension", 2)); err != nil {
+	if _, err := api.Update(ctx, "u-1", users.UpdateOpts{Description: &blank, Enabled: &disabled, Password: "new", Extra: map[string]any{"email": nil}}, request.Field("x_extension", 2)); err != nil {
 		t.Fatal(err)
 	}
 	var rows []string
-	for value, err := range api.List(ctx, users.WithListOptions(users.ListOpts{DomainID: "default", Enabled: &disabled, IdPID: "idp", Name: "alice", PasswordExpiresAt: "lt:2026-10-11T00:00:00Z", ProtocolID: "saml2", UniqueID: "uid", Filters: map[string]string{"name__icontains": "al"}}), users.WithListQuery("x", "1")) {
+	for value, err := range api.List(ctx, users.WithListOptions(users.ListOpts{DomainID: "default", Enabled: &disabled, IdPID: "idp", Name: "alice", PasswordExpiresAt: "lt:2026-10-11T00:00:00Z", ProtocolID: "saml2", UniqueID: "uid", Filters: map[string]string{"name__icontains": "al"}}), request.Query("x", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}
 		rows = append(rows, fmt.Sprintf("%s/%t/%t", value.ID, value.Enabled, value.PasswordExpiresAt.IsZero()))
 	}
-	for value, err := range api.ListInGroup(ctx, "g-1", users.WithListInGroupOptions(users.ListOpts{Name: "bob"}), users.WithListInGroupQuery("x", "2")) {
+	for value, err := range api.ListInGroup(ctx, "g-1", users.WithListInGroupOptions(users.ListOpts{Name: "bob"}), request.Query("x", "2")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -230,11 +231,11 @@ func TestNativeUserAdminStatusesAndPreflight(t *testing.T) {
 		}{
 			"create name": {"Create", func() error { _, err := api.Create(ctx, users.CreateOpts{Password: "x"}); return err }()},
 			"create core extension": {"Create", func() error {
-				_, err := api.Create(ctx, users.CreateOpts{Name: "alice"}, users.WithCreateField("password", "x"))
+				_, err := api.Create(ctx, users.CreateOpts{Name: "alice"}, request.Field("password", "x"))
 				return err
 			}()},
 			"update extra collision": {"Update", func() error {
-				_, err := api.Update(ctx, "u-1", users.UpdateOpts{Extra: map[string]any{"email": "a"}}, users.WithUpdateField("email", "b"))
+				_, err := api.Update(ctx, "u-1", users.UpdateOpts{Extra: map[string]any{"email": "a"}}, request.Field("email", "b"))
 				return err
 			}()},
 			"update nil option": {"Update", func() error {

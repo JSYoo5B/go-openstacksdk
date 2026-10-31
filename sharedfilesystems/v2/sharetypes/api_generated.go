@@ -45,11 +45,10 @@ type ShowAccessResult = upstream.ShowAccessResult
 type UnsetExtraSpecsResult = upstream.UnsetExtraSpecsResult
 type UpdateOpts = upstream.UpdateOpts
 type UpdateResult = upstream.UpdateResult
-type AddAccessOption = request.Option[AccessOpts]
+type AddAccessOption = request.NativeFieldCall
 
-func WithAddAccessOptions(value AccessOpts) AddAccessOption { return request.WithOptions(value) }
-func WithAddAccessField(key string, value any) AddAccessOption {
-	return request.WithField[AccessOpts](key, value)
+func WithAddAccessOptions(value AccessOpts) AddAccessOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type addAccessOptsBuilder struct {
@@ -73,12 +72,8 @@ func (b addAccessOptsBuilder) ToAddAccessMap() (map[string]any, error) {
 
 // AddAccess invokes the upstream API with library-owned builders and result handling.
 func (a *API) AddAccess(ctx context.Context, id string, opts AccessOpts, options ...AddAccessOption) error {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("AddAccess", "sharetypes", err)
-		return err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("AddAccess", "sharetypes", err)
 		return err
 	}
@@ -86,11 +81,10 @@ func (a *API) AddAccess(ctx context.Context, id string, opts AccessOpts, options
 	return request.Wrap("AddAccess", "sharetypes", upstream.AddAccess(ctx, a.client, id, _opts).ExtractErr())
 }
 
-type CreateOption = request.Option[CreateOpts]
+type CreateOption = request.NativeFieldCall
 
-func WithCreateOptions(value CreateOpts) CreateOption { return request.WithOptions(value) }
-func WithCreateField(key string, value any) CreateOption {
-	return request.WithField[CreateOpts](key, value)
+func WithCreateOptions(value CreateOpts) CreateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type createOptsBuilder struct {
@@ -114,13 +108,8 @@ func (b createOptsBuilder) ToShareTypeCreateMap() (map[string]any, error) {
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*ShareType, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Create", "sharetypes", err)
-		var zero0 *ShareType
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Create", "sharetypes", err)
 		var zero0 *ShareType
 		return zero0, err
@@ -161,10 +150,9 @@ func (a *API) GetExtraSpecs(ctx context.Context, id string) (ExtraSpecs, error) 
 	return value0, err
 }
 
-type ListOption = request.Option[ListOpts]
+type ListOption = request.NativeQueryCall
 
-func WithListOptions(value ListOpts) ListOption  { return request.WithOptions(value) }
-func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
+func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
 	base   ListOpts
@@ -192,12 +180,8 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*ShareT
 
 func (a *API) listWithControl(ctx context.Context, control resource.ListControl, options ...ListOption) iter.Seq2[*ShareType, error] {
 	var opts ListOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("List", "sharetypes", err)
-		return func(yield func(*ShareType, error) bool) { var zero *ShareType; yield(zero, err) }
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("List", "sharetypes", err)
 		return func(yield func(*ShareType, error) bool) { var zero *ShareType; yield(zero, err) }
 	}
@@ -208,11 +192,10 @@ func (a *API) listWithControl(ctx context.Context, control resource.ListControl,
 	}, control)
 }
 
-type RemoveAccessOption = request.Option[AccessOpts]
+type RemoveAccessOption = request.NativeFieldCall
 
-func WithRemoveAccessOptions(value AccessOpts) RemoveAccessOption { return request.WithOptions(value) }
-func WithRemoveAccessField(key string, value any) RemoveAccessOption {
-	return request.WithField[AccessOpts](key, value)
+func WithRemoveAccessOptions(value AccessOpts) RemoveAccessOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type removeAccessOptsBuilder struct {
@@ -236,12 +219,8 @@ func (b removeAccessOptsBuilder) ToRemoveAccessMap() (map[string]any, error) {
 
 // RemoveAccess invokes the upstream API with library-owned builders and result handling.
 func (a *API) RemoveAccess(ctx context.Context, id string, opts AccessOpts, options ...RemoveAccessOption) error {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("RemoveAccess", "sharetypes", err)
-		return err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("RemoveAccess", "sharetypes", err)
 		return err
 	}
@@ -249,13 +228,10 @@ func (a *API) RemoveAccess(ctx context.Context, id string, opts AccessOpts, opti
 	return request.Wrap("RemoveAccess", "sharetypes", upstream.RemoveAccess(ctx, a.client, id, _opts).ExtractErr())
 }
 
-type SetExtraSpecsOption = request.Option[SetExtraSpecsOpts]
+type SetExtraSpecsOption = request.NativeFieldCall
 
 func WithSetExtraSpecsOptions(value SetExtraSpecsOpts) SetExtraSpecsOption {
-	return request.WithOptions(value)
-}
-func WithSetExtraSpecsField(key string, value any) SetExtraSpecsOption {
-	return request.WithField[SetExtraSpecsOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type setExtraSpecsOptsBuilder struct {
@@ -279,13 +255,8 @@ func (b setExtraSpecsOptsBuilder) ToShareTypeSetExtraSpecsMap() (map[string]any,
 
 // SetExtraSpecs invokes the upstream API with library-owned builders and result handling.
 func (a *API) SetExtraSpecs(ctx context.Context, id string, opts SetExtraSpecsOpts, options ...SetExtraSpecsOption) (ExtraSpecs, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("SetExtraSpecs", "sharetypes", err)
-		var zero0 ExtraSpecs
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("SetExtraSpecs", "sharetypes", err)
 		var zero0 ExtraSpecs
 		return zero0, err
@@ -310,11 +281,10 @@ func (a *API) UnsetExtraSpecs(ctx context.Context, id string, key string) error 
 	return request.Wrap("UnsetExtraSpecs", "sharetypes", upstream.UnsetExtraSpecs(ctx, a.client, id, key).ExtractErr())
 }
 
-type UpdateOption = request.Option[UpdateOpts]
+type UpdateOption = request.NativeFieldCall
 
-func WithUpdateOptions(value UpdateOpts) UpdateOption { return request.WithOptions(value) }
-func WithUpdateField(key string, value any) UpdateOption {
-	return request.WithField[UpdateOpts](key, value)
+func WithUpdateOptions(value UpdateOpts) UpdateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type updateOptsBuilder struct {
@@ -338,13 +308,8 @@ func (b updateOptsBuilder) ToShareTypeUpdateMap() (map[string]any, error) {
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ...UpdateOption) (*ShareType, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Update", "sharetypes", err)
-		var zero0 *ShareType
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Update", "sharetypes", err)
 		var zero0 *ShareType
 		return zero0, err

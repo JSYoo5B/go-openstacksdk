@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -106,7 +107,7 @@ func TestNativeTapMirrorRoutesBodiesPagingAndDecode(t *testing.T) {
 		}
 		return nativeTapWire(200, `{"tap_mirror":`+nativeTapRow+`}`)
 	})
-	created, err := api.Create(ctx, tapmirrors.CreateOpts{Name: "mirror", PortID: "p1", MirrorType: tapmirrors.MirrorTypeErspanv1, RemoteIP: "192.0.2.9", Directions: tapmirrors.Directions{In: 1, Out: 2}}, tapmirrors.WithCreateField("x_extension", 1))
+	created, err := api.Create(ctx, tapmirrors.CreateOpts{Name: "mirror", PortID: "p1", MirrorType: tapmirrors.MirrorTypeErspanv1, RemoteIP: "192.0.2.9", Directions: tapmirrors.Directions{In: 1, Out: 2}}, request.Field("x_extension", 1))
 	if err != nil || !(created.ID == "tm-1" && created.Directions.In == 1 && created.Directions.Out == 2) {
 		t.Fatal(created, err)
 	}
@@ -118,11 +119,11 @@ func TestNativeTapMirrorRoutesBodiesPagingAndDecode(t *testing.T) {
 		t.Fatal(got, err)
 	}
 	empty := ""
-	if _, err := api.Update(ctx, "tm-1", tapmirrors.UpdateOpts{Description: &empty}, tapmirrors.WithUpdateField("x_extension", 1)); err != nil {
+	if _, err := api.Update(ctx, "tm-1", tapmirrors.UpdateOpts{Description: &empty}, request.Field("x_extension", 1)); err != nil {
 		t.Fatal(err)
 	}
 	var rows []*tapmirrors.TapMirror
-	for value, err := range api.List(ctx, tapmirrors.WithListOptions(tapmirrors.ListOpts{PortID: "p1", MirrorType: tapmirrors.MirrorTypeGre}), tapmirrors.WithListQuery("extra", "1")) {
+	for value, err := range api.List(ctx, tapmirrors.WithListOptions(tapmirrors.ListOpts{PortID: "p1", MirrorType: tapmirrors.MirrorTypeGre}), request.Query("extra", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -185,7 +186,7 @@ func TestNativeTapMirrorStrictStatusesDecodeAndPreflight(t *testing.T) {
 		api, _ := nativeTapAPI(t, &calls, func(*http.Request) *http.Response { return nativeTapWire(201, `{}`) })
 		for operation, err := range map[string]error{
 			"Create": func() error {
-				_, err := api.Create(ctx, tapmirrors.CreateOpts{}, tapmirrors.WithCreateField("directions", nil))
+				_, err := api.Create(ctx, tapmirrors.CreateOpts{}, request.Field("directions", nil))
 				return err
 			}(),
 			"Update": func() error { _, err := api.Update(ctx, "tm-1", tapmirrors.UpdateOpts{}, nil); return err }(),

@@ -11,6 +11,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/placement/v1/allocations"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
@@ -127,7 +128,7 @@ func TestPythonAllocationManageExtensionPlacement(t *testing.T) {
 	api := pythonAllocationAPI(t, &calls, func(*http.Request) *http.Response { return pythonAllocationWire(204, "") })
 	consumer := allocations.UpdateOpts{Allocations: map[string]allocations.ProviderAllocationsOpts{}, ProjectID: "p-1", UserID: "u-1", ConsumerType: "INSTANCE"}
 	mappings := map[string][]string{"": {"rp-1"}}
-	if err := api.Manage(context.Background(), allocations.ManageOpts{"c-1": consumer, "c-2": consumer}, allocations.WithManageField("mappings", mappings)); err != nil {
+	if err := api.Manage(context.Background(), allocations.ManageOpts{"c-1": consumer, "c-2": consumer}, request.Field("mappings", mappings)); err != nil {
 		t.Fatal(err)
 	}
 	body, ok := pythonAllocationJSON(t, calls[0].body).(map[string]any)

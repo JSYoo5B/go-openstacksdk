@@ -24,13 +24,13 @@ func (a *API) newResources() *resource.Collection[AddressGroup] {
 			return addressGroupBodyFilterValue(record, key)
 		},
 		IterateBodyControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*resource.BodyRecord[AddressGroup], error] {
-			options := []ListOption{func(config *request.Config[ListOpts]) error {
+			options := []ListOption{request.Custom(func(config *request.Config[ListOpts]) error {
 				config.Query = make(url.Values, len(q))
 				for key, values := range q {
 					config.Query[key] = append([]string(nil), values...)
 				}
 				return nil
-			}}
+			})}
 			return a.listBodyWithControl(ctx, control, options...)
 		},
 		FilterDescriptor: &resource.FilterDescriptor{Query: map[string]string{"description": "description", "fields": "fields", "limit": "limit", "marker": "marker", "name": "name", "project_id": "project_id", "sort_dir": "sort_dir", "sort_key": "sort_key"}, Body: map[string]string{"addresses": "addresses", "id": "id", "tenant_id": "tenant_id"}, Reserved: []string{"allow_unknown_params", "base_path", "headers", "jmespath_filters", "max_items", "microversion", "paginated", "resource_type", "session"}},
@@ -47,22 +47,19 @@ func (a *API) newResources() *resource.Collection[AddressGroup] {
 		Delete:    func(ctx context.Context, id string) error { return a.Delete(ctx, string(id)) },
 		IterateControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*AddressGroup, error] {
 			q = maps.Clone(q)
-			options := []ListOption{func(config *request.Config[ListOpts]) error {
+			options := []ListOption{request.Custom(func(config *request.Config[ListOpts]) error {
 				config.Query = make(url.Values, len(q))
 				for key, values := range q {
 					config.Query[key] = append([]string(nil), values...)
 				}
 				return nil
-			}}
+			})}
 			return a.listWithControl(ctx, control, options...)
 		}})
 }
 func (a *API) listBodyWithControl(ctx context.Context, control resource.ListControl, options ...ListOption) iter.Seq2[*resource.BodyRecord[AddressGroup], error] {
 	var opts ListOpts
-	cfg, err := request.Apply(opts, options...)
-	if err == nil {
-		err = request.ValidateCapabilities(cfg, false, true, false)
-	}
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
 		err = request.Wrap("List", "addressgroups", err)
 		return func(yield func(*resource.BodyRecord[AddressGroup], error) bool) { yield(nil, err) }

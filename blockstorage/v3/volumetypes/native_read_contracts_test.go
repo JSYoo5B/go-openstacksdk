@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -80,7 +81,7 @@ func TestNativeVolumeTypeReadRoutesPagingAndDecode(t *testing.T) {
 		}
 		ids = append(ids, value.ID)
 	}
-	for _, err := range api.List(ctx, volumetypes.WithListOptions(volumetypes.ListOpts{Name: "ssd", IsPublic: volumetypes.VisibilityPrivate, Limit: 1}), volumetypes.WithListQuery("extra", "1")) {
+	for _, err := range api.List(ctx, volumetypes.WithListOptions(volumetypes.ListOpts{Name: "ssd", IsPublic: volumetypes.VisibilityPrivate, Limit: 1}), request.Query("extra", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}

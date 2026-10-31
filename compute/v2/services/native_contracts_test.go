@@ -14,6 +14,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/services"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -63,7 +64,7 @@ func TestNativeComputeServiceRoutesBodiesAndDecode(t *testing.T) {
 		return nativeComputeServiceWire(200, `{"services":[{"id":"svc-uuid","binary":"nova-compute","host":"cmp1","updated_at":null},{"id":4,"binary":"nova-scheduler","host":"ctl"}],"services_links":[{"rel":"next","href":"http://ignored/"}]}`)
 	})
 	var ids []string
-	for value, err := range api.List(ctx, services.WithListOptions(services.ListOpts{Binary: "nova-compute", Host: "cmp1"}), services.WithListQuery("extra", "1")) {
+	for value, err := range api.List(ctx, services.WithListOptions(services.ListOpts{Binary: "nova-compute", Host: "cmp1"}), request.Query("extra", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -72,7 +73,7 @@ func TestNativeComputeServiceRoutesBodiesAndDecode(t *testing.T) {
 	if !reflect.DeepEqual(ids, []string{"svc-uuid", "4"}) {
 		t.Fatal(ids)
 	}
-	updated, err := api.Update(ctx, "svc-uuid", services.UpdateOpts{Status: services.ServiceDisabled, DisabledReason: "maint", ForcedDown: true}, services.WithUpdateField("x_extension", 1))
+	updated, err := api.Update(ctx, "svc-uuid", services.UpdateOpts{Status: services.ServiceDisabled, DisabledReason: "maint", ForcedDown: true}, request.Field("x_extension", 1))
 	if err != nil || updated.Status != "disabled" || !updated.ForcedDown || updated.Zone != "nova" || !updated.UpdatedAt.Equal(time.Date(2026, 10, 1, 1, 2, 3, 0, time.UTC)) {
 		t.Fatal(updated, err)
 	}
@@ -80,7 +81,7 @@ func TestNativeComputeServiceRoutesBodiesAndDecode(t *testing.T) {
 	if _, err := api.Update(ctx, "svc-uuid", services.UpdateOpts{Status: services.ServiceEnabled}); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := api.Update(ctx, "svc-uuid", services.UpdateOpts{}, services.WithUpdateField("forced_down_extra", false)); err != nil {
+	if _, err := api.Update(ctx, "svc-uuid", services.UpdateOpts{}, request.Field("forced_down_extra", false)); err != nil {
 		t.Fatal(err)
 	}
 	if err := api.Delete(ctx, "svc-uuid"); err != nil {
@@ -177,7 +178,7 @@ func TestNativeComputeServiceStatusesDecodeAndPreflight(t *testing.T) {
 		var calls []nativeComputeServiceCall
 		api := nativeComputeServiceAPI(t, &calls, func(*http.Request) *http.Response { return nativeComputeServiceWire(200, `{}`) })
 		// Omitted core keys are still reserved.
-		_, err := api.Update(ctx, "svc", services.UpdateOpts{}, services.WithUpdateField("forced_down", false))
+		_, err := api.Update(ctx, "svc", services.UpdateOpts{}, request.Field("forced_down", false))
 		nativeComputeServiceOperation(t, err, "Update")
 		_, err = api.Update(ctx, "svc", services.UpdateOpts{}, nil)
 		nativeComputeServiceOperation(t, err, "Update")

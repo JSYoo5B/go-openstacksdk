@@ -9,6 +9,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stackevents"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -33,7 +34,7 @@ func TestHeatStackEventsPaginationUsesLastEventMarkerAndEmptyPage(t *testing.T) 
 			t.Errorf("unexpected marker: %s", r.URL)
 		}
 	})
-	values, err := heatEventScope(t, cloud).All(context.Background(), stackevents.WithListOptions(stackevents.ListOpts{Limit: 1}), stackevents.WithListQuery("nested_depth", "2"), stackevents.WithListHeader("X-Events", "all-pages"))
+	values, err := heatEventScope(t, cloud).All(context.Background(), stackevents.WithListOptions(stackevents.ListOpts{Limit: 1}), request.Query("nested_depth", "2"), stackevents.WithListHeader("X-Events", "all-pages"))
 	if err != nil || len(values) != 2 || values[0].ID != "first" || values[1].ID != "last" || values[0].Header.Get("X-Request-Id") != "page-" || values[1].Header.Get("X-Request-Id") != "page-first" || calls.Load() != 3 {
 		t.Fatalf("values=%v err=%v calls=%d", values, err, calls.Load())
 	}

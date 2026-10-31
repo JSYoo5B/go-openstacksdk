@@ -257,9 +257,9 @@ func Update(ctx context.Context, deps Dependencies, nameOrID string, update comp
 	}
 	if update.Description.IsSet() {
 		if text, ok := update.Description.Get(); ok {
-			updateOptions = append(updateOptions, servers.WithUpdateField("description", text))
+			updateOptions = append(updateOptions, request.Field("description", text))
 		} else {
-			updateOptions = append(updateOptions, servers.WithUpdateField("description", nil))
+			updateOptions = append(updateOptions, request.Field("description", nil))
 		}
 	}
 	if err := deps.Guard(ctx); err != nil {

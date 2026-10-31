@@ -20,6 +20,10 @@ type Capabilities struct {
 	Query     bool
 	Headers   bool
 	Arguments []string
+	// Unchecked skips the final ValidateCapabilities step, like Apply alone,
+	// for hand-written operations that validate the Config themselves. Body,
+	// Query, Headers and Arguments are then ignored.
+	Unchecked bool
 }
 
 // ApplyCalls builds an operation's Config from base and shared calls, in
@@ -58,6 +62,9 @@ func ApplyCalls[T any, C Call](base T, caps Capabilities, calls ...C) (Config[T]
 	v := reflect.ValueOf(c.Options)
 	if v.IsValid() && v.Kind() == reflect.Pointer && v.IsNil() {
 		return c, fmt.Errorf("%w: nil typed request options", resource.ErrInvalidOption)
+	}
+	if caps.Unchecked {
+		return c, nil
 	}
 	check := c
 	if jsonQuery {
@@ -112,7 +119,7 @@ func applyEntry[T any](c *Config[T], entry CallEntry, caps Capabilities, jsonQue
 			}
 			c.Query[entry.Key] = slices.Clone(entry.Values)
 		default:
-			if !caps.Query {
+			if !caps.Query && !caps.Unchecked {
 				// Reported after all calls, like other query extensions.
 				*jsonQuery = true
 				return nil

@@ -10,6 +10,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -94,7 +95,7 @@ func TestPythonBackupListDetailsAndQuery(t *testing.T) {
 			// backups(name="nightly", status="available", all_projects=True) maps all_projects to all_tenants=True.
 			name: "query", path: pythonBackupBase + "/detail", query: url.Values{"name": {"nightly"}, "status": {"available"}, "all_tenants": {"True"}},
 			list: func(api *backups.API) func(func(*backups.Backup, error) bool) {
-				return api.ListDetail(ctx, backups.WithListDetailQuery("name", "nightly"), backups.WithListDetailQuery("status", "available"), backups.WithListDetailQuery("all_tenants", "True"))
+				return api.ListDetail(ctx, request.Query("name", "nightly"), request.Query("status", "available"), request.Query("all_tenants", "True"))
 			},
 		},
 		{

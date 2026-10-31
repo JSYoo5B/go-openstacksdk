@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/limits"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -71,7 +72,7 @@ func TestNativeLimitRoutesBodiesPagingAndDecode(t *testing.T) {
 		return nativeLimitWire(200, `{"limit":`+nativeLimitRow+`}`)
 	})
 	second := limits.CreateOpts{ServiceID: "svc-1", ResourceName: "ram", DomainID: "d", RegionID: "RegionOne", Description: "x", ResourceLimit: 5}
-	created, err := api.BatchCreate(ctx, limits.BatchCreateOpts{nativeLimitCreate, second}, limits.WithBatchCreateField("x_extension", 1))
+	created, err := api.BatchCreate(ctx, limits.BatchCreateOpts{nativeLimitCreate, second}, request.Field("x_extension", 1))
 	if err != nil || !(len(created) == 2 && created[0].ID == "lim-1" && created[0].ResourceLimit == 10 && created[1].ID == "lim-2") {
 		t.Fatal(created, err)
 	}
@@ -88,11 +89,11 @@ func TestNativeLimitRoutesBodiesPagingAndDecode(t *testing.T) {
 		t.Fatal(model, err)
 	}
 	zero, empty := 0, ""
-	if _, err := api.Update(ctx, "lim-1", limits.UpdateOpts{Description: &empty, ResourceLimit: &zero}, limits.WithUpdateField("x_extension", 2)); err != nil {
+	if _, err := api.Update(ctx, "lim-1", limits.UpdateOpts{Description: &empty, ResourceLimit: &zero}, request.Field("x_extension", 2)); err != nil {
 		t.Fatal(err)
 	}
 	var ids []string
-	for value, err := range api.List(ctx, limits.WithListOptions(limits.ListOpts{RegionID: "RegionOne", ProjectID: "p", DomainID: "d", ServiceID: "svc-1", ResourceName: "cores"}), limits.WithListQuery("extra", "1")) {
+	for value, err := range api.List(ctx, limits.WithListOptions(limits.ListOpts{RegionID: "RegionOne", ProjectID: "p", DomainID: "d", ServiceID: "svc-1", ResourceName: "cores"}), request.Query("extra", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -220,11 +221,11 @@ func TestNativeLimitStatusesDecodeAndPreflight(t *testing.T) {
 			}()},
 			// The batch type is a slice, so only the existing root limits key is protected.
 			"limits extension": {"BatchCreate", func() error {
-				_, err := api.BatchCreate(ctx, limits.BatchCreateOpts{nativeLimitCreate}, limits.WithBatchCreateField("limits", nil))
+				_, err := api.BatchCreate(ctx, limits.BatchCreateOpts{nativeLimitCreate}, request.Field("limits", nil))
 				return err
 			}()},
 			"update core extension": {"Update", func() error {
-				_, err := api.Update(ctx, "lim-1", limits.UpdateOpts{}, limits.WithUpdateField("resource_limit", 1))
+				_, err := api.Update(ctx, "lim-1", limits.UpdateOpts{}, request.Field("resource_limit", 1))
 				return err
 			}()},
 			"batch nil option": {"BatchCreate", func() error {

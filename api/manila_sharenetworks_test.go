@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/sharenetworks"
 )
@@ -41,7 +42,7 @@ func TestManilaShareNetworkCreateSendsEmptyNameAndAccepts200Or202(t *testing.T) 
 		})
 		value, err := sharenetworks.New(newManilaSupportClient(cloud)).Create(context.Background(),
 			sharenetworks.CreateOpts{NeutronNetID: "net-1"},
-			sharenetworks.WithCreateField("vendor", map[string]bool{"on": false}))
+			request.Field("vendor", map[string]bool{"on": false}))
 		if tc.success != (err == nil) || calls.Load() != 1 {
 			t.Fatalf("status %d value=%+v error=%v calls=%d", tc.status, value, err, calls.Load())
 		}
@@ -64,18 +65,18 @@ func TestManilaShareNetworkRejectsProtectedOrNilOptionsBeforeHTTP(t *testing.T) 
 	ctx := context.Background()
 	for name, err := range map[string]error{
 		"create name": func() error {
-			_, err := api.Create(ctx, sharenetworks.CreateOpts{}, sharenetworks.WithCreateField("name", "shadow"))
+			_, err := api.Create(ctx, sharenetworks.CreateOpts{}, request.Field("name", "shadow"))
 			return err
 		}(),
 		"create nil": func() error { _, err := api.Create(ctx, sharenetworks.CreateOpts{}, nil); return err }(),
 		"update protected": func() error {
 			empty := ""
-			_, err := api.Update(ctx, "sn-1", sharenetworks.UpdateOpts{Name: &empty}, sharenetworks.WithUpdateField("name", "x"))
+			_, err := api.Update(ctx, "sn-1", sharenetworks.UpdateOpts{Name: &empty}, request.Field("name", "x"))
 			return err
 		}(),
 		"update nil": func() error { _, err := api.Update(ctx, "sn-1", sharenetworks.UpdateOpts{}, nil); return err }(),
 		"add protected": func() error {
-			_, err := api.AddSecurityService(ctx, "sn-1", sharenetworks.AddSecurityServiceOpts{SecurityServiceID: "a"}, sharenetworks.WithAddSecurityServiceField("security_service_id", "b"))
+			_, err := api.AddSecurityService(ctx, "sn-1", sharenetworks.AddSecurityServiceOpts{SecurityServiceID: "a"}, request.Field("security_service_id", "b"))
 			return err
 		}(),
 		"add nil": func() error {
@@ -83,7 +84,7 @@ func TestManilaShareNetworkRejectsProtectedOrNilOptionsBeforeHTTP(t *testing.T) 
 			return err
 		}(),
 		"remove protected": func() error {
-			_, err := api.RemoveSecurityService(ctx, "sn-1", sharenetworks.RemoveSecurityServiceOpts{SecurityServiceID: "a"}, sharenetworks.WithRemoveSecurityServiceField("security_service_id", "b"))
+			_, err := api.RemoveSecurityService(ctx, "sn-1", sharenetworks.RemoveSecurityServiceOpts{SecurityServiceID: "a"}, request.Field("security_service_id", "b"))
 			return err
 		}(),
 		"remove nil": func() error {
@@ -120,7 +121,7 @@ func TestManilaShareNetworkUpdateKeepsEmptyStringsAndAcceptsOnly200(t *testing.T
 		})
 		empty := ""
 		value, err := sharenetworks.New(newManilaSupportClient(cloud)).Update(context.Background(), "sn-1",
-			sharenetworks.UpdateOpts{Name: &empty, Description: &empty}, sharenetworks.WithUpdateField("vendor", nil))
+			sharenetworks.UpdateOpts{Name: &empty, Description: &empty}, request.Field("vendor", nil))
 		if tc.success != (err == nil) || (tc.success && value.ID != "sn-1") {
 			t.Fatalf("status %d value=%+v error=%v", tc.status, value, err)
 		}
@@ -204,8 +205,8 @@ func TestManilaShareNetworkSecurityServiceActionsSendEnvelopeAndRequire200(t *te
 			testcloud.JSON(w, tc.status, manilaShareNetworkBody)
 		})
 		api := sharenetworks.New(newManilaSupportClient(cloud))
-		added, addErr := api.AddSecurityService(context.Background(), "sn-1", sharenetworks.AddSecurityServiceOpts{SecurityServiceID: "ss-1"}, sharenetworks.WithAddSecurityServiceField("vendor", false))
-		removed, removeErr := api.RemoveSecurityService(context.Background(), "sn-1", sharenetworks.RemoveSecurityServiceOpts{}, sharenetworks.WithRemoveSecurityServiceField("vendor", 0))
+		added, addErr := api.AddSecurityService(context.Background(), "sn-1", sharenetworks.AddSecurityServiceOpts{SecurityServiceID: "ss-1"}, request.Field("vendor", false))
+		removed, removeErr := api.RemoveSecurityService(context.Background(), "sn-1", sharenetworks.RemoveSecurityServiceOpts{}, request.Field("vendor", 0))
 		if tc.success != (addErr == nil) || tc.success != (removeErr == nil) {
 			t.Fatalf("status %d add=%v remove=%v", tc.status, addErr, removeErr)
 		}
@@ -242,7 +243,7 @@ func TestManilaShareNetworkListDetailFiltersAndOffsetPaging(t *testing.T) {
 	var ids []string
 	for value, err := range api.ListDetail(context.Background(),
 		sharenetworks.WithListDetailOptions(sharenetworks.ListOpts{AllTenants: true, Name: "n", IPVersion: 4, SegmentationID: 100, Limit: 1}),
-		sharenetworks.WithListDetailQuery("vendor", "x")) {
+		request.Query("vendor", "x")) {
 		if err != nil {
 			t.Fatal(err)
 		}

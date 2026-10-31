@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
@@ -49,7 +50,7 @@ func TestNativeSecretMetadataRoutesBodiesAndDecode(t *testing.T) {
 	if err != nil || !reflect.DeepEqual(created, map[string]string{"metadata_ref": "https://kms/v1/secrets/s1/metadata"}) {
 		t.Fatal(created, err)
 	}
-	if _, err := api.CreateMetadata(ctx, "s1", secrets.MetadataOpts{"a": "1"}, secrets.WithCreateMetadataField("x_extension", 1)); err != nil {
+	if _, err := api.CreateMetadata(ctx, "s1", secrets.MetadataOpts{"a": "1"}, request.Field("x_extension", 1)); err != nil {
 		t.Fatal(err)
 	}
 	datum, err := api.GetMetadatum(ctx, "s1", "a")
@@ -59,7 +60,7 @@ func TestNativeSecretMetadataRoutesBodiesAndDecode(t *testing.T) {
 	if err := api.CreateMetadatum(ctx, "s1", secrets.MetadatumOpts{Key: "c", Value: "3"}); err != nil {
 		t.Fatal(err)
 	}
-	updated, err := api.UpdateMetadatum(ctx, "s1", secrets.MetadatumOpts{Key: "a", Value: "9"}, secrets.WithUpdateMetadatumField("x_extension", true))
+	updated, err := api.UpdateMetadatum(ctx, "s1", secrets.MetadatumOpts{Key: "a", Value: "9"}, request.Field("x_extension", true))
 	if err != nil || updated.Key != "a" || updated.Value != "1" {
 		t.Fatal("native update returns the decoded response", updated, err)
 	}
@@ -135,14 +136,14 @@ func TestNativeSecretMetadataStrictStatusesAndPreflight(t *testing.T) {
 				return err
 			},
 			"create datum key collision": func() error {
-				return api.CreateMetadatum(ctx, "s1", datum, secrets.WithCreateMetadatumField("key", "x"))
+				return api.CreateMetadatum(ctx, "s1", datum, request.Field("key", "x"))
 			},
 			"update datum value collision": func() error {
-				_, err := api.UpdateMetadatum(ctx, "s1", datum, secrets.WithUpdateMetadatumField("value", "x"))
+				_, err := api.UpdateMetadatum(ctx, "s1", datum, request.Field("value", "x"))
 				return err
 			},
 			"metadata envelope collision": func() error {
-				_, err := api.CreateMetadata(ctx, "s1", secrets.MetadataOpts{}, secrets.WithCreateMetadataField("metadata", map[string]string{}))
+				_, err := api.CreateMetadata(ctx, "s1", secrets.MetadataOpts{}, request.Field("metadata", map[string]string{}))
 				return err
 			},
 			"nil option": func() error { return api.CreateMetadatum(ctx, "s1", datum, nil) },

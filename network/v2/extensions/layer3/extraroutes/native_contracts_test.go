@@ -12,6 +12,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/extraroutes"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -45,7 +46,7 @@ func TestNativeExtraRoutesAddRemoveBodiesAndStatuses(t *testing.T) {
 	var calls []nativeRouteCall
 	api := nativeRouteAPI(t, 200, &calls)
 	routes := &[]routers.Route{{DestinationCIDR: "10.1.0.0/24", NextHop: "10.0.0.9"}}
-	added, err := api.Add(ctx, "r1", extraroutes.Opts{Routes: routes}, extraroutes.WithAddField("x_extension", 1))
+	added, err := api.Add(ctx, "r1", extraroutes.Opts{Routes: routes}, request.Field("x_extension", 1))
 	if err != nil || added.ID != "r1" || added.Routes[0].NextHop != "10.0.0.9" {
 		t.Fatal(added, err)
 	}
@@ -85,7 +86,7 @@ func TestNativeExtraRoutesAddRemoveBodiesAndStatuses(t *testing.T) {
 	api = nativeRouteAPI(t, 200, &calls)
 	for operation, err := range map[string]error{
 		"Add": func() error {
-			_, err := api.Add(ctx, "r1", extraroutes.Opts{}, extraroutes.WithAddField("routes", nil))
+			_, err := api.Add(ctx, "r1", extraroutes.Opts{}, request.Field("routes", nil))
 			return err
 		}(),
 		"Remove": func() error { _, err := api.Remove(ctx, "r1", extraroutes.Opts{}, nil); return err }(),

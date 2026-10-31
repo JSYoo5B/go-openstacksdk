@@ -16,6 +16,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/baremetal/v1/nodes"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -161,7 +162,7 @@ func TestIronicNodeCreateSendsFlatBodyKeepsFalseAndExtensions(t *testing.T) {
 	value, err := newIronicNodes(t, cloud).Create(context.Background(), nodes.CreateOpts{
 		Driver: "ipmi", Name: "bm-1", AutomatedClean: ironicNodeFalse(), DisablePowerOff: ironicNodeFalse(),
 		Extra: map[string]any{"rack": nil, "spare": false},
-	}, nodes.WithCreateField("vendor", map[string]any{"enabled": false}))
+	}, request.Field("vendor", map[string]any{"enabled": false}))
 	if err != nil || value == nil || value.UUID != "n-1" {
 		t.Fatalf("value=%+v error=%v", value, err)
 	}
@@ -191,7 +192,7 @@ func TestIronicNodeRejectsProtectedOrNilOptionsBeforeHTTP(t *testing.T) {
 	ironicNodeUnreachable(t, cloud)
 	api := newIronicNodes(t, cloud)
 	ctx := context.Background()
-	if _, err := api.Create(ctx, nodes.CreateOpts{Driver: "ipmi"}, nodes.WithCreateField("driver", "shadow")); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := api.Create(ctx, nodes.CreateOpts{Driver: "ipmi"}, request.Field("driver", "shadow")); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatalf("protected create field: %v", err)
 	}
 	if _, err := api.Create(ctx, nodes.CreateOpts{}, nil); !errors.Is(err, resource.ErrInvalidOption) {
@@ -348,7 +349,7 @@ func TestIronicNodeListFiltersFollowLinksAndKeepExplicitFalseQuery(t *testing.T)
 	var ids []string
 	for value, err := range newIronicNodes(t, cloud).List(context.Background(),
 		nodes.WithListOptions(nodes.ListOpts{Driver: "ipmi", ProvisionState: nodes.Available, Fields: []string{"uuid", "name"}, Limit: 1, Maintenance: false}),
-		nodes.WithListQuery("maintenance", "false"), nodes.WithListQuery("vendor", "x")) {
+		request.Query("maintenance", "false"), request.Query("vendor", "x")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -396,7 +397,7 @@ func TestIronicNodeListDetailUsesDetailRouteAndCommonLookups(t *testing.T) {
 	ironicNodeServe(t, cloud, "GET /v1/nodes/n-1", 200, `{"uuid":"n-1","name":"bm-1","provision_state":"active"}`)
 	api := newIronicNodes(t, cloud)
 	var ids []string
-	for value, err := range api.ListDetail(context.Background(), nodes.WithListDetailOptions(nodes.ListOpts{Owner: "proj"}), nodes.WithListDetailQuery("vendor", "x")) {
+	for value, err := range api.ListDetail(context.Background(), nodes.WithListDetailOptions(nodes.ListOpts{Owner: "proj"}), request.Query("vendor", "x")) {
 		if err != nil {
 			t.Fatal(err)
 		}

@@ -18,7 +18,7 @@ const legacyKeysArgument = "quota_legacy_keys"
 // names change: values, explicit null inheritance from WithDefaultLimit and
 // the other limits are serialized identically. The last option wins.
 func WithLegacyQuotaKeys(enabled bool) UpdateOption {
-	return request.WithArgument[UpdateOpts](legacyKeysArgument, enabled)
+	return request.Custom(request.WithArgument[UpdateOpts](legacyKeysArgument, enabled))
 }
 
 // applyLegacyQuotaKeys renames the canonical core keys in place when the

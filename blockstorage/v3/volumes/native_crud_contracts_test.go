@@ -15,6 +15,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -70,7 +71,7 @@ func TestNativeVolumeRoutesBodiesPagingAndDecode(t *testing.T) {
 		return nativeVolumeWire(200, `{"volume":`+nativeVolumeRow+`}`)
 	})
 	hostID := "0f2b8b8e-1c1a-4c1e-9b1a-0a0b0c0d0e0f"
-	created, err := api.Create(ctx, volumes.CreateOpts{Size: 10, Name: "data", ImageID: "img", Metadata: map[string]string{"k": "v"}}, volumes.WithCreateField("x_extension", 1), volumes.WithCreateHintOpts(volumes.SchedulerHintOpts{SameHost: []string{hostID}, Query: "q"}))
+	created, err := api.Create(ctx, volumes.CreateOpts{Size: 10, Name: "data", ImageID: "img", Metadata: map[string]string{"k": "v"}}, request.Field("x_extension", 1), volumes.WithCreateHintOpts(volumes.SchedulerHintOpts{SameHost: []string{hostID}, Query: "q"}))
 	if err != nil || !(created.ID == "vol-1" && created.BackupID == nil && created.TenantID == "project" && created.Attachments[0].AttachedAt.Second() == 3 && created.CreatedAt.Nanosecond() == 123456000 && created.UpdatedAt.IsZero()) {
 		t.Fatal(created, err)
 	}
@@ -83,12 +84,12 @@ func TestNativeVolumeRoutesBodiesPagingAndDecode(t *testing.T) {
 		t.Fatal(got, err)
 	}
 	empty := ""
-	if _, err := api.Update(ctx, "vol-1", volumes.UpdateOpts{Description: &empty, Metadata: map[string]string{"a": "b"}}, volumes.WithUpdateField("x_extension", 1)); err != nil {
+	if _, err := api.Update(ctx, "vol-1", volumes.UpdateOpts{Description: &empty, Metadata: map[string]string{"a": "b"}}, request.Field("x_extension", 1)); err != nil {
 		t.Fatal(err)
 	}
 	bootable := false
 	var rows []*volumes.Volume
-	for value, err := range api.List(ctx, volumes.WithListOptions(volumes.ListOpts{Name: "data", Metadata: map[string]string{"k": "v"}, Bootable: &bootable, AllTenants: true, Limit: 1}), volumes.WithListQuery("extra", "1")) {
+	for value, err := range api.List(ctx, volumes.WithListOptions(volumes.ListOpts{Name: "data", Metadata: map[string]string{"k": "v"}, Bootable: &bootable, AllTenants: true, Limit: 1}), request.Query("extra", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -97,7 +98,7 @@ func TestNativeVolumeRoutesBodiesPagingAndDecode(t *testing.T) {
 	if !(len(rows) == 2 && rows[0].ID == "vol-1" && rows[1].ID == "vol-2" && rows[1].Metadata == nil) {
 		t.Fatal(rows)
 	}
-	if err := api.Delete(ctx, "vol-1", volumes.WithDeleteOptions(volumes.DeleteOpts{Cascade: true}), volumes.WithDeleteQuery("force", "true")); err != nil {
+	if err := api.Delete(ctx, "vol-1", volumes.WithDeleteOptions(volumes.DeleteOpts{Cascade: true}), request.Query("force", "true")); err != nil {
 		t.Fatal(err)
 	}
 	if err := api.Delete(ctx, "vol-1"); err != nil {
@@ -218,11 +219,11 @@ func TestNativeVolumeStrictStatusesDecodeAndPreflight(t *testing.T) {
 				return err
 			}()},
 			"core extension": {"Create", func() error {
-				_, err := api.Create(ctx, volumes.CreateOpts{}, volumes.WithCreateField("size", 1))
+				_, err := api.Create(ctx, volumes.CreateOpts{}, request.Field("size", 1))
 				return err
 			}()},
 			"update nil option":  {"Update", func() error { _, err := api.Update(ctx, "vol-1", volumes.UpdateOpts{}, nil); return err }()},
-			"delete empty query": {"Delete", api.Delete(ctx, "vol-1", volumes.WithDeleteQuery("", "x"))},
+			"delete empty query": {"Delete", api.Delete(ctx, "vol-1", request.Query("", "x"))},
 		} {
 			if check.err == nil {
 				t.Fatal(name, "accepted")

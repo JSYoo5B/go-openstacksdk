@@ -23,6 +23,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/networks"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/ports"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/subnets"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -449,7 +450,7 @@ func TestPythonCloudFirewallGapsCreateRuleAndFindFallback(t *testing.T) {
 	if len(calls) != 0 {
 		t.Fatal("no HTTP expected", calls)
 	}
-	rule, err := fwrules.New(client).Create(ctx, fwrules.CreateOpts{Name: "ssh", Protocol: fwrules.ProtocolTCP, Action: fwrules.ActionAllow}, fwrules.WithCreateField("source_firewall_group_id", "g1"))
+	rule, err := fwrules.New(client).Create(ctx, fwrules.CreateOpts{Name: "ssh", Protocol: fwrules.ProtocolTCP, Action: fwrules.ActionAllow}, request.Field("source_firewall_group_id", "g1"))
 	if err != nil || rule.ID != "r1" {
 		t.Fatal(rule, err)
 	}

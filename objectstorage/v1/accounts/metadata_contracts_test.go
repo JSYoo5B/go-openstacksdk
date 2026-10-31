@@ -14,6 +14,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -725,7 +726,7 @@ func TestAccountMetadataContractsSourceAndNativePolicy(t *testing.T) {
 			t.Fatalf("native Get=%+v err=%v", get, err)
 		}
 		var update *accounts.UpdateHeader
-		update, err = api.Update(context.Background(), accounts.UpdateOpts{Metadata: map[string]string{"Book": "native"}}, accounts.WithUpdateHeader("X-Trace", "native"))
+		update, err = api.Update(context.Background(), accounts.UpdateOpts{Metadata: map[string]string{"Book": "native"}}, request.Header("X-Trace", "native"))
 		if err != nil || update == nil {
 			t.Fatalf("native202 Update=%+v err=%v", update, err)
 		}

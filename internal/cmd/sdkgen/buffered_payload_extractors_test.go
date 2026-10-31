@@ -159,7 +159,7 @@ func TestBufferedPayloadActualNativeFamiliesAndFacades(t *testing.T) {
 				if opens != 0 || len(returns) != 2 || bufferedPayloadFormat(t, returns[0].Type) != "[]byte" || bufferedPayloadFormat(t, returns[1].Type) != "error" {
 					t.Fatal("payload was wrapped as a stream", method.Type.Results, opens)
 				}
-				for _, name := range []string{"GetPayloadOption", "WithGetPayloadOptions", "WithGetPayloadHeader"} {
+				for _, name := range []string{"GetPayloadOption", "WithGetPayloadOptions"} {
 					if emitted[name] == nil {
 						t.Fatal("existing option helper lost", name)
 					}

@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -54,7 +55,7 @@ func TestPythonParityCoreAgentListQueryAndLinks(t *testing.T) {
 	var rows []*agents.Agent
 	for value, err := range api.List(ctx,
 		agents.WithListOptions(agents.ListOpts{AgentType: "DHCP agent", Host: "net-1", Alive: &alive}),
-		agents.WithListQuery("admin_state_up", "False")) {
+		request.Query("admin_state_up", "False")) {
 		if err != nil {
 			t.Fatal(err)
 		}

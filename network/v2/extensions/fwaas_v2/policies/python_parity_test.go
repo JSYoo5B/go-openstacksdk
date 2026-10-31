@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -94,7 +95,7 @@ func TestPythonFirewallPolicyProxyParity(t *testing.T) {
 			return pythonFWPolicyWire(201, `{"firewall_policy":`+pythonFWPolicyRow+`}`)
 		})
 		// create_firewall_policy(name="web", shared=True, audited=False, firewall_rules=["r1","r2"], x_extension=1)
-		created, err := api.Create(ctx, policies.CreateOpts{Name: "web", Shared: pythonFWPolicyBool(true), Audited: pythonFWPolicyBool(false), FirewallRules: []string{"r1", "r2"}}, policies.WithCreateField("x_extension", 1))
+		created, err := api.Create(ctx, policies.CreateOpts{Name: "web", Shared: pythonFWPolicyBool(true), Audited: pythonFWPolicyBool(false), FirewallRules: []string{"r1", "r2"}}, request.Field("x_extension", 1))
 		if err != nil || created.ID != "fp-1" || !created.Shared || created.Audited || !reflect.DeepEqual(created.Rules, []string{"r1", "r2"}) {
 			t.Fatal(created, err)
 		}
@@ -167,7 +168,7 @@ func TestPythonFirewallPolicyProxyParity(t *testing.T) {
 		})
 		// firewall_policies(name="web", project_id="proj", shared=True, firewall_rules="r1", fields="id")
 		var ids []string
-		for value, err := range api.List(ctx, policies.WithListOptions(policies.ListOpts{Name: "web", ProjectID: "proj"}), policies.WithListQuery("shared", "True"), policies.WithListQuery("firewall_rules", "r1"), policies.WithListQuery("fields", "id")) {
+		for value, err := range api.List(ctx, policies.WithListOptions(policies.ListOpts{Name: "web", ProjectID: "proj"}), request.Query("shared", "True"), request.Query("firewall_rules", "r1"), request.Query("fields", "id")) {
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -224,7 +225,7 @@ func TestPythonFirewallPolicyRuleActions(t *testing.T) {
 				if _, err := api.InsertRule(ctx, "fp-1", opts); err == nil || len(recorder.snapshot()) != 0 {
 					t.Fatal(err, recorder.snapshot())
 				}
-				if _, err := api.InsertRule(ctx, "fp-1", opts, policies.WithInsertRuleField("insert_before", nil)); err == nil || len(recorder.snapshot()) != 0 {
+				if _, err := api.InsertRule(ctx, "fp-1", opts, request.Field("insert_before", nil)); err == nil || len(recorder.snapshot()) != 0 {
 					t.Fatal(err, recorder.snapshot())
 				}
 			})

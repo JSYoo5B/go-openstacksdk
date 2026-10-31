@@ -17,6 +17,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -86,7 +87,7 @@ func TestNativeObjectCreateUpdateDeleteHeadersAndEscaping(t *testing.T) {
 		return nativeObjectReply{201, http.Header{"Etag": {"x"}, "Last-Modified": {"Sun, 11 Oct 2026 01:02:03 GMT"}}, ""}
 	})
 	sum := fmt.Sprintf("%x", md5.Sum([]byte("payload")))
-	created, err := api.Create(ctx, "my box", "dir/file?", objects.CreateOpts{Content: strings.NewReader("payload"), ContentType: "text/plain", Metadata: map[string]string{"Color": "blue"}, MultipartManifest: "put"}, objects.WithCreateHeader("X-Extra", "1"))
+	created, err := api.Create(ctx, "my box", "dir/file?", objects.CreateOpts{Content: strings.NewReader("payload"), ContentType: "text/plain", Metadata: map[string]string{"Color": "blue"}, MultipartManifest: "put"}, request.Header("X-Extra", "1"))
 	if err != nil || created.ETag != "x" || created.LastModified.Day() != 11 {
 		t.Fatal(created, err)
 	}
@@ -174,7 +175,7 @@ func TestNativeObjectListAndBulkDelete(t *testing.T) {
 		return nativeObjectReply{200, json, `[]`}
 	})
 	var rows []string
-	for value, err := range api.List(ctx, "my box", objects.WithListOptions(objects.ListOpts{Delimiter: "/", Versions: true}), objects.WithListQuery("extra", "1")) {
+	for value, err := range api.List(ctx, "my box", objects.WithListOptions(objects.ListOpts{Delimiter: "/", Versions: true}), request.Query("extra", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -328,7 +329,7 @@ func TestNativeObjectStatusesNamesAndPreflight(t *testing.T) {
 			"destination short": {"Copy", func() error { _, err := api.Copy(ctx, "c", "o", objects.CopyOpts{Destination: "/c"}); return err }()},
 			"bulk empty object": {"BulkDelete", func() error { _, err := api.BulkDelete(ctx, "c", []string{"o", ""}); return err }()},
 			"core header": {"Create", func() error {
-				_, err := api.Create(ctx, "c", "o", objects.CreateOpts{Content: strings.NewReader("")}, objects.WithCreateHeader("Content-Type", "x"))
+				_, err := api.Create(ctx, "c", "o", objects.CreateOpts{Content: strings.NewReader("")}, request.Header("Content-Type", "x"))
 				return err
 			}()},
 		} {

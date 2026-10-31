@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/networks"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -68,7 +69,7 @@ func TestNativeNetworkRoutesBodiesPagingAndDecode(t *testing.T) {
 	})
 	api := networks.New(nativeNetworkClient(cloud))
 	ctx := context.Background()
-	created, err := api.Create(ctx, networks.CreateOpts{Name: "net", AdminStateUp: gophercloud.Enabled, Shared: gophercloud.Enabled, AvailabilityZoneHints: []string{"az1"}}, networks.WithCreateField("mtu", 1450))
+	created, err := api.Create(ctx, networks.CreateOpts{Name: "net", AdminStateUp: gophercloud.Enabled, Shared: gophercloud.Enabled, AvailabilityZoneHints: []string{"az1"}}, request.Field("mtu", 1450))
 	if err != nil || !(created.ID == "id-1" && created.RevisionNumber == 3 && created.CreatedAt.Year() == 2026 && created.Shared) {
 		t.Fatal(created, err)
 	}
@@ -77,7 +78,7 @@ func TestNativeNetworkRoutesBodiesPagingAndDecode(t *testing.T) {
 		t.Fatal(got, err)
 	}
 	var rows []*networks.Network
-	for value, err := range api.List(ctx, networks.WithListOptions(networks.ListOpts{Name: "net", Shared: gophercloud.Enabled, Limit: 1, Tags: "t"}), networks.WithListQuery("extra", "1")) {
+	for value, err := range api.List(ctx, networks.WithListOptions(networks.ListOpts{Name: "net", Shared: gophercloud.Enabled, Limit: 1, Tags: "t"}), request.Query("extra", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -163,7 +164,7 @@ func TestNativeNetworkStrictStatusesAndPreflight(t *testing.T) {
 		api := networks.New(nativeNetworkClient(cloud))
 		for name, check := range map[string]func() error{
 			"name extension": func() error {
-				_, err := api.Create(ctx, networks.CreateOpts{}, networks.WithCreateField("name", "x"))
+				_, err := api.Create(ctx, networks.CreateOpts{}, request.Field("name", "x"))
 				return err
 			},
 			"nil option": func() error { _, err := api.Create(ctx, networks.CreateOpts{}, nil); return err },

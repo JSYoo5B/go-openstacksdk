@@ -9,6 +9,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/placement/v1/allocationcandidates"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 type pythonCandidateCall struct{ method, path, query, version string }
@@ -95,7 +96,7 @@ func TestPythonAllocationCandidatesSuffixedMemberOfIsSingle(t *testing.T) {
 	api := pythonCandidateAPI(t, &calls, `{"allocation_requests":[],"provider_summaries":{}}`)
 	for _, err := range api.List(context.Background(), allocationcandidates.WithListOptions(allocationcandidates.ListOpts{
 		ResourceGroups: map[string]allocationcandidates.ResourceGroup{"1": {Resources: "VCPU:1", MemberOf: "agg-4"}},
-	}), allocationcandidates.WithListQuery("member_of1", "agg-5")) {
+	}), request.Query("member_of1", "agg-5")) {
 		if err != nil {
 			t.Fatal(err)
 		}

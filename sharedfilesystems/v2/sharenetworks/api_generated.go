@@ -37,13 +37,10 @@ type ShareNetwork = upstream.ShareNetwork
 type ShareNetworkPage = upstream.ShareNetworkPage
 type UpdateOpts = upstream.UpdateOpts
 type UpdateResult = upstream.UpdateResult
-type AddSecurityServiceOption = request.Option[AddSecurityServiceOpts]
+type AddSecurityServiceOption = request.NativeFieldCall
 
 func WithAddSecurityServiceOptions(value AddSecurityServiceOpts) AddSecurityServiceOption {
-	return request.WithOptions(value)
-}
-func WithAddSecurityServiceField(key string, value any) AddSecurityServiceOption {
-	return request.WithField[AddSecurityServiceOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type addSecurityServiceOptsBuilder struct {
@@ -67,13 +64,8 @@ func (b addSecurityServiceOptsBuilder) ToShareNetworkAddSecurityServiceMap() (ma
 
 // AddSecurityService invokes the upstream API with library-owned builders and result handling.
 func (a *API) AddSecurityService(ctx context.Context, id string, opts AddSecurityServiceOpts, options ...AddSecurityServiceOption) (*ShareNetwork, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("AddSecurityService", "sharenetworks", err)
-		var zero0 *ShareNetwork
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("AddSecurityService", "sharenetworks", err)
 		var zero0 *ShareNetwork
 		return zero0, err
@@ -85,11 +77,10 @@ func (a *API) AddSecurityService(ctx context.Context, id string, opts AddSecurit
 	return value0, err
 }
 
-type CreateOption = request.Option[CreateOpts]
+type CreateOption = request.NativeFieldCall
 
-func WithCreateOptions(value CreateOpts) CreateOption { return request.WithOptions(value) }
-func WithCreateField(key string, value any) CreateOption {
-	return request.WithField[CreateOpts](key, value)
+func WithCreateOptions(value CreateOpts) CreateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type createOptsBuilder struct {
@@ -113,13 +104,8 @@ func (b createOptsBuilder) ToShareNetworkCreateMap() (map[string]any, error) {
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*ShareNetwork, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Create", "sharenetworks", err)
-		var zero0 *ShareNetwork
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Create", "sharenetworks", err)
 		var zero0 *ShareNetwork
 		return zero0, err
@@ -144,11 +130,10 @@ func (a *API) Get(ctx context.Context, id string) (*ShareNetwork, error) {
 	return value0, err
 }
 
-type ListDetailOption = request.Option[ListOpts]
+type ListDetailOption = request.NativeQueryCall
 
-func WithListDetailOptions(value ListOpts) ListDetailOption { return request.WithOptions(value) }
-func WithListDetailQuery(key, value string) ListDetailOption {
-	return request.WithQuery[ListOpts](key, value)
+func WithListDetailOptions(value ListOpts) ListDetailOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type listDetailOptsBuilder struct {
@@ -177,12 +162,8 @@ func (a *API) ListDetail(ctx context.Context, options ...ListDetailOption) iter.
 
 func (a *API) listDetailWithControl(ctx context.Context, control resource.ListControl, options ...ListDetailOption) iter.Seq2[*ShareNetwork, error] {
 	var opts ListOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("ListDetail", "sharenetworks", err)
-		return func(yield func(*ShareNetwork, error) bool) { var zero *ShareNetwork; yield(zero, err) }
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("ListDetail", "sharenetworks", err)
 		return func(yield func(*ShareNetwork, error) bool) { var zero *ShareNetwork; yield(zero, err) }
 	}
@@ -193,13 +174,10 @@ func (a *API) listDetailWithControl(ctx context.Context, control resource.ListCo
 	}, control)
 }
 
-type RemoveSecurityServiceOption = request.Option[RemoveSecurityServiceOpts]
+type RemoveSecurityServiceOption = request.NativeFieldCall
 
 func WithRemoveSecurityServiceOptions(value RemoveSecurityServiceOpts) RemoveSecurityServiceOption {
-	return request.WithOptions(value)
-}
-func WithRemoveSecurityServiceField(key string, value any) RemoveSecurityServiceOption {
-	return request.WithField[RemoveSecurityServiceOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type removeSecurityServiceOptsBuilder struct {
@@ -223,13 +201,8 @@ func (b removeSecurityServiceOptsBuilder) ToShareNetworkRemoveSecurityServiceMap
 
 // RemoveSecurityService invokes the upstream API with library-owned builders and result handling.
 func (a *API) RemoveSecurityService(ctx context.Context, id string, opts RemoveSecurityServiceOpts, options ...RemoveSecurityServiceOption) (*ShareNetwork, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("RemoveSecurityService", "sharenetworks", err)
-		var zero0 *ShareNetwork
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("RemoveSecurityService", "sharenetworks", err)
 		var zero0 *ShareNetwork
 		return zero0, err
@@ -241,11 +214,10 @@ func (a *API) RemoveSecurityService(ctx context.Context, id string, opts RemoveS
 	return value0, err
 }
 
-type UpdateOption = request.Option[UpdateOpts]
+type UpdateOption = request.NativeFieldCall
 
-func WithUpdateOptions(value UpdateOpts) UpdateOption { return request.WithOptions(value) }
-func WithUpdateField(key string, value any) UpdateOption {
-	return request.WithField[UpdateOpts](key, value)
+func WithUpdateOptions(value UpdateOpts) UpdateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type updateOptsBuilder struct {
@@ -269,13 +241,8 @@ func (b updateOptsBuilder) ToShareNetworkUpdateMap() (map[string]any, error) {
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ...UpdateOption) (*ShareNetwork, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Update", "sharenetworks", err)
-		var zero0 *ShareNetwork
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Update", "sharenetworks", err)
 		var zero0 *ShareNetwork
 		return zero0, err

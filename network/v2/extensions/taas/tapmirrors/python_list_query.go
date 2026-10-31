@@ -7,5 +7,5 @@ import "github.com/JSYoo5B/go-openstacksdk/request"
 // requests. A later WithListQuery or WithListQueryValues for the key wins, and
 // no values drop the key. Neutron keeps the values in its next links.
 func WithListQueryValues(key string, values ...string) ListOption {
-	return request.WithQueryValues[ListOpts](key, values...)
+	return request.Custom(request.WithQueryValues[ListOpts](key, values...))
 }

@@ -99,7 +99,7 @@ func TestHeatStackEventsResolvesNameOnceAndSeparatesStackAndResourceLists(t *tes
 	values, err := scope.All(ctx, stackevents.WithListOptions(stackevents.ListOpts{
 		Marker: "start", Limit: 2,
 		ResourceActions: []stackevents.ResourceAction{"CREATE", "UPDATE"}, ResourceStatuses: []stackevents.ResourceStatus{"COMPLETE", "FAILED"}, ResourceNames: []string{"random", "server"}, ResourceTypes: []string{"OS::Heat::RandomString"}, SortKey: "created_at", SortDir: "asc",
-	}), stackevents.WithListQuery("nested_depth", "2"), stackevents.WithListQuery("vendor", "a&b"), stackevents.WithListHeader("X-Events", "stack"))
+	}), request.Query("nested_depth", "2"), request.Query("vendor", "a&b"), stackevents.WithListHeader("X-Events", "stack"))
 	if err != nil || len(values) != 1 {
 		t.Fatalf("stack list=%v err=%v", values, err)
 	}
@@ -108,7 +108,7 @@ func TestHeatStackEventsResolvesNameOnceAndSeparatesStackAndResourceLists(t *tes
 		t.Fatalf("summary did not preserve actual response and request identity: %+v", value)
 	}
 	bound := heatResourceEventScope(t, scope, "random")
-	values, err = bound.All(ctx, stackevents.WithListResourceEventsOptions(stackevents.ListResourceEventsOpts{ResourceNames: []string{"random"}}), stackevents.WithListResourceEventsQuery("nested_depth", "1"), stackevents.WithListResourceEventsHeader("X-Events", "resource"))
+	values, err = bound.All(ctx, stackevents.WithListResourceEventsOptions(stackevents.ListResourceEventsOpts{ResourceNames: []string{"random"}}), request.Query("nested_depth", "1"), stackevents.WithListResourceEventsHeader("X-Events", "resource"))
 	if err != nil || len(values) != 1 || values[0].RequestResourceName != "random" || values[0].ResourceName != "wire-resource" || values[0].Header.Get("X-Request-Id") != "resource-page" {
 		t.Fatalf("resource list=%v err=%v", values, err)
 	}
@@ -227,12 +227,12 @@ func TestHeatStackEventsPreflightValidatesIdentityPathsAndOptions(t *testing.T) 
 			t.Errorf("get option=%v", err)
 		}
 	}
-	for _, option := range []stackevents.ListOption{nil, request.WithField[stackevents.ListOpts]("field", false), request.WithArgument[stackevents.ListOpts]("arg", false), stackevents.WithListHeader("Accept", "override")} {
+	for _, option := range []stackevents.ListOption{nil, request.Custom(request.WithField[stackevents.ListOpts]("field", false)), request.Custom(request.WithArgument[stackevents.ListOpts]("arg", false)), stackevents.WithListHeader("Accept", "override")} {
 		if _, err := scope.All(ctx, option); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Errorf("list option=%v", err)
 		}
 	}
-	for _, option := range []stackevents.ListResourceEventsOption{nil, request.WithField[stackevents.ListResourceEventsOpts]("field", false), request.WithArgument[stackevents.ListResourceEventsOpts]("arg", false), stackevents.WithListResourceEventsHeader("X-Auth-Token", "override")} {
+	for _, option := range []stackevents.ListResourceEventsOption{nil, request.Custom(request.WithField[stackevents.ListResourceEventsOpts]("field", false)), request.Custom(request.WithArgument[stackevents.ListResourceEventsOpts]("arg", false)), stackevents.WithListResourceEventsHeader("X-Auth-Token", "override")} {
 		if _, err := bound.All(ctx, option); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Errorf("resource list option=%v", err)
 		}

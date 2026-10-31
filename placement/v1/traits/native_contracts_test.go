@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/placement/v1/traits"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -69,7 +70,7 @@ func TestNativeTraitsRoutesQueryAndDecode(t *testing.T) {
 	}
 	associated := false
 	var names []string
-	for value, err := range api.List(ctx, traits.WithListOptions(traits.ListOpts{Name: "in:CUSTOM_A,HW_CPU_X86_AVX", Associated: &associated}), traits.WithListQuery("extra", "1")) {
+	for value, err := range api.List(ctx, traits.WithListOptions(traits.ListOpts{Name: "in:CUSTOM_A,HW_CPU_X86_AVX", Associated: &associated}), request.Query("extra", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -147,7 +148,7 @@ func TestNativeTraitsStatusesAndPreflight(t *testing.T) {
 		var calls []nativeTraitCall
 		api := nativeTraitAPI(t, &calls, func(*http.Request) *http.Response { return nativeTraitWire(200, `{}`) })
 		for name, options := range map[string][]traits.ListOption{
-			"empty query key": {traits.WithListQuery("", "x")},
+			"empty query key": {request.Query("", "x")},
 			"nil option":      {nil},
 		} {
 			var errs []error

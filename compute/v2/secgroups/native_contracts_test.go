@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/secgroups"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -64,7 +65,7 @@ func TestNativeSecurityGroupRoutesBodiesAndDecode(t *testing.T) {
 		}
 		return 200, `{"security_group":` + nativeSecGroupRow + `}`
 	})
-	created, err := api.Create(ctx, secgroups.CreateOpts{Name: "web", Description: "d"}, secgroups.WithCreateField("x_extension", 1))
+	created, err := api.Create(ctx, secgroups.CreateOpts{Name: "web", Description: "d"}, request.Field("x_extension", 1))
 	if err != nil || !(created.ID == "7" && created.Rules[0].ID == "r-1" && created.Rules[0].ParentGroupID == "7" && created.Rules[0].IPRange.CIDR == "0.0.0.0/0" && created.Rules[0].Group.Name == "web") {
 		t.Fatal(created, err)
 	}
@@ -204,7 +205,7 @@ func TestNativeSecurityGroupStatusesAndPreflight(t *testing.T) {
 				return err
 			}()},
 			"core extension": {"Create", func() error {
-				_, err := api.Create(ctx, secgroups.CreateOpts{Name: "web"}, secgroups.WithCreateField("name", "x"))
+				_, err := api.Create(ctx, secgroups.CreateOpts{Name: "web"}, request.Field("name", "x"))
 				return err
 			}()},
 		} {

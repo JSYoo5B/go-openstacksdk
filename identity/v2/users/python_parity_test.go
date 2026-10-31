@@ -11,6 +11,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v2/users"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -61,7 +62,7 @@ func TestPythonUserCreateGetUpdateRequests(t *testing.T) {
 	if err != nil || !reflect.DeepEqual(*got, want) {
 		t.Fatal(got, err)
 	}
-	updated, err := api.Update(ctx, "u-1", users.UpdateOpts{Email: "b@example.invalid", Enabled: &disabled}, users.WithUpdateField("id", "u-1"))
+	updated, err := api.Update(ctx, "u-1", users.UpdateOpts{Email: "b@example.invalid", Enabled: &disabled}, request.Field("id", "u-1"))
 	if err != nil || updated.Email != "b@example.invalid" || updated.Enabled {
 		t.Fatal(updated, err)
 	}

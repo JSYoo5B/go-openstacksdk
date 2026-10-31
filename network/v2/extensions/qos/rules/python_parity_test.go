@@ -11,6 +11,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -145,7 +146,7 @@ func TestPythonQoSRuleParityCreateUpdate(t *testing.T) {
 			return pythonQoSRuleParityWire(code, `{"minimum_bandwidth_rule":{"id":"r-3","min_kbps":500,"direction":"egress"}}`)
 		})
 		// create_qos_minimum_bandwidth_rule("qp-1", min_kbps=500, direction="egress", x_extension=1)
-		created, err := api.CreateMinimumBandwidthRule(ctx, "qp-1", rules.CreateMinimumBandwidthRuleOpts{MinKBps: 500, Direction: "egress"}, rules.WithCreateMinimumBandwidthRuleField("x_extension", 1))
+		created, err := api.CreateMinimumBandwidthRule(ctx, "qp-1", rules.CreateMinimumBandwidthRuleOpts{MinKBps: 500, Direction: "egress"}, request.Field("x_extension", 1))
 		if err != nil || created.ID != "r-3" || created.MinKBps != 500 || created.Direction != "egress" {
 			t.Fatal(created, err)
 		}

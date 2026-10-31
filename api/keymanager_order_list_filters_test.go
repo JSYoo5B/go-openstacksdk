@@ -17,6 +17,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -537,7 +538,7 @@ func TestKeyManagerOrderListFiltersNativeStatusAndSurfaceIsolation(t *testing.T)
 			})
 			api := f.open(t, c)
 			n := 0
-			for value, err := range api.List(context.Background(), orders.WithListQuery("name", "wire-extension")) {
+			for value, err := range api.List(context.Background(), request.Query("name", "wire-extension")) {
 				if value == nil || err != nil {
 					t.Fatal(value, err)
 				}

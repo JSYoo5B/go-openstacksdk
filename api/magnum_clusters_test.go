@@ -14,6 +14,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/containerinfra/v1/clusters"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -72,7 +73,7 @@ func TestMagnumClusterCreateSendsNullDefaultsAndExplicitZeroFalse(t *testing.T) 
 	id, err := api.Create(context.Background(), clusters.CreateOpts{
 		ClusterTemplateID: "tpl-1", Name: "prod", NodeCount: magnumIntPtr(0), CreateTimeout: magnumIntPtr(0), FloatingIPEnabled: magnumFalse(),
 		MergeLabels: magnumFalse(), Labels: map[string]string{},
-	}, clusters.WithCreateField("vendor", map[string]bool{"on": false}))
+	}, request.Field("vendor", map[string]bool{"on": false}))
 	if err != nil || id != "cl-1" {
 		t.Fatalf("id=%q error=%v", id, err)
 	}
@@ -144,7 +145,7 @@ func TestMagnumClusterRejectsInvalidInputsBeforeHTTP(t *testing.T) {
 		t.Fatal("missing template ID must fail locally")
 	}
 	for _, key := range []string{"name", "node_count", "create_timeout", "cluster_template_id"} {
-		if _, err := api.Create(ctx, ok, clusters.WithCreateField(key, 1)); !errors.Is(err, resource.ErrInvalidOption) {
+		if _, err := api.Create(ctx, ok, request.Field(key, 1)); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatalf("create extension %q: %v", key, err)
 		}
 	}
@@ -154,7 +155,7 @@ func TestMagnumClusterRejectsInvalidInputsBeforeHTTP(t *testing.T) {
 	if _, err := api.Resize(ctx, "cl-1", clusters.ResizeOpts{}); err == nil {
 		t.Fatal("missing node count must fail locally")
 	}
-	if _, err := api.Resize(ctx, "cl-1", clusters.ResizeOpts{NodeCount: magnumIntPtr(1)}, clusters.WithResizeField("node_count", 2)); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := api.Resize(ctx, "cl-1", clusters.ResizeOpts{NodeCount: magnumIntPtr(1)}, request.Field("node_count", 2)); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatalf("resize collision: %v", err)
 	}
 	if _, err := api.Resize(ctx, "cl-1", clusters.ResizeOpts{NodeCount: magnumIntPtr(1)}, nil); !errors.Is(err, resource.ErrInvalidOption) {
@@ -163,7 +164,7 @@ func TestMagnumClusterRejectsInvalidInputsBeforeHTTP(t *testing.T) {
 	if _, err := api.Upgrade(ctx, "cl-1", clusters.UpgradeOpts{}); err == nil {
 		t.Fatal("missing upgrade template must fail locally")
 	}
-	if _, err := api.Upgrade(ctx, "cl-1", clusters.UpgradeOpts{ClusterTemplate: "t"}, clusters.WithUpgradeField("max_batch_size", 3)); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := api.Upgrade(ctx, "cl-1", clusters.UpgradeOpts{ClusterTemplate: "t"}, request.Field("max_batch_size", 3)); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatalf("upgrade collision: %v", err)
 	}
 	if _, err := api.Upgrade(ctx, "cl-1", clusters.UpgradeOpts{ClusterTemplate: "t"}, nil); !errors.Is(err, resource.ErrInvalidOption) {
@@ -233,13 +234,13 @@ func TestMagnumClusterListAndListDetailPaginateWithQueries(t *testing.T) {
 	ctx := context.Background()
 	opts := clusters.ListOpts{Limit: 1, SortKey: "name", SortDir: "desc"}
 	var ids []string
-	for value, err := range api.List(ctx, clusters.WithListOptions(opts), clusters.WithListQuery("vendor", "x")) {
+	for value, err := range api.List(ctx, clusters.WithListOptions(opts), request.Query("vendor", "x")) {
 		if err != nil {
 			t.Fatal(err)
 		}
 		ids = append(ids, value.UUID)
 	}
-	for value, err := range api.ListDetail(ctx, clusters.WithListDetailOptions(opts), clusters.WithListDetailQuery("vendor", "y")) {
+	for value, err := range api.ListDetail(ctx, clusters.WithListDetailOptions(opts), request.Query("vendor", "y")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -348,7 +349,7 @@ func TestMagnumClusterResizeKeepsZeroAndAccepts200Or202(t *testing.T) {
 		})
 		api := newMagnumClusters(t, cloud, "")
 		id, err := api.Resize(context.Background(), "cl-1", clusters.ResizeOpts{NodeCount: magnumIntPtr(0), NodesToRemove: []string{"n1"}, NodeGroup: "workers"},
-			clusters.WithResizeField("vendor", false))
+			request.Field("vendor", false))
 		if tc.success != (err == nil) || (tc.success && id != "cl-1") {
 			t.Fatalf("status %d id=%q error=%v", tc.status, id, err)
 		}

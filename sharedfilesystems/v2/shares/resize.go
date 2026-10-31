@@ -71,7 +71,7 @@ func (a *API) Resize(ctx context.Context, id string, newSize int, options ...Res
 	case newSize > current.Size && !cfg.noExtend:
 		var extra []ExtendOption
 		if cfg.force {
-			extra = append(extra, WithExtendField("force", true))
+			extra = append(extra, request.Field("force", true))
 		}
 		if err := a.Extend(ctx, id, ExtendOpts{NewSize: newSize}, extra...); err != nil {
 			return ResizeNone, err

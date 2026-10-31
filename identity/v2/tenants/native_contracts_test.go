@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v2/tenants"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -66,7 +67,7 @@ func TestNativeV2TenantRoutesBodiesPagingAndDecode(t *testing.T) {
 		return 200, `{"tenant":` + nativeV2TenantRow + `}`
 	})
 	enabled, disabled := true, false
-	created, err := api.Create(ctx, tenants.CreateOpts{Name: "demo", Description: "d", Enabled: &enabled}, tenants.WithCreateField("x_extension", 1))
+	created, err := api.Create(ctx, tenants.CreateOpts{Name: "demo", Description: "d", Enabled: &enabled}, request.Field("x_extension", 1))
 	if err != nil || !(created.ID == "t-1" && created.Enabled && created.Description == "d") {
 		t.Fatal(created, err)
 	}
@@ -78,14 +79,14 @@ func TestNativeV2TenantRoutesBodiesPagingAndDecode(t *testing.T) {
 		t.Fatal(got, err)
 	}
 	empty := ""
-	if _, err := api.Update(ctx, "t-1", tenants.UpdateOpts{Name: "renamed", Description: &empty, Enabled: &disabled}, tenants.WithUpdateField("x_extension", 1)); err != nil {
+	if _, err := api.Update(ctx, "t-1", tenants.UpdateOpts{Name: "renamed", Description: &empty, Enabled: &disabled}, request.Field("x_extension", 1)); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := api.Update(ctx, "t-1", tenants.UpdateOpts{}); err != nil {
 		t.Fatal(err)
 	}
 	var ids []string
-	for value, err := range api.List(ctx, tenants.WithListOptions(tenants.ListOpts{Marker: "t-0", Limit: 1}), tenants.WithListQuery("extra", "1")) {
+	for value, err := range api.List(ctx, tenants.WithListOptions(tenants.ListOpts{Marker: "t-0", Limit: 1}), request.Query("extra", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -184,10 +185,10 @@ func TestNativeV2TenantStatusesAndPreflight(t *testing.T) {
 			err       error
 		}{
 			"create name":      {"Create", func() error { _, err := api.Create(ctx, tenants.CreateOpts{Description: "d"}); return err }()},
-			"create extension": {"Create", func() error { _, err := api.Create(ctx, valid, tenants.WithCreateField("enabled", true)); return err }()},
+			"create extension": {"Create", func() error { _, err := api.Create(ctx, valid, request.Field("enabled", true)); return err }()},
 			"create nil":       {"Create", func() error { _, err := api.Create(ctx, valid, nil); return err }()},
 			"update extension": {"Update", func() error {
-				_, err := api.Update(ctx, "t-1", tenants.UpdateOpts{}, tenants.WithUpdateField("description", "x"))
+				_, err := api.Update(ctx, "t-1", tenants.UpdateOpts{}, request.Field("description", "x"))
 				return err
 			}()},
 			"update nil": {"Update", func() error { _, err := api.Update(ctx, "t-1", tenants.UpdateOpts{}, nil); return err }()},
@@ -200,7 +201,7 @@ func TestNativeV2TenantStatusesAndPreflight(t *testing.T) {
 		for _, err := range api.List(ctx, nil) {
 			nativeV2TenantOperation(t, err, "List")
 		}
-		for _, err := range api.List(ctx, tenants.WithListQuery(" ", "x")) {
+		for _, err := range api.List(ctx, request.Query(" ", "x")) {
 			nativeV2TenantOperation(t, err, "List")
 		}
 		if len(calls) != 0 {

@@ -28,7 +28,7 @@ func TestIntrospectionStartPreservesBootQueryAndEscapedExtensions(t *testing.T) 
 		{name: "explicit false", options: introspection.StartOpts{ManageBoot: &bootFalse}, boot: "false"},
 		{name: "explicit true", options: introspection.StartOpts{ManageBoot: &bootTrue}, boot: "true"},
 		{name: "typed option replaces initial options", options: introspection.StartOpts{ManageBoot: &bootTrue}, extra: []introspection.StartIntrospectionOption{introspection.WithStartIntrospectionOptions(introspection.StartOpts{ManageBoot: &bootFalse})}, boot: "false"},
-		{name: "extension query retains override policy", options: introspection.StartOpts{ManageBoot: &bootTrue}, extra: []introspection.StartIntrospectionOption{introspection.WithStartIntrospectionQuery("manage_boot", "false")}, boot: "false"},
+		{name: "extension query retains override policy", options: introspection.StartOpts{ManageBoot: &bootTrue}, extra: []introspection.StartIntrospectionOption{request.Query("manage_boot", "false")}, boot: "false"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			cloud := testcloud.New(t)
@@ -51,7 +51,7 @@ func TestIntrospectionStartPreservesBootQueryAndEscapedExtensions(t *testing.T) 
 			// The helper must retain native ServiceURL's ResourceBase precedence.
 			client.ResourceBase = gophercloud.NormalizeURL(cloud.Server.URL + "/v1")
 			api := introspection.New(client)
-			options := append([]introspection.StartIntrospectionOption{introspection.WithStartIntrospectionQuery("vendor key", "a&b +/한글")}, tc.extra...)
+			options := append([]introspection.StartIntrospectionOption{request.Query("vendor key", "a&b +/한글")}, tc.extra...)
 			if err := api.StartIntrospection(context.Background(), "node", tc.options, options...); err != nil || calls.Load() != 1 {
 				t.Fatalf("calls=%d err=%v", calls.Load(), err)
 			}
@@ -73,10 +73,10 @@ func TestIntrospectionStartRejectsQueryAndCapabilityErrorsBeforeHTTP(t *testing.
 		option introspection.StartIntrospectionOption
 		cause  error
 	}{
-		{"empty query key", introspection.WithStartIntrospectionQuery(" ", "value"), resource.ErrInvalidOption},
+		{"empty query key", request.Query(" ", "value"), resource.ErrInvalidOption},
 		{"nil option", nil, resource.ErrInvalidOption},
-		{"query option error", func(*request.Config[introspection.StartOpts]) error { return sentinel }, sentinel},
-		{"unsupported body field", request.WithField[introspection.StartOpts]("vendor", "value"), resource.ErrInvalidOption},
+		{"query option error", request.Custom(func(*request.Config[introspection.StartOpts]) error { return sentinel }), sentinel},
+		{"unsupported body field", request.Custom(request.WithField[introspection.StartOpts]("vendor", "value")), resource.ErrInvalidOption},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			err := api.StartIntrospection(context.Background(), "node", introspection.StartOpts{}, tc.option)
@@ -100,7 +100,7 @@ func TestIntrospectionStartRequires202AndPreservesHTTPCause(t *testing.T) {
 				testcloud.JSON(w, status, `{"error":{"message":"introspection rejected"}}`)
 			})
 			api := introspection.New(cloud.Client("baremetal-introspection", "/v1"))
-			err := api.StartIntrospection(context.Background(), "node", introspection.StartOpts{}, introspection.WithStartIntrospectionQuery("vendor", "a&b"))
+			err := api.StartIntrospection(context.Background(), "node", introspection.StartOpts{}, request.Query("vendor", "a&b"))
 			var response gophercloud.ErrUnexpectedResponseCode
 			var operation *resource.OperationError
 			if !errors.As(err, &response) || response.Actual != status || response.ResponseHeader.Get("X-Openstack-Request-Id") != "req-native-error" || !errors.As(err, &operation) || operation.Operation != "StartIntrospection" {

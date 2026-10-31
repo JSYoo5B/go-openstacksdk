@@ -36,19 +36,16 @@ type RemoveHostOpts = upstream.RemoveHostOpts
 type SetMetadataOpts = upstream.SetMetadataOpts
 type UpdateOpts = upstream.UpdateOpts
 type UpdateResult = upstream.UpdateResult
-type AddHostOption = request.Option[AddHostOpts]
+type AddHostOption = request.NativeCall
 
-func WithAddHostOptions(value AddHostOpts) AddHostOption { return request.WithOptions(value) }
+func WithAddHostOptions(value AddHostOpts) AddHostOption {
+	return request.Custom(request.WithOptions(value))
+}
 
 // AddHost invokes the upstream API with library-owned builders and result handling.
 func (a *API) AddHost(ctx context.Context, aggregateID int, opts AddHostOpts, options ...AddHostOption) (*Aggregate, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{}, options...)
 	if err != nil {
-		err = request.Wrap("AddHost", "aggregates", err)
-		var zero0 *Aggregate
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, false, false, false); err != nil {
 		err = request.Wrap("AddHost", "aggregates", err)
 		var zero0 *Aggregate
 		return zero0, err
@@ -59,11 +56,10 @@ func (a *API) AddHost(ctx context.Context, aggregateID int, opts AddHostOpts, op
 	return value0, err
 }
 
-type CreateOption = request.Option[CreateOpts]
+type CreateOption = request.NativeFieldCall
 
-func WithCreateOptions(value CreateOpts) CreateOption { return request.WithOptions(value) }
-func WithCreateField(key string, value any) CreateOption {
-	return request.WithField[CreateOpts](key, value)
+func WithCreateOptions(value CreateOpts) CreateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type createOptsBuilder struct {
@@ -87,13 +83,8 @@ func (b createOptsBuilder) ToAggregatesCreateMap() (map[string]any, error) {
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*Aggregate, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Create", "aggregates", err)
-		var zero0 *Aggregate
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Create", "aggregates", err)
 		var zero0 *Aggregate
 		return zero0, err
@@ -130,19 +121,16 @@ func (a *API) listWithControl(ctx context.Context, control resource.ListControl)
 	}, control)
 }
 
-type RemoveHostOption = request.Option[RemoveHostOpts]
+type RemoveHostOption = request.NativeCall
 
-func WithRemoveHostOptions(value RemoveHostOpts) RemoveHostOption { return request.WithOptions(value) }
+func WithRemoveHostOptions(value RemoveHostOpts) RemoveHostOption {
+	return request.Custom(request.WithOptions(value))
+}
 
 // RemoveHost invokes the upstream API with library-owned builders and result handling.
 func (a *API) RemoveHost(ctx context.Context, aggregateID int, opts RemoveHostOpts, options ...RemoveHostOption) (*Aggregate, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{}, options...)
 	if err != nil {
-		err = request.Wrap("RemoveHost", "aggregates", err)
-		var zero0 *Aggregate
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, false, false, false); err != nil {
 		err = request.Wrap("RemoveHost", "aggregates", err)
 		var zero0 *Aggregate
 		return zero0, err
@@ -153,21 +141,16 @@ func (a *API) RemoveHost(ctx context.Context, aggregateID int, opts RemoveHostOp
 	return value0, err
 }
 
-type SetMetadataOption = request.Option[SetMetadataOpts]
+type SetMetadataOption = request.NativeCall
 
 func WithSetMetadataOptions(value SetMetadataOpts) SetMetadataOption {
-	return request.WithOptions(value)
+	return request.Custom(request.WithOptions(value))
 }
 
 // SetMetadata invokes the upstream API with library-owned builders and result handling.
 func (a *API) SetMetadata(ctx context.Context, aggregateID int, opts SetMetadataOpts, options ...SetMetadataOption) (*Aggregate, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{}, options...)
 	if err != nil {
-		err = request.Wrap("SetMetadata", "aggregates", err)
-		var zero0 *Aggregate
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, false, false, false); err != nil {
 		err = request.Wrap("SetMetadata", "aggregates", err)
 		var zero0 *Aggregate
 		return zero0, err
@@ -178,11 +161,10 @@ func (a *API) SetMetadata(ctx context.Context, aggregateID int, opts SetMetadata
 	return value0, err
 }
 
-type UpdateOption = request.Option[UpdateOpts]
+type UpdateOption = request.NativeFieldCall
 
-func WithUpdateOptions(value UpdateOpts) UpdateOption { return request.WithOptions(value) }
-func WithUpdateField(key string, value any) UpdateOption {
-	return request.WithField[UpdateOpts](key, value)
+func WithUpdateOptions(value UpdateOpts) UpdateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type updateOptsBuilder struct {
@@ -206,13 +188,8 @@ func (b updateOptsBuilder) ToAggregatesUpdateMap() (map[string]any, error) {
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, aggregateID int, opts UpdateOpts, options ...UpdateOption) (*Aggregate, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Update", "aggregates", err)
-		var zero0 *Aggregate
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Update", "aggregates", err)
 		var zero0 *Aggregate
 		return zero0, err

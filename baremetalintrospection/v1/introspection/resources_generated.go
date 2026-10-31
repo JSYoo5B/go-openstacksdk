@@ -4,6 +4,7 @@ package introspection
 import (
 	context "context"
 	fmt "fmt"
+	request "github.com/JSYoo5B/go-openstacksdk/request"
 	resource "github.com/JSYoo5B/go-openstacksdk/resource"
 	iter "iter"
 	maps "maps"
@@ -24,7 +25,7 @@ func (a *API) newResources() *resource.Collection[Introspection] {
 			options := make([]ListIntrospectionsOption, 0, len(q))
 			for key, values := range q {
 				for _, value := range values {
-					options = append(options, WithListIntrospectionsQuery(key, value))
+					options = append(options, request.Query(key, value))
 				}
 			}
 			return a.listIntrospectionsWithControl(ctx, control, options...)

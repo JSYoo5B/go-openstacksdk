@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -94,7 +95,7 @@ func TestPythonFirewallGroupProxyParity(t *testing.T) {
 			return pythonFWGroupWire(201, `{"firewall_group":`+pythonFWGroupRow+`}`)
 		})
 		// create_firewall_group(name="edge", admin_state_up=False, ports=["p1"], ingress_firewall_policy_id="in", x_extension=1)
-		created, err := api.Create(ctx, groups.CreateOpts{Name: "edge", AdminStateUp: pythonFWGroupBool(false), Ports: []string{"p1"}, IngressFirewallPolicyID: "in"}, groups.WithCreateField("x_extension", 1))
+		created, err := api.Create(ctx, groups.CreateOpts{Name: "edge", AdminStateUp: pythonFWGroupBool(false), Ports: []string{"p1"}, IngressFirewallPolicyID: "in"}, request.Field("x_extension", 1))
 		if err != nil || created.ID != "fg-1" || created.Status != "ACTIVE" || created.AdminStateUp || created.ProjectID != "proj" || !reflect.DeepEqual(created.Ports, []string{"p1"}) {
 			t.Fatal(created, err)
 		}
@@ -183,7 +184,7 @@ func TestPythonFirewallGroupProxyParity(t *testing.T) {
 		// firewall_groups(name="edge", status="ACTIVE", project_id="proj", shared=False, ports=["p1","p2"], fields="id", limit=1)
 		ports := []string{"p1", "p2"}
 		var ids []string
-		for value, err := range api.List(ctx, groups.WithListOptions(groups.ListOpts{Name: "edge", Status: "ACTIVE", ProjectID: "proj", Ports: &ports, Limit: 1}), groups.WithListQuery("shared", "False"), groups.WithListQuery("fields", "id")) {
+		for value, err := range api.List(ctx, groups.WithListOptions(groups.ListOpts{Name: "edge", Status: "ACTIVE", ProjectID: "proj", Ports: &ports, Limit: 1}), request.Query("shared", "False"), request.Query("fields", "id")) {
 			if err != nil {
 				t.Fatal(err)
 			}

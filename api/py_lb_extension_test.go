@@ -14,6 +14,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/listeners"
 	"github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/loadbalancers"
 	"github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/pools"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 // Python Resource attributes and query keys that the pinned Gophercloud typed
@@ -41,28 +42,28 @@ func TestPyLBPythonOnlyWireKeysTravelThroughExtensionOptions(t *testing.T) {
 	ctx := context.Background()
 	client := cloud.Client("load-balancer", "/v2")
 	lbs := loadbalancers.New(client)
-	if _, err := lbs.Create(ctx, loadbalancers.CreateOpts{VipSubnetID: "subnet-1"}, loadbalancers.WithCreateField("vip_sg_ids", []string{"sg-1", "sg-2"})); err != nil {
+	if _, err := lbs.Create(ctx, loadbalancers.CreateOpts{VipSubnetID: "subnet-1"}, request.Field("vip_sg_ids", []string{"sg-1", "sg-2"})); err != nil {
 		t.Fatal(err)
 	}
 	if string(createBody["vip_sg_ids"]) != `["sg-1","sg-2"]` || string(createBody["vip_subnet_id"]) != `"subnet-1"` {
 		t.Fatalf("create body=%v", createBody)
 	}
-	for _, err := range lbs.List(ctx, loadbalancers.WithListQuery("vip_qos_policy_id", "qos-1")) {
+	for _, err := range lbs.List(ctx, request.Query("vip_qos_policy_id", "qos-1")) {
 		if err != nil {
 			t.Fatal(err)
 		}
 	}
-	for _, err := range listeners.New(client).List(ctx, listeners.WithListQuery("hsts_max_age", "10"), listeners.WithListQuery("alpn_protocols", "h2")) {
+	for _, err := range listeners.New(client).List(ctx, request.Query("hsts_max_age", "10"), request.Query("alpn_protocols", "h2")) {
 		if err != nil {
 			t.Fatal(err)
 		}
 	}
-	for _, err := range pools.New(client).ListMembers(ctx, "pool-1", pools.WithListMembersQuery("backup", "true")) {
+	for _, err := range pools.New(client).ListMembers(ctx, "pool-1", request.Query("backup", "true")) {
 		if err != nil {
 			t.Fatal(err)
 		}
 	}
-	for _, err := range l7policies.New(client).ListRules(ctx, "pol-1", l7policies.WithListRulesQuery("invert", "false")) {
+	for _, err := range l7policies.New(client).ListRules(ctx, "pol-1", request.Query("invert", "false")) {
 		if err != nil {
 			t.Fatal(err)
 		}

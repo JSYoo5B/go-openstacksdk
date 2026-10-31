@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/projects"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -70,7 +71,7 @@ func TestNativeProjectAdminRoutesBodiesPagingAndDecode(t *testing.T) {
 	})
 	disabled, yes, blank := false, true, ""
 	noTags := []string{}
-	created, err := api.Create(ctx, projects.CreateOpts{Name: "proj", DomainID: "default", Enabled: &disabled, IsDomain: &disabled, ParentID: "default", Description: "desc", Tags: []string{"a"}, Options: map[projects.Option]any{projects.Immutable: true}, Extra: map[string]any{"owner": "ops"}}, projects.WithCreateField("x_extension", 1))
+	created, err := api.Create(ctx, projects.CreateOpts{Name: "proj", DomainID: "default", Enabled: &disabled, IsDomain: &disabled, ParentID: "default", Description: "desc", Tags: []string{"a"}, Options: map[projects.Option]any{projects.Immutable: true}, Extra: map[string]any{"owner": "ops"}}, request.Field("x_extension", 1))
 	// Project has no Links field, so links joins the remaining keys in Extra.
 	if err != nil || !(created.ID == "p-1" && created.Enabled && created.ParentID == "default" && reflect.DeepEqual(created.Tags, []string{"a"}) && created.Options[projects.Immutable] == true && reflect.DeepEqual(created.Extra, map[string]any{"owner": "ops", "links": map[string]any{"self": "x"}})) {
 		t.Fatal(created, err)
@@ -80,11 +81,11 @@ func TestNativeProjectAdminRoutesBodiesPagingAndDecode(t *testing.T) {
 		t.Fatal(got, err)
 	}
 	// A pointer to an empty tag list clears tags, unlike ModifyTags below.
-	if _, err := api.Update(ctx, "p-1", projects.UpdateOpts{Name: "new", Description: &blank, Enabled: &yes, Tags: &noTags, Options: map[projects.Option]any{projects.Immutable: false}}, projects.WithUpdateField("x_extension", 2)); err != nil {
+	if _, err := api.Update(ctx, "p-1", projects.UpdateOpts{Name: "new", Description: &blank, Enabled: &yes, Tags: &noTags, Options: map[projects.Option]any{projects.Immutable: false}}, request.Field("x_extension", 2)); err != nil {
 		t.Fatal(err)
 	}
 	var rows []*projects.Project
-	for value, err := range api.List(ctx, projects.WithListOptions(projects.ListOpts{DomainID: "default", Enabled: &disabled, IsDomain: &yes, Name: "proj", ParentID: "root", Tags: "a,b", TagsAny: "c", NotTags: "d", NotTagsAny: "e", Limit: 5, Filters: map[string]string{"name__startswith": "pr"}}), projects.WithListQuery("x", "1")) {
+	for value, err := range api.List(ctx, projects.WithListOptions(projects.ListOpts{DomainID: "default", Enabled: &disabled, IsDomain: &yes, Name: "proj", ParentID: "root", Tags: "a,b", TagsAny: "c", NotTags: "d", NotTagsAny: "e", Limit: 5, Filters: map[string]string{"name__startswith": "pr"}}), request.Query("x", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -97,7 +98,7 @@ func TestNativeProjectAdminRoutesBodiesPagingAndDecode(t *testing.T) {
 	if err != nil || !reflect.DeepEqual(tags.Tags, []string{"a", "b"}) {
 		t.Fatal(tags, err)
 	}
-	modified, err := api.ModifyTags(ctx, "p-1", projects.ModifyTagsOpts{Tags: []string{"a", "b"}}, projects.WithModifyTagsField("x_extension", 3))
+	modified, err := api.ModifyTags(ctx, "p-1", projects.ModifyTagsOpts{Tags: []string{"a", "b"}}, request.Field("x_extension", 3))
 	if err != nil || !(len(modified.Projects) == 1 && modified.Projects[0].ID == "p-1" && modified.Links["self"] == "y") {
 		t.Fatal(modified, err)
 	}
@@ -211,11 +212,11 @@ func TestNativeProjectAdminStatusesAndPreflight(t *testing.T) {
 		}{
 			"create name": {"Create", func() error { _, err := api.Create(ctx, projects.CreateOpts{DomainID: "d"}); return err }()},
 			"create core extension": {"Create", func() error {
-				_, err := api.Create(ctx, projects.CreateOpts{Name: "p"}, projects.WithCreateField("tags", []string{"x"}))
+				_, err := api.Create(ctx, projects.CreateOpts{Name: "p"}, request.Field("tags", []string{"x"}))
 				return err
 			}()},
 			"create extra collision": {"Create", func() error {
-				_, err := api.Create(ctx, projects.CreateOpts{Name: "p", Extra: map[string]any{"owner": "a"}}, projects.WithCreateField("owner", "b"))
+				_, err := api.Create(ctx, projects.CreateOpts{Name: "p", Extra: map[string]any{"owner": "a"}}, request.Field("owner", "b"))
 				return err
 			}()},
 			"update nil option": {"Update", func() error {
@@ -223,7 +224,7 @@ func TestNativeProjectAdminStatusesAndPreflight(t *testing.T) {
 				return err
 			}()},
 			"modify tags core extension": {"ModifyTags", func() error {
-				_, err := api.ModifyTags(ctx, "p-1", projects.ModifyTagsOpts{}, projects.WithModifyTagsField("tags", []string{"x"}))
+				_, err := api.ModifyTags(ctx, "p-1", projects.ModifyTagsOpts{}, request.Field("tags", []string{"x"}))
 				return err
 			}()},
 		} {

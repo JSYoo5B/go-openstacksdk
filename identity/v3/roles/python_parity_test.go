@@ -10,6 +10,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/roles"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -63,7 +64,7 @@ func TestPythonRoleCreateGetUpdateRequests(t *testing.T) {
 	check(api.Create(ctx, roles.CreateOpts{Name: "reader", Description: "desc", DomainID: "dom-1", Options: map[roles.Option]any{roles.Immutable: true}}))
 	check(api.Get(ctx, "r-1"))
 	// Python update_role(r, name="viewer", description=None).
-	updated, err := api.Update(ctx, "r-1", roles.UpdateOpts{Name: "viewer", Extra: map[string]any{"description": nil}}, roles.WithUpdateField("id", "r-1"))
+	updated, err := api.Update(ctx, "r-1", roles.UpdateOpts{Name: "viewer", Extra: map[string]any{"description": nil}}, request.Field("id", "r-1"))
 	if err != nil || updated.Name != "viewer" {
 		t.Fatalf("%#v %v", updated, err)
 	}
@@ -146,7 +147,7 @@ func TestPythonRoleListRequests(t *testing.T) {
 			return 200, `{"roles":[` + pythonRoleRow + `],"links":{"next":null}}`
 		})
 		// Python follows with GET ?limit=1&marker=r-1 until an empty page.
-		pythonRoleIDs(t, api.List(ctx, roles.WithListQuery("limit", "1")))
+		pythonRoleIDs(t, api.List(ctx, request.Query("limit", "1")))
 		if !reflect.DeepEqual(calls, []pythonRoleCall{{http.MethodGet, pythonRoleBase, "limit=1", ""}}) {
 			t.Fatalf("%+v", calls)
 		}
@@ -185,9 +186,9 @@ func TestPythonRoleAssignmentsRequests(t *testing.T) {
 	// Python role_assignments(user_id="u-1", role_id="r-1",
 	// scope_project_id="p-1", include_names=True, inherited_to="projects").
 	collect(roles.WithListAssignmentsOptions(roles.ListAssignmentsOpts{UserID: "u-1", RoleID: "r-1", ScopeProjectID: "p-1"}),
-		roles.WithListAssignmentsQuery("include_names", "True"), roles.WithListAssignmentsQuery("scope.OS-INHERIT:inherited_to", "projects"))
+		request.Query("include_names", "True"), request.Query("scope.OS-INHERIT:inherited_to", "projects"))
 	// Python role_assignments(limit=1) would add GET ?limit=1&marker=<id>.
-	collect(roles.WithListAssignmentsQuery("limit", "1"))
+	collect(request.Query("limit", "1"))
 	wantCalls := []pythonRoleCall{
 		{http.MethodGet, "/keystone/v3/role_assignments", "include_names=true&role.id=r-1&scope.project.id=p-1&user.id=u-1", ""},
 		{http.MethodGet, "/keystone/v3/role_assignments", "include_names=True&role.id=r-1&scope.OS-INHERIT%3Ainherited_to=projects&scope.project.id=p-1&user.id=u-1", ""},

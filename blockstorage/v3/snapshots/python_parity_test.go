@@ -10,6 +10,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -97,7 +98,7 @@ func TestPythonSnapshotListDetailsAllProjectsAndQuery(t *testing.T) {
 			// snapshots(all_projects=True, name="daily", volume_id="vol-1") sends all_tenants=True.
 			name: "all projects", path: pythonSnapshotBase + "/detail", query: url.Values{"all_tenants": {"True"}, "name": {"daily"}, "volume_id": {"vol-1"}},
 			list: func(api *snapshots.API) func(func(*snapshots.Snapshot, error) bool) {
-				return api.ListDetail(ctx, snapshots.WithListDetailOptions(snapshots.ListOpts{Name: "daily", VolumeID: "vol-1"}), snapshots.WithListDetailQuery("all_tenants", "True"))
+				return api.ListDetail(ctx, snapshots.WithListDetailOptions(snapshots.ListOpts{Name: "daily", VolumeID: "vol-1"}), request.Query("all_tenants", "True"))
 			},
 		},
 		{

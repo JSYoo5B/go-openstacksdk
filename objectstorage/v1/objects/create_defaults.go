@@ -15,10 +15,10 @@ import (
 // replay evidence belong to CreateObject's separate owned-source workflow.
 func WithCreateBytes(value []byte) CreateOption {
 	owned := bytes.Clone(value)
-	return func(cfg *request.Config[CreateOpts]) error {
+	return request.Custom(func(cfg *request.Config[CreateOpts]) error {
 		cfg.Options.Content = bytes.NewReader(owned)
 		return nil
-	}
+	})
 }
 
 // normalizeCreateDefaults runs after all typed request options have been applied.

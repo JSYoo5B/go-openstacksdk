@@ -74,11 +74,10 @@ type UploadImageResult = upstream.UploadImageResult
 type Volume = upstream.Volume
 type VolumeImage = upstream.VolumeImage
 type VolumePage = upstream.VolumePage
-type AttachOption = request.Option[AttachOpts]
+type AttachOption = request.NativeFieldCall
 
-func WithAttachOptions(value AttachOpts) AttachOption { return request.WithOptions(value) }
-func WithAttachField(key string, value any) AttachOption {
-	return request.WithField[AttachOpts](key, value)
+func WithAttachOptions(value AttachOpts) AttachOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type attachOptsBuilder struct {
@@ -102,12 +101,8 @@ func (b attachOptsBuilder) ToVolumeAttachMap() (map[string]any, error) {
 
 // Attach invokes the upstream API with library-owned builders and result handling.
 func (a *API) Attach(ctx context.Context, id string, opts AttachOpts, options ...AttachOption) error {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Attach", "volumes", err)
-		return err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Attach", "volumes", err)
 		return err
 	}
@@ -120,11 +115,10 @@ func (a *API) BeginDetaching(ctx context.Context, id string) error {
 	return request.Wrap("BeginDetaching", "volumes", upstream.BeginDetaching(ctx, a.client, id).ExtractErr())
 }
 
-type ChangeTypeOption = request.Option[ChangeTypeOpts]
+type ChangeTypeOption = request.NativeFieldCall
 
-func WithChangeTypeOptions(value ChangeTypeOpts) ChangeTypeOption { return request.WithOptions(value) }
-func WithChangeTypeField(key string, value any) ChangeTypeOption {
-	return request.WithField[ChangeTypeOpts](key, value)
+func WithChangeTypeOptions(value ChangeTypeOpts) ChangeTypeOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type changeTypeOptsBuilder struct {
@@ -148,12 +142,8 @@ func (b changeTypeOptsBuilder) ToVolumeChangeTypeMap() (map[string]any, error) {
 
 // ChangeType invokes the upstream API with library-owned builders and result handling.
 func (a *API) ChangeType(ctx context.Context, id string, opts ChangeTypeOpts, options ...ChangeTypeOption) error {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("ChangeType", "volumes", err)
-		return err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("ChangeType", "volumes", err)
 		return err
 	}
@@ -161,14 +151,13 @@ func (a *API) ChangeType(ctx context.Context, id string, opts ChangeTypeOpts, op
 	return request.Wrap("ChangeType", "volumes", upstream.ChangeType(ctx, a.client, id, _opts).ExtractErr())
 }
 
-type CreateOption = request.Option[CreateOpts]
+type CreateOption = request.NativeFieldCall
 
-func WithCreateOptions(value CreateOpts) CreateOption { return request.WithOptions(value) }
-func WithCreateField(key string, value any) CreateOption {
-	return request.WithField[CreateOpts](key, value)
+func WithCreateOptions(value CreateOpts) CreateOption {
+	return request.Custom(request.WithOptions(value))
 }
 func WithCreateHintOpts(value SchedulerHintOpts) CreateOption {
-	return request.WithArgument[CreateOpts]("hintOpts", value)
+	return request.Custom(request.WithArgument[CreateOpts]("hintOpts", value))
 }
 
 type createOptsBuilder struct {
@@ -211,13 +200,8 @@ func (b createHintOptsBuilder) ToSchedulerHintsMap() (map[string]any, error) {
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*Volume, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true, Arguments: []string{"hintOpts"}}, options...)
 	if err != nil {
-		err = request.Wrap("Create", "volumes", err)
-		var zero0 *Volume
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false, "hintOpts"); err != nil {
 		err = request.Wrap("Create", "volumes", err)
 		var zero0 *Volume
 		return zero0, err
@@ -241,11 +225,10 @@ func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOpti
 	return value0, err
 }
 
-type DeleteOption = request.Option[DeleteOpts]
+type DeleteOption = request.NativeQueryCall
 
-func WithDeleteOptions(value DeleteOpts) DeleteOption { return request.WithOptions(value) }
-func WithDeleteQuery(key, value string) DeleteOption {
-	return request.WithQuery[DeleteOpts](key, value)
+func WithDeleteOptions(value DeleteOpts) DeleteOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type deleteOptsBuilder struct {
@@ -270,12 +253,8 @@ func (b deleteOptsBuilder) ToVolumeDeleteQuery() (string, error) {
 // Delete invokes the upstream API with library-owned builders and result handling.
 func (a *API) Delete(ctx context.Context, id string, options ...DeleteOption) error {
 	var opts DeleteOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("Delete", "volumes", err)
-		return err
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("Delete", "volumes", err)
 		return err
 	}
@@ -283,11 +262,10 @@ func (a *API) Delete(ctx context.Context, id string, options ...DeleteOption) er
 	return request.Wrap("Delete", "volumes", upstream.Delete(ctx, a.client, id, _opts).ExtractErr())
 }
 
-type DetachOption = request.Option[DetachOpts]
+type DetachOption = request.NativeFieldCall
 
-func WithDetachOptions(value DetachOpts) DetachOption { return request.WithOptions(value) }
-func WithDetachField(key string, value any) DetachOption {
-	return request.WithField[DetachOpts](key, value)
+func WithDetachOptions(value DetachOpts) DetachOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type detachOptsBuilder struct {
@@ -311,12 +289,8 @@ func (b detachOptsBuilder) ToVolumeDetachMap() (map[string]any, error) {
 
 // Detach invokes the upstream API with library-owned builders and result handling.
 func (a *API) Detach(ctx context.Context, id string, opts DetachOpts, options ...DetachOption) error {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Detach", "volumes", err)
-		return err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Detach", "volumes", err)
 		return err
 	}
@@ -324,11 +298,10 @@ func (a *API) Detach(ctx context.Context, id string, opts DetachOpts, options ..
 	return request.Wrap("Detach", "volumes", upstream.Detach(ctx, a.client, id, _opts).ExtractErr())
 }
 
-type ExtendSizeOption = request.Option[ExtendSizeOpts]
+type ExtendSizeOption = request.NativeFieldCall
 
-func WithExtendSizeOptions(value ExtendSizeOpts) ExtendSizeOption { return request.WithOptions(value) }
-func WithExtendSizeField(key string, value any) ExtendSizeOption {
-	return request.WithField[ExtendSizeOpts](key, value)
+func WithExtendSizeOptions(value ExtendSizeOpts) ExtendSizeOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type extendSizeOptsBuilder struct {
@@ -352,12 +325,8 @@ func (b extendSizeOptsBuilder) ToVolumeExtendSizeMap() (map[string]any, error) {
 
 // ExtendSize invokes the upstream API with library-owned builders and result handling.
 func (a *API) ExtendSize(ctx context.Context, id string, opts ExtendSizeOpts, options ...ExtendSizeOption) error {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("ExtendSize", "volumes", err)
-		return err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("ExtendSize", "volumes", err)
 		return err
 	}
@@ -378,13 +347,10 @@ func (a *API) Get(ctx context.Context, id string) (*Volume, error) {
 	return value0, err
 }
 
-type InitializeConnectionOption = request.Option[InitializeConnectionOpts]
+type InitializeConnectionOption = request.NativeFieldCall
 
 func WithInitializeConnectionOptions(value InitializeConnectionOpts) InitializeConnectionOption {
-	return request.WithOptions(value)
-}
-func WithInitializeConnectionField(key string, value any) InitializeConnectionOption {
-	return request.WithField[InitializeConnectionOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type initializeConnectionOptsBuilder struct {
@@ -408,13 +374,8 @@ func (b initializeConnectionOptsBuilder) ToVolumeInitializeConnectionMap() (map[
 
 // InitializeConnection invokes the upstream API with library-owned builders and result handling.
 func (a *API) InitializeConnection(ctx context.Context, id string, opts InitializeConnectionOpts, options ...InitializeConnectionOption) (map[string]any, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("InitializeConnection", "volumes", err)
-		var zero0 map[string]any
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("InitializeConnection", "volumes", err)
 		var zero0 map[string]any
 		return zero0, err
@@ -426,10 +387,9 @@ func (a *API) InitializeConnection(ctx context.Context, id string, opts Initiali
 	return value0, err
 }
 
-type ListOption = request.Option[ListOpts]
+type ListOption = request.NativeQueryCall
 
-func WithListOptions(value ListOpts) ListOption  { return request.WithOptions(value) }
-func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
+func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
 	base   ListOpts
@@ -457,12 +417,8 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Volume
 
 func (a *API) listWithControl(ctx context.Context, control resource.ListControl, options ...ListOption) iter.Seq2[*Volume, error] {
 	var opts ListOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("List", "volumes", err)
-		return func(yield func(*Volume, error) bool) { var zero *Volume; yield(zero, err) }
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("List", "volumes", err)
 		return func(yield func(*Volume, error) bool) { var zero *Volume; yield(zero, err) }
 	}
@@ -473,11 +429,10 @@ func (a *API) listWithControl(ctx context.Context, control resource.ListControl,
 	}, control)
 }
 
-type ReImageOption = request.Option[ReImageOpts]
+type ReImageOption = request.NativeFieldCall
 
-func WithReImageOptions(value ReImageOpts) ReImageOption { return request.WithOptions(value) }
-func WithReImageField(key string, value any) ReImageOption {
-	return request.WithField[ReImageOpts](key, value)
+func WithReImageOptions(value ReImageOpts) ReImageOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type reImageOptsBuilder struct {
@@ -501,12 +456,8 @@ func (b reImageOptsBuilder) ToReImageMap() (map[string]any, error) {
 
 // ReImage invokes the upstream API with library-owned builders and result handling.
 func (a *API) ReImage(ctx context.Context, id string, opts ReImageOpts, options ...ReImageOption) error {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("ReImage", "volumes", err)
-		return err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("ReImage", "volumes", err)
 		return err
 	}
@@ -519,13 +470,10 @@ func (a *API) Reserve(ctx context.Context, id string) error {
 	return request.Wrap("Reserve", "volumes", upstream.Reserve(ctx, a.client, id).ExtractErr())
 }
 
-type ResetStatusOption = request.Option[ResetStatusOpts]
+type ResetStatusOption = request.NativeFieldCall
 
 func WithResetStatusOptions(value ResetStatusOpts) ResetStatusOption {
-	return request.WithOptions(value)
-}
-func WithResetStatusField(key string, value any) ResetStatusOption {
-	return request.WithField[ResetStatusOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type resetStatusOptsBuilder struct {
@@ -549,12 +497,8 @@ func (b resetStatusOptsBuilder) ToResetStatusMap() (map[string]any, error) {
 
 // ResetStatus invokes the upstream API with library-owned builders and result handling.
 func (a *API) ResetStatus(ctx context.Context, id string, opts ResetStatusOpts, options ...ResetStatusOption) error {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("ResetStatus", "volumes", err)
-		return err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("ResetStatus", "volumes", err)
 		return err
 	}
@@ -562,11 +506,10 @@ func (a *API) ResetStatus(ctx context.Context, id string, opts ResetStatusOpts, 
 	return request.Wrap("ResetStatus", "volumes", upstream.ResetStatus(ctx, a.client, id, _opts).ExtractErr())
 }
 
-type SetBootableOption = request.Option[BootableOpts]
+type SetBootableOption = request.NativeFieldCall
 
-func WithSetBootableOptions(value BootableOpts) SetBootableOption { return request.WithOptions(value) }
-func WithSetBootableField(key string, value any) SetBootableOption {
-	return request.WithField[BootableOpts](key, value)
+func WithSetBootableOptions(value BootableOpts) SetBootableOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type setBootableOptsBuilder struct {
@@ -590,12 +533,8 @@ func (b setBootableOptsBuilder) ToBootableMap() (map[string]any, error) {
 
 // SetBootable invokes the upstream API with library-owned builders and result handling.
 func (a *API) SetBootable(ctx context.Context, id string, opts BootableOpts, options ...SetBootableOption) error {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("SetBootable", "volumes", err)
-		return err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("SetBootable", "volumes", err)
 		return err
 	}
@@ -603,13 +542,10 @@ func (a *API) SetBootable(ctx context.Context, id string, opts BootableOpts, opt
 	return request.Wrap("SetBootable", "volumes", upstream.SetBootable(ctx, a.client, id, _opts).ExtractErr())
 }
 
-type SetImageMetadataOption = request.Option[ImageMetadataOpts]
+type SetImageMetadataOption = request.NativeFieldCall
 
 func WithSetImageMetadataOptions(value ImageMetadataOpts) SetImageMetadataOption {
-	return request.WithOptions(value)
-}
-func WithSetImageMetadataField(key string, value any) SetImageMetadataOption {
-	return request.WithField[ImageMetadataOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type setImageMetadataOptsBuilder struct {
@@ -633,12 +569,8 @@ func (b setImageMetadataOptsBuilder) ToImageMetadataMap() (map[string]any, error
 
 // SetImageMetadata invokes the upstream API with library-owned builders and result handling.
 func (a *API) SetImageMetadata(ctx context.Context, id string, opts ImageMetadataOpts, options ...SetImageMetadataOption) error {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("SetImageMetadata", "volumes", err)
-		return err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("SetImageMetadata", "volumes", err)
 		return err
 	}
@@ -646,13 +578,10 @@ func (a *API) SetImageMetadata(ctx context.Context, id string, opts ImageMetadat
 	return request.Wrap("SetImageMetadata", "volumes", upstream.SetImageMetadata(ctx, a.client, id, _opts).ExtractErr())
 }
 
-type TerminateConnectionOption = request.Option[TerminateConnectionOpts]
+type TerminateConnectionOption = request.NativeFieldCall
 
 func WithTerminateConnectionOptions(value TerminateConnectionOpts) TerminateConnectionOption {
-	return request.WithOptions(value)
-}
-func WithTerminateConnectionField(key string, value any) TerminateConnectionOption {
-	return request.WithField[TerminateConnectionOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type terminateConnectionOptsBuilder struct {
@@ -676,12 +605,8 @@ func (b terminateConnectionOptsBuilder) ToVolumeTerminateConnectionMap() (map[st
 
 // TerminateConnection invokes the upstream API with library-owned builders and result handling.
 func (a *API) TerminateConnection(ctx context.Context, id string, opts TerminateConnectionOpts, options ...TerminateConnectionOption) error {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("TerminateConnection", "volumes", err)
-		return err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("TerminateConnection", "volumes", err)
 		return err
 	}
@@ -694,11 +619,10 @@ func (a *API) Unreserve(ctx context.Context, id string) error {
 	return request.Wrap("Unreserve", "volumes", upstream.Unreserve(ctx, a.client, id).ExtractErr())
 }
 
-type UpdateOption = request.Option[UpdateOpts]
+type UpdateOption = request.NativeFieldCall
 
-func WithUpdateOptions(value UpdateOpts) UpdateOption { return request.WithOptions(value) }
-func WithUpdateField(key string, value any) UpdateOption {
-	return request.WithField[UpdateOpts](key, value)
+func WithUpdateOptions(value UpdateOpts) UpdateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type updateOptsBuilder struct {
@@ -722,13 +646,8 @@ func (b updateOptsBuilder) ToVolumeUpdateMap() (map[string]any, error) {
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ...UpdateOption) (*Volume, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Update", "volumes", err)
-		var zero0 *Volume
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Update", "volumes", err)
 		var zero0 *Volume
 		return zero0, err
@@ -740,13 +659,10 @@ func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ..
 	return value0, err
 }
 
-type UploadImageOption = request.Option[UploadImageOpts]
+type UploadImageOption = request.NativeFieldCall
 
 func WithUploadImageOptions(value UploadImageOpts) UploadImageOption {
-	return request.WithOptions(value)
-}
-func WithUploadImageField(key string, value any) UploadImageOption {
-	return request.WithField[UploadImageOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type uploadImageOptsBuilder struct {
@@ -770,13 +686,8 @@ func (b uploadImageOptsBuilder) ToVolumeUploadImageMap() (map[string]any, error)
 
 // UploadImage invokes the upstream API with library-owned builders and result handling.
 func (a *API) UploadImage(ctx context.Context, id string, opts UploadImageOpts, options ...UploadImageOption) (VolumeImage, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("UploadImage", "volumes", err)
-		var zero0 VolumeImage
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("UploadImage", "volumes", err)
 		var zero0 VolumeImage
 		return zero0, err

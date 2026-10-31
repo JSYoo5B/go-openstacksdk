@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -73,7 +74,7 @@ func TestNativeRBACPolicyRoutesBodiesPagingAndDecode(t *testing.T) {
 		}
 		return nativeRBACWire(200, `{"rbac_policy":`+nativeRBACRow+`}`)
 	})
-	created, err := api.Create(ctx, nativeRBACCreate, rbacpolicies.WithCreateField("x_extension", 1))
+	created, err := api.Create(ctx, nativeRBACCreate, request.Field("x_extension", 1))
 	if err != nil || !(created.ID == "rb-1" && created.Action == rbacpolicies.ActionAccessShared && created.TargetTenant == "*" && created.Tags == nil) {
 		t.Fatal(created, err)
 	}
@@ -81,11 +82,11 @@ func TestNativeRBACPolicyRoutesBodiesPagingAndDecode(t *testing.T) {
 	if err != nil || got.ObjectID != "net-1" {
 		t.Fatal(got, err)
 	}
-	if _, err := api.Update(ctx, "rb-1", rbacpolicies.UpdateOpts{TargetTenant: "p2"}, rbacpolicies.WithUpdateField("x_extension", 1)); err != nil {
+	if _, err := api.Update(ctx, "rb-1", rbacpolicies.UpdateOpts{TargetTenant: "p2"}, request.Field("x_extension", 1)); err != nil {
 		t.Fatal(err)
 	}
 	var rows []*rbacpolicies.RBACPolicy
-	for value, err := range api.List(ctx, rbacpolicies.WithListOptions(rbacpolicies.ListOpts{ObjectType: "network", Action: rbacpolicies.ActionAccessShared, Limit: 1}), rbacpolicies.WithListQuery("extra", "1")) {
+	for value, err := range api.List(ctx, rbacpolicies.WithListOptions(rbacpolicies.ListOpts{ObjectType: "network", Action: rbacpolicies.ActionAccessShared, Limit: 1}), request.Query("extra", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -200,7 +201,7 @@ func TestNativeRBACPolicyStrictStatusesDecodeAndPreflight(t *testing.T) {
 			}()},
 			"update target": {"Update", func() error { _, err := api.Update(ctx, "rb-1", rbacpolicies.UpdateOpts{}); return err }()},
 			"create extension": {"Create", func() error {
-				_, err := api.Create(ctx, nativeRBACCreate, rbacpolicies.WithCreateField("object_id", "x"))
+				_, err := api.Create(ctx, nativeRBACCreate, request.Field("object_id", "x"))
 				return err
 			}()},
 			"update nil option": {"Update", func() error {

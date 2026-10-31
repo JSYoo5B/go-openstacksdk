@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/instanceactions"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -74,7 +75,7 @@ func TestNativeInstanceActionsRoutesQueryAndDecode(t *testing.T) {
 	ctx := context.Background()
 	since := time.Date(2026, 10, 10, 10, 0, 0, 0, time.FixedZone("KST", 9*3600))
 	var rows []instanceactions.InstanceAction
-	for value, err := range api.List(ctx, "s1", instanceactions.WithListOptions(instanceactions.ListOpts{Limit: 2, Marker: "req-9", ChangesSince: &since, ChangesBefore: &since}), instanceactions.WithListQuery("extra", "1")) {
+	for value, err := range api.List(ctx, "s1", instanceactions.WithListOptions(instanceactions.ListOpts{Limit: 2, Marker: "req-9", ChangesSince: &since, ChangesBefore: &since}), request.Query("extra", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}

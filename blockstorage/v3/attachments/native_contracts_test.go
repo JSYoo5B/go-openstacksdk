@@ -15,6 +15,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -74,7 +75,7 @@ func TestNativeAttachmentRoutesBodiesPagingAndDecode(t *testing.T) {
 		}
 		return nativeAttachmentWire(200, `{"attachment":`+nativeAttachmentRow+`}`)
 	})
-	created, err := api.Create(ctx, attachments.CreateOpts{VolumeUUID: "vol-1", InstanceUUID: "srv", Connector: map[string]any{"host": "compute-1"}, Mode: "rw"}, attachments.WithCreateField("x_extension", 1))
+	created, err := api.Create(ctx, attachments.CreateOpts{VolumeUUID: "vol-1", InstanceUUID: "srv", Connector: map[string]any{"host": "compute-1"}, Mode: "rw"}, request.Field("x_extension", 1))
 	if err != nil || !(created.ID == "att-1" && created.ConnectionInfo["driver_volume_type"] == "iscsi" && created.AttachedAt.Second() == 3 && created.DetachedAt.IsZero()) {
 		t.Fatal(created, err)
 	}
@@ -86,7 +87,7 @@ func TestNativeAttachmentRoutesBodiesPagingAndDecode(t *testing.T) {
 	if err != nil || got.Instance != "srv" {
 		t.Fatal(got, err)
 	}
-	if _, err := api.Update(ctx, "att-1", attachments.UpdateOpts{Connector: map[string]any{"host": "compute-2"}}, attachments.WithUpdateField("x_extension", 1)); err != nil {
+	if _, err := api.Update(ctx, "att-1", attachments.UpdateOpts{Connector: map[string]any{"host": "compute-2"}}, request.Field("x_extension", 1)); err != nil {
 		t.Fatal(err)
 	}
 	// A nil connector is sent as null.
@@ -97,7 +98,7 @@ func TestNativeAttachmentRoutesBodiesPagingAndDecode(t *testing.T) {
 		t.Fatal(err)
 	}
 	var rows []*attachments.Attachment
-	for value, err := range api.List(ctx, attachments.WithListOptions(attachments.ListOpts{VolumeID: "vol-1", InstanceID: "srv", AllTenants: true, Limit: 1}), attachments.WithListQuery("extra", "1")) {
+	for value, err := range api.List(ctx, attachments.WithListOptions(attachments.ListOpts{VolumeID: "vol-1", InstanceID: "srv", AllTenants: true, Limit: 1}), request.Query("extra", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -211,7 +212,7 @@ func TestNativeAttachmentStrictStatusesDecodeAndPreflight(t *testing.T) {
 		api, _ := nativeAttachmentAPI(t, &calls, func(*http.Request) *http.Response { return nativeAttachmentWire(200, `{}`) })
 		for operation, err := range map[string]error{
 			"Create": func() error {
-				_, err := api.Create(ctx, attachments.CreateOpts{}, attachments.WithCreateField("volume_uuid", "x"))
+				_, err := api.Create(ctx, attachments.CreateOpts{}, request.Field("volume_uuid", "x"))
 				return err
 			}(),
 			"Update": func() error { _, err := api.Update(ctx, "att-1", attachments.UpdateOpts{}, nil); return err }(),

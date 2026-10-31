@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
@@ -30,7 +31,7 @@ func TestNativeBackupAdminCalls(t *testing.T) {
 	if err != nil || record.BackupService != "cinder.backup.drivers.swift" || !reflect.DeepEqual(record.BackupURL, []byte{0, 1, 2}) {
 		t.Fatal(record, err)
 	}
-	imported, err := api.Import(ctx, backups.ImportOpts{BackupService: "cinder.backup.drivers.swift", BackupURL: []byte{0, 1, 2}}, backups.WithImportField("x_extension", 1))
+	imported, err := api.Import(ctx, backups.ImportOpts{BackupService: "cinder.backup.drivers.swift", BackupURL: []byte{0, 1, 2}}, request.Field("x_extension", 1))
 	if err != nil || imported.ID != "bk-9" || imported.Name != "imported" {
 		t.Fatal(imported, err)
 	}
@@ -102,7 +103,7 @@ func TestNativeBackupAdminStatusesAndDecode(t *testing.T) {
 		api, _ := nativeBackupAPI(t, &calls, func(*http.Request) *http.Response { return nativeBackupWire(201, `{}`) })
 		for operation, err := range map[string]error{
 			"Import": func() error {
-				_, err := api.Import(ctx, backups.ImportOpts{}, backups.WithImportField("backup_url", "x"))
+				_, err := api.Import(ctx, backups.ImportOpts{}, request.Field("backup_url", "x"))
 				return err
 			}(),
 			"ResetStatus": api.ResetStatus(ctx, "bk-1", backups.ResetStatusOpts{}, nil),

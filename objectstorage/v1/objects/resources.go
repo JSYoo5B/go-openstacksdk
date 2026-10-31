@@ -78,13 +78,10 @@ func (s *ObjectScope) listResources(ctx context.Context, query url.Values, contr
 	options := make([]ListOption, 0, len(query))
 	for key, values := range query {
 		for _, value := range values {
-			options = append(options, WithListQuery(key, value))
+			options = append(options, request.Query(key, value))
 		}
 	}
-	config, err := request.Apply(ListOpts{}, options...)
-	if err == nil {
-		err = request.ValidateCapabilities(config, false, true, false)
-	}
+	config, err := request.ApplyCalls(ListOpts{}, request.Capabilities{Query: true}, options...)
 	if err != nil {
 		return func(yield func(*ObjectResource, error) bool) { yield(nil, request.Wrap("List", "objects", err)) }
 	}

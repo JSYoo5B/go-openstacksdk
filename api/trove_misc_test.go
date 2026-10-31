@@ -16,6 +16,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/db/v1/flavors"
 	"github.com/JSYoo5B/go-openstacksdk/db/v1/users"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -43,7 +44,7 @@ func TestTroveMiscDatabaseCreateBodyOmitsEmptyOptionalsAndKeepsExtensions(t *tes
 	err := troveMiscDatabases(cloud).Create(context.Background(), "inst-1", databases.BatchCreateOpts{
 		{Name: "app", CharSet: "utf8mb4", Collate: "utf8mb4_unicode_ci"},
 		{Name: "logs"},
-	}, databases.WithCreateField("vendor", map[string]bool{"enabled": false}))
+	}, request.Field("vendor", map[string]bool{"enabled": false}))
 	if err != nil || calls.Load() != 1 {
 		t.Fatalf("error=%v calls=%d", err, calls.Load())
 	}
@@ -75,7 +76,7 @@ func TestTroveMiscDatabaseCreateRejectsInvalidInputsBeforeHTTP(t *testing.T) {
 	if err := api.Create(ctx, "inst-1", databases.BatchCreateOpts{{Name: "ok"}, {}}); !errors.As(err, &missing) {
 		t.Fatalf("missing name: %v", err)
 	}
-	if err := api.Create(ctx, "inst-1", databases.BatchCreateOpts{{Name: "ok"}}, databases.WithCreateField("databases", 1)); !errors.Is(err, resource.ErrInvalidOption) {
+	if err := api.Create(ctx, "inst-1", databases.BatchCreateOpts{{Name: "ok"}}, request.Field("databases", 1)); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatalf("protected databases field: %v", err)
 	}
 	if err := api.Create(ctx, "inst-1", databases.BatchCreateOpts{{Name: "ok"}}, nil); !errors.Is(err, resource.ErrInvalidOption) {
@@ -151,7 +152,7 @@ func TestTroveMiscUserCreateBodyKeepsHostAndOmitsEmptyOptionals(t *testing.T) {
 	err := troveMiscUsers(cloud).Create(context.Background(), "inst-1", users.BatchCreateOpts{
 		{Name: "reader", Password: "fixture-password", Host: "192.0.2.10", Databases: databases.BatchCreateOpts{{Name: "app"}}},
 		{Name: "plain", Password: "fixture-password"},
-	}, users.WithCreateField("vendor", false))
+	}, request.Field("vendor", false))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -179,7 +180,7 @@ func TestTroveMiscUserCreateRejectsInvalidInputsBeforeHTTP(t *testing.T) {
 	if err := api.Create(ctx, "inst-1", users.BatchCreateOpts{{Password: "p"}}); !errors.As(err, &missing) {
 		t.Fatalf("missing name: %v", err)
 	}
-	if err := api.Create(ctx, "inst-1", users.BatchCreateOpts{{Name: "u", Password: "p"}}, users.WithCreateField("users", 1)); !errors.Is(err, resource.ErrInvalidOption) {
+	if err := api.Create(ctx, "inst-1", users.BatchCreateOpts{{Name: "u", Password: "p"}}, request.Field("users", 1)); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatalf("protected users field: %v", err)
 	}
 	if err := api.Create(ctx, "inst-1", users.BatchCreateOpts{{Name: "u", Password: "p"}}, nil); !errors.Is(err, resource.ErrInvalidOption) {

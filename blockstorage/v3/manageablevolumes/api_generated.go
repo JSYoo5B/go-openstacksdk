@@ -17,13 +17,10 @@ func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
 type ManageExistingOpts = upstream.ManageExistingOpts
 type ManageExistingResult = upstream.ManageExistingResult
-type ManageExistingOption = request.Option[ManageExistingOpts]
+type ManageExistingOption = request.NativeFieldCall
 
 func WithManageExistingOptions(value ManageExistingOpts) ManageExistingOption {
-	return request.WithOptions(value)
-}
-func WithManageExistingField(key string, value any) ManageExistingOption {
-	return request.WithField[ManageExistingOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type manageExistingOptsBuilder struct {
@@ -47,13 +44,8 @@ func (b manageExistingOptsBuilder) ToManageExistingMap() (map[string]any, error)
 
 // ManageExisting invokes the upstream API with library-owned builders and result handling.
 func (a *API) ManageExisting(ctx context.Context, opts ManageExistingOpts, options ...ManageExistingOption) (*volumes.Volume, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("ManageExisting", "manageablevolumes", err)
-		var zero0 *volumes.Volume
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("ManageExisting", "manageablevolumes", err)
 		var zero0 *volumes.Volume
 		return zero0, err

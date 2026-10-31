@@ -11,6 +11,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
@@ -37,7 +38,7 @@ func TestNativeServerMetadataRoutesBodiesAndDecode(t *testing.T) {
 	if err != nil || reset["b"] != "2" {
 		t.Fatal("native reset returns the server response", reset, err)
 	}
-	if _, err := api.UpdateMetadata(ctx, "s1", servers.MetadataOpts{"c": "3"}, servers.WithUpdateMetadataField("x_extension", 1)); err != nil {
+	if _, err := api.UpdateMetadata(ctx, "s1", servers.MetadataOpts{"c": "3"}, request.Field("x_extension", 1)); err != nil {
 		t.Fatal(err)
 	}
 	one, err := api.Metadatum(ctx, "s1", "a")
@@ -123,7 +124,7 @@ func TestNativeServerMetadataStrictStatusesAndPreflight(t *testing.T) {
 				return err
 			},
 			"metadata collision": func() error {
-				_, err := api.ResetMetadata(ctx, "s1", servers.MetadataOpts{}, servers.WithResetMetadataField("metadata", map[string]string{}))
+				_, err := api.ResetMetadata(ctx, "s1", servers.MetadataOpts{}, request.Field("metadata", map[string]string{}))
 				return err
 			},
 			"nil option": func() error { _, err := api.UpdateMetadata(ctx, "s1", servers.MetadataOpts{}, nil); return err },

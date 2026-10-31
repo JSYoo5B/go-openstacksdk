@@ -14,6 +14,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/dns/v2/zones"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -57,7 +58,7 @@ func TestDesignateZoneCreateSendsFlatBodyAndPreservesExtensionValues(t *testing.
 	value, err := newDesignateZones(t, cloud).Create(context.Background(), zones.CreateOpts{
 		Name: "example.org.", Email: "admin@example.org", TTL: 3600, Type: "PRIMARY",
 		Attributes: map[string]string{"k": "v"}, Masters: []string{"192.0.2.1"},
-	}, zones.WithCreateField("flag", false), zones.WithCreateField("nothing", nil), zones.WithCreateField("empty", ""))
+	}, request.Field("flag", false), request.Field("nothing", nil), request.Field("empty", ""))
 	if err != nil || value == nil || value.ID != "zone-1" || value.Status != "PENDING" || value.Action != "CREATE" || value.Serial != 1700000000 || value.CreatedAt.IsZero() {
 		t.Fatalf("value=%+v error=%v", value, err)
 	}
@@ -143,7 +144,7 @@ func TestDesignateZoneUpdateKeepsEmptyDescriptionAndOmitsUnsetFields(t *testing.
 	})
 	empty := ""
 	value, err := newDesignateZones(t, cloud).Update(context.Background(), "zone-1",
-		zones.UpdateOpts{Description: &empty, TTL: 300, Masters: []string{"192.0.2.2"}}, zones.WithUpdateField("flag", false))
+		zones.UpdateOpts{Description: &empty, TTL: 300, Masters: []string{"192.0.2.2"}}, request.Field("flag", false))
 	if err != nil || value == nil || value.ID != "zone-1" {
 		t.Fatalf("value=%+v error=%v", value, err)
 	}
@@ -195,9 +196,9 @@ func TestDesignateZoneRejectsProtectedOrUnsupportedExtensionsBeforeHTTP(t *testi
 			t.Fatalf("%s: %v", name, err)
 		}
 	}
-	_, err := api.Create(ctx, zones.CreateOpts{Name: "a."}, zones.WithCreateField("name", "shadow"))
+	_, err := api.Create(ctx, zones.CreateOpts{Name: "a."}, request.Field("name", "shadow"))
 	invalid("protected create field", err)
-	_, err = api.Update(ctx, "zone-1", zones.UpdateOpts{}, zones.WithUpdateField("email", "x"))
+	_, err = api.Update(ctx, "zone-1", zones.UpdateOpts{}, request.Field("email", "x"))
 	invalid("protected update field", err)
 	_, err = api.Create(ctx, zones.CreateOpts{Name: "a."}, nil)
 	invalid("nil create option", err)
@@ -205,8 +206,8 @@ func TestDesignateZoneRejectsProtectedOrUnsupportedExtensionsBeforeHTTP(t *testi
 	invalid("nil update option", err)
 	for _, seq := range []func(func(*zones.Zone, error) bool){
 		api.List(ctx, nil),
-		api.List(ctx, zones.WithListHeader("X-Auth-All-Projects", "true"), zones.WithListOptions(zones.ListOpts{AllProjects: true})),
-		api.List(ctx, zones.WithListHeader("x-auth-sudo-tenant-id", "p"), zones.WithListOptions(zones.ListOpts{SudoTenantID: "q"})),
+		api.List(ctx, request.Header("X-Auth-All-Projects", "true"), zones.WithListOptions(zones.ListOpts{AllProjects: true})),
+		api.List(ctx, request.Header("x-auth-sudo-tenant-id", "p"), zones.WithListOptions(zones.ListOpts{SudoTenantID: "q"})),
 	} {
 		seen := 0
 		for _, err := range seq {
@@ -220,7 +221,7 @@ func TestDesignateZoneRejectsProtectedOrUnsupportedExtensionsBeforeHTTP(t *testi
 	for _, err := range api.ListShares(ctx, "zone-1", nil) {
 		invalid("nil list shares option", err)
 	}
-	for _, err := range api.ListShares(ctx, "zone-1", zones.WithListSharesHeader("X-Auth-All-Projects", "true"), zones.WithListSharesOptions(zones.ListSharesOpts{AllProjects: true})) {
+	for _, err := range api.ListShares(ctx, "zone-1", request.Header("X-Auth-All-Projects", "true"), zones.WithListSharesOptions(zones.ListSharesOpts{AllProjects: true})) {
 		invalid("list shares header collision", err)
 	}
 }
@@ -242,7 +243,7 @@ func TestDesignateZoneListFiltersHeadersAndFollowsLinksNext(t *testing.T) {
 	var ids []string
 	for value, err := range newDesignateZones(t, cloud).List(context.Background(),
 		zones.WithListOptions(zones.ListOpts{Name: "one.", Status: "ACTIVE", Type: "PRIMARY", TTL: 60, SortKey: "name", SortDir: "asc", Limit: 1, AllProjects: true, SudoTenantID: "p9"}),
-		zones.WithListQuery("vendor", "x"), zones.WithListHeader("X-Vendor", "h")) {
+		request.Query("vendor", "x"), request.Header("X-Vendor", "h")) {
 		if err != nil {
 			t.Fatal(err)
 		}

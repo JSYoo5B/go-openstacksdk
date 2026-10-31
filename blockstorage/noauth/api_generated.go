@@ -15,21 +15,16 @@ func New(client *gophercloud.ServiceClient) *API     { return &API{client: clien
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
 type EndpointOpts = upstream.EndpointOpts
-type NewBlockStorageNoAuthV2Option = request.Option[EndpointOpts]
+type NewBlockStorageNoAuthV2Option = request.NativeCall
 
 func WithNewBlockStorageNoAuthV2Options(value EndpointOpts) NewBlockStorageNoAuthV2Option {
-	return request.WithOptions(value)
+	return request.Custom(request.WithOptions(value))
 }
 
 // NewBlockStorageNoAuthV2 invokes the upstream API with library-owned builders and result handling.
 func (a *API) NewBlockStorageNoAuthV2(ctx context.Context, eo EndpointOpts, options ...NewBlockStorageNoAuthV2Option) (*gophercloud.ServiceClient, error) {
-	cfg, err := request.Apply(eo, options...)
+	cfg, err := request.ApplyCalls(eo, request.Capabilities{}, options...)
 	if err != nil {
-		err = request.Wrap("NewBlockStorageNoAuthV2", "noauth", err)
-		var zero0 *gophercloud.ServiceClient
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, false, false, false); err != nil {
 		err = request.Wrap("NewBlockStorageNoAuthV2", "noauth", err)
 		var zero0 *gophercloud.ServiceClient
 		return zero0, err
@@ -37,21 +32,16 @@ func (a *API) NewBlockStorageNoAuthV2(ctx context.Context, eo EndpointOpts, opti
 	return upstream.NewBlockStorageNoAuthV2(a.client.ProviderClient, cfg.Options)
 }
 
-type NewBlockStorageNoAuthV3Option = request.Option[EndpointOpts]
+type NewBlockStorageNoAuthV3Option = request.NativeCall
 
 func WithNewBlockStorageNoAuthV3Options(value EndpointOpts) NewBlockStorageNoAuthV3Option {
-	return request.WithOptions(value)
+	return request.Custom(request.WithOptions(value))
 }
 
 // NewBlockStorageNoAuthV3 invokes the upstream API with library-owned builders and result handling.
 func (a *API) NewBlockStorageNoAuthV3(ctx context.Context, eo EndpointOpts, options ...NewBlockStorageNoAuthV3Option) (*gophercloud.ServiceClient, error) {
-	cfg, err := request.Apply(eo, options...)
+	cfg, err := request.ApplyCalls(eo, request.Capabilities{}, options...)
 	if err != nil {
-		err = request.Wrap("NewBlockStorageNoAuthV3", "noauth", err)
-		var zero0 *gophercloud.ServiceClient
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, false, false, false); err != nil {
 		err = request.Wrap("NewBlockStorageNoAuthV3", "noauth", err)
 		var zero0 *gophercloud.ServiceClient
 		return zero0, err

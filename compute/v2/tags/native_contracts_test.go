@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/tags"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -69,7 +70,7 @@ func TestNativeTagsRoutesBodiesAndDecode(t *testing.T) {
 		t.Fatal(values, err)
 	}
 	// The response is returned as Nova ordered it, not as requested.
-	if values, err := api.ReplaceAll(ctx, "s1", tags.ReplaceAllOpts{Tags: []string{"c", "server-order"}}, tags.WithReplaceAllField("x_extension", 1)); err != nil || !reflect.DeepEqual(values, []string{"server-order", "c"}) {
+	if values, err := api.ReplaceAll(ctx, "s1", tags.ReplaceAllOpts{Tags: []string{"c", "server-order"}}, request.Field("x_extension", 1)); err != nil || !reflect.DeepEqual(values, []string{"server-order", "c"}) {
 		t.Fatal(values, err)
 	}
 	if _, err := api.ReplaceAll(ctx, "s1", tags.ReplaceAllOpts{Tags: []string{}}); err != nil {
@@ -156,7 +157,7 @@ func TestNativeTagsStrictStatusesCheckAndPreflight(t *testing.T) {
 		api := tags.New(nativeTagClient(cloud))
 		for name, opts := range map[string][]tags.ReplaceAllOption{
 			"nil tags":      nil,
-			"tags override": {tags.WithReplaceAllField("tags", []string{"x"})},
+			"tags override": {request.Field("tags", []string{"x"})},
 			"nil option":    {nil},
 		} {
 			input := tags.ReplaceAllOpts{Tags: []string{"t"}}

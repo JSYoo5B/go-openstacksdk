@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/listeners"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -68,7 +69,7 @@ func TestOctaviaListenerCreateKeepsExplicitFalseZeroAndExtensionFields(t *testin
 			LoadbalancerID: "lb-1", Protocol: listeners.ProtocolHTTP, ProtocolPort: 80,
 			AdminStateUp: octaviaListenerBool(false), ConnLimit: octaviaListenerInt(0), TimeoutClientData: octaviaListenerInt(0),
 			Tags: []string{"blue"},
-		}, listeners.WithCreateField("vendor", map[string]bool{"enabled": false}))
+		}, request.Field("vendor", map[string]bool{"enabled": false}))
 		if tc.success != (err == nil) || calls.Load() != 1 {
 			t.Fatalf("status %d value=%+v error=%v calls=%d", tc.status, value, err, calls.Load())
 		}
@@ -93,10 +94,10 @@ func TestOctaviaListenerRejectsProtectedOrUnsupportedExtensionsBeforeHTTP(t *tes
 	api := newOctaviaListeners(t, cloud)
 	ctx := context.Background()
 	create := listeners.CreateOpts{Protocol: listeners.ProtocolHTTP, ProtocolPort: 80}
-	if _, err := api.Create(ctx, create, listeners.WithCreateField("protocol", "TCP")); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := api.Create(ctx, create, request.Field("protocol", "TCP")); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatalf("protected create field: %v", err)
 	}
-	if _, err := api.Update(ctx, "ls-1", listeners.UpdateOpts{}, listeners.WithUpdateField("admin_state_up", true)); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := api.Update(ctx, "ls-1", listeners.UpdateOpts{}, request.Field("admin_state_up", true)); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatalf("protected update field: %v", err)
 	}
 	if _, err := api.Create(ctx, create, nil); !errors.Is(err, resource.ErrInvalidOption) {
@@ -139,7 +140,7 @@ func TestOctaviaListenerUpdateSendsEmptyValuesAndNullsAndAcceptsOnly200Or202(t *
 		value, err := newOctaviaListeners(t, cloud).Update(context.Background(), "ls-1", listeners.UpdateOpts{
 			Name: &empty, Description: &empty, DefaultPoolID: &empty, AdminStateUp: octaviaListenerBool(false),
 			ConnLimit: octaviaListenerInt(0), Tags: &tags, ALPNProtocols: &alpn, TLSVersions: &tlsVersions,
-		}, listeners.WithUpdateField("vendor", 1))
+		}, request.Field("vendor", 1))
 		if tc.success != (err == nil) || (tc.success && (value == nil || value.ID != "ls-1")) {
 			t.Fatalf("status %d value=%+v error=%v", tc.status, value, err)
 		}
@@ -232,7 +233,7 @@ func TestOctaviaListenerListFiltersFollowLinksAndPreserveFalseAndZero(t *testing
 			AdminStateUp: octaviaListenerBool(false), TimeoutClientData: octaviaListenerInt(0),
 			LoadbalancerID: "lb-1", Protocol: "HTTP", ProtocolPort: 80, Tags: []string{"a", "b"}, Limit: 1,
 		}),
-		listeners.WithListQuery("vendor", "x")) {
+		request.Query("vendor", "x")) {
 		if err != nil {
 			t.Fatal(err)
 		}

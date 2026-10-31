@@ -202,7 +202,7 @@ func emitSecurityGroupBodyRecordAdapter(e *emitter, plan *collectionPlan) {
 func emitSecurityGroupBodyFilterList(e *emitter, plan *collectionPlan) {
 	e.use("github.com/JSYoo5B/go-openstacksdk/request")
 	e.use("github.com/JSYoo5B/go-openstacksdk/internal/nativefind")
-	e.printf("func(a *API)listBodyWithControl(ctx context.Context,control resource.ListControl,options ...ListOption)iter.Seq2[*resource.BodyRecord[%s],error]{\nvar opts ListOpts\ncfg,err:=request.Apply(opts,options...)\n", plan.modelName)
-	e.printf("if err==nil{err=request.ValidateCapabilities(cfg,false,true,false)}\nif err!=nil{err=request.Wrap(\"List\",\"groups\",err);return func(yield func(*resource.BodyRecord[%s],error)bool){yield(nil,err)}}\n", plan.modelName)
+	e.printf("func(a *API)listBodyWithControl(ctx context.Context,control resource.ListControl,options ...ListOption)iter.Seq2[*resource.BodyRecord[%s],error]{\nvar opts ListOpts\ncfg,err:=request.ApplyCalls(opts,request.Capabilities{Query:true},options...)\n", plan.modelName)
+	e.printf("if err!=nil{err=request.Wrap(\"List\",\"groups\",err);return func(yield func(*resource.BodyRecord[%s],error)bool){yield(nil,err)}}\n", plan.modelName)
 	e.printf("return nativefind.IterateSecurityGroupBodies(ctx,a.RawClient(),cfg.Query,control)\n}\n")
 }

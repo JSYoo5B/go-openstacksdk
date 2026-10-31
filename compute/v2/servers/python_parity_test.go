@@ -13,6 +13,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
 	"github.com/JSYoo5B/go-openstacksdk/image/v2/images"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -71,7 +72,7 @@ func TestPythonServerGetUpdateDeleteMatchProxyRequests(t *testing.T) {
 		t.Fatal(got, err)
 	}
 	// update_server(server, name="vm2", description="d") sends only the passed attributes.
-	if _, err := api.Update(ctx, "s1", servers.UpdateOpts{Name: "vm2"}, servers.WithUpdateField("description", "d")); err != nil {
+	if _, err := api.Update(ctx, "s1", servers.UpdateOpts{Name: "vm2"}, request.Field("description", "d")); err != nil {
 		t.Fatal(err)
 	}
 	// delete_server(server) ignores a missing server; ignore_missing=False reports it.
@@ -173,11 +174,11 @@ func TestPythonServerRebuildSendsPassedKeysAndReturnsServer(t *testing.T) {
 	// rebuild_server(server, image, name=..., admin_password=..., preserve_ephemeral=True,
 	// metadata=..., key_name=None, description=None, user_data=..., hostname=...)
 	got, err := api.Rebuild(ctx, "s1", servers.RebuildOpts{ImageRef: "img", Name: "vm2", AdminPass: "p", Metadata: map[string]string{"k": "v"}},
-		servers.WithRebuildField("preserve_ephemeral", true),
-		servers.WithRebuildField("key_name", nil),
-		servers.WithRebuildField("description", nil),
-		servers.WithRebuildField("user_data", "dXNlcg=="),
-		servers.WithRebuildField("hostname", "host2"))
+		request.Field("preserve_ephemeral", true),
+		request.Field("key_name", nil),
+		request.Field("description", nil),
+		request.Field("user_data", "dXNlcg=="),
+		request.Field("hostname", "host2"))
 	if err != nil || got.ID != "s1" || got.Name != "vm2" || got.Status != "REBUILD" || got.AdminPass != "np" {
 		t.Fatal(got, err)
 	}
@@ -186,7 +187,7 @@ func TestPythonServerRebuildSendsPassedKeysAndReturnsServer(t *testing.T) {
 		t.Fatal(err)
 	}
 	// A typed key cannot carry an explicit null, so name=None has no Go spelling.
-	if _, err := api.Rebuild(ctx, "s1", servers.RebuildOpts{ImageRef: "img"}, servers.WithRebuildField("name", nil)); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := api.Rebuild(ctx, "s1", servers.RebuildOpts{ImageRef: "img"}, request.Field("name", nil)); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
 	want := []pythonServerCall{
@@ -210,15 +211,15 @@ func TestPythonServerLockAndUnshelveArgumentGaps(t *testing.T) {
 	if err := api.Unshelve(ctx, "s1", servers.UnshelveOpts{}); err != nil {
 		t.Fatal(err)
 	}
-	if err := api.Unshelve(ctx, "s1", servers.UnshelveOpts{AvailabilityZone: "az"}, servers.WithUnshelveField("host", "h")); err != nil {
+	if err := api.Unshelve(ctx, "s1", servers.UnshelveOpts{AvailabilityZone: "az"}, request.Field("host", "h")); err != nil {
 		t.Fatal(err)
 	}
 	// unshelve_server(server, host="h") nests host in the action; Go puts it beside a null action.
-	if err := api.Unshelve(ctx, "s1", servers.UnshelveOpts{}, servers.WithUnshelveField("host", "h")); err != nil {
+	if err := api.Unshelve(ctx, "s1", servers.UnshelveOpts{}, request.Field("host", "h")); err != nil {
 		t.Fatal(err)
 	}
 	// unshelve_server(server, availability_zone=None) sends {"availability_zone": null}; Go rejects it.
-	if err := api.Unshelve(ctx, "s1", servers.UnshelveOpts{}, servers.WithUnshelveField("availability_zone", nil)); !errors.Is(err, resource.ErrInvalidOption) {
+	if err := api.Unshelve(ctx, "s1", servers.UnshelveOpts{}, request.Field("availability_zone", nil)); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
 	action := pythonServerBase + "/action"

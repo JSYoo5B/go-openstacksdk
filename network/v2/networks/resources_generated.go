@@ -30,13 +30,13 @@ func (a *API) ResourceAdapter() resource.Adapter[Network] {
 			return networkBodyFilterValue(record, key)
 		},
 		IterateBodyControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*resource.BodyRecord[Network], error] {
-			options := []ListOption{func(config *request.Config[ListOpts]) error {
+			options := []ListOption{request.Custom(func(config *request.Config[ListOpts]) error {
 				config.Query = make(url.Values, len(q))
 				for key, values := range q {
 					config.Query[key] = append([]string(nil), values...)
 				}
 				return nil
-			}}
+			})}
 			return a.listBodyWithControl(ctx, control, options...)
 		},
 		FilterDescriptor: &resource.FilterDescriptor{Query: map[string]string{"any_tags": "tags-any", "description": "description", "fields": "fields", "id": "id", "ipv4_address_scope_id": "ipv4_address_scope", "ipv6_address_scope_id": "ipv6_address_scope", "is_admin_state_up": "admin_state_up", "is_port_security_enabled": "port_security_enabled", "is_router_external": "router:external", "is_shared": "shared", "limit": "limit", "marker": "marker", "name": "name", "not_any_tags": "not-tags-any", "not_tags": "not-tags", "project_id": "project_id", "provider_network_type": "provider:network_type", "provider_physical_network": "provider:physical_network", "provider_segmentation_id": "provider:segmentation_id", "sort_dir": "sort_dir", "sort_key": "sort_key", "status": "status", "tags": "tags"}, Body: map[string]string{"availability_zone_hints": "availability_zone_hints", "availability_zones": "availability_zones", "created_at": "created_at", "dns_domain": "dns_domain", "is_default": "is_default", "is_vlan_qinq": "vlan_qinq", "is_vlan_transparent": "vlan_transparent", "mtu": "mtu", "pvlan": "pvlan", "qos_policy_id": "qos_policy_id", "revision_number": "revision_number", "segments": "segments", "subnet_ids": "subnets", "updated_at": "updated_at"}, Reserved: []string{"allow_unknown_params", "base_path", "headers", "jmespath_filters", "max_items", "microversion", "paginated", "resource_type", "session"}},
@@ -58,22 +58,19 @@ func (a *API) ResourceAdapter() resource.Adapter[Network] {
 		Delete: func(ctx context.Context, id string) error { return a.Delete(ctx, string(id)) },
 		IterateControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*Network, error] {
 			q = maps.Clone(q)
-			options := []ListOption{func(config *request.Config[ListOpts]) error {
+			options := []ListOption{request.Custom(func(config *request.Config[ListOpts]) error {
 				config.Query = make(url.Values, len(q))
 				for key, values := range q {
 					config.Query[key] = append([]string(nil), values...)
 				}
 				return nil
-			}}
+			})}
 			return a.listWithControl(ctx, control, options...)
 		}}
 }
 func (a *API) listBodyWithControl(ctx context.Context, control resource.ListControl, options ...ListOption) iter.Seq2[*resource.BodyRecord[Network], error] {
 	var opts ListOpts
-	cfg, err := request.Apply(opts, options...)
-	if err == nil {
-		err = request.ValidateCapabilities(cfg, false, true, false)
-	}
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
 		err = request.Wrap("List", "networks", err)
 		return func(yield func(*resource.BodyRecord[Network], error) bool) { yield(nil, err) }

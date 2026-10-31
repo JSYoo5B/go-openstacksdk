@@ -10,6 +10,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/services"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -95,7 +96,7 @@ func TestPythonComputeServiceUpdateByIDCannotClearForcedDown(t *testing.T) {
 	}
 	// update_service_forced_down('svc-uuid', forced=False) sends forced_down false;
 	// Go omits the false typed key and refuses it as an extension.
-	if _, err := api.Update(ctx, "svc-uuid", services.UpdateOpts{}, services.WithUpdateField("forced_down", false)); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := api.Update(ctx, "svc-uuid", services.UpdateOpts{}, request.Field("forced_down", false)); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
 	want := []pythonComputeServiceCall{
@@ -115,7 +116,7 @@ func TestPythonComputeServiceLegacyActionsSendBodyButFailDecode(t *testing.T) {
 		return pythonComputeServiceWire(200, `{"service":{"host":"cmp1","binary":"nova-compute","status":"disabled"}}`)
 	})
 	// disable_service(None, host="cmp1", binary="nova-compute") puts os-services/disable.
-	_, err := api.Update(ctx, "disable", services.UpdateOpts{}, services.WithUpdateField("host", "cmp1"), services.WithUpdateField("binary", "nova-compute"))
+	_, err := api.Update(ctx, "disable", services.UpdateOpts{}, request.Field("host", "cmp1"), request.Field("binary", "nova-compute"))
 	if err == nil || !strings.Contains(err.Error(), "ID has unexpected type") {
 		t.Fatal("legacy service action response must fail decoding without an id", err)
 	}

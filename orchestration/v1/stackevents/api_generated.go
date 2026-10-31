@@ -44,10 +44,9 @@ func (a *API) Get(ctx context.Context, stackName string, stackID string, resourc
 	return value0, err
 }
 
-type ListOption = request.Option[ListOpts]
+type ListOption = request.NativeQueryCall
 
-func WithListOptions(value ListOpts) ListOption  { return request.WithOptions(value) }
-func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
+func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
 	base   ListOpts
@@ -71,12 +70,8 @@ func (b listOptsBuilder) ToStackEventListQuery() (string, error) {
 // List invokes the upstream API with library-owned builders and result handling.
 func (a *API) List(ctx context.Context, stackName string, stackID string, options ...ListOption) iter.Seq2[*Event, error] {
 	var opts ListOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("List", "stackevents", err)
-		return func(yield func(*Event, error) bool) { var zero *Event; yield(zero, err) }
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("List", "stackevents", err)
 		return func(yield func(*Event, error) bool) { var zero *Event; yield(zero, err) }
 	}
@@ -87,13 +82,10 @@ func (a *API) List(ctx context.Context, stackName string, stackID string, option
 	})
 }
 
-type ListResourceEventsOption = request.Option[ListResourceEventsOpts]
+type ListResourceEventsOption = request.NativeQueryCall
 
 func WithListResourceEventsOptions(value ListResourceEventsOpts) ListResourceEventsOption {
-	return request.WithOptions(value)
-}
-func WithListResourceEventsQuery(key, value string) ListResourceEventsOption {
-	return request.WithQuery[ListResourceEventsOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type listResourceEventsOptsBuilder struct {
@@ -118,12 +110,8 @@ func (b listResourceEventsOptsBuilder) ToResourceEventListQuery() (string, error
 // ListResourceEvents invokes the upstream API with library-owned builders and result handling.
 func (a *API) ListResourceEvents(ctx context.Context, stackName string, stackID string, resourceName string, options ...ListResourceEventsOption) iter.Seq2[*Event, error] {
 	var opts ListResourceEventsOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("ListResourceEvents", "stackevents", err)
-		return func(yield func(*Event, error) bool) { var zero *Event; yield(zero, err) }
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("ListResourceEvents", "stackevents", err)
 		return func(yield func(*Event, error) bool) { var zero *Event; yield(zero, err) }
 	}

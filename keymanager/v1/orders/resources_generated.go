@@ -27,13 +27,13 @@ func (a *API) newResources() *resource.Collection[Order] {
 		IterateBodyControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*resource.BodyRecord[Order], error] {
 			q = maps.Clone(q)
 			q.Del("status")
-			options := []ListOption{func(config *request.Config[ListOpts]) error {
+			options := []ListOption{request.Custom(func(config *request.Config[ListOpts]) error {
 				config.Query = make(url.Values, len(q))
 				for key, values := range q {
 					config.Query[key] = append([]string(nil), values...)
 				}
 				return nil
-			}}
+			})}
 			return a.listBodyWithControl(ctx, control, options...)
 		},
 		FilterDescriptor: &resource.FilterDescriptor{Query: map[string]string{"limit": "limit", "marker": "marker"}, Body: map[string]string{"created_at": "created_at", "creator_id": "creator_id", "id": "id", "meta": "meta", "name": "name", "order_id": "order_id", "order_ref": "order_ref", "secret_id": "secret_id", "secret_ref": "secret_ref", "status": "status", "sub_status": "sub_status", "sub_status_message": "sub_status_message", "type": "type", "updated_at": "updated_at"}, Reserved: []string{"allow_unknown_params", "base_path", "headers", "jmespath_filters", "max_items", "microversion", "paginated", "resource_type", "session"}},
@@ -54,22 +54,19 @@ func (a *API) newResources() *resource.Collection[Order] {
 		IterateControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*Order, error] {
 			q = maps.Clone(q)
 			q.Del("status")
-			options := []ListOption{func(config *request.Config[ListOpts]) error {
+			options := []ListOption{request.Custom(func(config *request.Config[ListOpts]) error {
 				config.Query = make(url.Values, len(q))
 				for key, values := range q {
 					config.Query[key] = append([]string(nil), values...)
 				}
 				return nil
-			}}
+			})}
 			return a.listWithControl(ctx, control, options...)
 		}})
 }
 func (a *API) listBodyWithControl(ctx context.Context, control resource.ListControl, options ...ListOption) iter.Seq2[*resource.BodyRecord[Order], error] {
 	var opts ListOpts
-	cfg, err := request.Apply(opts, options...)
-	if err == nil {
-		err = request.ValidateCapabilities(cfg, false, true, false)
-	}
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
 		err = request.Wrap("List", "orders", err)
 		return func(yield func(*resource.BodyRecord[Order], error) bool) { yield(nil, err) }

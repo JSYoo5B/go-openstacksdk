@@ -14,6 +14,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -68,7 +69,7 @@ func TestNativeSnapshotRoutesBodiesPagingAndDecode(t *testing.T) {
 		}
 		return nativeSnapWire(200, `{"snapshot":`+nativeSnapRow+`}`)
 	})
-	created, err := api.Create(ctx, snapshots.CreateOpts{VolumeID: "vol-1", Name: "daily", Force: true, Metadata: map[string]string{"k": "v"}}, snapshots.WithCreateField("x_extension", 1))
+	created, err := api.Create(ctx, snapshots.CreateOpts{VolumeID: "vol-1", Name: "daily", Force: true, Metadata: map[string]string{"k": "v"}}, request.Field("x_extension", 1))
 	if err != nil || !(created.ID == "snap-1" && created.Progress == "100%" && created.ProjectID == "project" && created.ConsumesQuota && created.CreatedAt.Second() == 3 && created.UpdatedAt.IsZero()) {
 		t.Fatal(created, err)
 	}
@@ -77,7 +78,7 @@ func TestNativeSnapshotRoutesBodiesPagingAndDecode(t *testing.T) {
 		t.Fatal(got, err)
 	}
 	empty := ""
-	if _, err := api.Update(ctx, "snap-1", snapshots.UpdateOpts{Description: &empty}, snapshots.WithUpdateField("x_extension", 1)); err != nil {
+	if _, err := api.Update(ctx, "snap-1", snapshots.UpdateOpts{Description: &empty}, request.Field("x_extension", 1)); err != nil {
 		t.Fatal(err)
 	}
 	collect := func(seq func(func(*snapshots.Snapshot, error) bool)) []string {
@@ -90,8 +91,8 @@ func TestNativeSnapshotRoutesBodiesPagingAndDecode(t *testing.T) {
 		}
 		return ids
 	}
-	listed := collect(api.List(ctx, snapshots.WithListOptions(snapshots.ListOpts{VolumeID: "vol-1", AllTenants: true, Limit: 1}), snapshots.WithListQuery("extra", "1")))
-	detailed := collect(api.ListDetail(ctx, snapshots.WithListDetailOptions(snapshots.ListOpts{Status: "available"}), snapshots.WithListDetailQuery("extra", "1")))
+	listed := collect(api.List(ctx, snapshots.WithListOptions(snapshots.ListOpts{VolumeID: "vol-1", AllTenants: true, Limit: 1}), request.Query("extra", "1")))
+	detailed := collect(api.ListDetail(ctx, snapshots.WithListDetailOptions(snapshots.ListOpts{Status: "available"}), request.Query("extra", "1")))
 	if !reflect.DeepEqual(listed, []string{"snap-1", "snap-2"}) || !reflect.DeepEqual(detailed, []string{"snap-1", "snap-2"}) {
 		t.Fatal(listed, detailed)
 	}
@@ -215,7 +216,7 @@ func TestNativeSnapshotStrictStatusesDecodeAndPreflight(t *testing.T) {
 		}{
 			"volume id": {"Create", func() error { _, err := api.Create(ctx, snapshots.CreateOpts{}); return err }()},
 			"core extension": {"Create", func() error {
-				_, err := api.Create(ctx, snapshots.CreateOpts{VolumeID: "vol-1"}, snapshots.WithCreateField("force", true))
+				_, err := api.Create(ctx, snapshots.CreateOpts{VolumeID: "vol-1"}, request.Field("force", true))
 				return err
 			}()},
 			"update nil option": {"Update", func() error { _, err := api.Update(ctx, "snap-1", snapshots.UpdateOpts{}, nil); return err }()},

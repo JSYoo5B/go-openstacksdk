@@ -10,6 +10,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -55,7 +56,7 @@ func TestPythonEndpointCreateGetUpdateRequests(t *testing.T) {
 	})
 	disabled, enabled := false, true
 	want := endpoints.Endpoint{ID: "ep-1", Availability: gophercloud.AvailabilityPublic, RegionID: "RegionOne", ServiceID: "svc-1", URL: "https://nova"}
-	created, err := api.Create(ctx, endpoints.CreateOpts{Availability: gophercloud.AvailabilityPublic, URL: "https://nova", ServiceID: "svc-1", Enabled: &disabled}, endpoints.WithCreateField("region_id", "RegionOne"))
+	created, err := api.Create(ctx, endpoints.CreateOpts{Availability: gophercloud.AvailabilityPublic, URL: "https://nova", ServiceID: "svc-1", Enabled: &disabled}, request.Field("region_id", "RegionOne"))
 	if err != nil || !reflect.DeepEqual(*created, want) {
 		t.Fatal(created, err)
 	}
@@ -63,7 +64,7 @@ func TestPythonEndpointCreateGetUpdateRequests(t *testing.T) {
 	if err != nil || !reflect.DeepEqual(*got, want) {
 		t.Fatal(got, err)
 	}
-	updated, err := api.Update(ctx, "ep-1", endpoints.UpdateOpts{URL: "https://nova2", Enabled: &enabled}, endpoints.WithUpdateField("region_id", "RegionTwo"))
+	updated, err := api.Update(ctx, "ep-1", endpoints.UpdateOpts{URL: "https://nova2", Enabled: &enabled}, request.Field("region_id", "RegionTwo"))
 	if err != nil || updated.RegionID != "RegionTwo" || updated.URL != "https://nova2" || !updated.Enabled {
 		t.Fatal(updated, err)
 	}

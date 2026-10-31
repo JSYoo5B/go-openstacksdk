@@ -38,13 +38,10 @@ type UserType = upstream.UserType
 const UserTypeEphemeral = upstream.UserTypeEphemeral
 const UserTypeLocal = upstream.UserTypeLocal
 
-type CreateMappingOption = request.Option[CreateMappingOpts]
+type CreateMappingOption = request.NativeFieldCall
 
 func WithCreateMappingOptions(value CreateMappingOpts) CreateMappingOption {
-	return request.WithOptions(value)
-}
-func WithCreateMappingField(key string, value any) CreateMappingOption {
-	return request.WithField[CreateMappingOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type createMappingOptsBuilder struct {
@@ -68,13 +65,8 @@ func (b createMappingOptsBuilder) ToMappingCreateMap() (map[string]any, error) {
 
 // CreateMapping invokes the upstream API with library-owned builders and result handling.
 func (a *API) CreateMapping(ctx context.Context, mappingID string, opts CreateMappingOpts, options ...CreateMappingOption) (*Mapping, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("CreateMapping", "federation", err)
-		var zero0 *Mapping
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("CreateMapping", "federation", err)
 		var zero0 *Mapping
 		return zero0, err
@@ -107,13 +99,10 @@ func (a *API) ListMappings(ctx context.Context) iter.Seq2[*Mapping, error] {
 	})
 }
 
-type UpdateMappingOption = request.Option[UpdateMappingOpts]
+type UpdateMappingOption = request.NativeFieldCall
 
 func WithUpdateMappingOptions(value UpdateMappingOpts) UpdateMappingOption {
-	return request.WithOptions(value)
-}
-func WithUpdateMappingField(key string, value any) UpdateMappingOption {
-	return request.WithField[UpdateMappingOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type updateMappingOptsBuilder struct {
@@ -137,13 +126,8 @@ func (b updateMappingOptsBuilder) ToMappingUpdateMap() (map[string]any, error) {
 
 // UpdateMapping invokes the upstream API with library-owned builders and result handling.
 func (a *API) UpdateMapping(ctx context.Context, mappingID string, opts UpdateMappingOpts, options ...UpdateMappingOption) (*Mapping, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("UpdateMapping", "federation", err)
-		var zero0 *Mapping
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("UpdateMapping", "federation", err)
 		var zero0 *Mapping
 		return zero0, err

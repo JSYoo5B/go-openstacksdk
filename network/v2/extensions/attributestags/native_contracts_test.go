@@ -11,6 +11,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/attributestags"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -62,7 +63,7 @@ func TestNativeAttributeTagRoutesAndBodies(t *testing.T) {
 		}
 		return 204, ""
 	})
-	replaced, err := api.ReplaceAll(ctx, "networks", "n1", attributestags.ReplaceAllOpts{Tags: []string{"a", "b"}}, attributestags.WithReplaceAllField("x_extension", 1))
+	replaced, err := api.ReplaceAll(ctx, "networks", "n1", attributestags.ReplaceAllOpts{Tags: []string{"a", "b"}}, request.Field("x_extension", 1))
 	if err != nil || !reflect.DeepEqual(replaced, []string{"a", "b"}) {
 		t.Fatal(replaced, err)
 	}
@@ -158,7 +159,7 @@ func TestNativeAttributeTagStatusesAndPreflight(t *testing.T) {
 				return err
 			}(),
 			"tags extension": func() error {
-				_, err := api.ReplaceAll(ctx, "networks", "n1", attributestags.ReplaceAllOpts{Tags: []string{}}, attributestags.WithReplaceAllField("tags", nil))
+				_, err := api.ReplaceAll(ctx, "networks", "n1", attributestags.ReplaceAllOpts{Tags: []string{}}, request.Field("tags", nil))
 				return err
 			}(),
 			"nil option": func() error {

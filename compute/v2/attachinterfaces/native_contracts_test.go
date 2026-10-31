@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/attachinterfaces"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -59,7 +60,7 @@ func TestNativeAttachInterfacesRoutesBodiesAndDecode(t *testing.T) {
 	}))
 	api := attachinterfaces.New(nativeInterfaceClient(cloud))
 	ctx := context.Background()
-	created, err := api.Create(ctx, "s1", attachinterfaces.CreateOpts{NetworkID: "n1", FixedIPs: []attachinterfaces.FixedIP{{SubnetID: "sn", IPAddress: "10.0.0.5"}, {IPAddress: "10.0.0.6"}}}, attachinterfaces.WithCreateField("tag", "eth1"))
+	created, err := api.Create(ctx, "s1", attachinterfaces.CreateOpts{NetworkID: "n1", FixedIPs: []attachinterfaces.FixedIP{{SubnetID: "sn", IPAddress: "10.0.0.5"}, {IPAddress: "10.0.0.6"}}}, request.Field("tag", "eth1"))
 	if err != nil || created.PortID != "p1" || created.MACAddr != "fa:16:3e:00:00:01" || created.FixedIPs[0].IPAddress != "10.0.0.5" {
 		t.Fatal(created, err)
 	}
@@ -170,7 +171,7 @@ func TestNativeAttachInterfacesStrictStatusesAndPreflight(t *testing.T) {
 		api := attachinterfaces.New(nativeInterfaceClient(cloud))
 		for name, check := range map[string]func() error{
 			"port_id extension": func() error {
-				_, err := api.Create(ctx, "s1", attachinterfaces.CreateOpts{}, attachinterfaces.WithCreateField("port_id", "x"))
+				_, err := api.Create(ctx, "s1", attachinterfaces.CreateOpts{}, request.Field("port_id", "x"))
 				return err
 			},
 			"nil option": func() error { _, err := api.Create(ctx, "s1", attachinterfaces.CreateOpts{}, nil); return err },

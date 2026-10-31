@@ -8,6 +8,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/schedulerstats"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 // pythonPoolCall records the wire request openstacksdk would also send.
@@ -48,11 +49,11 @@ func TestPythonBackendPoolsDetailQuery(t *testing.T) {
 		query   string
 	}{
 		// backend_pools() always sends Pools.base_path ?detail=True.
-		{"python detail spelling", []schedulerstats.ListOption{schedulerstats.WithListQuery("detail", "True")}, "detail=True"},
+		{"python detail spelling", []schedulerstats.ListOption{request.Query("detail", "True")}, "detail=True"},
 		// The typed option sends lowercase true, which Cinder parses as the same boolean.
 		{"typed detail", []schedulerstats.ListOption{schedulerstats.WithListOptions(schedulerstats.ListOpts{Detail: true})}, "detail=true"},
 		// backend_pools(limit=..., marker=...) adds the default pagination QueryParameters after detail.
-		{"pagination keys", []schedulerstats.ListOption{schedulerstats.WithListQuery("detail", "True"), schedulerstats.WithListQuery("limit", "1"), schedulerstats.WithListQuery("marker", "m")}, "detail=True&limit=1&marker=m"},
+		{"pagination keys", []schedulerstats.ListOption{request.Query("detail", "True"), request.Query("limit", "1"), request.Query("marker", "m")}, "detail=True&limit=1&marker=m"},
 		// The Go default omits detail, so Cinder returns names only; Python cannot send this request.
 		{"go default", nil, ""},
 	} {

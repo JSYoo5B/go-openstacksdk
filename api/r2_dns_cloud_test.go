@@ -14,6 +14,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/dns/v2/recordsets"
 	"github.com/JSYoo5B/go-openstacksdk/dns/v2/zones"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -288,7 +289,7 @@ func TestR2DNSConnectionHelpersUseDNSServiceAndHonorCancellation(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	list, err := conn.ListDNSZones(context.Background(), zones.WithListQuery("name", url.QueryEscape("a.")))
+	list, err := conn.ListDNSZones(context.Background(), request.Query("name", url.QueryEscape("a.")))
 	if err != nil || len(list) != 1 {
 		t.Fatalf("%v %v", list, err)
 	}

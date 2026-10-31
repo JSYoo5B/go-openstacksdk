@@ -83,10 +83,10 @@ func TestOctaviaQuotaLegacyKeysRejectAliasesAndForgedArgumentBeforeHTTP(t *testi
 	}
 	five := 5
 	for name, options := range map[string][]quotas.UpdateOption{
-		"legacy alias extension":    {quotas.WithLegacyQuotaKeys(true), quotas.WithUpdateField("load_balancer", 1)},
-		"legacy monitor extension":  {quotas.WithLegacyQuotaKeys(true), quotas.WithUpdateField("health_monitor", 1)},
-		"canonical alias extension": {quotas.WithLegacyQuotaKeys(true), quotas.WithUpdateField("loadbalancer", 1)},
-		"forged argument type":      {request.WithArgument[quotas.UpdateOpts]("quota_legacy_keys", "yes")},
+		"legacy alias extension":    {quotas.WithLegacyQuotaKeys(true), request.Field("load_balancer", 1)},
+		"legacy monitor extension":  {quotas.WithLegacyQuotaKeys(true), request.Field("health_monitor", 1)},
+		"canonical alias extension": {quotas.WithLegacyQuotaKeys(true), request.Field("loadbalancer", 1)},
+		"forged argument type":      {request.Custom(request.WithArgument[quotas.UpdateOpts]("quota_legacy_keys", "yes"))},
 		"value and default":         {quotas.WithLegacyQuotaKeys(true), quotas.WithDefaultLimit(quotas.LimitLoadBalancers)},
 	} {
 		value, err := scope.Update(context.Background(), quotas.UpdateOpts{Loadbalancer: &five}, options...)

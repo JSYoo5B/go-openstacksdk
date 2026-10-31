@@ -55,13 +55,13 @@ func (s *MemberScope) newResources() *resource.Collection[Member] {
 		Delete:      func(ctx context.Context, id string) error { return s.api.DeleteMember(ctx, s.parentID, string(id)) },
 		IterateControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*Member, error] {
 			q = maps.Clone(q)
-			options := []ListMembersOption{func(config *request.Config[ListMembersOpts]) error {
+			options := []ListMembersOption{request.Custom(func(config *request.Config[ListMembersOpts]) error {
 				config.Query = make(url.Values, len(q))
 				for key, values := range q {
 					config.Query[key] = append([]string(nil), values...)
 				}
 				return nil
-			}}
+			})}
 			return s.api.listMembersWithControl(ctx, s.parentID, control, options...)
 		}})
 }

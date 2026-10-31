@@ -14,6 +14,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -61,7 +62,7 @@ func TestNativeAggregateRoutesBodiesAndDecode(t *testing.T) {
 		}
 		return nativeAggregateWire(200, `{"aggregate":`+nativeAggregateRow+`}`)
 	})
-	created, err := api.Create(ctx, aggregates.CreateOpts{Name: "rack1", AvailabilityZone: "az1"}, aggregates.WithCreateField("x_extension", 1))
+	created, err := api.Create(ctx, aggregates.CreateOpts{Name: "rack1", AvailabilityZone: "az1"}, request.Field("x_extension", 1))
 	created2 := time.Date(2026, 10, 1, 1, 2, 3, 0, time.UTC)
 	if err != nil || created.ID != 7 || created.UUID != "agg-uuid" || !created.CreatedAt.Equal(created2) || !created.UpdatedAt.IsZero() || !reflect.DeepEqual(created.Hosts, []string{"cmp1"}) || created.Metadata["ssd"] != "true" {
 		t.Fatal(created, err)
@@ -72,7 +73,7 @@ func TestNativeAggregateRoutesBodiesAndDecode(t *testing.T) {
 	if _, err := api.Get(ctx, 7); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := api.Update(ctx, 7, aggregates.UpdateOpts{Name: "rack9"}, aggregates.WithUpdateField("x_extension", true)); err != nil {
+	if _, err := api.Update(ctx, 7, aggregates.UpdateOpts{Name: "rack9"}, request.Field("x_extension", true)); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := api.Update(ctx, 7, aggregates.UpdateOpts{}); err != nil {
@@ -222,11 +223,11 @@ func TestNativeAggregateStatusesDecodeAndPreflight(t *testing.T) {
 		_, err := api.Create(ctx, aggregates.CreateOpts{AvailabilityZone: "az1"})
 		check("Create", err)
 		// An omitted core key is still reserved.
-		_, err = api.Create(ctx, aggregates.CreateOpts{Name: "a"}, aggregates.WithCreateField("availability_zone", "az"))
+		_, err = api.Create(ctx, aggregates.CreateOpts{Name: "a"}, request.Field("availability_zone", "az"))
 		check("Create", err)
 		_, err = api.Create(ctx, aggregates.CreateOpts{Name: "a"}, nil)
 		check("Create", err)
-		_, err = api.Update(ctx, 7, aggregates.UpdateOpts{}, aggregates.WithUpdateField("name", "x"))
+		_, err = api.Update(ctx, 7, aggregates.UpdateOpts{}, request.Field("name", "x"))
 		check("Update", err)
 		_, err = api.AddHost(ctx, 7, aggregates.AddHostOpts{})
 		check("AddHost", err)

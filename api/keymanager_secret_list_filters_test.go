@@ -18,6 +18,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -646,7 +647,7 @@ func TestKeyManagerSecretListFiltersPagingSourceAndNativeIsolation(t *testing.T)
 			cloud.Mux.HandleFunc(secretFetchPath+"/payload", func(w http.ResponseWriter, r *http.Request) { payloads.Add(1); _, _ = w.Write([]byte("original")) })
 			api := f.open(t, cloud)
 			count := 0
-			for value, err := range api.List(context.Background(), secrets.WithListQuery("payload", "wire-only")) {
+			for value, err := range api.List(context.Background(), request.Query("payload", "wire-only")) {
 				if err != nil || value == nil {
 					t.Fatal(value, err)
 				}

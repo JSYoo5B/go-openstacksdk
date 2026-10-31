@@ -9,6 +9,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/swauth"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -45,7 +46,7 @@ func TestNativeSwauthAuthHeadersAndResult(t *testing.T) {
 	ctx := context.Background()
 	var calls []nativeSwauthCall
 	api, _ := nativeSwauthAPI(t, &calls, 200)
-	result, err := api.Auth(ctx, swauth.AuthOpts{User: "acct:user", Key: "secret"}, swauth.WithAuthHeader("X-Extra", "1"))
+	result, err := api.Auth(ctx, swauth.AuthOpts{User: "acct:user", Key: "secret"}, request.Header("X-Extra", "1"))
 	want := swauth.AuthResult{Token: "swift-token", StorageURL: "https://swift.example/v1/AUTH_acct", CDNURL: "https://cdn.example"}
 	if err != nil || result == nil || *result != want {
 		t.Fatal(result, err)
@@ -74,7 +75,7 @@ func TestNativeSwauthStatusesAndPreflight(t *testing.T) {
 		"missing user": func() error { _, err := api.Auth(ctx, swauth.AuthOpts{Key: "k"}); return err }(),
 		"missing key":  func() error { _, err := api.Auth(ctx, swauth.AuthOpts{User: "u"}); return err }(),
 		"core header": func() error {
-			_, err := api.Auth(ctx, swauth.AuthOpts{User: "u", Key: "k"}, swauth.WithAuthHeader("X-Auth-Key", "other"))
+			_, err := api.Auth(ctx, swauth.AuthOpts{User: "u", Key: "k"}, request.Header("X-Auth-Key", "other"))
 			return err
 		}(),
 		"nil option": func() error { _, err := api.Auth(ctx, swauth.AuthOpts{User: "u", Key: "k"}, nil); return err }(),

@@ -57,7 +57,7 @@ func (a *API) FindByNameOrID(ctx context.Context, identity string, options ...Fi
 			options := make([]ListOption, 0, len(q))
 			for key, values := range q {
 				for _, v := range values {
-					options = append(options, WithListQuery(key, v))
+					options = append(options, request.Query(key, v))
 				}
 			}
 			return a.List(ctx, options...)

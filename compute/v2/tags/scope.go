@@ -180,10 +180,7 @@ func (s *ServerTagScope) Replace(ctx context.Context, values []string, options .
 	if err := s.api.validateScope(ctx); err != nil {
 		return nil, request.Wrap("Replace", "server tags", err)
 	}
-	cfg, err := request.Apply(ReplaceAllOpts{Tags: values}, options...)
-	if err == nil {
-		err = request.ValidateCapabilities(cfg, true, false, false)
-	}
+	cfg, err := request.ApplyCalls(ReplaceAllOpts{Tags: values}, request.Capabilities{Body: true}, options...)
 	if err != nil {
 		return nil, request.Wrap("Replace", "server tags", err)
 	}

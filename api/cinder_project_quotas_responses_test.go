@@ -11,6 +11,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -93,7 +94,7 @@ func TestCinderProjectQuotaLimitsDefaultsUsageUpdateAndResetKeepFixedTarget(t *t
 	}
 	zero, unlimited := 0, -1
 	extension := map[string]string{"tier": "requested"}
-	option := quotasets.WithUpdateField("vendor", extension)
+	option := request.Field("vendor", extension)
 	extension["tier"] = "changed"
 	updated, err := scope.Update(context.Background(), quotasets.UpdateOpts{Volumes: &unlimited, Snapshots: &zero, Force: true}, option, quotasets.WithUpdateForce(false), quotasets.WithVolumeTypeQuota(quotasets.VolumeTypeVolumes, "SSD", 12))
 	if err != nil || updated == nil || updated.ProjectID != "project-fixed" || updated.ID != "wire-project" || updated.Header.Get("X-Openstack-Request-Id") != "req-update" || string(updated.Body["counter"]) != "9007199254740993" {

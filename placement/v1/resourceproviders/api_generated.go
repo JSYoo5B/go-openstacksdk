@@ -54,11 +54,10 @@ type UpdateInventoryResult = upstream.UpdateInventoryResult
 type UpdateOpts = upstream.UpdateOpts
 type UpdateResult = upstream.UpdateResult
 type UpdateTraitsOpts = upstream.UpdateTraitsOpts
-type CreateOption = request.Option[CreateOpts]
+type CreateOption = request.NativeFieldCall
 
-func WithCreateOptions(value CreateOpts) CreateOption { return request.WithOptions(value) }
-func WithCreateField(key string, value any) CreateOption {
-	return request.WithField[CreateOpts](key, value)
+func WithCreateOptions(value CreateOpts) CreateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type createOptsBuilder struct {
@@ -82,13 +81,8 @@ func (b createOptsBuilder) ToResourceProviderCreateMap() (map[string]any, error)
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*ResourceProvider, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Create", "resourceproviders", err)
-		var zero0 *ResourceProvider
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Create", "resourceproviders", err)
 		var zero0 *ResourceProvider
 		return zero0, err
@@ -176,10 +170,9 @@ func (a *API) GetUsages(ctx context.Context, resourceProviderID string) (*Resour
 	return value0, err
 }
 
-type ListOption = request.Option[ListOpts]
+type ListOption = request.NativeQueryCall
 
-func WithListOptions(value ListOpts) ListOption  { return request.WithOptions(value) }
-func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
+func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
 	base   ListOpts
@@ -207,12 +200,8 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Resour
 
 func (a *API) listWithControl(ctx context.Context, control resource.ListControl, options ...ListOption) iter.Seq2[*ResourceProvider, error] {
 	var opts ListOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("List", "resourceproviders", err)
-		return func(yield func(*ResourceProvider, error) bool) { var zero *ResourceProvider; yield(zero, err) }
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("List", "resourceproviders", err)
 		return func(yield func(*ResourceProvider, error) bool) { var zero *ResourceProvider; yield(zero, err) }
 	}
@@ -223,11 +212,10 @@ func (a *API) listWithControl(ctx context.Context, control resource.ListControl,
 	}, control)
 }
 
-type UpdateOption = request.Option[UpdateOpts]
+type UpdateOption = request.NativeFieldCall
 
-func WithUpdateOptions(value UpdateOpts) UpdateOption { return request.WithOptions(value) }
-func WithUpdateField(key string, value any) UpdateOption {
-	return request.WithField[UpdateOpts](key, value)
+func WithUpdateOptions(value UpdateOpts) UpdateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type updateOptsBuilder struct {
@@ -251,13 +239,8 @@ func (b updateOptsBuilder) ToResourceProviderUpdateMap() (map[string]any, error)
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, resourceProviderID string, opts UpdateOpts, options ...UpdateOption) (*ResourceProvider, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Update", "resourceproviders", err)
-		var zero0 *ResourceProvider
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Update", "resourceproviders", err)
 		var zero0 *ResourceProvider
 		return zero0, err
@@ -269,13 +252,10 @@ func (a *API) Update(ctx context.Context, resourceProviderID string, opts Update
 	return value0, err
 }
 
-type UpdateAggregatesOption = request.Option[UpdateAggregatesOpts]
+type UpdateAggregatesOption = request.NativeFieldCall
 
 func WithUpdateAggregatesOptions(value UpdateAggregatesOpts) UpdateAggregatesOption {
-	return request.WithOptions(value)
-}
-func WithUpdateAggregatesField(key string, value any) UpdateAggregatesOption {
-	return request.WithField[UpdateAggregatesOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type updateAggregatesOptsBuilder struct {
@@ -299,13 +279,8 @@ func (b updateAggregatesOptsBuilder) ToResourceProviderUpdateAggregatesMap() (ma
 
 // UpdateAggregates invokes the upstream API with library-owned builders and result handling.
 func (a *API) UpdateAggregates(ctx context.Context, resourceProviderID string, opts UpdateAggregatesOpts, options ...UpdateAggregatesOption) (*ResourceProviderAggregates, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("UpdateAggregates", "resourceproviders", err)
-		var zero0 *ResourceProviderAggregates
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("UpdateAggregates", "resourceproviders", err)
 		var zero0 *ResourceProviderAggregates
 		return zero0, err
@@ -317,13 +292,10 @@ func (a *API) UpdateAggregates(ctx context.Context, resourceProviderID string, o
 	return value0, err
 }
 
-type UpdateInventoriesOption = request.Option[UpdateInventoriesOpts]
+type UpdateInventoriesOption = request.NativeFieldCall
 
 func WithUpdateInventoriesOptions(value UpdateInventoriesOpts) UpdateInventoriesOption {
-	return request.WithOptions(value)
-}
-func WithUpdateInventoriesField(key string, value any) UpdateInventoriesOption {
-	return request.WithField[UpdateInventoriesOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type updateInventoriesOptsBuilder struct {
@@ -347,13 +319,8 @@ func (b updateInventoriesOptsBuilder) ToResourceProviderUpdateInventoriesMap() (
 
 // UpdateInventories invokes the upstream API with library-owned builders and result handling.
 func (a *API) UpdateInventories(ctx context.Context, resourceProviderID string, opts UpdateInventoriesOpts, options ...UpdateInventoriesOption) (*ResourceProviderInventories, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("UpdateInventories", "resourceproviders", err)
-		var zero0 *ResourceProviderInventories
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("UpdateInventories", "resourceproviders", err)
 		var zero0 *ResourceProviderInventories
 		return zero0, err
@@ -365,13 +332,10 @@ func (a *API) UpdateInventories(ctx context.Context, resourceProviderID string, 
 	return value0, err
 }
 
-type UpdateInventoryOption = request.Option[UpdateInventoryOpts]
+type UpdateInventoryOption = request.NativeFieldCall
 
 func WithUpdateInventoryOptions(value UpdateInventoryOpts) UpdateInventoryOption {
-	return request.WithOptions(value)
-}
-func WithUpdateInventoryField(key string, value any) UpdateInventoryOption {
-	return request.WithField[UpdateInventoryOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type updateInventoryOptsBuilder struct {
@@ -395,13 +359,8 @@ func (b updateInventoryOptsBuilder) ToResourceProviderUpdateInventoryMap() (map[
 
 // UpdateInventory invokes the upstream API with library-owned builders and result handling.
 func (a *API) UpdateInventory(ctx context.Context, resourceProviderID string, resourceClass string, opts UpdateInventoryOpts, options ...UpdateInventoryOption) (*ResourceProviderInventory, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("UpdateInventory", "resourceproviders", err)
-		var zero0 *ResourceProviderInventory
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("UpdateInventory", "resourceproviders", err)
 		var zero0 *ResourceProviderInventory
 		return zero0, err
@@ -413,13 +372,10 @@ func (a *API) UpdateInventory(ctx context.Context, resourceProviderID string, re
 	return value0, err
 }
 
-type UpdateTraitsOption = request.Option[UpdateTraitsOpts]
+type UpdateTraitsOption = request.NativeFieldCall
 
 func WithUpdateTraitsOptions(value UpdateTraitsOpts) UpdateTraitsOption {
-	return request.WithOptions(value)
-}
-func WithUpdateTraitsField(key string, value any) UpdateTraitsOption {
-	return request.WithField[UpdateTraitsOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type updateTraitsOptsBuilder struct {
@@ -443,13 +399,8 @@ func (b updateTraitsOptsBuilder) ToResourceProviderUpdateTraitsMap() (map[string
 
 // UpdateTraits invokes the upstream API with library-owned builders and result handling.
 func (a *API) UpdateTraits(ctx context.Context, resourceProviderID string, opts UpdateTraitsOpts, options ...UpdateTraitsOption) (*ResourceProviderTraits, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("UpdateTraits", "resourceproviders", err)
-		var zero0 *ResourceProviderTraits
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("UpdateTraits", "resourceproviders", err)
 		var zero0 *ResourceProviderTraits
 		return zero0, err

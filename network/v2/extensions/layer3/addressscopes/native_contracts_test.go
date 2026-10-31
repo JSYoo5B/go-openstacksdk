@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/addressscopes"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -67,7 +68,7 @@ func TestNativeAddressScopeRoutesBodiesPagingAndDecode(t *testing.T) {
 		}
 		return nativeScopeWire(200, `{"address_scope":`+nativeScopeRow+`}`)
 	})
-	created, err := api.Create(ctx, addressscopes.CreateOpts{Name: "scope", IPVersion: 6, Shared: true, ProjectID: "p"}, addressscopes.WithCreateField("x_extension", 1))
+	created, err := api.Create(ctx, addressscopes.CreateOpts{Name: "scope", IPVersion: 6, Shared: true, ProjectID: "p"}, request.Field("x_extension", 1))
 	if err != nil || !(created.ID == "as-1" && created.IPVersion == 6 && created.Shared && created.TenantID == "t") {
 		t.Fatal(created, err)
 	}
@@ -80,14 +81,14 @@ func TestNativeAddressScopeRoutesBodiesPagingAndDecode(t *testing.T) {
 		t.Fatal(got, err)
 	}
 	name, shared := "renamed", false
-	if _, err := api.Update(ctx, "as-1", addressscopes.UpdateOpts{Name: &name, Shared: &shared}, addressscopes.WithUpdateField("x_extension", 1)); err != nil {
+	if _, err := api.Update(ctx, "as-1", addressscopes.UpdateOpts{Name: &name, Shared: &shared}, request.Field("x_extension", 1)); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := api.Update(ctx, "as-1", addressscopes.UpdateOpts{}); err != nil {
 		t.Fatal(err)
 	}
 	var rows []*addressscopes.AddressScope
-	for value, err := range api.List(ctx, addressscopes.WithListOptions(addressscopes.ListOpts{Name: "scope", IPVersion: 6, Shared: gophercloud.Enabled, Limit: 1}), addressscopes.WithListQuery("extra", "1")) {
+	for value, err := range api.List(ctx, addressscopes.WithListOptions(addressscopes.ListOpts{Name: "scope", IPVersion: 6, Shared: gophercloud.Enabled, Limit: 1}), request.Query("extra", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -188,7 +189,7 @@ func TestNativeAddressScopeStrictStatusesAndPreflight(t *testing.T) {
 		api, _ := nativeScopeAPI(t, &calls, func(*http.Request) *http.Response { return nativeScopeWire(201, `{}`) })
 		for operation, err := range map[string]error{
 			"Create": func() error {
-				_, err := api.Create(ctx, addressscopes.CreateOpts{}, addressscopes.WithCreateField("ip_version", 4))
+				_, err := api.Create(ctx, addressscopes.CreateOpts{}, request.Field("ip_version", 4))
 				return err
 			}(),
 			"Update": func() error {

@@ -13,6 +13,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/speakers"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -110,7 +111,7 @@ func TestPythonBGPSpeakerUpdateAlwaysSendsAdvertiseFlags(t *testing.T) {
 	if _, err := api.Update(ctx, "bs-1", speakers.UpdateOpts{Name: "edge"}); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := api.Update(ctx, "bs-1", speakers.UpdateOpts{Name: "edge"}, speakers.WithUpdateField("advertise_tenant_networks", true)); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := api.Update(ctx, "bs-1", speakers.UpdateOpts{Name: "edge"}, request.Field("advertise_tenant_networks", true)); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
 	want := []pythonBGPSpeakerCall{

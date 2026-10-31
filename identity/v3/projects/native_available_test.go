@@ -11,6 +11,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/projects"
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/users"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -77,7 +78,7 @@ func TestNativeUserChangePassword(t *testing.T) {
 	var calls []nativeSelfCall
 	client, _ := nativeSelfClient(t, &calls, func(*http.Request) (int, string) { return 204, "" })
 	api := users.New(client)
-	if err := api.ChangePassword(ctx, "u1", users.ChangePasswordOpts{OriginalPassword: "old", Password: "new"}, users.WithChangePasswordField("x_extension", 1)); err != nil {
+	if err := api.ChangePassword(ctx, "u1", users.ChangePasswordOpts{OriginalPassword: "old", Password: "new"}, request.Field("x_extension", 1)); err != nil {
 		t.Fatal(err)
 	}
 	// Neither password is required or omitted when empty.
@@ -105,7 +106,7 @@ func TestNativeUserChangePassword(t *testing.T) {
 	var none []nativeSelfCall
 	client, _ = nativeSelfClient(t, &none, func(*http.Request) (int, string) { return 204, "" })
 	for name, err := range map[string]error{
-		"core extension": users.New(client).ChangePassword(ctx, "u1", users.ChangePasswordOpts{}, users.WithChangePasswordField("password", "x")),
+		"core extension": users.New(client).ChangePassword(ctx, "u1", users.ChangePasswordOpts{}, request.Field("password", "x")),
 		"nil option":     users.New(client).ChangePassword(ctx, "u1", users.ChangePasswordOpts{}, nil),
 	} {
 		var wrapped *resource.OperationError

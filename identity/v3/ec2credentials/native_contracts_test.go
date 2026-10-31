@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/ec2credentials"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -63,7 +64,7 @@ func TestNativeEC2CredentialRoutesBodiesPagingAndDecode(t *testing.T) {
 		}
 		return 200, `{"credential":` + nativeEC2Row + `}`
 	})
-	created, err := api.Create(ctx, "u1", ec2credentials.CreateOpts{TenantID: "p"}, ec2credentials.WithCreateField("x_extension", 1))
+	created, err := api.Create(ctx, "u1", ec2credentials.CreateOpts{TenantID: "p"}, request.Field("x_extension", 1))
 	if err != nil || created.Access != "ak" || created.Secret != "sk" || created.TrustID != "" {
 		t.Fatal(created, err)
 	}
@@ -134,7 +135,7 @@ func TestNativeEC2CredentialStatusesAndPreflight(t *testing.T) {
 		for name, err := range map[string]error{
 			"tenant": func() error { _, err := api.Create(ctx, "u1", ec2credentials.CreateOpts{}); return err }(),
 			"core extension": func() error {
-				_, err := api.Create(ctx, "u1", ec2credentials.CreateOpts{TenantID: "p"}, ec2credentials.WithCreateField("tenant_id", "x"))
+				_, err := api.Create(ctx, "u1", ec2credentials.CreateOpts{TenantID: "p"}, request.Field("tenant_id", "x"))
 				return err
 			}(),
 		} {

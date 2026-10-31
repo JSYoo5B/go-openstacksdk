@@ -10,6 +10,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/placement/v1/allocationcandidates"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -59,7 +60,7 @@ func TestPythonAllocationCandidatesRepeatedQueryValues(t *testing.T) {
 	}
 	// A later WithListQuery for the key wins.
 	calls = nil
-	for range api.List(context.Background(), allocationcandidates.WithListQueryValues("member_of1", "agg-4", "agg-5"), allocationcandidates.WithListQuery("member_of1", "agg-6")) {
+	for range api.List(context.Background(), allocationcandidates.WithListQueryValues("member_of1", "agg-4", "agg-5"), request.Query("member_of1", "agg-6")) {
 	}
 	if len(calls) != 1 || calls[0].query != "member_of1=agg-6" {
 		t.Fatalf("%+v", calls)

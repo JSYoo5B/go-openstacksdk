@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/services"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -106,7 +107,7 @@ func TestNativeVPNServiceRoutesBodiesPagingAndDecode(t *testing.T) {
 		}
 		return nativeVPNWire(200, `{"vpnservice":`+nativeVPNRow+`}`)
 	})
-	created, err := api.Create(ctx, services.CreateOpts{Name: "vpn", RouterID: "r1", AdminStateUp: gophercloud.Disabled}, services.WithCreateField("x_extension", 1))
+	created, err := api.Create(ctx, services.CreateOpts{Name: "vpn", RouterID: "r1", AdminStateUp: gophercloud.Disabled}, request.Field("x_extension", 1))
 	if err != nil || !(created.ID == "x-1" && created.SubnetID == "" && created.ExternalV4IP == "203.0.113.5") {
 		t.Fatal(created, err)
 	}
@@ -118,11 +119,11 @@ func TestNativeVPNServiceRoutesBodiesPagingAndDecode(t *testing.T) {
 		t.Fatal(got, err)
 	}
 	empty := ""
-	if _, err := api.Update(ctx, "x-1", services.UpdateOpts{Name: &empty, AdminStateUp: gophercloud.Enabled}, services.WithUpdateField("x_extension", 1)); err != nil {
+	if _, err := api.Update(ctx, "x-1", services.UpdateOpts{Name: &empty, AdminStateUp: gophercloud.Enabled}, request.Field("x_extension", 1)); err != nil {
 		t.Fatal(err)
 	}
 	var ids []string
-	for value, err := range api.List(ctx, services.WithListOptions(services.ListOpts{RouterID: "r1", AdminStateUp: gophercloud.Enabled}), services.WithListQuery("extra", "1")) {
+	for value, err := range api.List(ctx, services.WithListOptions(services.ListOpts{RouterID: "r1", AdminStateUp: gophercloud.Enabled}), request.Query("extra", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -179,7 +180,7 @@ func TestNativeVPNServiceStrictStatusesAndPreflight(t *testing.T) {
 		for name, err := range map[string]error{
 			"missing required": func() error { _, err := api.Create(ctx, services.CreateOpts{Name: "vpn"}); return err }(),
 			"core extension": func() error {
-				_, err := api.Create(ctx, services.CreateOpts{RouterID: "r1"}, services.WithCreateField("router_id", "r2"))
+				_, err := api.Create(ctx, services.CreateOpts{RouterID: "r1"}, request.Field("router_id", "r2"))
 				return err
 			}(),
 			"nil option": func() error { _, err := api.Update(ctx, "x-1", services.UpdateOpts{}, nil); return err }(),

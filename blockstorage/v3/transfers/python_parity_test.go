@@ -10,6 +10,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -103,13 +104,13 @@ func TestPythonTransferCreateListAndFindGaps(t *testing.T) {
 	})
 	// create_transfer(volume_id=..., name=..., no_snapshots=True) needs /volume-transfers at 3.55;
 	// Go can only add the key to the legacy route.
-	created, err := api.Create(ctx, transfers.CreateOpts{VolumeID: "vol-1", Name: "handoff"}, transfers.WithCreateField("no_snapshots", true))
+	created, err := api.Create(ctx, transfers.CreateOpts{VolumeID: "vol-1", Name: "handoff"}, request.Field("no_snapshots", true))
 	if err != nil || created.AuthKey != "secret" {
 		t.Fatal(created, err)
 	}
 	// transfers(all_projects=True) with the default details=True.
 	var ids []string
-	for value, err := range api.List(ctx, transfers.WithListQuery("all_tenants", "True")) {
+	for value, err := range api.List(ctx, request.Query("all_tenants", "True")) {
 		if err != nil {
 			t.Fatal(err)
 		}

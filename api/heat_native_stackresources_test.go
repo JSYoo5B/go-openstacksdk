@@ -10,6 +10,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stackresources"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 func heatNativeResourcesAPI(cloud *testcloud.Cloud, headers map[string]string) *stackresources.API {
@@ -229,7 +230,7 @@ func TestHeatNativeStackResourcesMarkUnhealthyPhysicalIDAndExtensions(t *testing
 	// Option helpers and extensions.
 	if err := api.MarkUnhealthy(context.Background(), "app", "fixed", "web", stackresources.MarkUnhealthyOpts{},
 		stackresources.WithMarkUnhealthyOptions(stackresources.MarkUnhealthyOpts{MarkUnhealthy: true, ResourceStatusReason: "why"}),
-		stackresources.WithMarkUnhealthyField("vendor", map[string]any{"keep": nil})); err != nil {
+		request.Field("vendor", map[string]any{"keep": nil})); err != nil {
 		t.Fatal(err)
 	}
 	if body := <-bodies; !reflect.DeepEqual(body, map[string]any{"mark_unhealthy": true, "resource_status_reason": "why", "vendor": map[string]any{"keep": nil}}) {
@@ -249,7 +250,7 @@ func TestHeatNativeStackResourcesMarkUnhealthyPhysicalIDAndExtensions(t *testing
 	}
 	// Extensions cannot replace typed fields; nothing is sent.
 	if err := api.MarkUnhealthy(context.Background(), "app", "fixed", "web", stackresources.MarkUnhealthyOpts{MarkUnhealthy: true},
-		stackresources.WithMarkUnhealthyField("mark_unhealthy", false)); err == nil {
+		request.Field("mark_unhealthy", false)); err == nil {
 		t.Fatal("typed mark_unhealthy field was overridden by an extension")
 	}
 	if err := api.MarkUnhealthy(context.Background(), "app", "fixed", "web", stackresources.MarkUnhealthyOpts{}, nil); err == nil {

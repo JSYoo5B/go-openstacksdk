@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
@@ -54,14 +55,14 @@ func TestNativeServerAdminActionsRoutesBodiesAndDecode(t *testing.T) {
 		call func() error
 	}{
 		{`{"evacuate":{"adminPass":"p","host":"h1","onSharedStorage":true,"x_extension":1}}`, evacuate("p",
-			servers.EvacuateOpts{Host: "h1", OnSharedStorage: true, AdminPass: "p"}, servers.WithEvacuateField("x_extension", 1))},
+			servers.EvacuateOpts{Host: "h1", OnSharedStorage: true, AdminPass: "p"}, request.Field("x_extension", 1))},
 		{`{"evacuate":{"host":"h1","onSharedStorage":false}}`, evacuate("", servers.EvacuateOpts{Host: "h1"})},
 		// onSharedStorage has no omitempty, so even an empty Evacuate sends it.
 		{`{"evacuate":{"onSharedStorage":false}}`, evacuate("", servers.EvacuateOpts{})},
 		{`{"forceDelete":""}`, func() error { return api.ForceDelete(ctx, "s1") }},
 		{`{"injectNetworkInfo":null}`, func() error { return api.InjectNetworkInfo(ctx, "s1") }},
 		{`{"os-migrateLive":{"block_migration":true,"disk_over_commit":false,"force":false,"host":"h2"}}`, func() error {
-			return api.LiveMigrate(ctx, "s1", servers.LiveMigrateOpts{Host: nativeServerAdminString("h2"), BlockMigration: nativeServerAdminBool(true), DiskOverCommit: nativeServerAdminBool(false)}, servers.WithLiveMigrateField("force", false))
+			return api.LiveMigrate(ctx, "s1", servers.LiveMigrateOpts{Host: nativeServerAdminString("h2"), BlockMigration: nativeServerAdminBool(true), DiskOverCommit: nativeServerAdminBool(false)}, request.Field("force", false))
 		}},
 		// host has no omitempty, so the scheduler choice is sent as null and block_migration is omitted.
 		{`{"os-migrateLive":{"host":null}}`, func() error { return api.LiveMigrate(ctx, "s1", servers.LiveMigrateOpts{}) }},
@@ -150,12 +151,12 @@ func TestNativeServerAdminActionsPreflight(t *testing.T) {
 		operation string
 		err       error
 	}{
-		"evacuate shared storage": {"Evacuate", evacuate(servers.WithEvacuateField("onSharedStorage", true))},
-		"evacuate omitted host":   {"Evacuate", evacuate(servers.WithEvacuateField("host", "h"))},
+		"evacuate shared storage": {"Evacuate", evacuate(request.Field("onSharedStorage", true))},
+		"evacuate omitted host":   {"Evacuate", evacuate(request.Field("host", "h"))},
 		"evacuate nil option":     {"Evacuate", evacuate(nil)},
 		// block_migration is a typed *bool, so the 2.25 "auto" value cannot be sent as an extension either.
-		"live migrate auto": {"LiveMigrate", api.LiveMigrate(ctx, "s1", servers.LiveMigrateOpts{}, servers.WithLiveMigrateField("block_migration", "auto"))},
-		"live migrate host": {"LiveMigrate", api.LiveMigrate(ctx, "s1", servers.LiveMigrateOpts{}, servers.WithLiveMigrateField("host", "h"))},
+		"live migrate auto": {"LiveMigrate", api.LiveMigrate(ctx, "s1", servers.LiveMigrateOpts{}, request.Field("block_migration", "auto"))},
+		"live migrate host": {"LiveMigrate", api.LiveMigrate(ctx, "s1", servers.LiveMigrateOpts{}, request.Field("host", "h"))},
 		"live migrate nil":  {"LiveMigrate", api.LiveMigrate(ctx, "s1", servers.LiveMigrateOpts{}, nil)},
 	} {
 		if check.err == nil {

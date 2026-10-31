@@ -5,6 +5,7 @@ import (
 	"iter"
 	"net/url"
 
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	resource "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -33,7 +34,7 @@ func (a *API) identityResources() *resource.Collection[Execution] {
 			options := make([]ListOption, 0, len(q))
 			for key, values := range q {
 				for _, value := range values {
-					options = append(options, WithListQuery(key, value))
+					options = append(options, request.Query(key, value))
 				}
 			}
 			return a.listWithControl(ctx, control, options...)

@@ -55,13 +55,13 @@ func (s *RecordSetScope) newResources() *resource.Collection[RecordSet] {
 		Delete: func(ctx context.Context, id string) error { return s.api.Delete(ctx, s.parentID, string(id)) },
 		IterateControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*RecordSet, error] {
 			q = maps.Clone(q)
-			options := []ListByZoneOption{func(config *request.Config[ListOpts]) error {
+			options := []ListByZoneOption{request.Custom(func(config *request.Config[ListOpts]) error {
 				config.Query = make(url.Values, len(q))
 				for key, values := range q {
 					config.Query[key] = append([]string(nil), values...)
 				}
 				return nil
-			}}
+			})}
 			return s.api.listByZoneWithControl(ctx, s.parentID, control, options...)
 		}})
 }

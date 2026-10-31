@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/federation"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -78,7 +79,7 @@ func TestNativeMappingRoutesBodiesPagingAndDecode(t *testing.T) {
 		}
 		return nativeMappingWire(200, `{"mapping":`+nativeMappingRow+`}`)
 	})
-	created, err := api.CreateMapping(ctx, "ACME", federation.CreateMappingOpts{Rules: nativeMappingRules()}, federation.WithCreateMappingField("schema_version", "2.0"))
+	created, err := api.CreateMapping(ctx, "ACME", federation.CreateMappingOpts{Rules: nativeMappingRules()}, request.Field("schema_version", "2.0"))
 	if err != nil || !(created.ID == "ACME" && reflect.DeepEqual(created.Rules, nativeMappingRules())) {
 		t.Fatal(created, err)
 	}
@@ -204,11 +205,11 @@ func TestNativeMappingStatusesDecodeAndPreflight(t *testing.T) {
 			err       error
 		}{
 			"create core extension": {"CreateMapping", func() error {
-				_, err := api.CreateMapping(ctx, "ACME", federation.CreateMappingOpts{}, federation.WithCreateMappingField("rules", []any{}))
+				_, err := api.CreateMapping(ctx, "ACME", federation.CreateMappingOpts{}, request.Field("rules", []any{}))
 				return err
 			}()},
 			"update core extension": {"UpdateMapping", func() error {
-				_, err := api.UpdateMapping(ctx, "ACME", federation.UpdateMappingOpts{}, federation.WithUpdateMappingField("rules", []any{}))
+				_, err := api.UpdateMapping(ctx, "ACME", federation.UpdateMappingOpts{}, request.Field("rules", []any{}))
 				return err
 			}()},
 			"create nil option": {"CreateMapping", func() error {

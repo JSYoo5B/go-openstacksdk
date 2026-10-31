@@ -9,6 +9,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/manageablevolumes"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 // pythonManageCall records the wire request openstacksdk would also send.
@@ -92,7 +93,7 @@ func TestPythonManageVolumeRequest(t *testing.T) {
 	t.Run("explicit null is not reachable", func(t *testing.T) {
 		api, calls := pythonManageAPI(t, "")
 		_, err := api.ManageExisting(ctx, manageablevolumes.ManageExistingOpts{Host: "node@lvm#pool", Ref: map[string]string{"source-name": "vol-1"}},
-			manageablevolumes.WithManageExistingField("name", nil))
+			request.Field("name", nil))
 		if err == nil || calls.Len() != 0 {
 			t.Fatal(err, pythonManageCalls(calls))
 		}

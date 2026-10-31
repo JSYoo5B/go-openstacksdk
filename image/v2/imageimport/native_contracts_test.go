@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -85,7 +86,7 @@ func TestNativeImageImportCreateBodyExtensionsAndStatus(t *testing.T) {
 		{"web download", "img", "/reverse/glance/v2/images/img/import", imageimport.CreateOpts{Name: imageimport.WebDownloadMethod, URI: "https://example.test/i.qcow2"}, nil,
 			`{"method":{"name":"web-download","uri":"https://example.test/i.qcow2"}}`},
 		{"empty values are sent", "img", "/reverse/glance/v2/images/img/import", imageimport.CreateOpts{}, nil, `{"method":{"name":"","uri":""}}`},
-		{"extension joins method", "img", "/reverse/glance/v2/images/img/import", imageimport.CreateOpts{Name: "glance-download"}, []imageimport.CreateOption{imageimport.WithCreateField("glance_image_id", "src")},
+		{"extension joins method", "img", "/reverse/glance/v2/images/img/import", imageimport.CreateOpts{Name: "glance-download"}, []imageimport.CreateOption{request.Field("glance_image_id", "src")},
 			`{"method":{"glance_image_id":"src","name":"glance-download","uri":""}}`},
 		{"raw id path", "a/b", "/reverse/glance/v2/images/a/b/import", imageimport.CreateOpts{Name: imageimport.GlanceDirectMethod}, nil, `{"method":{"name":"glance-direct","uri":""}}`},
 	} {
@@ -114,7 +115,7 @@ func TestNativeImageImportCreateBodyExtensionsAndStatus(t *testing.T) {
 			return nativeImportWire(code, `{}`), nil
 		}))
 		api := imageimport.New(nativeImportClient(cloud))
-		for _, option := range []imageimport.CreateOption{imageimport.WithCreateField("name", "x"), imageimport.WithCreateField("uri", "x"), nil} {
+		for _, option := range []imageimport.CreateOption{request.Field("name", "x"), request.Field("uri", "x"), nil} {
 			err := api.Create(context.Background(), "img", imageimport.CreateOpts{}, option)
 			nativeImportOperation(t, err, "Create")
 			if calls.Load() != 0 {

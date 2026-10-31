@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/services"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -67,7 +68,7 @@ func TestNativeServiceRoutesBodiesPagingAndDecode(t *testing.T) {
 		return nativeServiceWire(200, `{"service":`+nativeServiceRow+`}`)
 	})
 	enabled := false
-	created, err := api.Create(ctx, services.CreateOpts{Type: "compute", Name: "nova", Enabled: &enabled, Extra: map[string]any{"owner": "ops"}}, services.WithCreateField("x_extension", 1))
+	created, err := api.Create(ctx, services.CreateOpts{Type: "compute", Name: "nova", Enabled: &enabled, Extra: map[string]any{"owner": "ops"}}, request.Field("x_extension", 1))
 	// Without an explicit extra object, Extra holds unknown keys plus copies of name and description.
 	if err != nil || !(created.ID == "svc-1" && created.Enabled && reflect.DeepEqual(created.Extra, map[string]any{"owner": "ops", "name": "nova", "description": "compute"})) {
 		t.Fatal(created, err)
@@ -81,11 +82,11 @@ func TestNativeServiceRoutesBodiesPagingAndDecode(t *testing.T) {
 		t.Fatal(got, err)
 	}
 	empty := ""
-	if _, err := api.Update(ctx, "svc-1", services.UpdateOpts{Name: &empty, Description: &empty, Enabled: &enabled, Extra: map[string]any{"owner": "infra"}}, services.WithUpdateField("x_extension", 2)); err != nil {
+	if _, err := api.Update(ctx, "svc-1", services.UpdateOpts{Name: &empty, Description: &empty, Enabled: &enabled, Extra: map[string]any{"owner": "infra"}}, request.Field("x_extension", 2)); err != nil {
 		t.Fatal(err)
 	}
 	var rows []*services.Service
-	for value, err := range api.List(ctx, services.WithListOptions(services.ListOpts{ServiceType: "compute", Name: "nova"}), services.WithListQuery("extra", "1")) {
+	for value, err := range api.List(ctx, services.WithListOptions(services.ListOpts{ServiceType: "compute", Name: "nova"}), request.Query("extra", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -191,15 +192,15 @@ func TestNativeServiceStatusesDecodeAndPreflight(t *testing.T) {
 			err       error
 		}{
 			"create core extension": {"Create", func() error {
-				_, err := api.Create(ctx, services.CreateOpts{Type: "compute"}, services.WithCreateField("type", "x"))
+				_, err := api.Create(ctx, services.CreateOpts{Type: "compute"}, request.Field("type", "x"))
 				return err
 			}()},
 			"create extra collision": {"Create", func() error {
-				_, err := api.Create(ctx, services.CreateOpts{Type: "compute", Extra: map[string]any{"owner": "a"}}, services.WithCreateField("owner", "b"))
+				_, err := api.Create(ctx, services.CreateOpts{Type: "compute", Extra: map[string]any{"owner": "a"}}, request.Field("owner", "b"))
 				return err
 			}()},
 			"update core extension": {"Update", func() error {
-				_, err := api.Update(ctx, "svc-1", services.UpdateOpts{}, services.WithUpdateField("enabled", true))
+				_, err := api.Update(ctx, "svc-1", services.UpdateOpts{}, request.Field("enabled", true))
 				return err
 			}()},
 			"create nil option": {"Create", func() error {

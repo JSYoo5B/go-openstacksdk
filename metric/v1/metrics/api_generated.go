@@ -42,13 +42,10 @@ func (a *API) CleanTombstones(ctx context.Context) error {
 	return request.Wrap("CleanTombstones", "metrics", upstream.CleanTombstones(ctx, a.client).ExtractErr())
 }
 
-type DeleteSeriesOption = request.Option[DeleteSeriesOpts]
+type DeleteSeriesOption = request.NativeQueryCall
 
 func WithDeleteSeriesOptions(value DeleteSeriesOpts) DeleteSeriesOption {
-	return request.WithOptions(value)
-}
-func WithDeleteSeriesQuery(key, value string) DeleteSeriesOption {
-	return request.WithQuery[DeleteSeriesOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type deleteSeriesOptsBuilder struct {
@@ -73,12 +70,8 @@ func (b deleteSeriesOptsBuilder) ToMetricDeleteSeriesQuery() (string, error) {
 // DeleteSeries invokes the upstream API with library-owned builders and result handling.
 func (a *API) DeleteSeries(ctx context.Context, options ...DeleteSeriesOption) error {
 	var opts DeleteSeriesOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("DeleteSeries", "metrics", err)
-		return err
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("DeleteSeries", "metrics", err)
 		return err
 	}
@@ -86,13 +79,10 @@ func (a *API) DeleteSeries(ctx context.Context, options ...DeleteSeriesOption) e
 	return request.Wrap("DeleteSeries", "metrics", upstream.DeleteSeries(ctx, a.client, _opts).ExtractErr())
 }
 
-type LabelValuesOption = request.Option[LabelValuesOpts]
+type LabelValuesOption = request.NativeQueryCall
 
 func WithLabelValuesOptions(value LabelValuesOpts) LabelValuesOption {
-	return request.WithOptions(value)
-}
-func WithLabelValuesQuery(key, value string) LabelValuesOption {
-	return request.WithQuery[LabelValuesOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type labelValuesOptsBuilder struct {
@@ -116,13 +106,8 @@ func (b labelValuesOptsBuilder) ToMetricLabelValuesQuery() (string, error) {
 
 // LabelValues invokes the upstream API with library-owned builders and result handling.
 func (a *API) LabelValues(ctx context.Context, name string, opts LabelValuesOpts, options ...LabelValuesOption) ([]string, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("LabelValues", "metrics", err)
-		var zero0 []string
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("LabelValues", "metrics", err)
 		var zero0 []string
 		return zero0, err
@@ -134,11 +119,10 @@ func (a *API) LabelValues(ctx context.Context, name string, opts LabelValuesOpts
 	return value0, err
 }
 
-type LabelsOption = request.Option[LabelsOpts]
+type LabelsOption = request.NativeQueryCall
 
-func WithLabelsOptions(value LabelsOpts) LabelsOption { return request.WithOptions(value) }
-func WithLabelsQuery(key, value string) LabelsOption {
-	return request.WithQuery[LabelsOpts](key, value)
+func WithLabelsOptions(value LabelsOpts) LabelsOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type labelsOptsBuilder struct {
@@ -162,13 +146,8 @@ func (b labelsOptsBuilder) ToMetricLabelsQuery() (string, error) {
 
 // Labels invokes the upstream API with library-owned builders and result handling.
 func (a *API) Labels(ctx context.Context, opts LabelsOpts, options ...LabelsOption) ([]string, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("Labels", "metrics", err)
-		var zero0 []string
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("Labels", "metrics", err)
 		var zero0 []string
 		return zero0, err
@@ -180,10 +159,9 @@ func (a *API) Labels(ctx context.Context, opts LabelsOpts, options ...LabelsOpti
 	return value0, err
 }
 
-type QueryOption = request.Option[QueryOpts]
+type QueryOption = request.NativeQueryCall
 
-func WithQueryOptions(value QueryOpts) QueryOption { return request.WithOptions(value) }
-func WithQueryQuery(key, value string) QueryOption { return request.WithQuery[QueryOpts](key, value) }
+func WithQueryOptions(value QueryOpts) QueryOption { return request.Custom(request.WithOptions(value)) }
 
 type queryOptsBuilder struct {
 	base   QueryOpts
@@ -206,13 +184,8 @@ func (b queryOptsBuilder) ToMetricQueryQuery() (string, error) {
 
 // Query invokes the upstream API with library-owned builders and result handling.
 func (a *API) Query(ctx context.Context, opts QueryOpts, options ...QueryOption) (*QueryData, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("Query", "metrics", err)
-		var zero0 *QueryData
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("Query", "metrics", err)
 		var zero0 *QueryData
 		return zero0, err
@@ -232,11 +205,10 @@ func (a *API) RuntimeInfo(ctx context.Context) (*RuntimeInfoData, error) {
 	return value0, err
 }
 
-type SeriesOption = request.Option[SeriesOpts]
+type SeriesOption = request.NativeQueryCall
 
-func WithSeriesOptions(value SeriesOpts) SeriesOption { return request.WithOptions(value) }
-func WithSeriesQuery(key, value string) SeriesOption {
-	return request.WithQuery[SeriesOpts](key, value)
+func WithSeriesOptions(value SeriesOpts) SeriesOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type seriesOptsBuilder struct {
@@ -260,13 +232,8 @@ func (b seriesOptsBuilder) ToMetricSeriesQuery() (string, error) {
 
 // Series invokes the upstream API with library-owned builders and result handling.
 func (a *API) Series(ctx context.Context, opts SeriesOpts, options ...SeriesOption) ([]map[string]string, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("Series", "metrics", err)
-		var zero0 []map[string]string
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("Series", "metrics", err)
 		var zero0 []map[string]string
 		return zero0, err
@@ -286,11 +253,10 @@ func (a *API) Snapshot(ctx context.Context) (*SnapshotData, error) {
 	return value0, err
 }
 
-type TargetsOption = request.Option[TargetsOpts]
+type TargetsOption = request.NativeQueryCall
 
-func WithTargetsOptions(value TargetsOpts) TargetsOption { return request.WithOptions(value) }
-func WithTargetsQuery(key, value string) TargetsOption {
-	return request.WithQuery[TargetsOpts](key, value)
+func WithTargetsOptions(value TargetsOpts) TargetsOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type targetsOptsBuilder struct {
@@ -314,13 +280,8 @@ func (b targetsOptsBuilder) ToMetricTargetsQuery() (string, error) {
 
 // Targets invokes the upstream API with library-owned builders and result handling.
 func (a *API) Targets(ctx context.Context, opts TargetsOpts, options ...TargetsOption) (*TargetsData, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("Targets", "metrics", err)
-		var zero0 *TargetsData
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("Targets", "metrics", err)
 		var zero0 *TargetsData
 		return zero0, err

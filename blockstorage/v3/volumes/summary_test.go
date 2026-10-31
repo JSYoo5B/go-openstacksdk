@@ -30,7 +30,7 @@ func TestPythonVolumeSummarySelectsDetailsAndPreservesQuery(t *testing.T) {
 			var ids []string
 			for value, err := range api.ListWithDetails(context.Background(), details,
 				volumes.WithListOptions(volumes.ListOpts{Name: "data", Status: "available", Limit: 4}),
-				volumes.WithListQuery("all_tenants", "True")) {
+				request.Query("all_tenants", "True")) {
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -141,7 +141,7 @@ func TestPythonVolumeSummaryPreflightAndPartialFailures(t *testing.T) {
 		ctx, cancel := context.WithCancelCause(context.Background())
 		defer cancel(nil)
 		option := func(*request.Config[volumes.ListOpts]) error { cancel(cause); return callbackFailure }
-		for _, err := range api.ListSummary(ctx, option) {
+		for _, err := range api.ListSummary(ctx, request.Custom(option)) {
 			if !errors.Is(err, callbackFailure) || !errors.Is(err, cause) || !errors.Is(err, context.Canceled) {
 				t.Fatal(err)
 			}

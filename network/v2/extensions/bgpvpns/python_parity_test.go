@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -116,7 +117,7 @@ func TestPythonBGPVPNCreateCannotSendZeroLocalPref(t *testing.T) {
 	if _, err := api.Create(ctx, bgpvpns.CreateOpts{Name: "vpn", LocalPref: 0}); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := api.Create(ctx, bgpvpns.CreateOpts{Name: "vpn"}, bgpvpns.WithCreateField("local_pref", 0)); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := api.Create(ctx, bgpvpns.CreateOpts{Name: "vpn"}, request.Field("local_pref", 0)); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
 	want := []pythonBGPVPNCall{{http.MethodPost, pythonBGPVPNBase, "", `{"bgpvpn":{"name":"vpn"}}`}}
@@ -136,7 +137,7 @@ func TestPythonBGPVPNListQueryAndMarkerPaging(t *testing.T) {
 	// bgpvpns(name="vpn", type="l3", networks=["n-1"], limit=1): Python repeats the request
 	// with the last ID as marker while limit is set, as the Go marker pager does.
 	var ids []string
-	for value, err := range api.List(ctx, bgpvpns.WithListOptions(bgpvpns.ListOpts{Networks: []string{"n-1"}, Limit: 1}), bgpvpns.WithListQuery("name", "vpn"), bgpvpns.WithListQuery("type", "l3")) {
+	for value, err := range api.List(ctx, bgpvpns.WithListOptions(bgpvpns.ListOpts{Networks: []string{"n-1"}, Limit: 1}), request.Query("name", "vpn"), request.Query("type", "l3")) {
 		if err != nil {
 			t.Fatal(err)
 		}

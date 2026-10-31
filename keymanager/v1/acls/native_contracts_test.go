@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/keymanager/v1/acls"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -75,10 +76,10 @@ func TestNativeACLRoutesBodiesAndDecode(t *testing.T) {
 	if _, err := api.SetContainerACL(ctx, "c1", acls.SetOpts{{Type: "read"}}); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := api.UpdateSecretACL(ctx, "s1", read, acls.WithUpdateSecretACLField("x_extension", 1)); err != nil {
+	if _, err := api.UpdateSecretACL(ctx, "s1", read, request.Field("x_extension", 1)); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := api.UpdateContainerACL(ctx, "c1", acls.SetOpts{{Type: "read"}, {Type: "write", ProjectAccess: &access}}, acls.WithUpdateContainerACLField("x_extension", 1)); err != nil {
+	if _, err := api.UpdateContainerACL(ctx, "c1", acls.SetOpts{{Type: "read"}, {Type: "write", ProjectAccess: &access}}, request.Field("x_extension", 1)); err != nil {
 		t.Fatal(err)
 	}
 	if err := api.DeleteSecretACL(ctx, "s1"); err != nil {
@@ -149,7 +150,7 @@ func TestNativeACLStrictStatusesAndPreflight(t *testing.T) {
 			"missing type": func() error { _, err := api.SetSecretACL(ctx, "s1", acls.SetOpts{{}}); return err },
 			"nested collision": func() error {
 				users := []string{"u"}
-				_, err := api.SetSecretACL(ctx, "s1", acls.SetOpts{{Type: "read", Users: &users}}, acls.WithSetSecretACLField("users", []string{}))
+				_, err := api.SetSecretACL(ctx, "s1", acls.SetOpts{{Type: "read", Users: &users}}, request.Field("users", []string{}))
 				return err
 			},
 			"nil option": func() error { _, err := api.UpdateContainerACL(ctx, "c1", read, nil); return err },

@@ -41,7 +41,7 @@ func (a *API) ListSummaryWithControl(ctx context.Context, control resource.ListC
 	if err := cloudread.Context(ctx); err != nil {
 		return failure(err)
 	}
-	cfg, err := request.Apply(ListOpts{}, options...)
+	cfg, err := request.ApplyCalls(ListOpts{}, request.Capabilities{Unchecked: true}, options...)
 	if err != nil {
 		return failure(err)
 	}

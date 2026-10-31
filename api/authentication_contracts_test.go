@@ -10,6 +10,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v2/tokens"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -45,7 +46,7 @@ func TestIdentityV2AuthenticationRetainsEveryResponseView(t *testing.T) {
 	})
 	api := tokens.New(cloud.Client("identity", "/identity/v2"))
 	ctx := context.Background()
-	auth, err := api.Create(ctx, tokens.AuthOptions{TokenID: "initial-token", TenantID: "project"}, tokens.WithCreateField("vendor:enabled", false))
+	auth, err := api.Create(ctx, tokens.AuthOptions{TokenID: "initial-token", TenantID: "project"}, request.Field("vendor:enabled", false))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -76,7 +77,7 @@ func TestIdentityV2AuthenticationRetainsEveryResponseView(t *testing.T) {
 	if posts != 1 || gets != 1 {
 		t.Fatalf("posts=%d gets=%d", posts, gets)
 	}
-	if result, err := api.Create(ctx, tokens.AuthOptions{TokenID: "initial-token"}, tokens.WithCreateField("tenantId", "override")); result != nil || !errors.Is(err, resource.ErrInvalidOption) || posts != 1 {
+	if result, err := api.Create(ctx, tokens.AuthOptions{TokenID: "initial-token"}, request.Field("tenantId", "override")); result != nil || !errors.Is(err, resource.ErrInvalidOption) || posts != 1 {
 		t.Fatalf("result=%v err=%v posts=%d", result, err, posts)
 	}
 }

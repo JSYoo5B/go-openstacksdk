@@ -57,13 +57,10 @@ func (a *API) AddToGroup(ctx context.Context, groupID string, userID string) err
 	return request.Wrap("AddToGroup", "users", upstream.AddToGroup(ctx, a.client, groupID, userID).ExtractErr())
 }
 
-type ChangePasswordOption = request.Option[ChangePasswordOpts]
+type ChangePasswordOption = request.NativeFieldCall
 
 func WithChangePasswordOptions(value ChangePasswordOpts) ChangePasswordOption {
-	return request.WithOptions(value)
-}
-func WithChangePasswordField(key string, value any) ChangePasswordOption {
-	return request.WithField[ChangePasswordOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type changePasswordOptsBuilder struct {
@@ -87,12 +84,8 @@ func (b changePasswordOptsBuilder) ToUserChangePasswordMap() (map[string]any, er
 
 // ChangePassword invokes the upstream API with library-owned builders and result handling.
 func (a *API) ChangePassword(ctx context.Context, userID string, opts ChangePasswordOpts, options ...ChangePasswordOption) error {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("ChangePassword", "users", err)
-		return err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("ChangePassword", "users", err)
 		return err
 	}
@@ -100,11 +93,10 @@ func (a *API) ChangePassword(ctx context.Context, userID string, opts ChangePass
 	return request.Wrap("ChangePassword", "users", upstream.ChangePassword(ctx, a.client, userID, _opts).ExtractErr())
 }
 
-type CreateOption = request.Option[CreateOpts]
+type CreateOption = request.NativeFieldCall
 
-func WithCreateOptions(value CreateOpts) CreateOption { return request.WithOptions(value) }
-func WithCreateField(key string, value any) CreateOption {
-	return request.WithField[CreateOpts](key, value)
+func WithCreateOptions(value CreateOpts) CreateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type createOptsBuilder struct {
@@ -128,13 +120,8 @@ func (b createOptsBuilder) ToUserCreateMap() (map[string]any, error) {
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*User, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Create", "users", err)
-		var zero0 *User
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Create", "users", err)
 		var zero0 *User
 		return zero0, err
@@ -167,10 +154,9 @@ func (a *API) IsMemberOfGroup(ctx context.Context, groupID string, userID string
 	return value0, err
 }
 
-type ListOption = request.Option[ListOpts]
+type ListOption = request.NativeQueryCall
 
-func WithListOptions(value ListOpts) ListOption  { return request.WithOptions(value) }
-func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
+func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
 	base   ListOpts
@@ -198,12 +184,8 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*User, 
 
 func (a *API) listWithControl(ctx context.Context, control resource.ListControl, options ...ListOption) iter.Seq2[*User, error] {
 	var opts ListOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("List", "users", err)
-		return func(yield func(*User, error) bool) { var zero *User; yield(zero, err) }
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("List", "users", err)
 		return func(yield func(*User, error) bool) { var zero *User; yield(zero, err) }
 	}
@@ -222,11 +204,10 @@ func (a *API) ListGroups(ctx context.Context, userID string) iter.Seq2[*groups.G
 	})
 }
 
-type ListInGroupOption = request.Option[ListOpts]
+type ListInGroupOption = request.NativeQueryCall
 
-func WithListInGroupOptions(value ListOpts) ListInGroupOption { return request.WithOptions(value) }
-func WithListInGroupQuery(key, value string) ListInGroupOption {
-	return request.WithQuery[ListOpts](key, value)
+func WithListInGroupOptions(value ListOpts) ListInGroupOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type listInGroupOptsBuilder struct {
@@ -251,12 +232,8 @@ func (b listInGroupOptsBuilder) ToUserListQuery() (string, error) {
 // ListInGroup invokes the upstream API with library-owned builders and result handling.
 func (a *API) ListInGroup(ctx context.Context, groupID string, options ...ListInGroupOption) iter.Seq2[*User, error] {
 	var opts ListOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("ListInGroup", "users", err)
-		return func(yield func(*User, error) bool) { var zero *User; yield(zero, err) }
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("ListInGroup", "users", err)
 		return func(yield func(*User, error) bool) { var zero *User; yield(zero, err) }
 	}
@@ -280,11 +257,10 @@ func (a *API) RemoveFromGroup(ctx context.Context, groupID string, userID string
 	return request.Wrap("RemoveFromGroup", "users", upstream.RemoveFromGroup(ctx, a.client, groupID, userID).ExtractErr())
 }
 
-type UpdateOption = request.Option[UpdateOpts]
+type UpdateOption = request.NativeFieldCall
 
-func WithUpdateOptions(value UpdateOpts) UpdateOption { return request.WithOptions(value) }
-func WithUpdateField(key string, value any) UpdateOption {
-	return request.WithField[UpdateOpts](key, value)
+func WithUpdateOptions(value UpdateOpts) UpdateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type updateOptsBuilder struct {
@@ -308,13 +284,8 @@ func (b updateOptsBuilder) ToUserUpdateMap() (map[string]any, error) {
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, userID string, opts UpdateOpts, options ...UpdateOption) (*User, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Update", "users", err)
-		var zero0 *User
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Update", "users", err)
 		var zero0 *User
 		return zero0, err

@@ -14,6 +14,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/image/v2/tasks"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -70,7 +71,7 @@ func TestNativeTaskRoutesBodiesPagingAndDecode(t *testing.T) {
 		// Get answers with a task without an envelope.
 		return nativeTaskWire(200, nativeTaskRow)
 	})
-	created, err := api.Create(ctx, tasks.CreateOpts{Type: "import", Input: map[string]any{"import_from": "http://x/img.qcow2"}}, tasks.WithCreateField("x_extension", 1))
+	created, err := api.Create(ctx, tasks.CreateOpts{Type: "import", Input: map[string]any{"import_from": "http://x/img.qcow2"}}, request.Field("x_extension", 1))
 	if err != nil || !(created.ID == "t-1" && created.Status == string(tasks.TaskStatusPending) && created.Owner == "p-1" && created.Result == nil &&
 		created.CreatedAt.Equal(time.Date(2018, 7, 25, 8, 59, 13, 0, time.UTC)) && created.ExpiresAt.IsZero() && created.Self == "/v2/tasks/t-1") {
 		t.Fatalf("%+v %v", created, err)
@@ -84,7 +85,7 @@ func TestNativeTaskRoutesBodiesPagingAndDecode(t *testing.T) {
 	}
 	var ids []string
 	opts := tasks.ListOpts{Limit: 1, SortKey: "created_at", SortDir: "asc", Status: tasks.TaskStatusPending, ID: "t-9", Type: "import"}
-	for value, err := range api.List(ctx, tasks.WithListOptions(opts), tasks.WithListQuery("type", "import")) {
+	for value, err := range api.List(ctx, tasks.WithListOptions(opts), request.Query("type", "import")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -191,8 +192,8 @@ func TestNativeTaskStatusesDecodeAndPreflight(t *testing.T) {
 			opts   tasks.CreateOpts
 			option tasks.CreateOption
 		}{
-			"type":       {tasks.CreateOpts{}, tasks.WithCreateField("x", 1)},
-			"core field": {tasks.CreateOpts{Type: "import"}, tasks.WithCreateField("input", map[string]any{})},
+			"type":       {tasks.CreateOpts{}, request.Field("x", 1)},
+			"core field": {tasks.CreateOpts{Type: "import"}, request.Field("input", map[string]any{})},
 			"nil option": {tasks.CreateOpts{Type: "import"}, nil},
 		} {
 			_, err := api.Create(ctx, check.opts, check.option)

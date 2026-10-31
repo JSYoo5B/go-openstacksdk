@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -106,7 +107,7 @@ func TestNativeFirewallGroupRoutesBodiesPagingAndDecode(t *testing.T) {
 		}
 		return nativeFWWire(200, `{"firewall_group":`+nativeGroupRow+`}`)
 	})
-	created, err := api.Create(ctx, groups.CreateOpts{Name: "edge", IngressFirewallPolicyID: "in", AdminStateUp: gophercloud.Disabled, Ports: []string{"p1"}, Shared: gophercloud.Disabled}, groups.WithCreateField("x_extension", 1))
+	created, err := api.Create(ctx, groups.CreateOpts{Name: "edge", IngressFirewallPolicyID: "in", AdminStateUp: gophercloud.Disabled, Ports: []string{"p1"}, Shared: gophercloud.Disabled}, request.Field("x_extension", 1))
 	if err != nil || !(created.ID == "fg-1" && created.EgressFirewallPolicyID == "" && created.Ports[0] == "p1" && created.Status == "ACTIVE") {
 		t.Fatal(created, err)
 	}
@@ -115,7 +116,7 @@ func TestNativeFirewallGroupRoutesBodiesPagingAndDecode(t *testing.T) {
 		t.Fatal(got, err)
 	}
 	empty, ports := "", []string{}
-	if _, err := api.Update(ctx, "fg-1", groups.UpdateOpts{Description: &empty, Ports: &ports, AdminStateUp: gophercloud.Enabled}, groups.WithUpdateField("x_extension", 1)); err != nil {
+	if _, err := api.Update(ctx, "fg-1", groups.UpdateOpts{Description: &empty, Ports: &ports, AdminStateUp: gophercloud.Enabled}, request.Field("x_extension", 1)); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := api.RemoveIngressPolicy(ctx, "fg-1"); err != nil {
@@ -126,7 +127,7 @@ func TestNativeFirewallGroupRoutesBodiesPagingAndDecode(t *testing.T) {
 	}
 	filter := []string{"p1", "p2"}
 	var rows []*groups.Group
-	for value, err := range api.List(ctx, groups.WithListOptions(groups.ListOpts{Name: "edge", Ports: &filter, AdminStateUp: gophercloud.Enabled, Limit: 1}), groups.WithListQuery("extra", "1")) {
+	for value, err := range api.List(ctx, groups.WithListOptions(groups.ListOpts{Name: "edge", Ports: &filter, AdminStateUp: gophercloud.Enabled, Limit: 1}), request.Query("extra", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -192,7 +193,7 @@ func TestNativeFirewallGroupStrictStatusesAndPreflight(t *testing.T) {
 		api, _ := nativeFWAPI(t, &calls, func(*http.Request) *http.Response { return nativeFWWire(201, `{}`) })
 		for operation, err := range map[string]error{
 			"Create": func() error {
-				_, err := api.Create(ctx, groups.CreateOpts{}, groups.WithCreateField("ports", nil))
+				_, err := api.Create(ctx, groups.CreateOpts{}, request.Field("ports", nil))
 				return err
 			}(),
 			"Update": func() error { _, err := api.Update(ctx, "fg-1", groups.UpdateOpts{}, nil); return err }(),

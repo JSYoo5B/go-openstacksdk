@@ -5,6 +5,7 @@ import (
 	context "context"
 	fmt "fmt"
 	policies "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies"
+	request "github.com/JSYoo5B/go-openstacksdk/request"
 	resource "github.com/JSYoo5B/go-openstacksdk/resource"
 	iter "iter"
 	maps "maps"
@@ -44,7 +45,7 @@ func (s *BandwidthLimitRuleScope) newResources() *resource.Collection[BandwidthL
 			options := make([]ListBandwidthLimitRulesOption, 0, len(q))
 			for key, values := range q {
 				for _, value := range values {
-					options = append(options, WithListBandwidthLimitRulesQuery(key, value))
+					options = append(options, request.Query(key, value))
 				}
 			}
 			return s.api.listBandwidthLimitRulesWithControl(ctx, s.parentID, control, options...)
@@ -99,7 +100,7 @@ func (s *DSCPMarkingRuleScope) newResources() *resource.Collection[DSCPMarkingRu
 			options := make([]ListDSCPMarkingRulesOption, 0, len(q))
 			for key, values := range q {
 				for _, value := range values {
-					options = append(options, WithListDSCPMarkingRulesQuery(key, value))
+					options = append(options, request.Query(key, value))
 				}
 			}
 			return s.api.listDSCPMarkingRulesWithControl(ctx, s.parentID, control, options...)
@@ -154,7 +155,7 @@ func (s *MinimumBandwidthRuleScope) newResources() *resource.Collection[MinimumB
 			options := make([]ListMinimumBandwidthRulesOption, 0, len(q))
 			for key, values := range q {
 				for _, value := range values {
-					options = append(options, WithListMinimumBandwidthRulesQuery(key, value))
+					options = append(options, request.Query(key, value))
 				}
 			}
 			return s.api.listMinimumBandwidthRulesWithControl(ctx, s.parentID, control, options...)

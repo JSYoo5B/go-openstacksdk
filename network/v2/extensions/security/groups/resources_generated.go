@@ -23,13 +23,13 @@ func (a *API) newResources() *resource.Collection[SecGroup] {
 			return securityGroupBodyFilterValue(record, key)
 		},
 		IterateBodyControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*resource.BodyRecord[SecGroup], error] {
-			options := []ListOption{func(config *request.Config[ListOpts]) error {
+			options := []ListOption{request.Custom(func(config *request.Config[ListOpts]) error {
 				config.Query = make(url.Values, len(q))
 				for key, values := range q {
 					config.Query[key] = append([]string(nil), values...)
 				}
 				return nil
-			}}
+			})}
 			return a.listBodyWithControl(ctx, control, options...)
 		},
 		FilterDescriptor: &resource.FilterDescriptor{Query: map[string]string{"any_tags": "tags-any", "description": "description", "fields": "fields", "id": "id", "is_shared": "shared", "limit": "limit", "marker": "marker", "name": "name", "not_any_tags": "not-tags-any", "not_tags": "not-tags", "project_id": "project_id", "revision_number": "revision_number", "sort_dir": "sort_dir", "sort_key": "sort_key", "stateful": "stateful", "tags": "tags", "tenant_id": "tenant_id"}, Body: map[string]string{"created_at": "created_at", "security_group_rules": "security_group_rules", "updated_at": "updated_at"}, Reserved: []string{"allow_unknown_params", "base_path", "headers", "jmespath_filters", "max_items", "microversion", "paginated", "resource_type", "session"}},
@@ -51,10 +51,7 @@ func (a *API) newResources() *resource.Collection[SecGroup] {
 }
 func (a *API) listBodyWithControl(ctx context.Context, control resource.ListControl, options ...ListOption) iter.Seq2[*resource.BodyRecord[SecGroup], error] {
 	var opts ListOpts
-	cfg, err := request.Apply(opts, options...)
-	if err == nil {
-		err = request.ValidateCapabilities(cfg, false, true, false)
-	}
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
 		err = request.Wrap("List", "groups", err)
 		return func(yield func(*resource.BodyRecord[SecGroup], error) bool) { yield(nil, err) }

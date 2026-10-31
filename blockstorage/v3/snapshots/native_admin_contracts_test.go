@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
@@ -22,7 +23,7 @@ func TestNativeSnapshotAdminActions(t *testing.T) {
 	}{
 		{"ForceDelete", func(api *snapshots.API) error { return api.ForceDelete(ctx, "snap-1") }, `{"os-force_delete":{}}`},
 		{"ResetStatus", func(api *snapshots.API) error {
-			return api.ResetStatus(ctx, "snap-1", snapshots.ResetStatusOpts{Status: "error"}, snapshots.WithResetStatusField("x_extension", 1))
+			return api.ResetStatus(ctx, "snap-1", snapshots.ResetStatusOpts{Status: "error"}, request.Field("x_extension", 1))
 		}, `{"os-reset_status":{"status":"error","x_extension":1}}`},
 		{"UpdateStatus", func(api *snapshots.API) error {
 			return api.UpdateStatus(ctx, "snap-1", snapshots.UpdateStatusOpts{Status: "available", Progress: "100%"})
@@ -64,7 +65,7 @@ func TestNativeSnapshotAdminActions(t *testing.T) {
 		var calls []nativeSnapCall
 		api, _ := nativeSnapAPI(t, &calls, func(*http.Request) *http.Response { return nativeSnapWire(202, "") })
 		for operation, err := range map[string]error{
-			"ResetStatus":  api.ResetStatus(ctx, "snap-1", snapshots.ResetStatusOpts{}, snapshots.WithResetStatusField("status", "x")),
+			"ResetStatus":  api.ResetStatus(ctx, "snap-1", snapshots.ResetStatusOpts{}, request.Field("status", "x")),
 			"UpdateStatus": api.UpdateStatus(ctx, "snap-1", snapshots.UpdateStatusOpts{}, nil),
 		} {
 			nativeSnapOperation(t, err, operation)

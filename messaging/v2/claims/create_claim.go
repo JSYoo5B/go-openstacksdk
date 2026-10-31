@@ -26,11 +26,8 @@ type ClaimedMessages struct {
 // fails after the server accepted it, the claim may exist remotely until its
 // TTL expires.
 func (a *API) CreateClaim(ctx context.Context, queueName string, opts CreateOpts, options ...CreateOption) (*ClaimedMessages, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true, Query: true}, options...)
 	if err != nil {
-		return nil, request.Wrap("CreateClaim", "claims", err)
-	}
-	if err = request.ValidateCapabilities(cfg, true, true, false); err != nil {
 		return nil, request.Wrap("CreateClaim", "claims", err)
 	}
 	result := upstream.Create(ctx, a.client, queueName, createOptsBuilder{base: cfg.Options, config: cfg})

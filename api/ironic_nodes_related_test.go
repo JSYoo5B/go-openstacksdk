@@ -11,6 +11,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/baremetal/v1/nodes"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -98,7 +99,7 @@ func TestIronicNodeBIOSQueriesAndPointerFieldsDecode(t *testing.T) {
 	byName := ironicNodeServe(t, cloud, "GET /v1/nodes/n-1/bios/Named", 200, `{"Named":{"name":"Named","value":"v"}}`)
 	api := newIronicNodes(t, cloud)
 	ctx := context.Background()
-	settings, err := api.ListBIOSSettings(ctx, "n-1", nodes.WithListBIOSSettingsOptions(nodes.ListBIOSSettingsOpts{Detail: true}), nodes.WithListBIOSSettingsQuery("vendor", "x"))
+	settings, err := api.ListBIOSSettings(ctx, "n-1", nodes.WithListBIOSSettingsOptions(nodes.ListBIOSSettingsOpts{Detail: true}), request.Query("vendor", "x"))
 	if err != nil || len(settings) != 1 {
 		t.Fatalf("settings=%+v error=%v", settings, err)
 	}
@@ -255,7 +256,7 @@ func TestIronicNodeVirtualInterfacesListAttachDetach(t *testing.T) {
 	if err != nil || len(vifs) != 2 || vifs[1].ID != "vif-2" {
 		t.Fatalf("vifs=%+v error=%v", vifs, err)
 	}
-	if err := api.AttachVirtualInterface(ctx, "n-1", nodes.VirtualInterfaceOpts{ID: "vif-1", PortUUID: "port-1"}, nodes.WithAttachVirtualInterfaceField("vendor", false)); err != nil {
+	if err := api.AttachVirtualInterface(ctx, "n-1", nodes.VirtualInterfaceOpts{ID: "vif-1", PortUUID: "port-1"}, request.Field("vendor", false)); err != nil {
 		t.Fatal(err)
 	}
 	if got := ironicNodeFields(t, attach.only(t).Body); !reflect.DeepEqual(got, map[string]string{"id": `"vif-1"`, "port_uuid": `"port-1"`, "vendor": `false`}) {
@@ -277,7 +278,7 @@ func TestIronicNodeVirtualInterfaceRejectsConflictsBeforeHTTP(t *testing.T) {
 	if err := api.AttachVirtualInterface(ctx, "n-1", nodes.VirtualInterfaceOpts{ID: "v", PortUUID: "p", PortgroupUUID: "g"}); err == nil {
 		t.Fatal("port_uuid with portgroup_uuid must fail before HTTP")
 	}
-	if err := api.AttachVirtualInterface(ctx, "n-1", nodes.VirtualInterfaceOpts{ID: "v"}, nodes.WithAttachVirtualInterfaceField("id", "x")); !errors.Is(err, resource.ErrInvalidOption) {
+	if err := api.AttachVirtualInterface(ctx, "n-1", nodes.VirtualInterfaceOpts{ID: "v"}, request.Field("id", "x")); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatalf("protected field: %v", err)
 	}
 	if err := api.AttachVirtualInterface(ctx, "n-1", nodes.VirtualInterfaceOpts{}); err == nil {
@@ -295,7 +296,7 @@ func TestIronicNodeVirtualMediaAttachDetachAndGetKeepsRawBody(t *testing.T) {
 	ironicNodeServe(t, cloud, "GET /v1/nodes/n-1/vmedia", 200, `{"image":"","inserted":false,"media_types":[],"vendor_extra":1}`)
 	api := newIronicNodes(t, cloud)
 	ctx := context.Background()
-	if err := api.AttachVirtualMedia(ctx, "n-1", nodes.AttachVirtualMediaOpts{DeviceType: nodes.VirtualMediaCD, ImageURL: "http://img.example.test/a.iso"}, nodes.WithAttachVirtualMediaField("vendor", false)); err != nil {
+	if err := api.AttachVirtualMedia(ctx, "n-1", nodes.AttachVirtualMediaOpts{DeviceType: nodes.VirtualMediaCD, ImageURL: "http://img.example.test/a.iso"}, request.Field("vendor", false)); err != nil {
 		t.Fatal(err)
 	}
 	if err := api.AttachVirtualMedia(ctx, "n-1", nodes.AttachVirtualMediaOpts{DeviceType: nodes.VirtualMediaDisk, ImageURL: "swift://c/o", ImageDownloadSource: nodes.ImageDownloadSourceSwift}); err != nil {
@@ -308,7 +309,7 @@ func TestIronicNodeVirtualMediaAttachDetachAndGetKeepsRawBody(t *testing.T) {
 	if got := ironicNodeFields(t, calls[1].Body); got["image_download_source"] != `"swift"` {
 		t.Fatalf("second attach body=%v", got)
 	}
-	if err := api.DetachVirtualMedia(ctx, "n-1", nodes.DetachVirtualMediaOpts{DeviceTypes: []nodes.VirtualMediaDeviceType{nodes.VirtualMediaCD, nodes.VirtualMediaFloppy}}, nodes.WithDetachVirtualMediaQuery("vendor", "x")); err != nil {
+	if err := api.DetachVirtualMedia(ctx, "n-1", nodes.DetachVirtualMediaOpts{DeviceTypes: []nodes.VirtualMediaDeviceType{nodes.VirtualMediaCD, nodes.VirtualMediaFloppy}}, request.Query("vendor", "x")); err != nil {
 		t.Fatal(err)
 	}
 	if err := api.DetachVirtualMedia(ctx, "n-1", nodes.DetachVirtualMediaOpts{}); err != nil {
@@ -329,7 +330,7 @@ func TestIronicNodeVirtualMediaRejectsProtectedAndNilOptionsBeforeHTTP(t *testin
 	ironicNodeUnreachable(t, cloud)
 	api := newIronicNodes(t, cloud)
 	ctx := context.Background()
-	if err := api.AttachVirtualMedia(ctx, "n-1", nodes.AttachVirtualMediaOpts{}, nodes.WithAttachVirtualMediaField("device_type", "x")); !errors.Is(err, resource.ErrInvalidOption) {
+	if err := api.AttachVirtualMedia(ctx, "n-1", nodes.AttachVirtualMediaOpts{}, request.Field("device_type", "x")); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatalf("protected field: %v", err)
 	}
 	if err := api.AttachVirtualMedia(ctx, "n-1", nodes.AttachVirtualMediaOpts{}, nil); !errors.Is(err, resource.ErrInvalidOption) {

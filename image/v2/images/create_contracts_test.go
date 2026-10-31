@@ -14,6 +14,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/image/v2/images"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -46,7 +47,7 @@ func TestNativeImageCreateBodyPropertiesExtensionsAndProjection(t *testing.T) {
 			nil, `{"container_format":"bare","disk_format":"raw","id":"fixed","min_disk":1,"min_ram":2,"name":"n","os_hidden":false,"protected":true,"tags":["a"],"visibility":"private"}`},
 		// Properties are copied after the declared body and can replace declared keys.
 		{"properties override declared keys", images.CreateOpts{Name: "n", Properties: map[string]string{"name": "property", "hw_vendor": "x"}}, nil, `{"hw_vendor":"x","name":"property"}`},
-		{"extension field", images.CreateOpts{Name: "n"}, []images.CreateOption{images.WithCreateField("os_distro", map[string]any{"raw": json.RawMessage(`1e400`)})}, `{"name":"n","os_distro":{"raw":1e400}}`},
+		{"extension field", images.CreateOpts{Name: "n"}, []images.CreateOption{request.Field("os_distro", map[string]any{"raw": json.RawMessage(`1e400`)})}, `{"name":"n","os_distro":{"raw":1e400}}`},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			cloud := testcloud.New(t)
@@ -87,11 +88,11 @@ func TestNativeImageCreatePreflightAndStrictStatus(t *testing.T) {
 	for name, call := range map[string]func() error{
 		"missing required name": func() error { _, err := api.Create(context.Background(), images.CreateOpts{}); return err },
 		"extension collides with core field": func() error {
-			_, err := api.Create(context.Background(), images.CreateOpts{Name: "n"}, images.WithCreateField("name", "x"))
+			_, err := api.Create(context.Background(), images.CreateOpts{Name: "n"}, request.Field("name", "x"))
 			return err
 		},
 		"extension collides with property": func() error {
-			_, err := api.Create(context.Background(), images.CreateOpts{Name: "n", Properties: map[string]string{"os_distro": "a"}}, images.WithCreateField("os_distro", "b"))
+			_, err := api.Create(context.Background(), images.CreateOpts{Name: "n", Properties: map[string]string{"os_distro": "a"}}, request.Field("os_distro", "b"))
 			return err
 		},
 		"nil option": func() error {

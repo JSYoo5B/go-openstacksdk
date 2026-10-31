@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/siteconnections"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -106,7 +107,7 @@ func TestNativeVPNConnectionRoutesBodiesPagingAndDecode(t *testing.T) {
 		}
 		return nativeVPNWire(200, `{"ipsec_site_connection":`+nativeVPNRow+`}`)
 	})
-	created, err := api.Create(ctx, siteconnections.CreateOpts{Name: "site", IKEPolicyID: "ike", IPSecPolicyID: "ipsec", VPNServiceID: "vpn", PeerID: "198.51.100.1", PeerAddress: "198.51.100.1", PSK: "secret", PeerCIDRs: []string{"10.2.0.0/24"}, DPD: &siteconnections.DPDCreateOpts{Action: siteconnections.ActionHold, Interval: 30}}, siteconnections.WithCreateField("x_extension", 1))
+	created, err := api.Create(ctx, siteconnections.CreateOpts{Name: "site", IKEPolicyID: "ike", IPSecPolicyID: "ipsec", VPNServiceID: "vpn", PeerID: "198.51.100.1", PeerAddress: "198.51.100.1", PSK: "secret", PeerCIDRs: []string{"10.2.0.0/24"}, DPD: &siteconnections.DPDCreateOpts{Action: siteconnections.ActionHold, Interval: 30}}, request.Field("x_extension", 1))
 	if err != nil || !(created.ID == "x-1" && created.DPD.Timeout == 120 && created.PSK == "secret" && created.RouteMode == "static") {
 		t.Fatal(created, err)
 	}
@@ -118,11 +119,11 @@ func TestNativeVPNConnectionRoutesBodiesPagingAndDecode(t *testing.T) {
 		t.Fatal(got, err)
 	}
 	empty := ""
-	if _, err := api.Update(ctx, "x-1", siteconnections.UpdateOpts{Name: &empty, MTU: 1400, AdminStateUp: gophercloud.Disabled}, siteconnections.WithUpdateField("x_extension", 1)); err != nil {
+	if _, err := api.Update(ctx, "x-1", siteconnections.UpdateOpts{Name: &empty, MTU: 1400, AdminStateUp: gophercloud.Disabled}, request.Field("x_extension", 1)); err != nil {
 		t.Fatal(err)
 	}
 	var ids []string
-	for value, err := range api.List(ctx, siteconnections.WithListOptions(siteconnections.ListOpts{Name: "site", PSK: "secret", MTU: 1500}), siteconnections.WithListQuery("extra", "1")) {
+	for value, err := range api.List(ctx, siteconnections.WithListOptions(siteconnections.ListOpts{Name: "site", PSK: "secret", MTU: 1500}), request.Query("extra", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -178,7 +179,7 @@ func TestNativeVPNConnectionStrictStatusesAndPreflight(t *testing.T) {
 		api, _ := nativeVPNAPI(t, &calls, func(*http.Request) *http.Response { return nativeVPNWire(201, `{}`) })
 		for name, err := range map[string]error{
 			"core extension": func() error {
-				_, err := api.Create(ctx, siteconnections.CreateOpts{}, siteconnections.WithCreateField("psk", "x"))
+				_, err := api.Create(ctx, siteconnections.CreateOpts{}, request.Field("psk", "x"))
 				return err
 			}(),
 			"nil option": func() error { _, err := api.Update(ctx, "x-1", siteconnections.UpdateOpts{}, nil); return err }(),

@@ -49,13 +49,10 @@ func (a *API) GetSecretACL(ctx context.Context, secretID string) (*ACL, error) {
 	return value0, err
 }
 
-type SetContainerACLOption = request.Option[SetOpts]
+type SetContainerACLOption = request.NativeFieldCall
 
 func WithSetContainerACLOptions(value SetOpts) SetContainerACLOption {
-	return request.WithOptions(value)
-}
-func WithSetContainerACLField(key string, value any) SetContainerACLOption {
-	return request.WithField[SetOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type setContainerACLOptsBuilder struct {
@@ -79,13 +76,8 @@ func (b setContainerACLOptsBuilder) ToACLSetMap() (map[string]any, error) {
 
 // SetContainerACL invokes the upstream API with library-owned builders and result handling.
 func (a *API) SetContainerACL(ctx context.Context, containerID string, opts SetOpts, options ...SetContainerACLOption) (*ACLRef, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("SetContainerACL", "acls", err)
-		var zero0 *ACLRef
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("SetContainerACL", "acls", err)
 		var zero0 *ACLRef
 		return zero0, err
@@ -97,11 +89,10 @@ func (a *API) SetContainerACL(ctx context.Context, containerID string, opts SetO
 	return value0, err
 }
 
-type SetSecretACLOption = request.Option[SetOpts]
+type SetSecretACLOption = request.NativeFieldCall
 
-func WithSetSecretACLOptions(value SetOpts) SetSecretACLOption { return request.WithOptions(value) }
-func WithSetSecretACLField(key string, value any) SetSecretACLOption {
-	return request.WithField[SetOpts](key, value)
+func WithSetSecretACLOptions(value SetOpts) SetSecretACLOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type setSecretACLOptsBuilder struct {
@@ -125,13 +116,8 @@ func (b setSecretACLOptsBuilder) ToACLSetMap() (map[string]any, error) {
 
 // SetSecretACL invokes the upstream API with library-owned builders and result handling.
 func (a *API) SetSecretACL(ctx context.Context, secretID string, opts SetOpts, options ...SetSecretACLOption) (*ACLRef, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("SetSecretACL", "acls", err)
-		var zero0 *ACLRef
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("SetSecretACL", "acls", err)
 		var zero0 *ACLRef
 		return zero0, err
@@ -143,13 +129,10 @@ func (a *API) SetSecretACL(ctx context.Context, secretID string, opts SetOpts, o
 	return value0, err
 }
 
-type UpdateContainerACLOption = request.Option[SetOpts]
+type UpdateContainerACLOption = request.NativeFieldCall
 
 func WithUpdateContainerACLOptions(value SetOpts) UpdateContainerACLOption {
-	return request.WithOptions(value)
-}
-func WithUpdateContainerACLField(key string, value any) UpdateContainerACLOption {
-	return request.WithField[SetOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type updateContainerACLOptsBuilder struct {
@@ -173,13 +156,8 @@ func (b updateContainerACLOptsBuilder) ToACLSetMap() (map[string]any, error) {
 
 // UpdateContainerACL invokes the upstream API with library-owned builders and result handling.
 func (a *API) UpdateContainerACL(ctx context.Context, containerID string, opts SetOpts, options ...UpdateContainerACLOption) (*ACLRef, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("UpdateContainerACL", "acls", err)
-		var zero0 *ACLRef
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("UpdateContainerACL", "acls", err)
 		var zero0 *ACLRef
 		return zero0, err
@@ -191,13 +169,10 @@ func (a *API) UpdateContainerACL(ctx context.Context, containerID string, opts S
 	return value0, err
 }
 
-type UpdateSecretACLOption = request.Option[SetOpts]
+type UpdateSecretACLOption = request.NativeFieldCall
 
 func WithUpdateSecretACLOptions(value SetOpts) UpdateSecretACLOption {
-	return request.WithOptions(value)
-}
-func WithUpdateSecretACLField(key string, value any) UpdateSecretACLOption {
-	return request.WithField[SetOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type updateSecretACLOptsBuilder struct {
@@ -221,13 +196,8 @@ func (b updateSecretACLOptsBuilder) ToACLSetMap() (map[string]any, error) {
 
 // UpdateSecretACL invokes the upstream API with library-owned builders and result handling.
 func (a *API) UpdateSecretACL(ctx context.Context, secretID string, opts SetOpts, options ...UpdateSecretACLOption) (*ACLRef, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("UpdateSecretACL", "acls", err)
-		var zero0 *ACLRef
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("UpdateSecretACL", "acls", err)
 		var zero0 *ACLRef
 		return zero0, err

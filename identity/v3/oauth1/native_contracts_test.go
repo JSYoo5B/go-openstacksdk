@@ -18,6 +18,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/oauth1"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -115,7 +116,7 @@ func TestNativeOAuth1ConsumerRoutesBodiesPagingAndDecode(t *testing.T) {
 		}
 		return nativeOAuth1JSON(200, `{"consumer":`+nativeOAuth1Consumer+`}`)
 	})
-	created, err := api.CreateConsumer(ctx, oauth1.CreateConsumerOpts{Description: "d"}, oauth1.WithCreateConsumerField("x_extension", 1))
+	created, err := api.CreateConsumer(ctx, oauth1.CreateConsumerOpts{Description: "d"}, request.Field("x_extension", 1))
 	if err != nil || *created != (oauth1.Consumer{ID: "c1", Secret: "cs", Description: "d"}) {
 		t.Fatal(created, err)
 	}
@@ -127,7 +128,7 @@ func TestNativeOAuth1ConsumerRoutesBodiesPagingAndDecode(t *testing.T) {
 	if err != nil || got.ID != "c1" {
 		t.Fatal(got, err)
 	}
-	updated, err := api.UpdateConsumer(ctx, "c1", oauth1.UpdateConsumerOpts{Description: "new"}, oauth1.WithUpdateConsumerField("x_extension", "v"))
+	updated, err := api.UpdateConsumer(ctx, "c1", oauth1.UpdateConsumerOpts{Description: "new"}, request.Field("x_extension", "v"))
 	if err != nil || updated.Secret != "cs" {
 		t.Fatal(updated, err)
 	}
@@ -181,7 +182,7 @@ func TestNativeOAuth1AccessTokenRoutesAuthorizePagingAndDecode(t *testing.T) {
 		}
 		return nativeOAuth1JSON(200, `{"access_token":`+nativeOAuth1AccessToken+`}`)
 	})
-	authorized, err := api.AuthorizeToken(ctx, "rt1", oauth1.AuthorizeTokenOpts{Roles: []oauth1.Role{{ID: "r1"}, {Name: "member"}}}, oauth1.WithAuthorizeTokenField("x_extension", true))
+	authorized, err := api.AuthorizeToken(ctx, "rt1", oauth1.AuthorizeTokenOpts{Roles: []oauth1.Role{{ID: "r1"}, {Name: "member"}}}, request.Field("x_extension", true))
 	if err != nil || authorized.OAuthVerifier != "verifier" {
 		t.Fatal(authorized, err)
 	}
@@ -249,7 +250,7 @@ func TestNativeOAuth1SignedRequestAndAccessTokens(t *testing.T) {
 	requested, err := api.RequestToken(ctx, oauth1.RequestTokenOpts{
 		OAuthConsumerKey: "ck", OAuthConsumerSecret: "c&s", OAuthSignatureMethod: oauth1.HMACSHA1,
 		OAuthTimestamp: &stamp, OAuthNonce: "nonce", RequestedProjectID: "p1",
-	}, oauth1.WithRequestTokenHeader("x-vendor", "1"))
+	}, request.Header("x-vendor", "1"))
 	if err != nil || requested.OAuthToken != "tok" || requested.OAuthTokenSecret != "sec" || !requested.OAuthExpiresAt.Equal(expires) {
 		t.Fatal(requested, err)
 	}
@@ -270,7 +271,7 @@ func TestNativeOAuth1SignedRequestAndAccessTokens(t *testing.T) {
 	access, err := api.CreateAccessToken(ctx, oauth1.CreateAccessTokenOpts{
 		OAuthConsumerKey: "ck", OAuthConsumerSecret: "cs", OAuthToken: "tok", OAuthTokenSecret: "s/t",
 		OAuthVerifier: "v", OAuthSignatureMethod: oauth1.PLAINTEXT, OAuthTimestamp: &stamp, OAuthNonce: "nonce",
-	}, oauth1.WithCreateAccessTokenHeader("x-vendor", "2"))
+	}, request.Header("x-vendor", "2"))
 	if err != nil || access.OAuthToken != "tok" {
 		t.Fatal(access, err)
 	}
@@ -363,7 +364,7 @@ func TestNativeOAuth1CreateAuthTokenBodyHeadersAndSubjectToken(t *testing.T) {
 		OAuthConsumerKey: "ck", OAuthConsumerSecret: "cs", OAuthToken: "at1", OAuthTokenSecret: "ts",
 		OAuthSignatureMethod: oauth1.HMACSHA1, OAuthTimestamp: &stamp, OAuthNonce: "nonce", AllowReauth: true,
 	}
-	token, err := api.Create(ctx, opts, oauth1.WithCreateField("x_extension", 1), oauth1.WithCreateHeader("x-vendor", "1"))
+	token, err := api.Create(ctx, opts, request.Field("x_extension", 1), request.Header("x-vendor", "1"))
 	// The ID comes from X-Subject-Token; the OS-OAUTH1 token extension is not part of the returned tokens.Token.
 	if err != nil || token.ID != "issued" || !token.ExpiresAt.Equal(time.Date(2026, 10, 11, 1, 2, 3, 0, time.UTC)) {
 		t.Fatal(token, err)
@@ -404,7 +405,7 @@ func TestNativeOAuth1CreateAuthTokenBodyHeadersAndSubjectToken(t *testing.T) {
 
 func TestNativeOAuth1StatusesAndPreflight(t *testing.T) {
 	ctx := context.Background()
-	request := oauth1.RequestTokenOpts{OAuthConsumerKey: "ck", OAuthSignatureMethod: oauth1.HMACSHA1}
+	requestOpts := oauth1.RequestTokenOpts{OAuthConsumerKey: "ck", OAuthSignatureMethod: oauth1.HMACSHA1}
 	access := oauth1.CreateAccessTokenOpts{OAuthConsumerKey: "ck", OAuthToken: "t", OAuthVerifier: "v", OAuthSignatureMethod: oauth1.HMACSHA1}
 	auth := oauth1.AuthOptions{OAuthConsumerKey: "ck", OAuthToken: "t", OAuthSignatureMethod: oauth1.HMACSHA1}
 	for _, call := range []struct {
@@ -422,7 +423,7 @@ func TestNativeOAuth1StatusesAndPreflight(t *testing.T) {
 			return err
 		}},
 		{"DeleteConsumer", []int{202, 204}, func(api *oauth1.API) error { return api.DeleteConsumer(ctx, "c1") }},
-		{"RequestToken", []int{201}, func(api *oauth1.API) error { _, err := api.RequestToken(ctx, request); return err }},
+		{"RequestToken", []int{201}, func(api *oauth1.API) error { _, err := api.RequestToken(ctx, requestOpts); return err }},
 		{"AuthorizeToken", []int{200}, func(api *oauth1.API) error {
 			_, err := api.AuthorizeToken(ctx, "rt1", oauth1.AuthorizeTokenOpts{})
 			return err
@@ -501,9 +502,9 @@ func TestNativeOAuth1StatusesAndPreflight(t *testing.T) {
 	t.Run("preflight", func(t *testing.T) {
 		var calls []nativeOAuth1Call
 		api, _ := nativeOAuth1API(t, &calls, nil, func(*http.Request) nativeOAuth1Reply { return nativeOAuth1JSON(201, `{}`) })
-		noKey := request
+		noKey := requestOpts
 		noKey.OAuthConsumerKey = ""
-		noMethod := request
+		noMethod := requestOpts
 		noMethod.OAuthSignatureMethod = ""
 		noVerifier := access
 		noVerifier.OAuthVerifier = ""
@@ -516,7 +517,7 @@ func TestNativeOAuth1StatusesAndPreflight(t *testing.T) {
 			err       error
 		}{
 			"consumer core extension": {"CreateConsumer", func() error {
-				_, err := api.CreateConsumer(ctx, oauth1.CreateConsumerOpts{}, oauth1.WithCreateConsumerField("description", "x"))
+				_, err := api.CreateConsumer(ctx, oauth1.CreateConsumerOpts{}, request.Field("description", "x"))
 				return err
 			}()},
 			"consumer nil option": {"CreateConsumer", func() error {
@@ -524,22 +525,22 @@ func TestNativeOAuth1StatusesAndPreflight(t *testing.T) {
 				return err
 			}()},
 			"update core extension": {"UpdateConsumer", func() error {
-				_, err := api.UpdateConsumer(ctx, "c1", oauth1.UpdateConsumerOpts{}, oauth1.WithUpdateConsumerField("description", "x"))
+				_, err := api.UpdateConsumer(ctx, "c1", oauth1.UpdateConsumerOpts{}, request.Field("description", "x"))
 				return err
 			}()},
-			"request consumer key": {"RequestToken", func() error { _, err := api.RequestToken(ctx, noKey); return err }()},
-			"request method":       {"RequestToken", func() error { _, err := api.RequestToken(ctx, noMethod); return err }()},
-			"request authorization header": {"RequestToken", func() error {
-				_, err := api.RequestToken(ctx, request, oauth1.WithRequestTokenHeader("authorization", "x"))
+			"requestOpts consumer key": {"RequestToken", func() error { _, err := api.RequestToken(ctx, noKey); return err }()},
+			"requestOpts method":       {"RequestToken", func() error { _, err := api.RequestToken(ctx, noMethod); return err }()},
+			"requestOpts authorization header": {"RequestToken", func() error {
+				_, err := api.RequestToken(ctx, requestOpts, request.Header("authorization", "x"))
 				return err
 			}()},
 			// Requested-Project-Id is reserved by its h tag even when the field is empty.
-			"request project header": {"RequestToken", func() error {
-				_, err := api.RequestToken(ctx, request, oauth1.WithRequestTokenHeader("Requested-Project-Id", "p"))
+			"requestOpts project header": {"RequestToken", func() error {
+				_, err := api.RequestToken(ctx, requestOpts, request.Header("Requested-Project-Id", "p"))
 				return err
 			}()},
-			"request invalid header": {"RequestToken", func() error {
-				_, err := api.RequestToken(ctx, request, oauth1.WithRequestTokenHeader("bad header", "x"))
+			"requestOpts invalid header": {"RequestToken", func() error {
+				_, err := api.RequestToken(ctx, requestOpts, request.Header("bad header", "x"))
 				return err
 			}()},
 			"authorize empty role": {"AuthorizeToken", func() error {
@@ -547,22 +548,22 @@ func TestNativeOAuth1StatusesAndPreflight(t *testing.T) {
 				return err
 			}()},
 			"authorize core extension": {"AuthorizeToken", func() error {
-				_, err := api.AuthorizeToken(ctx, "rt1", oauth1.AuthorizeTokenOpts{}, oauth1.WithAuthorizeTokenField("roles", []string{}))
+				_, err := api.AuthorizeToken(ctx, "rt1", oauth1.AuthorizeTokenOpts{}, request.Field("roles", []string{}))
 				return err
 			}()},
 			"access verifier": {"CreateAccessToken", func() error { _, err := api.CreateAccessToken(ctx, noVerifier); return err }()},
 			"access token":    {"CreateAccessToken", func() error { _, err := api.CreateAccessToken(ctx, noToken); return err }()},
 			"access authorization header": {"CreateAccessToken", func() error {
-				_, err := api.CreateAccessToken(ctx, access, oauth1.WithCreateAccessTokenHeader("Authorization", "x"))
+				_, err := api.CreateAccessToken(ctx, access, request.Header("Authorization", "x"))
 				return err
 			}()},
 			"create token": {"Create", func() error { _, err := api.Create(ctx, noAuthToken); return err }()},
 			"create core extension": {"Create", func() error {
-				_, err := api.Create(ctx, auth, oauth1.WithCreateField("identity", map[string]any{}))
+				_, err := api.Create(ctx, auth, request.Field("identity", map[string]any{}))
 				return err
 			}()},
 			"create auth token header": {"Create", func() error {
-				_, err := api.Create(ctx, auth, oauth1.WithCreateHeader("x-auth-token", "x"))
+				_, err := api.Create(ctx, auth, request.Header("x-auth-token", "x"))
 				return err
 			}()},
 			"create nil option": {"Create", func() error { _, err := api.Create(ctx, auth, nil); return err }()},

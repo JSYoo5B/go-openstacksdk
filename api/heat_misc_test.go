@@ -17,6 +17,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/orchestration/v1/resourcetypes"
 	"github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks"
 	"github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacktemplates"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -193,7 +194,7 @@ func TestHeatMiscResourceTypesListQueryAndBothResponseShapes(t *testing.T) {
 	}
 	detailed, err := api.List(ctx,
 		resourcetypes.WithListOptions(resourcetypes.ListOpts{NameRegex: "OS::Nova.*", SupportStatus: resourcetypes.SupportStatusSupported, WithDescription: true}),
-		resourcetypes.WithListQuery("vendor", "x"))
+		request.Query("vendor", "x"))
 	if err != nil || len(detailed) != 1 || detailed[0].Description != "server" {
 		t.Fatalf("detailed=%+v error=%v", detailed, err)
 	}
@@ -240,7 +241,7 @@ func TestHeatMiscResourceTypesSchemaAndGenerateTemplate(t *testing.T) {
 	if err != nil || hot["heat_template_version"] != "2016-10-14" {
 		t.Fatalf("template=%v error=%v", hot, err)
 	}
-	if _, err := api.GenerateTemplate(ctx, "OS::Nova::Server", resourcetypes.GenerateTemplateOpts{TemplateType: resourcetypes.TemplateTypeCFn}, resourcetypes.WithGenerateTemplateQuery("vendor", "x")); err != nil {
+	if _, err := api.GenerateTemplate(ctx, "OS::Nova::Server", resourcetypes.GenerateTemplateOpts{TemplateType: resourcetypes.TemplateTypeCFn}, request.Query("vendor", "x")); err != nil {
 		t.Fatal(err)
 	}
 	if len(templateQueries) != 2 || templateQueries[0].Get("template_type") != "hot" || templateQueries[1].Get("template_type") != "cfn" || templateQueries[1].Get("vendor") != "x" {
@@ -335,7 +336,7 @@ func TestHeatMiscStackTemplateValidateWireShapeAndStatusCode(t *testing.T) {
 			testcloud.JSON(w, tc.status, `{"Description":"demo","Parameters":{"flag":{"Type":"Boolean","Default":false}},"ParameterGroups":{}}`)
 		})
 		value, err := stacktemplates.New(heatMiscClient(cloud)).Validate(context.Background(),
-			stacktemplates.ValidateOpts{Template: `{"heat_template_version":"2018-08-31"}`}, stacktemplates.WithValidateField("vendor", false))
+			stacktemplates.ValidateOpts{Template: `{"heat_template_version":"2018-08-31"}`}, request.Field("vendor", false))
 		if tc.success != (err == nil) || calls.Load() != 1 {
 			t.Fatalf("status %d error=%v calls=%d", tc.status, err, calls.Load())
 		}
@@ -367,7 +368,7 @@ func TestHeatMiscStackTemplateValidateSendsTemplateURLAndRejectsBadInputBeforeHT
 	if _, err := api.Validate(ctx, stacktemplates.ValidateOpts{}); err == nil {
 		t.Fatal("a template or template URL is required")
 	}
-	if _, err := api.Validate(ctx, stacktemplates.ValidateOpts{Template: "x"}, stacktemplates.WithValidateField("template", "y")); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := api.Validate(ctx, stacktemplates.ValidateOpts{Template: "x"}, request.Field("template", "y")); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatalf("protected field: %v", err)
 	}
 	if _, err := api.Validate(ctx, stacktemplates.ValidateOpts{Template: "x"}, nil); !errors.Is(err, resource.ErrInvalidOption) {
@@ -410,7 +411,7 @@ func TestHeatMiscStackCreateSendsStringTemplateAndPreservesFalseWithoutPolling(t
 			Name: "app", TemplateOpts: heatMiscTemplateOpts(), DisableRollback: &disable,
 			EnvironmentOpts: &stacks.Environment{TE: stacks.TE{Bin: []byte("parameters: {}\n")}},
 			Parameters:      map[string]any{"flag": false, "n": 0}, Tags: []string{"a", "b"},
-		}, stacks.WithCreateField("vendor", map[string]any{"x": nil}))
+		}, request.Field("vendor", map[string]any{"x": nil}))
 		if tc.success != (err == nil) || calls.Load() != 1 {
 			t.Fatalf("status %d error=%v calls=%d", tc.status, err, calls.Load())
 		}
@@ -501,7 +502,7 @@ func TestHeatMiscStackPreviewWireShapeRequires200AndDecodesPreview(t *testing.T)
 		disable := false
 		value, err := stacks.New(heatMiscClient(cloud)).Preview(context.Background(), stacks.PreviewOpts{
 			Name: "app", Timeout: 5, TemplateOpts: heatMiscTemplateOpts(), DisableRollback: &disable,
-		}, stacks.WithPreviewField("vendor", 0))
+		}, request.Field("vendor", 0))
 		if tc.success != (err == nil) || calls.Load() != 1 {
 			t.Fatalf("status %d error=%v calls=%d", tc.status, err, calls.Load())
 		}
@@ -520,10 +521,10 @@ func TestHeatMiscStackMutationsRejectInvalidInputBeforeHTTP(t *testing.T) {
 	api := stacks.New(heatMiscClient(cloud))
 	ctx := context.Background()
 	create := stacks.CreateOpts{Name: "app", TemplateOpts: heatMiscTemplateOpts()}
-	if _, err := api.Create(ctx, create, stacks.WithCreateField("stack_name", "other")); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := api.Create(ctx, create, request.Field("stack_name", "other")); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatalf("protected create field: %v", err)
 	}
-	if _, err := api.Create(ctx, create, stacks.WithCreateField("template", "other")); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := api.Create(ctx, create, request.Field("template", "other")); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatalf("template conflict: %v", err)
 	}
 	if _, err := api.Create(ctx, create, nil); !errors.Is(err, resource.ErrInvalidOption) {
@@ -536,7 +537,7 @@ func TestHeatMiscStackMutationsRejectInvalidInputBeforeHTTP(t *testing.T) {
 		t.Fatal("missing name must fail before HTTP")
 	}
 	adopt := stacks.AdoptOpts{Name: "app", AdoptStackData: "{}", TemplateOpts: heatMiscTemplateOpts()}
-	if _, err := api.Adopt(ctx, adopt, stacks.WithAdoptField("adopt_stack_data", "x")); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := api.Adopt(ctx, adopt, request.Field("adopt_stack_data", "x")); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatalf("protected adopt field: %v", err)
 	}
 	if _, err := api.Adopt(ctx, adopt, nil); !errors.Is(err, resource.ErrInvalidOption) {
@@ -546,7 +547,7 @@ func TestHeatMiscStackMutationsRejectInvalidInputBeforeHTTP(t *testing.T) {
 		t.Fatal("missing adopt data must fail before HTTP")
 	}
 	preview := stacks.PreviewOpts{Name: "app", Timeout: 1, TemplateOpts: heatMiscTemplateOpts()}
-	if _, err := api.Preview(ctx, preview, stacks.WithPreviewField("timeout_mins", 2)); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := api.Preview(ctx, preview, request.Field("timeout_mins", 2)); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatalf("protected preview field: %v", err)
 	}
 	if _, err := api.Preview(ctx, preview, nil); !errors.Is(err, resource.ErrInvalidOption) {

@@ -11,6 +11,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/placement/v1/usages"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -53,7 +54,7 @@ func TestNativeUsagesQueryAndDecode(t *testing.T) {
 	api := nativeUsageAPI(t, "1.38", &calls, func(*http.Request) *http.Response {
 		return nativeUsageWire(200, `{"usages":{"INSTANCE":{"consumer_count":2,"VCPU":4,"MEMORY_MB":1024},"all":{"consumer_count":2,"VCPU":4}}}`)
 	})
-	got, err := api.Get(ctx, usages.WithGetOptions(usages.GetOpts{ProjectID: "p-1", UserID: "u-1", ConsumerType: "INSTANCE"}), usages.WithGetQuery("extra", "1"))
+	got, err := api.Get(ctx, usages.WithGetOptions(usages.GetOpts{ProjectID: "p-1", UserID: "u-1", ConsumerType: "INSTANCE"}), request.Query("extra", "1"))
 	if err != nil || got.Usages["INSTANCE"]["consumer_count"] != 2 || got.Usages["INSTANCE"]["MEMORY_MB"] != 1024 || got.Usages["all"]["VCPU"] != 4 {
 		t.Fatal(got, err)
 	}
@@ -116,7 +117,7 @@ func TestNativeUsagesStatusesAndPreflight(t *testing.T) {
 		var calls []nativeUsageCall
 		api := nativeUsageAPI(t, "1.38", &calls, func(*http.Request) *http.Response { return nativeUsageWire(200, `{}`) })
 		for name, options := range map[string][]usages.GetOption{
-			"empty query key": {usages.WithGetQuery(" ", "x")},
+			"empty query key": {request.Query(" ", "x")},
 			"nil option":      {nil},
 		} {
 			_, err := api.Get(ctx, options...)

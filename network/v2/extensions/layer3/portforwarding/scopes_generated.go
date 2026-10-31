@@ -5,6 +5,7 @@ import (
 	context "context"
 	fmt "fmt"
 	floatingips "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips"
+	request "github.com/JSYoo5B/go-openstacksdk/request"
 	resource "github.com/JSYoo5B/go-openstacksdk/resource"
 	iter "iter"
 	maps "maps"
@@ -42,7 +43,7 @@ func (s *PortForwardingScope) newResources() *resource.Collection[PortForwarding
 			options := make([]ListOption, 0, len(q))
 			for key, values := range q {
 				for _, value := range values {
-					options = append(options, WithListQuery(key, value))
+					options = append(options, request.Query(key, value))
 				}
 			}
 			return s.api.listWithControl(ctx, s.parentID, control, options...)

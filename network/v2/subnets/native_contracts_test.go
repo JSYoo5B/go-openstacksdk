@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/subnets"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -68,7 +69,7 @@ func TestNativeSubnetRoutesBodiesPagingAndDecode(t *testing.T) {
 	})
 	api := subnets.New(nativeSubnetClient(cloud))
 	ctx := context.Background()
-	created, err := api.Create(ctx, subnets.CreateOpts{NetworkID: "n1", CIDR: "10.0.0.0/24", IPVersion: gophercloud.IPv4, GatewayIP: new(string), AllocationPools: []subnets.AllocationPool{{Start: "10.0.0.10", End: "10.0.0.20"}}}, subnets.WithCreateField("x_extension", 1))
+	created, err := api.Create(ctx, subnets.CreateOpts{NetworkID: "n1", CIDR: "10.0.0.0/24", IPVersion: gophercloud.IPv4, GatewayIP: new(string), AllocationPools: []subnets.AllocationPool{{Start: "10.0.0.10", End: "10.0.0.20"}}}, request.Field("x_extension", 1))
 	if err != nil || !(created.ID == "id-1" && created.GatewayIP == "" && created.AllocationPools[0].End == "10.0.0.20" && created.HostRoutes[0].NextHop == "10.0.0.1") {
 		t.Fatal(created, err)
 	}
@@ -77,7 +78,7 @@ func TestNativeSubnetRoutesBodiesPagingAndDecode(t *testing.T) {
 		t.Fatal(got, err)
 	}
 	var rows []*subnets.Subnet
-	for value, err := range api.List(ctx, subnets.WithListOptions(subnets.ListOpts{NetworkID: "n1", IPVersion: 6, EnableDHCP: gophercloud.Disabled, Limit: 1}), subnets.WithListQuery("extra", "1")) {
+	for value, err := range api.List(ctx, subnets.WithListOptions(subnets.ListOpts{NetworkID: "n1", IPVersion: 6, EnableDHCP: gophercloud.Disabled, Limit: 1}), request.Query("extra", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -167,7 +168,7 @@ func TestNativeSubnetStrictStatusesAndPreflight(t *testing.T) {
 		for name, check := range map[string]func() error{
 			"missing network": func() error { _, err := api.Create(ctx, subnets.CreateOpts{CIDR: "10.0.0.0/24"}); return err },
 			"network_id extension": func() error {
-				_, err := api.Create(ctx, subnets.CreateOpts{NetworkID: "n"}, subnets.WithCreateField("network_id", "x"))
+				_, err := api.Create(ctx, subnets.CreateOpts{NetworkID: "n"}, request.Field("network_id", "x"))
 				return err
 			},
 			"nil option": func() error { _, err := api.Create(ctx, subnets.CreateOpts{NetworkID: "n"}, nil); return err },

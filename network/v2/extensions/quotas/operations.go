@@ -19,10 +19,10 @@ const scopeCheckLimitArgument = "project_quota_check_limit"
 // Every application gets fresh pointers, so an option remains reusable.
 func WithQuotaOptions(options UpdateOpts) UpdateOption {
 	snapshot := cloneQuotaOptions(options)
-	return func(config *request.Config[UpdateOpts]) error {
+	return request.Custom(func(config *request.Config[UpdateOpts]) error {
 		config.Options = cloneQuotaOptions(snapshot)
 		return nil
-	}
+	})
 }
 
 func cloneQuotaOptions(options UpdateOpts) UpdateOpts {
@@ -43,7 +43,7 @@ func cloneQuotaOptions(options UpdateOpts) UpdateOpts {
 // a ProjectQuotaScope.Update option; the lower-level API retains native opts.
 // Server extension support and usage-check policy are not inferred by the SDK.
 func WithUpdateCheckLimit(check bool) UpdateOption {
-	return request.WithArgument[UpdateOpts](scopeCheckLimitArgument, check)
+	return request.Custom(request.WithArgument[UpdateOpts](scopeCheckLimitArgument, check))
 }
 
 // Update sends only supplied limits: nil omits, zero is explicit and -1 is
@@ -52,11 +52,8 @@ func (s *ProjectQuotaScope) Update(ctx context.Context, opts UpdateOpts, options
 	if err := s.api.validateQuotaClient(ctx); err != nil {
 		return nil, quotaError("Update", s.projectID, err)
 	}
-	config, err := request.Apply(opts, options...)
+	config, err := request.ApplyCalls(opts, request.Capabilities{Body: true, Arguments: []string{scopeCheckLimitArgument}}, options...)
 	if err != nil {
-		return nil, quotaError("Update", s.projectID, err)
-	}
-	if err := request.ValidateCapabilities(config, true, false, false, scopeCheckLimitArgument); err != nil {
 		return nil, quotaError("Update", s.projectID, err)
 	}
 	if err := validateLimits(config.Options); err != nil {

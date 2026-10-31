@@ -11,6 +11,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/schedulerstats"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -50,7 +51,7 @@ func TestNativeSchedulerStatsListRouteAndDecode(t *testing.T) {
 			"pools_links":[{"rel":"next","href":"`+cloud.Server.URL+`/never"}]}`)
 	})
 	var pools []schedulerstats.StoragePool
-	for value, err := range api.List(ctx, schedulerstats.WithListOptions(schedulerstats.ListOpts{Detail: true, TenantID: "p-1"}), schedulerstats.WithListQuery("extra", "1")) {
+	for value, err := range api.List(ctx, schedulerstats.WithListOptions(schedulerstats.ListOpts{Detail: true, TenantID: "p-1"}), request.Query("extra", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}

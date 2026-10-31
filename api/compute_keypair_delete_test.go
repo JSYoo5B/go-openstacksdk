@@ -181,7 +181,7 @@ func TestComputeKeypairDeleteOwnedDefaultsOwnerAndNativeCompatibility(t *testing
 			case "native Delete":
 				err = api.Delete(context.Background(), "name")
 			case "native Delete owner and query":
-				err = api.Delete(context.Background(), "name", keypairs.WithDeleteOptions(keypairs.DeleteOpts{UserID: "owner+team"}), keypairs.WithDeleteQuery("vendor", "value+one"))
+				err = api.Delete(context.Background(), "name", keypairs.WithDeleteOptions(keypairs.DeleteOpts{UserID: "owner+team"}), request.Query("vendor", "value+one"))
 			case "native Remove default":
 				err = api.Remove(context.Background(), resource.ID("name"))
 			default:

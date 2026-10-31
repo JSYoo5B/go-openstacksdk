@@ -39,11 +39,10 @@ type ZonePage = upstream.ZonePage
 type ZoneShare = upstream.ZoneShare
 type ZoneSharePage = upstream.ZoneSharePage
 type ZoneShareResult = upstream.ZoneShareResult
-type CreateOption = request.Option[CreateOpts]
+type CreateOption = request.NativeFieldCall
 
-func WithCreateOptions(value CreateOpts) CreateOption { return request.WithOptions(value) }
-func WithCreateField(key string, value any) CreateOption {
-	return request.WithField[CreateOpts](key, value)
+func WithCreateOptions(value CreateOpts) CreateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type createOptsBuilder struct {
@@ -67,13 +66,8 @@ func (b createOptsBuilder) ToZoneCreateMap() (map[string]any, error) {
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*Zone, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Create", "zones", err)
-		var zero0 *Zone
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Create", "zones", err)
 		var zero0 *Zone
 		return zero0, err
@@ -109,11 +103,9 @@ func (a *API) GetShare(ctx context.Context, zoneID string, shareID string) (*Zon
 	return value0, err
 }
 
-type ListOption = request.Option[ListOpts]
+type ListOption = request.NativeQueryHeaderCall
 
-func WithListOptions(value ListOpts) ListOption   { return request.WithOptions(value) }
-func WithListQuery(key, value string) ListOption  { return request.WithQuery[ListOpts](key, value) }
-func WithListHeader(key, value string) ListOption { return request.WithHeader[ListOpts](key, value) }
+func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
 	base   ListOpts
@@ -154,12 +146,8 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Zone, 
 
 func (a *API) listWithControl(ctx context.Context, control resource.ListControl, options ...ListOption) iter.Seq2[*Zone, error] {
 	var opts ListOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true, Headers: true}, options...)
 	if err != nil {
-		err = request.Wrap("List", "zones", err)
-		return func(yield func(*Zone, error) bool) { var zero *Zone; yield(zero, err) }
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, true); err != nil {
 		err = request.Wrap("List", "zones", err)
 		return func(yield func(*Zone, error) bool) { var zero *Zone; yield(zero, err) }
 	}
@@ -170,11 +158,10 @@ func (a *API) listWithControl(ctx context.Context, control resource.ListControl,
 	}, control)
 }
 
-type ListSharesOption = request.Option[ListSharesOpts]
+type ListSharesOption = request.NativeHeaderCall
 
-func WithListSharesOptions(value ListSharesOpts) ListSharesOption { return request.WithOptions(value) }
-func WithListSharesHeader(key, value string) ListSharesOption {
-	return request.WithHeader[ListSharesOpts](key, value)
+func WithListSharesOptions(value ListSharesOpts) ListSharesOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type listSharesOptsBuilder struct {
@@ -199,12 +186,8 @@ func (b listSharesOptsBuilder) ToZoneListSharesHeadersMap() (map[string]string, 
 // ListShares invokes the upstream API with library-owned builders and result handling.
 func (a *API) ListShares(ctx context.Context, zoneID string, options ...ListSharesOption) iter.Seq2[*ZoneShare, error] {
 	var opts ListSharesOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Headers: true}, options...)
 	if err != nil {
-		err = request.Wrap("ListShares", "zones", err)
-		return func(yield func(*ZoneShare, error) bool) { var zero *ZoneShare; yield(zero, err) }
-	}
-	if err = request.ValidateCapabilities(cfg, false, false, true); err != nil {
 		err = request.Wrap("ListShares", "zones", err)
 		return func(yield func(*ZoneShare, error) bool) { var zero *ZoneShare; yield(zero, err) }
 	}
@@ -215,11 +198,10 @@ func (a *API) ListShares(ctx context.Context, zoneID string, options ...ListShar
 	})
 }
 
-type ShareOption = request.Option[ShareZoneOpts]
+type ShareOption = request.NativeFieldCall
 
-func WithShareOptions(value ShareZoneOpts) ShareOption { return request.WithOptions(value) }
-func WithShareField(key string, value any) ShareOption {
-	return request.WithField[ShareZoneOpts](key, value)
+func WithShareOptions(value ShareZoneOpts) ShareOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type shareOptsBuilder struct {
@@ -243,13 +225,8 @@ func (b shareOptsBuilder) ToShareMap() (map[string]interface{}, error) {
 
 // Share invokes the upstream API with library-owned builders and result handling.
 func (a *API) Share(ctx context.Context, zoneID string, opts ShareZoneOpts, options ...ShareOption) (*ZoneShare, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Share", "zones", err)
-		var zero0 *ZoneShare
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Share", "zones", err)
 		var zero0 *ZoneShare
 		return zero0, err
@@ -266,11 +243,10 @@ func (a *API) Unshare(ctx context.Context, zoneID string, shareID string) error 
 	return request.Wrap("Unshare", "zones", upstream.Unshare(ctx, a.client, zoneID, shareID).ExtractErr())
 }
 
-type UpdateOption = request.Option[UpdateOpts]
+type UpdateOption = request.NativeFieldCall
 
-func WithUpdateOptions(value UpdateOpts) UpdateOption { return request.WithOptions(value) }
-func WithUpdateField(key string, value any) UpdateOption {
-	return request.WithField[UpdateOpts](key, value)
+func WithUpdateOptions(value UpdateOpts) UpdateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type updateOptsBuilder struct {
@@ -294,13 +270,8 @@ func (b updateOptsBuilder) ToZoneUpdateMap() (map[string]any, error) {
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, zoneID string, opts UpdateOpts, options ...UpdateOption) (*Zone, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Update", "zones", err)
-		var zero0 *Zone
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Update", "zones", err)
 		var zero0 *Zone
 		return zero0, err

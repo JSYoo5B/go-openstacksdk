@@ -20,10 +20,9 @@ type GetResult = upstream.GetResult
 type UpdateHeader = upstream.UpdateHeader
 type UpdateOpts = upstream.UpdateOpts
 type UpdateResult = upstream.UpdateResult
-type GetOption = request.Option[GetOpts]
+type GetOption = request.NativeHeaderCall
 
-func WithGetOptions(value GetOpts) GetOption    { return request.WithOptions(value) }
-func WithGetHeader(key, value string) GetOption { return request.WithHeader[GetOpts](key, value) }
+func WithGetOptions(value GetOpts) GetOption { return request.Custom(request.WithOptions(value)) }
 
 type getOptsBuilder struct {
 	base   GetOpts
@@ -47,13 +46,8 @@ func (b getOptsBuilder) ToAccountGetMap() (map[string]string, error) {
 // Get invokes the upstream API with library-owned builders and result handling.
 func (a *API) Get(ctx context.Context, options ...GetOption) (*GetHeader, error) {
 	var opts GetOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Headers: true}, options...)
 	if err != nil {
-		err = request.Wrap("Get", "accounts", err)
-		var zero0 *GetHeader
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, false, false, true); err != nil {
 		err = request.Wrap("Get", "accounts", err)
 		var zero0 *GetHeader
 		return zero0, err
@@ -65,11 +59,10 @@ func (a *API) Get(ctx context.Context, options ...GetOption) (*GetHeader, error)
 	return value0, err
 }
 
-type UpdateOption = request.Option[UpdateOpts]
+type UpdateOption = request.NativeHeaderCall
 
-func WithUpdateOptions(value UpdateOpts) UpdateOption { return request.WithOptions(value) }
-func WithUpdateHeader(key, value string) UpdateOption {
-	return request.WithHeader[UpdateOpts](key, value)
+func WithUpdateOptions(value UpdateOpts) UpdateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type updateOptsBuilder struct {
@@ -93,13 +86,8 @@ func (b updateOptsBuilder) ToAccountUpdateMap() (map[string]string, error) {
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, opts UpdateOpts, options ...UpdateOption) (*UpdateHeader, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Headers: true}, options...)
 	if err != nil {
-		err = request.Wrap("Update", "accounts", err)
-		var zero0 *UpdateHeader
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, false, false, true); err != nil {
 		err = request.Wrap("Update", "accounts", err)
 		var zero0 *UpdateHeader
 		return zero0, err

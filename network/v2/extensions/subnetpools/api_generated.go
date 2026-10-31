@@ -35,13 +35,10 @@ type SubnetPool = upstream.SubnetPool
 type SubnetPoolPage = upstream.SubnetPoolPage
 type UpdateOpts = upstream.UpdateOpts
 type UpdateResult = upstream.UpdateResult
-type AddPrefixesOption = request.Option[PrefixesOpsOpts]
+type AddPrefixesOption = request.NativeFieldCall
 
 func WithAddPrefixesOptions(value PrefixesOpsOpts) AddPrefixesOption {
-	return request.WithOptions(value)
-}
-func WithAddPrefixesField(key string, value any) AddPrefixesOption {
-	return request.WithField[PrefixesOpsOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type addPrefixesOptsBuilder struct {
@@ -65,13 +62,8 @@ func (b addPrefixesOptsBuilder) ToSubnetPoolPrefixesOpsMap() (map[string]any, er
 
 // AddPrefixes invokes the upstream API with library-owned builders and result handling.
 func (a *API) AddPrefixes(ctx context.Context, subnetPoolID string, opts PrefixesOpsOpts, options ...AddPrefixesOption) ([]string, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("AddPrefixes", "subnetpools", err)
-		var zero0 []string
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("AddPrefixes", "subnetpools", err)
 		var zero0 []string
 		return zero0, err
@@ -83,11 +75,10 @@ func (a *API) AddPrefixes(ctx context.Context, subnetPoolID string, opts Prefixe
 	return value0, err
 }
 
-type CreateOption = request.Option[CreateOpts]
+type CreateOption = request.NativeFieldCall
 
-func WithCreateOptions(value CreateOpts) CreateOption { return request.WithOptions(value) }
-func WithCreateField(key string, value any) CreateOption {
-	return request.WithField[CreateOpts](key, value)
+func WithCreateOptions(value CreateOpts) CreateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type createOptsBuilder struct {
@@ -111,13 +102,8 @@ func (b createOptsBuilder) ToSubnetPoolCreateMap() (map[string]any, error) {
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*SubnetPool, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Create", "subnetpools", err)
-		var zero0 *SubnetPool
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Create", "subnetpools", err)
 		var zero0 *SubnetPool
 		return zero0, err
@@ -142,10 +128,9 @@ func (a *API) Get(ctx context.Context, id string) (*SubnetPool, error) {
 	return value0, err
 }
 
-type ListOption = request.Option[ListOpts]
+type ListOption = request.NativeQueryCall
 
-func WithListOptions(value ListOpts) ListOption  { return request.WithOptions(value) }
-func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
+func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
 	base   ListOpts
@@ -173,12 +158,8 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Subnet
 
 func (a *API) listWithControl(ctx context.Context, control resource.ListControl, options ...ListOption) iter.Seq2[*SubnetPool, error] {
 	var opts ListOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("List", "subnetpools", err)
-		return func(yield func(*SubnetPool, error) bool) { var zero *SubnetPool; yield(zero, err) }
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("List", "subnetpools", err)
 		return func(yield func(*SubnetPool, error) bool) { var zero *SubnetPool; yield(zero, err) }
 	}
@@ -189,13 +170,10 @@ func (a *API) listWithControl(ctx context.Context, control resource.ListControl,
 	}, control)
 }
 
-type RemovePrefixesOption = request.Option[PrefixesOpsOpts]
+type RemovePrefixesOption = request.NativeFieldCall
 
 func WithRemovePrefixesOptions(value PrefixesOpsOpts) RemovePrefixesOption {
-	return request.WithOptions(value)
-}
-func WithRemovePrefixesField(key string, value any) RemovePrefixesOption {
-	return request.WithField[PrefixesOpsOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type removePrefixesOptsBuilder struct {
@@ -219,13 +197,8 @@ func (b removePrefixesOptsBuilder) ToSubnetPoolPrefixesOpsMap() (map[string]any,
 
 // RemovePrefixes invokes the upstream API with library-owned builders and result handling.
 func (a *API) RemovePrefixes(ctx context.Context, subnetPoolID string, opts PrefixesOpsOpts, options ...RemovePrefixesOption) ([]string, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("RemovePrefixes", "subnetpools", err)
-		var zero0 []string
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("RemovePrefixes", "subnetpools", err)
 		var zero0 []string
 		return zero0, err
@@ -237,11 +210,10 @@ func (a *API) RemovePrefixes(ctx context.Context, subnetPoolID string, opts Pref
 	return value0, err
 }
 
-type UpdateOption = request.Option[UpdateOpts]
+type UpdateOption = request.NativeFieldCall
 
-func WithUpdateOptions(value UpdateOpts) UpdateOption { return request.WithOptions(value) }
-func WithUpdateField(key string, value any) UpdateOption {
-	return request.WithField[UpdateOpts](key, value)
+func WithUpdateOptions(value UpdateOpts) UpdateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type updateOptsBuilder struct {
@@ -266,13 +238,8 @@ func (b updateOptsBuilder) ToSubnetPoolUpdateMap() (map[string]any, error) {
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, subnetPoolID string, opts UpdateOpts, options ...UpdateOption) (*SubnetPool, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Update", "subnetpools", err)
-		var zero0 *SubnetPool
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Update", "subnetpools", err)
 		var zero0 *SubnetPool
 		return zero0, err

@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/manageablevolumes"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -56,7 +57,7 @@ func TestNativeManageableVolumeRouteBodyAndDecode(t *testing.T) {
 	volume, err := api.ManageExisting(ctx, manageablevolumes.ManageExistingOpts{
 		Host: "host@lvm#LVM", Ref: map[string]string{"source-name": "existing"}, Name: "imported", AvailabilityZone: "nova",
 		Description: "d", VolumeType: "lvm", Bootable: true, Metadata: map[string]string{"k": "v"},
-	}, manageablevolumes.WithManageExistingField("x_extension", 1))
+	}, request.Field("x_extension", 1))
 	// Volume timestamps use the Cinder millisecond format without a zone.
 	if err != nil || !(volume.ID == "v-1" && volume.Status == "creating" && volume.Bootable == "true" && volume.CreatedAt.Equal(time.Date(2017, 6, 29, 5, 50, 35, 0, time.UTC)) && volume.UpdatedAt.IsZero() && volume.Metadata["k"] == "v") {
 		t.Fatal(volume, err)
@@ -109,9 +110,9 @@ func TestNativeManageableVolumeStatusesDecodeAndPreflight(t *testing.T) {
 		var calls []nativeManageCall
 		api := nativeManageAPI(t, &calls, func(*http.Request) *http.Response { return nativeManageWire(202, `{}`) })
 		for name, option := range map[string]manageablevolumes.ManageExistingOption{
-			"omitted core field": manageablevolumes.WithManageExistingField("cluster", "c"),
-			"set core field":     manageablevolumes.WithManageExistingField("host", "other"),
-			"empty key":          manageablevolumes.WithManageExistingField(" ", 1),
+			"omitted core field": request.Field("cluster", "c"),
+			"set core field":     request.Field("host", "other"),
+			"empty key":          request.Field(" ", 1),
 			"nil option":         nil,
 		} {
 			_, err := api.ManageExisting(ctx, manageablevolumes.ManageExistingOpts{Host: "h"}, option)

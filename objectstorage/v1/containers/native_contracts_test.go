@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -90,7 +91,7 @@ func TestNativeContainerHeaderCallsAndEscaping(t *testing.T) {
 		}
 		return nativeContainerReply{201, http.Header{"X-Trans-Id": {"tx"}}, ""}
 	})
-	created, err := api.Create(ctx, "my box?#", containers.CreateOpts{Metadata: map[string]string{"Color": "blue"}, ContainerRead: ".r:*", StoragePolicy: "gold", VersionsEnabled: true, DetectContentType: false}, containers.WithCreateHeader("X-Extra", "1"))
+	created, err := api.Create(ctx, "my box?#", containers.CreateOpts{Metadata: map[string]string{"Color": "blue"}, ContainerRead: ".r:*", StoragePolicy: "gold", VersionsEnabled: true, DetectContentType: false}, request.Header("X-Extra", "1"))
 	if err != nil || created.TransID != "tx" {
 		t.Fatal(created, err)
 	}
@@ -140,7 +141,7 @@ func TestNativeContainerListMarkerPagingAndBulkDelete(t *testing.T) {
 		return nativeContainerReply{200, nativeContainerJSON, `[]`}
 	})
 	var names []string
-	for value, err := range api.List(ctx, containers.WithListOptions(containers.ListOpts{Prefix: "p", Limit: 2}), containers.WithListQuery("extra", "1")) {
+	for value, err := range api.List(ctx, containers.WithListOptions(containers.ListOpts{Prefix: "p", Limit: 2}), request.Query("extra", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -216,7 +217,7 @@ func TestNativeContainerStatusesNamesAndPreflight(t *testing.T) {
 			"slash delete": {"Delete", func() error { _, err := api.Delete(ctx, "a/b"); return err }()},
 			"slash bulk":   {"BulkDelete", func() error { _, err := api.BulkDelete(ctx, []string{"ok", "a/b"}); return err }()},
 			"core header": {"Create", func() error {
-				_, err := api.Create(ctx, "c", containers.CreateOpts{}, containers.WithCreateHeader("X-Storage-Policy", "x"))
+				_, err := api.Create(ctx, "c", containers.CreateOpts{}, request.Header("X-Storage-Policy", "x"))
 				return err
 			}()},
 			"update nil": {"Update", func() error { _, err := api.Update(ctx, "c", containers.UpdateOpts{}, nil); return err }()},

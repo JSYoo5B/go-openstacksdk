@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/shares"
 )
 
@@ -30,7 +31,7 @@ func TestManilaShareGrantAccessSendsExactBodyAndAcceptsOnly200(t *testing.T) {
 		})
 		value, err := newManilaShares(cloud, "2.82").GrantAccess(context.Background(), "share-1",
 			shares.GrantAccessOpts{AccessType: "ip", AccessTo: "192.0.2.0/24"},
-			shares.WithGrantAccessField("vendor", map[string]bool{"x": false}))
+			request.Field("vendor", map[string]bool{"x": false}))
 		if tc.success != (err == nil) {
 			t.Fatalf("status %d value=%+v error=%v", tc.status, value, err)
 		}

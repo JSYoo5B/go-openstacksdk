@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -69,7 +70,7 @@ func TestNativeIPAvailabilityRoutesSinglePageAndDecode(t *testing.T) {
 		t.Fatal(got, err)
 	}
 	var rows []*networkipavailabilities.NetworkIPAvailability
-	for value, err := range api.List(ctx, networkipavailabilities.WithListOptions(networkipavailabilities.ListOpts{NetworkName: "public", IPVersion: "6", ProjectID: "p"}), networkipavailabilities.WithListQuery("extra", "1")) {
+	for value, err := range api.List(ctx, networkipavailabilities.WithListOptions(networkipavailabilities.ListOpts{NetworkName: "public", IPVersion: "6", ProjectID: "p"}), request.Query("extra", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}

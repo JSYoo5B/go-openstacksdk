@@ -10,6 +10,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/projects"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -73,7 +74,7 @@ func TestPythonProjectCreateGetUpdateRequests(t *testing.T) {
 	}
 	empty := []string{}
 	// Python update_project(p, description=None, is_enabled=False, tags=[]).
-	updated, err := api.Update(ctx, "p-1", projects.UpdateOpts{Enabled: &disabled, Tags: &empty, Extra: map[string]any{"description": nil}}, projects.WithUpdateField("id", "p-1"))
+	updated, err := api.Update(ctx, "p-1", projects.UpdateOpts{Enabled: &disabled, Tags: &empty, Extra: map[string]any{"description": nil}}, request.Field("id", "p-1"))
 	if err != nil || updated.Enabled || len(updated.Tags) != 0 {
 		t.Fatalf("%#v %v", updated, err)
 	}
@@ -148,7 +149,7 @@ func TestPythonProjectListRequests(t *testing.T) {
 		// not_tags=..., is_domain=False, is_enabled=True).
 		collect(t, api,
 			projects.WithListOptions(projects.ListOpts{DomainID: "dom-1", Name: "proj", ParentID: "dom-1", TagsAny: "a,b", NotTags: "c"}),
-			projects.WithListQuery("is_domain", "False"), projects.WithListQuery("enabled", "True"))
+			request.Query("is_domain", "False"), request.Query("enabled", "True"))
 		want := "domain_id=dom-1&enabled=True&is_domain=False&name=proj&not-tags=c&parent_id=dom-1&tags-any=a%2Cb"
 		if len(calls) != 1 || calls[0].query != want {
 			t.Fatalf("%+v", calls)

@@ -11,6 +11,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/baremetal/v1/nodes"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -59,7 +60,7 @@ func TestIronicNodeChangeProvisionStateSendsStepsConfigDriveAndExtensions(t *tes
 		CleanSteps:  []nodes.CleanStep{{Interface: nodes.InterfaceDeploy, Step: "erase_devices", Args: map[string]any{"verify": false}}},
 		DeploySteps: []nodes.DeployStep{{Interface: nodes.InterfaceDeploy, Step: "deploy", Args: map[string]any{}, Priority: 0}},
 		ConfigDrive: nodes.ConfigDrive{UserData: "#cloud-config"},
-	}, nodes.WithChangeProvisionStateField("vendor", map[string]bool{"fast": false}))
+	}, request.Field("vendor", map[string]bool{"fast": false}))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -94,7 +95,7 @@ func TestIronicNodeChangeProvisionStateOmitsUnsetValuesAndRejectsBadInputBeforeH
 	if err := guarded.ChangeProvisionState(ctx, "n-1", nodes.ProvisionStateOpts{}); err == nil {
 		t.Fatal("missing target must fail before HTTP")
 	}
-	if err := guarded.ChangeProvisionState(ctx, "n-1", nodes.ProvisionStateOpts{Target: nodes.TargetActive}, nodes.WithChangeProvisionStateField("target", "deleted")); !errors.Is(err, resource.ErrInvalidOption) {
+	if err := guarded.ChangeProvisionState(ctx, "n-1", nodes.ProvisionStateOpts{Target: nodes.TargetActive}, request.Field("target", "deleted")); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatalf("protected field: %v", err)
 	}
 	if err := guarded.ChangeProvisionState(ctx, "n-1", nodes.ProvisionStateOpts{Target: nodes.TargetActive}, nil); !errors.Is(err, resource.ErrInvalidOption) {
@@ -137,7 +138,7 @@ func TestIronicNodeChangePowerStateBodyKeepsTargetAndOmitsZeroTimeout(t *testing
 	recorder := ironicNodeServe(t, cloud, "PUT /v1/nodes/n-1/states/power", 202, "")
 	api := newIronicNodes(t, cloud)
 	ctx := context.Background()
-	if err := api.ChangePowerState(ctx, "n-1", nodes.PowerStateOpts{Target: nodes.SoftRebooting, Timeout: 30}, nodes.WithChangePowerStateField("vendor", nil)); err != nil {
+	if err := api.ChangePowerState(ctx, "n-1", nodes.PowerStateOpts{Target: nodes.SoftRebooting, Timeout: 30}, request.Field("vendor", nil)); err != nil {
 		t.Fatal(err)
 	}
 	if err := api.ChangePowerState(ctx, "n-1", nodes.PowerStateOpts{Target: nodes.PowerOff}); err != nil {
@@ -159,7 +160,7 @@ func TestIronicNodeChangePowerStateBodyKeepsTargetAndOmitsZeroTimeout(t *testing
 	if err := guarded.ChangePowerState(ctx, "n-1", nodes.PowerStateOpts{}); err == nil {
 		t.Fatal("missing target must fail before HTTP")
 	}
-	if err := guarded.ChangePowerState(ctx, "n-1", nodes.PowerStateOpts{Target: nodes.PowerOn}, nodes.WithChangePowerStateField("target", "x")); !errors.Is(err, resource.ErrInvalidOption) {
+	if err := guarded.ChangePowerState(ctx, "n-1", nodes.PowerStateOpts{Target: nodes.PowerOn}, request.Field("target", "x")); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatalf("protected field: %v", err)
 	}
 }
@@ -170,7 +171,7 @@ func TestIronicNodeMaintenanceBodyAndNoBodyUnset(t *testing.T) {
 	unset := ironicNodeServe(t, cloud, "DELETE /v1/nodes/n-1/maintenance", 202, "")
 	api := newIronicNodes(t, cloud)
 	ctx := context.Background()
-	if err := api.SetMaintenance(ctx, "n-1", nodes.MaintenanceOpts{Reason: "rack work"}, nodes.WithSetMaintenanceField("ticket", 0)); err != nil {
+	if err := api.SetMaintenance(ctx, "n-1", nodes.MaintenanceOpts{Reason: "rack work"}, request.Field("ticket", 0)); err != nil {
 		t.Fatal(err)
 	}
 	if err := api.SetMaintenance(ctx, "n-1", nodes.MaintenanceOpts{}); err != nil {
@@ -191,7 +192,7 @@ func TestIronicNodeMaintenanceBodyAndNoBodyUnset(t *testing.T) {
 	}
 	blocked := testcloud.New(t)
 	ironicNodeUnreachable(t, blocked)
-	if err := newIronicNodes(t, blocked).SetMaintenance(ctx, "n-1", nodes.MaintenanceOpts{}, nodes.WithSetMaintenanceField("reason", "x")); !errors.Is(err, resource.ErrInvalidOption) {
+	if err := newIronicNodes(t, blocked).SetMaintenance(ctx, "n-1", nodes.MaintenanceOpts{}, request.Field("reason", "x")); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatalf("protected field: %v", err)
 	}
 }
@@ -203,7 +204,7 @@ func TestIronicNodeBootDeviceKeepsFalsePersistentAndDecodesReads(t *testing.T) {
 	ironicNodeServe(t, cloud, "GET /v1/nodes/n-1/management/boot_device/supported", 200, `{"supported_boot_devices":["pxe","disk"]}`)
 	api := newIronicNodes(t, cloud)
 	ctx := context.Background()
-	if err := api.SetBootDevice(ctx, "n-1", nodes.BootDeviceOpts{BootDevice: "pxe"}, nodes.WithSetBootDeviceField("vendor", false)); err != nil {
+	if err := api.SetBootDevice(ctx, "n-1", nodes.BootDeviceOpts{BootDevice: "pxe"}, request.Field("vendor", false)); err != nil {
 		t.Fatal(err)
 	}
 	if got := ironicNodeFields(t, set.only(t).Body); !reflect.DeepEqual(got, map[string]string{"boot_device": `"pxe"`, "persistent": `false`, "vendor": `false`}) {
@@ -219,7 +220,7 @@ func TestIronicNodeBootDeviceKeepsFalsePersistentAndDecodesReads(t *testing.T) {
 	}
 	blocked := testcloud.New(t)
 	ironicNodeUnreachable(t, blocked)
-	if err := newIronicNodes(t, blocked).SetBootDevice(ctx, "n-1", nodes.BootDeviceOpts{}, nodes.WithSetBootDeviceField("persistent", true)); !errors.Is(err, resource.ErrInvalidOption) {
+	if err := newIronicNodes(t, blocked).SetBootDevice(ctx, "n-1", nodes.BootDeviceOpts{}, request.Field("persistent", true)); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatalf("protected field: %v", err)
 	}
 }
@@ -242,7 +243,7 @@ func TestIronicNodeSetRAIDConfigDefaultsSizeToMAXAndKeepsFalse(t *testing.T) {
 	err := newIronicNodes(t, cloud).SetRAIDConfig(context.Background(), "n-1", nodes.RAIDConfigOpts{LogicalDisks: []nodes.LogicalDisk{
 		{RAIDLevel: nodes.RAID1, IsRootVolume: ironicNodeFalse()},
 		{RAIDLevel: nodes.RAID10, SizeGB: &size, SharePhysicalDisks: ironicNodeFalse(), VolumeName: "data"},
-	}}, nodes.WithSetRAIDConfigField("vendor", []string{}))
+	}}, request.Field("vendor", []string{}))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -256,7 +257,7 @@ func TestIronicNodeSetRAIDConfigDefaultsSizeToMAXAndKeepsFalse(t *testing.T) {
 	}
 	blocked := testcloud.New(t)
 	ironicNodeUnreachable(t, blocked)
-	if err := newIronicNodes(t, blocked).SetRAIDConfig(context.Background(), "n-1", nodes.RAIDConfigOpts{}, nodes.WithSetRAIDConfigField("logical_disks", []int{})); !errors.Is(err, resource.ErrInvalidOption) {
+	if err := newIronicNodes(t, blocked).SetRAIDConfig(context.Background(), "n-1", nodes.RAIDConfigOpts{}, request.Field("logical_disks", []int{})); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatalf("protected field: %v", err)
 	}
 }

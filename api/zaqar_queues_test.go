@@ -15,6 +15,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/messaging/v2/queues"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -72,7 +73,7 @@ func TestZaqarQueueCreateBodyOmitsNameAndAcceptsOnly201Or204(t *testing.T) {
 		encrypt := false
 		err := newZaqarQueues(cloud).Create(context.Background(), queues.CreateOpts{
 			QueueName: "jobs", DefaultMessageTTL: 3600, DeadLetterQueue: "dead", EnableEncryptMessages: &encrypt,
-		}, queues.WithCreateField("vendor", map[string]bool{"enabled": false}))
+		}, request.Field("vendor", map[string]bool{"enabled": false}))
 		if tc.success != (err == nil) || calls.Load() != 1 {
 			t.Fatalf("status %d error=%v calls=%d", tc.status, err, calls.Load())
 		}
@@ -90,7 +91,7 @@ func TestZaqarQueueRejectsCollisionsAndNilOptionsBeforeHTTP(t *testing.T) {
 	zaqarQueueNoRequests(t, cloud)
 	api := newZaqarQueues(cloud)
 	ctx := context.Background()
-	if err := api.Create(ctx, queues.CreateOpts{QueueName: "jobs", DefaultMessageTTL: 60}, queues.WithCreateField("_default_message_ttl", 1)); !errors.Is(err, resource.ErrInvalidOption) {
+	if err := api.Create(ctx, queues.CreateOpts{QueueName: "jobs", DefaultMessageTTL: 60}, request.Field("_default_message_ttl", 1)); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatalf("protected create field: %v", err)
 	}
 	if err := api.Create(ctx, queues.CreateOpts{QueueName: "jobs", DefaultMessageTTL: 60}, nil); !errors.Is(err, resource.ErrInvalidOption) {
@@ -99,13 +100,13 @@ func TestZaqarQueueRejectsCollisionsAndNilOptionsBeforeHTTP(t *testing.T) {
 	if err := api.Create(ctx, queues.CreateOpts{DefaultMessageTTL: 60}); err == nil {
 		t.Fatal("missing queue name must fail before HTTP")
 	}
-	if err := api.Purge(ctx, "jobs", queues.PurgeOpts{ResourceTypes: []queues.PurgeResource{queues.ResourceMessages}}, queues.WithPurgeField("resource_types", []string{"x"})); !errors.Is(err, resource.ErrInvalidOption) {
+	if err := api.Purge(ctx, "jobs", queues.PurgeOpts{ResourceTypes: []queues.PurgeResource{queues.ResourceMessages}}, request.Field("resource_types", []string{"x"})); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatalf("protected purge field: %v", err)
 	}
 	if err := api.Purge(ctx, "jobs", queues.PurgeOpts{}); err == nil {
 		t.Fatal("empty purge resource types must fail before HTTP")
 	}
-	if _, err := api.Share(ctx, "jobs", queues.ShareOpts{}, queues.WithShareField("paths", []string{"x"}), queues.WithShareField("vendor", 1)); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := api.Share(ctx, "jobs", queues.ShareOpts{}, request.Field("paths", []string{"x"}), request.Field("vendor", 1)); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatalf("protected share field: %v", err)
 	}
 	if _, err := api.Share(ctx, "jobs", queues.ShareOpts{}, nil); !errors.Is(err, resource.ErrInvalidOption) {
@@ -325,17 +326,17 @@ func TestZaqarQueueShareAndPurgeWireShapes(t *testing.T) {
 	ctx := context.Background()
 	share, err := api.Share(ctx, "jobs", queues.ShareOpts{
 		Paths: []queues.SharePath{queues.PathMessages, queues.PathClaims}, Methods: []queues.ShareMethod{queues.MethodGet, queues.MethodPost}, Expires: "2026-12-31T00:00:00",
-	}, queues.WithShareField("vendor", false))
+	}, request.Field("vendor", false))
 	if err != nil || share.Project != "p1" || share.Signature != "sig" || !reflect.DeepEqual(share.Methods, []string{"GET"}) {
 		t.Fatalf("share=%+v error=%v", share, err)
 	}
 	purge := queues.PurgeOpts{ResourceTypes: []queues.PurgeResource{queues.ResourceMessages, queues.ResourceSubscriptions}}
-	if err := api.Purge(ctx, "jobs", purge, queues.WithPurgeField("vendor", 0)); err != nil {
+	if err := api.Purge(ctx, "jobs", purge, request.Field("vendor", 0)); err != nil {
 		t.Fatal(err)
 	}
 	purgeStatus.Store(200)
 	var unexpected gophercloud.ErrUnexpectedResponseCode
-	if err := api.Purge(ctx, "jobs", purge, queues.WithPurgeField("vendor", 0)); !errors.As(err, &unexpected) || unexpected.Actual != 200 {
+	if err := api.Purge(ctx, "jobs", purge, request.Field("vendor", 0)); !errors.As(err, &unexpected) || unexpected.Actual != 200 {
 		t.Fatalf("purge must require 204: %v", err)
 	}
 }
@@ -356,7 +357,7 @@ func TestZaqarQueueListFiltersFollowLinksAndStatus204(t *testing.T) {
 	})
 	var names []string
 	for value, err := range newZaqarQueues(cloud).List(context.Background(),
-		queues.WithListOptions(queues.ListOpts{Limit: 1, Detailed: true, WithCount: true}), queues.WithListQuery("vendor", "x")) {
+		queues.WithListOptions(queues.ListOpts{Limit: 1, Detailed: true, WithCount: true}), request.Query("vendor", "x")) {
 		if err != nil {
 			t.Fatal(err)
 		}

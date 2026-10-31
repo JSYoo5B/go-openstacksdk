@@ -903,20 +903,14 @@ func emitOperation(e *emitter, fn *types.Func, decl *ast.FuncDecl, extractors ma
 	if len(builders) > 0 {
 		primary := builders[0]
 		base := e.typ(primary.base)
-		e.printf("type %sOption = %s.Option[%s]\n", op, requestAlias, base)
-		e.printf("func With%sOptions(value %s) %sOption { return %s.WithOptions(value) }\n", op, base, op, requestAlias)
+		// The option type is the shared call category of the native builder's
+		// extension mechanisms, so request.Field, request.Query and
+		// request.Header compile only where the operation can serialize them.
 		caps := capabilities(e.pkg, primary)
-		if caps.body {
-			e.printf("func With%sField(key string,value any) %sOption { return %s.WithField[%s](key,value) }\n", op, op, requestAlias, base)
-		}
-		if caps.query {
-			e.printf("func With%sQuery(key,value string) %sOption { return %s.WithQuery[%s](key,value) }\n", op, op, requestAlias, base)
-		}
-		if caps.headers {
-			e.printf("func With%sHeader(key,value string) %sOption {return %s.WithHeader[%s](key,value)}\n", op, op, requestAlias, base)
-		}
+		e.printf("type %sOption = %s.%s\n", op, requestAlias, caps.category())
+		e.printf("func With%sOptions(value %s) %sOption { return %s.Custom(%s.WithOptions(value)) }\n", op, base, op, requestAlias, requestAlias)
 		for _, b := range builders[1:] {
-			e.printf("func With%s%s(value %s) %sOption { return %s.WithArgument[%s](%q,value) }\n", op, title(b.name), e.typ(b.base), op, requestAlias, base, b.name)
+			e.printf("func With%s%s(value %s) %sOption { return %s.Custom(%s.WithArgument[%s](%q,value)) }\n", op, title(b.name), e.typ(b.base), op, requestAlias, requestAlias, base, b.name)
 		}
 		params = append(params, "options ..."+op+"Option")
 		forwardArgs = append(forwardArgs, "options...")
@@ -1062,19 +1056,11 @@ func emitOperation(e *emitter, fn *types.Func, decl *ast.FuncDecl, extractors ma
 				e.printf("var %s %s\n", primary.name, e.typ(primary.base))
 			}
 		}
-		e.printf("cfg,err:=%s.Apply(%s,options...)\nif err!=nil {\n", requestAlias, primary.name)
-		errReturn()
-		e.printf("}\n")
-		caps := capabilities(e.pkg, primary)
 		allowed := []string{}
 		for _, b := range builders[1:] {
 			allowed = append(allowed, strconv.Quote(b.name))
 		}
-		arguments := ""
-		if len(allowed) > 0 {
-			arguments = "," + strings.Join(allowed, ",")
-		}
-		e.printf("if err=%s.ValidateCapabilities(cfg,%t,%t,%t%s);err!=nil{\n", requestAlias, caps.body, caps.query, caps.headers, arguments)
+		e.printf("cfg,err:=%s.ApplyCalls(%s,%s,options...)\nif err!=nil {\n", requestAlias, primary.name, capabilities(e.pkg, primary).literal(requestAlias, allowed))
 		errReturn()
 		e.printf("}\n")
 		// Normalize the owned empty Swift content default after options, so an

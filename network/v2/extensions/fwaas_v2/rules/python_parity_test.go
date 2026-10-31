@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -95,7 +96,7 @@ func TestPythonFirewallRuleProxyParity(t *testing.T) {
 		})
 		// create_firewall_rule(name="ssh", protocol="tcp", action="allow", ip_version=4,
 		//     source_ip_address="10.0.0.0/24", destination_port="22", enabled=True, x_extension=1)
-		created, err := api.Create(ctx, rules.CreateOpts{Name: "ssh", Protocol: rules.ProtocolTCP, Action: rules.ActionAllow, IPVersion: gophercloud.IPv4, SourceIPAddress: "10.0.0.0/24", DestinationPort: "22", Enabled: pythonFWRuleBool(true)}, rules.WithCreateField("x_extension", 1))
+		created, err := api.Create(ctx, rules.CreateOpts{Name: "ssh", Protocol: rules.ProtocolTCP, Action: rules.ActionAllow, IPVersion: gophercloud.IPv4, SourceIPAddress: "10.0.0.0/24", DestinationPort: "22", Enabled: pythonFWRuleBool(true)}, request.Field("x_extension", 1))
 		if err != nil || created.ID != "fr-1" || created.Protocol != "tcp" || created.IPVersion != 4 || !created.Enabled || !reflect.DeepEqual(created.FirewallPolicyID, []string{"fp-1"}) {
 			t.Fatal(created, err)
 		}
@@ -177,7 +178,7 @@ func TestPythonFirewallRuleProxyParity(t *testing.T) {
 		})
 		// firewall_rules(protocol="tcp", action="allow", ip_version=4, firewall_policy_id="fp-1", enabled=True)
 		var ids []string
-		for value, err := range api.List(ctx, rules.WithListOptions(rules.ListOpts{Protocol: rules.ProtocolTCP, Action: rules.ActionAllow, IPVersion: 4, FirewallPolicyID: "fp-1"}), rules.WithListQuery("enabled", "True")) {
+		for value, err := range api.List(ctx, rules.WithListOptions(rules.ListOpts{Protocol: rules.ProtocolTCP, Action: rules.ActionAllow, IPVersion: 4, FirewallPolicyID: "fp-1"}), request.Query("enabled", "True")) {
 			if err != nil {
 				t.Fatal(err)
 			}

@@ -11,6 +11,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -57,12 +58,12 @@ func TestPythonBackupListDetailsAndQuery(t *testing.T) {
 	var ids []string
 	for value, err := range api.ListDetail(ctx,
 		backups.WithListDetailOptions(backups.ListDetailOpts{Limit: 1}),
-		backups.WithListDetailQuery("name", "nightly"),
-		backups.WithListDetailQuery("status", "available"),
-		backups.WithListDetailQuery("volume_id", "vol-1"),
-		backups.WithListDetailQuery("all_tenants", "True"),
-		backups.WithListDetailQuery("sort_key", "name"),
-		backups.WithListDetailQuery("sort_dir", "asc"),
+		request.Query("name", "nightly"),
+		request.Query("status", "available"),
+		request.Query("volume_id", "vol-1"),
+		request.Query("all_tenants", "True"),
+		request.Query("sort_key", "name"),
+		request.Query("sort_dir", "asc"),
 	) {
 		if err != nil {
 			t.Fatal(err)

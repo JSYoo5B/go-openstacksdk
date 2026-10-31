@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/migrations"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -46,7 +47,7 @@ func TestNativeMigrationListQueryAndDecode(t *testing.T) {
 	since := time.Date(2026, 10, 1, 9, 0, 0, 0, time.FixedZone("KST", 9*3600))
 	before := time.Date(2026, 10, 2, 0, 0, 0, 0, time.UTC)
 	var rows []*migrations.Migration
-	for value, err := range api.List(ctx, migrations.WithListOptions(migrations.ListOpts{Host: &host, InstanceID: &instance, MigrationType: &kind, SourceCompute: &source, Status: &status, Limit: &limit, Marker: &marker, ChangesSince: &since, ChangesBefore: &before, UserID: &user, ProjectID: &project}), migrations.WithListQuery("hidden", "0")) {
+	for value, err := range api.List(ctx, migrations.WithListOptions(migrations.ListOpts{Host: &host, InstanceID: &instance, MigrationType: &kind, SourceCompute: &source, Status: &status, Limit: &limit, Marker: &marker, ChangesSince: &since, ChangesBefore: &before, UserID: &user, ProjectID: &project}), request.Query("hidden", "0")) {
 		if err != nil {
 			t.Fatal(err)
 		}

@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceclasses"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -64,7 +65,7 @@ func TestNativeResourceClassesRoutesBodiesAndDecode(t *testing.T) {
 		}
 		return nativeRCWire(200, `{"name":"CUSTOM_GPU","links":[{"href":"/resource_classes/CUSTOM_GPU","rel":"self"}]}`)
 	})
-	if err := api.Create(ctx, resourceclasses.CreateOpts{Name: "CUSTOM_GPU"}, resourceclasses.WithCreateField("x_extension", 1)); err != nil {
+	if err := api.Create(ctx, resourceclasses.CreateOpts{Name: "CUSTOM_GPU"}, request.Field("x_extension", 1)); err != nil {
 		t.Fatal(err)
 	}
 	got, err := api.Get(ctx, "CUSTOM_GPU")
@@ -179,7 +180,7 @@ func TestNativeResourceClassesStatusesAndPreflight(t *testing.T) {
 			err       error
 		}{
 			"create name":      {"Create", api.Create(ctx, resourceclasses.CreateOpts{})},
-			"create extension": {"Create", api.Create(ctx, resourceclasses.CreateOpts{Name: "CUSTOM_GPU"}, resourceclasses.WithCreateField("name", "x"))},
+			"create extension": {"Create", api.Create(ctx, resourceclasses.CreateOpts{Name: "CUSTOM_GPU"}, request.Field("name", "x"))},
 			"create nil":       {"Create", api.Create(ctx, resourceclasses.CreateOpts{Name: "CUSTOM_GPU"}, nil)},
 		} {
 			if check.err == nil {

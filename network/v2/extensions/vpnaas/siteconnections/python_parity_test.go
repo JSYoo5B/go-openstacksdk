@@ -11,6 +11,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/siteconnections"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -117,7 +118,7 @@ func TestPythonSiteConnectionUpdateCannotSendEmptyValues(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, key := range []string{"local_id", "peer_cidrs"} {
-		if _, err := api.Update(ctx, "sc-1", siteconnections.UpdateOpts{}, siteconnections.WithUpdateField(key, "")); !errors.Is(err, resource.ErrInvalidOption) {
+		if _, err := api.Update(ctx, "sc-1", siteconnections.UpdateOpts{}, request.Field(key, "")); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(key, err)
 		}
 	}
@@ -141,7 +142,7 @@ func TestPythonSiteConnectionListQueryAndLinks(t *testing.T) {
 	})
 	// vpn_ipsec_site_connections(vpnservice_id="vs-1", status="ACTIVE", limit=1)
 	var ids []string
-	for value, err := range api.List(ctx, siteconnections.WithListOptions(siteconnections.ListOpts{VPNServiceID: "vs-1"}), siteconnections.WithListQuery("status", "ACTIVE"), siteconnections.WithListQuery("limit", "1")) {
+	for value, err := range api.List(ctx, siteconnections.WithListOptions(siteconnections.ListOpts{VPNServiceID: "vs-1"}), request.Query("status", "ACTIVE"), request.Query("limit", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}

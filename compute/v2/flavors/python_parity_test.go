@@ -9,6 +9,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -62,7 +63,7 @@ func TestPythonFlavorCreateDeleteMatchProxyRequests(t *testing.T) {
 		t.Fatal(created, err)
 	}
 	// Keys outside CreateOpts go through WithCreateField.
-	if _, err := api.Create(ctx, flavors.CreateOpts{Name: "m2", RAM: 256, VCPUs: 2, Disk: pythonFlavorInt(0)}, flavors.WithCreateField("x_extension", 1)); err != nil {
+	if _, err := api.Create(ctx, flavors.CreateOpts{Name: "m2", RAM: 256, VCPUs: 2, Disk: pythonFlavorInt(0)}, request.Field("x_extension", 1)); err != nil {
 		t.Fatal(err)
 	}
 	// delete_flavor("f1") ignores 404; ignore_missing=False reports it.
@@ -103,7 +104,7 @@ func TestPythonFlavorUpdateCannotClearDescription(t *testing.T) {
 	}
 	// update_flavor("f1", description=None) or "" clears the description;
 	// Go omits the empty typed key and refuses it as an extension.
-	if _, err := api.Update(ctx, "f1", flavors.UpdateOpts{}, flavors.WithUpdateField("description", nil)); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := api.Update(ctx, "f1", flavors.UpdateOpts{}, request.Field("description", nil)); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
 	want := []pythonFlavorCall{

@@ -587,7 +587,7 @@ func TestComputeKeypairListNativeBindingKeepsTypedSinglePageABI(t *testing.T) {
 			})
 			var values []*keypairs.KeyPair
 			var failure error
-			for value, err := range keypairs.New(client).List(context.Background(), keypairs.WithListOptions(keypairs.ListOpts{UserID: "typed-owner"}), keypairs.WithListQuery("user_id", "raw+owner"), keypairs.WithListQuery("limit", "25")) {
+			for value, err := range keypairs.New(client).List(context.Background(), keypairs.WithListOptions(keypairs.ListOpts{UserID: "typed-owner"}), request.Query("user_id", "raw+owner"), request.Query("limit", "25")) {
 				if err != nil {
 					failure = err
 					break

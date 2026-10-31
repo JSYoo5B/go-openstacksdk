@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/quotasets"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -79,7 +80,7 @@ func TestNativeQuotaSetV2RoutesBodiesAndDecode(t *testing.T) {
 	}
 	volumes, zero, unlimited := 1, 0, -1
 	if _, err := api.Update(ctx, "p-1", quotasets.UpdateOpts{Volumes: &volumes, Snapshots: &zero, Gigabytes: &unlimited, Force: true, Extra: map[string]any{"volumes_ssd": 3}},
-		quotasets.WithUpdateField("x_extension", true)); err != nil {
+		request.Field("x_extension", true)); err != nil {
 		t.Fatal(err)
 	}
 	// Extra is merged after the typed fields, so it can override a typed limit.
@@ -162,11 +163,11 @@ func TestNativeQuotaSetV2StatusesDecodeAndPreflight(t *testing.T) {
 		api := nativeQuotaV2API(t, &calls, func(*http.Request) *http.Response { return nativeQuotaV2Wire(200, `{}`) })
 		for name, update := range map[string]func() error{
 			"omitted core field": func() error {
-				_, err := api.Update(ctx, "p-1", quotasets.UpdateOpts{}, quotasets.WithUpdateField("groups", 1))
+				_, err := api.Update(ctx, "p-1", quotasets.UpdateOpts{}, request.Field("groups", 1))
 				return err
 			},
 			"extra key": func() error {
-				_, err := api.Update(ctx, "p-1", quotasets.UpdateOpts{Extra: map[string]any{"volumes_ssd": 1}}, quotasets.WithUpdateField("volumes_ssd", 2))
+				_, err := api.Update(ctx, "p-1", quotasets.UpdateOpts{Extra: map[string]any{"volumes_ssd": 1}}, request.Field("volumes_ssd", 2))
 				return err
 			},
 			"nil option": func() error {

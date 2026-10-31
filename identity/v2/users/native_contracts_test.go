@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v2/users"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -66,7 +67,7 @@ func TestNativeV2UserRoutesBodiesAndDecode(t *testing.T) {
 		return 200, `{"user":` + nativeV2UserRow + `}`
 	})
 	enabled, disabled := true, false
-	created, err := api.Create(ctx, users.CreateOpts{Name: "alice", TenantID: "t-1", Enabled: &enabled, Email: "a@example.invalid"}, users.WithCreateField("x_extension", 1))
+	created, err := api.Create(ctx, users.CreateOpts{Name: "alice", TenantID: "t-1", Enabled: &enabled, Email: "a@example.invalid"}, request.Field("x_extension", 1))
 	want := users.User{ID: "u-1", Name: "alice", Username: "alice", Enabled: true, Email: "a@example.invalid", TenantID: "t-1"}
 	if err != nil || !reflect.DeepEqual(*created, want) {
 		t.Fatal(created, err)
@@ -78,7 +79,7 @@ func TestNativeV2UserRoutesBodiesAndDecode(t *testing.T) {
 	if err != nil || !reflect.DeepEqual(*got, want) {
 		t.Fatal(got, err)
 	}
-	if _, err := api.Update(ctx, "u-1", users.UpdateOpts{Email: "b@example.invalid", Enabled: &disabled}, users.WithUpdateField("x_extension", 1)); err != nil {
+	if _, err := api.Update(ctx, "u-1", users.UpdateOpts{Email: "b@example.invalid", Enabled: &disabled}, request.Field("x_extension", 1)); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := api.Update(ctx, "u-1", users.UpdateOpts{}); err != nil {
@@ -207,10 +208,10 @@ func TestNativeV2UserStatusesAndPreflight(t *testing.T) {
 				}
 				return err
 			}()},
-			"create extension": {"Create", func() error { _, err := api.Create(ctx, valid, users.WithCreateField("tenantId", "t")); return err }()},
+			"create extension": {"Create", func() error { _, err := api.Create(ctx, valid, request.Field("tenantId", "t")); return err }()},
 			"create nil":       {"Create", func() error { _, err := api.Create(ctx, valid, nil); return err }()},
 			"update extension": {"Update", func() error {
-				_, err := api.Update(ctx, "u-1", users.UpdateOpts{}, users.WithUpdateField("email", "x"))
+				_, err := api.Update(ctx, "u-1", users.UpdateOpts{}, request.Field("email", "x"))
 				return err
 			}()},
 			"update nil": {"Update", func() error { _, err := api.Update(ctx, "u-1", users.UpdateOpts{}, nil); return err }()},

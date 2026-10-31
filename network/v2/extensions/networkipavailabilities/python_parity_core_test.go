@@ -10,6 +10,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 type pythonParityCoreIPAvailabilityCall struct{ method, path, query string }
@@ -45,8 +46,8 @@ func TestPythonParityCoreIPAvailabilityListAndGet(t *testing.T) {
 	var rows []*networkipavailabilities.NetworkIPAvailability
 	for value, err := range api.List(ctx,
 		networkipavailabilities.WithListOptions(networkipavailabilities.ListOpts{NetworkName: "private", IPVersion: "4", ProjectID: "p-1"}),
-		networkipavailabilities.WithListQuery("sort_key", "network_name"),
-		networkipavailabilities.WithListQuery("fields", "network_id")) {
+		request.Query("sort_key", "network_name"),
+		request.Query("fields", "network_id")) {
 		if err != nil {
 			t.Fatal(err)
 		}

@@ -12,6 +12,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/messaging/v2/claims"
 	"github.com/JSYoo5B/go-openstacksdk/messaging/v2/messages"
 	"github.com/JSYoo5B/go-openstacksdk/messaging/v2/queues"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -235,7 +236,7 @@ func TestPyMsgWfClaimCreateFailuresAreNotReplayedAndKeepNativeStatus(t *testing.
 	if got != nil || !errors.As(err, &unexpected) || unexpected.Actual != 500 || calls.Load() != 1 {
 		t.Fatalf("claim=%v error=%v calls=%d", got, err, calls.Load())
 	}
-	if _, err := api.CreateClaim(context.Background(), "jobs", claims.CreateOpts{TTL: 60, Grace: 60}, claims.WithCreateField("ttl", 1)); !errors.Is(err, resource.ErrInvalidOption) || calls.Load() != 1 {
+	if _, err := api.CreateClaim(context.Background(), "jobs", claims.CreateOpts{TTL: 60, Grace: 60}, request.Field("ttl", 1)); !errors.Is(err, resource.ErrInvalidOption) || calls.Load() != 1 {
 		t.Fatalf("core-field extension must fail before HTTP: %v calls=%d", err, calls.Load())
 	}
 	if _, err := api.CreateClaim(context.Background(), "jobs", claims.CreateOpts{TTL: 60, Grace: 60}, nil); !errors.Is(err, resource.ErrInvalidOption) || calls.Load() != 1 {

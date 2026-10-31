@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -61,7 +62,7 @@ func TestNativeServerGroupsRoutesBodiesAndDecode(t *testing.T) {
 	api := servergroups.New(nativeGroupClient(cloud))
 	ctx := context.Background()
 	two := 2
-	created, err := api.Create(ctx, servergroups.CreateOpts{Name: "web", Policies: []string{"anti-affinity"}, Policy: "anti-affinity", Rules: &servergroups.Rules{MaxServerPerHost: two}}, servergroups.WithCreateField("x_extension", 1))
+	created, err := api.Create(ctx, servergroups.CreateOpts{Name: "web", Policies: []string{"anti-affinity"}, Policy: "anti-affinity", Rules: &servergroups.Rules{MaxServerPerHost: two}}, request.Field("x_extension", 1))
 	if err != nil || created.ID != "g1" || *created.Policy != "anti-affinity" || created.Rules.MaxServerPerHost != 2 || !reflect.DeepEqual(created.Members, []string{"s1"}) {
 		t.Fatal(created, err)
 	}
@@ -70,7 +71,7 @@ func TestNativeServerGroupsRoutesBodiesAndDecode(t *testing.T) {
 		t.Fatal(got, err)
 	}
 	var ids []string
-	for value, err := range api.List(ctx, servergroups.WithListOptions(servergroups.ListOpts{AllProjects: true, Limit: 5, Offset: 10}), servergroups.WithListQuery("extra", "1")) {
+	for value, err := range api.List(ctx, servergroups.WithListOptions(servergroups.ListOpts{AllProjects: true, Limit: 5, Offset: 10}), request.Query("extra", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -174,7 +175,7 @@ func TestNativeServerGroupsStrictStatusesAndPreflight(t *testing.T) {
 		for name, check := range map[string]func() error{
 			"missing name": func() error { _, err := api.Create(ctx, servergroups.CreateOpts{Policy: "affinity"}); return err },
 			"name extension": func() error {
-				_, err := api.Create(ctx, servergroups.CreateOpts{Name: "g"}, servergroups.WithCreateField("name", "x"))
+				_, err := api.Create(ctx, servergroups.CreateOpts{Name: "g"}, request.Field("name", "x"))
 				return err
 			},
 			"nil option": func() error { _, err := api.Create(ctx, servergroups.CreateOpts{Name: "g"}, nil); return err },

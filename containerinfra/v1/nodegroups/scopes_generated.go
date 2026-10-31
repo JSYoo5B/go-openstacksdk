@@ -5,6 +5,7 @@ import (
 	context "context"
 	fmt "fmt"
 	clusters "github.com/JSYoo5B/go-openstacksdk/containerinfra/v1/clusters"
+	request "github.com/JSYoo5B/go-openstacksdk/request"
 	resource "github.com/JSYoo5B/go-openstacksdk/resource"
 	iter "iter"
 	maps "maps"
@@ -49,7 +50,7 @@ func (s *NodeGroupScope) newResources() *resource.Collection[NodeGroup] {
 			options := make([]ListOption, 0, len(q))
 			for key, values := range q {
 				for _, value := range values {
-					options = append(options, WithListQuery(key, value))
+					options = append(options, request.Query(key, value))
 				}
 			}
 			return s.api.listWithControl(ctx, s.parentID, control, options...)

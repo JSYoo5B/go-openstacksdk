@@ -15,6 +15,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/messaging/v2/claims"
 	"github.com/JSYoo5B/go-openstacksdk/messaging/v2/messages"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -86,7 +87,7 @@ func TestZaqarMessageCreateSendsBatchEnvelopePreservingZeroValuesAndRequires201(
 		list, err := newZaqarMessages(cloud).Create(context.Background(), "jobs", messages.BatchCreateOpts{
 			{TTL: 300, Delay: 5, Body: map[string]any{"event": "a", "flag": false}},
 			{Body: map[string]any{}},
-		}, messages.WithCreateField("vendor", map[string]bool{"flag": false}))
+		}, request.Field("vendor", map[string]bool{"flag": false}))
 		if tc.success != (err == nil) || calls.Load() != 1 {
 			t.Fatalf("status %d error=%v calls=%d", tc.status, err, calls.Load())
 		}
@@ -108,7 +109,7 @@ func TestZaqarMessageRejectsCollisionsAndNilOptionsBeforeHTTP(t *testing.T) {
 	api := newZaqarMessages(cloud)
 	ctx := context.Background()
 	batch := messages.BatchCreateOpts{{Body: map[string]any{"a": 1}}}
-	if _, err := api.Create(ctx, "jobs", batch, messages.WithCreateField("messages", []int{})); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := api.Create(ctx, "jobs", batch, request.Field("messages", []int{})); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatalf("envelope collision: %v", err)
 	}
 	if _, err := api.Create(ctx, "jobs", batch, nil); !errors.Is(err, resource.ErrInvalidOption) {
@@ -153,7 +154,7 @@ func TestZaqarMessageListFiltersFollowLinksAndStatus204(t *testing.T) {
 	var ids []string
 	var first *messages.Message
 	for value, err := range newZaqarMessages(cloud).List(context.Background(), "jobs",
-		messages.WithListOptions(messages.ListOpts{Limit: 1, Echo: true, IncludeClaimed: true, IncludeDelayed: true}), messages.WithListQuery("vendor", "x")) {
+		messages.WithListOptions(messages.ListOpts{Limit: 1, Echo: true, IncludeClaimed: true, IncludeDelayed: true}), request.Query("vendor", "x")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -201,7 +202,7 @@ func TestZaqarMessageGetAndGetMessagesQueriesAndMissingError(t *testing.T) {
 	} else {
 		zaqarMessageUnexpected(t, err, 404)
 	}
-	list, err := api.GetMessages(ctx, "jobs", messages.WithGetMessagesOptions(messages.GetMessagesOpts{IDs: []string{"m1", "m2"}}), messages.WithGetMessagesQuery("vendor", "x"))
+	list, err := api.GetMessages(ctx, "jobs", messages.WithGetMessagesOptions(messages.GetMessagesOpts{IDs: []string{"m1", "m2"}}), request.Query("vendor", "x"))
 	if err != nil || len(list) != 2 || list[1].ID != "m2" {
 		t.Fatalf("list=%+v error=%v", list, err)
 	}
@@ -229,7 +230,7 @@ func TestZaqarMessageDeleteClaimQueryAndRequires204(t *testing.T) {
 	})
 	api := newZaqarMessages(cloud)
 	ctx := context.Background()
-	if err := api.Delete(ctx, "jobs", "m1", messages.WithDeleteOptions(messages.DeleteOpts{ClaimID: "c1"}), messages.WithDeleteQuery("vendor", "x")); err != nil {
+	if err := api.Delete(ctx, "jobs", "m1", messages.WithDeleteOptions(messages.DeleteOpts{ClaimID: "c1"}), request.Query("vendor", "x")); err != nil {
 		t.Fatal(err)
 	}
 	if err := api.Delete(ctx, "jobs", "m2"); err != nil {
@@ -257,7 +258,7 @@ func TestZaqarMessageBulkDeleteSendsIDsAndAcceptsOnly200Or204(t *testing.T) {
 			w.WriteHeader(tc.status)
 		})
 		api := newZaqarMessages(cloud)
-		err := api.DeleteMessages(context.Background(), "jobs", messages.WithDeleteMessagesOptions(messages.DeleteMessagesOpts{IDs: []string{"m1", "m2"}}), messages.WithDeleteMessagesQuery("vendor", "x"))
+		err := api.DeleteMessages(context.Background(), "jobs", messages.WithDeleteMessagesOptions(messages.DeleteMessagesOpts{IDs: []string{"m1", "m2"}}), request.Query("vendor", "x"))
 		if tc.success != (err == nil) {
 			t.Fatalf("status %d error=%v", tc.status, err)
 		}
@@ -283,7 +284,7 @@ func TestZaqarMessagePopSendsPopQueryAndDecodesClaimFields(t *testing.T) {
 	})
 	api := newZaqarMessages(cloud)
 	ctx := context.Background()
-	popped, err := api.PopMessages(ctx, "jobs", messages.PopMessagesOpts{Pop: 2}, messages.WithPopMessagesQuery("vendor", "x"))
+	popped, err := api.PopMessages(ctx, "jobs", messages.PopMessagesOpts{Pop: 2}, request.Query("vendor", "x"))
 	if err != nil || len(popped) != 1 || popped[0].ClaimID != "c1" || popped[0].ClaimCount != 1 || popped[0].Body["flag"] != false {
 		t.Fatalf("popped=%+v error=%v", popped, err)
 	}
@@ -376,7 +377,7 @@ func TestZaqarClaimCreateSendsTTLGraceAndLimitQuery(t *testing.T) {
 			testcloud.JSON(w, tc.status, `{"messages":[{"href":"/v2/queues/jobs/messages/m1?claim_id=c1","age":1.5,"ttl":0,"body":{"flag":false}}]}`)
 		})
 		got, err := newZaqarClaims(cloud).Create(context.Background(), "jobs", claims.CreateOpts{TTL: 300, Grace: 60, Limit: 5},
-			claims.WithCreateField("vendor", false), claims.WithCreateQuery("vendor", "x"))
+			request.Field("vendor", false), request.Query("vendor", "x"))
 		if tc.success != (err == nil) || calls.Load() != 1 {
 			t.Fatalf("status %d error=%v calls=%d", tc.status, err, calls.Load())
 		}
@@ -422,11 +423,11 @@ func TestZaqarClaimGetUpdateDeleteWireShapes(t *testing.T) {
 	} else {
 		zaqarMessageUnexpected(t, err, 404)
 	}
-	if err := api.Update(ctx, "jobs", "c1", claims.UpdateOpts{TTL: 120, Grace: 60}, claims.WithUpdateField("vendor", false)); err != nil {
+	if err := api.Update(ctx, "jobs", "c1", claims.UpdateOpts{TTL: 120, Grace: 60}, request.Field("vendor", false)); err != nil {
 		t.Fatal(err)
 	}
 	updateStatus.Store(200)
-	zaqarMessageUnexpected(t, api.Update(ctx, "jobs", "c1", claims.UpdateOpts{TTL: 120, Grace: 60}, claims.WithUpdateField("vendor", false)), 200)
+	zaqarMessageUnexpected(t, api.Update(ctx, "jobs", "c1", claims.UpdateOpts{TTL: 120, Grace: 60}, request.Field("vendor", false)), 200)
 	if err := api.Delete(ctx, "jobs", "c1"); err != nil {
 		t.Fatal(err)
 	}
@@ -442,13 +443,13 @@ func TestZaqarClaimRejectsCollisionsAndNilOptionsBeforeHTTP(t *testing.T) {
 	})
 	api := newZaqarClaims(cloud)
 	ctx := context.Background()
-	if _, err := api.Create(ctx, "jobs", claims.CreateOpts{TTL: 1}, claims.WithCreateField("ttl", 2)); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := api.Create(ctx, "jobs", claims.CreateOpts{TTL: 1}, request.Field("ttl", 2)); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatalf("protected create field: %v", err)
 	}
 	if _, err := api.Create(ctx, "jobs", claims.CreateOpts{}, nil); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatalf("nil create option: %v", err)
 	}
-	if err := api.Update(ctx, "jobs", "c1", claims.UpdateOpts{}, claims.WithUpdateField("grace", 2)); !errors.Is(err, resource.ErrInvalidOption) {
+	if err := api.Update(ctx, "jobs", "c1", claims.UpdateOpts{}, request.Field("grace", 2)); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatalf("protected update field: %v", err)
 	}
 	if err := api.Update(ctx, "jobs", "c1", claims.UpdateOpts{}, nil); !errors.Is(err, resource.ErrInvalidOption) {

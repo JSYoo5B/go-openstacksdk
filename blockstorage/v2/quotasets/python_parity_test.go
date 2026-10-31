@@ -8,6 +8,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/quotasets"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
@@ -66,7 +67,7 @@ func TestPythonQuotaSetUpdateSendsDirtyAttributes(t *testing.T) {
 	})
 	// update_quota_set(project, volumes=20, backups=5, volumes_lvmdriver-1=3)
 	volumes, backups := 20, 5
-	got, err := api.Update(context.Background(), "p1", quotasets.UpdateOpts{Volumes: &volumes, Backups: &backups}, quotasets.WithUpdateField("volumes_lvmdriver-1", 3))
+	got, err := api.Update(context.Background(), "p1", quotasets.UpdateOpts{Volumes: &volumes, Backups: &backups}, request.Field("volumes_lvmdriver-1", 3))
 	if err != nil || got.Volumes != 20 || got.Backups != 5 || got.Extra["volumes_lvmdriver-1"] != float64(3) {
 		t.Fatal(got, err)
 	}

@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/l7policies"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -67,7 +68,7 @@ func TestOctaviaL7PolicyCreateKeepsFalseNestedRulesAndExtensionFields(t *testing
 	value, err := newOctaviaL7Policies(t, cloud).Create(context.Background(), l7policies.CreateOpts{
 		ListenerID: "lis-1", Action: l7policies.ActionRedirectToURL, RedirectURL: "https://example.test/", AdminStateUp: octaviaL7Bool(false), Tags: []string{"blue"},
 		Rules: []l7policies.CreateRuleOpts{{RuleType: l7policies.TypeHeader, CompareType: l7policies.CompareTypeEqual, Value: "v", Key: "X-A", AdminStateUp: octaviaL7Bool(false)}},
-	}, l7policies.WithCreateField("vendor", map[string]bool{"enabled": false}))
+	}, request.Field("vendor", map[string]bool{"enabled": false}))
 	if err != nil || value == nil || value.ID != "pol-1" || value.AdminStateUp || value.RedirectHttpCode != 302 || len(value.Rules) != 1 || value.Rules[0].ID != "rule-1" {
 		t.Fatalf("value=%+v error=%v", value, err)
 	}
@@ -102,10 +103,10 @@ func TestOctaviaL7PolicyRejectsInvalidInputsBeforeHTTP(t *testing.T) {
 	ctx := context.Background()
 	rule := l7policies.CreateRuleOpts{RuleType: l7policies.TypePath, CompareType: l7policies.CompareTypeEqual, Value: "/"}
 	checks := map[string]error{}
-	_, checks["protected create field"] = api.Create(ctx, l7policies.CreateOpts{Action: l7policies.ActionReject}, l7policies.WithCreateField("action", "x"))
-	_, checks["protected update field"] = api.Update(ctx, "pol-1", l7policies.UpdateOpts{}, l7policies.WithUpdateField("position", 2))
-	_, checks["protected create rule field"] = api.CreateRule(ctx, "pol-1", rule, l7policies.WithCreateRuleField("type", "x"))
-	_, checks["protected update rule field"] = api.UpdateRule(ctx, "pol-1", "rule-1", l7policies.UpdateRuleOpts{}, l7policies.WithUpdateRuleField("invert", true))
+	_, checks["protected create field"] = api.Create(ctx, l7policies.CreateOpts{Action: l7policies.ActionReject}, request.Field("action", "x"))
+	_, checks["protected update field"] = api.Update(ctx, "pol-1", l7policies.UpdateOpts{}, request.Field("position", 2))
+	_, checks["protected create rule field"] = api.CreateRule(ctx, "pol-1", rule, request.Field("type", "x"))
+	_, checks["protected update rule field"] = api.UpdateRule(ctx, "pol-1", "rule-1", l7policies.UpdateRuleOpts{}, request.Field("invert", true))
 	_, checks["nil create option"] = api.Create(ctx, l7policies.CreateOpts{Action: l7policies.ActionReject}, nil)
 	_, checks["nil update option"] = api.Update(ctx, "pol-1", l7policies.UpdateOpts{}, nil)
 	_, checks["nil create rule option"] = api.CreateRule(ctx, "pol-1", rule, nil)
@@ -169,7 +170,7 @@ func TestOctaviaL7PolicyUpdateOmitsZeroPositionAndCode(t *testing.T) {
 	if _, err := api.Update(context.Background(), "pol-1", l7policies.UpdateOpts{}); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := api.Update(context.Background(), "pol-1", l7policies.UpdateOpts{Position: 2, RedirectHttpCode: 301, Action: l7policies.ActionRedirectToPool}, l7policies.WithUpdateField("vendor", nil)); err != nil {
+	if _, err := api.Update(context.Background(), "pol-1", l7policies.UpdateOpts{Position: 2, RedirectHttpCode: 301, Action: l7policies.ActionRedirectToPool}, request.Field("vendor", nil)); err != nil {
 		t.Fatal(err)
 	}
 	want := []map[string]string{{}, {"position": `2`, "redirect_http_code": `301`, "action": `"REDIRECT_TO_POOL"`, "vendor": `null`}}
@@ -235,7 +236,7 @@ func TestOctaviaL7PolicyListFiltersFollowLinksAndTypedBoolLimit(t *testing.T) {
 	var ids []string
 	for value, err := range api.List(context.Background(),
 		l7policies.WithListOptions(l7policies.ListOpts{ListenerID: "lis-1", Action: "REJECT", Limit: 1}),
-		l7policies.WithListQuery("admin_state_up", "false"), l7policies.WithListQuery("vendor", "x")) {
+		request.Query("admin_state_up", "false"), request.Query("vendor", "x")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -294,7 +295,7 @@ func TestOctaviaL7RuleCreateKeepsFalseAndExtensionFieldsAndAccepts201Or202(t *te
 		})
 		value, err := newOctaviaL7Policies(t, cloud).CreateRule(context.Background(), "pol-1", l7policies.CreateRuleOpts{
 			RuleType: l7policies.TypeHeader, CompareType: l7policies.CompareTypeEqual, Value: "v", Key: "X-A", AdminStateUp: octaviaL7Bool(false), Tags: []string{"blue"},
-		}, l7policies.WithCreateRuleField("vendor", false))
+		}, request.Field("vendor", false))
 		if (status != 200) != (err == nil) || (err == nil && (value.ID != "rule-1" || !value.Invert || value.AdminStateUp || value.Key != "X-A")) {
 			t.Fatalf("status %d value=%+v error=%v", status, value, err)
 		}
@@ -388,7 +389,7 @@ func TestOctaviaL7RuleListFiltersFollowLinksAndTypedBoolLimit(t *testing.T) {
 	var ids []string
 	for value, err := range api.ListRules(context.Background(), "pol-1",
 		l7policies.WithListRulesOptions(l7policies.ListRulesOpts{RuleType: l7policies.TypeHeader, Limit: 1}),
-		l7policies.WithListRulesQuery("invert", "false")) {
+		request.Query("invert", "false")) {
 		if err != nil {
 			t.Fatal(err)
 		}

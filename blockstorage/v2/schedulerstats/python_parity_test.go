@@ -8,6 +8,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/schedulerstats"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 func TestPythonBackendPoolsSendsDetailQuery(t *testing.T) {
@@ -23,7 +24,7 @@ func TestPythonBackendPoolsSendsDetailQuery(t *testing.T) {
 	api := schedulerstats.New(client)
 	// backend_pools() uses base_path /scheduler-stats/get_pools?detail=True.
 	var names []string
-	for pool, err := range api.List(context.Background(), schedulerstats.WithListQuery("detail", "True")) {
+	for pool, err := range api.List(context.Background(), request.Query("detail", "True")) {
 		if err != nil {
 			t.Fatal(err)
 		}

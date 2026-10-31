@@ -16,17 +16,14 @@ func WithGetReserved(include bool) GetOption {
 	if include {
 		value = "1"
 	}
-	return WithGetQuery("reserved", value)
+	return request.Query("reserved", value)
 }
 
 // prepareQuery fixes a single explicit tenant_id. Scoped calls do not accept
 // request options that replace their project; other service query extensions
 // keep their native values, including reserved's integer/server semantics.
 func prepareQuery(fixedProject string, options ...GetOption) (url.Values, string, error) {
-	config, err := request.Apply(GetOpts{}, options...)
-	if err == nil {
-		err = request.ValidateCapabilities(config, false, true, false)
-	}
+	config, err := request.ApplyCalls(GetOpts{}, request.Capabilities{Query: true}, options...)
 	if err != nil {
 		return nil, "", err
 	}

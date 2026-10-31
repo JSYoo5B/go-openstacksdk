@@ -33,11 +33,10 @@ type PopMessage = upstream.PopMessage
 type PopMessagesOpts = upstream.PopMessagesOpts
 type PopResult = upstream.PopResult
 type ResourceList = upstream.ResourceList
-type CreateOption = request.Option[BatchCreateOpts]
+type CreateOption = request.NativeFieldCall
 
-func WithCreateOptions(value BatchCreateOpts) CreateOption { return request.WithOptions(value) }
-func WithCreateField(key string, value any) CreateOption {
-	return request.WithField[BatchCreateOpts](key, value)
+func WithCreateOptions(value BatchCreateOpts) CreateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type createOptsBuilder struct {
@@ -61,13 +60,8 @@ func (b createOptsBuilder) ToMessageCreateMap() (map[string]any, error) {
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, queueName string, opts BatchCreateOpts, options ...CreateOption) (ResourceList, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Create", "messages", err)
-		var zero0 ResourceList
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Create", "messages", err)
 		var zero0 ResourceList
 		return zero0, err
@@ -79,11 +73,10 @@ func (a *API) Create(ctx context.Context, queueName string, opts BatchCreateOpts
 	return value0, err
 }
 
-type DeleteOption = request.Option[DeleteOpts]
+type DeleteOption = request.NativeQueryCall
 
-func WithDeleteOptions(value DeleteOpts) DeleteOption { return request.WithOptions(value) }
-func WithDeleteQuery(key, value string) DeleteOption {
-	return request.WithQuery[DeleteOpts](key, value)
+func WithDeleteOptions(value DeleteOpts) DeleteOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type deleteOptsBuilder struct {
@@ -108,12 +101,8 @@ func (b deleteOptsBuilder) ToMessageDeleteQuery() (string, error) {
 // Delete invokes the upstream API with library-owned builders and result handling.
 func (a *API) Delete(ctx context.Context, queueName string, messageID string, options ...DeleteOption) error {
 	var opts DeleteOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("Delete", "messages", err)
-		return err
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("Delete", "messages", err)
 		return err
 	}
@@ -126,13 +115,10 @@ func (a *API) DeleteMessageURL(ctx context.Context, queueName string, messageID 
 	return upstream.DeleteMessageURL(a.client, queueName, messageID)
 }
 
-type DeleteMessagesOption = request.Option[DeleteMessagesOpts]
+type DeleteMessagesOption = request.NativeQueryCall
 
 func WithDeleteMessagesOptions(value DeleteMessagesOpts) DeleteMessagesOption {
-	return request.WithOptions(value)
-}
-func WithDeleteMessagesQuery(key, value string) DeleteMessagesOption {
-	return request.WithQuery[DeleteMessagesOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type deleteMessagesOptsBuilder struct {
@@ -157,12 +143,8 @@ func (b deleteMessagesOptsBuilder) ToMessagesDeleteQuery() (string, error) {
 // DeleteMessages invokes the upstream API with library-owned builders and result handling.
 func (a *API) DeleteMessages(ctx context.Context, queueName string, options ...DeleteMessagesOption) error {
 	var opts DeleteMessagesOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("DeleteMessages", "messages", err)
-		return err
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("DeleteMessages", "messages", err)
 		return err
 	}
@@ -178,13 +160,10 @@ func (a *API) Get(ctx context.Context, queueName string, messageID string) (Mess
 	return value0, err
 }
 
-type GetMessagesOption = request.Option[GetMessagesOpts]
+type GetMessagesOption = request.NativeQueryCall
 
 func WithGetMessagesOptions(value GetMessagesOpts) GetMessagesOption {
-	return request.WithOptions(value)
-}
-func WithGetMessagesQuery(key, value string) GetMessagesOption {
-	return request.WithQuery[GetMessagesOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type getMessagesOptsBuilder struct {
@@ -209,13 +188,8 @@ func (b getMessagesOptsBuilder) ToGetMessagesListQuery() (string, error) {
 // GetMessages invokes the upstream API with library-owned builders and result handling.
 func (a *API) GetMessages(ctx context.Context, queueName string, options ...GetMessagesOption) ([]Message, error) {
 	var opts GetMessagesOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("GetMessages", "messages", err)
-		var zero0 []Message
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("GetMessages", "messages", err)
 		var zero0 []Message
 		return zero0, err
@@ -227,10 +201,9 @@ func (a *API) GetMessages(ctx context.Context, queueName string, options ...GetM
 	return value0, err
 }
 
-type ListOption = request.Option[ListOpts]
+type ListOption = request.NativeQueryCall
 
-func WithListOptions(value ListOpts) ListOption  { return request.WithOptions(value) }
-func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
+func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
 	base   ListOpts
@@ -254,12 +227,8 @@ func (b listOptsBuilder) ToMessageListQuery() (string, error) {
 // List invokes the upstream API with library-owned builders and result handling.
 func (a *API) List(ctx context.Context, queueName string, options ...ListOption) iter.Seq2[*Message, error] {
 	var opts ListOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("List", "messages", err)
-		return func(yield func(*Message, error) bool) { var zero *Message; yield(zero, err) }
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("List", "messages", err)
 		return func(yield func(*Message, error) bool) { var zero *Message; yield(zero, err) }
 	}
@@ -270,13 +239,10 @@ func (a *API) List(ctx context.Context, queueName string, options ...ListOption)
 	})
 }
 
-type PopMessagesOption = request.Option[PopMessagesOpts]
+type PopMessagesOption = request.NativeQueryCall
 
 func WithPopMessagesOptions(value PopMessagesOpts) PopMessagesOption {
-	return request.WithOptions(value)
-}
-func WithPopMessagesQuery(key, value string) PopMessagesOption {
-	return request.WithQuery[PopMessagesOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type popMessagesOptsBuilder struct {
@@ -300,13 +266,8 @@ func (b popMessagesOptsBuilder) ToMessagesPopQuery() (string, error) {
 
 // PopMessages invokes the upstream API with library-owned builders and result handling.
 func (a *API) PopMessages(ctx context.Context, queueName string, opts PopMessagesOpts, options ...PopMessagesOption) ([]PopMessage, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("PopMessages", "messages", err)
-		var zero0 []PopMessage
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("PopMessages", "messages", err)
 		var zero0 []PopMessage
 		return zero0, err

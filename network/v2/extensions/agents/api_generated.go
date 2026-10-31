@@ -60,10 +60,9 @@ func (a *API) Get(ctx context.Context, id string) (*Agent, error) {
 	return value0, err
 }
 
-type ListOption = request.Option[ListOpts]
+type ListOption = request.NativeQueryCall
 
-func WithListOptions(value ListOpts) ListOption  { return request.WithOptions(value) }
-func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
+func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
 	base   ListOpts
@@ -91,12 +90,8 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Agent,
 
 func (a *API) listWithControl(ctx context.Context, control resource.ListControl, options ...ListOption) iter.Seq2[*Agent, error] {
 	var opts ListOpts
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Query: true}, options...)
 	if err != nil {
-		err = request.Wrap("List", "agents", err)
-		return func(yield func(*Agent, error) bool) { var zero *Agent; yield(zero, err) }
-	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("List", "agents", err)
 		return func(yield func(*Agent, error) bool) { var zero *Agent; yield(zero, err) }
 	}
@@ -154,13 +149,10 @@ func (a *API) RemoveL3Router(ctx context.Context, id string, routerID string) er
 	return request.Wrap("RemoveL3Router", "agents", upstream.RemoveL3Router(ctx, a.client, id, routerID).ExtractErr())
 }
 
-type ScheduleBGPSpeakerOption = request.Option[ScheduleBGPSpeakerOpts]
+type ScheduleBGPSpeakerOption = request.NativeFieldCall
 
 func WithScheduleBGPSpeakerOptions(value ScheduleBGPSpeakerOpts) ScheduleBGPSpeakerOption {
-	return request.WithOptions(value)
-}
-func WithScheduleBGPSpeakerField(key string, value any) ScheduleBGPSpeakerOption {
-	return request.WithField[ScheduleBGPSpeakerOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type scheduleBGPSpeakerOptsBuilder struct {
@@ -184,12 +176,8 @@ func (b scheduleBGPSpeakerOptsBuilder) ToAgentScheduleBGPSpeakerMap() (map[strin
 
 // ScheduleBGPSpeaker invokes the upstream API with library-owned builders and result handling.
 func (a *API) ScheduleBGPSpeaker(ctx context.Context, agentID string, opts ScheduleBGPSpeakerOpts, options ...ScheduleBGPSpeakerOption) error {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("ScheduleBGPSpeaker", "agents", err)
-		return err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("ScheduleBGPSpeaker", "agents", err)
 		return err
 	}
@@ -197,13 +185,10 @@ func (a *API) ScheduleBGPSpeaker(ctx context.Context, agentID string, opts Sched
 	return request.Wrap("ScheduleBGPSpeaker", "agents", upstream.ScheduleBGPSpeaker(ctx, a.client, agentID, _opts).ExtractErr())
 }
 
-type ScheduleDHCPNetworkOption = request.Option[ScheduleDHCPNetworkOpts]
+type ScheduleDHCPNetworkOption = request.NativeFieldCall
 
 func WithScheduleDHCPNetworkOptions(value ScheduleDHCPNetworkOpts) ScheduleDHCPNetworkOption {
-	return request.WithOptions(value)
-}
-func WithScheduleDHCPNetworkField(key string, value any) ScheduleDHCPNetworkOption {
-	return request.WithField[ScheduleDHCPNetworkOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type scheduleDHCPNetworkOptsBuilder struct {
@@ -227,12 +212,8 @@ func (b scheduleDHCPNetworkOptsBuilder) ToAgentScheduleDHCPNetworkMap() (map[str
 
 // ScheduleDHCPNetwork invokes the upstream API with library-owned builders and result handling.
 func (a *API) ScheduleDHCPNetwork(ctx context.Context, id string, opts ScheduleDHCPNetworkOpts, options ...ScheduleDHCPNetworkOption) error {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("ScheduleDHCPNetwork", "agents", err)
-		return err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("ScheduleDHCPNetwork", "agents", err)
 		return err
 	}
@@ -240,13 +221,10 @@ func (a *API) ScheduleDHCPNetwork(ctx context.Context, id string, opts ScheduleD
 	return request.Wrap("ScheduleDHCPNetwork", "agents", upstream.ScheduleDHCPNetwork(ctx, a.client, id, _opts).ExtractErr())
 }
 
-type ScheduleL3RouterOption = request.Option[ScheduleL3RouterOpts]
+type ScheduleL3RouterOption = request.NativeFieldCall
 
 func WithScheduleL3RouterOptions(value ScheduleL3RouterOpts) ScheduleL3RouterOption {
-	return request.WithOptions(value)
-}
-func WithScheduleL3RouterField(key string, value any) ScheduleL3RouterOption {
-	return request.WithField[ScheduleL3RouterOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type scheduleL3RouterOptsBuilder struct {
@@ -270,12 +248,8 @@ func (b scheduleL3RouterOptsBuilder) ToAgentScheduleL3RouterMap() (map[string]an
 
 // ScheduleL3Router invokes the upstream API with library-owned builders and result handling.
 func (a *API) ScheduleL3Router(ctx context.Context, id string, opts ScheduleL3RouterOpts, options ...ScheduleL3RouterOption) error {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("ScheduleL3Router", "agents", err)
-		return err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("ScheduleL3Router", "agents", err)
 		return err
 	}
@@ -283,11 +257,10 @@ func (a *API) ScheduleL3Router(ctx context.Context, id string, opts ScheduleL3Ro
 	return request.Wrap("ScheduleL3Router", "agents", upstream.ScheduleL3Router(ctx, a.client, id, _opts).ExtractErr())
 }
 
-type UpdateOption = request.Option[UpdateOpts]
+type UpdateOption = request.NativeFieldCall
 
-func WithUpdateOptions(value UpdateOpts) UpdateOption { return request.WithOptions(value) }
-func WithUpdateField(key string, value any) UpdateOption {
-	return request.WithField[UpdateOpts](key, value)
+func WithUpdateOptions(value UpdateOpts) UpdateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type updateOptsBuilder struct {
@@ -311,13 +284,8 @@ func (b updateOptsBuilder) ToAgentUpdateMap() (map[string]any, error) {
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ...UpdateOption) (*Agent, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := request.ApplyCalls(opts, request.Capabilities{Body: true}, options...)
 	if err != nil {
-		err = request.Wrap("Update", "agents", err)
-		var zero0 *Agent
-		return zero0, err
-	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Update", "agents", err)
 		var zero0 *Agent
 		return zero0, err

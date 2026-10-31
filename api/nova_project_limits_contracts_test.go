@@ -106,9 +106,9 @@ func TestNovaLimitsReservedHelperUsesIntegersAndRawQueryKeepsNativeValues(t *tes
 	}{
 		{"include", "1", limits.WithGetReserved(true)},
 		{"exclude", "0", limits.WithGetReserved(false)},
-		{"negative includes", "-7", limits.WithGetQuery("reserved", "-7")},
-		{"other nonzero includes", "2", limits.WithGetQuery("reserved", "2")},
-		{"noninteger preserved", "true", limits.WithGetQuery("reserved", "true")},
+		{"negative includes", "-7", request.Query("reserved", "-7")},
+		{"other nonzero includes", "2", request.Query("reserved", "2")},
+		{"noninteger preserved", "true", request.Query("reserved", "true")},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			cloud := testcloud.New(t)
@@ -146,7 +146,7 @@ func TestNovaLimitsFetchExplicitTenantAndLargeTypedIntegers(t *testing.T) {
 		testcloud.JSON(w, 200, `{"limits":{"absolute":{"maxTotalCores":`+strconv.Itoa(int(^uint(0)>>1))+`},"rate":[{"limit":[{"next-available":"2026-10-01T00:00:00Z","value":`+strconv.Itoa(int(^uint(0)>>1))+`}]}]}}`)
 	})
 	api := limits.New(cloud.Client("compute", "/nova"))
-	for _, option := range []limits.GetOption{limits.WithGetOptions(limits.GetOpts{TenantID: "project-fixed"}), limits.WithGetQuery("tenant_id", "project-fixed")} {
+	for _, option := range []limits.GetOption{limits.WithGetOptions(limits.GetOpts{TenantID: "project-fixed"}), request.Query("tenant_id", "project-fixed")} {
 		value, err := api.Fetch(context.Background(), option, limits.WithGetReserved(false))
 		if err != nil || value.ProjectID != "project-fixed" || value.Absolute.MaxTotalCores != int(^uint(0)>>1) || value.Rate[0].Limits[0].Value != int(^uint(0)>>1) || string(value.Rate[0].Limits[0].NextAvailable) != `"2026-10-01T00:00:00Z"` || string(value.AbsoluteBody["maxTotalCores"]) != strconv.Itoa(int(^uint(0)>>1)) {
 			t.Fatal("integer/timestamp changed", value, err)
@@ -189,8 +189,8 @@ func TestNovaLimitsFixedScopeRejectsIdentityOverridesBeforeHTTP(t *testing.T) {
 	scope := newNovaLimitsScope(t, cloud)
 	for _, option := range []limits.GetOption{
 		nil, limits.WithGetOptions(limits.GetOpts{TenantID: "other-project"}), limits.WithGetOptions(limits.GetOpts{TenantID: "project-fixed"}),
-		limits.WithGetQuery("tenant_id", ""), limits.WithGetQuery("tenant_id", "project-fixed"), limits.WithGetQuery("project_id", "other-project"),
-		request.WithField[limits.GetOpts]("vendor", true), request.WithHeader[limits.GetOpts]("X-Vendor", "x"), request.WithArgument[limits.GetOpts]("unknown", true),
+		request.Query("tenant_id", ""), request.Query("tenant_id", "project-fixed"), request.Query("project_id", "other-project"),
+		request.Custom(request.WithField[limits.GetOpts]("vendor", true)), request.Custom(request.WithHeader[limits.GetOpts]("X-Vendor", "x")), request.Custom(request.WithArgument[limits.GetOpts]("unknown", true)),
 	} {
 		if value, err := scope.Get(context.Background(), option); value != nil || !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(value, err)
@@ -198,13 +198,13 @@ func TestNovaLimitsFixedScopeRejectsIdentityOverridesBeforeHTTP(t *testing.T) {
 	}
 	api := limits.New(cloud.Client("compute", "/nova"))
 	for _, with := range [][]limits.GetOption{
-		{nil}, {limits.WithGetQuery("project_id", "project-fixed")}, {limits.WithGetQuery("tenant_id", "")},
+		{nil}, {request.Query("project_id", "project-fixed")}, {request.Query("tenant_id", "")},
 		{limits.WithGetOptions(limits.GetOpts{TenantID: "bad/path"})},
-		{limits.WithGetOptions(limits.GetOpts{TenantID: "project-fixed"}), limits.WithGetQuery("tenant_id", "other")},
-		{func(config *request.Config[limits.GetOpts]) error {
+		{limits.WithGetOptions(limits.GetOpts{TenantID: "project-fixed"}), request.Query("tenant_id", "other")},
+		{request.Custom(func(config *request.Config[limits.GetOpts]) error {
 			config.Query["tenant_id"] = []string{"one", "two"}
 			return nil
-		}},
+		})},
 	} {
 		if value, err := api.Fetch(context.Background(), with...); value != nil || !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(value, err)
