@@ -14,6 +14,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
+	"github.com/JSYoo5B/go-openstacksdk/internal/serverview"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 
@@ -394,7 +395,7 @@ func (c *Connection) GetServer(ctx context.Context, nameOrID string, options ...
 			return nil, nil
 		}
 	}
-	server, err := cloudServerFromRecord(record)
+	server, err := serverview.FromRecord(record)
 	if err != nil {
 		return nil, wrap(err)
 	}
@@ -427,7 +428,7 @@ func (c *Connection) cloudServerListExpanded(ctx context.Context, cfg CloudServe
 	}
 	results := make([]*CloudServerResult, 0, len(rows))
 	for _, row := range rows {
-		server, err := cloudServerFromRecord(row)
+		server, err := serverview.FromRecord(row)
 		if err != nil {
 			return results, err
 		}
@@ -498,15 +499,7 @@ func CloudServerResultView(result *CloudServerResult) (json.RawMessage, error) {
 	if result.Hostvars != nil {
 		return json.Marshal(result.Hostvars)
 	}
-	location := resource.CloudLocation{}
-	body, err := cloudServerBase(result.Server, result.Record, location)
-	if err != nil {
-		return nil, err
-	}
-	if err := cloudServerOverlayInterfaces(body, result.Interfaces); err != nil {
-		return nil, err
-	}
-	return json.Marshal(body)
+	return cloudServerView(result.Server, result.Record, resource.CloudLocation{}, result.Interfaces)
 }
 
 // CloudServerActionOpts owns the wait, address and floating-IP controls shared

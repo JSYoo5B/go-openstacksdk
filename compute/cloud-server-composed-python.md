@@ -132,6 +132,12 @@ lookup, otherwise the typed server JSON plus a computed `location`, with
 `access_ipv4`, `access_ipv6`, the named `flavor` and `image`, and `volumes`
 set over it.
 
+The hostvars types (`CloudServerHostvars`, `CloudServerHostvarsFlavor`,
+`CloudServerHostvarsImage`, `CloudServerHostvarsVolume`, `CloudServerMeta`)
+and `CloudServerGroups` are defined in this `compute` package; the root
+package exposes them under the same names as type aliases and a forwarding
+function.
+
 `GetServerMeta` adds `CloudServerGroups(hostvars)`: cloud, region,
 `cloud_region`, the `group` metadata value, each nonempty comma-separated
 `groups` entry, `instance-ID`, `flavor-NAME` and `image-NAME` when a name was

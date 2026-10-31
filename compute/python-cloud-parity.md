@@ -876,7 +876,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk.Connection.GetOpenStackVars`
-- `github.com/JSYoo5B/go-openstacksdk.CloudServerHostvars.MarshalJSON`
+- `github.com/JSYoo5B/go-openstacksdk/compute.CloudServerHostvars.MarshalJSON`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.ExpandServerInterfaces`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.API.FindIdentity`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/secgroups.API.ListByServer`
