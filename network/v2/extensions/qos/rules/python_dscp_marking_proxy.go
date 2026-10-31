@@ -14,6 +14,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/jmespath"
 	"github.com/JSYoo5B/go-openstacksdk/internal/neutronfind"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -31,12 +32,10 @@ type DSCPMarkingProxyResult struct {
 	JSON  json.RawMessage
 }
 
-// WithDSCPMarkingProxyQuery consumes Source formal values at their option
+// dscpMarkingProxyQuery consumes Source formal values (request.Query) at their call
 // position, so later concrete headers/version/base-path choices remain last-win.
-func WithDSCPMarkingProxyQuery(key string, value any) DSCPMarkingListOption {
-	raw, err := json.Marshal(value)
-	owned := bytes.Clone(raw)
-	return func(c *DSCPMarkingListOpts) error {
+func dscpMarkingProxyQuery(key string, owned json.RawMessage, err error) func(*dscpMarkingListState) error {
+	return func(c *dscpMarkingListState) error {
 		if err != nil {
 			return err
 		}
@@ -67,15 +66,22 @@ func WithDSCPMarkingProxyQuery(key string, value any) DSCPMarkingListOption {
 	}
 }
 
+func dscpMarkingProxyCalls(calls []request.ListCall) []func(*dscpMarkingListState) error {
+	return qosCalls(calls, dscpMarkingListFields, dscpMarkingProxyQuery, true)
+}
+
 // ProxyDSCPMarkingRecords preserves Source Proxy's formal kwargs and opaque
 // generator JMESPath evaluation. Existing typed list keeps its legacy policy.
-func (a *API) ProxyDSCPMarkingRecords(ctx context.Context, parent string, options ...DSCPMarkingListOption) (*DSCPMarkingProxyResult, error) {
+// Here request.Query, request.Limit, request.Marker, request.MaxItems and
+// request.Paginated are Proxy kwargs; Query "headers", "microversion" and
+// "base_path" values replace those controls at their call position.
+func (a *API) ProxyDSCPMarkingRecords(ctx context.Context, parent string, opts DSCPMarkingListOpts, calls ...request.ListCall) (*DSCPMarkingProxyResult, error) {
 	const op = "ProxyDSCPMarkingRecords"
 	engine, err := a.dscpMarkingEnginePolicy(ctx, parent, true)
 	if err != nil {
 		return nil, dscpMarkingWrap(ctx, op, err)
 	}
-	cfg, err := applyDSCPMarkingOptions(ctx, engine, DSCPMarkingListOpts{}, copyDSCPMarkingList, slices.Clone(options))
+	cfg, err := applyDSCPMarkingOptions(ctx, engine, dscpMarkingListState{Query: opts.Query}, copyDSCPMarkingList, dscpMarkingProxyCalls(slices.Clone(calls)))
 	if err != nil {
 		return nil, dscpMarkingWrap(ctx, op, err)
 	}

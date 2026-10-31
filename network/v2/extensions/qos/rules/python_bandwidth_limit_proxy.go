@@ -12,6 +12,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/jmespath"
 	"github.com/JSYoo5B/go-openstacksdk/internal/neutronfind"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -29,15 +30,13 @@ type BandwidthLimitProxyResult struct {
 	JSON  json.RawMessage
 }
 
-// WithBandwidthLimitProxyQuery consumes Source formal values at their option
+// bandwidthLimitProxyQuery consumes Source formal values (request.Query) at their call
 // position, so later concrete headers/version/base-path choices remain last-win.
-func WithBandwidthLimitProxyQuery(key string, value any) BandwidthLimitListOption {
+func bandwidthLimitProxyQuery(key string, owned json.RawMessage, err error) func(*bandwidthLimitListState) error {
 	if key != "jmespath_filters" && bandwidthLimitListIgnores(key) {
-		return func(*BandwidthLimitListOpts) error { return nil }
+		return func(*bandwidthLimitListState) error { return nil }
 	}
-	raw, err := json.Marshal(value)
-	owned := bytes.Clone(raw)
-	return func(c *BandwidthLimitListOpts) error {
+	return func(c *bandwidthLimitListState) error {
 		if err != nil {
 			return err
 		}
@@ -68,19 +67,22 @@ func WithBandwidthLimitProxyQuery(key string, value any) BandwidthLimitListOptio
 	}
 }
 
+func bandwidthLimitProxyCalls(calls []request.ListCall) []func(*bandwidthLimitListState) error {
+	return qosCalls(calls, bandwidthLimitListFields, bandwidthLimitProxyQuery, true)
+}
+
 // ProxyBandwidthLimitRecords preserves Source Proxy's formal kwargs and opaque
 // generator JMESPath evaluation. Existing typed list keeps its legacy policy.
-func (a *API) ProxyBandwidthLimitRecords(ctx context.Context, parent string, options ...BandwidthLimitListOption) (*BandwidthLimitProxyResult, error) {
+// Here request.Query, request.Limit, request.Marker, request.MaxItems and
+// request.Paginated are Proxy kwargs; Query "headers", "microversion" and
+// "base_path" values replace those controls at their call position.
+func (a *API) ProxyBandwidthLimitRecords(ctx context.Context, parent string, opts BandwidthLimitListOpts, calls ...request.ListCall) (*BandwidthLimitProxyResult, error) {
 	const op = "ProxyBandwidthLimitRecords"
 	engine, err := a.bandwidthLimitEnginePolicy(ctx, parent, true)
 	if err != nil {
 		return nil, bandwidthLimitWrap(ctx, op, err)
 	}
-	callbacks := make([]func(*BandwidthLimitListOpts) error, len(options))
-	for i, apply := range slices.Clone(options) {
-		callbacks[i] = apply
-	}
-	cfg, err := applyBandwidthLimitOptions(ctx, engine, BandwidthLimitListOpts{}, copyBandwidthLimitList, callbacks)
+	cfg, err := applyBandwidthLimitOptions(ctx, engine, bandwidthLimitListState{Query: opts.Query}, copyBandwidthLimitList, bandwidthLimitProxyCalls(slices.Clone(calls)))
 	if err != nil {
 		return nil, bandwidthLimitWrap(ctx, op, err)
 	}

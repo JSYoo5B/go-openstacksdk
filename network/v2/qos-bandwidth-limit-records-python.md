@@ -13,11 +13,10 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.FindBandwidthLimitRecord`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitFindOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitFindIgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitFindQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitFindMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitFindHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 
 - GET-first uses literal escaped parent and rule, fixed qos_policy_id in member query, raw original kwargs and constructor Body seeds. Only clean400/403/404 fallback to same parent; no default name server hint. Default logical absence is nil and explicit ignore_missing false returns ErrNotFound only after complete successful search.
   Tests: `network/v2/extensions/qos/rules/python_bandwidth_limit_records_contracts_test.go:TestPythonBandwidthLimitMemberLiteralRoutesSourceQueryAndURIView`, `network/v2/extensions/qos/rules/python_bandwidth_limit_records_contracts_test.go:TestPythonBandwidthLimitGetNoFallbackAndFindMissingCompleteSearch`, `network/v2/extensions/qos/rules/python_bandwidth_limit_records_contracts_test.go:TestPythonBandwidthLimitFindBodySeedsAndListLocalFilters`.
@@ -50,9 +49,8 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.GetBandwidthLimitRecord`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitGetOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitGetMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitGetHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 
 - Exact public get proxy constructs literal parent URI without a parent fetch or member parent query, performs one rule GET, seeds only identity, and returns every actual member error without fallback or ignore-missing. Get has no Source query kwargs; safe Header/version convenience is explicit Go extension.
   Tests: `network/v2/extensions/qos/rules/python_bandwidth_limit_records_contracts_test.go:TestPythonBandwidthLimitMemberLiteralRoutesSourceQueryAndURIView`, `network/v2/extensions/qos/rules/python_bandwidth_limit_records_contracts_test.go:TestPythonBandwidthLimitGetNoFallbackAndFindMissingCompleteSearch`.
@@ -84,16 +82,15 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ListBandwidthLimitRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.AllBandwidthLimitRecords`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitListQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitListMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 
-- Lazy list uses fixed literal parent without lookup. Only default limit/marker transpose to server query; Body id/name/direction/bandwidth fields filter locally. Unknown kwargs including fields/tags are discarded before transport-value evaluation, even function/malformed unknown values.
+- Lazy list uses fixed literal parent without lookup. Only default limit/marker transpose to server query; Body id/name/direction/bandwidth fields filter locally. Unknown kwargs including fields/tags are discarded with any transport-value failure, even function/malformed unknown values; request.Query marshals each value once when constructed.
   Tests: `network/v2/extensions/qos/rules/python_bandwidth_limit_records_contracts_test.go:TestPythonBandwidthLimitListLazyQueryLocalFiltersAndUnknowns`, `network/v2/extensions/qos/rules/python_bandwidth_limit_records_contracts_test.go:TestPythonBandwidthLimitListRawCapSinglePageAndEarlyStop`.
 - Source list injects URI parent then consumes it outside Body; Wire owns foreign original row value and whole page proof. Positive raw cap counts before filtering, limit=0 plus cap creates limit hint; single page and early break avoid another request.
   Tests: `network/v2/extensions/qos/rules/python_bandwidth_limit_records_contracts_test.go:TestPythonBandwidthLimitListLazyQueryLocalFiltersAndUnknowns`, `network/v2/extensions/qos/rules/python_bandwidth_limit_records_contracts_test.go:TestPythonBandwidthLimitListRawCapSinglePageAndEarlyStop`.
@@ -129,8 +126,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSBandwidthLimitHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSBandwidthLimitMicroversion`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ProxyBandwidthLimitRecords`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitProxyQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitListBasePath`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.BasePath`
 
 - Complete QoS extension gate then exactly one parent policy resolution, owned untyped defaults/unknown fields/computed-null location, bound URI parent and local Body filtering with shared actual paging.
   Tests: `network/cloud_qos_bandwidth_test.go:TestCloudQoSBandwidthListOwnsGateParentPagingAndRawFields`.
@@ -166,8 +163,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSBandwidthLimitHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSBandwidthLimitMicroversion`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ProxyBandwidthLimitRecords`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitProxyQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitListBasePath`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.BasePath`
 
 - Complete QoS extension gate then exactly one parent policy resolution, owned untyped defaults/unknown fields/computed-null location, bound URI parent and local Body filtering with shared actual paging.
   Tests: `network/cloud_qos_bandwidth_test.go:TestCloudQoSBandwidthListOwnsGateParentPagingAndRawFields`.
@@ -277,6 +274,7 @@ import (
 
     sdk "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules"
+    "github.com/JSYoo5B/go-openstacksdk/request"
     "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -288,7 +286,7 @@ func run(ctx context.Context, cloud, mode, parent, identity string) (any, error)
     switch mode {
     case "find":
         value, err := network.QoSRules.FindBandwidthLimitRecord(
-            ctx, parent, identity, rules.WithBandwidthLimitFindIgnoreMissing(false),
+            ctx, parent, identity, rules.BandwidthLimitFindOpts{}, request.IgnoreMissing(false),
         )
         if err != nil || value == nil { return nil, err }
         return value.Resource, nil
@@ -298,8 +296,8 @@ func run(ctx context.Context, cloud, mode, parent, identity string) (any, error)
         return value.Resource, nil
     case "list":
         values, err := network.QoSRules.AllBandwidthLimitRecords(
-            ctx, parent, rules.WithBandwidthLimitListQuery("direction", "egress"),
-            rules.WithBandwidthLimitListMaxItems(100),
+            ctx, parent, rules.BandwidthLimitListOpts{}, request.Query("direction", "egress"),
+            request.MaxItems(100),
         )
         if err != nil { return nil, err }
         rows := make([]*resource.RawResource, 0, len(values))

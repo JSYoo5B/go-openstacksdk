@@ -13,11 +13,10 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.FindPacketRateLimitRecord`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateLimitFindOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateLimitFindIgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateLimitFindQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateLimitFindMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateLimitFindHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 
 - GET-first uses literal escaped parent and rule, fixed qos_policy_id in member query, raw original kwargs and constructor Body seeds. Only clean400/403/404 fallback to same parent; no default name server hint. Default logical absence is nil and explicit ignore_missing false returns ErrNotFound only after complete successful search.
   Tests: `network/v2/extensions/qos/rules/python_packet_rate_limit_contracts_test.go:TestPythonPacketRateLimitMemberLiteralRoutesSourceQueryAndURIView`, `network/v2/extensions/qos/rules/python_packet_rate_limit_contracts_test.go:TestPythonPacketRateLimitGetNoFallbackAndFindMissingCompleteSearch`, `network/v2/extensions/qos/rules/python_packet_rate_limit_contracts_test.go:TestPythonPacketRateLimitFindBodySeedsAndListLocalFilters`.
@@ -58,9 +57,8 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.GetPacketRateLimitRecord`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateLimitGetOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateLimitGetMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateLimitGetHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 
 - Exact public get proxy constructs literal parent URI without a parent fetch or member parent query, performs one rule GET, seeds only identity, and returns every actual member error without fallback or ignore-missing. Get has no Source query kwargs; safe Header/version convenience is explicit Go extension.
   Tests: `network/v2/extensions/qos/rules/python_packet_rate_limit_contracts_test.go:TestPythonPacketRateLimitMemberLiteralRoutesSourceQueryAndURIView`, `network/v2/extensions/qos/rules/python_packet_rate_limit_contracts_test.go:TestPythonPacketRateLimitGetNoFallbackAndFindMissingCompleteSearch`.
@@ -100,16 +98,15 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ListPacketRateLimitRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.AllPacketRateLimitRecords`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateLimitListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateLimitListQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateLimitListMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateLimitListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateLimitListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateLimitListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateLimitListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateLimitListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 
-- Lazy list uses fixed literal parent without lookup. Only default limit/marker transpose to server query; Body id/name/direction/bandwidth fields filter locally. Unknown kwargs including fields/tags are discarded before transport-value evaluation, even function/malformed unknown values.
+- Lazy list uses fixed literal parent without lookup. Only default limit/marker transpose to server query; Body id/name/direction/bandwidth fields filter locally. Unknown kwargs including fields/tags are discarded with any transport-value failure, even function/malformed unknown values; request.Query marshals each value once when constructed.
   Tests: `network/v2/extensions/qos/rules/python_packet_rate_limit_contracts_test.go:TestPythonPacketRateLimitListLazyQueryLocalFiltersAndUnknowns`, `network/v2/extensions/qos/rules/python_packet_rate_limit_contracts_test.go:TestPythonPacketRateLimitListRawCapSinglePageAndEarlyStop`.
 - Source list injects URI parent then consumes it outside Body; Wire owns foreign original row value and whole page proof. Positive raw cap counts before filtering, limit=0 plus cap creates limit hint; single page and early break avoid another request.
   Tests: `network/v2/extensions/qos/rules/python_packet_rate_limit_contracts_test.go:TestPythonPacketRateLimitListLazyQueryLocalFiltersAndUnknowns`, `network/v2/extensions/qos/rules/python_packet_rate_limit_contracts_test.go:TestPythonPacketRateLimitListRawCapSinglePageAndEarlyStop`.
@@ -186,6 +183,7 @@ import (
 
     sdk "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules"
+    "github.com/JSYoo5B/go-openstacksdk/request"
     "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -197,7 +195,7 @@ func run(ctx context.Context, cloud, mode, parent, identity string) (any, error)
     switch mode {
     case "find":
         value, err := network.QoSRules.FindPacketRateLimitRecord(
-            ctx, parent, identity, rules.WithPacketRateLimitFindIgnoreMissing(false),
+            ctx, parent, identity, rules.PacketRateLimitFindOpts{}, request.IgnoreMissing(false),
         )
         if err != nil || value == nil { return nil, err }
         return value.Resource, nil
@@ -207,8 +205,8 @@ func run(ctx context.Context, cloud, mode, parent, identity string) (any, error)
         return value.Resource, nil
     case "list":
         values, err := network.QoSRules.AllPacketRateLimitRecords(
-            ctx, parent, rules.WithPacketRateLimitListQuery("direction", "egress"),
-            rules.WithPacketRateLimitListMaxItems(100),
+            ctx, parent, rules.PacketRateLimitListOpts{}, request.Query("direction", "egress"),
+            request.MaxItems(100),
         )
         if err != nil { return nil, err }
         rows := make([]*resource.RawResource, 0, len(values))

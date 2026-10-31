@@ -13,10 +13,9 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.CreateMinimumPacketRateRecord`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleMutationOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleField`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - POST /qos/policies/{policy_id}/minimum_packet_rate_rules sends provided attrs (null and unknown attrs kept) under minimum_packet_rate_rule, binds the escaped literal policy, projects the response with the fixed QoSPolicyID, rejects qos_policy_id before HTTP and reports rejections with operation context.
   Tests: `network/v2/extensions/qos/rules/python_packet_rate_mutations_test.go:TestPythonMinimumPacketRateCreateUpdateDelete`.
@@ -36,10 +35,9 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.UpdateMinimumPacketRateRecord`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleMutationOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleField`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - PUT /qos/policies/{policy_id}/minimum_packet_rate_rules/{rule_id} sends only changed attrs, ignores if_revision without If-Match, the empty update sends nothing, id is rejected before HTTP and rejections keep operation context.
   Tests: `network/v2/extensions/qos/rules/python_packet_rate_mutations_test.go:TestPythonMinimumPacketRateCreateUpdateDelete`.
@@ -59,11 +57,11 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.DeleteMinimumPacketRateRecord`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleDeleteIgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleDeleteHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleDeleteMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
-- Bodyless DELETE /qos/policies/{policy_id}/minimum_packet_rate_rules/{rule_id} ignores a clean 404 by default (IgnoredMissing), WithPacketRateRuleDeleteIgnoreMissing(false) or other rejections return the native status with operation context.
+- Bodyless DELETE /qos/policies/{policy_id}/minimum_packet_rate_rules/{rule_id} ignores a clean 404 by default (IgnoredMissing), request.IgnoreMissing(false) or other rejections return the native status with operation context.
   Tests: `network/v2/extensions/qos/rules/python_packet_rate_mutations_test.go:TestPythonMinimumPacketRateCreateUpdateDelete`.
 
 Python/Go differences:
@@ -82,10 +80,9 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.CreatePacketRateLimitRecord`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleMutationOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleField`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - POST /qos/policies/{policy_id}/packet_rate_limit_rules sends provided attrs (null and unknown attrs kept) under packet_rate_limit_rule, binds the escaped literal policy, projects the response with the fixed QoSPolicyID, rejects qos_policy_id before HTTP and reports rejections with operation context.
   Tests: `network/v2/extensions/qos/rules/python_packet_rate_mutations_test.go:TestPythonPacketRateLimitCreateUpdateDelete`.
@@ -105,10 +102,9 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.UpdatePacketRateLimitRecord`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleMutationOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleField`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - PUT /qos/policies/{policy_id}/packet_rate_limit_rules/{rule_id} sends only changed attrs, ignores if_revision without If-Match, the empty update sends nothing, id is rejected before HTTP and rejections keep operation context.
   Tests: `network/v2/extensions/qos/rules/python_packet_rate_mutations_test.go:TestPythonPacketRateLimitCreateUpdateDelete`.
@@ -128,11 +124,11 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.DeletePacketRateLimitRecord`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleDeleteIgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleDeleteHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleDeleteMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
-- Bodyless DELETE /qos/policies/{policy_id}/packet_rate_limit_rules/{rule_id} ignores a clean 404 by default (IgnoredMissing), WithPacketRateRuleDeleteIgnoreMissing(false) or other rejections return the native status with operation context.
+- Bodyless DELETE /qos/policies/{policy_id}/packet_rate_limit_rules/{rule_id} ignores a clean 404 by default (IgnoredMissing), request.IgnoreMissing(false) or other rejections return the native status with operation context.
   Tests: `network/v2/extensions/qos/rules/python_packet_rate_mutations_test.go:TestPythonPacketRateLimitCreateUpdateDelete`.
 
 Python/Go differences:
@@ -157,15 +153,16 @@ conn.network.delete_qos_minimum_packet_rate_rule(rule, policy)
 
 ```go
 rule, err := network.QoSRules.CreateMinimumPacketRateRecord(ctx, policyID,
-    rules.WithPacketRateRuleField("min_kpps", 1000),
-    rules.WithPacketRateRuleField("direction", "any"))
+    rules.PacketRateRuleMutationOpts{},
+    request.Field("min_kpps", 1000),
+    request.Field("direction", "any"))
 if err != nil {
     return err
 }
 var ruleID string
 _ = json.Unmarshal(rule.Resource.Body["id"], &ruleID)
 if _, err := network.QoSRules.UpdateMinimumPacketRateRecord(ctx, policyID, ruleID,
-    rules.WithPacketRateRuleField("min_kpps", 2000)); err != nil {
+    rules.PacketRateRuleMutationOpts{}, request.Field("min_kpps", 2000)); err != nil {
     return err
 }
 _, err = network.QoSRules.DeleteMinimumPacketRateRecord(ctx, policyID, ruleID)

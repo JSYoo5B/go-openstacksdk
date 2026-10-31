@@ -126,8 +126,8 @@ func qosBandwidthParent(result *QoSBandwidthLimitResult) (string, error) {
 	}
 	return id, nil
 }
-func qosBandwidthListOptions(cfg QoSBandwidthLimitOpts) ([]rules.BandwidthLimitListOption, error) {
-	options := make([]rules.BandwidthLimitListOption, 0)
+func qosBandwidthListOptions(cfg QoSBandwidthLimitOpts) ([]request.ListCall, error) {
+	options := make([]request.ListCall, 0)
 	if cfg.Filters != nil {
 		truthy, err := cloudfilter.PythonJSONTruthy(*cfg.Filters)
 		if err != nil {
@@ -139,15 +139,15 @@ func qosBandwidthListOptions(cfg QoSBandwidthLimitOpts) ([]rules.BandwidthLimitL
 				return nil, qosBandwidthInvalid("truthy list filters must be a kwargs object: %v", err)
 			}
 			for _, member := range members {
-				options = append(options, rules.WithBandwidthLimitProxyQuery(member.Key, json.RawMessage(bytes.Clone(member.Value))))
+				options = append(options, request.Query(member.Key, json.RawMessage(bytes.Clone(member.Value))))
 			}
 		}
 	}
 	if cfg.headersPresent || len(cfg.Headers) > 0 {
-		options = append(options, rules.WithBandwidthLimitListHeaders(cfg.Headers))
+		options = append(options, request.Headers(cfg.Headers))
 	}
 	if cfg.Microversion != nil {
-		options = append(options, rules.WithBandwidthLimitListMicroversion(*cfg.Microversion))
+		options = append(options, request.Microversion(*cfg.Microversion))
 	}
 	return options, nil
 }
@@ -223,7 +223,7 @@ func (s *Service) qosBandwidthList(ctx context.Context, policy string, options [
 		result.filters = &raw
 	}
 	ctx = rest.WithOperationGuard(ctx, state.Check)
-	proxy, err := state.API.QoSRules.ProxyBandwidthLimitRecords(ctx, parent, listOptions...)
+	proxy, err := state.API.QoSRules.ProxyBandwidthLimitRecords(ctx, parent, rules.BandwidthLimitListOpts{}, listOptions...)
 	if err = errors.Join(err, state.Check(ctx)); err != nil {
 		return result, state, err
 	}
@@ -364,9 +364,9 @@ func (s *Service) GetQoSBandwidthLimitRule(ctx context.Context, policy, ruleID s
 	if err != nil {
 		return result, qosBandwidthWrap(ctx, op, err)
 	}
-	opts := []rules.BandwidthLimitGetOption{rules.WithBandwidthLimitGetHeaders(cfg.Headers)}
+	opts := []request.ReadCall{request.Headers(cfg.Headers)}
 	if cfg.Microversion != nil {
-		opts = append(opts, rules.WithBandwidthLimitGetMicroversion(*cfg.Microversion))
+		opts = append(opts, request.Microversion(*cfg.Microversion))
 	}
 	if cfg.Filters != nil {
 		return result, qosBandwidthWrap(ctx, op, qosBandwidthInvalid("get has no filters argument"))

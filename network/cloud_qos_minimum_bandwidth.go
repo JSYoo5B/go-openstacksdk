@@ -118,7 +118,7 @@ func (s *Service) readQoSMinimumBandwidth(ctx context.Context, policyNameOrID, r
 	if err = json.Unmarshal(result.Policy.Resource.Body["id"], &id); err != nil {
 		return fail(minimumBandwidthCloudPolicyProof(result.Policy, fmt.Errorf("%w: policy identity must be string: %v", resource.ErrInvalidOption, err)))
 	}
-	var leaf []rules.MinimumBandwidthListOption
+	var leaf []request.ListCall
 	if cfg.Filters != nil {
 		truthy, e := cloudfilter.PythonJSONTruthy(*cfg.Filters)
 		if e != nil {
@@ -130,11 +130,11 @@ func (s *Service) readQoSMinimumBandwidth(ctx context.Context, policyNameOrID, r
 				return fail(fmt.Errorf("Source filters must be a kwargs mapping: %w", e))
 			}
 			for _, member := range members {
-				leaf = append(leaf, rules.WithMinimumBandwidthProxyQuery(member.Key, json.RawMessage(bytes.Clone(member.Value))))
+				leaf = append(leaf, request.Query(member.Key, json.RawMessage(bytes.Clone(member.Value))))
 			}
 		}
 	}
-	proxy, e := state.API.QoSRules.ProxyMinimumBandwidthRecords(ctx, id, leaf...)
+	proxy, e := state.API.QoSRules.ProxyMinimumBandwidthRecords(ctx, id, rules.MinimumBandwidthListOpts{}, leaf...)
 	if e = errors.Join(e, state.Check(ctx)); e != nil {
 		return fail(e)
 	}

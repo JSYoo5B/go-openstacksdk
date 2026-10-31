@@ -14,6 +14,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/jmespath"
 	"github.com/JSYoo5B/go-openstacksdk/internal/neutronfind"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -31,12 +32,10 @@ type MinimumBandwidthProxyResult struct {
 	JSON  json.RawMessage
 }
 
-// WithMinimumBandwidthProxyQuery consumes Source formal values at their option
+// minimumBandwidthProxyQuery consumes Source formal values (request.Query) at their call
 // position, so later concrete headers/version/base-path choices remain last-win.
-func WithMinimumBandwidthProxyQuery(key string, value any) MinimumBandwidthListOption {
-	raw, err := json.Marshal(value)
-	owned := bytes.Clone(raw)
-	return func(c *MinimumBandwidthListOpts) error {
+func minimumBandwidthProxyQuery(key string, owned json.RawMessage, err error) func(*minimumBandwidthListState) error {
+	return func(c *minimumBandwidthListState) error {
 		if err != nil {
 			return err
 		}
@@ -67,19 +66,22 @@ func WithMinimumBandwidthProxyQuery(key string, value any) MinimumBandwidthListO
 	}
 }
 
+func minimumBandwidthProxyCalls(calls []request.ListCall) []func(*minimumBandwidthListState) error {
+	return qosCalls(calls, minimumBandwidthListFields, minimumBandwidthProxyQuery, true)
+}
+
 // ProxyMinimumBandwidthRecords preserves Source Proxy's formal kwargs and opaque
 // generator JMESPath evaluation. Existing typed list keeps its legacy policy.
-func (a *API) ProxyMinimumBandwidthRecords(ctx context.Context, parent string, options ...MinimumBandwidthListOption) (*MinimumBandwidthProxyResult, error) {
+// Here request.Query, request.Limit, request.Marker, request.MaxItems and
+// request.Paginated are Proxy kwargs; Query "headers", "microversion" and
+// "base_path" values replace those controls at their call position.
+func (a *API) ProxyMinimumBandwidthRecords(ctx context.Context, parent string, opts MinimumBandwidthListOpts, calls ...request.ListCall) (*MinimumBandwidthProxyResult, error) {
 	const op = "ProxyMinimumBandwidthRecords"
 	engine, err := a.minimumBandwidthEnginePolicy(ctx, parent, true)
 	if err != nil {
 		return nil, minimumBandwidthWrap(ctx, op, err)
 	}
-	callbacks := make([]func(*MinimumBandwidthListOpts) error, len(options))
-	for i, apply := range slices.Clone(options) {
-		callbacks[i] = apply
-	}
-	cfg, err := applyMinimumBandwidthOptions(ctx, engine, MinimumBandwidthListOpts{}, copyMinimumBandwidthList, callbacks)
+	cfg, err := applyMinimumBandwidthOptions(ctx, engine, minimumBandwidthListState{Query: opts.Query}, copyMinimumBandwidthList, minimumBandwidthProxyCalls(slices.Clone(calls)))
 	if err != nil {
 		return nil, minimumBandwidthWrap(ctx, op, err)
 	}

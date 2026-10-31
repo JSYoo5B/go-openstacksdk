@@ -136,14 +136,15 @@ func applyDSCPMarkingOptions[T any, O ~func(*T) error](ctx context.Context, engi
 }
 
 // GetDSCPMarkingRecord performs one literal member GET with the bound policy,
-// without parent lookup, find fallback, or missing suppression.
-func (a *API) GetDSCPMarkingRecord(ctx context.Context, policyID, id string, options ...DSCPMarkingGetOption) (*DSCPMarkingRecord, error) {
+// without parent lookup, find fallback, or missing suppression. Calls:
+// request.Query, request.Microversion, request.Header and request.Headers.
+func (a *API) GetDSCPMarkingRecord(ctx context.Context, policyID, id string, calls ...request.ReadCall) (*DSCPMarkingRecord, error) {
 	const operation = "GetDSCPMarkingRecord"
 	engine, err := a.dscpMarkingEngine(ctx, policyID)
 	if err != nil {
 		return nil, dscpMarkingWrap(ctx, operation, err)
 	}
-	policy, err := applyDSCPMarkingOptions(ctx, engine, DSCPMarkingGetOpts{}, copyDSCPMarkingGet, slices.Clone(options))
+	policy, err := applyDSCPMarkingOptions(ctx, engine, dscpMarkingGetState{}, copyDSCPMarkingGet, dscpMarkingGetCalls(slices.Clone(calls)))
 	var prepared neutronfind.Options
 	if err == nil {
 		prepared, err = dscpMarkingBound(dscpMarkingGetOptions(policy), policyID, false)
@@ -158,13 +159,13 @@ func (a *API) GetDSCPMarkingRecord(ctx context.Context, policyID, id string, opt
 // FindDSCPMarkingRecord is GET-first with clean400/403/404 list fallback and
 // complete exact ID/name uniqueness. IgnoreMissing defaults true. Per-call
 // microversion controls the GET; fallback retains selected service default.
-func (a *API) FindDSCPMarkingRecord(ctx context.Context, policyID, identity string, options ...DSCPMarkingFindOption) (*DSCPMarkingRecord, error) {
+func (a *API) FindDSCPMarkingRecord(ctx context.Context, policyID, identity string, opts DSCPMarkingFindOpts, calls ...request.ReadCall) (*DSCPMarkingRecord, error) {
 	const operation = "FindDSCPMarkingRecord"
 	engine, err := a.dscpMarkingEngine(ctx, policyID)
 	if err != nil {
 		return nil, dscpMarkingWrap(ctx, operation, err)
 	}
-	policy, err := applyDSCPMarkingOptions(ctx, engine, DSCPMarkingFindOpts{}, copyDSCPMarkingFind, slices.Clone(options))
+	policy, err := applyDSCPMarkingOptions(ctx, engine, dscpMarkingFindState{Query: opts.Query}, copyDSCPMarkingFind, dscpMarkingFindCalls(slices.Clone(calls)))
 	var prepared neutronfind.Options
 	if err == nil {
 		prepared, err = dscpMarkingBound(dscpMarkingFindOptions(policy), policyID, true)
@@ -178,8 +179,8 @@ func (a *API) FindDSCPMarkingRecord(ctx context.Context, policyID, identity stri
 
 // ListDSCPMarkingRecords lazily queries one policy. Only limit/marker are server
 // queries; id/name/dscp_mark filter rows locally and unknown kwargs are ignored.
-func (a *API) ListDSCPMarkingRecords(ctx context.Context, policyID string, options ...DSCPMarkingListOption) iter.Seq2[*DSCPMarkingRecord, error] {
-	snapshot := slices.Clone(options)
+func (a *API) ListDSCPMarkingRecords(ctx context.Context, policyID string, opts DSCPMarkingListOpts, calls ...request.ListCall) iter.Seq2[*DSCPMarkingRecord, error] {
+	initial, snapshot := copyDSCPMarkingList(dscpMarkingListState{Query: opts.Query}), slices.Clone(calls)
 	return func(yield func(*DSCPMarkingRecord, error) bool) {
 		const operation = "ListDSCPMarkingRecords"
 		engine, err := a.dscpMarkingEngine(ctx, policyID)
@@ -187,7 +188,7 @@ func (a *API) ListDSCPMarkingRecords(ctx context.Context, policyID string, optio
 			yield(nil, dscpMarkingWrap(ctx, operation, err))
 			return
 		}
-		policy, err := applyDSCPMarkingOptions(ctx, engine, DSCPMarkingListOpts{}, copyDSCPMarkingList, snapshot)
+		policy, err := applyDSCPMarkingOptions(ctx, engine, initial, copyDSCPMarkingList, dscpMarkingListCalls(snapshot))
 		var prepared neutronfind.Options
 		if err == nil {
 			prepared, err = dscpMarkingBound(dscpMarkingListOptions(policy), policyID, false)
@@ -203,9 +204,9 @@ func (a *API) ListDSCPMarkingRecords(ctx context.Context, policyID string, optio
 		}
 	}
 }
-func (a *API) AllDSCPMarkingRecords(ctx context.Context, policyID string, options ...DSCPMarkingListOption) ([]*DSCPMarkingRecord, error) {
+func (a *API) AllDSCPMarkingRecords(ctx context.Context, policyID string, opts DSCPMarkingListOpts, calls ...request.ListCall) ([]*DSCPMarkingRecord, error) {
 	var result []*DSCPMarkingRecord
-	for value, err := range a.ListDSCPMarkingRecords(ctx, policyID, options...) {
+	for value, err := range a.ListDSCPMarkingRecords(ctx, policyID, opts, calls...) {
 		if err != nil {
 			return nil, err
 		}

@@ -108,9 +108,9 @@ func (s *Service) qosDeleteRule(ctx context.Context, policy, id, kind, op string
 		cfg = copyQoSDeleteOpts(next)
 	}
 	ctx = rest.WithOperationGuard(ctx, state.Check)
-	leafOptions := []rules.QoSRuleDeleteOption{rules.WithQoSRuleDeleteHeaders(cfg.Headers), rules.WithQoSRuleDeleteIgnoreMissing(false)}
+	leafOptions := []request.MutationCall{request.Headers(cfg.Headers), request.IgnoreMissing(false)}
 	if cfg.Microversion != nil {
-		leafOptions = append(leafOptions, rules.WithQoSRuleDeleteMicroversion(*cfg.Microversion))
+		leafOptions = append(leafOptions, request.Microversion(*cfg.Microversion))
 	}
 	var receipt *rules.QoSRuleDeleteReceipt
 	switch kind {

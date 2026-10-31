@@ -3,45 +3,47 @@ package rules
 import (
 	"bytes"
 	"encoding/json"
-	"maps"
 	"slices"
 	"strings"
 	"unicode"
 	"unicode/utf8"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/neutronfind"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
-// DSCPMarkingFindOpts owns Source kwargs as JSON. Omitted IgnoreMissing is true.
-// Query is member query/constructor input; fallback maps aliases separately.
+// DSCPMarkingFindOpts owns Source find kwargs as JSON. Query is member
+// query/constructor input; fallback maps aliases separately. Its keys apply in
+// sorted order before ordered request.Query calls, which win on collision.
+// Calls: request.IgnoreMissing (omitted is true), request.Query,
+// request.Microversion, request.Header and request.Headers.
 type DSCPMarkingFindOpts struct {
+	Query map[string]json.RawMessage
+}
+
+type dscpMarkingFindState struct {
 	IgnoreMissing *bool
 	Microversion  *string
 	Query         map[string]json.RawMessage
 	Headers       map[string]string
 	order         []string
 }
-type DSCPMarkingFindOption func(*DSCPMarkingFindOpts) error
 
-func dscpMarkingFindOptions(v DSCPMarkingFindOpts) neutronfind.Options {
+func dscpMarkingFindOptions(v dscpMarkingFindState) neutronfind.Options {
 	return neutronfind.Options{IgnoreMissing: v.IgnoreMissing, Microversion: v.Microversion, Query: v.Query, Headers: v.Headers, Order: v.order}
 }
-func copyDSCPMarkingFind(v DSCPMarkingFindOpts) DSCPMarkingFindOpts {
+func copyDSCPMarkingFind(v dscpMarkingFindState) dscpMarkingFindState {
 	owned := neutronfind.CloneOptions(dscpMarkingFindOptions(v))
 	v.IgnoreMissing, v.Microversion, v.Query, v.Headers, v.order = owned.IgnoreMissing, owned.Microversion, owned.Query, owned.Headers, owned.Order
 	return v
 }
-func WithDSCPMarkingFindOpts(v DSCPMarkingFindOpts) DSCPMarkingFindOption {
-	owned := copyDSCPMarkingFind(v)
-	return func(c *DSCPMarkingFindOpts) error { *c = copyDSCPMarkingFind(owned); return nil }
+func dscpMarkingFindCalls(calls []request.ReadCall) []func(*dscpMarkingFindState) error {
+	return qosCalls(calls, func(s *dscpMarkingFindState) qosCallFields {
+		return qosCallFields{headers: &s.Headers, microversion: &s.Microversion, ignore: &s.IgnoreMissing}
+	}, dscpMarkingFindQuery, false)
 }
-func WithDSCPMarkingFindIgnoreMissing(v bool) DSCPMarkingFindOption {
-	return func(c *DSCPMarkingFindOpts) error { x := v; c.IgnoreMissing = &x; return nil }
-}
-func WithDSCPMarkingFindQuery(key string, value any) DSCPMarkingFindOption {
-	raw, err := json.Marshal(value)
-	owned := bytes.Clone(raw)
-	return func(c *DSCPMarkingFindOpts) error {
+func dscpMarkingFindQuery(key string, owned json.RawMessage, err error) func(*dscpMarkingFindState) error {
+	return func(c *dscpMarkingFindState) error {
 		if err != nil {
 			return err
 		}
@@ -55,37 +57,38 @@ func WithDSCPMarkingFindQuery(key string, value any) DSCPMarkingFindOption {
 		return nil
 	}
 }
-func WithDSCPMarkingFindMicroversion(v string) DSCPMarkingFindOption {
-	return func(c *DSCPMarkingFindOpts) error { x := v; c.Microversion = &x; return nil }
-}
-func WithDSCPMarkingFindHeaders(v map[string]string) DSCPMarkingFindOption {
-	owned := maps.Clone(v)
-	return func(c *DSCPMarkingFindOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
 
 // DSCPMarkingListOpts owns list kwargs. Query includes declared server fields,
-// nonquery Body filters and paginated/max_items controls. Unknowns are ignored.
+// nonquery Body filters and paginated/max_items controls; its keys apply in
+// sorted order before ordered calls. request.Query, request.Limit,
+// request.Marker, request.MaxItems and request.Paginated ignore unknown kwargs.
+// Other calls: request.BasePath, request.Microversion, request.Header(s).
 type DSCPMarkingListOpts struct {
+	Query map[string]json.RawMessage
+}
+
+type dscpMarkingListState struct {
 	BasePath     *string
 	Microversion *string
 	Query        map[string]json.RawMessage
 	Headers      map[string]string
 	order        []string
 }
-type DSCPMarkingListOption func(*DSCPMarkingListOpts) error
 
-func dscpMarkingListOptions(v DSCPMarkingListOpts) neutronfind.Options {
+func dscpMarkingListOptions(v dscpMarkingListState) neutronfind.Options {
 	return neutronfind.Options{BasePath: v.BasePath, Microversion: v.Microversion, Query: v.Query, Headers: v.Headers, Order: v.order}
 }
-func copyDSCPMarkingList(v DSCPMarkingListOpts) DSCPMarkingListOpts {
+func copyDSCPMarkingList(v dscpMarkingListState) dscpMarkingListState {
 	owned := neutronfind.CloneOptions(dscpMarkingListOptions(v))
 	v.BasePath = owned.BasePath
 	v.Microversion, v.Query, v.Headers, v.order = owned.Microversion, owned.Query, owned.Headers, owned.Order
 	return v
 }
-func WithDSCPMarkingListOpts(v DSCPMarkingListOpts) DSCPMarkingListOption {
-	owned := copyDSCPMarkingList(v)
-	return func(c *DSCPMarkingListOpts) error { *c = copyDSCPMarkingList(owned); return nil }
+func dscpMarkingListFields(s *dscpMarkingListState) qosCallFields {
+	return qosCallFields{headers: &s.Headers, microversion: &s.Microversion, basePath: &s.BasePath}
+}
+func dscpMarkingListCalls(calls []request.ListCall) []func(*dscpMarkingListState) error {
+	return qosCalls(calls, dscpMarkingListFields, dscpMarkingListQuery, true)
 }
 func dscpMarkingListIgnores(key string) bool {
 	if strings.TrimSpace(key) == "" || !utf8.ValidString(key) {
@@ -112,14 +115,12 @@ func dscpMarkingListIgnores(key string) bool {
 	}
 	return true
 }
-func WithDSCPMarkingListQuery(key string, value any) DSCPMarkingListOption {
-	// Source discards unknown kwargs before evaluating their transport value.
+func dscpMarkingListQuery(key string, owned json.RawMessage, err error) func(*dscpMarkingListState) error {
+	// Source discards unknown kwargs together with any transport-value error.
 	if dscpMarkingListIgnores(key) {
-		return func(*DSCPMarkingListOpts) error { return nil }
+		return func(*dscpMarkingListState) error { return nil }
 	}
-	raw, err := json.Marshal(value)
-	owned := bytes.Clone(raw)
-	return func(c *DSCPMarkingListOpts) error {
+	return func(c *dscpMarkingListState) error {
 		if err != nil {
 			return err
 		}
@@ -133,52 +134,31 @@ func WithDSCPMarkingListQuery(key string, value any) DSCPMarkingListOption {
 		return nil
 	}
 }
-func WithDSCPMarkingListMicroversion(v string) DSCPMarkingListOption {
-	return func(c *DSCPMarkingListOpts) error { x := v; c.Microversion = &x; return nil }
-}
-func WithDSCPMarkingListHeaders(v map[string]string) DSCPMarkingListOption {
-	owned := maps.Clone(v)
-	return func(c *DSCPMarkingListOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
-func WithDSCPMarkingListLimit(v int) DSCPMarkingListOption {
-	return WithDSCPMarkingListQuery("limit", v)
-}
-func WithDSCPMarkingListMarker(v string) DSCPMarkingListOption {
-	return WithDSCPMarkingListQuery("marker", v)
-}
-func WithDSCPMarkingListMaxItems(v int) DSCPMarkingListOption {
-	return WithDSCPMarkingListQuery("max_items", v)
-}
-func WithDSCPMarkingListPaginated(v bool) DSCPMarkingListOption {
-	return WithDSCPMarkingListQuery("paginated", v)
-}
 
-// DSCPMarkingGetOpts owns optional member transport extensions. Query does
+// dscpMarkingGetState owns optional member transport extensions. Query does
 // not seed response Body; the pinned named getter is query-free by default.
-type DSCPMarkingGetOpts struct {
+type dscpMarkingGetState struct {
 	Microversion *string
 	Query        map[string]json.RawMessage
 	Headers      map[string]string
 	order        []string
 }
-type DSCPMarkingGetOption func(*DSCPMarkingGetOpts) error
 
-func dscpMarkingGetOptions(v DSCPMarkingGetOpts) neutronfind.Options {
+func dscpMarkingGetOptions(v dscpMarkingGetState) neutronfind.Options {
 	return neutronfind.Options{Microversion: v.Microversion, Query: v.Query, Headers: v.Headers, Order: v.order}
 }
-func copyDSCPMarkingGet(v DSCPMarkingGetOpts) DSCPMarkingGetOpts {
+func copyDSCPMarkingGet(v dscpMarkingGetState) dscpMarkingGetState {
 	owned := neutronfind.CloneOptions(dscpMarkingGetOptions(v))
 	v.Microversion, v.Query, v.Headers, v.order = owned.Microversion, owned.Query, owned.Headers, owned.Order
 	return v
 }
-func WithDSCPMarkingGetOpts(v DSCPMarkingGetOpts) DSCPMarkingGetOption {
-	owned := copyDSCPMarkingGet(v)
-	return func(c *DSCPMarkingGetOpts) error { *c = copyDSCPMarkingGet(owned); return nil }
+func dscpMarkingGetCalls(calls []request.ReadCall) []func(*dscpMarkingGetState) error {
+	return qosCalls(calls, func(s *dscpMarkingGetState) qosCallFields {
+		return qosCallFields{headers: &s.Headers, microversion: &s.Microversion}
+	}, dscpMarkingGetQuery, false)
 }
-func WithDSCPMarkingGetQuery(key string, value any) DSCPMarkingGetOption {
-	raw, err := json.Marshal(value)
-	owned := bytes.Clone(raw)
-	return func(c *DSCPMarkingGetOpts) error {
+func dscpMarkingGetQuery(key string, owned json.RawMessage, err error) func(*dscpMarkingGetState) error {
+	return func(c *dscpMarkingGetState) error {
 		if err != nil {
 			return err
 		}
@@ -191,16 +171,4 @@ func WithDSCPMarkingGetQuery(key string, value any) DSCPMarkingGetOption {
 		c.Query[key] = bytes.Clone(owned)
 		return nil
 	}
-}
-func WithDSCPMarkingGetMicroversion(v string) DSCPMarkingGetOption {
-	return func(c *DSCPMarkingGetOpts) error { x := v; c.Microversion = &x; return nil }
-}
-func WithDSCPMarkingGetHeaders(v map[string]string) DSCPMarkingGetOption {
-	owned := maps.Clone(v)
-	return func(c *DSCPMarkingGetOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
-
-// WithDSCPMarkingListBasePath owns a service-relative route override for Proxy lists.
-func WithDSCPMarkingListBasePath(v string) DSCPMarkingListOption {
-	return func(c *DSCPMarkingListOpts) error { x := v; c.BasePath = &x; return nil }
 }

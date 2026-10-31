@@ -3,45 +3,47 @@ package rules
 import (
 	"bytes"
 	"encoding/json"
-	"maps"
 	"slices"
 	"strings"
 	"unicode"
 	"unicode/utf8"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/neutronfind"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
-// MinimumPacketRateFindOpts owns Source kwargs as JSON. Omitted IgnoreMissing is true.
-// Query is member query/constructor input; fallback maps aliases separately.
+// MinimumPacketRateFindOpts owns Source find kwargs as JSON. Query is member
+// query/constructor input; fallback maps aliases separately. Its keys apply in
+// sorted order before ordered request.Query calls, which win on collision.
+// Calls: request.IgnoreMissing (omitted is true), request.Query,
+// request.Microversion, request.Header and request.Headers.
 type MinimumPacketRateFindOpts struct {
+	Query map[string]json.RawMessage
+}
+
+type minimumPacketRateFindState struct {
 	IgnoreMissing *bool
 	Microversion  *string
 	Query         map[string]json.RawMessage
 	Headers       map[string]string
 	order         []string
 }
-type MinimumPacketRateFindOption func(*MinimumPacketRateFindOpts) error
 
-func minimumPacketRateFindOptions(v MinimumPacketRateFindOpts) neutronfind.Options {
+func minimumPacketRateFindOptions(v minimumPacketRateFindState) neutronfind.Options {
 	return neutronfind.Options{IgnoreMissing: v.IgnoreMissing, Microversion: v.Microversion, Query: v.Query, Headers: v.Headers, Order: v.order}
 }
-func copyMinimumPacketRateFind(v MinimumPacketRateFindOpts) MinimumPacketRateFindOpts {
+func copyMinimumPacketRateFind(v minimumPacketRateFindState) minimumPacketRateFindState {
 	owned := neutronfind.CloneOptions(minimumPacketRateFindOptions(v))
 	v.IgnoreMissing, v.Microversion, v.Query, v.Headers, v.order = owned.IgnoreMissing, owned.Microversion, owned.Query, owned.Headers, owned.Order
 	return v
 }
-func WithMinimumPacketRateFindOpts(v MinimumPacketRateFindOpts) MinimumPacketRateFindOption {
-	owned := copyMinimumPacketRateFind(v)
-	return func(c *MinimumPacketRateFindOpts) error { *c = copyMinimumPacketRateFind(owned); return nil }
+func minimumPacketRateFindCalls(calls []request.ReadCall) []func(*minimumPacketRateFindState) error {
+	return qosCalls(calls, func(s *minimumPacketRateFindState) qosCallFields {
+		return qosCallFields{headers: &s.Headers, microversion: &s.Microversion, ignore: &s.IgnoreMissing}
+	}, minimumPacketRateFindQuery, false)
 }
-func WithMinimumPacketRateFindIgnoreMissing(v bool) MinimumPacketRateFindOption {
-	return func(c *MinimumPacketRateFindOpts) error { x := v; c.IgnoreMissing = &x; return nil }
-}
-func WithMinimumPacketRateFindQuery(key string, value any) MinimumPacketRateFindOption {
-	raw, err := json.Marshal(value)
-	owned := bytes.Clone(raw)
-	return func(c *MinimumPacketRateFindOpts) error {
+func minimumPacketRateFindQuery(key string, owned json.RawMessage, err error) func(*minimumPacketRateFindState) error {
+	return func(c *minimumPacketRateFindState) error {
 		if err != nil {
 			return err
 		}
@@ -55,35 +57,36 @@ func WithMinimumPacketRateFindQuery(key string, value any) MinimumPacketRateFind
 		return nil
 	}
 }
-func WithMinimumPacketRateFindMicroversion(v string) MinimumPacketRateFindOption {
-	return func(c *MinimumPacketRateFindOpts) error { x := v; c.Microversion = &x; return nil }
-}
-func WithMinimumPacketRateFindHeaders(v map[string]string) MinimumPacketRateFindOption {
-	owned := maps.Clone(v)
-	return func(c *MinimumPacketRateFindOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
 
 // MinimumPacketRateListOpts owns list kwargs. Query includes declared server fields,
-// nonquery Body filters and paginated/max_items controls. Unknowns are ignored.
+// nonquery Body filters and paginated/max_items controls; its keys apply in
+// sorted order before ordered calls. request.Query, request.Limit,
+// request.Marker, request.MaxItems and request.Paginated ignore unknown kwargs.
+// Other calls: request.Microversion, request.Header(s).
 type MinimumPacketRateListOpts struct {
+	Query map[string]json.RawMessage
+}
+
+type minimumPacketRateListState struct {
 	Microversion *string
 	Query        map[string]json.RawMessage
 	Headers      map[string]string
 	order        []string
 }
-type MinimumPacketRateListOption func(*MinimumPacketRateListOpts) error
 
-func minimumPacketRateListOptions(v MinimumPacketRateListOpts) neutronfind.Options {
+func minimumPacketRateListOptions(v minimumPacketRateListState) neutronfind.Options {
 	return neutronfind.Options{Microversion: v.Microversion, Query: v.Query, Headers: v.Headers, Order: v.order}
 }
-func copyMinimumPacketRateList(v MinimumPacketRateListOpts) MinimumPacketRateListOpts {
+func copyMinimumPacketRateList(v minimumPacketRateListState) minimumPacketRateListState {
 	owned := neutronfind.CloneOptions(minimumPacketRateListOptions(v))
 	v.Microversion, v.Query, v.Headers, v.order = owned.Microversion, owned.Query, owned.Headers, owned.Order
 	return v
 }
-func WithMinimumPacketRateListOpts(v MinimumPacketRateListOpts) MinimumPacketRateListOption {
-	owned := copyMinimumPacketRateList(v)
-	return func(c *MinimumPacketRateListOpts) error { *c = copyMinimumPacketRateList(owned); return nil }
+func minimumPacketRateListFields(s *minimumPacketRateListState) qosCallFields {
+	return qosCallFields{headers: &s.Headers, microversion: &s.Microversion}
+}
+func minimumPacketRateListCalls(calls []request.ListCall) []func(*minimumPacketRateListState) error {
+	return qosCalls(calls, minimumPacketRateListFields, minimumPacketRateListQuery, true)
 }
 func minimumPacketRateListIgnores(key string) bool {
 	if strings.TrimSpace(key) == "" || !utf8.ValidString(key) {
@@ -110,14 +113,12 @@ func minimumPacketRateListIgnores(key string) bool {
 	}
 	return true
 }
-func WithMinimumPacketRateListQuery(key string, value any) MinimumPacketRateListOption {
-	// Source discards unknown kwargs before evaluating their transport value.
+func minimumPacketRateListQuery(key string, owned json.RawMessage, err error) func(*minimumPacketRateListState) error {
+	// Source discards unknown kwargs together with any transport-value error.
 	if minimumPacketRateListIgnores(key) {
-		return func(*MinimumPacketRateListOpts) error { return nil }
+		return func(*minimumPacketRateListState) error { return nil }
 	}
-	raw, err := json.Marshal(value)
-	owned := bytes.Clone(raw)
-	return func(c *MinimumPacketRateListOpts) error {
+	return func(c *minimumPacketRateListState) error {
 		if err != nil {
 			return err
 		}
@@ -131,50 +132,24 @@ func WithMinimumPacketRateListQuery(key string, value any) MinimumPacketRateList
 		return nil
 	}
 }
-func WithMinimumPacketRateListMicroversion(v string) MinimumPacketRateListOption {
-	return func(c *MinimumPacketRateListOpts) error { x := v; c.Microversion = &x; return nil }
-}
-func WithMinimumPacketRateListHeaders(v map[string]string) MinimumPacketRateListOption {
-	owned := maps.Clone(v)
-	return func(c *MinimumPacketRateListOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
-func WithMinimumPacketRateListLimit(v int) MinimumPacketRateListOption {
-	return WithMinimumPacketRateListQuery("limit", v)
-}
-func WithMinimumPacketRateListMarker(v string) MinimumPacketRateListOption {
-	return WithMinimumPacketRateListQuery("marker", v)
-}
-func WithMinimumPacketRateListMaxItems(v int) MinimumPacketRateListOption {
-	return WithMinimumPacketRateListQuery("max_items", v)
-}
-func WithMinimumPacketRateListPaginated(v bool) MinimumPacketRateListOption {
-	return WithMinimumPacketRateListQuery("paginated", v)
-}
 
-// MinimumPacketRateGetOpts adds operation-owned safe headers and microversion.
-// The pinned proxy exposes no member query kwargs; no Find options are reused.
-type MinimumPacketRateGetOpts struct {
+// minimumPacketRateGetState adds operation-owned safe headers and microversion. The pinned
+// proxy exposes no member query kwargs, so request.Query is rejected.
+type minimumPacketRateGetState struct {
 	Microversion *string
 	Headers      map[string]string
 }
-type MinimumPacketRateGetOption func(*MinimumPacketRateGetOpts) error
 
-func minimumPacketRateGetOptions(v MinimumPacketRateGetOpts) neutronfind.Options {
+func minimumPacketRateGetOptions(v minimumPacketRateGetState) neutronfind.Options {
 	return neutronfind.Options{Microversion: v.Microversion, Headers: v.Headers}
 }
-func copyMinimumPacketRateGet(v MinimumPacketRateGetOpts) MinimumPacketRateGetOpts {
+func copyMinimumPacketRateGet(v minimumPacketRateGetState) minimumPacketRateGetState {
 	owned := neutronfind.CloneOptions(minimumPacketRateGetOptions(v))
 	v.Microversion, v.Headers = owned.Microversion, owned.Headers
 	return v
 }
-func WithMinimumPacketRateGetOpts(v MinimumPacketRateGetOpts) MinimumPacketRateGetOption {
-	owned := copyMinimumPacketRateGet(v)
-	return func(c *MinimumPacketRateGetOpts) error { *c = copyMinimumPacketRateGet(owned); return nil }
-}
-func WithMinimumPacketRateGetMicroversion(v string) MinimumPacketRateGetOption {
-	return func(c *MinimumPacketRateGetOpts) error { x := v; c.Microversion = &x; return nil }
-}
-func WithMinimumPacketRateGetHeaders(v map[string]string) MinimumPacketRateGetOption {
-	owned := maps.Clone(v)
-	return func(c *MinimumPacketRateGetOpts) error { c.Headers = maps.Clone(owned); return nil }
+func minimumPacketRateGetCalls(calls []request.ReadCall) []func(*minimumPacketRateGetState) error {
+	return qosCalls(calls, func(s *minimumPacketRateGetState) qosCallFields {
+		return qosCallFields{headers: &s.Headers, microversion: &s.Microversion}
+	}, nil, false)
 }

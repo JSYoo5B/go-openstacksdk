@@ -15,11 +15,10 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.New`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.RawClient`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.FindDSCPMarkingRecord`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingFindOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingFindQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingFindHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingFindMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 
 - Required qos_policy_id is Source constructor URI and member fetch parameter: GET forwards it plus original kwargs, no parent GET. All_projects is consumed separately. Bound URI is removed from Body defaults. GET unknown Body seeds remain Source-shaped while response explicit values override them; caller bound policy/identity kwargs collision fails before HTTP.
   Tests: `network/v2/extensions/qos/rules/python_dscp_marking_contracts_test.go:TestPythonDSCPMarkingFindBoundRequiredKwargsAndUnknownConstructorSeeds`, `network/v2/extensions/qos/rules/python_dscp_marking_contracts_test.go:TestPythonDSCPMarkingPreflightBoundControlsCancellationAndSnapshots`.
@@ -57,10 +56,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.New`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.RawClient`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.GetDSCPMarkingRecord`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingGetOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingGetQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingGetHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingGetMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - One query-free named default GET at the bound policy/member path; no parent lookup, fallback or404 ignore. Optional Go transport query does not seed Body: accepted blank/malformed JSON keeps identity/defaults while actual null/scalar/wrong singular/invalidUTF8 are response evidence errors. Source getter has no kwargs; wider Go query/Header/version extensions are explicit.
   Tests: `network/v2/extensions/qos/rules/python_dscp_marking_contracts_test.go:TestPythonDSCPMarkingGetLiteralPolicyRouteRawProjectionAndDefaults`, `network/v2/extensions/qos/rules/python_dscp_marking_contracts_test.go:TestPythonDSCPMarkingGetPartialReceiptsWithoutQuerySeedsOrFallback`.
@@ -94,14 +92,13 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.New`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.RawClient`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ListDSCPMarkingRecords`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingListQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingListMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.AllDSCPMarkingRecords`
 
 - Lazy bound policy list defaults Accept application/json. Only inherited limit/marker are server queries; class-declared id/name/dscp_mark filter locally and unknowns are discarded before marshaling. Raw MaxItems includes filtered rows and supplies falsey-limit hint; Source URI is fixed independently of physical row qos_policy_id. Declared DSCP mark is untyped and exact false/null/zero/large extension values remain owned.
@@ -183,6 +180,7 @@ import (
 
     openstack "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules"
+    "github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 func show(record *rules.DSCPMarkingRecord) {
@@ -214,18 +212,18 @@ func main() {
         show(record)
     case "find":
         record, err := network.QoSRules.FindDSCPMarkingRecord(ctx, *policy, *rule,
-            rules.WithDSCPMarkingFindIgnoreMissing(!*strict))
+            rules.DSCPMarkingFindOpts{}, request.IgnoreMissing(!*strict))
         if err != nil { log.Fatal(err) }
         show(record)
     case "list":
-        options := []rules.DSCPMarkingListOption{
-            rules.WithDSCPMarkingListLimit(*pageSize),
-            rules.WithDSCPMarkingListMaxItems(*maxItems),
+        options := []request.ListCall{
+            request.Limit(*pageSize),
+            request.MaxItems(*maxItems),
         }
         if *mark >= 0 {
-            options = append(options, rules.WithDSCPMarkingListQuery("dscp_mark", *mark))
+            options = append(options, request.Query("dscp_mark", *mark))
         }
-        for record, err := range network.QoSRules.ListDSCPMarkingRecords(ctx, *policy, options...) {
+        for record, err := range network.QoSRules.ListDSCPMarkingRecords(ctx, *policy, rules.DSCPMarkingListOpts{}, options...) {
             if err != nil { log.Fatal(err) }
             show(record)
         }

@@ -18,8 +18,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSBandwidthLimitHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSBandwidthLimitMicroversion`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ProxyBandwidthLimitRecords`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitProxyQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitListBasePath`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.BasePath`
 
 - Complete QoS extension gate then exactly one parent policy resolution, owned untyped defaults/unknown fields/computed-null location, bound URI parent and local Body filtering with shared actual paging.
   Tests: `network/cloud_qos_bandwidth_test.go:TestCloudQoSBandwidthListOwnsGateParentPagingAndRawFields`.
@@ -55,8 +55,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSBandwidthLimitHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSBandwidthLimitMicroversion`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ProxyBandwidthLimitRecords`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitProxyQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitListBasePath`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.BasePath`
 
 - Complete QoS extension gate then exactly one parent policy resolution, owned untyped defaults/unknown fields/computed-null location, bound URI parent and local Body filtering with shared actual paging.
   Tests: `network/cloud_qos_bandwidth_test.go:TestCloudQoSBandwidthListOwnsGateParentPagingAndRawFields`.

@@ -10,6 +10,8 @@ See the [upstream SDK layout](https://docs.openstack.org/openstacksdk/latest/con
 
 Required inputs use concrete request structs. Optional behavior uses operation-specific options, preventing unrelated option types from mixing. Defaults are constructed per call. Invalid or nil options fail before mutation where the operation can validate them locally.
 
+Shared per-call controls are piloted in `network/v2/extensions/qos/rules` only. There, methods take the operation's `...Opts` struct for operation inputs plus sealed `request.ReadCall`, `request.ListCall` or `request.MutationCall` values built by `request.Header`, `request.Microversion`, `request.Query`, `request.Limit` and similar constructors. A control outside the operation's category does not compile; a control the operation does not implement fails with `resource.ErrInvalidOption` before HTTP. Calls only snapshot their inputs, and each operation keeps its own validation and ordering rules. Other packages still use operation-specific options.
+
 `request.Optional[T]` distinguishes omitted, null, and present values: zero omits a field; `request.Null[T]()` sends null; `request.Present(value)` sends false, zero, or empty values explicitly. Operations validate their own field rules. Callers use concrete options rather than implementing serialization builders.
 
 Extension fields use JSON snapshots and reject protected-field collisions. This does not make arbitrary extension schemas statically safe. Per-operation capability checks remain distinct from connection-level microversion selection.

@@ -13,11 +13,10 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.FindMinimumPacketRateRecord`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumPacketRateFindOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumPacketRateFindIgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumPacketRateFindQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumPacketRateFindMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumPacketRateFindHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 
 - Literal parent-first one-segment routes; Get uses URI constructor only and no parent query. Find member query includes fixed qos_policy_id plus original kwargs, with None query omission and explicit-null/default constructor seed preservation.
   Tests: `network/v2/extensions/qos/rules/python_minimum_packet_rate_contracts_test.go:TestPythonMinimumPacketRateMemberLiteralRoutesSourceQueryAndURIView`, `network/v2/extensions/qos/rules/python_minimum_packet_rate_contracts_test.go:TestPythonMinimumPacketRateGetNoFallbackAndFindMissingCompleteSearch`, `network/v2/extensions/qos/rules/python_minimum_packet_rate_contracts_test.go:TestPythonMinimumPacketRateFindBodySeedsAndListLocalFilters`, `network/v2/extensions/qos/rules/python_minimum_packet_rate_contracts_test.go:TestPythonMinimumPacketRateNoneQuerySeedsAndLocalDescriptorFilters`.
@@ -60,9 +59,8 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.GetMinimumPacketRateRecord`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumPacketRateGetOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumPacketRateGetMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumPacketRateGetHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 
 - Literal parent-first one-segment routes; Get uses URI constructor only and no parent query. Find member query includes fixed qos_policy_id plus original kwargs, with None query omission and explicit-null/default constructor seed preservation.
   Tests: `network/v2/extensions/qos/rules/python_minimum_packet_rate_contracts_test.go:TestPythonMinimumPacketRateMemberLiteralRoutesSourceQueryAndURIView`, `network/v2/extensions/qos/rules/python_minimum_packet_rate_contracts_test.go:TestPythonMinimumPacketRateGetNoFallbackAndFindMissingCompleteSearch`, `network/v2/extensions/qos/rules/python_minimum_packet_rate_contracts_test.go:TestPythonMinimumPacketRateFindBodySeedsAndListLocalFilters`, `network/v2/extensions/qos/rules/python_minimum_packet_rate_contracts_test.go:TestPythonMinimumPacketRateNoneQuerySeedsAndLocalDescriptorFilters`.
@@ -106,14 +104,13 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ListMinimumPacketRateRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.AllMinimumPacketRateRecords`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumPacketRateListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumPacketRateListQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumPacketRateListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumPacketRateListMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumPacketRateListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumPacketRateListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumPacketRateListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumPacketRateListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 
 - Literal parent-first one-segment routes; Get uses URI constructor only and no parent query. Find member query includes fixed qos_policy_id plus original kwargs, with None query omission and explicit-null/default constructor seed preservation.
   Tests: `network/v2/extensions/qos/rules/python_minimum_packet_rate_contracts_test.go:TestPythonMinimumPacketRateMemberLiteralRoutesSourceQueryAndURIView`, `network/v2/extensions/qos/rules/python_minimum_packet_rate_contracts_test.go:TestPythonMinimumPacketRateGetNoFallbackAndFindMissingCompleteSearch`, `network/v2/extensions/qos/rules/python_minimum_packet_rate_contracts_test.go:TestPythonMinimumPacketRateFindBodySeedsAndListLocalFilters`, `network/v2/extensions/qos/rules/python_minimum_packet_rate_contracts_test.go:TestPythonMinimumPacketRateNoneQuerySeedsAndLocalDescriptorFilters`.
@@ -194,6 +191,7 @@ import (
 
     sdk "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules"
+    "github.com/JSYoo5B/go-openstacksdk/request"
     "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -209,14 +207,14 @@ func run(ctx context.Context, cloud, mode, policyID, identity string) (any, erro
         return value.Resource, nil
     case "find":
         value, err := network.QoSRules.FindMinimumPacketRateRecord(
-            ctx, policyID, identity, rules.WithMinimumPacketRateFindIgnoreMissing(false),
+            ctx, policyID, identity, rules.MinimumPacketRateFindOpts{}, request.IgnoreMissing(false),
         )
         if err != nil || value == nil { return nil, err }
         return value.Resource, nil
     case "list":
         values, err := network.QoSRules.AllMinimumPacketRateRecords(
-            ctx, policyID, rules.WithMinimumPacketRateListQuery("direction", "any"),
-            rules.WithMinimumPacketRateListMaxItems(100),
+            ctx, policyID, rules.MinimumPacketRateListOpts{}, request.Query("direction", "any"),
+            request.MaxItems(100),
         )
         if err != nil { return nil, err }
         rows := make([]*resource.RawResource, 0, len(values))

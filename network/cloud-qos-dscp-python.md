@@ -17,7 +17,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.WithDSCPMarkingCloudCurrentLocation`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithDSCPMarkingCloudFiltersJSON`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ProxyDSCPMarkingRecords`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingProxyQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - Every call consumes the full fresh qos extension inventory before GET-first exact policy Find; early qos match does not suppress later alias/page faults. Missing or ambiguous policy stops rule I/O with actual already observed gate/policy evidence, no fabricated policy response.
   Tests: `network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingGateConsumesAllExtensionsAndStopsBeforePolicy`, `network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingPolicyMissingAndAmbiguityRetainActualGate`, `network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingFreshCompleteGatePolicyNameLookupAndSourceLinkPrecedence`.
@@ -52,7 +52,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.WithDSCPMarkingCloudCurrentLocation`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithDSCPMarkingCloudFiltersJSON`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ProxyDSCPMarkingRecords`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingProxyQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - Every call consumes the full fresh qos extension inventory before GET-first exact policy Find; early qos match does not suppress later alias/page faults. Missing or ambiguous policy stops rule I/O with actual already observed gate/policy evidence, no fabricated policy response.
   Tests: `network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingGateConsumesAllExtensionsAndStopsBeforePolicy`, `network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingPolicyMissingAndAmbiguityRetainActualGate`, `network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingFreshCompleteGatePolicyNameLookupAndSourceLinkPrecedence`.

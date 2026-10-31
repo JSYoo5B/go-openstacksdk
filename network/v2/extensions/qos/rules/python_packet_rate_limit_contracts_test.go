@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -32,9 +33,9 @@ func pythonPacketRateRead(ctx context.Context, api *rules.API, op string) (*rule
 	case "get":
 		return api.GetPacketRateLimitRecord(ctx, "parent", "target")
 	case "find":
-		return api.FindPacketRateLimitRecord(ctx, "parent", "target")
+		return api.FindPacketRateLimitRecord(ctx, "parent", "target", rules.PacketRateLimitFindOpts{})
 	default:
-		values, err := api.AllPacketRateLimitRecords(ctx, "parent")
+		values, err := api.AllPacketRateLimitRecords(ctx, "parent", rules.PacketRateLimitListOpts{})
 		if len(values) > 0 {
 			return values[0], err
 		}
@@ -73,7 +74,7 @@ func TestPythonPacketRateLimitMemberLiteralRoutesSourceQueryAndURIView(t *testin
 				if op == "get" {
 					value, err = api.GetPacketRateLimitRecord(context.Background(), parent, identity)
 				} else {
-					value, err = api.FindPacketRateLimitRecord(context.Background(), parent, identity)
+					value, err = api.FindPacketRateLimitRecord(context.Background(), parent, identity, rules.PacketRateLimitFindOpts{})
 				}
 				if err != nil || value == nil || value.QoSPolicyID != parent || value.StatusCode != 203 || string(value.Envelope) != body || value.Header.Get("X-Request-Id") != "receipt" || len(calls) != 1 || calls[0].body != "" {
 					t.Fatal(value, err, calls)
@@ -125,12 +126,12 @@ func TestPythonPacketRateLimitGetNoFallbackAndFindMissingCompleteSearch(t *testi
 			t.Fatal(value, err, calls)
 		}
 		calls = nil
-		value, err = api.FindPacketRateLimitRecord(context.Background(), "parent", "target")
+		value, err = api.FindPacketRateLimitRecord(context.Background(), "parent", "target", rules.PacketRateLimitFindOpts{})
 		if value != nil || err != nil || len(calls) != 2 {
 			t.Fatal(value, err, calls)
 		}
 		calls = nil
-		value, err = api.FindPacketRateLimitRecord(context.Background(), "parent", "target", rules.WithPacketRateLimitFindIgnoreMissing(false))
+		value, err = api.FindPacketRateLimitRecord(context.Background(), "parent", "target", rules.PacketRateLimitFindOpts{}, request.IgnoreMissing(false))
 		if value != nil || !errors.Is(err, resource.ErrNotFound) || len(calls) != 2 {
 			t.Fatal(value, err, calls)
 		}
@@ -152,7 +153,7 @@ func TestPythonPacketRateLimitFindBodySeedsAndListLocalFilters(t *testing.T) {
 		}
 		return nativeRuleWire(200, `{"packet_rate_limit_rules":[{"id":"no","name":"target","max_kpps":0,"direction":"egress","max_burst_kpps":{"nested":null}},{"id":"yes","name":"target","max_kpps":1,"direction":"egress","max_burst_kpps":{"nested":null},"qos_policy_id":"foreign"}]}`)
 	})
-	value, err := api.FindPacketRateLimitRecord(context.Background(), "parent", "target", rules.WithPacketRateLimitFindQuery("name", "target"), rules.WithPacketRateLimitFindQuery("max_kpps", true), rules.WithPacketRateLimitFindQuery("max_burst_kpps", map[string]any{"nested": nil}), rules.WithPacketRateLimitFindQuery("direction", "egress"), rules.WithPacketRateLimitFindQuery("x_seed", "keep"), rules.WithPacketRateLimitFindQuery("fields", []string{"id", "direction"}))
+	value, err := api.FindPacketRateLimitRecord(context.Background(), "parent", "target", rules.PacketRateLimitFindOpts{}, request.Query("name", "target"), request.Query("max_kpps", true), request.Query("max_burst_kpps", map[string]any{"nested": nil}), request.Query("direction", "egress"), request.Query("x_seed", "keep"), request.Query("fields", []string{"id", "direction"}))
 	if err != nil || value == nil || len(calls) != 2 || value.Resource.Body["qos_policy_id"] != nil {
 		t.Fatal(value, err, calls)
 	}
@@ -162,7 +163,7 @@ func TestPythonPacketRateLimitFindBodySeedsAndListLocalFilters(t *testing.T) {
 	}
 	calls = nil
 	seeded := pythonPacketRateAPI(t, &calls, func(*http.Request) *http.Response { return nativeRuleWire(204, "") })
-	value, err = seeded.FindPacketRateLimitRecord(context.Background(), "parent", "target", rules.WithPacketRateLimitFindQuery("max_kpps", "untyped"), rules.WithPacketRateLimitFindQuery("x_seed", false))
+	value, err = seeded.FindPacketRateLimitRecord(context.Background(), "parent", "target", rules.PacketRateLimitFindOpts{}, request.Query("max_kpps", "untyped"), request.Query("x_seed", false))
 	if err != nil || value.Wire != nil || value.Resource.Body["qos_policy_id"] != nil {
 		t.Fatal(value, err)
 	}
@@ -189,7 +190,7 @@ func TestPythonPacketRateLimitFindLaterDuplicateAndListFailureRemainTerminal(t *
 				return nativeRuleWire(403, `{"error":"rule access denied despite shared policy"}`)
 			}
 		})
-		value, err := api.FindPacketRateLimitRecord(context.Background(), "parent", "target")
+		value, err := api.FindPacketRateLimitRecord(context.Background(), "parent", "target", rules.PacketRateLimitFindOpts{})
 		if value != nil || err == nil || len(calls) != 3 {
 			t.Fatal(value, err, calls)
 		}
@@ -217,7 +218,7 @@ func TestPythonPacketRateLimitListLazyQueryLocalFiltersAndUnknowns(t *testing.T)
 		response.Header.Set("If-Match", "HTTP-only")
 		return response
 	})
-	seq := api.ListPacketRateLimitRecords(context.Background(), "parent", rules.WithPacketRateLimitListQuery("name", "demo"), rules.WithPacketRateLimitListQuery("max_kpps", true), rules.WithPacketRateLimitListQuery("direction", "egress"), rules.WithPacketRateLimitListQuery("fields", func() {}), rules.WithPacketRateLimitListQuery("tags", func() {}), rules.WithPacketRateLimitListOpts(rules.PacketRateLimitListOpts{Query: map[string]json.RawMessage{"name": json.RawMessage(`"demo"`), "max_kpps": json.RawMessage(`true`), "direction": json.RawMessage(`"egress"`), "ignored": json.RawMessage(`[`)}}))
+	seq := api.ListPacketRateLimitRecords(context.Background(), "parent", rules.PacketRateLimitListOpts{Query: map[string]json.RawMessage{"name": json.RawMessage(`"demo"`), "max_kpps": json.RawMessage(`true`), "direction": json.RawMessage(`"egress"`), "ignored": json.RawMessage(`[`)}}, request.Query("name", "demo"), request.Query("max_kpps", true), request.Query("direction", "egress"), request.Query("fields", func() {}), request.Query("tags", func() {}))
 	if len(calls) != 0 {
 		t.Fatal("eager list", calls)
 	}
@@ -249,15 +250,15 @@ func TestPythonPacketRateLimitListRawCapSinglePageAndEarlyStop(t *testing.T) {
 			}
 			return nativeRuleWire(200, `{"packet_rate_limit_rules":[{"id":"filtered","direction":"ingress"},{"id":"kept","direction":"egress"}],"packet_rate_limit_rules_links":[{"rel":"next","href":"?marker=kept"}]}`)
 		})
-		opts := []rules.PacketRateLimitListOption{}
+		opts := []request.ListCall{}
 		if mode == "cap" {
-			opts = append(opts, rules.WithPacketRateLimitListLimit(0), rules.WithPacketRateLimitListMaxItems(1), rules.WithPacketRateLimitListQuery("direction", "egress"))
+			opts = append(opts, request.Limit(0), request.MaxItems(1), request.Query("direction", "egress"))
 		}
 		if mode == "single" {
-			opts = append(opts, rules.WithPacketRateLimitListPaginated(false))
+			opts = append(opts, request.Paginated(false))
 		}
 		count := 0
-		for value, err := range api.ListPacketRateLimitRecords(context.Background(), "parent", opts...) {
+		for value, err := range api.ListPacketRateLimitRecords(context.Background(), "parent", rules.PacketRateLimitListOpts{}, opts...) {
 			if err != nil || value == nil {
 				t.Fatal(value, err)
 			}
@@ -291,7 +292,7 @@ func TestPythonPacketRateLimitListContinuationCannotChangeParentOrFilters(t *tes
 			}
 			return nativeRuleWire(200, `{"packet_rate_limit_rules":[]}`)
 		})
-		values, err := api.AllPacketRateLimitRecords(context.Background(), "parent", rules.WithPacketRateLimitListLimit(1))
+		values, err := api.AllPacketRateLimitRecords(context.Background(), "parent", rules.PacketRateLimitListOpts{}, request.Limit(1))
 		safe := href == "?marker=one" || strings.HasPrefix(href, "/v2.0/qos/policies/parent/")
 		if safe {
 			if err != nil || len(values) != 1 || len(calls) != 2 {
@@ -317,7 +318,7 @@ func TestPythonPacketRateLimitListMarkerFallbackAndFalseyNumericNext(t *testing.
 		}
 		return nativeRuleWire(200, `{"packet_rate_limit_rules":[]}`)
 	})
-	values, err := api.AllPacketRateLimitRecords(context.Background(), "parent", rules.WithPacketRateLimitListLimit(3))
+	values, err := api.AllPacketRateLimitRecords(context.Background(), "parent", rules.PacketRateLimitListOpts{}, request.Limit(3))
 	if err != nil || len(values) != 1 || len(calls) != 2 {
 		t.Fatal(values, err, calls)
 	}
@@ -326,7 +327,7 @@ func TestPythonPacketRateLimitListMarkerFallbackAndFalseyNumericNext(t *testing.
 		api = pythonPacketRateAPI(t, &calls, func(*http.Request) *http.Response {
 			return nativeRuleWire(200, `{"packet_rate_limit_rules":[{"id":"one"}],"next":`+token+`}`)
 		})
-		values, err = api.AllPacketRateLimitRecords(context.Background(), "parent")
+		values, err = api.AllPacketRateLimitRecords(context.Background(), "parent", rules.PacketRateLimitListOpts{})
 		if token == "1" {
 			var proof *resource.ResponseError
 			if values != nil || !errors.As(err, &proof) {
@@ -408,7 +409,7 @@ func TestPythonPacketRateLimitAllStatusAndMalformedReceiptBoundaries(t *testing.
 			if op == "get" {
 				value, err = api.GetPacketRateLimitRecord(context.Background(), "parent", "target")
 			} else {
-				value, err = api.FindPacketRateLimitRecord(context.Background(), "parent", "target", rules.WithPacketRateLimitFindQuery("max_kpps", false), rules.WithPacketRateLimitFindQuery("x_seed", "seed"))
+				value, err = api.FindPacketRateLimitRecord(context.Background(), "parent", "target", rules.PacketRateLimitFindOpts{}, request.Query("max_kpps", false), request.Query("x_seed", "seed"))
 			}
 			if err != nil || value == nil || value.Resource == nil || value.Wire != nil || value.StatusCode != status || string(value.Envelope) != raw || value.Header.Get("X-Request-Id") != "parse-default-proof" || value.Resource.StatusCode != status || len(calls) != 1 {
 				t.Fatal(op, raw, value, err, calls)
@@ -491,24 +492,23 @@ func TestPythonPacketRateLimitPhysicalReadCloseCancelAndSourceProof(t *testing.T
 
 func TestPythonPacketRateLimitOptionSnapshotsAndPreflight(t *testing.T) {
 	raw := json.RawMessage(`"owned"`)
-	query := map[string]json.RawMessage{"x_seed": raw}
+	opts := rules.PacketRateLimitFindOpts{Query: map[string]json.RawMessage{"x_seed": raw}}
 	headers := map[string]string{"X-Trace": "owned"}
 	version := "2.0"
-	option := rules.WithPacketRateLimitFindOpts(rules.PacketRateLimitFindOpts{Query: query, Headers: headers, Microversion: &version})
-	raw[1] = 'x'
+	options := []request.ReadCall{request.Headers(headers), request.Microversion(version)}
 	headers["X-Trace"] = "changed"
 	version = "changed"
-	var escaped *rules.PacketRateLimitFindOpts
 	var calls []nativeRuleCall
 	api := pythonPacketRateAPI(t, &calls, func(req *http.Request) *http.Response {
 		if req.URL.Query().Get("x_seed") != "owned" || req.Header.Get("X-Trace") != "owned" || req.Header.Get("OpenStack-API-Version") != "network 2.0" {
 			t.Fatal(req.URL, req.Header)
 		}
-		escaped.Query["x_seed"][1] = 'z'
-		escaped.Headers["X-Trace"] = "late"
+		// The operation owns its copy of the caller's Opts during the call.
+		raw[1] = 'z'
+		headers["X-Trace"] = "late"
 		return nativeRuleWire(200, `{"packet_rate_limit_rule":{}}`)
 	})
-	value, err := api.FindPacketRateLimitRecord(context.Background(), "parent", "target", option, func(c *rules.PacketRateLimitFindOpts) error { escaped = c; return nil })
+	value, err := api.FindPacketRateLimitRecord(context.Background(), "parent", "target", opts, options...)
 	if err != nil || value == nil {
 		t.Fatal(value, err)
 	}
@@ -522,12 +522,12 @@ func TestPythonPacketRateLimitOptionSnapshotsAndPreflight(t *testing.T) {
 	}
 	for _, key := range []string{"qos_policy_id", "qos_policy", "qos_rule_id", "qos_rule", "ignore_missing", "name_or_id", "cls", "base_path", "connection", "location", "__conflicting_attrs", "headers", "microversion", "id"} {
 		before := len(calls)
-		_, err := api.FindPacketRateLimitRecord(context.Background(), "parent", "target", rules.WithPacketRateLimitFindQuery(key, nil))
+		_, err := api.FindPacketRateLimitRecord(context.Background(), "parent", "target", rules.PacketRateLimitFindOpts{}, request.Query(key, nil))
 		if !errors.Is(err, resource.ErrInvalidOption) || len(calls) != before {
 			t.Fatal(key, err, calls)
 		}
 		if key != "id" {
-			values, err := api.AllPacketRateLimitRecords(context.Background(), "parent", rules.WithPacketRateLimitListQuery(key, nil))
+			values, err := api.AllPacketRateLimitRecords(context.Background(), "parent", rules.PacketRateLimitListOpts{}, request.Query(key, nil))
 			if values != nil || !errors.Is(err, resource.ErrInvalidOption) || len(calls) != before {
 				t.Fatal(key, values, err, calls)
 			}
@@ -538,7 +538,9 @@ func TestPythonPacketRateLimitOptionSnapshotsAndPreflight(t *testing.T) {
 	if !errors.Is(err, resource.ErrInvalidOption) || len(calls) != before {
 		t.Fatal(err, calls)
 	}
-	_, err = api.GetPacketRateLimitRecord(context.Background(), "parent", "target", func(*rules.PacketRateLimitGetOpts) error { api.RawClient().ResourceBase += "changed/"; return nil })
+	// Sealed calls cannot run caller code; the option-phase client guard is
+	// covered by TestQoSRuleApplyLoopsGuardCallbacks. Get rejects Query.
+	_, err = api.GetPacketRateLimitRecord(context.Background(), "parent", "target", request.Query("x_seed", true))
 	if !errors.Is(err, resource.ErrInvalidOption) || len(calls) != before {
 		t.Fatal(err, calls)
 	}
@@ -560,7 +562,7 @@ func TestPythonPacketRateLimitVersionPhasesCleanRetryAndOwnedHeaderPolicy(t *tes
 	source := api.RawClient()
 	source.Microversion = "2.0"
 	source.MoreHeaders = map[string]string{"Openstack-Api-Version": "network 2.0"}
-	value, err := api.FindPacketRateLimitRecord(context.Background(), "parent", "target", rules.WithPacketRateLimitFindMicroversion("2.1"))
+	value, err := api.FindPacketRateLimitRecord(context.Background(), "parent", "target", rules.PacketRateLimitFindOpts{}, request.Microversion("2.1"))
 	if err != nil || value == nil || !reflect.DeepEqual(versions, []string{"network 2.1", "network 2.0"}) || source.MoreHeaders["Openstack-Api-Version"] != "network 2.0" || source.Microversion != "2.0" {
 		t.Fatal(value, err, versions, source)
 	}
@@ -617,7 +619,7 @@ func TestPythonPacketRateLimitVersionPhasesCleanRetryAndOwnedHeaderPolicy(t *tes
 			}
 			return nil
 		}
-		_, err = api.AllPacketRateLimitRecords(context.Background(), "parent")
+		_, err = api.AllPacketRateLimitRecords(context.Background(), "parent", rules.PacketRateLimitListOpts{})
 		var native gophercloud.ErrUnexpectedResponseCode
 		if !errors.As(err, &native) || native.Actual != 503 || native.ResponseHeader.Get("X-Request-Id") != "retry-proof" {
 			t.Fatal(mutation, err, native)
@@ -640,7 +642,7 @@ func TestPythonPacketRateLimitListPartialIterationAndAllDropLateError(t *testing
 		return nativeRuleWire(500, `{"error":"late"}`)
 	})
 	count, failures := 0, 0
-	for value, err := range api.ListPacketRateLimitRecords(context.Background(), "parent") {
+	for value, err := range api.ListPacketRateLimitRecords(context.Background(), "parent", rules.PacketRateLimitListOpts{}) {
 		if err != nil {
 			failures++
 			continue
@@ -654,7 +656,7 @@ func TestPythonPacketRateLimitListPartialIterationAndAllDropLateError(t *testing
 		t.Fatal(count, failures, calls)
 	}
 	calls = nil
-	values, err := api.AllPacketRateLimitRecords(context.Background(), "parent")
+	values, err := api.AllPacketRateLimitRecords(context.Background(), "parent", rules.PacketRateLimitListOpts{})
 	if values != nil || err == nil || len(calls) != 2 {
 		t.Fatal(values, err, calls)
 	}
@@ -812,9 +814,9 @@ func TestPythonPacketRateLimitOwnedNilMapsMarshalCausesAndCanceledPreflight(t *t
 	for _, op := range []string{"find", "list"} {
 		var err error
 		if op == "find" {
-			_, err = api.FindPacketRateLimitRecord(context.Background(), "parent", "target", rules.WithPacketRateLimitFindQuery("max_kpps", value))
+			_, err = api.FindPacketRateLimitRecord(context.Background(), "parent", "target", rules.PacketRateLimitFindOpts{}, request.Query("max_kpps", value))
 		} else {
-			_, err = api.AllPacketRateLimitRecords(context.Background(), "parent", rules.WithPacketRateLimitListQuery("max_kpps", value))
+			_, err = api.AllPacketRateLimitRecords(context.Background(), "parent", rules.PacketRateLimitListOpts{}, request.Query("max_kpps", value))
 		}
 		var marshal *json.MarshalerError
 		if !errors.Is(err, cause) || !errors.Is(err, resource.ErrInvalidOption) || !errors.As(err, &marshal) || len(calls) != 0 {
@@ -827,40 +829,34 @@ func TestPythonPacketRateLimitOwnedNilMapsMarshalCausesAndCanceledPreflight(t *t
 	for _, op := range []string{"find", "list"} {
 		var err error
 		if op == "find" {
-			_, err = api.FindPacketRateLimitRecord(context.Background(), "parent", "target", rules.WithPacketRateLimitFindQuery("max_kpps", json.RawMessage(`bad`)))
+			_, err = api.FindPacketRateLimitRecord(context.Background(), "parent", "target", rules.PacketRateLimitFindOpts{}, request.Query("max_kpps", json.RawMessage(`bad`)))
 		} else {
-			_, err = api.AllPacketRateLimitRecords(context.Background(), "parent", rules.WithPacketRateLimitListQuery("max_kpps", json.RawMessage(`bad`)))
+			_, err = api.AllPacketRateLimitRecords(context.Background(), "parent", rules.PacketRateLimitListOpts{}, request.Query("max_kpps", json.RawMessage(`bad`)))
 		}
 		if !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
 			t.Fatal(op, err, calls)
 		}
 	}
-	_, err := api.FindPacketRateLimitRecord(context.Background(), "parent", "target", func(c *rules.PacketRateLimitFindOpts) error { c.Query = nil; c.Headers = nil; return nil }, func(c *rules.PacketRateLimitFindOpts) error {
-		c.Query["max_kpps"] = json.RawMessage(`false`)
-		c.Headers["X-Trace"] = "owned"
-		return cause
-	})
+	// Sealed calls cannot return caller errors; a caller marshaler failure is
+	// the remaining option-time error and still stops before HTTP.
+	failing := pythonPacketRateFailingValue{cause}
+	_, err := api.FindPacketRateLimitRecord(context.Background(), "parent", "target", rules.PacketRateLimitFindOpts{Query: nil}, request.Headers(nil), request.Query("max_kpps", json.RawMessage(`false`)), request.Header("X-Trace", "owned"), request.Query("max_kpps", failing))
 	if !errors.Is(err, cause) || len(calls) != 0 {
 		t.Fatal(err, calls)
 	}
-	_, err = api.AllPacketRateLimitRecords(context.Background(), "parent", func(c *rules.PacketRateLimitListOpts) error { c.Query = nil; c.Headers = nil; return nil }, func(c *rules.PacketRateLimitListOpts) error {
-		c.Query["max_kpps"] = json.RawMessage(`false`)
-		c.Headers["X-Trace"] = "owned"
-		return cause
-	})
+	_, err = api.AllPacketRateLimitRecords(context.Background(), "parent", rules.PacketRateLimitListOpts{Query: nil}, request.Headers(nil), request.Query("max_kpps", json.RawMessage(`false`)), request.Header("X-Trace", "owned"), request.Query("max_kpps", failing))
 	if !errors.Is(err, cause) || len(calls) != 0 {
 		t.Fatal(err, calls)
 	}
-	_, err = api.GetPacketRateLimitRecord(context.Background(), "parent", "target", func(c *rules.PacketRateLimitGetOpts) error { c.Headers = nil; return nil }, func(c *rules.PacketRateLimitGetOpts) error { c.Headers["X-Trace"] = "owned"; return cause })
-	if !errors.Is(err, cause) || len(calls) != 0 {
+	_, err = api.GetPacketRateLimitRecord(context.Background(), "parent", "target", request.Headers(nil), request.Header("X-Trace", "owned"), request.Query("max_kpps", false))
+	if !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
 		t.Fatal(err, calls)
 	}
 	ctx, cancel := context.WithCancelCause(context.Background())
 	cancel(cause)
-	callbacks := 0
-	_, err = api.FindPacketRateLimitRecord(ctx, "parent", "target", func(*rules.PacketRateLimitFindOpts) error { callbacks++; return nil })
-	if !errors.Is(err, context.Canceled) || !errors.Is(err, cause) || callbacks != 0 || len(calls) != 0 {
-		t.Fatal(err, callbacks, calls)
+	_, err = api.FindPacketRateLimitRecord(ctx, "parent", "target", rules.PacketRateLimitFindOpts{}, request.Query("max_kpps", failing))
+	if !errors.Is(err, context.Canceled) || !errors.Is(err, cause) || len(calls) != 0 {
+		t.Fatal(err, calls)
 	}
 	var nilAPI *rules.API
 	for _, op := range []string{"get", "find", "list"} {
@@ -870,17 +866,19 @@ func TestPythonPacketRateLimitOwnedNilMapsMarshalCausesAndCanceledPreflight(t *t
 		}
 	}
 	for _, key := range []string{"jmespath_filters", "allow_unknown_params"} {
-		_, err = api.FindPacketRateLimitRecord(context.Background(), "parent", "target", rules.WithPacketRateLimitFindQuery(key, true))
+		_, err = api.FindPacketRateLimitRecord(context.Background(), "parent", "target", rules.PacketRateLimitFindOpts{}, request.Query(key, true))
 		if !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
 			t.Fatal(key, err, calls)
 		}
-		_, err = api.AllPacketRateLimitRecords(context.Background(), "parent", rules.WithPacketRateLimitListQuery(key, true))
+		_, err = api.AllPacketRateLimitRecords(context.Background(), "parent", rules.PacketRateLimitListOpts{}, request.Query(key, true))
 		if !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
 			t.Fatal(key, err, calls)
 		}
 	}
-	rows, err := api.AllPacketRateLimitRecords(context.Background(), "parent", rules.WithPacketRateLimitListQuery("unknown", value), rules.WithPacketRateLimitListQuery("fields", func() {}))
-	if err != nil || len(rows) != 1 || len(calls) != 1 || conversions != 2 || calls[0].query != "" {
+	// request.Query snapshots its value when constructed, so a discarded
+	// unknown kwarg is marshaled once; its failure is still never reported.
+	rows, err := api.AllPacketRateLimitRecords(context.Background(), "parent", rules.PacketRateLimitListOpts{}, request.Query("unknown", value), request.Query("fields", func() {}))
+	if err != nil || len(rows) != 1 || len(calls) != 1 || conversions != 3 || calls[0].query != "" {
 		t.Fatal(rows, err, conversions, calls)
 	}
 }
@@ -940,23 +938,23 @@ func TestPythonPacketRateLimitClean401LiveAuthExplicitHeadersAndVersionAbsence(t
 					headers := map[string]string{"aCcEpT": "application/packet+json"}
 					switch op {
 					case "get":
-						options := []rules.PacketRateLimitGetOption{rules.WithPacketRateLimitGetHeaders(headers)}
+						options := []request.ReadCall{request.Headers(headers)}
 						if clear {
-							options = append(options, rules.WithPacketRateLimitGetMicroversion(""))
+							options = append(options, request.Microversion(""))
 						}
 						record, err = api.GetPacketRateLimitRecord(context.Background(), "parent", "target", options...)
 					case "find":
-						options := []rules.PacketRateLimitFindOption{rules.WithPacketRateLimitFindHeaders(headers)}
+						options := []request.ReadCall{request.Headers(headers)}
 						if clear {
-							options = append(options, rules.WithPacketRateLimitFindMicroversion(""))
+							options = append(options, request.Microversion(""))
 						}
-						record, err = api.FindPacketRateLimitRecord(context.Background(), "parent", "target", options...)
+						record, err = api.FindPacketRateLimitRecord(context.Background(), "parent", "target", rules.PacketRateLimitFindOpts{}, options...)
 					case "list":
-						options := []rules.PacketRateLimitListOption{rules.WithPacketRateLimitListHeaders(headers)}
+						options := []request.ListCall{request.Headers(headers)}
 						if clear {
-							options = append(options, rules.WithPacketRateLimitListMicroversion(""))
+							options = append(options, request.Microversion(""))
 						}
-						rows, listErr := api.AllPacketRateLimitRecords(context.Background(), "parent", options...)
+						rows, listErr := api.AllPacketRateLimitRecords(context.Background(), "parent", rules.PacketRateLimitListOpts{}, options...)
 						err = listErr
 						if len(rows) == 1 {
 							record = rows[0]
@@ -982,7 +980,7 @@ func TestPythonPacketRateLimitListConstructorCollisionsAndMemberSelectedVersion(
 				wire.Header.Set("X-Request-Id", "constructor-proof")
 				return wire
 			})
-			rows, err := api.AllPacketRateLimitRecords(context.Background(), "parent")
+			rows, err := api.AllPacketRateLimitRecords(context.Background(), "parent", rules.PacketRateLimitListOpts{})
 			var proof *resource.ResponseError
 			var operation *resource.OperationError
 			if rows != nil || !errors.As(err, &proof) || proof.StatusCode != 203 || string(proof.Body) != body || proof.Header.Get("X-Request-Id") != "constructor-proof" || !errors.As(err, &operation) || operation.Operation != "AllPacketRateLimitRecords" || len(calls) != 1 {
@@ -1016,3 +1014,7 @@ func TestPythonPacketRateLimitListConstructorCollisionsAndMemberSelectedVersion(
 		}
 	}
 }
+
+type pythonPacketRateFailingValue struct{ cause error }
+
+func (v pythonPacketRateFailingValue) MarshalJSON() ([]byte, error) { return nil, v.cause }

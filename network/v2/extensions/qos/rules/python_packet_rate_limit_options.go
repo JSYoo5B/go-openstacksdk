@@ -4,30 +4,36 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"maps"
 	"slices"
 	"strings"
 	"unicode"
 	"unicode/utf8"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/neutronfind"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
-// PacketRateLimitFindOpts owns Source kwargs as JSON. Omitted IgnoreMissing is true.
-// Query is member query/constructor input; fallback maps aliases separately.
+// PacketRateLimitFindOpts owns Source find kwargs as JSON. Query is member
+// query/constructor input; fallback maps aliases separately. Its keys apply in
+// sorted order before ordered request.Query calls, which win on collision.
+// Calls: request.IgnoreMissing (omitted is true), request.Query,
+// request.Microversion, request.Header and request.Headers.
 type PacketRateLimitFindOpts struct {
+	Query map[string]json.RawMessage
+}
+
+type packetRateLimitFindState struct {
 	IgnoreMissing *bool
 	Microversion  *string
 	Query         map[string]json.RawMessage
 	Headers       map[string]string
 	order         []string
 }
-type PacketRateLimitFindOption func(*PacketRateLimitFindOpts) error
 
-func packetRateLimitFindOptions(v PacketRateLimitFindOpts) neutronfind.Options {
+func packetRateLimitFindOptions(v packetRateLimitFindState) neutronfind.Options {
 	return neutronfind.Options{IgnoreMissing: v.IgnoreMissing, Microversion: v.Microversion, Query: v.Query, Headers: v.Headers, Order: v.order}
 }
-func copyPacketRateLimitFind(v PacketRateLimitFindOpts) PacketRateLimitFindOpts {
+func copyPacketRateLimitFind(v packetRateLimitFindState) packetRateLimitFindState {
 	owned := neutronfind.CloneOptions(packetRateLimitFindOptions(v))
 	v.IgnoreMissing, v.Microversion, v.Query, v.Headers, v.order = owned.IgnoreMissing, owned.Microversion, owned.Query, owned.Headers, owned.Order
 	if v.Query == nil {
@@ -38,17 +44,13 @@ func copyPacketRateLimitFind(v PacketRateLimitFindOpts) PacketRateLimitFindOpts 
 	}
 	return v
 }
-func WithPacketRateLimitFindOpts(v PacketRateLimitFindOpts) PacketRateLimitFindOption {
-	owned := copyPacketRateLimitFind(v)
-	return func(c *PacketRateLimitFindOpts) error { *c = copyPacketRateLimitFind(owned); return nil }
+func packetRateLimitFindCalls(calls []request.ReadCall) []func(*packetRateLimitFindState) error {
+	return qosCalls(calls, func(s *packetRateLimitFindState) qosCallFields {
+		return qosCallFields{headers: &s.Headers, microversion: &s.Microversion, ignore: &s.IgnoreMissing}
+	}, packetRateLimitFindQuery, false)
 }
-func WithPacketRateLimitFindIgnoreMissing(v bool) PacketRateLimitFindOption {
-	return func(c *PacketRateLimitFindOpts) error { x := v; c.IgnoreMissing = &x; return nil }
-}
-func WithPacketRateLimitFindQuery(key string, value any) PacketRateLimitFindOption {
-	raw, err := json.Marshal(value)
-	owned := bytes.Clone(raw)
-	return func(c *PacketRateLimitFindOpts) error {
+func packetRateLimitFindQuery(key string, owned json.RawMessage, err error) func(*packetRateLimitFindState) error {
+	return func(c *packetRateLimitFindState) error {
 		if err != nil {
 			return errors.Join(packetRateLimitInvalid("query %q must be JSON", key), err)
 		}
@@ -62,28 +64,27 @@ func WithPacketRateLimitFindQuery(key string, value any) PacketRateLimitFindOpti
 		return nil
 	}
 }
-func WithPacketRateLimitFindMicroversion(v string) PacketRateLimitFindOption {
-	return func(c *PacketRateLimitFindOpts) error { x := v; c.Microversion = &x; return nil }
-}
-func WithPacketRateLimitFindHeaders(v map[string]string) PacketRateLimitFindOption {
-	owned := maps.Clone(v)
-	return func(c *PacketRateLimitFindOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
 
 // PacketRateLimitListOpts owns list kwargs. Query includes declared server fields,
-// nonquery Body filters and paginated/max_items controls. Unknowns are ignored.
+// nonquery Body filters and paginated/max_items controls; its keys apply in
+// sorted order before ordered calls. request.Query, request.Limit,
+// request.Marker, request.MaxItems and request.Paginated ignore unknown kwargs.
+// Other calls: request.Microversion, request.Header(s).
 type PacketRateLimitListOpts struct {
+	Query map[string]json.RawMessage
+}
+
+type packetRateLimitListState struct {
 	Microversion *string
 	Query        map[string]json.RawMessage
 	Headers      map[string]string
 	order        []string
 }
-type PacketRateLimitListOption func(*PacketRateLimitListOpts) error
 
-func packetRateLimitListOptions(v PacketRateLimitListOpts) neutronfind.Options {
+func packetRateLimitListOptions(v packetRateLimitListState) neutronfind.Options {
 	return neutronfind.Options{Microversion: v.Microversion, Query: v.Query, Headers: v.Headers, Order: v.order}
 }
-func copyPacketRateLimitList(v PacketRateLimitListOpts) PacketRateLimitListOpts {
+func copyPacketRateLimitList(v packetRateLimitListState) packetRateLimitListState {
 	owned := neutronfind.CloneOptions(packetRateLimitListOptions(v))
 	v.Microversion, v.Query, v.Headers, v.order = owned.Microversion, owned.Query, owned.Headers, owned.Order
 	if v.Query == nil {
@@ -94,9 +95,11 @@ func copyPacketRateLimitList(v PacketRateLimitListOpts) PacketRateLimitListOpts 
 	}
 	return v
 }
-func WithPacketRateLimitListOpts(v PacketRateLimitListOpts) PacketRateLimitListOption {
-	owned := copyPacketRateLimitList(v)
-	return func(c *PacketRateLimitListOpts) error { *c = copyPacketRateLimitList(owned); return nil }
+func packetRateLimitListFields(s *packetRateLimitListState) qosCallFields {
+	return qosCallFields{headers: &s.Headers, microversion: &s.Microversion}
+}
+func packetRateLimitListCalls(calls []request.ListCall) []func(*packetRateLimitListState) error {
+	return qosCalls(calls, packetRateLimitListFields, packetRateLimitListQuery, true)
 }
 func packetRateLimitListIgnores(key string) bool {
 	if strings.TrimSpace(key) == "" || !utf8.ValidString(key) {
@@ -123,14 +126,12 @@ func packetRateLimitListIgnores(key string) bool {
 	}
 	return true
 }
-func WithPacketRateLimitListQuery(key string, value any) PacketRateLimitListOption {
-	// Source discards unknown kwargs before evaluating their transport value.
+func packetRateLimitListQuery(key string, owned json.RawMessage, err error) func(*packetRateLimitListState) error {
+	// Source discards unknown kwargs together with any transport-value error.
 	if packetRateLimitListIgnores(key) {
-		return func(*PacketRateLimitListOpts) error { return nil }
+		return func(*packetRateLimitListState) error { return nil }
 	}
-	raw, err := json.Marshal(value)
-	owned := bytes.Clone(raw)
-	return func(c *PacketRateLimitListOpts) error {
+	return func(c *packetRateLimitListState) error {
 		if err != nil {
 			return errors.Join(packetRateLimitInvalid("query %q must be JSON", key), err)
 		}
@@ -144,38 +145,18 @@ func WithPacketRateLimitListQuery(key string, value any) PacketRateLimitListOpti
 		return nil
 	}
 }
-func WithPacketRateLimitListMicroversion(v string) PacketRateLimitListOption {
-	return func(c *PacketRateLimitListOpts) error { x := v; c.Microversion = &x; return nil }
-}
-func WithPacketRateLimitListHeaders(v map[string]string) PacketRateLimitListOption {
-	owned := maps.Clone(v)
-	return func(c *PacketRateLimitListOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
-func WithPacketRateLimitListLimit(v int) PacketRateLimitListOption {
-	return WithPacketRateLimitListQuery("limit", v)
-}
-func WithPacketRateLimitListMarker(v string) PacketRateLimitListOption {
-	return WithPacketRateLimitListQuery("marker", v)
-}
-func WithPacketRateLimitListMaxItems(v int) PacketRateLimitListOption {
-	return WithPacketRateLimitListQuery("max_items", v)
-}
-func WithPacketRateLimitListPaginated(v bool) PacketRateLimitListOption {
-	return WithPacketRateLimitListQuery("paginated", v)
-}
 
-// PacketRateLimitGetOpts adds operation-owned safe headers and microversion.
-// The pinned proxy exposes no member query kwargs; no Find options are reused.
-type PacketRateLimitGetOpts struct {
+// packetRateLimitGetState adds operation-owned safe headers and microversion. The pinned
+// proxy exposes no member query kwargs, so request.Query is rejected.
+type packetRateLimitGetState struct {
 	Microversion *string
 	Headers      map[string]string
 }
-type PacketRateLimitGetOption func(*PacketRateLimitGetOpts) error
 
-func packetRateLimitGetOptions(v PacketRateLimitGetOpts) neutronfind.Options {
+func packetRateLimitGetOptions(v packetRateLimitGetState) neutronfind.Options {
 	return neutronfind.Options{Microversion: v.Microversion, Headers: v.Headers}
 }
-func copyPacketRateLimitGet(v PacketRateLimitGetOpts) PacketRateLimitGetOpts {
+func copyPacketRateLimitGet(v packetRateLimitGetState) packetRateLimitGetState {
 	owned := neutronfind.CloneOptions(packetRateLimitGetOptions(v))
 	v.Microversion, v.Headers = owned.Microversion, owned.Headers
 	if v.Headers == nil {
@@ -183,14 +164,8 @@ func copyPacketRateLimitGet(v PacketRateLimitGetOpts) PacketRateLimitGetOpts {
 	}
 	return v
 }
-func WithPacketRateLimitGetOpts(v PacketRateLimitGetOpts) PacketRateLimitGetOption {
-	owned := copyPacketRateLimitGet(v)
-	return func(c *PacketRateLimitGetOpts) error { *c = copyPacketRateLimitGet(owned); return nil }
-}
-func WithPacketRateLimitGetMicroversion(v string) PacketRateLimitGetOption {
-	return func(c *PacketRateLimitGetOpts) error { x := v; c.Microversion = &x; return nil }
-}
-func WithPacketRateLimitGetHeaders(v map[string]string) PacketRateLimitGetOption {
-	owned := maps.Clone(v)
-	return func(c *PacketRateLimitGetOpts) error { c.Headers = maps.Clone(owned); return nil }
+func packetRateLimitGetCalls(calls []request.ReadCall) []func(*packetRateLimitGetState) error {
+	return qosCalls(calls, func(s *packetRateLimitGetState) qosCallFields {
+		return qosCallFields{headers: &s.Headers, microversion: &s.Microversion}
+	}, nil, false)
 }

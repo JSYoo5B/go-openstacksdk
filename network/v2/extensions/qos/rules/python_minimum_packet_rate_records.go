@@ -130,16 +130,12 @@ func minimumPacketRateParentQuery(policy neutronfind.Options, parent string, inj
 
 // FindMinimumPacketRateRecord matches pinned GET-first Find within one literal
 // parent policy. Only clean member400/403/404 permit a complete ID/name search.
-func (a *API) FindMinimumPacketRateRecord(ctx context.Context, policyID, identity string, options ...MinimumPacketRateFindOption) (*MinimumPacketRateRecord, error) {
+func (a *API) FindMinimumPacketRateRecord(ctx context.Context, policyID, identity string, opts MinimumPacketRateFindOpts, calls ...request.ReadCall) (*MinimumPacketRateRecord, error) {
 	engine, err := a.minimumPacketRateEngine(ctx, policyID)
 	if err != nil {
 		return nil, minimumPacketRateWrap(ctx, "FindMinimumPacketRateRecord", err)
 	}
-	callbacks := make([]func(*MinimumPacketRateFindOpts) error, len(options))
-	for i, apply := range slices.Clone(options) {
-		callbacks[i] = apply
-	}
-	policy, err := applyMinimumPacketRateOptions(ctx, engine, MinimumPacketRateFindOpts{}, copyMinimumPacketRateFind, callbacks)
+	policy, err := applyMinimumPacketRateOptions(ctx, engine, minimumPacketRateFindState{Query: opts.Query}, copyMinimumPacketRateFind, minimumPacketRateFindCalls(slices.Clone(calls)))
 	if err != nil {
 		return nil, minimumPacketRateWrap(ctx, "FindMinimumPacketRateRecord", err)
 	}
@@ -154,16 +150,12 @@ func (a *API) FindMinimumPacketRateRecord(ctx context.Context, policyID, identit
 // GetMinimumPacketRateRecord performs one literal member GET, with no parent
 // lookup, Find fallback or ignore-missing behavior. Header/version options are
 // explicit Go conveniences; pinned get_qos_minimum_packet_rate_rule has no kwargs.
-func (a *API) GetMinimumPacketRateRecord(ctx context.Context, policyID, identity string, options ...MinimumPacketRateGetOption) (*MinimumPacketRateRecord, error) {
+func (a *API) GetMinimumPacketRateRecord(ctx context.Context, policyID, identity string, calls ...request.ReadCall) (*MinimumPacketRateRecord, error) {
 	engine, err := a.minimumPacketRateEngine(ctx, policyID)
 	if err != nil {
 		return nil, minimumPacketRateWrap(ctx, "GetMinimumPacketRateRecord", err)
 	}
-	callbacks := make([]func(*MinimumPacketRateGetOpts) error, len(options))
-	for i, apply := range slices.Clone(options) {
-		callbacks[i] = apply
-	}
-	policy, err := applyMinimumPacketRateOptions(ctx, engine, MinimumPacketRateGetOpts{}, copyMinimumPacketRateGet, callbacks)
+	policy, err := applyMinimumPacketRateOptions(ctx, engine, minimumPacketRateGetState{}, copyMinimumPacketRateGet, minimumPacketRateGetCalls(slices.Clone(calls)))
 	if err != nil {
 		return nil, minimumPacketRateWrap(ctx, "GetMinimumPacketRateRecord", err)
 	}
@@ -173,19 +165,15 @@ func (a *API) GetMinimumPacketRateRecord(ctx context.Context, policyID, identity
 
 // ListMinimumPacketRateRecords lazily yields rules within one literal parent.
 // Only limit/marker are server query fields; known Body kwargs filter locally.
-func (a *API) ListMinimumPacketRateRecords(ctx context.Context, policyID string, options ...MinimumPacketRateListOption) iter.Seq2[*MinimumPacketRateRecord, error] {
-	snapshot := slices.Clone(options)
+func (a *API) ListMinimumPacketRateRecords(ctx context.Context, policyID string, opts MinimumPacketRateListOpts, calls ...request.ListCall) iter.Seq2[*MinimumPacketRateRecord, error] {
+	initial, snapshot := copyMinimumPacketRateList(minimumPacketRateListState{Query: opts.Query}), slices.Clone(calls)
 	return func(yield func(*MinimumPacketRateRecord, error) bool) {
 		engine, err := a.minimumPacketRateEngine(ctx, policyID)
 		if err != nil {
 			yield(nil, minimumPacketRateWrap(ctx, "ListMinimumPacketRateRecords", err))
 			return
 		}
-		callbacks := make([]func(*MinimumPacketRateListOpts) error, len(snapshot))
-		for i, apply := range snapshot {
-			callbacks[i] = apply
-		}
-		policy, err := applyMinimumPacketRateOptions(ctx, engine, MinimumPacketRateListOpts{}, copyMinimumPacketRateList, callbacks)
+		policy, err := applyMinimumPacketRateOptions(ctx, engine, initial, copyMinimumPacketRateList, minimumPacketRateListCalls(snapshot))
 		if err != nil {
 			yield(nil, minimumPacketRateWrap(ctx, "ListMinimumPacketRateRecords", err))
 			return
@@ -203,9 +191,9 @@ func (a *API) ListMinimumPacketRateRecords(ctx context.Context, policyID string,
 	}
 }
 
-func (a *API) AllMinimumPacketRateRecords(ctx context.Context, policyID string, options ...MinimumPacketRateListOption) ([]*MinimumPacketRateRecord, error) {
+func (a *API) AllMinimumPacketRateRecords(ctx context.Context, policyID string, opts MinimumPacketRateListOpts, calls ...request.ListCall) ([]*MinimumPacketRateRecord, error) {
 	var values []*MinimumPacketRateRecord
-	for value, err := range a.ListMinimumPacketRateRecords(ctx, policyID, options...) {
+	for value, err := range a.ListMinimumPacketRateRecords(ctx, policyID, opts, calls...) {
 		if err != nil {
 			return nil, err
 		}

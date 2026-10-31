@@ -909,8 +909,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSBandwidthLimitHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSBandwidthLimitMicroversion`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ProxyBandwidthLimitRecords`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitProxyQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitListBasePath`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.BasePath`
 
 - Complete QoS extension gate then exactly one parent policy resolution, owned untyped defaults/unknown fields/computed-null location, bound URI parent and local Body filtering with shared actual paging.
   Tests: `network/cloud_qos_bandwidth_test.go:TestCloudQoSBandwidthListOwnsGateParentPagingAndRawFields`.
@@ -946,8 +946,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSBandwidthLimitHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSBandwidthLimitMicroversion`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ProxyBandwidthLimitRecords`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitProxyQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitListBasePath`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.BasePath`
 
 - Complete QoS extension gate then exactly one parent policy resolution, owned untyped defaults/unknown fields/computed-null location, bound URI parent and local Body filtering with shared actual paging.
   Tests: `network/cloud_qos_bandwidth_test.go:TestCloudQoSBandwidthListOwnsGateParentPagingAndRawFields`.
@@ -1033,7 +1033,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.WithDSCPMarkingCloudCurrentLocation`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithDSCPMarkingCloudFiltersJSON`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ProxyDSCPMarkingRecords`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingProxyQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - Every call consumes the full fresh qos extension inventory before GET-first exact policy Find; early qos match does not suppress later alias/page faults. Missing or ambiguous policy stops rule I/O with actual already observed gate/policy evidence, no fabricated policy response.
   Tests: `network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingGateConsumesAllExtensionsAndStopsBeforePolicy`, `network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingPolicyMissingAndAmbiguityRetainActualGate`, `network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingFreshCompleteGatePolicyNameLookupAndSourceLinkPrecedence`.
@@ -1068,7 +1068,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.WithDSCPMarkingCloudCurrentLocation`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithDSCPMarkingCloudFiltersJSON`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ProxyDSCPMarkingRecords`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingProxyQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - Every call consumes the full fresh qos extension inventory before GET-first exact policy Find; early qos match does not suppress later alias/page faults. Missing or ambiguous policy stops rule I/O with actual already observed gate/policy evidence, no fabricated policy response.
   Tests: `network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingGateConsumesAllExtensionsAndStopsBeforePolicy`, `network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingPolicyMissingAndAmbiguityRetainActualGate`, `network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingFreshCompleteGatePolicyNameLookupAndSourceLinkPrecedence`.
@@ -1152,7 +1152,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.WithMinimumBandwidthCloudCurrentLocation`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithMinimumBandwidthCloudFiltersJSON`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ProxyMinimumBandwidthRecords`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumBandwidthProxyQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - Every call consumes the full fresh qos extension inventory before GET-first exact policy Find; early qos match does not suppress later alias/page faults. Missing or ambiguous policy stops rule I/O with actual already observed gate/policy evidence, no fabricated policy response.
   Tests: `network/cloud_qos_minimum_bandwidth_test.go:TestCloudQoSMinimumBandwidthGateConsumesAllExtensionsAndStopsBeforePolicy`, `network/cloud_qos_minimum_bandwidth_test.go:TestCloudQoSMinimumBandwidthPolicyMissingAndAmbiguityRetainActualGate`, `network/cloud_qos_minimum_bandwidth_test.go:TestCloudQoSMinimumBandwidthFreshCompleteGatePolicyNameLookupAndSourceLinkPrecedence`.
@@ -1187,7 +1187,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.WithMinimumBandwidthCloudCurrentLocation`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithMinimumBandwidthCloudFiltersJSON`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ProxyMinimumBandwidthRecords`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumBandwidthProxyQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - Every call consumes the full fresh qos extension inventory before GET-first exact policy Find; early qos match does not suppress later alias/page faults. Missing or ambiguous policy stops rule I/O with actual already observed gate/policy evidence, no fabricated policy response.
   Tests: `network/cloud_qos_minimum_bandwidth_test.go:TestCloudQoSMinimumBandwidthGateConsumesAllExtensionsAndStopsBeforePolicy`, `network/cloud_qos_minimum_bandwidth_test.go:TestCloudQoSMinimumBandwidthPolicyMissingAndAmbiguityRetainActualGate`, `network/cloud_qos_minimum_bandwidth_test.go:TestCloudQoSMinimumBandwidthFreshCompleteGatePolicyNameLookupAndSourceLinkPrecedence`.
