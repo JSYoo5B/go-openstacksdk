@@ -155,7 +155,7 @@ func TestCloudGetProjectPhysicalCloseSourceCancelKeepActualNativeEvidence(t *tes
 				cause := errors.New(lane + " witness")
 				closes := &atomic.Int32{}
 				base := f.Provider.HTTPClient.Transport
-				f.Provider.HTTPClient.Transport = userCloudHTTP(func(r *http.Request) (*http.Response, error) {
+				f.SetTransport(testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 					response, err := base.RoundTrip(r)
 					if response != nil {
 						b := &endpointCloudFaultBody{ReadCloser: response.Body, closes: closes}
@@ -170,7 +170,7 @@ func TestCloudGetProjectPhysicalCloseSourceCancelKeepActualNativeEvidence(t *tes
 						response.Body = b
 					}
 					return response, err
-				})
+				}))
 				hooks := 0
 				f.Provider.RetryFunc = func(context.Context, string, string, *gophercloud.RequestOpts, error, uint) error {
 					hooks++

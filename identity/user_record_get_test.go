@@ -14,25 +14,10 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/identity"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
-
-// getterPhysicalReadBody is the existing scripted transport's operation-level
-// fault observer. Direct RoundTripper bypasses net/http length enforcement, so
-// the body must report an actual read failure instead of clean EOF.
-type getterPhysicalReadBody struct {
-	io.Reader
-}
-
-func (b *getterPhysicalReadBody) Read(p []byte) (int, error) {
-	n, err := b.Reader.Read(p)
-	if err == io.EOF {
-		return n, io.ErrUnexpectedEOF
-	}
-	return n, err
-}
-func (*getterPhysicalReadBody) Close() error { return nil }
 
 func TestPythonCloudGetUserFiltersNoneVersusAllFalseyPresence(t *testing.T) {
 	for _, filter := range []string{"omitted", "null", "{}", "[]", "false", "0", `""`} {
@@ -397,7 +382,7 @@ func TestPythonCloudGetUserPhysicalForbiddenNeverFindFallsThroughOrRetries(t *te
 				}
 				r := userCloudWire(403, `{"error":"physical"}`)
 				r.ContentLength = 128
-				r.Body = &getterPhysicalReadBody{Reader: strings.NewReader(`{"error":"physical"}`)}
+				r.Body = &testcloud.Body{Data: `{"error":"physical"}`, ReadErr: io.ErrUnexpectedEOF}
 				return r
 			})
 			fixture.Provider.RetryFunc = func(context.Context, string, string, *gophercloud.RequestOpts, error, uint) error {

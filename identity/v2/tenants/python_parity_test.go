@@ -6,7 +6,6 @@ import (
 	"io"
 	"net/http"
 	"reflect"
-	"strings"
 	"testing"
 	"time"
 
@@ -15,22 +14,12 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
-type pythonTenantTransport func(*http.Request) (*http.Response, error)
-
-func (transport pythonTenantTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 type pythonTenantCall struct{ method, path, query, body string }
 
 func pythonTenantAPI(t *testing.T, calls *[]pythonTenantCall, reply func(*http.Request) (int, string)) (*tenants.API, *testcloud.Cloud) {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = pythonTenantTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -38,8 +27,8 @@ func pythonTenantAPI(t *testing.T, calls *[]pythonTenantCall, reply func(*http.R
 		}
 		*calls = append(*calls, pythonTenantCall{req.Method, req.URL.Path, req.URL.RawQuery, raw})
 		code, body := reply(req)
-		return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}, nil
-	})
+		return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}}), nil
+	}))
 	client := cloud.Client("identity", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/keystone/v2.0/"
 	return tenants.New(client), cloud

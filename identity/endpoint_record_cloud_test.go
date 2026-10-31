@@ -501,7 +501,7 @@ func TestPythonEndpointCloudPhysicalFaultsNeverFallbackRetryOrInventRows(t *test
 					cause := errors.New(lane + " witness")
 					closes := &atomic.Int32{}
 					base := fixture.Provider.HTTPClient.Transport
-					fixture.Provider.HTTPClient.Transport = userCloudHTTP(func(r *http.Request) (*http.Response, error) {
+					fixture.SetTransport(testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 						response, err := base.RoundTrip(r)
 						if response != nil {
 							b := &endpointCloudFaultBody{ReadCloser: response.Body, closes: closes}
@@ -516,7 +516,7 @@ func TestPythonEndpointCloudPhysicalFaultsNeverFallbackRetryOrInventRows(t *test
 							response.Body = b
 						}
 						return response, err
-					})
+					}))
 					hooks := 0
 					fixture.Provider.RetryFunc = func(context.Context, string, string, *gophercloud.RequestOpts, error, uint) error {
 						hooks++

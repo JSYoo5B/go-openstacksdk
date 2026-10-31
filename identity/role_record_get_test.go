@@ -23,7 +23,7 @@ import (
 func roleGetFixture(t *testing.T, reply func(*http.Request) *http.Response) (*identity.RoleReadCloud, *testcloud.Cloud) {
 	t.Helper()
 	fixture := testcloud.New(t)
-	fixture.Provider.HTTPClient.Transport = userCloudHTTP(func(q *http.Request) (*http.Response, error) { return reply(q), nil })
+	fixture.SetTransport(testcloud.LinkRequest(func(q *http.Request) (*http.Response, error) { return reply(q), nil }))
 	client := fixture.Client("identity", "/catalog/unused/")
 	client.ResourceBase = fixture.Server.URL + "/keystone/v3/"
 	return identity.NewRoleReadCloud(roles.New(client)), fixture
@@ -381,7 +381,7 @@ func TestPythonCloudGetRoleOwnerCancellationPrivateGuardAndPhysical401(t *testin
 		calls++
 		r := roleGetWire(401, `{"error":"physical401"}`)
 		r.ContentLength = 128
-		r.Body = &getterPhysicalReadBody{Reader: strings.NewReader(`{"error":"physical401"}`)}
+		r.Body = &testcloud.Body{Data: `{"error":"physical401"}`, ReadErr: io.ErrUnexpectedEOF}
 		return r
 	})
 	fixture.Provider.RetryFunc = func(context.Context, string, string, *gophercloud.RequestOpts, error, uint) error {

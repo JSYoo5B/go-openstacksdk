@@ -8,7 +8,6 @@ import (
 	"io"
 	"net/http"
 	"reflect"
-	"strings"
 	"testing"
 	"time"
 
@@ -18,23 +17,13 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type nativeV2TokenTransport func(*http.Request) (*http.Response, error)
-
-func (transport nativeV2TokenTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 // authToken records the X-Auth-Token header that reaches the wire.
 type nativeV2TokenCall struct{ method, path, query, body, authToken string }
 
 func nativeV2TokenAPI(t *testing.T, calls *[]nativeV2TokenCall, reply func(*http.Request) (int, string)) (*tokens.API, *testcloud.Cloud) {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = nativeV2TokenTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -42,8 +31,8 @@ func nativeV2TokenAPI(t *testing.T, calls *[]nativeV2TokenCall, reply func(*http
 		}
 		*calls = append(*calls, nativeV2TokenCall{req.Method, req.URL.Path, req.URL.RawQuery, raw, req.Header.Get("X-Auth-Token")})
 		code, body := reply(req)
-		return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}, "X-Openstack-Request-Id": {"req-1"}}}, nil
-	})
+		return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}, "X-Openstack-Request-Id": {"req-1"}}), nil
+	}))
 	client := cloud.Client("identity", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/keystone/v2.0/"
 	return tokens.New(client), cloud

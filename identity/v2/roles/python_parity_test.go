@@ -2,25 +2,13 @@ package roles_test
 
 import (
 	"context"
-	"io"
 	"net/http"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v2/roles"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 )
-
-type pythonRoleTransport func(*http.Request) (*http.Response, error)
-
-func (transport pythonRoleTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
 
 type pythonRoleCall struct{ method, path, query string }
 
@@ -30,11 +18,11 @@ type pythonRoleCall struct{ method, path, query string }
 func TestPythonRoleListDefaultRequest(t *testing.T) {
 	cloud := testcloud.New(t)
 	var calls []pythonRoleCall
-	cloud.Provider.HTTPClient.Transport = pythonRoleTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		calls = append(calls, pythonRoleCall{req.Method, req.URL.Path, req.URL.RawQuery})
 		body := `{"roles":[{"id":"r-1","name":"admin","description":"d"}],"roles_links":[{"rel":"next","href":"` + cloud.Server.URL + `/keystone/v2.0/OS-KSADM/roles?marker=r-1"}]}`
-		return &http.Response{StatusCode: 200, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}, nil
-	})
+		return testcloud.Response(200, body, http.Header{"Content-Type": {"application/json"}}), nil
+	}))
 	client := cloud.Client("identity", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/keystone/v2.0/"
 	var rows []roles.Role

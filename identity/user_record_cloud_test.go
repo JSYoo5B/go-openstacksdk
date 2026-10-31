@@ -5,10 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/identity"
@@ -18,22 +16,13 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type userCloudHTTP func(*http.Request) (*http.Response, error)
-
-func (f userCloudHTTP) RoundTrip(r *http.Request) (*http.Response, error) {
-	response, err := f(r)
-	if response != nil && response.Request == nil {
-		response.Request = r
-	}
-	return response, err
-}
 func userCloudWire(status int, body string) *http.Response {
-	return &http.Response{StatusCode: status, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}, "X-Request-Id": {"actual-user-cloud"}}}
+	return testcloud.Response(status, body, http.Header{"Content-Type": {"application/json"}, "X-Request-Id": {"actual-user-cloud"}})
 }
 func userCloudFixture(t *testing.T, reply func(*http.Request) *http.Response) (*identity.UserReadCloud, *testcloud.Cloud) {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = userCloudHTTP(func(r *http.Request) (*http.Response, error) { return reply(r), nil })
+	cloud.SetTransport(testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) { return reply(r), nil }))
 	client := cloud.Client("identity", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/keystone/v3/"
 	return identity.NewUserReadCloud(users.New(client)), cloud
