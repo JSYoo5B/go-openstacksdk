@@ -11,6 +11,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -37,7 +38,7 @@ func TestNovaQuotaRecordProjectUserUsageAndArbitraryFetchQueries(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	query := []quotasets.QuotaReadOption{quotasets.WithQuotaReadQuery("fields", []string{"cores", "ram"}), quotasets.WithQuotaReadQuery("a", false)}
+	query := []quotasets.QuotaReadOption{request.Query("fields", []string{"cores", "ram"}), request.Query("a", false)}
 	got, err := scope.GetRecord(context.Background(), query...)
 	if err != nil || got.StatusCode != 203 || string(got.Resource.Body["cores"]) != "12" || string(got.Resource.Body["force"]) != "false" || string(got.Resource.Body["id"]) != `"foreign"` || got.ProjectID != "project" || got.Microversion != "2.96" {
 		t.Fatal(got, err)
@@ -102,7 +103,7 @@ func TestNovaQuotaRecordExplicitVersionSkipsDiscoveryAndAllowsNoVersion(t *testi
 			if err != nil {
 				t.Fatal(err)
 			}
-			result, err := scope.GetRecord(context.Background(), quotasets.WithQuotaReadMicroversion(selected))
+			result, err := scope.GetRecord(context.Background(), request.Microversion(selected))
 			if err != nil || result.Microversion != selected || calls != 1 || len(result.Discovery.Responses) != 0 {
 				t.Fatal(result, err, calls)
 			}
@@ -117,7 +118,7 @@ func TestNovaQuotaRecordBasePathCollisionAndRequiresIDFailBeforeDiscovery(t *tes
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, option := range []quotasets.QuotaReadOption{quotasets.WithQuotaReadQuery("base_path", nil), quotasets.WithQuotaReadQuery("base_path", "/other"), quotasets.WithQuotaReadRequiresID(true), nil} {
+	for _, option := range []quotasets.QuotaReadOption{request.Query("base_path", nil), request.Query("base_path", "/other"), quotasets.WithQuotaReadRequiresID(true), nil} {
 		_, err := scope.GetRecord(context.Background(), option)
 		if !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(err)
@@ -157,7 +158,7 @@ func TestNovaQuotaRecordOptionInputSnapshotAndNoCache(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := user.GetRecord(context.Background(), quotasets.WithQuotaReadQuery("user_id", nil)); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := user.GetRecord(context.Background(), request.Query("user_id", nil)); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
 	if calls != 2 {
@@ -196,7 +197,10 @@ func (v novaQuotaBasePathMarshaler) MarshalJSON() ([]byte, error) {
 	*v.calls++
 	return []byte(`"/other"`), nil
 }
-func TestNovaQuotaBasePathPresenceRejectsWithoutInvokingCallerMarshaler(t *testing.T) {
+
+// request.Query marshals its value once when the call is constructed; the
+// base_path key is still rejected by presence before HTTP.
+func TestNovaQuotaBasePathPresenceRejectsBeforeHTTP(t *testing.T) {
 	cloud := testcloud.New(t)
 	httpCalls, marshaled := 0, 0
 	cloud.Mux.HandleFunc("/compute/", func(w http.ResponseWriter, r *http.Request) { httpCalls++; testcloud.JSON(w, 200, `{}`) })
@@ -204,8 +208,8 @@ func TestNovaQuotaBasePathPresenceRejectsWithoutInvokingCallerMarshaler(t *testi
 	if err != nil {
 		t.Fatal(err)
 	}
-	_, err = scope.GetRecord(context.Background(), quotasets.WithQuotaReadQuery("base_path", novaQuotaBasePathMarshaler{&marshaled}))
-	if !errors.Is(err, resource.ErrInvalidOption) || httpCalls != 0 || marshaled != 0 {
+	_, err = scope.GetRecord(context.Background(), request.Query("base_path", novaQuotaBasePathMarshaler{&marshaled}))
+	if !errors.Is(err, resource.ErrInvalidOption) || httpCalls != 0 || marshaled != 1 {
 		t.Fatal(err, httpCalls, marshaled)
 	}
 }

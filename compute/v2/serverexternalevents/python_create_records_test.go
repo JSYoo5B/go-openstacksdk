@@ -35,7 +35,7 @@ func TestPythonExternalEventsBatchRawWireAndDeclaredProjection(t *testing.T) {
 	api, _, calls := eventAPI(t, reply, 203)
 	input := []serverexternalevents.Event{{"name": "network-changed", "server_uuid": "server", "code": "-1", "hosts": "host", "metadata": [1]int{1}, "opaque": func() {}, "unknown": "drop"}}
 	mutate := func(*request.Config[serverexternalevents.CreateOpts]) error { input[0]["name"] = "changed"; return nil }
-	rows, err := api.CreateRecords(context.Background(), input, mutate)
+	rows, err := api.CreateRecords(context.Background(), input, request.Custom(mutate))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -123,7 +123,7 @@ func TestPythonExternalEventsSourceGuardAndCanceledIteration(t *testing.T) {
 		client.Endpoint = "https://foreign.invalid/"
 		return nil
 	}
-	if _, err := api.CreateRecords(context.Background(), []serverexternalevents.Event{{}}, option); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := api.CreateRecords(context.Background(), []serverexternalevents.Event{{}}, request.Custom(option)); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
 	if len(*calls) != 0 {
@@ -180,7 +180,7 @@ func TestPythonExternalEventsSelectedAPIReplacementAndIterationBreak(t *testing.
 		*api = *serverexternalevents.New(&copyClient)
 		return nil
 	}
-	if _, err := api.CreateRecords(context.Background(), []serverexternalevents.Event{{}}, replace); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := api.CreateRecords(context.Background(), []serverexternalevents.Event{{}}, request.Custom(replace)); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
 	if len(*calls) != 0 {

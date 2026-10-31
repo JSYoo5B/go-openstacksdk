@@ -14,6 +14,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/microversions"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
@@ -30,34 +31,39 @@ type ConsoleCreateOpts struct {
 	URL      request.Optional[string] `json:"url,omitzero"`
 }
 
-type ConsoleCreateOption = request.Option[ConsoleCreateOpts]
+// ConsoleCreateOption is one option of CreateConsole: WithConsoleCreateOptions,
+// WithConsoleCreateProtocol, WithConsoleCreateProtocolValue,
+// WithConsoleCreateType, WithConsoleCreateTypeValue, WithConsoleCreateURL,
+// WithConsoleCreateURLValue, request.Field, request.Header or request.Custom
+// over *request.Config[ConsoleCreateOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type ConsoleCreateOption = request.WriteCall
+
+var consoleCreateCalls = calls.Spec[request.Config[ConsoleCreateOpts]]{
+	Header: calls.ConfigHeader[ConsoleCreateOpts],
+	Field:  calls.ConfigField[ConsoleCreateOpts],
+}
 
 func WithConsoleCreateOptions(value ConsoleCreateOpts) ConsoleCreateOption {
-	return func(config *request.Config[ConsoleCreateOpts]) error { config.Options = value; return nil }
+	return request.Custom(func(config *request.Config[ConsoleCreateOpts]) error { config.Options = value; return nil })
 }
 func WithConsoleCreateProtocol(value string) ConsoleCreateOption {
 	return WithConsoleCreateProtocolValue(request.Present(value))
 }
 func WithConsoleCreateProtocolValue(value request.Optional[string]) ConsoleCreateOption {
-	return func(config *request.Config[ConsoleCreateOpts]) error { config.Options.Protocol = value; return nil }
+	return request.Custom(func(config *request.Config[ConsoleCreateOpts]) error { config.Options.Protocol = value; return nil })
 }
 func WithConsoleCreateType(value string) ConsoleCreateOption {
 	return WithConsoleCreateTypeValue(request.Present(value))
 }
 func WithConsoleCreateTypeValue(value request.Optional[string]) ConsoleCreateOption {
-	return func(config *request.Config[ConsoleCreateOpts]) error { config.Options.Type = value; return nil }
+	return request.Custom(func(config *request.Config[ConsoleCreateOpts]) error { config.Options.Type = value; return nil })
 }
 func WithConsoleCreateURL(value string) ConsoleCreateOption {
 	return WithConsoleCreateURLValue(request.Present(value))
 }
 func WithConsoleCreateURLValue(value request.Optional[string]) ConsoleCreateOption {
-	return func(config *request.Config[ConsoleCreateOpts]) error { config.Options.URL = value; return nil }
-}
-func WithConsoleCreateField(key string, value any) ConsoleCreateOption {
-	return request.WithField[ConsoleCreateOpts](key, value)
-}
-func WithConsoleCreateHeader(key, value string) ConsoleCreateOption {
-	return request.WithHeader[ConsoleCreateOpts](key, value)
+	return request.Custom(func(config *request.Config[ConsoleCreateOpts]) error { config.Options.URL = value; return nil })
 }
 
 // ConsoleRecord separates seeded attributes from the actual selected response
@@ -100,8 +106,8 @@ func (a *API) CreateConsole(ctx context.Context, serverID string, options ...Con
 		}
 		return errors.Join(replacement, source.Guard(ctx), rest.CheckOperationGuard(ctx))
 	}
-	owned := slices.Clone(options)
-	guarded := make([]ConsoleCreateOption, len(owned))
+	owned := calls.Options(options, consoleCreateCalls)
+	guarded := make([]request.Option[ConsoleCreateOpts], len(owned))
 	for i, option := range owned {
 		apply := option
 		guarded[i] = func(config *request.Config[ConsoleCreateOpts]) error {

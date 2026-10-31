@@ -14,6 +14,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/microversions"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
@@ -36,7 +37,21 @@ type FlavorFindOpts struct {
 	Microversion  *string
 }
 
-type FlavorFindOption = request.Option[FlavorFindOpts]
+// FlavorFindOption is one option of FindRecord: WithFlavorFindOptions,
+// WithFlavorFindExtraSpecs, WithFlavorFindLimit, WithFlavorFindMarker,
+// WithFlavorFindMaxItems, WithFlavorFindPaginated, WithFlavorFindFilter,
+// WithFlavorFindFilters, request.IgnoreMissing, request.Query with a string
+// or []string value, request.Microversion, request.Header or request.Custom
+// over *request.Config[FlavorFindOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type FlavorFindOption = request.FindCall
+
+var flavorFindCalls = calls.Spec[request.Config[FlavorFindOpts]]{
+	Header:        calls.ConfigHeader[FlavorFindOpts],
+	Query:         calls.ConfigQuery[FlavorFindOpts],
+	Microversion:  calls.Pointer(func(c *request.Config[FlavorFindOpts]) **string { return &c.Options.Microversion }),
+	IgnoreMissing: calls.Pointer(func(c *request.Config[FlavorFindOpts]) **bool { return &c.Options.IgnoreMissing }),
+}
 
 func copyFlavorFindOptions(value FlavorFindOpts) FlavorFindOpts {
 	if value.IgnoreMissing != nil {
@@ -58,62 +73,46 @@ func copyFlavorFindOptions(value FlavorFindOpts) FlavorFindOpts {
 // supplied headers, wire queries and semantic filters.
 func WithFlavorFindOptions(value FlavorFindOpts) FlavorFindOption {
 	owned := copyFlavorFindOptions(value)
-	return func(config *request.Config[FlavorFindOpts]) error {
+	return request.Custom(func(config *request.Config[FlavorFindOpts]) error {
 		config.Options = copyFlavorFindOptions(owned)
 		return nil
-	}
+	})
 }
 func WithFlavorFindExtraSpecs(value bool) FlavorFindOption {
-	return func(config *request.Config[FlavorFindOpts]) error { config.Options.GetExtraSpecs = value; return nil }
+	return request.Custom(func(config *request.Config[FlavorFindOpts]) error { config.Options.GetExtraSpecs = value; return nil })
 }
-func WithFlavorFindIgnoreMissing(value bool) FlavorFindOption {
-	return func(config *request.Config[FlavorFindOpts]) error {
-		owned := value
-		config.Options.IgnoreMissing = &owned
-		return nil
-	}
-}
+
+// WithFlavorFindLimit, WithFlavorFindMarker, WithFlavorFindMaxItems and
+// WithFlavorFindPaginated control the list fallback. They are
+// operation-specific: FindRecord does not accept the shared paging calls.
 func WithFlavorFindLimit(value int) FlavorFindOption {
-	return func(config *request.Config[FlavorFindOpts]) error { config.Options.Limit = value; return nil }
+	return request.Custom(func(config *request.Config[FlavorFindOpts]) error { config.Options.Limit = value; return nil })
 }
 func WithFlavorFindMarker(value string) FlavorFindOption {
-	return func(config *request.Config[FlavorFindOpts]) error { config.Options.Marker = value; return nil }
+	return request.Custom(func(config *request.Config[FlavorFindOpts]) error { config.Options.Marker = value; return nil })
 }
 
 // WithFlavorFindMaxItems caps raw fallback rows before local Body filtering.
 func WithFlavorFindMaxItems(value int) FlavorFindOption {
-	return func(config *request.Config[FlavorFindOpts]) error { config.Options.MaxItems = value; return nil }
+	return request.Custom(func(config *request.Config[FlavorFindOpts]) error { config.Options.MaxItems = value; return nil })
 }
 func WithFlavorFindPaginated(value bool) FlavorFindOption {
-	return func(config *request.Config[FlavorFindOpts]) error {
+	return request.Custom(func(config *request.Config[FlavorFindOpts]) error {
 		owned := value
 		config.Options.Paginated = &owned
 		return nil
-	}
-}
-func WithFlavorFindMicroversion(value string) FlavorFindOption {
-	return func(config *request.Config[FlavorFindOpts]) error {
-		owned := value
-		config.Options.Microversion = &owned
-		return nil
-	}
-}
-func WithFlavorFindHeader(key, value string) FlavorFindOption {
-	return request.WithHeader[FlavorFindOpts](key, value)
-}
-func WithFlavorFindQuery(key, value string) FlavorFindOption {
-	return request.WithQuery[FlavorFindOpts](key, value)
+	})
 }
 
 // WithFlavorFindFilter sends the original attribute spelling to member GET,
 // then classifies it as a server query or local Body field for list fallback.
 func WithFlavorFindFilter(field string, value any) FlavorFindOption {
-	return flavorFilterOption[FlavorFindOpts](resource.WithFilter(field, value))
+	return request.Custom(flavorFilterOption[FlavorFindOpts](resource.WithFilter(field, value)))
 }
 
 // WithFlavorFindFilters replaces only semantic filters. Nil clears them.
 func WithFlavorFindFilters(values map[string]any) FlavorFindOption {
-	return flavorFilterOption[FlavorFindOpts](resource.WithFilters(values))
+	return request.Custom(flavorFilterOption[FlavorFindOpts](resource.WithFilters(values)))
 }
 
 func validateFlavorRecordIdentity(identity string) error {
@@ -207,7 +206,7 @@ func (a *API) FindFlavor(ctx context.Context, nameOrID string, options ...Flavor
 	check := func(checkCtx context.Context) error {
 		return errors.Join(guard(checkCtx), rest.CheckOperationGuard(checkCtx))
 	}
-	owned := slices.Clone(options)
+	owned := calls.Options(options, flavorFindCalls)
 	config, err := prepareFlavorReadConfig(operationCtx, check, FlavorFindOpts{}, copyFlavorFindOptions, owned)
 	if err != nil {
 		return fail(nil, err)

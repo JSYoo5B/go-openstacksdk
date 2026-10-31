@@ -163,11 +163,11 @@ func TestComputeFlavorFetchExtraSpecsAlwaysGETRawValuesAndOwnedExistingInputs(t 
 				w.Header().Set("X-Spec-Proof", "fresh receipt")
 				testcloud.JSON(w, 201, `{"extra_specs":{"fresh":"value"},"name":"response-is-not-flavor"}`)
 			})
-			value, err := flavors.New(client).FetchExtraSpecs(context.Background(), input, bulk, func(c *request.Config[flavors.FlavorExtraSpecsOpts]) error {
+			value, err := flavors.New(client).FetchExtraSpecs(context.Background(), input, bulk, request.Custom(func(c *request.Config[flavors.FlavorExtraSpecsOpts]) error {
 				first.Add(1)
 				c.Headers = shared
 				return nil
-			}, func(_ *request.Config[flavors.FlavorExtraSpecsOpts]) error {
+			}), request.Custom(func(_ *request.Config[flavors.FlavorExtraSpecsOpts]) error {
 				last.Add(1)
 				shared["X-Spec-Trace"] = "changed"
 				native.ID = "caller-change"
@@ -177,7 +177,7 @@ func TestComputeFlavorFetchExtraSpecsAlwaysGETRawValuesAndOwnedExistingInputs(t 
 				raw.Body["vendor"][0] = 'x'
 				raw.Header.Set("X-Seed-Proof", "caller-change")
 				return nil
-			})
+			}))
 			if err != nil || value == nil || value.Resource == nil || value.Wire == nil || string(value.ExtraSpecs) != `{"fresh":"value"}` || string(value.Resource.Body["extra_specs"]) != `{"fresh":"value"}` || string(value.Resource.Body["id"]) != wantID || calls.Load() != 1 || first.Load() != 1 || last.Load() != 1 || client.Microversion != "2.55" {
 				t.Fatal("always-fetch or owned seed changed", value, err, calls.Load(), first.Load(), last.Load())
 			}
@@ -263,7 +263,7 @@ func TestComputeFlavorFetchExtraSpecsAlwaysGETRawValuesAndOwnedExistingInputs(t 
 			})
 			var opts []flavors.FlavorExtraSpecsOption
 			if tc.empty {
-				opts = append(opts, flavors.WithFlavorExtraSpecsMicroversion(""))
+				opts = append(opts, request.Microversion(""))
 			}
 			value, err := flavors.New(client).FetchExtraSpecs(context.Background(), flavors.FlavorExtraSpecsRequest{ID: "7"}, opts...)
 			wantDiscovery := int32(0)
@@ -311,18 +311,18 @@ func TestComputeFlavorFetchExtraSpecsPreflightAndAcceptedTerminalReceipts(t *tes
 				options = append(options, nil)
 			case "cancel callback":
 				expected = context.Canceled
-				options = append(options, func(_ *request.Config[flavors.FlavorExtraSpecsOpts]) error { cancel(); return nil })
+				options = append(options, request.Custom(func(_ *request.Config[flavors.FlavorExtraSpecsOpts]) error { cancel(); return nil }))
 			case "source version callback":
-				options = append(options, func(_ *request.Config[flavors.FlavorExtraSpecsOpts]) error { client.Microversion = "2.1"; return nil })
+				options = append(options, request.Custom(func(_ *request.Config[flavors.FlavorExtraSpecsOpts]) error { client.Microversion = "2.1"; return nil }))
 			case "outer guard":
 				expected = cause
 				ctx = rest.WithOperationGuard(ctx, func(context.Context) error { return cause })
 			case "auth header before discovery":
 				client.Microversion = ""
 				client.Endpoint = cloud.Server.URL + "/reverse/nova/v2.1/project/"
-				options = append(options, flavors.WithFlavorExtraSpecsHeader("X-Auth-Token", "forged"))
+				options = append(options, request.Header("X-Auth-Token", "forged"))
 			}
-			options = append(options, func(_ *request.Config[flavors.FlavorExtraSpecsOpts]) error { later.Add(1); return nil })
+			options = append(options, request.Custom(func(_ *request.Config[flavors.FlavorExtraSpecsOpts]) error { later.Add(1); return nil }))
 			value, err := api.FetchExtraSpecs(ctx, input, options...)
 			if value != nil || !errors.Is(err, expected) || calls.Load() != 0 {
 				t.Fatal(value, err, calls.Load())

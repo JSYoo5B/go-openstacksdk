@@ -11,6 +11,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/microversions"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
@@ -177,7 +178,7 @@ func (a *API) CreateRecord(ctx context.Context, server, share string, options ..
 	if err := validIdentity(share); err != nil {
 		return nil, wrap(ctx, "CreateRecord", err)
 	}
-	cfg, err := cloudread.ApplyReadOptions(p.ctx, CreateOpts{}, options, ownCreate, p.guard)
+	cfg, err := cloudread.ApplyReadOptions(p.ctx, CreateOpts{}, calls.Options(options, createCalls), ownCreate, p.guard)
 	if err == nil {
 		err = request.ValidateCapabilities(cfg, false, false, true)
 	}
@@ -225,7 +226,7 @@ func (a *API) GetRecord(ctx context.Context, server, share string, options ...Re
 	if err := validIdentity(share); err != nil {
 		return nil, wrap(ctx, "GetRecord", err)
 	}
-	cfg, err := cloudread.ApplyReadOptions(p.ctx, ReadOpts{}, options, ownRead, p.guard)
+	cfg, err := cloudread.ApplyReadOptions(p.ctx, ReadOpts{}, calls.Options(options, readCalls), ownRead, p.guard)
 	if err == nil {
 		err = request.ValidateCapabilities(cfg, false, false, true)
 	}
@@ -256,7 +257,7 @@ func (a *API) DeleteRecord(ctx context.Context, server, share string, options ..
 	if err := validIdentity(share); err != nil {
 		return nil, wrap(ctx, "DeleteRecord", err)
 	}
-	cfg, err := cloudread.ApplyReadOptions(p.ctx, DeleteOpts{}, options, ownDelete, p.guard)
+	cfg, err := cloudread.ApplyReadOptions(p.ctx, DeleteOpts{}, calls.Options(options, deleteCalls), ownDelete, p.guard)
 	if err == nil {
 		err = request.ValidateCapabilities(cfg, false, false, true)
 	}

@@ -21,12 +21,12 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindAllProjects`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindOpts`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindDetails`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindAllProjects`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindQuery`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindLocation`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindLimit`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindMarker`
@@ -665,14 +665,14 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.API.FindFlavor`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorFindOptions`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorFindExtraSpecs`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorFindLimit`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorFindMarker`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorFindMaxItems`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorFindPaginated`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorFindMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorFindHeader`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorFindQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorFindFilter`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorFindFilters`
 

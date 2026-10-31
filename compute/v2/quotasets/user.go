@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/users"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/project"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
@@ -186,7 +187,7 @@ func (s *UserQuotaScope) Reset(ctx context.Context, options ...ResetOption) (*Re
 		return nil, s.wrap("Reset", err)
 	}
 	var config resetOptions
-	for _, apply := range options {
+	for _, apply := range calls.Translate(options, resetCalls) {
 		if apply == nil {
 			return nil, s.wrap("Reset", fmt.Errorf("%w: nil reset option", resource.ErrInvalidOption))
 		}

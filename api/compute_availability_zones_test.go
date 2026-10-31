@@ -198,20 +198,20 @@ func TestComputeAvailabilityZoneRecordsOrdinaryViewsLazyPagingAndOwnership(t *te
 		})
 		headers := map[string]string{"X-AZ-Owned": "owned"}
 		sequence := service.ListAvailabilityZones(context.Background(), captured,
-			func(c *request.Config[availabilityzones.AvailabilityZoneListOpts]) error {
+			request.Custom(func(c *request.Config[availabilityzones.AvailabilityZoneListOpts]) error {
 				callbacks.Add(1)
 				if locations.Load() != 1 || calls.Load() != 0 {
 					t.Error("AZ location was not captured before options", locations.Load(), calls.Load())
 				}
 				c.Headers = headers
 				return nil
-			}, func(_ *request.Config[availabilityzones.AvailabilityZoneListOpts]) error {
+			}), request.Custom(func(_ *request.Config[availabilityzones.AvailabilityZoneListOpts]) error {
 				callbacks.Add(1)
 				headers["X-AZ-Owned"] = "caller-changed"
 				cloudName = "caller-changed"
 				project[1] = 'x'
 				return nil
-			})
+			}))
 		if calls.Load() != 0 || locations.Load() != 0 || callbacks.Load() != 0 {
 			t.Fatal("AZ iterator creation eagerly ran source/location/options", calls.Load(), locations.Load(), callbacks.Load())
 		}
@@ -252,7 +252,7 @@ func TestComputeAvailabilityZoneRecordsOrdinaryViewsLazyPagingAndOwnership(t *te
 			testcloud.JSON(w, 200, `{"availabilityZoneInfo":[]}`)
 		})
 		count := 0
-		for record, err := range availabilityzones.New(client).ListRecords(context.Background(), availabilityzones.WithAvailabilityZoneMicroversion(""), availabilityzones.WithAvailabilityZoneHeader("X-AZ-Version", "empty")) {
+		for record, err := range availabilityzones.New(client).ListRecords(context.Background(), request.Microversion(""), request.Header("X-AZ-Version", "empty")) {
 			count++
 			t.Fatal(record, err)
 		}
@@ -268,11 +268,11 @@ func TestComputeAvailabilityZoneRecordsOrdinaryViewsLazyPagingAndOwnership(t *te
 		cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) { calls.Add(1); w.WriteHeader(500) })
 		count := 0
 		for record, err := range compute.New(client, compute.Dependencies{}).ListAvailabilityZones(context.Background(),
-			func(_ *request.Config[availabilityzones.AvailabilityZoneListOpts]) error {
+			request.Custom(func(_ *request.Config[availabilityzones.AvailabilityZoneListOpts]) error {
 				client.ResourceBase = cloud.Server.URL + "/changed/"
 				return nil
-			},
-			func(_ *request.Config[availabilityzones.AvailabilityZoneListOpts]) error { later.Add(1); return nil }) {
+			}),
+			request.Custom(func(_ *request.Config[availabilityzones.AvailabilityZoneListOpts]) error { later.Add(1); return nil })) {
 			count++
 			if record != nil || !errors.Is(err, resource.ErrInvalidOption) {
 				t.Fatal(record, err)
@@ -510,8 +510,8 @@ func TestComputeAvailabilityZoneNamesTruthinessSuppressionAndPartialInventory(t 
 		cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) { calls.Add(1); w.WriteHeader(500) })
 		original := gophercloud.ErrUnexpectedResponseCode{Actual: 404, Method: http.MethodGet, URL: "option-native-cause", Body: []byte("option cause")}
 		result, err := compute.New(client, compute.Dependencies{}).ListAvailabilityZoneNames(context.Background(),
-			func(_ *request.Config[compute.AvailabilityZoneNamesOpts]) error { return original },
-			func(_ *request.Config[compute.AvailabilityZoneNamesOpts]) error { later.Add(1); return nil })
+			request.Custom(func(_ *request.Config[compute.AvailabilityZoneNamesOpts]) error { return original }),
+			request.Custom(func(_ *request.Config[compute.AvailabilityZoneNamesOpts]) error { later.Add(1); return nil }))
 		var proof gophercloud.ErrUnexpectedResponseCode
 		if !errors.As(err, &proof) || proof.URL != original.URL || calls.Load() != 0 || later.Load() != 0 || result != nil && (result.SuppressedError != nil || result.Value != nil || result.Names != nil) {
 			t.Fatal("option native cause was swallowed as an actual fetch failure", result, err, calls.Load(), later.Load())
@@ -549,15 +549,15 @@ func TestComputeAvailabilityZoneNamesTruthinessSuppressionAndPartialInventory(t 
 			}
 			testcloud.JSON(w, 200, `{"availabilityZoneInfo":[{"zoneName":"down","zoneState":{"available":false},"location":false}]}`)
 		})
-		result, err := service.ListAvailabilityZoneNames(context.Background(), captured, compute.WithAvailabilityZoneNamesHeader("X-AZ-Names", "owned"),
-			func(_ *request.Config[compute.AvailabilityZoneNamesOpts]) error {
+		result, err := service.ListAvailabilityZoneNames(context.Background(), captured, request.Header("X-AZ-Names", "owned"),
+			request.Custom(func(_ *request.Config[compute.AvailabilityZoneNamesOpts]) error {
 				callbacks.Add(1)
 				if locations.Load() != 1 || calls.Load() != 0 {
 					t.Error("Cloud names options precede location snapshot", locations.Load(), calls.Load())
 				}
 				cloudName = "caller-changed"
 				return nil
-			})
+			}))
 		var location resource.CloudLocation
 		if err != nil || result == nil || len(result.Names) != 1 || string(result.Names[0]) != `"down"` || string(result.Value) != `["down"]` || len(result.Inventory) != 1 || locations.Load() != 1 || callbacks.Load() != 1 || calls.Load() != 1 || client.Microversion != "2.1" || json.Unmarshal(result.Inventory[0].Resource.Body["location"], &location) != nil || location.Cloud == nil || *location.Cloud != "names-cloud" || string(result.Inventory[0].Wire.Body["location"]) != `false` {
 			t.Fatal("Cloud names changed owned input/location or native source", result, err, locations.Load(), callbacks.Load(), calls.Load())

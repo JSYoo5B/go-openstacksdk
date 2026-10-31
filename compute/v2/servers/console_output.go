@@ -14,6 +14,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -26,29 +27,30 @@ type ConsoleOutputOpts struct {
 	Length *int `json:"length,omitempty"`
 }
 
-type ConsoleOutputOption = request.Option[ConsoleOutputOpts]
+// ConsoleOutputOption is one option of ConsoleOutput: WithConsoleOutputOptions,
+// WithConsoleOutputLength, request.Field (a JSON extension inside
+// os-getConsoleOutput; the declared length must be set with the concrete
+// length options) or request.Custom over *request.Config[ConsoleOutputOpts].
+// Other shared calls fail with resource.ErrInvalidOption before HTTP.
+type ConsoleOutputOption = request.WriteCall
+
+var consoleOutputCalls = calls.Spec[request.Config[ConsoleOutputOpts]]{Field: calls.ConfigField[ConsoleOutputOpts]}
 
 // WithConsoleOutputOptions owns the pointer now and for each application.
 func WithConsoleOutputOptions(value ConsoleOutputOpts) ConsoleOutputOption {
 	owned := cloneConsoleOutputOptions(value)
-	return func(config *request.Config[ConsoleOutputOpts]) error {
+	return request.Custom(func(config *request.Config[ConsoleOutputOpts]) error {
 		config.Options = cloneConsoleOutputOptions(owned)
 		return nil
-	}
+	})
 }
 
 func WithConsoleOutputLength(value int) ConsoleOutputOption {
-	return func(config *request.Config[ConsoleOutputOpts]) error {
+	return request.Custom(func(config *request.Config[ConsoleOutputOpts]) error {
 		copy := value
 		config.Options.Length = &copy
 		return nil
-	}
-}
-
-// WithConsoleOutputField adds JSON extensions inside os-getConsoleOutput.
-// Declared length must be set with the concrete length options.
-func WithConsoleOutputField(key string, value any) ConsoleOutputOption {
-	return request.WithField[ConsoleOutputOpts](key, value)
+	})
 }
 
 // ConsoleOutput owns the optional length and returns the native output string
@@ -82,8 +84,8 @@ func (a *API) ConsoleOutput(ctx context.Context, serverID string, options ...Con
 		}
 		return errors.Join(changed, source.Guard(ctx), rest.CheckOperationGuard(ctx))
 	}
-	owned := slices.Clone(options)
-	guarded := make([]ConsoleOutputOption, len(owned))
+	owned := calls.Options(options, consoleOutputCalls)
+	guarded := make([]request.Option[ConsoleOutputOpts], len(owned))
 	for i, option := range owned {
 		apply := option
 		guarded[i] = func(config *request.Config[ConsoleOutputOpts]) error {

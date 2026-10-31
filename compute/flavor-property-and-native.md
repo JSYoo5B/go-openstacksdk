@@ -14,8 +14,8 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.API.GetExtraSpecsProperty`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorExtraSpecsOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorExtraSpecsMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorExtraSpecsHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 
 - GetExtraSpecsProperty reads only the selected flavor/property member route with an empty body and no query, flavor GET, list or whole-specs GET. The concrete ID/native Flavor/RawResource input and selected source are captured before option callbacks; inline specs never skip this read, explicit ID determines the route, and the supplied existing extra_specs remain unchanged.
   Tests: `api/compute_flavor_property_native_test.go:TestComputeFlavorGetExtraSpecsPropertyRawValuesLiteralRouteAndVersionBinding`, `api/compute_flavor_extra_specs_fetch_test.go:TestComputeFlavorFetchExtraSpecsAlwaysGETRawValuesAndOwnedExistingInputs`.

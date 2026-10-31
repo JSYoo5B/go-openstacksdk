@@ -14,6 +14,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudlocation"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
@@ -61,7 +62,7 @@ func (a *API) ListCloudRecords(ctx context.Context, options ...RecordFindOption)
 		ctx = rest.WithOperationGuard(ctx, ownGuard)
 		guard := func(c context.Context) error { return errors.Join(ownGuard(c), rest.CheckOperationGuard(c)) }
 		policy := RecordFindOpts{}
-		for _, apply := range slices.Clone(options) {
+		for _, apply := range calls.Translate(options, recordFindCalls) {
 			if err := guard(ctx); err != nil {
 				yield(nil, wrap(err))
 				return

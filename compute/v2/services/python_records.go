@@ -6,6 +6,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
+	"slices"
+
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/jsonfilter"
@@ -13,9 +17,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/internal/neutronfind"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
-	"maps"
-	"net/http"
-	"slices"
 )
 
 // ReadRecord preserves the declared Source view separately from the physical response.
@@ -37,7 +38,33 @@ type RecordOptions struct {
 	ListBasePath  *string
 	order         []string
 }
-type RecordOption func(*RecordOptions) error
+
+// RecordOption is one option of the record reads: WithRecordOptions,
+// WithRecordListBasePath, request.Custom over *RecordOptions,
+// request.Query (a Source keyword argument; the value is sent as JSON),
+// request.Headers (replaces the headers), request.Microversion or
+// request.IgnoreMissing. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type RecordOption = request.FindCall
+
+var recordCalls = calls.Spec[RecordOptions]{
+	Query: calls.JSONQuery(func(o *RecordOptions, k string, raw json.RawMessage, err error) error {
+		if err != nil {
+			return err
+		}
+		if o.Query == nil {
+			o.Query = map[string]json.RawMessage{}
+		}
+		o.Query[k] = bytes.Clone(raw)
+		if !slices.Contains(o.order, k) {
+			o.order = append(o.order, k)
+		}
+		return nil
+	}),
+	Headers:       calls.Value(func(o *RecordOptions) *map[string]string { return &o.Headers }),
+	Microversion:  calls.Pointer(func(o *RecordOptions) **string { return &o.Microversion }),
+	IgnoreMissing: calls.Pointer(func(o *RecordOptions) **bool { return &o.IgnoreMissing }),
+}
 
 func cloneRecordOptions(v RecordOptions) RecordOptions {
 	o := neutronfind.CloneOptions(neutronfind.Options{Query: v.Query, Headers: v.Headers, Microversion: v.Microversion, IgnoreMissing: v.IgnoreMissing, ListBasePath: v.ListBasePath, Order: v.order})
@@ -50,36 +77,13 @@ func cloneRecordOptions(v RecordOptions) RecordOptions {
 }
 func WithRecordOptions(v RecordOptions) RecordOption {
 	owned := cloneRecordOptions(v)
-	return func(v *RecordOptions) error { *v = cloneRecordOptions(owned); return nil }
+	return request.Custom(func(v *RecordOptions) error { *v = cloneRecordOptions(owned); return nil })
 }
-func WithRecordQuery(k string, v any) RecordOption {
-	raw, err := json.Marshal(v)
-	return func(o *RecordOptions) error {
-		if err != nil {
-			return err
-		}
-		if o.Query == nil {
-			o.Query = map[string]json.RawMessage{}
-		}
-		o.Query[k] = bytes.Clone(raw)
-		if !slices.Contains(o.order, k) {
-			o.order = append(o.order, k)
-		}
-		return nil
-	}
-}
-func WithRecordHeaders(v map[string]string) RecordOption {
-	owned := maps.Clone(v)
-	return func(o *RecordOptions) error { o.Headers = maps.Clone(owned); return nil }
-}
-func WithRecordMicroversion(v string) RecordOption {
-	return func(o *RecordOptions) error { o.Microversion = &v; return nil }
-}
-func WithRecordIgnoreMissing(v bool) RecordOption {
-	return func(o *RecordOptions) error { o.IgnoreMissing = &v; return nil }
-}
+
+// WithRecordListBasePath selects the list route. It is operation-specific:
+// these reads do not accept the shared BasePath call.
 func WithRecordListBasePath(v string) RecordOption {
-	return func(o *RecordOptions) error { o.ListBasePath = &v; return nil }
+	return request.Custom(func(o *RecordOptions) error { o.ListBasePath = &v; return nil })
 }
 
 var readProfile = neutronfind.Profile{ServiceRole: "compute", Kind: "services", Path: "os-services", Singular: "service", Plural: "services", IDKey: "id", NameKey: "name", VersionedPath: "/v2.1/os-services", SourceFindPolicy: true, SourceStatusPolicy: true, SourceLinkPolicy: true, PythonLoadedEquality: true, StopFaultRetryCallbacks: true, Body: []neutronfind.Descriptor{{Name: "availability_zone", Wire: "zone", Missing: "null"}, {Name: "binary", Wire: "binary", Missing: "null"}, {Name: "disabled_reason", Wire: "disabled_reason", Missing: "null"}, {Name: "is_forced_down", Wire: "forced_down", Missing: "null", Kind: neutronfind.Boolean}, {Name: "host", Wire: "host", Missing: "null"}, {Name: "name", Wire: "name", Missing: "null", Alias: "binary"}, {Name: "state", Wire: "state", Missing: "null"}, {Name: "status", Wire: "status", Missing: "null"}, {Name: "updated_at", Wire: "updated_at", Missing: "null"}, {Name: "id", Wire: "id", Missing: "null"}}, Query: []neutronfind.QueryPair{{Name: "limit", Wire: "limit"}, {Name: "marker", Wire: "marker"}}}
@@ -113,7 +117,7 @@ func (a *API) prepareRecord(ctx context.Context, options []RecordOption) (*prepa
 		return nil, err
 	}
 	p := &preparedRecord{engine: engine}
-	for _, apply := range slices.Clone(options) {
+	for _, apply := range calls.Translate(options, recordCalls) {
 		if err := engine.Check(ctx); err != nil {
 			return nil, err
 		}

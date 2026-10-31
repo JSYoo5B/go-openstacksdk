@@ -69,7 +69,7 @@ func TestComputeFindFlavorMemberSeedAliasesAndLiteralRoutes(t *testing.T) {
 			})
 			value, err := flavors.New(client).FindFlavor(context.Background(), "target",
 				flavors.WithFlavorFindFilters(map[string]any{"description": "seed", "ram": 4, "min_ram": 2}),
-				flavors.WithFlavorFindQuery("vendor", "literal"))
+				request.Query("vendor", "literal"))
 			if value == nil || (err != nil) != tc.failure || calls.Load() != 1 || value.StatusCode != tc.status || value.Header.Get("X-Flavor-Find") != tc.name || string(value.Envelope) != tc.body || client.Microversion != "2.55" {
 				t.Fatal(value, err, calls.Load())
 			}
@@ -131,7 +131,7 @@ func TestComputeFindFlavorMemberSeedAliasesAndLiteralRoutes(t *testing.T) {
 			client.Microversion = tc.selected
 			var options []flavors.FlavorFindOption
 			if tc.empty {
-				options = append(options, flavors.WithFlavorFindMicroversion(""))
+				options = append(options, request.Microversion(""))
 			}
 			var calls atomic.Int32
 			cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -205,18 +205,18 @@ func TestComputeFindFlavorFallbackTerminalErrorsAndConnectedLocation(t *testing.
 			} else if mode == "explicit empty shared with fallback" {
 				selected = ""
 			}
-			options := []flavors.FlavorFindOption{flavors.WithFlavorFindFilter("min_ram", 2), flavors.WithFlavorFindQuery("vendor", "literal")}
+			options := []flavors.FlavorFindOption{flavors.WithFlavorFindFilter("min_ram", 2), request.Query("vendor", "literal")}
 			if mode == "strict missing" {
-				options = append(options, flavors.WithFlavorFindIgnoreMissing(false))
+				options = append(options, request.IgnoreMissing(false))
 			}
 			if mode == "explicit empty shared with fallback" {
-				options = append(options, flavors.WithFlavorFindMicroversion(""))
+				options = append(options, request.Microversion(""))
 			}
 			if mode == "unique enriches after full list" || mode == "duplicate next page" || mode == "late403 after match" {
 				options = append(options, flavors.WithFlavorFindExtraSpecs(true))
 			}
 			var gets, lists, specs, discoveries, callbacks atomic.Int32
-			options = append(options, func(_ *request.Config[flavors.FlavorFindOpts]) error { callbacks.Add(1); return nil })
+			options = append(options, request.Custom(func(_ *request.Config[flavors.FlavorFindOpts]) error { callbacks.Add(1); return nil }))
 			const rejected = `{"error":"original flavor member rejection"}`
 			const row = `{"id":"7","name":"target"}`
 			linked := mode == "duplicate next page" || mode == "late403 after match" || mode == "unique waits for full list" || mode == "unique enriches after full list"
@@ -462,7 +462,7 @@ func TestComputeFindFlavorFallbackTerminalErrorsAndConnectedLocation(t *testing.
 				w.WriteHeader(500)
 			}
 		})
-		sequence := service.ListFlavors(context.Background(), func(_ *request.Config[flavors.FlavorListOpts]) error {
+		sequence := service.ListFlavors(context.Background(), request.Custom(func(_ *request.Config[flavors.FlavorListOpts]) error {
 			callbacks.Add(1)
 			if locations.Load() != 1 || calls.Load() != 0 {
 				t.Error("list location was not captured before options", locations.Load(), calls.Load())
@@ -470,7 +470,7 @@ func TestComputeFindFlavorFallbackTerminalErrorsAndConnectedLocation(t *testing.
 			cloudName, region = "caller-changed", "caller-changed"
 			project[1] = 'x'
 			return nil
-		})
+		}))
 		if locations.Load() != 0 || calls.Load() != 0 || callbacks.Load() != 0 {
 			t.Fatal("service iterator eagerly captured location")
 		}
@@ -495,14 +495,14 @@ func TestComputeFindFlavorFallbackTerminalErrorsAndConnectedLocation(t *testing.
 		if err != nil {
 			t.Fatal(err)
 		}
-		value, err := service.FindFlavor(context.Background(), "target", func(_ *request.Config[flavors.FlavorFindOpts]) error {
+		value, err := service.FindFlavor(context.Background(), "target", request.Custom(func(_ *request.Config[flavors.FlavorFindOpts]) error {
 			callbacks.Add(1)
 			if locations.Load() != 2 || calls.Load() != 1 {
 				t.Error("find location was not captured before options", locations.Load(), calls.Load())
 			}
 			cloudName = "find-caller-changed"
 			return nil
-		})
+		}))
 		if err != nil || value == nil || value.Resource == nil || string(value.Resource.Body["location"]) != string(wantFind) || string(value.Wire.Body["location"]) != `false` || calls.Load() != 2 || locations.Load() != 2 || callbacks.Load() != 2 || string(records[1].Resource.Body["location"]) != string(want) {
 			t.Fatal(value, err, calls.Load(), locations.Load(), callbacks.Load())
 		}
@@ -527,12 +527,12 @@ func TestComputeFindFlavorFallbackTerminalErrorsAndConnectedLocation(t *testing.
 				t.Error("stopped service flavor operation touched HTTP", r.URL)
 				w.WriteHeader(500)
 			})
-			value, err := service.FindFlavor(ctx, "target", func(_ *request.Config[flavors.FlavorFindOpts]) error {
+			value, err := service.FindFlavor(ctx, "target", request.Custom(func(_ *request.Config[flavors.FlavorFindOpts]) error {
 				if mode == "option cancellation stops later callback" {
 					cancel()
 				}
 				return nil
-			}, func(_ *request.Config[flavors.FlavorFindOpts]) error { later.Add(1); return nil })
+			}), request.Custom(func(_ *request.Config[flavors.FlavorFindOpts]) error { later.Add(1); return nil }))
 			want := error(resource.ErrInvalidOption)
 			if mode == "option cancellation stops later callback" {
 				want = context.Canceled

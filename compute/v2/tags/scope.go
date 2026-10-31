@@ -10,6 +10,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
@@ -109,22 +110,22 @@ func (s *ServerTagScope) Add(ctx context.Context, tag string) error {
 
 type missingPolicy struct{ ignore bool }
 
-// MissingOption configures 404 handling for Check, Remove and RemoveAll.
-// Later options win. Other HTTP failures are always returned.
-type MissingOption func(*missingPolicy) error
+// MissingOption configures 404 handling for Check, Remove and RemoveAll:
+// request.IgnoreMissing controls whether a 404 is treated as absence (both
+// true and false are explicit values; false preserves a not-found error) and
+// WithMissingError is request.IgnoreMissing(false). Later options win. Other
+// HTTP failures are always returned, and other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type MissingOption = request.DeleteCall
 
-// WithIgnoreMissing controls whether a 404 is treated as absence. Both true
-// and false are explicit values; false preserves a not-found error.
-func WithIgnoreMissing(ignore bool) MissingOption {
-	return func(p *missingPolicy) error { p.ignore = ignore; return nil }
-}
+var missingCalls = calls.Spec[missingPolicy]{IgnoreMissing: calls.Value(func(p *missingPolicy) *bool { return &p.ignore })}
 
 // WithMissingError gives Check and deletion the strict Python TagMixin policy.
-func WithMissingError() MissingOption { return WithIgnoreMissing(false) }
+func WithMissingError() MissingOption { return request.IgnoreMissing(false) }
 
 func parseMissing(options []MissingOption) (missingPolicy, error) {
 	policy := missingPolicy{ignore: true}
-	for _, apply := range options {
+	for _, apply := range calls.Translate(options, missingCalls) {
 		if apply == nil {
 			return policy, fmt.Errorf("%w: nil tag missing option", resource.ErrInvalidOption)
 		}

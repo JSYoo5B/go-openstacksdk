@@ -5,9 +5,9 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"maps"
 	"slices"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/neutronfind"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -24,7 +24,26 @@ type RecordFindOpts struct {
 	Query         map[string]json.RawMessage
 	Headers       map[string]string
 }
-type RecordFindOption func(*RecordFindOpts) error
+
+// RecordFindOption is one option of FindRecord: WithRecordFindOpts,
+// WithRecordFindListBasePath, request.Custom over *RecordFindOpts,
+// request.IgnoreMissing, request.Query (a Source keyword argument; the value
+// is sent as JSON, and list_base_path or microversion keys select those
+// controls), request.Microversion or request.Headers (replaces the headers).
+// Other shared calls fail with resource.ErrInvalidOption before HTTP.
+type RecordFindOption = request.FindCall
+
+var recordFindCalls = calls.Spec[RecordFindOpts]{
+	IgnoreMissing: calls.Pointer(func(c *RecordFindOpts) **bool { return &c.IgnoreMissing }),
+	Query:         calls.JSONQuery(recordFindQuery),
+	Microversion: func(c *RecordFindOpts, value string) error {
+		c.Microversion = &value
+		delete(c.Query, "microversion")
+		c.queryOrder = slices.DeleteFunc(c.queryOrder, func(key string) bool { return key == "microversion" })
+		return nil
+	},
+	Headers: calls.Value(func(c *RecordFindOpts) *map[string]string { return &c.Headers }),
+}
 
 func internalFindOpts(value RecordFindOpts) neutronfind.Options {
 	return neutronfind.Options{IgnoreMissing: value.IgnoreMissing, Microversion: value.Microversion, ListBasePath: value.ListBasePath, Query: value.Query, Headers: value.Headers, Order: value.queryOrder}
@@ -41,77 +60,57 @@ func copyFindOpts(value RecordFindOpts) RecordFindOpts {
 
 func WithRecordFindOpts(value RecordFindOpts) RecordFindOption {
 	owned := copyFindOpts(value)
-	return func(c *RecordFindOpts) error { *c = copyFindOpts(owned); return nil }
+	return request.Custom(func(c *RecordFindOpts) error { *c = copyFindOpts(owned); return nil })
 }
-func WithRecordFindIgnoreMissing(value bool) RecordFindOption {
-	return func(c *RecordFindOpts) error { x := value; c.IgnoreMissing = &x; return nil }
-}
-func WithRecordFindQuery(key string, value any) RecordFindOption {
+func recordFindQuery(c *RecordFindOpts, key string, owned json.RawMessage, err error) error {
 	switch key {
 	case "id", "name_or_id", "ignore_missing", "cls", "session", "self", "resource_type", "connection", "_synchronized":
-		return func(*RecordFindOpts) error {
-			return findInvalid("%q collides with a bound Find/Resource constructor argument", key)
-		}
+		return findInvalid("%q collides with a bound Find/Resource constructor argument", key)
 	}
-	raw, err := json.Marshal(value)
-	owned := bytes.Clone(raw)
-	return func(c *RecordFindOpts) error {
+	if err != nil {
+		return err
+	}
+	switch key {
+	case "list_base_path", "microversion":
+		formalKey := key
+		if key == "list_base_path" {
+			formalKey = "base_path"
+		}
+		normalized, _, err := neutronfind.NormalizeProxyListOptions(neutronfind.Options{Query: map[string]json.RawMessage{formalKey: owned}})
 		if err != nil {
 			return err
 		}
-		switch key {
-		case "list_base_path", "microversion":
-			formalKey := key
-			if key == "list_base_path" {
-				formalKey = "base_path"
-			}
-			normalized, _, err := neutronfind.NormalizeProxyListOptions(neutronfind.Options{Query: map[string]json.RawMessage{formalKey: owned}})
-			if err != nil {
-				return err
-			}
-			if key == "list_base_path" {
-				c.ListBasePath = normalized.BasePath
-			} else {
-				c.Microversion = normalized.Microversion
-			}
-			delete(c.Query, key)
-			c.queryOrder = slices.DeleteFunc(c.queryOrder, func(existing string) bool { return existing == key })
-			return nil
+		if key == "list_base_path" {
+			c.ListBasePath = normalized.BasePath
+		} else {
+			c.Microversion = normalized.Microversion
 		}
-		if c.Query == nil {
-			c.Query = make(map[string]json.RawMessage)
-		}
-		c.Query[key] = bytes.Clone(owned)
-		if !slices.Contains(c.queryOrder, key) {
-			c.queryOrder = append(c.queryOrder, key)
-		}
+		delete(c.Query, key)
+		c.queryOrder = slices.DeleteFunc(c.queryOrder, func(existing string) bool { return existing == key })
 		return nil
 	}
-}
-func WithRecordFindMicroversion(value string) RecordFindOption {
-	return func(c *RecordFindOpts) error {
-		x := value
-		c.Microversion = &x
-		delete(c.Query, "microversion")
-		c.queryOrder = slices.DeleteFunc(c.queryOrder, func(key string) bool { return key == "microversion" })
-		return nil
+	if c.Query == nil {
+		c.Query = make(map[string]json.RawMessage)
 	}
-}
-func WithRecordFindHeaders(value map[string]string) RecordFindOption {
-	owned := maps.Clone(value)
-	return func(c *RecordFindOpts) error { c.Headers = maps.Clone(owned); return nil }
+	c.Query[key] = bytes.Clone(owned)
+	if !slices.Contains(c.queryOrder, key) {
+		c.queryOrder = append(c.queryOrder, key)
+	}
+	return nil
 }
 
 // WithRecordFindListBasePath selects only the fallback list route. The member
 // GET keeps the default Extensions route; an empty path uses that default.
+// It is operation-specific: FindRecord does not accept the shared BasePath
+// call.
 func WithRecordFindListBasePath(path string) RecordFindOption {
-	return func(c *RecordFindOpts) error {
+	return request.Custom(func(c *RecordFindOpts) error {
 		owned := path
 		c.ListBasePath = &owned
 		delete(c.Query, "list_base_path")
 		c.queryOrder = slices.DeleteFunc(c.queryOrder, func(key string) bool { return key == "list_base_path" })
 		return nil
-	}
+	})
 }
 
 // FindRecord matches the pinned Source GET-first, complete ID-or-name search.
@@ -138,7 +137,7 @@ func (a *API) FindRecord(ctx context.Context, identity string, options ...Record
 	}
 	guard := engine.Check
 	policy := RecordFindOpts{}
-	for _, apply := range slices.Clone(options) {
+	for _, apply := range calls.Translate(options, recordFindCalls) {
 		if err := guard(ctx); err != nil {
 			return nil, wrap(err)
 		}

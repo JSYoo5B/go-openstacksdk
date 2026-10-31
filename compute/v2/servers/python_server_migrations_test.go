@@ -8,6 +8,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -19,7 +20,7 @@ func serverMigrationField(t *testing.T, row *servers.ServerMigrationRecord, key,
 	}
 }
 func migrationVersion() servers.ServerMigrationOption {
-	return servers.WithServerMigrationMicroversion("2.80")
+	return request.Microversion("2.80")
 }
 
 func TestPythonServerMigrationListIsLazyAndKeepsUntypedProjection(t *testing.T) {
@@ -100,7 +101,7 @@ func TestPythonServerMigrationGetOwnsParentURIAndPassiveResponseID(t *testing.T)
 			})
 			opts := []servers.ServerMigrationOption{migrationVersion()}
 			if strict {
-				opts = append(opts, servers.WithServerMigrationIgnoreMissing(false))
+				opts = append(opts, request.IgnoreMissing(false))
 			}
 			row, err := api.GetServerMigrationRecord(context.Background(), "server/id", "migration/id", opts...)
 			if err != nil || row == nil || len(calls) != 1 {
@@ -122,7 +123,7 @@ func TestPythonServerMigrationGet404IsStrictForBothMissingFlags(t *testing.T) {
 				}
 				return nativeServerWire(404, `{"error":"actual missing"}`)
 			})
-			_, err := api.GetServerMigrationRecord(context.Background(), "server", "migration", migrationVersion(), servers.WithServerMigrationIgnoreMissing(ignore))
+			_, err := api.GetServerMigrationRecord(context.Background(), "server", "migration", migrationVersion(), request.IgnoreMissing(ignore))
 			var native gophercloud.ErrUnexpectedResponseCode
 			if len(calls) != 1 || !errors.As(err, &native) || native.Actual != 404 || string(native.Body) != `{"error":"actual missing"}` {
 				t.Fatal(err, native, calls)
@@ -143,7 +144,7 @@ func TestPythonServerMigrationAbortMissingDefaultAndStrictPolicies(t *testing.T)
 			})
 			opts := []servers.ServerMigrationOption{migrationVersion()}
 			if strict {
-				opts = append(opts, servers.WithServerMigrationIgnoreMissing(false))
+				opts = append(opts, request.IgnoreMissing(false))
 			}
 			result, err := api.AbortServerMigration(context.Background(), "server", "migration", opts...)
 			if len(calls) != 1 {
@@ -232,7 +233,7 @@ func TestPythonServerMigrationOptionsAreOwnedAcrossReusableCalls(t *testing.T) {
 			return nativeServerWire(200, discoveryBody)
 		})
 		rows := 0
-		for row, err := range discovered.ListServerMigrationRecords(context.Background(), "server", servers.WithServerMigrationMicroversion("")) {
+		for row, err := range discovered.ListServerMigrationRecords(context.Background(), "server", request.Microversion("")) {
 			if err != nil || row == nil || len(row.Discovery.Responses) != 1 || row.Discovery.Responses[0] == nil {
 				t.Fatal(row, err)
 			}
@@ -265,7 +266,7 @@ func TestPythonServerMigrationPreflightAndOptionGuardsStopRequests(t *testing.T)
 			api, cloud := serverFindAPI(t, &calls, func(r *http.Request) *http.Response { return nativeServerWire(200, `{}`) })
 			var option servers.ServerMigrationOption
 			if mode != "nil option" {
-				option = func(*servers.ServerMigrationOpts) error {
+				option = request.Custom(func(*servers.ServerMigrationOpts) error {
 					switch mode {
 					case "callback error":
 						return cause
@@ -275,10 +276,10 @@ func TestPythonServerMigrationPreflightAndOptionGuardsStopRequests(t *testing.T)
 						cancel(cause)
 					}
 					return nil
-				}
+				})
 			}
 			if mode == "forbidden header" {
-				option = servers.WithServerMigrationHeaders(map[string]string{"X-Auth-Token": "foreign"})
+				option = request.Headers(map[string]string{"X-Auth-Token": "foreign"})
 			}
 			serverID, migrationID := "server", "migration"
 			if mode == "invalid server" {
@@ -287,7 +288,7 @@ func TestPythonServerMigrationPreflightAndOptionGuardsStopRequests(t *testing.T)
 			if mode == "invalid migration" {
 				migrationID = ".."
 			}
-			_, err := api.GetServerMigrationRecord(ctx, serverID, migrationID, option, func(*servers.ServerMigrationOpts) error { later++; return nil })
+			_, err := api.GetServerMigrationRecord(ctx, serverID, migrationID, option, request.Custom(func(*servers.ServerMigrationOpts) error { later++; return nil }))
 			if err == nil || len(calls) != 0 {
 				t.Fatal(err, calls)
 			}

@@ -1,6 +1,7 @@
 package flavors
 
 import (
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 )
@@ -11,7 +12,16 @@ type FlavorExtraSpecsOpts struct {
 	Microversion *string
 }
 
-type FlavorExtraSpecsOption = request.Option[FlavorExtraSpecsOpts]
+// FlavorExtraSpecsOption is one option of FetchExtraSpecs and
+// GetExtraSpecsProperty: WithFlavorExtraSpecsOptions, request.Microversion,
+// request.Header or request.Custom over *request.Config[FlavorExtraSpecsOpts].
+// Other shared calls fail with resource.ErrInvalidOption before HTTP.
+type FlavorExtraSpecsOption = request.GetCall
+
+var flavorExtraSpecsCalls = calls.Spec[request.Config[FlavorExtraSpecsOpts]]{
+	Header:       calls.ConfigHeader[FlavorExtraSpecsOpts],
+	Microversion: calls.Pointer(func(c *request.Config[FlavorExtraSpecsOpts]) **string { return &c.Options.Microversion }),
+}
 
 func copyFlavorExtraSpecsOptions(value FlavorExtraSpecsOpts) FlavorExtraSpecsOpts {
 	if value.Microversion != nil {
@@ -24,22 +34,10 @@ func copyFlavorExtraSpecsOptions(value FlavorExtraSpecsOpts) FlavorExtraSpecsOpt
 // WithFlavorExtraSpecsOptions snapshots its pointer now and for each call.
 func WithFlavorExtraSpecsOptions(value FlavorExtraSpecsOpts) FlavorExtraSpecsOption {
 	owned := copyFlavorExtraSpecsOptions(value)
-	return func(config *request.Config[FlavorExtraSpecsOpts]) error {
+	return request.Custom(func(config *request.Config[FlavorExtraSpecsOpts]) error {
 		config.Options = copyFlavorExtraSpecsOptions(owned)
 		return nil
-	}
-}
-
-func WithFlavorExtraSpecsMicroversion(value string) FlavorExtraSpecsOption {
-	return func(config *request.Config[FlavorExtraSpecsOpts]) error {
-		owned := value
-		config.Options.Microversion = &owned
-		return nil
-	}
-}
-
-func WithFlavorExtraSpecsHeader(key, value string) FlavorExtraSpecsOption {
-	return request.WithHeader[FlavorExtraSpecsOpts](key, value)
+	})
 }
 
 func ownFlavorExtraSpecsConfig(config *request.Config[FlavorExtraSpecsOpts]) {

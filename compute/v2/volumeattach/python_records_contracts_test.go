@@ -10,6 +10,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/volumeattach"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -40,7 +41,7 @@ func TestPythonAttachmentRecordsListIsLazyAndPagesLimitOffset(t *testing.T) {
 			return pythonVolumeAttachWire(200, `{"volumeAttachments":[]}`)
 		}
 	})
-	sequence := api.ListRecords(context.Background(), "s1", volumeattach.WithAttachmentLimit(3), volumeattach.WithAttachmentOffset(2))
+	sequence := api.ListRecords(context.Background(), "s1", request.Limit(3), volumeattach.WithAttachmentOffset(2))
 	if calls.Len() != 0 {
 		t.Fatal(pythonVolumeAttachCalls(calls))
 	}
@@ -68,11 +69,11 @@ func TestPythonAttachmentRecordsControlCountsRawRowsBeforeFilters(t *testing.T) 
 	api, calls := pythonVolumeAttachAPI(t, func(*http.Request) *http.Response {
 		return pythonVolumeAttachWire(200, `{"volumeAttachments":[{"id":"v1","tag":"skip"},{"id":"v2","tag":"wanted"}],"next":"/nova/v2.1/servers/s1/os-volume_attachments?marker=v2&limit=2"}`)
 	})
-	ids, err := attachmentRecordIDs(t, api, volumeattach.WithAttachmentMaxItems(1), volumeattach.WithAttachmentQuery("tag", "wanted"), volumeattach.WithAttachmentQuery("not_a_field", make(chan int)))
+	ids, err := attachmentRecordIDs(t, api, request.MaxItems(1), request.Query("tag", "wanted"), request.Query("not_a_field", make(chan int)))
 	if err != nil || len(ids) != 0 || calls.Len() != 1 || calls.Calls()[0].RawQuery != "limit=1" {
 		t.Fatal(ids, err, pythonVolumeAttachCalls(calls))
 	}
-	ids, err = attachmentRecordIDs(t, api, volumeattach.WithAttachmentPaginated(false), volumeattach.WithAttachmentQuery("tag", "wanted"), volumeattach.WithAttachmentQuery("device", nil), volumeattach.WithAttachmentQuery("offset", nil), volumeattach.WithAttachmentLimit(0))
+	ids, err = attachmentRecordIDs(t, api, request.Paginated(false), request.Query("tag", "wanted"), request.Query("device", nil), request.Query("offset", nil), request.Limit(0))
 	if err != nil || !reflect.DeepEqual(ids, []string{"v2"}) || calls.Len() != 2 || calls.Calls()[1].RawQuery != "limit=0" {
 		t.Fatal(ids, err, pythonVolumeAttachCalls(calls))
 	}
@@ -95,7 +96,7 @@ func TestPythonAttachmentRecordsLinksAndLocalAliasProjection(t *testing.T) {
 		return pythonVolumeAttachWire(200, `{"volumeAttachments":{"id":"v1","bdm_id":"canonical","bdm_uuid":"last","volume_id":"canonical-volume","volumeId":"last-volume"},"volumeAttachments_links":[{"rel":"next","href":"?marker=v1"}]}`)
 	})
 	var records []*volumeattach.AttachmentRecord
-	for v, err := range api.ListRecords(context.Background(), "s1", volumeattach.WithAttachmentQuery("bdm_id", "last"), volumeattach.WithAttachmentQuery("volume_id", "last-volume")) {
+	for v, err := range api.ListRecords(context.Background(), "s1", request.Query("bdm_id", "last"), request.Query("volume_id", "last-volume")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -138,18 +139,18 @@ func TestPythonAttachmentRecordUpdateSnapshotsAndScope(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	value, err := scope.UpdateRecord(context.Background(), "old", attribute, func(v *volumeattach.AttachmentUpdateOpts) error {
+	value, err := scope.UpdateRecord(context.Background(), "old", attribute, request.Custom(func(v *volumeattach.AttachmentUpdateOpts) error {
 		retained = v
 		v.Headers = map[string]string{"X-Owned": "old"}
 		return nil
-	}, func(*volumeattach.AttachmentUpdateOpts) error {
+	}), request.Custom(func(*volumeattach.AttachmentUpdateOpts) error {
 		retained.Fields["tag"] = json.RawMessage(`"changed"`)
 		return nil
-	})
+	}))
 	if err != nil || value == nil || value.Wire != nil || value.StatusCode != 204 || string(value.Resource.Body["volume_id"]) != `"old"` || calls.Calls()[0].Body != `{"volumeAttachment":{"tag":{"enabled":false},"volumeId":"old"}}` {
 		t.Fatal(value, err, pythonVolumeAttachCalls(calls))
 	}
-	ids, err := attachmentRecordIDs(t, api, volumeattach.WithAttachmentPaginated(false))
+	ids, err := attachmentRecordIDs(t, api, request.Paginated(false))
 	var receipt *resource.ResponseError
 	if len(ids) != 0 || !errors.As(err, &receipt) || receipt.StatusCode != 204 {
 		t.Fatal(ids, err, receipt)
@@ -161,10 +162,10 @@ func TestPythonAttachmentRecordsRejectInvalidInputsBeforeHTTP(t *testing.T) {
 		name string
 		call func() error
 	}{
-		{"negative limit", func() error { _, err := attachmentRecordIDs(t, api, volumeattach.WithAttachmentLimit(-1)); return err }},
+		{"negative limit", func() error { _, err := attachmentRecordIDs(t, api, request.Limit(-1)); return err }},
 		{"negative offset", func() error { _, err := attachmentRecordIDs(t, api, volumeattach.WithAttachmentOffset(-1)); return err }},
 		{"negative cap", func() error {
-			_, err := attachmentRecordIDs(t, api, volumeattach.WithAttachmentMaxItems(-1))
+			_, err := attachmentRecordIDs(t, api, request.MaxItems(-1))
 			return err
 		}},
 		{"nil list option", func() error { _, err := attachmentRecordIDs(t, api, nil); return err }},
@@ -175,7 +176,7 @@ func TestPythonAttachmentRecordsRejectInvalidInputsBeforeHTTP(t *testing.T) {
 		}},
 		{"bad target", func() error { _, err := api.UpdateRecord(context.Background(), "..", "v1"); return err }},
 		{"auth header", func() error {
-			_, err := api.UpdateRecord(context.Background(), "s1", "v1", volumeattach.WithAttachmentUpdateHeaders(map[string]string{"X-Auth-Token": "bad"}))
+			_, err := api.UpdateRecord(context.Background(), "s1", "v1", request.Headers(map[string]string{"X-Auth-Token": "bad"}))
 			return err
 		}},
 	} {
@@ -201,13 +202,13 @@ func TestPythonAttachmentRecordsPreservePhysicalErrorsAndCanceledOptions(t *test
 	}
 	ctx, cancel := context.WithCancelCause(context.Background())
 	cause, callback := errors.New("cause"), errors.New("option")
-	_, err = api.UpdateRecord(ctx, "s1", "v1", func(*volumeattach.AttachmentUpdateOpts) error { cancel(cause); return callback })
+	_, err = api.UpdateRecord(ctx, "s1", "v1", request.Custom(func(*volumeattach.AttachmentUpdateOpts) error { cancel(cause); return callback }))
 	if attempts != 1 || !errors.Is(err, context.Canceled) || !errors.Is(err, cause) || !errors.Is(err, callback) {
 		t.Fatal(err, attempts)
 	}
 	original := api.RawClient().Microversion
 	defer func() { api.RawClient().Microversion = original }()
-	_, err = api.UpdateRecord(context.Background(), "s1", "v1", func(*volumeattach.AttachmentUpdateOpts) error { api.RawClient().Microversion = "2.90"; return callback })
+	_, err = api.UpdateRecord(context.Background(), "s1", "v1", request.Custom(func(*volumeattach.AttachmentUpdateOpts) error { api.RawClient().Microversion = "2.90"; return callback }))
 	if attempts != 1 || !errors.Is(err, resource.ErrInvalidOption) || !errors.Is(err, callback) {
 		t.Fatal(err, attempts)
 	}

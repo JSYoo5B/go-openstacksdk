@@ -16,6 +16,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/jsonfilter"
@@ -257,7 +258,43 @@ type AttachmentListOpts struct {
 	MaxItems  int
 	Paginated *bool
 }
-type AttachmentListOption func(*AttachmentListOpts) error
+
+// AttachmentListOption is one option of ListRecords: WithAttachmentListOpts,
+// WithAttachmentOffset, request.Query (a Source keyword argument sent as
+// JSON; unknown keys and wire-only Body aliases are ignored, matching
+// Resource.list's canonical attribute filters), request.Limit,
+// request.MaxItems, request.Paginated, request.Headers (replaces the headers)
+// or request.Custom over *AttachmentListOpts. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type AttachmentListOption = request.ListCall
+
+var attachmentListCalls = calls.Spec[AttachmentListOpts]{
+	Headers: calls.Value(func(v *AttachmentListOpts) *map[string]string { return &v.Headers }),
+	Query: calls.JSONQuery(func(v *AttachmentListOpts, key string, owned json.RawMessage, err error) error {
+		known := key == "limit" || key == "offset" || key == "marker"
+		for _, field := range attachmentFields {
+			if key == field {
+				known = true
+			}
+		}
+		if !known {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+		if v.Query == nil {
+			v.Query = map[string]json.RawMessage{}
+		}
+		v.Query[key] = owned
+		return nil
+	}),
+	Paging: calls.Paging[AttachmentListOpts]{
+		Limit:     calls.Pointer(func(v *AttachmentListOpts) **int { return &v.Limit }),
+		MaxItems:  calls.Value(func(v *AttachmentListOpts) *int { return &v.MaxItems }),
+		Paginated: calls.Pointer(func(v *AttachmentListOpts) **bool { return &v.Paginated }),
+	},
+}
 
 func copyAttachmentList(v AttachmentListOpts) AttachmentListOpts {
 	v.Headers = maps.Clone(v.Headers)
@@ -278,50 +315,12 @@ func copyAttachmentList(v AttachmentListOpts) AttachmentListOpts {
 }
 func WithAttachmentListOpts(value AttachmentListOpts) AttachmentListOption {
 	owned := copyAttachmentList(value)
-	return func(v *AttachmentListOpts) error { *v = copyAttachmentList(owned); return nil }
-}
-func WithAttachmentLimit(value int) AttachmentListOption {
-	return func(v *AttachmentListOpts) error { x := value; v.Limit = &x; return nil }
+	return request.Custom(func(v *AttachmentListOpts) error { *v = copyAttachmentList(owned); return nil })
 }
 func WithAttachmentOffset(value int) AttachmentListOption {
-	return func(v *AttachmentListOpts) error { x := value; v.Offset = &x; return nil }
-}
-func WithAttachmentMaxItems(value int) AttachmentListOption {
-	return func(v *AttachmentListOpts) error { v.MaxItems = value; return nil }
-}
-func WithAttachmentPaginated(value bool) AttachmentListOption {
-	return func(v *AttachmentListOpts) error { x := value; v.Paginated = &x; return nil }
-}
-func WithAttachmentListHeaders(value map[string]string) AttachmentListOption {
-	owned := maps.Clone(value)
-	return func(v *AttachmentListOpts) error { v.Headers = maps.Clone(owned); return nil }
+	return request.Custom(func(v *AttachmentListOpts) error { x := value; v.Offset = &x; return nil })
 }
 
-// Unknown query keys and wire-only Body aliases are ignored before marshaling,
-// matching Resource.list's canonical attribute filters.
-func WithAttachmentQuery(key string, value any) AttachmentListOption {
-	known := key == "limit" || key == "offset" || key == "marker"
-	for _, field := range attachmentFields {
-		if key == field {
-			known = true
-		}
-	}
-	if !known {
-		return func(*AttachmentListOpts) error { return nil }
-	}
-	raw, err := json.Marshal(value)
-	owned := bytes.Clone(raw)
-	return func(v *AttachmentListOpts) error {
-		if err != nil {
-			return err
-		}
-		if v.Query == nil {
-			v.Query = map[string]json.RawMessage{}
-		}
-		v.Query[key] = bytes.Clone(owned)
-		return nil
-	}
-}
 func prepareAttachmentList(v AttachmentListOpts) (url.Values, map[string]json.RawMessage, rest.ListControl, error) {
 	if v.MaxItems < 0 || v.Limit != nil && *v.Limit < 0 || v.Offset != nil && *v.Offset < 0 {
 		return nil, nil, rest.ListControl{}, attachmentInvalid("pagination values must be nonnegative")
@@ -407,7 +406,7 @@ func (a *API) ListRecords(ctx context.Context, serverID string, options ...Attac
 			yield(nil, attachmentWrap(ctx, op, err))
 			return
 		}
-		opts, err := attachmentApply(ctx, p.guard, AttachmentListOpts{}, copyAttachmentList, owned)
+		opts, err := attachmentApply(ctx, p.guard, AttachmentListOpts{}, copyAttachmentList, calls.Translate(owned, attachmentListCalls))
 		var query url.Values
 		var filters map[string]json.RawMessage
 		var control rest.ListControl
@@ -441,7 +440,15 @@ type AttachmentUpdateOpts struct {
 	Headers map[string]string
 	Fields  map[string]json.RawMessage
 }
-type AttachmentUpdateOption func(*AttachmentUpdateOpts) error
+
+// AttachmentUpdateOption is one option of UpdateRecord:
+// WithAttachmentUpdateOpts, WithAttachmentSwapTo, WithAttachmentAttribute,
+// request.Headers (replaces the headers) or request.Custom over
+// *AttachmentUpdateOpts. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type AttachmentUpdateOption = request.WriteCall
+
+var attachmentUpdateCalls = calls.Spec[AttachmentUpdateOpts]{Headers: calls.Value(func(v *AttachmentUpdateOpts) *map[string]string { return &v.Headers })}
 
 func copyAttachmentUpdate(v AttachmentUpdateOpts) AttachmentUpdateOpts {
 	v.Headers = maps.Clone(v.Headers)
@@ -450,11 +457,7 @@ func copyAttachmentUpdate(v AttachmentUpdateOpts) AttachmentUpdateOpts {
 }
 func WithAttachmentUpdateOpts(value AttachmentUpdateOpts) AttachmentUpdateOption {
 	owned := copyAttachmentUpdate(value)
-	return func(v *AttachmentUpdateOpts) error { *v = copyAttachmentUpdate(owned); return nil }
-}
-func WithAttachmentUpdateHeaders(value map[string]string) AttachmentUpdateOption {
-	owned := maps.Clone(value)
-	return func(v *AttachmentUpdateOpts) error { v.Headers = maps.Clone(owned); return nil }
+	return request.Custom(func(v *AttachmentUpdateOpts) error { *v = copyAttachmentUpdate(owned); return nil })
 }
 func WithAttachmentSwapTo(volumeID string) AttachmentUpdateOption {
 	return WithAttachmentAttribute("volume_id", volumeID)
@@ -462,14 +465,14 @@ func WithAttachmentSwapTo(volumeID string) AttachmentUpdateOption {
 func WithAttachmentAttribute(key string, value any) AttachmentUpdateOption {
 	canonical, known := attachmentCanonical(key)
 	if key == "server_id" || key == "id" {
-		return func(*AttachmentUpdateOpts) error { return attachmentInvalid("update target %q is fixed", key) }
+		return request.Custom(func(*AttachmentUpdateOpts) error { return attachmentInvalid("update target %q is fixed", key) })
 	}
 	if !known {
-		return func(*AttachmentUpdateOpts) error { return nil }
+		return request.Custom(func(*AttachmentUpdateOpts) error { return nil })
 	}
 	raw, err := json.Marshal(value)
 	owned := bytes.Clone(raw)
-	return func(v *AttachmentUpdateOpts) error {
+	return request.Custom(func(v *AttachmentUpdateOpts) error {
 		if err != nil {
 			return err
 		}
@@ -484,7 +487,7 @@ func WithAttachmentAttribute(key string, value any) AttachmentUpdateOption {
 			v.Fields[canonical] = bytes.Clone(owned)
 		}
 		return nil
-	}
+	})
 }
 
 // UpdateRecord uses the current volume ID in the route, never attachment_id.
@@ -498,7 +501,7 @@ func (a *API) UpdateRecord(ctx context.Context, serverID, volumeID string, optio
 	if err != nil {
 		return nil, attachmentWrap(ctx, op, err)
 	}
-	opts, err := attachmentApply(ctx, p.guard, AttachmentUpdateOpts{}, copyAttachmentUpdate, slices.Clone(options))
+	opts, err := attachmentApply(ctx, p.guard, AttachmentUpdateOpts{}, copyAttachmentUpdate, calls.Translate(options, attachmentUpdateCalls))
 	fields := map[string]json.RawMessage{}
 	fields["id"], _ = json.Marshal(volumeID)
 	fields["volume_id"], _ = json.Marshal(volumeID)

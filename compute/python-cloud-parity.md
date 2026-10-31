@@ -157,8 +157,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorRAMGetExtraValue`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorRAMQueryOptions`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryExtraSpecs`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryHeader`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.API.ListSourceRecords`
 
 - AllFlavors reproduces the list_flavors(get_extra=True) requests that get_flavor_by_ram starts with.
@@ -258,7 +258,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/hypervisors.API.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/hypervisors.API.AllRecords`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/hypervisors.WithRecordDetails`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/hypervisors.WithRecordQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - list_hypervisors(filters) is compute.hypervisors(details=True, **filters): WithRecordDetails(true) sends the detail route with caller filters as query keys.
   Tests: `compute/v2/hypervisors/python_records_test.go:TestHypervisorRecordsSummaryDetailAndDeclaredProjection`.
@@ -315,7 +315,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithServerGroupCloudReadOpts`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithServerGroupCloudFilters`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithServerGroupCloudExpression`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithServerGroupCloudHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithServerGroupCloudCurrentLocation`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.API.ListCloudRecords`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.API.FindCloudRecord`
@@ -362,7 +362,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithServerGroupCloudReadOpts`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithServerGroupCloudFilters`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithServerGroupCloudExpression`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithServerGroupCloudHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithServerGroupCloudCurrentLocation`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.API.ListCloudRecords`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.API.FindCloudRecord`
@@ -576,7 +576,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.ListCloudRecords`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindDetails`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindAllProjects`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk.WithCloudServerListOptions`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.ListServers`
 - `github.com/JSYoo5B/go-openstacksdk.WithCloudServerDetailed`
@@ -607,7 +607,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.ListCloudRecords`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindDetails`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindAllProjects`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk.WithCloudServerListOptions`
 - `github.com/JSYoo5B/go-openstacksdk.WithCloudServerFilters`
 - `github.com/JSYoo5B/go-openstacksdk.WithCloudServerExpression`

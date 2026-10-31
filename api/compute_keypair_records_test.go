@@ -124,7 +124,7 @@ func TestComputeKeypairRecordsProjectionSemanticQueriesAndLazyOwnership(t *testi
 			})
 			count := 0
 			var failure error
-			for value, err := range keypairs.New(client).ListRecords(context.Background(), keypairs.WithKeypairListFilter(key, want), keypairs.WithKeypairListPaginated(false)) {
+			for value, err := range keypairs.New(client).ListRecords(context.Background(), keypairs.WithKeypairListFilter(key, want), request.Paginated(false)) {
 				if err != nil {
 					failure = err
 					break
@@ -170,16 +170,16 @@ func TestComputeKeypairRecordsProjectionSemanticQueriesAndLazyOwnership(t *testi
 			}
 			testcloud.JSON(w, 200, `{"keypairs":[{"name":"original"},{"name":"changed"}]}`)
 		})
-		seq := api.ListRecords(context.Background(), filter, bulk, keypairs.WithKeypairListQuery("vendor", "first"), keypairs.WithKeypairListQuery("vendor", "last"), func(c *request.Config[keypairs.KeypairListOpts]) error {
+		seq := api.ListRecords(context.Background(), filter, bulk, request.Query("vendor", "first"), request.Query("vendor", "last"), request.Custom(func(c *request.Config[keypairs.KeypairListOpts]) error {
 			callbacks.Add(1)
 			shared["X-Trace"] = "owned"
 			c.Headers = shared
 			return nil
-		}, func(_ *request.Config[keypairs.KeypairListOpts]) error {
+		}), request.Custom(func(_ *request.Config[keypairs.KeypairListOpts]) error {
 			callbacks.Add(1)
 			shared["X-Trace"] = "changed"
 			return nil
-		})
+		}))
 		if calls.Load() != 0 || callbacks.Load() != 0 {
 			t.Fatal("iterator is not lazy")
 		}
@@ -276,10 +276,10 @@ func TestComputeKeypairRecordsContinuationLogicalMarkersCapsAndLateErrors(t *tes
 			})
 			options := []keypairs.KeypairListOption{keypairs.WithKeypairListUserID("owner"), keypairs.WithKeypairListFilter("type", "ssh")}
 			if mode == "initial limit fallback" {
-				options = append(options, keypairs.WithKeypairListLimit(5))
+				options = append(options, request.Limit(5))
 			}
 			if mode == "single page" {
-				options = append(options, keypairs.WithKeypairListPaginated(false))
+				options = append(options, request.Paginated(false))
 			}
 			var names []string
 			var failure error
@@ -344,7 +344,7 @@ func TestComputeKeypairRecordsContinuationLogicalMarkersCapsAndLateErrors(t *tes
 			})
 			count := 0
 			var failure error
-			for _, err := range keypairs.New(client).ListRecords(context.Background(), keypairs.WithKeypairListMaxItems(cap), keypairs.WithKeypairListFilter("type", "ssh")) {
+			for _, err := range keypairs.New(client).ListRecords(context.Background(), request.MaxItems(cap), keypairs.WithKeypairListFilter("type", "ssh")) {
 				if err != nil {
 					failure = err
 					break
@@ -411,22 +411,22 @@ func TestComputeKeypairRecordsVersionPreflightAndAcceptedFaultBinding(t *testing
 			case "auto2.10":
 				client.Microversion = ""
 			case "explicit empty":
-				opts = append(opts, keypairs.WithKeypairListMicroversion(""))
+				opts = append(opts, request.Microversion(""))
 			case "negative limit":
-				opts = append(opts, keypairs.WithKeypairListLimit(-1))
+				opts = append(opts, request.Limit(-1))
 			case "nil option":
 				opts = append(opts, nil)
 			case "query collision":
 				opts = append(opts, keypairs.WithKeypairListUserID("same"), keypairs.WithKeypairListFilter("user_id", "same"))
 			case "base_path control":
-				opts = append(opts, keypairs.WithKeypairListQuery("base_path", "/other"))
+				opts = append(opts, request.Query("base_path", "/other"))
 			case "jmespath control":
 				opts = append(opts, keypairs.WithKeypairListFilter("jmespath_filters", "name"))
 			case "source callback":
-				opts = append(opts, func(_ *request.Config[keypairs.KeypairListOpts]) error {
+				opts = append(opts, request.Custom(func(_ *request.Config[keypairs.KeypairListOpts]) error {
 					client.ResourceBase = cloud.Server.URL + "/changed/"
 					return nil
-				})
+				}))
 			case "outer guard":
 				ctx = rest.WithOperationGuard(ctx, func(context.Context) error { return cause })
 			}

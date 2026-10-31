@@ -16,6 +16,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -65,7 +66,7 @@ func TestPythonServerFindRecordDirectDefaultsAliasesAndWire(t *testing.T) {
 		r.Header.Set("If-Match", "actual")
 		return r
 	})
-	v, err := api.FindRecord(context.Background(), "folder/name%", servers.WithRecordFindDetails(false), servers.WithRecordFindAllProjects(true), servers.WithRecordFindQuery("x_raw", map[string]any{"false": false, "zero": 0}), servers.WithRecordFindQuery("name", "seed"), servers.WithRecordFindHeaders(map[string]string{"X-Trace": "owned"}))
+	v, err := api.FindRecord(context.Background(), "folder/name%", servers.WithRecordFindDetails(false), servers.WithRecordFindAllProjects(true), request.Query("x_raw", map[string]any{"false": false, "zero": 0}), request.Query("name", "seed"), request.Headers(map[string]string{"X-Trace": "owned"}))
 	if err != nil || len(calls) != 1 || calls[0].method != "GET" || calls[0].body != "" || escaped != serverFindBase+"/folder%2Fname%25" || header.Get("OpenStack-API-Version") != "compute 2.96" || header.Get("X-OpenStack-Nova-API-Version") != "2.96" || header.Get("X-Trace") != "owned" || header.Get("X-Auth-Token") != "test-token" {
 		t.Fatal(v, err, calls, header, escaped)
 	}
@@ -97,7 +98,7 @@ func TestPythonServerFindRecordEmptyMalformedShapeAndDescriptorProof(t *testing.
 		t.Run(fmt.Sprintf("%q", item.body), func(t *testing.T) {
 			var calls []nativeServerCall
 			api, _ := serverFindAPI(t, &calls, func(*http.Request) *http.Response { return nativeServerWire(202, item.body) })
-			v, err := api.FindRecord(context.Background(), "seed", servers.WithRecordFindQuery("progress", "12"))
+			v, err := api.FindRecord(context.Background(), "seed", request.Query("progress", "12"))
 			if (err == nil) != item.valid || v == nil || v.StatusCode != 202 || string(v.Envelope) != item.body || len(calls) != 1 {
 				t.Fatal(item, v, err, calls)
 			}
@@ -201,7 +202,7 @@ func TestPythonServerFindRecordFallbackStatusMissingAndAuthority(t *testing.T) {
 	if v != nil || err != nil || len(calls) != 2 {
 		t.Fatal(v, err, calls)
 	}
-	v, err = api.FindRecord(context.Background(), "missing", servers.WithRecordFindIgnoreMissing(false))
+	v, err = api.FindRecord(context.Background(), "missing", request.IgnoreMissing(false))
 	if v != nil || !errors.Is(err, resource.ErrNotFound) || gophercloud.ResponseCodeIs(err, 404) {
 		t.Fatal(v, err)
 	}
@@ -227,7 +228,7 @@ func TestPythonServerFindRecordDetailsScopeQueryPriorityAndOrderedSeed(t *testin
 		return nativeServerWire(200, `{"servers":[{"id":"wanted","name":"wanted","fault":{"enabled":1,"extra":false}}]}`)
 	})
 	api.RawClient().MoreHeaders["Accept"] = "member-custom"
-	v, err := api.FindRecord(context.Background(), "wanted", servers.WithRecordFindDetails(false), servers.WithRecordFindAllProjects(true), servers.WithRecordFindQuery("changes-since", "wire"), servers.WithRecordFindQuery("changes_since", nil), servers.WithRecordFindQuery("name", nil), servers.WithRecordFindQuery("any_tags", []any{"one", nil, "two"}), servers.WithRecordFindQuery("fault", map[string]any{"enabled": true}), servers.WithRecordFindQuery("x_extra", false))
+	v, err := api.FindRecord(context.Background(), "wanted", servers.WithRecordFindDetails(false), servers.WithRecordFindAllProjects(true), request.Query("changes-since", "wire"), request.Query("changes_since", nil), request.Query("name", nil), request.Query("any_tags", []any{"one", nil, "two"}), request.Query("fault", map[string]any{"enabled": true}), request.Query("x_extra", false))
 	if err != nil || v == nil || len(calls) != 2 || !reflect.DeepEqual(accept, []string{"member-custom", "application/json"}) {
 		t.Fatal(v, err, calls, accept)
 	}
@@ -237,13 +238,13 @@ func TestPythonServerFindRecordDetailsScopeQueryPriorityAndOrderedSeed(t *testin
 	}
 	calls = nil
 	api, _ = serverFindAPI(t, &calls, func(*http.Request) *http.Response { return nativeServerWire(200, `{}`) })
-	v, err = api.FindRecord(context.Background(), "wanted", servers.WithRecordFindQuery("is_locked", false), servers.WithRecordFindQuery("locked", true))
+	v, err = api.FindRecord(context.Background(), "wanted", request.Query("is_locked", false), request.Query("locked", true))
 	if err != nil {
 		t.Fatal(err)
 	}
 	serverFindValue(t, v, "is_locked", "true")
 	calls = nil
-	v, err = api.FindRecord(context.Background(), "wanted", servers.WithRecordFindQuery("locked", true), servers.WithRecordFindQuery("is_locked", false))
+	v, err = api.FindRecord(context.Background(), "wanted", request.Query("locked", true), request.Query("is_locked", false))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -262,7 +263,7 @@ func TestPythonServerFindRecordDictionaryTruthinessAndNumericEquality(t *testing
 				}
 				return nativeServerWire(200, `{"servers":[{"id":"wanted","fault":`+item.actual+`}]}`)
 			})
-			v, err := api.FindRecord(context.Background(), "wanted", servers.WithRecordFindQuery("fault", json.RawMessage(item.filter)))
+			v, err := api.FindRecord(context.Background(), "wanted", request.Query("fault", json.RawMessage(item.filter)))
 			if (v != nil) != item.match || (err == nil) != item.valid {
 				t.Fatal(item, v, err)
 			}
@@ -337,7 +338,7 @@ func TestPythonServerFindRecordExplicitVersionIsGETOnly(t *testing.T) {
 			}
 			return nativeServerWire(404, `{}`)
 		})
-		v, err := api.FindRecord(context.Background(), "wanted", servers.WithRecordFindMicroversion(version))
+		v, err := api.FindRecord(context.Background(), "wanted", request.Microversion(version))
 		if err != nil || v == nil || v.Microversion != "2.96" || len(calls) != 2 || api.RawClient().Microversion != "2.96" || headers[0].Get("X-OpenStack-Nova-API-Version") != version || headers[1].Get("X-OpenStack-Nova-API-Version") != "2.96" {
 			t.Fatal(version, v, err, calls, headers)
 		}
@@ -353,7 +354,7 @@ func TestPythonServerFindRecordExplicitVersionIsGETOnly(t *testing.T) {
 	})
 	client.Endpoint = client.ResourceBase
 	client.Microversion = ""
-	v, err := servers.New(client).FindRecord(context.Background(), "wanted", servers.WithRecordFindMicroversion("2.50"))
+	v, err := servers.New(client).FindRecord(context.Background(), "wanted", request.Microversion("2.50"))
 	if err != nil || v == nil || calls.Len() != 3 || calls.Calls()[0].Header.Get("X-OpenStack-Nova-API-Version") != "2.50" || calls.Calls()[1].Path != "/nova/v2.1/" || calls.Calls()[2].Header.Get("X-OpenStack-Nova-API-Version") != "2.90" || len(v.Discovery) != 1 {
 		t.Fatal(v, err, pythonServerCalls(calls))
 	}
@@ -397,9 +398,9 @@ func TestPythonServerFindRecordDiscoveryTerminalProofAndSourceGuard(t *testing.T
 func TestPythonServerFindRecordInvalidControlsBeforeHTTP(t *testing.T) {
 	var calls []nativeServerCall
 	api, _ := serverFindAPI(t, &calls, func(*http.Request) *http.Response { return nativeServerWire(200, `{}`) })
-	options := [][]servers.RecordFindOption{{nil}, {servers.WithRecordFindLimit(-1)}, {servers.WithRecordFindMaxItems(-1)}, {servers.WithRecordFindQuery("progress", "²")}, {servers.WithRecordFindQuery("x", json.RawMessage(`bad`))}, {servers.WithRecordFindAllProjects(false), servers.WithRecordFindQuery("all_tenants", nil)}, {servers.WithRecordFindHeaders(map[string]string{"X-Auth-Token": "bad"})}, {servers.WithRecordFindHeaders(map[string]string{"OpenStack-API-Version": "compute 2.5"})}, {servers.WithRecordFindHeaders(map[string]string{"X-OpenStack-Volume-API-Version": "3.5"})}}
+	options := [][]servers.RecordFindOption{{nil}, {servers.WithRecordFindLimit(-1)}, {servers.WithRecordFindMaxItems(-1)}, {request.Query("progress", "²")}, {request.Query("x", json.RawMessage(`bad`))}, {servers.WithRecordFindAllProjects(false), request.Query("all_tenants", nil)}, {request.Headers(map[string]string{"X-Auth-Token": "bad"})}, {request.Headers(map[string]string{"OpenStack-API-Version": "compute 2.5"})}, {request.Headers(map[string]string{"X-OpenStack-Volume-API-Version": "3.5"})}}
 	for _, key := range []string{"ignore_missing", "name_or_id", "session", "cls", "id", "self", "connection", "_synchronized", "details", "all_projects", "base_path", "list_base_path", "resource_type", "requires_id", "resource_response_key", "skip_cache", "error_message", "headers", "microversion", "paginated", "max_items", "location", "interface_ip"} {
-		options = append(options, []servers.RecordFindOption{servers.WithRecordFindQuery(key, nil)})
+		options = append(options, []servers.RecordFindOption{request.Query(key, nil)})
 	}
 	for _, opts := range options {
 		_, err := api.FindRecord(context.Background(), "wanted", opts...)
@@ -429,12 +430,12 @@ func TestPythonServerFindRecordSnapshotCancellationAndOptionSource(t *testing.T)
 	query["name"][1] = 'X'
 	version = "changed"
 	var retained *servers.RecordFindOpts
-	v, err := api.FindRecord(context.Background(), "wanted", option, func(p *servers.RecordFindOpts) error { retained = p; return nil }, func(*servers.RecordFindOpts) error {
+	v, err := api.FindRecord(context.Background(), "wanted", option, request.Custom(func(p *servers.RecordFindOpts) error { retained = p; return nil }), request.Custom(func(*servers.RecordFindOpts) error {
 		retained.Headers["X-Auth-Token"] = "bad"
 		retained.Query["name"] = json.RawMessage(`false`)
 		*retained.Microversion = "changed"
 		return nil
-	})
+	}))
 	if err != nil || v == nil || len(calls) != 1 || header.Get("X-Trace") != "original" || header.Get("X-OpenStack-Nova-API-Version") != "2.70" {
 		t.Fatal(v, err, calls, header)
 	}
@@ -442,12 +443,12 @@ func TestPythonServerFindRecordSnapshotCancellationAndOptionSource(t *testing.T)
 	calls = nil
 	ctx, cancel := context.WithCancelCause(context.Background())
 	cause, callback := errors.New("cancel cause"), errors.New("callback")
-	_, err = api.FindRecord(ctx, "wanted", func(*servers.RecordFindOpts) error { cancel(cause); return callback })
+	_, err = api.FindRecord(ctx, "wanted", request.Custom(func(*servers.RecordFindOpts) error { cancel(cause); return callback }))
 	if len(calls) != 0 || !errors.Is(err, context.Canceled) || !errors.Is(err, cause) || !errors.Is(err, callback) {
 		t.Fatal(err, calls)
 	}
 	original := api.RawClient().ResourceBase
-	_, err = api.FindRecord(context.Background(), "wanted", func(*servers.RecordFindOpts) error { api.RawClient().ResourceBase += "changed/"; return callback })
+	_, err = api.FindRecord(context.Background(), "wanted", request.Custom(func(*servers.RecordFindOpts) error { api.RawClient().ResourceBase += "changed/"; return callback }))
 	api.RawClient().ResourceBase = original
 	if len(calls) != 0 || !errors.Is(err, callback) || !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err, calls)
@@ -588,7 +589,7 @@ func TestPythonServerFindRecordRetryKeepsOriginalRejectionAndRequest(t *testing.
 					return nil
 				}
 			}
-			record, err := api.FindRecord(context.Background(), "wanted", servers.WithRecordFindQuery("x_query", false))
+			record, err := api.FindRecord(context.Background(), "wanted", request.Query("x_query", false))
 			if lane == "retry" || lane == "reauth" {
 				if err != nil || record == nil || len(calls) != 2 || calls[0] != calls[1] {
 					t.Fatal(record, err, calls)
@@ -680,7 +681,7 @@ func TestPythonServerFindRecordMarkerCapAndSinglePage(t *testing.T) {
 		}
 		return nativeServerWire(200, `{"servers":[{"id":"skip","name":"wanted","fault":false},{"id":"wanted","name":"wanted","fault":1},{"id":"bad","name":"wanted","connection":null}],"next":"https://bad.example/servers/detail"}`)
 	})
-	record, err = api.FindRecord(context.Background(), "wanted", servers.WithRecordFindQuery("fault", true), servers.WithRecordFindMaxItems(2), servers.WithRecordFindLimit(0))
+	record, err = api.FindRecord(context.Background(), "wanted", request.Query("fault", true), servers.WithRecordFindMaxItems(2), servers.WithRecordFindLimit(0))
 	if err != nil || record == nil || len(calls) != 2 {
 		t.Fatal(record, err, calls)
 	}
@@ -726,7 +727,7 @@ func TestPythonServerFindRecordPaginationRepresentationsAndGuards(t *testing.T) 
 				}
 				return response
 			})
-			record, err := api.FindRecord(context.Background(), "wanted", servers.WithRecordFindQuery("project_id", "fixed"))
+			record, err := api.FindRecord(context.Background(), "wanted", request.Query("project_id", "fixed"))
 			if lane == "filter" || lane == "path" || lane == "cycle" {
 				var receipt *resource.ResponseError
 				if record != nil || err == nil || !errors.As(err, &receipt) || receipt.StatusCode != 200 {
@@ -780,7 +781,7 @@ func TestPythonServerFindRecordRetryForbiddenHeadersAndOmittedVersion(t *testing
 						}
 						return nil
 					}
-					record, err := api.FindRecord(context.Background(), "wanted", servers.WithRecordFindMicroversion("2.70"))
+					record, err := api.FindRecord(context.Background(), "wanted", request.Microversion("2.70"))
 					var native gophercloud.ErrUnexpectedResponseCode
 					wantCalls := 1
 					if list {
@@ -890,7 +891,7 @@ func TestPythonServerFindRecordAcceptExplicitAndSelectedAPIChange(t *testing.T) 
 		return nativeServerWire(200, `{"servers":[{"id":"wanted"}]}`)
 	})
 	api.RawClient().MoreHeaders["Accept"] = "configured"
-	v, err := api.FindRecord(context.Background(), "wanted", servers.WithRecordFindHeaders(map[string]string{"aCcEpT": "owned"}))
+	v, err := api.FindRecord(context.Background(), "wanted", request.Headers(map[string]string{"aCcEpT": "owned"}))
 	if err != nil || v == nil || !reflect.DeepEqual(accept, []string{"owned", "owned"}) {
 		t.Fatal(v, err, calls, accept)
 	}
@@ -898,7 +899,7 @@ func TestPythonServerFindRecordAcceptExplicitAndSelectedAPIChange(t *testing.T) 
 	original := *api
 	replacement := nativeServerClient(cloud)
 	replacement.Microversion = "2.96"
-	_, err = api.FindRecord(context.Background(), "wanted", func(*servers.RecordFindOpts) error { *api = *servers.New(replacement); return nil })
+	_, err = api.FindRecord(context.Background(), "wanted", request.Custom(func(*servers.RecordFindOpts) error { *api = *servers.New(replacement); return nil }))
 	*api = original
 	if !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
 		t.Fatal(err, calls)

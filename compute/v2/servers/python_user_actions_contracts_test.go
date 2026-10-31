@@ -182,9 +182,9 @@ func TestPythonUserActionsExtensionsSnapshotAndPreflight(t *testing.T) {
 	client.Microversion = "2.43"
 	api := servers.New(client)
 	extension := map[string]any{"null": nil, "zero": 0, "false": false, "empty": []string{}}
-	option := servers.WithFloatingIPServerField("x_extension", extension)
+	option := request.Field("x_extension", extension)
 	extension["zero"] = 5
-	if err := api.AddFloatingIP(context.Background(), "s1", "203.0.113.1", option, servers.WithFloatingIPServerHeader("X-Test", "value")); err != nil {
+	if err := api.AddFloatingIP(context.Background(), "s1", "203.0.113.1", option, request.Header("X-Test", "value")); err != nil {
 		t.Fatal(err)
 	}
 	want := `{"addFloatingIp":{"address":"203.0.113.1","x_extension":{"empty":[],"false":false,"null":null,"zero":0}}}`
@@ -194,35 +194,35 @@ func TestPythonUserActionsExtensionsSnapshotAndPreflight(t *testing.T) {
 	before := calls.Len()
 	cases := []func() error{
 		func() error {
-			return api.ClearPassword(context.Background(), "s1", servers.WithUserActionField("x", 1))
+			return api.ClearPassword(context.Background(), "s1", request.Field("x", 1))
 		},
 		func() error { return api.Restore(context.Background(), "s1", nil) },
 		func() error {
-			return api.LockWithOptions(context.Background(), "s1", servers.WithLockServerField("locked_reason", nil))
+			return api.LockWithOptions(context.Background(), "s1", request.Field("locked_reason", nil))
 		},
 		func() error {
-			return api.UnshelveWithOptions(context.Background(), "s1", servers.WithUnshelveServerField("availability_zone", nil))
+			return api.UnshelveWithOptions(context.Background(), "s1", request.Field("availability_zone", nil))
 		},
 		func() error {
-			return api.UnshelveWithOptions(context.Background(), "s1", servers.WithUnshelveServerField("host", "bad"))
+			return api.UnshelveWithOptions(context.Background(), "s1", request.Field("host", "bad"))
 		},
 		func() error {
-			return api.AddFixedIP(context.Background(), "s1", "net", servers.WithUserActionField("networkId", "bad"))
+			return api.AddFixedIP(context.Background(), "s1", "net", request.Field("networkId", "bad"))
 		},
 		func() error {
-			return api.RemoveFixedIP(context.Background(), "s1", "address", servers.WithUserActionField("address", "bad"))
+			return api.RemoveFixedIP(context.Background(), "s1", "address", request.Field("address", "bad"))
 		},
 		func() error {
-			return api.AddFloatingIP(context.Background(), "s1", "address", servers.WithFloatingIPServerField("fixed_address", "bad"))
+			return api.AddFloatingIP(context.Background(), "s1", "address", request.Field("fixed_address", "bad"))
 		},
 		func() error {
-			return api.AddFloatingIP(context.Background(), "s1", "address", servers.WithFloatingIPServerHeader("X-Auth-Token", "bad"))
+			return api.AddFloatingIP(context.Background(), "s1", "address", request.Header("X-Auth-Token", "bad"))
 		},
 		func() error {
-			return api.RemoveFloatingIP(context.Background(), "s1", "address", request.WithQuery[servers.UserActionOpts]("x", "1"))
+			return api.RemoveFloatingIP(context.Background(), "s1", "address", request.Custom(request.WithQuery[servers.UserActionOpts]("x", "1")))
 		},
 		func() error {
-			return api.AddFloatingIP(context.Background(), "s1", "address", request.WithArgument[servers.FloatingIPServerOpts]("x", 1))
+			return api.AddFloatingIP(context.Background(), "s1", "address", request.Custom(request.WithArgument[servers.FloatingIPServerOpts]("x", 1)))
 		},
 		func() error { return api.Restore(nil, "s1") },
 		func() error { return api.Restore(context.Background(), "..") },
@@ -240,10 +240,10 @@ func TestPythonUserActionsExtensionsSnapshotAndPreflight(t *testing.T) {
 func TestPythonUserActionsOptionsCaptureSourceBeforeCallbacks(t *testing.T) {
 	client, _, calls := pythonServerCloud(t, func(*http.Request) *http.Response { return nativeServerWire(202, "") })
 	api := servers.New(client)
-	err := api.LockWithOptions(context.Background(), "s1", func(c *request.Config[servers.LockServerOpts]) error {
+	err := api.LockWithOptions(context.Background(), "s1", request.Custom(func(c *request.Config[servers.LockServerOpts]) error {
 		client.ResourceBase = "https://elsewhere.invalid/v2.1/"
 		return nil
-	})
+	}))
 	if !errors.Is(err, resource.ErrInvalidOption) || calls.Len() != 0 {
 		t.Fatal(err, pythonServerCalls(calls))
 	}
@@ -251,13 +251,13 @@ func TestPythonUserActionsOptionsCaptureSourceBeforeCallbacks(t *testing.T) {
 	var nilAPI *servers.API
 	optionCalls := 0
 	option := func(c *request.Config[servers.LockServerOpts]) error { optionCalls++; return nil }
-	if err := nilAPI.LockWithOptions(context.Background(), "s1", option); !errors.Is(err, resource.ErrInvalidOption) {
+	if err := nilAPI.LockWithOptions(context.Background(), "s1", request.Custom(option)); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
 	cause := errors.New("cancel reason")
 	ctx, cancel := context.WithCancelCause(context.Background())
 	cancel(cause)
-	if err := api.LockWithOptions(ctx, "s1", option); !errors.Is(err, context.Canceled) || !errors.Is(err, cause) {
+	if err := api.LockWithOptions(ctx, "s1", request.Custom(option)); !errors.Is(err, context.Canceled) || !errors.Is(err, cause) {
 		t.Fatal(err)
 	}
 	if optionCalls != 0 {

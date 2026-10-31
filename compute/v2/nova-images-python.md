@@ -78,7 +78,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/images.API.DeleteRecord`
 
-- DELETE /images/{escaped literal ID}; no JSON body decode. Actual 200..399 accepted and clean404 ignored by default; WithDeleteIgnoreMissing(false) retains original error. Unsupported microversion guard runs before HTTP and ignoreMissing.
+- DELETE /images/{escaped literal ID}; no JSON body decode. Actual 200..399 accepted and clean404 ignored by default; request.IgnoreMissing(false) retains original error. Unsupported microversion guard runs before HTTP and ignoreMissing.
   Tests: `compute/v2/images/image_records_test.go:TestPythonNovaImageFindSummaryAndDeleteMissing`, `compute/v2/images/image_records_test.go:TestPythonNovaImageExplicitVersionBounds`, `compute/v2/images/image_records_test.go:TestPythonNovaImageOwnedOptionsGuardsAndEvidence`, `compute/v2/images/image_records_test.go:TestPythonNovaImageRejectedResponseFailuresStopDeleteAndFind`, `compute/v2/images/image_records_test.go:TestPythonNovaImageCleanRejectionsRemainEligibleAfterNativeRetryHook`.
 - GET400/403/404 and Delete404 observe rejected Read/Close/context/source faults through shared REST; only clean rejection may establish ignoreMissing/fallback. Identical native retry stop-hook return remains a clean status; mixed retry errors preserve causes and stop after one physical request.
   Tests: `compute/v2/images/image_records_test.go:TestPythonNovaImageFindSummaryAndDeleteMissing`, `compute/v2/images/image_records_test.go:TestPythonNovaImageExplicitVersionBounds`, `compute/v2/images/image_records_test.go:TestPythonNovaImageOwnedOptionsGuardsAndEvidence`, `compute/v2/images/image_records_test.go:TestPythonNovaImageRejectedResponseFailuresStopDeleteAndFind`, `compute/v2/images/image_records_test.go:TestPythonNovaImageCleanRejectionsRemainEligibleAfterNativeRetryHook`.
@@ -222,7 +222,7 @@ func main() {
     if err != nil { log.Fatal(err) }
     api := service.Images
     for value, err := range api.ListRecords(ctx,
-        images.WithListDetails(false), images.WithListMaxItems(100)) {
+        images.WithListDetails(false), request.MaxItems(100)) {
         if err != nil { log.Fatal(err) }
         printImage(value)
     }
@@ -230,7 +230,7 @@ func main() {
     value, err := api.GetRecord(ctx, *id)
     if err != nil { log.Fatal(err) }
     printImage(value)
-    value, err = api.FindRecord(ctx, *id, images.WithFindIgnoreMissing(false))
+    value, err = api.FindRecord(ctx, *id, request.IgnoreMissing(false))
     if err != nil { log.Fatal(err) }
     printImage(value)
     value, err = api.FetchMetadata(ctx, *id)
@@ -250,7 +250,7 @@ func main() {
     }
     if *remove {
         if err := api.DeleteRecord(ctx, *id,
-            images.WithDeleteIgnoreMissing(false)); err != nil { log.Fatal(err) }
+            request.IgnoreMissing(false)); err != nil { log.Fatal(err) }
     }
 }
 ```

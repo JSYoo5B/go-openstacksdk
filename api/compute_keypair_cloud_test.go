@@ -212,7 +212,7 @@ func TestComputeCloudKeypairCreateAndDeleteOutcomes(t *testing.T) {
 				}
 				testcloud.JSON(w, 201, `{"keypair":{}}`)
 			})
-			record, err := compute.New(client, compute.Dependencies{}).CreateKeypair(context.Background(), tc.name, compute.WithCloudKeypairPublicKey(tc.publicKey), compute.WithCloudKeypairCreateHeader("X-Cloud-Create", "owned"))
+			record, err := compute.New(client, compute.Dependencies{}).CreateKeypair(context.Background(), tc.name, compute.WithCloudKeypairPublicKey(tc.publicKey), request.Header("X-Cloud-Create", "owned"))
 			name, _ := json.Marshal(tc.name)
 			if err != nil || record == nil || record.Resource == nil || string(record.Resource.Body["name"]) != string(name) || string(record.Resource.Body["type"]) != `"ssh"` || string(record.Resource.Body["location"]) != `null` || calls.Load() != 1 {
 				t.Fatal("Cloud create lost seed/default or rejected body name", record, err, calls.Load())
@@ -343,7 +343,7 @@ func TestComputeCloudKeypairOptionsOwnershipAndTerminalErrors(t *testing.T) {
 			testcloud.JSON(w, 200, `{"keypairs":[`+row+`,{"keypair":{"name":"key-b","location":false}}]}`)
 		})
 		result, err := service.SearchKeypairs(context.Background(), "key-*", compute.WithKeypairQueryFilters(json.RawMessage(`{"location":{"cloud":"original-cloud","project":{"id":"scope"}}}`)),
-			func(_ *request.Config[compute.KeypairQueryOpts]) error {
+			request.Custom(func(_ *request.Config[compute.KeypairQueryOpts]) error {
 				callbacks.Add(1)
 				if locations.Load() != 1 {
 					t.Error("location was not captured before options", locations.Load())
@@ -351,7 +351,7 @@ func TestComputeCloudKeypairOptionsOwnershipAndTerminalErrors(t *testing.T) {
 				cloudName, region = "caller-changed", "caller-changed"
 				project[1] = 'x'
 				return nil
-			})
+			}))
 		if err != nil || result == nil || len(result.Inventory) != 2 || len(result.Keypairs) != 2 || calls.Load() != 1 || locations.Load() != 1 || callbacks.Load() != 1 {
 			t.Fatal("location was discarded by cloud second filter or recaptured", result, err, calls.Load(), locations.Load(), callbacks.Load())
 		}
@@ -417,13 +417,13 @@ func TestComputeCloudKeypairOptionsOwnershipAndTerminalErrors(t *testing.T) {
 				w.WriteHeader(500)
 			}
 		})
-		created, err := service.CreateKeypair(context.Background(), "created", func(_ *request.Config[compute.CloudKeypairCreateOpts]) error {
+		created, err := service.CreateKeypair(context.Background(), "created", request.Custom(func(_ *request.Config[compute.CloudKeypairCreateOpts]) error {
 			if locations.Load() != 1 {
 				t.Error("create location was not captured before option", locations.Load())
 			}
 			cloudName = "member-cloud"
 			return nil
-		})
+		}))
 		var createLocation resource.CloudLocation
 		if err != nil || created == nil || created.Resource == nil || json.Unmarshal(created.Resource.Body["location"], &createLocation) != nil || createLocation.Cloud == nil || *createLocation.Cloud != "create-cloud" || created.Wire == nil || string(created.Wire.Body["location"]) != `false` || string(created.Envelope) != `{"keypair":{"name":"created","location":false}}` || locations.Load() != 1 {
 			t.Fatal("create location/result evidence changed", created, err, locations.Load())
@@ -470,17 +470,17 @@ func TestComputeCloudKeypairOptionsOwnershipAndTerminalErrors(t *testing.T) {
 		for repeat := 0; repeat < 2; repeat++ {
 			headers := map[string]string{"X-Cloud-Read": "owned"}
 			result, err := service.SearchKeypairs(context.Background(), "owned", captured,
-				func(config *request.Config[compute.KeypairQueryOpts]) error {
+				request.Custom(func(config *request.Config[compute.KeypairQueryOpts]) error {
 					callbacks.Add(1)
 					config.Headers = headers
 					return nil
-				},
-				func(_ *request.Config[compute.KeypairQueryOpts]) error {
+				}),
+				request.Custom(func(_ *request.Config[compute.KeypairQueryOpts]) error {
 					callbacks.Add(1)
 					headers["X-Cloud-Read"] = "caller-changed"
 					cloud.Provider.SetToken("cloud-live")
 					return nil
-				})
+				}))
 			if err != nil || result == nil || len(result.Keypairs) != 1 || len(result.Inventory) != 1 || string(result.Keypairs[0].Resource.Body["name"]) != `"owned"` || client.Microversion != "2.1" {
 				t.Fatal("Cloud wrapper replayed options or lost owned state", result, err, client)
 			}
@@ -503,18 +503,18 @@ func TestComputeCloudKeypairOptionsOwnershipAndTerminalErrors(t *testing.T) {
 			var option compute.KeypairQueryOption
 			switch mode {
 			case "negative max":
-				option = compute.WithKeypairQueryMaxItems(-1)
+				option = request.MaxItems(-1)
 			case "invalid filters":
 				option = compute.WithKeypairQueryFilters(json.RawMessage(`{`))
 			case "source":
-				option = func(_ *request.Config[compute.KeypairQueryOpts]) error {
+				option = request.Custom(func(_ *request.Config[compute.KeypairQueryOpts]) error {
 					client.ResourceBase = cloud.Server.URL + "/changed/"
 					return nil
-				}
+				})
 			case "cancel":
-				option = func(_ *request.Config[compute.KeypairQueryOpts]) error { cancel(cause); return original }
+				option = request.Custom(func(_ *request.Config[compute.KeypairQueryOpts]) error { cancel(cause); return original })
 			}
-			_, err := service.SearchKeypairs(ctx, "key", option, func(_ *request.Config[compute.KeypairQueryOpts]) error { later.Add(1); return nil })
+			_, err := service.SearchKeypairs(ctx, "key", option, request.Custom(func(_ *request.Config[compute.KeypairQueryOpts]) error { later.Add(1); return nil }))
 			if err == nil || calls.Load() != 0 {
 				t.Fatal("invalid Cloud preparation reached HTTP", err, calls.Load())
 			}

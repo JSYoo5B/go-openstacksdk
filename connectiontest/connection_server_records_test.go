@@ -59,7 +59,7 @@ func TestR2CloudComputeListServerRecordsWithoutDetailsAndQueryPushdown(t *testin
 	cloud := r2CloudComputeNew(t)
 	cloud.JSON("GET "+r2CloudComputeBase+"/servers", 200, `{"servers":[{"id":"s1","name":"web-1"}]}`)
 	rows, err := cloud.Conn.ListServerRecords(context.Background(), sdk.WithCloudServerListOptions(
-		servers.WithRecordFindDetails(false), servers.WithRecordFindQuery("status", "ACTIVE")))
+		servers.WithRecordFindDetails(false), request.Query("status", "ACTIVE")))
 	if err != nil || len(rows) != 1 {
 		t.Fatal(rows, err)
 	}

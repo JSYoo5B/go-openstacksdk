@@ -22,14 +22,14 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.API.FindFlavor`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorFindOptions`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorFindExtraSpecs`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorFindLimit`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorFindMarker`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorFindMaxItems`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorFindPaginated`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorFindMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorFindHeader`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorFindQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorFindFilter`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorFindFilters`
 
@@ -83,13 +83,13 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorListOptions`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorListDetails`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorListExtraSpecs`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorListPaginated`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorListMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorListHeader`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorListFilter`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorListFilters`
 
@@ -122,8 +122,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute.Service.AllFlavors`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryOptions`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryExtraSpecs`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 
 - AllFlavors eagerly consumes the existing detailed owned Flavor list in source page order, retaining duplicates and producing a completed JSON array, including [] for an empty inventory. Its actual source get_extra default is false; an explicit true enriches falsey inline specs while false makes no child request. It sends the fixed detail list query, never Cloud filters or a name selector, and retains the chosen version and live token through all pages and child reads.
   Tests: `api/compute_flavor_cloud_test.go:TestComputeCloudFlavorEagerInventoryDefaultsAndPartialEvidence`, `api/compute_flavor_records_test.go:TestComputeFlavorRecordsQueryProjectionAndOwnedViews`, `api/compute_flavor_records_test.go:TestComputeFlavorRecordsConditionalExtraSpecsEnrichment`.
@@ -150,8 +150,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryExtraSpecs`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryFilters`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryExpression`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 
 - SearchFlavors defaults requested extra specs to true and completes the entire detailed inventory and conditional child reads before applying any identifier or Cloud filter. Explicit false skips enrichment. Even an ultimately unmatched row is enriched when required, and a dictionary can select newly fetched specs. No name or Cloud dictionary is forwarded into the early Proxy query/Body matcher. Empty successful inventory/selection is [] rather than an inventory error.
   Tests: `api/compute_flavor_cloud_test.go:TestComputeCloudFlavorEagerInventoryDefaultsAndPartialEvidence`, `api/compute_flavor_records_test.go:TestComputeFlavorRecordsConditionalExtraSpecsEnrichment`.
@@ -176,8 +176,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryOptions`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryExtraSpecs`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryFilters`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 
 - GetFlavor delegates directly to the owned FindFlavor reader with IgnoreMissing(true) and requested extra specs true by default; it does not call Cloud Search or First. Absent, explicit null and every source-falsey filter become an unfiltered Find. Truthy dictionaries retain original member query spelling and known seed attributes. Direct success keeps inline nonempty specs, or enriches the canonical returned ID when requested specs are falsey; explicit false skips the child and an explicit empty microversion remains versionless for both reads without discovery.
   Tests: `api/compute_flavor_cloud_test.go:TestComputeCloudFlavorGetFindBindingAndFilterPreflight`, `api/compute_flavor_find_test.go:TestComputeFindFlavorMemberSeedAliasesAndLiteralRoutes`.
@@ -262,7 +262,7 @@ func run(ctx context.Context, cloud, identity string, extra bool) error {
         return nil
     }
     for record, err := range service.ListFlavors(ctx,
-        flavors.WithFlavorListMaxItems(20),
+        request.MaxItems(20),
         flavors.WithFlavorListExtraSpecs(extra)) {
         if printErr := printRecord("list", record); printErr != nil { return errors.Join(err, printErr) }
         if err != nil { return fmt.Errorf("list flavors: %w", err) }

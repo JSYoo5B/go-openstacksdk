@@ -149,8 +149,8 @@ func TestComputeCloudFlavorEagerInventoryDefaultsAndPartialEvidence(t *testing.T
 				testcloud.JSON(w, 201, childBody)
 			})
 			options := []compute.FlavorQueryOption{
-				compute.WithFlavorQueryHeader("X-Cloud-Flavor", "owned"),
-				func(_ *request.Config[compute.FlavorQueryOpts]) error { callbacks.Add(1); return nil },
+				request.Header("X-Cloud-Flavor", "owned"),
+				request.Custom(func(_ *request.Config[compute.FlavorQueryOpts]) error { callbacks.Add(1); return nil }),
 			}
 			if tc.extra >= 0 {
 				options = append(options, compute.WithFlavorQueryExtraSpecs(tc.extra == 1))
@@ -342,21 +342,21 @@ func TestComputeCloudFlavorSelectionOwnedOptionsAndLocation(t *testing.T) {
 			}
 			headers := map[string]string{"X-Cloud-Flavor": "owned"}
 			result, err := service.SearchFlavors(context.Background(), "owned-*", captured,
-				func(c *request.Config[compute.FlavorQueryOpts]) error {
+				request.Custom(func(c *request.Config[compute.FlavorQueryOpts]) error {
 					callbacks.Add(1)
 					if locations.Load() != int32(repeat+1) || calls.Load() != int32(repeat) {
 						t.Error("Cloud location was not captured once before options", locations.Load(), calls.Load())
 					}
 					c.Headers = headers
 					return nil
-				}, func(_ *request.Config[compute.FlavorQueryOpts]) error {
+				}), request.Custom(func(_ *request.Config[compute.FlavorQueryOpts]) error {
 					callbacks.Add(1)
 					headers["X-Cloud-Flavor"] = "caller-changed"
 					cloudName = "caller-changed"
 					project[1] = 'x'
 					cloud.Provider.SetToken("owned-live")
 					return nil
-				})
+				}))
 			if err != nil || result == nil || len(result.Flavors) != 2 || len(result.Inventory) != 2 || calls.Load() != int32(repeat+1) || locations.Load() != int32(repeat+1) || callbacks.Load() != int32(2*(repeat+1)) || client.Microversion != "2.1" {
 				t.Fatal("Cloud snapshot/options were reapplied or aliased", result, err, calls.Load(), locations.Load(), callbacks.Load())
 			}
@@ -408,12 +408,12 @@ func TestComputeCloudFlavorSelectionOwnedOptionsAndLocation(t *testing.T) {
 				return resource.CloudLocation{}, nil
 			}})
 			cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) { calls.Add(1); w.WriteHeader(500) })
-			result, err := service.SearchFlavors(ctx, "target", func(_ *request.Config[compute.FlavorQueryOpts]) error {
+			result, err := service.SearchFlavors(ctx, "target", request.Custom(func(_ *request.Config[compute.FlavorQueryOpts]) error {
 				if mode == "option cancellation stops later callbacks" {
 					cancel(cause)
 				}
 				return nil
-			}, func(_ *request.Config[compute.FlavorQueryOpts]) error { later.Add(1); return nil })
+			}), request.Custom(func(_ *request.Config[compute.FlavorQueryOpts]) error { later.Add(1); return nil }))
 			if err == nil || calls.Load() != 0 || locations.Load() != 1 || later.Load() != 0 || result != nil && (result.Value != nil || result.Flavors != nil || len(result.Inventory) != 0) {
 				t.Fatal("Cloud preflight guard allowed later callbacks or HTTP", result, err, calls.Load(), locations.Load(), later.Load())
 			}
@@ -530,14 +530,14 @@ func TestComputeCloudFlavorGetFindBindingAndFilterPreflight(t *testing.T) {
 				w.Header().Set("X-Cloud-Get", "specs")
 				testcloud.JSON(w, 201, `{"extra_specs":{"cpu":"fresh"}}`)
 			})
-			options := []compute.FlavorQueryOption{compute.WithFlavorQueryHeader("X-Cloud-Flavor", "get"), func(_ *request.Config[compute.FlavorQueryOpts]) error {
+			options := []compute.FlavorQueryOption{request.Header("X-Cloud-Flavor", "get"), request.Custom(func(_ *request.Config[compute.FlavorQueryOpts]) error {
 				callbacks.Add(1)
 				if locations.Load() != 1 || calls.Load() != 0 {
 					t.Error("GetFlavor location/options order differs", locations.Load(), calls.Load())
 				}
 				cloudName = "caller-changed"
 				return nil
-			}}
+			})}
 			if tc.filters != "" {
 				options = append(options, compute.WithFlavorQueryFilters(json.RawMessage(tc.filters)))
 			}
@@ -548,7 +548,7 @@ func TestComputeCloudFlavorGetFindBindingAndFilterPreflight(t *testing.T) {
 				options = append(options, compute.WithFlavorQueryExtraSpecs(tc.extra == 1))
 			}
 			if tc.name == "explicit empty microversion owns member and child without discovery" {
-				options = append(options, compute.WithFlavorQueryMicroversion(""))
+				options = append(options, request.Microversion(""))
 			}
 			var record *flavors.FlavorRecord
 			record, err = service.GetFlavor(context.Background(), "target", options...)

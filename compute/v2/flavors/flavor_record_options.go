@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -29,7 +30,27 @@ type FlavorListOpts struct {
 	Paginated     *bool
 	Microversion  *string
 }
-type FlavorListOption = request.Option[FlavorListOpts]
+
+// FlavorListOption is one option of ListRecords and AllRecords:
+// WithFlavorListOptions, WithFlavorListDetails, WithFlavorListExtraSpecs,
+// WithFlavorListFilter, WithFlavorListFilters, request.Query with a string or
+// []string value, request.Limit, request.Marker, request.MaxItems,
+// request.Paginated, request.Microversion, request.Header or request.Custom
+// over *request.Config[FlavorListOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type FlavorListOption = request.ListCall
+
+var flavorListCalls = calls.Spec[request.Config[FlavorListOpts]]{
+	Header:       calls.ConfigHeader[FlavorListOpts],
+	Query:        calls.ConfigQuery[FlavorListOpts],
+	Microversion: calls.Pointer(func(c *request.Config[FlavorListOpts]) **string { return &c.Options.Microversion }),
+	Paging: calls.Paging[request.Config[FlavorListOpts]]{
+		Limit:     calls.Value(func(c *request.Config[FlavorListOpts]) *int { return &c.Options.Limit }),
+		Marker:    calls.Value(func(c *request.Config[FlavorListOpts]) *string { return &c.Options.Marker }),
+		MaxItems:  calls.Value(func(c *request.Config[FlavorListOpts]) *int { return &c.Options.MaxItems }),
+		Paginated: calls.Pointer(func(c *request.Config[FlavorListOpts]) **bool { return &c.Options.Paginated }),
+	},
+}
 
 func copyFlavorListOptions(value FlavorListOpts) FlavorListOpts {
 	if value.Details != nil {
@@ -48,42 +69,13 @@ func copyFlavorListOptions(value FlavorListOpts) FlavorListOpts {
 }
 func WithFlavorListOptions(value FlavorListOpts) FlavorListOption {
 	owned := copyFlavorListOptions(value)
-	return func(c *request.Config[FlavorListOpts]) error { c.Options = copyFlavorListOptions(owned); return nil }
+	return request.Custom(func(c *request.Config[FlavorListOpts]) error { c.Options = copyFlavorListOptions(owned); return nil })
 }
 func WithFlavorListDetails(value bool) FlavorListOption {
-	return func(c *request.Config[FlavorListOpts]) error { owned := value; c.Options.Details = &owned; return nil }
+	return request.Custom(func(c *request.Config[FlavorListOpts]) error { owned := value; c.Options.Details = &owned; return nil })
 }
 func WithFlavorListExtraSpecs(value bool) FlavorListOption {
-	return func(c *request.Config[FlavorListOpts]) error { c.Options.GetExtraSpecs = value; return nil }
-}
-func WithFlavorListLimit(value int) FlavorListOption {
-	return func(c *request.Config[FlavorListOpts]) error { c.Options.Limit = value; return nil }
-}
-func WithFlavorListMarker(value string) FlavorListOption {
-	return func(c *request.Config[FlavorListOpts]) error { c.Options.Marker = value; return nil }
-}
-func WithFlavorListMaxItems(value int) FlavorListOption {
-	return func(c *request.Config[FlavorListOpts]) error { c.Options.MaxItems = value; return nil }
-}
-func WithFlavorListPaginated(value bool) FlavorListOption {
-	return func(c *request.Config[FlavorListOpts]) error {
-		owned := value
-		c.Options.Paginated = &owned
-		return nil
-	}
-}
-func WithFlavorListMicroversion(value string) FlavorListOption {
-	return func(c *request.Config[FlavorListOpts]) error {
-		owned := value
-		c.Options.Microversion = &owned
-		return nil
-	}
-}
-func WithFlavorListHeader(key, value string) FlavorListOption {
-	return request.WithHeader[FlavorListOpts](key, value)
-}
-func WithFlavorListQuery(key, value string) FlavorListOption {
-	return request.WithQuery[FlavorListOpts](key, value)
+	return request.Custom(func(c *request.Config[FlavorListOpts]) error { c.Options.GetExtraSpecs = value; return nil })
 }
 
 const flavorRecordFiltersArgument = "flavor_record_filters"
@@ -115,10 +107,10 @@ func flavorFilterOption[T any](option resource.ListOption) request.Option[T] {
 	}
 }
 func WithFlavorListFilter(field string, value any) FlavorListOption {
-	return flavorFilterOption[FlavorListOpts](resource.WithFilter(field, value))
+	return request.Custom(flavorFilterOption[FlavorListOpts](resource.WithFilter(field, value)))
 }
 func WithFlavorListFilters(values map[string]any) FlavorListOption {
-	return flavorFilterOption[FlavorListOpts](resource.WithFilters(values))
+	return request.Custom(flavorFilterOption[FlavorListOpts](resource.WithFilters(values)))
 }
 
 func ownFlavorReadConfig[T any](config *request.Config[T], clone func(T) T) {
@@ -226,7 +218,7 @@ func flavorReadParameters(value FlavorListOpts, rawQuery url.Values, headers map
 	return flavorListParameters{query: query, control: rest.ListControl{MaxItems: value.MaxItems, SinglePage: value.Paginated != nil && !*value.Paginated, LimitHint: true}, selection: selection, headers: maps.Clone(headers), microversion: value.Microversion, details: value.Details == nil || *value.Details, getExtraSpecs: value.GetExtraSpecs}, nil
 }
 func prepareFlavorList(ctx context.Context, check func(context.Context) error, options []FlavorListOption) (flavorListParameters, error) {
-	config, err := prepareFlavorReadConfig(ctx, check, FlavorListOpts{}, copyFlavorListOptions, options)
+	config, err := prepareFlavorReadConfig(ctx, check, FlavorListOpts{}, copyFlavorListOptions, calls.Options(options, flavorListCalls))
 	if err != nil {
 		return flavorListParameters{}, err
 	}

@@ -27,7 +27,7 @@ func TestPythonAggregateUpdateRecordSendsNullAndEmptyValues(t *testing.T) {
 	status, reply = http.StatusAccepted, `{"id":7,"name":"","availability_zone":"az2"}`
 	got, err = api.UpdateRecord(ctx, 7,
 		aggregates.WithUpdateRecordOptions(aggregates.UpdateRecordOpts{Name: request.Present(""), AvailabilityZone: request.Present("az2")}),
-		aggregates.WithUpdateRecordField("uuid", "u"), aggregates.WithUpdateRecordHeader("X-Trace", "t"))
+		request.Field("uuid", "u"), request.Header("X-Trace", "t"))
 	if err != nil || got.StatusCode != 202 || got.Aggregate.Name != "" || got.Aggregate.AvailabilityZone != "az2" || len(got.Fields) != 3 {
 		t.Fatal(got, err)
 	}
@@ -50,8 +50,8 @@ func TestPythonAggregateUpdateRecordRejectsInputsAndErrorStatuses(t *testing.T) 
 		return pythonAggregateWire(http.StatusConflict, `{"conflictingRequest":{"message":"busy"}}`)
 	})
 	for _, option := range []aggregates.UpdateRecordOption{
-		aggregates.WithUpdateRecordField("availability_zone", nil),
-		aggregates.WithUpdateRecordField("id", 8),
+		request.Field("availability_zone", nil),
+		request.Field("id", 8),
 		nil,
 	} {
 		var operation *resource.OperationError

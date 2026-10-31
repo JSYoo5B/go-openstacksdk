@@ -20,9 +20,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.UserQuotaScope.Detail`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.ProjectQuotaScope.GetRecord`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithQuotaReadOpts`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithQuotaReadQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithQuotaUsage`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithQuotaReadMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithQuotaReadLocation`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.UserQuotaScope.GetRecord`
 
@@ -58,7 +58,7 @@ Go API:
   Tests: `internal/quotafetch/read_test.go:TestQuotaOptionsObserveSourceAndCancellationBeforeRestoringCallback`, `internal/quotafetch/read_test.go:TestQuotaEachCallbackBoundaryOwnsOptionsBeforeLaterAliasedMutation`.
 - Library-owned descriptor profiles are detached before callbacks, and the final response projection rechecks captured source/context/operation guards. Accepted Close cancellation retains actual receipt and no success Resource.
   Tests: `internal/quotafetch/read_test.go:TestQuotaAcceptedCloseCancellationRetainsActualReceiptWithoutResource`, `internal/quotafetch/read_test.go:TestQuotaProfileDescriptorSliceIsOwnedBeforeCallerOptions`.
-- Nova base_path is a bound proxy argument collision by presence, so public WithQuotaReadQuery rejects it without invoking a caller marshaler or doing version discovery/HTTP.
+- Nova base_path is a bound proxy argument collision by presence, so public request.Query rejects it without invoking a caller marshaler or doing version discovery/HTTP.
   Tests: `compute/v2/quotasets/python_quota_query_test.go:TestNovaQuotaBasePathPresenceRejectsWithoutInvokingCallerMarshaler`.
 
 Python/Go differences:
@@ -109,7 +109,7 @@ func main() {
     if err != nil { log.Fatal(err) }
     quota, err := user.GetRecord(ctx,
         quotasets.WithQuotaUsage(true),
-        quotasets.WithQuotaReadQuery("fields", []string{"cores", "ram"}),
+        request.Query("fields", []string{"cores", "ram"}),
     )
     if err != nil { log.Fatal(err) }
     fmt.Println(string(quota.Resource.Body["cores"]))

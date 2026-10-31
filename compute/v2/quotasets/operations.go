@@ -9,6 +9,7 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
@@ -124,14 +125,15 @@ type resetOptions struct {
 	query         url.Values
 }
 
-// ResetOption configures the project/user reset's missing-target policy.
-type ResetOption func(*resetOptions) error
+// ResetOption is one option of the project and user Reset:
+// request.IgnoreMissing (only HTTP 404 returns nil, nil; the default is false,
+// matching Python's revert_quota_set, and the last call wins),
+// WithResetQuery or request.Custom over its unexported options state, which
+// only this package builds. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type ResetOption = request.DeleteCall
 
-// WithResetIgnoreMissing makes only HTTP 404 return nil, nil. The default is
-// false, matching Python's revert_quota_set; the last option wins.
-func WithResetIgnoreMissing(ignore bool) ResetOption {
-	return func(options *resetOptions) error { options.ignoreMissing = ignore; return nil }
-}
+var resetCalls = calls.Spec[resetOptions]{IgnoreMissing: calls.Value(func(c *resetOptions) *bool { return &c.ignoreMissing })}
 
 // Reset deletes the project's quota overrides, restoring Nova defaults.
 // Successful DELETE responses carry headers, not a quota object; no GET follows.
@@ -140,7 +142,7 @@ func (s *ProjectQuotaScope) Reset(ctx context.Context, options ...ResetOption) (
 		return nil, quotaError("Reset", s.projectID, err)
 	}
 	var config resetOptions
-	for _, apply := range options {
+	for _, apply := range calls.Translate(options, resetCalls) {
 		if apply == nil {
 			return nil, quotaError("Reset", s.projectID, fmt.Errorf("%w: nil reset option", resource.ErrInvalidOption))
 		}

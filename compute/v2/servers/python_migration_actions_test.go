@@ -8,6 +8,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -42,7 +43,7 @@ func TestPythonMigrationEvacuateAndMigrateSendOnlySuppliedKeys(t *testing.T) {
 			return api.EvacuateWithOptions(ctx, "s1", servers.WithEvacuateServerOnSharedStorage(true))
 		}},
 		{`{"evacuate":{"host":"h","x-ext":1}}`, func() error {
-			return api.EvacuateWithOptions(ctx, "s1", servers.WithEvacuateServerOptions(servers.EvacuateServerOpts{Host: pythonMigrationPtr("h")}), servers.WithEvacuateServerField("x-ext", 1))
+			return api.EvacuateWithOptions(ctx, "s1", servers.WithEvacuateServerOptions(servers.EvacuateServerOpts{Host: pythonMigrationPtr("h")}), request.Field("x-ext", 1))
 		}},
 		// migrate_server(server)
 		{`{"migrate":null}`, func() error { return api.MigrateWithOptions(ctx, "s1") }},
@@ -123,8 +124,8 @@ func TestPythonMigrationLiveMigrateFollowsSelectedMicroversionShape(t *testing.T
 		{"auto and boolean", "2.96", []servers.LiveMigrateServerOption{
 			servers.WithLiveMigrateServerOptions(servers.LiveMigrateServerOpts{AutoBlockMigration: true, BlockMigration: pythonMigrationPtr(false)}),
 		}},
-		{"version header conflicts with body version", "2.96", []servers.LiveMigrateServerOption{servers.WithLiveMigrateServerHeader("X-OpenStack-Nova-API-Version", "2.96")}},
-		{"core key extension", "2.96", []servers.LiveMigrateServerOption{servers.WithLiveMigrateServerField("block_migration", "auto")}},
+		{"version header conflicts with body version", "2.96", []servers.LiveMigrateServerOption{request.Header("X-OpenStack-Nova-API-Version", "2.96")}},
+		{"core key extension", "2.96", []servers.LiveMigrateServerOption{request.Field("block_migration", "auto")}},
 	}
 	for _, tc := range rejected {
 		t.Run(tc.name, func(t *testing.T) {
@@ -174,8 +175,8 @@ func TestPythonMigrationActionsStatusesAndPreflight(t *testing.T) {
 	for _, err := range []error{
 		api.EvacuateWithOptions(ctx, " "),
 		api.EvacuateWithOptions(ctx, "s1", nil),
-		api.EvacuateWithOptions(ctx, "s1", servers.WithEvacuateServerField("onSharedStorage", false)),
-		api.MigrateWithOptions(ctx, "s1", servers.WithMigrateServerField("host", "h")),
+		api.EvacuateWithOptions(ctx, "s1", request.Field("onSharedStorage", false)),
+		api.MigrateWithOptions(ctx, "s1", request.Field("host", "h")),
 		api.LiveMigrateWithOptions(ctx, "", servers.WithLiveMigrateServerHost("h")),
 	} {
 		if !errors.Is(err, resource.ErrInvalidOption) {

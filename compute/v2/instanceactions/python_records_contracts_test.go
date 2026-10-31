@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -115,7 +116,7 @@ func TestActionRecordsQueryAliasesLocalFiltersRawCapAndParentScope(t *testing.T)
 		t.Fatal(err)
 	}
 	var ids []string
-	for value, err := range scope.ListRecords(context.Background(), WithRecordListQuery("changes_since", "since"), WithRecordListQuery("changes-before", "before"), WithRecordListQuery("action", "reboot"), WithRecordListMaxItems(2), WithRecordListQuery("unknown", make(chan int))) {
+	for value, err := range scope.ListRecords(context.Background(), request.Query("changes_since", "since"), request.Query("changes-before", "before"), request.Query("action", "reboot"), request.MaxItems(2), request.Query("unknown", make(chan int))) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -243,18 +244,18 @@ func TestActionRecordsOptionsCannotReplaceParentAndKeepNilMapOwnership(t *testin
 	cloud, api := actionRecordsCloud(t)
 	calls := 0
 	cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) { calls++; w.WriteHeader(500) })
-	for _, err := range api.ListRecords(context.Background(), "server", WithRecordListQuery("server_id", make(chan int))) {
+	for _, err := range api.ListRecords(context.Background(), "server", request.Query("server_id", make(chan int))) {
 		if !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(err)
 		}
 	}
 	late := 0
-	for _, err := range api.ListRecords(context.Background(), "server", func(c *RecordListOpts) error {
+	for _, err := range api.ListRecords(context.Background(), "server", request.Custom(func(c *RecordListOpts) error {
 		api.client.ResourceBase = cloud.Server.URL + "/changed/"
 		c.Headers = nil
 		c.Query = nil
 		return nil
-	}, func(c *RecordListOpts) error { late++; return nil }) {
+	}), request.Custom(func(c *RecordListOpts) error { late++; return nil })) {
 		if !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(err)
 		}
@@ -382,7 +383,7 @@ func TestActionRecordsClean401And503RetriesKeepScopeQueryAndVersion(t *testing.T
 					return nil
 				}
 			}
-			rows, err := api.AllRecords(context.Background(), "server", WithRecordListQuery("changes_since", "since"))
+			rows, err := api.AllRecords(context.Background(), "server", request.Query("changes_since", "since"))
 			if err != nil || len(rows) != 0 || calls != 2 || hooks != 1 {
 				t.Fatal(rows, err, calls, hooks)
 			}
@@ -410,7 +411,7 @@ func TestActionRecordsEventResourceIdentityDoesNotEqualPlainJSONDictionary(t *te
 		{nil, []string{`"none"`}},
 	} {
 		var ids []string
-		for value, err := range api.ListRecords(context.Background(), "server", WithRecordListQuery("events", test.filter)) {
+		for value, err := range api.ListRecords(context.Background(), "server", request.Query("events", test.filter)) {
 			if err != nil {
 				t.Fatal(err)
 			}

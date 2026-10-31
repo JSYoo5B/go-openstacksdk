@@ -13,6 +13,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/microversions"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
@@ -29,7 +30,17 @@ type KeypairFindOpts struct {
 	Microversion  *string
 }
 
-type KeypairFindOption = request.Option[KeypairFindOpts]
+// KeypairFindOption is one option of FindKeypair: WithKeypairFindOptions,
+// WithKeypairFindUserID, request.IgnoreMissing, request.Microversion,
+// request.Header or request.Custom over *request.Config[KeypairFindOpts].
+// Other shared calls fail with resource.ErrInvalidOption before HTTP.
+type KeypairFindOption = request.FindCall
+
+var keypairFindCalls = calls.Spec[request.Config[KeypairFindOpts]]{
+	Header:        calls.ConfigHeader[KeypairFindOpts],
+	Microversion:  calls.Pointer(func(c *request.Config[KeypairFindOpts]) **string { return &c.Options.Microversion }),
+	IgnoreMissing: calls.Pointer(func(c *request.Config[KeypairFindOpts]) **bool { return &c.Options.IgnoreMissing }),
+}
 
 func copyKeypairFindOptions(value KeypairFindOpts) KeypairFindOpts {
 	if value.IgnoreMissing != nil {
@@ -46,35 +57,19 @@ func copyKeypairFindOptions(value KeypairFindOpts) KeypairFindOpts {
 // WithKeypairFindOptions replaces typed options, retaining additional headers.
 func WithKeypairFindOptions(value KeypairFindOpts) KeypairFindOption {
 	owned := copyKeypairFindOptions(value)
-	return func(config *request.Config[KeypairFindOpts]) error {
+	return request.Custom(func(config *request.Config[KeypairFindOpts]) error {
 		config.Options = copyKeypairFindOptions(owned)
 		return nil
-	}
+	})
 }
 func WithKeypairFindUserID(value string) KeypairFindOption {
-	return func(config *request.Config[KeypairFindOpts]) error { config.Options.UserID = value; return nil }
-}
-func WithKeypairFindIgnoreMissing(value bool) KeypairFindOption {
-	return func(config *request.Config[KeypairFindOpts]) error {
-		owned := value
-		config.Options.IgnoreMissing = &owned
-		return nil
-	}
-}
-func WithKeypairFindMicroversion(value string) KeypairFindOption {
-	return func(config *request.Config[KeypairFindOpts]) error {
-		owned := value
-		config.Options.Microversion = &owned
-		return nil
-	}
-}
-func WithKeypairFindHeader(key, value string) KeypairFindOption {
-	return request.WithHeader[KeypairFindOpts](key, value)
+	return request.Custom(func(config *request.Config[KeypairFindOpts]) error { config.Options.UserID = value; return nil })
 }
 
 func prepareKeypairFind(ctx context.Context, guard func(context.Context) error, options []KeypairFindOption) (request.Config[KeypairFindOpts], error) {
-	guarded := make([]KeypairFindOption, len(options))
-	for index, option := range options {
+	translated := calls.Options(options, keypairFindCalls)
+	guarded := make([]request.Option[KeypairFindOpts], len(translated))
+	for index, option := range translated {
 		apply := option
 		guarded[index] = func(config *request.Config[KeypairFindOpts]) error {
 			if err := guard(ctx); err != nil {

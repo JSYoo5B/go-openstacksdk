@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"iter"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/neutronfind"
 	"github.com/JSYoo5B/go-openstacksdk/internal/responsejson"
@@ -27,13 +28,15 @@ type Event map[string]any
 type EventRecord = neutronfind.Record
 
 type CreateOpts struct{ Microversion *string }
-type CreateOption = request.Option[CreateOpts]
 
-func WithCreateHeader(key, value string) CreateOption {
-	return request.WithHeader[CreateOpts](key, value)
-}
-func WithCreateMicroversion(value string) CreateOption {
-	return func(c *request.Config[CreateOpts]) error { x := value; c.Options.Microversion = &x; return nil }
+// CreateOption is one option of CreateRecords: request.Header,
+// request.Microversion or request.Custom over *request.Config[CreateOpts].
+// Other shared calls fail with resource.ErrInvalidOption before HTTP.
+type CreateOption = request.WriteCall
+
+var createCalls = calls.Spec[request.Config[CreateOpts]]{
+	Header:       calls.ConfigHeader[CreateOpts],
+	Microversion: calls.Pointer(func(c *request.Config[CreateOpts]) **string { return &c.Options.Microversion }),
 }
 
 func eventProfile() neutronfind.Profile {
@@ -108,7 +111,7 @@ func (a *API) CreateRecords(ctx context.Context, events []Event, options ...Crea
 			return nil, fail(cause)
 		}
 	}
-	cfg, err := cloudread.ApplyReadOptions(ctx, CreateOpts{}, options, ownCreate, engine.Check)
+	cfg, err := cloudread.ApplyReadOptions(ctx, CreateOpts{}, calls.Options(options, createCalls), ownCreate, engine.Check)
 	if err == nil {
 		err = request.ValidateCapabilities(cfg, false, false, true)
 	}

@@ -14,9 +14,9 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.WithGroupFindAllProjects`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.WithGroupFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.WithGroupFindOpts`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.WithGroupFindHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 
 - GET-first exact identity lookup falls back only for fault-free 400/403/404, matches either ID or name, and adds all_projects=True only to the fallback list. Untyped descriptors, Source dict rules, nullable fields, aliases and raw unknown response values are retained.
   Tests: `compute/v2/servergroups/python_find_contracts_test.go:TestPythonGroupFindRecordUsesGETThenExactIDOrNameAndAllProjects`.
@@ -44,11 +44,11 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/volumeattach.API.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/volumeattach.VolumeAttachmentScope.ListRecords`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/volumeattach.WithAttachmentLimit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/volumeattach.WithAttachmentOffset`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/volumeattach.WithAttachmentQuery`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/volumeattach.WithAttachmentMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/volumeattach.WithAttachmentPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 
 - The lazy fixed-server list sends limit and offset, retains offset on Source marker fallback even after short pages, falls back from absent id to the alternate volumeId, and stops on the next empty page without using consumer-mutated rows.
   Tests: `compute/v2/volumeattach/python_records_contracts_test.go:TestPythonAttachmentRecordsListIsLazyAndPagesLimitOffset`.
@@ -79,7 +79,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/volumeattach.WithAttachmentSwapTo`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/volumeattach.WithAttachmentAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/volumeattach.WithAttachmentUpdateOpts`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/volumeattach.WithAttachmentUpdateHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 
 - One PUT uses the current volume ID in the route and defaults volumeId to that ID; swap changes only the body. False, zero, explicit null and empty values persist, unknown attrs are discarded before marshaling, and named volume_id=None differs from a wire volumeId=null attr.
   Tests: `compute/v2/volumeattach/python_records_contracts_test.go:TestPythonAttachmentRecordUpdateDefaultsSwapAndExplicitValues`.
@@ -156,16 +156,16 @@ func main() {
     if err != nil { log.Fatal(err) }
     if *serverID != "" {
         for value, err := range service.VolumeAttachments.ListRecords(ctx, *serverID,
-            volumeattach.WithAttachmentLimit(20),
+            request.Limit(20),
             volumeattach.WithAttachmentOffset(0),
-            volumeattach.WithAttachmentMaxItems(100)) {
+            request.MaxItems(100)) {
             if err != nil { log.Fatal(err) }
             printJSON(value.Resource)
         }
     }
     if *groupName != "" {
         value, err := service.ServerGroups.FindRecord(ctx, *groupName,
-            servergroups.WithGroupFindIgnoreMissing(false),
+            request.IgnoreMissing(false),
             servergroups.WithGroupFindAllProjects(*allProjects))
         if err != nil { log.Fatal(err) }
         printJSON(value.Resource)

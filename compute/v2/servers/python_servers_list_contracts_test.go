@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -59,7 +60,7 @@ func TestPythonServersListDetailsAndAllProjectsAlternatives(t *testing.T) {
 		{"all projects", []servers.RecordFindOption{servers.WithRecordFindAllProjects(true)}, serverFindDetail, "all_tenants=True"},
 		{"all projects false", []servers.RecordFindOption{servers.WithRecordFindAllProjects(false)}, serverFindDetail, ""},
 		{"summary all projects", []servers.RecordFindOption{servers.WithRecordFindDetails(false), servers.WithRecordFindAllProjects(true)}, serverFindBase, "all_tenants=True"},
-		{"raw all_tenants", []servers.RecordFindOption{servers.WithRecordFindQuery("all_tenants", 1)}, serverFindDetail, "all_tenants=1"},
+		{"raw all_tenants", []servers.RecordFindOption{request.Query("all_tenants", 1)}, serverFindDetail, "all_tenants=1"},
 	} {
 		calls, headers = nil, nil
 		rows, err := serverListCollect(t, api, item.options...)
@@ -73,8 +74,8 @@ func TestPythonServersListDetailsAndAllProjectsAlternatives(t *testing.T) {
 	}
 	calls = nil
 	for _, conflict := range [][]servers.RecordFindOption{
-		{servers.WithRecordFindAllProjects(true), servers.WithRecordFindQuery("all_tenants", true)},
-		{servers.WithRecordFindAllProjects(false), servers.WithRecordFindQuery("all_tenants", true)},
+		{servers.WithRecordFindAllProjects(true), request.Query("all_tenants", true)},
+		{servers.WithRecordFindAllProjects(false), request.Query("all_tenants", true)},
 	} {
 		if _, err := serverListCollect(t, api, conflict...); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(err)
@@ -111,7 +112,7 @@ func TestPythonServersListEveryTypedFilterTransposes(t *testing.T) {
 	for client, wire := range serverListPythonQueryMapping {
 		for _, key := range []string{client, wire} {
 			calls = nil
-			rows, err := serverListCollect(t, api, servers.WithRecordFindQuery(key, "7"))
+			rows, err := serverListCollect(t, api, request.Query(key, "7"))
 			if err != nil || len(rows) != 0 || len(calls) != 1 {
 				t.Fatal(key, rows, err, calls)
 			}
@@ -126,12 +127,12 @@ func TestPythonServersListEveryTypedFilterTransposes(t *testing.T) {
 		// The client-side name wins over the Nova name, and an explicit
 		// client-side null suppresses the Nova name (requests drops None).
 		calls = nil
-		if _, err := serverListCollect(t, api, servers.WithRecordFindQuery(wire, "server"), servers.WithRecordFindQuery(client, "client")); err != nil {
+		if _, err := serverListCollect(t, api, request.Query(wire, "server"), request.Query(client, "client")); err != nil {
 			t.Fatal(err)
 		}
 		calls2 := calls
 		calls = nil
-		if _, err := serverListCollect(t, api, servers.WithRecordFindQuery(wire, "server"), servers.WithRecordFindQuery(client, nil)); err != nil {
+		if _, err := serverListCollect(t, api, request.Query(wire, "server"), request.Query(client, nil)); err != nil {
 			t.Fatal(err)
 		}
 		if want := (url.Values{wire: {"client"}}).Encode(); calls2[0].query != want || calls[0].query != "" {
@@ -140,12 +141,12 @@ func TestPythonServersListEveryTypedFilterTransposes(t *testing.T) {
 	}
 	calls = nil
 	if _, err := serverListCollect(t, api,
-		servers.WithRecordFindQuery("locked", true),
-		servers.WithRecordFindQuery("deleted_only", false),
-		servers.WithRecordFindQuery("any_tags", []any{"a", nil, "b"}),
-		servers.WithRecordFindQuery("progress", 0),
-		servers.WithRecordFindQuery("x_vendor_extension", "dropped"),
-		servers.WithRecordFindQuery("ipv4_address", nil)); err != nil {
+		request.Query("locked", true),
+		request.Query("deleted_only", false),
+		request.Query("any_tags", []any{"a", nil, "b"}),
+		request.Query("progress", 0),
+		request.Query("x_vendor_extension", "dropped"),
+		request.Query("ipv4_address", nil)); err != nil {
 		t.Fatal(err)
 	}
 	q, _ := url.ParseQuery(calls[0].query)
@@ -167,14 +168,14 @@ func TestPythonServersListClientBodyFiltersAndRawCap(t *testing.T) {
 		options []servers.RecordFindOption
 		want    string
 	}{
-		{"scalar", []servers.RecordFindOption{servers.WithRecordFindQuery("host_status", "UP")}, "a,c,d"},
-		{"converted bool equals int", []servers.RecordFindOption{servers.WithRecordFindQuery("is_locked", true)}, "a,c,d"},
-		{"nested dictionary subset", []servers.RecordFindOption{servers.WithRecordFindQuery("metadata", map[string]any{"role": "web"})}, "a,b,d"},
-		{"combined", []servers.RecordFindOption{servers.WithRecordFindQuery("host_status", "UP"), servers.WithRecordFindQuery("metadata", map[string]any{"role": "web"})}, "a,d"},
+		{"scalar", []servers.RecordFindOption{request.Query("host_status", "UP")}, "a,c,d"},
+		{"converted bool equals int", []servers.RecordFindOption{request.Query("is_locked", true)}, "a,c,d"},
+		{"nested dictionary subset", []servers.RecordFindOption{request.Query("metadata", map[string]any{"role": "web"})}, "a,b,d"},
+		{"combined", []servers.RecordFindOption{request.Query("host_status", "UP"), request.Query("metadata", map[string]any{"role": "web"})}, "a,d"},
 		// Resource.list counts every received row toward max_items before
 		// the client filter, so the third row ends the stream unmatched.
-		{"raw cap before filter", []servers.RecordFindOption{servers.WithRecordFindQuery("host_status", "DOWN"), servers.WithRecordFindMaxItems(1)}, ""},
-		{"raw cap counts skipped rows", []servers.RecordFindOption{servers.WithRecordFindQuery("host_status", "UP"), servers.WithRecordFindMaxItems(3)}, "a,c"},
+		{"raw cap before filter", []servers.RecordFindOption{request.Query("host_status", "DOWN"), servers.WithRecordFindMaxItems(1)}, ""},
+		{"raw cap counts skipped rows", []servers.RecordFindOption{request.Query("host_status", "UP"), servers.WithRecordFindMaxItems(3)}, "a,c"},
 	} {
 		calls = nil
 		rows, err := serverListCollect(t, api, item.options...)
@@ -187,7 +188,7 @@ func TestPythonServersListClientBodyFiltersAndRawCap(t *testing.T) {
 		}
 	}
 	calls = nil
-	if _, err := serverListCollect(t, api, servers.WithRecordFindQuery("metadata", map[string]any{"role": "web"}), servers.WithRecordFindMaxItems(2)); err != nil || calls[0].query != "limit=2" {
+	if _, err := serverListCollect(t, api, request.Query("metadata", map[string]any{"role": "web"}), servers.WithRecordFindMaxItems(2)); err != nil || calls[0].query != "limit=2" {
 		t.Fatal(err, calls)
 	}
 }
@@ -290,7 +291,7 @@ func TestPythonServersListPerCallMicroversionHeadersAndControls(t *testing.T) {
 		headers = append(headers, req.Header.Clone())
 		return nativeServerWire(200, `{"servers":[{"id":"s1"}]}`)
 	})
-	rows, err := serverListCollect(t, api, servers.WithRecordFindMicroversion("2.79"), servers.WithRecordFindHeaders(map[string]string{"X-Trace": "owned"}))
+	rows, err := serverListCollect(t, api, request.Microversion("2.79"), request.Headers(map[string]string{"X-Trace": "owned"}))
 	if err != nil || len(rows) != 1 || rows[0].Microversion != "2.79" || len(headers) != 1 {
 		t.Fatal(rows, err, headers)
 	}
@@ -302,21 +303,21 @@ func TestPythonServersListPerCallMicroversionHeadersAndControls(t *testing.T) {
 		t.Fatal("per-call microversion leaked into the shared client")
 	}
 	headers = nil
-	if _, err := serverListCollect(t, api, servers.WithRecordFindHeaders(map[string]string{"Accept": "application/vnd.custom"})); err != nil || headers[0].Get("Accept") != "application/vnd.custom" || headers[0].Get("X-Trace") != "" {
+	if _, err := serverListCollect(t, api, request.Headers(map[string]string{"Accept": "application/vnd.custom"})); err != nil || headers[0].Get("Accept") != "application/vnd.custom" || headers[0].Get("X-Trace") != "" {
 		t.Fatal(err, headers)
 	}
 	calls = nil
 	for _, invalid := range [][]servers.RecordFindOption{
-		{servers.WithRecordFindHeaders(map[string]string{"OpenStack-API-Version": "compute 2.1"})},
-		{servers.WithRecordFindHeaders(map[string]string{"X-OpenStack-Nova-API-Version": "2.1"})},
-		{servers.WithRecordFindQuery("base_path", "/other")},
-		{servers.WithRecordFindQuery("paginated", false)},
-		{servers.WithRecordFindQuery("max_items", 1)},
-		{servers.WithRecordFindQuery("microversion", "2.1")},
-		{servers.WithRecordFindQuery("headers", map[string]string{})},
-		{servers.WithRecordFindQuery("details", false)},
-		{servers.WithRecordFindQuery("all_projects", true)},
-		{servers.WithRecordFindQuery("jmespath_filters", "[?status=='ACTIVE']")},
+		{request.Headers(map[string]string{"OpenStack-API-Version": "compute 2.1"})},
+		{request.Headers(map[string]string{"X-OpenStack-Nova-API-Version": "2.1"})},
+		{request.Query("base_path", "/other")},
+		{request.Query("paginated", false)},
+		{request.Query("max_items", 1)},
+		{request.Query("microversion", "2.1")},
+		{request.Query("headers", map[string]string{})},
+		{request.Query("details", false)},
+		{request.Query("all_projects", true)},
+		{request.Query("jmespath_filters", "[?status=='ACTIVE']")},
 		{servers.WithRecordFindOpts(servers.RecordFindOpts{Query: map[string]json.RawMessage{"id": json.RawMessage("{")}})},
 		{servers.WithRecordFindMaxItems(-1)},
 		{servers.WithRecordFindLimit(-1)},

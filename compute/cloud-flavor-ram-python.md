@@ -20,8 +20,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorRAMGetExtraValue`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorRAMQueryOptions`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryExtraSpecs`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryHeader`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.API.ListSourceRecords`
 
 - AllFlavors reproduces the list_flavors(get_extra=True) requests that get_flavor_by_ram starts with.

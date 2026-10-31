@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -109,7 +110,7 @@ func TestComputeExtensionFindStrictMissingKeepsExistingNativeAPIs(t *testing.T) 
 	cloud, api := computeExtensionCloud(t)
 	cloud.Mux.HandleFunc("/v2.1/p/extensions/target", func(w http.ResponseWriter, r *http.Request) { testcloud.JSON(w, 404, `{"error":"missing"}`) })
 	cloud.Mux.HandleFunc("/v2.1/p/extensions", func(w http.ResponseWriter, r *http.Request) { testcloud.JSON(w, 200, `{"extensions":[]}`) })
-	if value, err := api.FindRecord(context.Background(), "target", WithRecordFindIgnoreMissing(false)); value != nil || !errors.Is(err, resource.ErrNotFound) {
+	if value, err := api.FindRecord(context.Background(), "target", request.IgnoreMissing(false)); value != nil || !errors.Is(err, resource.ErrNotFound) {
 		t.Fatal(value, err)
 	}
 	if _, err := api.Get(context.Background(), "target"); err == nil {
@@ -148,7 +149,7 @@ func TestComputeExtensionFindOwnedKwargsAndGetOnlyVersion(t *testing.T) {
 		}
 		testcloud.JSON(w, 200, `{"extensions":[{"alias":"target","namespace":"same"}]}`)
 	})
-	value, err := api.FindRecord(context.Background(), "target", WithRecordFindMicroversion("2.9"), WithRecordFindListBasePath("alternate-extensions"), WithRecordFindQuery("vendor", "opaque"), WithRecordFindQuery("namespace", "same"))
+	value, err := api.FindRecord(context.Background(), "target", request.Microversion("2.9"), WithRecordFindListBasePath("alternate-extensions"), request.Query("vendor", "opaque"), request.Query("namespace", "same"))
 	if err != nil || value == nil || calls != 2 || api.client.Microversion != "2.8" {
 		t.Fatal(value, err, calls)
 	}
@@ -175,7 +176,7 @@ func TestComputeExtensionFindOptionSourceGuardAndCancellation(t *testing.T) {
 	cloud, api := computeExtensionCloud(t)
 	calls, late := 0, 0
 	cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) { calls++; w.WriteHeader(500) })
-	_, err := api.FindRecord(context.Background(), "target", func(c *RecordFindOpts) error { api.client.ResourceBase = cloud.Server.URL + "/changed/"; return nil }, func(c *RecordFindOpts) error { late++; return nil })
+	_, err := api.FindRecord(context.Background(), "target", request.Custom(func(c *RecordFindOpts) error { api.client.ResourceBase = cloud.Server.URL + "/changed/"; return nil }), request.Custom(func(c *RecordFindOpts) error { late++; return nil }))
 	if !errors.Is(err, resource.ErrInvalidOption) || calls != 0 || late != 0 {
 		t.Fatal(err, calls, late)
 	}

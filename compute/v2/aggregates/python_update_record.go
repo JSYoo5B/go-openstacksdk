@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"strconv"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -18,35 +19,37 @@ import (
 
 // UpdateRecordOpts carries the Python update_aggregate attributes. An omitted
 // field is not sent, Null sends JSON null (Nova removes the zone) and Present
-// keeps empty strings. Other declared Aggregate attributes use
-// WithUpdateRecordField; the server validates every value.
+// keeps empty strings. Other declared Aggregate attributes use request.Field;
+// the server validates every value.
 type UpdateRecordOpts struct {
 	Name             request.Optional[string] `json:"name,omitzero"`
 	AvailabilityZone request.Optional[string] `json:"availability_zone,omitzero"`
 }
 
-type UpdateRecordOption = request.Option[UpdateRecordOpts]
+// UpdateRecordOption is one option of UpdateRecord: WithUpdateRecordOptions,
+// WithUpdateRecordName, WithUpdateRecordAvailabilityZone, request.Field
+// (another attribute inside the aggregate envelope; keys owned by
+// UpdateRecordOpts and the URI identity id are rejected), request.Header or
+// request.Custom over *request.Config[UpdateRecordOpts]. Other shared calls
+// fail with resource.ErrInvalidOption before HTTP.
+type UpdateRecordOption = request.WriteCall
+
+var updateRecordCalls = calls.Spec[request.Config[UpdateRecordOpts]]{
+	Header: calls.ConfigHeader[UpdateRecordOpts],
+	Field:  calls.ConfigField[UpdateRecordOpts],
+}
 
 func WithUpdateRecordOptions(value UpdateRecordOpts) UpdateRecordOption {
-	return request.WithOptions(value)
+	return request.Custom(request.WithOptions(value))
 }
 func WithUpdateRecordName(value request.Optional[string]) UpdateRecordOption {
-	return func(config *request.Config[UpdateRecordOpts]) error { config.Options.Name = value; return nil }
+	return request.Custom(func(config *request.Config[UpdateRecordOpts]) error { config.Options.Name = value; return nil })
 }
 func WithUpdateRecordAvailabilityZone(value request.Optional[string]) UpdateRecordOption {
-	return func(config *request.Config[UpdateRecordOpts]) error {
+	return request.Custom(func(config *request.Config[UpdateRecordOpts]) error {
 		config.Options.AvailabilityZone = value
 		return nil
-	}
-}
-
-// WithUpdateRecordField adds another attribute inside the aggregate envelope.
-// Keys owned by UpdateRecordOpts and the URI identity id are rejected.
-func WithUpdateRecordField(key string, value any) UpdateRecordOption {
-	return request.WithField[UpdateRecordOpts](key, value)
-}
-func WithUpdateRecordHeader(key, value string) UpdateRecordOption {
-	return request.WithHeader[UpdateRecordOpts](key, value)
+	})
 }
 
 // AggregateRecord is the committed Python Aggregate view. Aggregate is the
@@ -78,7 +81,7 @@ func (a *API) UpdateRecord(ctx context.Context, aggregateID int, options ...Upda
 	if err != nil {
 		return fail(nil, err)
 	}
-	config, err := cloudread.ApplyReadOptions(ctx, UpdateRecordOpts{}, options, cloudread.OwnReadConfig[UpdateRecordOpts], source.Guard)
+	config, err := cloudread.ApplyReadOptions(ctx, UpdateRecordOpts{}, calls.Options(options, updateRecordCalls), cloudread.OwnReadConfig[UpdateRecordOpts], source.Guard)
 	if err == nil {
 		err = request.ValidateCapabilities(config, true, false, true)
 	}

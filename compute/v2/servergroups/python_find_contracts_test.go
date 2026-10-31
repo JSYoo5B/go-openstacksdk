@@ -11,6 +11,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -50,7 +51,7 @@ func TestPythonGroupFindRecordMissingDefaultStrictAndDuplicate(t *testing.T) {
 	if err != nil || value != nil || calls.Len() != 2 {
 		t.Fatal(value, err, pythonServerGroupCalls(calls))
 	}
-	_, err = api.FindRecord(context.Background(), "missing", servergroups.WithGroupFindIgnoreMissing(false))
+	_, err = api.FindRecord(context.Background(), "missing", request.IgnoreMissing(false))
 	if !errors.Is(err, resource.ErrNotFound) || calls.Len() != 4 {
 		t.Fatal(err, pythonServerGroupCalls(calls))
 	}
@@ -163,9 +164,9 @@ func TestPythonGroupFindRecordSnapshotsOptionsAndRejectsBeforeHTTP(t *testing.T)
 	api, calls := pythonServerGroupAPI(t, func(*http.Request) *http.Response { return pythonServerGroupWire(200, `{"server_group":{"id":"g"}}`) })
 	var retained *servergroups.GroupFindOpts
 	headers := map[string]string{"X-Owned": "old"}
-	option := servergroups.WithGroupFindHeaders(headers)
+	option := request.Headers(headers)
 	headers["X-Owned"] = "bad"
-	_, err := api.FindRecord(context.Background(), "web", option, func(v *servergroups.GroupFindOpts) error { retained = v; return nil }, func(*servergroups.GroupFindOpts) error { retained.Headers["Authorization"] = "bad"; return nil })
+	_, err := api.FindRecord(context.Background(), "web", option, request.Custom(func(v *servergroups.GroupFindOpts) error { retained = v; return nil }), request.Custom(func(*servergroups.GroupFindOpts) error { retained.Headers["Authorization"] = "bad"; return nil }))
 	if err != nil || calls.Len() != 1 {
 		t.Fatal(err, pythonServerGroupCalls(calls))
 	}
@@ -176,7 +177,7 @@ func TestPythonGroupFindRecordSnapshotsOptionsAndRejectsBeforeHTTP(t *testing.T)
 		{"nil option", func() error { _, err := api.FindRecord(context.Background(), "web", nil); return err }},
 		{"invalid ID", func() error { _, err := api.FindRecord(context.Background(), ".."); return err }},
 		{"auth header", func() error {
-			_, err := api.FindRecord(context.Background(), "web", servergroups.WithGroupFindHeaders(map[string]string{"X-Auth-Token": "bad"}))
+			_, err := api.FindRecord(context.Background(), "web", request.Headers(map[string]string{"X-Auth-Token": "bad"}))
 			return err
 		}},
 	} {
@@ -188,7 +189,7 @@ func TestPythonGroupFindRecordSnapshotsOptionsAndRejectsBeforeHTTP(t *testing.T)
 	}
 	ctx, cancel := context.WithCancelCause(context.Background())
 	cause, callback := errors.New("caller cause"), errors.New("callback")
-	_, err = api.FindRecord(ctx, "web", func(*servergroups.GroupFindOpts) error { cancel(cause); return callback })
+	_, err = api.FindRecord(ctx, "web", request.Custom(func(*servergroups.GroupFindOpts) error { cancel(cause); return callback }))
 	if !errors.Is(err, context.Canceled) || !errors.Is(err, cause) || !errors.Is(err, callback) || calls.Len() != 1 {
 		t.Fatal(err, pythonServerGroupCalls(calls))
 	}

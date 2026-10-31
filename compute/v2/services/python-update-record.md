@@ -37,8 +37,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/services.WithUpdateRecordStatus`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/services.WithUpdateRecordDisabledReason`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/services.WithUpdateRecordForcedDown`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/services.WithUpdateRecordField`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/services.WithUpdateRecordHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/request.Null`
 - `github.com/JSYoo5B/go-openstacksdk/request.Present`
 
@@ -51,7 +51,7 @@ Python/Go differences:
 
 - Python sends min(Service _max_microversion 2.69, server maximum) discovered per request and checks 2.53 against the server range and default microversion; Go sends and checks the one microversion configured or negotiated on the Connection client.
 - Python accepts a Service or an ID string; Go takes the service ID string and rejects a blank one before HTTP.
-- Python maps attribute names such as availability_zone and is_forced_down to server keys and drops undeclared keyword attributes; WithUpdateRecordField sends any extension key verbatim as a server key except the typed keys and id.
+- Python maps attribute names such as availability_zone and is_forced_down to server keys and drops undeclared keyword attributes; request.Field sends any extension key verbatim as a server key except the typed keys and id.
 - Python returns the Resource merged from request attributes and the response; Go returns ServiceRecord with the native typed decode, the raw response object fields, headers and status, and Sent false when no request was needed.
 
 ## References

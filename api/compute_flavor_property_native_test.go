@@ -396,16 +396,16 @@ func TestComputeFlavorGetExtraSpecsPropertyRawValuesLiteralRouteAndVersionBindin
 			case "unselected discovers2.61 once":
 				client.Microversion, version = "", "2.61"
 			case "explicit empty is versionless":
-				options = append(options, flavors.WithFlavorExtraSpecsMicroversion(""))
+				options = append(options, request.Microversion(""))
 				version = ""
 			}
 			var callbacks, discoveries, gets atomic.Int32
-			options = append(options, func(_ *request.Config[flavors.FlavorExtraSpecsOpts]) error {
+			options = append(options, request.Custom(func(_ *request.Config[flavors.FlavorExtraSpecsOpts]) error {
 				callbacks.Add(1)
 				native.ID = "caller-change"
 				raw.Body["id"] = json.RawMessage(`"caller-change"`)
 				return nil
-			})
+			}))
 			cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 				if r.Method != http.MethodGet {
 					t.Errorf("method = %s, want %s", r.Method, http.MethodGet)
@@ -473,10 +473,10 @@ func TestComputeFlavorGetExtraSpecsPropertyPreflightAndBindingTerminalReceipts(t
 				t.Error("invalid property touched discovery or GET", r.URL)
 				w.WriteHeader(500)
 			})
-			value, err := flavors.New(client).GetExtraSpecsProperty(context.Background(), flavors.FlavorExtraSpecsRequest{ID: "7"}, property, func(_ *request.Config[flavors.FlavorExtraSpecsOpts]) error {
+			value, err := flavors.New(client).GetExtraSpecsProperty(context.Background(), flavors.FlavorExtraSpecsRequest{ID: "7"}, property, request.Custom(func(_ *request.Config[flavors.FlavorExtraSpecsOpts]) error {
 				callbacks.Add(1)
 				return nil
-			})
+			}))
 			if value != nil || !errors.Is(err, resource.ErrInvalidOption) || calls.Load() != 0 || callbacks.Load() != 0 {
 				t.Fatal(value, err, calls.Load(), callbacks.Load())
 			}

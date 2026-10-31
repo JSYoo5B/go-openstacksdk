@@ -13,6 +13,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -28,34 +29,36 @@ type KeypairDeleteOpts struct {
 	IgnoreMissing request.Optional[bool]
 }
 
-type KeypairDeleteOption = request.Option[KeypairDeleteOpts]
+// KeypairDeleteOption is one option of DeleteKeypair: WithKeypairDeleteOptions,
+// WithKeypairDeleteUserID, WithKeypairDeleteQuery, request.IgnoreMissing,
+// request.Header or request.Custom over *request.Config[KeypairDeleteOpts].
+// Other shared calls fail with resource.ErrInvalidOption before HTTP.
+type KeypairDeleteOption = request.DeleteCall
+
+var keypairDeleteCalls = calls.Spec[request.Config[KeypairDeleteOpts]]{
+	Header: calls.ConfigHeader[KeypairDeleteOpts],
+	IgnoreMissing: func(config *request.Config[KeypairDeleteOpts], ignore bool) error {
+		config.Options.IgnoreMissing = request.Present(ignore)
+		return nil
+	},
+}
 
 func WithKeypairDeleteOptions(value KeypairDeleteOpts) KeypairDeleteOption {
-	return request.WithOptions(value)
+	return request.Custom(request.WithOptions(value))
 }
 
 func WithKeypairDeleteUserID(value string) KeypairDeleteOption {
-	return func(config *request.Config[KeypairDeleteOpts]) error {
+	return request.Custom(func(config *request.Config[KeypairDeleteOpts]) error {
 		config.Options.UserID = value
 		return nil
-	}
-}
-
-func WithKeypairDeleteIgnoreMissing(value bool) KeypairDeleteOption {
-	return func(config *request.Config[KeypairDeleteOpts]) error {
-		config.Options.IgnoreMissing = request.Present(value)
-		return nil
-	}
+	})
 }
 
 // WithKeypairDeleteQuery adds a wire extension. The owner and local missing
 // policy require their concrete options and cannot be replaced by extensions.
+// It is operation-specific: deletes do not accept the shared Query call.
 func WithKeypairDeleteQuery(key, value string) KeypairDeleteOption {
-	return request.WithQuery[KeypairDeleteOpts](key, value)
-}
-
-func WithKeypairDeleteHeader(key, value string) KeypairDeleteOption {
-	return request.WithHeader[KeypairDeleteOpts](key, value)
+	return request.Custom(request.WithQuery[KeypairDeleteOpts](key, value))
 }
 
 // DeleteKeypair deletes a keypair directly by its name, which is Nova's logical
@@ -90,8 +93,8 @@ func (a *API) DeleteKeypair(ctx context.Context, name string, options ...Keypair
 		}
 		return errors.Join(changed, source.Guard(ctx), rest.CheckOperationGuard(ctx))
 	}
-	owned := slices.Clone(options)
-	guarded := make([]KeypairDeleteOption, len(owned))
+	owned := calls.Options(options, keypairDeleteCalls)
+	guarded := make([]request.Option[KeypairDeleteOpts], len(owned))
 	for index, option := range owned {
 		apply := option
 		guarded[index] = func(config *request.Config[KeypairDeleteOpts]) error {

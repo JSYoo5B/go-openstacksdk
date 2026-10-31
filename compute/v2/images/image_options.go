@@ -11,32 +11,39 @@ import (
 	"strconv"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 type ReadOpts struct{ Headers map[string]string }
-type ReadOption func(*ReadOpts) error
 
-func WithReadHeaders(values map[string]string) ReadOption {
-	owned := maps.Clone(values)
-	return func(c *ReadOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
+// ReadOption is one option of GetRecord, FetchMetadata, GetMetadata and
+// SetMetadata: request.Headers (replaces the headers) or request.Custom over
+// *ReadOpts. Other shared calls fail with resource.ErrInvalidOption before
+// HTTP.
+type ReadOption = request.GetCall
+
+var readCalls = calls.Spec[ReadOpts]{Headers: calls.Value(func(c *ReadOpts) *map[string]string { return &c.Headers })}
+
 func copyRead(v ReadOpts) ReadOpts { v.Headers = maps.Clone(v.Headers); return v }
 
 type DeleteOpts struct {
 	Headers       map[string]string
 	IgnoreMissing *bool
 }
-type DeleteOption func(*DeleteOpts) error
 
-func WithDeleteIgnoreMissing(value bool) DeleteOption {
-	return func(c *DeleteOpts) error { v := value; c.IgnoreMissing = &v; return nil }
+// DeleteOption is one option of DeleteRecord: request.IgnoreMissing,
+// request.Headers (replaces the headers) or request.Custom over *DeleteOpts.
+// Other shared calls fail with resource.ErrInvalidOption before HTTP.
+type DeleteOption = request.DeleteCall
+
+var deleteCalls = calls.Spec[DeleteOpts]{
+	Headers:       calls.Value(func(c *DeleteOpts) *map[string]string { return &c.Headers }),
+	IgnoreMissing: calls.Pointer(func(c *DeleteOpts) **bool { return &c.IgnoreMissing }),
 }
-func WithDeleteHeaders(values map[string]string) DeleteOption {
-	owned := maps.Clone(values)
-	return func(c *DeleteOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
+
 func copyDelete(v DeleteOpts) DeleteOpts {
 	v.Headers = maps.Clone(v.Headers)
 	if v.IgnoreMissing != nil {
@@ -47,11 +54,14 @@ func copyDelete(v DeleteOpts) DeleteOpts {
 }
 
 type FindOpts struct{ IgnoreMissing *bool }
-type FindOption func(*FindOpts) error
 
-func WithFindIgnoreMissing(value bool) FindOption {
-	return func(c *FindOpts) error { v := value; c.IgnoreMissing = &v; return nil }
-}
+// FindOption is one option of FindRecord: request.IgnoreMissing or
+// request.Custom over *FindOpts. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type FindOption = request.FindCall
+
+var findCalls = calls.Spec[FindOpts]{IgnoreMissing: calls.Pointer(func(c *FindOpts) **bool { return &c.IgnoreMissing })}
+
 func copyFind(v FindOpts) FindOpts {
 	if v.IgnoreMissing != nil {
 		x := *v.IgnoreMissing
@@ -70,7 +80,37 @@ type ListOpts struct {
 	MaxItems  int
 	Paginated *bool
 }
-type ListOption func(*ListOpts) error
+
+// ListOption is one option of ListRecords: WithListOpts, WithListDetails,
+// request.Query (a Source keyword argument sent as JSON; unknown keywords are
+// discarded, matching Resource.list), request.Limit, request.Marker,
+// request.MaxItems, request.Paginated, request.Headers (replaces the
+// headers) or request.Custom over *ListOpts. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type ListOption = request.ListCall
+
+var listCalls = calls.Spec[ListOpts]{
+	Headers: calls.Value(func(c *ListOpts) *map[string]string { return &c.Headers }),
+	Query: calls.JSONQuery(func(c *ListOpts, key string, owned json.RawMessage, err error) error {
+		if !imageKnownQuery(key) {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+		if c.Query == nil {
+			c.Query = make(map[string]json.RawMessage)
+		}
+		c.Query[key] = owned
+		return nil
+	}),
+	Paging: calls.Paging[ListOpts]{
+		Limit:     calls.Pointer(func(c *ListOpts) **int { return &c.Limit }),
+		Marker:    calls.Value(func(c *ListOpts) *string { return &c.Marker }),
+		MaxItems:  calls.Value(func(c *ListOpts) *int { return &c.MaxItems }),
+		Paginated: calls.Pointer(func(c *ListOpts) **bool { return &c.Paginated }),
+	},
+}
 
 func copyList(v ListOpts) ListOpts {
 	v.Headers = maps.Clone(v.Headers)
@@ -91,26 +131,10 @@ func copyList(v ListOpts) ListOpts {
 }
 func WithListOpts(value ListOpts) ListOption {
 	owned := copyList(value)
-	return func(c *ListOpts) error { *c = copyList(owned); return nil }
+	return request.Custom(func(c *ListOpts) error { *c = copyList(owned); return nil })
 }
 func WithListDetails(value bool) ListOption {
-	return func(c *ListOpts) error { v := value; c.Details = &v; return nil }
-}
-func WithListLimit(value int) ListOption {
-	return func(c *ListOpts) error { v := value; c.Limit = &v; return nil }
-}
-func WithListMarker(value string) ListOption {
-	return func(c *ListOpts) error { c.Marker = value; return nil }
-}
-func WithListMaxItems(value int) ListOption {
-	return func(c *ListOpts) error { c.MaxItems = value; return nil }
-}
-func WithListPaginated(value bool) ListOption {
-	return func(c *ListOpts) error { v := value; c.Paginated = &v; return nil }
-}
-func WithListHeaders(values map[string]string) ListOption {
-	owned := maps.Clone(values)
-	return func(c *ListOpts) error { c.Headers = maps.Clone(owned); return nil }
+	return request.Custom(func(c *ListOpts) error { v := value; c.Details = &v; return nil })
 }
 
 var imageQueries = map[string]string{"server": "server", "name": "name", "status": "status", "type": "type", "min_disk": "minDisk", "min_ram": "minRam", "changes_since": "changes-since"}
@@ -130,31 +154,19 @@ func imageKnownQuery(key string) bool {
 	return false
 }
 
-// Unknown kwargs are discarded before marshaling, matching Resource.list.
-func WithListQuery(key string, value any) ListOption {
-	if !imageKnownQuery(key) {
-		return func(*ListOpts) error { return nil }
-	}
-	raw, err := json.Marshal(value)
-	owned := bytes.Clone(raw)
-	return func(c *ListOpts) error {
-		if err != nil {
-			return err
-		}
-		if c.Query == nil {
-			c.Query = make(map[string]json.RawMessage)
-		}
-		c.Query[key] = bytes.Clone(owned)
-		return nil
-	}
-}
-
 // Nil Keys means replace all metadata with {}; an explicit empty slice does no HTTP.
 type DeleteMetadataOpts struct {
 	Headers map[string]string
 	Keys    *[]string
 }
-type DeleteMetadataOption func(*DeleteMetadataOpts) error
+
+// DeleteMetadataOption is one option of DeleteMetadata:
+// WithDeleteMetadataKeys, WithDeleteMetadataOpts, request.Headers (replaces
+// the headers) or request.Custom over *DeleteMetadataOpts. Other shared calls
+// fail with resource.ErrInvalidOption before HTTP.
+type DeleteMetadataOption = request.DeleteCall
+
+var deleteMetadataCalls = calls.Spec[DeleteMetadataOpts]{Headers: calls.Value(func(c *DeleteMetadataOpts) *map[string]string { return &c.Headers })}
 
 func copyDeleteMetadata(v DeleteMetadataOpts) DeleteMetadataOpts {
 	v.Headers = maps.Clone(v.Headers)
@@ -166,15 +178,11 @@ func copyDeleteMetadata(v DeleteMetadataOpts) DeleteMetadataOpts {
 }
 func WithDeleteMetadataKeys(values ...string) DeleteMetadataOption {
 	owned := slices.Clone(values)
-	return func(c *DeleteMetadataOpts) error { x := slices.Clone(owned); c.Keys = &x; return nil }
-}
-func WithDeleteMetadataHeaders(values map[string]string) DeleteMetadataOption {
-	owned := maps.Clone(values)
-	return func(c *DeleteMetadataOpts) error { c.Headers = maps.Clone(owned); return nil }
+	return request.Custom(func(c *DeleteMetadataOpts) error { x := slices.Clone(owned); c.Keys = &x; return nil })
 }
 func WithDeleteMetadataOpts(value DeleteMetadataOpts) DeleteMetadataOption {
 	owned := copyDeleteMetadata(value)
-	return func(c *DeleteMetadataOpts) error { *c = copyDeleteMetadata(owned); return nil }
+	return request.Custom(func(c *DeleteMetadataOpts) error { *c = copyDeleteMetadata(owned); return nil })
 }
 
 func applyOptions[T any, O ~func(*T) error](ctx context.Context, guard func(context.Context) error, value T, copyValue func(T) T, options []O) (T, error) {

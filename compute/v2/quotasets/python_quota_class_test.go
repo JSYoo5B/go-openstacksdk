@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -219,7 +220,7 @@ func TestNovaQuotaClassOptionsOwnAttributesHeadersAndExplicitVersion(t *testing.
 		selected := fixture.Client("compute", "/compute/v2.1/")
 		selected.Microversion = "2.1"
 		selected.MoreHeaders = map[string]string{"OpenStack-API-Version": "compute 2.1", "X-OpenStack-Nova-API-Version": "2.1"}
-		got, err := quotasets.New(selected).GetQuotaClassRecord(context.Background(), quotasets.WithQuotaClassGetMicroversion("2.56"))
+		got, err := quotasets.New(selected).GetQuotaClassRecord(context.Background(), request.Microversion("2.56"))
 		if err != nil || got == nil || requests != 1 || len(got.Discovery.Responses) != 0 {
 			t.Fatal(got, err, requests)
 		}
@@ -242,7 +243,7 @@ func TestNovaQuotaClassPreflightAndCallbackGuardsPreventRequests(t *testing.T) {
 			api := quotasets.New(cloud.Client("compute", "/compute/v2.1/"))
 			var option quotasets.QuotaClassGetOption
 			if mode != "nil option" {
-				option = func(*quotasets.QuotaClassGetOpts) error {
+				option = request.Custom(func(*quotasets.QuotaClassGetOpts) error {
 					switch mode {
 					case "callback error":
 						return cause
@@ -252,13 +253,13 @@ func TestNovaQuotaClassPreflightAndCallbackGuardsPreventRequests(t *testing.T) {
 						cancel(cause)
 					}
 					return nil
-				}
+				})
 			}
 			if mode == "invalid name" {
 				option = quotasets.WithQuotaClassName("..")
 			}
 			if mode == "forbidden header" {
-				option = quotasets.WithQuotaClassGetHeaders(map[string]string{"X-Auth-Token": "foreign"})
+				option = request.Headers(map[string]string{"X-Auth-Token": "foreign"})
 			}
 			var err error
 			switch mode {
@@ -269,7 +270,7 @@ func TestNovaQuotaClassPreflightAndCallbackGuardsPreventRequests(t *testing.T) {
 			case "invalid integer attribute":
 				_, err = api.UpdateQuotaClassRecord(ctx, "default", quotasets.WithQuotaClassUpdateAttribute("cores", "²"))
 			default:
-				_, err = api.GetQuotaClassRecord(ctx, option, func(*quotasets.QuotaClassGetOpts) error { later++; return nil })
+				_, err = api.GetQuotaClassRecord(ctx, option, request.Custom(func(*quotasets.QuotaClassGetOpts) error { later++; return nil }))
 			}
 			if err == nil || calls != 0 {
 				t.Fatal(err, calls)

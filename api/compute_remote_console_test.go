@@ -79,7 +79,7 @@ func TestComputeRemoteConsoleRequestDefaultsDerivationAndSeedOwnership(t *testin
 				testcloud.JSON(w, 200, `{"remote_console":{}}`)
 			})
 			options := append([]remoteconsoles.ConsoleCreateOption(nil), tc.options...)
-			options = append(options, remoteconsoles.WithConsoleCreateHeader("X-Call", "owned"), func(_ *request.Config[remoteconsoles.ConsoleCreateOpts]) error { callbacks.Add(1); return nil })
+			options = append(options, request.Header("X-Call", "owned"), request.Custom(func(_ *request.Config[remoteconsoles.ConsoleCreateOpts]) error { callbacks.Add(1); return nil }))
 			for repeat := 0; repeat < 2; repeat++ {
 				value, err := api.CreateConsole(context.Background(), "server-id", options...)
 				if err != nil || value == nil || value.Resource == nil || value.Wire == nil || string(value.Resource.Body["protocol"]) != tc.protocol || string(value.Resource.Body["type"]) != tc.kind || string(value.Resource.Body["url"]) != tc.url || string(value.Resource.Body["server_id"]) != `"server-id"` || len(value.Wire.Body) != 0 || len(value.Resource.Body) != 4 || value.StatusCode != 200 || value.Header.Get("X-Console-Proof") != "actual" || string(value.Envelope) != `{"remote_console":{}}` {
@@ -97,7 +97,7 @@ func TestComputeRemoteConsoleRequestDefaultsDerivationAndSeedOwnership(t *testin
 		bulk := remoteconsoles.WithConsoleCreateOptions(attrs)
 		attrs.Type = request.Present("changed")
 		vendor := map[string]any{"n": json.Number("9007199254740993")}
-		extension := remoteconsoles.WithConsoleCreateField("vendor", vendor)
+		extension := request.Field("vendor", vendor)
 		vendor["n"] = false
 		raw := json.RawMessage(`{"kept":true}`)
 		var calls, callbacks atomic.Int32
@@ -109,15 +109,15 @@ func TestComputeRemoteConsoleRequestDefaultsDerivationAndSeedOwnership(t *testin
 			}
 			testcloud.JSON(w, 200, `{"remote_console":{"url":null}}`)
 		})
-		value, err := remoteconsoles.New(flavorIdentityClient(cloud)).CreateConsole(context.Background(), "server-id", extension, bulk, func(config *request.Config[remoteconsoles.ConsoleCreateOpts]) error {
+		value, err := remoteconsoles.New(flavorIdentityClient(cloud)).CreateConsole(context.Background(), "server-id", extension, bulk, request.Custom(func(config *request.Config[remoteconsoles.ConsoleCreateOpts]) error {
 			callbacks.Add(1)
 			config.Fields["trace"] = raw
 			return nil
-		}, func(_ *request.Config[remoteconsoles.ConsoleCreateOpts]) error {
+		}), request.Custom(func(_ *request.Config[remoteconsoles.ConsoleCreateOpts]) error {
 			callbacks.Add(1)
 			raw[0] = 'x'
 			return nil
-		})
+		}))
 		if err != nil || value == nil || string(value.Resource.Body["type"]) != `"novnc"` || string(value.Resource.Body["protocol"]) != `null` || string(value.Resource.Body["url"]) != `null` || calls.Load() != 1 || callbacks.Load() != 2 {
 			t.Fatal(value, err, calls.Load(), callbacks.Load())
 		}
@@ -345,24 +345,24 @@ func TestComputeRemoteConsoleResponseEvidenceSourceAndNativeCompatibility(t *tes
 				var later atomic.Int32
 				switch mode {
 				case "protocol field":
-					option = remoteconsoles.WithConsoleCreateField("protocol", "vnc")
+					option = request.Field("protocol", "vnc")
 				case "type field":
-					option = remoteconsoles.WithConsoleCreateField("type", "novnc")
+					option = request.Field("type", "novnc")
 				case "url field":
-					option = remoteconsoles.WithConsoleCreateField("url", "value")
+					option = request.Field("url", "value")
 				case "parent field":
-					option = remoteconsoles.WithConsoleCreateField("server_id", "other")
+					option = request.Field("server_id", "other")
 				case "query":
-					option = request.WithQuery[remoteconsoles.ConsoleCreateOpts]("limit", "1")
+					option = request.Custom(request.WithQuery[remoteconsoles.ConsoleCreateOpts]("limit", "1"))
 				case "source":
-					option = func(_ *request.Config[remoteconsoles.ConsoleCreateOpts]) error {
+					option = request.Custom(func(_ *request.Config[remoteconsoles.ConsoleCreateOpts]) error {
 						client.ResourceBase = cloud.Server.URL + "/changed/"
 						return nil
-					}
+					})
 				case "cancel":
-					option = func(_ *request.Config[remoteconsoles.ConsoleCreateOpts]) error { cancel(cause); return original }
+					option = request.Custom(func(_ *request.Config[remoteconsoles.ConsoleCreateOpts]) error { cancel(cause); return original })
 				}
-				value, err := remoteconsoles.New(client).CreateConsole(ctx, "server-id", option, func(_ *request.Config[remoteconsoles.ConsoleCreateOpts]) error { later.Add(1); return nil })
+				value, err := remoteconsoles.New(client).CreateConsole(ctx, "server-id", option, request.Custom(func(_ *request.Config[remoteconsoles.ConsoleCreateOpts]) error { later.Add(1); return nil }))
 				if value != nil || err == nil || calls.Load() != 0 {
 					t.Fatal("invalid preflight reached HTTP", value, err, calls.Load())
 				}

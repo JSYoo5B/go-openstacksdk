@@ -12,6 +12,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/compute"
 	computev2 "github.com/JSYoo5B/go-openstacksdk/compute/v2"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -243,15 +244,15 @@ func TestCloudServerGroupReadsOwnsOptionsRecordsHeadersAndCurrentLocation(t *tes
 	filter := compute.WithServerGroupCloudFilters(raw)
 	raw[2] = 'X'
 	headers := map[string]string{"X-Owned": "before"}
-	header := compute.WithServerGroupCloudHeaders(headers)
+	header := request.Headers(headers)
 	headers["X-Owned"] = "wrong"
 	client.MoreHeaders = map[string]string{"X-Original": "original"}
 	var retained *compute.ServerGroupCloudReadOpts
-	result, e := service.SearchServerGroups(context.Background(), "", loc, filter, header, func(c *compute.ServerGroupCloudReadOpts) error { retained = c; return nil }, func(*compute.ServerGroupCloudReadOpts) error {
+	result, e := service.SearchServerGroups(context.Background(), "", loc, filter, header, request.Custom(func(c *compute.ServerGroupCloudReadOpts) error { retained = c; return nil }), request.Custom(func(*compute.ServerGroupCloudReadOpts) error {
 		retained.Headers["X-Owned"] = "late"
 		(*retained.Filters)[2] = 'X'
 		return nil
-	})
+	}))
 	if e != nil || result == nil || len(result.Groups) != 1 || selectedHeader != "before" {
 		t.Fatal(result, e, selectedHeader)
 	}
@@ -272,7 +273,7 @@ func TestCloudServerGroupReadsOwnsOptionsRecordsHeadersAndCurrentLocation(t *tes
 }
 func TestCloudServerGroupReadsPreflightSelectedAPIOptionsAndCustomCancellation(t *testing.T) {
 	service, client, calls := serverGroupCloudFixture(t, func(*http.Request) *http.Response { return backupServerWire(200, serverGroupCloudRows, "unexpected") })
-	for _, options := range [][]compute.ServerGroupCloudReadOption{{nil}, {compute.WithServerGroupCloudFilters(json.RawMessage(`broken`))}, {compute.WithServerGroupCloudHeaders(map[string]string{"X-Auth-Token": "forged"})}, {compute.WithServerGroupCloudCurrentLocation(resource.CloudLocation{Project: resource.CloudProject{ID: json.RawMessage(`broken`)}})}} {
+	for _, options := range [][]compute.ServerGroupCloudReadOption{{nil}, {compute.WithServerGroupCloudFilters(json.RawMessage(`broken`))}, {request.Headers(map[string]string{"X-Auth-Token": "forged"})}, {compute.WithServerGroupCloudCurrentLocation(resource.CloudLocation{Project: resource.CloudProject{ID: json.RawMessage(`broken`)}})}} {
 		result, e := service.SearchServerGroups(context.Background(), "", options...)
 		if result != nil || !errors.Is(e, resource.ErrInvalidOption) || len(*calls) != 0 {
 			t.Fatal(result, e, *calls)
@@ -302,7 +303,7 @@ func TestCloudServerGroupReadsPreflightSelectedAPIOptionsAndCustomCancellation(t
 			}
 			return nil
 		}
-		r, e := service.SearchServerGroups(ctx, "", option)
+		r, e := service.SearchServerGroups(ctx, "", request.Custom(option))
 		if r != nil || e == nil || len(*calls) != 0 || kind == "cancel" && (!errors.Is(e, context.Canceled) || !errors.Is(e, cause)) || kind != "cancel" && !errors.Is(e, resource.ErrInvalidOption) {
 			t.Fatal(r, e, *calls)
 		}
@@ -448,13 +449,13 @@ func TestCloudServerGroupReadsCleanRetryReauthStrictStatusAndHeaderCapture(t *te
 				option := func(*compute.ServerGroupCloudReadOpts) error { client.MoreHeaders["X-Owned"] = "after"; return nil }
 				var e error
 				if op == "get" {
-					r, cause := service.GetServerGroup(context.Background(), "g1", option)
+					r, cause := service.GetServerGroup(context.Background(), "g1", request.Custom(option))
 					e = cause
 					if kind != "route" && kind != "expanded-codes" && (r == nil || r.Group == nil || r.Group.StatusCode != map[bool]int{true: 199, false: 200}[kind == "source199"]) {
 						t.Fatal(r, e)
 					}
 				} else {
-					r, cause := service.SearchServerGroups(context.Background(), "", option)
+					r, cause := service.SearchServerGroups(context.Background(), "", request.Custom(option))
 					e = cause
 					if kind != "route" && kind != "expanded-codes" && (r == nil || len(r.Groups) != 2 || r.Inventory[0].StatusCode != map[bool]int{true: 199, false: 200}[kind == "source199"]) {
 						t.Fatal(r, e)

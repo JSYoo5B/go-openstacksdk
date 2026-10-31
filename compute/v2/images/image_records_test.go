@@ -14,6 +14,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/images"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -218,7 +219,7 @@ func TestPythonNovaImageListQueryDetailLocalFiltersAndCaps(t *testing.T) {
 	api, _, calls := novaImageAPI(t, "2.35", func(*http.Request) (int, string) {
 		return 200, `{"images":[{"id":"a","created":"raw","progress":"4","metadata":{"owner":"ci","extra":true}},{"id":"b","created":"other","progress":4,"metadata":{"owner":"ci"}}]}`
 	})
-	ids, err := novaImageIDs(t, api, images.WithListQuery("min_disk", []any{true, nil, "4"}), images.WithListQuery("minDisk", 99), images.WithListQuery("min_ram", nil), images.WithListQuery("changes_since", "now"), images.WithListQuery("server", map[string]any{"x": 1}), images.WithListQuery("name", false), images.WithListQuery("status", "ACTIVE"), images.WithListQuery("type", []string{"snapshot", "backup"}), images.WithListQuery("created_at", "raw"), images.WithListQuery("progress", 4), images.WithListQuery("metadata", map[string]any{"owner": "ci"}), images.WithListQuery("unknown", make(chan int)), images.WithListPaginated(false))
+	ids, err := novaImageIDs(t, api, request.Query("min_disk", []any{true, nil, "4"}), request.Query("minDisk", 99), request.Query("min_ram", nil), request.Query("changes_since", "now"), request.Query("server", map[string]any{"x": 1}), request.Query("name", false), request.Query("status", "ACTIVE"), request.Query("type", []string{"snapshot", "backup"}), request.Query("created_at", "raw"), request.Query("progress", 4), request.Query("metadata", map[string]any{"owner": "ci"}), request.Query("unknown", make(chan int)), request.Paginated(false))
 	if err != nil || !reflect.DeepEqual(ids, []string{"a"}) {
 		t.Fatal(ids, err)
 	}
@@ -227,7 +228,7 @@ func TestPythonNovaImageListQueryDetailLocalFiltersAndCaps(t *testing.T) {
 	if call.path != "/nova/v2.1/images/detail" || call.query != want {
 		t.Fatal(call)
 	}
-	ids, err = novaImageIDs(t, api, images.WithListDetails(false), images.WithListLimit(0), images.WithListMaxItems(1), images.WithListQuery("created_at", "other"))
+	ids, err = novaImageIDs(t, api, images.WithListDetails(false), request.Limit(0), request.MaxItems(1), request.Query("created_at", "other"))
 	if err != nil || len(ids) != 0 {
 		t.Fatal("cap must count raw rows before filter", ids, err)
 	}
@@ -239,7 +240,7 @@ func TestPythonNovaImageListQueryDetailLocalFiltersAndCaps(t *testing.T) {
 		api, _, _ := novaImageAPI(t, "2.35", func(*http.Request) (int, string) {
 			return 200, `{"images":[{"id":"a","created_at":"first","created":"last","minDisk":5,"min_disk":7}]}`
 		})
-		for v, err := range api.ListRecords(context.Background(), images.WithListPaginated(false)) {
+		for v, err := range api.ListRecords(context.Background(), request.Paginated(false)) {
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -249,12 +250,12 @@ func TestPythonNovaImageListQueryDetailLocalFiltersAndCaps(t *testing.T) {
 	})
 	t.Run("singleton and malformed capped tail", func(t *testing.T) {
 		api, _, _ := novaImageAPI(t, "2.35", func(*http.Request) (int, string) { return 200, `{"images":[{"id":"a"},42]}` })
-		ids, err := novaImageIDs(t, api, images.WithListMaxItems(1))
+		ids, err := novaImageIDs(t, api, request.MaxItems(1))
 		if err != nil || !reflect.DeepEqual(ids, []string{"a"}) {
 			t.Fatal(ids, err)
 		}
 		api, _, _ = novaImageAPI(t, "2.35", func(*http.Request) (int, string) { return 200, `{"images":{"id":"singleton"}}` })
-		ids, err = novaImageIDs(t, api, images.WithListPaginated(false))
+		ids, err = novaImageIDs(t, api, request.Paginated(false))
 		if err != nil || !reflect.DeepEqual(ids, []string{"singleton"}) {
 			t.Fatal(ids, err)
 		}
@@ -303,7 +304,7 @@ func TestPythonNovaImageListPagingAndWireMarker(t *testing.T) {
 			}
 			return 200, `{"images":[{"id":"original"}]}`
 		})
-		for v, err := range api.ListRecords(context.Background(), images.WithListLimit(2)) {
+		for v, err := range api.ListRecords(context.Background(), request.Limit(2)) {
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -372,7 +373,7 @@ func TestPythonNovaImageFindSummaryAndDeleteMissing(t *testing.T) {
 				}
 				return 200, `{"images":` + item.body + `}`
 			})
-			v, err := api.FindRecord(context.Background(), "ci", images.WithFindIgnoreMissing(!item.strict))
+			v, err := api.FindRecord(context.Background(), "ci", request.IgnoreMissing(!item.strict))
 			if item.target == nil {
 				if v != nil || err != nil {
 					t.Fatal(v, err)
@@ -413,7 +414,7 @@ func TestPythonNovaImageFindSummaryAndDeleteMissing(t *testing.T) {
 			if (err == nil) != (code < 400 || code == 404) {
 				t.Fatal(err)
 			}
-			err = api.DeleteRecord(context.Background(), "a", images.WithDeleteIgnoreMissing(false))
+			err = api.DeleteRecord(context.Background(), "a", request.IgnoreMissing(false))
 			if (err == nil) != (code < 400) || len(calls.snapshot()) != 2 {
 				t.Fatal(err, calls.snapshot())
 			}
@@ -442,7 +443,7 @@ func TestPythonNovaImageMetadataFetchAliasSetDeleteContracts(t *testing.T) {
 		t.Fatal(alias, err)
 	}
 	metadata := map[string]any{"owner": "ci", "empty": "", "none": nil, "count": json.Number("9007199254740993")}
-	v, err = api.SetMetadata(context.Background(), "folder/image%", metadata, func(*images.ReadOpts) error { metadata["owner"] = "changed"; return nil })
+	v, err = api.SetMetadata(context.Background(), "folder/image%", metadata, request.Custom(func(*images.ReadOpts) error { metadata["owner"] = "changed"; return nil }))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -582,17 +583,17 @@ func TestPythonNovaImageOwnedOptionsGuardsAndEvidence(t *testing.T) {
 	}
 	t.Run("retained callback cannot mutate applied options", func(t *testing.T) {
 		var retained *images.ListOpts
-		ids, err := novaImageIDs(t, api, func(c *images.ListOpts) error {
+		ids, err := novaImageIDs(t, api, request.Custom(func(c *images.ListOpts) error {
 			retained = c
 			c.Headers = map[string]string{"X-Owned": "old"}
 			c.Query = map[string]json.RawMessage{"created_at": json.RawMessage(`"ci"`)}
 			c.Paginated = &onePage
 			return nil
-		}, func(*images.ListOpts) error {
+		}), request.Custom(func(*images.ListOpts) error {
 			retained.Headers["X-Owned"] = "bad"
 			retained.Query["created_at"] = json.RawMessage(`"bad"`)
 			return nil
-		})
+		}))
 		if err != nil || !reflect.DeepEqual(ids, []string{"a"}) {
 			t.Fatal(ids, err)
 		}
@@ -600,8 +601,8 @@ func TestPythonNovaImageOwnedOptionsGuardsAndEvidence(t *testing.T) {
 	for _, item := range []struct {
 		name string
 		call func() error
-	}{{"nil read", func() error { _, err := api.GetRecord(context.Background(), "a", nil); return err }}, {"nil delete", func() error { return api.DeleteRecord(context.Background(), "a", nil) }}, {"nil find", func() error { _, err := api.FindRecord(context.Background(), "a", nil); return err }}, {"nil list", func() error { _, err := novaImageIDs(t, api, nil); return err }}, {"nil metadata delete", func() error { return api.DeleteMetadata(context.Background(), "a", nil) }}, {"negative limit", func() error { _, err := novaImageIDs(t, api, images.WithListLimit(-1)); return err }}, {"negative cap", func() error { _, err := novaImageIDs(t, api, images.WithListMaxItems(-1)); return err }}, {"protected header", func() error {
-		_, err := api.GetRecord(context.Background(), "a", images.WithReadHeaders(map[string]string{"X-Auth-Token": "bad"}))
+	}{{"nil read", func() error { _, err := api.GetRecord(context.Background(), "a", nil); return err }}, {"nil delete", func() error { return api.DeleteRecord(context.Background(), "a", nil) }}, {"nil find", func() error { _, err := api.FindRecord(context.Background(), "a", nil); return err }}, {"nil list", func() error { _, err := novaImageIDs(t, api, nil); return err }}, {"nil metadata delete", func() error { return api.DeleteMetadata(context.Background(), "a", nil) }}, {"negative limit", func() error { _, err := novaImageIDs(t, api, request.Limit(-1)); return err }}, {"negative cap", func() error { _, err := novaImageIDs(t, api, request.MaxItems(-1)); return err }}, {"protected header", func() error {
+		_, err := api.GetRecord(context.Background(), "a", request.Headers(map[string]string{"X-Auth-Token": "bad"}))
 		return err
 	}}, {"invalid identifier", func() error { _, err := api.GetRecord(context.Background(), ".."); return err }}} {
 		t.Run(item.name, func(t *testing.T) {
@@ -616,7 +617,7 @@ func TestPythonNovaImageOwnedOptionsGuardsAndEvidence(t *testing.T) {
 		ctx, cancel := context.WithCancelCause(context.Background())
 		cause, callbackErr := errors.New("caller cause"), errors.New("callback error")
 		before := len(calls.snapshot())
-		_, err := api.FindRecord(ctx, "ci", func(*images.FindOpts) error { cancel(cause); return callbackErr })
+		_, err := api.FindRecord(ctx, "ci", request.Custom(func(*images.FindOpts) error { cancel(cause); return callbackErr }))
 		if !errors.Is(err, cause) || !errors.Is(err, callbackErr) || !errors.Is(err, context.Canceled) || len(calls.snapshot()) != before {
 			t.Fatal(err, calls.snapshot())
 		}
@@ -627,7 +628,7 @@ func TestPythonNovaImageOwnedOptionsGuardsAndEvidence(t *testing.T) {
 		defer func() { client.Microversion = original }()
 		before := len(calls.snapshot())
 		callbackErr := errors.New("callback error")
-		_, err := api.GetRecord(context.Background(), "a", func(*images.ReadOpts) error { client.Microversion = "2.104"; return callbackErr })
+		_, err := api.GetRecord(context.Background(), "a", request.Custom(func(*images.ReadOpts) error { client.Microversion = "2.104"; return callbackErr }))
 		if !errors.Is(err, callbackErr) || !errors.Is(err, resource.ErrInvalidOption) || len(calls.snapshot()) != before {
 			t.Fatal(err, calls.snapshot())
 		}
@@ -646,7 +647,7 @@ func TestPythonNovaImageOwnedOptionsGuardsAndEvidence(t *testing.T) {
 	})
 	t.Run("member escapes once", func(t *testing.T) {
 		api, _, calls := novaImageAPI(t, "2.35", func(*http.Request) (int, string) { return 200, `{}` })
-		_, err := api.GetRecord(context.Background(), "folder/image%", images.WithReadHeaders(map[string]string{"X-Owned": "old"}))
+		_, err := api.GetRecord(context.Background(), "folder/image%", request.Headers(map[string]string{"X-Owned": "old"}))
 		if err != nil || calls.snapshot()[0].path != "/nova/v2.1/images/folder%2Fimage%25" {
 			t.Fatal(err, calls.snapshot())
 		}
@@ -733,7 +734,7 @@ func TestPythonNovaImageRejectedResponseFailuresStopDeleteAndFind(t *testing.T) 
 							t.Fatal("faulty member rejection produced a lookup result", value, err)
 						}
 					} else if strings.Contains(operation, "strict") {
-						err = api.DeleteRecord(ctx, "ci", images.WithDeleteIgnoreMissing(false))
+						err = api.DeleteRecord(ctx, "ci", request.IgnoreMissing(false))
 					} else {
 						err = api.DeleteRecord(ctx, "ci")
 					}
@@ -805,7 +806,7 @@ func TestPythonNovaImageCleanRejectionsRemainEligibleAfterNativeRetryHook(t *tes
 				} else {
 					var err error
 					if strings.Contains(operation, "strict") {
-						err = api.DeleteRecord(ctx, "ci", images.WithDeleteIgnoreMissing(false))
+						err = api.DeleteRecord(ctx, "ci", request.IgnoreMissing(false))
 					} else {
 						err = api.DeleteRecord(ctx, "ci")
 					}

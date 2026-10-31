@@ -323,13 +323,13 @@ func groupContext(ctx context.Context, deps Dependencies) (*compute.Service, *re
 // withGroupLocation appends an option that fills the current location when
 // the caller did not choose one.
 func withGroupLocation(options []compute.ServerGroupCloudReadOption, location *resource.CloudLocation) []compute.ServerGroupCloudReadOption {
-	return append(slices.Clone(options), func(cfg *compute.ServerGroupCloudReadOpts) error {
+	return append(slices.Clone(options), request.Custom(func(cfg *compute.ServerGroupCloudReadOpts) error {
 		if cfg.CurrentLocation == nil {
 			v := location.Clone()
 			cfg.CurrentLocation = &v
 		}
 		return nil
-	})
+	}))
 }
 
 // SearchServerGroups implements Connection.SearchServerGroups.

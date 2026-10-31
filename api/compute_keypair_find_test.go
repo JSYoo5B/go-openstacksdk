@@ -247,11 +247,11 @@ func TestComputeFindKeypairDirectSeedAndOwnerPreservingFullListFallback(t *testi
 			})
 			options := []keypairs.KeypairFindOption{keypairs.WithKeypairFindUserID(owner)}
 			if mode == "strict missing" {
-				options = append(options, keypairs.WithKeypairFindIgnoreMissing(false))
+				options = append(options, request.IgnoreMissing(false))
 			}
 			if mode == "explicit ignore wins" {
 				strict := false
-				options = append(options, keypairs.WithKeypairFindOptions(keypairs.KeypairFindOpts{UserID: owner, IgnoreMissing: &strict}), keypairs.WithKeypairFindIgnoreMissing(true))
+				options = append(options, keypairs.WithKeypairFindOptions(keypairs.KeypairFindOpts{UserID: owner, IgnoreMissing: &strict}), request.IgnoreMissing(true))
 			}
 			value, err := keypairs.New(client).FindKeypair(context.Background(), identity, options...)
 			wantLists := int32(1)
@@ -346,7 +346,7 @@ func TestComputeFindKeypairDirectSeedAndOwnerPreservingFullListFallback(t *testi
 				w.WriteHeader(500)
 			}
 		})
-		value, err := keypairs.New(client).FindKeypair(context.Background(), "target", keypairs.WithKeypairFindUserID("owner"), keypairs.WithKeypairFindHeader("X-Find-Option", "owned"), func(_ *request.Config[keypairs.KeypairFindOpts]) error { callbacks.Add(1); return nil })
+		value, err := keypairs.New(client).FindKeypair(context.Background(), "target", keypairs.WithKeypairFindUserID("owner"), request.Header("X-Find-Option", "owned"), request.Custom(func(_ *request.Config[keypairs.KeypairFindOpts]) error { callbacks.Add(1); return nil }))
 		if err != nil || value == nil || value.Resource == nil || discoveries.Load() != 1 || gets.Load() != 1 || lists.Load() != 1 || callbacks.Load() != 1 || client.Microversion != "" || client.ResourceBase != cloud.Server.URL+"/reverse/nova/v2.1/project/" {
 			t.Fatal(value, err, discoveries.Load(), gets.Load(), lists.Load(), callbacks.Load(), client)
 		}
@@ -393,16 +393,16 @@ func TestComputeFindKeypairOwnedOptionsPreflightAndPhysicalTerminalErrors(t *tes
 				w.WriteHeader(500)
 			}
 		})
-		options := []keypairs.KeypairFindOption{bulk, func(c *request.Config[keypairs.KeypairFindOpts]) error {
+		options := []keypairs.KeypairFindOption{bulk, request.Custom(func(c *request.Config[keypairs.KeypairFindOpts]) error {
 			first.Add(1)
 			shared["X-Find-Trace"] = "owned"
 			c.Headers = shared
 			return nil
-		}, func(_ *request.Config[keypairs.KeypairFindOpts]) error {
+		}), request.Custom(func(_ *request.Config[keypairs.KeypairFindOpts]) error {
 			last.Add(1)
 			shared["X-Find-Trace"] = "changed"
 			return nil
-		}}
+		})}
 		for repeat := 0; repeat < 2; repeat++ {
 			value, err := keypairs.New(client).FindKeypair(context.Background(), "target", options...)
 			if value != nil || !errors.Is(err, resource.ErrNotFound) {
@@ -444,12 +444,12 @@ func TestComputeFindKeypairOwnedOptionsPreflightAndPhysicalTerminalErrors(t *tes
 				opts = append(opts, nil)
 			case "cancel callback":
 				expected = context.Canceled
-				opts = append(opts, func(_ *request.Config[keypairs.KeypairFindOpts]) error { cancel(); return nil })
+				opts = append(opts, request.Custom(func(_ *request.Config[keypairs.KeypairFindOpts]) error { cancel(); return nil }))
 			case "source callback":
-				opts = append(opts, func(_ *request.Config[keypairs.KeypairFindOpts]) error {
+				opts = append(opts, request.Custom(func(_ *request.Config[keypairs.KeypairFindOpts]) error {
 					client.ResourceBase = cloud.Server.URL + "/changed/"
 					return nil
-				})
+				}))
 			case "outer guard":
 				expected = cause
 				ctx = rest.WithOperationGuard(ctx, func(context.Context) error { return cause })
@@ -457,7 +457,7 @@ func TestComputeFindKeypairOwnedOptionsPreflightAndPhysicalTerminalErrors(t *tes
 				client.Microversion = ""
 				client.MoreHeaders = map[string]string{"X-OpenStack-Nova-API-Version": ""}
 			}
-			opts = append(opts, func(_ *request.Config[keypairs.KeypairFindOpts]) error { later.Add(1); return nil })
+			opts = append(opts, request.Custom(func(_ *request.Config[keypairs.KeypairFindOpts]) error { later.Add(1); return nil }))
 			value, err := api.FindKeypair(ctx, identity, opts...)
 			if value != nil || !errors.Is(err, expected) || calls.Load() != 0 || later.Load() != 0 {
 				t.Fatal("preflight/callback guard ran later work", value, err, calls.Load(), later.Load())
@@ -608,7 +608,7 @@ func TestComputeFindKeypairOwnedOptionsPreflightAndPhysicalTerminalErrors(t *tes
 			}
 			testcloud.JSON(w, 200, `{"keypair":{"name":"actual"}}`)
 		})
-		value, err := keypairs.New(client).FindKeypair(context.Background(), "target", keypairs.WithKeypairFindUserID("owner"), keypairs.WithKeypairFindMicroversion("2.55"))
+		value, err := keypairs.New(client).FindKeypair(context.Background(), "target", keypairs.WithKeypairFindUserID("owner"), request.Microversion("2.55"))
 		if err != nil || value == nil || value.Resource == nil || string(value.Resource.Body["name"]) != `"actual"` || calls.Load() != 2 || reauths.Load() != 1 || client.Microversion != "2.55" {
 			t.Fatal(value, err, calls.Load(), reauths.Load())
 		}

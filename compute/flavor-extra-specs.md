@@ -14,8 +14,8 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.API.FetchExtraSpecs`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorExtraSpecsOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorExtraSpecsMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorExtraSpecsHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 
 - FetchExtraSpecs always performs one logical bodyless GET at the captured prefixed flavors/{id}/os-extra_specs route, with no flavor lookup or inline extra_specs shortcut. ID-only input seeds the requested ID; existing native or raw flavor fields are copied before options, keep their original fields, and only the Resource extra_specs value is replaced. Native Swap survives its json-excluded native field and native is_public/ephemeral wire aliases become source view names. An explicit route ID does not rewrite a supplied passive Resource ID; absent route ID uses the existing truthy string id/name/original_name identity.
   Tests: `api/compute_flavor_extra_specs_fetch_test.go:TestComputeFlavorFetchExtraSpecsAlwaysGETRawValuesAndOwnedExistingInputs`.
@@ -98,7 +98,7 @@ func run(ctx context.Context, id, version string, versionSet bool) error {
     }
     options := []flavors.FlavorExtraSpecsOption{}
     if versionSet {
-        options = append(options, flavors.WithFlavorExtraSpecsMicroversion(version))
+        options = append(options, request.Microversion(version))
     }
     record, fetchErr := service.API.Flavors.FetchExtraSpecs(ctx,
         flavors.FlavorExtraSpecsRequest{ID: id}, options...)

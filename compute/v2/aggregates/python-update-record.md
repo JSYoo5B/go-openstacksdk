@@ -16,8 +16,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.WithUpdateRecordOptions`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.WithUpdateRecordName`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.WithUpdateRecordAvailabilityZone`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.WithUpdateRecordField`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.WithUpdateRecordHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/request.Null`
 - `github.com/JSYoo5B/go-openstacksdk/request.Present`
 
@@ -30,7 +30,7 @@ Python/Go differences:
 
 - Python accepts an Aggregate or an ID string; Go takes the integer aggregate ID.
 - Python sends min(Aggregate _max_microversion 2.81, server maximum) discovered per request; Go sends the one microversion configured on the client.
-- Python drops undeclared keyword attributes; WithUpdateRecordField sends any extension key except the typed keys and id.
+- Python drops undeclared keyword attributes; request.Field sends any extension key except the typed keys and id.
 - Python returns the Resource merged from request attributes and the response; Go returns AggregateRecord with the native typed decode, the raw response object fields, headers and status, and Sent false when no request was needed.
 
 ## References

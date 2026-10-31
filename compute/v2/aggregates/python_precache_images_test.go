@@ -23,7 +23,7 @@ func TestPythonAggregatePrecacheImagesFixedVersionLiteralOrder(t *testing.T) {
 	api.RawClient().Microversion = "2.1"
 	images := []string{"image/a", "", "image/a"}
 	mutate := func(c *request.Config[aggregates.PrecacheImagesOpts]) error { images[0] = "changed"; return nil }
-	if err := api.PrecacheImages(context.Background(), 7, images, mutate, aggregates.WithPrecacheImagesHeader("X-Trace", "trace")); err != nil {
+	if err := api.PrecacheImages(context.Background(), 7, images, request.Custom(mutate), request.Header("X-Trace", "trace")); err != nil {
 		t.Fatal(err)
 	}
 	if calls.Len() != 1 || calls.Calls()[0].Method != "POST" || calls.Calls()[0].Path != pythonAggregateBase+"/7/images" || calls.Calls()[0].Body != `{"cache":[{"id":"image/a"},{"id":""},{"id":"image/a"}]}` || calls.Calls()[0].Header.Get("X-OpenStack-Nova-API-Version") != "2.81" {
@@ -80,7 +80,7 @@ func TestPythonAggregatePrecacheImagesInvalidOptionsAndSourceMutation(t *testing
 		api.RawClient().Endpoint = "https://foreign.invalid/"
 		return nil
 	}
-	if err := api.PrecacheImages(context.Background(), 7, nil, mutate); !errors.Is(err, resource.ErrInvalidOption) {
+	if err := api.PrecacheImages(context.Background(), 7, nil, request.Custom(mutate)); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
 	if calls.Len() != 0 {
@@ -105,7 +105,7 @@ func TestPythonAggregatePrecacheImagesSelectedAPIReplacement(t *testing.T) {
 		*api = *aggregates.New(&copied)
 		return nil
 	}
-	if err := api.PrecacheImages(context.Background(), 7, nil, replace); !errors.Is(err, resource.ErrInvalidOption) {
+	if err := api.PrecacheImages(context.Background(), 7, nil, request.Custom(replace)); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
 	if calls.Len() != 0 {

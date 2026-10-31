@@ -154,10 +154,10 @@ func TestPythonBackupActionValuesExtensionsAndResponseEvidence(t *testing.T) {
 	})
 	client.MoreHeaders = map[string]string{"X-Source": "before", "aCcEpT": "application/json", "x-openstack-nova-api-version": "2.96", "OpenStack-API-Version": "compute 2.96"}
 	extension := map[string]any{"null": nil, "zero": 0, "false": false, "empty": []string{}}
-	snapshot := servers.WithBackupActionField("future", extension)
+	snapshot := request.Field("future", extension)
 	extension["zero"] = 99
 	got, err := servers.New(client).CreateBackupAction(context.Background(), "a/b%2Fz", pythonBackupRequest(), snapshot,
-		servers.WithBackupActionHeader("X-Test", "caller"), servers.WithBackupActionOptions(servers.BackupActionRequest{Rotation: -1}))
+		request.Header("X-Test", "caller"), servers.WithBackupActionOptions(servers.BackupActionRequest{Rotation: -1}))
 	wantBody := `{"createBackup":{"backup_type":"","future":{"empty":[],"false":false,"null":null,"zero":0},"name":"","rotation":-1}}`
 	if err != nil || got == nil || got.ImageID != "body-id" || calls.Len() != 2 || calls.Calls()[1].Body != wantBody || action.URL.EscapedPath() != "/nova/v2.1/servers/a%2Fb%252Fz/action" || got.StatusCode != 203 || string(got.Body) != `{"image_id":"body-id","future":false}` {
 		t.Fatal(got, err, pythonServerCalls(calls))
@@ -257,20 +257,20 @@ func TestPythonBackupActionOptionPreflightAndCapturedSource(t *testing.T) {
 	api := servers.New(client)
 	options := []servers.BackupActionOption{
 		nil,
-		servers.WithBackupActionField("name", "override"),
-		servers.WithBackupActionField("backup_type", "override"),
-		servers.WithBackupActionField("rotation", 7),
-		servers.WithBackupActionField("future", make(chan int)),
-		servers.WithBackupActionHeader("X-Auth-Token", "foreign"),
-		servers.WithBackupActionHeader("X-OpenStack-Nova-API-Version", "2.1"),
-		servers.WithBackupActionHeader("OpenStack-API-Version", "compute 2.1"),
-		servers.WithBackupActionHeader("Content-Length", "99"),
-		servers.WithBackupActionHeader("Accept", "application/json"),
-		servers.WithBackupActionHeader("Accept", ""),
+		request.Field("name", "override"),
+		request.Field("backup_type", "override"),
+		request.Field("rotation", 7),
+		request.Field("future", make(chan int)),
+		request.Header("X-Auth-Token", "foreign"),
+		request.Header("X-OpenStack-Nova-API-Version", "2.1"),
+		request.Header("OpenStack-API-Version", "compute 2.1"),
+		request.Header("Content-Length", "99"),
+		request.Header("Accept", "application/json"),
+		request.Header("Accept", ""),
 		servers.WithBackupActionOptions(servers.BackupActionRequest{Name: "\xff"}),
 		servers.WithBackupActionOptions(servers.BackupActionRequest{BackupType: "\xff"}),
-		request.WithQuery[servers.BackupActionRequest]("future", "true"),
-		request.WithArgument[servers.BackupActionRequest]("future", true),
+		request.Custom(request.WithQuery[servers.BackupActionRequest]("future", "true")),
+		request.Custom(request.WithArgument[servers.BackupActionRequest]("future", true)),
 	}
 	for i, option := range options {
 		got, err := api.CreateBackupAction(context.Background(), "s1", pythonBackupRequest(), option)
@@ -281,20 +281,20 @@ func TestPythonBackupActionOptionPreflightAndCapturedSource(t *testing.T) {
 	optionCalls := 0
 	callback := func(c *request.Config[servers.BackupActionRequest]) error { optionCalls++; return nil }
 	var nilAPI *servers.API
-	if got, err := nilAPI.CreateBackupAction(context.Background(), "s1", pythonBackupRequest(), callback); got != nil || !errors.Is(err, resource.ErrInvalidOption) {
+	if got, err := nilAPI.CreateBackupAction(context.Background(), "s1", pythonBackupRequest(), request.Custom(callback)); got != nil || !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(got, err)
 	}
-	if got, err := api.CreateBackupAction(nil, "s1", pythonBackupRequest(), callback); got != nil || !errors.Is(err, resource.ErrInvalidOption) {
+	if got, err := api.CreateBackupAction(nil, "s1", pythonBackupRequest(), request.Custom(callback)); got != nil || !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(got, err)
 	}
 	cause := errors.New("caller cancelled")
 	ctx, cancel := context.WithCancelCause(context.Background())
 	cancel(cause)
-	if got, err := api.CreateBackupAction(ctx, "s1", pythonBackupRequest(), callback); got != nil || !errors.Is(err, context.Canceled) || !errors.Is(err, cause) {
+	if got, err := api.CreateBackupAction(ctx, "s1", pythonBackupRequest(), request.Custom(callback)); got != nil || !errors.Is(err, context.Canceled) || !errors.Is(err, cause) {
 		t.Fatal(got, err)
 	}
 	for _, id := range []string{"", ".", "..", "s1\n", "\xff"} {
-		got, err := api.CreateBackupAction(context.Background(), id, pythonBackupRequest(), callback)
+		got, err := api.CreateBackupAction(context.Background(), id, pythonBackupRequest(), request.Custom(callback))
 		if got != nil || !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(id, got, err)
 		}
@@ -302,10 +302,10 @@ func TestPythonBackupActionOptionPreflightAndCapturedSource(t *testing.T) {
 	if optionCalls != 0 || calls.Len() != 0 {
 		t.Fatal(optionCalls, pythonServerCalls(calls))
 	}
-	got, err := api.CreateBackupAction(context.Background(), "s1", pythonBackupRequest(), func(c *request.Config[servers.BackupActionRequest]) error {
+	got, err := api.CreateBackupAction(context.Background(), "s1", pythonBackupRequest(), request.Custom(func(c *request.Config[servers.BackupActionRequest]) error {
 		client.ResourceBase = "https://changed.invalid/v2.1/"
 		return nil
-	})
+	}))
 	if got != nil || !errors.Is(err, resource.ErrInvalidOption) || calls.Len() != 0 {
 		t.Fatal(got, err, pythonServerCalls(calls))
 	}

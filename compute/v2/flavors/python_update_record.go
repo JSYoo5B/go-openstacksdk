@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -19,28 +20,30 @@ import (
 // UpdateRecordOpts carries the Python update_flavor description. An omitted
 // field is not sent, Null sends JSON null and Present keeps an empty string,
 // both of which Nova accepts to clear the description. Other declared Flavor
-// attributes use WithUpdateRecordField with their server keys; the server
+// attributes use request.Field with their server keys; the server
 // validates every value.
 type UpdateRecordOpts struct {
 	Description request.Optional[string] `json:"description,omitzero"`
 }
 
-type UpdateRecordOption = request.Option[UpdateRecordOpts]
+// UpdateRecordOption is one option of UpdateRecord: WithUpdateRecordOptions,
+// WithUpdateRecordDescription, request.Field (another attribute inside the
+// flavor envelope; the typed description key and the URI identity id are
+// rejected), request.Header or request.Custom over
+// *request.Config[UpdateRecordOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type UpdateRecordOption = request.WriteCall
+
+var updateRecordCalls = calls.Spec[request.Config[UpdateRecordOpts]]{
+	Header: calls.ConfigHeader[UpdateRecordOpts],
+	Field:  calls.ConfigField[UpdateRecordOpts],
+}
 
 func WithUpdateRecordOptions(value UpdateRecordOpts) UpdateRecordOption {
-	return request.WithOptions(value)
+	return request.Custom(request.WithOptions(value))
 }
 func WithUpdateRecordDescription(value request.Optional[string]) UpdateRecordOption {
-	return func(config *request.Config[UpdateRecordOpts]) error { config.Options.Description = value; return nil }
-}
-
-// WithUpdateRecordField adds another attribute inside the flavor envelope.
-// The typed description key and the URI identity id are rejected.
-func WithUpdateRecordField(key string, value any) UpdateRecordOption {
-	return request.WithField[UpdateRecordOpts](key, value)
-}
-func WithUpdateRecordHeader(key, value string) UpdateRecordOption {
-	return request.WithHeader[UpdateRecordOpts](key, value)
+	return request.Custom(func(config *request.Config[UpdateRecordOpts]) error { config.Options.Description = value; return nil })
 }
 
 // FlavorUpdateRecord is the committed Python Flavor view. Flavor is the
@@ -75,7 +78,7 @@ func (a *API) UpdateRecord(ctx context.Context, flavorID string, options ...Upda
 	if err != nil {
 		return fail(nil, err)
 	}
-	config, err := cloudread.ApplyReadOptions(ctx, UpdateRecordOpts{}, options, cloudread.OwnReadConfig[UpdateRecordOpts], source.Guard)
+	config, err := cloudread.ApplyReadOptions(ctx, UpdateRecordOpts{}, calls.Options(options, updateRecordCalls), cloudread.OwnReadConfig[UpdateRecordOpts], source.Guard)
 	if err == nil {
 		err = request.ValidateCapabilities(config, true, false, true)
 	}

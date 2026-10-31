@@ -9,6 +9,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -62,17 +63,17 @@ func TestPythonQuotaResetForwardsQueryAndMissingPolicy(t *testing.T) {
 		t.Fatal(err)
 	}
 	// Python raises NotFoundException (ignore_missing=False); the Go default
-	// keeps the 404 and WithResetIgnoreMissing(true) suppresses only it.
+	// keeps the 404 and request.IgnoreMissing(true) suppresses only it.
 	status = http.StatusNotFound
 	if _, err := scope.Reset(ctx, quotasets.WithResetQuery("force", "True")); !errors.Is(err, resource.ErrNotFound) || !gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 		t.Fatal(err)
 	}
-	if got, err := scope.Reset(ctx, quotasets.WithResetQuery("force", "True"), quotasets.WithResetIgnoreMissing(true)); got != nil || err != nil {
+	if got, err := scope.Reset(ctx, quotasets.WithResetQuery("force", "True"), request.IgnoreMissing(true)); got != nil || err != nil {
 		t.Fatal(got, err)
 	}
 	status = http.StatusInternalServerError
 	var operation *resource.OperationError
-	if _, err := user.Reset(ctx, quotasets.WithResetQuery("force", "True"), quotasets.WithResetIgnoreMissing(true)); !gophercloud.ResponseCodeIs(err, status) || !errors.As(err, &operation) || operation.Operation != "Reset" {
+	if _, err := user.Reset(ctx, quotasets.WithResetQuery("force", "True"), request.IgnoreMissing(true)); !gophercloud.ResponseCodeIs(err, status) || !errors.As(err, &operation) || operation.Operation != "Reset" {
 		t.Fatal(err)
 	}
 	want := []pythonQuotaResetCall{

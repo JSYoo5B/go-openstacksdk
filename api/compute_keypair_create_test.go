@@ -253,7 +253,7 @@ func TestComputeKeypairCreateOwnedOptionsSourceAndAcceptedFailures(t *testing.T)
 		seed["name"] = "caller changed"
 		seed["public_key"].(map[string]any)["n"] = false
 		vendor := map[string]any{"enabled": true}
-		extension := keypairs.WithKeypairCreateField("vendor", vendor)
+		extension := request.Field("vendor", vendor)
 		vendor["enabled"] = false
 		raw := json.RawMessage(`{"kept":true}`)
 		callbackAttribute := map[string]any{"kept": true}
@@ -278,19 +278,19 @@ func TestComputeKeypairCreateOwnedOptionsSourceAndAcceptedFailures(t *testing.T)
 		options := []keypairs.KeypairCreateOption{
 			keypairs.WithKeypairCreateName("discarded"), keypairs.WithKeypairCreatePublicKey("discarded"), keypairs.WithKeypairCreateType("discarded"), bulk,
 			keypairs.WithKeypairCreateAttribute("id", "last"), keypairs.WithKeypairCreateAttribute("deleted", true), keypairs.WithKeypairCreateAttribute("is_deleted", false), keypairs.WithKeypairCreateUserID("owner"), extension,
-			keypairs.WithKeypairCreateHeader("X-Create-Extension", "kept"),
-			func(config *request.Config[keypairs.KeypairCreateOpts]) error {
+			request.Header("X-Create-Extension", "kept"),
+			request.Custom(func(config *request.Config[keypairs.KeypairCreateOpts]) error {
 				callbacks.Add(1)
 				config.Fields["trace"] = raw
 				config.Options.Attributes["created_at"] = callbackAttribute
 				return nil
-			},
-			func(_ *request.Config[keypairs.KeypairCreateOpts]) error {
+			}),
+			request.Custom(func(_ *request.Config[keypairs.KeypairCreateOpts]) error {
 				callbacks.Add(1)
 				raw[0] = 'x'
 				callbackAttribute["kept"] = false
 				return nil
-			},
+			}),
 		}
 		value, err := keypairs.New(flavorIdentityClient(cloud)).CreateKeypair(context.Background(), options...)
 		if err != nil || value == nil || string(value.Resource.Body["name"]) != `"last"` || string(value.Resource.Body["is_deleted"]) != `false` || string(value.Resource.Body["public_key"]) != `{"n":9007199254740993}` || string(value.Resource.Body["created_at"]) != `{"kept":true}` || calls.Load() != 1 || callbacks.Load() != 2 {
@@ -310,23 +310,23 @@ func TestComputeKeypairCreateOwnedOptionsSourceAndAcceptedFailures(t *testing.T)
 			var option keypairs.KeypairCreateOption
 			switch mode {
 			case "query":
-				option = request.WithQuery[keypairs.KeypairCreateOpts]("user_id", "wrong owner channel")
+				option = request.Custom(request.WithQuery[keypairs.KeypairCreateOpts]("user_id", "wrong owner channel"))
 			case "source":
-				option = func(_ *request.Config[keypairs.KeypairCreateOpts]) error {
+				option = request.Custom(func(_ *request.Config[keypairs.KeypairCreateOpts]) error {
 					client.ResourceBase = cloud.Server.URL + "/changed/"
 					return nil
-				}
+				})
 			case "reassigned API":
-				option = func(_ *request.Config[keypairs.KeypairCreateOpts]) error {
+				option = request.Custom(func(_ *request.Config[keypairs.KeypairCreateOpts]) error {
 					*api = *keypairs.New(flavorIdentityClient(cloud))
 					return nil
-				}
+				})
 			case "cancel":
-				option = func(_ *request.Config[keypairs.KeypairCreateOpts]) error { cancel(cause); return original }
+				option = request.Custom(func(_ *request.Config[keypairs.KeypairCreateOpts]) error { cancel(cause); return original })
 			default:
-				option = keypairs.WithKeypairCreateField(mode[:len(mode)-len(" field")], "override")
+				option = request.Field(mode[:len(mode)-len(" field")], "override")
 			}
-			value, err := api.CreateKeypair(ctx, option, func(_ *request.Config[keypairs.KeypairCreateOpts]) error { later.Add(1); return nil })
+			value, err := api.CreateKeypair(ctx, option, request.Custom(func(_ *request.Config[keypairs.KeypairCreateOpts]) error { later.Add(1); return nil }))
 			if value != nil || err == nil || calls.Load() != 0 {
 				t.Fatal("invalid option reached create allocation", value, err, calls.Load())
 			}
@@ -420,7 +420,7 @@ func TestComputeKeypairCreateOwnedOptionsSourceAndAcceptedFailures(t *testing.T)
 			client.ResourceBase = cloud.Server.URL + "/changed/"
 			return nil
 		}
-		value, err := keypairs.New(client).CreateKeypair(context.Background(), keypairs.WithKeypairCreateName("key"), func(_ *request.Config[keypairs.KeypairCreateOpts]) error { callbacks.Add(1); return nil })
+		value, err := keypairs.New(client).CreateKeypair(context.Background(), keypairs.WithKeypairCreateName("key"), request.Custom(func(_ *request.Config[keypairs.KeypairCreateOpts]) error { callbacks.Add(1); return nil }))
 		var original gophercloud.ErrUnexpectedResponseCode
 		if value != nil || !errors.Is(err, resource.ErrInvalidOption) || !errors.As(err, &original) || original.Actual != 503 || original.Method != http.MethodPost || original.URL != cloud.Server.URL+computeKeypairCreatePath || string(original.Body) != body || original.ResponseHeader.Get("X-Keypair-Proof") != "retry" || calls.Load() != 1 || retries.Load() != 1 || callbacks.Load() != 1 {
 			t.Fatal("source mutation resent allocation/lost original HTTP", value, err, original, calls.Load(), retries.Load(), callbacks.Load())
@@ -440,11 +440,11 @@ func TestComputeKeypairCreateOwnedOptionsSourceAndAcceptedFailures(t *testing.T)
 			}
 			testcloud.JSON(w, 201, `{"keypair":{"name":"actual"}}`)
 		})
-		value, err := keypairs.New(client).CreateKeypair(context.Background(), keypairs.WithKeypairCreateName("key"), func(_ *request.Config[keypairs.KeypairCreateOpts]) error {
+		value, err := keypairs.New(client).CreateKeypair(context.Background(), keypairs.WithKeypairCreateName("key"), request.Custom(func(_ *request.Config[keypairs.KeypairCreateOpts]) error {
 			callbacks.Add(1)
 			cloud.Provider.SetToken("refreshed-create-token")
 			return nil
-		})
+		}))
 		if err != nil || value == nil || string(value.Resource.Body["name"]) != `"actual"` || calls.Load() != 1 || callbacks.Load() != 1 {
 			t.Fatal(value, err, calls.Load(), callbacks.Load())
 		}

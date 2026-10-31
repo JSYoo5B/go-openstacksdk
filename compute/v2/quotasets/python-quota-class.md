@@ -15,8 +15,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.API.GetQuotaClassRecord`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithQuotaClassGetOpts`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithQuotaClassName`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithQuotaClassGetHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithQuotaClassGetMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - GET default/custom class names use the selected literal route, preserve declared untyped id and15 integer/default/null fields independently from actual unknown Wire and response proof. Invalid accepted integer conversion retains original evidence.
   Tests: `compute/v2/quotasets/python_quota_class_test.go:TestNovaQuotaClassGetDefaultAndCustomNamesKeepLiteralRoutes`, `compute/v2/quotasets/python_quota_class_test.go:TestNovaQuotaClassInvalidIntegerRetainsAcceptedResponse`.
@@ -39,8 +39,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.API.UpdateQuotaClassRecord`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithQuotaClassUpdateOpts`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithQuotaClassUpdateAttribute`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithQuotaClassUpdateHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithQuotaClassUpdateMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - PUT sends explicit raw quota_class_set attrs including nullable values, then projects declared integer view on response overlay without sending defaults or dirty id. Empty/unknown-only updates perform neither HTTP nor discovery and duplicate attrs id is rejected.
   Tests: `compute/v2/quotasets/python_quota_class_test.go:TestNovaQuotaClassUpdatePUTUsesRawAttributesAndProjectedResponse`, `compute/v2/quotasets/python_quota_class_test.go:TestNovaQuotaClassUpdateNoopSkipsHTTPAndDiscoveryAndIDCollisions`.

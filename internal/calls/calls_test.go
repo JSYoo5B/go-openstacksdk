@@ -203,3 +203,22 @@ func TestMergeHeaderUsesTheOperationMapOption(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestOptionsKeepNilAndOrder(t *testing.T) {
+	spec := Spec[request.Config[opts]]{Header: ConfigHeader[opts]}
+	options := Options[opts, request.GetCall](nil, spec)
+	if len(options) != 0 {
+		t.Fatal(options)
+	}
+	options = Options([]request.GetCall{request.Header("x-a", "1"), nil, request.Custom[request.Config[opts]](nil), request.Header("x-a", "2"), request.Microversion("1")}, spec)
+	if len(options) != 5 || options[1] != nil || options[2] != nil {
+		t.Fatalf("options = %v", options)
+	}
+	got, err := request.Apply(opts{}, options[0], options[3])
+	if err != nil || got.Headers["X-A"] != "2" {
+		t.Fatalf("got %+v %v", got.Headers, err)
+	}
+	if err := options[4](&got); !errors.Is(err, resource.ErrInvalidOption) || !strings.Contains(err.Error(), "Microversion call option is unsupported") {
+		t.Fatalf("microversion = %v", err)
+	}
+}

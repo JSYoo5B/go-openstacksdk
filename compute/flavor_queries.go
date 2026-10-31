@@ -10,6 +10,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -25,7 +26,18 @@ type FlavorQueryOpts struct {
 	Filters      *json.RawMessage
 	Microversion *string
 }
-type FlavorQueryOption = request.Option[FlavorQueryOpts]
+
+// FlavorQueryOption is one option of AllFlavors, SearchFlavors and GetFlavor:
+// WithFlavorQueryOptions, WithFlavorQueryExtraSpecs, WithFlavorQueryFilters,
+// WithFlavorQueryExpression, request.Microversion, request.Header or
+// request.Custom over *request.Config[FlavorQueryOpts]. Other shared calls
+// fail with resource.ErrInvalidOption before HTTP.
+type FlavorQueryOption = request.GetCall
+
+var flavorQueryCalls = calls.Spec[request.Config[FlavorQueryOpts]]{
+	Header:       calls.ConfigHeader[FlavorQueryOpts],
+	Microversion: calls.Pointer(func(c *request.Config[FlavorQueryOpts]) **string { return &c.Options.Microversion }),
+}
 
 func cloneFlavorQueryOptions(value FlavorQueryOpts) FlavorQueryOpts {
 	if value.GetExtra != nil {
@@ -44,45 +56,35 @@ func cloneFlavorQueryOptions(value FlavorQueryOpts) FlavorQueryOpts {
 }
 func WithFlavorQueryOptions(value FlavorQueryOpts) FlavorQueryOption {
 	owned := cloneFlavorQueryOptions(value)
-	return func(config *request.Config[FlavorQueryOpts]) error {
+	return request.Custom(func(config *request.Config[FlavorQueryOpts]) error {
 		config.Options = cloneFlavorQueryOptions(owned)
 		return nil
-	}
+	})
 }
 func WithFlavorQueryExtraSpecs(value bool) FlavorQueryOption {
-	return func(config *request.Config[FlavorQueryOpts]) error {
+	return request.Custom(func(config *request.Config[FlavorQueryOpts]) error {
 		owned := value
 		config.Options.GetExtra = &owned
 		return nil
-	}
+	})
 }
 
 // WithFlavorQueryFilters owns raw JSON. Nil clears the option; explicit null
 // remains present. Search preserves dictionary order and expression values.
 func WithFlavorQueryFilters(value json.RawMessage) FlavorQueryOption {
 	owned := bytes.Clone(value)
-	return func(config *request.Config[FlavorQueryOpts]) error {
+	return request.Custom(func(config *request.Config[FlavorQueryOpts]) error {
 		config.Options.Filters = nil
 		if owned != nil {
 			raw := json.RawMessage(bytes.Clone(owned))
 			config.Options.Filters = &raw
 		}
 		return nil
-	}
+	})
 }
 func WithFlavorQueryExpression(value string) FlavorQueryOption {
 	raw, _ := json.Marshal(value)
 	return WithFlavorQueryFilters(raw)
-}
-func WithFlavorQueryMicroversion(value string) FlavorQueryOption {
-	return func(config *request.Config[FlavorQueryOpts]) error {
-		owned := value
-		config.Options.Microversion = &owned
-		return nil
-	}
-}
-func WithFlavorQueryHeader(key, value string) FlavorQueryOption {
-	return request.WithHeader[FlavorQueryOpts](key, value)
 }
 
 // FlavorQueryResult retains consumed records, including partial work on error.
@@ -95,7 +97,7 @@ type FlavorQueryResult struct {
 }
 
 func (p *flavorRecordWorkflow) prepareQuery(options []FlavorQueryOption) (request.Config[FlavorQueryOpts], error) {
-	config, err := cloudread.ApplyReadOptions(p.ctx, FlavorQueryOpts{}, options, func(c *request.Config[FlavorQueryOpts]) {
+	config, err := cloudread.ApplyReadOptions(p.ctx, FlavorQueryOpts{}, calls.Options(options, flavorQueryCalls), func(c *request.Config[FlavorQueryOpts]) {
 		c.Options = cloneFlavorQueryOptions(c.Options)
 		cloudread.OwnReadConfig(c)
 	}, p.check)
@@ -139,10 +141,10 @@ func (p *flavorRecordWorkflow) queryInventorySource(config request.Config[Flavor
 	result := &FlavorQueryResult{Inventory: []*flavors.FlavorRecord{}}
 	options := []flavors.FlavorListOption{flavors.WithFlavorListDetails(true), flavors.WithFlavorListExtraSpecs(flavorQueryExtra(config.Options, defaultExtra))}
 	if config.Options.Microversion != nil {
-		options = append(options, flavors.WithFlavorListMicroversion(*config.Options.Microversion))
+		options = append(options, request.Microversion(*config.Options.Microversion))
 	}
 	for key, value := range config.Headers {
-		options = append(options, flavors.WithFlavorListHeader(key, value))
+		options = append(options, request.Header(key, value))
 	}
 	list := p.api.ListRecords
 	if sourceStatuses {
@@ -246,12 +248,12 @@ func (s *Service) GetFlavor(ctx context.Context, nameOrID string, options ...Fla
 	if err != nil {
 		return fail(nil, err)
 	}
-	findOptions := []flavors.FlavorFindOption{flavors.WithFlavorFindIgnoreMissing(true), flavors.WithFlavorFindExtraSpecs(flavorQueryExtra(config.Options, true))}
+	findOptions := []flavors.FlavorFindOption{request.IgnoreMissing(true), flavors.WithFlavorFindExtraSpecs(flavorQueryExtra(config.Options, true))}
 	if config.Options.Microversion != nil {
-		findOptions = append(findOptions, flavors.WithFlavorFindMicroversion(*config.Options.Microversion))
+		findOptions = append(findOptions, request.Microversion(*config.Options.Microversion))
 	}
 	for key, value := range config.Headers {
-		findOptions = append(findOptions, flavors.WithFlavorFindHeader(key, value))
+		findOptions = append(findOptions, request.Header(key, value))
 	}
 	if config.Options.Filters != nil {
 		raw := *config.Options.Filters

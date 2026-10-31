@@ -139,7 +139,7 @@ func TestComputeFlavorRecordsQueryProjectionAndOwnedViews(t *testing.T) {
 				options = append(options, flavors.WithFlavorListFilters(map[string]any{"limit": 2, "marker": "start", "sort_key": "name", "sort_dir": "asc", "is_public": true, "min_disk": 4, "minDisk": 99, "min_ram": 3, "minRam": 88}))
 				want = url.Values{"limit": {"2"}, "marker": {"start"}, "sort_key": {"name"}, "sort_dir": {"asc"}, "is_public": {"true"}, "minDisk": {"4"}, "minRam": {"3"}}
 			case "raw overrides typed query":
-				options = append(options, flavors.WithFlavorListOptions(flavors.FlavorListOpts{Limit: 2, Marker: "start"}), flavors.WithFlavorListQuery("limit", "1"), flavors.WithFlavorListQuery("vendor", "literal"))
+				options = append(options, flavors.WithFlavorListOptions(flavors.FlavorListOpts{Limit: 2, Marker: "start"}), request.Query("limit", "1"), request.Query("vendor", "literal"))
 				want.Set("limit", "1")
 				want.Set("marker", "start")
 				want.Set("vendor", "literal")
@@ -202,12 +202,12 @@ func TestComputeFlavorRecordsQueryProjectionAndOwnedViews(t *testing.T) {
 			cloud := testcloud.New(t)
 			client := flavorIdentityClient(cloud)
 			client.Microversion = "2.55"
-			options := []flavors.FlavorListOption{flavors.WithFlavorListFilter("limit", 2), flavors.WithFlavorListLimit(2)}
+			options := []flavors.FlavorListOption{flavors.WithFlavorListFilter("limit", 2), request.Limit(2)}
 			want := resource.ErrInvalidOption
 			if mode == "semantic collides raw" {
-				options = []flavors.FlavorListOption{flavors.WithFlavorListFilter("min_ram", 2), flavors.WithFlavorListQuery("minRam", "2")}
+				options = []flavors.FlavorListOption{flavors.WithFlavorListFilter("min_ram", 2), request.Query("minRam", "2")}
 			} else if mode == "unsupported base path" {
-				options = []flavors.FlavorListOption{flavors.WithFlavorListQuery("base_path", "/other")}
+				options = []flavors.FlavorListOption{request.Query("base_path", "/other")}
 				want = resource.ErrUnsupported
 			}
 			var calls atomic.Int32
@@ -237,12 +237,12 @@ func TestComputeFlavorRecordsPagingRawCapsAndLazyOwnership(t *testing.T) {
 			client := flavorIdentityClient(cloud)
 			client.Microversion = "2.55"
 			var calls, callbacks atomic.Int32
-			options := []flavors.FlavorListOption{flavors.WithFlavorListFilter("disk", 1), func(_ *request.Config[flavors.FlavorListOpts]) error { callbacks.Add(1); return nil }}
+			options := []flavors.FlavorListOption{flavors.WithFlavorListFilter("disk", 1), request.Custom(func(_ *request.Config[flavors.FlavorListOpts]) error { callbacks.Add(1); return nil })}
 			if mode == "initial limit short-page fallback" {
-				options = append(options, flavors.WithFlavorListLimit(5))
+				options = append(options, request.Limit(5))
 			}
 			if mode == "single page" {
-				options = append(options, flavors.WithFlavorListPaginated(false))
+				options = append(options, request.Paginated(false))
 			}
 			cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 				call := calls.Add(1)
@@ -379,7 +379,7 @@ func TestComputeFlavorRecordsPagingRawCapsAndLazyOwnership(t *testing.T) {
 			})
 			count := 0
 			var failure error
-			for _, err := range flavors.New(client).ListRecords(context.Background(), flavors.WithFlavorListMaxItems(maximum), flavors.WithFlavorListFilter("disk", 1)) {
+			for _, err := range flavors.New(client).ListRecords(context.Background(), request.MaxItems(maximum), flavors.WithFlavorListFilter("disk", 1)) {
 				if err != nil {
 					failure = err
 					break
@@ -430,17 +430,17 @@ func TestComputeFlavorRecordsPagingRawCapsAndLazyOwnership(t *testing.T) {
 			testcloud.JSON(w, 200, flavorIdentityPage(`{"id":"7","name":"hit"},{"id":"8","name":"miss"}`, ""))
 		})
 		sequence := flavors.New(client).ListRecords(context.Background(), bulk, filter,
-			func(c *request.Config[flavors.FlavorListOpts]) error {
+			request.Custom(func(c *request.Config[flavors.FlavorListOpts]) error {
 				first.Add(1)
 				c.Headers, c.Query = headers, query
 				return nil
-			},
-			func(_ *request.Config[flavors.FlavorListOpts]) error {
+			}),
+			request.Custom(func(_ *request.Config[flavors.FlavorListOpts]) error {
 				later.Add(1)
 				headers["X-Flavor-Trace"] = "changed"
 				query["vendor"][0] = "changed"
 				return nil
-			})
+			}))
 		if calls.Load() != 0 || first.Load() != 0 || later.Load() != 0 {
 			t.Fatal("owned options executed before iteration")
 		}
@@ -518,7 +518,7 @@ func TestComputeFlavorRecordsConditionalExtraSpecsEnrichment(t *testing.T) {
 			})
 			var result *flavors.FlavorRecord
 			count := 0
-			for value, err := range flavors.New(client).ListRecords(context.Background(), flavors.WithFlavorListExtraSpecs(tc.enabled), func(_ *request.Config[flavors.FlavorListOpts]) error { callbacks.Add(1); return nil }) {
+			for value, err := range flavors.New(client).ListRecords(context.Background(), flavors.WithFlavorListExtraSpecs(tc.enabled), request.Custom(func(_ *request.Config[flavors.FlavorListOpts]) error { callbacks.Add(1); return nil })) {
 				if err != nil {
 					t.Fatal(value, err)
 				}
@@ -559,7 +559,7 @@ func TestComputeFlavorRecordsConditionalExtraSpecsEnrichment(t *testing.T) {
 			if mode == "filtered row is not enriched" {
 				options = append(options, flavors.WithFlavorListFilter("disk", 1))
 			} else if mode == "cap excludes later row" {
-				options = append(options, flavors.WithFlavorListMaxItems(1))
+				options = append(options, request.MaxItems(1))
 			}
 			wantID := "7"
 			if mode == "filtered row is not enriched" {
@@ -731,7 +731,7 @@ func TestComputeFlavorRecordsConditionalExtraSpecsEnrichment(t *testing.T) {
 			}
 		})
 		count := 0
-		for value, err := range flavors.New(client).ListRecords(context.Background(), flavors.WithFlavorListExtraSpecs(true), func(_ *request.Config[flavors.FlavorListOpts]) error { callbacks.Add(1); return nil }) {
+		for value, err := range flavors.New(client).ListRecords(context.Background(), flavors.WithFlavorListExtraSpecs(true), request.Custom(func(_ *request.Config[flavors.FlavorListOpts]) error { callbacks.Add(1); return nil })) {
 			if err != nil || value == nil || value.Enrichment == nil {
 				t.Fatal(value, err)
 			}

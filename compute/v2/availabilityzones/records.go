@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"slices"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/microversions"
@@ -45,7 +46,18 @@ func (r *AvailabilityZoneRecord) UnmarshalJSON(data []byte) error {
 }
 
 type AvailabilityZoneListOpts struct{ Microversion *string }
-type AvailabilityZoneListOption = request.Option[AvailabilityZoneListOpts]
+
+// AvailabilityZoneListOption is one option of ListRecords and
+// ListDetailRecords: WithAvailabilityZoneListOptions, request.Microversion,
+// request.Header or request.Custom over
+// *request.Config[AvailabilityZoneListOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type AvailabilityZoneListOption = request.GetCall
+
+var availabilityZoneListCalls = calls.Spec[request.Config[AvailabilityZoneListOpts]]{
+	Header:       calls.ConfigHeader[AvailabilityZoneListOpts],
+	Microversion: calls.Pointer(func(c *request.Config[AvailabilityZoneListOpts]) **string { return &c.Options.Microversion }),
+}
 
 func ownOptions(c *request.Config[AvailabilityZoneListOpts]) {
 	cloudread.OwnReadConfig(c)
@@ -59,17 +71,7 @@ func WithAvailabilityZoneListOptions(value AvailabilityZoneListOpts) Availabilit
 		owned := *value.Microversion
 		value.Microversion = &owned
 	}
-	return func(c *request.Config[AvailabilityZoneListOpts]) error { c.Options = value; ownOptions(c); return nil }
-}
-func WithAvailabilityZoneMicroversion(value string) AvailabilityZoneListOption {
-	return func(c *request.Config[AvailabilityZoneListOpts]) error {
-		owned := value
-		c.Options.Microversion = &owned
-		return nil
-	}
-}
-func WithAvailabilityZoneHeader(key, value string) AvailabilityZoneListOption {
-	return request.WithHeader[AvailabilityZoneListOpts](key, value)
+	return request.Custom(func(c *request.Config[AvailabilityZoneListOpts]) error { c.Options = value; ownOptions(c); return nil })
 }
 
 // ListRecords lazily reads ordinary zones. ListDetailRecords owns the
@@ -110,7 +112,7 @@ func (a *API) listZoneRecords(ctx context.Context, operation, path string, optio
 			return errors.Join(source.Guard(ctx), changed, parent)
 		}
 		opctx := rest.WithOperationGuard(ctx, check)
-		config, err := cloudread.ApplyReadOptions(opctx, AvailabilityZoneListOpts{}, captured, ownOptions, check)
+		config, err := cloudread.ApplyReadOptions(opctx, AvailabilityZoneListOpts{}, calls.Options(captured, availabilityZoneListCalls), ownOptions, check)
 		if err == nil {
 			err = request.ValidateCapabilities(config, false, false, true)
 		}

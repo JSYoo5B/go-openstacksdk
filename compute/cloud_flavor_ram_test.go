@@ -13,6 +13,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/compute"
 	computev2 "github.com/JSYoo5B/go-openstacksdk/compute/v2"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -242,7 +243,7 @@ func TestCloudFlavorByRAMOwnsOptionsAndInheritedReadTransportOptions(t *testing.
 	raw := json.RawMessage(`"first"`)
 	include := compute.WithFlavorRAMInclude(raw)
 	raw[1] = 'X'
-	query := []compute.FlavorQueryOption{compute.WithFlavorQueryExtraSpecs(false), compute.WithFlavorQueryHeader("X-Owned", "before"), compute.WithFlavorQueryMicroversion("2.55")}
+	query := []compute.FlavorQueryOption{compute.WithFlavorQueryExtraSpecs(false), request.Header("X-Owned", "before"), request.Microversion("2.55")}
 	queryOption := compute.WithFlavorRAMQueryOptions(query...)
 	query[0] = compute.WithFlavorQueryExtraSpecs(true)
 	var retained *compute.FlavorRAMOpts

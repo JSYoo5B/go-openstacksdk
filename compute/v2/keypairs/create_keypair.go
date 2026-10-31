@@ -13,6 +13,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -24,7 +25,24 @@ import (
 // attributes are ignored, while explicit JSON extensions use a separate option.
 type KeypairCreateOpts struct{ Attributes map[string]any }
 
-type KeypairCreateOption = request.Option[KeypairCreateOpts]
+// KeypairCreateOption is one option of CreateKeypair: WithKeypairCreateOptions,
+// WithKeypairCreateAttribute, WithKeypairCreateName,
+// WithKeypairCreatePublicKey, WithKeypairCreateType, WithKeypairCreateUserID,
+// request.Field (a vendor JSON field inside keypair; all declared attributes
+// and aliases require their semantic options, even when omitted),
+// request.Header or request.Custom over *request.Config[KeypairCreateOpts].
+// Other shared calls fail with resource.ErrInvalidOption before HTTP.
+type KeypairCreateOption = request.WriteCall
+
+var keypairCreateCalls = calls.Spec[request.Config[KeypairCreateOpts]]{
+	Header: calls.ConfigHeader[KeypairCreateOpts],
+	Field: func(config *request.Config[KeypairCreateOpts], entry request.CallEntry) error {
+		if keypairCreateFieldReserved(entry.Key) {
+			return fmt.Errorf("%w: creation extension conflicts with keypair attribute %q", resource.ErrInvalidOption, entry.Key)
+		}
+		return calls.ConfigField(config, entry)
+	},
+}
 
 // KeypairRecord separates the seeded source view from the actual response.
 // Resource uses source attribute names; Wire and Envelope contain only actual
@@ -41,7 +59,7 @@ type KeypairRecord struct {
 // id/is_deleted aliases within a bulk input, including present null values.
 func WithKeypairCreateOptions(value KeypairCreateOpts) KeypairCreateOption {
 	frozen, prior := snapshotKeypairCreateAttributes(value.Attributes)
-	return func(config *request.Config[KeypairCreateOpts]) error {
+	return request.Custom(func(config *request.Config[KeypairCreateOpts]) error {
 		if prior != nil {
 			return prior
 		}
@@ -51,7 +69,7 @@ func WithKeypairCreateOptions(value KeypairCreateOpts) KeypairCreateOption {
 		}
 		config.Options.Attributes = owned
 		return nil
-	}
+	})
 }
 
 // WithKeypairCreateAttribute owns one declared attribute. Individual options use
@@ -59,7 +77,7 @@ func WithKeypairCreateOptions(value KeypairCreateOpts) KeypairCreateOption {
 // deleted. Unknown semantic attributes are discarded before JSON encoding.
 func WithKeypairCreateAttribute(name string, value any) KeypairCreateOption {
 	frozen, prior := snapshotKeypairCreateAttributes(map[string]any{name: value})
-	return func(config *request.Config[KeypairCreateOpts]) error {
+	return request.Custom(func(config *request.Config[KeypairCreateOpts]) error {
 		if prior != nil {
 			return prior
 		}
@@ -72,7 +90,7 @@ func WithKeypairCreateAttribute(name string, value any) KeypairCreateOption {
 		}
 		maps.Copy(config.Options.Attributes, owned)
 		return nil
-	}
+	})
 }
 
 func WithKeypairCreateName(value string) KeypairCreateOption {
@@ -86,22 +104,6 @@ func WithKeypairCreateType(value string) KeypairCreateOption {
 }
 func WithKeypairCreateUserID(value string) KeypairCreateOption {
 	return WithKeypairCreateAttribute("user_id", value)
-}
-
-// WithKeypairCreateField adds a vendor JSON field inside keypair. All declared
-// attributes and aliases require their semantic options, even when omitted.
-func WithKeypairCreateField(name string, value any) KeypairCreateOption {
-	apply := request.WithField[KeypairCreateOpts](name, value)
-	return func(config *request.Config[KeypairCreateOpts]) error {
-		if keypairCreateFieldReserved(name) {
-			return fmt.Errorf("%w: creation extension conflicts with keypair attribute %q", resource.ErrInvalidOption, name)
-		}
-		return apply(config)
-	}
-}
-
-func WithKeypairCreateHeader(name, value string) KeypairCreateOption {
-	return request.WithHeader[KeypairCreateOpts](name, value)
 }
 
 // CreateKeypair performs one fixed collection POST with owned attributes and
@@ -130,8 +132,8 @@ func (a *API) CreateKeypair(ctx context.Context, options ...KeypairCreateOption)
 		}
 		return errors.Join(changed, source.Guard(ctx), rest.CheckOperationGuard(ctx))
 	}
-	owned := slices.Clone(options)
-	guarded := make([]KeypairCreateOption, len(owned))
+	owned := calls.Options(options, keypairCreateCalls)
+	guarded := make([]request.Option[KeypairCreateOpts], len(owned))
 	for index, option := range owned {
 		apply := option
 		guarded[index] = func(config *request.Config[KeypairCreateOpts]) error {

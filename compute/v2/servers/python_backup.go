@@ -24,16 +24,15 @@ type BackupActionRequest struct {
 	BackupType string `json:"backup_type"`
 	Rotation   int    `json:"rotation"`
 }
-type BackupActionOption = request.Option[BackupActionRequest]
+
+// BackupActionOption is one option of CreateBackupAction:
+// WithBackupActionOptions, request.Header, request.Field or request.Custom
+// over *request.Config[BackupActionRequest]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type BackupActionOption = request.WriteCall
 
 func WithBackupActionOptions(value BackupActionRequest) BackupActionOption {
-	return request.WithOptions(value)
-}
-func WithBackupActionField(key string, value any) BackupActionOption {
-	return request.WithField[BackupActionRequest](key, value)
-}
-func WithBackupActionHeader(key, value string) BackupActionOption {
-	return request.WithHeader[BackupActionRequest](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 // BackupActionResult retains the accepted action separately from discovery.

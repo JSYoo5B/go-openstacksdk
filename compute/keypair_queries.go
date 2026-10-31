@@ -11,6 +11,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
@@ -27,7 +28,23 @@ type KeypairQueryOpts struct {
 	MaxItems     int
 	Paginated    *bool
 }
-type KeypairQueryOption = request.Option[KeypairQueryOpts]
+
+// KeypairQueryOption is one option of ListKeypairs, SearchKeypairs and
+// GetKeypair: WithKeypairQueryOptions, WithKeypairQueryFilters,
+// WithKeypairQueryExpression, WithKeypairQueryUserID, request.Microversion,
+// request.MaxItems, request.Paginated, request.Header or request.Custom over
+// *request.Config[KeypairQueryOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type KeypairQueryOption = request.ListCall
+
+var keypairQueryCalls = calls.Spec[request.Config[KeypairQueryOpts]]{
+	Header:       calls.ConfigHeader[KeypairQueryOpts],
+	Microversion: calls.Pointer(func(c *request.Config[KeypairQueryOpts]) **string { return &c.Options.Microversion }),
+	Paging: calls.Paging[request.Config[KeypairQueryOpts]]{
+		MaxItems:  calls.Value(func(c *request.Config[KeypairQueryOpts]) *int { return &c.Options.MaxItems }),
+		Paginated: calls.Pointer(func(c *request.Config[KeypairQueryOpts]) **bool { return &c.Options.Paginated }),
+	},
+}
 
 func cloneKeypairQueryOptions(value KeypairQueryOpts) KeypairQueryOpts {
 	if value.Filters != nil {
@@ -46,48 +63,28 @@ func cloneKeypairQueryOptions(value KeypairQueryOpts) KeypairQueryOpts {
 }
 func WithKeypairQueryOptions(value KeypairQueryOpts) KeypairQueryOption {
 	owned := cloneKeypairQueryOptions(value)
-	return func(c *request.Config[KeypairQueryOpts]) error {
+	return request.Custom(func(c *request.Config[KeypairQueryOpts]) error {
 		c.Options = cloneKeypairQueryOptions(owned)
 		return nil
-	}
+	})
 }
 func WithKeypairQueryFilters(value json.RawMessage) KeypairQueryOption {
 	owned := bytes.Clone(value)
-	return func(c *request.Config[KeypairQueryOpts]) error {
+	return request.Custom(func(c *request.Config[KeypairQueryOpts]) error {
 		c.Options.Filters = nil
 		if owned != nil {
 			raw := json.RawMessage(bytes.Clone(owned))
 			c.Options.Filters = &raw
 		}
 		return nil
-	}
+	})
 }
 func WithKeypairQueryExpression(expression string) KeypairQueryOption {
 	raw, _ := json.Marshal(expression)
 	return WithKeypairQueryFilters(raw)
 }
 func WithKeypairQueryUserID(value string) KeypairQueryOption {
-	return func(c *request.Config[KeypairQueryOpts]) error { c.Options.UserID = value; return nil }
-}
-func WithKeypairQueryMicroversion(value string) KeypairQueryOption {
-	return func(c *request.Config[KeypairQueryOpts]) error {
-		owned := value
-		c.Options.Microversion = &owned
-		return nil
-	}
-}
-func WithKeypairQueryMaxItems(value int) KeypairQueryOption {
-	return func(c *request.Config[KeypairQueryOpts]) error { c.Options.MaxItems = value; return nil }
-}
-func WithKeypairQueryPaginated(value bool) KeypairQueryOption {
-	return func(c *request.Config[KeypairQueryOpts]) error {
-		owned := value
-		c.Options.Paginated = &owned
-		return nil
-	}
-}
-func WithKeypairQueryHeader(key, value string) KeypairQueryOption {
-	return request.WithHeader[KeypairQueryOpts](key, value)
+	return request.Custom(func(c *request.Config[KeypairQueryOpts]) error { c.Options.UserID = value; return nil })
 }
 
 // Inventory is the actual consumed inventory, including partial work on error.
@@ -194,8 +191,9 @@ func (p *keypairWorkflow) prepare(options []KeypairQueryOption) (request.Config[
 	if err := p.captureLocation(); err != nil {
 		return request.Config[KeypairQueryOpts]{}, err
 	}
-	guarded := make([]KeypairQueryOption, len(options))
-	for i, option := range append([]KeypairQueryOption(nil), options...) {
+	translated := calls.Options(options, keypairQueryCalls)
+	guarded := make([]request.Option[KeypairQueryOpts], len(translated))
+	for i, option := range translated {
 		apply := option
 		guarded[i] = func(c *request.Config[KeypairQueryOpts]) error {
 			if err := p.check(p.ctx); err != nil {
@@ -259,15 +257,15 @@ func keypairQueryValues(rows []*keypairs.KeypairRecord) ([]json.RawMessage, json
 // listOptions connects the existing semantic classifier and paging controls;
 // it does not introduce a second collection reader or matching engine.
 func keypairCloudListOptions(c request.Config[KeypairQueryOpts], dictionary json.RawMessage) ([]keypairs.KeypairListOption, error) {
-	options := []keypairs.KeypairListOption{keypairs.WithKeypairListMaxItems(c.Options.MaxItems)}
+	options := []keypairs.KeypairListOption{request.MaxItems(c.Options.MaxItems)}
 	if c.Options.Paginated != nil {
-		options = append(options, keypairs.WithKeypairListPaginated(*c.Options.Paginated))
+		options = append(options, request.Paginated(*c.Options.Paginated))
 	}
 	if c.Options.Microversion != nil {
-		options = append(options, keypairs.WithKeypairListMicroversion(*c.Options.Microversion))
+		options = append(options, request.Microversion(*c.Options.Microversion))
 	}
 	for key, value := range c.Headers {
-		options = append(options, keypairs.WithKeypairListHeader(key, value))
+		options = append(options, request.Header(key, value))
 	}
 	if dictionary == nil {
 		return options, nil
@@ -283,7 +281,7 @@ func keypairCloudListOptions(c request.Config[KeypairQueryOpts], dictionary json
 			if err != nil {
 				return nil, err
 			}
-			options = append(options, keypairs.WithKeypairListPaginated(truthy))
+			options = append(options, request.Paginated(truthy))
 		case "max_items":
 			truthy, err := cloudfilter.PythonTruthy(member.Value)
 			if err != nil {
@@ -300,14 +298,14 @@ func keypairCloudListOptions(c request.Config[KeypairQueryOpts], dictionary json
 					}
 				}
 			}
-			options = append(options, keypairs.WithKeypairListMaxItems(maximum))
+			options = append(options, request.MaxItems(maximum))
 		case "microversion":
 			if !bytes.Equal(member.Value, []byte("null")) {
 				var version string
 				if err := json.Unmarshal(member.Value, &version); err != nil {
 					return nil, invalid("keypair microversion must be a string or null")
 				}
-				options = append(options, keypairs.WithKeypairListMicroversion(version))
+				options = append(options, request.Microversion(version))
 			}
 		case "headers":
 			if !bytes.Equal(member.Value, []byte("null")) {
@@ -316,7 +314,7 @@ func keypairCloudListOptions(c request.Config[KeypairQueryOpts], dictionary json
 					return nil, invalid("keypair headers must be a string dictionary or null")
 				}
 				for key, value := range headers {
-					options = append(options, keypairs.WithKeypairListHeader(key, value))
+					options = append(options, request.Header(key, value))
 				}
 			}
 		default:
@@ -449,10 +447,10 @@ func (s *Service) GetKeypair(ctx context.Context, nameOrID string, options ...Ke
 	if !present {
 		options := []keypairs.KeypairFindOption{keypairs.WithKeypairFindUserID(c.Options.UserID)}
 		if c.Options.Microversion != nil {
-			options = append(options, keypairs.WithKeypairFindMicroversion(*c.Options.Microversion))
+			options = append(options, request.Microversion(*c.Options.Microversion))
 		}
 		for key, value := range c.Headers {
-			options = append(options, keypairs.WithKeypairFindHeader(key, value))
+			options = append(options, request.Header(key, value))
 		}
 		result.Keypair, err = p.api.FindKeypair(p.ctx, nameOrID, options...)
 		p.locate(result.Keypair)

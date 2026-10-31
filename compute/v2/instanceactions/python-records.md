@@ -86,7 +86,7 @@ func main() {
     if err != nil { log.Fatal(err) }
     var options []instanceactions.RecordListOption
     if *since != "" {
-        options = append(options, instanceactions.WithRecordListQuery("changes_since", *since))
+        options = append(options, request.Query("changes_since", *since))
     }
     for value, err := range compute.InstanceActions.ListRecords(ctx, *server, options...) {
         if err != nil { log.Fatal(err) }

@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/microversions"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
@@ -19,39 +20,42 @@ import (
 
 // UpdateRecordOpts carries the Python update_service attributes. An omitted
 // field is not sent, while Present keeps false and empty strings and Null
-// sends JSON null. Other declared Service attributes use WithUpdateRecordField
-// with their server keys; the server validates every value.
+// sends JSON null. Other declared Service attributes use request.Field with
+// their server keys; the server validates every value.
 type UpdateRecordOpts struct {
 	Status         request.Optional[string] `json:"status,omitzero"`
 	DisabledReason request.Optional[string] `json:"disabled_reason,omitzero"`
 	ForcedDown     request.Optional[bool]   `json:"forced_down,omitzero"`
 }
 
-type UpdateRecordOption = request.Option[UpdateRecordOpts]
+// UpdateRecordOption is one option of UpdateRecord: WithUpdateRecordOptions,
+// WithUpdateRecordStatus, WithUpdateRecordDisabledReason,
+// WithUpdateRecordForcedDown, request.Field (another attribute of the
+// unwrapped body; keys owned by UpdateRecordOpts and the URI identity id are
+// rejected), request.Header or request.Custom over
+// *request.Config[UpdateRecordOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type UpdateRecordOption = request.WriteCall
+
+var updateRecordCalls = calls.Spec[request.Config[UpdateRecordOpts]]{
+	Header: calls.ConfigHeader[UpdateRecordOpts],
+	Field:  calls.ConfigField[UpdateRecordOpts],
+}
 
 func WithUpdateRecordOptions(value UpdateRecordOpts) UpdateRecordOption {
-	return request.WithOptions(value)
+	return request.Custom(request.WithOptions(value))
 }
 func WithUpdateRecordStatus(value request.Optional[string]) UpdateRecordOption {
-	return func(config *request.Config[UpdateRecordOpts]) error { config.Options.Status = value; return nil }
+	return request.Custom(func(config *request.Config[UpdateRecordOpts]) error { config.Options.Status = value; return nil })
 }
 func WithUpdateRecordDisabledReason(value request.Optional[string]) UpdateRecordOption {
-	return func(config *request.Config[UpdateRecordOpts]) error {
+	return request.Custom(func(config *request.Config[UpdateRecordOpts]) error {
 		config.Options.DisabledReason = value
 		return nil
-	}
+	})
 }
 func WithUpdateRecordForcedDown(value request.Optional[bool]) UpdateRecordOption {
-	return func(config *request.Config[UpdateRecordOpts]) error { config.Options.ForcedDown = value; return nil }
-}
-
-// WithUpdateRecordField adds another attribute to the unwrapped body. Keys
-// owned by UpdateRecordOpts and the URI identity id are rejected.
-func WithUpdateRecordField(key string, value any) UpdateRecordOption {
-	return request.WithField[UpdateRecordOpts](key, value)
-}
-func WithUpdateRecordHeader(key, value string) UpdateRecordOption {
-	return request.WithHeader[UpdateRecordOpts](key, value)
+	return request.Custom(func(config *request.Config[UpdateRecordOpts]) error { config.Options.ForcedDown = value; return nil })
 }
 
 // ServiceRecord is the committed Python Service view. Service is the native
@@ -92,7 +96,7 @@ func (a *API) UpdateRecord(ctx context.Context, serviceID string, options ...Upd
 	if strings.TrimSpace(serviceID) == "" {
 		return fail(nil, fmt.Errorf("%w: service id is required", resource.ErrInvalidOption))
 	}
-	config, err := cloudread.ApplyReadOptions(ctx, UpdateRecordOpts{}, options, cloudread.OwnReadConfig[UpdateRecordOpts], source.Guard)
+	config, err := cloudread.ApplyReadOptions(ctx, UpdateRecordOpts{}, calls.Options(options, updateRecordCalls), cloudread.OwnReadConfig[UpdateRecordOpts], source.Guard)
 	if err == nil {
 		err = request.ValidateCapabilities(config, true, false, true)
 	}

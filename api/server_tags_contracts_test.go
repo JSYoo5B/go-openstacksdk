@@ -239,7 +239,7 @@ func TestServerTagsScopeMissingPoliciesPreserveHTTPFailures(t *testing.T) {
 	if err := scope.RemoveAll(ctx); err != nil {
 		t.Fatal(err)
 	}
-	strict := []tags.MissingOption{tags.WithIgnoreMissing(true), tags.WithIgnoreMissing(false)}
+	strict := []tags.MissingOption{request.IgnoreMissing(true), request.IgnoreMissing(false)}
 	operations := []struct {
 		name string
 		run  func() error
@@ -256,7 +256,7 @@ func TestServerTagsScopeMissingPoliciesPreserveHTTPFailures(t *testing.T) {
 			t.Errorf("%s must preserve not-found and original HTTP cause: %v", op.name, err)
 		}
 	}
-	if err := scope.Remove(ctx, "absent", tags.WithMissingError(), tags.WithIgnoreMissing(true)); err != nil {
+	if err := scope.Remove(ctx, "absent", tags.WithMissingError(), request.IgnoreMissing(true)); err != nil {
 		t.Fatal(err)
 	}
 	for _, status := range []int{403, 409, 500} {
@@ -266,13 +266,13 @@ func TestServerTagsScopeMissingPoliciesPreserveHTTPFailures(t *testing.T) {
 				t.Errorf("%s must preserve HTTP %d: %v", op.name, status, err)
 			}
 		}
-		if present, err := scope.Check(ctx, "absent", tags.WithIgnoreMissing(true)); present || !gophercloud.ResponseCodeIs(err, status) {
+		if present, err := scope.Check(ctx, "absent", request.IgnoreMissing(true)); present || !gophercloud.ResponseCodeIs(err, status) {
 			t.Fatalf("Check ignored HTTP %d: present=%v err=%v", status, present, err)
 		}
-		if err := scope.Remove(ctx, "absent", tags.WithIgnoreMissing(true)); !gophercloud.ResponseCodeIs(err, status) {
+		if err := scope.Remove(ctx, "absent", request.IgnoreMissing(true)); !gophercloud.ResponseCodeIs(err, status) {
 			t.Fatal(err)
 		}
-		if err := scope.RemoveAll(ctx, tags.WithIgnoreMissing(true)); !gophercloud.ResponseCodeIs(err, status) {
+		if err := scope.RemoveAll(ctx, request.IgnoreMissing(true)); !gophercloud.ResponseCodeIs(err, status) {
 			t.Fatal(err)
 		}
 	}

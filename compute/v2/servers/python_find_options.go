@@ -12,9 +12,11 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/jsonfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -32,7 +34,36 @@ type RecordFindOpts struct {
 	MaxItems                                       int
 	order                                          []string
 }
-type RecordFindOption func(*RecordFindOpts) error
+
+// RecordFindOption is one option of FindRecord and ListCloudRecords:
+// WithRecordFindOpts, WithRecordFindDetails, WithRecordFindAllProjects,
+// WithRecordFindPaginated, WithRecordFindLimit, WithRecordFindMarker,
+// WithRecordFindMaxItems, WithRecordFindLocation, request.Custom over
+// *RecordFindOpts, request.IgnoreMissing, request.Query (a JSON keyword
+// value), request.Microversion (an inherited Resource.find convenience: the
+// explicit value applies to member GET; fallback uses the captured default) or
+// request.Headers (replaces the headers). Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type RecordFindOption = request.FindCall
+
+var recordFindCalls = calls.Spec[RecordFindOpts]{
+	IgnoreMissing: calls.Pointer(func(c *RecordFindOpts) **bool { return &c.IgnoreMissing }),
+	Microversion:  calls.Pointer(func(c *RecordFindOpts) **string { return &c.Microversion }),
+	Headers:       calls.Value(func(c *RecordFindOpts) *map[string]string { return &c.Headers }),
+	Query: calls.JSONQuery(func(c *RecordFindOpts, key string, owned json.RawMessage, err error) error {
+		if err != nil {
+			return err
+		}
+		if c.Query == nil {
+			c.Query = make(map[string]json.RawMessage)
+		}
+		if _, ok := c.Query[key]; !ok {
+			c.order = append(c.order, key)
+		}
+		c.Query[key] = owned
+		return nil
+	}),
+}
 
 func serverFindCopy(v RecordFindOpts) RecordFindOpts {
 	v.Query = serverFindClone(v.Query)
@@ -60,59 +91,34 @@ func serverFindCopy(v RecordFindOpts) RecordFindOpts {
 }
 func WithRecordFindOpts(v RecordFindOpts) RecordFindOption {
 	owned := serverFindCopy(v)
-	return func(c *RecordFindOpts) error { *c = serverFindCopy(owned); return nil }
-}
-func WithRecordFindIgnoreMissing(v bool) RecordFindOption {
-	return func(c *RecordFindOpts) error { x := v; c.IgnoreMissing = &x; return nil }
+	return request.Custom(func(c *RecordFindOpts) error { *c = serverFindCopy(owned); return nil })
 }
 func WithRecordFindDetails(v bool) RecordFindOption {
-	return func(c *RecordFindOpts) error { x := v; c.Details = &x; return nil }
+	return request.Custom(func(c *RecordFindOpts) error { x := v; c.Details = &x; return nil })
 }
 func WithRecordFindAllProjects(v bool) RecordFindOption {
-	return func(c *RecordFindOpts) error { x := v; c.AllProjects = &x; return nil }
-}
-func WithRecordFindPaginated(v bool) RecordFindOption {
-	return func(c *RecordFindOpts) error { x := v; c.Paginated = &x; return nil }
-}
-func WithRecordFindLimit(v int) RecordFindOption {
-	return func(c *RecordFindOpts) error { x := v; c.Limit = &x; return nil }
-}
-func WithRecordFindMarker(v string) RecordFindOption {
-	return func(c *RecordFindOpts) error { c.Marker = v; return nil }
-}
-func WithRecordFindMaxItems(v int) RecordFindOption {
-	return func(c *RecordFindOpts) error { c.MaxItems = v; return nil }
+	return request.Custom(func(c *RecordFindOpts) error { x := v; c.AllProjects = &x; return nil })
 }
 
-// WithRecordFindMicroversion is an inherited Resource.find convenience: its
-// explicit value applies to member GET; fallback uses the captured default.
-func WithRecordFindMicroversion(v string) RecordFindOption {
-	return func(c *RecordFindOpts) error { x := v; c.Microversion = &x; return nil }
+// WithRecordFindPaginated, WithRecordFindLimit, WithRecordFindMarker and
+// WithRecordFindMaxItems control the list. They are operation-specific: find
+// operations do not accept the shared paging calls.
+func WithRecordFindPaginated(v bool) RecordFindOption {
+	return request.Custom(func(c *RecordFindOpts) error { x := v; c.Paginated = &x; return nil })
 }
-func WithRecordFindHeaders(v map[string]string) RecordFindOption {
-	owned := maps.Clone(v)
-	return func(c *RecordFindOpts) error { c.Headers = maps.Clone(owned); return nil }
+func WithRecordFindLimit(v int) RecordFindOption {
+	return request.Custom(func(c *RecordFindOpts) error { x := v; c.Limit = &x; return nil })
 }
+func WithRecordFindMarker(v string) RecordFindOption {
+	return request.Custom(func(c *RecordFindOpts) error { c.Marker = v; return nil })
+}
+func WithRecordFindMaxItems(v int) RecordFindOption {
+	return request.Custom(func(c *RecordFindOpts) error { c.MaxItems = v; return nil })
+}
+
 func WithRecordFindLocation(v resource.CloudLocation) RecordFindOption {
 	owned := v.Clone()
-	return func(c *RecordFindOpts) error { x := owned.Clone(); c.Location = &x; return nil }
-}
-func WithRecordFindQuery(key string, v any) RecordFindOption {
-	raw, err := json.Marshal(v)
-	owned := bytes.Clone(raw)
-	return func(c *RecordFindOpts) error {
-		if err != nil {
-			return err
-		}
-		if c.Query == nil {
-			c.Query = make(map[string]json.RawMessage)
-		}
-		if _, ok := c.Query[key]; !ok {
-			c.order = append(c.order, key)
-		}
-		c.Query[key] = bytes.Clone(owned)
-		return nil
-	}
+	return request.Custom(func(c *RecordFindOpts) error { x := owned.Clone(); c.Location = &x; return nil })
 }
 func serverFindKeys(v RecordFindOpts) []string {
 	keys := make([]string, 0, len(v.Query))

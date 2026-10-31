@@ -273,7 +273,7 @@ func Update(ctx context.Context, deps Dependencies, nameOrID string, update comp
 	if err != nil {
 		return nil, wrap(err)
 	}
-	found, err := service.Servers.FindRecord(ctx, nameOrID, servers.WithRecordFindIgnoreMissing(false), servers.WithRecordFindLocation(location))
+	found, err := service.Servers.FindRecord(ctx, nameOrID, request.IgnoreMissing(false), servers.WithRecordFindLocation(location))
 	if err != nil {
 		return nil, wrap(err)
 	}

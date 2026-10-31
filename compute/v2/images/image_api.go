@@ -14,6 +14,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/jsonfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/microversions"
@@ -143,7 +144,7 @@ func (a *API) GetRecord(ctx context.Context, id string, options ...ReadOption) (
 	if err != nil {
 		return nil, imageWrap(ctx, op, err)
 	}
-	opts, err := applyOptions(ctx, p.guard, ReadOpts{}, copyRead, slices.Clone(options))
+	opts, err := applyOptions(ctx, p.guard, ReadOpts{}, copyRead, calls.Translate(options, readCalls))
 	if err == nil {
 		err = p.headers(opts.Headers)
 	}
@@ -159,7 +160,7 @@ func (a *API) DeleteRecord(ctx context.Context, id string, options ...DeleteOpti
 	if err != nil {
 		return imageWrap(ctx, op, err)
 	}
-	opts, err := applyOptions(ctx, p.guard, DeleteOpts{}, copyDelete, slices.Clone(options))
+	opts, err := applyOptions(ctx, p.guard, DeleteOpts{}, copyDelete, calls.Translate(options, deleteCalls))
 	if err == nil {
 		err = imageID(id)
 	}
@@ -214,7 +215,7 @@ func (a *API) ListRecords(ctx context.Context, options ...ListOption) iter.Seq2[
 			yield(nil, imageWrap(ctx, op, err))
 			return
 		}
-		opts, err := applyOptions(ctx, p.guard, ListOpts{}, copyList, owned)
+		opts, err := applyOptions(ctx, p.guard, ListOpts{}, copyList, calls.Translate(owned, listCalls))
 		if err == nil {
 			err = p.headers(opts.Headers)
 		}
@@ -249,7 +250,7 @@ func (a *API) FindRecord(ctx context.Context, nameOrID string, options ...FindOp
 	if err != nil {
 		return nil, imageWrap(ctx, op, err)
 	}
-	opts, err := applyOptions(ctx, p.guard, FindOpts{}, copyFind, slices.Clone(options))
+	opts, err := applyOptions(ctx, p.guard, FindOpts{}, copyFind, calls.Translate(options, findCalls))
 	if err != nil {
 		return nil, imageWrap(ctx, op, err)
 	}

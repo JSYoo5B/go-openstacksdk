@@ -13,7 +13,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.ProjectQuotaScope.Reset`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithResetIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 
 - DELETE removes quota overrides for the fixed project; a successful bodyless response returns independent headers and no follow-up GET or fabricated quota object.
   Tests: `api/project_quotas_contracts_test.go:TestProjectQuotaLimitsDetailUpdateAndResetPreserveTargetAndResponse`.
@@ -25,7 +25,7 @@ Go API:
 Python/Go differences:
 
 - The quota singleton exposes Reset rather than generic resource Delete; success returns ResetResponse(ProjectID, Header) instead of requiring a quota extraction from an empty DELETE body.
-- 404 remains an error by default; optional WithResetIgnoreMissing changes only that status.
+- 404 remains an error by default; optional request.IgnoreMissing changes only that status.
 - UserQuotaScope is an additional high-level mapping for fixed user_id requests; the pinned native API and generated per-project method contract are unchanged.
 
 ### `gophercloud:compute/v2/quotasets.Get`
@@ -198,9 +198,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.UserQuotaScope.Detail`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.ProjectQuotaScope.GetRecord`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithQuotaReadOpts`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithQuotaReadQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithQuotaUsage`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithQuotaReadMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithQuotaReadLocation`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.UserQuotaScope.GetRecord`
 
@@ -236,7 +236,7 @@ Go API:
   Tests: `internal/quotafetch/read_test.go:TestQuotaOptionsObserveSourceAndCancellationBeforeRestoringCallback`, `internal/quotafetch/read_test.go:TestQuotaEachCallbackBoundaryOwnsOptionsBeforeLaterAliasedMutation`.
 - Library-owned descriptor profiles are detached before callbacks, and the final response projection rechecks captured source/context/operation guards. Accepted Close cancellation retains actual receipt and no success Resource.
   Tests: `internal/quotafetch/read_test.go:TestQuotaAcceptedCloseCancellationRetainsActualReceiptWithoutResource`, `internal/quotafetch/read_test.go:TestQuotaProfileDescriptorSliceIsOwnedBeforeCallerOptions`.
-- Nova base_path is a bound proxy argument collision by presence, so public WithQuotaReadQuery rejects it without invoking a caller marshaler or doing version discovery/HTTP.
+- Nova base_path is a bound proxy argument collision by presence, so public request.Query rejects it without invoking a caller marshaler or doing version discovery/HTTP.
   Tests: `compute/v2/quotasets/python_quota_query_test.go:TestNovaQuotaBasePathPresenceRejectsWithoutInvokingCallerMarshaler`.
 
 Python/Go differences:
@@ -287,9 +287,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.ProjectQuotaScope.InUser`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.UserQuotaScope.Reset`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithResetQuery`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithResetIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 
-- WithResetQuery adds revert_quota_set(**query) parameters as literal values to the project DELETE os-quota-sets/{project} and next to the fixed user_id on the user scope, a later value for a key wins, a 404 stays an error that is also resource.ErrNotFound unless WithResetIgnoreMissing(true) is given, and a 500 stays a Gophercloud status error inside resource.OperationError.
+- WithResetQuery adds revert_quota_set(**query) parameters as literal values to the project DELETE os-quota-sets/{project} and next to the fixed user_id on the user scope, a later value for a key wins, a 404 stays an error that is also resource.ErrNotFound unless request.IgnoreMissing(true) is given, and a 500 stays a Gophercloud status error inside resource.OperationError.
   Tests: `compute/v2/quotasets/python_reset_query_test.go:TestPythonQuotaResetForwardsQueryAndMissingPolicy`.
 - WithResetQuery rejects user_id, a blank or control-character key, an invalid UTF-8 value and a nil option on both scopes before HTTP.
   Tests: `compute/v2/quotasets/python_reset_query_test.go:TestPythonQuotaResetQueryRejectsScopeOwnedAndInvalidKeys`.

@@ -14,6 +14,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/microversions"
 	"github.com/JSYoo5B/go-openstacksdk/internal/neutronfind"
@@ -62,7 +63,17 @@ type QuotaClassGetOpts struct {
 	Headers      map[string]string
 	Microversion *string
 }
-type QuotaClassGetOption func(*QuotaClassGetOpts) error
+
+// QuotaClassGetOption is one option of GetQuotaClassRecord:
+// WithQuotaClassGetOpts, WithQuotaClassName, request.Headers (replaces the
+// headers), request.Microversion or request.Custom over *QuotaClassGetOpts.
+// Other shared calls fail with resource.ErrInvalidOption before HTTP.
+type QuotaClassGetOption = request.GetCall
+
+var quotaClassGetCalls = calls.Spec[QuotaClassGetOpts]{
+	Headers:      calls.Value(func(c *QuotaClassGetOpts) *map[string]string { return &c.Headers }),
+	Microversion: calls.Pointer(func(c *QuotaClassGetOpts) **string { return &c.Microversion }),
+}
 
 func copyQuotaClassGetOpts(v QuotaClassGetOpts) QuotaClassGetOpts {
 	v.Headers = maps.Clone(v.Headers)
@@ -78,17 +89,10 @@ func copyQuotaClassGetOpts(v QuotaClassGetOpts) QuotaClassGetOpts {
 }
 func WithQuotaClassGetOpts(v QuotaClassGetOpts) QuotaClassGetOption {
 	owned := copyQuotaClassGetOpts(v)
-	return func(c *QuotaClassGetOpts) error { *c = copyQuotaClassGetOpts(owned); return nil }
+	return request.Custom(func(c *QuotaClassGetOpts) error { *c = copyQuotaClassGetOpts(owned); return nil })
 }
 func WithQuotaClassName(v string) QuotaClassGetOption {
-	return func(c *QuotaClassGetOpts) error { x := v; c.Name = &x; return nil }
-}
-func WithQuotaClassGetHeaders(v map[string]string) QuotaClassGetOption {
-	owned := maps.Clone(v)
-	return func(c *QuotaClassGetOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
-func WithQuotaClassGetMicroversion(v string) QuotaClassGetOption {
-	return func(c *QuotaClassGetOpts) error { x := v; c.Microversion = &x; return nil }
+	return request.Custom(func(c *QuotaClassGetOpts) error { x := v; c.Name = &x; return nil })
 }
 
 // QuotaClassUpdateOpts describes a newly seeded string-ID commit. Attributes
@@ -100,7 +104,18 @@ type QuotaClassUpdateOpts struct {
 	Microversion *string
 	order        []string
 }
-type QuotaClassUpdateOption func(*QuotaClassUpdateOpts) error
+
+// QuotaClassUpdateOption is one option of UpdateQuotaClassRecord:
+// WithQuotaClassUpdateOpts, WithQuotaClassUpdateAttribute, request.Headers
+// (replaces the headers), request.Microversion or request.Custom over
+// *QuotaClassUpdateOpts. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type QuotaClassUpdateOption = request.WriteCall
+
+var quotaClassUpdateCalls = calls.Spec[QuotaClassUpdateOpts]{
+	Headers:      calls.Value(func(c *QuotaClassUpdateOpts) *map[string]string { return &c.Headers }),
+	Microversion: calls.Pointer(func(c *QuotaClassUpdateOpts) **string { return &c.Microversion }),
+}
 
 func copyQuotaClassUpdateOpts(v QuotaClassUpdateOpts) QuotaClassUpdateOpts {
 	v.Attributes = maps.Clone(v.Attributes)
@@ -117,12 +132,12 @@ func copyQuotaClassUpdateOpts(v QuotaClassUpdateOpts) QuotaClassUpdateOpts {
 }
 func WithQuotaClassUpdateOpts(v QuotaClassUpdateOpts) QuotaClassUpdateOption {
 	owned := copyQuotaClassUpdateOpts(v)
-	return func(c *QuotaClassUpdateOpts) error { *c = copyQuotaClassUpdateOpts(owned); return nil }
+	return request.Custom(func(c *QuotaClassUpdateOpts) error { *c = copyQuotaClassUpdateOpts(owned); return nil })
 }
 func WithQuotaClassUpdateAttribute(key string, value any) QuotaClassUpdateOption {
 	raw, err := json.Marshal(value)
 	owned := bytes.Clone(raw)
-	return func(c *QuotaClassUpdateOpts) error {
+	return request.Custom(func(c *QuotaClassUpdateOpts) error {
 		if err != nil {
 			return err
 		}
@@ -134,14 +149,7 @@ func WithQuotaClassUpdateAttribute(key string, value any) QuotaClassUpdateOption
 		}
 		c.Attributes[key] = bytes.Clone(owned)
 		return nil
-	}
-}
-func WithQuotaClassUpdateHeaders(v map[string]string) QuotaClassUpdateOption {
-	owned := maps.Clone(v)
-	return func(c *QuotaClassUpdateOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
-func WithQuotaClassUpdateMicroversion(v string) QuotaClassUpdateOption {
-	return func(c *QuotaClassUpdateOpts) error { x := v; c.Microversion = &x; return nil }
+	})
 }
 
 var quotaClassProfile = func() neutronfind.Profile {
@@ -283,7 +291,7 @@ func (a *API) GetQuotaClassRecord(ctx context.Context, options ...QuotaClassGetO
 	if err != nil {
 		return nil, quotaClassWrap(ctx, op, err)
 	}
-	policy, err := applyQuotaClassOptions(ctx, p, QuotaClassGetOpts{}, copyQuotaClassGetOpts, options)
+	policy, err := applyQuotaClassOptions(ctx, p, QuotaClassGetOpts{}, copyQuotaClassGetOpts, calls.Translate(options, quotaClassGetCalls))
 	if err != nil {
 		return nil, quotaClassWrap(ctx, op, err)
 	}
@@ -361,7 +369,7 @@ func (a *API) UpdateQuotaClassRecord(ctx context.Context, className string, opti
 	if err != nil {
 		return nil, quotaClassWrap(ctx, op, err)
 	}
-	policy, err := applyQuotaClassOptions(ctx, p, QuotaClassUpdateOpts{}, copyQuotaClassUpdateOpts, options)
+	policy, err := applyQuotaClassOptions(ctx, p, QuotaClassUpdateOpts{}, copyQuotaClassUpdateOpts, calls.Translate(options, quotaClassUpdateCalls))
 	if err == nil {
 		err = quotaClassID(className)
 	}

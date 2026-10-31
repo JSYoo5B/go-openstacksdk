@@ -10,6 +10,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/availabilityzones"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -44,12 +45,12 @@ func TestPythonZoneDetailRecordsUseDetailRouteAndKeepHosts(t *testing.T) {
 	}{
 		{"availability_zones(details=True) with the client default", "2.55", "2.55", "compute 2.55", nil},
 		{"availability_zones(details=True) with no default is versionless", "", "", "", nil},
-		{"explicit empty microversion stays versionless", "2.55", "", "", []availabilityzones.AvailabilityZoneListOption{availabilityzones.WithAvailabilityZoneMicroversion("")}},
+		{"explicit empty microversion stays versionless", "2.55", "", "", []availabilityzones.AvailabilityZoneListOption{request.Microversion("")}},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			page := `{"availabilityZoneInfo":[` + pythonZoneDetailRow + `,{"zoneName":"nova","zoneState":{"available":false},"hosts":null}]}`
 			api, calls, _ := pythonZoneDetailAPI(t, tc.client, func(*http.Request) (int, string) { return http.StatusOK, page })
-			options := append(tc.options, availabilityzones.WithAvailabilityZoneHeader("X-Zone-Probe", "detail"))
+			options := append(tc.options, request.Header("X-Zone-Probe", "detail"))
 			var rows []*availabilityzones.AvailabilityZoneRecord
 			for record, err := range api.ListDetailRecords(ctx, options...) {
 				if err != nil {

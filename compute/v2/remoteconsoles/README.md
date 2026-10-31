@@ -20,8 +20,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/remoteconsoles.WithConsoleCreateTypeValue`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/remoteconsoles.WithConsoleCreateURL`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/remoteconsoles.WithConsoleCreateURLValue`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/remoteconsoles.WithConsoleCreateField`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/remoteconsoles.WithConsoleCreateHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 
 - CreateConsole posts directly to the selected ResourceBase servers/{serverID}/remote-consoles route without GET, LIST, query, discovery or a legacy action request. Omitted attributes produce an empty remote_console object. Omitted/null/empty protocol with a truthy type derives all seven pinned protocol mappings, unknown type derives null, and an explicit nonempty protocol is retained even when inconsistent. Nullable Type/URL, URL values and explicit empty values remain concrete inputs; an unset Optional clears an earlier choice.
   Tests: `api/compute_remote_console_test.go:TestComputeRemoteConsoleRequestDefaultsDerivationAndSeedOwnership`.

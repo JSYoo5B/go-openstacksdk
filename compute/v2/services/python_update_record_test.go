@@ -30,7 +30,7 @@ func TestPythonComputeServiceUpdateRecordSendsFalseAndEmptyValues(t *testing.T) 
 	status, reply = http.StatusAccepted, `{"id":"svc-uuid","binary":"nova-compute","host":"cmp1","zone":"az2","status":"disabled","state":"up","disabled_reason":null,"forced_down":false}`
 	got, err = api.UpdateRecord(ctx, "svc-uuid",
 		services.WithUpdateRecordOptions(services.UpdateRecordOpts{Status: request.Present("disabled"), DisabledReason: request.Null[string]()}),
-		services.WithUpdateRecordField("zone", "az2"), services.WithUpdateRecordHeader("X-Trace", "t"))
+		request.Field("zone", "az2"), request.Header("X-Trace", "t"))
 	if err != nil || got.StatusCode != 202 || got.Service.Zone != "az2" || got.Service.ForcedDown || got.Service.DisabledReason != "" || len(got.Fields) != 8 {
 		t.Fatal(got, err)
 	}
@@ -54,8 +54,8 @@ func TestPythonComputeServiceUpdateRecordRejectsInputsVersionsAndErrorStatuses(t
 	}
 	api, calls := pythonComputeServiceAPI(t, "2.53", reply)
 	for _, option := range []services.UpdateRecordOption{
-		services.WithUpdateRecordField("forced_down", false),
-		services.WithUpdateRecordField("id", "other"),
+		request.Field("forced_down", false),
+		request.Field("id", "other"),
 		nil,
 	} {
 		var operation *resource.OperationError

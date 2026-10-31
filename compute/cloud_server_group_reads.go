@@ -7,10 +7,10 @@ import (
 	"errors"
 	"fmt"
 	"maps"
-	"slices"
 	"unicode/utf8"
 
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/jsonfilter"
@@ -27,7 +27,16 @@ type ServerGroupCloudReadOpts struct {
 	Headers         map[string]string
 	CurrentLocation *resource.CloudLocation
 }
-type ServerGroupCloudReadOption func(*ServerGroupCloudReadOpts) error
+
+// ServerGroupCloudReadOption is one option of SearchServerGroups and
+// GetServerGroup: WithServerGroupCloudReadOpts, WithServerGroupCloudFilters,
+// WithServerGroupCloudExpression, WithServerGroupCloudCurrentLocation,
+// request.Headers (replaces the headers) or request.Custom over
+// *ServerGroupCloudReadOpts. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type ServerGroupCloudReadOption = request.GetCall
+
+var serverGroupCloudReadCalls = calls.Spec[ServerGroupCloudReadOpts]{Headers: calls.Value(func(c *ServerGroupCloudReadOpts) *map[string]string { return &c.Headers })}
 
 func cloneServerGroupCloudOptions(v ServerGroupCloudReadOpts) ServerGroupCloudReadOpts {
 	if v.Filters != nil {
@@ -43,30 +52,26 @@ func cloneServerGroupCloudOptions(v ServerGroupCloudReadOpts) ServerGroupCloudRe
 }
 func WithServerGroupCloudReadOpts(v ServerGroupCloudReadOpts) ServerGroupCloudReadOption {
 	owned := cloneServerGroupCloudOptions(v)
-	return func(c *ServerGroupCloudReadOpts) error { *c = cloneServerGroupCloudOptions(owned); return nil }
+	return request.Custom(func(c *ServerGroupCloudReadOpts) error { *c = cloneServerGroupCloudOptions(owned); return nil })
 }
 func WithServerGroupCloudFilters(v json.RawMessage) ServerGroupCloudReadOption {
 	owned := bytes.Clone(v)
-	return func(c *ServerGroupCloudReadOpts) error {
+	return request.Custom(func(c *ServerGroupCloudReadOpts) error {
 		c.Filters = nil
 		if owned != nil {
 			raw := json.RawMessage(bytes.Clone(owned))
 			c.Filters = &raw
 		}
 		return nil
-	}
+	})
 }
 func WithServerGroupCloudExpression(v string) ServerGroupCloudReadOption {
 	raw, _ := json.Marshal(v)
 	return WithServerGroupCloudFilters(raw)
 }
-func WithServerGroupCloudHeaders(v map[string]string) ServerGroupCloudReadOption {
-	owned := maps.Clone(v)
-	return func(c *ServerGroupCloudReadOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
 func WithServerGroupCloudCurrentLocation(v resource.CloudLocation) ServerGroupCloudReadOption {
 	owned := v.Clone()
-	return func(c *ServerGroupCloudReadOpts) error { loc := owned.Clone(); c.CurrentLocation = &loc; return nil }
+	return request.Custom(func(c *ServerGroupCloudReadOpts) error { loc := owned.Clone(); c.CurrentLocation = &loc; return nil })
 }
 
 // Value is arbitrary Source JSON. Groups associate ordinary local matches with
@@ -113,7 +118,7 @@ func (s *Service) serverGroupCloudStart(ctx context.Context, options []ServerGro
 	}
 	ctx = rest.WithOperationGuard(ctx, guard)
 	cfg := cloneServerGroupCloudOptions(ServerGroupCloudReadOpts{})
-	for _, apply := range slices.Clone(options) {
+	for _, apply := range calls.Translate(options, serverGroupCloudReadCalls) {
 		if err := guard(ctx); err != nil {
 			return nil, err
 		}

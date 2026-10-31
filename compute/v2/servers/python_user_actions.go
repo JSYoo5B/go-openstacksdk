@@ -14,6 +14,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/microversions"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
@@ -82,8 +83,15 @@ func ownUserActionConfig[T any](c *request.Config[T], clone func(T) T) {
 		c.Arguments = make(map[string]any)
 	}
 }
-func applyUserActionOptions[T any](p *pythonUserAction, initial T, clone func(T) T, body bool, options []request.Option[T]) (request.Config[T], error) {
-	owned := slices.Clone(options)
+
+// userActionCalls interprets the shared calls of the server actions: one
+// header and one JSON extension field inside the action object.
+func userActionCalls[T any]() calls.Spec[request.Config[T]] {
+	return calls.Spec[request.Config[T]]{Header: calls.ConfigHeader[T], Field: calls.ConfigField[T]}
+}
+
+func applyUserActionOptions[T any, C request.Call](p *pythonUserAction, initial T, clone func(T) T, body bool, options []C) (request.Config[T], error) {
+	owned := calls.Options(options, userActionCalls[T]())
 	guarded := make([]request.Option[T], len(owned))
 	for i, option := range owned {
 		apply := option

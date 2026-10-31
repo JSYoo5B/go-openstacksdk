@@ -27,7 +27,7 @@ func TestComputeConsoleOutputLiteralLengthOwnedOptionsAndNativeCompatibility(t *
 	frozen := servers.WithConsoleOutputOptions(servers.ConsoleOutputOpts{Length: &length})
 	length = 91
 	vendor := map[string]any{"values": []string{"original"}}
-	extension := servers.WithConsoleOutputField("vendor", vendor)
+	extension := request.Field("vendor", vendor)
 	vendor["values"].([]string)[0] = "changed"
 	for _, tc := range []struct {
 		name    string
@@ -75,7 +75,7 @@ func TestComputeConsoleOutputLiteralLengthOwnedOptionsAndNativeCompatibility(t *
 				testcloud.JSON(w, 200, `{"output":"콘솔\n\u0000text","vendor":17}`)
 			})
 			options := append([]servers.ConsoleOutputOption(nil), tc.options...)
-			options = append(options, func(_ *request.Config[servers.ConsoleOutputOpts]) error { callbacks.Add(1); return nil })
+			options = append(options, request.Custom(func(_ *request.Config[servers.ConsoleOutputOpts]) error { callbacks.Add(1); return nil }))
 			// Reuse the helper: its pointed value and raw extension remain owned.
 			for repeat := 0; repeat < 2; repeat++ {
 				value, err := api.ConsoleOutput(context.Background(), "server-id", options...)
@@ -101,16 +101,16 @@ func TestComputeConsoleOutputLiteralLengthOwnedOptionsAndNativeCompatibility(t *
 			}
 			testcloud.JSON(w, 200, `{"output":"owned"}`)
 		})
-		value, err := servers.New(flavorIdentityClient(cloud)).ConsoleOutput(context.Background(), "server-id", func(config *request.Config[servers.ConsoleOutputOpts]) error {
+		value, err := servers.New(flavorIdentityClient(cloud)).ConsoleOutput(context.Background(), "server-id", request.Custom(func(config *request.Config[servers.ConsoleOutputOpts]) error {
 			callbacks.Add(1)
 			config.Options.Length = &length
 			config.Fields["vendor"] = raw
 			return nil
-		}, func(_ *request.Config[servers.ConsoleOutputOpts]) error {
+		}), request.Custom(func(_ *request.Config[servers.ConsoleOutputOpts]) error {
 			callbacks.Add(1)
 			length, raw[0] = 9, 'x'
 			return nil
-		})
+		}))
 		if err != nil || value != "owned" || calls.Load() != 1 || callbacks.Load() != 2 {
 			t.Fatal(value, err, calls.Load(), callbacks.Load())
 		}
@@ -145,16 +145,16 @@ func TestComputeConsoleOutputLiteralLengthOwnedOptionsAndNativeCompatibility(t *
 		api := servers.New(flavorIdentityClient(cloud))
 		for _, option := range []servers.ConsoleOutputOption{
 			nil,
-			servers.WithConsoleOutputField("length", 0),
-			servers.WithConsoleOutputField("", true),
-			servers.WithConsoleOutputField("vendor", func() {}),
-			request.WithQuery[servers.ConsoleOutputOpts]("limit", "1"),
-			request.WithHeader[servers.ConsoleOutputOpts]("X-Call", "unsupported"),
-			request.WithArgument[servers.ConsoleOutputOpts]("vendor", true),
-			func(config *request.Config[servers.ConsoleOutputOpts]) error {
+			request.Field("length", 0),
+			request.Field("", true),
+			request.Field("vendor", func() {}),
+			request.Custom(request.WithQuery[servers.ConsoleOutputOpts]("limit", "1")),
+			request.Custom(request.WithHeader[servers.ConsoleOutputOpts]("X-Call", "unsupported")),
+			request.Custom(request.WithArgument[servers.ConsoleOutputOpts]("vendor", true)),
+			request.Custom(func(config *request.Config[servers.ConsoleOutputOpts]) error {
 				config.Fields["vendor"] = json.RawMessage(`{`)
 				return nil
-			},
+			}),
 		} {
 			value, err := api.ConsoleOutput(context.Background(), "server-id", option)
 			if value != "" || !errors.Is(err, resource.ErrInvalidOption) || calls.Load() != 0 {
@@ -273,19 +273,19 @@ func TestComputeConsoleOutputSourceContextAndAcceptedBodyBoundaries(t *testing.T
 				case "pre-canceled":
 					cancel(cause)
 				case "option cancellation":
-					options = append(options, func(_ *request.Config[servers.ConsoleOutputOpts]) error { cancel(cause); return original })
+					options = append(options, request.Custom(func(_ *request.Config[servers.ConsoleOutputOpts]) error { cancel(cause); return original }))
 				case "option source":
-					options = append(options, func(_ *request.Config[servers.ConsoleOutputOpts]) error {
+					options = append(options, request.Custom(func(_ *request.Config[servers.ConsoleOutputOpts]) error {
 						client.ResourceBase = cloud.Server.URL + "/changed/"
 						return nil
-					})
+					}))
 				case "reassigned API":
-					options = append(options, func(_ *request.Config[servers.ConsoleOutputOpts]) error {
+					options = append(options, request.Custom(func(_ *request.Config[servers.ConsoleOutputOpts]) error {
 						*api = *servers.New(flavorIdentityClient(cloud))
 						return nil
-					})
+					}))
 				}
-				options = append(options, func(_ *request.Config[servers.ConsoleOutputOpts]) error { later.Add(1); return nil })
+				options = append(options, request.Custom(func(_ *request.Config[servers.ConsoleOutputOpts]) error { later.Add(1); return nil }))
 				value, err := api.ConsoleOutput(ctx, id, options...)
 				if value != "" || err == nil || calls.Load() != 0 || later.Load() != 0 {
 					t.Fatal("invalid preflight reached callback/HTTP", value, err, calls.Load(), later.Load())
@@ -414,7 +414,7 @@ func TestComputeConsoleOutputSourceContextAndAcceptedBodyBoundaries(t *testing.T
 			return nil
 		}
 		api := servers.New(client)
-		value, err := api.ConsoleOutput(context.Background(), "server-id", servers.WithConsoleOutputLength(0), func(_ *request.Config[servers.ConsoleOutputOpts]) error { callbacks.Add(1); return nil })
+		value, err := api.ConsoleOutput(context.Background(), "server-id", servers.WithConsoleOutputLength(0), request.Custom(func(_ *request.Config[servers.ConsoleOutputOpts]) error { callbacks.Add(1); return nil }))
 		if err != nil || value != "retry accepted" || calls.Load() != 2 || callbacks.Load() != 1 || reauth.Load() != 1 || api.RawClient() != client || client.ProviderClient != cloud.Provider || client.Microversion != "2.87" {
 			t.Fatal("native auth/body/options/source changed", value, err, calls.Load(), callbacks.Load(), reauth.Load())
 		}

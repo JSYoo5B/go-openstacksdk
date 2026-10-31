@@ -8,6 +8,7 @@ import (
 	"net/url"
 
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
@@ -15,13 +16,17 @@ import (
 // The cloud convenience creates a name and only a truthy public key. The
 // versioned CreateKeypair remains available for nullable full-body attributes.
 type CloudKeypairCreateOpts struct{ PublicKey string }
-type CloudKeypairCreateOption = request.Option[CloudKeypairCreateOpts]
+
+// CloudKeypairCreateOption is one option of CreateKeypair:
+// WithCloudKeypairPublicKey, request.Header or request.Custom over
+// *request.Config[CloudKeypairCreateOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type CloudKeypairCreateOption = request.WriteCall
+
+var cloudKeypairCreateCalls = calls.Spec[request.Config[CloudKeypairCreateOpts]]{Header: calls.ConfigHeader[CloudKeypairCreateOpts]}
 
 func WithCloudKeypairPublicKey(value string) CloudKeypairCreateOption {
-	return func(c *request.Config[CloudKeypairCreateOpts]) error { c.Options.PublicKey = value; return nil }
-}
-func WithCloudKeypairCreateHeader(key, value string) CloudKeypairCreateOption {
-	return request.WithHeader[CloudKeypairCreateOpts](key, value)
+	return request.Custom(func(c *request.Config[CloudKeypairCreateOpts]) error { c.Options.PublicKey = value; return nil })
 }
 func (s *Service) CreateKeypair(ctx context.Context, name string, options ...CloudKeypairCreateOption) (*keypairs.KeypairRecord, error) {
 	p, err := s.captureKeypairs(ctx)
@@ -31,8 +36,9 @@ func (s *Service) CreateKeypair(ctx context.Context, name string, options ...Clo
 	if err := p.captureLocation(); err != nil {
 		return nil, keypairCloudFailure("CreateKeypair", err)
 	}
-	guarded := make([]CloudKeypairCreateOption, len(options))
-	for i, option := range append([]CloudKeypairCreateOption(nil), options...) {
+	translated := calls.Options(options, cloudKeypairCreateCalls)
+	guarded := make([]request.Option[CloudKeypairCreateOpts], len(translated))
+	for i, option := range translated {
 		apply := option
 		guarded[i] = func(c *request.Config[CloudKeypairCreateOpts]) error {
 			if err := p.check(p.ctx); err != nil {
@@ -62,7 +68,7 @@ func (s *Service) CreateKeypair(ctx context.Context, name string, options ...Clo
 		leaf = append(leaf, keypairs.WithKeypairCreatePublicKey(c.Options.PublicKey))
 	}
 	for key, value := range c.Headers {
-		leaf = append(leaf, keypairs.WithKeypairCreateHeader(key, value))
+		leaf = append(leaf, request.Header(key, value))
 	}
 	result, err := p.api.CreateKeypair(p.ctx, leaf...)
 	p.locate(result)
@@ -76,7 +82,7 @@ func (s *Service) DeleteKeypair(ctx context.Context, name string) (bool, error) 
 	if err != nil {
 		return false, keypairCloudFailure("DeleteKeypair", err)
 	}
-	err = p.api.DeleteKeypair(p.ctx, name, keypairs.WithKeypairDeleteIgnoreMissing(false))
+	err = p.api.DeleteKeypair(p.ctx, name, request.IgnoreMissing(false))
 	err = errors.Join(err, p.check(p.ctx))
 	if err == nil {
 		return true, nil

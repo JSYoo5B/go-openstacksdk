@@ -317,7 +317,7 @@ func TestBackupServerSourceAndOptionsFailBeforeWork(t *testing.T) {
 	}
 	// Build a fresh facade; nested leaf callbacks must obey the same outer guard.
 	f.service = compute.New(f.nova, compute.Dependencies{BackupImages: func(context.Context) (*image.Service, error) { f.imageLoads++; return f.image, nil }})
-	_, err = f.service.BackupServer(context.Background(), "s1", backupServerInput, compute.WithBackupServerActionOptions(func(*request.Config[servers.BackupActionRequest]) error { f.service.API.Servers = nil; return nil }))
+	_, err = f.service.BackupServer(context.Background(), "s1", backupServerInput, compute.WithBackupServerActionOptions(request.Custom(func(*request.Config[servers.BackupActionRequest]) error { f.service.API.Servers = nil; return nil })))
 	if !errors.Is(err, resource.ErrInvalidOption) || len(f.calls) != 0 || f.imageLoads != 0 {
 		t.Fatal(err, f.calls, f.imageLoads)
 	}

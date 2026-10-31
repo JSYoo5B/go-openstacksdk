@@ -9,6 +9,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -17,9 +18,10 @@ import (
 // DELETE. Python's Resource.delete encodes params with urlencode, which sends
 // str(value), so the value is the literal text the server receives. A later
 // call for the same key wins. user_id belongs to UserQuotaScope and is
-// rejected on both scopes.
+// rejected on both scopes. It is operation-specific: deletes do not accept the
+// shared Query call.
 func WithResetQuery(key, value string) ResetOption {
-	return func(options *resetOptions) error {
+	return request.Custom(func(options *resetOptions) error {
 		if strings.TrimSpace(key) == "" || !utf8.ValidString(key) || strings.IndexFunc(key, unicode.IsControl) >= 0 || !utf8.ValidString(value) {
 			return fmt.Errorf("%w: reset query needs a nonblank text key and valid UTF-8 value", resource.ErrInvalidOption)
 		}
@@ -31,7 +33,7 @@ func WithResetQuery(key, value string) ResetOption {
 		}
 		options.query.Set(key, value)
 		return nil
-	}
+	})
 }
 
 // resetQueryURL adds the reset parameters next to an existing user_id.

@@ -191,6 +191,22 @@ func ApplyConfig[T any, C request.Call](base T, spec Spec[request.Config[T]], ca
 	return c, nil
 }
 
+// Options translates calls into request.Option values over T, one per call
+// and in caller order, for operations whose apply loop takes request.Option
+// values, such as cloudread.ApplyReadOptions. A nil call, or request.Custom
+// with a nil function, stays a nil option so that loop reports it with its
+// own error at that position.
+func Options[T any, C request.Call](calls []C, spec Spec[request.Config[T]]) []request.Option[T] {
+	translated := Translate(calls, spec)
+	out := make([]request.Option[T], len(translated))
+	for i, apply := range translated {
+		if apply != nil {
+			out[i] = apply
+		}
+	}
+	return out
+}
+
 // ConfigHeader handles request.Header like request.WithHeader.
 func ConfigHeader[T any](c *request.Config[T], key, value string) error {
 	return request.WithHeader[T](key, value)(c)

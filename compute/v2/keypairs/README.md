@@ -37,9 +37,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.API.DeleteKeypair`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithKeypairDeleteOptions`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithKeypairDeleteUserID`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithKeypairDeleteIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithKeypairDeleteQuery`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithKeypairDeleteHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 
 - DeleteKeypair treats the supplied name as the logical keypair ID and makes one bodyless DELETE at the selected prefixed member route without GET, LIST or wait. Empty/default owner is omitted, an explicit Unicode/special-character owner and vendor query are URL-escaped, and selected live token/configured headers/both Compute2.1 version headers are retained without adding an owner-version gate or changing the client.
   Tests: `api/compute_keypair_delete_test.go:TestComputeKeypairDeleteOwnedDefaultsOwnerAndNativeCompatibility`.
@@ -108,8 +108,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithKeypairCreatePublicKey`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithKeypairCreateType`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithKeypairCreateUserID`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithKeypairCreateField`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithKeypairCreateHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 
 - CreateKeypair performs one fixed selected-ResourceBase collection POST at os-keypairs with keypair envelope and no query, preliminary GET/LIST, completion wait or cleanup. No attributes produce an empty keypair object. All eight declared body fields plus id/is_deleted aliases accept explicit null, empty, scalar, array or object JSON values; name is body data without member-path ID validation. Unknown semantic attributes are discarded before serialization. Selected live token, source headers and both Compute2.1 version headers are retained without a new local type or owner gate.
   Tests: `api/compute_keypair_create_test.go:TestComputeKeypairCreateDirtyBodyAliasesAndNativeCompatibility`, `api/compute_keypair_create_test.go:TestComputeKeypairCreateOwnedOptionsSourceAndAcceptedFailures`.
@@ -190,7 +190,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.API.FindKeypair`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithKeypairFindOptions`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithKeypairFindUserID`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithKeypairFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 
 - Find always attempts the escaped fixed member GET for accepted literal UTF-8 input and optional truthy owner. A successful member response returns its input-name/owner-seeded Resource with response fields overriding seed including null, while Wire and Envelope contain only actual response data. Opaque/malformed/empty accepted bodies retain the seed with nil Wire; valid nonobject/envelope failures retain a receipt beside the error.
   Tests: `api/compute_keypair_find_test.go:TestComputeFindKeypairDirectSeedAndOwnerPreservingFullListFallback`, `resource/find_identity_response_id_test.go:TestCollectionFindIdentityPassiveIDsAreOnlyCompared`.

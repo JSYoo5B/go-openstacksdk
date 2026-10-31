@@ -75,7 +75,7 @@ func main() {
     compute, err := conn.ComputeV2(ctx)
     if err != nil { log.Fatal(err) }
     value, err := compute.Extensions.FindRecord(ctx, *identity,
-        extensions.WithRecordFindIgnoreMissing(!*strict))
+        request.IgnoreMissing(!*strict))
     if err != nil { log.Fatal(err) }
     var output any
     if value != nil { output = value.Resource }

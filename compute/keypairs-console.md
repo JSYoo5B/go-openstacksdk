@@ -19,8 +19,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithKeypairCreatePublicKey`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithKeypairCreateType`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithKeypairCreateUserID`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithKeypairCreateField`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithKeypairCreateHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 
 - CreateKeypair performs one fixed selected-ResourceBase collection POST at os-keypairs with keypair envelope and no query, preliminary GET/LIST, completion wait or cleanup. No attributes produce an empty keypair object. All eight declared body fields plus id/is_deleted aliases accept explicit null, empty, scalar, array or object JSON values; name is body data without member-path ID validation. Unknown semantic attributes are discarded before serialization. Selected live token, source headers and both Compute2.1 version headers are retained without a new local type or owner gate.
   Tests: `api/compute_keypair_create_test.go:TestComputeKeypairCreateDirtyBodyAliasesAndNativeCompatibility`, `api/compute_keypair_create_test.go:TestComputeKeypairCreateOwnedOptionsSourceAndAcceptedFailures`.
@@ -92,7 +92,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute.Service.CreateKeypair`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithCloudKeypairPublicKey`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithCloudKeypairCreateHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 
 - Cloud CreateKeypair always supplies name as literal body data, including an empty or path-like body name, and supplies public_key only for a nonempty string. Empty public key is omitted rather than forwarded as the leaf's explicit empty attribute. The library composes the existing one fixed keypair-enveloped collection POST without lookup, wait or cleanup.
   Tests: `api/compute_keypair_cloud_test.go:TestComputeCloudKeypairCreateAndDeleteOutcomes`, `api/compute_keypair_create_test.go:TestComputeKeypairCreateDirtyBodyAliasesAndNativeCompatibility`.

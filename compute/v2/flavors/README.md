@@ -14,8 +14,8 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.API.FetchExtraSpecs`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorExtraSpecsOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorExtraSpecsMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorExtraSpecsHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 
 - FetchExtraSpecs always performs one logical bodyless GET at the captured prefixed flavors/{id}/os-extra_specs route, with no flavor lookup or inline extra_specs shortcut. ID-only input seeds the requested ID; existing native or raw flavor fields are copied before options, keep their original fields, and only the Resource extra_specs value is replaced. Native Swap survives its json-excluded native field and native is_public/ephemeral wire aliases become source view names. An explicit route ID does not rewrite a supplied passive Resource ID; absent route ID uses the existing truthy string id/name/original_name identity.
   Tests: `api/compute_flavor_extra_specs_fetch_test.go:TestComputeFlavorFetchExtraSpecsAlwaysGETRawValuesAndOwnedExistingInputs`.
@@ -60,8 +60,8 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.API.GetExtraSpecsProperty`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorExtraSpecsOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorExtraSpecsMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorExtraSpecsHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 
 - GetExtraSpecsProperty reads only the selected flavor/property member route with an empty body and no query, flavor GET, list or whole-specs GET. The concrete ID/native Flavor/RawResource input and selected source are captured before option callbacks; inline specs never skip this read, explicit ID determines the route, and the supplied existing extra_specs remain unchanged.
   Tests: `api/compute_flavor_property_native_test.go:TestComputeFlavorGetExtraSpecsPropertyRawValuesLiteralRouteAndVersionBinding`, `api/compute_flavor_extra_specs_fetch_test.go:TestComputeFlavorFetchExtraSpecsAlwaysGETRawValuesAndOwnedExistingInputs`.
@@ -176,13 +176,13 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorListOptions`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorListDetails`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorListExtraSpecs`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorListPaginated`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorListMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorListHeader`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorListFilter`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorListFilters`
 

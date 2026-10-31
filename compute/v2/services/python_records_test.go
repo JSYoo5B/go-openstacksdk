@@ -3,10 +3,12 @@ package services_test
 import (
 	"context"
 	"errors"
-	"github.com/JSYoo5B/go-openstacksdk/compute/v2/services"
-	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"net/http"
 	"testing"
+
+	"github.com/JSYoo5B/go-openstacksdk/compute/v2/services"
+	"github.com/JSYoo5B/go-openstacksdk/request"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func TestComputeServiceFindRecordsListOnlyMatchesIDBinaryAndHost(t *testing.T) {
@@ -18,7 +20,7 @@ func TestComputeServiceFindRecordsListOnlyMatchesIDBinaryAndHost(t *testing.T) {
 				}
 				return pythonComputeServiceWire(203, `{"services":[{"id":7,"binary":"nova-compute","host":"wrong"},{"id":7,"binary":"nova-compute","host":"wanted","forced_down":"false","zone":"zone","updated_at":"literal","x_unknown":1}]}`)
 			})
-			row, err := api.FindRecord(context.Background(), identity, services.WithRecordQuery("host", "wanted"), services.WithRecordQuery("binary", "ignored"), services.WithRecordQuery("status", "ignored"))
+			row, err := api.FindRecord(context.Background(), identity, request.Query("host", "wanted"), request.Query("binary", "ignored"), request.Query("status", "ignored"))
 			if err != nil || row == nil || calls.Len() != 1 || string(row.Resource.Body["name"]) != `"nova-compute"` || string(row.Resource.Body["availability_zone"]) != `"zone"` || string(row.Resource.Body["is_forced_down"]) != "true" || row.Resource.Body["x_unknown"] != nil || string(row.Wire.Body["x_unknown"]) != "1" {
 				t.Fatal(row, err, pythonComputeServiceCalls(calls))
 			}
@@ -42,7 +44,7 @@ func TestComputeServiceFindRecordsMissingDuplicateAndLateErrors(t *testing.T) {
 				}
 				return pythonComputeServiceWire(200, `{"services":[{"id":"a","binary":"nova-compute"}]}`)
 			})
-			row, err := api.FindRecord(context.Background(), "nova-compute", services.WithRecordIgnoreMissing(mode != "strict"))
+			row, err := api.FindRecord(context.Background(), "nova-compute", request.IgnoreMissing(mode != "strict"))
 			if row != nil {
 				t.Fatal(row, err)
 			}
@@ -69,7 +71,7 @@ func TestComputeServiceFindRecordsMissingDuplicateAndLateErrors(t *testing.T) {
 }
 func TestComputeServiceFindRecordOwnedOptionsAndFallbackPath(t *testing.T) {
 	headers := map[string]string{"X-Owned": "original"}
-	option := services.WithRecordHeaders(headers)
+	option := request.Headers(headers)
 	headers["X-Owned"] = "changed"
 	api, calls := pythonComputeServiceAPI(t, "2.69", func(r *http.Request) *http.Response {
 		if r.URL.Path != "/nova/v2.1/alternative-services" || r.Header.Get("X-Owned") != "original" {

@@ -9,11 +9,11 @@ import (
 	"maps"
 	"net/http"
 	"net/url"
-	"slices"
 	"strings"
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/microversions"
@@ -159,8 +159,8 @@ func (a *API) prepareFlavorExtraSpecsRead(ctx context.Context, input FlavorExtra
 	if err = errors.Join(err, check(operationCtx)); err != nil {
 		return nil, err
 	}
-	owned := slices.Clone(options)
-	guarded := make([]FlavorExtraSpecsOption, len(owned))
+	owned := calls.Options(options, flavorExtraSpecsCalls)
+	guarded := make([]request.Option[FlavorExtraSpecsOpts], len(owned))
 	for index, option := range owned {
 		apply := option
 		guarded[index] = func(config *request.Config[FlavorExtraSpecsOpts]) error {

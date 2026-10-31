@@ -27,7 +27,7 @@ func TestPythonFlavorUpdateRecordSendsNullAndEmptyDescription(t *testing.T) {
 	status, reply = http.StatusAccepted, `{"id":"f1","name":"m1","ram":512,"vcpus":1,"disk":10,"description":""}`
 	got, err = api.UpdateRecord(ctx, "f1",
 		flavors.WithUpdateRecordOptions(flavors.UpdateRecordOpts{Description: request.Present("")}),
-		flavors.WithUpdateRecordField("x_extension", 1), flavors.WithUpdateRecordHeader("X-Trace", "t"))
+		request.Field("x_extension", 1), request.Header("X-Trace", "t"))
 	if err != nil || got.StatusCode != 202 || got.Flavor.Description != "" || got.Flavor.RAM != 512 || len(got.Fields) != 6 {
 		t.Fatal(got, err)
 	}
@@ -56,8 +56,8 @@ func TestPythonFlavorUpdateRecordRejectsInputsAndErrorStatuses(t *testing.T) {
 		return pythonFlavorWire(http.StatusConflict, `{"conflictingRequest":{"message":"busy"}}`)
 	})
 	for _, option := range []flavors.UpdateRecordOption{
-		flavors.WithUpdateRecordField("description", nil),
-		flavors.WithUpdateRecordField("id", "f2"),
+		request.Field("description", nil),
+		request.Field("id", "f2"),
 		nil,
 	} {
 		var operation *resource.OperationError

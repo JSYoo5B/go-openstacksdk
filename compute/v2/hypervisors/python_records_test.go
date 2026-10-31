@@ -3,12 +3,14 @@ package hypervisors_test
 import (
 	"context"
 	"errors"
-	"github.com/JSYoo5B/go-openstacksdk/compute/v2/hypervisors"
-	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"io"
 	"net/http"
 	"strings"
 	"testing"
+
+	"github.com/JSYoo5B/go-openstacksdk/compute/v2/hypervisors"
+	"github.com/JSYoo5B/go-openstacksdk/request"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func TestHypervisorRecordsSummaryDetailAndDeclaredProjection(t *testing.T) {
@@ -24,7 +26,7 @@ func TestHypervisorRecordsSummaryDetailAndDeclaredProjection(t *testing.T) {
 				}
 				return pythonHypervisorWire(203, `{"hypervisors":[{"id":7,"hypervisor_hostname":"node","service":false,"servers":[1,{"uuid":"vm"}],"free_ram_mb":"raw","x_unknown":true}]}`)
 			})
-			seq := api.ListRecords(context.Background(), hypervisors.WithRecordDetails(detail), hypervisors.WithRecordQuery("with_servers", true))
+			seq := api.ListRecords(context.Background(), hypervisors.WithRecordDetails(detail), request.Query("with_servers", true))
 			if calls.Len() != 0 {
 				t.Fatal(pythonHypervisorCalls(calls))
 			}
@@ -62,7 +64,7 @@ func TestHypervisorRecordsLegacyHostnameSearchOwnsPatternAndVersion(t *testing.T
 				return pythonHypervisorWire(200, `{"hypervisors":[]}`)
 			})
 			api.RawClient().Endpoint = api.RawClient().ResourceBase
-			rows, err := api.AllRecords(context.Background(), hypervisors.WithRecordDetails(true), hypervisors.WithRecordQuery("hypervisor_hostname_pattern", "node/name"))
+			rows, err := api.AllRecords(context.Background(), hypervisors.WithRecordDetails(true), request.Query("hypervisor_hostname_pattern", "node/name"))
 			if err != nil || len(rows) != 0 {
 				t.Fatal(rows, err)
 			}
@@ -138,7 +140,7 @@ func TestHypervisorFindRecordsStrictMissingDuplicatesAndLateError(t *testing.T) 
 				}
 				return pythonHypervisorWire(200, `{"hypervisors":[{"id":"a","hypervisor_hostname":"node"}]}`)
 			})
-			row, err := api.FindRecord(context.Background(), "node", hypervisors.WithRecordIgnoreMissing(false))
+			row, err := api.FindRecord(context.Background(), "node", request.IgnoreMissing(false))
 			if row != nil || err == nil {
 				t.Fatal(row, err)
 			}
@@ -167,7 +169,7 @@ func TestHypervisorRecordsDefaultDiscoveryAndOptionSnapshots(t *testing.T) {
 		return pythonHypervisorWire(200, `{"hypervisors":[{"id":"one"}]}`)
 	})
 	headers := map[string]string{"X-Owned": "original"}
-	option := hypervisors.WithRecordHeaders(headers)
+	option := request.Headers(headers)
 	headers["X-Owned"] = "changed"
 	api.RawClient().Endpoint = api.RawClient().ResourceBase
 	rows, err := api.AllRecords(context.Background(), option)
@@ -232,7 +234,7 @@ func TestHypervisorProxyRecordsEvaluateSharedJMESAgainstLazyGenerator(t *testing
 			api, calls := pythonHypervisorAPI(t, "2.88", func(r *http.Request) *http.Response {
 				return pythonHypervisorWire(200, `{"hypervisors":[{"id":"one"}]}`)
 			})
-			result, err := api.ProxyListRecords(context.Background(), hypervisors.WithRecordQuery("jmespath_filters", expr))
+			result, err := api.ProxyListRecords(context.Background(), request.Query("jmespath_filters", expr))
 			if calls.Len() != 0 {
 				t.Fatal("JMES consumed generator", pythonHypervisorCalls(calls))
 			}
@@ -279,7 +281,7 @@ func TestHypervisorProxyRecordsEvaluateSharedJMESAgainstLazyGenerator(t *testing
 }
 func TestHypervisorRecordHeadersRejectBeforeUnversionedDiscovery(t *testing.T) {
 	api, calls := pythonHypervisorAPI(t, "", func(r *http.Request) *http.Response { return pythonHypervisorWire(500, `{}`) })
-	_, err := api.AllRecords(context.Background(), hypervisors.WithRecordHeaders(map[string]string{"X-Auth-Token": "foreign"}))
+	_, err := api.AllRecords(context.Background(), request.Headers(map[string]string{"X-Auth-Token": "foreign"}))
 	if !errors.Is(err, resource.ErrInvalidOption) || calls.Len() != 0 {
 		t.Fatal(err, pythonHypervisorCalls(calls))
 	}

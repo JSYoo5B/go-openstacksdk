@@ -288,7 +288,7 @@ func TestShareExplicitEmptyOverrideOwnsVersionAbsence(t *testing.T) {
 		}
 		testcloud.JSON(w, 200, `{"share":{}}`)
 	})
-	if _, err := api.GetRecord(context.Background(), "server", "share", WithReadMicroversion("")); err != nil {
+	if _, err := api.GetRecord(context.Background(), "server", "share", request.Microversion("")); err != nil {
 		t.Fatal(err)
 	}
 	if client.Microversion != "2.97" {
@@ -307,21 +307,21 @@ func TestShareInvalidOptionsAndIdentityPrecedeDiscovery(t *testing.T) {
 			return e
 		},
 		func() error {
-			_, e := api.GetRecord(context.Background(), "server", "share", request.WithQuery[ReadOpts]("q", "v"))
+			_, e := api.GetRecord(context.Background(), "server", "share", request.Custom(request.WithQuery[ReadOpts]("q", "v")))
 			return e
 		},
 		func() error {
-			_, e := api.DeleteRecord(context.Background(), "server", "share", request.WithField[DeleteOpts]("x", 1))
+			_, e := api.DeleteRecord(context.Background(), "server", "share", request.Custom(request.WithField[DeleteOpts]("x", 1)))
 			return e
 		},
 		func() error {
-			for _, e := range api.ListRecords(context.Background(), "server", WithListLimit(-1)) {
+			for _, e := range api.ListRecords(context.Background(), "server", request.Limit(-1)) {
 				return e
 			}
 			return nil
 		},
 		func() error {
-			_, e := api.GetRecord(context.Background(), "server", "share", func(c *request.Config[ReadOpts]) error { client.Endpoint = cloud.Server.URL + "/changed/"; return nil }, func(c *request.Config[ReadOpts]) error { late++; return nil })
+			_, e := api.GetRecord(context.Background(), "server", "share", request.Custom(func(c *request.Config[ReadOpts]) error { client.Endpoint = cloud.Server.URL + "/changed/"; return nil }), request.Custom(func(c *request.Config[ReadOpts]) error { late++; return nil }))
 			return e
 		},
 	}
@@ -356,7 +356,7 @@ func TestShareDeleteDefaultOnlyCleanMissingAndBodylessSuccess(t *testing.T) {
 				})
 				var options []DeleteOption
 				if strict {
-					options = append(options, WithDeleteIgnoreMissing(false))
+					options = append(options, request.IgnoreMissing(false))
 				}
 				value, err := api.DeleteRecord(context.Background(), "server", "share", options...)
 				wantErr := status == 409 || status == 404 && strict
@@ -389,7 +389,7 @@ func TestShareListProjectionLocalCapAndLazyNoLookahead(t *testing.T) {
 		}
 		testcloud.JSON(w, 200, `{"shares":[{"share_id":"a","status":"inactive"},{"share_id":"b","status":"active","tag":null},{"share_id":"c","status":"active"}],"next":{"invalid":"unconsumed"}}`)
 	})
-	sequence := api.ListRecords(context.Background(), "server", WithListMaxItems(2), WithListFilter("status", "active"))
+	sequence := api.ListRecords(context.Background(), "server", request.MaxItems(2), WithListFilter("status", "active"))
 	if calls != 0 {
 		t.Fatal("eager list")
 	}
@@ -436,7 +436,7 @@ func TestShareListAlternateMarkerPresenceAndContinuation(t *testing.T) {
 				}
 			})
 			count := 0
-			for _, err := range api.ListRecords(context.Background(), "server", WithListLimit(1)) {
+			for _, err := range api.ListRecords(context.Background(), "server", request.Limit(1)) {
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -455,7 +455,7 @@ func TestShareListNullPrimaryMarkerIsTerminalWithPageReceipt(t *testing.T) {
 	cloud.Mux.HandleFunc("/v2.1/projects/p/servers/server/shares", func(w http.ResponseWriter, r *http.Request) { calls++; testcloud.JSON(w, 200, body) })
 	count := 0
 	var failure error
-	for value, err := range api.ListRecords(context.Background(), "server", WithListLimit(1)) {
+	for value, err := range api.ListRecords(context.Background(), "server", request.Limit(1)) {
 		if err != nil {
 			failure = err
 			break
@@ -687,14 +687,14 @@ func TestShareOwnedConfigRepairsNilMapsAndCopiesPolicyAroundCallbacks(t *testing
 		}
 		testcloud.JSON(w, 200, `{"share":{}}`)
 	})
-	_, err := api.GetRecord(context.Background(), "server", "share", func(c *request.Config[ReadOpts]) error {
+	_, err := api.GetRecord(context.Background(), "server", "share", request.Custom(func(c *request.Config[ReadOpts]) error {
 		c.Options.Microversion = &selected
 		c.Headers = headers
 		c.Query = nil
 		c.Fields = nil
 		c.Arguments = nil
 		return nil
-	}, func(c *request.Config[ReadOpts]) error {
+	}), request.Custom(func(c *request.Config[ReadOpts]) error {
 		selected = "2.99"
 		headers["X-Caller"] = "outside"
 		if *c.Options.Microversion != "2.98" || c.Headers["X-Caller"] != "initial" || c.Query == nil || c.Fields == nil || c.Arguments == nil {
@@ -702,7 +702,7 @@ func TestShareOwnedConfigRepairsNilMapsAndCopiesPolicyAroundCallbacks(t *testing
 		}
 		c.Headers = nil
 		return nil
-	}, WithReadHeader("X-Caller", "last"))
+	}), request.Header("X-Caller", "last"))
 	if err != nil || calls != 1 || client.Microversion != "2.97" {
 		t.Fatalf("err=%v calls=%d selected=%s", err, calls, client.Microversion)
 	}
@@ -728,7 +728,7 @@ func TestShareListActualLinksUseFixedRouteAndSinglePageStopsBeforeLink(t *testin
 			})
 			var options []ListOption
 			if single {
-				options = append(options, WithListPaginated(false))
+				options = append(options, request.Paginated(false))
 			}
 			count := 0
 			for _, err := range api.ListRecords(context.Background(), "server", options...) {

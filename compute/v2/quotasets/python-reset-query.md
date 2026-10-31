@@ -17,9 +17,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.ProjectQuotaScope.InUser`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.UserQuotaScope.Reset`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithResetQuery`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithResetIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 
-- WithResetQuery adds revert_quota_set(**query) parameters as literal values to the project DELETE os-quota-sets/{project} and next to the fixed user_id on the user scope, a later value for a key wins, a 404 stays an error that is also resource.ErrNotFound unless WithResetIgnoreMissing(true) is given, and a 500 stays a Gophercloud status error inside resource.OperationError.
+- WithResetQuery adds revert_quota_set(**query) parameters as literal values to the project DELETE os-quota-sets/{project} and next to the fixed user_id on the user scope, a later value for a key wins, a 404 stays an error that is also resource.ErrNotFound unless request.IgnoreMissing(true) is given, and a 500 stays a Gophercloud status error inside resource.OperationError.
   Tests: `compute/v2/quotasets/python_reset_query_test.go:TestPythonQuotaResetForwardsQueryAndMissingPolicy`.
 - WithResetQuery rejects user_id, a blank or control-character key, an invalid UTF-8 value and a nil option on both scopes before HTTP.
   Tests: `compute/v2/quotasets/python_reset_query_test.go:TestPythonQuotaResetQueryRejectsScopeOwnedAndInvalidKeys`.

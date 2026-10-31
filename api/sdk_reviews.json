@@ -42,7 +42,7 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.ProjectQuotaScope.Reset",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithResetIgnoreMissing"
+        "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing"
       ],
       "contracts": [
         {
@@ -68,7 +68,7 @@
       ],
       "differences": [
         "The quota singleton exposes Reset rather than generic resource Delete; success returns ResetResponse(ProjectID, Header) instead of requiring a quota extraction from an empty DELETE body.",
-        "404 remains an error by default; optional WithResetIgnoreMissing changes only that status.",
+        "404 remains an error by default; optional request.IgnoreMissing changes only that status.",
         "UserQuotaScope is an additional high-level mapping for fixed user_id requests; the pinned native API and generated per-project method contract are unchanged."
       ],
       "documentation": [
@@ -2133,9 +2133,9 @@
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.UserQuotaScope.Detail",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.ProjectQuotaScope.GetRecord",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithQuotaReadOpts",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithQuotaReadQuery",
+        "github.com/JSYoo5B/go-openstacksdk/request.Query",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithQuotaUsage",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithQuotaReadMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithQuotaReadLocation",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.UserQuotaScope.GetRecord"
       ],
@@ -2256,9 +2256,9 @@
           ]
         },
         {
-          "behavior": "Nova base_path is a bound proxy argument collision by presence, so public WithQuotaReadQuery rejects it without invoking a caller marshaler or doing version discovery/HTTP.",
+          "behavior": "Nova base_path is a bound proxy argument collision by presence, so public request.Query rejects it before version discovery or HTTP. request.Query marshals its value once when the call is constructed.",
           "tests": [
-            "compute/v2/quotasets/python_quota_query_test.go:TestNovaQuotaBasePathPresenceRejectsWithoutInvokingCallerMarshaler"
+            "compute/v2/quotasets/python_quota_query_test.go:TestNovaQuotaBasePathPresenceRejectsBeforeHTTP"
           ]
         }
       ],
@@ -2366,11 +2366,11 @@
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.ProjectQuotaScope.InUser",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.UserQuotaScope.Reset",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithResetQuery",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithResetIgnoreMissing"
+        "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing"
       ],
       "contracts": [
         {
-          "behavior": "WithResetQuery adds revert_quota_set(**query) parameters as literal values to the project DELETE os-quota-sets/{project} and next to the fixed user_id on the user scope, a later value for a key wins, a 404 stays an error that is also resource.ErrNotFound unless WithResetIgnoreMissing(true) is given, and a 500 stays a Gophercloud status error inside resource.OperationError.",
+          "behavior": "WithResetQuery adds revert_quota_set(**query) parameters as literal values to the project DELETE os-quota-sets/{project} and next to the fixed user_id on the user scope, a later value for a key wins, a 404 stays an error that is also resource.ErrNotFound unless request.IgnoreMissing(true) is given, and a 500 stays a Gophercloud status error inside resource.OperationError.",
           "tests": [
             "compute/v2/quotasets/python_reset_query_test.go:TestPythonQuotaResetForwardsQueryAndMissingPolicy"
           ]
@@ -10087,13 +10087,13 @@
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindOpts",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindDetails",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindAllProjects",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindQuery",
+        "github.com/JSYoo5B/go-openstacksdk/request.Query",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindPaginated",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindLimit",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindMarker",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindMaxItems",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindMicroversion",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
+        "github.com/JSYoo5B/go-openstacksdk/request.Headers",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindLocation"
       ],
       "contracts": [
@@ -10736,12 +10736,12 @@
         "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindAllProjects",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.FindRecord",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindOpts",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindDetails",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindAllProjects",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindQuery",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindMicroversion",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/request.Query",
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
+        "github.com/JSYoo5B/go-openstacksdk/request.Headers",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindLocation",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindLimit",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindMarker",
@@ -12818,14 +12818,14 @@
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.API.FindFlavor",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorFindOptions",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorFindExtraSpecs",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorFindIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorFindLimit",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorFindMarker",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorFindMaxItems",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorFindPaginated",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorFindMicroversion",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorFindHeader",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorFindQuery",
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
+        "github.com/JSYoo5B/go-openstacksdk/request.Query",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorFindFilter",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorFindFilters"
       ],
@@ -48908,7 +48908,7 @@
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.ConsoleOutput",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithConsoleOutputLength",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithConsoleOutputOptions",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithConsoleOutputField"
+        "github.com/JSYoo5B/go-openstacksdk/request.Field"
       ],
       "contracts": [
         {
@@ -48961,8 +48961,8 @@
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/remoteconsoles.WithConsoleCreateTypeValue",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/remoteconsoles.WithConsoleCreateURL",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/remoteconsoles.WithConsoleCreateURLValue",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/remoteconsoles.WithConsoleCreateField",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/remoteconsoles.WithConsoleCreateHeader"
+        "github.com/JSYoo5B/go-openstacksdk/request.Field",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header"
       ],
       "contracts": [
         {
@@ -49019,9 +49019,9 @@
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.API.DeleteKeypair",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithKeypairDeleteOptions",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithKeypairDeleteUserID",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithKeypairDeleteIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithKeypairDeleteQuery",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithKeypairDeleteHeader"
+        "github.com/JSYoo5B/go-openstacksdk/request.Header"
       ],
       "contracts": [
         {
@@ -49178,8 +49178,8 @@
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithKeypairCreatePublicKey",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithKeypairCreateType",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithKeypairCreateUserID",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithKeypairCreateField",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithKeypairCreateHeader"
+        "github.com/JSYoo5B/go-openstacksdk/request.Field",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header"
       ],
       "contracts": [
         {
@@ -49495,7 +49495,7 @@
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.API.FindKeypair",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithKeypairFindOptions",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithKeypairFindUserID",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithKeypairFindIgnoreMissing"
+        "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing"
       ],
       "contracts": [
         {
@@ -49582,8 +49582,8 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.API.FetchExtraSpecs",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorExtraSpecsOptions",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorExtraSpecsMicroversion",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorExtraSpecsHeader"
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header"
       ],
       "contracts": [
         {
@@ -49815,7 +49815,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/compute.Service.CreateKeypair",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithCloudKeypairPublicKey",
-        "github.com/JSYoo5B/go-openstacksdk/compute.WithCloudKeypairCreateHeader"
+        "github.com/JSYoo5B/go-openstacksdk/request.Header"
       ],
       "contracts": [
         {
@@ -49900,8 +49900,8 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.API.GetExtraSpecsProperty",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorExtraSpecsOptions",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorExtraSpecsMicroversion",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorExtraSpecsHeader"
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header"
       ],
       "contracts": [
         {
@@ -50118,13 +50118,13 @@
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorListOptions",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorListDetails",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorListExtraSpecs",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorListLimit",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorListMarker",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorListMaxItems",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorListPaginated",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorListMicroversion",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorListHeader",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/request.Limit",
+        "github.com/JSYoo5B/go-openstacksdk/request.Marker",
+        "github.com/JSYoo5B/go-openstacksdk/request.MaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/request.Paginated",
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
+        "github.com/JSYoo5B/go-openstacksdk/request.Query",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorListFilter",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorListFilters"
       ],
@@ -50199,8 +50199,8 @@
         "github.com/JSYoo5B/go-openstacksdk/compute.Service.AllFlavors",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryOptions",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryExtraSpecs",
-        "github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryMicroversion",
-        "github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryHeader"
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header"
       ],
       "contracts": [
         {
@@ -50251,8 +50251,8 @@
         "github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryExtraSpecs",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryFilters",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryExpression",
-        "github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryMicroversion",
-        "github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryHeader"
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header"
       ],
       "contracts": [
         {
@@ -50305,8 +50305,8 @@
         "github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryOptions",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryExtraSpecs",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryFilters",
-        "github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryMicroversion",
-        "github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryHeader"
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header"
       ],
       "contracts": [
         {
@@ -50354,8 +50354,8 @@
         "github.com/JSYoo5B/go-openstacksdk/compute.Service.ListAvailabilityZoneNames",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithAvailabilityZoneNamesOptions",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithUnavailableZones",
-        "github.com/JSYoo5B/go-openstacksdk/compute.WithAvailabilityZoneNamesMicroversion",
-        "github.com/JSYoo5B/go-openstacksdk/compute.WithAvailabilityZoneNamesHeader"
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header"
       ],
       "contracts": [
         {
@@ -50451,8 +50451,8 @@
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/availabilityzones.API.ListDetailRecords",
         "github.com/JSYoo5B/go-openstacksdk/compute.Service.ListAvailabilityZones",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/availabilityzones.WithAvailabilityZoneListOptions",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/availabilityzones.WithAvailabilityZoneMicroversion",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/availabilityzones.WithAvailabilityZoneHeader"
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header"
       ],
       "contracts": [
         {
@@ -50485,7 +50485,7 @@
           ]
         },
         {
-          "behavior": "The details=True branch is ListDetailRecords: it sends a bodyless, queryless GET os-availability-zone/detail with the client microversion in X-OpenStack-Nova-API-Version and OpenStack-API-Version, no version headers for a blank client or an explicit empty WithAvailabilityZoneMicroversion, and caller headers from WithAvailabilityZoneHeader.",
+          "behavior": "The details=True branch is ListDetailRecords: it sends a bodyless, queryless GET os-availability-zone/detail with the client microversion in X-OpenStack-Nova-API-Version and OpenStack-API-Version, no version headers for a blank client or an explicit empty request.Microversion, and caller headers from request.Header.",
           "tests": [
             "compute/v2/availabilityzones/python_detail_records_test.go:TestPythonZoneDetailRecordsUseDetailRouteAndKeepHosts"
           ]
@@ -75995,9 +75995,9 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.API.FindRecord",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.WithGroupFindAllProjects",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.WithGroupFindIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.WithGroupFindOpts",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.WithGroupFindHeaders"
+        "github.com/JSYoo5B/go-openstacksdk/request.Headers"
       ],
       "contracts": [
         {
@@ -76236,11 +76236,11 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/volumeattach.API.ListRecords",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/volumeattach.VolumeAttachmentScope.ListRecords",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/volumeattach.WithAttachmentLimit",
+        "github.com/JSYoo5B/go-openstacksdk/request.Limit",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/volumeattach.WithAttachmentOffset",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/volumeattach.WithAttachmentQuery",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/volumeattach.WithAttachmentMaxItems",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/volumeattach.WithAttachmentPaginated"
+        "github.com/JSYoo5B/go-openstacksdk/request.Query",
+        "github.com/JSYoo5B/go-openstacksdk/request.MaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/request.Paginated"
       ],
       "contracts": [
         {
@@ -76296,7 +76296,7 @@
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/volumeattach.WithAttachmentSwapTo",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/volumeattach.WithAttachmentAttribute",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/volumeattach.WithAttachmentUpdateOpts",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/volumeattach.WithAttachmentUpdateHeaders"
+        "github.com/JSYoo5B/go-openstacksdk/request.Headers"
       ],
       "contracts": [
         {
@@ -76515,7 +76515,7 @@
       ],
       "contracts": [
         {
-          "behavior": "DELETE /images/{escaped literal ID}; no JSON body decode. Actual 200..399 accepted and clean404 ignored by default; WithDeleteIgnoreMissing(false) retains original error. Unsupported microversion guard runs before HTTP and ignoreMissing.",
+          "behavior": "DELETE /images/{escaped literal ID}; no JSON body decode. Actual 200..399 accepted and clean404 ignored by default; request.IgnoreMissing(false) retains original error. Unsupported microversion guard runs before HTTP and ignoreMissing.",
           "tests": [
             "compute/v2/images/image_records_test.go:TestPythonNovaImageFindSummaryAndDeleteMissing",
             "compute/v2/images/image_records_test.go:TestPythonNovaImageExplicitVersionBounds",
@@ -76890,8 +76890,8 @@
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.WithUpdateRecordOptions",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.WithUpdateRecordName",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.WithUpdateRecordAvailabilityZone",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.WithUpdateRecordField",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.WithUpdateRecordHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Field",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/request.Null",
         "github.com/JSYoo5B/go-openstacksdk/request.Present"
       ],
@@ -76916,7 +76916,7 @@
       "differences": [
         "Python accepts an Aggregate or an ID string; Go takes the integer aggregate ID.",
         "Python sends min(Aggregate _max_microversion 2.81, server maximum) discovered per request; Go sends the one microversion configured on the client.",
-        "Python drops undeclared keyword attributes; WithUpdateRecordField sends any extension key except the typed keys and id.",
+        "Python drops undeclared keyword attributes; request.Field sends any extension key except the typed keys and id.",
         "Python returns the Resource merged from request attributes and the response; Go returns AggregateRecord with the native typed decode, the raw response object fields, headers and status, and Sent false when no request was needed."
       ],
       "remaining": []
@@ -76985,7 +76985,7 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.API.PrecacheImages",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.WithPrecacheImagesHeader"
+        "github.com/JSYoo5B/go-openstacksdk/request.Header"
       ],
       "contracts": [
         {
@@ -77076,8 +77076,8 @@
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.API.UpdateRecord",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithUpdateRecordOptions",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithUpdateRecordDescription",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithUpdateRecordField",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithUpdateRecordHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Field",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/request.Null",
         "github.com/JSYoo5B/go-openstacksdk/request.Present"
       ],
@@ -77101,7 +77101,7 @@
       "differences": [
         "Python accepts a Flavor or an ID string; Go takes the flavor ID string and rejects a blank one before HTTP.",
         "Python sends min(Flavor _max_microversion 2.61, server maximum) discovered per request; Go sends the one microversion configured or negotiated on the Connection client.",
-        "Python maps attribute names such as is_public to server keys and drops undeclared keyword attributes; WithUpdateRecordField sends any extension key verbatim as a server key except description and id.",
+        "Python maps attribute names such as is_public to server keys and drops undeclared keyword attributes; request.Field sends any extension key verbatim as a server key except description and id.",
         "Python returns the Resource merged from request attributes and the response; Go returns FlavorUpdateRecord with the native typed decode, the raw response object fields, headers and status, and Sent false when no request was needed."
       ],
       "remaining": []
@@ -77638,8 +77638,8 @@
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/services.WithUpdateRecordStatus",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/services.WithUpdateRecordDisabledReason",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/services.WithUpdateRecordForcedDown",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/services.WithUpdateRecordField",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/services.WithUpdateRecordHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Field",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/request.Null",
         "github.com/JSYoo5B/go-openstacksdk/request.Present"
       ],
@@ -77663,7 +77663,7 @@
       "differences": [
         "Python sends min(Service _max_microversion 2.69, server maximum) discovered per request and checks 2.53 against the server range and default microversion; Go sends and checks the one microversion configured or negotiated on the Connection client.",
         "Python accepts a Service or an ID string; Go takes the service ID string and rejects a blank one before HTTP.",
-        "Python maps attribute names such as availability_zone and is_forced_down to server keys and drops undeclared keyword attributes; WithUpdateRecordField sends any extension key verbatim as a server key except the typed keys and id.",
+        "Python maps attribute names such as availability_zone and is_forced_down to server keys and drops undeclared keyword attributes; request.Field sends any extension key verbatim as a server key except the typed keys and id.",
         "Python returns the Resource merged from request attributes and the response; Go returns ServiceRecord with the native typed decode, the raw response object fields, headers and status, and Sent false when no request was needed."
       ],
       "remaining": []
@@ -77777,9 +77777,9 @@
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.ListServerMigrationRecords",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.AllServerMigrationRecords",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithServerMigrationOpts",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithServerMigrationHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithServerMigrationMicroversion",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithServerMigrationIgnoreMissing"
+        "github.com/JSYoo5B/go-openstacksdk/request.Headers",
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
+        "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing"
       ],
       "contracts": [
         {
@@ -77815,9 +77815,9 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.GetServerMigrationRecord",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithServerMigrationOpts",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithServerMigrationHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithServerMigrationMicroversion",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithServerMigrationIgnoreMissing"
+        "github.com/JSYoo5B/go-openstacksdk/request.Headers",
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
+        "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing"
       ],
       "contracts": [
         {
@@ -77853,9 +77853,9 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.AbortServerMigration",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithServerMigrationOpts",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithServerMigrationHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithServerMigrationMicroversion",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithServerMigrationIgnoreMissing"
+        "github.com/JSYoo5B/go-openstacksdk/request.Headers",
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
+        "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing"
       ],
       "contracts": [
         {
@@ -77891,9 +77891,9 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.ForceCompleteServerMigration",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithServerMigrationOpts",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithServerMigrationHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithServerMigrationMicroversion",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithServerMigrationIgnoreMissing"
+        "github.com/JSYoo5B/go-openstacksdk/request.Headers",
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
+        "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing"
       ],
       "contracts": [
         {
@@ -77958,8 +77958,8 @@
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithEvacuateServerAdminPass",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithEvacuateServerForce",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithEvacuateServerOnSharedStorage",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithEvacuateServerHeader",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithEvacuateServerField"
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
+        "github.com/JSYoo5B/go-openstacksdk/request.Field"
       ],
       "contracts": [
         {
@@ -77982,7 +77982,7 @@
         "Python sends min(Server _max_microversion 2.100, server maximum) discovered per request; Go sends the one microversion configured or negotiated on the client.",
         "Python accepts a Server or an ID; Go takes the server ID string.",
         "Like Python, Go does not gate onSharedStorage or force by microversion, so Nova validates them.",
-        "WithEvacuateServerField can send extension keys inside the evacuate object, which Python cannot."
+        "request.Field can send extension keys inside the evacuate object, which Python cannot."
       ],
       "remaining": []
     },
@@ -77993,8 +77993,8 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.MigrateWithOptions",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithMigrateServerHost",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithMigrateServerHeader",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithMigrateServerField"
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
+        "github.com/JSYoo5B/go-openstacksdk/request.Field"
       ],
       "contracts": [
         {
@@ -78032,8 +78032,8 @@
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithLiveMigrateServerBlockMigration",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithLiveMigrateServerAutoBlockMigration",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithLiveMigrateServerDiskOverCommit",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithLiveMigrateServerHeader",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithLiveMigrateServerField"
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
+        "github.com/JSYoo5B/go-openstacksdk/request.Field"
       ],
       "contracts": [
         {
@@ -78061,7 +78061,7 @@
       "differences": [
         "Python chooses the 2.30, 2.25 or legacy body from the supported server microversion (or the session default); Go chooses it from the selected client microversion, treating latest as 2.30 or later, and like Python sends 2.30 or 2.25 as the request microversion for those bodies.",
         "Python accepts a Server or an ID; Go takes the server ID string, and block_migration is expressed by WithLiveMigrateServerBlockMigration(bool) or WithLiveMigrateServerAutoBlockMigration().",
-        "WithLiveMigrateServerField can send extension keys inside os-migrateLive, which Python cannot."
+        "request.Field can send extension keys inside os-migrateLive, which Python cannot."
       ],
       "remaining": []
     },
@@ -78071,7 +78071,7 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.TriggerServerCrashDump",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithUserActionHeader"
+        "github.com/JSYoo5B/go-openstacksdk/request.Header"
       ],
       "contracts": [
         {
@@ -78183,8 +78183,8 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/serverexternalevents.API.CreateRecords",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/serverexternalevents.New",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/serverexternalevents.WithCreateHeader",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/serverexternalevents.WithCreateMicroversion"
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion"
       ],
       "contracts": [
         {
@@ -78233,8 +78233,8 @@
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.API.GetQuotaClassRecord",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithQuotaClassGetOpts",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithQuotaClassName",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithQuotaClassGetHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithQuotaClassGetMicroversion"
+        "github.com/JSYoo5B/go-openstacksdk/request.Headers",
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion"
       ],
       "contracts": [
         {
@@ -78272,8 +78272,8 @@
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.API.UpdateQuotaClassRecord",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithQuotaClassUpdateOpts",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithQuotaClassUpdateAttribute",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithQuotaClassUpdateHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithQuotaClassUpdateMicroversion"
+        "github.com/JSYoo5B/go-openstacksdk/request.Headers",
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion"
       ],
       "contracts": [
         {
@@ -105630,8 +105630,8 @@
         "github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorRAMGetExtraValue",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorRAMQueryOptions",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryExtraSpecs",
-        "github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryHeader",
-        "github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.API.ListSourceRecords"
       ],
       "contracts": [
@@ -106040,7 +106040,7 @@
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/hypervisors.API.ListRecords",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/hypervisors.API.AllRecords",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/hypervisors.WithRecordDetails",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/hypervisors.WithRecordQuery"
+        "github.com/JSYoo5B/go-openstacksdk/request.Query"
       ],
       "contracts": [
         {
@@ -106126,7 +106126,7 @@
         "github.com/JSYoo5B/go-openstacksdk/compute.WithServerGroupCloudReadOpts",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithServerGroupCloudFilters",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithServerGroupCloudExpression",
-        "github.com/JSYoo5B/go-openstacksdk/compute.WithServerGroupCloudHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/request.Headers",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithServerGroupCloudCurrentLocation",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.API.ListCloudRecords",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.API.FindCloudRecord",
@@ -106228,7 +106228,7 @@
         "github.com/JSYoo5B/go-openstacksdk/compute.WithServerGroupCloudReadOpts",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithServerGroupCloudFilters",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithServerGroupCloudExpression",
-        "github.com/JSYoo5B/go-openstacksdk/compute.WithServerGroupCloudHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/request.Headers",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithServerGroupCloudCurrentLocation",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.API.ListCloudRecords",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.API.FindCloudRecord",
@@ -106580,7 +106580,7 @@
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.ListCloudRecords",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindDetails",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindAllProjects",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindQuery",
+        "github.com/JSYoo5B/go-openstacksdk/request.Query",
         "github.com/JSYoo5B/go-openstacksdk.WithCloudServerListOptions",
         "github.com/JSYoo5B/go-openstacksdk.Connection.ListServers",
         "github.com/JSYoo5B/go-openstacksdk.WithCloudServerDetailed",
@@ -106631,7 +106631,7 @@
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.ListCloudRecords",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindDetails",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindAllProjects",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindQuery",
+        "github.com/JSYoo5B/go-openstacksdk/request.Query",
         "github.com/JSYoo5B/go-openstacksdk.WithCloudServerListOptions",
         "github.com/JSYoo5B/go-openstacksdk.WithCloudServerFilters",
         "github.com/JSYoo5B/go-openstacksdk.WithCloudServerExpression",

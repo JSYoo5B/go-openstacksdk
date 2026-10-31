@@ -46,7 +46,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.API.FindKeypair`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithKeypairFindOptions`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithKeypairFindUserID`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithKeypairFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 
 - Find always attempts the escaped fixed member GET for accepted literal UTF-8 input and optional truthy owner. A successful member response returns its input-name/owner-seeded Resource with response fields overriding seed including null, while Wire and Envelope contain only actual response data. Opaque/malformed/empty accepted bodies retain the seed with nil Wire; valid nonobject/envelope failures retain a receipt beside the error.
   Tests: `api/compute_keypair_find_test.go:TestComputeFindKeypairDirectSeedAndOwnerPreservingFullListFallback`, `resource/find_identity_response_id_test.go:TestCollectionFindIdentityPassiveIDsAreOnlyCompared`.
@@ -207,9 +207,9 @@ func run(ctx context.Context, name, owner, kind string, maximum int, strict bool
     if name != "" {
         options := []keypairs.KeypairFindOption{
             keypairs.WithKeypairFindUserID(owner),
-            keypairs.WithKeypairFindIgnoreMissing(!strict),
+            request.IgnoreMissing(!strict),
         }
-        if versionSet { options = append(options, keypairs.WithKeypairFindMicroversion(version)) }
+        if versionSet { options = append(options, request.Microversion(version)) }
         record, err := api.FindKeypair(ctx, name, options...)
         if record != nil {
             if printErr := printRecord(record); printErr != nil { return errors.Join(err, printErr) }
@@ -220,10 +220,10 @@ func run(ctx context.Context, name, owner, kind string, maximum int, strict bool
     }
     options := []keypairs.KeypairListOption{
         keypairs.WithKeypairListUserID(owner),
-        keypairs.WithKeypairListMaxItems(maximum),
+        request.MaxItems(maximum),
     }
     if kind != "" { options = append(options, keypairs.WithKeypairListFilter("type", kind)) }
-    if versionSet { options = append(options, keypairs.WithKeypairListMicroversion(version)) }
+    if versionSet { options = append(options, request.Microversion(version)) }
     for record, err := range api.ListRecords(ctx, options...) {
         if err != nil { return fmt.Errorf("list keypairs: %w", err) }
         if err := printRecord(record); err != nil { return err }

@@ -29,7 +29,7 @@ func TestPythonTriggerServerCrashDumpOwnsPayloadRouteAndSelectedVersion(t *testi
 			})
 			client.Microversion = version
 			client.MoreHeaders = map[string]string{"Accept": "application/foreign"}
-			err := servers.New(client).TriggerServerCrashDump(context.Background(), "folder/name%", servers.WithUserActionHeader("X-Owned", "captured"), servers.WithUserActionHeader("Accept", "caller"))
+			err := servers.New(client).TriggerServerCrashDump(context.Background(), "folder/name%", request.Header("X-Owned", "captured"), request.Header("Accept", "caller"))
 			if err != nil || calls.Len() != 1 {
 				t.Fatal(err, pythonServerCalls(calls))
 			}
@@ -64,8 +64,8 @@ func TestPythonTriggerServerCrashDumpOptionsAndSourceGuardsPrecedeHTTP(t *testin
 	client, _, calls := pythonServerCloud(t, func(*http.Request) *http.Response { t.Fatal("invalid crash dump sent HTTP"); return nil })
 	api := servers.New(client)
 	for _, opts := range [][]servers.UserActionOption{
-		{nil}, {servers.WithUserActionField("x", true)}, {servers.WithUserActionHeader("X-Auth-Token", "foreign")},
-		{func(c *request.Config[servers.UserActionOpts]) error { c.Query.Set("name", "forbidden"); return nil }},
+		{nil}, {request.Field("x", true)}, {request.Header("X-Auth-Token", "foreign")},
+		{request.Custom(func(c *request.Config[servers.UserActionOpts]) error { c.Query.Set("name", "forbidden"); return nil })},
 	} {
 		if err := api.TriggerServerCrashDump(context.Background(), "s1", opts...); err == nil || calls.Len() != 0 {
 			t.Fatal(err, pythonServerCalls(calls))
@@ -85,11 +85,11 @@ func TestPythonTriggerServerCrashDumpOptionsAndSourceGuardsPrecedeHTTP(t *testin
 	}
 	original := client.ResourceBase
 	later := 0
-	err := api.TriggerServerCrashDump(context.Background(), "s1", func(*request.Config[servers.UserActionOpts]) error { client.ResourceBase += "changed/"; return nil }, func(*request.Config[servers.UserActionOpts]) error {
+	err := api.TriggerServerCrashDump(context.Background(), "s1", request.Custom(func(*request.Config[servers.UserActionOpts]) error { client.ResourceBase += "changed/"; return nil }), request.Custom(func(*request.Config[servers.UserActionOpts]) error {
 		later++
 		client.ResourceBase = original
 		return nil
-	})
+	}))
 	client.ResourceBase = original
 	if !errors.Is(err, resource.ErrInvalidOption) || later != 0 || calls.Len() != 0 {
 		t.Fatal(err, later, pythonServerCalls(calls))

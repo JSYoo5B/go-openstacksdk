@@ -23,7 +23,7 @@ remain the Gophercloud-shaped alternative described in `docs/listing.md`.
 
 ## Query parameters
 
-`WithRecordFindQuery(key, value)` accepts every client-side name of the pinned
+`request.Query(key, value)` accepts every client-side name of the pinned
 `Server._query_mapping` and its Nova name, including the implicit `limit` and
 `marker` and the tag filters:
 
@@ -78,13 +78,13 @@ name.
 
 ## Per-call controls
 
-- `WithRecordFindMicroversion` overrides the negotiated microversion for this
+- `request.Microversion` overrides the negotiated microversion for this
   call only; without it the captured client microversion is used, or the
   minimum of the server maximum and `Server._max_microversion` 2.100 is
   negotiated.
-- `WithRecordFindHeaders` adds request headers; `Accept: application/json` is
+- `request.Headers` sets the request headers; `Accept: application/json` is
   the default and may be replaced. Microversion headers must use
-  `WithRecordFindMicroversion`.
+  `request.Microversion`.
 - The Python control keyword arguments (`paginated`, `max_items`,
   `microversion`, `headers`, `details`, `all_projects`, `base_path`) are typed
   options in Go; passing them as raw query keys fails before HTTP. The

@@ -223,7 +223,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.ConsoleOutput`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithConsoleOutputLength`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithConsoleOutputOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithConsoleOutputField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - The owned ConsoleOutput action uses the selected reverse/resource-base servers/{id}/action route with no preliminary GET or query. Omitted/nil length sends an empty action object; explicit0, positive and negative integers are transmitted literally. Default Accept is empty like the source action, while current authentication, configured source header and selected Compute2.87 are preserved. Reused helper options apply once per call and do not replace the native service/provider.
   Tests: `api/compute_console_output_test.go:TestComputeConsoleOutputLiteralLengthOwnedOptionsAndNativeCompatibility`.

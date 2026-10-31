@@ -20,8 +20,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/remoteconsoles.WithConsoleCreateTypeValue`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/remoteconsoles.WithConsoleCreateURL`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/remoteconsoles.WithConsoleCreateURLValue`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/remoteconsoles.WithConsoleCreateField`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/remoteconsoles.WithConsoleCreateHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 
 - CreateConsole posts directly to the selected ResourceBase servers/{serverID}/remote-consoles route without GET, LIST, query, discovery or a legacy action request. Omitted attributes produce an empty remote_console object. Omitted/null/empty protocol with a truthy type derives all seven pinned protocol mappings, unknown type derives null, and an explicit nonempty protocol is retained even when inconsistent. Nullable Type/URL, URL values and explicit empty values remain concrete inputs; an unset Optional clears an earlier choice.
   Tests: `api/compute_remote_console_test.go:TestComputeRemoteConsoleRequestDefaultsDerivationAndSeedOwnership`.
@@ -50,9 +50,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.API.DeleteKeypair`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithKeypairDeleteOptions`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithKeypairDeleteUserID`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithKeypairDeleteIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithKeypairDeleteQuery`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithKeypairDeleteHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 
 - DeleteKeypair treats the supplied name as the logical keypair ID and makes one bodyless DELETE at the selected prefixed member route without GET, LIST or wait. Empty/default owner is omitted, an explicit Unicode/special-character owner and vendor query are URL-escaped, and selected live token/configured headers/both Compute2.1 version headers are retained without adding an owner-version gate or changing the client.
   Tests: `api/compute_keypair_delete_test.go:TestComputeKeypairDeleteOwnedDefaultsOwnerAndNativeCompatibility`.
@@ -180,7 +180,7 @@ func run(ctx context.Context, serverID, keyName, ownerID string, strict bool) er
         return fmt.Errorf("create remote console: %w", err)
     }
     options := []keypairs.KeypairDeleteOption{
-        keypairs.WithKeypairDeleteIgnoreMissing(!strict),
+        request.IgnoreMissing(!strict),
     }
     if ownerID != "" {
         options = append(options, keypairs.WithKeypairDeleteUserID(ownerID))

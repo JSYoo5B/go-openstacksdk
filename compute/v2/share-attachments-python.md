@@ -193,7 +193,7 @@ func main() {
         fmt.Printf("HTTP %d\n", value.StatusCode)
     case "delete":
         value, err := compute.ShareAttachments.DeleteRecord(ctx, *server, *share,
-            shareattachments.WithDeleteIgnoreMissing(!*strict))
+            request.IgnoreMissing(!*strict))
         if err != nil { log.Fatal(err) }
         printJSON(value)
     default:

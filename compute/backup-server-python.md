@@ -137,10 +137,10 @@ and timeout checks between requests rather than cancelling an in-flight lookup.
 Caller context cancellation still interrupts requests and waits.
 
 `WithBackupServerActionOptions` forwards concrete action options exactly once.
-`servers.WithBackupActionField` snapshots unknown JSON fields inside
+`request.Field` snapshots unknown JSON fields inside
 createBackup; name, backup_type, and rotation cannot be replaced through JSON
 extensions. `servers.WithBackupActionOptions` supplies an owned typed replacement.
-`servers.WithBackupActionHeader` validates ordinary extra headers; authentication,
+`request.Header` validates ordinary extra headers; authentication,
 protocol headers, selected version, and the operation's Accept remain SDK owned.
 Query and secondary argument extensions are unsupported.
 

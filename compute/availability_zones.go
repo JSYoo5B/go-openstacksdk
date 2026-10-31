@@ -12,6 +12,7 @@ import (
 	"slices"
 
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/availabilityzones"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
@@ -120,7 +121,18 @@ type AvailabilityZoneNamesOpts struct {
 	Unavailable  bool
 	Microversion *string
 }
-type AvailabilityZoneNamesOption = request.Option[AvailabilityZoneNamesOpts]
+
+// AvailabilityZoneNamesOption is one option of ListAvailabilityZoneNames:
+// WithAvailabilityZoneNamesOptions, WithUnavailableZones,
+// request.Microversion, request.Header or request.Custom over
+// *request.Config[AvailabilityZoneNamesOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type AvailabilityZoneNamesOption = request.GetCall
+
+var availabilityZoneNamesCalls = calls.Spec[request.Config[AvailabilityZoneNamesOpts]]{
+	Header:       calls.ConfigHeader[AvailabilityZoneNamesOpts],
+	Microversion: calls.Pointer(func(c *request.Config[AvailabilityZoneNamesOpts]) **string { return &c.Options.Microversion }),
+}
 
 func ownZoneNames(c *request.Config[AvailabilityZoneNamesOpts]) {
 	cloudread.OwnReadConfig(c)
@@ -134,24 +146,14 @@ func WithAvailabilityZoneNamesOptions(value AvailabilityZoneNamesOpts) Availabil
 		v := *value.Microversion
 		value.Microversion = &v
 	}
-	return func(c *request.Config[AvailabilityZoneNamesOpts]) error {
+	return request.Custom(func(c *request.Config[AvailabilityZoneNamesOpts]) error {
 		c.Options = value
 		ownZoneNames(c)
 		return nil
-	}
+	})
 }
 func WithUnavailableZones(value bool) AvailabilityZoneNamesOption {
-	return func(c *request.Config[AvailabilityZoneNamesOpts]) error { c.Options.Unavailable = value; return nil }
-}
-func WithAvailabilityZoneNamesMicroversion(value string) AvailabilityZoneNamesOption {
-	return func(c *request.Config[AvailabilityZoneNamesOpts]) error {
-		v := value
-		c.Options.Microversion = &v
-		return nil
-	}
-}
-func WithAvailabilityZoneNamesHeader(key, value string) AvailabilityZoneNamesOption {
-	return request.WithHeader[AvailabilityZoneNamesOpts](key, value)
+	return request.Custom(func(c *request.Config[AvailabilityZoneNamesOpts]) error { c.Options.Unavailable = value; return nil })
 }
 
 // Names and Value are completed results. SuppressedError explains a source-
@@ -211,7 +213,7 @@ func (s *Service) ListAvailabilityZoneNames(ctx context.Context, options ...Avai
 	if err != nil {
 		return nil, wrap(err)
 	}
-	config, err := cloudread.ApplyReadOptions(p.ctx, AvailabilityZoneNamesOpts{}, owned, ownZoneNames, p.check)
+	config, err := cloudread.ApplyReadOptions(p.ctx, AvailabilityZoneNamesOpts{}, calls.Options(owned, availabilityZoneNamesCalls), ownZoneNames, p.check)
 	if err == nil {
 		err = request.ValidateCapabilities(config, false, false, true)
 	}
@@ -220,10 +222,10 @@ func (s *Service) ListAvailabilityZoneNames(ctx context.Context, options ...Avai
 	}
 	leaf := []availabilityzones.AvailabilityZoneListOption{}
 	if config.Options.Microversion != nil {
-		leaf = append(leaf, availabilityzones.WithAvailabilityZoneMicroversion(*config.Options.Microversion))
+		leaf = append(leaf, request.Microversion(*config.Options.Microversion))
 	}
 	for key, value := range config.Headers {
-		leaf = append(leaf, availabilityzones.WithAvailabilityZoneHeader(key, value))
+		leaf = append(leaf, request.Header(key, value))
 	}
 	result := &AvailabilityZoneNamesResult{}
 	names := []json.RawMessage{}

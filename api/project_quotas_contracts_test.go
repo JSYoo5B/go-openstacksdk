@@ -410,11 +410,11 @@ func TestProjectQuotaHTTPFailuresPreserveStatusBodyHeaderAndNotFound(t *testing.
 					t.Fatalf("response=%+v sdk=%+v err=%v", response, sdk, err)
 				}
 				if operation == "Reset" {
-					value, err := scope.Reset(context.Background(), quotasets.WithResetIgnoreMissing(true))
+					value, err := scope.Reset(context.Background(), request.IgnoreMissing(true))
 					if value != nil || (err == nil) != (status == 404) {
 						t.Fatalf("ignore reset=%v err=%v", value, err)
 					}
-					_, err = scope.Reset(context.Background(), quotasets.WithResetIgnoreMissing(true), quotasets.WithResetIgnoreMissing(false))
+					_, err = scope.Reset(context.Background(), request.IgnoreMissing(true), request.IgnoreMissing(false))
 					if !gophercloud.ResponseCodeIs(err, status) {
 						t.Fatalf("last reset option did not win: %v", err)
 					}

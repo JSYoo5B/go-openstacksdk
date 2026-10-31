@@ -1,6 +1,6 @@
 # Compute service lookup
 
-`FindRecord` follows the pinned `compute.find_service` override. It sends only LIST, compares Python-style string IDs or the `name` descriptor (which falls back to `binary`), then applies the optional `host` filter locally. Source discards other query kwargs rather than sending them to Nova. Duplicate matches are errors; missing defaults to nil, or errors with `WithRecordIgnoreMissing(false)`.
+`FindRecord` follows the pinned `compute.find_service` override. It sends only LIST, compares Python-style string IDs or the `name` descriptor (which falls back to `binary`), then applies the optional `host` filter locally. Source discards other query kwargs rather than sending them to Nova. Duplicate matches are errors; missing defaults to nil, or errors with `request.IgnoreMissing(false)`.
 
 `ReadRecord.Resource` contains declared descriptors, `Wire` retains response extensions, and `Envelope`, `Header`, `StatusCode` retain actual HTTP evidence. Version discovery chooses at most 2.69 when the client has no selected version. Typed headers/microversion are explicit Go transport conveniences; Source's query kwargs do not gain those meanings.
 
@@ -26,7 +26,7 @@ func main() {
     provider.UseTokenLock()
     provider.SetToken(os.Getenv("OS_TOKEN"))
     client := &gophercloud.ServiceClient{ProviderClient: provider, Type: "compute", Endpoint: os.Getenv("OS_COMPUTE_ENDPOINT")}
-    row, err := services.New(client).FindRecord(context.Background(), "nova-compute", services.WithRecordQuery("host", "node"), services.WithRecordIgnoreMissing(false))
+    row, err := services.New(client).FindRecord(context.Background(), "nova-compute", request.Query("host", "node"), request.IgnoreMissing(false))
     if err != nil { panic(err) }
     fmt.Println(string(row.Resource.Body["id"]))
 }

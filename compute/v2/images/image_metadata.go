@@ -7,9 +7,9 @@ import (
 	"errors"
 	"net/http"
 	"net/url"
-	"slices"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
@@ -30,7 +30,7 @@ func (a *API) fetchMetadata(ctx context.Context, op, id string, options []ReadOp
 	if err != nil {
 		return nil, imageWrap(ctx, op, err)
 	}
-	opts, err := applyOptions(ctx, p.guard, ReadOpts{}, copyRead, slices.Clone(options))
+	opts, err := applyOptions(ctx, p.guard, ReadOpts{}, copyRead, calls.Translate(options, readCalls))
 	if err == nil {
 		err = imageID(id)
 	}
@@ -90,7 +90,7 @@ func (a *API) SetMetadata(ctx context.Context, id string, metadata map[string]an
 	if !utf8.Valid(owned) {
 		return nil, imageWrap(ctx, op, imageInvalid("metadata must be UTF-8 JSON"))
 	}
-	opts, err := applyOptions(ctx, p.guard, ReadOpts{}, copyRead, slices.Clone(options))
+	opts, err := applyOptions(ctx, p.guard, ReadOpts{}, copyRead, calls.Translate(options, readCalls))
 	if err == nil {
 		err = imageID(id)
 	}
@@ -119,7 +119,7 @@ func (a *API) DeleteMetadata(ctx context.Context, id string, options ...DeleteMe
 	if err != nil {
 		return imageWrap(ctx, op, err)
 	}
-	opts, err := applyOptions(ctx, p.guard, DeleteMetadataOpts{}, copyDeleteMetadata, slices.Clone(options))
+	opts, err := applyOptions(ctx, p.guard, DeleteMetadataOpts{}, copyDeleteMetadata, calls.Translate(options, deleteMetadataCalls))
 	if err == nil {
 		err = imageID(id)
 	}

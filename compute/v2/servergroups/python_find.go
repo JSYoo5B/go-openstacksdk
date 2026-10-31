@@ -10,11 +10,11 @@ import (
 	"maps"
 	"net/http"
 	"net/url"
-	"slices"
 	"strings"
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/microversions"
@@ -258,7 +258,17 @@ type GroupFindOpts struct {
 	AllProjects   bool
 	Headers       map[string]string
 }
-type GroupFindOption func(*GroupFindOpts) error
+
+// GroupFindOption is one option of FindRecord: WithGroupFindOpts,
+// WithGroupFindAllProjects, request.IgnoreMissing, request.Headers (replaces
+// the headers) or request.Custom over *GroupFindOpts. Other shared calls fail
+// with resource.ErrInvalidOption before HTTP.
+type GroupFindOption = request.FindCall
+
+var groupFindCalls = calls.Spec[GroupFindOpts]{
+	IgnoreMissing: calls.Pointer(func(v *GroupFindOpts) **bool { return &v.IgnoreMissing }),
+	Headers:       calls.Value(func(v *GroupFindOpts) *map[string]string { return &v.Headers }),
+}
 
 func copyGroupFind(v GroupFindOpts) GroupFindOpts {
 	v.Headers = maps.Clone(v.Headers)
@@ -270,17 +280,10 @@ func copyGroupFind(v GroupFindOpts) GroupFindOpts {
 }
 func WithGroupFindOpts(value GroupFindOpts) GroupFindOption {
 	owned := copyGroupFind(value)
-	return func(v *GroupFindOpts) error { *v = copyGroupFind(owned); return nil }
-}
-func WithGroupFindIgnoreMissing(value bool) GroupFindOption {
-	return func(v *GroupFindOpts) error { x := value; v.IgnoreMissing = &x; return nil }
+	return request.Custom(func(v *GroupFindOpts) error { *v = copyGroupFind(owned); return nil })
 }
 func WithGroupFindAllProjects(value bool) GroupFindOption {
-	return func(v *GroupFindOpts) error { v.AllProjects = value; return nil }
-}
-func WithGroupFindHeaders(value map[string]string) GroupFindOption {
-	owned := maps.Clone(value)
-	return func(v *GroupFindOpts) error { v.Headers = maps.Clone(owned); return nil }
+	return request.Custom(func(v *GroupFindOpts) error { v.AllProjects = value; return nil })
 }
 
 // FindRecord GETs the literal identity first; a fault-free 400/403/404 permits
@@ -296,7 +299,7 @@ func (a *API) FindRecord(ctx context.Context, nameOrID string, options ...GroupF
 		return nil, groupRecordWrap(ctx, op, err)
 	}
 	opts := GroupFindOpts{}
-	for _, apply := range slices.Clone(options) {
+	for _, apply := range calls.Translate(options, groupFindCalls) {
 		if err = p.guard(ctx); err != nil {
 			return nil, groupRecordWrap(ctx, op, err)
 		}

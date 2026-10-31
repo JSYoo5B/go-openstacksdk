@@ -21,12 +21,12 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindAllProjects`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindOpts`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindDetails`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindAllProjects`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindQuery`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindLocation`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindLimit`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindMarker`
@@ -167,7 +167,7 @@ func main() {
     service, err := conn.ComputeV2(ctx)
     if err != nil { log.Fatal(err) }
     record, err := service.Servers.FindRecord(ctx, *identity,
-        servers.WithRecordFindIgnoreMissing(!*strict),
+        request.IgnoreMissing(!*strict),
         servers.WithRecordFindDetails(!*basic),
         servers.WithRecordFindAllProjects(*allProjects))
     if errors.Is(err, resource.ErrNotFound) { log.Fatal("server not found") }

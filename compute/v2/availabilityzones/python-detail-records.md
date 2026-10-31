@@ -16,8 +16,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/availabilityzones.API.ListDetailRecords`
 - `github.com/JSYoo5B/go-openstacksdk/compute.Service.ListAvailabilityZones`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/availabilityzones.WithAvailabilityZoneListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/availabilityzones.WithAvailabilityZoneMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/availabilityzones.WithAvailabilityZoneHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 
 - The details=False branch is available through ListRecords and Service.ListAvailabilityZones at the ordinary fixed path. id/name/state/hosts are passive raw descriptors with missing or null represented by JSON null; zoneName/name and zoneState/state aliases follow original dictionary order, unknown fields remain Wire-only, and a name never fabricates inherited id.
   Tests: `api/compute_availability_zones_test.go:TestComputeAvailabilityZoneRecordsOrdinaryViewsLazyPagingAndOwnership`, `api/compute_availability_zones_test.go:TestComputeAvailabilityZoneNamesTruthinessSuppressionAndPartialInventory`, `compute/v2/availabilityzones/python_detail_records_test.go:TestPythonZoneDetailRecordsLeaveOrdinaryRoute`.
@@ -27,7 +27,7 @@ Go API:
   Tests: `api/compute_availability_zones_test.go:TestComputeAvailabilityZoneRecordsOrdinaryViewsLazyPagingAndOwnership`.
 - The actual collection implementation composes the existing optional page reader, singleton-object representation and decode-no-content policies, plus an opt-in first advertised server limit that remains fixed without enabling initial-limit marker fallback. This shared behavior is separate from native SinglePageBase DTO listing.
   Tests: `internal/rest/list_test.go:TestListOptionalReaderAndRepresentationsKeepDefaultPolicy`, `internal/rest/list_test.go:TestListFirstServerLimitIsOptInAndFixedAcrossContinuations`, `api/compute_availability_zones_test.go:TestComputeAvailabilityZoneRecordsOrdinaryViewsLazyPagingAndOwnership`.
-- The details=True branch is ListDetailRecords: it sends a bodyless, queryless GET os-availability-zone/detail with the client microversion in X-OpenStack-Nova-API-Version and OpenStack-API-Version, no version headers for a blank client or an explicit empty WithAvailabilityZoneMicroversion, and caller headers from WithAvailabilityZoneHeader.
+- The details=True branch is ListDetailRecords: it sends a bodyless, queryless GET os-availability-zone/detail with the client microversion in X-OpenStack-Nova-API-Version and OpenStack-API-Version, no version headers for a blank client or an explicit empty request.Microversion, and caller headers from request.Header.
   Tests: `compute/v2/availabilityzones/python_detail_records_test.go:TestPythonZoneDetailRecordsUseDetailRouteAndKeepHosts`.
 - Detail rows use the same AvailabilityZoneRecord projection as ListRecords: zoneName/zoneState become name/state, hosts with per-service active/available/updated_at state stay raw JSON, id and location are null, unknown vendor fields remain only in Wire, and Envelope/Header/StatusCode keep the actual row and page receipt.
   Tests: `compute/v2/availabilityzones/python_detail_records_test.go:TestPythonZoneDetailRecordsUseDetailRouteAndKeepHosts`.

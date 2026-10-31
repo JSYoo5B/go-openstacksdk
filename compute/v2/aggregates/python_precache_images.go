@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -18,11 +19,13 @@ import (
 
 // PrecacheImagesOpts carries transport headers; the action owns version 2.81.
 type PrecacheImagesOpts struct{}
-type PrecacheImagesOption = request.Option[PrecacheImagesOpts]
 
-func WithPrecacheImagesHeader(key, value string) PrecacheImagesOption {
-	return request.WithHeader[PrecacheImagesOpts](key, value)
-}
+// PrecacheImagesOption is one option of PrecacheImages: request.Header or
+// request.Custom over *request.Config[PrecacheImagesOpts]. Other shared calls
+// fail with resource.ErrInvalidOption before HTTP.
+type PrecacheImagesOption = request.WriteCall
+
+var precacheImagesCalls = calls.Spec[request.Config[PrecacheImagesOpts]]{Header: calls.ConfigHeader[PrecacheImagesOpts]}
 
 // PrecacheImages sends aggregate_precache_images. A single image uses
 // []string{image}; an empty list sends an empty cache array. IDs are literal.
@@ -53,7 +56,7 @@ func (a *API) PrecacheImages(ctx context.Context, aggregateID int, images []stri
 	for i, id := range images {
 		cache[i] = map[string]string{"id": id}
 	}
-	cfg, err := cloudread.ApplyReadOptions(ctx, PrecacheImagesOpts{}, options, cloudread.OwnReadConfig[PrecacheImagesOpts], guard)
+	cfg, err := cloudread.ApplyReadOptions(ctx, PrecacheImagesOpts{}, calls.Options(options, precacheImagesCalls), cloudread.OwnReadConfig[PrecacheImagesOpts], guard)
 	if err == nil {
 		err = request.ValidateCapabilities(cfg, false, false, true)
 	}

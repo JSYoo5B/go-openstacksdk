@@ -140,8 +140,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.WithUpdateRecordOptions`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.WithUpdateRecordName`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.WithUpdateRecordAvailabilityZone`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.WithUpdateRecordField`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.WithUpdateRecordHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/request.Null`
 - `github.com/JSYoo5B/go-openstacksdk/request.Present`
 
@@ -154,7 +154,7 @@ Python/Go differences:
 
 - Python accepts an Aggregate or an ID string; Go takes the integer aggregate ID.
 - Python sends min(Aggregate _max_microversion 2.81, server maximum) discovered per request; Go sends the one microversion configured on the client.
-- Python drops undeclared keyword attributes; WithUpdateRecordField sends any extension key except the typed keys and id.
+- Python drops undeclared keyword attributes; request.Field sends any extension key except the typed keys and id.
 - Python returns the Resource merged from request attributes and the response; Go returns AggregateRecord with the native typed decode, the raw response object fields, headers and status, and Sent false when no request was needed.
 
 ### `python:compute/v2/create_flavor`
@@ -552,9 +552,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.ListServerMigrationRecords`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.AllServerMigrationRecords`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithServerMigrationOpts`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithServerMigrationHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithServerMigrationMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithServerMigrationIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 
 - Lazy server-scoped migration iteration uses the bound parent collection, untyped nullable descriptor/default projection, absent-id uuid alternate identity and actual physical page evidence; unknown Body/server_id values are not allowed to alter routing or Resource attributes. Complete advertised pages are consumed while early consumer break avoids further requests.
   Tests: `compute/v2/servers/python_server_migrations_test.go:TestPythonServerMigrationListIsLazyAndKeepsUntypedProjection`, `compute/v2/servers/python_server_migrations_test.go:TestPythonServerMigrationListFollowsCompletePagesAndHonorsEarlyBreak`.
@@ -574,9 +574,9 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.GetServerMigrationRecord`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithServerMigrationOpts`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithServerMigrationHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithServerMigrationMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithServerMigrationIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 
 - Member GET escapes parent and migration IDs independently, overlays passive actual response id on constructor seed and returns declared view plus physical response evidence. Source ignore_missing is a constructor-only discarded attr, so GET404 remains strict rather than missing suppression.
   Tests: `compute/v2/servers/python_server_migrations_test.go:TestPythonServerMigrationGetOwnsParentURIAndPassiveResponseID`, `compute/v2/servers/python_server_migrations_test.go:TestPythonServerMigrationGet404IsStrictForBothMissingFlags`.
@@ -596,9 +596,9 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.AbortServerMigration`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithServerMigrationOpts`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithServerMigrationHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithServerMigrationMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithServerMigrationIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 
 - Abort sends bodyless DELETE to the selected migration member, defaults to ignoring clean404 and permits strict missing. Completed/IgnoredMissing and actual Response receipt distinguish accepted completion from ignored absence without fabricating a Resource.
   Tests: `compute/v2/servers/python_server_migrations_test.go:TestPythonServerMigrationAbortMissingDefaultAndStrictPolicies`, `compute/v2/servers/python_server_migrations_test.go:TestPythonServerMigrationActionsOwnLiteralForceCompleteAndReceipts`.
@@ -619,9 +619,9 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.ForceCompleteServerMigration`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithServerMigrationOpts`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithServerMigrationHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithServerMigrationMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithServerMigrationIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 
 - Force-complete posts exactly {"force_complete":null} to the selected migration member action without resource-body decoding; non-JSON successful response remains actual receipt and the API does not wait for migration completion.
   Tests: `compute/v2/servers/python_server_migrations_test.go:TestPythonServerMigrationActionsOwnLiteralForceCompleteAndReceipts`.
@@ -658,7 +658,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.TriggerServerCrashDump`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithUserActionHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 
 - TriggerServerCrashDump posts exactly {"trigger_crash_dump":null} to the escaped server action with owned empty Accept and selected version, leaving the shared client unchanged. Like the pinned Source method it adds no action-local2.17 rejection gate.
   Tests: `compute/v2/servers/python_crash_dump_test.go:TestPythonTriggerServerCrashDumpOwnsPayloadRouteAndSelectedVersion`.
@@ -732,8 +732,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.API.GetQuotaClassRecord`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithQuotaClassGetOpts`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithQuotaClassName`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithQuotaClassGetHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithQuotaClassGetMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - GET default/custom class names use the selected literal route, preserve declared untyped id and15 integer/default/null fields independently from actual unknown Wire and response proof. Invalid accepted integer conversion retains original evidence.
   Tests: `compute/v2/quotasets/python_quota_class_test.go:TestNovaQuotaClassGetDefaultAndCustomNamesKeepLiteralRoutes`, `compute/v2/quotasets/python_quota_class_test.go:TestNovaQuotaClassInvalidIntegerRetainsAcceptedResponse`.
@@ -756,8 +756,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.API.UpdateQuotaClassRecord`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithQuotaClassUpdateOpts`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithQuotaClassUpdateAttribute`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithQuotaClassUpdateHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithQuotaClassUpdateMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - PUT sends explicit raw quota_class_set attrs including nullable values, then projects declared integer view on response overlay without sending defaults or dirty id. Empty/unknown-only updates perform neither HTTP nor discovery and duplicate attrs id is rejected.
   Tests: `compute/v2/quotasets/python_quota_class_test.go:TestNovaQuotaClassUpdatePUTUsesRawAttributesAndProjectedResponse`, `compute/v2/quotasets/python_quota_class_test.go:TestNovaQuotaClassUpdateNoopSkipsHTTPAndDiscoveryAndIDCollisions`.

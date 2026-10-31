@@ -14,9 +14,11 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/microversions"
 	"github.com/JSYoo5B/go-openstacksdk/internal/neutronfind"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -29,7 +31,20 @@ type ServerMigrationOpts struct {
 	Microversion  *string
 	IgnoreMissing *bool
 }
-type ServerMigrationOption func(*ServerMigrationOpts) error
+
+// ServerMigrationOption is one option of ListServerMigrationRecords,
+// AllServerMigrationRecords, GetServerMigrationRecord, AbortServerMigration
+// and ForceCompleteServerMigration: WithServerMigrationOpts, request.Headers
+// (replaces the headers), request.Microversion, request.IgnoreMissing or
+// request.Custom over *ServerMigrationOpts. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type ServerMigrationOption = request.DeleteCall
+
+var serverMigrationCalls = calls.Spec[ServerMigrationOpts]{
+	Headers:       calls.Value(func(c *ServerMigrationOpts) *map[string]string { return &c.Headers }),
+	Microversion:  calls.Pointer(func(c *ServerMigrationOpts) **string { return &c.Microversion }),
+	IgnoreMissing: calls.Pointer(func(c *ServerMigrationOpts) **bool { return &c.IgnoreMissing }),
+}
 
 func copyServerMigrationOpts(v ServerMigrationOpts) ServerMigrationOpts {
 	v.Headers = maps.Clone(v.Headers)
@@ -45,17 +60,7 @@ func copyServerMigrationOpts(v ServerMigrationOpts) ServerMigrationOpts {
 }
 func WithServerMigrationOpts(v ServerMigrationOpts) ServerMigrationOption {
 	owned := copyServerMigrationOpts(v)
-	return func(c *ServerMigrationOpts) error { *c = copyServerMigrationOpts(owned); return nil }
-}
-func WithServerMigrationHeaders(v map[string]string) ServerMigrationOption {
-	owned := maps.Clone(v)
-	return func(c *ServerMigrationOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
-func WithServerMigrationMicroversion(v string) ServerMigrationOption {
-	return func(c *ServerMigrationOpts) error { x := v; c.Microversion = &x; return nil }
-}
-func WithServerMigrationIgnoreMissing(v bool) ServerMigrationOption {
-	return func(c *ServerMigrationOpts) error { x := v; c.IgnoreMissing = &x; return nil }
+	return request.Custom(func(c *ServerMigrationOpts) error { *c = copyServerMigrationOpts(owned); return nil })
 }
 
 // ServerMigrationRecord separates the declared Source view from actual wire
@@ -145,7 +150,7 @@ func (a *API) prepareServerMigration(ctx context.Context, serverID string, optio
 		return nil, err
 	}
 	p := &preparedServerMigration{action: action, engine: engine}
-	for _, apply := range slices.Clone(options) {
+	for _, apply := range calls.Translate(options, serverMigrationCalls) {
 		if err := engine.Check(ctx); err != nil {
 			return p, err
 		}

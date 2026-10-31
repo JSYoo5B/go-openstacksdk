@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
@@ -27,7 +28,28 @@ type KeypairListOpts struct {
 	Microversion *string
 }
 
-type KeypairListOption = request.Option[KeypairListOpts]
+// KeypairListOption is one option of ListRecords: WithKeypairListOptions,
+// WithKeypairListUserID, WithKeypairListFilter, WithKeypairListFilters,
+// request.Query with a string or []string value (a raw wire query that
+// overrides the same typed query; operation controls require their dedicated
+// calls), request.Limit, request.Marker,
+// request.MaxItems (caps consumed raw rows before local Body filtering),
+// request.Paginated, request.Microversion, request.Header or request.Custom
+// over *request.Config[KeypairListOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type KeypairListOption = request.ListCall
+
+var keypairListCalls = calls.Spec[request.Config[KeypairListOpts]]{
+	Header:       calls.ConfigHeader[KeypairListOpts],
+	Query:        calls.ConfigQuery[KeypairListOpts],
+	Microversion: calls.Pointer(func(c *request.Config[KeypairListOpts]) **string { return &c.Options.Microversion }),
+	Paging: calls.Paging[request.Config[KeypairListOpts]]{
+		Limit:     calls.Value(func(c *request.Config[KeypairListOpts]) *int { return &c.Options.Limit }),
+		Marker:    calls.Value(func(c *request.Config[KeypairListOpts]) *string { return &c.Options.Marker }),
+		MaxItems:  calls.Value(func(c *request.Config[KeypairListOpts]) *int { return &c.Options.MaxItems }),
+		Paginated: calls.Pointer(func(c *request.Config[KeypairListOpts]) **bool { return &c.Options.Paginated }),
+	},
+}
 
 func copyKeypairListOptions(value KeypairListOpts) KeypairListOpts {
 	if value.Paginated != nil {
@@ -45,47 +67,13 @@ func copyKeypairListOptions(value KeypairListOpts) KeypairListOpts {
 // query and semantic filters. Mutable pointer values are owned now.
 func WithKeypairListOptions(value KeypairListOpts) KeypairListOption {
 	owned := copyKeypairListOptions(value)
-	return func(config *request.Config[KeypairListOpts]) error {
+	return request.Custom(func(config *request.Config[KeypairListOpts]) error {
 		config.Options = copyKeypairListOptions(owned)
 		return nil
-	}
+	})
 }
 func WithKeypairListUserID(value string) KeypairListOption {
-	return func(config *request.Config[KeypairListOpts]) error { config.Options.UserID = value; return nil }
-}
-func WithKeypairListLimit(value int) KeypairListOption {
-	return func(config *request.Config[KeypairListOpts]) error { config.Options.Limit = value; return nil }
-}
-func WithKeypairListMarker(value string) KeypairListOption {
-	return func(config *request.Config[KeypairListOpts]) error { config.Options.Marker = value; return nil }
-}
-
-// WithKeypairListMaxItems caps consumed raw rows before local Body filtering.
-func WithKeypairListMaxItems(value int) KeypairListOption {
-	return func(config *request.Config[KeypairListOpts]) error { config.Options.MaxItems = value; return nil }
-}
-func WithKeypairListPaginated(value bool) KeypairListOption {
-	return func(config *request.Config[KeypairListOpts]) error {
-		owned := value
-		config.Options.Paginated = &owned
-		return nil
-	}
-}
-func WithKeypairListMicroversion(value string) KeypairListOption {
-	return func(config *request.Config[KeypairListOpts]) error {
-		owned := value
-		config.Options.Microversion = &owned
-		return nil
-	}
-}
-func WithKeypairListHeader(key, value string) KeypairListOption {
-	return request.WithHeader[KeypairListOpts](key, value)
-}
-
-// WithKeypairListQuery supplies a raw wire query, overriding the same typed
-// query. Operation controls require their dedicated helpers.
-func WithKeypairListQuery(key, value string) KeypairListOption {
-	return request.WithQuery[KeypairListOpts](key, value)
+	return request.Custom(func(config *request.Config[KeypairListOpts]) error { config.Options.UserID = value; return nil })
 }
 
 const keypairListFiltersArgument = "keypair_record_filters"
@@ -104,7 +92,7 @@ func capturedKeypairListFilters(arguments map[string]any) ([]resource.ListOption
 	return append([]resource.ListOption(nil), capture.options...), nil
 }
 func keypairListFilterOption(option resource.ListOption) KeypairListOption {
-	return func(config *request.Config[KeypairListOpts]) error {
+	return request.Custom(func(config *request.Config[KeypairListOpts]) error {
 		options, err := capturedKeypairListFilters(config.Arguments)
 		if err != nil {
 			return err
@@ -114,7 +102,7 @@ func keypairListFilterOption(option resource.ListOption) KeypairListOption {
 		}
 		config.Arguments[keypairListFiltersArgument] = keypairListFilterCapture{options: append(options, option)}
 		return nil
-	}
+	})
 }
 
 // WithKeypairListFilter classifies a declared server query or local Body field.
@@ -168,8 +156,9 @@ type keypairListParameters struct {
 }
 
 func prepareKeypairList(ctx context.Context, guard func(context.Context) error, options []KeypairListOption) (keypairListParameters, error) {
-	guarded := make([]KeypairListOption, len(options))
-	for index, option := range options {
+	translated := calls.Options(options, keypairListCalls)
+	guarded := make([]request.Option[KeypairListOpts], len(translated))
+	for index, option := range translated {
 		apply := option
 		guarded[index] = func(config *request.Config[KeypairListOpts]) error {
 			if err := guard(ctx); err != nil {

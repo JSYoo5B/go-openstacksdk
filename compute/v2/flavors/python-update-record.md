@@ -15,8 +15,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.API.UpdateRecord`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithUpdateRecordOptions`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithUpdateRecordDescription`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithUpdateRecordField`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithUpdateRecordHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/request.Null`
 - `github.com/JSYoo5B/go-openstacksdk/request.Present`
 
@@ -29,7 +29,7 @@ Python/Go differences:
 
 - Python accepts a Flavor or an ID string; Go takes the flavor ID string and rejects a blank one before HTTP.
 - Python sends min(Flavor _max_microversion 2.61, server maximum) discovered per request; Go sends the one microversion configured or negotiated on the Connection client.
-- Python maps attribute names such as is_public to server keys and drops undeclared keyword attributes; WithUpdateRecordField sends any extension key verbatim as a server key except description and id.
+- Python maps attribute names such as is_public to server keys and drops undeclared keyword attributes; request.Field sends any extension key verbatim as a server key except description and id.
 - Python returns the Resource merged from request attributes and the response; Go returns FlavorUpdateRecord with the native typed decode, the raw response object fields, headers and status, and Sent false when no request was needed.
 
 ## References

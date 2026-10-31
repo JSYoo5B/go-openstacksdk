@@ -97,12 +97,12 @@ func TestComputeKeypairDeleteOwnedDefaultsOwnerAndNativeCompatibility(t *testing
 			input.IgnoreMissing = request.Present(true)
 			options := []keypairs.KeypairDeleteOption{
 				captured,
-				keypairs.WithKeypairDeleteHeader("X-Extension", "owned"),
-				func(_ *request.Config[keypairs.KeypairDeleteOpts]) error {
+				request.Header("X-Extension", "owned"),
+				request.Custom(func(_ *request.Config[keypairs.KeypairDeleteOpts]) error {
 					callbacks.Add(1)
 					cloud.Provider.SetToken("delete-live")
 					return nil
-				},
+				}),
 			}
 			if check.extension != "" {
 				options = append(options, keypairs.WithKeypairDeleteQuery("vendor", check.extension))
@@ -233,23 +233,23 @@ func TestComputeKeypairDeleteOwnedPreflightAndOptionOwnership(t *testing.T) {
 			case "missing query":
 				options = append(options, keypairs.WithKeypairDeleteQuery("ignore_missing", "false"))
 			case "body field":
-				options = append(options, request.WithField[keypairs.KeypairDeleteOpts]("vendor", true))
+				options = append(options, request.Custom(request.WithField[keypairs.KeypairDeleteOpts]("vendor", true)))
 			case "auth header":
-				options = append(options, keypairs.WithKeypairDeleteHeader("X-Auth-Token", "extension-token"))
+				options = append(options, request.Header("X-Auth-Token", "extension-token"))
 			case "option cancellation":
-				options = append(options, func(_ *request.Config[keypairs.KeypairDeleteOpts]) error { cancel(cause); return original })
+				options = append(options, request.Custom(func(_ *request.Config[keypairs.KeypairDeleteOpts]) error { cancel(cause); return original }))
 			case "option source":
-				options = append(options, func(_ *request.Config[keypairs.KeypairDeleteOpts]) error {
+				options = append(options, request.Custom(func(_ *request.Config[keypairs.KeypairDeleteOpts]) error {
 					client.ResourceBase = cloud.Server.URL + "/changed/"
 					return nil
-				})
+				}))
 			case "reassigned API":
-				options = append(options, func(_ *request.Config[keypairs.KeypairDeleteOpts]) error {
+				options = append(options, request.Custom(func(_ *request.Config[keypairs.KeypairDeleteOpts]) error {
 					*api = *keypairs.New(flavorIdentityClient(cloud))
 					return nil
-				})
+				}))
 			}
-			options = append(options, func(_ *request.Config[keypairs.KeypairDeleteOpts]) error { later.Add(1); return nil })
+			options = append(options, request.Custom(func(_ *request.Config[keypairs.KeypairDeleteOpts]) error { later.Add(1); return nil }))
 			err := api.DeleteKeypair(ctx, name, options...)
 			if err == nil || calls.Load() != 0 {
 				t.Fatal("invalid preflight reached HTTP", err, calls.Load())
@@ -298,22 +298,22 @@ func TestComputeKeypairDeleteOwnedPreflightAndOptionOwnership(t *testing.T) {
 			sharedHeaders := map[string]string{"X-Extension": "kept"}
 			var callbacks atomic.Int32
 			options := []keypairs.KeypairDeleteOption{
-				keypairs.WithKeypairDeleteIgnoreMissing(false), keypairs.WithKeypairDeleteUserID("first-owner"),
-				func(config *request.Config[keypairs.KeypairDeleteOpts]) error {
+				request.IgnoreMissing(false), keypairs.WithKeypairDeleteUserID("first-owner"),
+				request.Custom(func(config *request.Config[keypairs.KeypairDeleteOpts]) error {
 					callbacks.Add(1)
 					config.Query = sharedQuery
 					config.Headers = sharedHeaders
 					return nil
-				},
-				func(_ *request.Config[keypairs.KeypairDeleteOpts]) error {
+				}),
+				request.Custom(func(_ *request.Config[keypairs.KeypairDeleteOpts]) error {
 					callbacks.Add(1)
 					sharedQuery.Set("vendor", "caller-changed")
 					sharedHeaders["X-Extension"] = "caller-changed"
 					return nil
-				},
+				}),
 			}
 			if mode == "last wins" {
-				options = append(options, keypairs.WithKeypairDeleteUserID("last-owner"), keypairs.WithKeypairDeleteIgnoreMissing(true))
+				options = append(options, keypairs.WithKeypairDeleteUserID("last-owner"), request.IgnoreMissing(true))
 			} else {
 				options = append(options, keypairs.WithKeypairDeleteOptions(keypairs.KeypairDeleteOpts{}))
 			}
@@ -426,7 +426,7 @@ func TestComputeKeypairDeleteAcceptedFailuresAndNativeRetryGuards(t *testing.T) 
 			client.ResourceBase = cloud.Server.URL + "/changed/"
 			return nil
 		}
-		err := keypairs.New(client).DeleteKeypair(context.Background(), "name", func(_ *request.Config[keypairs.KeypairDeleteOpts]) error { callbacks.Add(1); return nil })
+		err := keypairs.New(client).DeleteKeypair(context.Background(), "name", request.Custom(func(_ *request.Config[keypairs.KeypairDeleteOpts]) error { callbacks.Add(1); return nil }))
 		var native gophercloud.ErrUnexpectedResponseCode
 		if !errors.Is(err, resource.ErrInvalidOption) || !errors.As(err, &native) || native.Actual != 503 || string(native.Body) != body || native.ResponseHeader.Get("X-Delete-Proof") != "retry" || calls.Load() != 1 || retries.Load() != 1 || callbacks.Load() != 1 {
 			t.Fatal("retry source change resent/hidden original proof", err, native, calls.Load(), retries.Load(), callbacks.Load())

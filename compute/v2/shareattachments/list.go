@@ -11,6 +11,7 @@ import (
 	"net/url"
 	"strconv"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
@@ -51,7 +52,7 @@ func (a *API) ListRecords(ctx context.Context, server string, options ...ListOpt
 			fail(err)
 			return
 		}
-		cfg, err := cloudread.ApplyReadOptions(p.ctx, ListOpts{}, owned, ownList, p.guard)
+		cfg, err := cloudread.ApplyReadOptions(p.ctx, ListOpts{}, calls.Options(owned, listCalls), ownList, p.guard)
 		if err == nil {
 			err = request.ValidateCapabilities(cfg, false, false, true)
 		}

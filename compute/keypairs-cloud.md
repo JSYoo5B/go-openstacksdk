@@ -92,7 +92,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute.Service.CreateKeypair`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithCloudKeypairPublicKey`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithCloudKeypairCreateHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 
 - Cloud CreateKeypair always supplies name as literal body data, including an empty or path-like body name, and supplies public_key only for a nonempty string. Empty public key is omitted rather than forwarded as the leaf's explicit empty attribute. The library composes the existing one fixed keypair-enveloped collection POST without lookup, wait or cleanup.
   Tests: `api/compute_keypair_cloud_test.go:TestComputeCloudKeypairCreateAndDeleteOutcomes`, `api/compute_keypair_create_test.go:TestComputeKeypairCreateDirtyBodyAliasesAndNativeCompatibility`.
