@@ -11,6 +11,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/baremetal/v1/nodes"
 	"github.com/JSYoo5B/go-openstacksdk/baremetal/v1/ports"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -215,7 +216,7 @@ func TestR2IronicCPortRecordGetFindListFollowSource(t *testing.T) {
 	if gone, err := api.FindRecord(ctx, "by-name", ports.WithRecordFindDetails(false)); err != nil || gone != nil || len(basic.all()) != 1 {
 		t.Fatalf("basic fallback: %v %v", gone, err)
 	}
-	rows, err := api.AllRecords(ctx, ports.WithRecordListQuery("node_id", "n"), ports.WithRecordListQuery("address", "aa"), ports.WithRecordListQuery("sort_key", "name"), ports.WithRecordListQuery("fields", []string{"id", "extra"}))
+	rows, err := api.AllRecords(ctx, request.Query("node_id", "n"), request.Query("address", "aa"), request.Query("sort_key", "name"), request.Query("fields", []string{"id", "extra"}))
 	if err != nil || len(rows) != 1 {
 		t.Fatal(rows, err)
 	}
@@ -272,7 +273,7 @@ func TestR2IronicCPortListRecordsIsLazyAndStopsAfterBreak(t *testing.T) {
 	cloud := testcloud.New(t)
 	page := r2icServe(t, cloud, "GET /v1/ports/detail", 200, `{"ports":[{"uuid":"a"},{"uuid":"b"}],"ports_links":[{"rel":"next","href":"`+cloud.Server.URL+`/v1/ports/detail?marker=b"}]}`)
 	api := ports.New(r2icClient(cloud, "1.101"))
-	seq := api.ListRecords(context.Background(), ports.WithRecordListDetails(true), ports.WithRecordListQuery("sort_key", "x"))
+	seq := api.ListRecords(context.Background(), ports.WithRecordListDetails(true), request.Query("sort_key", "x"))
 	if len(page.all()) != 0 {
 		t.Fatal("building the sequence must not send a request")
 	}

@@ -5,6 +5,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/ironicrest"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
@@ -26,17 +27,13 @@ type CreateOpts struct {
 	Actions     []Action    `json:"actions,omitzero"`
 }
 
-type CreateOption = request.Option[CreateOpts]
+// CreateOption is one option of Create: request.Field (a JSON member this package does not model; it
+// cannot replace a typed member),
+// request.Header or request.Custom over *request.Config[CreateOpts]. Other
+// shared calls fail with resource.ErrInvalidOption before HTTP.
+type CreateOption = request.WriteCall
 
-// WithCreateField adds a JSON member this package does not model. It cannot
-// replace a typed member.
-func WithCreateField(key string, value any) CreateOption {
-	return request.WithField[CreateOpts](key, value)
-}
-
-func WithCreateHeader(key, value string) CreateOption {
-	return request.WithHeader[CreateOpts](key, value)
-}
+var createCalls = calls.Spec[request.Config[CreateOpts]]{Field: calls.ConfigField[CreateOpts], Header: calls.ConfigHeader[CreateOpts]}
 
 // UpdateOpts selects members to set. Every set member is sent as an "add"
 // operation on its path, ordered by path, like the Python resource commit. Use
@@ -50,31 +47,36 @@ type UpdateOpts struct {
 	Actions     []Action    `json:"actions,omitzero"`
 }
 
-type UpdateOption = request.Option[UpdateOpts]
+// UpdateOption is one option of Update: request.Field, request.Header or
+// request.Custom over *request.Config[UpdateOpts]. A field cannot replace a
+// typed member. Other shared calls fail with resource.ErrInvalidOption before
+// HTTP.
+type UpdateOption = request.WriteCall
 
-func WithUpdateField(key string, value any) UpdateOption {
-	return request.WithField[UpdateOpts](key, value)
-}
-func WithUpdateHeader(key, value string) UpdateOption {
-	return request.WithHeader[UpdateOpts](key, value)
-}
+var updateCalls = calls.Spec[request.Config[UpdateOpts]]{Field: calls.ConfigField[UpdateOpts], Header: calls.ConfigHeader[UpdateOpts]}
 
 // GetOpts selects the members to fetch. Names are server member names such as
 // uuid or description; they are sent as a comma separated fields query.
 type GetOpts struct{ Fields []string }
 
-type GetOption = request.Option[GetOpts]
+// GetOption is one option of Get: WithGetFields, request.Header or
+// request.Custom over *request.Config[GetOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type GetOption = request.GetCall
+
+var getCalls = calls.Spec[request.Config[GetOpts]]{Header: calls.ConfigHeader[GetOpts]}
 
 func WithGetFields(fields ...string) GetOption {
 	owned := append([]string(nil), fields...)
-	return func(c *request.Config[GetOpts]) error { c.Options.Fields = owned; return nil }
+	return request.Custom(func(c *request.Config[GetOpts]) error { c.Options.Fields = owned; return nil })
 }
-func WithGetHeader(key, value string) GetOption { return request.WithHeader[GetOpts](key, value) }
 
 // ListOpts controls a list. Detail true sends detail=true (false sends
 // nothing). Limit is a page size: the walk continues until an empty page.
 // MaxItems caps the rows yielded and, without Limit, is also sent as limit.
-// SinglePage stops after the first page.
+// SinglePage stops after the first page. request.Limit, request.Marker,
+// request.MaxItems and request.Paginated(false) set Limit, Marker, MaxItems and
+// SinglePage.
 type ListOpts struct {
 	Detail     bool
 	Fields     []string
@@ -84,47 +86,48 @@ type ListOpts struct {
 	SinglePage bool
 }
 
-type ListOption = request.Option[ListOpts]
+// ListOption is one option of List: WithListDetail, WithListFields,
+// request.Limit, request.Marker, request.MaxItems, request.Paginated,
+// request.Query with a string or []string value (a server-side filter or sort
+// such as sort_key; it cannot replace detail, fields, limit or marker),
+// request.Header or request.Custom over *request.Config[ListOpts]. Other
+// shared calls fail with resource.ErrInvalidOption before HTTP.
+type ListOption = request.ListCall
+
+var listCalls = calls.Spec[request.Config[ListOpts]]{
+	Header: calls.ConfigHeader[ListOpts],
+	Query:  calls.ConfigQuery[ListOpts],
+	Paging: calls.Paging[request.Config[ListOpts]]{
+		Limit:     func(c *request.Config[ListOpts], n int) error { c.Options.Limit = &n; return nil },
+		Marker:    func(c *request.Config[ListOpts], marker string) error { c.Options.Marker = &marker; return nil },
+		MaxItems:  func(c *request.Config[ListOpts], n int) error { c.Options.MaxItems = n; return nil },
+		Paginated: func(c *request.Config[ListOpts], paginated bool) error { c.Options.SinglePage = !paginated; return nil },
+	},
+}
 
 func WithListDetail(detail bool) ListOption {
-	return func(c *request.Config[ListOpts]) error { c.Options.Detail = detail; return nil }
+	return request.Custom(func(c *request.Config[ListOpts]) error { c.Options.Detail = detail; return nil })
 }
 func WithListFields(fields ...string) ListOption {
 	owned := append([]string(nil), fields...)
-	return func(c *request.Config[ListOpts]) error { c.Options.Fields = owned; return nil }
+	return request.Custom(func(c *request.Config[ListOpts]) error { c.Options.Fields = owned; return nil })
 }
-func WithListLimit(limit int) ListOption {
-	return func(c *request.Config[ListOpts]) error { c.Options.Limit = &limit; return nil }
-}
-func WithListMarker(marker string) ListOption {
-	return func(c *request.Config[ListOpts]) error { c.Options.Marker = &marker; return nil }
-}
-func WithListMaxItems(n int) ListOption {
-	return func(c *request.Config[ListOpts]) error { c.Options.MaxItems = n; return nil }
-}
-func WithListSinglePage() ListOption {
-	return func(c *request.Config[ListOpts]) error { c.Options.SinglePage = true; return nil }
-}
-
-// WithListQuery adds a server-side filter or sort query such as sort_key. It
-// cannot replace detail, fields, limit or marker.
-func WithListQuery(key, value string) ListOption  { return request.WithQuery[ListOpts](key, value) }
-func WithListHeader(key, value string) ListOption { return request.WithHeader[ListOpts](key, value) }
 
 // DeleteOpts: IgnoreMissing defaults to true, as in Python.
 type DeleteOpts struct{ IgnoreMissing bool }
 
-type DeleteOption = request.Option[DeleteOpts]
+// DeleteOption is one option of Delete: request.IgnoreMissing,
+// request.Header or request.Custom over *request.Config[DeleteOpts]. Other
+// shared calls fail with resource.ErrInvalidOption before HTTP.
+type DeleteOption = request.DeleteCall
 
-func WithDeleteIgnoreMissing(ignore bool) DeleteOption {
-	return func(c *request.Config[DeleteOpts]) error { c.Options.IgnoreMissing = ignore; return nil }
-}
-func WithDeleteHeader(key, value string) DeleteOption {
-	return request.WithHeader[DeleteOpts](key, value)
+var deleteCalls = calls.Spec[request.Config[DeleteOpts]]{
+	Header:        calls.ConfigHeader[DeleteOpts],
+	IgnoreMissing: func(c *request.Config[DeleteOpts], ignore bool) error { c.Options.IgnoreMissing = ignore; return nil },
 }
 
 func listConfig(options []ListOption) (ironicrest.ListConfig, error) {
-	config, err := request.Apply(ListOpts{}, options...)
+	config, err := calls.ApplyConfig(ListOpts{}, listCalls, options...)
 	if err != nil {
 		return ironicrest.ListConfig{}, err
 	}

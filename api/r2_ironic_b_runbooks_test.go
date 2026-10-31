@@ -10,6 +10,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/baremetal/v1/runbooks"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -32,7 +33,7 @@ func TestR2IronicBRunbookCreateSendsExactBodyAndKeepsEvidence(t *testing.T) {
 		Public:      r2IronicBPtr(false),
 		Extra:       map[string]json.RawMessage{},
 		Steps:       []runbooks.Step{{Interface: "deploy", Step: "x", Args: map[string]json.RawMessage{"n": json.RawMessage("10000000000000000001")}, Order: &zero, Extra: map[string]json.RawMessage{"future": json.RawMessage("true")}}},
-	}, runbooks.WithCreateField("vendor", map[string]int{"a": 0}), runbooks.WithCreateHeader("X-Test", "1"))
+	}, request.Field("vendor", map[string]int{"a": 0}), request.Header("X-Test", "1"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -69,7 +70,7 @@ func TestR2IronicBRunbookCreateOmitsUnsetAndRejectsCollisionsBeforeHTTP(t *testi
 	api, fake = r2IronicBRunbooks(t, 201, r2IronicBRunbookBody)
 	for _, call := range []func() error{
 		func() error {
-			_, err := api.Create(context.Background(), runbooks.CreateOpts{Name: "n"}, runbooks.WithCreateField("name", "x"))
+			_, err := api.Create(context.Background(), runbooks.CreateOpts{Name: "n"}, request.Field("name", "x"))
 			return err
 		},
 		func() error {
@@ -152,7 +153,7 @@ func TestR2IronicBRunbookListFollowsNextLinkQueryOnly(t *testing.T) {
 	})
 	api := runbooks.New(r2IronicBClient(cloud))
 	var ids []string
-	for value, err := range api.List(context.Background(), runbooks.WithListDetail(true), runbooks.WithListLimit(1), runbooks.WithListQuery("sort_key", "name")) {
+	for value, err := range api.List(context.Background(), runbooks.WithListDetail(true), request.Limit(1), request.Query("sort_key", "name")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -178,7 +179,7 @@ func TestR2IronicBRunbookListControlsAndFailures(t *testing.T) {
 	fake := r2IronicBFixed(t, cloud, 200, `{"runbooks":[{"uuid":"a"},{"uuid":"b"},{"uuid":"c"}]}`)
 	api := runbooks.New(r2IronicBClient(cloud))
 	count := 0
-	for _, err := range api.List(context.Background(), runbooks.WithListMaxItems(2), runbooks.WithListSinglePage(), runbooks.WithListFields("uuid", "name")) {
+	for _, err := range api.List(context.Background(), request.MaxItems(2), request.Paginated(false), runbooks.WithListFields("uuid", "name")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -188,7 +189,7 @@ func TestR2IronicBRunbookListControlsAndFailures(t *testing.T) {
 	if count != 2 || call.RawQuery != "fields=uuid%2Cname&limit=2" {
 		t.Fatalf("count=%d call=%+v", count, call)
 	}
-	for _, opt := range []runbooks.ListOption{runbooks.WithListQuery("detail", "x"), runbooks.WithListQuery("marker", "x"), runbooks.WithListLimit(0), runbooks.WithListMarker(""), runbooks.WithListMaxItems(-1), runbooks.WithListFields("")} {
+	for _, opt := range []runbooks.ListOption{request.Query("detail", "x"), request.Query("marker", "x"), request.Limit(0), request.Marker(""), request.MaxItems(-1), runbooks.WithListFields("")} {
 		var gotErr error
 		for _, err := range api.List(context.Background(), opt) {
 			gotErr = err
@@ -208,7 +209,7 @@ func TestR2IronicBRunbookListDetectsMarkerLoopAndBadPages(t *testing.T) {
 	api := runbooks.New(r2IronicBClient(cloud))
 	var err error
 	n := 0
-	for _, e := range api.List(context.Background(), runbooks.WithListLimit(5)) {
+	for _, e := range api.List(context.Background(), request.Limit(5)) {
 		err, n = e, n+1
 	}
 	if !errors.Is(err, resource.ErrPaginationCycle) {
@@ -263,7 +264,7 @@ func TestR2IronicBRunbookUpdateSendsSortedAddOperations(t *testing.T) {
 	api, fake := r2IronicBRunbooks(t, 200, r2IronicBRunbookBody)
 	got, err := api.Update(context.Background(), "u 1", runbooks.UpdateOpts{
 		Public: r2IronicBPtr(false), Description: r2IronicBPtr(""), Name: r2IronicBPtr("N"), Extra: map[string]json.RawMessage{},
-	}, runbooks.WithUpdateField("zeta", 1), runbooks.WithUpdateHeader("X-Test", "2"))
+	}, request.Field("zeta", 1), request.Header("X-Test", "2"))
 	if err != nil || got.StatusCode != 200 {
 		t.Fatalf("got=%+v err=%v", got, err)
 	}
@@ -279,7 +280,7 @@ func TestR2IronicBRunbookUpdateRejectsEmptyAndCollisionsBeforeHTTP(t *testing.T)
 	for _, call := range []func() error{
 		func() error { _, err := api.Update(context.Background(), "u", runbooks.UpdateOpts{}); return err },
 		func() error {
-			_, err := api.Update(context.Background(), "u", runbooks.UpdateOpts{}, runbooks.WithUpdateField("name", "x"))
+			_, err := api.Update(context.Background(), "u", runbooks.UpdateOpts{}, request.Field("name", "x"))
 			return err
 		},
 		func() error {
@@ -341,7 +342,7 @@ func TestR2IronicBRunbookDeleteDefaultsIgnoreMissing(t *testing.T) {
 	if err != nil || deleted {
 		t.Fatalf("deleted=%v err=%v", deleted, err)
 	}
-	_, err = api.Delete(context.Background(), "u", runbooks.WithDeleteIgnoreMissing(false))
+	_, err = api.Delete(context.Background(), "u", request.IgnoreMissing(false))
 	var missing *resource.NotFoundError
 	if !errors.Is(err, resource.ErrNotFound) || !errors.As(err, &missing) || !gophercloud.ResponseCodeIs(err, 404) {
 		t.Fatalf("err=%v", err)

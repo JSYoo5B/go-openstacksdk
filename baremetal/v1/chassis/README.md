@@ -4,7 +4,7 @@
 
 | Operation | Route | Success code | Notes |
 |---|---|---|---|
-| `Create` | `POST /chassis` | 201 only | Typed `CreateOpts` plus `WithCreateField` extensions |
+| `Create` | `POST /chassis` | 201 only | Typed `CreateOpts` plus `request.Field` extensions |
 | `Get` | `GET .../{id}` | 200 only | `WithGetFields` sends `fields=a,b` (wire names) |
 | `Update` | `PATCH .../{id}` | 200 only | JSON Patch; empty patch fails before HTTP |
 | `Delete` | `DELETE .../{id}` | 204 only | A 404 stays a native error |
@@ -12,10 +12,10 @@
 | `FindIdentity` | GET by id, then list scan | | no name; matched by uuid only; default ignore-missing |
 | `Find`, `All`, `Remove` | shared `resource.Collection` | | `Remove` by ID ignores 404 unless `resource.WithMissingError()` |
 
-Typed create fields: `Description` (`*string`), `Extra`, `UUID`. Pointer fields and maps are omitted only when nil, so explicit `false`, `0`, `""` and `{}` are sent. Required string fields are omitted when empty and the server reports them. `WithCreateField` adds root body fields; a typed field or a server-owned field (`created_at`, `updated_at`, `links` and read-only collections) fails with `resource.ErrInvalidOption` before HTTP. 
+Typed create fields: `Description` (`*string`), `Extra`, `UUID`. Pointer fields and maps are omitted only when nil, so explicit `false`, `0`, `""` and `{}` are sent. Required string fields are omitted when empty and the server reports them. `request.Field` adds root body fields; a typed field or a server-owned field (`created_at`, `updated_at`, `links` and read-only collections) fails with `resource.ErrInvalidOption` before HTTP. 
 
 `UpdateOpts.Operations` is a JSON Patch list built with `Add`, `Replace` and `Remove`. `Add` and `Replace` always send `value` (nil is JSON null); `Remove` sends none. Operations other than add/replace/remove, paths not starting with `/`, and server-owned targets fail before HTTP. `FieldPatches(map)` builds the sorted add list that Python `update_*(**attrs)` sends. `WithUpdateOptions` replaces the list and `WithUpdateOperations` appends.
 
-List filters are `Fields`, `Limit`, `Marker`, `SortKey`, `SortDir` (zero values omitted, negative limit invalid); `WithListQuery` adds extension queries and rejects keys owned by typed filters. With an explicit limit and no advertised next link the iterator asks once more with the last uuid as `marker`, like Python.
+List filters are `Fields`, `Limit`, `Marker`, `SortKey`, `SortDir` (zero values omitted, negative limit invalid); `request.Query` adds extension queries and rejects keys owned by typed filters. With an explicit limit and no advertised next link the iterator asks once more with the last uuid as `marker`, like Python.
 
 Responses keep typed fields plus `Body` (original object, exact numbers), `Header` and `StatusCode`. The client's `Microversion` is sent as `X-OpenStack-Ironic-API-Version` for a baremetal-typed client (1.8 is the highest Python negotiates for this resource); it is never raised automatically. Cancelling a context stops only the local call; accepted mutations are never replayed.

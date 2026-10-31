@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
@@ -50,26 +51,28 @@ func (a *API) StartAndGet(ctx context.Context, nodeID string, opts StartOpts, op
 
 type abortConfig struct{ ignoreMissing bool }
 
-// AbortOption customizes AbortIntrospectionWithOptions.
-type AbortOption func(*abortConfig)
+// AbortOption is one option of AbortIntrospectionWithOptions. Only
+// request.IgnoreMissing is supported: it sets whether a 404 answer is treated
+// as success. The default is true, like
+// abort_introspection(ignore_missing=True). Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type AbortOption = request.DeleteCall
 
-// WithAbortIgnoreMissing sets whether a 404 answer is treated as success. The
-// default is true, like abort_introspection(ignore_missing=True).
-func WithAbortIgnoreMissing(ignore bool) AbortOption {
-	return func(c *abortConfig) { c.ignoreMissing = ignore }
-}
+var abortCalls = calls.Spec[abortConfig]{IgnoreMissing: calls.Value(func(c *abortConfig) *bool { return &c.ignoreMissing })}
 
 // AbortIntrospectionWithOptions aborts like AbortIntrospection but ignores a
-// missing introspection unless WithAbortIgnoreMissing(false) is given. The
+// missing introspection unless request.IgnoreMissing(false) is given. The
 // acknowledgement is not proof that the introspection stopped; wait with
 // WaitUntilFinishedIgnoringError.
 func (a *API) AbortIntrospectionWithOptions(ctx context.Context, nodeID string, options ...AbortOption) error {
 	cfg := abortConfig{ignoreMissing: true}
-	for _, option := range options {
-		if option == nil {
+	for _, apply := range calls.Translate(options, abortCalls) {
+		if apply == nil {
 			return request.Wrap("AbortIntrospection", "introspection", fmt.Errorf("%w: nil abort option", resource.ErrInvalidOption))
 		}
-		option(&cfg)
+		if err := apply(&cfg); err != nil {
+			return request.Wrap("AbortIntrospection", "introspection", err)
+		}
 	}
 	err := a.AbortIntrospection(ctx, nodeID)
 	var unexpected gophercloud.ErrUnexpectedResponseCode

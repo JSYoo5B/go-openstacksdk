@@ -22,7 +22,7 @@ pinned source and the documented API; no live inspector was exercised.
 - List sends exactly one GET: no limit, marker or next link. Python with a limit
   keeps paging with a marker the inspector ignores and ends with an endless
   pagination error; Python also filters Body attributes client side, Go does not.
-  `WithListMaxItems` is a client-side cap. Rows are the brief form (uuid,
+  `request.MaxItems` is a client-side cap. Rows are the brief form (uuid,
   description, scope, links).
 - `get_introspection_rule` has no name lookup in either implementation.
 - No retry on 409/503, exact status codes, typed models with raw members.

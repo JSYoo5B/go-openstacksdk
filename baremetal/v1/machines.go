@@ -41,7 +41,7 @@ func (s *Service) GetMachine(ctx context.Context, nameOrID string) (*nodes.NodeR
 	if err := machineIdentity("GetMachine", nameOrID); err != nil {
 		return nil, err
 	}
-	value, err := s.Nodes.FindRecord(ctx, nameOrID, nodes.WithRecordFindIgnoreMissing(true))
+	value, err := s.Nodes.FindRecord(ctx, nameOrID, request.IgnoreMissing(true))
 	return value, request.Wrap("GetMachine", "machines", err)
 }
 

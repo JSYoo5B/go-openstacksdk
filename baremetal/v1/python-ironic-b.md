@@ -29,17 +29,17 @@ described in [rules](../../baremetalintrospection/v1/rules/README.md).
   server names and does not validate the operation; Go validates op, path and
   value presence and does not rewrite names.
 - `Delete` ignores a missing resource by default and returns `deleted=false`,
-  like `ignore_missing=True`; `WithDeleteIgnoreMissing(false)` returns
+  like `ignore_missing=True`; `request.IgnoreMissing(false)` returns
   `resource.NotFoundError` wrapping the native 404. Python returns the
   resource instance; Go returns a boolean.
 - `Get` accepts `WithGetFields(server member names...)`, sent as a CSV `fields`
   query. Python also maps SDK attribute names (for example `id`) to server names.
 - List: `WithListDetail(true)` sends `detail=true` (false sends nothing, as
-  Python). `WithListLimit` is a page size; without a published `next` link the
+  Python). `request.Limit` is a page size; without a published `next` link the
   walk continues with `marker=<last uuid>` until an empty page, like Python.
   A next link is used only for its query and only if it continues the same
   collection route; the link's host is never contacted. A repeated marker
-  returns `resource.ErrPaginationCycle`. `WithListMaxItems` caps rows and, without
+  returns `resource.ErrPaginationCycle`. `request.MaxItems` caps rows and, without
   a limit, is sent as the limit; Go stops at the cap without an extra request.
   Python's client-side filtering of Body attributes is not reproduced.
 - `inspection_rules(details=True)` in Python writes `details`, which is not a

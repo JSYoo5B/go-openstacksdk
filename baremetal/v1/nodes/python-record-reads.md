@@ -16,7 +16,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/baremetal/v1/nodes.API.AllRecords`
 - `github.com/JSYoo5B/go-openstacksdk/baremetal/v1/nodes.API.ProxyListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/baremetal/v1/nodes.WithRecordListDetails`
-- `github.com/JSYoo5B/go-openstacksdk/baremetal/v1/nodes.WithRecordListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - Lazy basic/detail collection routes, declared query aliases and CSV fields conversion retain Source descriptor/local-filter behavior and actual unknown wire fields.
   Tests: `baremetal/v1/nodes/python_record_reads_test.go:TestPythonNodeListDetailsCSVAndDeclaredProjection`, `baremetal/v1/nodes/python_record_reads_test.go:TestPythonNodeListExplicitPathAndSourceCSVString`.
@@ -62,7 +62,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/baremetal/v1/nodes.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/baremetal/v1/nodes.WithRecordFindDetails`
-- `github.com/JSYoo5B/go-openstacksdk/baremetal/v1/nodes.WithRecordFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 
 - Clean rejected GET falls back to detailed collection by default or basic collection explicitly, without a name query hint; complete search detects duplicates, late errors and missing/strict policy.
   Tests: `baremetal/v1/nodes/python_record_reads_test.go:TestPythonNodeFindFallbackDetailsDefaultsAndMissing`.
@@ -118,6 +118,7 @@ import (
 
     sdk "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/nodes"
+    "github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 func main() {
@@ -133,22 +134,22 @@ func main() {
     switch action {
     case "list":
         values, callErr := service.Nodes.AllRecords(ctx,
-            nodes.WithRecordListMicroversion("1.109"),
+            request.Microversion("1.109"),
             nodes.WithRecordListDetails(true),
-            nodes.WithRecordListQuery("fields", []string{"id", "name"}))
+            request.Query("fields", []string{"id", "name"}))
         err = callErr
         views := make([]any, 0, len(values))
         for _, value := range values { views = append(views, value.Resource.Body) }
         output = views
     case "get":
         value, callErr := service.Nodes.GetRecord(ctx, identity,
-            nodes.WithRecordGetMicroversion("1.109"), nodes.WithRecordGetFields("id", "name"))
+            request.Microversion("1.109"), nodes.WithRecordGetFields("id", "name"))
         err = callErr
         if value != nil && value.Resource != nil { output = value.Resource.Body }
     case "find":
         value, callErr := service.Nodes.FindRecord(ctx, identity,
-            nodes.WithRecordFindMicroversion("1.109"), nodes.WithRecordFindDetails(true),
-            nodes.WithRecordFindIgnoreMissing(true))
+            request.Microversion("1.109"), nodes.WithRecordFindDetails(true),
+            request.IgnoreMissing(true))
         err = callErr
         if value != nil && value.Resource != nil { output = value.Resource.Body }
     default:

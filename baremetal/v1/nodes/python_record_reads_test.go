@@ -11,6 +11,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/baremetal/v1/nodes"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -46,7 +47,7 @@ func TestPythonNodeListDetailsCSVAndDeclaredProjection(t *testing.T) {
 		}
 		return nodeWire(203, `{"nodes":[{"uuid":"n","name":"node","driver_info":{"vendor":"v","extra":1},"properties":false,"traits":"trait","maintenance":0,"x_unknown":9007199254740993}]}`)
 	})
-	seq := api.ListRecords(context.Background(), nodes.WithRecordListDetails(true), nodes.WithRecordListQuery("fields", []string{"id", "instance_id"}), nodes.WithRecordListQuery("is_maintenance", false), nodes.WithRecordListQuery("driver_info", map[string]any{"vendor": "v"}), nodes.WithRecordListQuery("sort_key", "name"))
+	seq := api.ListRecords(context.Background(), nodes.WithRecordListDetails(true), request.Query("fields", []string{"id", "instance_id"}), request.Query("is_maintenance", false), request.Query("driver_info", map[string]any{"vendor": "v"}), request.Query("sort_key", "name"))
 	if *calls != 0 {
 		t.Fatal(*calls)
 	}
@@ -76,7 +77,7 @@ func TestPythonNodeListExplicitPathAndSourceCSVString(t *testing.T) {
 		}
 		return nodeWire(200, `{"nodes":[]}`)
 	})
-	rows, err := api.AllRecords(context.Background(), nodes.WithRecordListDetails(true), nodes.WithRecordListBasePath("/custom"), nodes.WithRecordListQuery("fields", "id"))
+	rows, err := api.AllRecords(context.Background(), nodes.WithRecordListDetails(true), request.BasePath("/custom"), request.Query("fields", "id"))
 	if err != nil || rows == nil || len(rows) != 0 || *calls != 1 {
 		t.Fatal(rows, err, *calls)
 	}
@@ -134,7 +135,7 @@ func TestPythonNodeFindFallbackDetailsDefaultsAndMissing(t *testing.T) {
 				options = append(options, nodes.WithRecordFindDetails(false))
 			}
 			if mode == "strict" {
-				options = append(options, nodes.WithRecordFindIgnoreMissing(false))
+				options = append(options, request.IgnoreMissing(false))
 			}
 			row, err := api.FindRecord(context.Background(), "wanted", options...)
 			switch mode {
@@ -229,10 +230,10 @@ func TestPythonNodeOptionsOwnDataAndGuardPreflight(t *testing.T) {
 	if _, err := api.GetRecord(context.Background(), "n", nil); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
-	_, err := api.GetRecord(context.Background(), "n", func(*nodes.RecordGetOpts) error {
+	_, err := api.GetRecord(context.Background(), "n", request.Custom(func(*nodes.RecordGetOpts) error {
 		*api = *nodes.New(cloud.Client("baremetal", "/different/"))
 		return nil
-	})
+	}))
 	if err == nil || *calls != before {
 		t.Fatal(err, *calls, before)
 	}
@@ -273,7 +274,7 @@ func TestPythonNodeDefaultVersionDiscoveryAndUncappedSelection(t *testing.T) {
 		}
 		return nodeWire(200, `{"uuid":"n"}`)
 	})
-	row, err = api.GetRecord(context.Background(), "n", nodes.WithRecordGetMicroversion("1.120"))
+	row, err = api.GetRecord(context.Background(), "n", request.Microversion("1.120"))
 	if err != nil || row == nil || len(row.Discovery.Responses) != 0 || *calls != 1 {
 		t.Fatal(row, err, *calls)
 	}
@@ -366,7 +367,7 @@ func TestPythonNodeHeadersCapturedBeforeCallbacks(t *testing.T) {
 		return nodeWire(200, `{"uuid":"n"}`)
 	})
 	api.RawClient().MoreHeaders = map[string]string{"X-Captured": "old"}
-	_, err := api.GetRecord(context.Background(), "n", func(*nodes.RecordGetOpts) error { api.RawClient().MoreHeaders["X-Captured"] = "new"; return nil })
+	_, err := api.GetRecord(context.Background(), "n", request.Custom(func(*nodes.RecordGetOpts) error { api.RawClient().MoreHeaders["X-Captured"] = "new"; return nil }))
 	if err != nil || *calls != 1 || !reflect.DeepEqual(api.RawClient().MoreHeaders, map[string]string{"X-Captured": "new"}) {
 		t.Fatal(err, *calls)
 	}

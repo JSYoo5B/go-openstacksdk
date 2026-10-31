@@ -11,6 +11,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/microversions"
@@ -153,7 +154,7 @@ func normalizePortListPolicy(p *RecordListOpts) error {
 }
 
 // WithRecordListDetails selects /ports/detail only when base_path is falsey.
-func WithRecordListDetails(v bool) RecordListOption { return WithRecordListQuery("details", v) }
+func WithRecordListDetails(v bool) RecordListOption { return request.Query("details", v) }
 
 // RecordGetOpts owns get_port's directly declared field selection and transport.
 type RecordGetOpts struct {
@@ -161,7 +162,20 @@ type RecordGetOpts struct {
 	Headers      map[string]string
 	Microversion *string
 }
-type RecordGetOption func(*RecordGetOpts) error
+
+// RecordGetOption is one option of GetRecord: WithRecordGetOpts,
+// WithRecordGetFields, request.Custom over *RecordGetOpts, request.Header
+// (adds one header), request.Headers (replaces the headers) or
+// request.Microversion. A nil option fails with resource.ErrInvalidOption
+// before HTTP.
+type RecordGetOption = request.GetCall
+
+var recordGetCalls = recordGetSpec()
+
+func recordGetSpec() calls.Spec[RecordGetOpts] {
+	header, headers := calls.HeaderMap(func(c *RecordGetOpts) *map[string]string { return &c.Headers })
+	return calls.Spec[RecordGetOpts]{Header: header, Headers: headers, Microversion: calls.Pointer(func(c *RecordGetOpts) **string { return &c.Microversion })}
+}
 
 func copyPortGet(v RecordGetOpts) RecordGetOpts {
 	v.Fields = slices.Clone(v.Fields)
@@ -174,18 +188,11 @@ func copyPortGet(v RecordGetOpts) RecordGetOpts {
 }
 func WithRecordGetOpts(v RecordGetOpts) RecordGetOption {
 	owned := copyPortGet(v)
-	return func(c *RecordGetOpts) error { *c = copyPortGet(owned); return nil }
+	return request.Custom(func(c *RecordGetOpts) error { *c = copyPortGet(owned); return nil })
 }
 func WithRecordGetFields(v ...string) RecordGetOption {
 	owned := slices.Clone(v)
-	return func(c *RecordGetOpts) error { c.Fields = slices.Clone(owned); return nil }
-}
-func WithRecordGetHeaders(v map[string]string) RecordGetOption {
-	owned := maps.Clone(v)
-	return func(c *RecordGetOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
-func WithRecordGetMicroversion(v string) RecordGetOption {
-	return func(c *RecordGetOpts) error { x := v; c.Microversion = &x; return nil }
+	return request.Custom(func(c *RecordGetOpts) error { c.Fields = slices.Clone(owned); return nil })
 }
 func (a *API) GetRecord(ctx context.Context, identity string, options ...RecordGetOption) (*PortRecord, error) {
 	wrap := func(err error) error { return request.Wrap("GetRecord", "ports", cloudread.ContextError(ctx, err)) }
@@ -195,7 +202,7 @@ func (a *API) GetRecord(ctx context.Context, identity string, options ...RecordG
 	}
 	client := portReadClientSnapshot(a)
 	policy := RecordGetOpts{}
-	for _, apply := range slices.Clone(options) {
+	for _, apply := range calls.Translate(options, recordGetCalls) {
 		if err := original.Check(ctx); err != nil {
 			return nil, wrap(err)
 		}
@@ -240,7 +247,24 @@ type RecordFindOpts struct {
 	Headers       map[string]string
 	Microversion  *string
 }
-type RecordFindOption func(*RecordFindOpts) error
+
+// RecordFindOption is one option of FindRecord: WithRecordFindOpts,
+// WithRecordFindDetails, request.Custom over *RecordFindOpts,
+// request.IgnoreMissing, request.Header (adds one header), request.Headers
+// (replaces the headers) or request.Microversion. Other shared calls and a nil
+// option fail with resource.ErrInvalidOption before HTTP.
+type RecordFindOption = request.FindCall
+
+var recordFindCalls = recordFindSpec()
+
+func recordFindSpec() calls.Spec[RecordFindOpts] {
+	header, headers := calls.HeaderMap(func(c *RecordFindOpts) *map[string]string { return &c.Headers })
+	return calls.Spec[RecordFindOpts]{
+		Header: header, Headers: headers,
+		Microversion:  calls.Pointer(func(c *RecordFindOpts) **string { return &c.Microversion }),
+		IgnoreMissing: calls.Pointer(func(c *RecordFindOpts) **bool { return &c.IgnoreMissing }),
+	}
+}
 
 func copyPortFind(v RecordFindOpts) RecordFindOpts {
 	v.Headers = maps.Clone(v.Headers)
@@ -260,20 +284,10 @@ func copyPortFind(v RecordFindOpts) RecordFindOpts {
 }
 func WithRecordFindOpts(v RecordFindOpts) RecordFindOption {
 	owned := copyPortFind(v)
-	return func(c *RecordFindOpts) error { *c = copyPortFind(owned); return nil }
+	return request.Custom(func(c *RecordFindOpts) error { *c = copyPortFind(owned); return nil })
 }
 func WithRecordFindDetails(v bool) RecordFindOption {
-	return func(c *RecordFindOpts) error { x := v; c.Details = &x; return nil }
-}
-func WithRecordFindIgnoreMissing(v bool) RecordFindOption {
-	return func(c *RecordFindOpts) error { x := v; c.IgnoreMissing = &x; return nil }
-}
-func WithRecordFindHeaders(v map[string]string) RecordFindOption {
-	owned := maps.Clone(v)
-	return func(c *RecordFindOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
-func WithRecordFindMicroversion(v string) RecordFindOption {
-	return func(c *RecordFindOpts) error { x := v; c.Microversion = &x; return nil }
+	return request.Custom(func(c *RecordFindOpts) error { x := v; c.Details = &x; return nil })
 }
 func (a *API) FindRecord(ctx context.Context, identity string, options ...RecordFindOption) (*PortRecord, error) {
 	wrap := func(err error) error { return request.Wrap("FindRecord", "ports", cloudread.ContextError(ctx, err)) }
@@ -283,7 +297,7 @@ func (a *API) FindRecord(ctx context.Context, identity string, options ...Record
 	}
 	client := portReadClientSnapshot(a)
 	policy := RecordFindOpts{}
-	for _, apply := range slices.Clone(options) {
+	for _, apply := range calls.Translate(options, recordFindCalls) {
 		if err := original.Check(ctx); err != nil {
 			return nil, wrap(err)
 		}

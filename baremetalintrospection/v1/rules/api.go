@@ -16,6 +16,7 @@ import (
 	"fmt"
 	"iter"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/ironicrest"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
@@ -48,21 +49,18 @@ type CreateOpts struct {
 	Actions     []Action    `json:"actions,omitzero"`
 }
 
-type CreateOption = request.Option[CreateOpts]
+// CreateOption is one option of Create: request.Field (a JSON member this
+// package does not model; it cannot replace a typed member), request.Header or
+// request.Custom over *request.Config[CreateOpts]. Other shared calls fail
+// with resource.ErrInvalidOption before HTTP.
+type CreateOption = request.WriteCall
 
-// WithCreateField adds a JSON member this package does not model. It cannot
-// replace a typed member.
-func WithCreateField(key string, value any) CreateOption {
-	return request.WithField[CreateOpts](key, value)
-}
-func WithCreateHeader(key, value string) CreateOption {
-	return request.WithHeader[CreateOpts](key, value)
-}
+var createCalls = calls.Spec[request.Config[CreateOpts]]{Field: calls.ConfigField[CreateOpts], Header: calls.ConfigHeader[CreateOpts]}
 
 // Create sends POST /rules. Only 201 succeeds; a failed or uncertain call is
 // never replayed.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*Rule, error) {
-	config, err := request.Apply(opts, options...)
+	config, err := calls.ApplyConfig(opts, createCalls, options...)
 	if err == nil {
 		err = request.ValidateCapabilities(config, true, false, true)
 	}
@@ -77,14 +75,17 @@ func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOpti
 	return value, request.Wrap("Create", kind, err)
 }
 
-type GetOption = request.Option[struct{}]
+// GetOption is one option of Get: request.Header or request.Custom over
+// *request.Config[struct{}]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type GetOption = request.GetCall
 
-func WithGetHeader(key, value string) GetOption { return request.WithHeader[struct{}](key, value) }
+var getCalls = calls.Spec[request.Config[struct{}]]{Header: calls.ConfigHeader[struct{}]}
 
 // Get sends GET /rules/{uuid}. Only 200 succeeds. The inspector has no name
 // lookup and no fields query.
 func (a *API) Get(ctx context.Context, id string, options ...GetOption) (*Rule, error) {
-	config, err := request.Apply(struct{}{}, options...)
+	config, err := calls.ApplyConfig(struct{}{}, getCalls, options...)
 	if err == nil {
 		err = request.ValidateCapabilities(config, false, false, true)
 	}
@@ -99,17 +100,22 @@ func (a *API) Get(ctx context.Context, id string, options ...GetOption) (*Rule, 
 // sent as limit because the inspector has no paging.
 type ListOpts struct{ MaxItems int }
 
-type ListOption = request.Option[ListOpts]
+// ListOption is one option of List: request.MaxItems, request.Header or
+// request.Custom over *request.Config[ListOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type ListOption = request.ListCall
 
-func WithListMaxItems(n int) ListOption {
-	return func(c *request.Config[ListOpts]) error { c.Options.MaxItems = n; return nil }
+var listCalls = calls.Spec[request.Config[ListOpts]]{
+	Header: calls.ConfigHeader[ListOpts],
+	Paging: calls.Paging[request.Config[ListOpts]]{
+		MaxItems: func(c *request.Config[ListOpts], n int) error { c.Options.MaxItems = n; return nil },
+	},
 }
-func WithListHeader(key, value string) ListOption { return request.WithHeader[ListOpts](key, value) }
 
 // List sends one GET /rules and yields its rows. It never follows a next link
 // and never sends limit or marker. Rows hold the brief representation.
 func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Rule, error] {
-	config, err := request.Apply(ListOpts{}, options...)
+	config, err := calls.ApplyConfig(ListOpts{}, listCalls, options...)
 	if err == nil {
 		err = request.ValidateCapabilities(config, false, false, true)
 	}
@@ -131,19 +137,20 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Rule, 
 
 type DeleteOpts struct{ IgnoreMissing bool }
 
-type DeleteOption = request.Option[DeleteOpts]
+// DeleteOption is one option of Delete: request.IgnoreMissing,
+// request.Header or request.Custom over *request.Config[DeleteOpts]. Other
+// shared calls fail with resource.ErrInvalidOption before HTTP.
+type DeleteOption = request.DeleteCall
 
-func WithDeleteIgnoreMissing(ignore bool) DeleteOption {
-	return func(c *request.Config[DeleteOpts]) error { c.Options.IgnoreMissing = ignore; return nil }
-}
-func WithDeleteHeader(key, value string) DeleteOption {
-	return request.WithHeader[DeleteOpts](key, value)
+var deleteCalls = calls.Spec[request.Config[DeleteOpts]]{
+	Header:        calls.ConfigHeader[DeleteOpts],
+	IgnoreMissing: func(c *request.Config[DeleteOpts], ignore bool) error { c.Options.IgnoreMissing = ignore; return nil },
 }
 
 // Delete sends DELETE /rules/{uuid}. Only 204 succeeds. By default a missing
 // rule is not an error and deleted is false.
 func (a *API) Delete(ctx context.Context, id string, options ...DeleteOption) (deleted bool, err error) {
-	config, err := request.Apply(DeleteOpts{IgnoreMissing: true}, options...)
+	config, err := calls.ApplyConfig(DeleteOpts{IgnoreMissing: true}, deleteCalls, options...)
 	if err == nil {
 		err = request.ValidateCapabilities(config, false, false, true)
 	}

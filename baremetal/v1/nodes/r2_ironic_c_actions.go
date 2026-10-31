@@ -9,6 +9,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/ironicwire"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
@@ -73,14 +74,29 @@ func (a *API) putPicked(ctx context.Context, op, id, required string, segments [
 	return request.Wrap(op, "nodes", err)
 }
 
-// RemoveTraitOption configures RemoveTrait.
-type RemoveTraitOption func(*bool)
+// ignoreMissingCalls interprets the options of RemoveTrait and DetachVIF.
+var ignoreMissingCalls = calls.Spec[bool]{IgnoreMissing: calls.Value(func(v *bool) *bool { return v })}
 
-// WithRemoveTraitIgnoreMissing selects whether HTTP 400 (the trait is not
-// assigned) is a successful no-op. The default is true, like the pinned source.
-func WithRemoveTraitIgnoreMissing(ignore bool) RemoveTraitOption {
-	return func(v *bool) { *v = ignore }
+// ignoreMissingOption applies options in order over the default true,
+// skipping nil options.
+func ignoreMissingOption(options []request.DeleteCall) (bool, error) {
+	ignore := true
+	for _, apply := range calls.Translate(options, ignoreMissingCalls) {
+		if apply == nil {
+			continue
+		}
+		if err := apply(&ignore); err != nil {
+			return true, err
+		}
+	}
+	return ignore, nil
 }
+
+// RemoveTraitOption is one option of RemoveTrait. Only request.IgnoreMissing is supported:
+// it selects whether HTTP 400 (the trait is not
+// assigned) is a successful no-op. The default is true, like the pinned source. A nil option is ignored; other
+// shared calls fail with resource.ErrInvalidOption before HTTP.
+type RemoveTraitOption = request.DeleteCall
 
 // RemoveTrait sends DELETE /nodes/{id}/traits/{trait} (microversion 1.37 picked
 // like SetBootMode, only 204). It reports true after a removal. With
@@ -90,11 +106,9 @@ func (a *API) RemoveTrait(ctx context.Context, id, trait string, options ...Remo
 	if id == "" || trait == "" {
 		return false, nodeInvalid("RemoveTrait", "node ID and trait must not be empty")
 	}
-	ignore := true
-	for _, option := range options {
-		if option != nil {
-			option(&ignore)
-		}
+	ignore, err := ignoreMissingOption(options)
+	if err != nil {
+		return false, request.Wrap("RemoveTrait", "nodes", err)
 	}
 	version, err := ironicwire.Pick(ctx, a.client, TraitsVersion)
 	if err != nil {
@@ -158,14 +172,11 @@ func (a *API) ListVIFIDs(ctx context.Context, id string) ([]string, error) {
 	return ids, nil
 }
 
-// DetachVIFOption configures DetachVIF.
-type DetachVIFOption func(*bool)
-
-// WithDetachVIFIgnoreMissing selects whether HTTP 400 (the VIF is not
-// attached) is a successful no-op. The default is true.
-func WithDetachVIFIgnoreMissing(ignore bool) DetachVIFOption {
-	return func(v *bool) { *v = ignore }
-}
+// DetachVIFOption is one option of DetachVIF. Only request.IgnoreMissing is supported:
+// it selects whether HTTP 400 (the VIF is not
+// attached) is a successful no-op. The default is true. A nil option is ignored; other
+// shared calls fail with resource.ErrInvalidOption before HTTP.
+type DetachVIFOption = request.DeleteCall
 
 // DetachVIF sends DELETE /nodes/{id}/vifs/{vif} after asserting microversion
 // 1.28, and reports whether a VIF was detached. With ignore-missing enabled,
@@ -175,11 +186,9 @@ func (a *API) DetachVIF(ctx context.Context, id, vifID string, options ...Detach
 	if id == "" || vifID == "" {
 		return false, nodeInvalid("DetachVIF", "node ID and VIF ID must not be empty")
 	}
-	ignore := true
-	for _, option := range options {
-		if option != nil {
-			option(&ignore)
-		}
+	ignore, err := ignoreMissingOption(options)
+	if err != nil {
+		return false, request.Wrap("DetachVIF", "nodes", err)
 	}
 	version, err := ironicwire.Assert(ctx, a.client, VIFVersion, ironicwire.NodeCeiling, "")
 	if err != nil {

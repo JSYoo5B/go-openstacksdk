@@ -11,6 +11,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/baremetal/v1/inspectionrules"
 	"github.com/JSYoo5B/go-openstacksdk/baremetalintrospection/v1/rules"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -30,7 +31,7 @@ func TestR2IronicBDeployTemplateCreateGetUpdatePatchDelete(t *testing.T) {
 	if call.Method != "POST" || call.Path != "/v1/deploy_templates" || call.Body != `{"extra":{},"name":"CUSTOM_T","steps":[{"args":null,"interface":"deploy","priority":0,"step":"s"}]}` {
 		t.Fatalf("call=%+v", call)
 	}
-	if _, err := api.Create(ctx, deploytemplates.CreateOpts{}, deploytemplates.WithCreateField("steps", 1)); err == nil {
+	if _, err := api.Create(ctx, deploytemplates.CreateOpts{}, request.Field("steps", 1)); err == nil {
 		t.Fatal("collision")
 	}
 
@@ -60,7 +61,7 @@ func TestR2IronicBDeployTemplateCreateGetUpdatePatchDelete(t *testing.T) {
 	if deleted, err := api.Delete(ctx, "x"); err != nil || deleted {
 		t.Fatal(deleted, err)
 	}
-	if _, err := api.Delete(ctx, "x", deploytemplates.WithDeleteIgnoreMissing(false)); !errors.Is(err, resource.ErrNotFound) {
+	if _, err := api.Delete(ctx, "x", request.IgnoreMissing(false)); !errors.Is(err, resource.ErrNotFound) {
 		t.Fatal(err)
 	}
 	if fake.all()[0].Method != "DELETE" {
@@ -116,7 +117,7 @@ func TestR2IronicBDeployTemplateFindDirectThenListFallback(t *testing.T) {
 	if v, err := api.Find(ctx, "nope", deploytemplates.WithFindDetail(false)); err != nil || v != nil || fake.all()[1].RawQuery != "" {
 		t.Fatal(v, err)
 	}
-	if _, err := api.Find(ctx, "nope", deploytemplates.WithFindIgnoreMissing(false)); !errors.Is(err, resource.ErrNotFound) {
+	if _, err := api.Find(ctx, "nope", request.IgnoreMissing(false)); !errors.Is(err, resource.ErrNotFound) {
 		t.Fatal(err)
 	}
 	api, _ = r2IronicBFindCloud(t, 404, `{"deploy_templates":[{"uuid":"a","name":"D"},{"uuid":"D","name":"z"}]}`)
@@ -191,7 +192,7 @@ func TestR2IronicBInspectionRuleOperations(t *testing.T) {
 	if c := fake.only(t); c.Method != "DELETE" || c.Path != "/v1/inspection_rules/r1" {
 		t.Fatalf("call=%+v", c)
 	}
-	if _, err := api.Create(ctx, inspectionrules.CreateOpts{}, inspectionrules.WithCreateField("phase", "x")); err == nil {
+	if _, err := api.Create(ctx, inspectionrules.CreateOpts{}, request.Field("phase", "x")); err == nil {
 		t.Fatal("collision")
 	}
 }
@@ -221,7 +222,7 @@ func TestR2IronicBIntrospectionRulesUseCollectionRoute(t *testing.T) {
 	if _, err := api.Create(ctx, rules.CreateOpts{}); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := api.Create(ctx, rules.CreateOpts{}, rules.WithCreateField("uuid", "x")); err == nil {
+	if _, err := api.Create(ctx, rules.CreateOpts{}, request.Field("uuid", "x")); err == nil {
 		t.Fatal("collision")
 	}
 	if _, err := api.Create(r2IronicBCanceled(), rules.CreateOpts{}); !errors.Is(err, context.Canceled) {
@@ -256,7 +257,7 @@ func TestR2IronicBIntrospectionRulesGetListDelete(t *testing.T) {
 		t.Fatal(v, err)
 	}
 	n := 0
-	for v, err := range api.List(ctx, rules.WithListMaxItems(2)) {
+	for v, err := range api.List(ctx, request.MaxItems(2)) {
 		if err != nil || v.Conditions != nil {
 			t.Fatal(v, err)
 		}
@@ -282,11 +283,11 @@ func TestR2IronicBIntrospectionRulesGetListDelete(t *testing.T) {
 	if ok, err := api.Delete(ctx, "gone"); err != nil || ok {
 		t.Fatal(ok, err)
 	}
-	if _, err := api.Delete(ctx, "gone", rules.WithDeleteIgnoreMissing(false)); !errors.Is(err, resource.ErrNotFound) {
+	if _, err := api.Delete(ctx, "gone", request.IgnoreMissing(false)); !errors.Is(err, resource.ErrNotFound) {
 		t.Fatal(err)
 	}
 	before := len(fake.all())
-	for _, err := range api.List(ctx, rules.WithListMaxItems(-1)) {
+	for _, err := range api.List(ctx, request.MaxItems(-1)) {
 		if !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(err)
 		}

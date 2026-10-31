@@ -8,6 +8,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/baremetal/v1/drivers"
 	"github.com/JSYoo5B/go-openstacksdk/baremetal/v1/nodes"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -86,7 +87,7 @@ func TestR2IronicCRemoveTraitIgnoreMissingOnly400(t *testing.T) {
 	if ok, err := api.RemoveTrait(ctx, "n1", "T/X"); err != nil || ok {
 		t.Fatalf("400 is a no-op: %v %v", ok, err)
 	}
-	if _, err := api.RemoveTrait(ctx, "n1", "T/X", nodes.WithRemoveTraitIgnoreMissing(false)); !gophercloud.ResponseCodeIs(err, 400) {
+	if _, err := api.RemoveTrait(ctx, "n1", "T/X", request.IgnoreMissing(false)); !gophercloud.ResponseCodeIs(err, 400) {
 		t.Fatalf("strict 400: %v", err)
 	}
 	if _, err := api.RemoveTrait(ctx, "n1", "T/X"); !gophercloud.ResponseCodeIs(err, 404) {
@@ -140,7 +141,7 @@ func TestR2IronicCInjectNMIListVIFsDetachVIFWire(t *testing.T) {
 	if ok, err := api.DetachVIF(ctx, "n1", "a"); err != nil || ok {
 		t.Fatalf("already detached: %v %v", ok, err)
 	}
-	if _, err := api.DetachVIF(ctx, "n1", "a", nodes.WithDetachVIFIgnoreMissing(false)); !gophercloud.ResponseCodeIs(err, 400) {
+	if _, err := api.DetachVIF(ctx, "n1", "a", request.IgnoreMissing(false)); !gophercloud.ResponseCodeIs(err, 400) {
 		t.Fatal(err)
 	}
 	if _, err := api.DetachVIF(ctx, "n1", "a"); !gophercloud.ResponseCodeIs(err, 409) || len(del.all()) != 4 {

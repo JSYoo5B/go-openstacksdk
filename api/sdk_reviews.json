@@ -117406,7 +117406,7 @@
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/nodes.API.AllRecords",
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/nodes.API.ProxyListRecords",
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/nodes.WithRecordListDetails",
-        "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/nodes.WithRecordListQuery"
+        "github.com/JSYoo5B/go-openstacksdk/request.Query"
       ],
       "contracts": [
         {
@@ -117488,7 +117488,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/nodes.API.FindRecord",
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/nodes.WithRecordFindDetails",
-        "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/nodes.WithRecordFindIgnoreMissing"
+        "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing"
       ],
       "contracts": [
         {
@@ -129702,7 +129702,7 @@
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/chassis.API.List",
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/chassis.API.ListDetail",
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/chassis.WithListOptions",
-        "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/chassis.WithListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/request.Query",
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/chassis.API.All"
       ],
       "contracts": [
@@ -129807,7 +129807,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/chassis.API.Create",
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/chassis.WithCreateOptions",
-        "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/chassis.WithCreateField"
+        "github.com/JSYoo5B/go-openstacksdk/request.Field"
       ],
       "contracts": [
         {
@@ -129845,8 +129845,8 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/deploytemplates.API.Create",
-        "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/deploytemplates.WithCreateField",
-        "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/deploytemplates.WithCreateHeader"
+        "github.com/JSYoo5B/go-openstacksdk/request.Field",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header"
       ],
       "contracts": [
         {
@@ -129872,7 +129872,7 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/inspectionrules.API.Create",
-        "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/inspectionrules.WithCreateField"
+        "github.com/JSYoo5B/go-openstacksdk/request.Field"
       ],
       "contracts": [
         {
@@ -129962,7 +129962,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/portgroups.API.Create",
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/portgroups.WithCreateOptions",
-        "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/portgroups.WithCreateField"
+        "github.com/JSYoo5B/go-openstacksdk/request.Field"
       ],
       "contracts": [
         {
@@ -130000,8 +130000,8 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/runbooks.API.Create",
-        "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/runbooks.WithCreateField",
-        "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/runbooks.WithCreateHeader"
+        "github.com/JSYoo5B/go-openstacksdk/request.Field",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header"
       ],
       "contracts": [
         {
@@ -130036,7 +130036,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/volumeconnectors.API.Create",
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/volumeconnectors.WithCreateOptions",
-        "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/volumeconnectors.WithCreateField"
+        "github.com/JSYoo5B/go-openstacksdk/request.Field"
       ],
       "contracts": [
         {
@@ -130075,7 +130075,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/volumetargets.API.Create",
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/volumetargets.WithCreateOptions",
-        "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/volumetargets.WithCreateField"
+        "github.com/JSYoo5B/go-openstacksdk/request.Field"
       ],
       "contracts": [
         {
@@ -130177,7 +130177,7 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/deploytemplates.API.Delete",
-        "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/deploytemplates.WithDeleteIgnoreMissing"
+        "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing"
       ],
       "contracts": [
         {
@@ -130203,7 +130203,7 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/inspectionrules.API.Delete",
-        "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/inspectionrules.WithDeleteIgnoreMissing"
+        "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing"
       ],
       "contracts": [
         {
@@ -130332,8 +130332,8 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/runbooks.API.Delete",
-        "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/runbooks.WithDeleteIgnoreMissing",
-        "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/runbooks.WithDeleteHeader"
+        "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header"
       ],
       "contracts": [
         {
@@ -130424,7 +130424,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/deploytemplates.API.List",
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/deploytemplates.WithListDetail",
-        "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/deploytemplates.WithListQuery"
+        "github.com/JSYoo5B/go-openstacksdk/request.Query"
       ],
       "contracts": [
         {
@@ -130452,7 +130452,7 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/nodes.API.DetachVIF",
-        "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/nodes.WithDetachVIFIgnoreMissing"
+        "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing"
       ],
       "contracts": [
         {
@@ -130625,7 +130625,7 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/deploytemplates.API.Find",
-        "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/deploytemplates.WithFindIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing",
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/deploytemplates.WithFindDetail"
       ],
       "contracts": [
@@ -130653,7 +130653,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/ports.API.FindRecord",
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/ports.WithRecordFindDetails",
-        "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/ports.WithRecordFindIgnoreMissing"
+        "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing"
       ],
       "contracts": [
         {
@@ -130851,7 +130851,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/deploytemplates.API.Get",
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/deploytemplates.WithGetFields",
-        "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/deploytemplates.WithGetHeader"
+        "github.com/JSYoo5B/go-openstacksdk/request.Header"
       ],
       "contracts": [
         {
@@ -131130,7 +131130,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/runbooks.API.Get",
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/runbooks.WithGetFields",
-        "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/runbooks.WithGetHeader"
+        "github.com/JSYoo5B/go-openstacksdk/request.Header"
       ],
       "contracts": [
         {
@@ -131578,7 +131578,7 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/runbooks.API.Patch",
-        "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/runbooks.WithPatchHeader"
+        "github.com/JSYoo5B/go-openstacksdk/request.Header"
       ],
       "contracts": [
         {
@@ -131690,7 +131690,7 @@
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/portgroups.API.List",
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/portgroups.API.ListDetail",
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/portgroups.WithListOptions",
-        "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/portgroups.WithListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/request.Query",
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/portgroups.API.All"
       ],
       "contracts": [
@@ -131730,7 +131730,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/ports.API.ListRecords",
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/ports.API.AllRecords",
-        "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/ports.WithRecordListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/request.Query",
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/ports.WithRecordListDetails"
       ],
       "contracts": [
@@ -131755,7 +131755,7 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/nodes.API.RemoveTrait",
-        "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/nodes.WithRemoveTraitIgnoreMissing"
+        "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing"
       ],
       "contracts": [
         {
@@ -131812,11 +131812,11 @@
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/runbooks.API.List",
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/runbooks.WithListDetail",
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/runbooks.WithListFields",
-        "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/runbooks.WithListLimit",
-        "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/runbooks.WithListMarker",
-        "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/runbooks.WithListMaxItems",
-        "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/runbooks.WithListSinglePage",
-        "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/runbooks.WithListQuery"
+        "github.com/JSYoo5B/go-openstacksdk/request.Limit",
+        "github.com/JSYoo5B/go-openstacksdk/request.Marker",
+        "github.com/JSYoo5B/go-openstacksdk/request.MaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/request.Paginated",
+        "github.com/JSYoo5B/go-openstacksdk/request.Query"
       ],
       "contracts": [
         {
@@ -131837,7 +131837,7 @@
       "differences": [
         "Python takes **attrs/**query and returns Resource objects; Go uses concrete options and typed models (raw members, headers and status in Metadata) and wraps native errors.",
         "Go never replays a request (Python retries HTTP 409/503), accepts only the documented success status (Python accepts any status below 400), uses the client microversion as configured (Python negotiates min(server maximum, class cap)), and takes deadlines from the context.",
-        "Python filters Body attributes client side and ignores unknown query names; Go sends only declared controls plus WithListQuery and does no client filtering.",
+        "Python filters Body attributes client side and ignores unknown query names; Go sends only declared controls plus request.Query and does no client filtering.",
         "Go stops at the max-items cap without the extra request Python makes."
       ],
       "documentation": [
@@ -132183,7 +132183,7 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/deploytemplates.API.Update",
-        "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/deploytemplates.WithUpdateField"
+        "github.com/JSYoo5B/go-openstacksdk/request.Field"
       ],
       "contracts": [
         {
@@ -132209,7 +132209,7 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/inspectionrules.API.Update",
-        "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/inspectionrules.WithUpdateField"
+        "github.com/JSYoo5B/go-openstacksdk/request.Field"
       ],
       "contracts": [
         {
@@ -132339,8 +132339,8 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/runbooks.API.Update",
-        "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/runbooks.WithUpdateField",
-        "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/runbooks.WithUpdateHeader"
+        "github.com/JSYoo5B/go-openstacksdk/request.Field",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header"
       ],
       "contracts": [
         {
@@ -132487,7 +132487,7 @@
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/volumeconnectors.API.List",
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/volumeconnectors.API.ListDetail",
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/volumeconnectors.WithListOptions",
-        "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/volumeconnectors.WithListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/request.Query",
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/volumeconnectors.API.All"
       ],
       "contracts": [
@@ -132528,7 +132528,7 @@
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/volumetargets.API.List",
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/volumetargets.API.ListDetail",
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/volumetargets.WithListOptions",
-        "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/volumetargets.WithListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/request.Query",
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/volumetargets.API.All"
       ],
       "contracts": [
@@ -144923,12 +144923,12 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/baremetalintrospection/v1/introspection.API.AbortIntrospectionWithOptions",
-        "github.com/JSYoo5B/go-openstacksdk/baremetalintrospection/v1/introspection.WithAbortIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing",
         "github.com/JSYoo5B/go-openstacksdk/baremetalintrospection/v1/introspection.API.AbortIntrospection"
       ],
       "contracts": [
         {
-          "behavior": "POST .../abort ignores a 404 by default and fails on it with WithAbortIgnoreMissing(false); other errors and unexpected success codes are kept.",
+          "behavior": "POST .../abort ignores a 404 by default and fails on it with request.IgnoreMissing(false); other errors and unexpected success codes are kept.",
           "tests": [
             "api/py_cloud_ironic_introspection_test.go:TestPyCloudIronicIntrospectionAbortIgnoresMissingByDefaultAndKeepsOtherErrors"
           ]
@@ -144988,7 +144988,7 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/baremetalintrospection/v1/rules.API.Create",
-        "github.com/JSYoo5B/go-openstacksdk/baremetalintrospection/v1/rules.WithCreateField"
+        "github.com/JSYoo5B/go-openstacksdk/request.Field"
       ],
       "contracts": [
         {
@@ -145039,7 +145039,7 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/baremetalintrospection/v1/rules.API.Delete",
-        "github.com/JSYoo5B/go-openstacksdk/baremetalintrospection/v1/rules.WithDeleteIgnoreMissing"
+        "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing"
       ],
       "contracts": [
         {
@@ -145065,7 +145065,7 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/baremetalintrospection/v1/rules.API.List",
-        "github.com/JSYoo5B/go-openstacksdk/baremetalintrospection/v1/rules.WithListMaxItems"
+        "github.com/JSYoo5B/go-openstacksdk/request.MaxItems"
       ],
       "contracts": [
         {

@@ -233,7 +233,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/baremetal/v1/nodes.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/baremetal/v1/nodes.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/baremetal/v1/nodes.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - POST /nodes sends a flat body, keeps explicit false and extension fields and omits unset fields; protected or nil options fail before HTTP.
   Tests: `api/ironic_nodes_crud_test.go:TestIronicNodeCreateSendsFlatBodyKeepsFalseAndExtensions`, `api/ironic_nodes_crud_test.go:TestIronicNodeCreateOmitsUnsetOptionalFields`, `api/ironic_nodes_crud_test.go:TestIronicNodeRejectsProtectedOrNilOptionsBeforeHTTP`

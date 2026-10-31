@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"iter"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/ironicrest"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
@@ -38,7 +39,7 @@ func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 // Create sends POST /inspection_rules. Only 201 succeeds; a failed or uncertain call is
 // never replayed.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*InspectionRule, error) {
-	config, err := request.Apply(opts, options...)
+	config, err := calls.ApplyConfig(opts, createCalls, options...)
 	if err == nil {
 		err = request.ValidateCapabilities(config, true, false, true)
 	}
@@ -55,7 +56,7 @@ func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOpti
 
 // Get sends GET /inspection_rules/{id}, with an optional fields query. Only 200 succeeds.
 func (a *API) Get(ctx context.Context, id string, options ...GetOption) (*InspectionRule, error) {
-	config, err := request.Apply(GetOpts{}, options...)
+	config, err := calls.ApplyConfig(GetOpts{}, getCalls, options...)
 	if err == nil {
 		err = request.ValidateCapabilities(config, false, false, true)
 	}
@@ -84,7 +85,7 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Inspec
 // Update sends PATCH /inspection_rules/{id} with one add operation per set member. An
 // update that sets nothing is rejected before HTTP.
 func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ...UpdateOption) (*InspectionRule, error) {
-	config, err := request.Apply(opts, options...)
+	config, err := calls.ApplyConfig(opts, updateCalls, options...)
 	if err == nil {
 		err = request.ValidateCapabilities(config, true, false, true)
 	}
@@ -108,15 +109,17 @@ func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ..
 	return value, request.Wrap("Update", kind, err)
 }
 
-// PatchOption configures Patch.
-type PatchOption = request.Option[struct{}]
+// PatchOption is one option of Patch: request.Header or request.Custom over
+// *request.Config[struct{}]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type PatchOption = request.WriteCall
 
-func WithPatchHeader(key, value string) PatchOption { return request.WithHeader[struct{}](key, value) }
+var patchCalls = calls.Spec[request.Config[struct{}]]{Header: calls.ConfigHeader[struct{}]}
 
 // Patch sends PATCH /inspection_rules/{id} with the operations exactly as given. Only
 // 200 succeeds.
 func (a *API) Patch(ctx context.Context, id string, ops []PatchOperation, options ...PatchOption) (*InspectionRule, error) {
-	config, err := request.Apply(struct{}{}, options...)
+	config, err := calls.ApplyConfig(struct{}{}, patchCalls, options...)
 	if err == nil {
 		err = request.ValidateCapabilities(config, false, false, true)
 	}
@@ -128,10 +131,10 @@ func (a *API) Patch(ctx context.Context, id string, ops []PatchOperation, option
 }
 
 // Delete sends DELETE /inspection_rules/{id}. Only 204 succeeds. By default a missing
-// runbook is not an error and deleted is false; WithDeleteIgnoreMissing(false)
+// runbook is not an error and deleted is false; request.IgnoreMissing(false)
 // returns a resource.NotFoundError instead.
 func (a *API) Delete(ctx context.Context, id string, options ...DeleteOption) (deleted bool, err error) {
-	config, err := request.Apply(DeleteOpts{IgnoreMissing: true}, options...)
+	config, err := calls.ApplyConfig(DeleteOpts{IgnoreMissing: true}, deleteCalls, options...)
 	if err == nil {
 		err = request.ValidateCapabilities(config, false, false, true)
 	}

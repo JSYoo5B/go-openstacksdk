@@ -15,6 +15,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/baremetal/v1/volumeconnectors"
 	"github.com/JSYoo5B/go-openstacksdk/baremetal/v1/volumetargets"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -94,11 +95,11 @@ func r2ironicAKinds() []r2IronicAKind {
 			protect:    []string{"uuid", "created_at", "updated_at", "links", "nodes"},
 			create: func(ctx context.Context, c *gophercloud.ServiceClient) (string, error) {
 				v, err := chassisAPI(c).Create(ctx, chassis.CreateOpts{UUID: r2ironicAStr("c-1"), Description: r2ironicAStr(""), Extra: map[string]any{}},
-					chassis.WithCreateField("vendor", map[string]bool{"enabled": false}))
+					request.Field("vendor", map[string]bool{"enabled": false}))
 				return r2ironicAUUID(v, err, func() string { return v.UUID })
 			},
 			createCollision: func(ctx context.Context, c *gophercloud.ServiceClient, key string) error {
-				_, err := chassisAPI(c).Create(ctx, chassis.CreateOpts{}, chassis.WithCreateField(key, 1))
+				_, err := chassisAPI(c).Create(ctx, chassis.CreateOpts{}, request.Field(key, 1))
 				return err
 			},
 			get: func(ctx context.Context, c *gophercloud.ServiceClient, id string, fields ...string) (string, error) {
@@ -125,7 +126,7 @@ func r2ironicAKinds() []r2IronicAKind {
 			list: func(ctx context.Context, c *gophercloud.ServiceClient, detail bool, limit int, filter string, fields []string, extra [][2]string) ([]string, error) {
 				opts := []chassis.ListOption{chassis.WithListOptions(chassis.ListOpts{Limit: limit, Fields: fields, SortKey: "uuid", SortDir: "desc"})}
 				for _, e := range extra {
-					opts = append(opts, chassis.WithListQuery(e[0], e[1]))
+					opts = append(opts, request.Query(e[0], e[1]))
 				}
 				var out []string
 				seq := chassisAPI(c).List(ctx, opts...)
@@ -161,11 +162,11 @@ func r2ironicAKinds() []r2IronicAKind {
 			create: func(ctx context.Context, c *gophercloud.ServiceClient) (string, error) {
 				v, err := pgAPI(c).Create(ctx, portgroups.CreateOpts{UUID: r2ironicAStr("pg-1"), NodeUUID: "n-1", Name: r2ironicAStr(""), Address: r2ironicAStr(""),
 					StandalonePortsSupported: r2ironicABool(false), Mode: r2ironicAStr(""), Properties: map[string]any{}, Extra: map[string]any{}},
-					portgroups.WithCreateField("vendor", 0))
+					request.Field("vendor", 0))
 				return r2ironicAUUID(v, err, func() string { return v.UUID })
 			},
 			createCollision: func(ctx context.Context, c *gophercloud.ServiceClient, key string) error {
-				_, err := pgAPI(c).Create(ctx, portgroups.CreateOpts{}, portgroups.WithCreateField(key, 1))
+				_, err := pgAPI(c).Create(ctx, portgroups.CreateOpts{}, request.Field(key, 1))
 				return err
 			},
 			get: func(ctx context.Context, c *gophercloud.ServiceClient, id string, fields ...string) (string, error) {
@@ -192,7 +193,7 @@ func r2ironicAKinds() []r2IronicAKind {
 			list: func(ctx context.Context, c *gophercloud.ServiceClient, detail bool, limit int, filter string, fields []string, extra [][2]string) ([]string, error) {
 				opts := []portgroups.ListOption{portgroups.WithListOptions(portgroups.ListOpts{Limit: limit, Fields: fields, Node: filter, Address: "aa:bb"})}
 				for _, e := range extra {
-					opts = append(opts, portgroups.WithListQuery(e[0], e[1]))
+					opts = append(opts, request.Query(e[0], e[1]))
 				}
 				var out []string
 				seq := pgAPI(c).List(ctx, opts...)
@@ -227,11 +228,11 @@ func r2ironicAKinds() []r2IronicAKind {
 			protect:    []string{"uuid", "created_at", "updated_at", "links"},
 			create: func(ctx context.Context, c *gophercloud.ServiceClient) (string, error) {
 				v, err := vcAPI(c).Create(ctx, volumeconnectors.CreateOpts{UUID: r2ironicAStr("vc-1"), NodeUUID: "n-1", Type: "iqn", ConnectorID: "iqn.x", Extra: map[string]any{}},
-					volumeconnectors.WithCreateField("vendor", false))
+					request.Field("vendor", false))
 				return r2ironicAUUID(v, err, func() string { return v.UUID })
 			},
 			createCollision: func(ctx context.Context, c *gophercloud.ServiceClient, key string) error {
-				_, err := vcAPI(c).Create(ctx, volumeconnectors.CreateOpts{}, volumeconnectors.WithCreateField(key, 1))
+				_, err := vcAPI(c).Create(ctx, volumeconnectors.CreateOpts{}, request.Field(key, 1))
 				return err
 			},
 			get: func(ctx context.Context, c *gophercloud.ServiceClient, id string, fields ...string) (string, error) {
@@ -258,7 +259,7 @@ func r2ironicAKinds() []r2IronicAKind {
 			list: func(ctx context.Context, c *gophercloud.ServiceClient, detail bool, limit int, filter string, fields []string, extra [][2]string) ([]string, error) {
 				opts := []volumeconnectors.ListOption{volumeconnectors.WithListOptions(volumeconnectors.ListOpts{Limit: limit, Fields: fields, Node: filter})}
 				for _, e := range extra {
-					opts = append(opts, volumeconnectors.WithListQuery(e[0], e[1]))
+					opts = append(opts, request.Query(e[0], e[1]))
 				}
 				var out []string
 				seq := vcAPI(c).List(ctx, opts...)
@@ -293,11 +294,11 @@ func r2ironicAKinds() []r2IronicAKind {
 			protect:    []string{"uuid", "created_at", "updated_at", "links"},
 			create: func(ctx context.Context, c *gophercloud.ServiceClient) (string, error) {
 				v, err := vtAPI(c).Create(ctx, volumetargets.CreateOpts{UUID: r2ironicAStr("vt-1"), NodeUUID: "n-1", VolumeType: "iscsi", VolumeID: "vol-1", BootIndex: r2ironicAInt(0),
-					Properties: map[string]any{}, Extra: map[string]any{}}, volumetargets.WithCreateField("vendor", nil))
+					Properties: map[string]any{}, Extra: map[string]any{}}, request.Field("vendor", nil))
 				return r2ironicAUUID(v, err, func() string { return v.UUID })
 			},
 			createCollision: func(ctx context.Context, c *gophercloud.ServiceClient, key string) error {
-				_, err := vtAPI(c).Create(ctx, volumetargets.CreateOpts{}, volumetargets.WithCreateField(key, 1))
+				_, err := vtAPI(c).Create(ctx, volumetargets.CreateOpts{}, request.Field(key, 1))
 				return err
 			},
 			get: func(ctx context.Context, c *gophercloud.ServiceClient, id string, fields ...string) (string, error) {
@@ -324,7 +325,7 @@ func r2ironicAKinds() []r2IronicAKind {
 			list: func(ctx context.Context, c *gophercloud.ServiceClient, detail bool, limit int, filter string, fields []string, extra [][2]string) ([]string, error) {
 				opts := []volumetargets.ListOption{volumetargets.WithListOptions(volumetargets.ListOpts{Limit: limit, Fields: fields, Node: filter})}
 				for _, e := range extra {
-					opts = append(opts, volumetargets.WithListQuery(e[0], e[1]))
+					opts = append(opts, request.Query(e[0], e[1]))
 				}
 				var out []string
 				seq := vtAPI(c).List(ctx, opts...)

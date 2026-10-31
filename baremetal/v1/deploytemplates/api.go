@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"iter"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/ironicrest"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
@@ -37,7 +38,7 @@ func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 // Create sends POST /deploy_templates. Only 201 succeeds; a failed or uncertain call is
 // never replayed.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*DeployTemplate, error) {
-	config, err := request.Apply(opts, options...)
+	config, err := calls.ApplyConfig(opts, createCalls, options...)
 	if err == nil {
 		err = request.ValidateCapabilities(config, true, false, true)
 	}
@@ -54,7 +55,7 @@ func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOpti
 
 // Get sends GET /deploy_templates/{id}, with an optional fields query. Only 200 succeeds.
 func (a *API) Get(ctx context.Context, id string, options ...GetOption) (*DeployTemplate, error) {
-	config, err := request.Apply(GetOpts{}, options...)
+	config, err := calls.ApplyConfig(GetOpts{}, getCalls, options...)
 	if err == nil {
 		err = request.ValidateCapabilities(config, false, false, true)
 	}
@@ -83,7 +84,7 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Deploy
 // Update sends PATCH /deploy_templates/{id} with one add operation per set member. An
 // update that sets nothing is rejected before HTTP.
 func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ...UpdateOption) (*DeployTemplate, error) {
-	config, err := request.Apply(opts, options...)
+	config, err := calls.ApplyConfig(opts, updateCalls, options...)
 	if err == nil {
 		err = request.ValidateCapabilities(config, true, false, true)
 	}
@@ -107,15 +108,17 @@ func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ..
 	return value, request.Wrap("Update", kind, err)
 }
 
-// PatchOption configures Patch.
-type PatchOption = request.Option[struct{}]
+// PatchOption is one option of Patch: request.Header or request.Custom over
+// *request.Config[struct{}]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type PatchOption = request.WriteCall
 
-func WithPatchHeader(key, value string) PatchOption { return request.WithHeader[struct{}](key, value) }
+var patchCalls = calls.Spec[request.Config[struct{}]]{Header: calls.ConfigHeader[struct{}]}
 
 // Patch sends PATCH /deploy_templates/{id} with the operations exactly as given. Only
 // 200 succeeds.
 func (a *API) Patch(ctx context.Context, id string, ops []PatchOperation, options ...PatchOption) (*DeployTemplate, error) {
-	config, err := request.Apply(struct{}{}, options...)
+	config, err := calls.ApplyConfig(struct{}{}, patchCalls, options...)
 	if err == nil {
 		err = request.ValidateCapabilities(config, false, false, true)
 	}
@@ -127,10 +130,10 @@ func (a *API) Patch(ctx context.Context, id string, ops []PatchOperation, option
 }
 
 // Delete sends DELETE /deploy_templates/{id}. Only 204 succeeds. By default a missing
-// deploy template is not an error and deleted is false; WithDeleteIgnoreMissing(false)
+// deploy template is not an error and deleted is false; request.IgnoreMissing(false)
 // returns a resource.NotFoundError instead.
 func (a *API) Delete(ctx context.Context, id string, options ...DeleteOption) (deleted bool, err error) {
-	config, err := request.Apply(DeleteOpts{IgnoreMissing: true}, options...)
+	config, err := calls.ApplyConfig(DeleteOpts{IgnoreMissing: true}, deleteCalls, options...)
 	if err == nil {
 		err = request.ValidateCapabilities(config, false, false, true)
 	}
@@ -144,25 +147,28 @@ func (a *API) Delete(ctx context.Context, id string, options ...DeleteOption) (d
 // FindOpts: IgnoreMissing defaults to true and Detail to true, as in Python.
 type FindOpts struct{ IgnoreMissing, Detail bool }
 
-type FindOption = request.Option[FindOpts]
+// FindOption is one option of Find: WithFindDetail, request.IgnoreMissing,
+// request.Header or request.Custom over *request.Config[FindOpts]. Other
+// shared calls fail with resource.ErrInvalidOption before HTTP.
+type FindOption = request.FindCall
 
-func WithFindIgnoreMissing(ignore bool) FindOption {
-	return func(c *request.Config[FindOpts]) error { c.Options.IgnoreMissing = ignore; return nil }
+var findCalls = calls.Spec[request.Config[FindOpts]]{
+	Header:        calls.ConfigHeader[FindOpts],
+	IgnoreMissing: func(c *request.Config[FindOpts], ignore bool) error { c.Options.IgnoreMissing = ignore; return nil },
 }
 
 // WithFindDetail selects detail=true on the fallback list.
 func WithFindDetail(detail bool) FindOption {
-	return func(c *request.Config[FindOpts]) error { c.Options.Detail = detail; return nil }
+	return request.Custom(func(c *request.Config[FindOpts]) error { c.Options.Detail = detail; return nil })
 }
-func WithFindHeader(key, value string) FindOption { return request.WithHeader[FindOpts](key, value) }
 
 // Find resolves a name or UUID. It first reads GET /deploy_templates/{ref}; a
 // 400, 403 or 404 there falls back to one complete list matched by exact uuid or
 // name. Two matches return *resource.AmbiguousError. A missing template returns
-// nil, nil by default and *resource.NotFoundError with WithFindIgnoreMissing(false).
+// nil, nil by default and *resource.NotFoundError with request.IgnoreMissing(false).
 // Nothing is retried.
 func (a *API) Find(ctx context.Context, ref string, options ...FindOption) (*DeployTemplate, error) {
-	config, err := request.Apply(FindOpts{IgnoreMissing: true, Detail: true}, options...)
+	config, err := calls.ApplyConfig(FindOpts{IgnoreMissing: true, Detail: true}, findCalls, options...)
 	if err == nil {
 		err = request.ValidateCapabilities(config, false, false, true)
 	}

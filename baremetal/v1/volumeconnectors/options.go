@@ -1,6 +1,7 @@
 package volumeconnectors
 
 import (
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/ironic"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 )
@@ -16,20 +17,22 @@ type CreateOpts struct {
 	Extra       map[string]any
 }
 
-type CreateOption = request.Option[CreateOpts]
+// CreateOption is one option of Create: WithCreateOptions, request.Custom
+// over *request.Config[CreateOpts] or request.Field. Other shared calls fail
+// with resource.ErrInvalidOption before HTTP.
+type CreateOption = request.WriteCall
+
+var createCalls = calls.Spec[request.Config[CreateOpts]]{Field: calls.ConfigField[CreateOpts]}
 
 // WithCreateOptions replaces the typed create options.
-func WithCreateOptions(value CreateOpts) CreateOption { return request.WithOptions(value) }
-
-// WithCreateField adds one extension body field. Typed and server-owned names are rejected before HTTP.
-func WithCreateField(key string, value any) CreateOption {
-	return request.WithField[CreateOpts](key, value)
+func WithCreateOptions(value CreateOpts) CreateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 var createReserved = []string{"uuid", "node_uuid", "type", "connector_id", "extra", "created_at", "updated_at", "links"}
 
 func prepareCreate(opts CreateOpts, options ...CreateOption) (map[string]any, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := calls.ApplyConfig(opts, createCalls, options...)
 	if err != nil {
 		return nil, err
 	}
@@ -59,18 +62,21 @@ func prepareCreate(opts CreateOpts, options ...CreateOption) (map[string]any, er
 // GetOpts selects wire field names for a field-limited read.
 type GetOpts struct{ Fields []string }
 
-type GetOption = request.Option[GetOpts]
+// GetOption is one option of Get: WithGetOptions, WithGetFields or
+// request.Custom over *request.Config[GetOpts]. Shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type GetOption = request.GetCall
 
-func WithGetOptions(value GetOpts) GetOption { return request.WithOptions(value) }
+func WithGetOptions(value GetOpts) GetOption { return request.Custom(request.WithOptions(value)) }
 
 // WithGetFields sends fields=<comma list>; names are wire names and must be nonempty and comma-free.
 func WithGetFields(fields ...string) GetOption {
 	copied := append([]string{}, fields...)
-	return func(c *request.Config[GetOpts]) error { c.Options.Fields = copied; return nil }
+	return request.Custom(func(c *request.Config[GetOpts]) error { c.Options.Fields = copied; return nil })
 }
 
 func prepareGet(options ...GetOption) ([]string, error) {
-	cfg, err := request.Apply(GetOpts{}, options...)
+	cfg, err := calls.ApplyConfig(GetOpts{}, calls.Spec[request.Config[GetOpts]]{}, options...)
 	if err != nil {
 		return nil, err
 	}
@@ -100,22 +106,27 @@ func FieldPatches(fields map[string]any) []PatchOperation { return ironic.FieldP
 // UpdateOpts is the JSON Patch document for one update.
 type UpdateOpts struct{ Operations []PatchOperation }
 
-type UpdateOption = request.Option[UpdateOpts]
+// UpdateOption is one option of Update: WithUpdateOptions,
+// WithUpdateOperations or request.Custom over *request.Config[UpdateOpts].
+// Shared calls fail with resource.ErrInvalidOption before HTTP.
+type UpdateOption = request.WriteCall
 
 // WithUpdateOptions replaces the initial operation list; it does not append.
-func WithUpdateOptions(value UpdateOpts) UpdateOption { return request.WithOptions(value) }
+func WithUpdateOptions(value UpdateOpts) UpdateOption {
+	return request.Custom(request.WithOptions(value))
+}
 
 // WithUpdateOperations appends operations in the given order.
 func WithUpdateOperations(operations ...PatchOperation) UpdateOption {
 	copied := append([]PatchOperation(nil), operations...)
-	return func(c *request.Config[UpdateOpts]) error {
+	return request.Custom(func(c *request.Config[UpdateOpts]) error {
 		c.Options.Operations = append(append([]PatchOperation(nil), c.Options.Operations...), copied...)
 		return nil
-	}
+	})
 }
 
 func prepareUpdate(opts UpdateOpts, options ...UpdateOption) ([]PatchOperation, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := calls.ApplyConfig(opts, calls.Spec[request.Config[UpdateOpts]]{}, options...)
 	if err != nil {
 		return nil, err
 	}
@@ -136,15 +147,18 @@ type ListOpts struct {
 	Node    string
 }
 
-type ListOption = request.Option[ListOpts]
+// ListOption is one option of List and ListDetail: WithListOptions,
+// request.Custom over *request.Config[ListOpts] or request.Query with a string
+// or []string value. Keys owned by typed filters are rejected before HTTP.
+// Other shared calls fail with resource.ErrInvalidOption before HTTP.
+type ListOption = request.ListCall
 
-func WithListOptions(value ListOpts) ListOption { return request.WithOptions(value) }
+var listCalls = calls.Spec[request.Config[ListOpts]]{Query: calls.ConfigQuery[ListOpts]}
 
-// WithListQuery adds an extension query. Keys owned by typed filters are rejected before HTTP.
-func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
+func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 func prepareList(options ...ListOption) (map[string][]string, error) {
-	cfg, err := request.Apply(ListOpts{}, options...)
+	cfg, err := calls.ApplyConfig(ListOpts{}, listCalls, options...)
 	if err != nil {
 		return nil, err
 	}

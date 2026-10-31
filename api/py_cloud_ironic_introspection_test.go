@@ -11,6 +11,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/baremetalintrospection/v1/introspection"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -100,7 +101,7 @@ func TestPyCloudIronicIntrospectionAbortIgnoresMissingByDefaultAndKeepsOtherErro
 	if err := api.AbortIntrospectionWithOptions(ctx, "gone"); err != nil {
 		t.Fatalf("missing must be ignored by default: %v", err)
 	}
-	ironicRequireStatus(t, api.AbortIntrospectionWithOptions(ctx, "gone", introspection.WithAbortIgnoreMissing(false)), 404)
+	ironicRequireStatus(t, api.AbortIntrospectionWithOptions(ctx, "gone", request.IgnoreMissing(false)), 404)
 	ironicRequireStatus(t, api.AbortIntrospectionWithOptions(ctx, "conflict"), 409)
 	ironicRequireStatus(t, api.AbortIntrospectionWithOptions(ctx, "odd-success"), 200)
 	if err := api.AbortIntrospectionWithOptions(ctx, "ok", nil); !errors.Is(err, resource.ErrInvalidOption) {
