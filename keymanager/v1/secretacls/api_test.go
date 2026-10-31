@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"strings"
 	"sync/atomic"
 	"testing"
 
@@ -16,18 +15,8 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type aclTransport func(*http.Request) (*http.Response, error)
-
-func (transport aclTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func aclWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}, "X-Acl-Proof": {"actual"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}, "X-Acl-Proof": {"actual"}})
 }
 
 type aclCall struct{ method, path, body, extra string }
@@ -36,7 +25,7 @@ func aclScope(t *testing.T, calls *[]aclCall, reply func(*http.Request) *http.Re
 	t.Helper()
 	cloud := testcloud.New(t)
 	client := cloud.Client("key-manager", "/barbican/v1/")
-	cloud.Provider.HTTPClient.Transport = aclTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -44,7 +33,7 @@ func aclScope(t *testing.T, calls *[]aclCall, reply func(*http.Request) *http.Re
 		}
 		*calls = append(*calls, aclCall{req.Method, req.URL.EscapedPath(), raw, req.Header.Get("X-Extra")})
 		return reply(req), nil
-	})
+	}))
 	scope, err := secretacls.New(client).InSecret(context.Background(), resource.ID("s 1"))
 	if err == nil {
 		t.Fatal("whitespace IDs are rejected before HTTP")

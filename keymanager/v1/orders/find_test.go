@@ -17,9 +17,9 @@ func TestOrderFindIdentityFollowsPythonFind(t *testing.T) {
 	run := func(reply func(n int32) *http.Response) (*orders.API, *atomic.Int32) {
 		var calls atomic.Int32
 		cloud := testcloud.New(t)
-		cloud.Provider.HTTPClient.Transport = nativeOrderTransport(func(req *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 			return reply(calls.Add(1)), nil
-		})
+		}))
 		return orders.New(nativeOrderClient(cloud)), &calls
 	}
 	api, calls := run(func(int32) *http.Response {

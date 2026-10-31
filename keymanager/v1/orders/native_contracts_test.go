@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"net/url"
 	"reflect"
-	"strings"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -19,18 +18,8 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type nativeOrderTransport func(*http.Request) (*http.Response, error)
-
-func (transport nativeOrderTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func nativeOrderWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}, "X-Order-Proof": {"actual"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}, "X-Order-Proof": {"actual"}})
 }
 
 func nativeOrderClient(cloud *testcloud.Cloud) *gophercloud.ServiceClient {
@@ -47,7 +36,7 @@ func TestNativeOrderRoutesBodiesAndDecode(t *testing.T) {
 	client := nativeOrderClient(cloud)
 	type exchange struct{ method, path, body string }
 	var seen []exchange
-	cloud.Provider.HTTPClient.Transport = nativeOrderTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -64,7 +53,7 @@ func TestNativeOrderRoutesBodiesAndDecode(t *testing.T) {
 			return nativeOrderWire(204, ""), nil
 		}
 		return nativeOrderWire(200, nativeOrderRow), nil
-	})
+	}))
 	api := orders.New(client)
 	if api.RawClient() != client {
 		t.Fatal("native client identity changed")
@@ -118,10 +107,10 @@ func TestNativeOrderStrictStatusesListAndPreflight(t *testing.T) {
 			t.Run(fmt.Sprintf("%s/%d", call.name, code), func(t *testing.T) {
 				cloud := testcloud.New(t)
 				var requests atomic.Int32
-				cloud.Provider.HTTPClient.Transport = nativeOrderTransport(func(req *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 					requests.Add(1)
 					return nativeOrderWire(code, nativeOrderRow), nil
-				})
+				}))
 				err := call.call(orders.New(nativeOrderClient(cloud)))
 				var wrapped *resource.OperationError
 				var native gophercloud.ErrUnexpectedResponseCode
@@ -134,10 +123,10 @@ func TestNativeOrderStrictStatusesListAndPreflight(t *testing.T) {
 	t.Run("collision and nil option", func(t *testing.T) {
 		cloud := testcloud.New(t)
 		var requests atomic.Int32
-		cloud.Provider.HTTPClient.Transport = nativeOrderTransport(func(req *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 			requests.Add(1)
 			return nativeOrderWire(202, `{}`), nil
-		})
+		}))
 		api := orders.New(nativeOrderClient(cloud))
 		for _, option := range []orders.CreateOption{orders.WithCreateField("meta", map[string]any{}), nil} {
 			if _, err := api.Create(ctx, orders.CreateOpts{Type: orders.KeyOrder}, option); err == nil {
@@ -152,14 +141,14 @@ func TestNativeOrderStrictStatusesListAndPreflight(t *testing.T) {
 		cloud := testcloud.New(t)
 		var queries []url.Values
 		var paths []string
-		cloud.Provider.HTTPClient.Transport = nativeOrderTransport(func(req *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 			queries = append(queries, req.URL.Query())
 			paths = append(paths, req.URL.Path)
 			if len(paths) == 1 {
 				return nativeOrderWire(200, `{"orders":[`+nativeOrderRow+`],"next":"`+cloud.Server.URL+`/other/orders?offset=1"}`), nil
 			}
 			return nativeOrderWire(200, `{"orders":[]}`), nil
-		})
+		}))
 		var refs []string
 		for value, err := range orders.New(nativeOrderClient(cloud)).List(ctx, orders.WithListOptions(orders.ListOpts{Limit: 1}), orders.WithListQuery("extra", "1")) {
 			if err != nil {

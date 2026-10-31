@@ -16,13 +16,8 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type secretFindRecordTransport func(*http.Request) (*http.Response, error)
-
-func (f secretFindRecordTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	return f(req)
-}
 func secretFindRecordResponse(status int, body string) *http.Response {
-	return &http.Response{StatusCode: status, Header: http.Header{"X-Receipt": []string{"actual"}}, Body: io.NopCloser(strings.NewReader(body))}
+	return testcloud.Response(status, body, http.Header{"X-Receipt": []string{"actual"}})
 }
 func secretFindRecordClient(cloud *testcloud.Cloud) *gophercloud.ServiceClient {
 	client := cloud.Client("key-manager", "/catalog/v1/")
@@ -42,7 +37,7 @@ func TestPythonSecretFindRecordDirectDescriptorsAndOwnedReceipts(t *testing.T) {
 	client.MoreHeaders = map[string]string{"X-Project-Id": "project", "aCcEpT": "configured"}
 	calls := 0
 	metadata := `{"name":false,"id":null,"secret_ref":"https://foreign.example/secrets/passive","status":0,"bit_length":9007199254740993,"algorithm":[false],"created":null,"created_at":"alias loses","content_types":{"default":"text/plain"},"payload_content_type":"application/octet-stream","unknown":{"n":9007199254740993},"connection":null,"microversion":true,"_synchronized":false,"cls":null}`
-	cloud.Provider.HTTPClient.Transport = secretFindRecordTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 		calls++
 		if req.Method != http.MethodGet || req.Header.Get("X-Auth-Token") != "test-token" || req.Header.Get("X-Project-Id") != "project" {
 			t.Fatal(req)
@@ -62,7 +57,7 @@ func TestPythonSecretFindRecordDirectDescriptorsAndOwnedReceipts(t *testing.T) {
 			t.Fatal("followed response ref", req.URL)
 			return nil, errors.New("extra HTTP")
 		}
-	})
+	}))
 	value, err := secrets.New(client).FindRecord(context.Background(), "request-id")
 	if err != nil || value == nil || value.RequestID != "request-id" || value.StatusCode != 201 || calls != 2 {
 		t.Fatal(value, err, calls)
@@ -106,7 +101,7 @@ func TestPythonSecretFindRecordPayloadSelectionAndBinaryDomain(t *testing.T) {
 			client := secretFindRecordClient(cloud)
 			calls := 0
 			client.MoreHeaders = map[string]string{"Accept": "configured"}
-			cloud.Provider.HTTPClient.Transport = secretFindRecordTransport(func(req *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 				calls++
 				if calls == 1 {
 					return secretFindRecordResponse(199, tc.metadata), nil
@@ -119,7 +114,7 @@ func TestPythonSecretFindRecordPayloadSelectionAndBinaryDomain(t *testing.T) {
 					t.Fatal("omitted explicit Accept")
 				}
 				return secretFindRecordResponse(399, string([]byte{0xff, 0, 0x42})), nil
-			})
+			}))
 			value, err := secrets.New(client).FindRecord(context.Background(), "s1")
 			if err != nil || value == nil {
 				t.Fatal(value, err)
@@ -153,7 +148,7 @@ func TestPythonSecretFindRecordMetadataAndTextFailuresKeepProof(t *testing.T) {
 			cloud := testcloud.New(t)
 			client := secretFindRecordClient(cloud)
 			calls := 0
-			cloud.Provider.HTTPClient.Transport = secretFindRecordTransport(func(req *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 				calls++
 				if calls == 1 {
 					return secretFindRecordResponse(200, tc.metadata), nil
@@ -162,7 +157,7 @@ func TestPythonSecretFindRecordMetadataAndTextFailuresKeepProof(t *testing.T) {
 					t.Fatal("decode error continued HTTP", req.URL)
 				}
 				return secretFindRecordResponse(200, tc.payload), nil
-			})
+			}))
 			value, err := secrets.New(client).FindRecord(context.Background(), "s1")
 			var proof *resource.ResponseError
 			if err == nil || !errors.As(err, &proof) || proof.Header.Get("X-Receipt") != "actual" || value == nil || value.Resource != nil {
@@ -194,7 +189,7 @@ func TestPythonSecretFindRecordCleanFallbackFromBothReads(t *testing.T) {
 				calls := 0
 				payloads := 0
 				lists := 0
-				cloud.Provider.HTTPClient.Transport = secretFindRecordTransport(func(req *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 					calls++
 					if req.URL.Path == "/barbican/v1/secrets/name" {
 						if stage == "metadata" {
@@ -217,7 +212,7 @@ func TestPythonSecretFindRecordCleanFallbackFromBothReads(t *testing.T) {
 						t.Fatal(req.URL, lists)
 					}
 					return secretFindRecordResponse(200, `{"secrets":[{"name":"name","secret_ref":"https://passive.example/secrets/s2","content_types":false,"bit_length":0,"x":true}],"next":false}`), nil
-				})
+				}))
 				value, err := secrets.New(client).FindRecord(context.Background(), "name")
 				if err != nil || value == nil || value.Payload != nil || value.RequestID != "" || lists != 2 || payloads != boolFindRecord(stage == "payload") || calls != 3+boolFindRecord(stage == "payload") {
 					t.Fatal(value, err, calls, payloads, lists)
@@ -255,7 +250,7 @@ func TestPythonSecretFindRecordMissingStrictHTTPAndFallbackPolicies(t *testing.T
 			cloud := testcloud.New(t)
 			client := secretFindRecordClient(cloud)
 			calls := 0
-			cloud.Provider.HTTPClient.Transport = secretFindRecordTransport(func(req *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 				calls++
 				if calls == 1 {
 					return secretFindRecordResponse(tc.direct, `{"error":"must not become a secret"}`), nil
@@ -264,7 +259,7 @@ func TestPythonSecretFindRecordMissingStrictHTTPAndFallbackPolicies(t *testing.T
 					t.Fatal(req.URL, calls)
 				}
 				return secretFindRecordResponse(tc.list, `{"secrets":[]}`), nil
-			})
+			}))
 			value, err := secrets.New(client).FindRecord(context.Background(), "s1", tc.options...)
 			if (err != nil) != tc.wantErr || err == nil && value != nil || value != nil && value.Resource != nil || calls != tc.requests {
 				t.Fatal(value, err, calls)
@@ -304,7 +299,7 @@ func TestPythonSecretFindRecordListOnlyExactMatchingAndLateFailures(t *testing.T
 			cloud := testcloud.New(t)
 			client := secretFindRecordClient(cloud)
 			calls := 0
-			cloud.Provider.HTTPClient.Transport = secretFindRecordTransport(func(req *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 				calls++
 				if req.URL.Path != "/barbican/v1/secrets" || req.URL.Query().Get("name") != tc.identity {
 					t.Fatal(req.URL)
@@ -317,7 +312,7 @@ func TestPythonSecretFindRecordListOnlyExactMatchingAndLateFailures(t *testing.T
 				}
 				t.Fatal("unexpected next", req.URL)
 				return nil, errors.New("extra HTTP")
-			})
+			}))
 			value, err := secrets.New(client).FindRecord(context.Background(), tc.identity)
 			if (err != nil) != tc.wantErr || calls != tc.requests || value != nil && err != nil && value.Resource != nil {
 				t.Fatal(value, err, calls)
@@ -351,14 +346,14 @@ func TestPythonSecretFindRecordOptionsCaptureAndPreflight(t *testing.T) {
 	ignore = true
 	var retained *secrets.FindRecordOpts
 	custom := func(value *secrets.FindRecordOpts) error { applied++; retained = value; return nil }
-	cloud.Provider.HTTPClient.Transport = secretFindRecordTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 		calls++
 		*retained.IgnoreMissing = true
 		if calls == 1 {
 			return secretFindRecordResponse(404, `{"error":"missing"}`), nil
 		}
 		return secretFindRecordResponse(200, `{"secrets":[]}`), nil
-	})
+	}))
 	value, err := secrets.New(client).FindRecord(context.Background(), "s1", bulk, custom)
 	if value == nil || value.Resource != nil || value.Wire != nil || string(value.Envelope) != `{"secrets":[]}` || value.StatusCode != 200 || value.Header.Get("X-Receipt") != "actual" || !errors.Is(err, resource.ErrNotFound) || calls != 2 || applied != 1 {
 		t.Fatal(value, err, calls, applied)
@@ -438,7 +433,7 @@ func TestPythonSecretFindRecordPhysicalFailuresPreventFallbackAndReplay(t *testi
 				defer cancel(nil)
 				readErr, closeErr, cause := errors.New("physical Read"), errors.New("physical Close"), errors.New("physical cancellation")
 				body := `{"actual":"partial receipt"}`
-				cloud.Provider.HTTPClient.Transport = secretFindRecordTransport(func(req *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 					calls++
 					if stage == "payload" && calls == 1 {
 						return secretFindRecordResponse(200, `{"content_types":{"default":"text/plain"},"x":"metadata proof"}`), nil
@@ -447,11 +442,11 @@ func TestPythonSecretFindRecordPhysicalFailuresPreventFallbackAndReplay(t *testi
 						t.Fatal(req.URL)
 					}
 					response := secretFindRecordResponse(status, body)
-					response.Body = &secretFindRecordFaultBody{data: []byte(body), readErr: readErr, closeErr: closeErr,
-						read:  func() { client.ResourceBase = cloud.Server.URL + "/transient/" },
-						close: func() { client.ResourceBase = cloud.Server.URL + "/barbican/v1/"; cancel(cause) }}
+					response.Body = &testcloud.Body{Data: body, ReadErr: readErr, CloseErr: closeErr,
+						OnRead:  func() { client.ResourceBase = cloud.Server.URL + "/transient/" },
+						OnClose: func() { client.ResourceBase = cloud.Server.URL + "/barbican/v1/"; cancel(cause) }}
 					return response, nil
-				})
+				}))
 				cloud.Provider.RetryFunc = func(context.Context, string, string, *gophercloud.RequestOpts, error, uint) error { return nil }
 				identity := "s1"
 				if stage == "list" {
@@ -493,7 +488,7 @@ func TestPythonSecretFindRecordCleanRetryAndFixedAccept(t *testing.T) {
 				client := secretFindRecordClient(cloud)
 				calls := 0
 				failed := false
-				cloud.Provider.HTTPClient.Transport = secretFindRecordTransport(func(req *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 					calls++
 					if stage == "payload" && req.URL.Path == "/barbican/v1/secrets/s1" {
 						return secretFindRecordResponse(200, `{"content_types":{"default":"text/plain"}}`), nil
@@ -515,7 +510,7 @@ func TestPythonSecretFindRecordCleanRetryAndFixedAccept(t *testing.T) {
 						return secretFindRecordResponse(200, `{"secrets":[{"name":"name with spaces"}]}`), nil
 					}
 					return secretFindRecordResponse(200, `{}`), nil
-				})
+				}))
 				cloud.Provider.RetryFunc = func(_ context.Context, _ string, _ string, opts *gophercloud.RequestOpts, _ error, _ uint) error {
 					if tamper {
 						if stage == "metadata" {
@@ -550,13 +545,13 @@ func TestPythonSecretFindRecordTransportAndRetryErrorsStayTerminal(t *testing.T)
 			client := secretFindRecordClient(cloud)
 			calls := 0
 			cause := errors.New("transport or retry cause")
-			cloud.Provider.HTTPClient.Transport = secretFindRecordTransport(func(req *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 				calls++
 				if retry {
 					return secretFindRecordResponse(404, `{"error":"original"}`), nil
 				}
 				return nil, cause
-			})
+			}))
 			if retry {
 				cloud.Provider.RetryFunc = func(context.Context, string, string, *gophercloud.RequestOpts, error, uint) error { return cause }
 			}

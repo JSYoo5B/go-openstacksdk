@@ -21,24 +21,21 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type waitTransport func(*http.Request) (*http.Response, error)
-
-func (f waitTransport) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
 func wire(status int, body string) *http.Response {
-	return &http.Response{StatusCode: status, Header: http.Header{"X-Request-Id": []string{"wait-proof"}}, Body: io.NopCloser(strings.NewReader(body))}
+	return testcloud.Response(status, body, http.Header{"X-Request-Id": []string{"wait-proof"}})
 }
 func fixture(t *testing.T, reply func(*http.Request, int) *http.Response) (*waits.API, *gophercloud.ServiceClient, *[]string) {
 	t.Helper()
 	cloud := testcloud.New(t)
 	client := cloud.Client("key-manager", "/barbican/v1/")
 	calls := &[]string{}
-	cloud.Provider.HTTPClient.Transport = waitTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 		*calls = append(*calls, req.Method+" "+req.URL.EscapedPath())
 		if req.Method != "GET" || req.URL.RawQuery != "" || req.Header.Get("X-Auth-Token") == "" {
 			t.Fatal(req)
 		}
 		return reply(req, len(*calls)), nil
-	})
+	}))
 	return waits.New(client), client, calls
 }
 func raw(t *testing.T, body string) *resource.RawResource {

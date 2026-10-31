@@ -8,7 +8,6 @@ import (
 	"io"
 	"net/http"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
@@ -18,11 +17,8 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type consumerRecordTransport func(*http.Request) (*http.Response, error)
-
-func (f consumerRecordTransport) RoundTrip(req *http.Request) (*http.Response, error) { return f(req) }
 func consumerRecordWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Header: http.Header{"X-Receipt": []string{"actual"}}, Body: io.NopCloser(strings.NewReader(body))}
+	return testcloud.Response(code, body, http.Header{"X-Receipt": []string{"actual"}})
 }
 func consumerRecordClient(cloud *testcloud.Cloud) *gophercloud.ServiceClient {
 	client := cloud.Client("key-manager", "/catalog/v1/")
@@ -41,7 +37,7 @@ func TestPythonConsumerRecordCreateSeedWireAndLiteralParent(t *testing.T) {
 	client := consumerRecordClient(cloud)
 	client.MoreHeaders = map[string]string{"X-Project-Id": "project"}
 	requests := 0
-	cloud.Provider.HTTPClient.Transport = consumerRecordTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 		requests++
 		raw, err := io.ReadAll(req.Body)
 		if err != nil {
@@ -59,7 +55,7 @@ func TestPythonConsumerRecordCreateSeedWireAndLiteralParent(t *testing.T) {
 			t.Fatalf("body=%s", raw)
 		}
 		return consumerRecordWire(200, `{"name":"server-secret","secret_id":"wrong-parent","secret_ref":"https://foreign/elsewhere","status":"ACTIVE","service":0,"x":{"n":9007199254740993}}`), nil
-	})
+	}))
 	opts := secretconsumers.WithCreateRecordAttributes(map[string]any{
 		"id": false, "service": nil, "resource_type": false, "resource_id": map[string]any{"counter": json.Number("9007199254740993")},
 		"secret_id": "replace", "status": func() {}, "UNKNOWN": make(chan int),
@@ -94,13 +90,13 @@ func TestPythonConsumerRecordMutationStatusesAndNoBodyPolicy(t *testing.T) {
 			cloud := testcloud.New(t)
 			client := consumerRecordClient(cloud)
 			calls := 0
-			cloud.Provider.HTTPClient.Transport = consumerRecordTransport(func(req *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 				calls++
 				if req.Method == http.MethodGet {
 					return consumerRecordWire(code, `{"consumers":[{}]}`), nil
 				}
 				return consumerRecordWire(code, "not JSON"), nil
-			})
+			}))
 			api := secretconsumers.New(client)
 			created, err := api.CreateRecord(context.Background(), "s1", secretconsumers.WithCreateRecordAttribute("resource_type", false))
 			if err != nil || created.StatusCode != code || created.Wire != nil || string(created.Envelope) != "not JSON" {
@@ -121,7 +117,7 @@ func TestPythonConsumerRecordMutationStatusesAndNoBodyPolicy(t *testing.T) {
 	for _, body := range []string{"null", "[]", "42"} {
 		t.Run(body, func(t *testing.T) {
 			cloud := testcloud.New(t)
-			cloud.Provider.HTTPClient.Transport = consumerRecordTransport(func(*http.Request) (*http.Response, error) { return consumerRecordWire(200, body), nil })
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(*http.Request) (*http.Response, error) { return consumerRecordWire(200, body), nil }))
 			result, err := secretconsumers.New(consumerRecordClient(cloud)).CreateRecord(context.Background(), "s1")
 			var accepted *resource.ResponseError
 			if result == nil || result.Resource != nil || !errors.As(err, &accepted) || string(accepted.Body) != body || accepted.StatusCode != 200 {
@@ -138,14 +134,14 @@ func TestPythonConsumerRecordOptionsSnapshotAndSourcePreflight(t *testing.T) {
 	cloud := testcloud.New(t)
 	client := consumerRecordClient(cloud)
 	calls := 0
-	cloud.Provider.HTTPClient.Transport = consumerRecordTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 		calls++
 		body, _ := io.ReadAll(req.Body)
 		if string(body) != `{"resource_id":{"owned":false},"resource_type":null,"service":"original"}` {
 			t.Fatalf("%s", body)
 		}
 		return consumerRecordWire(200, `{}`), nil
-	})
+	}))
 	input := map[string]any{"resource_id": map[string]any{"owned": false}, "resource_type": nil, "service": "original"}
 	option := secretconsumers.WithCreateRecordAttributes(input)
 	input["service"] = "changed"
@@ -227,14 +223,14 @@ func TestPythonConsumerRecordDeleteMissingAndRetryPolicy(t *testing.T) {
 	cloud := testcloud.New(t)
 	client := consumerRecordClient(cloud)
 	calls := 0
-	cloud.Provider.HTTPClient.Transport = consumerRecordTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 		calls++
 		body, _ := io.ReadAll(req.Body)
 		if string(body) != `{"resource_id":0,"resource_type":null,"service":false}` {
 			t.Fatalf("%s", body)
 		}
 		return consumerRecordWire(404, `{"error":"missing"}`), nil
-	})
+	}))
 	option := secretconsumers.WithDeleteRecordAttributes(map[string]any{"service": false, "resource_type": nil, "resource_id": 0})
 	api := secretconsumers.New(client)
 	if value, err := api.DeleteRecord(context.Background(), "s1", option); value != nil || err != nil {
@@ -263,13 +259,13 @@ func TestPythonConsumerRecordListBodyFiltersDefaultsRawCapsAndReuse(t *testing.T
 	cloud := testcloud.New(t)
 	client := consumerRecordClient(cloud)
 	calls := 0
-	cloud.Provider.HTTPClient.Transport = consumerRecordTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 		calls++
 		if req.Method != http.MethodGet || req.URL.RawQuery != "limit=2" || req.Header.Get("Accept") != "application/json" {
 			t.Fatal(req.URL, req.Header)
 		}
 		return consumerRecordWire(200, `{"consumers":[{"service":true,"resource_type":{"inner":{"flag":1,"extra":"ignored"}},"secret_id":"wire-parent"},{"service":0,"resource_type":{}},{"service":1}],"next":"https://foreign/unsafe"}`), nil
-	})
+	}))
 	query := map[string]any{"service": 1, "resource_type": map[string]any{"inner": map[string]any{"flag": true}}, "name": nil, "offset": make(chan int), "status": func() {}}
 	option := secretconsumers.WithListRecordQuery(query)
 	query["service"] = false
@@ -307,7 +303,7 @@ func TestPythonConsumerRecordListPagingFixedParentAndMarkerFallback(t *testing.T
 		cloud := testcloud.New(t)
 		client := consumerRecordClient(cloud)
 		calls := 0
-		cloud.Provider.HTTPClient.Transport = consumerRecordTransport(func(req *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 			calls++
 			if calls == 1 {
 				if req.URL.RawQuery != "" {
@@ -319,7 +315,7 @@ func TestPythonConsumerRecordListPagingFixedParentAndMarkerFallback(t *testing.T
 				t.Fatal(req.URL)
 			}
 			return consumerRecordWire(200, `{"consumers":[],"next":"https://foreign/ignored"}`), nil
-		})
+		}))
 		records, err := secretconsumers.New(client).AllRecords(context.Background(), "s1")
 		if err != nil || len(records) != 1 || calls != 2 {
 			t.Fatal(records, err, calls)
@@ -330,7 +326,7 @@ func TestPythonConsumerRecordListPagingFixedParentAndMarkerFallback(t *testing.T
 		cloud := testcloud.New(t)
 		client := consumerRecordClient(cloud)
 		calls := 0
-		cloud.Provider.HTTPClient.Transport = consumerRecordTransport(func(req *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 			calls++
 			if calls == 1 {
 				return consumerRecordWire(200, `{"consumers":[{"id":"last","service":false}]}`), nil
@@ -339,7 +335,7 @@ func TestPythonConsumerRecordListPagingFixedParentAndMarkerFallback(t *testing.T
 				t.Fatal(req.URL)
 			}
 			return consumerRecordWire(200, `{"consumers":[]}`), nil
-		})
+		}))
 		records, err := secretconsumers.New(client).AllRecords(context.Background(), "s1", secretconsumers.WithListRecordQuery(map[string]any{"service": true, "limit": 5}))
 		if err != nil || len(records) != 0 || calls != 2 {
 			t.Fatal(records, err, calls)
@@ -349,11 +345,11 @@ func TestPythonConsumerRecordListPagingFixedParentAndMarkerFallback(t *testing.T
 		t.Run(link, func(t *testing.T) {
 			cloud := testcloud.New(t)
 			calls := 0
-			cloud.Provider.HTTPClient.Transport = consumerRecordTransport(func(*http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(*http.Request) (*http.Response, error) {
 				calls++
 				raw, _ := json.Marshal(link)
 				return consumerRecordWire(200, `{"consumers":[{}],"next":`+string(raw)+`}`), nil
-			})
+			}))
 			rows, err := secretconsumers.New(consumerRecordClient(cloud)).AllRecords(context.Background(), "s1")
 			var accepted *resource.ResponseError
 			if err == nil || rows != nil || !errors.As(err, &accepted) || calls != 1 || accepted.StatusCode != 200 {
@@ -364,40 +360,15 @@ func TestPythonConsumerRecordListPagingFixedParentAndMarkerFallback(t *testing.T
 	t.Run("missing fallback id stops without replay", func(t *testing.T) {
 		cloud := testcloud.New(t)
 		calls := 0
-		cloud.Provider.HTTPClient.Transport = consumerRecordTransport(func(*http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.RoundTripperFunc(func(*http.Request) (*http.Response, error) {
 			calls++
 			return consumerRecordWire(200, `{"consumers":[{}]}`), nil
-		})
+		}))
 		_, err := secretconsumers.New(consumerRecordClient(cloud)).AllRecords(context.Background(), "s1", secretconsumers.WithListRecordQuery(map[string]any{"limit": 1}))
 		if !errors.Is(err, resource.ErrPaginationCycle) || calls != 1 {
 			t.Fatal(err, calls)
 		}
 	})
-}
-
-type consumerRecordFaultBody struct {
-	data              []byte
-	readErr, closeErr error
-	read, close       func()
-	done              bool
-}
-
-func (b *consumerRecordFaultBody) Read(p []byte) (int, error) {
-	if b.done {
-		return 0, io.EOF
-	}
-	b.done = true
-	if b.read != nil {
-		b.read()
-	}
-	n := copy(p, b.data)
-	return n, b.readErr
-}
-func (b *consumerRecordFaultBody) Close() error {
-	if b.close != nil {
-		b.close()
-	}
-	return b.closeErr
 }
 
 func TestPythonConsumerRecordPhysicalFaultsPreserveAllCauses(t *testing.T) {
@@ -417,14 +388,14 @@ func TestPythonConsumerRecordPhysicalFaultsPreserveAllCauses(t *testing.T) {
 			if operation == "rejected-delete" {
 				code = 404
 			}
-			cloud.Provider.HTTPClient.Transport = consumerRecordTransport(func(*http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(*http.Request) (*http.Response, error) {
 				calls++
 				response := consumerRecordWire(code, body)
-				response.Body = &consumerRecordFaultBody{data: []byte(body), readErr: readErr, closeErr: closeErr,
-					read:  func() { client.ResourceBase = cloud.Server.URL + "/changed/" },
-					close: func() { client.ResourceBase = cloud.Server.URL + "/barbican/v1/"; cancel(cause) }}
+				response.Body = &testcloud.Body{Data: body, ReadErr: readErr, CloseErr: closeErr,
+					OnRead:  func() { client.ResourceBase = cloud.Server.URL + "/changed/" },
+					OnClose: func() { client.ResourceBase = cloud.Server.URL + "/barbican/v1/"; cancel(cause) }}
 				return response, nil
-			})
+			}))
 			api := secretconsumers.New(client)
 			var err error
 			switch operation {
@@ -479,10 +450,10 @@ func TestPythonConsumerRecordRetriesCannotChangeBodyOrListAccept(t *testing.T) {
 			cloud := testcloud.New(t)
 			client := consumerRecordClient(cloud)
 			calls := 0
-			cloud.Provider.HTTPClient.Transport = consumerRecordTransport(func(req *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 				calls++
 				return consumerRecordWire(503, `{"error":"retry"}`), nil
-			})
+			}))
 			cloud.Provider.RetryFunc = func(_ context.Context, _ string, _ string, opts *gophercloud.RequestOpts, _ error, _ uint) error {
 				if operation == "list" {
 					opts.MoreHeaders["Accept"] = "text/plain"
@@ -522,19 +493,19 @@ func TestPythonConsumerRecordRejectedStatusesPreventPhysicalReplay(t *testing.T)
 				readErr, closeErr, cause := errors.New("rejected Read"), errors.New("rejected Close"), errors.New("rejected cancellation")
 				body := `{"error":"original rejected receipt"}`
 				calls := 0
-				cloud.Provider.HTTPClient.Transport = consumerRecordTransport(func(req *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 					calls++
 					if req.Method != method {
 						t.Fatal(req.Method, method)
 					}
 					response := consumerRecordWire(status, body)
-					response.Body = &consumerRecordFaultBody{
-						data: []byte(body), readErr: readErr, closeErr: closeErr,
-						read:  func() { client.ResourceBase = cloud.Server.URL + "/transient/" },
-						close: func() { client.ResourceBase = cloud.Server.URL + "/barbican/v1/"; cancel(cause) },
+					response.Body = &testcloud.Body{
+						Data: body, ReadErr: readErr, CloseErr: closeErr,
+						OnRead:  func() { client.ResourceBase = cloud.Server.URL + "/transient/" },
+						OnClose: func() { client.ResourceBase = cloud.Server.URL + "/barbican/v1/"; cancel(cause) },
 					}
 					return response, nil
-				})
+				}))
 				cloud.Provider.RetryFunc = func(context.Context, string, string, *gophercloud.RequestOpts, error, uint) error { return nil }
 				api := secretconsumers.New(client)
 				var err error

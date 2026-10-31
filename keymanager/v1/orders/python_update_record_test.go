@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
 	"strings"
 	"testing"
@@ -16,20 +15,22 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-func orderUpdateFixture(t *testing.T, reply func(*http.Request) *http.Response) (*orders.API, *testcloud.Cloud, *[]string) {
+func orderUpdateFixture(t *testing.T, reply func(*http.Request) *http.Response) (*orders.API, *testcloud.Cloud, *testcloud.Recorder) {
 	t.Helper()
 	cloud := testcloud.New(t)
-	calls := []string{}
+	calls := testcloud.NewRecorder(func(req *http.Request) (*http.Response, error) { return reply(req), nil })
 	client := nativeOrderClient(cloud)
-	cloud.Provider.HTTPClient.Transport = nativeOrderTransport(func(req *http.Request) (*http.Response, error) {
-		var data []byte
-		if req.Body != nil {
-			data, _ = io.ReadAll(req.Body)
-		}
-		calls = append(calls, req.Method+" "+req.URL.EscapedPath()+" "+string(data))
-		return reply(req), nil
-	})
-	return orders.New(client), cloud, &calls
+	cloud.SetTransport(calls)
+	return orders.New(client), cloud, calls
+}
+
+// orderUpdateCalls projects the recorded calls onto "METHOD escaped-path body" strings.
+func orderUpdateCalls(rec *testcloud.Recorder) []string {
+	calls := []string{}
+	for _, call := range rec.Calls() {
+		calls = append(calls, call.Method+" "+call.EscapedPath+" "+call.Body)
+	}
+	return calls
 }
 func TestPythonOrderUpdateRecordNoop(t *testing.T) {
 	for _, id := range []string{"o1", ""} {
@@ -41,8 +42,8 @@ func TestPythonOrderUpdateRecordNoop(t *testing.T) {
 					opts = append(opts, orders.WithUpdateRecordAttribute(attr, "ignored"))
 				}
 				got, err := api.UpdateRecord(context.Background(), id, opts...)
-				if err != nil || got == nil || got.Committed || got.StatusCode != 0 || got.Wire != nil || got.Header != nil || got.Envelope != nil || len(*calls) != 0 || len(got.Request) != 0 || got.Resource == nil {
-					t.Fatal(got, err, *calls)
+				if err != nil || got == nil || got.Committed || got.StatusCode != 0 || got.Wire != nil || got.Header != nil || got.Envelope != nil || calls.Len() != 0 || len(got.Request) != 0 || got.Resource == nil {
+					t.Fatal(got, err, orderUpdateCalls(calls))
 				}
 				want, _ := json.Marshal(id)
 				if string(got.Resource.Body["id"]) != string(want) || string(got.Resource.Body["meta"]) != "null" {
@@ -61,8 +62,8 @@ func TestPythonOrderUpdateRecordDirtyAliasesAndOwnedReceipt(t *testing.T) {
 	})
 	got, err := api.UpdateRecord(context.Background(), "o1", orders.WithUpdateRecordAttribute("created_at", nil), orders.WithUpdateRecordAttribute("updated", false), orders.WithUpdateRecordAttribute("order_id", "https://foreign/orders/input"), orders.WithUpdateRecordAttribute("meta", json.RawMessage(`{"bit_length":9007199254740993}`)), orders.WithUpdateRecordAttribute("unknown", "discard"))
 	want := `PUT /barbican/v1/orders/o1 {"created":null,"meta":{"bit_length":9007199254740993},"order_ref":"https://foreign/orders/input","updated":false}`
-	if err != nil || got == nil || !got.Committed || len(*calls) != 1 || (*calls)[0] != want || got.StatusCode != 202 || string(got.Resource.Body["meta"]) != "{}" || string(got.Resource.Body["order_id"]) != `"input"` || string(got.Resource.Body["secret_id"]) != `"new"` || got.Resource.Body["unknown"] != nil || string(got.Wire.Body["unknown"]) != "true" {
-		t.Fatal(got, err, *calls)
+	if err != nil || got == nil || !got.Committed || calls.Len() != 1 || orderUpdateCalls(calls)[0] != want || got.StatusCode != 202 || string(got.Resource.Body["meta"]) != "{}" || string(got.Resource.Body["order_id"]) != `"input"` || string(got.Resource.Body["secret_id"]) != `"new"` || got.Resource.Body["unknown"] != nil || string(got.Wire.Body["unknown"]) != "true" {
+		t.Fatal(got, err, orderUpdateCalls(calls))
 	}
 	if got.Request["id"] != nil || got.Resource.Body["self"] != nil {
 		t.Fatal(got)
@@ -89,8 +90,8 @@ func TestPythonOrderUpdateRecordAliasPriority(t *testing.T) {
 				want = "wire"
 			}
 			got, err := api.UpdateRecord(context.Background(), "o1", opts...)
-			if err != nil || (*calls)[0] != `PUT /barbican/v1/orders/o1 {"created":"`+want+`"}` || string(got.Resource.Body["created_at"]) != `"`+want+`"` {
-				t.Fatal(got, err, *calls)
+			if err != nil || orderUpdateCalls(calls)[0] != `PUT /barbican/v1/orders/o1 {"created":"`+want+`"}` || string(got.Resource.Body["created_at"]) != `"`+want+`"` {
+				t.Fatal(got, err, orderUpdateCalls(calls))
 			}
 		})
 	}
@@ -101,8 +102,8 @@ func TestPythonOrderUpdateRecordResponseDomain(t *testing.T) {
 			api, _, calls := orderUpdateFixture(t, func(*http.Request) *http.Response { return nativeOrderWire(200, body) })
 			got, err := api.UpdateRecord(context.Background(), "o1", orders.WithUpdateRecordAttribute("status", "PENDING"))
 			fail := body == `[]` || body == `null` || body == `false` || body == `42` || body == `"x"` || body == `{"order_ref":"invalid"}`
-			if got == nil || !got.Committed || got.StatusCode != 200 || string(got.Envelope) != body || len(*calls) != 1 {
-				t.Fatal(got, err, *calls)
+			if got == nil || !got.Committed || got.StatusCode != 200 || string(got.Envelope) != body || calls.Len() != 1 {
+				t.Fatal(got, err, orderUpdateCalls(calls))
 			}
 			if fail {
 				var proof *resource.ResponseError
@@ -120,8 +121,8 @@ func TestPythonOrderUpdateRecordAcceptedStatusAndFault(t *testing.T) {
 		t.Run(fmt.Sprint(code), func(t *testing.T) {
 			api, _, calls := orderUpdateFixture(t, func(*http.Request) *http.Response { return nativeOrderWire(code, `{"status":"received"}`) })
 			got, err := api.UpdateRecord(context.Background(), "o1", orders.WithUpdateRecordAttribute("status", nil))
-			if got == nil || len(*calls) != 1 || got.StatusCode != code || got.Committed != (code < 400) || (err != nil) != (code >= 400) {
-				t.Fatal(got, err, *calls)
+			if got == nil || calls.Len() != 1 || got.StatusCode != code || got.Committed != (code < 400) || (err != nil) != (code >= 400) {
+				t.Fatal(got, err, orderUpdateCalls(calls))
 			}
 			if code >= 400 {
 				var proof gophercloud.ErrUnexpectedResponseCode
@@ -137,8 +138,8 @@ func TestPythonOrderUpdateRecordPreflightAndClientGuard(t *testing.T) {
 		t.Run(id, func(t *testing.T) {
 			api, _, calls := orderUpdateFixture(t, func(*http.Request) *http.Response { t.Error("unexpected HTTP"); return nativeOrderWire(200, `{}`) })
 			_, err := api.UpdateRecord(context.Background(), id, orders.WithUpdateRecordAttribute("status", false))
-			if !errors.Is(err, resource.ErrInvalidOption) || len(*calls) != 0 {
-				t.Fatal(err, *calls)
+			if !errors.Is(err, resource.ErrInvalidOption) || calls.Len() != 0 {
+				t.Fatal(err, orderUpdateCalls(calls))
 			}
 		})
 	}
@@ -146,8 +147,8 @@ func TestPythonOrderUpdateRecordPreflightAndClientGuard(t *testing.T) {
 		t.Run(key, func(t *testing.T) {
 			api, _, calls := orderUpdateFixture(t, func(*http.Request) *http.Response { t.Error("unexpected HTTP"); return nativeOrderWire(200, `{}`) })
 			_, err := api.UpdateRecord(context.Background(), "o1", orders.WithUpdateRecordAttribute(key, "x"))
-			if !errors.Is(err, resource.ErrInvalidOption) || len(*calls) != 0 {
-				t.Fatal(err, *calls)
+			if !errors.Is(err, resource.ErrInvalidOption) || calls.Len() != 0 {
+				t.Fatal(err, orderUpdateCalls(calls))
 			}
 		})
 	}
@@ -156,8 +157,8 @@ func TestPythonOrderUpdateRecordPreflightAndClientGuard(t *testing.T) {
 		api.RawClient().ResourceBase = "https://changed.invalid/v1/"
 		return nil
 	})
-	if err == nil || len(*calls) != 0 {
-		t.Fatal(err, *calls)
+	if err == nil || calls.Len() != 0 {
+		t.Fatal(err, orderUpdateCalls(calls))
 	}
 }
 func TestPythonOrderUpdateRecordOptionsOwnInputsAndLiteralPath(t *testing.T) {
@@ -182,8 +183,8 @@ func TestPythonOrderUpdateRecordOptionsOwnInputsAndLiteralPath(t *testing.T) {
 			t.Fatal(got, err)
 		}
 	}
-	if len(*calls) != 2 || (*calls)[0] != `PUT /barbican/v1/alternate/orders/o%2F1 {"status":false}` || (*calls)[1] != (*calls)[0] {
-		t.Fatal(*calls)
+	if calls.Len() != 2 || orderUpdateCalls(calls)[0] != `PUT /barbican/v1/alternate/orders/o%2F1 {"status":false}` || orderUpdateCalls(calls)[1] != orderUpdateCalls(calls)[0] {
+		t.Fatal(orderUpdateCalls(calls))
 	}
 }
 func TestPythonOrderUpdateRecordCharsetKeepsPhysicalProof(t *testing.T) {

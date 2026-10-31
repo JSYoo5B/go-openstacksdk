@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
 	"reflect"
 	"strings"
@@ -19,20 +18,22 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-func secretUpdateFixture(t *testing.T, reply func(*http.Request) *http.Response) (*secrets.API, *testcloud.Cloud, *[]string) {
+func secretUpdateFixture(t *testing.T, reply func(*http.Request) *http.Response) (*secrets.API, *testcloud.Cloud, *testcloud.Recorder) {
 	t.Helper()
 	cloud := testcloud.New(t)
-	calls := []string{}
+	calls := testcloud.NewRecorder(func(req *http.Request) (*http.Response, error) { return reply(req), nil })
 	client := nativeSecretClient(cloud)
-	cloud.Provider.HTTPClient.Transport = nativeSecretTransport(func(req *http.Request) (*http.Response, error) {
-		raw := []byte{}
-		if req.Body != nil {
-			raw, _ = io.ReadAll(req.Body)
-		}
-		calls = append(calls, req.Method+" "+req.URL.EscapedPath()+" "+string(raw))
-		return reply(req), nil
-	})
-	return secrets.New(client), cloud, &calls
+	cloud.SetTransport(calls)
+	return secrets.New(client), cloud, calls
+}
+
+// secretUpdateCalls projects the recorded calls onto "METHOD escaped-path body" strings.
+func secretUpdateCalls(rec *testcloud.Recorder) []string {
+	calls := []string{}
+	for _, call := range rec.Calls() {
+		calls = append(calls, call.Method+" "+call.EscapedPath+" "+call.Body)
+	}
+	return calls
 }
 func TestPythonSecretUpdateRecordNoopSeedHasNoReceiptOrPUT(t *testing.T) {
 	for _, id := range []string{"s1", ""} {
@@ -44,8 +45,8 @@ func TestPythonSecretUpdateRecordNoopSeedHasNoReceiptOrPUT(t *testing.T) {
 					opts = append(opts, secrets.WithUpdateRecordAttribute(attr, "ignored"))
 				}
 				got, err := api.UpdateRecord(context.Background(), id, opts...)
-				if err != nil || got == nil || got.Committed || got.StatusCode != 0 || got.Header != nil || got.Wire != nil || got.Envelope != nil || len(*calls) != 0 || got.Resource == nil || len(got.Request) != 0 {
-					t.Fatal(got, err, *calls)
+				if err != nil || got == nil || got.Committed || got.StatusCode != 0 || got.Header != nil || got.Wire != nil || got.Envelope != nil || calls.Len() != 0 || got.Resource == nil || len(got.Request) != 0 {
+					t.Fatal(got, err, secretUpdateCalls(calls))
 				}
 				want, _ := json.Marshal(id)
 				if string(got.Resource.Body["id"]) != string(want) || got.Resource.StatusCode != 0 || string(got.Resource.Body["name"]) != "null" {
@@ -64,8 +65,8 @@ func TestPythonSecretUpdateRecordFlatDirtyBodyNullableAndRawValues(t *testing.T)
 	})
 	got, err := api.UpdateRecord(context.Background(), "s1", secrets.WithUpdateRecordAttribute("name", "new"), secrets.WithUpdateRecordAttribute("payload", false), secrets.WithUpdateRecordAttribute("payload_content_type", "text/plain"), secrets.WithUpdateRecordAttribute("bit_length", json.RawMessage(`9007199254740993`)), secrets.WithUpdateRecordAttribute("content_types", "raw"), secrets.WithUpdateRecordAttribute("expires_at", nil), secrets.WithUpdateRecordAttribute("unknown", "drop"))
 	want := `PUT /barbican/v1/secrets/s1 {"bit_length":9007199254740993,"content_types":"raw","expiration":null,"name":"new","payload":false,"payload_content_type":"text/plain"}`
-	if err != nil || got == nil || !got.Committed || got.StatusCode != 202 || len(*calls) != 1 || (*calls)[0] != want || string(got.Request["name"]) != `"new"` || string(got.Resource.Body["name"]) != "null" || string(got.Resource.Body["content_types"]) != "{}" || string(got.Resource.Body["status"]) != `"ACTIVE"` || string(got.Resource.Body["bit_length"]) != "9007199254740993" || got.Resource.Body["unknown"] != nil || string(got.Wire.Body["unknown"]) != `"wire-only"` || got.Header.Get("X-Secret-Proof") != "actual" {
-		t.Fatal(got, err, *calls)
+	if err != nil || got == nil || !got.Committed || got.StatusCode != 202 || calls.Len() != 1 || secretUpdateCalls(calls)[0] != want || string(got.Request["name"]) != `"new"` || string(got.Resource.Body["name"]) != "null" || string(got.Resource.Body["content_types"]) != "{}" || string(got.Resource.Body["status"]) != `"ACTIVE"` || string(got.Resource.Body["bit_length"]) != "9007199254740993" || got.Resource.Body["unknown"] != nil || string(got.Wire.Body["unknown"]) != `"wire-only"` || got.Header.Get("X-Secret-Proof") != "actual" {
+		t.Fatal(got, err, secretUpdateCalls(calls))
 	}
 	if got.Request["id"] != nil || got.Resource.Body["self"] != nil || string(got.Seed["name"]) != `"new"` {
 		t.Fatal(got)
@@ -92,8 +93,8 @@ func TestPythonSecretUpdateRecordAliasesOrderResponseMergeAndReferenceProjection
 				want = "wire"
 			}
 			got, err := api.UpdateRecord(context.Background(), "s1", opts...)
-			if err != nil || len(*calls) != 1 || (*calls)[0] != `PUT /barbican/v1/secrets/s1 {"expiration":"`+want+`"}` || string(got.Resource.Body["expires_at"]) != `"`+want+`"` || string(got.Resource.Body["id"]) != "null" || string(got.Resource.Body["secret_id"]) != `"new-ref"` {
-				t.Fatal(got, err, *calls)
+			if err != nil || calls.Len() != 1 || secretUpdateCalls(calls)[0] != `PUT /barbican/v1/secrets/s1 {"expiration":"`+want+`"}` || string(got.Resource.Body["expires_at"]) != `"`+want+`"` || string(got.Resource.Body["id"]) != "null" || string(got.Resource.Body["secret_id"]) != `"new-ref"` {
+				t.Fatal(got, err, secretUpdateCalls(calls))
 			}
 		})
 	}
@@ -104,8 +105,8 @@ func TestPythonSecretUpdateRecordEmptyInvalidJSONAndShapeErrorsKeepActualProof(t
 			api, _, calls := secretUpdateFixture(t, func(*http.Request) *http.Response { return nativeSecretWire(200, body) })
 			got, err := api.UpdateRecord(context.Background(), "s1", secrets.WithUpdateRecordAttribute("name", "seed"))
 			fail := body == `[]` || body == `null` || body == `false` || body == `42` || body == `"text"` || body == `{"secret_ref":"invalid"}`
-			if got == nil || got.StatusCode != 200 || string(got.Envelope) != body || len(*calls) != 1 || !got.Committed {
-				t.Fatal(got, err, *calls)
+			if got == nil || got.StatusCode != 200 || string(got.Envelope) != body || calls.Len() != 1 || !got.Committed {
+				t.Fatal(got, err, secretUpdateCalls(calls))
 			}
 			if fail {
 				var proof *resource.ResponseError
@@ -132,13 +133,13 @@ func TestPythonSecretUpdateRecordOptionsSnapshotBasePathAndSelectedVersion(t *te
 	var retained *secrets.UpdateRecordOpts
 	capture := func(c *secrets.UpdateRecordOpts) error { retained = c; return nil }
 	got, err := api.UpdateRecord(context.Background(), "id/with%", option, capture)
-	if err != nil || got.StatusCode != 204 || len(*calls) != 1 || (*calls)[0] != `PUT /barbican/v1/alternate/secrets/id%2Fwith%25 {"payload":"secret"}` || seen.Get("X-Trace") != "owned" || seen.Get("OpenStack-API-Version") != "key-manager 1.2" || api.RawClient().Microversion != "" {
-		t.Fatal(got, err, *calls, seen)
+	if err != nil || got.StatusCode != 204 || calls.Len() != 1 || secretUpdateCalls(calls)[0] != `PUT /barbican/v1/alternate/secrets/id%2Fwith%25 {"payload":"secret"}` || seen.Get("X-Trace") != "owned" || seen.Get("OpenStack-API-Version") != "key-manager 1.2" || api.RawClient().Microversion != "" {
+		t.Fatal(got, err, secretUpdateCalls(calls), seen)
 	}
 	retained.Attributes["payload"][1] = 'X'
 	_, err = api.UpdateRecord(context.Background(), "s1", option)
-	if err != nil || !strings.HasSuffix((*calls)[1], `{"payload":"secret"}`) {
-		t.Fatal(err, *calls)
+	if err != nil || !strings.HasSuffix(secretUpdateCalls(calls)[1], `{"payload":"secret"}`) {
+		t.Fatal(err, secretUpdateCalls(calls))
 	}
 }
 func TestPythonSecretUpdateRecordPreflightAndConstructorCollisions(t *testing.T) {
@@ -173,8 +174,8 @@ func TestPythonSecretUpdateRecordPreflightAndConstructorCollisions(t *testing.T)
 				opts = append(opts, func(*secrets.UpdateRecordOpts) error { api.RawClient().ResourceBase += "changed/"; return nil })
 			}
 			_, err := api.UpdateRecord(ctx, id, opts...)
-			if err == nil || len(*calls) != 0 {
-				t.Fatal(err, *calls)
+			if err == nil || calls.Len() != 0 {
+				t.Fatal(err, secretUpdateCalls(calls))
 			}
 		})
 	}
@@ -184,8 +185,8 @@ func TestPythonSecretUpdateRecordAcceptedAndRejectedStatusPolicy(t *testing.T) {
 		t.Run(fmt.Sprint(status), func(t *testing.T) {
 			api, _, calls := secretUpdateFixture(t, func(*http.Request) *http.Response { return nativeSecretWire(status, `{"name":"reply"}`) })
 			got, err := api.UpdateRecord(context.Background(), "s1", secrets.WithUpdateRecordAttribute("name", "n"))
-			if got == nil || got.StatusCode != status || len(*calls) != 1 || got.Header.Get("X-Secret-Proof") != "actual" {
-				t.Fatal(got, err, *calls)
+			if got == nil || got.StatusCode != status || calls.Len() != 1 || got.Header.Get("X-Secret-Proof") != "actual" {
+				t.Fatal(got, err, secretUpdateCalls(calls))
 			}
 			if status < 400 {
 				if err != nil || !got.Committed {
@@ -207,20 +208,20 @@ func TestPythonSecretUpdateRecordPhysicalFailuresNeverReplayAndRetainNativeProof
 				readCause, closeCause, cancelCause := errors.New("read"), errors.New("close"), errors.New("cancel")
 				ctx, cancel := context.WithCancelCause(context.Background())
 				defer cancel(nil)
-				physical := &secretFindRecordFaultBody{data: []byte(`{"name":"actual"}`)}
+				physical := &testcloud.Body{Data: `{"name":"actual"}`}
 				api, cloud, calls := secretUpdateFixture(t, func(*http.Request) *http.Response {
-					return &http.Response{StatusCode: status, Header: http.Header{"X-Actual": {"physical"}}, Body: physical}
+					return testcloud.StreamResponse(status, physical, http.Header{"X-Actual": {"physical"}})
 				})
 				client := api.RawClient()
 				base := client.ResourceBase
 				if lane == "read-close" {
-					physical.readErr = readCause
-					physical.closeErr = closeCause
+					physical.ReadErr = readCause
+					physical.CloseErr = closeCause
 				} else if lane == "cancel" {
-					physical.read = func() { cancel(cancelCause) }
+					physical.OnRead = func() { cancel(cancelCause) }
 				} else {
-					physical.read = func() { client.ResourceBase += "wrong/" }
-					physical.close = func() { client.ResourceBase = base }
+					physical.OnRead = func() { client.ResourceBase += "wrong/" }
+					physical.OnClose = func() { client.ResourceBase = base }
 				}
 				retries, auth, backoff := 0, 0, 0
 				sentinel := errors.New("unexpected callback")
@@ -234,8 +235,8 @@ func TestPythonSecretUpdateRecordPhysicalFailuresNeverReplayAndRetainNativeProof
 					return sentinel
 				}
 				got, err := api.UpdateRecord(ctx, "s1", secrets.WithUpdateRecordAttribute("name", "n"))
-				if err == nil || got == nil || got.StatusCode != status || string(got.Envelope) != `{"name":"actual"}` || got.Header.Get("X-Actual") != "physical" || len(*calls) != 1 || retries != 0 || auth != 0 || backoff != 0 || got.Committed {
-					t.Fatal(got, err, *calls, retries, auth, backoff)
+				if err == nil || got == nil || got.StatusCode != status || string(got.Envelope) != `{"name":"actual"}` || got.Header.Get("X-Actual") != "physical" || calls.Len() != 1 || retries != 0 || auth != 0 || backoff != 0 || got.Committed {
+					t.Fatal(got, err, secretUpdateCalls(calls), retries, auth, backoff)
 				}
 				if lane == "read-close" && (!errors.Is(err, readCause) || !errors.Is(err, closeCause)) || lane == "cancel" && !errors.Is(err, cancelCause) || lane == "source" && !errors.Is(err, resource.ErrInvalidOption) {
 					t.Fatal(err)
@@ -264,10 +265,10 @@ func TestPythonSecretUpdateRecordCleanRetryAndFailedReauthPreserveBody(t *testin
 			got, err := api.UpdateRecord(context.Background(), "s1", secrets.WithUpdateRecordAttribute("name", "owned"))
 			if mutate {
 				if err == nil || attempts != 1 || !errors.Is(err, resource.ErrInvalidOption) {
-					t.Fatal(got, err, *calls)
+					t.Fatal(got, err, secretUpdateCalls(calls))
 				}
-			} else if err != nil || attempts != 2 || !reflect.DeepEqual((*calls)[0], (*calls)[1]) {
-				t.Fatal(got, err, *calls)
+			} else if err != nil || attempts != 2 || !reflect.DeepEqual(secretUpdateCalls(calls)[0], secretUpdateCalls(calls)[1]) {
+				t.Fatal(got, err, secretUpdateCalls(calls))
 			}
 		})
 	}
@@ -277,8 +278,8 @@ func TestPythonSecretUpdateRecordCleanRetryAndFailedReauthPreserveBody(t *testin
 		cloud.Provider.ReauthFunc = func(context.Context) error { return cause }
 		got, err := api.UpdateRecord(context.Background(), "s1", secrets.WithUpdateRecordAttribute("name", "n"))
 		var unable *gophercloud.ErrUnableToReauthenticate
-		if !errors.As(err, &unable) || unable.ErrReauth != cause || got.StatusCode != 401 || string(got.Envelope) != `{"original":true}` || len(*calls) != 1 {
-			t.Fatal(got, err, unable, *calls)
+		if !errors.As(err, &unable) || unable.ErrReauth != cause || got.StatusCode != 401 || string(got.Envelope) != `{"original":true}` || calls.Len() != 1 {
+			t.Fatal(got, err, unable, secretUpdateCalls(calls))
 		}
 	})
 }
@@ -291,8 +292,8 @@ func TestPythonSecretUpdateRecordRequestsCharsetGapIsExplicit(t *testing.T) {
 	})
 	got, err := api.UpdateRecord(context.Background(), "s1", secrets.WithUpdateRecordAttribute("name", "seed"))
 	var proof *resource.ResponseError
-	if !errors.Is(err, resource.ErrUnsupported) || !errors.As(err, &proof) || got.StatusCode != 200 || string(got.Envelope) != body || !got.Committed || len(*calls) != 1 {
-		t.Fatal(got, err, proof, *calls)
+	if !errors.Is(err, resource.ErrUnsupported) || !errors.As(err, &proof) || got.StatusCode != 200 || string(got.Envelope) != body || !got.Committed || calls.Len() != 1 {
+		t.Fatal(got, err, proof, secretUpdateCalls(calls))
 	}
 }
 
@@ -331,8 +332,8 @@ func TestPythonSecretUpdateRecordExplicitCharsetsDecodeViewsKeepPhysicalEnvelope
 				return r
 			})
 			got, err := api.UpdateRecord(context.Background(), "s1", secrets.WithUpdateRecordAttribute("name", "seed"))
-			if err != nil || got == nil || got.Resource == nil || got.Wire == nil || !got.Committed || got.StatusCode != 200 || string(got.Envelope) != string(tc.body) || got.Header.Get("Content-Type") != contentType || len(*calls) != 1 {
-				t.Fatal(got, err, *calls)
+			if err != nil || got == nil || got.Resource == nil || got.Wire == nil || !got.Committed || got.StatusCode != 200 || string(got.Envelope) != string(tc.body) || got.Header.Get("Content-Type") != contentType || calls.Len() != 1 {
+				t.Fatal(got, err, secretUpdateCalls(calls))
 			}
 			for _, view := range []*resource.RawResource{got.Resource, got.Wire} {
 				var name string
@@ -358,8 +359,8 @@ func TestPythonSecretUpdateRecordDecodedShapeFailureKeepsOriginalEncodedProof(t 
 	})
 	got, err := api.UpdateRecord(context.Background(), "s1", secrets.WithUpdateRecordAttribute("name", "seed"))
 	var proof *resource.ResponseError
-	if err == nil || !errors.As(err, &proof) || got == nil || !got.Committed || got.StatusCode != 200 || string(got.Envelope) != string(body) || proof.StatusCode != 200 || string(proof.Body) != string(body) || proof.Header.Get("Content-Type") != contentType || got.Wire != nil || len(*calls) != 1 {
-		t.Fatal(got, err, proof, *calls)
+	if err == nil || !errors.As(err, &proof) || got == nil || !got.Committed || got.StatusCode != 200 || string(got.Envelope) != string(body) || proof.StatusCode != 200 || string(proof.Body) != string(body) || proof.Header.Get("Content-Type") != contentType || got.Wire != nil || calls.Len() != 1 {
+		t.Fatal(got, err, proof, secretUpdateCalls(calls))
 	}
 	proof.Body[0] = 0
 	proof.Header.Set("Content-Type", "changed")

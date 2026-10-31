@@ -4,9 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"io"
 	"net/http"
-	"strings"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
@@ -74,16 +72,6 @@ func TestPythonProjectQuotaRecordInvalidInputSourceAndCancellation(t *testing.T)
 	}
 }
 
-type projectRecordTransport func(*http.Request) (*http.Response, error)
-
-func (f projectRecordTransport) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
-
-type projectRecordBody struct {
-	io.Reader
-	cause error
-}
-
-func (b projectRecordBody) Close() error { return b.cause }
 func TestPythonProjectQuotaRecordFaultsKeepReceiptAndNeverReplay(t *testing.T) {
 	for _, status := range []int{202, 404} {
 		t.Run(http.StatusText(status), func(t *testing.T) {
@@ -95,9 +83,9 @@ func TestPythonProjectQuotaRecordFaultsKeepReceiptAndNeverReplay(t *testing.T) {
 			}
 			cause := errors.New("close")
 			attempts := 0
-			client.ProviderClient.HTTPClient.Transport = projectRecordTransport(func(r *http.Request) (*http.Response, error) {
+			client.ProviderClient.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				attempts++
-				return &http.Response{Request: r, StatusCode: status, Header: http.Header{"X-Proof": {"project"}}, Body: projectRecordBody{strings.NewReader(`{"project_quotas":{"name":"READY"}}`), cause}}, nil
+				return &http.Response{Request: r, StatusCode: status, Header: http.Header{"X-Proof": {"project"}}, Body: &testcloud.Body{Data: `{"project_quotas":{"name":"READY"}}`, CloseErr: cause}}, nil
 			})
 			_, err = scope.UpdateRecord(context.Background(), quotas.WithRecordAttribute("name", "BUILD"))
 			if attempts != 1 || !errors.Is(err, cause) {

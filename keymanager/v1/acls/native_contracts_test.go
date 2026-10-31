@@ -7,7 +7,6 @@ import (
 	"io"
 	"net/http"
 	"reflect"
-	"strings"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -18,18 +17,8 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type nativeACLTransport func(*http.Request) (*http.Response, error)
-
-func (transport nativeACLTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func nativeACLWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}, "X-ACL-Proof": {"actual"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}, "X-ACL-Proof": {"actual"}})
 }
 
 func nativeACLClient(cloud *testcloud.Cloud) *gophercloud.ServiceClient {
@@ -46,7 +35,7 @@ func TestNativeACLRoutesBodiesAndDecode(t *testing.T) {
 	client := nativeACLClient(cloud)
 	type exchange struct{ method, path, body string }
 	var seen []exchange
-	cloud.Provider.HTTPClient.Transport = nativeACLTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -63,7 +52,7 @@ func TestNativeACLRoutesBodiesAndDecode(t *testing.T) {
 			return nativeACLWire(200, ""), nil
 		}
 		return nativeACLWire(200, `{"acl_ref":"https://kms/v1/secrets/s1/acl"}`), nil
-	})
+	}))
 	api := acls.New(client)
 	if api.RawClient() != client {
 		t.Fatal("native client identity changed")
@@ -135,10 +124,10 @@ func TestNativeACLStrictStatusesAndPreflight(t *testing.T) {
 			t.Run(fmt.Sprintf("%s/%d", call.name, code), func(t *testing.T) {
 				cloud := testcloud.New(t)
 				var requests atomic.Int32
-				cloud.Provider.HTTPClient.Transport = nativeACLTransport(func(req *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 					requests.Add(1)
 					return nativeACLWire(code, nativeACLRow), nil
-				})
+				}))
 				err := call.call(acls.New(nativeACLClient(cloud)))
 				var wrapped *resource.OperationError
 				var native gophercloud.ErrUnexpectedResponseCode
@@ -151,10 +140,10 @@ func TestNativeACLStrictStatusesAndPreflight(t *testing.T) {
 	t.Run("required type, collision and nil option", func(t *testing.T) {
 		cloud := testcloud.New(t)
 		var requests atomic.Int32
-		cloud.Provider.HTTPClient.Transport = nativeACLTransport(func(req *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 			requests.Add(1)
 			return nativeACLWire(200, `{}`), nil
-		})
+		}))
 		api := acls.New(nativeACLClient(cloud))
 		checks := map[string]func() error{
 			"missing type": func() error { _, err := api.SetSecretACL(ctx, "s1", acls.SetOpts{{}}); return err },

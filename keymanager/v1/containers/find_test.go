@@ -17,11 +17,11 @@ import (
 func findContainerAPI(t *testing.T, calls *atomic.Int32, paths *[]string, reply func(n int32, req *http.Request) *http.Response) *containers.API {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = nativeContainerTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		n := calls.Add(1)
 		*paths = append(*paths, req.URL.Path+"?"+req.URL.RawQuery)
 		return reply(n, req), nil
-	})
+	}))
 	return containers.New(nativeContainerClient(cloud))
 }
 

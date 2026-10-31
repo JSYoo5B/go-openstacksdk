@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"net/url"
 	"reflect"
-	"strings"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -19,18 +18,8 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type nativeSecretTransport func(*http.Request) (*http.Response, error)
-
-func (transport nativeSecretTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func nativeSecretWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}, "X-Secret-Proof": {"actual"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}, "X-Secret-Proof": {"actual"}})
 }
 
 func nativeSecretClient(cloud *testcloud.Cloud) *gophercloud.ServiceClient {
@@ -59,7 +48,7 @@ func TestNativeSecretGetCreateDeleteUpdateRoutesAndBodies(t *testing.T) {
 	client := nativeSecretClient(cloud)
 	type exchange struct{ method, path, body, contentType, extra string }
 	var seen []exchange
-	cloud.Provider.HTTPClient.Transport = nativeSecretTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -76,7 +65,7 @@ func TestNativeSecretGetCreateDeleteUpdateRoutesAndBodies(t *testing.T) {
 			return nativeSecretWire(204, ""), nil
 		}
 		return nativeSecretWire(200, nativeSecretRow), nil
-	})
+	}))
 	api := secrets.New(client)
 	if api.RawClient() != client {
 		t.Fatal("native client identity changed")
@@ -131,10 +120,10 @@ func TestNativeSecretStrictStatusesAndPreflight(t *testing.T) {
 			t.Run(fmt.Sprintf("%s/%d", call.name, code), func(t *testing.T) {
 				cloud := testcloud.New(t)
 				var requests atomic.Int32
-				cloud.Provider.HTTPClient.Transport = nativeSecretTransport(func(req *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 					requests.Add(1)
 					return nativeSecretWire(code, nativeSecretRow), nil
-				})
+				}))
 				err := call.call(secrets.New(nativeSecretClient(cloud)))
 				nativeSecretOperation(t, err, call.name)
 				var native gophercloud.ErrUnexpectedResponseCode
@@ -147,10 +136,10 @@ func TestNativeSecretStrictStatusesAndPreflight(t *testing.T) {
 	t.Run("extension collisions and nil options", func(t *testing.T) {
 		cloud := testcloud.New(t)
 		var requests atomic.Int32
-		cloud.Provider.HTTPClient.Transport = nativeSecretTransport(func(req *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 			requests.Add(1)
 			return nativeSecretWire(201, `{}`), nil
-		})
+		}))
 		api := secrets.New(nativeSecretClient(cloud))
 		for _, option := range []secrets.CreateOption{secrets.WithCreateField("name", "x"), nil} {
 			_, err := api.Create(ctx, secrets.CreateOpts{Name: "n"}, option)
@@ -172,14 +161,14 @@ func TestNativeSecretListQueryPagingAndStop(t *testing.T) {
 	var calls atomic.Int32
 	var queries []url.Values
 	var paths []string
-	cloud.Provider.HTTPClient.Transport = nativeSecretTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		queries = append(queries, req.URL.Query())
 		paths = append(paths, req.URL.Path)
 		if calls.Add(1) == 1 {
 			return nativeSecretWire(200, `{"secrets":[`+nativeSecretRow+`],"next":"`+cloud.Server.URL+`/other/secrets?offset=1&limit=1","total":2}`), nil
 		}
 		return nativeSecretWire(200, `{"secrets":[{"name":"second"}],"total":2}`), nil
-	})
+	}))
 	created := time.Date(2026, 10, 10, 1, 2, 3, 0, time.UTC)
 	acl := true
 	var names []string
@@ -196,12 +185,12 @@ func TestNativeSecretListQueryPagingAndStop(t *testing.T) {
 	t.Run("empty page and early stop", func(t *testing.T) {
 		cloud := testcloud.New(t)
 		var calls atomic.Int32
-		cloud.Provider.HTTPClient.Transport = nativeSecretTransport(func(req *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 			if calls.Add(1) == 1 && req.URL.Query().Get("name") == "empty" {
 				return nativeSecretWire(200, `{"secrets":[],"next":"`+cloud.Server.URL+`/barbican/v1/secrets?offset=9"}`), nil
 			}
 			return nativeSecretWire(200, `{"secrets":[{"name":"a"},{"name":"b"}],"next":"`+cloud.Server.URL+`/barbican/v1/secrets?offset=2"}`), nil
-		})
+		}))
 		api := secrets.New(nativeSecretClient(cloud))
 		for value, err := range api.List(context.Background(), secrets.WithListQuery("name", "empty")) {
 			t.Fatal("empty page yielded", value, err)

@@ -5,23 +5,12 @@ import (
 	"io"
 	"net/http"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets"
 	"github.com/gophercloud/gophercloud/v2"
 )
-
-type pythonSecretTransport func(*http.Request) (*http.Response, error)
-
-func (transport pythonSecretTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
 
 type pythonSecretCall struct{ method, path, contentType, body string }
 
@@ -43,11 +32,11 @@ func TestPythonSecretUpdateSendsRawPayload(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			cloud := testcloud.New(t)
 			var calls []pythonSecretCall
-			cloud.Provider.HTTPClient.Transport = pythonSecretTransport(func(req *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 				data, _ := io.ReadAll(req.Body)
 				calls = append(calls, pythonSecretCall{req.Method, req.URL.Path, req.Header.Get("Content-Type"), string(data)})
-				return &http.Response{StatusCode: tc.status, Body: io.NopCloser(strings.NewReader(`{"secret_ref":"https://kms/v1/secrets/s1"}`)), Header: http.Header{"Content-Type": {"application/json"}}}, nil
-			})
+				return testcloud.Response(tc.status, `{"secret_ref":"https://kms/v1/secrets/s1"}`, http.Header{"Content-Type": {"application/json"}}), nil
+			}))
 			client := cloud.Client("key-manager", "/catalog/unused/")
 			client.ResourceBase = cloud.Server.URL + "/barbican/v1/"
 			err := secrets.New(client).Update(ctx, "s1", secrets.UpdateOpts{ContentType: "text/plain", Payload: "new"})

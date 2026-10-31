@@ -19,7 +19,7 @@ func TestNativeSecretMetadataRoutesBodiesAndDecode(t *testing.T) {
 	cloud := testcloud.New(t)
 	type exchange struct{ method, path, body string }
 	var seen []exchange
-	cloud.Provider.HTTPClient.Transport = nativeSecretTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -37,7 +37,7 @@ func TestNativeSecretMetadataRoutesBodiesAndDecode(t *testing.T) {
 			return nativeSecretWire(200, `{"metadata":{"a":"1","b":"2"}}`), nil
 		}
 		return nativeSecretWire(200, `{"key":"a","value":"1"}`), nil
-	})
+	}))
 	api := secrets.New(nativeSecretClient(cloud))
 	ctx := context.Background()
 	metadata, err := api.GetMetadata(ctx, "s1")
@@ -107,10 +107,10 @@ func TestNativeSecretMetadataStrictStatusesAndPreflight(t *testing.T) {
 			t.Run(fmt.Sprintf("%s/%d", call.name, code), func(t *testing.T) {
 				cloud := testcloud.New(t)
 				var requests atomic.Int32
-				cloud.Provider.HTTPClient.Transport = nativeSecretTransport(func(req *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 					requests.Add(1)
 					return nativeSecretWire(code, `{"key":"a","value":"1"}`), nil
-				})
+				}))
 				err := call.call(secrets.New(nativeSecretClient(cloud)))
 				nativeSecretOperation(t, err, call.name)
 				var native gophercloud.ErrUnexpectedResponseCode
@@ -123,10 +123,10 @@ func TestNativeSecretMetadataStrictStatusesAndPreflight(t *testing.T) {
 	t.Run("required key and value, collisions and nil options", func(t *testing.T) {
 		cloud := testcloud.New(t)
 		var requests atomic.Int32
-		cloud.Provider.HTTPClient.Transport = nativeSecretTransport(func(req *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 			requests.Add(1)
 			return nativeSecretWire(201, `{}`), nil
-		})
+		}))
 		api := secrets.New(nativeSecretClient(cloud))
 		checks := map[string]func() error{
 			"create missing value": func() error { return api.CreateMetadatum(ctx, "s1", secrets.MetadatumOpts{Key: "a"}) },

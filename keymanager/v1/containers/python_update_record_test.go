@@ -19,20 +19,22 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-func containerUpdateFixture(t *testing.T, reply func(*http.Request) *http.Response) (*containers.API, *testcloud.Cloud, *[]string) {
+func containerUpdateFixture(t *testing.T, reply func(*http.Request) *http.Response) (*containers.API, *testcloud.Cloud, *testcloud.Recorder) {
 	t.Helper()
 	cloud := testcloud.New(t)
-	calls := []string{}
+	calls := testcloud.NewRecorder(func(req *http.Request) (*http.Response, error) { return reply(req), nil })
 	client := nativeContainerClient(cloud)
-	cloud.Provider.HTTPClient.Transport = nativeContainerTransport(func(req *http.Request) (*http.Response, error) {
-		raw := []byte{}
-		if req.Body != nil {
-			raw, _ = io.ReadAll(req.Body)
-		}
-		calls = append(calls, req.Method+" "+req.URL.EscapedPath()+" "+string(raw))
-		return reply(req), nil
-	})
-	return containers.New(client), cloud, &calls
+	cloud.SetTransport(calls)
+	return containers.New(client), cloud, calls
+}
+
+// containerUpdateCalls projects the recorded calls onto "METHOD escaped-path body" strings.
+func containerUpdateCalls(rec *testcloud.Recorder) []string {
+	calls := []string{}
+	for _, call := range rec.Calls() {
+		calls = append(calls, call.Method+" "+call.EscapedPath+" "+call.Body)
+	}
+	return calls
 }
 func TestPythonContainerUpdateRecordNoopSeedHasNoReceiptOrPUT(t *testing.T) {
 	for _, id := range []string{"s1", ""} {
@@ -47,8 +49,8 @@ func TestPythonContainerUpdateRecordNoopSeedHasNoReceiptOrPUT(t *testing.T) {
 					opts = append(opts, containers.WithUpdateRecordAttribute(attr, "ignored"))
 				}
 				got, err := api.UpdateRecord(context.Background(), id, opts...)
-				if err != nil || got == nil || got.Committed || got.StatusCode != 0 || got.Header != nil || got.Wire != nil || got.Envelope != nil || len(*calls) != 0 || got.Resource == nil || len(got.Request) != 0 {
-					t.Fatal(got, err, *calls)
+				if err != nil || got == nil || got.Committed || got.StatusCode != 0 || got.Header != nil || got.Wire != nil || got.Envelope != nil || calls.Len() != 0 || got.Resource == nil || len(got.Request) != 0 {
+					t.Fatal(got, err, containerUpdateCalls(calls))
 				}
 				want, _ := json.Marshal(id)
 				if string(got.Resource.Body["id"]) != string(want) || got.Resource.StatusCode != 0 || string(got.Resource.Body["name"]) != "null" {
@@ -67,8 +69,8 @@ func TestPythonContainerUpdateRecordFlatDirtyBodyNullableAndRawValues(t *testing
 	})
 	got, err := api.UpdateRecord(context.Background(), "c1", containers.WithUpdateRecordAttribute("name", "new"), containers.WithUpdateRecordAttribute("secret_refs", false), containers.WithUpdateRecordAttribute("consumers", map[string]any{"n": 9007199254740993}), containers.WithUpdateRecordAttribute("updated_at", nil), containers.WithUpdateRecordAttribute("unknown", "drop"))
 	want := `PUT /barbican/v1/containers/c1 {"consumers":{"n":9007199254740993},"name":"new","secret_refs":false,"updated":null}`
-	if err != nil || got == nil || !got.Committed || got.StatusCode != 202 || len(*calls) != 1 || (*calls)[0] != want || string(got.Request["name"]) != `"new"` || string(got.Resource.Body["name"]) != "null" || string(got.Resource.Body["consumers"]) != `[{"n":9007199254740993}]` || string(got.Resource.Body["secret_refs"]) != `[false]` || string(got.Resource.Body["status"]) != `"ACTIVE"` || got.Resource.Body["unknown"] != nil || string(got.Wire.Body["unknown"]) != `"wire-only"` || got.Header.Get("X-Container-Proof") != "actual" {
-		t.Fatal(got, err, *calls)
+	if err != nil || got == nil || !got.Committed || got.StatusCode != 202 || calls.Len() != 1 || containerUpdateCalls(calls)[0] != want || string(got.Request["name"]) != `"new"` || string(got.Resource.Body["name"]) != "null" || string(got.Resource.Body["consumers"]) != `[{"n":9007199254740993}]` || string(got.Resource.Body["secret_refs"]) != `[false]` || string(got.Resource.Body["status"]) != `"ACTIVE"` || got.Resource.Body["unknown"] != nil || string(got.Wire.Body["unknown"]) != `"wire-only"` || got.Header.Get("X-Container-Proof") != "actual" {
+		t.Fatal(got, err, containerUpdateCalls(calls))
 	}
 	if got.Request["id"] != nil || got.Resource.Body["self"] != nil || string(got.Seed["name"]) != `"new"` {
 		t.Fatal(got)
@@ -95,8 +97,8 @@ func TestPythonContainerUpdateRecordAliasesOrderResponseMergeAndReferenceProject
 				want = "wire"
 			}
 			got, err := api.UpdateRecord(context.Background(), "s1", opts...)
-			if err != nil || len(*calls) != 1 || (*calls)[0] != `PUT /barbican/v1/containers/s1 {"updated":"`+want+`"}` || string(got.Resource.Body["updated_at"]) != `"`+want+`"` || string(got.Resource.Body["id"]) != "null" || string(got.Resource.Body["container_id"]) != `"new-ref"` {
-				t.Fatal(got, err, *calls)
+			if err != nil || calls.Len() != 1 || containerUpdateCalls(calls)[0] != `PUT /barbican/v1/containers/s1 {"updated":"`+want+`"}` || string(got.Resource.Body["updated_at"]) != `"`+want+`"` || string(got.Resource.Body["id"]) != "null" || string(got.Resource.Body["container_id"]) != `"new-ref"` {
+				t.Fatal(got, err, containerUpdateCalls(calls))
 			}
 		})
 	}
@@ -107,8 +109,8 @@ func TestPythonContainerUpdateRecordEmptyInvalidJSONAndShapeErrorsKeepActualProo
 			api, _, calls := containerUpdateFixture(t, func(*http.Request) *http.Response { return nativeContainerWire(200, body) })
 			got, err := api.UpdateRecord(context.Background(), "s1", containers.WithUpdateRecordAttribute("name", "seed"))
 			fail := body == `[]` || body == `null` || body == `false` || body == `42` || body == `"text"` || body == `{"container_ref":"invalid"}`
-			if got == nil || got.StatusCode != 200 || string(got.Envelope) != body || len(*calls) != 1 || !got.Committed {
-				t.Fatal(got, err, *calls)
+			if got == nil || got.StatusCode != 200 || string(got.Envelope) != body || calls.Len() != 1 || !got.Committed {
+				t.Fatal(got, err, containerUpdateCalls(calls))
 			}
 			if fail {
 				var proof *resource.ResponseError
@@ -135,13 +137,13 @@ func TestPythonContainerUpdateRecordOptionsSnapshotBasePathAndSelectedVersion(t 
 	var retained *containers.UpdateRecordOpts
 	capture := func(c *containers.UpdateRecordOpts) error { retained = c; return nil }
 	got, err := api.UpdateRecord(context.Background(), "id/with%", option, capture)
-	if err != nil || got.StatusCode != 204 || len(*calls) != 1 || (*calls)[0] != `PUT /barbican/v1/alternate/containers/id%2Fwith%25 {"name":"secret"}` || seen.Get("X-Trace") != "owned" || seen.Get("OpenStack-API-Version") != "key-manager 1.2" || api.RawClient().Microversion != "" {
-		t.Fatal(got, err, *calls, seen)
+	if err != nil || got.StatusCode != 204 || calls.Len() != 1 || containerUpdateCalls(calls)[0] != `PUT /barbican/v1/alternate/containers/id%2Fwith%25 {"name":"secret"}` || seen.Get("X-Trace") != "owned" || seen.Get("OpenStack-API-Version") != "key-manager 1.2" || api.RawClient().Microversion != "" {
+		t.Fatal(got, err, containerUpdateCalls(calls), seen)
 	}
 	retained.Attributes["name"][1] = 'X'
 	_, err = api.UpdateRecord(context.Background(), "s1", option)
-	if err != nil || !strings.HasSuffix((*calls)[1], `{"name":"secret"}`) {
-		t.Fatal(err, *calls)
+	if err != nil || !strings.HasSuffix(containerUpdateCalls(calls)[1], `{"name":"secret"}`) {
+		t.Fatal(err, containerUpdateCalls(calls))
 	}
 }
 func TestPythonContainerUpdateRecordPreflightAndConstructorCollisions(t *testing.T) {
@@ -176,8 +178,8 @@ func TestPythonContainerUpdateRecordPreflightAndConstructorCollisions(t *testing
 				opts = append(opts, func(*containers.UpdateRecordOpts) error { api.RawClient().ResourceBase += "changed/"; return nil })
 			}
 			_, err := api.UpdateRecord(ctx, id, opts...)
-			if err == nil || len(*calls) != 0 {
-				t.Fatal(err, *calls)
+			if err == nil || calls.Len() != 0 {
+				t.Fatal(err, containerUpdateCalls(calls))
 			}
 		})
 	}
@@ -187,8 +189,8 @@ func TestPythonContainerUpdateRecordAcceptedAndRejectedStatusPolicy(t *testing.T
 		t.Run(fmt.Sprint(status), func(t *testing.T) {
 			api, _, calls := containerUpdateFixture(t, func(*http.Request) *http.Response { return nativeContainerWire(status, `{"name":"reply"}`) })
 			got, err := api.UpdateRecord(context.Background(), "s1", containers.WithUpdateRecordAttribute("name", "n"))
-			if got == nil || got.StatusCode != status || len(*calls) != 1 || got.Header.Get("X-Container-Proof") != "actual" {
-				t.Fatal(got, err, *calls)
+			if got == nil || got.StatusCode != status || calls.Len() != 1 || got.Header.Get("X-Container-Proof") != "actual" {
+				t.Fatal(got, err, containerUpdateCalls(calls))
 			}
 			if status < 400 {
 				if err != nil || !got.Committed {
@@ -212,7 +214,7 @@ func TestPythonContainerUpdateRecordPhysicalFailuresNeverReplayAndRetainNativePr
 				defer cancel(nil)
 				physical := &containerUpdateFaultBody{data: []byte(`{"name":"actual"}`)}
 				api, cloud, calls := containerUpdateFixture(t, func(*http.Request) *http.Response {
-					return &http.Response{StatusCode: status, Header: http.Header{"X-Actual": {"physical"}}, Body: physical}
+					return testcloud.StreamResponse(status, physical, http.Header{"X-Actual": {"physical"}})
 				})
 				client := api.RawClient()
 				base := client.ResourceBase
@@ -237,8 +239,8 @@ func TestPythonContainerUpdateRecordPhysicalFailuresNeverReplayAndRetainNativePr
 					return sentinel
 				}
 				got, err := api.UpdateRecord(ctx, "s1", containers.WithUpdateRecordAttribute("name", "n"))
-				if err == nil || got == nil || got.StatusCode != status || string(got.Envelope) != `{"name":"actual"}` || got.Header.Get("X-Actual") != "physical" || len(*calls) != 1 || retries != 0 || auth != 0 || backoff != 0 || got.Committed {
-					t.Fatal(got, err, *calls, retries, auth, backoff)
+				if err == nil || got == nil || got.StatusCode != status || string(got.Envelope) != `{"name":"actual"}` || got.Header.Get("X-Actual") != "physical" || calls.Len() != 1 || retries != 0 || auth != 0 || backoff != 0 || got.Committed {
+					t.Fatal(got, err, containerUpdateCalls(calls), retries, auth, backoff)
 				}
 				if lane == "read-close" && (!errors.Is(err, readCause) || !errors.Is(err, closeCause)) || lane == "cancel" && !errors.Is(err, cancelCause) || lane == "source" && !errors.Is(err, resource.ErrInvalidOption) {
 					t.Fatal(err)
@@ -267,10 +269,10 @@ func TestPythonContainerUpdateRecordCleanRetryAndFailedReauthPreserveBody(t *tes
 			got, err := api.UpdateRecord(context.Background(), "s1", containers.WithUpdateRecordAttribute("name", "owned"))
 			if mutate {
 				if err == nil || attempts != 1 || !errors.Is(err, resource.ErrInvalidOption) {
-					t.Fatal(got, err, *calls)
+					t.Fatal(got, err, containerUpdateCalls(calls))
 				}
-			} else if err != nil || attempts != 2 || !reflect.DeepEqual((*calls)[0], (*calls)[1]) {
-				t.Fatal(got, err, *calls)
+			} else if err != nil || attempts != 2 || !reflect.DeepEqual(containerUpdateCalls(calls)[0], containerUpdateCalls(calls)[1]) {
+				t.Fatal(got, err, containerUpdateCalls(calls))
 			}
 		})
 	}
@@ -280,8 +282,8 @@ func TestPythonContainerUpdateRecordCleanRetryAndFailedReauthPreserveBody(t *tes
 		cloud.Provider.ReauthFunc = func(context.Context) error { return cause }
 		got, err := api.UpdateRecord(context.Background(), "s1", containers.WithUpdateRecordAttribute("name", "n"))
 		var unable *gophercloud.ErrUnableToReauthenticate
-		if !errors.As(err, &unable) || unable.ErrReauth != cause || got.StatusCode != 401 || string(got.Envelope) != `{"original":true}` || len(*calls) != 1 {
-			t.Fatal(got, err, unable, *calls)
+		if !errors.As(err, &unable) || unable.ErrReauth != cause || got.StatusCode != 401 || string(got.Envelope) != `{"original":true}` || calls.Len() != 1 {
+			t.Fatal(got, err, unable, containerUpdateCalls(calls))
 		}
 	})
 }
@@ -294,8 +296,8 @@ func TestPythonContainerUpdateRecordRequestsCharsetGapIsExplicit(t *testing.T) {
 	})
 	got, err := api.UpdateRecord(context.Background(), "s1", containers.WithUpdateRecordAttribute("name", "seed"))
 	var proof *resource.ResponseError
-	if !errors.Is(err, resource.ErrUnsupported) || !errors.As(err, &proof) || got.StatusCode != 200 || string(got.Envelope) != body || !got.Committed || len(*calls) != 1 {
-		t.Fatal(got, err, proof, *calls)
+	if !errors.Is(err, resource.ErrUnsupported) || !errors.As(err, &proof) || got.StatusCode != 200 || string(got.Envelope) != body || !got.Committed || calls.Len() != 1 {
+		t.Fatal(got, err, proof, containerUpdateCalls(calls))
 	}
 }
 
@@ -334,8 +336,8 @@ func TestPythonContainerUpdateRecordExplicitCharsetsDecodeViewsKeepPhysicalEnvel
 				return r
 			})
 			got, err := api.UpdateRecord(context.Background(), "s1", containers.WithUpdateRecordAttribute("name", "seed"))
-			if err != nil || got == nil || got.Resource == nil || got.Wire == nil || !got.Committed || got.StatusCode != 200 || string(got.Envelope) != string(tc.body) || got.Header.Get("Content-Type") != contentType || len(*calls) != 1 {
-				t.Fatal(got, err, *calls)
+			if err != nil || got == nil || got.Resource == nil || got.Wire == nil || !got.Committed || got.StatusCode != 200 || string(got.Envelope) != string(tc.body) || got.Header.Get("Content-Type") != contentType || calls.Len() != 1 {
+				t.Fatal(got, err, containerUpdateCalls(calls))
 			}
 			for _, view := range []*resource.RawResource{got.Resource, got.Wire} {
 				var name string
@@ -361,8 +363,8 @@ func TestPythonContainerUpdateRecordDecodedShapeFailureKeepsOriginalEncodedProof
 	})
 	got, err := api.UpdateRecord(context.Background(), "s1", containers.WithUpdateRecordAttribute("name", "seed"))
 	var proof *resource.ResponseError
-	if err == nil || !errors.As(err, &proof) || got == nil || !got.Committed || got.StatusCode != 200 || string(got.Envelope) != string(body) || proof.StatusCode != 200 || string(proof.Body) != string(body) || proof.Header.Get("Content-Type") != contentType || got.Wire != nil || len(*calls) != 1 {
-		t.Fatal(got, err, proof, *calls)
+	if err == nil || !errors.As(err, &proof) || got == nil || !got.Committed || got.StatusCode != 200 || string(got.Envelope) != string(body) || proof.StatusCode != 200 || string(proof.Body) != string(body) || proof.Header.Get("Content-Type") != contentType || got.Wire != nil || calls.Len() != 1 {
+		t.Fatal(got, err, proof, containerUpdateCalls(calls))
 	}
 	proof.Body[0] = 0
 	proof.Header.Set("Content-Type", "changed")

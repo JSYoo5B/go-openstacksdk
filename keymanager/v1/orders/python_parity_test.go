@@ -3,10 +3,8 @@ package orders_test
 import (
 	"context"
 	"errors"
-	"io"
 	"net/http"
 	"reflect"
-	"strings"
 	"testing"
 	"time"
 
@@ -15,31 +13,21 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
-type pythonOrderTransport func(*http.Request) (*http.Response, error)
-
-func (transport pythonOrderTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 type pythonOrderCall struct{ method, path string }
 
 // pythonOrderAPI replies with the given statuses in order and repeats the last.
 func pythonOrderAPI(t *testing.T, calls *[]pythonOrderCall, statuses ...string) *orders.API {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = pythonOrderTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		*calls = append(*calls, pythonOrderCall{req.Method, req.URL.Path})
 		status := statuses[min(len(*calls), len(statuses))-1]
 		code, body := 200, `{"order_ref":"https://kms/v1/orders/o1","status":"`+status+`","type":"key"}`
 		if status == "" {
 			code, body = 404, `{"code":404}`
 		}
-		return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}, nil
-	})
+		return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}}), nil
+	}))
 	client := cloud.Client("key-manager", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/barbican/v1/"
 	return orders.New(client)

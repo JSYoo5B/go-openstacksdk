@@ -22,13 +22,13 @@ func recordListAPI(t *testing.T, reply func(*http.Request) (*http.Response, erro
 	cloud := testcloud.New(t)
 	client := nativeSecretClient(cloud)
 	calls := &[]string{}
-	cloud.Provider.HTTPClient.Transport = nativeSecretTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		*calls = append(*calls, req.Method+" "+req.URL.Path+"?"+req.URL.RawQuery)
 		if req.URL.Path != "/barbican/v1/secrets" {
 			t.Fatal("unexpected member/payload/discovery request", req.URL)
 		}
 		return reply(req)
-	})
+	}))
 	return secrets.New(client), calls
 }
 func recordListField(t *testing.T, value *resource.RawResource, key, want string) {
@@ -156,7 +156,7 @@ func TestPythonSecretListRecordsRawCapsBeforeDescriptorAndLatePageErrors(t *test
 		t.Fatal(values, err, proof, *calls)
 	}
 	*calls = nil
-	api.RawClient().ProviderClient.HTTPClient.Transport = nativeSecretTransport(func(req *http.Request) (*http.Response, error) {
+	api.RawClient().ProviderClient.HTTPClient.Transport = testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		*calls = append(*calls, req.URL.String())
 		if len(*calls) == 1 {
 			return nativeSecretWire(200, `{"secrets":[{"id":"first"}],"next":"?offset=1"}`), nil

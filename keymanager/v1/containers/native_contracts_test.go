@@ -19,18 +19,8 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type nativeContainerTransport func(*http.Request) (*http.Response, error)
-
-func (transport nativeContainerTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func nativeContainerWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}, "X-Container-Proof": {"actual"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}, "X-Container-Proof": {"actual"}})
 }
 
 func nativeContainerClient(cloud *testcloud.Cloud) *gophercloud.ServiceClient {
@@ -59,7 +49,7 @@ func TestNativeContainerRoutesBodiesAndDecode(t *testing.T) {
 	client := nativeContainerClient(cloud)
 	type exchange struct{ method, path, body string }
 	var seen []exchange
-	cloud.Provider.HTTPClient.Transport = nativeContainerTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -80,7 +70,7 @@ func TestNativeContainerRoutesBodiesAndDecode(t *testing.T) {
 			return nativeContainerWire(204, ""), nil
 		}
 		return nativeContainerWire(200, nativeContainerRow), nil
-	})
+	}))
 	api := containers.New(client)
 	if api.RawClient() != client {
 		t.Fatal("native client identity changed")
@@ -157,10 +147,10 @@ func TestNativeContainerStrictStatusesAndPreflight(t *testing.T) {
 			t.Run(fmt.Sprintf("%s/%d", call.name, code), func(t *testing.T) {
 				cloud := testcloud.New(t)
 				var requests atomic.Int32
-				cloud.Provider.HTTPClient.Transport = nativeContainerTransport(func(req *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 					requests.Add(1)
 					return nativeContainerWire(code, nativeContainerRow), nil
-				})
+				}))
 				err := call.call(containers.New(nativeContainerClient(cloud)))
 				nativeContainerOperation(t, err, call.name)
 				var native gophercloud.ErrUnexpectedResponseCode
@@ -173,10 +163,10 @@ func TestNativeContainerStrictStatusesAndPreflight(t *testing.T) {
 	t.Run("required type, collisions and nil options", func(t *testing.T) {
 		cloud := testcloud.New(t)
 		var requests atomic.Int32
-		cloud.Provider.HTTPClient.Transport = nativeContainerTransport(func(req *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 			requests.Add(1)
 			return nativeContainerWire(201, `{}`), nil
-		})
+		}))
 		api := containers.New(nativeContainerClient(cloud))
 		checks := map[string]func() error{
 			"missing type": func() error { _, err := api.Create(ctx, containers.CreateOpts{Name: "n"}); return err },
@@ -207,7 +197,7 @@ func TestNativeContainerListsQueryPagingAndStop(t *testing.T) {
 	cloud := testcloud.New(t)
 	var queries []url.Values
 	var paths []string
-	cloud.Provider.HTTPClient.Transport = nativeContainerTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		queries = append(queries, req.URL.Query())
 		paths = append(paths, req.URL.Path)
 		consumers := strings.HasSuffix(req.URL.Path, "/consumers")
@@ -220,7 +210,7 @@ func TestNativeContainerListsQueryPagingAndStop(t *testing.T) {
 			return nativeContainerWire(200, `{"consumers":[{"name":"c1","url":"u","created":"2026-10-10T01:02:03"}],"next":"`+cloud.Server.URL+`/barbican/v1/containers/c1/consumers?offset=1"}`), nil
 		}
 		return nativeContainerWire(200, `{"consumers":[]}`), nil
-	})
+	}))
 	api := containers.New(nativeContainerClient(cloud))
 	var names []string
 	for value, err := range api.List(context.Background(), containers.WithListOptions(containers.ListOpts{Limit: 1, Name: "n"}), containers.WithListQuery("extra", "1")) {
@@ -248,10 +238,10 @@ func TestNativeContainerListsQueryPagingAndStop(t *testing.T) {
 	t.Run("early stop", func(t *testing.T) {
 		var calls atomic.Int32
 		cloud := testcloud.New(t)
-		cloud.Provider.HTTPClient.Transport = nativeContainerTransport(func(req *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 			calls.Add(1)
 			return nativeContainerWire(200, `{"containers":[{"name":"a"},{"name":"b"}],"next":"`+cloud.Server.URL+`/barbican/v1/containers?offset=2"}`), nil
-		})
+		}))
 		for value, err := range containers.New(nativeContainerClient(cloud)).List(context.Background()) {
 			if err != nil || value.Name != "a" {
 				t.Fatal(value, err)
