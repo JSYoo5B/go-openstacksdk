@@ -19,6 +19,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/usage"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
+	"github.com/JSYoo5B/go-openstacksdk/internal/cloudserver"
 	"github.com/JSYoo5B/go-openstacksdk/internal/jsonfilter"
 	"github.com/JSYoo5B/go-openstacksdk/network"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -173,7 +174,7 @@ func (c *Connection) SearchAggregates(ctx context.Context, nameOrID string, opti
 	wrap := func(err error) error {
 		return request.Wrap("SearchAggregates", "aggregates", cloudread.ContextError(ctx, err))
 	}
-	cfg, err := applyCloudServerReadOptions(options)
+	cfg, err := cloudserver.ApplyReadOptions(options)
 	if err != nil {
 		return nil, wrap(err)
 	}
@@ -405,7 +406,7 @@ func (c *Connection) cloudServerSecurityGroupNames(ctx context.Context, server s
 	if err != nil || record == nil {
 		return "", nil, false, err
 	}
-	id = cloudServerRecordString(record, "id")
+	id = cloudserver.RecordString(record, "id")
 	if id == "" {
 		return "", nil, false, fmt.Errorf("%w: found server has no string ID", resource.ErrInvalidOption)
 	}

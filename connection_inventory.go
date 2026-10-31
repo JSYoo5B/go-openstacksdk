@@ -14,6 +14,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudconfig"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
+	"github.com/JSYoo5B/go-openstacksdk/internal/cloudserver"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"gopkg.in/yaml.v2"
 )
@@ -261,7 +262,7 @@ func (i *Inventory) listCloud(ctx context.Context, e *inventoryEntry, opts Inven
 	if opts.Private {
 		cfg.Address = append(cfg.Address, compute.WithPrivateCloud(true))
 	}
-	results, err := conn.cloudServerListExpanded(ctx, cfg)
+	results, err := cloudserver.ListExpanded(ctx, conn.cloudServerDependencies(), cfg)
 	if err != nil {
 		return nil, err
 	}

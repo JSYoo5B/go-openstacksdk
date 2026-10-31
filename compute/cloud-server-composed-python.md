@@ -77,6 +77,14 @@ clouds.yaml), the cleanup is skipped without any request, as Python's
 gate. With wait, absence is observed for the timeout; once the DELETE was
 accepted, a wait failure returns `(true, err)`.
 
+The result and option types of these helpers (`CloudServerReadOpts`,
+`CloudServerReadOption`, `CloudServerSearchResult`, `CloudServerResult`,
+`CloudServerUpdate`, `CloudServerSearch`, `CloudServerActionOpts`,
+`CloudServerActionOption`) and `CloudServerResultView` are defined in this
+`compute` package; the root package exposes them under the same names as type
+aliases and a forwarding function, and keeps the `WithCloudServer*` option
+builders and the `Connection` methods.
+
 ## Expansion and hostvars
 
 Python's `bare=False` default passes every returned server through

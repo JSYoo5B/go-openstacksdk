@@ -2,7 +2,6 @@ package openstack
 
 import (
 	"context"
-	"encoding/json"
 	"slices"
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage"
@@ -10,7 +9,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/serverhostvars"
-	"github.com/JSYoo5B/go-openstacksdk/internal/serverview"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
@@ -93,33 +91,4 @@ func (c *Connection) cloudServerHostvars(ctx context.Context, server *servers.Se
 			return listed.Volumes, nil
 		},
 	}, server, record, address)
-}
-
-// cloudServerView renders the record Source view (or the typed server JSON
-// with location) with the interface fields of view set over it.
-func cloudServerView(server *servers.Server, record *servers.ServerFindRecord, location resource.CloudLocation, view *compute.ServerAddressView) (json.RawMessage, error) {
-	body, err := serverview.Base(server, record, location)
-	if err != nil {
-		return nil, err
-	}
-	var interfaces *serverview.Interfaces
-	if view != nil {
-		addresses := make(map[string][]map[string]json.RawMessage, len(view.Addresses))
-		for network, rows := range view.Addresses {
-			list := make([]map[string]json.RawMessage, len(rows))
-			for i, row := range rows {
-				list[i] = row.Fields
-			}
-			addresses[network] = list
-		}
-		interfaces = &serverview.Interfaces{
-			Addresses:  addresses,
-			PublicIPv4: view.PublicIPv4, PublicIPv6: view.PublicIPv6, PrivateIPv4: view.PrivateIPv4,
-			InterfaceIP: view.InterfaceIP, AccessIPv4: view.AccessIPv4, AccessIPv6: view.AccessIPv6,
-		}
-	}
-	if err := serverview.Overlay(body, interfaces); err != nil {
-		return nil, err
-	}
-	return json.Marshal(body)
 }
