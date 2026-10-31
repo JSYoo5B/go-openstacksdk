@@ -1,4 +1,4 @@
-package openstack
+package cloudconfig
 
 import (
 	"context"
@@ -49,21 +49,21 @@ func TestCloudNetworkConfigurationInheritanceAndFrozenNativeSettings(t *testing.
 			writeCloudConfigFile(t, filepath.Join(filepath.Dir(path), "secure.yaml"), "clouds:\n  dev:\n    auth: {password: secure-password}\n"+tc.secure)
 			publicPath := filepath.Join(cwd, "clouds-public.yaml")
 			writeCloudConfigFile(t, publicPath, "public-clouds:\n  provider:\n    auth: {project_name: inherited-project, project_domain_name: Default}\n    networks: [{name: public-network, default_interface: true}]\n  alternate:\n    auth: {project_name: inherited-project, project_domain_name: Default}\n    networks: [{name: alternate-network, default_interface: true}]\n  '':\n    networks: [{name: must-not-inherit, default_interface: true}]\n")
-			configuration, err := loadCloudConfiguration("dev", []string{path})
-			if err != nil || configuration.defaultNetwork != tc.want {
-				t.Fatalf("default=%q want=%q err=%v", configuration.defaultNetwork, tc.want, err)
+			configuration, err := Load("dev", []string{path}, nil)
+			if err != nil || configuration.DefaultNetwork != tc.want {
+				t.Fatalf("default=%q want=%q err=%v", configuration.DefaultNetwork, tc.want, err)
 			}
-			if configuration.networkRoles.DefaultNetworkSelector() != tc.want {
-				t.Fatalf("role selector=%q want=%q", configuration.networkRoles.DefaultNetworkSelector(), tc.want)
+			if configuration.NetworkRoles.DefaultNetworkSelector() != tc.want {
+				t.Fatalf("role selector=%q want=%q", configuration.NetworkRoles.DefaultNetworkSelector(), tc.want)
 			}
 			// Changes after loading cannot change auth or either settings layer.
 			writeCloudConfigFile(t, path, "clouds: {dev: {auth: {username: changed}}}\n")
 			writeCloudConfigFile(t, filepath.Join(filepath.Dir(path), "secure.yaml"), "clouds: {dev: {auth: {password: changed}}}\n")
 			writeCloudConfigFile(t, publicPath, "public-clouds: {provider: {networks: []}}\n")
-			if configuration.networkRoles.DefaultNetworkSelector() != tc.want {
+			if configuration.NetworkRoles.DefaultNetworkSelector() != tc.want {
 				t.Fatal("role policy changed after file mutation")
 			}
-			auth, endpoint, tlsConfig, err := clouds.Parse(configuration.parseOptions...)
+			auth, endpoint, tlsConfig, err := clouds.Parse(configuration.ParseOptions...)
 			if err != nil || auth.Username != "snapshot-user" || auth.Password != "secure-password" || auth.IdentityEndpoint != "https://identity.example/v3" || auth.TenantName != "inherited-project" || auth.Scope == nil || auth.Scope.ProjectName != "inherited-project" || auth.Scope.DomainName != "Default" || endpoint.Region != "region-file" || endpoint.Availability != gophercloud.AvailabilityInternal || tlsConfig == nil || !tlsConfig.InsecureSkipVerify {
 				t.Fatalf("native snapshot settings incorrect; err=%v", err)
 			}
@@ -77,33 +77,33 @@ func TestCloudNetworkConfigurationSearchAndReadFailures(t *testing.T) {
 	envPath := filepath.Join(t.TempDir(), "clouds.yaml")
 	writeCloudConfigFile(t, envPath, "clouds: {dev: {networks: [{name: env-network, default_interface: true}]}}\n")
 	t.Setenv("OS_CLIENT_CONFIG_FILE", envPath)
-	configuration, err := loadCloudConfiguration("dev", nil)
-	if err != nil || configuration.defaultNetwork != "env-network" {
-		t.Fatalf("default=%q err=%v", configuration.defaultNetwork, err)
+	configuration, err := Load("dev", nil, nil)
+	if err != nil || configuration.DefaultNetwork != "env-network" {
+		t.Fatalf("default=%q err=%v", configuration.DefaultNetwork, err)
 	}
 	explicitPath := filepath.Join(t.TempDir(), "clouds.yaml")
 	writeCloudConfigFile(t, explicitPath, "clouds: {dev: {networks: [{name: explicit-network, default_interface: true}]}}\n")
-	configuration, err = loadCloudConfiguration("dev", []string{filepath.Join(t.TempDir(), "missing"), explicitPath, envPath})
-	if err != nil || configuration.defaultNetwork != "explicit-network" {
-		t.Fatalf("default=%q err=%v", configuration.defaultNetwork, err)
+	configuration, err = Load("dev", []string{filepath.Join(t.TempDir(), "missing"), explicitPath, envPath}, nil)
+	if err != nil || configuration.DefaultNetwork != "explicit-network" {
+		t.Fatalf("default=%q err=%v", configuration.DefaultNetwork, err)
 	}
 	// The first opened file fails immediately; a directory is openable but not readable.
-	if _, err := loadCloudConfiguration("dev", []string{t.TempDir(), explicitPath}); err == nil {
+	if _, err := Load("dev", []string{t.TempDir(), explicitPath}, nil); err == nil {
 		t.Fatal("read failure incorrectly fell through to the next file")
 	}
-	if _, err := loadCloudConfiguration("absent", []string{explicitPath}); err == nil {
+	if _, err := Load("absent", []string{explicitPath}, nil); err == nil {
 		t.Fatal("missing cloud accepted")
 	}
 	// Public files are irrelevant without a profile, even when malformed.
 	writeCloudConfigFile(t, "clouds-public.yaml", "not: [valid")
-	if _, err := loadCloudConfiguration("dev", []string{explicitPath}); err != nil {
+	if _, err := Load("dev", []string{explicitPath}, nil); err != nil {
 		t.Fatal(err)
 	}
 	writeCloudConfigFile(t, filepath.Join(filepath.Dir(explicitPath), "secure.yaml"), "clouds: [invalid")
-	if _, err := loadCloudConfiguration("dev", []string{explicitPath}); err == nil {
+	if _, err := Load("dev", []string{explicitPath}, nil); err == nil {
 		t.Fatal("malformed secure config ignored")
 	}
-	if _, err := loadCloudConfiguration("dev", []string{filepath.Join(t.TempDir(), "absent")}); err == nil {
+	if _, err := Load("dev", []string{filepath.Join(t.TempDir(), "absent")}, nil); err == nil {
 		t.Fatal("missing file accepted")
 	}
 	// With no explicit or environment file, cwd precedes XDG on every OS.
@@ -111,16 +111,16 @@ func TestCloudNetworkConfigurationSearchAndReadFailures(t *testing.T) {
 	writeCloudConfigFile(t, "clouds.yaml", "clouds: {dev: {networks: [{name: cwd-network, default_interface: true}]}}\n")
 	xdgPath := filepath.Join(os.Getenv("XDG_CONFIG_HOME"), "openstack", "clouds.yaml")
 	writeCloudConfigFile(t, xdgPath, "clouds: {dev: {networks: [{name: xdg-network, default_interface: true}]}}\n")
-	configuration, err = loadCloudConfiguration("dev", nil)
-	if err != nil || configuration.defaultNetwork != "cwd-network" {
-		t.Fatalf("default=%q err=%v", configuration.defaultNetwork, err)
+	configuration, err = Load("dev", nil, nil)
+	if err != nil || configuration.DefaultNetwork != "cwd-network" {
+		t.Fatalf("default=%q err=%v", configuration.DefaultNetwork, err)
 	}
 	if err := os.Remove("clouds.yaml"); err != nil {
 		t.Fatal(err)
 	}
-	configuration, err = loadCloudConfiguration("dev", nil)
-	if err != nil || configuration.defaultNetwork != "xdg-network" {
-		t.Fatalf("default=%q err=%v", configuration.defaultNetwork, err)
+	configuration, err = Load("dev", nil, nil)
+	if err != nil || configuration.DefaultNetwork != "xdg-network" {
+		t.Fatalf("default=%q err=%v", configuration.DefaultNetwork, err)
 	}
 }
 
@@ -153,13 +153,13 @@ func TestCloudNetworkConfigurationValidation(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			path := filepath.Join(t.TempDir(), "clouds.yaml")
 			writeCloudConfigFile(t, path, "clouds:\n  dev: "+tc.settings+"\n")
-			configuration, err := loadCloudConfiguration("dev", []string{path})
+			configuration, err := Load("dev", []string{path}, nil)
 			if tc.invalid {
 				if !errors.Is(err, resource.ErrInvalidOption) {
 					t.Fatalf("err=%v", err)
 				}
-			} else if err != nil || configuration.defaultNetwork != tc.want {
-				t.Fatalf("default=%q want=%q err=%v", configuration.defaultNetwork, tc.want, err)
+			} else if err != nil || configuration.DefaultNetwork != tc.want {
+				t.Fatalf("default=%q want=%q err=%v", configuration.DefaultNetwork, tc.want, err)
 			}
 		})
 	}
@@ -187,44 +187,44 @@ func TestCloudBuiltinVendorProfilesFeedRoleConfiguration(t *testing.T) {
 	}
 	t.Run("rackspace without public file", func(t *testing.T) {
 		path := write(t, "    profile: rackspace\n    auth: {username: u, password: p}\n", "")
-		configuration, err := loadCloudConfiguration("dev", []string{path})
+		configuration, err := Load("dev", []string{path}, nil)
 		if err != nil {
 			t.Fatal(err)
 		}
-		if enabled, ok := configuration.serviceFlags["network"]; !ok || enabled {
-			t.Fatal(configuration.serviceFlags)
+		if enabled, ok := configuration.ServiceFlags["network"]; !ok || enabled {
+			t.Fatal(configuration.ServiceFlags)
 		}
-		if configuration.secgroupSource == nil || *configuration.secgroupSource != "None" {
-			t.Fatal(configuration.secgroupSource)
+		if configuration.SecgroupSource == nil || *configuration.SecgroupSource != "None" {
+			t.Fatal(configuration.SecgroupSource)
 		}
-		auth, _, _, err := clouds.Parse(configuration.parseOptions...)
+		auth, _, _, err := clouds.Parse(configuration.ParseOptions...)
 		if err != nil || auth.IdentityEndpoint != "https://identity.api.rackspacecloud.com/v2.0/" || auth.Username != "u" {
 			t.Fatal(auth, err)
 		}
 	})
 	t.Run("cloud settings override the profile", func(t *testing.T) {
 		path := write(t, "    profile: rackspace\n    has_network: true\n    auth: {auth_url: 'https://identity.example/v3', username: u, password: p}\n", "")
-		configuration, err := loadCloudConfiguration("dev", []string{path})
-		if err != nil || !configuration.serviceFlags["network"] {
-			t.Fatal(configuration.serviceFlags, err)
+		configuration, err := Load("dev", []string{path}, nil)
+		if err != nil || !configuration.ServiceFlags["network"] {
+			t.Fatal(configuration.ServiceFlags, err)
 		}
-		auth, _, _, err := clouds.Parse(configuration.parseOptions...)
+		auth, _, _, err := clouds.Parse(configuration.ParseOptions...)
 		if err != nil || auth.IdentityEndpoint != "https://identity.example/v3" {
 			t.Fatal(auth, err)
 		}
 	})
 	t.Run("public file entry wins", func(t *testing.T) {
 		path := write(t, "    profile: rackspace\n    auth: {username: u, password: p}\n", "public-clouds:\n  rackspace:\n    auth: {auth_url: 'https://public.example/v3'}\n    has_network: true\n")
-		configuration, err := loadCloudConfiguration("dev", []string{path})
-		if err != nil || !configuration.serviceFlags["network"] {
-			t.Fatal(configuration.serviceFlags, err)
+		configuration, err := Load("dev", []string{path}, nil)
+		if err != nil || !configuration.ServiceFlags["network"] {
+			t.Fatal(configuration.ServiceFlags, err)
 		}
 	})
 	t.Run("public file without the profile falls back", func(t *testing.T) {
 		path := write(t, "    profile: rackspace\n    auth: {username: u, password: p}\n", "public-clouds:\n  other: {}\n")
-		configuration, err := loadCloudConfiguration("dev", []string{path})
-		if err != nil || configuration.serviceFlags["network"] {
-			t.Fatal(configuration.serviceFlags, err)
+		configuration, err := Load("dev", []string{path}, nil)
+		if err != nil || configuration.ServiceFlags["network"] {
+			t.Fatal(configuration.ServiceFlags, err)
 		}
 	})
 	t.Run("profile regions carry network values", func(t *testing.T) {
@@ -234,27 +234,27 @@ func TestCloudBuiltinVendorProfilesFeedRoleConfiguration(t *testing.T) {
 			if region != "" {
 				explicit = &region
 			}
-			configuration, err := loadCloudRegionConfiguration("dev", []string{path}, explicit)
-			if err != nil || configuration.defaultNetwork != "Public Internet" || configuration.networkRoles.DefaultNetworkSelector() != "Public Internet" {
-				t.Fatal(region, configuration.defaultNetwork, err)
+			configuration, err := Load("dev", []string{path}, explicit)
+			if err != nil || configuration.DefaultNetwork != "Public Internet" || configuration.NetworkRoles.DefaultNetworkSelector() != "Public Internet" {
+				t.Fatal(region, configuration.DefaultNetwork, err)
 			}
 		}
 		unknown := "us-nowhere"
-		if _, err := loadCloudRegionConfiguration("dev", []string{path}, &unknown); !errors.Is(err, resource.ErrInvalidOption) {
+		if _, err := Load("dev", []string{path}, &unknown); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(err)
 		}
 	})
 	for _, name := range []string{"betacloud", "ovh"} {
 		t.Run(name+" rejected", func(t *testing.T) {
 			path := write(t, "    profile: "+name+"\n", "")
-			if _, err := loadCloudConfiguration("dev", []string{path}); !errors.Is(err, resource.ErrInvalidOption) {
+			if _, err := Load("dev", []string{path}, nil); !errors.Is(err, resource.ErrInvalidOption) {
 				t.Fatal(err)
 			}
 		})
 	}
 	t.Run("unknown profile without public file", func(t *testing.T) {
 		path := write(t, "    profile: nowhere\n", "")
-		if _, err := loadCloudConfiguration("dev", []string{path}); err == nil || errors.Is(err, resource.ErrInvalidOption) {
+		if _, err := Load("dev", []string{path}, nil); err == nil || errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(err)
 		}
 	})
@@ -294,7 +294,7 @@ func TestCloudServerAddressConfigurationPriorityNormalizedBooleansAndValidation(
 		{"client alias overridden by env", map[string]any{"broken-ipv6": true}, nil, false, false},
 	} {
 		t.Run(scenario.name, func(t *testing.T) {
-			policy, err := configuredServerAddresses(scenario.cloud, scenario.client)
+			policy, err := ServerAddresses(scenario.cloud, scenario.client)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -302,13 +302,13 @@ func TestCloudServerAddressConfigurationPriorityNormalizedBooleansAndValidation(
 		})
 	}
 	t.Setenv("OS_PREFER_IPV6", "false")
-	policy, err := configuredServerAddresses(map[string]any{"force_ipv4": false}, nil)
+	policy, err := ServerAddresses(map[string]any{"force_ipv4": false}, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 	checkAddressConfiguration(t, policy, false, false)
 	for _, settings := range []map[string]any{{"private": 1}, {"floating_ip_source": 1}, {"floating_ip_source": "unknown"}, {"force_ipv4": []any{}}} {
-		if _, err := configuredServerAddresses(settings, nil); err == nil {
+		if _, err := ServerAddresses(settings, nil); err == nil {
 			t.Fatalf("invalid settings accepted: %#v", settings)
 		}
 	}
@@ -323,12 +323,12 @@ func TestCloudServerAddressConfigurationUsesFrozenProfileBaseSecureLayers(t *tes
 	writeCloudConfigFile(t, "clouds-public.yaml", "public-clouds:\n  provider:\n    private: true\n    force_ipv4: true\n    floating_ip_source: nova\n")
 	writeCloudConfigFile(t, path, "client: {prefer_ipv6: false}\nclouds:\n  dev:\n    profile: provider\n    private: false\n")
 	writeCloudConfigFile(t, filepath.Join(filepath.Dir(path), "secure.yaml"), "client: {prefer_ipv6: true}\nclouds:\n  dev:\n    force_ipv4: false\n    floating_ip_source: null\n")
-	configuration, err := loadCloudConfiguration("dev", []string{path})
+	configuration, err := Load("dev", []string{path}, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
-	checkAddressConfiguration(t, configuration.serverAddresses, false, false)
+	checkAddressConfiguration(t, configuration.ServerAddresses, false, false)
 	writeCloudConfigFile(t, path, "clouds: {dev: {private: true, force_ipv4: true}}\n")
 	writeCloudConfigFile(t, filepath.Join(filepath.Dir(path), "secure.yaml"), "clouds: {dev: {private: true, force_ipv4: true}}\n")
-	checkAddressConfiguration(t, configuration.serverAddresses, false, false)
+	checkAddressConfiguration(t, configuration.ServerAddresses, false, false)
 }

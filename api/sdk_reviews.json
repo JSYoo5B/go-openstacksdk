@@ -21698,7 +21698,7 @@
           "tests": [
             "image/image_record_create_workflow_test.go:TestImageRecordCreateWorkflowDefaultsUsePythonTruthiness",
             "image/image_record_create_policy_test.go:TestImageCreatePolicyDefaultsRetainExplicitRawAndServicePresence",
-            "connection_image_create_policy_test.go:TestCloudImageConfigurationMergesDefaultsAndFreezesSourceValues"
+            "internal/cloudconfig/image_create_policy_test.go:TestCloudImageConfigurationMergesDefaultsAndFreezesSourceValues"
           ]
         },
         {
@@ -42447,9 +42447,9 @@
         {
           "behavior": "Cloud/secure/public files are snapshotted once for native auth/endpoint/TLS and SDK metadata. Network lists replace at each precedence layer, [] clears inheritance, null/duplicate defaults/invalid flags are configuration errors, and empty/null metadata profile stops network inheritance while retaining native auth fallback.",
           "tests": [
-            "connection_cloud_config_test.go:TestCloudNetworkConfigurationInheritanceAndFrozenNativeSettings",
-            "connection_cloud_config_test.go:TestCloudNetworkConfigurationSearchAndReadFailures",
-            "connection_cloud_config_test.go:TestCloudNetworkConfigurationValidation"
+            "internal/cloudconfig/cloudconfig_test.go:TestCloudNetworkConfigurationInheritanceAndFrozenNativeSettings",
+            "internal/cloudconfig/cloudconfig_test.go:TestCloudNetworkConfigurationSearchAndReadFailures",
+            "internal/cloudconfig/cloudconfig_test.go:TestCloudNetworkConfigurationValidation"
           ]
         },
         {
@@ -42863,9 +42863,9 @@
         {
           "behavior": "Cloud/secure/public files are snapshotted once for native auth/endpoint/TLS and SDK metadata. Network lists replace at each precedence layer, [] clears inheritance, null/duplicate defaults/invalid flags are configuration errors, and empty/null metadata profile stops network inheritance while retaining native auth fallback.",
           "tests": [
-            "connection_cloud_config_test.go:TestCloudNetworkConfigurationInheritanceAndFrozenNativeSettings",
-            "connection_cloud_config_test.go:TestCloudNetworkConfigurationSearchAndReadFailures",
-            "connection_cloud_config_test.go:TestCloudNetworkConfigurationValidation"
+            "internal/cloudconfig/cloudconfig_test.go:TestCloudNetworkConfigurationInheritanceAndFrozenNativeSettings",
+            "internal/cloudconfig/cloudconfig_test.go:TestCloudNetworkConfigurationSearchAndReadFailures",
+            "internal/cloudconfig/cloudconfig_test.go:TestCloudNetworkConfigurationValidation"
           ]
         },
         {
@@ -43026,9 +43026,9 @@
         {
           "behavior": "Cloud/secure/public files are snapshotted once for native auth/endpoint/TLS and SDK metadata. Network lists replace at each precedence layer, [] clears inheritance, null/duplicate defaults/invalid flags are configuration errors, and empty/null metadata profile stops network inheritance while retaining native auth fallback.",
           "tests": [
-            "connection_cloud_config_test.go:TestCloudNetworkConfigurationInheritanceAndFrozenNativeSettings",
-            "connection_cloud_config_test.go:TestCloudNetworkConfigurationSearchAndReadFailures",
-            "connection_cloud_config_test.go:TestCloudNetworkConfigurationValidation"
+            "internal/cloudconfig/cloudconfig_test.go:TestCloudNetworkConfigurationInheritanceAndFrozenNativeSettings",
+            "internal/cloudconfig/cloudconfig_test.go:TestCloudNetworkConfigurationSearchAndReadFailures",
+            "internal/cloudconfig/cloudconfig_test.go:TestCloudNetworkConfigurationValidation"
           ]
         },
         {
@@ -43132,9 +43132,9 @@
         {
           "behavior": "Cloud/secure/public files are snapshotted once for native auth/endpoint/TLS and SDK metadata. Network lists replace at each precedence layer, [] clears inheritance, null/duplicate defaults/invalid flags are configuration errors, and empty/null metadata profile stops network inheritance while retaining native auth fallback.",
           "tests": [
-            "connection_cloud_config_test.go:TestCloudNetworkConfigurationInheritanceAndFrozenNativeSettings",
-            "connection_cloud_config_test.go:TestCloudNetworkConfigurationSearchAndReadFailures",
-            "connection_cloud_config_test.go:TestCloudNetworkConfigurationValidation"
+            "internal/cloudconfig/cloudconfig_test.go:TestCloudNetworkConfigurationInheritanceAndFrozenNativeSettings",
+            "internal/cloudconfig/cloudconfig_test.go:TestCloudNetworkConfigurationSearchAndReadFailures",
+            "internal/cloudconfig/cloudconfig_test.go:TestCloudNetworkConfigurationValidation"
           ]
         },
         {
@@ -43189,7 +43189,7 @@
         {
           "behavior": "Role selectors are frozen with the same cloud/secure/public snapshot as native authentication. YAML family flags inherit routes_externally unless overridden; a typed WithNetworkRoles policy replaces the YAML role configuration and its default selector, and an empty typed replacement clears configured roles/default. Configured default NIC selection now consumes the same successful role snapshot; explicit typed default names retain their separate exact-name lookup.",
           "tests": [
-            "connection_cloud_config_test.go:TestCloudNetworkConfigurationInheritanceAndFrozenNativeSettings",
+            "internal/cloudconfig/cloudconfig_test.go:TestCloudNetworkConfigurationInheritanceAndFrozenNativeSettings",
             "connectiontest/connection_network_roles_test.go:TestConnectNetworkRoleConfigurationAndTypedOverrideSupplyDefaultNIC"
           ]
         },
@@ -43283,7 +43283,7 @@
         {
           "behavior": "A profile absent from clouds-public.yaml (or with no such file) resolves to the embedded, unmodified pinned vendor profile: rackspace disables has_network and sets secgroup_source under the cloud's own settings, limestonenetworks supplies per-region networks and default interface, and native authentication receives the profile's auth settings. A clouds-public.yaml entry wins; shutdown and URL profiles are configuration errors, deprecated profiles load without warnings, and embedded files match their documented hashes.",
           "tests": [
-            "connection_cloud_config_test.go:TestCloudBuiltinVendorProfilesFeedRoleConfiguration",
+            "internal/cloudconfig/cloudconfig_test.go:TestCloudBuiltinVendorProfilesFeedRoleConfiguration",
             "internal/cloudvendors/vendors_test.go:TestProfilesResolveStatusNestedAndRemoteNames",
             "internal/cloudvendors/vendors_test.go:TestEmbeddedFilesMatchREADMEHashes"
           ]
@@ -44252,7 +44252,7 @@
         {
           "behavior": "Role selectors are frozen with the same cloud/secure/public snapshot as native authentication. YAML family flags inherit routes_externally unless overridden; a typed WithNetworkRoles policy replaces the YAML role configuration and its default selector, and an empty typed replacement clears configured roles/default. Configured default NIC selection now consumes the same successful role snapshot; explicit typed default names retain their separate exact-name lookup.",
           "tests": [
-            "connection_cloud_config_test.go:TestCloudNetworkConfigurationInheritanceAndFrozenNativeSettings",
+            "internal/cloudconfig/cloudconfig_test.go:TestCloudNetworkConfigurationInheritanceAndFrozenNativeSettings",
             "connectiontest/connection_network_roles_test.go:TestConnectNetworkRoleConfigurationAndTypedOverrideSupplyDefaultNIC"
           ]
         },
@@ -44349,7 +44349,7 @@
         {
           "behavior": "A profile absent from clouds-public.yaml (or with no such file) resolves to the embedded, unmodified pinned vendor profile: rackspace disables has_network and sets secgroup_source under the cloud's own settings, limestonenetworks supplies per-region networks and default interface, and native authentication receives the profile's auth settings. A clouds-public.yaml entry wins; shutdown and URL profiles are configuration errors, deprecated profiles load without warnings, and embedded files match their documented hashes.",
           "tests": [
-            "connection_cloud_config_test.go:TestCloudBuiltinVendorProfilesFeedRoleConfiguration",
+            "internal/cloudconfig/cloudconfig_test.go:TestCloudBuiltinVendorProfilesFeedRoleConfiguration",
             "internal/cloudvendors/vendors_test.go:TestProfilesResolveStatusNestedAndRemoteNames",
             "internal/cloudvendors/vendors_test.go:TestEmbeddedFilesMatchREADMEHashes"
           ]
@@ -44451,7 +44451,7 @@
         {
           "behavior": "Role selectors are frozen with the same cloud/secure/public snapshot as native authentication. YAML family flags inherit routes_externally unless overridden; a typed WithNetworkRoles policy replaces the YAML role configuration and its default selector, and an empty typed replacement clears configured roles/default. Configured default NIC selection now consumes the same successful role snapshot; explicit typed default names retain their separate exact-name lookup.",
           "tests": [
-            "connection_cloud_config_test.go:TestCloudNetworkConfigurationInheritanceAndFrozenNativeSettings",
+            "internal/cloudconfig/cloudconfig_test.go:TestCloudNetworkConfigurationInheritanceAndFrozenNativeSettings",
             "connectiontest/connection_network_roles_test.go:TestConnectNetworkRoleConfigurationAndTypedOverrideSupplyDefaultNIC"
           ]
         },
@@ -44517,7 +44517,7 @@
         {
           "behavior": "A profile absent from clouds-public.yaml (or with no such file) resolves to the embedded, unmodified pinned vendor profile: rackspace disables has_network and sets secgroup_source under the cloud's own settings, limestonenetworks supplies per-region networks and default interface, and native authentication receives the profile's auth settings. A clouds-public.yaml entry wins; shutdown and URL profiles are configuration errors, deprecated profiles load without warnings, and embedded files match their documented hashes.",
           "tests": [
-            "connection_cloud_config_test.go:TestCloudBuiltinVendorProfilesFeedRoleConfiguration",
+            "internal/cloudconfig/cloudconfig_test.go:TestCloudBuiltinVendorProfilesFeedRoleConfiguration",
             "internal/cloudvendors/vendors_test.go:TestProfilesResolveStatusNestedAndRemoteNames",
             "internal/cloudvendors/vendors_test.go:TestEmbeddedFilesMatchREADMEHashes"
           ]
@@ -44618,7 +44618,7 @@
         {
           "behavior": "Role selectors are frozen with the same cloud/secure/public snapshot as native authentication. YAML family flags inherit routes_externally unless overridden; a typed WithNetworkRoles policy replaces the YAML role configuration and its default selector, and an empty typed replacement clears configured roles/default. Configured default NIC selection now consumes the same successful role snapshot; explicit typed default names retain their separate exact-name lookup.",
           "tests": [
-            "connection_cloud_config_test.go:TestCloudNetworkConfigurationInheritanceAndFrozenNativeSettings",
+            "internal/cloudconfig/cloudconfig_test.go:TestCloudNetworkConfigurationInheritanceAndFrozenNativeSettings",
             "connectiontest/connection_network_roles_test.go:TestConnectNetworkRoleConfigurationAndTypedOverrideSupplyDefaultNIC"
           ]
         },
@@ -44742,7 +44742,7 @@
         {
           "behavior": "Role selectors are frozen with the same cloud/secure/public snapshot as native authentication. YAML family flags inherit routes_externally unless overridden; a typed WithNetworkRoles policy replaces the YAML role configuration and its default selector, and an empty typed replacement clears configured roles/default. Configured default NIC selection now consumes the same successful role snapshot; explicit typed default names retain their separate exact-name lookup.",
           "tests": [
-            "connection_cloud_config_test.go:TestCloudNetworkConfigurationInheritanceAndFrozenNativeSettings",
+            "internal/cloudconfig/cloudconfig_test.go:TestCloudNetworkConfigurationInheritanceAndFrozenNativeSettings",
             "connectiontest/connection_network_roles_test.go:TestConnectNetworkRoleConfigurationAndTypedOverrideSupplyDefaultNIC"
           ]
         },
@@ -44866,7 +44866,7 @@
         {
           "behavior": "Role selectors are frozen with the same cloud/secure/public snapshot as native authentication. YAML family flags inherit routes_externally unless overridden; a typed WithNetworkRoles policy replaces the YAML role configuration and its default selector, and an empty typed replacement clears configured roles/default. Configured default NIC selection now consumes the same successful role snapshot; explicit typed default names retain their separate exact-name lookup.",
           "tests": [
-            "connection_cloud_config_test.go:TestCloudNetworkConfigurationInheritanceAndFrozenNativeSettings",
+            "internal/cloudconfig/cloudconfig_test.go:TestCloudNetworkConfigurationInheritanceAndFrozenNativeSettings",
             "connectiontest/connection_network_roles_test.go:TestConnectNetworkRoleConfigurationAndTypedOverrideSupplyDefaultNIC"
           ]
         },
@@ -44990,7 +44990,7 @@
         {
           "behavior": "Role selectors are frozen with the same cloud/secure/public snapshot as native authentication. YAML family flags inherit routes_externally unless overridden; a typed WithNetworkRoles policy replaces the YAML role configuration and its default selector, and an empty typed replacement clears configured roles/default. Configured default NIC selection now consumes the same successful role snapshot; explicit typed default names retain their separate exact-name lookup.",
           "tests": [
-            "connection_cloud_config_test.go:TestCloudNetworkConfigurationInheritanceAndFrozenNativeSettings",
+            "internal/cloudconfig/cloudconfig_test.go:TestCloudNetworkConfigurationInheritanceAndFrozenNativeSettings",
             "connectiontest/connection_network_roles_test.go:TestConnectNetworkRoleConfigurationAndTypedOverrideSupplyDefaultNIC"
           ]
         },
@@ -45134,7 +45134,7 @@
         {
           "behavior": "Role selectors are frozen with the same cloud/secure/public snapshot as native authentication. YAML family flags inherit routes_externally unless overridden; a typed WithNetworkRoles policy replaces the YAML role configuration and its default selector, and an empty typed replacement clears configured roles/default. Configured default NIC selection now consumes the same successful role snapshot; explicit typed default names retain their separate exact-name lookup.",
           "tests": [
-            "connection_cloud_config_test.go:TestCloudNetworkConfigurationInheritanceAndFrozenNativeSettings",
+            "internal/cloudconfig/cloudconfig_test.go:TestCloudNetworkConfigurationInheritanceAndFrozenNativeSettings",
             "connectiontest/connection_network_roles_test.go:TestConnectNetworkRoleConfigurationAndTypedOverrideSupplyDefaultNIC"
           ]
         },
@@ -45258,7 +45258,7 @@
         {
           "behavior": "Role selectors are frozen with the same cloud/secure/public snapshot as native authentication. YAML family flags inherit routes_externally unless overridden; a typed WithNetworkRoles policy replaces the YAML role configuration and its default selector, and an empty typed replacement clears configured roles/default. Configured default NIC selection now consumes the same successful role snapshot; explicit typed default names retain their separate exact-name lookup.",
           "tests": [
-            "connection_cloud_config_test.go:TestCloudNetworkConfigurationInheritanceAndFrozenNativeSettings",
+            "internal/cloudconfig/cloudconfig_test.go:TestCloudNetworkConfigurationInheritanceAndFrozenNativeSettings",
             "connectiontest/connection_network_roles_test.go:TestConnectNetworkRoleConfigurationAndTypedOverrideSupplyDefaultNIC"
           ]
         },
@@ -45382,7 +45382,7 @@
         {
           "behavior": "Role selectors are frozen with the same cloud/secure/public snapshot as native authentication. YAML family flags inherit routes_externally unless overridden; a typed WithNetworkRoles policy replaces the YAML role configuration and its default selector, and an empty typed replacement clears configured roles/default. Configured default NIC selection now consumes the same successful role snapshot; explicit typed default names retain their separate exact-name lookup.",
           "tests": [
-            "connection_cloud_config_test.go:TestCloudNetworkConfigurationInheritanceAndFrozenNativeSettings",
+            "internal/cloudconfig/cloudconfig_test.go:TestCloudNetworkConfigurationInheritanceAndFrozenNativeSettings",
             "connectiontest/connection_network_roles_test.go:TestConnectNetworkRoleConfigurationAndTypedOverrideSupplyDefaultNIC"
           ]
         },
@@ -45475,7 +45475,7 @@
         {
           "behavior": "Role selectors are frozen with the same cloud/secure/public snapshot as native authentication. YAML family flags inherit routes_externally unless overridden; a typed WithNetworkRoles policy replaces the YAML role configuration and its default selector, and an empty typed replacement clears configured roles/default. Configured default NIC selection now consumes the same successful role snapshot; explicit typed default names retain their separate exact-name lookup.",
           "tests": [
-            "connection_cloud_config_test.go:TestCloudNetworkConfigurationInheritanceAndFrozenNativeSettings",
+            "internal/cloudconfig/cloudconfig_test.go:TestCloudNetworkConfigurationInheritanceAndFrozenNativeSettings",
             "connectiontest/connection_network_roles_test.go:TestConnectNetworkRoleConfigurationAndTypedOverrideSupplyDefaultNIC"
           ]
         },
@@ -45507,7 +45507,7 @@
         {
           "behavior": "A profile absent from clouds-public.yaml (or with no such file) resolves to the embedded, unmodified pinned vendor profile: rackspace disables has_network and sets secgroup_source under the cloud's own settings, limestonenetworks supplies per-region networks and default interface, and native authentication receives the profile's auth settings. A clouds-public.yaml entry wins; shutdown and URL profiles are configuration errors, deprecated profiles load without warnings, and embedded files match their documented hashes.",
           "tests": [
-            "connection_cloud_config_test.go:TestCloudBuiltinVendorProfilesFeedRoleConfiguration",
+            "internal/cloudconfig/cloudconfig_test.go:TestCloudBuiltinVendorProfilesFeedRoleConfiguration",
             "internal/cloudvendors/vendors_test.go:TestProfilesResolveStatusNestedAndRemoteNames",
             "internal/cloudvendors/vendors_test.go:TestEmbeddedFilesMatchREADMEHashes"
           ]
@@ -45570,7 +45570,7 @@
         {
           "behavior": "Role selectors are frozen with the same cloud/secure/public snapshot as native authentication. YAML family flags inherit routes_externally unless overridden; a typed WithNetworkRoles policy replaces the YAML role configuration and its default selector, and an empty typed replacement clears configured roles/default. Configured default NIC selection now consumes the same successful role snapshot; explicit typed default names retain their separate exact-name lookup.",
           "tests": [
-            "connection_cloud_config_test.go:TestCloudNetworkConfigurationInheritanceAndFrozenNativeSettings",
+            "internal/cloudconfig/cloudconfig_test.go:TestCloudNetworkConfigurationInheritanceAndFrozenNativeSettings",
             "connectiontest/connection_network_roles_test.go:TestConnectNetworkRoleConfigurationAndTypedOverrideSupplyDefaultNIC"
           ]
         },
@@ -45602,7 +45602,7 @@
         {
           "behavior": "A profile absent from clouds-public.yaml (or with no such file) resolves to the embedded, unmodified pinned vendor profile: rackspace disables has_network and sets secgroup_source under the cloud's own settings, limestonenetworks supplies per-region networks and default interface, and native authentication receives the profile's auth settings. A clouds-public.yaml entry wins; shutdown and URL profiles are configuration errors, deprecated profiles load without warnings, and embedded files match their documented hashes.",
           "tests": [
-            "connection_cloud_config_test.go:TestCloudBuiltinVendorProfilesFeedRoleConfiguration",
+            "internal/cloudconfig/cloudconfig_test.go:TestCloudBuiltinVendorProfilesFeedRoleConfiguration",
             "internal/cloudvendors/vendors_test.go:TestProfilesResolveStatusNestedAndRemoteNames",
             "internal/cloudvendors/vendors_test.go:TestEmbeddedFilesMatchREADMEHashes"
           ]
@@ -46002,8 +46002,8 @@
             "connectiontest/connection_server_addresses_test.go:TestConnectionServerAddressFacadesShareRoleCacheAndFreshSupplementation",
             "connectiontest/connection_server_addresses_test.go:TestConnectionServerAddressMissingNeutronRetainsNovaAndIPv6",
             "connectiontest/connection_server_addresses_test.go:TestConnectServerAddressYAMLSourceAndTypedReplacement",
-            "connection_cloud_config_test.go:TestCloudServerAddressConfigurationPriorityNormalizedBooleansAndValidation",
-            "connection_cloud_config_test.go:TestCloudServerAddressConfigurationUsesFrozenProfileBaseSecureLayers"
+            "internal/cloudconfig/cloudconfig_test.go:TestCloudServerAddressConfigurationPriorityNormalizedBooleansAndValidation",
+            "internal/cloudconfig/cloudconfig_test.go:TestCloudServerAddressConfigurationUsesFrozenProfileBaseSecureLayers"
           ]
         },
         {
@@ -46090,8 +46090,8 @@
             "connectiontest/connection_server_addresses_test.go:TestConnectionServerAddressFacadesShareRoleCacheAndFreshSupplementation",
             "connectiontest/connection_server_addresses_test.go:TestConnectionServerAddressMissingNeutronRetainsNovaAndIPv6",
             "connectiontest/connection_server_addresses_test.go:TestConnectServerAddressYAMLSourceAndTypedReplacement",
-            "connection_cloud_config_test.go:TestCloudServerAddressConfigurationPriorityNormalizedBooleansAndValidation",
-            "connection_cloud_config_test.go:TestCloudServerAddressConfigurationUsesFrozenProfileBaseSecureLayers"
+            "internal/cloudconfig/cloudconfig_test.go:TestCloudServerAddressConfigurationPriorityNormalizedBooleansAndValidation",
+            "internal/cloudconfig/cloudconfig_test.go:TestCloudServerAddressConfigurationUsesFrozenProfileBaseSecureLayers"
           ]
         },
         {

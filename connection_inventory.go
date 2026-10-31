@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/compute"
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
+	"github.com/JSYoo5B/go-openstacksdk/internal/cloudconfig"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"gopkg.in/yaml.v2"
@@ -31,11 +32,11 @@ func CloudNames(options ...ConnectionOption) ([]string, error) {
 	if len(locations) == 0 {
 		if path := os.Getenv("OS_CLIENT_CONFIG_FILE"); path != "" {
 			locations = []string{path}
-		} else if locations, err = cloudSearchPaths("clouds.yaml"); err != nil {
+		} else if locations, err = cloudconfig.SearchPaths("clouds.yaml"); err != nil {
 			return nil, err
 		}
 	}
-	data, _, err := readFirstCloudFile(locations)
+	data, _, err := cloudconfig.ReadFirstFile(locations)
 	if err != nil {
 		return nil, err
 	}

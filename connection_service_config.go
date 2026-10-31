@@ -4,6 +4,8 @@ import (
 	"context"
 	"maps"
 	"strings"
+
+	"github.com/JSYoo5B/go-openstacksdk/internal/cloudconfig"
 )
 
 // officialServiceTypes lists the official service types of the OpenStack
@@ -73,51 +75,14 @@ func WithSecurityGroupSource(source string) ConnectionOption {
 	}
 }
 
-// configuredServiceSettings reads has_<service> flags and secgroup_source from
-// the merged clouds.yaml settings of one cloud.
-func configuredServiceSettings(settings map[string]any) (map[string]bool, *string, error) {
-	var flags map[string]bool
-	for key, value := range settings {
-		if !strings.HasPrefix(key, "has_") || len(key) == len("has_") {
-			continue
-		}
-		enabled, ok := value.(bool)
-		if !ok {
-			// CloudRegion.has_service asserts a bool value.
-			return nil, nil, invalid("%s must be a boolean, got %T", key, value)
-		}
-		if flags == nil {
-			flags = make(map[string]bool)
-		}
-		// Python looks the flag up by its exact normalized key only.
-		flags[key[len("has_"):]] = enabled
-	}
-	value, present := settings["secgroup_source"]
-	if !present {
-		value, present = settings["secgroup-source"]
-	}
-	if !present {
-		return flags, nil, nil
-	}
-	if value == nil {
-		empty := ""
-		return flags, &empty, nil
-	}
-	text, ok := value.(string)
-	if !ok {
-		return nil, nil, invalid("secgroup_source must be a string or null, got %T", value)
-	}
-	return flags, &text, nil
-}
-
-func (o *connectionOptions) applyConfiguredServiceSettings(configuration cloudConfiguration) {
-	if len(configuration.serviceFlags) != 0 {
-		flags := maps.Clone(configuration.serviceFlags)
+func (o *connectionOptions) applyConfiguredServiceSettings(configuration cloudconfig.Configuration) {
+	if len(configuration.ServiceFlags) != 0 {
+		flags := maps.Clone(configuration.ServiceFlags)
 		maps.Copy(flags, o.serviceFlags)
 		o.serviceFlags = flags
 	}
-	if !o.secgroupSourceSet && configuration.secgroupSource != nil {
-		value := *configuration.secgroupSource
+	if !o.secgroupSourceSet && configuration.SecgroupSource != nil {
+		value := *configuration.SecgroupSource
 		o.secgroupSource = &value
 	}
 }

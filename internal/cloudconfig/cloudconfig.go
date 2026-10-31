@@ -1,4 +1,10 @@
-package openstack
+// Package cloudconfig reads the clouds.yaml, secure.yaml and clouds-public.yaml
+// files, the OS_* environment and the built-in vendor profiles, and derives the
+// SDK-owned settings of one cloud from them: the frozen native parse options,
+// the default network, network roles, server address policy, image create
+// policy, has_<service> flags and secgroup_source. It has no Connection state;
+// Connect applies the result under its own option precedence.
+package cloudconfig
 
 import (
 	"bytes"
@@ -19,16 +25,17 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-// Freeze the selected files once. Native authentication/TLS parsing and SDK
-// network policy then consume the same bytes, even if files change meanwhile.
-type cloudConfiguration struct {
-	parseOptions      []clouds.ParseOption
-	defaultNetwork    string
-	networkRoles      network.NetworkRolePolicy
-	serverAddresses   compute.ServerAddressPolicy
-	imageCreatePolicy image.ImageCreatePolicy
-	serviceFlags      map[string]bool
-	secgroupSource    *string
+// Configuration freezes the selected files once. Native authentication/TLS
+// parsing and SDK network policy then consume the same bytes, even if files
+// change meanwhile.
+type Configuration struct {
+	ParseOptions      []clouds.ParseOption
+	DefaultNetwork    string
+	NetworkRoles      network.NetworkRolePolicy
+	ServerAddresses   compute.ServerAddressPolicy
+	ImageCreatePolicy image.ImageCreatePolicy
+	ServiceFlags      map[string]bool
+	SecgroupSource    *string
 }
 
 type cloudNetworkDocument struct {
@@ -37,26 +44,24 @@ type cloudNetworkDocument struct {
 	Client       map[string]any            `yaml:"client"`
 }
 
-func loadCloudConfiguration(name string, locations []string) (cloudConfiguration, error) {
-	return loadCloudRegionConfiguration(name, locations, nil)
-}
-
-// loadCloudRegionConfiguration also applies the values of the selected regions
-// entry; region is the explicit WithRegion value, if any.
-func loadCloudRegionConfiguration(name string, locations []string, region *string) (cloudConfiguration, error) {
-	var result cloudConfiguration
+// Load reads the named cloud from the first clouds file of locations (else
+// OS_CLIENT_CONFIG_FILE, else the search paths) with its secure.yaml and
+// profile layers, and applies the values of the selected regions entry;
+// region is the explicit WithRegion value, if any.
+func Load(name string, locations []string, region *string) (Configuration, error) {
+	var result Configuration
 	if len(locations) == 0 {
 		if path := os.Getenv("OS_CLIENT_CONFIG_FILE"); path != "" {
 			locations = []string{path}
 		} else {
 			var err error
-			locations, err = cloudSearchPaths("clouds.yaml")
+			locations, err = SearchPaths("clouds.yaml")
 			if err != nil {
 				return result, err
 			}
 		}
 	}
-	base, path, err := readFirstCloudFile(locations)
+	base, path, err := ReadFirstFile(locations)
 	if err != nil {
 		return result, err
 	}
@@ -72,7 +77,7 @@ func loadCloudRegionConfiguration(name string, locations []string, region *strin
 	if err != nil {
 		return result, err
 	}
-	result.parseOptions = []clouds.ParseOption{clouds.WithCloudName(name), clouds.WithCloudsYAML(bytes.NewReader(base))}
+	result.ParseOptions = []clouds.ParseOption{clouds.WithCloudName(name), clouds.WithCloudsYAML(bytes.NewReader(base))}
 	settings := maps.Clone(baseSettings)
 	var baseDocument cloudNetworkDocument
 	if err := yaml.Unmarshal(base, &baseDocument); err != nil {
@@ -113,7 +118,7 @@ func loadCloudRegionConfiguration(name string, locations []string, region *strin
 			settings = make(map[string]any)
 		}
 		maps.Copy(settings, overrides)
-		result.parseOptions = append(result.parseOptions, clouds.WithSecureYAML(bytes.NewReader(secure)))
+		result.ParseOptions = append(result.ParseOptions, clouds.WithSecureYAML(bytes.NewReader(secure)))
 	}
 	cloudSettings := maps.Clone(settings)
 	profile := header.Profile
@@ -132,11 +137,11 @@ func loadCloudRegionConfiguration(name string, locations []string, region *strin
 		return result, invalid("cloud profile must be a string or null")
 	}
 	if profile != "" {
-		paths, err := cloudSearchPaths("clouds-public.yaml")
+		paths, err := SearchPaths("clouds-public.yaml")
 		if err != nil {
 			return result, err
 		}
-		public, _, publicErr := readFirstCloudFile(paths)
+		public, _, publicErr := ReadFirstFile(paths)
 		var inherited map[string]any
 		if publicErr == nil && metadataProfileName != "" {
 			inherited, err = decodeCloudNetworkSettings(public, metadataProfileName, true)
@@ -170,34 +175,35 @@ func loadCloudRegionConfiguration(name string, locations []string, region *strin
 		// Python replaces network lists at each layer, including an empty list.
 		maps.Copy(inherited, settings)
 		settings = inherited
-		result.parseOptions = append(result.parseOptions, clouds.WithCloudsPublicYAML(bytes.NewReader(public)))
+		result.ParseOptions = append(result.ParseOptions, clouds.WithCloudsPublicYAML(bytes.NewReader(public)))
 	}
 	settings, err = applyRegionValues(cloudSettings, settings, region)
 	if err != nil {
 		return result, err
 	}
-	result.defaultNetwork, err = configuredDefaultNetwork(settings)
+	result.DefaultNetwork, err = configuredDefaultNetwork(settings)
 	if err != nil {
 		return result, err
 	}
-	result.networkRoles, err = configuredNetworkRoles(settings)
+	result.NetworkRoles, err = configuredNetworkRoles(settings)
 	if err != nil {
 		return result, err
 	}
-	result.serverAddresses, err = configuredServerAddresses(settings, clientSettings)
+	result.ServerAddresses, err = ServerAddresses(settings, clientSettings)
 	if err != nil {
 		return result, err
 	}
-	result.imageCreatePolicy, err = configuredImageCreatePolicy(name, settings)
+	result.ImageCreatePolicy, err = configuredImageCreatePolicy(name, settings)
 	if err != nil {
 		return result, err
 	}
-	result.serviceFlags, result.secgroupSource, err = configuredServiceSettings(settings)
+	result.ServiceFlags, result.SecgroupSource, err = configuredServiceSettings(settings)
 	return result, err
 }
 
-// Match the version-pinned native parser's paths on every supported OS.
-func cloudSearchPaths(filename string) ([]string, error) {
+// SearchPaths returns the search locations of filename, matching the
+// version-pinned native parser's paths on every supported OS.
+func SearchPaths(filename string) ([]string, error) {
 	cwd, err := os.Getwd()
 	if err != nil {
 		return nil, fmt.Errorf("get current working directory: %w", err)
@@ -224,7 +230,8 @@ func readOptionalCloudFile(path string) ([]byte, bool, error) {
 	return data, true, err
 }
 
-func readFirstCloudFile(paths []string) ([]byte, string, error) {
+// ReadFirstFile reads the first openable file of paths.
+func ReadFirstFile(paths []string) ([]byte, string, error) {
 	for _, path := range paths {
 		data, present, err := readOptionalCloudFile(path)
 		if present {
@@ -337,15 +344,15 @@ func environmentCloudSettings(environ []string) map[string]any {
 	return settings
 }
 
-// loadEnvironmentCloudConfiguration derives the SDK-owned role configuration
+// LoadEnvironment derives the SDK-owned role configuration
 // of Python's environment-variable cloud: OS_EXTERNAL_NETWORK and
 // OS_INTERNAL_NETWORK legacy roles, OS_USE_EXTERNAL_NETWORK and
 // OS_USE_INTERNAL_NETWORK flags, OS_HAS_<SERVICE> flags and OS_SECGROUP_SOURCE.
 // An OS_PROFILE naming a built-in vendor profile supplies settings under the
 // environment values, and its regions entry is selected like a file cloud's.
 // Native authentication still comes from Gophercloud's environment parser.
-func loadEnvironmentCloudConfiguration(environ []string, region *string) (cloudConfiguration, bool, error) {
-	var result cloudConfiguration
+func LoadEnvironment(environ []string, region *string) (Configuration, bool, error) {
+	var result Configuration
 	envSettings := environmentCloudSettings(environ)
 	if envSettings == nil {
 		return result, false, nil
@@ -365,17 +372,15 @@ func loadEnvironmentCloudConfiguration(environ []string, region *string) (cloudC
 	if err != nil {
 		return result, true, err
 	}
-	if result.defaultNetwork, err = configuredDefaultNetwork(settings); err != nil {
+	if result.DefaultNetwork, err = configuredDefaultNetwork(settings); err != nil {
 		return result, true, err
 	}
-	if result.networkRoles, err = configuredNetworkRoles(settings); err != nil {
+	if result.NetworkRoles, err = configuredNetworkRoles(settings); err != nil {
 		return result, true, err
 	}
-	result.serviceFlags, result.secgroupSource, err = configuredServiceSettings(settings)
+	result.ServiceFlags, result.SecgroupSource, err = configuredServiceSettings(settings)
 	return result, true, err
 }
-
-func osEnviron() []string { return os.Environ() }
 
 type cloudRegionEntry struct {
 	name   string
@@ -563,7 +568,9 @@ func configuredNetworkRoles(settings map[string]any) (network.NetworkRolePolicy,
 	return network.PrepareNetworkRoleOptions(network.WithConfiguredNetworks(rows...), network.WithExternalNetworkDiscovery(external), network.WithInternalNetworkDiscovery(internal))
 }
 
-func configuredServerAddresses(settings, client map[string]any) (compute.ServerAddressPolicy, error) {
+// ServerAddresses derives the server address policy from the merged cloud
+// settings, the client section and OS_PREFER_IPV6/OS_FORCE_IPV4.
+func ServerAddresses(settings, client map[string]any) (compute.ServerAddressPolicy, error) {
 	prefer, force := true, false
 	boolean := func(settings map[string]any, key, alias string, fallback bool) (bool, error) {
 		value, present := settings[key]

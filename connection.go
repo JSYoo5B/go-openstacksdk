@@ -13,6 +13,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage"
 	"github.com/JSYoo5B/go-openstacksdk/compute"
 	"github.com/JSYoo5B/go-openstacksdk/image"
+	"github.com/JSYoo5B/go-openstacksdk/internal/cloudconfig"
 	"github.com/JSYoo5B/go-openstacksdk/internal/nativefind"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/network"
@@ -58,23 +59,23 @@ func Connect(ctx context.Context, opts ...ConnectionOption) (*Connection, error)
 	if o.auth != nil {
 		auth = *o.auth
 	} else if cloudName != "" {
-		configuration, loadErr := loadCloudRegionConfiguration(cloudName, o.cloudFiles, o.region)
+		configuration, loadErr := cloudconfig.Load(cloudName, o.cloudFiles, o.region)
 		if loadErr != nil {
 			return nil, fmt.Errorf("load cloud configuration: %w", loadErr)
 		}
-		auth, eo, o.tlsConfig, err = clouds.Parse(configuration.parseOptions...)
+		auth, eo, o.tlsConfig, err = clouds.Parse(configuration.ParseOptions...)
 		if err != nil {
 			return nil, fmt.Errorf("load cloud configuration: %w", err)
 		}
-		o.configuredDefaultNetwork = configuration.defaultNetwork
+		o.configuredDefaultNetwork = configuration.DefaultNetwork
 		if !o.imageCreatePolicySet {
-			o.imageCreatePolicy = configuration.imageCreatePolicy
+			o.imageCreatePolicy = configuration.ImageCreatePolicy
 		}
 		if !o.networkRolesSet {
-			o.networkRoles = configuration.networkRoles
+			o.networkRoles = configuration.NetworkRoles
 		}
 		if !o.serverAddressesSet {
-			o.serverAddresses = configuration.serverAddresses
+			o.serverAddresses = configuration.ServerAddresses
 		}
 		o.applyConfiguredServiceSettings(configuration)
 	} else {
@@ -82,20 +83,20 @@ func Connect(ctx context.Context, opts ...ConnectionOption) (*Connection, error)
 		if err != nil {
 			return nil, fmt.Errorf("load environment authentication: %w", err)
 		}
-		configuration, present, loadErr := loadEnvironmentCloudConfiguration(osEnviron(), o.region)
+		configuration, present, loadErr := cloudconfig.LoadEnvironment(os.Environ(), o.region)
 		if loadErr != nil {
 			return nil, fmt.Errorf("load environment cloud configuration: %w", loadErr)
 		}
 		if present {
-			o.configuredDefaultNetwork = configuration.defaultNetwork
+			o.configuredDefaultNetwork = configuration.DefaultNetwork
 			if !o.networkRolesSet {
-				o.networkRoles = configuration.networkRoles
+				o.networkRoles = configuration.NetworkRoles
 			}
 			o.applyConfiguredServiceSettings(configuration)
 		}
 	}
 	if cloudName == "" && !o.serverAddressesSet {
-		o.serverAddresses, err = configuredServerAddresses(nil, nil)
+		o.serverAddresses, err = cloudconfig.ServerAddresses(nil, nil)
 		if err != nil {
 			return nil, err
 		}
