@@ -15,13 +15,13 @@ func TestSourceCollectionGETRequiresExplicitSourceProfileAndKeepsTrailingRoute(t
 		cloud := testcloud.New(t)
 		calls := 0
 		client := cloud.Client("network", "/v2.0/")
-		cloud.Provider.HTTPClient.Transport = policyTransport(func(r *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 			calls++
 			if r.Method != "GET" || r.URL.EscapedPath() != "/v2.0/records/" {
 				t.Fatal(r.Method, r.URL)
 			}
 			return policyWire(200, `{"record":{"name":"actual"}}`), nil
-		})
+		}))
 		profile := mutationProfile()
 		profile.SourceFindPolicy = c.source
 		profile.SourceCollectionGET = c.opt

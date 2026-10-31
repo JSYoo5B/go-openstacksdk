@@ -21,10 +21,6 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type roundTripFunc func(*http.Request) (*http.Response, error)
-
-func (f roundTripFunc) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
-
 func testScope(t *testing.T, collection string, handler http.HandlerFunc) (*Scope, *gophercloud.ServiceClient) {
 	t.Helper()
 	server := testcloud.NewServer(handler)
@@ -272,7 +268,7 @@ func TestMetadataPreparedOptionsAreIndependentAndLiveTokenKeepsFixedTarget(t *te
 		return nil
 	}
 	underlying := client.ProviderClient.HTTPClient.Transport
-	client.ProviderClient.HTTPClient.Transport = roundTripFunc(func(r *http.Request) (*http.Response, error) {
+	client.ProviderClient.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		wire, err := underlying.RoundTrip(r)
 		if len(seen) == 1 {
 			retained.Headers["X-Frozen"] = "after"
@@ -328,7 +324,7 @@ func TestMetadataNativeTransportAcceptedReadAndCancellationErrorsStayTerminal(t 
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()
 			var calls int
-			provider := &gophercloud.ProviderClient{HTTPClient: http.Client{Transport: roundTripFunc(func(r *http.Request) (*http.Response, error) {
+			provider := &gophercloud.ProviderClient{HTTPClient: http.Client{Transport: testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls++
 				if tc.cancel {
 					cancel()
@@ -402,7 +398,7 @@ func TestMetadataPreflightZeroHTTPAndBetweenDeletionSourceChecks(t *testing.T) {
 		t.Fatalf("post option cancellation err=%v calls=%d", err, calls)
 	}
 	underlying := client.ProviderClient.HTTPClient.Transport
-	client.ProviderClient.HTTPClient.Transport = roundTripFunc(func(r *http.Request) (*http.Response, error) {
+	client.ProviderClient.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		response, err := underlying.RoundTrip(r)
 		client.Type = "compute"
 		return response, err

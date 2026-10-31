@@ -18,10 +18,6 @@ import (
 	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/servers"
 )
 
-type roundTripFunc func(*http.Request) (*http.Response, error)
-
-func (fn roundTripFunc) RoundTrip(request *http.Request) (*http.Response, error) { return fn(request) }
-
 func TestNativeIdentityGetPreservesQueryNativeResultCodesAndEvidence(t *testing.T) {
 	for _, status := range []int{200, 203, 201, 400, 403, 404, 409, 500} {
 		t.Run(fmt.Sprint(status), func(t *testing.T) {
@@ -95,13 +91,13 @@ func TestNativeIdentityGetFreezesInputsAndUsesLiveProviderReauthentication(t *te
 	if transport == nil {
 		transport = http.DefaultTransport
 	}
-	cloud.Provider.HTTPClient.Transport = roundTripFunc(func(request *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.RoundTripperFunc(func(request *http.Request) (*http.Response, error) {
 		query["fields"][0] = "changed"
 		query["name"] = []string{"changed"}
 		segments[1] = "changed"
 		codes[1] = 201
 		return transport.RoundTrip(request)
-	})
+	}))
 	var result servers.GetResult
 	result.Header, result.Err = nativefind.Get(context.Background(), client, segments, query, codes, &result.Body)
 	value, err := result.Extract()

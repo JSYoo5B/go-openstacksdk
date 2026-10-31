@@ -90,7 +90,7 @@ func TestTerminalReadConsumersNativeTransport404IsNeverMissing(t *testing.T) {
 				cause = originalMissing
 			}
 			transportFailure := &url.Error{Op: "GET", URL: "http://transport.invalid/original", Err: cause}
-			cloud.Provider.HTTPClient.Transport = terminalConsumerRoundTrip(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				if r.URL.Path == "/reverse/v2/servers/detail" {
 					lists.Add(1)
 					return nil, errors.New("fallback must not run")
@@ -103,7 +103,7 @@ func TestTerminalReadConsumersNativeTransport404IsNeverMissing(t *testing.T) {
 					t.Error("query hook changed caller values", r.URL)
 				}
 				return nil, transportFailure
-			})
+			}))
 			collection := servers.New(cloud.Client("compute", "/reverse/v2/")).Resources
 			check := func(value *servers.Server, err error) {
 				t.Helper()
@@ -278,7 +278,3 @@ func TestTerminalReadConsumersJoinedTerminalCausesKeepSourceNotFound(t *testing.
 		})
 	}
 }
-
-type terminalConsumerRoundTrip func(*http.Request) (*http.Response, error)
-
-func (f terminalConsumerRoundTrip) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }

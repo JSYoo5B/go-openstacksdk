@@ -15,22 +15,19 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type nodeTransport func(*http.Request) (*http.Response, error)
-
-func (f nodeTransport) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
 func nodeWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Header: http.Header{"Content-Type": {"application/json"}, "X-Request-Id": {"node-proof"}}, Body: io.NopCloser(strings.NewReader(body))}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}, "X-Request-Id": {"node-proof"}})
 }
 func nodeAPI(t *testing.T, callback func(*http.Request) *http.Response) (*nodes.API, *testcloud.Cloud, *int) {
 	t.Helper()
 	cloud := testcloud.New(t)
 	calls := new(int)
-	cloud.Provider.HTTPClient.Transport = nodeTransport(func(r *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		*calls++
 		response := callback(r)
 		response.Request = r
 		return response, nil
-	})
+	}))
 	client := cloud.Client("baremetal", "/ironic/v1/")
 	client.Microversion = "1.109"
 	return nodes.New(client), cloud, calls
@@ -244,7 +241,7 @@ func TestPythonNodeDefaultVersionDiscoveryAndUncappedSelection(t *testing.T) {
 	cloud := testcloud.New(t)
 	var paths []string
 	serverMaximum, expectedSelection := "1.100", "1.100"
-	cloud.Provider.HTTPClient.Transport = nodeTransport(func(r *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		paths = append(paths, r.URL.Path)
 		if strings.HasSuffix(r.URL.Path, "/nodes/n") {
 			if r.Header.Get("X-OpenStack-Ironic-API-Version") != expectedSelection {
@@ -253,7 +250,7 @@ func TestPythonNodeDefaultVersionDiscoveryAndUncappedSelection(t *testing.T) {
 			return nodeWire(200, `{"uuid":"n"}`), nil
 		}
 		return nodeWire(200, `{"version":{"id":"v1","min_version":"1.1","version":"`+serverMaximum+`"}}`), nil
-	})
+	}))
 	api := nodes.New(cloud.Client("baremetal", "/ironic/v1/"))
 	row, err := api.GetRecord(context.Background(), "n")
 	if err != nil || row == nil || len(row.Discovery.Responses) == 0 || len(paths) != 2 {

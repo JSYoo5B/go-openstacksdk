@@ -541,11 +541,11 @@ func TestListResponseAndTransportErrorsKeepEvidence(t *testing.T) {
 	}
 	spec := listSpec(t, func(w http.ResponseWriter, r *http.Request) { writeList(w, `{"items":[]}`) })
 	cause := errors.New("source transport failed")
-	spec.Client.HTTPClient.Transport = listTransport(func(*http.Request) (*http.Response, error) { return nil, cause })
+	spec.Client.HTTPClient.Transport = testcloud.RoundTripperFunc(func(*http.Request) (*http.Response, error) { return nil, cause })
 	if _, err := collectList(context.Background(), spec, nil); !errors.Is(err, cause) {
 		t.Fatal(err)
 	}
-	spec.Client.HTTPClient.Transport = listTransport(func(r *http.Request) (*http.Response, error) {
+	spec.Client.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		return &http.Response{StatusCode: 200, Header: http.Header{"X-Evidence": {"kept"}}, Body: &failedListBody{prefix: []byte(`{"items":`), cause: cause}, Request: r}, nil
 	})
 	_, err := collectList(context.Background(), spec, nil)
@@ -554,10 +554,6 @@ func TestListResponseAndTransportErrorsKeepEvidence(t *testing.T) {
 		t.Fatalf("partial read lost: %v", err)
 	}
 }
-
-type listTransport func(*http.Request) (*http.Response, error)
-
-func (f listTransport) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
 
 type failedListBody struct {
 	prefix []byte
@@ -671,7 +667,7 @@ func TestCollectionCapabilitiesExactNamesAndDeleteCodes(t *testing.T) {
 		t.Fatal(err)
 	}
 	// Explicit invalid pagination inputs fail without executing the transport.
-	spec.Client.HTTPClient.Transport = listTransport(func(*http.Request) (*http.Response, error) { t.Error("invalid query reached HTTP"); return nil, io.EOF })
+	spec.Client.HTTPClient.Transport = testcloud.RoundTripperFunc(func(*http.Request) (*http.Response, error) { t.Error("invalid query reached HTTP"); return nil, io.EOF })
 	for _, q := range []url.Values{{"marker": {""}}, {"marker": {"a", "b"}}, {"limit": {"0"}}, {"limit": {"1", "2"}}} {
 		if _, err := collectList(context.Background(), spec, q); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(err)

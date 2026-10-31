@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -24,11 +25,7 @@ func (m *responseModel) UnmarshalJSON(data []byte) error {
 	return resource.DecodeObject(data, (*plain)(m), &m.Metadata)
 }
 
-type responseTransport func(*http.Request) (*http.Response, error)
-
-func (f responseTransport) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
-
-func responseClient(transport responseTransport) *gophercloud.ServiceClient {
+func responseClient(transport testcloud.RoundTripperFunc) *gophercloud.ServiceClient {
 	p := &gophercloud.ProviderClient{HTTPClient: http.Client{Transport: transport}}
 	p.UseTokenLock()
 	p.SetToken("old-token")
@@ -36,7 +33,7 @@ func responseClient(transport responseTransport) *gophercloud.ServiceClient {
 }
 
 func wireResponse(code int, body io.ReadCloser) *http.Response {
-	return &http.Response{StatusCode: code, Header: http.Header{"X-Request-Id": {"req-42"}}, Body: body}
+	return testcloud.StreamResponse(code, body, http.Header{"X-Request-Id": {"req-42"}})
 }
 
 func TestRESTResponseSnapshotsMutationAcrossReauth(t *testing.T) {

@@ -10,15 +10,10 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
-
-type policyTransport func(*http.Request) (*http.Response, error)
-
-func (value policyTransport) RoundTrip(request *http.Request) (*http.Response, error) {
-	return value(request)
-}
 
 type policyReader func([]byte) (int, error)
 
@@ -37,7 +32,7 @@ type policyMarshaler func() ([]byte, error)
 
 func (value policyMarshaler) MarshalJSON() ([]byte, error) { return value() }
 
-func policyClient(transport policyTransport) *gophercloud.ServiceClient {
+func policyClient(transport testcloud.RoundTripperFunc) *gophercloud.ServiceClient {
 	provider := &gophercloud.ProviderClient{HTTPClient: http.Client{Transport: transport}}
 	provider.UseTokenLock()
 	provider.SetToken("before")
@@ -45,7 +40,7 @@ func policyClient(transport policyTransport) *gophercloud.ServiceClient {
 }
 
 func policyHTTP(status int, body io.ReadCloser, header http.Header) *http.Response {
-	return &http.Response{StatusCode: status, Body: body, Header: header}
+	return testcloud.StreamResponse(status, body, header)
 }
 
 func TestResponsePolicyContextPreflightAndSingleCauseIdentity(t *testing.T) {

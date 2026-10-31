@@ -126,10 +126,10 @@ func TestNativeIdentityListModesRoutesFrozenQueriesAndLiveSource(t *testing.T) {
 					baseTransport = http.DefaultTransport
 				}
 				var middleware atomic.Int32
-				provider.HTTPClient.Transport = roundTripFunc(func(request *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(request *http.Request) (*http.Response, error) {
 					middleware.Add(1)
 					return baseTransport.RoundTrip(request)
-				})
+				}))
 				sequence := mode.list(context.Background(), client, input, details)
 				input["tag"][0] = "caller-mutation"
 				input["name"] = []string{"changed"}
@@ -377,13 +377,13 @@ func TestNativeIdentityListModesTransportAndAcceptedReadErrorsStayTerminal(t *te
 					client := cloud.Client("compute", "/reverse")
 					sentinel := errors.New("original-native-cause")
 					var calls atomic.Int32
-					cloud.Provider.HTTPClient.Transport = roundTripFunc(func(request *http.Request) (*http.Response, error) {
+					cloud.SetTransport(testcloud.RoundTripperFunc(func(request *http.Request) (*http.Response, error) {
 						calls.Add(1)
 						if !read {
 							return nil, sentinel
 						}
 						return &http.Response{StatusCode: 200, Header: http.Header{"Content-Type": {"application/json"}}, Request: request, Body: nativeListReadError{sentinel}}, nil
-					})
+					}))
 					var result error
 					values := 0
 					for _, err := range mode.list(context.Background(), client, nil, details) {

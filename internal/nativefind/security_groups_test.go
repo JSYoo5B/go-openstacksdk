@@ -70,10 +70,10 @@ func TestNativeSecurityGroupsPreserveQueriesModelsAndLiveSource(t *testing.T) {
 		originalTransport = http.DefaultTransport
 	}
 	var middleware atomic.Int32
-	provider.HTTPClient.Transport = roundTripFunc(func(r *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		middleware.Add(1)
 		return originalTransport.RoundTrip(r)
-	})
+	}))
 	sequence := nativefind.IterateSecurityGroups(context.Background(), client, input, resource.ListControl{})
 	input["fields"][0] = "mutated"
 	input["name"] = []string{"changed"}
@@ -243,7 +243,7 @@ func TestNativeSecurityGroupsContinuationAndFailuresAreTerminal(t *testing.T) {
 	client := cloud.Client("network", "/v2")
 	sentinel := errors.New("original transport")
 	var calls atomic.Int32
-	client.ProviderClient.HTTPClient.Transport = roundTripFunc(func(r *http.Request) (*http.Response, error) { calls.Add(1); return nil, sentinel })
+	cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) { calls.Add(1); return nil, sentinel }))
 	var result error
 	for _, err := range nativefind.IterateSecurityGroups(context.Background(), client, nil, resource.ListControl{}) {
 		result = err
@@ -304,7 +304,7 @@ func TestNativeSecurityGroupsInvalidSourceContextAndControlBeforeHTTP(t *testing
 	ctx, cancel = context.WithCancel(context.Background())
 	defer cancel()
 	client := cloud.Client("network", "/v2")
-	client.ProviderClient.HTTPClient.Transport = roundTripFunc(func(r *http.Request) (*http.Response, error) { cancel(); return nil, r.Context().Err() })
+	cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) { cancel(); return nil, r.Context().Err() }))
 	var result error
 	for _, err := range nativefind.IterateSecurityGroups(ctx, client, nil, resource.ListControl{}) {
 		result = err

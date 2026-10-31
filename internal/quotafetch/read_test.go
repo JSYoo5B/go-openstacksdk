@@ -20,17 +20,14 @@ func quotaProfile() quotafetch.Profile {
 	return quotafetch.Profile{Role: "volume", IntegerFields: []string{"volumes", "gigabytes"}}
 }
 
-type quotaTransport func(*http.Request) (*http.Response, error)
-
-func (f quotaTransport) RoundTrip(req *http.Request) (*http.Response, error) { return f(req) }
-func quotaClient(t *testing.T, reply quotaTransport) *gophercloud.ServiceClient {
+func quotaClient(t *testing.T, reply testcloud.RoundTripperFunc) *gophercloud.ServiceClient {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = reply
+	cloud.SetTransport(reply)
 	return cloud.Client("volumev3", "/prefix/v3/")
 }
 func quotaReply(code int, raw string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(raw)), Header: http.Header{"X-Request-Id": {"actual-quota"}}}
+	return testcloud.Response(code, raw, http.Header{"X-Request-Id": {"actual-quota"}})
 }
 func assertQuotaProof(t *testing.T, err error, code int, raw string) {
 	t.Helper()

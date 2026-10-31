@@ -29,7 +29,7 @@ func TestSourceCollectionPUTRequiresExplicitProfileAndOwnsOnlyFixedRoute(t *test
 			cloud := testcloud.New(t)
 			client := cloud.Client("network", "/neutron/v2.0/")
 			calls := 0
-			cloud.Provider.HTTPClient.Transport = policyTransport(func(req *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 				calls++
 				want := "/neutron/v2.0/records/"
 				if scenario.id != "" {
@@ -39,7 +39,7 @@ func TestSourceCollectionPUTRequiresExplicitProfileAndOwnsOnlyFixedRoute(t *test
 					t.Fatal(req.Method, req.URL)
 				}
 				return mutationResponse(200, `{"record":{"id":"actual","name":"owned"}}`), nil
-			})
+			}))
 			profile := mutationProfile()
 			profile.SourceFindPolicy = scenario.source
 			profile.SourceCollectionPUT = scenario.opt

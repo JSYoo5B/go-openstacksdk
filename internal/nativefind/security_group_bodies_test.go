@@ -34,7 +34,7 @@ func TestNativeSecurityGroupBodiesOwnQueryRowsAndLiveSource(t *testing.T) {
 	if base == nil {
 		base = http.DefaultTransport
 	}
-	c.ProviderClient.HTTPClient.Transport = roundTripFunc(func(r *http.Request) (*http.Response, error) { middleware.Add(1); return base.RoundTrip(r) })
+	cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) { middleware.Add(1); return base.RoundTrip(r) }))
 	cloud.Mux.HandleFunc("GET /reverse/v2/security-groups", func(w http.ResponseWriter, r *http.Request) {
 		calls.Add(1)
 		query := r.URL.Query()

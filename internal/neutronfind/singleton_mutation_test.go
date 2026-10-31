@@ -19,7 +19,7 @@ func singletonMutationEngine(t *testing.T, source, singleton bool, reply func(*h
 	t.Helper()
 	cloud := testcloud.New(t)
 	client := cloud.Client("network", "/neutron/v2.0/")
-	cloud.Provider.HTTPClient.Transport = policyTransport(reply)
+	cloud.SetTransport(testcloud.LinkRequest(reply))
 	profile := mutationProfile()
 	profile.SourceFindPolicy = source
 	profile.SourceSingletonMutation = singleton
@@ -35,13 +35,13 @@ func TestSourceSingletonMutationOwnsFixedRouteWrapperAndSeed(t *testing.T) {
 		cloud := testcloud.New(t)
 		calls := 0
 		const raw = `{"record":{"id":"singleton","name":"actual"}}`
-		cloud.Provider.HTTPClient.Transport = policyTransport(func(req *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 			calls++
 			if req.Method != http.MethodGet || req.URL.EscapedPath() != "/neutron/v2.0/records" || req.URL.RawQuery != "" || req.Body != nil {
 				t.Fatal(req.Method, req.URL, req.Body)
 			}
 			return mutationResponse(203, raw), nil
-		})
+		}))
 		profile := mutationProfile()
 		profile.SourceCollectionGET = true
 		profile.SourceSingletonMutation = true

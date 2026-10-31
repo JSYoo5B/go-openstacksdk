@@ -32,7 +32,7 @@ func mutationEngine(t *testing.T, reply func(*http.Request) (*http.Response, err
 	cloud := testcloud.New(t)
 	client := cloud.Client("network", "/catalog/")
 	client.ResourceBase = cloud.Server.URL + "/neutron/v2.0/"
-	cloud.Provider.HTTPClient.Transport = policyTransport(reply)
+	cloud.SetTransport(testcloud.LinkRequest(reply))
 	engine, err := neutronfind.New(context.Background(), client, mutationProfile(), nil)
 	if err != nil {
 		t.Fatal(err)
@@ -83,7 +83,7 @@ func TestSourceMutateOwnsBodySeedPolicyAndActualProjection(t *testing.T) {
 			client.ResourceBase = cloud.Server.URL + "/neutron/v2.0/"
 			client.Microversion = "2.0"
 			client.MoreHeaders = map[string]string{"Openstack-Api-Version": "network 2.0", "X-Source": "original"}
-			cloud.Provider.HTTPClient.Transport = policyTransport(func(req *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 				calls++
 				path := "/neutron/v2.0/records"
 				if method == http.MethodPut {
@@ -104,7 +104,7 @@ func TestSourceMutateOwnsBodySeedPolicyAndActualProjection(t *testing.T) {
 				response := mutationResponse(203, raw)
 				response.Header.Set("If-Match", "actual-condition")
 				return response, nil
-			})
+			}))
 			engine, err := neutronfind.New(context.Background(), client, mutationProfile(), nil)
 			if err != nil {
 				t.Fatal(err)
@@ -554,11 +554,11 @@ func TestSourceMutationsObserveSelectedGuardWithoutFabricatingReceipts(t *testin
 			calls := 0
 			cause := errors.New("selected leaf dependency changed")
 			changed := false
-			cloud.Provider.HTTPClient.Transport = policyTransport(func(*http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.LinkRequest(func(*http.Request) (*http.Response, error) {
 				calls++
 				t.Fatal("guard failure sent HTTP")
 				return nil, nil
-			})
+			}))
 			engine, err := neutronfind.New(context.Background(), client, mutationProfile(), func(context.Context) error {
 				if changed {
 					return cause
@@ -601,7 +601,7 @@ func TestMutateSourceStatusOptInKeepsBaselineAndPhysicalReceipts(t *testing.T) {
 					client := cloud.Client("network", "/v2.0/")
 					raw := `{"record":{"id":"actual"},"receipt":"physical"}`
 					calls := 0
-					cloud.Provider.HTTPClient.Transport = policyTransport(func(req *http.Request) (*http.Response, error) {
+					cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 						calls++
 						if req.Method != method {
 							t.Fatal(req.Method)
@@ -610,7 +610,7 @@ func TestMutateSourceStatusOptInKeepsBaselineAndPhysicalReceipts(t *testing.T) {
 							t.Fatal("DELETE body")
 						}
 						return mutationResponse(status, raw), nil
-					})
+					}))
 					profile := mutationProfile()
 					profile.SourceStatusPolicy = sourceStatus
 					engine, err := neutronfind.New(context.Background(), client, profile, nil)

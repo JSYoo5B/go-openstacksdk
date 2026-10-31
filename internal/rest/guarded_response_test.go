@@ -16,16 +16,14 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/fixedrequest"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
 const limitsGuardedTarget = "https://guarded.test/reverse/v3/limits?project_id=actual"
 
-type limitsGuardedTransport func(*http.Request) (*http.Response, error)
-
-func (f limitsGuardedTransport) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
-func limitsGuardedClient(f limitsGuardedTransport) *gophercloud.ServiceClient {
+func limitsGuardedClient(f testcloud.RoundTripperFunc) *gophercloud.ServiceClient {
 	p := &gophercloud.ProviderClient{HTTPClient: http.Client{Transport: f}}
 	p.UseTokenLock()
 	p.SetToken("original-token")
@@ -57,7 +55,7 @@ func (b *limitsGuardedBody) Close() error {
 	return b.closeErr
 }
 func limitsGuardedWire(code int, body io.ReadCloser) *http.Response {
-	return &http.Response{StatusCode: code, Header: http.Header{"X-Request-Id": {"physical-original"}, "X-Wire-Status": {fmt.Sprint(code)}}, Body: body}
+	return testcloud.StreamResponse(code, body, http.Header{"X-Request-Id": {"physical-original"}, "X-Wire-Status": {fmt.Sprint(code)}})
 }
 
 type limitsGuardedReader struct {
@@ -337,7 +335,7 @@ func TestDoJSONGuardedKeepsLiveAuthenticationAndOwnedRequestOnAllowedRetry(t *te
 	client.MoreHeaders = map[string]string{"X-Snapshot": "captured"}
 	sourceCause := errors.New("unexpected source change")
 	guard := limitsGuardedSnapshot(client, sourceCause)
-	client.HTTPClient.Transport = limitsGuardedTransport(func(r *http.Request) (*http.Response, error) {
+	client.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		n := requests.Add(1)
 		raw, err := io.ReadAll(r.Body)
 		token := "original-token"

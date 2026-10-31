@@ -101,10 +101,10 @@ func TestRecordExchangePreservesRejectedReadFaultAndPreventsReplay(t *testing.T)
 	}
 	cause := errors.New("physical rejected read")
 	calls := 0
-	fake.Provider.HTTPClient.Transport = roundTripFunc(func(r *http.Request) (*http.Response, error) {
+	fake.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		calls++
 		return &http.Response{StatusCode: 503, Header: http.Header{"X-Request-Id": {"actual503"}}, Body: &failingBody{data: "partial", cause: cause}, Request: r}, nil
-	})
+	}))
 	// Refresh the captured transport after configuring the fixture.
 	source, err = cloudread.Capture(context.Background(), client, "volume")
 	if err != nil {

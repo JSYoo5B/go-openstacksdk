@@ -44,13 +44,13 @@ func TestFindWithFetchControlsRequiresIDUsesSourceTruthiness(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			cloud := testcloud.New(t)
 			calls := 0
-			cloud.Provider.HTTPClient.Transport = policyTransport(func(req *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 				calls++
 				if req.URL.EscapedPath() != tc.path || req.URL.RawQuery != "" {
 					t.Fatalf("unexpected fetch %s", req.URL)
 				}
 				return policyWire(200, `{"record":{"id":"actual","name":"target"}}`), nil
-			})
+			}))
 			policy := neutronfind.Options{}
 			if tc.raw != "" {
 				policy = fetchControlsQuery(map[string]string{"requires_id": tc.raw})
@@ -68,7 +68,7 @@ func TestFindWithFetchControlsBasePathOwnsBothPhasesAndFallbackOverride(t *testi
 		t.Run(map[bool]string{false: "shared literal", true: "list override"}[override], func(t *testing.T) {
 			cloud := testcloud.New(t)
 			var paths []string
-			cloud.Provider.HTTPClient.Transport = policyTransport(func(req *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 				paths = append(paths, req.URL.EscapedPath())
 				if len(paths) == 1 {
 					return policyWire(404, `{"error":"missing"}`), nil
@@ -77,7 +77,7 @@ func TestFindWithFetchControlsBasePathOwnsBothPhasesAndFallbackOverride(t *testi
 					t.Fatal(req.URL)
 				}
 				return policyWire(200, `{"records":[{"id":"found","name":"target"}]}`), nil
-			})
+			}))
 			policy := fetchControlsQuery(map[string]string{"base_path": `"/alternative/records"`, "requires_id": "false"})
 			wantList := "/v2.0/alternative/records"
 			if override {
@@ -106,12 +106,12 @@ func TestFindWithFetchControlsResponseKeyAndAcceptedFailureEvidence(t *testing.T
 		t.Run(tc.name, func(t *testing.T) {
 			cloud := testcloud.New(t)
 			calls := 0
-			cloud.Provider.HTTPClient.Transport = policyTransport(func(req *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 				calls++
 				response := policyWire(202, tc.body)
 				response.Header.Set("X-Request-ID", "fetch-key-proof")
 				return response, nil
-			})
+			}))
 			value, err := fetchControlsEngine(t, cloud, nil).FindWithFetchControls(context.Background(), "target", fetchControlsQuery(map[string]string{"resource_response_key": tc.control}))
 			if tc.fail {
 				var response *resource.ResponseError
@@ -133,7 +133,7 @@ func TestFindWithFetchControlsResponseKeyAndAcceptedFailureEvidence(t *testing.T
 func TestFindWithFetchControlsRawHeadersAreGETQueryThenFallbackHeaders(t *testing.T) {
 	cloud := testcloud.New(t)
 	calls := 0
-	cloud.Provider.HTTPClient.Transport = policyTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		calls++
 		if calls == 1 {
 			if !reflect.DeepEqual(req.URL.Query()["headers"], []string{"Accept", "X-Fetch-Proof"}) || req.Header.Get("X-Fetch-Proof") != "owned-loses" {
@@ -145,7 +145,7 @@ func TestFindWithFetchControlsRawHeadersAreGETQueryThenFallbackHeaders(t *testin
 			t.Fatal(req.URL, req.Header)
 		}
 		return policyWire(200, `{"records":[{"id":"found","name":"target"}]}`), nil
-	})
+	}))
 	policy := fetchControlsQuery(map[string]string{"headers": `{"Accept":"application/vnd.source+json","X-Fetch-Proof":"raw-wins"}`})
 	policy.Headers = map[string]string{"X-Owned": "owned", "x-fetch-proof": "owned-loses"}
 	value, err := fetchControlsEngine(t, cloud, nil).FindWithFetchControls(context.Background(), "target", policy)
@@ -159,7 +159,7 @@ func TestFindWithFetchControlsInvalidRawHeadersAreDeferredUntilFallback(t *testi
 		t.Run(map[bool]string{false: "successful GET", true: "fallback"}[fallback], func(t *testing.T) {
 			cloud := testcloud.New(t)
 			calls := 0
-			cloud.Provider.HTTPClient.Transport = policyTransport(func(req *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 				calls++
 				if req.URL.Query().Get("headers") != "X-Proof" {
 					t.Fatal(req.URL)
@@ -168,7 +168,7 @@ func TestFindWithFetchControlsInvalidRawHeadersAreDeferredUntilFallback(t *testi
 					return policyWire(404, `{"error":"missing"}`), nil
 				}
 				return policyWire(200, `{"record":{"id":"found"}}`), nil
-			})
+			}))
 			value, err := fetchControlsEngine(t, cloud, nil).FindWithFetchControls(context.Background(), "target", fetchControlsQuery(map[string]string{"headers": `{"X-Proof":2}`}))
 			if calls != 1 {
 				t.Fatal(calls)
@@ -187,7 +187,7 @@ func TestFindWithFetchControlsInvalidRawHeadersAreDeferredUntilFallback(t *testi
 func TestFindWithFetchControlsSkipCacheIsLocalAndFetchesRemainStateless(t *testing.T) {
 	cloud := testcloud.New(t)
 	calls := 0
-	cloud.Provider.HTTPClient.Transport = policyTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		calls++
 		if req.URL.RawQuery != "" {
 			t.Fatal(req.URL)
@@ -196,7 +196,7 @@ func TestFindWithFetchControlsSkipCacheIsLocalAndFetchesRemainStateless(t *testi
 			return policyWire(200, `{"record":{"id":"one"}}`), nil
 		}
 		return policyWire(200, `{"record":{"id":"two"}}`), nil
-	})
+	}))
 	engine := fetchControlsEngine(t, cloud, nil)
 	for i, raw := range []string{"false", `{"ignored":true}`} {
 		value, err := engine.FindWithFetchControls(context.Background(), "target", fetchControlsQuery(map[string]string{"skip_cache": raw}))
@@ -216,7 +216,7 @@ func TestFindWithFetchControlsCustomErrorPreservesNativeFailureAndCleanFallback(
 			cloud := testcloud.New(t)
 			calls := 0
 			body := `{"error":"upstream proof"}`
-			cloud.Provider.HTTPClient.Transport = policyTransport(func(req *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 				calls++
 				if req.URL.Query().Has("error_message") {
 					t.Fatal(req.URL)
@@ -227,7 +227,7 @@ func TestFindWithFetchControlsCustomErrorPreservesNativeFailureAndCleanFallback(
 				response := policyWire(status, body)
 				response.Header.Set("X-Request-ID", "failure-proof")
 				return response, nil
-			})
+			}))
 			value, err := fetchControlsEngine(t, cloud, nil).FindWithFetchControls(context.Background(), "target", fetchControlsQuery(map[string]string{"error_message": `"custom lookup failed"`}))
 			if status == 404 {
 				if err != nil || value == nil || calls != 2 {
@@ -246,9 +246,9 @@ func TestFindWithFetchControlsCustomErrorPreservesNativeFailureAndCleanFallback(
 func TestFindWithFetchControlsOwnsInputAndRejectsUnsafeRoutes(t *testing.T) {
 	t.Run("inputs remain unchanged", func(t *testing.T) {
 		cloud := testcloud.New(t)
-		cloud.Provider.HTTPClient.Transport = policyTransport(func(req *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 			return policyWire(200, `{"record":{"id":"found"}}`), nil
-		})
+		}))
 		policy := fetchControlsQuery(map[string]string{"requires_id": "false", "base_path": `"/custom"`, "headers": `{"X-Proof":"owned"}`})
 		policy.Order = []string{"requires_id", "base_path", "headers"}
 		before, _ := json.Marshal(policy)
@@ -262,7 +262,7 @@ func TestFindWithFetchControlsOwnsInputAndRejectsUnsafeRoutes(t *testing.T) {
 		t.Run(path, func(t *testing.T) {
 			cloud := testcloud.New(t)
 			calls := 0
-			cloud.Provider.HTTPClient.Transport = policyTransport(func(req *http.Request) (*http.Response, error) { calls++; return policyWire(200, `{"record":{}}`), nil })
+			cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) { calls++; return policyWire(200, `{"record":{}}`), nil }))
 			raw, _ := json.Marshal(path)
 			value, err := fetchControlsEngine(t, cloud, nil).FindWithFetchControls(context.Background(), "target", neutronfind.Options{Query: map[string]json.RawMessage{"base_path": raw}})
 			if err == nil || value != nil || calls != 0 {
@@ -273,7 +273,7 @@ func TestFindWithFetchControlsOwnsInputAndRejectsUnsafeRoutes(t *testing.T) {
 	t.Run("cancellation and captured source guard", func(t *testing.T) {
 		cloud := testcloud.New(t)
 		calls := 0
-		cloud.Provider.HTTPClient.Transport = policyTransport(func(req *http.Request) (*http.Response, error) { calls++; return policyWire(200, `{"record":{}}`), nil })
+		cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) { calls++; return policyWire(200, `{"record":{}}`), nil }))
 		engine := fetchControlsEngine(t, cloud, nil)
 		ctx, cancel := context.WithCancel(context.Background())
 		cancel()
@@ -297,7 +297,7 @@ func TestFindWithFetchControlsOwnsInputAndRejectsUnsafeRoutes(t *testing.T) {
 	t.Run("ordinary Find remains rejecting", func(t *testing.T) {
 		cloud := testcloud.New(t)
 		calls := 0
-		cloud.Provider.HTTPClient.Transport = policyTransport(func(req *http.Request) (*http.Response, error) { calls++; return policyWire(200, `{"record":{}}`), nil })
+		cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) { calls++; return policyWire(200, `{"record":{}}`), nil }))
 		value, err := fetchControlsEngine(t, cloud, nil).Find(context.Background(), "target", fetchControlsQuery(map[string]string{"requires_id": "false"}))
 		if value != nil || !errors.Is(err, resource.ErrInvalidOption) || calls != 0 {
 			t.Fatal(value, err, calls)

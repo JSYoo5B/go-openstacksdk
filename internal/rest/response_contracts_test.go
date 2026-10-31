@@ -14,17 +14,14 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
 const ownershipTarget = "https://service.test/reverse/v2/objects/fixed?selector=original"
 
-type ownershipTransport func(*http.Request) (*http.Response, error)
-
-func (f ownershipTransport) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
-
-func ownershipClient(transport ownershipTransport) *gophercloud.ServiceClient {
+func ownershipClient(transport testcloud.RoundTripperFunc) *gophercloud.ServiceClient {
 	provider := &gophercloud.ProviderClient{HTTPClient: http.Client{Transport: transport}}
 	provider.UseTokenLock()
 	provider.SetToken("initial")
@@ -63,9 +60,9 @@ func (b *ownershipReadFailure) Read(p []byte) (int, error) {
 }
 
 func ownershipWire(code int, body io.ReadCloser) *http.Response {
-	return &http.Response{StatusCode: code, Header: http.Header{
+	return testcloud.StreamResponse(code, body, http.Header{
 		"X-Request-Id": {"actual-response"}, "X-Wire-Status": {fmt.Sprint(code)},
-	}, Body: body}
+	})
 }
 
 type ownershipMarshal struct {
@@ -407,7 +404,7 @@ func TestRESTOwnershipFixedScopeAndLiveProvider(t *testing.T) {
 			return nil
 		}
 		originalRetry := reflect.ValueOf(client.RetryFunc).Pointer()
-		client.HTTPClient.Transport = ownershipTransport(func(r *http.Request) (*http.Response, error) {
+		client.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			n := int(requests.Add(1)) - 1
 			codes, tokens := []int{401, 429, 503, 201}, []string{"initial", "reauth", "backoff", "retry"}
 			if n >= len(codes) {

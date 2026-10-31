@@ -22,12 +22,12 @@ func TestSourceMemberGetOwnsFetchQueryVersionAndPassiveEvidence(t *testing.T) {
 	client.Microversion = "2.0"
 	client.MoreHeaders = map[string]string{"Openstack-Api-Version": "network 2.0", "X-Source": "original"}
 	var seen *http.Request
-	cloud.Provider.HTTPClient.Transport = policyTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		seen = req.Clone(req.Context())
 		response := policyWire(203, `{"record":{"id":null,"name":"actual","cls":false}}`)
 		response.Header.Set("X-Proof", "member")
 		return response, nil
-	})
+	}))
 	engine, err := neutronfind.New(context.Background(), client, policyProfile(true), nil)
 	if err != nil {
 		t.Fatal(err)
@@ -62,12 +62,12 @@ func TestSourceMemberGetNeverFallsBackAndRetainsRejectedAndDecodeEvidence(t *tes
 			cloud := testcloud.New(t)
 			calls := 0
 			client := cloud.Client("network", "/neutron/v2.0/")
-			cloud.Provider.HTTPClient.Transport = policyTransport(func(req *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 				calls++
 				res := policyWire(lane.code, lane.body)
 				res.Header.Set("X-Proof", "actual")
 				return res, nil
-			})
+			}))
 			engine, err := neutronfind.New(context.Background(), client, policyProfile(true), nil)
 			if err != nil {
 				t.Fatal(err)
@@ -99,12 +99,12 @@ func TestSourceConstructorClassCollisionIsOptInAndPreservesActualListPage(t *tes
 				calls := 0
 				client := cloud.Client("network", "/neutron/v2.0/")
 				body := `{"records":[{"id":"one","cls":` + raw + `}]}`
-				cloud.Provider.HTTPClient.Transport = policyTransport(func(req *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 					calls++
 					res := policyWire(200, body)
 					res.Header.Set("X-Proof", "page")
 					return res, nil
-				})
+				}))
 				engine, err := neutronfind.New(context.Background(), client, policyProfile(enabled), nil)
 				if err != nil {
 					t.Fatal(err)
@@ -163,9 +163,9 @@ func TestSourceMemberVersionAttributeUsesSelectedPolicyWhileWireStaysActual(t *t
 				cloud := testcloud.New(t)
 				client := cloud.Client("network", "/neutron/v2.0/")
 				client.Microversion = version
-				cloud.Provider.HTTPClient.Transport = policyTransport(func(req *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 					return policyWire(200, `{"record":{"id":"actual","microversion":"foreign"}}`), nil
-				})
+				}))
 				engine, err := neutronfind.New(context.Background(), client, policyProfile(enabled), nil)
 				if err != nil {
 					t.Fatal(err)
@@ -193,7 +193,7 @@ func TestSourceFindControlsNeverBecomeFetchQueryOrConstructorSeed(t *testing.T) 
 		cloud := testcloud.New(t)
 		client := cloud.Client("network", "/neutron/v2.0/")
 		calls := 0
-		cloud.Provider.HTTPClient.Transport = policyTransport(func(req *http.Request) (*http.Response, error) { calls++; return policyWire(200, `{"record":{}}`), nil })
+		cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) { calls++; return policyWire(200, `{"record":{}}`), nil }))
 		engine, err := neutronfind.New(context.Background(), client, policyProfile(true), nil)
 		if err != nil {
 			t.Fatal(err)
@@ -217,7 +217,7 @@ func TestSourceComputedLocationIgnoresResponseExtensionAndKeepsWire(t *testing.T
 				if lane == "list" {
 					body = `{"records":[` + row + `]}`
 				}
-				cloud.Provider.HTTPClient.Transport = policyTransport(func(req *http.Request) (*http.Response, error) { calls++; return policyWire(200, body), nil })
+				cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) { calls++; return policyWire(200, body), nil }))
 				engine, err := neutronfind.New(context.Background(), client, policyProfile(enabled), nil)
 				if err != nil {
 					t.Fatal(err)
@@ -277,7 +277,7 @@ func TestAlternatePhysicalMarkerIsOptInAndPrimaryPresenceWins(t *testing.T) {
 			profile.Query = append(profile.Query, neutronfind.QueryPair{Name: "limit", Wire: "limit"})
 			calls := 0
 			body := `{"records":[` + tc.row + `]}`
-			cloud.Provider.HTTPClient.Transport = policyTransport(func(req *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 				calls++
 				if calls == 1 {
 					if req.URL.Query().Get("marker") != "" {
@@ -289,7 +289,7 @@ func TestAlternatePhysicalMarkerIsOptInAndPrimaryPresenceWins(t *testing.T) {
 					t.Fatal("alternate marker changed primary presence", req.URL, calls, tc.want)
 				}
 				return policyWire(200, `{"records":[]}`), nil
-			})
+			}))
 			engine, err := neutronfind.New(context.Background(), client, profile, nil)
 			if err != nil {
 				t.Fatal(err)
@@ -334,7 +334,7 @@ func TestSourceRetryCannotAddUnselectedConditionsWhileBaselineRetainsPolicy(t *t
 					options.MoreHeaders[key] = "foreign"
 					return nil
 				}
-				cloud.Provider.HTTPClient.Transport = policyTransport(func(req *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 					calls++
 					if calls == 1 {
 						return policyWire(503, `{"error":"actual first"}`), nil
@@ -343,7 +343,7 @@ func TestSourceRetryCannotAddUnselectedConditionsWhileBaselineRetainsPolicy(t *t
 						t.Fatal(req.Header, calls)
 					}
 					return policyWire(200, `{"record":{"id":"one"}}`), nil
-				})
+				}))
 				engine, err := neutronfind.New(context.Background(), client, policyProfile(enabled), nil)
 				if err != nil {
 					t.Fatal(err)
@@ -369,11 +369,11 @@ func TestSourceMemberHeaderCoalescesActualValuesWithoutChangingBaseline(t *testi
 		t.Run(map[bool]string{false: "baseline", true: "Source"}[enabled], func(t *testing.T) {
 			cloud := testcloud.New(t)
 			client := cloud.Client("network", "/neutron/v2.0/")
-			cloud.Provider.HTTPClient.Transport = policyTransport(func(req *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 				r := policyWire(200, `{"record":{"id":"one"}}`)
 				r.Header["If-Match"] = []string{"a", "b"}
 				return r, nil
-			})
+			}))
 			profile := policyProfile(enabled)
 			profile.Headers[0].Kind = neutronfind.List
 			engine, err := neutronfind.New(context.Background(), client, profile, nil)
@@ -402,12 +402,12 @@ func TestSourceMemberHeaderCoalescesActualValuesWithoutChangingBaseline(t *testi
 func TestSourceHeaderCanonicalCaseIsLiteralAndWireAliasIsInsensitive(t *testing.T) {
 	cloud := testcloud.New(t)
 	client := cloud.Client("network", "/neutron/v2.0/")
-	cloud.Provider.HTTPClient.Transport = policyTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		if req.URL.Query().Get("IF_MATCH") != "extension" || req.URL.Query().Get("IF-MATCH") != "selected" {
 			t.Fatal(req.URL)
 		}
 		return policyWire(200, `{"record":{"id":"one"}}`), nil
-	})
+	}))
 	profile := policyProfile(true)
 	profile.Headers[0].Kind = neutronfind.List
 	engine, err := neutronfind.New(context.Background(), client, profile, nil)

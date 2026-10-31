@@ -243,14 +243,14 @@ func TestFindIdentityMissingPolicyNeverHidesFallbackHTTPOrAddsSuppressedCause(t 
 			} else if mode == "input-snapshot" {
 				options = append(options, request.WithOptions(senlin.FindOpts{IgnoreMissing: &ignored}), func(config *request.Config[senlin.FindOpts]) error { captured = config; return nil })
 				native := cloud.Provider.HTTPClient.Transport
-				cloud.Provider.HTTPClient.Transport = findIdentityTransport(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					response, err := native.RoundTrip(r)
 					if strings.HasSuffix(r.URL.Path, "/items/wanted") {
 						ignored = false
 						captured.Options.Fallback = resource.FindFallbackNever
 					}
 					return response, err
-				})
+				}))
 			}
 			value, err := senlin.FindIdentity(context.Background(), findIdentityClient(cloud), findIdentitySpec, normalizeFindIdentity, "wanted", options...)
 			if mode == "strict-empty" {
@@ -275,10 +275,6 @@ func TestFindIdentityMissingPolicyNeverHidesFallbackHTTPOrAddsSuppressedCause(t 
 		})
 	}
 }
-
-type findIdentityTransport func(*http.Request) (*http.Response, error)
-
-func (f findIdentityTransport) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
 
 func TestFindIdentityOwnsRequestSnapshotAcrossReauthAndBothPhases(t *testing.T) {
 	cloud := testcloud.New(t)
@@ -329,7 +325,7 @@ func TestFindIdentityOwnsRequestSnapshotAcrossReauthAndBothPhases(t *testing.T) 
 		return nil
 	}
 	native := cloud.Provider.HTTPClient.Transport
-	cloud.Provider.HTTPClient.Transport = findIdentityTransport(func(r *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		response, err := native.RoundTrip(r)
 		if err == nil && strings.HasSuffix(r.URL.Path, "/items/wanted") && response.StatusCode == 403 {
 			source.MoreHeaders["x-find"] = "changed-source"
@@ -338,7 +334,7 @@ func TestFindIdentityOwnsRequestSnapshotAcrossReauthAndBothPhases(t *testing.T) 
 			cloud.Provider.SetToken("page-token")
 		}
 		return response, err
-	})
+	}))
 	value, err := senlin.FindIdentity(context.Background(), source, findIdentitySpec, normalizeFindIdentity, "wanted",
 		request.WithOptions(senlin.FindOpts{IgnoreMissing: &ignored}),
 		senlin.WithFindHeader("x-find", "earlier"), senlin.WithFindHeader("X-FIND", "request"), senlin.WithFindHeader("Accept", "application/vnd.find+json"),
@@ -417,7 +413,7 @@ func TestFindIdentityAcceptedReadAndTransportErrorsNeverTriggerFallback(t *testi
 			if strings.HasSuffix(mode, "native-cause") {
 				cause = gophercloud.ErrUnexpectedResponseCode{Actual: 404, Body: []byte(`{"error":"nested cause"}`)}
 			}
-			provider := &gophercloud.ProviderClient{HTTPClient: http.Client{Transport: findIdentityTransport(func(r *http.Request) (*http.Response, error) {
+			provider := &gophercloud.ProviderClient{HTTPClient: http.Client{Transport: testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls++
 				if r.URL.Path != "/v1/project/items/wanted" {
 					t.Error("failure unexpectedly invoked fallback", r.URL)
@@ -425,7 +421,7 @@ func TestFindIdentityAcceptedReadAndTransportErrorsNeverTriggerFallback(t *testi
 				if strings.HasPrefix(mode, "transport") {
 					return nil, cause
 				}
-				return &http.Response{StatusCode: 200, Header: http.Header{"X-Request-Id": {"read-proof"}}, Body: &findIdentityReadFailure{cause: cause}}, nil
+				return testcloud.StreamResponse(200, &findIdentityReadFailure{cause: cause}, http.Header{"X-Request-Id": {"read-proof"}}), nil
 			})}}
 			provider.UseTokenLock()
 			provider.SetToken("token")
@@ -471,7 +467,7 @@ func TestFindIdentityRechecksOriginalSourceEffectiveGatesAndCancellation(t *test
 				}
 			})
 			native := cloud.Provider.HTTPClient.Transport
-			cloud.Provider.HTTPClient.Transport = findIdentityTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				response, err := native.RoundTrip(r)
 				if err != nil {
 					return response, err
@@ -489,7 +485,7 @@ func TestFindIdentityRechecksOriginalSourceEffectiveGatesAndCancellation(t *test
 					source.Type = "compute"
 				}
 				return response, nil
-			})
+			}))
 			var options []senlin.FindOption
 			if mode != "uncontrolled-downshift" {
 				options = append(options, senlin.WithFindMicroversion("1.7"))

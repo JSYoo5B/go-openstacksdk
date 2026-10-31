@@ -124,13 +124,13 @@ func TestNativeFlavorExtraSpecsNativeFailuresRemainTerminal(t *testing.T) {
 			cloud := testcloud.New(t)
 			var calls atomic.Int32
 			sentinel := errors.New("native-extra-specs-cause")
-			cloud.Provider.HTTPClient.Transport = roundTripFunc(func(request *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(request *http.Request) (*http.Response, error) {
 				calls.Add(1)
 				if !read {
 					return nil, sentinel
 				}
 				return &http.Response{StatusCode: 200, Header: http.Header{"Content-Type": {"application/json"}}, Request: request, Body: nativeListReadError{sentinel}}, nil
-			})
+			}))
 			value, err := nativefind.FlavorExtraSpecs(context.Background(), cloud.Client("compute", "/reverse"), &flavors.Flavor{ID: "canonical"})
 			if value != nil || !errors.Is(err, sentinel) || calls.Load() != 1 {
 				t.Fatal(value, err, calls.Load())
@@ -165,7 +165,7 @@ func TestNativeFlavorExtraSpecsSharesLiveSourceAndFreezesInput(t *testing.T) {
 	if transport == nil {
 		transport = http.DefaultTransport
 	}
-	provider.HTTPClient.Transport = roundTripFunc(func(request *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.RoundTripperFunc(func(request *http.Request) (*http.Response, error) {
 		middleware.Add(1)
 		if request.Context().Value(struct{ value string }{"native"}) != "request-context" {
 			t.Error("caller context was replaced")
@@ -174,7 +174,7 @@ func TestNativeFlavorExtraSpecsSharesLiveSourceAndFreezesInput(t *testing.T) {
 		input.Name = "changed"
 		input.ExtraSpecs["late"] = "input"
 		return transport.RoundTrip(request)
-	})
+	}))
 	value, err := nativefind.FlavorExtraSpecs(ctx, client, input)
 	if err != nil || value == nil || value.ID != "canonical" || value.Name != "original" || !reflect.DeepEqual(value.ExtraSpecs, map[string]string{"from": "native"}) {
 		t.Fatal(value, err)
