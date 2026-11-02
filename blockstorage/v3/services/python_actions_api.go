@@ -5,6 +5,8 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"net/http"
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/internal/cinderowned"
@@ -73,9 +75,9 @@ func (a *API) Failover(ctx context.Context, service ServiceTarget, options ...Fa
 	return serviceAction(ctx, a, "Failover", "failover", service, nil, true, options)
 }
 
-func serviceAction[O ~func(*ActionOpts) error](ctx context.Context, a *API, op, action string, service ServiceTarget, body map[string]json.RawMessage, probe bool, options []O) (*ServiceRecord, error) {
+func serviceAction(ctx context.Context, a *API, op, action string, service ServiceTarget, body map[string]json.RawMessage, probe bool, options []request.WriteCall) (*ServiceRecord, error) {
 	t := a.actionTarget()
-	p, v, err := cinderowned.Begin(ctx, t, ActionOpts{}, copyAction, actionHeaders, defaultVersion, options)
+	p, v, err := cinderowned.Begin(ctx, t, ActionOpts{}, copyAction, actionHeaders, defaultVersion, calls.Translate(options, actionCalls))
 	if err != nil {
 		return nil, t.Wrap(ctx, op, err)
 	}
@@ -117,7 +119,7 @@ func serviceAction[O ~func(*ActionOpts) error](ctx context.Context, a *API, op, 
 func (a *API) SetLogLevels(ctx context.Context, level string, options ...LogOption) (*ActionReceipt, error) {
 	const op = "SetLogLevels"
 	t := a.actionTarget()
-	p, v, err := cinderowned.Begin(ctx, t, LogOpts{}, copyLog, func(v LogOpts) map[string]string { return v.Headers }, logVersion, options)
+	p, v, err := cinderowned.Begin(ctx, t, LogOpts{}, copyLog, func(v LogOpts) map[string]string { return v.Headers }, logVersion, calls.Translate(options, logCalls))
 	if err != nil {
 		return receipt(p, nil, nil), t.Wrap(ctx, op, err)
 	}
@@ -133,7 +135,7 @@ func (a *API) SetLogLevels(ctx context.Context, level string, options ...LogOpti
 func (a *API) GetLogLevels(ctx context.Context, options ...LogOption) (*LogLevels, error) {
 	const op = "GetLogLevels"
 	t := a.actionTarget()
-	p, v, err := cinderowned.Begin(ctx, t, LogOpts{}, copyLog, func(v LogOpts) map[string]string { return v.Headers }, logVersion, options)
+	p, v, err := cinderowned.Begin(ctx, t, LogOpts{}, copyLog, func(v LogOpts) map[string]string { return v.Headers }, logVersion, calls.Translate(options, logCalls))
 	if err != nil {
 		return logLevels(receipt(p, nil, nil)), t.Wrap(ctx, op, err)
 	}

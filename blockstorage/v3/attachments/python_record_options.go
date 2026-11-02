@@ -5,6 +5,8 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"maps"
 	"net/url"
 	"strconv"
@@ -23,7 +25,14 @@ type RecordCreateOpts struct {
 	// Nil performs guarded Cinder discovery automatically for falsey mode.
 	ModeSupported *bool
 }
-type RecordCreateOption func(*RecordCreateOpts) error
+
+// RecordCreateOption is one option of CreateRecord: WithRecordCreateOpts,
+// WithRecordCreateModeSupported, request.Field (a declared attribute or wire
+// name; aliases follow caller order and unknown keys are ignored),
+// request.Headers (replaces the headers) or request.Custom over
+// *RecordCreateOpts. Other shared calls fail with resource.ErrInvalidOption
+// before HTTP.
+type RecordCreateOption = request.WriteCall
 
 func pythonAttachmentCopyCreate(v RecordCreateOpts) RecordCreateOpts {
 	v.Fields = pythonAttachmentClone(v.Fields)
@@ -36,35 +45,10 @@ func pythonAttachmentCopyCreate(v RecordCreateOpts) RecordCreateOpts {
 }
 func WithRecordCreateOpts(v RecordCreateOpts) RecordCreateOption {
 	owned := pythonAttachmentCopyCreate(v)
-	return func(c *RecordCreateOpts) error { *c = pythonAttachmentCopyCreate(owned); return nil }
-}
-
-// WithRecordCreateField accepts declared attribute or wire names. Ordered
-// options give aliases deterministic last-write precedence.
-func WithRecordCreateField(key string, value any) RecordCreateOption {
-	name, ok := pythonAttachmentField(key)
-	if !ok {
-		return func(*RecordCreateOpts) error { return nil }
-	}
-	raw, err := json.Marshal(value)
-	owned := bytes.Clone(raw)
-	return func(c *RecordCreateOpts) error {
-		if err != nil {
-			return err
-		}
-		if c.Fields == nil {
-			c.Fields = make(map[string]json.RawMessage)
-		}
-		c.Fields[name] = bytes.Clone(owned)
-		return nil
-	}
-}
-func WithRecordCreateHeaders(v map[string]string) RecordCreateOption {
-	owned := maps.Clone(v)
-	return func(c *RecordCreateOpts) error { c.Headers = maps.Clone(owned); return nil }
+	return request.Custom(func(c *RecordCreateOpts) error { *c = pythonAttachmentCopyCreate(owned); return nil })
 }
 func WithRecordCreateModeSupported(v bool) RecordCreateOption {
-	return func(c *RecordCreateOpts) error { x := v; c.ModeSupported = &x; return nil }
+	return request.Custom(func(c *RecordCreateOpts) error { x := v; c.ModeSupported = &x; return nil })
 }
 
 // RecordListOpts splits known server parameters from declared local filters.
@@ -78,7 +62,15 @@ type RecordListOpts struct {
 	MaxItems     int
 	Paginated    *bool
 }
-type RecordListOption func(*RecordListOpts) error
+
+// RecordListOption is one option of ListRecords: WithRecordListOpts,
+// request.Query (a Source server query or declared local filter; the value
+// is sent as JSON and other keys are ignored), request.Limit,
+// request.Marker, request.MaxItems, request.Paginated, request.Microversion,
+// request.Headers (replaces the headers) or request.Custom over
+// *RecordListOpts. Other shared calls fail with resource.ErrInvalidOption
+// before HTTP.
+type RecordListOption = request.ListCall
 
 func pythonAttachmentCopyList(v RecordListOpts) RecordListOpts {
 	v.Query = pythonAttachmentClone(v.Query)
@@ -99,7 +91,7 @@ func pythonAttachmentCopyList(v RecordListOpts) RecordListOpts {
 }
 func WithRecordListOpts(v RecordListOpts) RecordListOption {
 	owned := pythonAttachmentCopyList(v)
-	return func(c *RecordListOpts) error { *c = pythonAttachmentCopyList(owned); return nil }
+	return request.Custom(func(c *RecordListOpts) error { *c = pythonAttachmentCopyList(owned); return nil })
 }
 func pythonAttachmentServerQuery(key string) (string, bool) {
 	switch key {
@@ -120,43 +112,50 @@ func pythonAttachmentLocalQuery(key string) bool {
 	}
 	return false
 }
-func WithRecordListQuery(key string, value any) RecordListOption {
-	_, server := pythonAttachmentServerQuery(key)
-	if !server && !pythonAttachmentLocalQuery(key) {
-		return func(*RecordListOpts) error { return nil }
+
+var (
+	recordCreateCalls = calls.Spec[RecordCreateOpts]{
+		Headers: calls.Value(func(c *RecordCreateOpts) *map[string]string { return &c.Headers }),
+		Field: func(c *RecordCreateOpts, entry request.CallEntry) error {
+			name, ok := pythonAttachmentField(entry.Key)
+			if !ok {
+				return nil
+			}
+			if entry.JSONErr != nil {
+				return entry.JSONErr
+			}
+			if c.Fields == nil {
+				c.Fields = make(map[string]json.RawMessage)
+			}
+			c.Fields[name] = bytes.Clone(entry.JSON)
+			return nil
+		},
 	}
-	raw, err := json.Marshal(value)
-	owned := bytes.Clone(raw)
-	return func(c *RecordListOpts) error {
-		if err != nil {
-			return err
-		}
-		if c.Query == nil {
-			c.Query = make(map[string]json.RawMessage)
-		}
-		c.Query[key] = bytes.Clone(owned)
-		return nil
+	recordListCalls = calls.Spec[RecordListOpts]{
+		Headers:      calls.Value(func(c *RecordListOpts) *map[string]string { return &c.Headers }),
+		Microversion: calls.Pointer(func(c *RecordListOpts) **string { return &c.Microversion }),
+		Query: func(c *RecordListOpts, entry request.CallEntry) error {
+			if _, server := pythonAttachmentServerQuery(entry.Key); !server && !pythonAttachmentLocalQuery(entry.Key) {
+				return nil
+			}
+			if entry.JSONErr != nil {
+				return entry.JSONErr
+			}
+			if c.Query == nil {
+				c.Query = make(map[string]json.RawMessage)
+			}
+			c.Query[entry.Key] = bytes.Clone(entry.JSON)
+			return nil
+		},
+		Paging: calls.Paging[RecordListOpts]{
+			Limit:     calls.Pointer(func(c *RecordListOpts) **int { return &c.Limit }),
+			Marker:    calls.Value(func(c *RecordListOpts) *string { return &c.Marker }),
+			MaxItems:  calls.Value(func(c *RecordListOpts) *int { return &c.MaxItems }),
+			Paginated: calls.Pointer(func(c *RecordListOpts) **bool { return &c.Paginated }),
+		},
 	}
-}
-func WithRecordListLimit(v int) RecordListOption {
-	return func(c *RecordListOpts) error { x := v; c.Limit = &x; return nil }
-}
-func WithRecordListMarker(v string) RecordListOption {
-	return func(c *RecordListOpts) error { c.Marker = v; return nil }
-}
-func WithRecordListMaxItems(v int) RecordListOption {
-	return func(c *RecordListOpts) error { c.MaxItems = v; return nil }
-}
-func WithRecordListPaginated(v bool) RecordListOption {
-	return func(c *RecordListOpts) error { x := v; c.Paginated = &x; return nil }
-}
-func WithRecordListMicroversion(v string) RecordListOption {
-	return func(c *RecordListOpts) error { x := v; c.Microversion = &x; return nil }
-}
-func WithRecordListHeaders(v map[string]string) RecordListOption {
-	owned := maps.Clone(v)
-	return func(c *RecordListOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
+)
+
 func pythonAttachmentApply[T any, O ~func(*T) error](ctx context.Context, guard func(context.Context) error, value T, copyValue func(T) T, options []O) (T, error) {
 	for _, option := range options {
 		if err := guard(ctx); err != nil {

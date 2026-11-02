@@ -38,9 +38,9 @@ func main() {
     scope, err := quotasets.New(client).InProject(context.Background(), resource.ID("project-id"))
     if err != nil { panic(err) }
     result, err := scope.RevertRecord(context.Background(),
-        quotasets.WithQuotaRevertQuery("user_id", "user-id"),
-        quotasets.WithQuotaRevertQuery("force", false),
-        quotasets.WithQuotaRevertQuery("optional", nil))
+        request.Query("user_id", "user-id"),
+        request.Query("force", false),
+        request.Query("optional", nil))
     if err != nil { panic(err) }
     fmt.Println(result.ProjectID, result.StatusCode)
 }

@@ -298,7 +298,7 @@ func TestCinderMetadataScopesNameBindingAndRequestSnapshots(t *testing.T) {
 			headers := map[string]string{"X-Snapshot": "before"}
 			option := metadata.WithHeaders(headers)
 			headers["X-Snapshot"] = "after"
-			mutate := metadata.Option(func(cfg *request.Config[metadata.Opts]) error { values["owner"] = "after-options"; return nil })
+			mutate := metadata.Option(request.Custom(func(cfg *request.Config[metadata.Opts]) error { values["owner"] = "after-options"; return nil }))
 			v, err := s.Merge(context.Background(), values, option, mutate)
 			if err != nil || v == nil || v.Metadata["owner"] != "server" || mutations.Load() != 1 || lists.Load() != wantLists || values["owner"] != "after-options" {
 				t.Fatal(v, err, mutations.Load(), lists.Load(), values)
@@ -470,19 +470,19 @@ func TestCinderMetadataScopesHeaderVersionAndETagPolicies(t *testing.T) {
 				client.Microversion = "3.15"
 			}
 			s := cinderMetadataBind(t, f, client)
-			options := []metadata.Option{metadata.WithHeader("X-Trace", "caller"), metadata.WithHeader("X-Option", "first"), metadata.WithHeader("x-option", "last")}
+			options := []metadata.Option{request.Header("X-Trace", "caller"), request.Header("X-Option", "first"), request.Header("x-option", "last")}
 			v, err := s.Get(context.Background(), options...)
 			if err != nil || v == nil || v.Header.Get("ETag") != `"current"` {
 				t.Fatal(v, err)
 			}
-			v, err = s.Replace(context.Background(), map[string]string{"server": "next"}, append(options, metadata.WithHeader("If-Match", `"stale"`))...)
+			v, err = s.Replace(context.Background(), map[string]string{"server": "next"}, append(options, request.Header("If-Match", `"stale"`))...)
 			var native gophercloud.ErrUnexpectedResponseCode
 			if v != nil || !errors.As(err, &native) || native.Actual != 412 || calls.Load() != 2 {
 				t.Fatal("If-Match was interpreted or retried locally", v, err, calls.Load())
 			}
 			client.MoreHeaders["If-Match"] = `"configured"`
 			before := calls.Load()
-			_, err = s.Get(context.Background(), metadata.WithHeader("If-Match", `"different"`))
+			_, err = s.Get(context.Background(), request.Header("If-Match", `"different"`))
 			if !errors.Is(err, resource.ErrInvalidOption) || calls.Load() != before {
 				t.Fatal("conditional source conflict sent HTTP", err, calls.Load())
 			}
@@ -496,14 +496,14 @@ func TestCinderMetadataScopesHeaderVersionAndETagPolicies(t *testing.T) {
 		client := cloud.Client("block-storage", f.prefix())
 		s := cinderMetadataBind(t, f, client)
 		for _, option := range []metadata.Option{
-			metadata.WithHeader("X-Auth-Token", "different"), metadata.WithHeader("OpenStack-API-Version", "volume 3.99"), metadata.WithHeader("Host", "elsewhere"),
-			func(c *request.Config[metadata.Opts]) error { c.Fields["metadata"] = json.RawMessage(`{}`); return nil },
-			func(c *request.Config[metadata.Opts]) error { c.Query.Set("target", "elsewhere"); return nil },
-			func(c *request.Config[metadata.Opts]) error { c.Arguments["base_path"] = "other"; return nil },
-			func(c *request.Config[metadata.Opts]) error {
+			request.Header("X-Auth-Token", "different"), request.Header("OpenStack-API-Version", "volume 3.99"), request.Header("Host", "elsewhere"),
+			request.Custom(func(c *request.Config[metadata.Opts]) error { c.Fields["metadata"] = json.RawMessage(`{}`); return nil }),
+			request.Custom(func(c *request.Config[metadata.Opts]) error { c.Query.Set("target", "elsewhere"); return nil }),
+			request.Custom(func(c *request.Config[metadata.Opts]) error { c.Arguments["base_path"] = "other"; return nil }),
+			request.Custom(func(c *request.Config[metadata.Opts]) error {
 				c.Headers["X-Case"], c.Headers["x-case"] = "first", "different"
 				return nil
-			},
+			}),
 		} {
 			_, err := s.Get(context.Background(), option)
 			if err == nil || calls.Load() != 0 {

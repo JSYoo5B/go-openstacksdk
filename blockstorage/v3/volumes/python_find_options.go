@@ -10,9 +10,11 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/jsonfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -29,7 +31,31 @@ type RecordFindOpts struct {
 	MaxItems      int
 	Paginated     *bool
 }
-type RecordFindOption func(*RecordFindOpts) error
+
+// RecordFindOption is one option of FindRecord: WithRecordFindOpts,
+// WithRecordFindDetails, WithRecordFindAllProjects, WithRecordFindLocation,
+// WithRecordFindMaxItems, WithRecordFindPaginated, request.Custom over
+// *RecordFindOpts, request.IgnoreMissing, request.Headers (replaces the
+// headers) or request.Query (a Resource.find keyword argument sent as JSON:
+// member GET sees ordinary Requests query values; the fallback list classifies
+// declared server filters and Body-local filters and drops unknown kwargs).
+// Other shared calls fail with resource.ErrInvalidOption before HTTP.
+type RecordFindOption = request.FindCall
+
+var recordFindCalls = calls.Spec[RecordFindOpts]{
+	IgnoreMissing: calls.Pointer(func(c *RecordFindOpts) **bool { return &c.IgnoreMissing }),
+	Headers:       calls.Value(func(c *RecordFindOpts) *map[string]string { return &c.Headers }),
+	Query: calls.JSONQuery(func(c *RecordFindOpts, key string, raw json.RawMessage, err error) error {
+		if err != nil {
+			return err
+		}
+		if c.Query == nil {
+			c.Query = make(map[string]json.RawMessage)
+		}
+		c.Query[key] = raw
+		return nil
+	}),
+}
 
 func copyFindOpts(value RecordFindOpts) RecordFindOpts {
 	value.Query = findFields(value.Query)
@@ -58,55 +84,31 @@ func copyFindOpts(value RecordFindOpts) RecordFindOpts {
 }
 func WithRecordFindOpts(value RecordFindOpts) RecordFindOption {
 	owned := copyFindOpts(value)
-	return func(c *RecordFindOpts) error { *c = copyFindOpts(owned); return nil }
-}
-func WithRecordFindIgnoreMissing(value bool) RecordFindOption {
-	return func(c *RecordFindOpts) error { x := value; c.IgnoreMissing = &x; return nil }
+	return request.Custom(func(c *RecordFindOpts) error { *c = copyFindOpts(owned); return nil })
 }
 func WithRecordFindDetails(value bool) RecordFindOption {
-	return func(c *RecordFindOpts) error { x := value; c.Details = &x; return nil }
+	return request.Custom(func(c *RecordFindOpts) error { x := value; c.Details = &x; return nil })
 }
 
 // WithRecordFindAllProjects changes only the fallback list. False omits the
 // automatic field; true sends all_tenants=True as the pinned proxy does.
 func WithRecordFindAllProjects(value bool) RecordFindOption {
-	return func(c *RecordFindOpts) error { x := value; c.AllProjects = &x; return nil }
+	return request.Custom(func(c *RecordFindOpts) error { x := value; c.AllProjects = &x; return nil })
 }
 
 // WithRecordFindLocation supplies recorded connection location, copied once
 // at construction and again per call. Row project/zone remain authoritative.
 func WithRecordFindLocation(value resource.CloudLocation) RecordFindOption {
 	owned := value.Clone()
-	return func(c *RecordFindOpts) error { x := owned.Clone(); c.Location = &x; return nil }
+	return request.Custom(func(c *RecordFindOpts) error { x := owned.Clone(); c.Location = &x; return nil })
 }
 func WithRecordFindMaxItems(value int) RecordFindOption {
-	return func(c *RecordFindOpts) error { c.MaxItems = value; return nil }
+	return request.Custom(func(c *RecordFindOpts) error { c.MaxItems = value; return nil })
 }
 func WithRecordFindPaginated(value bool) RecordFindOption {
-	return func(c *RecordFindOpts) error { x := value; c.Paginated = &x; return nil }
-}
-func WithRecordFindHeaders(values map[string]string) RecordFindOption {
-	owned := maps.Clone(values)
-	return func(c *RecordFindOpts) error { c.Headers = maps.Clone(owned); return nil }
+	return request.Custom(func(c *RecordFindOpts) error { x := value; c.Paginated = &x; return nil })
 }
 
-// WithRecordFindQuery extends the underlying Resource.find kwargs: member GET
-// sees ordinary Requests query values; fallback classifies declared server
-// filters and Body-local filters, dropping unknown kwargs from the list.
-func WithRecordFindQuery(key string, value any) RecordFindOption {
-	raw, err := json.Marshal(value)
-	owned := bytes.Clone(raw)
-	return func(c *RecordFindOpts) error {
-		if err != nil {
-			return err
-		}
-		if c.Query == nil {
-			c.Query = make(map[string]json.RawMessage)
-		}
-		c.Query[key] = bytes.Clone(owned)
-		return nil
-	}
-}
 func findKey(key string) error {
 	if strings.TrimSpace(key) == "" || !utf8.ValidString(key) {
 		return findInvalid("query key must be nonblank UTF-8")

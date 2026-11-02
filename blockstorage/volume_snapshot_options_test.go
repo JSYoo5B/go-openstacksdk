@@ -8,6 +8,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -87,10 +88,10 @@ func vsopPrepareCallbacks(ctx context.Context, kind string, nilIndex int, callba
 		for i, callback := range callbacks {
 			callback := callback
 			if i != nilIndex {
-				options[i] = func(next *VolumeSnapshotListOpts) error {
+				options[i] = request.Custom(func(next *VolumeSnapshotListOpts) error {
 					next.Location = &resource.CloudLocation{Project: resource.CloudProject{ID: json.RawMessage(`{"entered":true}`)}}
 					return callback()
-				}
+				})
 			}
 		}
 		return PrepareVolumeSnapshotListOptions(ctx, options...)
@@ -125,11 +126,11 @@ func TestVolumeSnapshotPreparePreservesOmissionAndExplicitFalseZeroEmptyPolicies
 	if err != nil || !reflect.DeepEqual(list, VolumeSnapshotListOpts{}) {
 		t.Fatal(list, err)
 	}
-	list, err = PrepareVolumeSnapshotListOptions(context.Background(), WithVolumeSnapshotListDetailed(false), WithVolumeSnapshotListPagination(false), WithVolumeSnapshotListMaxItems(0), WithVolumeSnapshotListMicroversion(""), WithVolumeSnapshotListExpression(""), WithVolumeSnapshotListAllowUnknownParams(false), WithVolumeSnapshotListHeaders(map[string]string{}))
+	list, err = PrepareVolumeSnapshotListOptions(context.Background(), WithVolumeSnapshotListDetailed(false), request.Paginated(false), request.MaxItems(0), request.Microversion(""), WithVolumeSnapshotListExpression(""), WithVolumeSnapshotListAllowUnknownParams(false), request.Headers(map[string]string{}))
 	if err != nil || list.Detailed == nil || *list.Detailed || list.Paginated == nil || *list.Paginated || list.MaxItems == nil || *list.MaxItems != 0 || list.Microversion == nil || *list.Microversion != "" || list.Expression == nil || *list.Expression != "" || list.AllowUnknownParams == nil || *list.AllowUnknownParams || list.Headers == nil || len(list.Headers) != 0 || list.Filters != nil || list.Location != nil || list.ConflictingAttrs != nil {
 		t.Fatal(list, err)
 	}
-	explicit, err := PrepareVolumeSnapshotListOptions(context.Background(), WithVolumeSnapshotListHeaders(nil))
+	explicit, err := PrepareVolumeSnapshotListOptions(context.Background(), request.Headers(nil))
 	if err != nil || explicit.Headers != nil {
 		t.Fatal(explicit, err)
 	}
@@ -281,11 +282,11 @@ func TestVolumeSnapshotSearchExpressionFactoryEncodesLiteralAndSearchOptionsOwnI
 func TestVolumeSnapshotIndividualListFactoriesRemainIndependentAndLaterOptionsOverride(t *testing.T) {
 	filters, conflicting := json.RawMessage(`{"name":"chosen"}`), json.RawMessage(`{"status":"available"}`)
 	headers := map[string]string{"X-Probe": "entry"}
-	filtersFactory, conflictingFactory, headersFactory := WithVolumeSnapshotListFilters(filters), WithVolumeSnapshotListConflictingAttrs(conflicting), WithVolumeSnapshotListHeaders(headers)
+	filtersFactory, conflictingFactory, headersFactory := WithVolumeSnapshotListFilters(filters), WithVolumeSnapshotListConflictingAttrs(conflicting), request.Headers(headers)
 	filters[0] = '!'
 	conflicting[0] = '!'
 	headers["X-Probe"] = "caller changed"
-	options := []VolumeSnapshotListOption{WithVolumeSnapshotListOptions(vsopListValue()), filtersFactory, conflictingFactory, headersFactory, WithVolumeSnapshotListDetailed(true), WithVolumeSnapshotListPagination(true), WithVolumeSnapshotListMaxItems(0), WithVolumeSnapshotListMicroversion(""), WithVolumeSnapshotListExpression(""), WithVolumeSnapshotListAllowUnknownParams(true)}
+	options := []VolumeSnapshotListOption{WithVolumeSnapshotListOptions(vsopListValue()), filtersFactory, conflictingFactory, headersFactory, WithVolumeSnapshotListDetailed(true), request.Paginated(true), request.MaxItems(0), request.Microversion(""), WithVolumeSnapshotListExpression(""), WithVolumeSnapshotListAllowUnknownParams(true)}
 	first, err := PrepareVolumeSnapshotListOptions(context.Background(), options...)
 	if err != nil || string(*first.Filters) != `{"name":"chosen"}` || string(*first.ConflictingAttrs) != `{"status":"available"}` || first.Headers["X-Probe"] != "entry" || !*first.Detailed || !*first.Paginated || *first.MaxItems != 0 || *first.Microversion != "" || *first.Expression != "" || !*first.AllowUnknownParams || first.Location == nil {
 		t.Fatal(first, err)
@@ -388,14 +389,14 @@ func TestVolumeSnapshotOriginalsRunOnceInCapturedOrderAndRetainedConfigsCannotAl
 		var retained, late *VolumeSnapshotListOpts
 		var order []int
 		options := make([]VolumeSnapshotListOption, 2)
-		options[0] = func(next *VolumeSnapshotListOpts) error {
+		options[0] = request.Custom(func(next *VolumeSnapshotListOpts) error {
 			order = append(order, 1)
 			*next = original
 			retained = next
-			options[1] = func(*VolumeSnapshotListOpts) error { return errors.New("replaced callback ran") }
+			options[1] = request.Custom(func(*VolumeSnapshotListOpts) error { return errors.New("replaced callback ran") })
 			return nil
-		}
-		options[1] = func(next *VolumeSnapshotListOpts) error {
+		})
+		options[1] = request.Custom(func(next *VolumeSnapshotListOpts) error {
 			order = append(order, 2)
 			vsopDamageList(retained)
 			if !reflect.DeepEqual(*next, expected) {
@@ -403,7 +404,7 @@ func TestVolumeSnapshotOriginalsRunOnceInCapturedOrderAndRetainedConfigsCannotAl
 			}
 			late = next
 			return nil
-		}
+		})
 		got, err := PrepareVolumeSnapshotListOptions(context.Background(), options...)
 		if err != nil || !reflect.DeepEqual(order, []int{1, 2}) {
 			t.Fatal(got, err, order)

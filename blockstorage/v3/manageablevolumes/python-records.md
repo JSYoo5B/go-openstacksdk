@@ -16,7 +16,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/manageablevolumes.API.AllRecords`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/manageablevolumes.API.ProxyListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/manageablevolumes.WithRecordListDetails`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/manageablevolumes.WithRecordListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - The SDK defaults details to false and reads the underscore summary/detail route while extracting the literal hyphenated response collection; nullable Source descriptors cast reference dictionaries, safe_to_manage JSON truthiness and integer size, preserving physical page evidence and unknown wire fields.
   Tests: `blockstorage/v3/manageablevolumes/python_records_test.go:TestPythonManageableVolumesListDefaultsDetailsAndViews`.
@@ -39,7 +39,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/manageablesnapshots.API.AllRecords`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/manageablesnapshots.API.ProxyListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/manageablesnapshots.WithRecordListDetails`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/manageablesnapshots.WithRecordListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - The SDK defaults details to false and reads the underscore summary/detail route while extracting the literal hyphenated response collection; nullable Source descriptors cast reference dictionaries, safe_to_manage JSON truthiness and integer size, preserving physical page evidence and unknown wire fields.
   Tests: `blockstorage/v3/manageablesnapshots/python_records_test.go:TestPythonManageableSnapshotsListDefaultsDetailsAndViews`.
@@ -88,8 +88,8 @@ func main() {
     if err != nil { log.Fatal(err) }
     for row, err := range service.ManageableVolumes.ListRecords(ctx,
         manageablevolumes.WithRecordListDetails(false),
-        manageablevolumes.WithRecordListQuery("host", "host@backend"),
-        manageablevolumes.WithRecordListLimit(20), manageablevolumes.WithRecordListMaxItems(20)) {
+        request.Query("host", "host@backend"),
+        request.Limit(20), request.MaxItems(20)) {
         if err != nil { log.Fatal(err) }
         data, err := json.MarshalIndent(row.Resource, "", "  ")
         if err != nil { log.Fatal(err) }
@@ -97,8 +97,8 @@ func main() {
     }
     for row, err := range service.ManageableSnapshots.ListRecords(ctx,
         manageablesnapshots.WithRecordListDetails(true),
-        manageablesnapshots.WithRecordListQuery("host", "host@backend"),
-        manageablesnapshots.WithRecordListMaxItems(20)) {
+        request.Query("host", "host@backend"),
+        request.MaxItems(20)) {
         if err != nil { log.Fatal(err) }
         data, err := json.MarshalIndent(row.Resource, "", "  ")
         if err != nil { log.Fatal(err) }

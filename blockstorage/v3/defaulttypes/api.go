@@ -6,6 +6,7 @@ package defaulttypes
 import (
 	"context"
 	"encoding/json"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"iter"
 	"net/http"
 
@@ -53,7 +54,7 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Defaul
 	return func(yield func(*DefaultType, error) bool) {
 		const op = "List"
 		t := a.target()
-		p, v, err := cinderowned.Begin(ctx, t, ListOpts{}, cinderowned.CopyList, func(v ListOpts) map[string]string { return v.Headers }, version, options)
+		p, v, err := cinderowned.Begin(ctx, t, ListOpts{}, cinderowned.CopyList, func(v ListOpts) map[string]string { return v.Headers }, version, calls.Translate(options, listCalls))
 		if err != nil {
 			yield(nil, t.Wrap(ctx, op, err))
 			return
@@ -85,7 +86,7 @@ func (a *API) Get(ctx context.Context, projectID string, options ...Option) (*De
 	if err := cinderowned.ValidateID("project ID", projectID); err != nil {
 		return nil, t.Wrap(ctx, op, err)
 	}
-	p, _, err := cinderowned.Begin(ctx, t, Opts{}, cinderowned.CopyRead, readHeaders, version, options)
+	p, _, err := cinderowned.Begin(ctx, t, Opts{}, cinderowned.CopyRead, readHeaders, version, calls.Translate(options, readCalls))
 	if err != nil {
 		return nil, t.Wrap(ctx, op, err)
 	}
@@ -101,7 +102,7 @@ func (a *API) Set(ctx context.Context, projectID, volumeTypeID string, options .
 	if err := cinderowned.ValidateID("project ID", projectID); err != nil {
 		return nil, t.Wrap(ctx, op, err)
 	}
-	p, _, err := cinderowned.Begin(ctx, t, Opts{}, cinderowned.CopyRead, readHeaders, version, options)
+	p, _, err := cinderowned.Begin(ctx, t, Opts{}, cinderowned.CopyRead, readHeaders, version, calls.Translate(options, readCalls))
 	if err != nil {
 		return nil, t.Wrap(ctx, op, err)
 	}
@@ -119,14 +120,14 @@ func (a *API) Set(ctx context.Context, projectID, volumeTypeID string, options .
 }
 
 // Unset implements unset_default_type: DELETE default-types/{project_id}.
-// Python always ignores a 404; WithDeleteIgnoreMissing(false) keeps it.
+// Python always ignores a 404; request.IgnoreMissing(false) keeps it.
 func (a *API) Unset(ctx context.Context, projectID string, options ...DeleteOption) error {
 	const op = "Unset"
 	t := a.target()
 	if err := cinderowned.ValidateID("project ID", projectID); err != nil {
 		return t.Wrap(ctx, op, err)
 	}
-	p, v, err := cinderowned.Begin(ctx, t, DeleteOpts{}, cinderowned.CopyDelete, deleteHeaders, version, options)
+	p, v, err := cinderowned.Begin(ctx, t, DeleteOpts{}, cinderowned.CopyDelete, deleteHeaders, version, calls.Translate(options, deleteCalls))
 	if err != nil {
 		return t.Wrap(ctx, op, err)
 	}

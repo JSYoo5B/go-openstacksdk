@@ -8,10 +8,10 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"slices"
 	"strings"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cinderrequest"
 	"github.com/JSYoo5B/go-openstacksdk/internal/microversions"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
@@ -116,7 +116,7 @@ func (a *API) replicationRecord(ctx context.Context, id, op, action string, opti
 	if err = recordID(id); err != nil {
 		return nil, recordWrap(ctx, op, err)
 	}
-	cfg, err := applyRecord(p, RecordReplicationOpts{}, copyReplication, slices.Clone(options))
+	cfg, err := applyRecord(p, RecordReplicationOpts{}, copyReplication, calls.Translate(options, replicationCalls))
 	if err == nil {
 		err = p.prepareReplication(cfg.Microversion, cfg.Headers)
 	}
@@ -153,7 +153,7 @@ func (a *API) FailoverReplicationRecord(ctx context.Context, id string, options 
 	if err = recordID(id); err != nil {
 		return nil, recordWrap(ctx, op, err)
 	}
-	cfg, err := applyRecord(p, RecordFailoverOpts{}, copyFailover, slices.Clone(options))
+	cfg, err := applyRecord(p, RecordFailoverOpts{}, copyFailover, calls.Translate(options, failoverCalls))
 	if err == nil && cfg.SecondaryBackendID != nil && !utf8.ValidString(*cfg.SecondaryBackendID) {
 		err = recordInvalid("replication backend ID must be UTF-8")
 	}

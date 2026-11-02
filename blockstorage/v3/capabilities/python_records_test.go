@@ -3,6 +3,7 @@ package capabilities_test
 import (
 	"context"
 	"errors"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"net/http"
 	"testing"
 
@@ -41,7 +42,7 @@ func TestPythonCinderCapabilitiesOwnedHeadersAndPreflight(t *testing.T) {
 	})
 	api := capabilities.New(cloud.Client("volumev3", "/cinder/v3/"))
 	headers := map[string]string{"X-Owned": "original"}
-	option := capabilities.WithHeaders(headers)
+	option := request.Headers(headers)
 	headers["X-Owned"] = "changed"
 	if _, err := api.GetRecord(context.Background(), "host", option); err != nil {
 		t.Fatal(err)

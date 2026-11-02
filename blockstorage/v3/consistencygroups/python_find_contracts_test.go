@@ -11,6 +11,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroups"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -91,7 +92,7 @@ func TestPythonCinderConsistencyGroupFindRecordMissingRequiresSuccessfulList(t *
 		})
 		options := []consistencygroups.RecordFindOption{}
 		if !ignore {
-			options = append(options, consistencygroups.WithRecordFindIgnoreMissing(false))
+			options = append(options, request.IgnoreMissing(false))
 		}
 		value, err := api.FindRecord(context.Background(), "missing", options...)
 		if value != nil || calls.Len() != 2 || (err == nil) != ignore || !ignore && !errors.Is(err, resource.ErrNotFound) || gophercloud.ResponseCodeIs(err, 403) {
@@ -222,7 +223,7 @@ func TestPythonCinderConsistencyGroupFindRecordOptionsOwnBothPhaseSnapshots(t *t
 		}
 		return cgWire(200, `{"consistencygroups":[{"id":"found","name":"target"}]}`)
 	})
-	value, err := api.FindRecord(context.Background(), "target", option, func(v *consistencygroups.RecordFindOpts) error { held = v; return nil })
+	value, err := api.FindRecord(context.Background(), "target", option, request.Custom(func(v *consistencygroups.RecordFindOpts) error { held = v; return nil }))
 	if err != nil || value == nil || calls.Len() != 2 || cgCalls(calls)[1].path != cgBase {
 		t.Fatal(value, err, cgCalls(calls))
 	}
@@ -249,15 +250,15 @@ func TestPythonCinderConsistencyGroupFindRecordPreflightAndStickyOriginalSource(
 			return err
 		},
 		func(api *consistencygroups.API) error {
-			_, err := api.FindRecord(context.Background(), "id", consistencygroups.WithRecordFindMicroversion("bad"))
+			_, err := api.FindRecord(context.Background(), "id", request.Microversion("bad"))
 			return err
 		},
 		func(api *consistencygroups.API) error {
-			_, err := api.FindRecord(context.Background(), "id", consistencygroups.WithRecordFindHeaders(map[string]string{"Authorization": "forged"}))
+			_, err := api.FindRecord(context.Background(), "id", request.Headers(map[string]string{"Authorization": "forged"}))
 			return err
 		},
 		func(api *consistencygroups.API) error {
-			_, err := api.FindRecord(context.Background(), "id", consistencygroups.WithRecordFindHeaders(map[string]string{"OpenStack-API-Version": "volume 3.38"}))
+			_, err := api.FindRecord(context.Background(), "id", request.Headers(map[string]string{"OpenStack-API-Version": "volume 3.38"}))
 			return err
 		},
 	} {
@@ -269,11 +270,11 @@ func TestPythonCinderConsistencyGroupFindRecordPreflightAndStickyOriginalSource(
 	api, calls := cgAPI(t, "3.38", func(*http.Request) *http.Response { t.Fatal("mutated source HTTP"); return nil })
 	cause := errors.New("option failure")
 	ctx, cancel := context.WithCancelCause(context.Background())
-	_, err := api.FindRecord(ctx, "id", func(*consistencygroups.RecordFindOpts) error {
+	_, err := api.FindRecord(ctx, "id", request.Custom(func(*consistencygroups.RecordFindOpts) error {
 		api.RawClient().ResourceBase = "https://other.example/v3/project/"
 		cancel(cause)
 		return cause
-	})
+	}))
 	if !errors.Is(err, resource.ErrInvalidOption) || !errors.Is(err, cause) || !errors.Is(err, context.Canceled) || calls.Len() != 0 {
 		t.Fatal(err, cgCalls(calls))
 	}
@@ -293,7 +294,7 @@ func TestPythonCinderConsistencyGroupFindRecordGetOverrideFallbackOriginalVersio
 		for key, value := range original {
 			expected[key] = value
 		}
-		value, err := api.FindRecord(context.Background(), "target", consistencygroups.WithRecordFindMicroversion(override))
+		value, err := api.FindRecord(context.Background(), "target", request.Microversion(override))
 		wantGet := override
 		if wantGet == "" {
 			wantGet = "3.13"
@@ -314,7 +315,7 @@ func TestPythonCinderConsistencyGroupFindRecordGetOverrideFallbackOriginalVersio
 		return cgWire(200, `{"consistencygroups":[{"id":"found","name":"target"}]}`)
 	})
 	api.RawClient().MoreHeaders = map[string]string{"Accept": "source"}
-	value, err := api.FindRecord(context.Background(), "target", consistencygroups.WithRecordFindHeaders(map[string]string{"accept": "per-call"}))
+	value, err := api.FindRecord(context.Background(), "target", request.Headers(map[string]string{"accept": "per-call"}))
 	if err != nil || value == nil || calls.Len() != 2 {
 		t.Fatal(value, err, cgCalls(calls))
 	}
@@ -444,16 +445,16 @@ func TestPythonCinderConsistencyGroupFindRecordFirstCustomHeaderOptionOwnsDefaul
 				case "nil_opts_headers":
 					options = append(options, consistencygroups.WithRecordFindOpts(consistencygroups.RecordFindOpts{Headers: nil}))
 				case "nil_header_option":
-					options = append(options, consistencygroups.WithRecordFindHeaders(nil))
+					options = append(options, request.Headers(nil))
 				}
-				options = append(options, func(cfg *consistencygroups.RecordFindOpts) error {
+				options = append(options, request.Custom(func(cfg *consistencygroups.RecordFindOpts) error {
 					if cfg.Headers == nil || len(cfg.Headers) != 0 {
 						t.Fatal("first custom option requires a fresh empty owned map", cfg.Headers)
 					}
 					cfg.Headers["X-Custom"] = value
 					held = cfg
 					return nil
-				})
+				}))
 				start := calls.Len()
 				result, err := api.FindRecord(context.Background(), "target", options...)
 				if err != nil || result == nil || calls.Len() != start+2 || !reflect.DeepEqual(api.RawClient().MoreHeaders, expected) || api.RawClient().Microversion != "3.38" {

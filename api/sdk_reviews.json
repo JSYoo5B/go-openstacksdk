@@ -3233,7 +3233,7 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.ProjectQuotaScope.Reset",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithResetIgnoreMissing"
+        "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing"
       ],
       "contracts": [
         {
@@ -3492,9 +3492,9 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.ProjectQuotaScope.Usage",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.ProjectQuotaScope.GetRecord",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaReadOpts",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaReadQuery",
+        "github.com/JSYoo5B/go-openstacksdk/request.Query",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaUsage",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaReadMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaReadLocation",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaReadBasePath"
       ],
@@ -3654,9 +3654,9 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.ProjectQuotaScope.Reset",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithResetIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.ProjectQuotaScope.RevertRecord",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaRevertQuery",
+        "github.com/JSYoo5B/go-openstacksdk/request.Query",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaRevertOpts"
       ],
       "contracts": [
@@ -5315,7 +5315,7 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/limits.API.CurrentProject",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/limits.ProjectLimitsScope.Get",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/limits.WithGetOptions",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/limits.WithGetQuery"
+        "github.com/JSYoo5B/go-openstacksdk/request.Query"
       ],
       "contracts": [
         {
@@ -5374,7 +5374,7 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/limits.API.CurrentProject",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/limits.ProjectLimitsScope.Get",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/limits.WithGetOptions",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/limits.WithGetQuery"
+        "github.com/JSYoo5B/go-openstacksdk/request.Query"
       ],
       "contracts": [
         {
@@ -10996,12 +10996,12 @@
         "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindDetails",
         "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindAllProjects",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.FindRecord",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordFindIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordFindDetails",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordFindAllProjects",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordFindOpts",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordFindQuery",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordFindHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/request.Query",
+        "github.com/JSYoo5B/go-openstacksdk/request.Headers",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordFindLocation",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordFindMaxItems",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordFindPaginated"
@@ -17782,7 +17782,7 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots.MetadataScope.DeleteKeys",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots.MetadataScope.ID",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots.MetadataScope.RawClient",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots.WithMetadataHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots.WithMetadataHeaders"
       ],
       "contracts": [
@@ -17819,7 +17819,7 @@
           ]
         },
         {
-          "behavior": "Input metadata maps and deletion keys are copied before custom options and HTTP; concrete WithMetadataHeader/WithMetadataHeaders capture header values and allow sequential canonical last-wins reuse without an application builder. Returned fields do not serve as request inputs or retarget identity.",
+          "behavior": "Input metadata maps and deletion keys are copied before custom options and HTTP; request.Header and the concrete WithMetadataHeaders capture header values and allow sequential canonical last-wins reuse without an application builder. Returned fields do not serve as request inputs or retarget identity.",
           "tests": [
             "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesNameBindingAndRequestSnapshots",
             "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation",
@@ -17892,7 +17892,7 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.MetadataScope.DeleteKeys",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.MetadataScope.ID",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.MetadataScope.RawClient",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithMetadataHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithMetadataHeaders"
       ],
       "contracts": [
@@ -17929,7 +17929,7 @@
           ]
         },
         {
-          "behavior": "Input metadata maps and deletion keys are copied before custom options and HTTP; concrete WithMetadataHeader/WithMetadataHeaders capture header values and allow sequential canonical last-wins reuse without an application builder. Returned fields do not serve as request inputs or retarget identity.",
+          "behavior": "Input metadata maps and deletion keys are copied before custom options and HTTP; request.Header and the concrete WithMetadataHeaders capture header values and allow sequential canonical last-wins reuse without an application builder. Returned fields do not serve as request inputs or retarget identity.",
           "tests": [
             "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesNameBindingAndRequestSnapshots",
             "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation",
@@ -18002,7 +18002,7 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots.MetadataScope.Get",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots.MetadataScope.ID",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots.MetadataScope.RawClient",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots.WithMetadataHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots.WithMetadataHeaders"
       ],
       "contracts": [
@@ -18039,7 +18039,7 @@
           ]
         },
         {
-          "behavior": "Input metadata maps and deletion keys are copied before custom options and HTTP; concrete WithMetadataHeader/WithMetadataHeaders capture header values and allow sequential canonical last-wins reuse without an application builder. Returned fields do not serve as request inputs or retarget identity.",
+          "behavior": "Input metadata maps and deletion keys are copied before custom options and HTTP; request.Header and the concrete WithMetadataHeaders capture header values and allow sequential canonical last-wins reuse without an application builder. Returned fields do not serve as request inputs or retarget identity.",
           "tests": [
             "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesNameBindingAndRequestSnapshots",
             "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation",
@@ -18111,7 +18111,7 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.MetadataScope.Get",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.MetadataScope.ID",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.MetadataScope.RawClient",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithMetadataHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithMetadataHeaders"
       ],
       "contracts": [
@@ -18148,7 +18148,7 @@
           ]
         },
         {
-          "behavior": "Input metadata maps and deletion keys are copied before custom options and HTTP; concrete WithMetadataHeader/WithMetadataHeaders capture header values and allow sequential canonical last-wins reuse without an application builder. Returned fields do not serve as request inputs or retarget identity.",
+          "behavior": "Input metadata maps and deletion keys are copied before custom options and HTTP; request.Header and the concrete WithMetadataHeaders capture header values and allow sequential canonical last-wins reuse without an application builder. Returned fields do not serve as request inputs or retarget identity.",
           "tests": [
             "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesNameBindingAndRequestSnapshots",
             "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation",
@@ -18220,7 +18220,7 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots.MetadataScope.Get",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots.MetadataScope.ID",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots.MetadataScope.RawClient",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots.WithMetadataHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots.WithMetadataHeaders"
       ],
       "contracts": [
@@ -18257,7 +18257,7 @@
           ]
         },
         {
-          "behavior": "Input metadata maps and deletion keys are copied before custom options and HTTP; concrete WithMetadataHeader/WithMetadataHeaders capture header values and allow sequential canonical last-wins reuse without an application builder. Returned fields do not serve as request inputs or retarget identity.",
+          "behavior": "Input metadata maps and deletion keys are copied before custom options and HTTP; request.Header and the concrete WithMetadataHeaders capture header values and allow sequential canonical last-wins reuse without an application builder. Returned fields do not serve as request inputs or retarget identity.",
           "tests": [
             "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesNameBindingAndRequestSnapshots",
             "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation",
@@ -18330,7 +18330,7 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.MetadataScope.Get",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.MetadataScope.ID",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.MetadataScope.RawClient",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithMetadataHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithMetadataHeaders"
       ],
       "contracts": [
@@ -18367,7 +18367,7 @@
           ]
         },
         {
-          "behavior": "Input metadata maps and deletion keys are copied before custom options and HTTP; concrete WithMetadataHeader/WithMetadataHeaders capture header values and allow sequential canonical last-wins reuse without an application builder. Returned fields do not serve as request inputs or retarget identity.",
+          "behavior": "Input metadata maps and deletion keys are copied before custom options and HTTP; request.Header and the concrete WithMetadataHeaders capture header values and allow sequential canonical last-wins reuse without an application builder. Returned fields do not serve as request inputs or retarget identity.",
           "tests": [
             "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesNameBindingAndRequestSnapshots",
             "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation",
@@ -18441,7 +18441,7 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots.MetadataScope.Replace",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots.MetadataScope.ID",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots.MetadataScope.RawClient",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots.WithMetadataHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots.WithMetadataHeaders"
       ],
       "contracts": [
@@ -18479,7 +18479,7 @@
           ]
         },
         {
-          "behavior": "Input metadata maps and deletion keys are copied before custom options and HTTP; concrete WithMetadataHeader/WithMetadataHeaders capture header values and allow sequential canonical last-wins reuse without an application builder. Returned fields do not serve as request inputs or retarget identity.",
+          "behavior": "Input metadata maps and deletion keys are copied before custom options and HTTP; request.Header and the concrete WithMetadataHeaders capture header values and allow sequential canonical last-wins reuse without an application builder. Returned fields do not serve as request inputs or retarget identity.",
           "tests": [
             "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesNameBindingAndRequestSnapshots",
             "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation",
@@ -18553,7 +18553,7 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.MetadataScope.Replace",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.MetadataScope.ID",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.MetadataScope.RawClient",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithMetadataHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithMetadataHeaders"
       ],
       "contracts": [
@@ -18591,7 +18591,7 @@
           ]
         },
         {
-          "behavior": "Input metadata maps and deletion keys are copied before custom options and HTTP; concrete WithMetadataHeader/WithMetadataHeaders capture header values and allow sequential canonical last-wins reuse without an application builder. Returned fields do not serve as request inputs or retarget identity.",
+          "behavior": "Input metadata maps and deletion keys are copied before custom options and HTTP; request.Header and the concrete WithMetadataHeaders capture header values and allow sequential canonical last-wins reuse without an application builder. Returned fields do not serve as request inputs or retarget identity.",
           "tests": [
             "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesNameBindingAndRequestSnapshots",
             "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation",
@@ -18664,10 +18664,9 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.MetadataScope.DeleteKeys",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.MetadataScope.ID",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.MetadataScope.RawClient",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithMetadataHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithMetadataHeaders",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.API.DeleteMetadataRecord",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithRecordMetadataHeader",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithRecordMetadataHeaders",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithRecordMetadataSeed"
       ],
@@ -18705,7 +18704,7 @@
           ]
         },
         {
-          "behavior": "Input metadata maps and deletion keys are copied before custom options and HTTP; concrete WithMetadataHeader/WithMetadataHeaders capture header values and allow sequential canonical last-wins reuse without an application builder. Returned fields do not serve as request inputs or retarget identity.",
+          "behavior": "Input metadata maps and deletion keys are copied before custom options and HTTP; request.Header and the concrete WithMetadataHeaders capture header values and allow sequential canonical last-wins reuse without an application builder. Returned fields do not serve as request inputs or retarget identity.",
           "tests": [
             "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesNameBindingAndRequestSnapshots",
             "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation",
@@ -18805,10 +18804,9 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.MetadataScope.DeleteKeys",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.MetadataScope.ID",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.MetadataScope.RawClient",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithMetadataHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithMetadataHeaders",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.DeleteMetadataRecord",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordMetadataHeader",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordMetadataHeaders",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordMetadataSeed",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordMetadataLocation"
@@ -18847,7 +18845,7 @@
           ]
         },
         {
-          "behavior": "Input metadata maps and deletion keys are copied before custom options and HTTP; concrete WithMetadataHeader/WithMetadataHeaders capture header values and allow sequential canonical last-wins reuse without an application builder. Returned fields do not serve as request inputs or retarget identity.",
+          "behavior": "Input metadata maps and deletion keys are copied before custom options and HTTP; request.Header and the concrete WithMetadataHeaders capture header values and allow sequential canonical last-wins reuse without an application builder. Returned fields do not serve as request inputs or retarget identity.",
           "tests": [
             "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesNameBindingAndRequestSnapshots",
             "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation",
@@ -18947,10 +18945,9 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.MetadataScope.Get",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.MetadataScope.ID",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.MetadataScope.RawClient",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithMetadataHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithMetadataHeaders",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.API.FetchMetadataRecord",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithRecordMetadataHeader",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithRecordMetadataHeaders",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithRecordMetadataSeed"
       ],
@@ -18988,7 +18985,7 @@
           ]
         },
         {
-          "behavior": "Input metadata maps and deletion keys are copied before custom options and HTTP; concrete WithMetadataHeader/WithMetadataHeaders capture header values and allow sequential canonical last-wins reuse without an application builder. Returned fields do not serve as request inputs or retarget identity.",
+          "behavior": "Input metadata maps and deletion keys are copied before custom options and HTTP; request.Header and the concrete WithMetadataHeaders capture header values and allow sequential canonical last-wins reuse without an application builder. Returned fields do not serve as request inputs or retarget identity.",
           "tests": [
             "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesNameBindingAndRequestSnapshots",
             "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation",
@@ -19085,10 +19082,9 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.MetadataScope.Get",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.MetadataScope.ID",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.MetadataScope.RawClient",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithMetadataHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithMetadataHeaders",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.FetchMetadataRecord",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordMetadataHeader",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordMetadataHeaders",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordMetadataSeed",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordMetadataLocation"
@@ -19127,7 +19123,7 @@
           ]
         },
         {
-          "behavior": "Input metadata maps and deletion keys are copied before custom options and HTTP; concrete WithMetadataHeader/WithMetadataHeaders capture header values and allow sequential canonical last-wins reuse without an application builder. Returned fields do not serve as request inputs or retarget identity.",
+          "behavior": "Input metadata maps and deletion keys are copied before custom options and HTTP; request.Header and the concrete WithMetadataHeaders capture header values and allow sequential canonical last-wins reuse without an application builder. Returned fields do not serve as request inputs or retarget identity.",
           "tests": [
             "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesNameBindingAndRequestSnapshots",
             "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation",
@@ -19224,10 +19220,9 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.MetadataScope.Get",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.MetadataScope.ID",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.MetadataScope.RawClient",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithMetadataHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithMetadataHeaders",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.API.GetMetadataRecord",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithRecordMetadataHeader",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithRecordMetadataHeaders",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithRecordMetadataSeed"
       ],
@@ -19265,7 +19260,7 @@
           ]
         },
         {
-          "behavior": "Input metadata maps and deletion keys are copied before custom options and HTTP; concrete WithMetadataHeader/WithMetadataHeaders capture header values and allow sequential canonical last-wins reuse without an application builder. Returned fields do not serve as request inputs or retarget identity.",
+          "behavior": "Input metadata maps and deletion keys are copied before custom options and HTTP; request.Header and the concrete WithMetadataHeaders capture header values and allow sequential canonical last-wins reuse without an application builder. Returned fields do not serve as request inputs or retarget identity.",
           "tests": [
             "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesNameBindingAndRequestSnapshots",
             "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation",
@@ -19363,10 +19358,9 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.MetadataScope.Get",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.MetadataScope.ID",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.MetadataScope.RawClient",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithMetadataHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithMetadataHeaders",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.GetMetadataRecord",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordMetadataHeader",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordMetadataHeaders",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordMetadataSeed",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordMetadataLocation"
@@ -19405,7 +19399,7 @@
           ]
         },
         {
-          "behavior": "Input metadata maps and deletion keys are copied before custom options and HTTP; concrete WithMetadataHeader/WithMetadataHeaders capture header values and allow sequential canonical last-wins reuse without an application builder. Returned fields do not serve as request inputs or retarget identity.",
+          "behavior": "Input metadata maps and deletion keys are copied before custom options and HTTP; request.Header and the concrete WithMetadataHeaders capture header values and allow sequential canonical last-wins reuse without an application builder. Returned fields do not serve as request inputs or retarget identity.",
           "tests": [
             "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesNameBindingAndRequestSnapshots",
             "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation",
@@ -19504,10 +19498,9 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.MetadataScope.Replace",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.MetadataScope.ID",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.MetadataScope.RawClient",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithMetadataHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithMetadataHeaders",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.API.SetMetadataRecord",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithRecordMetadataHeader",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithRecordMetadataHeaders",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithRecordMetadataSeed"
       ],
@@ -19546,7 +19539,7 @@
           ]
         },
         {
-          "behavior": "Input metadata maps and deletion keys are copied before custom options and HTTP; concrete WithMetadataHeader/WithMetadataHeaders capture header values and allow sequential canonical last-wins reuse without an application builder. Returned fields do not serve as request inputs or retarget identity.",
+          "behavior": "Input metadata maps and deletion keys are copied before custom options and HTTP; request.Header and the concrete WithMetadataHeaders capture header values and allow sequential canonical last-wins reuse without an application builder. Returned fields do not serve as request inputs or retarget identity.",
           "tests": [
             "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesNameBindingAndRequestSnapshots",
             "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation",
@@ -19645,10 +19638,9 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.MetadataScope.Replace",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.MetadataScope.ID",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.MetadataScope.RawClient",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithMetadataHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithMetadataHeaders",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.SetMetadataRecord",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordMetadataHeader",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordMetadataHeaders",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordMetadataSeed",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordMetadataLocation"
@@ -19688,7 +19680,7 @@
           ]
         },
         {
-          "behavior": "Input metadata maps and deletion keys are copied before custom options and HTTP; concrete WithMetadataHeader/WithMetadataHeaders capture header values and allow sequential canonical last-wins reuse without an application builder. Returned fields do not serve as request inputs or retarget identity.",
+          "behavior": "Input metadata maps and deletion keys are copied before custom options and HTTP; request.Header and the concrete WithMetadataHeaders capture header values and allow sequential canonical last-wins reuse without an application builder. Returned fields do not serve as request inputs or retarget identity.",
           "tests": [
             "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesNameBindingAndRequestSnapshots",
             "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation",
@@ -38096,10 +38088,10 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSnapshotListLocation",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSnapshotListFilters",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSnapshotListDetailed",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSnapshotListPagination",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSnapshotListMaxItems",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSnapshotListMicroversion",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSnapshotListHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/request.Paginated",
+        "github.com/JSYoo5B/go-openstacksdk/request.MaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
+        "github.com/JSYoo5B/go-openstacksdk/request.Headers",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSnapshotListExpression",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSnapshotListAllowUnknownParams",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSnapshotListConflictingAttrs"
@@ -39028,10 +39020,10 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupListOptions",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupListFilters",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupListDetailed",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupListPagination",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupListMaxItems",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupListMicroversion",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupListHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/request.Paginated",
+        "github.com/JSYoo5B/go-openstacksdk/request.MaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
+        "github.com/JSYoo5B/go-openstacksdk/request.Headers",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupListExpression",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupListAllowUnknownParams",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupListConflictingAttrs",
@@ -72494,8 +72486,8 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.InitializeWithConnector",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithConnectorHeader",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithConnectorHeaders"
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
+        "github.com/JSYoo5B/go-openstacksdk/request.Headers"
       ],
       "contracts": [
         {
@@ -72539,8 +72531,8 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.TerminateWithConnector",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithConnectorHeader",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithConnectorHeaders"
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
+        "github.com/JSYoo5B/go-openstacksdk/request.Headers"
       ],
       "contracts": [
         {
@@ -72609,15 +72601,15 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.API.FindRecord",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithRecordFindOpts",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithRecordFindIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithRecordFindDetails",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithRecordFindAllProjects",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithRecordFindPaginated",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithRecordFindLimit",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithRecordFindMarker",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithRecordFindMaxItems",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithRecordFindHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithRecordFindQuery"
+        "github.com/JSYoo5B/go-openstacksdk/request.Headers",
+        "github.com/JSYoo5B/go-openstacksdk/request.Query"
       ],
       "contracts": [
         {
@@ -72946,11 +72938,11 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.API.FindRecord",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.WithRecordFindIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.WithRecordFindDetails",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.WithRecordFindOpts",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.WithRecordFindQuery",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.WithRecordFindHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/request.Query",
+        "github.com/JSYoo5B/go-openstacksdk/request.Headers",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.WithRecordFindMaxItems",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.WithRecordFindPaginated"
       ],
@@ -73274,9 +73266,9 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments.API.CreateRecord",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments.WithRecordCreateField",
+        "github.com/JSYoo5B/go-openstacksdk/request.Field",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments.WithRecordCreateOpts",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments.WithRecordCreateHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/request.Headers",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments.WithRecordCreateModeSupported"
       ],
       "contracts": [
@@ -73375,13 +73367,13 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments.API.ListRecords",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments.WithRecordListOpts",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments.WithRecordListQuery",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments.WithRecordListLimit",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments.WithRecordListMarker",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments.WithRecordListMaxItems",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments.WithRecordListPaginated",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments.WithRecordListHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments.WithRecordListMicroversion"
+        "github.com/JSYoo5B/go-openstacksdk/request.Query",
+        "github.com/JSYoo5B/go-openstacksdk/request.Limit",
+        "github.com/JSYoo5B/go-openstacksdk/request.Marker",
+        "github.com/JSYoo5B/go-openstacksdk/request.MaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/request.Paginated",
+        "github.com/JSYoo5B/go-openstacksdk/request.Headers",
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion"
       ],
       "contracts": [
         {
@@ -73524,7 +73516,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.API.CreateRecord",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithRecordCreateOpts",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithRecordCreateField",
+        "github.com/JSYoo5B/go-openstacksdk/request.Field",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithRecordCreateVolumeID",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithRecordCreateName",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithRecordCreateNoSnapshots",
@@ -73581,7 +73573,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.API.Get",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.API.GetRecord",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithRecordReadHeaders"
+        "github.com/JSYoo5B/go-openstacksdk/request.Headers"
       ],
       "contracts": [
         {
@@ -73639,11 +73631,11 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithRecordListOpts",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithRecordListDetails",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithRecordListAllProjects",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithRecordListQuery",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithRecordListLimit",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithRecordListMarker",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithRecordListMaxItems",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithRecordListPaginated",
+        "github.com/JSYoo5B/go-openstacksdk/request.Query",
+        "github.com/JSYoo5B/go-openstacksdk/request.Limit",
+        "github.com/JSYoo5B/go-openstacksdk/request.Marker",
+        "github.com/JSYoo5B/go-openstacksdk/request.MaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/request.Paginated",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithRecordListServerQuery"
       ],
       "contracts": [
@@ -73690,7 +73682,7 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.API.FindRecord",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithRecordFindIgnoreMissing"
+        "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing"
       ],
       "contracts": [
         {
@@ -73788,7 +73780,7 @@
         "github.com/JSYoo5B/go-openstacksdk/resource.ID",
         "github.com/JSYoo5B/go-openstacksdk/resource.WithMissingError",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.API.DeleteRecord",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithRecordDeleteIgnoreMissing"
+        "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing"
       ],
       "contracts": [
         {
@@ -73860,7 +73852,7 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.API.FindRecord",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.WithRecordFindIgnoreMissing"
+        "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing"
       ],
       "contracts": [
         {
@@ -74337,8 +74329,8 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.API.FindRecord",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.WithRecordFindIgnoreMissing",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.WithRecordFindQuery",
+        "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/request.Query",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.WithRecordFindOpts"
       ],
       "contracts": [
@@ -83081,9 +83073,9 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/messages.New",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/messages.API.DeleteRecord",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/messages.WithRecordDeleteOpts",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/messages.WithRecordDeleteIgnoreMissing",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/messages.WithRecordDeleteMicroversion",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/messages.WithRecordDeleteHeaders"
+        "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
+        "github.com/JSYoo5B/go-openstacksdk/request.Headers"
       ],
       "contracts": [
         {
@@ -83142,8 +83134,8 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/messages.API.RawClient",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/messages.API.GetRecord",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/messages.WithRecordGetOpts",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/messages.WithRecordGetHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/messages.WithRecordGetMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/request.Headers",
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/messages.WithRecordGetSourceEnvelope"
       ],
       "contracts": [
@@ -83213,13 +83205,13 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/messages.New",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/messages.API.ListRecords",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/messages.WithRecordListOpts",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/messages.WithRecordListQuery",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/messages.WithRecordListHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/messages.WithRecordListMicroversion",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/messages.WithRecordListPaginated",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/messages.WithRecordListLimit",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/messages.WithRecordListMarker",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/messages.WithRecordListMaxItems"
+        "github.com/JSYoo5B/go-openstacksdk/request.Query",
+        "github.com/JSYoo5B/go-openstacksdk/request.Headers",
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
+        "github.com/JSYoo5B/go-openstacksdk/request.Paginated",
+        "github.com/JSYoo5B/go-openstacksdk/request.Limit",
+        "github.com/JSYoo5B/go-openstacksdk/request.Marker",
+        "github.com/JSYoo5B/go-openstacksdk/request.MaxItems"
       ],
       "contracts": [
         {
@@ -83287,9 +83279,9 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.API.CreateRecord",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordCreateField",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordCreateHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordCreateMicroversion"
+        "github.com/JSYoo5B/go-openstacksdk/request.Field",
+        "github.com/JSYoo5B/go-openstacksdk/request.Headers",
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion"
       ],
       "contracts": [
         {
@@ -83334,8 +83326,8 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordSourceSourceGroupID",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordSourceName",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordSourceDescription",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordSourceHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordSourceMicroversion"
+        "github.com/JSYoo5B/go-openstacksdk/request.Headers",
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion"
       ],
       "contracts": [
         {
@@ -83363,8 +83355,8 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.New",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.API.CreateRecord",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordCreateHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordCreateMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/request.Headers",
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordCreateLocation"
       ],
       "contracts": [
@@ -83424,9 +83416,9 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.API.DeleteRecord",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordDeleteVolumes",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordDeleteIgnoreMissing",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordDeleteHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordDeleteMicroversion"
+        "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/request.Headers",
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion"
       ],
       "contracts": [
         {
@@ -83461,9 +83453,9 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.New",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.API.DeleteRecord",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordDeleteHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordDeleteMicroversion",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordDeleteIgnoreMissing"
+        "github.com/JSYoo5B/go-openstacksdk/request.Headers",
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
+        "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing"
       ],
       "contracts": [
         {
@@ -83510,8 +83502,8 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.API.GetRecord",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordGetListVolume",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordGetField",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordGetMicroversion",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordGetHeaders"
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
+        "github.com/JSYoo5B/go-openstacksdk/request.Headers"
       ],
       "contracts": [
         {
@@ -83566,8 +83558,8 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.New",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.API.GetRecord",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordReadOpts",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordReadHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordReadMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/request.Headers",
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordReadLocation",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordReadSeed"
       ],
@@ -83628,16 +83620,16 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.New",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.API.ListRecords",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordListOpts",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordListHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordListMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/request.Headers",
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordListLocation",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordListDetails",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordListPaginated",
+        "github.com/JSYoo5B/go-openstacksdk/request.Paginated",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordListAllProjects",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordListLimit",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordListMarker",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordListMaxItems",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordListQuery"
+        "github.com/JSYoo5B/go-openstacksdk/request.Limit",
+        "github.com/JSYoo5B/go-openstacksdk/request.Marker",
+        "github.com/JSYoo5B/go-openstacksdk/request.MaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/request.Query"
       ],
       "contracts": [
         {
@@ -83707,7 +83699,7 @@
         "Go stable map-key order replaces Python kwargs insertion order. Shared local equality uses exact decimal JSON numbers rather than Python JSON float rounding; actual integer9007199254740992 versus raw filter9007199254740993.0 differs in Go and can equal after Python float decode. Recursive Source dictionary semantics are reused, not replaced by strict mapping-membership matching.",
         "The finite pager bounds limit to one nonnegative Go integer, marker to one nonblank transport value, max_items to nonnegative Go integer/zero-unbounded and paginated to bool; it does not emulate arbitrary Python control-value truthiness/coercion. Marker JSON uses shared Requests query expansion and must yield exactly one nonempty value; multiple/empty arrays/objects are rejected.",
         "Owned options support Source mapped server aliases and Body local filters, discarding unknown query. Go independently rejects changed origin/collection/filter/cycles, accepts Dictionary links and uses the shared safe pager rather than full mutable Python Resource/session paging engine. Explicit offset is retained and not automatically incremented; advertised offset links are supported. Shared finite pager permits one cursor family per request and nonnegative uint64 offset, removes the previous cursor on advertised family switches, and rejects repeated/backward offset rather than reproducing arbitrary Python mixed-cursor/session traversal.",
-        "WithRecordListQuery snapshots known JSON at factory creation; iterator captures service on execution. The public declared view/Wire/Envelope are distinct snapshots and retained private fields determine marker behavior."
+        "request.Query snapshots known JSON at factory creation; iterator captures service on execution. The public declared view/Wire/Envelope are distinct snapshots and retained private fields determine marker behavior."
       ],
       "remaining": []
     },
@@ -83718,13 +83710,13 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.API.ListRecords",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordListDetails",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordListQuery",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordListHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordListMicroversion",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordListPaginated",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordListLimit",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordListMarker",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordListMaxItems"
+        "github.com/JSYoo5B/go-openstacksdk/request.Query",
+        "github.com/JSYoo5B/go-openstacksdk/request.Headers",
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
+        "github.com/JSYoo5B/go-openstacksdk/request.Paginated",
+        "github.com/JSYoo5B/go-openstacksdk/request.Limit",
+        "github.com/JSYoo5B/go-openstacksdk/request.Marker",
+        "github.com/JSYoo5B/go-openstacksdk/request.MaxItems"
       ],
       "contracts": [
         {
@@ -83778,9 +83770,9 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.API.UpdateRecord",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordUpdateField",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordUpdateHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordUpdateMicroversion"
+        "github.com/JSYoo5B/go-openstacksdk/request.Field",
+        "github.com/JSYoo5B/go-openstacksdk/request.Headers",
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion"
       ],
       "contracts": [
         {
@@ -83999,10 +83991,10 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.API.FindRecord",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordFindOpts",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordFindIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordFindDetails",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordFindMicroversion",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordFindHeaders"
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
+        "github.com/JSYoo5B/go-openstacksdk/request.Headers"
       ],
       "contracts": [
         {
@@ -84096,12 +84088,12 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.New",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.API.FindRecord",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordFindOpts",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordFindIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordFindDetails",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordFindHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordFindMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/request.Headers",
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordFindLocation",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordFindQuery",
+        "github.com/JSYoo5B/go-openstacksdk/request.Query",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordFindPaginated",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordFindMaxItems"
       ],
@@ -84805,15 +84797,15 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.New",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.API.ListRecords",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordListOpts",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordListHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordListMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/request.Headers",
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordListLocation",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordListDetails",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordListPaginated",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordListLimit",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordListMarker",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordListMaxItems",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordListQuery"
+        "github.com/JSYoo5B/go-openstacksdk/request.Paginated",
+        "github.com/JSYoo5B/go-openstacksdk/request.Limit",
+        "github.com/JSYoo5B/go-openstacksdk/request.Marker",
+        "github.com/JSYoo5B/go-openstacksdk/request.MaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/request.Query"
       ],
       "contracts": [
         {
@@ -84837,7 +84829,7 @@
         {
           "behavior": "Raw known Source controls reject presence before Marshaler/HTTP, even null/false/zero and malformed raw JSON; ordinary uppercase/unknown remains skipped. Owned typed Headers/Microversion/Details/Paginated/MaxItems are alternatives; dynamic route/conflict/JMES arbitrary result shape stays explicit SDK-S1/SDK-J1, not silently supported.",
           "tests": [
-            "blockstorage/v3/consistencygroupsnapshots/python_boundary_contracts_test.go:TestPythonConsistencyGroupSnapshotListReservedControlsFailBeforeMarshalOrHTTP"
+            "blockstorage/v3/consistencygroupsnapshots/python_boundary_contracts_test.go:TestPythonConsistencyGroupSnapshotListReservedControlsFailBeforeHTTP"
           ]
         },
         {
@@ -84931,7 +84923,7 @@
           "behavior": "Page next truthiness uses existing cloudfilter.PythonJSONTruthy: Source binary64 underflow±1e-400 falsey ignored, nonzero1e-300 and overflow±1e400 truthy nonstring cause actual203 page error with no second listHTTP; local filter exact decimals remain explicit separate policy. LIST-only reserved helper rejects Source/Proxy controls by raw presence before Marshaler/HTTP for null/false/zero bulk/callback/single options, preserving typed controls and unknown case-sensitive discard.",
           "tests": [
             "blockstorage/v3/consistencygroups/python_record_contracts_test.go:TestPythonCinderConsistencyGroupListNextUsesPythonBinary64TruthinessAndActualPage",
-            "blockstorage/v3/consistencygroups/python_record_contracts_test.go:TestPythonCinderConsistencyGroupListReservedControlsFailBeforeMarshalAndHTTP"
+            "blockstorage/v3/consistencygroups/python_record_contracts_test.go:TestPythonCinderConsistencyGroupListReservedControlsFailBeforeHTTP"
           ]
         }
       ],
@@ -85033,8 +85025,8 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.New",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.API.CreateRecord",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordCreateOpts",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordCreateHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordCreateMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/request.Headers",
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordCreateLocation"
       ],
       "contracts": [
@@ -85145,9 +85137,9 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.New",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.API.DeleteRecord",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordDeleteOpts",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordDeleteHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordDeleteMicroversion",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordDeleteIgnoreMissing"
+        "github.com/JSYoo5B/go-openstacksdk/request.Headers",
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
+        "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing"
       ],
       "contracts": [
         {
@@ -85214,8 +85206,8 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.API.DisableReplicationRecord",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordReplicationOpts",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordReplicationMicroversion",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordReplicationHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
+        "github.com/JSYoo5B/go-openstacksdk/request.Headers",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordReplicationPinnedSourceWire"
       ],
       "contracts": [
@@ -85291,8 +85283,8 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.API.EnableReplicationRecord",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordReplicationOpts",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordReplicationMicroversion",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordReplicationHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
+        "github.com/JSYoo5B/go-openstacksdk/request.Headers",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordReplicationPinnedSourceWire"
       ],
       "contracts": [
@@ -85370,8 +85362,8 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordFailoverOpts",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordFailoverAllowedAttachedVolume",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordFailoverSecondaryBackendID",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordFailoverMicroversion",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordFailoverHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
+        "github.com/JSYoo5B/go-openstacksdk/request.Headers",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordFailoverPinnedSourceWire"
       ],
       "contracts": [
@@ -85505,12 +85497,12 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.New",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.API.FindRecord",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordFindOpts",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordFindIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordFindDetails",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordFindHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordFindMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/request.Headers",
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordFindLocation",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordFindQuery",
+        "github.com/JSYoo5B/go-openstacksdk/request.Query",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordFindPaginated",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordFindMaxItems"
       ],
@@ -85640,8 +85632,8 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.New",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.API.GetRecord",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordReadOpts",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordReadHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordReadMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/request.Headers",
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordReadLocation",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordReadSeed"
       ],
@@ -91221,7 +91213,7 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services.API.FindRecord",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services.WithFindRecordQuery"
+        "github.com/JSYoo5B/go-openstacksdk/request.Query"
       ],
       "contracts": [
         {
@@ -91554,7 +91546,7 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/manageablevolumes.API.AllRecords",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/manageablevolumes.API.ProxyListRecords",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/manageablevolumes.WithRecordListDetails",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/manageablevolumes.WithRecordListQuery"
+        "github.com/JSYoo5B/go-openstacksdk/request.Query"
       ],
       "contracts": [
         {
@@ -91590,7 +91582,7 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/manageablesnapshots.API.AllRecords",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/manageablesnapshots.API.ProxyListRecords",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/manageablesnapshots.WithRecordListDetails",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/manageablesnapshots.WithRecordListQuery"
+        "github.com/JSYoo5B/go-openstacksdk/request.Query"
       ],
       "contracts": [
         {
@@ -91694,8 +91686,8 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithSummaryOptions",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithSummaryAllProjects",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithSummaryQuery",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithSummaryHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithSummaryMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/request.Headers",
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithSummarySingleFetch"
       ],
       "contracts": [
@@ -91783,11 +91775,11 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/clusters.API.Find",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/clusters.WithFindIgnoreMissing"
+        "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing"
       ],
       "contracts": [
         {
-          "behavior": "Find sends GET clusters/{name_or_id} and after a clean 404 lists clusters/detail?name={name_or_id} matching id or name, returning nil by default and ErrNotFound with WithFindIgnoreMissing(false).",
+          "behavior": "Find sends GET clusters/{name_or_id} and after a clean 404 lists clusters/detail?name={name_or_id} matching id or name, returning nil by default and ErrNotFound with request.IgnoreMissing(false).",
           "tests": [
             "blockstorage/v3/clusters/api_test.go:TestClusterFindFallsBackToDetailListByName"
           ]
@@ -91812,7 +91804,7 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/clusters.API.List",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/clusters.API.All",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/clusters.WithListDetails",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/clusters.WithListQuery"
+        "github.com/JSYoo5B/go-openstacksdk/request.Query"
       ],
       "contracts": [
         {
@@ -91926,11 +91918,11 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.API.Find",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.WithFindIgnoreMissing"
+        "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing"
       ],
       "contracts": [
         {
-          "behavior": "Find sends GET group_types/{name_or_id}?is_public=none and after a clean 400/403/404 lists group_types?is_public=none matching exact id or name, returns nil for a missing type by default, ErrNotFound with WithFindIgnoreMissing(false), and AmbiguousError for duplicates.",
+          "behavior": "Find sends GET group_types/{name_or_id}?is_public=none and after a clean 400/403/404 lists group_types?is_public=none matching exact id or name, returns nil for a missing type by default, ErrNotFound with request.IgnoreMissing(false), and AmbiguousError for duplicates.",
           "tests": [
             "blockstorage/v3/grouptypes/api_test.go:TestGroupTypeFindUsesIsPublicNone"
           ]
@@ -91954,11 +91946,11 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.API.List",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.API.All",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.WithListQuery",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.WithListLimit",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.WithListMarker",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.WithListMaxItems",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.WithListPaginated"
+        "github.com/JSYoo5B/go-openstacksdk/request.Query",
+        "github.com/JSYoo5B/go-openstacksdk/request.Limit",
+        "github.com/JSYoo5B/go-openstacksdk/request.Marker",
+        "github.com/JSYoo5B/go-openstacksdk/request.MaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/request.Paginated"
       ],
       "contracts": [
         {
@@ -91984,7 +91976,7 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.API.Create",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.WithCreateField",
+        "github.com/JSYoo5B/go-openstacksdk/request.Field",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.WithCreateOpts"
       ],
       "contracts": [
@@ -92002,7 +91994,7 @@
         "Python negotiates min(Resource max, server max) through keystoneauth discovery; Go sends the configured client microversion or performs one Cinder version discovery GET with the same cap, and the result keeps the discovery responses.",
         "Python returns a mutable Resource; Go returns a typed struct with raw Body/Wire/Envelope, Header, StatusCode and Discovery evidence.",
         "Per-request header options are a Go extension; authentication, microversion and content headers stay SDK owned.",
-        "Python **attrs become WithCreateField options holding raw JSON; aliases of one Body key with different values are rejected before HTTP."
+        "Python **attrs become request.Field options holding raw JSON; aliases of one Body key with different values are rejected before HTTP."
       ],
       "remaining": []
     },
@@ -92012,7 +92004,7 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.API.Update",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.WithUpdateField",
+        "github.com/JSYoo5B/go-openstacksdk/request.Field",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.WithUpdateOpts"
       ],
       "contracts": [
@@ -92040,11 +92032,11 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.API.Delete",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.WithDeleteIgnoreMissing"
+        "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing"
       ],
       "contracts": [
         {
-          "behavior": "Delete sends DELETE group_types/{id}, ignores a clean 404 by default, returns it with WithDeleteIgnoreMissing(false) and always returns 409 with operation context.",
+          "behavior": "Delete sends DELETE group_types/{id}, ignores a clean 404 by default, returns it with request.IgnoreMissing(false) and always returns 409 with operation context.",
           "tests": [
             "blockstorage/v3/grouptypes/api_test.go:TestGroupTypeDeleteIgnoresMissingByDefault"
           ]
@@ -92168,11 +92160,11 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.API.DeleteGroupSpecsProperty",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.WithDeleteIgnoreMissing"
+        "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing"
       ],
       "contracts": [
         {
-          "behavior": "DeleteGroupSpecsProperty sends DELETE group_types/{id}/group_specs/{prop}, ignores a clean 404 by default, returns it with WithDeleteIgnoreMissing(false) and returns 403 with operation context.",
+          "behavior": "DeleteGroupSpecsProperty sends DELETE group_types/{id}/group_specs/{prop}, ignores a clean 404 by default, returns it with request.IgnoreMissing(false) and returns 403 with operation context.",
           "tests": [
             "blockstorage/v3/grouptypes/api_test.go:TestGroupTypeGroupSpecs"
           ]
@@ -92272,7 +92264,7 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/defaulttypes.API.Unset",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/defaulttypes.WithDeleteIgnoreMissing"
+        "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing"
       ],
       "contracts": [
         {
@@ -92288,7 +92280,7 @@
       "differences": [
         "Python accepts a Resource instance or an ID string; Go accepts only the ID string and URL-escapes it as one path segment, rejecting blank, dot and control-character IDs before HTTP, while Python urljoin does not escape.",
         "Python negotiates min(Resource max, server max) through keystoneauth discovery; Go sends the configured client microversion or performs one Cinder version discovery GET with the same cap, and the result keeps the discovery responses.",
-        "WithDeleteIgnoreMissing(false) is a Go extension; Python unset_default_type always ignores a 404."
+        "request.IgnoreMissing(false) is a Go extension; Python unset_default_type always ignores a 404."
       ],
       "remaining": []
     },
@@ -92300,8 +92292,8 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.API.GetQuotaClassRecord",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaClassGetOpts",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaClassName",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaClassGetHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaClassGetMicroversion"
+        "github.com/JSYoo5B/go-openstacksdk/request.Headers",
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion"
       ],
       "contracts": [
         {
@@ -92342,8 +92334,8 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.API.UpdateQuotaClassRecord",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaClassUpdateOpts",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaClassUpdateAttribute",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaClassUpdateHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaClassUpdateMicroversion"
+        "github.com/JSYoo5B/go-openstacksdk/request.Headers",
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion"
       ],
       "contracts": [
         {
@@ -92388,8 +92380,8 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/resourcefilters.WithRecordListOptions",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/resourcefilters.WithRecordListResource",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/resourcefilters.WithRecordListQuery",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/resourcefilters.WithRecordListHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/resourcefilters.WithRecordListMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/request.Headers",
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/resourcefilters.WithRecordListControl",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/resourcefilters.WithRecordListJMESPath",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/resourcefilters.API.ProxyListRecords",

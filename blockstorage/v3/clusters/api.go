@@ -6,6 +6,8 @@ package clusters
 import (
 	"context"
 	"encoding/json"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"iter"
 	"net/http"
 	"net/url"
@@ -63,7 +65,7 @@ func (a *API) Get(ctx context.Context, name string, options ...GetOption) (*Clus
 	if err := cinderowned.ValidateID("cluster name", name); err != nil {
 		return nil, t.Wrap(ctx, op, err)
 	}
-	p, _, err := cinderowned.Begin(ctx, t, GetOpts{}, cinderowned.CopyRead, readHeaders, version, options)
+	p, _, err := cinderowned.Begin(ctx, t, GetOpts{}, cinderowned.CopyRead, readHeaders, version, calls.Translate(options, getCalls))
 	if err != nil {
 		return nil, t.Wrap(ctx, op, err)
 	}
@@ -76,7 +78,7 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Cluste
 	return func(yield func(*Cluster, error) bool) {
 		const op = "List"
 		t := a.target()
-		p, v, err := cinderowned.Begin(ctx, t, ListOpts{}, copyList, func(v ListOpts) map[string]string { return v.Headers }, version, options)
+		p, v, err := cinderowned.Begin(ctx, t, ListOpts{}, copyList, func(v ListOpts) map[string]string { return v.Headers }, version, calls.Translate(options, listCalls))
 		if err != nil {
 			yield(nil, t.Wrap(ctx, op, err))
 			return
@@ -108,11 +110,11 @@ func (a *API) All(ctx context.Context, options ...ListOption) ([]*Cluster, error
 // Find implements find_cluster: GET clusters/{name_or_id} and, after a clean
 // 400, 403 or 404, the complete clusters/detail?name={name_or_id} list
 // matched by exact ID or name. A missing cluster returns nil, nil unless
-// WithFindIgnoreMissing(false) is given.
+// request.IgnoreMissing(false) is given.
 func (a *API) Find(ctx context.Context, nameOrID string, options ...FindOption) (*Cluster, error) {
 	const op = "Find"
 	t := a.target()
-	p, v, err := cinderowned.Begin(ctx, t, FindOpts{}, cinderowned.CopyFind, func(FindOpts) map[string]string { return nil }, version, options)
+	p, v, err := cinderowned.Begin(ctx, t, FindOpts{}, cinderowned.CopyFind, func(FindOpts) map[string]string { return nil }, version, calls.Translate(options, findCalls))
 	if err != nil {
 		return nil, t.Wrap(ctx, op, err)
 	}
@@ -133,9 +135,9 @@ func (a *API) Disable(ctx context.Context, cluster Target, options ...DisableOpt
 	return action(ctx, a, "Disable", "disable", cluster, options)
 }
 
-func action[O ~func(*ActionOpts) error](ctx context.Context, a *API, op, action string, cluster Target, options []O) (*Cluster, error) {
+func action(ctx context.Context, a *API, op, action string, cluster Target, options []request.WriteCall) (*Cluster, error) {
 	t := a.target()
-	p, v, err := cinderowned.Begin(ctx, t, ActionOpts{}, copyAction, func(v ActionOpts) map[string]string { return v.Headers }, actionVersion, options)
+	p, v, err := cinderowned.Begin(ctx, t, ActionOpts{}, copyAction, func(v ActionOpts) map[string]string { return v.Headers }, actionVersion, calls.Translate(options, actionCalls))
 	if err != nil {
 		return nil, t.Wrap(ctx, op, err)
 	}

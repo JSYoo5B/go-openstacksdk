@@ -11,6 +11,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudlocation"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/microversions"
@@ -67,7 +68,7 @@ func (a *API) FindRecord(ctx context.Context, identity string, options ...Record
 		return nil, wrap(err)
 	}
 	policy := RecordFindOpts{}
-	for _, apply := range slices.Clone(options) {
+	for _, apply := range calls.Translate(slices.Clone(options), recordFindCalls) {
 		if err = guard(ctx); err != nil {
 			return nil, wrap(err)
 		}

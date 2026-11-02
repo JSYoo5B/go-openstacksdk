@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -35,7 +36,7 @@ func TestPythonQoSFindRecordSplitsGETKwargsAndListServerBodyFilters(t *testing.T
 		}
 		return pythonQoSWire(200, `{"qos_specs":[{"id":"q-1","name":"gold","consumer":"back-end","specs":{"n":true,"extra":"ok"}},{"id":"q-2","name":"gold","consumer":"front-end","specs":{"n":true}}]}`)
 	})
-	value, err := api.FindRecord(context.Background(), "gold", qos.WithRecordFindQuery("project_id", []any{"p1", nil, "p2"}), qos.WithRecordFindQuery("consumer", "back-end"), qos.WithRecordFindQuery("specs", map[string]any{"n": 1}), qos.WithRecordFindQuery("host", "controller"), qos.WithRecordFindQuery("unknown", nil))
+	value, err := api.FindRecord(context.Background(), "gold", request.Query("project_id", []any{"p1", nil, "p2"}), request.Query("consumer", "back-end"), request.Query("specs", map[string]any{"n": 1}), request.Query("host", "controller"), request.Query("unknown", nil))
 	if err != nil || value == nil || string(value.Resource.Body["id"]) != `"q-1"` || calls.Len() != 2 {
 		t.Fatal(value, err, pythonQoSCalls(calls))
 	}
@@ -58,7 +59,7 @@ func TestPythonQoSFindRecordDefaultsMissingAndFallbackCodes(t *testing.T) {
 			if value != nil || err != nil {
 				t.Fatal(value, err)
 			}
-			_, err = api.FindRecord(context.Background(), "none", qos.WithRecordFindIgnoreMissing(false))
+			_, err = api.FindRecord(context.Background(), "none", request.IgnoreMissing(false))
 			if !errors.Is(err, resource.ErrNotFound) || calls.Len() != 4 {
 				t.Fatal(err, pythonQoSCalls(calls))
 			}
@@ -120,7 +121,7 @@ func TestPythonQoSFindRecordOwnsOptionsAndCapsBeforeBodyFilter(t *testing.T) {
 	}
 }
 func TestPythonQoSFindRecordGuardAndQueryFailuresBeforeHTTP(t *testing.T) {
-	for _, options := range [][]qos.RecordFindOption{{nil}, {qos.WithRecordFindOpts(qos.RecordFindOpts{Query: map[string]json.RawMessage{"name": json.RawMessage(`"unterminated`)}})}, {qos.WithRecordFindQuery("id", "collision")}} {
+	for _, options := range [][]qos.RecordFindOption{{nil}, {qos.WithRecordFindOpts(qos.RecordFindOpts{Query: map[string]json.RawMessage{"name": json.RawMessage(`"unterminated`)}})}, {request.Query("id", "collision")}} {
 		api, calls := pythonQoSAPI(t, func(*http.Request) *http.Response { t.Fatal("preflight reached HTTP"); return nil })
 		_, err := api.FindRecord(context.Background(), "gold", options...)
 		if !errors.Is(err, resource.ErrInvalidOption) || calls.Len() != 0 {
@@ -130,7 +131,7 @@ func TestPythonQoSFindRecordGuardAndQueryFailuresBeforeHTTP(t *testing.T) {
 	api, calls := pythonQoSAPI(t, func(*http.Request) *http.Response { t.Fatal("cancelled reached HTTP"); return nil })
 	ctx, cancel := context.WithCancelCause(context.Background())
 	cause := errors.New("find cancelled by user")
-	_, err := api.FindRecord(ctx, "gold", func(*qos.RecordFindOpts) error { cancel(cause); return nil })
+	_, err := api.FindRecord(ctx, "gold", request.Custom(func(*qos.RecordFindOpts) error { cancel(cause); return nil }))
 	if !errors.Is(err, context.Canceled) || !errors.Is(err, cause) || calls.Len() != 0 {
 		t.Fatal(err, pythonQoSCalls(calls))
 	}

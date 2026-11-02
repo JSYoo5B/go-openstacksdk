@@ -12,6 +12,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudlocation"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
@@ -103,7 +104,7 @@ func (a *API) FindRecord(ctx context.Context, identity string, options ...Record
 	if err := recordID(identity); err != nil {
 		return nil, recordWrap(ctx, op, err)
 	}
-	cfg, err := applyRecord(p, RecordFindOpts{}, copyFind, slices.Clone(options))
+	cfg, err := applyRecord(p, RecordFindOpts{}, copyFind, calls.Translate(options, findCalls))
 	var seed map[string]json.RawMessage
 	var query url.Values
 	var listCfg RecordListOpts

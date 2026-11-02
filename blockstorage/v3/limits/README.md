@@ -67,7 +67,7 @@ reads therefore require an admin context. The SDK does not infer server admin
 policy from local role names.
 
 `WithGetOptions(limits.GetOpts{ProjectID: "project-id"})` also filters `Fetch`.
-`WithGetQuery` adds query extension fields using the same concrete request
+`request.Query` adds query extension fields using the same concrete request
 configuration as other SDK operations. An explicit empty, invalid, repeated or
 conflicting `project_id` fails before HTTP. Fixed scopes reject a replacement
 project option, including the same ID supplied again. `tenant_id` is Nova's wire

@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -66,28 +67,28 @@ func TestVolumeSnapshotReadOriginalOptionsOwnEachSnapshotAndSourceOrdinaryHeader
 	filters := json.RawMessage(`{"status":"available","description":"wanted"}`)
 	headers := map[string]string{"x-extra": "owned"}
 	version := "latest"
-	first := func(o *blockstorage.VolumeSnapshotListOpts) error {
+	first := request.Custom(func(o *blockstorage.VolumeSnapshotListOpts) error {
 		callbacks.Add(1)
 		o.Filters = &filters
 		o.Headers = headers
 		o.Microversion = &version
 		return nil
-	}
-	second := func(o *blockstorage.VolumeSnapshotListOpts) error {
+	})
+	second := request.Custom(func(o *blockstorage.VolumeSnapshotListOpts) error {
 		callbacks.Add(1)
 		filters = json.RawMessage(`{"status":"changed","description":"changed"}`)
 		headers["x-extra"] = "changed"
 		version = "3.61"
 		client.MoreHeaders["x-source"] = "later ordinary change"
 		return nil
-	}
-	third := func(o *blockstorage.VolumeSnapshotListOpts) error {
+	})
+	third := request.Custom(func(o *blockstorage.VolumeSnapshotListOpts) error {
 		callbacks.Add(1)
 		if o.Filters == nil || string(*o.Filters) != `{"status":"available","description":"wanted"}` || o.Headers["x-extra"] != "owned" || o.Microversion == nil || *o.Microversion != "latest" {
 			t.Error("previous callback retained mutable inputs", o)
 		}
 		return nil
-	}
+	})
 	cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		calls.Add(1)
 		if r.URL.Path != snapshotReadContractDetail || r.URL.Query().Get("status") != "available" || len(r.URL.Query()) != 1 || r.Header.Get("X-Source") != "entry" || r.Header.Get("X-Extra") != "owned" || r.Header.Get("OpenStack-API-Version") != "volume latest" {

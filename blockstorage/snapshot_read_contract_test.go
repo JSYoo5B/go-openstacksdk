@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -263,7 +264,7 @@ func TestVolumeSnapshotReadMaxItemsCountsExcludedRowsAndStopsBeforeUnusedTail(t 
 		}
 		testcloud.JSON(w, 200, body)
 	})
-	result, err := blockstorage.ListVolumeSnapshots(context.Background(), client, blockstorage.WithVolumeSnapshotListMaxItems(1), blockstorage.WithVolumeSnapshotListFilters(json.RawMessage(`{"description":"wanted"}`)))
+	result, err := blockstorage.ListVolumeSnapshots(context.Background(), client, request.MaxItems(1), blockstorage.WithVolumeSnapshotListFilters(json.RawMessage(`{"description":"wanted"}`)))
 	if err != nil || result == nil || string(result.Value) != "[]" || result.Snapshots == nil || len(result.Snapshots) != 0 || len(result.Pages) != 1 || calls.Load() != 1 {
 		t.Fatal(result, err, calls.Load())
 	}
@@ -286,7 +287,7 @@ func TestVolumeSnapshotReadMaxItemsAtPageBoundaryStillFetchesAndParsesNextPage(t
 				}
 				testcloud.JSON(w, 200, nextBody)
 			})
-			result, err := blockstorage.ListVolumeSnapshots(context.Background(), client, blockstorage.WithVolumeSnapshotListMaxItems(1))
+			result, err := blockstorage.ListVolumeSnapshots(context.Background(), client, request.MaxItems(1))
 			if nextBody == `{"snapshots":[false]}` {
 				if err != nil || result == nil || len(result.Snapshots) != 1 || len(result.Pages) != 2 {
 					t.Fatal(result, err)
@@ -317,7 +318,7 @@ func TestVolumeSnapshotReadNegativeMaximumParsesResponseWithoutConsumingRows(t *
 				}
 				testcloud.JSON(w, 200, body)
 			})
-			result, err := blockstorage.ListVolumeSnapshots(context.Background(), client, blockstorage.WithVolumeSnapshotListMaxItems(-1))
+			result, err := blockstorage.ListVolumeSnapshots(context.Background(), client, request.MaxItems(-1))
 			if json.Valid([]byte(body)) {
 				if err != nil || result == nil || string(result.Value) != "[]" || result.Snapshots == nil || len(result.Snapshots) != 0 || len(result.Pages) != 1 {
 					t.Fatal(result, err)
@@ -354,7 +355,7 @@ func TestVolumeSnapshotReadZeroMaximumIsUnlimitedAndPaginationFalseStopsFirstPag
 				}
 				testcloud.JSON(w, 200, snapshotReadContractPage(`[{"id":"third"}]`, ""))
 			})
-			result, err := blockstorage.ListVolumeSnapshots(context.Background(), client, blockstorage.WithVolumeSnapshotListMaxItems(0), blockstorage.WithVolumeSnapshotListPagination(paginated))
+			result, err := blockstorage.ListVolumeSnapshots(context.Background(), client, request.MaxItems(0), request.Paginated(paginated))
 			want := 2
 			pages := 1
 			if paginated {

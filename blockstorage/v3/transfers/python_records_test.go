@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"io"
 	"net/http"
 	"reflect"
@@ -110,7 +111,7 @@ func TestPythonTransferCreateRawSnapshotsExtensionsAndResponseViews(t *testing.T
 	extension := map[string]any{"list": []any{nil, false, 0}}
 	extensionOption := transfers.WithRecordCreateExtension("future", extension)
 	extension["list"] = "changed"
-	v, err := api.CreateRecord(context.Background(), option, extensionOption, transfers.WithRecordCreateField("unused", make(chan int)))
+	v, err := api.CreateRecord(context.Background(), option, extensionOption, request.Field("unused", make(chan int)))
 	if err != nil || len(*calls) != 2 || (*calls)[1].body != `{"transfer":{"future":{"list":[null,false,0]},"name":"","no_snapshots":false,"volume_id":"v1"}}` {
 		t.Fatal(v, err, *calls)
 	}
@@ -132,7 +133,7 @@ func TestPythonTransferCreateRawSnapshotsExtensionsAndResponseViews(t *testing.T
 		t.Fatal("header aliases wire")
 	}
 	*calls = nil
-	if _, err := api.CreateRecord(context.Background(), transfers.WithRecordCreateField("volume_id", nil), transfers.WithRecordCreateField("name", 0), transfers.WithRecordCreateField("no_snapshots", []any{})); err != nil {
+	if _, err := api.CreateRecord(context.Background(), request.Field("volume_id", nil), request.Field("name", 0), request.Field("no_snapshots", []any{})); err != nil {
 		t.Fatal(err)
 	}
 	if (*calls)[1].body != `{"transfer":{"name":0,"no_snapshots":[],"volume_id":null}}` {
@@ -160,7 +161,7 @@ func TestPythonTransferListDefaultsSummaryQueriesAndRawFilters(t *testing.T) {
 				api, _, calls := recordTransferFixture(t, selected, "3.71", "3.0", func(*http.Request) (*http.Response, error) {
 					return pythonTransferWire(200, `{"transfers":[{"id":"a","name":"ci","links":{"owner":"p1","count":9007199254740993}},{"id":"b","name":"other"}]}`), nil
 				})
-				ids, err := recordTransferIDs(t, api, transfers.WithRecordListDetails(details), transfers.WithRecordListAllProjects(true), transfers.WithRecordListQuery("name", "ci"), transfers.WithRecordListQuery("links", map[string]any{"owner": "p1"}), transfers.WithRecordListQuery("unknown", make(chan int)), transfers.WithRecordListQuery("all_tenants", true))
+				ids, err := recordTransferIDs(t, api, transfers.WithRecordListDetails(details), transfers.WithRecordListAllProjects(true), request.Query("name", "ci"), request.Query("links", map[string]any{"owner": "p1"}), request.Query("unknown", make(chan int)), request.Query("all_tenants", true))
 				path := "/cinder/v3/project/volume-transfers"
 				if selected == "3.0" {
 					path = "/cinder/v3/project/os-volume-transfer"
@@ -175,7 +176,7 @@ func TestPythonTransferListDefaultsSummaryQueriesAndRawFilters(t *testing.T) {
 		}
 	}
 	api, _, calls := recordTransferFixture(t, "3.55", "3.71", "3.0", func(*http.Request) (*http.Response, error) { return pythonTransferWire(200, `{"transfers":[]}`), nil })
-	ids, err := recordTransferIDs(t, api, transfers.WithRecordListServerQuery("all_tenants", "True"), transfers.WithRecordListLimit(0), transfers.WithRecordListMarker("before"))
+	ids, err := recordTransferIDs(t, api, transfers.WithRecordListServerQuery("all_tenants", "True"), request.Limit(0), request.Marker("before"))
 	if err != nil || len(ids) != 0 || (*calls)[1].path != "/cinder/v3/project/volume-transfers/detail" || (*calls)[1].query != "all_tenants=True&limit=0&marker=before" {
 		t.Fatal(ids, err, *calls)
 	}
@@ -186,7 +187,7 @@ func TestPythonTransferListLazinessCapsAndContinuation(t *testing.T) {
 		api, _, calls := recordTransferFixture(t, "3.55", "3.71", "3.0", func(*http.Request) (*http.Response, error) {
 			return pythonTransferWire(200, `{"transfers":[{"id":"a","name":"other"},{"id":"b","name":"ci"}],"transfers_links":[{"rel":"next","href":"?marker=b"}]}`), nil
 		})
-		seq := api.ListRecords(context.Background(), transfers.WithRecordListQuery("name", "ci"), transfers.WithRecordListMaxItems(1))
+		seq := api.ListRecords(context.Background(), request.Query("name", "ci"), request.MaxItems(1))
 		if len(*calls) != 0 {
 			t.Fatal("constructed sequence performs HTTP", *calls)
 		}
@@ -208,7 +209,7 @@ func TestPythonTransferListLazinessCapsAndContinuation(t *testing.T) {
 			}
 			return pythonTransferWire(200, `{"transfers":[{"id":"a"}]}`), nil
 		})
-		ids, err := recordTransferIDs(t, api, transfers.WithRecordListLimit(2), transfers.WithRecordListDetails(false))
+		ids, err := recordTransferIDs(t, api, request.Limit(2), transfers.WithRecordListDetails(false))
 		if err != nil || !reflect.DeepEqual(ids, []string{"a"}) || len(*calls) != 3 || (*calls)[2].query != "limit=2&marker=a" {
 			t.Fatal(ids, err, *calls)
 		}
@@ -294,7 +295,7 @@ func TestPythonTransferFindGetFallbackSummaryAndMissingDefaults(t *testing.T) {
 		if v != nil || err != nil || len(*calls) != 3 {
 			t.Fatal(v, err, *calls)
 		}
-		v, err = api.FindRecord(context.Background(), "absent", transfers.WithRecordFindIgnoreMissing(false))
+		v, err = api.FindRecord(context.Background(), "absent", request.IgnoreMissing(false))
 		if v != nil || !errors.Is(err, resource.ErrNotFound) {
 			t.Fatal(v, err)
 		}
@@ -384,7 +385,7 @@ func TestPythonTransferModernGetAcceptDeleteAndCleanRetries(t *testing.T) {
 	if len(*calls) != 2 || (*calls)[1].path != "/cinder/v3/project/volume-transfers/id" {
 		t.Fatal(*calls)
 	}
-	if err := api.DeleteRecord(context.Background(), "id", transfers.WithRecordDeleteIgnoreMissing(false)); !gophercloud.ResponseCodeIs(err, 404) {
+	if err := api.DeleteRecord(context.Background(), "id", request.IgnoreMissing(false)); !gophercloud.ResponseCodeIs(err, 404) {
 		t.Fatal(err)
 	}
 }
@@ -404,7 +405,7 @@ func TestPythonTransferInvalidOptionsAndStickySelection(t *testing.T) {
 		},
 		func() error { _, err := api.GetRecord(context.Background(), ".."); return err },
 		func() error { _, err := api.AcceptRecord(context.Background(), "id", nil); return err },
-		func() error { _, err := recordTransferIDs(t, api, transfers.WithRecordListMaxItems(-1)); return err },
+		func() error { _, err := recordTransferIDs(t, api, request.MaxItems(-1)); return err },
 	} {
 		if err := invoke(); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(err)
@@ -413,7 +414,7 @@ func TestPythonTransferInvalidOptionsAndStickySelection(t *testing.T) {
 	if len(*calls) != 0 {
 		t.Fatal("invalid preflight performs HTTP", *calls)
 	}
-	_, err := api.CreateRecord(context.Background(), func(*transfers.RecordCreateOpts) error { client.Microversion = "3.54"; return nil })
+	_, err := api.CreateRecord(context.Background(), request.Custom(func(*transfers.RecordCreateOpts) error { client.Microversion = "3.54"; return nil }))
 	if !errors.Is(err, resource.ErrInvalidOption) || len(*calls) != 0 {
 		t.Fatal(err, *calls)
 	}

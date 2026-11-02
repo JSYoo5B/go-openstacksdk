@@ -15,8 +15,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.API.GetQuotaClassRecord`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaClassGetOpts`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaClassName`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaClassGetHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaClassGetMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - GET default/custom class names project the seven declared quota integer fields with missing/null distinction and preserve actual unknown Wire/body/header/status separately. Selected version remains owned and no version discovery is added.
   Tests: `blockstorage/v3/quotasets/python_quota_class_test.go:TestPythonCinderQuotaClassGetSevenDescriptorsAndActualWire`, `blockstorage/v3/quotasets/python_quota_class_test.go:TestPythonCinderQuotaClassGetMissingNullAndCopiedProof`, `blockstorage/v3/quotasets/python_quota_class_test.go:TestPythonCinderQuotaClassOwnedOptionsAndNoVersionDiscovery`.
@@ -39,8 +39,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.API.UpdateQuotaClassRecord`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaClassUpdateOpts`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaClassUpdateAttribute`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaClassUpdateHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaClassUpdateMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - PUT transmits raw dirty quota_class_set attrs and explicit null, overlays actual response on class id seed and casts only the returned declared view. No attrs or unknown-only fields yields no HTTP, while duplicate id/constructor controls fail before requests.
   Tests: `blockstorage/v3/quotasets/python_quota_class_test.go:TestPythonCinderQuotaClassUpdateRawDirtyAttrsAndSeedProjection`, `blockstorage/v3/quotasets/python_quota_class_test.go:TestPythonCinderQuotaClassUpdateNoopUnknownAndExplicitNull`, `blockstorage/v3/quotasets/python_quota_class_test.go:TestPythonCinderQuotaClassPreflightIDsAndBoundConstructorControls`.

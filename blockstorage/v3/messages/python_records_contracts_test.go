@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -122,7 +123,7 @@ func TestPythonCinderMessageDeleteDefaultStrictAndOriginalStatusPolicy(t *testin
 	if err := api.DeleteRecord(context.Background(), "id"); err != nil || calls.Len() != 1 || messageCalls(calls)[0].headers.Get("OpenStack-API-Version") != "volume 3.0" {
 		t.Fatal(err, messageCalls(calls))
 	}
-	if err := api.DeleteRecord(context.Background(), "id", messages.WithRecordDeleteIgnoreMissing(false)); !gophercloud.ResponseCodeIs(err, 404) || calls.Len() != 2 {
+	if err := api.DeleteRecord(context.Background(), "id", request.IgnoreMissing(false)); !gophercloud.ResponseCodeIs(err, 404) || calls.Len() != 2 {
 		t.Fatal(err, messageCalls(calls))
 	}
 	api, calls = messageAPI(t, "3.3", func(*http.Request) *http.Response { return messageWire(403, `{"policy":false}`) })
@@ -150,7 +151,7 @@ func TestPythonCinderMessageListQueryClassificationOwnedLocalFiltersAndRawCap(t 
 		}
 		return messageWire(200, `{"messages":[{"id":"a","message_level":"WARN"},{"id":"b","message_level":"ERROR","unknown":null},{"id":"c","message_level":"ERROR"}],"next":"https://wrong.example/messages"}`)
 	})
-	seq := api.ListRecords(context.Background(), option, messages.WithRecordListLimit(0), messages.WithRecordListMaxItems(2))
+	seq := api.ListRecords(context.Background(), option, request.Limit(0), request.MaxItems(2))
 	if calls.Len() != 0 {
 		t.Fatal("eager list", messageCalls(calls))
 	}
@@ -166,7 +167,7 @@ func TestPythonCinderMessageListQueryClassificationOwnedLocalFiltersAndRawCap(t 
 	api, calls = messageAPI(t, "3.3", func(*http.Request) *http.Response {
 		return messageWire(200, `{"messages":[{"id":1,"request_id":false},{"id":2,"request_id":"False"}]}`)
 	})
-	values, err = collectMessages(api.ListRecords(context.Background(), messages.WithRecordListQuery("id", true), messages.WithRecordListQuery("request_id", "False")))
+	values, err = collectMessages(api.ListRecords(context.Background(), request.Query("id", true), request.Query("request_id", "False")))
 	if err != nil || len(values) != 1 || calls.Len() != 1 {
 		t.Fatal(values, err, messageCalls(calls))
 	}
@@ -210,7 +211,7 @@ func TestPythonCinderMessageListLinkedMarkerOffsetAndSinglePage(t *testing.T) {
 				}
 				return reply
 			})
-			values, err := collectMessages(api.ListRecords(context.Background(), messages.WithRecordListQuery("project_id", "p")))
+			values, err := collectMessages(api.ListRecords(context.Background(), request.Query("project_id", "p")))
 			if err != nil || len(values) != 2 || calls.Len() != 2 {
 				t.Fatal(values, err, messageCalls(calls))
 			}
@@ -228,12 +229,12 @@ func TestPythonCinderMessageListLinkedMarkerOffsetAndSinglePage(t *testing.T) {
 		}
 		return messageWire(200, `{"messages":{"id":9007199254740993}}`)
 	})
-	values, err := collectMessages(api.ListRecords(context.Background(), messages.WithRecordListLimit(5)))
+	values, err := collectMessages(api.ListRecords(context.Background(), request.Limit(5)))
 	if err != nil || len(values) != 1 || calls.Len() != 2 {
 		t.Fatal(values, err, messageCalls(calls))
 	}
 	calls.Reset()
-	values, err = collectMessages(api.ListRecords(context.Background(), messages.WithRecordListLimit(5), messages.WithRecordListPaginated(false)))
+	values, err = collectMessages(api.ListRecords(context.Background(), request.Limit(5), request.Paginated(false)))
 	if err != nil || len(values) != 1 || calls.Len() != 1 {
 		t.Fatal(values, err, messageCalls(calls))
 	}
@@ -243,7 +244,7 @@ func TestPythonCinderMessageListLinkedMarkerOffsetAndSinglePage(t *testing.T) {
 		}
 		return messageWire(200, `{"messages":[{"id":"a"}],"next":"?offset=2&limit=2"}`)
 	})
-	values, err = collectMessages(api.ListRecords(context.Background(), messages.WithRecordListQuery("offset", 0)))
+	values, err = collectMessages(api.ListRecords(context.Background(), request.Query("offset", 0)))
 	if err != nil || len(values) != 2 || calls.Len() != 2 {
 		t.Fatal(values, err, messageCalls(calls))
 	}
@@ -251,7 +252,7 @@ func TestPythonCinderMessageListLinkedMarkerOffsetAndSinglePage(t *testing.T) {
 func TestPythonCinderMessageListEnvelopeConstructorAndContinuationErrors(t *testing.T) {
 	for _, body := range []string{`{}`, `{"messages":null}`, `{"messages":[null]}`, `{"messages":[{"connection":null}]}`, `{"messages":[{"microversion":"3.3"}]}`, `{"messages":[{"_synchronized":false}]}`, `{"messages":[{"id":"a"}],"next":"?project_id=changed&marker=a"}`} {
 		api, calls := messageAPI(t, "3.3", func(*http.Request) *http.Response { return messageWire(200, body) })
-		values, err := collectMessages(api.ListRecords(context.Background(), messages.WithRecordListQuery("project_id", "p")))
+		values, err := collectMessages(api.ListRecords(context.Background(), request.Query("project_id", "p")))
 		var proof *resource.ResponseError
 		if err == nil || len(values) > 1 || calls.Len() != 1 || !errors.As(err, &proof) || proof.StatusCode != 200 || string(proof.Body) != body {
 			t.Fatal(body, values, err, proof, messageCalls(calls))
@@ -382,13 +383,13 @@ func TestPythonCinderMessagePreflightCancellationAndRetainedOptionOwnership(t *t
 			t.Fatal(err, messageCalls(calls))
 		}
 	}
-	for _, opts := range [][]messages.RecordGetOption{{nil}, {messages.WithRecordGetHeaders(map[string]string{"X-Auth-Token": "bad"})}, {messages.WithRecordGetMicroversion("3.3\n")}} {
+	for _, opts := range [][]messages.RecordGetOption{{nil}, {request.Headers(map[string]string{"X-Auth-Token": "bad"})}, {request.Microversion("3.3\n")}} {
 		_, err := api.GetRecord(context.Background(), "id", opts...)
 		if err == nil || calls.Len() != 0 {
 			t.Fatal(err, messageCalls(calls))
 		}
 	}
-	for _, opts := range [][]messages.RecordListOption{{nil}, {messages.WithRecordListLimit(-1)}, {messages.WithRecordListMaxItems(-1)}, {messages.WithRecordListQuery("limit", []int{1, 2})}, {messages.WithRecordListOpts(messages.RecordListOpts{Query: map[string]json.RawMessage{"event_id": json.RawMessage(`{bad`)}})}} {
+	for _, opts := range [][]messages.RecordListOption{{nil}, {request.Limit(-1)}, {request.MaxItems(-1)}, {request.Query("limit", []int{1, 2})}, {messages.WithRecordListOpts(messages.RecordListOpts{Query: map[string]json.RawMessage{"event_id": json.RawMessage(`{bad`)}})}} {
 		_, err := collectMessages(api.ListRecords(context.Background(), opts...))
 		if err == nil || calls.Len() != 0 {
 			t.Fatal(err, messageCalls(calls))
@@ -396,19 +397,19 @@ func TestPythonCinderMessagePreflightCancellationAndRetainedOptionOwnership(t *t
 	}
 	ctx, cancel := context.WithCancelCause(context.Background())
 	cause, callback := errors.New("caller cause"), errors.New("callback cause")
-	_, err := api.GetRecord(ctx, "id", func(*messages.RecordGetOpts) error { cancel(cause); return callback })
+	_, err := api.GetRecord(ctx, "id", request.Custom(func(*messages.RecordGetOpts) error { cancel(cause); return callback }))
 	if !errors.Is(err, context.Canceled) || !errors.Is(err, cause) || !errors.Is(err, callback) || calls.Len() != 0 {
 		t.Fatal(err, messageCalls(calls))
 	}
 	var retained *messages.RecordGetOpts
-	_, err = api.GetRecord(context.Background(), "id", func(v *messages.RecordGetOpts) error {
+	_, err = api.GetRecord(context.Background(), "id", request.Custom(func(v *messages.RecordGetOpts) error {
 		retained = v
 		v.Headers = map[string]string{"X-Custom": "owned"}
 		return nil
-	}, func(*messages.RecordGetOpts) error {
+	}), request.Custom(func(*messages.RecordGetOpts) error {
 		retained.Headers["X-Auth-Token"] = "retained mutation"
 		return nil
-	})
+	}))
 	if err != nil || calls.Len() != 1 || messageCalls(calls)[0].headers.Get("X-Custom") != "owned" || api.RawClient().MoreHeaders != nil {
 		t.Fatal(err, messageCalls(calls))
 	}
@@ -421,7 +422,7 @@ func TestPythonCinderMessageConcurrentOwnedOptionsAndLiveReauthentication(t *tes
 		}
 		return messageWire(200, `{"message":{"id":"a"}}`), nil
 	})
-	option := messages.WithRecordGetHeaders(map[string]string{"X-Custom": "owned"})
+	option := request.Headers(map[string]string{"X-Custom": "owned"})
 	var wg sync.WaitGroup
 	for i := 0; i < 8; i++ {
 		wg.Add(1)

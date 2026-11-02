@@ -19,10 +19,10 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSnapshotListLocation`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSnapshotListFilters`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSnapshotListDetailed`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSnapshotListPagination`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSnapshotListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSnapshotListMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSnapshotListHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSnapshotListExpression`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSnapshotListAllowUnknownParams`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSnapshotListConflictingAttrs`

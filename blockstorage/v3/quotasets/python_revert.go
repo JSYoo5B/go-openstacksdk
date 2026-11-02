@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"maps"
 	"net/http"
 	"net/url"
@@ -30,7 +31,14 @@ type QuotaRevertOpts struct {
 	Microversion *string
 	order        []string
 }
-type QuotaRevertOption func(*QuotaRevertOpts) error
+
+// QuotaRevertOption is one option of RevertRecord: WithQuotaRevertOpts,
+// request.Query (a literal DELETE parameter; the value is sent as JSON and
+// encoded like Python urlencode), request.Microversion, request.Headers
+// (replaces the headers) or request.Custom over *QuotaRevertOpts. Other shared
+// calls fail with resource.ErrInvalidOption before HTTP. GetQueryCall is the
+// narrowest category that admits a query with headers and a microversion.
+type QuotaRevertOption = request.GetQueryCall
 
 func copyQuotaRevert(v QuotaRevertOpts) QuotaRevertOpts {
 	v.Query = cinderRevertFields(v.Query)
@@ -62,11 +70,11 @@ func cinderRevertFields(v map[string]json.RawMessage) map[string]json.RawMessage
 }
 func WithQuotaRevertOpts(v QuotaRevertOpts) QuotaRevertOption {
 	owned := copyQuotaRevert(v)
-	return func(o *QuotaRevertOpts) error { *o = copyQuotaRevert(owned); return nil }
+	return request.Custom(func(o *QuotaRevertOpts) error { *o = copyQuotaRevert(owned); return nil })
 }
-func WithQuotaRevertQuery(key string, value any) QuotaRevertOption {
-	raw, err := json.Marshal(value)
-	return func(o *QuotaRevertOpts) error {
+
+var quotaRevertCalls = calls.Spec[QuotaRevertOpts]{
+	Query: calls.JSONQuery(func(o *QuotaRevertOpts, key string, raw json.RawMessage, err error) error {
 		if err != nil {
 			return err
 		}
@@ -78,14 +86,9 @@ func WithQuotaRevertQuery(key string, value any) QuotaRevertOption {
 		}
 		o.Query[key] = bytes.Clone(raw)
 		return nil
-	}
-}
-func WithQuotaRevertHeaders(v map[string]string) QuotaRevertOption {
-	owned := maps.Clone(v)
-	return func(o *QuotaRevertOpts) error { o.Headers = maps.Clone(owned); return nil }
-}
-func WithQuotaRevertMicroversion(v string) QuotaRevertOption {
-	return func(o *QuotaRevertOpts) error { x := v; o.Microversion = &x; return nil }
+	}),
+	Headers:      calls.Value(func(o *QuotaRevertOpts) *map[string]string { return &o.Headers }),
+	Microversion: calls.Pointer(func(o *QuotaRevertOpts) **string { return &o.Microversion }),
 }
 
 // QuotaRevertRecord is actual DELETE evidence, never a decoded quota Resource.
@@ -129,7 +132,7 @@ func (s *ProjectQuotaScope) RevertRecord(ctx context.Context, options ...QuotaRe
 		return errors.Join(changed, source.Guard(ctx), rest.CheckOperationGuard(ctx))
 	}
 	policy := copyQuotaRevert(QuotaRevertOpts{})
-	for _, apply := range slices.Clone(options) {
+	for _, apply := range calls.Translate(options, quotaRevertCalls) {
 		if err := guard(ctx); err != nil {
 			return nil, wrap(err)
 		}

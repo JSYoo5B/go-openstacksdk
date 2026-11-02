@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"net/http"
 	"reflect"
 	"strings"
@@ -178,14 +179,13 @@ func validateLimits(options UpdateOpts) error {
 
 type resetOptions struct{ ignoreMissing bool }
 
-// ResetOption configures missing-project behavior for quota resets.
-type ResetOption func(*resetOptions) error
+// ResetOption is one option of Reset: request.IgnoreMissing (only HTTP 404
+// returns nil, nil; default false matches Python's revert_quota_set) or
+// request.Custom. Other shared calls fail with resource.ErrInvalidOption
+// before HTTP.
+type ResetOption = request.DeleteCall
 
-// WithResetIgnoreMissing makes only HTTP 404 return nil, nil. Default false
-// matches Python's revert_quota_set; the last option wins.
-func WithResetIgnoreMissing(ignore bool) ResetOption {
-	return func(options *resetOptions) error { options.ignoreMissing = ignore; return nil }
-}
+var resetCalls = calls.Spec[resetOptions]{IgnoreMissing: calls.Value(func(o *resetOptions) *bool { return &o.ignoreMissing })}
 
 // Reset deletes quota overrides with Cinder's DELETE 200 contract. It returns
 // response headers and never follows the reset with an automatic GET.
@@ -194,7 +194,7 @@ func (s *ProjectQuotaScope) Reset(ctx context.Context, options ...ResetOption) (
 		return nil, quotaError("Reset", s.projectID, err)
 	}
 	var config resetOptions
-	for _, apply := range options {
+	for _, apply := range calls.Translate(options, resetCalls) {
 		if apply == nil {
 			return nil, quotaError("Reset", s.projectID, fmt.Errorf("%w: nil reset option", resource.ErrInvalidOption))
 		}

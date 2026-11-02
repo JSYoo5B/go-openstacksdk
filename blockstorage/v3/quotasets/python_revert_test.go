@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -28,7 +29,7 @@ func TestPythonCinderRevertUsesSourceURLencodeWithoutDoseq(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	row, err := scope.RevertRecord(context.Background(), quotasets.WithQuotaRevertQuery("none", nil), quotasets.WithQuotaRevertQuery("flag", false), quotasets.WithQuotaRevertQuery("list", []any{"a", 1, true, nil}), quotasets.WithQuotaRevertQuery("mapping", json.RawMessage(`{"a":1,"b":false}`)), quotasets.WithQuotaRevertQuery("empty", []string{}), quotasets.WithQuotaRevertQuery("big", json.RawMessage(`9007199254740993`)))
+	row, err := scope.RevertRecord(context.Background(), request.Query("none", nil), request.Query("flag", false), request.Query("list", []any{"a", 1, true, nil}), request.Query("mapping", json.RawMessage(`{"a":1,"b":false}`)), request.Query("empty", []string{}), request.Query("big", json.RawMessage(`9007199254740993`)))
 	if err != nil || row == nil || row.ProjectID != "project" || row.StatusCode != 203 || string(row.Envelope) != "opaque reset acknowledgement" || row.Header.Get("X-Request-Id") != "quota-class-actual" || *calls != 1 {
 		t.Fatal(row, err, *calls)
 	}
@@ -46,7 +47,7 @@ func TestPythonCinderRevertRawControlNamesStayDeletionParams(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	_, err = scope.RevertRecord(context.Background(), quotasets.WithQuotaRevertQuery("microversion", "9.99"), quotasets.WithQuotaRevertQuery("base_path", "https://foreign.invalid/ignored"), quotasets.WithQuotaRevertQuery("headers", map[string]string{"X-Query": "literal"}), quotasets.WithQuotaRevertQuery("project_id", "other"), quotasets.WithQuotaRevertQuery("error_message", "literal"))
+	_, err = scope.RevertRecord(context.Background(), request.Query("microversion", "9.99"), request.Query("base_path", "https://foreign.invalid/ignored"), request.Query("headers", map[string]string{"X-Query": "literal"}), request.Query("project_id", "other"), request.Query("error_message", "literal"))
 	if err != nil || *calls != 1 || client.Microversion != "3.42" {
 		t.Fatal(err, *calls, client)
 	}
@@ -73,7 +74,7 @@ func TestPythonCinderRevertOwnsOptionsOrderAndTransportHeaders(t *testing.T) {
 	// Bulk map keys acquire a deterministic initial order before subsequent
 	// single-query options append keys; replacement retains its first position.
 	for range 2 {
-		row, err := scope.RevertRecord(context.Background(), option, quotasets.WithQuotaRevertQuery("second", "old"), quotasets.WithQuotaRevertQuery("first", 1), quotasets.WithQuotaRevertQuery("second", "last"))
+		row, err := scope.RevertRecord(context.Background(), option, request.Query("second", "old"), request.Query("first", 1), request.Query("second", "last"))
 		if err != nil || row == nil || row.Microversion != "3.50" {
 			t.Fatal(row, err)
 		}
@@ -120,14 +121,14 @@ func TestPythonCinderRevertPreflightGuardsAndCancellation(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, opts := range [][]quotasets.QuotaRevertOption{{nil}, {quotasets.WithQuotaRevertQuery("bad", make(chan int))}, {quotasets.WithQuotaRevertOpts(quotasets.QuotaRevertOpts{Query: map[string]json.RawMessage{"bad": json.RawMessage(`{broken`)}})}, {quotasets.WithQuotaRevertHeaders(map[string]string{"X-Auth-Token": "foreign"})}} {
+	for _, opts := range [][]quotasets.QuotaRevertOption{{nil}, {request.Query("bad", make(chan int))}, {quotasets.WithQuotaRevertOpts(quotasets.QuotaRevertOpts{Query: map[string]json.RawMessage{"bad": json.RawMessage(`{broken`)}})}, {request.Headers(map[string]string{"X-Auth-Token": "foreign"})}} {
 		if row, err := scope.RevertRecord(context.Background(), opts...); row != nil || err == nil || *calls != 0 {
 			t.Fatal(row, err, *calls)
 		}
 	}
 	original := client.ResourceBase
 	later := 0
-	row, err := scope.RevertRecord(context.Background(), func(*quotasets.QuotaRevertOpts) error { client.ResourceBase += "changed/"; return nil }, func(*quotasets.QuotaRevertOpts) error { later++; client.ResourceBase = original; return nil })
+	row, err := scope.RevertRecord(context.Background(), request.Custom(func(*quotasets.QuotaRevertOpts) error { client.ResourceBase += "changed/"; return nil }), request.Custom(func(*quotasets.QuotaRevertOpts) error { later++; client.ResourceBase = original; return nil }))
 	client.ResourceBase = original
 	if row != nil || !errors.Is(err, resource.ErrInvalidOption) || later != 0 || *calls != 0 {
 		t.Fatal(row, err, later, *calls)
@@ -227,7 +228,7 @@ func TestPythonCinderRevertCleanRetryKeepsQueryAndRejectsBodyReplacement(t *test
 				}
 				return nil
 			}
-			row, err := scope.RevertRecord(context.Background(), quotasets.WithQuotaRevertQuery("flag", false))
+			row, err := scope.RevertRecord(context.Background(), request.Query("flag", false))
 			if tamper {
 				var native gophercloud.ErrUnexpectedResponseCode
 				if row != nil || !errors.Is(err, resource.ErrInvalidOption) || !errors.As(err, &native) || native.Actual != 503 || *calls != 1 || retries != 1 {

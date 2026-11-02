@@ -15,9 +15,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/messages.New`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/messages.API.DeleteRecord`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/messages.WithRecordDeleteOpts`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/messages.WithRecordDeleteIgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/messages.WithRecordDeleteMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/messages.WithRecordDeleteHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 
 - DeleteRecord makes a bodyless query-free DELETE /messages/{literal escaped id}, accepts Source200..399 without JSON-body decoding and defaults to ignoring only a clean native404. Strict false preserves404;403 and joined read/close/cancel/source/retry causes on404 are never suppressed. No predelete Get/List or status/version capability gate is invented.
   Tests: `blockstorage/v3/messages/python_records_contracts_test.go:TestPythonCinderMessageDeleteDefaultStrictAndOriginalStatusPolicy`, `blockstorage/v3/messages/python_records_contracts_test.go:TestPythonCinderMessageRejectedStatusFamiliesPreservePhysicalCauses`, `blockstorage/v3/messages/python_records_contracts_test.go:TestPythonCinderMessageAcceptedPhysicalFaultsAndStickySource`, `blockstorage/v3/messages/python_records_contracts_test.go:TestPythonCinderMessageRetryPreservesCleanMissingAndFixedVersionHeaders`.
@@ -46,8 +46,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/messages.API.RawClient`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/messages.API.GetRecord`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/messages.WithRecordGetOpts`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/messages.WithRecordGetHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/messages.WithRecordGetMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/messages.WithRecordGetSourceEnvelope`
 
 - GetRecord makes one bodyless/query-free GET /messages/{literal escaped id} with no list fallback and no missing suppression. Actual accepted partial responses preserve ID seeds only in Source view; explicit null/nonstring IDs override them. Blank/malformed JSON keeps seeds, valid wrong shapes or badUTF8 return actual ACK errors.
@@ -80,13 +80,13 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/messages.New`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/messages.API.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/messages.WithRecordListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/messages.WithRecordListQuery`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/messages.WithRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/messages.WithRecordListMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/messages.WithRecordListPaginated`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/messages.WithRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/messages.WithRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/messages.WithRecordListMaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
 
 - ListRecords lazily reads /messages plural array/singleton with Source project_id/sort/limit/offset/marker server query classification. Declared nonserver Body attributes including id/name filter locally after string descriptor projection; unknown parameters are ignored. Requests query boolean/iterable/null encoding and Source Python equality/dictionary predicates are reused with actual-page errors for invalid mapping get.
   Tests: `blockstorage/v3/messages/python_records_contracts_test.go:TestPythonCinderMessageListQueryClassificationOwnedLocalFiltersAndRawCap`, `blockstorage/v3/messages/python_records_contracts_test.go:TestPythonCinderMessageListDictionarySemanticsAfterDescriptorConversion`.
@@ -187,7 +187,7 @@ func main() {
     if *id != "" {
         if *remove {
             if err := api.DeleteRecord(ctx, *id,
-                messages.WithRecordDeleteIgnoreMissing(false)); err != nil { log.Fatal(err) }
+                request.IgnoreMissing(false)); err != nil { log.Fatal(err) }
             return
         }
         value, err := api.GetRecord(ctx, *id)
@@ -196,7 +196,7 @@ func main() {
         return
     }
     options := []messages.RecordListOption{}
-    if *project != "" { options = append(options, messages.WithRecordListQuery("project_id", *project)) }
+    if *project != "" { options = append(options, request.Query("project_id", *project)) }
     for value, err := range api.ListRecords(ctx, options...) {
         if err != nil { log.Fatal(err) }
         printMessage(value.Resource)

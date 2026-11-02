@@ -13,6 +13,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cinderrequest"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
@@ -150,7 +151,7 @@ func (a *API) SummaryRecord(ctx context.Context, options ...SummaryOption) (*Vol
 		return errors.Join(changed, source.Guard(ctx), rest.CheckOperationGuard(ctx))
 	}
 	cfg := cloneSummary(SummaryOpts{})
-	for _, apply := range slices.Clone(options) {
+	for _, apply := range calls.Translate(slices.Clone(options), summaryCalls) {
 		if err = guard(ctx); err != nil {
 			return nil, wrap(err)
 		}

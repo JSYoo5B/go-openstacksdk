@@ -11,6 +11,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroups"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -141,7 +142,7 @@ func TestPythonCinderConsistencyGroupCreateRawPartialNullAndSnapshotOwnership(t 
 		return cgWire(202, `{"consistencygroup":{"id":"new","name":"wire"}}`)
 	})
 	for range 2 {
-		value, err := api.CreateRecord(context.Background(), option, func(c *consistencygroups.RecordCreateOpts) error { held = c; return nil })
+		value, err := api.CreateRecord(context.Background(), option, request.Custom(func(c *consistencygroups.RecordCreateOpts) error { held = c; return nil }))
 		if err != nil || value == nil || value.StatusCode != 202 || api.RawClient().Microversion != "" {
 			t.Fatal(value, err, cgCalls(calls))
 		}
@@ -200,7 +201,7 @@ func TestPythonCinderConsistencyGroupCreateFromSourceNullDefaultsAndLiteralRefer
 
 func TestPythonCinderConsistencyGroupUpdateDirtyNoopBlankVersionAndResponseMerge(t *testing.T) {
 	api, calls := cgAPI(t, "", func(*http.Request) *http.Response { t.Fatal("no-op HTTP"); return nil })
-	for _, options := range [][]consistencygroups.RecordUpdateOption{nil, {consistencygroups.WithRecordUpdateField("unknown", make(chan int))}, {consistencygroups.WithRecordUpdateField("id", "ignored")}} {
+	for _, options := range [][]consistencygroups.RecordUpdateOption{nil, {request.Field("unknown", make(chan int))}, {request.Field("id", "ignored")}} {
 		value, err := api.UpdateRecord(context.Background(), "literal", options...)
 		if err != nil || value == nil || value.StatusCode != 0 || value.Envelope != nil || value.Header != nil || value.Wire != nil || calls.Len() != 0 {
 			t.Fatal(value, err, cgCalls(calls))
@@ -215,7 +216,7 @@ func TestPythonCinderConsistencyGroupUpdateDirtyNoopBlankVersionAndResponseMerge
 			}
 			return cgWire(400, `{"stock":"blank update requires3.6"}`)
 		})
-		value, err := api.UpdateRecord(context.Background(), "id", consistencygroups.WithRecordUpdateField("name", ""), consistencygroups.WithRecordUpdateField("id", "other"))
+		value, err := api.UpdateRecord(context.Background(), "id", request.Field("name", ""), request.Field("id", "other"))
 		if value == nil || calls.Len() != 1 || cgCalls(calls)[0].method != http.MethodPut || cgCalls(calls)[0].path != cgBase+"/id" || (err == nil) != accepted {
 			t.Fatal(version, value, err, cgCalls(calls))
 		}
@@ -274,14 +275,14 @@ func TestPythonCinderConsistencyGroupDeleteCorrectedBodyReplayAndStrictMissing(t
 func TestPythonCinderConsistencyGroupListDeclaredQueryLocalFiltersAndRawCap(t *testing.T) {
 	body := `{"consistencygroups":[{"id":"first","name":"other"},{"id":"second","name":"target","volume_types":"type"}],"next":"?marker=next"}`
 	api, calls := cgAPI(t, "", func(*http.Request) *http.Response { return cgWire(200, body) })
-	values, err := collectCG(api.ListRecords(context.Background(), consistencygroups.WithRecordListQuery("name", "target"), consistencygroups.WithRecordListQuery("sort", []string{"name:asc", "id:desc"}), consistencygroups.WithRecordListQuery("all_tenants", make(chan int)), consistencygroups.WithRecordListQuery("unknown", make(chan int)), consistencygroups.WithRecordListMaxItems(2)))
+	values, err := collectCG(api.ListRecords(context.Background(), request.Query("name", "target"), request.Query("sort", []string{"name:asc", "id:desc"}), request.Query("all_tenants", make(chan int)), request.Query("unknown", make(chan int)), request.MaxItems(2)))
 	if err != nil || len(values) != 1 || calls.Len() != 1 || cgCalls(calls)[0].path != cgBase+"/detail" || cgCalls(calls)[0].query != "limit=2&sort=name%3Aasc&sort=id%3Adesc" {
 		t.Fatal(values, err, cgCalls(calls))
 	}
 	cgField(t, values[0], "id", `"second"`)
 	cgField(t, values[0], "volume_types", `["type"]`)
 	api, calls = cgAPI(t, "", func(*http.Request) *http.Response { return cgWire(200, body) })
-	values, err = collectCG(api.ListRecords(context.Background(), consistencygroups.WithRecordListQuery("name", "target"), consistencygroups.WithRecordListMaxItems(1)))
+	values, err = collectCG(api.ListRecords(context.Background(), request.Query("name", "target"), request.MaxItems(1)))
 	if err != nil || len(values) != 0 || calls.Len() != 1 || cgCalls(calls)[0].query != "limit=1" {
 		t.Fatal(values, err, cgCalls(calls))
 	}
@@ -297,7 +298,7 @@ func TestPythonCinderConsistencyGroupListStockSingularLinksOffsetsMarkersAndBrea
 		}
 		return cgWire(200, `{"consistencygroups":[{"id":"first","name":"target"}],"consistencygroup_links":[{"rel":"next","href":"?offset=2&limit=2"}]}`)
 	})
-	values, err := collectCG(api.ListRecords(context.Background(), consistencygroups.WithRecordListDetails(false), consistencygroups.WithRecordListLimit(2), consistencygroups.WithRecordListQuery("sort", "name:asc"), consistencygroups.WithRecordListQuery("name", "target")))
+	values, err := collectCG(api.ListRecords(context.Background(), consistencygroups.WithRecordListDetails(false), request.Limit(2), request.Query("sort", "name:asc"), request.Query("name", "target")))
 	if err != nil || len(values) != 2 || calls.Len() != 3 || cgCalls(calls)[0].path != cgBase || cgCalls(calls)[1].query != "limit=2&offset=2&sort=name%3Aasc" || cgCalls(calls)[2].query != "limit=2&marker=second&sort=name%3Aasc" {
 		t.Fatal(values, err, cgCalls(calls))
 	}
@@ -324,7 +325,7 @@ func TestPythonCinderConsistencyGroupListContinuationRejectsChangedScopeAndCurso
 	for _, next := range []string{"?sort=id:desc&offset=2", "?offset=0", "?offset=2&marker=x", "https://other.example/consistencygroups", "/cinder/v3/other/consistencygroups/detail?offset=2", "?limit=3&offset=2"} {
 		body := `{"consistencygroups":[{"id":"first"}],"next":"` + next + `"}`
 		api, calls := cgAPI(t, "", func(*http.Request) *http.Response { return cgWire(200, body) })
-		values, err := collectCG(api.ListRecords(context.Background(), consistencygroups.WithRecordListLimit(2), consistencygroups.WithRecordListQuery("sort", "name:asc")))
+		values, err := collectCG(api.ListRecords(context.Background(), request.Limit(2), request.Query("sort", "name:asc")))
 		var proof *resource.ResponseError
 		if err == nil || len(values) > 1 || calls.Len() != 1 || !errors.As(err, &proof) || proof.StatusCode != 200 || string(proof.Body) != body || proof.Header.Get("X-Request-Id") != "actual" {
 			t.Fatal(next, values, err, cgCalls(calls), proof)
@@ -354,12 +355,12 @@ func TestPythonCinderConsistencyGroupListDictionaryFiltersDefaultsAndShallowEqua
 	api, calls := cgAPI(t, "", func(*http.Request) *http.Response {
 		return cgWire(200, `{"consistencygroups":[{"id":"id","add_volumes":"actual","description":"scalar"}]}`)
 	})
-	values, err := collectCG(api.ListRecords(context.Background(), consistencygroups.WithRecordListQuery("add_volumes", "different"), consistencygroups.WithRecordListQuery("description", map[string]any{"key": true})))
+	values, err := collectCG(api.ListRecords(context.Background(), request.Query("add_volumes", "different"), request.Query("description", map[string]any{"key": true})))
 	if err != nil || len(values) != 0 || calls.Len() != 1 {
 		t.Fatal("first false must short circuit", values, err, cgCalls(calls))
 	}
 	api, calls = cgAPI(t, "", func(*http.Request) *http.Response { return cgWire(200, `{"consistencygroups":[{"id":"id"}]}`) })
-	values, err = collectCG(api.ListRecords(context.Background(), consistencygroups.WithRecordListQuery("description", nil)))
+	values, err = collectCG(api.ListRecords(context.Background(), request.Query("description", nil)))
 	if err != nil || len(values) != 1 || calls.Len() != 1 {
 		t.Fatal("absent known descriptor defaults null", values, err, cgCalls(calls))
 	}
@@ -376,7 +377,7 @@ func TestPythonCinderConsistencyGroupListExactDecimalPolicyIsExplicit(t *testing
 	api, calls = cgAPI(t, "", func(*http.Request) *http.Response {
 		return cgWire(200, `{"consistencygroups":[{"id":"id","description":1e-400}]}`)
 	})
-	values, err = collectCG(api.ListRecords(context.Background(), consistencygroups.WithRecordListQuery("description", map[string]any{})))
+	values, err = collectCG(api.ListRecords(context.Background(), request.Query("description", map[string]any{})))
 	if err != nil || len(values) != 1 || calls.Len() != 1 {
 		t.Fatal("nonzero exact decimal remains truthy", values, err, cgCalls(calls))
 	}
@@ -423,13 +424,13 @@ func TestPythonCinderConsistencyGroupOptionsMapsLazyProfilesAndSourceOwnership(t
 	if err != nil || len(values) != 1 || calls.Len() != 1 || cgCalls(calls)[0].headers.Get("Accept") != "custom" || cgCalls(calls)[0].headers.Get("X-Policy") != "owned" || !reflect.DeepEqual(api.RawClient().MoreHeaders, expected) {
 		t.Fatal(values, err, cgCalls(calls))
 	}
-	values, err = collectCG(api.ListRecords(context.Background(), func(c *consistencygroups.RecordListOpts) error {
+	values, err = collectCG(api.ListRecords(context.Background(), request.Custom(func(c *consistencygroups.RecordListOpts) error {
 		if c.Query == nil || c.Headers == nil {
 			t.Fatal(c)
 		}
 		c.Headers["X-First"] = "owned"
 		return nil
-	}))
+	})))
 	if err != nil || len(values) != 1 || calls.Len() != 2 || cgCalls(calls)[1].headers.Get("Accept") != "application/json" || cgCalls(calls)[1].headers.Get("X-First") != "owned" || !reflect.DeepEqual(api.RawClient().MoreHeaders, expected) {
 		t.Fatal(values, err, cgCalls(calls))
 	}
@@ -445,11 +446,11 @@ func TestPythonCinderConsistencyGroupPreflightControlsAndJoinedOptionCauses(t *t
 		func(a *consistencygroups.API) error { _, e := a.GetRecord(context.Background(), " "); return e },
 		func(a *consistencygroups.API) error { _, e := a.GetRecord(context.Background(), "id", nil); return e },
 		func(a *consistencygroups.API) error {
-			_, e := a.CreateRecord(context.Background(), consistencygroups.WithRecordCreateField("cls", nil))
+			_, e := a.CreateRecord(context.Background(), request.Field("cls", nil))
 			return e
 		},
 		func(a *consistencygroups.API) error {
-			_, e := a.UpdateRecord(context.Background(), "id", consistencygroups.WithRecordUpdateField("base_path", false))
+			_, e := a.UpdateRecord(context.Background(), "id", request.Field("base_path", false))
 			return e
 		},
 		func(a *consistencygroups.API) error {
@@ -458,15 +459,15 @@ func TestPythonCinderConsistencyGroupPreflightControlsAndJoinedOptionCauses(t *t
 		},
 		func(a *consistencygroups.API) error { e := a.DeleteRecord(context.Background(), "id", nil); return e },
 		func(a *consistencygroups.API) error {
-			_, e := collectCG(a.ListRecords(context.Background(), consistencygroups.WithRecordListQuery("cls", false)))
+			_, e := collectCG(a.ListRecords(context.Background(), request.Query("cls", false)))
 			return e
 		},
 		func(a *consistencygroups.API) error {
-			_, e := collectCG(a.ListRecords(context.Background(), consistencygroups.WithRecordListQuery("limit", -1)))
+			_, e := collectCG(a.ListRecords(context.Background(), request.Query("limit", -1)))
 			return e
 		},
 		func(a *consistencygroups.API) error {
-			_, e := a.GetRecord(context.Background(), "id", consistencygroups.WithRecordGetHeaders(map[string]string{"OpenStack-API-Version": "volume 3.90"}))
+			_, e := a.GetRecord(context.Background(), "id", request.Headers(map[string]string{"OpenStack-API-Version": "volume 3.90"}))
 			return e
 		},
 	} {
@@ -480,14 +481,14 @@ func TestPythonCinderConsistencyGroupPreflightControlsAndJoinedOptionCauses(t *t
 	ctx, cancel := context.WithCancelCause(context.Background())
 	defer cancel(nil)
 	api, calls := cgAPI(t, "", func(*http.Request) *http.Response { t.Fatal("preflight HTTP"); return nil })
-	_, err := api.CreateRecord(ctx, func(c *consistencygroups.RecordCreateOpts) error {
+	_, err := api.CreateRecord(ctx, request.Custom(func(c *consistencygroups.RecordCreateOpts) error {
 		if c.Fields == nil || c.Headers == nil {
 			t.Fatal(c)
 		}
 		api.RawClient().ResourceBase += "changed/"
 		cancel(cancelCause)
 		return optionCause
-	})
+	}))
 	for _, cause := range []error{optionCause, cancelCause, context.Canceled, resource.ErrInvalidOption} {
 		if !errors.Is(err, cause) {
 			t.Fatal(cause, err)
@@ -514,29 +515,29 @@ func TestPythonCinderConsistencyGroupEveryOptionFamilyStartsWithOwnedHeaders(t *
 		}
 		headers["X-First"] = "owned"
 	}
-	if _, err := api.GetRecord(context.Background(), "id", consistencygroups.WithRecordGetHeaders(nil), func(c *consistencygroups.RecordGetOpts) error { require(c.Headers); return nil }); err != nil {
+	if _, err := api.GetRecord(context.Background(), "id", request.Headers(nil), request.Custom(func(c *consistencygroups.RecordGetOpts) error { require(c.Headers); return nil })); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := api.CreateRecord(context.Background(), consistencygroups.WithRecordCreateOpts(consistencygroups.RecordCreateOpts{Headers: nil}), func(c *consistencygroups.RecordCreateOpts) error { require(c.Headers); return nil }); err != nil {
+	if _, err := api.CreateRecord(context.Background(), consistencygroups.WithRecordCreateOpts(consistencygroups.RecordCreateOpts{Headers: nil}), request.Custom(func(c *consistencygroups.RecordCreateOpts) error { require(c.Headers); return nil })); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := api.UpdateRecord(context.Background(), "id", func(c *consistencygroups.RecordUpdateOpts) error {
+	if _, err := api.UpdateRecord(context.Background(), "id", request.Custom(func(c *consistencygroups.RecordUpdateOpts) error {
 		require(c.Headers)
 		c.Fields["name"] = json.RawMessage(`"owned"`)
 		return nil
-	}); err != nil {
+	})); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := api.CreateFromSourceRecord(context.Background(), func(c *consistencygroups.RecordSourceOpts) error { require(c.Headers); return nil }); err != nil {
+	if _, err := api.CreateFromSourceRecord(context.Background(), request.Custom(func(c *consistencygroups.RecordSourceOpts) error { require(c.Headers); return nil })); err != nil {
 		t.Fatal(err)
 	}
-	if err := api.DeleteRecord(context.Background(), "id", func(c *consistencygroups.RecordDeleteOpts) error { require(c.Headers); return nil }); err != nil {
+	if err := api.DeleteRecord(context.Background(), "id", request.Custom(func(c *consistencygroups.RecordDeleteOpts) error { require(c.Headers); return nil })); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := collectCG(api.ListRecords(context.Background(), func(c *consistencygroups.RecordListOpts) error { require(c.Headers); return nil })); err != nil {
+	if _, err := collectCG(api.ListRecords(context.Background(), request.Custom(func(c *consistencygroups.RecordListOpts) error { require(c.Headers); return nil }))); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := api.FindRecord(context.Background(), "id", func(c *consistencygroups.RecordFindOpts) error { require(c.Headers); return nil }); err != nil {
+	if _, err := api.FindRecord(context.Background(), "id", request.Custom(func(c *consistencygroups.RecordFindOpts) error { require(c.Headers); return nil })); err != nil {
 		t.Fatal(err)
 	}
 	if calls.Len() != 7 || !reflect.DeepEqual(api.RawClient().MoreHeaders, expected) {
@@ -579,7 +580,7 @@ func TestPythonCinderConsistencyGroupPhysicalReceiptsStopHooksAndRetainAllCauses
 			case "source":
 				value, err = api.CreateFromSourceRecord(ctx)
 			case "update":
-				value, err = api.UpdateRecord(ctx, "id", consistencygroups.WithRecordUpdateField("name", "owned"))
+				value, err = api.UpdateRecord(ctx, "id", request.Field("name", "owned"))
 			case "delete":
 				err = api.DeleteRecord(ctx, "id")
 			case "list":
@@ -648,7 +649,7 @@ func TestPythonCinderConsistencyGroupNativeRetryOwnsPayloadVersionAndFraming(t *
 				}
 				return nil
 			}
-			value, err := api.CreateRecord(context.Background(), consistencygroups.WithRecordCreateField("name", "owned"))
+			value, err := api.CreateRecord(context.Background(), request.Field("name", "owned"))
 			var native gophercloud.ErrUnexpectedResponseCode
 			if value == nil || value.StatusCode != 503 || string(value.Envelope) != `{"retry":"actual"}` || !errors.Is(err, resource.ErrInvalidOption) || !errors.As(err, &native) || native.Actual != 503 || native.ResponseHeader.Get("X-Request-Id") != "actual" || calls.Len() != 1 {
 				t.Fatal(selected, mode, value, err, cgCalls(calls))
@@ -679,7 +680,7 @@ func TestPythonCinderConsistencyGroupClean401AndOrdinary503RetainOwnedPOST(t *te
 				return nil
 			}
 		}
-		value, err := api.CreateRecord(context.Background(), consistencygroups.WithRecordCreateField("volume_types", "type-a,type-b"))
+		value, err := api.CreateRecord(context.Background(), request.Field("volume_types", "type-a,type-b"))
 		if err != nil || value == nil || calls.Len() != 2 || callbacks != 1 || cgCalls(calls)[1].headers.Get("X-Auth-Token") != "live" || code == 503 && cgCalls(calls)[1].headers.Get("X-Retry") != "ordinary" {
 			t.Fatal(code, value, err, cgCalls(calls), callbacks)
 		}
@@ -698,7 +699,7 @@ func TestPythonCinderConsistencyGroupSourceAdmissionAndSelectedAliasesRemainUnca
 		source := map[string]string{"OpenStack-API-Version": "volume 3.90", "X-OpenStack-Volume-API-Version": "3.90"}
 		expected := map[string]string{"OpenStack-API-Version": "volume 3.90", "X-OpenStack-Volume-API-Version": "3.90"}
 		api.RawClient().MoreHeaders = source
-		value, err := api.GetRecord(context.Background(), "id", consistencygroups.WithRecordGetMicroversion("3.99"))
+		value, err := api.GetRecord(context.Background(), "id", request.Microversion("3.99"))
 		if err != nil || value == nil || value.StatusCode != code || calls.Len() != 1 || cgCalls(calls)[0].headers.Get("OpenStack-API-Version") != "volume 3.99" || api.RawClient().Microversion != "3.90" || !reflect.DeepEqual(api.RawClient().MoreHeaders, expected) {
 			t.Fatal(code, value, err, cgCalls(calls))
 		}
@@ -746,11 +747,13 @@ type cgReservedMarshal func() ([]byte, error)
 
 func (f cgReservedMarshal) MarshalJSON() ([]byte, error) { return f() }
 
-func TestPythonCinderConsistencyGroupListReservedControlsFailBeforeMarshalAndHTTP(t *testing.T) {
+// request.Query marshals once when constructed; a reserved control still fails
+// with its own invalid-option error, not the value's marshal error.
+func TestPythonCinderConsistencyGroupListReservedControlsFailBeforeHTTP(t *testing.T) {
 	for _, key := range []string{"self", "cls", "session", "headers", "paginated", "max_items", "allow_unknown_params", "details", "jmespath_filters", "__conflicting_attrs", "base_path", "list_base_path", "microversion", "connection", "_synchronized", "resource_type"} {
-		for _, input := range []any{nil, false, 0, cgReservedMarshal(func() ([]byte, error) { t.Fatal("reserved control invoked Marshaler", key); return nil, nil })} {
+		for _, input := range []any{nil, false, 0, cgReservedMarshal(func() ([]byte, error) { return nil, errors.New("reserved control marshal error") })} {
 			api, calls := cgAPI(t, "", func(*http.Request) *http.Response { t.Fatal("reserved control reached HTTP", key); return nil })
-			option := consistencygroups.WithRecordListQuery(key, input)
+			option := request.Query(key, input)
 			if calls.Len() != 0 {
 				t.Fatal("option factory executed HTTP", key)
 			}
@@ -764,7 +767,7 @@ func TestPythonCinderConsistencyGroupListReservedControlsFailBeforeMarshalAndHTT
 				api, calls := cgAPI(t, "", func(*http.Request) *http.Response { t.Fatal("raw reserved control reached HTTP", key); return nil })
 				var option consistencygroups.RecordListOption
 				if callback {
-					option = func(c *consistencygroups.RecordListOpts) error { c.Query[key] = raw; return nil }
+					option = request.Custom(func(c *consistencygroups.RecordListOpts) error { c.Query[key] = raw; return nil })
 				} else {
 					option = consistencygroups.WithRecordListOpts(consistencygroups.RecordListOpts{Query: map[string]json.RawMessage{key: raw}})
 				}
@@ -776,14 +779,14 @@ func TestPythonCinderConsistencyGroupListReservedControlsFailBeforeMarshalAndHTT
 		}
 	}
 	api, calls := cgAPI(t, "", func(*http.Request) *http.Response { return cgWire(200, `{"consistencygroups":[]}`) })
-	values, err := collectCG(api.ListRecords(context.Background(), consistencygroups.WithRecordListQuery("SESSION", cgReservedMarshal(func() ([]byte, error) { t.Fatal("ordinary unknown parameter invoked Marshaler"); return nil, nil }))))
+	values, err := collectCG(api.ListRecords(context.Background(), request.Query("SESSION", cgReservedMarshal(func() ([]byte, error) { return nil, errors.New("ignored parameter marshal error") }))))
 	if err != nil || len(values) != 0 || calls.Len() != 1 || cgCalls(calls)[0].query != "" {
 		t.Fatal(values, err, cgCalls(calls))
 	}
 	api, calls = cgAPI(t, "", func(*http.Request) *http.Response {
 		return cgWire(200, `{"consistencygroups":[{"id":"id"}],"next":"?marker=second"}`)
 	})
-	values, err = collectCG(api.ListRecords(context.Background(), consistencygroups.WithRecordListDetails(false), consistencygroups.WithRecordListPaginated(false), consistencygroups.WithRecordListMaxItems(1)))
+	values, err = collectCG(api.ListRecords(context.Background(), consistencygroups.WithRecordListDetails(false), request.Paginated(false), request.MaxItems(1)))
 	if err != nil || len(values) != 1 || calls.Len() != 1 || cgCalls(calls)[0].path != cgBase || cgCalls(calls)[0].query != "limit=1" {
 		t.Fatal("typed controls remain owned functional options", values, err, cgCalls(calls))
 	}

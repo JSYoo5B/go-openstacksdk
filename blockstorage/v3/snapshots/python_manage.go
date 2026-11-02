@@ -12,6 +12,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/microversions"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
@@ -23,7 +24,13 @@ type ManageRecordOpts struct {
 	Metadata          json.RawMessage
 	Headers           map[string]string
 }
-type ManageRecordOption func(*ManageRecordOpts) error
+
+// ManageRecordOption is one option of ManageRecord: WithManageRecordOpts,
+// WithManageRecordName, WithManageRecordDescription, WithManageRecordMetadata,
+// request.Headers (replaces the headers) or request.Custom over
+// *ManageRecordOpts. Other shared calls fail with resource.ErrInvalidOption
+// before HTTP.
+type ManageRecordOption = request.WriteCall
 
 func copyManageOpts(v ManageRecordOpts) ManageRecordOpts {
 	v.Metadata = bytes.Clone(v.Metadata)
@@ -40,30 +47,34 @@ func copyManageOpts(v ManageRecordOpts) ManageRecordOpts {
 }
 func WithManageRecordOpts(v ManageRecordOpts) ManageRecordOption {
 	own := copyManageOpts(v)
-	return func(c *ManageRecordOpts) error { *c = copyManageOpts(own); return nil }
+	return request.Custom(func(c *ManageRecordOpts) error { *c = copyManageOpts(own); return nil })
 }
 func WithManageRecordName(v string) ManageRecordOption {
-	return func(c *ManageRecordOpts) error { x := v; c.Name = &x; return nil }
+	return request.Custom(func(c *ManageRecordOpts) error { x := v; c.Name = &x; return nil })
 }
 func WithManageRecordDescription(v string) ManageRecordOption {
-	return func(c *ManageRecordOpts) error { x := v; c.Description = &x; return nil }
+	return request.Custom(func(c *ManageRecordOpts) error { x := v; c.Description = &x; return nil })
 }
 func WithManageRecordMetadata(v json.RawMessage) ManageRecordOption {
 	own := bytes.Clone(v)
-	return func(c *ManageRecordOpts) error { c.Metadata = bytes.Clone(own); return nil }
-}
-func WithManageRecordHeaders(v map[string]string) ManageRecordOption {
-	own := maps.Clone(v)
-	return func(c *ManageRecordOpts) error { c.Headers = maps.Clone(own); return nil }
+	return request.Custom(func(c *ManageRecordOpts) error { c.Metadata = bytes.Clone(own); return nil })
 }
 
 type UnmanageRecordOpts struct{ Headers map[string]string }
-type UnmanageRecordOption func(*UnmanageRecordOpts) error
 
-func WithUnmanageRecordHeaders(v map[string]string) UnmanageRecordOption {
-	own := maps.Clone(v)
-	return func(c *UnmanageRecordOpts) error { c.Headers = maps.Clone(own); return nil }
-}
+// UnmanageRecordOption is one option of UnmanageRecord: request.Headers
+// (replaces the headers) or request.Custom over *UnmanageRecordOpts. Other
+// shared calls fail with resource.ErrInvalidOption before HTTP.
+type UnmanageRecordOption = request.WriteCall
+
+var (
+	manageRecordCalls = calls.Spec[ManageRecordOpts]{
+		Headers: calls.Value(func(c *ManageRecordOpts) *map[string]string { return &c.Headers }),
+	}
+	unmanageRecordCalls = calls.Spec[UnmanageRecordOpts]{
+		Headers: calls.Value(func(c *UnmanageRecordOpts) *map[string]string { return &c.Headers }),
+	}
+)
 
 // ManagementReceipt is actual opaque action evidence; accepted means submitted,
 // not proof that backend provisioning has already changed.
@@ -156,7 +167,7 @@ func (a *API) ManageRecord(ctx context.Context, volumeID string, reference json.
 		ref = json.RawMessage("null")
 	}
 	policy := ManageRecordOpts{}
-	for _, apply := range slices.Clone(options) {
+	for _, apply := range calls.Translate(slices.Clone(options), manageRecordCalls) {
 		if err := p.guard(ctx); err != nil {
 			return nil, wrap(err)
 		}
@@ -245,7 +256,7 @@ func (a *API) UnmanageRecord(ctx context.Context, id string, options ...Unmanage
 		return nil, wrap(err)
 	}
 	policy := UnmanageRecordOpts{}
-	for _, apply := range slices.Clone(options) {
+	for _, apply := range calls.Translate(slices.Clone(options), unmanageRecordCalls) {
 		if err := p.guard(ctx); err != nil {
 			return nil, wrap(err)
 		}

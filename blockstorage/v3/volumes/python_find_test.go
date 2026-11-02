@@ -14,6 +14,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -161,7 +162,7 @@ func TestPythonVolumeFindRecordMissingAndAcceptedTranslation(t *testing.T) {
 	if value != nil || err != nil || calls.Len() != 2 {
 		t.Fatal(value, err, pythonVolumeCalls(calls))
 	}
-	value, err = api.FindRecord(context.Background(), "absent", volumes.WithRecordFindIgnoreMissing(false))
+	value, err = api.FindRecord(context.Background(), "absent", request.IgnoreMissing(false))
 	if value != nil || !errors.Is(err, resource.ErrNotFound) {
 		t.Fatal(value, err)
 	}
@@ -238,7 +239,7 @@ func TestPythonVolumeFindRecordQueryClassesOwnedOptsAndRawCap(t *testing.T) {
 	// metadata is both a mapped wire query and a canonical local Body filter.
 	// properties wins the server alias while metadata still filters locally.
 	calls.Reset()
-	value, err = api.FindRecord(context.Background(), "data", volumes.WithRecordFindQuery("properties", map[string]any{"server": "hint"}), volumes.WithRecordFindQuery("metadata", map[string]any{"count": 1}))
+	value, err = api.FindRecord(context.Background(), "data", request.Query("properties", map[string]any{"server": "hint"}), request.Query("metadata", map[string]any{"count": 1}))
 	if err != nil || value == nil || calls.Len() != 2 {
 		t.Fatal(value, err, pythonVolumeCalls(calls))
 	}
@@ -248,12 +249,12 @@ func TestPythonVolumeFindRecordQueryClassesOwnedOptsAndRawCap(t *testing.T) {
 	}
 	volumeFindField(t, value, "id", `"v1"`)
 	calls.Reset()
-	value, err = api.FindRecord(context.Background(), "data", volumes.WithRecordFindQuery("description", "two"), volumes.WithRecordFindMaxItems(1))
+	value, err = api.FindRecord(context.Background(), "data", request.Query("description", "two"), volumes.WithRecordFindMaxItems(1))
 	if err != nil || value != nil || calls.Len() != 2 || pythonVolumeCalls(calls)[1].query != "limit=1&name=data" {
 		t.Fatal(value, err, pythonVolumeCalls(calls))
 	}
 	calls.Reset()
-	value, err = api.FindRecord(context.Background(), "data", volumes.WithRecordFindQuery("name", nil), volumes.WithRecordFindQuery("description", "one"))
+	value, err = api.FindRecord(context.Background(), "data", request.Query("name", nil), request.Query("description", "one"))
 	if err != nil || value == nil || pythonVolumeCalls(calls)[1].query != "" {
 		t.Fatal(value, err, pythonVolumeCalls(calls))
 	}
@@ -303,7 +304,7 @@ func TestPythonVolumeFindRecordPagingShortMarkerAndHTTPLinkKeepScope(t *testing.
 				}
 				return response
 			})
-			options := []volumes.RecordFindOption{volumes.WithRecordFindQuery("limit", 2), volumes.WithRecordFindAllProjects(true)}
+			options := []volumes.RecordFindOption{request.Query("limit", 2), volumes.WithRecordFindAllProjects(true)}
 			value, err := api.FindRecord(context.Background(), "data", options...)
 			if err != nil || value == nil || calls.Len() != 3 || pythonVolumeCalls(calls)[2].query != "all_tenants=True&limit=2&marker=v1&name=data" {
 				t.Fatal(value, err, pythonVolumeCalls(calls))
@@ -327,7 +328,7 @@ func TestPythonVolumeFindRecordMarkerUsesRetainedUntypedWireID(t *testing.T) {
 		}
 		return pythonVolumeWire(200, `{"volumes":[{"id":9007199254740993,"name":"data"}]}`)
 	})
-	value, err := api.FindRecord(context.Background(), "data", volumes.WithRecordFindQuery("limit", 2))
+	value, err := api.FindRecord(context.Background(), "data", request.Query("limit", 2))
 	if err != nil || value == nil || calls.Len() != 3 || pythonVolumeCalls(calls)[2].query != "limit=2&marker=9007199254740993&name=data" {
 		t.Fatal(value, err, pythonVolumeCalls(calls))
 	}
@@ -452,9 +453,9 @@ func TestPythonVolumeFindRecordSelectionAndOptionFailures(t *testing.T) {
 		options  []volumes.RecordFindOption
 	}{
 		{"..", nil}, {"data", []volumes.RecordFindOption{nil}}, {"data", []volumes.RecordFindOption{volumes.WithRecordFindMaxItems(-1)}},
-		{"data", []volumes.RecordFindOption{volumes.WithRecordFindQuery("id", "collision")}},
-		{"data", []volumes.RecordFindOption{volumes.WithRecordFindAllProjects(false), volumes.WithRecordFindQuery("all_tenants", nil)}},
-		{"data", []volumes.RecordFindOption{volumes.WithRecordFindQuery("all_projects", true), volumes.WithRecordFindAllProjects(true)}},
+		{"data", []volumes.RecordFindOption{request.Query("id", "collision")}},
+		{"data", []volumes.RecordFindOption{volumes.WithRecordFindAllProjects(false), request.Query("all_tenants", nil)}},
+		{"data", []volumes.RecordFindOption{request.Query("all_projects", true), volumes.WithRecordFindAllProjects(true)}},
 		{"data", []volumes.RecordFindOption{volumes.WithRecordFindLocation(resource.CloudLocation{Project: resource.CloudProject{ID: json.RawMessage(`{bad`)}})}},
 		{"data", []volumes.RecordFindOption{volumes.WithRecordFindOpts(volumes.RecordFindOpts{Query: map[string]json.RawMessage{"metadata": json.RawMessage(`{bad`)}})}},
 	}
@@ -468,11 +469,11 @@ func TestPythonVolumeFindRecordSelectionAndOptionFailures(t *testing.T) {
 	}
 	ctx, cancel := context.WithCancelCause(context.Background())
 	cause := errors.New("user cancelled lookup")
-	_, err := api.FindRecord(ctx, "data", func(*volumes.RecordFindOpts) error { cancel(cause); return nil })
+	_, err := api.FindRecord(ctx, "data", request.Custom(func(*volumes.RecordFindOpts) error { cancel(cause); return nil }))
 	if !errors.Is(err, context.Canceled) || !errors.Is(err, cause) || calls.Len() != 0 {
 		t.Fatal(err, pythonVolumeCalls(calls))
 	}
-	_, err = api.FindRecord(context.Background(), "data", func(*volumes.RecordFindOpts) error { api.RawClient().Microversion = "3.43"; return nil })
+	_, err = api.FindRecord(context.Background(), "data", request.Custom(func(*volumes.RecordFindOpts) error { api.RawClient().Microversion = "3.43"; return nil }))
 	if !errors.Is(err, resource.ErrInvalidOption) || calls.Len() != 0 {
 		t.Fatal(err, pythonVolumeCalls(calls))
 	}
@@ -561,7 +562,7 @@ func TestPythonVolumeFindRecordConstructorSeedDescriptorsBeforeDiscoveryOrHTTP(t
 					return pythonVolumeWire(200, `{"volume":{"id":"v1","bootable":"false","encrypted":false,"size":1}}`)
 				})
 				api.RawClient().Microversion = selected
-				value, err := api.FindRecord(context.Background(), "v1", volumes.WithRecordFindQuery(item.key, item.value))
+				value, err := api.FindRecord(context.Background(), "v1", request.Query(item.key, item.value))
 				var response *resource.ResponseError
 				if value != nil || !errors.Is(err, resource.ErrInvalidOption) || errors.As(err, &response) || calls.Len() != 0 {
 					t.Fatal(value, err, pythonVolumeCalls(calls))
@@ -744,7 +745,7 @@ func TestPythonVolumeFindRecordExactDecimalEqualityAndUnderflowAreExplicitGoPoli
 				}
 				return pythonVolumeWire(200, body)
 			})
-			value, err := api.FindRecord(context.Background(), "data", volumes.WithRecordFindQuery(tc.key, json.RawMessage(tc.filter)))
+			value, err := api.FindRecord(context.Background(), "data", request.Query(tc.key, json.RawMessage(tc.filter)))
 			if err != nil || (value != nil) != tc.found || calls.Len() != 2 {
 				t.Fatal(value, err, pythonVolumeCalls(calls))
 			}

@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudlocation"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudsnapshot"
@@ -203,7 +204,7 @@ func (a *API) GetRecord(ctx context.Context, id string, options ...RecordReadOpt
 	if err := recordID(id); err != nil {
 		return nil, recordWrap(ctx, op, err)
 	}
-	cfg, err := applyRecord(p, RecordReadOpts{}, copyRead, slices.Clone(options))
+	cfg, err := applyRecord(p, RecordReadOpts{}, copyRead, calls.Translate(options, readCalls))
 	seed := make(map[string]json.RawMessage)
 	if err == nil && cfg.Seed != nil {
 		if cfg.Seed.Resource == nil {
@@ -273,7 +274,7 @@ func (a *API) CreateRecord(ctx context.Context, attrs map[string]any, options ..
 	if err := json.Unmarshal(raw, &fields); err != nil {
 		return nil, recordWrap(ctx, op, err)
 	}
-	cfg, err := applyRecord(p, RecordCreateOpts{}, copyCreate, slices.Clone(options))
+	cfg, err := applyRecord(p, RecordCreateOpts{}, copyCreate, calls.Translate(options, createCalls))
 	if err == nil {
 		err = p.prepare(cfg.Microversion, cfg.Headers, cfg.Location, true)
 	}
@@ -297,7 +298,7 @@ func (a *API) DeleteRecord(ctx context.Context, id string, options ...RecordDele
 	if err := recordID(id); err != nil {
 		return nil, recordWrap(ctx, op, err)
 	}
-	cfg, err := applyRecord(p, RecordDeleteOpts{}, copyDelete, slices.Clone(options))
+	cfg, err := applyRecord(p, RecordDeleteOpts{}, copyDelete, calls.Translate(options, deleteCalls))
 	if err == nil {
 		err = p.prepare(cfg.Microversion, cfg.Headers, nil, false)
 	}
@@ -332,7 +333,7 @@ func (a *API) ListRecords(ctx context.Context, options ...RecordListOption) iter
 			fail(err)
 			return
 		}
-		cfg, err := applyRecord(p, RecordListOpts{}, copyList, owned)
+		cfg, err := applyRecord(p, RecordListOpts{}, copyList, calls.Translate(owned, listCalls))
 		if err != nil {
 			fail(errors.Join(err, p.guard(ctx)))
 			return

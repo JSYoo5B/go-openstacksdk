@@ -13,6 +13,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cinderrequest"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
@@ -70,7 +71,7 @@ func (a *API) FindRecord(ctx context.Context, identity string, options ...Record
 		return errors.Join(changed, source.Guard(ctx), rest.CheckOperationGuard(ctx))
 	}
 	policy := RecordFindOpts{}
-	for _, apply := range slices.Clone(options) {
+	for _, apply := range calls.Translate(slices.Clone(options), recordFindCalls) {
 		if err := guard(ctx); err != nil {
 			return nil, wrap(err)
 		}

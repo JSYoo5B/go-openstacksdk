@@ -16,8 +16,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithSummaryOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithSummaryAllProjects`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithSummaryQuery`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithSummaryHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithSummaryMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithSummarySingleFetch`
 
 - Source Proxy summary preserves the initial queryless requires_id=False GET followed by all_tenants=False/True aggregate fetch; stock /volumes/summary is separate from /volumes ListSummary. First fetch only declared untyped seed survives omission; explicit null overwrites. Explicit single fetch improves redundant Source request sequence.

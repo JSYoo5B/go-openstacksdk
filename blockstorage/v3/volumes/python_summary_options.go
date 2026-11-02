@@ -5,6 +5,9 @@ import (
 	"encoding/json"
 	"maps"
 	"slices"
+
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 // SummaryOpts owns singleton query and protocol controls. The default reads
@@ -16,7 +19,18 @@ type SummaryOpts struct {
 	Microversion *string
 	SingleFetch  bool
 }
-type SummaryOption func(*SummaryOpts) error
+
+// SummaryOption is one option of the volume summary reads: WithSummaryOptions,
+// WithSummaryAllProjects, WithSummaryQuery, WithSummarySingleFetch,
+// request.Headers (replaces the headers), request.Microversion or
+// request.Custom over *SummaryOpts. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type SummaryOption = request.GetCall
+
+var summaryCalls = calls.Spec[SummaryOpts]{
+	Headers:      calls.Value(func(c *SummaryOpts) *map[string]string { return &c.Headers }),
+	Microversion: calls.Pointer(func(c *SummaryOpts) **string { return &c.Microversion }),
+}
 
 func cloneSummary(value SummaryOpts) SummaryOpts {
 	value.Query = maps.Clone(value.Query)
@@ -44,38 +58,31 @@ func cloneSummary(value SummaryOpts) SummaryOpts {
 func WithSummaryOptions(value SummaryOpts) SummaryOption {
 	owned := cloneSummary(value)
 	err := freezeSummaryQuery(&owned)
-	return func(c *SummaryOpts) error {
+	return request.Custom(func(c *SummaryOpts) error {
 		if err != nil {
 			return err
 		}
 		*c = cloneSummary(owned)
 		return nil
-	}
+	})
 }
 func WithSummaryAllProjects(value bool) SummaryOption {
-	return func(c *SummaryOpts) error { c.AllProjects = value; return nil }
+	return request.Custom(func(c *SummaryOpts) error { c.AllProjects = value; return nil })
 }
 func WithSummaryQuery(value map[string]any) SummaryOption {
 	cfg := cloneSummary(SummaryOpts{Query: value})
 	err := freezeSummaryQuery(&cfg)
-	return func(c *SummaryOpts) error {
+	return request.Custom(func(c *SummaryOpts) error {
 		if err != nil {
 			return err
 		}
 		c.Query = cloneSummary(cfg).Query
 		return nil
-	}
-}
-func WithSummaryHeaders(value map[string]string) SummaryOption {
-	owned := maps.Clone(value)
-	return func(c *SummaryOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
-func WithSummaryMicroversion(value string) SummaryOption {
-	return func(c *SummaryOpts) error { c.Microversion = &value; return nil }
+	})
 }
 
 // WithSummarySingleFetch improves the redundant fixed Python request sequence
 // explicitly. It sends only the aggregate request carrying all_tenants.
 func WithSummarySingleFetch(value bool) SummaryOption {
-	return func(c *SummaryOpts) error { c.SingleFetch = value; return nil }
+	return request.Custom(func(c *SummaryOpts) error { c.SingleFetch = value; return nil })
 }

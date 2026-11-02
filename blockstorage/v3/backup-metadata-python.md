@@ -99,13 +99,14 @@ import (
     "encoding/json"
 
     "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups"
+    "github.com/JSYoo5B/go-openstacksdk/request"
     "github.com/gophercloud/gophercloud/v2"
 )
 
 func fetchBackupMetadata(ctx context.Context, client *gophercloud.ServiceClient, id string) (map[string]string, error) {
     profile := backups.New(client).PythonMetadata()
     result, err := profile.FetchMetadata(ctx, id,
-        backups.WithMetadataHeader("X-Request-Id", "application-request"))
+        request.Header("X-Request-Id", "application-request"))
     if err != nil {
         return nil, err
     }

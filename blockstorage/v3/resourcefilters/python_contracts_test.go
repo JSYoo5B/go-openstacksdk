@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"io"
 	"net/http"
 	"net/url"
@@ -197,7 +198,7 @@ func TestPythonCinderResourceFiltersDiscoveryCeilingAndExplicitVersionOmission(t
 		}
 		filterJSON(w, 200, `{"resource_filters":[{}]}`)
 	})
-	values, err := api.AllRecords(context.Background(), resourcefilters.WithRecordListMicroversion(""))
+	values, err := api.AllRecords(context.Background(), request.Microversion(""))
 	if err != nil || len(values) != 1 || len(*calls) != 1 || len(values[0].Discovery) != 0 || api.RawClient().Microversion != "3.90" {
 		t.Fatal(values, err, *calls)
 	}
@@ -328,15 +329,15 @@ func TestPythonCinderResourceFiltersControlsBeforeMarshalerAndOptionSnapshots(t 
 		}
 		filterJSON(w, 200, `{"resource_filters":[]}`)
 	})
-	_, err := api.AllRecords(context.Background(), option, func(c *resourcefilters.RecordListOpts) error { c.Headers = nil; return nil }, func(c *resourcefilters.RecordListOpts) error {
+	_, err := api.AllRecords(context.Background(), option, request.Custom(func(c *resourcefilters.RecordListOpts) error { c.Headers = nil; return nil }), request.Custom(func(c *resourcefilters.RecordListOpts) error {
 		c.Headers["X-Owned"] = "before"
 		retained = c.Headers
 		return nil
-	}, func(*resourcefilters.RecordListOpts) error { retained["X-Owned"] = "after"; return nil })
+	}), request.Custom(func(*resourcefilters.RecordListOpts) error { retained["X-Owned"] = "after"; return nil }))
 	if err != nil || len(*calls) != 1 || api.RawClient().MoreHeaders != nil {
 		t.Fatal(err, *calls)
 	}
-	for _, option := range []resourcefilters.RecordListOption{nil, resourcefilters.WithRecordListMicroversion("bad"), resourcefilters.WithRecordListHeaders(map[string]string{"Authorization": "forged"}), resourcefilters.WithRecordListControl(resource.ListControl{MaxItems: -1})} {
+	for _, option := range []resourcefilters.RecordListOption{nil, request.Microversion("bad"), request.Headers(map[string]string{"Authorization": "forged"}), resourcefilters.WithRecordListControl(resource.ListControl{MaxItems: -1})} {
 		api, calls := filterFixture(t, "3.33", func(http.ResponseWriter, *http.Request) { t.Fatal("HTTP") })
 		_, err := api.AllRecords(context.Background(), option)
 		if !errors.Is(err, resource.ErrInvalidOption) || len(*calls) != 0 {

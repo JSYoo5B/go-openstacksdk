@@ -23,7 +23,7 @@ func listResource(ctx context.Context, client *gophercloud.ServiceClient, schema
 	if err != nil {
 		return nil, wrapRead(ctx, schema, schema.listOperation, err)
 	}
-	owned, err := prepare(ctx, options, cloneList, func() error { return p.source.Guard(ctx) })
+	owned, err := prepare(ctx, listOptions(options), cloneList, func() error { return p.source.Guard(ctx) })
 	var policy *listPolicy
 	if err == nil {
 		policy, err = compileListFor(owned, schema)

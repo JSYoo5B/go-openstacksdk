@@ -5,6 +5,8 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"maps"
 	"net/http"
 
@@ -20,7 +22,26 @@ type FindRecordOpts struct {
 	Headers       map[string]string
 	IgnoreMissing *bool
 }
-type FindRecordOption func(*FindRecordOpts) error
+
+// FindRecordOption is one option of FindRecord: WithFindRecordOpts,
+// request.Query (a Source keyword argument; the value is sent as JSON),
+// request.IgnoreMissing or request.Custom over *FindRecordOpts. Other shared
+// calls fail with resource.ErrInvalidOption before HTTP.
+type FindRecordOption = request.FindCall
+
+var findRecordCalls = calls.Spec[FindRecordOpts]{
+	Query: calls.JSONQuery(func(o *FindRecordOpts, key string, raw json.RawMessage, err error) error {
+		if err != nil {
+			return err
+		}
+		if o.Query == nil {
+			o.Query = map[string]json.RawMessage{}
+		}
+		o.Query[key] = bytes.Clone(raw)
+		return nil
+	}),
+	IgnoreMissing: calls.Pointer(func(o *FindRecordOpts) **bool { return &o.IgnoreMissing }),
+}
 
 func copyFindRecord(v FindRecordOpts) FindRecordOpts {
 	v.Query = cinderowned.CloneFields(v.Query)
@@ -33,23 +54,7 @@ func copyFindRecord(v FindRecordOpts) FindRecordOpts {
 }
 func WithFindRecordOpts(v FindRecordOpts) FindRecordOption {
 	owned := copyFindRecord(v)
-	return func(o *FindRecordOpts) error { *o = copyFindRecord(owned); return nil }
-}
-func WithFindRecordQuery(key string, value any) FindRecordOption {
-	raw, err := json.Marshal(value)
-	return func(o *FindRecordOpts) error {
-		if err != nil {
-			return err
-		}
-		if o.Query == nil {
-			o.Query = map[string]json.RawMessage{}
-		}
-		o.Query[key] = bytes.Clone(raw)
-		return nil
-	}
-}
-func WithFindRecordIgnoreMissing(v bool) FindRecordOption {
-	return func(o *FindRecordOpts) error { x := v; o.IgnoreMissing = &x; return nil }
+	return request.Custom(func(o *FindRecordOpts) error { *o = copyFindRecord(owned); return nil })
 }
 
 // FindRecord follows Service.find's list-only exact ID/name lookup. It reads
@@ -62,7 +67,7 @@ func (a *API) FindRecord(ctx context.Context, identity string, options ...FindRe
 	// Freeze transport headers before option callbacks, as the owned preamble does.
 	selected := *a.client
 	selected.MoreHeaders = maps.Clone(selected.MoreHeaders)
-	p, policy, err := cinderowned.Begin(ctx, t, FindRecordOpts{}, copyFindRecord, func(v FindRecordOpts) map[string]string { return v.Headers }, cinderowned.Version{Ceiling: "3.32"}, options)
+	p, policy, err := cinderowned.Begin(ctx, t, FindRecordOpts{}, copyFindRecord, func(v FindRecordOpts) map[string]string { return v.Headers }, cinderowned.Version{Ceiling: "3.32"}, calls.Translate(options, findRecordCalls))
 	if err != nil {
 		return nil, t.Wrap(ctx, "FindRecord", err)
 	}

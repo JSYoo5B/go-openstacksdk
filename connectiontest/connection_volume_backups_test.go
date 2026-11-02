@@ -16,6 +16,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudbackup"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudsnapshot"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -60,7 +61,7 @@ func backupConnectionCall(ctx context.Context, conn *sdk.Connection, operation, 
 }
 
 func backupConnectionCallbacks(callback func() error) ([]blockstorage.VolumeBackupListOption, []blockstorage.VolumeBackupSearchOption) {
-	return []blockstorage.VolumeBackupListOption{func(*blockstorage.VolumeBackupListOpts) error { return callback() }},
+	return []blockstorage.VolumeBackupListOption{request.Custom(func(*blockstorage.VolumeBackupListOpts) error { return callback() })},
 		[]blockstorage.VolumeBackupSearchOption{func(*blockstorage.VolumeBackupSearchOpts) error { return callback() }}
 }
 func backupConnectionOperation(t *testing.T, operation string, err error) {
@@ -367,9 +368,9 @@ func TestConnectionVolumeBackupListControlsStayPerCallAndDoNotLeakSnapshotQueryO
 		testcloud.JSON(w, 200, `{"snapshots":[{"id":"snapshot-default","force":"false","availability_zone":"must-not-be-zone"}]}`)
 	})
 	headers := map[string]string{"X-Trace": "owned-header"}
-	headerOption := blockstorage.WithVolumeBackupListHeaders(headers)
+	headerOption := request.Headers(headers)
 	headers["X-Trace"] = "caller-mutated"
-	result, err := conn.ListVolumeBackups(context.Background(), func(*blockstorage.VolumeBackupListOpts) error { originals.Add(1); return nil }, blockstorage.WithVolumeBackupListDetailed(false), blockstorage.WithVolumeBackupListPagination(false), blockstorage.WithVolumeBackupListMaxItems(1), blockstorage.WithVolumeBackupListMicroversion("3.41"), headerOption, blockstorage.WithVolumeBackupListFilters(json.RawMessage(`{"all_projects":false,"limit":1,"force":true,"description":"keep","consumes_quota":false}`)))
+	result, err := conn.ListVolumeBackups(context.Background(), request.Custom(func(*blockstorage.VolumeBackupListOpts) error { originals.Add(1); return nil }), blockstorage.WithVolumeBackupListDetailed(false), request.Paginated(false), request.MaxItems(1), request.Microversion("3.41"), headerOption, blockstorage.WithVolumeBackupListFilters(json.RawMessage(`{"all_projects":false,"limit":1,"force":true,"description":"keep","consumes_quota":false}`)))
 	if err != nil || result == nil || len(result.Backups) != 1 || len(result.Pages) != 1 || string(result.Backups[0].Body["id"]) != `"first"` {
 		t.Fatal(result, err)
 	}
@@ -484,7 +485,7 @@ func TestConnectionVolumeBackupListBindingValidationPrecedesServiceSelection(t *
 			if err != nil {
 				t.Fatal(err)
 			}
-			out, err := conn.ListVolumeBackups(context.Background(), func(*blockstorage.VolumeBackupListOpts) error { originals.Add(1); return nil }, blockstorage.WithVolumeBackupListFilters(json.RawMessage(raw)))
+			out, err := conn.ListVolumeBackups(context.Background(), request.Custom(func(*blockstorage.VolumeBackupListOpts) error { originals.Add(1); return nil }), blockstorage.WithVolumeBackupListFilters(json.RawMessage(raw)))
 			if out != nil || !errors.Is(err, resource.ErrInvalidOption) || originals.Load() != 1 || locates.Load() != 0 {
 				t.Fatal(out, err, originals.Load(), locates.Load())
 			}
@@ -539,15 +540,15 @@ func TestConnectionVolumeBackupCapturedOptionSliceAndRetainedPointersCannotRepla
 				return nil
 			}
 			var list []blockstorage.VolumeBackupListOption
-			list = []blockstorage.VolumeBackupListOption{func(opts *blockstorage.VolumeBackupListOpts) error {
+			list = []blockstorage.VolumeBackupListOption{request.Custom(func(opts *blockstorage.VolumeBackupListOpts) error {
 				originals.Add(1)
 				opts.Location = &location
 				opts.Filters = &filters
 				opts.Headers = headers
 				retainedLocation, retainedFilters, retainedHeaders = opts.Location, opts.Filters, opts.Headers
-				list[1] = func(*blockstorage.VolumeBackupListOpts) error { return errors.New("replacement must not execute") }
+				list[1] = request.Custom(func(*blockstorage.VolumeBackupListOpts) error { return errors.New("replacement must not execute") })
 				return nil
-			}, func(*blockstorage.VolumeBackupListOpts) error { return mutate() }}
+			}), request.Custom(func(*blockstorage.VolumeBackupListOpts) error { return mutate() })}
 			var search []blockstorage.VolumeBackupSearchOption
 			search = []blockstorage.VolumeBackupSearchOption{func(opts *blockstorage.VolumeBackupSearchOpts) error {
 				originals.Add(1)

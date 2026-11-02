@@ -17,10 +17,12 @@ type MetadataResult = metadata.Result
 // MetadataDeleteResult retains each acknowledged key deletion or an actual clear response.
 type MetadataDeleteResult = metadata.DeleteResult
 
-// MetadataOption configures only library-owned request headers.
+// MetadataOption is metadata.Option: WithMetadataHeaders, request.Header or
+// request.Custom over *request.Config[metadata.Opts]. Other shared calls fail
+// with resource.ErrInvalidOption before HTTP.
 type MetadataOption = metadata.Option
 
-func WithMetadataHeader(key, value string) MetadataOption { return metadata.WithHeader(key, value) }
+// WithMetadataHeaders merges ordinary headers like metadata.WithHeaders.
 func WithMetadataHeaders(headers map[string]string) MetadataOption {
 	return metadata.WithHeaders(headers)
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"net/http"
 	"strings"
 	"testing"
@@ -21,7 +22,7 @@ func TestPythonCinderFindServiceListsOnlyAndMatchesAliasIDHost(t *testing.T) {
 				}
 				return 203, `{"services":[{"id":7,"binary":"cinder-volume","host":"wrong"},{"id":7,"binary":"cinder-volume","host":"wanted","zone":"az1","x_unknown":false}]}`
 			})
-			row, err := api.FindRecord(context.Background(), identity, services.WithFindRecordQuery("host", "wanted"), services.WithFindRecordQuery("availability_zone", "az1"))
+			row, err := api.FindRecord(context.Background(), identity, request.Query("host", "wanted"), request.Query("availability_zone", "az1"))
 			if err != nil || row == nil || calls.Len() != 1 || string(row.Body["name"]) != `"cinder-volume"` || string(row.Body["host"]) != `"wanted"` || row.StatusCode != 203 || string(row.Wire["x_unknown"]) != "false" {
 				t.Fatal(row, err, svcActionCalls(calls))
 			}
@@ -45,7 +46,7 @@ func TestPythonCinderFindServiceMissingDuplicateAndLatePage(t *testing.T) {
 				}
 				return 200, `{"services":[{"id":"two","binary":"match"}]}`
 			})
-			row, err := api.FindRecord(context.Background(), "match", services.WithFindRecordIgnoreMissing(mode != "strict"))
+			row, err := api.FindRecord(context.Background(), "match", request.IgnoreMissing(mode != "strict"))
 			if row != nil {
 				t.Fatal(row)
 			}
@@ -133,7 +134,7 @@ func TestPythonCinderFindServiceNamePresenceAndListRouteControls(t *testing.T) {
 		}
 		return 200, `{"services":[{"id":"one","binary":"match","name":null},{"id":"two","binary":"match"}]}`
 	})
-	row, err := api.FindRecord(context.Background(), "match", services.WithFindRecordQuery("list_base_path", "/alternate-services"), services.WithFindRecordQuery("limit", 2), services.WithFindRecordQuery("paginated", false))
+	row, err := api.FindRecord(context.Background(), "match", request.Query("list_base_path", "/alternate-services"), request.Query("limit", 2), request.Query("paginated", false))
 	if err != nil || row == nil || string(row.Body["id"]) != `"two"` || calls.Len() != 1 {
 		t.Fatal(row, err, svcActionCalls(calls))
 	}
@@ -147,14 +148,14 @@ func TestPythonCinderFindServiceUsesOwnedResourceListControls(t *testing.T) {
 		return 200, `{"services":[{"id":7,"binary":"cinder-volume","host":"host"}]}`
 	})
 	row, err := api.FindRecord(context.Background(), "7",
-		services.WithFindRecordQuery("list_base_path", "/source-services"),
-		services.WithFindRecordQuery("base_path", "/overridden"),
-		services.WithFindRecordQuery("headers", map[string]string{"X-Raw": "owned", "Accept": "application/vnd.services+json"}),
-		services.WithFindRecordQuery("microversion", "9.99"),
-		services.WithFindRecordQuery("__conflicting_attrs", map[string]any{"host": "wrong", "base_path": "https://foreign.invalid"}),
-		services.WithFindRecordQuery("jmespath_filters", "[?"),
-		services.WithFindRecordQuery("all_projects", true),
-		services.WithFindRecordQuery("host", "host"), services.WithFindRecordQuery("limit", 2), services.WithFindRecordQuery("paginated", false))
+		request.Query("list_base_path", "/source-services"),
+		request.Query("base_path", "/overridden"),
+		request.Query("headers", map[string]string{"X-Raw": "owned", "Accept": "application/vnd.services+json"}),
+		request.Query("microversion", "9.99"),
+		request.Query("__conflicting_attrs", map[string]any{"host": "wrong", "base_path": "https://foreign.invalid"}),
+		request.Query("jmespath_filters", "[?"),
+		request.Query("all_projects", true),
+		request.Query("host", "host"), request.Query("limit", 2), request.Query("paginated", false))
 	if err != nil || row == nil || calls.Len() != 1 {
 		t.Fatal(row, err, svcActionCalls(calls))
 	}

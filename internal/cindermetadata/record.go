@@ -13,6 +13,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/metadata"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/gophercloud/gophercloud/v2"
@@ -89,11 +90,10 @@ func (s *Scope) ExchangeRecord(ctx context.Context, method string, key *string, 
 	default:
 		return nil, invalid("unsupported metadata record method %q", method)
 	}
-	copied := slices.Clone(options)
-	guarded := make([]metadata.Option, len(copied))
-	for index, option := range copied {
-		apply := option
-		guarded[index] = func(config *request.Config[metadata.Opts]) error {
+	translated := calls.Translate(slices.Clone(options), Calls)
+	guarded := make([]metadata.Option, len(translated))
+	for index, apply := range translated {
+		guarded[index] = request.Custom(func(config *request.Config[metadata.Opts]) error {
 			if err := check(ctx); err != nil {
 				return err
 			}
@@ -101,7 +101,7 @@ func (s *Scope) ExchangeRecord(ctx context.Context, method string, key *string, 
 				return invalid("nil metadata option")
 			}
 			return errors.Join(apply(config), check(ctx))
-		}
+		})
 	}
 	headers, err := s.prepare(ctx, guarded)
 	if err = errors.Join(err, check(ctx)); err != nil {

@@ -14,15 +14,15 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithRecordFindOpts`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithRecordFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithRecordFindDetails`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithRecordFindAllProjects`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithRecordFindPaginated`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithRecordFindLimit`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithRecordFindMarker`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithRecordFindMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithRecordFindHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithRecordFindQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - Find(resource.ID) sends one GET without list fallback and Find(resource.Name) lists snapshots/detail?name=..., so the two phases exist only as separate calls.
   Tests: `blockstorage/v3/snapshots/python_parity_test.go:TestPythonSnapshotFindHasNoIDThenNameFallback`.
@@ -79,6 +79,7 @@ import (
 
     sdk "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots"
+    "github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 func main() {
@@ -99,7 +100,7 @@ func main() {
     value, err := service.Snapshots.FindRecord(ctx, *identity,
         snapshots.WithRecordFindDetails(*details),
         snapshots.WithRecordFindAllProjects(*allProjects),
-        snapshots.WithRecordFindIgnoreMissing(!*strict))
+        request.IgnoreMissing(!*strict))
     if err != nil { log.Fatal(err) }
     if value == nil { fmt.Println("null"); return }
     data, err := json.MarshalIndent(value.Resource, "", "  ")

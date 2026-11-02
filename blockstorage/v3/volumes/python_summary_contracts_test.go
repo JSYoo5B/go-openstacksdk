@@ -11,6 +11,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -93,7 +94,7 @@ func TestPythonVolumeSummarySingleFetchAndFetchSpecificVersion(t *testing.T) {
 				headers = append(headers, r.Header.Clone())
 				return pythonVolumeWire(200, `{"volume-summary":{"total_count":2}}`)
 			})
-			v, err := api.SummaryRecord(context.Background(), volumes.WithSummaryMicroversion(version), volumes.WithSummarySingleFetch(single))
+			v, err := api.SummaryRecord(context.Background(), request.Microversion(version), volumes.WithSummarySingleFetch(single))
 			n := 2
 			if single {
 				n = 1
@@ -186,7 +187,7 @@ func TestPythonVolumeSummaryInvalidControlsBeforeMarshalerOrHTTP(t *testing.T) {
 		}
 		summaryWrapper(t, err)
 	}
-	for _, option := range []volumes.SummaryOption{nil, volumes.WithSummaryMicroversion("garbage"), volumes.WithSummaryHeaders(map[string]string{"Authorization": "forged"}), volumes.WithSummaryHeaders(map[string]string{"OpenStack-API-Version": "volume 3.12"})} {
+	for _, option := range []volumes.SummaryOption{nil, request.Microversion("garbage"), request.Headers(map[string]string{"Authorization": "forged"}), request.Headers(map[string]string{"OpenStack-API-Version": "volume 3.12"})} {
 		api, calls := summaryFixture(t, "3.36", func(*http.Request) *http.Response { t.Fatal("HTTP"); return nil })
 		_, err := api.SummaryRecord(context.Background(), option)
 		if !errors.Is(err, resource.ErrInvalidOption) || calls.Len() != 0 {
@@ -214,17 +215,17 @@ func TestPythonVolumeSummaryQuerySnapshotsRequestsExpansionAndOptionReset(t *tes
 		physical = r.Header.Clone()
 		return pythonVolumeWire(200, `{"volume-summary":{}}`)
 	})
-	v, err := api.SummaryRecord(context.Background(), option, func(c *volumes.SummaryOpts) error {
+	v, err := api.SummaryRecord(context.Background(), option, request.Custom(func(c *volumes.SummaryOpts) error {
 		for k, x := range retained {
 			c.Query[k] = x
 		}
 		c.Headers = nil
 		return nil
-	}, func(c *volumes.SummaryOpts) error {
+	}), request.Custom(func(c *volumes.SummaryOpts) error {
 		retained["dict"].(map[string]any)["mutated"] = true
 		c.Headers["X-Owned"] = "yes"
 		return nil
-	}, volumes.WithSummarySingleFetch(true))
+	}), volumes.WithSummarySingleFetch(true))
 	if err != nil || v == nil || calls.Len() != 1 || pythonVolumeCalls(calls)[0].query != "all_tenants=False&dict=original&false=False&keys=a&keys=False&order=key&zero=0" || physical.Get("X-Owned") != "yes" || api.RawClient().MoreHeaders != nil {
 		t.Fatal(v, err, pythonVolumeCalls(calls), physical)
 	}
@@ -388,7 +389,7 @@ func TestPythonVolumeSummaryHeadersKwargIsQueryAndTypedHeadersArePhysical(t *tes
 			physical = append(physical, r.Header.Clone())
 			return pythonVolumeWire(200, `{"volume-summary":{"total_count":1}}`)
 		})
-		value, err := api.SummaryRecord(context.Background(), volumes.WithSummaryQuery(map[string]any{"headers": raw}), volumes.WithSummaryHeaders(map[string]string{"X-Typed": "actual-http"}))
+		value, err := api.SummaryRecord(context.Background(), volumes.WithSummaryQuery(map[string]any{"headers": raw}), request.Headers(map[string]string{"X-Typed": "actual-http"}))
 		query := "all_tenants=False"
 		if raw != nil {
 			query += "&headers=X-Query"

@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"io"
 	"net/http"
 	"reflect"
@@ -13,6 +12,8 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -96,17 +97,17 @@ func TestPythonVolumeMetadataRecordSetCachesRequestDeltaAndOwnsInputs(t *testing
 	})
 	var retained *volumes.RecordMetadataOpts
 	value, err := api.SetMetadataRecord(context.Background(), "r1", input, volumes.WithRecordMetadataSeed(seed), option,
-		func(cfg *volumes.RecordMetadataOpts) error {
+		request.Custom(func(cfg *volumes.RecordMetadataOpts) error {
 			input["nested"].(map[string]any)["false"] = true
 			cfg.Headers["X-Owned"] = "first"
 			retained = cfg
 			return nil
-		},
-		func(*volumes.RecordMetadataOpts) error {
+		}),
+		request.Custom(func(*volumes.RecordMetadataOpts) error {
 			retained.Headers["X-Owned"] = "changed"
 			seed.Resource.Body["name"] = json.RawMessage(`"changed"`)
 			return nil
-		})
+		}))
 	expected, _ := json.Marshal(map[string]any{"metadata": json.RawMessage(raw)})
 	if err != nil || calls.Len() != 1 || pythonVolumeCalls(calls)[0].method != "POST" || pythonVolumeCalls(calls)[0].path != pythonVolumeBase+"/r1/metadata" || pythonVolumeCalls(calls)[0].body != string(expected) {
 		t.Fatal(value, err, pythonVolumeCalls(calls))
@@ -208,13 +209,13 @@ func TestPythonVolumeMetadataRecordSourceCaptureCallbacksAndPreflight(t *testing
 		case "cancel marshal":
 			input["k"] = metadataRecordMarshal(func() ([]byte, error) { cancel(cause); return nil, cause })
 		case "source option":
-			options = append(options, func(*volumes.RecordMetadataOpts) error { api.RawClient().Microversion = "changed"; return cause })
+			options = append(options, request.Custom(func(*volumes.RecordMetadataOpts) error { api.RawClient().Microversion = "changed"; return cause }))
 		case "cancel option":
-			options = append(options, func(*volumes.RecordMetadataOpts) error { cancel(cause); return cause })
+			options = append(options, request.Custom(func(*volumes.RecordMetadataOpts) error { cancel(cause); return cause }))
 		case "nil option":
 			options = append(options, nil)
 		case "auth header":
-			options = append(options, volumes.WithRecordMetadataHeader("X-Auth-Token", "caller"))
+			options = append(options, request.Header("X-Auth-Token", "caller"))
 		case "bad id":
 			id = ".."
 		}
@@ -337,7 +338,7 @@ func TestPythonVolumeMetadataRecordRetrySnapshotAndNativeCauses(t *testing.T) {
 		}
 	}
 	api, calls := recordMetadataFixture(t, func(*http.Request) *http.Response { return pythonVolumeWire(204, "") })
-	if _, err := api.DeleteMetadataRecord(context.Background(), "r1", []string{}, volumes.WithRecordMetadataHeader("X-Auth-Token", "bad")); !errors.Is(err, resource.ErrInvalidOption) || calls.Len() != 0 {
+	if _, err := api.DeleteMetadataRecord(context.Background(), "r1", []string{}, request.Header("X-Auth-Token", "bad")); !errors.Is(err, resource.ErrInvalidOption) || calls.Len() != 0 {
 		t.Fatal("no-op bypassed header validation", err, pythonVolumeCalls(calls))
 	}
 }
@@ -375,7 +376,7 @@ func TestPythonVolumeMetadataRecordSelectedMicroversionRetryAndSeedPreflight(t *
 	}
 	keys := []string{"original"}
 	api, calls = recordMetadataFixture(t, func(*http.Request) *http.Response { return pythonVolumeWire(204, "") })
-	deleted, err := api.DeleteMetadataRecord(context.Background(), "r1", keys, func(*volumes.RecordMetadataOpts) error { keys[0] = "mutated"; return nil })
+	deleted, err := api.DeleteMetadataRecord(context.Background(), "r1", keys, request.Custom(func(*volumes.RecordMetadataOpts) error { keys[0] = "mutated"; return nil }))
 	if err != nil || calls.Len() != 1 || len(deleted.Responses) != 1 || *deleted.Responses[0].Key != "original" || !strings.HasSuffix(pythonVolumeCalls(calls)[0].path, "/original") {
 		t.Fatal(deleted, err, pythonVolumeCalls(calls))
 	}

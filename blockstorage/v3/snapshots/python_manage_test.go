@@ -4,12 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots"
-	"github.com/JSYoo5B/go-openstacksdk/resource"
-	"github.com/gophercloud/gophercloud/v2"
 	"net/http"
 	"strings"
 	"testing"
+
+	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots"
+	"github.com/JSYoo5B/go-openstacksdk/request"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
+	"github.com/gophercloud/gophercloud/v2"
 )
 
 func TestPythonSnapshotManageRouteCapabilityAndFixedVersion(t *testing.T) {
@@ -157,9 +159,9 @@ func TestPythonSnapshotManagementRetriesOwnFixedVersionAndHeaders(t *testing.T) 
 				}
 				var err error
 				if action == "manage" {
-					_, err = api.ManageRecord(context.Background(), "v", json.RawMessage(`{}`), snapshots.WithManageRecordHeaders(map[string]string{"X-Owned": "selected"}))
+					_, err = api.ManageRecord(context.Background(), "v", json.RawMessage(`{}`), request.Headers(map[string]string{"X-Owned": "selected"}))
 				} else {
-					_, err = api.UnmanageRecord(context.Background(), "s", snapshots.WithUnmanageRecordHeaders(map[string]string{"X-Owned": "selected"}))
+					_, err = api.UnmanageRecord(context.Background(), "s", request.Headers(map[string]string{"X-Owned": "selected"}))
 				}
 				if callbacks != 1 {
 					t.Fatal(callbacks, err)

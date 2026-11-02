@@ -67,7 +67,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/defaulttypes.API.Unset`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/defaulttypes.WithDeleteIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 
 - Unset sends DELETE default-types/{project_id} at the negotiated 3.67 microversion, ignores a clean 404 like Proxy._delete and returns 403 with operation context.
   Tests: `blockstorage/v3/defaulttypes/api_test.go:TestDefaultTypeGetSetUnset`.
@@ -76,7 +76,7 @@ Python/Go differences:
 
 - Python accepts a Resource instance or an ID string; Go accepts only the ID string and URL-escapes it as one path segment, rejecting blank, dot and control-character IDs before HTTP, while Python urljoin does not escape.
 - Python negotiates min(Resource max, server max) through keystoneauth discovery; Go sends the configured client microversion or performs one Cinder version discovery GET with the same cap, and the result keeps the discovery responses.
-- WithDeleteIgnoreMissing(false) is a Go extension; Python unset_default_type always ignores a 404.
+- request.IgnoreMissing(false) is a Go extension; Python unset_default_type always ignores a 404.
 
 ## Usage examples
 

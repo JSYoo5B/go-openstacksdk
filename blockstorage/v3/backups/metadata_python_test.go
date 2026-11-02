@@ -36,7 +36,7 @@ func TestPythonBackupMetadataProfileFetchAndLegacyAliasKeepObservedJSON(t *testi
 	api.RawClient().Microversion = "3.42" // MetadataMixin adds no 3.43 gate.
 	profile := api.PythonMetadata()
 	for _, get := range []func(context.Context, string, ...backups.MetadataOption) (*backups.MetadataResult, error){profile.FetchMetadata, profile.GetMetadata} {
-		result, err := get(context.Background(), "bk-1", backups.WithMetadataHeader("X-Probe", "selected"))
+		result, err := get(context.Background(), "bk-1", request.Header("X-Probe", "selected"))
 		if err != nil || result.BackupID != "bk-1" || string(result.Metadata) != `{"owner":"wire","large":900719925474099312345,"null":null,"array":[false,1]}` || result.Response.StatusCode != 203 || string(result.Response.Body) != body || result.Response.Header.Get("X-Request-Id") != "physical-fetch" {
 			t.Fatal(result, err)
 		}
@@ -101,13 +101,13 @@ func TestPythonBackupMetadataProfileSetOwnsInputAndOpaqueAcknowledgement(t *test
 			if len(values) != 0 {
 				expected = `{"metadata":{"Unicode":"서울","empty":"","owner":"requested"}}`
 			}
-			mutate := func(config *request.Config[metadata.Opts]) error {
+			mutate := request.Custom(func(config *request.Config[metadata.Opts]) error {
 				if values != nil {
 					values["owner"] = "mutated"
 					values["new"] = "caller"
 				}
 				return nil
-			}
+			})
 			result, err := api.PythonMetadata().SetMetadata(context.Background(), "bk-1", values, mutate)
 			if err != nil || result.BackupID != "bk-1" || result.Metadata != nil || result.Response.StatusCode != 299 || string(result.Response.Body) != ack || calls.Len() != 1 {
 				t.Fatal(result, err, pythonBackupCalls(calls))
@@ -148,7 +148,7 @@ func TestPythonBackupMetadataProfileDeleteNilEmptyLiteralKeysAndPartialFailure(t
 			return response
 		})
 		keys := []string{"literal/ %é?fragment#", "duplicate", "duplicate", "never"}
-		mutate := func(*request.Config[metadata.Opts]) error { keys[0] = "mutated"; keys[1] = "caller"; return nil }
+		mutate := request.Custom(func(*request.Config[metadata.Opts]) error { keys[0] = "mutated"; keys[1] = "caller"; return nil })
 		result, err := api.PythonMetadata().DeleteMetadata(context.Background(), "bk-1", keys, mutate)
 		var native gophercloud.ErrUnexpectedResponseCode
 		if result == nil || result.Cleared != nil || len(result.Deleted) != 2 || !errors.As(err, &native) || native.Actual != 404 || string(native.Body) != "physical-ack-3" || native.ResponseHeader.Get("X-Ack") != "3" || calls.Len() != 3 {
@@ -332,7 +332,7 @@ func TestPythonBackupMetadataProfilePreflightOwnsOptionsAndPreservesWireCauses(t
 		return pythonBackupWire(200, `{}`)
 	})
 	profile := api.PythonMetadata()
-	for _, option := range []backups.MetadataOption{nil, backups.WithMetadataHeader("X-Auth-Token", "foreign"), backups.WithMetadataHeader("Content-Type", "text/plain"), backups.WithMetadataHeader("OpenStack-API-Version", "volume 3.43"), request.WithQuery[metadata.Opts]("limit", "1"), request.WithField[metadata.Opts]("metadata", map[string]string{})} {
+	for _, option := range []backups.MetadataOption{nil, request.Header("X-Auth-Token", "foreign"), request.Header("Content-Type", "text/plain"), request.Header("OpenStack-API-Version", "volume 3.43"), request.Custom(request.WithQuery[metadata.Opts]("limit", "1")), request.Custom(request.WithField[metadata.Opts]("metadata", map[string]string{}))} {
 		if _, err := profile.FetchMetadata(context.Background(), "bk-1", option); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(err)
 		}
@@ -393,11 +393,11 @@ func TestPythonBackupMetadataProfileSnapshotsHeadersConcurrentReuseAndSourceChan
 		t.Fatal(calls.Load(), client.MoreHeaders)
 	}
 	var kept *request.Config[metadata.Opts]
-	keep := func(config *request.Config[metadata.Opts]) error {
+	keep := request.Custom(func(config *request.Config[metadata.Opts]) error {
 		config.Headers["X-Probe"] = "snapshot"
 		kept = config
 		return nil
-	}
+	})
 	transport := cloud.Provider.HTTPClient.Transport
 	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		kept.Headers = map[string]string{"X-Probe": "late mutation"}

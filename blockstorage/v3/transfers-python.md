@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.API.CreateRecord`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithRecordCreateOpts`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithRecordCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithRecordCreateVolumeID`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithRecordCreateName`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithRecordCreateNoSnapshots`
@@ -47,7 +47,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.API.Get`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.API.GetRecord`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithRecordReadHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 
 - Transfers.Get sends GET os-volume-transfer/{id} and decodes name, volume_id and created_at.
   Tests: `blockstorage/v3/transfers/python_parity_test.go:TestPythonTransferGetAcceptDeleteUseLegacyRoute`.
@@ -80,11 +80,11 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithRecordListOpts`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithRecordListDetails`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithRecordListAllProjects`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithRecordListQuery`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithRecordListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithRecordListServerQuery`
 
 - ListRecords defaults to the discovered /detail route, while WithRecordListDetails(false) selects summary. Source all_projects and unknown kwargs are discarded; declared Body attrs filter locally.
@@ -111,7 +111,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.API.FindRecord`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithRecordFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 
 - FindRecord attempts discovered-route GET and falls back only on clean400/403/404; fallback is exact Source Transfer.list summary /volume-transfers even below3.55.
   Tests: `blockstorage/v3/transfers/python_records_test.go:TestPythonTransferFindGetFallbackSummaryAndMissingDefaults`.
@@ -168,7 +168,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.ID`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithMissingError`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.API.DeleteRecord`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithRecordDeleteIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 
 - Remove sends DELETE os-volume-transfer/{id}, ignores 404 by default and reports NotFound with WithMissingError.
   Tests: `blockstorage/v3/transfers/python_parity_test.go:TestPythonTransferGetAcceptDeleteUseLegacyRoute`.
@@ -238,7 +238,7 @@ func main() {
         fmt.Println(string(candidate.Resource.Body["id"]), string(candidate.Resource.Body["name"]))
     }
     found, err := storage.Transfers.FindRecord(ctx, "handoff",
-        transfers.WithRecordFindIgnoreMissing(false),
+        request.IgnoreMissing(false),
     )
     if err != nil { log.Fatal(err) }
     fmt.Println(string(found.Resource.Body["id"]))

@@ -3,6 +3,7 @@ package defaulttypes_test
 import (
 	"context"
 	"errors"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"net/http"
 	"testing"
 
@@ -137,7 +138,7 @@ func TestDefaultTypeGetSetUnset(t *testing.T) {
 		code    int
 		options []defaulttypes.DeleteOption
 		fail    bool
-	}{{204, nil, false}, {404, nil, false}, {404, []defaulttypes.DeleteOption{defaulttypes.WithDeleteIgnoreMissing(false)}, true}, {403, nil, true}} {
+	}{{204, nil, false}, {404, nil, false}, {404, []defaulttypes.DeleteOption{request.IgnoreMissing(false)}, true}, {403, nil, true}} {
 		api, calls = dtAPI(t, "", "3.70", func(*http.Request) (int, string) { return item.code, `` })
 		err = api.Unset(context.Background(), "p1", item.options...)
 		if dtCalls(calls)[1].method != http.MethodDelete || dtCalls(calls)[1].path != dtBase+"/p1" {

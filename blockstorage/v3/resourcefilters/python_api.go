@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"iter"
 	"maps"
 	"net/http"
@@ -71,7 +72,7 @@ func (a *API) prepare(ctx context.Context, options []RecordListOption, expressio
 		return errors.Join(changed, source.Guard(ctx), rest.CheckOperationGuard(ctx))
 	}
 	cfg := cloneOptions(RecordListOpts{})
-	for _, apply := range copyCallbacks(options) {
+	for _, apply := range calls.Translate(options, recordListCalls) {
 		if err = guard(ctx); err != nil {
 			return nil, err
 		}

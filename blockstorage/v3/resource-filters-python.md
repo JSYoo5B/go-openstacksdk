@@ -19,8 +19,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/resourcefilters.WithRecordListOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/resourcefilters.WithRecordListResource`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/resourcefilters.WithRecordListQuery`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/resourcefilters.WithRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/resourcefilters.WithRecordListMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/resourcefilters.WithRecordListControl`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/resourcefilters.WithRecordListJMESPath`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/resourcefilters.API.ProxyListRecords`

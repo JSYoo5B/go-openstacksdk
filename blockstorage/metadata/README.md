@@ -33,6 +33,7 @@ import (
 
     "github.com/gophercloud/gophercloud/v2"
     "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes"
+    "github.com/JSYoo5B/go-openstacksdk/request"
     "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -47,7 +48,7 @@ func replaceVolumeMetadata(ctx context.Context, client *gophercloud.ServiceClien
     }
     var options []volumes.MetadataOption
     if etag := current.Header.Get("ETag"); etag != "" {
-        options = append(options, volumes.WithMetadataHeader("If-Match", etag))
+        options = append(options, request.Header("If-Match", etag))
     }
     result, err := scope.Replace(ctx, map[string]string{"owner": "team-a"}, options...)
     if err != nil {
@@ -101,8 +102,11 @@ available through error unwrapping. Raw JSON retains unknown envelope fields.
 
 Request keys and values must be valid UTF-8. Maps and key slices are copied
 before custom options and HTTP; header options
-snapshot their values when created. `WithHeader` and `WithHeaders`, also exposed as leaf
-`WithMetadataHeader` / `WithMetadataHeaders`, are concrete SDK-owned options.
+snapshot their values when created. The shared `request.Header` and the merging
+`WithHeaders` (also exposed as leaf `WithMetadataHeaders`) are the header options;
+`request.Header` is validated and merged like a one-entry `WithHeaders` map, and
+other shared calls such as `request.Headers` or `request.Microversion` fail with
+`resource.ErrInvalidOption` before HTTP.
 They cannot change auth, body, routing or version ownership, and do not add
 query/session/cache/base-path options. Source `MoreHeaders` retains native
 precedence for ordinary headers; conflicting source/request `If-Match` values

@@ -6,13 +6,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"maps"
 	"net/http"
 	"net/url"
 	"slices"
 	"strings"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cinderaction"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cinderrequest"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
@@ -25,17 +25,19 @@ import (
 // ConnectorOpts is the concrete configuration carrier for owned connector actions.
 // Connector values are supplied separately and are snapshotted before options.
 type ConnectorOpts struct{}
-type ConnectorOption = request.Option[ConnectorOpts]
 
-func WithConnectorHeader(key, value string) ConnectorOption {
-	return request.WithHeader[ConnectorOpts](key, value)
-}
-func WithConnectorHeaders(values map[string]string) ConnectorOption {
-	owned := maps.Clone(values)
-	return func(cfg *request.Config[ConnectorOpts]) error {
-		cfg.Headers = maps.Clone(owned)
+// ConnectorOption is one option of InitializeWithConnector and
+// TerminateWithConnector: request.Header, request.Headers (replaces the
+// headers) or request.Custom over *request.Config[ConnectorOpts]. Other shared
+// calls fail with resource.ErrInvalidOption before HTTP.
+type ConnectorOption = request.WriteCall
+
+var connectorCalls = calls.Spec[request.Config[ConnectorOpts]]{
+	Header: calls.ConfigHeader[ConnectorOpts],
+	Headers: func(c *request.Config[ConnectorOpts], values map[string]string) error {
+		c.Headers = values
 		return nil
-	}
+	},
 }
 
 // VolumeConnectorResponse is actual HTTP evidence, not a reconstructed Volume.
@@ -103,7 +105,7 @@ func (a *API) connectorAction(ctx context.Context, id string, connector map[stri
 	}
 	// Keep the JSON type: plain []byte inside an interface encodes as base64.
 	snapshot := json.RawMessage(bytes.Clone(encoded))
-	cfg, err := cloudread.ApplyReadOptions(ctx, ConnectorOpts{}, slices.Clone(options), cloudread.OwnReadConfig[ConnectorOpts], guard)
+	cfg, err := cloudread.ApplyReadOptions(ctx, ConnectorOpts{}, calls.Options(slices.Clone(options), connectorCalls), cloudread.OwnReadConfig[ConnectorOpts], guard)
 	if err == nil {
 		err = request.ValidateCapabilities(cfg, false, false, true)
 	}

@@ -5,8 +5,8 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"iter"
-	"maps"
 	"slices"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
@@ -33,7 +33,39 @@ type RecordListOpts struct {
 	Microversion *string
 	order        []string
 }
-type RecordListOption func(*RecordListOpts) error
+
+// RecordListOption is one option of ListRecords, AllRecords and
+// ProxyListRecords: WithRecordListOpts, WithRecordListDetails,
+// WithRecordListJMESPath, request.Query (a Source keyword argument; the
+// value is sent as JSON), request.Limit, request.MaxItems and
+// request.Paginated (the limit, max_items and paginated keyword arguments),
+// request.Microversion, request.Headers (replaces the headers) or
+// request.Custom over *RecordListOpts. Other shared calls, including
+// request.Marker, fail with resource.ErrInvalidOption before HTTP.
+type RecordListOption = request.ListCall
+
+func setRecordListQuery(c *RecordListOpts, key string, raw json.RawMessage, err error) error {
+	if err != nil {
+		return err
+	}
+	if c.Query == nil {
+		c.Query = map[string]json.RawMessage{}
+	}
+	c.Query[key] = bytes.Clone(raw)
+	if !slices.Contains(c.order, key) {
+		c.order = append(c.order, key)
+	}
+	return nil
+}
+
+var recordListPaging = calls.JSONPaging(setRecordListQuery)
+
+var recordListCalls = calls.Spec[RecordListOpts]{
+	Query:        calls.JSONQuery(setRecordListQuery),
+	Headers:      calls.Value(func(c *RecordListOpts) *map[string]string { return &c.Headers }),
+	Microversion: calls.Pointer(func(c *RecordListOpts) **string { return &c.Microversion }),
+	Paging:       calls.Paging[RecordListOpts]{Limit: recordListPaging.Limit, MaxItems: recordListPaging.MaxItems, Paginated: recordListPaging.Paginated},
+}
 
 func listOptions(v RecordListOpts) neutronfind.Options {
 	return neutronfind.Options{Query: v.Query, Headers: v.Headers, Microversion: v.Microversion, Order: v.order}
@@ -45,40 +77,16 @@ func copyListOpts(v RecordListOpts) RecordListOpts {
 }
 func WithRecordListOpts(v RecordListOpts) RecordListOption {
 	own := copyListOpts(v)
-	return func(c *RecordListOpts) error { *c = copyListOpts(own); return nil }
+	return request.Custom(func(c *RecordListOpts) error { *c = copyListOpts(own); return nil })
 }
 func WithRecordListDetails(v bool) RecordListOption {
-	return func(c *RecordListOpts) error { c.Details = v; return nil }
+	return request.Custom(func(c *RecordListOpts) error { c.Details = v; return nil })
 }
-func WithRecordListQuery(key string, v any) RecordListOption {
-	raw, err := json.Marshal(v)
-	own := bytes.Clone(raw)
-	return func(c *RecordListOpts) error {
-		if err != nil {
-			return err
-		}
-		if c.Query == nil {
-			c.Query = map[string]json.RawMessage{}
-		}
-		c.Query[key] = bytes.Clone(own)
-		if !slices.Contains(c.order, key) {
-			c.order = append(c.order, key)
-		}
-		return nil
-	}
-}
-func WithRecordListHeaders(v map[string]string) RecordListOption {
-	own := maps.Clone(v)
-	return func(c *RecordListOpts) error { c.Headers = maps.Clone(own); return nil }
-}
-func WithRecordListMicroversion(v string) RecordListOption {
-	return func(c *RecordListOpts) error { x := v; c.Microversion = &x; return nil }
-}
-func WithRecordListLimit(v int) RecordListOption      { return WithRecordListQuery("limit", v) }
-func WithRecordListMaxItems(v int) RecordListOption   { return WithRecordListQuery("max_items", v) }
-func WithRecordListPaginated(v bool) RecordListOption { return WithRecordListQuery("paginated", v) }
+
+// WithRecordListJMESPath sets the Proxy jmespath_filters keyword argument.
 func WithRecordListJMESPath(v string) RecordListOption {
-	return WithRecordListQuery("jmespath_filters", v)
+	raw, err := json.Marshal(v)
+	return request.Custom(func(c *RecordListOpts) error { return setRecordListQuery(c, "jmespath_filters", raw, err) })
 }
 
 var recordProfile = neutronfind.Profile{
@@ -111,7 +119,7 @@ func (a *API) prepareRecords(ctx context.Context, options []RecordListOption) (*
 		return nil, RecordListOpts{}, nil, err
 	}
 	policy := RecordListOpts{}
-	for _, apply := range slices.Clone(options) {
+	for _, apply := range calls.Translate(options, recordListCalls) {
 		if err := engine.Check(ctx); err != nil {
 			return nil, policy, nil, err
 		}

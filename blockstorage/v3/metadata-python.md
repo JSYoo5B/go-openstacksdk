@@ -16,10 +16,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.MetadataScope.DeleteKeys`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.MetadataScope.ID`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.MetadataScope.RawClient`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithMetadataHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithMetadataHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.API.DeleteMetadataRecord`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithRecordMetadataHeader`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithRecordMetadataHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithRecordMetadataSeed`
 
@@ -31,7 +30,7 @@ Go API:
   Tests: `api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesRoutesAndOwnedResponse`, `api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext`, `connectiontest/connection_metadata_test.go:TestConnectionCinderMetadataSharesLiveVersionedClientAndFixedPrefix`, `internal/cindermetadata/scope_test.go:TestMetadataPreflightZeroHTTPAndBetweenDeletionSourceChecks`, `internal/cindermetadata/scope_test.go:TestMetadataUTF8AndSelectedOriginAreValidatedBeforeOptionsAndHTTP`.
 - Explicit resource.Name is a Go convenience resolving once through the current parent collection, then validating and fixing the resolved ID. Missing/duplicate/error observations retain the existing resolver policy: v2 Snapshot uses its native single page, while the other three bindings use native linked continuation; this scope does not broaden those native pagers.
   Tests: `api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesNameBindingAndRequestSnapshots`, `connectiontest/connection_metadata_test.go:TestConnectionCinderMetadataResolvesNamesOnceAndPreflightsReferences`.
-- Input metadata maps and deletion keys are copied before custom options and HTTP; concrete WithMetadataHeader/WithMetadataHeaders capture header values and allow sequential canonical last-wins reuse without an application builder. Returned fields do not serve as request inputs or retarget identity.
+- Input metadata maps and deletion keys are copied before custom options and HTTP; request.Header and the concrete WithMetadataHeaders capture header values and allow sequential canonical last-wins reuse without an application builder. Returned fields do not serve as request inputs or retarget identity.
   Tests: `api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesNameBindingAndRequestSnapshots`, `api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation`, `blockstorage/metadata/options_test.go:TestHeaderOptionsSnapshotCanonicalLastWinsAndIndependentReuse`, `blockstorage/metadata/options_test.go:TestHeaderOptionsRejectBulkConflictsAndReinitializeNilConfigMap`.
 - Malformed accepted JSON, missing/null/nonobject exact metadata, non-string/null values and accepted partial reads retain raw HTTP evidence through ResponseError and original causes. Native unexpected status, transport and cancellation remain unwrap-able; accepted decode failure does not reenter the SDK request or invoke retry callbacks. Invalid UTF-8 accepted response bytes are also terminal and retain their original evidence.
   Tests: `api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesMalformedAcceptedAndOriginalErrors`, `api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext`, `internal/cindermetadata/scope_test.go:TestMetadataCanonicalStringEnvelopeErrorsKeepWholeAcceptedResponse`, `internal/cindermetadata/scope_test.go:TestMetadataNativeTransportAcceptedReadAndCancellationErrorsStayTerminal`.
@@ -73,10 +72,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.MetadataScope.DeleteKeys`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.MetadataScope.ID`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.MetadataScope.RawClient`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithMetadataHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithMetadataHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.DeleteMetadataRecord`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordMetadataHeader`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordMetadataHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordMetadataSeed`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordMetadataLocation`
@@ -89,7 +87,7 @@ Go API:
   Tests: `api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesRoutesAndOwnedResponse`, `api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext`, `connectiontest/connection_metadata_test.go:TestConnectionCinderMetadataSharesLiveVersionedClientAndFixedPrefix`, `internal/cindermetadata/scope_test.go:TestMetadataPreflightZeroHTTPAndBetweenDeletionSourceChecks`, `internal/cindermetadata/scope_test.go:TestMetadataUTF8AndSelectedOriginAreValidatedBeforeOptionsAndHTTP`.
 - Explicit resource.Name is a Go convenience resolving once through the current parent collection, then validating and fixing the resolved ID. Missing/duplicate/error observations retain the existing resolver policy: v2 Snapshot uses its native single page, while the other three bindings use native linked continuation; this scope does not broaden those native pagers.
   Tests: `api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesNameBindingAndRequestSnapshots`, `connectiontest/connection_metadata_test.go:TestConnectionCinderMetadataResolvesNamesOnceAndPreflightsReferences`.
-- Input metadata maps and deletion keys are copied before custom options and HTTP; concrete WithMetadataHeader/WithMetadataHeaders capture header values and allow sequential canonical last-wins reuse without an application builder. Returned fields do not serve as request inputs or retarget identity.
+- Input metadata maps and deletion keys are copied before custom options and HTTP; request.Header and the concrete WithMetadataHeaders capture header values and allow sequential canonical last-wins reuse without an application builder. Returned fields do not serve as request inputs or retarget identity.
   Tests: `api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesNameBindingAndRequestSnapshots`, `api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation`, `blockstorage/metadata/options_test.go:TestHeaderOptionsSnapshotCanonicalLastWinsAndIndependentReuse`, `blockstorage/metadata/options_test.go:TestHeaderOptionsRejectBulkConflictsAndReinitializeNilConfigMap`.
 - Malformed accepted JSON, missing/null/nonobject exact metadata, non-string/null values and accepted partial reads retain raw HTTP evidence through ResponseError and original causes. Native unexpected status, transport and cancellation remain unwrap-able; accepted decode failure does not reenter the SDK request or invoke retry callbacks. Invalid UTF-8 accepted response bytes are also terminal and retain their original evidence.
   Tests: `api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesMalformedAcceptedAndOriginalErrors`, `api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext`, `internal/cindermetadata/scope_test.go:TestMetadataCanonicalStringEnvelopeErrorsKeepWholeAcceptedResponse`, `internal/cindermetadata/scope_test.go:TestMetadataNativeTransportAcceptedReadAndCancellationErrorsStayTerminal`.
@@ -131,10 +129,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.MetadataScope.Get`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.MetadataScope.ID`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.MetadataScope.RawClient`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithMetadataHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithMetadataHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.API.FetchMetadataRecord`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithRecordMetadataHeader`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithRecordMetadataHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithRecordMetadataSeed`
 
@@ -146,7 +143,7 @@ Go API:
   Tests: `api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesRoutesAndOwnedResponse`, `api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext`, `connectiontest/connection_metadata_test.go:TestConnectionCinderMetadataSharesLiveVersionedClientAndFixedPrefix`, `internal/cindermetadata/scope_test.go:TestMetadataPreflightZeroHTTPAndBetweenDeletionSourceChecks`, `internal/cindermetadata/scope_test.go:TestMetadataUTF8AndSelectedOriginAreValidatedBeforeOptionsAndHTTP`.
 - Explicit resource.Name is a Go convenience resolving once through the current parent collection, then validating and fixing the resolved ID. Missing/duplicate/error observations retain the existing resolver policy: v2 Snapshot uses its native single page, while the other three bindings use native linked continuation; this scope does not broaden those native pagers.
   Tests: `api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesNameBindingAndRequestSnapshots`, `connectiontest/connection_metadata_test.go:TestConnectionCinderMetadataResolvesNamesOnceAndPreflightsReferences`.
-- Input metadata maps and deletion keys are copied before custom options and HTTP; concrete WithMetadataHeader/WithMetadataHeaders capture header values and allow sequential canonical last-wins reuse without an application builder. Returned fields do not serve as request inputs or retarget identity.
+- Input metadata maps and deletion keys are copied before custom options and HTTP; request.Header and the concrete WithMetadataHeaders capture header values and allow sequential canonical last-wins reuse without an application builder. Returned fields do not serve as request inputs or retarget identity.
   Tests: `api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesNameBindingAndRequestSnapshots`, `api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation`, `blockstorage/metadata/options_test.go:TestHeaderOptionsSnapshotCanonicalLastWinsAndIndependentReuse`, `blockstorage/metadata/options_test.go:TestHeaderOptionsRejectBulkConflictsAndReinitializeNilConfigMap`.
 - Malformed accepted JSON, missing/null/nonobject exact metadata, non-string/null values and accepted partial reads retain raw HTTP evidence through ResponseError and original causes. Native unexpected status, transport and cancellation remain unwrap-able; accepted decode failure does not reenter the SDK request or invoke retry callbacks. Invalid UTF-8 accepted response bytes are also terminal and retain their original evidence.
   Tests: `api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesMalformedAcceptedAndOriginalErrors`, `api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext`, `internal/cindermetadata/scope_test.go:TestMetadataCanonicalStringEnvelopeErrorsKeepWholeAcceptedResponse`, `internal/cindermetadata/scope_test.go:TestMetadataNativeTransportAcceptedReadAndCancellationErrorsStayTerminal`.
@@ -187,10 +184,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.MetadataScope.Get`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.MetadataScope.ID`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.MetadataScope.RawClient`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithMetadataHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithMetadataHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.FetchMetadataRecord`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordMetadataHeader`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordMetadataHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordMetadataSeed`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordMetadataLocation`
@@ -203,7 +199,7 @@ Go API:
   Tests: `api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesRoutesAndOwnedResponse`, `api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext`, `connectiontest/connection_metadata_test.go:TestConnectionCinderMetadataSharesLiveVersionedClientAndFixedPrefix`, `internal/cindermetadata/scope_test.go:TestMetadataPreflightZeroHTTPAndBetweenDeletionSourceChecks`, `internal/cindermetadata/scope_test.go:TestMetadataUTF8AndSelectedOriginAreValidatedBeforeOptionsAndHTTP`.
 - Explicit resource.Name is a Go convenience resolving once through the current parent collection, then validating and fixing the resolved ID. Missing/duplicate/error observations retain the existing resolver policy: v2 Snapshot uses its native single page, while the other three bindings use native linked continuation; this scope does not broaden those native pagers.
   Tests: `api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesNameBindingAndRequestSnapshots`, `connectiontest/connection_metadata_test.go:TestConnectionCinderMetadataResolvesNamesOnceAndPreflightsReferences`.
-- Input metadata maps and deletion keys are copied before custom options and HTTP; concrete WithMetadataHeader/WithMetadataHeaders capture header values and allow sequential canonical last-wins reuse without an application builder. Returned fields do not serve as request inputs or retarget identity.
+- Input metadata maps and deletion keys are copied before custom options and HTTP; request.Header and the concrete WithMetadataHeaders capture header values and allow sequential canonical last-wins reuse without an application builder. Returned fields do not serve as request inputs or retarget identity.
   Tests: `api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesNameBindingAndRequestSnapshots`, `api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation`, `blockstorage/metadata/options_test.go:TestHeaderOptionsSnapshotCanonicalLastWinsAndIndependentReuse`, `blockstorage/metadata/options_test.go:TestHeaderOptionsRejectBulkConflictsAndReinitializeNilConfigMap`.
 - Malformed accepted JSON, missing/null/nonobject exact metadata, non-string/null values and accepted partial reads retain raw HTTP evidence through ResponseError and original causes. Native unexpected status, transport and cancellation remain unwrap-able; accepted decode failure does not reenter the SDK request or invoke retry callbacks. Invalid UTF-8 accepted response bytes are also terminal and retain their original evidence.
   Tests: `api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesMalformedAcceptedAndOriginalErrors`, `api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext`, `internal/cindermetadata/scope_test.go:TestMetadataCanonicalStringEnvelopeErrorsKeepWholeAcceptedResponse`, `internal/cindermetadata/scope_test.go:TestMetadataNativeTransportAcceptedReadAndCancellationErrorsStayTerminal`.
@@ -244,10 +240,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.MetadataScope.Get`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.MetadataScope.ID`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.MetadataScope.RawClient`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithMetadataHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithMetadataHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.API.GetMetadataRecord`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithRecordMetadataHeader`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithRecordMetadataHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithRecordMetadataSeed`
 
@@ -259,7 +254,7 @@ Go API:
   Tests: `api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesRoutesAndOwnedResponse`, `api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext`, `connectiontest/connection_metadata_test.go:TestConnectionCinderMetadataSharesLiveVersionedClientAndFixedPrefix`, `internal/cindermetadata/scope_test.go:TestMetadataPreflightZeroHTTPAndBetweenDeletionSourceChecks`, `internal/cindermetadata/scope_test.go:TestMetadataUTF8AndSelectedOriginAreValidatedBeforeOptionsAndHTTP`.
 - Explicit resource.Name is a Go convenience resolving once through the current parent collection, then validating and fixing the resolved ID. Missing/duplicate/error observations retain the existing resolver policy: v2 Snapshot uses its native single page, while the other three bindings use native linked continuation; this scope does not broaden those native pagers.
   Tests: `api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesNameBindingAndRequestSnapshots`, `connectiontest/connection_metadata_test.go:TestConnectionCinderMetadataResolvesNamesOnceAndPreflightsReferences`.
-- Input metadata maps and deletion keys are copied before custom options and HTTP; concrete WithMetadataHeader/WithMetadataHeaders capture header values and allow sequential canonical last-wins reuse without an application builder. Returned fields do not serve as request inputs or retarget identity.
+- Input metadata maps and deletion keys are copied before custom options and HTTP; request.Header and the concrete WithMetadataHeaders capture header values and allow sequential canonical last-wins reuse without an application builder. Returned fields do not serve as request inputs or retarget identity.
   Tests: `api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesNameBindingAndRequestSnapshots`, `api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation`, `blockstorage/metadata/options_test.go:TestHeaderOptionsSnapshotCanonicalLastWinsAndIndependentReuse`, `blockstorage/metadata/options_test.go:TestHeaderOptionsRejectBulkConflictsAndReinitializeNilConfigMap`.
 - Malformed accepted JSON, missing/null/nonobject exact metadata, non-string/null values and accepted partial reads retain raw HTTP evidence through ResponseError and original causes. Native unexpected status, transport and cancellation remain unwrap-able; accepted decode failure does not reenter the SDK request or invoke retry callbacks. Invalid UTF-8 accepted response bytes are also terminal and retain their original evidence.
   Tests: `api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesMalformedAcceptedAndOriginalErrors`, `api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext`, `internal/cindermetadata/scope_test.go:TestMetadataCanonicalStringEnvelopeErrorsKeepWholeAcceptedResponse`, `internal/cindermetadata/scope_test.go:TestMetadataNativeTransportAcceptedReadAndCancellationErrorsStayTerminal`.
@@ -301,10 +296,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.MetadataScope.Get`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.MetadataScope.ID`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.MetadataScope.RawClient`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithMetadataHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithMetadataHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.GetMetadataRecord`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordMetadataHeader`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordMetadataHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordMetadataSeed`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordMetadataLocation`
@@ -317,7 +311,7 @@ Go API:
   Tests: `api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesRoutesAndOwnedResponse`, `api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext`, `connectiontest/connection_metadata_test.go:TestConnectionCinderMetadataSharesLiveVersionedClientAndFixedPrefix`, `internal/cindermetadata/scope_test.go:TestMetadataPreflightZeroHTTPAndBetweenDeletionSourceChecks`, `internal/cindermetadata/scope_test.go:TestMetadataUTF8AndSelectedOriginAreValidatedBeforeOptionsAndHTTP`.
 - Explicit resource.Name is a Go convenience resolving once through the current parent collection, then validating and fixing the resolved ID. Missing/duplicate/error observations retain the existing resolver policy: v2 Snapshot uses its native single page, while the other three bindings use native linked continuation; this scope does not broaden those native pagers.
   Tests: `api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesNameBindingAndRequestSnapshots`, `connectiontest/connection_metadata_test.go:TestConnectionCinderMetadataResolvesNamesOnceAndPreflightsReferences`.
-- Input metadata maps and deletion keys are copied before custom options and HTTP; concrete WithMetadataHeader/WithMetadataHeaders capture header values and allow sequential canonical last-wins reuse without an application builder. Returned fields do not serve as request inputs or retarget identity.
+- Input metadata maps and deletion keys are copied before custom options and HTTP; request.Header and the concrete WithMetadataHeaders capture header values and allow sequential canonical last-wins reuse without an application builder. Returned fields do not serve as request inputs or retarget identity.
   Tests: `api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesNameBindingAndRequestSnapshots`, `api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation`, `blockstorage/metadata/options_test.go:TestHeaderOptionsSnapshotCanonicalLastWinsAndIndependentReuse`, `blockstorage/metadata/options_test.go:TestHeaderOptionsRejectBulkConflictsAndReinitializeNilConfigMap`.
 - Malformed accepted JSON, missing/null/nonobject exact metadata, non-string/null values and accepted partial reads retain raw HTTP evidence through ResponseError and original causes. Native unexpected status, transport and cancellation remain unwrap-able; accepted decode failure does not reenter the SDK request or invoke retry callbacks. Invalid UTF-8 accepted response bytes are also terminal and retain their original evidence.
   Tests: `api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesMalformedAcceptedAndOriginalErrors`, `api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext`, `internal/cindermetadata/scope_test.go:TestMetadataCanonicalStringEnvelopeErrorsKeepWholeAcceptedResponse`, `internal/cindermetadata/scope_test.go:TestMetadataNativeTransportAcceptedReadAndCancellationErrorsStayTerminal`.
@@ -360,10 +354,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.MetadataScope.Replace`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.MetadataScope.ID`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.MetadataScope.RawClient`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithMetadataHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithMetadataHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.API.SetMetadataRecord`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithRecordMetadataHeader`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithRecordMetadataHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithRecordMetadataSeed`
 
@@ -375,7 +368,7 @@ Go API:
   Tests: `api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesRoutesAndOwnedResponse`, `api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext`, `connectiontest/connection_metadata_test.go:TestConnectionCinderMetadataSharesLiveVersionedClientAndFixedPrefix`, `internal/cindermetadata/scope_test.go:TestMetadataPreflightZeroHTTPAndBetweenDeletionSourceChecks`, `internal/cindermetadata/scope_test.go:TestMetadataUTF8AndSelectedOriginAreValidatedBeforeOptionsAndHTTP`.
 - Explicit resource.Name is a Go convenience resolving once through the current parent collection, then validating and fixing the resolved ID. Missing/duplicate/error observations retain the existing resolver policy: v2 Snapshot uses its native single page, while the other three bindings use native linked continuation; this scope does not broaden those native pagers.
   Tests: `api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesNameBindingAndRequestSnapshots`, `connectiontest/connection_metadata_test.go:TestConnectionCinderMetadataResolvesNamesOnceAndPreflightsReferences`.
-- Input metadata maps and deletion keys are copied before custom options and HTTP; concrete WithMetadataHeader/WithMetadataHeaders capture header values and allow sequential canonical last-wins reuse without an application builder. Returned fields do not serve as request inputs or retarget identity.
+- Input metadata maps and deletion keys are copied before custom options and HTTP; request.Header and the concrete WithMetadataHeaders capture header values and allow sequential canonical last-wins reuse without an application builder. Returned fields do not serve as request inputs or retarget identity.
   Tests: `api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesNameBindingAndRequestSnapshots`, `api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation`, `blockstorage/metadata/options_test.go:TestHeaderOptionsSnapshotCanonicalLastWinsAndIndependentReuse`, `blockstorage/metadata/options_test.go:TestHeaderOptionsRejectBulkConflictsAndReinitializeNilConfigMap`.
 - Malformed accepted JSON, missing/null/nonobject exact metadata, non-string/null values and accepted partial reads retain raw HTTP evidence through ResponseError and original causes. Native unexpected status, transport and cancellation remain unwrap-able; accepted decode failure does not reenter the SDK request or invoke retry callbacks. Invalid UTF-8 accepted response bytes are also terminal and retain their original evidence.
   Tests: `api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesMalformedAcceptedAndOriginalErrors`, `api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext`, `internal/cindermetadata/scope_test.go:TestMetadataCanonicalStringEnvelopeErrorsKeepWholeAcceptedResponse`, `internal/cindermetadata/scope_test.go:TestMetadataNativeTransportAcceptedReadAndCancellationErrorsStayTerminal`.
@@ -418,10 +411,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.MetadataScope.Replace`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.MetadataScope.ID`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.MetadataScope.RawClient`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithMetadataHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithMetadataHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.SetMetadataRecord`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordMetadataHeader`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordMetadataHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordMetadataSeed`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordMetadataLocation`
@@ -434,7 +426,7 @@ Go API:
   Tests: `api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesRoutesAndOwnedResponse`, `api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext`, `connectiontest/connection_metadata_test.go:TestConnectionCinderMetadataSharesLiveVersionedClientAndFixedPrefix`, `internal/cindermetadata/scope_test.go:TestMetadataPreflightZeroHTTPAndBetweenDeletionSourceChecks`, `internal/cindermetadata/scope_test.go:TestMetadataUTF8AndSelectedOriginAreValidatedBeforeOptionsAndHTTP`.
 - Explicit resource.Name is a Go convenience resolving once through the current parent collection, then validating and fixing the resolved ID. Missing/duplicate/error observations retain the existing resolver policy: v2 Snapshot uses its native single page, while the other three bindings use native linked continuation; this scope does not broaden those native pagers.
   Tests: `api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesNameBindingAndRequestSnapshots`, `connectiontest/connection_metadata_test.go:TestConnectionCinderMetadataResolvesNamesOnceAndPreflightsReferences`.
-- Input metadata maps and deletion keys are copied before custom options and HTTP; concrete WithMetadataHeader/WithMetadataHeaders capture header values and allow sequential canonical last-wins reuse without an application builder. Returned fields do not serve as request inputs or retarget identity.
+- Input metadata maps and deletion keys are copied before custom options and HTTP; request.Header and the concrete WithMetadataHeaders capture header values and allow sequential canonical last-wins reuse without an application builder. Returned fields do not serve as request inputs or retarget identity.
   Tests: `api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesNameBindingAndRequestSnapshots`, `api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation`, `blockstorage/metadata/options_test.go:TestHeaderOptionsSnapshotCanonicalLastWinsAndIndependentReuse`, `blockstorage/metadata/options_test.go:TestHeaderOptionsRejectBulkConflictsAndReinitializeNilConfigMap`.
 - Malformed accepted JSON, missing/null/nonobject exact metadata, non-string/null values and accepted partial reads retain raw HTTP evidence through ResponseError and original causes. Native unexpected status, transport and cancellation remain unwrap-able; accepted decode failure does not reenter the SDK request or invoke retry callbacks. Invalid UTF-8 accepted response bytes are also terminal and retain their original evidence.
   Tests: `api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesMalformedAcceptedAndOriginalErrors`, `api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext`, `internal/cindermetadata/scope_test.go:TestMetadataCanonicalStringEnvelopeErrorsKeepWholeAcceptedResponse`, `internal/cindermetadata/scope_test.go:TestMetadataNativeTransportAcceptedReadAndCancellationErrorsStayTerminal`.
@@ -515,6 +507,7 @@ import (
     openstack "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots"
     "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes"
+    "github.com/JSYoo5B/go-openstacksdk/request"
     "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -553,7 +546,7 @@ func main() {
         case "fetch": record, err = service.Volumes.FetchMetadataRecord(ctx, *volumeID)
         case "get": record, err = service.Volumes.GetMetadataRecord(ctx, *volumeID)
         case "set": record, err = service.Volumes.SetMetadataRecord(ctx, *volumeID, values,
-            volumes.WithRecordMetadataHeader("X-Client-Request-Id", "metadata-volume"))
+            request.Header("X-Client-Request-Id", "metadata-volume"))
         default:
             var deleted *volumes.MetadataRecordDeletion
             deleted, err = service.Volumes.DeleteMetadataRecord(ctx, *volumeID, keys)
@@ -571,7 +564,7 @@ func main() {
         case "fetch": record, err = service.Snapshots.FetchMetadataRecord(ctx, *snapshotID)
         case "get": record, err = service.Snapshots.GetMetadataRecord(ctx, *snapshotID)
         case "set": record, err = service.Snapshots.SetMetadataRecord(ctx, *snapshotID, values,
-            snapshots.WithRecordMetadataHeader("X-Client-Request-Id", "metadata-snapshot"))
+            request.Header("X-Client-Request-Id", "metadata-snapshot"))
         default:
             var deleted *snapshots.MetadataRecordDeletion
             deleted, err = service.Snapshots.DeleteMetadataRecord(ctx, *snapshotID, keys)

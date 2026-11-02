@@ -9,6 +9,12 @@ import (
 
 // VolumeBackupListOpts owns backup list policy; omission retains source defaults.
 type VolumeBackupListOpts = cloudsnapshot.ListOptions
+
+// VolumeBackupListOption is one option of ListVolumeBackups: the
+// WithVolumeBackupList* functions, request.Custom over *VolumeBackupListOpts,
+// request.Paginated, request.MaxItems, request.Microversion or
+// request.Headers (replaces the headers). Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
 type VolumeBackupListOption = cloudsnapshot.ListOption
 
 func WithVolumeBackupListOptions(value VolumeBackupListOpts) VolumeBackupListOption {
@@ -21,22 +27,6 @@ func WithVolumeBackupListFilters(value json.RawMessage) VolumeBackupListOption {
 
 func WithVolumeBackupListDetailed(value bool) VolumeBackupListOption {
 	return cloudsnapshot.WithListDetailed(value)
-}
-
-func WithVolumeBackupListPagination(value bool) VolumeBackupListOption {
-	return cloudsnapshot.WithListPagination(value)
-}
-
-func WithVolumeBackupListMaxItems(value int) VolumeBackupListOption {
-	return cloudsnapshot.WithListMaxItems(value)
-}
-
-func WithVolumeBackupListMicroversion(value string) VolumeBackupListOption {
-	return cloudsnapshot.WithListMicroversion(value)
-}
-
-func WithVolumeBackupListHeaders(value map[string]string) VolumeBackupListOption {
-	return cloudsnapshot.WithListHeaders(value)
 }
 
 func WithVolumeBackupListExpression(value string) VolumeBackupListOption {

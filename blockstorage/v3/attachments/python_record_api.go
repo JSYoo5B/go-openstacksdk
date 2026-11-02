@@ -5,9 +5,9 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"iter"
 	"net/http"
-	"slices"
 	"strings"
 	"unicode"
 	"unicode/utf8"
@@ -174,7 +174,7 @@ func (a *API) CreateRecord(ctx context.Context, volumeID string, options ...Reco
 	if err != nil {
 		return nil, pythonAttachmentWrap(ctx, op, err)
 	}
-	policy, err := pythonAttachmentApply(ctx, p.guard, RecordCreateOpts{}, pythonAttachmentCopyCreate, slices.Clone(options))
+	policy, err := pythonAttachmentApply(ctx, p.guard, RecordCreateOpts{}, pythonAttachmentCopyCreate, calls.Translate(options, recordCreateCalls))
 	if err == nil {
 		err = pythonAttachmentVolumeID(volumeID)
 	}
@@ -238,7 +238,7 @@ func (a *API) CreateRecord(ctx context.Context, volumeID string, options ...Reco
 // ListRecords uses the Source summary /attachments route and follows
 // attachments_links, HTTP links and bounded marker fallback lazily.
 func (a *API) ListRecords(ctx context.Context, options ...RecordListOption) iter.Seq2[*AttachmentRecord, error] {
-	owned := slices.Clone(options)
+	owned := calls.Translate(options, recordListCalls)
 	return func(yield func(*AttachmentRecord, error) bool) {
 		const op = "ListRecords"
 		p, err := a.pythonAttachmentCapture(ctx)

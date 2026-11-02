@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"io"
 	"net/http"
 	"strings"
@@ -173,7 +174,7 @@ func TestPythonCinderQuotaClassPreflightIDsAndBoundConstructorControls(t *testin
 			t.Fatal(id, row, err)
 		}
 	}
-	for _, opts := range [][]quotasets.QuotaClassUpdateOption{{nil}, {quotasets.WithQuotaClassUpdateAttribute("id", nil)}, {quotasets.WithQuotaClassUpdateAttribute("base_path", "/foreign")}, {quotasets.WithQuotaClassUpdateHeaders(map[string]string{"X-Auth-Token": "foreign"})}} {
+	for _, opts := range [][]quotasets.QuotaClassUpdateOption{{nil}, {quotasets.WithQuotaClassUpdateAttribute("id", nil)}, {quotasets.WithQuotaClassUpdateAttribute("base_path", "/foreign")}, {request.Headers(map[string]string{"X-Auth-Token": "foreign"})}} {
 		if row, err := api.UpdateQuotaClassRecord(context.Background(), "default", opts...); row != nil || !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(row, err)
 		}
@@ -203,9 +204,9 @@ func TestPythonCinderQuotaClassCallbacksSourceAndCancellationStayTerminal(t *tes
 			later := 0
 			var err error
 			if method == http.MethodGet {
-				_, err = api.GetQuotaClassRecord(context.Background(), func(*quotasets.QuotaClassGetOpts) error { client.ResourceBase += "changed/"; return nil }, func(*quotasets.QuotaClassGetOpts) error { later++; return nil })
+				_, err = api.GetQuotaClassRecord(context.Background(), request.Custom(func(*quotasets.QuotaClassGetOpts) error { client.ResourceBase += "changed/"; return nil }), request.Custom(func(*quotasets.QuotaClassGetOpts) error { later++; return nil }))
 			} else {
-				_, err = api.UpdateQuotaClassRecord(context.Background(), "default", func(*quotasets.QuotaClassUpdateOpts) error { client.ResourceBase += "changed/"; return nil }, func(*quotasets.QuotaClassUpdateOpts) error { later++; return nil })
+				_, err = api.UpdateQuotaClassRecord(context.Background(), "default", request.Custom(func(*quotasets.QuotaClassUpdateOpts) error { client.ResourceBase += "changed/"; return nil }), request.Custom(func(*quotasets.QuotaClassUpdateOpts) error { later++; return nil }))
 			}
 			client.ResourceBase = original
 			if !errors.Is(err, resource.ErrInvalidOption) || *calls != 0 || later != 0 {

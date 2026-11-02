@@ -5,6 +5,8 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"maps"
 	"net/url"
 	"strconv"
@@ -16,13 +18,13 @@ import (
 
 // RecordReadOpts applies owned headers while discovery and routing remain SDK-owned.
 type RecordReadOpts struct{ Headers map[string]string }
-type RecordReadOption func(*RecordReadOpts) error
+
+// RecordReadOption is one option of GetRecord: request.Headers (replaces the
+// headers) or request.Custom over *RecordReadOpts. Other shared calls fail
+// with resource.ErrInvalidOption before HTTP.
+type RecordReadOption = request.GetCall
 
 func copyRecordRead(v RecordReadOpts) RecordReadOpts { v.Headers = maps.Clone(v.Headers); return v }
-func WithRecordReadHeaders(values map[string]string) RecordReadOption {
-	owned := maps.Clone(values)
-	return func(c *RecordReadOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
 
 // RecordCreateOpts preserves absent versus explicit JSON values. Extensions are
 // an explicit Go escape hatch; ordinary Fields retain Source declared-attribute policy.
@@ -32,7 +34,15 @@ type RecordCreateOpts struct {
 	Extensions              map[string]json.RawMessage
 	SuppressLegacySnapshots bool
 }
-type RecordCreateOption func(*RecordCreateOpts) error
+
+// RecordCreateOption is one option of CreateRecord: WithRecordCreateOpts,
+// WithRecordCreateVolumeID, WithRecordCreateName, WithRecordCreateNoSnapshots,
+// WithRecordCreateExtension, WithRecordCreateSuppressLegacySnapshots,
+// request.Field (a declared Source attribute; unknown keys are discarded with
+// any marshal error), request.Headers (replaces the headers) or
+// request.Custom over *RecordCreateOpts. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type RecordCreateOption = request.WriteCall
 
 func copyRecordCreate(v RecordCreateOpts) RecordCreateOpts {
 	v.Headers = maps.Clone(v.Headers)
@@ -42,45 +52,44 @@ func copyRecordCreate(v RecordCreateOpts) RecordCreateOpts {
 }
 func WithRecordCreateOpts(value RecordCreateOpts) RecordCreateOption {
 	owned := copyRecordCreate(value)
-	return func(c *RecordCreateOpts) error { *c = copyRecordCreate(owned); return nil }
+	return request.Custom(func(c *RecordCreateOpts) error { *c = copyRecordCreate(owned); return nil })
 }
-func WithRecordCreateField(key string, value any) RecordCreateOption {
+
+// setRecordCreateField stores a declared attribute; unknown keys are
+// discarded together with their marshal error.
+func setRecordCreateField(c *RecordCreateOpts, key string, raw json.RawMessage, err error) error {
 	if !recordKnown(key) {
-		return func(*RecordCreateOpts) error { return nil }
-	}
-	raw, err := json.Marshal(value)
-	owned := bytes.Clone(raw)
-	return func(c *RecordCreateOpts) error {
-		if err != nil {
-			return err
-		}
-		if c.Fields == nil {
-			c.Fields = make(map[string]json.RawMessage)
-		}
-		c.Fields[key] = bytes.Clone(owned)
 		return nil
 	}
+	if err != nil {
+		return err
+	}
+	if c.Fields == nil {
+		c.Fields = make(map[string]json.RawMessage)
+	}
+	c.Fields[key] = bytes.Clone(raw)
+	return nil
+}
+func recordCreateField(key string, value any) RecordCreateOption {
+	raw, err := json.Marshal(value)
+	return request.Custom(func(c *RecordCreateOpts) error { return setRecordCreateField(c, key, raw, err) })
 }
 func WithRecordCreateVolumeID(value string) RecordCreateOption {
-	return WithRecordCreateField("volume_id", value)
+	return recordCreateField("volume_id", value)
 }
 func WithRecordCreateName(value string) RecordCreateOption {
-	return WithRecordCreateField("name", value)
+	return recordCreateField("name", value)
 }
 func WithRecordCreateNoSnapshots(value bool) RecordCreateOption {
-	return WithRecordCreateField("no_snapshots", value)
-}
-func WithRecordCreateHeaders(values map[string]string) RecordCreateOption {
-	owned := maps.Clone(values)
-	return func(c *RecordCreateOpts) error { c.Headers = maps.Clone(owned); return nil }
+	return recordCreateField("no_snapshots", value)
 }
 
 // WithRecordCreateExtension sends an otherwise undeclared body key. It cannot
-// override a declared field: use WithRecordCreateField for that field.
+// override a declared field: use request.Field for that field.
 func WithRecordCreateExtension(key string, value any) RecordCreateOption {
 	raw, err := json.Marshal(value)
 	owned := bytes.Clone(raw)
-	return func(c *RecordCreateOpts) error {
+	return request.Custom(func(c *RecordCreateOpts) error {
 		if err != nil {
 			return err
 		}
@@ -92,21 +101,26 @@ func WithRecordCreateExtension(key string, value any) RecordCreateOption {
 		}
 		c.Extensions[key] = bytes.Clone(owned)
 		return nil
-	}
+	})
 }
 
 // WithRecordCreateSuppressLegacySnapshots opts into omitting no_snapshots when
 // 3.55 is unavailable. The default preserves the pinned proxy's actual body:
 // its cleanup only examines params, although proxy attrs live on the Resource.
 func WithRecordCreateSuppressLegacySnapshots(value bool) RecordCreateOption {
-	return func(c *RecordCreateOpts) error { c.SuppressLegacySnapshots = value; return nil }
+	return request.Custom(func(c *RecordCreateOpts) error { c.SuppressLegacySnapshots = value; return nil })
 }
 
 type RecordDeleteOpts struct {
 	Headers       map[string]string
 	IgnoreMissing *bool
 }
-type RecordDeleteOption func(*RecordDeleteOpts) error
+
+// RecordDeleteOption is one option of DeleteRecord: request.IgnoreMissing,
+// request.Headers (replaces the headers) or request.Custom over
+// *RecordDeleteOpts. Other shared calls fail with resource.ErrInvalidOption
+// before HTTP.
+type RecordDeleteOption = request.DeleteCall
 
 func copyRecordDelete(v RecordDeleteOpts) RecordDeleteOpts {
 	v.Headers = maps.Clone(v.Headers)
@@ -116,19 +130,17 @@ func copyRecordDelete(v RecordDeleteOpts) RecordDeleteOpts {
 	}
 	return v
 }
-func WithRecordDeleteIgnoreMissing(value bool) RecordDeleteOption {
-	return func(c *RecordDeleteOpts) error { x := value; c.IgnoreMissing = &x; return nil }
-}
-func WithRecordDeleteHeaders(values map[string]string) RecordDeleteOption {
-	owned := maps.Clone(values)
-	return func(c *RecordDeleteOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
 
 type RecordAcceptOpts struct {
 	Headers map[string]string
 	AuthKey json.RawMessage
 }
-type RecordAcceptOption func(*RecordAcceptOpts) error
+
+// RecordAcceptOption is one option of AcceptRecord: WithRecordAcceptAuthKey,
+// request.Headers (replaces the headers) or request.Custom over
+// *RecordAcceptOpts. Other shared calls fail with resource.ErrInvalidOption
+// before HTTP.
+type RecordAcceptOption = request.WriteCall
 
 func copyRecordAccept(v RecordAcceptOpts) RecordAcceptOpts {
 	v.Headers = maps.Clone(v.Headers)
@@ -138,21 +150,21 @@ func copyRecordAccept(v RecordAcceptOpts) RecordAcceptOpts {
 func WithRecordAcceptAuthKey(value any) RecordAcceptOption {
 	raw, err := json.Marshal(value)
 	owned := bytes.Clone(raw)
-	return func(c *RecordAcceptOpts) error {
+	return request.Custom(func(c *RecordAcceptOpts) error {
 		if err != nil {
 			return err
 		}
 		c.AuthKey = bytes.Clone(owned)
 		return nil
-	}
-}
-func WithRecordAcceptHeaders(values map[string]string) RecordAcceptOption {
-	owned := maps.Clone(values)
-	return func(c *RecordAcceptOpts) error { c.Headers = maps.Clone(owned); return nil }
+	})
 }
 
 type RecordFindOpts struct{ IgnoreMissing *bool }
-type RecordFindOption func(*RecordFindOpts) error
+
+// RecordFindOption is one option of FindRecord: request.IgnoreMissing or
+// request.Custom over *RecordFindOpts. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type RecordFindOption = request.FindCall
 
 func copyRecordFind(v RecordFindOpts) RecordFindOpts {
 	if v.IgnoreMissing != nil {
@@ -160,9 +172,6 @@ func copyRecordFind(v RecordFindOpts) RecordFindOpts {
 		v.IgnoreMissing = &x
 	}
 	return v
-}
-func WithRecordFindIgnoreMissing(value bool) RecordFindOption {
-	return func(c *RecordFindOpts) error { x := value; c.IgnoreMissing = &x; return nil }
 }
 
 // RecordListOpts defaults Details and Paginated to true. Only limit/marker are
@@ -180,7 +189,16 @@ type RecordListOpts struct {
 	MaxItems    int
 	Paginated   *bool
 }
-type RecordListOption func(*RecordListOpts) error
+
+// RecordListOption is one option of ListRecords: WithRecordListOpts,
+// WithRecordListDetails, WithRecordListAllProjects,
+// WithRecordListServerQuery, request.Query (a declared attribute, limit or
+// marker; the value is sent as JSON and other keys are discarded),
+// request.Limit, request.Marker, request.MaxItems, request.Paginated,
+// request.Headers (replaces the headers) or request.Custom over
+// *RecordListOpts. Other shared calls fail with resource.ErrInvalidOption
+// before HTTP.
+type RecordListOption = request.ListCall
 
 func copyRecordList(v RecordListOpts) RecordListOpts {
 	v.Headers = maps.Clone(v.Headers)
@@ -209,53 +227,20 @@ func recordQueryCopy(values url.Values) url.Values {
 }
 func WithRecordListOpts(value RecordListOpts) RecordListOption {
 	owned := copyRecordList(value)
-	return func(c *RecordListOpts) error { *c = copyRecordList(owned); return nil }
-}
-func WithRecordListQuery(key string, value any) RecordListOption {
-	if !recordKnown(key) && key != "limit" && key != "marker" {
-		return func(*RecordListOpts) error { return nil }
-	}
-	raw, err := json.Marshal(value)
-	owned := bytes.Clone(raw)
-	return func(c *RecordListOpts) error {
-		if err != nil {
-			return err
-		}
-		if c.Query == nil {
-			c.Query = make(map[string]json.RawMessage)
-		}
-		c.Query[key] = bytes.Clone(owned)
-		return nil
-	}
+	return request.Custom(func(c *RecordListOpts) error { *c = copyRecordList(owned); return nil })
 }
 func WithRecordListDetails(value bool) RecordListOption {
-	return func(c *RecordListOpts) error { x := value; c.Details = &x; return nil }
+	return request.Custom(func(c *RecordListOpts) error { x := value; c.Details = &x; return nil })
 }
 func WithRecordListAllProjects(value bool) RecordListOption {
-	return func(c *RecordListOpts) error { c.AllProjects = value; return nil }
-}
-func WithRecordListLimit(value int) RecordListOption {
-	return func(c *RecordListOpts) error { x := value; c.Limit = &x; return nil }
-}
-func WithRecordListMarker(value string) RecordListOption {
-	return func(c *RecordListOpts) error { c.Marker = value; return nil }
-}
-func WithRecordListMaxItems(value int) RecordListOption {
-	return func(c *RecordListOpts) error { c.MaxItems = value; return nil }
-}
-func WithRecordListPaginated(value bool) RecordListOption {
-	return func(c *RecordListOpts) error { x := value; c.Paginated = &x; return nil }
-}
-func WithRecordListHeaders(values map[string]string) RecordListOption {
-	owned := maps.Clone(values)
-	return func(c *RecordListOpts) error { c.Headers = maps.Clone(owned); return nil }
+	return request.Custom(func(c *RecordListOpts) error { c.AllProjects = value; return nil })
 }
 
 // WithRecordListServerQuery is an explicit Go extension for an otherwise
 // undeclared server filter, such as all_tenants. Pagination keeps owned helpers.
 func WithRecordListServerQuery(key string, values ...string) RecordListOption {
 	owned := append([]string(nil), values...)
-	return func(c *RecordListOpts) error {
+	return request.Custom(func(c *RecordListOpts) error {
 		if key == "" || !utf8.ValidString(key) || key == "limit" || key == "marker" {
 			return recordInvalid("server extension query must have an undeclared UTF-8 key")
 		}
@@ -264,8 +249,46 @@ func WithRecordListServerQuery(key string, values ...string) RecordListOption {
 		}
 		c.ServerQuery[key] = append([]string(nil), owned...)
 		return nil
-	}
+	})
 }
+
+var (
+	recordReadCalls   = calls.Spec[RecordReadOpts]{Headers: calls.Value(func(c *RecordReadOpts) *map[string]string { return &c.Headers })}
+	recordCreateCalls = calls.Spec[RecordCreateOpts]{
+		Headers: calls.Value(func(c *RecordCreateOpts) *map[string]string { return &c.Headers }),
+		Field: func(c *RecordCreateOpts, entry request.CallEntry) error {
+			return setRecordCreateField(c, entry.Key, entry.JSON, entry.JSONErr)
+		},
+	}
+	recordDeleteCalls = calls.Spec[RecordDeleteOpts]{
+		Headers:       calls.Value(func(c *RecordDeleteOpts) *map[string]string { return &c.Headers }),
+		IgnoreMissing: calls.Pointer(func(c *RecordDeleteOpts) **bool { return &c.IgnoreMissing }),
+	}
+	recordAcceptCalls = calls.Spec[RecordAcceptOpts]{Headers: calls.Value(func(c *RecordAcceptOpts) *map[string]string { return &c.Headers })}
+	recordFindCalls   = calls.Spec[RecordFindOpts]{IgnoreMissing: calls.Pointer(func(c *RecordFindOpts) **bool { return &c.IgnoreMissing })}
+	recordListCalls   = calls.Spec[RecordListOpts]{
+		Headers: calls.Value(func(c *RecordListOpts) *map[string]string { return &c.Headers }),
+		Query: func(c *RecordListOpts, entry request.CallEntry) error {
+			if !recordKnown(entry.Key) && entry.Key != "limit" && entry.Key != "marker" {
+				return nil
+			}
+			if entry.JSONErr != nil {
+				return entry.JSONErr
+			}
+			if c.Query == nil {
+				c.Query = make(map[string]json.RawMessage)
+			}
+			c.Query[entry.Key] = bytes.Clone(entry.JSON)
+			return nil
+		},
+		Paging: calls.Paging[RecordListOpts]{
+			Limit:     calls.Pointer(func(c *RecordListOpts) **int { return &c.Limit }),
+			Marker:    calls.Value(func(c *RecordListOpts) *string { return &c.Marker }),
+			MaxItems:  calls.Value(func(c *RecordListOpts) *int { return &c.MaxItems }),
+			Paginated: calls.Pointer(func(c *RecordListOpts) **bool { return &c.Paginated }),
+		},
+	}
+)
 
 func applyRecordOptions[T any, O ~func(*T) error](ctx context.Context, guard func(context.Context) error, value T, copyValue func(T) T, options []O) (T, error) {
 	for _, apply := range options {

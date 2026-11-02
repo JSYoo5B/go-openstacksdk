@@ -13,9 +13,9 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.API.CreateRecord`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordCreateField`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordCreateHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordCreateMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - POST groups uses known raw dirty attrs in group envelope with null/false/zero/empty and unknown discard before marshalling; response retains request known seeds, server overrides and raw proof without request-side list coercion.
   Tests: `blockstorage/v3/groups/python_records_test.go:TestPythonCinderGroupCreatePartialNullUnknownAndOptionSnapshots`, `blockstorage/v3/groups/python_records_test.go:TestPythonCinderGroupOptionsPreflightUnknownDiscardAndStickySource`.
@@ -42,8 +42,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordSourceSourceGroupID`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordSourceName`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordSourceDescription`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordSourceHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordSourceMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - POST groups/action create-from-src requires both nullable source IDs and defaults name/description to null. Fresh Source response has no request seed, while supplied fields and options own their bytes.
   Tests: `blockstorage/v3/groups/python_records_test.go:TestPythonCinderGroupCreateFromSourceRequiredNullableIDsAndFreshResponse`.
@@ -63,9 +63,9 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.API.DeleteRecord`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordDeleteVolumes`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordDeleteIgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordDeleteHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordDeleteMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - Delete uses POST member action delete/delete-volumes:false, not DELETE. Explicit true and strict ignore_missing:false are owned; only clean404 is suppressed and successful body is not decoded.
   Tests: `blockstorage/v3/groups/python_records_test.go:TestPythonCinderGroupDeleteActionDefaultsStrictMissingAndStatuses`.
@@ -88,8 +88,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.API.GetRecord`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordGetListVolume`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordGetField`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordGetMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordGetHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 
 - Literal ID GET preserves omission versus explicit list_volume=False/True and explicit selected microversion above3.38; known untyped/list Source descriptors, null defaults and raw unknown/large-number proof are independent.
   Tests: `blockstorage/v3/groups/python_records_test.go:TestPythonCinderGroupGetProjectionListVolumeAndOwnedProof`.
@@ -118,13 +118,13 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.API.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordListDetails`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordListQuery`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordListMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordListPaginated`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordListMaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
 
 - Lazy default details route, canonical all_projects wire alias precedence, discarded unknown/list_volume kwargs, Source known Body local filters and descriptor/default conversion are library owned. Raw cap/hint stops before unconsumed rows or links.
   Tests: `blockstorage/v3/groups/python_records_test.go:TestPythonCinderGroupListDeclaredAliasesLocalFiltersAndRawCap`, `blockstorage/v3/groups/python_records_test.go:TestPythonCinderGroupListLocalDictionaryFailuresKeepActualPage`.
@@ -153,9 +153,9 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.API.UpdateRecord`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordUpdateField`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordUpdateHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordUpdateMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - Partial PUT groups/id sends known dirty attrs. Empty/unknown-only/ID-only update skips mutation and discovery and returns status0 local seed without synthetic HTTP proof; response known values override supplied fields.
   Tests: `blockstorage/v3/groups/python_records_test.go:TestPythonCinderGroupUpdateDirtyNoopAndResponseMerge`.
@@ -178,10 +178,10 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordFindOpts`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordFindDetails`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordFindMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordFindHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 
 - Literal escaped member GET runs before list and returns successful Source untyped/null/numeric id/name without synthetic string validation; known descriptors and unknown raw proof are the existing Group record profile.
   Tests: `blockstorage/v3/groups/python_find_test.go:TestPythonCinderGroupFindRecordDirectUntypedProjectionAndLiteralIdentity`.
@@ -279,6 +279,7 @@ import (
 
     sdk "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups"
+    "github.com/JSYoo5B/go-openstacksdk/request"
     "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -319,9 +320,9 @@ func main() {
         value, err = api.GetRecord(ctx, *id, groups.WithRecordGetListVolume(true))
     case "create":
         value, err = api.CreateRecord(ctx,
-            groups.WithRecordCreateField("group_type", *groupType),
-            groups.WithRecordCreateField("volume_types", strings.Split(*volumeTypes, ",")),
-            groups.WithRecordCreateField("name", *name))
+            request.Field("group_type", *groupType),
+            request.Field("volume_types", strings.Split(*volumeTypes, ",")),
+            request.Field("name", *name))
     case "clone":
         var snapshot, source any
         if *sourceSnapshot != "" { snapshot = *sourceSnapshot }
@@ -331,9 +332,9 @@ func main() {
             groups.WithRecordSourceSourceGroupID(source),
             groups.WithRecordSourceName(*name))
     case "update":
-        value, err = api.UpdateRecord(ctx, *id, groups.WithRecordUpdateField("name", *name))
+        value, err = api.UpdateRecord(ctx, *id, request.Field("name", *name))
     case "delete":
-        err = api.DeleteRecord(ctx, *id, groups.WithRecordDeleteIgnoreMissing(false))
+        err = api.DeleteRecord(ctx, *id, request.IgnoreMissing(false))
         if err != nil { log.Fatal(err) }
         return
     default:

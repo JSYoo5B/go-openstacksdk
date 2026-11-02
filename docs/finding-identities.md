@@ -116,12 +116,12 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindDetails`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindAllProjects`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.FindRecord`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordFindDetails`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordFindAllProjects`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordFindOpts`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordFindQuery`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordFindHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordFindLocation`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordFindMaxItems`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordFindPaginated`

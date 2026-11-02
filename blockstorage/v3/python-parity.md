@@ -126,8 +126,8 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.InitializeWithConnector`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithConnectorHeader`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithConnectorHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 
 - The owned direct-ID action sends the exact Source envelope and arbitrary nested connector JSON, including wwnns arrays/nqn/extensions and nil/null/false/zero/empty values. Source is captured before custom MarshalJSON and JSON is snapshotted before options, so callbacks cannot change transmitted caller data; headers are concrete guarded inputs and native typed connector APIs remain unchanged.
   Tests: `blockstorage/v3/volumes/python_connector_test.go:TestPythonVolumeConnectorNestedInputAndOptionSnapshots`, `blockstorage/v3/volumes/python_connector_test.go:TestPythonVolumeConnectorNullEmptyAndRawConnectionInfo`.
@@ -149,8 +149,8 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.TerminateWithConnector`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithConnectorHeader`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithConnectorHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 
 - The owned direct-ID action sends the exact Source envelope and arbitrary nested connector JSON, including wwnns arrays/nqn/extensions and nil/null/false/zero/empty values. Source is captured before custom MarshalJSON and JSON is snapshotted before options, so callbacks cannot change transmitted caller data; headers are concrete guarded inputs and native typed connector APIs remain unchanged.
   Tests: `blockstorage/v3/volumes/python_connector_test.go:TestPythonVolumeConnectorNestedInputAndOptionSnapshots`, `blockstorage/v3/volumes/python_connector_test.go:TestPythonVolumeConnectorNullEmptyAndRawConnectionInfo`.
@@ -579,7 +579,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.API.Get`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.API.GetRecord`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithRecordReadHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 
 - Transfers.Get sends GET os-volume-transfer/{id} and decodes name, volume_id and created_at.
   Tests: `blockstorage/v3/transfers/python_parity_test.go:TestPythonTransferGetAcceptDeleteUseLegacyRoute`.
@@ -641,7 +641,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.ID`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithMissingError`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.API.DeleteRecord`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithRecordDeleteIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 
 - Remove sends DELETE os-volume-transfer/{id}, ignores 404 by default and reports NotFound with WithMissingError.
   Tests: `blockstorage/v3/transfers/python_parity_test.go:TestPythonTransferGetAcceptDeleteUseLegacyRoute`.

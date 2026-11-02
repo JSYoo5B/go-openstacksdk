@@ -16,9 +16,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.ProjectQuotaScope.Usage`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.ProjectQuotaScope.GetRecord`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaReadOpts`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaReadQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaUsage`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaReadMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaReadLocation`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaReadBasePath`
 
@@ -93,7 +93,7 @@ func main() {
     if err != nil { log.Fatal(err) }
     quota, err := scope.GetRecord(ctx,
         quotasets.WithQuotaUsage(true),
-        quotasets.WithQuotaReadQuery("fields", []string{"volumes", "gigabytes"}),
+        request.Query("fields", []string{"volumes", "gigabytes"}),
     )
     if err != nil { log.Fatal(err) }
     fmt.Println(string(quota.Resource.Body["volumes"]))

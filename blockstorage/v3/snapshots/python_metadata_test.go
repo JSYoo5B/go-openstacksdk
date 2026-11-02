@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -95,17 +96,17 @@ func TestPythonSnapshotMetadataRecordSetCachesRequestDeltaAndOwnsInputs(t *testi
 	})
 	var retained *snapshots.RecordMetadataOpts
 	value, err := api.SetMetadataRecord(context.Background(), "r1", input, snapshots.WithRecordMetadataSeed(seed), option,
-		func(cfg *snapshots.RecordMetadataOpts) error {
+		request.Custom(func(cfg *snapshots.RecordMetadataOpts) error {
 			input["nested"].(map[string]any)["false"] = true
 			cfg.Headers["X-Owned"] = "first"
 			retained = cfg
 			return nil
-		},
-		func(*snapshots.RecordMetadataOpts) error {
+		}),
+		request.Custom(func(*snapshots.RecordMetadataOpts) error {
 			retained.Headers["X-Owned"] = "changed"
 			seed.Resource.Body["name"] = json.RawMessage(`"changed"`)
 			return nil
-		})
+		}))
 	expected, _ := json.Marshal(map[string]any{"metadata": json.RawMessage(raw)})
 	if err != nil || calls.Len() != 1 || pythonSnapshotCalls(calls)[0].method != "POST" || pythonSnapshotCalls(calls)[0].path != pythonSnapshotBase+"/r1/metadata" || pythonSnapshotCalls(calls)[0].body != string(expected) {
 		t.Fatal(value, err, pythonSnapshotCalls(calls))
@@ -207,13 +208,13 @@ func TestPythonSnapshotMetadataRecordSourceCaptureCallbacksAndPreflight(t *testi
 		case "cancel marshal":
 			input["k"] = metadataRecordMarshal(func() ([]byte, error) { cancel(cause); return nil, cause })
 		case "source option":
-			options = append(options, func(*snapshots.RecordMetadataOpts) error { api.RawClient().Microversion = "changed"; return cause })
+			options = append(options, request.Custom(func(*snapshots.RecordMetadataOpts) error { api.RawClient().Microversion = "changed"; return cause }))
 		case "cancel option":
-			options = append(options, func(*snapshots.RecordMetadataOpts) error { cancel(cause); return cause })
+			options = append(options, request.Custom(func(*snapshots.RecordMetadataOpts) error { cancel(cause); return cause }))
 		case "nil option":
 			options = append(options, nil)
 		case "auth header":
-			options = append(options, snapshots.WithRecordMetadataHeader("X-Auth-Token", "caller"))
+			options = append(options, request.Header("X-Auth-Token", "caller"))
 		case "bad id":
 			id = ".."
 		}
@@ -336,7 +337,7 @@ func TestPythonSnapshotMetadataRecordRetrySnapshotAndNativeCauses(t *testing.T) 
 		}
 	}
 	api, calls := recordMetadataFixture(t, func(*http.Request) *http.Response { return pythonSnapshotWire(204, "") })
-	if _, err := api.DeleteMetadataRecord(context.Background(), "r1", []string{}, snapshots.WithRecordMetadataHeader("X-Auth-Token", "bad")); !errors.Is(err, resource.ErrInvalidOption) || calls.Len() != 0 {
+	if _, err := api.DeleteMetadataRecord(context.Background(), "r1", []string{}, request.Header("X-Auth-Token", "bad")); !errors.Is(err, resource.ErrInvalidOption) || calls.Len() != 0 {
 		t.Fatal("no-op bypassed header validation", err, pythonSnapshotCalls(calls))
 	}
 }
@@ -374,7 +375,7 @@ func TestPythonSnapshotMetadataRecordSelectedMicroversionRetryAndSeedPreflight(t
 	}
 	keys := []string{"original"}
 	api, calls = recordMetadataFixture(t, func(*http.Request) *http.Response { return pythonSnapshotWire(204, "") })
-	deleted, err := api.DeleteMetadataRecord(context.Background(), "r1", keys, func(*snapshots.RecordMetadataOpts) error { keys[0] = "mutated"; return nil })
+	deleted, err := api.DeleteMetadataRecord(context.Background(), "r1", keys, request.Custom(func(*snapshots.RecordMetadataOpts) error { keys[0] = "mutated"; return nil }))
 	if err != nil || calls.Len() != 1 || len(deleted.Responses) != 1 || *deleted.Responses[0].Key != "original" || !strings.HasSuffix(pythonSnapshotCalls(calls)[0].path, "/original") {
 		t.Fatal(deleted, err, pythonSnapshotCalls(calls))
 	}

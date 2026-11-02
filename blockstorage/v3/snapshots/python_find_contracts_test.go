@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -14,6 +13,8 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -130,7 +131,7 @@ func TestPythonSnapshotFindRecordMissingAndCleanNativeRetry(t *testing.T) {
 	if err != nil || v != nil || calls.Len() != 2 {
 		t.Fatal(v, err, pythonSnapshotCalls(calls))
 	}
-	_, err = api.FindRecord(context.Background(), "missing", snapshots.WithRecordFindIgnoreMissing(false))
+	_, err = api.FindRecord(context.Background(), "missing", request.IgnoreMissing(false))
 	if !errors.Is(err, resource.ErrNotFound) || calls.Len() != 4 {
 		t.Fatal(err, pythonSnapshotCalls(calls))
 	}
@@ -192,7 +193,7 @@ func TestPythonSnapshotFindRecordFilterDictionaryAndExplicitNullName(t *testing.
 		}
 		return pythonSnapshotWire(200, `{"snapshots":[{"id":"daily","name":"other"}]}`)
 	})
-	v, err := api.FindRecord(context.Background(), "daily", snapshots.WithRecordFindQuery("name", nil))
+	v, err := api.FindRecord(context.Background(), "daily", request.Query("name", nil))
 	q, _ := url.ParseQuery(pythonSnapshotCalls(calls)[1].query)
 	if err != nil || v == nil || q.Has("name") {
 		t.Fatal(v, err, q)
@@ -227,7 +228,7 @@ func TestPythonSnapshotFindRecordSinglePageMarkerFallbackAndOffsetPaging(t *test
 		}
 		return pythonSnapshotWire(200, `{"snapshots":[{"id":"a","name":"other"}],"next":"?offset=2&limit=2"}`)
 	})
-	v, err = api.FindRecord(context.Background(), "daily", snapshots.WithRecordFindQuery("offset", 0))
+	v, err = api.FindRecord(context.Background(), "daily", request.Query("offset", 0))
 	if err != nil || v == nil || calls.Len() != 3 {
 		t.Fatal(v, err, pythonSnapshotCalls(calls))
 	}
@@ -340,7 +341,7 @@ func TestPythonSnapshotFindRecordDiscoveryAndProtocolHeaderProtection(t *testing
 
 func TestPythonSnapshotFindRecordPreflightCancellationAndRetainedOptions(t *testing.T) {
 	api, calls := pythonSnapshotAPI(t, "3.65", func(*http.Request) *http.Response { return pythonSnapshotWire(200, `{"snapshot":{"id":"a"}}`) })
-	for _, opts := range [][]snapshots.RecordFindOption{{nil}, {snapshots.WithRecordFindLimit(-1)}, {snapshots.WithRecordFindMaxItems(-1)}, {snapshots.WithRecordFindQuery("id", "different")}, {snapshots.WithRecordFindHeaders(map[string]string{"X-Auth-Token": "bad"})}, {snapshots.WithRecordFindOpts(snapshots.RecordFindOpts{Query: map[string]json.RawMessage{"metadata": json.RawMessage(`{bad`)}})}} {
+	for _, opts := range [][]snapshots.RecordFindOption{{nil}, {snapshots.WithRecordFindLimit(-1)}, {snapshots.WithRecordFindMaxItems(-1)}, {request.Query("id", "different")}, {request.Headers(map[string]string{"X-Auth-Token": "bad"})}, {snapshots.WithRecordFindOpts(snapshots.RecordFindOpts{Query: map[string]json.RawMessage{"metadata": json.RawMessage(`{bad`)}})}} {
 		_, err := api.FindRecord(context.Background(), "daily", opts...)
 		if err == nil || calls.Len() != 0 {
 			t.Fatal(err, pythonSnapshotCalls(calls))
@@ -348,16 +349,16 @@ func TestPythonSnapshotFindRecordPreflightCancellationAndRetainedOptions(t *test
 	}
 	ctx, cancel := context.WithCancelCause(context.Background())
 	cause, callback := errors.New("custom cancel"), errors.New("callback failure")
-	_, err := api.FindRecord(ctx, "daily", func(*snapshots.RecordFindOpts) error { cancel(cause); return callback })
+	_, err := api.FindRecord(ctx, "daily", request.Custom(func(*snapshots.RecordFindOpts) error { cancel(cause); return callback }))
 	if !errors.Is(err, context.Canceled) || !errors.Is(err, cause) || !errors.Is(err, callback) || calls.Len() != 0 {
 		t.Fatal(err, pythonSnapshotCalls(calls))
 	}
 	var retained *snapshots.RecordFindOpts
-	_, err = api.FindRecord(context.Background(), "a", func(c *snapshots.RecordFindOpts) error {
+	_, err = api.FindRecord(context.Background(), "a", request.Custom(func(c *snapshots.RecordFindOpts) error {
 		retained = c
 		c.Headers = map[string]string{"X-Custom": "original"}
 		return nil
-	}, func(*snapshots.RecordFindOpts) error { retained.Headers["X-Auth-Token"] = "later mutation"; return nil })
+	}), request.Custom(func(*snapshots.RecordFindOpts) error { retained.Headers["X-Auth-Token"] = "later mutation"; return nil }))
 	if err != nil || calls.Len() != 1 {
 		t.Fatal(err, pythonSnapshotCalls(calls))
 	}
@@ -371,7 +372,7 @@ func TestPythonSnapshotFindRecordConcurrentOptionReuse(t *testing.T) {
 		}
 		return pythonSnapshotWire(200, `{"snapshot":{"id":"a"}}`), nil
 	})
-	opts := snapshots.WithRecordFindHeaders(map[string]string{"X-Custom": "owned"})
+	opts := request.Headers(map[string]string{"X-Custom": "owned"})
 	var wg sync.WaitGroup
 	for i := 0; i < 8; i++ {
 		wg.Add(1)

@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"maps"
 	"net/http"
 
@@ -32,12 +33,14 @@ type Record struct {
 	StatusCode     int
 }
 type ReadOpts struct{ Headers map[string]string }
-type ReadOption func(*ReadOpts) error
 
-func WithHeaders(v map[string]string) ReadOption {
-	owned := maps.Clone(v)
-	return func(o *ReadOpts) error { o.Headers = maps.Clone(owned); return nil }
-}
+// ReadOption is one option of GetRecord: request.Headers (replaces the
+// headers) or request.Custom over *ReadOpts. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type ReadOption = request.GetCall
+
+var readCalls = calls.Spec[ReadOpts]{Headers: calls.Value(func(o *ReadOpts) *map[string]string { return &o.Headers })}
+
 func (a *API) GetRecord(ctx context.Context, host string, options ...ReadOption) (*Record, error) {
 	wrap := func(err error) error { return request.Wrap("GetRecord", "capabilities", err) }
 	if a == nil {
@@ -65,7 +68,7 @@ func (a *API) GetRecord(ctx context.Context, host string, options ...ReadOption)
 		return nil, wrap(err)
 	}
 	policy := ReadOpts{}
-	for _, apply := range options {
+	for _, apply := range calls.Translate(options, readCalls) {
 		if apply == nil {
 			return nil, wrap(resource.ErrInvalidOption)
 		}

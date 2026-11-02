@@ -6,7 +6,9 @@ import (
 	"maps"
 	"net/http"
 	"net/url"
-	"slices"
+
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 // ResetStatusRecordResult carries the literal requested reference and the
@@ -21,7 +23,17 @@ type RecordResetStatusOpts struct {
 	Microversion *string
 	Headers      map[string]string
 }
-type RecordResetStatusOption func(*RecordResetStatusOpts) error
+
+// RecordResetStatusOption is one option of ResetStatusRecord: request.Custom
+// over *RecordResetStatusOpts, request.Microversion or request.Headers
+// (replaces the headers). Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type RecordResetStatusOption = request.WriteCall
+
+var resetStatusCalls = calls.Spec[RecordResetStatusOpts]{
+	Headers:      calls.Value(func(o *RecordResetStatusOpts) *map[string]string { return &o.Headers }),
+	Microversion: calls.Pointer(func(o *RecordResetStatusOpts) **string { return &o.Microversion }),
+}
 
 func copyResetStatus(v RecordResetStatusOpts) RecordResetStatusOpts {
 	v.Headers = maps.Clone(v.Headers)
@@ -30,13 +42,6 @@ func copyResetStatus(v RecordResetStatusOpts) RecordResetStatusOpts {
 		v.Microversion = &x
 	}
 	return v
-}
-func WithRecordResetStatusMicroversion(v string) RecordResetStatusOption {
-	return func(c *RecordResetStatusOpts) error { x := v; c.Microversion = &x; return nil }
-}
-func WithRecordResetStatusHeaders(v map[string]string) RecordResetStatusOption {
-	owned := maps.Clone(v)
-	return func(c *RecordResetStatusOpts) error { c.Headers = maps.Clone(owned); return nil }
 }
 
 // ResetStatusRecord implements reset_group_status and its deprecated alias
@@ -51,7 +56,7 @@ func (a *API) ResetStatusRecord(ctx context.Context, id, status string, options 
 	if err = recordID(id); err != nil {
 		return nil, recordWrap(ctx, op, err)
 	}
-	cfg, err := applyRecord(p, RecordResetStatusOpts{}, copyResetStatus, slices.Clone(options))
+	cfg, err := applyRecord(p, RecordResetStatusOpts{}, copyResetStatus, calls.Translate(options, resetStatusCalls))
 	if err == nil {
 		err = p.policy(cfg.Microversion, cfg.Headers)
 	}

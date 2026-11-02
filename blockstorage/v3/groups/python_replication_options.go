@@ -1,6 +1,11 @@
 package groups
 
-import "maps"
+import (
+	"maps"
+
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
+	"github.com/JSYoo5B/go-openstacksdk/request"
+)
 
 // RecordReplicationOpts owns the enable/disable read-independent action policy.
 // PinnedSourceWire reproduces the fixed SDK's null action value; the default
@@ -10,7 +15,14 @@ type RecordReplicationOpts struct {
 	Headers          map[string]string
 	PinnedSourceWire bool
 }
-type RecordReplicationOption func(*RecordReplicationOpts) error
+
+// RecordReplicationOption is one option of EnableReplicationRecord and
+// DisableReplicationRecord: WithRecordReplicationOpts,
+// WithRecordReplicationPinnedSourceWire, request.Custom over
+// *RecordReplicationOpts, request.Microversion or request.Headers (replaces
+// the headers). Other shared calls fail with resource.ErrInvalidOption
+// before HTTP.
+type RecordReplicationOption = request.WriteCall
 
 // RecordFailoverOpts defaults to false/null parameters and the stock action
 // key. PinnedSourceWire explicitly reproduces the pinned wrong action key.
@@ -21,7 +33,27 @@ type RecordFailoverOpts struct {
 	Headers               map[string]string
 	PinnedSourceWire      bool
 }
-type RecordFailoverOption func(*RecordFailoverOpts) error
+
+// RecordFailoverOption is one option of FailoverReplicationRecord:
+// WithRecordFailoverOpts, WithRecordFailover<Argument>, request.Custom over
+// *RecordFailoverOpts, request.Microversion or request.Headers (replaces the
+// headers). Other shared calls fail with resource.ErrInvalidOption before
+// HTTP.
+type RecordFailoverOption = request.WriteCall
+
+var (
+	replicationCalls = calls.Spec[RecordReplicationOpts]{
+		Headers: func(o *RecordReplicationOpts, v map[string]string) error {
+			o.Headers = replicationHeaders(v)
+			return nil
+		},
+		Microversion: calls.Pointer(func(o *RecordReplicationOpts) **string { return &o.Microversion }),
+	}
+	failoverCalls = calls.Spec[RecordFailoverOpts]{
+		Headers:      func(o *RecordFailoverOpts, v map[string]string) error { o.Headers = replicationHeaders(v); return nil },
+		Microversion: calls.Pointer(func(o *RecordFailoverOpts) **string { return &o.Microversion }),
+	}
+)
 
 func replicationHeaders(v map[string]string) map[string]string {
 	owned := maps.Clone(v)
@@ -56,35 +88,21 @@ func copyFailover(v RecordFailoverOpts) RecordFailoverOpts {
 }
 func WithRecordReplicationOpts(v RecordReplicationOpts) RecordReplicationOption {
 	owned := copyReplication(v)
-	return func(c *RecordReplicationOpts) error { *c = copyReplication(owned); return nil }
-}
-func WithRecordReplicationMicroversion(v string) RecordReplicationOption {
-	return func(c *RecordReplicationOpts) error { x := v; c.Microversion = &x; return nil }
-}
-func WithRecordReplicationHeaders(v map[string]string) RecordReplicationOption {
-	owned := replicationHeaders(v)
-	return func(c *RecordReplicationOpts) error { c.Headers = replicationHeaders(owned); return nil }
+	return request.Custom(func(c *RecordReplicationOpts) error { *c = copyReplication(owned); return nil })
 }
 func WithRecordReplicationPinnedSourceWire(v bool) RecordReplicationOption {
-	return func(c *RecordReplicationOpts) error { c.PinnedSourceWire = v; return nil }
+	return request.Custom(func(c *RecordReplicationOpts) error { c.PinnedSourceWire = v; return nil })
 }
 func WithRecordFailoverOpts(v RecordFailoverOpts) RecordFailoverOption {
 	owned := copyFailover(v)
-	return func(c *RecordFailoverOpts) error { *c = copyFailover(owned); return nil }
+	return request.Custom(func(c *RecordFailoverOpts) error { *c = copyFailover(owned); return nil })
 }
 func WithRecordFailoverAllowedAttachedVolume(v bool) RecordFailoverOption {
-	return func(c *RecordFailoverOpts) error { x := v; c.AllowedAttachedVolume = &x; return nil }
+	return request.Custom(func(c *RecordFailoverOpts) error { x := v; c.AllowedAttachedVolume = &x; return nil })
 }
 func WithRecordFailoverSecondaryBackendID(v string) RecordFailoverOption {
-	return func(c *RecordFailoverOpts) error { x := v; c.SecondaryBackendID = &x; return nil }
-}
-func WithRecordFailoverMicroversion(v string) RecordFailoverOption {
-	return func(c *RecordFailoverOpts) error { x := v; c.Microversion = &x; return nil }
-}
-func WithRecordFailoverHeaders(v map[string]string) RecordFailoverOption {
-	owned := replicationHeaders(v)
-	return func(c *RecordFailoverOpts) error { c.Headers = replicationHeaders(owned); return nil }
+	return request.Custom(func(c *RecordFailoverOpts) error { x := v; c.SecondaryBackendID = &x; return nil })
 }
 func WithRecordFailoverPinnedSourceWire(v bool) RecordFailoverOption {
-	return func(c *RecordFailoverOpts) error { c.PinnedSourceWire = v; return nil }
+	return request.Custom(func(c *RecordFailoverOpts) error { c.PinnedSourceWire = v; return nil })
 }

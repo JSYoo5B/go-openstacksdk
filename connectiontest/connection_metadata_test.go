@@ -12,6 +12,7 @@ import (
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/metadata"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -65,7 +66,7 @@ func TestConnectionCinderMetadataSharesLiveVersionedClientAndFixedPrefix(t *test
 			}
 			// A fixed scope keeps its original URL while authentication remains live.
 			client.ResourceBase = cloud.Server.URL + "/later/"
-			option := metadata.WithHeader("X-Call", "metadata")
+			option := request.Header("X-Call", "metadata")
 			for n := 1; n <= 2; n++ {
 				cloud.Provider.SetToken(fmt.Sprintf("token-%d", n))
 				result, err := scope.Get(context.Background(), option)

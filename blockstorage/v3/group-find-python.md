@@ -14,10 +14,10 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordFindOpts`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordFindDetails`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordFindMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordFindHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 
 - Literal escaped member GET runs before list and returns successful Source untyped/null/numeric id/name without synthetic string validation; known descriptors and unknown raw proof are the existing Group record profile.
   Tests: `blockstorage/v3/groups/python_find_test.go:TestPythonCinderGroupFindRecordDirectUntypedProjectionAndLiteralIdentity`.
@@ -97,6 +97,7 @@ import (
 
     sdk "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups"
+    "github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 func main() {
@@ -114,7 +115,7 @@ func main() {
     service, err := conn.BlockStorageV3(ctx)
     if err != nil { log.Fatal(err) }
     value, err := service.Groups.FindRecord(ctx, *identity,
-        groups.WithRecordFindIgnoreMissing(!*strict),
+        request.IgnoreMissing(!*strict),
         groups.WithRecordFindDetails(!*summary))
     if err != nil { log.Fatal(err) }
     if value == nil { fmt.Println("null"); return }
@@ -126,8 +127,8 @@ func main() {
 
 ```go
 value, err := service.Groups.FindRecord(ctx, "sample",
-    groups.WithRecordFindMicroversion("3.90"),
-    groups.WithRecordFindHeaders(map[string]string{"X-Trace": "group-find"}))
+    request.Microversion("3.90"),
+    request.Headers(map[string]string{"X-Trace": "group-find"}))
 ```
 
 ## References

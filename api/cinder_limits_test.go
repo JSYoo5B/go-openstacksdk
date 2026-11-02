@@ -73,7 +73,7 @@ func TestCinderLimitsProjectFilteringRequires339BeforeIdentityOrHTTP(t *testing.
 		if _, err := api.Fetch(context.Background(), limits.WithGetOptions(limits.GetOpts{ProjectID: "p"})); !errors.Is(err, resource.ErrUnsupported) {
 			t.Fatal(err)
 		}
-		if _, err := api.Fetch(context.Background(), limits.WithGetQuery("project_id", "p")); !errors.Is(err, resource.ErrUnsupported) {
+		if _, err := api.Fetch(context.Background(), request.Query("project_id", "p")); !errors.Is(err, resource.ErrUnsupported) {
 			t.Fatal(err)
 		}
 	}
@@ -212,7 +212,7 @@ func TestCinderLimitsQueryInputsCannotWidenFixedProject(t *testing.T) {
 		testcloud.JSON(w, 200, cinderLimitsBody)
 	})
 	api := newCinderLimitsAPI(cloud, "3.39")
-	value, err := api.Fetch(context.Background(), limits.WithGetOptions(limits.GetOpts{ProjectID: "project+&fixed"}), limits.WithGetQuery("vendor", "literal"))
+	value, err := api.Fetch(context.Background(), limits.WithGetOptions(limits.GetOpts{ProjectID: "project+&fixed"}), request.Query("vendor", "literal"))
 	if err != nil || value.ProjectID != "project+&fixed" {
 		t.Fatalf("value=%v err=%v", value, err)
 	}
@@ -220,23 +220,23 @@ func TestCinderLimitsQueryInputsCannotWidenFixedProject(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := scope.Get(context.Background(), limits.WithGetQuery("vendor", "literal")); err != nil {
+	if _, err := scope.Get(context.Background(), request.Query("vendor", "literal")); err != nil {
 		t.Fatal(err)
 	}
-	for _, option := range []limits.GetOption{limits.WithGetOptions(limits.GetOpts{ProjectID: "other"}), limits.WithGetQuery("project_id", "other"), limits.WithGetQuery("project_id", "project+&fixed"), limits.WithGetQuery("tenant_id", "other"), nil, request.WithField[limits.GetOpts]("force", true), request.WithArgument[limits.GetOpts]("other", true)} {
+	for _, option := range []limits.GetOption{limits.WithGetOptions(limits.GetOpts{ProjectID: "other"}), request.Query("project_id", "other"), request.Query("project_id", "project+&fixed"), request.Query("tenant_id", "other"), nil, request.Custom(request.WithField[limits.GetOpts]("force", true)), request.Custom(request.WithArgument[limits.GetOpts]("other", true))} {
 		if _, err := scope.Get(context.Background(), option); err == nil {
 			t.Fatal("scope replacement accepted")
 		}
 	}
-	for _, option := range []limits.GetOption{limits.WithGetQuery("project_id", ""), limits.WithGetOptions(limits.GetOpts{ProjectID: "bad/id"}), func(c *request.Config[limits.GetOpts]) error {
+	for _, option := range []limits.GetOption{request.Query("project_id", ""), limits.WithGetOptions(limits.GetOpts{ProjectID: "bad/id"}), request.Custom(func(c *request.Config[limits.GetOpts]) error {
 		c.Query["project_id"] = []string{"one", "two"}
 		return nil
-	}, func(c *request.Config[limits.GetOpts]) error { c.Query["project_id"] = nil; return nil }} {
+	}), request.Custom(func(c *request.Config[limits.GetOpts]) error { c.Query["project_id"] = nil; return nil })} {
 		if _, err := api.Fetch(context.Background(), option); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(err)
 		}
 	}
-	if _, err := api.Fetch(context.Background(), limits.WithGetOptions(limits.GetOpts{ProjectID: "one"}), limits.WithGetQuery("project_id", "one")); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := api.Fetch(context.Background(), limits.WithGetOptions(limits.GetOpts{ProjectID: "one"}), request.Query("project_id", "one")); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
 	if calls.Load() != 2 {

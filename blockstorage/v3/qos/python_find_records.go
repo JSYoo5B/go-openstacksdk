@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"iter"
 	"maps"
 	"net/http"
@@ -151,7 +152,28 @@ type RecordFindOpts struct {
 	Query         map[string]json.RawMessage
 	Headers       map[string]string
 }
-type RecordFindOption func(*RecordFindOpts) error
+
+// RecordFindOption is one option of FindRecord: WithRecordFindOpts,
+// request.Query (a Source keyword argument; the value is sent as JSON),
+// request.IgnoreMissing, request.Headers (replaces the headers) or
+// request.Custom over *RecordFindOpts. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type RecordFindOption = request.FindCall
+
+var recordFindCalls = calls.Spec[RecordFindOpts]{
+	Query: calls.JSONQuery(func(c *RecordFindOpts, key string, raw json.RawMessage, err error) error {
+		if err != nil {
+			return err
+		}
+		if c.Query == nil {
+			c.Query = make(map[string]json.RawMessage)
+		}
+		c.Query[key] = bytes.Clone(raw)
+		return nil
+	}),
+	IgnoreMissing: calls.Pointer(func(c *RecordFindOpts) **bool { return &c.IgnoreMissing }),
+	Headers:       calls.Value(func(c *RecordFindOpts) *map[string]string { return &c.Headers }),
+}
 
 func copyFindOpts(value RecordFindOpts) RecordFindOpts {
 	value.Query = findFields(value.Query)
@@ -164,28 +186,7 @@ func copyFindOpts(value RecordFindOpts) RecordFindOpts {
 }
 func WithRecordFindOpts(value RecordFindOpts) RecordFindOption {
 	owned := copyFindOpts(value)
-	return func(c *RecordFindOpts) error { *c = copyFindOpts(owned); return nil }
-}
-func WithRecordFindIgnoreMissing(value bool) RecordFindOption {
-	return func(c *RecordFindOpts) error { x := value; c.IgnoreMissing = &x; return nil }
-}
-func WithRecordFindQuery(key string, value any) RecordFindOption {
-	raw, err := json.Marshal(value)
-	owned := bytes.Clone(raw)
-	return func(c *RecordFindOpts) error {
-		if err != nil {
-			return err
-		}
-		if c.Query == nil {
-			c.Query = make(map[string]json.RawMessage)
-		}
-		c.Query[key] = bytes.Clone(owned)
-		return nil
-	}
-}
-func WithRecordFindHeaders(value map[string]string) RecordFindOption {
-	owned := maps.Clone(value)
-	return func(c *RecordFindOpts) error { c.Headers = maps.Clone(owned); return nil }
+	return request.Custom(func(c *RecordFindOpts) error { *c = copyFindOpts(owned); return nil })
 }
 func findKey(key string) error {
 	if strings.TrimSpace(key) == "" || !utf8.ValidString(key) {
@@ -301,7 +302,7 @@ func (a *API) FindRecord(ctx context.Context, identity string, options ...Record
 		return errors.Join(changed, source.Guard(ctx), rest.CheckOperationGuard(ctx))
 	}
 	policy := RecordFindOpts{}
-	for _, apply := range slices.Clone(options) {
+	for _, apply := range calls.Translate(options, recordFindCalls) {
 		if err := guard(ctx); err != nil {
 			return nil, wrap(err)
 		}

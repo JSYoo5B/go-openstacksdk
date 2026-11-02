@@ -8,9 +8,9 @@ import (
 	"iter"
 	"maps"
 	"net/url"
-	"slices"
 	"strings"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
@@ -57,7 +57,7 @@ func (a *API) FindRecord(ctx context.Context, identity string, options ...Record
 	if err = recordID(identity); err != nil {
 		return nil, recordWrap(ctx, operation, err)
 	}
-	v, err := applyRecord(p, RecordFindOpts{}, copyFindOpts, slices.Clone(options))
+	v, err := applyRecord(p, RecordFindOpts{}, copyFindOpts, calls.Translate(options, findCalls))
 	if err != nil {
 		return nil, recordWrap(ctx, operation, err)
 	}

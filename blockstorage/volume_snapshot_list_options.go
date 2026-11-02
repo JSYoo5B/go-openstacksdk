@@ -9,6 +9,12 @@ import (
 
 // VolumeSnapshotListOpts owns snapshot list policy; omission retains source defaults.
 type VolumeSnapshotListOpts = cloudsnapshot.ListOptions
+
+// VolumeSnapshotListOption is one option of ListVolumeSnapshots: the
+// WithVolumeSnapshotList* functions, request.Custom over *VolumeSnapshotListOpts,
+// request.Paginated, request.MaxItems, request.Microversion or
+// request.Headers (replaces the headers). Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
 type VolumeSnapshotListOption = cloudsnapshot.ListOption
 
 func WithVolumeSnapshotListOptions(value VolumeSnapshotListOpts) VolumeSnapshotListOption {
@@ -21,22 +27,6 @@ func WithVolumeSnapshotListFilters(value json.RawMessage) VolumeSnapshotListOpti
 
 func WithVolumeSnapshotListDetailed(value bool) VolumeSnapshotListOption {
 	return cloudsnapshot.WithListDetailed(value)
-}
-
-func WithVolumeSnapshotListPagination(value bool) VolumeSnapshotListOption {
-	return cloudsnapshot.WithListPagination(value)
-}
-
-func WithVolumeSnapshotListMaxItems(value int) VolumeSnapshotListOption {
-	return cloudsnapshot.WithListMaxItems(value)
-}
-
-func WithVolumeSnapshotListMicroversion(value string) VolumeSnapshotListOption {
-	return cloudsnapshot.WithListMicroversion(value)
-}
-
-func WithVolumeSnapshotListHeaders(value map[string]string) VolumeSnapshotListOption {
-	return cloudsnapshot.WithListHeaders(value)
 }
 
 func WithVolumeSnapshotListExpression(value string) VolumeSnapshotListOption {

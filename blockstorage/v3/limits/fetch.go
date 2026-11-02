@@ -3,6 +3,7 @@ package limits
 import (
 	"context"
 	"fmt"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"net/url"
 
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -12,13 +13,19 @@ import (
 type GetOpts struct {
 	ProjectID string `q:"project_id"`
 }
-type GetOption = request.Option[GetOpts]
 
-func WithGetOptions(value GetOpts) GetOption   { return request.WithOptions(value) }
-func WithGetQuery(key, value string) GetOption { return request.WithQuery[GetOpts](key, value) }
+// GetOption is one option of Fetch and ProjectLimitsScope.Get:
+// WithGetOptions, request.Query (a string or []string query value) or
+// request.Custom over *request.Config[GetOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type GetOption = request.GetQueryCall
+
+var getCalls = calls.Spec[request.Config[GetOpts]]{Query: calls.ConfigQuery[GetOpts]}
+
+func WithGetOptions(value GetOpts) GetOption { return request.Custom(request.WithOptions(value)) }
 
 func prepareQuery(fixedProject string, options ...GetOption) (url.Values, string, error) {
-	config, err := request.Apply(GetOpts{}, options...)
+	config, err := calls.ApplyConfig(GetOpts{}, getCalls, options...)
 	if err == nil {
 		err = request.ValidateCapabilities(config, false, true, false)
 	}

@@ -71,26 +71,6 @@ func CopyList(v ListOpts) ListOpts {
 	return v
 }
 
-// Marshal snapshots one option value; marshal errors surface when applied.
-func Marshal(value any) func() (json.RawMessage, error) {
-	raw, err := json.Marshal(value)
-	owned := bytes.Clone(raw)
-	return func() (json.RawMessage, error) { return bytes.Clone(owned), err }
-}
-
-// SetField stores a snapshotted value under key.
-func SetField(target *map[string]json.RawMessage, key string, value func() (json.RawMessage, error)) error {
-	raw, err := value()
-	if err != nil {
-		return err
-	}
-	if *target == nil {
-		*target = make(map[string]json.RawMessage)
-	}
-	(*target)[key] = raw
-	return nil
-}
-
 // Apply runs options in order on owned copies; a nil option fails before HTTP.
 func Apply[T any, O ~func(*T) error](ctx context.Context, guard func(context.Context) error, value T, copyValue func(T) T, options []O) (T, error) {
 	for _, apply := range options {

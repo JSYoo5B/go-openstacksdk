@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"net/http"
 	"reflect"
 	"strings"
@@ -163,10 +164,10 @@ func TestGroupTypeStatusPolicyAndRejections(t *testing.T) {
 func TestGroupTypeCreatePostsEnvelope(t *testing.T) {
 	api, calls := gtAPI(t, "", func(*http.Request) (int, string) { return 202, `{"group_type":` + gtRow + `}` })
 	v, err := api.Create(context.Background(),
-		grouptypes.WithCreateField("name", "gold"),
-		grouptypes.WithCreateField("is_public", true),
-		grouptypes.WithCreateField("group_specs", map[string]string{"k": "v"}),
-		grouptypes.WithCreateField("unknown", make(chan int)))
+		request.Field("name", "gold"),
+		request.Field("is_public", true),
+		request.Field("group_specs", map[string]string{"k": "v"}),
+		request.Field("unknown", make(chan int)))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -184,13 +185,13 @@ func TestGroupTypeCreatePostsEnvelope(t *testing.T) {
 	gtCheck(t, v)
 
 	api, _ = gtAPI(t, "3.11", func(*http.Request) (int, string) { return 400, `{"badRequest":{}}` })
-	_, err = api.Create(context.Background(), grouptypes.WithCreateField("name", "x"))
+	_, err = api.Create(context.Background(), request.Field("name", "x"))
 	gtOperation(t, err, "Create", 400)
 }
 
 func TestGroupTypeUpdateSendsDirtyAttributesOnly(t *testing.T) {
 	api, calls := gtAPI(t, "", func(*http.Request) (int, string) { return 200, `{"group_type":` + gtRow + `}` })
-	v, err := api.Update(context.Background(), "gt1", grouptypes.WithUpdateField("description", "d"), grouptypes.WithUpdateField("id", "other"))
+	v, err := api.Update(context.Background(), "gt1", request.Field("description", "d"), request.Field("id", "other"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -203,7 +204,7 @@ func TestGroupTypeUpdateSendsDirtyAttributesOnly(t *testing.T) {
 
 	// Nothing dirty: no discovery and no update request.
 	api, calls = gtAPI(t, "", func(*http.Request) (int, string) { t.Fatal("unexpected request"); return 0, "" })
-	v, err = api.Update(context.Background(), "gt1", grouptypes.WithUpdateField("id", "x"), grouptypes.WithUpdateField("unknown", 1))
+	v, err = api.Update(context.Background(), "gt1", request.Field("id", "x"), request.Field("unknown", 1))
 	if err != nil || calls.Len() != 0 || v.ID != "gt1" || v.StatusCode != 0 {
 		t.Fatal(err, gtCalls(calls), v)
 	}
@@ -214,7 +215,7 @@ func TestGroupTypeDeleteIgnoresMissingByDefault(t *testing.T) {
 		code    int
 		options []grouptypes.DeleteOption
 		fail    bool
-	}{{202, nil, false}, {204, nil, false}, {404, nil, false}, {404, []grouptypes.DeleteOption{grouptypes.WithDeleteIgnoreMissing(false)}, true}, {409, nil, true}} {
+	}{{202, nil, false}, {204, nil, false}, {404, nil, false}, {404, []grouptypes.DeleteOption{request.IgnoreMissing(false)}, true}, {409, nil, true}} {
 		api, calls := gtAPI(t, "3.11", func(*http.Request) (int, string) { return item.code, `{}` })
 		err := api.Delete(context.Background(), "gt1", item.options...)
 		if gtCalls(calls)[0].method != http.MethodDelete || gtCalls(calls)[0].path != gtBase+"/gt1" {
@@ -236,10 +237,10 @@ func TestGroupTypeListQueryFiltersAndPaging(t *testing.T) {
 		return 200, `{"group_types":[{"id":"gt3","name":"gold","description":null}]}`
 	})
 	values, err := api.All(context.Background(),
-		grouptypes.WithListQuery("is_public", true),
-		grouptypes.WithListQuery("all_projects", true),
-		grouptypes.WithListQuery("name", "gold"),
-		grouptypes.WithListQuery("unknown", "x"))
+		request.Query("is_public", true),
+		request.Query("all_projects", true),
+		request.Query("name", "gold"),
+		request.Query("unknown", "x"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -255,7 +256,7 @@ func TestGroupTypeListQueryFiltersAndPaging(t *testing.T) {
 	gtVersion(t, gtCalls(calls)[1], "3.11")
 
 	api, calls = gtAPI(t, "3.11", func(*http.Request) (int, string) { return 200, `{"group_types":[` + gtRow + `]}` })
-	values, err = api.All(context.Background(), grouptypes.WithListLimit(1), grouptypes.WithListMarker("m"), grouptypes.WithListPaginated(false))
+	values, err = api.All(context.Background(), request.Limit(1), request.Marker("m"), request.Paginated(false))
 	if err != nil || len(values) != 1 || gtCalls(calls)[0].query != "limit=1&marker=m" || calls.Len() != 1 {
 		t.Fatal(err, gtCalls(calls))
 	}
@@ -298,7 +299,7 @@ func TestGroupTypeFindUsesIsPublicNone(t *testing.T) {
 	if err != nil || v != nil {
 		t.Fatal(err, v)
 	}
-	_, err = api.Find(context.Background(), "missing", grouptypes.WithFindIgnoreMissing(false))
+	_, err = api.Find(context.Background(), "missing", request.IgnoreMissing(false))
 	if !errors.Is(err, resource.ErrNotFound) {
 		t.Fatal(err)
 	}
@@ -376,7 +377,7 @@ func TestGroupTypeGroupSpecs(t *testing.T) {
 		api, calls = gtAPI(t, "3.11", func(*http.Request) (int, string) { return item.code, `` })
 		var options []grouptypes.DeleteOption
 		if item.keep {
-			options = append(options, grouptypes.WithDeleteIgnoreMissing(false))
+			options = append(options, request.IgnoreMissing(false))
 		}
 		err = api.DeleteGroupSpecsProperty(context.Background(), "gt1", "a", options...)
 		if gtCalls(calls)[0].method != http.MethodDelete || gtCalls(calls)[0].path != gtBase+"/gt1/group_specs/a" {

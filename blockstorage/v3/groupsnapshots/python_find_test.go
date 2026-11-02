@@ -14,6 +14,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -52,7 +53,7 @@ func TestPythonGroupSnapshotFindDefaultsCleanFallbackAndNoAutomaticNameFilter(t 
 func TestPythonGroupSnapshotFindDirectSuccessUntypedIDAndSeed(t *testing.T) {
 	for _, body := range []string{`{"group_snapshot":{"id":null,"name":false,"cls":false}}`, `{"id":0,"name":[null]}`, `{}`, `opaque`} {
 		api, calls := snapshotAPI(t, "3.29", func(*http.Request) *http.Response { return snapshotWire(299, body) })
-		value, err := api.FindRecord(context.Background(), "selected", groupsnapshots.WithRecordFindQuery("description", map[string]any{"zero": 0, "null": nil, "enabled": false}))
+		value, err := api.FindRecord(context.Background(), "selected", request.Query("description", map[string]any{"zero": 0, "null": nil, "enabled": false}))
 		if err != nil || value == nil || value.Resource == nil || value.StatusCode != 299 || string(value.Envelope) != body || len(*calls) != 1 {
 			t.Fatal(body, value, err, *calls)
 		}
@@ -133,7 +134,7 @@ func TestPythonGroupSnapshotFindDefaultMissingStrictAndListRejection(t *testing.
 			})
 			opts := []groupsnapshots.RecordFindOption{}
 			if strict {
-				opts = append(opts, groupsnapshots.WithRecordFindIgnoreMissing(false))
+				opts = append(opts, request.IgnoreMissing(false))
 			}
 			value, err := api.FindRecord(context.Background(), "absent", opts...)
 			if value != nil || len(*calls) != 2 || (err != nil) != strict {
@@ -175,10 +176,10 @@ func TestPythonGroupSnapshotFindGetOnlyMicroversionAndIndependentDiscovery(t *te
 		})
 		opts := []groupsnapshots.RecordFindOption{}
 		if mode == "GET override" || mode == "service aliases" {
-			opts = append(opts, groupsnapshots.WithRecordFindMicroversion("3.80"))
+			opts = append(opts, request.Microversion("3.80"))
 		}
 		if mode == "GET absent" {
-			opts = append(opts, groupsnapshots.WithRecordFindMicroversion(""))
+			opts = append(opts, request.Microversion(""))
 		}
 		if mode == "service aliases" {
 			api.RawClient().MoreHeaders = map[string]string{"openstack-api-version": "volume 3.29", "x-openstack-volume-api-version": "3.29"}
@@ -236,11 +237,11 @@ func TestPythonGroupSnapshotFindQuerySeedFieldsScopeAndOwnedSnapshots(t *testing
 		return snapshotWire(200, `{"group_snapshots":[{"id":"first","name":"data","description":{"enabled":false,"extra":0}},{"id":"second","name":"other"}]}`)
 	})
 	var retained *groupsnapshots.RecordFindOpts
-	value, err := api.FindRecord(context.Background(), "data", option, func(c *groupsnapshots.RecordFindOpts) error { c.Headers["X-Next"] = "before"; retained = c; return nil }, func(*groupsnapshots.RecordFindOpts) error {
+	value, err := api.FindRecord(context.Background(), "data", option, request.Custom(func(c *groupsnapshots.RecordFindOpts) error { c.Headers["X-Next"] = "before"; retained = c; return nil }), request.Custom(func(*groupsnapshots.RecordFindOpts) error {
 		retained.Headers["X-Next"] = "after"
 		retained.Query["name"] = json.RawMessage(`"changed"`)
 		return nil
-	})
+	}))
 	if err != nil || value == nil || len(*calls) != 2 {
 		t.Fatal(value, err, *calls)
 	}
@@ -256,18 +257,21 @@ func TestPythonGroupSnapshotFindQuerySeedFieldsScopeAndOwnedSnapshots(t *testing
 	}
 	snapshotField(t, value, "id", `"first"`)
 	api, calls = snapshotAPI(t, "3.29", func(*http.Request) *http.Response { return snapshotWire(204, "") })
-	value, err = api.FindRecord(context.Background(), "id", groupsnapshots.WithRecordFindQuery("name", false), groupsnapshots.WithRecordFindQuery("description", nil))
+	value, err = api.FindRecord(context.Background(), "id", request.Query("name", false), request.Query("description", nil))
 	if err != nil || len(*calls) != 1 {
 		t.Fatal(value, err, *calls)
 	}
 	snapshotField(t, value, "name", "false")
 	snapshotField(t, value, "description", "null")
 }
+
+// request.Query marshals once when constructed; a reserved key still fails
+// with its own invalid-option error, not the value's marshal error.
 func TestPythonGroupSnapshotFindReservedAndMalformedInputPrecedesHTTP(t *testing.T) {
 	for _, key := range []string{"id", "cls", "self", "connection", "_synchronized", "base_path", "microversion", "paginated", "max_items"} {
-		for _, input := range []any{nil, false, 0, snapshotMarshal(func() ([]byte, error) { t.Fatal("reserved input marshaled"); return nil, nil })} {
+		for _, input := range []any{nil, false, 0, snapshotMarshal(func() ([]byte, error) { return nil, errors.New("reserved input marshal error") })} {
 			api, calls := snapshotAPI(t, "", func(*http.Request) *http.Response { t.Fatal("preflight HTTP"); return snapshotWire(200, `{}`) })
-			value, err := api.FindRecord(context.Background(), "data", groupsnapshots.WithRecordFindQuery(key, input))
+			value, err := api.FindRecord(context.Background(), "data", request.Query(key, input))
 			if value != nil || !errors.Is(err, resource.ErrInvalidOption) || len(*calls) != 0 {
 				t.Fatal(key, value, err, *calls)
 			}
@@ -300,9 +304,9 @@ func TestPythonGroupSnapshotFindCapturedSourceOptionCancellationAndNil(t *testin
 		opts := []groupsnapshots.RecordFindOption{}
 		switch mode {
 		case "source":
-			opts = append(opts, func(*groupsnapshots.RecordFindOpts) error { api.RawClient().Microversion = "3.80"; return cause })
+			opts = append(opts, request.Custom(func(*groupsnapshots.RecordFindOpts) error { api.RawClient().Microversion = "3.80"; return cause }))
 		case "cancel":
-			opts = append(opts, func(*groupsnapshots.RecordFindOpts) error { cancel(cause); return cause })
+			opts = append(opts, request.Custom(func(*groupsnapshots.RecordFindOpts) error { cancel(cause); return cause }))
 		case "nil":
 			opts = append(opts, nil)
 		case "nil context":
@@ -403,7 +407,7 @@ func TestPythonGroupSnapshotFindCleanRetryAndOwnedHeaders(t *testing.T) {
 			}
 			return nil
 		}
-		value, err := api.FindRecord(context.Background(), "data", groupsnapshots.WithRecordFindHeaders(map[string]string{"X-Owned": "original"}))
+		value, err := api.FindRecord(context.Background(), "data", request.Headers(map[string]string{"X-Owned": "original"}))
 		if mode == "clean" {
 			if err != nil || value == nil || value.Resource == nil || len(*calls) != 2 {
 				t.Fatal(value, err, *calls)
@@ -432,7 +436,7 @@ func TestPythonGroupSnapshotFindPagingControlsOffsetAndRawCap(t *testing.T) {
 			}
 			return snapshotWire(200, `{"group_snapshots":[{"id":"first","name":"data"}],"next":"?offset=1"}`)
 		})
-		opts := []groupsnapshots.RecordFindOption{groupsnapshots.WithRecordFindQuery("sort", "name:asc")}
+		opts := []groupsnapshots.RecordFindOption{request.Query("sort", "name:asc")}
 		if single {
 			opts = append(opts, groupsnapshots.WithRecordFindPaginated(false))
 		}

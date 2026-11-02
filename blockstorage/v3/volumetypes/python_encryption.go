@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"maps"
 	"net/http"
 	"net/url"
@@ -80,7 +81,17 @@ type EncryptionAttributeOpts struct {
 	Fields  map[string]json.RawMessage
 	Headers map[string]string
 }
-type EncryptionAttributeOption func(*EncryptionAttributeOpts) error
+
+// EncryptionAttributeOption is one option of CreateEncryptionWithAttributes,
+// UpdateEncryptionRecord and UpdateEncryptionFromType:
+// WithEncryptionAttributeOpts, WithEncryptionAttribute, request.Headers
+// (replaces the headers) or request.Custom over *EncryptionAttributeOpts.
+// Other shared calls fail with resource.ErrInvalidOption before HTTP.
+type EncryptionAttributeOption = request.WriteCall
+
+var encryptionCalls = calls.Spec[EncryptionAttributeOpts]{
+	Headers: calls.Value(func(c *EncryptionAttributeOpts) *map[string]string { return &c.Headers }),
+}
 
 func copyEncryptionOpts(value EncryptionAttributeOpts) EncryptionAttributeOpts {
 	value.Fields = pythonFields(value.Fields)
@@ -89,15 +100,18 @@ func copyEncryptionOpts(value EncryptionAttributeOpts) EncryptionAttributeOpts {
 }
 func WithEncryptionAttributeOpts(value EncryptionAttributeOpts) EncryptionAttributeOption {
 	owned := copyEncryptionOpts(value)
-	return func(c *EncryptionAttributeOpts) error { *c = copyEncryptionOpts(owned); return nil }
+	return request.Custom(func(c *EncryptionAttributeOpts) error { *c = copyEncryptionOpts(owned); return nil })
 }
+
+// WithEncryptionAttribute sets one declared TypeEncryption Body attribute.
+// Unknown keys are ignored before marshaling, like the pinned Source.
 func WithEncryptionAttribute(key string, value any) EncryptionAttributeOption {
 	if !encryptionKnown(key) {
-		return func(*EncryptionAttributeOpts) error { return nil }
+		return request.Custom(func(*EncryptionAttributeOpts) error { return nil })
 	}
 	raw, err := json.Marshal(value)
 	owned := bytes.Clone(raw)
-	return func(c *EncryptionAttributeOpts) error {
+	return request.Custom(func(c *EncryptionAttributeOpts) error {
 		if err != nil {
 			return err
 		}
@@ -106,11 +120,7 @@ func WithEncryptionAttribute(key string, value any) EncryptionAttributeOption {
 		}
 		c.Fields[key] = bytes.Clone(owned)
 		return nil
-	}
-}
-func WithEncryptionHeaders(value map[string]string) EncryptionAttributeOption {
-	owned := maps.Clone(value)
-	return func(c *EncryptionAttributeOpts) error { c.Headers = maps.Clone(owned); return nil }
+	})
 }
 
 type encryptionOperation struct {
@@ -142,7 +152,7 @@ func (a *API) prepareEncryption(ctx context.Context) (*encryptionOperation, erro
 }
 func (p *encryptionOperation) options(options []EncryptionAttributeOption) (EncryptionAttributeOpts, error) {
 	value := EncryptionAttributeOpts{}
-	for _, apply := range options {
+	for _, apply := range calls.Translate(options, encryptionCalls) {
 		if err := p.guard(p.ctx); err != nil {
 			return value, err
 		}

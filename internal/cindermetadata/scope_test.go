@@ -73,11 +73,11 @@ func TestMetadataMethodsKeepActualEvidenceExplicitEmptyAndInputSnapshots(t *test
 				t.Fatalf("get=%+v err=%v", got, err)
 			}
 			input := map[string]string{"initial": "owned"}
-			mutate := func(*request.Config[metadata.Opts]) error {
+			mutate := request.Custom(func(*request.Config[metadata.Opts]) error {
 				input["initial"] = "changed"
 				input["extra"] = "caller"
 				return nil
-			}
+			})
 			if _, err := scope.Merge(context.Background(), input, mutate); err != nil {
 				t.Fatal(err)
 			}
@@ -157,7 +157,7 @@ func TestMetadataDeleteKeepsLiteralKeysOrderDuplicatesAndPartialAcknowledgements
 		_, _ = io.WriteString(w, fmt.Sprintf("actual-ack-%d", len(seen)))
 	})
 	keys := []string{"literal/ %é?fragment#", "duplicate", "duplicate", "never"}
-	mutate := func(*request.Config[metadata.Opts]) error { keys[0] = "mutated"; keys[1] = "changed"; return nil }
+	mutate := request.Custom(func(*request.Config[metadata.Opts]) error { keys[0] = "mutated"; keys[1] = "changed"; return nil })
 	got, err := scope.DeleteKeys(context.Background(), keys, mutate)
 	var native gophercloud.ErrUnexpectedResponseCode
 	if got == nil || got.Cleared != nil || len(got.Deleted) != 2 || !errors.As(err, &native) || native.Actual != 404 || string(native.Body) != "missing duplicate" || native.ResponseHeader.Get("X-Ack") != "3" {
@@ -203,18 +203,18 @@ func TestMetadataHeaderSnapshotsConditionsAndProtectedCapabilities(t *testing.T)
 	input := map[string]string{"x-request-id": "frozen", "If-Match": `"current"`, "x-source": "per-call"}
 	opt := metadata.WithHeaders(input)
 	input["x-request-id"] = "changed"
-	got, err := scope.Replace(context.Background(), nil, opt, metadata.WithHeader("X-Request-ID", "last"))
+	got, err := scope.Replace(context.Background(), nil, opt, request.Header("X-Request-ID", "last"))
 	if err != nil || got.Header.Get("ETag") != `"actual-etag"` || len(headers) != 1 || headers[0].Get("If-Match") != `"current"` || headers[0].Get("X-Request-Id") != "last" || headers[0].Get("X-Source") != "configured" {
 		t.Fatalf("got=%+v err=%v headers=%v", got, err, headers)
 	}
 	if client.MoreHeaders["if-match"] != `"current"` || len(client.MoreHeaders) != 4 {
 		t.Fatal("configured source headers mutated")
 	}
-	if _, err := scope.Replace(context.Background(), nil, metadata.WithHeader("if-match", `"different"`)); !errors.Is(err, resource.ErrInvalidOption) || len(headers) != 1 {
+	if _, err := scope.Replace(context.Background(), nil, request.Header("if-match", `"different"`)); !errors.Is(err, resource.ErrInvalidOption) || len(headers) != 1 {
 		t.Fatalf("conflict error=%v calls=%d", err, len(headers))
 	}
 	delete(client.MoreHeaders, "if-match")
-	if value, err := scope.Replace(context.Background(), nil, metadata.WithHeader("If-Match", `"stale"`)); value != nil {
+	if value, err := scope.Replace(context.Background(), nil, request.Header("If-Match", `"stale"`)); value != nil {
 		t.Fatalf("stale result=%+v err=%v", value, err)
 	} else {
 		var native gophercloud.ErrUnexpectedResponseCode
@@ -227,7 +227,7 @@ func TestMetadataHeaderSnapshotsConditionsAndProtectedCapabilities(t *testing.T)
 	}
 	for _, key := range []string{"X-Auth-Token", "X-Service-Token", "Authorization", "Host", "Cookie", "Content-Type", "Content-Length", "OpenStack-API-Version", "X-OpenStack-Volume-API-Version", "Transfer-Encoding", "Connection"} {
 		before := len(headers)
-		_, err := scope.Get(context.Background(), metadata.WithHeader(key, "owned"))
+		_, err := scope.Get(context.Background(), request.Header(key, "owned"))
 		if !errors.Is(err, resource.ErrInvalidOption) || len(headers) != before {
 			t.Fatalf("protected=%s err=%v calls=%d", key, err, len(headers)-before)
 		}
@@ -243,7 +243,7 @@ func TestMetadataHeaderSnapshotsConditionsAndProtectedCapabilities(t *testing.T)
 		t.Fatalf("equal source aliases err=%v", err)
 	}
 	// Custom options cannot introduce body/query/version capabilities.
-	for _, option := range []metadata.Option{nil, request.WithField[metadata.Opts]("extension", true), request.WithQuery[metadata.Opts]("limit", "1"), request.WithArgument[metadata.Opts]("microversion", "3.99"), metadata.WithHeader("Bad:Header", "value"), metadata.WithHeader("X-Control", "\x01")} {
+	for _, option := range []metadata.Option{nil, request.Custom(request.WithField[metadata.Opts]("extension", true)), request.Custom(request.WithQuery[metadata.Opts]("limit", "1")), request.Custom(request.WithArgument[metadata.Opts]("microversion", "3.99")), request.Header("Bad:Header", "value"), request.Header("X-Control", "\x01")} {
 		before := len(headers)
 		_, err := scope.Get(context.Background(), option)
 		if err == nil || len(headers) != before {
@@ -262,11 +262,11 @@ func TestMetadataPreparedOptionsAreIndependentAndLiveTokenKeepsFixedTarget(t *te
 		w.WriteHeader(200)
 	})
 	var retained *request.Config[metadata.Opts]
-	custom := func(cfg *request.Config[metadata.Opts]) error {
+	custom := request.Custom(func(cfg *request.Config[metadata.Opts]) error {
 		cfg.Headers = map[string]string{"X-Frozen": "before"}
 		retained = cfg
 		return nil
-	}
+	})
 	underlying := client.ProviderClient.HTTPClient.Transport
 	client.ProviderClient.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		wire, err := underlying.RoundTrip(r)
@@ -378,7 +378,7 @@ func TestMetadataPreflightZeroHTTPAndBetweenDeletionSourceChecks(t *testing.T) {
 		func() error { _, err := (*Scope)(nil).Merge(context.Background(), nil); return err },
 		func() error { _, err := (*Scope)(nil).DeleteKeys(context.Background(), nil); return err },
 		func() error {
-			_, err := scope.DeleteKeys(context.Background(), []string{}, func(*request.Config[metadata.Opts]) error { client.Type = "compute"; return nil })
+			_, err := scope.DeleteKeys(context.Background(), []string{}, request.Custom(func(*request.Config[metadata.Opts]) error { client.Type = "compute"; return nil }))
 			return err
 		},
 	} {
@@ -393,7 +393,7 @@ func TestMetadataPreflightZeroHTTPAndBetweenDeletionSourceChecks(t *testing.T) {
 	client.Type = "block-storage"
 	ctx, cancel = context.WithCancel(context.Background())
 	defer cancel()
-	_, err := scope.DeleteKeys(ctx, []string{}, func(*request.Config[metadata.Opts]) error { cancel(); return nil })
+	_, err := scope.DeleteKeys(ctx, []string{}, request.Custom(func(*request.Config[metadata.Opts]) error { cancel(); return nil }))
 	if !errors.Is(err, context.Canceled) || calls != 0 {
 		t.Fatalf("post option cancellation err=%v calls=%d", err, calls)
 	}
@@ -467,7 +467,7 @@ func TestMetadataUTF8AndSelectedOriginAreValidatedBeforeOptionsAndHTTP(t *testin
 		jsonResponse(w, response)
 	})
 	var applied int
-	option := func(*request.Config[metadata.Opts]) error { applied++; return nil }
+	option := request.Custom(func(*request.Config[metadata.Opts]) error { applied++; return nil })
 	for _, values := range []map[string]string{
 		{string([]byte{0xff}): "key"}, {"value": string([]byte{0xff})},
 		{string([]byte{0xfe}): "first", string([]byte{0xff}): "second"},

@@ -38,11 +38,12 @@ type MetadataResult struct {
 // A partial result accompanies the first failed key; deletion is not atomic.
 type MetadataDeleteResult = metadata.DeleteResult
 
+// MetadataOption is metadata.Option: WithMetadataHeaders, request.Header or
+// request.Custom over *request.Config[metadata.Opts]. Other shared calls fail
+// with resource.ErrInvalidOption before HTTP.
 type MetadataOption = metadata.Option
 
-func WithMetadataHeader(key, value string) MetadataOption {
-	return metadata.WithHeader(key, value)
-}
+// WithMetadataHeaders merges ordinary headers like metadata.WithHeaders.
 func WithMetadataHeaders(headers map[string]string) MetadataOption {
 	return metadata.WithHeaders(headers)
 }
@@ -176,7 +177,7 @@ func (a *API) prepareMetadata(ctx context.Context, id string, options []Metadata
 	if err := cloudsnapshot.ValidateBackupExportID(id); err != nil {
 		return nil, err
 	}
-	config, err := request.Apply(metadata.Opts{}, append([]MetadataOption(nil), options...)...)
+	config, err := cindermetadata.ApplyOptions(append([]MetadataOption(nil), options...)...)
 	if err != nil {
 		return nil, err
 	}

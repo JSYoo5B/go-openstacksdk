@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -34,7 +34,7 @@ func TestGroupResetStatusRecordPostsAction(t *testing.T) {
 	for _, code := range []int{200, 204, 399, 400, 404, 409, 500} {
 		t.Run(fmt.Sprint(code), func(t *testing.T) {
 			api, calls := groupAPI(t, "3.20", func(*http.Request) *http.Response { return groupWire(code, `{"x":1}`) })
-			v, err := api.ResetStatusRecord(context.Background(), "g1", "error", groups.WithRecordResetStatusHeaders(map[string]string{"X-Trace": "t"}))
+			v, err := api.ResetStatusRecord(context.Background(), "g1", "error", request.Headers(map[string]string{"X-Trace": "t"}))
 			if calls.Len() != 1 || calls.Calls()[0].Header.Get("OpenStack-API-Version") != "volume 3.20" || calls.Calls()[0].Header.Get("X-Trace") != "t" {
 				t.Fatal(calls.Calls())
 			}

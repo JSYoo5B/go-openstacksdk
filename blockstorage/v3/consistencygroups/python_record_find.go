@@ -7,10 +7,11 @@ import (
 	"iter"
 	"maps"
 	"net/url"
-	"slices"
 	"strings"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -52,7 +53,7 @@ func (a *API) FindRecord(ctx context.Context, identity string, options ...Record
 	if err = recordID(identity); err != nil {
 		return nil, recordWrap(ctx, operation, err)
 	}
-	v, err := applyRecord(p, RecordFindOpts{}, copyFindOpts, slices.Clone(options))
+	v, err := applyRecord(p, RecordFindOpts{}, copyFindOpts, calls.Translate(options, findCalls))
 	if err != nil {
 		return nil, recordWrap(ctx, operation, err)
 	}
@@ -121,7 +122,19 @@ type RecordFindOpts struct {
 	Microversion  *string
 	Headers       map[string]string
 }
-type RecordFindOption func(*RecordFindOpts) error
+
+// RecordFindOption is one option of FindRecord: WithRecordFindOpts,
+// WithRecordFindDetails, request.Custom over *RecordFindOpts,
+// request.IgnoreMissing, request.Microversion or request.Headers (replaces
+// the headers). Other shared calls fail with resource.ErrInvalidOption
+// before HTTP.
+type RecordFindOption = request.FindCall
+
+var findCalls = calls.Spec[RecordFindOpts]{
+	Headers:       calls.Value(func(o *RecordFindOpts) *map[string]string { return &o.Headers }),
+	Microversion:  calls.Pointer(func(o *RecordFindOpts) **string { return &o.Microversion }),
+	IgnoreMissing: calls.Pointer(func(o *RecordFindOpts) **bool { return &o.IgnoreMissing }),
+}
 
 func copyFindOpts(v RecordFindOpts) RecordFindOpts {
 	v.Headers = maps.Clone(v.Headers)
@@ -144,18 +157,8 @@ func copyFindOpts(v RecordFindOpts) RecordFindOpts {
 }
 func WithRecordFindOpts(v RecordFindOpts) RecordFindOption {
 	owned := copyFindOpts(v)
-	return func(c *RecordFindOpts) error { *c = copyFindOpts(owned); return nil }
-}
-func WithRecordFindIgnoreMissing(v bool) RecordFindOption {
-	return func(c *RecordFindOpts) error { x := v; c.IgnoreMissing = &x; return nil }
+	return request.Custom(func(c *RecordFindOpts) error { *c = copyFindOpts(owned); return nil })
 }
 func WithRecordFindDetails(v bool) RecordFindOption {
-	return func(c *RecordFindOpts) error { x := v; c.Details = &x; return nil }
-}
-func WithRecordFindMicroversion(v string) RecordFindOption {
-	return func(c *RecordFindOpts) error { x := v; c.Microversion = &x; return nil }
-}
-func WithRecordFindHeaders(v map[string]string) RecordFindOption {
-	owned := maps.Clone(v)
-	return func(c *RecordFindOpts) error { c.Headers = maps.Clone(owned); return nil }
+	return request.Custom(func(c *RecordFindOpts) error { x := v; c.Details = &x; return nil })
 }

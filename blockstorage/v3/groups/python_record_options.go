@@ -9,9 +9,11 @@ import (
 	"strconv"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/jsonfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 // RecordGetOpts defaults ListVolume to absent, distinct from an explicit false.
@@ -21,7 +23,13 @@ type RecordGetOpts struct {
 	Microversion *string
 	Headers      map[string]string
 }
-type RecordGetOption func(*RecordGetOpts) error
+
+// RecordGetOption is one option of GetRecord: WithRecordGetOpts,
+// WithRecordGetListVolume, WithRecordGetField, request.Custom over
+// *RecordGetOpts, request.Microversion or request.Headers (replaces the
+// headers). Other shared calls fail with resource.ErrInvalidOption before
+// HTTP.
+type RecordGetOption = request.GetCall
 
 func copyGet(v RecordGetOpts) RecordGetOpts {
 	v.Fields = recordClone(v.Fields)
@@ -38,24 +46,25 @@ func copyGet(v RecordGetOpts) RecordGetOpts {
 }
 func WithRecordGetOpts(v RecordGetOpts) RecordGetOption {
 	owned := copyGet(v)
-	return func(c *RecordGetOpts) error { *c = copyGet(owned); return nil }
+	return request.Custom(func(c *RecordGetOpts) error { *c = copyGet(owned); return nil })
 }
 func WithRecordGetListVolume(v bool) RecordGetOption {
-	return func(c *RecordGetOpts) error { x := v; c.ListVolume = &x; return nil }
+	return request.Custom(func(c *RecordGetOpts) error { x := v; c.ListVolume = &x; return nil })
 }
 
 // WithRecordGetField retains declared attrs accepted by Source's deprecated
-// get_group kwargs. They seed response state, never become GET query fields.
+// get_group kwargs. They seed response state, never become GET query fields,
+// so this stays an operation-specific option rather than request.Field.
 func WithRecordGetField(key string, value any) RecordGetOption {
 	if key == "id" || recordReserved(key) {
-		return func(*RecordGetOpts) error { return recordInvalid("group get control %q is SDK owned", key) }
+		return request.Custom(func(*RecordGetOpts) error { return recordInvalid("group get control %q is SDK owned", key) })
 	}
 	if !recordKnown(key) {
-		return func(*RecordGetOpts) error { return nil }
+		return request.Custom(func(*RecordGetOpts) error { return nil })
 	}
 	raw, err := json.Marshal(value)
 	owned := bytes.Clone(raw)
-	return func(c *RecordGetOpts) error {
+	return request.Custom(func(c *RecordGetOpts) error {
 		if err != nil {
 			return err
 		}
@@ -64,14 +73,7 @@ func WithRecordGetField(key string, value any) RecordGetOption {
 		}
 		c.Fields[key] = bytes.Clone(owned)
 		return nil
-	}
-}
-func WithRecordGetMicroversion(v string) RecordGetOption {
-	return func(c *RecordGetOpts) error { x := v; c.Microversion = &x; return nil }
-}
-func WithRecordGetHeaders(v map[string]string) RecordGetOption {
-	owned := maps.Clone(v)
-	return func(c *RecordGetOpts) error { c.Headers = maps.Clone(owned); return nil }
+	})
 }
 
 // RecordCreateOpts uses known Source attributes; unknown attrs are discarded.
@@ -81,7 +83,13 @@ type RecordCreateOpts struct {
 	Microversion *string
 	Headers      map[string]string
 }
-type RecordCreateOption func(*RecordCreateOpts) error
+
+// RecordCreateOption is one option of CreateRecord: WithRecordCreateOpts,
+// request.Custom over *RecordCreateOpts, request.Field (a declared Source
+// attribute; unknown keys are discarded, SDK-owned controls fail),
+// request.Microversion or request.Headers (replaces the headers). Other
+// shared calls fail with resource.ErrInvalidOption before HTTP.
+type RecordCreateOption = request.WriteCall
 
 func copyCreate(v RecordCreateOpts) RecordCreateOpts {
 	v.Fields = recordClone(v.Fields)
@@ -94,34 +102,7 @@ func copyCreate(v RecordCreateOpts) RecordCreateOpts {
 }
 func WithRecordCreateOpts(v RecordCreateOpts) RecordCreateOption {
 	owned := copyCreate(v)
-	return func(c *RecordCreateOpts) error { *c = copyCreate(owned); return nil }
-}
-func WithRecordCreateField(key string, value any) RecordCreateOption {
-	if recordReserved(key) {
-		return func(*RecordCreateOpts) error { return recordInvalid("Resource control %q is SDK owned", key) }
-	}
-	if !recordKnown(key) {
-		return func(*RecordCreateOpts) error { return nil }
-	}
-	raw, err := json.Marshal(value)
-	owned := bytes.Clone(raw)
-	return func(c *RecordCreateOpts) error {
-		if err != nil {
-			return err
-		}
-		if c.Fields == nil {
-			c.Fields = make(map[string]json.RawMessage)
-		}
-		c.Fields[key] = bytes.Clone(owned)
-		return nil
-	}
-}
-func WithRecordCreateMicroversion(v string) RecordCreateOption {
-	return func(c *RecordCreateOpts) error { x := v; c.Microversion = &x; return nil }
-}
-func WithRecordCreateHeaders(v map[string]string) RecordCreateOption {
-	owned := maps.Clone(v)
-	return func(c *RecordCreateOpts) error { c.Headers = maps.Clone(owned); return nil }
+	return request.Custom(func(c *RecordCreateOpts) error { *c = copyCreate(owned); return nil })
 }
 
 // RecordUpdateOpts is an owned partial update. Empty, unknown-only and ID-only
@@ -131,7 +112,13 @@ type RecordUpdateOpts struct {
 	Microversion *string
 	Headers      map[string]string
 }
-type RecordUpdateOption func(*RecordUpdateOpts) error
+
+// RecordUpdateOption is one option of UpdateRecord: WithRecordUpdateOpts,
+// request.Custom over *RecordUpdateOpts, request.Field (a declared Source
+// attribute; unknown keys are discarded, SDK-owned controls fail),
+// request.Microversion or request.Headers (replaces the headers). Other
+// shared calls fail with resource.ErrInvalidOption before HTTP.
+type RecordUpdateOption = request.WriteCall
 
 func copyUpdate(v RecordUpdateOpts) RecordUpdateOpts {
 	v.Fields = recordClone(v.Fields)
@@ -144,34 +131,7 @@ func copyUpdate(v RecordUpdateOpts) RecordUpdateOpts {
 }
 func WithRecordUpdateOpts(v RecordUpdateOpts) RecordUpdateOption {
 	owned := copyUpdate(v)
-	return func(c *RecordUpdateOpts) error { *c = copyUpdate(owned); return nil }
-}
-func WithRecordUpdateField(key string, value any) RecordUpdateOption {
-	if recordReserved(key) {
-		return func(*RecordUpdateOpts) error { return recordInvalid("Resource control %q is SDK owned", key) }
-	}
-	if !recordKnown(key) {
-		return func(*RecordUpdateOpts) error { return nil }
-	}
-	raw, err := json.Marshal(value)
-	owned := bytes.Clone(raw)
-	return func(c *RecordUpdateOpts) error {
-		if err != nil {
-			return err
-		}
-		if c.Fields == nil {
-			c.Fields = make(map[string]json.RawMessage)
-		}
-		c.Fields[key] = bytes.Clone(owned)
-		return nil
-	}
-}
-func WithRecordUpdateMicroversion(v string) RecordUpdateOption {
-	return func(c *RecordUpdateOpts) error { x := v; c.Microversion = &x; return nil }
-}
-func WithRecordUpdateHeaders(v map[string]string) RecordUpdateOption {
-	owned := maps.Clone(v)
-	return func(c *RecordUpdateOpts) error { c.Headers = maps.Clone(owned); return nil }
+	return request.Custom(func(c *RecordUpdateOpts) error { *c = copyUpdate(owned); return nil })
 }
 
 // RecordSourceOpts keeps Source's two required nullable source IDs explicit.
@@ -181,7 +141,13 @@ type RecordSourceOpts struct {
 	Microversion                                      *string
 	Headers                                           map[string]string
 }
-type RecordSourceOption func(*RecordSourceOpts) error
+
+// RecordSourceOption is one option of CreateFromSourceRecord:
+// WithRecordSourceOpts, WithRecordSource<Argument>, request.Custom over
+// *RecordSourceOpts, request.Microversion or request.Headers (replaces the
+// headers). Other shared calls fail with resource.ErrInvalidOption before
+// HTTP.
+type RecordSourceOption = request.WriteCall
 
 func copySource(v RecordSourceOpts) RecordSourceOpts {
 	v.GroupSnapshotID = bytes.Clone(v.GroupSnapshotID)
@@ -197,58 +163,51 @@ func copySource(v RecordSourceOpts) RecordSourceOpts {
 }
 func WithRecordSourceOpts(v RecordSourceOpts) RecordSourceOption {
 	owned := copySource(v)
-	return func(c *RecordSourceOpts) error { *c = copySource(owned); return nil }
+	return request.Custom(func(c *RecordSourceOpts) error { *c = copySource(owned); return nil })
 }
 func WithRecordSourceGroupSnapshotID(value any) RecordSourceOption {
 	raw, err := json.Marshal(value)
 	owned := bytes.Clone(raw)
-	return func(c *RecordSourceOpts) error {
+	return request.Custom(func(c *RecordSourceOpts) error {
 		if err != nil {
 			return err
 		}
 		c.GroupSnapshotID = bytes.Clone(owned)
 		return nil
-	}
+	})
 }
 func WithRecordSourceSourceGroupID(value any) RecordSourceOption {
 	raw, err := json.Marshal(value)
 	owned := bytes.Clone(raw)
-	return func(c *RecordSourceOpts) error {
+	return request.Custom(func(c *RecordSourceOpts) error {
 		if err != nil {
 			return err
 		}
 		c.SourceGroupID = bytes.Clone(owned)
 		return nil
-	}
+	})
 }
 func WithRecordSourceName(value any) RecordSourceOption {
 	raw, err := json.Marshal(value)
 	owned := bytes.Clone(raw)
-	return func(c *RecordSourceOpts) error {
+	return request.Custom(func(c *RecordSourceOpts) error {
 		if err != nil {
 			return err
 		}
 		c.Name = bytes.Clone(owned)
 		return nil
-	}
+	})
 }
 func WithRecordSourceDescription(value any) RecordSourceOption {
 	raw, err := json.Marshal(value)
 	owned := bytes.Clone(raw)
-	return func(c *RecordSourceOpts) error {
+	return request.Custom(func(c *RecordSourceOpts) error {
 		if err != nil {
 			return err
 		}
 		c.Description = bytes.Clone(owned)
 		return nil
-	}
-}
-func WithRecordSourceMicroversion(v string) RecordSourceOption {
-	return func(c *RecordSourceOpts) error { x := v; c.Microversion = &x; return nil }
-}
-func WithRecordSourceHeaders(v map[string]string) RecordSourceOption {
-	owned := maps.Clone(v)
-	return func(c *RecordSourceOpts) error { c.Headers = maps.Clone(owned); return nil }
+	})
 }
 
 // RecordDeleteOpts sends Source's POST action, with owned false/true values.
@@ -258,7 +217,13 @@ type RecordDeleteOpts struct {
 	Microversion  *string
 	Headers       map[string]string
 }
-type RecordDeleteOption func(*RecordDeleteOpts) error
+
+// RecordDeleteOption is one option of DeleteRecord: WithRecordDeleteOpts,
+// WithRecordDeleteVolumes, request.Custom over *RecordDeleteOpts,
+// request.IgnoreMissing, request.Microversion or request.Headers (replaces
+// the headers). Other shared calls fail with resource.ErrInvalidOption
+// before HTTP.
+type RecordDeleteOption = request.DeleteCall
 
 func copyDelete(v RecordDeleteOpts) RecordDeleteOpts {
 	v.Headers = maps.Clone(v.Headers)
@@ -278,20 +243,10 @@ func copyDelete(v RecordDeleteOpts) RecordDeleteOpts {
 }
 func WithRecordDeleteOpts(v RecordDeleteOpts) RecordDeleteOption {
 	owned := copyDelete(v)
-	return func(c *RecordDeleteOpts) error { *c = copyDelete(owned); return nil }
+	return request.Custom(func(c *RecordDeleteOpts) error { *c = copyDelete(owned); return nil })
 }
 func WithRecordDeleteVolumes(v bool) RecordDeleteOption {
-	return func(c *RecordDeleteOpts) error { x := v; c.DeleteVolumes = &x; return nil }
-}
-func WithRecordDeleteIgnoreMissing(v bool) RecordDeleteOption {
-	return func(c *RecordDeleteOpts) error { x := v; c.IgnoreMissing = &x; return nil }
-}
-func WithRecordDeleteMicroversion(v string) RecordDeleteOption {
-	return func(c *RecordDeleteOpts) error { x := v; c.Microversion = &x; return nil }
-}
-func WithRecordDeleteHeaders(v map[string]string) RecordDeleteOption {
-	owned := maps.Clone(v)
-	return func(c *RecordDeleteOpts) error { c.Headers = maps.Clone(owned); return nil }
+	return request.Custom(func(c *RecordDeleteOpts) error { x := v; c.DeleteVolumes = &x; return nil })
 }
 
 // RecordListOpts keeps details=True, declared server aliases, local Body filters
@@ -306,7 +261,80 @@ type RecordListOpts struct {
 	Marker       string
 	MaxItems     int
 }
-type RecordListOption func(*RecordListOpts) error
+
+// RecordListOption is one option of ListRecords: WithRecordListOpts,
+// WithRecordListDetails, request.Custom over *RecordListOpts, request.Query
+// (a declared server alias or Body filter as JSON; other keys are ignored,
+// SDK-owned controls fail), request.Limit, request.Marker, request.MaxItems,
+// request.Paginated, request.Microversion or request.Headers (replaces the
+// headers). Other shared calls fail with resource.ErrInvalidOption before
+// HTTP.
+type RecordListOption = request.ListCall
+
+// recordJSON stores one declared keyword: an SDK-owned key fails, a key that
+// accept rejects is discarded with its marshal error, others are stored.
+func recordJSON(target map[string]json.RawMessage, key string, raw json.RawMessage, err error, accept func(string) bool) (map[string]json.RawMessage, error) {
+	if recordReserved(key) {
+		return target, recordInvalid("Resource control %q is SDK owned", key)
+	}
+	if !accept(key) {
+		return target, nil
+	}
+	if err != nil {
+		return target, err
+	}
+	if target == nil {
+		target = make(map[string]json.RawMessage)
+	}
+	target[key] = bytes.Clone(raw)
+	return target, nil
+}
+
+var (
+	getCalls = calls.Spec[RecordGetOpts]{
+		Headers:      calls.Value(func(o *RecordGetOpts) *map[string]string { return &o.Headers }),
+		Microversion: calls.Pointer(func(o *RecordGetOpts) **string { return &o.Microversion }),
+	}
+	createCalls = calls.Spec[RecordCreateOpts]{
+		Field: func(o *RecordCreateOpts, e request.CallEntry) (err error) {
+			o.Fields, err = recordJSON(o.Fields, e.Key, e.JSON, e.JSONErr, recordKnown)
+			return err
+		},
+		Headers:      calls.Value(func(o *RecordCreateOpts) *map[string]string { return &o.Headers }),
+		Microversion: calls.Pointer(func(o *RecordCreateOpts) **string { return &o.Microversion }),
+	}
+	updateCalls = calls.Spec[RecordUpdateOpts]{
+		Field: func(o *RecordUpdateOpts, e request.CallEntry) (err error) {
+			o.Fields, err = recordJSON(o.Fields, e.Key, e.JSON, e.JSONErr, recordKnown)
+			return err
+		},
+		Headers:      calls.Value(func(o *RecordUpdateOpts) *map[string]string { return &o.Headers }),
+		Microversion: calls.Pointer(func(o *RecordUpdateOpts) **string { return &o.Microversion }),
+	}
+	sourceCalls = calls.Spec[RecordSourceOpts]{
+		Headers:      calls.Value(func(o *RecordSourceOpts) *map[string]string { return &o.Headers }),
+		Microversion: calls.Pointer(func(o *RecordSourceOpts) **string { return &o.Microversion }),
+	}
+	deleteCalls = calls.Spec[RecordDeleteOpts]{
+		Headers:       calls.Value(func(o *RecordDeleteOpts) *map[string]string { return &o.Headers }),
+		Microversion:  calls.Pointer(func(o *RecordDeleteOpts) **string { return &o.Microversion }),
+		IgnoreMissing: calls.Pointer(func(o *RecordDeleteOpts) **bool { return &o.IgnoreMissing }),
+	}
+	listCalls = calls.Spec[RecordListOpts]{
+		Query: calls.JSONQuery(func(o *RecordListOpts, key string, raw json.RawMessage, err error) (out error) {
+			o.Query, out = recordJSON(o.Query, key, raw, err, func(k string) bool { return recordServer(k) || recordKnown(k) })
+			return out
+		}),
+		Headers:      calls.Value(func(o *RecordListOpts) *map[string]string { return &o.Headers }),
+		Microversion: calls.Pointer(func(o *RecordListOpts) **string { return &o.Microversion }),
+		Paging: calls.Paging[RecordListOpts]{
+			Limit:     calls.Pointer(func(o *RecordListOpts) **int { return &o.Limit }),
+			Marker:    calls.Value(func(o *RecordListOpts) *string { return &o.Marker }),
+			MaxItems:  calls.Value(func(o *RecordListOpts) *int { return &o.MaxItems }),
+			Paginated: calls.Pointer(func(o *RecordListOpts) **bool { return &o.Paginated }),
+		},
+	}
+)
 
 func copyList(v RecordListOpts) RecordListOpts {
 	v.Query = recordClone(v.Query)
@@ -331,29 +359,10 @@ func copyList(v RecordListOpts) RecordListOpts {
 }
 func WithRecordListOpts(v RecordListOpts) RecordListOption {
 	owned := copyList(v)
-	return func(c *RecordListOpts) error { *c = copyList(owned); return nil }
-}
-func WithRecordListHeaders(v map[string]string) RecordListOption {
-	owned := maps.Clone(v)
-	return func(c *RecordListOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
-func WithRecordListMicroversion(v string) RecordListOption {
-	return func(c *RecordListOpts) error { x := v; c.Microversion = &x; return nil }
+	return request.Custom(func(c *RecordListOpts) error { *c = copyList(owned); return nil })
 }
 func WithRecordListDetails(v bool) RecordListOption {
-	return func(c *RecordListOpts) error { x := v; c.Details = &x; return nil }
-}
-func WithRecordListPaginated(v bool) RecordListOption {
-	return func(c *RecordListOpts) error { x := v; c.Paginated = &x; return nil }
-}
-func WithRecordListLimit(v int) RecordListOption {
-	return func(c *RecordListOpts) error { x := v; c.Limit = &x; return nil }
-}
-func WithRecordListMarker(v string) RecordListOption {
-	return func(c *RecordListOpts) error { c.Marker = v; return nil }
-}
-func WithRecordListMaxItems(v int) RecordListOption {
-	return func(c *RecordListOpts) error { c.MaxItems = v; return nil }
+	return request.Custom(func(c *RecordListOpts) error { x := v; c.Details = &x; return nil })
 }
 func recordServer(key string) bool {
 	switch key {
@@ -361,26 +370,6 @@ func recordServer(key string) bool {
 		return true
 	}
 	return false
-}
-func WithRecordListQuery(key string, value any) RecordListOption {
-	if recordReserved(key) {
-		return func(*RecordListOpts) error { return recordInvalid("Resource control %q is SDK owned", key) }
-	}
-	if !recordServer(key) && !recordKnown(key) {
-		return func(*RecordListOpts) error { return nil }
-	}
-	raw, err := json.Marshal(value)
-	owned := bytes.Clone(raw)
-	return func(c *RecordListOpts) error {
-		if err != nil {
-			return err
-		}
-		if c.Query == nil {
-			c.Query = make(map[string]json.RawMessage)
-		}
-		c.Query[key] = bytes.Clone(owned)
-		return nil
-	}
 }
 func prepareList(v RecordListOpts) (url.Values, map[string]json.RawMessage, rest.ListControl, error) {
 	query, filters := make(url.Values), make(map[string]json.RawMessage)

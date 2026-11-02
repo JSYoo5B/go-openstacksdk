@@ -9,9 +9,11 @@ import (
 	"strconv"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/jsonfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 // RecordFindOpts defaults to details and ignore-missing enabled. Query and
@@ -24,7 +26,33 @@ type RecordFindOpts struct {
 	Marker                                         string
 	MaxItems                                       int
 }
-type RecordFindOption func(*RecordFindOpts) error
+
+// RecordFindOption is one option of FindRecord: WithRecordFindOpts,
+// WithRecordFindDetails, WithRecordFindAllProjects, WithRecordFindPaginated,
+// WithRecordFindLimit, WithRecordFindMarker, WithRecordFindMaxItems,
+// request.Custom over *RecordFindOpts, request.IgnoreMissing, request.Headers
+// (replaces the headers) or request.Query (a declared server filter or Body
+// attribute sent as JSON; other keys are discarded with their marshal error).
+// Other shared calls fail with resource.ErrInvalidOption before HTTP.
+type RecordFindOption = request.FindCall
+
+var recordFindCalls = calls.Spec[RecordFindOpts]{
+	IgnoreMissing: calls.Pointer(func(c *RecordFindOpts) **bool { return &c.IgnoreMissing }),
+	Headers:       calls.Value(func(c *RecordFindOpts) *map[string]string { return &c.Headers }),
+	Query: calls.JSONQuery(func(c *RecordFindOpts, key string, raw json.RawMessage, err error) error {
+		if _, server := findQueryWire(key); !server && !findBodyKnown(key) {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+		if c.Query == nil {
+			c.Query = make(map[string]json.RawMessage)
+		}
+		c.Query[key] = raw
+		return nil
+	}),
+}
 
 func copyFindOpts(v RecordFindOpts) RecordFindOpts {
 	v.Query = findClone(v.Query)
@@ -43,32 +71,25 @@ func copyFindOpts(v RecordFindOpts) RecordFindOpts {
 }
 func WithRecordFindOpts(v RecordFindOpts) RecordFindOption {
 	owned := copyFindOpts(v)
-	return func(c *RecordFindOpts) error { *c = copyFindOpts(owned); return nil }
-}
-func WithRecordFindIgnoreMissing(v bool) RecordFindOption {
-	return func(c *RecordFindOpts) error { x := v; c.IgnoreMissing = &x; return nil }
+	return request.Custom(func(c *RecordFindOpts) error { *c = copyFindOpts(owned); return nil })
 }
 func WithRecordFindDetails(v bool) RecordFindOption {
-	return func(c *RecordFindOpts) error { x := v; c.Details = &x; return nil }
+	return request.Custom(func(c *RecordFindOpts) error { x := v; c.Details = &x; return nil })
 }
 func WithRecordFindAllProjects(v bool) RecordFindOption {
-	return func(c *RecordFindOpts) error { x := v; c.AllProjects = &x; return nil }
+	return request.Custom(func(c *RecordFindOpts) error { x := v; c.AllProjects = &x; return nil })
 }
 func WithRecordFindPaginated(v bool) RecordFindOption {
-	return func(c *RecordFindOpts) error { x := v; c.Paginated = &x; return nil }
+	return request.Custom(func(c *RecordFindOpts) error { x := v; c.Paginated = &x; return nil })
 }
 func WithRecordFindLimit(v int) RecordFindOption {
-	return func(c *RecordFindOpts) error { x := v; c.Limit = &x; return nil }
+	return request.Custom(func(c *RecordFindOpts) error { x := v; c.Limit = &x; return nil })
 }
 func WithRecordFindMarker(v string) RecordFindOption {
-	return func(c *RecordFindOpts) error { c.Marker = v; return nil }
+	return request.Custom(func(c *RecordFindOpts) error { c.Marker = v; return nil })
 }
 func WithRecordFindMaxItems(v int) RecordFindOption {
-	return func(c *RecordFindOpts) error { c.MaxItems = v; return nil }
-}
-func WithRecordFindHeaders(v map[string]string) RecordFindOption {
-	owned := maps.Clone(v)
-	return func(c *RecordFindOpts) error { c.Headers = maps.Clone(owned); return nil }
+	return request.Custom(func(c *RecordFindOpts) error { c.MaxItems = v; return nil })
 }
 func findQueryWire(key string) (string, bool) {
 	switch key {
@@ -78,24 +99,6 @@ func findQueryWire(key string) (string, bool) {
 		return "all_tenants", true
 	default:
 		return "", false
-	}
-}
-func WithRecordFindQuery(key string, value any) RecordFindOption {
-	_, server := findQueryWire(key)
-	if !server && !findBodyKnown(key) {
-		return func(*RecordFindOpts) error { return nil }
-	}
-	raw, err := json.Marshal(value)
-	owned := bytes.Clone(raw)
-	return func(c *RecordFindOpts) error {
-		if err != nil {
-			return err
-		}
-		if c.Query == nil {
-			c.Query = make(map[string]json.RawMessage)
-		}
-		c.Query[key] = bytes.Clone(owned)
-		return nil
 	}
 }
 func prepareFindQuery(v RecordFindOpts, identity string) (url.Values, map[string]json.RawMessage, rest.ListControl, error) {

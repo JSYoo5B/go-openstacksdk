@@ -13,9 +13,9 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments.API.CreateRecord`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments.WithRecordCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments.WithRecordCreateOpts`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments.WithRecordCreateHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments.WithRecordCreateModeSupported`
 
 - CreateRecord posts the Source attachment envelope to summary /attachments, with mandatory volume_id renamed to volume_uuid. Omitted instance creates a reservation without instance_uuid; truthy instance renames to instance_uuid while explicit JSON falsey instances retain the original instance key. Unknown Source kwargs are ignored and known fields preserve omission/null/false/zero/empty/large JSON values.
@@ -49,13 +49,13 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments.API.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments.WithRecordListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments.WithRecordListQuery`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments.WithRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments.WithRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments.WithRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments.WithRecordListPaginated`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments.WithRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments.WithRecordListMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - ListRecords lazily GETs summary /attachments rather than native /attachments/detail, follows attachments_links and preserves actual per-page wire/declared fields and JSON alias ordering. id/status/project_id/volume_id/instance_id are server queries, all_projects maps all_tenants, server alias is accepted and client alias takes precedence even when null. Requests encoding preserves Python boolean spelling and iterable expansion; declared nonserver attribute names filter locally and unknown/wire-only Body aliases are ignored.
   Tests: `blockstorage/v3/attachments/python_records_contracts_test.go:TestPythonAttachmentRecordListSummaryQueriesAndLinkedPages`, `blockstorage/v3/attachments/python_records_contracts_test.go:TestPythonAttachmentRecordListServerAliasPrecedence`, `blockstorage/v3/attachments/python_records_contracts_test.go:TestPythonAttachmentRecordListLocalFilteringAndRawRowCap`.
@@ -119,8 +119,8 @@ func main() {
     if err != nil { log.Fatal(err) }
     api := service.Attachments
     for value, err := range api.ListRecords(ctx,
-        attachments.WithRecordListQuery("volume_id", *volume),
-        attachments.WithRecordListMaxItems(100)) {
+        request.Query("volume_id", *volume),
+        request.MaxItems(100)) {
         if err != nil { log.Fatal(err) }
         data, err := json.MarshalIndent(value.Resource, "", "  ")
         if err != nil { log.Fatal(err) }
@@ -129,7 +129,7 @@ func main() {
     if *reserve {
         options := []attachments.RecordCreateOption{}
         if *instance != "" {
-            options = append(options, attachments.WithRecordCreateField("instance", *instance))
+            options = append(options, request.Field("instance", *instance))
         }
         value, err := api.CreateRecord(ctx, *volume, options...)
         if err != nil { log.Fatal(err) }

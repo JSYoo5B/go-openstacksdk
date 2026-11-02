@@ -13,6 +13,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/metadata"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cindermetadata"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
@@ -29,15 +30,24 @@ type RecordMetadataOpts struct {
 	Headers map[string]string
 	Seed    *SnapshotRecord
 }
-type RecordMetadataOption func(*RecordMetadataOpts) error
 
-func WithRecordMetadataHeader(key, value string) RecordMetadataOption {
-	return WithRecordMetadataHeaders(map[string]string{key: value})
+// RecordMetadataOption is one option of FetchMetadataRecord,
+// GetMetadataRecord, SetMetadataRecord and DeleteMetadataRecord:
+// WithRecordMetadataHeaders, WithRecordMetadataSeed, request.Header (one header merged like
+// WithRecordMetadataHeaders) or request.Custom over *RecordMetadataOpts.
+// Other shared calls fail with resource.ErrInvalidOption before HTTP.
+type RecordMetadataOption = request.GetCall
+
+var recordMetadataCalls = calls.Spec[RecordMetadataOpts]{
+	Header: calls.MergeHeader[RecordMetadataOpts](WithRecordMetadataHeaders),
 }
+
+// WithRecordMetadataHeaders merges ordinary headers validated like
+// metadata.WithHeaders.
 func WithRecordMetadataHeaders(headers map[string]string) RecordMetadataOption {
 	owned := maps.Clone(headers)
-	return func(cfg *RecordMetadataOpts) error {
-		native, err := request.Apply(metadata.Opts{}, metadata.WithHeaders(owned))
+	return request.Custom(func(cfg *RecordMetadataOpts) error {
+		native, err := cindermetadata.ApplyOptions(metadata.WithHeaders(owned))
 		if err != nil {
 			return err
 		}
@@ -46,11 +56,11 @@ func WithRecordMetadataHeaders(headers map[string]string) RecordMetadataOption {
 		}
 		maps.Copy(cfg.Headers, native.Headers)
 		return nil
-	}
+	})
 }
 func WithRecordMetadataSeed(seed *SnapshotRecord) RecordMetadataOption {
 	owned := cloneMetadataRecordSeed(seed)
-	return func(cfg *RecordMetadataOpts) error { cfg.Seed = cloneMetadataRecordSeed(owned); return nil }
+	return request.Custom(func(cfg *RecordMetadataOpts) error { cfg.Seed = cloneMetadataRecordSeed(owned); return nil })
 }
 
 func cloneMetadataRecordSeed(seed *SnapshotRecord) *SnapshotRecord {
@@ -119,7 +129,7 @@ func (a *API) prepareRecordMetadata(ctx context.Context, id string, options []Re
 		return nil, err
 	}
 	cfg := RecordMetadataOpts{Headers: make(map[string]string)}
-	for _, option := range slices.Clone(options) {
+	for _, option := range calls.Translate(slices.Clone(options), recordMetadataCalls) {
 		if err := guard(ctx); err != nil {
 			return nil, err
 		}
@@ -165,7 +175,7 @@ func (a *API) prepareRecordMetadata(ctx context.Context, id string, options []Re
 func applyRecordMetadataHeaders(ctx context.Context, source *cloudread.Source, headers map[string]string) error {
 	// Reuse metadata's concrete header validation even when an empty key list
 	// means no HTTP. Authentication, content and version controls remain owned.
-	cfg, err := request.Apply(metadata.Opts{}, metadata.WithHeaders(headers))
+	cfg, err := cindermetadata.ApplyOptions(metadata.WithHeaders(headers))
 	if err != nil {
 		return err
 	}
@@ -304,7 +314,7 @@ func (a *API) SetMetadataRecord(ctx context.Context, id string, values map[strin
 	// Applying options through the same captured state must not recapture an
 	// original route changed by a custom input callback.
 	cfg := RecordMetadataOpts{Headers: make(map[string]string)}
-	for _, option := range slices.Clone(options) {
+	for _, option := range calls.Translate(slices.Clone(options), recordMetadataCalls) {
 		if err := state.guard(ctx); err != nil {
 			return nil, wrap(err)
 		}

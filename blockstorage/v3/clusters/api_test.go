@@ -3,6 +3,7 @@ package clusters_test
 import (
 	"context"
 	"errors"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"net/http"
 	"strings"
 	"testing"
@@ -108,10 +109,10 @@ func TestClusterListDetailsQueryAndLocalFilters(t *testing.T) {
 		return 200, `{"clusters":[` + clRow + `,{"name":"c2","binary":"cinder-volume","state":"down"}]}`
 	})
 	values, err := api.All(context.Background(),
-		clusters.WithListQuery("binary", "cinder-volume"),
-		clusters.WithListQuery("is_up", true),
-		clusters.WithListQuery("state", "up"),
-		clusters.WithListQuery("unknown", 1))
+		request.Query("binary", "cinder-volume"),
+		request.Query("is_up", true),
+		request.Query("state", "up"),
+		request.Query("unknown", 1))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -160,7 +161,7 @@ func TestClusterFindFallsBackToDetailListByName(t *testing.T) {
 	if v, err = api.Find(context.Background(), "none"); err != nil || v != nil {
 		t.Fatal(err, v)
 	}
-	_, err = api.Find(context.Background(), "none", clusters.WithFindIgnoreMissing(false))
+	_, err = api.Find(context.Background(), "none", request.IgnoreMissing(false))
 	if !errors.Is(err, resource.ErrNotFound) {
 		t.Fatal(err)
 	}

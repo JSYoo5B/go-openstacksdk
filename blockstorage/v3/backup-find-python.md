@@ -13,11 +13,11 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.API.FindRecord`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.WithRecordFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.WithRecordFindDetails`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.WithRecordFindOpts`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.WithRecordFindQuery`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.WithRecordFindHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.WithRecordFindMaxItems`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.WithRecordFindPaginated`
 
@@ -78,6 +78,7 @@ import (
 
     sdk "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups"
+    "github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 func main() {
@@ -90,7 +91,7 @@ func main() {
     service, err := conn.BlockStorageV3(ctx)
     if err != nil { log.Fatal(err) }
     backup, err := service.Backups.FindRecord(ctx, *identity,
-        backups.WithRecordFindIgnoreMissing(false),
+        request.IgnoreMissing(false),
         backups.WithRecordFindDetails(false),
     )
     if err != nil { log.Fatal(err) }

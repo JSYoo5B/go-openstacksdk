@@ -234,6 +234,7 @@ import (
 
     sdk "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroups"
+    "github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 func show(value *consistencygroups.ConsistencyGroupRecord) {
@@ -278,19 +279,19 @@ func main() {
         value, err = api.GetRecord(ctx, *id)
     case "find":
         value, err = api.FindRecord(ctx, *id,
-            consistencygroups.WithRecordFindIgnoreMissing(!*strict),
+            request.IgnoreMissing(!*strict),
             consistencygroups.WithRecordFindDetails(!*summary))
     case "create":
         value, err = api.CreateRecord(ctx,
-            consistencygroups.WithRecordCreateField("volume_types", *volumeTypes),
-            consistencygroups.WithRecordCreateField("name", *name))
+            request.Field("volume_types", *volumeTypes),
+            request.Field("name", *name))
     case "clone":
         value, err = api.CreateFromSourceRecord(ctx,
             consistencygroups.WithRecordSourceConsistencyGroupID(*sourceGroup),
             consistencygroups.WithRecordSourceConsistencyGroupSnapshotID(*sourceSnapshot),
             consistencygroups.WithRecordSourceName(*name))
     case "update":
-        value, err = api.UpdateRecord(ctx, *id, consistencygroups.WithRecordUpdateField("name", *name))
+        value, err = api.UpdateRecord(ctx, *id, request.Field("name", *name))
     case "delete":
         err = api.DeleteRecord(ctx, *id, consistencygroups.WithRecordDeleteForce(*force),
             consistencygroups.WithRecordDeletePinnedSourceWire(*sourceWire))

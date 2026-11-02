@@ -3,6 +3,8 @@ package resourcefilters
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"maps"
 	"slices"
 	"unicode/utf8"
@@ -20,7 +22,23 @@ type RecordListOpts struct {
 	Control      resource.ListControl
 	JMESPath     *string
 }
-type RecordListOption func(*RecordListOpts) error
+
+// RecordListOption is one option of ListRecords, AllRecords, ListResult and
+// ProxyListRecords: WithRecordListOptions, WithRecordListQuery (replaces the
+// whole kwargs map), WithRecordListResource, WithRecordListControl,
+// WithRecordListJMESPath, WithRecordListProxyJMESValue, request.Headers
+// (replaces the headers), request.Microversion or request.Custom over
+// *RecordListOpts. Other shared calls fail with resource.ErrInvalidOption
+// before HTTP.
+type RecordListOption = request.GetCall
+
+var recordListCalls = calls.Spec[RecordListOpts]{
+	Headers: func(c *RecordListOpts, values map[string]string) error {
+		c.Headers = values
+		return nil
+	},
+	Microversion: calls.Pointer(func(c *RecordListOpts) **string { return &c.Microversion }),
+}
 
 func cloneOptions(value RecordListOpts) RecordListOpts {
 	value.Query = maps.Clone(value.Query)
@@ -70,51 +88,44 @@ func freezeQuery(value *RecordListOpts) error {
 func WithRecordListOptions(value RecordListOpts) RecordListOption {
 	owned := cloneOptions(value)
 	err := freezeQuery(&owned)
-	return func(c *RecordListOpts) error {
+	return request.Custom(func(c *RecordListOpts) error {
 		if err != nil {
 			return err
 		}
 		*c = cloneOptions(owned)
 		return nil
-	}
+	})
 }
 func WithRecordListQuery(value map[string]any) RecordListOption {
 	owned := RecordListOpts{Query: maps.Clone(value)}
 	err := freezeQuery(&owned)
-	return func(c *RecordListOpts) error {
+	return request.Custom(func(c *RecordListOpts) error {
 		if err != nil {
 			return err
 		}
 		c.Query = cloneOptions(owned).Query
 		return nil
-	}
+	})
 }
 func WithRecordListResource(value string) RecordListOption {
-	return func(c *RecordListOpts) error { c.Query["resource"] = value; return nil }
-}
-func WithRecordListHeaders(value map[string]string) RecordListOption {
-	owned := maps.Clone(value)
-	return func(c *RecordListOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
-func WithRecordListMicroversion(value string) RecordListOption {
-	return func(c *RecordListOpts) error { c.Microversion = &value; return nil }
+	return request.Custom(func(c *RecordListOpts) error { c.Query["resource"] = value; return nil })
 }
 func WithRecordListControl(value resource.ListControl) RecordListOption {
-	return func(c *RecordListOpts) error { c.Control = value; return nil }
+	return request.Custom(func(c *RecordListOpts) error { c.Control = value; return nil })
 }
 
 // WithRecordListJMESPath selects the Proxy expression. ProxyListRecords keeps
 // the opaque Source input; ListResult explicitly evaluates collected JSON rows.
 // As in the pinned Proxy, an empty expression means no transformation.
 func WithRecordListJMESPath(value string) RecordListOption {
-	return func(c *RecordListOpts) error {
+	return request.Custom(func(c *RecordListOpts) error {
 		if value == "" {
 			c.JMESPath = nil
 		} else {
 			c.JMESPath = &value
 		}
 		return nil
-	}
+	})
 }
 func copyCallbacks(values []RecordListOption) []RecordListOption { return slices.Clone(values) }
 
@@ -123,11 +134,11 @@ func copyCallbacks(values []RecordListOption) []RecordListOption { return slices
 func WithRecordListProxyJMESValue(value any) RecordListOption {
 	raw, err := json.Marshal(value)
 	owned := json.RawMessage(bytes.Clone(raw))
-	return func(c *RecordListOpts) error {
+	return request.Custom(func(c *RecordListOpts) error {
 		if err != nil {
 			return err
 		}
 		c.Query["jmespath_filters"] = json.RawMessage(bytes.Clone(owned))
 		return nil
-	}
+	})
 }

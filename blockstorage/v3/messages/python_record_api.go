@@ -5,10 +5,10 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"iter"
 	"net/http"
 	"net/url"
-	"slices"
 	"sort"
 	"strings"
 	"unicode"
@@ -126,7 +126,7 @@ func (a *API) GetRecord(ctx context.Context, id string, options ...RecordGetOpti
 	if err = recordID(id); err != nil {
 		return nil, recordWrap(ctx, op, err)
 	}
-	policy, err := applyRecord(p, RecordGetOpts{}, copyGet, slices.Clone(options))
+	policy, err := applyRecord(p, RecordGetOpts{}, copyGet, calls.Translate(options, recordGetCalls))
 	if err == nil {
 		err = p.source.WithPolicy(ctx, policy.Microversion, policy.Headers)
 	}
@@ -154,7 +154,7 @@ func (a *API) DeleteRecord(ctx context.Context, id string, options ...RecordDele
 	if err = recordID(id); err != nil {
 		return recordWrap(ctx, op, err)
 	}
-	policy, err := applyRecord(p, RecordDeleteOpts{}, copyDelete, slices.Clone(options))
+	policy, err := applyRecord(p, RecordDeleteOpts{}, copyDelete, calls.Translate(options, recordDeleteCalls))
 	if err == nil {
 		err = p.source.WithPolicy(ctx, policy.Microversion, policy.Headers)
 	}
@@ -172,7 +172,7 @@ func (a *API) DeleteRecord(ctx context.Context, id string, options ...RecordDele
 // ListRecords lazily yields owned Source-shaped rows with raw-row cap and
 // declared Body filtering. The server retains authorization/project scoping.
 func (a *API) ListRecords(ctx context.Context, options ...RecordListOption) iter.Seq2[*MessageRecord, error] {
-	owned := slices.Clone(options)
+	owned := calls.Translate(options, recordListCalls)
 	return func(yield func(*MessageRecord, error) bool) {
 		const op = "ListRecords"
 		fail := func(err error) { yield(nil, recordWrap(ctx, op, err)) }

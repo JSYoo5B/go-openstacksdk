@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -151,7 +152,7 @@ func TestPythonBackupFindRecordMissingAndAcceptedTranslation(t *testing.T) {
 	if value != nil || err != nil || calls.Len() != 2 {
 		t.Fatal(value, err, pythonBackupCalls(calls))
 	}
-	value, err = api.FindRecord(context.Background(), "absent", backups.WithRecordFindIgnoreMissing(false))
+	value, err = api.FindRecord(context.Background(), "absent", request.IgnoreMissing(false))
 	if value != nil || !errors.Is(err, resource.ErrNotFound) {
 		t.Fatal(value, err)
 	}
@@ -196,12 +197,12 @@ func TestPythonBackupFindRecordQueryClassesOwnedOptsAndRawCap(t *testing.T) {
 		t.Fatal(get, list)
 	}
 	calls.Reset()
-	value, err = api.FindRecord(context.Background(), "nightly", backups.WithRecordFindQuery("container", "two"), backups.WithRecordFindMaxItems(1))
+	value, err = api.FindRecord(context.Background(), "nightly", request.Query("container", "two"), backups.WithRecordFindMaxItems(1))
 	if err != nil || value != nil || calls.Len() != 2 || pythonBackupCalls(calls)[1].query != "limit=1&name=nightly" {
 		t.Fatal(value, err, pythonBackupCalls(calls))
 	}
 	calls.Reset()
-	value, err = api.FindRecord(context.Background(), "nightly", backups.WithRecordFindQuery("name", nil), backups.WithRecordFindQuery("container", "one"))
+	value, err = api.FindRecord(context.Background(), "nightly", request.Query("name", nil), request.Query("container", "one"))
 	if err != nil || value == nil || pythonBackupCalls(calls)[1].query != "" {
 		t.Fatal(value, err, pythonBackupCalls(calls))
 	}
@@ -222,9 +223,9 @@ func TestPythonBackupFindRecordPagingShortMarkersAndOffset(t *testing.T) {
 				}
 				return pythonBackupWire(200, `{"backups":[{"id":"b1","name":"nightly"}]}`)
 			})
-			options := []backups.RecordFindOption{backups.WithRecordFindQuery("limit", 2)}
+			options := []backups.RecordFindOption{request.Query("limit", 2)}
 			if offset {
-				options = append(options, backups.WithRecordFindQuery("offset", 0))
+				options = append(options, request.Query("offset", 0))
 			}
 			value, err := api.FindRecord(context.Background(), "nightly", options...)
 			if err != nil || value == nil || calls.Len() != 3 {
@@ -256,7 +257,7 @@ func TestPythonBackupFindRecordMarkerUsesRetainedUntypedWireID(t *testing.T) {
 		}
 		return pythonBackupWire(200, `{"backups":[{"id":9007199254740993,"name":"nightly"}]}`)
 	})
-	value, err := api.FindRecord(context.Background(), "nightly", backups.WithRecordFindQuery("limit", 2))
+	value, err := api.FindRecord(context.Background(), "nightly", request.Query("limit", 2))
 	if err != nil || value == nil || calls.Len() != 3 || pythonBackupCalls(calls)[2].query != "limit=2&marker=9007199254740993&name=nightly" {
 		t.Fatal(value, err, pythonBackupCalls(calls))
 	}
@@ -329,7 +330,7 @@ func TestPythonBackupFindRecordSelectionAndOptionFailures(t *testing.T) {
 		options  []backups.RecordFindOption
 	}{
 		{"..", nil}, {"nightly", []backups.RecordFindOption{nil}}, {"nightly", []backups.RecordFindOption{backups.WithRecordFindMaxItems(-1)}},
-		{"nightly", []backups.RecordFindOption{backups.WithRecordFindQuery("id", "collision")}},
+		{"nightly", []backups.RecordFindOption{request.Query("id", "collision")}},
 		{"nightly", []backups.RecordFindOption{backups.WithRecordFindOpts(backups.RecordFindOpts{Query: map[string]json.RawMessage{"metadata": json.RawMessage(`{bad`)}})}},
 	}
 	for _, item := range cases {
@@ -342,11 +343,11 @@ func TestPythonBackupFindRecordSelectionAndOptionFailures(t *testing.T) {
 	}
 	ctx, cancel := context.WithCancelCause(context.Background())
 	cause := errors.New("user cancelled lookup")
-	_, err := api.FindRecord(ctx, "nightly", func(*backups.RecordFindOpts) error { cancel(cause); return nil })
+	_, err := api.FindRecord(ctx, "nightly", request.Custom(func(*backups.RecordFindOpts) error { cancel(cause); return nil }))
 	if !errors.Is(err, context.Canceled) || !errors.Is(err, cause) || calls.Len() != 0 {
 		t.Fatal(err, pythonBackupCalls(calls))
 	}
-	_, err = api.FindRecord(context.Background(), "nightly", func(*backups.RecordFindOpts) error { api.RawClient().Microversion = "3.43"; return nil })
+	_, err = api.FindRecord(context.Background(), "nightly", request.Custom(func(*backups.RecordFindOpts) error { api.RawClient().Microversion = "3.43"; return nil }))
 	if !errors.Is(err, resource.ErrInvalidOption) || calls.Len() != 0 {
 		t.Fatal(err, pythonBackupCalls(calls))
 	}

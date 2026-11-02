@@ -3,6 +3,7 @@ package volumetypes_test
 import (
 	"context"
 	"errors"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -74,15 +75,15 @@ func TestPythonTypeFindRecordMissingPoliciesAndPreflightGuard(t *testing.T) {
 	if value != nil || err != nil {
 		t.Fatal(value, err)
 	}
-	_, err = api.FindRecord(context.Background(), "none", volumetypes.WithRecordFindIgnoreMissing(false))
+	_, err = api.FindRecord(context.Background(), "none", request.IgnoreMissing(false))
 	if !errors.Is(err, resource.ErrNotFound) || calls.Len() != 4 {
 		t.Fatal(err, pythonTypeCalls(calls))
 	}
 	before := calls.Len()
-	_, err = api.FindRecord(context.Background(), "none", func(*volumetypes.RecordFindOpts) error {
+	_, err = api.FindRecord(context.Background(), "none", request.Custom(func(*volumetypes.RecordFindOpts) error {
 		api.RawClient().ResourceBase = "http://changed.invalid/v3/project/"
 		return nil
-	})
+	}))
 	if !errors.Is(err, resource.ErrInvalidOption) || calls.Len() != before {
 		t.Fatal(err, pythonTypeCalls(calls))
 	}
@@ -103,7 +104,7 @@ func TestPythonTypeFindRecordPhysicalRejectedBodyDoesNotFallback(t *testing.T) {
 }
 func TestPythonTypeFindRecordQueryExtensionLocalFilterAndSnapshot(t *testing.T) {
 	query := map[string][]string{"sort": {"name:asc"}}
-	option := volumetypes.WithRecordFindQuery("sort", query["sort"])
+	option := request.Query("sort", query["sort"])
 	query["sort"][0] = "changed"
 	api, calls := pythonTypeAPI(t, func(req *http.Request) *http.Response {
 		if req.URL.Path != pythonTypeBase {
@@ -111,7 +112,7 @@ func TestPythonTypeFindRecordQueryExtensionLocalFilterAndSnapshot(t *testing.T) 
 		}
 		return pythonTypeWire(200, `{"volume_types":[{"id":"vt-1","name":"fast","extra_specs":{"nested":{"v":true}}},{"id":"vt-2","name":"fast","extra_specs":{"nested":{"v":false}}}]}`)
 	})
-	value, err := api.FindRecord(context.Background(), "fast", option, volumetypes.WithRecordFindQuery("extra_specs", map[string]any{"nested": map[string]any{"v": 1}}))
+	value, err := api.FindRecord(context.Background(), "fast", option, request.Query("extra_specs", map[string]any{"nested": map[string]any{"v": 1}}))
 	if err != nil || value == nil || string(value.Resource.Body["id"]) != `"vt-1"` || calls.Len() != 2 {
 		t.Fatal(value, err, pythonTypeCalls(calls))
 	}

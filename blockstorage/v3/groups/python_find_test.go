@@ -11,6 +11,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -91,7 +92,7 @@ func TestPythonCinderGroupFindRecordMissingRequiresSuccessfulList(t *testing.T) 
 		})
 		options := []groups.RecordFindOption{}
 		if !ignore {
-			options = append(options, groups.WithRecordFindIgnoreMissing(false))
+			options = append(options, request.IgnoreMissing(false))
 		}
 		value, err := api.FindRecord(context.Background(), "missing", options...)
 		if value != nil || calls.Len() != 2 || (err == nil) != ignore || !ignore && !errors.Is(err, resource.ErrNotFound) || gophercloud.ResponseCodeIs(err, 403) {
@@ -222,7 +223,7 @@ func TestPythonCinderGroupFindRecordOptionsOwnBothPhaseSnapshots(t *testing.T) {
 		}
 		return groupWire(200, `{"groups":[{"id":"found","name":"target"}]}`)
 	})
-	value, err := api.FindRecord(context.Background(), "target", option, func(v *groups.RecordFindOpts) error { held = v; return nil })
+	value, err := api.FindRecord(context.Background(), "target", option, request.Custom(func(v *groups.RecordFindOpts) error { held = v; return nil }))
 	if err != nil || value == nil || calls.Len() != 2 || calls.Calls()[1].Path != groupBase {
 		t.Fatal(value, err, calls.Calls())
 	}
@@ -243,15 +244,15 @@ func TestPythonCinderGroupFindRecordPreflightAndStickyOriginalSource(t *testing.
 		func(api *groups.API) error { _, err := api.FindRecord(context.Background(), " "); return err },
 		func(api *groups.API) error { _, err := api.FindRecord(context.Background(), "id", nil); return err },
 		func(api *groups.API) error {
-			_, err := api.FindRecord(context.Background(), "id", groups.WithRecordFindMicroversion("bad"))
+			_, err := api.FindRecord(context.Background(), "id", request.Microversion("bad"))
 			return err
 		},
 		func(api *groups.API) error {
-			_, err := api.FindRecord(context.Background(), "id", groups.WithRecordFindHeaders(map[string]string{"Authorization": "forged"}))
+			_, err := api.FindRecord(context.Background(), "id", request.Headers(map[string]string{"Authorization": "forged"}))
 			return err
 		},
 		func(api *groups.API) error {
-			_, err := api.FindRecord(context.Background(), "id", groups.WithRecordFindHeaders(map[string]string{"OpenStack-API-Version": "volume 3.38"}))
+			_, err := api.FindRecord(context.Background(), "id", request.Headers(map[string]string{"OpenStack-API-Version": "volume 3.38"}))
 			return err
 		},
 	} {
@@ -263,11 +264,11 @@ func TestPythonCinderGroupFindRecordPreflightAndStickyOriginalSource(t *testing.
 	api, calls := groupAPI(t, "3.38", func(*http.Request) *http.Response { t.Fatal("mutated source HTTP"); return nil })
 	cause := errors.New("option failure")
 	ctx, cancel := context.WithCancelCause(context.Background())
-	_, err := api.FindRecord(ctx, "id", func(*groups.RecordFindOpts) error {
+	_, err := api.FindRecord(ctx, "id", request.Custom(func(*groups.RecordFindOpts) error {
 		api.RawClient().ResourceBase = "https://other.example/v3/project/"
 		cancel(cause)
 		return cause
-	})
+	}))
 	if !errors.Is(err, resource.ErrInvalidOption) || !errors.Is(err, cause) || !errors.Is(err, context.Canceled) || calls.Len() != 0 {
 		t.Fatal(err, calls.Calls())
 	}
@@ -287,7 +288,7 @@ func TestPythonCinderGroupFindRecordGetOverrideFallbackOriginalVersionAndHeaders
 		for key, value := range original {
 			expected[key] = value
 		}
-		value, err := api.FindRecord(context.Background(), "target", groups.WithRecordFindMicroversion(override))
+		value, err := api.FindRecord(context.Background(), "target", request.Microversion(override))
 		wantGet := override
 		if wantGet == "" {
 			wantGet = "3.13"
@@ -308,7 +309,7 @@ func TestPythonCinderGroupFindRecordGetOverrideFallbackOriginalVersionAndHeaders
 		return groupWire(200, `{"groups":[{"id":"found","name":"target"}]}`)
 	})
 	api.RawClient().MoreHeaders = map[string]string{"Accept": "source"}
-	value, err := api.FindRecord(context.Background(), "target", groups.WithRecordFindHeaders(map[string]string{"accept": "per-call"}))
+	value, err := api.FindRecord(context.Background(), "target", request.Headers(map[string]string{"accept": "per-call"}))
 	if err != nil || value == nil || calls.Len() != 2 {
 		t.Fatal(value, err, calls.Calls())
 	}
@@ -332,7 +333,7 @@ func TestPythonCinderGroupFindRecordDiscoveryEvidenceFollowsEachVersionPhase(t *
 		})
 		options := []groups.RecordFindOption{}
 		if override {
-			options = append(options, groups.WithRecordFindMicroversion("3.99"))
+			options = append(options, request.Microversion("3.99"))
 		}
 		value, err := api.FindRecord(context.Background(), "target", options...)
 		if err != nil || value == nil || calls.Len() != 3 || len(value.Discovery) != 1 || value.Discovery[0].StatusCode != 200 || value.StatusCode != 202 || calls.Calls()[2].Header.Get("OpenStack-API-Version") != "volume 3.38" || api.RawClient().Microversion != "" {
@@ -480,16 +481,16 @@ func TestPythonCinderGroupFindRecordFirstCustomHeaderOptionOwnsDefaultAndNilMaps
 				case "nil_opts_headers":
 					options = append(options, groups.WithRecordFindOpts(groups.RecordFindOpts{Headers: nil}))
 				case "nil_header_option":
-					options = append(options, groups.WithRecordFindHeaders(nil))
+					options = append(options, request.Headers(nil))
 				}
-				options = append(options, func(cfg *groups.RecordFindOpts) error {
+				options = append(options, request.Custom(func(cfg *groups.RecordFindOpts) error {
 					if cfg.Headers == nil || len(cfg.Headers) != 0 {
 						t.Fatal("first custom option requires a fresh empty owned map", cfg.Headers)
 					}
 					cfg.Headers["X-Custom"] = value
 					held = cfg
 					return nil
-				})
+				}))
 				start := calls.Len()
 				result, err := api.FindRecord(context.Background(), "target", options...)
 				if err != nil || result == nil || calls.Len() != start+2 || !reflect.DeepEqual(api.RawClient().MoreHeaders, expected) || api.RawClient().Microversion != "3.38" {

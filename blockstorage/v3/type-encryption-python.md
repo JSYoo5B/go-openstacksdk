@@ -13,7 +13,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.API.FindRecord`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.WithRecordFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 
 - GET-first type lookup uses lowercase is_public=none, returns the Source-shaped declared view, and does not list on successful GET.
   Tests: `blockstorage/v3/volumetypes/python_find_records_test.go:TestPythonTypeFindRecordGetFirstUsesLowercaseNone`.
@@ -91,8 +91,8 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.API.FindRecord`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.WithRecordFindIgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.WithRecordFindQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.WithRecordFindOpts`
 
 - A successful member GET stops lookup; Source string ID conversion preserves large-number Wire evidence, untyped fields and allowed unknown Body attributes.
@@ -170,14 +170,14 @@ func main() {
     service, err := conn.BlockStorageV3(ctx)
     if err != nil { log.Fatal(err) }
     volumeType, err := service.VolumeTypes.FindRecord(ctx, *typeName,
-        volumetypes.WithRecordFindIgnoreMissing(false))
+        request.IgnoreMissing(false))
     if err != nil { log.Fatal(err) }
     printResource(volumeType.Resource)
     var typeID string
     if err := json.Unmarshal(volumeType.Resource.Body["id"], &typeID); err != nil { log.Fatal(err) }
     if *qosName != "" {
         options := []qos.RecordFindOption{}
-        if *project != "" { options = append(options, qos.WithRecordFindQuery("project_id", *project)) }
+        if *project != "" { options = append(options, request.Query("project_id", *project)) }
         specification, err := service.QoS.FindRecord(ctx, *qosName, options...)
         if err != nil { log.Fatal(err) }
         if specification == nil { fmt.Println("QoS: null") } else { printResource(specification.Resource) }

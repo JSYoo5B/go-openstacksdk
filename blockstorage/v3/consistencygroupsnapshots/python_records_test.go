@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 	"io"
@@ -132,22 +133,22 @@ func (f snapshotMarshal) MarshalJSON() ([]byte, error) { return f() }
 func TestPythonConsistencyGroupSnapshotCreateDeclaredDirtyAttrsAndImmutableOptions(t *testing.T) {
 	attrs := map[string]any{"id": false, "name": "before", "description": map[string]any{"null": nil, "zero": 0, "enabled": false}, "consistencygroup_id": json.Number("9007199254740993"), "metadata": snapshotMarshal(func() ([]byte, error) { t.Fatal("unknown attr was marshaled"); return nil, nil })}
 	headers := map[string]string{"X-Owned": "original"}
-	option := consistencygroupsnapshots.WithRecordCreateHeaders(headers)
+	option := request.Headers(headers)
 	headers["X-Owned"] = "mutated"
 	api, calls := snapshotAPI(t, "3.29", func(*http.Request) *http.Response {
 		return snapshotWire(202, `{"cgsnapshot":{"id":"server","name":null,"status":"creating","unknown":9007199254740993}}`)
 	})
 	var retained *consistencygroupsnapshots.RecordCreateOpts
-	value, err := api.CreateRecord(context.Background(), attrs, option, func(cfg *consistencygroupsnapshots.RecordCreateOpts) error {
+	value, err := api.CreateRecord(context.Background(), attrs, option, request.Custom(func(cfg *consistencygroupsnapshots.RecordCreateOpts) error {
 		attrs["name"] = "after"
 		attrs["description"].(map[string]any)["zero"] = 99
 		cfg.Headers["X-Next"] = "first"
 		retained = cfg
 		return nil
-	}, func(*consistencygroupsnapshots.RecordCreateOpts) error {
+	}), request.Custom(func(*consistencygroupsnapshots.RecordCreateOpts) error {
 		retained.Headers["X-Next"] = "after"
 		return nil
-	})
+	}))
 	if err != nil || len(*calls) != 1 || (*calls)[0].method != "POST" || (*calls)[0].path != snapshotBase || (*calls)[0].headers.Get("X-Owned") != "original" || (*calls)[0].headers.Get("X-Next") != "first" || (*calls)[0].headers.Get("Content-Type") != "application/json" {
 		t.Fatal(value, err, *calls)
 	}
@@ -185,12 +186,12 @@ func TestPythonConsistencyGroupSnapshotCreateSourceCaptureMarshalAndConstructorC
 		case "marshal cancel":
 			attrs["name"] = snapshotMarshal(func() ([]byte, error) { cancel(cause); return nil, cause })
 		case "option source":
-			opts = append(opts, func(*consistencygroupsnapshots.RecordCreateOpts) error {
+			opts = append(opts, request.Custom(func(*consistencygroupsnapshots.RecordCreateOpts) error {
 				api.RawClient().Microversion = "3.80"
 				return cause
-			})
+			}))
 		case "option cancel":
-			opts = append(opts, func(*consistencygroupsnapshots.RecordCreateOpts) error { cancel(cause); return cause })
+			opts = append(opts, request.Custom(func(*consistencygroupsnapshots.RecordCreateOpts) error { cancel(cause); return cause }))
 		default:
 			attrs[mode] = nil
 		}
@@ -212,7 +213,7 @@ func TestPythonConsistencyGroupSnapshotListSourceQueriesDetailsFiltersAndRawCap(
 		api, calls := snapshotAPI(t, "3.29", func(*http.Request) *http.Response {
 			return snapshotWire(200, `{"cgsnapshots":[{"id":"first","name":"data","description":{"enabled":true,"extra":0}},{"id":"second","name":"data","description":{"enabled":false}}]}`)
 		})
-		options := []consistencygroupsnapshots.RecordListOption{consistencygroupsnapshots.WithRecordListQuery("all_projects", snapshotMarshal(func() ([]byte, error) { t.Fatal("unmapped all_projects was marshaled"); return nil, nil })), consistencygroupsnapshots.WithRecordListQuery("sort_dir", []string{"asc", "desc"}), consistencygroupsnapshots.WithRecordListQuery("sort", "name:asc"), consistencygroupsnapshots.WithRecordListQuery("name", "data"), consistencygroupsnapshots.WithRecordListQuery("description", map[string]any{"enabled": 1}), consistencygroupsnapshots.WithRecordListQuery("unknown", snapshotMarshal(func() ([]byte, error) { t.Fatal("unknown query marshaled"); return nil, nil }))}
+		options := []consistencygroupsnapshots.RecordListOption{request.Query("all_projects", snapshotMarshal(func() ([]byte, error) { return nil, errors.New("unmapped all_projects marshal error") })), request.Query("sort_dir", []string{"asc", "desc"}), request.Query("sort", "name:asc"), request.Query("name", "data"), request.Query("description", map[string]any{"enabled": 1}), request.Query("unknown", snapshotMarshal(func() ([]byte, error) { return nil, errors.New("ignored query marshal error") }))}
 		if !details {
 			options = append(options, consistencygroupsnapshots.WithRecordListDetails(false))
 		}
@@ -233,7 +234,7 @@ func TestPythonConsistencyGroupSnapshotListSourceQueriesDetailsFiltersAndRawCap(
 			t.Fatal(*calls)
 		}
 		snapshotField(t, values[0], "id", `"first"`)
-		values, err = snapshotsCollect(api.ListRecords(context.Background(), consistencygroupsnapshots.WithRecordListMaxItems(1), consistencygroupsnapshots.WithRecordListQuery("id", "second")))
+		values, err = snapshotsCollect(api.ListRecords(context.Background(), request.MaxItems(1), request.Query("id", "second")))
 		if err != nil || len(values) != 0 || len(*calls) != 2 || !strings.Contains((*calls)[1].query, "limit=1") {
 			t.Fatal(values, err, *calls)
 		}
@@ -243,7 +244,7 @@ func TestPythonConsistencyGroupSnapshotListLocalFloatPolicyAndConstructorCollisi
 	api, calls := snapshotAPI(t, "3.29", func(*http.Request) *http.Response {
 		return snapshotWire(200, `{"cgsnapshots":[{"id":"v","consistencygroup_id":9007199254740992}]}`)
 	})
-	values, err := snapshotsCollect(api.ListRecords(context.Background(), consistencygroupsnapshots.WithRecordListQuery("consistencygroup_id", json.RawMessage(`9007199254740993.0`))))
+	values, err := snapshotsCollect(api.ListRecords(context.Background(), request.Query("consistencygroup_id", json.RawMessage(`9007199254740993.0`))))
 	if err != nil || len(values) != 0 || len(*calls) != 1 {
 		t.Fatal("exact-decimal filter policy changed", values, err, *calls)
 	}
@@ -259,7 +260,7 @@ func TestPythonConsistencyGroupSnapshotListLocalFloatPolicyAndConstructorCollisi
 	for _, description := range []string{`"truthy"`, `false`, `{}`, `{"enabled":true}`} {
 		body := `{"cgsnapshots":[{"id":"v","description":` + description + `}]}`
 		api, _ := snapshotAPI(t, "3.29", func(*http.Request) *http.Response { return snapshotWire(200, body) })
-		values, err := snapshotsCollect(api.ListRecords(context.Background(), consistencygroupsnapshots.WithRecordListQuery("description", map[string]any{})))
+		values, err := snapshotsCollect(api.ListRecords(context.Background(), request.Query("description", map[string]any{})))
 		want := description == `"truthy"` || description == `{"enabled":true}`
 		if err != nil || (len(values) == 1) != want {
 			t.Fatal(description, values, err)
@@ -274,7 +275,7 @@ func TestPythonConsistencyGroupSnapshotListPagingUsesRetainedScalarMarkerAndScop
 		return snapshotWire(200, `{"cgsnapshots":[{"id":9007199254740993,"name":"kept"}]}`)
 	})
 	var values []*consistencygroupsnapshots.ConsistencyGroupSnapshotRecord
-	for value, err := range api.ListRecords(context.Background(), consistencygroupsnapshots.WithRecordListLimit(2)) {
+	for value, err := range api.ListRecords(context.Background(), request.Limit(2)) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -288,7 +289,7 @@ func TestPythonConsistencyGroupSnapshotListPagingUsesRetainedScalarMarkerAndScop
 	api, calls = snapshotAPI(t, "3.29", func(*http.Request) *http.Response {
 		return snapshotWire(200, `{"cgsnapshots":[{"id":"v"}],"cgsnapshots_links":[{"rel":"next","href":"?marker=unvisited"}]}`)
 	})
-	values, err := snapshotsCollect(api.ListRecords(context.Background(), consistencygroupsnapshots.WithRecordListPaginated(false)))
+	values, err := snapshotsCollect(api.ListRecords(context.Background(), request.Paginated(false)))
 	if err != nil || len(values) != 1 || len(*calls) != 1 {
 		t.Fatal(values, err, *calls)
 	}
@@ -320,7 +321,7 @@ func TestPythonConsistencyGroupSnapshotNoAutomaticDiscoveryAndUncappedSelectedVe
 	for _, override := range []string{"", "3.80"} {
 		api, calls := snapshotAPI(t, "3.71", func(*http.Request) *http.Response { return snapshotWire(200, `{}`) })
 		api.RawClient().MoreHeaders = map[string]string{"openstack-api-version": "volume 3.71", "x-openstack-volume-api-version": "3.71"}
-		value, err := api.GetRecord(context.Background(), "v", consistencygroupsnapshots.WithRecordReadMicroversion(override))
+		value, err := api.GetRecord(context.Background(), "v", request.Microversion(override))
 		generic := ""
 		if override != "" {
 			generic = "volume " + override
@@ -343,7 +344,7 @@ func TestPythonConsistencyGroupSnapshotDeleteDefaultMissingStrictAndOpaqueACK(t 
 		}
 	}
 	api, _ := snapshotAPI(t, "3.29", func(*http.Request) *http.Response { return snapshotWire(404, "missing") })
-	value, err := api.DeleteRecord(context.Background(), "v", consistencygroupsnapshots.WithRecordDeleteIgnoreMissing(false))
+	value, err := api.DeleteRecord(context.Background(), "v", request.IgnoreMissing(false))
 	if value == nil || value.IgnoredMissing || !gophercloud.ResponseCodeIs(err, 404) {
 		t.Fatal(value, err)
 	}
@@ -446,7 +447,7 @@ func TestPythonConsistencyGroupSnapshotRetryOwnsJSONHeadersAndSelectedVersion(t 
 			}
 			return nil
 		}
-		value, err := api.CreateRecord(context.Background(), attrs, consistencygroupsnapshots.WithRecordCreateHeaders(map[string]string{"X-Owned": "fixed"}))
+		value, err := api.CreateRecord(context.Background(), attrs, request.Headers(map[string]string{"X-Owned": "fixed"}))
 		if mode == "clean" {
 			if err != nil || len(*calls) != 2 || (*calls)[0].body != (*calls)[1].body {
 				t.Fatal(value, err, *calls)
@@ -476,7 +477,7 @@ func TestPythonConsistencyGroupSnapshotOptionsPreflightOwnershipAndNilAPI(t *tes
 			t.Fatal(id, err)
 		}
 	}
-	for _, opts := range [][]consistencygroupsnapshots.RecordListOption{{nil}, {consistencygroupsnapshots.WithRecordListMaxItems(-1)}, {consistencygroupsnapshots.WithRecordListLimit(-1)}, {consistencygroupsnapshots.WithRecordListHeaders(map[string]string{"X-Auth-Token": "caller"})}} {
+	for _, opts := range [][]consistencygroupsnapshots.RecordListOption{{nil}, {request.MaxItems(-1)}, {request.Limit(-1)}, {request.Headers(map[string]string{"X-Auth-Token": "caller"})}} {
 		_, err := snapshotsCollect(api.ListRecords(context.Background(), opts...))
 		if !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(err)
@@ -511,7 +512,7 @@ func TestPythonConsistencyGroupSnapshotCreateJSONFramingPrecedesHTTP(t *testing.
 		if serviceHeader {
 			api.RawClient().MoreHeaders = map[string]string{"content-type": "application/custom"}
 		} else {
-			options = append(options, consistencygroupsnapshots.WithRecordCreateHeaders(map[string]string{"CONTENT-TYPE": "application/custom"}))
+			options = append(options, request.Headers(map[string]string{"CONTENT-TYPE": "application/custom"}))
 		}
 		value, err := api.CreateRecord(context.Background(), map[string]any{"consistencygroup_id": "g"}, options...)
 		if value != nil || !errors.Is(err, resource.ErrInvalidOption) || len(*calls) != 0 {
@@ -528,7 +529,7 @@ func TestPythonConsistencyGroupSnapshotRawPagingInputPrecedesHTTP(t *testing.T) 
 		})
 		options := []consistencygroupsnapshots.RecordListOption{}
 		for key, value := range query {
-			options = append(options, consistencygroupsnapshots.WithRecordListQuery(key, value))
+			options = append(options, request.Query(key, value))
 		}
 		values, err := snapshotsCollect(api.ListRecords(context.Background(), options...))
 		if len(values) != 0 || !errors.Is(err, resource.ErrInvalidOption) || len(*calls) != 0 {
@@ -579,7 +580,7 @@ func TestPythonConsistencyGroupSnapshotListDefaultAcceptOwnsSourceAndExplicitOpt
 		options := []consistencygroupsnapshots.RecordListOption{}
 		want := "application/json"
 		if explicit {
-			options = append(options, consistencygroupsnapshots.WithRecordListHeaders(map[string]string{"aCcEpT": "application/operation"}))
+			options = append(options, request.Headers(map[string]string{"aCcEpT": "application/operation"}))
 			want = "application/operation"
 		}
 		values, err := snapshotsCollect(api.ListRecords(context.Background(), options...))
@@ -608,7 +609,7 @@ func TestPythonConsistencyGroupSnapshotListAdvertisedOffsetAndCursorScope(t *tes
 				return nil
 			}
 		})
-		values, err := snapshotsCollect(api.ListRecords(context.Background(), consistencygroupsnapshots.WithRecordListLimit(2), consistencygroupsnapshots.WithRecordListQuery("offset", 0), consistencygroupsnapshots.WithRecordListQuery("sort", "name:asc"), consistencygroupsnapshots.WithRecordListQuery("status", "available")))
+		values, err := snapshotsCollect(api.ListRecords(context.Background(), request.Limit(2), request.Query("offset", 0), request.Query("sort", "name:asc"), request.Query("status", "available")))
 		if err != nil || len(values) != 2 || len(*calls) != 3 {
 			t.Fatal(values, err, *calls)
 		}
@@ -635,7 +636,7 @@ func TestPythonConsistencyGroupSnapshotListAdvertisedOffsetAndCursorScope(t *tes
 			t.Fatal(r.URL)
 			return nil
 		})
-		values, err := snapshotsCollect(api.ListRecords(context.Background(), consistencygroupsnapshots.WithRecordListLimit(2), consistencygroupsnapshots.WithRecordListMarker("start")))
+		values, err := snapshotsCollect(api.ListRecords(context.Background(), request.Limit(2), request.Marker("start")))
 		if err != nil || len(values) != 2 || len(*calls) != 3 {
 			t.Fatal(values, err, *calls)
 		}
@@ -657,7 +658,7 @@ func TestPythonConsistencyGroupSnapshotListAdvertisedOffsetAndCursorScope(t *tes
 		t.Run(test.name, func(t *testing.T) {
 			body := `{"cgsnapshots":[{"id":"first"}],"next":` + fmt.Sprintf("%q", test.next) + `}`
 			api, calls := snapshotAPI(t, "3.29", func(*http.Request) *http.Response { return snapshotWire(200, body) })
-			values, err := snapshotsCollect(api.ListRecords(context.Background(), consistencygroupsnapshots.WithRecordListLimit(2), consistencygroupsnapshots.WithRecordListQuery("offset", test.initial), consistencygroupsnapshots.WithRecordListQuery("sort", "name:asc")))
+			values, err := snapshotsCollect(api.ListRecords(context.Background(), request.Limit(2), request.Query("offset", test.initial), request.Query("sort", "name:asc")))
 			var proof *resource.ResponseError
 			var cycle *resource.PaginationCycleError
 			if len(values) != 1 || err == nil || !errors.As(err, &proof) || proof.StatusCode != 200 || string(proof.Body) != body || len(*calls) != 1 || (test.cycle && !errors.As(err, &cycle)) || (!test.cycle && !errors.Is(err, resource.ErrInvalidOption)) {

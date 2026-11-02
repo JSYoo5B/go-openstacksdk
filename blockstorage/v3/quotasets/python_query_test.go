@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"net/http"
 	"strings"
 	"testing"
@@ -60,7 +61,7 @@ func TestCinderQuotaRecordFetchParametersAndBasePathControls(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	result, err := scope.GetRecord(context.Background(), quotasets.WithQuotaReadQuery("fields", []string{"volumes", "gigabytes"}), quotasets.WithQuotaReadQuery("custom", false), quotasets.WithQuotaReadQuery("none", nil), quotasets.WithQuotaReadQuery("base_path", "/os-quota-sets/%(project_id)s/defaults"), quotasets.WithQuotaReadQuery("microversion", "3.100"), quotasets.WithQuotaReadQuery("skip_cache", true), quotasets.WithQuotaReadQuery("resource_response_key", []int{1}))
+	result, err := scope.GetRecord(context.Background(), request.Query("fields", []string{"volumes", "gigabytes"}), request.Query("custom", false), request.Query("none", nil), request.Query("base_path", "/os-quota-sets/%(project_id)s/defaults"), request.Query("microversion", "3.100"), request.Query("skip_cache", true), request.Query("resource_response_key", []int{1}))
 	if err != nil || result.StatusCode != 203 || result.Microversion != "3.100" || string(result.Resource.Body["volumes"]) != "7" || calls != 1 || client.Microversion != "" {
 		t.Fatal(result, err, calls, client)
 	}
@@ -89,7 +90,7 @@ func TestCinderQuotaRecordBoundParamsAndOptionOwnership(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	for _, bad := range []quotasets.QuotaReadOption{nil, quotasets.WithQuotaReadRequiresID(true), quotasets.WithQuotaReadQuery("session", nil), quotasets.WithQuotaReadQuery("base_path", 1), quotasets.WithQuotaReadBasePath("https://foreign.invalid/quotas")} {
+	for _, bad := range []quotasets.QuotaReadOption{nil, quotasets.WithQuotaReadRequiresID(true), request.Query("session", nil), request.Query("base_path", 1), quotasets.WithQuotaReadBasePath("https://foreign.invalid/quotas")} {
 		if _, err := scope.GetRecord(context.Background(), bad); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(err)
 		}

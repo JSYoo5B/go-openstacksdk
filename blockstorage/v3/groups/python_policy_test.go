@@ -10,6 +10,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -94,7 +95,7 @@ func TestPythonCinderGroupNativeRetryOwnedVersionReservedHeadersAndBody(t *testi
 				item.change(o)
 				return callbackCause
 			}
-			v, err := api.CreateRecord(context.Background(), groups.WithRecordCreateField("name", "original"))
+			v, err := api.CreateRecord(context.Background(), request.Field("name", "original"))
 			var native gophercloud.ErrUnexpectedResponseCode
 			if v != nil || !errors.Is(err, callbackCause) || !errors.Is(err, resource.ErrInvalidOption) || !errors.As(err, &native) || native.Actual != 503 || string(native.Body) != `{"retry":"actual"}` || native.ResponseHeader.Get("X-Request-Id") != "actual" || !slices.Contains(native.Expected, 202) || slices.Contains(native.Expected, 503) || calls.Len() != 1 {
 				t.Fatal(v, err, native, calls.Calls())
@@ -116,7 +117,7 @@ func TestPythonCinderGroupNativeRetryOrdinaryHeadersLiveTokenAndOriginalStatus(t
 		provider.SetToken("fresh")
 		return nil
 	}
-	v, err := api.CreateRecord(context.Background(), groups.WithRecordCreateField("name", false))
+	v, err := api.CreateRecord(context.Background(), request.Field("name", false))
 	if err != nil || calls.Len() != 2 || calls.Calls()[1].Header.Get("X-Auth-Token") != "fresh" || calls.Calls()[1].Header.Get("X-Retry") != "allowed" || calls.Calls()[0].Body != calls.Calls()[1].Body || v.StatusCode != 202 {
 		t.Fatal(v, err, calls.Calls())
 	}

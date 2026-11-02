@@ -38,7 +38,7 @@ The host is a literal escaped URI segment. Only declared fields enter Resource;
 Wire retains unknown extensions. Properties uses the shared Source dictionary
 projection and replication_targets uses its list projection, preserving literal
 JSON in Wire. Missing values and explicit null remain visible. Headers can be
-supplied with `capabilities.WithHeaders`; mutable Python Resource inputs and
+supplied with `request.Headers`; mutable Python Resource inputs and
 Requests decoding outside the shared finite JSON profile remain outside this
 scalar-host API. A 404 is never converted into an empty capability set. These
 examples do not establish live-cloud validation.

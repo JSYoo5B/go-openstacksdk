@@ -9,7 +9,9 @@ import (
 	"maps"
 	"slices"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -38,11 +40,29 @@ type ListOptions struct {
 type Option[T any] func(*T) error
 type ReadOption = Option[ReadOptions]
 type SearchOption = Option[SearchOptions]
-type ListOption = Option[ListOptions]
+
+// ListOption is one option of the snapshot and backup lists: WithListOptions,
+// WithListLocation, WithListFilters, WithListDetailed, WithListExpression,
+// WithListAllowUnknownParams, WithListConflictingAttrs, request.Custom over
+// *ListOptions, request.Paginated, request.MaxItems, request.Microversion or
+// request.Headers (replaces the headers). Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type ListOption = request.ListCall
+
+var listCalls = calls.Spec[ListOptions]{
+	Headers:      calls.Value(func(o *ListOptions) *map[string]string { return &o.Headers }),
+	Microversion: calls.Pointer(func(o *ListOptions) **string { return &o.Microversion }),
+	Paging: calls.Paging[ListOptions]{
+		MaxItems:  calls.Pointer(func(o *ListOptions) **int { return &o.MaxItems }),
+		Paginated: calls.Pointer(func(o *ListOptions) **bool { return &o.Paginated }),
+	},
+}
 
 func WithReadOptions(value ReadOptions) ReadOption       { return withValue(value, cloneRead) }
 func WithSearchOptions(value SearchOptions) SearchOption { return withValue(value, cloneSearch) }
-func WithListOptions(value ListOptions) ListOption       { return withValue(value, cloneList) }
+func WithListOptions(value ListOptions) ListOption {
+	return request.Custom(withValue(value, cloneList))
+}
 
 func WithReadLocation(value resource.CloudLocation) ReadOption {
 	owned := value.Clone()
@@ -54,7 +74,7 @@ func WithSearchLocation(value resource.CloudLocation) SearchOption {
 }
 func WithListLocation(value resource.CloudLocation) ListOption {
 	owned := value.Clone()
-	return func(target *ListOptions) error { copy := owned.Clone(); target.Location = &copy; return nil }
+	return request.Custom(func(target *ListOptions) error { copy := owned.Clone(); target.Location = &copy; return nil })
 }
 func WithSearchFilters(value json.RawMessage) SearchOption {
 	owned := json.RawMessage(bytes.Clone(value))
@@ -66,33 +86,20 @@ func WithSearchExpression(value string) SearchOption {
 }
 func WithListFilters(value json.RawMessage) ListOption {
 	owned := json.RawMessage(bytes.Clone(value))
-	return func(target *ListOptions) error { target.Filters = cloneRaw(&owned); return nil }
+	return request.Custom(func(target *ListOptions) error { target.Filters = cloneRaw(&owned); return nil })
 }
 func WithListDetailed(value bool) ListOption {
-	return func(target *ListOptions) error { target.Detailed = clonePointer(&value); return nil }
-}
-func WithListPagination(value bool) ListOption {
-	return func(target *ListOptions) error { target.Paginated = clonePointer(&value); return nil }
-}
-func WithListMaxItems(value int) ListOption {
-	return func(target *ListOptions) error { target.MaxItems = clonePointer(&value); return nil }
-}
-func WithListMicroversion(value string) ListOption {
-	return func(target *ListOptions) error { target.Microversion = clonePointer(&value); return nil }
-}
-func WithListHeaders(value map[string]string) ListOption {
-	owned := maps.Clone(value)
-	return func(target *ListOptions) error { target.Headers = maps.Clone(owned); return nil }
+	return request.Custom(func(target *ListOptions) error { target.Detailed = clonePointer(&value); return nil })
 }
 func WithListExpression(value string) ListOption {
-	return func(target *ListOptions) error { target.Expression = clonePointer(&value); return nil }
+	return request.Custom(func(target *ListOptions) error { target.Expression = clonePointer(&value); return nil })
 }
 func WithListAllowUnknownParams(value bool) ListOption {
-	return func(target *ListOptions) error { target.AllowUnknownParams = clonePointer(&value); return nil }
+	return request.Custom(func(target *ListOptions) error { target.AllowUnknownParams = clonePointer(&value); return nil })
 }
 func WithListConflictingAttrs(value json.RawMessage) ListOption {
 	owned := json.RawMessage(bytes.Clone(value))
-	return func(target *ListOptions) error { target.ConflictingAttrs = cloneRaw(&owned); return nil }
+	return request.Custom(func(target *ListOptions) error { target.ConflictingAttrs = cloneRaw(&owned); return nil })
 }
 
 func PrepareRead(ctx context.Context, options ...ReadOption) (ReadOptions, error) {
@@ -102,7 +109,20 @@ func PrepareSearch(ctx context.Context, options ...SearchOption) (SearchOptions,
 	return prepare(ctx, options, cloneSearch, nil)
 }
 func PrepareList(ctx context.Context, options ...ListOption) (ListOptions, error) {
-	return prepare(ctx, options, cloneList, nil)
+	return prepare(ctx, listOptions(options), cloneList, nil)
+}
+
+// listOptions translates shared list calls in caller order; a nil call stays
+// nil so prepare reports it with the Cinder nil-option error.
+func listOptions(options []ListOption) []Option[ListOptions] {
+	translated := calls.Translate(options, listCalls)
+	out := make([]Option[ListOptions], len(translated))
+	for i, apply := range translated {
+		if apply != nil {
+			out[i] = apply
+		}
+	}
+	return out
 }
 
 func withValue[T any](value T, clone func(T) T) Option[T] {

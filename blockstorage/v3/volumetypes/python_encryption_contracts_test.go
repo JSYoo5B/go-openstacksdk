@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"net/http"
 	"reflect"
 	"testing"
@@ -127,10 +128,10 @@ func TestPythonEncryptionPreflightGuardsOptionsAndMalformedJSON(t *testing.T) {
 		})
 	}
 	api, calls := pythonTypeAPI(t, func(*http.Request) *http.Response { t.Fatal("changed source reached HTTP"); return nil })
-	_, err := api.CreateEncryptionWithAttributes(context.Background(), "vt-1", func(*volumetypes.EncryptionAttributeOpts) error {
+	_, err := api.CreateEncryptionWithAttributes(context.Background(), "vt-1", request.Custom(func(*volumetypes.EncryptionAttributeOpts) error {
 		api.RawClient().Microversion = "3.50"
 		return errors.New("option failed")
-	})
+	}))
 	if !errors.Is(err, resource.ErrInvalidOption) || calls.Len() != 0 {
 		t.Fatal(err, pythonTypeCalls(calls))
 	}

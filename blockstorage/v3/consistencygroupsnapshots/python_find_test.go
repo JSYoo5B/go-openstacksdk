@@ -14,6 +14,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -52,7 +53,7 @@ func TestPythonConsistencyGroupSnapshotFindDefaultsCleanFallbackAndNoAutomaticNa
 func TestPythonConsistencyGroupSnapshotFindDirectSuccessUntypedIDAndSeed(t *testing.T) {
 	for _, body := range []string{`{"cgsnapshot":{"id":null,"name":false,"cls":false}}`, `{"id":0,"name":[null]}`, `{}`, `opaque`} {
 		api, calls := snapshotAPI(t, "3.29", func(*http.Request) *http.Response { return snapshotWire(299, body) })
-		value, err := api.FindRecord(context.Background(), "selected", consistencygroupsnapshots.WithRecordFindQuery("description", map[string]any{"zero": 0, "null": nil, "enabled": false}))
+		value, err := api.FindRecord(context.Background(), "selected", request.Query("description", map[string]any{"zero": 0, "null": nil, "enabled": false}))
 		if err != nil || value == nil || value.Resource == nil || value.StatusCode != 299 || string(value.Envelope) != body || len(*calls) != 1 {
 			t.Fatal(body, value, err, *calls)
 		}
@@ -133,7 +134,7 @@ func TestPythonConsistencyGroupSnapshotFindDefaultMissingStrictAndListRejection(
 			})
 			opts := []consistencygroupsnapshots.RecordFindOption{}
 			if strict {
-				opts = append(opts, consistencygroupsnapshots.WithRecordFindIgnoreMissing(false))
+				opts = append(opts, request.IgnoreMissing(false))
 			}
 			value, err := api.FindRecord(context.Background(), "absent", opts...)
 			if value != nil || len(*calls) != 2 || (err != nil) != strict {
@@ -175,10 +176,10 @@ func TestPythonConsistencyGroupSnapshotFindGetOnlyMicroversionWithoutDiscovery(t
 		})
 		options := []consistencygroupsnapshots.RecordFindOption{}
 		if mode == "GET override" || mode == "service aliases" {
-			options = append(options, consistencygroupsnapshots.WithRecordFindMicroversion("3.80"))
+			options = append(options, request.Microversion("3.80"))
 		}
 		if mode == "GET absent" {
-			options = append(options, consistencygroupsnapshots.WithRecordFindMicroversion(""))
+			options = append(options, request.Microversion(""))
 		}
 		if mode == "service aliases" {
 			api.RawClient().MoreHeaders = map[string]string{"openstack-api-version": "volume 3.71", "x-openstack-volume-api-version": "3.71"}
@@ -222,15 +223,15 @@ func TestPythonConsistencyGroupSnapshotFindQuerySeedFieldsScopeAndOwnedSnapshots
 		return snapshotWire(200, `{"cgsnapshots":[{"id":"first","name":"data","description":{"enabled":false,"extra":0}},{"id":"second","name":"other"}]}`)
 	})
 	var retained *consistencygroupsnapshots.RecordFindOpts
-	value, err := api.FindRecord(context.Background(), "data", option, func(c *consistencygroupsnapshots.RecordFindOpts) error {
+	value, err := api.FindRecord(context.Background(), "data", option, request.Custom(func(c *consistencygroupsnapshots.RecordFindOpts) error {
 		c.Headers["X-Next"] = "before"
 		retained = c
 		return nil
-	}, func(*consistencygroupsnapshots.RecordFindOpts) error {
+	}), request.Custom(func(*consistencygroupsnapshots.RecordFindOpts) error {
 		retained.Headers["X-Next"] = "after"
 		retained.Query["name"] = json.RawMessage(`"changed"`)
 		return nil
-	})
+	}))
 	if err != nil || value == nil || len(*calls) != 2 {
 		t.Fatal(value, err, *calls)
 	}
@@ -246,18 +247,21 @@ func TestPythonConsistencyGroupSnapshotFindQuerySeedFieldsScopeAndOwnedSnapshots
 	}
 	snapshotField(t, value, "id", `"first"`)
 	api, calls = snapshotAPI(t, "3.29", func(*http.Request) *http.Response { return snapshotWire(204, "") })
-	value, err = api.FindRecord(context.Background(), "id", consistencygroupsnapshots.WithRecordFindQuery("name", false), consistencygroupsnapshots.WithRecordFindQuery("description", nil))
+	value, err = api.FindRecord(context.Background(), "id", request.Query("name", false), request.Query("description", nil))
 	if err != nil || len(*calls) != 1 {
 		t.Fatal(value, err, *calls)
 	}
 	snapshotField(t, value, "name", "false")
 	snapshotField(t, value, "description", "null")
 }
+
+// request.Query marshals once when constructed; a reserved key still fails
+// with its own invalid-option error, not the value's marshal error.
 func TestPythonConsistencyGroupSnapshotFindReservedAndMalformedInputPrecedesHTTP(t *testing.T) {
 	for _, key := range []string{"id", "cls", "self", "connection", "_synchronized", "base_path", "microversion", "paginated", "max_items"} {
-		for _, input := range []any{nil, false, 0, snapshotMarshal(func() ([]byte, error) { t.Fatal("reserved input marshaled"); return nil, nil })} {
+		for _, input := range []any{nil, false, 0, snapshotMarshal(func() ([]byte, error) { return nil, errors.New("reserved input marshal error") })} {
 			api, calls := snapshotAPI(t, "", func(*http.Request) *http.Response { t.Fatal("preflight HTTP"); return snapshotWire(200, `{}`) })
-			value, err := api.FindRecord(context.Background(), "data", consistencygroupsnapshots.WithRecordFindQuery(key, input))
+			value, err := api.FindRecord(context.Background(), "data", request.Query(key, input))
 			if value != nil || !errors.Is(err, resource.ErrInvalidOption) || len(*calls) != 0 {
 				t.Fatal(key, value, err, *calls)
 			}
@@ -290,12 +294,12 @@ func TestPythonConsistencyGroupSnapshotFindCapturedSourceOptionCancellationAndNi
 		opts := []consistencygroupsnapshots.RecordFindOption{}
 		switch mode {
 		case "source":
-			opts = append(opts, func(*consistencygroupsnapshots.RecordFindOpts) error {
+			opts = append(opts, request.Custom(func(*consistencygroupsnapshots.RecordFindOpts) error {
 				api.RawClient().Microversion = "3.80"
 				return cause
-			})
+			}))
 		case "cancel":
-			opts = append(opts, func(*consistencygroupsnapshots.RecordFindOpts) error { cancel(cause); return cause })
+			opts = append(opts, request.Custom(func(*consistencygroupsnapshots.RecordFindOpts) error { cancel(cause); return cause }))
 		case "nil":
 			opts = append(opts, nil)
 		case "nil context":
@@ -396,7 +400,7 @@ func TestPythonConsistencyGroupSnapshotFindCleanRetryAndOwnedHeaders(t *testing.
 			}
 			return nil
 		}
-		value, err := api.FindRecord(context.Background(), "data", consistencygroupsnapshots.WithRecordFindHeaders(map[string]string{"X-Owned": "original"}))
+		value, err := api.FindRecord(context.Background(), "data", request.Headers(map[string]string{"X-Owned": "original"}))
 		if mode == "clean" {
 			if err != nil || value == nil || value.Resource == nil || len(*calls) != 2 {
 				t.Fatal(value, err, *calls)
@@ -425,7 +429,7 @@ func TestPythonConsistencyGroupSnapshotFindPagingControlsOffsetAndRawCap(t *test
 			}
 			return snapshotWire(200, `{"cgsnapshots":[{"id":"first","name":"data"}],"next":"?offset=1"}`)
 		})
-		opts := []consistencygroupsnapshots.RecordFindOption{consistencygroupsnapshots.WithRecordFindQuery("sort", "name:asc")}
+		opts := []consistencygroupsnapshots.RecordFindOption{request.Query("sort", "name:asc")}
 		if single {
 			opts = append(opts, consistencygroupsnapshots.WithRecordFindPaginated(false))
 		}
@@ -487,11 +491,11 @@ func TestPythonConsistencyGroupSnapshotFindPreparationCannotBecomeMemberFallback
 		options := []consistencygroupsnapshots.RecordFindOption{}
 		switch mode {
 		case "version":
-			options = append(options, consistencygroupsnapshots.WithRecordFindMicroversion("invalid"))
+			options = append(options, request.Microversion("invalid"))
 		case "location":
 			options = append(options, consistencygroupsnapshots.WithRecordFindLocation(resource.CloudLocation{Project: resource.CloudProject{ID: json.RawMessage(`bad`)}}))
 		case "headers":
-			options = append(options, consistencygroupsnapshots.WithRecordFindHeaders(map[string]string{"X-Auth-Token": "wrong"}))
+			options = append(options, request.Headers(map[string]string{"X-Auth-Token": "wrong"}))
 		}
 		value, err := api.FindRecord(context.Background(), "data", options...)
 		if value != nil || !errors.Is(err, resource.ErrInvalidOption) || len(*calls) != 0 {

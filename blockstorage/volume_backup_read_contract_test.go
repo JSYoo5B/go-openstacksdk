@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -332,7 +333,7 @@ func TestVolumeBackupReadMaximumCountsExcludedRowsAndDefersUnusedConstruction(t 
 				}
 				testcloud.JSON(w, 203, tc.body)
 			})
-			result, err := blockstorage.ListVolumeBackups(backupReadContractContext(t), client, blockstorage.WithVolumeBackupListMaxItems(tc.maximum), blockstorage.WithVolumeBackupListFilters(json.RawMessage(`{"force":false}`)))
+			result, err := blockstorage.ListVolumeBackups(backupReadContractContext(t), client, request.MaxItems(tc.maximum), blockstorage.WithVolumeBackupListFilters(json.RawMessage(`{"force":false}`)))
 			if err != nil || result == nil || string(result.Value) != "[]" || result.Backups == nil || len(result.Backups) != 0 || len(result.Pages) != 1 || calls.Load() != 1 {
 				t.Fatal(result, err, calls.Load())
 			}
@@ -362,7 +363,7 @@ func TestVolumeBackupReadMaximumAtPageEndStillFetchesAndDecodesNextResponse(t *t
 					w.WriteHeader(500)
 				}
 			})
-			result, err := blockstorage.ListVolumeBackups(backupReadContractContext(t), client, blockstorage.WithVolumeBackupListMaxItems(1))
+			result, err := blockstorage.ListVolumeBackups(backupReadContractContext(t), client, request.MaxItems(1))
 			if result == nil || len(result.Pages) != 2 || calls.Load() != 2 || string(result.Pages[1].Body) != body {
 				t.Fatal(result, err, calls.Load())
 			}

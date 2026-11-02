@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"io"
 	"net/http"
 	"reflect"
@@ -15,6 +14,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
@@ -55,7 +55,7 @@ func TestPythonVolumeConnectorNestedInputAndOptionSnapshots(t *testing.T) {
 			connector := map[string]any{"wwnns": []string{"node-1", "node-2"}, "nqn": "nqn.example", "extensions": map[string]any{"false": false, "zero": 0, "null": nil, "empty": []any{}, "huge": json.RawMessage("900719925474099312345")}}
 			original, _ := json.Marshal(connector)
 			headers := map[string]string{"X-Connector": "before"}
-			factory := volumes.WithConnectorHeaders(headers)
+			factory := request.Headers(headers)
 			headers["X-Connector"] = "after"
 			var physical http.Header
 			api, calls := connectorFixture(t, func(req *http.Request) *http.Response {
@@ -65,12 +65,12 @@ func TestPythonVolumeConnectorNestedInputAndOptionSnapshots(t *testing.T) {
 				return response
 			})
 			retained := map[string]string{"X-Snapshot": "owned"}
-			result, err := operation.call(context.Background(), api, connector, factory, func(cfg *request.Config[volumes.ConnectorOpts]) error {
+			result, err := operation.call(context.Background(), api, connector, factory, request.Custom(func(cfg *request.Config[volumes.ConnectorOpts]) error {
 				connector["wwnns"].([]string)[0] = "changed"
 				connector["extensions"].(map[string]any)["false"] = true
 				cfg.Headers["X-Snapshot"] = retained["X-Snapshot"]
 				return nil
-			}, func(*request.Config[volumes.ConnectorOpts]) error { retained["X-Snapshot"] = "changed"; return nil })
+			}), request.Custom(func(*request.Config[volumes.ConnectorOpts]) error { retained["X-Snapshot"] = "changed"; return nil }))
 			expected, _ := json.Marshal(map[string]any{operation.action: map[string]any{"connector": json.RawMessage(original)}})
 			if err != nil || result == nil || result.Response == nil || result.Response.StatusCode != 203 || result.Response.Header.Get("X-Request-Id") != "actual-action" || result.Microversion != "3.71" || len(result.Discovery) != 0 || calls.Len() != 1 || pythonVolumeCalls(calls)[0].method != "POST" || pythonVolumeCalls(calls)[0].path != pythonVolumeBase+"/vol-1/action" || pythonVolumeCalls(calls)[0].query != "" || pythonVolumeCalls(calls)[0].body != string(expected) {
 				t.Fatalf("result=%+v err=%v calls=%+v", result, err, pythonVolumeCalls(calls))
@@ -178,22 +178,22 @@ func TestPythonVolumeConnectorCapturesSourceBeforeMarshalAndOptions(t *testing.T
 				case "marshal cause":
 					connector["value"] = connectorMarshalFunc(func() ([]byte, error) { return nil, marshalCause })
 				case "option source":
-					options = []volumes.ConnectorOption{func(*request.Config[volumes.ConnectorOpts]) error {
+					options = []volumes.ConnectorOption{request.Custom(func(*request.Config[volumes.ConnectorOpts]) error {
 						api.RawClient().Microversion = "3.70"
 						return marshalCause
-					}}
+					})}
 				case "option cancel":
-					options = []volumes.ConnectorOption{func(*request.Config[volumes.ConnectorOpts]) error { cancel(cancelCause); return marshalCause }}
+					options = []volumes.ConnectorOption{request.Custom(func(*request.Config[volumes.ConnectorOpts]) error { cancel(cancelCause); return marshalCause })}
 				case "invalid connector":
 					connector["value"] = make(chan int)
 				case "nil option":
 					options = []volumes.ConnectorOption{nil}
 				case "header auth":
-					options = []volumes.ConnectorOption{volumes.WithConnectorHeader("X-Auth-Token", "caller")}
+					options = []volumes.ConnectorOption{request.Header("X-Auth-Token", "caller")}
 				case "query forbidden":
-					options = []volumes.ConnectorOption{request.WithQuery[volumes.ConnectorOpts]("x", "y")}
+					options = []volumes.ConnectorOption{request.Custom(request.WithQuery[volumes.ConnectorOpts]("x", "y"))}
 				case "field forbidden":
-					options = []volumes.ConnectorOption{request.WithField[volumes.ConnectorOpts]("x", true)}
+					options = []volumes.ConnectorOption{request.Custom(request.WithField[volumes.ConnectorOpts]("x", true))}
 				}
 				_, err := operation.call(ctx, api, connector, options...)
 				if err == nil || calls.Len() != 0 {

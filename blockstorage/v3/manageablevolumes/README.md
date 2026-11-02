@@ -16,7 +16,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/manageablevolumes.API.AllRecords`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/manageablevolumes.API.ProxyListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/manageablevolumes.WithRecordListDetails`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/manageablevolumes.WithRecordListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - The SDK defaults details to false and reads the underscore summary/detail route while extracting the literal hyphenated response collection; nullable Source descriptors cast reference dictionaries, safe_to_manage JSON truthiness and integer size, preserving physical page evidence and unknown wire fields.
   Tests: `blockstorage/v3/manageablevolumes/python_records_test.go:TestPythonManageableVolumesListDefaultsDetailsAndViews`.

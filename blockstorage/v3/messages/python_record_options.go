@@ -3,6 +3,8 @@ package messages
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"maps"
 	"net/url"
 	"slices"
@@ -21,7 +23,12 @@ type RecordGetOpts struct {
 	Headers        map[string]string
 	SourceEnvelope *bool
 }
-type RecordGetOption func(*RecordGetOpts) error
+
+// RecordGetOption is one option of GetRecord: WithRecordGetOpts,
+// WithRecordGetSourceEnvelope, request.Microversion, request.Headers
+// (replaces the headers) or request.Custom over *RecordGetOpts. Other shared
+// calls fail with resource.ErrInvalidOption before HTTP.
+type RecordGetOption = request.GetCall
 
 func copyGet(v RecordGetOpts) RecordGetOpts {
 	v.Headers = maps.Clone(v.Headers)
@@ -37,17 +44,10 @@ func copyGet(v RecordGetOpts) RecordGetOpts {
 }
 func WithRecordGetOpts(v RecordGetOpts) RecordGetOption {
 	owned := copyGet(v)
-	return func(c *RecordGetOpts) error { *c = copyGet(owned); return nil }
-}
-func WithRecordGetHeaders(v map[string]string) RecordGetOption {
-	owned := maps.Clone(v)
-	return func(c *RecordGetOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
-func WithRecordGetMicroversion(v string) RecordGetOption {
-	return func(c *RecordGetOpts) error { x := v; c.Microversion = &x; return nil }
+	return request.Custom(func(c *RecordGetOpts) error { *c = copyGet(owned); return nil })
 }
 func WithRecordGetSourceEnvelope(v bool) RecordGetOption {
-	return func(c *RecordGetOpts) error { x := v; c.SourceEnvelope = &x; return nil }
+	return request.Custom(func(c *RecordGetOpts) error { x := v; c.SourceEnvelope = &x; return nil })
 }
 
 // RecordDeleteOpts defaults to ignoring only a clean native404.
@@ -56,7 +56,12 @@ type RecordDeleteOpts struct {
 	Microversion  *string
 	Headers       map[string]string
 }
-type RecordDeleteOption func(*RecordDeleteOpts) error
+
+// RecordDeleteOption is one option of DeleteRecord: WithRecordDeleteOpts,
+// request.IgnoreMissing, request.Microversion, request.Headers (replaces the
+// headers) or request.Custom over *RecordDeleteOpts. Other shared calls fail
+// with resource.ErrInvalidOption before HTTP.
+type RecordDeleteOption = request.DeleteCall
 
 func copyDelete(v RecordDeleteOpts) RecordDeleteOpts {
 	v.Headers = maps.Clone(v.Headers)
@@ -72,17 +77,7 @@ func copyDelete(v RecordDeleteOpts) RecordDeleteOpts {
 }
 func WithRecordDeleteOpts(v RecordDeleteOpts) RecordDeleteOption {
 	owned := copyDelete(v)
-	return func(c *RecordDeleteOpts) error { *c = copyDelete(owned); return nil }
-}
-func WithRecordDeleteIgnoreMissing(v bool) RecordDeleteOption {
-	return func(c *RecordDeleteOpts) error { x := v; c.IgnoreMissing = &x; return nil }
-}
-func WithRecordDeleteMicroversion(v string) RecordDeleteOption {
-	return func(c *RecordDeleteOpts) error { x := v; c.Microversion = &x; return nil }
-}
-func WithRecordDeleteHeaders(v map[string]string) RecordDeleteOption {
-	owned := maps.Clone(v)
-	return func(c *RecordDeleteOpts) error { c.Headers = maps.Clone(owned); return nil }
+	return request.Custom(func(c *RecordDeleteOpts) error { *c = copyDelete(owned); return nil })
 }
 
 // RecordListOpts owns Source server queries, Body filters and paging controls.
@@ -95,7 +90,14 @@ type RecordListOpts struct {
 	Marker       string
 	MaxItems     int
 }
-type RecordListOption func(*RecordListOpts) error
+
+// RecordListOption is one option of ListRecords: WithRecordListOpts,
+// request.Query (a Source server query or declared attribute; the value is
+// sent as JSON and other keys are discarded), request.Limit, request.Marker,
+// request.MaxItems, request.Paginated, request.Microversion, request.Headers
+// (replaces the headers) or request.Custom over *RecordListOpts. Other shared
+// calls fail with resource.ErrInvalidOption before HTTP.
+type RecordListOption = request.ListCall
 
 func copyList(v RecordListOpts) RecordListOpts {
 	v.Query = recordClone(v.Query)
@@ -116,26 +118,7 @@ func copyList(v RecordListOpts) RecordListOpts {
 }
 func WithRecordListOpts(v RecordListOpts) RecordListOption {
 	owned := copyList(v)
-	return func(c *RecordListOpts) error { *c = copyList(owned); return nil }
-}
-func WithRecordListHeaders(v map[string]string) RecordListOption {
-	owned := maps.Clone(v)
-	return func(c *RecordListOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
-func WithRecordListMicroversion(v string) RecordListOption {
-	return func(c *RecordListOpts) error { x := v; c.Microversion = &x; return nil }
-}
-func WithRecordListPaginated(v bool) RecordListOption {
-	return func(c *RecordListOpts) error { x := v; c.Paginated = &x; return nil }
-}
-func WithRecordListLimit(v int) RecordListOption {
-	return func(c *RecordListOpts) error { x := v; c.Limit = &x; return nil }
-}
-func WithRecordListMarker(v string) RecordListOption {
-	return func(c *RecordListOpts) error { c.Marker = v; return nil }
-}
-func WithRecordListMaxItems(v int) RecordListOption {
-	return func(c *RecordListOpts) error { c.MaxItems = v; return nil }
+	return request.Custom(func(c *RecordListOpts) error { *c = copyList(owned); return nil })
 }
 func recordServer(key string) bool {
 	switch key {
@@ -144,23 +127,42 @@ func recordServer(key string) bool {
 	}
 	return false
 }
-func WithRecordListQuery(key string, value any) RecordListOption {
-	if !recordServer(key) && !recordKnown(key) {
-		return func(*RecordListOpts) error { return nil }
+
+var (
+	recordGetCalls = calls.Spec[RecordGetOpts]{
+		Headers:      calls.Value(func(c *RecordGetOpts) *map[string]string { return &c.Headers }),
+		Microversion: calls.Pointer(func(c *RecordGetOpts) **string { return &c.Microversion }),
 	}
-	raw, err := json.Marshal(value)
-	owned := bytes.Clone(raw)
-	return func(c *RecordListOpts) error {
-		if err != nil {
-			return err
-		}
-		if c.Query == nil {
-			c.Query = make(map[string]json.RawMessage)
-		}
-		c.Query[key] = bytes.Clone(owned)
-		return nil
+	recordDeleteCalls = calls.Spec[RecordDeleteOpts]{
+		Headers:       calls.Value(func(c *RecordDeleteOpts) *map[string]string { return &c.Headers }),
+		Microversion:  calls.Pointer(func(c *RecordDeleteOpts) **string { return &c.Microversion }),
+		IgnoreMissing: calls.Pointer(func(c *RecordDeleteOpts) **bool { return &c.IgnoreMissing }),
 	}
-}
+	recordListCalls = calls.Spec[RecordListOpts]{
+		Headers:      calls.Value(func(c *RecordListOpts) *map[string]string { return &c.Headers }),
+		Microversion: calls.Pointer(func(c *RecordListOpts) **string { return &c.Microversion }),
+		Query: func(c *RecordListOpts, entry request.CallEntry) error {
+			if !recordServer(entry.Key) && !recordKnown(entry.Key) {
+				return nil
+			}
+			if entry.JSONErr != nil {
+				return entry.JSONErr
+			}
+			if c.Query == nil {
+				c.Query = make(map[string]json.RawMessage)
+			}
+			c.Query[entry.Key] = bytes.Clone(entry.JSON)
+			return nil
+		},
+		Paging: calls.Paging[RecordListOpts]{
+			Limit:     calls.Pointer(func(c *RecordListOpts) **int { return &c.Limit }),
+			Marker:    calls.Value(func(c *RecordListOpts) *string { return &c.Marker }),
+			MaxItems:  calls.Value(func(c *RecordListOpts) *int { return &c.MaxItems }),
+			Paginated: calls.Pointer(func(c *RecordListOpts) **bool { return &c.Paginated }),
+		},
+	}
+)
+
 func prepareList(v RecordListOpts) (url.Values, map[string]json.RawMessage, rest.ListControl, error) {
 	query, filters := make(url.Values), make(map[string]json.RawMessage)
 	control := rest.ListControl{MaxItems: v.MaxItems, SinglePage: v.Paginated != nil && !*v.Paginated, LimitHint: true}

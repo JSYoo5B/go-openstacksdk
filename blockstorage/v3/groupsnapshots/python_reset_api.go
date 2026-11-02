@@ -8,10 +8,11 @@ import (
 	"maps"
 	"net/http"
 	"net/url"
-	"slices"
 	"strings"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
@@ -33,19 +34,22 @@ type RecordResetStatusOpts struct {
 	Microversion *string
 	Headers      map[string]string
 }
-type RecordResetStatusOption func(*RecordResetStatusOpts) error
+
+// RecordResetStatusOption is one option of ResetStatusRecord: request.Custom
+// over *RecordResetStatusOpts, request.Microversion or request.Headers
+// (replaces the headers). Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type RecordResetStatusOption = request.WriteCall
+
+var resetStatusCalls = calls.Spec[RecordResetStatusOpts]{
+	Headers:      calls.Value(func(o *RecordResetStatusOpts) *map[string]string { return &o.Headers }),
+	Microversion: calls.Pointer(func(o *RecordResetStatusOpts) **string { return &o.Microversion }),
+}
 
 func copyResetStatus(v RecordResetStatusOpts) RecordResetStatusOpts {
 	v.Headers = maps.Clone(v.Headers)
 	v.Microversion = cloneString(v.Microversion)
 	return v
-}
-func WithRecordResetStatusMicroversion(v string) RecordResetStatusOption {
-	return func(c *RecordResetStatusOpts) error { x := v; c.Microversion = &x; return nil }
-}
-func WithRecordResetStatusHeaders(v map[string]string) RecordResetStatusOption {
-	owned := maps.Clone(v)
-	return func(c *RecordResetStatusOpts) error { c.Headers = maps.Clone(owned); return nil }
 }
 
 // ResetStatusRecord implements reset_group_snapshot_status and its deprecated
@@ -61,7 +65,7 @@ func (a *API) ResetStatusRecord(ctx context.Context, id, status string, options 
 	if err := recordID(id); err != nil {
 		return nil, recordWrap(ctx, op, err)
 	}
-	cfg, err := applyRecord(p, RecordResetStatusOpts{}, copyResetStatus, slices.Clone(options))
+	cfg, err := applyRecord(p, RecordResetStatusOpts{}, copyResetStatus, calls.Translate(options, resetStatusCalls))
 	if err == nil {
 		err = p.prepare(cfg.Microversion, cfg.Headers, nil, true)
 	}

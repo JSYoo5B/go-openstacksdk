@@ -6,6 +6,7 @@ import (
 	"errors"
 	api "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/manageablevolumes"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"net/http"
 	"testing"
@@ -28,7 +29,7 @@ func TestPythonManageableVolumesListDefaultsDetailsAndViews(t *testing.T) {
 				testcloud.JSON(w, 202, `{"manageable-volumes":[{"id":"one","reference":7,"safe_to_manage":"False","size":"٢","x_extension":true,"cinder_id":null}]}`)
 			})
 			a := api.New(cloud.Client("block-storage", "/v3/project/"))
-			rows, err := a.AllRecords(context.Background(), api.WithRecordListDetails(detail), api.WithRecordListQuery("cluster", "c"), api.WithRecordListQuery("unknown", 1))
+			rows, err := a.AllRecords(context.Background(), api.WithRecordListDetails(detail), request.Query("cluster", "c"), request.Query("unknown", 1))
 			if err != nil || len(rows) != 1 || calls != 1 {
 				t.Fatal(rows, err, calls)
 			}
@@ -60,24 +61,24 @@ func TestPythonManageableVolumesFiltersCapsProxyAndGuard(t *testing.T) {
 	if err != nil || calls != 0 || string(result.JSON) != "null" {
 		t.Fatal(result, err, calls)
 	}
-	rows, err := a.AllRecords(context.Background(), api.WithRecordListQuery("safe_to_manage", true), api.WithRecordListMaxItems(1))
+	rows, err := a.AllRecords(context.Background(), request.Query("safe_to_manage", true), request.MaxItems(1))
 	if err != nil || len(rows) != 0 || calls != 1 {
 		t.Fatal(rows, err, calls)
 	}
-	rows, err = a.AllRecords(context.Background(), api.WithRecordListQuery("safe_to_manage", true))
+	rows, err = a.AllRecords(context.Background(), request.Query("safe_to_manage", true))
 	if err != nil || len(rows) != 1 || string(rows[0].Resource.Body["id"]) != `"two"` {
 		t.Fatal(rows, err)
 	}
-	_, err = a.AllRecords(context.Background(), api.WithRecordListQuery("base_path", "/outside"))
+	_, err = a.AllRecords(context.Background(), request.Query("base_path", "/outside"))
 	if !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
 	before := calls
-	_, err = a.AllRecords(context.Background(), func(v *api.RecordListOpts) error {
+	_, err = a.AllRecords(context.Background(), request.Custom(func(v *api.RecordListOpts) error {
 		v.Query = map[string]json.RawMessage{}
 		*a = *api.New(cloud.Client("volumev3", "/changed/"))
 		return nil
-	})
+	}))
 	if !errors.Is(err, resource.ErrInvalidOption) || calls != before {
 		t.Fatal(err, calls)
 	}

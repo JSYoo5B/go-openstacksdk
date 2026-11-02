@@ -14,8 +14,8 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.API.DisableReplicationRecord`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordReplicationOpts`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordReplicationMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordReplicationHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordReplicationPinnedSourceWire`
 
 - Literal escaped group action POST, no GET/Find/delete fallback, complete Cinder JSON action request and actual ACK receipt only; no fabricated Group Resource/backend completion, unparsed accepted body including arbitrary JSON/invalidUTF8 and exact HTTP100..399 admission.
@@ -51,8 +51,8 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.API.EnableReplicationRecord`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordReplicationOpts`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordReplicationMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordReplicationHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordReplicationPinnedSourceWire`
 
 - Literal escaped group action POST, no GET/Find/delete fallback, complete Cinder JSON action request and actual ACK receipt only; no fabricated Group Resource/backend completion, unparsed accepted body including arbitrary JSON/invalidUTF8 and exact HTTP100..399 admission.
@@ -90,8 +90,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordFailoverOpts`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordFailoverAllowedAttachedVolume`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordFailoverSecondaryBackendID`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordFailoverMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordFailoverHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordFailoverPinnedSourceWire`
 
 - Literal escaped group action POST, no GET/Find/delete fallback, complete Cinder JSON action request and actual ACK receipt only; no fabricated Group Resource/backend completion, unparsed accepted body including arbitrary JSON/invalidUTF8 and exact HTTP100..399 admission.

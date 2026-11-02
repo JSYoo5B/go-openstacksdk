@@ -31,9 +31,9 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/clusters.API.Find`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/clusters.WithFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 
-- Find sends GET clusters/{name_or_id} and after a clean 404 lists clusters/detail?name={name_or_id} matching id or name, returning nil by default and ErrNotFound with WithFindIgnoreMissing(false).
+- Find sends GET clusters/{name_or_id} and after a clean 404 lists clusters/detail?name={name_or_id} matching id or name, returning nil by default and ErrNotFound with request.IgnoreMissing(false).
   Tests: `blockstorage/v3/clusters/api_test.go:TestClusterFindFallsBackToDetailListByName`.
 
 Python/Go differences:
@@ -52,7 +52,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/clusters.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/clusters.API.All`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/clusters.WithListDetails`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/clusters.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List sends GET clusters/detail by default or clusters with WithListDetails(false), maps the Cluster QueryParameters to Requests-encoded query and filters undeclared-query Body attributes such as state locally.
   Tests: `blockstorage/v3/clusters/api_test.go:TestClusterListDetailsQueryAndLocalFilters`.

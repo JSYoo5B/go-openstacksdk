@@ -99,8 +99,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithSummaryOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithSummaryAllProjects`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithSummaryQuery`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithSummaryHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithSummaryMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithSummarySingleFetch`
 
 - Source Proxy summary preserves the initial queryless requires_id=False GET followed by all_tenants=False/True aggregate fetch; stock /volumes/summary is separate from /volumes ListSummary. First fetch only declared untyped seed survives omission; explicit null overwrites. Explicit single fetch improves redundant Source request sequence.
@@ -130,8 +130,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.API.GetQuotaClassRecord`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaClassGetOpts`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaClassName`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaClassGetHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaClassGetMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - GET default/custom class names project the seven declared quota integer fields with missing/null distinction and preserve actual unknown Wire/body/header/status separately. Selected version remains owned and no version discovery is added.
   Tests: `blockstorage/v3/quotasets/python_quota_class_test.go:TestPythonCinderQuotaClassGetSevenDescriptorsAndActualWire`, `blockstorage/v3/quotasets/python_quota_class_test.go:TestPythonCinderQuotaClassGetMissingNullAndCopiedProof`, `blockstorage/v3/quotasets/python_quota_class_test.go:TestPythonCinderQuotaClassOwnedOptionsAndNoVersionDiscovery`.
@@ -154,8 +154,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.API.UpdateQuotaClassRecord`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaClassUpdateOpts`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaClassUpdateAttribute`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaClassUpdateHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaClassUpdateMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - PUT transmits raw dirty quota_class_set attrs and explicit null, overlays actual response on class id seed and casts only the returned declared view. No attrs or unknown-only fields yields no HTTP, while duplicate id/constructor controls fail before requests.
   Tests: `blockstorage/v3/quotasets/python_quota_class_test.go:TestPythonCinderQuotaClassUpdateRawDirtyAttrsAndSeedProjection`, `blockstorage/v3/quotasets/python_quota_class_test.go:TestPythonCinderQuotaClassUpdateNoopUnknownAndExplicitNull`, `blockstorage/v3/quotasets/python_quota_class_test.go:TestPythonCinderQuotaClassPreflightIDsAndBoundConstructorControls`.
@@ -182,8 +182,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/resourcefilters.WithRecordListOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/resourcefilters.WithRecordListResource`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/resourcefilters.WithRecordListQuery`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/resourcefilters.WithRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/resourcefilters.WithRecordListMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/resourcefilters.WithRecordListControl`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/resourcefilters.WithRecordListJMESPath`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/resourcefilters.API.ProxyListRecords`

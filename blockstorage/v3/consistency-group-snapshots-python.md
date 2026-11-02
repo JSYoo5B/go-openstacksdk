@@ -15,15 +15,15 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.New`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.API.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordListMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordListLocation`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordListDetails`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordListPaginated`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - Lazy default/detail vs summary listing. Source6 server query names only; declared Body attrs use shared ordered local predicates, unknown attrs/all_projects/all_tenants skipped without Marshaler. LIST bound row constructor collisions reject actual page while GET unknown cls remains Wire. Exact decimal comparison differs from Source binary64 and is documented.
   Tests: `blockstorage/v3/consistencygroupsnapshots/python_records_test.go:TestPythonConsistencyGroupSnapshotListSourceQueriesDetailsFiltersAndRawCap`, `blockstorage/v3/consistencygroupsnapshots/python_records_test.go:TestPythonConsistencyGroupSnapshotListLocalFloatPolicyAndConstructorCollisions`, `blockstorage/v3/consistencygroupsnapshots/python_records_test.go:TestPythonConsistencyGroupSnapshotBoundClsPresenceAndGetWireBoundary`, `blockstorage/v3/consistencygroupsnapshots/python_records_test.go:TestPythonConsistencyGroupSnapshotListDefaultAcceptOwnsSourceAndExplicitOption`.
@@ -65,8 +65,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.New`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.API.CreateRecord`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordCreateOpts`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordCreateHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordCreateMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordCreateLocation`
 
 - Fresh known dirty attrs sent once as cgsnapshot JSON wrapper, supplied ID retained, explicit null/false/zero/nested JSON preserved, nil attrs empty object. Unknown attrs are not marshaled; bound constructor reserved-key presence rejected before HTTP. Source does not prevalidate required consistencygroup_id: actual server400/body/header and native cause retained, no prefetch. JSON framing preflight occurs before POST.
@@ -103,9 +103,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.New`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.API.DeleteRecord`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordDeleteOpts`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordDeleteHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordDeleteMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordDeleteIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 
 - Bodyless DELETE of one escaped literal ID, no prefetch. Default ignores only clean native404 and preserves its actual ignored-missing receipt; strict opts retain404. Opaque generic100..399 ACK retained, no successful metadata GET or projected Resource replaces actual DELETE response. Physical404 remains error and cannot be ignored.
   Tests: `blockstorage/v3/consistencygroupsnapshots/python_records_test.go:TestPythonConsistencyGroupSnapshotDeleteDefaultMissingStrictAndOpaqueACK`, `blockstorage/v3/consistencygroupsnapshots/python_records_test.go:TestPythonConsistencyGroupSnapshotPhysicalFaultsNeverReplayIgnoreOrInventSuccess`.
@@ -141,12 +141,12 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.New`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordFindOpts`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordFindDetails`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordFindHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordFindMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordFindLocation`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordFindQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordFindPaginated`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordFindMaxItems`
 
@@ -188,8 +188,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.New`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.API.GetRecord`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordReadOpts`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordReadHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordReadMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordReadLocation`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordReadSeed`
 
@@ -281,6 +281,7 @@ import (
 
     openstack "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots"
+    "github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 func main() {
@@ -317,7 +318,7 @@ func main() {
         show(api.GetRecord(ctx, *identity))
     case "find":
         show(api.FindRecord(ctx, *identity,
-            consistencygroupsnapshots.WithRecordFindIgnoreMissing(!*strict),
+            request.IgnoreMissing(!*strict),
             consistencygroupsnapshots.WithRecordFindDetails(!*summary)))
     case "list":
         var query map[string]json.RawMessage
@@ -338,7 +339,7 @@ func main() {
         show(api.CreateRecord(ctx, attrs))
     case "delete":
         receipt, err := api.DeleteRecord(ctx, *identity,
-            consistencygroupsnapshots.WithRecordDeleteIgnoreMissing(!*strict))
+            request.IgnoreMissing(!*strict))
         if receipt != nil {
             fmt.Printf("actual_http=%d actual_body=%q ignored_missing=%t\n",
                 receipt.StatusCode, receipt.Envelope, receipt.IgnoredMissing)

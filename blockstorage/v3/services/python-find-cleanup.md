@@ -4,7 +4,7 @@ The owned finder reads `os-services` directly, without a member GET. It matches
 stringified IDs or the declared name (falling back to binary only when name is
 absent), applies host matching, and finishes the inventory before returning so
 late failures and duplicate matches remain errors. Missing defaults to nil;
-`WithFindRecordIgnoreMissing(false)` requests an error. A selected Cinder version
+`request.IgnoreMissing(false)` requests an error. A selected Cinder version
 is preserved; an unset version negotiates up to the Source Service maximum 3.32.
 
 ```python
@@ -40,7 +40,7 @@ func main() {
     }
     sdk := blockstorage.New(client)
     found, err := sdk.Services.FindRecord(context.Background(), "cinder-volume",
-        services.WithFindRecordQuery("host", "host@lvm"))
+        request.Query("host", "host@lvm"))
     if err != nil { panic(err) }
     fmt.Println(found)
     result, err := sdk.Services.CleanupServiceWorkers(context.Background(),

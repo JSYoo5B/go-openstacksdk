@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -177,7 +178,7 @@ func TestPythonCinderGroupCreateFromSourceRequiredNullableIDsAndFreshResponse(t 
 	groupField(t, v, "name", `null`)
 }
 func TestPythonCinderGroupUpdateDirtyNoopAndResponseMerge(t *testing.T) {
-	for _, options := range [][]groups.RecordUpdateOption{nil, {groups.WithRecordUpdateOpts(groups.RecordUpdateOpts{Fields: map[string]json.RawMessage{"unknown": json.RawMessage(`{bad`)}})}, {groups.WithRecordUpdateField("id", "ignored")}} {
+	for _, options := range [][]groups.RecordUpdateOption{nil, {groups.WithRecordUpdateOpts(groups.RecordUpdateOpts{Fields: map[string]json.RawMessage{"unknown": json.RawMessage(`{bad`)}})}, {request.Field("id", "ignored")}} {
 		api, calls := groupAPI(t, "", func(*http.Request) *http.Response { t.Fatal("no-op sent HTTP"); return nil })
 		v, err := api.UpdateRecord(context.Background(), "seed", options...)
 		if err != nil || calls.Len() != 0 || v.StatusCode != 0 || v.Wire != nil || v.Envelope != nil || len(v.Discovery) != 0 {
@@ -189,7 +190,7 @@ func TestPythonCinderGroupUpdateDirtyNoopAndResponseMerge(t *testing.T) {
 	api, calls := groupAPI(t, "3.38", func(*http.Request) *http.Response {
 		return groupWire(202, `{"group":{"description":"server","unknown":0}}`)
 	})
-	v, err := api.UpdateRecord(context.Background(), "id", groups.WithRecordUpdateField("name", nil), groups.WithRecordUpdateField("description", false), groups.WithRecordUpdateField("add_volumes", "a,b"), groups.WithRecordUpdateField("remove_volumes", ""))
+	v, err := api.UpdateRecord(context.Background(), "id", request.Field("name", nil), request.Field("description", false), request.Field("add_volumes", "a,b"), request.Field("remove_volumes", ""))
 	if err != nil || calls.Len() != 1 || calls.Calls()[0].Method != http.MethodPut || calls.Calls()[0].Path != groupBase+"/id" {
 		t.Fatal(v, err, calls.Calls())
 	}
@@ -211,7 +212,7 @@ func TestPythonCinderGroupDeleteActionDefaultsStrictMissingAndStatuses(t *testin
 	if err := api.DeleteRecord(context.Background(), "id"); err != nil || calls.Len() != 1 {
 		t.Fatal(err, calls.Calls())
 	}
-	if err := api.DeleteRecord(context.Background(), "id", groups.WithRecordDeleteIgnoreMissing(false), groups.WithRecordDeleteVolumes(true)); !gophercloud.ResponseCodeIs(err, 404) || calls.Len() != 2 {
+	if err := api.DeleteRecord(context.Background(), "id", request.IgnoreMissing(false), groups.WithRecordDeleteVolumes(true)); !gophercloud.ResponseCodeIs(err, 404) || calls.Len() != 2 {
 		t.Fatal(err, calls.Calls())
 	}
 	groupJSON(t, calls.Calls()[1].Body, `{"delete":{"delete-volumes":true}}`)
@@ -230,7 +231,7 @@ func TestPythonCinderGroupListDeclaredAliasesLocalFiltersAndRawCap(t *testing.T)
 		}
 		return groupWire(200, `{"groups":[{"id":"a","name":"other"},{"id":"b","name":"target","unknown":9007199254740993},null],"next":"https://wrong.example/groups"}`)
 	})
-	seq := api.ListRecords(context.Background(), option, groups.WithRecordListLimit(0), groups.WithRecordListMaxItems(2))
+	seq := api.ListRecords(context.Background(), option, request.Limit(0), request.MaxItems(2))
 	if calls.Len() != 0 {
 		t.Fatal("eager list", calls.Calls())
 	}
@@ -265,7 +266,7 @@ func TestPythonCinderGroupListLocalDictionaryFailuresKeepActualPage(t *testing.T
 	api, _ := groupAPI(t, "3.38", func(*http.Request) *http.Response {
 		return groupWire(200, `{"groups":[{"id":"other","name":"scalar"}]}`)
 	})
-	values, err := collectGroups(api.ListRecords(context.Background(), groups.WithRecordListQuery("id", "target"), groups.WithRecordListQuery("name", map[string]bool{"k": true})))
+	values, err := collectGroups(api.ListRecords(context.Background(), request.Query("id", "target"), request.Query("name", map[string]bool{"k": true})))
 	if err != nil || len(values) != 0 {
 		t.Fatal("first false must short-circuit later local errors", values, err)
 	}
@@ -292,7 +293,7 @@ func TestPythonCinderGroupListDetailsLinksMarkersOffsetsAndConsumerBreak(t *test
 				}
 				return reply
 			})
-			values, err := collectGroups(api.ListRecords(context.Background(), groups.WithRecordListDetails(false), groups.WithRecordListQuery("sort", "id:asc")))
+			values, err := collectGroups(api.ListRecords(context.Background(), groups.WithRecordListDetails(false), request.Query("sort", "id:asc")))
 			if err != nil || len(values) != 2 || calls.Len() != 2 || calls.Calls()[0].Path != groupBase || calls.Calls()[1].Path != groupBase {
 				t.Fatal(values, err, calls.Calls())
 			}
@@ -310,7 +311,7 @@ func TestPythonCinderGroupListDetailsLinksMarkersOffsetsAndConsumerBreak(t *test
 		}
 		return groupWire(200, `{"groups":{"id":9007199254740993}}`)
 	})
-	values, err := collectGroups(api.ListRecords(context.Background(), groups.WithRecordListLimit(5)))
+	values, err := collectGroups(api.ListRecords(context.Background(), request.Limit(5)))
 	if err != nil || len(values) != 1 || calls.Len() != 2 || !strings.Contains(calls.Calls()[1].RawQuery, "marker=9007199254740993") {
 		t.Fatal(values, err, calls.Calls())
 	}
@@ -320,7 +321,7 @@ func TestPythonCinderGroupListDetailsLinksMarkersOffsetsAndConsumerBreak(t *test
 		}
 		return groupWire(200, `{"groups":[{"id":"a"}],"next":"?offset=2&limit=2"}`)
 	})
-	values, err = collectGroups(api.ListRecords(context.Background(), groups.WithRecordListQuery("offset", 0), groups.WithRecordListLimit(2)))
+	values, err = collectGroups(api.ListRecords(context.Background(), request.Query("offset", 0), request.Limit(2)))
 	if err != nil || len(values) != 1 || calls.Len() != 2 {
 		t.Fatal(values, err, calls.Calls())
 	}
@@ -375,7 +376,7 @@ func TestPythonCinderGroupDiscoveryCeilingSelectedOverridesAndOwnedEvidence(t *t
 		t.Fatal(v)
 	}
 	api, calls = groupAPI(t, "3.80", func(*http.Request) *http.Response { return groupWire(200, `{"group":{}}`) })
-	v, err = api.GetRecord(context.Background(), "id", groups.WithRecordGetMicroversion("3.13"))
+	v, err = api.GetRecord(context.Background(), "id", request.Microversion("3.13"))
 	if err != nil || calls.Len() != 1 || calls.Calls()[0].Header.Get("OpenStack-API-Version") != "volume 3.13" || api.RawClient().Microversion != "3.80" || len(v.Discovery) != 0 {
 		t.Fatal(v, err, calls.Calls())
 	}
@@ -394,11 +395,11 @@ func TestPythonCinderGroupOptionsPreflightUnknownDiscardAndStickySource(t *testi
 		func() error { _, err := api.GetRecord(context.Background(), " "); return err },
 		func() error { _, err := api.GetRecord(context.Background(), "id", nil); return err },
 		func() error {
-			_, err := api.GetRecord(context.Background(), "id", groups.WithRecordGetMicroversion("bad"))
+			_, err := api.GetRecord(context.Background(), "id", request.Microversion("bad"))
 			return err
 		},
 		func() error {
-			_, err := api.CreateRecord(context.Background(), groups.WithRecordCreateField("connection", nil))
+			_, err := api.CreateRecord(context.Background(), request.Field("connection", nil))
 			return err
 		},
 		func() error {
@@ -406,19 +407,19 @@ func TestPythonCinderGroupOptionsPreflightUnknownDiscardAndStickySource(t *testi
 			return err
 		},
 		func() error {
-			_, err := collectGroups(api.ListRecords(context.Background(), groups.WithRecordListLimit(-1)))
+			_, err := collectGroups(api.ListRecords(context.Background(), request.Limit(-1)))
 			return err
 		},
 		func() error {
-			_, err := collectGroups(api.ListRecords(context.Background(), groups.WithRecordListQuery("base_path", "/other")))
+			_, err := collectGroups(api.ListRecords(context.Background(), request.Query("base_path", "/other")))
 			return err
 		},
 		func() error {
-			_, err := collectGroups(api.ListRecords(context.Background(), groups.WithRecordListQuery("limit", false)))
+			_, err := collectGroups(api.ListRecords(context.Background(), request.Query("limit", false)))
 			return err
 		},
 		func() error {
-			return api.DeleteRecord(context.Background(), "id", groups.WithRecordDeleteHeaders(map[string]string{"Authorization": "forged"}))
+			return api.DeleteRecord(context.Background(), "id", request.Headers(map[string]string{"Authorization": "forged"}))
 		},
 	} {
 		if err := invoke(); !errors.Is(err, resource.ErrInvalidOption) || calls.Len() != 0 {
@@ -427,21 +428,21 @@ func TestPythonCinderGroupOptionsPreflightUnknownDiscardAndStickySource(t *testi
 	}
 	cause := errors.New("option failed")
 	ctx, cancel := context.WithCancelCause(context.Background())
-	_, err := api.CreateRecord(ctx, func(*groups.RecordCreateOpts) error { cancel(cause); return cause })
+	_, err := api.CreateRecord(ctx, request.Custom(func(*groups.RecordCreateOpts) error { cancel(cause); return cause }))
 	if !errors.Is(err, cause) || !errors.Is(err, context.Canceled) || calls.Len() != 0 {
 		t.Fatal(err, calls.Calls())
 	}
 	api, calls = groupAPI(t, "3.38", func(*http.Request) *http.Response { return groupWire(202, `{"group":{}}`) })
-	_, err = api.CreateRecord(context.Background(), groups.WithRecordCreateField("unknown", make(chan int)))
+	_, err = api.CreateRecord(context.Background(), request.Field("unknown", make(chan int)))
 	if err != nil || calls.Len() != 1 {
 		t.Fatal("Source discards unknown before JSON encoding", err, calls.Calls())
 	}
 	groupJSON(t, calls.Calls()[0].Body, `{"group":{}}`)
 	api, calls = groupAPI(t, "3.38", func(*http.Request) *http.Response { t.Fatal("mutated source sent HTTP"); return nil })
-	_, err = api.GetRecord(context.Background(), "id", func(*groups.RecordGetOpts) error {
+	_, err = api.GetRecord(context.Background(), "id", request.Custom(func(*groups.RecordGetOpts) error {
 		api.RawClient().ResourceBase = "https://different.example/v3/project/"
 		return nil
-	})
+	}))
 	if !errors.Is(err, resource.ErrInvalidOption) || calls.Len() != 0 {
 		t.Fatal(err, calls.Calls())
 	}
@@ -510,7 +511,7 @@ func TestPythonCinderGroupClassInputsAreBoundControlsBeforeDiscovery(t *testing.
 					return err
 				}},
 				{"create_field", func(api *groups.API) error {
-					_, err := api.CreateRecord(context.Background(), groups.WithRecordCreateField("cls", decoded))
+					_, err := api.CreateRecord(context.Background(), request.Field("cls", decoded))
 					return err
 				}},
 				{"create_opts", func(api *groups.API) error {
@@ -518,7 +519,7 @@ func TestPythonCinderGroupClassInputsAreBoundControlsBeforeDiscovery(t *testing.
 					return err
 				}},
 				{"update_field", func(api *groups.API) error {
-					_, err := api.UpdateRecord(context.Background(), "id", groups.WithRecordUpdateField("cls", decoded))
+					_, err := api.UpdateRecord(context.Background(), "id", request.Field("cls", decoded))
 					return err
 				}},
 				{"update_opts", func(api *groups.API) error {
@@ -526,7 +527,7 @@ func TestPythonCinderGroupClassInputsAreBoundControlsBeforeDiscovery(t *testing.
 					return err
 				}},
 				{"list_query", func(api *groups.API) error {
-					_, err := collectGroups(api.ListRecords(context.Background(), groups.WithRecordListQuery("cls", decoded)))
+					_, err := collectGroups(api.ListRecords(context.Background(), request.Query("cls", decoded)))
 					return err
 				}},
 				{"list_opts", func(api *groups.API) error {
@@ -569,12 +570,12 @@ func TestPythonCinderGroupListAdvertisedOffsetTransitionsKeepScopeAndFallback(t 
 				}
 				return groupWire(200, `{"groups":[{"id":"a","name":"wanted"}],"next":"?offset=2&limit=2"}`)
 			})
-			options := []groups.RecordListOption{groups.WithRecordListLimit(2), groups.WithRecordListQuery("sort", "id:asc"), groups.WithRecordListQuery("all_projects", false), groups.WithRecordListQuery("name", "wanted")}
+			options := []groups.RecordListOption{request.Limit(2), request.Query("sort", "id:asc"), request.Query("all_projects", false), request.Query("name", "wanted")}
 			switch initial {
 			case "marker":
-				options = append(options, groups.WithRecordListMarker("initial"))
+				options = append(options, request.Marker("initial"))
 			case "offset":
-				options = append(options, groups.WithRecordListQuery("offset", 0))
+				options = append(options, request.Query("offset", 0))
 			}
 			values, err := collectGroups(api.ListRecords(context.Background(), options...))
 			if err != nil || len(values) != 1 || calls.Len() != 3 {
@@ -631,7 +632,7 @@ func TestPythonCinderGroupListOffsetContinuationRejectsScopeAndCursorRegressions
 				actualBody = `{"groups":[{"id":"` + id + `"}],"next":"` + next + `","proof":"` + item.name + `"}`
 				return groupWire(actualStatus, actualBody)
 			})
-			values, err := collectGroups(api.ListRecords(context.Background(), groups.WithRecordListQuery("sort", "id:asc"), groups.WithRecordListQuery("all_projects", false)))
+			values, err := collectGroups(api.ListRecords(context.Background(), request.Query("sort", "id:asc"), request.Query("all_projects", false)))
 			wantCalls := 1
 			if item.late {
 				wantCalls = 2

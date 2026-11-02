@@ -15,6 +15,7 @@ import (
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 	v3 "github.com/gophercloud/gophercloud/v2/openstack/identity/v3/tokens"
@@ -64,7 +65,7 @@ func snapshotConnectionCall(ctx context.Context, conn *sdk.Connection, operation
 }
 
 func snapshotConnectionCallbacks(callback func() error) ([]blockstorage.VolumeSnapshotListOption, []blockstorage.VolumeSnapshotSearchOption, []blockstorage.VolumeSnapshotReadOption) {
-	return []blockstorage.VolumeSnapshotListOption{func(*blockstorage.VolumeSnapshotListOpts) error { return callback() }},
+	return []blockstorage.VolumeSnapshotListOption{request.Custom(func(*blockstorage.VolumeSnapshotListOpts) error { return callback() })},
 		[]blockstorage.VolumeSnapshotSearchOption{func(*blockstorage.VolumeSnapshotSearchOpts) error { return callback() }},
 		[]blockstorage.VolumeSnapshotReadOption{func(*blockstorage.VolumeSnapshotReadOpts) error { return callback() }}
 }
@@ -241,13 +242,13 @@ func TestConnectionVolumeSnapshotRecordedScopeIsCapturedAfterOptionsBeforeGetter
 		}
 	})
 	for index := range 2 {
-		out, err := conn.ListVolumeSnapshots(context.Background(), func(*blockstorage.VolumeSnapshotListOpts) error {
+		out, err := conn.ListVolumeSnapshots(context.Background(), request.Custom(func(*blockstorage.VolumeSnapshotListOpts) error {
 			callbacks.Add(1)
 			if index == 0 {
 				return snapshotConnectionRecordScope(cloud.Provider, "after-original", "original-token")
 			}
 			return nil
-		})
+		}))
 		if err != nil || out == nil || len(out.Snapshots) != 2 || len(out.Pages) != 2 {
 			t.Fatal(out, err)
 		}
@@ -361,11 +362,11 @@ func TestConnectionVolumeSnapshotListControlsArePerCallAndDoNotChangeCachedDefau
 		testcloud.JSON(w, 200, `{"snapshots":[{"id":"default"}]}`)
 	})
 	headers := map[string]string{"X-Trace": "owned-header"}
-	headerOption := blockstorage.WithVolumeSnapshotListHeaders(headers)
+	headerOption := request.Headers(headers)
 	headers["X-Trace"] = "caller-mutated"
-	result, err := conn.ListVolumeSnapshots(context.Background(), func(*blockstorage.VolumeSnapshotListOpts) error { callbacks.Add(1); return nil },
-		blockstorage.WithVolumeSnapshotListDetailed(false), blockstorage.WithVolumeSnapshotListPagination(false), blockstorage.WithVolumeSnapshotListMaxItems(1),
-		blockstorage.WithVolumeSnapshotListMicroversion("3.41"), headerOption, blockstorage.WithVolumeSnapshotListFilters(json.RawMessage(`{"status":"available","description":"keep"}`)))
+	result, err := conn.ListVolumeSnapshots(context.Background(), request.Custom(func(*blockstorage.VolumeSnapshotListOpts) error { callbacks.Add(1); return nil }),
+		blockstorage.WithVolumeSnapshotListDetailed(false), request.Paginated(false), request.MaxItems(1),
+		request.Microversion("3.41"), headerOption, blockstorage.WithVolumeSnapshotListFilters(json.RawMessage(`{"status":"available","description":"keep"}`)))
 	if err != nil || result == nil || len(result.Snapshots) != 1 || len(result.Pages) != 1 || string(result.Snapshots[0].Body["id"]) != `"first"` {
 		t.Fatal(result, err)
 	}
@@ -473,7 +474,7 @@ func TestConnectionVolumeSnapshotRawListBindingCollisionsFailBeforeServiceSelect
 			if err != nil {
 				t.Fatal(err)
 			}
-			out, err := conn.ListVolumeSnapshots(context.Background(), func(*blockstorage.VolumeSnapshotListOpts) error { callbacks.Add(1); return nil }, blockstorage.WithVolumeSnapshotListFilters(json.RawMessage(raw)))
+			out, err := conn.ListVolumeSnapshots(context.Background(), request.Custom(func(*blockstorage.VolumeSnapshotListOpts) error { callbacks.Add(1); return nil }), blockstorage.WithVolumeSnapshotListFilters(json.RawMessage(raw)))
 			if out != nil || !errors.Is(err, resource.ErrInvalidOption) || callbacks.Load() != 1 || locates.Load() != 0 {
 				t.Fatal(out, err, callbacks.Load(), locates.Load())
 			}
@@ -617,17 +618,17 @@ func TestConnectionVolumeSnapshotOriginalSliceAndRetainedOptionPointersCannotCha
 			var search []blockstorage.VolumeSnapshotSearchOption
 			var read []blockstorage.VolumeSnapshotReadOption
 			list = []blockstorage.VolumeSnapshotListOption{
-				func(opts *blockstorage.VolumeSnapshotListOpts) error {
+				request.Custom(func(opts *blockstorage.VolumeSnapshotListOpts) error {
 					callbacks.Add(1)
 					opts.Location = &location
 					opts.Filters = &filters
 					retainedLocation, retainedFilters = opts.Location, opts.Filters
-					list[1] = func(*blockstorage.VolumeSnapshotListOpts) error {
+					list[1] = request.Custom(func(*blockstorage.VolumeSnapshotListOpts) error {
 						return errors.New("replaced original should not run")
-					}
+					})
 					return nil
-				},
-				func(*blockstorage.VolumeSnapshotListOpts) error { return mutate() },
+				}),
+				request.Custom(func(*blockstorage.VolumeSnapshotListOpts) error { return mutate() }),
 			}
 			search = []blockstorage.VolumeSnapshotSearchOption{
 				func(opts *blockstorage.VolumeSnapshotSearchOpts) error {

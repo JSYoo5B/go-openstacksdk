@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 	"io"
@@ -132,19 +133,19 @@ func (f snapshotMarshal) MarshalJSON() ([]byte, error) { return f() }
 func TestPythonGroupSnapshotCreateDeclaredDirtyAttrsAndImmutableOptions(t *testing.T) {
 	attrs := map[string]any{"id": false, "group_id": "group", "name": "before", "description": map[string]any{"null": nil, "zero": 0, "enabled": false}, "group_type_id": json.Number("9007199254740993"), "metadata": snapshotMarshal(func() ([]byte, error) { t.Fatal("unknown attr was marshaled"); return nil, nil })}
 	headers := map[string]string{"X-Owned": "original"}
-	option := groupsnapshots.WithRecordCreateHeaders(headers)
+	option := request.Headers(headers)
 	headers["X-Owned"] = "mutated"
 	api, calls := snapshotAPI(t, "3.29", func(*http.Request) *http.Response {
 		return snapshotWire(202, `{"group_snapshot":{"id":"server","name":null,"status":"creating","unknown":9007199254740993}}`)
 	})
 	var retained *groupsnapshots.RecordCreateOpts
-	value, err := api.CreateRecord(context.Background(), attrs, option, func(cfg *groupsnapshots.RecordCreateOpts) error {
+	value, err := api.CreateRecord(context.Background(), attrs, option, request.Custom(func(cfg *groupsnapshots.RecordCreateOpts) error {
 		attrs["name"] = "after"
 		attrs["description"].(map[string]any)["zero"] = 99
 		cfg.Headers["X-Next"] = "first"
 		retained = cfg
 		return nil
-	}, func(*groupsnapshots.RecordCreateOpts) error { retained.Headers["X-Next"] = "after"; return nil })
+	}), request.Custom(func(*groupsnapshots.RecordCreateOpts) error { retained.Headers["X-Next"] = "after"; return nil }))
 	if err != nil || len(*calls) != 1 || (*calls)[0].method != "POST" || (*calls)[0].path != snapshotBase || (*calls)[0].headers.Get("X-Owned") != "original" || (*calls)[0].headers.Get("X-Next") != "first" || (*calls)[0].headers.Get("Content-Type") != "application/json" {
 		t.Fatal(value, err, *calls)
 	}
@@ -182,9 +183,9 @@ func TestPythonGroupSnapshotCreateSourceCaptureMarshalAndConstructorCollisions(t
 		case "marshal cancel":
 			attrs["name"] = snapshotMarshal(func() ([]byte, error) { cancel(cause); return nil, cause })
 		case "option source":
-			opts = append(opts, func(*groupsnapshots.RecordCreateOpts) error { api.RawClient().Microversion = "3.80"; return cause })
+			opts = append(opts, request.Custom(func(*groupsnapshots.RecordCreateOpts) error { api.RawClient().Microversion = "3.80"; return cause }))
 		case "option cancel":
-			opts = append(opts, func(*groupsnapshots.RecordCreateOpts) error { cancel(cause); return cause })
+			opts = append(opts, request.Custom(func(*groupsnapshots.RecordCreateOpts) error { cancel(cause); return cause }))
 		default:
 			attrs[mode] = nil
 		}
@@ -206,7 +207,7 @@ func TestPythonGroupSnapshotListSourceQueriesDetailsFiltersAndRawCap(t *testing.
 		api, calls := snapshotAPI(t, "3.29", func(*http.Request) *http.Response {
 			return snapshotWire(200, `{"group_snapshots":[{"id":"first","name":"data","description":{"enabled":true,"extra":0}},{"id":"second","name":"data","description":{"enabled":false}}]}`)
 		})
-		options := []groupsnapshots.RecordListOption{groupsnapshots.WithRecordListQuery("all_projects", false), groupsnapshots.WithRecordListQuery("sort_dir", []string{"asc", "desc"}), groupsnapshots.WithRecordListQuery("sort", "name:asc"), groupsnapshots.WithRecordListQuery("name", "data"), groupsnapshots.WithRecordListQuery("description", map[string]any{"enabled": 1}), groupsnapshots.WithRecordListQuery("unknown", snapshotMarshal(func() ([]byte, error) { t.Fatal("unknown query marshaled"); return nil, nil }))}
+		options := []groupsnapshots.RecordListOption{request.Query("all_projects", false), request.Query("sort_dir", []string{"asc", "desc"}), request.Query("sort", "name:asc"), request.Query("name", "data"), request.Query("description", map[string]any{"enabled": 1}), request.Query("unknown", snapshotMarshal(func() ([]byte, error) { return nil, errors.New("ignored query marshal error") }))}
 		if !details {
 			options = append(options, groupsnapshots.WithRecordListDetails(false))
 		}
@@ -227,7 +228,7 @@ func TestPythonGroupSnapshotListSourceQueriesDetailsFiltersAndRawCap(t *testing.
 			t.Fatal(*calls)
 		}
 		snapshotField(t, values[0], "id", `"first"`)
-		values, err = snapshotsCollect(api.ListRecords(context.Background(), groupsnapshots.WithRecordListMaxItems(1), groupsnapshots.WithRecordListQuery("id", "second")))
+		values, err = snapshotsCollect(api.ListRecords(context.Background(), request.MaxItems(1), request.Query("id", "second")))
 		if err != nil || len(values) != 0 || len(*calls) != 2 || !strings.Contains((*calls)[1].query, "limit=1") {
 			t.Fatal(values, err, *calls)
 		}
@@ -237,7 +238,7 @@ func TestPythonGroupSnapshotListLocalFloatPolicyAndConstructorCollisions(t *test
 	api, calls := snapshotAPI(t, "3.29", func(*http.Request) *http.Response {
 		return snapshotWire(200, `{"group_snapshots":[{"id":"v","group_type_id":9007199254740992}]}`)
 	})
-	values, err := snapshotsCollect(api.ListRecords(context.Background(), groupsnapshots.WithRecordListQuery("group_type_id", json.RawMessage(`9007199254740993.0`))))
+	values, err := snapshotsCollect(api.ListRecords(context.Background(), request.Query("group_type_id", json.RawMessage(`9007199254740993.0`))))
 	if err != nil || len(values) != 0 || len(*calls) != 1 {
 		t.Fatal("exact-decimal filter policy changed", values, err, *calls)
 	}
@@ -253,7 +254,7 @@ func TestPythonGroupSnapshotListLocalFloatPolicyAndConstructorCollisions(t *test
 	for _, description := range []string{`"truthy"`, `false`, `{}`, `{"enabled":true}`} {
 		body := `{"group_snapshots":[{"id":"v","description":` + description + `}]}`
 		api, _ := snapshotAPI(t, "3.29", func(*http.Request) *http.Response { return snapshotWire(200, body) })
-		values, err := snapshotsCollect(api.ListRecords(context.Background(), groupsnapshots.WithRecordListQuery("description", map[string]any{})))
+		values, err := snapshotsCollect(api.ListRecords(context.Background(), request.Query("description", map[string]any{})))
 		want := description == `"truthy"` || description == `{"enabled":true}`
 		if err != nil || (len(values) == 1) != want {
 			t.Fatal(description, values, err)
@@ -268,7 +269,7 @@ func TestPythonGroupSnapshotListPagingUsesRetainedScalarMarkerAndScope(t *testin
 		return snapshotWire(200, `{"group_snapshots":[{"id":9007199254740993,"name":"kept"}]}`)
 	})
 	var values []*groupsnapshots.GroupSnapshotRecord
-	for value, err := range api.ListRecords(context.Background(), groupsnapshots.WithRecordListLimit(2), groupsnapshots.WithRecordListAllProjects(true)) {
+	for value, err := range api.ListRecords(context.Background(), request.Limit(2), groupsnapshots.WithRecordListAllProjects(true)) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -282,7 +283,7 @@ func TestPythonGroupSnapshotListPagingUsesRetainedScalarMarkerAndScope(t *testin
 	api, calls = snapshotAPI(t, "3.29", func(*http.Request) *http.Response {
 		return snapshotWire(200, `{"group_snapshots":[{"id":"v"}],"group_snapshots_links":[{"rel":"next","href":"?marker=unvisited"}]}`)
 	})
-	values, err := snapshotsCollect(api.ListRecords(context.Background(), groupsnapshots.WithRecordListPaginated(false)))
+	values, err := snapshotsCollect(api.ListRecords(context.Background(), request.Paginated(false)))
 	if err != nil || len(values) != 1 || len(*calls) != 1 {
 		t.Fatal(values, err, *calls)
 	}
@@ -316,7 +317,7 @@ func TestPythonGroupSnapshotDefaultDiscoveryAndExplicitVersion(t *testing.T) {
 		}
 	}
 	api, calls := snapshotAPI(t, "3.80", func(*http.Request) *http.Response { return snapshotWire(200, `{}`) })
-	_, err := api.GetRecord(context.Background(), "v", groupsnapshots.WithRecordReadMicroversion(""))
+	_, err := api.GetRecord(context.Background(), "v", request.Microversion(""))
 	if err != nil || len(*calls) != 1 || (*calls)[0].headers.Get("OpenStack-API-Version") != "" {
 		t.Fatal(err, *calls)
 	}
@@ -334,7 +335,7 @@ func TestPythonGroupSnapshotDeleteDefaultMissingStrictAndOpaqueACK(t *testing.T)
 		}
 	}
 	api, _ := snapshotAPI(t, "3.29", func(*http.Request) *http.Response { return snapshotWire(404, "missing") })
-	value, err := api.DeleteRecord(context.Background(), "v", groupsnapshots.WithRecordDeleteIgnoreMissing(false))
+	value, err := api.DeleteRecord(context.Background(), "v", request.IgnoreMissing(false))
 	if value == nil || value.IgnoredMissing || !gophercloud.ResponseCodeIs(err, 404) {
 		t.Fatal(value, err)
 	}
@@ -437,7 +438,7 @@ func TestPythonGroupSnapshotRetryOwnsJSONHeadersAndSelectedVersion(t *testing.T)
 			}
 			return nil
 		}
-		value, err := api.CreateRecord(context.Background(), attrs, groupsnapshots.WithRecordCreateHeaders(map[string]string{"X-Owned": "fixed"}))
+		value, err := api.CreateRecord(context.Background(), attrs, request.Headers(map[string]string{"X-Owned": "fixed"}))
 		if mode == "clean" {
 			if err != nil || len(*calls) != 2 || (*calls)[0].body != (*calls)[1].body {
 				t.Fatal(value, err, *calls)
@@ -467,7 +468,7 @@ func TestPythonGroupSnapshotOptionsPreflightOwnershipAndNilAPI(t *testing.T) {
 			t.Fatal(id, err)
 		}
 	}
-	for _, opts := range [][]groupsnapshots.RecordListOption{{nil}, {groupsnapshots.WithRecordListMaxItems(-1)}, {groupsnapshots.WithRecordListAllProjects(false), groupsnapshots.WithRecordListQuery("all_tenants", nil)}, {groupsnapshots.WithRecordListHeaders(map[string]string{"X-Auth-Token": "caller"})}} {
+	for _, opts := range [][]groupsnapshots.RecordListOption{{nil}, {request.MaxItems(-1)}, {groupsnapshots.WithRecordListAllProjects(false), request.Query("all_tenants", nil)}, {request.Headers(map[string]string{"X-Auth-Token": "caller"})}} {
 		_, err := snapshotsCollect(api.ListRecords(context.Background(), opts...))
 		if !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(err)
@@ -502,7 +503,7 @@ func TestPythonGroupSnapshotCreateJSONFramingPrecedesDiscovery(t *testing.T) {
 		if serviceHeader {
 			api.RawClient().MoreHeaders = map[string]string{"content-type": "application/custom"}
 		} else {
-			options = append(options, groupsnapshots.WithRecordCreateHeaders(map[string]string{"CONTENT-TYPE": "application/custom"}))
+			options = append(options, request.Headers(map[string]string{"CONTENT-TYPE": "application/custom"}))
 		}
 		value, err := api.CreateRecord(context.Background(), map[string]any{"group_id": "g"}, options...)
 		if value != nil || !errors.Is(err, resource.ErrInvalidOption) || len(*calls) != 0 {
@@ -568,7 +569,7 @@ func TestPythonGroupSnapshotRawPagingInputPrecedesDiscovery(t *testing.T) {
 		})
 		options := []groupsnapshots.RecordListOption{}
 		for key, value := range query {
-			options = append(options, groupsnapshots.WithRecordListQuery(key, value))
+			options = append(options, request.Query(key, value))
 		}
 		values, err := snapshotsCollect(api.ListRecords(context.Background(), options...))
 		if len(values) != 0 || !errors.Is(err, resource.ErrInvalidOption) || len(*calls) != 0 {
@@ -619,7 +620,7 @@ func TestPythonGroupSnapshotListDefaultAcceptOwnsSourceAndExplicitOption(t *test
 		options := []groupsnapshots.RecordListOption{}
 		want := "application/json"
 		if explicit {
-			options = append(options, groupsnapshots.WithRecordListHeaders(map[string]string{"aCcEpT": "application/operation"}))
+			options = append(options, request.Headers(map[string]string{"aCcEpT": "application/operation"}))
 			want = "application/operation"
 		}
 		values, err := snapshotsCollect(api.ListRecords(context.Background(), options...))
@@ -648,7 +649,7 @@ func TestPythonGroupSnapshotListAdvertisedOffsetAndCursorScope(t *testing.T) {
 				return nil
 			}
 		})
-		values, err := snapshotsCollect(api.ListRecords(context.Background(), groupsnapshots.WithRecordListLimit(2), groupsnapshots.WithRecordListAllProjects(false), groupsnapshots.WithRecordListQuery("offset", 0), groupsnapshots.WithRecordListQuery("sort", "name:asc"), groupsnapshots.WithRecordListQuery("status", "available")))
+		values, err := snapshotsCollect(api.ListRecords(context.Background(), request.Limit(2), groupsnapshots.WithRecordListAllProjects(false), request.Query("offset", 0), request.Query("sort", "name:asc"), request.Query("status", "available")))
 		if err != nil || len(values) != 2 || len(*calls) != 3 {
 			t.Fatal(values, err, *calls)
 		}
@@ -675,7 +676,7 @@ func TestPythonGroupSnapshotListAdvertisedOffsetAndCursorScope(t *testing.T) {
 			t.Fatal(r.URL)
 			return nil
 		})
-		values, err := snapshotsCollect(api.ListRecords(context.Background(), groupsnapshots.WithRecordListLimit(2), groupsnapshots.WithRecordListMarker("start"), groupsnapshots.WithRecordListAllProjects(true)))
+		values, err := snapshotsCollect(api.ListRecords(context.Background(), request.Limit(2), request.Marker("start"), groupsnapshots.WithRecordListAllProjects(true)))
 		if err != nil || len(values) != 2 || len(*calls) != 3 {
 			t.Fatal(values, err, *calls)
 		}
@@ -697,7 +698,7 @@ func TestPythonGroupSnapshotListAdvertisedOffsetAndCursorScope(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			body := `{"group_snapshots":[{"id":"first"}],"next":` + fmt.Sprintf("%q", test.next) + `}`
 			api, calls := snapshotAPI(t, "3.29", func(*http.Request) *http.Response { return snapshotWire(200, body) })
-			values, err := snapshotsCollect(api.ListRecords(context.Background(), groupsnapshots.WithRecordListLimit(2), groupsnapshots.WithRecordListQuery("offset", test.initial), groupsnapshots.WithRecordListQuery("sort", "name:asc")))
+			values, err := snapshotsCollect(api.ListRecords(context.Background(), request.Limit(2), request.Query("offset", test.initial), request.Query("sort", "name:asc")))
 			var proof *resource.ResponseError
 			var cycle *resource.PaginationCycleError
 			if len(values) != 1 || err == nil || !errors.As(err, &proof) || proof.StatusCode != 200 || string(proof.Body) != body || len(*calls) != 1 || (test.cycle && !errors.As(err, &cycle)) || (!test.cycle && !errors.Is(err, resource.ErrInvalidOption)) {

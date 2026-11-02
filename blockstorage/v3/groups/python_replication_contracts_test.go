@@ -11,6 +11,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -128,7 +129,7 @@ func TestPythonCinderGroupReplicationOwnedOptionsRetainedMutationAndSelectedAlia
 	expected := map[string]string{"OpenStack-API-Version": "volume 3.38", "X-OpenStack-Volume-API-Version": "3.38", "X-Source": "source"}
 	api.RawClient().MoreHeaders = original
 	for range 2 {
-		value, err := api.FailoverReplicationRecord(context.Background(), "id", option, func(c *groups.RecordFailoverOpts) error { held = c; return nil })
+		value, err := api.FailoverReplicationRecord(context.Background(), "id", option, request.Custom(func(c *groups.RecordFailoverOpts) error { held = c; return nil }))
 		if err != nil || value == nil || !reflect.DeepEqual(api.RawClient().MoreHeaders, expected) || api.RawClient().Microversion != "3.38" {
 			t.Fatal(value, err, calls.Calls(), api.RawClient())
 		}
@@ -150,21 +151,21 @@ func TestPythonCinderGroupReplicationFirstCustomOptionsOwnNilHeaders(t *testing.
 		var value *groups.ReplicationRecordResult
 		var err error
 		if failover {
-			value, err = api.FailoverReplicationRecord(context.Background(), "id", groups.WithRecordFailoverHeaders(nil), func(c *groups.RecordFailoverOpts) error {
+			value, err = api.FailoverReplicationRecord(context.Background(), "id", request.Headers(nil), request.Custom(func(c *groups.RecordFailoverOpts) error {
 				if c.Headers == nil || len(c.Headers) != 0 {
 					t.Fatal(c)
 				}
 				c.Headers["X-First"] = "owned"
 				return nil
-			})
+			}))
 		} else {
-			value, err = api.EnableReplicationRecord(context.Background(), "id", groups.WithRecordReplicationOpts(groups.RecordReplicationOpts{Headers: nil}), func(c *groups.RecordReplicationOpts) error {
+			value, err = api.EnableReplicationRecord(context.Background(), "id", groups.WithRecordReplicationOpts(groups.RecordReplicationOpts{Headers: nil}), request.Custom(func(c *groups.RecordReplicationOpts) error {
 				if c.Headers == nil || len(c.Headers) != 0 {
 					t.Fatal(c)
 				}
 				c.Headers["X-First"] = "owned"
 				return nil
-			})
+			}))
 		}
 		if err != nil || value == nil || calls.Len() != 1 || calls.Calls()[0].Header.Get("X-First") != "owned" || len(api.RawClient().MoreHeaders) != 0 {
 			t.Fatal(value, err, calls.Calls(), api.RawClient().MoreHeaders)
@@ -181,7 +182,7 @@ func TestPythonCinderGroupReplicationMinimumRejectsBeforeMutationAndOverrideWork
 		}
 	}
 	api, calls := groupAPI(t, "3.37", func(*http.Request) *http.Response { return groupWire(202, "ack") })
-	value, err := api.DisableReplicationRecord(context.Background(), "id", groups.WithRecordReplicationMicroversion("3.38"))
+	value, err := api.DisableReplicationRecord(context.Background(), "id", request.Microversion("3.38"))
 	if err != nil || value == nil || calls.Len() != 1 || calls.Calls()[0].Header.Get("OpenStack-API-Version") != "volume 3.38" || api.RawClient().Microversion != "3.37" {
 		t.Fatal(value, err, calls.Calls())
 	}
@@ -359,15 +360,15 @@ func TestPythonCinderGroupReplicationPreflightOptionsAndOriginalCauses(t *testin
 			return e
 		},
 		func(api *groups.API) error {
-			_, e := api.EnableReplicationRecord(context.Background(), "id", groups.WithRecordReplicationMicroversion("invalid"))
+			_, e := api.EnableReplicationRecord(context.Background(), "id", request.Microversion("invalid"))
 			return e
 		},
 		func(api *groups.API) error {
-			_, e := api.EnableReplicationRecord(context.Background(), "id", groups.WithRecordReplicationHeaders(map[string]string{"Authorization": "forged"}))
+			_, e := api.EnableReplicationRecord(context.Background(), "id", request.Headers(map[string]string{"Authorization": "forged"}))
 			return e
 		},
 		func(api *groups.API) error {
-			_, e := api.EnableReplicationRecord(context.Background(), "id", groups.WithRecordReplicationHeaders(map[string]string{"OpenStack-API-Version": "volume 3.38"}))
+			_, e := api.EnableReplicationRecord(context.Background(), "id", request.Headers(map[string]string{"OpenStack-API-Version": "volume 3.38"}))
 			return e
 		},
 		func(api *groups.API) error {
@@ -383,11 +384,11 @@ func TestPythonCinderGroupReplicationPreflightOptionsAndOriginalCauses(t *testin
 	api, calls := groupAPI(t, "3.38", func(*http.Request) *http.Response { t.Fatal("source option HTTP"); return nil })
 	ctx, cancel := context.WithCancelCause(context.Background())
 	cause := errors.New("option cause")
-	value, err := api.EnableReplicationRecord(ctx, "id", func(*groups.RecordReplicationOpts) error {
+	value, err := api.EnableReplicationRecord(ctx, "id", request.Custom(func(*groups.RecordReplicationOpts) error {
 		api.RawClient().ResourceBase = "https://other.example/v3/project/"
 		cancel(cause)
 		return cause
-	})
+	}))
 	if value != nil || calls.Len() != 0 || !errors.Is(err, cause) || !errors.Is(err, context.Canceled) || !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(value, err, calls.Calls())
 	}

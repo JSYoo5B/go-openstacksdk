@@ -18,10 +18,10 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupListOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupListFilters`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupListDetailed`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupListPagination`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupListMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupListHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupListExpression`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupListAllowUnknownParams`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupListConflictingAttrs`
@@ -164,6 +164,7 @@ import (
     "github.com/gophercloud/gophercloud/v2"
     sdk "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/blockstorage"
+    "github.com/JSYoo5B/go-openstacksdk/request"
     "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -243,15 +244,16 @@ func ViaConnection(ctx context.Context, conn *sdk.Connection) error {
 func PreparedFirstPage(ctx context.Context, conn *sdk.Connection) error {
     calls := 0
     policy, err := blockstorage.PrepareVolumeBackupListOptions(ctx,
-        func(value *blockstorage.VolumeBackupListOpts) error {
+        request.Custom(func(value *blockstorage.VolumeBackupListOpts) error {
             calls++
-            return blockstorage.WithVolumeBackupListFilters(
-                json.RawMessage(`{"status":"available"}`))(value)
-        },
+            filters := json.RawMessage(`{"status":"available"}`)
+            value.Filters = &filters
+            return nil
+        }),
         blockstorage.WithVolumeBackupListDetailed(false),
-        blockstorage.WithVolumeBackupListPagination(false),
-        blockstorage.WithVolumeBackupListMaxItems(10),
-        blockstorage.WithVolumeBackupListHeaders(map[string]string{
+        request.Paginated(false),
+        request.MaxItems(10),
+        request.Headers(map[string]string{
             "X-Request-ID": "backup-read-example",
         }))
     if err != nil { return err }

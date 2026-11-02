@@ -14,11 +14,23 @@ import (
 	"unicode/utf8"
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/metadata"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
+
+// Calls interprets the shared calls of metadata.Option: request.Header is
+// one-entry metadata.WithHeaders; every other shared control is unsupported.
+var Calls = calls.Spec[request.Config[metadata.Opts]]{
+	Header: calls.MergeHeader[request.Config[metadata.Opts]](metadata.WithHeaders),
+}
+
+// ApplyOptions applies metadata options in caller order like request.Apply.
+func ApplyOptions(options ...metadata.Option) (request.Config[metadata.Opts], error) {
+	return calls.ApplyConfig(metadata.Opts{}, Calls, options...)
+}
 
 type Scope struct {
 	client                   *gophercloud.ServiceClient
@@ -87,7 +99,7 @@ func (s *Scope) prepare(ctx context.Context, options []metadata.Option) (map[str
 	if err := s.validate(ctx); err != nil {
 		return nil, err
 	}
-	config, err := request.Apply(metadata.Opts{}, append([]metadata.Option(nil), options...)...)
+	config, err := ApplyOptions(append([]metadata.Option(nil), options...)...)
 	if err != nil {
 		return nil, err
 	}

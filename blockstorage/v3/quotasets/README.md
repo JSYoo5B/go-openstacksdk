@@ -118,7 +118,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.ProjectQuotaScope.Reset`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithResetIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 
 - DELETE resets overrides at the fixed project endpoint, accepts native HTTP 200, returns bodyless reset metadata and performs no follow-up GET.
   Tests: `api/cinder_project_quotas_responses_test.go:TestCinderProjectQuotaLimitsDefaultsUsageUpdateAndResetKeepFixedTarget`, `api/cinder_project_quotas_responses_test.go:TestCinderProjectQuotaDeleteAndUpdateAcceptOnlyNative200`.
@@ -142,9 +142,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.ProjectQuotaScope.Usage`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.ProjectQuotaScope.GetRecord`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaReadOpts`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaReadQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaUsage`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaReadMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaReadLocation`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaReadBasePath`
 
@@ -217,9 +217,9 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.ProjectQuotaScope.Reset`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithResetIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.ProjectQuotaScope.RevertRecord`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaRevertQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaRevertOpts`
 
 - Quota reset uses strict 404 handling by default and sends no follow-up GET; optional ignore-missing changes only 404.

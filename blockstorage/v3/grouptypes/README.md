@@ -34,9 +34,9 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.API.Find`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.WithFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 
-- Find sends GET group_types/{name_or_id}?is_public=none and after a clean 400/403/404 lists group_types?is_public=none matching exact id or name, returns nil for a missing type by default, ErrNotFound with WithFindIgnoreMissing(false), and AmbiguousError for duplicates.
+- Find sends GET group_types/{name_or_id}?is_public=none and after a clean 400/403/404 lists group_types?is_public=none matching exact id or name, returns nil for a missing type by default, ErrNotFound with request.IgnoreMissing(false), and AmbiguousError for duplicates.
   Tests: `blockstorage/v3/grouptypes/api_test.go:TestGroupTypeFindUsesIsPublicNone`.
 
 Python/Go differences:
@@ -54,11 +54,11 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.API.All`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.WithListQuery`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.WithListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.WithListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.WithListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.WithListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 
 - List sends GET group_types with Accept application/json, maps is_public and all_projects (as all_tenants) to Requests-encoded query, filters id/name/description/group_specs locally, ignores unknown names, follows group_types_links and honors limit, marker and paginated.
   Tests: `blockstorage/v3/grouptypes/api_test.go:TestGroupTypeListQueryFiltersAndPaging`.
@@ -76,7 +76,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.API.Create`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.WithCreateOpts`
 
 - Create posts {"group_type": attrs} with only declared attributes to group_types at the negotiated 3.11 microversion and decodes the response.
@@ -87,7 +87,7 @@ Python/Go differences:
 - Python negotiates min(Resource max, server max) through keystoneauth discovery; Go sends the configured client microversion or performs one Cinder version discovery GET with the same cap, and the result keeps the discovery responses.
 - Python returns a mutable Resource; Go returns a typed struct with raw Body/Wire/Envelope, Header, StatusCode and Discovery evidence.
 - Per-request header options are a Go extension; authentication, microversion and content headers stay SDK owned.
-- Python **attrs become WithCreateField options holding raw JSON; aliases of one Body key with different values are rejected before HTTP.
+- Python **attrs become request.Field options holding raw JSON; aliases of one Body key with different values are rejected before HTTP.
 
 ### `python:block_storage/v3/update_group_type`
 
@@ -96,7 +96,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.API.Update`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.WithUpdateOpts`
 
 - Update sends PUT group_types/{id} with only the dirty declared attributes, never the id, and sends neither discovery nor update HTTP when nothing is dirty.
@@ -116,9 +116,9 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.API.Delete`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.WithDeleteIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 
-- Delete sends DELETE group_types/{id}, ignores a clean 404 by default, returns it with WithDeleteIgnoreMissing(false) and always returns 409 with operation context.
+- Delete sends DELETE group_types/{id}, ignores a clean 404 by default, returns it with request.IgnoreMissing(false) and always returns 409 with operation context.
   Tests: `blockstorage/v3/grouptypes/api_test.go:TestGroupTypeDeleteIgnoresMissingByDefault`.
 
 Python/Go differences:
@@ -204,9 +204,9 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.API.DeleteGroupSpecsProperty`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.WithDeleteIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 
-- DeleteGroupSpecsProperty sends DELETE group_types/{id}/group_specs/{prop}, ignores a clean 404 by default, returns it with WithDeleteIgnoreMissing(false) and returns 403 with operation context.
+- DeleteGroupSpecsProperty sends DELETE group_types/{id}/group_specs/{prop}, ignores a clean 404 by default, returns it with request.IgnoreMissing(false) and returns 403 with operation context.
   Tests: `blockstorage/v3/grouptypes/api_test.go:TestGroupTypeGroupSpecs`.
 
 Python/Go differences:
@@ -228,8 +228,8 @@ conn.block_storage.delete_group_type(gt)
 ```go
 api := grouptypes.New(volumeClient)
 gt, err := api.Create(ctx,
-    grouptypes.WithCreateField("name", "gold"),
-    grouptypes.WithCreateField("is_public", true))
+    request.Field("name", "gold"),
+    request.Field("is_public", true))
 if err != nil { return err }
 _, err = api.CreateGroupSpecs(ctx, gt.ID, map[string]any{"consistent_group_snapshot_enabled": "<is> True"})
 if err != nil { return err }

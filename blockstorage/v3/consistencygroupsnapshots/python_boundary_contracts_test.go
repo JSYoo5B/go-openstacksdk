@@ -13,18 +13,21 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-func TestPythonConsistencyGroupSnapshotListReservedControlsFailBeforeMarshalOrHTTP(t *testing.T) {
+// request.Query marshals once when constructed; a reserved control still fails
+// with its own invalid-option error, not the value's marshal error.
+func TestPythonConsistencyGroupSnapshotListReservedControlsFailBeforeHTTP(t *testing.T) {
 	for _, key := range []string{"cls", "self", "session", "base_path", "list_base_path", "microversion", "headers", "__conflicting_attrs", "jmespath_filters", "resource_type", "details", "connection", "_synchronized"} {
-		for _, input := range []any{nil, false, 0, snapshotMarshal(func() ([]byte, error) { t.Fatal("reserved list control was marshaled"); return nil, nil })} {
+		for _, input := range []any{nil, false, 0, snapshotMarshal(func() ([]byte, error) { return nil, errors.New("reserved list control marshal error") })} {
 			api, calls := snapshotAPI(t, "", func(r *http.Request) *http.Response {
 				t.Fatal("reserved control reached HTTP", r.URL)
 				return snapshotWire(200, `{}`)
 			})
-			option := consistencygroupsnapshots.WithRecordListQuery(key, input)
+			option := request.Query(key, input)
 			if len(*calls) != 0 {
 				t.Fatal("option factory executed HTTP")
 			}
@@ -42,7 +45,7 @@ func TestPythonConsistencyGroupSnapshotListReservedControlsFailBeforeMarshalOrHT
 		}
 	}
 	api, calls := snapshotAPI(t, "", func(*http.Request) *http.Response { return snapshotWire(200, `{"cgsnapshots":[]}`) })
-	values, err := snapshotsCollect(api.ListRecords(context.Background(), consistencygroupsnapshots.WithRecordListQuery("CLS", snapshotMarshal(func() ([]byte, error) { t.Fatal("ordinary unknown parameter marshaled"); return nil, nil }))))
+	values, err := snapshotsCollect(api.ListRecords(context.Background(), request.Query("CLS", snapshotMarshal(func() ([]byte, error) { return nil, errors.New("ignored parameter marshal error") }))))
 	if err != nil || len(values) != 0 || len(*calls) != 1 || (*calls)[0].query != "" {
 		t.Fatal(values, err, *calls)
 	}

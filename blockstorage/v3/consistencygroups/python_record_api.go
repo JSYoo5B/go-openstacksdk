@@ -14,6 +14,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/microversions"
@@ -194,7 +195,7 @@ func (a *API) GetRecord(ctx context.Context, id string, options ...RecordGetOpti
 	if err = recordID(id); err != nil {
 		return nil, recordWrap(ctx, op, err)
 	}
-	v, err := applyRecord(p, RecordGetOpts{}, copyGet, slices.Clone(options))
+	v, err := applyRecord(p, RecordGetOpts{}, copyGet, calls.Translate(options, getCalls))
 	if err == nil {
 		err = p.policy(v.Microversion, v.Headers)
 	}
@@ -217,7 +218,7 @@ func (a *API) CreateRecord(ctx context.Context, options ...RecordCreateOption) (
 	if err != nil {
 		return nil, recordWrap(ctx, op, err)
 	}
-	v, err := applyRecord(p, RecordCreateOpts{}, copyCreate, slices.Clone(options))
+	v, err := applyRecord(p, RecordCreateOpts{}, copyCreate, calls.Translate(options, createCalls))
 	var fields map[string]json.RawMessage
 	if err == nil {
 		fields, err = mutationFields(v.Fields, false)
@@ -241,7 +242,7 @@ func (a *API) CreateFromSourceRecord(ctx context.Context, options ...RecordSourc
 	if err != nil {
 		return nil, recordWrap(ctx, op, err)
 	}
-	v, err := applyRecord(p, RecordSourceOpts{}, copySource, slices.Clone(options))
+	v, err := applyRecord(p, RecordSourceOpts{}, copySource, calls.Translate(options, sourceCalls))
 	for _, text := range []*string{v.ConsistencyGroupSnapshotID, v.ConsistencyGroupID, v.Name, v.Description} {
 		if text != nil && !utf8.ValidString(*text) {
 			err = errors.Join(err, recordInvalid("source text must be UTF-8"))
@@ -277,7 +278,7 @@ func (a *API) UpdateRecord(ctx context.Context, id string, options ...RecordUpda
 	if err = recordID(id); err != nil {
 		return nil, recordWrap(ctx, op, err)
 	}
-	v, err := applyRecord(p, RecordUpdateOpts{}, copyUpdate, slices.Clone(options))
+	v, err := applyRecord(p, RecordUpdateOpts{}, copyUpdate, calls.Translate(options, updateCalls))
 	var fields map[string]json.RawMessage
 	if err == nil {
 		fields, err = mutationFields(v.Fields, true)
@@ -313,7 +314,7 @@ func (a *API) DeleteRecord(ctx context.Context, id string, options ...RecordDele
 	if err = recordID(id); err != nil {
 		return recordWrap(ctx, op, err)
 	}
-	v, err := applyRecord(p, RecordDeleteOpts{}, copyDelete, slices.Clone(options))
+	v, err := applyRecord(p, RecordDeleteOpts{}, copyDelete, calls.Translate(options, deleteCalls))
 	if err == nil {
 		err = p.policy(v.Microversion, v.Headers)
 	}
@@ -341,7 +342,7 @@ func (a *API) ListRecords(ctx context.Context, options ...RecordListOption) iter
 			fail(err)
 			return
 		}
-		v, err := applyRecord(p, RecordListOpts{}, copyList, owned)
+		v, err := applyRecord(p, RecordListOpts{}, copyList, calls.Translate(owned, listCalls))
 		var query url.Values
 		var filters map[string]json.RawMessage
 		var control rest.ListControl

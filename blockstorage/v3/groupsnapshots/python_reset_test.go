@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -19,7 +19,7 @@ func TestGroupSnapshotResetStatusRecordPostsActionWithEmptyAccept(t *testing.T) 
 		}
 		return snapshotWire(202, ``)
 	})
-	v, err := api.ResetStatusRecord(context.Background(), "s1", "available", groupsnapshots.WithRecordResetStatusHeaders(map[string]string{"Accept": "text/plain"}))
+	v, err := api.ResetStatusRecord(context.Background(), "s1", "available", request.Headers(map[string]string{"Accept": "text/plain"}))
 	if err != nil || len(*calls) != 2 {
 		t.Fatal(err, *calls)
 	}

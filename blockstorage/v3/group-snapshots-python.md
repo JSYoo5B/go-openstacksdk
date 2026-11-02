@@ -14,8 +14,8 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.New`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.API.CreateRecord`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordCreateHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordCreateMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordCreateLocation`
 
 - Fresh known attrs snapshot is wrapped under group_snapshot and posted once without Resource GET. Explicit id remains dirty in POST because GroupSnapshot has no allow_patch. Unknown attrs are discarded before Marshaler invocation; omitted/nil/empty attrs versus explicit null/false/zero/empty nested values and exact big integers retain distinct JSON. Parsed server descriptors overwrite matching seed values, unknown values remain Wire only.
@@ -47,9 +47,9 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.New`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.API.DeleteRecord`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordDeleteHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordDeleteMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordDeleteIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 
 - One bodyless fixed-ID DELETE accepts generic100..399 opaque ACK without JSON decode or prefetch. Source ignore_missing=True is the owned default; only a fault-free native404 is suppressed, with IgnoredMissing and copied actual404 receipt retained. Explicit false and non404/native/physical/retry failures remain errors.
   Tests: `blockstorage/v3/groupsnapshots/python_records_test.go:TestPythonGroupSnapshotDeleteDefaultMissingStrictAndOpaqueACK`, `blockstorage/v3/groupsnapshots/python_records_test.go:TestPythonGroupSnapshotPhysicalFaultsNeverReplayIgnoreOrInventSuccess`.
@@ -76,8 +76,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.New`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.API.GetRecord`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordReadOpts`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordReadHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordReadMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordReadLocation`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordReadSeed`
 
@@ -111,16 +111,16 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.New`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.API.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordListMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordListLocation`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordListDetails`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordListAllProjects`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - Lazy Source detail=True chooses /group_snapshots/detail; false chooses summary collection. Known server query mapping limit/marker/offset/sort_dir/sort_key/sort and all_projects→all_tenants plus wire alias preserve client-key precedence including null, bool/number/text/array/object request expansion. Unknown query values are discarded without Marshaler calls; typed/raw scope conflicts and invalid pagination controls fail before HTTP/discovery.
   Tests: `blockstorage/v3/groupsnapshots/python_records_test.go:TestPythonGroupSnapshotListSourceQueriesDetailsFiltersAndRawCap`, `blockstorage/v3/groupsnapshots/python_records_test.go:TestPythonGroupSnapshotRawPagingInputPrecedesDiscovery`, `blockstorage/v3/groupsnapshots/python_records_test.go:TestPythonGroupSnapshotOptionsPreflightOwnershipAndNilAPI`.
@@ -149,7 +149,7 @@ Python/Go differences:
 - Go stable map-key order replaces Python kwargs insertion order. Shared local equality uses exact decimal JSON numbers rather than Python JSON float rounding; actual integer9007199254740992 versus raw filter9007199254740993.0 differs in Go and can equal after Python float decode. Recursive Source dictionary semantics are reused, not replaced by strict mapping-membership matching.
 - The finite pager bounds limit to one nonnegative Go integer, marker to one nonblank transport value, max_items to nonnegative Go integer/zero-unbounded and paginated to bool; it does not emulate arbitrary Python control-value truthiness/coercion. Marker JSON uses shared Requests query expansion and must yield exactly one nonempty value; multiple/empty arrays/objects are rejected.
 - Owned options support Source mapped server aliases and Body local filters, discarding unknown query. Go independently rejects changed origin/collection/filter/cycles, accepts Dictionary links and uses the shared safe pager rather than full mutable Python Resource/session paging engine. Explicit offset is retained and not automatically incremented; advertised offset links are supported. Shared finite pager permits one cursor family per request and nonnegative uint64 offset, removes the previous cursor on advertised family switches, and rejects repeated/backward offset rather than reproducing arbitrary Python mixed-cursor/session traversal.
-- WithRecordListQuery snapshots known JSON at factory creation; iterator captures service on execution. The public declared view/Wire/Envelope are distinct snapshots and retained private fields determine marker behavior.
+- request.Query snapshots known JSON at factory creation; iterator captures service on execution. The public declared view/Wire/Envelope are distinct snapshots and retained private fields determine marker behavior.
 
 ## Usage examples
 
@@ -188,6 +188,7 @@ import (
 
     openstack "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots"
+    "github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 func show(value *groupsnapshots.GroupSnapshotRecord) {
@@ -218,8 +219,8 @@ func main() {
     case "list":
         for value, err := range api.ListRecords(ctx,
             groupsnapshots.WithRecordListDetails(false),
-            groupsnapshots.WithRecordListQuery("status", "available"),
-            groupsnapshots.WithRecordListLimit(10)) {
+            request.Query("status", "available"),
+            request.Limit(10)) {
             if err != nil { log.Fatal(err) }
             show(value)
         }
@@ -228,7 +229,7 @@ func main() {
         show(value)
         if err != nil { log.Fatal(err) }
     case "delete":
-        receipt, err := api.DeleteRecord(ctx, *id, groupsnapshots.WithRecordDeleteIgnoreMissing(false))
+        receipt, err := api.DeleteRecord(ctx, *id, request.IgnoreMissing(false))
         if receipt != nil { fmt.Printf("actual_http=%d ignored404=%t actual_body=%q\n", receipt.StatusCode, receipt.IgnoredMissing, receipt.Envelope) }
         if err != nil { log.Fatal(err) }
     default:

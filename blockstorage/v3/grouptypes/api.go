@@ -8,6 +8,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"iter"
 	"net/http"
 	"net/url"
@@ -67,7 +68,7 @@ func (a *API) Get(ctx context.Context, id string, options ...GetOption) (*GroupT
 	if err := cinderowned.ValidateID("group type ID", id); err != nil {
 		return nil, t.Wrap(ctx, op, err)
 	}
-	p, _, err := cinderowned.Begin(ctx, t, GetOpts{}, cinderowned.CopyRead, readHeaders, version, options)
+	p, _, err := cinderowned.Begin(ctx, t, GetOpts{}, cinderowned.CopyRead, readHeaders, version, calls.Translate(options, getCalls))
 	if err != nil {
 		return nil, t.Wrap(ctx, op, err)
 	}
@@ -79,7 +80,7 @@ func (a *API) Get(ctx context.Context, id string, options ...GetOption) (*GroupT
 func (a *API) Create(ctx context.Context, options ...CreateOption) (*GroupType, error) {
 	const op = "Create"
 	t := a.target()
-	p, v, err := cinderowned.Begin(ctx, t, CreateOpts{}, cinderowned.CopyWrite, writeHeaders, version, options)
+	p, v, err := cinderowned.Begin(ctx, t, CreateOpts{}, cinderowned.CopyWrite, writeHeaders, version, calls.Translate(options, writeCalls))
 	if err != nil {
 		return nil, t.Wrap(ctx, op, err)
 	}
@@ -96,7 +97,7 @@ func (a *API) Update(ctx context.Context, id string, options ...UpdateOption) (*
 	}
 	// Resource.commit returns before selecting a microversion when nothing
 	// is dirty, so discovery runs only for a real update.
-	p, v, err := cinderowned.Begin(ctx, t, UpdateOpts{}, cinderowned.CopyWrite, writeHeaders, cinderowned.Version{Default: true}, options)
+	p, v, err := cinderowned.Begin(ctx, t, UpdateOpts{}, cinderowned.CopyWrite, writeHeaders, cinderowned.Version{Default: true}, calls.Translate(options, writeCalls))
 	var fields map[string]json.RawMessage
 	if err == nil {
 		fields, err = spec.BodyFields(v.Fields, true)
@@ -111,14 +112,14 @@ func (a *API) Update(ctx context.Context, id string, options ...UpdateOption) (*
 }
 
 // Delete implements delete_group_type: DELETE group_types/{id}. A clean 404
-// returns nil unless WithDeleteIgnoreMissing(false) is given.
+// returns nil unless request.IgnoreMissing(false) is given.
 func (a *API) Delete(ctx context.Context, id string, options ...DeleteOption) error {
 	const op = "Delete"
 	t := a.target()
 	if err := cinderowned.ValidateID("group type ID", id); err != nil {
 		return t.Wrap(ctx, op, err)
 	}
-	p, v, err := cinderowned.Begin(ctx, t, DeleteOpts{}, cinderowned.CopyDelete, deleteHeaders, version, options)
+	p, v, err := cinderowned.Begin(ctx, t, DeleteOpts{}, cinderowned.CopyDelete, deleteHeaders, version, calls.Translate(options, deleteCalls))
 	if err != nil {
 		return t.Wrap(ctx, op, err)
 	}
@@ -131,7 +132,7 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*GroupT
 	return func(yield func(*GroupType, error) bool) {
 		const op = "List"
 		t := a.target()
-		p, v, err := cinderowned.Begin(ctx, t, ListOpts{}, cinderowned.CopyList, func(v ListOpts) map[string]string { return v.Headers }, version, options)
+		p, v, err := cinderowned.Begin(ctx, t, ListOpts{}, cinderowned.CopyList, func(v ListOpts) map[string]string { return v.Headers }, version, calls.Translate(options, listCalls))
 		if err != nil {
 			yield(nil, t.Wrap(ctx, op, err))
 			return
@@ -159,11 +160,11 @@ func (a *API) All(ctx context.Context, options ...ListOption) ([]*GroupType, err
 // Find implements find_group_type: GET group_types/{name_or_id}?is_public=none
 // and, after a clean 400, 403 or 404, the complete group_types?is_public=none
 // list matched by exact ID or name. A missing group type returns nil, nil
-// unless WithFindIgnoreMissing(false) is given.
+// unless request.IgnoreMissing(false) is given.
 func (a *API) Find(ctx context.Context, nameOrID string, options ...FindOption) (*GroupType, error) {
 	const op = "Find"
 	t := a.target()
-	p, v, err := cinderowned.Begin(ctx, t, FindOpts{}, cinderowned.CopyFind, noHeaders, version, options)
+	p, v, err := cinderowned.Begin(ctx, t, FindOpts{}, cinderowned.CopyFind, noHeaders, version, calls.Translate(options, findCalls))
 	if err != nil {
 		return nil, t.Wrap(ctx, op, err)
 	}
@@ -193,7 +194,7 @@ func (a *API) specs(ctx context.Context, op, id, method string, body map[string]
 	if err := cinderowned.ValidateID("group type ID", id); err != nil {
 		return nil, t.Wrap(ctx, op, err)
 	}
-	p, _, err := cinderowned.Begin(ctx, t, GetOpts{}, cinderowned.CopyRead, readHeaders, version, options)
+	p, _, err := cinderowned.Begin(ctx, t, GetOpts{}, cinderowned.CopyRead, readHeaders, version, calls.Translate(options, getCalls))
 	if err != nil {
 		return nil, t.Wrap(ctx, op, err)
 	}
@@ -242,7 +243,7 @@ func (a *API) property(ctx context.Context, op, id, prop, method string, body ma
 	if err != nil {
 		return nil, t.Wrap(ctx, op, err)
 	}
-	p, _, err := cinderowned.Begin(ctx, t, GetOpts{}, cinderowned.CopyRead, readHeaders, version, options)
+	p, _, err := cinderowned.Begin(ctx, t, GetOpts{}, cinderowned.CopyRead, readHeaders, version, calls.Translate(options, getCalls))
 	if err != nil {
 		return nil, t.Wrap(ctx, op, err)
 	}
@@ -278,14 +279,14 @@ func (a *API) property(ctx context.Context, op, id, prop, method string, body ma
 
 // DeleteGroupSpecsProperty implements delete_group_type_group_specs_property:
 // DELETE group_types/{id}/group_specs/{prop}. A clean 404 returns nil unless
-// WithDeleteIgnoreMissing(false) is given.
+// request.IgnoreMissing(false) is given.
 func (a *API) DeleteGroupSpecsProperty(ctx context.Context, id, prop string, options ...DeleteOption) error {
 	const op = "DeleteGroupSpecsProperty"
 	t := a.target()
 	if err := errors.Join(cinderowned.ValidateID("group type ID", id), cinderowned.ValidateID("group spec name", prop)); err != nil {
 		return t.Wrap(ctx, op, err)
 	}
-	p, v, err := cinderowned.Begin(ctx, t, DeleteOpts{}, cinderowned.CopyDelete, deleteHeaders, version, options)
+	p, v, err := cinderowned.Begin(ctx, t, DeleteOpts{}, cinderowned.CopyDelete, deleteHeaders, version, calls.Translate(options, deleteCalls))
 	if err != nil {
 		return t.Wrap(ctx, op, err)
 	}
