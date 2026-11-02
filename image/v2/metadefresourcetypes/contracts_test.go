@@ -17,6 +17,7 @@ import (
 
 	rt "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -161,7 +162,7 @@ func rtProof(t *testing.T, e error, code int, raw []byte) *resource.ResponseErro
 	return proof
 }
 func rtHeaders() rtOptions {
-	return rtOptions{create: []rt.CreateOption{rt.WithCreateHeaders(map[string]string{"X-Option": "owned"}), rt.WithCreateHeader("X-Final", "yes")}, deletion: []rt.DeleteOption{rt.WithDeleteHeaders(map[string]string{"X-Option": "owned"}), rt.WithDeleteHeader("X-Final", "yes")}, list: []rt.ListOption{rt.WithListHeaders(map[string]string{"X-Option": "owned"}), rt.WithListHeader("X-Final", "yes")}}
+	return rtOptions{create: []rt.CreateOption{rt.WithCreateHeaders(map[string]string{"X-Option": "owned"}), request.Header("X-Final", "yes")}, deletion: []rt.DeleteOption{rt.WithDeleteHeaders(map[string]string{"X-Option": "owned"}), request.Header("X-Final", "yes")}, list: []rt.ListOption{rt.WithListHeaders(map[string]string{"X-Option": "owned"}), request.Header("X-Final", "yes")}}
 }
 
 func TestMetadefResourceTypesFixedRoutesAndPayloads(t *testing.T) {
@@ -433,7 +434,7 @@ func TestMetadefResourceTypesFiniteIterationAndLocalCaps(t *testing.T) {
 				})
 				a, s := rtScope(t, c)
 				var names []string
-				rtEach(a, s, context.Background(), global, []rt.ListOption{rt.WithListMaxItems(cap)}, func(m *resource.Metadata, n *string, e error) bool {
+				rtEach(a, s, context.Background(), global, []rt.ListOption{request.MaxItems(cap)}, func(m *resource.Metadata, n *string, e error) bool {
 					if e != nil {
 						t.Fatal(e)
 					}
@@ -463,7 +464,7 @@ func TestMetadefResourceTypesFiniteIterationAndLocalCaps(t *testing.T) {
 				a, s := rtScope(t, c)
 				opts := []rt.ListOption{}
 				if mode == "cap" {
-					opts = append(opts, rt.WithListMaxItems(1))
+					opts = append(opts, request.MaxItems(1))
 				}
 				n, terminal := 0, 0
 				rtEach(a, s, context.Background(), global, opts, func(_ *resource.Metadata, name *string, e error) bool {
@@ -607,11 +608,11 @@ func TestMetadefResourceTypesFiniteIterationAndLocalCaps(t *testing.T) {
 			return rtWire(200, &rtBody{Reader: strings.NewReader(rtGlobalJSON)}), nil
 		})
 		a, _ := rtScope(t, c)
-		opts := []rt.ListOption{func(o *rt.ListOpts) error {
+		opts := []rt.ListOption{request.Custom(func(o *rt.ListOpts) error {
 			callbacks.Add(1)
 			o.Headers = map[string]string{"X-Option": "owned"}
 			return nil
-		}}
+		})}
 		seq := a.List(context.Background(), opts...)
 		opts[0] = nil
 		if calls.Load() != 0 || callbacks.Load() != 0 {
@@ -680,9 +681,9 @@ func TestMetadefResourceTypesOwnedPreparationAndSource(t *testing.T) {
 			for _, op := range []string{"Create", "Delete"} {
 				var e error
 				if op == "Create" {
-					_, e = s.Create(context.Background(), name, func(*rt.CreateOpts) error { callbacks.Add(1); return nil })
+					_, e = s.Create(context.Background(), name, request.Custom(func(*rt.CreateOpts) error { callbacks.Add(1); return nil }))
 				} else {
-					_, e = s.Delete(context.Background(), name, func(*rt.DeleteOpts) error { callbacks.Add(1); return nil })
+					_, e = s.Delete(context.Background(), name, request.Custom(func(*rt.DeleteOpts) error { callbacks.Add(1); return nil }))
 				}
 				if !errors.Is(e, resource.ErrInvalidOption) {
 					t.Fatal(e)
@@ -738,7 +739,7 @@ func TestMetadefResourceTypesOwnedPreparationAndSource(t *testing.T) {
 				t.Fatal(e)
 			}
 			var callbacks atomic.Int32
-			rows, e := a.All(ctx, func(*rt.ListOpts) error { callbacks.Add(1); return nil })
+			rows, e := a.All(ctx, request.Custom(func(*rt.ListOpts) error { callbacks.Add(1); return nil }))
 			if rows != nil || e == nil || callbacks.Load() != 0 || calls.Load() != 0 {
 				t.Fatal(rows, e, callbacks.Load(), calls.Load())
 			}
@@ -781,7 +782,7 @@ func TestMetadefResourceTypesOwnedPreparationAndSource(t *testing.T) {
 				if op.global && (mode == "API" || mode == "Endpoint" || mode == "base" || mode == "Microversion") {
 					return
 				}
-				o := rtOptions{create: []rt.CreateOption{func(*rt.CreateOpts) error { callbacks.Add(1); return nil }}, deletion: []rt.DeleteOption{func(*rt.DeleteOpts) error { callbacks.Add(1); return nil }}, list: []rt.ListOption{func(*rt.ListOpts) error { callbacks.Add(1); return nil }}}
+				o := rtOptions{create: []rt.CreateOption{request.Custom(func(*rt.CreateOpts) error { callbacks.Add(1); return nil })}, deletion: []rt.DeleteOption{request.Custom(func(*rt.DeleteOpts) error { callbacks.Add(1); return nil })}, list: []rt.ListOption{request.Custom(func(*rt.ListOpts) error { callbacks.Add(1); return nil })}}
 				v, e := rtCall(a, s, ctx, op.name, o)
 				if v != nil || e == nil || calls.Load() != 0 || callbacks.Load() != 0 {
 					t.Fatal(v, e, calls.Load(), callbacks.Load())
@@ -824,7 +825,7 @@ func TestMetadefResourceTypesOwnedPreparationAndSource(t *testing.T) {
 					}
 					return nil
 				}
-				o := rtOptions{create: []rt.CreateOption{func(*rt.CreateOpts) error { return mutate() }}, deletion: []rt.DeleteOption{func(*rt.DeleteOpts) error { return mutate() }}, list: []rt.ListOption{func(*rt.ListOpts) error { return mutate() }}}
+				o := rtOptions{create: []rt.CreateOption{request.Custom(func(*rt.CreateOpts) error { return mutate() })}, deletion: []rt.DeleteOption{request.Custom(func(*rt.DeleteOpts) error { return mutate() })}, list: []rt.ListOption{request.Custom(func(*rt.ListOpts) error { return mutate() })}}
 				if mode == "nil option" {
 					o = rtOptions{create: []rt.CreateOption{nil}, deletion: []rt.DeleteOption{nil}, list: []rt.ListOption{nil}}
 				}
@@ -848,7 +849,7 @@ func TestMetadefResourceTypesOwnedPreparationAndSource(t *testing.T) {
 				var calls atomic.Int32
 				c := rtClient(func(*http.Request) (*http.Response, error) { calls.Add(1); return nil, errors.New("unexpected HTTP") })
 				a, s := rtScope(t, c)
-				o := rtOptions{create: []rt.CreateOption{rt.WithCreateHeader(header, "bad")}, deletion: []rt.DeleteOption{rt.WithDeleteHeader(header, "bad")}, list: []rt.ListOption{rt.WithListHeader(header, "bad")}}
+				o := rtOptions{create: []rt.CreateOption{request.Header(header, "bad")}, deletion: []rt.DeleteOption{request.Header(header, "bad")}, list: []rt.ListOption{request.Header(header, "bad")}}
 				v, e := rtCall(a, s, context.Background(), op.name, o)
 				if v != nil || !errors.Is(e, resource.ErrInvalidOption) || calls.Load() != 0 {
 					t.Fatal(v, e, calls.Load())
@@ -865,9 +866,9 @@ func TestMetadefResourceTypesOwnedPreparationAndSource(t *testing.T) {
 		{"bad prefix UTF8", rtOptions{create: []rt.CreateOption{rt.WithCreatePrefix(string([]byte{255}))}}, "Create"},
 		{"long target", rtOptions{create: []rt.CreateOption{rt.WithCreatePropertiesTarget(strings.Repeat("界", 81))}}, "Create"},
 		{"bad target UTF8", rtOptions{create: []rt.CreateOption{rt.WithCreatePropertiesTarget(string([]byte{255}))}}, "Create"},
-		{"negative local cap", rtOptions{list: []rt.ListOption{rt.WithListMaxItems(-1)}}, "GlobalAll"},
+		{"negative local cap", rtOptions{list: []rt.ListOption{request.MaxItems(-1)}}, "GlobalAll"},
 		{"alias conflict", rtOptions{create: []rt.CreateOption{rt.WithCreateHeaders(map[string]string{"X-Alias": "one", "x-alias": "two"})}}, "Create"},
-		{"header newline", rtOptions{deletion: []rt.DeleteOption{rt.WithDeleteHeader("X-Value", "one\ntwo")}}, "Delete"},
+		{"header newline", rtOptions{deletion: []rt.DeleteOption{request.Header("X-Value", "one\ntwo")}}, "Delete"},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			var calls atomic.Int32
@@ -899,13 +900,13 @@ func TestMetadefResourceTypesOwnedPreparationAndSource(t *testing.T) {
 		})
 		c.MoreHeaders = map[string]string{"X-Source": "captured"}
 		_, s := rtScope(t, c)
-		v, e := s.Create(context.Background(), rtName, rt.WithCreatePrefix("discard"), owned, func(o *rt.CreateOpts) error {
+		v, e := s.Create(context.Background(), rtName, rt.WithCreatePrefix("discard"), owned, request.Custom(func(o *rt.CreateOpts) error {
 			callbacks.Add(1)
 			escapedHeaders = o.Headers
 			escapedPrefix = o.Prefix
 			escapedTarget = o.PropertiesTarget
 			return nil
-		}, func(*rt.CreateOpts) error {
+		}), request.Custom(func(*rt.CreateOpts) error {
 			callbacks.Add(1)
 			escapedHeaders["X-Owned"] = "escaped"
 			*escapedPrefix = "escaped"
@@ -913,7 +914,7 @@ func TestMetadefResourceTypesOwnedPreparationAndSource(t *testing.T) {
 			c.MoreHeaders["X-Source"] = "late"
 			c.SetToken("live")
 			return nil
-		})
+		}))
 		if e != nil || v == nil || calls.Load() != 1 || callbacks.Load() != 2 || c.MoreHeaders["X-Owned"] != "" || c.MoreHeaders["X-Source"] != "late" {
 			t.Fatal(v, e, calls.Load(), callbacks.Load(), c.MoreHeaders)
 		}
@@ -927,7 +928,7 @@ func TestMetadefResourceTypesOwnedPreparationAndSource(t *testing.T) {
 			return rtWire(201, &rtBody{Reader: strings.NewReader(rtJSON)}), nil
 		})
 		_, s := rtScope(t, c)
-		v, e := s.Create(context.Background(), rtName, rt.WithCreatePrefix("discard"), rt.WithCreateHeader("X-Old", "discard"), rt.WithCreateOpts(rt.CreateOpts{}))
+		v, e := s.Create(context.Background(), rtName, rt.WithCreatePrefix("discard"), request.Header("X-Old", "discard"), rt.WithCreateOpts(rt.CreateOpts{}))
 		if e != nil || v == nil {
 			t.Fatal(v, e)
 		}
@@ -952,7 +953,7 @@ func TestMetadefResourceTypesOwnedPreparationAndSource(t *testing.T) {
 			return cause
 		}
 		_, s := rtScope(t, c)
-		v, e := s.Delete(context.Background(), rtName, rt.WithDeleteIgnoreMissing(true), owned, func(o *rt.DeleteOpts) error { escaped = o.IgnoreMissing; return nil }, func(*rt.DeleteOpts) error { *escaped = true; return nil })
+		v, e := s.Delete(context.Background(), rtName, request.IgnoreMissing(true), owned, request.Custom(func(o *rt.DeleteOpts) error { escaped = o.IgnoreMissing; return nil }), request.Custom(func(*rt.DeleteOpts) error { *escaped = true; return nil }))
 		if v != nil || !errors.Is(e, cause) || !gophercloud.ResponseCodeIs(e, 404) || hooks.Load() != 1 {
 			t.Fatal(v, e, hooks.Load())
 		}
@@ -971,7 +972,7 @@ func TestMetadefResourceTypesOwnedPreparationAndSource(t *testing.T) {
 			return rtWire(200, &rtBody{Reader: strings.NewReader(`{"resource_types":[{},null]}`)}), nil
 		})
 		a, _ := rtScope(t, c)
-		rows, e := a.All(context.Background(), rt.WithListMaxItems(9), rt.WithListHeader("X-Discard", "old"), owned, func(o *rt.ListOpts) error { escaped = o.Headers; return nil }, func(*rt.ListOpts) error { escaped["X-Owned"] = "escaped"; return nil })
+		rows, e := a.All(context.Background(), request.MaxItems(9), request.Header("X-Discard", "old"), owned, request.Custom(func(o *rt.ListOpts) error { escaped = o.Headers; return nil }), request.Custom(func(*rt.ListOpts) error { escaped["X-Owned"] = "escaped"; return nil }))
 		if e != nil || len(rows) != 1 || calls.Load() != 1 {
 			t.Fatal(rows, e, calls.Load())
 		}
@@ -1084,7 +1085,7 @@ func TestMetadefResourceTypesResponseOwnershipAndNativeHooks(t *testing.T) {
 			_, s := rtScope(t, c)
 			opts := []rt.DeleteOption{}
 			if mode != "default" {
-				opts = append(opts, rt.WithDeleteIgnoreMissing(mode == "explicit true"))
+				opts = append(opts, request.IgnoreMissing(mode == "explicit true"))
 			}
 			v, e := s.Delete(context.Background(), rtName, opts...)
 			if v != nil || calls.Load() != 1 || b.closes.Load() != 1 {

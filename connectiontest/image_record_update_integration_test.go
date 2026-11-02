@@ -13,6 +13,7 @@ import (
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/image"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -83,7 +84,7 @@ func TestConnectionOwnedImageUpdateSharesBindingSourceAndCleanLifecycle(t *testi
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	updated, err := conn.UpdateImageRecord(context.Background(), image.ImageRecordUpdateRequest{Record: seed}, image.WithImageRecordAttribute("name", "after"), image.WithImageRecordHeader("X-Call", "owned-update"))
+	updated, err := conn.UpdateImageRecord(context.Background(), image.ImageRecordUpdateRequest{Record: seed}, image.WithImageRecordAttribute("name", "after"), request.Header("X-Call", "owned-update"))
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

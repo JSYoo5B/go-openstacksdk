@@ -12,6 +12,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
@@ -86,7 +87,7 @@ func (s *Service) prepareImageRecordTag(ctx context.Context, input ImageRecordTa
 
 func prepareImageRecordTagHeaders(ctx context.Context, check func(context.Context) error, options []ImageMutationOption) (map[string]string, error) {
 	config := copyImageMutationOpts(ImageMutationOpts{})
-	for _, apply := range options {
+	for _, apply := range calls.Translate(options, imageMutationCalls) {
 		if err := check(ctx); err != nil {
 			return nil, err
 		}

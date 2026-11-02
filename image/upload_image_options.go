@@ -1,6 +1,11 @@
 package image
 
-import "encoding/json"
+import (
+	"encoding/json"
+
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
+	"github.com/JSYoo5B/go-openstacksdk/request"
+)
 
 // ImageUploadOpts owns flat metadata overrides and ordinary headers for a new
 // direct upload. Size is sent only on the binary PUT, including an explicit zero.
@@ -10,26 +15,32 @@ type ImageUploadOpts struct {
 	Size    *int64
 }
 
-type ImageUploadOption func(*ImageUploadOpts) error
+// ImageUploadOption is one option of UploadImage: WithImageUploadOpts,
+// WithImageUploadHeaders (merges), the size and field options,
+// request.Header (merges one header) or request.Custom over *ImageUploadOpts.
+// Other shared calls, including request.Headers and request.Field, fail with
+// resource.ErrInvalidOption before HTTP. WithImageUploadField checks the key
+// before it runs the value's marshaler, which request.Field cannot do.
+type ImageUploadOption = request.WriteCall
+
+var imageUploadCalls = calls.Spec[ImageUploadOpts]{
+	Header: calls.MergeHeader[ImageUploadOpts](WithImageUploadHeaders),
+}
 
 // WithImageUploadOpts snapshots and replaces the complete upload policy.
 func WithImageUploadOpts(value ImageUploadOpts) ImageUploadOption {
 	snapshot := copyImageUploadOpts(value)
-	return func(config *ImageUploadOpts) error { *config = copyImageUploadOpts(snapshot); return nil }
-}
-func WithImageUploadHeader(key, value string) ImageUploadOption {
-	apply := WithImageMutationHeader(key, value)
-	return func(config *ImageUploadOpts) error { return applyImageMemberHeader(&config.Headers, apply) }
+	return request.Custom(func(config *ImageUploadOpts) error { *config = copyImageUploadOpts(snapshot); return nil })
 }
 func WithImageUploadHeaders(values map[string]string) ImageUploadOption {
-	apply := WithImageMutationHeaders(values)
-	return func(config *ImageUploadOpts) error { return applyImageMemberHeader(&config.Headers, apply) }
+	apply := mergeImageMutationHeaders(values)
+	return request.Custom(func(config *ImageUploadOpts) error { return applyImageMemberHeader(&config.Headers, apply) })
 }
 func WithImageUploadSize(value int64) ImageUploadOption {
-	return func(config *ImageUploadOpts) error { owned := value; config.Size = &owned; return nil }
+	return request.Custom(func(config *ImageUploadOpts) error { owned := value; config.Size = &owned; return nil })
 }
 func WithoutImageUploadSize() ImageUploadOption {
-	return func(config *ImageUploadOpts) error { config.Size = nil; return nil }
+	return request.Custom(func(config *ImageUploadOpts) error { config.Size = nil; return nil })
 }
 
 // WithImageUploadField snapshots standard Go JSON once at factory time. It
@@ -40,7 +51,7 @@ func WithImageUploadField(key string, value any) ImageUploadOption {
 	if err == nil {
 		encoded, err = marshalImagePatchField(key, value)
 	}
-	return func(config *ImageUploadOpts) error {
+	return request.Custom(func(config *ImageUploadOpts) error {
 		if err != nil {
 			return err
 		}
@@ -49,14 +60,14 @@ func WithImageUploadField(key string, value any) ImageUploadOption {
 		}
 		config.Fields[key] = copyImagePatchRaw(encoded)
 		return nil
-	}
+	})
 }
 
 // WithImageUploadFields replaces all overrides. Nil and empty maps restore the
 // default metadata fields; supplied raw values remain independent snapshots.
 func WithImageUploadFields(values map[string]json.RawMessage) ImageUploadOption {
 	snapshot := copyImagePatchMap(values)
-	return func(config *ImageUploadOpts) error { config.Fields = copyImagePatchMap(snapshot); return nil }
+	return request.Custom(func(config *ImageUploadOpts) error { config.Fields = copyImagePatchMap(snapshot); return nil })
 }
 func WithImageUploadDiskFormat(value string) ImageUploadOption {
 	return WithImageUploadField("disk_format", value)

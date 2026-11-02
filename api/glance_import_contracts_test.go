@@ -16,6 +16,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport"
 	"github.com/JSYoo5B/go-openstacksdk/image/v2/images"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -209,7 +210,7 @@ func TestGlanceImportFreshFormatsAndAllPageNameBinding(t *testing.T) {
 			testcloud.JSON(w, 200, glanceImportJSON("response-must-not-retarget"))
 		})
 		cloud.Mux.HandleFunc(glanceImportPrefix+"images/selected/import", func(w http.ResponseWriter, r *http.Request) { posts.Add(1); testcloud.JSON(w, 202, `{"ack":true}`) })
-		v, err := imageimport.New(cloud.Client("image", glanceImportPrefix)).ImportImage(context.Background(), resource.Name("worker"), imageimport.WithImportHeader("X-Trace", "prepared"))
+		v, err := imageimport.New(cloud.Client("image", glanceImportPrefix)).ImportImage(context.Background(), resource.Name("worker"), request.Header("X-Trace", "prepared"))
 		if err != nil || v == nil || v.ImageID != "selected" || lists.Load() != 2 || gets.Load() != 1 || posts.Load() != 1 {
 			t.Fatal(v, err, lists.Load(), gets.Load(), posts.Load())
 		}
@@ -297,7 +298,7 @@ func TestGlanceImportOptionSnapshotsReplacementAndReuse(t *testing.T) {
 		seed := glanceImportKnown()
 		var retained *imageimport.ImportOpts
 		var calls atomic.Int32
-		option := imageimport.ImportOption(func(o *imageimport.ImportOpts) error {
+		option := request.Custom(func(o *imageimport.ImportOpts) error {
 			seed.ID = "other"
 			seed.ContainerFormat = ""
 			seed.DiskFormat = ""
@@ -337,7 +338,7 @@ func TestGlanceImportOptionSnapshotsReplacementAndReuse(t *testing.T) {
 			}
 			w.WriteHeader(202)
 		})
-		if v, err := imageimport.New(cloud.Client("image", glanceImportPrefix)).ImportKnownImage(context.Background(), glanceImportKnown(), imageimport.WithImportStore("old"), imageimport.WithImportURI("old"), imageimport.WithImportField("vendor", true), imageimport.WithImportOpts(imageimport.ImportOpts{})); err != nil || v == nil || calls.Load() != 1 {
+		if v, err := imageimport.New(cloud.Client("image", glanceImportPrefix)).ImportKnownImage(context.Background(), glanceImportKnown(), imageimport.WithImportStore("old"), imageimport.WithImportURI("old"), request.Field("vendor", true), imageimport.WithImportOpts(imageimport.ImportOpts{})); err != nil || v == nil || calls.Load() != 1 {
 			t.Fatal(v, err, calls.Load())
 		}
 	})
@@ -349,7 +350,7 @@ func TestGlanceImportExtensionsAndPreflightAreSDKOwned(t *testing.T) {
 		var calls atomic.Int32
 		root := json.RawMessage(`{"large":9007199254740993,"nested":[null,{}]}`)
 		method := []any{json.Number("1e+123"), map[string]any{"value": "owned"}}
-		opts := []imageimport.ImportOption{imageimport.WithImportField("vendor", false), imageimport.WithImportField("vendor", root), imageimport.WithImportMethodField("vendor_method", method)}
+		opts := []imageimport.ImportOption{request.Field("vendor", false), request.Field("vendor", root), imageimport.WithImportMethodField("vendor_method", method)}
 		root[0] = '!'
 		method[1].(map[string]any)["value"] = "changed"
 		cloud.Mux.HandleFunc(glanceImportPrefix+"images/selected/import", func(w http.ResponseWriter, r *http.Request) {
@@ -373,8 +374,8 @@ func TestGlanceImportExtensionsAndPreflightAreSDKOwned(t *testing.T) {
 	client := cloud.Client("image", glanceImportPrefix)
 	a := imageimport.New(client)
 	for _, option := range []imageimport.ImportOption{
-		nil, imageimport.WithImportStore(""), imageimport.WithImportStores("valid", ""), imageimport.WithImportHeader("X-Auth-Token", "forged"), imageimport.WithImportHeader("X-Image-Meta-Store", "forged"), imageimport.WithImportHeader("OpenStack-API-Version", "image 2.8"), imageimport.WithImportHeaders(map[string]string{"X-Trace": "a", "x-trace": "b"}),
-		imageimport.WithImportField("method", true), imageimport.WithImportField("ALL-STORES", true), imageimport.WithImportField("stores", []string{"a"}), imageimport.WithImportMethodField("NAME", "copy-image"), imageimport.WithImportMethodField("glance-region", "remote"), imageimport.WithImportMethodField("URI", "https://remote.invalid"), imageimport.WithImportField("vendor", json.RawMessage(`{`)), imageimport.WithImportField("vendor", make(chan int)),
+		nil, imageimport.WithImportStore(""), imageimport.WithImportStores("valid", ""), request.Header("X-Auth-Token", "forged"), request.Header("X-Image-Meta-Store", "forged"), request.Header("OpenStack-API-Version", "image 2.8"), imageimport.WithImportHeaders(map[string]string{"X-Trace": "a", "x-trace": "b"}),
+		request.Field("method", true), request.Field("ALL-STORES", true), request.Field("stores", []string{"a"}), imageimport.WithImportMethodField("NAME", "copy-image"), imageimport.WithImportMethodField("glance-region", "remote"), imageimport.WithImportMethodField("URI", "https://remote.invalid"), request.Field("vendor", json.RawMessage(`{`)), request.Field("vendor", make(chan int)),
 	} {
 		if v, err := a.ImportImage(context.Background(), resource.ID("selected"), option); v != nil || !errors.Is(err, resource.ErrInvalidOption) || calls.Load() != 0 {
 			t.Fatal("closed option reached GET", v, err, calls.Load())
@@ -610,7 +611,7 @@ func TestGlanceImportLiveProviderFixedRoutesAndSourceRechecks(t *testing.T) {
 			w.Header().Set("X-Submit", "actual")
 			testcloud.JSON(w, 202, `{"submission":true}`)
 		})
-		v, err := imageimport.New(client).ImportImage(context.WithValue(context.Background(), key{}, "caller"), resource.ID("selected"), imageimport.WithImportHeader("X-Trace", "earlier"), imageimport.WithImportHeader("x-trace", "final"))
+		v, err := imageimport.New(client).ImportImage(context.WithValue(context.Background(), key{}, "caller"), resource.ID("selected"), request.Header("X-Trace", "earlier"), request.Header("x-trace", "final"))
 		if err != nil || v == nil || v.ImageID != "selected" || v.Header.Get("X-Submit") != "actual" || gets.Load() != 1 || posts.Load() != 3 || middleware.Load() != 4 || reauth.Load() != 1 || retries.Load() != 1 || client.Endpoint != cloud.Server.URL+"/catalog/unused/" || client.ResourceBase != cloud.Server.URL+glanceImportPrefix {
 			t.Fatal(v, err, gets.Load(), posts.Load(), middleware.Load(), reauth.Load(), retries.Load())
 		}
@@ -626,7 +627,7 @@ func TestGlanceImportLiveProviderFixedRoutesAndSourceRechecks(t *testing.T) {
 			})
 			opts := []imageimport.ImportOption{}
 			if when == "options" {
-				opts = append(opts, func(*imageimport.ImportOpts) error { client.Type = "compute"; return nil })
+				opts = append(opts, request.Custom(func(*imageimport.ImportOpts) error { client.Type = "compute"; return nil }))
 			} else {
 				transport := cloud.Provider.HTTPClient.Transport
 				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {

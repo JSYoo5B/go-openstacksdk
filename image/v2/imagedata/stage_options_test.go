@@ -6,6 +6,7 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -15,7 +16,7 @@ func TestStageOptionsOwnedSnapshotsReplacementAndConcurrentReuse(t *testing.T) {
 	option := WithStageOpts(value)
 	size, value.Headers["x-note"] = 99, "after"
 	var captured *StageOpts
-	parsed, err := parseStageOpts([]StageOption{option, func(config *StageOpts) error { captured = config; return nil }})
+	parsed, err := parseStageOpts([]StageOption{option, request.Custom(func(config *StageOpts) error { captured = config; return nil })})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -52,12 +53,12 @@ func TestStageOptionsHeaderAuthorityAndCanonicalLastWins(t *testing.T) {
 	input := map[string]string{"x-note": "first", "X-NOTE": "first"}
 	option := WithStageHeaders(input)
 	input["x-note"], input["X-NOTE"] = "after", "after"
-	parsed, err := parseStageOpts([]StageOption{option, WithStageHeader("x-NOTE", "last")})
+	parsed, err := parseStageOpts([]StageOption{option, request.Header("x-NOTE", "last")})
 	if err != nil || len(parsed.Headers) != 1 || parsed.Headers["X-Note"] != "last" {
 		t.Fatalf("header ownership: %#v %v", parsed, err)
 	}
 	for _, key := range []string{"Accept", "Content-Type", "X-OpenStack-Image-Size", "Authorization", "X-Auth-Token", "X-Service-Token", "Cookie", "Host", "Content-Length", "Transfer-Encoding", "Connection", "Trailer", "Te", "Upgrade", "OpenStack-API-Version", "X-OpenStack-Glance-API-Version"} {
-		if _, err := parseStageOpts([]StageOption{WithStageHeader(key, "blocked")}); !errors.Is(err, resource.ErrInvalidOption) {
+		if _, err := parseStageOpts([]StageOption{request.Header(key, "blocked")}); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Errorf("header %s: %v", key, err)
 		}
 	}

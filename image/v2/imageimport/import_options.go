@@ -8,6 +8,8 @@ import (
 	"strings"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -35,13 +37,27 @@ type ImportOpts struct {
 	MethodFields           map[string]any
 }
 
-// ImportOption configures the SDK-owned workflow. Later options replace earlier values.
-type ImportOption func(*ImportOpts) error
+// ImportOption configures the SDK-owned workflow: WithImportOpts, the typed
+// WithImport* options, WithImportHeaders (validates and merges the map),
+// WithImportMethodField, request.Header (one ordinary header;
+// case-insensitive later options win), request.Field (a root JSON body
+// extension that cannot override built-in fields) or request.Custom over
+// *ImportOpts. Later options replace earlier values. Other shared calls fail
+// with resource.ErrInvalidOption before HTTP.
+type ImportOption = request.WriteCall
+
+var importCalls = calls.Spec[ImportOpts]{
+	Header: setImportHeader,
+	Field: func(config *ImportOpts, entry request.CallEntry) error {
+		snapshot, err := importJSONRaw(entry.JSON, entry.JSONErr)
+		return setImportField(config, entry.Key, snapshot, err, false)
+	},
+}
 
 // WithImportOpts snapshots and replaces the complete options value.
 func WithImportOpts(value ImportOpts) ImportOption {
 	snapshot, err := copyImportOpts(value)
-	return func(config *ImportOpts) error {
+	return request.Custom(func(config *ImportOpts) error {
 		if err != nil {
 			return err
 		}
@@ -50,106 +66,102 @@ func WithImportOpts(value ImportOpts) ImportOption {
 			*config = owned
 		}
 		return err
-	}
+	})
 }
 
 func WithImportMethod(value ImportMethod) ImportOption {
-	return func(config *ImportOpts) error { config.Method = value; return nil }
+	return request.Custom(func(config *ImportOpts) error { config.Method = value; return nil })
 }
 func WithImportURI(value string) ImportOption {
-	return func(config *ImportOpts) error { config.URI = value; return nil }
+	return request.Custom(func(config *ImportOpts) error { config.URI = value; return nil })
 }
 func WithImportRemoteRegion(value string) ImportOption {
-	return func(config *ImportOpts) error { config.RemoteRegion = value; return nil }
+	return request.Custom(func(config *ImportOpts) error { config.RemoteRegion = value; return nil })
 }
 func WithImportRemoteImageID(value string) ImportOption {
-	return func(config *ImportOpts) error { config.RemoteImageID = value; return nil }
+	return request.Custom(func(config *ImportOpts) error { config.RemoteImageID = value; return nil })
 }
 func WithImportRemoteServiceInterface(value string) ImportOption {
-	return func(config *ImportOpts) error { config.RemoteServiceInterface = value; return nil }
+	return request.Custom(func(config *ImportOpts) error { config.RemoteServiceInterface = value; return nil })
 }
 func WithImportStore(value string) ImportOption {
-	return func(config *ImportOpts) error { owned := value; config.Store = &owned; return nil }
+	return request.Custom(func(config *ImportOpts) error { owned := value; config.Store = &owned; return nil })
 }
 func WithImportStores(values ...string) ImportOption {
 	snapshot := append(make([]string, 0, len(values)), values...)
-	return func(config *ImportOpts) error {
+	return request.Custom(func(config *ImportOpts) error {
 		config.Stores = append(make([]string, 0, len(snapshot)), snapshot...)
 		return nil
-	}
+	})
 }
 func WithImportAllStores(value bool) ImportOption {
-	return func(config *ImportOpts) error { owned := value; config.AllStores = &owned; return nil }
+	return request.Custom(func(config *ImportOpts) error { owned := value; config.AllStores = &owned; return nil })
 }
 func WithImportAllStoresMustSucceed(value bool) ImportOption {
-	return func(config *ImportOpts) error { owned := value; config.AllStoresMustSucceed = &owned; return nil }
+	return request.Custom(func(config *ImportOpts) error { owned := value; config.AllStoresMustSucceed = &owned; return nil })
 }
 
-// WithImportHeader adds an ordinary header. Case-insensitive later options win.
+// setImportHeader adds an ordinary header. Case-insensitive later options win.
 // Authentication, transport, version and store selection remain SDK-owned.
-func WithImportHeader(key, value string) ImportOption {
-	return func(config *ImportOpts) error {
-		canonical, err := importHeaders(map[string]string{key: value}, false, "")
-		if err != nil {
-			return err
-		}
-		if config.Headers == nil {
-			config.Headers = make(map[string]string)
-		}
-		for existing := range config.Headers {
-			if strings.EqualFold(existing, key) {
-				delete(config.Headers, existing)
-			}
-		}
-		for key, value := range canonical {
-			config.Headers[key] = value
-		}
-		return nil
+func setImportHeader(config *ImportOpts, key, value string) error {
+	canonical, err := importHeaders(map[string]string{key: value}, false, "")
+	if err != nil {
+		return err
 	}
+	if config.Headers == nil {
+		config.Headers = make(map[string]string)
+	}
+	for existing := range config.Headers {
+		if strings.EqualFold(existing, key) {
+			delete(config.Headers, existing)
+		}
+	}
+	for key, value := range canonical {
+		config.Headers[key] = value
+	}
+	return nil
 }
 
 // WithImportHeaders snapshots and merges headers, rejecting conflicting case aliases.
 func WithImportHeaders(headers map[string]string) ImportOption {
 	snapshot := maps.Clone(headers)
-	return func(config *ImportOpts) error {
+	return request.Custom(func(config *ImportOpts) error {
 		canonical, err := importHeaders(snapshot, false, "")
 		if err != nil {
 			return err
 		}
 		for key, value := range canonical {
-			if err := WithImportHeader(key, value)(config); err != nil {
+			if err := setImportHeader(config, key, value); err != nil {
 				return err
 			}
 		}
 		return nil
-	}
+	})
 }
 
-func WithImportField(key string, value any) ImportOption {
-	return withImportField(key, value, false)
-}
+// WithImportMethodField adds one extension to the method JSON object. It
+// cannot override built-in method fields.
 func WithImportMethodField(key string, value any) ImportOption {
-	return withImportField(key, value, true)
-}
-func withImportField(key string, value any, method bool) ImportOption {
 	snapshot, err := importJSONValue(value)
-	return func(config *ImportOpts) error {
-		if err != nil {
-			return err
-		}
-		if err := importFieldKey(key, method); err != nil {
-			return err
-		}
-		fields := &config.Fields
-		if method {
-			fields = &config.MethodFields
-		}
-		if *fields == nil {
-			*fields = make(map[string]any)
-		}
-		(*fields)[key] = append(json.RawMessage(nil), snapshot...)
-		return nil
+	return request.Custom(func(config *ImportOpts) error { return setImportField(config, key, snapshot, err, true) })
+}
+
+func setImportField(config *ImportOpts, key string, snapshot json.RawMessage, err error, method bool) error {
+	if err != nil {
+		return err
 	}
+	if err := importFieldKey(key, method); err != nil {
+		return err
+	}
+	fields := &config.Fields
+	if method {
+		fields = &config.MethodFields
+	}
+	if *fields == nil {
+		*fields = make(map[string]any)
+	}
+	(*fields)[key] = append(json.RawMessage(nil), snapshot...)
+	return nil
 }
 
 func copyImportOpts(value ImportOpts) (ImportOpts, error) {
@@ -194,6 +206,11 @@ func copyImportFields(fields map[string]any) (map[string]any, error) {
 
 func importJSONValue(value any) (json.RawMessage, error) {
 	body, err := json.Marshal(value)
+	return importJSONRaw(body, err)
+}
+
+// importJSONRaw checks one marshaled extension value and its marshal error.
+func importJSONRaw(body []byte, err error) (json.RawMessage, error) {
 	if err != nil {
 		return nil, fmt.Errorf("%w: import extension: %w", resource.ErrInvalidOption, err)
 	}
@@ -205,7 +222,7 @@ func importJSONValue(value any) (json.RawMessage, error) {
 
 func parseImportOpts(options []ImportOption) (ImportOpts, error) {
 	var config ImportOpts
-	for _, apply := range options {
+	for _, apply := range calls.Translate(options, importCalls) {
 		if apply == nil {
 			return config, importInvalid("nil import option")
 		}

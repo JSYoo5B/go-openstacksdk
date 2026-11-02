@@ -8,6 +8,7 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -21,7 +22,7 @@ func TestImportOptionsOwnedSnapshotsReplacementAndConcurrentReuse(t *testing.T) 
 	extension["nested"].([]any)[0] = "after"
 	value.MethodFields["extra"].([]string)[0] = "after"
 	var captured *ImportOpts
-	config, err := parseImportOpts([]ImportOption{option, func(value *ImportOpts) error { captured = value; return nil }})
+	config, err := parseImportOpts([]ImportOption{option, request.Custom(func(value *ImportOpts) error { captured = value; return nil })})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -69,7 +70,7 @@ func TestImportOptionsMethodBodyAndOwnedNamespaces(t *testing.T) {
 		{"default", nil, `{"method":{"name":"glance-direct"}}`},
 		{"false-root", []ImportOption{WithImportAllStores(false), WithImportAllStoresMustSucceed(false)}, `{"all_stores":false,"all_stores_must_succeed":false,"method":{"name":"glance-direct"}}`},
 		{"remote-default-interface", []ImportOption{WithImportMethod(GlanceDownloadMethod), WithImportRemoteRegion("region"), WithImportRemoteImageID("not-a-route-id")}, `{"method":{"glance_image_id":"not-a-route-id","glance_region":"region","name":"glance-download"}}`},
-		{"unknown-method", []ImportOption{WithImportMethod("operator-method"), WithImportMethodField("vendor", json.Number("9007199254740993")), WithImportField("root", nil)}, `{"method":{"name":"operator-method","vendor":9007199254740993},"root":null}`},
+		{"unknown-method", []ImportOption{WithImportMethod("operator-method"), WithImportMethodField("vendor", json.Number("9007199254740993")), request.Field("root", nil)}, `{"method":{"name":"operator-method","vendor":9007199254740993},"root":null}`},
 		{"plural-stores", []ImportOption{WithImportStores("one", "two")}, `{"method":{"name":"glance-direct"},"stores":["one","two"]}`},
 		{"singular-no-body", []ImportOption{WithImportStore("one")}, `{"method":{"name":"glance-direct"}}`},
 	}
@@ -90,9 +91,9 @@ func TestImportOptionsMethodBodyAndOwnedNamespaces(t *testing.T) {
 		{WithImportMethod(GlanceDownloadMethod), WithImportRemoteRegion("one")},
 		{WithImportRemoteImageID("one")}, {WithImportRemoteServiceInterface("public")},
 		{WithImportStore("one"), WithImportStores("two")}, {WithImportStore("one"), WithImportAllStores(true)},
-		{WithImportStores("one"), WithImportAllStores(true)}, {WithImportField("AllStores", false)},
-		{WithImportField("METHOD", map[string]any{})}, {WithImportMethodField("remote_region", "x")},
-		{WithImportMethodField("Glance-Image-ID", "x")}, {WithImportField("bad", func() {})},
+		{WithImportStores("one"), WithImportAllStores(true)}, {request.Field("AllStores", false)},
+		{request.Field("METHOD", map[string]any{})}, {WithImportMethodField("remote_region", "x")},
+		{WithImportMethodField("Glance-Image-ID", "x")}, {request.Field("bad", func() {})},
 		{WithImportOpts(ImportOpts{Fields: map[string]any{"stores": nil}})},
 		{WithImportStore("one\r\nX-Auth-Token: other")}, {WithImportURI(string([]byte{255}))},
 		{WithImportStore("")}, {WithImportStores("valid", "")},
@@ -105,12 +106,12 @@ func TestImportOptionsMethodBodyAndOwnedNamespaces(t *testing.T) {
 }
 
 func TestImportOptionsHeaderAuthorityAndCanonicalLastWins(t *testing.T) {
-	config, err := parseImportOpts([]ImportOption{WithImportHeaders(map[string]string{"x-note": "first", "X-NOTE": "first"}), WithImportHeader("X-Note", "last")})
+	config, err := parseImportOpts([]ImportOption{WithImportHeaders(map[string]string{"x-note": "first", "X-NOTE": "first"}), request.Header("X-Note", "last")})
 	if err != nil || len(config.Headers) != 1 || config.Headers["X-Note"] != "last" {
 		t.Fatalf("headers: %#v, %v", config.Headers, err)
 	}
 	for _, key := range []string{"X-Auth-Token", "X-Service-Token", "Authorization", "Host", "Cookie", "Content-Type", "Content-Length", "Transfer-Encoding", "Connection", "OpenStack-API-Version", "X-OpenStack-Glance-API-Version", "X-Image-Meta-Store"} {
-		if _, err := parseImportOpts([]ImportOption{WithImportHeader(key, "blocked")}); !errors.Is(err, resource.ErrInvalidOption) {
+		if _, err := parseImportOpts([]ImportOption{request.Header(key, "blocked")}); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Errorf("caller authority %s: %v", key, err)
 		}
 	}

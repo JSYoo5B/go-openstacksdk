@@ -13,6 +13,7 @@ import (
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	prop "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
@@ -119,7 +120,7 @@ func TestConnectionImageMetadefPropertiesShareClientAndFixedScope(t *testing.T) 
 	updated, err := scope.Update(ctx, child, prop.WithUpdateName("renamed"), prop.WithUpdateType("integer"), prop.WithUpdateTitle(""))
 	check(updated, err, 200)
 	advance()
-	sequence := scope.List(ctx, prop.WithListMaxItems(1))
+	sequence := scope.List(ctx, request.MaxItems(1))
 	if calls != 3 {
 		t.Fatal("eager iterator")
 	}
@@ -135,7 +136,7 @@ func TestConnectionImageMetadefPropertiesShareClientAndFixedScope(t *testing.T) 
 		t.Fatalf("all=%+v err=%v calls=%d", all, err, calls)
 	}
 	advance()
-	deleted, err := scope.Delete(ctx, child, prop.WithDeleteIgnoreMissing(false))
+	deleted, err := scope.Delete(ctx, child, request.IgnoreMissing(false))
 	if err != nil || deleted == nil || deleted.Name == nil || *deleted.Name != child || deleted.Namespace != parent || deleted.StatusCode != 204 || string(deleted.Body) != "opaque child" {
 		t.Fatalf("delete=%+v err=%v", deleted, err)
 	}
@@ -158,7 +159,7 @@ func TestConnectionImageMetadefPropertiesShareClientAndFixedScope(t *testing.T) 
 	}
 	callbacks := 0
 	client.Endpoint = "https://changed.test/v2/"
-	value, err := scope.Get(ctx, child, func(*prop.GetOpts) error { callbacks++; return nil })
+	value, err := scope.Get(ctx, child, request.Custom(func(*prop.GetOpts) error { callbacks++; return nil }))
 	if value != nil || err == nil || callbacks != 0 || calls != 9 {
 		t.Fatalf("retarget value=%+v err=%v callbacks=%d calls=%d", value, err, callbacks, calls)
 	}

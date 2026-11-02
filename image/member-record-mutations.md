@@ -14,12 +14,12 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.AddImageMember`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.AddImageMemberRecord`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.AddImageMemberRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordWriteOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordWriteHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordWriteHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordWriteAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordWriteAttributes`
@@ -72,7 +72,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetImageMember`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetImageMemberRecord`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.GetImageMemberRecord`
@@ -125,12 +125,12 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.UpdateImageMember`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.UpdateImageMemberRecord`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.UpdateImageMemberRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordWriteOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordWriteHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordWriteHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordWriteAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordWriteAttributes`
@@ -185,9 +185,9 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.RemoveImageMember`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithRemoveImageMemberOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithRemoveImageMemberHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithRemoveImageMemberHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithRemoveImageMemberIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.RemoveImageMemberRecord`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.RemoveImageMemberRecord`
 
@@ -322,10 +322,10 @@ func run(ctx context.Context, ownerCloud, memberCloud, imageID, memberID, status
     input := image.ImageMemberRecordRequest{ID: memberID}
     created, err := owner.AddImageMemberRecord(ctx, parent,
         image.WithImageMemberRecordMemberID(memberID),
-        image.WithImageMemberRecordWriteHeader("X-Request-Source", "member-record-example"))
+        request.Header("X-Request-Source", "member-record-example"))
     if err := showRecord("add", created, err); err != nil { return err }
     fetched, err := owner.GetImageMemberRecord(ctx, parent, input,
-        image.WithImageMemberHeader("X-Request-Source", "member-record-example"))
+        request.Header("X-Request-Source", "member-record-example"))
     if err := showRecord("get", fetched, err); err != nil { return err }
     updated, err := recipient.UpdateImageMemberRecord(ctx, parent,
         image.ImageMemberRecordRequest{Record: fetched},
@@ -338,8 +338,8 @@ func run(ctx context.Context, ownerCloud, memberCloud, imageID, memberID, status
         image.WithImageMemberRecordStatus(status))
     if err := showRecord("update-again", repeated, err); err != nil { return err }
     ack, err := owner.RemoveImageMemberRecord(ctx, parent, input,
-        image.WithRemoveImageMemberIgnoreMissing(false),
-        image.WithRemoveImageMemberHeader("X-Request-Source", "member-record-example"))
+        request.IgnoreMissing(false),
+        request.Header("X-Request-Source", "member-record-example"))
     return showAcknowledgement(ack, err)
 }
 ```

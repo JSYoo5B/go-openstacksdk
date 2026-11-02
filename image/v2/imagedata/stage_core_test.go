@@ -15,6 +15,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/image/v2/images"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 	nativeimages "github.com/gophercloud/gophercloud/v2/openstack/image/v2/images"
@@ -89,11 +90,11 @@ func TestStageCoreKnownSnapshotBorrowedCursorAndHeaderPhases(t *testing.T) {
 				return stageCoreResponse(200, `{"id":"response-decoy","status":"uploading"}`), nil
 			}))
 			client.MoreHeaders = map[string]string{"accept": "metadata-accept", "content-type": "metadata-type"}
-			options := []StageOption{WithStageOpts(StageOpts{Size: size, Headers: map[string]string{"X-Note": "initial"}}), func(config *StageOpts) error {
+			options := []StageOption{WithStageOpts(StageOpts{Size: size, Headers: map[string]string{"X-Note": "initial"}}), request.Custom(func(config *StageOpts) error {
 				captured = config
 				seed.ID, seed.Status = "changed", images.ImageStatus("active")
 				return nil
-			}}
+			})}
 			result, err := New(client).StageKnownImage(context.Background(), seed, reader, options...)
 			if err != nil || calls != 2 || result == nil || result.ImageID != "fixed" || result.Image == nil || result.Image.ID != "response-decoy" || result.StatusCode != 200 || result.Acknowledgement.StatusCode != 204 || string(result.Acknowledgement.Body) != "actual ack" || reader.seeks != 0 || reader.closes != 0 || reader.reads == 0 || len(options) != 2 {
 				t.Fatalf("result%#v err%v calls%d reader%#v", result, err, calls, reader)
@@ -297,7 +298,7 @@ func TestStageCorePreflightSourceAndCustomCancellationCauses(t *testing.T) {
 			return err
 		},
 		func() error {
-			_, err := api.StageImage(context.Background(), resource.ID("id"), nil, func(*StageOpts) error { optionCalls++; return nil })
+			_, err := api.StageImage(context.Background(), resource.ID("id"), nil, request.Custom(func(*StageOpts) error { optionCalls++; return nil }))
 			return err
 		},
 		func() error { _, err := api.StageImage(context.Background(), resource.ID("id"), typedNil); return err },
@@ -318,7 +319,7 @@ func TestStageCorePreflightSourceAndCustomCancellationCauses(t *testing.T) {
 			return err
 		},
 		func() error {
-			_, err := api.StageImage(context.Background(), resource.ID("id"), strings.NewReader(""), WithStageHeader("Accept", "bad"))
+			_, err := api.StageImage(context.Background(), resource.ID("id"), strings.NewReader(""), request.Header("Accept", "bad"))
 			return err
 		},
 	} {

@@ -15,6 +15,7 @@ import (
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	obj "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
@@ -108,10 +109,10 @@ func TestConnectionImageMetadefObjectsShareClientAndFixedScope(t *testing.T) {
 			t.Fatalf("object=%+v err=%v", value, err)
 		}
 	}
-	created, err := scope.Create(ctx, child, obj.WithCreateHeader("X-Call", "objects"), obj.WithCreateDescription("first\nsecond"), obj.WithCreateProperties(map[string]json.RawMessage{"CPU": json.RawMessage(`{"type":"integer","precision":9007199254740993}`)}), obj.WithCreateRequired([]string{"CPU", "literal,comma"}))
+	created, err := scope.Create(ctx, child, request.Header("X-Call", "objects"), obj.WithCreateDescription("first\nsecond"), obj.WithCreateProperties(map[string]json.RawMessage{"CPU": json.RawMessage(`{"type":"integer","precision":9007199254740993}`)}), obj.WithCreateRequired([]string{"CPU", "literal,comma"}))
 	check(created, err, 201)
 	advanceHeader()
-	fetched, err := other.Get(ctx, child, obj.WithGetHeader("X-Call", "objects"))
+	fetched, err := other.Get(ctx, child, request.Header("X-Call", "objects"))
 	check(fetched, err, 200)
 	created.Header.Set("X-Proof", "caller")
 	created.Properties["future"][0] = '0'
@@ -120,10 +121,10 @@ func TestConnectionImageMetadefObjectsShareClientAndFixedScope(t *testing.T) {
 		t.Fatal("field/raw/separate response ownership aliases")
 	}
 	advanceHeader()
-	updated, err := scope.Update(ctx, child, obj.WithUpdateHeader("X-Call", "objects"), obj.WithUpdateName("renamed"), obj.WithUpdateProperties(map[string]json.RawMessage{}))
+	updated, err := scope.Update(ctx, child, request.Header("X-Call", "objects"), obj.WithUpdateName("renamed"), obj.WithUpdateProperties(map[string]json.RawMessage{}))
 	check(updated, err, 200)
 	advanceHeader()
-	sequence := scope.List(ctx, obj.WithListHeader("X-Call", "objects"), obj.WithListMaxItems(1))
+	sequence := scope.List(ctx, request.Header("X-Call", "objects"), request.MaxItems(1))
 	if calls != 3 {
 		t.Fatal("eager iterator")
 	}
@@ -136,7 +137,7 @@ func TestConnectionImageMetadefObjectsShareClientAndFixedScope(t *testing.T) {
 		t.Fatalf("cap rows=%d calls=%d", rows, calls)
 	}
 	advanceHeader()
-	all, err := other.All(ctx, obj.WithListHeader("X-Call", "objects"))
+	all, err := other.All(ctx, request.Header("X-Call", "objects"))
 	if err != nil || len(all) != 2 || calls != 5 || all[1].Name == nil || *all[1].Name != "" || all[1].Properties == nil || len(all[1].Properties) != 0 || all[1].Required == nil || len(all[1].Required) != 0 {
 		t.Fatalf("all=%+v err=%v calls=%d", all, err, calls)
 	}
@@ -145,12 +146,12 @@ func TestConnectionImageMetadefObjectsShareClientAndFixedScope(t *testing.T) {
 		t.Fatal("finite page row headers alias")
 	}
 	advanceHeader()
-	deleted, err := scope.Delete(ctx, child, obj.WithDeleteHeader("X-Call", "objects"), obj.WithDeleteIgnoreMissing(false))
+	deleted, err := scope.Delete(ctx, child, request.Header("X-Call", "objects"), request.IgnoreMissing(false))
 	if err != nil || deleted == nil || deleted.Namespace != parent || deleted.Name == nil || *deleted.Name != child || deleted.StatusCode != 204 || string(deleted.Body) != "opaque child acknowledgement" {
 		t.Fatalf("delete=%+v err=%v", deleted, err)
 	}
 	advanceHeader()
-	deletedAll, err := other.DeleteAll(ctx, obj.WithDeleteAllHeader("X-Call", "objects"))
+	deletedAll, err := other.DeleteAll(ctx, request.Header("X-Call", "objects"))
 	if err != nil || deletedAll == nil || deletedAll.Namespace != parent || deletedAll.Name != nil || deletedAll.StatusCode != 204 || string(deletedAll.Body) != "opaque collection acknowledgement" {
 		t.Fatalf("deleteall=%+v err=%v", deletedAll, err)
 	}
@@ -161,14 +162,14 @@ func TestConnectionImageMetadefObjectsShareClientAndFixedScope(t *testing.T) {
 	}
 	advanceHeader()
 	client.RetryFunc = nil
-	strict, err := scope.DeleteAll(ctx, obj.WithDeleteAllHeader("X-Call", "objects"))
+	strict, err := scope.DeleteAll(ctx, request.Header("X-Call", "objects"))
 	var status gophercloud.ErrUnexpectedResponseCode
 	if strict != nil || err == nil || !errors.As(err, &status) || status.Actual != 404 || calls != 9 {
 		t.Fatalf("strictdeleteall=%+v err=%v calls=%d", strict, err, calls)
 	}
 	callbacks := 0
 	client.Endpoint = "https://changed.test/v2/"
-	value, err := scope.Get(ctx, child, func(*obj.GetOpts) error { callbacks++; return nil })
+	value, err := scope.Get(ctx, child, request.Custom(func(*obj.GetOpts) error { callbacks++; return nil }))
 	if value != nil || err == nil || callbacks != 0 || calls != 9 {
 		t.Fatalf("scope retarget value=%+v err=%v callbacks=%d calls=%d", value, err, callbacks, calls)
 	}

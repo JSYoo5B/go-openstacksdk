@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -42,7 +43,7 @@ func TestCloudImageRecordWaitPollsFindUntilExactActive(t *testing.T) {
 		return taskCoreJSON(req, response.code, response.body)
 	})
 	// The supplied record status is ignored; Cloud always looks the image up.
-	result, err := service.WaitForCloudImageRecord(context.Background(), cloudWaitSeed(t, "img"), WithImageRecordCloudWaitHeader("X-Cloud", "wait"), WithImageRecordCloudWaitPollInterval(time.Millisecond))
+	result, err := service.WaitForCloudImageRecord(context.Background(), cloudWaitSeed(t, "img"), request.Header("X-Cloud", "wait"), WithImageRecordCloudWaitPollInterval(time.Millisecond))
 	if err != nil || calls != len(responses) || result.Lookups != 6 || result.Image == nil || result.Image != result.Last || result.Image.StatusCode != 203 {
 		t.Fatal(result, err, calls)
 	}

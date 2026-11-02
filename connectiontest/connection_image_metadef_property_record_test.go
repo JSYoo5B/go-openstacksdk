@@ -9,6 +9,7 @@ import (
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -54,11 +55,11 @@ func TestConnectionImageMetadefPropertyRecordUsesOwnedLocationAndLiveAuth(t *tes
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
-		record, err := scope.GetRecord(context.Background(), metadefproperties.RecordRequest{Resource: seed}, metadefproperties.WithRecordGetAttribute("min_length", "03"), func(opts *metadefproperties.RecordGetOpts) error {
+		record, err := scope.GetRecord(context.Background(), metadefproperties.RecordRequest{Resource: seed}, metadefproperties.WithRecordGetAttribute("min_length", "03"), request.Custom(func(opts *metadefproperties.RecordGetOpts) error {
 			provider.SetToken("live")
 			opts.Headers = map[string]string{"X-Option": "owned"}
 			return nil
-		})
+		}))
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}

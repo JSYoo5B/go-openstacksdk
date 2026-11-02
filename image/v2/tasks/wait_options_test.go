@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -24,12 +25,12 @@ func TestTaskWaitOptionsSnapshotCustomRetentionAndConcurrentReuse(t *testing.T) 
 	}
 	*first.Timeout, first.FailureStates[0], first.Headers["X-Proof"] = 5*time.Hour, "mutated", "mutated"
 	var retained *TaskWaitOpts
-	custom := TaskWaitOption(func(value *TaskWaitOpts) error {
+	custom := TaskWaitOption(request.Custom(func(value *TaskWaitOpts) error {
 		retained = value
 		value.FailureStates = []string{"failure"}
 		value.Headers = map[string]string{"X-Proof": "custom"}
 		return nil
-	})
+	}))
 	parsed, err := parseTaskWaitOpts([]TaskWaitOption{custom})
 	if err != nil {
 		t.Fatal(err)
@@ -88,22 +89,22 @@ func TestTaskWaitHeadersCanonicalLastWinsAndProtectedOwnership(t *testing.T) {
 	headers := map[string]string{"x-proof": "first"}
 	option := WithTaskWaitHeaders(headers)
 	headers["x-proof"] = "late"
-	value, err := parseTaskWaitOpts([]TaskWaitOption{option, WithTaskWaitHeader("X-PROOF", "last")})
+	value, err := parseTaskWaitOpts([]TaskWaitOption{option, request.Header("X-PROOF", "last")})
 	if err != nil || len(value.Headers) != 1 || value.Headers["X-Proof"] != "last" {
 		t.Fatalf("canonical last wins: %#v %v", value.Headers, err)
 	}
 	for _, options := range [][]TaskWaitOption{
 		{WithTaskWaitHeaders(map[string]string{"X-Proof": "one", "x-proof": "two"})},
-		{WithTaskWaitHeader("X-Proof", "line\r\nbreak")},
-		{WithTaskWaitHeader("X Bad", "value")},
-		{WithTaskWaitHeader("X-Proof", "\x7f")},
+		{request.Header("X-Proof", "line\r\nbreak")},
+		{request.Header("X Bad", "value")},
+		{request.Header("X-Proof", "\x7f")},
 	} {
 		if _, err := parseTaskWaitOpts(options); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatalf("invalid headers accepted: %v", err)
 		}
 	}
 	for _, name := range []string{"X-Auth-Token", "X-Service-Token", "Authorization", "Host", "Cookie", "Content-Type", "Content-Length", "Transfer-Encoding", "Connection", "Trailer", "TE", "Upgrade", "OpenStack-API-Version", "X-OpenStack-Glance-API-Version"} {
-		if _, err := parseTaskWaitOpts([]TaskWaitOption{WithTaskWaitHeader(name, "value")}); !errors.Is(err, resource.ErrInvalidOption) {
+		if _, err := parseTaskWaitOpts([]TaskWaitOption{request.Header(name, "value")}); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatalf("protected header %s accepted: %v", name, err)
 		}
 	}

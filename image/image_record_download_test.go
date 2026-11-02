@@ -22,6 +22,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -659,8 +660,8 @@ func TestImageRecordDownloadPreflightRejectsAmbiguousSelectorsAndUnsafeLocalInpu
 		{"negative chunk", ImageRecordDownloadRequest{ID: "fixed"}, WithImageRecordDownloadChunkSize(-1)},
 		{"large chunk", ImageRecordDownloadRequest{ID: "fixed"}, WithImageRecordDownloadChunkSize(64*1024*1024 + 1)},
 		{"preferences UTF8", ImageRecordDownloadRequest{ID: "fixed"}, WithImageRecordDownloadStorePreferences(string([]byte{255}))},
-		{"owned auth header", ImageRecordDownloadRequest{ID: "fixed"}, WithImageRecordDownloadHeader("X-Auth-Token", "spoof")},
-		{"owned media header", ImageRecordDownloadRequest{ID: "fixed"}, WithImageRecordDownloadHeader("Accept", "spoof")},
+		{"owned auth header", ImageRecordDownloadRequest{ID: "fixed"}, request.Header("X-Auth-Token", "spoof")},
+		{"owned media header", ImageRecordDownloadRequest{ID: "fixed"}, request.Header("Accept", "spoof")},
 	}
 	var typedNil *downloadCoreWriter
 	cases = append(cases, struct {
@@ -811,7 +812,7 @@ func TestImageRecordDownloadAcceptedStatusRangeAndEmptyBodyUseWholeChecksumProfi
 			})
 			client.MoreHeaders = map[string]string{"Range": "bytes=0-2"}
 			client.ProviderClient.HTTPClient.CheckRedirect = func(*http.Request, []*http.Request) error { redirects++; return nil }
-			got, err := New(client).DownloadImageRecord(context.Background(), ImageRecordDownloadRequest{ID: "fixed"}, WithImageRecordDownloadHeader("If-Range", "etag"))
+			got, err := New(client).DownloadImageRecord(context.Background(), ImageRecordDownloadRequest{ID: "fixed"}, request.Header("If-Range", "etag"))
 			if err != nil || got == nil || got.Downloaded == nil || got.Downloaded.StatusCode != code || string(got.Downloaded.Body) != payload || got.BytesWritten != int64(len(payload)) || redirects != 0 || calls != 2 || got.Downloaded.Header.Get("Content-Range") == "" {
 				t.Fatal(got, err, calls, redirects)
 			}
@@ -1058,11 +1059,11 @@ func TestImageRecordDownloadCapturesConstructorOptionsLocationAndHeadersBeforeCa
 	headers["X-Note"] = "external changed"
 	preferences[0] = "external changed"
 	var retained *ImageRecordDownloadOpts
-	options := []ImageRecordDownloadOption{option, func(config *ImageRecordDownloadOpts) error {
+	options := []ImageRecordDownloadOption{option, request.Custom(func(config *ImageRecordDownloadOpts) error {
 		callbacks++
 		retained = config
-		return WithImageRecordDownloadHeader("X-Added", "yes")(config)
-	}}
+		return applyCall(imageRecordDownloadCalls, request.Header("X-Added", "yes"), config)
+	})}
 	writer := &downloadCoreWriter{}
 	var client *gophercloud.ServiceClient
 	client = taskCoreClient(func(req *http.Request) (*http.Response, error) {
@@ -1097,7 +1098,7 @@ func TestImageRecordDownloadCapturesConstructorOptionsLocationAndHeadersBeforeCa
 		seed.Body["id"] = json.RawMessage(`"external decoy"`)
 		seed.Body["vendor"] = json.RawMessage(`"external decoy"`)
 		seed.Body["name"] = json.RawMessage(`"external decoy"`)
-		options[1] = func(*ImageRecordDownloadOpts) error { t.Fatal("uncaptured option slice"); return nil }
+		options[1] = request.Custom(func(*ImageRecordDownloadOpts) error { t.Fatal("uncaptured option slice"); return nil })
 		client.SetToken("live first")
 		return resource.CloudLocation{Cloud: &cloud}, nil
 	}})
@@ -1160,14 +1161,14 @@ func TestImageRecordDownloadOptionMergeReplacementReuseAndStickyCallbackGuards(t
 				return taskCoreJSON(req, 200, "abc"), nil
 			})
 			service := New(client)
-			opts := []ImageRecordDownloadOption{WithImageRecordDownloadStream(true), WithImageRecordDownloadChunkSize(2), WithImageRecordDownloadStorePreferences("before", "before"), WithImageRecordDownloadHeader("X-Discarded", "old")}
+			opts := []ImageRecordDownloadOption{WithImageRecordDownloadStream(true), WithImageRecordDownloadChunkSize(2), WithImageRecordDownloadStorePreferences("before", "before"), request.Header("X-Discarded", "old")}
 			switch mode {
 			case "header merge", "reusable helpers":
 				opts = append(opts, WithImageRecordDownloadHeaders(map[string]string{"X-Final": "new"}))
 			case "full replace":
 				opts = append(opts, WithImageRecordDownloadOpts(ImageRecordDownloadOpts{Headers: map[string]string{"X-Final": "new"}}))
 			default:
-				opts = append(opts, func(*ImageRecordDownloadOpts) error {
+				opts = append(opts, request.Custom(func(*ImageRecordDownloadOpts) error {
 					callbacks++
 					switch mode {
 					case "cancel":
@@ -1182,7 +1183,7 @@ func TestImageRecordDownloadOptionMergeReplacementReuseAndStickyCallbackGuards(t
 						return marker
 					}
 					return nil
-				}, func(*ImageRecordDownloadOpts) error { later++; return nil })
+				}), request.Custom(func(*ImageRecordDownloadOpts) error { later++; return nil }))
 			}
 			got, err := service.DownloadImageRecord(ctx, ImageRecordDownloadRequest{ID: "fixed", Output: writer}, opts...)
 			if mode == "header merge" || mode == "full replace" || mode == "reusable helpers" {

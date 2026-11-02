@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.AddTag`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMutationOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageMutationHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMutationHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.AddImageRecordTag`
 
@@ -67,7 +67,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.RemoveTag`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMutationOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageMutationHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMutationHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.RemoveImageRecordTag`
 
@@ -192,7 +192,7 @@ func run(ctx context.Context, cloud, imageID, tag string) error {
     if err != nil { return err }
 
     added, err := service.AddImageRecordTag(ctx, image.ImageRecordTagRequest{ID: imageID}, tag,
-        image.WithImageMutationHeader("X-Request-Source", "image-record-tags-example"))
+        request.Header("X-Request-Source", "image-record-tags-example"))
     if err := printResult(added, err); err != nil { return err }
 
     seed, err := service.GetImageRecord(ctx, image.ImageRecordRequest{ID: imageID})

@@ -19,7 +19,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/tasks.WithUnlimitedTaskWait`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/tasks.WithTaskWaitPollInterval`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/tasks.WithTaskWaitFailureStates`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/tasks.WithTaskWaitHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/tasks.WithTaskWaitHeaders`
 
 - The SDK-owned WaitForTask starts with a fresh GET of an explicit ID and defaults to success, exact case-insensitive failure, one120-second budget and two-second polling. WaitForTaskState accepts an explicit target. Incidental GET response IDs do not change the current request ID; OriginalID and CurrentID identify actual request routing.

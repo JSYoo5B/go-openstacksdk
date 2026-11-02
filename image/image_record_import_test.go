@@ -15,6 +15,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -574,7 +575,7 @@ func TestImageRecordImportExtensionAndFullOptionsFactoriesAreSnapshotsAndReusabl
 			}
 			return taskCoreJSON(req, 202, ""), nil
 		}
-		got, err := service.ImportImageRecord(context.Background(), ImageRecordImportRequest{Record: seed}, WithImageRecordImportStore(ImageRecordImportStore{ID: "discarded store"}), WithImageRecordImportHeader("X-Discarded", "old"), WithImageRecordImportField("discarded", true), WithImageRecordImportMethodField("discarded_method", true), replacement, WithImageRecordImportHeaders(map[string]string{"X-Added": "yes"}))
+		got, err := service.ImportImageRecord(context.Background(), ImageRecordImportRequest{Record: seed}, WithImageRecordImportStore(ImageRecordImportStore{ID: "discarded store"}), request.Header("X-Discarded", "old"), WithImageRecordImportField("discarded", true), WithImageRecordImportMethodField("discarded_method", true), replacement, WithImageRecordImportHeaders(map[string]string{"X-Added": "yes"}))
 		if got == nil || err != nil || calls != 2 {
 			t.Fatal(got, err, calls)
 		}
@@ -592,7 +593,7 @@ func TestImageRecordImportExtensionAndFullOptionsFactoriesAreSnapshotsAndReusabl
 			}
 			return taskCoreJSON(req, 202, ""), nil
 		}
-		got, err := service.ImportImageRecord(context.Background(), ImageRecordImportRequest{Record: seed}, WithImageRecordImportStores(ImageRecordImportStore{ID: "discarded"}), WithImageRecordImportStores(), WithImageRecordImportStores(ImageRecordImportStore{ID: "final"}), WithImageRecordImportHeader("x-note", "first"), WithImageRecordImportHeaders(map[string]string{"X-Merged": "yes"}), WithImageRecordImportHeader("X-NOTE", "last"))
+		got, err := service.ImportImageRecord(context.Background(), ImageRecordImportRequest{Record: seed}, WithImageRecordImportStores(ImageRecordImportStore{ID: "discarded"}), WithImageRecordImportStores(), WithImageRecordImportStores(ImageRecordImportStore{ID: "final"}), request.Header("x-note", "first"), WithImageRecordImportHeaders(map[string]string{"X-Merged": "yes"}), request.Header("X-NOTE", "last"))
 		if got == nil || err != nil || calls != 2 {
 			t.Fatal(got, err, calls)
 		}
@@ -615,18 +616,18 @@ func TestImageRecordImportCapturesPrivateImageStoreOptionsAndLocationBeforeCallb
 	headers["x-note"] = "later header"
 	cloud := "captured location"
 	var retained *ImageRecordImportOpts
-	options := []ImageRecordImportOption{factory, func(config *ImageRecordImportOpts) error {
+	options := []ImageRecordImportOption{factory, request.Custom(func(config *ImageRecordImportOpts) error {
 		callbacks++
 		retained = config
-		return WithImageRecordImportHeader("X-Final", "yes")(config)
-	}}
+		return applyCall(imageRecordImportCalls, request.Header("X-Final", "yes"), config)
+	})}
 	client.MoreHeaders = map[string]string{"X-Source": "captured source"}
 	service.dependencies.CloudLocation = func() (resource.CloudLocation, error) {
 		locations++
 		seed.bodyState.current["id"] = json.RawMessage(`"later private target"`)
 		seed.bodyState.current["name"] = json.RawMessage(`"later private name"`)
 		*stores[0] = serviceinfo.StoreRecord{}
-		options[1] = func(*ImageRecordImportOpts) error { t.Fatal("options slice was not captured"); return nil }
+		options[1] = request.Custom(func(*ImageRecordImportOpts) error { t.Fatal("options slice was not captured"); return nil })
 		client.MoreHeaders["X-Source"] = "later source"
 		client.SetToken("live import token")
 		return resource.CloudLocation{Cloud: &cloud}, nil
@@ -712,7 +713,7 @@ func TestImageRecordImportPreflightRejectsUnsafeSelectorsDescriptorsJSONAndProte
 	}
 	for _, header := range []string{"Authorization", "X-Auth-Token", "Content-Type", "Accept", "Content-Length", "OpenStack-API-Version", "x-image-meta-store"} {
 		t.Run("owned header="+header, func(t *testing.T) {
-			got, err := service.ImportImageRecord(context.Background(), ImageRecordImportRequest{Record: seed}, WithImageRecordImportHeader(header, "rogue"))
+			got, err := service.ImportImageRecord(context.Background(), ImageRecordImportRequest{Record: seed}, request.Header(header, "rogue"))
 			if got != nil || !errors.Is(err, resource.ErrInvalidOption) || calls != 1 {
 				t.Fatal(got, err, calls)
 			}
@@ -721,14 +722,14 @@ func TestImageRecordImportPreflightRejectsUnsafeSelectorsDescriptorsJSONAndProte
 	t.Run("pre-canceled context and nil context avoid callbacks", func(t *testing.T) {
 		callbacks := 0
 		option := func(*ImageRecordImportOpts) error { callbacks++; return nil }
-		got, err := service.ImportImageRecord(nil, ImageRecordImportRequest{Record: seed}, option)
+		got, err := service.ImportImageRecord(nil, ImageRecordImportRequest{Record: seed}, request.Custom(option))
 		if got != nil || !errors.Is(err, resource.ErrInvalidOption) || callbacks != 0 {
 			t.Fatal(got, err, callbacks)
 		}
 		marker := errors.New("pre-canceled import")
 		ctx, cancel := context.WithCancelCause(context.Background())
 		cancel(marker)
-		got, err = service.ImportImageRecord(ctx, ImageRecordImportRequest{Record: seed}, option)
+		got, err = service.ImportImageRecord(ctx, ImageRecordImportRequest{Record: seed}, request.Custom(option))
 		if got != nil || !errors.Is(err, marker) || !errors.Is(err, context.Canceled) || callbacks != 0 || calls != 1 {
 			t.Fatal(got, err, callbacks, calls)
 		}
@@ -736,7 +737,7 @@ func TestImageRecordImportPreflightRejectsUnsafeSelectorsDescriptorsJSONAndProte
 	t.Run("invalid source before option", func(t *testing.T) {
 		client.MoreHeaders = map[string]string{"X-Auth-Token": "forged"}
 		callbacks := 0
-		got, err := service.ImportImageRecord(context.Background(), ImageRecordImportRequest{Record: seed}, func(*ImageRecordImportOpts) error { callbacks++; return nil })
+		got, err := service.ImportImageRecord(context.Background(), ImageRecordImportRequest{Record: seed}, request.Custom(func(*ImageRecordImportOpts) error { callbacks++; return nil }))
 		if got != nil || !errors.Is(err, resource.ErrInvalidOption) || callbacks != 0 || calls != 1 {
 			t.Fatal(got, err, callbacks, calls)
 		}
@@ -761,7 +762,7 @@ func TestImageRecordImportOptionAndNestedMarshalerGuardsStopLaterWorkWithCauses(
 				}
 				return nil
 			})
-			got, err := service.ImportImageRecord(ctx, ImageRecordImportRequest{Record: seed}, func(config *ImageRecordImportOpts) error {
+			got, err := service.ImportImageRecord(ctx, ImageRecordImportRequest{Record: seed}, request.Custom(func(config *ImageRecordImportOpts) error {
 				callbacks++
 				switch mode {
 				case "cancel":
@@ -782,7 +783,7 @@ func TestImageRecordImportOptionAndNestedMarshalerGuardsStopLaterWorkWithCauses(
 					})}
 				}
 				return nil
-			}, func(*ImageRecordImportOpts) error { later++; return nil })
+			}), request.Custom(func(*ImageRecordImportOpts) error { later++; return nil }))
 			if got != nil || err == nil || calls != 1 || callbacks != 1 || later != 0 {
 				t.Fatal(got, err, calls, callbacks, later)
 			}

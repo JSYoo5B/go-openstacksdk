@@ -8,6 +8,7 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -44,10 +45,10 @@ func TestImageTaskOptionsReplacementAndLastWins(t *testing.T) {
 		return taskCoreJSON(req, 200, `{"tasks":[{},{},{}]}`), nil
 	}))
 	values, err := service.AllImageTasks(context.Background(), resource.ID("id"),
-		WithListImageTasksMaxItems(1), WithListImageTasksHeader("X-Erased", "old"),
+		request.MaxItems(1), request.Header("X-Erased", "old"),
 		WithListImageTasksOpts(ListImageTasksOpts{}),
-		WithListImageTasksHeaders(map[string]string{"x-policy": "first"}), WithListImageTasksHeader("X-Policy", "last"),
-		WithListImageTasksMaxItems(2), WithListImageTasksMaxItems(0))
+		WithListImageTasksHeaders(map[string]string{"x-policy": "first"}), request.Header("X-Policy", "last"),
+		request.MaxItems(2), request.MaxItems(0))
 	if err != nil || len(values) != 3 || calls != 1 {
 		t.Fatal(values, err, calls)
 	}
@@ -64,7 +65,7 @@ func TestImageTaskOptionsCallbacksLazyAndOwned(t *testing.T) {
 		return taskCoreJSON(req, 200, `{"tasks":[{},{}]}`), nil
 	})
 	client.MoreHeaders = map[string]string{"X-Source": "captured"}
-	callback := ListImageTasksOption(func(o *ListImageTasksOpts) error {
+	callback := request.Custom(func(o *ListImageTasksOpts) error {
 		callbacks++
 		if o.Headers == nil {
 			t.Fatal("nil callback headers")
@@ -75,14 +76,14 @@ func TestImageTaskOptionsCallbacksLazyAndOwned(t *testing.T) {
 		client.MoreHeaders["X-Source"] = "changed"
 		return nil
 	})
-	opts := []ListImageTasksOption{callback, func(o *ListImageTasksOpts) error {
+	opts := []ListImageTasksOption{callback, request.Custom(func(o *ListImageTasksOpts) error {
 		retained.Headers["X-Policy"] = "rogue"
 		retained.MaxItems = 99
 		return nil
-	}}
+	})}
 	service := New(client)
 	iterator := service.ImageTasks(context.Background(), resource.ID("id"), opts...)
-	opts[0] = func(o *ListImageTasksOpts) error { t.Fatal("variadic slice not owned"); return nil }
+	opts[0] = request.Custom(func(o *ListImageTasksOpts) error { t.Fatal("variadic slice not owned"); return nil })
 	if calls != 0 || callbacks != 0 {
 		t.Fatal(calls, callbacks)
 	}
@@ -98,11 +99,11 @@ func TestImageTaskOptionsCallbacksLazyAndOwned(t *testing.T) {
 		t.Fatal(calls, callbacks, count)
 	}
 	cause := errors.New("callback error")
-	values, err := service.AllImageTasks(context.Background(), resource.ID("id"), func(o *ListImageTasksOpts) error { return cause })
+	values, err := service.AllImageTasks(context.Background(), resource.ID("id"), request.Custom(func(o *ListImageTasksOpts) error { return cause }))
 	if values != nil || !errors.Is(err, cause) || calls != 1 {
 		t.Fatal(values, err, calls)
 	}
-	for _, option := range []ListImageTasksOption{nil, WithListImageTasksMaxItems(-1), WithListImageTasksHeader("Accept", "owned"), WithListImageTasksHeader("X-Auth-Token", "owned")} {
+	for _, option := range []ListImageTasksOption{nil, request.MaxItems(-1), request.Header("Accept", "owned"), request.Header("X-Auth-Token", "owned")} {
 		values, err := service.AllImageTasks(context.Background(), resource.Name("parent"), option)
 		if values != nil || !errors.Is(err, resource.ErrInvalidOption) || calls != 1 {
 			t.Fatal(values, err, calls)

@@ -3,6 +3,9 @@ package image
 import (
 	"maps"
 	"strings"
+
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 // ImageMutationOpts supplies ordinary headers for single-tag and activation
@@ -11,17 +14,25 @@ type ImageMutationOpts struct {
 	Headers map[string]string
 }
 
-type ImageMutationOption func(*ImageMutationOpts) error
+// ImageMutationOption is one option of the image tag, activation and similar
+// header-only mutations: WithImageMutationOpts, WithImageMutationHeaders
+// (merges), request.Header (adds one ordinary header like a one-entry
+// WithImageMutationHeaders) or request.Custom over *ImageMutationOpts. Other
+// shared calls, including request.Headers, fail with resource.ErrInvalidOption
+// before HTTP.
+type ImageMutationOption = request.GetCall
+
+var imageMutationCalls = calls.Spec[ImageMutationOpts]{Header: calls.MergeHeader[ImageMutationOpts](WithImageMutationHeaders)}
 
 // WithImageMutationOpts snapshots and replaces the complete typed policy.
 func WithImageMutationOpts(value ImageMutationOpts) ImageMutationOption {
 	snapshot := copyImageMutationOpts(value)
-	return func(config *ImageMutationOpts) error { *config = copyImageMutationOpts(snapshot); return nil }
+	return request.Custom(func(config *ImageMutationOpts) error { *config = copyImageMutationOpts(snapshot); return nil })
 }
 
-// WithImageMutationHeader adds one ordinary header. Later case-insensitive
+// imageMutationHeader adds one ordinary header. Later case-insensitive
 // applications replace the earlier value without retaining caller maps.
-func WithImageMutationHeader(key, value string) ImageMutationOption {
+func imageMutationHeader(key, value string) func(*ImageMutationOpts) error {
 	return func(config *ImageMutationOpts) error {
 		headers, err := imageMutationHeaders(map[string]string{key: value}, false, "")
 		if err != nil {
@@ -45,6 +56,12 @@ func WithImageMutationHeader(key, value string) ImageMutationOption {
 // WithImageMutationHeaders snapshots and merges ordinary headers. Conflicting
 // aliases in this supplied map are rejected; later helper applications win.
 func WithImageMutationHeaders(values map[string]string) ImageMutationOption {
+	return request.Custom(mergeImageMutationHeaders(values))
+}
+
+// mergeImageMutationHeaders is the merge of WithImageMutationHeaders that the
+// header options of the other image operations reuse.
+func mergeImageMutationHeaders(values map[string]string) func(*ImageMutationOpts) error {
 	snapshot := maps.Clone(values)
 	return func(config *ImageMutationOpts) error {
 		headers, err := imageMutationHeaders(snapshot, false, "")
@@ -52,7 +69,7 @@ func WithImageMutationHeaders(values map[string]string) ImageMutationOption {
 			return err
 		}
 		for key, value := range headers {
-			if err := WithImageMutationHeader(key, value)(config); err != nil {
+			if err := imageMutationHeader(key, value)(config); err != nil {
 				return err
 			}
 		}
@@ -70,7 +87,7 @@ func copyImageMutationOpts(value ImageMutationOpts) ImageMutationOpts {
 
 func parseImageMutationOptions(options []ImageMutationOption) (ImageMutationOpts, error) {
 	config := copyImageMutationOpts(ImageMutationOpts{})
-	for _, apply := range options {
+	for _, apply := range calls.Translate(options, imageMutationCalls) {
 		if apply == nil {
 			return config, uploadInvalid("nil image mutation option")
 		}

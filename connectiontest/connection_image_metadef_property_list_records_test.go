@@ -9,6 +9,7 @@ import (
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -51,13 +52,13 @@ func TestConnectionImageMetadefPropertyListsShareOwnedLocationAndFiniteRoutes(t 
 	}
 	options := []metadefproperties.RecordListOption{
 		metadefproperties.WithRecordListFilter("min_length", 3),
-		metadefproperties.WithRecordListMaxItems(2),
-		func(opts *metadefproperties.RecordListOpts) error {
+		request.MaxItems(2),
+		request.Custom(func(opts *metadefproperties.RecordListOpts) error {
 			callbacks++
 			provider.SetToken("live")
 			opts.Headers = map[string]string{"X-Option": "owned"}
 			return nil
-		},
+		}),
 	}
 	for index, api := range []*metadefproperties.API{service.API.MetadefProperties, versioned.MetadefProperties} {
 		scope, err := api.InNamespace(context.Background(), "OS::Nova")

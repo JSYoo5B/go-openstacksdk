@@ -18,20 +18,17 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.API.AllStores`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithListStoresOptions`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithListStoresDetails`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithListStoresMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithListStoresPaginated`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithListStoresQuery`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithListStoresHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.NewWithDependencies`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.API.ListStoreRecords`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.API.AllStoreRecords`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithStoreRecordListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithStoreRecordListHeader`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithStoreRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithStoreRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithStoreRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithStoreRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithStoreRecordListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithStoreRecordListFilter`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithStoreRecordListFilters`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithStoreRecordListDetails`
@@ -107,6 +104,7 @@ import (
 
     image "github.com/JSYoo5B/go-openstacksdk/image/v2"
     "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo"
+    "github.com/JSYoo5B/go-openstacksdk/request"
     "github.com/gophercloud/gophercloud/v2"
 )
 
@@ -118,7 +116,7 @@ func main() {
     service := image.New(client)
     for row, err := range service.ServiceInfo.ListStoreRecords(context.Background(),
         serviceinfo.WithStoreRecordListDetails(true),
-        serviceinfo.WithStoreRecordListPaginated(false),
+        request.Paginated(false),
         serviceinfo.WithStoreRecordListFilter("is_default", true),
     ) {
         if err != nil { log.Fatal(err) }

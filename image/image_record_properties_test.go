@@ -14,6 +14,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -871,7 +872,7 @@ func TestImageRecordPropertiesConcreteFactoriesOwnValuesAndReplacementOrder(t *t
 				kwargs, meta := json.RawMessage(`{"name":"after"}`), json.RawMessage(`{"vendor":false}`)
 				factory := WithImageRecordPropertiesOpts(ImageRecordPropertiesOpts{Headers: headers, Properties: kwargs, Meta: meta})
 				headers["X-Retained"], kwargs[9], meta[2] = "caller changed", 'X', 'X'
-				options = []ImageRecordPropertiesOption{WithImageRecordPropertiesHeader("X-Discarded", "old"), WithImageRecordProperty("discarded", "old"), WithImageRecordPropertyMeta("discarded meta", true), factory}
+				options = []ImageRecordPropertiesOption{request.Header("X-Discarded", "old"), WithImageRecordProperty("discarded", "old"), WithImageRecordPropertyMeta("discarded meta", true), factory}
 				patch = `[{"op":"add","path":"/name","value":"after"},{"op":"add","path":"/vendor","value":false}]`
 			}
 			handler = func(req *http.Request) (*http.Response, error) {
@@ -970,18 +971,18 @@ func TestImageRecordPropertiesSnapshotsCoverDiscoveryAndCommitWithoutRecapture(t
 		locations++
 		seed.bodyState.current["id"] = json.RawMessage(`"location target decoy"`)
 		seed.bodyState.current["properties"] = json.RawMessage(`{"cached":99}`)
-		options[0] = WithImageRecordPropertiesHeader("X-Option", "location changed option")
+		options[0] = request.Header("X-Option", "location changed option")
 		client.MoreHeaders["X-Source"] = "ordinary changed by location"
 		return facts, nil
 	}})
-	options = []ImageRecordPropertiesOption{factory, WithImageRecordPropertiesJSON(json.RawMessage(`{"kernel":"match","vendor":{"n":1}}`)), WithImageRecordPropertyMeta("meta", false), func(config *ImageRecordPropertiesOpts) error {
+	options = []ImageRecordPropertiesOption{factory, WithImageRecordPropertiesJSON(json.RawMessage(`{"kernel":"match","vendor":{"n":1}}`)), WithImageRecordPropertyMeta("meta", false), request.Custom(func(config *ImageRecordPropertiesOpts) error {
 		callbacks++
 		retained = config
 		cloud = "option changed location"
 		facts.Project.ID[1] = 'X'
 		client.SetToken("live token")
-		return WithImageRecordPropertiesHeader("X-Final", "yes")(config)
-	}}
+		return applyCall(imageRecordPropertiesCalls, request.Header("X-Final", "yes"), config)
+	})}
 	got, err := service.UpdateImagePropertiesRecord(context.Background(), ImageRecordPropertiesRequest{Record: seed}, options...)
 	if got == nil || got.Record == nil || !got.Updated || err != nil || calls != 3 || locations != 1 || callbacks != 1 || string(got.Record.Resource.Body["id"]) != `"fixed"` {
 		t.Fatal(got, err, calls, locations, callbacks)
@@ -1035,7 +1036,7 @@ func TestImageRecordPropertiesControlsParserAndIdentityFailBeforePatch(t *testin
 		{"both selectors", ImageRecordPropertiesRequest{ID: "fixed", Record: &ImageRecord{}}, nil},
 		{"handcrafted record", ImageRecordPropertiesRequest{Record: &ImageRecord{Resource: &resource.RawResource{Metadata: resource.Metadata{Body: map[string]json.RawMessage{"id": json.RawMessage(`"fixed"`)}}}}}, nil},
 		{"nil option", ImageRecordPropertiesRequest{ID: "fixed"}, []ImageRecordPropertiesOption{nil}},
-		{"owned auth", ImageRecordPropertiesRequest{ID: "fixed"}, []ImageRecordPropertiesOption{WithImageRecordPropertiesHeader("X-Auth-Token", "foreign")}},
+		{"owned auth", ImageRecordPropertiesRequest{ID: "fixed"}, []ImageRecordPropertiesOption{request.Header("X-Auth-Token", "foreign")}},
 		{"invalid kwargs JSON", ImageRecordPropertiesRequest{ID: "fixed"}, []ImageRecordPropertiesOption{WithImageRecordPropertiesJSON(json.RawMessage(`{"broken":`))}},
 		{"nonobject kwargs", ImageRecordPropertiesRequest{ID: "fixed"}, []ImageRecordPropertiesOption{WithImageRecordPropertiesJSON(json.RawMessage(`[]`))}},
 		{"truthy nonobject meta", ImageRecordPropertiesRequest{ID: "fixed"}, []ImageRecordPropertiesOption{WithImageRecordPropertiesMetaJSON(json.RawMessage(`[1]`))}},
@@ -1094,7 +1095,7 @@ func TestImageRecordPropertiesOptionAndContextGuardsStopLaterCallbacks(t *testin
 			if mode == "pre canceled" {
 				cancel(marker)
 			}
-			got, err := service.UpdateImagePropertiesRecord(ctx, ImageRecordPropertiesRequest{Record: seed}, func(config *ImageRecordPropertiesOpts) error {
+			got, err := service.UpdateImagePropertiesRecord(ctx, ImageRecordPropertiesRequest{Record: seed}, request.Custom(func(config *ImageRecordPropertiesOpts) error {
 				callbacks++
 				switch mode {
 				case "callback cancel":
@@ -1108,8 +1109,8 @@ func TestImageRecordPropertiesOptionAndContextGuardsStopLaterCallbacks(t *testin
 				case "callback cause":
 					return marker
 				}
-				return WithImageRecordProperty("kernel", "must not list")(config)
-			}, func(*ImageRecordPropertiesOpts) error { later++; return nil })
+				return applyCall(imageRecordPropertiesCalls, WithImageRecordProperty("kernel", "must not list"), config)
+			}), request.Custom(func(*ImageRecordPropertiesOpts) error { later++; return nil }))
 			wantCallbacks := 1
 			if mode == "nil context" || mode == "pre canceled" || mode == "location cause" {
 				wantCallbacks = 0

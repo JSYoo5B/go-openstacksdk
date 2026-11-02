@@ -90,7 +90,7 @@ func TestServiceInfoUsageDefaultRouteAndPassiveModels(t *testing.T) {
 				return wire, nil
 			}))
 			api := serviceinfo.New(client)
-			value, err := api.GetUsageInfo(context.Background(), serviceinfo.WithGetUsageInfoHeader("X-Option", "ordinary"))
+			value, err := api.GetUsageInfo(context.Background(), request.Header("X-Option", "ordinary"))
 			if err != nil || value == nil || value.Usage == nil || value.StatusCode != 200 || value.Header.Get("X-Request-Id") != "actual-usage" || value.Header.Get("Location") == "" || string(value.Body["usage"]) == "" || api.RawClient() != client || calls.Load() != 1 || body.closes.Load() != 1 {
 				t.Fatal(value, err, calls.Load(), body.closes.Load())
 			}
@@ -205,7 +205,7 @@ func TestServiceInfoUsageCompletePreflightAndPreparedOptions(t *testing.T) {
 				calls.Add(1)
 				return nil, errors.New("preflight reached HTTP")
 			}))
-			value, err := api.GetUsageInfo(ctx, func(*request.Config[serviceinfo.GetUsageInfoOpts]) error { callbacks.Add(1); return nil })
+			value, err := api.GetUsageInfo(ctx, request.Custom(func(*request.Config[serviceinfo.GetUsageInfoOpts]) error { callbacks.Add(1); return nil }))
 			if value != nil || !errors.Is(err, want) || mode == "canceled" && !errors.Is(err, cause) || calls.Load() != 0 || callbacks.Load() != 0 {
 				t.Fatal(value, err, calls.Load(), callbacks.Load())
 			}
@@ -221,7 +221,7 @@ func TestServiceInfoUsageCompletePreflightAndPreparedOptions(t *testing.T) {
 			}))
 			cause := errors.New("usage callback")
 			want := error(resource.ErrInvalidOption)
-			option := serviceinfo.GetUsageInfoOption(func(c *request.Config[serviceinfo.GetUsageInfoOpts]) error {
+			option := serviceinfo.GetUsageInfoOption(request.Custom(func(c *request.Config[serviceinfo.GetUsageInfoOpts]) error {
 				switch mode {
 				case "callback error":
 					return cause
@@ -239,7 +239,7 @@ func TestServiceInfoUsageCompletePreflightAndPreparedOptions(t *testing.T) {
 					c.Headers["X-Invalid"] = "newline\n"
 				}
 				return nil
-			})
+			}))
 			if mode == "nil option" {
 				option = nil
 			} else if mode == "callback error" {
@@ -256,20 +256,20 @@ func TestServiceInfoUsageCompletePreflightAndPreparedOptions(t *testing.T) {
 		var calls, callbacks atomic.Int32
 		var retained *request.Config[serviceinfo.GetUsageInfoOpts]
 		var options []serviceinfo.GetUsageInfoOption
-		options = []serviceinfo.GetUsageInfoOption{func(c *request.Config[serviceinfo.GetUsageInfoOpts]) error {
+		options = []serviceinfo.GetUsageInfoOption{request.Custom(func(c *request.Config[serviceinfo.GetUsageInfoOpts]) error {
 			callbacks.Add(1)
 			c.Headers["X-Option"] = "prepared"
 			retained = c
 			options[1] = nil
 			return nil
-		}, func(c *request.Config[serviceinfo.GetUsageInfoOpts]) error {
+		}), request.Custom(func(c *request.Config[serviceinfo.GetUsageInfoOpts]) error {
 			callbacks.Add(1)
 			retained.Headers["X-Option"] = "changed"
 			if c.Headers["X-Option"] != "prepared" {
 				t.Error("retained callback config changed next callback")
 			}
 			return nil
-		}}
+		})}
 		cloud.SetTransport(testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 			calls.Add(1)
 			retained.Headers["X-Option"] = "late"
@@ -294,7 +294,7 @@ func TestServiceInfoUsageCompletePreflightAndPreparedOptions(t *testing.T) {
 			return usageWire(200, io.NopCloser(strings.NewReader(`{"usage":{}}`))), nil
 		}))
 		api := serviceinfo.New(usageClient(cloud))
-		option := serviceinfo.WithGetUsageInfoHeader("X-Option", "reusable")
+		option := request.Header("X-Option", "reusable")
 		var workers sync.WaitGroup
 		for i := 0; i < 4; i++ {
 			workers.Add(1)
@@ -423,7 +423,7 @@ func TestServiceInfoUsageProviderSourceAndRetryBoundaries(t *testing.T) {
 				}
 				return usageWire(200, io.NopCloser(strings.NewReader(`{"usage":{}}`))), nil
 			}))
-			value, err := serviceinfo.New(client).GetUsageInfo(context.Background(), func(*request.Config[serviceinfo.GetUsageInfoOpts]) error {
+			value, err := serviceinfo.New(client).GetUsageInfo(context.Background(), request.Custom(func(*request.Config[serviceinfo.GetUsageInfoOpts]) error {
 				switch change {
 				case "valid prefix headers token":
 					client.ResourceBase = cloud.Server.URL + "/later/v2/"
@@ -437,7 +437,7 @@ func TestServiceInfoUsageProviderSourceAndRetryBoundaries(t *testing.T) {
 				}
 				cloud.Provider.SetToken("after-callback")
 				return nil
-			})
+			}))
 			if change == "valid prefix headers token" {
 				if err != nil || value == nil || calls.Load() != 1 {
 					t.Fatal(value, err, calls.Load())

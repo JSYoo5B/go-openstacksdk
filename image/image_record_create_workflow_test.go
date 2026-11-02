@@ -16,6 +16,7 @@ import (
 	"testing"
 
 	objectapi "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -578,7 +579,7 @@ func TestImageRecordCreateWorkflowCallbacksAndSourceAreCapturedOnce(t *testing.T
 				}
 				return resource.CloudLocation{}, nil
 			}})
-			got, err := service.CreateImageRecord(ctx, ImageRecordCreateRequest{Name: "selected"}, WithImageRecordCreateAllowDuplicates(true), func(c *ImageRecordCreateOpts) error {
+			got, err := service.CreateImageRecord(ctx, ImageRecordCreateRequest{Name: "selected"}, WithImageRecordCreateAllowDuplicates(true), request.Custom(func(c *ImageRecordCreateOpts) error {
 				applied++
 				if mode == "option changes source" {
 					client.ResourceBase = "https://foreign.example/"
@@ -587,7 +588,7 @@ func TestImageRecordCreateWorkflowCallbacksAndSourceAreCapturedOnce(t *testing.T
 					cancel(marker)
 				}
 				return nil
-			})
+			}))
 			if mode == "stable" {
 				if err != nil || got == nil || calls != 1 || locations != 1 || applied != 1 {
 					t.Fatal(got, err, calls, locations, applied)
@@ -611,7 +612,7 @@ func TestImageRecordCreateWorkflowNilAndCancelledContextsDoNotInvokeCallbacks(t 
 	for _, selected := range []context.Context{nil, ctx} {
 		calls, locations, applied := 0, 0, 0
 		service := NewWithDependencies(taskCoreClient(func(*http.Request) (*http.Response, error) { calls++; return nil, nil }), Dependencies{CloudLocation: func() (resource.CloudLocation, error) { locations++; return resource.CloudLocation{}, nil }})
-		got, err := service.CreateImageRecord(selected, ImageRecordCreateRequest{Name: "selected"}, func(*ImageRecordCreateOpts) error { applied++; return nil })
+		got, err := service.CreateImageRecord(selected, ImageRecordCreateRequest{Name: "selected"}, request.Custom(func(*ImageRecordCreateOpts) error { applied++; return nil }))
 		if err == nil || calls != 0 || locations != 0 || applied != 0 || got != nil {
 			t.Fatal(got, err, calls, locations, applied)
 		}

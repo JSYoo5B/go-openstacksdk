@@ -13,6 +13,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -72,7 +73,7 @@ func TestDeleteCoreFixedScopeAndOwnedAcknowledgement(t *testing.T) {
 				return deleteCoreHTTP(204, body, header), nil
 			})
 			client.MoreHeaders = map[string]string{"X-Snapshot": "before"}
-			result, err := New(client).DeleteImage(context.Background(), resource.ID(id), func(value *DeleteImageOpts) error {
+			result, err := New(client).DeleteImage(context.Background(), resource.ID(id), request.Custom(func(value *DeleteImageOpts) error {
 				callbacks++
 				retained = value
 				ignore := true
@@ -85,7 +86,7 @@ func TestDeleteCoreFixedScopeAndOwnedAcknowledgement(t *testing.T) {
 				client.ResourceBase = "https://example.test/later-valid/"
 				client.ProviderClient.SetToken("after")
 				return nil
-			})
+			}))
 			if err != nil || result == nil || result.ImageID != id || result.StoreID != store || result.StatusCode != 204 || !bytes.Equal(result.Body, []byte{'r', 'a', 'w', 255}) || result.Header.Get("X-Actual") != "before" || calls != 1 || body.closes != 1 {
 				t.Fatalf("result=%+v err=%v calls=%d closes=%d", result, err, calls, body.closes)
 			}
@@ -130,7 +131,7 @@ func TestDeleteCoreOwnedMissingPreservesBodyAndContextFailures(t *testing.T) {
 				retries++
 				return errors.New("handled404 must bypass native retry")
 			}
-			result, err := New(client).DeleteImage(ctx, resource.ID("fixed"), WithDeleteImageStore("fast"), WithDeleteImageIgnoreMissing(!test.strict))
+			result, err := New(client).DeleteImage(ctx, resource.ID("fixed"), WithDeleteImageStore("fast"), request.IgnoreMissing(!test.strict))
 			failedBody := test.readErr != nil || test.closeErr != nil || test.canceled
 			if result != nil || calls != 1 || retries != 0 || body.closes != 1 {
 				t.Fatalf("result=%+v err=%v calls=%d retries=%d closes=%d", result, err, calls, retries, body.closes)
@@ -239,7 +240,7 @@ func TestDeleteCoreNameAbsenceAndSourceFailureBoundaries(t *testing.T) {
 				}
 				return deleteCoreHTTP(200, io.NopCloser(strings.NewReader(`{"images":`+images+`}`)), http.Header{}), nil
 			})
-			result, err := New(client).DeleteImage(ctx, resource.Name("exact"), WithDeleteImageStore("fast"), WithDeleteImageIgnoreMissing(mode != "strict missing"))
+			result, err := New(client).DeleteImage(ctx, resource.Name("exact"), WithDeleteImageStore("fast"), request.IgnoreMissing(mode != "strict missing"))
 			if mode == "unique" {
 				if err != nil || result == nil || gets != 2 || deletes != 1 {
 					t.Fatalf("result=%+v err=%v gets=%d deletes=%d", result, err, gets, deletes)

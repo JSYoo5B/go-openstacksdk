@@ -7,12 +7,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gophercloud/gophercloud/v2"
-
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/image"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
+	"github.com/gophercloud/gophercloud/v2"
 )
 
 func TestConnectionImageLocationsShareNativeClientAndPreservePassiveData(t *testing.T) {
@@ -68,14 +68,14 @@ func TestConnectionImageLocationsShareNativeClientAndPreservePassiveData(t *test
 		t.Fatal("location methods replaced the cached native image client")
 	}
 	added, err := service.AddImageLocation(ctx, resource.ID("fixed"), locationURL,
-		image.WithImageLocationValidation("sha256", "AB CD"), image.WithAddImageLocationHeader("X-Call", "locations"))
+		image.WithImageLocationValidation("sha256", "AB CD"), request.Header("X-Call", "locations"))
 	if err != nil || added == nil || added.ImageID != "fixed" || added.URL != locationURL || added.StatusCode != 202 || added.Header.Get("X-Proof") != "accepted" || string(added.Body) != "opaque acceptance" {
 		t.Fatalf("added=%+v err=%v", added, err)
 	}
 	added.Body[0] = 'X'
 	added.Header.Set("X-Proof", "caller mutation")
 	provider.SetToken("location-1")
-	listed, err := service.GetImageLocations(ctx, resource.ID("fixed"), image.WithGetImageLocationsHeader("X-Call", "locations"))
+	listed, err := service.GetImageLocations(ctx, resource.ID("fixed"), request.Header("X-Call", "locations"))
 	if err != nil || listed == nil || listed.ImageID != "fixed" || listed.StatusCode != 200 || listed.Header.Get("X-Proof") != "listed" || len(listed.Locations) != 1 || calls != 2 {
 		t.Fatalf("listed=%+v err=%v calls=%d", listed, err, calls)
 	}

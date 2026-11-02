@@ -15,7 +15,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.API.InNamespace`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.NamespaceScope.Create`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithCreateOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithCreateHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithCreateHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithCreateDescription`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithCreateProperties`
@@ -53,7 +53,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.API.InNamespace`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.NamespaceScope.Get`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithGetOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithGetHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithGetHeaders`
 
 - Zero-HTTP InNamespace validates required literal parent and captures original API/client/provider/type/endpoint/base/microversion for scope lifetime. Parent/child names are nonempty UTF8<=80runes, route-breaking/control/dot syntax rejected, colon/Unicode/space preserved and escaped once. No Ref/find/parent GET or response-driven routing. Each request copies latest ordinary source headers and uses live original auth; scope/source/context rechecked before callbacks, after accepted body and consumed rows.
@@ -89,19 +89,17 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.NamespaceScope.List`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.NamespaceScope.All`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithListHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithListMaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.NamespaceScope.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.NamespaceScope.AllRecords`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.NewWithDependencies`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithRecordListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithRecordListHeader`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithRecordListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithRecordListFilter`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithRecordListFilters`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithRecordListVisibility`
@@ -152,7 +150,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.API.InNamespace`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.NamespaceScope.Update`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithUpdateOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithUpdateHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithUpdateHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithUpdateName`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithUpdateDescription`
@@ -193,9 +191,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.API.InNamespace`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.NamespaceScope.Delete`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithDeleteOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithDeleteHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithDeleteHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithDeleteIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 
 - Zero-HTTP InNamespace validates required literal parent and captures original API/client/provider/type/endpoint/base/microversion for scope lifetime. Parent/child names are nonempty UTF8<=80runes, route-breaking/control/dot syntax rejected, colon/Unicode/space preserved and escaped once. No Ref/find/parent GET or response-driven routing. Each request copies latest ordinary source headers and uses live original auth; scope/source/context rechecked before callbacks, after accepted body and consumed rows.
   Tests: `image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreFixedScopeAndCRUD`, `image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreCompletePreflight`, `image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreLifetimeSourceAndNativeRetryBoundaries`, `image/v2/metadefobjects/options_test.go:TestMetadefObjectsOptionsValidationAndDefaults`, `image/v2/metadefobjects/contracts_test.go:TestMetadefObjectsOwnedPreparationAndSource`, `connectiontest/connection_image_metadef_objects_test.go:TestConnectionImageMetadefObjectsShareClientAndFixedScope`.
@@ -229,7 +227,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.API.InNamespace`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.NamespaceScope.DeleteAll`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithDeleteAllOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithDeleteAllHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithDeleteAllHeaders`
 
 - Zero-HTTP InNamespace validates required literal parent and captures original API/client/provider/type/endpoint/base/microversion for scope lifetime. Parent/child names are nonempty UTF8<=80runes, route-breaking/control/dot syntax rejected, colon/Unicode/space preserved and escaped once. No Ref/find/parent GET or response-driven routing. Each request copies latest ordinary source headers and uses live original auth; scope/source/context rechecked before callbacks, after accepted body and consumed rows.
@@ -268,6 +266,7 @@ import (
 
     "github.com/JSYoo5B/go-openstacksdk/image"
     "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects"
+    "github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 type ObjectEvidence struct {
@@ -290,7 +289,7 @@ func manageObjects(ctx context.Context, service *image.Service, namespace, name,
     required := []string{"vcpus"}
     out.Created, err = scope.Create(ctx, name,
         metadefobjects.WithCreateOpts(metadefobjects.CreateOpts{Description: &description}),
-        metadefobjects.WithCreateHeader("X-Request-Source", "example"),
+        request.Header("X-Request-Source", "example"),
         metadefobjects.WithCreateHeaders(map[string]string{"X-Trace": "create"}),
         metadefobjects.WithCreateDescription(description),
         metadefobjects.WithCreateProperties(properties),
@@ -299,15 +298,15 @@ func manageObjects(ctx context.Context, service *image.Service, namespace, name,
 
     out.Read, err = scope.Get(ctx, name,
         metadefobjects.WithGetOpts(metadefobjects.GetOpts{}),
-        metadefobjects.WithGetHeader("X-Request-Source", "example"),
+        request.Header("X-Request-Source", "example"),
         metadefobjects.WithGetHeaders(map[string]string{"X-Trace": "get"}))
     if err != nil { return out, err }
 
     listOptions := []metadefobjects.ListOption{
         metadefobjects.WithListOpts(metadefobjects.ListOpts{}),
-        metadefobjects.WithListHeader("X-Request-Source", "example"),
+        request.Header("X-Request-Source", "example"),
         metadefobjects.WithListHeaders(map[string]string{"X-Trace": "list"}),
-        metadefobjects.WithListMaxItems(20),
+        request.MaxItems(20),
     }
     for row, listErr := range scope.List(ctx, listOptions...) {
         if listErr != nil { return out, listErr }
@@ -318,7 +317,7 @@ func manageObjects(ctx context.Context, service *image.Service, namespace, name,
 
     out.Updated, err = scope.Update(ctx, name,
         metadefobjects.WithUpdateOpts(metadefobjects.UpdateOpts{}),
-        metadefobjects.WithUpdateHeader("X-Request-Source", "example"),
+        request.Header("X-Request-Source", "example"),
         metadefobjects.WithUpdateHeaders(map[string]string{"X-Trace": "update"}),
         metadefobjects.WithUpdateName(replacementName),
         metadefobjects.WithUpdateDescription(description),
@@ -328,13 +327,13 @@ func manageObjects(ctx context.Context, service *image.Service, namespace, name,
 
     out.Deleted, err = scope.Delete(ctx, replacementName,
         metadefobjects.WithDeleteOpts(metadefobjects.DeleteOpts{}),
-        metadefobjects.WithDeleteHeader("X-Request-Source", "example"),
+        request.Header("X-Request-Source", "example"),
         metadefobjects.WithDeleteHeaders(map[string]string{"X-Trace": "delete"}),
-        metadefobjects.WithDeleteIgnoreMissing(false))
+        request.IgnoreMissing(false))
     if err != nil || !clearNamespace { return out, err }
     out.Cleared, err = scope.DeleteAll(ctx,
         metadefobjects.WithDeleteAllOpts(metadefobjects.DeleteAllOpts{}),
-        metadefobjects.WithDeleteAllHeader("X-Request-Source", "example"),
+        request.Header("X-Request-Source", "example"),
         metadefobjects.WithDeleteAllHeaders(map[string]string{"X-Trace": "delete-all"}))
     return out, err
 }

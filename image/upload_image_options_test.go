@@ -12,6 +12,7 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -106,11 +107,11 @@ func TestImageUploadOptionsReplacementAndTypedPresence(t *testing.T) {
 		}
 		return taskCoreJSON(req, 204, ""), nil
 	}))
-	value, err := service.UploadImage(context.Background(), imageUploadCoreInput(strings.NewReader("data")), WithImageUploadField("erased", 1), WithImageUploadHeader("X-Erased", "old"), WithImageUploadSize(123), WithImageUploadOpts(ImageUploadOpts{}), WithImageUploadHeaders(map[string]string{"x-policy": "first"}), WithImageUploadHeader("X-Policy", "last"), WithImageUploadDiskFormat("future-disk"), WithImageUploadContainerFormat("future-container"), WithImageUploadVisibility(Visibility("future")), WithImageUploadOwner(""), WithImageUploadProtected(false), WithImageUploadHidden(false), WithImageUploadMinDisk(0), WithImageUploadMinRAM(-1), WithImageUploadTags(), WithImageUploadField("custom", nil), WithImageUploadField("id", "forwarded"), WithImageUploadSize(999), WithoutImageUploadSize())
+	value, err := service.UploadImage(context.Background(), imageUploadCoreInput(strings.NewReader("data")), WithImageUploadField("erased", 1), request.Header("X-Erased", "old"), WithImageUploadSize(123), WithImageUploadOpts(ImageUploadOpts{}), WithImageUploadHeaders(map[string]string{"x-policy": "first"}), request.Header("X-Policy", "last"), WithImageUploadDiskFormat("future-disk"), WithImageUploadContainerFormat("future-container"), WithImageUploadVisibility(Visibility("future")), WithImageUploadOwner(""), WithImageUploadProtected(false), WithImageUploadHidden(false), WithImageUploadMinDisk(0), WithImageUploadMinRAM(-1), WithImageUploadTags(), WithImageUploadField("custom", nil), WithImageUploadField("id", "forwarded"), WithImageUploadSize(999), WithoutImageUploadSize())
 	if value == nil || err != nil || value.ImageID != "observed" || *value.Image.Name != "response" {
 		t.Fatal(value, err)
 	}
-	value, err = service.UploadImage(context.Background(), imageUploadCoreInput(strings.NewReader("data")), WithImageUploadHeader("X-Policy", "last"), WithImageUploadFields(map[string]json.RawMessage{"erased": json.RawMessage("1")}), WithImageUploadFields(nil))
+	value, err = service.UploadImage(context.Background(), imageUploadCoreInput(strings.NewReader("data")), request.Header("X-Policy", "last"), WithImageUploadFields(map[string]json.RawMessage{"erased": json.RawMessage("1")}), WithImageUploadFields(nil))
 	if value == nil || err != nil || calls != 4 {
 		t.Fatal(value, err, calls)
 	}
@@ -118,7 +119,7 @@ func TestImageUploadOptionsReplacementAndTypedPresence(t *testing.T) {
 	option := WithImageUploadTags(tags...)
 	tags[0] = "changed"
 	config := copyImageUploadOpts(ImageUploadOpts{})
-	if err := option(&config); err != nil || string(config.Fields["tags"]) != `["one","one","two"]` {
+	if err := applyCall(imageUploadCalls, option, &config); err != nil || string(config.Fields["tags"]) != `["one","one","two"]` {
 		t.Fatal(config, err)
 	}
 }
@@ -170,11 +171,11 @@ func TestImageUploadOptionsRetainedCallbacksAndSource(t *testing.T) {
 		}
 		return nil
 	}
-	if value, err := New(client).UploadImage(context.Background(), imageUploadCoreInput(strings.NewReader("data")), first, second); value == nil || err != nil || callbacks != 2 || calls != 2 {
+	if value, err := New(client).UploadImage(context.Background(), imageUploadCoreInput(strings.NewReader("data")), request.Custom(first), request.Custom(second)); value == nil || err != nil || callbacks != 2 || calls != 2 {
 		t.Fatal(value, err, callbacks, calls)
 	}
 	cause := errors.New("callback cause")
-	if value, err := New(client).UploadImage(context.Background(), imageUploadCoreInput(strings.NewReader("unread")), func(*ImageUploadOpts) error { return cause }); value != nil || !errors.Is(err, cause) || calls != 2 {
+	if value, err := New(client).UploadImage(context.Background(), imageUploadCoreInput(strings.NewReader("unread")), request.Custom(func(*ImageUploadOpts) error { return cause })); value != nil || !errors.Is(err, cause) || calls != 2 {
 		t.Fatal(value, err, calls)
 	}
 	for _, field := range []string{"endpoint", "base", "type", "version", "provider", "client"} {
@@ -199,7 +200,7 @@ func TestImageUploadOptionsRetainedCallbacksAndSource(t *testing.T) {
 				}
 				return nil
 			}
-			if value, err := service.UploadImage(context.Background(), imageUploadCoreInput(strings.NewReader("unread")), option); value != nil || !errors.Is(err, resource.ErrInvalidOption) || requests != 0 {
+			if value, err := service.UploadImage(context.Background(), imageUploadCoreInput(strings.NewReader("unread")), request.Custom(option)); value != nil || !errors.Is(err, resource.ErrInvalidOption) || requests != 0 {
 				t.Fatal(value, err, requests)
 			}
 		})
@@ -257,16 +258,16 @@ func TestImageUploadOptionsParallelReuseAndHeaderPolicies(t *testing.T) {
 		t.Fatal(calls.Load())
 	}
 	for _, key := range []string{"Authorization", "Host", "Content-Type", "Accept", "Content-Length", "X-OpenStack-Image-Size", "x-openstack-image-size", "OpenStack-API-Version"} {
-		if value, err := service.UploadImage(context.Background(), imageUploadCoreInput(strings.NewReader("unread")), WithImageUploadHeader(key, "owned")); value != nil || !errors.Is(err, resource.ErrInvalidOption) || calls.Load() != 24 {
+		if value, err := service.UploadImage(context.Background(), imageUploadCoreInput(strings.NewReader("unread")), request.Header(key, "owned")); value != nil || !errors.Is(err, resource.ErrInvalidOption) || calls.Load() != 24 {
 			t.Fatal(key, value, err)
 		}
 	}
 	value := copyImageUploadOpts(ImageUploadOpts{})
 	merge := WithImageUploadHeaders(map[string]string{"x-policy": "one"})
-	if err := merge(&value); err != nil {
+	if err := applyCall(imageUploadCalls, merge, &value); err != nil {
 		t.Fatal(err)
 	}
-	if err := WithImageUploadHeader("X-Policy", "two")(&value); err != nil || !reflect.DeepEqual(value.Headers, map[string]string{"X-Policy": "two"}) {
+	if err := applyCall(imageUploadCalls, request.Header("X-Policy", "two"), &value); err != nil || !reflect.DeepEqual(value.Headers, map[string]string{"X-Policy": "two"}) {
 		t.Fatal(value, err)
 	}
 }

@@ -14,6 +14,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -180,7 +181,7 @@ func TestTaskCoreCompletePreflight(t *testing.T) {
 	service := New(client)
 	callback := func(opts *CreateTaskOpts) error { callbacks++; return nil }
 	for _, kind := range []string{"", string([]byte{0xff})} {
-		if value, err := service.CreateTask(context.Background(), kind, callback); value != nil || !errors.Is(err, resource.ErrInvalidOption) {
+		if value, err := service.CreateTask(context.Background(), kind, request.Custom(callback)); value != nil || !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(value, err)
 		}
 	}
@@ -194,27 +195,27 @@ func TestTaskCoreCompletePreflight(t *testing.T) {
 			t.Fatal(value, err)
 		}
 	}
-	for _, opts := range []CreateTaskOption{nil, WithCreateTaskHeader("Authorization", "private"), WithCreateTaskHeader("Accept", "other")} {
+	for _, opts := range []CreateTaskOption{nil, request.Header("Authorization", "private"), request.Header("Accept", "other")} {
 		if value, err := service.CreateTask(context.Background(), "import", opts); value != nil || !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(value, err)
 		}
 	}
-	for _, opts := range []ListTasksOption{nil, WithListTasksLimit(-1), WithListTasksMaxItems(-1), WithListTasksSortDir("ASC"), WithListTasksMarker("\n"), WithListTasksType(string([]byte{0xff}))} {
+	for _, opts := range []ListTasksOption{nil, request.Limit(-1), request.MaxItems(-1), WithListTasksSortDir("ASC"), request.Marker("\n"), WithListTasksType(string([]byte{0xff}))} {
 		if value, err := service.AllTasks(context.Background(), opts); value != nil || !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(value, err)
 		}
 	}
-	if value, err := service.CreateTask(nil, "import", callback); value != nil || !errors.Is(err, resource.ErrInvalidOption) {
+	if value, err := service.CreateTask(nil, "import", request.Custom(callback)); value != nil || !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(value, err)
 	}
 	cause := errors.New("stop")
 	ctx, cancel := context.WithCancelCause(context.Background())
 	cancel(cause)
-	if value, err := service.CreateTask(ctx, "import", callback); value != nil || !errors.Is(err, cause) || !errors.Is(err, context.Canceled) {
+	if value, err := service.CreateTask(ctx, "import", request.Custom(callback)); value != nil || !errors.Is(err, cause) || !errors.Is(err, context.Canceled) {
 		t.Fatal(value, err)
 	}
 	client.MoreHeaders = map[string]string{"X-Auth-Token": "owned"}
-	if value, err := service.CreateTask(context.Background(), "import", callback); value != nil || !errors.Is(err, resource.ErrInvalidOption) {
+	if value, err := service.CreateTask(context.Background(), "import", request.Custom(callback)); value != nil || !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(value, err)
 	}
 	if calls != 0 || callbacks != 0 {
@@ -254,7 +255,7 @@ func TestTaskCoreAdvertisedPagesAndLocalConsumption(t *testing.T) {
 		client.Endpoint = "https://glance.example/reverse%20proxy/glance/v2/"
 		client.MoreHeaders = map[string]string{"X-Source": "first", "X-Fixed": "source"}
 		service := New(client)
-		seq := service.Tasks(context.Background(), WithListTasksLimit(1), WithListTasksMarker("start"), WithListTasksType("future-type"), WithListTasksStatus("future-status"), WithListTasksSortKey("future-key"), WithListTasksSortDir("asc"), WithListTasksHeader("X-Fixed", "option"))
+		seq := service.Tasks(context.Background(), request.Limit(1), request.Marker("start"), WithListTasksType("future-type"), WithListTasksStatus("future-status"), WithListTasksSortKey("future-key"), WithListTasksSortDir("asc"), request.Header("X-Fixed", "option"))
 		if calls != 0 {
 			t.Fatal("not lazy")
 		}
@@ -290,7 +291,7 @@ func TestTaskCoreAdvertisedPagesAndLocalConsumption(t *testing.T) {
 			service := New(client)
 			opts := []ListTasksOption{}
 			if mode == "cap" {
-				opts = append(opts, WithListTasksMaxItems(1))
+				opts = append(opts, request.MaxItems(1))
 			}
 			if mode == "single" {
 				opts = append(opts, WithListTasksSinglePage(true))
@@ -319,7 +320,7 @@ func TestTaskCoreAdvertisedPagesAndLocalConsumption(t *testing.T) {
 			}
 			return taskCoreJSON(req, 200, `{"tasks":[],"next":false}`), nil
 		}))
-		values, err := service.AllTasks(context.Background(), WithListTasksLimit(0))
+		values, err := service.AllTasks(context.Background(), request.Limit(0))
 		if err != nil || values == nil || len(values) != 0 || calls != 1 {
 			t.Fatal(values, err, calls)
 		}
@@ -447,7 +448,7 @@ func TestTaskCoreFixedSourceAndPrebodyPolicy(t *testing.T) {
 					service.client = taskCoreClient(nil)
 				}
 			}
-			value, err := service.CreateTask(context.Background(), "import", func(opts *CreateTaskOpts) error { mutate(); return nil })
+			value, err := service.CreateTask(context.Background(), "import", request.Custom(func(opts *CreateTaskOpts) error { mutate(); return nil }))
 			if value != nil || !errors.Is(err, resource.ErrInvalidOption) || calls != 0 {
 				t.Fatal(value, err, calls)
 			}

@@ -14,12 +14,12 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.AddImageMember`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.AddImageMemberRecord`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.AddImageMemberRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordWriteOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordWriteHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordWriteHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordWriteAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordWriteAttributes`
@@ -72,7 +72,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetImageMember`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetImageMemberRecord`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.GetImageMemberRecord`
@@ -125,12 +125,12 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.UpdateImageMember`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.UpdateImageMemberRecord`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.UpdateImageMemberRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordWriteOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordWriteHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordWriteHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordWriteAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordWriteAttributes`
@@ -185,9 +185,9 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.RemoveImageMember`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithRemoveImageMemberOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithRemoveImageMemberHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithRemoveImageMemberHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithRemoveImageMemberIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.RemoveImageMemberRecord`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.RemoveImageMemberRecord`
 
@@ -233,14 +233,14 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.FindImageMember`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithFindImageMemberOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithFindImageMemberHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithFindImageMemberHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithFindImageMemberIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.FindImageMemberRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithFindImageMemberRecordOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithFindImageMemberRecordHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithFindImageMemberRecordHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithFindImageMemberRecordIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 
 - All methods require an explicit parent image Ref; direct imageID has only fixed member endpoint, explicit parentName uses unchanged native exact-name resolver. No Member parent recovery, memberName/project lookup, response-ID synthesis or response-driven routes.
   Tests: `image/members_contracts_test.go:TestImageMembersFixedParentRoutesAndBodies`, `image/members_core_test.go:TestImageMembersCoreFixedRoutesAndActualEvidence`, `connectiontest/connection_image_members_test.go:TestConnectionImageMembersShareClientAndConcreteDefaults`, `internal/cmd/sdkgen/glance_members_test.go:TestGlanceMemberWorkflowsPreserveNativeScopeAndConcreteDefaults`.
@@ -284,19 +284,19 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.ListImageMembers`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithListImageMembersOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithListImageMembersHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithListImageMembersHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithListImageMembersMaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.AllImageMembers`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.ListImageMemberRecords`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.AllImageMemberRecords`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordListHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordListFilter`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordListFilters`
 
@@ -354,7 +354,7 @@ func shareAndReadMembers(ctx context.Context, owner, member *image.Service, pare
         image.WithImageMemberOpts(image.ImageMemberOpts{
             Headers: map[string]string{"X-Request-Source": "example"},
         }),
-        image.WithImageMemberHeader("X-Member-Request", "single"),
+        request.Header("X-Member-Request", "single"),
         image.WithImageMemberHeaders(map[string]string{"X-Example": "members"}),
     }
     created, err := owner.AddImageMember(ctx, parent, memberID, common...)
@@ -375,9 +375,9 @@ func shareAndReadMembers(ctx context.Context, owner, member *image.Service, pare
 
     found, err := owner.FindImageMember(ctx, parent, memberID,
         image.WithFindImageMemberOpts(image.FindImageMemberOpts{}),
-        image.WithFindImageMemberHeader("X-Member-Request", "find"),
+        request.Header("X-Member-Request", "find"),
         image.WithFindImageMemberHeaders(map[string]string{"X-Example": "members"}),
-        image.WithFindImageMemberIgnoreMissing(false))
+        request.IgnoreMissing(false))
     if err != nil {
         return nil, err
     }
@@ -385,9 +385,9 @@ func shareAndReadMembers(ctx context.Context, owner, member *image.Service, pare
 
     listOptions := []image.ListImageMembersOption{
         image.WithListImageMembersOpts(image.ListImageMembersOpts{}),
-        image.WithListImageMembersHeader("X-Member-Request", "list"),
+        request.Header("X-Member-Request", "list"),
         image.WithListImageMembersHeaders(map[string]string{"X-Example": "members"}),
-        image.WithListImageMembersMaxItems(20),
+        request.MaxItems(20),
     }
     for row, err := range owner.ListImageMembers(ctx, parent, listOptions...) {
         if err != nil {
@@ -403,9 +403,9 @@ func shareAndReadMembers(ctx context.Context, owner, member *image.Service, pare
 
     ack, err := owner.RemoveImageMember(ctx, parent, memberID,
         image.WithRemoveImageMemberOpts(image.RemoveImageMemberOpts{}),
-        image.WithRemoveImageMemberHeader("X-Member-Request", "remove"),
+        request.Header("X-Member-Request", "remove"),
         image.WithRemoveImageMemberHeaders(map[string]string{"X-Example": "members"}),
-        image.WithRemoveImageMemberIgnoreMissing(true))
+        request.IgnoreMissing(true))
     return ack, err
 }
 ```

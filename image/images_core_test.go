@@ -13,6 +13,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -93,7 +94,7 @@ func TestImageCoreCompletePreflight(t *testing.T) {
 	for _, ref := range []resource.Ref{resource.Ref{}, resource.ID("."), resource.ID(".."), resource.ID("a/b"), resource.ID("a\\\\b"), resource.ID("a\n"), resource.ID(string([]byte{0xff})), resource.Name(string([]byte{0xff}))} {
 		calls, callbacks := 0, 0
 		service := New(taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return taskCoreJSON(req, 200, "{}"), nil }))
-		value, err := service.GetImage(context.Background(), ref, func(o *GetImageOpts) error { callbacks++; return nil })
+		value, err := service.GetImage(context.Background(), ref, request.Custom(func(o *GetImageOpts) error { callbacks++; return nil }))
 		if value != nil || err == nil || calls != 0 || callbacks != 0 {
 			t.Fatal(value, err, calls, callbacks, ref)
 		}
@@ -101,10 +102,10 @@ func TestImageCoreCompletePreflight(t *testing.T) {
 	for _, ctx := range []context.Context{nil, func() context.Context { ctx, cancel := context.WithCancel(context.Background()); cancel(); return ctx }()} {
 		calls, callbacks := 0, 0
 		service := New(taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return nil, nil }))
-		if v, e := service.GetImage(ctx, resource.ID("id"), func(o *GetImageOpts) error { callbacks++; return nil }); v != nil || e == nil {
+		if v, e := service.GetImage(ctx, resource.ID("id"), request.Custom(func(o *GetImageOpts) error { callbacks++; return nil })); v != nil || e == nil {
 			t.Fatal(v, e)
 		}
-		if v, e := service.AllImages(ctx, func(o *ListImagesOpts) error { callbacks++; return nil }); v != nil || e == nil || calls != 0 || callbacks != 0 {
+		if v, e := service.AllImages(ctx, request.Custom(func(o *ListImagesOpts) error { callbacks++; return nil })); v != nil || e == nil || calls != 0 || callbacks != 0 {
 			t.Fatal(v, e, calls, callbacks)
 		}
 	}
@@ -115,7 +116,7 @@ func TestImageCoreCompletePreflight(t *testing.T) {
 			return nil, nil
 		})
 		alter(client)
-		if values, err := New(client).AllImages(context.Background(), func(o *ListImagesOpts) error { callbacks++; return nil }); values != nil || err == nil || callbacks != 0 {
+		if values, err := New(client).AllImages(context.Background(), request.Custom(func(o *ListImagesOpts) error { callbacks++; return nil })); values != nil || err == nil || callbacks != 0 {
 			t.Fatal(values, err, callbacks)
 		}
 	}
@@ -183,7 +184,7 @@ func TestImageCorePagingGuardsAndLocalConsumption(t *testing.T) {
 	body := `{"images":[{"id":"first"},{"tags":[null]}],"next":42}`
 	calls := 0
 	service := New(taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return taskCoreJSON(req, 200, body), nil }))
-	if values, err := service.AllImages(context.Background(), WithListImagesMaxItems(1)); err != nil || len(values) != 1 {
+	if values, err := service.AllImages(context.Background(), request.MaxItems(1)); err != nil || len(values) != 1 {
 		t.Fatal(values, err)
 	}
 	for value, err := range service.ListImages(context.Background()) {
@@ -221,7 +222,7 @@ func TestImageCorePagingGuardsAndLocalConsumption(t *testing.T) {
 	t.Run("same marker cycle", func(t *testing.T) {
 		body := `{"images":[],"next":"?marker=initial"}`
 		calls := 0
-		values, err := New(taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return taskCoreJSON(req, 200, body), nil })).AllImages(context.Background(), WithListImagesMarker("initial"))
+		values, err := New(taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return taskCoreJSON(req, 200, body), nil })).AllImages(context.Background(), request.Marker("initial"))
 		if values != nil || !errors.Is(err, resource.ErrPaginationCycle) || calls != 1 {
 			t.Fatal(values, err, calls)
 		}
@@ -296,7 +297,7 @@ func TestImageCoreExactNameSourceAndOwnedFailures(t *testing.T) {
 			calls := 0
 			client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return nil, nil })
 			client.ResourceBase = client.Endpoint
-			v, e := New(client).GetImage(context.Background(), resource.Name("Parent"), func(o *GetImageOpts) error {
+			v, e := New(client).GetImage(context.Background(), resource.Name("Parent"), request.Custom(func(o *GetImageOpts) error {
 				switch field {
 				case "endpoint":
 					client.Endpoint = "https://glance.example/changed/"
@@ -306,7 +307,7 @@ func TestImageCoreExactNameSourceAndOwnedFailures(t *testing.T) {
 					client.ProviderClient = &gophercloud.ProviderClient{}
 				}
 				return nil
-			})
+			}))
 			if v != nil || !errors.Is(e, resource.ErrInvalidOption) || calls != 0 {
 				t.Fatal(v, e, calls)
 			}

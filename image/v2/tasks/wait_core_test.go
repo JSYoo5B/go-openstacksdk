@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -85,7 +86,7 @@ func TestTaskWaitCoreOneBudgetRawRecreationFixedRoutesAndLiveToken(t *testing.T)
 	parent, cancel := context.WithTimeout(context.WithValue(context.Background(), "task-proof", "context"), time.Second)
 	defer cancel()
 	parentDeadline, _ := parent.Deadline()
-	result, err := api.WaitForTask(parent, resource.ID("original"), WithTaskWaitPollInterval(time.Nanosecond), WithTaskWaitHeader("x-proof", "caller"))
+	result, err := api.WaitForTask(parent, resource.ID("original"), WithTaskWaitPollInterval(time.Nanosecond), request.Header("x-proof", "caller"))
 	if err != nil || count != 5 || result.OriginalID != "original" || result.CurrentID != "new-two" || result.Recreated != 2 || result.Task.ID != "response-decoy" || result.StatusCode != 200 || result.Created.Task.Status != "pending" || result.Created.StatusCode != 201 {
 		t.Fatalf("workflow result=%#v count=%d err=%v", result, count, err)
 	}

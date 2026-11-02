@@ -11,6 +11,7 @@ import (
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	ns "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -120,7 +121,7 @@ func TestConnectionImageMetadefRecordListsShareLocationAndPaging(t *testing.T) {
 			headers := map[string]string{"X-Call": "snapshot"}
 			ownedHeaders := ns.WithRecordListHeaders(headers)
 			headers["X-Call"] = "caller mutation"
-			namespaces, err := api.MetadefNamespaces.AllRecords(context.Background(), ownedHeaders, ns.WithRecordListLimit(1), ns.WithRecordListMaxItems(2), ns.WithRecordListFilter("visibility", "public"), ns.WithRecordListFilter("is_protected", false))
+			namespaces, err := api.MetadefNamespaces.AllRecords(context.Background(), ownedHeaders, request.Limit(1), request.MaxItems(2), ns.WithRecordListFilter("visibility", "public"), ns.WithRecordListFilter("is_protected", false))
 			if err != nil {
 				t.Fatalf("unexpected error: %v", err)
 			}

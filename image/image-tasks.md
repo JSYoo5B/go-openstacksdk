@@ -15,20 +15,20 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.ImageTasks`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.AllImageTasks`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithListImageTasksOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithListImageTasksHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithListImageTasksHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithListImageTasksMaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/images.API.TaskRecords`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/images.API.AllTaskRecords`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/images.WithTaskRecordsOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/images.WithTaskRecordsQuery`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/images.WithTaskRecordsHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/images.WithTaskRecordsMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/images.WithTaskRecordsLocation`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/images.WithTaskRecordsLimit`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/images.WithTaskRecordsMarker`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/images.WithTaskRecordsMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/images.WithTaskRecordsPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 
 - Required validated image Ref fixes parent route. DirectID has no metadata GET/UUID/localmaxlength gate; literalUTF8 safe segments escapeonce. Name is explicitGo extension using captured existing exact image resolver with uniqueness/missing/nativepagination semantics; no Python literal string lookup equivalence.
   Tests: `image/image_tasks_core_test.go:TestImageTaskCoreFixedRouteAndFullRecords`, `image/image_tasks_core_test.go:TestImageTaskCoreCompletePreflight`, `image/image_tasks_core_test.go:TestImageTaskCoreExactNameAndSourceGuards`, `image/image_tasks_contracts_test.go:TestImageTaskContractsFixedRouteAndParentIdentity`, `image/image_tasks_contracts_test.go:TestImageTaskContractsOwnedOptionsAndSource`.
@@ -102,9 +102,9 @@ import (
 func imageTaskExamples(ctx context.Context, svc *image.Service, imageID string) ([]*image.ImageTaskInfo, error) {
     options := []image.ListImageTasksOption{
         image.WithListImageTasksOpts(image.ListImageTasksOpts{MaxItems: 0}),
-        image.WithListImageTasksHeader("X-Request-Id", "image-tasks-example"),
+        request.Header("X-Request-Id", "image-tasks-example"),
         image.WithListImageTasksHeaders(map[string]string{"X-Example": "tasks"}),
-        image.WithListImageTasksMaxItems(20),
+        request.MaxItems(20),
     }
     rows := make([]*image.ImageTaskInfo, 0)
     for task, err := range svc.ImageTasks(ctx, resource.ID(imageID), options...) {
@@ -117,7 +117,7 @@ func imageTaskExamples(ctx context.Context, svc *image.Service, imageID string) 
 }
 
 func allImageTaskExamples(ctx context.Context, svc *image.Service, imageID string) ([]*image.ImageTaskInfo, error) {
-    return svc.AllImageTasks(ctx, resource.ID(imageID), image.WithListImageTasksMaxItems(20))
+    return svc.AllImageTasks(ctx, resource.ID(imageID), request.MaxItems(20))
 }
 ```
 

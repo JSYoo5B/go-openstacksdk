@@ -11,6 +11,8 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -26,7 +28,7 @@ func TestMetadefObjectsOptionsSnapshotsReplacementAndLastWins(t *testing.T) {
 	properties["key"][9] = 'X'
 	required[0] = "after"
 	headers["X-Original"] = "after"
-	config, err := prepareCreate([]CreateOption{WithCreateHeader("X-Removed", "yes"), WithCreateDescription("removed"), option, WithCreateHeader("x-original", "last")})
+	config, err := prepareCreate([]CreateOption{request.Header("X-Removed", "yes"), WithCreateDescription("removed"), option, request.Header("x-original", "last")})
 	if err != nil || *config.Description != "before" || string(config.Properties["key"]) != `{"type":"before"}` || config.Required[0] != "key" || config.Headers["X-Original"] != "last" || config.Headers["X-Removed"] != "" {
 		t.Fatalf("full snapshot %+v %v", config, err)
 	}
@@ -43,29 +45,29 @@ func TestMetadefObjectsOptionsSnapshotsReplacementAndLastWins(t *testing.T) {
 	*updateInput.Name = "after"
 	updateInput.Properties["x"] = json.RawMessage(`null`)
 	updateInput.Headers["X-Update"] = "after"
-	updated, err := prepareUpdate([]UpdateOption{WithUpdateHeader("X-Removed", "yes"), update, WithUpdateDescription("")})
+	updated, err := prepareUpdate([]UpdateOption{request.Header("X-Removed", "yes"), update, WithUpdateDescription("")})
 	if err != nil || *updated.Name != "new::name" || *updated.Description != "" || string(updated.Properties["x"]) != `{}` || updated.Required == nil || updated.Headers["X-Removed"] != "" {
 		t.Fatalf("update replacement %+v %v", updated, err)
 	}
 	ignore := false
 	deletion := WithDeleteOpts(DeleteOpts{IgnoreMissing: &ignore, Headers: map[string]string{"X-Delete": "before"}})
 	ignore = true
-	deleted, err := prepareDelete([]DeleteOption{WithDeleteIgnoreMissing(true), deletion})
+	deleted, err := prepareDelete([]DeleteOption{request.IgnoreMissing(true), deletion})
 	if err != nil || *deleted.IgnoreMissing {
 		t.Fatalf("delete snapshot %+v %v", deleted, err)
 	}
-	bulk, err := prepareDeleteAll([]DeleteAllOption{WithDeleteAllHeader("X-Removed", "yes"), WithDeleteAllOpts(DeleteAllOpts{}), WithDeleteAllHeader("X-Bulk", "last")})
+	bulk, err := prepareDeleteAll([]DeleteAllOption{request.Header("X-Removed", "yes"), WithDeleteAllOpts(DeleteAllOpts{}), request.Header("X-Bulk", "last")})
 	if err != nil || bulk.Headers["X-Removed"] != "" || bulk.Headers["X-Bulk"] != "last" {
 		t.Fatalf("bulk replacement %+v %v", bulk, err)
 	}
 	inputHeaders := map[string]string{"x-snapshot": "before"}
 	get := WithGetHeaders(inputHeaders)
 	inputHeaders["x-snapshot"] = "after"
-	fetched, err := prepareGet([]GetOption{get, WithGetHeader("X-Snapshot", "last")})
+	fetched, err := prepareGet([]GetOption{get, request.Header("X-Snapshot", "last")})
 	if err != nil || fetched.Headers["X-Snapshot"] != "last" {
 		t.Fatalf("header lastwins %+v %v", fetched, err)
 	}
-	listed, err := prepareList([]ListOption{WithListMaxItems(9), WithListOpts(ListOpts{MaxItems: 2}), WithListMaxItems(3)})
+	listed, err := prepareList([]ListOption{request.MaxItems(9), WithListOpts(ListOpts{MaxItems: 2}), request.MaxItems(3)})
 	if err != nil || listed.MaxItems != 3 {
 		t.Fatalf("cap lastwins %+v %v", listed, err)
 	}
@@ -80,7 +82,7 @@ func TestMetadefObjectsOptionsSnapshotsReplacementAndLastWins(t *testing.T) {
 		t.Fatalf("field helper snapshots %+v %v", captured, err)
 	}
 	var zero GetOpts
-	if err := WithGetHeader("X-Direct", "yes")(&zero); err != nil || zero.Headers["X-Direct"] != "yes" {
+	if err := calls.Translate([]GetOption{request.Header("X-Direct", "yes")}, getCalls)[0](&zero); err != nil || zero.Headers["X-Direct"] != "yes" {
 		t.Fatalf("direct zero helper %+v %v", zero, err)
 	}
 }
@@ -88,7 +90,7 @@ func TestMetadefObjectsOptionsSnapshotsReplacementAndLastWins(t *testing.T) {
 func TestMetadefObjectsOptionsCallbackDeepOwnership(t *testing.T) {
 	var retained *CreateOpts
 	callbacks := 0
-	first := CreateOption(func(o *CreateOpts) error {
+	first := CreateOption(request.Custom(func(o *CreateOpts) error {
 		callbacks++
 		if o.Headers == nil {
 			t.Fatal("nil initial Headers")
@@ -99,8 +101,8 @@ func TestMetadefObjectsOptionsCallbackDeepOwnership(t *testing.T) {
 		o.Headers["X-Handle"] = "before"
 		retained = o
 		return nil
-	})
-	second := CreateOption(func(o *CreateOpts) error {
+	}))
+	second := CreateOption(request.Custom(func(o *CreateOpts) error {
 		callbacks++
 		*retained.Description = "old"
 		retained.Properties["x"][5] = '2'
@@ -110,7 +112,7 @@ func TestMetadefObjectsOptionsCallbackDeepOwnership(t *testing.T) {
 			t.Fatal("earlier callback aliases new config")
 		}
 		return nil
-	})
+	}))
 	config, err := prepareCreate([]CreateOption{first, second})
 	if err != nil || callbacks != 2 {
 		t.Fatalf("callbacks%d %v", callbacks, err)
@@ -131,10 +133,10 @@ func TestMetadefObjectsOptionsCallbackDeepOwnership(t *testing.T) {
 		return objectCoreJSON(req, 200, `{}`), nil
 	}), "parent")
 	var options []GetOption
-	options = []GetOption{func(*GetOpts) error {
-		options[1] = func(*GetOpts) error { return errors.New("changed caller slice") }
+	options = []GetOption{request.Custom(func(*GetOpts) error {
+		options[1] = request.Custom(func(*GetOpts) error { return errors.New("changed caller slice") })
 		return nil
-	}, WithGetHeader("X-Chosen", "yes")}
+	}), request.Header("X-Chosen", "yes")}
 	if _, err := scope.Get(context.Background(), "child", options...); err != nil || requests != 1 {
 		t.Fatalf("owned method slice %v requests%d", err, requests)
 	}
@@ -143,9 +145,9 @@ func TestMetadefObjectsOptionsCallbackDeepOwnership(t *testing.T) {
 		requests++
 		return objectCoreJSON(req, 200, `{"objects":[{},{}]}`), nil
 	}), "parent")
-	listOptions := []ListOption{func(*ListOpts) error { callbacks++; return nil }, WithListMaxItems(1)}
+	listOptions := []ListOption{request.Custom(func(*ListOpts) error { callbacks++; return nil }), request.MaxItems(1)}
 	seq := scope.List(context.Background(), listOptions...)
-	listOptions[1] = func(*ListOpts) error { return errors.New("mutated lazy slice") }
+	listOptions[1] = request.Custom(func(*ListOpts) error { return errors.New("mutated lazy slice") })
 	if callbacks != 0 || requests != 0 {
 		t.Fatal("iterator eager")
 	}
@@ -208,7 +210,7 @@ func TestMetadefObjectsOptionsValidationAndDefaults(t *testing.T) {
 		}
 	}
 	for _, key := range []string{"X-Auth-Token", "X-Service-Token", "Authorization", "Host", "Cookie", "Content-Length", "Transfer-Encoding", "Connection", "Trailer", "Te", "Upgrade", "Accept", "Content-Type", "OpenStack-API-Version", "X-OpenStack-Glance-Api-Version", "X-OpenStack-Image-Size"} {
-		if _, err := prepareGet([]GetOption{WithGetHeader(key, "value")}); !errors.Is(err, resource.ErrInvalidOption) {
+		if _, err := prepareGet([]GetOption{request.Header(key, "value")}); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatalf("protected header %s %v", key, err)
 		}
 	}
@@ -224,7 +226,7 @@ func TestMetadefObjectsOptionsValidationAndDefaults(t *testing.T) {
 		}
 	}
 	cause := errors.New("callback-cause")
-	if _, err := prepareCreate([]CreateOption{func(*CreateOpts) error { return cause }}); err != cause {
+	if _, err := prepareCreate([]CreateOption{request.Custom(func(*CreateOpts) error { return cause })}); err != cause {
 		t.Fatalf("lost cause identity %v", err)
 	}
 	explicit, err := prepareCreate([]CreateOption{WithCreateDescription(""), WithCreateProperties(map[string]json.RawMessage{}), WithCreateRequired([]string{})})

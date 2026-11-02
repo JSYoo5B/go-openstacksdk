@@ -17,6 +17,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/image"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -80,12 +81,12 @@ func TestImageContractsGetRouteAndReference(t *testing.T) {
 				w.Header().Set("OpenStack-image-import-methods", "header-only")
 				_, _ = io.WriteString(w, imageContractObject)
 			})
-			v, e := image.New(client).GetImage(context.Background(), resource.ID(id), opts, image.WithGetImageHeader("X-Final", "last"), func(o *image.GetImageOpts) error {
+			v, e := image.New(client).GetImage(context.Background(), resource.ID(id), opts, request.Header("X-Final", "last"), request.Custom(func(o *image.GetImageOpts) error {
 				callbacks.Add(1)
 				client.MoreHeaders["X-Source"] = "after callback"
 				cloud.Provider.SetToken("live")
 				return nil
-			})
+			}))
 			if e != nil || v == nil || *v.ID != "response-id" || v.StatusCode != 200 || v.Header.Get("Location") != "https://foreign.invalid/retarget" || v.Body["openstack-image-import-methods"] != nil || calls.Load() != 1 || callbacks.Load() != 1 {
 				t.Fatal(v, e, calls.Load(), callbacks.Load())
 			}
@@ -110,7 +111,7 @@ func TestImageContractsGetRouteAndReference(t *testing.T) {
 		t.Run("unsafe ID "+id, func(t *testing.T) {
 			var calls, callbacks atomic.Int32
 			c := taskContractsClient(func(*http.Request) (*http.Response, error) { calls.Add(1); return nil, errors.New("unexpected") })
-			v, e := image.New(c).GetImage(context.Background(), resource.ID(id), func(*image.GetImageOpts) error { callbacks.Add(1); return nil })
+			v, e := image.New(c).GetImage(context.Background(), resource.ID(id), request.Custom(func(*image.GetImageOpts) error { callbacks.Add(1); return nil }))
 			if v != nil || !errors.Is(e, resource.ErrInvalidOption) || calls.Load() != 0 || callbacks.Load() != 0 {
 				t.Fatal(v, e, calls.Load(), callbacks.Load())
 			}
@@ -149,12 +150,12 @@ func TestImageContractsGetRouteAndReference(t *testing.T) {
 				t.Error("lookup or Get replay", n)
 			}
 		})
-		v, e := image.New(c).GetImage(context.Background(), resource.Name("exact"), func(o *image.GetImageOpts) error {
+		v, e := image.New(c).GetImage(context.Background(), resource.Name("exact"), request.Custom(func(o *image.GetImageOpts) error {
 			callbacks.Add(1)
 			o.Headers["X-Option"] = "owned"
 			c.MoreHeaders["X-Source"] = "after callback"
 			return nil
-		})
+		}))
 		if e != nil || v == nil || *v.ID != "response-id" || *v.Name != "literal\nname" || calls.Load() != 3 || callbacks.Load() != 1 {
 			t.Fatal(v, e, calls.Load(), callbacks.Load())
 		}
@@ -333,7 +334,7 @@ func TestImageContractsPagingAndConsumption(t *testing.T) {
 			return nil, errors.New("extra page")
 		})
 		s := image.New(c)
-		opts := []image.ListImagesOption{image.WithListImagesName("line\n"), image.WithListImagesLimit(4), image.WithListImagesTags("first", "second", "first"), image.WithListImagesSortKeys("name", "size"), image.WithListImagesSortDirs("asc", "desc"), image.WithListImagesFilter("x-property", "one", "two"), image.WithListImagesHeader("X-Fixed", "option")}
+		opts := []image.ListImagesOption{image.WithListImagesName("line\n"), request.Limit(4), image.WithListImagesTags("first", "second", "first"), image.WithListImagesSortKeys("name", "size"), image.WithListImagesSortDirs("asc", "desc"), image.WithListImagesFilter("x-property", "one", "two"), request.Header("X-Fixed", "option")}
 		got := []string{}
 		for v, e := range s.ListImages(context.Background(), opts...) {
 			if e != nil {
@@ -371,7 +372,7 @@ func TestImageContractsPagingAndConsumption(t *testing.T) {
 			}
 			opts := []image.ListImagesOption{}
 			if mode == "cap" {
-				opts = append(opts, image.WithListImagesMaxItems(1))
+				opts = append(opts, request.MaxItems(1))
 			}
 			if mode == "single" {
 				raw = []byte(`{"images":[{"id":"first"}],"next":17}`)
@@ -395,7 +396,7 @@ func TestImageContractsPagingAndConsumption(t *testing.T) {
 	for _, raw := range []string{`{}`, `null`, `[]`, `{"images":null}`, `{"Images":[]}`, `{"images":{}}`, `{"images":[{}]} trailing`, "{\"images\":[{}],\"x\":\"" + string([]byte{0xff}) + "\"}"} {
 		t.Run("envelope "+raw, func(t *testing.T) {
 			c := taskContractsClient(func(*http.Request) (*http.Response, error) { return imageContractJSONResponse(raw), nil })
-			rows, e := image.New(c).AllImages(context.Background(), image.WithListImagesMaxItems(1))
+			rows, e := image.New(c).AllImages(context.Background(), request.MaxItems(1))
 			taskContractsProof(t, e, 200, []byte(raw))
 			if rows != nil {
 				t.Fatal(rows, e)
@@ -462,7 +463,7 @@ func TestImageContractsPagingAndConsumption(t *testing.T) {
 				calls.Add(1)
 				return taskContractsWire(200, &taskContractsBody{Reader: bytes.NewReader(raw)}), nil
 			})
-			rows, e := image.New(c).AllImages(context.Background(), image.WithListImagesTags("a", "b"), image.WithListImagesMarker("initial"))
+			rows, e := image.New(c).AllImages(context.Background(), image.WithListImagesTags("a", "b"), request.Marker("initial"))
 			taskContractsProof(t, e, 200, raw)
 			if rows != nil || calls.Load() != 1 {
 				t.Fatal(rows, e, calls.Load())
@@ -495,7 +496,7 @@ func TestImageContractsConcreteQueriesAndSource(t *testing.T) {
 		headers := map[string]string{"X-Option": "owned"}
 		h := image.WithListImagesHeaders(headers)
 		headers["X-Option"] = "late"
-		rows, e := image.New(c).AllImages(context.Background(), h, image.WithListImagesHeader("X-Last", "last"), image.WithListImagesID(""), image.WithListImagesName("line\nname"), image.WithListImagesVisibility("future"), image.WithListImagesMemberStatus(""), image.WithListImagesOwner("owner"), image.WithListImagesStatus("in:future,queued"), image.WithListImagesCreatedAt("not-ISO\r\n"), image.WithListImagesUpdatedAt(""), image.WithListImagesContainerFormat(""), image.WithListImagesDiskFormat("in:qcow2,iso"), image.WithListImagesLimit(0), image.WithListImagesSizeMin(0), image.WithListImagesSizeMax(0), image.WithListImagesProtected(false), image.WithListImagesHidden(false), image.WithListImagesMarker(""), image.WithListImagesSortKeys("", "size", "size"), image.WithListImagesSortDirs("future", "", "future"), image.WithListImagesTags("", "line\n", "repeat", "repeat"), image.WithListImagesFilter("metadata", "literal\x00data", ""), image.WithListImagesMaxItems(0), image.WithListImagesSinglePage(false))
+		rows, e := image.New(c).AllImages(context.Background(), h, request.Header("X-Last", "last"), image.WithListImagesID(""), image.WithListImagesName("line\nname"), image.WithListImagesVisibility("future"), image.WithListImagesMemberStatus(""), image.WithListImagesOwner("owner"), image.WithListImagesStatus("in:future,queued"), image.WithListImagesCreatedAt("not-ISO\r\n"), image.WithListImagesUpdatedAt(""), image.WithListImagesContainerFormat(""), image.WithListImagesDiskFormat("in:qcow2,iso"), request.Limit(0), image.WithListImagesSizeMin(0), image.WithListImagesSizeMax(0), image.WithListImagesProtected(false), image.WithListImagesHidden(false), request.Marker(""), image.WithListImagesSortKeys("", "size", "size"), image.WithListImagesSortDirs("future", "", "future"), image.WithListImagesTags("", "line\n", "repeat", "repeat"), image.WithListImagesFilter("metadata", "literal\x00data", ""), request.MaxItems(0), image.WithListImagesSinglePage(false))
 		if rows == nil || e != nil || calls.Load() != 1 {
 			t.Fatal(rows, e, calls.Load())
 		}
@@ -546,7 +547,7 @@ func TestImageContractsConcreteQueriesAndSource(t *testing.T) {
 			}
 			return imageContractJSONResponse(`{"images":[]}`), nil
 		})
-		rows, e := image.New(c).AllImages(context.Background(), image.WithListImagesHeader("X-Discard", "before replacement"), image.WithListImagesStatus("before"), full, f, image.WithListImagesFilter("deleted"), image.WithListImagesFilter("single", ""))
+		rows, e := image.New(c).AllImages(context.Background(), request.Header("X-Discard", "before replacement"), image.WithListImagesStatus("before"), full, f, image.WithListImagesFilter("deleted"), image.WithListImagesFilter("single", ""))
 		if rows == nil || e != nil || calls.Load() != 1 {
 			t.Fatal(rows, e, calls.Load())
 		}
@@ -559,7 +560,7 @@ func TestImageContractsConcreteQueriesAndSource(t *testing.T) {
 			}
 			return imageContractJSONResponse(`{}`), nil
 		})
-		v, e := image.New(c).GetImage(context.Background(), resource.ID("fixed"), image.WithGetImageHeader("X-Discard", "discard"), getFull)
+		v, e := image.New(c).GetImage(context.Background(), resource.ID("fixed"), request.Header("X-Discard", "discard"), getFull)
 		if v == nil || e != nil {
 			t.Fatal(v, e)
 		}
@@ -601,9 +602,9 @@ func TestImageContractsConcreteQueriesAndSource(t *testing.T) {
 			return nil
 		}
 		// Each sequence copies its function slice; callback storage is separate per iteration.
-		opts := []image.ListImagesOption{first, second}
+		opts := []image.ListImagesOption{request.Custom(first), request.Custom(second)}
 		seq := image.New(c).ListImages(context.Background(), opts...)
-		opts[0] = func(*image.ListImagesOpts) error { return errors.New("changed slice") }
+		opts[0] = request.Custom(func(*image.ListImagesOpts) error { return errors.New("changed slice") })
 		if calls.Load() != 0 || callbacks.Load() != 0 {
 			t.Fatal("iterator eager")
 		}
@@ -615,7 +616,7 @@ func TestImageContractsConcreteQueriesAndSource(t *testing.T) {
 			}
 		}
 		// The independent iterator is safe to invoke in parallel when no caller-owned options are mutated.
-		parallel := image.New(c).ListImages(context.Background(), image.WithListImagesHeader("X-Owned", "owned"), image.WithListImagesName("owned"), image.WithListImagesFilter("x", "owned"))
+		parallel := image.New(c).ListImages(context.Background(), request.Header("X-Owned", "owned"), image.WithListImagesName("owned"), image.WithListImagesFilter("x", "owned"))
 		var wg sync.WaitGroup
 		for n := 0; n < 4; n++ {
 			wg.Add(1)
@@ -637,7 +638,7 @@ func TestImageContractsConcreteQueriesAndSource(t *testing.T) {
 		name string
 		opts []image.ListImagesOption
 	}{
-		{"negative limit", []image.ListImagesOption{image.WithListImagesLimit(-1)}}, {"negative min", []image.ListImagesOption{image.WithListImagesSizeMin(-1)}}, {"negative max", []image.ListImagesOption{image.WithListImagesSizeMax(-1)}}, {"negative cap", []image.ListImagesOption{image.WithListImagesMaxItems(-1)}}, {"Sort presence classic conflict", []image.ListImagesOption{image.WithListImagesSort(""), image.WithListImagesSortKeys("name")}}, {"classic directions count", []image.ListImagesOption{image.WithListImagesSortKeys("name"), image.WithListImagesSortDirs("asc", "desc")}}, {"empty filter key", []image.ListImagesOption{image.WithListImagesFilter("", "x")}}, {"control filter key", []image.ListImagesOption{image.WithListImagesFilter("line\n", "x")}}, {"empty filter values", []image.ListImagesOption{image.WithListImagesFilters(url.Values{"x": nil})}}, {"invalid UTF8 query", []image.ListImagesOption{image.WithListImagesName(string([]byte{0xff}))}}, {"nil callback", []image.ListImagesOption{nil}}, {"protected header", []image.ListImagesOption{image.WithListImagesHeader("X-Auth-Token", "override")}}, {"invalid header", []image.ListImagesOption{image.WithListImagesHeader("X-Bad", "line\n")}},
+		{"negative limit", []image.ListImagesOption{request.Limit(-1)}}, {"negative min", []image.ListImagesOption{image.WithListImagesSizeMin(-1)}}, {"negative max", []image.ListImagesOption{image.WithListImagesSizeMax(-1)}}, {"negative cap", []image.ListImagesOption{request.MaxItems(-1)}}, {"Sort presence classic conflict", []image.ListImagesOption{image.WithListImagesSort(""), image.WithListImagesSortKeys("name")}}, {"classic directions count", []image.ListImagesOption{image.WithListImagesSortKeys("name"), image.WithListImagesSortDirs("asc", "desc")}}, {"empty filter key", []image.ListImagesOption{image.WithListImagesFilter("", "x")}}, {"control filter key", []image.ListImagesOption{image.WithListImagesFilter("line\n", "x")}}, {"empty filter values", []image.ListImagesOption{image.WithListImagesFilters(url.Values{"x": nil})}}, {"invalid UTF8 query", []image.ListImagesOption{image.WithListImagesName(string([]byte{0xff}))}}, {"nil callback", []image.ListImagesOption{nil}}, {"protected header", []image.ListImagesOption{request.Header("X-Auth-Token", "override")}}, {"invalid header", []image.ListImagesOption{request.Header("X-Bad", "line\n")}},
 	}
 	for _, key := range []string{"limit", "marker", "id", "name", "visibility", "member_status", "owner", "status", "size_min", "size_max", "protected", "os_hidden", "sort", "sort_key", "sort_dir", "tag", "created_at", "updated_at", "container_format", "disk_format", "deleted", "max_items", "single_page"} {
 		bad = append(bad, struct {
@@ -662,13 +663,13 @@ func TestImageContractsConcreteQueriesAndSource(t *testing.T) {
 			c := taskContractsClient(func(*http.Request) (*http.Response, error) { calls.Add(1); return nil, errors.New("unexpected") })
 			ctx := context.Background()
 			want := resource.ErrInvalidOption
-			getOpts := []image.GetImageOption{func(*image.GetImageOpts) error {
+			getOpts := []image.GetImageOption{request.Custom(func(*image.GetImageOpts) error {
 				callbacks.Add(1)
 				if mode == "callback cause" {
 					return cause
 				}
 				return nil
-			}}
+			})}
 			switch mode {
 			case "nil context":
 				ctx = nil
@@ -691,7 +692,7 @@ func TestImageContractsConcreteQueriesAndSource(t *testing.T) {
 			case "callback cause":
 				want = cause
 			case "get bad header":
-				getOpts = []image.GetImageOption{image.WithGetImageHeader("X-Auth-Token", "override")}
+				getOpts = []image.GetImageOption{request.Header("X-Auth-Token", "override")}
 			}
 			v, e := image.New(c).GetImage(ctx, resource.Name("exact"), getOpts...)
 			if v != nil || !errors.Is(e, want) || calls.Load() != 0 || mode != "callback cause" && callbacks.Load() != 0 {
@@ -706,7 +707,7 @@ func TestImageContractsConcreteQueriesAndSource(t *testing.T) {
 		t.Run("callback source drift "+field, func(t *testing.T) {
 			var calls atomic.Int32
 			c := taskContractsClient(func(*http.Request) (*http.Response, error) { calls.Add(1); return nil, errors.New("unexpected") })
-			v, e := image.New(c).GetImage(context.Background(), resource.Name("exact"), func(*image.GetImageOpts) error {
+			v, e := image.New(c).GetImage(context.Background(), resource.Name("exact"), request.Custom(func(*image.GetImageOpts) error {
 				switch field {
 				case "provider":
 					c.ProviderClient = &gophercloud.ProviderClient{}
@@ -720,7 +721,7 @@ func TestImageContractsConcreteQueriesAndSource(t *testing.T) {
 					c.Microversion = "2.99"
 				}
 				return nil
-			})
+			}))
 			if v != nil || !errors.Is(e, resource.ErrInvalidOption) || calls.Load() != 0 {
 				t.Fatal(v, e, calls.Load())
 			}

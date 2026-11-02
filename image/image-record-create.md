@@ -44,7 +44,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCreateAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCreateAttributes`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCreateImportOptions`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCreateHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCreateHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCreateSwiftHeader`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCreateSwiftHeaders`

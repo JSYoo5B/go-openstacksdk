@@ -12,6 +12,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -46,7 +47,7 @@ func TestUpdateImageCoreFixedOrderedPatchAndMedia(t *testing.T) {
 			return taskCoreJSON(req, 200, `{"id":"different","name":"fresh","created_at":"literal","protected":false,"size":9007199254740993,"locations":[{"url":"foreign","metadata":{"n":900719925474099312345}}],"custom":{"precise":1.000000000000000001},"links":false}`), nil
 		})
 		client.MoreHeaders = original
-		value, err := New(client).UpdateImage(context.Background(), resource.ID(id), WithUpdateImageHeader("X-Policy", "option"), WithUpdateImageChanges(ImagePatch{Op: "replace", Path: "/name", Value: json.RawMessage(`"first"`)}, ImagePatch{Op: "remove", Path: "/custom"}, ImagePatch{Op: "add", Path: "/name", Value: json.RawMessage(`"last"`)}, ImagePatch{Op: "add", Path: "/locations/-", Value: json.RawMessage(`{"url":"foreign","metadata":{}}`)}))
+		value, err := New(client).UpdateImage(context.Background(), resource.ID(id), request.Header("X-Policy", "option"), WithUpdateImageChanges(ImagePatch{Op: "replace", Path: "/name", Value: json.RawMessage(`"first"`)}, ImagePatch{Op: "remove", Path: "/custom"}, ImagePatch{Op: "add", Path: "/name", Value: json.RawMessage(`"last"`)}, ImagePatch{Op: "add", Path: "/locations/-", Value: json.RawMessage(`{"url":"foreign","metadata":{}}`)}))
 		if err != nil || value == nil || *value.ID != "different" || *value.Name != "fresh" || *value.Size != 9007199254740993 || *value.CreatedAt != "literal" || value.StatusCode != 200 || value.Header.Get("X-Task-Proof") != "actual" || value.Links != nil || calls != 1 {
 			t.Fatal(value, err, calls)
 		}
@@ -93,10 +94,10 @@ func TestUpdateImageCoreCompletePreflight(t *testing.T) {
 	service := New(taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return nil, nil }))
 	for _, ref := range []resource.Ref{resource.Ref{}, resource.ID("."), resource.ID(".."), resource.ID("a/b"), resource.ID("a\\b"), resource.ID("a\n"), resource.ID(string([]byte{0xff})), resource.Name(string([]byte{0xff}))} {
 		callbacks := 0
-		if v, e := service.UpdateImage(context.Background(), ref, func(*UpdateImageOpts) error { callbacks++; return nil }); v != nil || e == nil || callbacks != 0 {
+		if v, e := service.UpdateImage(context.Background(), ref, request.Custom(func(*UpdateImageOpts) error { callbacks++; return nil })); v != nil || e == nil || callbacks != 0 {
 			t.Fatal(ref, v, e, callbacks)
 		}
-		if v, e := service.SetImageProperties(context.Background(), ref, func(*SetImagePropertiesOpts) error { callbacks++; return nil }); v != nil || e == nil || callbacks != 0 {
+		if v, e := service.SetImageProperties(context.Background(), ref, request.Custom(func(*SetImagePropertiesOpts) error { callbacks++; return nil })); v != nil || e == nil || callbacks != 0 {
 			t.Fatal(ref, v, e, callbacks)
 		}
 	}
@@ -105,25 +106,25 @@ func TestUpdateImageCoreCompletePreflight(t *testing.T) {
 			t.Fatal(change, v, e)
 		}
 	}
-	for _, option := range []UpdateImageOption{nil, WithUpdateImageHeader("Accept", "other"), WithUpdateImageHeader("Content-Type", "other"), WithUpdateImageHeader("Authorization", "secret"), WithUpdateImageField("", 1), WithUpdateImageField(" x", 1), WithUpdateImageField(string([]byte{0xff}), 1)} {
+	for _, option := range []UpdateImageOption{nil, request.Header("Accept", "other"), request.Header("Content-Type", "other"), request.Header("Authorization", "secret"), WithUpdateImageField("", 1), WithUpdateImageField(" x", 1), WithUpdateImageField(string([]byte{0xff}), 1)} {
 		if v, e := service.UpdateImage(context.Background(), resource.Name("Name"), option); v != nil || !errors.Is(e, resource.ErrInvalidOption) {
 			t.Fatal(v, e)
 		}
 	}
-	for _, option := range []SetImagePropertiesOption{nil, WithSetImagePropertiesHeader("Content-Type", "other"), WithSetImagePropertiesProperties(map[string]json.RawMessage{"x": {}}), WithSetImagePropertiesProperty("\u001fy", 1)} {
+	for _, option := range []SetImagePropertiesOption{nil, request.Header("Content-Type", "other"), WithSetImagePropertiesProperties(map[string]json.RawMessage{"x": {}}), WithSetImagePropertiesProperty("\u001fy", 1)} {
 		if v, e := service.SetImageProperties(context.Background(), resource.Name("Name"), option); v != nil || !errors.Is(e, resource.ErrInvalidOption) {
 			t.Fatal(v, e)
 		}
 	}
 	cause := errors.New("callback cause")
-	if v, e := service.UpdateImage(context.Background(), resource.Name("Name"), func(*UpdateImageOpts) error { return cause }); v != nil || !errors.Is(e, cause) {
+	if v, e := service.UpdateImage(context.Background(), resource.Name("Name"), request.Custom(func(*UpdateImageOpts) error { return cause })); v != nil || !errors.Is(e, cause) {
 		t.Fatal(v, e)
 	}
 	ctx, cancel := context.WithCancelCause(context.Background())
 	cancel(cause)
 	for _, ctx := range []context.Context{nil, ctx} {
 		cb := 0
-		if v, e := service.UpdateImage(ctx, resource.ID("id"), func(*UpdateImageOpts) error { cb++; return nil }); v != nil || e == nil || cb != 0 {
+		if v, e := service.UpdateImage(ctx, resource.ID("id"), request.Custom(func(*UpdateImageOpts) error { cb++; return nil })); v != nil || e == nil || cb != 0 {
 			t.Fatal(v, e, cb)
 		}
 	}
@@ -165,11 +166,11 @@ func TestUpdateImageCoreExactNameAndSource(t *testing.T) {
 			return nil, nil
 		})
 		client.MoreHeaders = map[string]string{"X-Source": "captured", "Content-Type": "application/x-source", "Accept": "application/x-source"}
-		v, e := New(client).UpdateImage(context.Background(), resource.Name("Parent"), WithUpdateImageName("new"), WithUpdateImageHeader("X-Fixed", "option"), func(*UpdateImageOpts) error {
+		v, e := New(client).UpdateImage(context.Background(), resource.Name("Parent"), WithUpdateImageName("new"), request.Header("X-Fixed", "option"), request.Custom(func(*UpdateImageOpts) error {
 			client.MoreHeaders["X-Source"] = "changed"
 			client.ProviderClient.SetToken("later-token")
 			return nil
-		})
+		}))
 		if e != nil || v == nil || *v.ID != "passive" || calls != 3 || client.MoreHeaders["Content-Type"] != "application/x-source" {
 			t.Fatal(v, e, calls, client.MoreHeaders)
 		}
@@ -189,7 +190,7 @@ func TestUpdateImageCoreExactNameAndSource(t *testing.T) {
 			calls := 0
 			client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return nil, nil })
 			client.ResourceBase = client.Endpoint
-			v, e := New(client).UpdateImage(context.Background(), resource.Name("Parent"), func(*UpdateImageOpts) error {
+			v, e := New(client).UpdateImage(context.Background(), resource.Name("Parent"), request.Custom(func(*UpdateImageOpts) error {
 				switch field {
 				case "endpoint":
 					client.Endpoint = "https://glance.example/changed/"
@@ -199,7 +200,7 @@ func TestUpdateImageCoreExactNameAndSource(t *testing.T) {
 					client.ProviderClient = &gophercloud.ProviderClient{}
 				}
 				return nil
-			})
+			}))
 			if v != nil || !errors.Is(e, resource.ErrInvalidOption) || calls != 0 {
 				t.Fatal(v, e, calls)
 			}

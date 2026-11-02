@@ -15,20 +15,20 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.ImageTasks`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.AllImageTasks`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithListImageTasksOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithListImageTasksHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithListImageTasksHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithListImageTasksMaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/images.API.TaskRecords`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/images.API.AllTaskRecords`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/images.WithTaskRecordsOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/images.WithTaskRecordsQuery`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/images.WithTaskRecordsHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/images.WithTaskRecordsMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/images.WithTaskRecordsLocation`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/images.WithTaskRecordsLimit`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/images.WithTaskRecordsMarker`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/images.WithTaskRecordsMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/images.WithTaskRecordsPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 
 - Required validated image Ref fixes parent route. DirectID has no metadata GET/UUID/localmaxlength gate; literalUTF8 safe segments escapeonce. Name is explicitGo extension using captured existing exact image resolver with uniqueness/missing/nativepagination semantics; no Python literal string lookup equivalence.
   Tests: `image/image_tasks_core_test.go:TestImageTaskCoreFixedRouteAndFullRecords`, `image/image_tasks_core_test.go:TestImageTaskCoreCompletePreflight`, `image/image_tasks_core_test.go:TestImageTaskCoreExactNameAndSourceGuards`, `image/image_tasks_contracts_test.go:TestImageTaskContractsFixedRouteAndParentIdentity`, `image/image_tasks_contracts_test.go:TestImageTaskContractsOwnedOptionsAndSource`.
@@ -117,6 +117,7 @@ import (
 
     openstack "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/image/v2/images"
+    "github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 func main() {
@@ -142,12 +143,12 @@ func run(cloud, imageID, status string, limit, maxItems int, paginated bool) err
     service, err := conn.ImageV2(ctx)
     if err != nil { return err }
     options := []images.TaskRecordsOption{
-        images.WithTaskRecordsHeaders(map[string]string{"X-Request-Source": "image-tasks-example"}),
-        images.WithTaskRecordsMaxItems(maxItems),
-        images.WithTaskRecordsPaginated(paginated),
+        request.Headers(map[string]string{"X-Request-Source": "image-tasks-example"}),
+        request.MaxItems(maxItems),
+        request.Paginated(paginated),
     }
-    if limit >= 0 { options = append(options, images.WithTaskRecordsLimit(limit)) }
-    if status != "" { options = append(options, images.WithTaskRecordsQuery("status", status)) }
+    if limit >= 0 { options = append(options, request.Limit(limit)) }
+    if status != "" { options = append(options, request.Query("status", status)) }
     out := json.NewEncoder(os.Stdout)
     for record, readErr := range service.Images.TaskRecords(ctx, imageID, options...) {
         if readErr != nil { return readErr }

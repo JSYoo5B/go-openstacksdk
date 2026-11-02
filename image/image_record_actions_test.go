@@ -14,6 +14,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -252,7 +253,7 @@ func TestImageRecordActionsRejectUnsafeSelectorsAndDescriptorInputsBeforeHTTP(t 
 		{"control in literal", ImageRecordActionRequest{ID: "bad\n"}, nil},
 		{"invalid UTF8 literal", ImageRecordActionRequest{ID: string([]byte{0xff})}, nil},
 		{"nil option", ImageRecordActionRequest{ID: "fixed"}, []ImageRecordActionOption{nil}},
-		{"owned auth header", ImageRecordActionRequest{ID: "fixed"}, []ImageRecordActionOption{WithImageRecordActionHeader("X-Auth-Token", "foreign")}},
+		{"owned auth header", ImageRecordActionRequest{ID: "fixed"}, []ImageRecordActionOption{request.Header("X-Auth-Token", "foreign")}},
 		{"invalid ordinary header", ImageRecordActionRequest{ID: "fixed"}, []ImageRecordActionOption{WithImageRecordActionHeaders(map[string]string{"X-Extra": "\n"})}},
 	}
 	for _, test := range cases {
@@ -308,7 +309,7 @@ func TestImageRecordActionsRejectUnsafeSelectorsAndDescriptorInputsBeforeHTTP(t 
 			case "nil service":
 				service = nil
 			}
-			got, err := imageRecordActionCall(service, "reactivate", ctx, ImageRecordActionRequest{ID: "fixed"}, func(*ImageRecordActionOpts) error { callbacks++; return nil })
+			got, err := imageRecordActionCall(service, "reactivate", ctx, ImageRecordActionRequest{ID: "fixed"}, request.Custom(func(*ImageRecordActionOpts) error { callbacks++; return nil }))
 			if got != nil || err == nil || calls != 0 || callbacks != 0 {
 				t.Fatal(got, err, calls, callbacks)
 			}
@@ -349,17 +350,17 @@ func TestImageRecordActionsSnapshotInputsOptionsHeadersAndLocation(t *testing.T)
 				seed.bodyState.current["id"] = json.RawMessage(`"location changed ID"`)
 				seed.bodyState.current["name"] = json.RawMessage(`"location changed name"`)
 				client.MoreHeaders["X-Source"] = "location changed"
-				options[0] = WithImageRecordActionHeader("X-Option", "location changed option")
+				options[0] = request.Header("X-Option", "location changed option")
 				return facts, nil
 			}})
-			options = []ImageRecordActionOption{factory, func(config *ImageRecordActionOpts) error {
+			options = []ImageRecordActionOption{factory, request.Custom(func(config *ImageRecordActionOpts) error {
 				callbacks++
 				retained = config
 				cloud = "option changed location"
 				facts.Project.ID[1] = 'X'
 				client.SetToken("live")
-				return WithImageRecordActionHeader("X-Final", "yes")(config)
-			}}
+				return applyCall(imageRecordActionCalls, request.Header("X-Final", "yes"), config)
+			})}
 			got, err := imageRecordActionCall(service, action, context.Background(), ImageRecordActionRequest{Record: seed}, options...)
 			if got == nil || got.Record == nil || err != nil || calls != 2 || callbacks != 1 || locations != 1 || string(got.Record.Resource.Body["id"]) != `"fixed"` || string(got.Record.Resource.Body["name"]) != `"captured seed"` {
 				t.Fatal(got, err, calls, callbacks, locations)
@@ -384,7 +385,7 @@ func TestImageRecordActionsSnapshotInputsOptionsHeadersAndLocation(t *testing.T)
 				}
 				return taskCoreJSON(req, 204, ""), nil
 			})
-			options := []ImageRecordActionOption{WithImageRecordActionHeader("X-Discarded", "old")}
+			options := []ImageRecordActionOption{request.Header("X-Discarded", "old")}
 			if mode == "full options replace" {
 				options = append(options, WithImageRecordActionOpts(ImageRecordActionOpts{Headers: map[string]string{"X-Retained": "new"}}))
 			} else {
@@ -414,7 +415,7 @@ func TestImageRecordActionsStopAfterGuardFailureInOptions(t *testing.T) {
 			calls, callbacks, later := 0, 0, 0
 			client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return nil, nil })
 			service := New(client)
-			got, err := imageRecordActionCall(service, "reactivate", ctx, ImageRecordActionRequest{ID: "fixed"}, func(*ImageRecordActionOpts) error {
+			got, err := imageRecordActionCall(service, "reactivate", ctx, ImageRecordActionRequest{ID: "fixed"}, request.Custom(func(*ImageRecordActionOpts) error {
 				callbacks++
 				switch mode {
 				case "cancel":
@@ -429,7 +430,7 @@ func TestImageRecordActionsStopAfterGuardFailureInOptions(t *testing.T) {
 					return marker
 				}
 				return nil
-			}, func(*ImageRecordActionOpts) error { later++; return nil })
+			}), request.Custom(func(*ImageRecordActionOpts) error { later++; return nil }))
 			if got != nil || err == nil || calls != 0 || callbacks != 1 || later != 0 {
 				t.Fatal(got, err, calls, callbacks, later)
 			}

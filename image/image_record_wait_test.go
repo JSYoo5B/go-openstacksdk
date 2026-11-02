@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -292,7 +293,7 @@ func TestImageRecordWaitStatusOwnsOneBudgetLocationHeadersAndLiteralID(t *testin
 	parent, cancel := context.WithTimeout(context.WithValue(context.Background(), "image wait proof", "context value"), 5*time.Second)
 	defer cancel()
 	started := time.Now()
-	got, err := service.WaitForImageRecordStatus(parent, seed, "active", option, func(value *ImageRecordWaitOpts) error {
+	got, err := service.WaitForImageRecordStatus(parent, seed, "active", option, request.Custom(func(value *ImageRecordWaitOpts) error {
 		optionsApplied++
 		retained = value
 		client.SetToken("live before")
@@ -305,8 +306,8 @@ func TestImageRecordWaitStatusOwnsOneBudgetLocationHeadersAndLiteralID(t *testin
 			}
 			client.SetToken("live after")
 		}
-		return WithImageRecordWaitHeader("X-Final", "yes")(value)
-	})
+		return applyCall(imageRecordWaitCalls, request.Header("X-Final", "yes"), value)
+	}))
 	if got == nil || err != nil || calls != 2 || locations != 1 || optionsApplied != 1 || callbacks != 1 || deadline.Sub(started) < 900*time.Millisecond || deadline.Sub(started) > 1100*time.Millisecond {
 		t.Fatal(got, err, calls, locations, optionsApplied, callbacks, deadline.Sub(started))
 	}
@@ -697,7 +698,7 @@ func TestImageRecordWaitCompletePreflightAndConcreteReplacement(t *testing.T) {
 		{"remote attr alias", nil, "active", []ImageRecordWaitOption{WithImageRecordWaitAttribute("os_hidden")}},
 		{"attr case alias", nil, "active", []ImageRecordWaitOption{WithImageRecordWaitAttribute("Status")}},
 		{"unknown attr", nil, "active", []ImageRecordWaitOption{WithImageRecordWaitAttribute("unknown")}},
-		{"owned token", nil, "active", []ImageRecordWaitOption{WithImageRecordWaitHeader("X-Auth-Token", "foreign")}},
+		{"owned token", nil, "active", []ImageRecordWaitOption{request.Header("X-Auth-Token", "foreign")}},
 		{"header newline", nil, "active", []ImageRecordWaitOption{WithImageRecordWaitHeaders(map[string]string{"X-Extra": "\n"})}},
 	} {
 		t.Run(test.name, func(t *testing.T) {
@@ -716,7 +717,7 @@ func TestImageRecordWaitCompletePreflightAndConcreteReplacement(t *testing.T) {
 	for _, ctx := range []context.Context{nil, func() context.Context { ctx, cancel := context.WithCancel(context.Background()); cancel(); return ctx }()} {
 		calls, callbacks := 0, 0
 		service := New(taskCoreClient(func(*http.Request) (*http.Response, error) { calls++; return nil, nil }))
-		got, err := service.WaitForImageRecordStatus(ctx, imageRecordWaitSeed(json.RawMessage(`"active"`)), "active", func(*ImageRecordWaitOpts) error { callbacks++; return nil })
+		got, err := service.WaitForImageRecordStatus(ctx, imageRecordWaitSeed(json.RawMessage(`"active"`)), "active", request.Custom(func(*ImageRecordWaitOpts) error { callbacks++; return nil }))
 		if got != nil || err == nil || calls != 0 || callbacks != 0 {
 			t.Fatal(got, err, calls, callbacks)
 		}
@@ -741,7 +742,7 @@ func TestImageRecordWaitCompletePreflightAndConcreteReplacement(t *testing.T) {
 			}
 			return taskCoreJSON(req, 200, `{"status":"ACTIVE","name":"ERROR"}`), nil
 		})
-		options := []ImageRecordWaitOption{WithImageRecordWaitAttribute("name"), WithImageRecordWaitFailureStates("ACTIVE"), WithImageRecordWaitHeader("X-Discard", "old"), WithImageRecordWaitOpts(ImageRecordWaitOpts{Headers: map[string]string{"X-Final": "yes"}})}
+		options := []ImageRecordWaitOption{WithImageRecordWaitAttribute("name"), WithImageRecordWaitFailureStates("ACTIVE"), request.Header("X-Discard", "old"), WithImageRecordWaitOpts(ImageRecordWaitOpts{Headers: map[string]string{"X-Final": "yes"}})}
 		got, err := New(client).WaitForImageRecordStatus(context.Background(), imageRecordWaitSeed(json.RawMessage(`"pending"`)), "active", options...)
 		if got == nil || err != nil || calls != 1 {
 			t.Fatal(got, err, calls)

@@ -18,20 +18,17 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.API.AllStores`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithListStoresOptions`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithListStoresDetails`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithListStoresMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithListStoresPaginated`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithListStoresQuery`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithListStoresHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.NewWithDependencies`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.API.ListStoreRecords`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.API.AllStoreRecords`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithStoreRecordListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithStoreRecordListHeader`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithStoreRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithStoreRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithStoreRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithStoreRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithStoreRecordListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithStoreRecordListFilter`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithStoreRecordListFilters`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithStoreRecordListDetails`
@@ -88,11 +85,10 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.New`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.API.RawClient`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.API.GetImportInfo`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithGetImportInfoHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.NewWithDependencies`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.API.GetImportInfoRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithImportRecordOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithImportRecordHeader`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithImportRecordHeaders`
 
 - GetImportInfo performs ID-free singleton GET info/import with actual200 only and no list/cache/capability gate. Flat root metadata carries actual Header/status/raw unknown fields. Original native ImageImport.Get still performs the same discovery wire route and retains its existing typed callable/model.
@@ -165,6 +161,7 @@ import (
 
     "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo"
+    "github.com/JSYoo5B/go-openstacksdk/request"
     "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -201,17 +198,17 @@ func run(ctx context.Context, cloud, storeID string, limit, maxItems int, pagina
     service, err := conn.ImageV2(ctx)
     if err != nil { return err }
     info, err := service.ServiceInfo.GetImportInfoRecord(ctx,
-        serviceinfo.WithImportRecordHeader("X-Request-Source", "serviceinfo-records-example"))
+        request.Header("X-Request-Source", "serviceinfo-records-example"))
     if err != nil { return err }
     if err := printRecord(info.Resource, info.Wire, info.StatusCode); err != nil { return err }
 
     options := []serviceinfo.StoreRecordListOption{
         serviceinfo.WithStoreRecordListOpts(serviceinfo.StoreRecordListOpts{MaxItems: maxItems}),
-        serviceinfo.WithStoreRecordListHeader("X-Request-Source", "serviceinfo-records-example"),
-        serviceinfo.WithStoreRecordListPaginated(paginated),
+        request.Header("X-Request-Source", "serviceinfo-records-example"),
+        request.Paginated(paginated),
     }
     if limit >= 0 {
-        options = append(options, serviceinfo.WithStoreRecordListLimit(limit))
+        options = append(options, request.Limit(limit))
     }
     if storeID != "" {
         options = append(options, serviceinfo.WithStoreRecordListFilter("id", storeID))

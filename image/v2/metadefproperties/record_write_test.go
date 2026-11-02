@@ -14,6 +14,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -162,8 +163,8 @@ func TestMetadefPropertyRecordWriteEmptyConstructionAndIdentityOnlyUpdate(t *tes
 				t.Fatal(err)
 			}
 			options := propertyRecordWriteAttributes(check.attrs)
-			options.create = append(options.create, WithRecordCreateHeader("X-Only", "header"))
-			options.update = append(options.update, WithRecordUpdateHeader("X-Only", "header"))
+			options.create = append(options.create, request.Header("X-Only", "header"))
+			options.update = append(options.update, request.Header("X-Only", "header"))
 			record, err := propertyRecordWriteCall(propertyRecordScope(t, client, Dependencies{CloudLocation: func() (resource.CloudLocation, error) { locations++; return location, nil }}), context.Background(), check.update, check.input, options)
 			want := propertyRecordWriteDefaults(check.update)
 			want["location"] = string(captured)
@@ -190,7 +191,7 @@ func TestMetadefPropertyRecordWriteEmptyConstructionAndIdentityOnlyUpdate(t *tes
 			propertyRecordAssertWriteBody(t, req, true, "fixed-id", map[string]string{"name": `"renamed/name"`})
 			return propertyCoreJSON(req, 200, `{}`), nil
 		})
-		record, err := propertyRecordScope(t, client, Dependencies{}).UpdateRecord(context.Background(), RecordRequest{Resource: seed}, func(*RecordUpdateOpts) error { seed.Body["id"] = json.RawMessage(`"caller changed"`); return nil }, WithRecordUpdateAttribute("name", "renamed/name"))
+		record, err := propertyRecordScope(t, client, Dependencies{}).UpdateRecord(context.Background(), RecordRequest{Resource: seed}, request.Custom(func(*RecordUpdateOpts) error { seed.Body["id"] = json.RawMessage(`"caller changed"`); return nil }), WithRecordUpdateAttribute("name", "renamed/name"))
 		if err != nil || record == nil || calls != 1 || string(record.Resource.Body["id"]) != `"fixed-id"` || string(record.Resource.Body["name"]) != `"renamed/name"` || string(record.Resource.Body["title"]) != "null" || string(record.Resource.Body["minimum"]) != "null" {
 			t.Fatal("old resource definition entered new commit", record, err, calls)
 		}
@@ -359,36 +360,36 @@ func TestMetadefPropertyRecordWriteFactoriesSelectionAndCapturedLocation(t *test
 			options := propertyRecordWriteOptions{}
 			if operation.update {
 				var retained *RecordUpdateOpts
-				options.update = []RecordUpdateOption{WithRecordUpdateHeader("X-Replaced", "old"), WithRecordUpdateOpts(RecordUpdateOpts{Headers: headers, Attributes: slice}), WithRecordUpdateHeaders(bulk),
-					func(config *RecordUpdateOpts) error {
+				options.update = []RecordUpdateOption{request.Header("X-Replaced", "old"), WithRecordUpdateOpts(RecordUpdateOpts{Headers: headers, Attributes: slice}), WithRecordUpdateHeaders(bulk),
+					request.Custom(func(config *RecordUpdateOpts) error {
 						callbacks++
 						retained = config
 						cloud = "option changed"
 						location.Project.ID[1] = 'X'
 						client.MoreHeaders["X-Source"] = "option changed"
 						return nil
-					},
-					func(*RecordUpdateOpts) error {
+					}),
+					request.Custom(func(*RecordUpdateOpts) error {
 						retained.Headers["X-Full"] = "retained changed"
 						retained.Attributes[0] = resource.WithFilter("default", "retained changed")
 						return nil
-					}, WithRecordUpdateHeader("x-final", "final"), WithRecordUpdateAttribute("description", "last description")}
+					}), request.Header("x-final", "final"), WithRecordUpdateAttribute("description", "last description")}
 			} else {
 				var retained *RecordCreateOpts
-				options.create = []RecordCreateOption{WithRecordCreateHeader("X-Replaced", "old"), WithRecordCreateOpts(RecordCreateOpts{Headers: headers, Attributes: slice}), WithRecordCreateHeaders(bulk),
-					func(config *RecordCreateOpts) error {
+				options.create = []RecordCreateOption{request.Header("X-Replaced", "old"), WithRecordCreateOpts(RecordCreateOpts{Headers: headers, Attributes: slice}), WithRecordCreateHeaders(bulk),
+					request.Custom(func(config *RecordCreateOpts) error {
 						callbacks++
 						retained = config
 						cloud = "option changed"
 						location.Project.ID[1] = 'X'
 						client.MoreHeaders["X-Source"] = "option changed"
 						return nil
-					},
-					func(*RecordCreateOpts) error {
+					}),
+					request.Custom(func(*RecordCreateOpts) error {
 						retained.Headers["X-Full"] = "retained changed"
 						retained.Attributes[0] = resource.WithFilter("default", "retained changed")
 						return nil
-					}, WithRecordCreateHeader("x-final", "final"), WithRecordCreateAttribute("description", "last description")}
+					}), request.Header("x-final", "final"), WithRecordCreateAttribute("description", "last description")}
 			}
 			headers["X-Full"] = "caller changed"
 			bulk["X-Bulk"] = "caller changed"
@@ -457,9 +458,9 @@ func TestMetadefPropertyRecordWriteInputAttributeAndHeaderPreflight(t *testing.T
 			{"nonsemantic option", propertyRecordWriteOptions{create: []RecordCreateOption{WithRecordCreateOpts(RecordCreateOpts{Attributes: []resource.ListOption{resource.WithQuery("title", "foreign")}})}, update: []RecordUpdateOption{WithRecordUpdateOpts(RecordUpdateOpts{Attributes: []resource.ListOption{resource.WithQuery("title", "foreign")}})}}},
 			{"known encoding failure", propertyRecordWriteAttributes(map[string]any{"title": make(chan int)})},
 			{"constructor descriptor failure", propertyRecordWriteAttributes(map[string]any{"minimum": "²"})},
-			{"protected token", propertyRecordWriteOptions{create: []RecordCreateOption{WithRecordCreateHeader("X-Auth-Token", "foreign")}, update: []RecordUpdateOption{WithRecordUpdateHeader("X-Auth-Token", "foreign")}}},
+			{"protected token", propertyRecordWriteOptions{create: []RecordCreateOption{request.Header("X-Auth-Token", "foreign")}, update: []RecordUpdateOption{request.Header("X-Auth-Token", "foreign")}}},
 			{"duplicate header aliases", propertyRecordWriteOptions{create: []RecordCreateOption{WithRecordCreateHeaders(map[string]string{"X-Alias": "one", "x-alias": "two"})}, update: []RecordUpdateOption{WithRecordUpdateHeaders(map[string]string{"X-Alias": "one", "x-alias": "two"})}}},
-			{"invalid header value", propertyRecordWriteOptions{create: []RecordCreateOption{WithRecordCreateHeader("X-Option", "bad\nvalue")}, update: []RecordUpdateOption{WithRecordUpdateHeader("X-Option", "bad\nvalue")}}},
+			{"invalid header value", propertyRecordWriteOptions{create: []RecordCreateOption{request.Header("X-Option", "bad\nvalue")}, update: []RecordUpdateOption{request.Header("X-Option", "bad\nvalue")}}},
 		} {
 			t.Run(operation.name+"/"+check.name, func(t *testing.T) {
 				calls := 0
@@ -557,7 +558,7 @@ func TestMetadefPropertyRecordWriteGuardsAlsoCoverLocalNoop(t *testing.T) {
 					scope.namespace = propertyRecordParent
 					return nil
 				}
-				options := propertyRecordWriteOptions{create: []RecordCreateOption{func(*RecordCreateOpts) error { return mutate() }, func(*RecordCreateOpts) error { return restore() }}, update: []RecordUpdateOption{func(*RecordUpdateOpts) error { return mutate() }, func(*RecordUpdateOpts) error { return restore() }}}
+				options := propertyRecordWriteOptions{create: []RecordCreateOption{request.Custom(func(*RecordCreateOpts) error { return mutate() }), request.Custom(func(*RecordCreateOpts) error { return restore() })}, update: []RecordUpdateOption{request.Custom(func(*RecordUpdateOpts) error { return mutate() }), request.Custom(func(*RecordUpdateOpts) error { return restore() })}}
 				record, err := propertyRecordWriteCall(scope, use, operation.update, RecordRequest{ID: propertyRecordChild}, options)
 				if record != nil || err == nil || calls != 0 || second != 0 {
 					t.Fatal("guard failure was restored or bypassed by no-op", record, err, calls, locations, first, second)
@@ -588,7 +589,7 @@ func TestMetadefPropertyRecordWriteGuardsAlsoCoverLocalNoop(t *testing.T) {
 		location := resource.CloudLocation{Cloud: &cloud}
 		client := propertyCoreClient(func(*http.Request) (*http.Response, error) { calls++; return nil, nil })
 		scope := propertyRecordScope(t, client, Dependencies{CloudLocation: func() (resource.CloudLocation, error) { locations++; return location, nil }})
-		record, err := scope.UpdateRecord(context.Background(), RecordRequest{ID: propertyRecordChild}, func(*RecordUpdateOpts) error { callbacks++; cloud = "changed"; return nil }, WithRecordUpdateHeader("X-Noop", "validated"))
+		record, err := scope.UpdateRecord(context.Background(), RecordRequest{ID: propertyRecordChild}, request.Custom(func(*RecordUpdateOpts) error { callbacks++; cloud = "changed"; return nil }), request.Header("X-Noop", "validated"))
 		var actual resource.CloudLocation
 		if err != nil || record == nil || calls != 0 || locations != 1 || callbacks != 1 {
 			t.Fatal(record, err, calls, locations, callbacks)

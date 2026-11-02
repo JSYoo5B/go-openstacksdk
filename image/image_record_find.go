@@ -10,8 +10,10 @@ import (
 	"net/url"
 	"slices"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -25,7 +27,19 @@ type FindImageRecordOpts struct {
 	List          ImageRecordListOpts
 	listOptions   []ImageRecordListOption
 }
-type FindImageRecordOption func(*FindImageRecordOpts) error
+
+// FindImageRecordOption is one option of FindImageRecord:
+// WithFindImageRecordOpts, WithFindImageRecordHeaders (merges),
+// WithFindImageRecordListOptions, request.Header (merges one header),
+// request.IgnoreMissing or request.Custom over *FindImageRecordOpts. Other
+// shared calls, including request.Headers and request.Query, fail with
+// resource.ErrInvalidOption before HTTP.
+type FindImageRecordOption = request.FindCall
+
+var findImageRecordCalls = calls.Spec[FindImageRecordOpts]{
+	Header:        calls.MergeHeader[FindImageRecordOpts](WithFindImageRecordHeaders),
+	IgnoreMissing: calls.Pointer(func(c *FindImageRecordOpts) **bool { return &c.IgnoreMissing }),
+}
 
 func copyFindImageRecord(value FindImageRecordOpts) FindImageRecordOpts {
 	value.Headers = maps.Clone(value.Headers)
@@ -39,33 +53,26 @@ func copyFindImageRecord(value FindImageRecordOpts) FindImageRecordOpts {
 }
 func WithFindImageRecordOpts(value FindImageRecordOpts) FindImageRecordOption {
 	owned := copyFindImageRecord(value)
-	return func(config *FindImageRecordOpts) error { *config = copyFindImageRecord(owned); return nil }
-}
-func WithFindImageRecordHeader(key, value string) FindImageRecordOption {
-	apply := WithImageMutationHeader(key, value)
-	return func(config *FindImageRecordOpts) error { return applyImageMemberHeader(&config.Headers, apply) }
+	return request.Custom(func(config *FindImageRecordOpts) error { *config = copyFindImageRecord(owned); return nil })
 }
 func WithFindImageRecordHeaders(values map[string]string) FindImageRecordOption {
-	apply := WithImageMutationHeaders(values)
-	return func(config *FindImageRecordOpts) error { return applyImageMemberHeader(&config.Headers, apply) }
-}
-func WithFindImageRecordIgnoreMissing(value bool) FindImageRecordOption {
-	return func(config *FindImageRecordOpts) error { owned := value; config.IgnoreMissing = &owned; return nil }
+	apply := mergeImageMutationHeaders(values)
+	return request.Custom(func(config *FindImageRecordOpts) error { return applyImageMemberHeader(&config.Headers, apply) })
 }
 
 // WithFindImageRecordListOptions appends options to the owned list profile.
 // They are applied once with context and source checks between callbacks.
 func WithFindImageRecordListOptions(options ...ImageRecordListOption) FindImageRecordOption {
 	owned := slices.Clone(options)
-	return func(config *FindImageRecordOpts) error {
+	return request.Custom(func(config *FindImageRecordOpts) error {
 		config.listOptions = append(config.listOptions, owned...)
 		return nil
-	}
+	})
 }
 
 func prepareFindImageRecord(ctx context.Context, check func(context.Context) error, options []FindImageRecordOption) (FindImageRecordOpts, imageRecordListParameters, error) {
 	value := copyFindImageRecord(FindImageRecordOpts{})
-	for _, apply := range options {
+	for _, apply := range calls.Translate(options, findImageRecordCalls) {
 		if err := check(ctx); err != nil {
 			return value, imageRecordListParameters{}, err
 		}

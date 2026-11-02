@@ -12,6 +12,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -121,7 +122,7 @@ func TestImageRecordListSourceQueryAndLocalFilterClassification(t *testing.T) {
 		}
 		return taskCoreJSON(req, 200, `{"images":[{"id":"first","checksum":"other","protected":true,"owner":"row owner","properties":{"subset":{"chosen":true}}},{"id":"kept","checksum":"selected","protected":"false","owner":"row owner","properties":{"subset":{"chosen":true,"extra":null},"passive":1}}]}`), nil
 	})
-	rows, err := New(client).AllImageRecords(context.Background(), WithImageRecordListFilters(filters), WithImageRecordListLimit(0), WithImageRecordListMarker("start"))
+	rows, err := New(client).AllImageRecords(context.Background(), WithImageRecordListFilters(filters), request.Limit(0), request.Marker("start"))
 	if err != nil || len(rows) != 1 || calls != 1 || string(rows[0].Resource.Body["id"]) != `"kept"` {
 		t.Fatal(rows, err, calls)
 	}
@@ -182,13 +183,13 @@ func TestImageRecordListLazyRepeatedOptionSnapshots(t *testing.T) {
 		client.MoreHeaders["X-Source"] = "getter mutation"
 		return resource.CloudLocation{Cloud: &cloud}, nil
 	}})
-	options := []ImageRecordListOption{option, func(value *ImageRecordListOpts) error {
+	options := []ImageRecordListOption{option, request.Custom(func(value *ImageRecordListOpts) error {
 		callbacks++
 		retained = value
 		cloud = "callback mutation"
 		client.MoreHeaders["X-Source"] = "callback mutation"
 		return nil
-	}}
+	})}
 	stream := service.ListImageRecords(context.Background(), options...)
 	headers["X-Option"] = "caller mutation"
 	filters["checksum"][1] = 'X'
@@ -240,15 +241,15 @@ func TestImageRecordListPagingRawCapsAndPartials(t *testing.T) {
 				header.Set("Link", "<"+next+">; rel=\"next\"")
 			case "marker fallback":
 				extra = ""
-				options = append(options, WithImageRecordListLimit(3))
+				options = append(options, request.Limit(3))
 			case "server limit only":
 				extra = `,"limit":2`
 			case "single page":
-				options = append(options, WithImageRecordListPaginated(false))
+				options = append(options, request.Paginated(false))
 			case "raw cap filter":
-				options = append(options, WithImageRecordListMaxItems(2), WithImageRecordListFilter("checksum", "selected"))
+				options = append(options, request.MaxItems(2), WithImageRecordListFilter("checksum", "selected"))
 			case "zero limit empty stop":
-				options = append(options, WithImageRecordListLimit(0))
+				options = append(options, request.Limit(0))
 			}
 			first := `{"images":[{"id":"first","checksum":"other"},{"id":"last","checksum":"selected"}]` + extra + `}`
 			if mode == "zero limit empty stop" {
@@ -323,7 +324,7 @@ func TestImageRecordListPagingRawCapsAndPartials(t *testing.T) {
 			options := []ImageRecordListOption{}
 			first := `{"images":[{"id":"kept"}],"next":"?marker=second"}`
 			if mode == "ignored pagination cycle" || mode == "missing wire marker" {
-				options = append(options, WithImageRecordListLimit(1))
+				options = append(options, request.Limit(1))
 				first = `{"images":[{"id":"kept"}]}`
 			}
 			if mode == "missing wire marker" {
@@ -373,7 +374,7 @@ func TestImageRecordListPagingRawCapsAndPartials(t *testing.T) {
 			calls++
 			return taskCoreJSON(req, 200, `{"images":[{"id":"kept"},{"hw_vif_multiqueue_enabled":1}],"next":"https://foreign.test/unused"}`), nil
 		})
-		rows, err := New(client).AllImageRecords(context.Background(), WithImageRecordListMaxItems(1))
+		rows, err := New(client).AllImageRecords(context.Background(), request.MaxItems(1))
 		if err != nil || len(rows) != 1 || calls != 1 {
 			t.Fatal(rows, err, calls)
 		}
@@ -487,8 +488,8 @@ func TestImageRecordListCompletePreflightAndLegacyBoundary(t *testing.T) {
 		options []ImageRecordListOption
 	}{
 		{"nil option", []ImageRecordListOption{nil}},
-		{"negative limit", []ImageRecordListOption{WithImageRecordListLimit(-1)}}, {"negative cap", []ImageRecordListOption{WithImageRecordListMaxItems(-1)}}, {"control marker", []ImageRecordListOption{WithImageRecordListMarker("bad\n")}},
-		{"owned token", []ImageRecordListOption{WithImageRecordListHeader("X-Auth-Token", "foreign")}}, {"header newline", []ImageRecordListOption{WithImageRecordListHeaders(map[string]string{"X-Extra": "\n"})}},
+		{"negative limit", []ImageRecordListOption{request.Limit(-1)}}, {"negative cap", []ImageRecordListOption{request.MaxItems(-1)}}, {"control marker", []ImageRecordListOption{request.Marker("bad\n")}},
+		{"owned token", []ImageRecordListOption{request.Header("X-Auth-Token", "foreign")}}, {"header newline", []ImageRecordListOption{WithImageRecordListHeaders(map[string]string{"X-Extra": "\n"})}},
 		{"broken known server filter", []ImageRecordListOption{WithImageRecordListOpts(ImageRecordListOpts{Filters: map[string]json.RawMessage{"status": json.RawMessage(`{`)}})}},
 		{"broken known local filter", []ImageRecordListOption{WithImageRecordListOpts(ImageRecordListOpts{Filters: map[string]json.RawMessage{"checksum": json.RawMessage(`{`)}})}},
 		{"known nonJSON filter", []ImageRecordListOption{WithImageRecordListFilter("metadata", make(chan int))}},
@@ -508,7 +509,7 @@ func TestImageRecordListCompletePreflightAndLegacyBoundary(t *testing.T) {
 	for _, ctx := range []context.Context{nil, func() context.Context { ctx, cancel := context.WithCancel(context.Background()); cancel(); return ctx }()} {
 		calls, callbacks := 0, 0
 		client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return nil, nil })
-		rows, err := New(client).AllImageRecords(ctx, func(*ImageRecordListOpts) error { callbacks++; return nil })
+		rows, err := New(client).AllImageRecords(ctx, request.Custom(func(*ImageRecordListOpts) error { callbacks++; return nil }))
 		if len(rows) != 0 || err == nil || calls != 0 || callbacks != 0 {
 			t.Fatal(rows, err, calls, callbacks)
 		}

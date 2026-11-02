@@ -10,9 +10,11 @@ import (
 	"strings"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -163,8 +165,8 @@ func (s *Service) GetImageRecordByID(ctx context.Context, id string, options ...
 	// headers because the Source helper has no list or filter arguments.
 	state := copyImageRecordQuery(ImageRecordQueryOpts{})
 	converted := make([]ImageRecordOption, 0, len(options)+1)
-	for _, apply := range slices.Clone(options) {
-		converted = append(converted, func(*ImageRecordOpts) error {
+	for _, apply := range calls.Translate(options, imageRecordQueryCalls) {
+		converted = append(converted, request.Custom(func(*ImageRecordOpts) error {
 			if apply == nil {
 				return uploadInvalid("nil image record query option")
 			}
@@ -174,15 +176,15 @@ func (s *Service) GetImageRecordByID(ctx context.Context, id string, options ...
 			}
 			state = copyImageRecordQuery(next)
 			return nil
-		})
+		}))
 	}
-	converted = append(converted, func(config *ImageRecordOpts) error {
+	converted = append(converted, request.Custom(func(config *ImageRecordOpts) error {
 		policy, err := prepareImageRecordQuery(ctx, cloudread.Context, []ImageRecordQueryOption{WithImageRecordQueryOpts(state)}, imageRecordQueryArguments{})
 		if err != nil {
 			return err
 		}
 		return mergeImageRecordHeaders(&config.Headers, policy.Headers)
-	})
+	}))
 	record, err := s.GetImageRecord(ctx, ImageRecordRequest{ID: id}, converted...)
 	return record, renameImageOperation(err, operation)
 }

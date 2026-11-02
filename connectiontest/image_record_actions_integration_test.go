@@ -15,6 +15,7 @@ import (
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/image"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -73,19 +74,19 @@ func TestConnectionOwnedImageActionsPreserveRecordAndSeparateReceipts(t *testing
 	if upper.RawClient() != source || upper.API.RawClient() != source || calls != 0 {
 		t.Fatal("actions replaced shared source")
 	}
-	seed, err := upper.GetImageRecord(context.Background(), image.ImageRecordRequest{ID: id}, image.WithImageRecordHeader("X-Call", "record-action"))
+	seed, err := upper.GetImageRecord(context.Background(), image.ImageRecordRequest{ID: id}, request.Header("X-Call", "record-action"))
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	seed.Resource.Body["id"] = json.RawMessage(`"public decoy"`)
-	deactivated, err := conn.DeactivateImageRecord(context.Background(), image.ImageRecordActionRequest{Record: seed}, image.WithImageRecordActionHeader("X-Call", "record-action"))
+	deactivated, err := conn.DeactivateImageRecord(context.Background(), image.ImageRecordActionRequest{Record: seed}, request.Header("X-Call", "record-action"))
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	if deactivated == nil || deactivated.Record == nil || deactivated.Acknowledgement == nil {
 		t.Fatal(deactivated)
 	}
-	reactivated, err := conn.ReactivateImageRecord(context.Background(), image.ImageRecordActionRequest{Record: deactivated.Record}, image.WithImageRecordActionHeader("X-Call", "record-action"))
+	reactivated, err := conn.ReactivateImageRecord(context.Background(), image.ImageRecordActionRequest{Record: deactivated.Record}, request.Header("X-Call", "record-action"))
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

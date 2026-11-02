@@ -14,14 +14,14 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.SetImageProperties`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithSetImagePropertiesOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithSetImagePropertiesHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithSetImagePropertiesHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithSetImagePropertiesProperty`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithSetImagePropertiesProperties`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.UpdateImagePropertiesRecord`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.UpdateImagePropertiesRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordPropertiesOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordPropertiesHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordPropertiesHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordProperty`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordProperties`
@@ -197,7 +197,7 @@ func run(ctx context.Context, cloud, imageID string, properties, meta json.RawMe
             Properties: properties,
             Meta: meta,
         }),
-        image.WithImageRecordPropertiesHeader("X-SDK-Example", "owned-properties"),
+        request.Header("X-SDK-Example", "owned-properties"),
     }
     var result *image.ImageRecordPropertiesResult
     if viaService {

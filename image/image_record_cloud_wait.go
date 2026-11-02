@@ -7,7 +7,9 @@ import (
 	"slices"
 	"time"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -23,7 +25,17 @@ type ImageRecordCloudWaitOpts struct {
 	Unlimited    bool
 	PollInterval *time.Duration
 }
-type ImageRecordCloudWaitOption func(*ImageRecordCloudWaitOpts) error
+
+// ImageRecordCloudWaitOption is one option of the Cloud image waits:
+// WithImageRecordCloudWaitOpts, WithImageRecordCloudWaitHeaders (merges), the
+// timeout and poll options, request.Header (merges one header) or
+// request.Custom over *ImageRecordCloudWaitOpts. Other shared calls, including
+// request.Headers, fail with resource.ErrInvalidOption before HTTP.
+type ImageRecordCloudWaitOption = request.GetCall
+
+var imageRecordCloudWaitCalls = calls.Spec[ImageRecordCloudWaitOpts]{
+	Header: calls.MergeHeader[ImageRecordCloudWaitOpts](WithImageRecordCloudWaitHeaders),
+}
 
 func copyImageRecordCloudWait(value ImageRecordCloudWaitOpts) ImageRecordCloudWaitOpts {
 	value.Headers = copyImageRecordHeaders(value.Headers)
@@ -39,34 +51,29 @@ func copyImageRecordCloudWait(value ImageRecordCloudWaitOpts) ImageRecordCloudWa
 }
 func WithImageRecordCloudWaitOpts(value ImageRecordCloudWaitOpts) ImageRecordCloudWaitOption {
 	owned := copyImageRecordCloudWait(value)
-	return func(config *ImageRecordCloudWaitOpts) error { *config = copyImageRecordCloudWait(owned); return nil }
-}
-func WithImageRecordCloudWaitHeader(key, value string) ImageRecordCloudWaitOption {
-	return func(config *ImageRecordCloudWaitOpts) error {
-		return mergeImageRecordHeaders(&config.Headers, map[string]string{key: value})
-	}
+	return request.Custom(func(config *ImageRecordCloudWaitOpts) error { *config = copyImageRecordCloudWait(owned); return nil })
 }
 func WithImageRecordCloudWaitHeaders(values map[string]string) ImageRecordCloudWaitOption {
 	owned := copyImageRecordHeaders(values)
-	return func(config *ImageRecordCloudWaitOpts) error { return mergeImageRecordHeaders(&config.Headers, owned) }
+	return request.Custom(func(config *ImageRecordCloudWaitOpts) error { return mergeImageRecordHeaders(&config.Headers, owned) })
 }
 func WithImageRecordCloudWaitTimeout(value time.Duration) ImageRecordCloudWaitOption {
-	return func(config *ImageRecordCloudWaitOpts) error {
+	return request.Custom(func(config *ImageRecordCloudWaitOpts) error {
 		owned := value
 		config.Timeout, config.Unlimited = &owned, false
 		return nil
-	}
+	})
 }
 func WithImageRecordCloudWaitUnlimited() ImageRecordCloudWaitOption {
-	return func(config *ImageRecordCloudWaitOpts) error { config.Timeout, config.Unlimited = nil, true; return nil }
+	return request.Custom(func(config *ImageRecordCloudWaitOpts) error { config.Timeout, config.Unlimited = nil, true; return nil })
 }
 func WithImageRecordCloudWaitPollInterval(value time.Duration) ImageRecordCloudWaitOption {
-	return func(config *ImageRecordCloudWaitOpts) error { owned := value; config.PollInterval = &owned; return nil }
+	return request.Custom(func(config *ImageRecordCloudWaitOpts) error { owned := value; config.PollInterval = &owned; return nil })
 }
 
 func prepareImageRecordCloudWait(ctx context.Context, check func(context.Context) error, options []ImageRecordCloudWaitOption) (ImageRecordCloudWaitOpts, error) {
 	value := copyImageRecordCloudWait(ImageRecordCloudWaitOpts{})
-	for _, apply := range options {
+	for _, apply := range calls.Translate(options, imageRecordCloudWaitCalls) {
 		if err := check(ctx); err != nil {
 			return value, err
 		}

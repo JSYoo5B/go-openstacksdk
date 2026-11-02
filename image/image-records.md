@@ -19,9 +19,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.FindImageRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithFindImageRecordOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithFindImageRecordHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithFindImageRecordHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithFindImageRecordIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithFindImageRecordListOptions`
 
 - The pinned direct proxy accepts a string name_or_id and ignore_missing=True. Safe strings use native GET first; only compatible GET400/403/404 fall back to the normal list, with explicit strict, 404-only and GET-only Go options. Root-object GET200 extraction preserves the native Image model, additional Properties and import/store response headers.
@@ -65,11 +65,11 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetImage`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetImageOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithGetImageHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetImageHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetImageRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordAttributes`
@@ -120,10 +120,10 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.ListImages`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.AllImages`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithListImagesOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithListImagesHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithListImagesHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithListImagesLimit`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithListImagesMarker`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithListImagesID`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithListImagesName`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithListImagesVisibility`
@@ -144,19 +144,19 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.WithListImagesDiskFormat`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithListImagesFilter`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithListImagesFilters`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithListImagesMaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithListImagesSinglePage`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.ListImageRecords`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.AllImageRecords`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordListHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordListHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordListFilter`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordListFilters`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 
 - Concrete pointer query preserves nilomission versus explicitempty/0/false; emptyMarkeromitted, nonnegativeLimit/Size bounds withoutminmax inference; queryVALUEUTF8-only with escaped controls/no clientenum/date/UUID/length normalization/defaultserver injection.
   Tests: `image/images_core_test.go:TestImageCoreCompletePreflight`, `image/images_options_test.go:TestImageOptionsImmediateSnapshotsAndPresence`, `image/images_options_test.go:TestImageOptionsReplacementExtensionsAndLastWins`, `image/images_options_test.go:TestImageOptionsValidationAndParallelReusablePolicies`, `image/images_contracts_test.go:TestImageContractsConcreteQueriesAndSource`.
@@ -243,7 +243,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryFilterDeleted`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryShowAll`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeaders`
 
 - AllCloudImageRecords eagerly consumes the complete default owned image list once, keeps every consumed row in Inventory and removes rows whose Python-lowered string status equals deleted unless FilterDeleted is false. Value is the completed JSON array of kept declared views, [] for an empty result, and Images aligns with it.
@@ -271,7 +271,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryFilters`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryExpression`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeaders`
 
 - SearchImageRecords completes the default list_images inventory, including the deleted-status filter and no member query, before the shared Cloud identifier exact-or-fnmatch phase. No name or filter is forwarded as a server query or Proxy Body filter; deleted rows are never selectable.
@@ -297,7 +297,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryFilters`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryExpression`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeaders`
 
 - Omitted or JSON-null filters delegate to the owned Proxy find_image engine with ignore_missing true: literal GET, clean 400/403/404 fallback to the visible and hidden name lists, no Cloud deleted-status filter, nil Value/Image when missing and terminal native errors. Value is the found declared view.
@@ -321,7 +321,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetImageRecordByID`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeaders`
 
 - GetImageRecordByID delegates to one strict literal GetImageRecord without query, Find fallback, missing-as-nil or deleted filtering; native 404 remains an error named GetImageRecordByID without nesting the delegated operation, and the Connection location is projected.
@@ -405,20 +405,20 @@ func run(ctx context.Context, cloud, imageID, nameOrID string) error {
     if err != nil { return err }
 
     value, err := service.GetImageRecord(ctx, image.ImageRecordRequest{ID: imageID},
-        image.WithImageRecordHeader("X-Request-Source", "image-records-example"))
+        request.Header("X-Request-Source", "image-records-example"))
     if err != nil { return err }
     if err := printRecord(value); err != nil { return err }
 
     for value, readErr := range service.ListImageRecords(ctx,
         image.WithImageRecordListFilter("status", "active"),
-        image.WithImageRecordListLimit(10), image.WithImageRecordListMaxItems(20)) {
+        request.Limit(10), request.MaxItems(20)) {
         if readErr != nil { return readErr }
         if err := printRecord(value); err != nil { return err }
     }
 
     if nameOrID != "" {
         found, err := service.FindImageRecord(ctx, nameOrID,
-            image.WithFindImageRecordIgnoreMissing(false))
+            request.IgnoreMissing(false))
         if err != nil { return err }
         if err := printRecord(found); err != nil { return err }
     }

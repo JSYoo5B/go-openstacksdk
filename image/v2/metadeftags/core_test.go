@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -234,21 +235,21 @@ func TestMetadefTagsCoreCompletePreflight(t *testing.T) {
 	client := tagCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return tagCoreJSON(req, 200, `{}`), nil })
 	scope := tagCoreScope(t, client, "parent")
 	for _, name := range []string{"", ".", "..", "slash/", "back\\", "%2f", "?", "#", "control\n", strings.Repeat("界", 81), string([]byte{255})} {
-		_, err := scope.Create(context.Background(), name, func(*CreateOpts) error { callbacks++; return nil })
+		_, err := scope.Create(context.Background(), name, request.Custom(func(*CreateOpts) error { callbacks++; return nil }))
 		if !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatalf("unsafe route %q %v", name, err)
 		}
 	}
-	if _, err := scope.Set(context.Background(), []string{string([]byte{255})}, func(*SetOpts) error { callbacks++; return nil }); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := scope.Set(context.Background(), []string{string([]byte{255})}, request.Custom(func(*SetOpts) error { callbacks++; return nil })); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
-	if _, err := scope.Get(nil, "child", func(*GetOpts) error { callbacks++; return nil }); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := scope.Get(nil, "child", request.Custom(func(*GetOpts) error { callbacks++; return nil })); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
 	ctx, cancel := context.WithCancelCause(context.Background())
 	cause := errors.New("caller cancelled")
 	cancel(cause)
-	if _, err := scope.Delete(ctx, "child", func(*DeleteOpts) error { callbacks++; return nil }); !errors.Is(err, context.Canceled) || !errors.Is(err, cause) {
+	if _, err := scope.Delete(ctx, "child", request.Custom(func(*DeleteOpts) error { callbacks++; return nil })); !errors.Is(err, context.Canceled) || !errors.Is(err, cause) {
 		t.Fatalf("custom cancellation %v", err)
 	}
 	if callbacks != 0 || calls != 0 {
@@ -257,31 +258,31 @@ func TestMetadefTagsCoreCompletePreflight(t *testing.T) {
 	client.MoreHeaders = map[string]string{"x-OPENSTACK-append": "True"}
 	operations := []func() error{
 		func() error {
-			_, e := scope.Create(context.Background(), "child", func(*CreateOpts) error { callbacks++; return nil })
+			_, e := scope.Create(context.Background(), "child", request.Custom(func(*CreateOpts) error { callbacks++; return nil }))
 			return e
 		},
 		func() error {
-			_, e := scope.Get(context.Background(), "child", func(*GetOpts) error { callbacks++; return nil })
+			_, e := scope.Get(context.Background(), "child", request.Custom(func(*GetOpts) error { callbacks++; return nil }))
 			return e
 		},
 		func() error {
-			_, e := scope.Update(context.Background(), "child", func(*UpdateOpts) error { callbacks++; return nil })
+			_, e := scope.Update(context.Background(), "child", request.Custom(func(*UpdateOpts) error { callbacks++; return nil }))
 			return e
 		},
 		func() error {
-			_, e := scope.Delete(context.Background(), "child", func(*DeleteOpts) error { callbacks++; return nil })
+			_, e := scope.Delete(context.Background(), "child", request.Custom(func(*DeleteOpts) error { callbacks++; return nil }))
 			return e
 		},
 		func() error {
-			_, e := scope.DeleteAll(context.Background(), func(*DeleteAllOpts) error { callbacks++; return nil })
+			_, e := scope.DeleteAll(context.Background(), request.Custom(func(*DeleteAllOpts) error { callbacks++; return nil }))
 			return e
 		},
 		func() error {
-			_, e := scope.Set(context.Background(), nil, func(*SetOpts) error { callbacks++; return nil })
+			_, e := scope.Set(context.Background(), nil, request.Custom(func(*SetOpts) error { callbacks++; return nil }))
 			return e
 		},
 		func() error {
-			_, e := scope.All(context.Background(), func(*ListOpts) error { callbacks++; return nil })
+			_, e := scope.All(context.Background(), request.Custom(func(*ListOpts) error { callbacks++; return nil }))
 			return e
 		},
 	}
@@ -295,16 +296,16 @@ func TestMetadefTagsCoreCompletePreflight(t *testing.T) {
 	}
 	client.MoreHeaders = nil
 	sentinel := errors.New("callback")
-	if _, err := scope.Get(context.Background(), "child", func(*GetOpts) error { callbacks++; return sentinel }); !errors.Is(err, sentinel) {
+	if _, err := scope.Get(context.Background(), "child", request.Custom(func(*GetOpts) error { callbacks++; return sentinel })); !errors.Is(err, sentinel) {
 		t.Fatal(err)
 	}
 	if _, err := scope.Update(context.Background(), "child", WithUpdateName("../unsafe")); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
-	if _, err := scope.Set(context.Background(), nil, WithSetHeader("X-OpenStack-Append", "True")); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := scope.Set(context.Background(), nil, request.Header("X-OpenStack-Append", "True")); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
-	if _, err := scope.All(context.Background(), WithListLimit(-1)); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := scope.All(context.Background(), request.Limit(-1)); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
 	if callbacks != 1 || calls != 0 {
@@ -351,7 +352,7 @@ func TestMetadefTagsCorePagedRawMarkersAndConsumption(t *testing.T) {
 		})
 		client.MoreHeaders = map[string]string{"X-Latest": "one"}
 		scope := tagCoreScope(t, client, "parent")
-		seq := scope.List(context.Background(), WithListLimit(2), WithListSortKey("name"), WithListSortDir("asc"))
+		seq := scope.List(context.Background(), request.Limit(2), WithListSortKey("name"), WithListSortDir("asc"))
 		if calls != 0 {
 			t.Fatal("List eager")
 		}
@@ -387,11 +388,11 @@ func TestMetadefTagsCorePagedRawMarkersAndConsumption(t *testing.T) {
 			var options []ListOption
 			switch caseName {
 			case "zero limit":
-				options = []ListOption{WithListLimit(0), WithListMarker(""), WithListSortKey("")}
+				options = []ListOption{request.Limit(0), request.Marker(""), WithListSortKey("")}
 			case "cap":
-				options = []ListOption{WithListLimit(1), WithListMaxItems(1)}
+				options = []ListOption{request.Limit(1), request.MaxItems(1)}
 			case "break":
-				options = []ListOption{WithListLimit(1)}
+				options = []ListOption{request.Limit(1)}
 			}
 			if caseName == "break" {
 				for _, err := range scope.List(context.Background(), options...) {
@@ -401,7 +402,7 @@ func TestMetadefTagsCorePagedRawMarkersAndConsumption(t *testing.T) {
 					break
 				}
 			} else if caseName == "nil limit" {
-				values, err := scope.All(context.Background(), WithListMaxItems(1))
+				values, err := scope.All(context.Background(), request.MaxItems(1))
 				if err != nil || len(values) != 1 {
 					t.Fatalf("cap nillimit %v", err)
 				}
@@ -420,7 +421,7 @@ func TestMetadefTagsCorePagedRawMarkersAndConsumption(t *testing.T) {
 			calls, yielded := 0, 0
 			raw := `{"tags":[` + tail + `]}`
 			client := tagCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return tagCoreJSON(req, 200, raw), nil })
-			for _, err := range tagCoreScope(t, client, "parent").List(context.Background(), WithListLimit(1), WithListMarker("repeat")) {
+			for _, err := range tagCoreScope(t, client, "parent").List(context.Background(), request.Limit(1), request.Marker("repeat")) {
 				if err != nil {
 					tagCoreProof(t, err, 200, raw)
 					if tail == `{"name":"repeat"}` && !errors.Is(err, resource.ErrPaginationCycle) {
@@ -445,7 +446,7 @@ func TestMetadefTagsCorePagedRawMarkersAndConsumption(t *testing.T) {
 			}
 			return tagCoreJSON(req, 200, bad), nil
 		})
-		values, err := tagCoreScope(t, client, "parent").All(context.Background(), WithListLimit(1))
+		values, err := tagCoreScope(t, client, "parent").All(context.Background(), request.Limit(1))
 		if values != nil || calls != 2 {
 			t.Fatal("late error kept rows")
 		}
@@ -559,7 +560,7 @@ func TestMetadefTagsCoreLifetimeSourceAndNativeRetryBoundaries(t *testing.T) {
 		scope := tagCoreScope(t, client, "parent")
 		endpoint := client.Endpoint
 		client.Endpoint = "https://changed.test/"
-		if _, err := scope.Get(context.Background(), "child", func(*GetOpts) error { callbacks++; return nil }); !errors.Is(err, resource.ErrInvalidOption) || callbacks != 0 || calls != 0 {
+		if _, err := scope.Get(context.Background(), "child", request.Custom(func(*GetOpts) error { callbacks++; return nil })); !errors.Is(err, resource.ErrInvalidOption) || callbacks != 0 || calls != 0 {
 			t.Fatalf("changed target %v %d/%d", err, callbacks, calls)
 		}
 		client.Endpoint = endpoint
@@ -632,7 +633,7 @@ func TestMetadefTagsCoreLifetimeSourceAndNativeRetryBoundaries(t *testing.T) {
 		})
 		scope := tagCoreScope(t, client, "parent")
 		observed := false
-		for _, err := range scope.List(context.Background(), WithListLimit(1)) {
+		for _, err := range scope.List(context.Background(), request.Limit(1)) {
 			if err != nil {
 				if !errors.Is(err, resource.ErrInvalidOption) {
 					t.Fatal(err)

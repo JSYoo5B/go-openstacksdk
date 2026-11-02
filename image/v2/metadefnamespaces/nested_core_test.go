@@ -10,6 +10,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -158,14 +159,14 @@ func TestMetadefNamespaceCreateNestedCoreCompletePreflight(t *testing.T) {
 		}
 	}
 	cause := errors.New("callback")
-	if _, err := api.Create(context.Background(), "parent", func(*CreateOpts) error { return cause }); !errors.Is(err, cause) {
+	if _, err := api.Create(context.Background(), "parent", request.Custom(func(*CreateOpts) error { return cause })); !errors.Is(err, cause) {
 		t.Fatal(err)
 	}
 	callbacks := 0
-	if _, err := api.Create(nil, "parent", func(*CreateOpts) error { callbacks++; return nil }); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := api.Create(nil, "parent", request.Custom(func(*CreateOpts) error { callbacks++; return nil })); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
-	if _, err := api.Create(context.Background(), strings.Repeat("界", 81), func(*CreateOpts) error { callbacks++; return nil }); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := api.Create(context.Background(), strings.Repeat("界", 81), request.Custom(func(*CreateOpts) error { callbacks++; return nil })); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
 	if calls != 0 || callbacks != 0 {
@@ -304,7 +305,7 @@ func TestMetadefNamespaceCreateNestedCoreSourceAndUpdatePreservation(t *testing.
 	t.Run("callback source change", func(t *testing.T) {
 		calls := 0
 		c := namespaceCoreClient(func(*http.Request) (*http.Response, error) { calls++; return nil, nil })
-		v, err := New(c).Create(context.Background(), "parent", WithCreateTags([]TagDefinition{{Name: "data"}}), func(*CreateOpts) error { c.ResourceBase = "https://example.test/other/"; return nil })
+		v, err := New(c).Create(context.Background(), "parent", WithCreateTags([]TagDefinition{{Name: "data"}}), request.Custom(func(*CreateOpts) error { c.ResourceBase = "https://example.test/other/"; return nil }))
 		if v != nil || !errors.Is(err, resource.ErrInvalidOption) || calls != 0 {
 			t.Fatal(v, err, calls)
 		}

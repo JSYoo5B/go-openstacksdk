@@ -13,6 +13,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -107,7 +108,7 @@ func TestImageTaskCoreCompletePreflight(t *testing.T) {
 			if tc.alter != nil {
 				tc.alter(client)
 			}
-			values, err := New(client).AllImageTasks(context.Background(), tc.ref, func(o *ListImageTasksOpts) error { callbacks++; return nil })
+			values, err := New(client).AllImageTasks(context.Background(), tc.ref, request.Custom(func(o *ListImageTasksOpts) error { callbacks++; return nil }))
 			if values != nil || err == nil || calls != 0 || callbacks != 0 {
 				t.Fatal(values, err, calls, callbacks)
 			}
@@ -116,11 +117,11 @@ func TestImageTaskCoreCompletePreflight(t *testing.T) {
 	service := New(taskCoreClient(func(req *http.Request) (*http.Response, error) { t.Fatal("preflight HTTP"); return nil, nil }))
 	for _, ctx := range []context.Context{nil, func() context.Context { ctx, cancel := context.WithCancel(context.Background()); cancel(); return ctx }()} {
 		called := false
-		if values, err := service.AllImageTasks(ctx, resource.ID("id"), func(o *ListImageTasksOpts) error { called = true; return nil }); values != nil || err == nil || called {
+		if values, err := service.AllImageTasks(ctx, resource.ID("id"), request.Custom(func(o *ListImageTasksOpts) error { called = true; return nil })); values != nil || err == nil || called {
 			t.Fatal(values, err, called)
 		}
 	}
-	for _, options := range [][]ListImageTasksOption{{nil}, {WithListImageTasksMaxItems(-1)}, {WithListImageTasksHeader("Host", "foreign")}, {WithListImageTasksHeaders(map[string]string{"X": "\n"})}} {
+	for _, options := range [][]ListImageTasksOption{{nil}, {request.MaxItems(-1)}, {request.Header("Host", "foreign")}, {WithListImageTasksHeaders(map[string]string{"X": "\n"})}} {
 		if values, err := service.AllImageTasks(context.Background(), resource.Name("parent"), options...); values != nil || !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(values, err)
 		}
@@ -140,7 +141,7 @@ func TestImageTaskCoreFiniteConsumptionAndEnvelope(t *testing.T) {
 			response.Header.Set("Link", `<https://foreign/next>; rel="next"`)
 			return response, nil
 		}))
-		values, err := service.AllImageTasks(context.Background(), resource.ID("id"), WithListImageTasksMaxItems(20))
+		values, err := service.AllImageTasks(context.Background(), resource.ID("id"), request.MaxItems(20))
 		if values == nil || err != nil || calls != 1 {
 			t.Fatal(values, err, calls)
 		}
@@ -148,7 +149,7 @@ func TestImageTaskCoreFiniteConsumptionAndEnvelope(t *testing.T) {
 	body := `{"tasks":[{"id":"first","deleted":false},{"deleted":"invalid"},null],"next":"https://foreign/tasks"}`
 	calls := 0
 	service := New(taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return taskCoreJSON(req, 200, body), nil }))
-	values, err := service.AllImageTasks(context.Background(), resource.ID("id"), WithListImageTasksMaxItems(1))
+	values, err := service.AllImageTasks(context.Background(), resource.ID("id"), request.MaxItems(1))
 	if err != nil || len(values) != 1 || calls != 1 {
 		t.Fatal(values, err, calls)
 	}
@@ -226,7 +227,7 @@ func TestImageTaskCoreExactNameAndSourceGuards(t *testing.T) {
 				return taskCoreJSON(req, 200, `{"tasks":[]}`), nil
 			})
 			client.ResourceBase = client.Endpoint
-			values, err := New(client).AllImageTasks(context.Background(), resource.ID("id"), func(o *ListImageTasksOpts) error {
+			values, err := New(client).AllImageTasks(context.Background(), resource.ID("id"), request.Custom(func(o *ListImageTasksOpts) error {
 				switch field {
 				case "endpoint":
 					client.Endpoint = "https://glance.example/changed/"
@@ -236,7 +237,7 @@ func TestImageTaskCoreExactNameAndSourceGuards(t *testing.T) {
 					client.ProviderClient = &gophercloud.ProviderClient{}
 				}
 				return nil
-			})
+			}))
 			if values != nil || !errors.Is(err, resource.ErrInvalidOption) || calls != 0 {
 				t.Fatal(values, err, calls)
 			}

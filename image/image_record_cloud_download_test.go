@@ -11,6 +11,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -53,7 +54,7 @@ func TestCloudImageRecordDownloadFindsThenDownloadsToRequiredOutput(t *testing.T
 	binary := func(req *http.Request) *http.Response {
 		return taskCoreHTTP(req, 200, io.NopCloser(strings.NewReader("abc")))
 	}
-	header := WithImageRecordCloudDownloadHeader("X-Cloud", "download")
+	header := request.Header("X-Cloud", "download")
 	t.Run("writer", func(t *testing.T) {
 		calls := 0
 		service := cloudImageService(t, &calls, cloudDownloadTransport(t, &calls, binary))
@@ -133,7 +134,7 @@ func TestCloudImageRecordDownloadStrictFindAndPreflight(t *testing.T) {
 		})
 	}
 	t.Run("nil option and invalid header", func(t *testing.T) {
-		for _, option := range []ImageRecordCloudDownloadOption{nil, WithImageRecordCloudDownloadHeader("X-Bad", "a\nb")} {
+		for _, option := range []ImageRecordCloudDownloadOption{nil, request.Header("X-Bad", "a\nb")} {
 			if _, err := service.DownloadCloudImageRecord(ctx, ImageRecordCloudDownloadRequest{NameOrID: "ubuntu", Output: &bytes.Buffer{}}, option); !errors.Is(err, resource.ErrInvalidOption) || calls != 0 {
 				t.Fatal(err, calls)
 			}

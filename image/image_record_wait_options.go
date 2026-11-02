@@ -3,10 +3,11 @@ package image
 import (
 	"context"
 	"errors"
-	"slices"
 	"time"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -24,7 +25,16 @@ type ImageRecordWaitOpts struct {
 	Callback              func(int)
 }
 
-type ImageRecordWaitOption func(*ImageRecordWaitOpts) error
+// ImageRecordWaitOption is one option of the image record waits:
+// WithImageRecordWaitOpts, WithImageRecordWaitHeaders (merges), the timeout,
+// poll, failure state, attribute and callback options, request.Header (merges
+// one header) or request.Custom over *ImageRecordWaitOpts. Other shared calls,
+// including request.Headers, fail with resource.ErrInvalidOption before HTTP.
+type ImageRecordWaitOption = request.GetCall
+
+var imageRecordWaitCalls = calls.Spec[ImageRecordWaitOpts]{
+	Header: calls.MergeHeader[ImageRecordWaitOpts](WithImageRecordWaitHeaders),
+}
 
 func copyImageRecordWaitOpts(value ImageRecordWaitOpts) ImageRecordWaitOpts {
 	value.Headers = copyImageRecordHeaders(value.Headers)
@@ -46,56 +56,51 @@ func copyImageRecordWaitOpts(value ImageRecordWaitOpts) ImageRecordWaitOpts {
 
 func WithImageRecordWaitOpts(value ImageRecordWaitOpts) ImageRecordWaitOption {
 	owned := copyImageRecordWaitOpts(value)
-	return func(config *ImageRecordWaitOpts) error { *config = copyImageRecordWaitOpts(owned); return nil }
-}
-func WithImageRecordWaitHeader(key, value string) ImageRecordWaitOption {
-	return func(config *ImageRecordWaitOpts) error {
-		return mergeImageRecordHeaders(&config.Headers, map[string]string{key: value})
-	}
+	return request.Custom(func(config *ImageRecordWaitOpts) error { *config = copyImageRecordWaitOpts(owned); return nil })
 }
 func WithImageRecordWaitHeaders(values map[string]string) ImageRecordWaitOption {
 	owned := copyImageRecordHeaders(values)
-	return func(config *ImageRecordWaitOpts) error { return mergeImageRecordHeaders(&config.Headers, owned) }
+	return request.Custom(func(config *ImageRecordWaitOpts) error { return mergeImageRecordHeaders(&config.Headers, owned) })
 }
 func WithImageRecordWaitTimeout(value time.Duration) ImageRecordWaitOption {
-	return func(config *ImageRecordWaitOpts) error {
+	return request.Custom(func(config *ImageRecordWaitOpts) error {
 		owned := value
 		config.Timeout, config.Unlimited = &owned, false
 		return nil
-	}
+	})
 }
 func WithImageRecordWaitPollInterval(value time.Duration) ImageRecordWaitOption {
-	return func(config *ImageRecordWaitOpts) error { owned := value; config.PollInterval = &owned; return nil }
+	return request.Custom(func(config *ImageRecordWaitOpts) error { owned := value; config.PollInterval = &owned; return nil })
 }
 func WithImageRecordWaitUnlimited() ImageRecordWaitOption {
-	return func(config *ImageRecordWaitOpts) error { config.Timeout, config.Unlimited = nil, true; return nil }
+	return request.Custom(func(config *ImageRecordWaitOpts) error { config.Timeout, config.Unlimited = nil, true; return nil })
 }
 func WithImageRecordWaitFailureStates(values ...string) ImageRecordWaitOption {
 	owned := make([]string, len(values))
 	copy(owned, values)
-	return func(config *ImageRecordWaitOpts) error {
+	return request.Custom(func(config *ImageRecordWaitOpts) error {
 		config.FailureStates = make([]string, len(owned))
 		copy(config.FailureStates, owned)
 		return nil
-	}
+	})
 }
 func WithImageRecordWaitAttribute(value string) ImageRecordWaitOption {
-	return func(config *ImageRecordWaitOpts) error {
+	return request.Custom(func(config *ImageRecordWaitOpts) error {
 		if value == "" {
 			return uploadInvalid("image wait attribute must not be empty")
 		}
 		config.Attribute = value
 		return nil
-	}
+	})
 }
 func WithImageRecordWaitCallback(value func(int)) ImageRecordWaitOption {
-	return func(config *ImageRecordWaitOpts) error {
+	return request.Custom(func(config *ImageRecordWaitOpts) error {
 		if value == nil {
 			return uploadInvalid("image wait callback must not be nil")
 		}
 		config.Callback = value
 		return nil
-	}
+	})
 }
 
 func imageRecordWaitAttribute(value string) bool {
@@ -112,7 +117,7 @@ func imageRecordWaitAttribute(value string) bool {
 
 func prepareImageRecordWait(ctx context.Context, check func(context.Context) error, options []ImageRecordWaitOption, deleting bool) (ImageRecordWaitOpts, error) {
 	config := ImageRecordWaitOpts{}
-	for _, apply := range slices.Clone(options) {
+	for _, apply := range calls.Translate(options, imageRecordWaitCalls) {
 		if err := check(ctx); err != nil {
 			return config, err
 		}

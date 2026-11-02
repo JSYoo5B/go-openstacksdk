@@ -13,8 +13,10 @@ import (
 	"strings"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -33,7 +35,13 @@ type ImageRecordOpts struct {
 	Headers    map[string]string
 	Attributes map[string]any
 }
-type ImageRecordOption func(*ImageRecordOpts) error
+
+// ImageRecordOption is one option of GetImageRecord and the record updates
+// built on it: WithImageRecordOpts, WithImageRecordHeaders (merges),
+// WithImageRecordAttribute(s), request.Header (merges one header) or
+// request.Custom over *ImageRecordOpts. Other shared calls, including
+// request.Headers, fail with resource.ErrInvalidOption before HTTP.
+type ImageRecordOption = request.GetCall
 
 // ImageRecordListOpts controls Source Image listing. Filters select declared
 // server queries first and otherwise canonical Body filters. Unknown names are
@@ -47,7 +55,28 @@ type ImageRecordListOpts struct {
 	MaxItems  int
 	Paginated *bool
 }
-type ImageRecordListOption func(*ImageRecordListOpts) error
+
+// ImageRecordListOption is one option of ListImageRecords and
+// AllImageRecords: WithImageRecordListOpts, WithImageRecordListHeaders
+// (merges), WithImageRecordListFilter(s), request.Header (merges one header),
+// request.Limit, request.Marker, request.MaxItems, request.Paginated or
+// request.Custom over *ImageRecordListOpts. Other shared calls, including
+// request.Headers and request.Query, fail with resource.ErrInvalidOption
+// before HTTP.
+type ImageRecordListOption = request.ListCall
+
+var (
+	imageRecordCalls     = calls.Spec[ImageRecordOpts]{Header: calls.MergeHeader[ImageRecordOpts](WithImageRecordHeaders)}
+	imageRecordListCalls = calls.Spec[ImageRecordListOpts]{
+		Header: calls.MergeHeader[ImageRecordListOpts](WithImageRecordListHeaders),
+		Paging: calls.Paging[ImageRecordListOpts]{
+			Limit:     calls.Pointer(func(c *ImageRecordListOpts) **int { return &c.Limit }),
+			Marker:    calls.Value(func(c *ImageRecordListOpts) *string { return &c.Marker }),
+			MaxItems:  calls.Value(func(c *ImageRecordListOpts) *int { return &c.MaxItems }),
+			Paginated: calls.Pointer(func(c *ImageRecordListOpts) **bool { return &c.Paginated }),
+		},
+	}
+)
 
 func copyImageRecordHeaders(values map[string]string) map[string]string {
 	owned := maps.Clone(values)
@@ -141,30 +170,25 @@ func copyImageRecordList(value ImageRecordListOpts) ImageRecordListOpts {
 }
 func WithImageRecordOpts(value ImageRecordOpts) ImageRecordOption {
 	owned, captureErr := copyImageRecordOpts(nil, nil, value)
-	return func(config *ImageRecordOpts) error {
+	return request.Custom(func(config *ImageRecordOpts) error {
 		if captureErr != nil {
 			return captureErr
 		}
 		copy, err := copyImageRecordOpts(nil, nil, owned)
 		*config = copy
 		return err
-	}
-}
-func WithImageRecordHeader(key, value string) ImageRecordOption {
-	return func(config *ImageRecordOpts) error {
-		return mergeImageRecordHeaders(&config.Headers, map[string]string{key: value})
-	}
+	})
 }
 func WithImageRecordHeaders(values map[string]string) ImageRecordOption {
 	owned := copyImageRecordHeaders(values)
-	return func(config *ImageRecordOpts) error { return mergeImageRecordHeaders(&config.Headers, owned) }
+	return request.Custom(func(config *ImageRecordOpts) error { return mergeImageRecordHeaders(&config.Headers, owned) })
 }
 func WithImageRecordAttribute(field string, value any) ImageRecordOption {
 	return WithImageRecordAttributes(map[string]any{field: value})
 }
 func WithImageRecordAttributes(values map[string]any) ImageRecordOption {
 	owned, captureErr := captureImageRecordAttributes(nil, nil, values)
-	return func(config *ImageRecordOpts) error {
+	return request.Custom(func(config *ImageRecordOpts) error {
 		if captureErr != nil {
 			return captureErr
 		}
@@ -175,32 +199,15 @@ func WithImageRecordAttributes(values map[string]any) ImageRecordOption {
 			config.Attributes[key] = json.RawMessage(bytes.Clone(raw))
 		}
 		return nil
-	}
+	})
 }
 func WithImageRecordListOpts(value ImageRecordListOpts) ImageRecordListOption {
 	owned := copyImageRecordList(value)
-	return func(config *ImageRecordListOpts) error { *config = copyImageRecordList(owned); return nil }
-}
-func WithImageRecordListHeader(key, value string) ImageRecordListOption {
-	return func(config *ImageRecordListOpts) error {
-		return mergeImageRecordHeaders(&config.Headers, map[string]string{key: value})
-	}
+	return request.Custom(func(config *ImageRecordListOpts) error { *config = copyImageRecordList(owned); return nil })
 }
 func WithImageRecordListHeaders(values map[string]string) ImageRecordListOption {
 	owned := copyImageRecordHeaders(values)
-	return func(config *ImageRecordListOpts) error { return mergeImageRecordHeaders(&config.Headers, owned) }
-}
-func WithImageRecordListLimit(value int) ImageRecordListOption {
-	return func(config *ImageRecordListOpts) error { owned := value; config.Limit = &owned; return nil }
-}
-func WithImageRecordListMarker(value string) ImageRecordListOption {
-	return func(config *ImageRecordListOpts) error { config.Marker = value; return nil }
-}
-func WithImageRecordListMaxItems(value int) ImageRecordListOption {
-	return func(config *ImageRecordListOpts) error { config.MaxItems = value; return nil }
-}
-func WithImageRecordListPaginated(value bool) ImageRecordListOption {
-	return func(config *ImageRecordListOpts) error { owned := value; config.Paginated = &owned; return nil }
+	return request.Custom(func(config *ImageRecordListOpts) error { return mergeImageRecordHeaders(&config.Headers, owned) })
 }
 
 var imageRecordQueries = map[string]string{
@@ -245,16 +252,16 @@ func imageRecordFilterKnown(key string) bool {
 }
 func WithImageRecordListFilter(field string, value any) ImageRecordListOption {
 	if !imageRecordFilterKnown(field) {
-		return func(*ImageRecordListOpts) error { return nil }
+		return request.Custom(func(*ImageRecordListOpts) error { return nil })
 	}
 	if imageRecordFilterControl(field) {
-		return func(*ImageRecordListOpts) error {
+		return request.Custom(func(*ImageRecordListOpts) error {
 			return fmt.Errorf("%w: image filter %q requires a dedicated control", resource.ErrUnsupported, field)
-		}
+		})
 	}
 	raw, encodeErr := json.Marshal(value)
 	owned := bytes.Clone(raw)
-	return func(config *ImageRecordListOpts) error {
+	return request.Custom(func(config *ImageRecordListOpts) error {
 		if encodeErr != nil {
 			return errors.Join(uploadInvalid("image filter %q cannot be encoded", field), encodeErr)
 		}
@@ -268,7 +275,7 @@ func WithImageRecordListFilter(field string, value any) ImageRecordListOption {
 		}
 		config.Filters[field] = bytes.Clone(owned)
 		return nil
-	}
+	})
 }
 func WithImageRecordListFilters(values map[string]any) ImageRecordListOption {
 	owned := make(map[string]json.RawMessage)
@@ -293,7 +300,7 @@ func WithImageRecordListFilters(values map[string]any) ImageRecordListOption {
 		}
 		owned[key] = bytes.Clone(raw)
 	}
-	return func(config *ImageRecordListOpts) error {
+	return request.Custom(func(config *ImageRecordListOpts) error {
 		if captureErr != nil {
 			return captureErr
 		}
@@ -309,11 +316,11 @@ func WithImageRecordListFilters(values map[string]any) ImageRecordListOption {
 			config.Filters[key] = bytes.Clone(raw)
 		}
 		return nil
-	}
+	})
 }
 func prepareImageRecordGet(ctx context.Context, check func(context.Context) error, options []ImageRecordOption) (map[string]json.RawMessage, map[string]string, error) {
 	value := ImageRecordOpts{Headers: make(map[string]string), Attributes: make(map[string]any)}
-	for _, apply := range options {
+	for _, apply := range calls.Translate(options, imageRecordCalls) {
 		if err := check(ctx); err != nil {
 			return nil, nil, err
 		}
@@ -349,7 +356,7 @@ type imageRecordListParameters struct {
 
 func prepareImageRecordList(ctx context.Context, check func(context.Context) error, options []ImageRecordListOption) (imageRecordListParameters, error) {
 	value := copyImageRecordList(ImageRecordListOpts{})
-	for _, apply := range options {
+	for _, apply := range calls.Translate(options, imageRecordListCalls) {
 		if err := check(ctx); err != nil {
 			return imageRecordListParameters{}, err
 		}

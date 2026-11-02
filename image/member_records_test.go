@@ -13,6 +13,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -134,11 +135,11 @@ func TestImageMemberRecordsIdentityAliasesAndLocation(t *testing.T) {
 				return memberRecordJSON(200, `{"members":[`+test.row+`]}`), nil
 			})
 			service := NewWithDependencies(client, Dependencies{CloudLocation: func() (resource.CloudLocation, error) { locations++; return location, nil }})
-			rows, err := service.AllImageMemberRecords(context.Background(), resource.ID(memberRecordParent), func(*ImageMemberRecordListOpts) error {
+			rows, err := service.AllImageMemberRecords(context.Background(), resource.ID(memberRecordParent), request.Custom(func(*ImageMemberRecordListOpts) error {
 				cloud = "after option"
 				location.Project.ID[1] = 'X'
 				return nil
-			})
+			}))
 			if err != nil || len(rows) != 1 || calls != 1 || locations != 1 {
 				t.Fatal(rows, err, calls, locations)
 			}
@@ -184,13 +185,13 @@ func TestImageMemberRecordsLazyRepeatedOptionSnapshots(t *testing.T) {
 		client.MoreHeaders["X-Source"] = "changed by location"
 		return resource.CloudLocation{Cloud: &cloud}, nil
 	}})
-	stream := service.ListImageMemberRecords(context.Background(), resource.ID(memberRecordParent), factory, func(value *ImageMemberRecordListOpts) error {
+	stream := service.ListImageMemberRecords(context.Background(), resource.ID(memberRecordParent), factory, request.Custom(func(value *ImageMemberRecordListOpts) error {
 		callbacks++
 		retained = value
 		cloud = "changed by callback"
 		client.MoreHeaders["X-Source"] = "changed by callback"
 		return nil
-	})
+	}))
 	headers["X-Option"] = "caller mutation"
 	filters["member_id"][1] = 'X'
 	paginated = true
@@ -240,13 +241,13 @@ func TestImageMemberRecordsPagingAndRawConsumption(t *testing.T) {
 				header.Set("Link", "<"+next+">; rel=\"next\"")
 			case "marker fallback":
 				extra = ""
-				options = append(options, WithImageMemberRecordListLimit(2))
+				options = append(options, request.Limit(2))
 			case "initial server limit only":
 				extra = `,"limit":2`
 			case "single page":
-				options = append(options, WithImageMemberRecordListPaginated(false))
+				options = append(options, request.Paginated(false))
 			case "raw cap filter":
-				options = append(options, WithImageMemberRecordListMaxItems(2), WithImageMemberRecordListFilter("member_id", "last"))
+				options = append(options, request.MaxItems(2), WithImageMemberRecordListFilter("member_id", "last"))
 			}
 			first += extra + `}`
 			client := deleteCoreClient(func(req *http.Request) (*http.Response, error) {
@@ -447,11 +448,11 @@ func TestImageMemberRecordsPreflightAndExtensionFilters(t *testing.T) {
 	}{
 		{"empty image", resource.ID(""), nil}, {"unsafe image", resource.ID("bad/id"), nil},
 		{"nil option", resource.ID(memberRecordParent), []ImageMemberRecordListOption{nil}},
-		{"negative limit", resource.ID(memberRecordParent), []ImageMemberRecordListOption{WithImageMemberRecordListLimit(-1)}},
-		{"negative cap", resource.ID(memberRecordParent), []ImageMemberRecordListOption{WithImageMemberRecordListMaxItems(-1)}},
-		{"bad marker", resource.ID(memberRecordParent), []ImageMemberRecordListOption{WithImageMemberRecordListMarker("\n")}},
-		{"owned token", resource.ID(memberRecordParent), []ImageMemberRecordListOption{WithImageMemberRecordListHeader("X-Auth-Token", "foreign")}},
-		{"header newline", resource.ID(memberRecordParent), []ImageMemberRecordListOption{WithImageMemberRecordListHeader("X-Extra", "\n")}},
+		{"negative limit", resource.ID(memberRecordParent), []ImageMemberRecordListOption{request.Limit(-1)}},
+		{"negative cap", resource.ID(memberRecordParent), []ImageMemberRecordListOption{request.MaxItems(-1)}},
+		{"bad marker", resource.ID(memberRecordParent), []ImageMemberRecordListOption{request.Marker("\n")}},
+		{"owned token", resource.ID(memberRecordParent), []ImageMemberRecordListOption{request.Header("X-Auth-Token", "foreign")}},
+		{"header newline", resource.ID(memberRecordParent), []ImageMemberRecordListOption{request.Header("X-Extra", "\n")}},
 		{"broken declared filter", resource.ID(memberRecordParent), []ImageMemberRecordListOption{WithImageMemberRecordListOpts(ImageMemberRecordListOpts{Filters: map[string]json.RawMessage{"status": json.RawMessage(`{`)}})}},
 	} {
 		t.Run(test.name, func(t *testing.T) {
@@ -500,11 +501,11 @@ func TestImageMemberRecordsPreflightAndExtensionFilters(t *testing.T) {
 			calls++
 			return memberRecordJSON(200, `{"members":[]}`), nil
 		})
-		rows, err := New(client).AllImageMemberRecords(context.Background(), resource.ID(memberRecordParent), func(*ImageMemberRecordListOpts) error { client.Endpoint = "https://foreign.test/"; return nil }, func(*ImageMemberRecordListOpts) error {
+		rows, err := New(client).AllImageMemberRecords(context.Background(), resource.ID(memberRecordParent), request.Custom(func(*ImageMemberRecordListOpts) error { client.Endpoint = "https://foreign.test/"; return nil }), request.Custom(func(*ImageMemberRecordListOpts) error {
 			callbacks++
 			client.Endpoint = "https://example.test/catalog/"
 			return nil
-		})
+		}))
 		if len(rows) != 0 || !errors.Is(err, resource.ErrInvalidOption) || calls != 0 || callbacks != 0 {
 			t.Fatal(rows, err, calls, callbacks)
 		}
@@ -515,7 +516,7 @@ func TestImageMemberRecordsPreflightAndExtensionFilters(t *testing.T) {
 		callbacks, locations := 0, 0
 		client := deleteCoreClient(func(req *http.Request) (*http.Response, error) { t.Fatal("HTTP before preflight"); return nil, nil })
 		service := NewWithDependencies(client, Dependencies{CloudLocation: func() (resource.CloudLocation, error) { locations++; return resource.CloudLocation{}, nil }})
-		rows, err := service.AllImageMemberRecords(ctx, resource.ID(memberRecordParent), func(*ImageMemberRecordListOpts) error { callbacks++; return nil })
+		rows, err := service.AllImageMemberRecords(ctx, resource.ID(memberRecordParent), request.Custom(func(*ImageMemberRecordListOpts) error { callbacks++; return nil }))
 		if len(rows) != 0 || !errors.Is(err, context.Canceled) || locations != 0 || callbacks != 0 {
 			t.Fatal(rows, err, locations, callbacks)
 		}

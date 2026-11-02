@@ -15,19 +15,17 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.API.All`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithListHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithListMaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.API.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.API.AllRecords`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.NewWithDependencies`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordListHeader`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordListFilter`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordListFilters`
 
@@ -70,13 +68,12 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.API.InNamespace`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.NamespaceScope.Create`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithCreateOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithCreateHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithCreateHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithCreatePrefix`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithCreatePropertiesTarget`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.NamespaceScope.CreateRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordCreateOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordCreateHeader`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordCreateHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordCreateAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordCreateAttributes`
@@ -123,9 +120,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.API.InNamespace`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.NamespaceScope.Delete`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithDeleteOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithDeleteHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithDeleteHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithDeleteIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.NamespaceScope.DeleteRecord`
 
 - InNamespace is zeroHTTP; required safe literal namespace, original API/client/provider/type/endpoint/ServiceURL/microversion captured for scope lifetime without retained context or parentGET/lookup/Ref. Selected child is nonempty UTF8<=80runes with route-breaking/control/dot rejection and exact-once path escape, no trim/UUID/nameFind. Latest valid ordinary source headers copied per request and original provider auth remains live, guards before callbacks/request/accepted body/each consumedrow.
@@ -167,19 +164,17 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.NamespaceScope.List`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.NamespaceScope.All`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithListHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithListMaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.NamespaceScope.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.NamespaceScope.AllRecords`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.NewWithDependencies`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordListHeader`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordListFilter`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordListFilters`
 
@@ -225,6 +220,7 @@ import (
 
     "github.com/JSYoo5B/go-openstacksdk/image"
     types "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes"
+    "github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 type AssociationEvidence struct {
@@ -245,9 +241,9 @@ func manageResourceTypeAssociation(
     api := service.API.MetadefResourceTypes
     listOptions := []types.ListOption{
         types.WithListOpts(types.ListOpts{MaxItems: 20}),
-        types.WithListHeader("X-Example", "resource-types"),
+        request.Header("X-Example", "resource-types"),
         types.WithListHeaders(map[string]string{"X-Request-Group": "example"}),
-        types.WithListMaxItems(20),
+        request.MaxItems(20),
     }
     for row, err := range api.List(ctx, listOptions...) {
         if err != nil {
@@ -266,7 +262,7 @@ func manageResourceTypeAssociation(
     }
     evidence.Created, err = scope.Create(ctx, resourceType,
         types.WithCreateOpts(types.CreateOpts{}),
-        types.WithCreateHeader("X-Example", "association"),
+        request.Header("X-Example", "association"),
         types.WithCreateHeaders(map[string]string{"X-Request-Group": "example"}),
         types.WithCreatePrefix(prefix),
         types.WithCreatePropertiesTarget(target),
@@ -286,9 +282,9 @@ func manageResourceTypeAssociation(
     }
     evidence.Deleted, err = scope.Delete(ctx, resourceType,
         types.WithDeleteOpts(types.DeleteOpts{}),
-        types.WithDeleteHeader("X-Example", "association"),
+        request.Header("X-Example", "association"),
         types.WithDeleteHeaders(map[string]string{"X-Request-Group": "example"}),
-        types.WithDeleteIgnoreMissing(false),
+        request.IgnoreMissing(false),
     )
     return evidence, err
 }

@@ -6,6 +6,9 @@ import (
 	"net/url"
 	"strconv"
 	"unicode/utf8"
+
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 // CreateTaskOpts supplies an input object and ordinary headers. Nil Input
@@ -17,11 +20,22 @@ type CreateTaskOpts struct {
 	Input     map[string]json.RawMessage
 	NullInput bool
 }
-type CreateTaskOption func(*CreateTaskOpts) error
+
+// CreateTaskOption is one option of CreateTask: WithCreateTaskOpts,
+// WithCreateTaskHeaders (merges), WithCreateTaskInput, request.Header (merges
+// one header) or request.Custom over *CreateTaskOpts. Other shared calls,
+// including request.Headers and request.Field, fail with
+// resource.ErrInvalidOption before HTTP.
+type CreateTaskOption = request.WriteCall
 
 // GetTaskOpts supplies ordinary headers for one fixed task GET.
 type GetTaskOpts struct{ Headers map[string]string }
-type GetTaskOption func(*GetTaskOpts) error
+
+// GetTaskOption is one option of GetTask: WithGetTaskOpts,
+// WithGetTaskHeaders (merges), request.Header (merges one header) or
+// request.Custom over *GetTaskOpts. Other shared calls, including
+// request.Headers, fail with resource.ErrInvalidOption before HTTP.
+type GetTaskOption = request.GetCall
 
 // ListTasksOpts supplies six server query fields and local iteration controls.
 // Empty strings omit queries; nil Limit omits, while an explicit zero is sent.
@@ -41,19 +55,35 @@ type ListTasksOpts struct {
 	MarkerFallback                         bool
 	LinkHeader                             bool
 }
-type ListTasksOption func(*ListTasksOpts) error
+
+// ListTasksOption is one option of ListTasks and AllTasks: WithListTasksOpts,
+// WithListTasksHeaders (merges), the typed filter, sort and Python paging
+// options, request.Header (merges one header), request.Limit,
+// request.Marker, request.MaxItems or request.Custom over *ListTasksOpts.
+// Other shared calls, including request.Headers, request.Query and
+// request.Paginated, fail with resource.ErrInvalidOption before HTTP.
+type ListTasksOption = request.ListCall
+
+var (
+	createTaskCalls = calls.Spec[CreateTaskOpts]{Header: calls.MergeHeader[CreateTaskOpts](WithCreateTaskHeaders)}
+	getTaskCalls    = calls.Spec[GetTaskOpts]{Header: calls.MergeHeader[GetTaskOpts](WithGetTaskHeaders)}
+	listTasksCalls  = calls.Spec[ListTasksOpts]{
+		Header: calls.MergeHeader[ListTasksOpts](WithListTasksHeaders),
+		Paging: calls.Paging[ListTasksOpts]{
+			Limit:    calls.Pointer(func(c *ListTasksOpts) **int { return &c.Limit }),
+			Marker:   calls.Value(func(c *ListTasksOpts) *string { return &c.Marker }),
+			MaxItems: calls.Value(func(c *ListTasksOpts) *int { return &c.MaxItems }),
+		},
+	}
+)
 
 func WithCreateTaskOpts(value CreateTaskOpts) CreateTaskOption {
 	snapshot := copyCreateTaskOpts(value)
-	return func(config *CreateTaskOpts) error { *config = copyCreateTaskOpts(snapshot); return nil }
-}
-func WithCreateTaskHeader(key, value string) CreateTaskOption {
-	apply := WithImageMutationHeader(key, value)
-	return func(config *CreateTaskOpts) error { return applyImageMemberHeader(&config.Headers, apply) }
+	return request.Custom(func(config *CreateTaskOpts) error { *config = copyCreateTaskOpts(snapshot); return nil })
 }
 func WithCreateTaskHeaders(value map[string]string) CreateTaskOption {
-	apply := WithImageMutationHeaders(value)
-	return func(config *CreateTaskOpts) error { return applyImageMemberHeader(&config.Headers, apply) }
+	apply := mergeImageMutationHeaders(value)
+	return request.Custom(func(config *CreateTaskOpts) error { return applyImageMemberHeader(&config.Headers, apply) })
 }
 
 // WithCreateTaskInput serializes and snapshots the supplied object immediately.
@@ -61,62 +91,45 @@ func WithCreateTaskHeaders(value map[string]string) CreateTaskOption {
 // are checked before encoding/json can replace malformed UTF-8.
 func WithCreateTaskInput(value map[string]any) CreateTaskOption {
 	snapshot, err := marshalTaskInput(value)
-	return func(config *CreateTaskOpts) error {
+	return request.Custom(func(config *CreateTaskOpts) error {
 		if err != nil {
 			return err
 		}
 		config.Input = copyTaskRawMap(snapshot)
 		config.NullInput = false
 		return nil
-	}
+	})
 }
 func WithGetTaskOpts(value GetTaskOpts) GetTaskOption {
 	snapshot := copyGetTaskOpts(value)
-	return func(config *GetTaskOpts) error { *config = copyGetTaskOpts(snapshot); return nil }
-}
-func WithGetTaskHeader(key, value string) GetTaskOption {
-	apply := WithImageMutationHeader(key, value)
-	return func(config *GetTaskOpts) error { return applyImageMemberHeader(&config.Headers, apply) }
+	return request.Custom(func(config *GetTaskOpts) error { *config = copyGetTaskOpts(snapshot); return nil })
 }
 func WithGetTaskHeaders(value map[string]string) GetTaskOption {
-	apply := WithImageMutationHeaders(value)
-	return func(config *GetTaskOpts) error { return applyImageMemberHeader(&config.Headers, apply) }
+	apply := mergeImageMutationHeaders(value)
+	return request.Custom(func(config *GetTaskOpts) error { return applyImageMemberHeader(&config.Headers, apply) })
 }
 func WithListTasksOpts(value ListTasksOpts) ListTasksOption {
 	snapshot := copyListTasksOpts(value)
-	return func(config *ListTasksOpts) error { *config = copyListTasksOpts(snapshot); return nil }
-}
-func WithListTasksHeader(key, value string) ListTasksOption {
-	apply := WithImageMutationHeader(key, value)
-	return func(config *ListTasksOpts) error { return applyImageMemberHeader(&config.Headers, apply) }
+	return request.Custom(func(config *ListTasksOpts) error { *config = copyListTasksOpts(snapshot); return nil })
 }
 func WithListTasksHeaders(value map[string]string) ListTasksOption {
-	apply := WithImageMutationHeaders(value)
-	return func(config *ListTasksOpts) error { return applyImageMemberHeader(&config.Headers, apply) }
-}
-func WithListTasksLimit(value int) ListTasksOption {
-	return func(config *ListTasksOpts) error { snapshot := value; config.Limit = &snapshot; return nil }
-}
-func WithListTasksMarker(value string) ListTasksOption {
-	return func(config *ListTasksOpts) error { config.Marker = value; return nil }
+	apply := mergeImageMutationHeaders(value)
+	return request.Custom(func(config *ListTasksOpts) error { return applyImageMemberHeader(&config.Headers, apply) })
 }
 func WithListTasksType(value string) ListTasksOption {
-	return func(config *ListTasksOpts) error { config.Type = value; return nil }
+	return request.Custom(func(config *ListTasksOpts) error { config.Type = value; return nil })
 }
 func WithListTasksStatus(value string) ListTasksOption {
-	return func(config *ListTasksOpts) error { config.Status = value; return nil }
+	return request.Custom(func(config *ListTasksOpts) error { config.Status = value; return nil })
 }
 func WithListTasksSortKey(value string) ListTasksOption {
-	return func(config *ListTasksOpts) error { config.SortKey = value; return nil }
+	return request.Custom(func(config *ListTasksOpts) error { config.SortKey = value; return nil })
 }
 func WithListTasksSortDir(value string) ListTasksOption {
-	return func(config *ListTasksOpts) error { config.SortDir = value; return nil }
-}
-func WithListTasksMaxItems(value int) ListTasksOption {
-	return func(config *ListTasksOpts) error { config.MaxItems = value; return nil }
+	return request.Custom(func(config *ListTasksOpts) error { config.SortDir = value; return nil })
 }
 func WithListTasksSinglePage(value bool) ListTasksOption {
-	return func(config *ListTasksOpts) error { config.SinglePage = value; return nil }
+	return request.Custom(func(config *ListTasksOpts) error { config.SinglePage = value; return nil })
 }
 
 func taskHeadersCopy(value map[string]string) map[string]string {
@@ -169,7 +182,7 @@ func applyTaskOptions[T any, O ~func(*T) error](value T, options []O, copyValue 
 	return value, nil
 }
 func parseCreateTaskOptions(options []CreateTaskOption) (CreateTaskOpts, error) {
-	value, err := applyTaskOptions(CreateTaskOpts{}, options, copyCreateTaskOpts)
+	value, err := applyTaskOptions(CreateTaskOpts{}, calls.Translate(options, createTaskCalls), copyCreateTaskOpts)
 	if err != nil {
 		return value, err
 	}
@@ -188,14 +201,14 @@ func parseCreateTaskOptions(options []CreateTaskOption) (CreateTaskOpts, error) 
 	return value, err
 }
 func parseGetTaskOptions(options []GetTaskOption) (GetTaskOpts, error) {
-	value, err := applyTaskOptions(GetTaskOpts{}, options, copyGetTaskOpts)
+	value, err := applyTaskOptions(GetTaskOpts{}, calls.Translate(options, getTaskCalls), copyGetTaskOpts)
 	if err == nil {
 		value.Headers, err = imageMutationHeaders(value.Headers, false, "")
 	}
 	return value, err
 }
 func parseListTasksOptions(options []ListTasksOption) (ListTasksOpts, url.Values, error) {
-	value, err := applyTaskOptions(ListTasksOpts{}, options, copyListTasksOpts)
+	value, err := applyTaskOptions(ListTasksOpts{}, calls.Translate(options, listTasksCalls), copyListTasksOpts)
 	query := make(url.Values)
 	if err != nil {
 		return value, query, err

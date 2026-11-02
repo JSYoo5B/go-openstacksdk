@@ -15,13 +15,13 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.API.InNamespace`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.NamespaceScope.Get`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithGetOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithGetHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithGetHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithGetResourceType`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.NewWithDependencies`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.NamespaceScope.GetRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordGetOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordGetHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordGetHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordGetAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordGetAttributes`

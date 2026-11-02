@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithCreateOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithCreateHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithCreateHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithCreateDisplayName`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithCreateDescription`
@@ -63,9 +63,9 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.API.Delete`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithDeleteOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithDeleteHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithDeleteHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithDeleteIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 
 - Literal namespace identity, fixed source capture and strict preflight: name is nonempty UTF8<=80runes; colon/Unicode/spaces remain, route-breaking/control/dot syntax rejected before callbacks/HTTP. No Find, Ref/name resolver, generic Resources or response-driven routing. Fixed original provider/prefix/header/microversion with live original auth; source checks after callbacks/body and before consumed rows/pages.
   Tests: `image/v2/metadefnamespaces/core_test.go:TestMetadefNamespacesCoreCompletePreflight`, `image/v2/metadefnamespaces/core_test.go:TestMetadefNamespacesCoreCapturedSourceAndNativeRetryBoundaries`, `image/v2/metadefnamespaces/options_test.go:TestMetadefNamespacesOptionsValidationAndDefaults`, `image/v2/metadefnamespaces/contracts_test.go:TestMetadefNamespacesOwnedPreparationAndSource`, `connectiontest/connection_image_metadef_namespaces_test.go:TestConnectionImageMetadefNamespacesShareClientAndPagingDefaults`.
@@ -100,7 +100,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.API.Get`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithGetOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithGetHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithGetHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithGetResourceType`
 
@@ -135,15 +135,15 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithListHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithListMarker`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithListVisibility`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithListSortKey`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithListSortDir`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithListResourceTypes`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithListMaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithListSinglePage`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.API.All`
@@ -151,12 +151,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.API.AllRecords`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.NewWithDependencies`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithRecordListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithRecordListHeader`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithRecordListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithRecordListFilter`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithRecordListFilters`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithRecordListVisibility`
@@ -209,7 +205,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithUpdateOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithUpdateHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithUpdateHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithUpdateNamespace`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithUpdateDisplayName`
@@ -255,6 +251,7 @@ import (
 
     "github.com/JSYoo5B/go-openstacksdk/image"
     "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces"
+    "github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 type NamespaceEvidence struct {
@@ -274,7 +271,7 @@ func manageNamespace(ctx context.Context, service *image.Service, namespace, rep
         metadefnamespaces.WithCreateOpts(metadefnamespaces.CreateOpts{
             Description: &description, Protected: &protected,
         }),
-        metadefnamespaces.WithCreateHeader("X-Request-Source", "example"),
+        request.Header("X-Request-Source", "example"),
         metadefnamespaces.WithCreateHeaders(map[string]string{"X-Trace": "create"}),
         metadefnamespaces.WithCreateDisplayName("Example"),
         metadefnamespaces.WithCreateDescription(description),
@@ -285,22 +282,22 @@ func manageNamespace(ctx context.Context, service *image.Service, namespace, rep
 
     out.Read, err = api.Get(ctx, namespace,
         metadefnamespaces.WithGetOpts(metadefnamespaces.GetOpts{}),
-        metadefnamespaces.WithGetHeader("X-Request-Source", "example"),
+        request.Header("X-Request-Source", "example"),
         metadefnamespaces.WithGetHeaders(map[string]string{"X-Trace": "get"}),
         metadefnamespaces.WithGetResourceType(resourceType))
     if err != nil { return out, err }
 
     listOptions := []metadefnamespaces.ListOption{
         metadefnamespaces.WithListOpts(metadefnamespaces.ListOpts{}),
-        metadefnamespaces.WithListHeader("X-Request-Source", "example"),
+        request.Header("X-Request-Source", "example"),
         metadefnamespaces.WithListHeaders(map[string]string{"X-Trace": "list"}),
-        metadefnamespaces.WithListLimit(pageLimit),
-        metadefnamespaces.WithListMarker(""),
+        request.Limit(pageLimit),
+        request.Marker(""),
         metadefnamespaces.WithListVisibility("private"),
         metadefnamespaces.WithListSortKey("created_at"),
         metadefnamespaces.WithListSortDir("desc"),
         metadefnamespaces.WithListResourceTypes("OS::Glance::Image,OS::Nova::Server"),
-        metadefnamespaces.WithListMaxItems(20),
+        request.MaxItems(20),
         metadefnamespaces.WithListSinglePage(false),
     }
     for row, listErr := range api.List(ctx, listOptions...) {
@@ -312,7 +309,7 @@ func manageNamespace(ctx context.Context, service *image.Service, namespace, rep
 
     out.Updated, err = api.Update(ctx, namespace,
         metadefnamespaces.WithUpdateOpts(metadefnamespaces.UpdateOpts{}),
-        metadefnamespaces.WithUpdateHeader("X-Request-Source", "example"),
+        request.Header("X-Request-Source", "example"),
         metadefnamespaces.WithUpdateHeaders(map[string]string{"X-Trace": "update"}),
         metadefnamespaces.WithUpdateNamespace(replacementNamespace),
         metadefnamespaces.WithUpdateDisplayName("Example"),
@@ -324,9 +321,9 @@ func manageNamespace(ctx context.Context, service *image.Service, namespace, rep
 
     out.Deleted, err = api.Delete(ctx, replacementNamespace,
         metadefnamespaces.WithDeleteOpts(metadefnamespaces.DeleteOpts{}),
-        metadefnamespaces.WithDeleteHeader("X-Request-Source", "example"),
+        request.Header("X-Request-Source", "example"),
         metadefnamespaces.WithDeleteHeaders(map[string]string{"X-Trace": "delete"}),
-        metadefnamespaces.WithDeleteIgnoreMissing(false))
+        request.IgnoreMissing(false))
     return out, err
 }
 ```

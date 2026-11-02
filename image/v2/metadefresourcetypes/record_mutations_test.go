@@ -14,6 +14,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -261,19 +262,19 @@ func TestMetadefResourceTypeRecordCreateFactoriesSelectionAndLocationSnapshot(t 
 		full := WithRecordCreateOpts(RecordCreateOpts{Headers: headers, Attributes: slice})
 		bulkOption := WithRecordCreateHeaders(bulk)
 		var retained *RecordCreateOpts
-		options := []RecordCreateOption{WithRecordCreateHeader("X-Replaced", "old"), full, bulkOption,
-			func(config *RecordCreateOpts) error {
+		options := []RecordCreateOption{request.Header("X-Replaced", "old"), full, bulkOption,
+			request.Custom(func(config *RecordCreateOpts) error {
 				retained = config
 				cloud = "option changed"
 				location.Project.ID[1] = 'X'
 				client.MoreHeaders["X-Source"] = "option changed"
 				return nil
-			},
-			func(*RecordCreateOpts) error {
+			}),
+			request.Custom(func(*RecordCreateOpts) error {
 				retained.Headers["X-Full"] = "retained changed"
 				retained.Attributes[0] = resource.WithFilter("prefix", "retained changed")
 				return nil
-			}, WithRecordCreateHeader("x-final", "last"), WithRecordCreateAttribute("properties_target", false)}
+			}), request.Header("x-final", "last"), WithRecordCreateAttribute("properties_target", false)}
 		headers["X-Full"] = "caller changed"
 		bulk["X-Bulk"] = "caller changed"
 		nested["nested"] = "caller changed"
@@ -333,7 +334,7 @@ func TestMetadefResourceTypeRecordDeleteOpaqueStatusesAndFixedIdentitySnapshot(t
 				locations++
 				return resource.CloudLocation{}, errors.New("not needed for opaque deletion")
 			}})
-			ack, err := scope.DeleteRecord(context.Background(), RecordRequest{ID: rtMutationChild}, WithDeleteHeader("X-Option", "owned"))
+			ack, err := scope.DeleteRecord(context.Background(), RecordRequest{ID: rtMutationChild}, request.Header("X-Option", "owned"))
 			if err != nil || ack == nil || ack.Namespace != rtRecordParent || ack.Name == nil || *ack.Name != rtMutationChild || ack.StatusCode != code || string(ack.Body) != body || ack.Header.Get("X-Proof") != "original" || calls != 1 || locations != 0 {
 				t.Fatal("opaque deletion lost actual evidence or invoked location", ack, err, calls, locations)
 			}
@@ -354,11 +355,11 @@ func TestMetadefResourceTypeRecordDeleteOpaqueStatusesAndFixedIdentitySnapshot(t
 				return rtCoreJSON(req, 202, `{"name":"response name","namespace_name":"response parent"}`), nil
 			})
 			_, scope := rtRecordBindings(t, client, true, Dependencies{})
-			ack, err := scope.DeleteRecord(context.Background(), RecordRequest{Resource: seed}, func(*DeleteOpts) error {
+			ack, err := scope.DeleteRecord(context.Background(), RecordRequest{Resource: seed}, request.Custom(func(*DeleteOpts) error {
 				seed.Body["id"] = json.RawMessage(`"caller changed"`)
 				seed.Body["name"] = json.RawMessage(`"caller changed"`)
 				return nil
-			})
+			}))
 			if err != nil || ack == nil || ack.Name == nil || *ack.Name != check.identity || ack.Namespace != rtRecordParent || calls != 1 {
 				t.Fatal("input mutation or response retargeted deletion", ack, err, calls)
 			}
@@ -392,10 +393,10 @@ func TestMetadefResourceTypeRecordDeletePhysicalMissingAndOptionOwnership(t *tes
 			_, scope := rtRecordBindings(t, client, true, Dependencies{})
 			var options []DeleteOption
 			if mode == "strict physical missing" {
-				options = []DeleteOption{WithDeleteIgnoreMissing(false)}
+				options = []DeleteOption{request.IgnoreMissing(false)}
 			}
 			if mode == "explicit handled missing" {
-				options = []DeleteOption{WithDeleteIgnoreMissing(true)}
+				options = []DeleteOption{request.IgnoreMissing(true)}
 			}
 			ack, err := scope.DeleteRecord(context.Background(), RecordRequest{ID: rtMutationChild}, options...)
 			if calls != 1 {
@@ -444,15 +445,15 @@ func TestMetadefResourceTypeRecordDeletePhysicalMissingAndOptionOwnership(t *tes
 		full := WithDeleteOpts(DeleteOpts{Headers: headers, IgnoreMissing: &ignore})
 		bulkOption := WithDeleteHeaders(bulk)
 		var retained *DeleteOpts
-		options := []DeleteOption{WithDeleteHeader("X-Replaced", "old"), full, bulkOption, func(config *DeleteOpts) error {
+		options := []DeleteOption{request.Header("X-Replaced", "old"), full, bulkOption, request.Custom(func(config *DeleteOpts) error {
 			retained = config
 			client.MoreHeaders["X-Source"] = "option changed"
 			return nil
-		}, func(*DeleteOpts) error {
+		}), request.Custom(func(*DeleteOpts) error {
 			retained.Headers["X-Full"] = "retained changed"
 			*retained.IgnoreMissing = true
 			return nil
-		}, WithDeleteHeader("x-final", "last")}
+		}), request.Header("x-final", "last")}
 		ignore = true
 		headers["X-Full"] = "caller changed"
 		bulk["X-Bulk"] = "caller changed"
@@ -472,10 +473,10 @@ func TestMetadefResourceTypeRecordMutationCompletePreflight(t *testing.T) {
 		{"known encoding failure", []RecordCreateOption{WithRecordCreateAttribute("prefix", make(chan int))}},
 		{"nil semantic option", []RecordCreateOption{WithRecordCreateOpts(RecordCreateOpts{Attributes: []resource.ListOption{nil}})}},
 		{"nonsemantic carrier", []RecordCreateOption{WithRecordCreateOpts(RecordCreateOpts{Attributes: []resource.ListOption{resource.WithQuery("name", "foreign")}})}},
-		{"protected token", []RecordCreateOption{WithRecordCreateHeader("X-Auth-Token", "foreign")}},
-		{"Accept owned", []RecordCreateOption{WithRecordCreateHeader("Accept", "text/plain")}},
+		{"protected token", []RecordCreateOption{request.Header("X-Auth-Token", "foreign")}},
+		{"Accept owned", []RecordCreateOption{request.Header("Accept", "text/plain")}},
 		{"header aliases", []RecordCreateOption{WithRecordCreateHeaders(map[string]string{"X-Alias": "one", "x-alias": "two"})}},
-		{"header newline", []RecordCreateOption{WithRecordCreateHeader("X-Option", "bad\nvalue")}},
+		{"header newline", []RecordCreateOption{request.Header("X-Option", "bad\nvalue")}},
 	} {
 		t.Run("create/"+check.name, func(t *testing.T) {
 			calls := 0
@@ -513,7 +514,7 @@ func TestMetadefResourceTypeRecordMutationCompletePreflight(t *testing.T) {
 			calls, callbacks := 0, 0
 			client := rtCoreClient(func(*http.Request) (*http.Response, error) { calls++; return nil, nil })
 			_, scope := rtRecordBindings(t, client, true, Dependencies{})
-			ack, err := scope.DeleteRecord(context.Background(), check.input, func(*DeleteOpts) error { callbacks++; return nil })
+			ack, err := scope.DeleteRecord(context.Background(), check.input, request.Custom(func(*DeleteOpts) error { callbacks++; return nil }))
 			if ack != nil || !errors.Is(err, resource.ErrInvalidOption) || calls != 0 || callbacks != 0 {
 				t.Fatal("identity preflight invoked callbacks or HTTP", ack, err, calls, callbacks)
 			}
@@ -561,7 +562,7 @@ func TestMetadefResourceTypeRecordMutationStickySourceAndOuterPreflight(t *testi
 					scope.namespace = rtRecordParent
 					return nil
 				}
-				options := rtMutationOptions{create: []RecordCreateOption{func(*RecordCreateOpts) error { return mutate() }, func(*RecordCreateOpts) error { return restore() }}, deletion: []DeleteOption{func(*DeleteOpts) error { return mutate() }, func(*DeleteOpts) error { return restore() }}}
+				options := rtMutationOptions{create: []RecordCreateOption{request.Custom(func(*RecordCreateOpts) error { return mutate() }), request.Custom(func(*RecordCreateOpts) error { return restore() })}, deletion: []DeleteOption{request.Custom(func(*DeleteOpts) error { return mutate() }), request.Custom(func(*DeleteOpts) error { return restore() })}}
 				record, ack, err := rtMutationCall(scope, use, operation.deletion, RecordRequest{ID: rtMutationChild}, options)
 				if record != nil || ack != nil || err == nil || calls != 0 || second != 0 {
 					t.Fatal("failure restored before HTTP", record, ack, err, calls, locations, first, second)
@@ -604,7 +605,7 @@ func TestMetadefResourceTypeRecordMutationStickySourceAndOuterPreflight(t *testi
 				client.Endpoint = "https://changed.test/"
 				return resource.CloudLocation{}, nil
 			}})
-			record, err := scope.CreateRecord(context.Background(), func(*RecordCreateOpts) error { callbacks++; return nil })
+			record, err := scope.CreateRecord(context.Background(), request.Custom(func(*RecordCreateOpts) error { callbacks++; return nil }))
 			if record != nil || err == nil || calls != 0 || callbacks != 0 || locations != 1 {
 				t.Fatal(record, err, calls, callbacks, locations)
 			}

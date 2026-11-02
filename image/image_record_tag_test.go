@@ -14,6 +14,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -236,12 +237,12 @@ func TestImageRecordTagSourceHeaderSeedAndOptionSnapshots(t *testing.T) {
 	})
 	client.MoreHeaders = map[string]string{"X-Source": "captured"}
 	client.Microversion = "2.10"
-	options := []ImageMutationOption{option, func(value *ImageMutationOpts) error {
+	options := []ImageMutationOption{option, request.Custom(func(value *ImageMutationOpts) error {
 		callbacks++
 		retained = value
 		client.SetToken("live")
-		return WithImageMutationHeader("X-Final", "yes")(value)
-	}}
+		return applyCall(imageMutationCalls, request.Header("X-Final", "yes"), value)
+	})}
 	service := NewWithDependencies(client, Dependencies{CloudLocation: func() (resource.CloudLocation, error) {
 		locations++
 		client.MoreHeaders["X-Source"] = "getter changed"
@@ -391,7 +392,7 @@ func TestImageRecordTagPreflightAndGuardedCallbacks(t *testing.T) {
 		{"unsafe image identity", ImageRecordTagRequest{ID: "bad\n"}, "tag", nil},
 		{"empty tag", ImageRecordTagRequest{ID: "original"}, "", nil}, {"dot tag", ImageRecordTagRequest{ID: "original"}, ".", nil}, {"dotdot tag", ImageRecordTagRequest{ID: "original"}, "..", nil}, {"control tag", ImageRecordTagRequest{ID: "original"}, "bad\n", nil}, {"invalid UTF8 tag", ImageRecordTagRequest{ID: "original"}, string([]byte{0xff}), nil},
 		{"nil option", ImageRecordTagRequest{ID: "original"}, "tag", []ImageMutationOption{nil}},
-		{"owned auth header", ImageRecordTagRequest{ID: "original"}, "tag", []ImageMutationOption{WithImageMutationHeader("X-Auth-Token", "foreign")}},
+		{"owned auth header", ImageRecordTagRequest{ID: "original"}, "tag", []ImageMutationOption{request.Header("X-Auth-Token", "foreign")}},
 		{"header newline", ImageRecordTagRequest{ID: "original"}, "tag", []ImageMutationOption{WithImageMutationHeaders(map[string]string{"X-Extra": "\n"})}},
 	} {
 		t.Run(test.name, func(t *testing.T) {
@@ -406,7 +407,7 @@ func TestImageRecordTagPreflightAndGuardedCallbacks(t *testing.T) {
 	for _, ctx := range []context.Context{nil, func() context.Context { ctx, cancel := context.WithCancel(context.Background()); cancel(); return ctx }()} {
 		calls, callbacks := 0, 0
 		service := New(taskCoreClient(func(*http.Request) (*http.Response, error) { calls++; return nil, nil }))
-		got, err := service.RemoveImageRecordTag(ctx, ImageRecordTagRequest{ID: "original"}, "tag", func(*ImageMutationOpts) error { callbacks++; return nil })
+		got, err := service.RemoveImageRecordTag(ctx, ImageRecordTagRequest{ID: "original"}, "tag", request.Custom(func(*ImageMutationOpts) error { callbacks++; return nil }))
 		if got != nil || err == nil || calls != 0 || callbacks != 0 {
 			t.Fatal(got, err, calls, callbacks)
 		}
@@ -430,7 +431,7 @@ func TestImageRecordTagPreflightAndGuardedCallbacks(t *testing.T) {
 			calls, later := 0, 0
 			client := taskCoreClient(func(*http.Request) (*http.Response, error) { calls++; return nil, nil })
 			service := New(client)
-			got, err := service.AddImageRecordTag(ctx, ImageRecordTagRequest{ID: "original"}, "tag", func(*ImageMutationOpts) error {
+			got, err := service.AddImageRecordTag(ctx, ImageRecordTagRequest{ID: "original"}, "tag", request.Custom(func(*ImageMutationOpts) error {
 				switch mode {
 				case "cancel":
 					cancel(marker)
@@ -442,7 +443,7 @@ func TestImageRecordTagPreflightAndGuardedCallbacks(t *testing.T) {
 					invalidOuter = true
 				}
 				return nil
-			}, func(*ImageMutationOpts) error { later++; return nil })
+			}), request.Custom(func(*ImageMutationOpts) error { later++; return nil }))
 			if got != nil || err == nil || calls != 0 || later != 0 {
 				t.Fatal(got, err, calls, later)
 			}

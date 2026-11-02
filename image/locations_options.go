@@ -3,6 +3,9 @@ package image
 import (
 	"maps"
 	"unicode/utf8"
+
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 // ImageLocationValidation supplies literal hash values to the server's location
@@ -19,71 +22,71 @@ type AddImageLocationOpts struct {
 	Headers        map[string]string
 }
 
-type AddImageLocationOption func(*AddImageLocationOpts) error
+// AddImageLocationOption is one option of AddImageLocation:
+// WithAddImageLocationOpts, WithImageLocationValidation,
+// WithAddImageLocationHeaders (merges), request.Header (merges one header) or
+// request.Custom over *AddImageLocationOpts. Other shared calls, including
+// request.Headers and request.Field, fail with resource.ErrInvalidOption
+// before HTTP.
+type AddImageLocationOption = request.WriteCall
 
 // GetImageLocationsOpts supplies ordinary headers for one finite locations GET.
 type GetImageLocationsOpts struct {
 	Headers map[string]string
 }
 
-type GetImageLocationsOption func(*GetImageLocationsOpts) error
+// GetImageLocationsOption is one option of GetImageLocations:
+// WithGetImageLocationsOpts, WithGetImageLocationsHeaders (merges),
+// request.Header (merges one header) or request.Custom over
+// *GetImageLocationsOpts. Other shared calls, including request.Headers, fail
+// with resource.ErrInvalidOption before HTTP.
+type GetImageLocationsOption = request.GetCall
+
+var (
+	addImageLocationCalls  = calls.Spec[AddImageLocationOpts]{Header: calls.MergeHeader[AddImageLocationOpts](WithAddImageLocationHeaders)}
+	getImageLocationsCalls = calls.Spec[GetImageLocationsOpts]{Header: calls.MergeHeader[GetImageLocationsOpts](WithGetImageLocationsHeaders)}
+)
 
 // WithAddImageLocationOpts snapshots and replaces the complete typed policy.
 func WithAddImageLocationOpts(value AddImageLocationOpts) AddImageLocationOption {
 	snapshot := copyAddImageLocationOpts(value)
-	return func(config *AddImageLocationOpts) error { *config = copyAddImageLocationOpts(snapshot); return nil }
+	return request.Custom(func(config *AddImageLocationOpts) error { *config = copyAddImageLocationOpts(snapshot); return nil })
 }
 
 // WithImageLocationValidation supplies both literal hash fields. No algorithm,
 // hex, whitespace or case normalization is performed by the SDK.
 func WithImageLocationValidation(algorithm, value string) AddImageLocationOption {
-	return func(config *AddImageLocationOpts) error {
+	return request.Custom(func(config *AddImageLocationOpts) error {
 		config.ValidationData = &ImageLocationValidation{OSHashAlgo: algorithm, OSHashValue: value}
 		return nil
-	}
-}
-
-// WithAddImageLocationHeader adds one ordinary header; later applications win.
-func WithAddImageLocationHeader(key, value string) AddImageLocationOption {
-	apply := WithImageMutationHeader(key, value)
-	return func(config *AddImageLocationOpts) error {
-		return applyImageLocationHeader(&config.Headers, apply)
-	}
+	})
 }
 
 // WithAddImageLocationHeaders snapshots and merges ordinary headers, rejecting
 // conflicting aliases within the supplied map.
 func WithAddImageLocationHeaders(values map[string]string) AddImageLocationOption {
-	apply := WithImageMutationHeaders(values)
-	return func(config *AddImageLocationOpts) error {
+	apply := mergeImageMutationHeaders(values)
+	return request.Custom(func(config *AddImageLocationOpts) error {
 		return applyImageLocationHeader(&config.Headers, apply)
-	}
+	})
 }
 
 // WithGetImageLocationsOpts snapshots and replaces the complete typed policy.
 func WithGetImageLocationsOpts(value GetImageLocationsOpts) GetImageLocationsOption {
 	snapshot := copyGetImageLocationsOpts(value)
-	return func(config *GetImageLocationsOpts) error { *config = copyGetImageLocationsOpts(snapshot); return nil }
-}
-
-// WithGetImageLocationsHeader adds one ordinary header; later applications win.
-func WithGetImageLocationsHeader(key, value string) GetImageLocationsOption {
-	apply := WithImageMutationHeader(key, value)
-	return func(config *GetImageLocationsOpts) error {
-		return applyImageLocationHeader(&config.Headers, apply)
-	}
+	return request.Custom(func(config *GetImageLocationsOpts) error { *config = copyGetImageLocationsOpts(snapshot); return nil })
 }
 
 // WithGetImageLocationsHeaders snapshots and merges ordinary headers, rejecting
 // conflicting aliases within the supplied map.
 func WithGetImageLocationsHeaders(values map[string]string) GetImageLocationsOption {
-	apply := WithImageMutationHeaders(values)
-	return func(config *GetImageLocationsOpts) error {
+	apply := mergeImageMutationHeaders(values)
+	return request.Custom(func(config *GetImageLocationsOpts) error {
 		return applyImageLocationHeader(&config.Headers, apply)
-	}
+	})
 }
 
-func applyImageLocationHeader(headers *map[string]string, apply ImageMutationOption) error {
+func applyImageLocationHeader(headers *map[string]string, apply func(*ImageMutationOpts) error) error {
 	config := ImageMutationOpts{Headers: *headers}
 	if err := apply(&config); err != nil {
 		return err
@@ -111,7 +114,7 @@ func copyGetImageLocationsOpts(value GetImageLocationsOpts) GetImageLocationsOpt
 
 func parseAddImageLocationOptions(options []AddImageLocationOption) (AddImageLocationOpts, error) {
 	config := copyAddImageLocationOpts(AddImageLocationOpts{})
-	for _, apply := range options {
+	for _, apply := range calls.Translate(options, addImageLocationCalls) {
 		if apply == nil {
 			return config, uploadInvalid("nil add image location option")
 		}
@@ -133,7 +136,7 @@ func parseAddImageLocationOptions(options []AddImageLocationOption) (AddImageLoc
 
 func parseGetImageLocationsOptions(options []GetImageLocationsOption) (GetImageLocationsOpts, error) {
 	config := copyGetImageLocationsOpts(GetImageLocationsOpts{})
-	for _, apply := range options {
+	for _, apply := range calls.Translate(options, getImageLocationsCalls) {
 		if apply == nil {
 			return config, uploadInvalid("nil get image locations option")
 		}

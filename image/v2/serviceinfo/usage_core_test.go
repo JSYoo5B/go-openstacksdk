@@ -29,7 +29,7 @@ func TestUsageCoreCurrentProjectRouteAndEmptyUsage(t *testing.T) {
 			}
 			return infoResponse(req, body), nil
 		})
-		value, err := New(client).GetUsageInfo(context.Background(), WithGetUsageInfoHeader("X-Extra", "owned"))
+		value, err := New(client).GetUsageInfo(context.Background(), request.Header("X-Extra", "owned"))
 		if err != nil || value == nil || value.Usage == nil || value.StatusCode != 200 || value.Header.Get("X-Actual") != "owned" || requests != 1 || body.closes != 1 {
 			t.Fatalf("value=%+v err=%v requests=%d closes=%d", value, err, requests, body.closes)
 		}
@@ -89,8 +89,8 @@ func TestUsageCoreAcceptedSchemaFailuresKeepEvidence(t *testing.T) {
 func TestUsageCoreOptionsPreflightAndOwnership(t *testing.T) {
 	custom := errors.New("option cause")
 	for _, option := range []GetUsageInfoOption{
-		nil, func(*request.Config[GetUsageInfoOpts]) error { return custom }, request.WithQuery[GetUsageInfoOpts]("project_id", "other"), request.WithField[GetUsageInfoOpts]("usage", true), request.WithArgument[GetUsageInfoOpts]("microversion", "2.8"),
-		WithGetUsageInfoHeader("Authorization", "replacement"), WithGetUsageInfoHeader("Accept", "text/plain"), WithGetUsageInfoHeader("OpenStack-API-Version", "image 2.8"), WithGetUsageInfoHeader("Bad Name", "value"), WithGetUsageInfoHeader("X-Extra", "bad\x00value"), WithGetUsageInfoHeader("X-Extra", "bad\xffvalue"),
+		nil, request.Custom(func(*request.Config[GetUsageInfoOpts]) error { return custom }), request.Custom(request.WithQuery[GetUsageInfoOpts]("project_id", "other")), request.Custom(request.WithField[GetUsageInfoOpts]("usage", true)), request.Custom(request.WithArgument[GetUsageInfoOpts]("microversion", "2.8")),
+		request.Header("Authorization", "replacement"), request.Header("Accept", "text/plain"), request.Header("OpenStack-API-Version", "image 2.8"), request.Header("Bad Name", "value"), request.Header("X-Extra", "bad\x00value"), request.Header("X-Extra", "bad\xffvalue"),
 	} {
 		var requests int
 		client := infoClient(func(req *http.Request) (*http.Response, error) {
@@ -112,7 +112,7 @@ func TestUsageCoreOptionsPreflightAndOwnership(t *testing.T) {
 		{nil, infoClient(nil), resource.ErrInvalidOption}, {ctx, infoClient(nil), custom}, {context.Background(), nil, resource.ErrInvalidOption}, {context.Background(), &gophercloud.ServiceClient{}, resource.ErrInvalidOption},
 	} {
 		var callbacks int
-		value, err := New(test.client).GetUsageInfo(test.ctx, func(*request.Config[GetUsageInfoOpts]) error { callbacks++; return nil })
+		value, err := New(test.client).GetUsageInfo(test.ctx, request.Custom(func(*request.Config[GetUsageInfoOpts]) error { callbacks++; return nil }))
 		if value != nil || !errors.Is(err, test.cause) || callbacks != 0 {
 			t.Fatalf("preflight called option: value=%+v err=%v callbacks=%d", value, err, callbacks)
 		}
@@ -120,18 +120,18 @@ func TestUsageCoreOptionsPreflightAndOwnership(t *testing.T) {
 	var retained *request.Config[GetUsageInfoOpts]
 	var callbacks int
 	headers, err := prepareGetUsageInfo([]GetUsageInfoOption{
-		func(config *request.Config[GetUsageInfoOpts]) error {
+		request.Custom(func(config *request.Config[GetUsageInfoOpts]) error {
 			callbacks++
 			retained = config
 			config.Headers["X-Extra"] = "owned"
 			return nil
-		},
-		func(*request.Config[GetUsageInfoOpts]) error {
+		}),
+		request.Custom(func(*request.Config[GetUsageInfoOpts]) error {
 			callbacks++
 			retained.Headers["X-Extra"] = "changed"
 			retained.Query.Set("project_id", "other")
 			return nil
-		},
+		}),
 	})
 	if err != nil || callbacks != 2 || headers["X-Extra"] != "owned" {
 		t.Fatal("later callback changed prepared ownership", headers, callbacks, err)
@@ -140,7 +140,7 @@ func TestUsageCoreOptionsPreflightAndOwnership(t *testing.T) {
 	if headers["X-Extra"] != "owned" {
 		t.Fatal("prepared headers alias retained callback", headers)
 	}
-	option := WithGetUsageInfoHeader("X-Reusable", "owned")
+	option := request.Header("X-Reusable", "owned")
 	var group sync.WaitGroup
 	for range 8 {
 		group.Add(1)
@@ -214,13 +214,13 @@ func TestUsageCoreCapturedSourceAndNativeRetry(t *testing.T) {
 		retries++
 		return nil
 	}
-	value, err := New(client).GetUsageInfo(context.Background(), func(*request.Config[GetUsageInfoOpts]) error {
+	value, err := New(client).GetUsageInfo(context.Background(), request.Custom(func(*request.Config[GetUsageInfoOpts]) error {
 		callbacks++
 		client.ResourceBase = "https://example.test/other/v2/"
 		client.MoreHeaders["X-Source"] = "after"
 		client.SetToken("after")
 		return nil
-	})
+	}))
 	if err != nil || value == nil || value.Usage == nil || requests != 2 || callbacks != 1 || retries != 1 {
 		t.Fatalf("value=%+v err=%v requests=%d callbacks=%d retries=%d", value, err, requests, callbacks, retries)
 	}
@@ -236,7 +236,7 @@ func TestUsageCoreCapturedSourceAndNativeRetry(t *testing.T) {
 			requests++
 			return infoResponse(req, http.NoBody), nil
 		})
-		value, err := New(client).GetUsageInfo(context.Background(), func(*request.Config[GetUsageInfoOpts]) error { tamper(client); return nil })
+		value, err := New(client).GetUsageInfo(context.Background(), request.Custom(func(*request.Config[GetUsageInfoOpts]) error { tamper(client); return nil }))
 		if value != nil || !errors.Is(err, resource.ErrInvalidOption) || requests != 0 {
 			t.Fatalf("source retarget reached HTTP: value=%+v err=%v requests=%d", value, err, requests)
 		}

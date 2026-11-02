@@ -7,8 +7,10 @@ import (
 	"net/http"
 	"slices"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 // GetSchemaRecord reads one fixed schema using its pinned Schema/MetadefSchema
@@ -67,16 +69,16 @@ func (s *Service) GetSchemaRecord(ctx context.Context, kind SchemaKind, options 
 		return fail(err)
 	}
 	guarded := slices.Clone(options)
-	for i, apply := range guarded {
+	for i, apply := range calls.Translate(options, getSchemaCalls) {
 		if apply == nil {
 			continue
 		}
-		guarded[i] = func(config *GetSchemaOpts) error {
+		guarded[i] = request.Custom(func(config *GetSchemaOpts) error {
 			if err := check(opctx); err != nil {
 				return err
 			}
 			return errors.Join(apply(config), check(opctx))
-		}
+		})
 	}
 	prepared, err := s.prepareSchema(opctx, guarded)
 	if err = errors.Join(err, check(opctx)); err != nil {

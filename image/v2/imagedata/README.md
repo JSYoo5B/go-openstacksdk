@@ -16,12 +16,12 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/imagedata.API.StageKnownImage`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/imagedata.WithStageOpts`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/imagedata.WithStageSize`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/imagedata.WithStageHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/imagedata.WithStageHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.StageImageRecord`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.StageImageRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordStageOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordStageHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordStageHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordStageSize`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithoutImageRecordStageSize`
@@ -183,12 +183,13 @@ import (
     "github.com/gophercloud/gophercloud/v2"
     "github.com/JSYoo5B/go-openstacksdk/image/v2/imagedata"
     "github.com/JSYoo5B/go-openstacksdk/image/v2/images"
+    "github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 func stageKnownImage(ctx context.Context, client *gophercloud.ServiceClient, image *images.Image, data io.Reader, remainingBytes int64) (*imagedata.StageImageResult, error) {
     return imagedata.New(client).StageKnownImage(ctx, image, data,
         imagedata.WithStageSize(remainingBytes),
-        imagedata.WithStageHeader("X-Trace", "stage-image"),
+        request.Header("X-Trace", "stage-image"),
     )
 }
 ```

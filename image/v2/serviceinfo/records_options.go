@@ -13,13 +13,20 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 // ImportRecordOpts provides ordinary caller headers for the fixed import route.
 type ImportRecordOpts struct{ Headers map[string]string }
-type ImportRecordOption func(*ImportRecordOpts) error
+
+// ImportRecordOption is one option of GetImportRecord: WithImportRecordOpts,
+// WithImportRecordHeaders (validates and merges the map), request.Header or
+// request.Custom over *ImportRecordOpts. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type ImportRecordOption = request.GetCall
 
 // StoreRecordListOpts controls owned basic store discovery. Nil Limit is
 // omitted; an explicit zero is sent without marker fallback. Nil Paginated
@@ -34,7 +41,15 @@ type StoreRecordListOpts struct {
 	Paginated *bool
 	Filters   map[string]json.RawMessage
 }
-type StoreRecordListOption func(*StoreRecordListOpts) error
+
+// StoreRecordListOption is one option of ListStoreRecords:
+// WithStoreRecordListOpts, WithStoreRecordListHeaders (validates and merges
+// the map), WithStoreRecordListDetails, WithStoreRecordListFilter,
+// WithStoreRecordListFilters, request.Header, request.Limit, request.Marker,
+// request.MaxItems, request.Paginated or request.Custom over
+// *StoreRecordListOpts. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type StoreRecordListOption = request.ListCall
 
 func copyRecordHeaders(value map[string]string) map[string]string {
 	result := maps.Clone(value)
@@ -88,42 +103,34 @@ func mergeRecordHeaders(target *map[string]string, values map[string]string) err
 // WithImportRecordOpts snapshots and replaces the complete concrete policy.
 func WithImportRecordOpts(value ImportRecordOpts) ImportRecordOption {
 	owned := copyImportRecordOpts(value)
-	return func(config *ImportRecordOpts) error { *config = copyImportRecordOpts(owned); return nil }
-}
-func WithImportRecordHeader(key, value string) ImportRecordOption {
-	return func(config *ImportRecordOpts) error {
-		return mergeRecordHeaders(&config.Headers, map[string]string{key: value})
-	}
+	return request.Custom(func(config *ImportRecordOpts) error { *config = copyImportRecordOpts(owned); return nil })
 }
 func WithImportRecordHeaders(values map[string]string) ImportRecordOption {
 	owned := copyRecordHeaders(values)
-	return func(config *ImportRecordOpts) error { return mergeRecordHeaders(&config.Headers, owned) }
+	return request.Custom(func(config *ImportRecordOpts) error { return mergeRecordHeaders(&config.Headers, owned) })
 }
 func WithStoreRecordListOpts(value StoreRecordListOpts) StoreRecordListOption {
 	owned := copyStoreRecordListOpts(value)
-	return func(config *StoreRecordListOpts) error { *config = copyStoreRecordListOpts(owned); return nil }
-}
-func WithStoreRecordListHeader(key, value string) StoreRecordListOption {
-	return func(config *StoreRecordListOpts) error {
-		return mergeRecordHeaders(&config.Headers, map[string]string{key: value})
-	}
+	return request.Custom(func(config *StoreRecordListOpts) error { *config = copyStoreRecordListOpts(owned); return nil })
 }
 func WithStoreRecordListHeaders(values map[string]string) StoreRecordListOption {
 	owned := copyRecordHeaders(values)
-	return func(config *StoreRecordListOpts) error { return mergeRecordHeaders(&config.Headers, owned) }
+	return request.Custom(func(config *StoreRecordListOpts) error { return mergeRecordHeaders(&config.Headers, owned) })
 }
-func WithStoreRecordListLimit(value int) StoreRecordListOption {
-	return func(config *StoreRecordListOpts) error { owned := value; config.Limit = &owned; return nil }
-}
-func WithStoreRecordListMarker(value string) StoreRecordListOption {
-	return func(config *StoreRecordListOpts) error { config.Marker = value; return nil }
-}
-func WithStoreRecordListMaxItems(value int) StoreRecordListOption {
-	return func(config *StoreRecordListOpts) error { config.MaxItems = value; return nil }
-}
-func WithStoreRecordListPaginated(value bool) StoreRecordListOption {
-	return func(config *StoreRecordListOpts) error { owned := value; config.Paginated = &owned; return nil }
-}
+
+var (
+	importRecordCalls    = calls.Spec[ImportRecordOpts]{Header: calls.MergeHeader[ImportRecordOpts](WithImportRecordHeaders)}
+	storeRecordListCalls = calls.Spec[StoreRecordListOpts]{
+		Header: calls.MergeHeader[StoreRecordListOpts](WithStoreRecordListHeaders),
+		Paging: calls.Paging[StoreRecordListOpts]{
+			Limit:     calls.Pointer(func(o *StoreRecordListOpts) **int { return &o.Limit }),
+			Marker:    calls.Value(func(o *StoreRecordListOpts) *string { return &o.Marker }),
+			MaxItems:  calls.Value(func(o *StoreRecordListOpts) *int { return &o.MaxItems }),
+			Paginated: calls.Pointer(func(o *StoreRecordListOpts) **bool { return &o.Paginated }),
+		},
+	}
+)
+
 func storeRecordFilterKnown(key string) bool {
 	// Source Body filtering tests class attribute names; the remote spelling
 	// "default" is not a declared class attribute and remains unknown here.
@@ -136,11 +143,11 @@ func storeRecordFilterKnown(key string) bool {
 }
 func WithStoreRecordListFilter(field string, value any) StoreRecordListOption {
 	if !storeRecordFilterKnown(field) {
-		return func(*StoreRecordListOpts) error { return nil }
+		return request.Custom(func(*StoreRecordListOpts) error { return nil })
 	}
 	raw, encodeErr := json.Marshal(value)
 	owned := bytes.Clone(raw)
-	return func(config *StoreRecordListOpts) error {
+	return request.Custom(func(config *StoreRecordListOpts) error {
 		if encodeErr != nil {
 			return fmt.Errorf("%w: store filter %q: %w", resource.ErrInvalidOption, field, encodeErr)
 		}
@@ -149,7 +156,7 @@ func WithStoreRecordListFilter(field string, value any) StoreRecordListOption {
 		}
 		config.Filters[field] = bytes.Clone(owned)
 		return nil
-	}
+	})
 }
 func WithStoreRecordListFilters(values map[string]any) StoreRecordListOption {
 	owned := make(map[string]json.RawMessage, len(values))
@@ -165,7 +172,7 @@ func WithStoreRecordListFilters(values map[string]any) StoreRecordListOption {
 		}
 		owned[key] = bytes.Clone(raw)
 	}
-	return func(config *StoreRecordListOpts) error {
+	return request.Custom(func(config *StoreRecordListOpts) error {
 		if encodeErr != nil {
 			return encodeErr
 		}
@@ -176,12 +183,12 @@ func WithStoreRecordListFilters(values map[string]any) StoreRecordListOption {
 			config.Filters[key] = bytes.Clone(raw)
 		}
 		return nil
-	}
+	})
 }
 
 func prepareImportRecord(ctx context.Context, check func(context.Context) error, options []ImportRecordOption) (map[string]string, error) {
 	value := copyImportRecordOpts(ImportRecordOpts{})
-	for _, apply := range options {
+	for _, apply := range calls.Translate(options, importRecordCalls) {
 		if err := check(ctx); err != nil {
 			return nil, err
 		}
@@ -208,7 +215,7 @@ type storeRecordListParameters struct {
 
 func prepareStoreRecordList(ctx context.Context, check func(context.Context) error, options []StoreRecordListOption) (storeRecordListParameters, error) {
 	value := copyStoreRecordListOpts(StoreRecordListOpts{})
-	for _, apply := range options {
+	for _, apply := range calls.Translate(options, storeRecordListCalls) {
 		if err := check(ctx); err != nil {
 			return storeRecordListParameters{}, err
 		}

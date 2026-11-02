@@ -9,8 +9,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 const (
@@ -28,7 +30,18 @@ type ImageRecordCloudDeleteOpts struct {
 	Unlimited    bool
 	PollInterval *time.Duration
 }
-type ImageRecordCloudDeleteOption func(*ImageRecordCloudDeleteOpts) error
+
+// ImageRecordCloudDeleteOption is one option of DeleteCloudImageRecord:
+// WithImageRecordCloudDeleteOpts, WithImageRecordCloudDeleteHeaders (merges),
+// the wait, timeout and poll options, request.Header (merges one header) or
+// request.Custom over *ImageRecordCloudDeleteOpts. Other shared calls,
+// including request.Headers and request.IgnoreMissing, fail with
+// resource.ErrInvalidOption before HTTP.
+type ImageRecordCloudDeleteOption = request.DeleteCall
+
+var imageRecordCloudDeleteCalls = calls.Spec[ImageRecordCloudDeleteOpts]{
+	Header: calls.MergeHeader[ImageRecordCloudDeleteOpts](WithImageRecordCloudDeleteHeaders),
+}
 
 func copyImageRecordCloudDelete(value ImageRecordCloudDeleteOpts) ImageRecordCloudDeleteOpts {
 	wait := copyImageRecordCloudWait(ImageRecordCloudWaitOpts{Headers: value.Headers, Timeout: value.Timeout, PollInterval: value.PollInterval})
@@ -37,47 +50,42 @@ func copyImageRecordCloudDelete(value ImageRecordCloudDeleteOpts) ImageRecordClo
 }
 func WithImageRecordCloudDeleteOpts(value ImageRecordCloudDeleteOpts) ImageRecordCloudDeleteOption {
 	owned := copyImageRecordCloudDelete(value)
-	return func(config *ImageRecordCloudDeleteOpts) error {
+	return request.Custom(func(config *ImageRecordCloudDeleteOpts) error {
 		*config = copyImageRecordCloudDelete(owned)
 		return nil
-	}
-}
-func WithImageRecordCloudDeleteHeader(key, value string) ImageRecordCloudDeleteOption {
-	return func(config *ImageRecordCloudDeleteOpts) error {
-		return mergeImageRecordHeaders(&config.Headers, map[string]string{key: value})
-	}
+	})
 }
 func WithImageRecordCloudDeleteHeaders(values map[string]string) ImageRecordCloudDeleteOption {
 	owned := copyImageRecordHeaders(values)
-	return func(config *ImageRecordCloudDeleteOpts) error { return mergeImageRecordHeaders(&config.Headers, owned) }
+	return request.Custom(func(config *ImageRecordCloudDeleteOpts) error { return mergeImageRecordHeaders(&config.Headers, owned) })
 }
 func WithImageRecordCloudDeleteWait(value bool) ImageRecordCloudDeleteOption {
-	return func(config *ImageRecordCloudDeleteOpts) error { config.Wait = value; return nil }
+	return request.Custom(func(config *ImageRecordCloudDeleteOpts) error { config.Wait = value; return nil })
 }
 func WithImageRecordCloudDeleteTimeout(value time.Duration) ImageRecordCloudDeleteOption {
-	return func(config *ImageRecordCloudDeleteOpts) error {
+	return request.Custom(func(config *ImageRecordCloudDeleteOpts) error {
 		owned := value
 		config.Timeout, config.Unlimited = &owned, false
 		return nil
-	}
+	})
 }
 func WithImageRecordCloudDeleteUnlimited() ImageRecordCloudDeleteOption {
-	return func(config *ImageRecordCloudDeleteOpts) error {
+	return request.Custom(func(config *ImageRecordCloudDeleteOpts) error {
 		config.Timeout, config.Unlimited = nil, true
 		return nil
-	}
+	})
 }
 func WithImageRecordCloudDeletePollInterval(value time.Duration) ImageRecordCloudDeleteOption {
-	return func(config *ImageRecordCloudDeleteOpts) error {
+	return request.Custom(func(config *ImageRecordCloudDeleteOpts) error {
 		owned := value
 		config.PollInterval = &owned
 		return nil
-	}
+	})
 }
 
 func prepareImageRecordCloudDelete(ctx context.Context, check func(context.Context) error, options []ImageRecordCloudDeleteOption) (ImageRecordCloudDeleteOpts, ImageRecordCloudWaitOpts, error) {
 	value := copyImageRecordCloudDelete(ImageRecordCloudDeleteOpts{})
-	for _, apply := range options {
+	for _, apply := range calls.Translate(options, imageRecordCloudDeleteCalls) {
 		if err := check(ctx); err != nil {
 			return value, ImageRecordCloudWaitOpts{}, err
 		}

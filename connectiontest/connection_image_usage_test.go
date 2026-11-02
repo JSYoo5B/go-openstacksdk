@@ -5,11 +5,11 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/gophercloud/gophercloud/v2"
-
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
+	"github.com/gophercloud/gophercloud/v2"
 )
 
 func TestConnectionImageUsageSharesServiceInfoAndCurrentProject(t *testing.T) {
@@ -57,12 +57,12 @@ func TestConnectionImageUsageSharesServiceInfoAndCurrentProject(t *testing.T) {
 			t.Fatalf("metric=%+v", metric)
 		}
 	}
-	first, err := versioned.ServiceInfo.GetUsageInfo(ctx, serviceinfo.WithGetUsageInfoHeader("X-Call", "versioned"))
+	first, err := versioned.ServiceInfo.GetUsageInfo(ctx, request.Header("X-Call", "versioned"))
 	check(first, err)
 	*first.Usage["image_size_total"].Limit = 1
 	first.Body["vendor"][0] = '0'
 	provider.SetToken("second-project-token")
-	second, err := upper.API.ServiceInfo.GetUsageInfo(ctx, serviceinfo.WithGetUsageInfoHeader("X-Call", "upper"))
+	second, err := upper.API.ServiceInfo.GetUsageInfo(ctx, request.Header("X-Call", "upper"))
 	check(second, err)
 	if calls != 2 || client.ProviderClient != provider {
 		t.Fatalf("requests=%d provider=%p", calls, client.ProviderClient)

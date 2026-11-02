@@ -12,6 +12,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -158,11 +159,11 @@ func TestImageMembersCoreFiniteLazyListAndConsumedRows(t *testing.T) {
 			}
 			return deleteCoreHTTP(200, io.NopCloser(strings.NewReader(`{"members": [{"member_id":"a"},{"member_id":"b"}],"next":"https://foreign.test/next","links":false,"schema":[]}`)), nil), nil
 		})
-		seq := New(client).ListImageMembers(context.Background(), resource.ID("image"), WithListImageMembersMaxItems(cap), func(config *ListImageMembersOpts) error {
+		seq := New(client).ListImageMembers(context.Background(), resource.ID("image"), request.MaxItems(cap), request.Custom(func(config *ListImageMembersOpts) error {
 			callbacks++
 			config.Headers["X-Policy"] = "owned"
 			return nil
-		})
+		}))
 		if calls != 0 || callbacks != 0 {
 			t.Fatal("not lazy")
 		}
@@ -192,7 +193,7 @@ func TestImageMembersCoreFiniteLazyListAndConsumedRows(t *testing.T) {
 			return deleteCoreHTTP(200, io.NopCloser(strings.NewReader(payload)), http.Header{"X-Actual": {"whole"}}), nil
 		})
 		service := New(client)
-		rows, err := service.AllImageMembers(context.Background(), resource.ID("image"), WithListImageMembersMaxItems(1))
+		rows, err := service.AllImageMembers(context.Background(), resource.ID("image"), request.MaxItems(1))
 		if err != nil || len(rows) != 1 {
 			t.Fatal(rows, err)
 		}
@@ -240,11 +241,11 @@ func TestImageMembersCoreCompletePreflightAndParentMissing(t *testing.T) {
 			var err error
 			switch action {
 			case "add":
-				_, err = service.AddImageMember(context.Background(), resource.Name("parent"), id, option)
+				_, err = service.AddImageMember(context.Background(), resource.Name("parent"), id, request.Custom(option))
 			case "get":
-				_, err = service.GetImageMember(context.Background(), resource.Name("parent"), id, option)
+				_, err = service.GetImageMember(context.Background(), resource.Name("parent"), id, request.Custom(option))
 			case "update":
-				_, err = service.UpdateImageMember(context.Background(), resource.Name("parent"), id, "accepted", option)
+				_, err = service.UpdateImageMember(context.Background(), resource.Name("parent"), id, "accepted", request.Custom(option))
 			case "find":
 				_, err = service.FindImageMember(context.Background(), resource.Name("parent"), id)
 			case "remove":
@@ -256,14 +257,14 @@ func TestImageMembersCoreCompletePreflightAndParentMissing(t *testing.T) {
 		}
 	}
 	for _, status := range []string{"", "Accepted", " accepted", "accepted ", "unknown"} {
-		if _, err := service.UpdateImageMember(context.Background(), resource.Name("parent"), "member", status, option); !errors.Is(err, resource.ErrInvalidOption) {
+		if _, err := service.UpdateImageMember(context.Background(), resource.Name("parent"), "member", status, request.Custom(option)); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(status, err)
 		}
 	}
-	if _, err := service.GetImageMember(nil, resource.ID("image"), "member", option); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := service.GetImageMember(nil, resource.ID("image"), "member", request.Custom(option)); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
-	if _, err := service.AllImageMembers(context.Background(), resource.Name("parent"), WithListImageMembersMaxItems(-1)); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := service.AllImageMembers(context.Background(), resource.Name("parent"), request.MaxItems(-1)); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
 	if calls != 0 || callbacks != 0 {
@@ -369,13 +370,13 @@ func TestImageMembersCoreOwnedBodyFailuresAndPhysical404(t *testing.T) {
 			}
 			var err error
 			if operation == "find" {
-				value, failure := New(client).FindImageMember(context.Background(), resource.ID("image"), "member", WithFindImageMemberIgnoreMissing(!strict))
+				value, failure := New(client).FindImageMember(context.Background(), resource.ID("image"), "member", request.IgnoreMissing(!strict))
 				err = failure
 				if value != nil {
 					t.Fatal(value)
 				}
 			} else {
-				value, failure := New(client).RemoveImageMember(context.Background(), resource.ID("image"), "member", WithRemoveImageMemberIgnoreMissing(!strict))
+				value, failure := New(client).RemoveImageMember(context.Background(), resource.ID("image"), "member", request.IgnoreMissing(!strict))
 				err = failure
 				if value != nil {
 					t.Fatal(value)
@@ -403,14 +404,14 @@ func TestImageMembersCoreCapturedSourceAndRequestOwnership(t *testing.T) {
 		return deleteCoreHTTP(200, io.NopCloser(strings.NewReader(`{}`)), nil), nil
 	})
 	client.MoreHeaders = map[string]string{"X-Snapshot": "before"}
-	value, err := New(client).GetImageMember(context.Background(), resource.ID("image"), "member", func(config *ImageMemberOpts) error {
+	value, err := New(client).GetImageMember(context.Background(), resource.ID("image"), "member", request.Custom(func(config *ImageMemberOpts) error {
 		retained = config
 		config.Headers["X-A"] = "owned"
 		client.MoreHeaders["X-Snapshot"] = "changed"
 		client.ResourceBase = "https://example.test/later/"
 		client.ProviderClient.SetToken("after")
 		return nil
-	})
+	}))
 	if value == nil || err != nil {
 		t.Fatal(value, err)
 	}
@@ -428,7 +429,7 @@ func TestImageMembersCoreCapturedSourceAndRequestOwnership(t *testing.T) {
 		})
 		service := New(client)
 		if mode == "provider-before" {
-			_, err = service.GetImageMember(context.Background(), resource.ID("image"), "member", func(*ImageMemberOpts) error { client.ProviderClient = &gophercloud.ProviderClient{}; return nil })
+			_, err = service.GetImageMember(context.Background(), resource.ID("image"), "member", request.Custom(func(*ImageMemberOpts) error { client.ProviderClient = &gophercloud.ProviderClient{}; return nil }))
 			if calls != 0 || !errors.Is(err, resource.ErrInvalidOption) {
 				t.Fatal(mode, err, calls)
 			}

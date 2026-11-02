@@ -9,7 +9,9 @@ import (
 	"slices"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 // ImageRecordPropertiesOpts owns ordered kwargs and raw metadata objects.
@@ -22,43 +24,47 @@ type ImageRecordPropertiesOpts struct {
 	Meta       json.RawMessage
 }
 
-type ImageRecordPropertiesOption func(*ImageRecordPropertiesOpts) error
+// ImageRecordPropertiesOption is one option of the image record property
+// updates: WithImageRecordPropertiesOpts, WithImageRecordPropertiesHeaders
+// (merges), the property options, request.Header (merges one header) or
+// request.Custom over *ImageRecordPropertiesOpts. Other shared calls,
+// including request.Headers and request.Field, fail with
+// resource.ErrInvalidOption before HTTP.
+type ImageRecordPropertiesOption = request.WriteCall
+
+var imageRecordPropertiesCalls = calls.Spec[ImageRecordPropertiesOpts]{
+	Header: calls.MergeHeader[ImageRecordPropertiesOpts](WithImageRecordPropertiesHeaders),
+}
 
 func WithImageRecordPropertiesOpts(value ImageRecordPropertiesOpts) ImageRecordPropertiesOption {
 	snapshot, captureErr := copyImageRecordPropertiesOpts(value)
-	return func(config *ImageRecordPropertiesOpts) error {
+	return request.Custom(func(config *ImageRecordPropertiesOpts) error {
 		if captureErr != nil {
 			return captureErr
 		}
 		owned, err := copyImageRecordPropertiesOpts(snapshot)
 		*config = owned
 		return err
-	}
-}
-
-func WithImageRecordPropertiesHeader(key, value string) ImageRecordPropertiesOption {
-	return func(config *ImageRecordPropertiesOpts) error {
-		return mergeImageRecordHeaders(&config.Headers, map[string]string{key: value})
-	}
+	})
 }
 
 func WithImageRecordPropertiesHeaders(values map[string]string) ImageRecordPropertiesOption {
 	owned := maps.Clone(values)
-	return func(config *ImageRecordPropertiesOpts) error { return mergeImageRecordHeaders(&config.Headers, owned) }
+	return request.Custom(func(config *ImageRecordPropertiesOpts) error { return mergeImageRecordHeaders(&config.Headers, owned) })
 }
 
 // WithImageRecordProperty replaces one kwargs key while preserving its first
 // insertion position. Its Go value is encoded once when this factory is called.
 func WithImageRecordProperty(name string, value any) ImageRecordPropertiesOption {
 	raw, captureErr := captureImageRecordProperty(name, value)
-	return func(config *ImageRecordPropertiesOpts) error {
+	return request.Custom(func(config *ImageRecordPropertiesOpts) error {
 		if captureErr != nil {
 			return captureErr
 		}
 		var err error
 		config.Properties, err = upsertImageRecordProperty(config.Properties, name, raw)
 		return err
-	}
+	})
 }
 
 // WithImageRecordProperties merges sorted Go map keys into kwargs, preserving
@@ -82,7 +88,7 @@ func WithImageRecordProperties(values map[string]any) ImageRecordPropertiesOptio
 		members = append(members, cloudfilter.JSONMember{Key: key, Value: raw})
 	}
 	snapshot := imageRecordPropertyObject(members)
-	return func(config *ImageRecordPropertiesOpts) error {
+	return request.Custom(func(config *ImageRecordPropertiesOpts) error {
 		if captureErr != nil {
 			return captureErr
 		}
@@ -103,46 +109,46 @@ func WithImageRecordProperties(values map[string]any) ImageRecordPropertiesOptio
 		}
 		config.Properties = imageRecordPropertyObject(current)
 		return nil
-	}
+	})
 }
 
 // WithImageRecordPropertiesJSON replaces kwargs with an ordered JSON object.
 // Duplicate names retain their first insertion position and last supplied value.
 func WithImageRecordPropertiesJSON(value json.RawMessage) ImageRecordPropertiesOption {
 	snapshot, captureErr := captureImageRecordPropertyObject(bytes.Clone(value), false)
-	return func(config *ImageRecordPropertiesOpts) error {
+	return request.Custom(func(config *ImageRecordPropertiesOpts) error {
 		if captureErr != nil {
 			return captureErr
 		}
 		config.Properties = bytes.Clone(snapshot)
 		return nil
-	}
+	})
 }
 
 // WithImageRecordPropertyMeta upserts a raw metadata value that bypasses helper
 // conversion and never invokes kernel/ramdisk discovery.
 func WithImageRecordPropertyMeta(name string, value any) ImageRecordPropertiesOption {
 	raw, captureErr := captureImageRecordProperty(name, value)
-	return func(config *ImageRecordPropertiesOpts) error {
+	return request.Custom(func(config *ImageRecordPropertiesOpts) error {
 		if captureErr != nil {
 			return captureErr
 		}
 		var err error
 		config.Meta, err = upsertImageRecordProperty(config.Meta, name, raw)
 		return err
-	}
+	})
 }
 
 // WithImageRecordPropertiesMetaJSON replaces the raw metadata overlay.
 func WithImageRecordPropertiesMetaJSON(value json.RawMessage) ImageRecordPropertiesOption {
 	snapshot, captureErr := captureImageRecordPropertyObject(bytes.Clone(value), true)
-	return func(config *ImageRecordPropertiesOpts) error {
+	return request.Custom(func(config *ImageRecordPropertiesOpts) error {
 		if captureErr != nil {
 			return captureErr
 		}
 		config.Meta = bytes.Clone(snapshot)
 		return nil
-	}
+	})
 }
 
 func captureImageRecordProperty(name string, value any) (json.RawMessage, error) {
@@ -199,7 +205,7 @@ func copyImageRecordPropertiesOpts(value ImageRecordPropertiesOpts) (ImageRecord
 
 func prepareImageRecordPropertiesOptions(ctx context.Context, check func(context.Context) error, options []ImageRecordPropertiesOption) (ImageRecordPropertiesOpts, error) {
 	config, _ := copyImageRecordPropertiesOpts(ImageRecordPropertiesOpts{})
-	for _, apply := range options {
+	for _, apply := range calls.Translate(options, imageRecordPropertiesCalls) {
 		if err := check(ctx); err != nil {
 			return config, err
 		}

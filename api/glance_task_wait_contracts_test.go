@@ -17,6 +17,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/image/v2/tasks"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -489,7 +490,7 @@ func TestGlanceTaskWaitPreflightAndClosedOptions(t *testing.T) {
 	}{
 		{"nil option", nil}, {"zero timeout helper", tasks.WithTaskWaitTimeout(0)}, {"negative timeout", tasks.WithTaskWaitTimeout(-time.Second)},
 		{"zero poll", tasks.WithTaskWaitPollInterval(0)}, {"blank failure", tasks.WithTaskWaitFailureStates(" ")},
-		{"auth", tasks.WithTaskWaitHeader("X-Auth-Token", "forged")}, {"content type", tasks.WithTaskWaitHeader("Content-Type", "text/plain")},
+		{"auth", request.Header("X-Auth-Token", "forged")}, {"content type", request.Header("Content-Type", "text/plain")},
 		{"conflicting case aliases", tasks.WithTaskWaitHeaders(map[string]string{"X-Trace": "first", "x-trace": "second"})},
 	} {
 		if _, err := a.WaitForTask(context.Background(), resource.ID("old"), tc.option); !errors.Is(err, resource.ErrInvalidOption) || calls.Load() != 0 {
@@ -575,7 +576,7 @@ func TestGlanceTaskWaitOptionSnapshotsAndConcurrentReuse(t *testing.T) {
 	}
 	// A retained custom option object is no longer the parsed request policy.
 	var retained *tasks.TaskWaitOpts
-	custom := tasks.TaskWaitOption(func(o *tasks.TaskWaitOpts) error {
+	custom := request.Custom(func(o *tasks.TaskWaitOpts) error {
 		o.Headers = map[string]string{"X-Trace": "owned"}
 		retained = o
 		return nil
@@ -653,7 +654,7 @@ func TestGlanceTaskWaitLiveSourceFixedRoutesAndReauthentication(t *testing.T) {
 			}
 			testcloud.JSON(w, 200, glanceTaskJSON("new", "success", "", `{}`))
 		})
-		v, err := tasks.New(client).WaitForTask(context.WithValue(context.Background(), key{}, "caller"), resource.ID("old"), glanceTaskFast(), tasks.WithTaskWaitHeader("X-Trace", "earlier"), tasks.WithTaskWaitHeader("x-trace", "final"))
+		v, err := tasks.New(client).WaitForTask(context.WithValue(context.Background(), key{}, "caller"), resource.ID("old"), glanceTaskFast(), request.Header("X-Trace", "earlier"), request.Header("x-trace", "final"))
 		if err != nil || v == nil || v.CurrentID != "new" || posts.Load() != 3 || gets.Load() != 2 || middleware.Load() != 5 || reauth.Load() != 1 || retries.Load() != 1 || client.ResourceBase != cloud.Server.URL+glanceTaskPrefix || client.MoreHeaders["X-Source"] != "configured" {
 			t.Fatal(v, err, posts.Load(), gets.Load(), middleware.Load(), reauth.Load(), retries.Load())
 		}
@@ -670,7 +671,7 @@ func TestGlanceTaskWaitLiveSourceFixedRoutesAndReauthentication(t *testing.T) {
 				})
 				opts := []tasks.TaskWaitOption{}
 				if when == "option" {
-					opts = append(opts, func(*tasks.TaskWaitOpts) error { client.Type = "compute"; return nil })
+					opts = append(opts, request.Custom(func(*tasks.TaskWaitOpts) error { client.Type = "compute"; return nil }))
 				} else {
 					transport := cloud.Provider.HTTPClient.Transport
 					cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {

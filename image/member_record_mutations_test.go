@@ -14,6 +14,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -242,7 +243,7 @@ func TestGetImageMemberRecordFreshConstructorAliasesAndAcceptedBodies(t *testing
 				retries++
 				return err
 			}
-			got, err := New(client).GetImageMemberRecord(context.Background(), resource.ID(memberRecordParent), ImageMemberRecordRequest{Record: seed}, WithImageMemberHeader("X-Option", "owned"))
+			got, err := New(client).GetImageMemberRecord(context.Background(), resource.ID(memberRecordParent), ImageMemberRecordRequest{Record: seed}, request.Header("X-Option", "owned"))
 			if got == nil || err != nil || calls != 1 || retries != 0 || body.closes != 1 || (got.Wire != nil) != test.parsed || got.StatusCode != test.code || string(got.Envelope) != test.body || len(got.Resource.Body) != 9 || got.ImageID == nil || *got.ImageID != memberRecordParent {
 				t.Fatal(got, err, calls, retries, body.closes)
 			}
@@ -300,7 +301,7 @@ func TestImageMemberRecordFamilyRejectsNativeStatusesWithoutFakeReceipt(t *testi
 				if operation == "get" {
 					got, err = service.GetImageMemberRecord(context.Background(), resource.ID(memberRecordParent), ImageMemberRecordRequest{ID: "selected"})
 				} else if operation == "remove" {
-					ack, err = service.RemoveImageMemberRecord(context.Background(), resource.ID(memberRecordParent), ImageMemberRecordRequest{ID: "selected"}, WithRemoveImageMemberIgnoreMissing(false))
+					ack, err = service.RemoveImageMemberRecord(context.Background(), resource.ID(memberRecordParent), ImageMemberRecordRequest{ID: "selected"}, request.IgnoreMissing(false))
 				} else {
 					got, err = memberRecordMutationWrite(service, operation == "update", context.Background())
 				}
@@ -422,14 +423,14 @@ func TestImageMemberRecordWriteOptionsAndLocationAreOwned(t *testing.T) {
 				client.MoreHeaders["X-Source"] = "changed in callback"
 				return facts, nil
 			}})
-			got, err := memberRecordMutationWrite(service, update, context.Background(), option, func(config *ImageMemberRecordWriteOpts) error {
+			got, err := memberRecordMutationWrite(service, update, context.Background(), option, request.Custom(func(config *ImageMemberRecordWriteOpts) error {
 				callbacks++
 				retained = config
 				cloud = "after option"
 				facts.Project.ID[1] = 'X'
 				client.SetToken("live")
-				return WithImageMemberRecordWriteHeader("X-Final", "yes")(config)
-			})
+				return applyCall(imageMemberRecordWriteCalls, request.Header("X-Final", "yes"), config)
+			}))
 			if got == nil || err != nil || calls != 1 || callbacks != 1 || locations != 1 {
 				t.Fatal(got, err, calls, callbacks, locations)
 			}
@@ -545,10 +546,10 @@ func TestRemoveImageMemberRecordMissingPolicyHonorsOnlyCleanFinal404(t *testing.
 			}
 			options := []RemoveImageMemberOption{}
 			if mode == "false strict" {
-				options = append(options, WithRemoveImageMemberIgnoreMissing(false))
+				options = append(options, request.IgnoreMissing(false))
 			}
 			if mode == "true ignored" {
-				options = append(options, WithRemoveImageMemberIgnoreMissing(true))
+				options = append(options, request.IgnoreMissing(true))
 			}
 			ack, err := New(client).RemoveImageMemberRecord(ctx, resource.ID(memberRecordParent), ImageMemberRecordRequest{ID: "selected"}, options...)
 			clean := mode == "default ignored" || mode == "true ignored" || mode == "retry clean final"
@@ -669,7 +670,7 @@ func TestImageMemberRecordMutationsAcceptedPhysicalFailuresKeepPartialEvidence(t
 
 func TestImageMemberRecordMutationsFullPreflight(t *testing.T) {
 	for _, update := range []bool{false, true} {
-		for _, option := range []ImageMemberRecordWriteOption{nil, WithImageMemberRecordWriteHeader("X-Auth-Token", "foreign"), WithImageMemberRecordWriteHeader("X-Extra", "\n"), WithImageMemberRecordWriteAttribute("status", make(chan int)), WithImageMemberRecordWriteOpts(ImageMemberRecordWriteOpts{Attributes: []resource.ListOption{resource.WithQuery("status", "bad")}})} {
+		for _, option := range []ImageMemberRecordWriteOption{nil, request.Header("X-Auth-Token", "foreign"), request.Header("X-Extra", "\n"), WithImageMemberRecordWriteAttribute("status", make(chan int)), WithImageMemberRecordWriteOpts(ImageMemberRecordWriteOpts{Attributes: []resource.ListOption{resource.WithQuery("status", "bad")}})} {
 			t.Run(fmt.Sprintf("update=%v/option=%p", update, option), func(t *testing.T) {
 				calls := 0
 				service := New(taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return nil, nil }))
@@ -694,7 +695,7 @@ func TestImageMemberRecordMutationsFullPreflight(t *testing.T) {
 		t.Run(fmt.Sprintf("child=%+v", input), func(t *testing.T) {
 			calls, callbacks := 0, 0
 			service := New(taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return nil, nil }))
-			got, err := service.UpdateImageMemberRecord(context.Background(), resource.ID(memberRecordParent), input, func(*ImageMemberRecordWriteOpts) error { callbacks++; return nil })
+			got, err := service.UpdateImageMemberRecord(context.Background(), resource.ID(memberRecordParent), input, request.Custom(func(*ImageMemberRecordWriteOpts) error { callbacks++; return nil }))
 			if got != nil || err == nil || calls != 0 || callbacks != 0 {
 				t.Fatal(got, err, calls, callbacks)
 			}
@@ -727,13 +728,13 @@ func TestImageMemberRecordMutationsFullPreflight(t *testing.T) {
 				}
 				var err error
 				if operation == "remove" {
-					_, err = service.RemoveImageMemberRecord(ctx, parent, ImageMemberRecordRequest{ID: "selected"}, func(*RemoveImageMemberOpts) error { callbacks++; return nil })
+					_, err = service.RemoveImageMemberRecord(ctx, parent, ImageMemberRecordRequest{ID: "selected"}, request.Custom(func(*RemoveImageMemberOpts) error { callbacks++; return nil }))
 				} else if operation == "get" {
-					_, err = service.GetImageMemberRecord(ctx, parent, ImageMemberRecordRequest{ID: "selected"}, func(*ImageMemberOpts) error { callbacks++; return nil })
+					_, err = service.GetImageMemberRecord(ctx, parent, ImageMemberRecordRequest{ID: "selected"}, request.Custom(func(*ImageMemberOpts) error { callbacks++; return nil }))
 				} else if operation == "update" {
-					_, err = service.UpdateImageMemberRecord(ctx, parent, ImageMemberRecordRequest{ID: "selected"}, func(*ImageMemberRecordWriteOpts) error { callbacks++; return nil })
+					_, err = service.UpdateImageMemberRecord(ctx, parent, ImageMemberRecordRequest{ID: "selected"}, request.Custom(func(*ImageMemberRecordWriteOpts) error { callbacks++; return nil }))
 				} else {
-					_, err = service.AddImageMemberRecord(ctx, parent, func(*ImageMemberRecordWriteOpts) error { callbacks++; return nil })
+					_, err = service.AddImageMemberRecord(ctx, parent, request.Custom(func(*ImageMemberRecordWriteOpts) error { callbacks++; return nil }))
 				}
 				if err == nil || calls != 0 || callbacks != 0 {
 					t.Fatal(err, calls, callbacks)
@@ -789,23 +790,23 @@ func TestImageMemberRecordFamilyReusesExplicitParentNameLookup(t *testing.T) {
 				parent := resource.Name("needle")
 				writeOption := func(config *ImageMemberRecordWriteOpts) error {
 					callbacks++
-					return WithImageMemberRecordWriteHeader("X-Call", "parent")(config)
+					return applyCall(imageMemberRecordWriteCalls, request.Header("X-Call", "parent"), config)
 				}
 				switch operation {
 				case "add":
-					record, err = service.AddImageMemberRecord(context.Background(), parent, writeOption)
+					record, err = service.AddImageMemberRecord(context.Background(), parent, request.Custom(writeOption))
 				case "update":
-					record, err = service.UpdateImageMemberRecord(context.Background(), parent, ImageMemberRecordRequest{ID: "selected"}, writeOption)
+					record, err = service.UpdateImageMemberRecord(context.Background(), parent, ImageMemberRecordRequest{ID: "selected"}, request.Custom(writeOption))
 				case "get":
-					record, err = service.GetImageMemberRecord(context.Background(), parent, ImageMemberRecordRequest{ID: "selected"}, func(config *ImageMemberOpts) error {
+					record, err = service.GetImageMemberRecord(context.Background(), parent, ImageMemberRecordRequest{ID: "selected"}, request.Custom(func(config *ImageMemberOpts) error {
 						callbacks++
-						return WithImageMemberHeader("X-Call", "parent")(config)
-					})
+						return applyCall(imageMemberCalls, request.Header("X-Call", "parent"), config)
+					}))
 				case "remove":
-					ack, err = service.RemoveImageMemberRecord(context.Background(), parent, ImageMemberRecordRequest{ID: "selected"}, func(config *RemoveImageMemberOpts) error {
+					ack, err = service.RemoveImageMemberRecord(context.Background(), parent, ImageMemberRecordRequest{ID: "selected"}, request.Custom(func(config *RemoveImageMemberOpts) error {
 						callbacks++
-						return WithRemoveImageMemberHeader("X-Call", "parent")(config)
-					})
+						return applyCall(removeImageMemberCalls, request.Header("X-Call", "parent"), config)
+					}))
 				}
 				if missing {
 					if record != nil || ack != nil || err == nil || calls != 1 {
@@ -863,13 +864,13 @@ func TestImageMemberRecordFamilyStopsAfterOptionGuardFailure(t *testing.T) {
 				var err error
 				switch operation {
 				case "add":
-					_, err = service.AddImageMemberRecord(ctx, resource.ID(memberRecordParent), func(*ImageMemberRecordWriteOpts) error { action(); return nil }, func(*ImageMemberRecordWriteOpts) error { later++; return nil })
+					_, err = service.AddImageMemberRecord(ctx, resource.ID(memberRecordParent), request.Custom(func(*ImageMemberRecordWriteOpts) error { action(); return nil }), request.Custom(func(*ImageMemberRecordWriteOpts) error { later++; return nil }))
 				case "update":
-					_, err = service.UpdateImageMemberRecord(ctx, resource.ID(memberRecordParent), ImageMemberRecordRequest{ID: "selected"}, func(*ImageMemberRecordWriteOpts) error { action(); return nil }, func(*ImageMemberRecordWriteOpts) error { later++; return nil })
+					_, err = service.UpdateImageMemberRecord(ctx, resource.ID(memberRecordParent), ImageMemberRecordRequest{ID: "selected"}, request.Custom(func(*ImageMemberRecordWriteOpts) error { action(); return nil }), request.Custom(func(*ImageMemberRecordWriteOpts) error { later++; return nil }))
 				case "get":
-					_, err = service.GetImageMemberRecord(ctx, resource.ID(memberRecordParent), ImageMemberRecordRequest{ID: "selected"}, func(*ImageMemberOpts) error { action(); return nil }, func(*ImageMemberOpts) error { later++; return nil })
+					_, err = service.GetImageMemberRecord(ctx, resource.ID(memberRecordParent), ImageMemberRecordRequest{ID: "selected"}, request.Custom(func(*ImageMemberOpts) error { action(); return nil }), request.Custom(func(*ImageMemberOpts) error { later++; return nil }))
 				case "remove":
-					_, err = service.RemoveImageMemberRecord(ctx, resource.ID(memberRecordParent), ImageMemberRecordRequest{ID: "selected"}, func(*RemoveImageMemberOpts) error { action(); return nil }, func(*RemoveImageMemberOpts) error { later++; return nil })
+					_, err = service.RemoveImageMemberRecord(ctx, resource.ID(memberRecordParent), ImageMemberRecordRequest{ID: "selected"}, request.Custom(func(*RemoveImageMemberOpts) error { action(); return nil }), request.Custom(func(*RemoveImageMemberOpts) error { later++; return nil }))
 				}
 				if err == nil || calls != 0 || first != 1 || later != 0 {
 					t.Fatal(err, calls, first, later)

@@ -18,6 +18,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/image"
 	sdkimages "github.com/JSYoo5B/go-openstacksdk/image/v2/images"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -131,11 +132,11 @@ func TestImageLocationsFixedRoutesAndPassiveData(t *testing.T) {
 			}
 		})
 		service := image.New(client)
-		ack, err := service.AddImageLocation(context.Background(), resource.ID("fixed"), locationsURL, image.WithAddImageLocationHeader("X-Option", "ordinary"))
+		ack, err := service.AddImageLocation(context.Background(), resource.ID("fixed"), locationsURL, request.Header("X-Option", "ordinary"))
 		if err != nil || ack == nil || ack.ImageID != "fixed" || ack.URL != locationsURL || ack.StatusCode != 202 || len(ack.Body) != 0 || ack.Header.Get("X-Request-Id") != "actual-locations" {
 			t.Fatal(ack, err)
 		}
-		value, err := service.GetImageLocations(context.Background(), resource.ID("fixed"), image.WithGetImageLocationsHeader("X-Option", "ordinary"))
+		value, err := service.GetImageLocations(context.Background(), resource.ID("fixed"), request.Header("X-Option", "ordinary"))
 		if err != nil || value == nil || value.ImageID != "fixed" || value.Locations == nil || len(value.Locations) != 0 || value.StatusCode != 200 || string(value.Body) != "[]" || value.Header.Get("Location") == "" || calls.Load() != 2 {
 			t.Fatal(value, err, calls.Load())
 		}
@@ -250,7 +251,7 @@ func TestImageLocationsCanonicalModelsAndPreflight(t *testing.T) {
 			ref, literal := resource.Name("needle"), locationsURL
 			want := error(resource.ErrInvalidOption)
 			wantCallbacks := int32(0)
-			option := image.AddImageLocationOption(func(*image.AddImageLocationOpts) error { callbacks.Add(1); return nil })
+			option := request.Custom(func(*image.AddImageLocationOpts) error { callbacks.Add(1); return nil })
 			switch mode {
 			case "nil client":
 				client = nil
@@ -294,10 +295,10 @@ func TestImageLocationsCanonicalModelsAndPreflight(t *testing.T) {
 				option = nil
 			case "callback error":
 				want, wantCallbacks = cause, 1
-				option = func(*image.AddImageLocationOpts) error { callbacks.Add(1); return cause }
+				option = request.Custom(func(*image.AddImageLocationOpts) error { callbacks.Add(1); return cause })
 			case "empty pair", "missing algorithm", "missing value", "invalid UTF8 pair":
 				wantCallbacks = 1
-				option = func(c *image.AddImageLocationOpts) error {
+				option = request.Custom(func(c *image.AddImageLocationOpts) error {
 					callbacks.Add(1)
 					c.ValidationData = &image.ImageLocationValidation{}
 					switch mode {
@@ -309,14 +310,14 @@ func TestImageLocationsCanonicalModelsAndPreflight(t *testing.T) {
 						c.ValidationData.OSHashAlgo, c.ValidationData.OSHashValue = "algo", string([]byte{255})
 					}
 					return nil
-				}
+				})
 			case "provider replacement":
 				wantCallbacks = 1
-				option = func(*image.AddImageLocationOpts) error {
+				option = request.Custom(func(*image.AddImageLocationOpts) error {
 					callbacks.Add(1)
 					client.ProviderClient = &gophercloud.ProviderClient{}
 					return nil
-				}
+				})
 			}
 			service := image.New(client)
 			if mode == "nil service" {
@@ -336,7 +337,7 @@ func TestImageLocationsCanonicalModelsAndPreflight(t *testing.T) {
 			t.Run(fmt.Sprint("protected option ", add, " ", header), func(t *testing.T) {
 				var calls atomic.Int32
 				client := locationsClient(func(*http.Request) (*http.Response, error) { calls.Add(1); return nil, errors.New("unexpected HTTP") })
-				options := locationsOptions{add: []image.AddImageLocationOption{image.WithAddImageLocationHeader(header, "foreign")}, get: []image.GetImageLocationsOption{image.WithGetImageLocationsHeader(header, "foreign")}}
+				options := locationsOptions{add: []image.AddImageLocationOption{request.Header(header, "foreign")}, get: []image.GetImageLocationsOption{request.Header(header, "foreign")}}
 				value, err := locationsCall(image.New(client), context.Background(), add, resource.Name("needle"), locationsURL, options)
 				if value != nil || !errors.Is(err, resource.ErrInvalidOption) || calls.Load() != 0 {
 					t.Fatal(value, err, calls.Load())
@@ -350,7 +351,7 @@ func TestImageLocationsCanonicalModelsAndPreflight(t *testing.T) {
 		cancel(cause)
 		var calls, callbacks atomic.Int32
 		client := locationsClient(func(*http.Request) (*http.Response, error) { calls.Add(1); return nil, cause })
-		value, err := image.New(client).GetImageLocations(ctx, resource.ID("fixed"), func(*image.GetImageLocationsOpts) error { callbacks.Add(1); return nil })
+		value, err := image.New(client).GetImageLocations(ctx, resource.ID("fixed"), request.Custom(func(*image.GetImageLocationsOpts) error { callbacks.Add(1); return nil }))
 		if value != nil || !errors.Is(err, context.Canceled) || !errors.Is(err, cause) || calls.Load() != 0 || callbacks.Load() != 0 {
 			t.Fatal(value, err, calls.Load(), callbacks.Load())
 		}
@@ -377,22 +378,22 @@ func TestImageLocationsPreparedOptionsAndExactNames(t *testing.T) {
 			return locationsWire(202, io.NopCloser(strings.NewReader(""))), nil
 		})
 		client.MoreHeaders = map[string]string{"X-Source": "source"}
-		options := []image.AddImageLocationOption{image.WithAddImageLocationHeader("X-Discarded", "discarded"), replacement, mergeOption, nil, nil}
+		options := []image.AddImageLocationOption{request.Header("X-Discarded", "discarded"), replacement, mergeOption, nil, nil}
 		var retained *image.AddImageLocationOpts
-		options[3] = func(c *image.AddImageLocationOpts) error {
+		options[3] = request.Custom(func(c *image.AddImageLocationOpts) error {
 			callbacks.Add(1)
 			retained = c
 			c.Headers["X-Retained"] = "original"
 			options[4] = nil
 			return nil
-		}
-		options[4] = func(c *image.AddImageLocationOpts) error {
+		})
+		options[4] = request.Custom(func(c *image.AddImageLocationOpts) error {
 			callbacks.Add(1)
 			retained.ValidationData.OSHashValue = "late"
 			retained.Headers["X-Retained"] = "late"
 			c.Headers["X-Last"] = "applied"
 			return nil
-		}
+		})
 		value, err := image.New(client).AddImageLocation(context.Background(), resource.ID("fixed"), locationsURL, options...)
 		if err != nil || value == nil || calls.Load() != 1 || callbacks.Load() != 2 || client.MoreHeaders["X-Source"] != "source" {
 			t.Fatal(value, err, calls.Load(), callbacks.Load(), client.MoreHeaders)
@@ -411,19 +412,19 @@ func TestImageLocationsPreparedOptionsAndExactNames(t *testing.T) {
 			}
 			return locationsWire(200, io.NopCloser(strings.NewReader("[]"))), nil
 		})
-		options := []image.GetImageLocationsOption{image.WithGetImageLocationsHeader("X-Discarded", "discarded"), option, nil, nil}
-		options[2] = func(c *image.GetImageLocationsOpts) error {
+		options := []image.GetImageLocationsOption{request.Header("X-Discarded", "discarded"), option, nil, nil}
+		options[2] = request.Custom(func(c *image.GetImageLocationsOpts) error {
 			callbacks.Add(1)
 			retained = c
 			c.Headers["X-Retained"] = "original"
 			options[3] = nil
 			return nil
-		}
-		options[3] = func(c *image.GetImageLocationsOpts) error {
+		})
+		options[3] = request.Custom(func(c *image.GetImageLocationsOpts) error {
 			callbacks.Add(1)
 			retained.Headers["X-Retained"] = "late"
-			return image.WithGetImageLocationsHeaders(map[string]string{"X-Merged": "applied"})(c)
-		}
+			return applyCustom(image.WithGetImageLocationsHeaders(map[string]string{"X-Merged": "applied"}), c)
+		})
 		value, err := image.New(client).GetImageLocations(context.Background(), resource.ID("fixed"), options...)
 		if err != nil || value == nil || callbacks.Load() != 2 || calls.Load() != 1 {
 			t.Fatal(value, err, callbacks.Load(), calls.Load())
@@ -546,15 +547,15 @@ func TestImageLocationsPreparedOptionsAndExactNames(t *testing.T) {
 					bodies = append(bodies, body)
 					return locationsWire(code, body), nil
 				})
-				options := locationsOptions{add: []image.AddImageLocationOption{image.WithAddImageLocationHeader("X-Option", "prepared"), image.WithImageLocationValidation("Future", "hash1")}, get: []image.GetImageLocationsOption{image.WithGetImageLocationsHeader("X-Option", "prepared")}}
+				options := locationsOptions{add: []image.AddImageLocationOption{request.Header("X-Option", "prepared"), image.WithImageLocationValidation("Future", "hash1")}, get: []image.GetImageLocationsOption{request.Header("X-Option", "prepared")}}
 				if mode == "safe callback source changes" {
 					change := func() {
 						client.ResourceBase = "https://glance.invalid/later/v2/"
 						client.MoreHeaders = map[string]string{"X-Source": "later"}
 						client.SetToken("during-options")
 					}
-					options.add = append(options.add, func(*image.AddImageLocationOpts) error { change(); return nil })
-					options.get = append(options.get, func(*image.GetImageLocationsOpts) error { change(); return nil })
+					options.add = append(options.add, request.Custom(func(*image.AddImageLocationOpts) error { change(); return nil }))
+					options.get = append(options.get, request.Custom(func(*image.GetImageLocationsOpts) error { change(); return nil }))
 				}
 				value, err := locationsCall(image.New(client), ctx, add, resource.Name(name), locationsURL, options)
 				success := mode == "all pages" || mode == "safe callback source changes" || mode == "UUID-shaped Name"

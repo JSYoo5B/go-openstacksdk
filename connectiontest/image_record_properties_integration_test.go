@@ -14,6 +14,7 @@ import (
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/image"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -103,12 +104,12 @@ func TestConnectionOwnedImagePropertiesSharesSourceResolverAndCommit(t *testing.
 	if service.RawClient() != source || service.API.RawClient() != source || calls != 0 {
 		t.Fatal("property helper replaced shared source")
 	}
-	seed, err := service.GetImageRecord(context.Background(), image.ImageRecordRequest{ID: id}, image.WithImageRecordHeader("X-Call", "property-helper"))
+	seed, err := service.GetImageRecord(context.Background(), image.ImageRecordRequest{ID: id}, request.Header("X-Call", "property-helper"))
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	seed.Resource.Body["id"] = json.RawMessage(`"public decoy"`)
-	result, err := conn.UpdateImagePropertiesRecord(context.Background(), image.ImageRecordPropertiesRequest{Record: seed}, image.WithImageRecordProperty("kernel", "kernel*"), image.WithImageRecordProperty("gpu", true), image.WithImageRecordPropertiesHeader("X-Call", "property-helper"))
+	result, err := conn.UpdateImagePropertiesRecord(context.Background(), image.ImageRecordPropertiesRequest{Record: seed}, image.WithImageRecordProperty("kernel", "kernel*"), image.WithImageRecordProperty("gpu", true), request.Header("X-Call", "property-helper"))
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

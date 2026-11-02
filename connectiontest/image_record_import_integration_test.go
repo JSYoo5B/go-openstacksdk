@@ -16,6 +16,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/image"
 	"github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -176,7 +177,7 @@ func TestConnectionOwnedImageImportSharesSourceAndPreservesBorrowedData(t *testi
 	}
 	stores[0].Resource.Body["id"] = json.RawMessage(`"public-store-decoy"`)
 	staged.Record.Resource.Body["id"] = json.RawMessage(`"public-image-decoy"`)
-	first, err := conn.ImportImageRecord(context.Background(), image.ImageRecordImportRequest{Record: staged.Record}, image.WithImageRecordImportStore(image.ImageRecordImportStore{Record: stores[0]}), func(*image.ImageRecordImportOpts) error { source.MoreHeaders["X-Source"] = "later"; return nil })
+	first, err := conn.ImportImageRecord(context.Background(), image.ImageRecordImportRequest{Record: staged.Record}, image.WithImageRecordImportStore(image.ImageRecordImportStore{Record: stores[0]}), request.Custom(func(*image.ImageRecordImportOpts) error { source.MoreHeaders["X-Source"] = "later"; return nil }))
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

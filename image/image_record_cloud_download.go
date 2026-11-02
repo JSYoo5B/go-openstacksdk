@@ -6,6 +6,9 @@ import (
 	"io"
 	"slices"
 	"unicode/utf8"
+
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 // ImageRecordCloudDownloadRequest names the Cloud download_image image and
@@ -25,7 +28,18 @@ type ImageRecordCloudDownloadOpts struct {
 	ChunkSize *int
 	Stream    bool
 }
-type ImageRecordCloudDownloadOption func(*ImageRecordCloudDownloadOpts) error
+
+// ImageRecordCloudDownloadOption is one option of DownloadCloudImageRecord:
+// WithImageRecordCloudDownloadOpts, WithImageRecordCloudDownloadHeaders
+// (merges), the chunk size and stream options, request.Header (merges one
+// header) or request.Custom over *ImageRecordCloudDownloadOpts. Other shared
+// calls, including request.Headers, fail with resource.ErrInvalidOption before
+// HTTP.
+type ImageRecordCloudDownloadOption = request.GetCall
+
+var imageRecordCloudDownloadCalls = calls.Spec[ImageRecordCloudDownloadOpts]{
+	Header: calls.MergeHeader[ImageRecordCloudDownloadOpts](WithImageRecordCloudDownloadHeaders),
+}
 
 func copyImageRecordCloudDownload(value ImageRecordCloudDownloadOpts) ImageRecordCloudDownloadOpts {
 	value.Headers = copyImageRecordHeaders(value.Headers)
@@ -34,36 +48,31 @@ func copyImageRecordCloudDownload(value ImageRecordCloudDownloadOpts) ImageRecor
 }
 func WithImageRecordCloudDownloadOpts(value ImageRecordCloudDownloadOpts) ImageRecordCloudDownloadOption {
 	owned := copyImageRecordCloudDownload(value)
-	return func(config *ImageRecordCloudDownloadOpts) error {
+	return request.Custom(func(config *ImageRecordCloudDownloadOpts) error {
 		*config = copyImageRecordCloudDownload(owned)
 		return nil
-	}
-}
-func WithImageRecordCloudDownloadHeader(key, value string) ImageRecordCloudDownloadOption {
-	return func(config *ImageRecordCloudDownloadOpts) error {
-		return mergeImageRecordHeaders(&config.Headers, map[string]string{key: value})
-	}
+	})
 }
 func WithImageRecordCloudDownloadHeaders(values map[string]string) ImageRecordCloudDownloadOption {
 	owned := copyImageRecordHeaders(values)
-	return func(config *ImageRecordCloudDownloadOpts) error {
+	return request.Custom(func(config *ImageRecordCloudDownloadOpts) error {
 		return mergeImageRecordHeaders(&config.Headers, owned)
-	}
+	})
 }
 func WithImageRecordCloudDownloadChunkSize(value int) ImageRecordCloudDownloadOption {
-	return func(config *ImageRecordCloudDownloadOpts) error {
+	return request.Custom(func(config *ImageRecordCloudDownloadOpts) error {
 		owned := value
 		config.ChunkSize = &owned
 		return nil
-	}
+	})
 }
 func WithImageRecordCloudDownloadStream(value bool) ImageRecordCloudDownloadOption {
-	return func(config *ImageRecordCloudDownloadOpts) error { config.Stream = value; return nil }
+	return request.Custom(func(config *ImageRecordCloudDownloadOpts) error { config.Stream = value; return nil })
 }
 
 func prepareImageRecordCloudDownload(ctx context.Context, check func(context.Context) error, options []ImageRecordCloudDownloadOption) (ImageRecordCloudDownloadOpts, error) {
 	value := copyImageRecordCloudDownload(ImageRecordCloudDownloadOpts{})
-	for _, apply := range options {
+	for _, apply := range calls.Translate(options, imageRecordCloudDownloadCalls) {
 		if err := check(ctx); err != nil {
 			return value, err
 		}

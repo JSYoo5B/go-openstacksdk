@@ -14,6 +14,7 @@ import (
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/image"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -167,7 +168,7 @@ func TestConnectionOwnedImageUploadSharesSourceAndBorrowedDataThroughImportUpdat
 	if service.RawClient() != source || service.API.RawClient() != source {
 		t.Fatal("owned upload replaced connection source")
 	}
-	uploaded, err := conn.UploadImageRecord(context.Background(), image.ImageRecordUploadRequest{Data: reader, Attributes: map[string]any{"name": "seed", "status": "queued"}}, image.WithImageRecordUploadContainerFormat("bare"), image.WithImageRecordUploadDiskFormat("qcow2"), func(*image.ImageRecordUploadOpts) error { source.MoreHeaders["X-Source"] = "later"; return nil })
+	uploaded, err := conn.UploadImageRecord(context.Background(), image.ImageRecordUploadRequest{Data: reader, Attributes: map[string]any{"name": "seed", "status": "queued"}}, image.WithImageRecordUploadContainerFormat("bare"), image.WithImageRecordUploadDiskFormat("qcow2"), request.Custom(func(*image.ImageRecordUploadOpts) error { source.MoreHeaders["X-Source"] = "later"; return nil }))
 	if err != nil || uploaded == nil || uploaded.Record == nil || uploaded.Metadata == nil || uploaded.Uploaded == nil || calls != 2 || uploaded.Metadata.StatusCode != 203 || uploaded.Uploaded.StatusCode != 299 || string(uploaded.Uploaded.Body) != "opaque upload\xff" || string(uploaded.Record.Envelope) != `{"id":"image /한글:%?","status":"queued"}` || uploaded.Record.Header.Get("X-Proof") != "phase-0" || len(uploaded.Record.ImportMethods) != 2 || reader.Len() != 4 {
 		t.Fatal(uploaded, err, calls, reader.Len())
 	}

@@ -11,6 +11,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -48,7 +49,7 @@ func TestImageSchemasCoreSixteenFixedBodylessRoutes(t *testing.T) {
 				}
 				return deleteCoreHTTP(200, body, header), nil
 			})
-			value, err := test.get(New(client), context.Background(), WithGetSchemaHeader("X-Extra", "owned"))
+			value, err := test.get(New(client), context.Background(), request.Header("X-Extra", "owned"))
 			if err != nil || value == nil || value.Name == nil || *value.Name != "../passive-name" || value.StatusCode != 200 || value.Header.Get("X-Actual") != "owned" || value.AdditionalProperties != nil || value.Links != nil || value.CreatedAt != nil || value.UpdatedAt != nil || string(value.Body["links"]) != "false" || calls != 1 || body.closes != 1 {
 				t.Fatalf("value=%+v err=%v calls=%d closes=%d", value, err, calls, body.closes)
 			}
@@ -142,20 +143,20 @@ func TestImageSchemasCoreCaptureAndCompletePreflight(t *testing.T) {
 		return deleteCoreHTTP(200, io.NopCloser(strings.NewReader(`{}`)), nil), nil
 	})
 	client.MoreHeaders = map[string]string{"X-Snapshot": "captured"}
-	value, err := New(client).GetImageSchema(context.Background(), func(config *GetSchemaOpts) error {
+	value, err := New(client).GetImageSchema(context.Background(), request.Custom(func(config *GetSchemaOpts) error {
 		retained = config
 		config.Headers["X-Extra"] = "owned"
 		client.ResourceBase = "https://example.test/later/"
 		client.MoreHeaders["X-Snapshot"] = "late"
 		client.ProviderClient.SetToken("latest")
 		return nil
-	})
+	}))
 	if value == nil || err != nil || calls != 1 {
 		t.Fatal(value, err, calls)
 	}
 	for _, mutate := range []func(*gophercloud.ServiceClient){func(c *gophercloud.ServiceClient) { c.ProviderClient = &gophercloud.ProviderClient{} }, func(c *gophercloud.ServiceClient) { c.ResourceBase = "https://foreign.test/v2/" }} {
 		client := deleteCoreClient(func(*http.Request) (*http.Response, error) { t.Fatal("retargeted schema request"); return nil, nil })
-		value, err := New(client).GetImageSchema(context.Background(), func(*GetSchemaOpts) error { mutate(client); return nil })
+		value, err := New(client).GetImageSchema(context.Background(), request.Custom(func(*GetSchemaOpts) error { mutate(client); return nil }))
 		if value != nil || !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal("source retarget accepted", value, err)
 		}
@@ -164,7 +165,7 @@ func TestImageSchemasCoreCaptureAndCompletePreflight(t *testing.T) {
 		client := deleteCoreClient(func(*http.Request) (*http.Response, error) { t.Fatal("bad source requested"); return nil, nil })
 		mutate(client)
 		var callbacks int
-		value, err := New(client).GetImageSchema(context.Background(), func(*GetSchemaOpts) error { callbacks++; return nil })
+		value, err := New(client).GetImageSchema(context.Background(), request.Custom(func(*GetSchemaOpts) error { callbacks++; return nil }))
 		if value != nil || err == nil || callbacks != 0 {
 			t.Fatal("source not checked before callback", value, err, callbacks)
 		}

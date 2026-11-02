@@ -19,6 +19,7 @@ import (
 	sdkmembers "github.com/JSYoo5B/go-openstacksdk/image/v2/members"
 	sdktasks "github.com/JSYoo5B/go-openstacksdk/image/v2/tasks"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -121,7 +122,7 @@ func TestImageSchemasFixedRoutesAndRawDiscovery(t *testing.T) {
 		service := image.New(client)
 		for index, getter := range getters {
 			cloud.Provider.SetToken(fmt.Sprint("live-", index))
-			value, err := getter.get(service, context.Background(), image.WithGetSchemaHeader("X-Option", "ordinary"))
+			value, err := getter.get(service, context.Background(), request.Header("X-Option", "ordinary"))
 			if err != nil || value == nil || value.Name == nil || *value.Name != "passive-server-name" || value.Properties == nil || len(value.Properties) != 0 || value.AdditionalProperties != nil || value.Links != nil || value.StatusCode != 200 || value.Header.Get("X-Request-Id") != "actual-schema" || string(value.Body["links"]) == "" || calls.Load() != int32(index+1) {
 				t.Fatal(getter.name, value, err, calls.Load())
 			}
@@ -308,16 +309,16 @@ func TestImageSchemasPreparedOptionsAndLiveSource(t *testing.T) {
 			if mode == "nil service" {
 				service = nil
 			}
-			option := image.GetSchemaOption(func(*image.GetSchemaOpts) error { callbacks.Add(1); return nil })
+			option := request.Custom(func(*image.GetSchemaOpts) error { callbacks.Add(1); return nil })
 			switch mode {
 			case "nil option":
 				option = nil
 			case "callback error":
 				want, wantCallbacks = cause, 1
-				option = func(*image.GetSchemaOpts) error { callbacks.Add(1); return cause }
+				option = request.Custom(func(*image.GetSchemaOpts) error { callbacks.Add(1); return cause })
 			case "provider replacement", "service replacement", "late unsafe source", "late canceled":
 				wantCallbacks = 1
-				option = func(*image.GetSchemaOpts) error {
+				option = request.Custom(func(*image.GetSchemaOpts) error {
 					callbacks.Add(1)
 					if mode == "provider replacement" {
 						client.ProviderClient = &gophercloud.ProviderClient{}
@@ -332,7 +333,7 @@ func TestImageSchemasPreparedOptionsAndLiveSource(t *testing.T) {
 						cancel(cause)
 					}
 					return nil
-				}
+				})
 				if mode == "late canceled" {
 					ctx, want = refCtx, context.Canceled
 				}
@@ -350,7 +351,7 @@ func TestImageSchemasPreparedOptionsAndLiveSource(t *testing.T) {
 		t.Run("protected option "+header, func(t *testing.T) {
 			var calls atomic.Int32
 			client := schemasClient(func(*http.Request) (*http.Response, error) { calls.Add(1); return nil, errors.New("unexpected HTTP") })
-			value, err := image.New(client).GetImageSchema(context.Background(), image.WithGetSchemaHeader(header, "foreign"))
+			value, err := image.New(client).GetImageSchema(context.Background(), request.Header(header, "foreign"))
 			if value != nil || !errors.Is(err, resource.ErrInvalidOption) || calls.Load() != 0 {
 				t.Fatal(value, err, calls.Load())
 			}
@@ -382,19 +383,20 @@ func TestImageSchemasPreparedOptionsAndLiveSource(t *testing.T) {
 			return schemasWire(200, io.NopCloser(strings.NewReader(`{}`))), nil
 		})
 		client.MoreHeaders = map[string]string{"X-Source": "source"}
-		options := []image.GetSchemaOption{image.WithGetSchemaHeader("X-Discarded", "discarded"), full, merge, nil, nil}
-		options[3] = func(c *image.GetSchemaOpts) error {
+		options := []image.GetSchemaOption{request.Header("X-Discarded", "discarded"), full, merge, nil, nil}
+		options[3] = request.Custom(func(c *image.GetSchemaOpts) error {
 			callbacks.Add(1)
 			retained = c
 			c.Headers["X-Retained"] = "original"
 			options[4] = nil
 			return nil
-		}
-		options[4] = func(c *image.GetSchemaOpts) error {
+		})
+		options[4] = request.Custom(func(c *image.GetSchemaOpts) error {
 			callbacks.Add(1)
 			retained.Headers["X-Retained"] = "late"
-			return image.WithGetSchemaHeader("X-Last", "applied")(c)
-		}
+			c.Headers["X-Last"] = "applied"
+			return nil
+		})
 		value, err := image.New(client).GetImageSchema(context.Background(), options...)
 		if err != nil || value == nil || calls.Load() != 1 || callbacks.Load() != 2 || client.MoreHeaders["X-Source"] != "source" {
 			t.Fatal(value, err, calls.Load(), callbacks.Load(), client.MoreHeaders)
@@ -412,14 +414,14 @@ func TestImageSchemasPreparedOptionsAndLiveSource(t *testing.T) {
 		client.MoreHeaders = map[string]string{"X-Source": "captured"}
 		client.Microversion = "2.10"
 		provider := client.ProviderClient
-		value, err := image.New(client).GetImageSchema(context.Background(), func(*image.GetSchemaOpts) error {
+		value, err := image.New(client).GetImageSchema(context.Background(), request.Custom(func(*image.GetSchemaOpts) error {
 			client.Endpoint = "https://glance.invalid/later/catalog/"
 			client.ResourceBase = "https://glance.invalid/later/v2/"
 			client.MoreHeaders = map[string]string{"X-Source": "later"}
 			client.Microversion = "2.99"
 			client.SetToken("after-options")
 			return nil
-		})
+		}))
 		if err != nil || value == nil || calls.Load() != 1 || client.ProviderClient != provider || client.MoreHeaders["X-Source"] != "later" {
 			t.Fatal(value, err, calls.Load())
 		}

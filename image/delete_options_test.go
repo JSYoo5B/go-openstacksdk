@@ -5,6 +5,7 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -20,7 +21,7 @@ func TestDeleteOptionsDefaultsAndExplicitStorePreflight(t *testing.T) {
 		}
 	}
 	for _, store := range []string{"fast", "store&=fast", "저장소"} {
-		value, err := parseDeleteImageOptions([]DeleteImageOption{WithDeleteImageStore(store), WithDeleteImageIgnoreMissing(false)})
+		value, err := parseDeleteImageOptions([]DeleteImageOption{WithDeleteImageStore(store), request.IgnoreMissing(false)})
 		if err != nil || value.StoreID == nil || *value.StoreID != store || *value.IgnoreMissing {
 			t.Errorf("store=%q value=%+v err=%v", store, value, err)
 		}
@@ -30,7 +31,7 @@ func TestDeleteOptionsDefaultsAndExplicitStorePreflight(t *testing.T) {
 		t.Fatal(err)
 	}
 	cause := errors.New("caller delete policy failed")
-	_, err = parseDeleteImageOptions([]DeleteImageOption{func(*DeleteImageOpts) error { return cause }})
+	_, err = parseDeleteImageOptions([]DeleteImageOption{request.Custom(func(*DeleteImageOpts) error { return cause })})
 	if !errors.Is(err, cause) {
 		t.Fatal("caller cause lost", err)
 	}
@@ -56,7 +57,7 @@ func TestDeleteOptionsFullReplacementAndConcurrentReuse(t *testing.T) {
 	if err != nil || defaults.StoreID != nil || !*defaults.IgnoreMissing {
 		t.Fatalf("replacement=%+v err=%v", defaults, err)
 	}
-	value, err := parseDeleteImageOptions([]DeleteImageOption{option, WithDeleteImageStore("last"), WithDeleteImageIgnoreMissing(true)})
+	value, err := parseDeleteImageOptions([]DeleteImageOption{option, WithDeleteImageStore("last"), request.IgnoreMissing(true)})
 	if err != nil || *value.StoreID != "last" || !*value.IgnoreMissing {
 		t.Fatalf("last option=%+v err=%v", value, err)
 	}
@@ -81,7 +82,7 @@ func TestDeleteOptionsCallbacksOnceAndIndependentRetainedHandles(t *testing.T) {
 		retained = append(retained, value)
 		return nil
 	}
-	value, err := parseDeleteImageOptions([]DeleteImageOption{first, second})
+	value, err := parseDeleteImageOptions([]DeleteImageOption{request.Custom(first), request.Custom(second)})
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -17,6 +17,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -117,7 +118,7 @@ func TestImageRecordStageFixedRoutesAndOpaqueAcceptedReceipts(t *testing.T) {
 				return response, nil
 			}
 			reader := &imageUploadCoreReader{reader: strings.NewReader("current bytes")}
-			got, err := service.StageImageRecord(context.Background(), ImageRecordStageRequest{Record: seed, Data: reader}, WithImageRecordStageSize(0), WithImageRecordStageHeader("X-Ordinary", "yes"))
+			got, err := service.StageImageRecord(context.Background(), ImageRecordStageRequest{Record: seed, Data: reader}, WithImageRecordStageSize(0), request.Header("X-Ordinary", "yes"))
 			if got == nil || got.Record == nil || got.Staged == nil || got.Metadata == nil || err != nil || calls != 3 || redirects != 0 || callbacks != 0 || ack.closes != 1 || reader.closes.Load() != 0 || reader.seeks.Load() != 0 {
 				t.Fatal(got, err, calls, redirects, callbacks, reader, ack.closes)
 			}
@@ -168,7 +169,7 @@ func TestImageRecordStageRequiresExactQueuedBeforeAnyDataIO(t *testing.T) {
 				t.Fatal("queued failure performed HTTP", req.URL)
 				return nil, nil
 			}
-			got, err := service.StageImageRecord(context.Background(), ImageRecordStageRequest{Record: seed, Data: reader}, func(*ImageRecordStageOpts) error { options++; return nil })
+			got, err := service.StageImageRecord(context.Background(), ImageRecordStageRequest{Record: seed, Data: reader}, request.Custom(func(*ImageRecordStageOpts) error { options++; return nil }))
 			if got != nil || err == nil || calls != 1 || reader.reads.Load() != 0 || reader.seeks.Load() != 0 || reader.closes.Load() != 0 || options != 0 {
 				t.Fatal(got, err, calls, options, reader)
 			}
@@ -638,7 +639,7 @@ func TestImageRecordStageRejectsInvalidInputsAndOwnedHeadersBeforeIO(t *testing.
 	}
 	for _, key := range []string{"Authorization", "X-Auth-Token", "Content-Type", "Accept", "Content-Length", "X-OpenStack-Image-Size", "OpenStack-API-Version"} {
 		t.Run("owned header="+key, func(t *testing.T) {
-			got, err := service.StageImageRecord(context.Background(), ImageRecordStageRequest{Record: seed, Data: reader}, WithImageRecordStageHeader(key, "bad"))
+			got, err := service.StageImageRecord(context.Background(), ImageRecordStageRequest{Record: seed, Data: reader}, request.Header(key, "bad"))
 			if got != nil || !errors.Is(err, resource.ErrInvalidOption) || calls != 1 || reader.reads.Load() != 0 || reader.seeks.Load() != 0 {
 				t.Fatal(got, err, calls, reader)
 			}
@@ -653,14 +654,14 @@ func TestImageRecordStageRejectsInvalidInputsAndOwnedHeadersBeforeIO(t *testing.
 	t.Run("nil and canceled context do not run options", func(t *testing.T) {
 		callbacks := 0
 		option := func(*ImageRecordStageOpts) error { callbacks++; return nil }
-		got, err := service.StageImageRecord(nil, ImageRecordStageRequest{Record: seed, Data: reader}, option)
+		got, err := service.StageImageRecord(nil, ImageRecordStageRequest{Record: seed, Data: reader}, request.Custom(option))
 		if got != nil || !errors.Is(err, resource.ErrInvalidOption) || callbacks != 0 {
 			t.Fatal(got, err, callbacks)
 		}
 		marker := errors.New("stage already canceled")
 		ctx, cancel := context.WithCancelCause(context.Background())
 		cancel(marker)
-		got, err = service.StageImageRecord(ctx, ImageRecordStageRequest{Record: seed, Data: reader}, option)
+		got, err = service.StageImageRecord(ctx, ImageRecordStageRequest{Record: seed, Data: reader}, request.Custom(option))
 		if got != nil || !errors.Is(err, marker) || !errors.Is(err, context.Canceled) || callbacks != 0 || calls != 1 {
 			t.Fatal(got, err, callbacks, calls)
 		}
@@ -668,7 +669,7 @@ func TestImageRecordStageRejectsInvalidInputsAndOwnedHeadersBeforeIO(t *testing.
 	t.Run("invalid source before callback", func(t *testing.T) {
 		client.MoreHeaders = map[string]string{"X-Auth-Token": "forged"}
 		callbacks := 0
-		got, err := service.StageImageRecord(context.Background(), ImageRecordStageRequest{Record: seed, Data: reader}, func(*ImageRecordStageOpts) error { callbacks++; return nil })
+		got, err := service.StageImageRecord(context.Background(), ImageRecordStageRequest{Record: seed, Data: reader}, request.Custom(func(*ImageRecordStageOpts) error { callbacks++; return nil }))
 		if got != nil || !errors.Is(err, resource.ErrInvalidOption) || callbacks != 0 || calls != 1 {
 			t.Fatal(got, err, callbacks, calls)
 		}
@@ -682,7 +683,7 @@ func TestImageRecordStageCapturesRequestOptionsLocationAndOrdinaryHeadersOnce(t 
 	service := New(client)
 	seed := imageRecordStageFetched(t, service, &handler)
 	data := &imageUploadCoreReader{reader: strings.NewReader("captured data")}
-	request := ImageRecordStageRequest{Record: seed, Data: data}
+	input := ImageRecordStageRequest{Record: seed, Data: data}
 	original := cloneImageRecord(seed)
 	size := int64(0)
 	headers := map[string]string{"x-note": "captured"}
@@ -690,19 +691,19 @@ func TestImageRecordStageCapturesRequestOptionsLocationAndOrdinaryHeadersOnce(t 
 	headers["x-note"] = "external changed"
 	size = 9
 	var retained *ImageRecordStageOpts
-	options := []ImageRecordStageOption{option, func(config *ImageRecordStageOpts) error {
+	options := []ImageRecordStageOption{option, request.Custom(func(config *ImageRecordStageOpts) error {
 		callbacks++
 		retained = config
-		return WithImageRecordStageHeader("X-Added", "yes")(config)
-	}}
+		return applyCall(imageRecordStageCalls, request.Header("X-Added", "yes"), config)
+	})}
 	cloud := "captured location"
 	client.MoreHeaders = map[string]string{"X-Source": "captured source", "Content-Type": "source metadata", "Accept": "source accept"}
 	service.dependencies.CloudLocation = func() (resource.CloudLocation, error) {
 		locations++
 		seed.bodyState.current["id"] = json.RawMessage(`"later private identity"`)
 		seed.bodyState.current["name"] = json.RawMessage(`"later private name"`)
-		request.Data = strings.NewReader("later request")
-		options[1] = func(*ImageRecordStageOpts) error { t.Fatal("options slice was not captured"); return nil }
+		input.Data = strings.NewReader("later request")
+		options[1] = request.Custom(func(*ImageRecordStageOpts) error { t.Fatal("options slice was not captured"); return nil })
 		client.MoreHeaders["X-Source"] = "later source"
 		client.SetToken("live token")
 		return resource.CloudLocation{Cloud: &cloud}, nil
@@ -728,7 +729,7 @@ func TestImageRecordStageCapturesRequestOptionsLocationAndOrdinaryHeadersOnce(t 
 		}
 		return taskCoreJSON(req, 200, `{}`), nil
 	}
-	got, err := service.StageImageRecord(context.Background(), request, options...)
+	got, err := service.StageImageRecord(context.Background(), input, options...)
 	if got == nil || got.Record == nil || err != nil || calls != 3 || callbacks != 1 || locations != 1 || data.seeks.Load() != 0 || string(got.Record.Resource.Body["name"]) != string(original.Resource.Body["name"]) {
 		t.Fatal(got, err, calls, callbacks, locations, data)
 	}
@@ -756,13 +757,13 @@ func TestImageRecordStageOptionsKeepBulkMergeFullReplacementAndGuardOwnership(t 
 				}
 				return nil
 			})
-			options := []ImageRecordStageOption{WithImageRecordStageHeader("X-Discarded", "old")}
+			options := []ImageRecordStageOption{request.Header("X-Discarded", "old")}
 			if mode == "bulk merge" {
 				options = append(options, WithImageRecordStageHeaders(map[string]string{"X-Final": "new"}))
 			} else if mode == "full replace" {
 				options = append(options, WithImageRecordStageOpts(ImageRecordStageOpts{Headers: map[string]string{"X-Final": "new"}}))
 			} else {
-				options = append(options, func(*ImageRecordStageOpts) error {
+				options = append(options, request.Custom(func(*ImageRecordStageOpts) error {
 					callbacks++
 					switch mode {
 					case "cancel":
@@ -777,7 +778,7 @@ func TestImageRecordStageOptionsKeepBulkMergeFullReplacementAndGuardOwnership(t 
 						return marker
 					}
 					return nil
-				}, func(*ImageRecordStageOpts) error { later++; return nil })
+				}), request.Custom(func(*ImageRecordStageOpts) error { later++; return nil }))
 			}
 			handler = func(req *http.Request) (*http.Response, error) {
 				want := ""

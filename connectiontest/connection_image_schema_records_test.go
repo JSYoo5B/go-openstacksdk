@@ -10,6 +10,7 @@ import (
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/image"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -68,11 +69,15 @@ func TestConnectionImageSchemaRecordsShareClientAndRetainBareLocation(t *testing
 			if err != nil || cached != service || service.RawClient() != client || service.API.RawClient() != client || client.ProviderClient != provider {
 				t.Fatal("schema record binding changed Connection client", service, cached, err)
 			}
-			got, err := service.GetSchemaRecord(ctx, tc.kind, func(config *image.GetSchemaOpts) error {
+			got, err := service.GetSchemaRecord(ctx, tc.kind, request.Custom(func(config *image.GetSchemaOpts) error {
 				callbacks++
 				provider.SetToken("after-options")
-				return image.WithGetSchemaHeader("X-Call", "owned")(config)
-			})
+				if config.Headers == nil {
+					config.Headers = map[string]string{}
+				}
+				config.Headers["X-Call"] = "owned"
+				return nil
+			}))
 			if err != nil || got == nil || got.Kind != tc.kind || got.Resource == nil || got.Wire == nil || got.StatusCode != 201 || got.Header.Get("X-Connection-Proof") != "1" || string(got.Envelope) != raw || callbacks != 1 || calls != 1 {
 				t.Fatal(got, err, calls, callbacks)
 			}

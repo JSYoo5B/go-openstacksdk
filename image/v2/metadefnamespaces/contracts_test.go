@@ -17,6 +17,7 @@ import (
 
 	namespaces "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -132,11 +133,11 @@ func namespaceProof(t *testing.T, e error, code int, raw []byte) *resource.Respo
 }
 func namespaceAllHeaders() namespaceOptions {
 	return namespaceOptions{
-		create:   []namespaces.CreateOption{namespaces.WithCreateHeaders(map[string]string{"X-Option": "owned"}), namespaces.WithCreateHeader("X-Final", "yes")},
-		get:      []namespaces.GetOption{namespaces.WithGetHeaders(map[string]string{"X-Option": "owned"}), namespaces.WithGetHeader("X-Final", "yes")},
-		update:   []namespaces.UpdateOption{namespaces.WithUpdateHeaders(map[string]string{"X-Option": "owned"}), namespaces.WithUpdateHeader("X-Final", "yes")},
-		deletion: []namespaces.DeleteOption{namespaces.WithDeleteHeaders(map[string]string{"X-Option": "owned"}), namespaces.WithDeleteHeader("X-Final", "yes")},
-		list:     []namespaces.ListOption{namespaces.WithListHeaders(map[string]string{"X-Option": "owned"}), namespaces.WithListHeader("X-Final", "yes")},
+		create:   []namespaces.CreateOption{namespaces.WithCreateHeaders(map[string]string{"X-Option": "owned"}), request.Header("X-Final", "yes")},
+		get:      []namespaces.GetOption{namespaces.WithGetHeaders(map[string]string{"X-Option": "owned"}), request.Header("X-Final", "yes")},
+		update:   []namespaces.UpdateOption{namespaces.WithUpdateHeaders(map[string]string{"X-Option": "owned"}), request.Header("X-Final", "yes")},
+		deletion: []namespaces.DeleteOption{namespaces.WithDeleteHeaders(map[string]string{"X-Option": "owned"}), request.Header("X-Final", "yes")},
+		list:     []namespaces.ListOption{namespaces.WithListHeaders(map[string]string{"X-Option": "owned"}), request.Header("X-Final", "yes")},
 	}
 }
 
@@ -367,7 +368,7 @@ func TestMetadefNamespacesCanonicalModelsAndRawOwnership(t *testing.T) {
 			return namespaceWire(200, io.NopCloser(strings.NewReader(raw))), nil
 		})
 		a := namespaces.New(client)
-		rows, e := a.All(context.Background(), namespaces.WithListMaxItems(2))
+		rows, e := a.All(context.Background(), request.MaxItems(2))
 		if e != nil || len(rows) != 2 {
 			t.Fatal(rows, e)
 		}
@@ -471,7 +472,7 @@ func TestMetadefNamespacesAdvertisedPagingAndControls(t *testing.T) {
 				bodies = append(bodies, b)
 				return namespaceWire(200, b), nil
 			})
-			rows, e := namespaces.New(client).All(context.Background(), namespaces.WithListLimit(2), namespaces.WithListMarker("Start::Namespace"), namespaces.WithListVisibility("public"), namespaces.WithListSortKey("future_sort"), namespaces.WithListSortDir("asc"), namespaces.WithListResourceTypes("OS::Glance::Image, OS::Nova::Flavor"))
+			rows, e := namespaces.New(client).All(context.Background(), request.Limit(2), request.Marker("Start::Namespace"), namespaces.WithListVisibility("public"), namespaces.WithListSortKey("future_sort"), namespaces.WithListSortDir("asc"), namespaces.WithListResourceTypes("OS::Glance::Image, OS::Nova::Flavor"))
 			if e != nil || len(rows) != 2 || calls.Load() != 2 {
 				t.Fatal(rows, e, calls.Load())
 			}
@@ -513,14 +514,14 @@ func TestMetadefNamespacesAdvertisedPagingAndControls(t *testing.T) {
 				wire.Header.Set("Link", `<https://foreign.invalid/next>; rel="next"`)
 				return wire, nil
 			})
-			opts := []namespaces.ListOption{namespaces.WithListMaxItems(20)}
+			opts := []namespaces.ListOption{request.MaxItems(20)}
 			switch mode {
 			case "explicit limit no next":
-				opts = append(opts, namespaces.WithListLimit(2))
+				opts = append(opts, request.Limit(2))
 			case "explicit zero":
-				opts = append(opts, namespaces.WithListLimit(0))
+				opts = append(opts, request.Limit(0))
 			case "empty marker omitted":
-				opts = append(opts, namespaces.WithListMarker(""))
+				opts = append(opts, request.Marker(""))
 			}
 			rows, e := namespaces.New(client).All(context.Background(), opts...)
 			if e != nil || rows == nil || calls.Load() != 1 {
@@ -559,7 +560,7 @@ func TestMetadefNamespacesAdvertisedPagingAndControls(t *testing.T) {
 			}
 			opts := []namespaces.ListOption{namespaces.WithListSinglePage(true)}
 			if mode == "cap skips bad row and next" {
-				opts = []namespaces.ListOption{namespaces.WithListMaxItems(1)}
+				opts = []namespaces.ListOption{request.MaxItems(1)}
 			}
 			rows, e := a.All(context.Background(), opts...)
 			if mode == "SinglePage validates bad row" {
@@ -598,7 +599,7 @@ func TestMetadefNamespacesAdvertisedPagingAndControls(t *testing.T) {
 			var calls atomic.Int32
 			b := &namespaceBody{Reader: strings.NewReader(raw)}
 			client := namespaceClient(func(*http.Request) (*http.Response, error) { calls.Add(1); return namespaceWire(200, b), nil })
-			rows, e := namespaces.New(client).All(context.Background(), namespaces.WithListLimit(2), namespaces.WithListVisibility("public"))
+			rows, e := namespaces.New(client).All(context.Background(), request.Limit(2), namespaces.WithListVisibility("public"))
 			namespaceProof(t, e, 200, []byte(raw))
 			if rows != nil || calls.Load() != 1 || b.closes.Load() != 1 {
 				t.Fatal(rows, e, calls.Load(), b.closes.Load())
@@ -641,7 +642,7 @@ func TestMetadefNamespacesAdvertisedPagingAndControls(t *testing.T) {
 			})
 			opts := []namespaces.ListOption{}
 			if mode == "initial marker repeated" {
-				opts = append(opts, namespaces.WithListMarker("Start"))
+				opts = append(opts, request.Marker("Start"))
 			}
 			rows, e := namespaces.New(client).All(context.Background(), opts...)
 			wantCalls := 2
@@ -688,7 +689,7 @@ func TestMetadefNamespacesAdvertisedPagingAndControls(t *testing.T) {
 	t.Run("parallel reusable lazy option slice", func(t *testing.T) {
 		var calls, callbacks atomic.Int32
 		headers := map[string]string{"X-Option": "snapshot"}
-		opts := []namespaces.ListOption{namespaces.WithListOpts(namespaces.ListOpts{Headers: headers, MaxItems: 1}), func(*namespaces.ListOpts) error { callbacks.Add(1); return nil }}
+		opts := []namespaces.ListOption{namespaces.WithListOpts(namespaces.ListOpts{Headers: headers, MaxItems: 1}), request.Custom(func(*namespaces.ListOpts) error { callbacks.Add(1); return nil })}
 		client := namespaceClient(func(r *http.Request) (*http.Response, error) {
 			calls.Add(1)
 			if r.Header.Get("X-Option") != "snapshot" || r.URL.RawQuery != "" {
@@ -753,7 +754,7 @@ func TestMetadefNamespacesOwnedPreparationAndSource(t *testing.T) {
 				case "source protected header":
 					client.MoreHeaders = map[string]string{"x-auth-token": "forged"}
 				}
-				o := namespaceOptions{create: []namespaces.CreateOption{func(*namespaces.CreateOpts) error { callbacks.Add(1); return nil }}, get: []namespaces.GetOption{func(*namespaces.GetOpts) error { callbacks.Add(1); return nil }}, update: []namespaces.UpdateOption{func(*namespaces.UpdateOpts) error { callbacks.Add(1); return nil }}, deletion: []namespaces.DeleteOption{func(*namespaces.DeleteOpts) error { callbacks.Add(1); return nil }}, list: []namespaces.ListOption{func(*namespaces.ListOpts) error { callbacks.Add(1); return nil }}}
+				o := namespaceOptions{create: []namespaces.CreateOption{request.Custom(func(*namespaces.CreateOpts) error { callbacks.Add(1); return nil })}, get: []namespaces.GetOption{request.Custom(func(*namespaces.GetOpts) error { callbacks.Add(1); return nil })}, update: []namespaces.UpdateOption{request.Custom(func(*namespaces.UpdateOpts) error { callbacks.Add(1); return nil })}, deletion: []namespaces.DeleteOption{request.Custom(func(*namespaces.DeleteOpts) error { callbacks.Add(1); return nil })}, list: []namespaces.ListOption{request.Custom(func(*namespaces.ListOpts) error { callbacks.Add(1); return nil })}}
 				v, e := namespaceCall(a, ctx, op.name, namespaceName, o)
 				if v != nil || e == nil || calls.Load() != 0 || callbacks.Load() != 0 {
 					t.Fatal(v, e, calls.Load(), callbacks.Load())
@@ -780,7 +781,7 @@ func TestMetadefNamespacesOwnedPreparationAndSource(t *testing.T) {
 			t.Run(op.name+" invalid identity "+name, func(t *testing.T) {
 				var calls, callbacks atomic.Int32
 				client := namespaceClient(func(*http.Request) (*http.Response, error) { calls.Add(1); return nil, errors.New("unexpected HTTP") })
-				o := namespaceOptions{create: []namespaces.CreateOption{func(*namespaces.CreateOpts) error { callbacks.Add(1); return nil }}, get: []namespaces.GetOption{func(*namespaces.GetOpts) error { callbacks.Add(1); return nil }}, update: []namespaces.UpdateOption{func(*namespaces.UpdateOpts) error { callbacks.Add(1); return nil }}, deletion: []namespaces.DeleteOption{func(*namespaces.DeleteOpts) error { callbacks.Add(1); return nil }}}
+				o := namespaceOptions{create: []namespaces.CreateOption{request.Custom(func(*namespaces.CreateOpts) error { callbacks.Add(1); return nil })}, get: []namespaces.GetOption{request.Custom(func(*namespaces.GetOpts) error { callbacks.Add(1); return nil })}, update: []namespaces.UpdateOption{request.Custom(func(*namespaces.UpdateOpts) error { callbacks.Add(1); return nil })}, deletion: []namespaces.DeleteOption{request.Custom(func(*namespaces.DeleteOpts) error { callbacks.Add(1); return nil })}}
 				v, e := namespaceCall(namespaces.New(client), context.Background(), op.name, name, o)
 				if v != nil || !errors.Is(e, resource.ErrInvalidOption) || calls.Load() != 0 || callbacks.Load() != 0 {
 					t.Fatal(v, e, calls.Load(), callbacks.Load())
@@ -793,7 +794,7 @@ func TestMetadefNamespacesOwnedPreparationAndSource(t *testing.T) {
 			t.Run(op.name+" protected option "+header, func(t *testing.T) {
 				var calls atomic.Int32
 				client := namespaceClient(func(*http.Request) (*http.Response, error) { calls.Add(1); return nil, errors.New("unexpected HTTP") })
-				o := namespaceOptions{create: []namespaces.CreateOption{namespaces.WithCreateHeader(header, "value")}, get: []namespaces.GetOption{namespaces.WithGetHeader(header, "value")}, update: []namespaces.UpdateOption{namespaces.WithUpdateHeader(header, "value")}, deletion: []namespaces.DeleteOption{namespaces.WithDeleteHeader(header, "value")}, list: []namespaces.ListOption{namespaces.WithListHeader(header, "value")}}
+				o := namespaceOptions{create: []namespaces.CreateOption{request.Header(header, "value")}, get: []namespaces.GetOption{request.Header(header, "value")}, update: []namespaces.UpdateOption{request.Header(header, "value")}, deletion: []namespaces.DeleteOption{request.Header(header, "value")}, list: []namespaces.ListOption{request.Header(header, "value")}}
 				v, e := namespaceCall(namespaces.New(client), context.Background(), op.name, namespaceName, o)
 				if v != nil || !errors.Is(e, resource.ErrInvalidOption) || calls.Load() != 0 {
 					t.Fatal(v, e, calls.Load())
@@ -828,7 +829,7 @@ func TestMetadefNamespacesOwnedPreparationAndSource(t *testing.T) {
 					}
 					return nil
 				}
-				o := namespaceOptions{create: []namespaces.CreateOption{func(*namespaces.CreateOpts) error { return mutate() }}, get: []namespaces.GetOption{func(*namespaces.GetOpts) error { return mutate() }}, update: []namespaces.UpdateOption{func(*namespaces.UpdateOpts) error { return mutate() }}, deletion: []namespaces.DeleteOption{func(*namespaces.DeleteOpts) error { return mutate() }}, list: []namespaces.ListOption{func(*namespaces.ListOpts) error { return mutate() }}}
+				o := namespaceOptions{create: []namespaces.CreateOption{request.Custom(func(*namespaces.CreateOpts) error { return mutate() })}, get: []namespaces.GetOption{request.Custom(func(*namespaces.GetOpts) error { return mutate() })}, update: []namespaces.UpdateOption{request.Custom(func(*namespaces.UpdateOpts) error { return mutate() })}, deletion: []namespaces.DeleteOption{request.Custom(func(*namespaces.DeleteOpts) error { return mutate() })}, list: []namespaces.ListOption{request.Custom(func(*namespaces.ListOpts) error { return mutate() })}}
 				if mode == "nil callback" {
 					o = namespaceOptions{create: []namespaces.CreateOption{nil}, get: []namespaces.GetOption{nil}, update: []namespaces.UpdateOption{nil}, deletion: []namespaces.DeleteOption{nil}, list: []namespaces.ListOption{nil}}
 				}
@@ -858,9 +859,9 @@ func TestMetadefNamespacesOwnedPreparationAndSource(t *testing.T) {
 		{"update rename", namespaceOptions{update: []namespaces.UpdateOption{namespaces.WithUpdateNamespace("bad/name")}}},
 		{"update visibility", namespaceOptions{update: []namespaces.UpdateOption{namespaces.WithUpdateVisibility("Public")}}},
 		{"get ResourceType control", namespaceOptions{get: []namespaces.GetOption{namespaces.WithGetResourceType("bad\nvalue")}}},
-		{"negative limit", namespaceOptions{list: []namespaces.ListOption{namespaces.WithListLimit(-1)}}},
-		{"negative cap", namespaceOptions{list: []namespaces.ListOption{namespaces.WithListMaxItems(-1)}}},
-		{"bad marker", namespaceOptions{list: []namespaces.ListOption{namespaces.WithListMarker("bad/name")}}},
+		{"negative limit", namespaceOptions{list: []namespaces.ListOption{request.Limit(-1)}}},
+		{"negative cap", namespaceOptions{list: []namespaces.ListOption{request.MaxItems(-1)}}},
+		{"bad marker", namespaceOptions{list: []namespaces.ListOption{request.Marker("bad/name")}}},
 		{"bad visibility", namespaceOptions{list: []namespaces.ListOption{namespaces.WithListVisibility("Public")}}},
 		{"bad sortdir", namespaceOptions{list: []namespaces.ListOption{namespaces.WithListSortDir("ASC")}}},
 		{"sort control", namespaceOptions{list: []namespaces.ListOption{namespaces.WithListSortKey("sort\nkey")}}},
@@ -911,21 +912,21 @@ func TestMetadefNamespacesOwnedPreparationAndSource(t *testing.T) {
 				}
 			}
 			o := namespaceOptions{
-				create: []namespaces.CreateOption{namespaces.WithCreateHeader("X-Dropped", "gone"), namespaces.WithCreateOpts(namespaces.CreateOpts{Headers: input, DisplayName: &text, Protected: &flag}), func(c *namespaces.CreateOpts) error {
+				create: []namespaces.CreateOption{request.Header("X-Dropped", "gone"), namespaces.WithCreateOpts(namespaces.CreateOpts{Headers: input, DisplayName: &text, Protected: &flag}), request.Custom(func(c *namespaces.CreateOpts) error {
 					escaped = c.Headers
 					escapedText = c.DisplayName
 					escapedFlag = c.Protected
 					return nil
-				}, func(*namespaces.CreateOpts) error { mutate(); return nil }},
-				get: []namespaces.GetOption{namespaces.WithGetHeader("X-Dropped", "gone"), namespaces.WithGetOpts(namespaces.GetOpts{Headers: input, ResourceType: &text}), func(c *namespaces.GetOpts) error { escaped = c.Headers; escapedText = c.ResourceType; return nil }, func(*namespaces.GetOpts) error { mutate(); return nil }},
-				update: []namespaces.UpdateOption{namespaces.WithUpdateHeader("X-Dropped", "gone"), namespaces.WithUpdateOpts(namespaces.UpdateOpts{Headers: input, DisplayName: &text, Protected: &flag}), func(c *namespaces.UpdateOpts) error {
+				}), request.Custom(func(*namespaces.CreateOpts) error { mutate(); return nil })},
+				get: []namespaces.GetOption{request.Header("X-Dropped", "gone"), namespaces.WithGetOpts(namespaces.GetOpts{Headers: input, ResourceType: &text}), request.Custom(func(c *namespaces.GetOpts) error { escaped = c.Headers; escapedText = c.ResourceType; return nil }), request.Custom(func(*namespaces.GetOpts) error { mutate(); return nil })},
+				update: []namespaces.UpdateOption{request.Header("X-Dropped", "gone"), namespaces.WithUpdateOpts(namespaces.UpdateOpts{Headers: input, DisplayName: &text, Protected: &flag}), request.Custom(func(c *namespaces.UpdateOpts) error {
 					escaped = c.Headers
 					escapedText = c.DisplayName
 					escapedFlag = c.Protected
 					return nil
-				}, func(*namespaces.UpdateOpts) error { mutate(); return nil }},
-				deletion: []namespaces.DeleteOption{namespaces.WithDeleteHeader("X-Dropped", "gone"), namespaces.WithDeleteOpts(namespaces.DeleteOpts{Headers: input, IgnoreMissing: &flag}), func(c *namespaces.DeleteOpts) error { escaped = c.Headers; escapedFlag = c.IgnoreMissing; return nil }, func(*namespaces.DeleteOpts) error { mutate(); return nil }},
-				list:     []namespaces.ListOption{namespaces.WithListHeader("X-Dropped", "gone"), namespaces.WithListOpts(namespaces.ListOpts{Headers: input, Limit: &limit, MaxItems: 1}), func(c *namespaces.ListOpts) error { escaped = c.Headers; escapedLimit = c.Limit; return nil }, func(*namespaces.ListOpts) error { mutate(); return nil }},
+				}), request.Custom(func(*namespaces.UpdateOpts) error { mutate(); return nil })},
+				deletion: []namespaces.DeleteOption{request.Header("X-Dropped", "gone"), namespaces.WithDeleteOpts(namespaces.DeleteOpts{Headers: input, IgnoreMissing: &flag}), request.Custom(func(c *namespaces.DeleteOpts) error { escaped = c.Headers; escapedFlag = c.IgnoreMissing; return nil }), request.Custom(func(*namespaces.DeleteOpts) error { mutate(); return nil })},
+				list:     []namespaces.ListOption{request.Header("X-Dropped", "gone"), namespaces.WithListOpts(namespaces.ListOpts{Headers: input, Limit: &limit, MaxItems: 1}), request.Custom(func(c *namespaces.ListOpts) error { escaped = c.Headers; escapedLimit = c.Limit; return nil }), request.Custom(func(*namespaces.ListOpts) error { mutate(); return nil })},
 			}
 			input["X-Owned"] = "caller"
 			text = "caller"
@@ -977,11 +978,11 @@ func TestMetadefNamespacesOwnedPreparationAndSource(t *testing.T) {
 		if a.RawClient() != client || calls.Load() != 0 {
 			t.Fatal("constructor/source")
 		}
-		v, e := a.Get(context.Background(), namespaceName, func(*namespaces.GetOpts) error {
+		v, e := a.Get(context.Background(), namespaceName, request.Custom(func(*namespaces.GetOpts) error {
 			client.MoreHeaders["X-Source"] = "later"
 			client.SetToken("live")
 			return nil
-		})
+		}))
 		if e != nil || v == nil || calls.Load() != 1 || client.MoreHeaders["X-Source"] != "later" {
 			t.Fatal(v, e, calls.Load())
 		}
@@ -1124,7 +1125,7 @@ func TestMetadefNamespacesResponseOwnershipAndNativeHooks(t *testing.T) {
 			}
 			opts := []namespaces.DeleteOption{}
 			if mode != "default" {
-				opts = append(opts, namespaces.WithDeleteIgnoreMissing(mode == "explicit true"))
+				opts = append(opts, request.IgnoreMissing(mode == "explicit true"))
 			}
 			v, e := namespaces.New(client).Delete(context.Background(), namespaceName, opts...)
 			if v != nil || calls.Load() != 1 || b.closes.Load() != 1 {

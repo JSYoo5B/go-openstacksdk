@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -20,7 +21,7 @@ func TestPythonStoreRecordsDetailsSelectsFixedRouteAndSchema(t *testing.T) {
 		return infoRecordJSON(r, 203, body), nil
 	})
 	api := New(client)
-	rows, err := api.AllStoreRecords(context.Background(), WithStoreRecordListDetails(true), WithStoreRecordListLimit(0), WithStoreRecordListFilter("is_default", true))
+	rows, err := api.AllStoreRecords(context.Background(), WithStoreRecordListDetails(true), request.Limit(0), WithStoreRecordListFilter("is_default", true))
 	if err != nil || len(rows) != 1 || calls != 1 {
 		t.Fatal(rows, err, calls)
 	}
@@ -73,7 +74,7 @@ func TestPythonStoreRecordsDetailsPagingPartialAndCaps(t *testing.T) {
 	if len(rows) != 2 || !errors.As(err, &proof) || string(proof.Body) != bad || proof.StatusCode != 202 || calls != 2 {
 		t.Fatal(rows, err, proof, calls)
 	}
-	rows, err = api.AllStoreRecords(context.Background(), WithStoreRecordListDetails(true), WithStoreRecordListMaxItems(1), WithStoreRecordListFilter("is_default", true))
+	rows, err = api.AllStoreRecords(context.Background(), WithStoreRecordListDetails(true), request.MaxItems(1), WithStoreRecordListFilter("is_default", true))
 	if err != nil || len(rows) != 0 || calls != 3 {
 		t.Fatal(rows, err, calls)
 	}

@@ -16,6 +16,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -317,21 +318,21 @@ func TestDeleteImageRecordSourceOptionsLocationAndChildSnapshots(t *testing.T) {
 				locations++
 				seed.bodyState.current["id"] = json.RawMessage(`"location changed ID"`)
 				client.MoreHeaders["X-Source"] = "changed by location"
-				options[0] = WithImageRecordDeleteHeader("X-Option", "location changed option")
+				options[0] = request.Header("X-Option", "location changed option")
 				return facts, nil
 			}})
 			options = []ImageRecordDeleteOption{factory}
 			if storeMode {
 				options = append(options, WithImageRecordDeleteStoreRecord(store))
 			}
-			options = append(options, func(config *ImageRecordDeleteOpts) error {
+			options = append(options, request.Custom(func(config *ImageRecordDeleteOpts) error {
 				callbacks++
 				retained = config
 				cloud = "after option"
 				facts.Project.ID[1] = 'X'
 				client.SetToken("live")
-				return WithImageRecordDeleteHeader("X-Final", "yes")(config)
-			})
+				return applyCall(imageRecordDeleteCalls, request.Header("X-Final", "yes"), config)
+			}))
 			got, err := service.DeleteImageRecord(context.Background(), ImageRecordDeleteRequest{Record: seed}, options...)
 			if got == nil || err != nil || calls != 2 || callbacks != 1 || locations != 1 {
 				t.Fatal(got, err, calls, callbacks, locations)
@@ -493,10 +494,10 @@ func TestDeleteImageRecordMissingPolicySuppressesOnlyCleanFinalNative404(t *test
 					options = append(options, WithImageRecordDeleteStoreID("store"))
 				}
 				if mode == "strict" {
-					options = append(options, WithImageRecordDeleteIgnoreMissing(false))
+					options = append(options, request.IgnoreMissing(false))
 				}
 				if mode == "explicit true" {
-					options = append(options, WithImageRecordDeleteIgnoreMissing(true))
+					options = append(options, request.IgnoreMissing(true))
 				}
 				got, err := New(client).DeleteImageRecord(ctx, ImageRecordDeleteRequest{ID: "fixed"}, options...)
 				clean := mode == "default" || mode == "explicit true" || mode == "retry clean final"
@@ -542,7 +543,7 @@ func TestDeleteImageRecordNativeRejectionsNeverCreateAcknowledgement(t *testing.
 					calls++
 					return taskCoreJSON(req, code, `actual rejection`), nil
 				})
-				options := []ImageRecordDeleteOption{WithImageRecordDeleteIgnoreMissing(false)}
+				options := []ImageRecordDeleteOption{request.IgnoreMissing(false)}
 				if store {
 					options = append(options, WithImageRecordDeleteStoreID("store"))
 				}
@@ -598,7 +599,7 @@ func TestDeleteImageRecordNativeRetryKeepsFixedScopeAndActualStatusPolicy(t *tes
 					return nil
 				}
 				originalHook := reflect.ValueOf(client.RetryFunc).Pointer()
-				options := []ImageRecordDeleteOption{WithImageRecordDeleteIgnoreMissing(false)}
+				options := []ImageRecordDeleteOption{request.IgnoreMissing(false)}
 				if store {
 					options = append(options, WithImageRecordDeleteStoreID("store"))
 				}
@@ -648,7 +649,7 @@ func TestDeleteImageRecordCompletePreflightRejectsAmbiguousOrUnsafeSelectors(t *
 		{"store null id", ImageRecordDeleteRequest{ID: "fixed"}, []ImageRecordDeleteOption{WithImageRecordDeleteStoreRecord(imageRecordDeleteStore(`null`))}},
 		{"store untyped id", ImageRecordDeleteRequest{ID: "fixed"}, []ImageRecordDeleteOption{WithImageRecordDeleteStoreRecord(imageRecordDeleteStore(`false`))}},
 		{"nil option", ImageRecordDeleteRequest{ID: "fixed"}, []ImageRecordDeleteOption{nil}},
-		{"owned auth header", ImageRecordDeleteRequest{ID: "fixed"}, []ImageRecordDeleteOption{WithImageRecordDeleteHeader("X-Auth-Token", "foreign")}},
+		{"owned auth header", ImageRecordDeleteRequest{ID: "fixed"}, []ImageRecordDeleteOption{request.Header("X-Auth-Token", "foreign")}},
 		{"invalid header", ImageRecordDeleteRequest{ID: "fixed"}, []ImageRecordDeleteOption{WithImageRecordDeleteHeaders(map[string]string{"X-Extra": "\n"})}},
 	}
 	for _, value := range []string{" ", ".", "..", "bad\n", string([]byte{0xff})} {
@@ -689,7 +690,7 @@ func TestDeleteImageRecordCompletePreflightRejectsAmbiguousOrUnsafeSelectors(t *
 			if mode == "nil service" {
 				service = nil
 			}
-			got, err := service.DeleteImageRecord(ctx, ImageRecordDeleteRequest{ID: "fixed"}, func(*ImageRecordDeleteOpts) error { callbacks++; return nil })
+			got, err := service.DeleteImageRecord(ctx, ImageRecordDeleteRequest{ID: "fixed"}, request.Custom(func(*ImageRecordDeleteOpts) error { callbacks++; return nil }))
 			if got != nil || err == nil || calls != 0 || callbacks != 0 {
 				t.Fatal(got, err, calls, callbacks)
 			}
@@ -713,7 +714,7 @@ func TestDeleteImageRecordStopsAfterGuardFailureInOptions(t *testing.T) {
 			calls, callbacks, later := 0, 0, 0
 			client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return nil, nil })
 			service := New(client)
-			got, err := service.DeleteImageRecord(ctx, ImageRecordDeleteRequest{ID: "fixed"}, func(*ImageRecordDeleteOpts) error {
+			got, err := service.DeleteImageRecord(ctx, ImageRecordDeleteRequest{ID: "fixed"}, request.Custom(func(*ImageRecordDeleteOpts) error {
 				callbacks++
 				switch mode {
 				case "cancel":
@@ -726,7 +727,7 @@ func TestDeleteImageRecordStopsAfterGuardFailureInOptions(t *testing.T) {
 					outerInvalid = true
 				}
 				return nil
-			}, func(*ImageRecordDeleteOpts) error { later++; return nil })
+			}), request.Custom(func(*ImageRecordDeleteOpts) error { later++; return nil }))
 			if got != nil || err == nil || calls != 0 || callbacks != 1 || later != 0 {
 				t.Fatal(got, err, calls, callbacks, later)
 			}

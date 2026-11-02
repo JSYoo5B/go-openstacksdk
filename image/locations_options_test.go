@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -17,7 +18,7 @@ func TestImageLocationsOptionsSnapshotsAndReplacement(t *testing.T) {
 	helper := WithAddImageLocationOpts(AddImageLocationOpts{ValidationData: pair, Headers: headers})
 	pair.OSHashAlgo = "after"
 	headers["X-Original"] = "after"
-	policy, err := parseAddImageLocationOptions([]AddImageLocationOption{WithAddImageLocationHeader("X-Discard", "before"), WithImageLocationValidation("discard", "discard"), helper, WithAddImageLocationHeader("x-original", "last"), WithAddImageLocationHeaders(map[string]string{"X-Extra": "owned"})})
+	policy, err := parseAddImageLocationOptions([]AddImageLocationOption{request.Header("X-Discard", "before"), WithImageLocationValidation("discard", "discard"), helper, request.Header("x-original", "last"), WithAddImageLocationHeaders(map[string]string{"X-Extra": "owned"})})
 	if err != nil || policy.ValidationData.OSHashAlgo != "before" || policy.Headers["X-Original"] != "last" || policy.Headers["X-Extra"] != "owned" || policy.Headers["X-Discard"] != "" {
 		t.Fatal("replacement/snapshot failed", policy, err)
 	}
@@ -34,7 +35,7 @@ func TestImageLocationsOptionsSnapshotsAndReplacement(t *testing.T) {
 	getHeaders := map[string]string{"X-Before": "owned"}
 	getHelper := WithGetImageLocationsOpts(GetImageLocationsOpts{Headers: getHeaders})
 	getHeaders["X-Before"] = "late"
-	get, err := parseGetImageLocationsOptions([]GetImageLocationsOption{WithGetImageLocationsHeader("X-Discard", "before"), getHelper, WithGetImageLocationsHeader("x-before", "last")})
+	get, err := parseGetImageLocationsOptions([]GetImageLocationsOption{request.Header("X-Discard", "before"), getHelper, request.Header("x-before", "last")})
 	if err != nil || get.Headers["X-Before"] != "last" || get.Headers["X-Discard"] != "" {
 		t.Fatal("Get replacement failed", get, err)
 	}
@@ -44,7 +45,7 @@ func TestImageLocationsOptionsOwnCallbackHandlesAndSlice(t *testing.T) {
 	var retained *AddImageLocationOpts
 	var applies, calls int
 	options := make([]AddImageLocationOption, 2)
-	options[0] = func(config *AddImageLocationOpts) error {
+	options[0] = request.Custom(func(config *AddImageLocationOpts) error {
 		applies++
 		if config.Headers == nil {
 			t.Fatal("default Headers not initialized")
@@ -52,10 +53,10 @@ func TestImageLocationsOptionsOwnCallbackHandlesAndSlice(t *testing.T) {
 		config.Headers["X-Extra"] = "owned"
 		config.ValidationData = &ImageLocationValidation{OSHashAlgo: "literal", OSHashValue: "owned"}
 		retained = config
-		options[1] = func(*AddImageLocationOpts) error { t.Fatal("option slice was not captured"); return nil }
+		options[1] = request.Custom(func(*AddImageLocationOpts) error { t.Fatal("option slice was not captured"); return nil })
 		return nil
-	}
-	options[1] = func(config *AddImageLocationOpts) error {
+	})
+	options[1] = request.Custom(func(config *AddImageLocationOpts) error {
 		applies++
 		retained.Headers["X-Extra"] = "retained mutation"
 		retained.ValidationData.OSHashValue = "retained mutation"
@@ -63,7 +64,7 @@ func TestImageLocationsOptionsOwnCallbackHandlesAndSlice(t *testing.T) {
 			t.Fatal("retained config aliases next callback", config)
 		}
 		return nil
-	}
+	})
 	client := deleteCoreClient(func(req *http.Request) (*http.Response, error) {
 		calls++
 		var body struct {
@@ -83,14 +84,14 @@ func TestImageLocationsOptionsOwnCallbackHandlesAndSlice(t *testing.T) {
 		client := deleteCoreClient(func(*http.Request) (*http.Response, error) { t.Fatal("option failure sent HTTP"); return nil, nil })
 		var err error
 		if add {
-			_, err = New(client).AddImageLocation(context.Background(), resource.Name("exact"), "literal", func(*AddImageLocationOpts) error { return cause })
+			_, err = New(client).AddImageLocation(context.Background(), resource.Name("exact"), "literal", request.Custom(func(*AddImageLocationOpts) error { return cause }))
 		} else {
-			_, err = New(client).GetImageLocations(context.Background(), resource.Name("exact"), func(config *GetImageLocationsOpts) error {
+			_, err = New(client).GetImageLocations(context.Background(), resource.Name("exact"), request.Custom(func(config *GetImageLocationsOpts) error {
 				if config.Headers == nil {
 					t.Fatal("Get Headers nil")
 				}
 				return cause
-			})
+			}))
 		}
 		if !errors.Is(err, cause) {
 			t.Fatal("option cause lost", err)

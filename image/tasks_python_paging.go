@@ -9,6 +9,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/jsonfilter"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 // taskBodyFilterFields maps each pinned Python openstack/image/v2/task.py Body
@@ -32,11 +33,11 @@ var taskBodyFilterFields = map[string]string{
 // as null (internal/jsonfilter.MatchFilters, the shared Body-filter policy).
 // Filters never reach the wire. Repeating a name replaces its value.
 //
-// As in Python, WithListTasksMaxItems counts raw rows before filtering, and
+// As in Python, request.MaxItems counts raw rows before filtering, and
 // rows excluded by a filter still advance marker fallback.
 func WithListTasksBodyFilter(name string, value any) ListTasksOption {
 	encoded, err := json.Marshal(value)
-	return func(config *ListTasksOpts) error {
+	return request.Custom(func(config *ListTasksOpts) error {
 		if err != nil {
 			return uploadInvalid("task body filter %q: %v", name, err)
 		}
@@ -48,12 +49,12 @@ func WithListTasksBodyFilter(name string, value any) ListTasksOption {
 		}
 		config.BodyFilters[name] = append(json.RawMessage(nil), encoded...)
 		return nil
-	}
+	})
 }
 
 // WithListTasksMarkerFallback enables pinned Python Resource.list's final
 // continuation rule: when a nonempty page has no usable next link and an
-// explicit positive WithListTasksLimit was given, request the same collection
+// explicit positive request.Limit was given, request the same collection
 // again with the initial filters, the same limit and marker set to the last
 // raw row's id. Iteration ends at the first empty page, so a fully consumed
 // collection costs one extra request, exactly as in Python. A repeated marker
@@ -61,7 +62,7 @@ func WithListTasksBodyFilter(name string, value any) ListTasksOption {
 // by default, and ignored without a positive limit, with SinglePage, or after
 // a MaxItems cap or caller break.
 func WithListTasksMarkerFallback(enabled bool) ListTasksOption {
-	return func(config *ListTasksOpts) error { config.MarkerFallback = enabled; return nil }
+	return request.Custom(func(config *ListTasksOpts) error { config.MarkerFallback = enabled; return nil })
 }
 
 // WithListTasksLinkHeader lets an RFC 8288 HTTP Link header with rel="next"
@@ -71,7 +72,7 @@ func WithListTasksMarkerFallback(enabled bool) ListTasksOption {
 // nonempty marker). A body next link always takes precedence. Disabled by
 // default; malformed Link headers fail only when the option is enabled.
 func WithListTasksLinkHeader(enabled bool) ListTasksOption {
-	return func(config *ListTasksOpts) error { config.LinkHeader = enabled; return nil }
+	return request.Custom(func(config *ListTasksOpts) error { config.LinkHeader = enabled; return nil })
 }
 
 func validateTaskBodyFilters(filters map[string]json.RawMessage) error {

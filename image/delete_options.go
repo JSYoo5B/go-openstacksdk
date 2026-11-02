@@ -1,6 +1,11 @@
 package image
 
-import "unicode/utf8"
+import (
+	"unicode/utf8"
+
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
+	"github.com/JSYoo5B/go-openstacksdk/request"
+)
 
 // DeleteImageOpts selects whole-image deletion or one store's copy.
 // Nil StoreID deletes the whole image. Nil IgnoreMissing ignores absence.
@@ -10,21 +15,25 @@ type DeleteImageOpts struct {
 	IgnoreMissing *bool
 }
 
-type DeleteImageOption func(*DeleteImageOpts) error
+// DeleteImageOption is one option of DeleteImage: WithDeleteImageOpts,
+// WithDeleteImageStore, request.IgnoreMissing or request.Custom over
+// *DeleteImageOpts. Other shared calls, including request.Header and
+// request.Headers, fail with resource.ErrInvalidOption before HTTP.
+type DeleteImageOption = request.DeleteCall
+
+var deleteImageCalls = calls.Spec[DeleteImageOpts]{
+	IgnoreMissing: calls.Pointer(func(c *DeleteImageOpts) **bool { return &c.IgnoreMissing }),
+}
 
 // WithDeleteImageOpts snapshots and replaces the complete deletion policy.
 func WithDeleteImageOpts(value DeleteImageOpts) DeleteImageOption {
 	snapshot := copyDeleteImageOpts(value)
-	return func(config *DeleteImageOpts) error { *config = copyDeleteImageOpts(snapshot); return nil }
+	return request.Custom(func(config *DeleteImageOpts) error { *config = copyDeleteImageOpts(snapshot); return nil })
 }
 
 // WithDeleteImageStore deletes the image copy from the specified store.
 func WithDeleteImageStore(value string) DeleteImageOption {
-	return func(config *DeleteImageOpts) error { owned := value; config.StoreID = &owned; return nil }
-}
-
-func WithDeleteImageIgnoreMissing(value bool) DeleteImageOption {
-	return func(config *DeleteImageOpts) error { owned := value; config.IgnoreMissing = &owned; return nil }
+	return request.Custom(func(config *DeleteImageOpts) error { owned := value; config.StoreID = &owned; return nil })
 }
 
 func copyDeleteImageOpts(value DeleteImageOpts) DeleteImageOpts {
@@ -35,7 +44,7 @@ func copyDeleteImageOpts(value DeleteImageOpts) DeleteImageOpts {
 
 func parseDeleteImageOptions(options []DeleteImageOption) (DeleteImageOpts, error) {
 	var config DeleteImageOpts
-	for _, apply := range options {
+	for _, apply := range calls.Translate(options, deleteImageCalls) {
 		if apply == nil {
 			return config, uploadInvalid("nil delete option")
 		}

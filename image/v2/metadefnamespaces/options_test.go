@@ -10,6 +10,8 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -21,7 +23,7 @@ func TestMetadefNamespacesOptionsSnapshotsReplacementAndLastWins(t *testing.T) {
 	create := WithCreateOpts(CreateOpts{Headers: headers, DisplayName: &display, Description: &description, Visibility: &visibility, Owner: &owner, Protected: &protected})
 	display, description, visibility, owner, protected = "mutated", "mutated", "public", "mutated", true
 	headers["X-Original"] = "after"
-	value, err := prepareCreate([]CreateOption{WithCreateDisplayName("superseded"), WithCreateHeader("X-Removed", "x"), create, WithCreateHeader("x-original", "last"), WithCreateProtected(false)})
+	value, err := prepareCreate([]CreateOption{WithCreateDisplayName("superseded"), request.Header("X-Removed", "x"), create, request.Header("x-original", "last"), WithCreateProtected(false)})
 	if err != nil || *value.DisplayName != "display" || *value.Description != "description" || *value.Visibility != "private" || *value.Owner != "owner" || *value.Protected || value.Headers["X-Original"] != "last" || value.Headers["X-Removed"] != "" {
 		t.Fatalf("create snapshot/lastwins %+v %v", value, err)
 	}
@@ -36,7 +38,7 @@ func TestMetadefNamespacesOptionsSnapshotsReplacementAndLastWins(t *testing.T) {
 	*updateInput.Namespace = "changed"
 	*updateInput.Protected = true
 	updateInput.Headers["X-Replace"] = "after"
-	updated, err := prepareUpdate([]UpdateOption{WithUpdateHeader("X-Removed", "x"), update})
+	updated, err := prepareUpdate([]UpdateOption{request.Header("X-Removed", "x"), update})
 	if err != nil || *updated.Namespace != "new::name" || *updated.Protected || updated.Headers["X-Replace"] != "before" || updated.Headers["X-Removed"] != "" {
 		t.Fatalf("update snapshot %+v %v", updated, err)
 	}
@@ -59,19 +61,19 @@ func TestMetadefNamespacesOptionsSnapshotsReplacementAndLastWins(t *testing.T) {
 	list := WithListOpts(listInput)
 	limit = 2
 	listInput.Headers["X-List"] = "after"
-	listed, query, err := prepareList([]ListOption{WithListMarker("superseded"), list})
+	listed, query, err := prepareList([]ListOption{request.Marker("superseded"), list})
 	if err != nil || *listed.Limit != 0 || query.Get("limit") != "0" || query.Get("marker") != "OS::start" || query.Get("resource_types") != "OS::A, OS::B" || listed.Headers["X-List"] != "before" || listed.MaxItems != 3 || !listed.SinglePage {
 		t.Fatalf("list snapshot %+v %s %v", listed, query, err)
 	}
 	mapInput := map[string]string{"x-snapshot": "before"}
 	mapOption := WithGetHeaders(mapInput)
 	mapInput["x-snapshot"] = "after"
-	if got, err := prepareGet([]GetOption{mapOption, WithGetHeader("X-Snapshot", "last")}); err != nil || got.Headers["X-Snapshot"] != "last" {
+	if got, err := prepareGet([]GetOption{mapOption, request.Header("X-Snapshot", "last")}); err != nil || got.Headers["X-Snapshot"] != "last" {
 		t.Fatalf("header helper snapshot %+v %v", got, err)
 	}
-	// Public header helpers also work when applied directly to a zero options value.
+	// The shared header call also works when translated directly onto a zero options value.
 	var zero GetOpts
-	if err := WithGetHeader("X-Direct", "yes")(&zero); err != nil || zero.Headers["X-Direct"] != "yes" {
+	if err := calls.Translate([]GetOption{request.Header("X-Direct", "yes")}, getCalls)[0](&zero); err != nil || zero.Headers["X-Direct"] != "yes" {
 		t.Fatalf("direct helper %+v %v", zero, err)
 	}
 }
@@ -79,7 +81,7 @@ func TestMetadefNamespacesOptionsSnapshotsReplacementAndLastWins(t *testing.T) {
 func TestMetadefNamespacesOptionsCallbackPointersAndSliceOwnership(t *testing.T) {
 	var retained *CreateOpts
 	callbacks := 0
-	first := CreateOption(func(value *CreateOpts) error {
+	first := CreateOption(request.Custom(func(value *CreateOpts) error {
 		callbacks++
 		if value.Headers == nil {
 			t.Fatal("callback headers uninitialized")
@@ -88,8 +90,8 @@ func TestMetadefNamespacesOptionsCallbackPointersAndSliceOwnership(t *testing.T)
 		value.Headers["X-Handle"] = "before"
 		retained = value
 		return nil
-	})
-	second := CreateOption(func(value *CreateOpts) error {
+	}))
+	second := CreateOption(request.Custom(func(value *CreateOpts) error {
 		callbacks++
 		*retained.DisplayName = "old-handle"
 		retained.Headers["X-Handle"] = "old-handle"
@@ -98,7 +100,7 @@ func TestMetadefNamespacesOptionsCallbackPointersAndSliceOwnership(t *testing.T)
 		}
 		value.Owner = namespaceOptionPointer("owner")
 		return nil
-	})
+	}))
 	config, err := prepareCreate([]CreateOption{first, second})
 	if err != nil || callbacks != 2 || *config.DisplayName != "before" || config.Headers["X-Handle"] != "before" {
 		t.Fatalf("retained callback %+v %v", config, err)
@@ -109,10 +111,10 @@ func TestMetadefNamespacesOptionsCallbackPointersAndSliceOwnership(t *testing.T)
 		t.Fatal("closed retained handle affects prepared config")
 	}
 	var options []GetOption
-	options = []GetOption{func(value *GetOpts) error {
-		options[1] = func(*GetOpts) error { return errors.New("unowned replacement") }
+	options = []GetOption{request.Custom(func(value *GetOpts) error {
+		options[1] = request.Custom(func(*GetOpts) error { return errors.New("unowned replacement") })
 		return nil
-	}, WithGetHeader("X-Chosen", "yes")}
+	}), request.Header("X-Chosen", "yes")}
 	calls := 0
 	api := New(namespaceCoreClient(func(req *http.Request) (*http.Response, error) {
 		calls++
@@ -132,9 +134,9 @@ func TestMetadefNamespacesOptionsCallbackPointersAndSliceOwnership(t *testing.T)
 		}
 		return namespaceCoreJSON(req, 200, `{"namespaces":[{}]}`), nil
 	}))
-	listOptions := []ListOption{func(*ListOpts) error { lazyCallbacks++; return nil }, WithListMaxItems(3)}
+	listOptions := []ListOption{request.Custom(func(*ListOpts) error { lazyCallbacks++; return nil }), request.MaxItems(3)}
 	seq := lazy.List(context.Background(), listOptions...)
-	listOptions[1] = func(*ListOpts) error { return errors.New("changed source slice") }
+	listOptions[1] = request.Custom(func(*ListOpts) error { return errors.New("changed source slice") })
 	if lazyCallbacks != 0 || lazyRequests != 0 {
 		t.Fatal("iterator is not lazy")
 	}
@@ -171,7 +173,7 @@ func TestMetadefNamespacesOptionsValidationAndDefaults(t *testing.T) {
 	if err != nil || list.Limit != nil || list.MaxItems != 0 || list.SinglePage || len(query) != 0 {
 		t.Fatalf("list defaults %+v %s %v", list, query, err)
 	}
-	if _, _, err := prepareList([]ListOption{WithListLimit(0), WithListMarker(""), WithListSortKey("unknown_column"), WithListResourceTypes("OS::A, OS::A")}); err != nil {
+	if _, _, err := prepareList([]ListOption{request.Limit(0), request.Marker(""), WithListSortKey("unknown_column"), WithListResourceTypes("OS::A, OS::A")}); err != nil {
 		t.Fatal(err)
 	}
 	if err := literal(strings.Repeat("界", 80)); err != nil {
@@ -194,7 +196,7 @@ func TestMetadefNamespacesOptionsValidationAndDefaults(t *testing.T) {
 		}
 	}
 	for _, key := range []string{"X-Auth-Token", "X-Service-Token", "Authorization", "Host", "Cookie", "Content-Length", "Transfer-Encoding", "Connection", "Trailer", "Te", "Upgrade", "Accept", "Content-Type", "OpenStack-API-Version", "X-OpenStack-Glance-Api-Version", "X-OpenStack-Image-Size"} {
-		if _, err := prepareGet([]GetOption{WithGetHeader(key, "value")}); !errors.Is(err, resource.ErrInvalidOption) {
+		if _, err := prepareGet([]GetOption{request.Header(key, "value")}); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatalf("protected header %q: %v", key, err)
 		}
 	}
@@ -211,7 +213,7 @@ func TestMetadefNamespacesOptionsValidationAndDefaults(t *testing.T) {
 		t.Fatal(err)
 	}
 	cause := errors.New("callback cause")
-	if _, err := prepareUpdate([]UpdateOption{func(*UpdateOpts) error { return cause }}); err != cause {
+	if _, err := prepareUpdate([]UpdateOption{request.Custom(func(*UpdateOpts) error { return cause })}); err != cause {
 		t.Fatalf("callback identity lost: %v", err)
 	}
 	if body := scalarBody("literal", namespaceOptionPointer(""), nil, nil, nil, namespaceOptionPointer(false)); !reflect.DeepEqual(body, map[string]any{"namespace": "literal", "display_name": "", "protected": false}) {

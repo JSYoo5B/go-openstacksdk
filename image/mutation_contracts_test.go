@@ -18,6 +18,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/image"
 	sdkimages "github.com/JSYoo5B/go-openstacksdk/image/v2/images"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -129,7 +130,7 @@ func TestImageMutationsFixedRoutesAndAcknowledgements(t *testing.T) {
 				w.Header().Set("Location", "https://foreign.invalid/images/decoy")
 				w.WriteHeader(204)
 			})
-			value, err := mutationCall(image.New(client), context.Background(), operation.name, resource.ID("fixed"), "literal", image.WithImageMutationHeader("X-Option", "ordinary"))
+			value, err := mutationCall(image.New(client), context.Background(), operation.name, resource.ID("fixed"), "literal", request.Header("X-Option", "ordinary"))
 			if err != nil || value == nil || value.ImageID != "fixed" || value.Action != operation.action || value.StatusCode != 204 || len(value.Body) != 0 || value.Header.Get("X-Request-Id") != "actual-mutation" || value.Header.Get("Location") == "" || calls.Load() != 1 {
 				t.Fatal(value, err, calls.Load())
 			}
@@ -215,7 +216,7 @@ func TestImageMutationsLiteralTagIdentityAndCompletePreflight(t *testing.T) {
 				calls.Add(1)
 				return mutationWire(500, io.NopCloser(strings.NewReader("unexpected"))), nil
 			})
-			value, err := image.New(client).RemoveTag(context.Background(), resource.Name("needle"), tag, func(*image.ImageMutationOpts) error { callbacks.Add(1); return nil })
+			value, err := image.New(client).RemoveTag(context.Background(), resource.Name("needle"), tag, request.Custom(func(*image.ImageMutationOpts) error { callbacks.Add(1); return nil }))
 			if value != nil || !errors.Is(err, resource.ErrInvalidOption) || calls.Load() != 0 || callbacks.Load() != 0 {
 				t.Fatal(value, err, calls.Load(), callbacks.Load())
 			}
@@ -233,7 +234,7 @@ func TestImageMutationsLiteralTagIdentityAndCompletePreflight(t *testing.T) {
 			ref := resource.ID("fixed")
 			want := error(resource.ErrInvalidOption)
 			wantCallbacks := int32(0)
-			option := image.ImageMutationOption(func(*image.ImageMutationOpts) error { callbacks.Add(1); return nil })
+			option := request.Custom(func(*image.ImageMutationOpts) error { callbacks.Add(1); return nil })
 			switch mode {
 			case "nil client":
 				client = nil
@@ -279,20 +280,20 @@ func TestImageMutationsLiteralTagIdentityAndCompletePreflight(t *testing.T) {
 				option = nil
 			case "callback error":
 				want, wantCallbacks = cause, 1
-				option = func(*image.ImageMutationOpts) error { callbacks.Add(1); return cause }
+				option = request.Custom(func(*image.ImageMutationOpts) error { callbacks.Add(1); return cause })
 			case "option bad header", "option aliases":
 				wantCallbacks = 1
-				option = func(c *image.ImageMutationOpts) error {
+				option = request.Custom(func(c *image.ImageMutationOpts) error {
 					callbacks.Add(1)
 					c.Headers = map[string]string{"X-Option": "bad\nvalue"}
 					if mode == "option aliases" {
 						c.Headers = map[string]string{"X-Option": "a", "x-option": "b"}
 					}
 					return nil
-				}
+				})
 			case "provider replacement", "foreign source after callback":
 				wantCallbacks = 1
-				option = func(*image.ImageMutationOpts) error {
+				option = request.Custom(func(*image.ImageMutationOpts) error {
 					callbacks.Add(1)
 					if mode == "provider replacement" {
 						client.ProviderClient = &gophercloud.ProviderClient{}
@@ -300,7 +301,7 @@ func TestImageMutationsLiteralTagIdentityAndCompletePreflight(t *testing.T) {
 						client.ResourceBase = "https://foreign.invalid/v2/"
 					}
 					return nil
-				}
+				})
 			}
 			service := image.New(client)
 			if mode == "nil service" {
@@ -322,7 +323,7 @@ func TestImageMutationsLiteralTagIdentityAndCompletePreflight(t *testing.T) {
 				calls.Add(1)
 				return mutationWire(500, io.NopCloser(strings.NewReader(""))), nil
 			})
-			value, err := image.New(client).AddTag(context.Background(), resource.Name("needle"), "literal", image.WithImageMutationHeader(header, "foreign"))
+			value, err := image.New(client).AddTag(context.Background(), resource.Name("needle"), "literal", request.Header(header, "foreign"))
 			if value != nil || !errors.Is(err, resource.ErrInvalidOption) || calls.Load() != 0 {
 				t.Fatal(value, err, calls.Load())
 			}
@@ -425,7 +426,7 @@ func TestImageMutationsExactNameResolutionAndFailures(t *testing.T) {
 				bodies = append(bodies, body)
 				return mutationWire(code, body), nil
 			})
-			value, err := image.New(client).DeactivateImage(ctx, resource.Name(name), image.WithImageMutationHeader("X-Option", "lookup-and-mutation"))
+			value, err := image.New(client).DeactivateImage(ctx, resource.Name(name), request.Header("X-Option", "lookup-and-mutation"))
 			success := mode == "one exact match all pages" || mode == "safe source changes after first page" || mode == "UUID-shaped name"
 			if success {
 				wantCalls := 3
@@ -475,22 +476,22 @@ func TestImageMutationsPreparedOptionsAndLiveSource(t *testing.T) {
 		var retained *image.ImageMutationOpts
 		var callbacks atomic.Int32
 		options := []image.ImageMutationOption{
-			image.WithImageMutationHeader("X-Replaced", "discarded"),
+			request.Header("X-Replaced", "discarded"),
 			replaceOption, mergeOption, nil, nil,
 		}
-		options[3] = func(c *image.ImageMutationOpts) error {
+		options[3] = request.Custom(func(c *image.ImageMutationOpts) error {
 			callbacks.Add(1)
 			c.Headers["X-Retained"] = "original"
 			retained = c
 			options[4] = nil
 			return nil
-		}
-		options[4] = func(c *image.ImageMutationOpts) error {
+		})
+		options[4] = request.Custom(func(c *image.ImageMutationOpts) error {
 			callbacks.Add(1)
 			retained.Headers["X-Retained"] = "later-mutated"
 			c.Headers["X-Last"] = "applied"
 			return nil
-		}
+		})
 		value, err := image.New(client).AddTag(context.Background(), resource.ID("fixed"), "literal", options...)
 		if err != nil || value == nil || calls.Load() != 1 || callbacks.Load() != 2 || client.MoreHeaders["X-Source"] != "source" {
 			t.Fatal(value, err, calls.Load(), callbacks.Load(), client.MoreHeaders)
@@ -535,7 +536,7 @@ func TestImageMutationsPreparedOptionsAndLiveSource(t *testing.T) {
 			return mutationWire(204, io.NopCloser(strings.NewReader(""))), nil
 		})
 		client.MoreHeaders = map[string]string{"X-Source": "captured"}
-		option := image.ImageMutationOption(func(*image.ImageMutationOpts) error {
+		option := request.Custom(func(*image.ImageMutationOpts) error {
 			client.ResourceBase = "https://glance.invalid/later/v2/"
 			client.MoreHeaders = map[string]string{"X-Source": "later"}
 			client.SetToken("latest")

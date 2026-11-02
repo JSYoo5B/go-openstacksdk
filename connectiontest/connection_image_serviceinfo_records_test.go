@@ -10,6 +10,7 @@ import (
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -84,7 +85,7 @@ func TestConnectionImageServiceInfoRecordsShareLocationAndNativeClient(t *testin
 			if info == nil || info.Resource == nil || info.Wire == nil || len(info.Resource.Body) != 4 || info.StatusCode != 201 || string(info.Resource.Body["location"]) != string(location) || string(info.Resource.Body["id"]) != "null" || string(info.Resource.Body["import_methods"]) != `{"value":[null,4],"extension":9007199254740993}` || string(info.Wire.Body["location"]) != `{"foreign":true}` || string(info.Wire.Body["vendor"]) != "1e400" || string(info.Envelope) != bodies[0] {
 				t.Fatal("import declared view/provenance", info)
 			}
-			rows, err := api.AllStoreRecords(context.Background(), storeHeader, serviceinfo.WithStoreRecordListLimit(1), serviceinfo.WithStoreRecordListMaxItems(2))
+			rows, err := api.AllStoreRecords(context.Background(), storeHeader, request.Limit(1), request.MaxItems(2))
 			if err != nil {
 				t.Fatalf("unexpected error: %v", err)
 			}

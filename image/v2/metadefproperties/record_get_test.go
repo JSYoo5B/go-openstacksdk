@@ -13,6 +13,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -127,11 +128,11 @@ func TestMetadefPropertyRecordSeedAttributesAndResponseOverlay(t *testing.T) {
 			})
 			scope := propertyRecordScope(t, client, Dependencies{})
 			options := append([]RecordGetOption{}, check.attrs...)
-			options = append(options, func(*RecordGetOpts) error {
+			options = append(options, request.Custom(func(*RecordGetOpts) error {
 				seed.Body["name"] = json.RawMessage(`"caller changed"`)
 				seed.Body["title"] = json.RawMessage(`"caller changed"`)
 				return nil
-			})
+			}))
 			record, err := scope.GetRecord(context.Background(), RecordRequest{Resource: seed}, options...)
 			if err != nil || record == nil || calls != 1 || len(record.Resource.Body) != 21 {
 				t.Fatal(record, err, calls)
@@ -273,10 +274,10 @@ func TestMetadefPropertyRecordInputAndAttributesPreflight(t *testing.T) {
 		{"known attr encoding failure", RecordRequest{ID: propertyRecordChild}, []RecordGetOption{WithRecordGetAttribute("minimum", make(chan int))}},
 		{"nil semantic option", RecordRequest{ID: propertyRecordChild}, []RecordGetOption{WithRecordGetOpts(RecordGetOpts{Attributes: []resource.ListOption{nil}})}},
 		{"nonsemantic option", RecordRequest{ID: propertyRecordChild}, []RecordGetOption{WithRecordGetOpts(RecordGetOpts{Attributes: []resource.ListOption{resource.WithName("other")}})}},
-		{"protected auth header", RecordRequest{ID: propertyRecordChild}, []RecordGetOption{WithRecordGetHeader("X-Auth-Token", "foreign")}},
-		{"accept header", RecordRequest{ID: propertyRecordChild}, []RecordGetOption{WithRecordGetHeader("Accept", "text/plain")}},
+		{"protected auth header", RecordRequest{ID: propertyRecordChild}, []RecordGetOption{request.Header("X-Auth-Token", "foreign")}},
+		{"accept header", RecordRequest{ID: propertyRecordChild}, []RecordGetOption{request.Header("Accept", "text/plain")}},
 		{"header aliases", RecordRequest{ID: propertyRecordChild}, []RecordGetOption{WithRecordGetHeaders(map[string]string{"X-Alias": "one", "x-alias": "two"})}},
-		{"header newline", RecordRequest{ID: propertyRecordChild}, []RecordGetOption{WithRecordGetHeader("X-Option", "bad\nvalue")}},
+		{"header newline", RecordRequest{ID: propertyRecordChild}, []RecordGetOption{request.Header("X-Option", "bad\nvalue")}},
 	} {
 		t.Run(check.name, func(t *testing.T) {
 			calls := 0
@@ -330,7 +331,7 @@ func TestMetadefPropertyRecordPreflightOrderAndCallbackCauses(t *testing.T) {
 			case "outer failure":
 				use = rest.WithOperationGuard(use, func(context.Context) error { return cause })
 			}
-			record, err := scope.GetRecord(use, RecordRequest{ID: propertyRecordChild}, func(*RecordGetOpts) error {
+			record, err := scope.GetRecord(use, RecordRequest{ID: propertyRecordChild}, request.Custom(func(*RecordGetOpts) error {
 				callbacks++
 				if mode == "callback failure" {
 					return cause
@@ -342,7 +343,7 @@ func TestMetadefPropertyRecordPreflightOrderAndCallbackCauses(t *testing.T) {
 					client.Endpoint = "https://changed.test/"
 				}
 				return nil
-			})
+			}))
 			if record != nil || err == nil || calls != 0 {
 				t.Fatal(record, err, calls)
 			}
@@ -394,21 +395,21 @@ func TestMetadefPropertyRecordOptionFactoriesAndRetainedStorage(t *testing.T) {
 	bulkOption := WithRecordGetHeaders(bulk)
 	attributeFactory := WithRecordGetAttributes(map[string]any{"description": "factory description", "unknown": make(chan int)})
 	var retained *RecordGetOpts
-	options := []RecordGetOption{WithRecordGetHeader("X-Replaced", "old"), full, bulkOption, attributeFactory,
-		func(config *RecordGetOpts) error {
+	options := []RecordGetOption{request.Header("X-Replaced", "old"), full, bulkOption, attributeFactory,
+		request.Custom(func(config *RecordGetOpts) error {
 			retained = config
 			cloud = "option changed"
 			location.Project.ID[1] = 'X'
 			seed.Body["title"] = json.RawMessage(`"caller changed"`)
 			client.MoreHeaders["X-Source"] = "option changed"
 			return nil
-		},
-		func(config *RecordGetOpts) error {
+		}),
+		request.Custom(func(config *RecordGetOpts) error {
 			retained.Headers["X-Full"] = "retained changed"
 			retained.Attributes[0] = resource.WithFilter("description", "retained changed")
 			return nil
-		},
-		WithRecordGetHeader("x-final", "final"), WithRecordGetAttribute("description", "last description"),
+		}),
+		request.Header("x-final", "final"), WithRecordGetAttribute("description", "last description"),
 	}
 	headers["X-Full"] = "caller changed"
 	bulk["X-Bulk"] = "caller changed"

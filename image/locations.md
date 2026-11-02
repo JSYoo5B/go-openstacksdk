@@ -15,7 +15,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.AddImageLocation`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithAddImageLocationOpts`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageLocationValidation`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithAddImageLocationHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithAddImageLocationHeaders`
 
 - Add sends one prepared flat root JSON url plus default validation_data:{} to fixed POST images/{chosenID}/locations with no query. URL is nonempty validUTF8 literal JSON data, never parsed/normalized/fetched or used as client target; scheme/case/whitespace/percent/query/fragment remain unchanged. Supplied validation pointer requires both nonempty validUTF8 strings; no local algorithm/hex/digest whitelist or normalization/verification.
@@ -50,7 +50,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetImageLocations`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetImageLocationsOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithGetImageLocationsHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetImageLocationsHeaders`
 
 - Get performs one bodyless/query-free fixed-parent GET accepting actual200 finite barearray only. Empty[] yields nonnil empty rows. No Link/marker/limit fallback or row ID/URL based continuation; canonical request ImageID stays fixed and returned metadata remains passive.
@@ -105,7 +105,7 @@ func addValidatedThenGetLocations(ctx context.Context, service *image.Service, r
             Headers: map[string]string{"X-Request-Source": "example"},
         }),
         image.WithImageLocationValidation(algorithm, value),
-        image.WithAddImageLocationHeader("X-Location-Request", "add"))
+        request.Header("X-Location-Request", "add"))
     if err != nil {
         return ack, nil, err
     }
@@ -113,7 +113,7 @@ func addValidatedThenGetLocations(ctx context.Context, service *image.Service, r
         image.WithGetImageLocationsOpts(image.GetImageLocationsOpts{
             Headers: map[string]string{"X-Request-Source": "example"},
         }),
-        image.WithGetImageLocationsHeader("X-Location-Request", "get"))
+        request.Header("X-Location-Request", "get"))
     return ack, locations, err
 }
 ```

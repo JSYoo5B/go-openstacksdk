@@ -1,24 +1,47 @@
 package image
 
-import "maps"
+import (
+	"maps"
+
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
+	"github.com/JSYoo5B/go-openstacksdk/request"
+)
 
 // ImageMemberOpts supplies ordinary headers for add, get and update requests.
 type ImageMemberOpts struct{ Headers map[string]string }
-type ImageMemberOption func(*ImageMemberOpts) error
+
+// ImageMemberOption is one option of AddImageMember, GetImageMember and
+// UpdateImageMember: WithImageMemberOpts, WithImageMemberHeaders (merges),
+// request.Header (merges one header) or request.Custom over *ImageMemberOpts.
+// Other shared calls, including request.Headers, fail with
+// resource.ErrInvalidOption before HTTP.
+type ImageMemberOption = request.GetCall
 
 // RemoveImageMemberOpts controls a member deletion. Nil IgnoreMissing means true.
 type RemoveImageMemberOpts struct {
 	Headers       map[string]string
 	IgnoreMissing *bool
 }
-type RemoveImageMemberOption func(*RemoveImageMemberOpts) error
+
+// RemoveImageMemberOption is one option of RemoveImageMember:
+// WithRemoveImageMemberOpts, WithRemoveImageMemberHeaders (merges),
+// request.Header (merges one header), request.IgnoreMissing or request.Custom
+// over *RemoveImageMemberOpts. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type RemoveImageMemberOption = request.DeleteCall
 
 // FindImageMemberOpts controls one direct member GET. Nil IgnoreMissing means true.
 type FindImageMemberOpts struct {
 	Headers       map[string]string
 	IgnoreMissing *bool
 }
-type FindImageMemberOption func(*FindImageMemberOpts) error
+
+// FindImageMemberOption is one option of FindImageMember:
+// WithFindImageMemberOpts, WithFindImageMemberHeaders (merges),
+// request.Header (merges one header), request.IgnoreMissing or request.Custom
+// over *FindImageMemberOpts. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type FindImageMemberOption = request.FindCall
 
 // ListImageMembersOpts bounds locally consumed rows; zero MaxItems is unlimited.
 // The server receives no limit or pagination query.
@@ -26,76 +49,66 @@ type ListImageMembersOpts struct {
 	Headers  map[string]string
 	MaxItems int
 }
-type ListImageMembersOption func(*ListImageMembersOpts) error
+
+// ListImageMembersOption is one option of ListImageMembers:
+// WithListImageMembersOpts, WithListImageMembersHeaders (merges),
+// request.Header (merges one header), request.MaxItems or request.Custom over
+// *ListImageMembersOpts. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type ListImageMembersOption = request.ListCall
 
 // WithImageMemberOpts snapshots and replaces the entire concrete configuration.
 func WithImageMemberOpts(value ImageMemberOpts) ImageMemberOption {
 	snapshot := copyImageMemberOpts(value)
-	return func(config *ImageMemberOpts) error { *config = copyImageMemberOpts(snapshot); return nil }
-}
-func WithImageMemberHeader(key, value string) ImageMemberOption {
-	apply := WithImageMutationHeader(key, value)
-	return func(config *ImageMemberOpts) error { return applyImageMemberHeader(&config.Headers, apply) }
+	return request.Custom(func(config *ImageMemberOpts) error { *config = copyImageMemberOpts(snapshot); return nil })
 }
 func WithImageMemberHeaders(values map[string]string) ImageMemberOption {
-	apply := WithImageMutationHeaders(values)
-	return func(config *ImageMemberOpts) error { return applyImageMemberHeader(&config.Headers, apply) }
+	apply := mergeImageMutationHeaders(values)
+	return request.Custom(func(config *ImageMemberOpts) error { return applyImageMemberHeader(&config.Headers, apply) })
 }
 func WithRemoveImageMemberOpts(value RemoveImageMemberOpts) RemoveImageMemberOption {
 	snapshot := copyRemoveImageMemberOpts(value)
-	return func(config *RemoveImageMemberOpts) error { *config = copyRemoveImageMemberOpts(snapshot); return nil }
-}
-func WithRemoveImageMemberHeader(key, value string) RemoveImageMemberOption {
-	apply := WithImageMutationHeader(key, value)
-	return func(config *RemoveImageMemberOpts) error { return applyImageMemberHeader(&config.Headers, apply) }
+	return request.Custom(func(config *RemoveImageMemberOpts) error { *config = copyRemoveImageMemberOpts(snapshot); return nil })
 }
 func WithRemoveImageMemberHeaders(values map[string]string) RemoveImageMemberOption {
-	apply := WithImageMutationHeaders(values)
-	return func(config *RemoveImageMemberOpts) error { return applyImageMemberHeader(&config.Headers, apply) }
-}
-func WithRemoveImageMemberIgnoreMissing(value bool) RemoveImageMemberOption {
-	return func(config *RemoveImageMemberOpts) error {
-		snapshot := value
-		config.IgnoreMissing = &snapshot
-		return nil
-	}
+	apply := mergeImageMutationHeaders(values)
+	return request.Custom(func(config *RemoveImageMemberOpts) error { return applyImageMemberHeader(&config.Headers, apply) })
 }
 func WithFindImageMemberOpts(value FindImageMemberOpts) FindImageMemberOption {
 	snapshot := copyFindImageMemberOpts(value)
-	return func(config *FindImageMemberOpts) error { *config = copyFindImageMemberOpts(snapshot); return nil }
-}
-func WithFindImageMemberHeader(key, value string) FindImageMemberOption {
-	apply := WithImageMutationHeader(key, value)
-	return func(config *FindImageMemberOpts) error { return applyImageMemberHeader(&config.Headers, apply) }
+	return request.Custom(func(config *FindImageMemberOpts) error { *config = copyFindImageMemberOpts(snapshot); return nil })
 }
 func WithFindImageMemberHeaders(values map[string]string) FindImageMemberOption {
-	apply := WithImageMutationHeaders(values)
-	return func(config *FindImageMemberOpts) error { return applyImageMemberHeader(&config.Headers, apply) }
-}
-func WithFindImageMemberIgnoreMissing(value bool) FindImageMemberOption {
-	return func(config *FindImageMemberOpts) error {
-		snapshot := value
-		config.IgnoreMissing = &snapshot
-		return nil
-	}
+	apply := mergeImageMutationHeaders(values)
+	return request.Custom(func(config *FindImageMemberOpts) error { return applyImageMemberHeader(&config.Headers, apply) })
 }
 func WithListImageMembersOpts(value ListImageMembersOpts) ListImageMembersOption {
 	snapshot := copyListImageMembersOpts(value)
-	return func(config *ListImageMembersOpts) error { *config = copyListImageMembersOpts(snapshot); return nil }
-}
-func WithListImageMembersHeader(key, value string) ListImageMembersOption {
-	apply := WithImageMutationHeader(key, value)
-	return func(config *ListImageMembersOpts) error { return applyImageMemberHeader(&config.Headers, apply) }
+	return request.Custom(func(config *ListImageMembersOpts) error { *config = copyListImageMembersOpts(snapshot); return nil })
 }
 func WithListImageMembersHeaders(values map[string]string) ListImageMembersOption {
-	apply := WithImageMutationHeaders(values)
-	return func(config *ListImageMembersOpts) error { return applyImageMemberHeader(&config.Headers, apply) }
-}
-func WithListImageMembersMaxItems(value int) ListImageMembersOption {
-	return func(config *ListImageMembersOpts) error { config.MaxItems = value; return nil }
+	apply := mergeImageMutationHeaders(values)
+	return request.Custom(func(config *ListImageMembersOpts) error { return applyImageMemberHeader(&config.Headers, apply) })
 }
 
-func applyImageMemberHeader(headers *map[string]string, apply ImageMutationOption) error {
+var (
+	imageMemberCalls       = calls.Spec[ImageMemberOpts]{Header: calls.MergeHeader[ImageMemberOpts](WithImageMemberHeaders)}
+	removeImageMemberCalls = calls.Spec[RemoveImageMemberOpts]{
+		Header:        calls.MergeHeader[RemoveImageMemberOpts](WithRemoveImageMemberHeaders),
+		IgnoreMissing: calls.Pointer(func(c *RemoveImageMemberOpts) **bool { return &c.IgnoreMissing }),
+	}
+	findImageMemberCalls = calls.Spec[FindImageMemberOpts]{
+		Header:        calls.MergeHeader[FindImageMemberOpts](WithFindImageMemberHeaders),
+		IgnoreMissing: calls.Pointer(func(c *FindImageMemberOpts) **bool { return &c.IgnoreMissing }),
+	}
+	listImageMembersCalls = calls.Spec[ListImageMembersOpts]{
+		Header: calls.MergeHeader[ListImageMembersOpts](WithListImageMembersHeaders),
+		Paging: calls.Paging[ListImageMembersOpts]{MaxItems: calls.Value(func(c *ListImageMembersOpts) *int { return &c.MaxItems })},
+	}
+)
+
+// applyImageMemberHeader merges headers with one image mutation header option.
+func applyImageMemberHeader(headers *map[string]string, apply func(*ImageMutationOpts) error) error {
 	config := ImageMutationOpts{Headers: *headers}
 	if err := apply(&config); err != nil {
 		return err
@@ -146,7 +159,7 @@ func applyImageMemberOptions[T any, O ~func(*T) error](config T, options []O, co
 	return config, nil
 }
 func parseImageMemberOptions(options []ImageMemberOption) (ImageMemberOpts, error) {
-	config, err := applyImageMemberOptions(ImageMemberOpts{}, options, copyImageMemberOpts)
+	config, err := applyImageMemberOptions(ImageMemberOpts{}, calls.Translate(options, imageMemberCalls), copyImageMemberOpts)
 	if err != nil {
 		return config, err
 	}
@@ -154,7 +167,7 @@ func parseImageMemberOptions(options []ImageMemberOption) (ImageMemberOpts, erro
 	return config, err
 }
 func parseRemoveImageMemberOptions(options []RemoveImageMemberOption) (RemoveImageMemberOpts, error) {
-	config, err := applyImageMemberOptions(RemoveImageMemberOpts{}, options, copyRemoveImageMemberOpts)
+	config, err := applyImageMemberOptions(RemoveImageMemberOpts{}, calls.Translate(options, removeImageMemberCalls), copyRemoveImageMemberOpts)
 	if err != nil {
 		return config, err
 	}
@@ -162,7 +175,7 @@ func parseRemoveImageMemberOptions(options []RemoveImageMemberOption) (RemoveIma
 	return config, err
 }
 func parseFindImageMemberOptions(options []FindImageMemberOption) (FindImageMemberOpts, error) {
-	config, err := applyImageMemberOptions(FindImageMemberOpts{}, options, copyFindImageMemberOpts)
+	config, err := applyImageMemberOptions(FindImageMemberOpts{}, calls.Translate(options, findImageMemberCalls), copyFindImageMemberOpts)
 	if err != nil {
 		return config, err
 	}
@@ -170,7 +183,7 @@ func parseFindImageMemberOptions(options []FindImageMemberOption) (FindImageMemb
 	return config, err
 }
 func parseListImageMembersOptions(options []ListImageMembersOption) (ListImageMembersOpts, error) {
-	config, err := applyImageMemberOptions(ListImageMembersOpts{}, options, copyListImageMembersOpts)
+	config, err := applyImageMemberOptions(ListImageMembersOpts{}, calls.Translate(options, listImageMembersCalls), copyListImageMembersOpts)
 	if err != nil {
 		return config, err
 	}

@@ -18,6 +18,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/image"
 	nativeImages "github.com/JSYoo5B/go-openstacksdk/image/v2/images"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -62,8 +63,8 @@ func updateContractWantPatch(t *testing.T, raw []byte, want string) {
 }
 func updateContractHeaders() updateContractOptions {
 	return updateContractOptions{
-		update: []image.UpdateImageOption{image.WithUpdateImageHeader("X-Option", "owned")},
-		set:    []image.SetImagePropertiesOption{image.WithSetImagePropertiesHeader("X-Option", "owned")},
+		update: []image.UpdateImageOption{request.Header("X-Option", "owned")},
+		set:    []image.SetImagePropertiesOption{request.Header("X-Option", "owned")},
 	}
 }
 
@@ -107,17 +108,17 @@ func TestImageUpdateContractsWireAndReference(t *testing.T) {
 			var calls, callbacks atomic.Int32
 			opts := updateContractHeaders()
 			if set {
-				opts.set = append(opts.set, func(o *image.SetImagePropertiesOpts) error {
+				opts.set = append(opts.set, request.Custom(func(o *image.SetImagePropertiesOpts) error {
 					callbacks.Add(1)
 					c.MoreHeaders["X-Source"] = "after callback"
 					return nil
-				})
+				}))
 			} else {
-				opts.update = append(opts.update, func(o *image.UpdateImageOpts) error {
+				opts.update = append(opts.update, request.Custom(func(o *image.UpdateImageOpts) error {
 					callbacks.Add(1)
 					c.MoreHeaders["X-Source"] = "after callback"
 					return nil
-				})
+				}))
 			}
 			cloud.Mux.HandleFunc(taskContractsPrefix, func(w http.ResponseWriter, r *http.Request) {
 				w.Header().Set("Content-Type", "application/json")
@@ -269,7 +270,7 @@ func TestImageUpdateContractsPatchAndProperties(t *testing.T) {
 			}
 			return imageContractJSONResponse(`{}`), nil
 		})
-		value, e := image.New(c).UpdateImage(context.Background(), resource.ID("fixed"), full, plural, image.WithUpdateImageField("name", "second"), ownedFields, image.WithUpdateImageFields(nil), ownedTags, image.WithUpdateImageChange(image.ImagePatch{Op: "add", Path: "/locations/-", Value: json.RawMessage(`{"url":"literal:% ?#","metadata":{}}`)}), image.WithUpdateImageHeaders(map[string]string{"X-Merged": "owned"}), image.WithUpdateImageHeader("X-Last", "yes"))
+		value, e := image.New(c).UpdateImage(context.Background(), resource.ID("fixed"), full, plural, image.WithUpdateImageField("name", "second"), ownedFields, image.WithUpdateImageFields(nil), ownedTags, image.WithUpdateImageChange(image.ImagePatch{Op: "add", Path: "/locations/-", Value: json.RawMessage(`{"url":"literal:% ?#","metadata":{}}`)}), image.WithUpdateImageHeaders(map[string]string{"X-Merged": "owned"}), request.Header("X-Last", "yes"))
 		if e != nil || value == nil {
 			t.Fatal(value, e)
 		}
@@ -299,7 +300,7 @@ func TestImageUpdateContractsPatchAndProperties(t *testing.T) {
 			}
 			return imageContractJSONResponse(`{}`), nil
 		})
-		value, e := image.New(c).SetImageProperties(context.Background(), resource.ID("fixed"), image.WithSetImagePropertiesProperty("discard", 1), image.WithSetImagePropertiesOpts(image.SetImagePropertiesOpts{Headers: map[string]string{"X-Discard": "discard"}, Properties: map[string]json.RawMessage{"discard": json.RawMessage(`1`)}}), image.WithSetImagePropertiesOpts(image.SetImagePropertiesOpts{}), snapshot, image.WithSetImagePropertiesProperty("kernel", "literal-image-name"), image.WithSetImagePropertiesProperty("properties", map[string]any{"nested": false}), image.WithSetImagePropertiesProperty("protected", false), image.WithSetImagePropertiesHeaders(map[string]string{"X-Merged": "owned"}), image.WithSetImagePropertiesHeader("X-Last", "yes"))
+		value, e := image.New(c).SetImageProperties(context.Background(), resource.ID("fixed"), image.WithSetImagePropertiesProperty("discard", 1), image.WithSetImagePropertiesOpts(image.SetImagePropertiesOpts{Headers: map[string]string{"X-Discard": "discard"}, Properties: map[string]json.RawMessage{"discard": json.RawMessage(`1`)}}), image.WithSetImagePropertiesOpts(image.SetImagePropertiesOpts{}), snapshot, image.WithSetImagePropertiesProperty("kernel", "literal-image-name"), image.WithSetImagePropertiesProperty("properties", map[string]any{"nested": false}), image.WithSetImagePropertiesProperty("protected", false), image.WithSetImagePropertiesHeaders(map[string]string{"X-Merged": "owned"}), request.Header("X-Last", "yes"))
 		if e != nil || value == nil || calls.Load() != 1 {
 			t.Fatal(value, e, calls.Load())
 		}
@@ -373,7 +374,7 @@ func TestImageUpdateContractsPatchAndProperties(t *testing.T) {
 
 	for _, raw := range []json.RawMessage{nil, {}, json.RawMessage(`{`), json.RawMessage{'"', 255, '"'}} {
 		t.Run(fmt.Sprintf("Set raw value presence invalid %q", raw), func(t *testing.T) {
-			for _, option := range []image.SetImagePropertiesOption{image.WithSetImagePropertiesOpts(image.SetImagePropertiesOpts{Properties: map[string]json.RawMessage{"field": raw}}), image.WithSetImagePropertiesProperties(map[string]json.RawMessage{"field": raw}), func(o *image.SetImagePropertiesOpts) error { o.Properties["field"] = raw; return nil }} {
+			for _, option := range []image.SetImagePropertiesOption{image.WithSetImagePropertiesOpts(image.SetImagePropertiesOpts{Properties: map[string]json.RawMessage{"field": raw}}), image.WithSetImagePropertiesProperties(map[string]json.RawMessage{"field": raw}), request.Custom(func(o *image.SetImagePropertiesOpts) error { o.Properties["field"] = raw; return nil })} {
 				var calls atomic.Int32
 				c := taskContractsClient(func(*http.Request) (*http.Response, error) {
 					calls.Add(1)
@@ -403,32 +404,32 @@ func TestImageUpdateContractsOptionsAndSource(t *testing.T) {
 				return imageContractJSONResponse(`{}`), nil
 			})
 			opts := updateContractOptions{
-				update: []image.UpdateImageOption{func(o *image.UpdateImageOpts) error {
+				update: []image.UpdateImageOption{request.Custom(func(o *image.UpdateImageOpts) error {
 					callbacks.Add(1)
 					o.Headers["X-First"] = "first"
 					o.Changes = []image.ImagePatch{{Op: "add", Path: "/number", Value: json.RawMessage(`1`)}}
 					aliasUpdate = o
 					return nil
-				}, func(o *image.UpdateImageOpts) error {
+				}), request.Custom(func(o *image.UpdateImageOpts) error {
 					callbacks.Add(1)
 					aliasUpdate.Headers["X-First"] = "late"
 					aliasUpdate.Changes[0].Value[0] = '2'
 					o.Headers["X-Last"] = "last"
 					return nil
-				}},
-				set: []image.SetImagePropertiesOption{func(o *image.SetImagePropertiesOpts) error {
+				})},
+				set: []image.SetImagePropertiesOption{request.Custom(func(o *image.SetImagePropertiesOpts) error {
 					callbacks.Add(1)
 					o.Headers["X-First"] = "first"
 					o.Properties["number"] = json.RawMessage(`1`)
 					aliasSet = o
 					return nil
-				}, func(o *image.SetImagePropertiesOpts) error {
+				}), request.Custom(func(o *image.SetImagePropertiesOpts) error {
 					callbacks.Add(1)
 					aliasSet.Headers["X-First"] = "late"
 					aliasSet.Properties["number"][0] = '2'
 					o.Headers["X-Last"] = "last"
 					return nil
-				}},
+				})},
 			}
 			value, e := updateContractCall(image.New(c), context.Background(), resource.ID("fixed"), set, opts)
 			if e != nil || value == nil || callbacks.Load() != 2 {
@@ -512,7 +513,7 @@ func TestImageUpdateContractsOptionsAndSource(t *testing.T) {
 				s := image.New(c)
 				ctx := context.Context(context.Background())
 				want := error(resource.ErrInvalidOption)
-				opts := updateContractOptions{update: []image.UpdateImageOption{func(*image.UpdateImageOpts) error { callbacks.Add(1); return nil }}, set: []image.SetImagePropertiesOption{func(*image.SetImagePropertiesOpts) error { callbacks.Add(1); return nil }}}
+				opts := updateContractOptions{update: []image.UpdateImageOption{request.Custom(func(*image.UpdateImageOpts) error { callbacks.Add(1); return nil })}, set: []image.SetImagePropertiesOption{request.Custom(func(*image.SetImagePropertiesOpts) error { callbacks.Add(1); return nil })}}
 				wantCallbacks := int32(0)
 				switch mode {
 				case "nil context":
@@ -540,11 +541,11 @@ func TestImageUpdateContractsOptionsAndSource(t *testing.T) {
 				case "callback error":
 					want = cause
 					wantCallbacks = 1
-					opts = updateContractOptions{update: []image.UpdateImageOption{func(*image.UpdateImageOpts) error { callbacks.Add(1); return cause }}, set: []image.SetImagePropertiesOption{func(*image.SetImagePropertiesOpts) error { callbacks.Add(1); return cause }}}
+					opts = updateContractOptions{update: []image.UpdateImageOption{request.Custom(func(*image.UpdateImageOpts) error { callbacks.Add(1); return cause })}, set: []image.SetImagePropertiesOption{request.Custom(func(*image.SetImagePropertiesOpts) error { callbacks.Add(1); return cause })}}
 				case "option protected media":
-					opts = updateContractOptions{update: []image.UpdateImageOption{image.WithUpdateImageHeader("Content-Type", "other")}, set: []image.SetImagePropertiesOption{image.WithSetImagePropertiesHeader("Accept", "other")}}
+					opts = updateContractOptions{update: []image.UpdateImageOption{request.Header("Content-Type", "other")}, set: []image.SetImagePropertiesOption{request.Header("Accept", "other")}}
 				case "option bad header":
-					opts = updateContractOptions{update: []image.UpdateImageOption{image.WithUpdateImageHeader("X-Bad", "line\n")}, set: []image.SetImagePropertiesOption{image.WithSetImagePropertiesHeader("X-Bad", "line\n")}}
+					opts = updateContractOptions{update: []image.UpdateImageOption{request.Header("X-Bad", "line\n")}, set: []image.SetImagePropertiesOption{request.Header("X-Bad", "line\n")}}
 				default:
 					wantCallbacks = 1
 					mutate := func() {
@@ -559,7 +560,7 @@ func TestImageUpdateContractsOptionsAndSource(t *testing.T) {
 							c.ProviderClient = &gophercloud.ProviderClient{}
 						}
 					}
-					opts = updateContractOptions{update: []image.UpdateImageOption{func(*image.UpdateImageOpts) error { callbacks.Add(1); mutate(); return nil }}, set: []image.SetImagePropertiesOption{func(*image.SetImagePropertiesOpts) error { callbacks.Add(1); mutate(); return nil }}}
+					opts = updateContractOptions{update: []image.UpdateImageOption{request.Custom(func(*image.UpdateImageOpts) error { callbacks.Add(1); mutate(); return nil })}, set: []image.SetImagePropertiesOption{request.Custom(func(*image.SetImagePropertiesOpts) error { callbacks.Add(1); mutate(); return nil })}}
 				}
 				value, e := updateContractCall(s, ctx, resource.Name("exact"), set, opts)
 				if value != nil || !errors.Is(e, want) || calls.Load() != 0 || callbacks.Load() != wantCallbacks {
@@ -574,7 +575,7 @@ func TestImageUpdateContractsOptionsAndSource(t *testing.T) {
 			t.Run(fmt.Sprintf("unsafe direct ID %q set=%v", id, set), func(t *testing.T) {
 				var calls, callbacks atomic.Int32
 				c := taskContractsClient(func(*http.Request) (*http.Response, error) { calls.Add(1); return nil, errors.New("unexpected") })
-				opts := updateContractOptions{update: []image.UpdateImageOption{func(*image.UpdateImageOpts) error { callbacks.Add(1); return nil }}, set: []image.SetImagePropertiesOption{func(*image.SetImagePropertiesOpts) error { callbacks.Add(1); return nil }}}
+				opts := updateContractOptions{update: []image.UpdateImageOption{request.Custom(func(*image.UpdateImageOpts) error { callbacks.Add(1); return nil })}, set: []image.SetImagePropertiesOption{request.Custom(func(*image.SetImagePropertiesOpts) error { callbacks.Add(1); return nil })}}
 				value, e := updateContractCall(image.New(c), context.Background(), resource.ID(id), set, opts)
 				if value != nil || !errors.Is(e, resource.ErrInvalidOption) || calls.Load() != 0 || callbacks.Load() != 0 {
 					t.Fatal(value, e, calls.Load(), callbacks.Load())

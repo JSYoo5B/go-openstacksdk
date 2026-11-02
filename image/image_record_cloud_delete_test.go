@@ -10,6 +10,7 @@ import (
 	"time"
 
 	objectapi "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -87,7 +88,7 @@ func TestCloudImageRecordDeleteFindsDeletesCleansAndWaits(t *testing.T) {
 				}
 				return cloudDeleteAbsent(route, req)
 			})
-			result, err := service.DeleteCloudImageRecord(context.Background(), "img", WithImageRecordCloudDeleteHeader("X-Cloud", "delete"), WithImageRecordCloudDeleteWait(true), WithImageRecordCloudDeleteTimeout(5*time.Second), WithImageRecordCloudDeletePollInterval(time.Millisecond))
+			result, err := service.DeleteCloudImageRecord(context.Background(), "img", request.Header("X-Cloud", "delete"), WithImageRecordCloudDeleteWait(true), WithImageRecordCloudDeleteTimeout(5*time.Second), WithImageRecordCloudDeletePollInterval(time.Millisecond))
 			if err != nil || !result.Deleted || result.Found == nil || result.Delete == nil || result.WaitLookups != 1 || result.WaitLast != nil {
 				t.Fatal(result, err, routes)
 			}
@@ -109,7 +110,7 @@ func TestCloudImageRecordDeleteFindsDeletesCleansAndWaits(t *testing.T) {
 	t.Run("missing image returns false without delete", func(t *testing.T) {
 		var routes []string
 		service := cloudDeleteService(t, "true", &routes, cloudDeleteAbsent)
-		result, err := service.DeleteCloudImageRecord(context.Background(), "img", WithImageRecordCloudDeleteHeader("X-Cloud", "delete"), WithImageRecordCloudDeleteWait(true), WithImageRecordCloudDeleteTimeout(time.Second))
+		result, err := service.DeleteCloudImageRecord(context.Background(), "img", request.Header("X-Cloud", "delete"), WithImageRecordCloudDeleteWait(true), WithImageRecordCloudDeleteTimeout(time.Second))
 		if err != nil || result.Deleted || result.Found != nil || result.Delete != nil || len(routes) != 3 {
 			t.Fatal(result, err, routes)
 		}
@@ -122,7 +123,7 @@ func TestCloudImageRecordDeleteFindsDeletesCleansAndWaits(t *testing.T) {
 			}
 			return taskCoreJSON(req, 200, `{"id":"img"}`)
 		})
-		result, err := service.DeleteCloudImageRecord(context.Background(), "img", WithImageRecordCloudDeleteHeader("X-Cloud", "delete"))
+		result, err := service.DeleteCloudImageRecord(context.Background(), "img", request.Header("X-Cloud", "delete"))
 		if err != nil || !result.Deleted || len(routes) != 2 || result.WaitLookups != 0 {
 			t.Fatal(result, err, routes)
 		}
@@ -153,7 +154,7 @@ func TestCloudImageRecordDeleteLateFailuresKeepPhases(t *testing.T) {
 				}
 				return taskCoreJSON(req, 203, test.image)
 			})
-			result, err := service.DeleteCloudImageRecord(context.Background(), "img", WithImageRecordCloudDeleteHeader("X-Cloud", "delete"), WithImageRecordCloudDeleteWait(true), WithImageRecordCloudDeleteTimeout(time.Second))
+			result, err := service.DeleteCloudImageRecord(context.Background(), "img", request.Header("X-Cloud", "delete"), WithImageRecordCloudDeleteWait(true), WithImageRecordCloudDeleteTimeout(time.Second))
 			want := 2
 			if test.listed {
 				want = 3
@@ -172,7 +173,7 @@ func TestCloudImageRecordDeleteLateFailuresKeepPhases(t *testing.T) {
 			}
 			return taskCoreJSON(req, 200, `{"id":"img","owner_specified.openstack.object":"a/b"}`)
 		})
-		result, err := service.DeleteCloudImageRecord(context.Background(), "img", WithImageRecordCloudDeleteHeader("X-Cloud", "delete"))
+		result, err := service.DeleteCloudImageRecord(context.Background(), "img", request.Header("X-Cloud", "delete"))
 		var operation *resource.OperationError
 		if !gophercloud.ResponseCodeIs(err, http.StatusConflict) || !errors.As(err, &operation) || operation.Operation != "DeleteCloudImageRecord" || errors.As(operation.Cause, &operation) || result.Deleted || result.Found == nil || len(routes) != 2 {
 			t.Fatal(result, err, routes)
@@ -186,7 +187,7 @@ func TestCloudImageRecordDeleteLateFailuresKeepPhases(t *testing.T) {
 			}
 			return taskCoreJSON(req, 200, `{"id":"img","status":"deleted"}`)
 		})
-		result, err := service.DeleteCloudImageRecord(context.Background(), "img", WithImageRecordCloudDeleteHeader("X-Cloud", "delete"), WithImageRecordCloudDeleteWait(true), WithImageRecordCloudDeleteTimeout(15*time.Millisecond), WithImageRecordCloudDeletePollInterval(5*time.Millisecond))
+		result, err := service.DeleteCloudImageRecord(context.Background(), "img", request.Header("X-Cloud", "delete"), WithImageRecordCloudDeleteWait(true), WithImageRecordCloudDeleteTimeout(15*time.Millisecond), WithImageRecordCloudDeletePollInterval(5*time.Millisecond))
 		if !errors.Is(err, context.DeadlineExceeded) || result.Deleted || result.WaitLookups < 1 || result.WaitLast == nil {
 			t.Fatal(result, err, routes)
 		}
@@ -208,7 +209,7 @@ func TestCloudImageRecordDeleteInputFailsBeforeHTTP(t *testing.T) {
 			return err
 		},
 		"invalid header": func() error {
-			_, err := service.DeleteCloudImageRecord(ctx, "img", WithImageRecordCloudDeleteHeader("X-Bad", "a\nb"))
+			_, err := service.DeleteCloudImageRecord(ctx, "img", request.Header("X-Bad", "a\nb"))
 			return err
 		},
 		"invalid tasks config": func() error {

@@ -16,7 +16,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.WithCreateTaskOpts`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithCreateTaskInput`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithCreateTaskNullInput`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithCreateTaskHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithCreateTaskHeaders`
 
 - WithCreateTaskNullInput makes CreateTask send POST tasks with {"type": ..., "input": null}, clears an earlier input object, is overridden by a later WithCreateTaskInput, is also selected by CreateTaskOpts.NullInput, and a null input in the 201 response leaves TaskInfo.Input nil with the raw null kept in Metadata.Body.
@@ -52,7 +52,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetTask`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetTaskOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithGetTaskHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetTaskHeaders`
 
 - One direct taskID child GET200, captured target and original liveauth. ID nonempty validUTF8 safe URI literal with no UUID/max length gate; escaped percent/spaces/query/hash accepted, dot/dotdot/slash/backslash/control rejected before callback/HTTP. No Ref/Name/find/fallback/ignoreMissing or Self/Schema/Location retargeting.
@@ -86,15 +86,15 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.Tasks`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.AllTasks`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithListTasksOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithListTasksHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithListTasksHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithListTasksLimit`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithListTasksMarker`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithListTasksType`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithListTasksStatus`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithListTasksSortKey`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithListTasksSortDir`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithListTasksMaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithListTasksSinglePage`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithListTasksBodyFilter`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithListTasksMarkerFallback`
@@ -147,7 +147,7 @@ func createTask(ctx context.Context, svc *image.Service) (*image.TaskInfo, error
         image.WithCreateTaskOpts(image.CreateTaskOpts{
             Input: map[string]json.RawMessage{"import_from_format": json.RawMessage(`"qcow2"`)},
         }),
-        image.WithCreateTaskHeader("X-Request-Id", "task-create-example"),
+        request.Header("X-Request-Id", "task-create-example"),
         image.WithCreateTaskHeaders(map[string]string{"X-Example": "create"}),
         image.WithCreateTaskInput(map[string]any{
             "import_from": "https://example.invalid/image.qcow2",
@@ -161,22 +161,22 @@ func createTask(ctx context.Context, svc *image.Service) (*image.TaskInfo, error
 func getTask(ctx context.Context, svc *image.Service, taskID string) (*image.TaskInfo, error) {
     return svc.GetTask(ctx, taskID,
         image.WithGetTaskOpts(image.GetTaskOpts{}),
-        image.WithGetTaskHeader("X-Request-Id", "task-get-example"),
+        request.Header("X-Request-Id", "task-get-example"),
         image.WithGetTaskHeaders(map[string]string{"X-Example": "get"}))
 }
 
 func listTasks(ctx context.Context, svc *image.Service, marker string) ([]*image.TaskInfo, error) {
     options := []image.ListTasksOption{
         image.WithListTasksOpts(image.ListTasksOpts{}),
-        image.WithListTasksHeader("X-Request-Id", "task-list-example"),
+        request.Header("X-Request-Id", "task-list-example"),
         image.WithListTasksHeaders(map[string]string{"X-Example": "list"}),
-        image.WithListTasksLimit(20),
-        image.WithListTasksMarker(marker),
+        request.Limit(20),
+        request.Marker(marker),
         image.WithListTasksType("import"),
         image.WithListTasksStatus("pending"),
         image.WithListTasksSortKey("created_at"),
         image.WithListTasksSortDir("desc"),
-        image.WithListTasksMaxItems(40),
+        request.MaxItems(40),
         image.WithListTasksSinglePage(false),
     }
     rows := make([]*image.TaskInfo, 0)
@@ -190,7 +190,7 @@ func listTasks(ctx context.Context, svc *image.Service, marker string) ([]*image
 }
 
 func allTasks(ctx context.Context, svc *image.Service) ([]*image.TaskInfo, error) {
-    return svc.AllTasks(ctx, image.WithListTasksMaxItems(40))
+    return svc.AllTasks(ctx, request.MaxItems(40))
 }
 
 // pythonLikeTasks opts in to the pinned Python Resource.list behaviors:
@@ -201,7 +201,7 @@ func allTasks(ctx context.Context, svc *image.Service) ([]*image.TaskInfo, error
 func pythonLikeTasks(ctx context.Context, svc *image.Service, owner string) ([]*image.TaskInfo, error) {
     return svc.AllTasks(ctx,
         image.WithListTasksType("import"),
-        image.WithListTasksLimit(20),
+        request.Limit(20),
         image.WithListTasksBodyFilter("owner_id", owner),
         image.WithListTasksBodyFilter("input", map[string]any{"import_from_format": "qcow2"}),
         image.WithListTasksLinkHeader(true),

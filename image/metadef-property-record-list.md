@@ -15,7 +15,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.API.InNamespace`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.NamespaceScope.Create`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithCreateOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithCreateHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithCreateHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithCreateType`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithCreateTitle`
@@ -24,7 +24,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithCreateAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.NamespaceScope.CreateRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordCreateOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordCreateHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordCreateHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordCreateAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordCreateAttributes`
@@ -73,17 +73,17 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.NamespaceScope.List`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.NamespaceScope.All`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithListHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithListMaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.NamespaceScope.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.NamespaceScope.AllRecords`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordListHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordListHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordListFilter`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordListFilters`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordListMaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.NewWithDependencies`
 
 - Zero-HTTP InNamespace validates required literal namespace and captures API/client/original provider/type/endpoint/base/microversion for scope lifetime. Parent and child are nonempty validUTF8<=80runes with route-breaking/control/dot syntax rejected and colon/Unicode/space escaped once. No Ref/find/parentGET or response-driven routing. Each call copies latest ordinary source headers, uses live original authentication and rechecks scope/source/context before callbacks, after accepted body and consumed rows.
@@ -128,7 +128,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.API.InNamespace`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.NamespaceScope.Update`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithUpdateOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithUpdateHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithUpdateHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithUpdateName`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithUpdateType`
@@ -138,7 +138,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithUpdateAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.NamespaceScope.UpdateRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordUpdateOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordUpdateHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordUpdateHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordUpdateAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordUpdateAttributes`
@@ -187,11 +187,11 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.API.InNamespace`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.NamespaceScope.Delete`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithDeleteOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithDeleteHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithDeleteHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithDeleteIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithDeleteAllOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithDeleteAllHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithDeleteAllHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.NamespaceScope.DeleteRecord`
 
@@ -230,7 +230,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.API.InNamespace`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.NamespaceScope.DeleteAll`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithDeleteAllOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithDeleteAllHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithDeleteAllHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.NamespaceScope.DeleteAllRecords`
 

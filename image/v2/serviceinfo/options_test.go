@@ -7,6 +7,7 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
@@ -18,19 +19,19 @@ func TestServiceInfoOptionsSnapshotReplacementAndRetainedHandles(t *testing.T) {
 	var retained *request.Config[ListStoresOpts]
 	policy, query, headers, control, err := prepareListStores([]ListStoresOption{
 		WithListStoresOptions(ListStoresOpts{Limit: 99}), option,
-		func(config *request.Config[ListStoresOpts]) error {
+		request.Custom(func(config *request.Config[ListStoresOpts]) error {
 			retained = config
 			config.Query.Set("extension", "owned")
 			config.Headers["X-Extra"] = "owned"
 			return nil
-		},
-		func(*request.Config[ListStoresOpts]) error {
+		}),
+		request.Custom(func(*request.Config[ListStoresOpts]) error {
 			*retained.Options.Paginated = true
 			retained.Options.Details = false
 			retained.Query.Set("extension", "changed")
 			retained.Headers["X-Extra"] = "changed"
 			return nil
-		},
+		}),
 	})
 	if err != nil || !policy.Details || policy.Limit != 2 || policy.MaxItems != 3 || policy.Paginated == nil || *policy.Paginated || query.Get("marker") != "before" || query.Get("extension") != "owned" || headers["X-Extra"] != "owned" || !control.SinglePage || control.LimitHint {
 		t.Fatalf("policy=%+v query=%v headers=%v control=%+v err=%v", policy, query, headers, control, err)
@@ -40,10 +41,10 @@ func TestServiceInfoOptionsSnapshotReplacementAndRetainedHandles(t *testing.T) {
 		t.Fatal("prepared query aliases retained callback")
 	}
 	configA, configB := request.Config[ListStoresOpts]{}, request.Config[ListStoresOpts]{}
-	if err := option(&configA); err != nil {
+	if err := calls.Options([]ListStoresOption{option}, listStoresCalls)[0](&configA); err != nil {
 		t.Fatal(err)
 	}
-	if err := option(&configB); err != nil {
+	if err := calls.Options([]ListStoresOption{option}, listStoresCalls)[0](&configB); err != nil {
 		t.Fatal(err)
 	}
 	*configA.Options.Paginated = true
@@ -55,14 +56,14 @@ func TestServiceInfoOptionsSnapshotReplacementAndRetainedHandles(t *testing.T) {
 func TestServiceInfoOptionsRejectUnsupportedInputsBeforeHTTP(t *testing.T) {
 	custom := errors.New("option callback cause")
 	for _, option := range []ListStoresOption{
-		nil, func(*request.Config[ListStoresOpts]) error { return custom },
-		WithListStoresOptions(ListStoresOpts{Limit: -1}), WithListStoresMaxItems(-1),
-		WithListStoresQuery("DETAILS", "true"), WithListStoresQuery("max_items", "1"), WithListStoresQuery("base_path", "/other"),
-		WithListStoresQuery("limit", "0"), WithListStoresQuery("marker", " "),
-		WithListStoresQuery("invalid\xff", "value"), WithListStoresQuery("extension", "invalid\xff"),
-		WithListStoresHeader("X-Auth-Token", "replacement"), WithListStoresHeader("OpenStack-API-Version", "image 2.8"), WithListStoresHeader("Content-Type", "text/plain"),
-		WithListStoresHeader("Bad Name", "value"), WithListStoresHeader("X-Extra", "bad\x00value"),
-		request.WithField[ListStoresOpts]("unknown", true), request.WithArgument[ListStoresOpts]("microversion", "2.8"),
+		nil, request.Custom(func(*request.Config[ListStoresOpts]) error { return custom }),
+		WithListStoresOptions(ListStoresOpts{Limit: -1}), request.MaxItems(-1),
+		request.Query("DETAILS", "true"), request.Query("max_items", "1"), request.Query("base_path", "/other"),
+		request.Query("limit", "0"), request.Query("marker", " "),
+		request.Query("invalid\xff", "value"), request.Query("extension", "invalid\xff"),
+		request.Header("X-Auth-Token", "replacement"), request.Header("OpenStack-API-Version", "image 2.8"), request.Header("Content-Type", "text/plain"),
+		request.Header("Bad Name", "value"), request.Header("X-Extra", "bad\x00value"),
+		request.Custom(request.WithField[ListStoresOpts]("unknown", true)), request.Custom(request.WithArgument[ListStoresOpts]("microversion", "2.8")),
 	} {
 		var requests int
 		client := infoClient(func(req *http.Request) (*http.Response, error) {
@@ -78,7 +79,7 @@ func TestServiceInfoOptionsRejectUnsupportedInputsBeforeHTTP(t *testing.T) {
 		}
 	}
 	for _, option := range []GetImportInfoOption{
-		nil, request.WithQuery[GetImportInfoOpts]("unknown", "value"), request.WithField[GetImportInfoOpts]("unknown", true), request.WithArgument[GetImportInfoOpts]("microversion", "2.8"), WithGetImportInfoHeader("Authorization", "replacement"),
+		nil, request.Custom(request.WithQuery[GetImportInfoOpts]("unknown", "value")), request.Custom(request.WithField[GetImportInfoOpts]("unknown", true)), request.Custom(request.WithArgument[GetImportInfoOpts]("microversion", "2.8")), request.Header("Authorization", "replacement"),
 	} {
 		var requests int
 		client := infoClient(func(req *http.Request) (*http.Response, error) {
@@ -94,7 +95,7 @@ func TestServiceInfoOptionsRejectUnsupportedInputsBeforeHTTP(t *testing.T) {
 
 func TestServiceInfoOptionsConcurrentReusableSnapshots(t *testing.T) {
 	paginated := false
-	options := []ListStoresOption{WithListStoresOptions(ListStoresOpts{Paginated: &paginated}), WithListStoresDetails(true), WithListStoresMaxItems(5), WithListStoresQuery("extension", "owned"), WithListStoresHeader("X-Extra", "owned")}
+	options := []ListStoresOption{WithListStoresOptions(ListStoresOpts{Paginated: &paginated}), WithListStoresDetails(true), request.MaxItems(5), request.Query("extension", "owned"), request.Header("X-Extra", "owned")}
 	var group sync.WaitGroup
 	for range 12 {
 		group.Add(1)

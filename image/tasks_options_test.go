@@ -10,6 +10,7 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -111,18 +112,18 @@ func TestTaskOptionsReplacementPresenceAndLastWins(t *testing.T) {
 		}
 		return taskCoreJSON(req, 200, `{"tasks":[]}`), nil
 	}))
-	_, err := service.CreateTask(context.Background(), "import", WithCreateTaskInput(map[string]any{"old": 1}), WithCreateTaskHeader("X-Erased", "old"), WithCreateTaskOpts(CreateTaskOpts{Input: map[string]json.RawMessage{}}), WithCreateTaskHeaders(map[string]string{"x-policy": "first"}), WithCreateTaskHeader("X-Policy", "last"))
+	_, err := service.CreateTask(context.Background(), "import", WithCreateTaskInput(map[string]any{"old": 1}), request.Header("X-Erased", "old"), WithCreateTaskOpts(CreateTaskOpts{Input: map[string]json.RawMessage{}}), WithCreateTaskHeaders(map[string]string{"x-policy": "first"}), request.Header("X-Policy", "last"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	_, err = service.GetTask(context.Background(), "literal", WithGetTaskHeader("X-Erased", "old"), WithGetTaskOpts(GetTaskOpts{}), WithGetTaskHeaders(map[string]string{"x-policy": "first"}), WithGetTaskHeader("X-Policy", "last"))
+	_, err = service.GetTask(context.Background(), "literal", request.Header("X-Erased", "old"), WithGetTaskOpts(GetTaskOpts{}), WithGetTaskHeaders(map[string]string{"x-policy": "first"}), request.Header("X-Policy", "last"))
 	if err != nil {
 		t.Fatal(err)
 	}
 	limit := 2
 	base := WithListTasksOpts(ListTasksOpts{Limit: &limit, Marker: "old", Type: "old", Status: "old", SortKey: "old", SortDir: "desc", MaxItems: 4, SinglePage: true})
 	limit = -1
-	_, err = service.AllTasks(context.Background(), base, WithListTasksHeader("X-Erased", "old"), WithListTasksOpts(ListTasksOpts{}), WithListTasksLimit(0), WithListTasksMarker(""), WithListTasksType(""), WithListTasksStatus(""), WithListTasksSortKey(""), WithListTasksSortDir(""), WithListTasksMaxItems(0), WithListTasksSinglePage(false), WithListTasksHeaders(map[string]string{"x-policy": "first"}), WithListTasksHeader("X-Policy", "last"))
+	_, err = service.AllTasks(context.Background(), base, request.Header("X-Erased", "old"), WithListTasksOpts(ListTasksOpts{}), request.Limit(0), request.Marker(""), WithListTasksType(""), WithListTasksStatus(""), WithListTasksSortKey(""), WithListTasksSortDir(""), request.MaxItems(0), WithListTasksSinglePage(false), WithListTasksHeaders(map[string]string{"x-policy": "first"}), request.Header("X-Policy", "last"))
 	if err != nil || calls != 3 {
 		t.Fatal(err, calls)
 	}
@@ -175,15 +176,15 @@ func TestTaskOptionsCallbacksAndCompleteValidation(t *testing.T) {
 		}
 		return nil
 	}
-	if value, err := New(client).CreateTask(context.Background(), "import", first, second); err != nil || value == nil || calls != 1 || callbacks != 2 {
+	if value, err := New(client).CreateTask(context.Background(), "import", request.Custom(first), request.Custom(second)); err != nil || value == nil || calls != 1 || callbacks != 2 {
 		t.Fatal(value, err, calls, callbacks)
 	}
 	cause := errors.New("callback")
-	if _, err := New(client).CreateTask(context.Background(), "import", func(config *CreateTaskOpts) error { return cause }); !errors.Is(err, cause) || calls != 1 {
+	if _, err := New(client).CreateTask(context.Background(), "import", request.Custom(func(config *CreateTaskOpts) error { return cause })); !errors.Is(err, cause) || calls != 1 {
 		t.Fatal(err, calls)
 	}
 	for _, input := range []map[string]json.RawMessage{{"nil": nil}, {"bad": json.RawMessage("NaN")}, {"bad": json.RawMessage([]byte{'"', 0xff, '"'})}, {string([]byte{0xff}): json.RawMessage("1")}} {
-		value, err := New(client).CreateTask(context.Background(), "import", func(config *CreateTaskOpts) error { config.Input = input; return nil })
+		value, err := New(client).CreateTask(context.Background(), "import", request.Custom(func(config *CreateTaskOpts) error { config.Input = input; return nil }))
 		if value != nil || !errors.Is(err, resource.ErrInvalidOption) || calls != 1 {
 			t.Fatal(value, err, calls)
 		}

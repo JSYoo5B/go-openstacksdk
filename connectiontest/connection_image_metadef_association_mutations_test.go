@@ -11,6 +11,7 @@ import (
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	types "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -95,10 +96,10 @@ func TestConnectionImageMetadefAssociationMutationsShareLocationAndIdentity(t *t
 			created, err := scope.CreateRecord(context.Background(), types.WithRecordCreateAttributes(map[string]any{
 				"id": "input-id", "name": "OS::Nova::Server", "created_at": false,
 				"updated_at": json.Number("9007199254740993"), "prefix": "hw_", "properties_target": nil,
-			}), types.WithRecordCreateHeader("X-Option", "owned"), func(*types.RecordCreateOpts) error {
+			}), request.Header("X-Option", "owned"), request.Custom(func(*types.RecordCreateOpts) error {
 				provider.SetToken("live")
 				return nil
-			})
+			}))
 			if err != nil {
 				t.Fatalf("unexpected error: %v", err)
 			}
@@ -113,10 +114,10 @@ func TestConnectionImageMetadefAssociationMutationsShareLocationAndIdentity(t *t
 			}
 			seed := created.Resource.Clone()
 			seed.Body["namespace_name"] = json.RawMessage(`"different parent"`)
-			ack, err := scope.DeleteRecord(context.Background(), types.RecordRequest{Resource: seed}, types.WithDeleteHeader("X-Option", "owned"), func(*types.DeleteOpts) error {
+			ack, err := scope.DeleteRecord(context.Background(), types.RecordRequest{Resource: seed}, request.Header("X-Option", "owned"), request.Custom(func(*types.DeleteOpts) error {
 				seed.Body["id"] = json.RawMessage(`"caller changed"`)
 				return nil
-			})
+			}))
 			if err != nil {
 				t.Fatalf("unexpected error: %v", err)
 			}

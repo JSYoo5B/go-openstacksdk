@@ -10,6 +10,7 @@ import (
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/image"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -66,7 +67,7 @@ func TestConnectionImageCacheSharesClientDefaultsAndPassiveMeasurements(t *testi
 	if service.RawClient() != client || service.API.RawClient() != client || client.ProviderClient != provider {
 		t.Fatal("cache operations replaced shared native client")
 	}
-	options := []image.CacheOption{image.WithCacheOpts(image.CacheOpts{Headers: map[string]string{"X-Call": "initial"}}), image.WithCacheHeader("X-Call", "intermediate"), image.WithCacheHeaders(map[string]string{"x-call": "cache"})}
+	options := []image.CacheOption{image.WithCacheOpts(image.CacheOpts{Headers: map[string]string{"X-Call": "initial"}}), request.Header("X-Call", "intermediate"), image.WithCacheHeaders(map[string]string{"x-call": "cache"})}
 	advance := func() { provider.SetToken(fmt.Sprintf("cache-%d", calls)) }
 	snapshot, err := service.GetImageCache(ctx, options...)
 	if err != nil || snapshot == nil || snapshot.StatusCode != 200 || len(snapshot.CachedImages) != 1 || len(snapshot.QueuedImages) != 2 || snapshot.QueuedImages[0] != "opaque%2F?key=value#fragment" || snapshot.CreatedAt != nil {
@@ -87,12 +88,12 @@ func TestConnectionImageCacheSharesClientDefaultsAndPassiveMeasurements(t *testi
 		t.Fatalf("queue=%+v err=%v", queued, err)
 	}
 	advance()
-	deleted, err := service.CacheDeleteImage(ctx, resource.ID("fixed"), image.WithCacheDeleteOpts(image.CacheDeleteOpts{Headers: map[string]string{"X-Call": "initial"}}), image.WithCacheDeleteHeader("X-Call", "intermediate"), image.WithCacheDeleteHeaders(map[string]string{"x-call": "cache"}), image.WithCacheDeleteIgnoreMissing(false))
+	deleted, err := service.CacheDeleteImage(ctx, resource.ID("fixed"), image.WithCacheDeleteOpts(image.CacheDeleteOpts{Headers: map[string]string{"X-Call": "initial"}}), request.Header("X-Call", "intermediate"), image.WithCacheDeleteHeaders(map[string]string{"x-call": "cache"}), request.IgnoreMissing(false))
 	if err != nil || deleted == nil || deleted.ImageID != "fixed" || deleted.Target != nil || deleted.StatusCode != 204 || string(deleted.Body) != "opaque deletion" {
 		t.Fatalf("delete=%+v err=%v", deleted, err)
 	}
 	advance()
-	cleared, err := service.ClearCache(ctx, image.WithClearCacheOpts(image.ClearCacheOpts{Headers: map[string]string{"X-Call": "initial"}}), image.WithClearCacheHeader("X-Call", "intermediate"), image.WithClearCacheHeaders(map[string]string{"x-call": "cache"}), image.WithClearCacheTarget(image.QueueOnly))
+	cleared, err := service.ClearCache(ctx, image.WithClearCacheOpts(image.ClearCacheOpts{Headers: map[string]string{"X-Call": "initial"}}), request.Header("X-Call", "intermediate"), image.WithClearCacheHeaders(map[string]string{"x-call": "cache"}), image.WithClearCacheTarget(image.QueueOnly))
 	if err != nil || cleared == nil || cleared.ImageID != "" || cleared.Target == nil || *cleared.Target != image.QueueOnly || cleared.StatusCode != 204 || string(cleared.Body) != "opaque clear" {
 		t.Fatalf("clear=%+v err=%v", cleared, err)
 	}

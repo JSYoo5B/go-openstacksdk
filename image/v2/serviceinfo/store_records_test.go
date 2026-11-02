@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -100,7 +101,7 @@ func TestStoreRecordsDescriptorsAliasesAndLocations(t *testing.T) {
 				return infoRecordJSON(req, 200, `{"stores":[`+test.row+`]}`), nil
 			})
 			api := NewWithDependencies(client, Dependencies{CloudLocation: func() (resource.CloudLocation, error) { locations++; return resource.CloudLocation{Cloud: &cloud}, nil }})
-			rows, err := api.AllStoreRecords(context.Background(), func(*StoreRecordListOpts) error { cloud = "after option"; return nil })
+			rows, err := api.AllStoreRecords(context.Background(), request.Custom(func(*StoreRecordListOpts) error { cloud = "after option"; return nil }))
 			if err != nil || len(rows) != 1 || locations != 1 || len(rows[0].Resource.Body) != 6 {
 				t.Fatal(rows, err, locations)
 			}
@@ -169,13 +170,13 @@ func TestStoreRecordsLazyRepeatedCapturedOptions(t *testing.T) {
 		client.MoreHeaders["X-Source"] = "changed by location"
 		return resource.CloudLocation{Cloud: &cloud}, nil
 	}})
-	stream := api.ListStoreRecords(context.Background(), factory, func(value *StoreRecordListOpts) error {
+	stream := api.ListStoreRecords(context.Background(), factory, request.Custom(func(value *StoreRecordListOpts) error {
 		callbacks++
 		retained = value
 		client.MoreHeaders["X-Source"] = "changed by option"
 		cloud = "changed by option"
 		return nil
-	})
+	}))
 	headers["X-Option"] = "caller changed"
 	filters["id"][1] = 'X'
 	limit = 1
@@ -224,18 +225,18 @@ func TestStoreRecordsSourcePagingAndRawCaps(t *testing.T) {
 				suffix = ""
 			case "positive marker fallback":
 				suffix = ""
-				options = append(options, WithStoreRecordListLimit(2))
+				options = append(options, request.Limit(2))
 			case "explicit zero":
 				suffix = ""
-				options = append(options, WithStoreRecordListLimit(0))
+				options = append(options, request.Limit(0))
 			case "first server limit only":
 				suffix = `,"limit":2`
 			case "single page":
-				options = append(options, WithStoreRecordListPaginated(false))
+				options = append(options, request.Paginated(false))
 			case "raw cap filter":
-				options = append(options, WithStoreRecordListMaxItems(2), WithStoreRecordListFilter("id", "last"))
+				options = append(options, request.MaxItems(2), WithStoreRecordListFilter("id", "last"))
 			case "zero plus cap hint":
-				options = append(options, WithStoreRecordListLimit(0), WithStoreRecordListMaxItems(2), WithStoreRecordListFilter("id", "last"))
+				options = append(options, request.Limit(0), request.MaxItems(2), WithStoreRecordListFilter("id", "last"))
 			}
 			first += suffix + `}`
 			client := infoClient(func(req *http.Request) (*http.Response, error) {
@@ -312,7 +313,7 @@ func TestStoreRecordsSourcePagingAndRawCaps(t *testing.T) {
 			}
 			return infoRecordJSON(req, 200, `{"stores":[{"id":"same"}]}`), nil
 		})
-		rows, err := New(client).AllStoreRecords(context.Background(), WithStoreRecordListLimit(1))
+		rows, err := New(client).AllStoreRecords(context.Background(), request.Limit(1))
 		if len(rows) != 2 || !errors.Is(err, resource.ErrPaginationCycle) || calls != 2 {
 			t.Fatal("repeat cycle/partial evidence", rows, err, calls)
 		}
@@ -523,7 +524,7 @@ func TestStoreRecordsPreflightAndLegacyDetailCompatibility(t *testing.T) {
 		name   string
 		option StoreRecordListOption
 	}{
-		{"nil option", nil}, {"negative limit", WithStoreRecordListLimit(-1)}, {"negative cap", WithStoreRecordListMaxItems(-1)}, {"bad marker", WithStoreRecordListMarker("\n")}, {"owned auth", WithStoreRecordListHeader("X-Auth-Token", "foreign")}, {"bad header", WithStoreRecordListHeader("X-Extra", "\n")}, {"broken canonical JSON", WithStoreRecordListOpts(StoreRecordListOpts{Filters: map[string]json.RawMessage{"properties": json.RawMessage(`{`)}})},
+		{"nil option", nil}, {"negative limit", request.Limit(-1)}, {"negative cap", request.MaxItems(-1)}, {"bad marker", request.Marker("\n")}, {"owned auth", request.Header("X-Auth-Token", "foreign")}, {"bad header", request.Header("X-Extra", "\n")}, {"broken canonical JSON", WithStoreRecordListOpts(StoreRecordListOpts{Filters: map[string]json.RawMessage{"properties": json.RawMessage(`{`)}})},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			calls := 0
@@ -546,7 +547,7 @@ func TestStoreRecordsPreflightAndLegacyDetailCompatibility(t *testing.T) {
 	t.Run("option source drift stops later restoration", func(t *testing.T) {
 		calls, callbacks := 0, 0
 		client := infoClient(func(req *http.Request) (*http.Response, error) { calls++; return nil, nil })
-		rows, err := New(client).AllStoreRecords(context.Background(), func(*StoreRecordListOpts) error { client.ProviderClient = &gophercloud.ProviderClient{}; return nil }, func(*StoreRecordListOpts) error { callbacks++; return nil })
+		rows, err := New(client).AllStoreRecords(context.Background(), request.Custom(func(*StoreRecordListOpts) error { client.ProviderClient = &gophercloud.ProviderClient{}; return nil }), request.Custom(func(*StoreRecordListOpts) error { callbacks++; return nil }))
 		if len(rows) != 0 || !errors.Is(err, resource.ErrInvalidOption) || calls != 0 || callbacks != 0 {
 			t.Fatal(rows, err, calls, callbacks)
 		}

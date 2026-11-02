@@ -14,6 +14,7 @@ import (
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/image"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -116,7 +117,7 @@ func TestConnectionImageTaskFacadeSharesClientAndOwnsInput(t *testing.T) {
 		t.Fatalf("GET must retain actual response ID: %+v %v", fetched, err)
 	}
 	var ids []string
-	for task, err := range upper.Tasks(ctx, image.WithListTasksType("future"), image.WithListTasksStatus("future"), image.WithListTasksLimit(0), image.WithListTasksHeader("X-Call", "stable")) {
+	for task, err := range upper.Tasks(ctx, image.WithListTasksType("future"), image.WithListTasksStatus("future"), request.Limit(0), request.Header("X-Call", "stable")) {
 		if err != nil || task == nil || task.ID == nil || task.Input != nil || task.Result != nil {
 			t.Fatalf("list stub=%+v err=%v", task, err)
 		}

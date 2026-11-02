@@ -10,6 +10,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -103,7 +104,7 @@ func TestFindImageMemberRecordCompatibleFallbackAndUniqueness(t *testing.T) {
 				var getBody *deleteCoreBody
 				options := []FindImageMemberRecordOption{}
 				if mode == "zero strict" {
-					options = append(options, WithFindImageMemberRecordIgnoreMissing(false))
+					options = append(options, request.IgnoreMissing(false))
 				}
 				first := `{"member":"other"}`
 				second := ""
@@ -343,14 +344,14 @@ func TestFindImageMemberRecordOptionsLocationAndFallbackSnapshot(t *testing.T) {
 		client.MoreHeaders["X-Source"] = "changed by location"
 		return location, nil
 	}})
-	got, err := service.FindImageMemberRecord(context.Background(), resource.ID(memberRecordParent), "selected", option, func(value *FindImageMemberRecordOpts) error {
+	got, err := service.FindImageMemberRecord(context.Background(), resource.ID(memberRecordParent), "selected", option, request.Custom(func(value *FindImageMemberRecordOpts) error {
 		callbacks++
 		retained = value
 		cloud = "changed"
 		client.MoreHeaders["X-Source"] = "changed"
 		client.SetToken("live")
-		return WithFindImageMemberRecordHeader("X-Final", "yes")(value)
-	})
+		return applyCall(findImageMemberRecordCalls, request.Header("X-Final", "yes"), value)
+	}))
 	if got != nil || !errors.Is(err, resource.ErrNotFound) || calls != 2 || callbacks != 1 || locations != 1 {
 		t.Fatal(got, err, calls, callbacks, locations)
 	}
@@ -384,13 +385,13 @@ func TestFindImageMemberRecordPreflightAndLegacyBoundaries(t *testing.T) {
 			calls, callbacks, locations := 0, 0, 0
 			client := deleteCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return nil, nil })
 			service := NewWithDependencies(client, Dependencies{CloudLocation: func() (resource.CloudLocation, error) { locations++; return resource.CloudLocation{}, nil }})
-			got, err := service.FindImageMemberRecord(context.Background(), resource.ID(memberRecordParent), selected, func(*FindImageMemberRecordOpts) error { callbacks++; return nil })
+			got, err := service.FindImageMemberRecord(context.Background(), resource.ID(memberRecordParent), selected, request.Custom(func(*FindImageMemberRecordOpts) error { callbacks++; return nil }))
 			if got != nil || !errors.Is(err, resource.ErrInvalidOption) || calls != 0 || callbacks != 0 || locations != 0 {
 				t.Fatal(got, err, calls, callbacks, locations)
 			}
 		})
 	}
-	for _, option := range []FindImageMemberRecordOption{nil, WithFindImageMemberRecordHeader("X-Auth-Token", "foreign"), WithFindImageMemberRecordHeader("X-Extra", "\n")} {
+	for _, option := range []FindImageMemberRecordOption{nil, request.Header("X-Auth-Token", "foreign"), request.Header("X-Extra", "\n")} {
 		t.Run(fmt.Sprintf("option %p", option), func(t *testing.T) {
 			calls := 0
 			client := deleteCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return nil, nil })

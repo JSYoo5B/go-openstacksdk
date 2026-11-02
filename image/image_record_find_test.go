@@ -11,6 +11,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -91,7 +92,7 @@ func TestFindImageRecordAcceptedGetAndAbsence(t *testing.T) {
 			})
 			opts := []FindImageRecordOption{}
 			if test.strict {
-				opts = append(opts, WithFindImageRecordIgnoreMissing(false))
+				opts = append(opts, request.IgnoreMissing(false))
 			}
 			got, err := New(client).FindImageRecord(context.Background(), "selected", opts...)
 			if test.missing {
@@ -214,13 +215,13 @@ func TestFindImageRecordOptionsAndLocationOwnAllPhases(t *testing.T) {
 		client.MoreHeaders["X-Source"] = "later"
 		return resource.CloudLocation{Cloud: &cloud}, nil
 	}})
-	got, err := service.FindImageRecord(context.Background(), "selected", option, func(v *FindImageRecordOpts) error {
+	got, err := service.FindImageRecord(context.Background(), "selected", option, request.Custom(func(v *FindImageRecordOpts) error {
 		callbacks++
 		retained = v
 		cloud = "changed"
 		client.SetToken("live")
 		return nil
-	}, WithFindImageRecordListOptions(WithImageRecordListLimit(2)))
+	}), WithFindImageRecordListOptions(request.Limit(2)))
 	if got != nil || !errors.Is(err, resource.ErrNotFound) || calls != 3 || callbacks != 1 || locations != 1 {
 		t.Fatal(got, err, calls, callbacks, locations)
 	}
@@ -229,12 +230,12 @@ func TestFindImageRecordNestedCallbackSourceChangeStopsBeforeHTTP(t *testing.T) 
 	calls, callbacks := 0, 0
 	client := taskCoreClient(func(*http.Request) (*http.Response, error) { calls++; return nil, nil })
 	got, err := New(client).FindImageRecord(context.Background(), "selected", WithFindImageRecordListOptions(
-		func(*ImageRecordListOpts) error {
+		request.Custom(func(*ImageRecordListOpts) error {
 			callbacks++
 			client.Endpoint = "https://changed.test/v2/"
 			return nil
-		},
-		func(*ImageRecordListOpts) error { callbacks++; return nil },
+		}),
+		request.Custom(func(*ImageRecordListOpts) error { callbacks++; return nil }),
 	))
 	if got != nil || err == nil || calls != 0 || callbacks != 1 {
 		t.Fatal(got, err, calls, callbacks)

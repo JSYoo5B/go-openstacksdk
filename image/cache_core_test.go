@@ -12,6 +12,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -209,7 +210,7 @@ func TestImageCacheCoreCompletePreflightAndOwnedTargetHeader(t *testing.T) {
 			var options []CacheOption
 			if bad == "callback" {
 				ref = resource.ID("id")
-				options = []CacheOption{func(*CacheOpts) error { client.MoreHeaders[cacheTargetHeader] = "cache"; return nil }}
+				options = []CacheOption{request.Custom(func(*CacheOpts) error { client.MoreHeaders[cacheTargetHeader] = "cache"; return nil })}
 			}
 			value, err := New(client).QueueImage(context.Background(), ref, options...)
 			if value != nil || !errors.Is(err, resource.ErrInvalidOption) || calls != map[string]int{"callback": 0, "name-success": 1, "name-failure": 1}[bad] {
@@ -223,7 +224,7 @@ func TestImageCacheCoreCompletePreflightAndOwnedTargetHeader(t *testing.T) {
 	client := deleteCoreClient(func(*http.Request) (*http.Response, error) { t.Fatal("HTTP"); return nil, nil })
 	callbacks := 0
 	client.Type = "compute"
-	if value, err := New(client).CleanCache(context.Background(), func(*CacheOpts) error { callbacks++; return nil }); value != nil || !errors.Is(err, resource.ErrUnsupported) || callbacks != 0 {
+	if value, err := New(client).CleanCache(context.Background(), request.Custom(func(*CacheOpts) error { callbacks++; return nil })); value != nil || !errors.Is(err, resource.ErrUnsupported) || callbacks != 0 {
 		t.Fatal(value, err, callbacks)
 	}
 	var nilService *Service
@@ -308,7 +309,7 @@ func TestImageCacheCoreAcknowledgementFailuresAndMissingPolicy(t *testing.T) {
 			}
 			var options []CacheDeleteOption
 			if mode == "strict" {
-				options = []CacheDeleteOption{WithCacheDeleteIgnoreMissing(false)}
+				options = []CacheDeleteOption{request.IgnoreMissing(false)}
 			}
 			value, err := New(client).CacheDeleteImage(ctx, resource.ID("id"), options...)
 			if value != nil || body.closes != 1 {
@@ -351,12 +352,12 @@ func TestImageCacheCoreCapturedSourceAndPrebodyGuards(t *testing.T) {
 		return deleteCoreHTTP(202, io.NopCloser(strings.NewReader("")), nil), nil
 	})
 	client.MoreHeaders = map[string]string{"X-Extra": "captured"}
-	value, err := New(client).QueueImage(context.Background(), resource.ID("id"), func(*CacheOpts) error {
+	value, err := New(client).QueueImage(context.Background(), resource.ID("id"), request.Custom(func(*CacheOpts) error {
 		client.ResourceBase = "https://example.test/changed/v2/"
 		client.MoreHeaders["X-Extra"] = "later"
 		client.ProviderClient.SetToken("live")
 		return nil
-	})
+	}))
 	if value == nil || err != nil || calls != 1 {
 		t.Fatal(value, err, calls)
 	}

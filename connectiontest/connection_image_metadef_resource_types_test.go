@@ -13,6 +13,7 @@ import (
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	rt "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
@@ -96,7 +97,7 @@ func TestConnectionImageMetadefResourceTypesShareClientAndScopes(t *testing.T) {
 		t.Fatalf("other=%+v err=%v", other, err)
 	}
 	count := 0
-	for value, err := range upper.API.MetadefResourceTypes.List(ctx, rt.WithListMaxItems(1)) {
+	for value, err := range upper.API.MetadefResourceTypes.List(ctx, request.MaxItems(1)) {
 		if err != nil || value == nil || value.Name == nil || *value.Name != "passive-name" || value.CreatedAt == nil || *value.CreatedAt != "unparsed.12345678901" || value.UpdatedAt != nil || string(value.Body["protected"]) != "false" || string(value.Body["precision"]) != "9007199254740993" || value.StatusCode != 200 {
 			t.Fatalf("global=%+v err=%v", value, err)
 		}
@@ -114,7 +115,7 @@ func TestConnectionImageMetadefResourceTypesShareClientAndScopes(t *testing.T) {
 		t.Fatalf("created=%+v err=%v", created, err)
 	}
 	count = 0
-	for value, err := range other.List(ctx, rt.WithListMaxItems(1)) {
+	for value, err := range other.List(ctx, request.MaxItems(1)) {
 		if err != nil || value == nil || value.Name == nil || *value.Name != "one" {
 			t.Fatalf("association=%+v err=%v", value, err)
 		}
@@ -141,7 +142,7 @@ func TestConnectionImageMetadefResourceTypesShareClientAndScopes(t *testing.T) {
 	if ack != nil || err != nil || retries != 0 {
 		t.Fatalf("ignored=%+v err=%v retries=%d", ack, err, retries)
 	}
-	ack, err = scope.Delete(ctx, child, rt.WithDeleteIgnoreMissing(false))
+	ack, err = scope.Delete(ctx, child, request.IgnoreMissing(false))
 	var status gophercloud.ErrUnexpectedResponseCode
 	if ack != nil || !errors.As(err, &status) || status.Actual != 404 || retries != 1 {
 		t.Fatalf("strict=%+v err=%v retries=%d", ack, err, retries)
@@ -152,7 +153,7 @@ func TestConnectionImageMetadefResourceTypesShareClientAndScopes(t *testing.T) {
 	}
 	callbacks := 0
 	client.Endpoint = "https://changed.test/v2/"
-	created, err = scope.Create(ctx, child, func(*rt.CreateOpts) error { callbacks++; return nil })
+	created, err = scope.Create(ctx, child, request.Custom(func(*rt.CreateOpts) error { callbacks++; return nil }))
 	if created != nil || err == nil || callbacks != 0 || calls != 9 {
 		t.Fatalf("retarget=%+v err=%v callbacks=%d calls=%d", created, err, callbacks, calls)
 	}

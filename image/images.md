@@ -14,11 +14,11 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetImage`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetImageOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithGetImageHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetImageHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetImageRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordAttributes`
@@ -69,10 +69,10 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.ListImages`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.AllImages`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithListImagesOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithListImagesHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithListImagesHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithListImagesLimit`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithListImagesMarker`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithListImagesID`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithListImagesName`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithListImagesVisibility`
@@ -93,19 +93,19 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.WithListImagesDiskFormat`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithListImagesFilter`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithListImagesFilters`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithListImagesMaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithListImagesSinglePage`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.ListImageRecords`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.AllImageRecords`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordListHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordListHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordListFilter`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordListFilters`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 
 - Concrete pointer query preserves nilomission versus explicitempty/0/false; emptyMarkeromitted, nonnegativeLimit/Size bounds withoutminmax inference; queryVALUEUTF8-only with escaped controls/no clientenum/date/UUID/length normalization/defaultserver injection.
   Tests: `image/images_core_test.go:TestImageCoreCompletePreflight`, `image/images_options_test.go:TestImageOptionsImmediateSnapshotsAndPresence`, `image/images_options_test.go:TestImageOptionsReplacementExtensionsAndLastWins`, `image/images_options_test.go:TestImageOptionsValidationAndParallelReusablePolicies`, `image/images_contracts_test.go:TestImageContractsConcreteQueriesAndSource`.
@@ -170,7 +170,7 @@ func getImageExample(ctx context.Context, svc *image.Service, imageID string) (*
     return svc.GetImage(ctx, resource.ID(imageID),
         image.WithGetImageOpts(image.GetImageOpts{}),
         image.WithGetImageHeaders(map[string]string{"X-Example": "image-get"}),
-        image.WithGetImageHeader("X-Request-Id", "image-get-example"),
+        request.Header("X-Request-Id", "image-get-example"),
     )
 }
 
@@ -178,9 +178,9 @@ func classicImagesExample(ctx context.Context, svc *image.Service, imageName, ow
     options := []image.ListImagesOption{
         image.WithListImagesOpts(image.ListImagesOpts{MaxItems: 0}),
         image.WithListImagesHeaders(map[string]string{"X-Example": "image-list"}),
-        image.WithListImagesHeader("X-Request-Id", "image-list-example"),
-        image.WithListImagesLimit(2),
-        image.WithListImagesMarker(""),
+        request.Header("X-Request-Id", "image-list-example"),
+        request.Limit(2),
+        request.Marker(""),
         image.WithListImagesName(imageName),
         image.WithListImagesVisibility("private"),
         image.WithListImagesMemberStatus("all"),
@@ -202,7 +202,7 @@ func classicImagesExample(ctx context.Context, svc *image.Service, imageName, ow
         }),
         image.WithListImagesFilter("architecture", "x86_64"),
         image.WithListImagesFilter("unused"),
-        image.WithListImagesMaxItems(20),
+        request.MaxItems(20),
         image.WithListImagesSinglePage(false),
     }
     rows := make([]*image.ImageInfo, 0)
@@ -219,7 +219,7 @@ func modernImagesExample(ctx context.Context, svc *image.Service, imageID string
     return svc.AllImages(ctx,
         image.WithListImagesID(imageID),
         image.WithListImagesSort("name:asc,created_at:desc"),
-        image.WithListImagesMaxItems(20),
+        request.MaxItems(20),
     )
 }
 ```

@@ -14,6 +14,7 @@ import (
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/image"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -130,10 +131,10 @@ func TestConnectionOwnedImageStageSharesSourceAndRetainsBorrowedDataThroughPrope
 		t.Fatalf("unexpected error: %v", err)
 	}
 	seed.Resource.Body["id"] = json.RawMessage(`"public decoy"`)
-	first, err := conn.StageImageRecord(context.Background(), image.ImageRecordStageRequest{Record: seed, Data: reader}, func(*image.ImageRecordStageOpts) error {
+	first, err := conn.StageImageRecord(context.Background(), image.ImageRecordStageRequest{Record: seed, Data: reader}, request.Custom(func(*image.ImageRecordStageOpts) error {
 		source.MoreHeaders["X-Source"] = "mutated"
 		return nil
-	})
+	}))
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

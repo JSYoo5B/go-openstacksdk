@@ -13,6 +13,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -119,7 +120,7 @@ func TestMetadefObjectRecordsIdentityPresenceAndLocation(t *testing.T) {
 				return objectCoreJSON(req, 200, objectRecordEnvelope("objects", `[`+check.row+`]`, "")), nil
 			})
 			scope := objectRecordBindings(t, client, Dependencies{CloudLocation: func() (resource.CloudLocation, error) { locationCalls++; return location, nil }})
-			rows, err := scope.AllRecords(context.Background(), func(*RecordListOpts) error { cloud = "after option"; location.Project.ID[1] = 'X'; return nil })
+			rows, err := scope.AllRecords(context.Background(), request.Custom(func(*RecordListOpts) error { cloud = "after option"; location.Project.ID[1] = 'X'; return nil }))
 			if err != nil || len(rows) != 1 || locationCalls != 1 || string(rows[0].Resource.Body["id"]) != check.id {
 				t.Fatal(rows, err, locationCalls)
 			}
@@ -161,12 +162,12 @@ func TestMetadefObjectRecordsLazyRepeatAndOptionSnapshots(t *testing.T) {
 		headers := map[string]string{"X-Option": "factory snapshot"}
 		filters := map[string]any{"name": "match"}
 		owned := WithRecordListOpts(RecordListOpts{Headers: headers, Limit: 2, Marker: "start", Paginated: &paginated, Filters: []resource.ListOption{resource.WithFilters(filters)}})
-		seq := scope.ListRecords(context.Background(), owned, func(*RecordListOpts) error {
+		seq := scope.ListRecords(context.Background(), owned, request.Custom(func(*RecordListOpts) error {
 			callbacks++
 			client.MoreHeaders["X-Source"] = "changed by callback"
 			cloud = "changed by callback"
 			return nil
-		})
+		}))
 		headers["X-Option"] = "caller changed"
 		filters["name"] = "caller changed"
 		paginated = true
@@ -251,20 +252,20 @@ func TestMetadefObjectRecordsCompletePreflight(t *testing.T) {
 		options []RecordListOption
 	}{
 		{"nil option", []RecordListOption{nil}},
-		{"negative limit", []RecordListOption{WithRecordListLimit(-1)}},
-		{"negative cap", []RecordListOption{WithRecordListMaxItems(-1)}},
-		{"whitespace marker", []RecordListOption{WithRecordListMarker(" \t ")}},
+		{"negative limit", []RecordListOption{request.Limit(-1)}},
+		{"negative cap", []RecordListOption{request.MaxItems(-1)}},
+		{"whitespace marker", []RecordListOption{request.Marker(" \t ")}},
 		{"multiple semantic limit", []RecordListOption{WithRecordListFilter("limit", []int{1, 2})}},
 		{"semantic zero limit", []RecordListOption{WithRecordListFilter("limit", 0)}},
-		{"conflicting typed semantic limit", []RecordListOption{WithRecordListLimit(2), WithRecordListFilter("limit", 2)}},
+		{"conflicting typed semantic limit", []RecordListOption{request.Limit(2), WithRecordListFilter("limit", 2)}},
 		{"semantic marker array", []RecordListOption{WithRecordListFilter("marker", []string{"one", "two"})}},
 		{"nil semantic option", []RecordListOption{WithRecordListOpts(RecordListOpts{Filters: []resource.ListOption{nil}})}},
 		{"non-semantic collection option", []RecordListOption{WithRecordListOpts(RecordListOpts{Filters: []resource.ListOption{resource.WithName("other")}})}},
 		{"known encoding failure", []RecordListOption{WithRecordListFilter("name", make(chan int))}},
-		{"protected header", []RecordListOption{WithRecordListHeader("X-Auth-Token", "foreign")}},
-		{"accept header", []RecordListOption{WithRecordListHeader("Accept", "text/plain")}},
+		{"protected header", []RecordListOption{request.Header("X-Auth-Token", "foreign")}},
+		{"accept header", []RecordListOption{request.Header("Accept", "text/plain")}},
 		{"header aliases", []RecordListOption{WithRecordListHeaders(map[string]string{"X-Duplicate": "one", "x-duplicate": "two"})}},
-		{"header newline", []RecordListOption{WithRecordListHeader("X-Option", "bad\nvalue")}},
+		{"header newline", []RecordListOption{request.Header("X-Option", "bad\nvalue")}},
 		{"visibility control", []RecordListOption{WithRecordListVisibility("pub\nlic")}},
 		{"resource types control", []RecordListOption{WithRecordListResourceTypes("bad\x7f")}},
 		{"sort key UTF8", []RecordListOption{WithRecordListSortKey("bad\xff")}},
@@ -325,13 +326,13 @@ func TestMetadefObjectRecordsPreflightOrderAndLocationFailures(t *testing.T) {
 			case "scope lifetime":
 				client.ResourceBase += "changed/"
 			}
-			rows, err := scope.AllRecords(ctx, func(*RecordListOpts) error {
+			rows, err := scope.AllRecords(ctx, request.Custom(func(*RecordListOpts) error {
 				callbacks++
 				if mode == "option retarget" {
 					client.Endpoint = "https://changed.test/"
 				}
 				return nil
-			})
+			}))
 			if err == nil || len(rows) != 0 || calls != 0 {
 				t.Fatal(rows, err, calls)
 			}
@@ -379,13 +380,13 @@ func TestMetadefObjectRecordsRawCapAndEarlyStop(t *testing.T) {
 			scope := objectRecordBindings(t, client, Dependencies{})
 			options := []RecordListOption{}
 			if mode == "cap" || mode == "filtered cap" {
-				options = append(options, WithRecordListMaxItems(1))
+				options = append(options, request.MaxItems(1))
 			}
 			if mode == "filtered cap" {
 				options = append(options, WithRecordListFilter("name", "excluded"))
 			}
 			if mode == "single page" {
-				options = append(options, WithRecordListPaginated(false))
+				options = append(options, request.Paginated(false))
 			}
 			count := 0
 			var failure error
@@ -446,7 +447,7 @@ func TestMetadefObjectRecordsMarkerFallbackUsesWireIdentity(t *testing.T) {
 			})
 			scope := objectRecordBindings(t, client, Dependencies{})
 			count := 0
-			for row, err := range scope.ListRecords(context.Background(), WithRecordListLimit(5)) {
+			for row, err := range scope.ListRecords(context.Background(), request.Limit(5)) {
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -468,7 +469,7 @@ func TestMetadefObjectRecordsMarkerFallbackUsesWireIdentity(t *testing.T) {
 			body := objectRecordEnvelope("objects", `[`+row+`]`, "")
 			client := objectCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return objectCoreJSON(req, 200, body), nil })
 			scope := objectRecordBindings(t, client, Dependencies{})
-			rows, err := scope.AllRecords(context.Background(), WithRecordListLimit(5))
+			rows, err := scope.AllRecords(context.Background(), request.Limit(5))
 			if len(rows) != 1 || !errors.Is(err, resource.ErrInvalidOption) || calls != 1 {
 				t.Fatal(rows, err, calls)
 			}
@@ -515,7 +516,7 @@ func TestMetadefObjectRecordsContinuationRepresentations(t *testing.T) {
 				return response, nil
 			})
 			scope := objectRecordBindings(t, client, Dependencies{})
-			rows, err := scope.AllRecords(context.Background(), WithRecordListLimit(4))
+			rows, err := scope.AllRecords(context.Background(), request.Limit(4))
 			if err != nil || len(rows) != 1 || calls != 2 {
 				t.Fatal(rows, err, calls)
 			}
@@ -551,7 +552,7 @@ func TestMetadefObjectRecordsRejectedContinuationKeepsPartialReceipt(t *testing.
 				return response, nil
 			})
 			scope := objectRecordBindings(t, client, Dependencies{})
-			rows, err := scope.AllRecords(context.Background(), WithRecordListLimit(4), WithRecordListMarker("seed"))
+			rows, err := scope.AllRecords(context.Background(), request.Limit(4), request.Marker("seed"))
 			if len(rows) != 1 || err == nil || calls != 1 {
 				t.Fatal(rows, err, calls)
 			}
@@ -703,7 +704,7 @@ func TestMetadefObjectRecordsNativeRetryAndOwnership(t *testing.T) {
 				}
 				return nil
 			}
-			rows, err := scope.AllRecords(context.Background(), WithRecordListLimit(3))
+			rows, err := scope.AllRecords(context.Background(), request.Limit(3))
 			if len(rows) != 0 || retries != 1 {
 				t.Fatal(rows, err, retries)
 			}
@@ -809,7 +810,7 @@ func TestMetadefObjectRecordsLegacyFiniteListRemainsSeparate(t *testing.T) {
 		}
 		return objectCoreJSON(req, 200, `{"objects":[{"name":"one"}],"next":"https://foreign.test/"}`), nil
 	})
-	rows, err := objectCoreScope(t, client, objectRecordParent).All(context.Background(), WithListMaxItems(2))
+	rows, err := objectCoreScope(t, client, objectRecordParent).All(context.Background(), request.MaxItems(2))
 	if err != nil || len(rows) != 1 || calls != 1 || rows[0].Name == nil || *rows[0].Name != "one" {
 		t.Fatal(rows, err, calls)
 	}
@@ -834,19 +835,19 @@ func TestMetadefObjectRecordsFullOptionsAndRetainedCallbacksOwnStorage(t *testin
 		bulk := WithRecordListHeaders(bulkHeaders)
 		var retained *RecordListOpts
 		options := []RecordListOption{
-			WithRecordListHeader("X-Replaced", "old"), WithRecordListLimit(99), full, bulk,
-			func(config *RecordListOpts) error { retained = config; return nil },
-			func(config *RecordListOpts) error {
+			request.Header("X-Replaced", "old"), request.Limit(99), full, bulk,
+			request.Custom(func(config *RecordListOpts) error { retained = config; return nil }),
+			request.Custom(func(config *RecordListOpts) error {
 				retained.Headers["X-Full"] = "retained mutation"
 				retained.Filters[0] = resource.WithFilter("name", "excluded")
 				*retained.Paginated = true
 				retained.Limit = 100
 				return nil
-			},
-			WithRecordListHeader("x-final", "after replacement"),
+			}),
+			request.Header("x-final", "after replacement"),
 		}
 		seq := scope.ListRecords(context.Background(), options...)
-		options[0] = WithRecordListHeader("X-Replaced", "caller changed")
+		options[0] = request.Header("X-Replaced", "caller changed")
 		filters[0] = resource.WithFilter("name", "caller changed")
 		fullHeaders["X-Full"] = "caller changed"
 		bulkHeaders["X-Bulk"] = "caller changed"
@@ -979,7 +980,7 @@ func TestMetadefObjectRecordsNamespaceGuardAndRowProvenance(t *testing.T) {
 			var failure error
 			options := []RecordListOption{}
 			if mode == "option" {
-				options = append(options, func(*RecordListOpts) error { scope.namespace = "changed"; return nil })
+				options = append(options, request.Custom(func(*RecordListOpts) error { scope.namespace = "changed"; return nil }))
 			}
 			for row, err := range scope.ListRecords(context.Background(), options...) {
 				if err != nil {

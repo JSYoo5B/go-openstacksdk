@@ -6,6 +6,9 @@ import (
 	"errors"
 	"slices"
 
+	"github.com/JSYoo5B/go-openstacksdk/image/v2/internal/glancecalls"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -26,7 +29,12 @@ type RecordGetOpts struct {
 	Headers    map[string]string
 	Attributes []resource.ListOption
 }
-type RecordGetOption func(*RecordGetOpts) error
+
+// RecordGetOption is one option of the operation: WithRecordGetOpts,
+// WithRecordGetHeaders, WithRecordGetAttribute, WithRecordGetAttributes,
+// request.Header, or request.Custom over *RecordGetOpts. Other shared calls
+// fail with resource.ErrInvalidOption before HTTP.
+type RecordGetOption = request.GetCall
 
 func copyRecordGet(value RecordGetOpts) RecordGetOpts {
 	value.Headers = copyHeaders(value.Headers)
@@ -35,14 +43,11 @@ func copyRecordGet(value RecordGetOpts) RecordGetOpts {
 }
 func WithRecordGetOpts(value RecordGetOpts) RecordGetOption {
 	owned := copyRecordGet(value)
-	return func(c *RecordGetOpts) error { *c = copyRecordGet(owned); return nil }
-}
-func WithRecordGetHeader(key, value string) RecordGetOption {
-	return func(c *RecordGetOpts) error { c.Headers = setHeader(c.Headers, key, value); return nil }
+	return request.Custom(func(c *RecordGetOpts) error { *c = copyRecordGet(owned); return nil })
 }
 func WithRecordGetHeaders(values map[string]string) RecordGetOption {
 	owned := copyHeaders(values)
-	return func(c *RecordGetOpts) error {
+	return request.Custom(func(c *RecordGetOpts) error {
 		headers, err := validateHeaders(owned, false, "")
 		if err != nil {
 			return err
@@ -51,19 +56,19 @@ func WithRecordGetHeaders(values map[string]string) RecordGetOption {
 			c.Headers = setHeader(c.Headers, key, value)
 		}
 		return nil
-	}
+	})
 }
 func WithRecordGetAttribute(field string, value any) RecordGetOption {
 	owned := resource.WithFilter(field, value)
-	return func(c *RecordGetOpts) error { c.Attributes = append(c.Attributes, owned); return nil }
+	return request.Custom(func(c *RecordGetOpts) error { c.Attributes = append(c.Attributes, owned); return nil })
 }
 func WithRecordGetAttributes(values map[string]any) RecordGetOption {
 	owned := resource.WithFilters(values)
-	return func(c *RecordGetOpts) error { c.Attributes = append(c.Attributes, owned); return nil }
+	return request.Custom(func(c *RecordGetOpts) error { c.Attributes = append(c.Attributes, owned); return nil })
 }
 func prepareRecordGet(ctx context.Context, check func(context.Context) error, options []RecordGetOption) (map[string]json.RawMessage, map[string]string, error) {
 	value := copyRecordGet(RecordGetOpts{})
-	for _, apply := range options {
+	for _, apply := range calls.Translate(options, recordGetCalls) {
 		if err := check(ctx); err != nil {
 			return nil, nil, err
 		}
@@ -96,3 +101,7 @@ func prepareRecordGet(ctx context.Context, check func(context.Context) error, op
 	headers, err := validateHeaders(value.Headers, false, "")
 	return attrs, headers, errors.Join(err, check(ctx))
 }
+
+var (
+	recordGetCalls = glancecalls.HeaderSpec(func(o *RecordGetOpts) *map[string]string { return &o.Headers })
+)

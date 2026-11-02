@@ -17,6 +17,7 @@ import (
 
 	tags "github.com/JSYoo5B/go-openstacksdk/image/v2/metadeftags"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -31,17 +32,17 @@ const tagListJSON = `{"tags":[` + tagJSON + `],"next":"https://passive.invalid",
 
 func tagCallbacks(counter *atomic.Int32, cause error) tagOptions {
 	return tagOptions{
-		create:    []tags.CreateOption{func(*tags.CreateOpts) error { counter.Add(1); return cause }},
-		get:       []tags.GetOption{func(*tags.GetOpts) error { counter.Add(1); return cause }},
-		update:    []tags.UpdateOption{func(*tags.UpdateOpts) error { counter.Add(1); return cause }},
-		deletion:  []tags.DeleteOption{func(*tags.DeleteOpts) error { counter.Add(1); return cause }},
-		deleteAll: []tags.DeleteAllOption{func(*tags.DeleteAllOpts) error { counter.Add(1); return cause }},
-		set:       []tags.SetOption{func(*tags.SetOpts) error { counter.Add(1); return cause }},
-		list:      []tags.ListOption{func(*tags.ListOpts) error { counter.Add(1); return cause }},
+		create:    []tags.CreateOption{request.Custom(func(*tags.CreateOpts) error { counter.Add(1); return cause })},
+		get:       []tags.GetOption{request.Custom(func(*tags.GetOpts) error { counter.Add(1); return cause })},
+		update:    []tags.UpdateOption{request.Custom(func(*tags.UpdateOpts) error { counter.Add(1); return cause })},
+		deletion:  []tags.DeleteOption{request.Custom(func(*tags.DeleteOpts) error { counter.Add(1); return cause })},
+		deleteAll: []tags.DeleteAllOption{request.Custom(func(*tags.DeleteAllOpts) error { counter.Add(1); return cause })},
+		set:       []tags.SetOption{request.Custom(func(*tags.SetOpts) error { counter.Add(1); return cause })},
+		list:      []tags.ListOption{request.Custom(func(*tags.ListOpts) error { counter.Add(1); return cause })},
 	}
 }
 func tagHeaderOption(key, value string) tagOptions {
-	return tagOptions{create: []tags.CreateOption{tags.WithCreateHeader(key, value)}, get: []tags.GetOption{tags.WithGetHeader(key, value)}, update: []tags.UpdateOption{tags.WithUpdateHeader(key, value)}, deletion: []tags.DeleteOption{tags.WithDeleteHeader(key, value)}, deleteAll: []tags.DeleteAllOption{tags.WithDeleteAllHeader(key, value)}, set: []tags.SetOption{tags.WithSetHeader(key, value)}, list: []tags.ListOption{tags.WithListHeader(key, value)}}
+	return tagOptions{create: []tags.CreateOption{request.Header(key, value)}, get: []tags.GetOption{request.Header(key, value)}, update: []tags.UpdateOption{request.Header(key, value)}, deletion: []tags.DeleteOption{request.Header(key, value)}, deleteAll: []tags.DeleteAllOption{request.Header(key, value)}, set: []tags.SetOption{request.Header(key, value)}, list: []tags.ListOption{request.Header(key, value)}}
 }
 
 func TestMetadefTagsOwnedPreparationAndSource(t *testing.T) {
@@ -140,8 +141,8 @@ func TestMetadefTagsOwnedPreparationAndSource(t *testing.T) {
 			return tagWire(200, &tagBody{Reader: strings.NewReader(tagJSON)}), nil
 		})
 		s := tagScope(t, client, tagParent)
-		for _, o := range []tags.ListOption{nil, tags.WithListLimit(-1), tags.WithListMaxItems(-1), tags.WithListMarker("line\n"), tags.WithListSortKey("\xff"), tags.WithListSortDir(""), tags.WithListSortDir("ASC")} {
-			v, e := s.All(context.Background(), func(*tags.ListOpts) error { callbacks.Add(1); return nil }, o)
+		for _, o := range []tags.ListOption{nil, request.Limit(-1), request.MaxItems(-1), request.Marker("line\n"), tags.WithListSortKey("\xff"), tags.WithListSortDir(""), tags.WithListSortDir("ASC")} {
+			v, e := s.All(context.Background(), request.Custom(func(*tags.ListOpts) error { callbacks.Add(1); return nil }), o)
 			if v != nil || !errors.Is(e, resource.ErrInvalidOption) {
 				t.Fatal(v, e)
 			}
@@ -192,7 +193,7 @@ func TestMetadefTagsOwnedPreparationAndSource(t *testing.T) {
 		})
 		client.MoreHeaders = map[string]string{"X-Source": "captured"}
 		s := tagScope(t, client, tagParent)
-		v, e := s.Set(context.Background(), input, full, func(o *tags.SetOpts) error {
+		v, e := s.Set(context.Background(), input, full, request.Custom(func(o *tags.SetOpts) error {
 			callbacks.Add(1)
 			o.Headers["X-Step"] = "first"
 			borrowedHeaders = o.Headers
@@ -200,12 +201,12 @@ func TestMetadefTagsOwnedPreparationAndSource(t *testing.T) {
 			input[0] = "caller late"
 			client.MoreHeaders["X-Source"] = "future"
 			return nil
-		}, func(o *tags.SetOpts) error {
+		}), request.Custom(func(o *tags.SetOpts) error {
 			callbacks.Add(1)
 			borrowedHeaders["X-Step"] = "late"
 			*borrowedAppend = false
 			return nil
-		})
+		}))
 		if e != nil || v == nil || calls.Load() != 1 || callbacks.Load() != 2 || client.MoreHeaders["X-Source"] != "future" {
 			t.Fatal(v, e, calls.Load(), callbacks.Load())
 		}
@@ -382,13 +383,13 @@ func tagProof(t *testing.T, e error, status int, raw []byte) *resource.ResponseE
 func tagHeaders() tagOptions {
 	m := map[string]string{"X-Option": "owned"}
 	return tagOptions{
-		create:    []tags.CreateOption{tags.WithCreateHeaders(m), tags.WithCreateHeader("X-Final", "yes")},
-		get:       []tags.GetOption{tags.WithGetHeaders(m), tags.WithGetHeader("X-Final", "yes")},
-		update:    []tags.UpdateOption{tags.WithUpdateHeaders(m), tags.WithUpdateHeader("X-Final", "yes")},
-		deletion:  []tags.DeleteOption{tags.WithDeleteHeaders(m), tags.WithDeleteHeader("X-Final", "yes")},
-		deleteAll: []tags.DeleteAllOption{tags.WithDeleteAllHeaders(m), tags.WithDeleteAllHeader("X-Final", "yes")},
-		set:       []tags.SetOption{tags.WithSetHeaders(m), tags.WithSetHeader("X-Final", "yes")},
-		list:      []tags.ListOption{tags.WithListHeaders(m), tags.WithListHeader("X-Final", "yes")},
+		create:    []tags.CreateOption{tags.WithCreateHeaders(m), request.Header("X-Final", "yes")},
+		get:       []tags.GetOption{tags.WithGetHeaders(m), request.Header("X-Final", "yes")},
+		update:    []tags.UpdateOption{tags.WithUpdateHeaders(m), request.Header("X-Final", "yes")},
+		deletion:  []tags.DeleteOption{tags.WithDeleteHeaders(m), request.Header("X-Final", "yes")},
+		deleteAll: []tags.DeleteAllOption{tags.WithDeleteAllHeaders(m), request.Header("X-Final", "yes")},
+		set:       []tags.SetOption{tags.WithSetHeaders(m), request.Header("X-Final", "yes")},
+		list:      []tags.ListOption{tags.WithListHeaders(m), request.Header("X-Final", "yes")},
 	}
 }
 
@@ -1173,7 +1174,7 @@ func TestMetadefTagsListAndPagingControls(t *testing.T) {
 			})
 			s := tagScope(t, client, tagParent)
 			seen := 0
-			for v, e := range s.List(context.Background(), tags.WithListLimit(2), tags.WithListMarker("initial:?"), tags.WithListSortKey("name"), tags.WithListSortDir("asc")) {
+			for v, e := range s.List(context.Background(), request.Limit(2), request.Marker("initial:?"), tags.WithListSortKey("name"), tags.WithListSortDir("asc")) {
 				if e != nil {
 					t.Fatal(e)
 				}
@@ -1203,7 +1204,7 @@ func TestMetadefTagsListAndPagingControls(t *testing.T) {
 			}
 			return tagWire(200, &tagBody{Reader: strings.NewReader(`{"tags":[]}`)}), nil
 		})
-		v, e := tagScope(t, client, tagParent).All(context.Background(), tags.WithListMarker(""), tags.WithListSortKey(""), tags.WithListLimit(0))
+		v, e := tagScope(t, client, tagParent).All(context.Background(), request.Marker(""), tags.WithListSortKey(""), request.Limit(0))
 		if e != nil || v == nil {
 			t.Fatal(v, e)
 		}
@@ -1218,9 +1219,9 @@ func TestMetadefTagsListAndPagingControls(t *testing.T) {
 					return tagWire(200, &tagBody{Reader: strings.NewReader(raw)}), nil
 				})
 				s := tagScope(t, client, tagParent)
-				options := []tags.ListOption{tags.WithListLimit(1), tags.WithListMarker("initial")}
+				options := []tags.ListOption{request.Limit(1), request.Marker("initial")}
 				if mode == "cap" {
-					options = append(options, tags.WithListMaxItems(1))
+					options = append(options, request.MaxItems(1))
 				}
 				if mode == "break" {
 					for v, e := range s.List(context.Background(), options...) {
@@ -1261,7 +1262,7 @@ func TestMetadefTagsListAndPagingControls(t *testing.T) {
 			}
 			return tagWire(200, &tagBody{Reader: strings.NewReader(raw)}), nil
 		})
-		v, e := tagScope(t, client, tagParent).All(context.Background(), tags.WithListLimit(1))
+		v, e := tagScope(t, client, tagParent).All(context.Background(), request.Limit(1))
 		if v != nil || e == nil || calls.Load() != 2 {
 			t.Fatal(v, e, calls.Load())
 		}
@@ -1286,7 +1287,7 @@ func TestMetadefTagsListAndPagingControls(t *testing.T) {
 			} else {
 				options := []tags.ListOption{}
 				if mode == "cap" {
-					options = append(options, tags.WithListMaxItems(1))
+					options = append(options, request.MaxItems(1))
 				}
 				v, e := s.All(context.Background(), options...)
 				if mode == "cap" {
@@ -1311,7 +1312,7 @@ func TestMetadefTagsListAndPagingControls(t *testing.T) {
 				return tagWire(200, &tagBody{Reader: strings.NewReader(raw)}), nil
 			})
 			seen := 0
-			for v, e := range tagScope(t, client, tagParent).List(context.Background(), tags.WithListMaxItems(1)) {
+			for v, e := range tagScope(t, client, tagParent).List(context.Background(), request.MaxItems(1)) {
 				if e == nil || v != nil {
 					t.Fatal(v, e)
 				}
@@ -1341,7 +1342,7 @@ func TestMetadefTagsListAndPagingControls(t *testing.T) {
 			}
 			return tagWire(200, &tagBody{Reader: strings.NewReader(`{"tags":[]}`)}), nil
 		})
-		options := []tags.ListOption{full, func(o *tags.ListOpts) error { callbacks.Add(1); return nil }}
+		options := []tags.ListOption{full, request.Custom(func(o *tags.ListOpts) error { callbacks.Add(1); return nil })}
 		seq := tagScope(t, client, tagParent).List(context.Background(), options...)
 		options[0] = nil
 		options[1] = nil
@@ -1389,7 +1390,7 @@ func TestMetadefTagsListAndPagingControls(t *testing.T) {
 			s := tagScope(t, client, tagParent)
 			options := []tags.ListOption{}
 			if mode == "new headers next page" {
-				options = append(options, tags.WithListLimit(1))
+				options = append(options, request.Limit(1))
 			}
 			seen, failures := 0, 0
 			for v, e := range s.List(ctx, options...) {

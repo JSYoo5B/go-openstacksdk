@@ -11,7 +11,9 @@ import (
 	"strings"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 // ImageMemberRecordListOpts supplies explicit Go query and consumption controls.
@@ -25,7 +27,15 @@ type ImageMemberRecordListOpts struct {
 	Paginated       *bool
 	Filters         map[string]json.RawMessage
 }
-type ImageMemberRecordListOption func(*ImageMemberRecordListOpts) error
+
+// ImageMemberRecordListOption is one option of the member record lists:
+// WithImageMemberRecordListOpts, WithImageMemberRecordListHeaders (merges),
+// WithImageMemberRecordListFilter(s), request.Header (merges one header),
+// request.Limit, request.Marker, request.MaxItems, request.Paginated or
+// request.Custom over *ImageMemberRecordListOpts. Other shared calls,
+// including request.Headers and request.Query, fail with
+// resource.ErrInvalidOption before HTTP.
+type ImageMemberRecordListOption = request.ListCall
 
 // FindImageMemberRecordOpts controls owned GET-first member discovery. Nil
 // IgnoreMissing means true. Ordinary headers apply to GET and fallback pages.
@@ -33,7 +43,29 @@ type FindImageMemberRecordOpts struct {
 	Headers       map[string]string
 	IgnoreMissing *bool
 }
-type FindImageMemberRecordOption func(*FindImageMemberRecordOpts) error
+
+// FindImageMemberRecordOption is one option of FindImageMemberRecord:
+// WithFindImageMemberRecordOpts, WithFindImageMemberRecordHeaders (merges),
+// request.Header (merges one header), request.IgnoreMissing or
+// request.Custom over *FindImageMemberRecordOpts. Other shared calls fail
+// with resource.ErrInvalidOption before HTTP.
+type FindImageMemberRecordOption = request.FindCall
+
+var (
+	imageMemberRecordListCalls = calls.Spec[ImageMemberRecordListOpts]{
+		Header: calls.MergeHeader[ImageMemberRecordListOpts](WithImageMemberRecordListHeaders),
+		Paging: calls.Paging[ImageMemberRecordListOpts]{
+			Limit:     calls.Value(func(c *ImageMemberRecordListOpts) *int { return &c.Limit }),
+			Marker:    calls.Value(func(c *ImageMemberRecordListOpts) *string { return &c.Marker }),
+			MaxItems:  calls.Value(func(c *ImageMemberRecordListOpts) *int { return &c.MaxItems }),
+			Paginated: calls.Pointer(func(c *ImageMemberRecordListOpts) **bool { return &c.Paginated }),
+		},
+	}
+	findImageMemberRecordCalls = calls.Spec[FindImageMemberRecordOpts]{
+		Header:        calls.MergeHeader[FindImageMemberRecordOpts](WithFindImageMemberRecordHeaders),
+		IgnoreMissing: calls.Pointer(func(c *FindImageMemberRecordOpts) **bool { return &c.IgnoreMissing }),
+	}
+)
 
 func copyImageMemberRecordList(value ImageMemberRecordListOpts) ImageMemberRecordListOpts {
 	value.Headers = copyImageMemberOpts(ImageMemberOpts{Headers: value.Headers}).Headers
@@ -60,35 +92,19 @@ func copyFindImageMemberRecord(value FindImageMemberRecordOpts) FindImageMemberR
 // WithImageMemberRecordListOpts snapshots and replaces the entire configuration.
 func WithImageMemberRecordListOpts(value ImageMemberRecordListOpts) ImageMemberRecordListOption {
 	owned := copyImageMemberRecordList(value)
-	return func(config *ImageMemberRecordListOpts) error { *config = copyImageMemberRecordList(owned); return nil }
-}
-func WithImageMemberRecordListHeader(key, value string) ImageMemberRecordListOption {
-	apply := WithImageMutationHeader(key, value)
-	return func(config *ImageMemberRecordListOpts) error { return applyImageMemberHeader(&config.Headers, apply) }
+	return request.Custom(func(config *ImageMemberRecordListOpts) error { *config = copyImageMemberRecordList(owned); return nil })
 }
 func WithImageMemberRecordListHeaders(values map[string]string) ImageMemberRecordListOption {
-	apply := WithImageMutationHeaders(values)
-	return func(config *ImageMemberRecordListOpts) error { return applyImageMemberHeader(&config.Headers, apply) }
-}
-func WithImageMemberRecordListLimit(value int) ImageMemberRecordListOption {
-	return func(config *ImageMemberRecordListOpts) error { config.Limit = value; return nil }
-}
-func WithImageMemberRecordListMarker(value string) ImageMemberRecordListOption {
-	return func(config *ImageMemberRecordListOpts) error { config.Marker = value; return nil }
-}
-func WithImageMemberRecordListMaxItems(value int) ImageMemberRecordListOption {
-	return func(config *ImageMemberRecordListOpts) error { config.MaxItems = value; return nil }
-}
-func WithImageMemberRecordListPaginated(value bool) ImageMemberRecordListOption {
-	return func(config *ImageMemberRecordListOpts) error { owned := value; config.Paginated = &owned; return nil }
+	apply := mergeImageMutationHeaders(values)
+	return request.Custom(func(config *ImageMemberRecordListOpts) error { return applyImageMemberHeader(&config.Headers, apply) })
 }
 func WithImageMemberRecordListFilter(field string, value any) ImageMemberRecordListOption {
 	if imageMemberRecordFilterKey(field) == "" {
-		return func(*ImageMemberRecordListOpts) error { return nil }
+		return request.Custom(func(*ImageMemberRecordListOpts) error { return nil })
 	}
 	raw, encodeErr := json.Marshal(value)
 	owned := bytes.Clone(raw)
-	return func(config *ImageMemberRecordListOpts) error {
+	return request.Custom(func(config *ImageMemberRecordListOpts) error {
 		if encodeErr != nil {
 			return encodeErr
 		}
@@ -97,7 +113,7 @@ func WithImageMemberRecordListFilter(field string, value any) ImageMemberRecordL
 		}
 		config.Filters[field] = bytes.Clone(owned)
 		return nil
-	}
+	})
 }
 func WithImageMemberRecordListFilters(values map[string]any) ImageMemberRecordListOption {
 	owned := make(map[string]json.RawMessage, len(values))
@@ -110,7 +126,7 @@ func WithImageMemberRecordListFilters(values map[string]any) ImageMemberRecordLi
 		encodeErr = errors.Join(encodeErr, err)
 		owned[key] = bytes.Clone(raw)
 	}
-	return func(config *ImageMemberRecordListOpts) error {
+	return request.Custom(func(config *ImageMemberRecordListOpts) error {
 		if encodeErr != nil {
 			return encodeErr
 		}
@@ -121,31 +137,20 @@ func WithImageMemberRecordListFilters(values map[string]any) ImageMemberRecordLi
 			config.Filters[key] = bytes.Clone(raw)
 		}
 		return nil
-	}
+	})
 }
 func WithFindImageMemberRecordOpts(value FindImageMemberRecordOpts) FindImageMemberRecordOption {
 	owned := copyFindImageMemberRecord(value)
-	return func(config *FindImageMemberRecordOpts) error { *config = copyFindImageMemberRecord(owned); return nil }
-}
-func WithFindImageMemberRecordHeader(key, value string) FindImageMemberRecordOption {
-	apply := WithImageMutationHeader(key, value)
-	return func(config *FindImageMemberRecordOpts) error { return applyImageMemberHeader(&config.Headers, apply) }
+	return request.Custom(func(config *FindImageMemberRecordOpts) error { *config = copyFindImageMemberRecord(owned); return nil })
 }
 func WithFindImageMemberRecordHeaders(values map[string]string) FindImageMemberRecordOption {
-	apply := WithImageMutationHeaders(values)
-	return func(config *FindImageMemberRecordOpts) error { return applyImageMemberHeader(&config.Headers, apply) }
-}
-func WithFindImageMemberRecordIgnoreMissing(value bool) FindImageMemberRecordOption {
-	return func(config *FindImageMemberRecordOpts) error {
-		owned := value
-		config.IgnoreMissing = &owned
-		return nil
-	}
+	apply := mergeImageMutationHeaders(values)
+	return request.Custom(func(config *FindImageMemberRecordOpts) error { return applyImageMemberHeader(&config.Headers, apply) })
 }
 
 func prepareFindImageMemberRecord(ctx context.Context, check func(context.Context) error, options []FindImageMemberRecordOption) (FindImageMemberRecordOpts, error) {
 	value := copyFindImageMemberRecord(FindImageMemberRecordOpts{})
-	for _, apply := range options {
+	for _, apply := range calls.Translate(options, findImageMemberRecordCalls) {
 		if err := check(ctx); err != nil {
 			return value, err
 		}
@@ -172,7 +177,7 @@ type imageMemberRecordListParameters struct {
 
 func prepareImageMemberRecordList(ctx context.Context, check func(context.Context) error, options []ImageMemberRecordListOption) (imageMemberRecordListParameters, error) {
 	value := copyImageMemberRecordList(ImageMemberRecordListOpts{})
-	for _, apply := range options {
+	for _, apply := range calls.Translate(options, imageMemberRecordListCalls) {
 		if err := check(ctx); err != nil {
 			return imageMemberRecordListParameters{}, err
 		}

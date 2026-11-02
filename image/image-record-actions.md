@@ -14,12 +14,12 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.DeactivateImage`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMutationOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageMutationHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMutationHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.DeactivateImageRecord`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.DeactivateImageRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordActionOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordActionHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordActionHeaders`
 
 - Legacy typed strict204 profile only: DeactivateImage defaults to bodyless/query-free POST on the dedicated fixed-ID endpoint; only actual204 acknowledges the request. Direct ID causes no metadata GET/list/PATCH/discovery/wait. Missing image or tag is a strict error; there is no IgnoreMissing option or nested404 suppression.
@@ -75,12 +75,12 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.ReactivateImage`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMutationOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageMutationHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMutationHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.ReactivateImageRecord`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.ReactivateImageRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordActionOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordActionHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordActionHeaders`
 
 - Legacy typed strict204 profile only: ReactivateImage defaults to bodyless/query-free POST on the dedicated fixed-ID endpoint; only actual204 acknowledges the request. Direct ID causes no metadata GET/list/PATCH/discovery/wait. Missing image or tag is a strict error; there is no IgnoreMissing option or nested404 suppression.
@@ -204,7 +204,7 @@ func run(ctx context.Context, cloud, imageID, action string, fromRecord, viaServ
         image.WithImageRecordActionOpts(image.ImageRecordActionOpts{
             Headers: map[string]string{"X-Request-Source": "image-record-actions-example"},
         }),
-        image.WithImageRecordActionHeader("X-SDK-Example-Action", action),
+        request.Header("X-SDK-Example-Action", action),
         image.WithImageRecordActionHeaders(map[string]string{"X-SDK-Example-Mode": "owned"}),
     }
     var result *image.ImageRecordActionResult

@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -22,7 +24,17 @@ type ImageRecordQueryOpts struct {
 	ShowAll       *bool
 	Filters       *json.RawMessage
 }
-type ImageRecordQueryOption func(*ImageRecordQueryOpts) error
+
+// ImageRecordQueryOption is one option of the Cloud image record reads and
+// searches: WithImageRecordQueryOpts, WithImageRecordQueryHeaders (merges),
+// the filter options, request.Header (merges one header) or request.Custom
+// over *ImageRecordQueryOpts. Other shared calls, including request.Headers,
+// fail with resource.ErrInvalidOption before HTTP.
+type ImageRecordQueryOption = request.GetCall
+
+var imageRecordQueryCalls = calls.Spec[ImageRecordQueryOpts]{
+	Header: calls.MergeHeader[ImageRecordQueryOpts](WithImageRecordQueryHeaders),
+}
 
 func copyImageRecordQuery(value ImageRecordQueryOpts) ImageRecordQueryOpts {
 	value.Headers = copyImageRecordHeaders(value.Headers)
@@ -42,36 +54,31 @@ func copyImageRecordQuery(value ImageRecordQueryOpts) ImageRecordQueryOpts {
 }
 func WithImageRecordQueryOpts(value ImageRecordQueryOpts) ImageRecordQueryOption {
 	owned := copyImageRecordQuery(value)
-	return func(config *ImageRecordQueryOpts) error { *config = copyImageRecordQuery(owned); return nil }
-}
-func WithImageRecordQueryHeader(key, value string) ImageRecordQueryOption {
-	return func(config *ImageRecordQueryOpts) error {
-		return mergeImageRecordHeaders(&config.Headers, map[string]string{key: value})
-	}
+	return request.Custom(func(config *ImageRecordQueryOpts) error { *config = copyImageRecordQuery(owned); return nil })
 }
 func WithImageRecordQueryHeaders(values map[string]string) ImageRecordQueryOption {
 	owned := copyImageRecordHeaders(values)
-	return func(config *ImageRecordQueryOpts) error { return mergeImageRecordHeaders(&config.Headers, owned) }
+	return request.Custom(func(config *ImageRecordQueryOpts) error { return mergeImageRecordHeaders(&config.Headers, owned) })
 }
 func WithImageRecordQueryFilterDeleted(value bool) ImageRecordQueryOption {
-	return func(config *ImageRecordQueryOpts) error { owned := value; config.FilterDeleted = &owned; return nil }
+	return request.Custom(func(config *ImageRecordQueryOpts) error { owned := value; config.FilterDeleted = &owned; return nil })
 }
 func WithImageRecordQueryShowAll(value bool) ImageRecordQueryOption {
-	return func(config *ImageRecordQueryOpts) error { owned := value; config.ShowAll = &owned; return nil }
+	return request.Custom(func(config *ImageRecordQueryOpts) error { owned := value; config.ShowAll = &owned; return nil })
 }
 
 // WithImageRecordQueryFilters owns raw JSON. Nil clears the option; explicit
 // null remains present. Search preserves dictionary order and expressions.
 func WithImageRecordQueryFilters(value json.RawMessage) ImageRecordQueryOption {
 	owned := bytes.Clone(value)
-	return func(config *ImageRecordQueryOpts) error {
+	return request.Custom(func(config *ImageRecordQueryOpts) error {
 		config.Filters = nil
 		if owned != nil {
 			raw := json.RawMessage(bytes.Clone(owned))
 			config.Filters = &raw
 		}
 		return nil
-	}
+	})
 }
 func WithImageRecordQueryExpression(value string) ImageRecordQueryOption {
 	raw, _ := json.Marshal(value)
@@ -85,7 +92,7 @@ type imageRecordQueryArguments struct {
 
 func prepareImageRecordQuery(ctx context.Context, check func(context.Context) error, options []ImageRecordQueryOption, accepted imageRecordQueryArguments) (ImageRecordQueryOpts, error) {
 	value := copyImageRecordQuery(ImageRecordQueryOpts{})
-	for _, apply := range options {
+	for _, apply := range calls.Translate(options, imageRecordQueryCalls) {
 		if err := check(ctx); err != nil {
 			return value, err
 		}

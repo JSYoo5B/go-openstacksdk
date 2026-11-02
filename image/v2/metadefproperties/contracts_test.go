@@ -17,6 +17,7 @@ import (
 
 	properties "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -150,7 +151,7 @@ func propertyProof(t *testing.T, e error, status int, raw []byte) *resource.Resp
 	return proof
 }
 func propertyHeaders() propertyOptions {
-	return propertyOptions{create: []properties.CreateOption{properties.WithCreateHeaders(map[string]string{"X-Option": "owned"}), properties.WithCreateHeader("X-Final", "yes")}, get: []properties.GetOption{properties.WithGetHeaders(map[string]string{"X-Option": "owned"}), properties.WithGetHeader("X-Final", "yes")}, update: []properties.UpdateOption{properties.WithUpdateHeaders(map[string]string{"X-Option": "owned"}), properties.WithUpdateHeader("X-Final", "yes")}, deletion: []properties.DeleteOption{properties.WithDeleteHeaders(map[string]string{"X-Option": "owned"}), properties.WithDeleteHeader("X-Final", "yes")}, deleteAll: []properties.DeleteAllOption{properties.WithDeleteAllHeaders(map[string]string{"X-Option": "owned"}), properties.WithDeleteAllHeader("X-Final", "yes")}, list: []properties.ListOption{properties.WithListHeaders(map[string]string{"X-Option": "owned"}), properties.WithListHeader("X-Final", "yes")}}
+	return propertyOptions{create: []properties.CreateOption{properties.WithCreateHeaders(map[string]string{"X-Option": "owned"}), request.Header("X-Final", "yes")}, get: []properties.GetOption{properties.WithGetHeaders(map[string]string{"X-Option": "owned"}), request.Header("X-Final", "yes")}, update: []properties.UpdateOption{properties.WithUpdateHeaders(map[string]string{"X-Option": "owned"}), request.Header("X-Final", "yes")}, deletion: []properties.DeleteOption{properties.WithDeleteHeaders(map[string]string{"X-Option": "owned"}), request.Header("X-Final", "yes")}, deleteAll: []properties.DeleteAllOption{properties.WithDeleteAllHeaders(map[string]string{"X-Option": "owned"}), request.Header("X-Final", "yes")}, list: []properties.ListOption{properties.WithListHeaders(map[string]string{"X-Option": "owned"}), request.Header("X-Final", "yes")}}
 }
 
 func TestMetadefPropertiesFixedScopedRoutesAndPayloads(t *testing.T) {
@@ -415,7 +416,7 @@ func TestMetadefPropertiesCanonicalModelsAndRawOwnership(t *testing.T) {
 		wire := propertyWire(200, b)
 		client := propertyClient(func(*http.Request) (*http.Response, error) { return wire, nil })
 		scope := propertyScope(t, client, propertyParent)
-		rows, e := scope.All(context.Background(), properties.WithListMaxItems(2))
+		rows, e := scope.All(context.Background(), request.MaxItems(2))
 		if e != nil || len(rows) != 2 || *rows[0].Key != "z first" || *rows[0].Name != "passive other" || *rows[1].Key != "a second" || rows[1].Name != nil || len(rows[1].Body) != 0 {
 			t.Fatal(rows, e)
 		}
@@ -458,7 +459,7 @@ func TestMetadefPropertiesFiniteDictionaryAndLocalControls(t *testing.T) {
 				wire.Header.Set("Link", `<https://foreign.invalid/b>; rel="next"`)
 				return wire, nil
 			})
-			rows, e := propertyScope(t, client, propertyParent).All(context.Background(), properties.WithListMaxItems(cap))
+			rows, e := propertyScope(t, client, propertyParent).All(context.Background(), request.MaxItems(cap))
 			expected := 2
 			if cap == 1 {
 				expected = 1
@@ -519,7 +520,7 @@ func TestMetadefPropertiesFiniteDictionaryAndLocalControls(t *testing.T) {
 			} else {
 				opts := []properties.ListOption{}
 				if mode == "cap" {
-					opts = append(opts, properties.WithListMaxItems(1))
+					opts = append(opts, request.MaxItems(1))
 				}
 				rows, e := scope.All(context.Background(), opts...)
 				if mode == "all" {
@@ -540,7 +541,7 @@ func TestMetadefPropertiesFiniteDictionaryAndLocalControls(t *testing.T) {
 		t.Run("strict "+raw, func(t *testing.T) {
 			b := &propertyBody{Reader: strings.NewReader(raw)}
 			client := propertyClient(func(*http.Request) (*http.Response, error) { return propertyWire(200, b), nil })
-			rows, e := propertyScope(t, client, propertyParent).All(context.Background(), properties.WithListMaxItems(1))
+			rows, e := propertyScope(t, client, propertyParent).All(context.Background(), request.MaxItems(1))
 			if rows != nil || e == nil || b.closes.Load() != 1 {
 				t.Fatal(rows, e)
 			}
@@ -557,7 +558,7 @@ func TestMetadefPropertiesFiniteDictionaryAndLocalControls(t *testing.T) {
 			return propertyWire(200, &propertyBody{Reader: strings.NewReader(`{"properties":{"first":{},"unused":null}}`)}), nil
 		})
 		headers := map[string]string{"X-Snapshot": "owned"}
-		opts := []properties.ListOption{properties.WithListHeaders(headers), properties.WithListMaxItems(1), func(*properties.ListOpts) error { callbacks.Add(1); return nil }}
+		opts := []properties.ListOption{properties.WithListHeaders(headers), request.MaxItems(1), request.Custom(func(*properties.ListOpts) error { callbacks.Add(1); return nil })}
 		seq := propertyScope(t, client, propertyParent).List(context.Background(), opts...)
 		headers["X-Snapshot"] = "mutated"
 		opts[0] = nil
@@ -743,7 +744,7 @@ func TestMetadefPropertiesOwnedPreparationAndSource(t *testing.T) {
 			t.Run(op.name+" header "+header, func(t *testing.T) {
 				var calls atomic.Int32
 				client := propertyClient(func(*http.Request) (*http.Response, error) { calls.Add(1); return nil, errors.New("unexpectedHTTP") })
-				opts := propertyOptions{create: []properties.CreateOption{properties.WithCreateHeader(header, "bad")}, get: []properties.GetOption{properties.WithGetHeader(header, "bad")}, update: []properties.UpdateOption{properties.WithUpdateHeader(header, "bad")}, deletion: []properties.DeleteOption{properties.WithDeleteHeader(header, "bad")}, deleteAll: []properties.DeleteAllOption{properties.WithDeleteAllHeader(header, "bad")}, list: []properties.ListOption{properties.WithListHeader(header, "bad")}}
+				opts := propertyOptions{create: []properties.CreateOption{request.Header(header, "bad")}, get: []properties.GetOption{request.Header(header, "bad")}, update: []properties.UpdateOption{request.Header(header, "bad")}, deletion: []properties.DeleteOption{request.Header(header, "bad")}, deleteAll: []properties.DeleteAllOption{request.Header(header, "bad")}, list: []properties.ListOption{request.Header(header, "bad")}}
 				v, e := propertyCall(propertyScope(t, client, propertyParent), context.Background(), op.name, propertyName, opts)
 				if v != nil || !errors.Is(e, resource.ErrInvalidOption) || calls.Load() != 0 {
 					t.Fatal(v, e, calls.Load())
@@ -912,7 +913,7 @@ func TestMetadefPropertiesOwnedPreparationAndSource(t *testing.T) {
 	t.Run("negative local cap", func(t *testing.T) {
 		var calls atomic.Int32
 		client := propertyClient(func(*http.Request) (*http.Response, error) { calls.Add(1); return nil, errors.New("unexpectedHTTP") })
-		v, e := propertyScope(t, client, propertyParent).All(context.Background(), properties.WithListMaxItems(-1))
+		v, e := propertyScope(t, client, propertyParent).All(context.Background(), request.MaxItems(-1))
 		if v != nil || !errors.Is(e, resource.ErrInvalidOption) || calls.Load() != 0 {
 			t.Fatal(v, e, calls.Load())
 		}
@@ -930,52 +931,52 @@ func TestMetadefPropertiesOwnedPreparationAndSource(t *testing.T) {
 			var escapedIgnore *bool
 			var calls, callbacks atomic.Int32
 			opts := propertyOptions{}
-			opts.create = []properties.CreateOption{properties.WithCreateHeader("X-Dropped", "no"), properties.WithCreateOpts(properties.CreateOpts{Headers: headers, Type: &kind, Title: &title, Description: &desc, Attributes: attrs}), func(o *properties.CreateOpts) error {
+			opts.create = []properties.CreateOption{request.Header("X-Dropped", "no"), properties.WithCreateOpts(properties.CreateOpts{Headers: headers, Type: &kind, Title: &title, Description: &desc, Attributes: attrs}), request.Custom(func(o *properties.CreateOpts) error {
 				callbacks.Add(1)
 				escapedHeaders = o.Headers
 				escapedRaw = o.Attributes["future"]
 				escapedType = o.Type
 				return nil
-			}, func(*properties.CreateOpts) error {
+			}), request.Custom(func(*properties.CreateOpts) error {
 				escapedHeaders["X-Owned"] = "mutated"
 				escapedRaw[len(escapedRaw)-2] = '2'
 				*escapedType = "mutated"
 				return nil
-			}}
-			opts.update = []properties.UpdateOption{properties.WithUpdateHeader("X-Dropped", "no"), properties.WithUpdateOpts(properties.UpdateOpts{Headers: headers, Type: &kind, Title: &title, Description: &desc, Attributes: attrs}), func(o *properties.UpdateOpts) error {
+			})}
+			opts.update = []properties.UpdateOption{request.Header("X-Dropped", "no"), properties.WithUpdateOpts(properties.UpdateOpts{Headers: headers, Type: &kind, Title: &title, Description: &desc, Attributes: attrs}), request.Custom(func(o *properties.UpdateOpts) error {
 				callbacks.Add(1)
 				escapedHeaders = o.Headers
 				escapedRaw = o.Attributes["future"]
 				escapedType = o.Type
 				return nil
-			}, func(*properties.UpdateOpts) error {
+			}), request.Custom(func(*properties.UpdateOpts) error {
 				escapedHeaders["X-Owned"] = "mutated"
 				escapedRaw[len(escapedRaw)-2] = '2'
 				*escapedType = "mutated"
 				return nil
-			}}
-			opts.get = []properties.GetOption{properties.WithGetHeader("X-Dropped", "no"), properties.WithGetOpts(properties.GetOpts{Headers: headers, ResourceType: &query}), func(o *properties.GetOpts) error {
+			})}
+			opts.get = []properties.GetOption{request.Header("X-Dropped", "no"), properties.WithGetOpts(properties.GetOpts{Headers: headers, ResourceType: &query}), request.Custom(func(o *properties.GetOpts) error {
 				callbacks.Add(1)
 				escapedHeaders = o.Headers
 				escapedType = o.ResourceType
 				return nil
-			}, func(*properties.GetOpts) error {
+			}), request.Custom(func(*properties.GetOpts) error {
 				escapedHeaders["X-Owned"] = "mutated"
 				*escapedType = "mutated"
 				return nil
-			}}
-			opts.deletion = []properties.DeleteOption{properties.WithDeleteHeader("X-Dropped", "no"), properties.WithDeleteOpts(properties.DeleteOpts{Headers: headers, IgnoreMissing: &ignore}), func(o *properties.DeleteOpts) error {
+			})}
+			opts.deletion = []properties.DeleteOption{request.Header("X-Dropped", "no"), properties.WithDeleteOpts(properties.DeleteOpts{Headers: headers, IgnoreMissing: &ignore}), request.Custom(func(o *properties.DeleteOpts) error {
 				callbacks.Add(1)
 				escapedHeaders = o.Headers
 				escapedIgnore = o.IgnoreMissing
 				return nil
-			}, func(*properties.DeleteOpts) error {
+			}), request.Custom(func(*properties.DeleteOpts) error {
 				escapedHeaders["X-Owned"] = "mutated"
 				*escapedIgnore = false
 				return nil
-			}}
-			opts.deleteAll = []properties.DeleteAllOption{properties.WithDeleteAllHeader("X-Dropped", "no"), properties.WithDeleteAllOpts(properties.DeleteAllOpts{Headers: headers}), func(o *properties.DeleteAllOpts) error { callbacks.Add(1); escapedHeaders = o.Headers; return nil }, func(*properties.DeleteAllOpts) error { escapedHeaders["X-Owned"] = "mutated"; return nil }}
-			opts.list = []properties.ListOption{properties.WithListHeader("X-Dropped", "no"), properties.WithListOpts(properties.ListOpts{Headers: headers, MaxItems: 1}), func(o *properties.ListOpts) error { callbacks.Add(1); escapedHeaders = o.Headers; return nil }, func(*properties.ListOpts) error { escapedHeaders["X-Owned"] = "mutated"; return nil }}
+			})}
+			opts.deleteAll = []properties.DeleteAllOption{request.Header("X-Dropped", "no"), properties.WithDeleteAllOpts(properties.DeleteAllOpts{Headers: headers}), request.Custom(func(o *properties.DeleteAllOpts) error { callbacks.Add(1); escapedHeaders = o.Headers; return nil }), request.Custom(func(*properties.DeleteAllOpts) error { escapedHeaders["X-Owned"] = "mutated"; return nil })}
+			opts.list = []properties.ListOption{request.Header("X-Dropped", "no"), properties.WithListOpts(properties.ListOpts{Headers: headers, MaxItems: 1}), request.Custom(func(o *properties.ListOpts) error { callbacks.Add(1); escapedHeaders = o.Headers; return nil }), request.Custom(func(*properties.ListOpts) error { escapedHeaders["X-Owned"] = "mutated"; return nil })}
 			kind = "caller changed"
 			desc = "caller changed"
 			headers["X-Owned"] = "caller changed"
@@ -1057,7 +1058,7 @@ func TestMetadefPropertiesOwnedPreparationAndSource(t *testing.T) {
 		}
 		client.MoreHeaders["X-Source"] = "second"
 		client.SetToken("second")
-		v, e = scope.Get(context.Background(), propertyName, func(*properties.GetOpts) error { client.MoreHeaders["X-Source"] = "third"; return nil })
+		v, e = scope.Get(context.Background(), propertyName, request.Custom(func(*properties.GetOpts) error { client.MoreHeaders["X-Source"] = "third"; return nil }))
 		if v == nil || e != nil {
 			t.Fatal(v, e)
 		}
@@ -1069,7 +1070,7 @@ func TestMetadefPropertiesOwnedPreparationAndSource(t *testing.T) {
 	})
 }
 func propertyCallbacks(f func(), cause error) propertyOptions {
-	return propertyOptions{create: []properties.CreateOption{func(*properties.CreateOpts) error { f(); return cause }}, get: []properties.GetOption{func(*properties.GetOpts) error { f(); return cause }}, update: []properties.UpdateOption{func(*properties.UpdateOpts) error { f(); return cause }}, deletion: []properties.DeleteOption{func(*properties.DeleteOpts) error { f(); return cause }}, deleteAll: []properties.DeleteAllOption{func(*properties.DeleteAllOpts) error { f(); return cause }}, list: []properties.ListOption{func(*properties.ListOpts) error { f(); return cause }}}
+	return propertyOptions{create: []properties.CreateOption{request.Custom(func(*properties.CreateOpts) error { f(); return cause })}, get: []properties.GetOption{request.Custom(func(*properties.GetOpts) error { f(); return cause })}, update: []properties.UpdateOption{request.Custom(func(*properties.UpdateOpts) error { f(); return cause })}, deletion: []properties.DeleteOption{request.Custom(func(*properties.DeleteOpts) error { f(); return cause })}, deleteAll: []properties.DeleteAllOption{request.Custom(func(*properties.DeleteAllOpts) error { f(); return cause })}, list: []properties.ListOption{request.Custom(func(*properties.ListOpts) error { f(); return cause })}}
 }
 func TestMetadefPropertiesResponseOwnershipAndNativeHooks(t *testing.T) {
 	for _, op := range propertyOperations {
@@ -1180,7 +1181,7 @@ func TestMetadefPropertiesResponseOwnershipAndNativeHooks(t *testing.T) {
 				op = "DeleteAll"
 			}
 			if mode == "explicit true" || mode == "explicit false" {
-				opts.deletion = []properties.DeleteOption{properties.WithDeleteIgnoreMissing(mode == "explicit true")}
+				opts.deletion = []properties.DeleteOption{request.IgnoreMissing(mode == "explicit true")}
 			}
 			v, e := propertyCall(propertyScope(t, client, propertyParent), context.Background(), op, propertyName, opts)
 			if v != nil || calls.Load() != 1 || b.closes.Load() != 1 {

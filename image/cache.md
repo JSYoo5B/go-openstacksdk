@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetImageCache`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithCacheOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithCacheHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithCacheHeaders`
 
 - GetImageCache sends bodyless/query-free GET at captured base plus fixed cache, requiring original actual200 only. DirectID has only requested cache endpoint; explicit Name for per-ID calls uses unchanged native all-pages exact-name resolution, with no synthetic Ref/ID for singleton routes.
@@ -49,9 +49,9 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.CacheDeleteImage`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithCacheDeleteOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithCacheDeleteHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithCacheDeleteHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithCacheDeleteIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 
 - CacheDeleteImage sends bodyless/query-free DELETE at captured base plus fixed cache/{image_id}, requiring actual204 acknowledgement only, with separately owned404 acceptance for the narrow nil/true missing policy. DirectID has only requested cache endpoint; explicit Name for per-ID calls uses unchanged native all-pages exact-name resolution, with no synthetic Ref/ID for singleton routes.
   Tests: `image/cache_contracts_test.go:TestImageCacheFixedRoutesAndClearTargets`, `image/cache_core_test.go:TestImageCacheCoreFixedRoutesAndActualEvidence`, `connectiontest/connection_image_cache_test.go:TestConnectionImageCacheSharesClientDefaultsAndPassiveMeasurements`, `internal/cmd/sdkgen/glance_cache_test.go:TestGlanceCacheManualMethodsPreserveNativeBindingsAndDocumentDefaults`, `image/cache_contracts_test.go:TestImageCacheExactNameResolutionAndDirectIdentity`.
@@ -85,7 +85,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.QueueImage`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithCacheOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithCacheHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithCacheHeaders`
 
 - QueueImage sends bodyless/query-free PUT at captured base plus fixed cache/{image_id}, requiring original actual202 only. DirectID has only requested cache endpoint; explicit Name for per-ID calls uses unchanged native all-pages exact-name resolution, with no synthetic Ref/ID for singleton routes.
@@ -120,7 +120,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.ClearCache`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithClearCacheOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithClearCacheHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithClearCacheHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithClearCacheTarget`
 
@@ -156,7 +156,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.CachedImageNodes`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithCacheOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithCacheHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithCacheHeaders`
 
 - CachedImageNodes sends bodyless/query-free GET at captured base plus fixed cache/nodes/{image_id}, requiring original actual200 only. DirectID has only requested cache endpoint; explicit Name for per-ID calls uses unchanged native all-pages exact-name resolution, with no synthetic Ref/ID for singleton routes.
@@ -191,7 +191,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.CleanCache`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithCacheOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithCacheHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithCacheHeaders`
 
 - CleanCache sends bodyless/query-free POST at captured base plus fixed cache/clean, requiring original actual200 only. DirectID has only requested cache endpoint; explicit Name for per-ID calls uses unchanged native all-pages exact-name resolution, with no synthetic Ref/ID for singleton routes.
@@ -226,7 +226,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.PruneCache`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithCacheOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithCacheHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithCacheHeaders`
 
 - PruneCache sends bodyless/query-free POST at captured base plus fixed cache/prune, requiring original actual200 only. DirectID has only requested cache endpoint; explicit Name for per-ID calls uses unchanged native all-pages exact-name resolution, with no synthetic Ref/ID for singleton routes.
@@ -282,7 +282,7 @@ func inspectAndManageCache(ctx context.Context, service *image.Service, ref reso
         image.WithCacheOpts(image.CacheOpts{
             Headers: map[string]string{"X-Request-Source": "example"},
         }),
-        image.WithCacheHeader("X-Cache-Request", "manage"),
+        request.Header("X-Cache-Request", "manage"),
         image.WithCacheHeaders(map[string]string{"X-Cache-Trace": "sample"}),
     }
     out.State, err = service.GetImageCache(ctx, options...)
@@ -295,15 +295,15 @@ func inspectAndManageCache(ctx context.Context, service *image.Service, ref reso
         image.WithCacheDeleteOpts(image.CacheDeleteOpts{
             Headers: map[string]string{"X-Request-Source": "example"},
         }),
-        image.WithCacheDeleteHeader("X-Cache-Request", "delete"),
+        request.Header("X-Cache-Request", "delete"),
         image.WithCacheDeleteHeaders(map[string]string{"X-Cache-Trace": "sample"}),
-        image.WithCacheDeleteIgnoreMissing(false))
+        request.IgnoreMissing(false))
     if err != nil { return out, err }
     out.Cleared, err = service.ClearCache(ctx,
         image.WithClearCacheOpts(image.ClearCacheOpts{
             Headers: map[string]string{"X-Request-Source": "example"},
         }),
-        image.WithClearCacheHeader("X-Cache-Request", "clear"),
+        request.Header("X-Cache-Request", "clear"),
         image.WithClearCacheHeaders(map[string]string{"X-Cache-Trace": "sample"}),
         image.WithClearCacheTarget(target))
     if err != nil { return out, err }

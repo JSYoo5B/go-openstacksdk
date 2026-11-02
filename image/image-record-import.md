@@ -24,9 +24,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithImportStores`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithImportAllStores`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithImportAllStoresMustSucceed`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithImportHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithImportHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithImportField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithImportMethodField`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.ImportImageRecord`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.ImportImageRecord`
@@ -40,7 +40,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordImportAllStoresMustSucceed`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordImportStore`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordImportStores`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordImportHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordImportHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordImportField`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordImportFields`

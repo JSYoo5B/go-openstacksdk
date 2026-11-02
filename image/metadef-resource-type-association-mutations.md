@@ -15,13 +15,13 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.API.InNamespace`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.NamespaceScope.Create`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithCreateOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithCreateHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithCreateHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithCreatePrefix`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithCreatePropertiesTarget`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.NamespaceScope.CreateRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordCreateOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordCreateHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordCreateHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordCreateAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordCreateAttributes`
@@ -68,9 +68,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.API.InNamespace`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.NamespaceScope.Delete`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithDeleteOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithDeleteHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithDeleteHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithDeleteIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.NamespaceScope.DeleteRecord`
 
 - InNamespace is zeroHTTP; required safe literal namespace, original API/client/provider/type/endpoint/ServiceURL/microversion captured for scope lifetime without retained context or parentGET/lookup/Ref. Selected child is nonempty UTF8<=80runes with route-breaking/control/dot rejection and exact-once path escape, no trim/UUID/nameFind. Latest valid ordinary source headers copied per request and original provider auth remains live, guards before callbacks/request/accepted body/each consumedrow.

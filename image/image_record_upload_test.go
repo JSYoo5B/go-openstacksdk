@@ -16,6 +16,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -240,9 +241,9 @@ func TestImageRecordUploadRejectsFixedControlsAndInvalidConstructorBeforeHTTP(t 
 		{"invalid raw JSON", map[string]any{"vendor": json.RawMessage(`{`)}, nil},
 		{"unsupported value", map[string]any{"vendor": make(chan int)}, nil},
 		{"invalid UTF8", map[string]any{"vendor": string([]byte{0xff})}, nil},
-		{"Content-Type owned", nil, WithImageRecordUploadHeader("Content-Type", "spoof")},
-		{"Accept owned", nil, WithImageRecordUploadHeader("Accept", "spoof")},
-		{"Size header owned", nil, WithImageRecordUploadHeader("X-OpenStack-Image-Size", "spoof")},
+		{"Content-Type owned", nil, request.Header("Content-Type", "spoof")},
+		{"Accept owned", nil, request.Header("Accept", "spoof")},
+		{"Size header owned", nil, request.Header("X-OpenStack-Image-Size", "spoof")},
 	}
 	for _, key := range []string{"base_path", "resource_type", "self", "connection", "_synchronized", "microversion"} {
 		cases = append(cases, struct {
@@ -630,11 +631,11 @@ func TestImageRecordUploadCapturesAttributesOptionsLocationAndHeadersOnce(t *tes
 	requestAttrs := map[string]any{"name": "request", "request_only": true}
 	reader := &imageUploadCoreReader{reader: strings.NewReader("captured data")}
 	var retained *ImageRecordUploadOpts
-	options := []ImageRecordUploadOption{base, func(config *ImageRecordUploadOpts) error {
+	options := []ImageRecordUploadOption{base, request.Custom(func(config *ImageRecordUploadOpts) error {
 		callbacks++
 		retained = config
-		return WithImageRecordUploadHeader("X-Added", "yes")(config)
-	}}
+		return applyCall(imageRecordUploadCalls, request.Header("X-Added", "yes"), config)
+	})}
 	var client *gophercloud.ServiceClient
 	client = taskCoreClient(func(req *http.Request) (*http.Response, error) {
 		calls++
@@ -658,7 +659,7 @@ func TestImageRecordUploadCapturesAttributesOptionsLocationAndHeadersOnce(t *tes
 	service := NewWithDependencies(client, Dependencies{CloudLocation: func() (resource.CloudLocation, error) {
 		locations++
 		requestAttrs["request_only"] = false
-		options[1] = func(*ImageRecordUploadOpts) error { t.Fatal("uncaptured option slice"); return nil }
+		options[1] = request.Custom(func(*ImageRecordUploadOpts) error { t.Fatal("uncaptured option slice"); return nil })
 		client.MoreHeaders["X-Source"] = "later source"
 		client.SetToken("live token")
 		return resource.CloudLocation{Cloud: &cloud}, nil
@@ -713,13 +714,13 @@ func TestImageRecordUploadOptionMergeReplacementAndStickyCallbackGuards(t *testi
 				return taskCoreJSON(req, 204, ""), nil
 			})
 			service := New(client)
-			options := append(imageRecordUploadFormats(), WithImageRecordUploadAttribute("discarded", "old"), WithImageRecordUploadHeader("X-Discarded", "old"))
+			options := append(imageRecordUploadFormats(), WithImageRecordUploadAttribute("discarded", "old"), request.Header("X-Discarded", "old"))
 			if mode == "bulk merge" {
 				options = append(options, WithImageRecordUploadAttributes(map[string]any{"final": "new"}), WithImageRecordUploadHeaders(map[string]string{"X-Final": "new"}))
 			} else if mode == "full replace" {
 				options = append(options, WithImageRecordUploadOpts(ImageRecordUploadOpts{ContainerFormat: json.RawMessage(`"bare"`), DiskFormat: json.RawMessage(`"qcow2"`), Attributes: map[string]any{"final": "new"}, Headers: map[string]string{"X-Final": "new"}}))
 			} else {
-				options = append(options, func(*ImageRecordUploadOpts) error {
+				options = append(options, request.Custom(func(*ImageRecordUploadOpts) error {
 					callbacks++
 					switch mode {
 					case "cancel":
@@ -734,7 +735,7 @@ func TestImageRecordUploadOptionMergeReplacementAndStickyCallbackGuards(t *testi
 						return marker
 					}
 					return nil
-				}, func(*ImageRecordUploadOpts) error { later++; return nil })
+				}), request.Custom(func(*ImageRecordUploadOpts) error { later++; return nil }))
 			}
 			got, err := service.UploadImageRecord(ctx, ImageRecordUploadRequest{Attributes: map[string]any{"request": true}}, options...)
 			if mode == "bulk merge" || mode == "full replace" {
@@ -770,18 +771,18 @@ func TestImageRecordUploadOptionMergeReplacementAndStickyCallbackGuards(t *testi
 				}
 				return []byte(`"captured"`), nil
 			})
-			request := ImageRecordUploadRequest{}
+			input := ImageRecordUploadRequest{}
 			options := imageRecordUploadFormats()
 			if strings.HasPrefix(mode, "request") {
-				request.Attributes = map[string]any{"vendor": value}
+				input.Attributes = map[string]any{"vendor": value}
 			} else {
-				options = append(options, func(config *ImageRecordUploadOpts) error {
+				options = append(options, request.Custom(func(config *ImageRecordUploadOpts) error {
 					config.Attributes = map[string]any{"vendor": value}
 					return nil
-				})
+				}))
 			}
-			options = append(options, func(*ImageRecordUploadOpts) error { later++; return nil })
-			got, err := New(client).UploadImageRecord(ctx, request, options...)
+			options = append(options, request.Custom(func(*ImageRecordUploadOpts) error { later++; return nil }))
+			got, err := New(client).UploadImageRecord(ctx, input, options...)
 			if got != nil || err == nil || calls != 0 || later != 0 {
 				t.Fatal(got, err, calls, later)
 			}

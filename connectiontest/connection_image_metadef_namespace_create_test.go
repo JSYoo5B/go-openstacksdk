@@ -15,6 +15,7 @@ import (
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	ns "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -99,7 +100,7 @@ func TestConnectionImageMetadefNamespaceNestedCreateSharesClientAndOwnsInput(t *
 		ns.WithCreateObjects([]ns.ObjectDefinition{{Name: "../object%", Description: &empty, Properties: map[string]ns.PropertyDefinition{}, Required: []string{"/key%\n", "/key%\n"}}}),
 		ns.WithCreateTags([]ns.TagDefinition{{Name: ""}, {Name: "/tag%\n"}, {Name: "/tag%\n"}}),
 		ns.WithCreateResourceTypeAssociations([]ns.ResourceTypeAssociationDefinition{{Name: "OS::Long/Type%", Prefix: &empty, PropertiesTarget: &target}}),
-		func(config *ns.CreateOpts) error { callbacks++; return nil })
+		request.Custom(func(config *ns.CreateOpts) error { callbacks++; return nil }))
 	if err != nil || value == nil || value.Namespace == nil || *value.Namespace != "server-other" || value.StatusCode != 201 || callbacks != 1 || string(value.Body["properties"]) != `{"server":{"precision":9007199254740993}}` {
 		t.Fatalf("unseeded response=%+v callbacks=%d err=%v", value, callbacks, err)
 	}

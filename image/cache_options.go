@@ -1,10 +1,20 @@
 package image
 
-import "maps"
+import (
+	"maps"
+
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
+	"github.com/JSYoo5B/go-openstacksdk/request"
+)
 
 // CacheOpts supplies ordinary headers for cache reads, queueing and maintenance.
 type CacheOpts struct{ Headers map[string]string }
-type CacheOption func(*CacheOpts) error
+
+// CacheOption is one option of the cache reads, queueing and maintenance
+// operations: WithCacheOpts, WithCacheHeaders (merges), request.Header (merges
+// one header) or request.Custom over *CacheOpts. Other shared calls, including
+// request.Headers, fail with resource.ErrInvalidOption before HTTP.
+type CacheOption = request.GetCall
 
 // CacheDeleteOpts controls deletion of one cached or queued image. A nil
 // IgnoreMissing uses the default true; name lookup errors are always returned.
@@ -12,7 +22,13 @@ type CacheDeleteOpts struct {
 	Headers       map[string]string
 	IgnoreMissing *bool
 }
-type CacheDeleteOption func(*CacheDeleteOpts) error
+
+// CacheDeleteOption is one option of the cached and queued image deletions:
+// WithCacheDeleteOpts, WithCacheDeleteHeaders (merges), request.Header (merges
+// one header), request.IgnoreMissing or request.Custom over *CacheDeleteOpts.
+// Other shared calls, including request.Headers, fail with
+// resource.ErrInvalidOption before HTTP.
+type CacheDeleteOption = request.DeleteCall
 
 // CacheTarget selects the part of the cache cleared by ClearCache.
 type CacheTarget uint8
@@ -28,70 +44,61 @@ type ClearCacheOpts struct {
 	Headers map[string]string
 	Target  CacheTarget
 }
-type ClearCacheOption func(*ClearCacheOpts) error
+
+// ClearCacheOption is one option of ClearCache: WithClearCacheOpts,
+// WithClearCacheHeaders (merges), WithClearCacheTarget, request.Header (merges
+// one header) or request.Custom over *ClearCacheOpts. Other shared calls,
+// including request.Headers and request.IgnoreMissing, fail with
+// resource.ErrInvalidOption before HTTP.
+type ClearCacheOption = request.DeleteCall
+
+var (
+	cacheCalls       = calls.Spec[CacheOpts]{Header: calls.MergeHeader[CacheOpts](WithCacheHeaders)}
+	cacheDeleteCalls = calls.Spec[CacheDeleteOpts]{
+		Header:        calls.MergeHeader[CacheDeleteOpts](WithCacheDeleteHeaders),
+		IgnoreMissing: calls.Pointer(func(c *CacheDeleteOpts) **bool { return &c.IgnoreMissing }),
+	}
+	clearCacheCalls = calls.Spec[ClearCacheOpts]{Header: calls.MergeHeader[ClearCacheOpts](WithClearCacheHeaders)}
+)
 
 func WithCacheOpts(value CacheOpts) CacheOption {
 	snapshot := copyCacheOpts(value)
-	return func(config *CacheOpts) error { *config = copyCacheOpts(snapshot); return nil }
-}
-func WithCacheHeader(key, value string) CacheOption {
-	return cacheHeaderOption(WithImageMutationHeader(key, value))
+	return request.Custom(func(config *CacheOpts) error { *config = copyCacheOpts(snapshot); return nil })
 }
 func WithCacheHeaders(values map[string]string) CacheOption {
-	return cacheHeaderOption(WithImageMutationHeaders(values))
+	return request.Custom(cacheHeaderOption(mergeImageMutationHeaders(values)))
 }
 func WithCacheDeleteOpts(value CacheDeleteOpts) CacheDeleteOption {
 	snapshot := copyCacheDeleteOpts(value)
-	return func(config *CacheDeleteOpts) error { *config = copyCacheDeleteOpts(snapshot); return nil }
-}
-func WithCacheDeleteHeader(key, value string) CacheDeleteOption {
-	apply := WithCacheHeader(key, value)
-	return func(config *CacheDeleteOpts) error {
-		value := CacheOpts{Headers: config.Headers}
-		err := apply(&value)
-		config.Headers = value.Headers
-		return err
-	}
+	return request.Custom(func(config *CacheDeleteOpts) error { *config = copyCacheDeleteOpts(snapshot); return nil })
 }
 func WithCacheDeleteHeaders(values map[string]string) CacheDeleteOption {
-	apply := WithCacheHeaders(values)
-	return func(config *CacheDeleteOpts) error {
+	apply := cacheHeaderOption(mergeImageMutationHeaders(values))
+	return request.Custom(func(config *CacheDeleteOpts) error {
 		value := CacheOpts{Headers: config.Headers}
 		err := apply(&value)
 		config.Headers = value.Headers
 		return err
-	}
-}
-func WithCacheDeleteIgnoreMissing(value bool) CacheDeleteOption {
-	return func(config *CacheDeleteOpts) error { snapshot := value; config.IgnoreMissing = &snapshot; return nil }
+	})
 }
 func WithClearCacheOpts(value ClearCacheOpts) ClearCacheOption {
 	snapshot := copyClearCacheOpts(value)
-	return func(config *ClearCacheOpts) error { *config = copyClearCacheOpts(snapshot); return nil }
-}
-func WithClearCacheHeader(key, value string) ClearCacheOption {
-	apply := WithCacheHeader(key, value)
-	return func(config *ClearCacheOpts) error {
-		value := CacheOpts{Headers: config.Headers}
-		err := apply(&value)
-		config.Headers = value.Headers
-		return err
-	}
+	return request.Custom(func(config *ClearCacheOpts) error { *config = copyClearCacheOpts(snapshot); return nil })
 }
 func WithClearCacheHeaders(values map[string]string) ClearCacheOption {
-	apply := WithCacheHeaders(values)
-	return func(config *ClearCacheOpts) error {
+	apply := cacheHeaderOption(mergeImageMutationHeaders(values))
+	return request.Custom(func(config *ClearCacheOpts) error {
 		value := CacheOpts{Headers: config.Headers}
 		err := apply(&value)
 		config.Headers = value.Headers
 		return err
-	}
+	})
 }
 func WithClearCacheTarget(value CacheTarget) ClearCacheOption {
-	return func(config *ClearCacheOpts) error { config.Target = value; return nil }
+	return request.Custom(func(config *ClearCacheOpts) error { config.Target = value; return nil })
 }
 
-func cacheHeaderOption(apply ImageMutationOption) CacheOption {
+func cacheHeaderOption(apply func(*ImageMutationOpts) error) func(*CacheOpts) error {
 	return func(config *CacheOpts) error {
 		value := ImageMutationOpts{Headers: config.Headers}
 		err := apply(&value)
@@ -125,7 +132,7 @@ func copyClearCacheOpts(value ClearCacheOpts) ClearCacheOpts {
 }
 func parseCacheOptions(options []CacheOption) (CacheOpts, error) {
 	config := copyCacheOpts(CacheOpts{})
-	for _, apply := range options {
+	for _, apply := range calls.Translate(options, cacheCalls) {
 		if apply == nil {
 			return config, uploadInvalid("nil cache option")
 		}
@@ -141,7 +148,7 @@ func parseCacheOptions(options []CacheOption) (CacheOpts, error) {
 }
 func parseCacheDeleteOptions(options []CacheDeleteOption) (CacheDeleteOpts, error) {
 	config := copyCacheDeleteOpts(CacheDeleteOpts{})
-	for _, apply := range options {
+	for _, apply := range calls.Translate(options, cacheDeleteCalls) {
 		if apply == nil {
 			return config, uploadInvalid("nil cache delete option")
 		}
@@ -157,7 +164,7 @@ func parseCacheDeleteOptions(options []CacheDeleteOption) (CacheDeleteOpts, erro
 }
 func parseClearCacheOptions(options []ClearCacheOption) (ClearCacheOpts, error) {
 	config := copyClearCacheOpts(ClearCacheOpts{})
-	for _, apply := range options {
+	for _, apply := range calls.Translate(options, clearCacheCalls) {
 		if apply == nil {
 			return config, uploadInvalid("nil clear cache option")
 		}

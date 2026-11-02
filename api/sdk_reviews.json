@@ -12687,9 +12687,9 @@
         "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery",
         "github.com/JSYoo5B/go-openstacksdk/image.Service.FindImageRecord",
         "github.com/JSYoo5B/go-openstacksdk/image.WithFindImageRecordOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithFindImageRecordHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image.WithFindImageRecordHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithFindImageRecordIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing",
         "github.com/JSYoo5B/go-openstacksdk/image.WithFindImageRecordListOptions"
       ],
       "contracts": [
@@ -20560,7 +20560,7 @@
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitFailureStates",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitAttribute",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitCallback",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitHeaders"
       ],
       "contracts": [
@@ -20719,7 +20719,7 @@
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitFailureStates",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitAttribute",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitCallback",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitHeaders"
       ],
       "contracts": [
@@ -20879,7 +20879,7 @@
         "github.com/JSYoo5B/go-openstacksdk/image/v2/tasks.WithUnlimitedTaskWait",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/tasks.WithTaskWaitPollInterval",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/tasks.WithTaskWaitFailureStates",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/tasks.WithTaskWaitHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/tasks.WithTaskWaitHeaders"
       ],
       "contracts": [
@@ -21009,9 +21009,9 @@
         "github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithImportStores",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithImportAllStores",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithImportAllStoresMustSucceed",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithImportHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithImportHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithImportField",
+        "github.com/JSYoo5B/go-openstacksdk/request.Field",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithImportMethodField",
         "github.com/JSYoo5B/go-openstacksdk/image.Service.ImportImageRecord",
         "github.com/JSYoo5B/go-openstacksdk.Connection.ImportImageRecord",
@@ -21025,7 +21025,6 @@
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordImportAllStoresMustSucceed",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordImportStore",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordImportStores",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordImportHeader",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordImportHeaders",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordImportField",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordImportFields",
@@ -21286,12 +21285,11 @@
         "github.com/JSYoo5B/go-openstacksdk/image/v2/imagedata.API.StageKnownImage",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/imagedata.WithStageOpts",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/imagedata.WithStageSize",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/imagedata.WithStageHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/imagedata.WithStageHeaders",
         "github.com/JSYoo5B/go-openstacksdk/image.Service.StageImageRecord",
         "github.com/JSYoo5B/go-openstacksdk.Connection.StageImageRecord",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordStageOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordStageHeader",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordStageHeaders",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordStageSize",
         "github.com/JSYoo5B/go-openstacksdk/image.WithoutImageRecordStageSize",
@@ -21576,7 +21574,7 @@
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCreateAttribute",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCreateAttributes",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCreateImportOptions",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCreateHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCreateHeaders",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCreateSwiftHeader",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCreateSwiftHeaders",
@@ -22025,7 +22023,7 @@
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordDownloadStorePreferences",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordDownloadChecksumVerification",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordDownloadHashFactory",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordDownloadHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordDownloadHeaders"
       ],
       "contracts": [
@@ -22379,15 +22377,14 @@
         "github.com/JSYoo5B/go-openstacksdk/image.Service.DeleteImage",
         "github.com/JSYoo5B/go-openstacksdk/image.WithDeleteImageOpts",
         "github.com/JSYoo5B/go-openstacksdk/image.WithDeleteImageStore",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithDeleteImageIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing",
         "github.com/JSYoo5B/go-openstacksdk/image.Service.DeleteImageRecord",
         "github.com/JSYoo5B/go-openstacksdk.Connection.DeleteImageRecord",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordDeleteOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordDeleteHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordDeleteHeaders",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordDeleteStoreID",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordDeleteStoreRecord",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordDeleteIgnoreMissing"
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordDeleteStoreRecord"
       ],
       "contracts": [
         {
@@ -22561,20 +22558,17 @@
         "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.API.AllStores",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithListStoresOptions",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithListStoresDetails",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithListStoresMaxItems",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithListStoresPaginated",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithListStoresQuery",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithListStoresHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.MaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/request.Paginated",
+        "github.com/JSYoo5B/go-openstacksdk/request.Query",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.NewWithDependencies",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.API.ListStoreRecords",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.API.AllStoreRecords",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithStoreRecordListOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithStoreRecordListHeader",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithStoreRecordListHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithStoreRecordListLimit",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithStoreRecordListMarker",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithStoreRecordListMaxItems",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithStoreRecordListPaginated",
+        "github.com/JSYoo5B/go-openstacksdk/request.Limit",
+        "github.com/JSYoo5B/go-openstacksdk/request.Marker",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithStoreRecordListFilter",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithStoreRecordListFilters",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithStoreRecordListDetails"
@@ -22737,11 +22731,10 @@
         "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.New",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.API.RawClient",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.API.GetImportInfo",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithGetImportInfoHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.NewWithDependencies",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.API.GetImportInfoRecord",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithImportRecordOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithImportRecordHeader",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithImportRecordHeaders"
       ],
       "contracts": [
@@ -22863,7 +22856,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.AddTag",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageMutationOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithImageMutationHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageMutationHeaders",
         "github.com/JSYoo5B/go-openstacksdk/image.Service.AddImageRecordTag"
       ],
@@ -23043,7 +23036,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.RemoveTag",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageMutationOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithImageMutationHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageMutationHeaders",
         "github.com/JSYoo5B/go-openstacksdk/image.Service.RemoveImageRecordTag"
       ],
@@ -23223,12 +23216,11 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.DeactivateImage",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageMutationOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithImageMutationHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageMutationHeaders",
         "github.com/JSYoo5B/go-openstacksdk/image.Service.DeactivateImageRecord",
         "github.com/JSYoo5B/go-openstacksdk.Connection.DeactivateImageRecord",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordActionOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordActionHeader",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordActionHeaders"
       ],
       "contracts": [
@@ -23410,12 +23402,11 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.ReactivateImage",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageMutationOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithImageMutationHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageMutationHeaders",
         "github.com/JSYoo5B/go-openstacksdk/image.Service.ReactivateImageRecord",
         "github.com/JSYoo5B/go-openstacksdk.Connection.ReactivateImageRecord",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordActionOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordActionHeader",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordActionHeaders"
       ],
       "contracts": [
@@ -23598,7 +23589,7 @@
         "github.com/JSYoo5B/go-openstacksdk/image.Service.AddImageLocation",
         "github.com/JSYoo5B/go-openstacksdk/image.WithAddImageLocationOpts",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageLocationValidation",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithAddImageLocationHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image.WithAddImageLocationHeaders"
       ],
       "contracts": [
@@ -23710,7 +23701,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.GetImageLocations",
         "github.com/JSYoo5B/go-openstacksdk/image.WithGetImageLocationsOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithGetImageLocationsHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image.WithGetImageLocationsHeaders"
       ],
       "contracts": [
@@ -23826,7 +23817,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.GetImagesSchema",
         "github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeaders"
       ],
       "contracts": [
@@ -23913,7 +23904,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.GetImageSchema",
         "github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeaders"
       ],
       "contracts": [
@@ -24000,7 +23991,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.GetMembersSchema",
         "github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeaders"
       ],
       "contracts": [
@@ -24087,7 +24078,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.GetMemberSchema",
         "github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeaders"
       ],
       "contracts": [
@@ -24174,7 +24165,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.GetTasksSchema",
         "github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeaders",
         "github.com/JSYoo5B/go-openstacksdk/image.Service.GetSchemaRecord",
         "github.com/JSYoo5B/go-openstacksdk/image.NewWithDependencies"
@@ -24283,7 +24274,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.GetTaskSchema",
         "github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeaders",
         "github.com/JSYoo5B/go-openstacksdk/image.Service.GetSchemaRecord",
         "github.com/JSYoo5B/go-openstacksdk/image.NewWithDependencies"
@@ -24392,7 +24383,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.GetMetadefNamespaceSchema",
         "github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeaders",
         "github.com/JSYoo5B/go-openstacksdk/image.Service.GetSchemaRecord",
         "github.com/JSYoo5B/go-openstacksdk/image.NewWithDependencies"
@@ -24501,7 +24492,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.GetMetadefNamespacesSchema",
         "github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeaders",
         "github.com/JSYoo5B/go-openstacksdk/image.Service.GetSchemaRecord",
         "github.com/JSYoo5B/go-openstacksdk/image.NewWithDependencies"
@@ -24610,7 +24601,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.GetMetadefResourceTypeSchema",
         "github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeaders",
         "github.com/JSYoo5B/go-openstacksdk/image.Service.GetSchemaRecord",
         "github.com/JSYoo5B/go-openstacksdk/image.NewWithDependencies"
@@ -24719,7 +24710,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.GetMetadefResourceTypesSchema",
         "github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeaders",
         "github.com/JSYoo5B/go-openstacksdk/image.Service.GetSchemaRecord",
         "github.com/JSYoo5B/go-openstacksdk/image.NewWithDependencies"
@@ -24828,7 +24819,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.GetMetadefObjectSchema",
         "github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeaders",
         "github.com/JSYoo5B/go-openstacksdk/image.Service.GetSchemaRecord",
         "github.com/JSYoo5B/go-openstacksdk/image.NewWithDependencies"
@@ -24937,7 +24928,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.GetMetadefObjectsSchema",
         "github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeaders",
         "github.com/JSYoo5B/go-openstacksdk/image.Service.GetSchemaRecord",
         "github.com/JSYoo5B/go-openstacksdk/image.NewWithDependencies"
@@ -25046,7 +25037,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.GetMetadefPropertySchema",
         "github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeaders",
         "github.com/JSYoo5B/go-openstacksdk/image.Service.GetSchemaRecord",
         "github.com/JSYoo5B/go-openstacksdk/image.NewWithDependencies"
@@ -25155,7 +25146,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.GetMetadefPropertiesSchema",
         "github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeaders",
         "github.com/JSYoo5B/go-openstacksdk/image.Service.GetSchemaRecord",
         "github.com/JSYoo5B/go-openstacksdk/image.NewWithDependencies"
@@ -25264,7 +25255,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.GetMetadefTagSchema",
         "github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeaders",
         "github.com/JSYoo5B/go-openstacksdk/image.Service.GetSchemaRecord",
         "github.com/JSYoo5B/go-openstacksdk/image.NewWithDependencies"
@@ -25373,7 +25364,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.GetMetadefTagsSchema",
         "github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeaders",
         "github.com/JSYoo5B/go-openstacksdk/image.Service.GetSchemaRecord",
         "github.com/JSYoo5B/go-openstacksdk/image.NewWithDependencies"
@@ -25482,7 +25473,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.GetImageCache",
         "github.com/JSYoo5B/go-openstacksdk/image.WithCacheOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithCacheHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image.WithCacheHeaders"
       ],
       "contracts": [
@@ -25571,9 +25562,9 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.CacheDeleteImage",
         "github.com/JSYoo5B/go-openstacksdk/image.WithCacheDeleteOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithCacheDeleteHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image.WithCacheDeleteHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithCacheDeleteIgnoreMissing"
+        "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing"
       ],
       "contracts": [
         {
@@ -25659,7 +25650,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.QueueImage",
         "github.com/JSYoo5B/go-openstacksdk/image.WithCacheOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithCacheHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image.WithCacheHeaders"
       ],
       "contracts": [
@@ -25746,7 +25737,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.ClearCache",
         "github.com/JSYoo5B/go-openstacksdk/image.WithClearCacheOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithClearCacheHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image.WithClearCacheHeaders",
         "github.com/JSYoo5B/go-openstacksdk/image.WithClearCacheTarget"
       ],
@@ -25833,7 +25824,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.CachedImageNodes",
         "github.com/JSYoo5B/go-openstacksdk/image.WithCacheOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithCacheHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image.WithCacheHeaders"
       ],
       "contracts": [
@@ -25923,7 +25914,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.CleanCache",
         "github.com/JSYoo5B/go-openstacksdk/image.WithCacheOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithCacheHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image.WithCacheHeaders"
       ],
       "contracts": [
@@ -26009,7 +26000,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.PruneCache",
         "github.com/JSYoo5B/go-openstacksdk/image.WithCacheOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithCacheHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image.WithCacheHeaders"
       ],
       "contracts": [
@@ -26098,12 +26089,11 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.AddImageMember",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberHeaders",
         "github.com/JSYoo5B/go-openstacksdk/image.Service.AddImageMemberRecord",
         "github.com/JSYoo5B/go-openstacksdk.Connection.AddImageMemberRecord",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordWriteOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordWriteHeader",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordWriteHeaders",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordWriteAttribute",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordWriteAttributes",
@@ -26249,7 +26239,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.GetImageMember",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberHeaders",
         "github.com/JSYoo5B/go-openstacksdk/image.Service.GetImageMemberRecord",
         "github.com/JSYoo5B/go-openstacksdk.Connection.GetImageMemberRecord"
@@ -26388,12 +26378,11 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.UpdateImageMember",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberHeaders",
         "github.com/JSYoo5B/go-openstacksdk/image.Service.UpdateImageMemberRecord",
         "github.com/JSYoo5B/go-openstacksdk.Connection.UpdateImageMemberRecord",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordWriteOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordWriteHeader",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordWriteHeaders",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordWriteAttribute",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordWriteAttributes",
@@ -26546,9 +26535,9 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.RemoveImageMember",
         "github.com/JSYoo5B/go-openstacksdk/image.WithRemoveImageMemberOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithRemoveImageMemberHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image.WithRemoveImageMemberHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithRemoveImageMemberIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing",
         "github.com/JSYoo5B/go-openstacksdk/image.Service.RemoveImageMemberRecord",
         "github.com/JSYoo5B/go-openstacksdk.Connection.RemoveImageMemberRecord"
       ],
@@ -26676,14 +26665,12 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.FindImageMember",
         "github.com/JSYoo5B/go-openstacksdk/image.WithFindImageMemberOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithFindImageMemberHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image.WithFindImageMemberHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithFindImageMemberIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing",
         "github.com/JSYoo5B/go-openstacksdk/image.Service.FindImageMemberRecord",
         "github.com/JSYoo5B/go-openstacksdk/image.WithFindImageMemberRecordOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithFindImageMemberRecordHeader",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithFindImageMemberRecordHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithFindImageMemberRecordIgnoreMissing"
+        "github.com/JSYoo5B/go-openstacksdk/image.WithFindImageMemberRecordHeaders"
       ],
       "contracts": [
         {
@@ -26807,19 +26794,17 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.ListImageMembers",
         "github.com/JSYoo5B/go-openstacksdk/image.WithListImageMembersOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithListImageMembersHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image.WithListImageMembersHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithListImageMembersMaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/request.MaxItems",
         "github.com/JSYoo5B/go-openstacksdk/image.Service.AllImageMembers",
         "github.com/JSYoo5B/go-openstacksdk/image.Service.ListImageMemberRecords",
         "github.com/JSYoo5B/go-openstacksdk/image.Service.AllImageMemberRecords",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordListOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordListHeader",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordListHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordListLimit",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordListMarker",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordListMaxItems",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordListPaginated",
+        "github.com/JSYoo5B/go-openstacksdk/request.Limit",
+        "github.com/JSYoo5B/go-openstacksdk/request.Marker",
+        "github.com/JSYoo5B/go-openstacksdk/request.Paginated",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordListFilter",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordListFilters"
       ],
@@ -26950,7 +26935,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.API.Create",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithCreateOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithCreateHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithCreateHeaders",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithCreateDisplayName",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithCreateDescription",
@@ -27052,9 +27037,9 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.API.Delete",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithDeleteOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithDeleteHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithDeleteHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithDeleteIgnoreMissing"
+        "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing"
       ],
       "contracts": [
         {
@@ -27148,7 +27133,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.API.Get",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithGetOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithGetHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithGetHeaders",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithGetResourceType"
       ],
@@ -27239,15 +27224,15 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithListOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithListHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithListHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithListLimit",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithListMarker",
+        "github.com/JSYoo5B/go-openstacksdk/request.Limit",
+        "github.com/JSYoo5B/go-openstacksdk/request.Marker",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithListVisibility",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithListSortKey",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithListSortDir",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithListResourceTypes",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithListMaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/request.MaxItems",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithListSinglePage",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.API.List",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.API.All",
@@ -27255,12 +27240,8 @@
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.API.AllRecords",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.NewWithDependencies",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithRecordListOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithRecordListHeader",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithRecordListHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithRecordListLimit",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithRecordListMarker",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithRecordListMaxItems",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithRecordListPaginated",
+        "github.com/JSYoo5B/go-openstacksdk/request.Paginated",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithRecordListFilter",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithRecordListFilters",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithRecordListVisibility",
@@ -27421,7 +27402,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.API.Update",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithUpdateOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithUpdateHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithUpdateHeaders",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithUpdateNamespace",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithUpdateDisplayName",
@@ -27523,7 +27504,7 @@
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.API.InNamespace",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.NamespaceScope.Create",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithCreateOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithCreateHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithCreateHeaders",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithCreateDescription",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithCreateProperties",
@@ -27614,7 +27595,7 @@
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.API.InNamespace",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.NamespaceScope.Get",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithGetOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithGetHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithGetHeaders"
       ],
       "contracts": [
@@ -27698,19 +27679,17 @@
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.NamespaceScope.List",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.NamespaceScope.All",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithListOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithListHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithListHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithListMaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/request.MaxItems",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.NamespaceScope.ListRecords",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.NamespaceScope.AllRecords",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.NewWithDependencies",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithRecordListOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithRecordListHeader",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithRecordListHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithRecordListLimit",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithRecordListMarker",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithRecordListMaxItems",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithRecordListPaginated",
+        "github.com/JSYoo5B/go-openstacksdk/request.Limit",
+        "github.com/JSYoo5B/go-openstacksdk/request.Marker",
+        "github.com/JSYoo5B/go-openstacksdk/request.Paginated",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithRecordListFilter",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithRecordListFilters",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithRecordListVisibility",
@@ -27852,7 +27831,7 @@
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.API.InNamespace",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.NamespaceScope.Update",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithUpdateOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithUpdateHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithUpdateHeaders",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithUpdateName",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithUpdateDescription",
@@ -27946,9 +27925,9 @@
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.API.InNamespace",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.NamespaceScope.Delete",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithDeleteOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithDeleteHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithDeleteHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithDeleteIgnoreMissing"
+        "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing"
       ],
       "contracts": [
         {
@@ -28032,7 +28011,7 @@
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.API.InNamespace",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.NamespaceScope.DeleteAll",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithDeleteAllOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithDeleteAllHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithDeleteAllHeaders"
       ],
       "contracts": [
@@ -28115,7 +28094,7 @@
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.API.InNamespace",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.NamespaceScope.Create",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithCreateOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithCreateHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithCreateHeaders",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithCreateType",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithCreateTitle",
@@ -28124,7 +28103,6 @@
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithCreateAttribute",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.NamespaceScope.CreateRecord",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordCreateOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordCreateHeader",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordCreateHeaders",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordCreateAttribute",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordCreateAttributes",
@@ -28258,13 +28236,12 @@
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.API.InNamespace",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.NamespaceScope.Get",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithGetOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithGetHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithGetHeaders",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithGetResourceType",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.NewWithDependencies",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.NamespaceScope.GetRecord",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordGetOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordGetHeader",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordGetHeaders",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordGetAttribute",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordGetAttributes"
@@ -28403,17 +28380,15 @@
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.NamespaceScope.List",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.NamespaceScope.All",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithListOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithListHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithListHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithListMaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/request.MaxItems",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.NamespaceScope.ListRecords",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.NamespaceScope.AllRecords",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordListOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordListHeader",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordListHeaders",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordListFilter",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordListFilters",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordListMaxItems",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.NewWithDependencies"
       ],
       "contracts": [
@@ -28545,7 +28520,7 @@
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.API.InNamespace",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.NamespaceScope.Update",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithUpdateOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithUpdateHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithUpdateHeaders",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithUpdateName",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithUpdateType",
@@ -28555,7 +28530,6 @@
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithUpdateAttribute",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.NamespaceScope.UpdateRecord",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordUpdateOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordUpdateHeader",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordUpdateHeaders",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordUpdateAttribute",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordUpdateAttributes",
@@ -28691,11 +28665,10 @@
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.API.InNamespace",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.NamespaceScope.Delete",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithDeleteOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithDeleteHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithDeleteHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithDeleteIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithDeleteAllOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithDeleteAllHeader",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithDeleteAllHeaders",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.NamespaceScope.DeleteRecord"
       ],
@@ -28800,7 +28773,7 @@
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.API.InNamespace",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.NamespaceScope.DeleteAll",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithDeleteAllOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithDeleteAllHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithDeleteAllHeaders",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.NamespaceScope.DeleteAllRecords"
       ],
@@ -28898,7 +28871,7 @@
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadeftags.API.InNamespace",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadeftags.NamespaceScope.Create",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadeftags.WithCreateOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadeftags.WithCreateHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadeftags.WithCreateHeaders"
       ],
       "contracts": [
@@ -28980,7 +28953,7 @@
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadeftags.API.InNamespace",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadeftags.NamespaceScope.Delete",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadeftags.WithDeleteOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadeftags.WithDeleteHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadeftags.WithDeleteHeaders"
       ],
       "contracts": [
@@ -29056,7 +29029,7 @@
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadeftags.API.InNamespace",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadeftags.NamespaceScope.DeleteAll",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadeftags.WithDeleteAllOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadeftags.WithDeleteAllHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadeftags.WithDeleteAllHeaders"
       ],
       "contracts": [
@@ -29131,19 +29104,17 @@
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.API.List",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.API.All",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithListOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithListHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithListHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithListMaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/request.MaxItems",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.API.ListRecords",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.API.AllRecords",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.NewWithDependencies",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordListOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordListHeader",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordListHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordListLimit",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordListMarker",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordListMaxItems",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordListPaginated",
+        "github.com/JSYoo5B/go-openstacksdk/request.Limit",
+        "github.com/JSYoo5B/go-openstacksdk/request.Marker",
+        "github.com/JSYoo5B/go-openstacksdk/request.Paginated",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordListFilter",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordListFilters"
       ],
@@ -29263,13 +29234,12 @@
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.API.InNamespace",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.NamespaceScope.Create",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithCreateOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithCreateHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithCreateHeaders",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithCreatePrefix",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithCreatePropertiesTarget",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.NamespaceScope.CreateRecord",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordCreateOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordCreateHeader",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordCreateHeaders",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordCreateAttribute",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordCreateAttributes"
@@ -29396,9 +29366,9 @@
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.API.InNamespace",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.NamespaceScope.Delete",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithDeleteOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithDeleteHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithDeleteHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithDeleteIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.NamespaceScope.DeleteRecord"
       ],
       "contracts": [
@@ -29512,19 +29482,17 @@
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.NamespaceScope.List",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.NamespaceScope.All",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithListOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithListHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithListHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithListMaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/request.MaxItems",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.NamespaceScope.ListRecords",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.NamespaceScope.AllRecords",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.NewWithDependencies",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordListOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordListHeader",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordListHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordListLimit",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordListMarker",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordListMaxItems",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordListPaginated",
+        "github.com/JSYoo5B/go-openstacksdk/request.Limit",
+        "github.com/JSYoo5B/go-openstacksdk/request.Marker",
+        "github.com/JSYoo5B/go-openstacksdk/request.Paginated",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordListFilter",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordListFilters"
       ],
@@ -29645,7 +29613,7 @@
         "github.com/JSYoo5B/go-openstacksdk/image.WithCreateTaskOpts",
         "github.com/JSYoo5B/go-openstacksdk/image.WithCreateTaskInput",
         "github.com/JSYoo5B/go-openstacksdk/image.WithCreateTaskNullInput",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithCreateTaskHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image.WithCreateTaskHeaders"
       ],
       "contracts": [
@@ -29731,7 +29699,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.GetTask",
         "github.com/JSYoo5B/go-openstacksdk/image.WithGetTaskOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithGetTaskHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image.WithGetTaskHeaders"
       ],
       "contracts": [
@@ -29803,15 +29771,15 @@
         "github.com/JSYoo5B/go-openstacksdk/image.Service.Tasks",
         "github.com/JSYoo5B/go-openstacksdk/image.Service.AllTasks",
         "github.com/JSYoo5B/go-openstacksdk/image.WithListTasksOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithListTasksHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image.WithListTasksHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithListTasksLimit",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithListTasksMarker",
+        "github.com/JSYoo5B/go-openstacksdk/request.Limit",
+        "github.com/JSYoo5B/go-openstacksdk/request.Marker",
         "github.com/JSYoo5B/go-openstacksdk/image.WithListTasksType",
         "github.com/JSYoo5B/go-openstacksdk/image.WithListTasksStatus",
         "github.com/JSYoo5B/go-openstacksdk/image.WithListTasksSortKey",
         "github.com/JSYoo5B/go-openstacksdk/image.WithListTasksSortDir",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithListTasksMaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/request.MaxItems",
         "github.com/JSYoo5B/go-openstacksdk/image.WithListTasksSinglePage",
         "github.com/JSYoo5B/go-openstacksdk/image.WithListTasksBodyFilter",
         "github.com/JSYoo5B/go-openstacksdk/image.WithListTasksMarkerFallback",
@@ -29913,20 +29881,19 @@
         "github.com/JSYoo5B/go-openstacksdk/image.Service.ImageTasks",
         "github.com/JSYoo5B/go-openstacksdk/image.Service.AllImageTasks",
         "github.com/JSYoo5B/go-openstacksdk/image.WithListImageTasksOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithListImageTasksHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image.WithListImageTasksHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithListImageTasksMaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/request.MaxItems",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/images.API.TaskRecords",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/images.API.AllTaskRecords",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/images.WithTaskRecordsOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/images.WithTaskRecordsQuery",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/images.WithTaskRecordsHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/images.WithTaskRecordsMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/request.Query",
+        "github.com/JSYoo5B/go-openstacksdk/request.Headers",
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/images.WithTaskRecordsLocation",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/images.WithTaskRecordsLimit",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/images.WithTaskRecordsMarker",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/images.WithTaskRecordsMaxItems",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/images.WithTaskRecordsPaginated"
+        "github.com/JSYoo5B/go-openstacksdk/request.Limit",
+        "github.com/JSYoo5B/go-openstacksdk/request.Marker",
+        "github.com/JSYoo5B/go-openstacksdk/request.Paginated"
       ],
       "contracts": [
         {
@@ -30098,11 +30065,10 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.GetImage",
         "github.com/JSYoo5B/go-openstacksdk/image.WithGetImageOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithGetImageHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image.WithGetImageHeaders",
         "github.com/JSYoo5B/go-openstacksdk/image.Service.GetImageRecord",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordHeader",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordHeaders",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordAttribute",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordAttributes"
@@ -30240,10 +30206,10 @@
         "github.com/JSYoo5B/go-openstacksdk/image.Service.ListImages",
         "github.com/JSYoo5B/go-openstacksdk/image.Service.AllImages",
         "github.com/JSYoo5B/go-openstacksdk/image.WithListImagesOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithListImagesHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image.WithListImagesHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithListImagesLimit",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithListImagesMarker",
+        "github.com/JSYoo5B/go-openstacksdk/request.Limit",
+        "github.com/JSYoo5B/go-openstacksdk/request.Marker",
         "github.com/JSYoo5B/go-openstacksdk/image.WithListImagesID",
         "github.com/JSYoo5B/go-openstacksdk/image.WithListImagesName",
         "github.com/JSYoo5B/go-openstacksdk/image.WithListImagesVisibility",
@@ -30264,19 +30230,15 @@
         "github.com/JSYoo5B/go-openstacksdk/image.WithListImagesDiskFormat",
         "github.com/JSYoo5B/go-openstacksdk/image.WithListImagesFilter",
         "github.com/JSYoo5B/go-openstacksdk/image.WithListImagesFilters",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithListImagesMaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/request.MaxItems",
         "github.com/JSYoo5B/go-openstacksdk/image.WithListImagesSinglePage",
         "github.com/JSYoo5B/go-openstacksdk/image.Service.ListImageRecords",
         "github.com/JSYoo5B/go-openstacksdk/image.Service.AllImageRecords",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordListOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordListHeader",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordListHeaders",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordListFilter",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordListFilters",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordListLimit",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordListMarker",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordListMaxItems",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordListPaginated"
+        "github.com/JSYoo5B/go-openstacksdk/request.Paginated"
       ],
       "contracts": [
         {
@@ -30435,7 +30397,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.UpdateImage",
         "github.com/JSYoo5B/go-openstacksdk/image.WithUpdateImageOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithUpdateImageHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image.WithUpdateImageHeaders",
         "github.com/JSYoo5B/go-openstacksdk/image.WithUpdateImageChange",
         "github.com/JSYoo5B/go-openstacksdk/image.WithUpdateImageChanges",
@@ -30457,7 +30419,6 @@
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordOpts",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordAttribute",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordAttributes",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordHeader",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordHeaders"
       ],
       "contracts": [
@@ -30604,14 +30565,13 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.SetImageProperties",
         "github.com/JSYoo5B/go-openstacksdk/image.WithSetImagePropertiesOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithSetImagePropertiesHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image.WithSetImagePropertiesHeaders",
         "github.com/JSYoo5B/go-openstacksdk/image.WithSetImagePropertiesProperty",
         "github.com/JSYoo5B/go-openstacksdk/image.WithSetImagePropertiesProperties",
         "github.com/JSYoo5B/go-openstacksdk/image.Service.UpdateImagePropertiesRecord",
         "github.com/JSYoo5B/go-openstacksdk.Connection.UpdateImagePropertiesRecord",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordPropertiesOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordPropertiesHeader",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordPropertiesHeaders",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordProperty",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordProperties",
@@ -30860,7 +30820,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.UploadImage",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadHeaders",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadSize",
         "github.com/JSYoo5B/go-openstacksdk/image.WithoutImageUploadSize",
@@ -30882,7 +30842,6 @@
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordUploadDiskFormat",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordUploadAttribute",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordUploadAttributes",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordUploadHeader",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordUploadHeaders",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordUploadSize",
         "github.com/JSYoo5B/go-openstacksdk/image.WithoutImageRecordUploadSize",
@@ -50631,7 +50590,7 @@
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryFilterDeleted",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryShowAll",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeaders"
       ],
       "contracts": [
@@ -50683,7 +50642,7 @@
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryFilters",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryExpression",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeaders"
       ],
       "contracts": [
@@ -50729,7 +50688,7 @@
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryFilters",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryExpression",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeaders"
       ],
       "contracts": [
@@ -50773,7 +50732,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.GetImageRecordByID",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeaders"
       ],
       "contracts": [
@@ -50811,7 +50770,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.GetImageRecordExclude",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeaders"
       ],
       "contracts": [
@@ -50858,7 +50817,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.GetImageRecordName",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeaders"
       ],
       "contracts": [
@@ -50905,7 +50864,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.GetImageRecordID",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeaders"
       ],
       "contracts": [
@@ -50952,7 +50911,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.WaitForCloudImageRecord",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudWaitOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudWaitHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudWaitHeaders",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudWaitTimeout",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudWaitUnlimited",
@@ -50996,7 +50955,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.DownloadCloudImageRecord",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDownloadOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDownloadHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDownloadHeaders",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDownloadChunkSize",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDownloadStream"
@@ -51080,7 +51039,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.DeleteCloudImageRecord",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDeleteOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDeleteHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDeleteHeaders",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDeleteWait",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDeleteTimeout",

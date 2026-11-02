@@ -8,7 +8,10 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/JSYoo5B/go-openstacksdk/image/v2/internal/glancecalls"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -23,7 +26,13 @@ type RecordListOpts struct {
 	Paginated *bool
 	Filters   []resource.ListOption
 }
-type RecordListOption func(*RecordListOpts) error
+
+// RecordListOption is one option of the operation: WithRecordListOpts,
+// WithRecordListHeaders, WithRecordListFilter, WithRecordListFilters,
+// request.Header, request.Limit, request.Marker, request.MaxItems,
+// request.Paginated, or request.Custom over *RecordListOpts. Other shared
+// calls fail with resource.ErrInvalidOption before HTTP.
+type RecordListOption = request.ListCall
 
 func copyRecordList(value RecordListOpts) RecordListOpts {
 	value.Headers = copyHeaders(value.Headers)
@@ -33,14 +42,11 @@ func copyRecordList(value RecordListOpts) RecordListOpts {
 }
 func WithRecordListOpts(value RecordListOpts) RecordListOption {
 	owned := copyRecordList(value)
-	return func(c *RecordListOpts) error { *c = copyRecordList(owned); return nil }
-}
-func WithRecordListHeader(key, value string) RecordListOption {
-	return func(c *RecordListOpts) error { c.Headers = setHeader(c.Headers, key, value); return nil }
+	return request.Custom(func(c *RecordListOpts) error { *c = copyRecordList(owned); return nil })
 }
 func WithRecordListHeaders(values map[string]string) RecordListOption {
 	owned := copyHeaders(values)
-	return func(c *RecordListOpts) error {
+	return request.Custom(func(c *RecordListOpts) error {
 		headers, err := validateHeaders(owned, false, "")
 		if err != nil {
 			return err
@@ -49,27 +55,15 @@ func WithRecordListHeaders(values map[string]string) RecordListOption {
 			c.Headers = setHeader(c.Headers, key, value)
 		}
 		return nil
-	}
-}
-func WithRecordListLimit(value int) RecordListOption {
-	return func(c *RecordListOpts) error { c.Limit = value; return nil }
-}
-func WithRecordListMarker(value string) RecordListOption {
-	return func(c *RecordListOpts) error { c.Marker = value; return nil }
-}
-func WithRecordListMaxItems(value int) RecordListOption {
-	return func(c *RecordListOpts) error { c.MaxItems = value; return nil }
-}
-func WithRecordListPaginated(value bool) RecordListOption {
-	return func(c *RecordListOpts) error { owned := value; c.Paginated = &owned; return nil }
+	})
 }
 func WithRecordListFilter(field string, value any) RecordListOption {
 	owned := resource.WithFilter(field, value)
-	return func(c *RecordListOpts) error { c.Filters = append(c.Filters, owned); return nil }
+	return request.Custom(func(c *RecordListOpts) error { c.Filters = append(c.Filters, owned); return nil })
 }
 func WithRecordListFilters(values map[string]any) RecordListOption {
 	owned := resource.WithFilters(values)
-	return func(c *RecordListOpts) error { c.Filters = append(c.Filters, owned); return nil }
+	return request.Custom(func(c *RecordListOpts) error { c.Filters = append(c.Filters, owned); return nil })
 }
 
 func recordFilterDescriptor(scoped bool) *resource.FilterDescriptor {
@@ -90,7 +84,7 @@ type recordListParameters struct {
 
 func prepareRecordList(ctx context.Context, check func(context.Context) error, scoped bool, options []RecordListOption) (recordListParameters, error) {
 	value := copyRecordList(RecordListOpts{})
-	for _, apply := range options {
+	for _, apply := range calls.Translate(options, recordListCalls) {
 		if err := check(ctx); err != nil {
 			return recordListParameters{}, err
 		}
@@ -151,3 +145,15 @@ func prepareRecordList(ctx context.Context, check func(context.Context) error, s
 	return recordListParameters{query: query, filters: filters, headers: headers,
 		control: rest.ListControl{MaxItems: value.MaxItems, SinglePage: value.Paginated != nil && !*value.Paginated, LimitHint: true}}, check(ctx)
 }
+
+var (
+	recordListCalls = calls.Spec[RecordListOpts]{
+		Header: glancecalls.SetHeader(func(o *RecordListOpts) *map[string]string { return &o.Headers }),
+		Paging: calls.Paging[RecordListOpts]{
+			Limit:     calls.Value(func(o *RecordListOpts) *int { return &o.Limit }),
+			Marker:    calls.Value(func(o *RecordListOpts) *string { return &o.Marker }),
+			MaxItems:  calls.Value(func(o *RecordListOpts) *int { return &o.MaxItems }),
+			Paginated: calls.Pointer(func(o *RecordListOpts) **bool { return &o.Paginated }),
+		},
+	}
+)

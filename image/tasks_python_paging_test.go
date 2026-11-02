@@ -9,6 +9,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -47,7 +48,7 @@ func TestTaskPythonBodyFiltersStayLocalAndCountRawRows(t *testing.T) {
 		t.Fatalf("ids=%v err=%v", ids, err)
 	}
 	// Python counts excluded rows toward max_items: a and b are consumed, only a matches.
-	ids, err = taskPythonIDs(t, service, WithListTasksBodyFilter("owner_id", "p1"), WithListTasksMaxItems(2))
+	ids, err = taskPythonIDs(t, service, WithListTasksBodyFilter("owner_id", "p1"), request.MaxItems(2))
 	if err != nil || !reflect.DeepEqual(ids, []string{"a"}) {
 		t.Fatalf("raw cap ids=%v err=%v", ids, err)
 	}
@@ -94,16 +95,16 @@ func TestTaskPythonMarkerFallbackFollowsLimitAndLastRawRow(t *testing.T) {
 		return taskCoreJSON(req, 200, pages[query.Get("marker")]), nil
 	})
 	service := New(client)
-	ids, err := taskPythonIDs(t, service, WithListTasksLimit(2), WithListTasksType("import"), WithListTasksMarkerFallback(true), WithListTasksBodyFilter("owner_id", "p1"))
+	ids, err := taskPythonIDs(t, service, request.Limit(2), WithListTasksType("import"), WithListTasksMarkerFallback(true), WithListTasksBodyFilter("owner_id", "p1"))
 	want := []string{"limit=2&type=import", "limit=2&marker=b&type=import", "limit=2&marker=c&type=import"}
 	if err != nil || !reflect.DeepEqual(ids, []string{"a", "c"}) || !reflect.DeepEqual(requested, want) {
 		t.Fatalf("ids=%v err=%v requested=%v", ids, err, requested)
 	}
 	for name, options := range map[string][]ListTasksOption{
-		"disabled by default": {WithListTasksLimit(2), WithListTasksType("import")},
-		"last option wins":    {WithListTasksLimit(2), WithListTasksType("import"), WithListTasksMarkerFallback(true), WithListTasksMarkerFallback(false)},
-		"single page":         {WithListTasksLimit(2), WithListTasksType("import"), WithListTasksMarkerFallback(true), WithListTasksSinglePage(true)},
-		"max items":           {WithListTasksLimit(2), WithListTasksType("import"), WithListTasksMarkerFallback(true), WithListTasksMaxItems(2)},
+		"disabled by default": {request.Limit(2), WithListTasksType("import")},
+		"last option wins":    {request.Limit(2), WithListTasksType("import"), WithListTasksMarkerFallback(true), WithListTasksMarkerFallback(false)},
+		"single page":         {request.Limit(2), WithListTasksType("import"), WithListTasksMarkerFallback(true), WithListTasksSinglePage(true)},
+		"max items":           {request.Limit(2), WithListTasksType("import"), WithListTasksMarkerFallback(true), request.MaxItems(2)},
 	} {
 		requested = nil
 		ids, err := taskPythonIDs(t, service, options...)
@@ -142,7 +143,7 @@ func TestTaskPythonMarkerFallbackGuards(t *testing.T) {
 			})
 			options := []ListTasksOption{WithListTasksMarkerFallback(true)}
 			if tc.limit > 0 {
-				options = append(options, WithListTasksLimit(tc.limit))
+				options = append(options, request.Limit(tc.limit))
 			}
 			_, err := taskPythonIDs(t, New(client), options...)
 			if !tc.check(err) || calls != tc.wantCalls {
@@ -167,12 +168,12 @@ func TestTaskPythonLinkHeaderContinuation(t *testing.T) {
 	}
 	const valid = `<https://glance.example/other>; rel="prev", <https://glance.example/reverse/glance/v2/tasks?limit=1&marker=one>; rel="next"`
 	calls, requested := 0, []url.Values(nil)
-	ids, err := taskPythonIDs(t, newClient(valid, &calls, &requested), WithListTasksLimit(1), WithListTasksLinkHeader(true))
+	ids, err := taskPythonIDs(t, newClient(valid, &calls, &requested), request.Limit(1), WithListTasksLinkHeader(true))
 	if err != nil || !reflect.DeepEqual(ids, []string{"one", "two"}) || calls != 2 || requested[1].Get("marker") != "one" || requested[1].Get("limit") != "1" {
 		t.Fatalf("ids=%v err=%v calls=%d requested=%v", ids, err, calls, requested)
 	}
 	calls, requested = 0, nil
-	ids, err = taskPythonIDs(t, newClient(valid, &calls, &requested), WithListTasksLimit(1))
+	ids, err = taskPythonIDs(t, newClient(valid, &calls, &requested), request.Limit(1))
 	if err != nil || !reflect.DeepEqual(ids, []string{"one"}) || calls != 1 {
 		t.Fatalf("disabled: ids=%v err=%v calls=%d", ids, err, calls)
 	}
@@ -182,13 +183,13 @@ func TestTaskPythonLinkHeaderContinuation(t *testing.T) {
 		"malformed value": `https://glance.example/reverse/glance/v2/tasks?marker=one; rel=next`,
 	} {
 		calls, requested = 0, nil
-		_, err := taskPythonIDs(t, newClient(link, &calls, &requested), WithListTasksLimit(1), WithListTasksLinkHeader(true))
+		_, err := taskPythonIDs(t, newClient(link, &calls, &requested), request.Limit(1), WithListTasksLinkHeader(true))
 		var response *resource.ResponseError
 		if !errors.Is(err, resource.ErrInvalidOption) || !errors.As(err, &response) || response.StatusCode != 200 || calls != 1 {
 			t.Fatalf("%s: err=%v calls=%d", name, err, calls)
 		}
 		calls, requested = 0, nil
-		if _, err := taskPythonIDs(t, newClient(link, &calls, &requested), WithListTasksLimit(1)); err != nil || calls != 1 {
+		if _, err := taskPythonIDs(t, newClient(link, &calls, &requested), request.Limit(1)); err != nil || calls != 1 {
 			t.Fatalf("%s disabled: err=%v calls=%d", name, err, calls)
 		}
 	}

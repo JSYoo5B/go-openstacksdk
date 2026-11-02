@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.UploadImage`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadSize`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithoutImageUploadSize`
@@ -36,7 +36,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordUploadDiskFormat`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordUploadAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordUploadAttributes`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordUploadHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordUploadHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordUploadSize`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithoutImageRecordUploadSize`
@@ -158,7 +158,7 @@ func uploadFile(ctx context.Context, service *image.Service, filename string,
             Fields: map[string]json.RawMessage{"build": json.RawMessage(`"initial"`)},
         }),
         image.WithImageUploadHeaders(map[string]string{"X-Trace-Label": "upload"}),
-        image.WithImageUploadHeader("X-Request-Label", "direct-upload"),
+        request.Header("X-Request-Label", "direct-upload"),
         image.WithImageUploadFields(map[string]json.RawMessage{
             "build": json.RawMessage(`"release"`),
         }),

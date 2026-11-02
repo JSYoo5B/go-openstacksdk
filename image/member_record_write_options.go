@@ -6,6 +6,8 @@ import (
 	"errors"
 	"slices"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -17,7 +19,18 @@ type ImageMemberRecordWriteOpts struct {
 	Headers    map[string]string
 	Attributes []resource.ListOption
 }
-type ImageMemberRecordWriteOption func(*ImageMemberRecordWriteOpts) error
+
+// ImageMemberRecordWriteOption is one option of AddImageMemberRecord and
+// UpdateImageMemberRecord: WithImageMemberRecordWriteOpts,
+// WithImageMemberRecordWriteHeaders (merges), the attribute options,
+// request.Header (merges one header) or request.Custom over
+// *ImageMemberRecordWriteOpts. Other shared calls, including request.Headers
+// and request.Field, fail with resource.ErrInvalidOption before HTTP.
+type ImageMemberRecordWriteOption = request.WriteCall
+
+var imageMemberRecordWriteCalls = calls.Spec[ImageMemberRecordWriteOpts]{
+	Header: calls.MergeHeader[ImageMemberRecordWriteOpts](WithImageMemberRecordWriteHeaders),
+}
 
 func copyImageMemberRecordWrite(value ImageMemberRecordWriteOpts) ImageMemberRecordWriteOpts {
 	value.Headers = copyImageMemberOpts(ImageMemberOpts{Headers: value.Headers}).Headers
@@ -28,35 +41,31 @@ func copyImageMemberRecordWrite(value ImageMemberRecordWriteOpts) ImageMemberRec
 // WithImageMemberRecordWriteOpts snapshots and replaces the whole configuration.
 func WithImageMemberRecordWriteOpts(value ImageMemberRecordWriteOpts) ImageMemberRecordWriteOption {
 	owned := copyImageMemberRecordWrite(value)
-	return func(config *ImageMemberRecordWriteOpts) error {
+	return request.Custom(func(config *ImageMemberRecordWriteOpts) error {
 		*config = copyImageMemberRecordWrite(owned)
 		return nil
-	}
-}
-func WithImageMemberRecordWriteHeader(key, value string) ImageMemberRecordWriteOption {
-	apply := WithImageMutationHeader(key, value)
-	return func(config *ImageMemberRecordWriteOpts) error { return applyImageMemberHeader(&config.Headers, apply) }
+	})
 }
 func WithImageMemberRecordWriteHeaders(values map[string]string) ImageMemberRecordWriteOption {
-	apply := WithImageMutationHeaders(values)
-	return func(config *ImageMemberRecordWriteOpts) error { return applyImageMemberHeader(&config.Headers, apply) }
+	apply := mergeImageMutationHeaders(values)
+	return request.Custom(func(config *ImageMemberRecordWriteOpts) error { return applyImageMemberHeader(&config.Headers, apply) })
 }
 func WithImageMemberRecordWriteAttribute(field string, value any) ImageMemberRecordWriteOption {
 	owned := resource.WithFilter(field, value)
-	return func(config *ImageMemberRecordWriteOpts) error {
+	return request.Custom(func(config *ImageMemberRecordWriteOpts) error {
 		config.Attributes = append(config.Attributes, owned)
 		return nil
-	}
+	})
 }
 
 // WithImageMemberRecordWriteAttributes replaces the semantic attribute set.
 // Nil or empty clears previous attributes without changing request headers.
 func WithImageMemberRecordWriteAttributes(values map[string]any) ImageMemberRecordWriteOption {
 	owned := resource.WithFilters(values)
-	return func(config *ImageMemberRecordWriteOpts) error {
+	return request.Custom(func(config *ImageMemberRecordWriteOpts) error {
 		config.Attributes = append(config.Attributes, owned)
 		return nil
-	}
+	})
 }
 func WithImageMemberRecordMemberID(value any) ImageMemberRecordWriteOption {
 	return WithImageMemberRecordWriteAttribute("member_id", value)
@@ -67,7 +76,7 @@ func WithImageMemberRecordStatus(value any) ImageMemberRecordWriteOption {
 
 func prepareImageMemberRecordWrite(ctx context.Context, check func(context.Context) error, options []ImageMemberRecordWriteOption, update bool) (map[string]json.RawMessage, map[string]string, error) {
 	config := copyImageMemberRecordWrite(ImageMemberRecordWriteOpts{})
-	for _, apply := range options {
+	for _, apply := range calls.Translate(options, imageMemberRecordWriteCalls) {
 		if err := check(ctx); err != nil {
 			return nil, nil, err
 		}
@@ -122,7 +131,7 @@ func prepareImageMemberRecordWrite(ctx context.Context, check func(context.Conte
 
 func prepareImageMemberRecordHeaders(ctx context.Context, check func(context.Context) error, options []ImageMemberOption) (map[string]string, error) {
 	config := copyImageMemberOpts(ImageMemberOpts{})
-	for _, apply := range options {
+	for _, apply := range calls.Translate(options, imageMemberCalls) {
 		if err := check(ctx); err != nil {
 			return nil, err
 		}
@@ -141,7 +150,7 @@ func prepareImageMemberRecordHeaders(ctx context.Context, check func(context.Con
 
 func prepareImageMemberRecordRemove(ctx context.Context, check func(context.Context) error, options []RemoveImageMemberOption) (RemoveImageMemberOpts, error) {
 	config := copyRemoveImageMemberOpts(RemoveImageMemberOpts{})
-	for _, apply := range options {
+	for _, apply := range calls.Translate(options, removeImageMemberCalls) {
 		if err := check(ctx); err != nil {
 			return config, err
 		}

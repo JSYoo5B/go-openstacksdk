@@ -6,6 +6,9 @@ import (
 	"hash"
 	"slices"
 	"unicode/utf8"
+
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 // ImageRecordDownloadHashFactory extends the SDK's primary digest selection.
@@ -24,46 +27,51 @@ type ImageRecordDownloadOpts struct {
 	HashFactory      ImageRecordDownloadHashFactory
 	Headers          map[string]string
 }
-type ImageRecordDownloadOption func(*ImageRecordDownloadOpts) error
+
+// ImageRecordDownloadOption is one option of DownloadImageRecord:
+// WithImageRecordDownloadOpts, WithImageRecordDownloadHeaders (merges), the
+// stream, chunk, store and checksum options, request.Header (merges one
+// header) or request.Custom over *ImageRecordDownloadOpts. Other shared calls,
+// including request.Headers, fail with resource.ErrInvalidOption before HTTP.
+type ImageRecordDownloadOption = request.GetCall
+
+var imageRecordDownloadCalls = calls.Spec[ImageRecordDownloadOpts]{
+	Header: calls.MergeHeader[ImageRecordDownloadOpts](WithImageRecordDownloadHeaders),
+}
 
 func WithImageRecordDownloadOpts(value ImageRecordDownloadOpts) ImageRecordDownloadOption {
 	snapshot := copyImageRecordDownloadOpts(value)
-	return func(config *ImageRecordDownloadOpts) error {
+	return request.Custom(func(config *ImageRecordDownloadOpts) error {
 		*config = copyImageRecordDownloadOpts(snapshot)
 		return nil
-	}
+	})
 }
 func WithImageRecordDownloadStream(value bool) ImageRecordDownloadOption {
-	return func(config *ImageRecordDownloadOpts) error { config.Stream = value; return nil }
+	return request.Custom(func(config *ImageRecordDownloadOpts) error { config.Stream = value; return nil })
 }
 func WithImageRecordDownloadChunkSize(value int) ImageRecordDownloadOption {
-	return func(config *ImageRecordDownloadOpts) error { owned := value; config.ChunkSize = &owned; return nil }
+	return request.Custom(func(config *ImageRecordDownloadOpts) error { owned := value; config.ChunkSize = &owned; return nil })
 }
 func WithImageRecordDownloadStorePreferences(values ...string) ImageRecordDownloadOption {
 	snapshot := slices.Clone(values)
-	return func(config *ImageRecordDownloadOpts) error {
+	return request.Custom(func(config *ImageRecordDownloadOpts) error {
 		config.StorePreferences = slices.Clone(snapshot)
 		return nil
-	}
+	})
 }
 func WithImageRecordDownloadChecksumVerification(value bool) ImageRecordDownloadOption {
-	return func(config *ImageRecordDownloadOpts) error {
+	return request.Custom(func(config *ImageRecordDownloadOpts) error {
 		owned := value
 		config.VerifyChecksum = &owned
 		return nil
-	}
+	})
 }
 func WithImageRecordDownloadHashFactory(value ImageRecordDownloadHashFactory) ImageRecordDownloadOption {
-	return func(config *ImageRecordDownloadOpts) error { config.HashFactory = value; return nil }
-}
-func WithImageRecordDownloadHeader(key, value string) ImageRecordDownloadOption {
-	return func(config *ImageRecordDownloadOpts) error {
-		return mergeImageRecordHeaders(&config.Headers, map[string]string{key: value})
-	}
+	return request.Custom(func(config *ImageRecordDownloadOpts) error { config.HashFactory = value; return nil })
 }
 func WithImageRecordDownloadHeaders(values map[string]string) ImageRecordDownloadOption {
 	snapshot := copyImageRecordHeaders(values)
-	return func(config *ImageRecordDownloadOpts) error { return mergeImageRecordHeaders(&config.Headers, snapshot) }
+	return request.Custom(func(config *ImageRecordDownloadOpts) error { return mergeImageRecordHeaders(&config.Headers, snapshot) })
 }
 func copyImageRecordDownloadOpts(value ImageRecordDownloadOpts) ImageRecordDownloadOpts {
 	value.ChunkSize = copyCreateImportPointer(value.ChunkSize)
@@ -74,7 +82,7 @@ func copyImageRecordDownloadOpts(value ImageRecordDownloadOpts) ImageRecordDownl
 }
 func prepareImageRecordDownloadOptions(ctx context.Context, check func(context.Context) error, options []ImageRecordDownloadOption) (ImageRecordDownloadOpts, error) {
 	var config ImageRecordDownloadOpts
-	for _, apply := range options {
+	for _, apply := range calls.Translate(options, imageRecordDownloadCalls) {
 		if err := check(ctx); err != nil {
 			return config, err
 		}

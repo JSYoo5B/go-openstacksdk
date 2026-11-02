@@ -9,7 +9,9 @@ import (
 	"slices"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 // DeleteRecord deletes one fixed property identity and preserves the opaque
@@ -116,8 +118,8 @@ func recordDeletionIdentity(input RecordRequest) (string, error) {
 // later callback cannot undo an observed source or namespace change.
 func guardRecordDeleteOptions(ctx context.Context, check func(context.Context) error, options []DeleteOption) []DeleteOption {
 	guarded := make([]DeleteOption, 0, len(options))
-	for _, apply := range options {
-		guarded = append(guarded, func(config *DeleteOpts) error {
+	for _, apply := range calls.Translate(options, deleteCalls) {
+		guarded = append(guarded, request.Custom(func(config *DeleteOpts) error {
 			if err := check(ctx); err != nil {
 				return err
 			}
@@ -125,14 +127,14 @@ func guardRecordDeleteOptions(ctx context.Context, check func(context.Context) e
 				return invalid("nil property option")
 			}
 			return errors.Join(apply(config), check(ctx))
-		})
+		}))
 	}
 	return guarded
 }
 func guardRecordDeleteAllOptions(ctx context.Context, check func(context.Context) error, options []DeleteAllOption) []DeleteAllOption {
 	guarded := make([]DeleteAllOption, 0, len(options))
-	for _, apply := range options {
-		guarded = append(guarded, func(config *DeleteAllOpts) error {
+	for _, apply := range calls.Translate(options, deleteAllCalls) {
+		guarded = append(guarded, request.Custom(func(config *DeleteAllOpts) error {
 			if err := check(ctx); err != nil {
 				return err
 			}
@@ -140,7 +142,7 @@ func guardRecordDeleteAllOptions(ctx context.Context, check func(context.Context
 				return invalid("nil property option")
 			}
 			return errors.Join(apply(config), check(ctx))
-		})
+		}))
 	}
 	return guarded
 }

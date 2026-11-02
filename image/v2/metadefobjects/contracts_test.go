@@ -17,6 +17,7 @@ import (
 
 	objects "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -149,7 +150,7 @@ func objectProof(t *testing.T, e error, status int, raw []byte) *resource.Respon
 	return proof
 }
 func objectHeaders() objectOptions {
-	return objectOptions{create: []objects.CreateOption{objects.WithCreateHeaders(map[string]string{"X-Option": "owned"}), objects.WithCreateHeader("X-Final", "yes")}, get: []objects.GetOption{objects.WithGetHeaders(map[string]string{"X-Option": "owned"}), objects.WithGetHeader("X-Final", "yes")}, update: []objects.UpdateOption{objects.WithUpdateHeaders(map[string]string{"X-Option": "owned"}), objects.WithUpdateHeader("X-Final", "yes")}, deletion: []objects.DeleteOption{objects.WithDeleteHeaders(map[string]string{"X-Option": "owned"}), objects.WithDeleteHeader("X-Final", "yes")}, deleteAll: []objects.DeleteAllOption{objects.WithDeleteAllHeaders(map[string]string{"X-Option": "owned"}), objects.WithDeleteAllHeader("X-Final", "yes")}, list: []objects.ListOption{objects.WithListHeaders(map[string]string{"X-Option": "owned"}), objects.WithListHeader("X-Final", "yes")}}
+	return objectOptions{create: []objects.CreateOption{objects.WithCreateHeaders(map[string]string{"X-Option": "owned"}), request.Header("X-Final", "yes")}, get: []objects.GetOption{objects.WithGetHeaders(map[string]string{"X-Option": "owned"}), request.Header("X-Final", "yes")}, update: []objects.UpdateOption{objects.WithUpdateHeaders(map[string]string{"X-Option": "owned"}), request.Header("X-Final", "yes")}, deletion: []objects.DeleteOption{objects.WithDeleteHeaders(map[string]string{"X-Option": "owned"}), request.Header("X-Final", "yes")}, deleteAll: []objects.DeleteAllOption{objects.WithDeleteAllHeaders(map[string]string{"X-Option": "owned"}), request.Header("X-Final", "yes")}, list: []objects.ListOption{objects.WithListHeaders(map[string]string{"X-Option": "owned"}), request.Header("X-Final", "yes")}}
 }
 
 func TestMetadefObjectsFixedScopedRoutesAndPayloads(t *testing.T) {
@@ -420,7 +421,7 @@ func TestMetadefObjectsCanonicalModelsAndRawOwnership(t *testing.T) {
 			return objectWire(200, io.NopCloser(strings.NewReader(raw))), nil
 		})
 		scope := objectScope(t, client, objectParent)
-		rows, e := scope.All(context.Background(), objects.WithListMaxItems(2))
+		rows, e := scope.All(context.Background(), request.MaxItems(2))
 		if e != nil || len(rows) != 2 {
 			t.Fatal(rows, e)
 		}
@@ -453,7 +454,7 @@ func TestMetadefObjectsFiniteListAndLocalControls(t *testing.T) {
 				wire.Header.Set("Link", `<https://foreign.invalid>; rel="next"`)
 				return wire, nil
 			})
-			rows, e := objectScope(t, client, objectParent).All(context.Background(), objects.WithListMaxItems(cap))
+			rows, e := objectScope(t, client, objectParent).All(context.Background(), request.MaxItems(cap))
 			want := 2
 			if cap == 1 {
 				want = 1
@@ -498,7 +499,7 @@ func TestMetadefObjectsFiniteListAndLocalControls(t *testing.T) {
 			} else {
 				opts := []objects.ListOption{}
 				if mode == "cap" {
-					opts = append(opts, objects.WithListMaxItems(1))
+					opts = append(opts, request.MaxItems(1))
 				}
 				rows, e := scope.All(context.Background(), opts...)
 				if mode == "cap" {
@@ -532,7 +533,7 @@ func TestMetadefObjectsFiniteListAndLocalControls(t *testing.T) {
 	t.Run("parallel lazy reused iterator snapshots", func(t *testing.T) {
 		var calls, callbacks atomic.Int32
 		headers := map[string]string{"X-Option": "snapshot"}
-		opts := []objects.ListOption{objects.WithListOpts(objects.ListOpts{Headers: headers, MaxItems: 1}), func(*objects.ListOpts) error { callbacks.Add(1); return nil }}
+		opts := []objects.ListOption{objects.WithListOpts(objects.ListOpts{Headers: headers, MaxItems: 1}), request.Custom(func(*objects.ListOpts) error { callbacks.Add(1); return nil })}
 		client := objectClient(func(r *http.Request) (*http.Response, error) {
 			calls.Add(1)
 			if r.Header.Get("X-Option") != "snapshot" || r.URL.RawQuery != "" {
@@ -673,7 +674,7 @@ func TestMetadefObjectsOwnedPreparationAndSource(t *testing.T) {
 				var calls, callbacks atomic.Int32
 				client := objectClient(func(*http.Request) (*http.Response, error) { calls.Add(1); return nil, errors.New("unexpected HTTP") })
 				scope := objectScope(t, client, objectParent)
-				o := objectOptions{create: []objects.CreateOption{func(*objects.CreateOpts) error { callbacks.Add(1); return nil }}, get: []objects.GetOption{func(*objects.GetOpts) error { callbacks.Add(1); return nil }}, update: []objects.UpdateOption{func(*objects.UpdateOpts) error { callbacks.Add(1); return nil }}, deletion: []objects.DeleteOption{func(*objects.DeleteOpts) error { callbacks.Add(1); return nil }}}
+				o := objectOptions{create: []objects.CreateOption{request.Custom(func(*objects.CreateOpts) error { callbacks.Add(1); return nil })}, get: []objects.GetOption{request.Custom(func(*objects.GetOpts) error { callbacks.Add(1); return nil })}, update: []objects.UpdateOption{request.Custom(func(*objects.UpdateOpts) error { callbacks.Add(1); return nil })}, deletion: []objects.DeleteOption{request.Custom(func(*objects.DeleteOpts) error { callbacks.Add(1); return nil })}}
 				v, e := objectCall(scope, context.Background(), op.name, name, o)
 				if v != nil || !errors.Is(e, resource.ErrInvalidOption) || calls.Load() != 0 || callbacks.Load() != 0 {
 					t.Fatal(v, e, calls.Load(), callbacks.Load())
@@ -711,7 +712,7 @@ func TestMetadefObjectsOwnedPreparationAndSource(t *testing.T) {
 				case "protected source":
 					client.MoreHeaders = map[string]string{"X-Auth-Token": "forged"}
 				}
-				o := objectOptions{create: []objects.CreateOption{func(*objects.CreateOpts) error { callbacks.Add(1); return nil }}, get: []objects.GetOption{func(*objects.GetOpts) error { callbacks.Add(1); return nil }}, update: []objects.UpdateOption{func(*objects.UpdateOpts) error { callbacks.Add(1); return nil }}, deletion: []objects.DeleteOption{func(*objects.DeleteOpts) error { callbacks.Add(1); return nil }}, deleteAll: []objects.DeleteAllOption{func(*objects.DeleteAllOpts) error { callbacks.Add(1); return nil }}, list: []objects.ListOption{func(*objects.ListOpts) error { callbacks.Add(1); return nil }}}
+				o := objectOptions{create: []objects.CreateOption{request.Custom(func(*objects.CreateOpts) error { callbacks.Add(1); return nil })}, get: []objects.GetOption{request.Custom(func(*objects.GetOpts) error { callbacks.Add(1); return nil })}, update: []objects.UpdateOption{request.Custom(func(*objects.UpdateOpts) error { callbacks.Add(1); return nil })}, deletion: []objects.DeleteOption{request.Custom(func(*objects.DeleteOpts) error { callbacks.Add(1); return nil })}, deleteAll: []objects.DeleteAllOption{request.Custom(func(*objects.DeleteAllOpts) error { callbacks.Add(1); return nil })}, list: []objects.ListOption{request.Custom(func(*objects.ListOpts) error { callbacks.Add(1); return nil })}}
 				v, e := objectCall(scope, ctx, op.name, objectName, o)
 				if v != nil || e == nil || calls.Load() != 0 || callbacks.Load() != 0 {
 					t.Fatal(v, e, calls.Load(), callbacks.Load())
@@ -731,7 +732,7 @@ func TestMetadefObjectsOwnedPreparationAndSource(t *testing.T) {
 			t.Run(op.name+" header "+header, func(t *testing.T) {
 				var calls atomic.Int32
 				client := objectClient(func(*http.Request) (*http.Response, error) { calls.Add(1); return nil, errors.New("unexpected HTTP") })
-				o := objectOptions{create: []objects.CreateOption{objects.WithCreateHeader(header, "value")}, get: []objects.GetOption{objects.WithGetHeader(header, "value")}, update: []objects.UpdateOption{objects.WithUpdateHeader(header, "value")}, deletion: []objects.DeleteOption{objects.WithDeleteHeader(header, "value")}, deleteAll: []objects.DeleteAllOption{objects.WithDeleteAllHeader(header, "value")}, list: []objects.ListOption{objects.WithListHeader(header, "value")}}
+				o := objectOptions{create: []objects.CreateOption{request.Header(header, "value")}, get: []objects.GetOption{request.Header(header, "value")}, update: []objects.UpdateOption{request.Header(header, "value")}, deletion: []objects.DeleteOption{request.Header(header, "value")}, deleteAll: []objects.DeleteAllOption{request.Header(header, "value")}, list: []objects.ListOption{request.Header(header, "value")}}
 				v, e := objectCall(objectScope(t, client, objectParent), context.Background(), op.name, objectName, o)
 				if v != nil || !errors.Is(e, resource.ErrInvalidOption) || calls.Load() != 0 {
 					t.Fatal(v, e, calls.Load())
@@ -769,7 +770,7 @@ func TestMetadefObjectsOwnedPreparationAndSource(t *testing.T) {
 					}
 					return nil
 				}
-				o := objectOptions{create: []objects.CreateOption{func(*objects.CreateOpts) error { return mutate() }}, get: []objects.GetOption{func(*objects.GetOpts) error { return mutate() }}, update: []objects.UpdateOption{func(*objects.UpdateOpts) error { return mutate() }}, deletion: []objects.DeleteOption{func(*objects.DeleteOpts) error { return mutate() }}, deleteAll: []objects.DeleteAllOption{func(*objects.DeleteAllOpts) error { return mutate() }}, list: []objects.ListOption{func(*objects.ListOpts) error { return mutate() }}}
+				o := objectOptions{create: []objects.CreateOption{request.Custom(func(*objects.CreateOpts) error { return mutate() })}, get: []objects.GetOption{request.Custom(func(*objects.GetOpts) error { return mutate() })}, update: []objects.UpdateOption{request.Custom(func(*objects.UpdateOpts) error { return mutate() })}, deletion: []objects.DeleteOption{request.Custom(func(*objects.DeleteOpts) error { return mutate() })}, deleteAll: []objects.DeleteAllOption{request.Custom(func(*objects.DeleteAllOpts) error { return mutate() })}, list: []objects.ListOption{request.Custom(func(*objects.ListOpts) error { return mutate() })}}
 				if mode == "nil callback" {
 					o = objectOptions{create: []objects.CreateOption{nil}, get: []objects.GetOption{nil}, update: []objects.UpdateOption{nil}, deletion: []objects.DeleteOption{nil}, deleteAll: []objects.DeleteAllOption{nil}, list: []objects.ListOption{nil}}
 				}
@@ -808,7 +809,7 @@ func TestMetadefObjectsOwnedPreparationAndSource(t *testing.T) {
 		{"Property key UTF8", "Create", objectOptions{create: []objects.CreateOption{objects.WithCreateProperties(map[string]json.RawMessage{string([]byte{255}): json.RawMessage(`{}`)})}}},
 		{"Required UTF8", "Update", objectOptions{update: []objects.UpdateOption{objects.WithUpdateRequired([]string{string([]byte{255})})}}},
 		{"unsafe rename", "Update", objectOptions{update: []objects.UpdateOption{objects.WithUpdateName("bad/name")}}},
-		{"negative local cap", "All", objectOptions{list: []objects.ListOption{objects.WithListMaxItems(-1)}}},
+		{"negative local cap", "All", objectOptions{list: []objects.ListOption{request.MaxItems(-1)}}},
 	}
 	for _, test := range invalidOpts {
 		t.Run(test.name, func(t *testing.T) {
@@ -850,28 +851,28 @@ func TestMetadefObjectsOwnedPreparationAndSource(t *testing.T) {
 				}
 			}
 			o := objectOptions{
-				create: []objects.CreateOption{objects.WithCreateHeader("X-Dropped", "gone"), objects.WithCreateOpts(objects.CreateOpts{Headers: input, Description: &text, Properties: properties, Required: required}), func(c *objects.CreateOpts) error {
+				create: []objects.CreateOption{request.Header("X-Dropped", "gone"), objects.WithCreateOpts(objects.CreateOpts{Headers: input, Description: &text, Properties: properties, Required: required}), request.Custom(func(c *objects.CreateOpts) error {
 					escapedHeaders = c.Headers
 					escapedText = c.Description
 					escapedProperties = c.Properties
 					escapedRequired = c.Required
 					return nil
-				}, func(*objects.CreateOpts) error { mutate(); return nil }},
-				update: []objects.UpdateOption{objects.WithUpdateHeader("X-Dropped", "gone"), objects.WithUpdateOpts(objects.UpdateOpts{Headers: input, Description: &text, Properties: properties, Required: required}), func(c *objects.UpdateOpts) error {
+				}), request.Custom(func(*objects.CreateOpts) error { mutate(); return nil })},
+				update: []objects.UpdateOption{request.Header("X-Dropped", "gone"), objects.WithUpdateOpts(objects.UpdateOpts{Headers: input, Description: &text, Properties: properties, Required: required}), request.Custom(func(c *objects.UpdateOpts) error {
 					escapedHeaders = c.Headers
 					escapedText = c.Description
 					escapedProperties = c.Properties
 					escapedRequired = c.Required
 					return nil
-				}, func(*objects.UpdateOpts) error { mutate(); return nil }},
-				get: []objects.GetOption{objects.WithGetHeader("X-Dropped", "gone"), objects.WithGetOpts(objects.GetOpts{Headers: input}), func(c *objects.GetOpts) error { escapedHeaders = c.Headers; return nil }, func(*objects.GetOpts) error { mutate(); return nil }},
-				deletion: []objects.DeleteOption{objects.WithDeleteHeader("X-Dropped", "gone"), objects.WithDeleteOpts(objects.DeleteOpts{Headers: input, IgnoreMissing: &flag}), func(c *objects.DeleteOpts) error {
+				}), request.Custom(func(*objects.UpdateOpts) error { mutate(); return nil })},
+				get: []objects.GetOption{request.Header("X-Dropped", "gone"), objects.WithGetOpts(objects.GetOpts{Headers: input}), request.Custom(func(c *objects.GetOpts) error { escapedHeaders = c.Headers; return nil }), request.Custom(func(*objects.GetOpts) error { mutate(); return nil })},
+				deletion: []objects.DeleteOption{request.Header("X-Dropped", "gone"), objects.WithDeleteOpts(objects.DeleteOpts{Headers: input, IgnoreMissing: &flag}), request.Custom(func(c *objects.DeleteOpts) error {
 					escapedHeaders = c.Headers
 					escapedFlag = c.IgnoreMissing
 					return nil
-				}, func(*objects.DeleteOpts) error { mutate(); return nil }},
-				deleteAll: []objects.DeleteAllOption{objects.WithDeleteAllHeader("X-Dropped", "gone"), objects.WithDeleteAllOpts(objects.DeleteAllOpts{Headers: input}), func(c *objects.DeleteAllOpts) error { escapedHeaders = c.Headers; return nil }, func(*objects.DeleteAllOpts) error { mutate(); return nil }},
-				list:      []objects.ListOption{objects.WithListHeader("X-Dropped", "gone"), objects.WithListOpts(objects.ListOpts{Headers: input, MaxItems: 1}), func(c *objects.ListOpts) error { escapedHeaders = c.Headers; return nil }, func(*objects.ListOpts) error { mutate(); return nil }},
+				}), request.Custom(func(*objects.DeleteOpts) error { mutate(); return nil })},
+				deleteAll: []objects.DeleteAllOption{request.Header("X-Dropped", "gone"), objects.WithDeleteAllOpts(objects.DeleteAllOpts{Headers: input}), request.Custom(func(c *objects.DeleteAllOpts) error { escapedHeaders = c.Headers; return nil }), request.Custom(func(*objects.DeleteAllOpts) error { mutate(); return nil })},
+				list:      []objects.ListOption{request.Header("X-Dropped", "gone"), objects.WithListOpts(objects.ListOpts{Headers: input, MaxItems: 1}), request.Custom(func(c *objects.ListOpts) error { escapedHeaders = c.Headers; return nil }), request.Custom(func(*objects.ListOpts) error { mutate(); return nil })},
 			}
 			input["X-Owned"] = "caller"
 			text = "caller"
@@ -925,7 +926,7 @@ func TestMetadefObjectsOwnedPreparationAndSource(t *testing.T) {
 		}
 		client.MoreHeaders = map[string]string{"X-Source": "second"}
 		client.SetToken("second-token")
-		v, e = scope.Get(context.Background(), objectName, func(*objects.GetOpts) error { client.MoreHeaders["X-Source"] = "third"; return nil })
+		v, e = scope.Get(context.Background(), objectName, request.Custom(func(*objects.GetOpts) error { client.MoreHeaders["X-Source"] = "third"; return nil }))
 		if v == nil || e != nil {
 			t.Fatal(v, e)
 		}
@@ -1046,7 +1047,7 @@ func TestMetadefObjectsResponseOwnershipAndNativeHooks(t *testing.T) {
 				op = "DeleteAll"
 			}
 			if mode == "explicit true" || mode == "explicit false" {
-				opts.deletion = []objects.DeleteOption{objects.WithDeleteIgnoreMissing(mode == "explicit true")}
+				opts.deletion = []objects.DeleteOption{request.IgnoreMissing(mode == "explicit true")}
 			}
 			v, e := objectCall(objectScope(t, client, objectParent), context.Background(), op, objectName, opts)
 			if v != nil || calls.Load() != 1 || b.closes.Load() != 1 {

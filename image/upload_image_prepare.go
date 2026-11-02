@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"strings"
 	"unicode/utf8"
+
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 )
 
 func validateImageUploadField(key string) error {
@@ -28,7 +30,7 @@ func (s *Service) prepareImageUpload(ctx context.Context, input UploadImageReque
 	if input.Data == nil || isNilReader(input.Data) {
 		return nil, ImageUploadOpts{}, nil, uploadInvalid("image upload reader is required")
 	}
-	policy, err := applyTaskOptions(ImageUploadOpts{}, options, copyImageUploadOpts)
+	policy, err := applyTaskOptions(ImageUploadOpts{}, calls.Translate(options, imageUploadCalls), copyImageUploadOpts)
 	if err == nil {
 		policy.Headers, err = imageMutationHeaders(policy.Headers, false, "")
 	}

@@ -22,7 +22,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitFailureStates`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitCallback`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitHeaders`
 
 - Generic service WaitForState requires a target and applies exact case-insensitive ERROR, two-second polling and no SDK timeout. The returned model is the actual native observation, not a cached supplied Python Resource.
@@ -86,7 +86,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitFailureStates`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitCallback`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitHeaders`
 
 - SDK-owned WaitForDelete supplies a two-second interval and120-second SDK timeout. Actual404, successful nil or deleted status complete with error-only success. An ERROR observation does not itself complete or fail this deletion waiter; caller failure-state lists do not change deletion-state policy.
@@ -229,7 +229,7 @@ func run(ctx context.Context, cloud, imageID, target string, waitDelete bool) er
         image.WithImageRecordWaitTimeout(2*time.Minute),
         image.WithImageRecordWaitPollInterval(2*time.Second),
         image.WithImageRecordWaitCallback(callback),
-        image.WithImageRecordWaitHeader("X-Request-Source", "image-record-waits-example"))
+        request.Header("X-Request-Source", "image-record-waits-example"))
     if err := waitResult(ready, err); err != nil { return err }
 
     if waitDelete {

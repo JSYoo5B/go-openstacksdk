@@ -12,6 +12,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudlocation"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/microversions"
@@ -67,7 +68,7 @@ func (a *API) TaskRecords(ctx context.Context, imageID string, options ...TaskRe
 		operationCtx := rest.WithOperationGuard(ctx, ownGuard)
 		guard := func(c context.Context) error { return errors.Join(ownGuard(c), rest.CheckOperationGuard(c)) }
 		policy := TaskRecordsOpts{}
-		for _, apply := range options {
+		for _, apply := range calls.Translate(options, taskRecordsCalls) {
 			if err := guard(operationCtx); err != nil {
 				fail(err)
 				return

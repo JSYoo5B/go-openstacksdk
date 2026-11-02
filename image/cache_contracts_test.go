@@ -17,6 +17,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/image"
 	sdkimages "github.com/JSYoo5B/go-openstacksdk/image/v2/images"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -194,7 +195,7 @@ func TestImageCacheFixedRoutesAndClearTargets(t *testing.T) {
 		})
 		for i, op := range ops {
 			cloud.Provider.SetToken(fmt.Sprint("live-", i))
-			o := cacheContractOptions{common: []image.CacheOption{image.WithCacheHeader("X-Option", "ordinary")}, deletion: []image.CacheDeleteOption{image.WithCacheDeleteHeader("X-Option", "ordinary")}, clear: []image.ClearCacheOption{image.WithClearCacheHeader("X-Option", "ordinary")}}
+			o := cacheContractOptions{common: []image.CacheOption{request.Header("X-Option", "ordinary")}, deletion: []image.CacheDeleteOption{request.Header("X-Option", "ordinary")}, clear: []image.ClearCacheOption{request.Header("X-Option", "ordinary")}}
 			v, e := cacheContractCall(image.New(client), context.Background(), op.name, resource.ID("fixed"), o)
 			if e != nil || v == nil || v.status() != op.status || v.header().Get("X-Request-Id") != "actual-cache" || calls.Load() != int32(i+1) {
 				t.Fatal(op.name, v, e, calls.Load())
@@ -406,13 +407,13 @@ func TestImageCachePreparedOptionsAndLiveSource(t *testing.T) {
 				if origin == "source" {
 					client.MoreHeaders = map[string]string{key: ""}
 				} else if origin == "option" {
-					o.common = []image.CacheOption{image.WithCacheHeader(key, "cache")}
-					o.deletion = []image.CacheDeleteOption{image.WithCacheDeleteHeader(key, "cache")}
-					o.clear = []image.ClearCacheOption{image.WithClearCacheHeader(key, "queue")}
+					o.common = []image.CacheOption{request.Header(key, "cache")}
+					o.deletion = []image.CacheDeleteOption{request.Header(key, "cache")}
+					o.clear = []image.ClearCacheOption{request.Header(key, "queue")}
 				} else {
-					o.common = []image.CacheOption{func(*image.CacheOpts) error { client.MoreHeaders = map[string]string{key: "queue"}; return nil }}
-					o.deletion = []image.CacheDeleteOption{func(*image.CacheDeleteOpts) error { client.MoreHeaders = map[string]string{key: "queue"}; return nil }}
-					o.clear = []image.ClearCacheOption{func(*image.ClearCacheOpts) error { client.MoreHeaders = map[string]string{key: "queue"}; return nil }}
+					o.common = []image.CacheOption{request.Custom(func(*image.CacheOpts) error { client.MoreHeaders = map[string]string{key: "queue"}; return nil })}
+					o.deletion = []image.CacheDeleteOption{request.Custom(func(*image.CacheDeleteOpts) error { client.MoreHeaders = map[string]string{key: "queue"}; return nil })}
+					o.clear = []image.ClearCacheOption{request.Custom(func(*image.ClearCacheOpts) error { client.MoreHeaders = map[string]string{key: "queue"}; return nil })}
 				}
 				v, e := cacheContractCall(image.New(client), context.Background(), op.name, resource.Name("needle"), o)
 				if v != nil || !errors.Is(e, resource.ErrInvalidOption) || calls.Load() != 0 {
@@ -433,7 +434,7 @@ func TestImageCachePreparedOptionsAndLiveSource(t *testing.T) {
 			cause := errors.New("preflight cause")
 			want := error(resource.ErrInvalidOption)
 			expected := int32(0)
-			option := image.CacheOption(func(*image.CacheOpts) error { callbacks.Add(1); return nil })
+			option := request.Custom(func(*image.CacheOpts) error { callbacks.Add(1); return nil })
 			switch mode {
 			case "nil context":
 				ctx = nil
@@ -472,21 +473,21 @@ func TestImageCachePreparedOptionsAndLiveSource(t *testing.T) {
 			case "callback error":
 				expected = 1
 				want = cause
-				option = func(*image.CacheOpts) error { callbacks.Add(1); return cause }
+				option = request.Custom(func(*image.CacheOpts) error { callbacks.Add(1); return cause })
 			case "option aliases":
 				expected = 1
-				option = func(o *image.CacheOpts) error {
+				option = request.Custom(func(o *image.CacheOpts) error {
 					callbacks.Add(1)
 					o.Headers = map[string]string{"X-Option": "a", "x-option": "b"}
 					return nil
-				}
+				})
 			case "provider replacement":
 				expected = 1
-				option = func(*image.CacheOpts) error {
+				option = request.Custom(func(*image.CacheOpts) error {
 					callbacks.Add(1)
 					client.ProviderClient = &gophercloud.ProviderClient{}
 					return nil
-				}
+				})
 			}
 			s := image.New(client)
 			if mode == "nil service" {
@@ -524,14 +525,14 @@ func TestImageCachePreparedOptionsAndLiveSource(t *testing.T) {
 			}
 			return cacheContractWire(202, io.NopCloser(strings.NewReader(""))), nil
 		})
-		options := []image.CacheOption{helper, func(o *image.CacheOpts) error {
+		options := []image.CacheOption{helper, request.Custom(func(o *image.CacheOpts) error {
 			callbacks.Add(1)
 			retained = o
 			client.ResourceBase = "https://glance.invalid/later/v2/"
 			client.MoreHeaders = map[string]string{"X-Source": "later"}
 			client.SetToken("live")
 			return nil
-		}, func(o *image.CacheOpts) error {
+		}), request.Custom(func(o *image.CacheOpts) error {
 			callbacks.Add(1)
 			retained.Headers["X-Option"] = "retained mutation"
 			if o.Headers["X-Option"] != "owned" {
@@ -539,7 +540,7 @@ func TestImageCachePreparedOptionsAndLiveSource(t *testing.T) {
 			}
 			o.Headers["X-Extra"] = "last"
 			return nil
-		}}
+		})}
 		v, e := image.New(client).QueueImage(context.Background(), resource.ID("fixed"), options...)
 		if e != nil || v == nil || callbacks.Load() != 2 || calls.Load() != 1 || input["X-Option"] != "mutated" {
 			t.Fatal(v, e, callbacks.Load(), calls.Load())
@@ -560,13 +561,13 @@ func TestImageCachePreparedOptionsAndLiveSource(t *testing.T) {
 			}
 			return cacheContractWire(404, io.NopCloser(strings.NewReader("native404"))), nil
 		})
-		v, e := image.New(client).CacheDeleteImage(context.Background(), resource.ID("fixed"), image.WithCacheDeleteHeader("X-Dropped", "before"), helper, func(o *image.CacheDeleteOpts) error {
+		v, e := image.New(client).CacheDeleteImage(context.Background(), resource.ID("fixed"), request.Header("X-Dropped", "before"), helper, request.Custom(func(o *image.CacheDeleteOpts) error {
 			retained = o
 			if o.IgnoreMissing == nil || *o.IgnoreMissing {
 				t.Error(o)
 			}
 			return nil
-		}, func(o *image.CacheDeleteOpts) error {
+		}), request.Custom(func(o *image.CacheDeleteOpts) error {
 			*retained.IgnoreMissing = true
 			retained.Headers["X-Option"] = "retained"
 			if *o.IgnoreMissing || o.Headers["X-Option"] != "owned" {
@@ -574,7 +575,7 @@ func TestImageCachePreparedOptionsAndLiveSource(t *testing.T) {
 			}
 			o.Headers["X-Last"] = "last"
 			return nil
-		})
+		}))
 		if v != nil || !gophercloud.ResponseCodeIs(e, 404) || calls.Load() != 1 {
 			t.Fatal(v, e, calls.Load())
 		}
@@ -589,7 +590,7 @@ func TestImageCachePreparedOptionsAndLiveSource(t *testing.T) {
 			}
 			return cacheContractWire(204, io.NopCloser(strings.NewReader(""))), nil
 		})
-		v, e := image.New(client).ClearCache(context.Background(), image.WithClearCacheHeader("X-Dropped", "before"), helper, image.WithClearCacheHeaders(map[string]string{"X-Extra": "owned"}), image.WithClearCacheHeader("x-option", "last"), image.WithClearCacheTarget(image.QueueOnly))
+		v, e := image.New(client).ClearCache(context.Background(), request.Header("X-Dropped", "before"), helper, image.WithClearCacheHeaders(map[string]string{"X-Extra": "owned"}), request.Header("x-option", "last"), image.WithClearCacheTarget(image.QueueOnly))
 		if e != nil || v == nil || v.Target == nil || *v.Target != image.QueueOnly {
 			t.Fatal(v, e)
 		}
@@ -737,7 +738,7 @@ func TestImageCacheExactNameResolutionAndDirectIdentity(t *testing.T) {
 					bodies = append(bodies, body)
 					return cacheContractWire(code, body), nil
 				})
-				o := cacheContractOptions{common: []image.CacheOption{image.WithCacheHeader("X-Option", "lookup-and-cache")}, deletion: []image.CacheDeleteOption{image.WithCacheDeleteHeader("X-Option", "lookup-and-cache")}, clear: nil}
+				o := cacheContractOptions{common: []image.CacheOption{request.Header("X-Option", "lookup-and-cache")}, deletion: []image.CacheDeleteOption{request.Header("X-Option", "lookup-and-cache")}, clear: nil}
 				v, e := cacheContractCall(image.New(client), ctx, op.name, resource.Name(name), o)
 				success := mode == "unique last page" || mode == "UUID name"
 				if success {
@@ -926,11 +927,11 @@ func TestImageCacheProviderHooksAndCauseSafeMissing(t *testing.T) {
 			var o []image.CacheDeleteOption
 			switch mode {
 			case "explicit true":
-				o = []image.CacheDeleteOption{image.WithCacheDeleteIgnoreMissing(true)}
+				o = []image.CacheDeleteOption{request.IgnoreMissing(true)}
 			case "nil replacement":
-				o = []image.CacheDeleteOption{image.WithCacheDeleteIgnoreMissing(false), image.WithCacheDeleteOpts(image.CacheDeleteOpts{})}
+				o = []image.CacheDeleteOption{request.IgnoreMissing(false), image.WithCacheDeleteOpts(image.CacheDeleteOpts{})}
 			case "explicit false", "false native retry":
-				o = []image.CacheDeleteOption{image.WithCacheDeleteIgnoreMissing(false)}
+				o = []image.CacheDeleteOption{request.IgnoreMissing(false)}
 			}
 			v, e := image.New(client).CacheDeleteImage(context.Background(), resource.ID("fixed"), o...)
 			switch mode {

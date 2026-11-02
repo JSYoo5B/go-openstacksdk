@@ -9,6 +9,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -19,7 +20,7 @@ import (
 func (s *Service) AddImageLocation(ctx context.Context, ref resource.Ref, locationURL string, options ...AddImageLocationOption) (*AddImageLocationResult, error) {
 	options = append([]AddImageLocationOption(nil), options...)
 	var body, validationJSON json.RawMessage
-	prepared, err := s.prepareImageMutation(ctx, ref, nil, []ImageMutationOption{func(config *ImageMutationOpts) error {
+	prepared, err := s.prepareImageMutation(ctx, ref, nil, []ImageMutationOption{request.Custom(func(config *ImageMutationOpts) error {
 		if locationURL == "" || !utf8.ValidString(locationURL) {
 			return uploadInvalid("location URL must be nonempty valid UTF-8")
 		}
@@ -38,7 +39,7 @@ func (s *Service) AddImageLocation(ctx context.Context, ref resource.Ref, locati
 		body, err = json.Marshal(map[string]any{"url": locationURL, "validation_data": validation})
 		config.Headers = policy.Headers
 		return err
-	}})
+	})})
 	if err != nil {
 		return nil, wrapImageMutationError(ctx, "AddImageLocation", err)
 	}
@@ -70,11 +71,11 @@ func (s *Service) AddImageLocation(ctx context.Context, ref resource.Ref, locati
 // Any response-body or decoding failure returns nil with raw response evidence.
 func (s *Service) GetImageLocations(ctx context.Context, ref resource.Ref, options ...GetImageLocationsOption) (*ImageLocationsResult, error) {
 	options = append([]GetImageLocationsOption(nil), options...)
-	prepared, err := s.prepareImageMutation(ctx, ref, nil, []ImageMutationOption{func(config *ImageMutationOpts) error {
+	prepared, err := s.prepareImageMutation(ctx, ref, nil, []ImageMutationOption{request.Custom(func(config *ImageMutationOpts) error {
 		policy, err := parseGetImageLocationsOptions(options)
 		config.Headers = policy.Headers
 		return err
-	}})
+	})})
 	if err != nil {
 		return nil, wrapImageMutationError(ctx, "GetImageLocations", err)
 	}

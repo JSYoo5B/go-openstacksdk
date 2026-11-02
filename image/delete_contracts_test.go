@@ -16,6 +16,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/image"
 	sdkimages "github.com/JSYoo5B/go-openstacksdk/image/v2/images"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -193,7 +194,7 @@ func TestDeleteImageCompletePreflight(t *testing.T) {
 			case "invalid microversion":
 				client.Microversion = "2.10\nunsafe"
 			case "callback provider change", "callback type change", "callback nested404":
-				options = []image.DeleteImageOption{func(*image.DeleteImageOpts) error {
+				options = []image.DeleteImageOption{request.Custom(func(*image.DeleteImageOpts) error {
 					callbacks.Add(1)
 					if mode == "callback provider change" {
 						client.ProviderClient = &gophercloud.ProviderClient{HTTPClient: cloud.Provider.HTTPClient}
@@ -203,7 +204,7 @@ func TestDeleteImageCompletePreflight(t *testing.T) {
 						return errors.Join(cause, deleteNative404("callback://not-wire"))
 					}
 					return nil
-				}}
+				})}
 				if mode == "callback type change" {
 					want = resource.ErrUnsupported
 				} else if mode == "callback nested404" {
@@ -244,14 +245,14 @@ func TestDeleteImagePreparedSnapshotsAndSource(t *testing.T) {
 			}
 			return deleteWire(404, body), nil
 		}))
-		options := []image.DeleteImageOption{bulk, func(o *image.DeleteImageOpts) error {
+		options := []image.DeleteImageOption{bulk, request.Custom(func(o *image.DeleteImageOpts) error {
 			callbacks.Add(1)
 			retained = o
 			client.ResourceBase = cloud.Server.URL + "/later/v2/"
 			client.MoreHeaders = map[string]string{"X-Source": "later"}
 			cloud.Provider.SetToken("live-after-options")
 			return nil
-		}}
+		})}
 		v, err := image.New(client).DeleteImage(context.Background(), resource.ID("fixed"), options...)
 		if v != nil || !errors.Is(err, resource.ErrNotFound) || !gophercloud.ResponseCodeIs(err, 404) || callbacks.Load() != 1 || calls.Load() != 1 || body.closes.Load() != 1 || client.MoreHeaders["X-Source"] != "later" {
 			t.Fatal(v, err, callbacks.Load(), calls.Load(), body.closes.Load())
@@ -268,10 +269,10 @@ func TestDeleteImagePreparedSnapshotsAndSource(t *testing.T) {
 				options = []image.DeleteImageOption{image.WithDeleteImageStore(""), image.WithDeleteImageOpts(image.DeleteImageOpts{StoreID: &store})}
 				path = deletePrefix + "stores/fast/fixed"
 			case "empty bulk resets store and ignore":
-				options = []image.DeleteImageOption{image.WithDeleteImageStore("fast"), image.WithDeleteImageIgnoreMissing(false), image.WithDeleteImageOpts(image.DeleteImageOpts{})}
+				options = []image.DeleteImageOption{image.WithDeleteImageStore("fast"), request.IgnoreMissing(false), image.WithDeleteImageOpts(image.DeleteImageOpts{})}
 				code = 404
 			case "last explicit false wins":
-				options = []image.DeleteImageOption{image.WithDeleteImageIgnoreMissing(true), image.WithDeleteImageIgnoreMissing(false)}
+				options = []image.DeleteImageOption{request.IgnoreMissing(true), request.IgnoreMissing(false)}
 				code = 404
 			}
 			var calls atomic.Int32
@@ -347,7 +348,7 @@ func TestDeleteImageExactNameResolutionAndFailures(t *testing.T) {
 			var bodies []*deleteBody
 			var options []image.DeleteImageOption
 			if mode == "strict missing" {
-				options = []image.DeleteImageOption{image.WithDeleteImageIgnoreMissing(false)}
+				options = []image.DeleteImageOption{request.IgnoreMissing(false)}
 			} else if mode == "one exact match across all pages" {
 				options = []image.DeleteImageOption{image.WithDeleteImageStore("fast")}
 			}
@@ -451,7 +452,7 @@ func TestDeleteImageNotFoundPolicyAndClassification(t *testing.T) {
 					return errors.New("handled404 must bypass native retry")
 				}
 				path := deletePrefix + "images/fixed"
-				options := []image.DeleteImageOption{image.WithDeleteImageIgnoreMissing(ignore)}
+				options := []image.DeleteImageOption{request.IgnoreMissing(ignore)}
 				if store != "" {
 					path = deletePrefix + "stores/fast/fixed"
 					options = append(options, image.WithDeleteImageStore(store))

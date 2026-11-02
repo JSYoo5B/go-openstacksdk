@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.UpdateImage`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithUpdateImageOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithUpdateImageHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithUpdateImageHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithUpdateImageChange`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithUpdateImageChanges`
@@ -36,7 +36,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordOpts`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordAttributes`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordHeaders`
 
 - Required Ref uses direct safe literal ID without GET or existing exact native Name resolution then fixed PATCH; values/options validate before Name HTTP. v2.1 media and Accept are set on private client after Name, source untouched, actual 200 only.
@@ -85,14 +85,14 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.SetImageProperties`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithSetImagePropertiesOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithSetImagePropertiesHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithSetImagePropertiesHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithSetImagePropertiesProperty`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithSetImagePropertiesProperties`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.UpdateImagePropertiesRecord`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.UpdateImagePropertiesRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordPropertiesOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordPropertiesHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordPropertiesHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordProperty`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordProperties`
@@ -223,7 +223,7 @@ func updateQueuedImageExample(ctx context.Context, svc *image.Service, imageID, 
             Headers: map[string]string{"X-Example": "ordered-image-patch"},
         }),
         image.WithUpdateImageHeaders(map[string]string{"X-Trace-Id": "image-update"}),
-        image.WithUpdateImageHeader("X-Request-Id", "image-update-example"),
+        request.Header("X-Request-Id", "image-update-example"),
         image.WithUpdateImageChanges(image.ImagePatch{
             Op: "add", Path: "/build", Value: json.RawMessage(`"draft"`),
         }),
@@ -255,7 +255,7 @@ func setImagePropertiesExample(ctx context.Context, svc *image.Service, imageID 
             Headers: map[string]string{"X-Example": "property-upsert"},
         }),
         image.WithSetImagePropertiesHeaders(map[string]string{"X-Trace-Id": "image-properties"}),
-        image.WithSetImagePropertiesHeader("X-Request-Id", "image-properties-example"),
+        request.Header("X-Request-Id", "image-properties-example"),
         image.WithSetImagePropertiesProperties(map[string]json.RawMessage{
             "team": json.RawMessage(`"platform"`),
             "release": json.RawMessage(`"2026"`),

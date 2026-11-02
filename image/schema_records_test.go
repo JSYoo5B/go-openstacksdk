@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -51,9 +52,9 @@ func TestSchemaRecordsFixedKindsClassViewsAndOwnedWire(t *testing.T) {
 			option := func(config *GetSchemaOpts) error {
 				callbacks++
 				client.SetToken("after-option")
-				return WithGetSchemaHeader("X-Option", "owned")(config)
+				return applyCall(getSchemaCalls, request.Header("X-Option", "owned"), config)
 			}
-			got, err := New(client).GetSchemaRecord(context.Background(), tc.kind, option)
+			got, err := New(client).GetSchemaRecord(context.Background(), tc.kind, request.Custom(option))
 			if err != nil || got == nil || got.Kind != tc.kind || got.Resource == nil || got.Wire == nil || got.StatusCode != 200 || got.Header.Get("X-Task-Proof") != "actual" || string(got.Envelope) != raw || calls != 1 || callbacks != 1 {
 				t.Fatal(got, err, calls, callbacks)
 			}
@@ -327,7 +328,7 @@ func TestSchemaRecordsLocationOptionsAndPreflightBindings(t *testing.T) {
 			return taskCoreJSON(req, 201, `{"location":{"server":"ignored"},"project_id":"foreign","availability_zone":"foreign","name":12}`), nil
 		})
 		service := NewWithDependencies(client, Dependencies{CloudLocation: func() (resource.CloudLocation, error) { locations++; return facts, nil }})
-		got, err := service.GetSchemaRecord(context.Background(), SchemaMetadefProperty, option, func(config *GetSchemaOpts) error {
+		got, err := service.GetSchemaRecord(context.Background(), SchemaMetadefProperty, option, request.Custom(func(config *GetSchemaOpts) error {
 			callbacks++
 			if locations != 1 {
 				t.Fatal("options before location")
@@ -338,7 +339,7 @@ func TestSchemaRecordsLocationOptionsAndPreflightBindings(t *testing.T) {
 			config.Headers["X-Callback"] = "owned"
 			retained = config
 			return nil
-		})
+		}))
 		if err != nil || got == nil || got.Resource == nil || got.Wire == nil || locations != 1 || callbacks != 1 || calls != 1 {
 			t.Fatal(got, err, locations, callbacks, calls)
 		}
@@ -405,7 +406,7 @@ func TestSchemaRecordsLocationOptionsAndPreflightBindings(t *testing.T) {
 				}
 				return nil
 			}
-			got, err := service.GetSchemaRecord(ctx, kind, option, func(config *GetSchemaOpts) error { callbacks++; return nil })
+			got, err := service.GetSchemaRecord(ctx, kind, request.Custom(option), request.Custom(func(config *GetSchemaOpts) error { callbacks++; return nil }))
 			wantCallbacks, wantLocations := 0, 0
 			if strings.HasPrefix(mode, "callback ") {
 				wantCallbacks, wantLocations = 1, 1

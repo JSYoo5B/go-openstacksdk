@@ -9,6 +9,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -17,7 +18,7 @@ func TestImageSchemasOptionsSnapshotReplacementAndLastWins(t *testing.T) {
 	full := WithGetSchemaOpts(GetSchemaOpts{Headers: headers})
 	merge := WithGetSchemaHeaders(headers)
 	headers["X-Source"] = "mutated"
-	policy, err := parseGetSchemaOptions([]GetSchemaOption{WithGetSchemaHeader("X-Discard", "before"), full, WithGetSchemaHeader("x-source", "last"), WithGetSchemaHeaders(map[string]string{"X-Extra": "owned"})})
+	policy, err := parseGetSchemaOptions([]GetSchemaOption{request.Header("X-Discard", "before"), full, request.Header("x-source", "last"), WithGetSchemaHeaders(map[string]string{"X-Extra": "owned"})})
 	if err != nil || policy.Headers["X-Source"] != "last" || policy.Headers["X-Extra"] != "owned" || policy.Headers["X-Discard"] != "" {
 		t.Fatal("replacement/last-wins failed", policy, err)
 	}
@@ -40,17 +41,17 @@ func TestImageSchemasOptionsOwnRetainedCallbacksAndSlice(t *testing.T) {
 	var retained *GetSchemaOpts
 	var applies, calls int
 	options := make([]GetSchemaOption, 2)
-	options[0] = func(config *GetSchemaOpts) error {
+	options[0] = request.Custom(func(config *GetSchemaOpts) error {
 		applies++
 		if config.Headers == nil {
 			t.Fatal("default map not initialized")
 		}
 		config.Headers["X-Extra"] = "owned"
 		retained = config
-		options[1] = func(*GetSchemaOpts) error { t.Fatal("option slice not captured"); return nil }
+		options[1] = request.Custom(func(*GetSchemaOpts) error { t.Fatal("option slice not captured"); return nil })
 		return nil
-	}
-	options[1] = func(config *GetSchemaOpts) error {
+	})
+	options[1] = request.Custom(func(config *GetSchemaOpts) error {
 		applies++
 		retained.Headers["X-Extra"] = "late mutation"
 		if config.Headers["X-Extra"] != "owned" {
@@ -58,7 +59,7 @@ func TestImageSchemasOptionsOwnRetainedCallbacksAndSlice(t *testing.T) {
 		}
 		retained = config
 		return nil
-	}
+	})
 	client := deleteCoreClient(func(req *http.Request) (*http.Response, error) {
 		calls++
 		retained.Headers["X-Extra"] = "transport-time mutation"
@@ -73,7 +74,7 @@ func TestImageSchemasOptionsOwnRetainedCallbacksAndSlice(t *testing.T) {
 	}
 	cause := errors.New("custom option cause")
 	client = deleteCoreClient(func(*http.Request) (*http.Response, error) { t.Fatal("failed option emitted GET"); return nil, nil })
-	value, err = New(client).GetImageSchema(context.Background(), func(*GetSchemaOpts) error { return cause })
+	value, err = New(client).GetImageSchema(context.Background(), request.Custom(func(*GetSchemaOpts) error { return cause }))
 	if value != nil || !errors.Is(err, cause) {
 		t.Fatal("option cause lost", value, err)
 	}
@@ -87,7 +88,7 @@ func TestImageSchemasOptionsHeaderAuthorityAndAliases(t *testing.T) {
 			t.Fatal("invalid header accepted", headers, value, err)
 		}
 	}
-	policy, err := parseGetSchemaOptions([]GetSchemaOption{WithGetSchemaHeaders(map[string]string{"X-Alias": "same", "x-alias": "same"}), WithGetSchemaHeader("x-alias", "last")})
+	policy, err := parseGetSchemaOptions([]GetSchemaOption{WithGetSchemaHeaders(map[string]string{"X-Alias": "same", "x-alias": "same"}), request.Header("x-alias", "last")})
 	if err != nil || len(policy.Headers) != 1 || policy.Headers["X-Alias"] != "last" {
 		t.Fatal("safe alias merge failed", policy, err)
 	}
@@ -102,7 +103,7 @@ func TestImageSchemasOptionsParallelReusableHelpers(t *testing.T) {
 	headers := map[string]string{"X-Shared": "owned"}
 	full := WithGetSchemaOpts(GetSchemaOpts{Headers: headers})
 	merge := WithGetSchemaHeaders(headers)
-	one := WithGetSchemaHeader("X-Extra", "owned")
+	one := request.Header("X-Extra", "owned")
 	headers["X-Shared"] = "late"
 	for index := 0; index < 12; index++ {
 		t.Run(fmt.Sprint(index), func(t *testing.T) {

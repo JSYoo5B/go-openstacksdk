@@ -7,6 +7,8 @@ import (
 	"strings"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -17,57 +19,62 @@ type StageOpts struct {
 	Headers map[string]string
 }
 
-// StageOption configures a staging workflow. Later options replace earlier values.
-type StageOption func(*StageOpts) error
+// StageOption configures a staging workflow: WithStageOpts, WithStageSize,
+// WithStageHeaders (validates and merges the map), request.Header (one
+// ordinary header; case-insensitive later options win) or request.Custom over
+// *StageOpts. Later options replace earlier values. Other shared calls fail
+// with resource.ErrInvalidOption before HTTP.
+type StageOption = request.WriteCall
+
+var stageCalls = calls.Spec[StageOpts]{Header: setStageHeader}
 
 // WithStageOpts snapshots and replaces the complete options value.
 func WithStageOpts(value StageOpts) StageOption {
 	snapshot := copyStageOpts(value)
-	return func(config *StageOpts) error { *config = copyStageOpts(snapshot); return nil }
+	return request.Custom(func(config *StageOpts) error { *config = copyStageOpts(snapshot); return nil })
 }
 
 // WithStageSize sets the nonnegative expected byte count, including zero.
 func WithStageSize(value int64) StageOption {
-	return func(config *StageOpts) error { owned := value; config.Size = &owned; return nil }
+	return request.Custom(func(config *StageOpts) error { owned := value; config.Size = &owned; return nil })
 }
 
-// WithStageHeader adds an ordinary header. Case-insensitive later options win.
-func WithStageHeader(key, value string) StageOption {
-	return func(config *StageOpts) error {
-		headers, err := stageHeaders(map[string]string{key: value}, false, "")
-		if err != nil {
-			return err
-		}
-		if config.Headers == nil {
-			config.Headers = make(map[string]string)
-		}
-		for existing := range config.Headers {
-			if strings.EqualFold(existing, key) {
-				delete(config.Headers, existing)
-			}
-		}
-		for name, value := range headers {
-			config.Headers[name] = value
-		}
-		return nil
+// setStageHeader validates and adds one ordinary header, replacing earlier
+// case-insensitive aliases.
+func setStageHeader(config *StageOpts, key, value string) error {
+	headers, err := stageHeaders(map[string]string{key: value}, false, "")
+	if err != nil {
+		return err
 	}
+	if config.Headers == nil {
+		config.Headers = make(map[string]string)
+	}
+	for existing := range config.Headers {
+		if strings.EqualFold(existing, key) {
+			delete(config.Headers, existing)
+		}
+	}
+	for name, value := range headers {
+		config.Headers[name] = value
+	}
+	return nil
 }
 
 // WithStageHeaders snapshots and merges headers, rejecting conflicting case aliases.
 func WithStageHeaders(values map[string]string) StageOption {
 	snapshot := maps.Clone(values)
-	return func(config *StageOpts) error {
+	return request.Custom(func(config *StageOpts) error {
 		headers, err := stageHeaders(snapshot, false, "")
 		if err != nil {
 			return err
 		}
 		for key, value := range headers {
-			if err := WithStageHeader(key, value)(config); err != nil {
+			if err := setStageHeader(config, key, value); err != nil {
 				return err
 			}
 		}
 		return nil
-	}
+	})
 }
 
 func copyStageOpts(value StageOpts) StageOpts {
@@ -81,7 +88,7 @@ func copyStageOpts(value StageOpts) StageOpts {
 
 func parseStageOpts(options []StageOption) (StageOpts, error) {
 	var config StageOpts
-	for _, apply := range options {
+	for _, apply := range calls.Translate(options, stageCalls) {
 		if apply == nil {
 			return config, stageInvalid("nil stage option")
 		}

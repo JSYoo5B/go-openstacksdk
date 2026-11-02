@@ -13,6 +13,7 @@ import (
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	ns "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
@@ -111,17 +112,17 @@ func TestConnectionImageMetadefNamespacesShareClientAndPagingDefaults(t *testing
 	}
 	created, err := upper.API.MetadefNamespaces.Create(ctx, identity, ns.WithCreateHeaders(map[string]string{"X-Call": "namespaces"}), ns.WithCreateProtected(false), ns.WithCreateDescription("first\nsecond"))
 	check(created, err, 201)
-	fetched, err := version.MetadefNamespaces.Get(ctx, identity, ns.WithGetHeader("X-Call", "namespaces"), ns.WithGetResourceType("OS::Glance::Image"))
+	fetched, err := version.MetadefNamespaces.Get(ctx, identity, request.Header("X-Call", "namespaces"), ns.WithGetResourceType("OS::Glance::Image"))
 	check(fetched, err, 200)
 	created.Header.Set("X-Proof", "caller")
 	created.Body["namespace"][1] = '!'
 	if fetched.Header.Get("X-Proof") != "namespace-1" || *created.Namespace != "passive-other" || string(fetched.Body["namespace"]) != `"passive-other"` {
 		t.Fatal("separate responses alias raw/typed evidence")
 	}
-	updated, err := version.MetadefNamespaces.Update(ctx, identity, ns.WithUpdateHeader("X-Call", "namespaces"), ns.WithUpdateNamespace("OS::Renamed"), ns.WithUpdateProtected(false))
+	updated, err := version.MetadefNamespaces.Update(ctx, identity, request.Header("X-Call", "namespaces"), ns.WithUpdateNamespace("OS::Renamed"), ns.WithUpdateProtected(false))
 	check(updated, err, 200)
-	listOpts := []ns.ListOption{ns.WithListHeader("X-Call", "namespaces"), ns.WithListLimit(1), ns.WithListVisibility("public"), ns.WithListResourceTypes("OS::Glance::Image,OS::Nova::Flavor"), ns.WithListSortKey("namespace"), ns.WithListSortDir("asc")}
-	capOpts := append(append([]ns.ListOption(nil), listOpts...), ns.WithListMaxItems(1))
+	listOpts := []ns.ListOption{request.Header("X-Call", "namespaces"), request.Limit(1), ns.WithListVisibility("public"), ns.WithListResourceTypes("OS::Glance::Image,OS::Nova::Flavor"), ns.WithListSortKey("namespace"), ns.WithListSortDir("asc")}
+	capOpts := append(append([]ns.ListOption(nil), listOpts...), request.MaxItems(1))
 	sequence := version.MetadefNamespaces.List(ctx, capOpts...)
 	if calls != 3 {
 		t.Fatal("eager iterator")
@@ -142,7 +143,7 @@ func TestConnectionImageMetadefNamespacesShareClientAndPagingDefaults(t *testing
 	if all[1].Header.Get("X-Proof") != "namespace-5" {
 		t.Fatal("page headers alias")
 	}
-	deleted, err := version.MetadefNamespaces.Delete(ctx, identity, ns.WithDeleteHeader("X-Call", "namespaces"), ns.WithDeleteIgnoreMissing(false))
+	deleted, err := version.MetadefNamespaces.Delete(ctx, identity, request.Header("X-Call", "namespaces"), request.IgnoreMissing(false))
 	if err != nil || deleted == nil || deleted.Namespace != identity || deleted.StatusCode != 204 || string(deleted.Body) != "opaque acknowledgement" {
 		t.Fatalf("delete=%+v err=%v", deleted, err)
 	}

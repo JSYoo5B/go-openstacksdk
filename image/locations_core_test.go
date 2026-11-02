@@ -12,6 +12,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -46,7 +47,7 @@ func TestImageLocationsCoreFixedRoutesAndPassiveData(t *testing.T) {
 				}
 				return deleteCoreHTTP(202, body, http.Header{"Location": {"https://foreign.test/decoy"}}), nil
 			})
-			options := []AddImageLocationOption{WithAddImageLocationHeader("X-Extra", "owned")}
+			options := []AddImageLocationOption{request.Header("X-Extra", "owned")}
 			if supplied {
 				options = append(options, WithImageLocationValidation(" Future-Algorithm ", " Non-Hex AA "))
 			}
@@ -150,7 +151,7 @@ func TestImageLocationsCoreExactNameAndPreparedPayload(t *testing.T) {
 		}
 	})
 	client.MoreHeaders = map[string]string{"X-Snapshot": "captured"}
-	ack, err := New(client).AddImageLocation(context.Background(), resource.Name("exact"), "swift://literal", func(config *AddImageLocationOpts) error {
+	ack, err := New(client).AddImageLocation(context.Background(), resource.Name("exact"), "swift://literal", request.Custom(func(config *AddImageLocationOpts) error {
 		retained = config
 		config.Headers["X-Extra"] = "owned"
 		config.ValidationData = &ImageLocationValidation{OSHashAlgo: "algo", OSHashValue: "owned"}
@@ -158,7 +159,7 @@ func TestImageLocationsCoreExactNameAndPreparedPayload(t *testing.T) {
 		client.MoreHeaders["X-Snapshot"] = "late"
 		client.ProviderClient.SetToken("latest")
 		return nil
-	})
+	}))
 	if err != nil || ack == nil || ack.ImageID != "chosen" || calls != 3 {
 		t.Fatalf("ack=%+v err=%v calls=%d", ack, err, calls)
 	}
@@ -192,7 +193,7 @@ func TestImageLocationsCoreCompletePreflight(t *testing.T) {
 			calls++
 			return deleteCoreHTTP(202, http.NoBody, nil), nil
 		})
-		result, err := New(client).AddImageLocation(context.Background(), resource.Name("exact"), badURL, func(*AddImageLocationOpts) error { options++; return nil })
+		result, err := New(client).AddImageLocation(context.Background(), resource.Name("exact"), badURL, request.Custom(func(*AddImageLocationOpts) error { options++; return nil }))
 		if result != nil || !errors.Is(err, resource.ErrInvalidOption) || calls != 0 || options != 0 {
 			t.Fatalf("url=%q result=%v err=%v calls=%d options=%d", badURL, result, err, calls, options)
 		}
@@ -224,7 +225,7 @@ func TestImageLocationsCoreCompletePreflight(t *testing.T) {
 	}
 	for _, mutate := range []func(*gophercloud.ServiceClient){func(c *gophercloud.ServiceClient) { c.ProviderClient = &gophercloud.ProviderClient{} }, func(c *gophercloud.ServiceClient) { c.ResourceBase = "https://foreign.test/v2/" }} {
 		client := deleteCoreClient(func(*http.Request) (*http.Response, error) { t.Fatal("retargeted request"); return nil, nil })
-		result, err := New(client).GetImageLocations(context.Background(), resource.ID("fixed"), func(*GetImageLocationsOpts) error { mutate(client); return nil })
+		result, err := New(client).GetImageLocations(context.Background(), resource.ID("fixed"), request.Custom(func(*GetImageLocationsOpts) error { mutate(client); return nil }))
 		if result != nil || !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatalf("source change result=%v err=%v", result, err)
 		}

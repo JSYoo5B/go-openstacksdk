@@ -11,6 +11,7 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -56,10 +57,10 @@ func TestUpdateImageOptionsFactoriesAndNilPresence(t *testing.T) {
 			t.Fatal(v, e)
 		}
 	}
-	for _, option := range []UpdateImageOption{WithUpdateImageChange(ImagePatch{Op: "remove", Path: "/x", Value: json.RawMessage{}}), WithUpdateImageChanges(ImagePatch{Op: "remove", Path: "/x", Value: json.RawMessage{}}), WithUpdateImageOpts(UpdateImageOpts{Changes: []ImagePatch{{Op: "remove", Path: "/x", Value: json.RawMessage{}}}}), func(o *UpdateImageOpts) error {
+	for _, option := range []UpdateImageOption{WithUpdateImageChange(ImagePatch{Op: "remove", Path: "/x", Value: json.RawMessage{}}), WithUpdateImageChanges(ImagePatch{Op: "remove", Path: "/x", Value: json.RawMessage{}}), WithUpdateImageOpts(UpdateImageOpts{Changes: []ImagePatch{{Op: "remove", Path: "/x", Value: json.RawMessage{}}}}), request.Custom(func(o *UpdateImageOpts) error {
 		o.Changes = []ImagePatch{{Op: "remove", Path: "/x", Value: json.RawMessage{}}}
 		return nil
-	}} {
+	})} {
 		if v, e := service.UpdateImage(context.Background(), resource.Name("Name"), option); v != nil || !errors.Is(e, resource.ErrInvalidOption) {
 			t.Fatal("nonnil empty value collapsed", v, e)
 		}
@@ -96,11 +97,11 @@ func TestUpdateImageOptionsReplacementAppendAndTypedFields(t *testing.T) {
 		}
 		return taskCoreJSON(req, 200, "{}"), nil
 	}))
-	v, e := service.UpdateImage(context.Background(), resource.ID("id"), WithUpdateImageChange(ImagePatch{Op: "invalid"}), WithUpdateImageHeader("X-Erased", "old"), WithUpdateImageOpts(UpdateImageOpts{}), WithUpdateImageHeaders(map[string]string{"x-policy": "first"}), WithUpdateImageHeader("X-Policy", "last"), WithUpdateImageName(""), WithUpdateImageVisibility("future"), WithUpdateImageProtected(false), WithUpdateImageHidden(false), WithUpdateImageOwner(""), WithUpdateImageContainerFormat("future"), WithUpdateImageDiskFormat("future"), WithUpdateImageMinDisk(0), WithUpdateImageMinRAM(-1), WithUpdateImageTags(), WithUpdateImageFields(map[string]json.RawMessage{"z": json.RawMessage("[1]"), "a": json.RawMessage("null")}), WithUpdateImageField("a/b~", "literal"), WithUpdateImageRemoveField("name"))
+	v, e := service.UpdateImage(context.Background(), resource.ID("id"), WithUpdateImageChange(ImagePatch{Op: "invalid"}), request.Header("X-Erased", "old"), WithUpdateImageOpts(UpdateImageOpts{}), WithUpdateImageHeaders(map[string]string{"x-policy": "first"}), request.Header("X-Policy", "last"), WithUpdateImageName(""), WithUpdateImageVisibility("future"), WithUpdateImageProtected(false), WithUpdateImageHidden(false), WithUpdateImageOwner(""), WithUpdateImageContainerFormat("future"), WithUpdateImageDiskFormat("future"), WithUpdateImageMinDisk(0), WithUpdateImageMinRAM(-1), WithUpdateImageTags(), WithUpdateImageFields(map[string]json.RawMessage{"z": json.RawMessage("[1]"), "a": json.RawMessage("null")}), WithUpdateImageField("a/b~", "literal"), WithUpdateImageRemoveField("name"))
 	if v == nil || e != nil {
 		t.Fatal(v, e)
 	}
-	v, e = service.SetImageProperties(context.Background(), resource.ID("id"), WithSetImagePropertiesHeader("X-Erased", "old"), WithSetImagePropertiesProperty("erased", 1), WithSetImagePropertiesOpts(SetImagePropertiesOpts{}), WithSetImagePropertiesHeaders(map[string]string{"x-policy": "first"}), WithSetImagePropertiesHeader("X-Policy", "last"), WithSetImagePropertiesProperties(map[string]json.RawMessage{"erased": json.RawMessage("1")}), WithSetImagePropertiesProperties(map[string]json.RawMessage{"properties": json.RawMessage("false"), "readonly": json.RawMessage("0")}), WithSetImagePropertiesProperty("a", nil))
+	v, e = service.SetImageProperties(context.Background(), resource.ID("id"), request.Header("X-Erased", "old"), WithSetImagePropertiesProperty("erased", 1), WithSetImagePropertiesOpts(SetImagePropertiesOpts{}), WithSetImagePropertiesHeaders(map[string]string{"x-policy": "first"}), request.Header("X-Policy", "last"), WithSetImagePropertiesProperties(map[string]json.RawMessage{"erased": json.RawMessage("1")}), WithSetImagePropertiesProperties(map[string]json.RawMessage{"properties": json.RawMessage("false"), "readonly": json.RawMessage("0")}), WithSetImagePropertiesProperty("a", nil))
 	if v == nil || e != nil || calls != 2 {
 		t.Fatal(v, e, calls)
 	}
@@ -143,10 +144,10 @@ func TestUpdateImageOptionsCallbacksOwnRetainedState(t *testing.T) {
 		}
 		return nil
 	}
-	if v, e := service.UpdateImage(context.Background(), resource.ID("id"), first, second); v == nil || e != nil {
+	if v, e := service.UpdateImage(context.Background(), resource.ID("id"), request.Custom(first), request.Custom(second)); v == nil || e != nil {
 		t.Fatal(v, e)
 	}
-	if v, e := service.SetImageProperties(context.Background(), resource.ID("id"), func(o *SetImagePropertiesOpts) error {
+	if v, e := service.SetImageProperties(context.Background(), resource.ID("id"), request.Custom(func(o *SetImagePropertiesOpts) error {
 		callbacks++
 		if o.Headers == nil || o.Properties == nil {
 			t.Fatal("nil callback maps")
@@ -155,7 +156,7 @@ func TestUpdateImageOptionsCallbacksOwnRetainedState(t *testing.T) {
 		o.Properties["owned"] = json.RawMessage("null")
 		retainedSet = o
 		return nil
-	}, func(o *SetImagePropertiesOpts) error {
+	}), request.Custom(func(o *SetImagePropertiesOpts) error {
 		callbacks++
 		retainedSet.Headers["X-Policy"] = "changed"
 		retainedSet.Properties["owned"][0] = '0'
@@ -163,13 +164,13 @@ func TestUpdateImageOptionsCallbacksOwnRetainedState(t *testing.T) {
 			t.Fatal(o)
 		}
 		return nil
-	}); v == nil || e != nil {
+	})); v == nil || e != nil {
 		t.Fatal(v, e)
 	}
 	retained.Changes = nil
 	retainedSet.Properties = nil
 	cause := errors.New("callback")
-	if v, e := service.UpdateImage(context.Background(), resource.Name("Parent"), func(*UpdateImageOpts) error { return cause }); v != nil || !errors.Is(e, cause) {
+	if v, e := service.UpdateImage(context.Background(), resource.Name("Parent"), request.Custom(func(*UpdateImageOpts) error { return cause })); v != nil || !errors.Is(e, cause) {
 		t.Fatal(v, e)
 	}
 	if callbacks != 4 || calls != 2 {

@@ -9,6 +9,7 @@ import (
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/image"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
@@ -86,7 +87,7 @@ func TestConnectionImageSchemasShareNativeClientAndKeepDiscoveryPassive(t *testi
 	}
 	for index, get := range methods {
 		provider.SetToken(fmt.Sprintf("schema-%d", index))
-		result, err := get(ctx, image.WithGetSchemaOpts(image.GetSchemaOpts{Headers: map[string]string{"X-Opts": "replacement"}}), image.WithGetSchemaHeader("X-Call", "initial"), image.WithGetSchemaHeaders(map[string]string{"x-call": "override"}))
+		result, err := get(ctx, image.WithGetSchemaOpts(image.GetSchemaOpts{Headers: map[string]string{"X-Opts": "replacement"}}), request.Header("X-Call", "initial"), image.WithGetSchemaHeaders(map[string]string{"x-call": "override"}))
 		if err != nil || result == nil || result.Name == nil || *result.Name != "passive server name" || result.StatusCode != 200 || result.Header.Get("X-Proof") != fmt.Sprintf("schema-%d", index) || result.Required == nil || len(result.Required) != 0 || result.CreatedAt != nil || result.UpdatedAt != nil || result.Links != nil {
 			t.Fatalf("schema %d: result=%+v err=%v", index, result, err)
 		}

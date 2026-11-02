@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -189,14 +190,14 @@ func TestMetadefResourceTypesCoreCompletePreflight(t *testing.T) {
 	}
 	scope := rtCoreScope(t, client, "parent")
 	for _, name := range []string{"", "..", "bad/name", strings.Repeat("界", 81), string([]byte{0xff})} {
-		if _, err := scope.Create(ctx, name, func(*CreateOpts) error { callbacks++; return nil }); !errors.Is(err, resource.ErrInvalidOption) {
+		if _, err := scope.Create(ctx, name, request.Custom(func(*CreateOpts) error { callbacks++; return nil })); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatalf("invalid create name %q %v", name, err)
 		}
-		if _, err := scope.Delete(ctx, name, func(*DeleteOpts) error { callbacks++; return nil }); !errors.Is(err, resource.ErrInvalidOption) {
+		if _, err := scope.Delete(ctx, name, request.Custom(func(*DeleteOpts) error { callbacks++; return nil })); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatalf("invalid delete name %q %v", name, err)
 		}
 	}
-	for _, opts := range [][]CreateOption{{nil}, {WithCreatePrefix(strings.Repeat("界", 81))}, {WithCreatePropertiesTarget(string([]byte{0xff}))}, {WithCreateHeader("Content-Type", "text/plain")}} {
+	for _, opts := range [][]CreateOption{{nil}, {WithCreatePrefix(strings.Repeat("界", 81))}, {WithCreatePropertiesTarget(string([]byte{0xff}))}, {request.Header("Content-Type", "text/plain")}} {
 		if _, err := scope.Create(ctx, "child", opts...); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(err)
 		}
@@ -204,7 +205,7 @@ func TestMetadefResourceTypesCoreCompletePreflight(t *testing.T) {
 	if _, err := scope.Delete(ctx, "child", nil); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
-	for _, opts := range [][]ListOption{{nil}, {WithListMaxItems(-1)}, {WithListHeader("X-Auth-Token", "foreign")}} {
+	for _, opts := range [][]ListOption{{nil}, {request.MaxItems(-1)}, {request.Header("X-Auth-Token", "foreign")}} {
 		if _, err := api.All(ctx, opts...); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(err)
 		}
@@ -213,20 +214,20 @@ func TestMetadefResourceTypesCoreCompletePreflight(t *testing.T) {
 		}
 	}
 	cause := errors.New("callback")
-	if _, err := scope.Create(ctx, "child", func(*CreateOpts) error { return cause }); !errors.Is(err, cause) {
+	if _, err := scope.Create(ctx, "child", request.Custom(func(*CreateOpts) error { return cause })); !errors.Is(err, cause) {
 		t.Fatal(err)
 	}
-	if _, err := api.All(nil, func(*ListOpts) error { callbacks++; return nil }); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := api.All(nil, request.Custom(func(*ListOpts) error { callbacks++; return nil })); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
 	canceled, cancel := context.WithCancelCause(ctx)
 	custom := errors.New("custom cancel")
 	cancel(custom)
-	if _, err := scope.Delete(canceled, "child", func(*DeleteOpts) error { callbacks++; return nil }); !errors.Is(err, context.Canceled) || !errors.Is(err, custom) {
+	if _, err := scope.Delete(canceled, "child", request.Custom(func(*DeleteOpts) error { callbacks++; return nil })); !errors.Is(err, context.Canceled) || !errors.Is(err, custom) {
 		t.Fatal(err)
 	}
 	client.MoreHeaders = map[string]string{"Authorization": "secret"}
-	if _, err := api.All(ctx, func(*ListOpts) error { callbacks++; return nil }); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := api.All(ctx, request.Custom(func(*ListOpts) error { callbacks++; return nil })); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
 	client.MoreHeaders = nil
@@ -250,7 +251,7 @@ func TestMetadefResourceTypesCoreFiniteConsumptionAndRootEvidence(t *testing.T) 
 			return rtCoreJSON(req, 200, `{"resource_types":[{"name":"one"},{"name":false}],"next":false}`), nil
 		})
 		api := New(client)
-		option := ListOption(func(c *ListOpts) error { callbacks++; c.MaxItems = 1; return nil })
+		option := ListOption(request.Custom(func(c *ListOpts) error { callbacks++; c.MaxItems = 1; return nil }))
 		seq := api.List(context.Background(), option)
 		if calls != 0 || callbacks != 0 {
 			t.Fatal("iterator eager")
@@ -286,7 +287,7 @@ func TestMetadefResourceTypesCoreFiniteConsumptionAndRootEvidence(t *testing.T) 
 		for _, raw := range []string{`null`, `[]`, `{}`, `{"resource_type_associations":null}`, `{"resource_type_associations":{}}`, `{"resource_type_associations":[{}],"bad":`, "{\"resource_type_associations\":[],\"bad\":\"\xff\"}"} {
 			client := rtCoreClient(func(req *http.Request) (*http.Response, error) { return rtCoreJSON(req, 200, raw), nil })
 			scope := rtCoreScope(t, client, "parent")
-			values, err := scope.All(context.Background(), WithListMaxItems(1))
+			values, err := scope.All(context.Background(), request.MaxItems(1))
 			if values != nil || err == nil {
 				t.Fatalf("root %q %v %+v", raw, err, values)
 			}
@@ -307,7 +308,7 @@ func TestMetadefResourceTypesCoreFiniteConsumptionAndRootEvidence(t *testing.T) 
 		if err != nil || empty == nil || len(empty) != 0 {
 			t.Fatalf("empty %v %+v", err, empty)
 		}
-		values, err := api.All(context.Background(), WithListMaxItems(20))
+		values, err := api.All(context.Background(), request.MaxItems(20))
 		if err != nil || len(values) != 2 || calls != 2 {
 			t.Fatal("server finite list must not repeat", err, calls)
 		}
@@ -393,7 +394,7 @@ func TestMetadefResourceTypesCoreAcceptedBodiesAndMissingPolicy(t *testing.T) {
 	})
 	t.Run("strict and nested404 remain errors", func(t *testing.T) {
 		client := rtCoreClient(func(req *http.Request) (*http.Response, error) { return rtCoreJSON(req, 404, `missing`), nil })
-		ack, err := rtCoreScope(t, client, "parent").Delete(context.Background(), "child", WithDeleteIgnoreMissing(false))
+		ack, err := rtCoreScope(t, client, "parent").Delete(context.Background(), "child", request.IgnoreMissing(false))
 		if ack != nil || !gophercloud.ResponseCodeIs(err, 404) {
 			t.Fatalf("strict404 %v %+v", err, ack)
 		}
@@ -417,7 +418,7 @@ func TestMetadefResourceTypesCoreSourceLifetimeAndNativePolicies(t *testing.T) {
 				t.Fatal(err)
 			}
 			mutate(api, client)
-			if _, err = scope.Create(context.Background(), "child", func(*CreateOpts) error { callbacks++; return nil }); !errors.Is(err, resource.ErrInvalidOption) || calls != 0 || callbacks != 0 {
+			if _, err = scope.Create(context.Background(), "child", request.Custom(func(*CreateOpts) error { callbacks++; return nil })); !errors.Is(err, resource.ErrInvalidOption) || calls != 0 || callbacks != 0 {
 				t.Fatalf("retarget %v %d/%d", err, calls, callbacks)
 			}
 		}
@@ -437,7 +438,7 @@ func TestMetadefResourceTypesCoreSourceLifetimeAndNativePolicies(t *testing.T) {
 		})
 		api := New(client)
 		client.MoreHeaders = map[string]string{"X-Caller": "before"}
-		seq := api.List(context.Background(), func(*ListOpts) error { client.MoreHeaders["X-Caller"] = "after"; return nil })
+		seq := api.List(context.Background(), request.Custom(func(*ListOpts) error { client.MoreHeaders["X-Caller"] = "after"; return nil }))
 		for _, err := range seq {
 			if err != nil {
 				t.Fatal(err)

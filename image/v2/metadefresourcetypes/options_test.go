@@ -11,6 +11,7 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -35,14 +36,14 @@ func TestMetadefResourceTypesOptionsSnapshotsReplacementAndLastWins(t *testing.T
 	if err != nil || *second.Prefix != "before" || second.Headers["X-Caller"] != "before" {
 		t.Fatal("reused helper changed", err)
 	}
-	value, err := prepareCreate([]CreateOption{WithCreatePrefix("one"), WithCreatePropertiesTarget("two"), WithCreateHeader("X-Caller", "old"), WithCreateOpts(CreateOpts{}), WithCreateHeader("x-caller", "final"), WithCreatePrefix("")})
+	value, err := prepareCreate([]CreateOption{WithCreatePrefix("one"), WithCreatePropertiesTarget("two"), request.Header("X-Caller", "old"), WithCreateOpts(CreateOpts{}), request.Header("x-caller", "final"), WithCreatePrefix("")})
 	if err != nil || value.Prefix == nil || *value.Prefix != "" || value.PropertiesTarget != nil || !reflect.DeepEqual(value.Headers, map[string]string{"X-Caller": "final"}) {
 		t.Fatalf("whole replacement/last wins %v %+v", err, value)
 	}
 	mergedHeaders := map[string]string{"X-First": "one", "X-Caller": "first"}
 	merged := WithCreateHeaders(mergedHeaders)
 	mergedHeaders["X-First"] = "mutated"
-	value, err = prepareCreate([]CreateOption{merged, WithCreateHeader("x-caller", "last")})
+	value, err = prepareCreate([]CreateOption{merged, request.Header("x-caller", "last")})
 	if err != nil || value.Headers["X-First"] != "one" || value.Headers["X-Caller"] != "last" {
 		t.Fatal(err, value)
 	}
@@ -55,14 +56,14 @@ func TestMetadefResourceTypesOptionsSnapshotsReplacementAndLastWins(t *testing.T
 	if err != nil || *deletion.IgnoreMissing || deletion.Headers["X-Caller"] != "original" {
 		t.Fatal(err, deletion)
 	}
-	deletion, err = prepareDelete([]DeleteOption{deleteOption, WithDeleteOpts(DeleteOpts{}), WithDeleteHeader("X-Final", "yes")})
+	deletion, err = prepareDelete([]DeleteOption{deleteOption, WithDeleteOpts(DeleteOpts{}), request.Header("X-Final", "yes")})
 	if err != nil || deletion.IgnoreMissing != nil || !reflect.DeepEqual(deletion.Headers, map[string]string{"X-Final": "yes"}) {
 		t.Fatal(err, deletion)
 	}
 	listHeaders := map[string]string{"X-Caller": "original"}
 	listOption := WithListOpts(ListOpts{Headers: listHeaders, MaxItems: 3})
 	listHeaders["X-Caller"] = "changed"
-	listing, err := prepareList([]ListOption{listOption, WithListMaxItems(1), WithListHeader("x-caller", "final")})
+	listing, err := prepareList([]ListOption{listOption, request.MaxItems(1), request.Header("x-caller", "final")})
 	if err != nil || listing.MaxItems != 1 || listing.Headers["X-Caller"] != "final" {
 		t.Fatal(err, listing)
 	}
@@ -124,7 +125,7 @@ func TestMetadefResourceTypesOptionsCallbacksAndRequestOwnership(t *testing.T) {
 		}
 	})
 	scope := rtCoreScope(t, client, "parent")
-	first := CreateOption(func(c *CreateOpts) error {
+	first := CreateOption(request.Custom(func(c *CreateOpts) error {
 		callbacks++
 		if c.Headers == nil {
 			t.Fatal("default maps not initialized")
@@ -134,8 +135,8 @@ func TestMetadefResourceTypesOptionsCallbacksAndRequestOwnership(t *testing.T) {
 		c.PropertiesTarget = rtOptionPointer("image")
 		retained = c
 		return nil
-	})
-	second := CreateOption(func(c *CreateOpts) error {
+	}))
+	second := CreateOption(request.Custom(func(c *CreateOpts) error {
 		callbacks++
 		retained.Headers["X-Caller"] = "changed"
 		*retained.Prefix = "changed"
@@ -144,13 +145,13 @@ func TestMetadefResourceTypesOptionsCallbacksAndRequestOwnership(t *testing.T) {
 			t.Fatal("callbacks shared pointers")
 		}
 		return nil
-	})
+	}))
 	options := []CreateOption{first, second}
 	if _, err := scope.Create(context.Background(), "child", options...); err != nil {
 		t.Fatal(err)
 	}
 	// A copied option slice permits reusing a lazy sequence after caller mutation.
-	listingOptions := []ListOption{func(c *ListOpts) error { callbacks++; c.Headers["X-Caller"] = "owned"; retainedList = c; return nil }, func(c *ListOpts) error {
+	listingOptions := []ListOption{request.Custom(func(c *ListOpts) error { callbacks++; c.Headers["X-Caller"] = "owned"; retainedList = c; return nil }), request.Custom(func(c *ListOpts) error {
 		callbacks++
 		retainedList.Headers["X-Caller"] = "changed"
 		retainedList.MaxItems = 99
@@ -158,7 +159,7 @@ func TestMetadefResourceTypesOptionsCallbacksAndRequestOwnership(t *testing.T) {
 			t.Fatal("retained list config")
 		}
 		return nil
-	}}
+	})}
 	seq := New(client).List(context.Background(), listingOptions...)
 	listingOptions[0] = nil
 	for _, err := range seq {
@@ -166,13 +167,13 @@ func TestMetadefResourceTypesOptionsCallbacksAndRequestOwnership(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	_, err := scope.Delete(context.Background(), "child", func(c *DeleteOpts) error {
+	_, err := scope.Delete(context.Background(), "child", request.Custom(func(c *DeleteOpts) error {
 		callbacks++
 		c.Headers["X-Caller"] = "owned"
 		c.IgnoreMissing = rtOptionPointer(false)
 		retainedDelete = c
 		return nil
-	}, func(c *DeleteOpts) error {
+	}), request.Custom(func(c *DeleteOpts) error {
 		callbacks++
 		retainedDelete.Headers["X-Caller"] = "changed"
 		*retainedDelete.IgnoreMissing = true
@@ -180,7 +181,7 @@ func TestMetadefResourceTypesOptionsCallbacksAndRequestOwnership(t *testing.T) {
 			t.Fatal("retained delete config")
 		}
 		return nil
-	})
+	}))
 	if err != nil || calls != 3 || callbacks != 6 {
 		t.Fatal(err, calls, callbacks)
 	}
@@ -188,7 +189,7 @@ func TestMetadefResourceTypesOptionsCallbacksAndRequestOwnership(t *testing.T) {
 		source string
 		target string
 	}{{"X-Caller", "x-caller"}, {"x-caller", "X-Caller"}} {
-		v, err := prepareCreate([]CreateOption{WithCreateHeader(pair.source, "one"), WithCreateHeader(pair.target, "two")})
+		v, err := prepareCreate([]CreateOption{request.Header(pair.source, "one"), request.Header(pair.target, "two")})
 		if err != nil || len(v.Headers) != 1 || v.Headers["X-Caller"] != "two" {
 			t.Fatal(err, v)
 		}
@@ -251,7 +252,7 @@ func TestMetadefResourceTypesOptionsValidationAndDefaults(t *testing.T) {
 			t.Fatal(headers, err)
 		}
 	}
-	if _, err := prepareList([]ListOption{WithListMaxItems(-1)}); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := prepareList([]ListOption{request.MaxItems(-1)}); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
 	for _, which := range []string{"create", "delete", "list"} {
@@ -259,11 +260,11 @@ func TestMetadefResourceTypesOptionsValidationAndDefaults(t *testing.T) {
 		var err error
 		switch which {
 		case "create":
-			_, err = prepareCreate([]CreateOption{func(*CreateOpts) error { return cause }})
+			_, err = prepareCreate([]CreateOption{request.Custom(func(*CreateOpts) error { return cause })})
 		case "delete":
-			_, err = prepareDelete([]DeleteOption{func(*DeleteOpts) error { return cause }})
+			_, err = prepareDelete([]DeleteOption{request.Custom(func(*DeleteOpts) error { return cause })})
 		case "list":
-			_, err = prepareList([]ListOption{func(*ListOpts) error { return cause }})
+			_, err = prepareList([]ListOption{request.Custom(func(*ListOpts) error { return cause })})
 		}
 		if err != cause {
 			t.Fatal("callback cause identity lost", err)

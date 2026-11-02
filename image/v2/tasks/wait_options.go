@@ -7,6 +7,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -21,91 +23,96 @@ type TaskWaitOpts struct {
 	Headers       map[string]string
 }
 
-// TaskWaitOption configures the task waiter. Later options replace earlier values.
-type TaskWaitOption func(*TaskWaitOpts) error
+// TaskWaitOption configures the task waiter: WithTaskWaitOpts,
+// WithTaskWaitTimeout, WithUnlimitedTaskWait, WithTaskWaitPollInterval,
+// WithTaskWaitFailureStates, WithTaskWaitHeaders (validates and merges the
+// map), request.Header (one request header; case-insensitive later options
+// win) or request.Custom over *TaskWaitOpts. Later options replace earlier
+// values. Other shared calls fail with resource.ErrInvalidOption before HTTP.
+type TaskWaitOption = request.GetCall
+
+var taskWaitCalls = calls.Spec[TaskWaitOpts]{Header: setTaskWaitHeader}
 
 // WithTaskWaitOpts snapshots and replaces the complete task policy.
 func WithTaskWaitOpts(value TaskWaitOpts) TaskWaitOption {
 	snapshot := copyTaskWaitOpts(value)
-	return func(config *TaskWaitOpts) error { *config = copyTaskWaitOpts(snapshot); return nil }
+	return request.Custom(func(config *TaskWaitOpts) error { *config = copyTaskWaitOpts(snapshot); return nil })
 }
 
 func WithTaskWaitTimeout(value time.Duration) TaskWaitOption {
-	return func(config *TaskWaitOpts) error {
+	return request.Custom(func(config *TaskWaitOpts) error {
 		if value <= 0 {
 			return taskWaitInvalid("timeout must be positive")
 		}
 		owned := value
 		config.Timeout = &owned
 		return nil
-	}
+	})
 }
 
 // WithUnlimitedTaskWait removes the SDK timeout while retaining the parent context.
 func WithUnlimitedTaskWait() TaskWaitOption {
-	return func(config *TaskWaitOpts) error { owned := time.Duration(0); config.Timeout = &owned; return nil }
+	return request.Custom(func(config *TaskWaitOpts) error { owned := time.Duration(0); config.Timeout = &owned; return nil })
 }
 
 func WithTaskWaitPollInterval(value time.Duration) TaskWaitOption {
-	return func(config *TaskWaitOpts) error {
+	return request.Custom(func(config *TaskWaitOpts) error {
 		if value <= 0 {
 			return taskWaitInvalid("poll interval must be positive")
 		}
 		owned := value
 		config.PollInterval = &owned
 		return nil
-	}
+	})
 }
 
 // WithTaskWaitFailureStates replaces failure detection with exact,
 // case-insensitive states. No arguments disable failure detection.
 func WithTaskWaitFailureStates(states ...string) TaskWaitOption {
 	snapshot := append(make([]string, 0, len(states)), states...)
-	return func(config *TaskWaitOpts) error {
+	return request.Custom(func(config *TaskWaitOpts) error {
 		config.FailureStates = append(make([]string, 0, len(snapshot)), snapshot...)
 		return nil
-	}
+	})
 }
 
-// WithTaskWaitHeader adds a request header. Case-insensitive later options win.
+// setTaskWaitHeader adds a request header. Case-insensitive later options win.
 // Authentication, transport and version headers remain owned by the SDK.
-func WithTaskWaitHeader(key, value string) TaskWaitOption {
-	return func(config *TaskWaitOpts) error {
-		headers, err := taskWaitHeaders(map[string]string{key: value}, false, "")
-		if err != nil {
-			return err
-		}
-		if config.Headers == nil {
-			config.Headers = make(map[string]string)
-		}
-		for existing := range config.Headers {
-			if strings.EqualFold(existing, key) {
-				delete(config.Headers, existing)
-			}
-		}
-		for name, value := range headers {
-			config.Headers[name] = value
-		}
-		return nil
+func setTaskWaitHeader(config *TaskWaitOpts, key, value string) error {
+	headers, err := taskWaitHeaders(map[string]string{key: value}, false, "")
+	if err != nil {
+		return err
 	}
+	if config.Headers == nil {
+		config.Headers = make(map[string]string)
+	}
+	for existing := range config.Headers {
+		if strings.EqualFold(existing, key) {
+			delete(config.Headers, existing)
+		}
+	}
+	for name, value := range headers {
+		config.Headers[name] = value
+	}
+	return nil
 }
 
 // WithTaskWaitHeaders snapshots and merges headers, rejecting conflicting
 // case aliases within the supplied map.
 func WithTaskWaitHeaders(headers map[string]string) TaskWaitOption {
 	snapshot := maps.Clone(headers)
-	return func(config *TaskWaitOpts) error {
+	return request.Custom(func(config *TaskWaitOpts) error {
 		canonical, err := taskWaitHeaders(snapshot, false, "")
 		if err != nil {
 			return err
 		}
 		for key, value := range canonical {
-			if err := WithTaskWaitHeader(key, value)(config); err != nil {
+			if err := setTaskWaitHeader(config, key, value); err != nil {
 				return err
 			}
 		}
 		return nil
-	}
+	})
 }
 
 func copyTaskWaitOpts(value TaskWaitOpts) TaskWaitOpts {
@@ -126,7 +133,7 @@ func copyTaskWaitOpts(value TaskWaitOpts) TaskWaitOpts {
 
 func parseTaskWaitOpts(options []TaskWaitOption) (TaskWaitOpts, error) {
 	var value TaskWaitOpts
-	for _, apply := range options {
+	for _, apply := range calls.Translate(options, taskWaitCalls) {
 		if apply == nil {
 			return value, taskWaitInvalid("nil task wait option")
 		}

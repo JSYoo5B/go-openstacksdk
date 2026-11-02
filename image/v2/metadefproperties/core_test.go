@@ -13,6 +13,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -213,11 +214,11 @@ func TestMetadefPropertiesCoreCompletePreflight(t *testing.T) {
 	}
 	scope := propertyCoreScope(t, client, "OS::parent")
 	for _, name := range []string{"", ".", "..", "a/b", "a\\b", "a%b", "a?b", "a#b", "a\nb", string([]byte{0xff}), strings.Repeat("界", 81)} {
-		if _, err := scope.Create(context.Background(), name, func(*CreateOpts) error { callbacks++; return nil }); !errors.Is(err, resource.ErrInvalidOption) {
+		if _, err := scope.Create(context.Background(), name, request.Custom(func(*CreateOpts) error { callbacks++; return nil })); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatalf("bad child%q %v", name, err)
 		}
 	}
-	if _, err := scope.Get(nil, "child", func(*GetOpts) error { callbacks++; return nil }); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := scope.Get(nil, "child", request.Custom(func(*GetOpts) error { callbacks++; return nil })); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
 	ctx, cancel := context.WithCancelCause(context.Background())
@@ -247,10 +248,10 @@ func TestMetadefPropertiesCoreCompletePreflight(t *testing.T) {
 		},
 		func() error { _, e := scope.Delete(context.Background(), "child", nil); return e },
 		func() error {
-			_, e := scope.DeleteAll(context.Background(), WithDeleteAllHeader("Host", "foreign"))
+			_, e := scope.DeleteAll(context.Background(), request.Header("Host", "foreign"))
 			return e
 		},
-		func() error { _, e := scope.All(context.Background(), WithListMaxItems(-1)); return e },
+		func() error { _, e := scope.All(context.Background(), request.MaxItems(-1)); return e },
 	}
 	for i, check := range checks {
 		if err := check(); !errors.Is(err, resource.ErrInvalidOption) {
@@ -292,7 +293,7 @@ func TestMetadefPropertiesCoreOrderedDictionaryConsumption(t *testing.T) {
 		response.Header.Set("Link", "<https://foreign.test>; rel=next")
 		return response, nil
 	}), "parent")
-	seq := scope.List(context.Background(), func(*ListOpts) error { callbacks++; return nil }, WithListMaxItems(1))
+	seq := scope.List(context.Background(), request.Custom(func(*ListOpts) error { callbacks++; return nil }), request.MaxItems(1))
 	if calls != 0 || callbacks != 0 {
 		t.Fatal("iterator eager")
 	}
@@ -342,7 +343,7 @@ func TestMetadefPropertiesCoreOrderedDictionaryConsumption(t *testing.T) {
 		{"{\"properties\":{},\"unknown\":\"\xff\"}", 1, false},
 	} {
 		testScope := propertyCoreScope(t, propertyCoreClient(func(req *http.Request) (*http.Response, error) { return propertyCoreJSON(req, 200, sample.body), nil }), "parent")
-		rows, err := testScope.All(context.Background(), WithListMaxItems(sample.cap))
+		rows, err := testScope.All(context.Background(), request.MaxItems(sample.cap))
 		if sample.good {
 			if err != nil || rows == nil {
 				t.Fatalf("goodfinite %+v %v", rows, err)
@@ -410,7 +411,7 @@ func TestMetadefPropertiesCoreAcceptedBodiesAndMissingPolicy(t *testing.T) {
 		if ack, err := scope.Delete(context.Background(), "child"); ack != nil || err != nil || hooks != 0 {
 			t.Fatalf("default %+v %v hooks%d", ack, err, hooks)
 		}
-		if ack, err := scope.Delete(context.Background(), "child", WithDeleteIgnoreMissing(false)); ack != nil || !errors.Is(err, retryCause) || hooks != 1 || !gophercloud.ResponseCodeIs(err, 404) {
+		if ack, err := scope.Delete(context.Background(), "child", request.IgnoreMissing(false)); ack != nil || !errors.Is(err, retryCause) || hooks != 1 || !gophercloud.ResponseCodeIs(err, 404) {
 			t.Fatalf("strict %+v %v hooks%d", ack, err, hooks)
 		}
 		if ack, err := scope.DeleteAll(context.Background()); ack != nil || !errors.Is(err, retryCause) || hooks != 2 {
@@ -439,7 +440,7 @@ func TestMetadefPropertiesCoreLifetimeSourceAndNativeRetryBoundaries(t *testing.
 			client := propertyCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return propertyCoreJSON(req, 200, `{}`), nil })
 			scope := propertyCoreScope(t, client, "parent")
 			mutate(client)
-			if _, err := scope.Get(context.Background(), "child", func(*GetOpts) error { callbacks++; return nil }); !errors.Is(err, resource.ErrInvalidOption) || calls != 0 || callbacks != 0 {
+			if _, err := scope.Get(context.Background(), "child", request.Custom(func(*GetOpts) error { callbacks++; return nil })); !errors.Is(err, resource.ErrInvalidOption) || calls != 0 || callbacks != 0 {
 				t.Fatalf("drift beforecallback %v calls%d callbacks%d", err, calls, callbacks)
 			}
 		})
@@ -456,12 +457,12 @@ func TestMetadefPropertiesCoreLifetimeSourceAndNativeRetryBoundaries(t *testing.
 		client.MoreHeaders = map[string]string{"X-Source": "initial"}
 		scope := propertyCoreScope(t, client, "parent")
 		client.MoreHeaders["X-Source"] = "latest"
-		if _, err := scope.Get(context.Background(), "child", func(o *GetOpts) error {
+		if _, err := scope.Get(context.Background(), "child", request.Custom(func(o *GetOpts) error {
 			client.MoreHeaders["X-Source"] = "callback-change"
 			client.ProviderClient.TokenID = "after"
 			o.Headers["X-Option"] = "chosen"
 			return nil
-		}); err != nil || calls != 1 {
+		})); err != nil || calls != 1 {
 			t.Fatal(err)
 		}
 	})
@@ -469,7 +470,7 @@ func TestMetadefPropertiesCoreLifetimeSourceAndNativeRetryBoundaries(t *testing.
 		calls := 0
 		client := propertyCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return propertyCoreJSON(req, 200, `{}`), nil })
 		scope := propertyCoreScope(t, client, "parent")
-		if _, err := scope.Get(context.Background(), "child", func(*GetOpts) error { client.ResourceBase = "https://example.test/changed/"; return nil }); !errors.Is(err, resource.ErrInvalidOption) || calls != 0 {
+		if _, err := scope.Get(context.Background(), "child", request.Custom(func(*GetOpts) error { client.ResourceBase = "https://example.test/changed/"; return nil })); !errors.Is(err, resource.ErrInvalidOption) || calls != 0 {
 			t.Fatalf("callback drift %v calls%d", err, calls)
 		}
 	})

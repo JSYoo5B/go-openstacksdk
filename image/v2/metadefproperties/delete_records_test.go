@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -53,7 +54,7 @@ func TestMetadefPropertyDeleteRecordsFixedRoutesAndOpaqueStatuses(t *testing.T) 
 					return response, nil
 				})
 				scope := propertyRecordScope(t, client, Dependencies{})
-				options := propertyRecordDeleteOptions{member: []DeleteOption{WithDeleteHeader("X-Option", "owned")}, all: []DeleteAllOption{WithDeleteAllHeader("X-Option", "owned")}}
+				options := propertyRecordDeleteOptions{member: []DeleteOption{request.Header("X-Option", "owned")}, all: []DeleteAllOption{request.Header("X-Option", "owned")}}
 				ack, err := propertyRecordDeleteCall(scope, context.Background(), operation.all, RecordRequest{ID: propertyRecordChild}, options)
 				if err != nil || ack == nil || ack.Namespace != propertyRecordParent || ack.StatusCode != code || string(ack.Body) != body || ack.Header.Get("X-Proof") != "original" || calls != 1 {
 					t.Fatal("opaque actual receipt lost", ack, err, calls)
@@ -87,11 +88,11 @@ func TestMetadefPropertyDeleteRecordResourceIdentityIsSnapshotAndOnlySelection(t
 				}
 				return propertyCoreJSON(req, 202, `{"name":"response name","namespace_name":"response parent","deleted":900719925474099312345}`), nil
 			})
-			ack, err := propertyRecordScope(t, client, Dependencies{}).DeleteRecord(context.Background(), RecordRequest{Resource: seed}, func(*DeleteOpts) error {
+			ack, err := propertyRecordScope(t, client, Dependencies{}).DeleteRecord(context.Background(), RecordRequest{Resource: seed}, request.Custom(func(*DeleteOpts) error {
 				seed.Body["id"] = json.RawMessage(`"caller changed"`)
 				seed.Body["name"] = json.RawMessage(`"caller changed"`)
 				return nil
-			})
+			}))
 			if err != nil || ack == nil || ack.Name == nil || *ack.Name != check.identity || ack.Namespace != propertyRecordParent || calls != 1 || ack.StatusCode != 202 {
 				t.Fatal(ack, err, calls)
 			}
@@ -124,10 +125,10 @@ func TestMetadefPropertyDeleteRecordsMissingReceiptsAndNativeErrors(t *testing.T
 			scope := propertyRecordScope(t, client, Dependencies{})
 			options := propertyRecordDeleteOptions{}
 			if mode == "strict member missing" {
-				options.member = []DeleteOption{WithDeleteIgnoreMissing(false)}
+				options.member = []DeleteOption{request.IgnoreMissing(false)}
 			}
 			if mode == "explicit handled missing" {
-				options.member = []DeleteOption{WithDeleteIgnoreMissing(true)}
+				options.member = []DeleteOption{request.IgnoreMissing(true)}
 			}
 			ack, err := propertyRecordDeleteCall(scope, context.Background(), mode == "bulk missing", RecordRequest{ID: propertyRecordChild}, options)
 			if calls != 1 {
@@ -179,7 +180,7 @@ func TestMetadefPropertyDeleteRecordCompleteInputPreflight(t *testing.T) {
 		t.Run(check.name, func(t *testing.T) {
 			calls, callbacks := 0, 0
 			client := propertyCoreClient(func(*http.Request) (*http.Response, error) { calls++; return nil, nil })
-			ack, err := propertyRecordScope(t, client, Dependencies{}).DeleteRecord(context.Background(), check.input, func(*DeleteOpts) error { callbacks++; return nil })
+			ack, err := propertyRecordScope(t, client, Dependencies{}).DeleteRecord(context.Background(), check.input, request.Custom(func(*DeleteOpts) error { callbacks++; return nil }))
 			if ack != nil || !errors.Is(err, resource.ErrInvalidOption) || calls != 0 || callbacks != 0 {
 				t.Fatal("invalid selection invoked callback or HTTP", ack, err, calls, callbacks)
 			}
@@ -227,7 +228,7 @@ func TestMetadefPropertyDeleteRecordsSourceFirstAndPerCallbackGuard(t *testing.T
 					scope.namespace = propertyRecordParent
 					return nil
 				}
-				options := propertyRecordDeleteOptions{member: []DeleteOption{func(*DeleteOpts) error { return mutate() }, func(*DeleteOpts) error { return restore() }}, all: []DeleteAllOption{func(*DeleteAllOpts) error { return mutate() }, func(*DeleteAllOpts) error { return restore() }}}
+				options := propertyRecordDeleteOptions{member: []DeleteOption{request.Custom(func(*DeleteOpts) error { return mutate() }), request.Custom(func(*DeleteOpts) error { return restore() })}, all: []DeleteAllOption{request.Custom(func(*DeleteAllOpts) error { return mutate() }), request.Custom(func(*DeleteAllOpts) error { return restore() })}}
 				if mode == "nil option" {
 					options = propertyRecordDeleteOptions{member: []DeleteOption{nil}, all: []DeleteAllOption{nil}}
 				}
@@ -268,19 +269,19 @@ func TestMetadefPropertyDeleteRecordOptionsOwnPointersHeadersAndIdentity(t *test
 	full := WithDeleteOpts(DeleteOpts{Headers: headers, IgnoreMissing: &ignore})
 	bulkOption := WithDeleteHeaders(bulk)
 	var retained *DeleteOpts
-	options := []DeleteOption{WithDeleteHeader("X-Replaced", "old"), full, bulkOption,
-		func(config *DeleteOpts) error {
+	options := []DeleteOption{request.Header("X-Replaced", "old"), full, bulkOption,
+		request.Custom(func(config *DeleteOpts) error {
 			retained = config
 			seed.Body["id"] = json.RawMessage(`"caller changed"`)
 			client.MoreHeaders["X-Source"] = "caller changed"
 			return nil
-		},
-		func(*DeleteOpts) error {
+		}),
+		request.Custom(func(*DeleteOpts) error {
 			retained.Headers["X-Full"] = "retained changed"
 			*retained.IgnoreMissing = true
 			return nil
-		},
-		WithDeleteHeader("x-final", "last"),
+		}),
+		request.Header("x-final", "last"),
 	}
 	ignore = true
 	headers["X-Full"] = "caller changed"

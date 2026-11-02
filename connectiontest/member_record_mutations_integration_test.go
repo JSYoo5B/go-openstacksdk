@@ -14,6 +14,7 @@ import (
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/image"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -76,28 +77,28 @@ func TestConnectionOwnedImageMemberFamilySharesSourceLocationAndActualReceipts(t
 		t.Fatal("member family does not share connection binding")
 	}
 	parent := resource.ID("parent")
-	added, err := conn.AddImageMemberRecord(context.Background(), parent, image.WithImageMemberRecordMemberID("submitted"), image.WithImageMemberRecordStatus("future"), image.WithImageMemberRecordWriteHeader("X-Call", "member-family"))
+	added, err := conn.AddImageMemberRecord(context.Background(), parent, image.WithImageMemberRecordMemberID("submitted"), image.WithImageMemberRecordStatus("future"), request.Header("X-Call", "member-family"))
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	if added == nil || string(added.Resource.Body["id"]) != `"returned-add"` || string(added.Resource.Body["status"]) != `"future"` {
 		t.Fatal(added)
 	}
-	fetched, err := conn.GetImageMemberRecord(context.Background(), parent, image.ImageMemberRecordRequest{Record: added}, image.WithImageMemberHeader("X-Call", "member-family"))
+	fetched, err := conn.GetImageMemberRecord(context.Background(), parent, image.ImageMemberRecordRequest{Record: added}, request.Header("X-Call", "member-family"))
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	if fetched == nil || string(fetched.Resource.Body["id"]) != `"returned-get"` || string(fetched.Resource.Body["created_at"]) != `null` || string(fetched.Wire.Body["image_id"]) != `"foreign"` {
 		t.Fatal(fetched)
 	}
-	updated, err := conn.UpdateImageMemberRecord(context.Background(), parent, image.ImageMemberRecordRequest{Record: fetched}, image.WithImageMemberRecordStatus(nil), image.WithImageMemberRecordWriteHeader("X-Call", "member-family"))
+	updated, err := conn.UpdateImageMemberRecord(context.Background(), parent, image.ImageMemberRecordRequest{Record: fetched}, image.WithImageMemberRecordStatus(nil), request.Header("X-Call", "member-family"))
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	if updated == nil || updated.Wire != nil || string(updated.Resource.Body["id"]) != `"returned-get"` || string(updated.Resource.Body["status"]) != `null` {
 		t.Fatal(updated)
 	}
-	ack, err := conn.RemoveImageMemberRecord(context.Background(), parent, image.ImageMemberRecordRequest{Record: updated}, image.WithRemoveImageMemberHeader("X-Call", "member-family"))
+	ack, err := conn.RemoveImageMemberRecord(context.Background(), parent, image.ImageMemberRecordRequest{Record: updated}, request.Header("X-Call", "member-family"))
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

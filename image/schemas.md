@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetImagesSchema`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeaders`
 
 - GetImagesSchema performs bodyless/query-free GET at captured base plus fixed schemas/images, requires actual200 and no Ref/ID/Name lookup. The pinned controller uses Controller.images with raw(); reported top-level additionalProperties is absent. Plural getters return one discovery document, never resource lists or generic pagination. Returned passive Name need not equal the fixed route.
@@ -46,7 +46,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetImageSchema`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeaders`
 
 - GetImageSchema performs bodyless/query-free GET at captured base plus fixed schemas/image, requires actual200 and no Ref/ID/Name lookup. The pinned controller uses Controller.image with raw(); reported top-level additionalProperties is object {type:string}. Plural getters return one discovery document, never resource lists or generic pagination. Returned passive Name need not equal the fixed route.
@@ -78,7 +78,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetMembersSchema`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeaders`
 
 - GetMembersSchema performs bodyless/query-free GET at captured base plus fixed schemas/members, requires actual200 and no Ref/ID/Name lookup. The pinned controller uses Controller.members with minimal(); reported top-level additionalProperties is absent. Plural getters return one discovery document, never resource lists or generic pagination. Returned passive Name need not equal the fixed route.
@@ -110,7 +110,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetMemberSchema`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeaders`
 
 - GetMemberSchema performs bodyless/query-free GET at captured base plus fixed schemas/member, requires actual200 and no Ref/ID/Name lookup. The pinned controller uses Controller.member with minimal(); reported top-level additionalProperties is absent. Plural getters return one discovery document, never resource lists or generic pagination. Returned passive Name need not equal the fixed route.
@@ -142,7 +142,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetTasksSchema`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetSchemaRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.NewWithDependencies`
@@ -181,7 +181,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetTaskSchema`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetSchemaRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.NewWithDependencies`
@@ -220,7 +220,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetMetadefNamespaceSchema`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetSchemaRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.NewWithDependencies`
@@ -259,7 +259,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetMetadefNamespacesSchema`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetSchemaRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.NewWithDependencies`
@@ -298,7 +298,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetMetadefResourceTypeSchema`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetSchemaRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.NewWithDependencies`
@@ -337,7 +337,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetMetadefResourceTypesSchema`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetSchemaRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.NewWithDependencies`
@@ -376,7 +376,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetMetadefObjectSchema`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetSchemaRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.NewWithDependencies`
@@ -415,7 +415,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetMetadefObjectsSchema`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetSchemaRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.NewWithDependencies`
@@ -454,7 +454,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetMetadefPropertySchema`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetSchemaRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.NewWithDependencies`
@@ -493,7 +493,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetMetadefPropertiesSchema`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetSchemaRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.NewWithDependencies`
@@ -532,7 +532,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetMetadefTagSchema`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetSchemaRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.NewWithDependencies`
@@ -571,7 +571,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetMetadefTagsSchema`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetSchemaRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.NewWithDependencies`
@@ -620,7 +620,7 @@ func getAllSchemas(ctx context.Context, service *image.Service) (map[string]*ima
         image.WithGetSchemaOpts(image.GetSchemaOpts{
             Headers: map[string]string{"X-Request-Source": "example"},
         }),
-        image.WithGetSchemaHeader("X-Schema-Request", "discovery"),
+        request.Header("X-Schema-Request", "discovery"),
         image.WithGetSchemaHeaders(map[string]string{"X-Client-Workflow": "schemas"}),
     }
     getters := []struct {

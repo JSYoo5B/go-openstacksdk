@@ -15,6 +15,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/image/v2/images"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -152,7 +153,7 @@ func TestPythonImageTasksRecordsLocalFiltersUnknownAndQueryControls(t *testing.T
 	api, _ := imageTasksAPI(t, &calls, func(*http.Request) *http.Response {
 		return imageTasksWire(200, `{"tasks":[{"id":"one","image_id":"parent","input":{"nested":{"enabled":1,"extra":false}},"deleted":1},{"id":"two","image_id":"parent","input":{},"deleted":false}]}`)
 	})
-	rows, err := api.AllTaskRecords(context.Background(), "parent", images.WithTaskRecordsQuery("input", map[string]any{"nested": map[string]any{"enabled": true}}), images.WithTaskRecordsQuery("deleted", true), images.WithTaskRecordsQuery("x_unknown", false), images.WithTaskRecordsPaginated(false))
+	rows, err := api.AllTaskRecords(context.Background(), "parent", request.Query("input", map[string]any{"nested": map[string]any{"enabled": true}}), request.Query("deleted", true), request.Query("x_unknown", false), request.Paginated(false))
 	if err != nil || len(rows) != 1 || len(calls) != 1 || calls[0].query != "" {
 		t.Fatal(rows, err, calls)
 	}
@@ -165,7 +166,7 @@ func TestPythonImageTasksRecordsLocalFiltersUnknownAndQueryControls(t *testing.T
 		api, _ = imageTasksAPI(t, &calls, func(*http.Request) *http.Response {
 			return imageTasksWire(200, `{"tasks":[{"image_id":"parent","result":`+item.actual+`}]}`)
 		})
-		rows, err = api.AllTaskRecords(context.Background(), "parent", images.WithTaskRecordsQuery("result", json.RawMessage(item.filter)))
+		rows, err = api.AllTaskRecords(context.Background(), "parent", request.Query("result", json.RawMessage(item.filter)))
 		if (len(rows) == 1) != item.match || (err == nil) != item.valid {
 			t.Fatal(item, rows, err)
 		}
@@ -185,12 +186,12 @@ func TestPythonImageTasksRecordsMarkerCapsAndUnconsumedRows(t *testing.T) {
 		}
 		return imageTasksWire(200, `{"tasks":[{"id":"first","image_id":"parent"}]}`)
 	})
-	rows, err := api.AllTaskRecords(context.Background(), "parent", images.WithTaskRecordsLimit(5))
+	rows, err := api.AllTaskRecords(context.Background(), "parent", request.Limit(5))
 	if err != nil || len(rows) != 1 || len(calls) != 2 || !strings.Contains(calls[1].query, "marker=first") {
 		t.Fatal(rows, err, calls)
 	}
 	calls = nil
-	rows, err = api.AllTaskRecords(context.Background(), "parent", images.WithTaskRecordsLimit(5), images.WithTaskRecordsPaginated(false))
+	rows, err = api.AllTaskRecords(context.Background(), "parent", request.Limit(5), request.Paginated(false))
 	if err != nil || len(rows) != 1 || len(calls) != 1 {
 		t.Fatal(rows, err, calls)
 	}
@@ -198,13 +199,13 @@ func TestPythonImageTasksRecordsMarkerCapsAndUnconsumedRows(t *testing.T) {
 	api, _ = imageTasksAPI(t, &calls, func(*http.Request) *http.Response {
 		return imageTasksWire(200, `{"tasks":[{"id":"skip","image_id":"other"},{"id":"keep","image_id":"parent"},{"image_id":"parent","cls":null}],"next":"https://foreign.invalid/tasks"}`)
 	})
-	rows, err = api.AllTaskRecords(context.Background(), "parent", images.WithTaskRecordsLimit(0), images.WithTaskRecordsMaxItems(2))
+	rows, err = api.AllTaskRecords(context.Background(), "parent", request.Limit(0), request.MaxItems(2))
 	if err != nil || len(rows) != 1 || len(calls) != 1 || calls[0].query != "limit=2" {
 		t.Fatal(rows, err, calls)
 	}
 	imageTaskValue(t, rows[0], "id", `"keep"`)
 	calls = nil
-	rows, err = api.AllTaskRecords(context.Background(), "parent", images.WithTaskRecordsMaxItems(1))
+	rows, err = api.AllTaskRecords(context.Background(), "parent", request.MaxItems(1))
 	if err != nil || rows == nil || len(rows) != 0 || len(calls) != 1 {
 		t.Fatal(rows, err, calls)
 	}
@@ -298,12 +299,12 @@ func TestPythonImageTasksRecordsLazySnapshotsReusableAndConcurrent(t *testing.T)
 	version = "changed"
 	var retained *images.TaskRecordsOpts
 	applied := 0
-	opts := []images.TaskRecordsOption{option, func(p *images.TaskRecordsOpts) error { applied++; retained = p; return nil }, func(*images.TaskRecordsOpts) error {
+	opts := []images.TaskRecordsOption{option, request.Custom(func(p *images.TaskRecordsOpts) error { applied++; retained = p; return nil }), request.Custom(func(*images.TaskRecordsOpts) error {
 		retained.Headers["X-Auth-Token"] = "bad"
 		retained.Query["name"] = json.RawMessage(`false`)
 		*retained.Microversion = "changed"
 		return nil
-	}}
+	})}
 	iterator := api.TaskRecords(context.Background(), "parent", opts...)
 	opts[0] = nil
 	if applied != 0 || len(calls) != 0 {
@@ -327,7 +328,7 @@ func TestPythonImageTasksRecordsLazySnapshotsReusableAndConcurrent(t *testing.T)
 		attempts.Add(1)
 		return imageTasksWire(200, `{"tasks":[{"image_id":"parent","input":{"x":false}}]}`), nil
 	}))
-	shared := images.WithTaskRecordsHeaders(map[string]string{"X-Trace": "owned"})
+	shared := request.Headers(map[string]string{"X-Trace": "owned"})
 	var wg sync.WaitGroup
 	for i := 0; i < 8; i++ {
 		wg.Add(1)
@@ -352,9 +353,9 @@ func TestPythonImageTasksRecordsLazySnapshotsReusableAndConcurrent(t *testing.T)
 func TestPythonImageTasksRecordsPreflightAndContextCauses(t *testing.T) {
 	var calls []imageTasksCall
 	api, _ := imageTasksAPI(t, &calls, func(*http.Request) *http.Response { t.Fatal("invalid options reached HTTP"); return nil })
-	opts := [][]images.TaskRecordsOption{{nil}, {images.WithTaskRecordsLimit(-1)}, {images.WithTaskRecordsMaxItems(-1)}, {images.WithTaskRecordsQuery("limit", []int{1, 2})}, {images.WithTaskRecordsQuery("limit", 1.5)}, {images.WithTaskRecordsQuery("marker", "")}, {images.WithTaskRecordsQuery("status", json.RawMessage(`bad`))}, {images.WithTaskRecordsHeaders(map[string]string{"X-Auth-Token": "bad"})}, {images.WithTaskRecordsHeaders(map[string]string{"OpenStack-API-Version": "image 2.0"})}}
+	opts := [][]images.TaskRecordsOption{{nil}, {request.Limit(-1)}, {request.MaxItems(-1)}, {request.Query("limit", []int{1, 2})}, {request.Query("limit", 1.5)}, {request.Query("marker", "")}, {request.Query("status", json.RawMessage(`bad`))}, {request.Headers(map[string]string{"X-Auth-Token": "bad"})}, {request.Headers(map[string]string{"OpenStack-API-Version": "image 2.0"})}}
 	for _, key := range []string{"image_id", "cls", "session", "self", "connection", "_synchronized", "base_path", "allow_unknown_params", "paginated", "microversion", "headers", "max_items", "location"} {
-		opts = append(opts, []images.TaskRecordsOption{images.WithTaskRecordsQuery(key, nil)})
+		opts = append(opts, []images.TaskRecordsOption{request.Query(key, nil)})
 	}
 	for _, options := range opts {
 		rows, err := api.AllTaskRecords(context.Background(), "parent", options...)
@@ -370,12 +371,12 @@ func TestPythonImageTasksRecordsPreflightAndContextCauses(t *testing.T) {
 	}
 	ctx, cancel := context.WithCancelCause(context.Background())
 	cause, callback := errors.New("cancel cause"), errors.New("callback")
-	_, err := api.AllTaskRecords(ctx, "parent", func(*images.TaskRecordsOpts) error { cancel(cause); return callback })
+	_, err := api.AllTaskRecords(ctx, "parent", request.Custom(func(*images.TaskRecordsOpts) error { cancel(cause); return callback }))
 	if !errors.Is(err, context.Canceled) || !errors.Is(err, cause) || !errors.Is(err, callback) || len(calls) != 0 {
 		t.Fatal(err, calls)
 	}
 	original := api.RawClient().ResourceBase
-	_, err = api.AllTaskRecords(context.Background(), "parent", func(*images.TaskRecordsOpts) error { api.RawClient().ResourceBase += "changed/"; return callback })
+	_, err = api.AllTaskRecords(context.Background(), "parent", request.Custom(func(*images.TaskRecordsOpts) error { api.RawClient().ResourceBase += "changed/"; return callback }))
 	api.RawClient().ResourceBase = original
 	if !errors.Is(err, callback) || !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
 		t.Fatal(err, calls)
@@ -395,7 +396,7 @@ func TestPythonImageTasksRecordsSelectedVersionAndAcceptOwnership(t *testing.T) 
 			return imageTasksWire(200, `{"tasks":[{"image_id":"parent"}]}`)
 		})
 		api.RawClient().MoreHeaders = map[string]string{"Accept": "configured"}
-		rows, err := api.AllTaskRecords(context.Background(), "parent", images.WithTaskRecordsMicroversion(version))
+		rows, err := api.AllTaskRecords(context.Background(), "parent", request.Microversion(version))
 		wanted := ""
 		if version != "" {
 			wanted = "image " + version
@@ -404,7 +405,7 @@ func TestPythonImageTasksRecordsSelectedVersionAndAcceptOwnership(t *testing.T) 
 			t.Fatal(rows, err, calls, header)
 		}
 		calls = nil
-		rows, err = api.AllTaskRecords(context.Background(), "parent", images.WithTaskRecordsHeaders(map[string]string{"aCcEpT": "owned"}))
+		rows, err = api.AllTaskRecords(context.Background(), "parent", request.Headers(map[string]string{"aCcEpT": "owned"}))
 		if err != nil || len(rows) != 1 || header.Get("Accept") != "owned" || len(calls) != 1 {
 			t.Fatal(rows, err, calls, header)
 		}
@@ -425,7 +426,7 @@ func TestPythonImageTasksRecordsDiscoveryCeilingAndAPIMinorIsNotMicroversion(t *
 			})
 			api.RawClient().Endpoint = api.RawClient().ResourceBase
 			api.RawClient().Microversion = item.selected
-			rows, err := api.AllTaskRecords(context.Background(), "parent", images.WithTaskRecordsHeaders(map[string]string{"X-Trace": "owned"}))
+			rows, err := api.AllTaskRecords(context.Background(), "parent", request.Headers(map[string]string{"X-Trace": "owned"}))
 			count, observations := 1, 0
 			if item.selected == "" {
 				count, observations = 2, 1
@@ -684,7 +685,7 @@ func TestPythonImageTasksRecordsConditionalHeadersAreOwned(t *testing.T) {
 					api.RawClient().MoreHeaders = map[string]string{strings.ToLower(key): value}
 				}
 				if lane == "explicit" || lane == "changed" || lane == "omitted" {
-					options = append(options, images.WithTaskRecordsHeaders(map[string]string{strings.ToLower(key): value}))
+					options = append(options, request.Headers(map[string]string{strings.ToLower(key): value}))
 				}
 				cause := errors.New("conditional callback")
 				api.RawClient().RetryFunc = func(_ context.Context, _ string, _ string, opts *gophercloud.RequestOpts, _ error, _ uint) error {

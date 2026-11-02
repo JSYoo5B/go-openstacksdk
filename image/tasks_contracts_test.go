@@ -18,6 +18,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/image"
 	nativeTasks "github.com/JSYoo5B/go-openstacksdk/image/v2/tasks"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -104,9 +105,9 @@ var taskContractsOperations = []struct {
 
 func taskContractsHeaders() taskContractsOptions {
 	return taskContractsOptions{
-		create: []image.CreateTaskOption{image.WithCreateTaskHeaders(map[string]string{"X-Option": "owned"}), image.WithCreateTaskHeader("X-Final", "yes")},
-		get:    []image.GetTaskOption{image.WithGetTaskHeaders(map[string]string{"X-Option": "owned"}), image.WithGetTaskHeader("X-Final", "yes")},
-		list:   []image.ListTasksOption{image.WithListTasksHeaders(map[string]string{"X-Option": "owned"}), image.WithListTasksHeader("X-Final", "yes")},
+		create: []image.CreateTaskOption{image.WithCreateTaskHeaders(map[string]string{"X-Option": "owned"}), request.Header("X-Final", "yes")},
+		get:    []image.GetTaskOption{image.WithGetTaskHeaders(map[string]string{"X-Option": "owned"}), request.Header("X-Final", "yes")},
+		list:   []image.ListTasksOption{image.WithListTasksHeaders(map[string]string{"X-Option": "owned"}), request.Header("X-Final", "yes")},
 	}
 }
 func taskContractsProof(t *testing.T, err error, code int, raw []byte) *resource.ResponseError {
@@ -234,7 +235,7 @@ func TestTaskContractsFixedRoutesAndInput(t *testing.T) {
 			}
 			return taskContractsWire(200, &taskContractsBody{Reader: strings.NewReader(`{"tasks":[]}`)}), nil
 		})
-		rows, err := image.New(client).AllTasks(context.Background(), image.WithListTasksLimit(0), image.WithListTasksMarker("not-uuid %#"), image.WithListTasksType("api_image_import"), image.WithListTasksStatus("future-status"), image.WithListTasksSortKey("future key"), image.WithListTasksSortDir("asc"))
+		rows, err := image.New(client).AllTasks(context.Background(), request.Limit(0), request.Marker("not-uuid %#"), image.WithListTasksType("api_image_import"), image.WithListTasksStatus("future-status"), image.WithListTasksSortKey("future key"), image.WithListTasksSortDir("asc"))
 		if err != nil || rows == nil || len(rows) != 0 || calls.Load() != 1 {
 			t.Fatal(rows, err, calls.Load())
 		}
@@ -246,7 +247,7 @@ func TestTaskContractsFixedRoutesAndInput(t *testing.T) {
 			}
 			return taskContractsWire(200, &taskContractsBody{Reader: strings.NewReader(taskContractsList)}), nil
 		})
-		rows, err := image.New(client).AllTasks(context.Background(), image.WithListTasksOpts(image.ListTasksOpts{}), image.WithListTasksMarker(""), image.WithListTasksType(""), image.WithListTasksStatus(""), image.WithListTasksSortKey(""), image.WithListTasksSortDir(""), image.WithListTasksMaxItems(1))
+		rows, err := image.New(client).AllTasks(context.Background(), image.WithListTasksOpts(image.ListTasksOpts{}), request.Marker(""), image.WithListTasksType(""), image.WithListTasksStatus(""), image.WithListTasksSortKey(""), image.WithListTasksSortDir(""), request.MaxItems(1))
 		if err != nil || len(rows) != 1 {
 			t.Fatal(rows, err)
 		}
@@ -364,7 +365,7 @@ func TestTaskContractsAdvertisedPagingAndLocalCaps(t *testing.T) {
 			return taskContractsWire(200, &taskContractsBody{Reader: strings.NewReader(`{"tasks":[{"id":"second"}]}`)}), nil
 		})
 		client.MoreHeaders = map[string]string{"X-Source": "first"}
-		rows, err := image.New(client).AllTasks(context.Background(), image.WithListTasksType("import"), image.WithListTasksLimit(2), image.WithListTasksHeader("X-Fixed", "option"))
+		rows, err := image.New(client).AllTasks(context.Background(), image.WithListTasksType("import"), request.Limit(2), request.Header("X-Fixed", "option"))
 		if err != nil || len(rows) != 2 || *rows[0].ID != "first" || *rows[1].ID != "second" || calls.Load() != 2 {
 			t.Fatal(rows, err, calls.Load())
 		}
@@ -450,7 +451,7 @@ func TestTaskContractsAdvertisedPagingAndLocalCaps(t *testing.T) {
 					break
 				}
 			} else {
-				option := image.WithListTasksMaxItems(1)
+				var option image.ListTasksOption = request.MaxItems(1)
 				if mode == "single page" {
 					option = image.WithListTasksSinglePage(true)
 				}
@@ -485,7 +486,7 @@ func TestTaskContractsAdvertisedPagingAndLocalCaps(t *testing.T) {
 				wire.Header.Set("Link", `<https://foreign.invalid/tasks>; rel="next"`)
 				return wire, nil
 			})
-			rows, err := image.New(client).AllTasks(context.Background(), image.WithListTasksLimit(1))
+			rows, err := image.New(client).AllTasks(context.Background(), request.Limit(1))
 			if err != nil || rows == nil || calls.Load() != 1 {
 				t.Fatal(rows, err, calls.Load())
 			}
@@ -514,13 +515,13 @@ func TestTaskContractsAdvertisedPagingAndLocalCaps(t *testing.T) {
 			}
 			return taskContractsWire(200, &taskContractsBody{Reader: strings.NewReader(`{"tasks":[{}]}`)}), nil
 		})
-		options := []image.ListTasksOption{func(o *image.ListTasksOpts) error {
+		options := []image.ListTasksOption{request.Custom(func(o *image.ListTasksOpts) error {
 			callbacks.Add(1)
 			o.Headers["X-Choice"] = "owned"
 			return nil
-		}}
+		})}
 		seq := image.New(client).Tasks(context.Background(), options...)
-		options[0] = image.WithListTasksHeader("X-Choice", "mutated")
+		options[0] = request.Header("X-Choice", "mutated")
 		if calls.Load() != 0 || callbacks.Load() != 0 {
 			t.Fatal("iterator eager")
 		}
@@ -566,13 +567,13 @@ func TestTaskContractsOwnedOptionsAndSource(t *testing.T) {
 			}
 			return taskContractsWire(201, &taskContractsBody{Reader: strings.NewReader(`{}`)}), nil
 		})
-		value, err := image.New(client).CreateTask(context.Background(), "future", image.WithCreateTaskHeader("X-Later", "discarded"), option,
-			func(o *image.CreateTaskOpts) error { retained = o; return nil },
-			func(*image.CreateTaskOpts) error {
+		value, err := image.New(client).CreateTask(context.Background(), "future", request.Header("X-Later", "discarded"), option,
+			request.Custom(func(o *image.CreateTaskOpts) error { retained = o; return nil }),
+			request.Custom(func(*image.CreateTaskOpts) error {
 				retained.Headers["X-Choice"] = "mutated retained"
 				retained.Input["snapshot"][0] = '!'
 				return nil
-			})
+			}))
 		if value == nil || err != nil {
 			t.Fatal(value, err)
 		}
@@ -624,17 +625,17 @@ func TestTaskContractsOwnedOptionsAndSource(t *testing.T) {
 			}
 			return taskContractsWire(200, &taskContractsBody{Reader: strings.NewReader(`{"tasks":[]}`)}), nil
 		})
-		if v, err := image.New(client).GetTask(context.Background(), "fixed-id", get, image.WithGetTaskHeader("X-Final", "first"), image.WithGetTaskHeader("X-Final", "last")); v == nil || err != nil {
+		if v, err := image.New(client).GetTask(context.Background(), "fixed-id", get, request.Header("X-Final", "first"), request.Header("X-Final", "last")); v == nil || err != nil {
 			t.Fatal(v, err)
 		}
 		var retained *image.ListTasksOpts
-		rows, err := image.New(client).AllTasks(context.Background(), list, image.WithListTasksHeader("X-Final", "last"),
-			func(o *image.ListTasksOpts) error { retained = o; return nil },
-			func(*image.ListTasksOpts) error {
+		rows, err := image.New(client).AllTasks(context.Background(), list, request.Header("X-Final", "last"),
+			request.Custom(func(o *image.ListTasksOpts) error { retained = o; return nil }),
+			request.Custom(func(*image.ListTasksOpts) error {
 				*retained.Limit = 99
 				retained.Headers["X-Choice"] = "late"
 				return nil
-			})
+			}))
 		if rows == nil || err != nil || calls.Load() != 2 {
 			t.Fatal(rows, err, calls.Load())
 		}
@@ -704,7 +705,7 @@ func TestTaskContractsOwnedOptionsAndSource(t *testing.T) {
 			case "source version":
 				client.Microversion = "bad\nversion"
 			}
-			v, err := s.CreateTask(ctx, "future", func(*image.CreateTaskOpts) error { callbacks.Add(1); return nil })
+			v, err := s.CreateTask(ctx, "future", request.Custom(func(*image.CreateTaskOpts) error { callbacks.Add(1); return nil }))
 			if v != nil || !errors.Is(err, want) || calls.Load() != 0 || callbacks.Load() != 0 {
 				t.Fatal(v, err, calls.Load(), callbacks.Load())
 			}
@@ -714,13 +715,13 @@ func TestTaskContractsOwnedOptionsAndSource(t *testing.T) {
 		t.Run("unsafe ID "+id, func(t *testing.T) {
 			var calls, callbacks atomic.Int32
 			client := taskContractsClient(func(*http.Request) (*http.Response, error) { calls.Add(1); return nil, errors.New("unexpected wire") })
-			v, err := image.New(client).GetTask(context.Background(), id, func(*image.GetTaskOpts) error { callbacks.Add(1); return nil })
+			v, err := image.New(client).GetTask(context.Background(), id, request.Custom(func(*image.GetTaskOpts) error { callbacks.Add(1); return nil }))
 			if v != nil || !errors.Is(err, resource.ErrInvalidOption) || calls.Load() != 0 || callbacks.Load() != 0 {
 				t.Fatal(v, err, calls.Load(), callbacks.Load())
 			}
 		})
 	}
-	for _, option := range []image.ListTasksOption{nil, image.WithListTasksLimit(-1), image.WithListTasksMaxItems(-1), image.WithListTasksSortDir("ASC"), image.WithListTasksMarker("line\n"), image.WithListTasksType(string([]byte{0xff})), image.WithListTasksHeader("Authorization", "forged")} {
+	for _, option := range []image.ListTasksOption{nil, request.Limit(-1), request.MaxItems(-1), image.WithListTasksSortDir("ASC"), request.Marker("line\n"), image.WithListTasksType(string([]byte{0xff})), request.Header("Authorization", "forged")} {
 		t.Run("invalid list option", func(t *testing.T) {
 			var calls atomic.Int32
 			client := taskContractsClient(func(*http.Request) (*http.Response, error) { calls.Add(1); return nil, errors.New("unexpected wire") })
@@ -730,7 +731,7 @@ func TestTaskContractsOwnedOptionsAndSource(t *testing.T) {
 			}
 		})
 	}
-	for _, option := range []image.CreateTaskOption{nil, image.WithCreateTaskInput(map[string]any{"x": make(chan int)}), image.WithCreateTaskOpts(image.CreateTaskOpts{Input: map[string]json.RawMessage{"x": json.RawMessage(`not JSON`)}}), image.WithCreateTaskHeader("Content-Length", "9")} {
+	for _, option := range []image.CreateTaskOption{nil, image.WithCreateTaskInput(map[string]any{"x": make(chan int)}), image.WithCreateTaskOpts(image.CreateTaskOpts{Input: map[string]json.RawMessage{"x": json.RawMessage(`not JSON`)}}), request.Header("Content-Length", "9")} {
 		t.Run("invalid create option", func(t *testing.T) {
 			var calls atomic.Int32
 			client := taskContractsClient(func(*http.Request) (*http.Response, error) { calls.Add(1); return nil, errors.New("unexpected wire") })
@@ -747,14 +748,14 @@ func TestTaskContractsOwnedOptionsAndSource(t *testing.T) {
 			ctx, cancel := context.WithCancelCause(context.Background())
 			defer cancel(nil)
 			client := taskContractsClient(func(*http.Request) (*http.Response, error) { calls.Add(1); return nil, errors.New("unexpected wire") })
-			v, err := image.New(client).CreateTask(ctx, "future", func(*image.CreateTaskOpts) error {
+			v, err := image.New(client).CreateTask(ctx, "future", request.Custom(func(*image.CreateTaskOpts) error {
 				callbacks.Add(1)
 				if cancelNow {
 					cancel(cause)
 					return nil
 				}
 				return cause
-			}, func(*image.CreateTaskOpts) error { callbacks.Add(100); return nil })
+			}), request.Custom(func(*image.CreateTaskOpts) error { callbacks.Add(100); return nil }))
 			wantCallbacks := int32(1)
 			if cancelNow {
 				wantCallbacks = 101
@@ -768,7 +769,7 @@ func TestTaskContractsOwnedOptionsAndSource(t *testing.T) {
 		t.Run("callback target drift "+mode, func(t *testing.T) {
 			var calls atomic.Int32
 			client := taskContractsClient(func(*http.Request) (*http.Response, error) { calls.Add(1); return nil, errors.New("unexpected wire") })
-			v, err := image.New(client).GetTask(context.Background(), "fixed-id", func(*image.GetTaskOpts) error {
+			v, err := image.New(client).GetTask(context.Background(), "fixed-id", request.Custom(func(*image.GetTaskOpts) error {
 				switch mode {
 				case "provider":
 					client.ProviderClient = &gophercloud.ProviderClient{}
@@ -782,7 +783,7 @@ func TestTaskContractsOwnedOptionsAndSource(t *testing.T) {
 					client.Microversion = "2.19"
 				}
 				return nil
-			})
+			}))
 			if v != nil || !errors.Is(err, resource.ErrInvalidOption) || calls.Load() != 0 {
 				t.Fatal(v, err, calls.Load())
 			}
@@ -798,11 +799,11 @@ func TestTaskContractsOwnedOptionsAndSource(t *testing.T) {
 			return taskContractsWire(200, &taskContractsBody{Reader: strings.NewReader(`{}`)}), nil
 		})
 		client.MoreHeaders = map[string]string{"X-Source": "before"}
-		v, err := image.New(client).GetTask(context.Background(), "fixed-id", func(*image.GetTaskOpts) error {
+		v, err := image.New(client).GetTask(context.Background(), "fixed-id", request.Custom(func(*image.GetTaskOpts) error {
 			client.MoreHeaders["X-Source"] = "after"
 			client.SetToken("live")
 			return nil
-		})
+		}))
 		if v == nil || err != nil || calls.Load() != 1 {
 			t.Fatal(v, err, calls.Load())
 		}

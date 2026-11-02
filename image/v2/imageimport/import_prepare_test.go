@@ -7,6 +7,7 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -16,13 +17,13 @@ func TestPrepareImportOptionsFreezesJSONAndSourceConflictsWithoutRequests(t *tes
 	api := New(client)
 	var calls atomic.Int32
 	var captured *ImportOpts
-	prepared, err := api.PrepareImportOptions(context.Background(), func(value *ImportOpts) error {
+	prepared, err := api.PrepareImportOptions(context.Background(), request.Custom(func(value *ImportOpts) error {
 		calls.Add(1)
 		value.Stores = []string{"fast"}
 		value.Fields = map[string]any{"vendor": map[string]any{"large": json.Number("9007199254740993")}}
 		captured = value
 		return nil
-	})
+	}))
 	if err != nil || calls.Load() != 1 || prepared.Method != GlanceDirectMethod {
 		t.Fatalf("prepared=%+v calls=%d err=%v", prepared, calls.Load(), err)
 	}

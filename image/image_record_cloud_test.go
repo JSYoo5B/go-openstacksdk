@@ -9,6 +9,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -63,7 +64,7 @@ func TestCloudImageRecordListDeletedFilterShowAllAndLocation(t *testing.T) {
 				}
 				return taskCoreJSON(req, 200, cloudImageInventoryPage)
 			})
-			options := append([]ImageRecordQueryOption{WithImageRecordQueryHeader("X-Cloud", "header")}, test.options...)
+			options := append([]ImageRecordQueryOption{request.Header("X-Cloud", "header")}, test.options...)
 			result, err := service.AllCloudImageRecords(context.Background(), options...)
 			if err != nil || calls != 1 || len(result.Inventory) != 4 {
 				t.Fatal(result, err, calls)
@@ -209,7 +210,7 @@ func TestCloudImageRecordArgumentsFailBeforeHTTP(t *testing.T) {
 		{"by ID rejects blank ID", func() error { _, err := service.GetImageRecordByID(ctx, ""); return err }},
 		{"nil option", func() error { _, err := service.SearchImageRecords(ctx, "", nil); return err }},
 		{"invalid header", func() error {
-			_, err := service.AllCloudImageRecords(ctx, WithImageRecordQueryHeader("X-Bad", "line\nbreak"))
+			_, err := service.AllCloudImageRecords(ctx, request.Header("X-Bad", "line\nbreak"))
 			return err
 		}},
 	}
@@ -247,7 +248,7 @@ func TestCloudImageRecordOptionsCancelBeforeLaterCallbacks(t *testing.T) {
 	} {
 		ctx, cancel := context.WithCancelCause(context.Background())
 		later := 0
-		err := call(ctx, func(*ImageRecordQueryOpts) error { cancel(cause); return nil }, func(*ImageRecordQueryOpts) error { later++; return nil })
+		err := call(ctx, request.Custom(func(*ImageRecordQueryOpts) error { cancel(cause); return nil }), request.Custom(func(*ImageRecordQueryOpts) error { later++; return nil }))
 		if !errors.Is(err, cause) || later != 0 || calls != 0 {
 			t.Fatal(err, later, calls)
 		}
@@ -273,7 +274,7 @@ func TestCloudImageRecordGetFindPathAndMissing(t *testing.T) {
 			t.Fatal("unexpected request", req.URL)
 			return nil
 		})
-		options := []ImageRecordQueryOption{WithImageRecordQueryHeader("X-Cloud", "header")}
+		options := []ImageRecordQueryOption{request.Header("X-Cloud", "header")}
 		if filters != nil {
 			options = append(options, WithImageRecordQueryFilters(filters))
 		}
@@ -394,7 +395,7 @@ func TestCloudImageRecordGetByIDIsStrictLiteralGet(t *testing.T) {
 	if err := json.Unmarshal(record.Resource.Body["location"], &location); err != nil || location.Cloud == nil || *location.Cloud != "current" {
 		t.Fatal(location, err)
 	}
-	record, err = service.GetImageRecordByID(context.Background(), "literal/空", WithImageRecordQueryHeader("X-Cloud", "header"))
+	record, err = service.GetImageRecordByID(context.Background(), "literal/空", request.Header("X-Cloud", "header"))
 	var operation *resource.OperationError
 	if record != nil || calls != 2 || !gophercloud.ResponseCodeIs(err, http.StatusNotFound) || !errors.As(err, &operation) || operation.Operation != "GetImageRecordByID" {
 		t.Fatal(record, err, calls)
@@ -420,7 +421,7 @@ func TestCloudImageRecordExcludeMembershipOrderAndValues(t *testing.T) {
 		return taskCoreJSON(req, 200, page)
 	})
 	ctx := context.Background()
-	header := WithImageRecordQueryHeader("X-Cloud", "header")
+	header := request.Header("X-Cloud", "header")
 	for _, test := range []struct {
 		name, pattern, exclude, id string
 	}{

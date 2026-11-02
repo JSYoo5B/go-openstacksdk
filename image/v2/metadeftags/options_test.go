@@ -11,6 +11,7 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -52,7 +53,7 @@ func TestMetadefTagsOptionsSnapshotsReplacementAndLastWins(t *testing.T) {
 	headerInput := map[string]string{"X-Map": "owned"}
 	headers := WithSetHeaders(headerInput)
 	headerInput["X-Map"] = "changed"
-	if _, err := scope.Set(context.Background(), nil, helper, WithSetHeader("X-header", "first"), WithSetHeader("x-HEADER", "last"), headers, WithSetAppend(false)); err != nil {
+	if _, err := scope.Set(context.Background(), nil, helper, request.Header("X-header", "first"), request.Header("x-HEADER", "last"), headers, WithSetAppend(false)); err != nil {
 		t.Fatal(err)
 	}
 	if calls != 4 {
@@ -61,7 +62,7 @@ func TestMetadefTagsOptionsSnapshotsReplacementAndLastWins(t *testing.T) {
 	name := tagOptionPointer("snapshot-name")
 	update := WithUpdateOpts(UpdateOpts{Name: name, Headers: map[string]string{"X-Update": "snapshot"}})
 	*name = "caller-change"
-	config, err := prepareUpdate([]UpdateOption{update, WithUpdateName("last-name"), WithUpdateHeader("x-update", "last")})
+	config, err := prepareUpdate([]UpdateOption{update, WithUpdateName("last-name"), request.Header("x-update", "last")})
 	if err != nil || *config.Name != "last-name" || config.Headers["X-Update"] != "last" {
 		t.Fatalf("update last-wins %v %+v", err, config)
 	}
@@ -72,7 +73,7 @@ func TestMetadefTagsOptionsSnapshotsReplacementAndLastWins(t *testing.T) {
 	*listInput.SortKey = "changed"
 	*listInput.SortDir = "desc"
 	listInput.Headers["X-List"] = "changed"
-	policy, query, err := prepareList([]ListOption{listHelper, WithListMarker("last"), WithListMaxItems(1)})
+	policy, query, err := prepareList([]ListOption{listHelper, request.Marker("last"), request.MaxItems(1)})
 	if err != nil || query.Get("limit") != "2" || query.Get("marker") != "last" || query.Get("sort_key") != "name" || query.Get("sort_dir") != "asc" || policy.MaxItems != 1 || policy.Headers["X-List"] != "owned" {
 		t.Fatalf("list snapshot %v %v %+v", err, query, policy)
 	}
@@ -96,7 +97,7 @@ func TestMetadefTagsOptionsCallbackAndBorrowedOwnership(t *testing.T) {
 		return tagCoreJSON(req, 201, `{"tags":[]}`), nil
 	})
 	scope := tagCoreScope(t, client, "parent")
-	first := SetOption(func(c *SetOpts) error {
+	first := SetOption(request.Custom(func(c *SetOpts) error {
 		callbacks++
 		if c.Headers == nil {
 			t.Fatal("headers not initialized")
@@ -107,8 +108,8 @@ func TestMetadefTagsOptionsCallbackAndBorrowedOwnership(t *testing.T) {
 		retainedMap = c.Headers
 		names[0] = string([]byte{255})
 		return nil
-	})
-	second := SetOption(func(c *SetOpts) error {
+	}))
+	second := SetOption(request.Custom(func(c *SetOpts) error {
 		callbacks++
 		retained.Headers["X-Option"] = "mutated"
 		*retained.Append = false
@@ -116,7 +117,7 @@ func TestMetadefTagsOptionsCallbackAndBorrowedOwnership(t *testing.T) {
 			t.Fatal("callback copies share borrowed pointers")
 		}
 		return nil
-	})
+	}))
 	if _, err := scope.Set(context.Background(), names, first, second); err != nil || callbacks != 2 {
 		t.Fatalf("callbacks once %v %d", err, callbacks)
 	}
@@ -125,7 +126,7 @@ func TestMetadefTagsOptionsCallbackAndBorrowedOwnership(t *testing.T) {
 	*retained.Append = false
 	var prior *ListOpts
 	count := 0
-	policy, query, err := prepareList([]ListOption{func(c *ListOpts) error {
+	policy, query, err := prepareList([]ListOption{request.Custom(func(c *ListOpts) error {
 		count++
 		c.Limit = tagOptionPointer(2)
 		c.Marker = tagOptionPointer("owned")
@@ -134,7 +135,7 @@ func TestMetadefTagsOptionsCallbackAndBorrowedOwnership(t *testing.T) {
 		c.Headers["X-List"] = "owned"
 		prior = c
 		return nil
-	}, func(c *ListOpts) error {
+	}), request.Custom(func(c *ListOpts) error {
 		count++
 		*prior.Limit = 0
 		*prior.Marker = "bad\n"
@@ -142,12 +143,12 @@ func TestMetadefTagsOptionsCallbackAndBorrowedOwnership(t *testing.T) {
 		*prior.SortDir = "bad"
 		prior.Headers["X-List"] = "bad"
 		return nil
-	}})
+	})})
 	if err != nil || count != 2 || query.Get("limit") != "2" || query.Get("marker") != "owned" || query.Get("sort_key") != "name" || query.Get("sort_dir") != "asc" || policy.Headers["X-List"] != "owned" {
 		t.Fatalf("owned list callbacks %v %v", err, query)
 	}
 	sentinel := errors.New("callback error")
-	_, err = scope.Set(context.Background(), nil, func(*SetOpts) error { return sentinel })
+	_, err = scope.Set(context.Background(), nil, request.Custom(func(*SetOpts) error { return sentinel }))
 	if !errors.Is(err, sentinel) {
 		t.Fatalf("callback error identity %v", err)
 	}
@@ -158,10 +159,10 @@ func TestMetadefTagsOptionsValidationAndDefaults(t *testing.T) {
 		name    string
 		options []ListOption
 	}{
-		{"negative limit", []ListOption{WithListLimit(-1)}},
-		{"negative cap", []ListOption{WithListMaxItems(-1)}},
-		{"marker control", []ListOption{WithListMarker("x\n")}},
-		{"marker utf8", []ListOption{WithListMarker(string([]byte{255}))}},
+		{"negative limit", []ListOption{request.Limit(-1)}},
+		{"negative cap", []ListOption{request.MaxItems(-1)}},
+		{"marker control", []ListOption{request.Marker("x\n")}},
+		{"marker utf8", []ListOption{request.Marker(string([]byte{255}))}},
 		{"key control", []ListOption{WithListSortKey("x\x00")}},
 		{"key utf8", []ListOption{WithListSortKey(string([]byte{255}))}},
 		{"direction", []ListOption{WithListSortDir("ASC")}},
@@ -179,12 +180,12 @@ func TestMetadefTagsOptionsValidationAndDefaults(t *testing.T) {
 	if err != nil || defaults.Limit != nil || defaults.Marker != nil || defaults.SortKey != nil || defaults.SortDir != nil || defaults.MaxItems != 0 || len(query) != 0 || defaults.Headers == nil {
 		t.Fatalf("nil defaults %v %+v %v", err, defaults, query)
 	}
-	policy, query, err := prepareList([]ListOption{WithListLimit(0), WithListMarker(""), WithListSortKey(""), WithListMaxItems(20)})
+	policy, query, err := prepareList([]ListOption{request.Limit(0), request.Marker(""), WithListSortKey(""), request.MaxItems(20)})
 	if err != nil || query.Encode() != "limit=0&marker=&sort_key=" || policy.MaxItems != 20 {
 		t.Fatalf("explicit values %v %v", err, query)
 	}
 	marker := strings.Repeat("界", 81) + "/?%# &"
-	_, query, err = prepareList([]ListOption{WithListMarker(marker), WithListSortKey("custom-db-field")})
+	_, query, err = prepareList([]ListOption{request.Marker(marker), WithListSortKey("custom-db-field")})
 	if err != nil || query.Get("marker") != marker || query.Get("sort_key") != "custom-db-field" {
 		t.Fatalf("query literals %v %v", err, query)
 	}
@@ -244,7 +245,7 @@ func TestMetadefTagsOptionsParallelReusableHelpers(t *testing.T) {
 		return tagCoreJSON(req, 201, `{"tags":[{"name":"literal"}]}`), nil
 	})
 	scope := tagCoreScope(t, client, "parent")
-	option := SetOption(func(c *SetOpts) error { callbacks.Add(1); c.Headers["X-Per-Call"] = "owned"; return nil })
+	option := SetOption(request.Custom(func(c *SetOpts) error { callbacks.Add(1); c.Headers["X-Per-Call"] = "owned"; return nil }))
 	var wait sync.WaitGroup
 	for range 24 {
 		wait.Add(1)

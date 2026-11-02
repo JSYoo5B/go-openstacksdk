@@ -4,6 +4,9 @@ import (
 	"context"
 	"errors"
 	"maps"
+
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 // ImageRecordActionOpts supplies ordinary headers for one compiled image
@@ -12,28 +15,30 @@ type ImageRecordActionOpts struct {
 	Headers map[string]string
 }
 
-type ImageRecordActionOption func(*ImageRecordActionOpts) error
+// ImageRecordActionOption is one option of the image record actions:
+// WithImageRecordActionOpts, WithImageRecordActionHeaders (merges),
+// request.Header (merges one header) or request.Custom over
+// *ImageRecordActionOpts. Other shared calls, including request.Headers and
+// request.Field, fail with resource.ErrInvalidOption before HTTP.
+type ImageRecordActionOption = request.WriteCall
+
+var imageRecordActionCalls = calls.Spec[ImageRecordActionOpts]{
+	Header: calls.MergeHeader[ImageRecordActionOpts](WithImageRecordActionHeaders),
+}
 
 func WithImageRecordActionOpts(value ImageRecordActionOpts) ImageRecordActionOption {
 	snapshot := copyImageRecordActionOpts(value)
-	return func(config *ImageRecordActionOpts) error {
+	return request.Custom(func(config *ImageRecordActionOpts) error {
 		*config = copyImageRecordActionOpts(snapshot)
 		return nil
-	}
-}
-
-func WithImageRecordActionHeader(key, value string) ImageRecordActionOption {
-	apply := WithImageMutationHeader(key, value)
-	return func(config *ImageRecordActionOpts) error {
-		return applyImageMemberHeader(&config.Headers, apply)
-	}
+	})
 }
 
 func WithImageRecordActionHeaders(values map[string]string) ImageRecordActionOption {
-	apply := WithImageMutationHeaders(values)
-	return func(config *ImageRecordActionOpts) error {
+	apply := mergeImageMutationHeaders(values)
+	return request.Custom(func(config *ImageRecordActionOpts) error {
 		return applyImageMemberHeader(&config.Headers, apply)
-	}
+	})
 }
 
 func copyImageRecordActionOpts(value ImageRecordActionOpts) ImageRecordActionOpts {
@@ -46,7 +51,7 @@ func copyImageRecordActionOpts(value ImageRecordActionOpts) ImageRecordActionOpt
 
 func prepareImageRecordActionHeaders(ctx context.Context, check func(context.Context) error, options []ImageRecordActionOption) (map[string]string, error) {
 	config := copyImageRecordActionOpts(ImageRecordActionOpts{})
-	for _, apply := range options {
+	for _, apply := range calls.Translate(options, imageRecordActionCalls) {
 		if err := check(ctx); err != nil {
 			return nil, err
 		}

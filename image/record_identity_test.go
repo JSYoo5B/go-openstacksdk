@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -357,10 +358,10 @@ func TestImageRecordPagingStrictRawMarker(t *testing.T) {
 			var err error
 			count := 0
 			if test.family == "image" {
-				got, failure := service.AllImageRecords(context.Background(), WithImageRecordListLimit(1))
+				got, failure := service.AllImageRecords(context.Background(), request.Limit(1))
 				count, err = len(got), failure
 			} else {
-				got, failure := service.AllImageMemberRecords(context.Background(), resource.ID(memberRecordParent), WithImageMemberRecordListLimit(1))
+				got, failure := service.AllImageMemberRecords(context.Background(), resource.ID(memberRecordParent), request.Limit(1))
 				count, err = len(got), failure
 			}
 			if count != 1 {

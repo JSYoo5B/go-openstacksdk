@@ -15,6 +15,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -468,14 +469,14 @@ func TestImageRecordUpdateSourceOptionsAndAttributeSnapshots(t *testing.T) {
 		client.MoreHeaders["X-Source"] = "callback changed"
 		return facts, nil
 	}})
-	got, err := service.UpdateImageRecord(context.Background(), ImageRecordUpdateRequest{ID: "fixed"}, option, func(config *ImageRecordOpts) error {
+	got, err := service.UpdateImageRecord(context.Background(), ImageRecordUpdateRequest{ID: "fixed"}, option, request.Custom(func(config *ImageRecordOpts) error {
 		callbacks++
 		retained = config
 		cloud = "after options"
 		facts.Project.ID[1] = 'X'
 		client.SetToken("live")
-		return WithImageRecordHeader("X-Final", "yes")(config)
-	})
+		return applyCall(imageRecordCalls, request.Header("X-Final", "yes"), config)
+	}))
 	if got == nil || err != nil || calls != 1 || callbacks != 1 || locations != 1 {
 		t.Fatal(got, err, calls, callbacks, locations)
 	}
@@ -555,8 +556,8 @@ func TestImageRecordUpdatePreflightIncludesSourceControlsAndFinalDescriptors(t *
 		{"literal attr id collision", ImageRecordUpdateRequest{ID: "fixed", Attributes: map[string]any{"id": "fixed"}}, nil},
 		{"literal option id collision", ImageRecordUpdateRequest{ID: "fixed"}, []ImageRecordOption{WithImageRecordAttribute("id", nil)}},
 		{"nil option", ImageRecordUpdateRequest{ID: "fixed"}, []ImageRecordOption{nil}},
-		{"owned token header", ImageRecordUpdateRequest{ID: "fixed"}, []ImageRecordOption{WithImageRecordHeader("X-Auth-Token", "foreign")}},
-		{"owned patch type header", ImageRecordUpdateRequest{ID: "fixed"}, []ImageRecordOption{WithImageRecordHeader("Content-Type", "other")}},
+		{"owned token header", ImageRecordUpdateRequest{ID: "fixed"}, []ImageRecordOption{request.Header("X-Auth-Token", "foreign")}},
+		{"owned patch type header", ImageRecordUpdateRequest{ID: "fixed"}, []ImageRecordOption{request.Header("Content-Type", "other")}},
 		{"unsupported attr", ImageRecordUpdateRequest{ID: "fixed", Attributes: map[string]any{"name": make(chan int)}}, nil},
 		{"invalid descriptor", ImageRecordUpdateRequest{ID: "fixed", Attributes: map[string]any{"hw_vif_multiqueue_enabled": " false "}}, nil},
 	}
@@ -600,7 +601,7 @@ func TestImageRecordUpdatePreflightIncludesSourceControlsAndFinalDescriptors(t *
 			if mode == "nil service" {
 				service = nil
 			}
-			got, err := service.UpdateImageRecord(ctx, ImageRecordUpdateRequest{ID: "fixed"}, func(*ImageRecordOpts) error { callbacks++; return nil })
+			got, err := service.UpdateImageRecord(ctx, ImageRecordUpdateRequest{ID: "fixed"}, request.Custom(func(*ImageRecordOpts) error { callbacks++; return nil }))
 			if got != nil || err == nil || calls != 0 || callbacks != 0 {
 				t.Fatal(got, err, calls, callbacks)
 			}
@@ -629,11 +630,11 @@ func TestImageRecordUpdateAccepts200Through399WithoutAutomaticReplay(t *testing.
 
 func TestImageRecordUpdateCapturesOptionsAndTopLevelAttributesBeforeMarshal(t *testing.T) {
 	calls, marshals := 0, 0
-	options := []ImageRecordOption{WithImageRecordHeader("X-Option", "captured")}
+	options := []ImageRecordOption{request.Header("X-Option", "captured")}
 	attributes := map[string]any{"zzz_later": "captured scalar"}
 	attributes["a_callback"] = imageRecordMarshalCallback(func() ([]byte, error) {
 		marshals++
-		options[0] = WithImageRecordHeader("X-Option", "changed by marshaler")
+		options[0] = request.Header("X-Option", "changed by marshaler")
 		attributes["zzz_later"] = "changed by marshaler"
 		return []byte(`{"owned":true}`), nil
 	})

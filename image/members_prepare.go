@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -19,7 +20,7 @@ func (s *Service) prepareImageMember(ctx context.Context, parent resource.Ref, m
 	if source != nil {
 		provider = source.ProviderClient
 	}
-	prepared, err := s.prepareImageMutation(ctx, parent, nil, []ImageMutationOption{func(config *ImageMutationOpts) error {
+	prepared, err := s.prepareImageMutation(ctx, parent, nil, []ImageMutationOption{request.Custom(func(config *ImageMutationOpts) error {
 		if memberID != nil {
 			if !utf8.ValidString(*memberID) {
 				return uploadInvalid("member ID must be valid UTF-8")
@@ -34,7 +35,7 @@ func (s *Service) prepareImageMember(ctx context.Context, parent resource.Ref, m
 		headers, err := apply()
 		config.Headers = headers
 		return err
-	}})
+	})})
 	if err != nil && source != nil {
 		var sourceErr error
 		if s.client != source || source.ProviderClient != provider {

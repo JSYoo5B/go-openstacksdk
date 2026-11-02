@@ -7,6 +7,8 @@ import (
 	"maps"
 
 	"github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 // ImageRecordDeleteOpts selects whole-image or one-store deletion. A nil
@@ -19,58 +21,53 @@ type ImageRecordDeleteOpts struct {
 	IgnoreMissing *bool
 }
 
-type ImageRecordDeleteOption func(*ImageRecordDeleteOpts) error
+// ImageRecordDeleteOption is one option of DeleteImageRecord:
+// WithImageRecordDeleteOpts, WithImageRecordDeleteHeaders (merges), the store
+// options, request.Header (merges one header), request.IgnoreMissing or
+// request.Custom over *ImageRecordDeleteOpts. Other shared calls, including
+// request.Headers, fail with resource.ErrInvalidOption before HTTP.
+type ImageRecordDeleteOption = request.DeleteCall
+
+var imageRecordDeleteCalls = calls.Spec[ImageRecordDeleteOpts]{
+	Header:        calls.MergeHeader[ImageRecordDeleteOpts](WithImageRecordDeleteHeaders),
+	IgnoreMissing: calls.Pointer(func(c *ImageRecordDeleteOpts) **bool { return &c.IgnoreMissing }),
+}
 
 // WithImageRecordDeleteOpts captures and replaces the entire configuration.
 // Nil store selectors clear a previous store selection to whole-image mode.
 func WithImageRecordDeleteOpts(value ImageRecordDeleteOpts) ImageRecordDeleteOption {
 	snapshot := copyImageRecordDeleteOpts(value)
-	return func(config *ImageRecordDeleteOpts) error {
+	return request.Custom(func(config *ImageRecordDeleteOpts) error {
 		*config = copyImageRecordDeleteOpts(snapshot)
 		return nil
-	}
-}
-
-func WithImageRecordDeleteHeader(key, value string) ImageRecordDeleteOption {
-	apply := WithImageMutationHeader(key, value)
-	return func(config *ImageRecordDeleteOpts) error {
-		return applyImageMemberHeader(&config.Headers, apply)
-	}
+	})
 }
 
 func WithImageRecordDeleteHeaders(values map[string]string) ImageRecordDeleteOption {
-	apply := WithImageMutationHeaders(values)
-	return func(config *ImageRecordDeleteOpts) error {
+	apply := mergeImageMutationHeaders(values)
+	return request.Custom(func(config *ImageRecordDeleteOpts) error {
 		return applyImageMemberHeader(&config.Headers, apply)
-	}
+	})
 }
 
 // WithImageRecordDeleteStoreID selects a literal store and clears StoreRecord.
 // An explicitly empty ID is invalid rather than selecting whole-image mode.
 func WithImageRecordDeleteStoreID(value string) ImageRecordDeleteOption {
-	return func(config *ImageRecordDeleteOpts) error {
+	return request.Custom(func(config *ImageRecordDeleteOpts) error {
 		snapshot := value
 		config.StoreID, config.StoreRecord = &snapshot, nil
 		return nil
-	}
+	})
 }
 
 // WithImageRecordDeleteStoreRecord captures a store's Resource identity and
 // clears StoreID. Nil clears both selectors to whole-image mode.
 func WithImageRecordDeleteStoreRecord(value *serviceinfo.StoreRecord) ImageRecordDeleteOption {
 	snapshot := cloneImageRecordDeleteStore(value)
-	return func(config *ImageRecordDeleteOpts) error {
+	return request.Custom(func(config *ImageRecordDeleteOpts) error {
 		config.StoreID, config.StoreRecord = nil, cloneImageRecordDeleteStore(snapshot)
 		return nil
-	}
-}
-
-func WithImageRecordDeleteIgnoreMissing(value bool) ImageRecordDeleteOption {
-	return func(config *ImageRecordDeleteOpts) error {
-		snapshot := value
-		config.IgnoreMissing = &snapshot
-		return nil
-	}
+	})
 }
 
 func cloneImageRecordDeleteStore(value *serviceinfo.StoreRecord) *serviceinfo.StoreRecord {
@@ -103,7 +100,7 @@ func copyImageRecordDeleteOpts(value ImageRecordDeleteOpts) ImageRecordDeleteOpt
 
 func prepareImageRecordDeleteOptions(ctx context.Context, check func(context.Context) error, options []ImageRecordDeleteOption) (ImageRecordDeleteOpts, error) {
 	config := copyImageRecordDeleteOpts(ImageRecordDeleteOpts{})
-	for _, apply := range options {
+	for _, apply := range calls.Translate(options, imageRecordDeleteCalls) {
 		if err := check(ctx); err != nil {
 			return config, err
 		}

@@ -128,7 +128,7 @@ func TestServiceInfoCorePagingUsesAdvertisedLinksAndStopsAtControls(t *testing.T
 		}
 		return infoResponse(req, io.NopCloser(strings.NewReader(body))), nil
 	})
-	for value, err := range New(client).ListStores(context.Background(), WithListStoresOptions(ListStoresOpts{Details: true, Limit: 2}), WithListStoresQuery("filter", "a & b")) {
+	for value, err := range New(client).ListStores(context.Background(), WithListStoresOptions(ListStoresOpts{Details: true, Limit: 2}), request.Query("filter", "a & b")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -142,8 +142,8 @@ func TestServiceInfoCorePagingUsesAdvertisedLinksAndStopsAtControls(t *testing.T
 		option ListStoresOption
 		body   string
 	}{
-		{WithListStoresMaxItems(1), `{"stores":[{"id":"one"},{"id":5}],"next":"https://foreign.test/unused"}`},
-		{WithListStoresPaginated(false), `{"stores":[{"id":"one"}],"next":"https://foreign.test/unused"}`},
+		{request.MaxItems(1), `{"stores":[{"id":"one"},{"id":5}],"next":"https://foreign.test/unused"}`},
+		{request.Paginated(false), `{"stores":[{"id":"one"}],"next":"https://foreign.test/unused"}`},
 	} {
 		requests = 0
 		client = infoClient(func(req *http.Request) (*http.Response, error) {
@@ -165,10 +165,10 @@ func TestServiceInfoCoreServerIgnoresPaginationQueries(t *testing.T) {
 		name, path, limit, marker string
 		options                   []ListStoresOption
 	}{
-		{"local cap three", "/info/stores", "", "", []ListStoresOption{WithListStoresMaxItems(3)}},
-		{"local cap twenty detail", "/info/stores/detail", "", "", []ListStoresOption{WithListStoresDetails(true), WithListStoresMaxItems(20)}},
+		{"local cap three", "/info/stores", "", "", []ListStoresOption{request.MaxItems(3)}},
+		{"local cap twenty detail", "/info/stores/detail", "", "", []ListStoresOption{WithListStoresDetails(true), request.MaxItems(20)}},
 		{"explicit typed inputs", "/info/stores", "1", "start", []ListStoresOption{WithListStoresOptions(ListStoresOpts{Limit: 1, Marker: "start"})}},
-		{"explicit raw inputs", "/info/stores", "1", "raw", []ListStoresOption{WithListStoresQuery("limit", "1"), WithListStoresQuery("marker", "raw")}},
+		{"explicit raw inputs", "/info/stores", "1", "raw", []ListStoresOption{request.Query("limit", "1"), request.Query("marker", "raw")}},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			var requests int
@@ -235,13 +235,13 @@ func TestServiceInfoCoreCapturesSourceAndGuardsLaterPages(t *testing.T) {
 	})
 	client.MoreHeaders = map[string]string{"X-Source": "before"}
 	api := New(client)
-	option := func(*request.Config[ListStoresOpts]) error {
+	option := request.Custom(func(*request.Config[ListStoresOpts]) error {
 		callbacks++
 		client.ResourceBase = "https://example.test/other/v2/"
 		client.MoreHeaders["X-Source"] = "after"
 		client.SetToken("after")
 		return nil
-	}
+	})
 	iterator := api.ListStores(context.Background(), option)
 	if requests != 0 || callbacks != 0 {
 		t.Fatal("list construction was not lazy")
@@ -261,7 +261,7 @@ func TestServiceInfoCoreCapturesSourceAndGuardsLaterPages(t *testing.T) {
 		t.Fatalf("later provider replacement not guarded terminal=%v requests=%d callbacks=%d", terminal, requests, callbacks)
 	}
 	callbacks = 0
-	if _, err := api.GetImportInfo(nil, func(*request.Config[GetImportInfoOpts]) error { callbacks++; return nil }); !errors.Is(err, resource.ErrInvalidOption) || callbacks != 0 {
+	if _, err := api.GetImportInfo(nil, request.Custom(func(*request.Config[GetImportInfoOpts]) error { callbacks++; return nil })); !errors.Is(err, resource.ErrInvalidOption) || callbacks != 0 {
 		t.Fatal("source/context preflight ran options", err, callbacks)
 	}
 }

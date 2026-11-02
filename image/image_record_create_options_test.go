@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -96,10 +97,10 @@ func TestImageRecordCreateWholeOptionsCaptureNestedRawMapsStoresAndReuseIndepend
 func TestImageRecordCreateOptionsMergeReplaceAndEmptyStorePresenceRemainDistinct(t *testing.T) {
 	for _, mode := range []string{"merge", "whole replace", "meta replace", "present empty stores", "omitted stores"} {
 		t.Run(mode, func(t *testing.T) {
-			options := []ImageRecordCreateOption{WithImageRecordCreateAttribute("a", 1), WithImageRecordCreateHeader("x-note", "first"), WithImageRecordCreateSwiftHeader("x-note", "first"), WithImageRecordCreateMeta(map[string]any{"a": 1})}
+			options := []ImageRecordCreateOption{WithImageRecordCreateAttribute("a", 1), request.Header("x-note", "first"), WithImageRecordCreateSwiftHeader("x-note", "first"), WithImageRecordCreateMeta(map[string]any{"a": 1})}
 			switch mode {
 			case "merge":
-				options = append(options, WithImageRecordCreateAttributes(map[string]any{"b": nil}), WithImageRecordCreateHeader("X-NOTE", "last"), WithImageRecordCreateSwiftHeaders(map[string]string{"X-NOTE": "last"}))
+				options = append(options, WithImageRecordCreateAttributes(map[string]any{"b": nil}), request.Header("X-NOTE", "last"), WithImageRecordCreateSwiftHeaders(map[string]string{"X-NOTE": "last"}))
 			case "whole replace":
 				options = append(options, WithImageRecordCreateOpts(ImageRecordCreateOpts{Attributes: map[string]any{"b": nil}}))
 			case "meta replace":
@@ -203,7 +204,7 @@ func TestImageRecordCreateNestedImportCallbacksRunOnceAndStopAfterEachGuard(t *t
 				t.Fatalf("unexpected error: %v", err)
 			}
 			var retained *ImageRecordImportOpts
-			options := []ImageRecordImportOption{func(c *ImageRecordImportOpts) error {
+			options := []ImageRecordImportOption{request.Custom(func(c *ImageRecordImportOpts) error {
 				first++
 				retained = c
 				c.URI = json.RawMessage(`"without method"`)
@@ -216,17 +217,17 @@ func TestImageRecordCreateNestedImportCallbacksRunOnceAndStopAfterEachGuard(t *t
 					return marker
 				}
 				return nil
-			}, func(*ImageRecordImportOpts) error { later++; return nil }}
+			}), request.Custom(func(*ImageRecordImportOpts) error { later++; return nil })}
 			option := WithImageRecordCreateImportOptions(options...)
-			options[0] = func(*ImageRecordImportOpts) error { t.Fatal("uncaptured nested option slice"); return nil }
+			options[0] = request.Custom(func(*ImageRecordImportOpts) error { t.Fatal("uncaptured nested option slice"); return nil })
 			var outer ImageRecordCreateOption = option
 			if mode == "whole replacement guard" {
-				outer = func(c *ImageRecordCreateOpts) error {
-					if err := WithImageRecordCreateOpts(ImageRecordCreateOpts{})(c); err != nil {
+				outer = request.Custom(func(c *ImageRecordCreateOpts) error {
+					if err := applyCall(imageRecordCreateCalls, WithImageRecordCreateOpts(ImageRecordCreateOpts{}), c); err != nil {
 						return err
 					}
-					return option(c)
-				}
+					return applyCall(imageRecordCreateCalls, option, c)
+				})
 			}
 			got, err := prepareImageRecordCreateOptions(p.ctx, p.check, []ImageRecordCreateOption{outer})
 			if calls != 0 || first != 1 {
@@ -306,7 +307,7 @@ func TestImageRecordCreateOptionAndMarshalerGuardsStopLaterCallbacks(t *testing.
 				}
 				return nil
 			}
-			_, err = prepareImageRecordCreateOptions(p.ctx, p.check, []ImageRecordCreateOption{first, func(*ImageRecordCreateOpts) error { later++; return nil }})
+			_, err = prepareImageRecordCreateOptions(p.ctx, p.check, []ImageRecordCreateOption{request.Custom(first), request.Custom(func(*ImageRecordCreateOpts) error { later++; return nil })})
 			if err == nil || later != 0 || calls != 0 {
 				t.Fatal(err, later, calls)
 			}
@@ -330,7 +331,7 @@ func TestImageRecordCreateHeaderNamespacesRejectOwnedControlsAndInvalidOptions(t
 		option ImageRecordCreateOption
 	}{
 		{"nil create option", nil}, {"nil nested option", WithImageRecordCreateImportOptions(nil)},
-		{"auth", WithImageRecordCreateHeader("X-Auth-Token", "spoof")}, {"media", WithImageRecordCreateHeader("Content-Type", "spoof")},
+		{"auth", request.Header("X-Auth-Token", "spoof")}, {"media", request.Header("Content-Type", "spoof")},
 		{"framing", WithImageRecordCreateSwiftHeader("Content-Length", "1")}, {"Swift TTL", WithImageRecordCreateSwiftHeader("x-delete-after", "1")},
 		{"Swift autocreate", WithImageRecordCreateSwiftHeader("x-object-meta-x-sdk-autocreated", "false")},
 		{"newline", WithImageRecordCreateHeaders(map[string]string{"X-Note": "bad\nvalue"})},

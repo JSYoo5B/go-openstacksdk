@@ -10,12 +10,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gophercloud/gophercloud/v2"
-
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/image"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
+	"github.com/gophercloud/gophercloud/v2"
 )
 
 func TestConnectionImageAssociatedTasksSharesClientAndResolvesName(t *testing.T) {
@@ -95,7 +95,7 @@ func TestConnectionImageAssociatedTasksSharesClientAndResolvesName(t *testing.T)
 	headers := map[string]string{"X-Call": "snapshot"}
 	option := image.WithListImageTasksHeaders(headers)
 	headers["X-Call"] = "changed"
-	rows, err := upper.AllImageTasks(ctx, resource.ID(id), option, image.WithListImageTasksMaxItems(1))
+	rows, err := upper.AllImageTasks(ctx, resource.ID(id), option, request.MaxItems(1))
 	if err != nil || len(rows) != 1 || rows[0].ID == nil || *rows[0].ID != "actual-task" || rows[0].ImageID == nil || *rows[0].ImageID != "actual-image" || rows[0].Deleted == nil || *rows[0].Deleted || rows[0].DeletedAt == nil || *rows[0].DeletedAt != "" || rows[0].StatusCode != 200 || rows[0].Header.Get("X-Proof") != "0" || calls != 1 {
 		t.Fatalf("actual owned row=%+v err=%v calls=%d", rows, err, calls)
 	}
@@ -107,7 +107,7 @@ func TestConnectionImageAssociatedTasksSharesClientAndResolvesName(t *testing.T)
 	if err != nil || empty == nil || len(empty) != 0 || calls != 2 {
 		t.Fatalf("empty finite list=%v err=%v calls=%d", empty, err, calls)
 	}
-	named, err := upper.AllImageTasks(ctx, resource.Name("Ubuntu 24"), image.WithListImageTasksHeader("X-Call", "named"))
+	named, err := upper.AllImageTasks(ctx, resource.Name("Ubuntu 24"), request.Header("X-Call", "named"))
 	if err != nil || len(named) != 1 || named[0].ID == nil || *named[0].ID != "named-task" || named[0].ImageID != nil || named[0].Deleted == nil || !*named[0].Deleted || named[0].DeletedAt != nil || calls != 4 {
 		t.Fatalf("name resolution=%+v err=%v calls=%d", named, err, calls)
 	}
@@ -121,10 +121,10 @@ func TestConnectionImageAssociatedTasksSharesClientAndResolvesName(t *testing.T)
 	if bad != nil || !errors.As(err, &response) || response.StatusCode != 200 || string(response.Body) != `{"tasks":[{"deleted":"wrong"}]}` || response.Header.Get("X-Proof") != "5" || calls != 6 {
 		t.Fatalf("owned200 decode error=%+v %v calls=%d", bad, err, calls)
 	}
-	invalid, err := upper.AllImageTasks(ctx, resource.ID("../image"), func(*image.ListImageTasksOpts) error {
+	invalid, err := upper.AllImageTasks(ctx, resource.ID("../image"), request.Custom(func(*image.ListImageTasksOpts) error {
 		t.Fatal("invalid parent reached option callback")
 		return nil
-	})
+	}))
 	if invalid != nil || !errors.Is(err, resource.ErrInvalidOption) || calls != 6 {
 		t.Fatalf("invalid ref=%+v %v calls=%d", invalid, err, calls)
 	}

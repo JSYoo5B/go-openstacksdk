@@ -13,6 +13,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -20,7 +21,7 @@ import (
 func namespaceRecordRows(t *testing.T, body string, options ...RecordListOption) ([]*Record, error) {
 	t.Helper()
 	api := New(namespaceCoreClient(func(req *http.Request) (*http.Response, error) { return namespaceCoreJSON(req, 203, body), nil }))
-	return api.AllRecords(context.Background(), append(options, WithRecordListPaginated(false))...)
+	return api.AllRecords(context.Background(), append(options, request.Paginated(false))...)
 }
 func namespaceRecordField(t *testing.T, row *Record, key, want string) {
 	t.Helper()
@@ -116,7 +117,7 @@ func TestMetadefNamespaceRecordsActualStatusesAndMandatoryRepresentation(t *test
 			body := &namespaceCoreBody{reader: strings.NewReader(`{"namespaces":{"namespace":"one"}}`)}
 			client := namespaceCoreClient(func(req *http.Request) (*http.Response, error) { return namespaceCoreHTTP(req, status, body), nil })
 			client.ProviderClient.HTTPClient.CheckRedirect = func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }
-			rows, err := New(client).AllRecords(context.Background(), WithRecordListPaginated(false))
+			rows, err := New(client).AllRecords(context.Background(), request.Paginated(false))
 			if err != nil || len(rows) != 1 || rows[0].StatusCode != status || body.closes != 1 {
 				t.Fatalf("status %d rows %d closes %d: %v", status, len(rows), body.closes, err)
 			}
@@ -154,7 +155,7 @@ func TestMetadefNamespaceRecordsSourceQueriesAndNormalizedLocalFilters(t *testin
 		}
 		return namespaceCoreJSON(req, 206, `{"namespaces":[{"namespace":"one","protected":"false","tags":"one","resource_type_associations":{"name":"OS::A","extra":1}},{"namespace":"two","protected":false,"tags":[]},{"namespace":"three","protected":true,"tags":"one","resource_type_associations":[{"name":"OS::A","extra":1}]}]}`), nil
 	})
-	rows, err := New(client).AllRecords(context.Background(), WithRecordListLimit(3), WithRecordListMarker("OS::starting/+?"), WithRecordListPaginated(false), WithRecordListHeader("X-Custom", "owned"), WithRecordListFilters(map[string]any{
+	rows, err := New(client).AllRecords(context.Background(), request.Limit(3), request.Marker("OS::starting/+?"), request.Paginated(false), request.Header("X-Custom", "owned"), WithRecordListFilters(map[string]any{
 		"resource_types": []string{"OS::A", "OS::B"}, "sort_dir": "DESC", "sort_key": "vendor_future", "visibility": "unexpected-server-owned", "is_protected": true, "tags": []string{"one"}, "resource_type_associations": []any{map[string]any{"name": "OS::A", "extra": 1}}, "protected": make(chan int), "any_tags": make(chan int), "vendor": make(chan int),
 	}))
 	if err != nil || len(rows) != 2 || calls != 1 {
@@ -229,7 +230,7 @@ func TestMetadefNamespaceRecordsGenericPaginationAndRawMarkers(t *testing.T) {
 				}
 				return namespaceCoreJSON(req, 200, `{"namespaces":[`+tt.wire+`]}`), nil
 			}))
-			stream := api.ListRecords(context.Background(), WithRecordListLimit(2))
+			stream := api.ListRecords(context.Background(), request.Limit(2))
 			rows := 0
 			for row, err := range stream {
 				if err != nil {
@@ -248,7 +249,7 @@ func TestMetadefNamespaceRecordsGenericPaginationAndRawMarkers(t *testing.T) {
 		t.Run("bad marker "+wire, func(t *testing.T) {
 			body := `{"namespaces":[` + wire + `]}`
 			api := New(namespaceCoreClient(func(req *http.Request) (*http.Response, error) { return namespaceCoreJSON(req, 200, body), nil }))
-			rows, err := api.AllRecords(context.Background(), WithRecordListLimit(2))
+			rows, err := api.AllRecords(context.Background(), request.Limit(2))
 			if len(rows) != 1 || err == nil {
 				t.Fatalf("rows %d: %v", len(rows), err)
 			}
@@ -263,7 +264,7 @@ func TestMetadefNamespaceRecordsGenericPaginationAndRawMarkers(t *testing.T) {
 				calls++
 				return namespaceCoreJSON(req, 200, body), nil
 			}))
-			rows, err := api.AllRecords(context.Background(), WithRecordListMarker("starting"), WithRecordListVisibility("public"))
+			rows, err := api.AllRecords(context.Background(), request.Marker("starting"), WithRecordListVisibility("public"))
 			if len(rows) != 1 || err == nil || calls != 1 {
 				t.Fatalf("calls %d rows %d: %v", calls, len(rows), err)
 			}
@@ -282,12 +283,12 @@ func TestMetadefNamespaceRecordsCapsPartialsAndIteratorOwnership(t *testing.T) {
 		}
 		return namespaceCoreJSON(req, 203, body), nil
 	}))
-	rows, err := api.AllRecords(context.Background(), WithRecordListMaxItems(1), WithRecordListFilter("is_protected", true))
+	rows, err := api.AllRecords(context.Background(), request.MaxItems(1), WithRecordListFilter("is_protected", true))
 	if err != nil || len(rows) != 0 || calls != 1 {
 		t.Fatalf("raw cap filtered rows %d calls %d: %v", len(rows), calls, err)
 	}
 	api = New(namespaceCoreClient(func(req *http.Request) (*http.Response, error) { return namespaceCoreJSON(req, 203, body), nil }))
-	rows, err = api.AllRecords(context.Background(), WithRecordListPaginated(false))
+	rows, err = api.AllRecords(context.Background(), request.Paginated(false))
 	if err == nil || len(rows) != 1 {
 		t.Fatalf("partial rows %d: %v", len(rows), err)
 	}
@@ -330,7 +331,7 @@ func TestMetadefNamespaceRecordsCapsPartialsAndIteratorOwnership(t *testing.T) {
 		}
 		return namespaceCoreJSON(req, 200, `{"namespaces":[{"namespace":"one"}]}`), nil
 	})
-	stream := New(client).ListRecords(context.Background(), option, func(value *RecordListOpts) error { retained = value; return nil })
+	stream := New(client).ListRecords(context.Background(), option, request.Custom(func(value *RecordListOpts) error { retained = value; return nil }))
 	for run := 0; run < 2; run++ {
 		rows, err = collectRecords(stream)
 		if err != nil || len(rows) != 1 {
@@ -354,7 +355,7 @@ func TestMetadefNamespaceRecordsCurrentLocationAndStickyGuards(t *testing.T) {
 		locationCalls++
 		return resource.CloudLocation{Cloud: &cloud, RegionName: &region, Project: resource.CloudProject{ID: json.RawMessage(`"project"`)}, Zone: json.RawMessage(`"zone"`)}, nil
 	}})
-	rows, err := api.AllRecords(context.Background(), WithRecordListPaginated(false), func(*RecordListOpts) error { cloud = "changed-after-capture"; return nil })
+	rows, err := api.AllRecords(context.Background(), request.Paginated(false), request.Custom(func(*RecordListOpts) error { cloud = "changed-after-capture"; return nil }))
 	if err != nil || len(rows) != 4 || locationCalls != 1 || httpCalls != 1 {
 		t.Fatalf("locations %d calls %d: %v", locationCalls, httpCalls, err)
 	}
@@ -378,7 +379,7 @@ func TestMetadefNamespaceRecordsCurrentLocationAndStickyGuards(t *testing.T) {
 		return nil
 	})
 	ran := 0
-	rows, err = api.AllRecords(ctx, func(*RecordListOpts) error { client.Endpoint = "https://changed.test/"; return nil }, func(*RecordListOpts) error { ran++; client.Endpoint = original; return nil })
+	rows, err = api.AllRecords(ctx, request.Custom(func(*RecordListOpts) error { client.Endpoint = "https://changed.test/"; return nil }), request.Custom(func(*RecordListOpts) error { ran++; client.Endpoint = original; return nil }))
 	client.Endpoint = original
 	if err == nil || len(rows) != 0 || ran != 0 || calls != 0 {
 		t.Fatalf("sticky options ran%d calls%d: %v", ran, calls, err)
@@ -421,15 +422,15 @@ func TestMetadefNamespaceRecordsCompletePreflightAndFaultReceipts(t *testing.T) 
 		name   string
 		option RecordListOption
 	}{
-		{"nil", nil}, {"negative limit", WithRecordListLimit(-1)}, {"negative cap", WithRecordListMaxItems(-1)},
-		{"empty marker", WithRecordListFilter("marker", "")}, {"marker controls", WithRecordListMarker("line\n")},
+		{"nil", nil}, {"negative limit", request.Limit(-1)}, {"negative cap", request.MaxItems(-1)},
+		{"empty marker", WithRecordListFilter("marker", "")}, {"marker controls", request.Marker("line\n")},
 		{"limit negative semantic", WithRecordListFilter("limit", -1)}, {"bad limit", WithRecordListFilter("limit", []int{1, 2})},
 		{"query controls", WithRecordListFilter("resource_types", "bad\n")}, {"known encoding", WithRecordListFilter("namespace", make(chan int))},
-		{"raw option wrong namespace", func(c *RecordListOpts) error {
+		{"raw option wrong namespace", request.Custom(func(c *RecordListOpts) error {
 			c.Filters = []resource.ListOption{resource.WithQuery("vendor", "x")}
 			return nil
-		}},
-		{"managed header", WithRecordListHeader("Authorization", "x")}, {"invalid header", WithRecordListHeader("X-Valid", "bad\n")},
+		})},
+		{"managed header", request.Header("Authorization", "x")}, {"invalid header", request.Header("X-Valid", "bad\n")},
 		{"header aliases", WithRecordListHeaders(map[string]string{"x-h": "one", "X-H": "two"})},
 	}
 	for _, control := range []string{"resource_type", "session", "paginated", "base_path", "microversion", "headers", "max_items", "allow_unknown_params", "jmespath_filters", "__conflicting_attrs"} {
@@ -481,7 +482,7 @@ func TestMetadefNamespaceRecordsCompletePreflightAndFaultReceipts(t *testing.T) 
 			case "outer guard":
 				ctx = rest.WithOperationGuard(ctx, func(context.Context) error { return sentinel })
 			}
-			rows, err := api.AllRecords(ctx, func(*RecordListOpts) error { callbacks++; return nil })
+			rows, err := api.AllRecords(ctx, request.Custom(func(*RecordListOpts) error { callbacks++; return nil }))
 			if err == nil || calls != 0 || callbacks != 0 || len(rows) != 0 {
 				t.Fatalf("callbacks %d calls %d: %v", callbacks, calls, err)
 			}
@@ -529,14 +530,14 @@ func TestMetadefNamespaceRecordsCompletePreflightAndFaultReceipts(t *testing.T) 
 		calls++
 		return namespaceCoreJSON(req, 200, `{"namespaces":[]}`), nil
 	})
-	rows, err := New(client).AllRecords(context.Background(), WithRecordListLimit(1), WithRecordListFilter("limit", 1))
+	rows, err := New(client).AllRecords(context.Background(), request.Limit(1), WithRecordListFilter("limit", 1))
 	if err == nil || calls != 0 || len(rows) != 0 {
 		t.Fatal("semantic control collision sent HTTP")
 	}
 }
 
 func TestMetadefNamespaceRecordsExplicitZeroLimitAndBindingCollisions(t *testing.T) {
-	for _, option := range []RecordListOption{WithRecordListLimit(0), WithRecordListFilter("limit", 0)} {
+	for _, option := range []RecordListOption{request.Limit(0), WithRecordListFilter("limit", 0)} {
 		t.Run("zero no fallback", func(t *testing.T) {
 			calls := 0
 			api := New(namespaceCoreClient(func(req *http.Request) (*http.Response, error) {
@@ -580,7 +581,7 @@ func TestMetadefNamespaceRecordsExplicitZeroLimitAndBindingCollisions(t *testing
 		option RecordListOption
 		want   string
 	}{
-		{"typed falsey zero hint", WithRecordListLimit(0), "2"},
+		{"typed falsey zero hint", request.Limit(0), "2"},
 		{"semantic falsey zero hint", WithRecordListFilter("limit", 0), "2"},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
@@ -590,7 +591,7 @@ func TestMetadefNamespaceRecordsExplicitZeroLimitAndBindingCollisions(t *testing
 				}
 				return namespaceCoreJSON(req, 200, `{"namespaces":[{},{}],"next":false}`), nil
 			}))
-			rows, err := api.AllRecords(context.Background(), tt.option, WithRecordListMaxItems(2))
+			rows, err := api.AllRecords(context.Background(), tt.option, request.MaxItems(2))
 			if err != nil || len(rows) != 2 {
 				t.Fatalf("rows%d: %v", len(rows), err)
 			}

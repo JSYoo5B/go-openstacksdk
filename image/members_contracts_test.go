@@ -18,6 +18,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/image"
 	nativeMembers "github.com/JSYoo5B/go-openstacksdk/image/v2/members"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -135,10 +136,10 @@ func memberContractNative404() error {
 }
 func memberContractHeaders() memberContractOptions {
 	return memberContractOptions{
-		common: []image.ImageMemberOption{image.WithImageMemberHeaders(map[string]string{"X-Option": "owned"}), image.WithImageMemberHeader("X-Final", "yes")},
-		remove: []image.RemoveImageMemberOption{image.WithRemoveImageMemberHeaders(map[string]string{"X-Option": "owned"}), image.WithRemoveImageMemberHeader("X-Final", "yes")},
-		find:   []image.FindImageMemberOption{image.WithFindImageMemberHeaders(map[string]string{"X-Option": "owned"}), image.WithFindImageMemberHeader("X-Final", "yes")},
-		list:   []image.ListImageMembersOption{image.WithListImageMembersHeaders(map[string]string{"X-Option": "owned"}), image.WithListImageMembersHeader("X-Final", "yes")},
+		common: []image.ImageMemberOption{image.WithImageMemberHeaders(map[string]string{"X-Option": "owned"}), request.Header("X-Final", "yes")},
+		remove: []image.RemoveImageMemberOption{image.WithRemoveImageMemberHeaders(map[string]string{"X-Option": "owned"}), request.Header("X-Final", "yes")},
+		find:   []image.FindImageMemberOption{image.WithFindImageMemberHeaders(map[string]string{"X-Option": "owned"}), request.Header("X-Final", "yes")},
+		list:   []image.ListImageMembersOption{image.WithListImageMembersHeaders(map[string]string{"X-Option": "owned"}), request.Header("X-Final", "yes")},
 	}
 }
 
@@ -372,7 +373,7 @@ func TestImageMembersCanonicalRawModelsAndFiniteList(t *testing.T) {
 			return wire, nil
 		})
 		s := image.New(client)
-		rows, e := s.AllImageMembers(context.Background(), resource.ID("parent"), image.WithListImageMembersMaxItems(2))
+		rows, e := s.AllImageMembers(context.Background(), resource.ID("parent"), request.MaxItems(2))
 		if e != nil || len(rows) != 2 || calls.Load() != 1 {
 			t.Fatal(rows, e, calls.Load())
 		}
@@ -421,7 +422,7 @@ func TestImageMembersCanonicalRawModelsAndFiniteList(t *testing.T) {
 			return memberContractWire(200, io.NopCloser(strings.NewReader(`{"members":[]}`))), nil
 		})
 		s := image.New(client)
-		seq := s.ListImageMembers(context.Background(), resource.ID("parent"), func(*image.ListImageMembersOpts) error { callbacks.Add(1); return nil })
+		seq := s.ListImageMembers(context.Background(), resource.ID("parent"), request.Custom(func(*image.ListImageMembersOpts) error { callbacks.Add(1); return nil }))
 		if calls.Load() != 0 || callbacks.Load() != 0 {
 			t.Fatal("eager list")
 		}
@@ -498,7 +499,7 @@ func TestImageMembersOwnedOptionsAndPreflight(t *testing.T) {
 				case "invalid parent UTF8":
 					parent = resource.Name(string([]byte{255}))
 				}
-				o := memberContractOptions{common: []image.ImageMemberOption{func(*image.ImageMemberOpts) error { callbacks.Add(1); return nil }}, remove: []image.RemoveImageMemberOption{func(*image.RemoveImageMemberOpts) error { callbacks.Add(1); return nil }}, find: []image.FindImageMemberOption{func(*image.FindImageMemberOpts) error { callbacks.Add(1); return nil }}, list: []image.ListImageMembersOption{func(*image.ListImageMembersOpts) error { callbacks.Add(1); return nil }}}
+				o := memberContractOptions{common: []image.ImageMemberOption{request.Custom(func(*image.ImageMemberOpts) error { callbacks.Add(1); return nil })}, remove: []image.RemoveImageMemberOption{request.Custom(func(*image.RemoveImageMemberOpts) error { callbacks.Add(1); return nil })}, find: []image.FindImageMemberOption{request.Custom(func(*image.FindImageMemberOpts) error { callbacks.Add(1); return nil })}, list: []image.ListImageMembersOption{request.Custom(func(*image.ListImageMembersOpts) error { callbacks.Add(1); return nil })}}
 				v, e := memberContractCall(s, ctx, op.name, parent, "member", o)
 				if v != nil || e == nil || calls.Load() != 0 || callbacks.Load() != 0 {
 					t.Fatal(v, e, calls.Load(), callbacks.Load())
@@ -521,7 +522,7 @@ func TestImageMembersOwnedOptionsAndPreflight(t *testing.T) {
 			t.Run(op.name+" invalid member "+id, func(t *testing.T) {
 				var calls, callbacks atomic.Int32
 				client := memberContractClient(func(*http.Request) (*http.Response, error) { calls.Add(1); return nil, errors.New("unexpected HTTP") })
-				o := memberContractOptions{common: []image.ImageMemberOption{func(*image.ImageMemberOpts) error { callbacks.Add(1); return nil }}, remove: []image.RemoveImageMemberOption{func(*image.RemoveImageMemberOpts) error { callbacks.Add(1); return nil }}, find: []image.FindImageMemberOption{func(*image.FindImageMemberOpts) error { callbacks.Add(1); return nil }}}
+				o := memberContractOptions{common: []image.ImageMemberOption{request.Custom(func(*image.ImageMemberOpts) error { callbacks.Add(1); return nil })}, remove: []image.RemoveImageMemberOption{request.Custom(func(*image.RemoveImageMemberOpts) error { callbacks.Add(1); return nil })}, find: []image.FindImageMemberOption{request.Custom(func(*image.FindImageMemberOpts) error { callbacks.Add(1); return nil })}}
 				v, e := memberContractCall(image.New(client), context.Background(), op.name, resource.Name("needle"), id, o)
 				if v != nil || !errors.Is(e, resource.ErrInvalidOption) || calls.Load() != 0 || callbacks.Load() != 0 {
 					t.Fatal(v, e, calls.Load(), callbacks.Load())
@@ -533,7 +534,7 @@ func TestImageMembersOwnedOptionsAndPreflight(t *testing.T) {
 		t.Run("invalid status "+status, func(t *testing.T) {
 			var calls, callbacks atomic.Int32
 			client := memberContractClient(func(*http.Request) (*http.Response, error) { calls.Add(1); return nil, errors.New("unexpected HTTP") })
-			v, e := image.New(client).UpdateImageMember(context.Background(), resource.Name("needle"), "member", status, func(*image.ImageMemberOpts) error { callbacks.Add(1); return nil })
+			v, e := image.New(client).UpdateImageMember(context.Background(), resource.Name("needle"), "member", status, request.Custom(func(*image.ImageMemberOpts) error { callbacks.Add(1); return nil }))
 			if v != nil || !errors.Is(e, resource.ErrInvalidOption) || calls.Load() != 0 || callbacks.Load() != 0 {
 				t.Fatal(v, e, calls.Load(), callbacks.Load())
 			}
@@ -558,7 +559,7 @@ func TestImageMembersOwnedOptionsAndPreflight(t *testing.T) {
 			t.Run(op.name+" protected option "+header, func(t *testing.T) {
 				var calls atomic.Int32
 				client := memberContractClient(func(*http.Request) (*http.Response, error) { calls.Add(1); return nil, errors.New("unexpected HTTP") })
-				o := memberContractOptions{common: []image.ImageMemberOption{image.WithImageMemberHeader(header, "value")}, remove: []image.RemoveImageMemberOption{image.WithRemoveImageMemberHeader(header, "value")}, find: []image.FindImageMemberOption{image.WithFindImageMemberHeader(header, "value")}, list: []image.ListImageMembersOption{image.WithListImageMembersHeader(header, "value")}}
+				o := memberContractOptions{common: []image.ImageMemberOption{request.Header(header, "value")}, remove: []image.RemoveImageMemberOption{request.Header(header, "value")}, find: []image.FindImageMemberOption{request.Header(header, "value")}, list: []image.ListImageMembersOption{request.Header(header, "value")}}
 				v, e := memberContractCall(image.New(client), context.Background(), op.name, resource.Name("needle"), "member", o)
 				if v != nil || !errors.Is(e, resource.ErrInvalidOption) || calls.Load() != 0 {
 					t.Fatal(v, e, calls.Load())
@@ -589,7 +590,7 @@ func TestImageMembersOwnedOptionsAndPreflight(t *testing.T) {
 					}
 					return nil
 				}
-				o := memberContractOptions{common: []image.ImageMemberOption{func(*image.ImageMemberOpts) error { return apply() }}, remove: []image.RemoveImageMemberOption{func(*image.RemoveImageMemberOpts) error { return apply() }}, find: []image.FindImageMemberOption{func(*image.FindImageMemberOpts) error { return apply() }}, list: []image.ListImageMembersOption{func(*image.ListImageMembersOpts) error { return apply() }}}
+				o := memberContractOptions{common: []image.ImageMemberOption{request.Custom(func(*image.ImageMemberOpts) error { return apply() })}, remove: []image.RemoveImageMemberOption{request.Custom(func(*image.RemoveImageMemberOpts) error { return apply() })}, find: []image.FindImageMemberOption{request.Custom(func(*image.FindImageMemberOpts) error { return apply() })}, list: []image.ListImageMembersOption{request.Custom(func(*image.ListImageMembersOpts) error { return apply() })}}
 				if mode == "nil callback" {
 					o = memberContractOptions{common: []image.ImageMemberOption{nil}, remove: []image.RemoveImageMemberOption{nil}, find: []image.FindImageMemberOption{nil}, list: []image.ListImageMembersOption{nil}}
 				}
@@ -606,7 +607,7 @@ func TestImageMembersOwnedOptionsAndPreflight(t *testing.T) {
 	t.Run("negative local cap before lookup", func(t *testing.T) {
 		var calls atomic.Int32
 		client := memberContractClient(func(*http.Request) (*http.Response, error) { calls.Add(1); return nil, errors.New("unexpected HTTP") })
-		rows, e := image.New(client).AllImageMembers(context.Background(), resource.Name("needle"), image.WithListImageMembersMaxItems(-1))
+		rows, e := image.New(client).AllImageMembers(context.Background(), resource.Name("needle"), request.MaxItems(-1))
 		if rows != nil || !errors.Is(e, resource.ErrInvalidOption) || calls.Load() != 0 {
 			t.Fatal(rows, e, calls.Load())
 		}
@@ -627,18 +628,18 @@ func TestImageMembersOwnedOptionsAndPreflight(t *testing.T) {
 				}
 			}
 			o := memberContractOptions{
-				common: []image.ImageMemberOption{image.WithImageMemberHeader("X-Dropped", "gone"), image.WithImageMemberOpts(image.ImageMemberOpts{Headers: input}), func(c *image.ImageMemberOpts) error { escaped = c.Headers; return nil }, func(c *image.ImageMemberOpts) error { mutate(); return nil }},
-				remove: []image.RemoveImageMemberOption{image.WithRemoveImageMemberHeader("X-Dropped", "gone"), image.WithRemoveImageMemberOpts(image.RemoveImageMemberOpts{Headers: input, IgnoreMissing: &flag}), func(c *image.RemoveImageMemberOpts) error {
+				common: []image.ImageMemberOption{request.Header("X-Dropped", "gone"), image.WithImageMemberOpts(image.ImageMemberOpts{Headers: input}), request.Custom(func(c *image.ImageMemberOpts) error { escaped = c.Headers; return nil }), request.Custom(func(c *image.ImageMemberOpts) error { mutate(); return nil })},
+				remove: []image.RemoveImageMemberOption{request.Header("X-Dropped", "gone"), image.WithRemoveImageMemberOpts(image.RemoveImageMemberOpts{Headers: input, IgnoreMissing: &flag}), request.Custom(func(c *image.RemoveImageMemberOpts) error {
 					escaped = c.Headers
 					escapedFlag = c.IgnoreMissing
 					return nil
-				}, func(c *image.RemoveImageMemberOpts) error { mutate(); return nil }},
-				find: []image.FindImageMemberOption{image.WithFindImageMemberHeader("X-Dropped", "gone"), image.WithFindImageMemberOpts(image.FindImageMemberOpts{Headers: input, IgnoreMissing: &flag}), func(c *image.FindImageMemberOpts) error {
+				}), request.Custom(func(c *image.RemoveImageMemberOpts) error { mutate(); return nil })},
+				find: []image.FindImageMemberOption{request.Header("X-Dropped", "gone"), image.WithFindImageMemberOpts(image.FindImageMemberOpts{Headers: input, IgnoreMissing: &flag}), request.Custom(func(c *image.FindImageMemberOpts) error {
 					escaped = c.Headers
 					escapedFlag = c.IgnoreMissing
 					return nil
-				}, func(c *image.FindImageMemberOpts) error { mutate(); return nil }},
-				list: []image.ListImageMembersOption{image.WithListImageMembersHeader("X-Dropped", "gone"), image.WithListImageMembersOpts(image.ListImageMembersOpts{Headers: input, MaxItems: 1}), func(c *image.ListImageMembersOpts) error { escaped = c.Headers; return nil }, func(c *image.ListImageMembersOpts) error { mutate(); return nil }},
+				}), request.Custom(func(c *image.FindImageMemberOpts) error { mutate(); return nil })},
+				list: []image.ListImageMembersOption{request.Header("X-Dropped", "gone"), image.WithListImageMembersOpts(image.ListImageMembersOpts{Headers: input, MaxItems: 1}), request.Custom(func(c *image.ListImageMembersOpts) error { escaped = c.Headers; return nil }), request.Custom(func(c *image.ListImageMembersOpts) error { mutate(); return nil })},
 			}
 			input["X-Owned"] = "caller mutation"
 			flag = false
@@ -672,13 +673,13 @@ func TestImageMembersOwnedOptionsAndPreflight(t *testing.T) {
 			}
 			return memberContractWire(200, io.NopCloser(strings.NewReader(memberContractObject))), nil
 		})
-		v, e := image.New(client).GetImageMember(context.Background(), resource.ID("parent"), "member", func(*image.ImageMemberOpts) error {
+		v, e := image.New(client).GetImageMember(context.Background(), resource.ID("parent"), "member", request.Custom(func(*image.ImageMemberOpts) error {
 			client.Endpoint = "https://glance.invalid/changed/v2/"
 			client.ResourceBase = "https://glance.invalid/replacement/v2/"
 			client.MoreHeaders["X-Source"] = "later"
 			client.SetToken("live")
 			return nil
-		})
+		}))
 		if e != nil || v == nil || calls.Load() != 1 || client.MoreHeaders["X-Source"] != "later" {
 			t.Fatal(v, e, calls.Load())
 		}
@@ -693,7 +694,7 @@ func TestImageMembersOwnedOptionsAndPreflight(t *testing.T) {
 			}
 			return memberContractWire(200, io.NopCloser(strings.NewReader(`{"members":[{},null]}`))), nil
 		})
-		opts := []image.ListImageMembersOption{image.WithListImageMembersOpts(image.ListImageMembersOpts{Headers: input, MaxItems: 1}), func(*image.ListImageMembersOpts) error { callbacks.Add(1); return nil }}
+		opts := []image.ListImageMembersOption{image.WithListImageMembersOpts(image.ListImageMembersOpts{Headers: input, MaxItems: 1}), request.Custom(func(*image.ListImageMembersOpts) error { callbacks.Add(1); return nil })}
 		seq := image.New(client).ListImageMembers(context.Background(), resource.ID("parent"), opts...)
 		opts[0] = nil
 		input["X-Option"] = "later"
@@ -833,14 +834,14 @@ func TestImageMembersAcceptedEvidenceAndMutationNoReplay(t *testing.T) {
 				o := memberContractOptions{}
 				switch mode {
 				case "explicit true":
-					o.find = []image.FindImageMemberOption{image.WithFindImageMemberIgnoreMissing(true)}
-					o.remove = []image.RemoveImageMemberOption{image.WithRemoveImageMemberIgnoreMissing(true)}
+					o.find = []image.FindImageMemberOption{request.IgnoreMissing(true)}
+					o.remove = []image.RemoveImageMemberOption{request.IgnoreMissing(true)}
 				case "nil replacement":
-					o.find = []image.FindImageMemberOption{image.WithFindImageMemberIgnoreMissing(false), image.WithFindImageMemberOpts(image.FindImageMemberOpts{})}
-					o.remove = []image.RemoveImageMemberOption{image.WithRemoveImageMemberIgnoreMissing(false), image.WithRemoveImageMemberOpts(image.RemoveImageMemberOpts{})}
+					o.find = []image.FindImageMemberOption{request.IgnoreMissing(false), image.WithFindImageMemberOpts(image.FindImageMemberOpts{})}
+					o.remove = []image.RemoveImageMemberOption{request.IgnoreMissing(false), image.WithRemoveImageMemberOpts(image.RemoveImageMemberOpts{})}
 				case "explicit false", "false native retry":
-					o.find = []image.FindImageMemberOption{image.WithFindImageMemberIgnoreMissing(false)}
-					o.remove = []image.RemoveImageMemberOption{image.WithRemoveImageMemberIgnoreMissing(false)}
+					o.find = []image.FindImageMemberOption{request.IgnoreMissing(false)}
+					o.remove = []image.RemoveImageMemberOption{request.IgnoreMissing(false)}
 				}
 				v, e := memberContractCall(image.New(client), context.Background(), op, resource.ID("parent"), "member", o)
 				switch mode {

@@ -7,6 +7,9 @@ import (
 	"slices"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/image/v2/internal/glancecalls"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -27,7 +30,13 @@ type RecordCreateOpts struct {
 	Headers    map[string]string
 	Attributes []resource.ListOption
 }
-type RecordCreateOption func(*RecordCreateOpts) error
+
+// RecordCreateOption is one option of the operation: WithRecordCreateOpts,
+// WithRecordCreateHeaders, WithRecordCreateAttribute,
+// WithRecordCreateAttributes, request.Header, or request.Custom over
+// *RecordCreateOpts. Other shared calls fail with resource.ErrInvalidOption
+// before HTTP.
+type RecordCreateOption = request.WriteCall
 
 func copyRecordCreate(value RecordCreateOpts) RecordCreateOpts {
 	value.Headers = copyHeaders(value.Headers)
@@ -36,17 +45,11 @@ func copyRecordCreate(value RecordCreateOpts) RecordCreateOpts {
 }
 func WithRecordCreateOpts(value RecordCreateOpts) RecordCreateOption {
 	owned := copyRecordCreate(value)
-	return func(config *RecordCreateOpts) error { *config = copyRecordCreate(owned); return nil }
-}
-func WithRecordCreateHeader(key, value string) RecordCreateOption {
-	return func(config *RecordCreateOpts) error {
-		config.Headers = setHeader(config.Headers, key, value)
-		return nil
-	}
+	return request.Custom(func(config *RecordCreateOpts) error { *config = copyRecordCreate(owned); return nil })
 }
 func WithRecordCreateHeaders(values map[string]string) RecordCreateOption {
 	owned := copyHeaders(values)
-	return func(config *RecordCreateOpts) error {
+	return request.Custom(func(config *RecordCreateOpts) error {
 		headers, err := validateHeaders(owned, false, "")
 		if err != nil {
 			return err
@@ -55,22 +58,22 @@ func WithRecordCreateHeaders(values map[string]string) RecordCreateOption {
 			config.Headers = setHeader(config.Headers, key, value)
 		}
 		return nil
-	}
+	})
 }
 func WithRecordCreateAttribute(field string, value any) RecordCreateOption {
 	owned := resource.WithFilter(field, value)
-	return func(config *RecordCreateOpts) error { config.Attributes = append(config.Attributes, owned); return nil }
+	return request.Custom(func(config *RecordCreateOpts) error { config.Attributes = append(config.Attributes, owned); return nil })
 }
 func WithRecordCreateAttributes(values map[string]any) RecordCreateOption {
 	owned := resource.WithFilters(values)
-	return func(config *RecordCreateOpts) error { config.Attributes = append(config.Attributes, owned); return nil }
+	return request.Custom(func(config *RecordCreateOpts) error { config.Attributes = append(config.Attributes, owned); return nil })
 }
 
 var associationRecordBodyFields = [...]string{"id", "name", "created_at", "updated_at", "prefix", "properties_target"}
 
 func prepareRecordCreate(ctx context.Context, check func(context.Context) error, options []RecordCreateOption) (map[string]json.RawMessage, map[string]string, error) {
 	value := copyRecordCreate(RecordCreateOpts{})
-	for _, apply := range options {
+	for _, apply := range calls.Translate(options, recordCreateCalls) {
 		if err := check(ctx); err != nil {
 			return nil, nil, err
 		}
@@ -140,8 +143,8 @@ func recordDeletionIdentity(input RecordRequest) (string, error) {
 
 func guardRecordDeleteOptions(ctx context.Context, check func(context.Context) error, options []DeleteOption) []DeleteOption {
 	guarded := make([]DeleteOption, 0, len(options))
-	for _, apply := range options {
-		guarded = append(guarded, func(config *DeleteOpts) error {
+	for _, apply := range calls.Translate(options, deleteCalls) {
+		guarded = append(guarded, request.Custom(func(config *DeleteOpts) error {
 			if err := check(ctx); err != nil {
 				return err
 			}
@@ -149,7 +152,11 @@ func guardRecordDeleteOptions(ctx context.Context, check func(context.Context) e
 				return invalid("nil record delete option")
 			}
 			return errors.Join(apply(config), check(ctx))
-		})
+		}))
 	}
 	return guarded
 }
+
+var (
+	recordCreateCalls = glancecalls.HeaderSpec(func(o *RecordCreateOpts) *map[string]string { return &o.Headers })
+)

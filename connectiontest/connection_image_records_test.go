@@ -10,6 +10,7 @@ import (
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/image"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -66,21 +67,21 @@ func TestConnectionImageRecordsShareSourceLocationAndHiddenDiscovery(t *testing.
 	if upper.RawClient() != client || upper.API.RawClient() != client || client.ProviderClient != provider || calls != 0 {
 		t.Fatal("shared source or eager call")
 	}
-	got, err := upper.GetImageRecord(context.Background(), image.ImageRecordRequest{ID: "get"}, image.WithImageRecordHeader("X-Call", "records"))
+	got, err := upper.GetImageRecord(context.Background(), image.ImageRecordRequest{ID: "get"}, request.Header("X-Call", "records"))
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	if got == nil || calls != 1 || len(got.Resource.Body) != 65 || string(got.Resource.Body["id"]) != `"get"` || string(got.Resource.Body["owner_id"]) != `"foreign-owner"` || string(got.Resource.Body["location"]) != string(location) || len(got.ImportMethods) != 2 || got.ImportMethods[1] != " glance-direct" {
 		t.Fatal(got, calls)
 	}
-	rows, err := upper.AllImageRecords(context.Background(), image.WithImageRecordListHeader("X-Call", "records"))
+	rows, err := upper.AllImageRecords(context.Background(), request.Header("X-Call", "records"))
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	if len(rows) != 2 || calls != 3 || string(rows[0].Resource.Body["size"]) != "9007199254740993" || string(rows[1].Resource.Body["is_hidden"]) != "true" {
 		t.Fatal(rows, calls)
 	}
-	found, err := upper.FindImageRecord(context.Background(), "hidden", image.WithFindImageRecordHeader("X-Call", "records"))
+	found, err := upper.FindImageRecord(context.Background(), "hidden", request.Header("X-Call", "records"))
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

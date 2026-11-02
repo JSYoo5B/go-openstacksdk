@@ -16,6 +16,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/image"
 	"github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -73,12 +74,12 @@ func TestConnectionOwnedImageDeletionSeparatesWholeRecordFromStoreAcknowledgemen
 	if upper.RawClient() != source || upper.API.RawClient() != source || source.ProviderClient != provider || calls != 0 {
 		t.Fatal("owned deletion replaced shared source")
 	}
-	seed, err := upper.GetImageRecord(context.Background(), image.ImageRecordRequest{ID: id}, image.WithImageRecordHeader("X-Call", "delete-record"))
+	seed, err := upper.GetImageRecord(context.Background(), image.ImageRecordRequest{ID: id}, request.Header("X-Call", "delete-record"))
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	seed.Resource.Body["id"] = json.RawMessage(`"public decoy"`)
-	whole, err := conn.DeleteImageRecord(context.Background(), image.ImageRecordDeleteRequest{Record: seed}, image.WithImageRecordDeleteHeader("X-Call", "delete-record"))
+	whole, err := conn.DeleteImageRecord(context.Background(), image.ImageRecordDeleteRequest{Record: seed}, request.Header("X-Call", "delete-record"))
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -89,14 +90,14 @@ func TestConnectionOwnedImageDeletionSeparatesWholeRecordFromStoreAcknowledgemen
 		t.Errorf("whole.Record.ImportMethods = %#v, want %#v", whole.Record.ImportMethods, []string{"new", "", " raw"})
 	}
 	store := &serviceinfo.StoreRecord{Resource: &resource.RawResource{Metadata: resource.Metadata{Body: map[string]json.RawMessage{"id": json.RawMessage(`"store /标签:%?"`)}}}}
-	stored, err := conn.DeleteImageRecord(context.Background(), image.ImageRecordDeleteRequest{Record: whole.Record}, image.WithImageRecordDeleteStoreRecord(store), image.WithImageRecordDeleteHeader("X-Call", "delete-record"))
+	stored, err := conn.DeleteImageRecord(context.Background(), image.ImageRecordDeleteRequest{Record: whole.Record}, image.WithImageRecordDeleteStoreRecord(store), request.Header("X-Call", "delete-record"))
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	if stored == nil || stored.Record != nil || stored.Acknowledgement == nil || stored.Acknowledgement.ImageID != id || stored.Acknowledgement.StoreID != storeID || stored.Acknowledgement.StatusCode != 299 || string(stored.Acknowledgement.Body) != bodies[2] {
 		t.Fatal(stored)
 	}
-	literal, err := upper.DeleteImageRecord(context.Background(), image.ImageRecordDeleteRequest{ID: "literal"}, image.WithImageRecordDeleteHeader("X-Call", "delete-record"))
+	literal, err := upper.DeleteImageRecord(context.Background(), image.ImageRecordDeleteRequest{ID: "literal"}, request.Header("X-Call", "delete-record"))
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

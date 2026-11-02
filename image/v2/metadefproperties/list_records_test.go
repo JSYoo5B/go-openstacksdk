@@ -13,6 +13,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -219,7 +220,7 @@ func TestMetadefPropertyListRecordsCapsBreakAndPartialResults(t *testing.T) {
 			scope := propertyRecordScope(t, client, Dependencies{})
 			options := []RecordListOption{}
 			if mode == "cap" || mode == "filtered cap" {
-				options = append(options, WithRecordListMaxItems(1))
+				options = append(options, request.MaxItems(1))
 			}
 			if mode == "filtered cap" {
 				options = append(options, WithRecordListFilter("title", "excluded"))
@@ -261,7 +262,7 @@ func TestMetadefPropertyListRecordsCapsBreakAndPartialResults(t *testing.T) {
 		t.Run("cap skips "+bad, func(t *testing.T) {
 			body := `{"properties":{"one":{},"unused":` + bad + `}}`
 			client := propertyCoreClient(func(req *http.Request) (*http.Response, error) { return propertyCoreJSON(req, 200, body), nil })
-			rows, err := propertyRecordScope(t, client, Dependencies{}).AllRecords(context.Background(), WithRecordListMaxItems(1))
+			rows, err := propertyRecordScope(t, client, Dependencies{}).AllRecords(context.Background(), request.MaxItems(1))
 			if err != nil || len(rows) != 1 {
 				t.Fatal(rows, err)
 			}
@@ -284,7 +285,7 @@ func TestMetadefPropertyListRecordsStatusAndMandatoryWholePageValidation(t *test
 	for _, body := range []string{"", `not JSON`, `null`, `[]`, `{}`, `{"properties":null}`, `{"properties":[]}`, `{"properties":false}`, `{"properties":{"one":{}}} trailing`, `{"properties":{"one":{},"unused":}}`, "{\"properties\":{\"one\":{}},\"unused\":\"\xff\"}"} {
 		t.Run("invalid page "+fmt.Sprintf("%q", body), func(t *testing.T) {
 			client := propertyCoreClient(func(req *http.Request) (*http.Response, error) { return propertyCoreJSON(req, 204, body), nil })
-			rows, err := propertyRecordScope(t, client, Dependencies{}).AllRecords(context.Background(), WithRecordListMaxItems(1))
+			rows, err := propertyRecordScope(t, client, Dependencies{}).AllRecords(context.Background(), request.MaxItems(1))
 			if err == nil || len(rows) != 0 {
 				t.Fatal("list reused member invalid-JSON tolerance", rows, err)
 			}
@@ -344,22 +345,22 @@ func TestMetadefPropertyListRecordsLazySnapshotsAndReiteration(t *testing.T) {
 	full := WithRecordListOpts(RecordListOpts{Headers: fullHeaders, Filters: filterSlice, MaxItems: 1})
 	bulk := WithRecordListHeaders(bulkHeaders)
 	var retained *RecordListOpts
-	options := []RecordListOption{WithRecordListHeader("X-Replaced", "old"), full, bulk,
-		func(config *RecordListOpts) error {
+	options := []RecordListOption{request.Header("X-Replaced", "old"), full, bulk,
+		request.Custom(func(config *RecordListOpts) error {
 			callbacks++
 			retained = config
 			cloud = "callback changed"
 			location.Project.ID[1] = 'X'
 			client.MoreHeaders["X-Source"] = "callback changed"
 			return nil
-		},
-		func(*RecordListOpts) error {
+		}),
+		request.Custom(func(*RecordListOpts) error {
 			retained.Headers["X-Full"] = "retained changed"
 			retained.Filters[0] = resource.WithFilter("name", "excluded")
 			retained.MaxItems = 0
 			return nil
-		},
-		WithRecordListHeader("x-final", "last"),
+		}),
+		request.Header("x-final", "last"),
 	}
 	seq := scope.ListRecords(context.Background(), options...)
 	options[0] = nil
@@ -404,14 +405,14 @@ func TestMetadefPropertyListRecordsCompletePreflightAndSourceLifetime(t *testing
 		options []RecordListOption
 	}{
 		{"nil option", []RecordListOption{nil}},
-		{"negative raw cap", []RecordListOption{WithRecordListMaxItems(-1)}},
+		{"negative raw cap", []RecordListOption{request.MaxItems(-1)}},
 		{"nil semantic option", []RecordListOption{WithRecordListOpts(RecordListOpts{Filters: []resource.ListOption{nil}})}},
 		{"nonsemantic option", []RecordListOption{WithRecordListOpts(RecordListOpts{Filters: []resource.ListOption{resource.WithName("other")}})}},
 		{"known encoding failure", []RecordListOption{WithRecordListFilter("minimum", make(chan int))}},
-		{"protected header", []RecordListOption{WithRecordListHeader("Authorization", "foreign")}},
-		{"accept header", []RecordListOption{WithRecordListHeader("Accept", "text/plain")}},
+		{"protected header", []RecordListOption{request.Header("Authorization", "foreign")}},
+		{"accept header", []RecordListOption{request.Header("Accept", "text/plain")}},
 		{"header aliases", []RecordListOption{WithRecordListHeaders(map[string]string{"X-Alias": "one", "x-alias": "two"})}},
-		{"header newline", []RecordListOption{WithRecordListHeader("X-Option", "bad\nvalue")}},
+		{"header newline", []RecordListOption{request.Header("X-Option", "bad\nvalue")}},
 	} {
 		t.Run(check.name, func(t *testing.T) {
 			calls := 0
@@ -457,7 +458,7 @@ func TestMetadefPropertyListRecordsCompletePreflightAndSourceLifetime(t *testing
 			case "outer failure":
 				use = rest.WithOperationGuard(use, func(context.Context) error { return cause })
 			}
-			rows, err := scope.AllRecords(use, func(*RecordListOpts) error {
+			rows, err := scope.AllRecords(use, request.Custom(func(*RecordListOpts) error {
 				callbacks++
 				if mode == "callback failure" {
 					return cause
@@ -466,7 +467,7 @@ func TestMetadefPropertyListRecordsCompletePreflightAndSourceLifetime(t *testing
 					client.Type = "compute"
 				}
 				return nil
-			})
+			}))
 			if len(rows) != 0 || err == nil || calls != 0 {
 				t.Fatal(rows, err, calls)
 			}
@@ -530,7 +531,7 @@ func TestMetadefPropertyListRecordsGuardBeforeNextDecodeAndEmptyCompletion(t *te
 			scope := propertyRecordScope(t, client, Dependencies{})
 			options := []RecordListOption{}
 			if mode == "cap completion guard" {
-				options = append(options, WithRecordListMaxItems(1))
+				options = append(options, request.MaxItems(1))
 			}
 			rows, failures := 0, 0
 			for _, err := range scope.ListRecords(ctx, options...) {
@@ -647,7 +648,7 @@ func TestMetadefPropertyListRecordsLegacyFiniteDTOIsSeparate(t *testing.T) {
 		}
 		return propertyCoreJSON(req, 200, `{"properties":{"literal":{"minLength":"03","readonly":"false"}},"next":false}`), nil
 	})
-	rows, err := propertyCoreScope(t, client, propertyRecordParent).All(context.Background(), WithListMaxItems(1))
+	rows, err := propertyCoreScope(t, client, propertyRecordParent).All(context.Background(), request.MaxItems(1))
 	if err != nil || len(rows) != 1 || calls != 1 || rows[0].Key == nil || *rows[0].Key != "literal" || rows[0].Name != nil || string(rows[0].Body["minLength"]) != `"03"` || string(rows[0].Body["readonly"]) != `"false"` {
 		t.Fatal(rows, err, calls)
 	}

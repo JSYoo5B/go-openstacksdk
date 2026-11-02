@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -217,14 +218,14 @@ func TestImportInfoRecordLocationAndConcreteOptionSnapshots(t *testing.T) {
 		client.MoreHeaders["X-Source"] = "location getter changed"
 		return facts, nil
 	}})
-	got, err := api.GetImportInfoRecord(context.Background(), option, func(value *ImportRecordOpts) error {
+	got, err := api.GetImportInfoRecord(context.Background(), option, request.Custom(func(value *ImportRecordOpts) error {
 		callbacks++
 		retained = value
 		cloud = "after option"
 		facts.Project.ID[1] = 'X'
 		client.SetToken("live")
-		return WithImportRecordHeader("X-Final", "yes")(value)
-	})
+		return importRecordCalls.Header(value, "X-Final", "yes")
+	}))
 	if got == nil || err != nil || calls != 1 || locations != 1 || callbacks != 1 {
 		t.Fatal(got, err, calls, locations, callbacks)
 	}
@@ -245,7 +246,7 @@ func TestImportInfoRecordLocationAndConcreteOptionSnapshots(t *testing.T) {
 			}
 			return infoRecordJSON(req, 200, `{}`), nil
 		})
-		got, err := New(client).GetImportInfoRecord(context.Background(), WithImportRecordHeader("X-Removed", "before"), WithImportRecordOpts(ImportRecordOpts{}), merged, WithImportRecordHeader("X-Final", "yes"))
+		got, err := New(client).GetImportInfoRecord(context.Background(), request.Header("X-Removed", "before"), WithImportRecordOpts(ImportRecordOpts{}), merged, request.Header("X-Final", "yes"))
 		if got == nil || err != nil {
 			t.Fatal(got, err)
 		}
@@ -328,9 +329,9 @@ func TestImportInfoRecordPreflightAndLegacyABI(t *testing.T) {
 		want   error
 	}{
 		{name: "nil option", option: nil, want: resource.ErrInvalidOption},
-		{name: "option cause", option: func(*ImportRecordOpts) error { return cause }, want: cause},
-		{name: "owned auth", option: WithImportRecordHeader("X-Auth-Token", "foreign"), want: resource.ErrInvalidOption},
-		{name: "header newline", option: WithImportRecordHeader("X-Extra", "\n"), want: resource.ErrInvalidOption},
+		{name: "option cause", option: request.Custom(func(*ImportRecordOpts) error { return cause }), want: cause},
+		{name: "owned auth", option: request.Header("X-Auth-Token", "foreign"), want: resource.ErrInvalidOption},
+		{name: "header newline", option: request.Header("X-Extra", "\n"), want: resource.ErrInvalidOption},
 		{name: "conflicting aliases", option: WithImportRecordOpts(ImportRecordOpts{Headers: map[string]string{"X-Extra": "first", "x-extra": "second"}}), want: resource.ErrInvalidOption},
 		{name: "source missing provider", change: func(c *gophercloud.ServiceClient) { c.ProviderClient = nil }, option: WithImportRecordOpts(ImportRecordOpts{}), want: resource.ErrInvalidOption},
 		{name: "wrong type", change: func(c *gophercloud.ServiceClient) { c.Type = "compute" }, option: WithImportRecordOpts(ImportRecordOpts{}), want: resource.ErrUnsupported},
@@ -356,7 +357,7 @@ func TestImportInfoRecordPreflightAndLegacyABI(t *testing.T) {
 	t.Run("source drift stops later option", func(t *testing.T) {
 		calls, callbacks := 0, 0
 		client := infoClient(func(req *http.Request) (*http.Response, error) { calls++; return nil, nil })
-		got, err := New(client).GetImportInfoRecord(context.Background(), func(*ImportRecordOpts) error { client.Microversion = "2.99"; return nil }, func(*ImportRecordOpts) error { callbacks++; client.Microversion = ""; return nil })
+		got, err := New(client).GetImportInfoRecord(context.Background(), request.Custom(func(*ImportRecordOpts) error { client.Microversion = "2.99"; return nil }), request.Custom(func(*ImportRecordOpts) error { callbacks++; client.Microversion = ""; return nil }))
 		if got != nil || !errors.Is(err, resource.ErrInvalidOption) || calls != 0 || callbacks != 0 {
 			t.Fatal(got, err, calls, callbacks)
 		}
@@ -367,7 +368,7 @@ func TestImportInfoRecordPreflightAndLegacyABI(t *testing.T) {
 		locations, callbacks := 0, 0
 		client := infoClient(func(req *http.Request) (*http.Response, error) { t.Fatal("HTTP after cancellation"); return nil, nil })
 		api := NewWithDependencies(client, Dependencies{CloudLocation: func() (resource.CloudLocation, error) { locations++; return resource.CloudLocation{}, nil }})
-		got, err := api.GetImportInfoRecord(ctx, func(*ImportRecordOpts) error { callbacks++; return nil })
+		got, err := api.GetImportInfoRecord(ctx, request.Custom(func(*ImportRecordOpts) error { callbacks++; return nil }))
 		if got != nil || !errors.Is(err, context.Canceled) || locations != 0 || callbacks != 0 {
 			t.Fatal(got, err, locations, callbacks)
 		}

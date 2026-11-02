@@ -5,12 +5,11 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/gophercloud/gophercloud/v2"
-
 	sdk "github.com/JSYoo5B/go-openstacksdk"
-	"github.com/JSYoo5B/go-openstacksdk/image"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
+	"github.com/gophercloud/gophercloud/v2"
 )
 
 func TestConnectionImageMutationsShareClientAndKeepAcknowledgements(t *testing.T) {
@@ -48,7 +47,7 @@ func TestConnectionImageMutationsShareClientAndKeepAcknowledgements(t *testing.T
 	if service.RawClient() != client || service.API.RawClient() != client || client.ProviderClient != provider {
 		t.Fatal("mutations replaced the cached native image client")
 	}
-	option := image.WithImageMutationHeader("X-Call", "mutation")
+	option := request.Header("X-Call", "mutation")
 	added, err := service.AddTag(ctx, resource.ID("fixed"), "literal%2F", option)
 	if err != nil || added == nil || added.ImageID != "fixed" || added.Tag != "literal%2F" || added.StatusCode != 204 || added.Header.Get("X-Proof") != "actual" || string(added.Body) != "opaque acknowledgement" {
 		t.Fatalf("added=%+v err=%v", added, err)

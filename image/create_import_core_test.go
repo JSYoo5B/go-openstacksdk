@@ -15,6 +15,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/image/v2/imagedata"
 	"github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -42,7 +43,7 @@ func TestCreateImportPreflightValidatesEveryPhaseBeforeCreationOrReading(t *test
 		{"metadata invalid header", []CreateImportOption{WithCreateImportMetadata(CreateImportMetadataOpts{Headers: map[string]string{"Authorization": "override"}})}},
 		{"metadata unserializable", []CreateImportOption{WithCreateImportMetadata(CreateImportMetadataOpts{Properties: map[string]any{"vendor": func() {}}})}},
 		{"stage negative size", []CreateImportOption{WithCreateImportStage(imagedata.StageOpts{Size: &negative})}},
-		{"stage callback", []CreateImportOption{WithCreateImportStageOptions(imagedata.WithStageHeader("Accept", "bad"))}},
+		{"stage callback", []CreateImportOption{WithCreateImportStageOptions(request.Header("Accept", "bad"))}},
 		{"import callback", []CreateImportOption{WithCreateImportImportOptions(imageimport.WithImportAllStores(true), imageimport.WithImportStore("conflict"))}},
 		{"import missing remote", []CreateImportOption{WithCreateImportImport(imageimport.ImportOpts{Method: imageimport.GlanceDownloadMethod, RemoteRegion: "region"})}},
 		{"unsupported copy", []CreateImportOption{WithCreateImportImport(imageimport.ImportOpts{Method: imageimport.CopyImageMethod})}},

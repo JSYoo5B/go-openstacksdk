@@ -10,6 +10,8 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/image/v2/imagedata"
 	"github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -85,7 +87,7 @@ func WithCreateImportStage(value imagedata.StageOpts) CreateImportOption {
 	option := imagedata.WithStageOpts(value)
 	return func(config *CreateImportOpts) error {
 		config.stageOptions = nil
-		return option(&config.Stage)
+		return applyCustomCall(option, &config.Stage)
 	}
 }
 
@@ -93,7 +95,7 @@ func WithCreateImportImport(value imageimport.ImportOpts) CreateImportOption {
 	option := imageimport.WithImportOpts(value)
 	return func(config *CreateImportOpts) error {
 		config.importOptions = nil
-		return option(&config.Import)
+		return applyCustomCall(option, &config.Import)
 	}
 }
 
@@ -180,10 +182,10 @@ func copyCreateImportOpts(value CreateImportOpts) (CreateImportOpts, error) {
 	if err != nil {
 		return value, err
 	}
-	if err = imagedata.WithStageOpts(value.Stage)(&value.Stage); err != nil {
+	if err = applyCustomCall(imagedata.WithStageOpts(value.Stage), &value.Stage); err != nil {
 		return value, err
 	}
-	if err = imageimport.WithImportOpts(value.Import)(&value.Import); err != nil {
+	if err = applyCustomCall(imageimport.WithImportOpts(value.Import), &value.Import); err != nil {
 		return value, err
 	}
 	if value.Wait != nil {
@@ -238,4 +240,10 @@ func prepareCreateImportWait(value *CreateImportWaitOpts) ([]resource.WaitOption
 		}
 	}
 	return options, resource.ValidateWaitOptionsFor[Image](options...)
+}
+
+// applyCustomCall applies one request.Custom call over T, such as a
+// With<Op>Opts option of another image package, to state.
+func applyCustomCall[T any, C request.Call](call C, state *T) error {
+	return calls.Translate([]C{call}, calls.Spec[T]{})[0](state)
 }

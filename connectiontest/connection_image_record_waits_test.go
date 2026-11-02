@@ -13,6 +13,7 @@ import (
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/image"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -79,7 +80,7 @@ func TestConnectionImageRecordWaitsShareOwnedSourceAndLatestObservation(t *testi
 	if source != service.RawClient() || source.ProviderClient != provider || calls != 0 {
 		t.Fatal("shared source changed")
 	}
-	seed, err := service.GetImageRecord(context.Background(), image.ImageRecordRequest{ID: "fixed"}, image.WithImageRecordHeader("X-Call", "seed"))
+	seed, err := service.GetImageRecord(context.Background(), image.ImageRecordRequest{ID: "fixed"}, request.Header("X-Call", "seed"))
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -87,8 +88,8 @@ func TestConnectionImageRecordWaitsShareOwnedSourceAndLatestObservation(t *testi
 	callbacks, options := 0, 0
 	status, err := service.WaitForImageRecordStatus(context.Background(), seed, "active",
 		image.WithImageRecordWaitPollInterval(time.Millisecond), image.WithImageRecordWaitTimeout(time.Second),
-		image.WithImageRecordWaitHeader("X-Call", "status"),
-		func(config *image.ImageRecordWaitOpts) error {
+		request.Header("X-Call", "status"),
+		request.Custom(func(config *image.ImageRecordWaitOpts) error {
 			options++
 			config.Callback = func(progress int) {
 				callbacks++
@@ -97,7 +98,7 @@ func TestConnectionImageRecordWaitsShareOwnedSourceAndLatestObservation(t *testi
 				}
 			}
 			return nil
-		})
+		}))
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -109,8 +110,8 @@ func TestConnectionImageRecordWaitsShareOwnedSourceAndLatestObservation(t *testi
 	}
 	deleted, err := service.WaitForImageRecordDelete(context.Background(), seed,
 		image.WithImageRecordWaitPollInterval(time.Millisecond), image.WithImageRecordWaitTimeout(time.Second),
-		image.WithImageRecordWaitHeader("X-Call", "delete"),
-		func(config *image.ImageRecordWaitOpts) error {
+		request.Header("X-Call", "delete"),
+		request.Custom(func(config *image.ImageRecordWaitOpts) error {
 			options++
 			config.Callback = func(progress int) {
 				callbacks++
@@ -119,7 +120,7 @@ func TestConnectionImageRecordWaitsShareOwnedSourceAndLatestObservation(t *testi
 				}
 			}
 			return nil
-		})
+		}))
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

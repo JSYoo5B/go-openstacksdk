@@ -15,6 +15,7 @@ import (
 
 	namespaces "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -329,16 +330,16 @@ func TestMetadefNamespaceNestedOptionsAndCapturedSource(t *testing.T) {
 		var retainedRaw json.RawMessage
 		options := []namespaces.CreateOption{
 			namespaces.WithCreateOpts(nestedOptions()),
-			func(config *namespaces.CreateOpts) error {
+			request.Custom(func(config *namespaces.CreateOpts) error {
 				retained = config.Properties
 				retainedRaw = config.Properties["root/property\n"].Attributes["minimum"]
 				return nil
-			},
-			func(config *namespaces.CreateOpts) error {
+			}),
+			request.Custom(func(config *namespaces.CreateOpts) error {
 				retainedRaw[0] = '1'
 				retained["root/property\n"] = namespaces.PropertyDefinition{}
 				return nil
-			},
+			}),
 		}
 		nestedCapture(t, options, func(body map[string]json.RawMessage) {
 			if string(nestedJSON(t, nestedJSON(t, body["properties"])["root/property\n"])["minimum"]) != `9007199254740993` {
@@ -375,7 +376,7 @@ func TestMetadefNamespaceNestedOptionsAndCapturedSource(t *testing.T) {
 				if mode == "protected source header" {
 					client.MoreHeaders = map[string]string{"X-Auth-Token": "spoof"}
 				}
-				options := []namespaces.CreateOption{func(config *namespaces.CreateOpts) error {
+				options := []namespaces.CreateOption{request.Custom(func(config *namespaces.CreateOpts) error {
 					callbacks.Add(1)
 					if mode == "callback error" {
 						return cause
@@ -385,9 +386,9 @@ func TestMetadefNamespaceNestedOptionsAndCapturedSource(t *testing.T) {
 					}
 					config.Tags = []namespaces.TagDefinition{{Name: ""}}
 					return nil
-				}}
+				})}
 				if mode == "protected option header" {
-					options = append(options, namespaces.WithCreateHeader("Content-Type", "text/plain"))
+					options = append(options, request.Header("Content-Type", "text/plain"))
 				}
 				value, err := namespaces.New(client).Create(contextArg, namespaceName, options...)
 				if value != nil || err == nil || calls.Load() != 0 {
@@ -414,11 +415,11 @@ func TestMetadefNamespaceNestedOptionsAndCapturedSource(t *testing.T) {
 		})
 		client.MoreHeaders = map[string]string{"X-Source": "before"}
 		provider := client.ProviderClient
-		value, err := namespaces.New(client).Create(context.Background(), namespaceName, namespaces.WithCreateTags([]namespaces.TagDefinition{{Name: ""}}), func(config *namespaces.CreateOpts) error {
+		value, err := namespaces.New(client).Create(context.Background(), namespaceName, namespaces.WithCreateTags([]namespaces.TagDefinition{{Name: ""}}), request.Custom(func(config *namespaces.CreateOpts) error {
 			client.MoreHeaders["X-Source"] = "after"
 			provider.SetToken("new-live")
 			return nil
-		})
+		}))
 		if err != nil || value == nil || calls.Load() != 1 || client.ProviderClient != provider || client.MoreHeaders["X-Source"] != "after" {
 			t.Fatal(value, err, calls.Load())
 		}
@@ -426,7 +427,7 @@ func TestMetadefNamespaceNestedOptionsAndCapturedSource(t *testing.T) {
 			t.Run(mode, func(t *testing.T) {
 				calls.Store(0)
 				client := namespaceClient(func(*http.Request) (*http.Response, error) { calls.Add(1); return nil, errors.New("retargeted") })
-				value, err := namespaces.New(client).Create(context.Background(), namespaceName, namespaces.WithCreateTags([]namespaces.TagDefinition{{Name: ""}}), func(*namespaces.CreateOpts) error {
+				value, err := namespaces.New(client).Create(context.Background(), namespaceName, namespaces.WithCreateTags([]namespaces.TagDefinition{{Name: ""}}), request.Custom(func(*namespaces.CreateOpts) error {
 					switch mode {
 					case "provider":
 						client.ProviderClient = &gophercloud.ProviderClient{}
@@ -438,7 +439,7 @@ func TestMetadefNamespaceNestedOptionsAndCapturedSource(t *testing.T) {
 						client.Microversion = "2.18"
 					}
 					return nil
-				})
+				}))
 				if value != nil || !errors.Is(err, resource.ErrInvalidOption) || calls.Load() != 0 {
 					t.Fatal(value, err, calls.Load())
 				}

@@ -5,11 +5,19 @@ import (
 	"strconv"
 	"unicode"
 	"unicode/utf8"
+
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 // GetImageOpts supplies ordinary request headers.
 type GetImageOpts struct{ Headers map[string]string }
-type GetImageOption func(*GetImageOpts) error
+
+// GetImageOption is one option of GetImage: WithGetImageOpts,
+// WithGetImageHeaders (merges), request.Header (merges one header) or
+// request.Custom over *GetImageOpts. Other shared calls, including
+// request.Headers, fail with resource.ErrInvalidOption before HTTP.
+type GetImageOption = request.GetCall
 
 // ListImagesOpts supplies literal server filters and local iteration controls.
 // Pointer fields preserve explicit empty strings, false and zero. Repeated
@@ -38,100 +46,105 @@ type ListImagesOpts struct {
 	MaxItems                 int
 	SinglePage               bool
 }
-type ListImagesOption func(*ListImagesOpts) error
+
+// ListImagesOption is one option of ListImages and AllImages:
+// WithListImagesOpts, WithListImagesHeaders (merges), the typed filter and
+// sort options, request.Header (merges one header), request.Limit,
+// request.Marker, request.MaxItems or request.Custom over *ListImagesOpts.
+// Other shared calls, including request.Headers, request.Query and
+// request.Paginated, fail with resource.ErrInvalidOption before HTTP.
+type ListImagesOption = request.ListCall
+
+var (
+	getImageCalls   = calls.Spec[GetImageOpts]{Header: calls.MergeHeader[GetImageOpts](WithGetImageHeaders)}
+	listImagesCalls = calls.Spec[ListImagesOpts]{
+		Header: calls.MergeHeader[ListImagesOpts](WithListImagesHeaders),
+		Paging: calls.Paging[ListImagesOpts]{
+			Limit:    calls.Pointer(func(c *ListImagesOpts) **int { return &c.Limit }),
+			Marker:   calls.Value(func(c *ListImagesOpts) *string { return &c.Marker }),
+			MaxItems: calls.Value(func(c *ListImagesOpts) *int { return &c.MaxItems }),
+		},
+	}
+)
 
 func WithGetImageOpts(value GetImageOpts) GetImageOption {
 	snapshot := copyGetImageOpts(value)
-	return func(config *GetImageOpts) error { *config = copyGetImageOpts(snapshot); return nil }
-}
-func WithGetImageHeader(key, value string) GetImageOption {
-	apply := WithImageMutationHeader(key, value)
-	return func(config *GetImageOpts) error { return applyImageMemberHeader(&config.Headers, apply) }
+	return request.Custom(func(config *GetImageOpts) error { *config = copyGetImageOpts(snapshot); return nil })
 }
 func WithGetImageHeaders(value map[string]string) GetImageOption {
-	apply := WithImageMutationHeaders(value)
-	return func(config *GetImageOpts) error { return applyImageMemberHeader(&config.Headers, apply) }
+	apply := mergeImageMutationHeaders(value)
+	return request.Custom(func(config *GetImageOpts) error { return applyImageMemberHeader(&config.Headers, apply) })
 }
 func WithListImagesOpts(value ListImagesOpts) ListImagesOption {
 	snapshot := copyListImagesOpts(value)
-	return func(config *ListImagesOpts) error { *config = copyListImagesOpts(snapshot); return nil }
-}
-func WithListImagesHeader(key, value string) ListImagesOption {
-	apply := WithImageMutationHeader(key, value)
-	return func(config *ListImagesOpts) error { return applyImageMemberHeader(&config.Headers, apply) }
+	return request.Custom(func(config *ListImagesOpts) error { *config = copyListImagesOpts(snapshot); return nil })
 }
 func WithListImagesHeaders(value map[string]string) ListImagesOption {
-	apply := WithImageMutationHeaders(value)
-	return func(config *ListImagesOpts) error { return applyImageMemberHeader(&config.Headers, apply) }
+	apply := mergeImageMutationHeaders(value)
+	return request.Custom(func(config *ListImagesOpts) error { return applyImageMemberHeader(&config.Headers, apply) })
 }
 func WithListImagesID(value string) ListImagesOption {
-	return func(config *ListImagesOpts) error { snapshot := value; config.ID = &snapshot; return nil }
+	return request.Custom(func(config *ListImagesOpts) error { snapshot := value; config.ID = &snapshot; return nil })
 }
 func WithListImagesName(value string) ListImagesOption {
-	return func(config *ListImagesOpts) error { snapshot := value; config.Name = &snapshot; return nil }
+	return request.Custom(func(config *ListImagesOpts) error { snapshot := value; config.Name = &snapshot; return nil })
 }
 func WithListImagesVisibility(value string) ListImagesOption {
-	return func(config *ListImagesOpts) error { snapshot := value; config.Visibility = &snapshot; return nil }
+	return request.Custom(func(config *ListImagesOpts) error { snapshot := value; config.Visibility = &snapshot; return nil })
 }
 func WithListImagesMemberStatus(value string) ListImagesOption {
-	return func(config *ListImagesOpts) error { snapshot := value; config.MemberStatus = &snapshot; return nil }
+	return request.Custom(func(config *ListImagesOpts) error { snapshot := value; config.MemberStatus = &snapshot; return nil })
 }
 func WithListImagesOwner(value string) ListImagesOption {
-	return func(config *ListImagesOpts) error { snapshot := value; config.Owner = &snapshot; return nil }
+	return request.Custom(func(config *ListImagesOpts) error { snapshot := value; config.Owner = &snapshot; return nil })
 }
 func WithListImagesStatus(value string) ListImagesOption {
-	return func(config *ListImagesOpts) error { snapshot := value; config.Status = &snapshot; return nil }
+	return request.Custom(func(config *ListImagesOpts) error { snapshot := value; config.Status = &snapshot; return nil })
 }
 func WithListImagesSort(value string) ListImagesOption {
-	return func(config *ListImagesOpts) error { snapshot := value; config.Sort = &snapshot; return nil }
+	return request.Custom(func(config *ListImagesOpts) error { snapshot := value; config.Sort = &snapshot; return nil })
 }
 func WithListImagesCreatedAt(value string) ListImagesOption {
-	return func(config *ListImagesOpts) error { snapshot := value; config.CreatedAt = &snapshot; return nil }
+	return request.Custom(func(config *ListImagesOpts) error { snapshot := value; config.CreatedAt = &snapshot; return nil })
 }
 func WithListImagesUpdatedAt(value string) ListImagesOption {
-	return func(config *ListImagesOpts) error { snapshot := value; config.UpdatedAt = &snapshot; return nil }
+	return request.Custom(func(config *ListImagesOpts) error { snapshot := value; config.UpdatedAt = &snapshot; return nil })
 }
 func WithListImagesContainerFormat(value string) ListImagesOption {
-	return func(config *ListImagesOpts) error { snapshot := value; config.ContainerFormat = &snapshot; return nil }
+	return request.Custom(func(config *ListImagesOpts) error { snapshot := value; config.ContainerFormat = &snapshot; return nil })
 }
 func WithListImagesDiskFormat(value string) ListImagesOption {
-	return func(config *ListImagesOpts) error { snapshot := value; config.DiskFormat = &snapshot; return nil }
-}
-func WithListImagesLimit(value int) ListImagesOption {
-	return func(config *ListImagesOpts) error { snapshot := value; config.Limit = &snapshot; return nil }
+	return request.Custom(func(config *ListImagesOpts) error { snapshot := value; config.DiskFormat = &snapshot; return nil })
 }
 func WithListImagesSizeMin(value int64) ListImagesOption {
-	return func(config *ListImagesOpts) error { snapshot := value; config.SizeMin = &snapshot; return nil }
+	return request.Custom(func(config *ListImagesOpts) error { snapshot := value; config.SizeMin = &snapshot; return nil })
 }
 func WithListImagesSizeMax(value int64) ListImagesOption {
-	return func(config *ListImagesOpts) error { snapshot := value; config.SizeMax = &snapshot; return nil }
+	return request.Custom(func(config *ListImagesOpts) error { snapshot := value; config.SizeMax = &snapshot; return nil })
 }
 func WithListImagesProtected(value bool) ListImagesOption {
-	return func(config *ListImagesOpts) error { snapshot := value; config.Protected = &snapshot; return nil }
+	return request.Custom(func(config *ListImagesOpts) error { snapshot := value; config.Protected = &snapshot; return nil })
 }
 func WithListImagesHidden(value bool) ListImagesOption {
-	return func(config *ListImagesOpts) error { snapshot := value; config.Hidden = &snapshot; return nil }
-}
-func WithListImagesMarker(value string) ListImagesOption {
-	return func(config *ListImagesOpts) error { config.Marker = value; return nil }
+	return request.Custom(func(config *ListImagesOpts) error { snapshot := value; config.Hidden = &snapshot; return nil })
 }
 func WithListImagesTags(values ...string) ListImagesOption {
 	snapshot := append([]string(nil), values...)
-	return func(config *ListImagesOpts) error { config.Tags = append([]string(nil), snapshot...); return nil }
+	return request.Custom(func(config *ListImagesOpts) error { config.Tags = append([]string(nil), snapshot...); return nil })
 }
 func WithListImagesSortKeys(values ...string) ListImagesOption {
 	snapshot := append([]string(nil), values...)
-	return func(config *ListImagesOpts) error { config.SortKeys = append([]string(nil), snapshot...); return nil }
+	return request.Custom(func(config *ListImagesOpts) error { config.SortKeys = append([]string(nil), snapshot...); return nil })
 }
 func WithListImagesSortDirs(values ...string) ListImagesOption {
 	snapshot := append([]string(nil), values...)
-	return func(config *ListImagesOpts) error { config.SortDirs = append([]string(nil), snapshot...); return nil }
+	return request.Custom(func(config *ListImagesOpts) error { config.SortDirs = append([]string(nil), snapshot...); return nil })
 }
 
 // WithListImagesFilter replaces one extension key; no values deletes that key.
 func WithListImagesFilter(key string, values ...string) ListImagesOption {
 	snapshot := append([]string(nil), values...)
-	return func(config *ListImagesOpts) error {
+	return request.Custom(func(config *ListImagesOpts) error {
 		if config.Filters == nil {
 			config.Filters = make(url.Values)
 		}
@@ -141,19 +154,16 @@ func WithListImagesFilter(key string, values ...string) ListImagesOption {
 			config.Filters[key] = append([]string(nil), snapshot...)
 		}
 		return nil
-	}
+	})
 }
 
 // WithListImagesFilters replaces the complete extension filter map.
 func WithListImagesFilters(values url.Values) ListImagesOption {
 	snapshot := copyImageQuery(values)
-	return func(config *ListImagesOpts) error { config.Filters = copyImageQuery(snapshot); return nil }
-}
-func WithListImagesMaxItems(value int) ListImagesOption {
-	return func(config *ListImagesOpts) error { config.MaxItems = value; return nil }
+	return request.Custom(func(config *ListImagesOpts) error { config.Filters = copyImageQuery(snapshot); return nil })
 }
 func WithListImagesSinglePage(value bool) ListImagesOption {
-	return func(config *ListImagesOpts) error { config.SinglePage = value; return nil }
+	return request.Custom(func(config *ListImagesOpts) error { config.SinglePage = value; return nil })
 }
 
 func copyGetImageOpts(value GetImageOpts) GetImageOpts {
@@ -240,14 +250,14 @@ func copyListImagesOpts(value ListImagesOpts) ListImagesOpts {
 	return value
 }
 func parseGetImageOptions(options []GetImageOption) (GetImageOpts, error) {
-	value, err := applyTaskOptions(GetImageOpts{}, options, copyGetImageOpts)
+	value, err := applyTaskOptions(GetImageOpts{}, calls.Translate(options, getImageCalls), copyGetImageOpts)
 	if err == nil {
 		value.Headers, err = imageMutationHeaders(value.Headers, false, "")
 	}
 	return value, err
 }
 func parseListImagesOptions(options []ListImagesOption) (ListImagesOpts, url.Values, error) {
-	value, err := applyTaskOptions(ListImagesOpts{}, options, copyListImagesOpts)
+	value, err := applyTaskOptions(ListImagesOpts{}, calls.Translate(options, listImagesCalls), copyListImagesOpts)
 	query := make(url.Values)
 	if err != nil {
 		return value, query, err

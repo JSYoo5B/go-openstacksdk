@@ -6,13 +6,22 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+
+	"github.com/JSYoo5B/go-openstacksdk/image/v2/internal/glancecalls"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 // CreateOpts configures Create.
 type CreateOpts struct {
 	Headers map[string]string
 }
-type CreateOption func(*CreateOpts) error
+
+// CreateOption is one option of Create: WithCreateOpts, WithCreateHeaders
+// (validates and merges the map), request.Header or request.Custom over
+// *CreateOpts. Other shared calls fail with resource.ErrInvalidOption before
+// HTTP.
+type CreateOption = request.WriteCall
 
 func copyCreate(value CreateOpts) CreateOpts {
 	value.Headers = copyHeaders(value.Headers)
@@ -22,14 +31,11 @@ func copyCreate(value CreateOpts) CreateOpts {
 // WithCreateOpts snapshots and replaces the complete configuration.
 func WithCreateOpts(value CreateOpts) CreateOption {
 	owned := copyCreate(value)
-	return func(config *CreateOpts) error { *config = copyCreate(owned); return nil }
-}
-func WithCreateHeader(key, value string) CreateOption {
-	return func(config *CreateOpts) error { config.Headers = setHeader(config.Headers, key, value); return nil }
+	return request.Custom(func(config *CreateOpts) error { *config = copyCreate(owned); return nil })
 }
 func WithCreateHeaders(value map[string]string) CreateOption {
 	owned := copyHeaders(value)
-	return func(config *CreateOpts) error {
+	return request.Custom(func(config *CreateOpts) error {
 		headers, err := validateHeaders(owned, false, "")
 		if err != nil {
 			return err
@@ -38,14 +44,18 @@ func WithCreateHeaders(value map[string]string) CreateOption {
 			config.Headers = setHeader(config.Headers, key, value)
 		}
 		return nil
-	}
+	})
 }
 
 // GetOpts configures Get.
 type GetOpts struct {
 	Headers map[string]string
 }
-type GetOption func(*GetOpts) error
+
+// GetOption is one option of Get: WithGetOpts, WithGetHeaders (validates and
+// merges the map), request.Header or request.Custom over *GetOpts. Other
+// shared calls fail with resource.ErrInvalidOption before HTTP.
+type GetOption = request.GetCall
 
 func copyGet(value GetOpts) GetOpts {
 	value.Headers = copyHeaders(value.Headers)
@@ -55,14 +65,11 @@ func copyGet(value GetOpts) GetOpts {
 // WithGetOpts snapshots and replaces the complete configuration.
 func WithGetOpts(value GetOpts) GetOption {
 	owned := copyGet(value)
-	return func(config *GetOpts) error { *config = copyGet(owned); return nil }
-}
-func WithGetHeader(key, value string) GetOption {
-	return func(config *GetOpts) error { config.Headers = setHeader(config.Headers, key, value); return nil }
+	return request.Custom(func(config *GetOpts) error { *config = copyGet(owned); return nil })
 }
 func WithGetHeaders(value map[string]string) GetOption {
 	owned := copyHeaders(value)
-	return func(config *GetOpts) error {
+	return request.Custom(func(config *GetOpts) error {
 		headers, err := validateHeaders(owned, false, "")
 		if err != nil {
 			return err
@@ -71,7 +78,7 @@ func WithGetHeaders(value map[string]string) GetOption {
 			config.Headers = setHeader(config.Headers, key, value)
 		}
 		return nil
-	}
+	})
 }
 
 // UpdateOpts configures Update.
@@ -79,7 +86,12 @@ type UpdateOpts struct {
 	Headers map[string]string
 	Name    *string
 }
-type UpdateOption func(*UpdateOpts) error
+
+// UpdateOption is one option of Update: WithUpdateOpts, WithUpdateHeaders
+// (validates and merges the map), WithUpdateName, request.Header or
+// request.Custom over *UpdateOpts. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type UpdateOption = request.WriteCall
 
 func copyUpdate(value UpdateOpts) UpdateOpts {
 	value.Headers = copyHeaders(value.Headers)
@@ -90,14 +102,11 @@ func copyUpdate(value UpdateOpts) UpdateOpts {
 // WithUpdateOpts snapshots and replaces the complete configuration.
 func WithUpdateOpts(value UpdateOpts) UpdateOption {
 	owned := copyUpdate(value)
-	return func(config *UpdateOpts) error { *config = copyUpdate(owned); return nil }
-}
-func WithUpdateHeader(key, value string) UpdateOption {
-	return func(config *UpdateOpts) error { config.Headers = setHeader(config.Headers, key, value); return nil }
+	return request.Custom(func(config *UpdateOpts) error { *config = copyUpdate(owned); return nil })
 }
 func WithUpdateHeaders(value map[string]string) UpdateOption {
 	owned := copyHeaders(value)
-	return func(config *UpdateOpts) error {
+	return request.Custom(func(config *UpdateOpts) error {
 		headers, err := validateHeaders(owned, false, "")
 		if err != nil {
 			return err
@@ -106,17 +115,22 @@ func WithUpdateHeaders(value map[string]string) UpdateOption {
 			config.Headers = setHeader(config.Headers, key, value)
 		}
 		return nil
-	}
+	})
 }
 func WithUpdateName(value string) UpdateOption {
-	return func(config *UpdateOpts) error { owned := value; config.Name = &owned; return nil }
+	return request.Custom(func(config *UpdateOpts) error { owned := value; config.Name = &owned; return nil })
 }
 
 // DeleteOpts configures Delete.
 type DeleteOpts struct {
 	Headers map[string]string
 }
-type DeleteOption func(*DeleteOpts) error
+
+// DeleteOption is one option of Delete: WithDeleteOpts, WithDeleteHeaders
+// (validates and merges the map), request.Header or request.Custom over
+// *DeleteOpts. Other shared calls fail with resource.ErrInvalidOption before
+// HTTP.
+type DeleteOption = request.DeleteCall
 
 func copyDelete(value DeleteOpts) DeleteOpts {
 	value.Headers = copyHeaders(value.Headers)
@@ -126,14 +140,11 @@ func copyDelete(value DeleteOpts) DeleteOpts {
 // WithDeleteOpts snapshots and replaces the complete configuration.
 func WithDeleteOpts(value DeleteOpts) DeleteOption {
 	owned := copyDelete(value)
-	return func(config *DeleteOpts) error { *config = copyDelete(owned); return nil }
-}
-func WithDeleteHeader(key, value string) DeleteOption {
-	return func(config *DeleteOpts) error { config.Headers = setHeader(config.Headers, key, value); return nil }
+	return request.Custom(func(config *DeleteOpts) error { *config = copyDelete(owned); return nil })
 }
 func WithDeleteHeaders(value map[string]string) DeleteOption {
 	owned := copyHeaders(value)
-	return func(config *DeleteOpts) error {
+	return request.Custom(func(config *DeleteOpts) error {
 		headers, err := validateHeaders(owned, false, "")
 		if err != nil {
 			return err
@@ -142,14 +153,19 @@ func WithDeleteHeaders(value map[string]string) DeleteOption {
 			config.Headers = setHeader(config.Headers, key, value)
 		}
 		return nil
-	}
+	})
 }
 
 // DeleteAllOpts configures DeleteAll.
 type DeleteAllOpts struct {
 	Headers map[string]string
 }
-type DeleteAllOption func(*DeleteAllOpts) error
+
+// DeleteAllOption is one option of DeleteAll: WithDeleteAllOpts,
+// WithDeleteAllHeaders (validates and merges the map), request.Header or
+// request.Custom over *DeleteAllOpts. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type DeleteAllOption = request.DeleteCall
 
 func copyDeleteAll(value DeleteAllOpts) DeleteAllOpts {
 	value.Headers = copyHeaders(value.Headers)
@@ -159,14 +175,11 @@ func copyDeleteAll(value DeleteAllOpts) DeleteAllOpts {
 // WithDeleteAllOpts snapshots and replaces the complete configuration.
 func WithDeleteAllOpts(value DeleteAllOpts) DeleteAllOption {
 	owned := copyDeleteAll(value)
-	return func(config *DeleteAllOpts) error { *config = copyDeleteAll(owned); return nil }
-}
-func WithDeleteAllHeader(key, value string) DeleteAllOption {
-	return func(config *DeleteAllOpts) error { config.Headers = setHeader(config.Headers, key, value); return nil }
+	return request.Custom(func(config *DeleteAllOpts) error { *config = copyDeleteAll(owned); return nil })
 }
 func WithDeleteAllHeaders(value map[string]string) DeleteAllOption {
 	owned := copyHeaders(value)
-	return func(config *DeleteAllOpts) error {
+	return request.Custom(func(config *DeleteAllOpts) error {
 		headers, err := validateHeaders(owned, false, "")
 		if err != nil {
 			return err
@@ -175,7 +188,7 @@ func WithDeleteAllHeaders(value map[string]string) DeleteAllOption {
 			config.Headers = setHeader(config.Headers, key, value)
 		}
 		return nil
-	}
+	})
 }
 
 // SetOpts configures Set.
@@ -183,7 +196,12 @@ type SetOpts struct {
 	Headers map[string]string
 	Append  *bool
 }
-type SetOption func(*SetOpts) error
+
+// SetOption is one option of Set: WithSetOpts, WithSetHeaders (validates and
+// merges the map), WithSetAppend, request.Header or request.Custom over
+// *SetOpts. Other shared calls fail with resource.ErrInvalidOption before
+// HTTP.
+type SetOption = request.WriteCall
 
 func copySet(value SetOpts) SetOpts {
 	value.Headers = copyHeaders(value.Headers)
@@ -194,14 +212,11 @@ func copySet(value SetOpts) SetOpts {
 // WithSetOpts snapshots and replaces the complete configuration.
 func WithSetOpts(value SetOpts) SetOption {
 	owned := copySet(value)
-	return func(config *SetOpts) error { *config = copySet(owned); return nil }
-}
-func WithSetHeader(key, value string) SetOption {
-	return func(config *SetOpts) error { config.Headers = setHeader(config.Headers, key, value); return nil }
+	return request.Custom(func(config *SetOpts) error { *config = copySet(owned); return nil })
 }
 func WithSetHeaders(value map[string]string) SetOption {
 	owned := copyHeaders(value)
-	return func(config *SetOpts) error {
+	return request.Custom(func(config *SetOpts) error {
 		headers, err := validateHeaders(owned, false, "")
 		if err != nil {
 			return err
@@ -210,10 +225,10 @@ func WithSetHeaders(value map[string]string) SetOption {
 			config.Headers = setHeader(config.Headers, key, value)
 		}
 		return nil
-	}
+	})
 }
 func WithSetAppend(value bool) SetOption {
-	return func(config *SetOpts) error { owned := value; config.Append = &owned; return nil }
+	return request.Custom(func(config *SetOpts) error { owned := value; config.Append = &owned; return nil })
 }
 
 // ListOpts configures List.
@@ -225,7 +240,13 @@ type ListOpts struct {
 	SortDir  *string
 	MaxItems int
 }
-type ListOption func(*ListOpts) error
+
+// ListOption is one option of List: WithListOpts, WithListHeaders (validates
+// and merges the map), WithListSortKey, WithListSortDir, request.Limit,
+// request.Marker, request.MaxItems, request.Header or request.Custom over
+// *ListOpts. Other shared calls fail with resource.ErrInvalidOption before
+// HTTP.
+type ListOption = request.ListCall
 
 func copyList(value ListOpts) ListOpts {
 	value.Headers = copyHeaders(value.Headers)
@@ -239,14 +260,11 @@ func copyList(value ListOpts) ListOpts {
 // WithListOpts snapshots and replaces the complete configuration.
 func WithListOpts(value ListOpts) ListOption {
 	owned := copyList(value)
-	return func(config *ListOpts) error { *config = copyList(owned); return nil }
-}
-func WithListHeader(key, value string) ListOption {
-	return func(config *ListOpts) error { config.Headers = setHeader(config.Headers, key, value); return nil }
+	return request.Custom(func(config *ListOpts) error { *config = copyList(owned); return nil })
 }
 func WithListHeaders(value map[string]string) ListOption {
 	owned := copyHeaders(value)
-	return func(config *ListOpts) error {
+	return request.Custom(func(config *ListOpts) error {
 		headers, err := validateHeaders(owned, false, "")
 		if err != nil {
 			return err
@@ -255,23 +273,31 @@ func WithListHeaders(value map[string]string) ListOption {
 			config.Headers = setHeader(config.Headers, key, value)
 		}
 		return nil
-	}
-}
-func WithListLimit(value int) ListOption {
-	return func(config *ListOpts) error { owned := value; config.Limit = &owned; return nil }
-}
-func WithListMarker(value string) ListOption {
-	return func(config *ListOpts) error { owned := value; config.Marker = &owned; return nil }
+	})
 }
 func WithListSortKey(value string) ListOption {
-	return func(config *ListOpts) error { owned := value; config.SortKey = &owned; return nil }
+	return request.Custom(func(config *ListOpts) error { owned := value; config.SortKey = &owned; return nil })
 }
 func WithListSortDir(value string) ListOption {
-	return func(config *ListOpts) error { owned := value; config.SortDir = &owned; return nil }
+	return request.Custom(func(config *ListOpts) error { owned := value; config.SortDir = &owned; return nil })
 }
-func WithListMaxItems(value int) ListOption {
-	return func(config *ListOpts) error { config.MaxItems = value; return nil }
-}
+
+var (
+	createCalls    = glancecalls.HeaderSpec(func(o *CreateOpts) *map[string]string { return &o.Headers })
+	getCalls       = glancecalls.HeaderSpec(func(o *GetOpts) *map[string]string { return &o.Headers })
+	updateCalls    = glancecalls.HeaderSpec(func(o *UpdateOpts) *map[string]string { return &o.Headers })
+	deleteCalls    = glancecalls.HeaderSpec(func(o *DeleteOpts) *map[string]string { return &o.Headers })
+	deleteAllCalls = glancecalls.HeaderSpec(func(o *DeleteAllOpts) *map[string]string { return &o.Headers })
+	setCalls       = glancecalls.HeaderSpec(func(o *SetOpts) *map[string]string { return &o.Headers })
+	listCalls      = calls.Spec[ListOpts]{
+		Header: glancecalls.SetHeader(func(o *ListOpts) *map[string]string { return &o.Headers }),
+		Paging: calls.Paging[ListOpts]{
+			Limit:    calls.Pointer(func(o *ListOpts) **int { return &o.Limit }),
+			Marker:   calls.Pointer(func(o *ListOpts) **string { return &o.Marker }),
+			MaxItems: calls.Value(func(o *ListOpts) *int { return &o.MaxItems }),
+		},
+	}
+)
 
 func copyPointer[T any](value *T) *T {
 	if value == nil {
@@ -315,7 +341,7 @@ func apply[T any, O ~func(*T) error](options []O, copyValue func(T) T) (T, error
 	return config, nil
 }
 func prepareCreate(options []CreateOption) (CreateOpts, error) {
-	value, err := apply(options, copyCreate)
+	value, err := apply(calls.Translate(options, createCalls), copyCreate)
 	if err != nil {
 		return value, err
 	}
@@ -323,7 +349,7 @@ func prepareCreate(options []CreateOption) (CreateOpts, error) {
 	return value, err
 }
 func prepareGet(options []GetOption) (GetOpts, error) {
-	value, err := apply(options, copyGet)
+	value, err := apply(calls.Translate(options, getCalls), copyGet)
 	if err != nil {
 		return value, err
 	}
@@ -331,7 +357,7 @@ func prepareGet(options []GetOption) (GetOpts, error) {
 	return value, err
 }
 func prepareUpdate(options []UpdateOption) (UpdateOpts, error) {
-	value, err := apply(options, copyUpdate)
+	value, err := apply(calls.Translate(options, updateCalls), copyUpdate)
 	if err != nil {
 		return value, err
 	}
@@ -344,7 +370,7 @@ func prepareUpdate(options []UpdateOption) (UpdateOpts, error) {
 	return value, err
 }
 func prepareDelete(options []DeleteOption) (DeleteOpts, error) {
-	value, err := apply(options, copyDelete)
+	value, err := apply(calls.Translate(options, deleteCalls), copyDelete)
 	if err != nil {
 		return value, err
 	}
@@ -352,7 +378,7 @@ func prepareDelete(options []DeleteOption) (DeleteOpts, error) {
 	return value, err
 }
 func prepareDeleteAll(options []DeleteAllOption) (DeleteAllOpts, error) {
-	value, err := apply(options, copyDeleteAll)
+	value, err := apply(calls.Translate(options, deleteAllCalls), copyDeleteAll)
 	if err != nil {
 		return value, err
 	}
@@ -360,7 +386,7 @@ func prepareDeleteAll(options []DeleteAllOption) (DeleteAllOpts, error) {
 	return value, err
 }
 func prepareSet(options []SetOption) (SetOpts, error) {
-	value, err := apply(options, copySet)
+	value, err := apply(calls.Translate(options, setCalls), copySet)
 	if err != nil {
 		return value, err
 	}
@@ -369,7 +395,7 @@ func prepareSet(options []SetOption) (SetOpts, error) {
 }
 
 func prepareList(options []ListOption) (ListOpts, url.Values, error) {
-	value, err := apply(options, copyList)
+	value, err := apply(calls.Translate(options, listCalls), copyList)
 	if err != nil {
 		return value, nil, err
 	}

@@ -5,6 +5,8 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"maps"
 	"slices"
 	"strings"
@@ -28,13 +30,24 @@ type ImageRecordCreateOpts struct {
 	optionContext                                      context.Context
 	optionCheck                                        func(context.Context) error
 }
-type ImageRecordCreateOption func(*ImageRecordCreateOpts) error
+
+// ImageRecordCreateOption is one option of CreateImageRecord and the Cloud
+// image create: WithImageRecordCreateOpts, the value, import and Swift header
+// options, WithImageRecordCreateHeaders (merges), request.Header (merges one
+// header) or request.Custom over *ImageRecordCreateOpts. Other shared calls,
+// including request.Headers and request.Field, fail with
+// resource.ErrInvalidOption before HTTP.
+type ImageRecordCreateOption = request.WriteCall
+
+var imageRecordCreateCalls = calls.Spec[ImageRecordCreateOpts]{
+	Header: calls.MergeHeader[ImageRecordCreateOpts](WithImageRecordCreateHeaders),
+}
 
 // WithImageRecordCreateOpts captures and replaces the entire option policy.
 func WithImageRecordCreateOpts(value ImageRecordCreateOpts) ImageRecordCreateOption {
 	snapshot, captureErr := copyImageRecordCreateOpts(nil, nil, value)
 	snapshot.optionContext, snapshot.optionCheck = nil, nil
-	return func(config *ImageRecordCreateOpts) error {
+	return request.Custom(func(config *ImageRecordCreateOpts) error {
 		if captureErr != nil {
 			return captureErr
 		}
@@ -44,17 +57,17 @@ func WithImageRecordCreateOpts(value ImageRecordCreateOpts) ImageRecordCreateOpt
 			*config = owned
 		}
 		return err
-	}
+	})
 }
 func WithImageRecordCreateContainer(value string) ImageRecordCreateOption {
-	return func(config *ImageRecordCreateOpts) error {
+	return request.Custom(func(config *ImageRecordCreateOpts) error {
 		if !utf8.ValidString(value) {
 			return uploadInvalid("image create container must be UTF-8")
 		}
 		owned := value
 		config.Container = &owned
 		return nil
-	}
+	})
 }
 func WithImageRecordCreateMD5(value any) ImageRecordCreateOption {
 	return withImageRecordCreateValue(value, func(c *ImageRecordCreateOpts, r json.RawMessage) { c.MD5 = r })
@@ -94,19 +107,19 @@ func WithImageRecordCreateSize(value any) ImageRecordCreateOption {
 }
 func withImageRecordCreateValue(value any, set func(*ImageRecordCreateOpts, json.RawMessage)) ImageRecordCreateOption {
 	snapshot, captureErr := captureImageRecordImportJSON(nil, nil, value)
-	return func(config *ImageRecordCreateOpts) error {
+	return request.Custom(func(config *ImageRecordCreateOpts) error {
 		if captureErr != nil {
 			return captureErr
 		}
 		set(config, bytes.Clone(snapshot))
 		return nil
-	}
+	})
 }
 
 // WithImageRecordCreateMeta replaces the complete raw metadata mapping.
 func WithImageRecordCreateMeta(values map[string]any) ImageRecordCreateOption {
 	snapshot, captureErr := captureImageRecordImportMap(nil, nil, values, nil)
-	return func(config *ImageRecordCreateOpts) error {
+	return request.Custom(func(config *ImageRecordCreateOpts) error {
 		if captureErr != nil {
 			return captureErr
 		}
@@ -115,7 +128,7 @@ func WithImageRecordCreateMeta(values map[string]any) ImageRecordCreateOption {
 			config.Meta = owned
 		}
 		return err
-	}
+	})
 }
 func WithImageRecordCreateAttribute(field string, value any) ImageRecordCreateOption {
 	return WithImageRecordCreateAttributes(map[string]any{field: value})
@@ -125,7 +138,7 @@ func WithImageRecordCreateAttribute(field string, value any) ImageRecordCreateOp
 // and Source shape/conversion checks belong to the later selected branch.
 func WithImageRecordCreateAttributes(values map[string]any) ImageRecordCreateOption {
 	snapshot, captureErr := captureImageRecordImportMap(nil, nil, values, nil)
-	return func(config *ImageRecordCreateOpts) error {
+	return request.Custom(func(config *ImageRecordCreateOpts) error {
 		if captureErr != nil {
 			return captureErr
 		}
@@ -140,20 +153,20 @@ func WithImageRecordCreateAttributes(values map[string]any) ImageRecordCreateOpt
 			config.Attributes[key] = value
 		}
 		return nil
-	}
+	})
 }
 
 // WithImageRecordCreateImportOptions applies each captured nested callback once
 // at operation preparation, before any branch-specific import default/check.
 func WithImageRecordCreateImportOptions(options ...ImageRecordImportOption) ImageRecordCreateOption {
 	owned := slices.Clone(options)
-	return func(config *ImageRecordCreateOpts) error {
+	return request.Custom(func(config *ImageRecordCreateOpts) error {
 		ctx, check := config.optionContext, config.optionCheck
 		imported, err := copyImageRecordImportOpts(ctx, check, config.Import)
 		if err != nil {
 			return err
 		}
-		for _, apply := range owned {
+		for _, apply := range calls.Translate(owned, imageRecordImportCalls) {
 			if err := imageRecordImportCheck(ctx, check); err != nil {
 				return err
 			}
@@ -174,29 +187,24 @@ func WithImageRecordCreateImportOptions(options ...ImageRecordImportOption) Imag
 		}
 		config.Import = imported
 		return imageRecordImportCheck(ctx, check)
-	}
-}
-func WithImageRecordCreateHeader(key, value string) ImageRecordCreateOption {
-	return func(config *ImageRecordCreateOpts) error {
-		return mergeImageRecordHeaders(&config.Headers, map[string]string{key: value})
-	}
+	})
 }
 func WithImageRecordCreateHeaders(values map[string]string) ImageRecordCreateOption {
 	snapshot := copyImageRecordHeaders(values)
-	return func(config *ImageRecordCreateOpts) error { return mergeImageRecordHeaders(&config.Headers, snapshot) }
+	return request.Custom(func(config *ImageRecordCreateOpts) error { return mergeImageRecordHeaders(&config.Headers, snapshot) })
 }
 func WithImageRecordCreateSwiftHeader(key, value string) ImageRecordCreateOption {
 	return WithImageRecordCreateSwiftHeaders(map[string]string{key: value})
 }
 func WithImageRecordCreateSwiftHeaders(values map[string]string) ImageRecordCreateOption {
 	snapshot := copyImageRecordHeaders(values)
-	return func(config *ImageRecordCreateOpts) error {
+	return request.Custom(func(config *ImageRecordCreateOpts) error {
 		headers, err := imageRecordCreateSwiftHeaders(snapshot)
 		if err != nil {
 			return err
 		}
 		return mergeImageRecordHeaders(&config.SwiftHeaders, headers)
-	}
+	})
 }
 func imageRecordCreateSwiftHeaders(values map[string]string) (map[string]string, error) {
 	headers, err := imageMutationHeaders(values, false, "")
@@ -250,7 +258,7 @@ func prepareImageRecordCreateOptions(ctx context.Context, check func(context.Con
 	if err != nil {
 		return config, err
 	}
-	for _, apply := range slices.Clone(options) {
+	for _, apply := range calls.Translate(options, imageRecordCreateCalls) {
 		if err := imageRecordImportCheck(ctx, check); err != nil {
 			return config, err
 		}

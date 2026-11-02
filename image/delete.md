@@ -15,15 +15,15 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.DeleteImage`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithDeleteImageOpts`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithDeleteImageStore`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithDeleteImageIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.DeleteImageRecord`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.DeleteImageRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordDeleteOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordDeleteHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordDeleteHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordDeleteStoreID`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordDeleteStoreRecord`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordDeleteIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 
 - Legacy typed DeleteImage profile only: DeleteImage defaults to whole-image DELETE and ignores clean missing resources. ID routes directly without metadata GET; nonnil store selects only /stores/{storeID}/{imageID}. Only actual204 constructs a result with fixed selected ImageID/StoreID, owned raw Body, cloned Header and actual StatusCode; no decoded model or fabricated response.
   Tests: `image/delete_contracts_test.go:TestDeleteImageWholeAndStoreRoutesAndEvidence`, `image/delete_core_test.go:TestDeleteCoreFixedScopeAndOwnedAcknowledgement`.

@@ -12,8 +12,10 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -30,7 +32,38 @@ type TaskRecordsOpts struct {
 	Paginated    *bool
 	order        []string
 }
-type TaskRecordsOption func(*TaskRecordsOpts) error
+
+// TaskRecordsOption is one option of TaskRecords and AllTaskRecords:
+// WithTaskRecordsOpts, WithTaskRecordsLocation, request.Query (the value is
+// kept as JSON in caller order), request.Headers (replaces the headers),
+// request.Microversion, request.Limit, request.Marker, request.MaxItems,
+// request.Paginated or request.Custom over *TaskRecordsOpts. Other shared
+// calls fail with resource.ErrInvalidOption before HTTP.
+type TaskRecordsOption = request.ListCall
+
+var taskRecordsCalls = calls.Spec[TaskRecordsOpts]{
+	Headers:      calls.Value(func(c *TaskRecordsOpts) *map[string]string { return &c.Headers }),
+	Microversion: calls.Pointer(func(c *TaskRecordsOpts) **string { return &c.Microversion }),
+	Query: func(c *TaskRecordsOpts, entry request.CallEntry) error {
+		if entry.JSONErr != nil {
+			return entry.JSONErr
+		}
+		if c.Query == nil {
+			c.Query = make(map[string]json.RawMessage)
+		}
+		if _, ok := c.Query[entry.Key]; !ok {
+			c.order = append(c.order, entry.Key)
+		}
+		c.Query[entry.Key] = bytes.Clone(entry.JSON)
+		return nil
+	},
+	Paging: calls.Paging[TaskRecordsOpts]{
+		Limit:     calls.Pointer(func(c *TaskRecordsOpts) **int { return &c.Limit }),
+		Marker:    calls.Value(func(c *TaskRecordsOpts) *string { return &c.Marker }),
+		MaxItems:  calls.Value(func(c *TaskRecordsOpts) *int { return &c.MaxItems }),
+		Paginated: calls.Pointer(func(c *TaskRecordsOpts) **bool { return &c.Paginated }),
+	},
+}
 
 func taskRecordCopy(v TaskRecordsOpts) TaskRecordsOpts {
 	v.Query = taskRecordClone(v.Query)
@@ -56,47 +89,11 @@ func taskRecordCopy(v TaskRecordsOpts) TaskRecordsOpts {
 }
 func WithTaskRecordsOpts(v TaskRecordsOpts) TaskRecordsOption {
 	owned := taskRecordCopy(v)
-	return func(c *TaskRecordsOpts) error { *c = taskRecordCopy(owned); return nil }
-}
-func WithTaskRecordsQuery(key string, v any) TaskRecordsOption {
-	raw, err := json.Marshal(v)
-	owned := bytes.Clone(raw)
-	return func(c *TaskRecordsOpts) error {
-		if err != nil {
-			return err
-		}
-		if c.Query == nil {
-			c.Query = make(map[string]json.RawMessage)
-		}
-		if _, ok := c.Query[key]; !ok {
-			c.order = append(c.order, key)
-		}
-		c.Query[key] = bytes.Clone(owned)
-		return nil
-	}
-}
-func WithTaskRecordsHeaders(v map[string]string) TaskRecordsOption {
-	owned := maps.Clone(v)
-	return func(c *TaskRecordsOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
-func WithTaskRecordsMicroversion(v string) TaskRecordsOption {
-	return func(c *TaskRecordsOpts) error { x := v; c.Microversion = &x; return nil }
+	return request.Custom(func(c *TaskRecordsOpts) error { *c = taskRecordCopy(owned); return nil })
 }
 func WithTaskRecordsLocation(v resource.CloudLocation) TaskRecordsOption {
 	owned := v.Clone()
-	return func(c *TaskRecordsOpts) error { x := owned.Clone(); c.Location = &x; return nil }
-}
-func WithTaskRecordsLimit(v int) TaskRecordsOption {
-	return func(c *TaskRecordsOpts) error { x := v; c.Limit = &x; return nil }
-}
-func WithTaskRecordsMarker(v string) TaskRecordsOption {
-	return func(c *TaskRecordsOpts) error { c.Marker = v; return nil }
-}
-func WithTaskRecordsMaxItems(v int) TaskRecordsOption {
-	return func(c *TaskRecordsOpts) error { c.MaxItems = v; return nil }
-}
-func WithTaskRecordsPaginated(v bool) TaskRecordsOption {
-	return func(c *TaskRecordsOpts) error { x := v; c.Paginated = &x; return nil }
+	return request.Custom(func(c *TaskRecordsOpts) error { x := owned.Clone(); c.Location = &x; return nil })
 }
 func taskRecordKeys(v TaskRecordsOpts) []string {
 	keys := make([]string, 0, len(v.Query))

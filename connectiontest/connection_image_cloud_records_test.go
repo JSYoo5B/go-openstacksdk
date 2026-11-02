@@ -10,6 +10,7 @@ import (
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/image"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -50,7 +51,7 @@ func TestConnectionCloudImageRecordsShareSourceLocationAndLiveToken(t *testing.T
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	header := image.WithImageRecordQueryHeader("X-Call", "cloud")
+	header := request.Header("X-Call", "cloud")
 	ctx := context.Background()
 
 	all, err := service.AllCloudImageRecords(ctx, header, image.WithImageRecordQueryShowAll(true))

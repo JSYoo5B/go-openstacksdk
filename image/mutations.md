@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.AddTag`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMutationOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageMutationHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMutationHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.AddImageRecordTag`
 
@@ -67,7 +67,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.RemoveTag`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMutationOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageMutationHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMutationHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.RemoveImageRecordTag`
 
@@ -120,12 +120,12 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.DeactivateImage`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMutationOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageMutationHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMutationHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.DeactivateImageRecord`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.DeactivateImageRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordActionOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordActionHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordActionHeaders`
 
 - Legacy typed strict204 profile only: DeactivateImage defaults to bodyless/query-free POST on the dedicated fixed-ID endpoint; only actual204 acknowledges the request. Direct ID causes no metadata GET/list/PATCH/discovery/wait. Missing image or tag is a strict error; there is no IgnoreMissing option or nested404 suppression.
@@ -181,12 +181,12 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.ReactivateImage`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMutationOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageMutationHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMutationHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.ReactivateImageRecord`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.ReactivateImageRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordActionOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordActionHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordActionHeaders`
 
 - Legacy typed strict204 profile only: ReactivateImage defaults to bodyless/query-free POST on the dedicated fixed-ID endpoint; only actual204 acknowledges the request. Direct ID causes no metadata GET/list/PATCH/discovery/wait. Missing image or tag is a strict error; there is no IgnoreMissing option or nested404 suppression.
@@ -256,7 +256,7 @@ type MutationProof struct {
 }
 
 func mutateImage(ctx context.Context, service *image.Service, ref resource.Ref, tag string) (proof MutationProof, err error) {
-    option := image.WithImageMutationHeader("X-Request-Source", "example")
+    option := request.Header("X-Request-Source", "example")
     proof.Added, err = service.AddTag(ctx, ref, tag, option)
     if err != nil {
         return proof, err

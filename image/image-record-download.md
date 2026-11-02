@@ -25,7 +25,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordDownloadStorePreferences`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordDownloadChecksumVerification`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordDownloadHashFactory`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordDownloadHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordDownloadHeaders`
 
 - Legacy typed writer-only DownloadTo profile only: DownloadTo defaults to metadata GET200 then full binary GET200, using a bounded 1MiB copy chunk and available checksum verification. It retains independent actual native Image, raw metadata body/header/status, actual accepted binary header/status and exact BytesWritten without keeping the full payload or fabricating completion.
@@ -127,7 +127,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.DownloadCloudImageRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDownloadOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDownloadHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDownloadHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDownloadChunkSize`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDownloadStream`

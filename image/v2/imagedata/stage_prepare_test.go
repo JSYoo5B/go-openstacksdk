@@ -6,6 +6,7 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -15,14 +16,14 @@ func TestPrepareStageOptionsFreezesOnceWithoutRequests(t *testing.T) {
 	api := New(client)
 	var calls atomic.Int32
 	var captured *StageOpts
-	option := func(value *StageOpts) error {
+	option := request.Custom(func(value *StageOpts) error {
 		calls.Add(1)
 		zero := int64(0)
 		value.Size = &zero
 		value.Headers = map[string]string{"x-note": "before"}
 		captured = value
 		return nil
-	}
+	})
 	prepared, err := api.PrepareStageOptions(context.Background(), option)
 	if err != nil || calls.Load() != 1 || prepared.Size == nil || *prepared.Size != 0 || prepared.Headers["X-Note"] != "before" {
 		t.Fatalf("prepared=%+v calls=%d err=%v", prepared, calls.Load(), err)

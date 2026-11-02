@@ -10,6 +10,7 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -86,16 +87,16 @@ func TestImageOptionsReplacementExtensionsAndLastWins(t *testing.T) {
 		return taskCoreJSON(req, 200, `{"images":[{},{}]}`), nil
 	}))
 	values, err := service.AllImages(context.Background(),
-		WithListImagesMaxItems(-1), WithListImagesLimit(-1), WithListImagesHeader("X-Erased", "old"), WithListImagesFilter("old", "x"),
-		WithListImagesOpts(ListImagesOpts{}), WithListImagesHeaders(map[string]string{"x-policy": "first"}), WithListImagesHeader("X-Policy", "last"),
+		request.MaxItems(-1), request.Limit(-1), request.Header("X-Erased", "old"), WithListImagesFilter("old", "x"),
+		WithListImagesOpts(ListImagesOpts{}), WithListImagesHeaders(map[string]string{"x-policy": "first"}), request.Header("X-Policy", "last"),
 		WithListImagesID(""), WithListImagesName(""), WithListImagesVisibility("future"), WithListImagesMemberStatus("future"), WithListImagesOwner(""), WithListImagesStatus("future"),
 		WithListImagesSort(""), WithListImagesCreatedAt("literal\n"), WithListImagesUpdatedAt(""), WithListImagesContainerFormat("future"), WithListImagesDiskFormat("future"),
-		WithListImagesSizeMin(9), WithListImagesSizeMax(0), WithListImagesProtected(false), WithListImagesHidden(false), WithListImagesLimit(0), WithListImagesMarker(""),
-		WithListImagesFilters(url.Values{"erased": {"x"}, "kept": {"first"}}), WithListImagesFilter("kept", "last", "last"), WithListImagesFilter("erased"), WithListImagesMaxItems(1), WithListImagesMaxItems(0), WithListImagesSinglePage(true))
+		WithListImagesSizeMin(9), WithListImagesSizeMax(0), WithListImagesProtected(false), WithListImagesHidden(false), request.Limit(0), request.Marker(""),
+		WithListImagesFilters(url.Values{"erased": {"x"}, "kept": {"first"}}), WithListImagesFilter("kept", "last", "last"), WithListImagesFilter("erased"), request.MaxItems(1), request.MaxItems(0), WithListImagesSinglePage(true))
 	if err != nil || len(values) != 2 {
 		t.Fatal(values, err)
 	}
-	if value, err := service.GetImage(context.Background(), resource.ID("id"), WithGetImageHeader("X-Erased", "old"), WithGetImageOpts(GetImageOpts{}), WithGetImageHeader("X-Policy", "first"), WithGetImageHeader("x-policy", "last")); value == nil || err != nil || calls != 2 {
+	if value, err := service.GetImage(context.Background(), resource.ID("id"), request.Header("X-Erased", "old"), WithGetImageOpts(GetImageOpts{}), request.Header("X-Policy", "first"), request.Header("x-policy", "last")); value == nil || err != nil || calls != 2 {
 		t.Fatal(value, err, calls)
 	}
 }
@@ -115,7 +116,7 @@ func TestImageOptionsLazyCallbacksAndRetainedOwnership(t *testing.T) {
 		return taskCoreJSON(req, 200, `{"images":[{"id":"last"}]}`), nil
 	})
 	client.MoreHeaders = map[string]string{"X-Source": "captured"}
-	options := []ListImagesOption{func(o *ListImagesOpts) error {
+	options := []ListImagesOption{request.Custom(func(o *ListImagesOpts) error {
 		callbacks++
 		if o.Headers == nil || o.Filters == nil {
 			t.Fatal("callback maps not initialized")
@@ -128,17 +129,17 @@ func TestImageOptionsLazyCallbacksAndRetainedOwnership(t *testing.T) {
 		retained = o
 		client.MoreHeaders["X-Source"] = "changed"
 		return nil
-	}, func(o *ListImagesOpts) error {
+	}), request.Custom(func(o *ListImagesOpts) error {
 		*retained.Name = "rogue"
 		*retained.Limit = 99
 		retained.Headers["X-Policy"] = "rogue"
 		retained.Filters["extra"][0] = "rogue"
 		retained.Tags[0] = "rogue"
 		return nil
-	}}
+	})}
 	service := New(client)
 	iterator := service.ListImages(context.Background(), options...)
-	options[0] = func(o *ListImagesOpts) error { t.Fatal("option slice not snapshotted"); return nil }
+	options[0] = request.Custom(func(o *ListImagesOpts) error { t.Fatal("option slice not snapshotted"); return nil })
 	if calls != 0 || callbacks != 0 {
 		t.Fatal(calls, callbacks)
 	}
@@ -155,7 +156,7 @@ func TestImageOptionsLazyCallbacksAndRetainedOwnership(t *testing.T) {
 		t.Fatal(calls, callbacks, count)
 	}
 	cause := errors.New("custom callback")
-	values, err := service.AllImages(context.Background(), func(o *ListImagesOpts) error { return cause })
+	values, err := service.AllImages(context.Background(), request.Custom(func(o *ListImagesOpts) error { return cause }))
 	if values != nil || !errors.Is(err, cause) || calls != 2 {
 		t.Fatal(values, err, calls)
 	}
@@ -168,21 +169,21 @@ func TestImageOptionsValidationAndParallelReusablePolicies(t *testing.T) {
 		t.Error("invalid option reached HTTP")
 		return taskCoreJSON(req, 200, `{"images":[]}`), nil
 	}))
-	invalid := []ListImagesOption{nil, WithListImagesLimit(-1), WithListImagesMaxItems(-1), WithListImagesSizeMin(-1), WithListImagesSizeMax(-1),
-		WithListImagesHeader("Accept", "owned"), WithListImagesHeader("Host", "foreign"), WithListImagesHeader("X-Auth-Token", "owned"),
+	invalid := []ListImagesOption{nil, request.Limit(-1), request.MaxItems(-1), WithListImagesSizeMin(-1), WithListImagesSizeMax(-1),
+		request.Header("Accept", "owned"), request.Header("Host", "foreign"), request.Header("X-Auth-Token", "owned"),
 		WithListImagesFilters(url.Values{"limit": {"1"}}), WithListImagesFilters(url.Values{"deleted": {"true"}}), WithListImagesFilters(url.Values{"x": nil}),
 		WithListImagesFilter("", "value"), WithListImagesFilter("key\n", "value"), WithListImagesFilter(string([]byte{0xff}), "value"), WithListImagesFilter("key", string([]byte{0xff})),
-		WithListImagesName(string([]byte{0xff})), WithListImagesMarker(string([]byte{0xff})), WithListImagesTags(string([]byte{0xff})),
-		func(o *ListImagesOpts) error {
+		WithListImagesName(string([]byte{0xff})), request.Marker(string([]byte{0xff})), WithListImagesTags(string([]byte{0xff})),
+		request.Custom(func(o *ListImagesOpts) error {
 			o.Sort = taskOptionPointer("")
 			o.SortKeys = []string{"name"}
 			return nil
-		},
-		func(o *ListImagesOpts) error {
+		}),
+		request.Custom(func(o *ListImagesOpts) error {
 			o.SortDirs = []string{"asc", "desc"}
 			o.SortKeys = []string{"name"}
 			return nil
-		},
+		}),
 	}
 	for index, option := range invalid {
 		values, err := service.AllImages(context.Background(), option)
@@ -190,7 +191,7 @@ func TestImageOptionsValidationAndParallelReusablePolicies(t *testing.T) {
 			t.Fatal(index, values, err, calls)
 		}
 	}
-	for _, option := range []GetImageOption{nil, WithGetImageHeader("Accept", "owned")} {
+	for _, option := range []GetImageOption{nil, request.Header("Accept", "owned")} {
 		value, err := service.GetImage(context.Background(), resource.Name("Parent"), option)
 		if value != nil || !errors.Is(err, resource.ErrInvalidOption) || calls != 0 {
 			t.Fatal(value, err, calls)

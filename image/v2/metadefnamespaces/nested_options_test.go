@@ -11,6 +11,7 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -114,7 +115,7 @@ func TestMetadefNamespaceCreateNestedOptionsCallbackAndRawValidation(t *testing.
 			}
 			return namespaceCoreJSON(req, 201, `{}`), nil
 		})
-		first := CreateOption(func(c *CreateOpts) error {
+		first := CreateOption(request.Custom(func(c *CreateOpts) error {
 			callbacks++
 			c.Properties = map[string]PropertyDefinition{"p": {Type: "string", Attributes: map[string]json.RawMessage{"default": json.RawMessage(`9007199254740993`)}}}
 			c.Objects = []ObjectDefinition{{Name: "object", Required: []string{"owned"}}}
@@ -122,8 +123,8 @@ func TestMetadefNamespaceCreateNestedOptionsCallbackAndRawValidation(t *testing.
 			c.ResourceTypeAssociations = []ResourceTypeAssociationDefinition{{Name: "type", Prefix: namespaceOptionPointer("owned")}}
 			retained = c
 			return nil
-		})
-		second := CreateOption(func(c *CreateOpts) error {
+		}))
+		second := CreateOption(request.Custom(func(c *CreateOpts) error {
 			callbacks++
 			retained.Properties["p"].Attributes["default"][0] = '1'
 			p := retained.Properties["p"]
@@ -136,7 +137,7 @@ func TestMetadefNamespaceCreateNestedOptionsCallbackAndRawValidation(t *testing.
 				t.Fatal("callbacks shared recursive storage")
 			}
 			return nil
-		})
+		}))
 		if _, err := New(client).Create(context.Background(), "parent", first, second); err != nil || calls != 1 || callbacks != 2 {
 			t.Fatal(err, calls, callbacks)
 		}
@@ -158,7 +159,7 @@ func TestMetadefNamespaceCreateNestedOptionsCallbackAndRawValidation(t *testing.
 			}
 		}
 		cause := errors.New("callback")
-		if _, err := prepareCreate([]CreateOption{func(*CreateOpts) error { return cause }}); err != cause {
+		if _, err := prepareCreate([]CreateOption{request.Custom(func(*CreateOpts) error { return cause })}); err != cause {
 			t.Fatal("cause identity", err)
 		}
 	})

@@ -19,9 +19,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.FindImageRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithFindImageRecordOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithFindImageRecordHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithFindImageRecordHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithFindImageRecordIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithFindImageRecordListOptions`
 
 - The pinned direct proxy accepts a string name_or_id and ignore_missing=True. Safe strings use native GET first; only compatible GET400/403/404 fall back to the normal list, with explicit strict, 404-only and GET-only Go options. Root-object GET200 extraction preserves the native Image model, additional Properties and import/store response headers.
@@ -75,9 +75,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithImportStores`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithImportAllStores`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithImportAllStoresMustSucceed`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithImportHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithImportHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithImportField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithImportMethodField`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.ImportImageRecord`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.ImportImageRecord`
@@ -91,7 +91,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordImportAllStoresMustSucceed`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordImportStore`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordImportStores`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordImportHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordImportHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordImportField`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordImportFields`
@@ -210,7 +210,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCreateAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCreateAttributes`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCreateImportOptions`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCreateHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCreateHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCreateSwiftHeader`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCreateSwiftHeaders`
@@ -352,7 +352,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordDownloadStorePreferences`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordDownloadChecksumVerification`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordDownloadHashFactory`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordDownloadHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordDownloadHeaders`
 
 - Legacy typed writer-only DownloadTo profile only: DownloadTo defaults to metadata GET200 then full binary GET200, using a bounded 1MiB copy chunk and available checksum verification. It retains independent actual native Image, raw metadata body/header/status, actual accepted binary header/status and exact BytesWritten without keeping the full payload or fabricating completion.
@@ -455,15 +455,15 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.DeleteImage`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithDeleteImageOpts`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithDeleteImageStore`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithDeleteImageIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.DeleteImageRecord`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.DeleteImageRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordDeleteOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordDeleteHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordDeleteHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordDeleteStoreID`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordDeleteStoreRecord`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordDeleteIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 
 - Legacy typed DeleteImage profile only: DeleteImage defaults to whole-image DELETE and ignores clean missing resources. ID routes directly without metadata GET; nonnil store selects only /stores/{storeID}/{imageID}. Only actual204 constructs a result with fixed selected ImageID/StoreID, owned raw Body, cloned Header and actual StatusCode; no decoded model or fabricated response.
   Tests: `image/delete_contracts_test.go:TestDeleteImageWholeAndStoreRoutesAndEvidence`, `image/delete_core_test.go:TestDeleteCoreFixedScopeAndOwnedAcknowledgement`.
@@ -529,20 +529,20 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.API.AllStores`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithListStoresOptions`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithListStoresDetails`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithListStoresMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithListStoresPaginated`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithListStoresQuery`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithListStoresHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.NewWithDependencies`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.API.ListStoreRecords`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.API.AllStoreRecords`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithStoreRecordListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithStoreRecordListHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithStoreRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithStoreRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithStoreRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithStoreRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithStoreRecordListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithStoreRecordListFilter`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithStoreRecordListFilters`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithStoreRecordListDetails`
@@ -599,11 +599,11 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.New`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.API.RawClient`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.API.GetImportInfo`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithGetImportInfoHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.NewWithDependencies`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.API.GetImportInfoRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithImportRecordOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithImportRecordHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithImportRecordHeaders`
 
 - GetImportInfo performs ID-free singleton GET info/import with actual200 only and no list/cache/capability gate. Flat root metadata carries actual Header/status/raw unknown fields. Original native ImageImport.Get still performs the same discovery wire route and retains its existing typed callable/model.
@@ -648,7 +648,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.AddTag`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMutationOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageMutationHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMutationHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.AddImageRecordTag`
 
@@ -701,7 +701,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.RemoveTag`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMutationOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageMutationHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMutationHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.RemoveImageRecordTag`
 
@@ -754,12 +754,12 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.DeactivateImage`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMutationOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageMutationHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMutationHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.DeactivateImageRecord`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.DeactivateImageRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordActionOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordActionHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordActionHeaders`
 
 - Legacy typed strict204 profile only: DeactivateImage defaults to bodyless/query-free POST on the dedicated fixed-ID endpoint; only actual204 acknowledges the request. Direct ID causes no metadata GET/list/PATCH/discovery/wait. Missing image or tag is a strict error; there is no IgnoreMissing option or nested404 suppression.
@@ -815,12 +815,12 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.ReactivateImage`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMutationOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageMutationHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMutationHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.ReactivateImageRecord`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.ReactivateImageRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordActionOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordActionHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordActionHeaders`
 
 - Legacy typed strict204 profile only: ReactivateImage defaults to bodyless/query-free POST on the dedicated fixed-ID endpoint; only actual204 acknowledges the request. Direct ID causes no metadata GET/list/PATCH/discovery/wait. Missing image or tag is a strict error; there is no IgnoreMissing option or nested404 suppression.
@@ -877,7 +877,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.AddImageLocation`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithAddImageLocationOpts`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageLocationValidation`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithAddImageLocationHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithAddImageLocationHeaders`
 
 - Add sends one prepared flat root JSON url plus default validation_data:{} to fixed POST images/{chosenID}/locations with no query. URL is nonempty validUTF8 literal JSON data, never parsed/normalized/fetched or used as client target; scheme/case/whitespace/percent/query/fragment remain unchanged. Supplied validation pointer requires both nonempty validUTF8 strings; no local algorithm/hex/digest whitelist or normalization/verification.
@@ -912,7 +912,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetImageLocations`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetImageLocationsOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithGetImageLocationsHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetImageLocationsHeaders`
 
 - Get performs one bodyless/query-free fixed-parent GET accepting actual200 finite barearray only. Empty[] yields nonnil empty rows. No Link/marker/limit fallback or row ID/URL based continuation; canonical request ImageID stays fixed and returned metadata remains passive.
@@ -951,7 +951,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetImagesSchema`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeaders`
 
 - GetImagesSchema performs bodyless/query-free GET at captured base plus fixed schemas/images, requires actual200 and no Ref/ID/Name lookup. The pinned controller uses Controller.images with raw(); reported top-level additionalProperties is absent. Plural getters return one discovery document, never resource lists or generic pagination. Returned passive Name need not equal the fixed route.
@@ -983,7 +983,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetImageSchema`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeaders`
 
 - GetImageSchema performs bodyless/query-free GET at captured base plus fixed schemas/image, requires actual200 and no Ref/ID/Name lookup. The pinned controller uses Controller.image with raw(); reported top-level additionalProperties is object {type:string}. Plural getters return one discovery document, never resource lists or generic pagination. Returned passive Name need not equal the fixed route.
@@ -1015,7 +1015,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetMembersSchema`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeaders`
 
 - GetMembersSchema performs bodyless/query-free GET at captured base plus fixed schemas/members, requires actual200 and no Ref/ID/Name lookup. The pinned controller uses Controller.members with minimal(); reported top-level additionalProperties is absent. Plural getters return one discovery document, never resource lists or generic pagination. Returned passive Name need not equal the fixed route.
@@ -1047,7 +1047,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetMemberSchema`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeaders`
 
 - GetMemberSchema performs bodyless/query-free GET at captured base plus fixed schemas/member, requires actual200 and no Ref/ID/Name lookup. The pinned controller uses Controller.member with minimal(); reported top-level additionalProperties is absent. Plural getters return one discovery document, never resource lists or generic pagination. Returned passive Name need not equal the fixed route.
@@ -1079,7 +1079,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetTasksSchema`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetSchemaRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.NewWithDependencies`
@@ -1118,7 +1118,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetTaskSchema`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetSchemaRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.NewWithDependencies`
@@ -1157,7 +1157,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetMetadefNamespaceSchema`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetSchemaRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.NewWithDependencies`
@@ -1196,7 +1196,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetMetadefNamespacesSchema`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetSchemaRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.NewWithDependencies`
@@ -1235,7 +1235,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetMetadefResourceTypeSchema`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetSchemaRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.NewWithDependencies`
@@ -1274,7 +1274,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetMetadefResourceTypesSchema`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetSchemaRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.NewWithDependencies`
@@ -1313,7 +1313,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetMetadefObjectSchema`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetSchemaRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.NewWithDependencies`
@@ -1352,7 +1352,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetMetadefObjectsSchema`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetSchemaRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.NewWithDependencies`
@@ -1391,7 +1391,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetMetadefPropertySchema`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetSchemaRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.NewWithDependencies`
@@ -1430,7 +1430,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetMetadefPropertiesSchema`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetSchemaRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.NewWithDependencies`
@@ -1469,7 +1469,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetMetadefTagSchema`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetSchemaRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.NewWithDependencies`
@@ -1508,7 +1508,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetMetadefTagsSchema`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetSchemaHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetSchemaRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.NewWithDependencies`
@@ -1547,7 +1547,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetImageCache`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithCacheOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithCacheHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithCacheHeaders`
 
 - GetImageCache sends bodyless/query-free GET at captured base plus fixed cache, requiring original actual200 only. DirectID has only requested cache endpoint; explicit Name for per-ID calls uses unchanged native all-pages exact-name resolution, with no synthetic Ref/ID for singleton routes.
@@ -1582,9 +1582,9 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.CacheDeleteImage`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithCacheDeleteOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithCacheDeleteHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithCacheDeleteHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithCacheDeleteIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 
 - CacheDeleteImage sends bodyless/query-free DELETE at captured base plus fixed cache/{image_id}, requiring actual204 acknowledgement only, with separately owned404 acceptance for the narrow nil/true missing policy. DirectID has only requested cache endpoint; explicit Name for per-ID calls uses unchanged native all-pages exact-name resolution, with no synthetic Ref/ID for singleton routes.
   Tests: `image/cache_contracts_test.go:TestImageCacheFixedRoutesAndClearTargets`, `image/cache_core_test.go:TestImageCacheCoreFixedRoutesAndActualEvidence`, `connectiontest/connection_image_cache_test.go:TestConnectionImageCacheSharesClientDefaultsAndPassiveMeasurements`, `internal/cmd/sdkgen/glance_cache_test.go:TestGlanceCacheManualMethodsPreserveNativeBindingsAndDocumentDefaults`, `image/cache_contracts_test.go:TestImageCacheExactNameResolutionAndDirectIdentity`.
@@ -1618,7 +1618,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.QueueImage`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithCacheOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithCacheHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithCacheHeaders`
 
 - QueueImage sends bodyless/query-free PUT at captured base plus fixed cache/{image_id}, requiring original actual202 only. DirectID has only requested cache endpoint; explicit Name for per-ID calls uses unchanged native all-pages exact-name resolution, with no synthetic Ref/ID for singleton routes.
@@ -1653,7 +1653,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.ClearCache`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithClearCacheOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithClearCacheHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithClearCacheHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithClearCacheTarget`
 
@@ -1689,7 +1689,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.CachedImageNodes`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithCacheOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithCacheHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithCacheHeaders`
 
 - CachedImageNodes sends bodyless/query-free GET at captured base plus fixed cache/nodes/{image_id}, requiring original actual200 only. DirectID has only requested cache endpoint; explicit Name for per-ID calls uses unchanged native all-pages exact-name resolution, with no synthetic Ref/ID for singleton routes.
@@ -1724,7 +1724,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.CleanCache`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithCacheOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithCacheHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithCacheHeaders`
 
 - CleanCache sends bodyless/query-free POST at captured base plus fixed cache/clean, requiring original actual200 only. DirectID has only requested cache endpoint; explicit Name for per-ID calls uses unchanged native all-pages exact-name resolution, with no synthetic Ref/ID for singleton routes.
@@ -1759,7 +1759,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.PruneCache`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithCacheOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithCacheHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithCacheHeaders`
 
 - PruneCache sends bodyless/query-free POST at captured base plus fixed cache/prune, requiring original actual200 only. DirectID has only requested cache endpoint; explicit Name for per-ID calls uses unchanged native all-pages exact-name resolution, with no synthetic Ref/ID for singleton routes.
@@ -1794,7 +1794,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.UploadImage`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadSize`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithoutImageUploadSize`
@@ -1816,7 +1816,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordUploadDiskFormat`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordUploadAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordUploadAttributes`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordUploadHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordUploadHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordUploadSize`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithoutImageRecordUploadSize`
@@ -1908,7 +1908,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryFilterDeleted`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryShowAll`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeaders`
 
 - AllCloudImageRecords eagerly consumes the complete default owned image list once, keeps every consumed row in Inventory and removes rows whose Python-lowered string status equals deleted unless FilterDeleted is false. Value is the completed JSON array of kept declared views, [] for an empty result, and Images aligns with it.
@@ -1936,7 +1936,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryFilters`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryExpression`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeaders`
 
 - SearchImageRecords completes the default list_images inventory, including the deleted-status filter and no member query, before the shared Cloud identifier exact-or-fnmatch phase. No name or filter is forwarded as a server query or Proxy Body filter; deleted rows are never selectable.
@@ -1962,7 +1962,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryFilters`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryExpression`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeaders`
 
 - Omitted or JSON-null filters delegate to the owned Proxy find_image engine with ignore_missing true: literal GET, clean 400/403/404 fallback to the visible and hidden name lists, no Cloud deleted-status filter, nil Value/Image when missing and terminal native errors. Value is the found declared view.
@@ -1986,7 +1986,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetImageRecordByID`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeaders`
 
 - GetImageRecordByID delegates to one strict literal GetImageRecord without query, Find fallback, missing-as-nil or deleted filtering; native 404 remains an error named GetImageRecordByID without nesting the delegated operation, and the Connection location is projected.
@@ -2008,7 +2008,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetImageRecordExclude`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeaders`
 
 - The helper completes the default filter-free search_images inventory first, so deleted rows are never candidates and an empty identifier selects every row. An empty exclude returns the first selected row; otherwise rows are visited in order and the first whose name does not contain exclude is selected without inspecting later rows.
@@ -2033,7 +2033,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetImageRecordName`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeaders`
 
 - The helper completes the default filter-free search_images inventory first, so deleted rows are never candidates and an empty identifier selects every row. An empty exclude returns the first selected row; otherwise rows are visited in order and the first whose name does not contain exclude is selected without inspecting later rows.
@@ -2058,7 +2058,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetImageRecordID`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeaders`
 
 - The helper completes the default filter-free search_images inventory first, so deleted rows are never candidates and an empty identifier selects every row. An empty exclude returns the first selected row; otherwise rows are visited in order and the first whose name does not contain exclude is selected without inspecting later rows.
@@ -2083,7 +2083,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.WaitForCloudImageRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudWaitOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudWaitHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudWaitHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudWaitTimeout`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudWaitUnlimited`
@@ -2109,7 +2109,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.DownloadCloudImageRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDownloadOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDownloadHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDownloadHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDownloadChunkSize`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDownloadStream`
@@ -2157,7 +2157,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.DeleteCloudImageRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDeleteOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDeleteHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDeleteHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDeleteWait`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDeleteTimeout`

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"strings"
 
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -46,7 +47,7 @@ func (s *Service) prepareCache(ctx context.Context, ref *resource.Ref, apply fun
 		return nil, err
 	}
 	if ref != nil {
-		prepared, err := s.prepareImageMutation(ctx, *ref, nil, []ImageMutationOption{func(config *ImageMutationOpts) error {
+		prepared, err := s.prepareImageMutation(ctx, *ref, nil, []ImageMutationOption{request.Custom(func(config *ImageMutationOpts) error {
 			values, err := apply()
 			if err != nil {
 				return err
@@ -56,7 +57,7 @@ func (s *Service) prepareCache(ctx context.Context, ref *resource.Ref, apply fun
 			}
 			config.Headers = values
 			return nil
-		}})
+		})})
 		if err != nil {
 			if _, sourceErr := validateCacheSource(ctx, source); sourceErr != nil && !errors.Is(err, sourceErr) {
 				err = errors.Join(err, sourceErr)

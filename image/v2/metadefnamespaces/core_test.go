@@ -13,6 +13,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -182,13 +183,13 @@ func TestMetadefNamespacesCoreCompletePreflight(t *testing.T) {
 	api := New(client)
 	for _, identity := range []string{"", ".", "..", "a/b", "a\\b", "a%2Fb", "a?b", "a#b", "a\n", string([]byte{0xff}), strings.Repeat("界", 81)} {
 		ran := 0
-		_, err := api.Get(context.Background(), identity, func(*GetOpts) error { ran++; return nil })
+		_, err := api.Get(context.Background(), identity, request.Custom(func(*GetOpts) error { ran++; return nil }))
 		if !errors.Is(err, resource.ErrInvalidOption) || ran != 0 {
 			t.Fatalf("identity preflight %q: %v callbacks%d", identity, err, ran)
 		}
 	}
 	ran := 0
-	if _, err := api.Create(nil, "valid", func(*CreateOpts) error { ran++; return nil }); !errors.Is(err, resource.ErrInvalidOption) || ran != 0 {
+	if _, err := api.Create(nil, "valid", request.Custom(func(*CreateOpts) error { ran++; return nil })); !errors.Is(err, resource.ErrInvalidOption) || ran != 0 {
 		t.Fatalf("nilctx %v callbacks%d", err, ran)
 	}
 	custom := errors.New("cancel-preflight")
@@ -224,12 +225,12 @@ func TestMetadefNamespacesCoreCompletePreflight(t *testing.T) {
 		},
 		func() error { _, err := api.Get(context.Background(), "valid", WithGetResourceType("a\t")); return err },
 		func() error {
-			_, err := api.Delete(context.Background(), "valid", WithDeleteHeader("Authorization", "x"))
+			_, err := api.Delete(context.Background(), "valid", request.Header("Authorization", "x"))
 			return err
 		},
-		func() error { _, err := api.All(context.Background(), WithListLimit(-1)); return err },
-		func() error { _, err := api.All(context.Background(), WithListMaxItems(-1)); return err },
-		func() error { _, err := api.All(context.Background(), WithListMarker("a/b")); return err },
+		func() error { _, err := api.All(context.Background(), request.Limit(-1)); return err },
+		func() error { _, err := api.All(context.Background(), request.MaxItems(-1)); return err },
+		func() error { _, err := api.All(context.Background(), request.Marker("a/b")); return err },
 		func() error { _, err := api.All(context.Background(), WithListSortDir("DESC")); return err },
 		func() error { _, err := api.All(context.Background(), WithListSortKey("x\n")); return err },
 		func() error {
@@ -273,7 +274,7 @@ func TestMetadefNamespacesCoreAdvertisedPaginationAndCaps(t *testing.T) {
 			}
 			return namespaceCoreJSON(req, 200, `{"namespaces":[{"namespace":"last"}],"next":null}`), nil
 		})
-		values, err := New(client).All(context.Background(), WithListLimit(0), WithListVisibility("public"), WithListSortKey("literal-column"), WithListSortDir("asc"), WithListResourceTypes("OS::A, OS::B"))
+		values, err := New(client).All(context.Background(), request.Limit(0), WithListVisibility("public"), WithListSortKey("literal-column"), WithListSortDir("asc"), WithListResourceTypes("OS::A, OS::B"))
 		if err != nil || len(values) != 2 || calls != 2 {
 			t.Fatalf("values%d calls%d %v", len(values), calls, err)
 		}
@@ -331,7 +332,7 @@ func TestMetadefNamespacesCoreAdvertisedPaginationAndCaps(t *testing.T) {
 			}
 			return namespaceCoreJSON(req, 200, body), nil
 		}))
-		rows, err := api.All(context.Background(), WithListMaxItems(1))
+		rows, err := api.All(context.Background(), request.MaxItems(1))
 		if err != nil || len(rows) != 1 || calls != 1 {
 			t.Fatalf("cap %d %v", len(rows), err)
 		}
@@ -363,7 +364,7 @@ func TestMetadefNamespacesCoreAdvertisedPaginationAndCaps(t *testing.T) {
 				calls++
 				return namespaceCoreJSON(req, 200, body), nil
 			}))
-			rows, err := api.All(context.Background(), WithListMaxItems(20))
+			rows, err := api.All(context.Background(), request.MaxItems(20))
 			if err != nil || rows == nil || calls != 1 {
 				t.Fatalf("finite: calls%d %v", calls, err)
 			}
@@ -378,7 +379,7 @@ func TestMetadefNamespacesCoreAdvertisedPaginationAndCaps(t *testing.T) {
 				calls++
 				return namespaceCoreJSON(req, 200, body), nil
 			}))
-			rows, err := api.All(context.Background(), WithListMarker("start"))
+			rows, err := api.All(context.Background(), request.Marker("start"))
 			if err == nil || rows != nil || calls != 1 {
 				t.Fatalf("unsafe link %q rows%v calls%d err%v", link, rows, calls, err)
 			}
@@ -425,7 +426,7 @@ func TestMetadefNamespacesCoreAcceptedBodyFailuresAndMissingOwnership(t *testing
 		if ack, err := api.Delete(context.Background(), "literal"); ack != nil || err != nil || callbacks != 0 {
 			t.Fatalf("default404: %v %v hooks%d", ack, err, callbacks)
 		}
-		if ack, err := api.Delete(context.Background(), "literal", WithDeleteIgnoreMissing(false)); ack != nil || err == nil || callbacks != 1 {
+		if ack, err := api.Delete(context.Background(), "literal", request.IgnoreMissing(false)); ack != nil || err == nil || callbacks != 1 {
 			t.Fatalf("strict404: %v %v hooks%d", ack, err, callbacks)
 		}
 		bad := &namespaceCoreBody{reader: strings.NewReader("masked"), closeErr: closeCause}
@@ -452,7 +453,7 @@ func TestMetadefNamespacesCoreCapturedSourceAndNativeRetryBoundaries(t *testing.
 			calls++
 			return namespaceCoreJSON(req, 200, `{}`), nil
 		})
-		_, err := New(client).Get(context.Background(), "literal", func(*GetOpts) error { mutate(client); return nil })
+		_, err := New(client).Get(context.Background(), "literal", request.Custom(func(*GetOpts) error { mutate(client); return nil }))
 		if !errors.Is(err, resource.ErrInvalidOption) || calls != 0 {
 			t.Fatalf("source mutation sent calls%d %v", calls, err)
 		}
@@ -465,12 +466,12 @@ func TestMetadefNamespacesCoreCapturedSourceAndNativeRetryBoundaries(t *testing.
 			return namespaceCoreJSON(req, 200, `{"self":"https://foreign.test","schema":"foreign","namespace":"different"}`), nil
 		})
 		client.MoreHeaders = map[string]string{"X-Source": "before"}
-		_, err := New(client).Get(context.Background(), "literal", func(o *GetOpts) error {
+		_, err := New(client).Get(context.Background(), "literal", request.Custom(func(o *GetOpts) error {
 			client.MoreHeaders["X-Source"] = "after"
 			client.ProviderClient.TokenID = "after"
 			o.Headers["X-Option"] = "chosen"
 			return nil
-		})
+		}))
 		if err != nil {
 			t.Fatal(err)
 		}

@@ -13,6 +13,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -359,14 +360,14 @@ func TestImageRecordGetLocationAndConcreteSnapshots(t *testing.T) {
 		seed.Body["checksum"][1] = 'X'
 		return facts, nil
 	}})
-	got, err := service.GetImageRecord(context.Background(), ImageRecordRequest{Resource: seed}, option, func(value *ImageRecordOpts) error {
+	got, err := service.GetImageRecord(context.Background(), ImageRecordRequest{Resource: seed}, option, request.Custom(func(value *ImageRecordOpts) error {
 		callbacks++
 		retained = value
 		cloud = "after option"
 		facts.Project.ID[1] = 'X'
 		client.SetToken("live")
-		return WithImageRecordHeader("X-Final", "yes")(value)
-	})
+		return applyCall(imageRecordCalls, request.Header("X-Final", "yes"), value)
+	}))
 	if got == nil || err != nil || calls != 1 || callbacks != 1 || locations != 1 || string(got.Resource.Body["name"]) != `"factory name"` || string(got.Resource.Body["checksum"]) != `"seed checksum"` {
 		t.Fatal(got, err, calls, callbacks, locations)
 	}
@@ -456,8 +457,8 @@ func TestImageRecordGetCompletePreflightAndLegacyBoundary(t *testing.T) {
 		{"blank identity", ImageRecordRequest{ID: " "}, nil}, {"dot identity", ImageRecordRequest{ID: "."}, nil}, {"dotdot identity", ImageRecordRequest{ID: ".."}, nil}, {"control identity", ImageRecordRequest{ID: "bad\n"}, nil}, {"invalid UTF8", ImageRecordRequest{ID: string([]byte{0xff})}, nil},
 		{"untyped id cannot route", ImageRecordRequest{Attributes: map[string]any{"id": false}}, nil},
 		{"nil option", ImageRecordRequest{ID: "selected"}, []ImageRecordOption{nil}},
-		{"owned token", ImageRecordRequest{ID: "selected"}, []ImageRecordOption{WithImageRecordHeader("X-Auth-Token", "foreign")}},
-		{"header newline", ImageRecordRequest{ID: "selected"}, []ImageRecordOption{WithImageRecordHeader("X-Extra", "\n")}},
+		{"owned token", ImageRecordRequest{ID: "selected"}, []ImageRecordOption{request.Header("X-Auth-Token", "foreign")}},
+		{"header newline", ImageRecordRequest{ID: "selected"}, []ImageRecordOption{request.Header("X-Extra", "\n")}},
 		{"unsupported attribute", ImageRecordRequest{ID: "selected"}, []ImageRecordOption{WithImageRecordAttribute("vendor", make(chan int))}},
 	} {
 		t.Run(test.name, func(t *testing.T) {
@@ -471,7 +472,7 @@ func TestImageRecordGetCompletePreflightAndLegacyBoundary(t *testing.T) {
 	}
 	for _, ctx := range []context.Context{nil, func() context.Context { ctx, cancel := context.WithCancel(context.Background()); cancel(); return ctx }()} {
 		calls, callbacks := 0, 0
-		got, err := New(taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return nil, nil })).GetImageRecord(ctx, ImageRecordRequest{ID: "selected"}, func(*ImageRecordOpts) error { callbacks++; return nil })
+		got, err := New(taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return nil, nil })).GetImageRecord(ctx, ImageRecordRequest{ID: "selected"}, request.Custom(func(*ImageRecordOpts) error { callbacks++; return nil }))
 		if got != nil || err == nil || calls != 0 || callbacks != 0 {
 			t.Fatal(got, err, calls, callbacks)
 		}
@@ -507,11 +508,11 @@ func (callback imageRecordMarshalCallback) MarshalJSON() ([]byte, error) { retur
 
 func TestImageRecordGetCapturesOptionsAndTopLevelAttributesBeforeMarshal(t *testing.T) {
 	calls, marshals := 0, 0
-	options := []ImageRecordOption{WithImageRecordHeader("X-Option", "captured")}
+	options := []ImageRecordOption{request.Header("X-Option", "captured")}
 	attributes := map[string]any{"zzz_later": "captured scalar"}
 	attributes["a_callback"] = imageRecordMarshalCallback(func() ([]byte, error) {
 		marshals++
-		options[0] = WithImageRecordHeader("X-Option", "changed by marshaler")
+		options[0] = request.Header("X-Option", "changed by marshaler")
 		attributes["zzz_later"] = "changed by marshaler"
 		return []byte(`{"owned":true}`), nil
 	})

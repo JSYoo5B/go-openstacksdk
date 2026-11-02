@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.UpdateImage`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithUpdateImageOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithUpdateImageHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithUpdateImageHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithUpdateImageChange`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithUpdateImageChanges`
@@ -36,7 +36,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordOpts`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordAttributes`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordHeaders`
 
 - Required Ref uses direct safe literal ID without GET or existing exact native Name resolution then fixed PATCH; values/options validate before Name HTTP. v2.1 media and Accept are set on private client after Name, source untouched, actual 200 only.
@@ -152,7 +152,7 @@ func run(ctx context.Context, cloud, imageID, name string) error {
     updated, err := conn.UpdateImageRecord(ctx, image.ImageRecordUpdateRequest{
         ID: imageID,
         Attributes: map[string]any{"name": name},
-    }, image.WithImageRecordHeader("X-Request-Source", "image-record-update-example"))
+    }, request.Header("X-Request-Source", "image-record-update-example"))
     if err := printRecord("update by ID", updated, err); err != nil { return err }
 
     // name has no descriptor conversion: use the returned raw JSON spelling.

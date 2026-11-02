@@ -12,6 +12,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -69,7 +70,7 @@ func TestImageMutationCoreFixedRoutesAndOpaqueAcknowledgements(t *testing.T) {
 				}
 				return deleteCoreHTTP(204, body, header), nil
 			})
-			ack, err := mutationCoreInvoke(New(client), test.operation, context.Background(), resource.ID(id), " Mixed %2F ?# 中文 ", WithImageMutationHeader("X-Extra", "owned"))
+			ack, err := mutationCoreInvoke(New(client), test.operation, context.Background(), resource.ID(id), " Mixed %2F ?# 中文 ", request.Header("X-Extra", "owned"))
 			if err != nil || ack == nil || ack.id != id || ack.literal != test.literal || ack.status != 204 || !bytes.Equal(ack.body, raw) || ack.header.Get("X-Actual") != "before" || requests != 1 || body.closes != 1 {
 				t.Fatalf("ack=%+v err=%v requests=%d closes=%d", ack, err, requests, body.closes)
 			}
@@ -88,7 +89,7 @@ func TestImageMutationCoreTagBoundsPrecedeOptionsAndLookup(t *testing.T) {
 			requests++
 			return deleteCoreHTTP(204, http.NoBody, nil), nil
 		})
-		ack, err := mutationCoreInvoke(New(client), "AddTag", context.Background(), resource.Name("exact"), tag, func(*ImageMutationOpts) error { callbacks++; return nil })
+		ack, err := mutationCoreInvoke(New(client), "AddTag", context.Background(), resource.Name("exact"), tag, request.Custom(func(*ImageMutationOpts) error { callbacks++; return nil }))
 		if ack != nil || !errors.Is(err, resource.ErrInvalidOption) || callbacks != 0 || requests != 0 {
 			t.Fatalf("tag=%q ack=%+v err=%v callbacks=%d requests=%d", tag, ack, err, callbacks, requests)
 		}
@@ -157,7 +158,7 @@ func TestImageMutationCoreExactNameAndStrictLookupFailures(t *testing.T) {
 				}
 				return deleteCoreHTTP(200, io.NopCloser(strings.NewReader(`{"images":`+rows+`}`)), nil), nil
 			})
-			ack, err := mutationCoreInvoke(New(client), "RemoveTag", ctx, resource.Name("exact"), "literal", WithImageMutationHeader("X-Extra", "owned"))
+			ack, err := mutationCoreInvoke(New(client), "RemoveTag", ctx, resource.Name("exact"), "literal", request.Header("X-Extra", "owned"))
 			if mode == "unique" {
 				if err != nil || ack == nil || ack.id != "fixed" || lists != 2 || mutations != 1 {
 					t.Fatalf("ack=%+v err=%v lists=%d mutations=%d", ack, err, lists, mutations)
@@ -258,14 +259,14 @@ func TestImageMutationCoreSourcePreflightAndCapturedLiveAuth(t *testing.T) {
 		return deleteCoreHTTP(204, http.NoBody, nil), nil
 	})
 	client.MoreHeaders = map[string]string{"X-Snapshot": "before"}
-	ack, err := mutationCoreInvoke(New(client), "DeactivateImage", context.Background(), resource.ID("fixed"), "", func(value *ImageMutationOpts) error {
+	ack, err := mutationCoreInvoke(New(client), "DeactivateImage", context.Background(), resource.ID("fixed"), "", request.Custom(func(value *ImageMutationOpts) error {
 		retained = value
 		value.Headers["X-Extra"] = "owned"
 		client.ResourceBase = "https://example.test/later/v2/"
 		client.MoreHeaders["X-Snapshot"] = "after"
 		client.SetToken("after")
 		return nil
-	})
+	}))
 	if err != nil || ack == nil || requests != 1 {
 		t.Fatalf("ack=%+v err=%v requests=%d", ack, err, requests)
 	}
@@ -291,7 +292,7 @@ func TestImageMutationCoreSourcePreflightAndCapturedLiveAuth(t *testing.T) {
 			if test.edit != nil {
 				test.edit(client)
 			}
-			ack, err := mutationCoreInvoke(New(client), "ReactivateImage", test.ctx, resource.ID("fixed"), "", func(*ImageMutationOpts) error { callbacks++; return nil })
+			ack, err := mutationCoreInvoke(New(client), "ReactivateImage", test.ctx, resource.ID("fixed"), "", request.Custom(func(*ImageMutationOpts) error { callbacks++; return nil }))
 			if ack != nil || err == nil || requests != 0 || callbacks != 0 {
 				t.Fatalf("source preflight reached callback/HTTP: ack=%+v err=%v requests=%d callbacks=%d", ack, err, requests, callbacks)
 			}
@@ -314,7 +315,7 @@ func TestImageMutationCoreSourcePreflightAndCapturedLiveAuth(t *testing.T) {
 			return deleteCoreHTTP(204, http.NoBody, nil), nil
 		})
 		service := New(client)
-		ack, err := mutationCoreInvoke(service, "AddTag", context.Background(), resource.ID("fixed"), "tag", func(*ImageMutationOpts) error { tamper(service); return nil })
+		ack, err := mutationCoreInvoke(service, "AddTag", context.Background(), resource.ID("fixed"), "tag", request.Custom(func(*ImageMutationOpts) error { tamper(service); return nil }))
 		if ack != nil || !errors.Is(err, resource.ErrInvalidOption) || requests != 0 {
 			t.Fatalf("source changed before mutation: ack=%+v err=%v requests=%d", ack, err, requests)
 		}

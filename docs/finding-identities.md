@@ -611,9 +611,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.FindImageRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithFindImageRecordOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithFindImageRecordHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithFindImageRecordHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithFindImageRecordIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithFindImageRecordListOptions`
 
 - The pinned direct proxy accepts a string name_or_id and ignore_missing=True. Safe strings use native GET first; only compatible GET400/403/404 fall back to the normal list, with explicit strict, 404-only and GET-only Go options. Root-object GET200 extraction preserves the native Image model, additional Properties and import/store response headers.

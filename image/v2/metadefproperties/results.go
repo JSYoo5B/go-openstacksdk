@@ -1,8 +1,9 @@
 package metadefproperties
 
 import (
-	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"net/http"
+
+	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 )
 
 // Acknowledgement records an actual DELETE response independently of handling

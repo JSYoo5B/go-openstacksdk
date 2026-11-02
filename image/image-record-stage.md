@@ -16,12 +16,12 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/imagedata.API.StageKnownImage`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/imagedata.WithStageOpts`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/imagedata.WithStageSize`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/imagedata.WithStageHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/imagedata.WithStageHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.StageImageRecord`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.StageImageRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordStageOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordStageHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordStageHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordStageSize`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithoutImageRecordStageSize`
@@ -179,7 +179,7 @@ func run(ctx context.Context, cloud, imageID, filename string, borrow, viaServic
         image.WithImageRecordStageOpts(image.ImageRecordStageOpts{
             Headers: map[string]string{"X-Request-Source": "image-record-stage-example"},
         }),
-        image.WithImageRecordStageHeader("X-SDK-Example-Mode", mode),
+        request.Header("X-SDK-Example-Mode", mode),
         image.WithImageRecordStageHeaders(map[string]string{"X-SDK-Example-Operation": "stage"}),
         image.WithImageRecordStageSizeInference(infer),
     }

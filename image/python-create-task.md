@@ -16,7 +16,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.WithCreateTaskOpts`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithCreateTaskInput`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithCreateTaskNullInput`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithCreateTaskHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithCreateTaskHeaders`
 
 - WithCreateTaskNullInput makes CreateTask send POST tasks with {"type": ..., "input": null}, clears an earlier input object, is overridden by a later WithCreateTaskInput, is also selected by CreateTaskOpts.NullInput, and a null input in the 201 response leaves TaskInfo.Input nil with the raw null kept in Metadata.Body.

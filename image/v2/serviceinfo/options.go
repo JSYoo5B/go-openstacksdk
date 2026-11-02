@@ -8,6 +8,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 )
@@ -24,10 +25,35 @@ type ListStoresOpts struct {
 	Paginated *bool
 }
 
-type ListStoresOption = request.Option[ListStoresOpts]
+// ListStoresOption is one option of ListStores: WithListStoresOptions,
+// WithListStoresDetails, request.Query (an exact wire query given as a string
+// or []string; it overrides an identically named typed query and does not
+// enable Python local Body filtering), request.Header, request.MaxItems,
+// request.Paginated or request.Custom over *request.Config[ListStoresOpts].
+// Other shared calls fail with resource.ErrInvalidOption before HTTP.
+type ListStoresOption = request.ListCall
 
 type GetImportInfoOpts struct{}
-type GetImportInfoOption = request.Option[GetImportInfoOpts]
+
+// GetImportInfoOption is one option of GetImportInfo: request.Header or
+// request.Custom over *request.Config[GetImportInfoOpts]. Other shared calls
+// fail with resource.ErrInvalidOption before HTTP.
+type GetImportInfoOption = request.GetCall
+
+var (
+	listStoresCalls = calls.Spec[request.Config[ListStoresOpts]]{
+		Header: calls.ConfigHeader[ListStoresOpts],
+		Query:  calls.ConfigQuery[ListStoresOpts],
+		Paging: calls.Paging[request.Config[ListStoresOpts]]{
+			MaxItems: func(c *request.Config[ListStoresOpts], n int) error { c.Options.MaxItems = n; return nil },
+			Paginated: func(c *request.Config[ListStoresOpts], paginated bool) error {
+				c.Options.Paginated = &paginated
+				return nil
+			},
+		},
+	}
+	getImportInfoCalls = calls.Spec[request.Config[GetImportInfoOpts]]{Header: calls.ConfigHeader[GetImportInfoOpts]}
+)
 
 func copyListStoresOpts(value ListStoresOpts) ListStoresOpts {
 	if value.Paginated != nil {
@@ -41,40 +67,14 @@ func copyListStoresOpts(value ListStoresOpts) ListStoresOpts {
 // creation and on every application. Separate query and header options remain.
 func WithListStoresOptions(value ListStoresOpts) ListStoresOption {
 	owned := copyListStoresOpts(value)
-	return func(config *request.Config[ListStoresOpts]) error {
+	return request.Custom(func(config *request.Config[ListStoresOpts]) error {
 		config.Options = copyListStoresOpts(owned)
 		return nil
-	}
+	})
 }
 
 func WithListStoresDetails(value bool) ListStoresOption {
-	return func(config *request.Config[ListStoresOpts]) error { config.Options.Details = value; return nil }
-}
-
-func WithListStoresMaxItems(value int) ListStoresOption {
-	return func(config *request.Config[ListStoresOpts]) error { config.Options.MaxItems = value; return nil }
-}
-
-func WithListStoresPaginated(value bool) ListStoresOption {
-	return func(config *request.Config[ListStoresOpts]) error {
-		owned := value
-		config.Options.Paginated = &owned
-		return nil
-	}
-}
-
-// WithListStoresQuery sends an exact wire query. It overrides an identically
-// named typed query and does not enable Python local Body filtering.
-func WithListStoresQuery(key, value string) ListStoresOption {
-	return request.WithQuery[ListStoresOpts](key, value)
-}
-
-func WithListStoresHeader(key, value string) ListStoresOption {
-	return request.WithHeader[ListStoresOpts](key, value)
-}
-
-func WithGetImportInfoHeader(key, value string) GetImportInfoOption {
-	return request.WithHeader[GetImportInfoOpts](key, value)
+	return request.Custom(func(config *request.Config[ListStoresOpts]) error { config.Options.Details = value; return nil })
 }
 
 func copyConfig[T any](value request.Config[T], copyOptions func(T) T) request.Config[T] {
@@ -118,7 +118,7 @@ func applyOptions[T any](base T, options []request.Option[T], copyOptions func(T
 }
 
 func prepareListStores(options []ListStoresOption) (ListStoresOpts, url.Values, map[string]string, rest.ListControl, error) {
-	config, err := applyOptions(ListStoresOpts{}, options, copyListStoresOpts)
+	config, err := applyOptions(ListStoresOpts{}, calls.Options(options, listStoresCalls), copyListStoresOpts)
 	if err == nil {
 		err = request.ValidateCapabilities(config, false, true, true)
 	}
@@ -156,7 +156,7 @@ func prepareListStores(options []ListStoresOption) (ListStoresOpts, url.Values, 
 }
 
 func prepareGetImportInfo(options []GetImportInfoOption) (map[string]string, error) {
-	config, err := applyOptions(GetImportInfoOpts{}, options, func(value GetImportInfoOpts) GetImportInfoOpts { return value })
+	config, err := applyOptions(GetImportInfoOpts{}, calls.Options(options, getImportInfoCalls), func(value GetImportInfoOpts) GetImportInfoOpts { return value })
 	if err == nil {
 		err = request.ValidateCapabilities(config, false, false, true)
 	}

@@ -14,6 +14,7 @@ import (
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/image"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -71,7 +72,7 @@ func TestConnectionImageRecordTagsShareOwnedSourceAndMutationReceipts(t *testing
 	if service.RawClient() != source || source.ProviderClient != provider || calls != 0 {
 		t.Fatal("Connection service did not share source")
 	}
-	seed, err := service.GetImageRecord(context.Background(), image.ImageRecordRequest{ID: identity}, image.WithImageRecordHeader("X-Call", "records"))
+	seed, err := service.GetImageRecord(context.Background(), image.ImageRecordRequest{ID: identity}, request.Header("X-Call", "records"))
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -81,14 +82,14 @@ func TestConnectionImageRecordTagsShareOwnedSourceAndMutationReceipts(t *testing
 		config.Headers = map[string]string{"X-Call": "records"}
 		return nil
 	}
-	added, err := service.AddImageRecordTag(context.Background(), image.ImageRecordTagRequest{Record: seed}, tag, mutationOption)
+	added, err := service.AddImageRecordTag(context.Background(), image.ImageRecordTagRequest{Record: seed}, tag, request.Custom(mutationOption))
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	if added == nil || added.Record == nil || added.Acknowledgement == nil || added.Acknowledgement.StatusCode != 299 || !bytes.Equal(added.Acknowledgement.Body, []byte(bodies[1])) || added.Acknowledgement.ImageID != identity || added.Acknowledgement.Tag != tag || added.Acknowledgement.Header.Get("X-Proof") != "response-1" || string(added.Record.Resource.Body["tags"]) != `["duplicate/标签","keep","duplicate/标签"]` {
 		t.Fatal(added)
 	}
-	removed, err := service.RemoveImageRecordTag(context.Background(), image.ImageRecordTagRequest{Record: added.Record}, tag, mutationOption)
+	removed, err := service.RemoveImageRecordTag(context.Background(), image.ImageRecordTagRequest{Record: added.Record}, tag, request.Custom(mutationOption))
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -100,7 +101,7 @@ func TestConnectionImageRecordTagsShareOwnedSourceAndMutationReceipts(t *testing
 			t.Fatal("mutation overwrote fetched receipt or declared state", record)
 		}
 	}
-	literal, err := service.AddImageRecordTag(context.Background(), image.ImageRecordTagRequest{ID: "literal"}, "new", mutationOption)
+	literal, err := service.AddImageRecordTag(context.Background(), image.ImageRecordTagRequest{ID: "literal"}, "new", request.Custom(mutationOption))
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

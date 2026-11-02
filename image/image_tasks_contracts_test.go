@@ -17,6 +17,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/image"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -71,7 +72,7 @@ func TestImageTaskContractsFixedRouteAndParentIdentity(t *testing.T) {
 					w.Header().Set("Location", "https://foreign.invalid/tasks")
 					_, _ = io.WriteString(w, imageTaskContractList)
 				})
-				rows, err := imageTaskContractRows(image.New(client), context.Background(), resource.ID(id), iterator, image.WithListImageTasksHeaders(map[string]string{"X-Option": "owned"}), image.WithListImageTasksHeader("X-Final", "last"))
+				rows, err := imageTaskContractRows(image.New(client), context.Background(), resource.ID(id), iterator, image.WithListImageTasksHeaders(map[string]string{"X-Option": "owned"}), request.Header("X-Final", "last"))
 				if err != nil || len(rows) != 1 || *rows[0].ID != "response-task" || *rows[0].ImageID != "response-parent" || rows[0].StatusCode != 200 || calls.Load() != 1 {
 					t.Fatal(rows, err, calls.Load())
 				}
@@ -100,7 +101,7 @@ func TestImageTaskContractsFixedRouteAndParentIdentity(t *testing.T) {
 				calls.Add(1)
 				return nil, errors.New("unexpected request")
 			})
-			rows, err := image.New(client).AllImageTasks(context.Background(), resource.ID(id), func(*image.ListImageTasksOpts) error { callbacks.Add(1); return nil })
+			rows, err := image.New(client).AllImageTasks(context.Background(), resource.ID(id), request.Custom(func(*image.ListImageTasksOpts) error { callbacks.Add(1); return nil }))
 			if rows != nil || !errors.Is(err, resource.ErrInvalidOption) || calls.Load() != 0 || callbacks.Load() != 0 {
 				t.Fatal(rows, err, calls.Load(), callbacks.Load())
 			}
@@ -138,12 +139,12 @@ func TestImageTaskContractsFixedRouteAndParentIdentity(t *testing.T) {
 				t.Error("unexpected lookup/task replay", page)
 			}
 		})
-		rows, err := image.New(client).AllImageTasks(context.Background(), resource.Name("exact"), func(o *image.ListImageTasksOpts) error {
+		rows, err := image.New(client).AllImageTasks(context.Background(), resource.Name("exact"), request.Custom(func(o *image.ListImageTasksOpts) error {
 			callbacks.Add(1)
 			o.Headers["X-Option"] = "owned"
 			client.MoreHeaders["X-Source"] = "after callback"
 			return nil
-		})
+		}))
 		if err != nil || len(rows) != 1 || calls.Load() != 3 || callbacks.Load() != 1 {
 			t.Fatal(rows, err, calls.Load(), callbacks.Load())
 		}
@@ -292,9 +293,9 @@ func TestImageTaskContractsLazyConsumptionAndLocalCaps(t *testing.T) {
 					break
 				}
 			} else {
-				option := image.WithListImageTasksMaxItems(0)
+				option := request.MaxItems(0)
 				if mode == "cap" {
-					option = image.WithListImageTasksMaxItems(1)
+					option = request.MaxItems(1)
 				}
 				rows, err := s.AllImageTasks(context.Background(), resource.ID("chosen"), option)
 				if err != nil || rows == nil {
@@ -324,7 +325,7 @@ func TestImageTaskContractsLazyConsumptionAndLocalCaps(t *testing.T) {
 			})
 			options := []image.ListImageTasksOption{}
 			if !bytes.Contains(raw, []byte("null]")) {
-				options = append(options, image.WithListImageTasksMaxItems(1))
+				options = append(options, request.MaxItems(1))
 			}
 			rows, err := image.New(client).AllImageTasks(context.Background(), resource.ID("chosen"), options...)
 			taskContractsProof(t, err, 200, raw)
@@ -383,13 +384,13 @@ func TestImageTaskContractsLazyConsumptionAndLocalCaps(t *testing.T) {
 			}
 			return taskContractsWire(200, &taskContractsBody{Reader: strings.NewReader(imageTaskContractList)}), nil
 		})
-		options := []image.ListImageTasksOption{func(o *image.ListImageTasksOpts) error {
+		options := []image.ListImageTasksOption{request.Custom(func(o *image.ListImageTasksOpts) error {
 			callbacks.Add(1)
 			o.Headers["X-Choice"] = "captured"
 			return nil
-		}}
+		})}
 		seq := image.New(client).ImageTasks(context.Background(), resource.ID("chosen"), options...)
-		options[0] = image.WithListImageTasksHeader("X-Choice", "late")
+		options[0] = request.Header("X-Choice", "late")
 		if calls.Load() != 0 || callbacks.Load() != 0 {
 			t.Fatal("eager iterator")
 		}
@@ -431,12 +432,12 @@ func TestImageTaskContractsOwnedOptionsAndSource(t *testing.T) {
 			}
 			return taskContractsWire(200, &taskContractsBody{Reader: strings.NewReader(`{"tasks":[{},null]}`)}), nil
 		})
-		rows, err := image.New(client).AllImageTasks(context.Background(), resource.ID("chosen"), image.WithListImageTasksHeader("X-Discard", "removed"), option, image.WithListImageTasksHeader("X-Final", "first"), image.WithListImageTasksHeader("X-Final", "last"), func(o *image.ListImageTasksOpts) error { callbacks.Add(1); retained = o; return nil }, func(*image.ListImageTasksOpts) error {
+		rows, err := image.New(client).AllImageTasks(context.Background(), resource.ID("chosen"), request.Header("X-Discard", "removed"), option, request.Header("X-Final", "first"), request.Header("X-Final", "last"), request.Custom(func(o *image.ListImageTasksOpts) error { callbacks.Add(1); retained = o; return nil }), request.Custom(func(*image.ListImageTasksOpts) error {
 			callbacks.Add(1)
 			retained.Headers["X-Choice"] = "retained late"
 			retained.MaxItems = 0
 			return nil
-		})
+		}))
 		if err != nil || len(rows) != 1 || callbacks.Load() != 2 || calls.Load() != 1 {
 			t.Fatal(rows, err, callbacks.Load(), calls.Load())
 		}
@@ -476,13 +477,13 @@ func TestImageTaskContractsOwnedOptionsAndSource(t *testing.T) {
 			case "bad UTF8 Ref":
 				ref = resource.Name(string([]byte{0xff}))
 			}
-			rows, err := s.AllImageTasks(ctx, ref, func(*image.ListImageTasksOpts) error { callbacks.Add(1); return nil })
+			rows, err := s.AllImageTasks(ctx, ref, request.Custom(func(*image.ListImageTasksOpts) error { callbacks.Add(1); return nil }))
 			if rows != nil || !errors.Is(err, want) || calls.Load() != 0 || callbacks.Load() != 0 {
 				t.Fatal(rows, err, calls.Load(), callbacks.Load())
 			}
 		})
 	}
-	for _, option := range []image.ListImageTasksOption{nil, image.WithListImageTasksMaxItems(-1), image.WithListImageTasksHeader("Authorization", "forged"), image.WithListImageTasksHeader("Content-Type", "text/plain"), image.WithListImageTasksHeaders(map[string]string{"X-A": "first", "x-a": "second"}), image.WithListImageTasksHeader("X-A", "bad\nvalue")} {
+	for _, option := range []image.ListImageTasksOption{nil, request.MaxItems(-1), request.Header("Authorization", "forged"), request.Header("Content-Type", "text/plain"), image.WithListImageTasksHeaders(map[string]string{"X-A": "first", "x-a": "second"}), request.Header("X-A", "bad\nvalue")} {
 		t.Run("invalid option precedes Name HTTP", func(t *testing.T) {
 			var calls atomic.Int32
 			client := taskContractsClient(func(*http.Request) (*http.Response, error) { calls.Add(1); return nil, errors.New("unexpected lookup") })
@@ -496,7 +497,7 @@ func TestImageTaskContractsOwnedOptionsAndSource(t *testing.T) {
 		var calls, callbacks atomic.Int32
 		cause := errors.New("option callback")
 		client := taskContractsClient(func(*http.Request) (*http.Response, error) { calls.Add(1); return nil, errors.New("unexpected wire") })
-		rows, err := image.New(client).AllImageTasks(context.Background(), resource.Name("exact"), func(*image.ListImageTasksOpts) error { callbacks.Add(1); return cause }, func(*image.ListImageTasksOpts) error { callbacks.Add(100); return nil })
+		rows, err := image.New(client).AllImageTasks(context.Background(), resource.Name("exact"), request.Custom(func(*image.ListImageTasksOpts) error { callbacks.Add(1); return cause }), request.Custom(func(*image.ListImageTasksOpts) error { callbacks.Add(100); return nil }))
 		if rows != nil || !errors.Is(err, cause) || calls.Load() != 0 || callbacks.Load() != 1 {
 			t.Fatal(rows, err, calls.Load(), callbacks.Load())
 		}
@@ -506,7 +507,7 @@ func TestImageTaskContractsOwnedOptionsAndSource(t *testing.T) {
 			var calls atomic.Int32
 			client := taskContractsClient(func(*http.Request) (*http.Response, error) { calls.Add(1); return nil, errors.New("unexpected wire") })
 			client.ResourceBase = taskContractsBase
-			rows, err := image.New(client).AllImageTasks(context.Background(), resource.Name("exact"), func(*image.ListImageTasksOpts) error {
+			rows, err := image.New(client).AllImageTasks(context.Background(), resource.Name("exact"), request.Custom(func(*image.ListImageTasksOpts) error {
 				switch mode {
 				case "provider":
 					client.ProviderClient = &gophercloud.ProviderClient{}
@@ -520,7 +521,7 @@ func TestImageTaskContractsOwnedOptionsAndSource(t *testing.T) {
 					client.Microversion = "2.19"
 				}
 				return nil
-			})
+			}))
 			if rows != nil || !errors.Is(err, resource.ErrInvalidOption) || calls.Load() != 0 {
 				t.Fatal(rows, err, calls.Load())
 			}
@@ -549,11 +550,11 @@ func TestImageTaskContractsOwnedOptionsAndSource(t *testing.T) {
 			return taskContractsWire(200, &taskContractsBody{Reader: strings.NewReader(imageTaskContractList)}), nil
 		})
 		client.MoreHeaders = map[string]string{"X-Source": "before"}
-		rows, err := image.New(client).AllImageTasks(context.Background(), resource.ID("chosen"), func(*image.ListImageTasksOpts) error {
+		rows, err := image.New(client).AllImageTasks(context.Background(), resource.ID("chosen"), request.Custom(func(*image.ListImageTasksOpts) error {
 			client.MoreHeaders["X-Source"] = "after"
 			client.SetToken("latest")
 			return nil
-		})
+		}))
 		if err != nil || len(rows) != 1 || calls.Load() != 1 {
 			t.Fatal(rows, err, calls.Load())
 		}

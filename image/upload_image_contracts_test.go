@@ -17,6 +17,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/image"
 	nativeData "github.com/JSYoo5B/go-openstacksdk/image/v2/imagedata"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -139,7 +140,7 @@ func TestImageUploadContractsWireAndOwnership(t *testing.T) {
 			return uploadImageContractResponse(204, ""), nil
 		})
 		result, e := image.New(c).UploadImage(context.Background(), uploadImageContractInput(reader),
-			image.WithImageUploadHeader("X-One", "one"), image.WithImageUploadHeaders(map[string]string{"X-Two": "two"}),
+			request.Header("X-One", "one"), image.WithImageUploadHeaders(map[string]string{"X-Two": "two"}),
 			image.WithImageUploadFields(fields), image.WithImageUploadDiskFormat("future/disk"), image.WithImageUploadContainerFormat("future/container"),
 			image.WithImageUploadVisibility(image.Visibility("future/visibility")), image.WithImageUploadOwner(""), image.WithImageUploadProtected(false), image.WithImageUploadHidden(false),
 			image.WithImageUploadMinDisk(-1), image.WithImageUploadMinRAM(0), image.WithImageUploadTags("repeat", "repeat", "line\n", ""), image.WithImageUploadField("custom", map[string]any{"flag": false}), image.WithImageUploadSize(0))
@@ -225,8 +226,8 @@ func TestImageUploadContractsPreflightAndSnapshots(t *testing.T) {
 			_ = uploadImageContractRead(t, r)
 			return uploadImageContractResponse(204, ""), nil
 		})
-		result, e := image.New(c).UploadImage(context.Background(), uploadImageContractInput(strings.NewReader("data")), image.WithImageUploadHeader("X-Removed", "before"), full, one,
-			func(o *image.ImageUploadOpts) error {
+		result, e := image.New(c).UploadImage(context.Background(), uploadImageContractInput(strings.NewReader("data")), request.Header("X-Removed", "before"), full, one,
+			request.Custom(func(o *image.ImageUploadOpts) error {
 				callbacks.Add(1)
 				if o.Headers == nil || o.Fields == nil {
 					t.Error("uninitialized options")
@@ -237,8 +238,8 @@ func TestImageUploadContractsPreflightAndSnapshots(t *testing.T) {
 				oldHeaders = o.Headers
 				oldSize = o.Size
 				return nil
-			},
-			func(o *image.ImageUploadOpts) error {
+			}),
+			request.Custom(func(o *image.ImageUploadOpts) error {
 				callbacks.Add(1)
 				oldFields["callback"][0] = '9'
 				oldHeaders["X-Callback"] = "retained mutation"
@@ -247,7 +248,7 @@ func TestImageUploadContractsPreflightAndSnapshots(t *testing.T) {
 					t.Error(o.Headers)
 				}
 				return nil
-			})
+			}))
 		if e != nil || result == nil || calls.Load() != 2 || callbacks.Load() != 2 || marshals.Load() != 1 {
 			t.Fatal(result, e, calls.Load(), callbacks.Load(), marshals.Load())
 		}
@@ -298,7 +299,7 @@ func TestImageUploadContractsPreflightAndSnapshots(t *testing.T) {
 					var v *uploadImageContractReader
 					input.Data = v
 				}
-				result, e := s.UploadImage(ctx, input, func(*image.ImageUploadOpts) error { callbacks.Add(1); return nil })
+				result, e := s.UploadImage(ctx, input, request.Custom(func(*image.ImageUploadOpts) error { callbacks.Add(1); return nil }))
 				expected := resource.ErrInvalidOption
 				if mode == "wrong type" {
 					expected = resource.ErrUnsupported
@@ -329,8 +330,8 @@ func TestImageUploadContractsPreflightAndSnapshots(t *testing.T) {
 			{"raw UTF8", image.WithImageUploadFields(map[string]json.RawMessage{"value": json.RawMessage{'"', 255, '"'}})},
 			{"format empty", image.WithImageUploadDiskFormat("")}, {"format null", image.WithImageUploadFields(map[string]json.RawMessage{"disk_format": json.RawMessage(`null`)})},
 			{"format numeric", image.WithImageUploadFields(map[string]json.RawMessage{"container_format": json.RawMessage(`1`)})},
-			{"protected auth", image.WithImageUploadHeader("x-auth-token", "override")}, {"protected media", image.WithImageUploadHeader("Accept", "x")},
-			{"protected size", image.WithImageUploadHeader("X-OpenStack-Image-Size", "1")}, {"protected length", image.WithImageUploadHeader("Content-Length", "1")},
+			{"protected auth", request.Header("x-auth-token", "override")}, {"protected media", request.Header("Accept", "x")},
+			{"protected size", request.Header("X-OpenStack-Image-Size", "1")}, {"protected length", request.Header("Content-Length", "1")},
 		}
 		for _, tc := range cases {
 			t.Run(tc.name, func(t *testing.T) {
@@ -363,7 +364,7 @@ func TestImageUploadContractsPreflightAndSnapshots(t *testing.T) {
 				case "unsupported encoding":
 					option = image.WithImageUploadField("key", make(chan int))
 				case "callback":
-					option = func(*image.ImageUploadOpts) error { return cause }
+					option = request.Custom(func(*image.ImageUploadOpts) error { return cause })
 				}
 				result, e := image.New(c).UploadImage(context.Background(), uploadImageContractInput(strings.NewReader("data")), option)
 				if result != nil || e == nil || calls.Load() != 0 {
@@ -600,7 +601,7 @@ func TestImageUploadContractsSourceAndBinaryPolicy(t *testing.T) {
 		})
 		c.MoreHeaders = map[string]string{"X-Source": "captured"}
 		provider := c.ProviderClient
-		result, e := image.New(c).UploadImage(context.Background(), uploadImageContractInput(reader), image.WithImageUploadHeader("X-Option", "owned"))
+		result, e := image.New(c).UploadImage(context.Background(), uploadImageContractInput(reader), request.Header("X-Option", "owned"))
 		if e != nil || result == nil || calls.Load() != 2 || c.ProviderClient != provider || c.MoreHeaders["X-Source"] != "latest" || len(c.MoreHeaders) != 1 {
 			t.Fatal(result, e, c.MoreHeaders, calls.Load())
 		}
@@ -642,7 +643,7 @@ func TestImageUploadContractsSourceAndBinaryPolicy(t *testing.T) {
 					})
 					opts := []image.ImageUploadOption{}
 					if phase == "callback" {
-						opts = append(opts, func(*image.ImageUploadOpts) error { mutate(); return nil })
+						opts = append(opts, request.Custom(func(*image.ImageUploadOpts) error { mutate(); return nil }))
 					}
 					result, e := image.New(c).UploadImage(context.Background(), uploadImageContractInput(reader), opts...)
 					if !errors.Is(e, resource.ErrInvalidOption) {

@@ -14,6 +14,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/image/v2/images"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -45,12 +46,12 @@ func TestImportCoreKnownSeedAndHTTPBodySnapshots(t *testing.T) {
 	defer server.Close()
 	api := New(importCoreClient(server))
 	options := []ImportOption{WithImportStore("selected"), WithImportAllStoresMustSucceed(false),
-		WithImportHeader("X-Note", "initial"), WithImportMethodField("vendor", json.Number("9007199254740993")),
-		WithImportField("root", map[string]any{"nested": []string{"initial"}}), func(config *ImportOpts) error {
+		request.Header("X-Note", "initial"), WithImportMethodField("vendor", json.Number("9007199254740993")),
+		request.Field("root", map[string]any{"nested": []string{"initial"}}), request.Custom(func(config *ImportOpts) error {
 			captured = config
 			seed.ID, seed.ContainerFormat, seed.DiskFormat = "wrong", "", ""
 			return nil
-		}}
+		})}
 	result, err := api.ImportKnownImage(context.Background(), seed, options...)
 	if err != nil || calls.Load() != 1 || result == nil || result.ImageID != "fixed" || result.StatusCode != 202 || result.Header.Get("X-Ack") != "real" || string(result.Body) != "arbitrary asynchronous bytes" {
 		t.Fatalf("result %#v error %v calls %d", result, err, calls.Load())
@@ -135,11 +136,11 @@ func TestImportCorePreflightAndSourceBeforeEveryPhase(t *testing.T) {
 			return err
 		},
 		func() error {
-			_, err := api.ImportKnownImage(context.Background(), seed, WithImportHeader("Authorization", "bad"))
+			_, err := api.ImportKnownImage(context.Background(), seed, request.Header("Authorization", "bad"))
 			return err
 		},
 		func() error {
-			_, err := api.ImportKnownImage(context.Background(), seed, WithImportField("stores", nil))
+			_, err := api.ImportKnownImage(context.Background(), seed, request.Field("stores", nil))
 			return err
 		},
 	}

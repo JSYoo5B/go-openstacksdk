@@ -5,6 +5,8 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"maps"
 	"slices"
 	"strings"
@@ -54,13 +56,26 @@ type ImageRecordImportOpts struct {
 	MethodFields           map[string]any
 }
 
-type ImageRecordImportOption func(*ImageRecordImportOpts) error
+// ImageRecordImportOption is one option of ImportImageRecord and the import
+// step of CreateImageRecord: WithImageRecordImportOpts, the method, URI,
+// remote and store options, WithImageRecordImportHeaders (merges),
+// WithImageRecordImportField(s) and WithImageRecordImportMethodField(s),
+// request.Header (merges one header) or request.Custom over
+// *ImageRecordImportOpts. Other shared calls, including request.Headers and
+// request.Field, fail with resource.ErrInvalidOption before HTTP;
+// WithImageRecordImportField also rejects invalid UTF-8 Go strings that
+// request.Field would already have replaced while marshaling.
+type ImageRecordImportOption = request.WriteCall
+
+var imageRecordImportCalls = calls.Spec[ImageRecordImportOpts]{
+	Header: calls.MergeHeader[ImageRecordImportOpts](WithImageRecordImportHeaders),
+}
 
 // WithImageRecordImportOpts captures values and store identities immediately and
 // replaces the complete policy when applied. With helpers may then overlay it.
 func WithImageRecordImportOpts(value ImageRecordImportOpts) ImageRecordImportOption {
 	snapshot, captureErr := copyImageRecordImportOpts(nil, nil, value)
-	return func(config *ImageRecordImportOpts) error {
+	return request.Custom(func(config *ImageRecordImportOpts) error {
 		if captureErr != nil {
 			return captureErr
 		}
@@ -69,7 +84,7 @@ func WithImageRecordImportOpts(value ImageRecordImportOpts) ImageRecordImportOpt
 			*config = owned
 		}
 		return err
-	}
+	})
 }
 
 func WithImageRecordImportMethod(value any) ImageRecordImportOption {
@@ -96,18 +111,18 @@ func WithImageRecordImportAllStoresMustSucceed(value any) ImageRecordImportOptio
 
 func withImageRecordImportValue(value any, set func(*ImageRecordImportOpts, json.RawMessage)) ImageRecordImportOption {
 	snapshot, captureErr := captureImageRecordImportJSON(nil, nil, value)
-	return func(config *ImageRecordImportOpts) error {
+	return request.Custom(func(config *ImageRecordImportOpts) error {
 		if captureErr != nil {
 			return captureErr
 		}
 		set(config, bytes.Clone(snapshot))
 		return nil
-	}
+	})
 }
 
 func WithImageRecordImportStore(value ImageRecordImportStore) ImageRecordImportOption {
 	snapshot, captureErr := copyImageRecordImportStore(nil, nil, value)
-	return func(config *ImageRecordImportOpts) error {
+	return request.Custom(func(config *ImageRecordImportOpts) error {
 		if captureErr != nil {
 			return captureErr
 		}
@@ -116,7 +131,7 @@ func WithImageRecordImportStore(value ImageRecordImportStore) ImageRecordImportO
 			config.Store = &owned
 		}
 		return err
-	}
+	})
 }
 
 // WithImageRecordImportStores replaces the complete plural selection. An empty
@@ -130,7 +145,7 @@ func WithImageRecordImportStores(values ...ImageRecordImportStore) ImageRecordIm
 			break
 		}
 	}
-	return func(config *ImageRecordImportOpts) error {
+	return request.Custom(func(config *ImageRecordImportOpts) error {
 		if captureErr != nil {
 			return captureErr
 		}
@@ -144,19 +159,14 @@ func WithImageRecordImportStores(values ...ImageRecordImportStore) ImageRecordIm
 		}
 		config.Stores = owned
 		return nil
-	}
+	})
 }
 
-func WithImageRecordImportHeader(key, value string) ImageRecordImportOption {
-	return func(config *ImageRecordImportOpts) error {
-		return mergeImageRecordImportHeaders(&config.Headers, map[string]string{key: value})
-	}
-}
 func WithImageRecordImportHeaders(values map[string]string) ImageRecordImportOption {
 	snapshot := copyImageRecordHeaders(values)
-	return func(config *ImageRecordImportOpts) error {
+	return request.Custom(func(config *ImageRecordImportOpts) error {
 		return mergeImageRecordImportHeaders(&config.Headers, snapshot)
-	}
+	})
 }
 func WithImageRecordImportField(key string, value any) ImageRecordImportOption {
 	return WithImageRecordImportFields(map[string]any{key: value})
@@ -173,7 +183,7 @@ func WithImageRecordImportMethodFields(values map[string]any) ImageRecordImportO
 
 func withImageRecordImportFields(values map[string]any, method bool) ImageRecordImportOption {
 	snapshot, captureErr := captureImageRecordImportMap(nil, nil, values, func(key string) error { return imageRecordImportFieldKey(key, method) })
-	return func(config *ImageRecordImportOpts) error {
+	return request.Custom(func(config *ImageRecordImportOpts) error {
 		if captureErr != nil {
 			return captureErr
 		}
@@ -188,7 +198,7 @@ func withImageRecordImportFields(values map[string]any, method bool) ImageRecord
 			(*target)[key] = json.RawMessage(bytes.Clone(value.(json.RawMessage)))
 		}
 		return nil
-	}
+	})
 }
 
 func imageRecordImportFieldKey(key string, method bool) error {
@@ -273,7 +283,7 @@ func prepareImageRecordImportOptions(ctx context.Context, check func(context.Con
 	if err != nil {
 		return config, err
 	}
-	for _, apply := range options {
+	for _, apply := range calls.Translate(options, imageRecordImportCalls) {
 		if err := check(ctx); err != nil {
 			return config, err
 		}

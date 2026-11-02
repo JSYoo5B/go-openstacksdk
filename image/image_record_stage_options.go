@@ -3,6 +3,9 @@ package image
 import (
 	"context"
 	"errors"
+
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 // ImageRecordStageOpts owns headers and optional X-OpenStack-Image-Size.
@@ -15,36 +18,39 @@ type ImageRecordStageOpts struct {
 	DisableSizeInference bool
 }
 
-type ImageRecordStageOption func(*ImageRecordStageOpts) error
+// ImageRecordStageOption is one option of StageImageRecord:
+// WithImageRecordStageOpts, WithImageRecordStageHeaders (merges), the size
+// options, request.Header (merges one header) or request.Custom over
+// *ImageRecordStageOpts. Other shared calls, including request.Headers and
+// request.Field, fail with resource.ErrInvalidOption before HTTP.
+type ImageRecordStageOption = request.WriteCall
+
+var imageRecordStageCalls = calls.Spec[ImageRecordStageOpts]{
+	Header: calls.MergeHeader[ImageRecordStageOpts](WithImageRecordStageHeaders),
+}
 
 func WithImageRecordStageOpts(value ImageRecordStageOpts) ImageRecordStageOption {
 	snapshot := copyImageRecordStageOpts(value)
-	return func(config *ImageRecordStageOpts) error { *config = copyImageRecordStageOpts(snapshot); return nil }
+	return request.Custom(func(config *ImageRecordStageOpts) error { *config = copyImageRecordStageOpts(snapshot); return nil })
 }
 
 func WithImageRecordStageSize(value int64) ImageRecordStageOption {
-	return func(config *ImageRecordStageOpts) error { owned := value; config.Size = &owned; return nil }
+	return request.Custom(func(config *ImageRecordStageOpts) error { owned := value; config.Size = &owned; return nil })
 }
 
 // WithoutImageRecordStageSize clears an explicit Size. Default size inference
 // remains enabled; use WithImageRecordStageSizeInference(false) to avoid seeking.
 func WithoutImageRecordStageSize() ImageRecordStageOption {
-	return func(config *ImageRecordStageOpts) error { config.Size = nil; return nil }
+	return request.Custom(func(config *ImageRecordStageOpts) error { config.Size = nil; return nil })
 }
 
 func WithImageRecordStageSizeInference(enabled bool) ImageRecordStageOption {
-	return func(config *ImageRecordStageOpts) error { config.DisableSizeInference = !enabled; return nil }
-}
-
-func WithImageRecordStageHeader(key, value string) ImageRecordStageOption {
-	return func(config *ImageRecordStageOpts) error {
-		return mergeImageRecordHeaders(&config.Headers, map[string]string{key: value})
-	}
+	return request.Custom(func(config *ImageRecordStageOpts) error { config.DisableSizeInference = !enabled; return nil })
 }
 
 func WithImageRecordStageHeaders(values map[string]string) ImageRecordStageOption {
 	snapshot := copyImageRecordHeaders(values)
-	return func(config *ImageRecordStageOpts) error { return mergeImageRecordHeaders(&config.Headers, snapshot) }
+	return request.Custom(func(config *ImageRecordStageOpts) error { return mergeImageRecordHeaders(&config.Headers, snapshot) })
 }
 
 func copyImageRecordStageOpts(value ImageRecordStageOpts) ImageRecordStageOpts {
@@ -58,7 +64,7 @@ func copyImageRecordStageOpts(value ImageRecordStageOpts) ImageRecordStageOpts {
 
 func prepareImageRecordStageOptions(ctx context.Context, check func(context.Context) error, options []ImageRecordStageOption) (ImageRecordStageOpts, error) {
 	config := copyImageRecordStageOpts(ImageRecordStageOpts{})
-	for _, apply := range options {
+	for _, apply := range calls.Translate(options, imageRecordStageCalls) {
 		if err := check(ctx); err != nil {
 			return config, err
 		}

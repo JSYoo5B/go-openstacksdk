@@ -6,7 +6,9 @@ import (
 	"encoding/json"
 	"errors"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 // ImageRecordUploadOpts owns formal raw formats, constructor attributes and
@@ -24,13 +26,23 @@ type ImageRecordUploadOpts struct {
 	DisableSizeInference bool
 }
 
-type ImageRecordUploadOption func(*ImageRecordUploadOpts) error
+// ImageRecordUploadOption is one option of UploadImageRecord:
+// WithImageRecordUploadOpts, WithImageRecordUploadHeaders (merges), the
+// attribute, format and size options, request.Header (merges one header) or
+// request.Custom over *ImageRecordUploadOpts. Other shared calls, including
+// request.Headers and request.Field, fail with resource.ErrInvalidOption
+// before HTTP.
+type ImageRecordUploadOption = request.WriteCall
+
+var imageRecordUploadCalls = calls.Spec[ImageRecordUploadOpts]{
+	Header: calls.MergeHeader[ImageRecordUploadOpts](WithImageRecordUploadHeaders),
+}
 
 // WithImageRecordUploadOpts captures and replaces the complete option policy.
 // Request Attributes remain separate; later option helpers overlay this policy.
 func WithImageRecordUploadOpts(value ImageRecordUploadOpts) ImageRecordUploadOption {
 	snapshot, captureErr := copyImageRecordUploadOpts(nil, nil, value)
-	return func(config *ImageRecordUploadOpts) error {
+	return request.Custom(func(config *ImageRecordUploadOpts) error {
 		if captureErr != nil {
 			return captureErr
 		}
@@ -39,7 +51,7 @@ func WithImageRecordUploadOpts(value ImageRecordUploadOpts) ImageRecordUploadOpt
 			*config = owned
 		}
 		return err
-	}
+	})
 }
 
 func WithImageRecordUploadContainerFormat(value any) ImageRecordUploadOption {
@@ -50,7 +62,7 @@ func WithImageRecordUploadDiskFormat(value any) ImageRecordUploadOption {
 }
 func withImageRecordUploadFormat(value any, container bool) ImageRecordUploadOption {
 	snapshot, captureErr := captureImageRecordImportJSON(nil, nil, value)
-	return func(config *ImageRecordUploadOpts) error {
+	return request.Custom(func(config *ImageRecordUploadOpts) error {
 		if captureErr != nil {
 			return captureErr
 		}
@@ -60,7 +72,7 @@ func withImageRecordUploadFormat(value any, container bool) ImageRecordUploadOpt
 			config.DiskFormat = bytes.Clone(snapshot)
 		}
 		return nil
-	}
+	})
 }
 
 func WithImageRecordUploadAttribute(field string, value any) ImageRecordUploadOption {
@@ -72,7 +84,7 @@ func WithImageRecordUploadAttribute(field string, value any) ImageRecordUploadOp
 // option attribute map. No schema, name, enum or server-owned range is imposed.
 func WithImageRecordUploadAttributes(values map[string]any) ImageRecordUploadOption {
 	snapshot, captureErr := captureImageRecordUploadAttributes(nil, nil, values)
-	return func(config *ImageRecordUploadOpts) error {
+	return request.Custom(func(config *ImageRecordUploadOpts) error {
 		if captureErr != nil {
 			return captureErr
 		}
@@ -83,28 +95,23 @@ func WithImageRecordUploadAttributes(values map[string]any) ImageRecordUploadOpt
 			config.Attributes[key] = json.RawMessage(bytes.Clone(value.(json.RawMessage)))
 		}
 		return nil
-	}
-}
-func WithImageRecordUploadHeader(key, value string) ImageRecordUploadOption {
-	return func(config *ImageRecordUploadOpts) error {
-		return mergeImageRecordHeaders(&config.Headers, map[string]string{key: value})
-	}
+	})
 }
 func WithImageRecordUploadHeaders(values map[string]string) ImageRecordUploadOption {
 	snapshot := copyImageRecordHeaders(values)
-	return func(config *ImageRecordUploadOpts) error { return mergeImageRecordHeaders(&config.Headers, snapshot) }
+	return request.Custom(func(config *ImageRecordUploadOpts) error { return mergeImageRecordHeaders(&config.Headers, snapshot) })
 }
 func WithImageRecordUploadSize(value int64) ImageRecordUploadOption {
-	return func(config *ImageRecordUploadOpts) error { owned := value; config.Size = &owned; return nil }
+	return request.Custom(func(config *ImageRecordUploadOpts) error { owned := value; config.Size = &owned; return nil })
 }
 
 // WithoutImageRecordUploadSize clears explicit Size; default inference remains
 // enabled. WithImageRecordUploadSizeInference(false) disables size inspection.
 func WithoutImageRecordUploadSize() ImageRecordUploadOption {
-	return func(config *ImageRecordUploadOpts) error { config.Size = nil; return nil }
+	return request.Custom(func(config *ImageRecordUploadOpts) error { config.Size = nil; return nil })
 }
 func WithImageRecordUploadSizeInference(enabled bool) ImageRecordUploadOption {
-	return func(config *ImageRecordUploadOpts) error { config.DisableSizeInference = !enabled; return nil }
+	return request.Custom(func(config *ImageRecordUploadOpts) error { config.DisableSizeInference = !enabled; return nil })
 }
 
 func copyImageRecordUploadOpts(ctx context.Context, check func(context.Context) error, value ImageRecordUploadOpts) (ImageRecordUploadOpts, error) {
@@ -128,7 +135,7 @@ func copyImageRecordUploadOpts(ctx context.Context, check func(context.Context) 
 
 func prepareImageRecordUploadOptions(ctx context.Context, check func(context.Context) error, options []ImageRecordUploadOption) (ImageRecordUploadOpts, error) {
 	config := ImageRecordUploadOpts{}
-	for _, apply := range options {
+	for _, apply := range calls.Translate(options, imageRecordUploadCalls) {
 		if err := check(ctx); err != nil {
 			return config, err
 		}

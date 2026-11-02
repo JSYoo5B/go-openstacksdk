@@ -9,6 +9,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -18,7 +19,7 @@ func TestImageCacheOptionsSnapshotReplacementAndLastWins(t *testing.T) {
 	merge := WithCacheHeaders(input)
 	input["X-First"] = "mutated"
 	for _, option := range []CacheOption{full, merge} {
-		value, err := parseCacheOptions([]CacheOption{WithCacheHeader("X-Discard", "old"), option, WithCacheHeader("x-first", "last")})
+		value, err := parseCacheOptions([]CacheOption{request.Header("X-Discard", "old"), option, request.Header("x-first", "last")})
 		if err != nil || value.Headers["X-First"] != "last" {
 			t.Fatal(value, err)
 		}
@@ -27,25 +28,25 @@ func TestImageCacheOptionsSnapshotReplacementAndLastWins(t *testing.T) {
 			t.Fatal(again, err)
 		}
 	}
-	value, err := parseCacheOptions([]CacheOption{WithCacheHeader("X-Discard", "old"), WithCacheOpts(CacheOpts{})})
+	value, err := parseCacheOptions([]CacheOption{request.Header("X-Discard", "old"), WithCacheOpts(CacheOpts{})})
 	if err != nil || value.Headers == nil || len(value.Headers) != 0 {
 		t.Fatal(value, err)
 	}
 	falseValue := false
 	deleteFull := WithCacheDeleteOpts(CacheDeleteOpts{Headers: map[string]string{"X-A": "snapshot"}, IgnoreMissing: &falseValue})
 	falseValue = true
-	deleted, err := parseCacheDeleteOptions([]CacheDeleteOption{deleteFull, WithCacheDeleteHeader("x-a", "last"), WithCacheDeleteHeaders(map[string]string{"X-B": "merged"})})
+	deleted, err := parseCacheDeleteOptions([]CacheDeleteOption{deleteFull, request.Header("x-a", "last"), WithCacheDeleteHeaders(map[string]string{"X-B": "merged"})})
 	if err != nil || *deleted.IgnoreMissing || deleted.Headers["X-A"] != "last" || deleted.Headers["X-B"] != "merged" {
 		t.Fatal(deleted, err)
 	}
-	deleted, err = parseCacheDeleteOptions([]CacheDeleteOption{WithCacheDeleteIgnoreMissing(false), WithCacheDeleteOpts(CacheDeleteOpts{})})
+	deleted, err = parseCacheDeleteOptions([]CacheDeleteOption{request.IgnoreMissing(false), WithCacheDeleteOpts(CacheDeleteOpts{})})
 	if err != nil || deleted.IgnoreMissing == nil || !*deleted.IgnoreMissing || deleted.Headers == nil {
 		t.Fatal(deleted, err)
 	}
 	clearInput := map[string]string{"X-A": "snapshot"}
 	clearFull := WithClearCacheOpts(ClearCacheOpts{Headers: clearInput, Target: QueueOnly})
 	clearInput["X-A"] = "changed"
-	cleared, err := parseClearCacheOptions([]ClearCacheOption{clearFull, WithClearCacheHeader("x-a", "last"), WithClearCacheHeaders(map[string]string{"X-B": "merged"}), WithClearCacheTarget(CacheOnly)})
+	cleared, err := parseClearCacheOptions([]ClearCacheOption{clearFull, request.Header("x-a", "last"), WithClearCacheHeaders(map[string]string{"X-B": "merged"}), WithClearCacheTarget(CacheOnly)})
 	if err != nil || cleared.Target != CacheOnly || cleared.Headers["X-A"] != "last" || cleared.Headers["X-B"] != "merged" {
 		t.Fatal(cleared, err)
 	}
@@ -59,17 +60,17 @@ func TestImageCacheOptionsOwnPointersCallbacksAndSlices(t *testing.T) {
 	var retained *CacheDeleteOpts
 	secondCalls := 0
 	options := make([]CacheDeleteOption, 2)
-	options[0] = func(config *CacheDeleteOpts) error {
+	options[0] = request.Custom(func(config *CacheDeleteOpts) error {
 		if config.Headers == nil || config.IgnoreMissing == nil || !*config.IgnoreMissing {
 			t.Fatal(config)
 		}
 		retained = config
 		config.Headers["X-A"] = "owned"
 		*config.IgnoreMissing = false
-		options[1] = func(*CacheDeleteOpts) error { t.Fatal("changed caller slice executed"); return nil }
+		options[1] = request.Custom(func(*CacheDeleteOpts) error { t.Fatal("changed caller slice executed"); return nil })
 		return nil
-	}
-	options[1] = func(config *CacheDeleteOpts) error {
+	})
+	options[1] = request.Custom(func(config *CacheDeleteOpts) error {
 		secondCalls++
 		retained.Headers["X-A"] = "late"
 		*retained.IgnoreMissing = true
@@ -78,7 +79,7 @@ func TestImageCacheOptionsOwnPointersCallbacksAndSlices(t *testing.T) {
 		}
 		retained = config
 		return nil
-	}
+	})
 	client := deleteCoreClient(func(r *http.Request) (*http.Response, error) {
 		retained.Headers["X-A"] = "transport"
 		*retained.IgnoreMissing = true
@@ -92,25 +93,25 @@ func TestImageCacheOptionsOwnPointersCallbacksAndSlices(t *testing.T) {
 		t.Fatal(value, err, secondCalls)
 	}
 	var old *ClearCacheOpts
-	cleared, err := parseClearCacheOptions([]ClearCacheOption{func(config *ClearCacheOpts) error {
+	cleared, err := parseClearCacheOptions([]ClearCacheOption{request.Custom(func(config *ClearCacheOpts) error {
 		old = config
 		config.Target = QueueOnly
 		config.Headers["X-A"] = "owned"
 		return nil
-	}, func(config *ClearCacheOpts) error {
+	}), request.Custom(func(config *ClearCacheOpts) error {
 		old.Target = CacheOnly
 		old.Headers["X-A"] = "late"
 		if config.Target != QueueOnly || config.Headers["X-A"] != "owned" {
 			t.Fatal(config)
 		}
 		return nil
-	}})
+	})})
 	if err != nil || cleared.Target != QueueOnly || cleared.Headers["X-A"] != "owned" {
 		t.Fatal(cleared, err)
 	}
 	cause := errors.New("option cause")
 	client = deleteCoreClient(func(*http.Request) (*http.Response, error) { t.Fatal("HTTP after option error"); return nil, nil })
-	if value, err := New(client).CleanCache(context.Background(), func(*CacheOpts) error { return cause }); value != nil || !errors.Is(err, cause) {
+	if value, err := New(client).CleanCache(context.Background(), request.Custom(func(*CacheOpts) error { return cause })); value != nil || !errors.Is(err, cause) {
 		t.Fatal(value, err)
 	}
 }
@@ -146,7 +147,7 @@ func TestImageCacheOptionsProtectedHeadersAndCompleteDefaults(t *testing.T) {
 			t.Fatal(value, err)
 		}
 	}
-	value, err := parseCacheOptions([]CacheOption{WithCacheHeaders(map[string]string{"x-a": "same", "X-A": "same"}), WithCacheHeader("x-a", "last")})
+	value, err := parseCacheOptions([]CacheOption{WithCacheHeaders(map[string]string{"x-a": "same", "X-A": "same"}), request.Header("x-a", "last")})
 	if err != nil || len(value.Headers) != 1 || value.Headers["X-A"] != "last" {
 		t.Fatal(value, err)
 	}
@@ -155,9 +156,9 @@ func TestImageCacheOptionsProtectedHeadersAndCompleteDefaults(t *testing.T) {
 func TestImageCacheOptionsParallelReusableHelpers(t *testing.T) {
 	input := map[string]string{"X-A": "snapshot"}
 	missing := false
-	common := []CacheOption{WithCacheOpts(CacheOpts{Headers: input}), WithCacheHeaders(input), WithCacheHeader("X-B", "last")}
-	deleted := []CacheDeleteOption{WithCacheDeleteOpts(CacheDeleteOpts{Headers: input, IgnoreMissing: &missing}), WithCacheDeleteHeaders(input), WithCacheDeleteHeader("X-B", "last"), WithCacheDeleteIgnoreMissing(false)}
-	cleared := []ClearCacheOption{WithClearCacheOpts(ClearCacheOpts{Headers: input, Target: CacheOnly}), WithClearCacheHeaders(input), WithClearCacheHeader("X-B", "last"), WithClearCacheTarget(QueueOnly)}
+	common := []CacheOption{WithCacheOpts(CacheOpts{Headers: input}), WithCacheHeaders(input), request.Header("X-B", "last")}
+	deleted := []CacheDeleteOption{WithCacheDeleteOpts(CacheDeleteOpts{Headers: input, IgnoreMissing: &missing}), WithCacheDeleteHeaders(input), request.Header("X-B", "last"), request.IgnoreMissing(false)}
+	cleared := []ClearCacheOption{WithClearCacheOpts(ClearCacheOpts{Headers: input, Target: CacheOnly}), WithClearCacheHeaders(input), request.Header("X-B", "last"), WithClearCacheTarget(QueueOnly)}
 	input["X-A"] = "late"
 	missing = true
 	for i := 0; i < 12; i++ {

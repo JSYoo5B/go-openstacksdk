@@ -13,6 +13,7 @@ import (
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/image"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -110,11 +111,11 @@ func TestConnectionImageReadFacadeOwnsResponseAndPreservesFilters(t *testing.T) 
 	if string(fetched.Body["x-number"]) != "9007199254740995" || string(fetched.Properties["properties"]) != "[]" || string(fetched.Properties["metadata"]) != "true" {
 		t.Fatal("raw projection aliases or forces nested property shape")
 	}
-	rows, err := upper.AllImages(ctx, image.WithListImagesLimit(0), image.WithListImagesName(""), image.WithListImagesProtected(false), image.WithListImagesHidden(false), image.WithListImagesSizeMin(0), image.WithListImagesTags("first", "second"), image.WithListImagesHeader("X-Call", "list"))
+	rows, err := upper.AllImages(ctx, request.Limit(0), image.WithListImagesName(""), image.WithListImagesProtected(false), image.WithListImagesHidden(false), image.WithListImagesSizeMin(0), image.WithListImagesTags("first", "second"), request.Header("X-Call", "list"))
 	if err != nil || len(rows) != 1 || *rows[0].ID != "actual-id" || rows[0].Header.Get("X-Proof") != "1" || calls != 3 {
 		t.Fatalf("restored repeat query=%+v err=%v calls=%d", rows, err, calls)
 	}
-	named, err := upper.GetImage(ctx, resource.Name("Ubuntu 24"), image.WithGetImageHeader("X-Call", "named"))
+	named, err := upper.GetImage(ctx, resource.Name("Ubuntu 24"), request.Header("X-Call", "named"))
 	if err != nil || named == nil || *named.ID != "fresh-renamed" || named.Name != nil || named.Size != nil || string(named.Properties["x-number"]) != "null" || calls != 5 {
 		t.Fatalf("fresh Name image=%+v err=%v calls=%d", named, err, calls)
 	}

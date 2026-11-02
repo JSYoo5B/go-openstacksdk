@@ -6,6 +6,9 @@ import (
 	"errors"
 	"slices"
 
+	"github.com/JSYoo5B/go-openstacksdk/image/v2/internal/glancecalls"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -16,7 +19,13 @@ type RecordCreateOpts struct {
 	Headers    map[string]string
 	Attributes []resource.ListOption
 }
-type RecordCreateOption func(*RecordCreateOpts) error
+
+// RecordCreateOption is one option of the operation: WithRecordCreateOpts,
+// WithRecordCreateHeaders, WithRecordCreateAttribute,
+// WithRecordCreateAttributes, request.Header, or request.Custom over
+// *RecordCreateOpts. Other shared calls fail with resource.ErrInvalidOption
+// before HTTP.
+type RecordCreateOption = request.WriteCall
 
 // RecordUpdateOpts captures fresh dirty attributes for an existing identity.
 // Input Resource fields are not a replacement definition. Headers alone do not
@@ -25,7 +34,13 @@ type RecordUpdateOpts struct {
 	Headers    map[string]string
 	Attributes []resource.ListOption
 }
-type RecordUpdateOption func(*RecordUpdateOpts) error
+
+// RecordUpdateOption is one option of the operation: WithRecordUpdateOpts,
+// WithRecordUpdateHeaders, WithRecordUpdateAttribute,
+// WithRecordUpdateAttributes, request.Header, or request.Custom over
+// *RecordUpdateOpts. Other shared calls fail with resource.ErrInvalidOption
+// before HTTP.
+type RecordUpdateOption = request.WriteCall
 
 func copyRecordCreate(value RecordCreateOpts) RecordCreateOpts {
 	value.Headers = copyHeaders(value.Headers)
@@ -39,17 +54,11 @@ func copyRecordUpdate(value RecordUpdateOpts) RecordUpdateOpts {
 }
 func WithRecordCreateOpts(value RecordCreateOpts) RecordCreateOption {
 	owned := copyRecordCreate(value)
-	return func(config *RecordCreateOpts) error { *config = copyRecordCreate(owned); return nil }
-}
-func WithRecordCreateHeader(key, value string) RecordCreateOption {
-	return func(config *RecordCreateOpts) error {
-		config.Headers = setHeader(config.Headers, key, value)
-		return nil
-	}
+	return request.Custom(func(config *RecordCreateOpts) error { *config = copyRecordCreate(owned); return nil })
 }
 func WithRecordCreateHeaders(values map[string]string) RecordCreateOption {
 	owned := copyHeaders(values)
-	return func(config *RecordCreateOpts) error {
+	return request.Custom(func(config *RecordCreateOpts) error {
 		headers, err := validateHeaders(owned, false, "")
 		if err != nil {
 			return err
@@ -58,29 +67,23 @@ func WithRecordCreateHeaders(values map[string]string) RecordCreateOption {
 			config.Headers = setHeader(config.Headers, key, value)
 		}
 		return nil
-	}
+	})
 }
 func WithRecordCreateAttribute(field string, value any) RecordCreateOption {
 	owned := resource.WithFilter(field, value)
-	return func(config *RecordCreateOpts) error { config.Attributes = append(config.Attributes, owned); return nil }
+	return request.Custom(func(config *RecordCreateOpts) error { config.Attributes = append(config.Attributes, owned); return nil })
 }
 func WithRecordCreateAttributes(values map[string]any) RecordCreateOption {
 	owned := resource.WithFilters(values)
-	return func(config *RecordCreateOpts) error { config.Attributes = append(config.Attributes, owned); return nil }
+	return request.Custom(func(config *RecordCreateOpts) error { config.Attributes = append(config.Attributes, owned); return nil })
 }
 func WithRecordUpdateOpts(value RecordUpdateOpts) RecordUpdateOption {
 	owned := copyRecordUpdate(value)
-	return func(config *RecordUpdateOpts) error { *config = copyRecordUpdate(owned); return nil }
-}
-func WithRecordUpdateHeader(key, value string) RecordUpdateOption {
-	return func(config *RecordUpdateOpts) error {
-		config.Headers = setHeader(config.Headers, key, value)
-		return nil
-	}
+	return request.Custom(func(config *RecordUpdateOpts) error { *config = copyRecordUpdate(owned); return nil })
 }
 func WithRecordUpdateHeaders(values map[string]string) RecordUpdateOption {
 	owned := copyHeaders(values)
-	return func(config *RecordUpdateOpts) error {
+	return request.Custom(func(config *RecordUpdateOpts) error {
 		headers, err := validateHeaders(owned, false, "")
 		if err != nil {
 			return err
@@ -89,26 +92,26 @@ func WithRecordUpdateHeaders(values map[string]string) RecordUpdateOption {
 			config.Headers = setHeader(config.Headers, key, value)
 		}
 		return nil
-	}
+	})
 }
 func WithRecordUpdateAttribute(field string, value any) RecordUpdateOption {
 	owned := resource.WithFilter(field, value)
-	return func(config *RecordUpdateOpts) error { config.Attributes = append(config.Attributes, owned); return nil }
+	return request.Custom(func(config *RecordUpdateOpts) error { config.Attributes = append(config.Attributes, owned); return nil })
 }
 func WithRecordUpdateAttributes(values map[string]any) RecordUpdateOption {
 	owned := resource.WithFilters(values)
-	return func(config *RecordUpdateOpts) error { config.Attributes = append(config.Attributes, owned); return nil }
+	return request.Custom(func(config *RecordUpdateOpts) error { config.Attributes = append(config.Attributes, owned); return nil })
 }
 
 func prepareRecordCreate(ctx context.Context, check func(context.Context) error, options []RecordCreateOption) (map[string]json.RawMessage, map[string]string, error) {
-	value, err := applyRecordWriteOptions(ctx, check, options, copyRecordCreate)
+	value, err := applyRecordWriteOptions(ctx, check, calls.Translate(options, recordCreateCalls), copyRecordCreate)
 	if err != nil {
 		return nil, nil, err
 	}
 	return prepareRecordWriteAttributes(ctx, check, value.Headers, value.Attributes, false)
 }
 func prepareRecordUpdate(ctx context.Context, check func(context.Context) error, options []RecordUpdateOption) (map[string]json.RawMessage, map[string]string, error) {
-	value, err := applyRecordWriteOptions(ctx, check, options, copyRecordUpdate)
+	value, err := applyRecordWriteOptions(ctx, check, calls.Translate(options, recordUpdateCalls), copyRecordUpdate)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -117,10 +120,10 @@ func prepareRecordUpdate(ctx context.Context, check func(context.Context) error,
 
 // apply supplies existing independent config snapshots; wrappers prevent a
 // later callback from undoing an observed source, namespace or outer failure.
-func applyRecordWriteOptions[T any, O ~func(*T) error](ctx context.Context, check func(context.Context) error, options []O, copyValue func(T) T) (T, error) {
-	guarded := make([]O, len(options))
+func applyRecordWriteOptions[T any](ctx context.Context, check func(context.Context) error, options []func(*T) error, copyValue func(T) T) (T, error) {
+	guarded := make([]func(*T) error, len(options))
 	for index, option := range options {
-		guarded[index] = O(func(config *T) error {
+		guarded[index] = func(config *T) error {
 			if err := check(ctx); err != nil {
 				return err
 			}
@@ -128,7 +131,7 @@ func applyRecordWriteOptions[T any, O ~func(*T) error](ctx context.Context, chec
 				return invalid("nil property option")
 			}
 			return errors.Join(option(config), check(ctx))
-		})
+		}
 	}
 	value, err := apply(guarded, copyValue)
 	return value, errors.Join(err, check(ctx))
@@ -167,3 +170,8 @@ func prepareRecordWriteAttributes(ctx context.Context, check func(context.Contex
 	headers, err := validateHeaders(headerValues, false, "")
 	return attributes, headers, errors.Join(err, check(ctx))
 }
+
+var (
+	recordCreateCalls = glancecalls.HeaderSpec(func(o *RecordCreateOpts) *map[string]string { return &o.Headers })
+	recordUpdateCalls = glancecalls.HeaderSpec(func(o *RecordUpdateOpts) *map[string]string { return &o.Headers })
+)

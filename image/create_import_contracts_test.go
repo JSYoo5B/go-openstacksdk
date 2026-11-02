@@ -19,6 +19,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport"
 	sdkimages "github.com/JSYoo5B/go-openstacksdk/image/v2/images"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -290,12 +291,12 @@ func TestCreateAndImportCompletePreflight(t *testing.T) {
 		{"metadata auth header", image.CreateAndImportRequest{Name: "worker"}, []image.CreateImportOption{image.WithCreateImportMetadata(image.CreateImportMetadataOpts{Headers: map[string]string{"X-Auth-Token": "override"}})}},
 		{"metadata header newline", image.CreateAndImportRequest{Name: "worker"}, []image.CreateImportOption{image.WithCreateImportMetadata(image.CreateImportMetadataOpts{Headers: map[string]string{"X-Trace": "line\nbreak"}})}},
 		{"negative stage size", image.CreateAndImportRequest{Name: "worker"}, []image.CreateImportOption{image.WithCreateImportStage(imagedata.StageOpts{Size: func() *int64 { v := int64(-1); return &v }()})}},
-		{"stage owned header", image.CreateAndImportRequest{Name: "worker"}, []image.CreateImportOption{image.WithCreateImportStageOptions(imagedata.WithStageHeader("Accept", "override"))}},
+		{"stage owned header", image.CreateAndImportRequest{Name: "worker"}, []image.CreateImportOption{image.WithCreateImportStageOptions(request.Header("Accept", "override"))}},
 		{"empty selected store", image.CreateAndImportRequest{Name: "worker"}, []image.CreateImportOption{image.WithCreateImportImportOptions(imageimport.WithImportStore(""))}},
 		{"conflicting selectors", image.CreateAndImportRequest{Name: "worker"}, []image.CreateImportOption{image.WithCreateImportImportOptions(imageimport.WithImportAllStores(true), imageimport.WithImportStores("fast"))}},
-		{"import owned field", image.CreateAndImportRequest{Name: "worker"}, []image.CreateImportOption{image.WithCreateImportImportOptions(imageimport.WithImportField("method", map[string]any{"name": "web-download"}))}},
+		{"import owned field", image.CreateAndImportRequest{Name: "worker"}, []image.CreateImportOption{image.WithCreateImportImportOptions(request.Field("method", map[string]any{"name": "web-download"}))}},
 		{"import owned method field", image.CreateAndImportRequest{Name: "worker"}, []image.CreateImportOption{image.WithCreateImportImportOptions(imageimport.WithImportMethodField("uri", "https://source.invalid"))}},
-		{"import nonJSON extension", image.CreateAndImportRequest{Name: "worker"}, []image.CreateImportOption{image.WithCreateImportImportOptions(imageimport.WithImportField("vendor", make(chan int)))}},
+		{"import nonJSON extension", image.CreateAndImportRequest{Name: "worker"}, []image.CreateImportOption{image.WithCreateImportImportOptions(request.Field("vendor", make(chan int)))}},
 		{"web missing URI", image.CreateAndImportRequest{Name: "worker"}, []image.CreateImportOption{image.WithCreateImportImport(imageimport.ImportOpts{Method: imageimport.WebDownloadMethod})}},
 		{"partial remote", image.CreateAndImportRequest{Name: "worker"}, []image.CreateImportOption{image.WithCreateImportImport(imageimport.ImportOpts{Method: imageimport.GlanceDownloadMethod, RemoteRegion: "region"})}},
 		{"copy existing-only", image.CreateAndImportRequest{Name: "worker"}, []image.CreateImportOption{image.WithCreateImportImport(imageimport.ImportOpts{Method: imageimport.CopyImageMethod})}},
@@ -384,8 +385,8 @@ func TestCreateAndImportCompletePreflight(t *testing.T) {
 		}))
 		v, err := image.New(cloud.Client("image", createImportPrefix)).CreateAndImport(context.Background(), image.CreateAndImportRequest{Name: "worker", Data: data},
 			func(*image.CreateImportOpts) error { workflow.Add(1); return nil },
-			image.WithCreateImportStageOptions(func(*imagedata.StageOpts) error { stage.Add(1); return nil }),
-			image.WithCreateImportImportOptions(func(*imageimport.ImportOpts) error { importing.Add(1); return nil }),
+			image.WithCreateImportStageOptions(request.Custom(func(*imagedata.StageOpts) error { stage.Add(1); return nil })),
+			image.WithCreateImportImportOptions(request.Custom(func(*imageimport.ImportOpts) error { importing.Add(1); return nil })),
 			image.WithCreateImportWait(image.CreateImportWaitOpts{PollInterval: new(time.Duration)}))
 		if v != nil || !errors.Is(err, resource.ErrInvalidOption) || calls.Load() != 0 || data.reads.Load() != 0 || workflow.Load() != 1 || stage.Load() != 1 || importing.Load() != 1 {
 			t.Fatal(v, err, calls.Load(), data.reads.Load(), workflow.Load(), stage.Load(), importing.Load())
@@ -422,8 +423,8 @@ func TestCreateAndImportPreparedSnapshotsAndCallbacksOnce(t *testing.T) {
 	var retainedImport *imageimport.ImportOpts
 	options := []image.CreateImportOption{bulk,
 		func(o *image.CreateImportOpts) error { workflowCallbacks.Add(1); retained = o; return nil },
-		image.WithCreateImportStageOptions(func(o *imagedata.StageOpts) error { stageCallbacks.Add(1); retainedStage = o; return nil }),
-		image.WithCreateImportImportOptions(func(o *imageimport.ImportOpts) error { importCallbacks.Add(1); retainedImport = o; return nil }),
+		image.WithCreateImportStageOptions(request.Custom(func(o *imagedata.StageOpts) error { stageCallbacks.Add(1); retainedStage = o; return nil })),
+		image.WithCreateImportImportOptions(request.Custom(func(o *imageimport.ImportOpts) error { importCallbacks.Add(1); retainedImport = o; return nil })),
 	}
 	cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		calls.Add(1)

@@ -102,7 +102,7 @@ func TestServiceInfoDefaultRoutesAndEvidence(t *testing.T) {
 				t.Fatal("API changed original client")
 			}
 			if mode == "import" {
-				v, err := api.GetImportInfo(context.Background(), serviceinfo.WithGetImportInfoHeader("X-Option", "ordinary"))
+				v, err := api.GetImportInfo(context.Background(), request.Header("X-Option", "ordinary"))
 				if err != nil || v == nil || v.ImportMethods == nil || !reflect.DeepEqual(v.ImportMethods.Value, []string{"future-method", "glance-direct", "future-method"}) || v.StatusCode != 200 || v.Header.Get("X-Request-Id") != "actual-info" || string(v.Body["import-methods"]) == "" {
 					t.Fatal(v, err)
 				}
@@ -111,7 +111,7 @@ func TestServiceInfoDefaultRoutesAndEvidence(t *testing.T) {
 					t.Fatal("metadata aliases wire")
 				}
 			} else {
-				v, err := api.AllStores(context.Background(), serviceinfo.WithListStoresDetails(mode == "details"), serviceinfo.WithListStoresHeader("X-Option", "ordinary"))
+				v, err := api.AllStores(context.Background(), serviceinfo.WithListStoresDetails(mode == "details"), request.Header("X-Option", "ordinary"))
 				if err != nil || v == nil || mode == "empty stores" && len(v) != 0 || mode != "empty stores" && (len(v) != 3 || v[0].ID != "second" || v[1].ID != "first" || v[2].ID != "second" || v[1].IsDefault == nil || !*v[1].IsDefault) {
 					t.Fatal(v, err)
 				}
@@ -247,11 +247,11 @@ func TestServiceInfoCompletePreflight(t *testing.T) {
 			if mode == "nil API" {
 				api = nil
 			}
-			v, err := api.GetImportInfo(ctx, func(*request.Config[serviceinfo.GetImportInfoOpts]) error { callbacks.Add(1); return nil })
+			v, err := api.GetImportInfo(ctx, request.Custom(func(*request.Config[serviceinfo.GetImportInfoOpts]) error { callbacks.Add(1); return nil }))
 			if v != nil || !errors.Is(err, want) {
 				t.Fatal(v, err)
 			}
-			stores, err := api.AllStores(ctx, func(*request.Config[serviceinfo.ListStoresOpts]) error { callbacks.Add(1); return nil })
+			stores, err := api.AllStores(ctx, request.Custom(func(*request.Config[serviceinfo.ListStoresOpts]) error { callbacks.Add(1); return nil }))
 			if stores != nil || !errors.Is(err, want) || calls.Load() != 0 || callbacks.Load() != 0 || mode == "canceled" && !errors.Is(err, cause) {
 				t.Fatal(stores, err, calls.Load(), callbacks.Load())
 			}
@@ -270,21 +270,21 @@ func TestServiceInfoCompletePreflight(t *testing.T) {
 			case "negative limit":
 				option = serviceinfo.WithListStoresOptions(serviceinfo.ListStoresOpts{Limit: -1})
 			case "negative cap":
-				option = serviceinfo.WithListStoresMaxItems(-1)
+				option = request.MaxItems(-1)
 			case "empty marker query":
-				option = serviceinfo.WithListStoresQuery("marker", "")
+				option = request.Query("marker", "")
 			case "details query", "base_path query", "paginated query", "headers query", "microversion query":
-				option = serviceinfo.WithListStoresQuery(strings.TrimSuffix(mode, " query"), "value")
+				option = request.Query(strings.TrimSuffix(mode, " query"), "value")
 			case "JSON field":
-				option = request.WithField[serviceinfo.ListStoresOpts]("unexpected", true)
+				option = request.Custom(request.WithField[serviceinfo.ListStoresOpts]("unexpected", true))
 			case "argument":
-				option = request.WithArgument[serviceinfo.ListStoresOpts]("microversion", "2.10")
+				option = request.Custom(request.WithArgument[serviceinfo.ListStoresOpts]("microversion", "2.10"))
 			case "owned header":
-				option = serviceinfo.WithListStoresHeader("Authorization", "override")
+				option = request.Header("Authorization", "override")
 			case "bad header":
-				option = serviceinfo.WithListStoresHeader("X-Bad", "bad\nvalue")
+				option = request.Header("X-Bad", "bad\nvalue")
 			case "callback error", "callback provider", "callback type":
-				option = func(*request.Config[serviceinfo.ListStoresOpts]) error {
+				option = request.Custom(func(*request.Config[serviceinfo.ListStoresOpts]) error {
 					if mode == "callback error" {
 						return cause
 					}
@@ -294,7 +294,7 @@ func TestServiceInfoCompletePreflight(t *testing.T) {
 						client.Type = "compute"
 					}
 					return nil
-				}
+				})
 				if mode == "callback error" {
 					want = cause
 				} else if mode == "callback type" {
@@ -307,7 +307,7 @@ func TestServiceInfoCompletePreflight(t *testing.T) {
 			}
 		})
 	}
-	for _, option := range []serviceinfo.GetImportInfoOption{nil, request.WithField[serviceinfo.GetImportInfoOpts]("unexpected", true), request.WithQuery[serviceinfo.GetImportInfoOpts]("id", "not-supported"), request.WithArgument[serviceinfo.GetImportInfoOpts]("microversion", "2.10"), serviceinfo.WithGetImportInfoHeader("X-Auth-Token", "override")} {
+	for _, option := range []serviceinfo.GetImportInfoOption{nil, request.Custom(request.WithField[serviceinfo.GetImportInfoOpts]("unexpected", true)), request.Custom(request.WithQuery[serviceinfo.GetImportInfoOpts]("id", "not-supported")), request.Custom(request.WithArgument[serviceinfo.GetImportInfoOpts]("microversion", "2.10")), request.Header("X-Auth-Token", "override")} {
 		cloud := testcloud.New(t)
 		var calls atomic.Int32
 		cloud.SetTransport(testcloud.LinkRequest(func(*http.Request) (*http.Response, error) { calls.Add(1); return infoWire(500, http.NoBody), nil }))
@@ -327,13 +327,13 @@ func TestServiceInfoPreparedOptionsAndLazyParallelReuse(t *testing.T) {
 		paginated = true
 		var retained *request.Config[serviceinfo.ListStoresOpts]
 		var calls, first, second atomic.Int32
-		options := []serviceinfo.ListStoresOption{bulk, func(c *request.Config[serviceinfo.ListStoresOpts]) error {
+		options := []serviceinfo.ListStoresOption{bulk, request.Custom(func(c *request.Config[serviceinfo.ListStoresOpts]) error {
 			first.Add(1)
 			c.Query.Set("vendor:mode", "original")
 			c.Headers["X-Option"] = "original"
 			retained = c
 			return nil
-		}, func(c *request.Config[serviceinfo.ListStoresOpts]) error {
+		}), request.Custom(func(c *request.Config[serviceinfo.ListStoresOpts]) error {
 			second.Add(1)
 			retained.Options.Details, *retained.Options.Paginated = false, true
 			retained.Query["vendor:mode"][0] = "changed"
@@ -342,7 +342,7 @@ func TestServiceInfoPreparedOptionsAndLazyParallelReuse(t *testing.T) {
 				t.Error("previous retained callback changed next config", c)
 			}
 			return nil
-		}}
+		})}
 		api := serviceinfo.New(client)
 		list := api.ListStores(context.Background(), options...)
 		options[1] = nil
@@ -383,7 +383,7 @@ func TestServiceInfoPreparedOptionsAndLazyParallelReuse(t *testing.T) {
 			}
 			return infoWire(200, io.NopCloser(strings.NewReader(`{"stores":[{"id":"unfiltered","name":"different"},{"id":12}],"next":"https://foreign.invalid/unused"}`))), nil
 		}))
-		options := []serviceinfo.ListStoresOption{serviceinfo.WithListStoresDetails(true), serviceinfo.WithListStoresOptions(serviceinfo.ListStoresOpts{MaxItems: 1}), serviceinfo.WithListStoresQuery("name", "wire-only"), serviceinfo.WithListStoresHeader("X-Option", "ordinary"), func(*request.Config[serviceinfo.ListStoresOpts]) error { callbacks.Add(1); return nil }}
+		options := []serviceinfo.ListStoresOption{serviceinfo.WithListStoresDetails(true), serviceinfo.WithListStoresOptions(serviceinfo.ListStoresOpts{MaxItems: 1}), request.Query("name", "wire-only"), request.Header("X-Option", "ordinary"), request.Custom(func(*request.Config[serviceinfo.ListStoresOpts]) error { callbacks.Add(1); return nil })}
 		list := serviceinfo.New(infoClient(cloud)).ListStores(context.Background(), options...)
 		var workers sync.WaitGroup
 		for i := 0; i < 4; i++ {
@@ -491,7 +491,7 @@ func TestServiceInfoPaginationCapsAndRawMarkers(t *testing.T) {
 				}
 				return wire, nil
 			}))
-			v, err := serviceinfo.New(infoClient(cloud)).AllStores(context.Background(), serviceinfo.WithListStoresQuery("vendor", "a&b"))
+			v, err := serviceinfo.New(infoClient(cloud)).AllStores(context.Background(), request.Query("vendor", "a&b"))
 			if err != nil || len(v) != 2 || v[0].ID != "first" || v[1].ID != "second" || calls.Load() != 2 {
 				t.Fatal(v, err, calls.Load())
 			}
@@ -512,17 +512,17 @@ func TestServiceInfoPaginationCapsAndRawMarkers(t *testing.T) {
 				raw = `{"stores":[{"id":"first"}],"next":"/v2/info/stores?marker=second"}`
 			case "changed filter":
 				raw = `{"stores":[{"id":"first"}],"next":"?marker=second&vendor=changed"}`
-				options = []serviceinfo.ListStoresOption{serviceinfo.WithListStoresQuery("vendor", "original")}
+				options = []serviceinfo.ListStoresOption{request.Query("vendor", "original")}
 			case "conflicting links":
 				raw = `{"stores":[{"id":"first"}],"next":"?marker=second","links":[{"rel":"next","href":"?marker=other"}]}`
 			case "cycle":
 				raw = `{"stores":[{"id":"first"}],"next":"?marker=repeat"}`
 			case "malformed unused row":
 				raw = `{"stores":[{"id":"first"},{"id":12}],"next":"https://foreign.invalid/unused"}`
-				options = []serviceinfo.ListStoresOption{serviceinfo.WithListStoresMaxItems(1)}
+				options = []serviceinfo.ListStoresOption{request.MaxItems(1)}
 			case "first page only":
 				raw = `{"stores":[{"id":"first"}],"next":"https://foreign.invalid/unused"}`
-				options = []serviceinfo.ListStoresOption{serviceinfo.WithListStoresPaginated(false)}
+				options = []serviceinfo.ListStoresOption{request.Paginated(false)}
 			}
 			cloud.SetTransport(testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 				n := calls.Add(1)

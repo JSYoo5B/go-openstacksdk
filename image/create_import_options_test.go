@@ -11,6 +11,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/image/v2/imagedata"
 	"github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/openstack/image/v2/images"
@@ -57,18 +58,18 @@ func TestCreateImportDeferredPhaseCallbacksAreAppliedOnceAndCanBeCleared(t *test
 	stageCalls, importCalls := 0, 0
 	var capturedStage *imagedata.StageOpts
 	var capturedImport *imageimport.ImportOpts
-	stageOptions := []imagedata.StageOption{func(value *imagedata.StageOpts) error {
+	stageOptions := []imagedata.StageOption{request.Custom(func(value *imagedata.StageOpts) error {
 		stageCalls++
 		value.Headers = map[string]string{"x-stage": "before"}
 		capturedStage = value
 		return nil
-	}}
-	importOptions := []imageimport.ImportOption{func(value *imageimport.ImportOpts) error {
+	})}
+	importOptions := []imageimport.ImportOption{request.Custom(func(value *imageimport.ImportOpts) error {
 		importCalls++
 		value.Stores = []string{"fast"}
 		capturedImport = value
 		return nil
-	}}
+	})}
 	stage, imp := WithCreateImportStageOptions(stageOptions...), WithCreateImportImportOptions(importOptions...)
 	stageOptions[0], importOptions[0] = nil, nil
 	prepared, err := parseCreateImportOptions([]CreateImportOption{stage, imp})

@@ -14,6 +14,7 @@ import (
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	tag "github.com/JSYoo5B/go-openstacksdk/image/v2/metadeftags"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
@@ -137,7 +138,7 @@ func TestConnectionImageMetadefTagsShareClientAndPaging(t *testing.T) {
 	updated, err := scope.Update(ctx, child, tag.WithUpdateName("renamed"))
 	check(updated, err, 200)
 	names := []string{"one", "two"}
-	set, err := scope.Set(ctx, names, func(*tag.SetOpts) error { names[0] = "mutated"; return nil })
+	set, err := scope.Set(ctx, names, request.Custom(func(*tag.SetOpts) error { names[0] = "mutated"; return nil }))
 	if err != nil || set == nil || set.StatusCode != 201 || len(set.Tags) != 2 || *set.Tags[0].Name != "one" || set.Header.Get("X-Proof") != "tag-3" {
 		t.Fatalf("set=%+v err=%v", set, err)
 	}
@@ -147,14 +148,14 @@ func TestConnectionImageMetadefTagsShareClientAndPaging(t *testing.T) {
 		t.Fatal("set root/rows alias")
 	}
 	rows := 0
-	for value, err := range scope.List(ctx, tag.WithListLimit(2), tag.WithListMaxItems(1)) {
+	for value, err := range scope.List(ctx, request.Limit(2), request.MaxItems(1)) {
 		check(value, err, 200)
 		rows++
 	}
 	if rows != 1 || calls != 5 {
 		t.Fatal("local cap", rows, calls)
 	}
-	all, err := other.All(ctx, tag.WithListLimit(1), tag.WithListSortKey("name"), tag.WithListSortDir("asc"))
+	all, err := other.All(ctx, request.Limit(1), tag.WithListSortKey("name"), tag.WithListSortDir("asc"))
 	if err != nil || len(all) != 2 || *all[0].Name != "raw-page1" || *all[1].Name != "raw-page2" || all[0].Header.Get("X-Proof") != "tag-5" || all[1].Header.Get("X-Proof") != "tag-6" || calls != 8 {
 		t.Fatalf("all=%+v err=%v calls=%d", all, err, calls)
 	}
@@ -185,7 +186,7 @@ func TestConnectionImageMetadefTagsShareClientAndPaging(t *testing.T) {
 	}
 	callbacks := 0
 	client.Endpoint = "https://changed.test/v2/"
-	value, err := scope.Get(ctx, child, func(*tag.GetOpts) error { callbacks++; return nil })
+	value, err := scope.Get(ctx, child, request.Custom(func(*tag.GetOpts) error { callbacks++; return nil }))
 	if value != nil || err == nil || callbacks != 0 || calls != 14 {
 		t.Fatalf("retarget value=%+v err=%v callbacks=%d calls=%d", value, err, callbacks, calls)
 	}

@@ -16,7 +16,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryFilterDeleted`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryShowAll`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeaders`
 
 - AllCloudImageRecords eagerly consumes the complete default owned image list once, keeps every consumed row in Inventory and removes rows whose Python-lowered string status equals deleted unless FilterDeleted is false. Value is the completed JSON array of kept declared views, [] for an empty result, and Images aligns with it.
@@ -44,7 +44,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryFilters`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryExpression`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeaders`
 
 - SearchImageRecords completes the default list_images inventory, including the deleted-status filter and no member query, before the shared Cloud identifier exact-or-fnmatch phase. No name or filter is forwarded as a server query or Proxy Body filter; deleted rows are never selectable.
@@ -70,7 +70,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryFilters`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryExpression`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeaders`
 
 - Omitted or JSON-null filters delegate to the owned Proxy find_image engine with ignore_missing true: literal GET, clean 400/403/404 fallback to the visible and hidden name lists, no Cloud deleted-status filter, nil Value/Image when missing and terminal native errors. Value is the found declared view.
@@ -94,7 +94,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetImageRecordByID`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeaders`
 
 - GetImageRecordByID delegates to one strict literal GetImageRecord without query, Find fallback, missing-as-nil or deleted filtering; native 404 remains an error named GetImageRecordByID without nesting the delegated operation, and the Connection location is projected.
@@ -116,7 +116,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetImageRecordExclude`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeaders`
 
 - The helper completes the default filter-free search_images inventory first, so deleted rows are never candidates and an empty identifier selects every row. An empty exclude returns the first selected row; otherwise rows are visited in order and the first whose name does not contain exclude is selected without inspecting later rows.
@@ -141,7 +141,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetImageRecordName`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeaders`
 
 - The helper completes the default filter-free search_images inventory first, so deleted rows are never candidates and an empty identifier selects every row. An empty exclude returns the first selected row; otherwise rows are visited in order and the first whose name does not contain exclude is selected without inspecting later rows.
@@ -166,7 +166,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetImageRecordID`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeaders`
 
 - The helper completes the default filter-free search_images inventory first, so deleted rows are never candidates and an empty identifier selects every row. An empty exclude returns the first selected row; otherwise rows are visited in order and the first whose name does not contain exclude is selected without inspecting later rows.
@@ -191,7 +191,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.WaitForCloudImageRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudWaitOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudWaitHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudWaitHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudWaitTimeout`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudWaitUnlimited`
@@ -217,7 +217,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.DownloadCloudImageRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDownloadOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDownloadHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDownloadHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDownloadChunkSize`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDownloadStream`
@@ -265,7 +265,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.DeleteCloudImageRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDeleteOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDeleteHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDeleteHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDeleteWait`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDeleteTimeout`

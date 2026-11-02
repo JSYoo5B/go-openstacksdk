@@ -11,6 +11,7 @@ import (
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -77,12 +78,12 @@ func TestConnectionImageMetadefPropertyWritesShareLocationAndFreshState(t *testi
 				t.Fatalf("unexpected error: %v", err)
 			}
 			provider.SetToken("live")
-			created, err := scope.CreateRecord(context.Background(), metadefproperties.WithRecordCreateAttributes(map[string]any{"name": "new-property", "min_length": "03"}), metadefproperties.WithRecordCreateHeader("X-Option", "owned"))
+			created, err := scope.CreateRecord(context.Background(), metadefproperties.WithRecordCreateAttributes(map[string]any{"name": "new-property", "min_length": "03"}), request.Header("X-Option", "owned"))
 			if err != nil {
 				t.Fatalf("unexpected error: %v", err)
 			}
 			seed := &resource.RawResource{Metadata: resource.Metadata{Body: map[string]json.RawMessage{"id": json.RawMessage(`"seed-id"`), "title": json.RawMessage(`"discarded old title"`), "minLength": json.RawMessage(`"not an integer"`)}, Header: http.Header{"X-Old": {"seed"}}, StatusCode: 201}}
-			updated, err := scope.UpdateRecord(context.Background(), metadefproperties.RecordRequest{Resource: seed}, metadefproperties.WithRecordUpdateAttribute("title", nil), metadefproperties.WithRecordUpdateHeader("X-Option", "owned"))
+			updated, err := scope.UpdateRecord(context.Background(), metadefproperties.RecordRequest{Resource: seed}, metadefproperties.WithRecordUpdateAttribute("title", nil), request.Header("X-Option", "owned"))
 			if err != nil {
 				t.Fatalf("unexpected error: %v", err)
 			}
@@ -95,7 +96,7 @@ func TestConnectionImageMetadefPropertyWritesShareLocationAndFreshState(t *testi
 				t.Fatal(created, updated, seed)
 			}
 			before := calls
-			noop, err := scope.UpdateRecord(context.Background(), metadefproperties.RecordRequest{Resource: seed}, metadefproperties.WithRecordUpdateHeader("X-Option", "owned"))
+			noop, err := scope.UpdateRecord(context.Background(), metadefproperties.RecordRequest{Resource: seed}, request.Header("X-Option", "owned"))
 			if err != nil {
 				t.Fatalf("unexpected error: %v", err)
 			}

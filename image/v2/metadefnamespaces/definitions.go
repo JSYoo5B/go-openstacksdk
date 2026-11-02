@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"slices"
 	"unicode/utf8"
+
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 // PropertyDefinition is a property schema submitted within a namespace.
@@ -39,28 +41,28 @@ type ResourceTypeAssociationDefinition struct {
 // A nil map omits properties; a nonnil empty map sends an empty JSON object.
 func WithCreateProperties(value map[string]PropertyDefinition) CreateOption {
 	owned := copyPropertyDefinitions(value)
-	return func(config *CreateOpts) error { config.Properties = copyPropertyDefinitions(owned); return nil }
+	return request.Custom(func(config *CreateOpts) error { config.Properties = copyPropertyDefinitions(owned); return nil })
 }
 
 // WithCreateObjects snapshots and replaces nested object definitions.
 func WithCreateObjects(value []ObjectDefinition) CreateOption {
 	owned := copyObjectDefinitions(value)
-	return func(config *CreateOpts) error { config.Objects = copyObjectDefinitions(owned); return nil }
+	return request.Custom(func(config *CreateOpts) error { config.Objects = copyObjectDefinitions(owned); return nil })
 }
 
 // WithCreateTags snapshots and replaces nested tags without deduplication.
 func WithCreateTags(value []TagDefinition) CreateOption {
 	owned := slices.Clone(value)
-	return func(config *CreateOpts) error { config.Tags = slices.Clone(owned); return nil }
+	return request.Custom(func(config *CreateOpts) error { config.Tags = slices.Clone(owned); return nil })
 }
 
 // WithCreateResourceTypeAssociations snapshots and replaces associations.
 func WithCreateResourceTypeAssociations(value []ResourceTypeAssociationDefinition) CreateOption {
 	owned := copyAssociationDefinitions(value)
-	return func(config *CreateOpts) error {
+	return request.Custom(func(config *CreateOpts) error {
 		config.ResourceTypeAssociations = copyAssociationDefinitions(owned)
 		return nil
-	}
+	})
 }
 
 func copyPropertyDefinitions(value map[string]PropertyDefinition) map[string]PropertyDefinition {

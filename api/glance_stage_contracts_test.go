@@ -16,6 +16,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/image/v2/imagedata"
 	"github.com/JSYoo5B/go-openstacksdk/image/v2/images"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -168,7 +169,7 @@ func TestGlanceStageSizeAndOptionSnapshots(t *testing.T) {
 		})
 		a := imagedata.New(cloud.Client("image", glanceStagePrefix))
 		for range 2 {
-			if v, err := a.StageKnownImage(context.Background(), glanceStageKnown(), strings.NewReader("payload"), imagedata.WithStageSize(99), option, imagedata.WithStageHeader("X-Trace", "earlier"), imagedata.WithStageHeader("x-trace", "final")); err != nil || v == nil {
+			if v, err := a.StageKnownImage(context.Background(), glanceStageKnown(), strings.NewReader("payload"), imagedata.WithStageSize(99), option, request.Header("X-Trace", "earlier"), request.Header("x-trace", "final")); err != nil || v == nil {
 				t.Fatal(v, err)
 			}
 		}
@@ -181,7 +182,7 @@ func TestGlanceStageSizeAndOptionSnapshots(t *testing.T) {
 		seed := glanceStageKnown()
 		var retained *imagedata.StageOpts
 		var puts, gets atomic.Int32
-		option := imagedata.StageOption(func(o *imagedata.StageOpts) error {
+		option := request.Custom(func(o *imagedata.StageOpts) error {
 			seed.ID = "other"
 			seed.Status = "active"
 			o.Size = new(int64)
@@ -272,7 +273,7 @@ func TestGlanceStageQueuedNativePreflightAndNameBinding(t *testing.T) {
 			}
 			w.WriteHeader(204)
 		})
-		v, err := imagedata.New(cloud.Client("image", glanceStagePrefix)).StageImage(context.Background(), resource.Name("worker"), data, imagedata.WithStageHeader("X-Trace", "prepared"))
+		v, err := imagedata.New(cloud.Client("image", glanceStagePrefix)).StageImage(context.Background(), resource.Name("worker"), data, request.Header("X-Trace", "prepared"))
 		if err != nil || v == nil || v.ImageID != "selected" || lists.Load() != 2 || gets.Load() != 2 || puts.Load() != 1 {
 			t.Fatal(v, err, lists.Load(), gets.Load(), puts.Load())
 		}
@@ -718,7 +719,7 @@ func TestGlanceStageClosedOptionsAndPreflight(t *testing.T) {
 		}, resource.ErrInvalidOption},
 		{"source changed by option", func(c *testcloud.Cloud, d *glanceStageReader) (*imagedata.StageImageResult, error) {
 			client := c.Client("image", glanceStagePrefix)
-			return imagedata.New(client).StageImage(context.Background(), resource.ID("selected"), d, func(*imagedata.StageOpts) error { client.Type = "compute"; return nil })
+			return imagedata.New(client).StageImage(context.Background(), resource.ID("selected"), d, request.Custom(func(*imagedata.StageOpts) error { client.Type = "compute"; return nil }))
 		}, resource.ErrUnsupported},
 	}
 	for _, tc := range cases {
@@ -758,13 +759,13 @@ func TestGlanceStageClosedOptionsAndPreflight(t *testing.T) {
 		{"negative size", []imagedata.StageOption{imagedata.WithStageSize(-1)}}, {"nil option", []imagedata.StageOption{nil}},
 		{"caller alias conflict", []imagedata.StageOption{imagedata.WithStageOpts(imagedata.StageOpts{Headers: map[string]string{"X-Trace": "first", "x-trace": "second"}})}},
 		{"bulk header alias conflict", []imagedata.StageOption{imagedata.WithStageHeaders(map[string]string{"X-Trace": "first", "x-trace": "second"})}},
-		{"bad header value", []imagedata.StageOption{imagedata.WithStageHeader("X-Trace", "bad\r\nvalue")}},
+		{"bad header value", []imagedata.StageOption{request.Header("X-Trace", "bad\r\nvalue")}},
 	}
 	for _, key := range []string{"Accept", "Content-Type", "X-OpenStack-Image-Size", "X-Auth-Token", "X-Service-Token", "Authorization", "OpenStack-API-Version", "Content-Length", "Transfer-Encoding"} {
 		options = append(options, struct {
 			name   string
 			values []imagedata.StageOption
-		}{key, []imagedata.StageOption{imagedata.WithStageHeader(key, "override")}})
+		}{key, []imagedata.StageOption{request.Header(key, "override")}})
 	}
 	for _, tc := range options {
 		t.Run(tc.name, func(t *testing.T) {
@@ -866,7 +867,7 @@ func TestGlanceStageLiveProviderFixedRoutesAndNativeABI(t *testing.T) {
 			cloud.Provider.SetToken("for-fetch")
 			w.WriteHeader(204)
 		})
-		v, err := imagedata.New(client).StageImage(context.WithValue(context.Background(), callerKey{}, "caller"), resource.ID("selected"), strings.NewReader("payload"), imagedata.WithStageHeader("X-Trace", "earlier"), imagedata.WithStageHeader("x-trace", "final"))
+		v, err := imagedata.New(client).StageImage(context.WithValue(context.Background(), callerKey{}, "caller"), resource.ID("selected"), strings.NewReader("payload"), request.Header("X-Trace", "earlier"), request.Header("x-trace", "final"))
 		if err != nil || v == nil || v.ImageID != "selected" || v.Image == nil || v.Image.ID != "actual-response-id" || v.Header.Get("X-Metadata") != "final" || gets.Load() != 4 || puts.Load() != 1 || middleware.Load() != 5 || reauth.Load() != 1 || retries.Load() != 1 || client.Endpoint != cloud.Server.URL+"/catalog/unused/" || client.ResourceBase != cloud.Server.URL+glanceStagePrefix || client.MoreHeaders["Content-Type"] != "application/metadata" || cloud.Provider.ReauthFunc == nil || cloud.Provider.RetryFunc == nil {
 			t.Fatal(v, err, gets.Load(), puts.Load(), middleware.Load(), reauth.Load(), retries.Load(), client)
 		}

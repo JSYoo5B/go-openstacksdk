@@ -15,6 +15,7 @@ import (
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/image"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -135,7 +136,7 @@ func TestConnectionImageUpdateFacadeOwnsPatchAndResponse(t *testing.T) {
 	properties := map[string]json.RawMessage{"number": json.RawMessage(`9007199254740995`), "null": json.RawMessage(`null`)}
 	policy := image.WithSetImagePropertiesProperties(properties)
 	properties["number"][0] = '1'
-	set, err := upper.SetImageProperties(ctx, resource.ID(id), policy, image.WithSetImagePropertiesProperty("bool", false), image.WithSetImagePropertiesHeader("X-Call", "properties"))
+	set, err := upper.SetImageProperties(ctx, resource.ID(id), policy, image.WithSetImagePropertiesProperty("bool", false), request.Header("X-Call", "properties"))
 	if err != nil || set == nil || set.Header.Get("X-Proof") != "1" || calls != 2 {
 		t.Fatal(set, err, calls)
 	}
@@ -143,7 +144,7 @@ func TestConnectionImageUpdateFacadeOwnsPatchAndResponse(t *testing.T) {
 	if err != nil || empty == nil || empty.Header.Get("X-Proof") != "2" || calls != 3 {
 		t.Fatal(empty, err, calls)
 	}
-	named, err := upper.UpdateImage(ctx, resource.Name("Ubuntu 24"), image.WithUpdateImageName("changed"), image.WithUpdateImageHeader("X-Call", "named"))
+	named, err := upper.UpdateImage(ctx, resource.Name("Ubuntu 24"), image.WithUpdateImageName("changed"), request.Header("X-Call", "named"))
 	if err != nil || named == nil || *named.ID != "passive-response" || named.Name != nil || string(named.Properties["properties"]) != "false" || calls != 5 {
 		t.Fatal(named, err, calls)
 	}

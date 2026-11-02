@@ -10,6 +10,7 @@ import (
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/image"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -70,7 +71,7 @@ func TestConnectionImageMembersShareClientAndConcreteDefaults(t *testing.T) {
 		t.Fatal("member workflows replaced shared native client")
 	}
 	parent := resource.ID("parent")
-	options := []image.ImageMemberOption{image.WithImageMemberOpts(image.ImageMemberOpts{Headers: map[string]string{"X-Call": "initial"}}), image.WithImageMemberHeader("X-Call", "intermediate"), image.WithImageMemberHeaders(map[string]string{"x-call": "members"})}
+	options := []image.ImageMemberOption{image.WithImageMemberOpts(image.ImageMemberOpts{Headers: map[string]string{"X-Call": "initial"}}), request.Header("X-Call", "intermediate"), image.WithImageMemberHeaders(map[string]string{"x-call": "members"})}
 	check := func(value *image.ImageMember, err error) {
 		t.Helper()
 		if err != nil || value == nil || value.StatusCode != 200 || value.MemberID == nil || *value.MemberID != "passive-other" || value.ImageID == nil || *value.ImageID != "passive-parent" || value.Status == nil || *value.Status != "future-status" || value.Schema == nil || *value.Schema != "https://foreign.test/member" || value.CreatedAt == nil || *value.CreatedAt != "2026-10-03T09:01:02.12345678901+09:00" || value.UpdatedAt != nil || value.Links != nil || string(value.Body["precision"]) != "9007199254740993" {
@@ -92,11 +93,11 @@ func TestConnectionImageMembersShareClientAndConcreteDefaults(t *testing.T) {
 	updated, err := service.UpdateImageMember(ctx, parent, "fixed", "accepted", options...)
 	check(updated, err)
 	advance()
-	findOptions := []image.FindImageMemberOption{image.WithFindImageMemberOpts(image.FindImageMemberOpts{Headers: map[string]string{"X-Call": "initial"}}), image.WithFindImageMemberHeader("X-Call", "intermediate"), image.WithFindImageMemberHeaders(map[string]string{"x-call": "members"}), image.WithFindImageMemberIgnoreMissing(false)}
+	findOptions := []image.FindImageMemberOption{image.WithFindImageMemberOpts(image.FindImageMemberOpts{Headers: map[string]string{"X-Call": "initial"}}), request.Header("X-Call", "intermediate"), image.WithFindImageMemberHeaders(map[string]string{"x-call": "members"}), request.IgnoreMissing(false)}
 	found, err := service.FindImageMember(ctx, parent, "fixed", findOptions...)
 	check(found, err)
 	advance()
-	listOptions := []image.ListImageMembersOption{image.WithListImageMembersOpts(image.ListImageMembersOpts{Headers: map[string]string{"X-Call": "initial"}}), image.WithListImageMembersHeader("X-Call", "intermediate"), image.WithListImageMembersHeaders(map[string]string{"x-call": "members"}), image.WithListImageMembersMaxItems(1)}
+	listOptions := []image.ListImageMembersOption{image.WithListImageMembersOpts(image.ListImageMembersOpts{Headers: map[string]string{"X-Call": "initial"}}), request.Header("X-Call", "intermediate"), image.WithListImageMembersHeaders(map[string]string{"x-call": "members"}), request.MaxItems(1)}
 	sequence := service.ListImageMembers(ctx, parent, listOptions...)
 	if calls != 4 {
 		t.Fatal("member iterator sent an eager request")
@@ -119,7 +120,7 @@ func TestConnectionImageMembersShareClientAndConcreteDefaults(t *testing.T) {
 		t.Fatal("list row headers alias")
 	}
 	advance()
-	deleteOptions := []image.RemoveImageMemberOption{image.WithRemoveImageMemberOpts(image.RemoveImageMemberOpts{Headers: map[string]string{"X-Call": "initial"}}), image.WithRemoveImageMemberHeader("X-Call", "intermediate"), image.WithRemoveImageMemberHeaders(map[string]string{"x-call": "members"}), image.WithRemoveImageMemberIgnoreMissing(false)}
+	deleteOptions := []image.RemoveImageMemberOption{image.WithRemoveImageMemberOpts(image.RemoveImageMemberOpts{Headers: map[string]string{"X-Call": "initial"}}), request.Header("X-Call", "intermediate"), image.WithRemoveImageMemberHeaders(map[string]string{"x-call": "members"}), request.IgnoreMissing(false)}
 	deleted, err := service.RemoveImageMember(ctx, parent, "fixed", deleteOptions...)
 	if err != nil || deleted == nil || deleted.ImageID != "parent" || deleted.MemberID != "fixed" || deleted.StatusCode != 204 || string(deleted.Body) != "opaque deletion" {
 		t.Fatalf("delete=%+v err=%v", deleted, err)

@@ -15,7 +15,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadeftags.API.InNamespace`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadeftags.NamespaceScope.Create`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadeftags.WithCreateOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadeftags.WithCreateHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadeftags.WithCreateHeaders`
 
 - InNamespace is zeroHTTP and captures required literal namespace plus original API/client/provider/type/endpoint/base/microversion for scope lifetime. Parent and route child are nonempty validUTF8<=80runes with route-breaking/control/dot syntax rejected, colons/Unicode/spaces preserved and escaped once. No parent lookup/Ref/find/search/returned identity routing. Before callbacks and after accepted handling source/context stay fixed, per-request ordinary headers are newly copied and authentication remains live from original provider.
@@ -52,7 +52,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadeftags.API.InNamespace`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadeftags.NamespaceScope.Delete`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadeftags.WithDeleteOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadeftags.WithDeleteHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadeftags.WithDeleteHeaders`
 
 - InNamespace is zeroHTTP and captures required literal namespace plus original API/client/provider/type/endpoint/base/microversion for scope lifetime. Parent and route child are nonempty validUTF8<=80runes with route-breaking/control/dot syntax rejected, colons/Unicode/spaces preserved and escaped once. No parent lookup/Ref/find/search/returned identity routing. Before callbacks and after accepted handling source/context stay fixed, per-request ordinary headers are newly copied and authentication remains live from original provider.
@@ -87,7 +87,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadeftags.API.InNamespace`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadeftags.NamespaceScope.DeleteAll`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadeftags.WithDeleteAllOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadeftags.WithDeleteAllHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadeftags.WithDeleteAllHeaders`
 
 - InNamespace is zeroHTTP and captures required literal namespace plus original API/client/provider/type/endpoint/base/microversion for scope lifetime. Parent and route child are nonempty validUTF8<=80runes with route-breaking/control/dot syntax rejected, colons/Unicode/spaces preserved and escaped once. No parent lookup/Ref/find/search/returned identity routing. Before callbacks and after accepted handling source/context stay fixed, per-request ordinary headers are newly copied and authentication remains live from original provider.
@@ -125,6 +125,7 @@ import (
 
     "github.com/JSYoo5B/go-openstacksdk/image"
     "github.com/JSYoo5B/go-openstacksdk/image/v2/metadeftags"
+    "github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 type TagEvidence struct {
@@ -143,36 +144,36 @@ func manageNamespaceTags(ctx context.Context, service *image.Service, namespace,
     if err != nil { return out, err }
     out.Created, err = scope.Create(ctx, current,
         metadeftags.WithCreateOpts(metadeftags.CreateOpts{}),
-        metadeftags.WithCreateHeader("X-Request-Source", "example"),
+        request.Header("X-Request-Source", "example"),
         metadeftags.WithCreateHeaders(map[string]string{"X-Trace": "create"}))
     if err != nil { return out, err }
     out.Read, err = scope.Get(ctx, current,
         metadeftags.WithGetOpts(metadeftags.GetOpts{}),
-        metadeftags.WithGetHeader("X-Request-Source", "example"),
+        request.Header("X-Request-Source", "example"),
         metadeftags.WithGetHeaders(map[string]string{"X-Trace": "get"}))
     if err != nil { return out, err }
     out.Updated, err = scope.Update(ctx, current,
         metadeftags.WithUpdateOpts(metadeftags.UpdateOpts{}),
-        metadeftags.WithUpdateHeader("X-Request-Source", "example"),
+        request.Header("X-Request-Source", "example"),
         metadeftags.WithUpdateHeaders(map[string]string{"X-Trace": "update"}),
         metadeftags.WithUpdateName(replacement))
     if err != nil { return out, err }
     out.Set, err = scope.Set(ctx, setNames,
         metadeftags.WithSetOpts(metadeftags.SetOpts{}),
-        metadeftags.WithSetHeader("X-Request-Source", "example"),
+        request.Header("X-Request-Source", "example"),
         metadeftags.WithSetHeaders(map[string]string{"X-Trace": "set"}),
         metadeftags.WithSetAppend(true))
     if err != nil { return out, err }
 
     listOptions := []metadeftags.ListOption{
         metadeftags.WithListOpts(metadeftags.ListOpts{}),
-        metadeftags.WithListHeader("X-Request-Source", "example"),
+        request.Header("X-Request-Source", "example"),
         metadeftags.WithListHeaders(map[string]string{"X-Trace": "list"}),
-        metadeftags.WithListLimit(2),
-        metadeftags.WithListMarker(""),
+        request.Limit(2),
+        request.Marker(""),
         metadeftags.WithListSortKey("name"),
         metadeftags.WithListSortDir("asc"),
-        metadeftags.WithListMaxItems(20),
+        request.MaxItems(20),
     }
     for row, listErr := range scope.List(ctx, listOptions...) {
         if listErr != nil { return out, listErr }
@@ -182,12 +183,12 @@ func manageNamespaceTags(ctx context.Context, service *image.Service, namespace,
     if err != nil { return out, err }
     out.Deleted, err = scope.Delete(ctx, replacement,
         metadeftags.WithDeleteOpts(metadeftags.DeleteOpts{}),
-        metadeftags.WithDeleteHeader("X-Request-Source", "example"),
+        request.Header("X-Request-Source", "example"),
         metadeftags.WithDeleteHeaders(map[string]string{"X-Trace": "delete"}))
     if err != nil || !clearNamespace { return out, err }
     out.Cleared, err = scope.DeleteAll(ctx,
         metadeftags.WithDeleteAllOpts(metadeftags.DeleteAllOpts{}),
-        metadeftags.WithDeleteAllHeader("X-Request-Source", "example"),
+        request.Header("X-Request-Source", "example"),
         metadeftags.WithDeleteAllHeaders(map[string]string{"X-Trace": "delete-all"}))
     return out, err
 }
