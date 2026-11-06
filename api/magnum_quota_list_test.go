@@ -52,7 +52,7 @@ func TestMagnumQuotaListPreservesAllTenantsExtensionsAndExactRowsAcrossPages(t *
 	})
 	api := quotas.New(cloud.Client("container-infrastructure-management", "/catalog"))
 	api.RawClient().ResourceBase = gophercloud.NormalizeURL(cloud.Server.URL + "/magnum/v1")
-	values, err := api.All(context.Background(), quotas.WithListOptions(quotas.ListOpts{Limit: 1}), quotas.WithListAllTenants(true), quotas.WithListQuery("vendor_filter", "requested"))
+	values, err := api.All(context.Background(), quotas.WithListOptions(quotas.ListOpts{Limit: 1}), quotas.WithListAllTenants(true), request.Query("vendor_filter", "requested"))
 	if err != nil || len(values) != 2 || calls.Load() != 3 {
 		t.Fatal(values, err, calls.Load())
 	}
@@ -80,7 +80,7 @@ func TestMagnumQuotaListOptionsSnapshotLazyAndReusable(t *testing.T) {
 	option := quotas.WithListOptions(quotas.ListOpts{Marker: "9007199254740993", SortKey: "resource", SortDir: "desc", AllTenants: &all})
 	all = false
 	var applied *bool
-	capture := func(config *request.Config[quotas.ListOpts]) error { applied = config.Options.AllTenants; return nil }
+	capture := request.Custom(func(config *request.Config[quotas.ListOpts]) error { applied = config.Options.AllTenants; return nil })
 	options := []quotas.ListOption{option, capture}
 	api := quotas.New(cloud.Client("container-infrastructure-management", "/magnum/v1"))
 	iterator := api.List(context.Background(), options...)
@@ -222,8 +222,8 @@ func TestMagnumQuotaListPreflightAndMalformedResponsesPreserveEvidence(t *testin
 		{nil}, {quotas.WithListOptions(quotas.ListOpts{Limit: -1})},
 		{quotas.WithListOptions(quotas.ListOpts{Marker: "0"})}, {quotas.WithListOptions(quotas.ListOpts{Marker: "project-id"})},
 		{quotas.WithListOptions(quotas.ListOpts{SortKey: " "})}, {quotas.WithListOptions(quotas.ListOpts{SortDir: "ASC"})},
-		{quotas.WithListQuery("all_tenants", "true")}, {quotas.WithListQuery("limit", "2")}, {quotas.WithListQuery("", "bad")},
-		{request.WithField[quotas.ListOpts]("field", 1)}, {request.WithHeader[quotas.ListOpts]("X-Test", "value")}, {request.WithArgument[quotas.ListOpts]("unsupported", true)},
+		{request.Query("all_tenants", "true")}, {request.Query("limit", "2")}, {request.Query("", "bad")},
+		{request.Custom(request.WithField[quotas.ListOpts]("field", 1))}, {request.Custom(request.WithHeader[quotas.ListOpts]("X-Test", "value"))}, {request.Custom(request.WithArgument[quotas.ListOpts]("unsupported", true))},
 	} {
 		if values, err := api.All(context.Background(), options...); values != nil || !errors.Is(err, resource.ErrInvalidOption) || calls.Load() != 0 {
 			t.Fatal(values, err, calls.Load())
@@ -254,7 +254,7 @@ func TestMagnumQuotaListRejectsScopeChangingLinksAndCycles(t *testing.T) {
 				calls.Add(1)
 				testcloud.JSON(w, 200, fmt.Sprintf(`{"quotas":[],"next":%q}`, link))
 			})
-			values, err := quotas.New(cloud.Client("container-infrastructure-management", "/magnum/v1")).All(context.Background(), quotas.WithListOptions(quotas.ListOpts{Limit: 1}), quotas.WithListAllTenants(true), quotas.WithListQuery("vendor_filter", "requested"))
+			values, err := quotas.New(cloud.Client("container-infrastructure-management", "/magnum/v1")).All(context.Background(), quotas.WithListOptions(quotas.ListOpts{Limit: 1}), quotas.WithListAllTenants(true), request.Query("vendor_filter", "requested"))
 			if values != nil || err == nil || calls.Load() != 1 {
 				t.Fatal(values, err, calls.Load())
 			}

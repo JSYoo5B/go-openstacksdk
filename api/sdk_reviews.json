@@ -5438,7 +5438,7 @@
         "github.com/JSYoo5B/go-openstacksdk/containerinfra/v1/quotas.ResourceQuotaScope.Create",
         "github.com/JSYoo5B/go-openstacksdk/containerinfra/v1/quotas.WithHardLimit",
         "github.com/JSYoo5B/go-openstacksdk/containerinfra/v1/quotas.WithQuotaCreateOptions",
-        "github.com/JSYoo5B/go-openstacksdk/containerinfra/v1/quotas.WithQuotaCreateField"
+        "github.com/JSYoo5B/go-openstacksdk/request.Field"
       ],
       "contracts": [
         {

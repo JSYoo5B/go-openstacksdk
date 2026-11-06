@@ -13,6 +13,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
@@ -29,27 +30,32 @@ type ListOpts struct {
 	AllTenants *bool
 }
 
-type ListOption = request.Option[ListOpts]
+// ListOption is one option of List and All: WithListOptions,
+// WithListAllTenants, request.Query with a string or []string value (a
+// deployment query extension the server validates; typed core parameters
+// cannot be overwritten) or request.Custom over *request.Config[ListOpts].
+// The page limit and marker are ListOpts members; request.Limit,
+// request.Marker and other shared calls fail with resource.ErrInvalidOption
+// before HTTP.
+type ListOption = request.ListCall
+
+var listCalls = calls.Spec[request.Config[ListOpts]]{Query: calls.ConfigQuery[ListOpts]}
 
 func WithListOptions(value ListOpts) ListOption {
 	value = cloneListOptions(value)
-	return func(config *request.Config[ListOpts]) error {
+	return request.Custom(func(config *request.Config[ListOpts]) error {
 		config.Options = cloneListOptions(value)
 		return nil
-	}
+	})
 }
 
 func WithListAllTenants(value bool) ListOption {
-	return func(config *request.Config[ListOpts]) error {
+	return request.Custom(func(config *request.Config[ListOpts]) error {
 		copy := value
 		config.Options.AllTenants = &copy
 		return nil
-	}
+	})
 }
-
-// WithListQuery adds a deployment query extension; typed core parameters cannot
-// be overwritten. The server validates whether an extension is supported.
-func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
 
 func cloneListOptions(value ListOpts) ListOpts {
 	if value.AllTenants != nil {
@@ -121,7 +127,7 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*QuotaR
 			yield(nil, quotaError("List", "", err))
 			return
 		}
-		config, err := request.Apply(ListOpts{}, options...)
+		config, err := calls.ApplyConfig(ListOpts{}, listCalls, options...)
 		if err == nil {
 			err = request.ValidateCapabilities(config, false, true, false)
 		}

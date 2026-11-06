@@ -18,7 +18,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/containerinfra/v1/quotas.ResourceQuotaScope.Create`
 - `github.com/JSYoo5B/go-openstacksdk/containerinfra/v1/quotas.WithHardLimit`
 - `github.com/JSYoo5B/go-openstacksdk/containerinfra/v1/quotas.WithQuotaCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/containerinfra/v1/quotas.WithQuotaCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
 - Explicit project IDs and resource names fix the compound quota target; exact project names resolve once through a separate Keystone client, and recorded v2/v3 auth fixes the current project without guessing from endpoints or response identity.
   Tests: `api/magnum_quota_create_test.go:TestMagnumQuotaScopeUsesSeparateIdentityAndRecordedAuth`, `connectiontest/connection_project_quotas_test.go:TestConnectionServiceQuotaNamesUseSeparateIdentityClient`, `connectiontest/connection_project_quotas_test.go:TestConnectionServiceQuotasIDAuthAndCancellation`.
@@ -46,7 +46,7 @@ func createClusterQuota(ctx context.Context, client *gophercloud.ServiceClient) 
     if err != nil { return err }
 
     quota, err := scope.Create(ctx, quotas.WithHardLimit(0),
-        quotas.WithQuotaCreateField("vendor", map[string]string{"tier": "small"}))
+        request.Field("vendor", map[string]string{"tier": "small"}))
     if err != nil { return err }
     fmt.Println(quota.RequestProjectID, quota.RequestResource,
         quota.ID, quota.HardLimit, quota.Header.Get("X-Openstack-Request-Id"))

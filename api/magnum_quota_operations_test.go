@@ -62,7 +62,7 @@ func TestMagnumQuotaScopedOperationsKeepProjectResourceBodyAndMetadata(t *testin
 		t.Fatal(value, err)
 	}
 	extension := map[string]string{"tier": "requested"}
-	field := quotas.WithQuotaUpdateField("vendor", extension)
+	field := request.Field("vendor", extension)
 	extension["tier"] = "caller-change"
 	updated, err := scope.Update(context.Background(), quotas.WithHardLimit(0), field)
 	if err != nil || updated == nil || updated.RequestProjectID != "project-fixed" || updated.RequestResource != quotas.Cluster || updated.StatusCode != 202 || updated.Header.Get("X-Openstack-Request-Id") != "quota-update" || updated.ID != "9007199254740993" || string(updated.Body["optional"]) != "null" {
@@ -117,10 +117,10 @@ func TestMagnumQuotaUpdateSnapshotRemainsExactAcrossReauthAndReuse(t *testing.T)
 	})
 	scope := newMagnumQuotaScope(t, cloud)
 	var applied *int
-	capture := func(config *request.Config[quotas.QuotaUpdateOpts]) error {
+	capture := request.Custom(func(config *request.Config[quotas.QuotaUpdateOpts]) error {
 		applied = config.Options.HardLimit
 		return nil
-	}
+	})
 	if _, err := scope.Update(context.Background(), option, capture); err != nil {
 		t.Fatal(err)
 	}
@@ -137,14 +137,14 @@ func TestMagnumQuotaOperationsPreflightRejectsInvalidOptionsAndNilScopes(t *test
 	scope := newMagnumQuotaScope(t, cloud)
 	for _, options := range [][]quotas.QuotaUpdateOption{
 		nil, {nil}, {quotas.WithQuotaUpdateOptions(quotas.QuotaUpdateOpts{})},
-		{quotas.WithHardLimit(0), quotas.WithQuotaUpdateField("hard_limit", 1)},
-		{quotas.WithHardLimit(0), quotas.WithQuotaUpdateField("project_id", "changed")},
-		{quotas.WithHardLimit(0), quotas.WithQuotaUpdateField("resource", "changed")},
-		{quotas.WithHardLimit(0), quotas.WithQuotaUpdateField("id", 1)},
-		{quotas.WithHardLimit(0), quotas.WithQuotaUpdateField("vendor", make(chan bool))},
-		{quotas.WithHardLimit(0), request.WithQuery[quotas.QuotaUpdateOpts]("all_tenants", "true")},
-		{quotas.WithHardLimit(0), request.WithHeader[quotas.QuotaUpdateOpts]("X-Vendor", "value")},
-		{quotas.WithHardLimit(0), request.WithArgument[quotas.QuotaUpdateOpts]("unsupported", true)},
+		{quotas.WithHardLimit(0), request.Field("hard_limit", 1)},
+		{quotas.WithHardLimit(0), request.Field("project_id", "changed")},
+		{quotas.WithHardLimit(0), request.Field("resource", "changed")},
+		{quotas.WithHardLimit(0), request.Field("id", 1)},
+		{quotas.WithHardLimit(0), request.Field("vendor", make(chan bool))},
+		{quotas.WithHardLimit(0), request.Custom(request.WithQuery[quotas.QuotaUpdateOpts]("all_tenants", "true"))},
+		{quotas.WithHardLimit(0), request.Custom(request.WithHeader[quotas.QuotaUpdateOpts]("X-Vendor", "value"))},
+		{quotas.WithHardLimit(0), request.Custom(request.WithArgument[quotas.QuotaUpdateOpts]("unsupported", true))},
 	} {
 		if value, err := scope.Update(context.Background(), options...); value != nil || !errors.Is(err, resource.ErrInvalidOption) || calls.Load() != 0 {
 			t.Fatal(value, err, calls.Load())
@@ -204,11 +204,11 @@ func TestMagnumQuotaOperationsHTTPPolicyAndStrictMissing(t *testing.T) {
 					t.Fatal(response, sdk, err)
 				}
 				if operation == "Delete" {
-					value, err := scope.Delete(context.Background(), quotas.WithDeleteIgnoreMissing(true))
+					value, err := scope.Delete(context.Background(), request.IgnoreMissing(true))
 					if value != nil || (err == nil) != (status == 404) {
 						t.Fatal(value, err)
 					}
-					_, err = scope.Delete(context.Background(), quotas.WithDeleteIgnoreMissing(true), quotas.WithDeleteIgnoreMissing(false))
+					_, err = scope.Delete(context.Background(), request.IgnoreMissing(true), request.IgnoreMissing(false))
 					if !gophercloud.ResponseCodeIs(err, status) {
 						t.Fatal(err)
 					}

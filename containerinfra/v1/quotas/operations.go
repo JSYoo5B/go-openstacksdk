@@ -6,22 +6,22 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
 type QuotaUpdateOpts = QuotaCreateOpts
-type QuotaUpdateOption = request.Option[QuotaUpdateOpts]
+
+// QuotaUpdateOption is one option of Update; it accepts the same calls as
+// QuotaCreateOption.
+type QuotaUpdateOption = request.WriteCall
 
 // WithQuotaUpdateOptions snapshots the hard limit at construction, replacing
 // typed update attributes. WithHardLimit can also be used for an update.
 func WithQuotaUpdateOptions(value QuotaUpdateOpts) QuotaUpdateOption {
 	return WithQuotaCreateOptions(value)
-}
-
-func WithQuotaUpdateField(key string, value any) QuotaUpdateOption {
-	return WithQuotaCreateField(key, value)
 }
 
 func (s *ResourceQuotaScope) validate(ctx context.Context) error {
@@ -58,7 +58,7 @@ func (s *ResourceQuotaScope) Update(ctx context.Context, options ...QuotaUpdateO
 	if err := s.validate(ctx); err != nil {
 		return nil, quotaError("Update", s.ProjectID(), err)
 	}
-	config, err := request.Apply(QuotaUpdateOpts{}, options...)
+	config, err := calls.ApplyConfig(QuotaUpdateOpts{}, quotaWriteCalls, options...)
 	if err == nil {
 		err = request.ValidateCapabilities(config, true, false, false)
 	}
@@ -94,11 +94,13 @@ func (s *ResourceQuotaScope) Update(ctx context.Context, options ...QuotaUpdateO
 }
 
 type deleteOptions struct{ ignoreMissing bool }
-type DeleteOption func(*deleteOptions) error
 
-func WithDeleteIgnoreMissing(ignore bool) DeleteOption {
-	return func(options *deleteOptions) error { options.ignoreMissing = ignore; return nil }
-}
+// DeleteOption is one option of Delete: request.IgnoreMissing, which
+// suppresses only HTTP 404. Delete is strict by default and the last option
+// wins. Other shared calls fail with resource.ErrInvalidOption before HTTP.
+type DeleteOption = request.DeleteCall
+
+var deleteCalls = calls.Spec[deleteOptions]{IgnoreMissing: calls.Value(func(o *deleteOptions) *bool { return &o.ignoreMissing })}
 
 type DeleteResponse struct {
 	ProjectID    string
@@ -114,7 +116,7 @@ func (s *ResourceQuotaScope) Delete(ctx context.Context, options ...DeleteOption
 		return nil, quotaError("Delete", s.ProjectID(), err)
 	}
 	var config deleteOptions
-	for _, apply := range options {
+	for _, apply := range calls.Translate(options, deleteCalls) {
 		if apply == nil {
 			return nil, quotaError("Delete", s.projectID, fmt.Errorf("%w: nil delete option", resource.ErrInvalidOption))
 		}

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
@@ -16,25 +17,32 @@ type QuotaCreateOpts struct {
 	HardLimit *int `json:"hard_limit"`
 }
 
-type QuotaCreateOption = request.Option[QuotaCreateOpts]
+// QuotaCreateOption is one option of Create and Update: WithHardLimit,
+// WithQuotaCreateOptions, request.Field (an additional deployment JSON field;
+// core quota attributes and scope identity cannot be replaced) or
+// request.Custom over *request.Config[QuotaCreateOpts]. Other shared calls
+// fail with resource.ErrInvalidOption before HTTP.
+type QuotaCreateOption = request.WriteCall
+
+var quotaWriteCalls = calls.Spec[request.Config[QuotaCreateOpts]]{Field: calls.ConfigField[QuotaCreateOpts]}
 
 // WithHardLimit supplies an exact integer without requiring a pointer variable.
 func WithHardLimit(value int) QuotaCreateOption {
-	return func(config *request.Config[QuotaCreateOpts]) error {
+	return request.Custom(func(config *request.Config[QuotaCreateOpts]) error {
 		copy := value
 		config.Options.HardLimit = &copy
 		return nil
-	}
+	})
 }
 
 // WithQuotaCreateOptions snapshots its pointer at option construction and gives
 // each application a private copy. It replaces all typed create attributes.
 func WithQuotaCreateOptions(value QuotaCreateOpts) QuotaCreateOption {
 	copy := cloneCreateOptions(value)
-	return func(config *request.Config[QuotaCreateOpts]) error {
+	return request.Custom(func(config *request.Config[QuotaCreateOpts]) error {
 		config.Options = cloneCreateOptions(copy)
 		return nil
-	}
+	})
 }
 
 func cloneCreateOptions(value QuotaCreateOpts) QuotaCreateOpts {
@@ -43,12 +51,6 @@ func cloneCreateOptions(value QuotaCreateOpts) QuotaCreateOpts {
 		value.HardLimit = &copy
 	}
 	return value
-}
-
-// WithQuotaCreateField snapshots additional deployment JSON fields. Core quota
-// attributes and scope identity cannot be replaced through extension fields.
-func WithQuotaCreateField(key string, value any) QuotaCreateOption {
-	return request.WithField[QuotaCreateOpts](key, value)
 }
 
 // Create posts a quota with this scope's fixed project and resource. It retains
@@ -60,7 +62,7 @@ func (s *ResourceQuotaScope) Create(ctx context.Context, options ...QuotaCreateO
 	if err := s.api.validateQuotaClient(ctx); err != nil {
 		return nil, quotaError("Create", s.projectID, err)
 	}
-	config, err := request.Apply(QuotaCreateOpts{}, options...)
+	config, err := calls.ApplyConfig(QuotaCreateOpts{}, quotaWriteCalls, options...)
 	if err == nil {
 		err = request.ValidateCapabilities(config, true, false, false)
 	}
