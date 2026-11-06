@@ -6,10 +6,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"maps"
 	"net/http"
 	"slices"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/neutronfind"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -112,7 +112,13 @@ type RecordFindOpts struct {
 	Query         map[string]json.RawMessage
 	Headers       map[string]string
 }
-type RecordFindOption func(*RecordFindOpts) error
+
+// RecordFindOption is one option of FindRecord: WithRecordFindOpts,
+// request.IgnoreMissing, request.Query (one Python kwarg as JSON; its marshal
+// error is returned when applied), request.Microversion, request.Headers
+// (replaces the headers) or request.Custom over *RecordFindOpts. Other shared
+// calls fail with resource.ErrInvalidOption before HTTP.
+type RecordFindOption = request.FindCall
 
 func internalFindOpts(value RecordFindOpts) neutronfind.Options {
 	return neutronfind.Options{IgnoreMissing: value.IgnoreMissing, Microversion: value.Microversion, Query: value.Query, Headers: value.Headers, Order: value.queryOrder}
@@ -126,34 +132,27 @@ func copyFindOpts(value RecordFindOpts) RecordFindOpts {
 
 func WithRecordFindOpts(value RecordFindOpts) RecordFindOption {
 	owned := copyFindOpts(value)
-	return func(c *RecordFindOpts) error { *c = copyFindOpts(owned); return nil }
+	return request.Custom(func(c *RecordFindOpts) error { *c = copyFindOpts(owned); return nil })
 }
-func WithRecordFindIgnoreMissing(value bool) RecordFindOption {
-	return func(c *RecordFindOpts) error { x := value; c.IgnoreMissing = &x; return nil }
-}
-func WithRecordFindQuery(key string, value any) RecordFindOption {
-	raw, err := json.Marshal(value)
-	owned := bytes.Clone(raw)
-	return func(c *RecordFindOpts) error {
-		if err != nil {
-			return err
+
+// recordFindCalls interprets the shared calls of FindRecord.
+var recordFindCalls = calls.Spec[RecordFindOpts]{
+	IgnoreMissing: calls.Pointer(func(c *RecordFindOpts) **bool { return &c.IgnoreMissing }),
+	Query: func(c *RecordFindOpts, entry request.CallEntry) error {
+		if entry.JSONErr != nil {
+			return entry.JSONErr
 		}
 		if c.Query == nil {
 			c.Query = make(map[string]json.RawMessage)
 		}
-		c.Query[key] = bytes.Clone(owned)
-		if !slices.Contains(c.queryOrder, key) {
-			c.queryOrder = append(c.queryOrder, key)
+		c.Query[entry.Key] = bytes.Clone(entry.JSON)
+		if !slices.Contains(c.queryOrder, entry.Key) {
+			c.queryOrder = append(c.queryOrder, entry.Key)
 		}
 		return nil
-	}
-}
-func WithRecordFindMicroversion(value string) RecordFindOption {
-	return func(c *RecordFindOpts) error { x := value; c.Microversion = &x; return nil }
-}
-func WithRecordFindHeaders(value map[string]string) RecordFindOption {
-	owned := maps.Clone(value)
-	return func(c *RecordFindOpts) error { c.Headers = maps.Clone(owned); return nil }
+	},
+	Microversion: calls.Pointer(func(c *RecordFindOpts) **string { return &c.Microversion }),
+	Headers:      calls.Value(func(c *RecordFindOpts) *map[string]string { return &c.Headers }),
 }
 
 // FindRecord matches the pinned Source GET-first, complete ID-or-name search.
@@ -180,7 +179,7 @@ func (a *API) FindRecord(ctx context.Context, identity string, options ...Record
 	}
 	guard := engine.Check
 	policy := RecordFindOpts{}
-	for _, apply := range slices.Clone(options) {
+	for _, apply := range calls.Translate(options, recordFindCalls) {
 		if err := guard(ctx); err != nil {
 			return nil, wrap(err)
 		}

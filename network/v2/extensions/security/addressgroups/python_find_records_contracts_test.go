@@ -5,15 +5,17 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups"
-	"github.com/JSYoo5B/go-openstacksdk/resource"
-	"github.com/gophercloud/gophercloud/v2"
 	"io"
 	"net/http"
 	"net/url"
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups"
+	"github.com/JSYoo5B/go-openstacksdk/request"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
+	"github.com/gophercloud/gophercloud/v2"
 )
 
 func pythonFindField(t *testing.T, value *addressgroups.AddressGroupFindRecord, key, want string) {
@@ -46,7 +48,7 @@ func TestPythonAddressGroupFindRecordMemberSeedDefaultsAndActualEvidence(t *test
 			response.Header.Set("X-Request-Id", "receipt")
 			return response
 		})
-		got, err := api.FindRecord(context.Background(), "literal/id %2F", addressgroups.WithRecordFindQuery("x_seed", map[string]any{"nested": nil}), addressgroups.WithRecordFindQuery("name", "seed"), addressgroups.WithRecordFindQuery("if_match", "seed-header"))
+		got, err := api.FindRecord(context.Background(), "literal/id %2F", request.Query("x_seed", map[string]any{"nested": nil}), request.Query("name", "seed"), request.Query("if_match", "seed-header"))
 		if err != nil || got == nil || len(calls) != 1 || calls[0].body != "" || got.StatusCode != 203 || string(got.Envelope) != body || got.Header.Get("X-Request-Id") != "receipt" {
 			t.Fatal(got, err, calls)
 		}
@@ -97,7 +99,7 @@ func TestPythonAddressGroupFindRecordFallbackQueryMappingAndLocalFilters(t *test
 		listed = req.URL.Query()
 		return nativeGroupWire(200, `{"address_groups":[{"id":"filtered","name":"target","tenant_id":2},{"id":"match","name":"target","tenant_id":1,"x_extension":null}]}`)
 	})
-	got, err := api.FindRecord(context.Background(), "target", addressgroups.WithRecordFindQuery("x_unknown", "keep"), addressgroups.WithRecordFindQuery("all_projects", true), addressgroups.WithRecordFindQuery("fields", []string{"id", "name"}), addressgroups.WithRecordFindQuery("tenant_id", true), addressgroups.WithRecordFindQuery("is_admin_state_up", false), addressgroups.WithRecordFindQuery("admin_state_up", true), addressgroups.WithRecordFindQuery("any_tags", []string{"red", "blue"}), addressgroups.WithRecordFindQuery("not_any_tags", "black"), addressgroups.WithRecordFindQuery("sort_key", "name"), addressgroups.WithRecordFindQuery("sort_dir", "asc"))
+	got, err := api.FindRecord(context.Background(), "target", request.Query("x_unknown", "keep"), request.Query("all_projects", true), request.Query("fields", []string{"id", "name"}), request.Query("tenant_id", true), request.Query("is_admin_state_up", false), request.Query("admin_state_up", true), request.Query("any_tags", []string{"red", "blue"}), request.Query("not_any_tags", "black"), request.Query("sort_key", "name"), request.Query("sort_dir", "asc"))
 	if err != nil || got == nil || len(calls) != 2 {
 		t.Fatal(got, err, calls)
 	}
@@ -134,7 +136,7 @@ func TestPythonAddressGroupFindRecordNamePresenceMissingAndPassiveResponseID(t *
 				})
 				options := []addressgroups.RecordFindOption{}
 				if testcase.supplied {
-					options = append(options, addressgroups.WithRecordFindQuery("name", testcase.value))
+					options = append(options, request.Query("name", testcase.value))
 				}
 				got, err := api.FindRecord(context.Background(), "target", options...)
 				if err != nil || got != nil || len(calls) != 2 {
@@ -168,7 +170,7 @@ func TestPythonAddressGroupFindRecordNamePresenceMissingAndPassiveResponseID(t *
 			}
 			return nativeGroupWire(status, body)
 		})
-		got, err := api.FindRecord(context.Background(), "target", addressgroups.WithRecordFindIgnoreMissing(false))
+		got, err := api.FindRecord(context.Background(), "target", request.IgnoreMissing(false))
 		if got != nil || err == nil || (status == 200 && !errors.Is(err, resource.ErrNotFound)) || len(calls) != 2 {
 			t.Fatal(got, err, calls)
 		}
@@ -234,7 +236,7 @@ func TestPythonAddressGroupFindRecordLateDuplicateErrorMarkerAndRawCap(t *testin
 			}
 			return nativeGroupWire(200, `{"address_groups":[{"id":7,"name":"target"}]}`)
 		})
-		got, err := api.FindRecord(context.Background(), "target", addressgroups.WithRecordFindQuery("limit", 2), addressgroups.WithRecordFindQuery("tags", []string{"a", "b"}))
+		got, err := api.FindRecord(context.Background(), "target", request.Query("limit", 2), request.Query("tags", []string{"a", "b"}))
 		if err != nil || got == nil || len(calls) != 3 {
 			t.Fatal(got, err, calls)
 		}
@@ -251,7 +253,7 @@ func TestPythonAddressGroupFindRecordLateDuplicateErrorMarkerAndRawCap(t *testin
 			}
 			return nativeGroupWire(200, `{"address_groups":[{"id":"filtered","name":"target","tenant_id":2},{"id":"match","name":"target","tenant_id":1}],"address_groups_links":[{"rel":"next","href":"?marker=late"}]}`)
 		})
-		got, err := api.FindRecord(context.Background(), "target", addressgroups.WithRecordFindQuery("max_items", 1), addressgroups.WithRecordFindQuery("tenant_id", true))
+		got, err := api.FindRecord(context.Background(), "target", request.Query("max_items", 1), request.Query("tenant_id", true))
 		if err != nil || got != nil || len(calls) != 2 {
 			t.Fatal(got, err, calls)
 		}
@@ -268,7 +270,7 @@ func TestPythonAddressGroupFindRecordOptionSnapshotsAndPreflightGuards(t *testin
 	delete(query, "x_seed")
 	headers["X-Trace"] = "changed"
 	ignore = true
-	fieldOption := addressgroups.WithRecordFindQuery("fields", fields)
+	fieldOption := request.Query("fields", fields)
 	fields[0] = "changed"
 	var escaped *addressgroups.RecordFindOpts
 	var calls []nativeGroupCall
@@ -280,7 +282,7 @@ func TestPythonAddressGroupFindRecordOptionSnapshotsAndPreflightGuards(t *testin
 		escaped.Headers["X-Trace"] = "callback changed"
 		return nativeGroupWire(200, `{"address_group":{}}`)
 	})
-	got, err := api.FindRecord(context.Background(), "target", options, fieldOption, func(c *addressgroups.RecordFindOpts) error { escaped = c; return nil })
+	got, err := api.FindRecord(context.Background(), "target", options, fieldOption, request.Custom(func(c *addressgroups.RecordFindOpts) error { escaped = c; return nil }))
 	if err != nil || got == nil || len(calls) != 1 {
 		t.Fatal(got, err, calls)
 	}
@@ -292,15 +294,15 @@ func TestPythonAddressGroupFindRecordOptionSnapshotsAndPreflightGuards(t *testin
 	}{
 		{"nil", []addressgroups.RecordFindOption{nil}, resource.ErrInvalidOption},
 		{"malformed JSON", []addressgroups.RecordFindOption{addressgroups.WithRecordFindOpts(addressgroups.RecordFindOpts{Query: map[string]json.RawMessage{"fields": json.RawMessage(`[`)}})}, resource.ErrInvalidOption},
-		{"negative cap", []addressgroups.RecordFindOption{addressgroups.WithRecordFindQuery("max_items", -1)}, resource.ErrInvalidOption},
+		{"negative cap", []addressgroups.RecordFindOption{request.Query("max_items", -1)}, resource.ErrInvalidOption},
 		{"bad page flag", []addressgroups.RecordFindOption{addressgroups.WithRecordFindOpts(addressgroups.RecordFindOpts{Query: map[string]json.RawMessage{"paginated": json.RawMessage(`bad flag`)}})}, resource.ErrInvalidOption},
-		{"identity keyword collision", []addressgroups.RecordFindOption{addressgroups.WithRecordFindQuery("id", "different")}, resource.ErrInvalidOption},
-		{"route override", []addressgroups.RecordFindOption{addressgroups.WithRecordFindQuery("base_path", "/other")}, resource.ErrInvalidOption},
-		{"fetch requires_id control", []addressgroups.RecordFindOption{addressgroups.WithRecordFindQuery("requires_id", false)}, resource.ErrInvalidOption},
-		{"fetch error_message control", []addressgroups.RecordFindOption{addressgroups.WithRecordFindQuery("error_message", "changed")}, resource.ErrInvalidOption},
-		{"fetch cache control", []addressgroups.RecordFindOption{addressgroups.WithRecordFindQuery("skip_cache", true)}, resource.ErrInvalidOption},
-		{"fetch response envelope control", []addressgroups.RecordFindOption{addressgroups.WithRecordFindQuery("resource_response_key", "other")}, resource.ErrInvalidOption},
-		{"protected Header", []addressgroups.RecordFindOption{addressgroups.WithRecordFindHeaders(map[string]string{"X-Auth-Token": "different"})}, resource.ErrInvalidOption},
+		{"identity keyword collision", []addressgroups.RecordFindOption{request.Query("id", "different")}, resource.ErrInvalidOption},
+		{"route override", []addressgroups.RecordFindOption{request.Query("base_path", "/other")}, resource.ErrInvalidOption},
+		{"fetch requires_id control", []addressgroups.RecordFindOption{request.Query("requires_id", false)}, resource.ErrInvalidOption},
+		{"fetch error_message control", []addressgroups.RecordFindOption{request.Query("error_message", "changed")}, resource.ErrInvalidOption},
+		{"fetch cache control", []addressgroups.RecordFindOption{request.Query("skip_cache", true)}, resource.ErrInvalidOption},
+		{"fetch response envelope control", []addressgroups.RecordFindOption{request.Query("resource_response_key", "other")}, resource.ErrInvalidOption},
+		{"protected Header", []addressgroups.RecordFindOption{request.Headers(map[string]string{"X-Auth-Token": "different"})}, resource.ErrInvalidOption},
 	} {
 		t.Run(testcase.name, func(t *testing.T) {
 			var calls []nativeGroupCall
@@ -314,7 +316,7 @@ func TestPythonAddressGroupFindRecordOptionSnapshotsAndPreflightGuards(t *testin
 	t.Run("source mutation is sticky", func(t *testing.T) {
 		var calls []nativeGroupCall
 		api := pythonFindAPI(t, &calls, func(*http.Request) *http.Response { t.Fatal("unexpected HTTP"); return nil })
-		got, err := api.FindRecord(context.Background(), "target", func(*addressgroups.RecordFindOpts) error { api.RawClient().ResourceBase += "changed/"; return nil })
+		got, err := api.FindRecord(context.Background(), "target", request.Custom(func(*addressgroups.RecordFindOpts) error { api.RawClient().ResourceBase += "changed/"; return nil }))
 		if got != nil || !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
 			t.Fatal(got, err, calls)
 		}
@@ -504,7 +506,7 @@ func TestPythonAddressGroupFindRecordMalformedPagesAndDetachedExtensionEvidence(
 	}
 	var calls []nativeGroupCall
 	api := pythonFindAPI(t, &calls, func(*http.Request) *http.Response { return nativeGroupWire(202, "not JSON") })
-	got, err := api.FindRecord(context.Background(), "target", addressgroups.WithRecordFindQuery("x_extension", []any{nil, 9007199254740993}))
+	got, err := api.FindRecord(context.Background(), "target", request.Query("x_extension", []any{nil, 9007199254740993}))
 	if err != nil || got == nil || got.Wire != nil || string(got.Envelope) != "not JSON" || len(calls) != 1 {
 		t.Fatal(got, err, calls)
 	}
@@ -596,7 +598,7 @@ func TestPythonAddressGroupFindRecordLiveReauthenticationAndMicroversionOwnershi
 	}
 	var none []nativeGroupCall
 	invalid := pythonFindAPI(t, &none, func(*http.Request) *http.Response { t.Fatal("invalid version HTTP"); return nil })
-	got, err = invalid.FindRecord(context.Background(), "target", addressgroups.WithRecordFindMicroversion("2.1\r\nchanged"))
+	got, err = invalid.FindRecord(context.Background(), "target", request.Microversion("2.1\r\nchanged"))
 	if got != nil || !errors.Is(err, resource.ErrInvalidOption) || len(none) != 0 {
 		t.Fatal(got, err, none)
 	}
@@ -626,7 +628,7 @@ func TestPythonAddressGroupFindRecordDictionaryTruthinessShortCircuitAndFailureR
 				response.Header.Set("X-Request-Id", "dict-filter")
 				return response
 			})
-			got, err := api.FindRecord(context.Background(), "target", addressgroups.WithRecordFindQuery("tenant_id", json.RawMessage(testcase.filter)))
+			got, err := api.FindRecord(context.Background(), "target", request.Query("tenant_id", json.RawMessage(testcase.filter)))
 			if len(calls) != 2 {
 				t.Fatal(got, err, calls)
 			}
@@ -661,7 +663,7 @@ func TestPythonAddressGroupFindRecordPaginationTruthiness(t *testing.T) {
 				}
 				return nativeGroupWire(200, `{"address_groups":[{"id":"match","name":"target"}],"next":"?marker=next"}`)
 			})
-			got, err := api.FindRecord(context.Background(), "target", addressgroups.WithRecordFindQuery("paginated", testcase.flag))
+			got, err := api.FindRecord(context.Background(), "target", request.Query("paginated", testcase.flag))
 			if err != nil || got == nil || len(calls) != testcase.pages+1 {
 				t.Fatal(got, err, calls)
 			}
@@ -685,7 +687,7 @@ func TestPythonAddressGroupFindRecordListAcceptAndRetryVersionPolicy(t *testing.
 			options := []addressgroups.RecordFindOption{}
 			want := []string{"text/xml", "application/json"}
 			if explicit {
-				options = append(options, addressgroups.WithRecordFindHeaders(map[string]string{"Accept": "text/plain"}))
+				options = append(options, request.Headers(map[string]string{"Accept": "text/plain"}))
 				want = []string{"text/plain", "text/plain"}
 			}
 			got, err := api.FindRecord(context.Background(), "target", options...)
@@ -712,7 +714,7 @@ func TestPythonAddressGroupFindRecordListAcceptAndRetryVersionPolicy(t *testing.
 			}
 			options := []addressgroups.RecordFindOption{}
 			if version != "" {
-				options = append(options, addressgroups.WithRecordFindMicroversion(version))
+				options = append(options, request.Microversion(version))
 			}
 			got, err := api.FindRecord(context.Background(), "target", options...)
 			var native gophercloud.ErrUnexpectedResponseCode
@@ -781,7 +783,7 @@ func TestPythonAddressGroupFindRecordLocalFilterDescriptorAndAliasOrder(t *testi
 			}
 			return nativeGroupWire(200, `{"address_groups":[{"id":"match","name":"target","addresses":`+testcase.actual+`}]} `)
 		})
-		got, err := api.FindRecord(context.Background(), "target", addressgroups.WithRecordFindQuery("addresses", json.RawMessage(testcase.filter)))
+		got, err := api.FindRecord(context.Background(), "target", request.Query("addresses", json.RawMessage(testcase.filter)))
 		if err != nil || (got != nil) != testcase.match || len(calls) != 2 {
 			t.Fatal(testcase, got, err, calls)
 		}
@@ -805,7 +807,7 @@ func TestPythonAddressGroupFindRecordFallbackUsesSelectedVersionAndSourceReceipt
 		if selected != "" {
 			source.MoreHeaders["OpenStack-API-Version"] = "network " + selected
 		}
-		got, err := api.FindRecord(context.Background(), "target", addressgroups.WithRecordFindMicroversion("2.1"))
+		got, err := api.FindRecord(context.Background(), "target", request.Microversion("2.1"))
 		wantList := ""
 		if selected != "" {
 			wantList = "network " + selected
@@ -868,7 +870,7 @@ func TestPythonAddressGroupFindRecordSourceCancellationAndConstructorPreflight(t
 	var calls []nativeGroupCall
 	api := pythonFindAPI(t, &calls, func(*http.Request) *http.Response { t.Fatal("preflight made HTTP"); return nil })
 	for _, key := range []string{"connection", "session", "list_base_path", "microversion", "_synchronized", "resource_type", "self", "location", "__conflicting_attrs"} {
-		got, err := api.FindRecord(context.Background(), "target", addressgroups.WithRecordFindQuery(key, nil))
+		got, err := api.FindRecord(context.Background(), "target", request.Query(key, nil))
 		if got != nil || !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
 			t.Fatal(key, got, err, calls)
 		}
@@ -909,7 +911,7 @@ func TestPythonAddressGroupFindRecordFloatTruthinessKeepsWireAndExactComparisonB
 				}
 				return nativeGroupWire(200, body)
 			})
-			got, err := api.FindRecord(context.Background(), "target", addressgroups.WithRecordFindQuery("tenant_id", map[string]any{}))
+			got, err := api.FindRecord(context.Background(), "target", request.Query("tenant_id", map[string]any{}))
 			if err != nil || (got != nil) != testcase.truth || len(calls) != 2 {
 				t.Fatal(testcase, got, err, calls)
 			}
@@ -932,7 +934,7 @@ func TestPythonAddressGroupFindRecordFloatTruthinessKeepsWireAndExactComparisonB
 				}
 				return nativeGroupWire(200, `{"address_groups":[{"id":"match","name":"target"}],"next":"?marker=next"}`)
 			})
-			got, err := api.FindRecord(context.Background(), "target", addressgroups.WithRecordFindQuery("paginated", json.RawMessage(testcase.raw)))
+			got, err := api.FindRecord(context.Background(), "target", request.Query("paginated", json.RawMessage(testcase.raw)))
 			expected := 2
 			if testcase.truth {
 				expected = 3
@@ -958,7 +960,7 @@ func TestPythonAddressGroupFindRecordFloatTruthinessKeepsWireAndExactComparisonB
 				}
 				return nativeGroupWire(200, `{"address_groups":[{"id":"match","name":"target","tenant_id":`+testcase.actual+`}]}`)
 			})
-			got, err := api.FindRecord(context.Background(), "target", addressgroups.WithRecordFindQuery("tenant_id", json.RawMessage(testcase.filter)))
+			got, err := api.FindRecord(context.Background(), "target", request.Query("tenant_id", json.RawMessage(testcase.filter)))
 			if err != nil || (got != nil) != testcase.match || len(calls) != 2 {
 				t.Fatal(testcase, got, err, calls)
 			}

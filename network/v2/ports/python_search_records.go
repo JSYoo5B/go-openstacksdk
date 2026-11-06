@@ -143,7 +143,7 @@ func searchPushdown(filters *json.RawMessage) ([]RecordListOption, error) {
 		}
 		options := make([]RecordListOption, 0, len(members))
 		for _, member := range members {
-			options = append(options, withRecordListRaw(member.Key, member.Value, nil))
+			options = append(options, request.Custom(withRecordListRaw(member.Key, member.Value, nil)))
 		}
 		return options, nil
 	}
@@ -199,10 +199,10 @@ func (a *API) SearchRecords(ctx context.Context, nameOrID string, options ...Rec
 		return nil, wrap(err)
 	}
 	if policy.Headers != nil {
-		pushdown = append(pushdown, WithRecordListHeaders(policy.Headers))
+		pushdown = append(pushdown, request.Headers(policy.Headers))
 	}
 	if policy.Microversion != nil {
-		pushdown = append(pushdown, WithRecordListMicroversion(*policy.Microversion))
+		pushdown = append(pushdown, request.Microversion(*policy.Microversion))
 	}
 	listPolicy, err := applyRecordListOptions(ctx, engine, pushdown)
 	if err != nil {

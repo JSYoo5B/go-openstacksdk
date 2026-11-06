@@ -14,6 +14,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/networks"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -99,7 +100,7 @@ func TestPythonNetworkListRecordsAllQueryNamesWireAliasesAndCanonicalPresence(t 
 		return networkListResponse(200, `{"networks":[]}`)
 	})
 	options := []networks.RecordListOption{
-		networks.WithRecordListLimit(0), networks.WithRecordListMarker("marker"), networks.WithRecordListQuery("description", "d"), networks.WithRecordListQuery("fields", []string{"id", "router:external"}), networks.WithRecordListQuery("name", "n"), networks.WithRecordListQuery("status", "ACTIVE"), networks.WithRecordListQuery("project_id", "p"), networks.WithRecordListQuery("sort_key", []string{"id", "name"}), networks.WithRecordListQuery("sort_dir", []string{"asc", "desc"}), networks.WithRecordListQuery("id", []string{"n1", "n2"}), networks.WithRecordListQuery("ipv4_address_scope_id", "four"), networks.WithRecordListQuery("ipv4_address_scope", "ignored"), networks.WithRecordListQuery("ipv6_address_scope", "six"), networks.WithRecordListQuery("is_admin_state_up", false), networks.WithRecordListQuery("admin_state_up", true), networks.WithRecordListQuery("is_port_security_enabled", nil), networks.WithRecordListQuery("port_security_enabled", true), networks.WithRecordListQuery("is_router_external", true), networks.WithRecordListQuery("router:external", false), networks.WithRecordListQuery("is_shared", false), networks.WithRecordListQuery("shared", true), networks.WithRecordListQuery("provider_network_type", "vxlan"), networks.WithRecordListQuery("provider:network_type", "vlan"), networks.WithRecordListQuery("provider:physical_network", "phys"), networks.WithRecordListQuery("provider_segmentation_id", 0), networks.WithRecordListQuery("provider:segmentation_id", 1), networks.WithRecordListQuery("tags", []any{"a", nil, "b"}), networks.WithRecordListQuery("any_tags", "any"), networks.WithRecordListQuery("tags-any", "ignored"), networks.WithRecordListQuery("not_tags", "not"), networks.WithRecordListQuery("not-tags", "ignored"), networks.WithRecordListQuery("not_any_tags", "not-any"), networks.WithRecordListQuery("not-tags-any", "ignored"), networks.WithRecordListQuery("tenant_id", make(chan int)), networks.WithRecordListQuery("if_match", make(chan int)),
+		request.Limit(0), request.Marker("marker"), networks.WithRecordListQuery("description", "d"), networks.WithRecordListQuery("fields", []string{"id", "router:external"}), networks.WithRecordListQuery("name", "n"), networks.WithRecordListQuery("status", "ACTIVE"), networks.WithRecordListQuery("project_id", "p"), networks.WithRecordListQuery("sort_key", []string{"id", "name"}), networks.WithRecordListQuery("sort_dir", []string{"asc", "desc"}), networks.WithRecordListQuery("id", []string{"n1", "n2"}), networks.WithRecordListQuery("ipv4_address_scope_id", "four"), networks.WithRecordListQuery("ipv4_address_scope", "ignored"), networks.WithRecordListQuery("ipv6_address_scope", "six"), networks.WithRecordListQuery("is_admin_state_up", false), networks.WithRecordListQuery("admin_state_up", true), networks.WithRecordListQuery("is_port_security_enabled", nil), networks.WithRecordListQuery("port_security_enabled", true), networks.WithRecordListQuery("is_router_external", true), networks.WithRecordListQuery("router:external", false), networks.WithRecordListQuery("is_shared", false), networks.WithRecordListQuery("shared", true), networks.WithRecordListQuery("provider_network_type", "vxlan"), networks.WithRecordListQuery("provider:network_type", "vlan"), networks.WithRecordListQuery("provider:physical_network", "phys"), networks.WithRecordListQuery("provider_segmentation_id", 0), networks.WithRecordListQuery("provider:segmentation_id", 1), networks.WithRecordListQuery("tags", []any{"a", nil, "b"}), networks.WithRecordListQuery("any_tags", "any"), networks.WithRecordListQuery("tags-any", "ignored"), networks.WithRecordListQuery("not_tags", "not"), networks.WithRecordListQuery("not-tags", "ignored"), networks.WithRecordListQuery("not_any_tags", "not-any"), networks.WithRecordListQuery("not-tags-any", "ignored"), networks.WithRecordListQuery("tenant_id", make(chan int)), networks.WithRecordListQuery("if_match", make(chan int)),
 	}
 	rows, err := api.AllRecords(context.Background(), options...)
 	want := url.Values{"limit": {"0"}, "marker": {"marker"}, "description": {"d"}, "fields": {"id", "router:external"}, "name": {"n"}, "status": {"ACTIVE"}, "project_id": {"p"}, "sort_key": {"id", "name"}, "sort_dir": {"asc", "desc"}, "id": {"n1", "n2"}, "ipv4_address_scope": {"four"}, "ipv6_address_scope": {"six"}, "admin_state_up": {"False"}, "router:external": {"True"}, "shared": {"False"}, "provider:network_type": {"vxlan"}, "provider:physical_network": {"phys"}, "provider:segmentation_id": {"0"}, "tags": {"a", "b"}, "tags-any": {"any"}, "not-tags": {"not"}, "not-tags-any": {"not-any"}}
@@ -164,12 +165,12 @@ func TestPythonNetworkListRecordsContinuationRawCapsBreakAndAtomicAll(t *testing
 	var calls []nativeNetworkCall
 	body := `{"networks":[{"id":"skip","mtu":1},{"id":"keep","mtu":2},{"cls":null}],"next":"https://foreign.invalid/networks"}`
 	api := pythonCoreNetworkAPI(t, &calls, func(*http.Request) *http.Response { return networkListResponse(203, body) })
-	rows, err := api.AllRecords(context.Background(), networks.WithRecordListMaxItems(2), networks.WithRecordListLimit(0), networks.WithRecordListQuery("mtu", 2))
+	rows, err := api.AllRecords(context.Background(), request.MaxItems(2), request.Limit(0), networks.WithRecordListQuery("mtu", 2))
 	if err != nil || len(rows) != 1 || len(calls) != 1 || calls[0].query != "limit=2" {
 		t.Fatal(rows, err, calls)
 	}
 	calls = nil
-	rows, err = api.AllRecords(context.Background(), networks.WithRecordListMaxItems(1), networks.WithRecordListQuery("mtu", 2))
+	rows, err = api.AllRecords(context.Background(), request.MaxItems(1), networks.WithRecordListQuery("mtu", 2))
 	if err != nil || rows == nil || len(rows) != 0 || len(calls) != 1 {
 		t.Fatal(rows, err, calls)
 	}
@@ -244,7 +245,7 @@ func (v networkListJSONCall) MarshalJSON() ([]byte, error) {
 func TestPythonNetworkListRecordsPreflightControlPresenceAndUnknownDiscard(t *testing.T) {
 	var calls []nativeNetworkCall
 	api := pythonCoreNetworkAPI(t, &calls, func(*http.Request) *http.Response { t.Fatal("preflight reached HTTP"); return nil })
-	options := [][]networks.RecordListOption{{nil}, {networks.WithRecordListLimit(-1)}, {networks.WithRecordListMaxItems(-1)}, {networks.WithRecordListMarker("")}, {networks.WithRecordListQuery("limit", []int{1, 2})}, {networks.WithRecordListQuery("limit", 1.5)}, {networks.WithRecordListQuery("created_at", json.RawMessage(`bad`))}, {networks.WithRecordListHeaders(map[string]string{"X-Auth-Token": "bad"})}, {networks.WithRecordListHeaders(map[string]string{"OpenStack-API-Version": "network 2.0"})}}
+	options := [][]networks.RecordListOption{{nil}, {request.Limit(-1)}, {request.MaxItems(-1)}, {request.Marker("")}, {networks.WithRecordListQuery("limit", []int{1, 2})}, {networks.WithRecordListQuery("limit", 1.5)}, {networks.WithRecordListQuery("created_at", json.RawMessage(`bad`))}, {request.Headers(map[string]string{"X-Auth-Token": "bad"})}, {request.Headers(map[string]string{"OpenStack-API-Version": "network 2.0"})}}
 	var marshals atomic.Int32
 	for _, key := range []string{"cls", "resource_type", "session", "self"} {
 		options = append(options, []networks.RecordListOption{networks.WithRecordListQuery(key, networkListJSONCall{&marshals})}, []networks.RecordListOption{networks.WithRecordListOpts(networks.RecordListOpts{Query: map[string]json.RawMessage{key: json.RawMessage(`null`)}})})
@@ -336,8 +337,8 @@ func TestPythonNetworkListRecordsOwnedOptionsNilMapsLazinessAndConcurrentReuse(t
 		kept.Headers["X-Trace"] = "changed"
 		return nil
 	}
-	for _, head := range []networks.RecordListOption{networks.WithRecordListHeaders(nil), func(c *networks.RecordListOpts) error { c.Headers = nil; c.Query = nil; return nil }} {
-		rows, err := api.AllRecords(context.Background(), head, callback, after)
+	for _, head := range []networks.RecordListOption{request.Headers(nil), request.Custom(func(c *networks.RecordListOpts) error { c.Headers = nil; c.Query = nil; return nil })} {
+		rows, err := api.AllRecords(context.Background(), head, request.Custom(callback), request.Custom(after))
 		if err != nil || len(rows) != 1 {
 			t.Fatal(rows, err)
 		}
@@ -355,7 +356,7 @@ func TestPythonNetworkListRecordsSourceMutationAndCanceledOptionAreSticky(t *tes
 		api.RawClient().ResourceBase = original
 		return nil
 	}
-	rows, err := api.AllRecords(context.Background(), mutate, restore)
+	rows, err := api.AllRecords(context.Background(), request.Custom(mutate), request.Custom(restore))
 	api.RawClient().ResourceBase = original
 	if rows != nil || !errors.Is(err, resource.ErrInvalidOption) || after || len(calls) != 0 {
 		t.Fatal(rows, err, after, calls)
@@ -363,7 +364,7 @@ func TestPythonNetworkListRecordsSourceMutationAndCanceledOptionAreSticky(t *tes
 	cause := errors.New("cancel option")
 	ctx, cancel := context.WithCancelCause(context.Background())
 	defer cancel(nil)
-	rows, err = api.AllRecords(ctx, func(*networks.RecordListOpts) error { cancel(cause); return nil })
+	rows, err = api.AllRecords(ctx, request.Custom(func(*networks.RecordListOpts) error { cancel(cause); return nil }))
 	if rows != nil || !errors.Is(err, context.Canceled) || !errors.Is(err, cause) || len(calls) != 0 {
 		t.Fatal(rows, err, calls)
 	}

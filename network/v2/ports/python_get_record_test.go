@@ -8,6 +8,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/ports"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -26,7 +27,7 @@ func TestPortGetRecordReusesDescriptorsAndNeverFinds(t *testing.T) {
 			})
 			api := ports.New(cloud.Client("network", "/v2.0"))
 			headers := map[string]string{"X-Owned": "original"}
-			option := ports.WithRecordFindHeaders(headers)
+			option := request.Headers(headers)
 			headers["X-Owned"] = "changed"
 			row, err := api.GetRecord(context.Background(), "folder/name", option)
 			if calls != 1 {

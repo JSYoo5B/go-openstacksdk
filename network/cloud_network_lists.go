@@ -158,10 +158,10 @@ func (s *Service) networkCloudLists(ctx context.Context, identity string, search
 		leaf = append(leaf, networks.WithCloudRecordListQuery(m.Key, m.Value))
 	}
 	if cfg.Headers != nil {
-		leaf = append(leaf, networks.WithRecordListHeaders(cfg.Headers))
+		leaf = append(leaf, request.Headers(cfg.Headers))
 	}
 	if cfg.Microversion != nil {
-		leaf = append(leaf, networks.WithRecordListMicroversion(*cfg.Microversion))
+		leaf = append(leaf, request.Microversion(*cfg.Microversion))
 	}
 	api := networks.New(&source.Client)
 	proxy, err := api.ProxyCloudListRecords(ctx, cfg.CurrentLocation, leaf...)

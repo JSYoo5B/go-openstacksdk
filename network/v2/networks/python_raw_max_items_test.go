@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	sdk "github.com/JSYoo5B/go-openstacksdk/network/v2/networks"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -55,7 +56,7 @@ func TestPythonNetworkRawMaxItemsJSONDomainAndDeferredComparison(t *testing.T) {
 					}
 					return nativeNetworkWire(203, body)
 				})
-				proxy, err := api.ProxyCloudListRecords(context.Background(), nil, sdk.WithCloudRecordListQuery("max_items", json.RawMessage(tc.raw)), sdk.WithRecordListLimit(10))
+				proxy, err := api.ProxyCloudListRecords(context.Background(), nil, sdk.WithCloudRecordListQuery("max_items", json.RawMessage(tc.raw)), request.Limit(10))
 				if err != nil || len(calls) != 0 {
 					t.Fatal(proxy, err, calls)
 				}
@@ -118,7 +119,7 @@ func TestPythonNetworkRawMaxItemsExactPageBoundaryObservesNextResponse(t *testin
 				}
 				return response
 			})
-			rows, err := networkRawCapRows(t, api, ctx, sdk.WithCloudRecordListQuery("max_items", json.RawMessage("2")), sdk.WithRecordListLimit(10))
+			rows, err := networkRawCapRows(t, api, ctx, sdk.WithCloudRecordListQuery("max_items", json.RawMessage("2")), request.Limit(10))
 			if len(calls) != 2 || len(rows) != 2 {
 				t.Fatal(rows, err, calls)
 			}
@@ -142,7 +143,7 @@ func TestPythonNetworkRawMaxItemsCountsFilteredRowsAndStopsBeforeConstructor(t *
 		t.Run(mode, func(t *testing.T) {
 			var calls []nativeNetworkCall
 			body := `{"networks":[{"id":"filtered","dns_domain":"drop"},{"id":"kept","dns_domain":"keep"},{"id":"beyond","dns_domain":"keep"}]}`
-			options := []sdk.RecordListOption{sdk.WithCloudRecordListQuery("max_items", json.RawMessage("2")), sdk.WithRecordListLimit(10)}
+			options := []sdk.RecordListOption{sdk.WithCloudRecordListQuery("max_items", json.RawMessage("2")), request.Limit(10)}
 			want := 1
 			if mode == "local-filter" {
 				options = append(options, sdk.WithRecordListQuery("dns_domain", "keep"))
@@ -180,7 +181,7 @@ func TestPythonNetworkRawMaxItemsOpaqueJMESAndOwnedJSON(t *testing.T) {
 	raw := json.RawMessage("true")
 	owned := sdk.WithCloudRecordListQuery("max_items", raw)
 	raw[0] = 'X'
-	rows, err := networkRawCapRows(t, api, context.Background(), owned, sdk.WithRecordListLimit(10))
+	rows, err := networkRawCapRows(t, api, context.Background(), owned, request.Limit(10))
 	if err != nil || len(rows) != 1 || len(calls) != 1 {
 		t.Fatal(rows, err, calls)
 	}

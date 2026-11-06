@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/ports"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -51,7 +52,7 @@ func TestPythonPortFindRecordMemberFirstSeedAndResponseProjection(t *testing.T) 
 				response.Header.Set("X-Request-Id", "member")
 				return response
 			})
-			value, err := api.FindRecord(context.Background(), "target", ports.WithRecordFindQuery("x_seed", map[string]any{"keep": nil}), ports.WithRecordFindQuery("status", "ACTIVE"))
+			value, err := api.FindRecord(context.Background(), "target", request.Query("x_seed", map[string]any{"keep": nil}), request.Query("status", "ACTIVE"))
 			if err != nil || len(calls) != 1 || calls[0].path != "/neutron/v2.0/ports/target" || calls[0].method != http.MethodGet {
 				t.Fatal(value, err, calls)
 			}
@@ -72,7 +73,7 @@ func TestPythonPortFindRecordMemberFirstSeedAndResponseProjection(t *testing.T) 
 	}
 	var calls []nativePortCall
 	api := pythonCorePortAPI(t, &calls, func(*http.Request) *http.Response { return nativePortWire(204, "") })
-	value, err := api.FindRecord(context.Background(), "literal/id %2F", ports.WithRecordFindQuery("name", "seed"))
+	value, err := api.FindRecord(context.Background(), "literal/id %2F", request.Query("name", "seed"))
 	if err != nil || len(calls) != 1 || value.Wire != nil || value.StatusCode != 204 {
 		t.Fatal(value, err, calls)
 	}
@@ -102,9 +103,9 @@ func TestPythonPortFindRecordFallbackAliasesAndLocalBodyFilters(t *testing.T) {
 	configured := map[string]string{"X-Trace": "old"}
 	api.RawClient().MoreHeaders = configured
 	value, err := api.FindRecord(context.Background(), "target",
-		ports.WithRecordFindQuery("x_unknown", "keep"), ports.WithRecordFindQuery("all_projects", true), ports.WithRecordFindQuery("fields", []string{"id", "name"}),
-		ports.WithRecordFindQuery("any_tags", []string{"red", "blue"}), ports.WithRecordFindQuery("not_any_tags", "black"), ports.WithRecordFindQuery("paginated", false),
-		ports.WithRecordFindHeaders(map[string]string{"X-Trace": "owned"}), ports.WithRecordFindQuery("project_id", "current"), ports.WithRecordFindQuery("tenant_id", "legacy"), ports.WithRecordFindQuery("security_groups", []string{"wire"}), ports.WithRecordFindQuery("security_group_ids", []string{"sg"}), ports.WithRecordFindQuery("binding_profile", map[string]any{"nested": map[string]any{"enabled": true}}))
+		request.Query("x_unknown", "keep"), request.Query("all_projects", true), request.Query("fields", []string{"id", "name"}),
+		request.Query("any_tags", []string{"red", "blue"}), request.Query("not_any_tags", "black"), request.Query("paginated", false),
+		request.Headers(map[string]string{"X-Trace": "owned"}), request.Query("project_id", "current"), request.Query("tenant_id", "legacy"), request.Query("security_groups", []string{"wire"}), request.Query("security_group_ids", []string{"sg"}), request.Query("binding_profile", map[string]any{"nested": map[string]any{"enabled": true}}))
 	if err != nil || value == nil || len(calls) != 2 {
 		t.Fatal(value, err, calls)
 	}
@@ -145,7 +146,7 @@ func TestPythonPortFindRecordNamePresenceMissingAndPassiveResponseID(t *testing.
 				})
 				options := []ports.RecordFindOption{}
 				if testcase.supplied {
-					options = append(options, ports.WithRecordFindQuery("name", testcase.value))
+					options = append(options, request.Query("name", testcase.value))
 				}
 				got, err := api.FindRecord(context.Background(), "target", options...)
 				if err != nil || got != nil || len(calls) != 2 {
@@ -179,7 +180,7 @@ func TestPythonPortFindRecordNamePresenceMissingAndPassiveResponseID(t *testing.
 			}
 			return nativePortWire(status, body)
 		})
-		got, err := api.FindRecord(context.Background(), "target", ports.WithRecordFindIgnoreMissing(false))
+		got, err := api.FindRecord(context.Background(), "target", request.IgnoreMissing(false))
 		if got != nil || err == nil || (status == 200 && !errors.Is(err, resource.ErrNotFound)) || len(calls) != 2 {
 			t.Fatal(got, err, calls)
 		}
@@ -245,7 +246,7 @@ func TestPythonPortFindRecordLateDuplicateErrorMarkerAndRawCap(t *testing.T) {
 			}
 			return nativePortWire(200, `{"ports":[{"id":7,"name":"target"}]}`)
 		})
-		got, err := api.FindRecord(context.Background(), "target", ports.WithRecordFindQuery("limit", 2), ports.WithRecordFindQuery("tags", []string{"a", "b"}))
+		got, err := api.FindRecord(context.Background(), "target", request.Query("limit", 2), request.Query("tags", []string{"a", "b"}))
 		if err != nil || got == nil || len(calls) != 3 {
 			t.Fatal(got, err, calls)
 		}
@@ -262,7 +263,7 @@ func TestPythonPortFindRecordLateDuplicateErrorMarkerAndRawCap(t *testing.T) {
 			}
 			return nativePortWire(200, `{"ports":[{"id":"filtered","name":"target","binding:profile":{"nested":{"enabled":false}}},{"id":"match","name":"target","binding:profile":{"nested":{"enabled":1},"extra":"keep"}}],"ports_links":[{"rel":"next","href":"?marker=late"}]}`)
 		})
-		got, err := api.FindRecord(context.Background(), "target", ports.WithRecordFindQuery("max_items", 1), ports.WithRecordFindQuery("binding_profile", map[string]any{"nested": map[string]any{"enabled": true}}))
+		got, err := api.FindRecord(context.Background(), "target", request.Query("max_items", 1), request.Query("binding_profile", map[string]any{"nested": map[string]any{"enabled": true}}))
 		if err != nil || got != nil || len(calls) != 2 {
 			t.Fatal(got, err, calls)
 		}
@@ -279,7 +280,7 @@ func TestPythonPortFindRecordOptionSnapshotsAndPreflightGuards(t *testing.T) {
 	delete(query, "x_seed")
 	headers["X-Trace"] = "changed"
 	ignore = true
-	fieldOption := ports.WithRecordFindQuery("fields", fields)
+	fieldOption := request.Query("fields", fields)
 	fields[0] = "changed"
 	var escaped *ports.RecordFindOpts
 	var calls []nativePortCall
@@ -291,7 +292,7 @@ func TestPythonPortFindRecordOptionSnapshotsAndPreflightGuards(t *testing.T) {
 		escaped.Headers["X-Trace"] = "callback changed"
 		return nativePortWire(200, `{"port":{}}`)
 	})
-	got, err := api.FindRecord(context.Background(), "target", options, fieldOption, func(c *ports.RecordFindOpts) error { escaped = c; return nil })
+	got, err := api.FindRecord(context.Background(), "target", options, fieldOption, request.Custom(func(c *ports.RecordFindOpts) error { escaped = c; return nil }))
 	if err != nil || got == nil || len(calls) != 1 {
 		t.Fatal(got, err, calls)
 	}
@@ -303,15 +304,15 @@ func TestPythonPortFindRecordOptionSnapshotsAndPreflightGuards(t *testing.T) {
 	}{
 		{"nil", []ports.RecordFindOption{nil}, resource.ErrInvalidOption},
 		{"malformed JSON", []ports.RecordFindOption{ports.WithRecordFindOpts(ports.RecordFindOpts{Query: map[string]json.RawMessage{"fields": json.RawMessage(`[`)}})}, resource.ErrInvalidOption},
-		{"negative cap", []ports.RecordFindOption{ports.WithRecordFindQuery("max_items", -1)}, resource.ErrInvalidOption},
+		{"negative cap", []ports.RecordFindOption{request.Query("max_items", -1)}, resource.ErrInvalidOption},
 		{"bad page flag", []ports.RecordFindOption{ports.WithRecordFindOpts(ports.RecordFindOpts{Query: map[string]json.RawMessage{"paginated": json.RawMessage(`bad flag`)}})}, resource.ErrInvalidOption},
-		{"identity keyword collision", []ports.RecordFindOption{ports.WithRecordFindQuery("id", "different")}, resource.ErrInvalidOption},
-		{"route override", []ports.RecordFindOption{ports.WithRecordFindQuery("base_path", "/other")}, resource.ErrInvalidOption},
-		{"fetch requires_id control", []ports.RecordFindOption{ports.WithRecordFindQuery("requires_id", false)}, resource.ErrInvalidOption},
-		{"fetch error_message control", []ports.RecordFindOption{ports.WithRecordFindQuery("error_message", "changed")}, resource.ErrInvalidOption},
-		{"fetch cache control", []ports.RecordFindOption{ports.WithRecordFindQuery("skip_cache", true)}, resource.ErrInvalidOption},
-		{"fetch response envelope control", []ports.RecordFindOption{ports.WithRecordFindQuery("resource_response_key", "other")}, resource.ErrInvalidOption},
-		{"protected Header", []ports.RecordFindOption{ports.WithRecordFindHeaders(map[string]string{"X-Auth-Token": "different"})}, resource.ErrInvalidOption},
+		{"identity keyword collision", []ports.RecordFindOption{request.Query("id", "different")}, resource.ErrInvalidOption},
+		{"route override", []ports.RecordFindOption{request.Query("base_path", "/other")}, resource.ErrInvalidOption},
+		{"fetch requires_id control", []ports.RecordFindOption{request.Query("requires_id", false)}, resource.ErrInvalidOption},
+		{"fetch error_message control", []ports.RecordFindOption{request.Query("error_message", "changed")}, resource.ErrInvalidOption},
+		{"fetch cache control", []ports.RecordFindOption{request.Query("skip_cache", true)}, resource.ErrInvalidOption},
+		{"fetch response envelope control", []ports.RecordFindOption{request.Query("resource_response_key", "other")}, resource.ErrInvalidOption},
+		{"protected Header", []ports.RecordFindOption{request.Headers(map[string]string{"X-Auth-Token": "different"})}, resource.ErrInvalidOption},
 	} {
 		t.Run(testcase.name, func(t *testing.T) {
 			var calls []nativePortCall
@@ -325,7 +326,7 @@ func TestPythonPortFindRecordOptionSnapshotsAndPreflightGuards(t *testing.T) {
 	t.Run("source mutation is sticky", func(t *testing.T) {
 		var calls []nativePortCall
 		api := pythonCorePortAPI(t, &calls, func(*http.Request) *http.Response { t.Fatal("unexpected HTTP"); return nil })
-		got, err := api.FindRecord(context.Background(), "target", func(*ports.RecordFindOpts) error { api.RawClient().ResourceBase += "changed/"; return nil })
+		got, err := api.FindRecord(context.Background(), "target", request.Custom(func(*ports.RecordFindOpts) error { api.RawClient().ResourceBase += "changed/"; return nil }))
 		if got != nil || !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
 			t.Fatal(got, err, calls)
 		}
@@ -515,7 +516,7 @@ func TestPythonPortFindRecordMalformedPagesAndDetachedExtensionEvidence(t *testi
 	}
 	var calls []nativePortCall
 	api := pythonCorePortAPI(t, &calls, func(*http.Request) *http.Response { return nativePortWire(202, "not JSON") })
-	got, err := api.FindRecord(context.Background(), "target", ports.WithRecordFindQuery("x_extension", []any{nil, 9007199254740993}))
+	got, err := api.FindRecord(context.Background(), "target", request.Query("x_extension", []any{nil, 9007199254740993}))
 	if err != nil || got == nil || got.Wire != nil || string(got.Envelope) != "not JSON" || len(calls) != 1 {
 		t.Fatal(got, err, calls)
 	}
@@ -607,7 +608,7 @@ func TestPythonPortFindRecordLiveReauthenticationAndMicroversionOwnership(t *tes
 	}
 	var none []nativePortCall
 	invalid := pythonCorePortAPI(t, &none, func(*http.Request) *http.Response { t.Fatal("invalid version HTTP"); return nil })
-	got, err = invalid.FindRecord(context.Background(), "target", ports.WithRecordFindMicroversion("2.1\r\nchanged"))
+	got, err = invalid.FindRecord(context.Background(), "target", request.Microversion("2.1\r\nchanged"))
 	if got != nil || !errors.Is(err, resource.ErrInvalidOption) || len(none) != 0 {
 		t.Fatal(got, err, none)
 	}
@@ -637,7 +638,7 @@ func TestPythonPortFindRecordDictionaryTruthinessShortCircuitAndFailureReceipts(
 				response.Header.Set("X-Request-Id", "dict-filter")
 				return response
 			})
-			got, err := api.FindRecord(context.Background(), "target", ports.WithRecordFindQuery("created_at", json.RawMessage(testcase.filter)))
+			got, err := api.FindRecord(context.Background(), "target", request.Query("created_at", json.RawMessage(testcase.filter)))
 			if len(calls) != 2 {
 				t.Fatal(got, err, calls)
 			}
@@ -667,7 +668,7 @@ func TestPythonPortFindRecordDictionaryTruthinessShortCircuitAndFailureReceipts(
 			if firstMatches {
 				first = "observed"
 			}
-			got, err := api.FindRecord(context.Background(), "target", ports.WithRecordFindQuery("created_at", first), ports.WithRecordFindQuery("revision_number", map[string]any{"value": 1}))
+			got, err := api.FindRecord(context.Background(), "target", request.Query("created_at", first), request.Query("revision_number", map[string]any{"value": 1}))
 			if got != nil || len(calls) != 2 {
 				t.Fatal(got, err, calls)
 			}
@@ -702,7 +703,7 @@ func TestPythonPortFindRecordPaginationTruthinessAndHeaderConstructorProjection(
 				}
 				return nativePortWire(200, `{"ports":[{"id":"match","name":"target"}],"next":"?marker=next"}`)
 			})
-			got, err := api.FindRecord(context.Background(), "target", ports.WithRecordFindQuery("paginated", testcase.flag))
+			got, err := api.FindRecord(context.Background(), "target", request.Query("paginated", testcase.flag))
 			if err != nil || got == nil || len(calls) != testcase.pages+1 {
 				t.Fatal(got, err, calls)
 			}
@@ -733,7 +734,7 @@ func TestPythonPortFindRecordPaginationTruthinessAndHeaderConstructorProjection(
 			})
 			options := []ports.RecordFindOption{}
 			if testcase.seed != "" {
-				options = append(options, ports.WithRecordFindQuery("if_match", testcase.seed))
+				options = append(options, request.Query("if_match", testcase.seed))
 			}
 			got, err := api.FindRecord(context.Background(), "target", options...)
 			if err != nil || got == nil {
@@ -763,7 +764,7 @@ func TestPythonPortFindRecordListAcceptAndRetryVersionPolicy(t *testing.T) {
 			options := []ports.RecordFindOption{}
 			want := []string{"text/xml", "application/json"}
 			if explicit {
-				options = append(options, ports.WithRecordFindHeaders(map[string]string{"Accept": "text/plain"}))
+				options = append(options, request.Headers(map[string]string{"Accept": "text/plain"}))
 				want = []string{"text/plain", "text/plain"}
 			}
 			got, err := api.FindRecord(context.Background(), "target", options...)
@@ -790,7 +791,7 @@ func TestPythonPortFindRecordListAcceptAndRetryVersionPolicy(t *testing.T) {
 			}
 			options := []ports.RecordFindOption{}
 			if version != "" {
-				options = append(options, ports.WithRecordFindMicroversion(version))
+				options = append(options, request.Microversion(version))
 			}
 			got, err := api.FindRecord(context.Background(), "target", options...)
 			var native gophercloud.ErrUnexpectedResponseCode

@@ -12,6 +12,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/jmespath"
@@ -42,7 +43,15 @@ type RecordListOpts struct {
 	proxyExpression json.RawMessage
 	order           []string
 }
-type RecordListOption func(*RecordListOpts) error
+
+// RecordListOption is one option of the record lists: WithRecordListOpts,
+// WithRecordListQuery, WithRecordListJMESPath, request.Headers (replaces the
+// headers), request.Microversion, request.BasePath, request.Limit,
+// request.Marker, request.MaxItems, request.Paginated or request.Custom over
+// *RecordListOpts. request.Query is rejected because WithRecordListQuery
+// classifies the key before it marshals the value. Other shared calls fail
+// with resource.ErrInvalidOption before HTTP.
+type RecordListOption = request.ListBasePathCall
 
 func recordListOptions(v RecordListOpts) neutronfind.Options {
 	return neutronfind.Options{Query: v.Query, Headers: v.Headers, Microversion: v.Microversion, BasePath: v.BasePath, Order: v.order}
@@ -58,7 +67,7 @@ func copyRecordListOpts(v RecordListOpts) RecordListOpts {
 }
 func WithRecordListOpts(v RecordListOpts) RecordListOption {
 	owned := copyRecordListOpts(v)
-	return func(c *RecordListOpts) error { *c = copyRecordListOpts(owned); return nil }
+	return request.Custom(func(c *RecordListOpts) error { *c = copyRecordListOpts(owned); return nil })
 }
 
 // recordListIgnores reports kwargs that Source Resource.list discards before
@@ -95,7 +104,7 @@ func recordListControl(key string) error {
 	return nil
 }
 
-func withRecordListRaw(key string, raw json.RawMessage, encodeErr error) RecordListOption {
+func withRecordListRaw(key string, raw json.RawMessage, encodeErr error) func(*RecordListOpts) error {
 	if err := recordListControl(key); err != nil {
 		return func(*RecordListOpts) error { return err }
 	}
@@ -145,6 +154,10 @@ func withRecordListRaw(key string, raw json.RawMessage, encodeErr error) RecordL
 // Declared query names and wire names go to the server; other declared Body
 // attributes become local filters on each received row.
 func WithRecordListQuery(key string, value any) RecordListOption {
+	return request.Custom(withRecordListQuery(key, value))
+}
+
+func withRecordListQuery(key string, value any) func(*RecordListOpts) error {
 	if err := recordListControl(key); err != nil {
 		return func(*RecordListOpts) error { return err }
 	}
@@ -154,7 +167,7 @@ func WithRecordListQuery(key string, value any) RecordListOption {
 	raw, err := json.Marshal(value)
 	return withRecordListRaw(key, raw, err)
 }
-func WithRecordListHeaders(v map[string]string) RecordListOption {
+func withRecordListHeaders(v map[string]string) func(*RecordListOpts) error {
 	owned := maps.Clone(v)
 	return func(c *RecordListOpts) error {
 		c.Headers = maps.Clone(owned)
@@ -163,7 +176,7 @@ func WithRecordListHeaders(v map[string]string) RecordListOption {
 		return nil
 	}
 }
-func WithRecordListMicroversion(v string) RecordListOption {
+func withRecordListMicroversion(v string) func(*RecordListOpts) error {
 	return func(c *RecordListOpts) error {
 		x := v
 		c.Microversion = &x
@@ -173,8 +186,8 @@ func WithRecordListMicroversion(v string) RecordListOption {
 	}
 }
 
-// WithRecordListBasePath selects an owned service-relative Source list path.
-func WithRecordListBasePath(value string) RecordListOption {
+// withRecordListBasePath selects an owned service-relative Source list path.
+func withRecordListBasePath(value string) func(*RecordListOpts) error {
 	return func(c *RecordListOpts) error {
 		path := value
 		c.BasePath = &path
@@ -189,11 +202,6 @@ func WithRecordListBasePath(value string) RecordListOption {
 func WithRecordListJMESPath(expression string) RecordListOption {
 	return WithRecordListQuery("jmespath_filters", expression)
 }
-
-func WithRecordListLimit(v int) RecordListOption      { return WithRecordListQuery("limit", v) }
-func WithRecordListMarker(v string) RecordListOption  { return WithRecordListQuery("marker", v) }
-func WithRecordListMaxItems(v int) RecordListOption   { return WithRecordListQuery("max_items", v) }
-func WithRecordListPaginated(v bool) RecordListOption { return WithRecordListQuery("paginated", v) }
 
 func (a *API) portListEngine(ctx context.Context) (*neutronfind.Engine, error) {
 	return a.portRecordEngine(ctx, portListProfile())
@@ -222,7 +230,7 @@ func portListRecord(value *neutronfind.Record) *PortRecord {
 }
 func applyRecordListOptions(ctx context.Context, engine *neutronfind.Engine, options []RecordListOption) (RecordListOpts, error) {
 	policy := copyRecordListOpts(RecordListOpts{})
-	for _, apply := range options {
+	for _, apply := range calls.Translate(options, recordListCalls) {
 		if err := engine.Check(ctx); err != nil {
 			return policy, err
 		}
@@ -469,4 +477,12 @@ func portProxyListValue(ctx context.Context, engine *neutronfind.Engine, policy 
 		}
 	}
 	return value, engine.Check(ctx)
+}
+
+// recordListCalls interprets the shared calls of RecordListOption.
+var recordListCalls = calls.Spec[RecordListOpts]{
+	Headers:      neutronfind.Use(withRecordListHeaders),
+	Microversion: neutronfind.Use(withRecordListMicroversion),
+	BasePath:     neutronfind.Use(withRecordListBasePath),
+	Paging:       neutronfind.KeywordPaging(withRecordListQuery),
 }

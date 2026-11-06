@@ -21,6 +21,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/ports"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/subnets"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -279,7 +280,7 @@ func TestPythonCloudNetworkBUpdatePortAndSubnetChains(t *testing.T) {
 			"PUT /v2.0/ports/port-1":   {{200, `{"port":{"id":"port-1","name":"renamed","network_id":"net-1","admin_state_up":false}}`}},
 		})
 		api := ports.New(client)
-		found, err := api.FindRecord(context.Background(), "web-port", ports.WithRecordFindIgnoreMissing(false))
+		found, err := api.FindRecord(context.Background(), "web-port", request.IgnoreMissing(false))
 		if err != nil || string(found.Resource.Body["id"]) != `"port-1"` {
 			t.Fatal(found, err)
 		}
@@ -296,7 +297,7 @@ func TestPythonCloudNetworkBUpdatePortAndSubnetChains(t *testing.T) {
 			"GET /v2.0/ports/absent": {{404, `{}`}},
 			"GET /v2.0/ports":        {{200, `{"ports":[]}`}},
 		})
-		if value, err := ports.New(client).FindRecord(context.Background(), "absent", ports.WithRecordFindIgnoreMissing(false)); err == nil {
+		if value, err := ports.New(client).FindRecord(context.Background(), "absent", request.IgnoreMissing(false)); err == nil {
 			t.Fatal(value)
 		}
 		pythonCloudBRequests(t, calls(), "GET /v2.0/ports/absent", "GET /v2.0/ports?name=absent")
@@ -307,7 +308,7 @@ func TestPythonCloudNetworkBUpdatePortAndSubnetChains(t *testing.T) {
 			"PUT /v2.0/subnets/sub-1": {{200, `{"subnet":{"id":"sub-1","name":"renamed","network_id":"net-1","cidr":"10.0.0.0/24","ip_version":4,"gateway_ip":null,"enable_dhcp":false}}`}},
 		})
 		api := subnets.New(client)
-		found, err := api.FindRecord(context.Background(), "sub-1", subnets.WithRecordFindIgnoreMissing(false))
+		found, err := api.FindRecord(context.Background(), "sub-1", request.IgnoreMissing(false))
 		if err != nil || string(found.Resource.Body["id"]) != `"sub-1"` {
 			t.Fatal(found, err)
 		}

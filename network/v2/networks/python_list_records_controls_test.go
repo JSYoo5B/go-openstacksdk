@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/networks"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -25,7 +26,7 @@ func TestPythonNetworkListRecordsConflictingAttrsFormalOverridesAndOriginalJMES(
 		return networkListResponse(200, `{"networks":[{"id":"one","mtu":2}]}`)
 	})
 	conflict := json.RawMessage(`{"name":"restored","mtu":2,"headers":{"X-Trace":"restored"},"microversion":"2.1","jmespath_filters":"[?","__conflicting_attrs":{"name":"never recurse"}}`)
-	result, err := api.ProxyListRecords(context.Background(), networks.WithRecordListQuery("name", "original"), networks.WithRecordListHeaders(map[string]string{"X-Trace": "original"}), networks.WithRecordListMicroversion("2.0"), networks.WithRecordListConflictingAttrs(conflict), networks.WithRecordListJMESPath("@"))
+	result, err := api.ProxyListRecords(context.Background(), networks.WithRecordListQuery("name", "original"), request.Headers(map[string]string{"X-Trace": "original"}), request.Microversion("2.0"), networks.WithRecordListConflictingAttrs(conflict), networks.WithRecordListJMESPath("@"))
 	conflict[0] = 'X'
 	if err != nil || result == nil || result.JSON != nil || len(calls) != 0 {
 		t.Fatal(result, err, calls)
@@ -71,15 +72,15 @@ func TestPythonNetworkListRecordsBasePathAndNamedHeadersVersionsUseOwnedFinalVal
 			var options []networks.RecordListOption
 			switch lane {
 			case "typed-final":
-				options = []networks.RecordListOption{networks.WithRecordListQuery("base_path", "/wrong"), networks.WithRecordListQuery("headers", map[string]string{"X-Trace": "wrong"}), networks.WithRecordListQuery("microversion", "2.1"), networks.WithRecordListBasePath("/alternate-networks"), networks.WithRecordListHeaders(map[string]string{"X-Trace": "final"}), networks.WithRecordListMicroversion("2.2")}
+				options = []networks.RecordListOption{networks.WithRecordListQuery("base_path", "/wrong"), networks.WithRecordListQuery("headers", map[string]string{"X-Trace": "wrong"}), networks.WithRecordListQuery("microversion", "2.1"), request.BasePath("/alternate-networks"), request.Headers(map[string]string{"X-Trace": "final"}), request.Microversion("2.2")}
 			case "source-final":
-				options = []networks.RecordListOption{networks.WithRecordListBasePath("/wrong"), networks.WithRecordListHeaders(map[string]string{"X-Trace": "wrong"}), networks.WithRecordListMicroversion("2.1"), networks.WithRecordListQuery("base_path", "/alternate-networks"), networks.WithRecordListQuery("headers", map[string]string{"X-Trace": "final"}), networks.WithRecordListQuery("microversion", "2.2")}
+				options = []networks.RecordListOption{request.BasePath("/wrong"), request.Headers(map[string]string{"X-Trace": "wrong"}), request.Microversion("2.1"), networks.WithRecordListQuery("base_path", "/alternate-networks"), networks.WithRecordListQuery("headers", map[string]string{"X-Trace": "final"}), networks.WithRecordListQuery("microversion", "2.2")}
 			case "nullable":
 				target, version, trace = "/neutron/v2.0/networks", "", ""
-				options = []networks.RecordListOption{networks.WithRecordListBasePath("/wrong"), networks.WithRecordListHeaders(map[string]string{"X-Trace": "wrong"}), networks.WithRecordListMicroversion("2.1"), networks.WithRecordListQuery("base_path", nil), networks.WithRecordListQuery("headers", nil), networks.WithRecordListQuery("microversion", nil)}
+				options = []networks.RecordListOption{request.BasePath("/wrong"), request.Headers(map[string]string{"X-Trace": "wrong"}), request.Microversion("2.1"), networks.WithRecordListQuery("base_path", nil), networks.WithRecordListQuery("headers", nil), networks.WithRecordListQuery("microversion", nil)}
 			case "default-empty":
 				target, version, trace = "/neutron/v2.0/networks", "", ""
-				options = []networks.RecordListOption{networks.WithRecordListBasePath("")}
+				options = []networks.RecordListOption{request.BasePath("")}
 			}
 			api := pythonCoreNetworkAPI(t, &calls, func(req *http.Request) *http.Response {
 				received = req.Header.Clone()
@@ -97,7 +98,7 @@ func TestPythonNetworkListRecordsBasePathAndNamedHeadersVersionsUseOwnedFinalVal
 	for _, path := range []string{"https://foreign.invalid/networks", "../networks", "/networks?foreign=true", "/networks#fragment", "//foreign.invalid/networks", "/a/../networks"} {
 		var calls []nativeNetworkCall
 		api := pythonCoreNetworkAPI(t, &calls, func(*http.Request) *http.Response { t.Fatal("bad path reached HTTP"); return nil })
-		rows, err := api.AllRecords(context.Background(), networks.WithRecordListBasePath(path))
+		rows, err := api.AllRecords(context.Background(), request.BasePath(path))
 		if rows != nil || !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
 			t.Fatal(path, rows, err, calls)
 		}
@@ -112,7 +113,7 @@ func TestPythonNetworkListRecordsBasePathAndNamedHeadersVersionsUseOwnedFinalVal
 		}
 		return networkListResponse(200, `{"networks":[{"id":"one"}],"next":"/neutron/v2.0/alternate-networks?marker=next"}`)
 	})
-	rows, err := api.AllRecords(context.Background(), networks.WithRecordListBasePath("/alternate-networks"))
+	rows, err := api.AllRecords(context.Background(), request.BasePath("/alternate-networks"))
 	if err != nil || len(rows) != 1 || len(calls) != 2 {
 		t.Fatal(rows, err, calls)
 	}

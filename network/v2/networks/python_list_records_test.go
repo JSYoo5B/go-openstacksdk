@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/networks"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -151,9 +152,9 @@ func TestPythonNetworkListRecordsPagingLinksAndLimitMarker(t *testing.T) {
 			var options []networks.RecordListOption
 			switch lane {
 			case "limit-marker":
-				options = append(options, networks.WithRecordListLimit(1))
+				options = append(options, request.Limit(1))
 			case "single-page":
-				options = append(options, networks.WithRecordListPaginated(false))
+				options = append(options, request.Paginated(false))
 			}
 			rows, err := api.AllRecords(context.Background(), options...)
 			if err != nil {

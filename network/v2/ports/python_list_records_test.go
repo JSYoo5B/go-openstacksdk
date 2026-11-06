@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/ports"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -129,11 +130,11 @@ func TestPythonPortListRecordsPagingLinksAndLimitMarker(t *testing.T) {
 			var options []ports.RecordListOption
 			switch lane {
 			case "limit-marker":
-				options = append(options, ports.WithRecordListLimit(1))
+				options = append(options, request.Limit(1))
 			case "single-page":
-				options = append(options, ports.WithRecordListPaginated(false))
+				options = append(options, request.Paginated(false))
 			case "max-items":
-				options = append(options, ports.WithRecordListMaxItems(1))
+				options = append(options, request.MaxItems(1))
 			}
 			rows, err := api.AllRecords(context.Background(), options...)
 			if err != nil {
@@ -278,7 +279,7 @@ func TestPythonPortListRecordsHeadersAndMicroversionOnEveryPage(t *testing.T) {
 		}
 		return nativePortWire(200, `{"ports":[{"id":"first"}],"ports_links":[{"rel":"next","href":"`+fmt.Sprintf("http://%s/neutron/v2.0/ports?marker=first", req.Host)+`"}]}`)
 	})
-	rows, err := api.AllRecords(context.Background(), ports.WithRecordListHeaders(map[string]string{"X-Trace": "owned"}), ports.WithRecordListMicroversion("2.1"))
+	rows, err := api.AllRecords(context.Background(), request.Headers(map[string]string{"X-Trace": "owned"}), request.Microversion("2.1"))
 	want := []string{"owned|network 2.1|application/json", "owned|network 2.1|application/json"}
 	if err != nil || len(rows) != 1 || !reflect.DeepEqual(seen, want) {
 		t.Fatal(rows, err, seen)
@@ -363,7 +364,7 @@ func TestPythonPortListRecordsControlsDiscardAndValidationBeforeEncoding(t *test
 func TestPythonPortListRecordsOptionsOwnMapsAndNilHeaders(t *testing.T) {
 	headers := map[string]string{"X-Trace": "original"}
 	fields := []string{"id", "name"}
-	option := ports.WithRecordListHeaders(headers)
+	option := request.Headers(headers)
 	qoption := ports.WithRecordListQuery("fields", fields)
 	headers["X-Trace"] = "mutated"
 	fields[0] = "mutated"
@@ -377,7 +378,7 @@ func TestPythonPortListRecordsOptionsOwnMapsAndNilHeaders(t *testing.T) {
 		escaped.Query["fields"][2] = 'x'
 		return nativePortWire(200, `{"ports":[{"id":"p"}]}`)
 	})
-	rows, err := api.AllRecords(context.Background(), ports.WithRecordListHeaders(nil), ports.WithRecordListOpts(ports.RecordListOpts{}), option, qoption, func(c *ports.RecordListOpts) error { c.Headers["X-Callback"] = "owned"; escaped = c; return nil })
+	rows, err := api.AllRecords(context.Background(), request.Headers(nil), ports.WithRecordListOpts(ports.RecordListOpts{}), option, qoption, request.Custom(func(c *ports.RecordListOpts) error { c.Headers["X-Callback"] = "owned"; escaped = c; return nil }))
 	if err != nil || len(rows) != 1 || len(calls) != 1 {
 		t.Fatal(rows, err, calls)
 	}
@@ -408,7 +409,7 @@ func TestPythonPortListAndSearchRecordOptionsGuardCancellationAndSource(t *testi
 					_, err = api.SearchRecords(ctx, "", func(c *ports.RecordSearchOpts) error { c.Headers["X-Owned"] = "yes"; mutate(); return supplied })
 					op = "SearchRecords"
 				} else {
-					_, err = api.AllRecords(ctx, func(c *ports.RecordListOpts) error { c.Headers["X-Owned"] = "yes"; mutate(); return supplied })
+					_, err = api.AllRecords(ctx, request.Custom(func(c *ports.RecordListOpts) error { c.Headers["X-Owned"] = "yes"; mutate(); return supplied }))
 				}
 				if !errors.Is(err, supplied) || len(calls) != 0 {
 					t.Fatal(err, calls)
@@ -448,9 +449,9 @@ func TestPythonPortListRecordsCapCountsFilteredRowsAndLazyConsumer(t *testing.T)
 			}
 			options := []ports.RecordListOption{ports.WithRecordListQuery("dns_name", "keep")}
 			if mode == "single page" {
-				options = append(options, ports.WithRecordListPaginated(false))
+				options = append(options, request.Paginated(false))
 			} else {
-				options = append(options, ports.WithRecordListMaxItems(1))
+				options = append(options, request.MaxItems(1))
 			}
 			rows, err := api.AllRecords(context.Background(), options...)
 			if err != nil || len(calls) != 1 {
@@ -578,7 +579,7 @@ func TestPythonPortListRecordsCleanReauthenticationAndRetryKeepPolicy(t *testing
 				c.MoreHeaders["X-Retry-Probe"] = "ordinary"
 				return nil
 			}
-			rows, err := api.AllRecords(context.Background(), ports.WithRecordListMicroversion("2.1"), ports.WithRecordListQuery("network_id", "n"))
+			rows, err := api.AllRecords(context.Background(), request.Microversion("2.1"), ports.WithRecordListQuery("network_id", "n"))
 			if err != nil || len(rows) != 1 || len(calls) != 2 || status == 401 && (reauth != 1 || retries != 0 || !reflect.DeepEqual(tokens, []string{"test-token", "renewed"})) || status == 503 && (retries != 1 || reauth != 0) {
 				t.Fatal(rows, err, calls, tokens, retries, reauth)
 			}
@@ -756,7 +757,7 @@ func TestPythonPortListRecordsBasePathOwnsRouteAndLocksContinuation(t *testing.T
 			options := []ports.RecordListOption{ports.WithRecordListQuery("network_id", "n")}
 			switch mode {
 			case "typed":
-				options = append(options, ports.WithRecordListBasePath("/custom/ports"))
+				options = append(options, request.BasePath("/custom/ports"))
 			case "raw formal":
 				options = append(options, ports.WithRecordListQuery("base_path", "/custom/ports"))
 			case "snapshot":
@@ -774,7 +775,7 @@ func TestPythonPortListRecordsBasePathOwnsRouteAndLocksContinuation(t *testing.T
 	for _, path := range []string{"https://foreign.invalid/ports", "//foreign.invalid/ports", "../ports", "/ports/../other", "/ports?query=x", "/ports#fragment"} {
 		var calls []nativePortCall
 		api := pythonCorePortAPI(t, &calls, func(*http.Request) *http.Response { t.Fatal("unsafe route HTTP"); return nil })
-		rows, err := api.AllRecords(context.Background(), ports.WithRecordListBasePath(path))
+		rows, err := api.AllRecords(context.Background(), request.BasePath(path))
 		if rows != nil || !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
 			t.Fatal(path, rows, err, calls)
 		}
@@ -843,7 +844,7 @@ func TestPythonPortListRecordsFormalFactoriesAndTypedOptionsUseLastValue(t *test
 			return nativePortWire(200, `{"ports":[]}`)
 		})
 		raw := []ports.RecordListOption{ports.WithRecordListQuery("headers", map[string]string{"X-Trace": "raw"}), ports.WithRecordListQuery("microversion", "2.1"), ports.WithRecordListQuery("base_path", "/raw-ports")}
-		typed := []ports.RecordListOption{ports.WithRecordListHeaders(map[string]string{"X-Trace": "typed"}), ports.WithRecordListMicroversion("2.2"), ports.WithRecordListBasePath("/typed-ports")}
+		typed := []ports.RecordListOption{request.Headers(map[string]string{"X-Trace": "typed"}), request.Microversion("2.2"), request.BasePath("/typed-ports")}
 		options := append(raw, typed...)
 		wantPath, wantVersion, wantTrace := "/neutron/v2.0/typed-ports", "network 2.2", "typed"
 		if rawLast {

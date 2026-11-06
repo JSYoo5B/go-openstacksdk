@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/subnets"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -51,7 +52,7 @@ func TestPythonSubnetFindRecordMemberFirstSeedAndResponseProjection(t *testing.T
 				response.Header.Set("X-Request-Id", "member")
 				return response
 			})
-			value, err := api.FindRecord(context.Background(), "target", subnets.WithRecordFindQuery("x_seed", map[string]any{"keep": nil}), subnets.WithRecordFindQuery("status", "ACTIVE"))
+			value, err := api.FindRecord(context.Background(), "target", request.Query("x_seed", map[string]any{"keep": nil}), request.Query("status", "ACTIVE"))
 			if err != nil || len(calls) != 1 || calls[0].path != "/neutron/v2.0/subnets/target" || calls[0].method != http.MethodGet {
 				t.Fatal(value, err, calls)
 			}
@@ -72,7 +73,7 @@ func TestPythonSubnetFindRecordMemberFirstSeedAndResponseProjection(t *testing.T
 	}
 	var calls []nativeSubnetCall
 	api := pythonCoreSubnetAPI(t, &calls, func(*http.Request) *http.Response { return nativeSubnetWire(204, "") })
-	value, err := api.FindRecord(context.Background(), "literal/id %2F", subnets.WithRecordFindQuery("name", "seed"))
+	value, err := api.FindRecord(context.Background(), "literal/id %2F", request.Query("name", "seed"))
 	if err != nil || len(calls) != 1 || value.Wire != nil || value.StatusCode != 204 {
 		t.Fatal(value, err, calls)
 	}
@@ -102,9 +103,9 @@ func TestPythonSubnetFindRecordFallbackAliasesAndLocalBodyFilters(t *testing.T) 
 	configured := map[string]string{"X-Trace": "old"}
 	api.RawClient().MoreHeaders = configured
 	value, err := api.FindRecord(context.Background(), "target",
-		subnets.WithRecordFindQuery("x_unknown", "keep"), subnets.WithRecordFindQuery("all_projects", true), subnets.WithRecordFindQuery("fields", []string{"id", "name"}),
-		subnets.WithRecordFindQuery("any_tags", []string{"red", "blue"}), subnets.WithRecordFindQuery("not_any_tags", "black"), subnets.WithRecordFindQuery("paginated", false),
-		subnets.WithRecordFindHeaders(map[string]string{"X-Trace": "owned"}), subnets.WithRecordFindQuery("is_dhcp_enabled", false), subnets.WithRecordFindQuery("enable_dhcp", true), subnets.WithRecordFindQuery("subnet_pool_id", "pool"), subnets.WithRecordFindQuery("subnetpool_id", "wire"), subnets.WithRecordFindQuery("prefix_length", true))
+		request.Query("x_unknown", "keep"), request.Query("all_projects", true), request.Query("fields", []string{"id", "name"}),
+		request.Query("any_tags", []string{"red", "blue"}), request.Query("not_any_tags", "black"), request.Query("paginated", false),
+		request.Headers(map[string]string{"X-Trace": "owned"}), request.Query("is_dhcp_enabled", false), request.Query("enable_dhcp", true), request.Query("subnet_pool_id", "pool"), request.Query("subnetpool_id", "wire"), request.Query("prefix_length", true))
 	if err != nil || value == nil || len(calls) != 2 {
 		t.Fatal(value, err, calls)
 	}
@@ -145,7 +146,7 @@ func TestPythonSubnetFindRecordNamePresenceMissingAndPassiveResponseID(t *testin
 				})
 				options := []subnets.RecordFindOption{}
 				if testcase.supplied {
-					options = append(options, subnets.WithRecordFindQuery("name", testcase.value))
+					options = append(options, request.Query("name", testcase.value))
 				}
 				got, err := api.FindRecord(context.Background(), "target", options...)
 				if err != nil || got != nil || len(calls) != 2 {
@@ -179,7 +180,7 @@ func TestPythonSubnetFindRecordNamePresenceMissingAndPassiveResponseID(t *testin
 			}
 			return nativeSubnetWire(status, body)
 		})
-		got, err := api.FindRecord(context.Background(), "target", subnets.WithRecordFindIgnoreMissing(false))
+		got, err := api.FindRecord(context.Background(), "target", request.IgnoreMissing(false))
 		if got != nil || err == nil || (status == 200 && !errors.Is(err, resource.ErrNotFound)) || len(calls) != 2 {
 			t.Fatal(got, err, calls)
 		}
@@ -245,7 +246,7 @@ func TestPythonSubnetFindRecordLateDuplicateErrorMarkerAndRawCap(t *testing.T) {
 			}
 			return nativeSubnetWire(200, `{"subnets":[{"id":7,"name":"target"}]}`)
 		})
-		got, err := api.FindRecord(context.Background(), "target", subnets.WithRecordFindQuery("limit", 2), subnets.WithRecordFindQuery("tags", []string{"a", "b"}))
+		got, err := api.FindRecord(context.Background(), "target", request.Query("limit", 2), request.Query("tags", []string{"a", "b"}))
 		if err != nil || got == nil || len(calls) != 3 {
 			t.Fatal(got, err, calls)
 		}
@@ -262,7 +263,7 @@ func TestPythonSubnetFindRecordLateDuplicateErrorMarkerAndRawCap(t *testing.T) {
 			}
 			return nativeSubnetWire(200, `{"subnets":[{"id":"filtered","name":"target","prefixlen":2},{"id":"match","name":"target","prefixlen":1}],"subnets_links":[{"rel":"next","href":"?marker=late"}]}`)
 		})
-		got, err := api.FindRecord(context.Background(), "target", subnets.WithRecordFindQuery("max_items", 1), subnets.WithRecordFindQuery("prefix_length", true))
+		got, err := api.FindRecord(context.Background(), "target", request.Query("max_items", 1), request.Query("prefix_length", true))
 		if err != nil || got != nil || len(calls) != 2 {
 			t.Fatal(got, err, calls)
 		}
@@ -279,7 +280,7 @@ func TestPythonSubnetFindRecordOptionSnapshotsAndPreflightGuards(t *testing.T) {
 	delete(query, "x_seed")
 	headers["X-Trace"] = "changed"
 	ignore = true
-	fieldOption := subnets.WithRecordFindQuery("fields", fields)
+	fieldOption := request.Query("fields", fields)
 	fields[0] = "changed"
 	var escaped *subnets.RecordFindOpts
 	var calls []nativeSubnetCall
@@ -291,7 +292,7 @@ func TestPythonSubnetFindRecordOptionSnapshotsAndPreflightGuards(t *testing.T) {
 		escaped.Headers["X-Trace"] = "callback changed"
 		return nativeSubnetWire(200, `{"subnet":{}}`)
 	})
-	got, err := api.FindRecord(context.Background(), "target", options, fieldOption, func(c *subnets.RecordFindOpts) error { escaped = c; return nil })
+	got, err := api.FindRecord(context.Background(), "target", options, fieldOption, request.Custom(func(c *subnets.RecordFindOpts) error { escaped = c; return nil }))
 	if err != nil || got == nil || len(calls) != 1 {
 		t.Fatal(got, err, calls)
 	}
@@ -303,15 +304,15 @@ func TestPythonSubnetFindRecordOptionSnapshotsAndPreflightGuards(t *testing.T) {
 	}{
 		{"nil", []subnets.RecordFindOption{nil}, resource.ErrInvalidOption},
 		{"malformed JSON", []subnets.RecordFindOption{subnets.WithRecordFindOpts(subnets.RecordFindOpts{Query: map[string]json.RawMessage{"fields": json.RawMessage(`[`)}})}, resource.ErrInvalidOption},
-		{"negative cap", []subnets.RecordFindOption{subnets.WithRecordFindQuery("max_items", -1)}, resource.ErrInvalidOption},
+		{"negative cap", []subnets.RecordFindOption{request.Query("max_items", -1)}, resource.ErrInvalidOption},
 		{"bad page flag", []subnets.RecordFindOption{subnets.WithRecordFindOpts(subnets.RecordFindOpts{Query: map[string]json.RawMessage{"paginated": json.RawMessage(`bad flag`)}})}, resource.ErrInvalidOption},
-		{"identity keyword collision", []subnets.RecordFindOption{subnets.WithRecordFindQuery("id", "different")}, resource.ErrInvalidOption},
-		{"route override", []subnets.RecordFindOption{subnets.WithRecordFindQuery("base_path", "/other")}, resource.ErrInvalidOption},
-		{"fetch requires_id control", []subnets.RecordFindOption{subnets.WithRecordFindQuery("requires_id", false)}, resource.ErrInvalidOption},
-		{"fetch error_message control", []subnets.RecordFindOption{subnets.WithRecordFindQuery("error_message", "changed")}, resource.ErrInvalidOption},
-		{"fetch cache control", []subnets.RecordFindOption{subnets.WithRecordFindQuery("skip_cache", true)}, resource.ErrInvalidOption},
-		{"fetch response envelope control", []subnets.RecordFindOption{subnets.WithRecordFindQuery("resource_response_key", "other")}, resource.ErrInvalidOption},
-		{"protected Header", []subnets.RecordFindOption{subnets.WithRecordFindHeaders(map[string]string{"X-Auth-Token": "different"})}, resource.ErrInvalidOption},
+		{"identity keyword collision", []subnets.RecordFindOption{request.Query("id", "different")}, resource.ErrInvalidOption},
+		{"route override", []subnets.RecordFindOption{request.Query("base_path", "/other")}, resource.ErrInvalidOption},
+		{"fetch requires_id control", []subnets.RecordFindOption{request.Query("requires_id", false)}, resource.ErrInvalidOption},
+		{"fetch error_message control", []subnets.RecordFindOption{request.Query("error_message", "changed")}, resource.ErrInvalidOption},
+		{"fetch cache control", []subnets.RecordFindOption{request.Query("skip_cache", true)}, resource.ErrInvalidOption},
+		{"fetch response envelope control", []subnets.RecordFindOption{request.Query("resource_response_key", "other")}, resource.ErrInvalidOption},
+		{"protected Header", []subnets.RecordFindOption{request.Headers(map[string]string{"X-Auth-Token": "different"})}, resource.ErrInvalidOption},
 	} {
 		t.Run(testcase.name, func(t *testing.T) {
 			var calls []nativeSubnetCall
@@ -325,7 +326,7 @@ func TestPythonSubnetFindRecordOptionSnapshotsAndPreflightGuards(t *testing.T) {
 	t.Run("source mutation is sticky", func(t *testing.T) {
 		var calls []nativeSubnetCall
 		api := pythonCoreSubnetAPI(t, &calls, func(*http.Request) *http.Response { t.Fatal("unexpected HTTP"); return nil })
-		got, err := api.FindRecord(context.Background(), "target", func(*subnets.RecordFindOpts) error { api.RawClient().ResourceBase += "changed/"; return nil })
+		got, err := api.FindRecord(context.Background(), "target", request.Custom(func(*subnets.RecordFindOpts) error { api.RawClient().ResourceBase += "changed/"; return nil }))
 		if got != nil || !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
 			t.Fatal(got, err, calls)
 		}
@@ -515,7 +516,7 @@ func TestPythonSubnetFindRecordMalformedPagesAndDetachedExtensionEvidence(t *tes
 	}
 	var calls []nativeSubnetCall
 	api := pythonCoreSubnetAPI(t, &calls, func(*http.Request) *http.Response { return nativeSubnetWire(202, "not JSON") })
-	got, err := api.FindRecord(context.Background(), "target", subnets.WithRecordFindQuery("x_extension", []any{nil, 9007199254740993}))
+	got, err := api.FindRecord(context.Background(), "target", request.Query("x_extension", []any{nil, 9007199254740993}))
 	if err != nil || got == nil || got.Wire != nil || string(got.Envelope) != "not JSON" || len(calls) != 1 {
 		t.Fatal(got, err, calls)
 	}
@@ -607,7 +608,7 @@ func TestPythonSubnetFindRecordLiveReauthenticationAndMicroversionOwnership(t *t
 	}
 	var none []nativeSubnetCall
 	invalid := pythonCoreSubnetAPI(t, &none, func(*http.Request) *http.Response { t.Fatal("invalid version HTTP"); return nil })
-	got, err = invalid.FindRecord(context.Background(), "target", subnets.WithRecordFindMicroversion("2.1\r\nchanged"))
+	got, err = invalid.FindRecord(context.Background(), "target", request.Microversion("2.1\r\nchanged"))
 	if got != nil || !errors.Is(err, resource.ErrInvalidOption) || len(none) != 0 {
 		t.Fatal(got, err, none)
 	}
@@ -637,7 +638,7 @@ func TestPythonSubnetFindRecordDictionaryTruthinessShortCircuitAndFailureReceipt
 				response.Header.Set("X-Request-Id", "dict-filter")
 				return response
 			})
-			got, err := api.FindRecord(context.Background(), "target", subnets.WithRecordFindQuery("created_at", json.RawMessage(testcase.filter)))
+			got, err := api.FindRecord(context.Background(), "target", request.Query("created_at", json.RawMessage(testcase.filter)))
 			if len(calls) != 2 {
 				t.Fatal(got, err, calls)
 			}
@@ -667,7 +668,7 @@ func TestPythonSubnetFindRecordDictionaryTruthinessShortCircuitAndFailureReceipt
 			if firstMatches {
 				first = "observed"
 			}
-			got, err := api.FindRecord(context.Background(), "target", subnets.WithRecordFindQuery("created_at", first), subnets.WithRecordFindQuery("revision_number", map[string]any{"value": 1}))
+			got, err := api.FindRecord(context.Background(), "target", request.Query("created_at", first), request.Query("revision_number", map[string]any{"value": 1}))
 			if got != nil || len(calls) != 2 {
 				t.Fatal(got, err, calls)
 			}
@@ -702,7 +703,7 @@ func TestPythonSubnetFindRecordPaginationTruthinessAndHeaderConstructorProjectio
 				}
 				return nativeSubnetWire(200, `{"subnets":[{"id":"match","name":"target"}],"next":"?marker=next"}`)
 			})
-			got, err := api.FindRecord(context.Background(), "target", subnets.WithRecordFindQuery("paginated", testcase.flag))
+			got, err := api.FindRecord(context.Background(), "target", request.Query("paginated", testcase.flag))
 			if err != nil || got == nil || len(calls) != testcase.pages+1 {
 				t.Fatal(got, err, calls)
 			}
@@ -733,7 +734,7 @@ func TestPythonSubnetFindRecordPaginationTruthinessAndHeaderConstructorProjectio
 			})
 			options := []subnets.RecordFindOption{}
 			if testcase.seed != "" {
-				options = append(options, subnets.WithRecordFindQuery("if_match", testcase.seed))
+				options = append(options, request.Query("if_match", testcase.seed))
 			}
 			got, err := api.FindRecord(context.Background(), "target", options...)
 			if err != nil || got == nil {
@@ -763,7 +764,7 @@ func TestPythonSubnetFindRecordListAcceptAndRetryVersionPolicy(t *testing.T) {
 			options := []subnets.RecordFindOption{}
 			want := []string{"text/xml", "application/json"}
 			if explicit {
-				options = append(options, subnets.WithRecordFindHeaders(map[string]string{"Accept": "text/plain"}))
+				options = append(options, request.Headers(map[string]string{"Accept": "text/plain"}))
 				want = []string{"text/plain", "text/plain"}
 			}
 			got, err := api.FindRecord(context.Background(), "target", options...)
@@ -790,7 +791,7 @@ func TestPythonSubnetFindRecordListAcceptAndRetryVersionPolicy(t *testing.T) {
 			}
 			options := []subnets.RecordFindOption{}
 			if version != "" {
-				options = append(options, subnets.WithRecordFindMicroversion(version))
+				options = append(options, request.Microversion(version))
 			}
 			got, err := api.FindRecord(context.Background(), "target", options...)
 			var native gophercloud.ErrUnexpectedResponseCode

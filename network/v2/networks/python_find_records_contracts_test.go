@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/networks"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -51,7 +52,7 @@ func TestPythonNetworkFindRecordMemberFirstSeedAndResponseProjection(t *testing.
 				response.Header.Set("X-Request-Id", "member")
 				return response
 			})
-			value, err := api.FindRecord(context.Background(), "target", networks.WithRecordFindQuery("x_seed", map[string]any{"keep": nil}), networks.WithRecordFindQuery("status", "ACTIVE"))
+			value, err := api.FindRecord(context.Background(), "target", request.Query("x_seed", map[string]any{"keep": nil}), request.Query("status", "ACTIVE"))
 			if err != nil || len(calls) != 1 || calls[0].path != "/neutron/v2.0/networks/target" || calls[0].method != http.MethodGet {
 				t.Fatal(value, err, calls)
 			}
@@ -72,7 +73,7 @@ func TestPythonNetworkFindRecordMemberFirstSeedAndResponseProjection(t *testing.
 	}
 	var calls []nativeNetworkCall
 	api := pythonCoreNetworkAPI(t, &calls, func(*http.Request) *http.Response { return nativeNetworkWire(204, "") })
-	value, err := api.FindRecord(context.Background(), "literal/id %2F", networks.WithRecordFindQuery("name", "seed"))
+	value, err := api.FindRecord(context.Background(), "literal/id %2F", request.Query("name", "seed"))
 	if err != nil || len(calls) != 1 || value.Wire != nil || value.StatusCode != 204 {
 		t.Fatal(value, err, calls)
 	}
@@ -102,9 +103,9 @@ func TestPythonNetworkFindRecordFallbackAliasesAndLocalBodyFilters(t *testing.T)
 	configured := map[string]string{"X-Trace": "old"}
 	api.RawClient().MoreHeaders = configured
 	value, err := api.FindRecord(context.Background(), "target",
-		networks.WithRecordFindQuery("x_unknown", "keep"), networks.WithRecordFindQuery("all_projects", true), networks.WithRecordFindQuery("fields", []string{"id", "name"}),
-		networks.WithRecordFindQuery("any_tags", []string{"red", "blue"}), networks.WithRecordFindQuery("not_any_tags", "black"), networks.WithRecordFindQuery("paginated", false),
-		networks.WithRecordFindHeaders(map[string]string{"X-Trace": "owned"}), networks.WithRecordFindQuery("is_shared", false), networks.WithRecordFindQuery("shared", true), networks.WithRecordFindQuery("provider_network_type", "vxlan"), networks.WithRecordFindQuery("provider:network_type", "vlan"), networks.WithRecordFindQuery("mtu", true))
+		request.Query("x_unknown", "keep"), request.Query("all_projects", true), request.Query("fields", []string{"id", "name"}),
+		request.Query("any_tags", []string{"red", "blue"}), request.Query("not_any_tags", "black"), request.Query("paginated", false),
+		request.Headers(map[string]string{"X-Trace": "owned"}), request.Query("is_shared", false), request.Query("shared", true), request.Query("provider_network_type", "vxlan"), request.Query("provider:network_type", "vlan"), request.Query("mtu", true))
 	if err != nil || value == nil || len(calls) != 2 {
 		t.Fatal(value, err, calls)
 	}
@@ -145,7 +146,7 @@ func TestPythonNetworkFindRecordNamePresenceMissingAndPassiveResponseID(t *testi
 				})
 				options := []networks.RecordFindOption{}
 				if testcase.supplied {
-					options = append(options, networks.WithRecordFindQuery("name", testcase.value))
+					options = append(options, request.Query("name", testcase.value))
 				}
 				got, err := api.FindRecord(context.Background(), "target", options...)
 				if err != nil || got != nil || len(calls) != 2 {
@@ -179,7 +180,7 @@ func TestPythonNetworkFindRecordNamePresenceMissingAndPassiveResponseID(t *testi
 			}
 			return nativeNetworkWire(status, body)
 		})
-		got, err := api.FindRecord(context.Background(), "target", networks.WithRecordFindIgnoreMissing(false))
+		got, err := api.FindRecord(context.Background(), "target", request.IgnoreMissing(false))
 		if got != nil || err == nil || (status == 200 && !errors.Is(err, resource.ErrNotFound)) || len(calls) != 2 {
 			t.Fatal(got, err, calls)
 		}
@@ -245,7 +246,7 @@ func TestPythonNetworkFindRecordLateDuplicateErrorMarkerAndRawCap(t *testing.T) 
 			}
 			return nativeNetworkWire(200, `{"networks":[{"id":7,"name":"target"}]}`)
 		})
-		got, err := api.FindRecord(context.Background(), "target", networks.WithRecordFindQuery("limit", 2), networks.WithRecordFindQuery("tags", []string{"a", "b"}))
+		got, err := api.FindRecord(context.Background(), "target", request.Query("limit", 2), request.Query("tags", []string{"a", "b"}))
 		if err != nil || got == nil || len(calls) != 3 {
 			t.Fatal(got, err, calls)
 		}
@@ -262,7 +263,7 @@ func TestPythonNetworkFindRecordLateDuplicateErrorMarkerAndRawCap(t *testing.T) 
 			}
 			return nativeNetworkWire(200, `{"networks":[{"id":"filtered","name":"target","mtu":2},{"id":"match","name":"target","mtu":true}],"networks_links":[{"rel":"next","href":"?marker=late"}]}`)
 		})
-		got, err := api.FindRecord(context.Background(), "target", networks.WithRecordFindQuery("max_items", 1), networks.WithRecordFindQuery("mtu", true))
+		got, err := api.FindRecord(context.Background(), "target", request.Query("max_items", 1), request.Query("mtu", true))
 		if err != nil || got != nil || len(calls) != 2 {
 			t.Fatal(got, err, calls)
 		}
@@ -279,7 +280,7 @@ func TestPythonNetworkFindRecordOptionSnapshotsAndPreflightGuards(t *testing.T) 
 	delete(query, "x_seed")
 	headers["X-Trace"] = "changed"
 	ignore = true
-	fieldOption := networks.WithRecordFindQuery("fields", fields)
+	fieldOption := request.Query("fields", fields)
 	fields[0] = "changed"
 	var escaped *networks.RecordFindOpts
 	var calls []nativeNetworkCall
@@ -291,7 +292,7 @@ func TestPythonNetworkFindRecordOptionSnapshotsAndPreflightGuards(t *testing.T) 
 		escaped.Headers["X-Trace"] = "callback changed"
 		return nativeNetworkWire(200, `{"network":{}}`)
 	})
-	got, err := api.FindRecord(context.Background(), "target", options, fieldOption, func(c *networks.RecordFindOpts) error { escaped = c; return nil })
+	got, err := api.FindRecord(context.Background(), "target", options, fieldOption, request.Custom(func(c *networks.RecordFindOpts) error { escaped = c; return nil }))
 	if err != nil || got == nil || len(calls) != 1 {
 		t.Fatal(got, err, calls)
 	}
@@ -303,15 +304,15 @@ func TestPythonNetworkFindRecordOptionSnapshotsAndPreflightGuards(t *testing.T) 
 	}{
 		{"nil", []networks.RecordFindOption{nil}, resource.ErrInvalidOption},
 		{"malformed JSON", []networks.RecordFindOption{networks.WithRecordFindOpts(networks.RecordFindOpts{Query: map[string]json.RawMessage{"fields": json.RawMessage(`[`)}})}, resource.ErrInvalidOption},
-		{"negative cap", []networks.RecordFindOption{networks.WithRecordFindQuery("max_items", -1)}, resource.ErrInvalidOption},
+		{"negative cap", []networks.RecordFindOption{request.Query("max_items", -1)}, resource.ErrInvalidOption},
 		{"bad page flag", []networks.RecordFindOption{networks.WithRecordFindOpts(networks.RecordFindOpts{Query: map[string]json.RawMessage{"paginated": json.RawMessage(`bad flag`)}})}, resource.ErrInvalidOption},
-		{"identity keyword collision", []networks.RecordFindOption{networks.WithRecordFindQuery("id", "different")}, resource.ErrInvalidOption},
-		{"route override", []networks.RecordFindOption{networks.WithRecordFindQuery("base_path", "/other")}, resource.ErrInvalidOption},
-		{"fetch requires_id control", []networks.RecordFindOption{networks.WithRecordFindQuery("requires_id", false)}, resource.ErrInvalidOption},
-		{"fetch error_message control", []networks.RecordFindOption{networks.WithRecordFindQuery("error_message", "changed")}, resource.ErrInvalidOption},
-		{"fetch cache control", []networks.RecordFindOption{networks.WithRecordFindQuery("skip_cache", true)}, resource.ErrInvalidOption},
-		{"fetch response envelope control", []networks.RecordFindOption{networks.WithRecordFindQuery("resource_response_key", "other")}, resource.ErrInvalidOption},
-		{"protected Header", []networks.RecordFindOption{networks.WithRecordFindHeaders(map[string]string{"X-Auth-Token": "different"})}, resource.ErrInvalidOption},
+		{"identity keyword collision", []networks.RecordFindOption{request.Query("id", "different")}, resource.ErrInvalidOption},
+		{"route override", []networks.RecordFindOption{request.Query("base_path", "/other")}, resource.ErrInvalidOption},
+		{"fetch requires_id control", []networks.RecordFindOption{request.Query("requires_id", false)}, resource.ErrInvalidOption},
+		{"fetch error_message control", []networks.RecordFindOption{request.Query("error_message", "changed")}, resource.ErrInvalidOption},
+		{"fetch cache control", []networks.RecordFindOption{request.Query("skip_cache", true)}, resource.ErrInvalidOption},
+		{"fetch response envelope control", []networks.RecordFindOption{request.Query("resource_response_key", "other")}, resource.ErrInvalidOption},
+		{"protected Header", []networks.RecordFindOption{request.Headers(map[string]string{"X-Auth-Token": "different"})}, resource.ErrInvalidOption},
 	} {
 		t.Run(testcase.name, func(t *testing.T) {
 			var calls []nativeNetworkCall
@@ -325,7 +326,7 @@ func TestPythonNetworkFindRecordOptionSnapshotsAndPreflightGuards(t *testing.T) 
 	t.Run("source mutation is sticky", func(t *testing.T) {
 		var calls []nativeNetworkCall
 		api := pythonCoreNetworkAPI(t, &calls, func(*http.Request) *http.Response { t.Fatal("unexpected HTTP"); return nil })
-		got, err := api.FindRecord(context.Background(), "target", func(*networks.RecordFindOpts) error { api.RawClient().ResourceBase += "changed/"; return nil })
+		got, err := api.FindRecord(context.Background(), "target", request.Custom(func(*networks.RecordFindOpts) error { api.RawClient().ResourceBase += "changed/"; return nil }))
 		if got != nil || !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
 			t.Fatal(got, err, calls)
 		}
@@ -515,7 +516,7 @@ func TestPythonNetworkFindRecordMalformedPagesAndDetachedExtensionEvidence(t *te
 	}
 	var calls []nativeNetworkCall
 	api := pythonCoreNetworkAPI(t, &calls, func(*http.Request) *http.Response { return nativeNetworkWire(202, "not JSON") })
-	got, err := api.FindRecord(context.Background(), "target", networks.WithRecordFindQuery("x_extension", []any{nil, 9007199254740993}))
+	got, err := api.FindRecord(context.Background(), "target", request.Query("x_extension", []any{nil, 9007199254740993}))
 	if err != nil || got == nil || got.Wire != nil || string(got.Envelope) != "not JSON" || len(calls) != 1 {
 		t.Fatal(got, err, calls)
 	}
@@ -607,7 +608,7 @@ func TestPythonNetworkFindRecordLiveReauthenticationAndMicroversionOwnership(t *
 	}
 	var none []nativeNetworkCall
 	invalid := pythonCoreNetworkAPI(t, &none, func(*http.Request) *http.Response { t.Fatal("invalid version HTTP"); return nil })
-	got, err = invalid.FindRecord(context.Background(), "target", networks.WithRecordFindMicroversion("2.1\r\nchanged"))
+	got, err = invalid.FindRecord(context.Background(), "target", request.Microversion("2.1\r\nchanged"))
 	if got != nil || !errors.Is(err, resource.ErrInvalidOption) || len(none) != 0 {
 		t.Fatal(got, err, none)
 	}
@@ -637,7 +638,7 @@ func TestPythonNetworkFindRecordDictionaryTruthinessShortCircuitAndFailureReceip
 				response.Header.Set("X-Request-Id", "dict-filter")
 				return response
 			})
-			got, err := api.FindRecord(context.Background(), "target", networks.WithRecordFindQuery("created_at", json.RawMessage(testcase.filter)))
+			got, err := api.FindRecord(context.Background(), "target", request.Query("created_at", json.RawMessage(testcase.filter)))
 			if len(calls) != 2 {
 				t.Fatal(got, err, calls)
 			}
@@ -667,7 +668,7 @@ func TestPythonNetworkFindRecordDictionaryTruthinessShortCircuitAndFailureReceip
 			if firstMatches {
 				first = "observed"
 			}
-			got, err := api.FindRecord(context.Background(), "target", networks.WithRecordFindQuery("created_at", first), networks.WithRecordFindQuery("revision_number", map[string]any{"value": 1}))
+			got, err := api.FindRecord(context.Background(), "target", request.Query("created_at", first), request.Query("revision_number", map[string]any{"value": 1}))
 			if got != nil || len(calls) != 2 {
 				t.Fatal(got, err, calls)
 			}
@@ -702,7 +703,7 @@ func TestPythonNetworkFindRecordPaginationTruthinessAndHeaderConstructorProjecti
 				}
 				return nativeNetworkWire(200, `{"networks":[{"id":"match","name":"target"}],"next":"?marker=next"}`)
 			})
-			got, err := api.FindRecord(context.Background(), "target", networks.WithRecordFindQuery("paginated", testcase.flag))
+			got, err := api.FindRecord(context.Background(), "target", request.Query("paginated", testcase.flag))
 			if err != nil || got == nil || len(calls) != testcase.pages+1 {
 				t.Fatal(got, err, calls)
 			}
@@ -733,7 +734,7 @@ func TestPythonNetworkFindRecordPaginationTruthinessAndHeaderConstructorProjecti
 			})
 			options := []networks.RecordFindOption{}
 			if testcase.seed != "" {
-				options = append(options, networks.WithRecordFindQuery("if_match", testcase.seed))
+				options = append(options, request.Query("if_match", testcase.seed))
 			}
 			got, err := api.FindRecord(context.Background(), "target", options...)
 			if err != nil || got == nil {
@@ -763,7 +764,7 @@ func TestPythonNetworkFindRecordListAcceptAndRetryVersionPolicy(t *testing.T) {
 			options := []networks.RecordFindOption{}
 			want := []string{"text/xml", "application/json"}
 			if explicit {
-				options = append(options, networks.WithRecordFindHeaders(map[string]string{"Accept": "text/plain"}))
+				options = append(options, request.Headers(map[string]string{"Accept": "text/plain"}))
 				want = []string{"text/plain", "text/plain"}
 			}
 			got, err := api.FindRecord(context.Background(), "target", options...)
@@ -790,7 +791,7 @@ func TestPythonNetworkFindRecordListAcceptAndRetryVersionPolicy(t *testing.T) {
 			}
 			options := []networks.RecordFindOption{}
 			if version != "" {
-				options = append(options, networks.WithRecordFindMicroversion(version))
+				options = append(options, request.Microversion(version))
 			}
 			got, err := api.FindRecord(context.Background(), "target", options...)
 			var native gophercloud.ErrUnexpectedResponseCode

@@ -123,7 +123,7 @@ func TestPythonCloudNetworkGetHelpersFindByIDThenNameWithFilters(t *testing.T) {
 				ctx := context.Background()
 				switch kind {
 				case "networks":
-					value, err := networks.New(client).FindRecord(ctx, identity, networks.WithRecordFindIgnoreMissing(true), networks.WithRecordFindQuery("project_id", "p"))
+					value, err := networks.New(client).FindRecord(ctx, identity, request.IgnoreMissing(true), request.Query("project_id", "p"))
 					if value == nil {
 						return nil, err
 					}
@@ -135,13 +135,13 @@ func TestPythonCloudNetworkGetHelpersFindByIDThenNameWithFilters(t *testing.T) {
 					}
 					return value.Resource, err
 				case "subnets":
-					value, err := subnets.New(client).FindRecord(ctx, identity, subnets.WithRecordFindIgnoreMissing(true), subnets.WithRecordFindQuery("project_id", "p"))
+					value, err := subnets.New(client).FindRecord(ctx, identity, request.IgnoreMissing(true), request.Query("project_id", "p"))
 					if value == nil {
 						return nil, err
 					}
 					return value.Resource, err
 				default:
-					value, err := ports.New(client).FindRecord(ctx, identity, ports.WithRecordFindIgnoreMissing(true), ports.WithRecordFindQuery("project_id", "p"))
+					value, err := ports.New(client).FindRecord(ctx, identity, request.IgnoreMissing(true), request.Query("project_id", "p"))
 					if value == nil {
 						return nil, err
 					}
@@ -249,7 +249,7 @@ func TestPythonCloudNetworkDeleteHelpersFindThenDelete(t *testing.T) {
 				var err error
 				switch kind {
 				case "ports":
-					value, findErr := ports.New(client).FindRecord(ctx, test.identity, ports.WithRecordFindIgnoreMissing(true))
+					value, findErr := ports.New(client).FindRecord(ctx, test.identity, request.IgnoreMissing(true))
 					if err = findErr; value != nil {
 						found = value.Resource
 						err = ports.New(client).DeleteWithOptions(ctx, pythonCloudAID(t, found))
@@ -261,7 +261,7 @@ func TestPythonCloudNetworkDeleteHelpersFindThenDelete(t *testing.T) {
 						err = routers.New(client).DeleteWithOptions(ctx, pythonCloudAID(t, found))
 					}
 				default:
-					value, findErr := subnets.New(client).FindRecord(ctx, test.identity, subnets.WithRecordFindIgnoreMissing(true))
+					value, findErr := subnets.New(client).FindRecord(ctx, test.identity, request.IgnoreMissing(true))
 					if err = findErr; value != nil {
 						found = value.Resource
 						err = subnets.New(client).DeleteWithOptions(ctx, pythonCloudAID(t, found))
@@ -410,7 +410,7 @@ func TestPythonCloudFirewallGroupCreateResolvesPoliciesAndPorts(t *testing.T) {
 		return policy.ID
 	}
 	ingress, egress := policyID("in"), policyID("out-id")
-	port, err := ports.New(client).FindRecord(ctx, "web", ports.WithRecordFindIgnoreMissing(false))
+	port, err := ports.New(client).FindRecord(ctx, "web", request.IgnoreMissing(false))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -427,7 +427,7 @@ func TestPythonCloudFirewallGroupCreateResolvesPoliciesAndPorts(t *testing.T) {
 	pythonCloudABody(t, calls[5].body, `{"firewall_group":{"name":"grp","ingress_firewall_policy_id":"in-id","egress_firewall_policy_id":"out-id","ports":["port-1"],"admin_state_up":true}}`)
 
 	calls = nil
-	if _, err := ports.New(client).FindRecord(ctx, "gone", ports.WithRecordFindIgnoreMissing(false)); !errors.Is(err, resource.ErrNotFound) {
+	if _, err := ports.New(client).FindRecord(ctx, "gone", request.IgnoreMissing(false)); !errors.Is(err, resource.ErrNotFound) {
 		t.Fatal("missing port must be NotFound before POST", err)
 	}
 	pythonCloudAExpect(t, calls, "GET /ports/gone", "GET /ports?name=gone")

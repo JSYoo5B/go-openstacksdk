@@ -113,10 +113,10 @@ func (a *API) ListSourceValues(ctx context.Context, options ...SourceCloudListOp
 		return nil, wrap(err)
 	}
 	if cfg.headersPresent || len(cfg.Headers) > 0 {
-		pushdown = append(pushdown, WithRecordListHeaders(cfg.Headers))
+		pushdown = append(pushdown, request.Headers(cfg.Headers))
 	}
 	if cfg.Microversion != nil {
-		pushdown = append(pushdown, WithRecordListMicroversion(*cfg.Microversion))
+		pushdown = append(pushdown, request.Microversion(*cfg.Microversion))
 	}
 	policy, err := applyRecordListOptions(ctx, engine, pushdown)
 	if err != nil {
@@ -190,7 +190,7 @@ func sourceCloudListPushdown(filters *json.RawMessage) ([]RecordListOption, erro
 	}
 	options := make([]RecordListOption, 0, len(members))
 	for _, member := range members {
-		options = append(options, withRecordListRaw(member.Key, member.Value, nil))
+		options = append(options, request.Custom(withRecordListRaw(member.Key, member.Value, nil)))
 	}
 	return options, nil
 }

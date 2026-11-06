@@ -12,6 +12,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/neutronfind"
@@ -42,7 +43,17 @@ type RecordListOpts struct {
 	expression   json.RawMessage
 	order        []string
 }
-type RecordListOption func(*RecordListOpts) error
+
+// RecordListOption is one option of ListRecords, AllRecords,
+// ProxyListRecords and ProxyCloudListRecords: WithRecordListOpts,
+// WithRecordListQuery, WithRecordListConflictingAttrs,
+// WithRecordListJMESPath, WithCloudRecordListQuery, request.Headers (replaces
+// the headers), request.Microversion, request.BasePath, request.Limit,
+// request.Marker, request.MaxItems, request.Paginated or request.Custom over
+// *RecordListOpts. request.Query is rejected because WithRecordListQuery
+// classifies the key before it marshals the value. Other shared calls fail
+// with resource.ErrInvalidOption before HTTP.
+type RecordListOption = request.ListBasePathCall
 
 func recordListOptions(v RecordListOpts) neutronfind.Options {
 	return neutronfind.Options{Query: v.Query, Headers: v.Headers, Microversion: v.Microversion, BasePath: v.BasePath, Order: v.order}
@@ -58,7 +69,7 @@ func copyRecordListOpts(v RecordListOpts) RecordListOpts {
 }
 func WithRecordListOpts(v RecordListOpts) RecordListOption {
 	owned := copyRecordListOpts(v)
-	return func(c *RecordListOpts) error { *c = copyRecordListOpts(owned); return nil }
+	return request.Custom(func(c *RecordListOpts) error { *c = copyRecordListOpts(owned); return nil })
 }
 
 // recordListIgnores reports kwargs that Source Resource.list discards before
@@ -98,6 +109,10 @@ func recordListControlError(key string) error {
 // attributes become local filters on each received row. Source runtime controls
 // fail by presence before invoking an application JSON marshaler.
 func WithRecordListQuery(key string, value any) RecordListOption {
+	return request.Custom(recordListQuery(key, value))
+}
+
+func recordListQuery(key string, value any) func(*RecordListOpts) error {
 	if recordListIgnores(key) {
 		return func(*RecordListOpts) error { return nil }
 	}
@@ -151,7 +166,7 @@ func WithRecordListQuery(key string, value any) RecordListOption {
 		return nil
 	}
 }
-func WithRecordListHeaders(v map[string]string) RecordListOption {
+func recordListHeaders(v map[string]string) func(*RecordListOpts) error {
 	owned := maps.Clone(v)
 	return func(c *RecordListOpts) error {
 		c.Headers = maps.Clone(owned)
@@ -160,7 +175,7 @@ func WithRecordListHeaders(v map[string]string) RecordListOption {
 		return nil
 	}
 }
-func WithRecordListMicroversion(v string) RecordListOption {
+func recordListMicroversion(v string) func(*RecordListOpts) error {
 	return func(c *RecordListOpts) error {
 		x := v
 		c.Microversion = &x
@@ -170,9 +185,9 @@ func WithRecordListMicroversion(v string) RecordListOption {
 	}
 }
 
-// WithRecordListBasePath uses a service-relative collection route while
+// recordListBasePath uses a service-relative collection route while
 // retaining source, origin and continuation guards. Empty selects the default.
-func WithRecordListBasePath(path string) RecordListOption {
+func recordListBasePath(path string) func(*RecordListOpts) error {
 	return func(c *RecordListOpts) error {
 		value := path
 		c.BasePath = &value
@@ -188,10 +203,14 @@ func WithRecordListConflictingAttrs(value json.RawMessage) RecordListOption {
 	return WithRecordListQuery("__conflicting_attrs", value)
 }
 
-func WithRecordListLimit(v int) RecordListOption      { return WithRecordListQuery("limit", v) }
-func WithRecordListMarker(v string) RecordListOption  { return WithRecordListQuery("marker", v) }
-func WithRecordListMaxItems(v int) RecordListOption   { return WithRecordListQuery("max_items", v) }
-func WithRecordListPaginated(v bool) RecordListOption { return WithRecordListQuery("paginated", v) }
+// recordListCalls interprets the shared calls of the record lists. Paging
+// calls are the Python limit, marker, max_items and paginated kwargs.
+var recordListCalls = calls.Spec[RecordListOpts]{
+	Headers:      neutronfind.Use(recordListHeaders),
+	Microversion: neutronfind.Use(recordListMicroversion),
+	BasePath:     neutronfind.Use(recordListBasePath),
+	Paging:       neutronfind.KeywordPaging(recordListQuery),
+}
 
 // WithRecordListJMESPath evaluates the deprecated Proxy expression through
 // ProxyListRecords. Empty expressions leave the lazy resource generator intact.
@@ -222,7 +241,7 @@ func networkListRecord(value *neutronfind.Record) *NetworkRecord {
 }
 func applyRecordListOptions(ctx context.Context, engine *neutronfind.Engine, options []RecordListOption) (RecordListOpts, error) {
 	policy := RecordListOpts{}
-	for _, apply := range options {
+	for _, apply := range calls.Translate(options, recordListCalls) {
 		if err := engine.Check(ctx); err != nil {
 			return policy, err
 		}

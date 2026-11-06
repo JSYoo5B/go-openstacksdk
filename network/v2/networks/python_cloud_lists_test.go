@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/networks"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -55,7 +56,7 @@ func TestPythonNetworkCloudListEmptyPathSkipsHTTPAndKeepsIterationGuards(t *test
 		api := pythonCoreNetworkAPI(t, &calls, func(*http.Request) *http.Response { t.Fatal("empty path HTTP"); return nil })
 		ctx, cancel := context.WithCancelCause(context.Background())
 		defer cancel(nil)
-		proxy, err := api.ProxyCloudListRecords(ctx, nil, networks.WithRecordListBasePath(""))
+		proxy, err := api.ProxyCloudListRecords(ctx, nil, request.BasePath(""))
 		if err != nil {
 			t.Fatal(err)
 		}

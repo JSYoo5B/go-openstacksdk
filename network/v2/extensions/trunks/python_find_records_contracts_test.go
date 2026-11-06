@@ -5,15 +5,17 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks"
-	"github.com/JSYoo5B/go-openstacksdk/resource"
-	"github.com/gophercloud/gophercloud/v2"
 	"io"
 	"net/http"
 	"net/url"
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks"
+	"github.com/JSYoo5B/go-openstacksdk/request"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
+	"github.com/gophercloud/gophercloud/v2"
 )
 
 func pythonFindField(t *testing.T, value *trunks.TrunkFindRecord, key, want string) {
@@ -46,7 +48,7 @@ func TestPythonTrunkFindRecordMemberSeedDefaultsAndActualEvidence(t *testing.T) 
 			response.Header.Set("X-Request-Id", "receipt")
 			return response
 		})
-		got, err := api.FindRecord(context.Background(), "literal/id %2F", trunks.WithRecordFindQuery("x_seed", map[string]any{"nested": nil}), trunks.WithRecordFindQuery("name", "seed"), trunks.WithRecordFindQuery("if_match", "seed-header"))
+		got, err := api.FindRecord(context.Background(), "literal/id %2F", request.Query("x_seed", map[string]any{"nested": nil}), request.Query("name", "seed"), request.Query("if_match", "seed-header"))
 		if err != nil || got == nil || len(calls) != 1 || calls[0].body != "" || got.StatusCode != 203 || string(got.Envelope) != body || got.Header.Get("X-Request-Id") != "receipt" {
 			t.Fatal(got, err, calls)
 		}
@@ -99,7 +101,7 @@ func TestPythonTrunkFindRecordFallbackQueryMappingAndLocalFilters(t *testing.T) 
 		listed = req.URL.Query()
 		return nativeTrunkWire(200, `{"trunks":[{"id":"filtered","name":"target","tenant_id":2},{"id":"match","name":"target","tenant_id":1,"x_extension":null}]}`)
 	})
-	got, err := api.FindRecord(context.Background(), "target", trunks.WithRecordFindQuery("x_unknown", "keep"), trunks.WithRecordFindQuery("all_projects", true), trunks.WithRecordFindQuery("fields", []string{"id", "name"}), trunks.WithRecordFindQuery("tenant_id", true), trunks.WithRecordFindQuery("is_admin_state_up", false), trunks.WithRecordFindQuery("admin_state_up", true), trunks.WithRecordFindQuery("any_tags", []string{"red", "blue"}), trunks.WithRecordFindQuery("not_any_tags", "black"), trunks.WithRecordFindQuery("sort_key", "name"), trunks.WithRecordFindQuery("sort_dir", "asc"))
+	got, err := api.FindRecord(context.Background(), "target", request.Query("x_unknown", "keep"), request.Query("all_projects", true), request.Query("fields", []string{"id", "name"}), request.Query("tenant_id", true), request.Query("is_admin_state_up", false), request.Query("admin_state_up", true), request.Query("any_tags", []string{"red", "blue"}), request.Query("not_any_tags", "black"), request.Query("sort_key", "name"), request.Query("sort_dir", "asc"))
 	if err != nil || got == nil || len(calls) != 2 {
 		t.Fatal(got, err, calls)
 	}
@@ -136,7 +138,7 @@ func TestPythonTrunkFindRecordNamePresenceMissingAndPassiveResponseID(t *testing
 				})
 				options := []trunks.RecordFindOption{}
 				if testcase.supplied {
-					options = append(options, trunks.WithRecordFindQuery("name", testcase.value))
+					options = append(options, request.Query("name", testcase.value))
 				}
 				got, err := api.FindRecord(context.Background(), "target", options...)
 				if err != nil || got != nil || len(calls) != 2 {
@@ -170,7 +172,7 @@ func TestPythonTrunkFindRecordNamePresenceMissingAndPassiveResponseID(t *testing
 			}
 			return nativeTrunkWire(status, body)
 		})
-		got, err := api.FindRecord(context.Background(), "target", trunks.WithRecordFindIgnoreMissing(false))
+		got, err := api.FindRecord(context.Background(), "target", request.IgnoreMissing(false))
 		if got != nil || err == nil || (status == 200 && !errors.Is(err, resource.ErrNotFound)) || len(calls) != 2 {
 			t.Fatal(got, err, calls)
 		}
@@ -236,7 +238,7 @@ func TestPythonTrunkFindRecordLateDuplicateErrorMarkerAndRawCap(t *testing.T) {
 			}
 			return nativeTrunkWire(200, `{"trunks":[{"id":7,"name":"target"}]}`)
 		})
-		got, err := api.FindRecord(context.Background(), "target", trunks.WithRecordFindQuery("limit", 2), trunks.WithRecordFindQuery("tags", []string{"a", "b"}))
+		got, err := api.FindRecord(context.Background(), "target", request.Query("limit", 2), request.Query("tags", []string{"a", "b"}))
 		if err != nil || got == nil || len(calls) != 3 {
 			t.Fatal(got, err, calls)
 		}
@@ -253,7 +255,7 @@ func TestPythonTrunkFindRecordLateDuplicateErrorMarkerAndRawCap(t *testing.T) {
 			}
 			return nativeTrunkWire(200, `{"trunks":[{"id":"filtered","name":"target","tenant_id":2},{"id":"match","name":"target","tenant_id":1}],"trunks_links":[{"rel":"next","href":"?marker=late"}]}`)
 		})
-		got, err := api.FindRecord(context.Background(), "target", trunks.WithRecordFindQuery("max_items", 1), trunks.WithRecordFindQuery("tenant_id", true))
+		got, err := api.FindRecord(context.Background(), "target", request.Query("max_items", 1), request.Query("tenant_id", true))
 		if err != nil || got != nil || len(calls) != 2 {
 			t.Fatal(got, err, calls)
 		}
@@ -270,7 +272,7 @@ func TestPythonTrunkFindRecordOptionSnapshotsAndPreflightGuards(t *testing.T) {
 	delete(query, "x_seed")
 	headers["X-Trace"] = "changed"
 	ignore = true
-	fieldOption := trunks.WithRecordFindQuery("fields", fields)
+	fieldOption := request.Query("fields", fields)
 	fields[0] = "changed"
 	var escaped *trunks.RecordFindOpts
 	var calls []nativeTrunkCall
@@ -282,7 +284,7 @@ func TestPythonTrunkFindRecordOptionSnapshotsAndPreflightGuards(t *testing.T) {
 		escaped.Headers["X-Trace"] = "callback changed"
 		return nativeTrunkWire(200, `{"trunk":{}}`)
 	})
-	got, err := api.FindRecord(context.Background(), "target", options, fieldOption, func(c *trunks.RecordFindOpts) error { escaped = c; return nil })
+	got, err := api.FindRecord(context.Background(), "target", options, fieldOption, request.Custom(func(c *trunks.RecordFindOpts) error { escaped = c; return nil }))
 	if err != nil || got == nil || len(calls) != 1 {
 		t.Fatal(got, err, calls)
 	}
@@ -294,15 +296,15 @@ func TestPythonTrunkFindRecordOptionSnapshotsAndPreflightGuards(t *testing.T) {
 	}{
 		{"nil", []trunks.RecordFindOption{nil}, resource.ErrInvalidOption},
 		{"malformed JSON", []trunks.RecordFindOption{trunks.WithRecordFindOpts(trunks.RecordFindOpts{Query: map[string]json.RawMessage{"fields": json.RawMessage(`[`)}})}, resource.ErrInvalidOption},
-		{"negative cap", []trunks.RecordFindOption{trunks.WithRecordFindQuery("max_items", -1)}, resource.ErrInvalidOption},
+		{"negative cap", []trunks.RecordFindOption{request.Query("max_items", -1)}, resource.ErrInvalidOption},
 		{"bad page flag", []trunks.RecordFindOption{trunks.WithRecordFindOpts(trunks.RecordFindOpts{Query: map[string]json.RawMessage{"paginated": json.RawMessage(`bad flag`)}})}, resource.ErrInvalidOption},
-		{"identity keyword collision", []trunks.RecordFindOption{trunks.WithRecordFindQuery("id", "different")}, resource.ErrInvalidOption},
-		{"route override", []trunks.RecordFindOption{trunks.WithRecordFindQuery("base_path", "/other")}, resource.ErrInvalidOption},
-		{"fetch requires_id control", []trunks.RecordFindOption{trunks.WithRecordFindQuery("requires_id", false)}, resource.ErrInvalidOption},
-		{"fetch error_message control", []trunks.RecordFindOption{trunks.WithRecordFindQuery("error_message", "changed")}, resource.ErrInvalidOption},
-		{"fetch cache control", []trunks.RecordFindOption{trunks.WithRecordFindQuery("skip_cache", true)}, resource.ErrInvalidOption},
-		{"fetch response envelope control", []trunks.RecordFindOption{trunks.WithRecordFindQuery("resource_response_key", "other")}, resource.ErrInvalidOption},
-		{"protected Header", []trunks.RecordFindOption{trunks.WithRecordFindHeaders(map[string]string{"X-Auth-Token": "different"})}, resource.ErrInvalidOption},
+		{"identity keyword collision", []trunks.RecordFindOption{request.Query("id", "different")}, resource.ErrInvalidOption},
+		{"route override", []trunks.RecordFindOption{request.Query("base_path", "/other")}, resource.ErrInvalidOption},
+		{"fetch requires_id control", []trunks.RecordFindOption{request.Query("requires_id", false)}, resource.ErrInvalidOption},
+		{"fetch error_message control", []trunks.RecordFindOption{request.Query("error_message", "changed")}, resource.ErrInvalidOption},
+		{"fetch cache control", []trunks.RecordFindOption{request.Query("skip_cache", true)}, resource.ErrInvalidOption},
+		{"fetch response envelope control", []trunks.RecordFindOption{request.Query("resource_response_key", "other")}, resource.ErrInvalidOption},
+		{"protected Header", []trunks.RecordFindOption{request.Headers(map[string]string{"X-Auth-Token": "different"})}, resource.ErrInvalidOption},
 	} {
 		t.Run(testcase.name, func(t *testing.T) {
 			var calls []nativeTrunkCall
@@ -316,7 +318,7 @@ func TestPythonTrunkFindRecordOptionSnapshotsAndPreflightGuards(t *testing.T) {
 	t.Run("source mutation is sticky", func(t *testing.T) {
 		var calls []nativeTrunkCall
 		api := pythonFindAPI(t, &calls, func(*http.Request) *http.Response { t.Fatal("unexpected HTTP"); return nil })
-		got, err := api.FindRecord(context.Background(), "target", func(*trunks.RecordFindOpts) error { api.RawClient().ResourceBase += "changed/"; return nil })
+		got, err := api.FindRecord(context.Background(), "target", request.Custom(func(*trunks.RecordFindOpts) error { api.RawClient().ResourceBase += "changed/"; return nil }))
 		if got != nil || !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
 			t.Fatal(got, err, calls)
 		}
@@ -506,7 +508,7 @@ func TestPythonTrunkFindRecordMalformedPagesAndDetachedExtensionEvidence(t *test
 	}
 	var calls []nativeTrunkCall
 	api := pythonFindAPI(t, &calls, func(*http.Request) *http.Response { return nativeTrunkWire(202, "not JSON") })
-	got, err := api.FindRecord(context.Background(), "target", trunks.WithRecordFindQuery("x_extension", []any{nil, 9007199254740993}))
+	got, err := api.FindRecord(context.Background(), "target", request.Query("x_extension", []any{nil, 9007199254740993}))
 	if err != nil || got == nil || got.Wire != nil || string(got.Envelope) != "not JSON" || len(calls) != 1 {
 		t.Fatal(got, err, calls)
 	}
@@ -598,7 +600,7 @@ func TestPythonTrunkFindRecordLiveReauthenticationAndMicroversionOwnership(t *te
 	}
 	var none []nativeTrunkCall
 	invalid := pythonFindAPI(t, &none, func(*http.Request) *http.Response { t.Fatal("invalid version HTTP"); return nil })
-	got, err = invalid.FindRecord(context.Background(), "target", trunks.WithRecordFindMicroversion("2.1\r\nchanged"))
+	got, err = invalid.FindRecord(context.Background(), "target", request.Microversion("2.1\r\nchanged"))
 	if got != nil || !errors.Is(err, resource.ErrInvalidOption) || len(none) != 0 {
 		t.Fatal(got, err, none)
 	}
@@ -628,7 +630,7 @@ func TestPythonTrunkFindRecordDictionaryTruthinessShortCircuitAndFailureReceipts
 				response.Header.Set("X-Request-Id", "dict-filter")
 				return response
 			})
-			got, err := api.FindRecord(context.Background(), "target", trunks.WithRecordFindQuery("tenant_id", json.RawMessage(testcase.filter)))
+			got, err := api.FindRecord(context.Background(), "target", request.Query("tenant_id", json.RawMessage(testcase.filter)))
 			if len(calls) != 2 {
 				t.Fatal(got, err, calls)
 			}
@@ -663,7 +665,7 @@ func TestPythonTrunkFindRecordPaginationTruthiness(t *testing.T) {
 				}
 				return nativeTrunkWire(200, `{"trunks":[{"id":"match","name":"target"}],"next":"?marker=next"}`)
 			})
-			got, err := api.FindRecord(context.Background(), "target", trunks.WithRecordFindQuery("paginated", testcase.flag))
+			got, err := api.FindRecord(context.Background(), "target", request.Query("paginated", testcase.flag))
 			if err != nil || got == nil || len(calls) != testcase.pages+1 {
 				t.Fatal(got, err, calls)
 			}
@@ -687,7 +689,7 @@ func TestPythonTrunkFindRecordListAcceptAndRetryVersionPolicy(t *testing.T) {
 			options := []trunks.RecordFindOption{}
 			want := []string{"text/xml", "application/json"}
 			if explicit {
-				options = append(options, trunks.WithRecordFindHeaders(map[string]string{"Accept": "text/plain"}))
+				options = append(options, request.Headers(map[string]string{"Accept": "text/plain"}))
 				want = []string{"text/plain", "text/plain"}
 			}
 			got, err := api.FindRecord(context.Background(), "target", options...)
@@ -714,7 +716,7 @@ func TestPythonTrunkFindRecordListAcceptAndRetryVersionPolicy(t *testing.T) {
 			}
 			options := []trunks.RecordFindOption{}
 			if version != "" {
-				options = append(options, trunks.WithRecordFindMicroversion(version))
+				options = append(options, request.Microversion(version))
 			}
 			got, err := api.FindRecord(context.Background(), "target", options...)
 			var native gophercloud.ErrUnexpectedResponseCode
@@ -803,7 +805,7 @@ func TestPythonTrunkFindRecordFallbackUsesSelectedVersionAndSourceReceipt(t *tes
 		if selected != "" {
 			source.MoreHeaders["OpenStack-API-Version"] = "network " + selected
 		}
-		got, err := api.FindRecord(context.Background(), "target", trunks.WithRecordFindMicroversion("2.1"))
+		got, err := api.FindRecord(context.Background(), "target", request.Microversion("2.1"))
 		wantList := ""
 		if selected != "" {
 			wantList = "network " + selected
@@ -866,7 +868,7 @@ func TestPythonTrunkFindRecordSourceCancellationAndConstructorPreflight(t *testi
 	var calls []nativeTrunkCall
 	api := pythonFindAPI(t, &calls, func(*http.Request) *http.Response { t.Fatal("preflight made HTTP"); return nil })
 	for _, key := range []string{"connection", "session", "list_base_path", "microversion", "_synchronized", "resource_type", "self", "location", "__conflicting_attrs"} {
-		got, err := api.FindRecord(context.Background(), "target", trunks.WithRecordFindQuery(key, nil))
+		got, err := api.FindRecord(context.Background(), "target", request.Query(key, nil))
 		if got != nil || !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
 			t.Fatal(key, got, err, calls)
 		}
@@ -899,7 +901,7 @@ func TestPythonTrunkFindRecordConstructorAliasOrderIsSeparateFromListQueryPreced
 			t.Run(testcase.name+reply.body, func(t *testing.T) {
 				var calls []nativeTrunkCall
 				api := pythonFindAPI(t, &calls, func(*http.Request) *http.Response { return nativeTrunkWire(200, reply.body) })
-				got, err := api.FindRecord(context.Background(), "target", trunks.WithRecordFindQuery(testcase.first, json.RawMessage(testcase.firstValue)), trunks.WithRecordFindQuery(testcase.second, json.RawMessage(testcase.secondValue)))
+				got, err := api.FindRecord(context.Background(), "target", request.Query(testcase.first, json.RawMessage(testcase.firstValue)), request.Query(testcase.second, json.RawMessage(testcase.secondValue)))
 				if err != nil || got == nil || len(calls) != 1 || string(got.Envelope) != reply.body {
 					t.Fatal(got, err, calls)
 				}
@@ -918,7 +920,7 @@ func TestPythonTrunkFindRecordConstructorAliasOrderIsSeparateFromListQueryPreced
 				}
 				return nativeTrunkWire(200, `{"trunks":[{"id":"match","name":"target","admin_state_up":true}]}`)
 			})
-			got, err := api.FindRecord(context.Background(), "target", trunks.WithRecordFindQuery(testcase.first, json.RawMessage(testcase.firstValue)), trunks.WithRecordFindQuery(testcase.second, json.RawMessage(testcase.secondValue)))
+			got, err := api.FindRecord(context.Background(), "target", request.Query(testcase.first, json.RawMessage(testcase.firstValue)), request.Query(testcase.second, json.RawMessage(testcase.secondValue)))
 			if err != nil || got == nil || len(calls) != 2 {
 				t.Fatal(got, err, calls)
 			}
@@ -956,7 +958,7 @@ func TestPythonTrunkFindRecordFloatTruthinessKeepsWireAndExactComparisonBoundary
 				}
 				return nativeTrunkWire(200, body)
 			})
-			got, err := api.FindRecord(context.Background(), "target", trunks.WithRecordFindQuery("tenant_id", map[string]any{}))
+			got, err := api.FindRecord(context.Background(), "target", request.Query("tenant_id", map[string]any{}))
 			if err != nil || (got != nil) != testcase.truth || len(calls) != 2 {
 				t.Fatal(testcase, got, err, calls)
 			}
@@ -979,7 +981,7 @@ func TestPythonTrunkFindRecordFloatTruthinessKeepsWireAndExactComparisonBoundary
 				}
 				return nativeTrunkWire(200, `{"trunks":[{"id":"match","name":"target"}],"next":"?marker=next"}`)
 			})
-			got, err := api.FindRecord(context.Background(), "target", trunks.WithRecordFindQuery("paginated", json.RawMessage(testcase.raw)))
+			got, err := api.FindRecord(context.Background(), "target", request.Query("paginated", json.RawMessage(testcase.raw)))
 			expected := 2
 			if testcase.truth {
 				expected = 3
@@ -1005,7 +1007,7 @@ func TestPythonTrunkFindRecordFloatTruthinessKeepsWireAndExactComparisonBoundary
 				}
 				return nativeTrunkWire(200, `{"trunks":[{"id":"match","name":"target","tenant_id":`+testcase.actual+`}]}`)
 			})
-			got, err := api.FindRecord(context.Background(), "target", trunks.WithRecordFindQuery("tenant_id", json.RawMessage(testcase.filter)))
+			got, err := api.FindRecord(context.Background(), "target", request.Query("tenant_id", json.RawMessage(testcase.filter)))
 			if err != nil || (got != nil) != testcase.match || len(calls) != 2 {
 				t.Fatal(testcase, got, err, calls)
 			}
@@ -1049,7 +1051,7 @@ func TestPythonTrunkFindRecordBooleanDescriptorUsesFloatTruthiness(t *testing.T)
 	}
 	var calls []nativeTrunkCall
 	api := pythonFindAPI(t, &calls, func(*http.Request) *http.Response { return nativeTrunkWire(200, `{"trunk":{}}`) })
-	got, err := api.FindRecord(context.Background(), "target", trunks.WithRecordFindQuery("is_admin_state_up", json.RawMessage(`1e-4000`)))
+	got, err := api.FindRecord(context.Background(), "target", request.Query("is_admin_state_up", json.RawMessage(`1e-4000`)))
 	if err != nil || got == nil || len(calls) != 1 {
 		t.Fatal(got, err, calls)
 	}

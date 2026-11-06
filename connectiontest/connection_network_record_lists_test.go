@@ -11,6 +11,7 @@ import (
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/ports"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -41,7 +42,7 @@ func TestConnectionPortRecordsCachedServiceAndAutomaticPerRowLocation(t *testing
 		}
 		testcloud.JSON(w, 203, `{"ports":[{"id":"current","name":"alpha","project_id":"scope","location":{"cloud":"forged"}},{"id":"foreign","name":"beta","project_id":"other"}]}`)
 	})
-	records, err := conn.ListPorts(context.Background(), func(*ports.RecordListOpts) error { callbacks++; return nil })
+	records, err := conn.ListPorts(context.Background(), request.Custom(func(*ports.RecordListOpts) error { callbacks++; return nil }))
 	if err != nil || len(records) != 2 || requests != 1 || locates != 1 || callbacks != 1 {
 		t.Fatal(records, err, requests, locates, callbacks)
 	}
@@ -79,10 +80,10 @@ func TestConnectionPortRecordsCatalogAbsencePrecedesListOptionsButSearchStillEva
 		if err != nil {
 			t.Fatal(err)
 		}
-		records, err := conn.ListPorts(context.Background(), func(*ports.RecordListOpts) error {
+		records, err := conn.ListPorts(context.Background(), request.Custom(func(*ports.RecordListOpts) error {
 			listCallbacks++
 			return errors.New("must not evaluate missing-service filters")
-		}, nil)
+		}), nil)
 		if err != nil || records == nil || len(records) != 0 || listCallbacks != 0 || requests != 0 || locates != 1 {
 			t.Fatal(records, err, listCallbacks, requests, locates)
 		}

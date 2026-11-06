@@ -195,9 +195,9 @@ func (s *Service) ListRouterInterfaces(ctx context.Context, router json.RawMessa
 		return nil, wrap(fmt.Errorf("%w: router dictionary has no id", resource.ErrInvalidOption))
 	}
 	api := networkv2.New(&source.Client)
-	leaf := []ports.RecordListOption{ports.WithRecordListQuery("device_id", id), ports.WithRecordListHeaders(cfg.Headers)}
+	leaf := []ports.RecordListOption{ports.WithRecordListQuery("device_id", id), request.Headers(cfg.Headers)}
 	if cfg.Microversion != nil {
-		leaf = append(leaf, ports.WithRecordListMicroversion(*cfg.Microversion))
+		leaf = append(leaf, request.Microversion(*cfg.Microversion))
 	}
 	result := &RouterInterfaceReadResult{Inventory: make([]*ports.PortRecord, 0)}
 	fail := func(e error) (*RouterInterfaceReadResult, error) {

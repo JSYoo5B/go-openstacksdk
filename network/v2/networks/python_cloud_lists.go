@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/jmespath"
@@ -24,7 +25,7 @@ import (
 // the older typed record APIs retain their eager option-validation contract.
 func WithCloudRecordListQuery(key string, value json.RawMessage) RecordListOption {
 	owned := bytes.Clone(value)
-	return func(c *RecordListOpts) error {
+	return request.Custom(func(c *RecordListOpts) error {
 		if c.Query == nil {
 			c.Query = make(map[string]json.RawMessage)
 		}
@@ -33,14 +34,14 @@ func WithCloudRecordListQuery(key string, value json.RawMessage) RecordListOptio
 		}
 		c.Query[key] = bytes.Clone(owned)
 		return nil
-	}
+	})
 }
 
 // networkCloudListProxyOptions performs only Python argument binding and the
 // Proxy's one conflicting-attrs merge. Resource.list validation remains lazy.
 func networkCloudListProxyOptions(ctx context.Context, engine *neutronfind.Engine, options []RecordListOption) (RecordListOpts, error) {
 	policy := RecordListOpts{}
-	for _, apply := range options {
+	for _, apply := range calls.Translate(options, recordListCalls) {
 		if err := engine.Check(ctx); err != nil {
 			return policy, err
 		}

@@ -207,13 +207,13 @@ func (p *prepared) engine(ctx context.Context, portID string) (*neutronfind.Engi
 	return neutronfind.New(ctx, p.api.client, profile(portID), p.guard)
 }
 func (p *prepared) getPort(ctx context.Context, portID string) (*ports.PortRecord, string, error) {
-	row, err := ports.New(p.api.client).GetRecord(ctx, portID, ports.WithRecordFindHeaders(p.policy.Headers), func(c *ports.RecordFindOpts) error {
+	row, err := ports.New(p.api.client).GetRecord(ctx, portID, request.Headers(p.policy.Headers), request.Custom(func(c *ports.RecordFindOpts) error {
 		if p.policy.Microversion != nil {
 			x := *p.policy.Microversion
 			c.Microversion = &x
 		}
 		return nil
-	})
+	}))
 	err = errors.Join(err, p.guard(ctx))
 	if err != nil {
 		return row, "", err
