@@ -9,6 +9,7 @@ import (
 	"maps"
 	"slices"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
@@ -38,7 +39,22 @@ type QoSBandwidthLimitOpts struct {
 	Microversion   *string
 	headersPresent bool
 }
-type QoSBandwidthLimitOption func(*QoSBandwidthLimitOpts) error
+
+// QoSBandwidthLimitOption is one option of ListQoSBandwidthLimitRules,
+// SearchQoSBandwidthLimitRules and GetQoSBandwidthLimitRule:
+// WithQoSBandwidthLimitOpts, WithQoSBandwidthLimitFilters, request.Headers
+// (replaces the headers), request.Microversion or request.Custom over
+// *QoSBandwidthLimitOpts. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type QoSBandwidthLimitOption = request.GetCall
+
+var qosBandwidthLimitCalls = calls.Spec[QoSBandwidthLimitOpts]{
+	Headers: func(c *QoSBandwidthLimitOpts, values map[string]string) error {
+		c.Headers, c.headersPresent = values, true
+		return nil
+	},
+	Microversion: calls.Pointer(func(c *QoSBandwidthLimitOpts) **string { return &c.Microversion }),
+}
 
 func copyQoSBandwidthOpts(v QoSBandwidthLimitOpts) QoSBandwidthLimitOpts {
 	if v.Filters != nil {
@@ -58,26 +74,15 @@ func copyQoSBandwidthOpts(v QoSBandwidthLimitOpts) QoSBandwidthLimitOpts {
 func WithQoSBandwidthLimitOpts(v QoSBandwidthLimitOpts) QoSBandwidthLimitOption {
 	v.headersPresent = v.headersPresent || v.Headers != nil
 	owned := copyQoSBandwidthOpts(v)
-	return func(c *QoSBandwidthLimitOpts) error { *c = copyQoSBandwidthOpts(owned); return nil }
+	return request.Custom(func(c *QoSBandwidthLimitOpts) error { *c = copyQoSBandwidthOpts(owned); return nil })
 }
 func WithQoSBandwidthLimitFilters(raw json.RawMessage) QoSBandwidthLimitOption {
 	owned := bytes.Clone(raw)
-	return func(c *QoSBandwidthLimitOpts) error {
+	return request.Custom(func(c *QoSBandwidthLimitOpts) error {
 		value := json.RawMessage(bytes.Clone(owned))
 		c.Filters = &value
 		return nil
-	}
-}
-func WithQoSBandwidthLimitHeaders(value map[string]string) QoSBandwidthLimitOption {
-	owned := maps.Clone(value)
-	return func(c *QoSBandwidthLimitOpts) error {
-		c.Headers = maps.Clone(owned)
-		c.headersPresent = true
-		return nil
-	}
-}
-func WithQoSBandwidthLimitMicroversion(value string) QoSBandwidthLimitOption {
-	return func(c *QoSBandwidthLimitOpts) error { v := value; c.Microversion = &v; return nil }
+	})
 }
 func qosBandwidthInvalid(format string, args ...any) error {
 	return fmt.Errorf("%w: %s", resource.ErrInvalidOption, fmt.Sprintf(format, args...))
@@ -103,7 +108,7 @@ func (s *Service) qosBandwidthStart(ctx context.Context, policy string, options 
 		return result, state, QoSBandwidthLimitOpts{}, &resource.NotFoundError{Resource: "qos_policy", Reference: policy}
 	}
 	cfg := copyQoSBandwidthOpts(QoSBandwidthLimitOpts{})
-	for _, apply := range slices.Clone(options) {
+	for _, apply := range calls.Translate(options, qosBandwidthLimitCalls) {
 		if err := state.Check(ctx); err != nil {
 			return result, state, cfg, err
 		}

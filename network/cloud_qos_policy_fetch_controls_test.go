@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -43,7 +44,7 @@ func TestCloudQoSPolicyFetchControlsFreshFullGateAndPolicyProfile(t *testing.T) 
 	})
 	option := network.WithQoSPolicyFilters(json.RawMessage(`{"requires_id":false,"base_path":"/owned-policies","skip_cache":true,"error_message":"custom lookup","resource_response_key":"selected"}`))
 	for i := 0; i < 2; i++ {
-		result, err := service.GetQoSPolicyRecord(context.Background(), "requested", option, network.WithQoSPolicyHeaders(map[string]string{"X-Typed": "owned"}))
+		result, err := service.GetQoSPolicyRecord(context.Background(), "requested", option, request.Headers(map[string]string{"X-Typed": "owned"}))
 		if err != nil || result == nil || result.Policy == nil || len(result.Extensions) != 2 {
 			t.Fatal(result, err)
 		}
@@ -93,7 +94,7 @@ func TestCloudQoSPolicyFetchControlsRawHeadersHaveSeparatePhases(t *testing.T) {
 	})
 	service.RawClient().Microversion = "2.0"
 	headers := map[string]string{"X-Phase": "typed", "X-Owned": "typed"}
-	result, err := service.GetQoSPolicyRecord(context.Background(), "target", network.WithQoSPolicyHeaders(headers), network.WithQoSPolicyFilters(json.RawMessage(`{"base_path":"/owned-policies","list_base_path":"/fallback-policies","microversion":"2.1","headers":{"Accept":"application/vnd.policy+json","X-Phase":"raw"}}`)))
+	result, err := service.GetQoSPolicyRecord(context.Background(), "target", request.Headers(headers), network.WithQoSPolicyFilters(json.RawMessage(`{"base_path":"/owned-policies","list_base_path":"/fallback-policies","microversion":"2.1","headers":{"Accept":"application/vnd.policy+json","X-Phase":"raw"}}`)))
 	if err != nil || result == nil || result.Policy == nil || count.Load() != 3 || !reflect.DeepEqual(paths, []string{"/neutron/v2.0/owned-policies/target", "/neutron/v2.0/fallback-policies"}) || !reflect.DeepEqual(versions, []string{"network 2.1", "network 2.0"}) || service.RawClient().Microversion != "2.0" || headers["X-Phase"] != "typed" {
 		t.Fatal(result, err, count.Load(), paths, versions)
 	}

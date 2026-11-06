@@ -9,6 +9,7 @@ import (
 	"maps"
 	"slices"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions"
@@ -26,7 +27,17 @@ type QoSPolicyReadOpts struct {
 	Headers      map[string]string
 	Microversion *string
 }
-type QoSPolicyReadOption func(*QoSPolicyReadOpts) error
+
+// QoSPolicyReadOption is one option of the QoS policy cloud reads:
+// WithQoSPolicyReadOpts, WithQoSPolicyFilters, request.Headers (replaces the
+// headers), request.Microversion or request.Custom over *QoSPolicyReadOpts.
+// Other shared calls fail with resource.ErrInvalidOption before HTTP.
+type QoSPolicyReadOption = request.GetCall
+
+var qosPolicyReadCalls = calls.Spec[QoSPolicyReadOpts]{
+	Headers:      calls.Value(func(c *QoSPolicyReadOpts) *map[string]string { return &c.Headers }),
+	Microversion: calls.Pointer(func(c *QoSPolicyReadOpts) **string { return &c.Microversion }),
+}
 
 func copyQoSPolicyReadOpts(value QoSPolicyReadOpts) QoSPolicyReadOpts {
 	value.Filters = bytes.Clone(value.Filters)
@@ -42,18 +53,11 @@ func copyQoSPolicyReadOpts(value QoSPolicyReadOpts) QoSPolicyReadOpts {
 }
 func WithQoSPolicyReadOpts(value QoSPolicyReadOpts) QoSPolicyReadOption {
 	owned := copyQoSPolicyReadOpts(value)
-	return func(current *QoSPolicyReadOpts) error { *current = copyQoSPolicyReadOpts(owned); return nil }
+	return request.Custom(func(current *QoSPolicyReadOpts) error { *current = copyQoSPolicyReadOpts(owned); return nil })
 }
 func WithQoSPolicyFilters(value json.RawMessage) QoSPolicyReadOption {
 	owned := bytes.Clone(value)
-	return func(current *QoSPolicyReadOpts) error { current.Filters = bytes.Clone(owned); return nil }
-}
-func WithQoSPolicyHeaders(value map[string]string) QoSPolicyReadOption {
-	owned := maps.Clone(value)
-	return func(current *QoSPolicyReadOpts) error { current.Headers = maps.Clone(owned); return nil }
-}
-func WithQoSPolicyMicroversion(value string) QoSPolicyReadOption {
-	return func(current *QoSPolicyReadOpts) error { owned := value; current.Microversion = &owned; return nil }
+	return request.Custom(func(current *QoSPolicyReadOpts) error { current.Filters = bytes.Clone(owned); return nil })
 }
 
 // QoSPolicyRecords retains both the completed extension gate and policy reads.
@@ -179,7 +183,7 @@ func (s *Service) qosPolicyCloudRecords(ctx context.Context, op, identity string
 	result := &QoSPolicyRecords{Extensions: state.Extensions}
 	fail := func(err error) (*QoSPolicyRecords, error) { return result, qosPolicyCloudWrap(ctx, op, err) }
 	policy := copyQoSPolicyReadOpts(QoSPolicyReadOpts{})
-	for _, apply := range slices.Clone(options) {
+	for _, apply := range calls.Translate(options, qosPolicyReadCalls) {
 		if err := state.Check(ctx); err != nil {
 			return fail(err)
 		}

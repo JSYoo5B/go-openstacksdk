@@ -9,6 +9,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -124,9 +125,9 @@ func TestCloudQoSRuleDeleteOwnedHeadersVersionAndSafeIDs(t *testing.T) {
 	client.ResourceBase = cloud.Server.URL + "/v2.0/"
 	service := network.New(client)
 	headers := map[string]string{"X-Trace": "owned"}
-	option := network.WithQoSRuleDeleteHeaders(headers)
+	option := request.Headers(headers)
 	headers["X-Trace"] = "changed"
-	result, err := service.DeleteQoSBandwidthLimitRule(context.Background(), "parent", "rule", network.WithQoSRuleDeleteHeaders(nil), option, network.WithQoSRuleDeleteMicroversion("2.1"), func(c *network.QoSRuleDeleteOpts) error { c.Headers["X-Callback"] = "yes"; return nil })
+	result, err := service.DeleteQoSBandwidthLimitRule(context.Background(), "parent", "rule", request.Headers(nil), option, request.Microversion("2.1"), request.Custom(func(c *network.QoSRuleDeleteOpts) error { c.Headers["X-Callback"] = "yes"; return nil }))
 	if err != nil || result == nil || !result.Deleted || result.Receipt.Header.Get("X-Request-Id") != "delete-only" || len(paths) != 3 {
 		t.Fatal(result, err, paths)
 	}
@@ -146,14 +147,14 @@ func TestCloudQoSRuleDeleteCallbackSourceAndCancellationFailuresKeepParents(t *t
 		service := network.New(client)
 		ctx, cancel := context.WithCancelCause(context.Background())
 		cause, optionCause := errors.New("cancelled cloud"), errors.New("delete option")
-		result, err := service.DeleteQoSBandwidthLimitRule(ctx, "parent", "rule", func(*network.QoSRuleDeleteOpts) error {
+		result, err := service.DeleteQoSBandwidthLimitRule(ctx, "parent", "rule", request.Custom(func(*network.QoSRuleDeleteOpts) error {
 			if cancelled {
 				cancel(cause)
 			} else {
 				client.ResourceBase += "changed/"
 			}
 			return optionCause
-		})
+		}))
 		cancel(nil)
 		if result == nil || result.Completed || result.Receipt != nil || result.Policy == nil || len(result.Extensions) != 1 || len(calls()) != 2 || !errors.Is(err, optionCause) || cancelled && !errors.Is(err, cause) || !cancelled && !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(result, err, calls())

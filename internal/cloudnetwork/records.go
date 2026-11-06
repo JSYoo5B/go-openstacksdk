@@ -24,13 +24,13 @@ func ListNetworkRecords(ctx context.Context, deps Dependencies, options ...netwo
 	if service == nil {
 		return &network.NetworkCloudRecords{Networks: make([]*networks.NetworkRecord, 0), Values: make([]any, 0), JSON: json.RawMessage("[]")}, nil
 	}
-	owned := append(slices.Clone(options), func(cfg *network.NetworkCloudListOpts) error {
+	owned := append(slices.Clone(options), request.Custom(func(cfg *network.NetworkCloudListOpts) error {
 		if cfg.CurrentLocation == nil {
 			v := location.Clone()
 			cfg.CurrentLocation = &v
 		}
 		return nil
-	})
+	}))
 	value, err := service.ListNetworkRecords(ctx, owned...)
 	return value, wrap(err)
 }
@@ -44,13 +44,13 @@ func SearchNetworkRecords(ctx context.Context, deps Dependencies, identity strin
 	if err != nil {
 		return nil, wrap(err)
 	}
-	owned := append(slices.Clone(options), func(cfg *network.NetworkCloudListOpts) error {
+	owned := append(slices.Clone(options), request.Custom(func(cfg *network.NetworkCloudListOpts) error {
 		if cfg.CurrentLocation == nil {
 			v := location.Clone()
 			cfg.CurrentLocation = &v
 		}
 		return nil
-	})
+	}))
 	value, err := service.SearchNetworkRecords(ctx, identity, owned...)
 	return value, wrap(err)
 }
@@ -67,13 +67,13 @@ func ListSubnetRecords(ctx context.Context, deps Dependencies, options ...networ
 	if service == nil {
 		return &network.SubnetRecords{Subnets: make([]*subnets.SubnetRecord, 0), Inventory: make([]*subnets.SubnetRecord, 0), Value: make([]any, 0), JSON: json.RawMessage("[]")}, nil
 	}
-	owned := append(slices.Clone(options), func(cfg *network.SubnetReadOpts) error {
+	owned := append(slices.Clone(options), request.Custom(func(cfg *network.SubnetReadOpts) error {
 		if cfg.CurrentLocation == nil {
 			v := location.Clone()
 			cfg.CurrentLocation = &v
 		}
 		return nil
-	})
+	}))
 	value, err := service.ListSubnetRecords(ctx, owned...)
 	return value, wrap(err)
 }
@@ -87,13 +87,13 @@ func SearchSubnetRecords(ctx context.Context, deps Dependencies, identity string
 	if err != nil {
 		return nil, wrap(err)
 	}
-	owned := append(slices.Clone(options), func(cfg *network.SubnetReadOpts) error {
+	owned := append(slices.Clone(options), request.Custom(func(cfg *network.SubnetReadOpts) error {
 		if cfg.CurrentLocation == nil {
 			v := location.Clone()
 			cfg.CurrentLocation = &v
 		}
 		return nil
-	})
+	}))
 	value, err := service.SearchSubnetRecords(ctx, identity, owned...)
 	return value, wrap(err)
 }
@@ -147,13 +147,13 @@ func ListRouterInterfaces(ctx context.Context, deps Dependencies, router json.Ra
 	if err != nil {
 		return nil, wrap(err)
 	}
-	owned := append(slices.Clone(options), func(cfg *network.RouterInterfaceReadOpts) error {
+	owned := append(slices.Clone(options), request.Custom(func(cfg *network.RouterInterfaceReadOpts) error {
 		if cfg.CurrentLocation == nil {
 			copy := location.Clone()
 			cfg.CurrentLocation = &copy
 		}
 		return nil
-	})
+	}))
 	value, err := service.ListRouterInterfaces(ctx, router, owned...)
 	return value, wrap(err)
 }

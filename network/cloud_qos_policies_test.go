@@ -17,6 +17,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -277,12 +278,12 @@ func TestCloudQoSPolicyReadOptionsSnapshotsCallbacksAndLateFailures(t *testing.T
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			result, err := service.ListQoSPolicyRecords(context.Background(), option, func(c *network.QoSPolicyReadOpts) error {
+			result, err := service.ListQoSPolicyRecords(context.Background(), option, request.Custom(func(c *network.QoSPolicyReadOpts) error {
 				if c.Headers == nil {
 					t.Error("nil callback headers")
 				}
 				return nil
-			})
+			}))
 			if err != nil || result == nil {
 				lock.Lock()
 				t.Error(result, err)
@@ -306,10 +307,10 @@ func TestCloudQoSPolicyReadOptionsSnapshotsCallbacksAndLateFailures(t *testing.T
 		t.Fatal(result, err, count.Load())
 	}
 	before := count.Load()
-	result, err = late.ListQoSPolicyRecords(context.Background(), func(c *network.QoSPolicyReadOpts) error {
+	result, err = late.ListQoSPolicyRecords(context.Background(), request.Custom(func(c *network.QoSPolicyReadOpts) error {
 		late.RawClient().ResourceBase += "changed/"
 		return nil
-	})
+	}))
 	if result == nil || !errors.Is(err, resource.ErrInvalidOption) || count.Load() != before+1 {
 		t.Fatal(result, err, count.Load())
 	}

@@ -1187,7 +1187,7 @@ created, err := service.FloatingIPs.Create(ctx,
     network.WithPort(resource.ID("port-id")),
     network.WithFixedAddress("10.0.0.10"),
     network.WithDescription("web ingress"),
-    network.WithFloatingIPField("vendor_enabled", false))
+    request.Field("vendor_enabled", false))
 ```
 
 ## References

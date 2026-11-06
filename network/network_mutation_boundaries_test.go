@@ -385,7 +385,7 @@ func TestNetworkMutationOwnedProviderExtensionAndConcurrentReuse(t *testing.T) {
 	segmentation := map[string]any{"values": []int{0}}
 	extension := []string{"original"}
 	provider := network.WithNetworkProvider(network.ProviderNetwork{SegmentationID: request.Present[any](segmentation)})
-	field := network.WithNetworkField("vendor:values", extension)
+	field := request.Field("vendor:values", extension)
 	segmentation["values"].([]int)[0] = 99
 	extension[0] = "changed"
 	s := mutationService(t, cloud)

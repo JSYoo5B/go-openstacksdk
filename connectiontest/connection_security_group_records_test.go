@@ -10,6 +10,7 @@ import (
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -117,7 +118,7 @@ func TestConnectionSecurityGroupExistingReferenceBypassesDiscoveryAndOptions(t *
 	}
 	reference := map[string]json.RawMessage{"id": json.RawMessage(`null`), "name": json.RawMessage(`"existing"`)}
 	optionCalls := 0
-	result, err := conn.GetSecurityGroupRecord(context.Background(), reference, func(*network.SecurityGroupReadOpts) error { optionCalls++; return errors.New("should bypass") })
+	result, err := conn.GetSecurityGroupRecord(context.Background(), reference, request.Custom(func(*network.SecurityGroupReadOpts) error { optionCalls++; return errors.New("should bypass") }))
 	if err != nil || result == nil || result.Backend != "existing" || calls != 0 || optionCalls != 0 {
 		t.Fatal(result, err, calls, optionCalls)
 	}

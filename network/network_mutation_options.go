@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
@@ -29,15 +30,35 @@ type networkMutationOptions struct {
 	create   bool
 }
 
-// NetworkOption applies an SDK-owned network field. Options can be reused;
-// the last value wins, and an invalid earlier option is never hidden.
-type NetworkOption func(*networkMutationOptions) error
+// NetworkOption is one option of CreateNetwork, UpdateNetwork,
+// CreateNetworkDetail and UpdateNetworkDetail: the WithNetwork* field options,
+// or request.Field for an additional JSON extension (null included; an empty
+// key or a field that has its own option is rejected, and a marshal failure is
+// reported when applied). Options can be reused; the last value wins, and an
+// invalid earlier option is never hidden. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type NetworkOption = request.WriteCall
+
+type networkOption = func(*networkMutationOptions) error
+
+var networkMutationCalls = calls.Spec[networkMutationOptions]{
+	Field: func(o *networkMutationOptions, entry request.CallEntry) error {
+		if strings.TrimSpace(entry.Key) == "" || networkMutationCoreFields[entry.Key] {
+			return networkMutationInvalid("empty or reserved network extension field: " + entry.Key)
+		}
+		if entry.JSONErr != nil {
+			return networkMutationInvalid("network field is not valid JSON: " + entry.JSONErr.Error())
+		}
+		o.fields[entry.Key] = append(json.RawMessage(nil), entry.JSON...)
+		return nil
+	},
+}
 
 func networkMutationInvalid(message string) error {
 	return fmt.Errorf("%w: %s", resource.ErrInvalidOption, message)
 }
 
-func networkField(key string, value any) NetworkOption {
+func networkField(key string, value any) networkOption {
 	encoded, encodeErr := json.Marshal(value)
 	return func(o *networkMutationOptions) error {
 		if encodeErr != nil {
@@ -48,23 +69,27 @@ func networkField(key string, value any) NetworkOption {
 	}
 }
 
-func WithNetworkName(name string) NetworkOption { return networkField("name", name) }
+func WithNetworkName(name string) NetworkOption { return request.Custom(networkField("name", name)) }
 func WithNetworkDescription(description string) NetworkOption {
-	return networkField("description", description)
+	return request.Custom(networkField("description", description))
 }
 func WithNetworkAdminStateUp(enabled bool) NetworkOption {
-	return networkField("admin_state_up", enabled)
+	return request.Custom(networkField("admin_state_up", enabled))
 }
-func WithNetworkShared(enabled bool) NetworkOption { return networkField("shared", enabled) }
+func WithNetworkShared(enabled bool) NetworkOption {
+	return request.Custom(networkField("shared", enabled))
+}
 func WithNetworkExternal(enabled bool) NetworkOption {
-	return networkField("router:external", enabled)
+	return request.Custom(networkField("router:external", enabled))
 }
 func WithNetworkPortSecurity(enabled bool) NetworkOption {
-	return networkField("port_security_enabled", enabled)
+	return request.Custom(networkField("port_security_enabled", enabled))
 }
-func WithNetworkDNSDomain(domain string) NetworkOption { return networkField("dns_domain", domain) }
+func WithNetworkDNSDomain(domain string) NetworkOption {
+	return request.Custom(networkField("dns_domain", domain))
+}
 
-func optionalNetworkField[T any](key string, value request.Optional[T]) NetworkOption {
+func optionalNetworkField[T any](key string, value request.Optional[T]) networkOption {
 	if !value.IsSet() {
 		return func(*networkMutationOptions) error { return nil }
 	}
@@ -74,63 +99,63 @@ func optionalNetworkField[T any](key string, value request.Optional[T]) NetworkO
 // Value options additionally preserve a supplied JSON null. An unset Optional
 // leaves the field unchanged; use ordinary With functions for concrete values.
 func WithNetworkNameValue(value request.Optional[string]) NetworkOption {
-	return optionalNetworkField("name", value)
+	return request.Custom(optionalNetworkField("name", value))
 }
 func WithNetworkAdminStateValue(value request.Optional[bool]) NetworkOption {
-	return optionalNetworkField("admin_state_up", value)
+	return request.Custom(optionalNetworkField("admin_state_up", value))
 }
 func WithNetworkSharedValue(value request.Optional[bool]) NetworkOption {
-	return optionalNetworkField("shared", value)
+	return request.Custom(optionalNetworkField("shared", value))
 }
 func WithNetworkExternalValue(value request.Optional[bool]) NetworkOption {
-	return optionalNetworkField("router:external", value)
+	return request.Custom(optionalNetworkField("router:external", value))
 }
 func WithNetworkDNSDomainValue(value request.Optional[string]) NetworkOption {
-	return optionalNetworkField("dns_domain", value)
+	return request.Custom(optionalNetworkField("dns_domain", value))
 }
 
 // WithNetworkMTU accepts zero only for Create (which omits it). Nonzero MTU
 // must be at least 68; backend and IPv6-subnet constraints belong to Neutron.
 func WithNetworkMTU(size int) NetworkOption {
 	set := networkField("mtu", size)
-	return func(o *networkMutationOptions) error {
+	return request.Custom(func(o *networkMutationOptions) error {
 		if size < 0 || size > 0 && size < 68 || !o.create && size == 0 {
 			return networkMutationInvalid("network MTU must be zero or at least 68")
 		}
 		return set(o)
-	}
+	})
 }
 
 // WithNetworkProjectID is create-only. Neutron checks permission to select
 // another project's owner; the SDK does not infer authorization from the ID.
 func WithNetworkProjectID(id string) NetworkOption {
 	set := networkField("project_id", id)
-	return func(o *networkMutationOptions) error {
+	return request.Custom(func(o *networkMutationOptions) error {
 		if !o.create {
 			return networkMutationInvalid("project owner is create-only")
 		}
 		o.project = true
 		return set(o)
-	}
+	})
 }
 
 // WithNetworkAvailabilityZoneHints is create-only. Even an empty list checks
 // the network_availability_zone extension and sends an explicit [] field.
 func WithNetworkAvailabilityZoneHints(hints ...string) NetworkOption {
 	set := networkField("availability_zone_hints", append([]string{}, hints...))
-	return func(o *networkMutationOptions) error {
+	return request.Custom(func(o *networkMutationOptions) error {
 		if !o.create {
 			return networkMutationInvalid("availability-zone hints are create-only")
 		}
 		o.hints = true
 		return set(o)
-	}
+	})
 }
 
 // WithNetworkProvider replaces the previous provider selection as a whole.
-// Unknown provider attributes are supplied through WithNetworkField.
+// Unknown provider attributes are supplied through request.Field.
 func WithNetworkProvider(provider ProviderNetwork) NetworkOption {
-	var fields []NetworkOption
+	var fields []networkOption
 	for _, field := range []struct {
 		key   string
 		set   bool
@@ -144,7 +169,7 @@ func WithNetworkProvider(provider ProviderNetwork) NetworkOption {
 			fields = append(fields, networkField(field.key, field.value))
 		}
 	}
-	return func(o *networkMutationOptions) error {
+	return request.Custom(func(o *networkMutationOptions) error {
 		for _, key := range []string{"provider:network_type", "provider:physical_network", "provider:segmentation_id"} {
 			delete(o.fields, key)
 		}
@@ -154,12 +179,12 @@ func WithNetworkProvider(provider ProviderNetwork) NetworkOption {
 			}
 		}
 		return nil
-	}
+	})
 }
 
 // WithNetworkRevision is update-only and sends If-Match: revision_number=N.
 func WithNetworkRevision(revision int) NetworkOption {
-	return func(o *networkMutationOptions) error {
+	return request.Custom(func(o *networkMutationOptions) error {
 		if o.create {
 			return networkMutationInvalid("network revision is update-only")
 		}
@@ -169,7 +194,7 @@ func WithNetworkRevision(revision int) NetworkOption {
 		value := revision
 		o.revision = &value
 		return nil
-	}
+	})
 }
 
 var networkMutationCoreFields = map[string]bool{
@@ -180,25 +205,13 @@ var networkMutationCoreFields = map[string]bool{
 	"provider:segmentation_id": true, "revision_number": true,
 }
 
-// WithNetworkField snapshots an additional JSON extension, including null.
-// Known fields must use their concrete options and cannot be overwritten here.
-func WithNetworkField(key string, value any) NetworkOption {
-	set := networkField(key, value)
-	return func(o *networkMutationOptions) error {
-		if strings.TrimSpace(key) == "" || networkMutationCoreFields[key] {
-			return networkMutationInvalid("empty or reserved network extension field: " + key)
-		}
-		return set(o)
-	}
-}
-
 func prepareNetworkMutation(create bool, name string, options []NetworkOption) (networkMutationOptions, error) {
 	o := networkMutationOptions{fields: map[string]json.RawMessage{}, create: create}
 	if create {
 		_ = networkField("name", name)(&o)
-		_ = WithNetworkAdminStateUp(true)(&o)
+		_ = networkField("admin_state_up", true)(&o)
 	}
-	for _, apply := range options {
+	for _, apply := range calls.Translate(options, networkMutationCalls) {
 		if apply == nil {
 			return o, networkMutationInvalid("nil network option")
 		}

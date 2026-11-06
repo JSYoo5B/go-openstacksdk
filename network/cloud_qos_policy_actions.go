@@ -3,8 +3,8 @@ package network
 import (
 	"context"
 	"errors"
-	"slices"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions"
@@ -45,7 +45,7 @@ func (s *Service) GetQoSPolicyRecord(ctx context.Context, identity string, optio
 	}
 	fail := func(err error) (*QoSPolicyLookup, error) { return result, qosPolicyCloudWrap(ctx, op, err) }
 	policy := copyQoSPolicyReadOpts(QoSPolicyReadOpts{})
-	for _, apply := range slices.Clone(options) {
+	for _, apply := range calls.Translate(options, qosPolicyReadCalls) {
 		if err := state.Check(ctx); err != nil {
 			return fail(err)
 		}

@@ -8,6 +8,7 @@ import (
 	"maps"
 	"slices"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
@@ -24,7 +25,19 @@ type NetworkCloudListOpts struct {
 	CurrentLocation  *resource.CloudLocation
 	ServiceAvailable *bool
 }
-type NetworkCloudListOption func(*NetworkCloudListOpts) error
+
+// NetworkCloudListOption is one option of ListNetworkRecords and
+// SearchNetworkRecords: WithNetworkCloudListOpts, WithNetworkCloudFilters,
+// WithNetworkCloudCurrentLocation, WithNetworkCloudServiceAvailable,
+// request.Headers (replaces the headers), request.Microversion or
+// request.Custom over *NetworkCloudListOpts. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type NetworkCloudListOption = request.GetCall
+
+var networkCloudListCalls = calls.Spec[NetworkCloudListOpts]{
+	Headers:      calls.Value(func(c *NetworkCloudListOpts) *map[string]string { return &c.Headers }),
+	Microversion: calls.Pointer(func(c *NetworkCloudListOpts) **string { return &c.Microversion }),
+}
 
 func copyNetworkCloudList(v NetworkCloudListOpts) NetworkCloudListOpts {
 	v.Filters = bytes.Clone(v.Filters)
@@ -45,25 +58,18 @@ func copyNetworkCloudList(v NetworkCloudListOpts) NetworkCloudListOpts {
 }
 func WithNetworkCloudListOpts(v NetworkCloudListOpts) NetworkCloudListOption {
 	owned := copyNetworkCloudList(v)
-	return func(c *NetworkCloudListOpts) error { *c = copyNetworkCloudList(owned); return nil }
+	return request.Custom(func(c *NetworkCloudListOpts) error { *c = copyNetworkCloudList(owned); return nil })
 }
 func WithNetworkCloudFilters(raw json.RawMessage) NetworkCloudListOption {
 	owned := bytes.Clone(raw)
-	return func(c *NetworkCloudListOpts) error { c.Filters = bytes.Clone(owned); return nil }
-}
-func WithNetworkCloudHeaders(v map[string]string) NetworkCloudListOption {
-	owned := maps.Clone(v)
-	return func(c *NetworkCloudListOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
-func WithNetworkCloudMicroversion(v string) NetworkCloudListOption {
-	return func(c *NetworkCloudListOpts) error { x := v; c.Microversion = &x; return nil }
+	return request.Custom(func(c *NetworkCloudListOpts) error { c.Filters = bytes.Clone(owned); return nil })
 }
 func WithNetworkCloudCurrentLocation(v resource.CloudLocation) NetworkCloudListOption {
 	owned := v.Clone()
-	return func(c *NetworkCloudListOpts) error { x := owned.Clone(); c.CurrentLocation = &x; return nil }
+	return request.Custom(func(c *NetworkCloudListOpts) error { x := owned.Clone(); c.CurrentLocation = &x; return nil })
 }
 func WithNetworkCloudServiceAvailable(v bool) NetworkCloudListOption {
-	return func(c *NetworkCloudListOpts) error { x := v; c.ServiceAvailable = &x; return nil }
+	return request.Custom(func(c *NetworkCloudListOpts) error { x := v; c.ServiceAvailable = &x; return nil })
 }
 
 // Networks are populated only for ordinary generator output. Values/JSON can
@@ -110,7 +116,7 @@ func (s *Service) networkCloudLists(ctx context.Context, identity string, search
 	}
 	ctx = rest.WithOperationGuard(ctx, guard)
 	cfg := copyNetworkCloudList(NetworkCloudListOpts{})
-	for _, apply := range slices.Clone(options) {
+	for _, apply := range calls.Translate(options, networkCloudListCalls) {
 		if err := guard(ctx); err != nil {
 			return fail(err)
 		}

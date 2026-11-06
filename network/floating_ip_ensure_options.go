@@ -113,7 +113,8 @@ func WithEnsureProject(id string) EnsureFloatingIPOption {
 }
 
 func ensureDestinationOption(option CreateFloatingIPOption) EnsureFloatingIPOption {
-	return func(o *ensureFloatingIPOptions) error { return option(&o.destination) }
+	apply := createFloatingIPCalls([]CreateFloatingIPOption{option})[0]
+	return func(o *ensureFloatingIPOptions) error { return apply(&o.destination) }
 }
 
 func WithEnsurePort(ref resource.Ref) EnsureFloatingIPOption {

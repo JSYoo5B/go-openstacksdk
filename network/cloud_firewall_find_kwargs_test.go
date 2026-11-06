@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -109,7 +110,7 @@ func TestCloudFirewallDeleteFindHeadersAndMicroversionPhases(t *testing.T) {
 	// The Find microversion keyword and the Go transport Microversion option
 	// would select two different GET versions, so the pair is rejected.
 	client, calls = firewallKwargsClient(t, map[string][]receiptReply{})
-	_, err = network.New(client).DeleteFirewallPolicyRecord(context.Background(), "p", network.WithFirewallDeleteFilters(json.RawMessage(`{"microversion":"2.5"}`)), network.WithFirewallDeleteMicroversion("2.1"))
+	_, err = network.New(client).DeleteFirewallPolicyRecord(context.Background(), "p", network.WithFirewallDeleteFilters(json.RawMessage(`{"microversion":"2.5"}`)), request.Microversion("2.1"))
 	if !errors.Is(err, resource.ErrInvalidOption) || len(calls()) != 0 {
 		t.Fatal(err, calls())
 	}

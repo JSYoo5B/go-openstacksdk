@@ -15,6 +15,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -149,13 +150,13 @@ func TestCloudQoSPolicyGetFalseyFiltersRawControlsAndSourceSnapshot(t *testing.T
 		}
 		t.Fatal("mutated route policy HTTP")
 	})
-	result, err := service.GetQoSPolicyRecord(context.Background(), "requested", func(c *network.QoSPolicyReadOpts) error {
+	result, err := service.GetQoSPolicyRecord(context.Background(), "requested", request.Custom(func(c *network.QoSPolicyReadOpts) error {
 		if c.Headers == nil {
 			t.Error("nil callback headers")
 		}
 		service.RawClient().ResourceBase += "changed/"
 		return nil
-	})
+	}))
 	if result == nil || !errors.Is(err, resource.ErrInvalidOption) || count.Load() != 1 {
 		t.Fatal(result, err, count.Load())
 	}

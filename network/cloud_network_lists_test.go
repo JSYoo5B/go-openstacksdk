@@ -15,6 +15,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/networks"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -213,7 +214,7 @@ func TestCloudNetworkListLateFailureIsAtomicAndOptionsOwnSource(t *testing.T) {
 		testcloud.JSON(w, 200, `{"networks":[{"id":"first"}],"next":"?marker=later"}`)
 	})
 	headers := map[string]string{"X-Owned": "before"}
-	option := network.WithNetworkCloudHeaders(headers)
+	option := request.Headers(headers)
 	headers["X-Owned"] = "after"
 	result, err := service.ListNetworkRecords(context.Background(), option)
 	var native gophercloud.ErrUnexpectedResponseCode
@@ -221,7 +222,7 @@ func TestCloudNetworkListLateFailureIsAtomicAndOptionsOwnSource(t *testing.T) {
 		t.Fatal(result, err, count.Load())
 	}
 	before := count.Load()
-	result, err = service.ListNetworkRecords(context.Background(), func(*network.NetworkCloudListOpts) error { service.RawClient().ResourceBase += "changed/"; return nil })
+	result, err = service.ListNetworkRecords(context.Background(), request.Custom(func(*network.NetworkCloudListOpts) error { service.RawClient().ResourceBase += "changed/"; return nil }))
 	if result != nil || !errors.Is(err, resource.ErrInvalidOption) || count.Load() != before {
 		t.Fatal(result, err, count.Load())
 	}

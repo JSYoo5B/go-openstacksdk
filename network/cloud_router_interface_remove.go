@@ -7,8 +7,8 @@ import (
 	"errors"
 	"maps"
 	"net/http"
-	"slices"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
@@ -28,7 +28,17 @@ type RouterInterfaceRemoveOpts struct {
 	SubnetID, PortID *routers.RouterInterfaceRef
 	Headers          map[string]string
 }
-type RouterInterfaceRemoveOption func(*RouterInterfaceRemoveOpts) error
+
+// RouterInterfaceRemoveOption is one option of RemoveRouterInterface:
+// WithRouterInterfaceRemoveOpts, WithRouterInterfaceRemoveSubnetID,
+// WithRouterInterfaceRemovePortID, request.Headers (replaces the headers) or
+// request.Custom over *RouterInterfaceRemoveOpts. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type RouterInterfaceRemoveOption = request.GetCall
+
+var routerInterfaceRemoveCalls = calls.Spec[RouterInterfaceRemoveOpts]{
+	Headers: calls.Value(func(c *RouterInterfaceRemoveOpts) *map[string]string { return &c.Headers }),
+}
 
 func copyRouterInterfaceRemoveRef(v *routers.RouterInterfaceRef) *routers.RouterInterfaceRef {
 	if v == nil {
@@ -44,7 +54,7 @@ func copyRouterInterfaceRemove(v RouterInterfaceRemoveOpts) RouterInterfaceRemov
 }
 func WithRouterInterfaceRemoveOpts(v RouterInterfaceRemoveOpts) RouterInterfaceRemoveOption {
 	owned := copyRouterInterfaceRemove(v)
-	return func(c *RouterInterfaceRemoveOpts) error { *c = copyRouterInterfaceRemove(owned); return nil }
+	return request.Custom(func(c *RouterInterfaceRemoveOpts) error { *c = copyRouterInterfaceRemove(owned); return nil })
 }
 func routerInterfaceRemoveRef(v any) (*routers.RouterInterfaceRef, error) {
 	var cached *resource.RawResource
@@ -82,7 +92,7 @@ func routerInterfaceRemoveRef(v any) (*routers.RouterInterfaceRef, error) {
 }
 func routerInterfaceRemoveOption(v any, port bool) RouterInterfaceRemoveOption {
 	owned, err := routerInterfaceRemoveRef(v)
-	return func(c *RouterInterfaceRemoveOpts) error {
+	return request.Custom(func(c *RouterInterfaceRemoveOpts) error {
 		if err != nil {
 			return err
 		}
@@ -92,17 +102,13 @@ func routerInterfaceRemoveOption(v any, port bool) RouterInterfaceRemoveOption {
 			c.SubnetID = copyRouterInterfaceRemoveRef(owned)
 		}
 		return nil
-	}
+	})
 }
 func WithRouterInterfaceRemoveSubnetID(v any) RouterInterfaceRemoveOption {
 	return routerInterfaceRemoveOption(v, false)
 }
 func WithRouterInterfaceRemovePortID(v any) RouterInterfaceRemoveOption {
 	return routerInterfaceRemoveOption(v, true)
-}
-func WithRouterInterfaceRemoveHeaders(v map[string]string) RouterInterfaceRemoveOption {
-	owned := maps.Clone(v)
-	return func(c *RouterInterfaceRemoveOpts) error { c.Headers = maps.Clone(owned); return nil }
 }
 func routerInterfaceRemoveTruthy(v *routers.RouterInterfaceRef) (bool, error) {
 	if v == nil {
@@ -183,7 +189,7 @@ func (s *Service) RemoveRouterInterface(ctx context.Context, routerID string, op
 		return errors.Join(changed, source.Guard(ctx))
 	}
 	cfg := RouterInterfaceRemoveOpts{}
-	for _, apply := range slices.Clone(options) {
+	for _, apply := range calls.Translate(options, routerInterfaceRemoveCalls) {
 		if err := cloudread.Context(ctx); err != nil {
 			return nil, wrap(err)
 		}

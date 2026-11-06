@@ -49,7 +49,7 @@ func TestCloudQoSBandwidthSearchKeepsRuleIDPhaseAndFilterPresence(t *testing.T) 
 	for _, id := range []string{"a*", "missing", ""} {
 		client, calls := pythonCloudBClient(t, bandwidthCloudReplies(`{"bandwidth_limit_rules":[{"id":"a","max_kbps":true},{"id":"b","max_kbps":1},{"id":"c","max_kbps":2}]}`))
 		callbacks := 0
-		result, err := network.New(client).SearchQoSBandwidthLimitRules(context.Background(), "parent", id, network.WithQoSBandwidthLimitFilters(json.RawMessage(`{"max_kbps":1}`)), func(*network.QoSBandwidthLimitOpts) error { callbacks++; return nil })
+		result, err := network.New(client).SearchQoSBandwidthLimitRules(context.Background(), "parent", id, network.WithQoSBandwidthLimitFilters(json.RawMessage(`{"max_kbps":1}`)), request.Custom(func(*network.QoSBandwidthLimitOpts) error { callbacks++; return nil }))
 		want := 2
 		if id == "a*" {
 			want = 1
@@ -96,7 +96,7 @@ func TestCloudQoSBandwidthGateConsumesAllExtensionsAndStopsBeforePolicy(t *testi
 	for _, body := range []string{`{"extensions":[{"alias":"other"}]}`, `{"extensions":[{"alias":"qos"},{"alias":[]}]}`} {
 		client, calls := pythonCloudBClient(t, map[string][]pythonCloudBReply{"GET /v2.0/extensions": {{200, body}}})
 		callbacks := 0
-		result, err := network.New(client).ListQoSBandwidthLimitRules(context.Background(), "parent", func(*network.QoSBandwidthLimitOpts) error { callbacks++; return nil })
+		result, err := network.New(client).ListQoSBandwidthLimitRules(context.Background(), "parent", request.Custom(func(*network.QoSBandwidthLimitOpts) error { callbacks++; return nil }))
 		if result == nil || len(result.Extensions) == 0 || result.Policy != nil || result.Value != nil || err == nil || callbacks != 0 || len(calls()) != 1 {
 			t.Fatal(result, err, callbacks, calls())
 		}
@@ -166,7 +166,7 @@ func TestCloudQoSBandwidthSourceProxyLiteralsBasePathAndOldTypedBoundary(t *test
 	replies := bandwidthCloudReplies(`{"bandwidth_limit_rules":[]}`)
 	replies["GET /v2.0/alternate"] = []pythonCloudBReply{{200, `{"bandwidth_limit_rules":[{"id":"actual"}]}`}}
 	client, calls := pythonCloudBClient(t, replies)
-	result, err := network.New(client).ListQoSBandwidthLimitRules(context.Background(), "parent", network.WithQoSBandwidthLimitFilters(json.RawMessage(`{"base_path":"alternate","headers":{"X-Trace":"raw"}}`)), network.WithQoSBandwidthLimitHeaders(map[string]string{"X-Trace": "typed"}))
+	result, err := network.New(client).ListQoSBandwidthLimitRules(context.Background(), "parent", network.WithQoSBandwidthLimitFilters(json.RawMessage(`{"base_path":"alternate","headers":{"X-Trace":"raw"}}`)), request.Headers(map[string]string{"X-Trace": "typed"}))
 	if err != nil || len(result.Rules) != 1 || len(calls()) != 3 || calls()[2].path != "/v2.0/alternate" {
 		t.Fatal(result, err, calls())
 	}
@@ -190,7 +190,7 @@ func TestCloudQoSBandwidthFilterOwnershipCallbackGuardAndFalseyCases(t *testing.
 		service := network.New(client)
 		ctx, cancel := context.WithCancelCause(context.Background())
 		cause, optionCause := errors.New("cancelled"), errors.New("option error")
-		result, err := service.ListQoSBandwidthLimitRules(ctx, "parent", func(c *network.QoSBandwidthLimitOpts) error {
+		result, err := service.ListQoSBandwidthLimitRules(ctx, "parent", request.Custom(func(c *network.QoSBandwidthLimitOpts) error {
 			c.Headers["X-Trace"] = "initialized"
 			if cancelled {
 				cancel(cause)
@@ -198,7 +198,7 @@ func TestCloudQoSBandwidthFilterOwnershipCallbackGuardAndFalseyCases(t *testing.
 				client.ResourceBase += "changed/"
 			}
 			return optionCause
-		})
+		}))
 		cancel(nil)
 		if result == nil || result.Policy == nil || !errors.Is(err, optionCause) || len(calls()) != 2 || cancelled && !errors.Is(err, cause) || !cancelled && !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(result, err, calls())

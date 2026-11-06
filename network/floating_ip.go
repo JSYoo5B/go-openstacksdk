@@ -12,7 +12,6 @@ import (
 	floatingipapi "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips"
 	portapi "github.com/JSYoo5B/go-openstacksdk/network/v2/ports"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
-
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/networks"
 	nativeports "github.com/gophercloud/gophercloud/v2/openstack/networking/v2/ports"
 	"github.com/gophercloud/gophercloud/v2/pagination"
@@ -87,7 +86,7 @@ func (f *FloatingIPs) Create(ctx context.Context, input CreateFloatingIPRequest,
 		return nil, fmt.Errorf("external network: %w", err)
 	}
 	o := createFloatingIPOptions{}
-	for _, apply := range options {
+	for _, apply := range createFloatingIPCalls(options) {
 		if apply == nil {
 			return nil, floatingIPInvalid("nil floating IP option")
 		}

@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -97,9 +98,9 @@ func TestCloudRouterInterfacesOwnedInputsLocationHeadersAndRawReceipt(t *testing
 	filter := network.WithRouterInterfaceTypeJSON(raw)
 	raw[1] = 'X'
 	headers := map[string]string{"X-Trace": "owned"}
-	h := network.WithRouterInterfaceReadHeaders(headers)
+	h := request.Headers(headers)
 	headers["X-Trace"] = "mutated"
-	result, err := network.New(client).ListRouterInterfaces(context.Background(), network.RouterInterfaceRouterID("router"), loc, filter, h, network.WithRouterInterfaceReadMicroversion("2.77"))
+	result, err := network.New(client).ListRouterInterfaces(context.Background(), network.RouterInterfaceRouterID("router"), loc, filter, h, request.Microversion("2.77"))
 	if err != nil || len(result.Ports) != 1 || header.Get("X-Trace") != "owned" || header.Get("OpenStack-API-Version") != "network 2.77" {
 		t.Fatal(result, err, header)
 	}
@@ -126,14 +127,14 @@ func TestCloudRouterInterfacesSourceGuardCancellationAndPreflight(t *testing.T) 
 		service := network.New(client)
 		ctx, cancel := context.WithCancelCause(context.Background())
 		cause, optionErr := errors.New("router cancelled"), errors.New("option failure")
-		result, err := service.ListRouterInterfaces(ctx, network.RouterInterfaceRouterID("router"), func(*network.RouterInterfaceReadOpts) error {
+		result, err := service.ListRouterInterfaces(ctx, network.RouterInterfaceRouterID("router"), request.Custom(func(*network.RouterInterfaceReadOpts) error {
 			if cancelled {
 				cancel(cause)
 			} else {
 				client.ResourceBase += "changed/"
 			}
 			return optionErr
-		})
+		}))
 		cancel(nil)
 		if result != nil || !errors.Is(err, optionErr) || cancelled && !errors.Is(err, cause) || !cancelled && !errors.Is(err, resource.ErrInvalidOption) || len(calls()) != 0 {
 			t.Fatal(result, err, calls())

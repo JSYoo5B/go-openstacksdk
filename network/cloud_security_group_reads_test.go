@@ -13,6 +13,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -89,7 +90,7 @@ func TestCloudSecurityGroupExistingReferenceBypassesFeatureDiscoveryAndCallbacks
 	cloud := network.NewSecurityGroupCloud(network.SecurityGroupReadDependencies{Source: &disabled})
 	for _, ref := range []any{json.RawMessage(`{"id":null,"name":"raw"}`), map[string]any{"id": false, "name": "raw"}, &resource.RawResource{Metadata: resource.Metadata{Body: map[string]json.RawMessage{"id": json.RawMessage("0")}}}} {
 		callbacks := 0
-		result, err := cloud.GetSecurityGroup(context.Background(), ref, func(*network.SecurityGroupReadOpts) error { callbacks++; return errors.New("must be ignored") })
+		result, err := cloud.GetSecurityGroup(context.Background(), ref, request.Custom(func(*network.SecurityGroupReadOpts) error { callbacks++; return errors.New("must be ignored") }))
 		if err != nil || result == nil || result.Backend != "existing" || len(result.Value) == 0 || callbacks != 0 || len(result.Inventory) != 0 {
 			t.Fatal(result, err, callbacks)
 		}
@@ -337,14 +338,14 @@ func TestCloudSecurityGroupReadSourceGuardCancellationAndPreflight(t *testing.T)
 		service := network.New(client)
 		ctx, cancel := context.WithCancelCause(context.Background())
 		cause, optionErr := errors.New("cancelled"), errors.New("option")
-		result, err := service.SearchSecurityGroups(ctx, "", func(*network.SecurityGroupReadOpts) error {
+		result, err := service.SearchSecurityGroups(ctx, "", request.Custom(func(*network.SecurityGroupReadOpts) error {
 			if cancelled {
 				cancel(cause)
 			} else {
 				client.ResourceBase += "changed/"
 			}
 			return optionErr
-		})
+		}))
 		cancel(nil)
 		if result != nil || !errors.Is(err, optionErr) || cancelled && !errors.Is(err, cause) || !cancelled && !errors.Is(err, resource.ErrInvalidOption) || len(calls()) != 0 {
 			t.Fatal(result, err, calls())

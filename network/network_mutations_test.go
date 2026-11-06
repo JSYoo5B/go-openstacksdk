@@ -84,7 +84,7 @@ func TestCreateNetworkCloudDefaultsAndOptionPresence(t *testing.T) {
 				network.WithNetworkDNSDomain(""), network.WithNetworkDescription(""), network.WithNetworkProjectID(""),
 				network.WithNetworkProvider(network.ProviderNetwork{NetworkType: request.Present("vlan"),
 					PhysicalNetwork: request.Null[string](), SegmentationID: request.Present[any]("vlan1")}),
-				network.WithNetworkField("extension:enabled", false))
+				request.Field("extension:enabled", false))
 			if err != nil || row == nil || posts.Load() != 2 {
 				t.Fatal(row, err, posts.Load())
 			}
@@ -281,9 +281,9 @@ func TestNetworkMutationPreflightStopsEveryLookupAndMutation(t *testing.T) {
 		{"negative revision", false, []network.NetworkOption{network.WithNetworkRevision(-1)}},
 		{"update project", false, []network.NetworkOption{network.WithNetworkProjectID("owner")}},
 		{"update AZ", false, []network.NetworkOption{network.WithNetworkAvailabilityZoneHints()}},
-		{"blank extension", true, []network.NetworkOption{network.WithNetworkField(" ", 1)}},
-		{"reserved extension", true, []network.NetworkOption{network.WithNetworkField("router:external", false)}},
-		{"marshal cannot be hidden", true, []network.NetworkOption{network.WithNetworkField("extension:value", make(chan int)), network.WithNetworkField("extension:value", 1)}},
+		{"blank extension", true, []network.NetworkOption{request.Field(" ", 1)}},
+		{"reserved extension", true, []network.NetworkOption{request.Field("router:external", false)}},
+		{"marshal cannot be hidden", true, []network.NetworkOption{request.Field("extension:value", make(chan int)), request.Field("extension:value", 1)}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

@@ -4,13 +4,15 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"net/http"
+	"testing"
+
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/compute"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/gophercloud/gophercloud/v2"
-	"net/http"
-	"testing"
 )
 
 func TestConnectionCycle8MissingNeutronOnlyListsSkipOptions(t *testing.T) {
@@ -21,11 +23,11 @@ func TestConnectionCycle8MissingNeutronOnlyListsSkipOptions(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	n, err := conn.ListNetworkRecords(context.Background(), func(*network.NetworkCloudListOpts) error { opts++; return errors.New("must skip") })
+	n, err := conn.ListNetworkRecords(context.Background(), request.Custom(func(*network.NetworkCloudListOpts) error { opts++; return errors.New("must skip") }))
 	if err != nil || n == nil || string(n.JSON) != "[]" || opts != 0 {
 		t.Fatal(n, err, opts)
 	}
-	s, err := conn.ListSubnetRecords(context.Background(), func(*network.SubnetReadOpts) error { opts++; return errors.New("must skip") })
+	s, err := conn.ListSubnetRecords(context.Background(), request.Custom(func(*network.SubnetReadOpts) error { opts++; return errors.New("must skip") }))
 	if err != nil || s == nil || string(s.JSON) != "[]" || opts != 0 {
 		t.Fatal(s, err, opts)
 	}

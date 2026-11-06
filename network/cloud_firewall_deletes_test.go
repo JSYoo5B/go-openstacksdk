@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -184,7 +185,7 @@ func TestCloudFirewallDeleteFiltersOwnJSONAndUntypedLocalProjection(t *testing.T
 		})
 		raw := json.RawMessage(`{"name":"override","x_seed":"precise"}`)
 		headers := map[string]string{"X-Owned": "before"}
-		opts := []network.FirewallDeleteOption{network.WithFirewallDeleteFilters(raw), network.WithFirewallDeleteHeaders(headers)}
+		opts := []network.FirewallDeleteOption{network.WithFirewallDeleteFilters(raw), request.Headers(headers)}
 		raw[2] = 'X'
 		headers["X-Owned"] = "after"
 		result, err := f.call(service, context.Background(), "asked", opts...)
@@ -370,7 +371,7 @@ func TestCloudFirewallDeleteOptionsSourceGuardsAndFabricated404NeverFalse(t *tes
 		t.Fatal(result, err, count.Load(), calls)
 	}
 	before := count.Load()
-	result, err = f.call(service, context.Background(), "asked", func(*network.FirewallDeleteOpts) error { service.RawClient().ResourceBase += "changed/"; return nil })
+	result, err = f.call(service, context.Background(), "asked", request.Custom(func(*network.FirewallDeleteOpts) error { service.RawClient().ResourceBase += "changed/"; return nil }))
 	if err == nil || result.Deleted || !errors.Is(err, resource.ErrInvalidOption) || count.Load() != before {
 		t.Fatal(result, err, count.Load())
 	}

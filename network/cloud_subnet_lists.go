@@ -8,6 +8,7 @@ import (
 	"maps"
 	"slices"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
@@ -28,7 +29,23 @@ type SubnetReadOpts struct {
 	NetworkAvailable       *bool
 	headersPresent         bool
 }
-type SubnetReadOption func(*SubnetReadOpts) error
+
+// SubnetReadOption is one option of ListSubnetRecords and SearchSubnetRecords:
+// WithSubnetReadOpts, WithSubnetReadFiltersJSON,
+// WithSubnetReadCurrentLocation, WithSubnetNetworkAvailable, request.Headers
+// (replaces the headers), request.Microversion, request.BasePath or
+// request.Custom over *SubnetReadOpts. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type SubnetReadOption = request.ListBasePathCall
+
+var subnetReadCalls = calls.Spec[SubnetReadOpts]{
+	Headers: func(c *SubnetReadOpts, values map[string]string) error {
+		c.Headers, c.headersPresent = values, true
+		return nil
+	},
+	Microversion: calls.Pointer(func(c *SubnetReadOpts) **string { return &c.Microversion }),
+	BasePath:     calls.Pointer(func(c *SubnetReadOpts) **string { return &c.BasePath }),
+}
 
 func cloneSubnetRead(v SubnetReadOpts) SubnetReadOpts {
 	v.Filters = bytes.Clone(v.Filters)
@@ -54,7 +71,7 @@ func cloneSubnetRead(v SubnetReadOpts) SubnetReadOpts {
 func WithSubnetReadOpts(v SubnetReadOpts) SubnetReadOption {
 	v.headersPresent = v.headersPresent || v.Headers != nil
 	owned := cloneSubnetRead(v)
-	return func(c *SubnetReadOpts) error {
+	return request.Custom(func(c *SubnetReadOpts) error {
 		next := cloneSubnetRead(owned)
 		if next.CurrentLocation == nil && c.CurrentLocation != nil {
 			x := c.CurrentLocation.Clone()
@@ -66,28 +83,18 @@ func WithSubnetReadOpts(v SubnetReadOpts) SubnetReadOption {
 		}
 		*c = next
 		return nil
-	}
+	})
 }
 func WithSubnetReadFiltersJSON(v json.RawMessage) SubnetReadOption {
 	owned := bytes.Clone(v)
-	return func(c *SubnetReadOpts) error { c.Filters = bytes.Clone(owned); return nil }
-}
-func WithSubnetReadHeaders(v map[string]string) SubnetReadOption {
-	owned := maps.Clone(v)
-	return func(c *SubnetReadOpts) error { c.Headers = maps.Clone(owned); c.headersPresent = true; return nil }
-}
-func WithSubnetReadMicroversion(v string) SubnetReadOption {
-	return func(c *SubnetReadOpts) error { x := v; c.Microversion = &x; return nil }
-}
-func WithSubnetReadBasePath(v string) SubnetReadOption {
-	return func(c *SubnetReadOpts) error { x := v; c.BasePath = &x; return nil }
+	return request.Custom(func(c *SubnetReadOpts) error { c.Filters = bytes.Clone(owned); return nil })
 }
 func WithSubnetReadCurrentLocation(v resource.CloudLocation) SubnetReadOption {
 	owned := v.Clone()
-	return func(c *SubnetReadOpts) error { x := owned.Clone(); c.CurrentLocation = &x; return nil }
+	return request.Custom(func(c *SubnetReadOpts) error { x := owned.Clone(); c.CurrentLocation = &x; return nil })
 }
 func WithSubnetNetworkAvailable(v bool) SubnetReadOption {
-	return func(c *SubnetReadOpts) error { x := v; c.NetworkAvailable = &x; return nil }
+	return request.Custom(func(c *SubnetReadOpts) error { x := v; c.NetworkAvailable = &x; return nil })
 }
 
 // SubnetRecords distinguishes cloud list() values from actual resource reads.
@@ -162,7 +169,7 @@ func (s *Service) prepareSubnetRead(ctx context.Context, options []SubnetReadOpt
 		return errors.Join(changed, source.Guard(ctx), outerCheck(ctx))
 	}
 	cfg := cloneSubnetRead(SubnetReadOpts{})
-	for _, apply := range slices.Clone(options) {
+	for _, apply := range calls.Translate(options, subnetReadCalls) {
 		if err := guard(ctx); err != nil {
 			return nil, cfg, guard, err
 		}

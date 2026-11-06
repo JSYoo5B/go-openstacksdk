@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"slices"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions"
@@ -31,7 +32,17 @@ type QoSRuleDeleteOpts struct {
 	Headers      map[string]string
 	Microversion *string
 }
-type QoSRuleDeleteOption func(*QoSRuleDeleteOpts) error
+
+// QoSRuleDeleteOption is one option of the QoS rule cloud deletes:
+// WithQoSRuleDeleteOpts, request.Headers (replaces the headers),
+// request.Microversion or request.Custom over *QoSRuleDeleteOpts. Other shared
+// calls fail with resource.ErrInvalidOption before HTTP.
+type QoSRuleDeleteOption = request.GetCall
+
+var qosRuleDeleteCalls = calls.Spec[QoSRuleDeleteOpts]{
+	Headers:      calls.Value(func(c *QoSRuleDeleteOpts) *map[string]string { return &c.Headers }),
+	Microversion: calls.Pointer(func(c *QoSRuleDeleteOpts) **string { return &c.Microversion }),
+}
 
 func copyQoSDeleteOpts(v QoSRuleDeleteOpts) QoSRuleDeleteOpts {
 	v.Headers = maps.Clone(v.Headers)
@@ -46,14 +57,7 @@ func copyQoSDeleteOpts(v QoSRuleDeleteOpts) QoSRuleDeleteOpts {
 }
 func WithQoSRuleDeleteOpts(v QoSRuleDeleteOpts) QoSRuleDeleteOption {
 	owned := copyQoSDeleteOpts(v)
-	return func(c *QoSRuleDeleteOpts) error { *c = copyQoSDeleteOpts(owned); return nil }
-}
-func WithQoSRuleDeleteHeaders(v map[string]string) QoSRuleDeleteOption {
-	owned := maps.Clone(v)
-	return func(c *QoSRuleDeleteOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
-func WithQoSRuleDeleteMicroversion(v string) QoSRuleDeleteOption {
-	return func(c *QoSRuleDeleteOpts) error { value := v; c.Microversion = &value; return nil }
+	return request.Custom(func(c *QoSRuleDeleteOpts) error { *c = copyQoSDeleteOpts(owned); return nil })
 }
 func qosDeleteWrap(ctx context.Context, op string, err error) error {
 	return request.Wrap(op, "qos_rules", cloudread.ContextError(ctx, err))
@@ -94,7 +98,7 @@ func (s *Service) qosDeleteRule(ctx context.Context, policy, id, kind, op string
 		return result, qosDeleteWrap(ctx, op, (&rest.Response{Body: bytes.Clone(result.Policy.Envelope), Header: result.Policy.Header.Clone(), StatusCode: result.Policy.StatusCode}).Fail(cause))
 	}
 	cfg := copyQoSDeleteOpts(QoSRuleDeleteOpts{})
-	for _, apply := range slices.Clone(options) {
+	for _, apply := range calls.Translate(options, qosRuleDeleteCalls) {
 		if err := state.Check(ctx); err != nil {
 			return result, qosDeleteWrap(ctx, op, err)
 		}

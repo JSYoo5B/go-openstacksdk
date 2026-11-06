@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -165,7 +166,7 @@ func TestFloatingIPAllocatesWithoutAssociationAndSnapshotsExtensions(t *testing.
 		respondFloatingIP(w, 201, "", "", "DOWN")
 	})
 	value := map[string]any{"enabled": false}
-	option := network.WithFloatingIPField("vendor", value)
+	option := request.Field("vendor", value)
 	value["enabled"] = true
 	service := network.New(cloud.Client("network", "/v2.0"))
 	for range 2 {
@@ -189,8 +190,8 @@ func TestFloatingIPInvalidConfigurationHasNoHTTPRequests(t *testing.T) {
 		{network.WithFixedAddress("2001:db8::1")}, {network.WithFixedAddress("invalid")},
 		{network.WithFloatingIPAddress("2001:db8::1")},
 		{network.WithServer(resource.ID("server")), network.WithWait(resource.WithTimeout(0))},
-		{network.WithFloatingIPField("port_id", "override")}, {network.WithFloatingIPField("", true)},
-		{network.WithFloatingIPField("invalid", make(chan bool))},
+		{request.Field("port_id", "override")}, {request.Field("", true)},
+		{request.Field("invalid", make(chan bool))},
 	} {
 		created, err := service.FloatingIPs.Create(context.Background(), network.CreateFloatingIPRequest{Network: resource.Name("public")}, options...)
 		if created != nil || !errors.Is(err, resource.ErrInvalidOption) {

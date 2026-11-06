@@ -84,7 +84,8 @@ func WithAttachDestinationPolicy(policy EnsureFloatingIPPolicy) AttachFloatingIP
 }
 
 func attachDestinationOption(option CreateFloatingIPOption) AttachFloatingIPOption {
-	return func(o *attachFloatingIPOptions) error { return option(&o.destination) }
+	apply := createFloatingIPCalls([]CreateFloatingIPOption{option})[0]
+	return func(o *attachFloatingIPOptions) error { return apply(&o.destination) }
 }
 
 func WithAttachPort(ref resource.Ref) AttachFloatingIPOption {

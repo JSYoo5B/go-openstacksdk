@@ -7,8 +7,8 @@ import (
 	"errors"
 	"maps"
 	"net/http"
-	"slices"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/jsonfilter"
@@ -28,7 +28,19 @@ type FirewallDeleteOpts struct {
 	Microversion    *string
 	CurrentLocation *resource.CloudLocation
 }
-type FirewallDeleteOption func(*FirewallDeleteOpts) error
+
+// FirewallDeleteOption is one option of DeleteFirewallRuleRecord,
+// DeleteFirewallPolicyRecord and DeleteFirewallGroupRecord:
+// WithFirewallDeleteOpts, WithFirewallDeleteFilters,
+// WithFirewallDeleteCurrentLocation, request.Headers (replaces the headers),
+// request.Microversion or request.Custom over *FirewallDeleteOpts. Other
+// shared calls fail with resource.ErrInvalidOption before HTTP.
+type FirewallDeleteOption = request.GetCall
+
+var firewallDeleteCalls = calls.Spec[FirewallDeleteOpts]{
+	Headers:      calls.Value(func(c *FirewallDeleteOpts) *map[string]string { return &c.Headers }),
+	Microversion: calls.Pointer(func(c *FirewallDeleteOpts) **string { return &c.Microversion }),
+}
 
 func copyFirewallDelete(v FirewallDeleteOpts) FirewallDeleteOpts {
 	v.Filters = bytes.Clone(v.Filters)
@@ -45,22 +57,15 @@ func copyFirewallDelete(v FirewallDeleteOpts) FirewallDeleteOpts {
 }
 func WithFirewallDeleteOpts(v FirewallDeleteOpts) FirewallDeleteOption {
 	owned := copyFirewallDelete(v)
-	return func(c *FirewallDeleteOpts) error { *c = copyFirewallDelete(owned); return nil }
+	return request.Custom(func(c *FirewallDeleteOpts) error { *c = copyFirewallDelete(owned); return nil })
 }
 func WithFirewallDeleteFilters(v json.RawMessage) FirewallDeleteOption {
 	owned := bytes.Clone(v)
-	return func(c *FirewallDeleteOpts) error { c.Filters = bytes.Clone(owned); return nil }
-}
-func WithFirewallDeleteHeaders(v map[string]string) FirewallDeleteOption {
-	owned := maps.Clone(v)
-	return func(c *FirewallDeleteOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
-func WithFirewallDeleteMicroversion(v string) FirewallDeleteOption {
-	return func(c *FirewallDeleteOpts) error { x := v; c.Microversion = &x; return nil }
+	return request.Custom(func(c *FirewallDeleteOpts) error { c.Filters = bytes.Clone(owned); return nil })
 }
 func WithFirewallDeleteCurrentLocation(v resource.CloudLocation) FirewallDeleteOption {
 	owned := v.Clone()
-	return func(c *FirewallDeleteOpts) error { x := owned.Clone(); c.CurrentLocation = &x; return nil }
+	return request.Custom(func(c *FirewallDeleteOpts) error { x := owned.Clone(); c.CurrentLocation = &x; return nil })
 }
 
 // FirewallRecord contains the Source view and independent physical lookup proof.
@@ -231,7 +236,7 @@ func (s *Service) deleteFirewallRecord(ctx context.Context, family, op, identity
 	}
 	ctx = rest.WithOperationGuard(ctx, guard)
 	cfg := FirewallDeleteOpts{}
-	for _, apply := range slices.Clone(options) {
+	for _, apply := range calls.Translate(options, firewallDeleteCalls) {
 		if err := guard(ctx); err != nil {
 			return fail(err)
 		}

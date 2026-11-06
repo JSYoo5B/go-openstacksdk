@@ -13,6 +13,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/jsonfilter"
@@ -62,7 +63,20 @@ type SecurityGroupReadOpts struct {
 	Microversion    *string
 	CurrentLocation *resource.CloudLocation
 }
-type SecurityGroupReadOption func(*SecurityGroupReadOpts) error
+
+// SecurityGroupReadOption is one option of SearchSecurityGroups and
+// GetSecurityGroup: WithSecurityGroupReadOpts,
+// WithSecurityGroupReadFiltersJSON, WithSecurityGroupReadExpression,
+// WithSecurityGroupReadCurrentLocation, request.Headers (replaces the
+// headers), request.Microversion or request.Custom over
+// *SecurityGroupReadOpts. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type SecurityGroupReadOption = request.GetCall
+
+var securityGroupReadCalls = calls.Spec[SecurityGroupReadOpts]{
+	Headers:      calls.Value(func(c *SecurityGroupReadOpts) *map[string]string { return &c.Headers }),
+	Microversion: calls.Pointer(func(c *SecurityGroupReadOpts) **string { return &c.Microversion }),
+}
 
 func copySecurityGroupRead(c SecurityGroupReadOpts) SecurityGroupReadOpts {
 	if c.Filters != nil {
@@ -85,33 +99,26 @@ func copySecurityGroupRead(c SecurityGroupReadOpts) SecurityGroupReadOpts {
 }
 func WithSecurityGroupReadOpts(c SecurityGroupReadOpts) SecurityGroupReadOption {
 	owned := copySecurityGroupRead(c)
-	return func(c *SecurityGroupReadOpts) error { *c = copySecurityGroupRead(owned); return nil }
+	return request.Custom(func(c *SecurityGroupReadOpts) error { *c = copySecurityGroupRead(owned); return nil })
 }
 func WithSecurityGroupReadFiltersJSON(raw json.RawMessage) SecurityGroupReadOption {
 	owned := bytes.Clone(raw)
-	return func(c *SecurityGroupReadOpts) error {
+	return request.Custom(func(c *SecurityGroupReadOpts) error {
 		c.Filters = nil
 		if owned != nil {
 			x := json.RawMessage(bytes.Clone(owned))
 			c.Filters = &x
 		}
 		return nil
-	}
+	})
 }
 func WithSecurityGroupReadExpression(v string) SecurityGroupReadOption {
 	raw, _ := json.Marshal(v)
 	return WithSecurityGroupReadFiltersJSON(raw)
 }
-func WithSecurityGroupReadHeaders(v map[string]string) SecurityGroupReadOption {
-	owned := maps.Clone(v)
-	return func(c *SecurityGroupReadOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
-func WithSecurityGroupReadMicroversion(v string) SecurityGroupReadOption {
-	return func(c *SecurityGroupReadOpts) error { x := v; c.Microversion = &x; return nil }
-}
 func WithSecurityGroupReadCurrentLocation(v resource.CloudLocation) SecurityGroupReadOption {
 	owned := v.Clone()
-	return func(c *SecurityGroupReadOpts) error { x := owned.Clone(); c.CurrentLocation = &x; return nil }
+	return request.Custom(func(c *SecurityGroupReadOpts) error { x := owned.Clone(); c.CurrentLocation = &x; return nil })
 }
 
 // Groups/Group contain only actual HTTP or explicitly supplied existing records.
@@ -213,7 +220,7 @@ func (c *SecurityGroupCloud) start(ctx context.Context, options []SecurityGroupR
 	}
 	state.source = source
 	cfg := copySecurityGroupRead(SecurityGroupReadOpts{CurrentLocation: d.CurrentLocation})
-	for _, apply := range slices.Clone(options) {
+	for _, apply := range calls.Translate(options, securityGroupReadCalls) {
 		if e := errors.Join(state.guard(ctx), cloudread.Context(ctx)); e != nil {
 			return nil, e
 		}

@@ -7,8 +7,8 @@ import (
 	"errors"
 	"fmt"
 	"maps"
-	"slices"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/jsonfilter"
@@ -27,7 +27,19 @@ type RouterInterfaceReadOpts struct {
 	Microversion    *string
 	CurrentLocation *resource.CloudLocation
 }
-type RouterInterfaceReadOption func(*RouterInterfaceReadOpts) error
+
+// RouterInterfaceReadOption is one option of ListRouterInterfaces:
+// WithRouterInterfaceReadOpts, WithRouterInterfaceTypeJSON,
+// WithRouterInterfaceType, WithRouterInterfaceReadCurrentLocation,
+// request.Headers (replaces the headers), request.Microversion or
+// request.Custom over *RouterInterfaceReadOpts. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type RouterInterfaceReadOption = request.GetCall
+
+var routerInterfaceReadCalls = calls.Spec[RouterInterfaceReadOpts]{
+	Headers:      calls.Value(func(c *RouterInterfaceReadOpts) *map[string]string { return &c.Headers }),
+	Microversion: calls.Pointer(func(c *RouterInterfaceReadOpts) **string { return &c.Microversion }),
+}
 
 func copyRouterInterfaceRead(v RouterInterfaceReadOpts) RouterInterfaceReadOpts {
 	if v.InterfaceType != nil {
@@ -50,30 +62,23 @@ func copyRouterInterfaceRead(v RouterInterfaceReadOpts) RouterInterfaceReadOpts 
 }
 func WithRouterInterfaceReadOpts(v RouterInterfaceReadOpts) RouterInterfaceReadOption {
 	owned := copyRouterInterfaceRead(v)
-	return func(c *RouterInterfaceReadOpts) error { *c = copyRouterInterfaceRead(owned); return nil }
+	return request.Custom(func(c *RouterInterfaceReadOpts) error { *c = copyRouterInterfaceRead(owned); return nil })
 }
 func WithRouterInterfaceTypeJSON(v json.RawMessage) RouterInterfaceReadOption {
 	owned := bytes.Clone(v)
-	return func(c *RouterInterfaceReadOpts) error {
+	return request.Custom(func(c *RouterInterfaceReadOpts) error {
 		x := json.RawMessage(bytes.Clone(owned))
 		c.InterfaceType = &x
 		return nil
-	}
+	})
 }
 func WithRouterInterfaceType(v string) RouterInterfaceReadOption {
 	raw, _ := json.Marshal(v)
 	return WithRouterInterfaceTypeJSON(raw)
 }
-func WithRouterInterfaceReadHeaders(v map[string]string) RouterInterfaceReadOption {
-	owned := maps.Clone(v)
-	return func(c *RouterInterfaceReadOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
-func WithRouterInterfaceReadMicroversion(v string) RouterInterfaceReadOption {
-	return func(c *RouterInterfaceReadOpts) error { x := v; c.Microversion = &x; return nil }
-}
 func WithRouterInterfaceReadCurrentLocation(v resource.CloudLocation) RouterInterfaceReadOption {
 	owned := v.Clone()
-	return func(c *RouterInterfaceReadOpts) error { x := owned.Clone(); c.CurrentLocation = &x; return nil }
+	return request.Custom(func(c *RouterInterfaceReadOpts) error { x := owned.Clone(); c.CurrentLocation = &x; return nil })
 }
 
 // RouterInterfaceRouterID constructs the Source router dictionary without a
@@ -165,7 +170,7 @@ func (s *Service) ListRouterInterfaces(ctx context.Context, router json.RawMessa
 	}
 	ctx = rest.WithOperationGuard(ctx, guard)
 	cfg := copyRouterInterfaceRead(RouterInterfaceReadOpts{})
-	for _, apply := range slices.Clone(options) {
+	for _, apply := range calls.Translate(options, routerInterfaceReadCalls) {
 		if e := errors.Join(guard(ctx), cloudread.Context(ctx)); e != nil {
 			return nil, wrap(e)
 		}

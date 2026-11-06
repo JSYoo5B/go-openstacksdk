@@ -11,6 +11,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/subnets"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -216,12 +217,12 @@ func TestCloudSubnetListsSnapshotsHeaderNilResetAndSourceMutation(t *testing.T) 
 	raw := json.RawMessage(`{"name":"owned","headers":{"X-Trace":"filter"}}`)
 	opt := network.WithSubnetReadFiltersJSON(raw)
 	raw[2] = 'X'
-	result, err := service.ListSubnetRecords(context.Background(), opt, network.WithSubnetReadHeaders(nil))
+	result, err := service.ListSubnetRecords(context.Background(), opt, request.Headers(nil))
 	if err != nil || count.Load() != 1 || !reflect.DeepEqual(observed, []string{""}) {
 		t.Fatal(result, err, observed)
 	}
 	before := count.Load()
-	result, err = service.ListSubnetRecords(context.Background(), func(*network.SubnetReadOpts) error { service.API.RawClient().Microversion = "changed"; return nil })
+	result, err = service.ListSubnetRecords(context.Background(), request.Custom(func(*network.SubnetReadOpts) error { service.API.RawClient().Microversion = "changed"; return nil }))
 	if result != nil || !errors.Is(err, resource.ErrInvalidOption) || count.Load() != before {
 		t.Fatal(result, err, count.Load())
 	}

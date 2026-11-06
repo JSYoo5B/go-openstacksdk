@@ -17,6 +17,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/ports"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/subnets"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -134,11 +135,11 @@ func TestCloudRouterInterfaceRemoveOwnsOptionRefsHeadersAndEscapedState(t *testi
 	raw[1] = 'X'
 	headers["X-Trace"] = "changed"
 	var escaped *network.RouterInterfaceRemoveOpts
-	result, err := service.RemoveRouterInterface(context.Background(), "r", option, func(c *network.RouterInterfaceRemoveOpts) error { escaped = c; return nil }, func(*network.RouterInterfaceRemoveOpts) error {
+	result, err := service.RemoveRouterInterface(context.Background(), "r", option, request.Custom(func(c *network.RouterInterfaceRemoveOpts) error { escaped = c; return nil }), request.Custom(func(*network.RouterInterfaceRemoveOpts) error {
 		escaped.PortID.Value[1] = 'Y'
 		escaped.Headers["X-Trace"] = "escaped"
 		return nil
-	})
+	}))
 	if err != nil || result == nil || count.Load() != 1 || string(posted["port_id"]) != `"owned-port"` || requestHeader.Get("X-Trace") != "owned" {
 		t.Fatal(result, err, posted, requestHeader)
 	}
@@ -167,10 +168,10 @@ func TestCloudRouterInterfaceRemoveCancellationNilOptionsAndStickySourceStopCall
 		}
 	}
 	nextCalls := 0
-	result, err = service.RemoveRouterInterface(context.Background(), "r", network.WithRouterInterfaceRemovePortID("p"), func(*network.RouterInterfaceRemoveOpts) error {
+	result, err = service.RemoveRouterInterface(context.Background(), "r", network.WithRouterInterfaceRemovePortID("p"), request.Custom(func(*network.RouterInterfaceRemoveOpts) error {
 		service.RawClient().ResourceBase += "drift/"
 		return nil
-	}, func(*network.RouterInterfaceRemoveOpts) error { nextCalls++; return nil })
+	}), request.Custom(func(*network.RouterInterfaceRemoveOpts) error { nextCalls++; return nil }))
 	if result != nil || !errors.Is(err, resource.ErrInvalidOption) || nextCalls != 0 || count.Load() != 0 {
 		t.Fatal(result, err, nextCalls, count.Load())
 	}
