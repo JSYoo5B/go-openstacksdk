@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"io"
 	"net/http"
 	"testing"
@@ -71,11 +72,11 @@ func TestPortPairGroupCreatePostsEnvelope(t *testing.T) {
 	var calls []ppgCall
 	api := ppgAPI(t, &calls, func(*http.Request) (int, string) { return 201, `{"port_pair_group":` + ppgRow + `}` })
 	v, err := api.Create(context.Background(),
-		portpairgroups.WithCreateField("name", "web"),
-		portpairgroups.WithCreateField("port_pairs", []string{"pp1", "pp2"}),
-		portpairgroups.WithCreateField("is_tap_enabled", false),
-		portpairgroups.WithCreateField("port_pair_group_parameters", map[string]any{"lb_fields": []string{"ip_src"}}),
-		portpairgroups.WithCreateField("unknown", make(chan int)))
+		request.Field("name", "web"),
+		request.Field("port_pairs", []string{"pp1", "pp2"}),
+		request.Field("is_tap_enabled", false),
+		request.Field("port_pair_group_parameters", map[string]any{"lb_fields": []string{"ip_src"}}),
+		request.Field("unknown", make(chan int)))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -90,7 +91,7 @@ func TestPortPairGroupCreatePostsEnvelope(t *testing.T) {
 		t.Run(fmt.Sprint(code), func(t *testing.T) {
 			var calls []ppgCall
 			api := ppgAPI(t, &calls, func(*http.Request) (int, string) { return code, `{}` })
-			_, err := api.Create(context.Background(), portpairgroups.WithCreateField("tenant_id", "p1"))
+			_, err := api.Create(context.Background(), request.Field("tenant_id", "p1"))
 			if calls[0].body != `{"port_pair_group":{"tenant_id":"p1"}}` {
 				t.Fatal(calls)
 			}
@@ -137,18 +138,18 @@ func TestPortPairGroupGetDecodesDescriptorsAndRejects(t *testing.T) {
 func TestPortPairGroupUpdatePutsDirtyAttributes(t *testing.T) {
 	var calls []ppgCall
 	api := ppgAPI(t, &calls, func(*http.Request) (int, string) { return 200, `{"port_pair_group":` + ppgRow + `}` })
-	v, err := api.Update(context.Background(), "x1", portpairgroups.WithUpdateField("description", "d"), portpairgroups.WithUpdateField("name", nil), portpairgroups.WithUpdateField("id", "ignored"))
+	v, err := api.Update(context.Background(), "x1", request.Field("description", "d"), request.Field("name", nil), request.Field("id", "ignored"))
 	if err != nil || len(calls) != 1 || calls[0].method != http.MethodPut || calls[0].path != ppgBase+"/x1" || calls[0].body != `{"port_pair_group":{"description":"d","name":null}}` {
 		t.Fatal(v, err, calls)
 	}
 	ppgCheck(t, v)
 	calls = nil
-	v, err = api.Update(context.Background(), "x1", portpairgroups.WithUpdateField("unknown", 1))
+	v, err = api.Update(context.Background(), "x1", request.Field("unknown", 1))
 	if err != nil || len(calls) != 0 || v.ID != "x1" || v.StatusCode != 0 {
 		t.Fatal("nothing dirty must not send PUT", v, err, calls)
 	}
 	api = ppgAPI(t, &calls, func(*http.Request) (int, string) { return 409, `{}` })
-	_, err = api.Update(context.Background(), "x1", portpairgroups.WithUpdateField("description", "x"))
+	_, err = api.Update(context.Background(), "x1", request.Field("description", "x"))
 	ppgOperation(t, err, "Update")
 	ppgStatus(t, err, 409)
 }
@@ -160,7 +161,7 @@ func TestPortPairGroupDeleteIgnoresMissingByDefault(t *testing.T) {
 		fails   bool
 	}{
 		{204, nil, false}, {404, nil, false},
-		{404, []portpairgroups.DeleteOption{portpairgroups.WithDeleteIgnoreMissing(false)}, true},
+		{404, []portpairgroups.DeleteOption{request.IgnoreMissing(false)}, true},
 		{409, nil, true},
 	} {
 		t.Run(fmt.Sprint(item.code, len(item.options)), func(t *testing.T) {
@@ -188,8 +189,8 @@ func TestPortPairGroupListQueryFiltersAndPaging(t *testing.T) {
 		return 200, `{"port_pair_groups":[` + ppgRow + `,{"id":"x2","name":"web","tap_enabled":true,"port_pairs":["pp1","pp2"]}]}`
 	})
 	values, err := api.All(context.Background(), portpairgroups.WithListName("web"),
-		portpairgroups.WithListQuery("description", "d"),
-		portpairgroups.WithListQuery("is_tap_enabled", false), portpairgroups.WithListQuery("tap_enabled", "x"))
+		request.Query("description", "d"),
+		request.Query("is_tap_enabled", false), request.Query("tap_enabled", "x"))
 	if err != nil || len(values) != 1 || len(calls) != 1 {
 		t.Fatal(values, err, calls)
 	}
@@ -213,7 +214,7 @@ func TestPortPairGroupListQueryFiltersAndPaging(t *testing.T) {
 		t.Fatal("port_pair_groups_links next continuation", values, err, calls)
 	}
 	calls = nil
-	values, err = api.All(context.Background(), portpairgroups.WithListMaxItems(1))
+	values, err = api.All(context.Background(), request.MaxItems(1))
 	if err != nil || len(values) != 1 || len(calls) != 1 || calls[0].query != "limit=1" {
 		t.Fatal(values, err, calls)
 	}
@@ -243,7 +244,7 @@ func TestPortPairGroupFindFallsBackToNameList(t *testing.T) {
 			if err != nil || v != nil || len(calls) != 2 {
 				t.Fatal("ignore_missing default returns nil", v, err, calls)
 			}
-			_, err = api.Find(context.Background(), "absent", portpairgroups.WithFindIgnoreMissing(false))
+			_, err = api.Find(context.Background(), "absent", request.IgnoreMissing(false))
 			var missing *resource.NotFoundError
 			if !errors.As(err, &missing) {
 				t.Fatal(err)
@@ -253,7 +254,7 @@ func TestPortPairGroupFindFallsBackToNameList(t *testing.T) {
 	}
 	var calls []ppgCall
 	api := ppgAPI(t, &calls, func(*http.Request) (int, string) { return 200, `{"port_pair_group":` + ppgRow + `}` })
-	v, err := api.Find(context.Background(), "x1", portpairgroups.WithFindQuery("project_id", "p1"))
+	v, err := api.Find(context.Background(), "x1", request.Query("project_id", "p1"))
 	if err != nil || len(calls) != 1 || calls[0].query != "project_id=p1" {
 		t.Fatal(v, err, calls)
 	}
@@ -289,9 +290,9 @@ func TestPortPairGroupRejectsInvalidInputBeforeHTTP(t *testing.T) {
 		"nil get option":    func() error { _, err := api.Get(ctx, "a", nil); return err },
 		"nil update option": func() error { _, err := api.Update(ctx, "a", nil); return err },
 		"nil delete option": func() error { return api.Delete(ctx, "a", nil) },
-		"find id query":     func() error { _, err := api.Find(ctx, "a", portpairgroups.WithFindQuery("id", "x")); return err },
+		"find id query":     func() error { _, err := api.Find(ctx, "a", request.Query("id", "x")); return err },
 		"nil list option":   func() error { _, err := api.All(ctx, nil); return err },
-		"negative limit":    func() error { _, err := api.All(ctx, portpairgroups.WithListLimit(-1)); return err },
+		"negative limit":    func() error { _, err := api.All(ctx, request.Limit(-1)); return err },
 		"nil API":           func() error { _, err := (*portpairgroups.API)(nil).Get(ctx, "a"); return err },
 	}
 	for name, check := range checks {

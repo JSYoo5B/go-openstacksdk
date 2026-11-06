@@ -7,6 +7,7 @@ import (
 	"context"
 	"iter"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/sfc/internal/sfcrecord"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -41,30 +42,30 @@ func (a *API) target() sfcrecord.Target {
 // Create implements create_sfc_service_graph: POST sfc/service_graphs with
 // {"service_graph": attrs} holding every given declared attribute.
 func (a *API) Create(ctx context.Context, options ...CreateOption) (*ServiceGraph, error) {
-	return convert(sfcrecord.Create(ctx, a.target(), options))
+	return convert(sfcrecord.Create(ctx, a.target(), calls.Translate(options, writeCalls)))
 }
 
 // Get implements get_sfc_service_graph: GET sfc/service_graphs/{id}.
 func (a *API) Get(ctx context.Context, id string, options ...GetOption) (*ServiceGraph, error) {
-	return convert(sfcrecord.Get(ctx, a.target(), id, options))
+	return convert(sfcrecord.Get(ctx, a.target(), id, calls.Translate(options, sfcrecord.ReadCalls)))
 }
 
 // Update implements update_sfc_service_graph: PUT sfc/service_graphs/{id} with only the
 // given declared attributes. No declared attribute means no request.
 func (a *API) Update(ctx context.Context, id string, options ...UpdateOption) (*ServiceGraph, error) {
-	return convert(sfcrecord.Update(ctx, a.target(), id, options))
+	return convert(sfcrecord.Update(ctx, a.target(), id, calls.Translate(options, writeCalls)))
 }
 
 // Delete implements delete_sfc_service_graph. A clean 404 returns nil unless
-// WithDeleteIgnoreMissing(false) is given.
+// request.IgnoreMissing(false) is given.
 func (a *API) Delete(ctx context.Context, id string, options ...DeleteOption) error {
-	return sfcrecord.Delete(ctx, a.target(), id, options)
+	return sfcrecord.Delete(ctx, a.target(), id, calls.Translate(options, sfcrecord.DeleteCalls))
 }
 
 // List implements sfc_service_graphs(**query) as a lazy iterator that follows
 // the service_graphs_links next link and limit-driven marker pages.
 func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*ServiceGraph, error] {
-	source := sfcrecord.List(ctx, a.target(), options)
+	source := sfcrecord.List(ctx, a.target(), calls.Translate(options, listCalls))
 	return func(yield func(*ServiceGraph, error) bool) {
 		for record, err := range source {
 			if !yield(fromRecord(record), err) || err != nil {
@@ -89,7 +90,7 @@ func (a *API) All(ctx context.Context, options ...ListOption) ([]*ServiceGraph, 
 // Find implements find_sfc_service_graph: GET by ID first and, after a clean 400,
 // 403 or 404, the complete list queried by name=name_or_id and matched by
 // exact ID or name. A missing service graph returns nil, nil unless
-// WithFindIgnoreMissing(false) is given.
+// request.IgnoreMissing(false) is given.
 func (a *API) Find(ctx context.Context, nameOrID string, options ...FindOption) (*ServiceGraph, error) {
-	return convert(sfcrecord.Find(ctx, a.target(), nameOrID, options))
+	return convert(sfcrecord.Find(ctx, a.target(), nameOrID, calls.Translate(options, sfcrecord.FindCalls)))
 }

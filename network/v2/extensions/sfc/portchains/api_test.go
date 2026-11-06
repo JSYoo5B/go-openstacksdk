@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"io"
 	"net/http"
 	"testing"
@@ -71,11 +72,11 @@ func TestPortChainCreatePostsEnvelope(t *testing.T) {
 	var calls []pcCall
 	api := pcAPI(t, &calls, func(*http.Request) (int, string) { return 201, `{"port_chain":` + pcRow + `}` })
 	v, err := api.Create(context.Background(),
-		portchains.WithCreateField("name", "web"),
-		portchains.WithCreateField("port_pair_groups", []string{"g1", "g2"}),
-		portchains.WithCreateField("flow_classifiers", []string{"fc1"}),
-		portchains.WithCreateField("chain_parameters", map[string]any{"symmetric": false}),
-		portchains.WithCreateField("unknown", make(chan int)))
+		request.Field("name", "web"),
+		request.Field("port_pair_groups", []string{"g1", "g2"}),
+		request.Field("flow_classifiers", []string{"fc1"}),
+		request.Field("chain_parameters", map[string]any{"symmetric": false}),
+		request.Field("unknown", make(chan int)))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -90,7 +91,7 @@ func TestPortChainCreatePostsEnvelope(t *testing.T) {
 		t.Run(fmt.Sprint(code), func(t *testing.T) {
 			var calls []pcCall
 			api := pcAPI(t, &calls, func(*http.Request) (int, string) { return code, `{}` })
-			_, err := api.Create(context.Background(), portchains.WithCreateField("tenant_id", "p1"))
+			_, err := api.Create(context.Background(), request.Field("tenant_id", "p1"))
 			if calls[0].body != `{"port_chain":{"tenant_id":"p1"}}` {
 				t.Fatal(calls)
 			}
@@ -137,18 +138,18 @@ func TestPortChainGetDecodesDescriptorsAndRejects(t *testing.T) {
 func TestPortChainUpdatePutsDirtyAttributes(t *testing.T) {
 	var calls []pcCall
 	api := pcAPI(t, &calls, func(*http.Request) (int, string) { return 200, `{"port_chain":` + pcRow + `}` })
-	v, err := api.Update(context.Background(), "x1", portchains.WithUpdateField("description", "d"), portchains.WithUpdateField("name", nil), portchains.WithUpdateField("id", "ignored"))
+	v, err := api.Update(context.Background(), "x1", request.Field("description", "d"), request.Field("name", nil), request.Field("id", "ignored"))
 	if err != nil || len(calls) != 1 || calls[0].method != http.MethodPut || calls[0].path != pcBase+"/x1" || calls[0].body != `{"port_chain":{"description":"d","name":null}}` {
 		t.Fatal(v, err, calls)
 	}
 	pcCheck(t, v)
 	calls = nil
-	v, err = api.Update(context.Background(), "x1", portchains.WithUpdateField("unknown", 1))
+	v, err = api.Update(context.Background(), "x1", request.Field("unknown", 1))
 	if err != nil || len(calls) != 0 || v.ID != "x1" || v.StatusCode != 0 {
 		t.Fatal("nothing dirty must not send PUT", v, err, calls)
 	}
 	api = pcAPI(t, &calls, func(*http.Request) (int, string) { return 409, `{}` })
-	_, err = api.Update(context.Background(), "x1", portchains.WithUpdateField("description", "x"))
+	_, err = api.Update(context.Background(), "x1", request.Field("description", "x"))
 	pcOperation(t, err, "Update")
 	pcStatus(t, err, 409)
 }
@@ -160,7 +161,7 @@ func TestPortChainDeleteIgnoresMissingByDefault(t *testing.T) {
 		fails   bool
 	}{
 		{204, nil, false}, {404, nil, false},
-		{404, []portchains.DeleteOption{portchains.WithDeleteIgnoreMissing(false)}, true},
+		{404, []portchains.DeleteOption{request.IgnoreMissing(false)}, true},
 		{409, nil, true},
 	} {
 		t.Run(fmt.Sprint(item.code, len(item.options)), func(t *testing.T) {
@@ -188,8 +189,8 @@ func TestPortChainListQueryFiltersAndPaging(t *testing.T) {
 		return 200, `{"port_chains":[` + pcRow + `,{"id":"x2","name":"web","flow_classifiers":["fc2"],"chain_parameters":{"symmetric":false}}]}`
 	})
 	values, err := api.All(context.Background(), portchains.WithListName("web"),
-		portchains.WithListQuery("tenant_id", "p1"),
-		portchains.WithListQuery("flow_classifiers", []string{"fc1"}), portchains.WithListQuery("symmetric", "x"))
+		request.Query("tenant_id", "p1"),
+		request.Query("flow_classifiers", []string{"fc1"}), request.Query("symmetric", "x"))
 	if err != nil || len(values) != 1 || len(calls) != 1 {
 		t.Fatal(values, err, calls)
 	}
@@ -213,7 +214,7 @@ func TestPortChainListQueryFiltersAndPaging(t *testing.T) {
 		t.Fatal("port_chains_links next continuation", values, err, calls)
 	}
 	calls = nil
-	values, err = api.All(context.Background(), portchains.WithListMaxItems(1))
+	values, err = api.All(context.Background(), request.MaxItems(1))
 	if err != nil || len(values) != 1 || len(calls) != 1 || calls[0].query != "limit=1" {
 		t.Fatal(values, err, calls)
 	}
@@ -243,7 +244,7 @@ func TestPortChainFindFallsBackToNameList(t *testing.T) {
 			if err != nil || v != nil || len(calls) != 2 {
 				t.Fatal("ignore_missing default returns nil", v, err, calls)
 			}
-			_, err = api.Find(context.Background(), "absent", portchains.WithFindIgnoreMissing(false))
+			_, err = api.Find(context.Background(), "absent", request.IgnoreMissing(false))
 			var missing *resource.NotFoundError
 			if !errors.As(err, &missing) {
 				t.Fatal(err)
@@ -253,7 +254,7 @@ func TestPortChainFindFallsBackToNameList(t *testing.T) {
 	}
 	var calls []pcCall
 	api := pcAPI(t, &calls, func(*http.Request) (int, string) { return 200, `{"port_chain":` + pcRow + `}` })
-	v, err := api.Find(context.Background(), "x1", portchains.WithFindQuery("project_id", "p1"))
+	v, err := api.Find(context.Background(), "x1", request.Query("project_id", "p1"))
 	if err != nil || len(calls) != 1 || calls[0].query != "project_id=p1" {
 		t.Fatal(v, err, calls)
 	}
@@ -289,9 +290,9 @@ func TestPortChainRejectsInvalidInputBeforeHTTP(t *testing.T) {
 		"nil get option":    func() error { _, err := api.Get(ctx, "a", nil); return err },
 		"nil update option": func() error { _, err := api.Update(ctx, "a", nil); return err },
 		"nil delete option": func() error { return api.Delete(ctx, "a", nil) },
-		"find id query":     func() error { _, err := api.Find(ctx, "a", portchains.WithFindQuery("id", "x")); return err },
+		"find id query":     func() error { _, err := api.Find(ctx, "a", request.Query("id", "x")); return err },
 		"nil list option":   func() error { _, err := api.All(ctx, nil); return err },
-		"negative limit":    func() error { _, err := api.All(ctx, portchains.WithListLimit(-1)); return err },
+		"negative limit":    func() error { _, err := api.All(ctx, request.Limit(-1)); return err },
 		"nil API":           func() error { _, err := (*portchains.API)(nil).Get(ctx, "a"); return err },
 	}
 	for name, check := range checks {

@@ -14,9 +14,9 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/sfc/flowclassifiers.New`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/sfc/flowclassifiers.API.Create`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/sfc/flowclassifiers.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/sfc/flowclassifiers.WithCreateOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/sfc/flowclassifiers.WithCreateHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 
 - Create sends POST /v2.0/sfc/flow_classifiers with {"flow_classifier": attrs} holding every given declared attribute (Python attribute names or Body keys, id included, unknown names dropped), accepts 200-399, decodes the flow_classifier member or root object over the sent values, and returns 400 and above with Create operation context.
   Tests: `network/v2/extensions/sfc/flowclassifiers/api_test.go:TestFlowClassifierCreatePostsEnvelope`, `network/v2/extensions/sfc/flowclassifiers/api_test.go:TestFlowClassifierRejectsInvalidInputBeforeHTTP`.
@@ -36,7 +36,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/sfc/flowclassifiers.New`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/sfc/flowclassifiers.API.Get`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/sfc/flowclassifiers.WithGetHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 
 - Get sends GET /v2.0/sfc/flow_classifiers/{id}, decodes the flow_classifier member or root object with the Python Body descriptor conversions and the project_id to tenant_id alias, fails non-object JSON with the accepted response as proof and returns 404 with Get operation context.
   Tests: `network/v2/extensions/sfc/flowclassifiers/api_test.go:TestFlowClassifierGetDecodesAndRejects`, `network/v2/extensions/sfc/flowclassifiers/api_test.go:TestFlowClassifierRejectsInvalidInputBeforeHTTP`.
@@ -55,10 +55,10 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/sfc/flowclassifiers.New`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/sfc/flowclassifiers.API.Find`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/sfc/flowclassifiers.WithFindIgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/sfc/flowclassifiers.WithFindQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
-- Find sends GET /v2.0/sfc/flow_classifiers/{name_or_id} with every find query name as query first and, after a clean 400, 403 or 404, lists /v2.0/sfc/flow_classifiers with the query plus name=name_or_id (unless the query names one) matching exact ID or name; a missing resource is nil by default or resource.NotFoundError with WithFindIgnoreMissing(false), duplicates return resource.AmbiguousError and other GET failures do not fall back.
+- Find sends GET /v2.0/sfc/flow_classifiers/{name_or_id} with every find query name as query first and, after a clean 400, 403 or 404, lists /v2.0/sfc/flow_classifiers with the query plus name=name_or_id (unless the query names one) matching exact ID or name; a missing resource is nil by default or resource.NotFoundError with request.IgnoreMissing(false), duplicates return resource.AmbiguousError and other GET failures do not fall back.
   Tests: `network/v2/extensions/sfc/flowclassifiers/api_test.go:TestFlowClassifierFindFallsBackToNameList`, `network/v2/extensions/sfc/flowclassifiers/api_test.go:TestFlowClassifierRejectsInvalidInputBeforeHTTP`.
 
 Python/Go differences:
@@ -79,15 +79,15 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/sfc/flowclassifiers.New`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/sfc/flowclassifiers.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/sfc/flowclassifiers.API.All`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/sfc/flowclassifiers.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/sfc/flowclassifiers.WithListOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/sfc/flowclassifiers.WithListName`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/sfc/flowclassifiers.WithListProjectID`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/sfc/flowclassifiers.WithListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/sfc/flowclassifiers.WithListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/sfc/flowclassifiers.WithListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/sfc/flowclassifiers.WithListPaginated`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/sfc/flowclassifiers.WithListHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 
 - List sends GET /v2.0/sfc/flow_classifiers with Accept: application/json and the QueryParameters names (plus limit and marker) as Requests-encoded server query, filters the other Body attributes locally with Python dict-subset semantics, ignores other names, follows the flow_classifiers_links next link (including a /v2.0-prefixed relative link) and limit-driven marker continuation until an empty page, honors max_items and paginated=False, and returns page failures with List operation context.
   Tests: `network/v2/extensions/sfc/flowclassifiers/api_test.go:TestFlowClassifierListQueryFiltersAndPaging`, `network/v2/extensions/sfc/flowclassifiers/api_test.go:TestFlowClassifierRejectsInvalidInputBeforeHTTP`.
@@ -107,9 +107,9 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/sfc/flowclassifiers.New`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/sfc/flowclassifiers.API.Update`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/sfc/flowclassifiers.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/sfc/flowclassifiers.WithUpdateOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/sfc/flowclassifiers.WithUpdateHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 
 - Update sends PUT /v2.0/sfc/flow_classifiers/{id} with {"flow_classifier": attrs} holding only the given declared attributes except id, sends nothing when no declared attribute is given, decodes the response like Get and returns 409 with Update operation context.
   Tests: `network/v2/extensions/sfc/flowclassifiers/api_test.go:TestFlowClassifierUpdatePutsDirtyAttributes`, `network/v2/extensions/sfc/flowclassifiers/api_test.go:TestFlowClassifierRejectsInvalidInputBeforeHTTP`.
@@ -129,10 +129,10 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/sfc/flowclassifiers.New`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/sfc/flowclassifiers.API.Delete`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/sfc/flowclassifiers.WithDeleteIgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/sfc/flowclassifiers.WithDeleteHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 
-- Delete sends DELETE /v2.0/sfc/flow_classifiers/{id}, accepts 200-399, turns a clean 404 into nil by default as ignore_missing=True, returns the 404 with WithDeleteIgnoreMissing(false) and always returns other statuses such as 409 with Delete operation context.
+- Delete sends DELETE /v2.0/sfc/flow_classifiers/{id}, accepts 200-399, turns a clean 404 into nil by default as ignore_missing=True, returns the 404 with request.IgnoreMissing(false) and always returns other statuses such as 409 with Delete operation context.
   Tests: `network/v2/extensions/sfc/flowclassifiers/api_test.go:TestFlowClassifierDeleteIgnoresMissingByDefault`, `network/v2/extensions/sfc/flowclassifiers/api_test.go:TestFlowClassifierRejectsInvalidInputBeforeHTTP`.
 
 Python/Go differences:

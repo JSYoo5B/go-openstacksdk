@@ -1,86 +1,84 @@
 package portpairgroups
 
-import "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/sfc/internal/sfcrecord"
+import (
+	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/sfc/internal/sfcrecord"
+	"github.com/JSYoo5B/go-openstacksdk/request"
+)
 
 // GetOpts carries per-request headers, a Go extension.
 type GetOpts = sfcrecord.ReadOpts
-type GetOption func(*GetOpts) error
 
-func WithGetHeaders(values map[string]string) GetOption {
-	return GetOption(sfcrecord.ReadHeaders(values))
-}
+// GetOption is one option of Get: request.Headers (replaces the headers) or
+// request.Custom over *GetOpts. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type GetOption = request.GetCall
 
 // CreateOpts carries the Python **attrs as raw JSON. Keys are Python
 // attribute names or Body keys; unknown keys are dropped.
 type CreateOpts = sfcrecord.WriteOpts
-type CreateOption func(*CreateOpts) error
+
+// CreateOption is one option of Create: WithCreateOpts, request.Field (one
+// Python attribute; unknown names are dropped with their marshal error),
+// request.Headers (replaces the headers) or request.Custom over *CreateOpts.
+// Other shared calls fail with resource.ErrInvalidOption before HTTP.
+type CreateOption = request.WriteCall
 
 func WithCreateOpts(opts CreateOpts) CreateOption {
-	return CreateOption(sfcrecord.WriteSnapshot(opts))
-}
-func WithCreateField(key string, value any) CreateOption {
-	return CreateOption(spec.WriteField(key, value))
-}
-func WithCreateHeaders(values map[string]string) CreateOption {
-	return CreateOption(sfcrecord.WriteHeaders(values))
+	return request.Custom(sfcrecord.WriteSnapshot(opts))
 }
 
 // UpdateOpts carries the Python **attrs of update_sfc_port_pair_group; id is never sent.
 type UpdateOpts = sfcrecord.WriteOpts
-type UpdateOption func(*UpdateOpts) error
+
+// UpdateOption is one option of Update: WithUpdateOpts, request.Field (one
+// Python attribute; unknown names are dropped with their marshal error),
+// request.Headers (replaces the headers) or request.Custom over *UpdateOpts.
+// Other shared calls fail with resource.ErrInvalidOption before HTTP.
+type UpdateOption = request.WriteCall
 
 func WithUpdateOpts(opts UpdateOpts) UpdateOption {
-	return UpdateOption(sfcrecord.WriteSnapshot(opts))
-}
-func WithUpdateField(key string, value any) UpdateOption {
-	return UpdateOption(spec.WriteField(key, value))
-}
-func WithUpdateHeaders(values map[string]string) UpdateOption {
-	return UpdateOption(sfcrecord.WriteHeaders(values))
+	return request.Custom(sfcrecord.WriteSnapshot(opts))
 }
 
 // DeleteOpts selects ignore_missing; nil keeps the Python default true.
 type DeleteOpts = sfcrecord.DeleteOpts
-type DeleteOption func(*DeleteOpts) error
 
-func WithDeleteIgnoreMissing(value bool) DeleteOption {
-	return DeleteOption(sfcrecord.DeleteIgnoreMissing(value))
-}
-func WithDeleteHeaders(values map[string]string) DeleteOption {
-	return DeleteOption(sfcrecord.DeleteHeaders(values))
-}
+// DeleteOption is one option of Delete: request.IgnoreMissing,
+// request.Headers (replaces the headers) or request.Custom over *DeleteOpts.
+// Other shared calls fail with resource.ErrInvalidOption before HTTP.
+type DeleteOption = request.DeleteCall
 
 // FindOpts selects ignore_missing (nil keeps the Python default true) and
 // carries the Python find **query.
 type FindOpts = sfcrecord.FindOpts
-type FindOption func(*FindOpts) error
 
-func WithFindIgnoreMissing(value bool) FindOption {
-	return FindOption(sfcrecord.FindIgnoreMissing(value))
-}
-
-// WithFindQuery adds one Python find **query name. It is sent on the GET by
-// ID and passed to the list fallback; id and Resource controls are rejected.
-func WithFindQuery(key string, value any) FindOption {
-	return FindOption(sfcrecord.FindQuery(key, value))
-}
+// FindOption is one option of Find: request.IgnoreMissing, request.Query
+// (one Python find **query name, sent on the GET by ID and passed to the
+// list fallback; id and Resource controls are rejected when Find runs) or
+// request.Custom over *FindOpts. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type FindOption = request.FindCall
 
 // ListOpts carries Python **query: description, name, project_id, tenant_id,
 // limit and marker go to the server; the other Body attributes
 // (id, is_tap_enabled, port_pair_group_parameters, port_pairs) filter locally; other names are ignored.
 type ListOpts = sfcrecord.ListOpts
-type ListOption func(*ListOpts) error
 
-func WithListOpts(opts ListOpts) ListOption { return ListOption(sfcrecord.ListSnapshot(opts)) }
-func WithListQuery(key string, value any) ListOption {
-	return ListOption(spec.ListQuery(key, value))
+// ListOption is one option of List and All: WithListOpts, WithListName,
+// WithListProjectID, request.Query (one Python **query name as JSON; unknown
+// names are dropped with their marshal error), request.Limit,
+// request.Marker, request.MaxItems, request.Paginated, request.Headers
+// (replaces the headers) or request.Custom over *ListOpts. Other shared
+// calls fail with resource.ErrInvalidOption before HTTP.
+type ListOption = request.ListCall
+
+func WithListOpts(opts ListOpts) ListOption { return request.Custom(sfcrecord.ListSnapshot(opts)) }
+func WithListName(name string) ListOption   { return request.Custom(spec.ListQuery("name", name)) }
+func WithListProjectID(projectID string) ListOption {
+	return request.Custom(spec.ListQuery("project_id", projectID))
 }
-func WithListName(name string) ListOption           { return WithListQuery("name", name) }
-func WithListProjectID(projectID string) ListOption { return WithListQuery("project_id", projectID) }
-func WithListLimit(limit int) ListOption            { return ListOption(sfcrecord.ListLimit(limit)) }
-func WithListMarker(marker string) ListOption       { return ListOption(sfcrecord.ListMarker(marker)) }
-func WithListMaxItems(count int) ListOption         { return ListOption(sfcrecord.ListMaxItems(count)) }
-func WithListPaginated(value bool) ListOption       { return ListOption(sfcrecord.ListPaginated(value)) }
-func WithListHeaders(values map[string]string) ListOption {
-	return ListOption(sfcrecord.ListHeaders(values))
-}
+
+var (
+	writeCalls = spec.WriteCalls()
+	listCalls  = spec.ListCalls()
+)

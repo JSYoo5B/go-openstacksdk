@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"io"
 	"net/http"
 	"testing"
@@ -76,12 +77,12 @@ func TestFlowClassifierCreatePostsEnvelope(t *testing.T) {
 		return 201, `{"flow_classifier":` + fcRow + `}`
 	})
 	v, err := api.Create(context.Background(),
-		flowclassifiers.WithCreateField("name", "web"),
-		flowclassifiers.WithCreateField("source_port_range_min", 22),
-		flowclassifiers.WithCreateField("l7_parameters", map[string]string{"url": "x"}),
-		flowclassifiers.WithCreateField("project_id", "p1"),
-		flowclassifiers.WithCreateField("summary", "computed"),
-		flowclassifiers.WithCreateField("unknown", make(chan int)))
+		request.Field("name", "web"),
+		request.Field("source_port_range_min", 22),
+		request.Field("l7_parameters", map[string]string{"url": "x"}),
+		request.Field("project_id", "p1"),
+		request.Field("summary", "computed"),
+		request.Field("unknown", make(chan int)))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -96,7 +97,7 @@ func TestFlowClassifierCreatePostsEnvelope(t *testing.T) {
 
 	calls = nil
 	api, _ = fcAPI(t, &calls, func(*http.Request) (int, string) { return 201, `` })
-	v, err = api.Create(context.Background(), flowclassifiers.WithCreateField("id", "chosen"), flowclassifiers.WithCreateField("tenant_id", "t1"), flowclassifiers.WithCreateField("logical_source_port", nil))
+	v, err = api.Create(context.Background(), request.Field("id", "chosen"), request.Field("tenant_id", "t1"), request.Field("logical_source_port", nil))
 	if err != nil || calls[0].body != `{"flow_classifier":{"id":"chosen","logical_source_port":null,"tenant_id":"t1"}}` {
 		t.Fatal(v, err, calls)
 	}
@@ -174,9 +175,9 @@ func TestFlowClassifierUpdatePutsDirtyAttributes(t *testing.T) {
 		return 200, `{"flow_classifier":` + fcRow + `}`
 	})
 	v, err := api.Update(context.Background(), "fc1",
-		flowclassifiers.WithUpdateField("description", "d"),
-		flowclassifiers.WithUpdateField("name", nil),
-		flowclassifiers.WithUpdateField("id", "ignored"))
+		request.Field("description", "d"),
+		request.Field("name", nil),
+		request.Field("id", "ignored"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -186,12 +187,12 @@ func TestFlowClassifierUpdatePutsDirtyAttributes(t *testing.T) {
 	fcCheck(t, v)
 
 	calls = nil
-	v, err = api.Update(context.Background(), "fc1", flowclassifiers.WithUpdateField("summary", "x"), flowclassifiers.WithUpdateField("unknown", 1))
+	v, err = api.Update(context.Background(), "fc1", request.Field("summary", "x"), request.Field("unknown", 1))
 	if err != nil || len(calls) != 0 || v.ID != "fc1" || v.StatusCode != 0 {
 		t.Fatal("nothing dirty must not send PUT", v, err, calls)
 	}
 	api, _ = fcAPI(t, &calls, func(*http.Request) (int, string) { return 409, `{}` })
-	_, err = api.Update(context.Background(), "fc1", flowclassifiers.WithUpdateField("description", "x"))
+	_, err = api.Update(context.Background(), "fc1", request.Field("description", "x"))
 	fcOperation(t, err, "Update")
 	fcStatus(t, err, 409)
 }
@@ -203,7 +204,7 @@ func TestFlowClassifierDeleteIgnoresMissingByDefault(t *testing.T) {
 		fails   bool
 	}{
 		{204, nil, false}, {202, nil, false}, {404, nil, false},
-		{404, []flowclassifiers.DeleteOption{flowclassifiers.WithDeleteIgnoreMissing(false)}, true},
+		{404, []flowclassifiers.DeleteOption{request.IgnoreMissing(false)}, true},
 		{409, nil, true},
 	} {
 		t.Run(fmt.Sprint(item.code, len(item.options)), func(t *testing.T) {
@@ -231,9 +232,9 @@ func TestFlowClassifierListQueryFiltersAndPaging(t *testing.T) {
 		return 200, `{"flow_classifiers":[` + fcRow + `,{"id":"fc2","source_ip_prefix":"10.9.0.0/24","l7_parameters":{}}],"flow_classifiers_links":[]}`
 	})
 	values, err := api.All(context.Background(), flowclassifiers.WithListName("web"), flowclassifiers.WithListProjectID("p1"),
-		flowclassifiers.WithListQuery("protocol", "tcp"), flowclassifiers.WithListQuery("source_port_range_min", 22),
-		flowclassifiers.WithListQuery("tenant_id", "p1"), flowclassifiers.WithListQuery("source_ip_prefix", "10.0.0.0/24"),
-		flowclassifiers.WithListQuery("summary", "x"), flowclassifiers.WithListQuery("unknown", make(chan int)))
+		request.Query("protocol", "tcp"), request.Query("source_port_range_min", 22),
+		request.Query("tenant_id", "p1"), request.Query("source_ip_prefix", "10.0.0.0/24"),
+		request.Query("summary", "x"), request.Query("unknown", make(chan int)))
 	if err != nil || len(values) != 1 || len(calls) != 1 {
 		t.Fatal(values, err, calls)
 	}
@@ -242,7 +243,7 @@ func TestFlowClassifierListQueryFiltersAndPaging(t *testing.T) {
 		t.Fatal(calls)
 	}
 	calls = nil
-	values, err = api.All(context.Background(), flowclassifiers.WithListQuery("l7_parameters", map[string]string{"url": "x"}), flowclassifiers.WithListQuery("id", "fc1"))
+	values, err = api.All(context.Background(), request.Query("l7_parameters", map[string]string{"url": "x"}), request.Query("id", "fc1"))
 	if err != nil || len(values) != 1 || values[0].ID != "fc1" || calls[0].query != "" {
 		t.Fatal("dict and id filters run locally", values, err, calls)
 	}
@@ -260,7 +261,7 @@ func TestFlowClassifierListQueryFiltersAndPaging(t *testing.T) {
 		}
 		return 500, `{}`
 	})
-	values, err = api.All(context.Background(), flowclassifiers.WithListLimit(1))
+	values, err = api.All(context.Background(), request.Limit(1))
 	if err != nil || len(values) != 2 || len(calls) != 3 || calls[0].query != "limit=1" || calls[1].query != "limit=1&marker=a" || calls[2].query != "limit=1&marker=b" {
 		t.Fatal("next link then limit-driven marker continuation until an empty page", values, err, calls)
 	}
@@ -276,17 +277,17 @@ func TestFlowClassifierListQueryFiltersAndPaging(t *testing.T) {
 		t.Fatal("a version-prefixed relative next link resolves below the endpoint", values, err, calls)
 	}
 	calls = nil
-	values, err = api.All(context.Background(), flowclassifiers.WithListLimit(1), flowclassifiers.WithListPaginated(false))
+	values, err = api.All(context.Background(), request.Limit(1), request.Paginated(false))
 	if err != nil || len(values) != 1 || len(calls) != 1 {
 		t.Fatal(values, err, calls)
 	}
 	calls = nil
-	values, err = api.All(context.Background(), flowclassifiers.WithListMaxItems(1))
+	values, err = api.All(context.Background(), request.MaxItems(1))
 	if err != nil || len(values) != 1 || len(calls) != 1 || calls[0].query != "limit=1" {
 		t.Fatal(values, err, calls)
 	}
 	calls = nil
-	values, err = api.All(context.Background(), flowclassifiers.WithListMarker("a"))
+	values, err = api.All(context.Background(), request.Marker("a"))
 	if err != nil || len(values) != 1 || len(calls) != 1 || calls[0].query != "marker=a" {
 		t.Fatal(values, err, calls)
 	}
@@ -323,7 +324,7 @@ func TestFlowClassifierFindFallsBackToNameList(t *testing.T) {
 			if err != nil || v != nil || len(calls) != 2 {
 				t.Fatal("ignore_missing default returns nil", v, err, calls)
 			}
-			_, err = api.Find(context.Background(), "absent", flowclassifiers.WithFindIgnoreMissing(false))
+			_, err = api.Find(context.Background(), "absent", request.IgnoreMissing(false))
 			var missing *resource.NotFoundError
 			if !errors.As(err, &missing) {
 				t.Fatal(err)
@@ -346,7 +347,7 @@ func TestFlowClassifierFindFallsBackToNameList(t *testing.T) {
 		}
 		return 404, `{}`
 	})
-	v, err = api.Find(context.Background(), "web", flowclassifiers.WithFindQuery("project_id", "p1"), flowclassifiers.WithFindQuery("source_ip_prefix", "10.0.0.0/24"), flowclassifiers.WithFindQuery("all_projects", true))
+	v, err = api.Find(context.Background(), "web", request.Query("project_id", "p1"), request.Query("source_ip_prefix", "10.0.0.0/24"), request.Query("all_projects", true))
 	if err != nil || v == nil || v.ID != "fc7" || len(calls) != 2 {
 		t.Fatal(v, err, calls)
 	}
@@ -387,12 +388,12 @@ func TestFlowClassifierRejectsInvalidInputBeforeHTTP(t *testing.T) {
 		"nil delete option":  func() error { return api.Delete(ctx, "a", nil) },
 		"dot delete ID":      func() error { return api.Delete(ctx, "..") },
 		"nil find option":    func() error { _, err := api.Find(ctx, "a", nil); return err },
-		"find id query":      func() error { _, err := api.Find(ctx, "a", flowclassifiers.WithFindQuery("id", "x")); return err },
-		"find control query": func() error { _, err := api.Find(ctx, "a", flowclassifiers.WithFindQuery("headers", "x")); return err },
+		"find id query":      func() error { _, err := api.Find(ctx, "a", request.Query("id", "x")); return err },
+		"find control query": func() error { _, err := api.Find(ctx, "a", request.Query("headers", "x")); return err },
 		"nil list option":    func() error { _, err := api.All(ctx, nil); return err },
-		"negative limit":     func() error { _, err := api.All(ctx, flowclassifiers.WithListLimit(-1)); return err },
+		"negative limit":     func() error { _, err := api.All(ctx, request.Limit(-1)); return err },
 		"owned header": func() error {
-			_, err := api.Get(ctx, "a", flowclassifiers.WithGetHeaders(map[string]string{"X-Auth-Token": "x"}))
+			_, err := api.Get(ctx, "a", request.Headers(map[string]string{"X-Auth-Token": "x"}))
 			return err
 		},
 		"nil API": func() error { _, err := (*flowclassifiers.API)(nil).Get(ctx, "a"); return err },
@@ -405,7 +406,7 @@ func TestFlowClassifierRejectsInvalidInputBeforeHTTP(t *testing.T) {
 	if len(calls) != 0 {
 		t.Fatal(calls)
 	}
-	if _, err := api.Get(ctx, "a", flowclassifiers.WithGetHeaders(map[string]string{"X-Trace": "1"})); err != nil || len(calls) != 1 {
+	if _, err := api.Get(ctx, "a", request.Headers(map[string]string{"X-Trace": "1"})); err != nil || len(calls) != 1 {
 		t.Fatal(err, calls)
 	}
 	if api.RawClient() != client || (*flowclassifiers.API)(nil).RawClient() != nil {
