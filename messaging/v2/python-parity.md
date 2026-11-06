@@ -8,7 +8,7 @@ Python `MessageResource` sends `Client-ID` (a fresh UUID when none is given) and
 
 ## Delete defaults
 
-Python `delete_queue`, `delete_message`, `delete_claim` and `delete_subscription` default to `ignore_missing=True`. The native Go `Delete` methods stay strict and keep the native 404 response error. To get the Python default, wrap the call: `err = resource.IgnoreMissing(api.Delete(ctx, ...))`. `IgnoreMissing` suppresses only an actual HTTP 404 (not transport, decode, cancellation or joined errors) and nothing is retried. Subscriptions expose the same default through `WithDeleteIgnoreMissing`.
+Python `delete_queue`, `delete_message`, `delete_claim` and `delete_subscription` default to `ignore_missing=True`. The native Go `Delete` methods stay strict and keep the native 404 response error. To get the Python default, wrap the call: `err = resource.IgnoreMissing(api.Delete(ctx, ...))`. `IgnoreMissing` suppresses only an actual HTTP 404 (not transport, decode, cancellation or joined errors) and nothing is retried. Subscriptions expose the same default through `request.IgnoreMissing`.
 
 Python `delete_message(claim=...)` appends `claim_id` only for a non-empty claim; use `messages.WithDeleteOptions(messages.DeleteOpts{ClaimID: id})`.
 

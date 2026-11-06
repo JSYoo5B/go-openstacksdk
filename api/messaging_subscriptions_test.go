@@ -134,9 +134,9 @@ func TestMessagingSubscriptionsCreateSnapshotsExactMetadataAndIdentity(t *testin
 	opts.Options[0] = '['
 	opts.ClientID = "mutated"
 	extras := map[string]json.RawMessage{"n": json.RawMessage("9007199254740993")}
-	field := subscriptions.WithCreateField("vendor", extras)
+	field := request.Field("vendor", extras)
 	extras["n"][0] = '1'
-	reusable := []subscriptions.CreateOption{snapshot, subscriptions.WithCreateTTL(60), subscriptions.WithCreateTTL(9007199254740993), field, subscriptions.WithCreateHeader("x-trace", "first"), subscriptions.WithCreateHeader("X-Trace", "last")}
+	reusable := []subscriptions.CreateOption{snapshot, subscriptions.WithCreateTTL(60), subscriptions.WithCreateTTL(9007199254740993), field, request.Header("x-trace", "first"), request.Header("X-Trace", "last")}
 	var group sync.WaitGroup
 	for range 4 {
 		group.Add(1)
@@ -218,10 +218,10 @@ func TestMessagingSubscriptionsPythonMarkerPagingIgnoresLinksAndKeepsSource(t *t
 				cloud.Provider.SetToken("rotated")
 				return res, err
 			}))
-			opts := []subscriptions.ListOption{subscriptions.WithListHeader("X-Trace", "frozen"), func(cfg *request.Config[subscriptions.ListOpts]) error {
+			opts := []subscriptions.ListOption{request.Header("X-Trace", "frozen"), request.Custom(func(cfg *request.Config[subscriptions.ListOpts]) error {
 				cfg.Query["tag"] = []string{"first", "second"}
 				return nil
-			}}
+			})}
 			if mode == "short-initial" {
 				opts = append(opts, subscriptions.WithListOptions(subscriptions.ListOpts{Limit: 3}))
 			}
@@ -268,7 +268,7 @@ func TestMessagingSubscriptionsListControlsLazyDecodeAndReuse(t *testing.T) {
 			})
 			opts := []subscriptions.ListOption{}
 			if mode == "cap" || mode == "bad-json" {
-				opts = append(opts, subscriptions.WithListMaxItems(1))
+				opts = append(opts, request.MaxItems(1))
 			}
 			if mode == "single" || mode == "reuse" {
 				value := false
@@ -276,7 +276,7 @@ func TestMessagingSubscriptionsListControlsLazyDecodeAndReuse(t *testing.T) {
 				value = true
 			}
 			seq := scope.List(context.Background(), opts...)
-			opts = append(opts, subscriptions.WithListMaxItems(-1))
+			opts = append(opts, request.MaxItems(-1))
 			if calls.Load() != 0 {
 				t.Fatal("eager")
 			}
@@ -331,12 +331,12 @@ func TestMessagingSubscriptionsInvalidOptionsAndMissingClientIdentity(t *testing
 	var calls atomic.Int32
 	cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) { calls.Add(1); w.WriteHeader(500) })
 	for _, option := range []subscriptions.CreateOption{
-		func(cfg *request.Config[subscriptions.CreateOpts]) error {
+		request.Custom(func(cfg *request.Config[subscriptions.CreateOpts]) error {
 			cfg.Headers["X-Trace"] = "first"
 			cfg.Headers["x-trace"] = "second"
 			return nil
-		},
-		nil, subscriptions.WithCreateSubscriber(""), subscriptions.WithCreateDeliveryOptions(nil), subscriptions.WithCreateDeliveryOptions([]string{}), subscriptions.WithCreateField("subscriber", "other"), subscriptions.WithCreateField("TTL", 3), subscriptions.WithCreateField("age", 2), subscriptions.WithCreateField("queue_name", "other"), subscriptions.WithCreateHeader("Client-ID", "other"), subscriptions.WithCreateHeader("X-PROJECT-ID", "other"), subscriptions.WithCreateHeader("X-Auth-Token", "other"), subscriptions.WithCreateHeader("bad?header", "x"), subscriptions.WithCreateHeader("X-Test", "bad\x00"), request.WithQuery[subscriptions.CreateOpts]("x", "y"), request.WithArgument[subscriptions.CreateOpts]("x", "y"),
+		}),
+		nil, subscriptions.WithCreateSubscriber(""), subscriptions.WithCreateDeliveryOptions(nil), subscriptions.WithCreateDeliveryOptions([]string{}), request.Field("subscriber", "other"), request.Field("TTL", 3), request.Field("age", 2), request.Field("queue_name", "other"), request.Header("Client-ID", "other"), request.Header("X-PROJECT-ID", "other"), request.Header("X-Auth-Token", "other"), request.Header("bad?header", "x"), request.Header("X-Test", "bad\x00"), request.Custom(request.WithQuery[subscriptions.CreateOpts]("x", "y")), request.Custom(request.WithArgument[subscriptions.CreateOpts]("x", "y")),
 	} {
 		if _, err := scope.Create(context.Background(), subscriptions.CreateOpts{Subscriber: "mailto:example@example.test"}, option); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(err)
@@ -345,7 +345,7 @@ func TestMessagingSubscriptionsInvalidOptionsAndMissingClientIdentity(t *testing
 	if _, err := scope.Create(context.Background(), subscriptions.CreateOpts{Subscriber: "http://example.invalid", TTL: request.Null[int64]()}); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
-	for _, option := range []subscriptions.ListOption{nil, subscriptions.WithListMaxItems(-1), subscriptions.WithListOptions(subscriptions.ListOpts{Limit: -1}), subscriptions.WithListQuery("limit", "0"), subscriptions.WithListQuery("marker", " "), subscriptions.WithListQuery("Queue_Name", "other"), subscriptions.WithListQuery("headers", "x"), subscriptions.WithListQuery("max_items", "1"), request.WithField[subscriptions.ListOpts]("x", 1), request.WithArgument[subscriptions.ListOpts]("x", 1)} {
+	for _, option := range []subscriptions.ListOption{nil, request.MaxItems(-1), subscriptions.WithListOptions(subscriptions.ListOpts{Limit: -1}), request.Query("limit", "0"), request.Query("marker", " "), request.Query("Queue_Name", "other"), request.Query("headers", "x"), request.Query("max_items", "1"), request.Custom(request.WithField[subscriptions.ListOpts]("x", 1)), request.Custom(request.WithArgument[subscriptions.ListOpts]("x", 1))} {
 		if values, err := scope.All(context.Background(), option); values != nil || !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(values, err)
 		}
@@ -528,7 +528,7 @@ func TestMessagingSubscriptionsMutationAndReadEvidenceNeverResend(t *testing.T) 
 				case "get":
 					_, err = scope.Get(context.Background(), "id")
 				case "delete":
-					err = scope.Delete(context.Background(), "id", subscriptions.WithDeleteIgnoreMissing(false))
+					err = scope.Delete(context.Background(), "id", request.IgnoreMissing(false))
 				}
 				if !gophercloud.ResponseCodeIs(err, code) || calls.Load() != 1 {
 					t.Fatal(err, calls.Load())
@@ -566,7 +566,7 @@ func TestMessagingSubscriptionsMutationAndReadEvidenceNeverResend(t *testing.T) 
 	if err := scope.Delete(context.Background(), "id"); err != nil {
 		t.Fatal(err)
 	}
-	if err := scope.Delete(context.Background(), "id", subscriptions.WithDeleteIgnoreMissing(false)); !gophercloud.ResponseCodeIs(err, 404) {
+	if err := scope.Delete(context.Background(), "id", request.IgnoreMissing(false)); !gophercloud.ResponseCodeIs(err, 404) {
 		t.Fatal(err)
 	}
 	if calls.Load() != 2 {
@@ -706,7 +706,7 @@ func TestMessagingSubscriptionsListTerminalErrorsAndSourceCancellation(t *testin
 	if _, err := scope.Get(nil, "id"); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
-	if _, err := scope.Create(context.Background(), subscriptions.CreateOpts{Subscriber: "http://example.invalid"}, func(cfg *request.Config[subscriptions.CreateOpts]) error { c.Type = "compute"; return nil }); !errors.Is(err, resource.ErrUnsupported) {
+	if _, err := scope.Create(context.Background(), subscriptions.CreateOpts{Subscriber: "http://example.invalid"}, request.Custom(func(cfg *request.Config[subscriptions.CreateOpts]) error { c.Type = "compute"; return nil })); !errors.Is(err, resource.ErrUnsupported) {
 		t.Fatal(err)
 	}
 	if calls.Load() != 0 {

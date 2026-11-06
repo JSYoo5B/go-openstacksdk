@@ -15854,8 +15854,8 @@
         "github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.WithCreateSubscriber",
         "github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.WithCreateTTL",
         "github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.WithCreateDeliveryOptions",
-        "github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.WithCreateField",
-        "github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.WithCreateHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Field",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.WithCreateClientID",
         "github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.WithCreateProjectID"
       ],
@@ -15922,7 +15922,7 @@
         "github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.API.InQueue",
         "github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.QueueScope.Get",
         "github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.WithGetOptions",
-        "github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.WithGetHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.WithGetClientID",
         "github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.WithGetProjectID"
       ],
@@ -15982,12 +15982,12 @@
         "github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.QueueScope.List",
         "github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.QueueScope.All",
         "github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.WithListOptions",
-        "github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.WithListQuery",
-        "github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.WithListHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Query",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.WithListClientID",
         "github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.WithListProjectID",
-        "github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.WithListMaxItems",
-        "github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.WithListPaginated"
+        "github.com/JSYoo5B/go-openstacksdk/request.MaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/request.Paginated"
       ],
       "contracts": [
         {
@@ -16054,8 +16054,8 @@
         "github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.API.InQueue",
         "github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.QueueScope.Delete",
         "github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.WithDeleteOptions",
-        "github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.WithDeleteIgnoreMissing",
-        "github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.WithDeleteHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.WithDeleteClientID",
         "github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.WithDeleteProjectID"
       ],

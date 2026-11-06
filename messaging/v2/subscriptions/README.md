@@ -19,8 +19,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.WithCreateSubscriber`
 - `github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.WithCreateTTL`
 - `github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.WithCreateDeliveryOptions`
-- `github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.WithCreateField`
-- `github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.WithCreateHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.WithCreateClientID`
 - `github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.WithCreateProjectID`
 
@@ -54,7 +54,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.API.InQueue`
 - `github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.QueueScope.Get`
 - `github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.WithGetOptions`
-- `github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.WithGetHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.WithGetClientID`
 - `github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.WithGetProjectID`
 
@@ -86,12 +86,12 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.QueueScope.List`
 - `github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.QueueScope.All`
 - `github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.WithListQuery`
-- `github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.WithListHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.WithListClientID`
 - `github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.WithListProjectID`
-- `github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.WithListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.WithListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 
 - Pinned _proxy.py:207-229 fixes queue_name before MessageResource.list; Go scopes it in the URI and rejects route/control query injection. List is lazy, expects 200 with a subscriptions array and copies original caller queries/options/headers per iteration. Explicit positive limit/marker are submitted; the selected fixed endpoint and live ProviderClient are retained across pages.
   Tests: `api/messaging_subscriptions_test.go:TestMessagingSubscriptionsPythonMarkerPagingIgnoresLinksAndKeepsSource`, `api/messaging_subscriptions_test.go:TestMessagingSubscriptionsInvalidOptionsAndMissingClientIdentity`, `api/messaging_subscriptions_test.go:TestMessagingSubscriptionsFourRoutesFixedQueueAndRawModels`.
@@ -124,8 +124,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.API.InQueue`
 - `github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.QueueScope.Delete`
 - `github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.WithDeleteOptions`
-- `github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.WithDeleteIgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.WithDeleteHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.WithDeleteClientID`
 - `github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.WithDeleteProjectID`
 
@@ -175,12 +175,12 @@ func Subscribe(ctx context.Context, client *gophercloud.ServiceClient) error {
     fmt.Println(current.Subscriber, string(current.TTL))
     for item, err := range queue.List(ctx,
         subscriptions.WithListOptions(subscriptions.ListOpts{Limit: 10}),
-        subscriptions.WithListMaxItems(5)) {
+        request.MaxItems(5)) {
         if err != nil { return err }
         fmt.Println(item.ID)
     }
     return queue.Delete(ctx, created.SubscriptionID,
-        subscriptions.WithDeleteIgnoreMissing(false))
+        request.IgnoreMissing(false))
 }
 ```
 

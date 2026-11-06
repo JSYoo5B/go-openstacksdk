@@ -12,6 +12,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
@@ -178,7 +179,7 @@ func (s *QueueScope) Create(ctx context.Context, opts CreateOpts, options ...Cre
 	if err := s.validate(ctx); err != nil {
 		return nil, request.Wrap("Create", kind, err)
 	}
-	config, err := request.Apply(CreateOpts{}, append([]CreateOption{WithCreateOptions(opts)}, options...)...)
+	config, err := calls.ApplyConfig(CreateOpts{}, createCalls, append([]CreateOption{WithCreateOptions(opts)}, options...)...)
 	if err == nil {
 		err = request.ValidateCapabilities(config, true, false, true)
 	}
@@ -236,7 +237,7 @@ func (s *QueueScope) Get(ctx context.Context, id string, options ...GetOption) (
 	if err := segment(id); err != nil {
 		return nil, request.Wrap("Get", kind, err)
 	}
-	config, err := request.Apply(GetOpts{}, options...)
+	config, err := calls.ApplyConfig(GetOpts{}, getCalls, options...)
 	if err == nil {
 		err = request.ValidateCapabilities(config, false, false, true)
 	}
@@ -261,7 +262,7 @@ func (s *QueueScope) Delete(ctx context.Context, id string, options ...DeleteOpt
 	if err := segment(id); err != nil {
 		return request.Wrap("Delete", kind, err)
 	}
-	config, err := request.Apply(DeleteOpts{}, options...)
+	config, err := calls.ApplyConfig(DeleteOpts{}, deleteCalls, options...)
 	if err == nil {
 		err = request.ValidateCapabilities(config, false, false, true)
 	}

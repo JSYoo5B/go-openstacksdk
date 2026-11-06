@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
@@ -22,7 +23,7 @@ func (s *QueueScope) List(ctx context.Context, options ...ListOption) iter.Seq2[
 			fail(err)
 			return
 		}
-		config, err := request.Apply(ListOpts{}, owned...)
+		config, err := calls.ApplyConfig(ListOpts{}, listCalls, owned...)
 		if err == nil {
 			err = request.ValidateCapabilities(config, false, true, true)
 		}
