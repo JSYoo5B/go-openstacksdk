@@ -9,7 +9,9 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/neutronfind"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 // RecordListOpts owns Source list kwargs. Only declared server aliases are
@@ -22,7 +24,15 @@ type RecordListOpts struct {
 	Microversion *string
 	order        []string
 }
-type RecordListOption func(*RecordListOpts) error
+
+// RecordListOption is one option of ListRecords and AllRecords:
+// WithRecordListOpts, WithRecordListQuery, request.Headers (replaces the
+// headers), request.Microversion, request.Limit, request.Marker,
+// request.MaxItems, request.Paginated or request.Custom over *RecordListOpts.
+// request.Query is rejected because WithRecordListQuery checks the key before it
+// marshals the value. Other shared calls fail with resource.ErrInvalidOption
+// before HTTP.
+type RecordListOption = request.ListCall
 
 func recordListOptions(v RecordListOpts) neutronfind.Options {
 	return neutronfind.Options{Query: v.Query, Order: v.order, Headers: v.Headers, Microversion: v.Microversion}
@@ -40,7 +50,7 @@ func copyRecordList(v RecordListOpts) RecordListOpts {
 }
 func WithRecordListOpts(v RecordListOpts) RecordListOption {
 	owned := copyRecordList(v)
-	return func(c *RecordListOpts) error { *c = copyRecordList(owned); return nil }
+	return request.Custom(func(c *RecordListOpts) error { *c = copyRecordList(owned); return nil })
 }
 func recordListCheck(v RecordListOpts) error {
 	if _, present := v.Query["jmespath_filters"]; present {
@@ -75,6 +85,10 @@ func recordListIgnores(key string) bool {
 // The named Source jmespath_filters transform is rejected without evaluating
 // its value, including explicit null/false, under the SDK-S1 boundary.
 func WithRecordListQuery(key string, value any) RecordListOption {
+	return request.Custom(withRecordListQuery(key, value))
+}
+
+func withRecordListQuery(key string, value any) func(*RecordListOpts) error {
 	if key == "jmespath_filters" {
 		return func(*RecordListOpts) error {
 			return findInvalid("jmespath_filters transformation is unsupported (SDK-S1)")
@@ -99,18 +113,34 @@ func WithRecordListQuery(key string, value any) RecordListOption {
 		return nil
 	}
 }
-func WithRecordListHeaders(value map[string]string) RecordListOption {
+func withRecordListHeaders(value map[string]string) func(*RecordListOpts) error {
 	owned := maps.Clone(value)
 	return func(c *RecordListOpts) error { c.Headers = maps.Clone(owned); return nil }
 }
-func WithRecordListMicroversion(value string) RecordListOption {
+func withRecordListMicroversion(value string) func(*RecordListOpts) error {
 	return func(c *RecordListOpts) error { v := value; c.Microversion = &v; return nil }
 }
-func WithRecordListLimit(value int) RecordListOption     { return WithRecordListQuery("limit", value) }
-func WithRecordListMarker(value string) RecordListOption { return WithRecordListQuery("marker", value) }
-func WithRecordListMaxItems(value int) RecordListOption {
-	return WithRecordListQuery("max_items", value)
+func withRecordListLimit(value int) func(*RecordListOpts) error {
+	return withRecordListQuery("limit", value)
 }
-func WithRecordListPaginated(value bool) RecordListOption {
-	return WithRecordListQuery("paginated", value)
+func withRecordListMarker(value string) func(*RecordListOpts) error {
+	return withRecordListQuery("marker", value)
+}
+func withRecordListMaxItems(value int) func(*RecordListOpts) error {
+	return withRecordListQuery("max_items", value)
+}
+func withRecordListPaginated(value bool) func(*RecordListOpts) error {
+	return withRecordListQuery("paginated", value)
+}
+
+// recordListCalls interprets the shared calls of RecordListOption.
+var recordListCalls = calls.Spec[RecordListOpts]{
+	Headers:      neutronfind.Use(withRecordListHeaders),
+	Microversion: neutronfind.Use(withRecordListMicroversion),
+	Paging: calls.Paging[RecordListOpts]{
+		Limit:     neutronfind.Use(withRecordListLimit),
+		Marker:    neutronfind.Use(withRecordListMarker),
+		MaxItems:  neutronfind.Use(withRecordListMaxItems),
+		Paginated: neutronfind.Use(withRecordListPaginated),
+	},
 }

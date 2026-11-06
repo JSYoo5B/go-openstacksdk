@@ -176,7 +176,7 @@ func TestPythonTrunkDeleteDefaultsStrictOptionsAndSourceStatuses(t *testing.T) {
 				})
 				var options []trunks.DeleteOption
 				if strict {
-					options = []trunks.DeleteOption{trunks.WithDeleteIgnoreMissing(false)}
+					options = []trunks.DeleteOption{request.IgnoreMissing(false)}
 				}
 				err := api.DeleteWithOptions(context.Background(), "literal.id", options...)
 				if code < 400 || code == 404 && !strict {
@@ -207,10 +207,10 @@ func TestPythonTrunkDeleteDefaultsStrictOptionsAndSourceStatuses(t *testing.T) {
 				t.Fatal(err)
 			}
 		}
-		if err := api.DeleteWithOptions(context.Background(), "gone", option, trunks.WithDeleteIgnoreMissing(true)); err != nil {
+		if err := api.DeleteWithOptions(context.Background(), "gone", option, request.IgnoreMissing(true)); err != nil {
 			t.Fatal(err)
 		}
-		if err := api.DeleteWithOptions(context.Background(), "gone", trunks.WithDeleteIgnoreMissing(false), trunks.WithDeleteOptions(trunks.DeleteOpts{})); err != nil {
+		if err := api.DeleteWithOptions(context.Background(), "gone", request.IgnoreMissing(false), trunks.WithDeleteOptions(trunks.DeleteOpts{})); err != nil {
 			t.Fatal(err)
 		}
 		if len(calls) != 4 {

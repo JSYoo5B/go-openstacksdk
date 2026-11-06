@@ -10,6 +10,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/ports"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/subnets"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -67,7 +68,7 @@ func TestPythonSubnetPortsTargetsAndOptionsAreOwnedAndGuarded(t *testing.T) {
 	target := ports.SubnetPortFields(fields)
 	fields["id"][2] = 'x'
 	headers := map[string]string{"X-Trace": "owned"}
-	option := ports.WithSubnetPortHeaders(headers)
+	option := request.Headers(headers)
 	headers["X-Trace"] = "mutated"
 	var calls []nativePortCall
 	api := pythonCorePortAPI(t, &calls, func(r *http.Request) *http.Response {
@@ -76,7 +77,7 @@ func TestPythonSubnetPortsTargetsAndOptionsAreOwnedAndGuarded(t *testing.T) {
 		}
 		return nativePortWire(200, `{"ports":[{"id":"p","fixed_ips":[{"subnet_id":"sub"}]}]}`)
 	})
-	result, err := api.GetSubnetPorts(context.Background(), target, ports.WithSubnetPortHeaders(nil), option, ports.WithSubnetPortMicroversion("2.1"), func(c *ports.SubnetPortOpts) error { c.Headers["X-Callback"] = "yes"; return nil })
+	result, err := api.GetSubnetPorts(context.Background(), target, request.Headers(nil), option, request.Microversion("2.1"), request.Custom(func(c *ports.SubnetPortOpts) error { c.Headers["X-Callback"] = "yes"; return nil }))
 	if err != nil || result == nil || len(result.Ports) != 1 || len(calls) != 1 {
 		t.Fatal(result, err, calls)
 	}
@@ -138,14 +139,14 @@ func TestPythonSubnetPortsCallbackCancellationAndSourceMutationPreserveCauses(t 
 		defer cancel(nil)
 		cause := errors.New("callback cancelled")
 		optionCause := errors.New("option failed")
-		result, err := api.GetSubnetPorts(ctx, ports.SubnetPortID("sub"), func(*ports.SubnetPortOpts) error {
+		result, err := api.GetSubnetPorts(ctx, ports.SubnetPortID("sub"), request.Custom(func(*ports.SubnetPortOpts) error {
 			if cancelled {
 				cancel(cause)
 			} else {
 				api.RawClient().ResourceBase += "changed/"
 			}
 			return optionCause
-		})
+		}))
 		if result != nil || !errors.Is(err, optionCause) || len(calls) != 0 {
 			t.Fatal(result, err, calls)
 		}

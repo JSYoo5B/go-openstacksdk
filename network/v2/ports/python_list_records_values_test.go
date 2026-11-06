@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/ports"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -140,7 +141,7 @@ func TestSourceCloudPortListHeadersInputAndCallbackSnapshots(t *testing.T) {
 		escaped.Headers["X-Trace"] = "mutated"
 		return nativePortWire(200, `{"ports":[]}`)
 	})
-	result, err := api.ListSourceValues(context.Background(), option, ports.WithSourceCloudListHeaders(map[string]string{"X-Trace": "typed"}), func(c *ports.SourceCloudListOpts) error { c.Headers["X-Callback"] = "yes"; escaped = c; return nil })
+	result, err := api.ListSourceValues(context.Background(), option, request.Headers(map[string]string{"X-Trace": "typed"}), request.Custom(func(c *ports.SourceCloudListOpts) error { c.Headers["X-Callback"] = "yes"; escaped = c; return nil }))
 	if err != nil || result == nil || len(calls) != 1 {
 		t.Fatal(result, err, calls)
 	}

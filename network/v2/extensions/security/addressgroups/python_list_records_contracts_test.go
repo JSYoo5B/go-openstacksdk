@@ -15,6 +15,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -102,7 +103,7 @@ func TestPythonAddressGroupListPaginationCapsNextTruthinessAndLateErrors(t *test
 			})
 			opts := []addressgroups.RecordListOption{addressgroups.WithRecordListQuery("project_id", "project")}
 			if nextKind == "marker" {
-				opts = append(opts, addressgroups.WithRecordListLimit(2))
+				opts = append(opts, request.Limit(2))
 			}
 			var values []*addressgroups.AddressGroupListRecord
 			for value, err := range api.ListRecords(context.Background(), opts...) {
@@ -157,11 +158,11 @@ func TestPythonAddressGroupListPaginationCapsNextTruthinessAndLateErrors(t *test
 			options := []addressgroups.RecordListOption{addressgroups.WithRecordListQuery("project_id", "project")}
 			switch mode {
 			case "cap":
-				options = append(options, addressgroups.WithRecordListMaxItems(1), addressgroups.WithRecordListQuery("id", "wanted"))
+				options = append(options, request.MaxItems(1), addressgroups.WithRecordListQuery("id", "wanted"))
 			case "single_page":
-				options = append(options, addressgroups.WithRecordListPaginated(false))
+				options = append(options, request.Paginated(false))
 			case "cycle":
-				options = append(options, addressgroups.WithRecordListMarker("start"))
+				options = append(options, request.Marker("start"))
 			}
 			seq := api.ListRecords(context.Background(), options...)
 			if len(calls) != 0 {
@@ -450,7 +451,7 @@ func TestPythonAddressGroupListOptionsPreflightSnapshotsAndConcurrentReuse(t *te
 		retained.Headers["Accept"] = "retained"
 		return nativeGroupWire(200, `{"address_groups":[{"id":"one"}]}`)
 	})
-	rows, err := api.AllRecords(context.Background(), option, func(c *addressgroups.RecordListOpts) error { retained = c; return nil })
+	rows, err := api.AllRecords(context.Background(), option, request.Custom(func(c *addressgroups.RecordListOpts) error { retained = c; return nil }))
 	if err != nil || len(rows) != 1 || len(calls) != 1 {
 		t.Fatal(rows, err, calls)
 	}
@@ -468,19 +469,19 @@ func TestPythonAddressGroupListOptionsPreflightSnapshotsAndConcurrentReuse(t *te
 		case "nil_option":
 			options = []addressgroups.RecordListOption{nil}
 		case "cancel":
-			options = append(options, func(*addressgroups.RecordListOpts) error { cancel(cause); return nil })
+			options = append(options, request.Custom(func(*addressgroups.RecordListOpts) error { cancel(cause); return nil }))
 		case "source":
-			options = append(options, func(*addressgroups.RecordListOpts) error { api.RawClient().Type = "compute"; return cause })
+			options = append(options, request.Custom(func(*addressgroups.RecordListOpts) error { api.RawClient().Type = "compute"; return cause }))
 		case "cause":
-			options = append(options, func(*addressgroups.RecordListOpts) error { return cause })
+			options = append(options, request.Custom(func(*addressgroups.RecordListOpts) error { return cause }))
 		case "protected_header":
-			options = append(options, addressgroups.WithRecordListHeaders(map[string]string{"Authorization": "foreign"}))
+			options = append(options, request.Headers(map[string]string{"Authorization": "foreign"}))
 		case "bad_json":
 			options = append(options, addressgroups.WithRecordListOpts(addressgroups.RecordListOpts{Query: map[string]json.RawMessage{"id": json.RawMessage(`invalid`)}}))
 		case "negative_limit":
-			options = append(options, addressgroups.WithRecordListLimit(-1))
+			options = append(options, request.Limit(-1))
 		case "negative_cap":
-			options = append(options, addressgroups.WithRecordListMaxItems(-1))
+			options = append(options, request.MaxItems(-1))
 		case "reserved":
 			options = append(options, addressgroups.WithRecordListQuery("cls", nil))
 		case "marshal":
@@ -548,7 +549,7 @@ func TestPythonAddressGroupListExplicitVersionOwnsEveryPageAndOriginalHeaders(t 
 		})
 		api.RawClient().Microversion = "2.0"
 		api.RawClient().MoreHeaders = map[string]string{"Openstack-Api-Version": "network 2.0"}
-		rows, err := api.AllRecords(context.Background(), addressgroups.WithRecordListMicroversion(version))
+		rows, err := api.AllRecords(context.Background(), request.Microversion(version))
 		if err != nil || len(rows) != 1 || len(calls) != 2 || api.RawClient().Microversion != "2.0" || api.RawClient().MoreHeaders["Openstack-Api-Version"] != "network 2.0" {
 			t.Fatal(rows, err, calls, api.RawClient())
 		}

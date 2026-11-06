@@ -9,7 +9,10 @@ import (
 	"strings"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
+	"github.com/JSYoo5B/go-openstacksdk/internal/neutronfind"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 // BulkPortInput owns one set of raw Source attributes in insertion order.
@@ -96,7 +99,12 @@ type BulkPortOpts struct {
 	Headers      map[string]string
 	Microversion *string
 }
-type BulkPortOption func(*BulkPortOpts) error
+
+// BulkPortOption is one option of CreatePorts: WithBulkPortOpts, request.Headers
+// (replaces the headers), request.Microversion or request.Custom over
+// *BulkPortOpts. Other shared calls fail with resource.ErrInvalidOption before
+// HTTP.
+type BulkPortOption = request.WriteCall
 
 func cloneBulkPortOpts(value BulkPortOpts) BulkPortOpts {
 	value.Headers = maps.Clone(value.Headers)
@@ -111,13 +119,13 @@ func cloneBulkPortOpts(value BulkPortOpts) BulkPortOpts {
 }
 func WithBulkPortOpts(value BulkPortOpts) BulkPortOption {
 	owned := cloneBulkPortOpts(value)
-	return func(c *BulkPortOpts) error { *c = cloneBulkPortOpts(owned); return nil }
+	return request.Custom(func(c *BulkPortOpts) error { *c = cloneBulkPortOpts(owned); return nil })
 }
-func WithBulkPortHeaders(value map[string]string) BulkPortOption {
+func withBulkPortHeaders(value map[string]string) func(*BulkPortOpts) error {
 	owned := maps.Clone(value)
 	return func(c *BulkPortOpts) error { c.Headers = maps.Clone(owned); return nil }
 }
-func WithBulkPortMicroversion(value string) BulkPortOption {
+func withBulkPortMicroversion(value string) func(*BulkPortOpts) error {
 	return func(c *BulkPortOpts) error { v := value; c.Microversion = &v; return nil }
 }
 
@@ -216,4 +224,10 @@ func bulkHeaderValue(raw json.RawMessage) (string, error) {
 		return "", findInvalid("If-Match contains invalid header bytes")
 	}
 	return value, nil
+}
+
+// bulkPortCalls interprets the shared calls of BulkPortOption.
+var bulkPortCalls = calls.Spec[BulkPortOpts]{
+	Headers:      neutronfind.Use(withBulkPortHeaders),
+	Microversion: neutronfind.Use(withBulkPortMicroversion),
 }

@@ -15,6 +15,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -171,7 +172,7 @@ func (a *API) UpdateRecord(ctx context.Context, id string, options ...RecordMuta
 	if err != nil {
 		return nil, poolRecordWrap(ctx, operation, err)
 	}
-	policy, err := poolRecordOptions(ctx, p.guard, RecordMutationOpts{}, copyPoolMutation, slices.Clone(options))
+	policy, err := poolRecordOptions(ctx, p.guard, RecordMutationOpts{}, copyPoolMutation, calls.Translate(options, recordMutationCalls))
 	if err != nil {
 		return nil, poolRecordWrap(ctx, operation, err)
 	}
@@ -212,7 +213,7 @@ func (a *API) ListRecords(ctx context.Context, options ...RecordListOption) iter
 			yield(nil, poolRecordWrap(ctx, "ListRecords", err))
 			return
 		}
-		policy, err := poolRecordOptions(ctx, p.guard, RecordListOpts{}, copyPoolList, snapshot)
+		policy, err := poolRecordOptions(ctx, p.guard, RecordListOpts{}, copyPoolList, calls.Translate(snapshot, recordListCalls))
 		if err != nil {
 			yield(nil, poolRecordWrap(ctx, "ListRecords", err))
 			return
@@ -257,7 +258,7 @@ func (a *API) FindRecord(ctx context.Context, identity string, options ...Record
 	if err != nil {
 		return nil, poolRecordWrap(ctx, operation, err)
 	}
-	policy, err := poolRecordOptions(ctx, p.guard, RecordFindOpts{}, copyPoolFind, slices.Clone(options))
+	policy, err := poolRecordOptions(ctx, p.guard, RecordFindOpts{}, copyPoolFind, calls.Translate(options, recordFindCalls))
 	if err != nil {
 		return nil, poolRecordWrap(ctx, operation, err)
 	}

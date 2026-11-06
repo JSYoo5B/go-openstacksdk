@@ -9,13 +9,14 @@ import (
 	"maps"
 	"net/http"
 	"net/url"
-	"slices"
 	"strings"
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
+	"github.com/JSYoo5B/go-openstacksdk/internal/neutronfind"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
@@ -37,7 +38,13 @@ type AddressActionOpts struct {
 	Headers map[string]string
 	Seed    *resource.RawResource
 }
-type AddressActionOption func(*AddressActionOpts) error
+
+// AddressActionOption is one option of AddAddressesRecord and
+// RemoveAddressesRecord: WithAddressActionOpts, WithAddressActionSeed,
+// request.Headers (replaces the headers) or request.Custom over
+// *AddressActionOpts. Other shared calls fail with resource.ErrInvalidOption
+// before HTTP.
+type AddressActionOption = request.WriteCall
 
 func copyActionOpts(v AddressActionOpts) AddressActionOpts {
 	v.Headers = maps.Clone(v.Headers)
@@ -46,15 +53,15 @@ func copyActionOpts(v AddressActionOpts) AddressActionOpts {
 }
 func WithAddressActionOpts(value AddressActionOpts) AddressActionOption {
 	owned := copyActionOpts(value)
-	return func(v *AddressActionOpts) error { *v = copyActionOpts(owned); return nil }
+	return request.Custom(func(v *AddressActionOpts) error { *v = copyActionOpts(owned); return nil })
 }
-func WithAddressActionHeaders(values map[string]string) AddressActionOption {
+func withAddressActionHeaders(values map[string]string) func(*AddressActionOpts) error {
 	owned := maps.Clone(values)
 	return func(v *AddressActionOpts) error { v.Headers = maps.Clone(owned); return nil }
 }
 func WithAddressActionSeed(value *resource.RawResource) AddressActionOption {
 	owned := value.Clone()
-	return func(v *AddressActionOpts) error { v.Seed = owned.Clone(); return nil }
+	return request.Custom(func(v *AddressActionOpts) error { v.Seed = owned.Clone(); return nil })
 }
 func actionInvalid(format string, values ...any) error {
 	return fmt.Errorf("%w: %s", resource.ErrInvalidOption, fmt.Sprintf(format, values...))
@@ -230,7 +237,7 @@ func (a *API) actionRecord(ctx context.Context, id string, value any, route stri
 	}
 	raw = bytes.Clone(raw)
 	opts := AddressActionOpts{}
-	for _, apply := range slices.Clone(options) {
+	for _, apply := range calls.Translate(options, addressActionCalls) {
 		if err = guard(ctx); err != nil {
 			return nil, err
 		}
@@ -272,4 +279,9 @@ func (a *API) AddAddressesRecord(ctx context.Context, id string, value any, opti
 func (a *API) RemoveAddressesRecord(ctx context.Context, id string, value any, options ...AddressActionOption) (*AddressActionRecord, error) {
 	record, err := a.actionRecord(ctx, id, value, "remove_addresses", options)
 	return record, request.Wrap("RemoveAddressesRecord", "addressgroups", cloudread.ContextError(ctx, err))
+}
+
+// addressActionCalls interprets the shared calls of AddressActionOption.
+var addressActionCalls = calls.Spec[AddressActionOpts]{
+	Headers: neutronfind.Use(withAddressActionHeaders),
 }

@@ -8,12 +8,12 @@ import (
 	"maps"
 	"net/http"
 	"net/url"
-	"slices"
 	"sort"
 	"strings"
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -64,7 +64,7 @@ func (a *API) FindRecord(ctx context.Context, identity string, options ...Record
 		return errors.Join(changed, source.Guard(ctx), rest.CheckOperationGuard(ctx))
 	}
 	policy := RecordFindOpts{}
-	for _, apply := range slices.Clone(options) {
+	for _, apply := range calls.Translate(options, recordFindCalls) {
 		if err := guard(ctx); err != nil {
 			return nil, wrap(err)
 		}

@@ -13,9 +13,12 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/jsonfilter"
+	"github.com/JSYoo5B/go-openstacksdk/internal/neutronfind"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 // RecordMutationOpts owns only supplied Body attrs plus explicit Go request
@@ -27,7 +30,13 @@ type RecordMutationOpts struct {
 	Microversion *string
 	order        []string
 }
-type RecordMutationOption func(*RecordMutationOpts) error
+
+// RecordMutationOption is one option of UpdateRecord: WithRecordMutationOpts,
+// request.Field (one raw canonical or wire Body attribute; its marshal error is
+// returned when applied), request.Headers (replaces the headers),
+// request.Microversion or request.Custom over *RecordMutationOpts. Other shared
+// calls fail with resource.ErrInvalidOption before HTTP.
+type RecordMutationOption = request.WriteCall
 
 func copyPoolMutation(v RecordMutationOpts) RecordMutationOpts {
 	v.Fields = poolRecordClone(v.Fields)
@@ -41,13 +50,13 @@ func copyPoolMutation(v RecordMutationOpts) RecordMutationOpts {
 }
 func WithRecordMutationOpts(v RecordMutationOpts) RecordMutationOption {
 	owned := copyPoolMutation(v)
-	return func(c *RecordMutationOpts) error { *c = copyPoolMutation(owned); return nil }
+	return request.Custom(func(c *RecordMutationOpts) error { *c = copyPoolMutation(owned); return nil })
 }
 
-// WithRecordAttribute snapshots raw canonical/wire Body attrs; unknown fields,
-// if_revision/if_match and explicit null remain ordinary Body data here.
-func WithRecordAttribute(key string, value any) RecordMutationOption {
-	raw, err := json.Marshal(value)
+// recordAttribute records one raw canonical/wire Body attr (request.Field);
+// unknown fields, if_revision/if_match and explicit null remain ordinary Body
+// data here.
+func recordAttribute(key string, raw json.RawMessage, err error) func(*RecordMutationOpts) error {
 	owned := bytes.Clone(raw)
 	return func(c *RecordMutationOpts) error {
 		if err != nil {
@@ -63,11 +72,11 @@ func WithRecordAttribute(key string, value any) RecordMutationOption {
 		return nil
 	}
 }
-func WithRecordMutationHeaders(v map[string]string) RecordMutationOption {
+func withRecordMutationHeaders(v map[string]string) func(*RecordMutationOpts) error {
 	owned := maps.Clone(v)
 	return func(c *RecordMutationOpts) error { c.Headers = maps.Clone(owned); return nil }
 }
-func WithRecordMutationMicroversion(v string) RecordMutationOption {
+func withRecordMutationMicroversion(v string) func(*RecordMutationOpts) error {
 	return func(c *RecordMutationOpts) error { x := v; c.Microversion = &x; return nil }
 }
 func poolRecordOrderedKeys(fields map[string]json.RawMessage, order []string) []string {
@@ -136,7 +145,15 @@ type RecordListOpts struct {
 	Paginated    *bool
 	order        []string
 }
-type RecordListOption func(*RecordListOpts) error
+
+// RecordListOption is one option of ListRecords and AllRecords:
+// WithRecordListOpts, WithRecordListQuery, request.Headers (replaces the
+// headers), request.Microversion, request.Limit, request.Marker,
+// request.MaxItems, request.Paginated or request.Custom over *RecordListOpts.
+// request.Query is rejected because WithRecordListQuery checks the key before it
+// marshals the value. Other shared calls fail with resource.ErrInvalidOption
+// before HTTP.
+type RecordListOption = request.ListCall
 
 func copyPoolList(v RecordListOpts) RecordListOpts {
 	v.Query = poolRecordClone(v.Query)
@@ -158,17 +175,17 @@ func copyPoolList(v RecordListOpts) RecordListOpts {
 }
 func WithRecordListOpts(v RecordListOpts) RecordListOption {
 	owned := copyPoolList(v)
-	return func(c *RecordListOpts) error { *c = copyPoolList(owned); return nil }
+	return request.Custom(func(c *RecordListOpts) error { *c = copyPoolList(owned); return nil })
 }
 func WithRecordListQuery(key string, value any) RecordListOption {
 	keyErr := poolRecordQueryKey(key, false)
 	_, server := poolRecordQueryWire(key)
 	if keyErr != nil || !server && !poolRecordKnown(key) {
-		return func(*RecordListOpts) error { return keyErr }
+		return request.Custom(func(*RecordListOpts) error { return keyErr })
 	}
 	raw, err := json.Marshal(value)
 	owned := bytes.Clone(raw)
-	return func(c *RecordListOpts) error {
+	return request.Custom(func(c *RecordListOpts) error {
 		if err != nil {
 			return err
 		}
@@ -180,25 +197,25 @@ func WithRecordListQuery(key string, value any) RecordListOption {
 		}
 		c.Query[key] = bytes.Clone(owned)
 		return nil
-	}
+	})
 }
-func WithRecordListHeaders(v map[string]string) RecordListOption {
+func withRecordListHeaders(v map[string]string) func(*RecordListOpts) error {
 	owned := maps.Clone(v)
 	return func(c *RecordListOpts) error { c.Headers = maps.Clone(owned); return nil }
 }
-func WithRecordListMicroversion(v string) RecordListOption {
+func withRecordListMicroversion(v string) func(*RecordListOpts) error {
 	return func(c *RecordListOpts) error { x := v; c.Microversion = &x; return nil }
 }
-func WithRecordListLimit(v int) RecordListOption {
+func withRecordListLimit(v int) func(*RecordListOpts) error {
 	return func(c *RecordListOpts) error { x := v; c.Limit = &x; return nil }
 }
-func WithRecordListMarker(v string) RecordListOption {
+func withRecordListMarker(v string) func(*RecordListOpts) error {
 	return func(c *RecordListOpts) error { c.Marker = v; return nil }
 }
-func WithRecordListMaxItems(v int) RecordListOption {
+func withRecordListMaxItems(v int) func(*RecordListOpts) error {
 	return func(c *RecordListOpts) error { c.MaxItems = v; return nil }
 }
-func WithRecordListPaginated(v bool) RecordListOption {
+func withRecordListPaginated(v bool) func(*RecordListOpts) error {
 	return func(c *RecordListOpts) error { x := v; c.Paginated = &x; return nil }
 }
 
@@ -215,7 +232,16 @@ type RecordFindOpts struct {
 	Paginated     *bool
 	order         []string
 }
-type RecordFindOption func(*RecordFindOpts) error
+
+// RecordFindOption is one option of FindRecord: WithRecordFindOpts,
+// WithRecordFindLimit, WithRecordFindMarker, WithRecordFindMaxItems,
+// WithRecordFindPaginated, request.IgnoreMissing, request.Query (one Python
+// kwarg as JSON; its marshal error is returned when applied), request.Headers
+// (replaces the headers), request.Microversion or request.Custom over
+// *RecordFindOpts. The paging options stay package options because the find
+// category has no paging calls. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type RecordFindOption = request.FindCall
 
 func poolFindList(v RecordFindOpts) RecordListOpts {
 	return RecordListOpts{Query: v.Query, Headers: v.Headers, Microversion: v.Microversion, Limit: v.Limit, Marker: v.Marker, MaxItems: v.MaxItems, Paginated: v.Paginated, order: v.order}
@@ -231,13 +257,12 @@ func copyPoolFind(v RecordFindOpts) RecordFindOpts {
 }
 func WithRecordFindOpts(v RecordFindOpts) RecordFindOption {
 	owned := copyPoolFind(v)
-	return func(c *RecordFindOpts) error { *c = copyPoolFind(owned); return nil }
+	return request.Custom(func(c *RecordFindOpts) error { *c = copyPoolFind(owned); return nil })
 }
-func WithRecordFindIgnoreMissing(v bool) RecordFindOption {
+func withRecordFindIgnoreMissing(v bool) func(*RecordFindOpts) error {
 	return func(c *RecordFindOpts) error { x := v; c.IgnoreMissing = &x; return nil }
 }
-func WithRecordFindQuery(key string, value any) RecordFindOption {
-	raw, err := json.Marshal(value)
+func recordFindQuery(key string, raw json.RawMessage, err error) func(*RecordFindOpts) error {
 	owned := bytes.Clone(raw)
 	return func(c *RecordFindOpts) error {
 		if err != nil {
@@ -253,24 +278,24 @@ func WithRecordFindQuery(key string, value any) RecordFindOption {
 		return nil
 	}
 }
-func WithRecordFindHeaders(v map[string]string) RecordFindOption {
+func withRecordFindHeaders(v map[string]string) func(*RecordFindOpts) error {
 	owned := maps.Clone(v)
 	return func(c *RecordFindOpts) error { c.Headers = maps.Clone(owned); return nil }
 }
-func WithRecordFindMicroversion(v string) RecordFindOption {
+func withRecordFindMicroversion(v string) func(*RecordFindOpts) error {
 	return func(c *RecordFindOpts) error { x := v; c.Microversion = &x; return nil }
 }
 func WithRecordFindLimit(v int) RecordFindOption {
-	return func(c *RecordFindOpts) error { x := v; c.Limit = &x; return nil }
+	return request.Custom(func(c *RecordFindOpts) error { x := v; c.Limit = &x; return nil })
 }
 func WithRecordFindMarker(v string) RecordFindOption {
-	return func(c *RecordFindOpts) error { c.Marker = v; return nil }
+	return request.Custom(func(c *RecordFindOpts) error { c.Marker = v; return nil })
 }
 func WithRecordFindMaxItems(v int) RecordFindOption {
-	return func(c *RecordFindOpts) error { c.MaxItems = v; return nil }
+	return request.Custom(func(c *RecordFindOpts) error { c.MaxItems = v; return nil })
 }
 func WithRecordFindPaginated(v bool) RecordFindOption {
-	return func(c *RecordFindOpts) error { x := v; c.Paginated = &x; return nil }
+	return request.Custom(func(c *RecordFindOpts) error { x := v; c.Paginated = &x; return nil })
 }
 
 var poolRecordQueryAliases = map[string]string{"is_shared": "shared", "any_tags": "tags-any", "not_tags": "not-tags", "not_any_tags": "not-tags-any"}
@@ -428,4 +453,31 @@ func poolRecordOptions[T any, O ~func(*T) error](ctx context.Context, guard func
 		config = copy(next)
 	}
 	return config, guard(ctx)
+}
+
+// recordMutationCalls interprets the shared calls of RecordMutationOption.
+var recordMutationCalls = calls.Spec[RecordMutationOpts]{
+	Field:        neutronfind.UseJSON(recordAttribute),
+	Headers:      neutronfind.Use(withRecordMutationHeaders),
+	Microversion: neutronfind.Use(withRecordMutationMicroversion),
+}
+
+// recordListCalls interprets the shared calls of RecordListOption.
+var recordListCalls = calls.Spec[RecordListOpts]{
+	Headers:      neutronfind.Use(withRecordListHeaders),
+	Microversion: neutronfind.Use(withRecordListMicroversion),
+	Paging: calls.Paging[RecordListOpts]{
+		Limit:     neutronfind.Use(withRecordListLimit),
+		Marker:    neutronfind.Use(withRecordListMarker),
+		MaxItems:  neutronfind.Use(withRecordListMaxItems),
+		Paginated: neutronfind.Use(withRecordListPaginated),
+	},
+}
+
+// recordFindCalls interprets the shared calls of RecordFindOption.
+var recordFindCalls = calls.Spec[RecordFindOpts]{
+	IgnoreMissing: neutronfind.Use(withRecordFindIgnoreMissing),
+	Query:         neutronfind.UseJSON(recordFindQuery),
+	Headers:       neutronfind.Use(withRecordFindHeaders),
+	Microversion:  neutronfind.Use(withRecordFindMicroversion),
 }

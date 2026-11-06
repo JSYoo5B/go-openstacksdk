@@ -6,8 +6,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"maps"
 	"slices"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/ports"
@@ -83,19 +85,18 @@ func SearchPorts(ctx context.Context, deps Dependencies, nameOrID string, option
 func searchAbsentPorts(ctx context.Context, nameOrID string, options []ports.RecordSearchOption) (*ports.SearchResult, error) {
 	wrap := func(err error) error { return request.Wrap("SearchPorts", "ports", cloudread.ContextError(ctx, err)) }
 	cfg := ports.RecordSearchOpts{}
-	for _, apply := range options {
+	for _, apply := range calls.Translate(options, absentPortSearchCalls) {
 		if err := cloudread.Context(ctx); err != nil {
 			return nil, wrap(err)
 		}
 		if apply == nil {
 			return nil, wrap(fmt.Errorf("%w: nil port search option", resource.ErrInvalidOption))
 		}
-		var next ports.RecordSearchOpts
-		_ = ports.WithRecordSearchOpts(cfg)(&next)
+		next := ownedPortSearchOpts(cfg)
 		if err := errors.Join(apply(&next), cloudread.Context(ctx)); err != nil {
 			return nil, wrap(err)
 		}
-		_ = ports.WithRecordSearchOpts(next)(&cfg)
+		cfg = ownedPortSearchOpts(next)
 	}
 	result := &ports.SearchResult{Inventory: make([]*ports.PortRecord, 0)}
 	selected, err := cloudfilter.SelectLoaded(make([]json.RawMessage, 0), nameOrID, cfg.Filters, func() error { return cloudread.Context(ctx) })
@@ -134,4 +135,35 @@ func ListPortValues(ctx context.Context, deps Dependencies, options ...ports.Sou
 	owned := append(slices.Clone(options), ports.WithSourceCloudListLocation(location))
 	result, err := service.Ports.ListSourceValues(ctx, owned...)
 	return result, wrap(err)
+}
+
+// absentPortSearchCalls accepts the shared calls of ports.RecordSearchOption
+// (request.Headers and request.Microversion) for the local search over an
+// absent ports service, which only reads the filters.
+var absentPortSearchCalls = calls.Spec[ports.RecordSearchOpts]{
+	Headers:      calls.Value(func(c *ports.RecordSearchOpts) *map[string]string { return &c.Headers }),
+	Microversion: calls.Pointer(func(c *ports.RecordSearchOpts) **string { return &c.Microversion }),
+}
+
+// ownedPortSearchOpts snapshots the search filters so a later option cannot
+// change an earlier result.
+func ownedPortSearchOpts(v ports.RecordSearchOpts) ports.RecordSearchOpts {
+	v.Headers = maps.Clone(v.Headers)
+	if v.Filters != nil {
+		raw := json.RawMessage(bytes.Clone(*v.Filters))
+		v.Filters = &raw
+	}
+	if v.Location != nil {
+		raw := json.RawMessage(bytes.Clone(*v.Location))
+		v.Location = &raw
+	}
+	if v.CloudLocation != nil {
+		location := v.CloudLocation.Clone()
+		v.CloudLocation = &location
+	}
+	if v.Microversion != nil {
+		version := *v.Microversion
+		v.Microversion = &version
+	}
+	return v
 }

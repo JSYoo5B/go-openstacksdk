@@ -6,11 +6,12 @@ import (
 	"encoding/json"
 	"errors"
 	"maps"
-	"slices"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/jsonfilter"
+	"github.com/JSYoo5B/go-openstacksdk/internal/neutronfind"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/subnets"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -66,7 +67,12 @@ type SubnetPortOpts struct {
 	Headers      map[string]string
 	Microversion *string
 }
-type SubnetPortOption func(*SubnetPortOpts) error
+
+// SubnetPortOption is one option of GetSubnetPorts: WithSubnetPortOpts,
+// request.Headers (replaces the headers), request.Microversion or
+// request.Custom over *SubnetPortOpts. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type SubnetPortOption = request.GetCall
 
 func copySubnetPortOpts(value SubnetPortOpts) SubnetPortOpts {
 	value.Headers = maps.Clone(value.Headers)
@@ -81,13 +87,13 @@ func copySubnetPortOpts(value SubnetPortOpts) SubnetPortOpts {
 }
 func WithSubnetPortOpts(value SubnetPortOpts) SubnetPortOption {
 	owned := copySubnetPortOpts(value)
-	return func(c *SubnetPortOpts) error { *c = copySubnetPortOpts(owned); return nil }
+	return request.Custom(func(c *SubnetPortOpts) error { *c = copySubnetPortOpts(owned); return nil })
 }
-func WithSubnetPortHeaders(value map[string]string) SubnetPortOption {
+func withSubnetPortHeaders(value map[string]string) func(*SubnetPortOpts) error {
 	owned := maps.Clone(value)
 	return func(c *SubnetPortOpts) error { c.Headers = maps.Clone(owned); return nil }
 }
-func WithSubnetPortMicroversion(value string) SubnetPortOption {
+func withSubnetPortMicroversion(value string) func(*SubnetPortOpts) error {
 	return func(c *SubnetPortOpts) error { version := value; c.Microversion = &version; return nil }
 }
 
@@ -116,7 +122,7 @@ func (a *API) GetSubnetPorts(ctx context.Context, target SubnetPortTarget, optio
 		return nil, wrap(findInvalid("subnet identifier must contain complete UTF-8 JSON"))
 	}
 	policy := copySubnetPortOpts(SubnetPortOpts{})
-	for _, apply := range slices.Clone(options) {
+	for _, apply := range calls.Translate(options, subnetPortCalls) {
 		if err := engine.Check(ctx); err != nil {
 			return nil, wrap(err)
 		}
@@ -172,4 +178,10 @@ func portSubnetProof(record *PortRecord, cause error) error {
 		return cause
 	}
 	return (&rest.Response{Body: bytes.Clone(record.Envelope), Header: record.Header.Clone(), StatusCode: record.StatusCode}).Fail(cause)
+}
+
+// subnetPortCalls interprets the shared calls of SubnetPortOption.
+var subnetPortCalls = calls.Spec[SubnetPortOpts]{
+	Headers:      neutronfind.Use(withSubnetPortHeaders),
+	Microversion: neutronfind.Use(withSubnetPortMicroversion),
 }

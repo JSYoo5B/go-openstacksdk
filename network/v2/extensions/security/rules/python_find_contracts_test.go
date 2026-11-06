@@ -17,6 +17,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -46,7 +47,7 @@ func TestPythonSecurityRuleFindRecordGetFirstRawKwargsSeedAndWire(t *testing.T) 
 		return response
 	})
 	api.RawClient().Microversion = "3.4"
-	record, err := api.FindRecord(context.Background(), "folder/name%", rules.WithRecordFindQuery("name", "seed-name"), rules.WithRecordFindQuery("x_cached", map[string]any{"false": false, "zero": 0}), rules.WithRecordFindQuery("if_match", []string{"cached"}), rules.WithRecordFindHeaders(map[string]string{"X-Trace": "owned"}))
+	record, err := api.FindRecord(context.Background(), "folder/name%", request.Query("name", "seed-name"), request.Query("x_cached", map[string]any{"false": false, "zero": 0}), request.Query("if_match", []string{"cached"}), request.Headers(map[string]string{"X-Trace": "owned"}))
 	if err != nil || len(calls) != 1 || calls[0].method != "GET" || calls[0].body != "" || calls[0].path != findBase+"/folder/name%" || seen.Get("OpenStack-API-Version") != "network 3.4" || seen.Get("If-Match") != "" || seen.Get("X-Trace") != "owned" {
 		t.Fatal(record, err, calls, seen)
 	}
@@ -74,7 +75,7 @@ func TestPythonSecurityRuleFindRecordEmptyMalformedAndWrongShapes(t *testing.T) 
 		t.Run(fmt.Sprintf("%q", item.body), func(t *testing.T) {
 			var calls []nativeRuleCall
 			api, _ := findAPI(t, &calls, func(*http.Request) *http.Response { return nativeRuleWire(202, item.body) })
-			record, err := api.FindRecord(context.Background(), "seed", rules.WithRecordFindQuery("x_cached", false), rules.WithRecordFindQuery("if_match", []any{}))
+			record, err := api.FindRecord(context.Background(), "seed", request.Query("x_cached", false), request.Query("if_match", []any{}))
 			if (err == nil) != item.valid || record == nil || record.StatusCode != 202 || string(record.Envelope) != item.body || len(calls) != 1 {
 				t.Fatal(item, record, err, calls)
 			}
@@ -131,7 +132,7 @@ func TestPythonSecurityRuleFindRecordFallbackCodesMissingAndCleanRetry(t *testin
 	if record != nil || err != nil || len(calls) != 2 {
 		t.Fatal(record, err, calls)
 	}
-	record, err = api.FindRecord(context.Background(), "missing", rules.WithRecordFindIgnoreMissing(false))
+	record, err = api.FindRecord(context.Background(), "missing", request.IgnoreMissing(false))
 	if record != nil || !errors.Is(err, resource.ErrNotFound) || gophercloud.ResponseCodeIs(err, 404) || len(calls) != 4 {
 		t.Fatal(record, err, calls)
 	}
@@ -144,7 +145,7 @@ func TestPythonSecurityRuleFindRecordQueryAliasesScopeAndLocalFilters(t *testing
 		}
 		return nativeRuleWire(200, `{"security_group_rules":[{"id":"wanted","name":"wanted","created_at":{"enabled":1,"extra":false},"x_row":0}]}`)
 	})
-	record, err := api.FindRecord(context.Background(), "wanted", rules.WithRecordFindQuery("nativeRuleWireALIAS", "discarded"), rules.WithRecordFindQuery("nativeRuleClientALIAS", nil), rules.WithRecordFindQuery("any_tags", []any{"one", nil, "two"}), rules.WithRecordFindQuery("fields", []any{"name", nil, "id"}), rules.WithRecordFindQuery("created_at", map[string]any{"enabled": true}), rules.WithRecordFindQuery("x_unknown", map[string]any{"key": false}), rules.WithRecordFindQuery("all_projects", true))
+	record, err := api.FindRecord(context.Background(), "wanted", request.Query("nativeRuleWireALIAS", "discarded"), request.Query("nativeRuleClientALIAS", nil), request.Query("any_tags", []any{"one", nil, "two"}), request.Query("fields", []any{"name", nil, "id"}), request.Query("created_at", map[string]any{"enabled": true}), request.Query("x_unknown", map[string]any{"key": false}), request.Query("all_projects", true))
 	if err != nil || record == nil || len(calls) != 2 {
 		t.Fatal(record, err, calls)
 	}
@@ -160,7 +161,7 @@ func TestPythonSecurityRuleFindRecordQueryAliasesScopeAndLocalFilters(t *testing
 		}
 		return nativeRuleWire(200, `{"security_group_rules":[{"id":null,"name":"wanted"}]}`)
 	})
-	record, err = api.FindRecord(context.Background(), "wanted", rules.WithRecordFindQuery("name", nil))
+	record, err = api.FindRecord(context.Background(), "wanted", request.Query("name", nil))
 	if err != nil || record != nil || len(requests) != 2 {
 		t.Fatal(record, err, requests)
 	}
@@ -234,7 +235,7 @@ func TestPythonSecurityRuleFindRecordMarkerCapAndSinglePage(t *testing.T) {
 		}
 		return nativeRuleWire(200, `{"security_group_rules":[{"id":"skip","name":"wanted","created_at":false},{"id":"wanted","name":"wanted","created_at":1},{"id":"bad","name":"wanted","connection":null}],"next":"https://bad.example/security-group-rules"}`)
 	})
-	record, err = api.FindRecord(context.Background(), "wanted", rules.WithRecordFindQuery("created_at", true), rules.WithRecordFindMaxItems(2), rules.WithRecordFindLimit(0))
+	record, err = api.FindRecord(context.Background(), "wanted", request.Query("created_at", true), rules.WithRecordFindMaxItems(2), rules.WithRecordFindLimit(0))
 	if err != nil || record == nil || len(calls) != 2 {
 		t.Fatal(record, err, calls)
 	}
@@ -280,7 +281,7 @@ func TestPythonSecurityRuleFindRecordPaginationRepresentationsAndGuards(t *testi
 				}
 				return response
 			})
-			record, err := api.FindRecord(context.Background(), "wanted", rules.WithRecordFindQuery("project_id", "fixed"))
+			record, err := api.FindRecord(context.Background(), "wanted", request.Query("project_id", "fixed"))
 			if lane == "filter" || lane == "path" || lane == "cycle" {
 				var receipt *resource.ResponseError
 				if record != nil || err == nil || !errors.As(err, &receipt) || receipt.StatusCode != 200 {
@@ -345,7 +346,7 @@ func TestPythonSecurityRuleFindRecordDictionaryTruthinessAndEquality(t *testing.
 				}
 				return nativeRuleWire(200, `{"security_group_rules":[{"id":"wanted","name":"wanted","created_at":`+item.actual+`}]}`)
 			})
-			record, err := api.FindRecord(context.Background(), "wanted", rules.WithRecordFindQuery("created_at", json.RawMessage(item.filter)))
+			record, err := api.FindRecord(context.Background(), "wanted", request.Query("created_at", json.RawMessage(item.filter)))
 			if (record != nil) != item.match || (err == nil) != item.valid {
 				t.Fatal(item, record, err)
 			}
@@ -361,7 +362,7 @@ func TestPythonSecurityRuleFindRecordDictionaryTruthinessAndEquality(t *testing.
 func TestPythonSecurityRuleFindRecordInvalidControlsAndDescriptorFailBeforeHTTP(t *testing.T) {
 	var calls []nativeRuleCall
 	api, _ := findAPI(t, &calls, func(*http.Request) *http.Response { return nativeRuleWire(200, `{}`) })
-	for _, options := range [][]rules.RecordFindOption{{nil}, {rules.WithRecordFindLimit(-1)}, {rules.WithRecordFindMaxItems(-1)}, {rules.WithRecordFindQuery("id", "other")}, {rules.WithRecordFindQuery("connection", nil)}, {rules.WithRecordFindQuery("base_path", "/other")}, {rules.WithRecordFindQuery("headers", map[string]any{})}, {rules.WithRecordFindQuery("microversion", "3.4")}, {rules.WithRecordFindQuery("revision_number", json.RawMessage(`"²"`))}, {rules.WithRecordFindQuery("x_unknown", json.RawMessage(`invalid`))}, {rules.WithRecordFindHeaders(map[string]string{"X-Auth-Token": "bad"})}, {rules.WithRecordFindHeaders(map[string]string{"OpenStack-API-Version": "network 3.4"})}} {
+	for _, options := range [][]rules.RecordFindOption{{nil}, {rules.WithRecordFindLimit(-1)}, {rules.WithRecordFindMaxItems(-1)}, {request.Query("id", "other")}, {request.Query("connection", nil)}, {request.Query("base_path", "/other")}, {request.Query("headers", map[string]any{})}, {request.Query("microversion", "3.4")}, {request.Query("revision_number", json.RawMessage(`"²"`))}, {request.Query("x_unknown", json.RawMessage(`invalid`))}, {request.Headers(map[string]string{"X-Auth-Token": "bad"})}, {request.Headers(map[string]string{"OpenStack-API-Version": "network 3.4"})}} {
 		_, err := api.FindRecord(context.Background(), "wanted", options...)
 		if err == nil || len(calls) != 0 {
 			t.Fatal(err, calls)
@@ -390,12 +391,12 @@ func TestPythonSecurityRuleFindRecordOptionsSnapshotCancellationAndMarshal(t *te
 	query["x_cached"][9] = 'X'
 	version = "changed"
 	var retained *rules.RecordFindOpts
-	record, err := api.FindRecord(context.Background(), "wanted", option, rules.WithRecordFindQuery("x_input", input), func(v *rules.RecordFindOpts) error { retained = v; input["false"] = true; return nil }, func(*rules.RecordFindOpts) error {
+	record, err := api.FindRecord(context.Background(), "wanted", option, request.Query("x_input", input), request.Custom(func(v *rules.RecordFindOpts) error { retained = v; input["false"] = true; return nil }), request.Custom(func(*rules.RecordFindOpts) error {
 		retained.Headers["X-Auth-Token"] = "later"
 		retained.Query["x_cached"] = json.RawMessage(`true`)
 		*retained.Microversion = "changed"
 		return nil
-	})
+	}))
 	if err != nil || record == nil || len(calls) != 1 || headers.Get("X-Trace") != "original" || headers.Get("OpenStack-API-Version") != "network 3.4" {
 		t.Fatal(record, err, calls, headers)
 	}
@@ -404,18 +405,18 @@ func TestPythonSecurityRuleFindRecordOptionsSnapshotCancellationAndMarshal(t *te
 	calls = nil
 	ctx, cancel := context.WithCancelCause(context.Background())
 	cause, callback := errors.New("cancel cause"), errors.New("callback")
-	_, err = api.FindRecord(ctx, "wanted", func(*rules.RecordFindOpts) error { cancel(cause); return callback })
+	_, err = api.FindRecord(ctx, "wanted", request.Custom(func(*rules.RecordFindOpts) error { cancel(cause); return callback }))
 	if len(calls) != 0 || !errors.Is(err, context.Canceled) || !errors.Is(err, cause) || !errors.Is(err, callback) {
 		t.Fatal(err, calls)
 	}
 	original := api.RawClient().ResourceBase
 	defer func() { api.RawClient().ResourceBase = original }()
-	_, err = api.FindRecord(context.Background(), "wanted", func(*rules.RecordFindOpts) error { api.RawClient().ResourceBase += "changed/"; return callback })
+	_, err = api.FindRecord(context.Background(), "wanted", request.Custom(func(*rules.RecordFindOpts) error { api.RawClient().ResourceBase += "changed/"; return callback }))
 	if len(calls) != 0 || !errors.Is(err, callback) || !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err, calls)
 	}
 	api.RawClient().ResourceBase = original
-	_, err = api.FindRecord(context.Background(), "wanted", rules.WithRecordFindQuery("x_marshal", findMarshaler(func() ([]byte, error) { return nil, callback })))
+	_, err = api.FindRecord(context.Background(), "wanted", request.Query("x_marshal", findMarshaler(func() ([]byte, error) { return nil, callback })))
 	if len(calls) != 0 || !errors.Is(err, callback) {
 		t.Fatal(err, calls)
 	}
@@ -587,7 +588,7 @@ func TestPythonSecurityRuleFindRecordRetryKeepsOriginalRejectionAndRequest(t *te
 					return nil
 				}
 			}
-			record, err := api.FindRecord(context.Background(), "wanted", rules.WithRecordFindQuery("x_query", false))
+			record, err := api.FindRecord(context.Background(), "wanted", request.Query("x_query", false))
 			if lane == "retry" || lane == "reauth" {
 				if err != nil || record == nil || len(calls) != 2 || calls[0] != calls[1] {
 					t.Fatal(record, err, calls)
@@ -651,13 +652,13 @@ func TestPythonSecurityRuleFindRecordProtocolAbsenceAndPerCallVersion(t *testing
 		return nativeRuleWire(404, `{}`)
 	})
 	api.RawClient().Microversion = "3.4"
-	record, err := api.FindRecord(context.Background(), "wanted", rules.WithRecordFindMicroversion(""))
+	record, err := api.FindRecord(context.Background(), "wanted", request.Microversion(""))
 	if err != nil || record == nil || len(calls) != 2 || !reflect.DeepEqual(seen, []string{"", "network 3.4"}) || api.RawClient().Microversion != "3.4" {
 		t.Fatal(record, err, calls, seen)
 	}
 	calls = nil
 	seen = nil
-	record, err = api.FindRecord(context.Background(), "wanted", rules.WithRecordFindMicroversion("latest"))
+	record, err = api.FindRecord(context.Background(), "wanted", request.Microversion("latest"))
 	if err != nil || record == nil || len(calls) != 2 || !reflect.DeepEqual(seen, []string{"network latest", "network 3.4"}) || api.RawClient().Microversion != "3.4" {
 		t.Fatal(record, err, calls, seen)
 	}
@@ -677,7 +678,7 @@ func TestPythonSecurityRuleFindRecordSourceArgumentCollisions(t *testing.T) {
 	var calls []nativeRuleCall
 	api, _ := findAPI(t, &calls, func(*http.Request) *http.Response { t.Fatal("preflight reached HTTP"); return nil })
 	for _, key := range []string{"ignore_missing", "name_or_id", "session", "cls"} {
-		record, err := api.FindRecord(context.Background(), "wanted", rules.WithRecordFindQuery(key, false))
+		record, err := api.FindRecord(context.Background(), "wanted", request.Query(key, false))
 		if record != nil || !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
 			t.Fatal(key, record, err, calls)
 		}
@@ -723,7 +724,7 @@ func TestPythonSecurityRuleFindRecordHeaderAliasDomains(t *testing.T) {
 				})
 				options := []rules.RecordFindOption{}
 				if lane == "seed" {
-					options = append(options, rules.WithRecordFindQuery(key, "value"))
+					options = append(options, request.Query(key, "value"))
 				}
 				record, err := api.FindRecord(context.Background(), "wanted", options...)
 				if err != nil || record == nil {
@@ -790,10 +791,10 @@ func TestPythonSecurityRuleFindRecordMicroversionPhasesAndAcceptDefault(t *testi
 					if selected != "" {
 						source.MoreHeaders["oPeNsTaCk-ApI-vErSiOn"] = "network " + selected
 					}
-					options := []rules.RecordFindOption{rules.WithRecordFindMicroversion(explicit)}
+					options := []rules.RecordFindOption{request.Microversion(explicit)}
 					wantAccept := []string{"text/xml", "application/json"}
 					if callerAccept {
-						options = append(options, rules.WithRecordFindHeaders(map[string]string{"aCcEpT": "text/plain"}))
+						options = append(options, request.Headers(map[string]string{"aCcEpT": "text/plain"}))
 						wantAccept = []string{"text/plain", "text/plain"}
 					}
 					record, err := api.FindRecord(context.Background(), "wanted", options...)
@@ -851,7 +852,7 @@ func TestPythonSecurityRuleFindRecordRetryForbiddenHeadersAndOmittedVersion(t *t
 						}
 						return nil
 					}
-					record, err := api.FindRecord(context.Background(), "wanted", rules.WithRecordFindMicroversion("3.5"))
+					record, err := api.FindRecord(context.Background(), "wanted", request.Microversion("3.5"))
 					var native gophercloud.ErrUnexpectedResponseCode
 					wantCalls := 1
 					if list {

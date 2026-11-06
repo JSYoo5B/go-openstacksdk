@@ -11,9 +11,12 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/jsonfilter"
+	"github.com/JSYoo5B/go-openstacksdk/internal/neutronfind"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 // RecordFindOpts defaults to ignore-missing and full pagination. Query snapshots
@@ -30,7 +33,16 @@ type RecordFindOpts struct {
 	MaxItems                 int
 	order                    []string
 }
-type RecordFindOption func(*RecordFindOpts) error
+
+// RecordFindOption is one option of FindRecord: WithRecordFindOpts,
+// WithRecordFindLimit, WithRecordFindMarker, WithRecordFindMaxItems,
+// WithRecordFindPaginated, request.IgnoreMissing, request.Query (one Python
+// kwarg as JSON; its marshal error is returned when applied), request.Headers
+// (replaces the headers), request.Microversion or request.Custom over
+// *RecordFindOpts. The fallback paging options stay package options because the
+// find category has no paging calls. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type RecordFindOption = request.FindCall
 
 func copyFindOpts(v RecordFindOpts) RecordFindOpts {
 	v.Query = findClone(v.Query)
@@ -54,35 +66,34 @@ func copyFindOpts(v RecordFindOpts) RecordFindOpts {
 }
 func WithRecordFindOpts(v RecordFindOpts) RecordFindOption {
 	owned := copyFindOpts(v)
-	return func(c *RecordFindOpts) error { *c = copyFindOpts(owned); return nil }
+	return request.Custom(func(c *RecordFindOpts) error { *c = copyFindOpts(owned); return nil })
 }
-func WithRecordFindIgnoreMissing(v bool) RecordFindOption {
+func withRecordFindIgnoreMissing(v bool) func(*RecordFindOpts) error {
 	return func(c *RecordFindOpts) error { x := v; c.IgnoreMissing = &x; return nil }
 }
 func WithRecordFindPaginated(v bool) RecordFindOption {
-	return func(c *RecordFindOpts) error { x := v; c.Paginated = &x; return nil }
+	return request.Custom(func(c *RecordFindOpts) error { x := v; c.Paginated = &x; return nil })
 }
 func WithRecordFindLimit(v int) RecordFindOption {
-	return func(c *RecordFindOpts) error { x := v; c.Limit = &x; return nil }
+	return request.Custom(func(c *RecordFindOpts) error { x := v; c.Limit = &x; return nil })
 }
 func WithRecordFindMarker(v string) RecordFindOption {
-	return func(c *RecordFindOpts) error { c.Marker = v; return nil }
+	return request.Custom(func(c *RecordFindOpts) error { c.Marker = v; return nil })
 }
 func WithRecordFindMaxItems(v int) RecordFindOption {
-	return func(c *RecordFindOpts) error { c.MaxItems = v; return nil }
+	return request.Custom(func(c *RecordFindOpts) error { c.MaxItems = v; return nil })
 }
-func WithRecordFindMicroversion(v string) RecordFindOption {
+func withRecordFindMicroversion(v string) func(*RecordFindOpts) error {
 	return func(c *RecordFindOpts) error { x := v; c.Microversion = &x; return nil }
 }
-func WithRecordFindHeaders(v map[string]string) RecordFindOption {
+func withRecordFindHeaders(v map[string]string) func(*RecordFindOpts) error {
 	owned := maps.Clone(v)
 	return func(c *RecordFindOpts) error { c.Headers = maps.Clone(owned); return nil }
 }
 
-// WithRecordFindQuery records insertion order for Source constructor aliases.
+// withRecordFindQuery records insertion order for Source constructor aliases.
 // Unknown kwargs remain member query/seed values and are dropped from LIST.
-func WithRecordFindQuery(key string, value any) RecordFindOption {
-	raw, err := json.Marshal(value)
+func withRecordFindQuery(key string, raw json.RawMessage, err error) func(*RecordFindOpts) error {
 	owned := bytes.Clone(raw)
 	return func(c *RecordFindOpts) error {
 		if err != nil {
@@ -257,4 +268,12 @@ func findLocalValue(actual, filter json.RawMessage) (bool, error) {
 		return true, nil
 	}
 	return jsonfilter.EqualPythonJSON(actual, filter)
+}
+
+// recordFindCalls interprets the shared calls of RecordFindOption.
+var recordFindCalls = calls.Spec[RecordFindOpts]{
+	Query:         neutronfind.UseJSON(withRecordFindQuery),
+	IgnoreMissing: neutronfind.Use(withRecordFindIgnoreMissing),
+	Headers:       neutronfind.Use(withRecordFindHeaders),
+	Microversion:  neutronfind.Use(withRecordFindMicroversion),
 }

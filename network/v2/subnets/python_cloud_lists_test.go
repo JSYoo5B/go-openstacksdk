@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/subnets"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -79,11 +80,11 @@ func TestPythonSubnetListsPushdownLocalLoadedFiltersAndUnknownMarshalDiscard(t *
 	api := pythonCoreSubnetAPI(t, &calls, func(*http.Request) *http.Response {
 		return subnetListResponse(200, `{"subnets":[{"id":"no","prefixlen":2},{"id":"yes","prefixlen":true,"created_at":9007199254740993}]}`)
 	})
-	rows, err := api.AllRecords(context.Background(), subnets.WithRecordListQuery("prefix_length", 1), subnets.WithRecordListQuery("created_at", json.RawMessage("9007199254740992.0")), subnets.WithRecordListQuery("is_dhcp_enabled", false), subnets.WithRecordListQuery("unknown_extension", make(chan int)), subnets.WithRecordListPaginated(false))
+	rows, err := api.AllRecords(context.Background(), subnets.WithRecordListQuery("prefix_length", 1), subnets.WithRecordListQuery("created_at", json.RawMessage("9007199254740992.0")), subnets.WithRecordListQuery("is_dhcp_enabled", false), subnets.WithRecordListQuery("unknown_extension", make(chan int)), request.Paginated(false))
 	if err != nil || len(rows) != 0 || len(calls) != 1 {
 		t.Fatal(rows, err, calls)
 	} // large int != rounded float, while true equals 1.
-	rows, err = api.AllRecords(context.Background(), subnets.WithRecordListQuery("prefix_length", 1), subnets.WithRecordListQuery("is_dhcp_enabled", false), subnets.WithRecordListQuery("subnet_pool_id", "pool"), subnets.WithRecordListQuery("unknown_extension", "discard"), subnets.WithRecordListPaginated(false))
+	rows, err = api.AllRecords(context.Background(), subnets.WithRecordListQuery("prefix_length", 1), subnets.WithRecordListQuery("is_dhcp_enabled", false), subnets.WithRecordListQuery("subnet_pool_id", "pool"), subnets.WithRecordListQuery("unknown_extension", "discard"), request.Paginated(false))
 	if err != nil || len(rows) != 1 {
 		t.Fatal(rows, err, calls)
 	}
@@ -171,7 +172,7 @@ func TestPythonSubnetListsEmptyPathOnlyNullDefaultAndDelayedCancellation(t *test
 	var calls []nativeSubnetCall
 	api := pythonCoreSubnetAPI(t, &calls, func(*http.Request) *http.Response { return subnetListResponse(200, `{"subnets":[]}`) })
 	ctx, cancel := context.WithCancel(context.Background())
-	result, err := api.ProxyListRecords(ctx, subnets.WithRecordListBasePath(""))
+	result, err := api.ProxyListRecords(ctx, request.BasePath(""))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -269,7 +270,7 @@ func TestPythonSubnetListsSourceLinkPrecedenceAndRawMarkerMaxItems(t *testing.T)
 		}
 		return subnetListResponse(200, `{"subnets":[{"id":"filtered","prefixlen":2},{"id":"yes","prefixlen":1}],"links":{"next":"?marker=ignored"},"subnets_links":[{"rel":"next","href":"?marker=wrong"}]}`)
 	})
-	rows, err := api.AllRecords(context.Background(), subnets.WithRecordListQuery("prefix_length", 1), subnets.WithRecordListLimit(2))
+	rows, err := api.AllRecords(context.Background(), subnets.WithRecordListQuery("prefix_length", 1), request.Limit(2))
 	if err != nil || len(rows) != 1 || len(calls) != 2 {
 		t.Fatal(rows, err, calls)
 	}
@@ -281,7 +282,7 @@ func TestPythonSubnetListsSourceLinkPrecedenceAndRawMarkerMaxItems(t *testing.T)
 	api = pythonCoreSubnetAPI(t, &calls, func(*http.Request) *http.Response {
 		return subnetListResponse(200, `{"subnets":[{"id":"one"},{"id":"two"}],"next":"?marker=late"}`)
 	})
-	rows, err = api.AllRecords(context.Background(), subnets.WithRecordListMaxItems(1))
+	rows, err = api.AllRecords(context.Background(), request.MaxItems(1))
 	if err != nil || len(rows) != 1 || len(calls) != 1 {
 		t.Fatal(rows, err, calls)
 	}

@@ -1,6 +1,11 @@
 package neutronfind
 
-import "github.com/JSYoo5B/go-openstacksdk/internal/calls"
+import (
+	"encoding/json"
+
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
+	"github.com/JSYoo5B/go-openstacksdk/request"
+)
 
 // Use adapts an option constructor over S to a calls.Spec handler, so a
 // shared call is applied exactly like the constructor the package used
@@ -21,4 +26,11 @@ func KeywordPaging[S any](keyword func(key string, value any) func(*S) error) ca
 		MaxItems:  func(s *S, n int) error { return keyword("max_items", n)(s) },
 		Paginated: func(s *S, paginated bool) error { return keyword("paginated", paginated)(s) },
 	}
+}
+
+// UseJSON adapts a builder over one key and its JSON value (marshaled when
+// the shared call was constructed, with its marshal error) to a Query or
+// Field handler.
+func UseJSON[S any](build func(key string, raw json.RawMessage, err error) func(*S) error) func(*S, request.CallEntry) error {
+	return func(s *S, entry request.CallEntry) error { return build(entry.Key, entry.JSON, entry.JSONErr)(s) }
 }

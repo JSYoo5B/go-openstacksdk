@@ -406,7 +406,7 @@ func TestPythonPortListAndSearchRecordOptionsGuardCancellationAndSource(t *testi
 				var err error
 				op := "ListRecords"
 				if search {
-					_, err = api.SearchRecords(ctx, "", func(c *ports.RecordSearchOpts) error { c.Headers["X-Owned"] = "yes"; mutate(); return supplied })
+					_, err = api.SearchRecords(ctx, "", request.Custom(func(c *ports.RecordSearchOpts) error { c.Headers["X-Owned"] = "yes"; mutate(); return supplied }))
 					op = "SearchRecords"
 				} else {
 					_, err = api.AllRecords(ctx, request.Custom(func(c *ports.RecordListOpts) error { c.Headers["X-Owned"] = "yes"; mutate(); return supplied }))
@@ -616,7 +616,7 @@ func TestPythonPortSearchRecordsFalseyFiltersHeaderSnapshotAndUnknownKeys(t *tes
 	for _, filter := range []string{"null", "false", "0", "1e-400", "[]", "{}", `""`} {
 		var calls []nativePortCall
 		headers := map[string]string{"X-Trace": "original"}
-		option := ports.WithRecordSearchHeaders(headers)
+		option := request.Headers(headers)
 		headers["X-Trace"] = "mutated"
 		api := pythonCorePortAPI(t, &calls, func(r *http.Request) *http.Response {
 			if r.URL.RawQuery != "" || r.Header.Get("X-Trace") != "original" {
@@ -624,7 +624,7 @@ func TestPythonPortSearchRecordsFalseyFiltersHeaderSnapshotAndUnknownKeys(t *tes
 			}
 			return nativePortWire(200, pythonPortSearchRows())
 		})
-		result, err := api.SearchRecords(context.Background(), "", ports.WithRecordSearchFilters(json.RawMessage(filter)), ports.WithRecordSearchHeaders(nil), option, func(c *ports.RecordSearchOpts) error { c.Headers["X-Own"] = "yes"; return nil })
+		result, err := api.SearchRecords(context.Background(), "", ports.WithRecordSearchFilters(json.RawMessage(filter)), request.Headers(nil), option, request.Custom(func(c *ports.RecordSearchOpts) error { c.Headers["X-Own"] = "yes"; return nil }))
 		if err != nil || result == nil || len(result.Ports) != 3 || len(calls) != 1 {
 			t.Fatal(filter, result, err, calls)
 		}

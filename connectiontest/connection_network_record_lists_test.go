@@ -60,7 +60,7 @@ func TestConnectionPortRecordsCachedServiceAndAutomaticPerRowLocation(t *testing
 	if string(records[0].Wire.Body["location"]) != `{"cloud":"forged"}` {
 		t.Fatal("computed location altered wire", records[0].Wire.Body)
 	}
-	result, err := conn.SearchPorts(context.Background(), "a*", ports.WithRecordSearchFilters(json.RawMessage(`{"location":{"cloud":"configured-cloud","project":{"id":"scope"}}}`)), func(*ports.RecordSearchOpts) error { callbacks++; return nil })
+	result, err := conn.SearchPorts(context.Background(), "a*", ports.WithRecordSearchFilters(json.RawMessage(`{"location":{"cloud":"configured-cloud","project":{"id":"scope"}}}`)), request.Custom(func(*ports.RecordSearchOpts) error { callbacks++; return nil }))
 	if err != nil || result == nil || len(result.Ports) != 1 || len(result.Inventory) != 2 || string(result.Ports[0].Resource.Body["id"]) != `"current"` || requests != 2 || locates != 1 || callbacks != 2 {
 		t.Fatal(result, err, requests, locates, callbacks)
 	}

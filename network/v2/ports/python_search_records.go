@@ -9,6 +9,7 @@ import (
 	"slices"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/neutronfind"
@@ -27,7 +28,14 @@ type RecordSearchOpts struct {
 	Location      *json.RawMessage
 	CloudLocation *resource.CloudLocation
 }
-type RecordSearchOption func(*RecordSearchOpts) error
+
+// RecordSearchOption is one option of SearchRecords: WithRecordSearchOpts,
+// WithRecordSearchLocation, WithRecordSearchCloudLocation,
+// WithRecordSearchFilters, WithRecordSearchExpression, request.Headers
+// (replaces the headers), request.Microversion or request.Custom over
+// *RecordSearchOpts. Other shared calls fail with resource.ErrInvalidOption
+// before HTTP.
+type RecordSearchOption = request.GetCall
 
 func copyRecordSearchOpts(v RecordSearchOpts) RecordSearchOpts {
 	owned := copyRecordListOpts(RecordListOpts{Headers: v.Headers, Microversion: v.Microversion})
@@ -51,14 +59,14 @@ func copyRecordSearchOpts(v RecordSearchOpts) RecordSearchOpts {
 // filters and an optional Connection location. No user-supplied builder is needed.
 func WithRecordSearchOpts(value RecordSearchOpts) RecordSearchOption {
 	owned := copyRecordSearchOpts(value)
-	return func(c *RecordSearchOpts) error { *c = copyRecordSearchOpts(owned); return nil }
+	return request.Custom(func(c *RecordSearchOpts) error { *c = copyRecordSearchOpts(owned); return nil })
 }
 
 // WithRecordSearchLocation is the Connection adapter's declared Resource view.
 // It is applied before dictionary/JMESPath selection and never changes Wire.
 func WithRecordSearchLocation(value json.RawMessage) RecordSearchOption {
 	owned := bytes.Clone(value)
-	return func(c *RecordSearchOpts) error {
+	return request.Custom(func(c *RecordSearchOpts) error {
 		c.Location = nil
 		c.CloudLocation = nil
 		if owned != nil {
@@ -66,7 +74,7 @@ func WithRecordSearchLocation(value json.RawMessage) RecordSearchOption {
 			c.Location = &raw
 		}
 		return nil
-	}
+	})
 }
 
 // WithRecordSearchCloudLocation supplies configured Connection facts. The SDK
@@ -74,25 +82,25 @@ func WithRecordSearchLocation(value json.RawMessage) RecordSearchOption {
 // foreign project IDs while clearing the current project's names.
 func WithRecordSearchCloudLocation(value resource.CloudLocation) RecordSearchOption {
 	owned := value.Clone()
-	return func(c *RecordSearchOpts) error {
+	return request.Custom(func(c *RecordSearchOpts) error {
 		copy := owned.Clone()
 		c.CloudLocation = &copy
 		c.Location = nil
 		return nil
-	}
+	})
 }
 
 // WithRecordSearchFilters snapshots raw JSON filters. nil clears them.
 func WithRecordSearchFilters(value json.RawMessage) RecordSearchOption {
 	owned := bytes.Clone(value)
-	return func(c *RecordSearchOpts) error {
+	return request.Custom(func(c *RecordSearchOpts) error {
 		c.Filters = nil
 		if owned != nil {
 			raw := json.RawMessage(bytes.Clone(owned))
 			c.Filters = &raw
 		}
 		return nil
-	}
+	})
 }
 
 // WithRecordSearchExpression supplies the deprecated JMESPath string filter.
@@ -101,14 +109,14 @@ func WithRecordSearchExpression(expression string) RecordSearchOption {
 	raw, _ := json.Marshal(expression)
 	return WithRecordSearchFilters(raw)
 }
-func WithRecordSearchHeaders(v map[string]string) RecordSearchOption {
+func withRecordSearchHeaders(v map[string]string) func(*RecordSearchOpts) error {
 	owned := copyRecordSearchOpts(RecordSearchOpts{Headers: v})
 	return func(c *RecordSearchOpts) error {
 		c.Headers = copyRecordSearchOpts(owned).Headers
 		return nil
 	}
 }
-func WithRecordSearchMicroversion(v string) RecordSearchOption {
+func withRecordSearchMicroversion(v string) func(*RecordSearchOpts) error {
 	return func(c *RecordSearchOpts) error { x := v; c.Microversion = &x; return nil }
 }
 
@@ -170,7 +178,7 @@ func (a *API) SearchRecords(ctx context.Context, nameOrID string, options ...Rec
 		return nil, wrap(err)
 	}
 	policy := copyRecordSearchOpts(RecordSearchOpts{})
-	for _, apply := range slices.Clone(options) {
+	for _, apply := range calls.Translate(options, recordSearchCalls) {
 		if err := engine.Check(ctx); err != nil {
 			return nil, wrap(err)
 		}
@@ -320,4 +328,10 @@ func collectPortSearchRows(ctx context.Context, engine *neutronfind.Engine, poli
 		records = append(records, nil)
 	}
 	return rows, records, nil
+}
+
+// recordSearchCalls interprets the shared calls of RecordSearchOption.
+var recordSearchCalls = calls.Spec[RecordSearchOpts]{
+	Headers:      neutronfind.Use(withRecordSearchHeaders),
+	Microversion: neutronfind.Use(withRecordSearchMicroversion),
 }

@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	sdk "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -55,7 +56,7 @@ func TestPythonSubnetRawMaxItemsJSONDomainAndDeferredComparison(t *testing.T) {
 					}
 					return nativeSubnetWire(203, body)
 				})
-				proxy, err := api.ProxyListRecords(context.Background(), sdk.WithRecordListQuery("max_items", json.RawMessage(tc.raw)), sdk.WithRecordListLimit(10))
+				proxy, err := api.ProxyListRecords(context.Background(), sdk.WithRecordListQuery("max_items", json.RawMessage(tc.raw)), request.Limit(10))
 				if err != nil || len(calls) != 0 {
 					t.Fatal(proxy, err, calls)
 				}
@@ -118,7 +119,7 @@ func TestPythonSubnetRawMaxItemsExactPageBoundaryObservesNextResponse(t *testing
 				}
 				return response
 			})
-			rows, err := subnetRawCapRows(t, api, ctx, sdk.WithRecordListQuery("max_items", json.RawMessage("2")), sdk.WithRecordListLimit(10))
+			rows, err := subnetRawCapRows(t, api, ctx, sdk.WithRecordListQuery("max_items", json.RawMessage("2")), request.Limit(10))
 			if len(calls) != 2 || len(rows) != 2 {
 				t.Fatal(rows, err, calls)
 			}
@@ -142,7 +143,7 @@ func TestPythonSubnetRawMaxItemsCountsFilteredRowsAndStopsBeforeConstructor(t *t
 		t.Run(mode, func(t *testing.T) {
 			var calls []nativeSubnetCall
 			body := `{"subnets":[{"id":"filtered","prefix_length":"drop"},{"id":"kept","prefix_length":"keep"},{"id":"beyond","prefix_length":"keep"}]}`
-			options := []sdk.RecordListOption{sdk.WithRecordListQuery("max_items", json.RawMessage("2")), sdk.WithRecordListLimit(10)}
+			options := []sdk.RecordListOption{sdk.WithRecordListQuery("max_items", json.RawMessage("2")), request.Limit(10)}
 			want := 1
 			if mode == "local-filter" {
 				options = append(options, sdk.WithRecordListQuery("prefix_length", "keep"))
@@ -180,7 +181,7 @@ func TestPythonSubnetRawMaxItemsOpaqueJMESAndOwnedJSON(t *testing.T) {
 	raw := json.RawMessage("true")
 	owned := sdk.WithRecordListQuery("max_items", raw)
 	raw[0] = 'X'
-	rows, err := subnetRawCapRows(t, api, context.Background(), owned, sdk.WithRecordListLimit(10))
+	rows, err := subnetRawCapRows(t, api, context.Background(), owned, request.Limit(10))
 	if err != nil || len(rows) != 1 || len(calls) != 1 {
 		t.Fatal(rows, err, calls)
 	}

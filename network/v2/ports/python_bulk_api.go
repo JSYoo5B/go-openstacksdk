@@ -8,9 +8,9 @@ import (
 	"iter"
 	"maps"
 	"net/http"
-	"slices"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/neutronfind"
@@ -64,7 +64,7 @@ func (a *API) CreatePorts(ctx context.Context, data []BulkPortInput, options ...
 		inputs[i] = cloneBulkPortInput(input)
 	}
 	cfg := cloneBulkPortOpts(BulkPortOpts{})
-	for _, apply := range slices.Clone(options) {
+	for _, apply := range calls.Translate(options, bulkPortCalls) {
 		if err := engine.Check(ctx); err != nil {
 			return nil, wrap(err)
 		}

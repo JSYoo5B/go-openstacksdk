@@ -8,6 +8,7 @@ import (
 	"maps"
 	"slices"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/neutronfind"
@@ -24,7 +25,13 @@ type SourceCloudListOpts struct {
 	CloudLocation  *resource.CloudLocation
 	headersPresent bool
 }
-type SourceCloudListOption func(*SourceCloudListOpts) error
+
+// SourceCloudListOption is one option of ListSourceValues:
+// WithSourceCloudListOpts, WithSourceCloudListFilters,
+// WithSourceCloudListLocation, request.Headers (replaces the headers),
+// request.Microversion or request.Custom over *SourceCloudListOpts. Other shared
+// calls fail with resource.ErrInvalidOption before HTTP.
+type SourceCloudListOption = request.GetCall
 
 func copySourceCloudListOpts(value SourceCloudListOpts) SourceCloudListOpts {
 	value.Headers = maps.Clone(value.Headers)
@@ -48,29 +55,29 @@ func copySourceCloudListOpts(value SourceCloudListOpts) SourceCloudListOpts {
 func WithSourceCloudListOpts(value SourceCloudListOpts) SourceCloudListOption {
 	value.headersPresent = value.headersPresent || value.Headers != nil
 	owned := copySourceCloudListOpts(value)
-	return func(c *SourceCloudListOpts) error { *c = copySourceCloudListOpts(owned); return nil }
+	return request.Custom(func(c *SourceCloudListOpts) error { *c = copySourceCloudListOpts(owned); return nil })
 }
 func WithSourceCloudListFilters(value json.RawMessage) SourceCloudListOption {
 	owned := bytes.Clone(value)
-	return func(c *SourceCloudListOpts) error {
+	return request.Custom(func(c *SourceCloudListOpts) error {
 		c.Filters = nil
 		if owned != nil {
 			raw := json.RawMessage(bytes.Clone(owned))
 			c.Filters = &raw
 		}
 		return nil
-	}
+	})
 }
-func WithSourceCloudListHeaders(value map[string]string) SourceCloudListOption {
+func withSourceCloudListHeaders(value map[string]string) func(*SourceCloudListOpts) error {
 	owned := maps.Clone(value)
 	return func(c *SourceCloudListOpts) error { c.Headers = maps.Clone(owned); c.headersPresent = true; return nil }
 }
-func WithSourceCloudListMicroversion(value string) SourceCloudListOption {
+func withSourceCloudListMicroversion(value string) func(*SourceCloudListOpts) error {
 	return func(c *SourceCloudListOpts) error { v := value; c.Microversion = &v; return nil }
 }
 func WithSourceCloudListLocation(value resource.CloudLocation) SourceCloudListOption {
 	owned := value.Clone()
-	return func(c *SourceCloudListOpts) error { v := owned.Clone(); c.CloudLocation = &v; return nil }
+	return request.Custom(func(c *SourceCloudListOpts) error { v := owned.Clone(); c.CloudLocation = &v; return nil })
 }
 
 // SourceCloudListResult is the actual Python list() conversion. Values can
@@ -95,7 +102,7 @@ func (a *API) ListSourceValues(ctx context.Context, options ...SourceCloudListOp
 		return nil, wrap(err)
 	}
 	cfg := copySourceCloudListOpts(SourceCloudListOpts{})
-	for _, apply := range slices.Clone(options) {
+	for _, apply := range calls.Translate(options, sourceCloudListCalls) {
 		if err := engine.Check(ctx); err != nil {
 			return nil, wrap(err)
 		}
@@ -272,4 +279,10 @@ func sourceCloudWrapGenerators(values []any, location *resource.CloudLocation, e
 	for _, value := range values {
 		wrap(value)
 	}
+}
+
+// sourceCloudListCalls interprets the shared calls of SourceCloudListOption.
+var sourceCloudListCalls = calls.Spec[SourceCloudListOpts]{
+	Headers:      neutronfind.Use(withSourceCloudListHeaders),
+	Microversion: neutronfind.Use(withSourceCloudListMicroversion),
 }

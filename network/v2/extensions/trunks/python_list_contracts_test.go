@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -233,7 +234,7 @@ func TestPythonTrunkListRecordRawCapMarkerAndConsumerStop(t *testing.T) {
 		}
 		return nativeTrunkWire(200, `{"trunks":[{"id":"skip","tenant_id":"other"},{"id":"keep","tenant_id":"tenant"},{"connection":null}],"next":"https://foreign.example/trunks"}`)
 	})
-	rows, err := api.AllRecords(context.Background(), trunks.WithRecordListQuery("tenant_id", "tenant"), trunks.WithRecordListLimit(0), trunks.WithRecordListMaxItems(2))
+	rows, err := api.AllRecords(context.Background(), trunks.WithRecordListQuery("tenant_id", "tenant"), request.Limit(0), request.MaxItems(2))
 	if err != nil || len(rows) != 1 || len(calls) != 1 {
 		t.Fatal(rows, err, calls)
 	}
@@ -248,7 +249,7 @@ func TestPythonTrunkListRecordRawCapMarkerAndConsumerStop(t *testing.T) {
 		}
 		return nativeTrunkWire(200, `{"trunks":[{"id":42,"name":"passive"}]}`)
 	})
-	for v, e := range api.ListRecords(context.Background(), trunks.WithRecordListLimit(4)) {
+	for v, e := range api.ListRecords(context.Background(), request.Limit(4)) {
 		if e != nil {
 			t.Fatal(e)
 		}
@@ -270,7 +271,7 @@ func TestPythonTrunkListRecordRawCapMarkerAndConsumerStop(t *testing.T) {
 	if len(calls) != 1 {
 		t.Fatal(calls)
 	}
-	rows, err = api.AllRecords(context.Background(), trunks.WithRecordListPaginated(false), trunks.WithRecordListMaxItems(1))
+	rows, err = api.AllRecords(context.Background(), request.Paginated(false), request.MaxItems(1))
 	if err != nil || len(rows) != 1 || len(calls) != 2 {
 		t.Fatal(rows, err, calls)
 	}
@@ -367,7 +368,7 @@ func TestPythonTrunkListRecordOptionOwnershipLazyReuseAndPreflight(t *testing.T)
 	headers["X-Trace"] = "changed"
 	version = "changed"
 	callbacks := 0
-	options := []trunks.RecordListOption{owned, func(c *trunks.RecordListOpts) error { callbacks++; retained = c; return nil }}
+	options := []trunks.RecordListOption{owned, request.Custom(func(c *trunks.RecordListOpts) error { callbacks++; retained = c; return nil })}
 	seq := api.ListRecords(context.Background(), options...)
 	options[0] = nil
 	if len(calls) != 0 || callbacks != 0 {
@@ -390,7 +391,7 @@ func TestPythonTrunkListRecordOptionOwnershipLazyReuseAndPreflight(t *testing.T)
 	}
 	calls = nil
 	api, _ = nativeTrunkAPI(t, &calls, func(*http.Request) *http.Response { t.Fatal("preflight HTTP"); return nil })
-	for _, option := range []trunks.RecordListOption{nil, trunks.WithRecordListLimit(-1), trunks.WithRecordListMaxItems(-1), trunks.WithRecordListQuery("name", json.RawMessage("bad")), trunks.WithRecordListQuery("cls", nil), trunks.WithRecordListQuery("allow_unknown_params", true), trunks.WithRecordListQuery("jmespath_filters", "[*]"), trunks.WithRecordListQuery("location", nil), trunks.WithRecordListQuery("base_path", nil), trunks.WithRecordListQuery("headers", nil), trunks.WithRecordListQuery("session", nil), trunks.WithRecordListQuery("microversion", nil), trunks.WithRecordListQuery("bad\n", nil), trunks.WithRecordListHeaders(map[string]string{"X-Auth-Token": "fake"}), trunks.WithRecordListHeaders(map[string]string{"OpenStack-API-Version": "network 2.0"})} {
+	for _, option := range []trunks.RecordListOption{nil, request.Limit(-1), request.MaxItems(-1), trunks.WithRecordListQuery("name", json.RawMessage("bad")), trunks.WithRecordListQuery("cls", nil), trunks.WithRecordListQuery("allow_unknown_params", true), trunks.WithRecordListQuery("jmespath_filters", "[*]"), trunks.WithRecordListQuery("location", nil), trunks.WithRecordListQuery("base_path", nil), trunks.WithRecordListQuery("headers", nil), trunks.WithRecordListQuery("session", nil), trunks.WithRecordListQuery("microversion", nil), trunks.WithRecordListQuery("bad\n", nil), request.Headers(map[string]string{"X-Auth-Token": "fake"}), request.Headers(map[string]string{"OpenStack-API-Version": "network 2.0"})} {
 		rows, err := api.AllRecords(context.Background(), option)
 		if rows != nil || !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
 			t.Fatal(rows, err, calls)
@@ -410,19 +411,19 @@ func TestPythonTrunkListRecordOptionOwnershipLazyReuseAndPreflight(t *testing.T)
 	cause := errors.New("option cause")
 	source := api.RawClient()
 	original := source.ResourceBase
-	rows, err = api.AllRecords(context.Background(), func(*trunks.RecordListOpts) error { source.ResourceBase += "changed/"; return cause })
+	rows, err = api.AllRecords(context.Background(), request.Custom(func(*trunks.RecordListOpts) error { source.ResourceBase += "changed/"; return cause }))
 	source.ResourceBase = original
 	if rows != nil || !errors.Is(err, cause) || !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
 		t.Fatal(rows, err, calls)
 	}
 	originalAPI := *api
 	replacement := *source
-	rows, err = api.AllRecords(context.Background(), func(*trunks.RecordListOpts) error { *api = *trunks.New(&replacement); return nil })
+	rows, err = api.AllRecords(context.Background(), request.Custom(func(*trunks.RecordListOpts) error { *api = *trunks.New(&replacement); return nil }))
 	*api = originalAPI
 	if rows != nil || !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
 		t.Fatal(rows, err, calls)
 	}
-	rows, err = api.AllRecords(context.Background(), func(c *trunks.RecordListOpts) error { c.Query = nil; c.Headers = nil; return nil }, trunks.WithRecordListQuery("name", "valid"), func(c *trunks.RecordListOpts) error { c.Headers["X-Trace"] = "valid"; return cause })
+	rows, err = api.AllRecords(context.Background(), request.Custom(func(c *trunks.RecordListOpts) error { c.Query = nil; c.Headers = nil; return nil }), trunks.WithRecordListQuery("name", "valid"), request.Custom(func(c *trunks.RecordListOpts) error { c.Headers["X-Trace"] = "valid"; return cause }))
 	if rows != nil || !errors.Is(err, cause) || len(calls) != 0 {
 		t.Fatal(rows, err, calls)
 	}
@@ -461,9 +462,9 @@ func TestPythonTrunkListRecordExplicitAndAbsentVersionsAcrossPages(t *testing.T)
 		for k, v := range source.MoreHeaders {
 			before[k] = v
 		}
-		options := []trunks.RecordListOption{trunks.WithRecordListHeaders(map[string]string{"aCcEpT": "explicit"})}
+		options := []trunks.RecordListOption{request.Headers(map[string]string{"aCcEpT": "explicit"})}
 		if item.explicit {
-			options = append(options, trunks.WithRecordListMicroversion(item.override))
+			options = append(options, request.Microversion(item.override))
 		}
 		rows, err := api.AllRecords(context.Background(), options...)
 		if err != nil || len(rows) != 1 || len(calls) != 2 || source.Microversion != item.selected || !reflect.DeepEqual(source.MoreHeaders, before) {
@@ -591,7 +592,7 @@ func TestPythonTrunkListRecordNativeRetryOwnershipAndCleanReauthentication(t *te
 					return nil
 				}
 			}
-			rows, err := api.AllRecords(context.Background(), trunks.WithRecordListMicroversion("2.4"), trunks.WithRecordListQuery("name", "owned"))
+			rows, err := api.AllRecords(context.Background(), request.Microversion("2.4"), trunks.WithRecordListQuery("name", "owned"))
 			if lane == "retry" || lane == "reauth" {
 				if err != nil || len(rows) != 1 || len(calls) != 2 || calls[0] != calls[1] {
 					t.Fatal(rows, err, calls)
@@ -669,7 +670,7 @@ func TestPythonTrunkListRecordFixedContinuationGuardsAndWholePageReceipt(t *test
 			r.Header.Set("X-Request-Id", "continuation")
 			return r
 		})
-		rows, err := api.AllRecords(context.Background(), trunks.WithRecordListQuery("project_id", "fixed"), trunks.WithRecordListMarker("same"))
+		rows, err := api.AllRecords(context.Background(), trunks.WithRecordListQuery("project_id", "fixed"), request.Marker("same"))
 		var proof *resource.ResponseError
 		if rows != nil || !errors.As(err, &proof) || proof.StatusCode != 203 || string(proof.Body) != body || proof.Header.Get("X-Request-Id") != "continuation" || len(calls) != 1 {
 			t.Fatal(next, rows, err, proof, calls)
@@ -702,7 +703,7 @@ func TestPythonTrunkListRecordKnownMarshalErrorsPreflightAndUnknownDiscard(t *te
 		t.Fatal(conversions, calls)
 	}
 	callbacks := 0
-	rows, err := api.AllRecords(context.Background(), known, func(*trunks.RecordListOpts) error { callbacks++; return nil })
+	rows, err := api.AllRecords(context.Background(), known, request.Custom(func(*trunks.RecordListOpts) error { callbacks++; return nil }))
 	var marshal *json.MarshalerError
 	if rows != nil || !errors.Is(err, resource.ErrInvalidOption) || !errors.Is(err, cause) || !errors.As(err, &marshal) || callbacks != 0 || conversions != 1 || len(calls) != 0 {
 		t.Fatal(rows, err, marshal, callbacks, conversions, calls)

@@ -326,13 +326,13 @@ func (s *Service) subnetCloudList(ctx context.Context, op, identity string, sear
 		leaf = append(leaf, subnets.WithRecordListQuery(member.Key, member.Value))
 	}
 	if cfg.headersPresent {
-		leaf = append(leaf, subnets.WithRecordListHeaders(cfg.Headers))
+		leaf = append(leaf, request.Headers(cfg.Headers))
 	}
 	if cfg.Microversion != nil {
-		leaf = append(leaf, subnets.WithRecordListMicroversion(*cfg.Microversion))
+		leaf = append(leaf, request.Microversion(*cfg.Microversion))
 	}
 	if cfg.BasePath != nil {
-		leaf = append(leaf, subnets.WithRecordListBasePath(*cfg.BasePath))
+		leaf = append(leaf, request.BasePath(*cfg.BasePath))
 	}
 	leafCtx := rest.WithOperationGuard(ctx, guard)
 	proxy, err := api.Subnets.ProxyListRecords(leafCtx, leaf...)

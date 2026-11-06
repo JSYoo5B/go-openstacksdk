@@ -339,9 +339,9 @@ func (s *securityGroupReadState) list(ctx context.Context, result *SecurityGroup
 	for _, m := range pushdown {
 		leaf = append(leaf, groups.WithRecordProxyQuery(m.Key, json.RawMessage(bytes.Clone(m.Value))))
 	}
-	leaf = append(leaf, groups.WithRecordListHeaders(s.cfg.Headers))
+	leaf = append(leaf, request.Headers(s.cfg.Headers))
 	if s.cfg.Microversion != nil {
-		leaf = append(leaf, groups.WithRecordListMicroversion(*s.cfg.Microversion))
+		leaf = append(leaf, request.Microversion(*s.cfg.Microversion))
 	}
 	proxy, e := s.api.ProxyListRecords(ctx, leaf...)
 	if e != nil {
@@ -528,9 +528,9 @@ func (c *SecurityGroupCloud) GetSecurityGroup(ctx context.Context, reference any
 				result.Value, _ = json.Marshal(result.Group.Resource.Body)
 			}
 		} else {
-			leaf := []groups.RecordListOption{groups.WithRecordListHeaders(state.cfg.Headers)}
+			leaf := []groups.RecordListOption{request.Headers(state.cfg.Headers)}
 			if state.cfg.Microversion != nil {
-				leaf = append(leaf, groups.WithRecordListMicroversion(*state.cfg.Microversion))
+				leaf = append(leaf, request.Microversion(*state.cfg.Microversion))
 			}
 			result.LastGroup, e = state.api.GetSourceRecord(ctx, identity, leaf...)
 			if e == nil {

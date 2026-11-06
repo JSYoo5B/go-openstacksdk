@@ -16,6 +16,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -48,7 +49,7 @@ func TestPythonSubnetPoolRecordsUpdateAliasesNoopAndSeedWireProjection(t *testin
 	if _, present := value.Resource.Body["if_match"]; present {
 		t.Fatal(value)
 	}
-	value, err = api.UpdateRecord(context.Background(), "folder/pool?%", subnetpools.WithRecordAttribute("default_prefix_length", "20"), subnetpools.WithRecordAttribute("default_prefixlen", "24"), subnetpools.WithRecordAttribute("default_quota", false), subnetpools.WithRecordAttribute("if_revision", 0), subnetpools.WithRecordAttribute("if_match", "body-only"), subnetpools.WithRecordAttribute("x_seed", map[string]any{"null": nil, "false": false, "zero": 0, "empty": []any{}}))
+	value, err = api.UpdateRecord(context.Background(), "folder/pool?%", request.Field("default_prefix_length", "20"), request.Field("default_prefixlen", "24"), request.Field("default_quota", false), request.Field("if_revision", 0), request.Field("if_match", "body-only"), request.Field("x_seed", map[string]any{"null": nil, "false": false, "zero": 0, "empty": []any{}}))
 	if err != nil || len(calls) != 1 || calls[0].method != http.MethodPut || calls[0].query != "" || escaped != poolRecordsPath+"/folder%2Fpool%3F%25" || conditional != "" {
 		t.Fatal(value, err, calls, escaped, conditional)
 	}
@@ -87,9 +88,9 @@ func TestPythonSubnetPoolRecordsMemberDescriptorsSparseAndMalformedEvidence(t *t
 				var value *subnetpools.SubnetPoolRecord
 				var err error
 				if update {
-					value, err = api.UpdateRecord(context.Background(), "seed", subnetpools.WithRecordAttribute("x_seed", false))
+					value, err = api.UpdateRecord(context.Background(), "seed", request.Field("x_seed", false))
 				} else {
-					value, err = api.FindRecord(context.Background(), "seed", subnetpools.WithRecordFindQuery("x_seed", false))
+					value, err = api.FindRecord(context.Background(), "seed", request.Query("x_seed", false))
 				}
 				if (err == nil) != sample.valid || value == nil || value.StatusCode != 204 || string(value.Envelope) != sample.body || len(calls) != 1 {
 					t.Fatal(sample, value, err, calls)
@@ -112,7 +113,7 @@ func TestPythonSubnetPoolRecordsMemberDescriptorsSparseAndMalformedEvidence(t *t
 	api, _ := nativePoolAPI(t, &calls, func(*http.Request) *http.Response {
 		return nativePoolWire(299, `{"subnetpool":{"id":null,"name":"observed","default_prefixlen":1.9,"default_quota":"-4","ip_version":false,"max_prefixlen":"١٢","min_prefixlen":9007199254740993,"prefixes":false,"tags":null,"shared":"false","is_default":1e-4000,"tenant_id":{"raw":true},"created_at":"raw-time","if_match":"unknown-body"}}`)
 	})
-	value, err := api.FindRecord(context.Background(), "literal/id?", subnetpools.WithRecordFindQuery("name", "seed-name"))
+	value, err := api.FindRecord(context.Background(), "literal/id?", request.Query("name", "seed-name"))
 	if err != nil || len(calls) != 1 || value.StatusCode != 299 {
 		t.Fatal(value, err, calls)
 	}
@@ -135,7 +136,7 @@ func TestPythonSubnetPoolRecordsQueryClassificationAliasesAndLocalDescriptors(t 
 		return nativePoolWire(200, `{"subnetpools":[{"id":"wanted","name":"wanted","default_quota":"١","tenant_id":null,"prefixes":{"cidr":true},"shared":false,"x_row":null}]}`)
 	})
 	api.RawClient().MoreHeaders = map[string]string{"Accept": "application/source"}
-	value, err := api.FindRecord(context.Background(), "wanted", subnetpools.WithRecordFindQuery("shared", false), subnetpools.WithRecordFindQuery("is_shared", nil), subnetpools.WithRecordFindQuery("default_quota", true), subnetpools.WithRecordFindQuery("prefixes", []any{map[string]any{"cidr": true}}), subnetpools.WithRecordFindQuery("tenant_id", nil), subnetpools.WithRecordFindQuery("project_id", "fixed"), subnetpools.WithRecordFindQuery("any_tags", []any{"one", nil, "two"}), subnetpools.WithRecordFindQuery("fields", []any{"maximum_prefix_length", nil, "id"}), subnetpools.WithRecordFindQuery("x_unknown", map[string]any{"key": false}), subnetpools.WithRecordFindQuery("all_projects", true))
+	value, err := api.FindRecord(context.Background(), "wanted", request.Query("shared", false), request.Query("is_shared", nil), request.Query("default_quota", true), request.Query("prefixes", []any{map[string]any{"cidr": true}}), request.Query("tenant_id", nil), request.Query("project_id", "fixed"), request.Query("any_tags", []any{"one", nil, "two"}), request.Query("fields", []any{"maximum_prefix_length", nil, "id"}), request.Query("x_unknown", map[string]any{"key": false}), request.Query("all_projects", true))
 	if err != nil || value == nil || len(calls) != 2 || !reflect.DeepEqual(accepts, []string{"application/source", "application/json"}) {
 		t.Fatal(value, err, calls, accepts)
 	}
@@ -148,7 +149,7 @@ func TestPythonSubnetPoolRecordsQueryClassificationAliasesAndLocalDescriptors(t 
 	poolRecordValue(t, value, "minimum_prefix_length", "null")
 	calls = nil
 	accepts = nil
-	values, err := api.AllRecords(context.Background(), subnetpools.WithRecordListQuery("id", "wanted"), subnetpools.WithRecordListQuery("default_quota", true), subnetpools.WithRecordListQuery("default_prefixlen", 999), subnetpools.WithRecordListQuery("x_unknown", poolRecordMarshaler(func() ([]byte, error) { return nil, errors.New("discarded unknown") })), subnetpools.WithRecordListOpts(subnetpools.RecordListOpts{Query: map[string]json.RawMessage{"x_raw": json.RawMessage(`invalid`)}}), subnetpools.WithRecordListHeaders(map[string]string{"accept": "application/explicit"}))
+	values, err := api.AllRecords(context.Background(), subnetpools.WithRecordListQuery("id", "wanted"), subnetpools.WithRecordListQuery("default_quota", true), subnetpools.WithRecordListQuery("default_prefixlen", 999), subnetpools.WithRecordListQuery("x_unknown", poolRecordMarshaler(func() ([]byte, error) { return nil, errors.New("discarded unknown") })), subnetpools.WithRecordListOpts(subnetpools.RecordListOpts{Query: map[string]json.RawMessage{"x_raw": json.RawMessage(`invalid`)}}), request.Headers(map[string]string{"accept": "application/explicit"}))
 	// WithRecordListOpts replaces preceding options, and unknown list values are
 	// discarded without invoking their marshaler or becoming server filters.
 	if err != nil || len(values) != 1 || len(calls) != 1 || accepts[0] != "application/explicit" || calls[0].query != "" {
@@ -191,7 +192,7 @@ func TestPythonSubnetPoolRecordsPaginationFullSearchAndRawCaps(t *testing.T) {
 			_ = cloud
 			opts := []subnetpools.RecordListOption{subnetpools.WithRecordListQuery("name", "wanted")}
 			if nextKind == "marker" {
-				opts = append(opts, subnetpools.WithRecordListLimit(2))
+				opts = append(opts, request.Limit(2))
 			}
 			values, err := api.AllRecords(context.Background(), opts...)
 			// Marker continuation keeps fetching short pages until an empty page.
@@ -256,12 +257,12 @@ func TestPythonSubnetPoolRecordsPaginationFullSearchAndRawCaps(t *testing.T) {
 	api, _ := nativePoolAPI(t, &calls, func(*http.Request) *http.Response {
 		return nativePoolWire(200, `{"subnetpools":[{"id":"discard","name":"other"},{"id":"wanted","name":"wanted"}],"subnetpools_links":[{"rel":"next","href":"?marker=wanted"}]}`)
 	})
-	values, err := api.AllRecords(context.Background(), subnetpools.WithRecordListQuery("id", "wanted"), subnetpools.WithRecordListMaxItems(1))
+	values, err := api.AllRecords(context.Background(), subnetpools.WithRecordListQuery("id", "wanted"), request.MaxItems(1))
 	if err != nil || len(values) != 0 || len(calls) != 1 || urlMustQuery(t, calls[0].query).Get("limit") != "1" {
 		t.Fatal(values, err, calls)
 	}
 	calls = nil
-	values, err = api.AllRecords(context.Background(), subnetpools.WithRecordListPaginated(false))
+	values, err = api.AllRecords(context.Background(), request.Paginated(false))
 	if err != nil || len(values) != 2 || len(calls) != 1 {
 		t.Fatal(values, err, calls)
 	}
@@ -300,7 +301,7 @@ func TestPythonSubnetPoolRecordsCleanMissingAndConstructorFailures(t *testing.T)
 					}
 					return nativePoolWire(200, `{"subnetpools":[]}`)
 				})
-				value, err := api.FindRecord(context.Background(), "absent", subnetpools.WithRecordFindIgnoreMissing(!strict))
+				value, err := api.FindRecord(context.Background(), "absent", request.IgnoreMissing(!strict))
 				clean := status == 400 || status == 403 || status == 404
 				if value != nil {
 					t.Fatal(value)
@@ -437,7 +438,7 @@ func TestPythonSubnetPoolRecordsPhysicalFailuresPreserveAcceptedAndRejectedProof
 					var err error
 					switch operation {
 					case "UpdateRecord":
-						value, err = api.UpdateRecord(ctx, "pool", subnetpools.WithRecordAttribute("name", "new"))
+						value, err = api.UpdateRecord(ctx, "pool", request.Field("name", "new"))
 					case "FindRecord", "fallback_list":
 						value, err = api.FindRecord(ctx, "pool")
 					case "ListRecords":
@@ -549,7 +550,7 @@ func TestPythonSubnetPoolRecordsRetriesKeepProtocolBodyAndNativeCauses(t *testin
 					var err error
 					switch operation {
 					case "UpdateRecord":
-						_, err = api.UpdateRecord(context.Background(), "pool", subnetpools.WithRecordAttribute("name", "new"))
+						_, err = api.UpdateRecord(context.Background(), "pool", request.Field("name", "new"))
 					case "FindRecord", "fallback_list":
 						_, err = api.FindRecord(context.Background(), "pool")
 					case "ListRecords":
@@ -599,7 +600,7 @@ func TestPythonSubnetPoolRecordsRetriesKeepProtocolBodyAndNativeCauses(t *testin
 				var err error
 				switch operation {
 				case "UpdateRecord":
-					_, err = api.UpdateRecord(context.Background(), "pool", subnetpools.WithRecordAttribute("name", "new"))
+					_, err = api.UpdateRecord(context.Background(), "pool", request.Field("name", "new"))
 				case "FindRecord":
 					_, err = api.FindRecord(context.Background(), "pool")
 				case "ListRecords":
@@ -616,7 +617,7 @@ func TestPythonSubnetPoolRecordsRetriesKeepProtocolBodyAndNativeCauses(t *testin
 func TestPythonSubnetPoolRecordsOptionsSourceContextAndConcurrentOwnership(t *testing.T) {
 	input := map[string]any{"items": []any{nil, false, 0}}
 	headers := map[string]string{"X-Record": "owned"}
-	field, header := subnetpools.WithRecordAttribute("x_input", input), subnetpools.WithRecordMutationHeaders(headers)
+	field, header := request.Field("x_input", input), request.Headers(headers)
 	input["items"] = nil
 	headers["X-Record"] = "changed"
 	var calls []nativePoolCall
@@ -629,7 +630,7 @@ func TestPythonSubnetPoolRecordsOptionsSourceContextAndConcurrentOwnership(t *te
 		retained.Headers["X-Record"] = "retained mutation"
 		return nativePoolWire(200, `{"subnetpool":{"id":"pool"}}`)
 	})
-	value, err := api.UpdateRecord(context.Background(), "pool", field, header, func(o *subnetpools.RecordMutationOpts) error { retained = o; return nil })
+	value, err := api.UpdateRecord(context.Background(), "pool", field, header, request.Custom(func(o *subnetpools.RecordMutationOpts) error { retained = o; return nil }))
 	if err != nil || len(calls) != 1 || calls[0].body != `{"subnetpool":{"x_input":{"items":[null,false,0]}}}` {
 		t.Fatal(value, err, calls)
 	}
@@ -643,28 +644,28 @@ func TestPythonSubnetPoolRecordsOptionsSourceContextAndConcurrentOwnership(t *te
 			var actual context.Context = ctx
 			id := "pool"
 			cause := errors.New("option cause")
-			options := []subnetpools.RecordMutationOption{subnetpools.WithRecordAttribute("name", "new")}
+			options := []subnetpools.RecordMutationOption{request.Field("name", "new")}
 			switch lane {
 			case "nil_context":
 				actual = nil
 			case "cancel_callback":
-				options = append(options, func(*subnetpools.RecordMutationOpts) error { cancel(cause); return nil })
+				options = append(options, request.Custom(func(*subnetpools.RecordMutationOpts) error { cancel(cause); return nil }))
 			case "source_callback":
-				options = append(options, func(*subnetpools.RecordMutationOpts) error { api.RawClient().Type = "compute"; return cause })
+				options = append(options, request.Custom(func(*subnetpools.RecordMutationOpts) error { api.RawClient().Type = "compute"; return cause }))
 			case "callback_cause":
-				options = append(options, func(*subnetpools.RecordMutationOpts) error { return cause })
+				options = append(options, request.Custom(func(*subnetpools.RecordMutationOpts) error { return cause }))
 			case "nil_option":
 				options = append(options, nil)
 			case "bad_id":
 				id = " \n"
 			case "protected_header":
-				options = append(options, subnetpools.WithRecordMutationHeaders(map[string]string{"Authorization": "foreign"}))
+				options = append(options, request.Headers(map[string]string{"Authorization": "foreign"}))
 			case "bad_descriptor":
-				options = append(options, subnetpools.WithRecordAttribute("default_quota", "²"))
+				options = append(options, request.Field("default_quota", "²"))
 			case "marshal_cause":
-				options = append(options, subnetpools.WithRecordAttribute("name", poolRecordMarshaler(func() ([]byte, error) { return nil, cause })))
+				options = append(options, request.Field("name", poolRecordMarshaler(func() ([]byte, error) { return nil, cause })))
 			case "reserved_body":
-				options = append(options, subnetpools.WithRecordAttribute("id", "changed"))
+				options = append(options, request.Field("id", "changed"))
 			}
 			value, err := api.UpdateRecord(actual, id, options...)
 			if err == nil || value != nil || len(calls) != 0 {
@@ -679,13 +680,13 @@ func TestPythonSubnetPoolRecordsOptionsSourceContextAndConcurrentOwnership(t *te
 		t.Run("find_control_"+key, func(t *testing.T) {
 			var calls []nativePoolCall
 			api, _ := nativePoolAPI(t, &calls, func(*http.Request) *http.Response { return nativePoolWire(200, `{}`) })
-			value, err := api.FindRecord(context.Background(), "pool", subnetpools.WithRecordFindQuery(key, nil))
+			value, err := api.FindRecord(context.Background(), "pool", request.Query(key, nil))
 			if value != nil || !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
 				t.Fatal(value, err, calls)
 			}
 		})
 	}
-	for _, opts := range [][]subnetpools.RecordListOption{{nil}, {subnetpools.WithRecordListLimit(-1)}, {subnetpools.WithRecordListMaxItems(-1)}, {subnetpools.WithRecordListQuery("cls", nil)}, {subnetpools.WithRecordListHeaders(map[string]string{"Cookie": "foreign"})}} {
+	for _, opts := range [][]subnetpools.RecordListOption{{nil}, {request.Limit(-1)}, {request.MaxItems(-1)}, {subnetpools.WithRecordListQuery("cls", nil)}, {request.Headers(map[string]string{"Cookie": "foreign"})}} {
 		var calls []nativePoolCall
 		api, _ := nativePoolAPI(t, &calls, func(*http.Request) *http.Response { return nativePoolWire(200, `{}`) })
 		_, err := api.AllRecords(context.Background(), opts...)
@@ -704,7 +705,7 @@ func TestPythonSubnetPoolRecordsOptionsSourceContextAndConcurrentOwnership(t *te
 		}
 		return nativePoolWire(200, string(body)), nil
 	}))
-	option := subnetpools.WithRecordAttribute("x_shared", []any{false, 0, nil})
+	option := request.Field("x_shared", []any{false, 0, nil})
 	values := make([]*subnetpools.SubnetPoolRecord, 8)
 	failures := make([]error, 8)
 	var workers sync.WaitGroup
@@ -751,7 +752,7 @@ func TestPythonSubnetPoolRecordsFindMicroversionIsMemberPhaseOnly(t *testing.T) 
 				return nativePoolWire(200, `{"subnetpools":[{"id":"found","name":"wanted"}]}`)
 			})
 			api.RawClient().Microversion = selected
-			value, err := api.FindRecord(context.Background(), "wanted", subnetpools.WithRecordFindMicroversion("2.9"), subnetpools.WithRecordFindHeaders(map[string]string{"X-Record": "both-phases"}))
+			value, err := api.FindRecord(context.Background(), "wanted", request.Microversion("2.9"), request.Headers(map[string]string{"X-Record": "both-phases"}))
 			listVersion := ""
 			if selected != "" {
 				listVersion = "network " + selected
@@ -789,7 +790,7 @@ func TestPythonSubnetPoolRecordsFindMicroversionIsMemberPhaseOnly(t *testing.T) 
 				o.MoreHeaders["OpenStack-API-Version"] = "network 2.9"
 				return nil
 			}
-			value, err := api.FindRecord(context.Background(), "wanted", subnetpools.WithRecordFindMicroversion("2.9"))
+			value, err := api.FindRecord(context.Background(), "wanted", request.Microversion("2.9"))
 			var native gophercloud.ErrUnexpectedResponseCode
 			if value != nil || !errors.Is(err, resource.ErrInvalidOption) || !errors.As(err, &native) || native.Actual != 503 || string(native.Body) != `{"phase":"original LIST"}` || native.ResponseHeader.Get("X-Request-Id") != "fallback-native" || callbacks != 1 || len(calls) != 2 {
 				t.Fatal(value, err, native, calls, callbacks)
@@ -811,9 +812,9 @@ func TestPythonSubnetPoolRecordsFindMicroversionIsMemberPhaseOnly(t *testing.T) 
 		api.RawClient().Microversion = "2.0"
 		var err error
 		if operation == "list" {
-			_, err = api.AllRecords(context.Background(), subnetpools.WithRecordListMicroversion("2.9"))
+			_, err = api.AllRecords(context.Background(), request.Microversion("2.9"))
 		} else {
-			_, err = api.UpdateRecord(context.Background(), "pool", subnetpools.WithRecordMutationMicroversion("2.9"), subnetpools.WithRecordAttribute("name", "new"))
+			_, err = api.UpdateRecord(context.Background(), "pool", request.Microversion("2.9"), request.Field("name", "new"))
 		}
 		if err != nil || len(calls) != 1 || api.RawClient().Microversion != "2.0" {
 			t.Fatal(err, calls)

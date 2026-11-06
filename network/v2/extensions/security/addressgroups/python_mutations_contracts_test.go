@@ -180,7 +180,7 @@ func TestPythonAddressGroupDeleteDefaultsStrictOptionsAndSourceStatuses(t *testi
 				})
 				var options []addressgroups.DeleteOption
 				if strict {
-					options = []addressgroups.DeleteOption{addressgroups.WithDeleteIgnoreMissing(false)}
+					options = []addressgroups.DeleteOption{request.IgnoreMissing(false)}
 				}
 				err := api.DeleteWithOptions(context.Background(), "literal.id", options...)
 				if code < 400 || code == 404 && !strict {
@@ -211,10 +211,10 @@ func TestPythonAddressGroupDeleteDefaultsStrictOptionsAndSourceStatuses(t *testi
 				t.Fatal(err)
 			}
 		}
-		if err := api.DeleteWithOptions(context.Background(), "gone", option, addressgroups.WithDeleteIgnoreMissing(true)); err != nil {
+		if err := api.DeleteWithOptions(context.Background(), "gone", option, request.IgnoreMissing(true)); err != nil {
 			t.Fatal(err)
 		}
-		if err := api.DeleteWithOptions(context.Background(), "gone", addressgroups.WithDeleteIgnoreMissing(false), addressgroups.WithDeleteOptions(addressgroups.DeleteOpts{})); err != nil {
+		if err := api.DeleteWithOptions(context.Background(), "gone", request.IgnoreMissing(false), addressgroups.WithDeleteOptions(addressgroups.DeleteOpts{})); err != nil {
 			t.Fatal(err)
 		}
 		if len(calls) != 4 {

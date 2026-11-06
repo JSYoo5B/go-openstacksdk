@@ -14,6 +14,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -96,7 +97,7 @@ func TestPythonSecurityGroupListRecordsQueryAliasesAndNullCanonicalPriority(t *t
 		query = req.URL.Query()
 		return listRecordWire(200, `{"security_groups":[]}`)
 	})
-	options := []groups.RecordListOption{groups.WithRecordListQuery("description", "desc"), groups.WithRecordListQuery("fields", []string{"id", "shared"}), groups.WithRecordListQuery("id", []string{"one", "two"}), groups.WithRecordListQuery("name", "name"), groups.WithRecordListQuery("stateful", false), groups.WithRecordListQuery("project_id", "project"), groups.WithRecordListQuery("tenant_id", "tenant"), groups.WithRecordListQuery("revision_number", 0), groups.WithRecordListQuery("sort_key", []string{"id", "name"}), groups.WithRecordListQuery("sort_dir", []string{"asc", "desc"}), groups.WithRecordListQuery("tags", "tags"), groups.WithRecordListQuery("any_tags", "canonical-any"), groups.WithRecordListQuery("tags-any", "wire-any"), groups.WithRecordListQuery("not_tags", "canonical-not"), groups.WithRecordListQuery("not-tags", "wire-not"), groups.WithRecordListQuery("not_any_tags", "canonical-not-any"), groups.WithRecordListQuery("not-tags-any", "wire-not-any"), groups.WithRecordListQuery("is_shared", nil), groups.WithRecordListQuery("shared", true), groups.WithRecordListLimit(0), groups.WithRecordListMarker("initial"), groups.WithRecordListQuery("unknown", make(chan int)), groups.WithRecordListQuery("if_match", make(chan int))}
+	options := []groups.RecordListOption{groups.WithRecordListQuery("description", "desc"), groups.WithRecordListQuery("fields", []string{"id", "shared"}), groups.WithRecordListQuery("id", []string{"one", "two"}), groups.WithRecordListQuery("name", "name"), groups.WithRecordListQuery("stateful", false), groups.WithRecordListQuery("project_id", "project"), groups.WithRecordListQuery("tenant_id", "tenant"), groups.WithRecordListQuery("revision_number", 0), groups.WithRecordListQuery("sort_key", []string{"id", "name"}), groups.WithRecordListQuery("sort_dir", []string{"asc", "desc"}), groups.WithRecordListQuery("tags", "tags"), groups.WithRecordListQuery("any_tags", "canonical-any"), groups.WithRecordListQuery("tags-any", "wire-any"), groups.WithRecordListQuery("not_tags", "canonical-not"), groups.WithRecordListQuery("not-tags", "wire-not"), groups.WithRecordListQuery("not_any_tags", "canonical-not-any"), groups.WithRecordListQuery("not-tags-any", "wire-not-any"), groups.WithRecordListQuery("is_shared", nil), groups.WithRecordListQuery("shared", true), request.Limit(0), request.Marker("initial"), groups.WithRecordListQuery("unknown", make(chan int)), groups.WithRecordListQuery("if_match", make(chan int))}
 	rows, err := api.AllRecords(context.Background(), options...)
 	if err != nil || rows == nil || len(rows) != 0 || len(calls) != 1 || len(query) != 16 || query["shared"] != nil || query["unknown"] != nil || query["if_match"] != nil || !reflect.DeepEqual(query["id"], []string{"one", "two"}) || !reflect.DeepEqual(query["fields"], []string{"id", "shared"}) || !reflect.DeepEqual(query["stateful"], []string{"False"}) || !reflect.DeepEqual(query["tags-any"], []string{"canonical-any"}) || !reflect.DeepEqual(query["not-tags"], []string{"canonical-not"}) || !reflect.DeepEqual(query["not-tags-any"], []string{"canonical-not-any"}) || !reflect.DeepEqual(query["project_id"], []string{"project"}) || !reflect.DeepEqual(query["tenant_id"], []string{"tenant"}) {
 		t.Fatal(rows, err, calls, query)
@@ -218,26 +219,26 @@ func TestPythonSecurityGroupListRecordsRawCapsMarkerAndUnconsumedRows(t *testing
 		}
 		return listRecordWire(200, `{"security_groups":[{"id":"first"}]}`)
 	})
-	rows, err := api.AllRecords(context.Background(), groups.WithRecordListLimit(5))
+	rows, err := api.AllRecords(context.Background(), request.Limit(5))
 	if err != nil || len(rows) != 1 || len(calls) != 2 || !strings.Contains(calls[1].query, "marker=first") {
 		t.Fatal(rows, err, calls)
 	}
 	calls = nil
-	rows, err = api.AllRecords(context.Background(), groups.WithRecordListLimit(5), groups.WithRecordListPaginated(false))
+	rows, err = api.AllRecords(context.Background(), request.Limit(5), request.Paginated(false))
 	if err != nil || len(rows) != 1 || len(calls) != 1 {
 		t.Fatal(rows, err, calls)
 	}
 	calls = nil
 	body := `{"security_groups":[{"id":"skip","created_at":"other"},{"id":"keep","created_at":"wanted"},{"cls":null}],"next":"https://foreign.invalid"}`
 	api, _ = findAPI(t, &calls, func(*http.Request) *http.Response { return listRecordWire(200, body) })
-	options := []groups.RecordListOption{groups.WithRecordListLimit(0), groups.WithRecordListMaxItems(2), groups.WithRecordListQuery("created_at", "wanted")}
+	options := []groups.RecordListOption{request.Limit(0), request.MaxItems(2), groups.WithRecordListQuery("created_at", "wanted")}
 	rows, err = api.AllRecords(context.Background(), options...)
 	if err != nil || len(rows) != 1 || len(calls) != 1 || calls[0].query != "limit=2" {
 		t.Fatal(rows, err, calls)
 	}
 	findValue(t, rows[0], "id", `"keep"`)
 	calls = nil
-	rows, err = api.AllRecords(context.Background(), groups.WithRecordListMaxItems(1), groups.WithRecordListQuery("created_at", "wanted"))
+	rows, err = api.AllRecords(context.Background(), request.MaxItems(1), groups.WithRecordListQuery("created_at", "wanted"))
 	if err != nil || rows == nil || len(rows) != 0 || len(calls) != 1 {
 		t.Fatal(rows, err, calls)
 	}
@@ -281,7 +282,7 @@ func TestPythonSecurityGroupListRecordsEnvelopeAndConstructorErrorsKeepPage(t *t
 func TestPythonSecurityGroupListRecordsPreflightAndIgnoredValues(t *testing.T) {
 	var calls []nativeSecGroupCall
 	api, _ := findAPI(t, &calls, func(*http.Request) *http.Response { t.Fatal("preflight reached HTTP"); return nil })
-	opts := [][]groups.RecordListOption{{nil}, {groups.WithRecordListLimit(-1)}, {groups.WithRecordListMaxItems(-1)}, {groups.WithRecordListMarker("")}, {groups.WithRecordListQuery("limit", []int{1, 2})}, {groups.WithRecordListQuery("limit", 1.5)}, {groups.WithRecordListQuery("created_at", json.RawMessage(`bad`))}, {groups.WithRecordListHeaders(map[string]string{"X-Auth-Token": "bad"})}, {groups.WithRecordListHeaders(map[string]string{"OpenStack-API-Version": "network 2.0"})}, {groups.WithRecordListQuery("jmespath_filters", "")}, {groups.WithRecordListOpts(groups.RecordListOpts{Query: map[string]json.RawMessage{"jmespath_filters": json.RawMessage(`null`)}})}}
+	opts := [][]groups.RecordListOption{{nil}, {request.Limit(-1)}, {request.MaxItems(-1)}, {request.Marker("")}, {groups.WithRecordListQuery("limit", []int{1, 2})}, {groups.WithRecordListQuery("limit", 1.5)}, {groups.WithRecordListQuery("created_at", json.RawMessage(`bad`))}, {request.Headers(map[string]string{"X-Auth-Token": "bad"})}, {request.Headers(map[string]string{"OpenStack-API-Version": "network 2.0"})}, {groups.WithRecordListQuery("jmespath_filters", "")}, {groups.WithRecordListOpts(groups.RecordListOpts{Query: map[string]json.RawMessage{"jmespath_filters": json.RawMessage(`null`)}})}}
 	for _, key := range []string{"cls", "session", "connection", "_synchronized", "base_path", "list_base_path", "self", "resource_type", "location", "__conflicting_attrs", "headers", "microversion"} {
 		opts = append(opts, []groups.RecordListOption{groups.WithRecordListQuery(key, nil)})
 	}
@@ -323,12 +324,12 @@ func TestPythonSecurityGroupListRecordsLazySnapshotsAndConcurrentReuse(t *testin
 	version = "changed"
 	var retained *groups.RecordListOpts
 	applied := 0
-	options := []groups.RecordListOption{option, func(v *groups.RecordListOpts) error { applied++; retained = v; return nil }, func(*groups.RecordListOpts) error {
+	options := []groups.RecordListOption{option, request.Custom(func(v *groups.RecordListOpts) error { applied++; retained = v; return nil }), request.Custom(func(*groups.RecordListOpts) error {
 		retained.Query["name"] = json.RawMessage(`false`)
 		retained.Headers["X-Auth-Token"] = "bad"
 		*retained.Microversion = "changed"
 		return nil
-	}}
+	})}
 	iterator := api.ListRecords(context.Background(), options...)
 	options[0] = nil
 	if len(calls) != 0 || applied != 0 {
@@ -352,7 +353,7 @@ func TestPythonSecurityGroupListRecordsLazySnapshotsAndConcurrentReuse(t *testin
 		attempts.Add(1)
 		return listRecordWire(200, `{"security_groups":[{"id":"one","x_new":{"x":false}}]}`), nil
 	}))
-	shared := groups.WithRecordListHeaders(map[string]string{"X-Trace": "owned"})
+	shared := request.Headers(map[string]string{"X-Trace": "owned"})
 	var wg sync.WaitGroup
 	for i := 0; i < 8; i++ {
 		wg.Add(1)
@@ -393,7 +394,7 @@ func TestPythonSecurityGroupListRecordsSelectedVersionAndListHeaders(t *testing.
 			t.Fatal(rows, err, calls, headers)
 		}
 		calls = nil
-		rows, err = api.AllRecords(context.Background(), groups.WithRecordListMicroversion(""), groups.WithRecordListHeaders(map[string]string{"aCcEpT": "owned", "If-Match": "selected"}))
+		rows, err = api.AllRecords(context.Background(), request.Microversion(""), request.Headers(map[string]string{"aCcEpT": "owned", "If-Match": "selected"}))
 		if err != nil || len(rows) != 1 || len(calls) != 1 || headers.Get("OpenStack-API-Version") != "" || headers.Get("Accept") != "owned" || headers.Get("If-Match") != "selected" || api.RawClient().Microversion != selected {
 			t.Fatal(rows, err, calls, headers)
 		}
@@ -553,12 +554,12 @@ func TestPythonSecurityGroupListRecordsPublicFixtureAndCancellation(t *testing.T
 	}
 	ctx, cancel := context.WithCancelCause(context.Background())
 	cause, callback := errors.New("cancel"), errors.New("callback")
-	rows, err = api.AllRecords(ctx, func(*groups.RecordListOpts) error { cancel(cause); return callback })
+	rows, err = api.AllRecords(ctx, request.Custom(func(*groups.RecordListOpts) error { cancel(cause); return callback }))
 	if rows != nil || !errors.Is(err, context.Canceled) || !errors.Is(err, cause) || !errors.Is(err, callback) || count.Load() != 1 {
 		t.Fatal(rows, err, count.Load())
 	}
 	original := api.RawClient().ResourceBase
-	rows, err = api.AllRecords(context.Background(), func(*groups.RecordListOpts) error { api.RawClient().ResourceBase += "changed/"; return callback })
+	rows, err = api.AllRecords(context.Background(), request.Custom(func(*groups.RecordListOpts) error { api.RawClient().ResourceBase += "changed/"; return callback }))
 	api.RawClient().ResourceBase = original
 	if rows != nil || !errors.Is(err, resource.ErrInvalidOption) || !errors.Is(err, callback) || count.Load() != 1 {
 		t.Fatal(rows, err, count.Load())
@@ -588,7 +589,7 @@ func TestPythonSecurityGroupListRecordsConditionalRequestOwnership(t *testing.T)
 					api.RawClient().MoreHeaders = map[string]string{strings.ToLower(key): value}
 				}
 				if lane == "explicit" || lane == "changed" || lane == "omitted" {
-					options = append(options, groups.WithRecordListHeaders(map[string]string{strings.ToLower(key): value}))
+					options = append(options, request.Headers(map[string]string{strings.ToLower(key): value}))
 				}
 				cause := errors.New("conditional callback")
 				api.RawClient().RetryFunc = func(_ context.Context, _ string, _ string, opts *gophercloud.RequestOpts, _ error, _ uint) error {

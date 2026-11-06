@@ -9,14 +9,15 @@ import (
 	"maps"
 	"net/http"
 	"net/url"
-	"slices"
 	"strings"
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/jsonfilter"
+	"github.com/JSYoo5B/go-openstacksdk/internal/neutronfind"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
@@ -38,7 +39,13 @@ type SubportActionOpts struct {
 	Headers map[string]string
 	Seed    *resource.RawResource
 }
-type SubportActionOption func(*SubportActionOpts) error
+
+// SubportActionOption is one option of AddSubportsRecord and
+// RemoveSubportsRecord: WithSubportActionOpts, WithSubportActionSeed,
+// request.Headers (replaces the headers) or request.Custom over
+// *SubportActionOpts. Other shared calls fail with resource.ErrInvalidOption
+// before HTTP.
+type SubportActionOption = request.WriteCall
 
 func copyActionOpts(v SubportActionOpts) SubportActionOpts {
 	v.Headers = maps.Clone(v.Headers)
@@ -47,15 +54,15 @@ func copyActionOpts(v SubportActionOpts) SubportActionOpts {
 }
 func WithSubportActionOpts(value SubportActionOpts) SubportActionOption {
 	owned := copyActionOpts(value)
-	return func(v *SubportActionOpts) error { *v = copyActionOpts(owned); return nil }
+	return request.Custom(func(v *SubportActionOpts) error { *v = copyActionOpts(owned); return nil })
 }
-func WithSubportActionHeaders(values map[string]string) SubportActionOption {
+func withSubportActionHeaders(values map[string]string) func(*SubportActionOpts) error {
 	owned := maps.Clone(values)
 	return func(v *SubportActionOpts) error { v.Headers = maps.Clone(owned); return nil }
 }
 func WithSubportActionSeed(value *resource.RawResource) SubportActionOption {
 	owned := value.Clone()
-	return func(v *SubportActionOpts) error { v.Seed = owned.Clone(); return nil }
+	return request.Custom(func(v *SubportActionOpts) error { v.Seed = owned.Clone(); return nil })
 }
 func actionInvalid(format string, values ...any) error {
 	return fmt.Errorf("%w: %s", resource.ErrInvalidOption, fmt.Sprintf(format, values...))
@@ -266,7 +273,7 @@ func (a *API) actionRecord(ctx context.Context, id string, value any, route stri
 		}
 	}
 	opts := SubportActionOpts{}
-	for _, apply := range slices.Clone(options) {
+	for _, apply := range calls.Translate(options, subportActionCalls) {
 		if err = guard(ctx); err != nil {
 			return nil, err
 		}
@@ -308,4 +315,9 @@ func (a *API) AddSubportsRecord(ctx context.Context, id string, value any, optio
 func (a *API) RemoveSubportsRecord(ctx context.Context, id string, value any, options ...SubportActionOption) (*TrunkActionRecord, error) {
 	record, err := a.actionRecord(ctx, id, value, "remove_subports", true, options)
 	return record, request.Wrap("RemoveSubportsRecord", "trunks", cloudread.ContextError(ctx, err))
+}
+
+// subportActionCalls interprets the shared calls of SubportActionOption.
+var subportActionCalls = calls.Spec[SubportActionOpts]{
+	Headers: neutronfind.Use(withSubportActionHeaders),
 }

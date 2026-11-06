@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -83,7 +84,7 @@ func TestPythonOnboardNetworkSubnetsOptionsOwnershipAndGuard(t *testing.T) {
 	if err != nil || len(calls) != 1 || api.RawClient().Microversion != "2.0" || api.RawClient().MoreHeaders["OpenStack-API-Version"] != "network 2.0" {
 		t.Fatal(err, calls)
 	}
-	for _, opts := range [][]subnetpools.OnboardNetworkOption{{nil}, {subnetpools.WithOnboardNetworkHeaders(map[string]string{"X-Auth-Token": "foreign"})}, {func(*subnetpools.OnboardNetworkOpts) error { api.RawClient().Endpoint += "changed/"; return nil }}} {
+	for _, opts := range [][]subnetpools.OnboardNetworkOption{{nil}, {request.Headers(map[string]string{"X-Auth-Token": "foreign"})}, {request.Custom(func(*subnetpools.OnboardNetworkOpts) error { api.RawClient().Endpoint += "changed/"; return nil })}} {
 		_, err = api.OnboardNetworkSubnetsRecord(context.Background(), "pool", "net", opts...)
 		if err == nil || len(calls) != 1 {
 			t.Fatal(err, calls)

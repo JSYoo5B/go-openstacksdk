@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/ports"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -73,7 +74,7 @@ func TestPythonBulkPortsLastRowHeaderAndSelectedVersion(t *testing.T) {
 			})
 			api.RawClient().MoreHeaders = map[string]string{"If-Match": "configured"}
 			api.RawClient().Microversion = "9.9"
-			result, err := api.CreatePorts(context.Background(), []ports.BulkPortInput{ports.BulkPortJSON(json.RawMessage(`{"if_match":"earlier"}`)), ports.BulkPortJSON(json.RawMessage(test.last))}, ports.WithBulkPortMicroversion("2.1"))
+			result, err := api.CreatePorts(context.Background(), []ports.BulkPortInput{ports.BulkPortJSON(json.RawMessage(`{"if_match":"earlier"}`)), ports.BulkPortJSON(json.RawMessage(test.last))}, request.Microversion("2.1"))
 			if err != nil || result == nil || len(calls) != 1 || api.RawClient().Microversion != "9.9" {
 				t.Fatal(result, err, calls)
 			}
@@ -109,7 +110,7 @@ func TestPythonBulkPortsInputsAndOptionCallbacksAreOwned(t *testing.T) {
 	input := ports.BulkPortFields(fields)
 	fields["network_id"][1] = 'x'
 	headers := map[string]string{"X-Trace": "owned"}
-	option := ports.WithBulkPortHeaders(headers)
+	option := request.Headers(headers)
 	headers["X-Trace"] = "mutated"
 	var escaped *ports.BulkPortOpts
 	var calls []nativePortCall
@@ -120,7 +121,7 @@ func TestPythonBulkPortsInputsAndOptionCallbacksAreOwned(t *testing.T) {
 		escaped.Headers["X-Trace"] = "escaped"
 		return nativePortWire(201, `{"ports":[{}]}`)
 	})
-	result, err := api.CreatePorts(context.Background(), []ports.BulkPortInput{input}, ports.WithBulkPortHeaders(nil), option, func(c *ports.BulkPortOpts) error { c.Headers["X-Callback"] = "yes"; escaped = c; return nil })
+	result, err := api.CreatePorts(context.Background(), []ports.BulkPortInput{input}, request.Headers(nil), option, request.Custom(func(c *ports.BulkPortOpts) error { c.Headers["X-Callback"] = "yes"; escaped = c; return nil }))
 	if err != nil || result == nil || len(calls) != 1 {
 		t.Fatal(result, err, calls)
 	}
@@ -250,14 +251,14 @@ func TestPythonBulkPortsCancellationAndSourceMutationRetainCauses(t *testing.T) 
 		api := pythonCorePortAPI(t, &calls, func(*http.Request) *http.Response { t.Fatal("callback changed captured source"); return nil })
 		ctx, cancel := context.WithCancelCause(context.Background())
 		cause, optionCause := errors.New("cancelled bulk"), errors.New("failed bulk option")
-		result, err := api.CreatePorts(ctx, []ports.BulkPortInput{ports.BulkPort()}, func(*ports.BulkPortOpts) error {
+		result, err := api.CreatePorts(ctx, []ports.BulkPortInput{ports.BulkPort()}, request.Custom(func(*ports.BulkPortOpts) error {
 			if cancelled {
 				cancel(cause)
 			} else {
 				api.RawClient().ResourceBase += "changed/"
 			}
 			return optionCause
-		})
+		}))
 		cancel(nil)
 		if result != nil || len(calls) != 0 || !errors.Is(err, optionCause) || cancelled && (!errors.Is(err, context.Canceled) || !errors.Is(err, cause)) || !cancelled && !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(result, err, calls)
@@ -365,7 +366,7 @@ func TestPythonBulkPortsCleanReauthenticationAndRetryKeepOneBulkBodyPolicy(t *te
 			c.MoreHeaders["X-Retry-Probe"] = "ordinary"
 			return nil
 		}
-		result, err := api.CreatePorts(context.Background(), []ports.BulkPortInput{ports.BulkPort(ports.WithBulkPortAttribute("network_id", "n"), ports.WithBulkPortAttribute("if_match", "last"))}, ports.WithBulkPortMicroversion("2.1"))
+		result, err := api.CreatePorts(context.Background(), []ports.BulkPortInput{ports.BulkPort(ports.WithBulkPortAttribute("network_id", "n"), ports.WithBulkPortAttribute("if_match", "last"))}, request.Microversion("2.1"))
 		if err != nil || result == nil {
 			t.Fatal(result, err, calls)
 		}

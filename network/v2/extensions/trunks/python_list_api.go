@@ -7,6 +7,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/neutronfind"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -66,7 +67,7 @@ func (a *API) ListRecords(ctx context.Context, options ...RecordListOption) iter
 			return
 		}
 		policy := copyRecordList(RecordListOpts{})
-		for _, apply := range snapshot {
+		for _, apply := range calls.Translate(snapshot, recordListCalls) {
 			if err := engine.Check(ctx); err != nil {
 				yield(nil, listRecordWrap(ctx, "ListRecords", err))
 				return

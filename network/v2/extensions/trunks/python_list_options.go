@@ -7,7 +7,9 @@ import (
 	"maps"
 	"slices"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/neutronfind"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 // RecordListOpts owns declared server kwargs, local Body filters and list
@@ -19,7 +21,15 @@ type RecordListOpts struct {
 	Microversion *string
 	order        []string
 }
-type RecordListOption func(*RecordListOpts) error
+
+// RecordListOption is one option of ListRecords and AllRecords:
+// WithRecordListOpts, WithRecordListQuery, request.Headers (replaces the
+// headers), request.Microversion, request.Limit, request.Marker,
+// request.MaxItems, request.Paginated or request.Custom over *RecordListOpts.
+// request.Query is rejected because WithRecordListQuery checks the key before it
+// marshals the value. Other shared calls fail with resource.ErrInvalidOption
+// before HTTP.
+type RecordListOption = request.ListCall
 
 func recordListOptions(value RecordListOpts) neutronfind.Options {
 	return neutronfind.Options{Query: value.Query, Headers: value.Headers, Microversion: value.Microversion, Order: value.order}
@@ -37,7 +47,7 @@ func copyRecordList(value RecordListOpts) RecordListOpts {
 }
 func WithRecordListOpts(value RecordListOpts) RecordListOption {
 	owned := copyRecordList(value)
-	return func(c *RecordListOpts) error { *c = copyRecordList(owned); return nil }
+	return request.Custom(func(c *RecordListOpts) error { *c = copyRecordList(owned); return nil })
 }
 func recordListIgnores(key string) bool {
 	// Invalid key spelling and owned Resource controls must reach preflight,
@@ -61,6 +71,10 @@ func recordListIgnores(key string) bool {
 	return true
 }
 func WithRecordListQuery(key string, value any) RecordListOption {
+	return request.Custom(withRecordListQuery(key, value))
+}
+
+func withRecordListQuery(key string, value any) func(*RecordListOpts) error {
 	if recordListIgnores(key) {
 		return func(*RecordListOpts) error { return nil }
 	}
@@ -80,18 +94,34 @@ func WithRecordListQuery(key string, value any) RecordListOption {
 		return nil
 	}
 }
-func WithRecordListHeaders(value map[string]string) RecordListOption {
+func withRecordListHeaders(value map[string]string) func(*RecordListOpts) error {
 	owned := maps.Clone(value)
 	return func(c *RecordListOpts) error { c.Headers = maps.Clone(owned); return nil }
 }
-func WithRecordListMicroversion(value string) RecordListOption {
+func withRecordListMicroversion(value string) func(*RecordListOpts) error {
 	return func(c *RecordListOpts) error { x := value; c.Microversion = &x; return nil }
 }
-func WithRecordListLimit(value int) RecordListOption     { return WithRecordListQuery("limit", value) }
-func WithRecordListMarker(value string) RecordListOption { return WithRecordListQuery("marker", value) }
-func WithRecordListMaxItems(value int) RecordListOption {
-	return WithRecordListQuery("max_items", value)
+func withRecordListLimit(value int) func(*RecordListOpts) error {
+	return withRecordListQuery("limit", value)
 }
-func WithRecordListPaginated(value bool) RecordListOption {
-	return WithRecordListQuery("paginated", value)
+func withRecordListMarker(value string) func(*RecordListOpts) error {
+	return withRecordListQuery("marker", value)
+}
+func withRecordListMaxItems(value int) func(*RecordListOpts) error {
+	return withRecordListQuery("max_items", value)
+}
+func withRecordListPaginated(value bool) func(*RecordListOpts) error {
+	return withRecordListQuery("paginated", value)
+}
+
+// recordListCalls interprets the shared calls of RecordListOption.
+var recordListCalls = calls.Spec[RecordListOpts]{
+	Headers:      neutronfind.Use(withRecordListHeaders),
+	Microversion: neutronfind.Use(withRecordListMicroversion),
+	Paging: calls.Paging[RecordListOpts]{
+		Limit:     neutronfind.Use(withRecordListLimit),
+		Marker:    neutronfind.Use(withRecordListMarker),
+		MaxItems:  neutronfind.Use(withRecordListMaxItems),
+		Paginated: neutronfind.Use(withRecordListPaginated),
+	},
 }

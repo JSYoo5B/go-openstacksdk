@@ -176,7 +176,7 @@ func TestPythonSubnetPoolDeleteDefaultsStrictOptionsAndSourceStatuses(t *testing
 				})
 				var options []subnetpools.DeleteOption
 				if strict {
-					options = []subnetpools.DeleteOption{subnetpools.WithDeleteIgnoreMissing(false)}
+					options = []subnetpools.DeleteOption{request.IgnoreMissing(false)}
 				}
 				err := api.DeleteWithOptions(context.Background(), "literal.id", options...)
 				if code < 400 || code == 404 && !strict {
@@ -207,10 +207,10 @@ func TestPythonSubnetPoolDeleteDefaultsStrictOptionsAndSourceStatuses(t *testing
 				t.Fatal(err)
 			}
 		}
-		if err := api.DeleteWithOptions(context.Background(), "gone", option, subnetpools.WithDeleteIgnoreMissing(true)); err != nil {
+		if err := api.DeleteWithOptions(context.Background(), "gone", option, request.IgnoreMissing(true)); err != nil {
 			t.Fatal(err)
 		}
-		if err := api.DeleteWithOptions(context.Background(), "gone", subnetpools.WithDeleteIgnoreMissing(false), subnetpools.WithDeleteOptions(subnetpools.DeleteOpts{})); err != nil {
+		if err := api.DeleteWithOptions(context.Background(), "gone", request.IgnoreMissing(false), subnetpools.WithDeleteOptions(subnetpools.DeleteOpts{})); err != nil {
 			t.Fatal(err)
 		}
 		if len(calls) != 4 {

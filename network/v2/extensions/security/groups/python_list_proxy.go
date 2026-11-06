@@ -11,6 +11,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/jmespath"
@@ -55,7 +56,7 @@ func (a *API) securityGroupSourceListEngine(ctx context.Context) (*neutronfind.E
 func WithRecordProxyQuery(key string, value any) RecordListOption {
 	raw, e := json.Marshal(value)
 	owned := bytes.Clone(raw)
-	return func(c *RecordListOpts) error {
+	return request.Custom(func(c *RecordListOpts) error {
 		if e != nil {
 			return e
 		}
@@ -67,9 +68,9 @@ func WithRecordProxyQuery(key string, value any) RecordListOption {
 		}
 		c.Query[key] = bytes.Clone(owned)
 		return nil
-	}
+	})
 }
-func WithRecordListBasePath(value string) RecordListOption {
+func withRecordListBasePath(value string) func(*RecordListOpts) error {
 	return func(c *RecordListOpts) error { x := value; c.BasePath = &x; return nil }
 }
 
@@ -83,7 +84,7 @@ func (a *API) ProxyListRecords(ctx context.Context, options ...RecordListOption)
 		return nil, wrap(e)
 	}
 	cfg := copyRecordListOpts(RecordListOpts{})
-	for _, apply := range slices.Clone(options) {
+	for _, apply := range calls.Translate(options, recordListCalls) {
 		if e := engine.Check(ctx); e != nil {
 			return nil, wrap(e)
 		}
@@ -163,7 +164,7 @@ func (a *API) GetSourceRecord(ctx context.Context, id string, options ...RecordL
 		return nil, wrap(e)
 	}
 	cfg := copyRecordListOpts(RecordListOpts{})
-	for _, apply := range slices.Clone(options) {
+	for _, apply := range calls.Translate(options, recordListCalls) {
 		if e := engine.Check(ctx); e != nil {
 			return nil, wrap(e)
 		}

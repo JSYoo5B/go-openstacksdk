@@ -17,6 +17,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -159,13 +160,13 @@ func TestPythonSecurityRuleListRawCapAndBreakAvoidUnconsumedWork(t *testing.T) {
 		}
 		return securityRecordListWire(200, raw)
 	})
-	values, err := api.AllRecords(context.Background(), rules.WithRecordListQuery("name", "wanted"), rules.WithRecordListLimit(0), rules.WithRecordListMaxItems(2))
+	values, err := api.AllRecords(context.Background(), rules.WithRecordListQuery("name", "wanted"), request.Limit(0), request.MaxItems(2))
 	if err != nil || len(values) != 1 || len(*calls) != 1 {
 		t.Fatal(err, values, *calls)
 	}
 	securityRecordListField(t, values[0], "id", `"one"`)
 	api, calls = securityRecordListAPI(t, func(*http.Request) *http.Response { return securityRecordListWire(200, raw) })
-	values, err = api.AllRecords(context.Background(), rules.WithRecordListQuery("name", "wanted"), rules.WithRecordListMaxItems(1))
+	values, err = api.AllRecords(context.Background(), rules.WithRecordListQuery("name", "wanted"), request.MaxItems(1))
 	if err != nil || values == nil || len(values) != 0 || len(*calls) != 1 {
 		t.Fatal(err, values, *calls)
 	}
@@ -244,12 +245,12 @@ func TestPythonSecurityRuleListPagesEnvelopeAndConstructorProof(t *testing.T) {
 				}
 				return response
 			})
-			options := []rules.RecordListOption{rules.WithRecordListMarker("start"), rules.WithRecordListQuery("direction", "ingress")}
+			options := []rules.RecordListOption{request.Marker("start"), rules.WithRecordListQuery("direction", "ingress")}
 			if mode == "short page" {
-				options = append(options, rules.WithRecordListLimit(5))
+				options = append(options, request.Limit(5))
 			}
 			if mode == "single page" {
-				options = append(options, rules.WithRecordListPaginated(false))
+				options = append(options, request.Paginated(false))
 			}
 			values, err := collectSecurityRecordList(api.ListRecords(context.Background(), options...))
 			success := mode == "body next" || mode == "plural links" || mode == "http link" || mode == "versioned" || mode == "short page" || mode == "single page" || mode == "singleton" || mode == "empty" || mode == "falsey next"
@@ -463,11 +464,11 @@ func TestPythonSecurityRuleListVersionsHeadersRetryAndReauthentication(t *testin
 			want := "network 2.0"
 			if mode == "explicit" {
 				want = "network 2.1"
-				options = append(options, rules.WithRecordListMicroversion("2.1"), rules.WithRecordListHeaders(map[string]string{"aCcEpT": "owned"}))
+				options = append(options, request.Microversion("2.1"), request.Headers(map[string]string{"aCcEpT": "owned"}))
 			}
 			if mode == "empty" {
 				want = ""
-				options = append(options, rules.WithRecordListMicroversion(""))
+				options = append(options, request.Microversion(""))
 			}
 			if mode == "live retry" || mode == "expanded codes" {
 				api.RawClient().RetryFunc = func(_ context.Context, _ string, _ string, o *gophercloud.RequestOpts, _ error, _ uint) error {
@@ -550,7 +551,7 @@ func TestPythonSecurityRuleListPreflightAndOwnedOptionSnapshots(t *testing.T) {
 			t.Fatal(key, err)
 		}
 	}
-	for _, opts := range [][]rules.RecordListOption{{nil}, {rules.WithRecordListMaxItems(-1)}, {rules.WithRecordListLimit(-1)}, {rules.WithRecordListHeaders(map[string]string{"Authorization": "foreign"})}, {rules.WithRecordListQuery("name", json.RawMessage(`broken`))}} {
+	for _, opts := range [][]rules.RecordListOption{{nil}, {request.MaxItems(-1)}, {request.Limit(-1)}, {request.Headers(map[string]string{"Authorization": "foreign"})}, {rules.WithRecordListQuery("name", json.RawMessage(`broken`))}} {
 		_, err := api.AllRecords(context.Background(), opts...)
 		if err == nil {
 			t.Fatal(opts)
@@ -566,7 +567,7 @@ func TestPythonSecurityRuleListPreflightAndOwnedOptionSnapshots(t *testing.T) {
 	}
 	cause := errors.New("canceled option")
 	ctx, cancel := context.WithCancelCause(context.Background())
-	_, err = api.AllRecords(ctx, func(*rules.RecordListOpts) error { cancel(cause); return nil })
+	_, err = api.AllRecords(ctx, request.Custom(func(*rules.RecordListOpts) error { cancel(cause); return nil }))
 	if !errors.Is(err, cause) || len(*calls) != 0 {
 		t.Fatal(err, *calls)
 	}
@@ -592,7 +593,7 @@ func TestPythonSecurityRuleListPreflightAndOwnedOptionSnapshots(t *testing.T) {
 		}
 		return securityRecordListWire(200, `{"security_group_rules":[{"name":"original"}]}`)
 	})
-	seq := api.ListRecords(context.Background(), owned, func(v *rules.RecordListOpts) error { retained = v; return nil })
+	seq := api.ListRecords(context.Background(), owned, request.Custom(func(v *rules.RecordListOpts) error { retained = v; return nil }))
 	if len(*calls) != 0 {
 		t.Fatal("not lazy")
 	}
@@ -613,7 +614,7 @@ func TestPythonSecurityRuleListPublicFixtureConcurrentReuse(t *testing.T) {
 	})
 	api := rules.New(nativeRuleClient(cloud))
 	headers := map[string]string{"X-Probe": "owned"}
-	options := []rules.RecordListOption{rules.WithRecordListHeaders(headers), rules.WithRecordListQuery("security_group_id", "group /%?#")}
+	options := []rules.RecordListOption{request.Headers(headers), rules.WithRecordListQuery("security_group_id", "group /%?#")}
 	headers["X-Probe"] = "changed"
 	var wait sync.WaitGroup
 	for i := 0; i < 8; i++ {
@@ -654,7 +655,7 @@ func TestPythonSecurityRuleListConditionalHeadersRemainSelected(t *testing.T) {
 				})
 				var options []rules.RecordListOption
 				if mode != "absent injection" {
-					options = append(options, rules.WithRecordListHeaders(map[string]string{strings.ToLower(condition): "selected"}))
+					options = append(options, request.Headers(map[string]string{strings.ToLower(condition): "selected"}))
 				}
 				cause := errors.New("conditional callback cause")
 				api.RawClient().RetryFunc = func(_ context.Context, _ string, _ string, opts *gophercloud.RequestOpts, _ error, _ uint) error {
@@ -708,11 +709,11 @@ func TestPythonSecurityRuleListCustomCallbacksReceiveOwnedMaps(t *testing.T) {
 			var options []rules.RecordListOption
 			switch mode {
 			case "nil reset":
-				options = append(options, func(o *rules.RecordListOpts) error { o.Query = nil; o.Headers = nil; return nil })
+				options = append(options, request.Custom(func(o *rules.RecordListOpts) error { o.Query = nil; o.Headers = nil; return nil }))
 			case "empty opts factory":
 				options = append(options, rules.WithRecordListOpts(rules.RecordListOpts{}))
 			}
-			options = append(options, func(o *rules.RecordListOpts) error {
+			options = append(options, request.Custom(func(o *rules.RecordListOpts) error {
 				if o.Query == nil || o.Headers == nil {
 					t.Fatal("SDK option maps were not initialized", mode, o)
 				}
@@ -720,7 +721,7 @@ func TestPythonSecurityRuleListCustomCallbacksReceiveOwnedMaps(t *testing.T) {
 				o.Headers["X-Probe"] = "owned"
 				retained = o
 				return nil
-			})
+			}))
 			seq := api.ListRecords(context.Background(), options...)
 			if retained != nil || len(*calls) != 0 {
 				t.Fatal("callback evaluated eagerly", retained, *calls)
@@ -764,7 +765,7 @@ func TestPythonSecurityRuleListJMESPathTransformPresenceIsExplicitlyUnsupported(
 				api, calls := securityRecordListAPI(t, func(*http.Request) *http.Response { t.Fatal("unsupported owned transform reached HTTP"); return nil })
 				option := rules.WithRecordListOpts(rules.RecordListOpts{Query: map[string]json.RawMessage{"jmespath_filters": raw}})
 				if mode == "custom callback" {
-					option = func(o *rules.RecordListOpts) error { o.Query["jmespath_filters"] = raw; return nil }
+					option = request.Custom(func(o *rules.RecordListOpts) error { o.Query["jmespath_filters"] = raw; return nil })
 				}
 				rows, err := api.AllRecords(context.Background(), option)
 				var proof *resource.ResponseError

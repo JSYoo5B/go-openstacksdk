@@ -8,12 +8,14 @@ import (
 	"maps"
 	"net/http"
 	"net/url"
-	"slices"
 	"strings"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
+	"github.com/JSYoo5B/go-openstacksdk/internal/neutronfind"
 	"github.com/JSYoo5B/go-openstacksdk/internal/responsejson"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 // OnboardNetworkOpts owns transport policy for one Source subnet-onboard PUT.
@@ -21,7 +23,12 @@ type OnboardNetworkOpts struct {
 	Headers      map[string]string
 	Microversion *string
 }
-type OnboardNetworkOption func(*OnboardNetworkOpts) error
+
+// OnboardNetworkOption is one option of OnboardNetworkSubnetsRecord:
+// WithOnboardNetworkOpts, request.Headers (replaces the headers),
+// request.Microversion or request.Custom over *OnboardNetworkOpts. Other shared
+// calls fail with resource.ErrInvalidOption before HTTP.
+type OnboardNetworkOption = request.WriteCall
 
 func cloneOnboardNetworkOpts(v OnboardNetworkOpts) OnboardNetworkOpts {
 	v.Headers = maps.Clone(v.Headers)
@@ -33,13 +40,13 @@ func cloneOnboardNetworkOpts(v OnboardNetworkOpts) OnboardNetworkOpts {
 }
 func WithOnboardNetworkOpts(v OnboardNetworkOpts) OnboardNetworkOption {
 	own := cloneOnboardNetworkOpts(v)
-	return func(c *OnboardNetworkOpts) error { *c = cloneOnboardNetworkOpts(own); return nil }
+	return request.Custom(func(c *OnboardNetworkOpts) error { *c = cloneOnboardNetworkOpts(own); return nil })
 }
-func WithOnboardNetworkHeaders(v map[string]string) OnboardNetworkOption {
+func withOnboardNetworkHeaders(v map[string]string) func(*OnboardNetworkOpts) error {
 	own := maps.Clone(v)
 	return func(c *OnboardNetworkOpts) error { c.Headers = maps.Clone(own); return nil }
 }
-func WithOnboardNetworkMicroversion(v string) OnboardNetworkOption {
+func withOnboardNetworkMicroversion(v string) func(*OnboardNetworkOpts) error {
 	return func(c *OnboardNetworkOpts) error { x := v; c.Microversion = &x; return nil }
 }
 
@@ -78,7 +85,7 @@ func (a *API) OnboardNetworkSubnetsRecord(ctx context.Context, poolID, networkID
 		return nil, poolRecordWrap(ctx, op, err)
 	}
 	policy := OnboardNetworkOpts{}
-	for _, apply := range slices.Clone(options) {
+	for _, apply := range calls.Translate(options, onboardNetworkCalls) {
 		if err = p.guard(ctx); err != nil {
 			return nil, poolRecordWrap(ctx, op, err)
 		}
@@ -127,4 +134,10 @@ func (a *API) OnboardNetworkSubnetsRecord(ctx context.Context, poolID, networkID
 	}
 	result.Value = bytes.Clone(normalized)
 	return result, nil
+}
+
+// onboardNetworkCalls interprets the shared calls of OnboardNetworkOption.
+var onboardNetworkCalls = calls.Spec[OnboardNetworkOpts]{
+	Headers:      neutronfind.Use(withOnboardNetworkHeaders),
+	Microversion: neutronfind.Use(withOnboardNetworkMicroversion),
 }

@@ -10,6 +10,7 @@ import (
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/ports"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -25,7 +26,7 @@ func TestConnectionListPortValuesAbsentServiceSkipsFilterExpansion(t *testing.T)
 	if err != nil {
 		t.Fatal(err)
 	}
-	result, err := conn.ListPortValues(context.Background(), ports.WithSourceCloudListFilters(json.RawMessage("true")), func(*ports.SourceCloudListOpts) error { callbacks++; return errors.New("must not execute") })
+	result, err := conn.ListPortValues(context.Background(), ports.WithSourceCloudListFilters(json.RawMessage("true")), request.Custom(func(*ports.SourceCloudListOpts) error { callbacks++; return errors.New("must not execute") }))
 	if err != nil || result == nil || string(result.JSON) != "[]" || result.Values == nil || result.Ports == nil || result.Inventory == nil || callbacks != 0 || lookups != 1 {
 		t.Fatal(result, err, lookups, callbacks)
 	}

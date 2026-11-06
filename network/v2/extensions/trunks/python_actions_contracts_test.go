@@ -11,6 +11,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -94,17 +95,17 @@ func TestPythonTrunkActionsSnapshotsHeaderPolicyAndInvalidOptions(t *testing.T) 
 	api, _ := nativeTrunkAPI(t, &calls, func(*http.Request) *http.Response { return nativeTrunkWire(200, `{}`) })
 	value := map[string]any{"false": false}
 	headers := map[string]string{"X-Owned": "old"}
-	headerOption := trunks.WithSubportActionHeaders(headers)
+	headerOption := request.Headers(headers)
 	headers["Authorization"] = "bad"
 	seed := &resource.RawResource{Metadata: resource.Metadata{Body: map[string]json.RawMessage{"name": json.RawMessage(`"old"`)}}}
 	seedOption := trunks.WithSubportActionSeed(seed)
 	seed.Body["name"] = json.RawMessage(`"changed"`)
 	var retained *trunks.SubportActionOpts
-	record, err := api.AddSubportsRecord(context.Background(), "r1", value, headerOption, seedOption, func(v *trunks.SubportActionOpts) error { retained = v; value["false"] = true; return nil }, func(*trunks.SubportActionOpts) error {
+	record, err := api.AddSubportsRecord(context.Background(), "r1", value, headerOption, seedOption, request.Custom(func(v *trunks.SubportActionOpts) error { retained = v; value["false"] = true; return nil }), request.Custom(func(*trunks.SubportActionOpts) error {
 		retained.Seed.Body["name"] = json.RawMessage(`"retained"`)
 		retained.Headers["Authorization"] = "bad"
 		return nil
-	})
+	}))
 	if err != nil || record == nil || string(record.Resource.Body["name"]) != `"old"` || calls[0].body != `{"sub_ports":{"false":false}}` {
 		t.Fatal(record, err, calls)
 	}
@@ -115,7 +116,7 @@ func TestPythonTrunkActionsSnapshotsHeaderPolicyAndInvalidOptions(t *testing.T) 
 		{"nil option", func() error { _, err := api.AddSubportsRecord(context.Background(), "r1", nil, nil); return err }},
 		{"bad target", func() error { _, err := api.AddSubportsRecord(context.Background(), "..", nil); return err }},
 		{"protected header", func() error {
-			_, err := api.AddSubportsRecord(context.Background(), "r1", nil, trunks.WithSubportActionHeaders(map[string]string{"X-Auth-Token": "bad"}))
+			_, err := api.AddSubportsRecord(context.Background(), "r1", nil, request.Headers(map[string]string{"X-Auth-Token": "bad"}))
 			return err
 		}},
 		{"bad seed", func() error {
@@ -136,14 +137,14 @@ func TestPythonTrunkActionsCanceledOrChangedOptionsAndMarshalAreTerminal(t *test
 	api, _ := nativeTrunkAPI(t, &calls, func(*http.Request) *http.Response { return nativeTrunkWire(200, `{}`) })
 	ctx, cancel := context.WithCancelCause(context.Background())
 	cause, callback := errors.New("cause"), errors.New("option")
-	_, err := api.AddSubportsRecord(ctx, "r1", nil, func(*trunks.SubportActionOpts) error { cancel(cause); return callback })
+	_, err := api.AddSubportsRecord(ctx, "r1", nil, request.Custom(func(*trunks.SubportActionOpts) error { cancel(cause); return callback }))
 	if len(calls) != 0 || !errors.Is(err, context.Canceled) || !errors.Is(err, cause) || !errors.Is(err, callback) {
 		t.Fatal(err, calls)
 	}
 	client := api.RawClient()
 	original := client.ResourceBase
 	defer func() { client.ResourceBase = original }()
-	_, err = api.AddSubportsRecord(context.Background(), "r1", nil, func(*trunks.SubportActionOpts) error { client.ResourceBase += "changed/"; return callback })
+	_, err = api.AddSubportsRecord(context.Background(), "r1", nil, request.Custom(func(*trunks.SubportActionOpts) error { client.ResourceBase += "changed/"; return callback }))
 	if len(calls) != 0 || !errors.Is(err, resource.ErrInvalidOption) || !errors.Is(err, callback) {
 		t.Fatal(err, calls)
 	}
