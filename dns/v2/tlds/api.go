@@ -10,6 +10,7 @@ import (
 	"strconv"
 
 	"github.com/JSYoo5B/go-openstacksdk/dns/v2/internal/designate"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
@@ -42,7 +43,7 @@ type UpdateOpts struct {
 	Description request.Optional[string] `json:"description,omitzero"`
 }
 
-// ListOpts holds typed filters. Zero values are omitted; use WithListQuery to
+// ListOpts holds typed filters. Zero values are omitted; use request.Query to
 // send an explicit empty value.
 type ListOpts struct {
 	Name        string
@@ -71,20 +72,39 @@ func (o ListOpts) values() url.Values {
 	return q
 }
 
-type CreateOption = request.Option[CreateOpts]
-type UpdateOption = request.Option[UpdateOpts]
-type ListOption = request.Option[ListOpts]
+// CreateOption is one option of Create: WithCreateOptions, request.Field (an
+// extension body member that cannot replace a typed one) or request.Custom
+// over *request.Config[CreateOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type CreateOption = request.WriteCall
 
-func WithCreateOptions(value CreateOpts) CreateOption { return request.WithOptions(value) }
-func WithCreateField(key string, value any) CreateOption {
-	return request.WithField[CreateOpts](key, value)
+// UpdateOption is one option of Update: WithUpdateOptions, request.Field or
+// request.Custom over *request.Config[UpdateOpts]. Other shared calls fail
+// with resource.ErrInvalidOption before HTTP.
+type UpdateOption = request.WriteCall
+
+var (
+	createCalls = designate.FieldCalls[CreateOpts]()
+	updateCalls = designate.FieldCalls[UpdateOpts]()
+)
+
+func WithCreateOptions(value CreateOpts) CreateOption {
+	return request.Custom(request.WithOptions(value))
 }
-func WithUpdateOptions(value UpdateOpts) UpdateOption { return request.WithOptions(value) }
-func WithUpdateField(key string, value any) UpdateOption {
-	return request.WithField[UpdateOpts](key, value)
+func WithUpdateOptions(value UpdateOpts) UpdateOption {
+	return request.Custom(request.WithOptions(value))
 }
-func WithListOptions(value ListOpts) ListOption  { return request.WithOptions(value) }
-func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
+
+// ListOption is one option of List: WithListOptions, request.Query with a
+// string or []string value (an explicit filter, including an empty one) or
+// request.Custom over *request.Config[ListOpts]. Limit and marker are ListOpts
+// members; request.Limit, request.Marker and other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type ListOption = request.ListCall
+
+var listCalls = designate.ListCalls[ListOpts]()
+
+func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 // API owns one authenticated Designate client.
 type API struct {
@@ -117,7 +137,7 @@ func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
 // Create sends POST /tlds and accepts only 201.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*TLD, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := calls.ApplyConfig(opts, createCalls, options...)
 	if err == nil {
 		err = request.ValidateCapabilities(cfg, true, false, false)
 	}
@@ -140,7 +160,7 @@ func (a *API) Get(ctx context.Context, id string) (*TLD, error) {
 
 // Update sends PATCH /tlds/{id}, accepts only 200 and never replays.
 func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ...UpdateOption) (*TLD, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := calls.ApplyConfig(opts, updateCalls, options...)
 	if err == nil {
 		err = request.ValidateCapabilities(cfg, true, false, false)
 	}
@@ -170,7 +190,7 @@ func (a *API) Remove(ctx context.Context, ref resource.Ref, options ...resource.
 
 // List streams tlds across pages (links.next, then marker/limit).
 func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*TLD, error] {
-	cfg, err := request.Apply(ListOpts{}, options...)
+	cfg, err := calls.ApplyConfig(ListOpts{}, listCalls, options...)
 	if err == nil {
 		err = request.ValidateCapabilities(cfg, false, true, false)
 	}

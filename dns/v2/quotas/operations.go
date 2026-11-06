@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"reflect"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
@@ -82,13 +83,13 @@ func (s *ProjectQuotaScope) Update(ctx context.Context, options UpdateOpts, with
 
 type resetOptions struct{ ignoreMissing bool }
 
-type ResetOption func(*resetOptions) error
+// ResetOption is one option of Reset: request.IgnoreMissing, which suppresses
+// only HTTP 404. Reset is strict by default; the last option wins, and no read
+// follows a successful reset. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type ResetOption = request.DeleteCall
 
-// WithResetIgnoreMissing suppresses only HTTP 404. Reset is strict by default;
-// the last option wins, and no read follows a successful reset.
-func WithResetIgnoreMissing(enabled bool) ResetOption {
-	return func(options *resetOptions) error { options.ignoreMissing = enabled; return nil }
-}
+var resetCalls = calls.Spec[resetOptions]{IgnoreMissing: calls.Value(func(o *resetOptions) *bool { return &o.ignoreMissing })}
 
 // ResetResponse represents Designate's bodyless reset acknowledgement.
 type ResetResponse struct {
@@ -103,7 +104,7 @@ func (s *ProjectQuotaScope) Reset(ctx context.Context, options ...ResetOption) (
 		return nil, quotaError("Reset", s.ProjectID(), err)
 	}
 	var config resetOptions
-	for _, apply := range options {
+	for _, apply := range calls.Translate(options, resetCalls) {
 		if apply == nil {
 			return nil, quotaError("Reset", s.projectID, fmt.Errorf("%w: nil reset option", resource.ErrInvalidOption))
 		}

@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/JSYoo5B/go-openstacksdk/dns/v2/internal/designate"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
@@ -57,16 +58,26 @@ func (o ListOpts) values() url.Values {
 	return q
 }
 
-type SetOption = request.Option[SetOpts]
-type ListOption = request.Option[ListOpts]
+// SetOption is one option of Set: WithSetOptions, request.Field (an extension
+// body member that cannot replace a typed one), request.Header (an extension
+// header; Designate's project headers are owned by the SDK) or request.Custom
+// over *request.Config[SetOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type SetOption = request.WriteCall
 
-func WithSetOptions(value SetOpts) SetOption { return request.WithOptions(value) }
-func WithSetField(key string, value any) SetOption {
-	return request.WithField[SetOpts](key, value)
-}
-func WithSetHeader(key, value string) SetOption  { return request.WithHeader[SetOpts](key, value) }
-func WithListOptions(value ListOpts) ListOption  { return request.WithOptions(value) }
-func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
+// ListOption is one option of List: WithListOptions, request.Query with a
+// string or []string value (an explicit filter, including an empty one) or
+// request.Custom over *request.Config[ListOpts]. Limit and marker are ListOpts
+// members; request.Limit, request.Marker and other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type ListOption = request.ListCall
+
+var listCalls = designate.ListCalls[ListOpts]()
+
+var setCalls = designate.FieldHeaderCalls[SetOpts]()
+
+func WithSetOptions(value SetOpts) SetOption    { return request.Custom(request.WithOptions(value)) }
+func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 // API owns one authenticated Designate client.
 type API struct {
@@ -102,7 +113,7 @@ func (a *API) Get(ctx context.Context, id string) (*FloatingIP, error) {
 // accepts 200 or 202. A 202 acknowledges the change; it does not mean the PTR
 // record is ACTIVE. The body never carries the identifier.
 func (a *API) Set(ctx context.Context, id string, opts SetOpts, options ...SetOption) (*FloatingIP, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := calls.ApplyConfig(opts, setCalls, options...)
 	if err == nil {
 		err = request.ValidateCapabilities(cfg, true, false, true)
 	}
@@ -130,7 +141,7 @@ func (a *API) Unset(ctx context.Context, id string) (*FloatingIP, error) {
 
 // List streams PTR records across pages.
 func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*FloatingIP, error] {
-	cfg, err := request.Apply(ListOpts{}, options...)
+	cfg, err := calls.ApplyConfig(ListOpts{}, listCalls, options...)
 	if err == nil {
 		err = request.ValidateCapabilities(cfg, false, true, false)
 	}

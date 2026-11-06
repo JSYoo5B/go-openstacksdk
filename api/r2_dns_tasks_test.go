@@ -159,7 +159,7 @@ func TestR2DNSFloatingIPPTRSetUnsetBodiesCodesAndColonID(t *testing.T) {
 	if _, err := api.Set(ctx, "RegionOne:bad", floatingips.SetOpts{}); err == nil {
 		t.Fatal("201 must be rejected")
 	}
-	if _, err := api.Set(ctx, "RegionOne:f1", floatingips.SetOpts{}, floatingips.WithSetField("ttl", 1)); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := api.Set(ctx, "RegionOne:f1", floatingips.SetOpts{}, request.Field("ttl", 1)); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatalf("collision: %v", err)
 	}
 	if v, err := api.WaitFor(ctx, resource.ID("RegionOne:f1"), "active", resource.WithPollInterval(time.Millisecond)); err != nil || v.Status != "ACTIVE" {

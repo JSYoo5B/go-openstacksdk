@@ -4890,7 +4890,7 @@
           ]
         },
         {
-          "behavior": "Reset uses DELETE204 without a follow-up read; strict missing behavior is the Go default and WithResetIgnoreMissing changes only404. Reset responses carry the fixed project and independent HTTP metadata.",
+          "behavior": "Reset uses DELETE204 without a follow-up read; strict missing behavior is the Go default and request.IgnoreMissing changes only404. Reset responses carry the fixed project and independent HTTP metadata.",
           "tests": [
             "api/designate_project_quotas_contracts_test.go:TestDesignateProjectQuotasUseRootObjectAndOfficialMethods",
             "api/designate_project_quotas_contracts_test.go:TestDesignateQuotaErrorsPreserveNativeResponseAndMissingPolicy",
@@ -4918,7 +4918,7 @@
       "differences": [
         "The Go singleton returns QuotaResource with fixed ProjectID, raw fields, Header and StatusCode rather than a native Result/Python mutable Resource; context and error are explicit.",
         "The fixed scope preserves the configured service client and sends the target through Designate sudo-project headers; WithAllProjects is explicit and does not enumerate other projects.",
-        "Python delete_quota defaults ignore_missing=True; Go Reset is strict unless WithResetIgnoreMissing(true) is supplied.",
+        "Python delete_quota defaults ignore_missing=True; Go Reset is strict unless request.IgnoreMissing(true) is supplied.",
         "Pinned Python read: Quota.fetch/_prepare_request send x-auth-sudo-project-id from the alternate-ID project and strip id from PATCH bodies; Go's fixed scope sends the same header and never an id. Python coerces int attributes and drops unknown attributes, while Go uses typed pointer limits (nil omitted, zero sent) plus explicit extensions. Python accepts any non-error status; Go accepts exactly 200 (get/update) and 204 (delete). Resource caching/dirty state and adapter microversions do not exist in Go (Designate v2 has none)."
       ],
       "documentation": [
@@ -133586,7 +133586,7 @@
         "github.com/JSYoo5B/go-openstacksdk/dns/v2/blacklists.API.List",
         "github.com/JSYoo5B/go-openstacksdk/dns/v2/blacklists.API.All",
         "github.com/JSYoo5B/go-openstacksdk/dns/v2/blacklists.WithListOptions",
-        "github.com/JSYoo5B/go-openstacksdk/dns/v2/blacklists.WithListQuery"
+        "github.com/JSYoo5B/go-openstacksdk/request.Query"
       ],
       "contracts": [
         {
@@ -133614,7 +133614,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/dns/v2/blacklists.API.Create",
         "github.com/JSYoo5B/go-openstacksdk/dns/v2/blacklists.WithCreateOptions",
-        "github.com/JSYoo5B/go-openstacksdk/dns/v2/blacklists.WithCreateField"
+        "github.com/JSYoo5B/go-openstacksdk/request.Field"
       ],
       "contracts": [
         {
@@ -133670,7 +133670,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/dns/v2/blacklists.API.Update",
         "github.com/JSYoo5B/go-openstacksdk/dns/v2/blacklists.WithUpdateOptions",
-        "github.com/JSYoo5B/go-openstacksdk/dns/v2/blacklists.WithUpdateField"
+        "github.com/JSYoo5B/go-openstacksdk/request.Field"
       ],
       "contracts": [
         {
@@ -133728,7 +133728,7 @@
         "github.com/JSYoo5B/go-openstacksdk/dns/v2/tlds.API.List",
         "github.com/JSYoo5B/go-openstacksdk/dns/v2/tlds.API.All",
         "github.com/JSYoo5B/go-openstacksdk/dns/v2/tlds.WithListOptions",
-        "github.com/JSYoo5B/go-openstacksdk/dns/v2/tlds.WithListQuery"
+        "github.com/JSYoo5B/go-openstacksdk/request.Query"
       ],
       "contracts": [
         {
@@ -133755,7 +133755,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/dns/v2/tlds.API.Create",
         "github.com/JSYoo5B/go-openstacksdk/dns/v2/tlds.WithCreateOptions",
-        "github.com/JSYoo5B/go-openstacksdk/dns/v2/tlds.WithCreateField"
+        "github.com/JSYoo5B/go-openstacksdk/request.Field"
       ],
       "contracts": [
         {
@@ -133804,7 +133804,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/dns/v2/tlds.API.Update",
         "github.com/JSYoo5B/go-openstacksdk/dns/v2/tlds.WithUpdateOptions",
-        "github.com/JSYoo5B/go-openstacksdk/dns/v2/tlds.WithUpdateField"
+        "github.com/JSYoo5B/go-openstacksdk/request.Field"
       ],
       "contracts": [
         {
@@ -134179,7 +134179,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/dns/v2/ptr/floatingips.API.Set",
         "github.com/JSYoo5B/go-openstacksdk/dns/v2/ptr/floatingips.WithSetOptions",
-        "github.com/JSYoo5B/go-openstacksdk/dns/v2/ptr/floatingips.WithSetField"
+        "github.com/JSYoo5B/go-openstacksdk/request.Field"
       ],
       "contracts": [
         {

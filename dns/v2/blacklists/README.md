@@ -14,7 +14,7 @@ SDK-owned binding for Designate `/v2/blacklists` (Gophercloud v2.15.0 has none).
 
 Rules:
 
-- Bodies are flat. `request.Optional` distinguishes omitted, `Present` (including `""`) and `Null`. `WithCreateField` / `WithUpdateField` add extension fields; a name that collides with a core field fails before HTTP.
+- Bodies are flat. `request.Optional` distinguishes omitted, `Present` (including `""`) and `Null`. `request.Field` adds extension fields; a name that collides with a core field fails before HTTP.
 - Results embed the exact decoded object (`Body`), `Header` and `StatusCode`; numbers and null stay inspectable.
 - Success codes are explicit and never broadened. A 404 on Get/Update/Delete wraps `resource.ErrNotFound`.
 - Lists follow `links.next` (same origin only), stop at `metadata.total_count`, and with an explicit positive `Limit` continue with `marker=<last id>` until an empty page; repeated pages and repeated markers fail.

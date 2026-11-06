@@ -26,7 +26,7 @@ func TestR2DNSBlacklistCreateFlatBodyPreservesOmitNullEmptyAndExtensions(t *test
 	}{
 		{"omitted description", blacklists.CreateOpts{Pattern: "p"}, nil, map[string]string{"pattern": `"p"`}},
 		{"empty description", blacklists.CreateOpts{Pattern: "p", Description: request.Present("")}, nil, map[string]string{"pattern": `"p"`, "description": `""`}},
-		{"null description and false extension", blacklists.CreateOpts{Pattern: "p", Description: request.Null[string]()}, []blacklists.CreateOption{blacklists.WithCreateField("flag", false)}, map[string]string{"pattern": `"p"`, "description": `null`, "flag": `false`}},
+		{"null description and false extension", blacklists.CreateOpts{Pattern: "p", Description: request.Null[string]()}, []blacklists.CreateOption{request.Field("flag", false)}, map[string]string{"pattern": `"p"`, "description": `null`, "flag": `false`}},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -49,11 +49,11 @@ func TestR2DNSBlacklistRejectsCoreExtensionCollisionAndCancelledContextBeforeHTT
 	cloud := testcloud.New(t)
 	calls := r2dnsCounter(t, cloud, "/", 500, "")
 	api := blacklists.New(r2dnsClient(cloud))
-	_, err := api.Create(context.Background(), blacklists.CreateOpts{Pattern: "p"}, blacklists.WithCreateField("pattern", "x"))
+	_, err := api.Create(context.Background(), blacklists.CreateOpts{Pattern: "p"}, request.Field("pattern", "x"))
 	if !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatalf("collision: %v", err)
 	}
-	if _, err := api.Update(context.Background(), "bl-1", blacklists.UpdateOpts{}, blacklists.WithUpdateField("description", "x")); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := api.Update(context.Background(), "bl-1", blacklists.UpdateOpts{}, request.Field("description", "x")); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatalf("update collision: %v", err)
 	}
 	ctx, cancel := context.WithCancel(context.Background())

@@ -237,11 +237,11 @@ func TestDesignateQuotaErrorsPreserveNativeResponseAndMissingPolicy(t *testing.T
 					}
 				}
 				if operation == "Reset" {
-					value, err := scope.Reset(context.Background(), quotas.WithResetIgnoreMissing(true))
+					value, err := scope.Reset(context.Background(), request.IgnoreMissing(true))
 					if value != nil || (err == nil) != (status == 404) {
 						t.Fatal(value, err)
 					}
-					if _, err := scope.Reset(context.Background(), quotas.WithResetIgnoreMissing(true), quotas.WithResetIgnoreMissing(false)); !gophercloud.ResponseCodeIs(err, status) {
+					if _, err := scope.Reset(context.Background(), request.IgnoreMissing(true), request.IgnoreMissing(false)); !gophercloud.ResponseCodeIs(err, status) {
 						t.Fatal(err)
 					}
 				}

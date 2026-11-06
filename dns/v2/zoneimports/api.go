@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/JSYoo5B/go-openstacksdk/dns/v2/internal/designate"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
@@ -61,10 +62,16 @@ func (o ListOpts) values() url.Values {
 	return q
 }
 
-type ListOption = request.Option[ListOpts]
+// ListOption is one option of List: WithListOptions, request.Query with a
+// string or []string value (an explicit filter, including an empty one) or
+// request.Custom over *request.Config[ListOpts]. Limit and marker are ListOpts
+// members; request.Limit, request.Marker and other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type ListOption = request.ListCall
 
-func WithListOptions(value ListOpts) ListOption  { return request.WithOptions(value) }
-func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
+var listCalls = designate.ListCalls[ListOpts]()
+
+func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 // API owns one authenticated Designate client.
 type API struct {
@@ -120,7 +127,7 @@ func (a *API) Delete(ctx context.Context, id string) (*Acknowledgement, error) {
 
 // List streams imports across pages.
 func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*ZoneImport, error] {
-	cfg, err := request.Apply(ListOpts{}, options...)
+	cfg, err := calls.ApplyConfig(ListOpts{}, listCalls, options...)
 	if err == nil {
 		err = request.ValidateCapabilities(cfg, false, true, false)
 	}
