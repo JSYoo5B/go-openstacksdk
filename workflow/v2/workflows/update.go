@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	request "github.com/JSYoo5B/go-openstacksdk/request"
 	resource "github.com/JSYoo5B/go-openstacksdk/resource"
 	gophercloud "github.com/gophercloud/gophercloud/v2"
@@ -23,12 +24,20 @@ type UpdateOpts struct {
 	Definition io.Reader
 }
 
-// UpdateOption configures Update with the SDK's concrete option mechanism.
-type UpdateOption = request.Option[UpdateOpts]
+// UpdateOption is one option of Update: WithUpdateOptions, WithUpdateQuery or
+// request.Custom over *request.Config[UpdateOpts]. Every shared call fails
+// with resource.ErrInvalidOption before HTTP, because Update takes no extension
+// body field or header; WithUpdateQuery stays because the write category
+// admits no query call.
+type UpdateOption = request.WriteCall
 
-func WithUpdateOptions(value UpdateOpts) UpdateOption { return request.WithOptions(value) }
+var updateCalls = calls.Spec[request.Config[UpdateOpts]]{}
+
+func WithUpdateOptions(value UpdateOpts) UpdateOption {
+	return request.Custom(request.WithOptions(value))
+}
 func WithUpdateQuery(key, value string) UpdateOption {
-	return request.WithQuery[UpdateOpts](key, value)
+	return request.Custom(request.WithQuery[UpdateOpts](key, value))
 }
 
 // Update replaces the workflows named in the definition. It sends exactly one
@@ -38,7 +47,7 @@ func WithUpdateQuery(key, value string) UpdateOption {
 // definition may or may not have been applied, and the one-shot Definition
 // reader has been consumed. Local cancellation does not roll back remote work.
 func (a *API) Update(ctx context.Context, opts UpdateOpts, options ...UpdateOption) ([]Workflow, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := calls.ApplyConfig(opts, updateCalls, options...)
 	if err == nil {
 		err = request.ValidateCapabilities(cfg, false, true, false)
 	}
