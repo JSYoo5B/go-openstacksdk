@@ -14,9 +14,9 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/ruletypes.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/ruletypes.WithRecordFindOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/ruletypes.WithRecordFindIgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/ruletypes.WithRecordFindMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/ruletypes.WithRecordFindHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 
 - Four declared Resource Body fields id/name/type/drivers with nullable defaults, Source drivers list boxing, arbitrary untyped nested driver/parameter values and independently owned raw extensions/HTTP evidence. SDK-owned location=null and selected runtime member microversion do not overwrite Wire.
   Tests: `network/v2/extensions/qos/ruletypes/python_records_contracts_test.go:TestPythonQoSRuleTypeGetFieldsDefaultsAndOwnedActualEvidence`, `network/v2/extensions/qos/ruletypes/python_records_contracts_test.go:TestPythonQoSRuleTypeLiteralIDPriorityAndAlternateListID`, `network/v2/extensions/qos/ruletypes/python_records_contracts_test.go:TestPythonQoSRuleTypeNestedDriverParametersRemainExactRawJSON`.
@@ -53,8 +53,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/ruletypes.API.GetRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/ruletypes.WithRecordGetOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/ruletypes.WithRecordGetFields`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/ruletypes.WithRecordGetMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/ruletypes.WithRecordGetHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 
 - Four declared Resource Body fields id/name/type/drivers with nullable defaults, Source drivers list boxing, arbitrary untyped nested driver/parameter values and independently owned raw extensions/HTTP evidence. SDK-owned location=null and selected runtime member microversion do not overwrite Wire.
   Tests: `network/v2/extensions/qos/ruletypes/python_records_contracts_test.go:TestPythonQoSRuleTypeGetFieldsDefaultsAndOwnedActualEvidence`, `network/v2/extensions/qos/ruletypes/python_records_contracts_test.go:TestPythonQoSRuleTypeLiteralIDPriorityAndAlternateListID`, `network/v2/extensions/qos/ruletypes/python_records_contracts_test.go:TestPythonQoSRuleTypeNestedDriverParametersRemainExactRawJSON`.
@@ -89,13 +89,13 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/ruletypes.API.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/ruletypes.API.AllRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/ruletypes.WithRecordListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/ruletypes.WithRecordListQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/ruletypes.WithRecordListMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/ruletypes.WithRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/ruletypes.WithRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/ruletypes.WithRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/ruletypes.WithRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/ruletypes.WithRecordListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 
 - Four declared Resource Body fields id/name/type/drivers with nullable defaults, Source drivers list boxing, arbitrary untyped nested driver/parameter values and independently owned raw extensions/HTTP evidence. SDK-owned location=null and selected runtime member microversion do not overwrite Wire.
   Tests: `network/v2/extensions/qos/ruletypes/python_records_contracts_test.go:TestPythonQoSRuleTypeGetFieldsDefaultsAndOwnedActualEvidence`, `network/v2/extensions/qos/ruletypes/python_records_contracts_test.go:TestPythonQoSRuleTypeLiteralIDPriorityAndAlternateListID`, `network/v2/extensions/qos/ruletypes/python_records_contracts_test.go:TestPythonQoSRuleTypeNestedDriverParametersRemainExactRawJSON`.
@@ -216,15 +216,15 @@ func main() {
         if err != nil { log.Fatal(err) }
         printType(value)
     case "find":
-        value, err := api.FindRecord(ctx, *name, ruletypes.WithRecordFindIgnoreMissing(!*strict))
+        value, err := api.FindRecord(ctx, *name, request.IgnoreMissing(!*strict))
         if err != nil { log.Fatal(err) }
         printType(value)
     case "list":
-        options := []ruletypes.RecordListOption{ruletypes.WithRecordListMaxItems(*maxItems)}
-        if len(selected) != 0 { options = append(options, ruletypes.WithRecordListQuery("fields", selected)) }
-        if *typeFilter != "" { options = append(options, ruletypes.WithRecordListQuery("type", *typeFilter)) }
-        if *allRules { options = append(options, ruletypes.WithRecordListQuery("all_rules", true)) }
-        if *allSupported { options = append(options, ruletypes.WithRecordListQuery("all_supported", true)) }
+        options := []ruletypes.RecordListOption{request.MaxItems(*maxItems)}
+        if len(selected) != 0 { options = append(options, request.Query("fields", selected)) }
+        if *typeFilter != "" { options = append(options, request.Query("type", *typeFilter)) }
+        if *allRules { options = append(options, request.Query("all_rules", true)) }
+        if *allSupported { options = append(options, request.Query("all_supported", true)) }
         for value, err := range api.ListRecords(ctx, options...) {
             if err != nil { log.Fatal(err) }
             printType(value)

@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -18,7 +19,7 @@ import (
 // create_bgpvpn. An omitted field is not sent, Null sends JSON null and
 // Present keeps zero, empty strings and empty lists, so local_pref=0 and
 // vni=0 reach the server. BgpVpn allows unknown body attributes, so other keys
-// such as tenant_id use WithCreateRecordField; the server validates every value.
+// such as tenant_id use request.Field; the server validates every value.
 type CreateRecordOpts struct {
 	Name                request.Optional[string]   `json:"name,omitzero"`
 	ProjectID           request.Optional[string]   `json:"project_id,omitzero"`
@@ -31,22 +32,23 @@ type CreateRecordOpts struct {
 	VNI                 request.Optional[int]      `json:"vni,omitzero"`
 }
 
-type CreateRecordOption = request.Option[CreateRecordOpts]
+// CreateRecordOption is one option of CreateRecord: WithCreateRecordOptions,
+// WithCreateRecordLocalPref, request.Field (another attribute inside the
+// bgpvpn envelope; keys owned by CreateRecordOpts are rejected),
+// request.Header or request.Custom over *request.Config[CreateRecordOpts].
+// Other shared calls fail with resource.ErrInvalidOption before HTTP.
+type CreateRecordOption = request.WriteCall
+
+var createRecordOptionCalls = calls.Spec[request.Config[CreateRecordOpts]]{
+	Header: calls.ConfigHeader[CreateRecordOpts],
+	Field:  calls.ConfigField[CreateRecordOpts],
+}
 
 func WithCreateRecordOptions(value CreateRecordOpts) CreateRecordOption {
-	return request.WithOptions(value)
+	return request.Custom(request.WithOptions(value))
 }
 func WithCreateRecordLocalPref(value request.Optional[int]) CreateRecordOption {
-	return func(config *request.Config[CreateRecordOpts]) error { config.Options.LocalPref = value; return nil }
-}
-
-// WithCreateRecordField adds another attribute inside the bgpvpn envelope.
-// Keys owned by CreateRecordOpts are rejected.
-func WithCreateRecordField(key string, value any) CreateRecordOption {
-	return request.WithField[CreateRecordOpts](key, value)
-}
-func WithCreateRecordHeader(key, value string) CreateRecordOption {
-	return request.WithHeader[CreateRecordOpts](key, value)
+	return request.Custom(func(config *request.Config[CreateRecordOpts]) error { config.Options.LocalPref = value; return nil })
 }
 
 // BGPVPNRecord is the created Python BgpVpn view. BGPVPN is the native typed
@@ -76,7 +78,7 @@ func (a *API) CreateRecord(ctx context.Context, options ...CreateRecordOption) (
 	if err != nil {
 		return fail(nil, err)
 	}
-	config, err := cloudread.ApplyReadOptions(ctx, CreateRecordOpts{}, options, cloudread.OwnReadConfig[CreateRecordOpts], source.Guard)
+	config, err := cloudread.ApplyReadOptions(ctx, CreateRecordOpts{}, calls.Options(options, createRecordOptionCalls), cloudread.OwnReadConfig[CreateRecordOpts], source.Guard)
 	if err == nil {
 		err = request.ValidateCapabilities(config, true, false, true)
 	}

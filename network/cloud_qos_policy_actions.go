@@ -9,6 +9,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 // QoSPolicyLookup retains completed extension discovery and an optional policy.
@@ -62,19 +63,19 @@ func (s *Service) GetQoSPolicyRecord(ctx context.Context, identity string, optio
 	if err = errors.Join(err, state.Check(ctx)); err != nil {
 		return fail(err)
 	}
-	leaf := []policies.RecordFindOption{policies.WithRecordFindIgnoreMissing(true)}
+	leaf := []policies.RecordFindOption{request.IgnoreMissing(true)}
 	for _, member := range members {
 		// Cloud already binds these arguments. Reject by presence, including null.
 		if member.Key == "name_or_id" || member.Key == "ignore_missing" {
 			return fail(qosPolicyCloudInvalid("%q duplicates the cloud Find argument", member.Key))
 		}
-		leaf = append(leaf, policies.WithRecordFindQuery(member.Key, member.Value))
+		leaf = append(leaf, request.Query(member.Key, member.Value))
 	}
 	if len(policy.Headers) > 0 {
-		leaf = append(leaf, policies.WithRecordFindHeaders(policy.Headers))
+		leaf = append(leaf, request.Headers(policy.Headers))
 	}
 	if policy.Microversion != nil {
-		leaf = append(leaf, policies.WithRecordFindMicroversion(*policy.Microversion))
+		leaf = append(leaf, request.Microversion(*policy.Microversion))
 	}
 	ctx = rest.WithOperationGuard(ctx, state.Check)
 	record, err := state.API.QoSPolicies.FindSourceRecord(ctx, identity, leaf...)
@@ -99,7 +100,7 @@ func (s *Service) DeleteQoSPolicyRecord(ctx context.Context, identity string) (*
 		return result, qosPolicyCloudWrap(ctx, op, err)
 	}
 	ctx = rest.WithOperationGuard(ctx, state.Check)
-	record, err := state.API.QoSPolicies.FindSourceRecord(ctx, identity, policies.WithRecordFindIgnoreMissing(true))
+	record, err := state.API.QoSPolicies.FindSourceRecord(ctx, identity, request.IgnoreMissing(true))
 	if err = errors.Join(err, state.Check(ctx)); err != nil {
 		return result, qosPolicyCloudWrap(ctx, op, err)
 	}

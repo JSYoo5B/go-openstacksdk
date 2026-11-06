@@ -6,11 +6,11 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
-	"slices"
 	"strings"
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/neutronfind"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
@@ -97,10 +97,7 @@ func (a *API) CreateRecord(ctx context.Context, options ...RecordCreateOption) (
 	if err != nil {
 		return nil, rbacRecordWrap(ctx, "CreateRecord", err)
 	}
-	callbacks := make([]func(*RecordCreateOpts) error, len(options))
-	for i, apply := range slices.Clone(options) {
-		callbacks[i] = apply
-	}
+	callbacks := calls.Translate(options, recordCreateCalls)
 	policy, err := applyRBACRecordOptions(ctx, engine, RecordCreateOpts{}, copyRBACCreateMutation, callbacks)
 	if err != nil {
 		return nil, rbacRecordWrap(ctx, "CreateRecord", err)
@@ -121,10 +118,7 @@ func (a *API) UpdateRecord(ctx context.Context, id string, options ...RecordUpda
 	if err != nil {
 		return nil, rbacRecordWrap(ctx, "UpdateRecord", err)
 	}
-	callbacks := make([]func(*RecordUpdateOpts) error, len(options))
-	for i, apply := range slices.Clone(options) {
-		callbacks[i] = apply
-	}
+	callbacks := calls.Translate(options, recordUpdateCalls)
 	policy, err := applyRBACRecordOptions(ctx, engine, RecordUpdateOpts{}, copyRBACUpdateMutation, callbacks)
 	if err != nil {
 		return nil, rbacRecordWrap(ctx, "UpdateRecord", err)
@@ -155,10 +149,7 @@ func (a *API) DeleteRecord(ctx context.Context, id string, options ...RecordDele
 	if err != nil {
 		return nil, rbacRecordWrap(ctx, "DeleteRecord", err)
 	}
-	callbacks := make([]func(*RecordDeleteOpts) error, len(options))
-	for i, apply := range slices.Clone(options) {
-		callbacks[i] = apply
-	}
+	callbacks := calls.Translate(options, recordDeleteCalls)
 	policy, err := applyRBACRecordOptions(ctx, engine, RecordDeleteOpts{}, copyRBACDeleteMutation, callbacks)
 	if err != nil {
 		return nil, rbacRecordWrap(ctx, "DeleteRecord", err)

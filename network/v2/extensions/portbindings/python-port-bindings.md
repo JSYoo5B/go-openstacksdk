@@ -142,7 +142,7 @@ func main() {
             portbindings.WithAttribute("host", *host),
             portbindings.WithAttribute("profile", map[string]any{"capabilities": []string{"switchdev"}}))
     case "list":
-        value, err = api.All(ctx, *port, portbindings.WithQuery("host", *host))
+        value, err = api.All(ctx, *port, request.Query("host", *host))
     case "activate":
         value, err = api.Activate(ctx, *port, *host)
     case "delete":

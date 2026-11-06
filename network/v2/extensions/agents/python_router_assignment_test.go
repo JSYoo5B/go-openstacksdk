@@ -6,6 +6,7 @@ import (
 	"errors"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"io"
 	"net/http"
@@ -88,16 +89,16 @@ func TestPythonRouterAssignmentOptionsOwnershipAndPreflight(t *testing.T) {
 		t.Fatal(err, calls)
 	}
 	before := len(calls)
-	for _, opts := range [][]agents.RouterAssignmentOption{{nil}, {agents.WithRouterAssignmentPriorityJSON(json.RawMessage(`{bad`))}, {agents.WithRouterAssignmentHeaders(map[string]string{"X-Auth-Token": "foreign"})}} {
+	for _, opts := range [][]agents.RouterAssignmentOption{{nil}, {agents.WithRouterAssignmentPriorityJSON(json.RawMessage(`{bad`))}, {request.Headers(map[string]string{"X-Auth-Token": "foreign"})}} {
 		_, err = api.UpdateRouterInAgent(context.Background(), "a", "r", opts...)
 		if err == nil || len(calls) != before {
 			t.Fatal(err, calls)
 		}
 	}
-	_, err = api.UpdateRouterInAgent(context.Background(), "a", "r", func(*agents.RouterAssignmentOpts) error {
+	_, err = api.UpdateRouterInAgent(context.Background(), "a", "r", request.Custom(func(*agents.RouterAssignmentOpts) error {
 		*api = *agents.New(cloud.Client("network", "/changed/"))
 		return nil
-	})
+	}))
 	if !errors.Is(err, resource.ErrInvalidOption) || len(calls) != before {
 		t.Fatal(err, calls)
 	}
@@ -114,7 +115,7 @@ func TestPythonRouterAssignmentVersionOverrideAndCancellation(t *testing.T) {
 	client := api.RawClient()
 	client.Microversion = "2.0"
 	client.MoreHeaders = map[string]string{"OpenStack-API-Version": "network 2.0"}
-	result, err := api.UpdateRouterInAgent(context.Background(), "a", "r", agents.WithRouterAssignmentMicroversion("2.5"))
+	result, err := api.UpdateRouterInAgent(context.Background(), "a", "r", request.Microversion("2.5"))
 	if err != nil || result == nil || string(result.Value) != "null" || len(calls) != 1 || client.Microversion != "2.0" || client.MoreHeaders["OpenStack-API-Version"] != "network 2.0" {
 		t.Fatal(result, err, calls, client)
 	}

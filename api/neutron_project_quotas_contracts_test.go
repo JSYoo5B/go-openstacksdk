@@ -247,11 +247,11 @@ func TestNeutronProjectQuotaHTTPFailuresAndStrictMissingPolicy(t *testing.T) {
 					t.Fatalf("response=%+v sdk=%+v error=%v", response, sdk, err)
 				}
 				if operation == "Delete" {
-					value, err := scope.Delete(context.Background(), quotas.WithDeleteIgnoreMissing(true))
+					value, err := scope.Delete(context.Background(), request.IgnoreMissing(true))
 					if value != nil || (err == nil) != (status == 404) {
 						t.Fatalf("ignored DELETE=%+v error=%v", value, err)
 					}
-					_, err = scope.Delete(context.Background(), quotas.WithDeleteIgnoreMissing(true), quotas.WithDeleteIgnoreMissing(false))
+					_, err = scope.Delete(context.Background(), request.IgnoreMissing(true), request.IgnoreMissing(false))
 					if !gophercloud.ResponseCodeIs(err, status) {
 						t.Fatalf("last false option did not restore strict errors: %v", err)
 					}

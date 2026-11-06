@@ -32,7 +32,7 @@ func TestPythonBGPPeerUpdateRecordSendsEmptyName(t *testing.T) {
 	status, reply = http.StatusAccepted, `{"id":"bp-1","name":"","remote_as":64512}`
 	got, err = api.UpdateRecord(ctx, "bp-1",
 		peers.WithUpdateRecordOptions(peers.UpdateRecordOpts{Name: request.Null[string](), Password: request.Present("")}),
-		peers.WithUpdateRecordField("hold_time", 0), peers.WithUpdateRecordHeader("X-Trace", "t"))
+		request.Field("hold_time", 0), request.Header("X-Trace", "t"))
 	if err != nil || got.StatusCode != 202 || got.BGPPeer.Name != "" || got.BGPPeer.RemoteAS != 64512 || len(got.Fields) != 3 {
 		t.Fatal(got, err)
 	}
@@ -61,9 +61,9 @@ func TestPythonBGPPeerUpdateRecordRejectsInputsAndErrorStatuses(t *testing.T) {
 		return pythonBGPPeerWire(http.StatusConflict, `{"NeutronError":{"type":"Conflict","message":"busy"}}`)
 	})
 	for _, option := range []peers.UpdateRecordOption{
-		peers.WithUpdateRecordField("name", ""),
-		peers.WithUpdateRecordField("id", "bp-2"),
-		peers.WithUpdateRecordField("", 1),
+		request.Field("name", ""),
+		request.Field("id", "bp-2"),
+		request.Field("", 1),
 		nil,
 	} {
 		var operation *resource.OperationError

@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/siteconnections"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -57,7 +58,7 @@ func TestVPNSiteRecordsServerQueryAndLocalFiltersAcrossPages(t *testing.T) {
 		}
 		return nativeVPNWire(200, `{"ipsec_site_connections":[{"id":"no","interval":10}],"ipsec_site_connections_links":[{"rel":"next","href":"?marker=p2"}]}`)
 	})
-	seq := api.ListRecords(context.Background(), siteconnections.WithRecordListQuery("status", "ACTIVE"), siteconnections.WithRecordListQuery("is_admin_state_up", false), siteconnections.WithRecordListQuery("mtu", 1500), siteconnections.WithRecordListQuery("fields", []string{"id"}), siteconnections.WithRecordListQuery("interval", 30), siteconnections.WithRecordListQuery("peer_cidrs", []string{"10.0.0.0/24"}), siteconnections.WithRecordListQuery("tenant_id", make(chan int)), siteconnections.WithRecordListQuery("unknown", make(chan int)))
+	seq := api.ListRecords(context.Background(), request.Query("status", "ACTIVE"), request.Query("is_admin_state_up", false), request.Query("mtu", 1500), request.Query("fields", []string{"id"}), request.Query("interval", 30), request.Query("peer_cidrs", []string{"10.0.0.0/24"}), request.Query("tenant_id", make(chan int)), request.Query("unknown", make(chan int)))
 	if len(calls) != 0 {
 		t.Fatal("eager HTTP")
 	}
@@ -84,7 +85,7 @@ func TestVPNSiteRecordsMarkerCountsPhysicalRowsBeforeFiltering(t *testing.T) {
 		}
 		return nativeVPNWire(200, `{"ipsec_site_connections":[{"id":"a","action":"clear"},{"id":"b","action":"clear"}]}`)
 	})
-	rows, err := api.AllRecords(context.Background(), siteconnections.WithRecordListLimit(2), siteconnections.WithRecordListQuery("action", "hold"))
+	rows, err := api.AllRecords(context.Background(), request.Limit(2), request.Query("action", "hold"))
 	if err != nil || len(rows) != 1 || len(calls) != 3 || !strings.Contains(calls[1].query, "marker=b") || !strings.Contains(calls[2].query, "marker=c") {
 		t.Fatal(rows, err, calls)
 	}
@@ -95,7 +96,7 @@ func TestVPNSiteRecordsControlsUnknownAndOwnedOptions(t *testing.T) {
 		t.Run(key, func(t *testing.T) {
 			calls := []nativeVPNCall{}
 			api, _ := nativeVPNAPI(t, &calls, func(*http.Request) *http.Response { t.Error("control HTTP"); return nativeVPNWire(200, `{}`) })
-			_, err := api.AllRecords(context.Background(), siteconnections.WithRecordListQuery(key, make(chan int)))
+			_, err := api.AllRecords(context.Background(), request.Query(key, make(chan int)))
 			if !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
 				t.Fatal(err, calls)
 			}
@@ -216,11 +217,11 @@ func TestVPNSiteRecordsCancellationAndRouteGuard(t *testing.T) {
 	calls := []nativeVPNCall{}
 	api, _ := nativeVPNAPI(t, &calls, func(*http.Request) *http.Response { t.Error("preflight HTTP"); return nativeVPNWire(200, `{}`) })
 	entered := false
-	_, err := api.AllRecords(context.Background(), func(*siteconnections.RecordListOpts) error {
+	_, err := api.AllRecords(context.Background(), request.Custom(func(*siteconnections.RecordListOpts) error {
 		entered = true
 		api.RawClient().ResourceBase = "https://changed.invalid/v2.0/"
 		return nil
-	})
+	}))
 	if !entered || !errors.Is(err, resource.ErrInvalidOption) || !strings.Contains(err.Error(), "source or route changed") || len(calls) != 0 {
 		t.Fatal(fmt.Sprint(err), entered, calls)
 	}

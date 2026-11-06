@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	sdk "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -63,7 +64,7 @@ func TestPythonOwnedListServerQueriesAndLocalBodyFilters(t *testing.T) {
 		}
 		testcloud.JSON(w, 200, `{"bgpvpns":[{"id":"skip","name":"vpn","tenant_id":"owner","route_targets":["64512:2"],"import_targets":null,"vni":"7","local_pref":false,"x_unknown":9007199254740993},{"id":"keep","name":"vpn","tenant_id":"owner","route_targets":"64512:1","import_targets":null,"vni":"7","local_pref":false,"x_unknown":9007199254740993}]}`)
 	})
-	rows, err := api.AllRecords(context.Background(), sdk.WithRecordListQuery("project_id", "owner"), sdk.WithRecordListQuery("route_targets", json.RawMessage(`["64512:1"]`)), sdk.WithRecordListQuery("unknown", func() {}))
+	rows, err := api.AllRecords(context.Background(), request.Query("project_id", "owner"), request.Query("route_targets", json.RawMessage(`["64512:1"]`)), request.Query("unknown", func() {}))
 	if err != nil || len(rows) != 1 || *calls != 1 || string(rows[0].Resource.Body["id"]) != `"keep"` {
 		t.Fatal(rows, err, *calls)
 	}
@@ -107,7 +108,7 @@ func TestPythonOwnedListPagingLinksRawCapsAndEarlyBreak(t *testing.T) {
 	api, calls := listRecordsFixture(t, func(w http.ResponseWriter, r *http.Request) {
 		testcloud.JSON(w, 200, `{"bgpvpns":[{"id":"skip"},{"id":"keep"}],"next":"?marker=tail"}`)
 	})
-	rows, err := api.AllRecords(context.Background(), sdk.WithRecordListMaxItems(1))
+	rows, err := api.AllRecords(context.Background(), request.MaxItems(1))
 	if err != nil || len(rows) != 1 || *calls != 1 {
 		t.Fatal(rows, err, *calls)
 	}
@@ -165,7 +166,7 @@ func TestPythonOwnedListOptionsSnapshotRestorationAndPreflight(t *testing.T) {
 	if _, err := api.AllRecords(context.Background(), option); err != nil {
 		t.Fatal(err)
 	}
-	for _, bad := range []sdk.RecordListOption{nil, sdk.WithRecordListQuery("session", func() {}), sdk.WithRecordListBasePath("https://foreign.invalid/path"), sdk.WithRecordListMaxItems(-1)} {
+	for _, bad := range []sdk.RecordListOption{nil, request.Query("session", func() {}), request.BasePath("https://foreign.invalid/path"), request.MaxItems(-1)} {
 		if _, err := api.AllRecords(context.Background(), bad); err == nil || *calls != 1 {
 			t.Fatal(err, *calls)
 		}
@@ -176,7 +177,7 @@ func TestPythonOwnedListOptionsSnapshotRestorationAndPreflight(t *testing.T) {
 		}
 		testcloud.JSON(w, 200, `{"bgpvpns":[]}`)
 	})
-	if _, err := restored.AllRecords(context.Background(), sdk.WithRecordListQuery("project_id", "old"), sdk.WithRecordListConflictingAttrs(json.RawMessage(`{"project_id":"restored","headers":{"X-Raw":"proof"}}`))); err != nil || *restoredCalls != 1 {
+	if _, err := restored.AllRecords(context.Background(), request.Query("project_id", "old"), sdk.WithRecordListConflictingAttrs(json.RawMessage(`{"project_id":"restored","headers":{"X-Raw":"proof"}}`))); err != nil || *restoredCalls != 1 {
 		t.Fatal(err, *restoredCalls)
 	}
 }

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/endpointgroups"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"net/http"
 	"testing"
@@ -19,7 +20,7 @@ func TestVPNEndpointGroupRecordsAllPagesServerQueryAndLocalFilter(t *testing.T) 
 		return pythonEndpointGroupWire(200, `{"endpoint_groups":[{"id":"skip","endpoints":["b"]},{"id":"first","endpoints":["a"]}],"next":"`+base+`?marker=next"}`)
 	})
 	base = cloud.Server.URL + pythonEndpointGroupBase
-	rows, err := api.AllRecords(context.Background(), endpointgroups.WithRecordListQuery("endpoints", json.RawMessage(`["a"]`)), endpointgroups.WithRecordListQuery("type", json.RawMessage(`"cidr"`)), endpointgroups.WithRecordListQuery("tenant_id", "tenant"))
+	rows, err := api.AllRecords(context.Background(), request.Query("endpoints", json.RawMessage(`["a"]`)), request.Query("type", json.RawMessage(`"cidr"`)), request.Query("tenant_id", "tenant"))
 	if err != nil || len(rows) != 2 || len(*calls) != 2 || string(rows[0].Resource.Body["id"]) != `"first"` || string(rows[1].Resource.Body["id"]) != `"last"` {
 		t.Fatal(rows, err, *calls)
 	}
@@ -38,7 +39,7 @@ func TestVPNEndpointGroupRecordsAllPagesServerQueryAndLocalFilter(t *testing.T) 
 		}
 		return pythonEndpointGroupWire(200, `{"endpoint_groups":[]}`)
 	})
-	_, err = api.AllRecords(context.Background(), endpointgroups.WithRecordListQuery("endpoints", json.RawMessage(`["a"]`)), endpointgroups.WithRecordListQuery("type", json.RawMessage(`"cidr"`)), endpointgroups.WithRecordListQuery("tenant_id", "tenant"))
+	_, err = api.AllRecords(context.Background(), request.Query("endpoints", json.RawMessage(`["a"]`)), request.Query("type", json.RawMessage(`"cidr"`)), request.Query("tenant_id", "tenant"))
 	if err != nil || len(*calls) != 1 {
 		t.Fatal(err, *calls)
 	}
@@ -95,20 +96,20 @@ func TestVPNEndpointGroupRecordsOptionsCancellationAndFailures(t *testing.T) {
 		return pythonEndpointGroupWire(200, `{"endpoint_groups":[{"id":"r","endpoints":["a"]}]}`)
 	})
 	raw := json.RawMessage(`["a"]`)
-	option := endpointgroups.WithRecordListQuery("endpoints", raw)
+	option := request.Query("endpoints", raw)
 	raw[0] = 'X'
-	rows, err := api.AllRecords(context.Background(), option, endpointgroups.WithRecordListQuery("ignored_extension", make(chan int)))
+	rows, err := api.AllRecords(context.Background(), option, request.Query("ignored_extension", make(chan int)))
 	if err != nil || len(rows) != 1 || count != 1 {
 		t.Fatal(rows, err)
 	}
-	for _, options := range [][]endpointgroups.RecordListOption{{nil}, {endpointgroups.WithRecordListQuery("session", make(chan int))}, {endpointgroups.WithRecordListMicroversion("2.1\r\nbad")}} {
+	for _, options := range [][]endpointgroups.RecordListOption{{nil}, {request.Query("session", make(chan int))}, {request.Microversion("2.1\r\nbad")}} {
 		rows, err = api.AllRecords(context.Background(), options...)
 		if err == nil || rows != nil || len(*calls) != 1 {
 			t.Fatal(rows, err, *calls)
 		}
 	}
 	ctx, cancel := context.WithCancel(context.Background())
-	rows, err = api.AllRecords(ctx, func(*endpointgroups.RecordListOpts) error { cancel(); return nil })
+	rows, err = api.AllRecords(ctx, request.Custom(func(*endpointgroups.RecordListOpts) error { cancel(); return nil }))
 	if !errors.Is(err, context.Canceled) || rows != nil || len(*calls) != 1 {
 		t.Fatal(rows, err, *calls)
 	}

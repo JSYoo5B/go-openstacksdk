@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -29,7 +30,7 @@ func TestExtensionFindFetchControlsCollectionKeepsConstructorSeedAndAliasProject
 		}
 		testcloud.JSON(w, 203, body)
 	})
-	row, err := api.FindRecord(context.Background(), "requested", extensions.WithRecordFindQuery("requires_id", false), extensions.WithRecordFindQuery("base_path", "/alternate-extensions"), extensions.WithRecordFindQuery("skip_cache", true), extensions.WithRecordFindQuery("error_message", "custom missing"), extensions.WithRecordFindQuery("resource_response_key", "selected"), extensions.WithRecordFindQuery("x_seed", map[string]any{"seed-key": nil}))
+	row, err := api.FindRecord(context.Background(), "requested", request.Query("requires_id", false), request.Query("base_path", "/alternate-extensions"), request.Query("skip_cache", true), request.Query("error_message", "custom missing"), request.Query("resource_response_key", "selected"), request.Query("x_seed", map[string]any{"seed-key": nil}))
 	if err != nil || row == nil || count.Load() != 1 || row.StatusCode != 203 || string(row.Envelope) != body || row.Header.Get("X-Request-Id") != "extension-actual" {
 		t.Fatal(row, err, count.Load())
 	}
@@ -46,7 +47,7 @@ func TestExtensionFindFetchControlsEnvelopeNullIDAndMalformedProof(t *testing.T)
 		api, count := recordExtensionAPI(t, func(w http.ResponseWriter, r *http.Request) {
 			testcloud.JSON(w, 200, `{"selected":{"id":null,"alias":"fallback","updated":null,"links":null}}`)
 		})
-		row, err := api.FindRecord(context.Background(), "requested", extensions.WithRecordFindQuery("resource_response_key", "selected"))
+		row, err := api.FindRecord(context.Background(), "requested", request.Query("resource_response_key", "selected"))
 		if err != nil || row == nil || count.Load() != 1 {
 			t.Fatal(row, err, count.Load())
 		}
@@ -57,7 +58,7 @@ func TestExtensionFindFetchControlsEnvelopeNullIDAndMalformedProof(t *testing.T)
 	t.Run("malformed selected envelope keeps accepted response", func(t *testing.T) {
 		body := `{"selected":[],"extension":{"id":"wrong"}}`
 		api, count := recordExtensionAPI(t, func(w http.ResponseWriter, r *http.Request) { testcloud.JSON(w, 202, body) })
-		row, err := api.FindRecord(context.Background(), "requested", extensions.WithRecordFindQuery("resource_response_key", "selected"))
+		row, err := api.FindRecord(context.Background(), "requested", request.Query("resource_response_key", "selected"))
 		if row != nil || err == nil || count.Load() != 1 {
 			t.Fatal(row, err, count.Load())
 		}
@@ -84,7 +85,7 @@ func TestExtensionFindFetchControlsRawHeadersUseGETQueryThenFallbackTransport(t 
 		}
 		testcloud.JSON(w, 200, `{"extensions":[{"alias":"selected","name":"target","updated":"literal","links":false}]}`)
 	})
-	row, err := api.FindRecord(context.Background(), "target", extensions.WithRecordFindQuery("base_path", "/alternate-extensions"), extensions.WithRecordFindListBasePath("/list-extensions"), extensions.WithRecordFindQuery("headers", json.RawMessage(`{"Accept":"application/vnd.extension+json","X-Raw":"raw"}`)), extensions.WithRecordFindHeaders(map[string]string{"X-Typed": "kept", "x-raw": "typed"}))
+	row, err := api.FindRecord(context.Background(), "target", request.Query("base_path", "/alternate-extensions"), extensions.WithRecordFindListBasePath("/list-extensions"), request.Query("headers", json.RawMessage(`{"Accept":"application/vnd.extension+json","X-Raw":"raw"}`)), request.Headers(map[string]string{"X-Typed": "kept", "x-raw": "typed"}))
 	if err != nil || row == nil || count.Load() != 2 {
 		t.Fatal(row, err, count.Load())
 	}
@@ -109,7 +110,7 @@ func TestExtensionFindFetchControlsRawHeadersValidateOnlyAtFallback(t *testing.T
 				}
 				testcloud.JSON(w, 200, `{"extension":{"alias":"qos"}}`)
 			})
-			row, err := api.FindRecord(context.Background(), "requested", extensions.WithRecordFindQuery("headers", json.RawMessage(`{"X-Raw":7}`)))
+			row, err := api.FindRecord(context.Background(), "requested", request.Query("headers", json.RawMessage(`{"X-Raw":7}`)))
 			if count.Load() != 1 {
 				t.Fatal(count.Load())
 			}
@@ -167,7 +168,7 @@ func TestExtensionFindFetchControlsOwnOptionsWithoutCacheAndKeepHTTPCause(t *tes
 			}
 			testcloud.JSON(w, 500, body)
 		})
-		row, err := api.FindRecord(context.Background(), "requested", extensions.WithRecordFindQuery("error_message", "extension lookup failed"))
+		row, err := api.FindRecord(context.Background(), "requested", request.Query("error_message", "extension lookup failed"))
 		var native gophercloud.ErrUnexpectedResponseCode
 		if row != nil || count.Load() != 1 || !errors.As(err, &native) || native.Actual != 500 || string(native.Body) != body || native.ResponseHeader.Get("X-Request-Id") != "extension-actual" || !strings.Contains(err.Error(), "extension lookup failed") {
 			t.Fatal(row, err, native, count.Load())
@@ -203,7 +204,7 @@ func TestExtensionFindFetchControlsPhysicalFaultsNeverFallback(t *testing.T) {
 			cloud.SetTransport(transport)
 			client := cloud.Client("network", "/catalog/")
 			client.ResourceBase = cloud.Server.URL + "/neutron/v2.0/"
-			row, err := extensions.New(client).FindRecord(ctx, "requested", extensions.WithRecordFindQuery("requires_id", false), extensions.WithRecordFindQuery("skip_cache", true), extensions.WithRecordFindQuery("error_message", "controlled extension lookup"))
+			row, err := extensions.New(client).FindRecord(ctx, "requested", request.Query("requires_id", false), request.Query("skip_cache", true), request.Query("error_message", "controlled extension lookup"))
 			if row != nil || calls.Load() != 1 || closed.Load() != 1 || !errors.Is(err, cause) {
 				t.Fatal(row, err, calls.Load(), closed.Load())
 			}

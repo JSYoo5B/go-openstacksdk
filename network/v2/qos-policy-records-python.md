@@ -19,10 +19,10 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordFindOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordFindIgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordFindQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordFindMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordFindHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 
 - Pinned direct find_qos_policy (openstack/network/v2/_proxy.py:5130) accepts a string, ignore_missing=True and query. Native GET200 /qos/policies/id and policy envelope preserve canonical IDs and typed model extraction; undeclared GET203/204 and accepted native decode errors remain terminal without fallback or resend.
   Tests: `api/find_identity_network_qos_addresses_test.go:TestNativeFindIdentityNetworkQoSAddressesGETModelsAndNativeCodes`.
@@ -97,13 +97,13 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.AllRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordListQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordListMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 
 - Ordinary QoSPolicy.Resources.List/All classify the complete pinned declaration through SDK-owned WithFilter/WithFilters: fifteen canonical query fields and nineteen accepted canonical/wire spellings, two local Body fields rules/tenant_id and nine reserved list controls. QoSPolicy inherits Resource+TagMixin, not NetworkResource. Queried id/name/description/project_id/is_default/shared/tags remain server-only even when returned values differ; no implicit GET, tag fetch or caller builder is added. Generated leaf and cached Network/NetworkV2 facades share this descriptor.
   Tests: `api/qos_policy_list_filters_test.go:TestQoSPolicyListFiltersEntireQueryAndAliasDescriptor`, `api/qos_policy_list_filters_test.go:TestQoSPolicyListFiltersRawRulesAndTenantPresence`, `connectiontest/connection_qos_policy_filters_test.go:TestConnectionQoSPolicyFiltersSharedFacadesAndExactRawRules`.
@@ -213,21 +213,21 @@ func run(ctx context.Context, cloud, mode, identity, project string) (any, error
     switch mode {
     case "find":
         options := []policies.RecordFindOption{
-            policies.WithRecordFindIgnoreMissing(false),
-            policies.WithRecordFindQuery("is_shared", false),
+            request.IgnoreMissing(false),
+            request.Query("is_shared", false),
         }
         if project != "" {
-            options = append(options, policies.WithRecordFindQuery("project_id", project))
+            options = append(options, request.Query("project_id", project))
         }
         record, err := network.QoSPolicies.FindRecord(ctx, identity, options...)
         if err != nil || record == nil { return nil, err }
         return record.Resource, nil
     case "list":
         options := []policies.RecordListOption{
-            policies.WithRecordListQuery("is_shared", false),
+            request.Query("is_shared", false),
         }
         if project != "" {
-            options = append(options, policies.WithRecordListQuery("project_id", project))
+            options = append(options, request.Query("project_id", project))
         }
         records, err := network.QoSPolicies.AllRecords(ctx, options...)
         if err != nil { return nil, err }

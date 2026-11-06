@@ -6,13 +6,13 @@ import (
 	"encoding/json"
 	"errors"
 	"iter"
-	"maps"
 	"net/url"
 	"slices"
 	"strings"
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/jmespath"
@@ -28,7 +28,45 @@ type DHCPHostListOpts struct {
 	order        []string
 	basePath     *string
 }
-type DHCPHostListOption func(*DHCPHostListOpts) error
+
+// DHCPHostListOption is one option of the DHCP agent list of a network:
+// WithDHCPHostListOpts, WithDHCPHostListJMESPath, request.Query (one Source
+// kwarg as JSON), request.MaxItems, request.Paginated (the max_items and
+// paginated kwargs), request.Headers (replaces the headers),
+// request.Microversion or request.Custom over *DHCPHostListOpts. Other shared
+// calls fail with resource.ErrInvalidOption before HTTP.
+type DHCPHostListOption = request.ListCall
+
+func dhcpHostKeyword(c *DHCPHostListOpts, key string, own json.RawMessage, err error) error {
+	if err != nil {
+		return err
+	}
+	if c.Query == nil {
+		c.Query = map[string]json.RawMessage{}
+	}
+	c.Query[key] = bytes.Clone(own)
+	if !slices.Contains(c.order, key) {
+		c.order = append(c.order, key)
+	}
+	return nil
+}
+
+var dhcpHostCalls = calls.Spec[DHCPHostListOpts]{
+	Query: func(c *DHCPHostListOpts, entry request.CallEntry) error {
+		return dhcpHostKeyword(c, entry.Key, entry.JSON, entry.JSONErr)
+	},
+	Headers:      calls.Value(func(c *DHCPHostListOpts) *map[string]string { return &c.Headers }),
+	Microversion: calls.Pointer(func(c *DHCPHostListOpts) **string { return &c.Microversion }),
+	Paging: calls.Paging[DHCPHostListOpts]{
+		MaxItems:  func(c *DHCPHostListOpts, n int) error { return dhcpHostJSON(c, "max_items", n) },
+		Paginated: func(c *DHCPHostListOpts, v bool) error { return dhcpHostJSON(c, "paginated", v) },
+	},
+}
+
+func dhcpHostJSON(c *DHCPHostListOpts, key string, value any) error {
+	raw, err := json.Marshal(value)
+	return dhcpHostKeyword(c, key, raw, err)
+}
 
 func dhcpHostPolicy(v DHCPHostListOpts) neutronfind.Options {
 	return neutronfind.Options{Query: v.Query, Headers: v.Headers, Microversion: v.Microversion, Order: v.order}
@@ -44,38 +82,11 @@ func cloneDHCPHostOpts(v DHCPHostListOpts) DHCPHostListOpts {
 }
 func WithDHCPHostListOpts(v DHCPHostListOpts) DHCPHostListOption {
 	own := cloneDHCPHostOpts(v)
-	return func(c *DHCPHostListOpts) error { *c = cloneDHCPHostOpts(own); return nil }
-}
-func WithDHCPHostListQuery(key string, v any) DHCPHostListOption {
-	raw, err := json.Marshal(v)
-	own := bytes.Clone(raw)
-	return func(c *DHCPHostListOpts) error {
-		if err != nil {
-			return err
-		}
-		if c.Query == nil {
-			c.Query = map[string]json.RawMessage{}
-		}
-		c.Query[key] = bytes.Clone(own)
-		if !slices.Contains(c.order, key) {
-			c.order = append(c.order, key)
-		}
-		return nil
-	}
-}
-func WithDHCPHostListHeaders(v map[string]string) DHCPHostListOption {
-	own := maps.Clone(v)
-	return func(c *DHCPHostListOpts) error { c.Headers = maps.Clone(own); return nil }
-}
-func WithDHCPHostListMicroversion(v string) DHCPHostListOption {
-	return func(c *DHCPHostListOpts) error { x := v; c.Microversion = &x; return nil }
-}
-func WithDHCPHostListMaxItems(v int) DHCPHostListOption { return WithDHCPHostListQuery("max_items", v) }
-func WithDHCPHostListPaginated(v bool) DHCPHostListOption {
-	return WithDHCPHostListQuery("paginated", v)
+	return request.Custom(func(c *DHCPHostListOpts) error { *c = cloneDHCPHostOpts(own); return nil })
 }
 func WithDHCPHostListJMESPath(v string) DHCPHostListOption {
-	return WithDHCPHostListQuery("jmespath_filters", v)
+	raw, err := json.Marshal(v)
+	return request.Custom(func(c *DHCPHostListOpts) error { return dhcpHostKeyword(c, "jmespath_filters", raw, err) })
 }
 func dhcpHostSegment(v string) error {
 	if strings.TrimSpace(v) == "" || v == "." || v == ".." || !utf8.ValidString(v) || strings.IndexFunc(v, unicode.IsControl) >= 0 {
@@ -121,7 +132,7 @@ func (a *API) prepareDHCPHosts(ctx context.Context, networkID string, options []
 		return nil, DHCPHostListOpts{}, nil, err
 	}
 	policy := DHCPHostListOpts{}
-	for _, apply := range slices.Clone(options) {
+	for _, apply := range calls.Translate(options, dhcpHostCalls) {
 		if err := engine.Check(ctx); err != nil {
 			return nil, policy, nil, err
 		}

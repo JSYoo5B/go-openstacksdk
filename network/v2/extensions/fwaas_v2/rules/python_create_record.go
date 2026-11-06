@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -35,21 +36,22 @@ type CreateRecordOpts struct {
 	FirewallPolicyID     request.Optional[string] `json:"firewall_policy_id,omitzero"`
 }
 
-type CreateRecordOption = request.Option[CreateRecordOpts]
+// CreateRecordOption is one option of CreateRecord: WithCreateRecordOptions,
+// request.Field (another attribute inside the firewall_rule envelope, such as
+// source_firewall_group_id. FirewallRule allows unknown body attributes. A
+// declared key may be given with another JSON type, such as protocol 6, only
+// when CreateRecordOpts leaves that key omitted), request.Header or
+// request.Custom over *request.Config[CreateRecordOpts]. Other shared calls
+// fail with resource.ErrInvalidOption before HTTP.
+type CreateRecordOption = request.WriteCall
+
+var createRecordOptionCalls = calls.Spec[request.Config[CreateRecordOpts]]{
+	Header: calls.ConfigHeader[CreateRecordOpts],
+	Field:  calls.ConfigField[CreateRecordOpts],
+}
 
 func WithCreateRecordOptions(value CreateRecordOpts) CreateRecordOption {
-	return request.WithOptions(value)
-}
-
-// WithCreateRecordField adds another attribute inside the firewall_rule
-// envelope, such as source_firewall_group_id. FirewallRule allows unknown body
-// attributes. A declared key may be given here with another JSON type, such
-// as protocol 6, only when CreateRecordOpts leaves that key omitted.
-func WithCreateRecordField(key string, value any) CreateRecordOption {
-	return request.WithField[CreateRecordOpts](key, value)
-}
-func WithCreateRecordHeader(key, value string) CreateRecordOption {
-	return request.WithHeader[CreateRecordOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 // RuleRecord is the created Python FirewallRule view. Rule is the native typed
@@ -79,7 +81,7 @@ func (a *API) CreateRecord(ctx context.Context, options ...CreateRecordOption) (
 	if err != nil {
 		return fail(nil, err)
 	}
-	config, err := cloudread.ApplyReadOptions(ctx, CreateRecordOpts{}, options, cloudread.OwnReadConfig[CreateRecordOpts], source.Guard)
+	config, err := cloudread.ApplyReadOptions(ctx, CreateRecordOpts{}, calls.Options(options, createRecordOptionCalls), cloudread.OwnReadConfig[CreateRecordOpts], source.Guard)
 	if err == nil {
 		err = request.ValidateCapabilities(config, true, false, true)
 	}

@@ -10,7 +10,7 @@ client, resolved once). `ProjectQuotaScope` then maps the Python cloud helpers:
   `PUT /quotas/{project}` with `{"quota": {...}}`; nil omits a limit, zero and
   `-1` are sent, and `WithUpdateCheckLimit` sends `check_limit` including false.
 - `delete_network_quotas(name_or_id)`: `Delete` sends `DELETE /quotas/{project}`
-  with no body (`WithDeleteIgnoreMissing` selects strict missing handling).
+  with no body (`request.IgnoreMissing` selects strict missing handling).
 
 Known differences: a project given as an explicit ID is not verified through
 Keystone (Python always runs `find_project`); an update with no limits sends an

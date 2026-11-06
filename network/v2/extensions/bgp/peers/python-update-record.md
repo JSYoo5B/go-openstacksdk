@@ -16,12 +16,12 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/peers.WithUpdateRecordOptions`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/peers.WithUpdateRecordName`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/peers.WithUpdateRecordPassword`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/peers.WithUpdateRecordField`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/peers.WithUpdateRecordHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/request.Null`
 - `github.com/JSYoo5B/go-openstacksdk/request.Present`
 
-- UpdateRecord sends PUT bgp-peers/{id} with only the supplied attributes in the bgp_peer envelope, including an empty name, a null name, an empty password and unknown body attributes through WithUpdateRecordField, accepts any status below 400, decodes enveloped, flat and empty responses, and sends nothing when no attribute is supplied.
+- UpdateRecord sends PUT bgp-peers/{id} with only the supplied attributes in the bgp_peer envelope, including an empty name, a null name, an empty password and unknown body attributes through request.Field, accepts any status below 400, decodes enveloped, flat and empty responses, and sends nothing when no attribute is supplied.
   Tests: `network/v2/extensions/bgp/peers/python_update_record_test.go:TestPythonBGPPeerUpdateRecordSendsEmptyName`.
 - Extension fields that collide with typed keys or the id identity, empty extension keys, nil options and blank or dot IDs fail before HTTP, and a 409 response is returned as the Gophercloud status error wrapped in resource.OperationError.
   Tests: `network/v2/extensions/bgp/peers/python_update_record_test.go:TestPythonBGPPeerUpdateRecordRejectsInputsAndErrorStatuses`.
@@ -29,7 +29,7 @@ Go API:
 Python/Go differences:
 
 - Python accepts a BgpPeer Resource or an ID string; Go takes the ID string and rejects blank, '.' and '..' IDs before HTTP.
-- Python silently discards an id attribute from the commit; WithUpdateRecordField rejects the id key before HTTP.
+- Python silently discards an id attribute from the commit; request.Field rejects the id key before HTTP.
 - Python returns the Resource merged from request attributes and the response; Go returns BGPPeerRecord with the native typed decode, the raw response object fields, headers and status, and Sent false when no request was needed.
 
 ## References

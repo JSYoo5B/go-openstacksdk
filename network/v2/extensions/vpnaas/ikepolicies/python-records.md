@@ -20,14 +20,14 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ikepolicies.API.AllRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ikepolicies.API.ProxyListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ikepolicies.WithRecordListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ikepolicies.WithRecordListQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ikepolicies.WithRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ikepolicies.WithRecordListMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ikepolicies.WithRecordListBasePath`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ikepolicies.WithRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ikepolicies.WithRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ikepolicies.WithRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ikepolicies.WithRecordListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.BasePath`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ikepolicies.WithRecordListJMESPath`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ikepolicies.WithRecordListConflictingAttrs`
 
@@ -49,7 +49,7 @@ Python/Go differences:
 - Existing native typed List retains its native query/model behavior; new record APIs use pinned Source QueryParameters and apply non-query Body kwargs locally across all pages.
 - Source policy lifetime is a nullable dict; comment defaults seconds/3600 are not descriptor defaults. Top-level units/value remain separate. Go JSONprofile preserves received bytes and owned descriptor projection, with literal path/origin safety and full Requests/NaN/Infinity/runtime-type differences.
 - Source declaration/dict-conversion/nested-filter audit used22 AST-extracted assertions with stubs; this is not full Proxy/HTTP/decoder runtime or live Neutron evidence.
-- Native ListOpts.Phase1NegotiationMode retains phase_1_negotiation_mode spelling; new WithRecordListQuery("phase1_negotiation_mode",...) sends the exact Source spelling.
+- Native ListOpts.Phase1NegotiationMode retains phase_1_negotiation_mode spelling; new request.Query("phase1_negotiation_mode",...) sends the exact Source spelling.
 
 ## Usage examples
 
@@ -101,8 +101,8 @@ func run(ctx context.Context, cloud, name, units string) error {
     service, err := conn.NetworkV2(ctx)
     if err != nil { return err }
     var options []ikepolicies.RecordListOption
-    if name != "" { options = append(options, ikepolicies.WithRecordListQuery("name", name)) }
-    if units != "" { options = append(options, ikepolicies.WithRecordListQuery("units", units)) }
+    if name != "" { options = append(options, request.Query("name", name)) }
+    if units != "" { options = append(options, request.Query("units", units)) }
     for record, err := range service.VPNIKEPolicies.ListRecords(ctx, options...) {
         if err != nil { return err }
         if err := json.NewEncoder(os.Stdout).Encode(record.Resource.Body); err != nil { return err }

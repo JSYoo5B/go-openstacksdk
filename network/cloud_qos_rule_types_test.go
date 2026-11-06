@@ -14,6 +14,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/ruletypes"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -354,12 +355,12 @@ func TestCloudQoSRuleTypesOldStatusAndTypedRawRejectionRemainUnchanged(t *testin
 	calls = nil
 	service = cloudRuleTypes(t, &calls, cloudRuleTypeReply)
 	for _, key := range []string{"base_path", "headers", "microversion"} {
-		_, err := service.API.QoSRuleTypes.AllRecords(context.Background(), ruletypes.WithRecordListQuery(key, "qos/type-catalog"))
+		_, err := service.API.QoSRuleTypes.AllRecords(context.Background(), request.Query(key, "qos/type-catalog"))
 		if !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
 			t.Fatal(key, err, calls)
 		}
 	}
-	for record, err := range service.API.QoSRuleTypes.ListRecords(context.Background(), ruletypes.WithRecordListBasePath("qos/type-catalog")) {
+	for record, err := range service.API.QoSRuleTypes.ListRecords(context.Background(), request.BasePath("qos/type-catalog")) {
 		if err != nil || record == nil {
 			t.Fatal(record, err)
 		}

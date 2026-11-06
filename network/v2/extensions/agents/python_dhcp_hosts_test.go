@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"net/http"
 	"strings"
@@ -20,7 +21,7 @@ func TestPythonDHCPHostsInheritedQueriesAndDescriptorViews(t *testing.T) {
 		}
 		return 202, `{"agents":[{"id":"a","alive":0,"admin_state_up":"False","resources_synced":[],"configurations":["raw"],"heartbeat_timestamp":"literal","ha_chassis_priority":"٢","unknown":{"large":9007199254740993}}]}`
 	})
-	rows, err := api.AllDHCPHostRecords(context.Background(), "net/id", agents.WithDHCPHostListQuery("is_alive", false), agents.WithDHCPHostListQuery("host", "node"), agents.WithDHCPHostListQuery("ignored", true))
+	rows, err := api.AllDHCPHostRecords(context.Background(), "net/id", request.Query("is_alive", false), request.Query("host", "node"), request.Query("ignored", true))
 	if err != nil || len(rows) != 1 || len(calls) != 1 {
 		t.Fatal(rows, err, calls)
 	}
@@ -46,20 +47,20 @@ func TestPythonDHCPHostsCapsLocalFiltersProxyAndParentRoute(t *testing.T) {
 	if err != nil || len(calls) != 0 || string(proxy.JSON) != "null" {
 		t.Fatal(proxy, err, calls)
 	}
-	rows, err := api.AllDHCPHostRecords(context.Background(), "net", agents.WithDHCPHostListQuery("configuration", map[string]any{"n": 2}), agents.WithDHCPHostListMaxItems(1))
+	rows, err := api.AllDHCPHostRecords(context.Background(), "net", request.Query("configuration", map[string]any{"n": 2}), request.MaxItems(1))
 	if err != nil || len(rows) != 0 || len(calls) != 1 {
 		t.Fatal(rows, err, calls)
 	}
-	rows, err = api.AllDHCPHostRecords(context.Background(), "net", agents.WithDHCPHostListQuery("configuration", map[string]any{"n": 2}))
+	rows, err = api.AllDHCPHostRecords(context.Background(), "net", request.Query("configuration", map[string]any{"n": 2}))
 	if err != nil || len(rows) != 1 || string(rows[0].Resource.Body["id"]) != `"two"` {
 		t.Fatal(rows, err)
 	}
 	before := len(calls)
-	_, err = api.AllDHCPHostRecords(context.Background(), "net", agents.WithDHCPHostListQuery("network_id", "other"))
+	_, err = api.AllDHCPHostRecords(context.Background(), "net", request.Query("network_id", "other"))
 	if !errors.Is(err, resource.ErrInvalidOption) || len(calls) != before {
 		t.Fatal(err, calls)
 	}
-	_, err = api.AllDHCPHostRecords(context.Background(), "net", agents.WithDHCPHostListQuery("__dhcp_owned_base_path", "https://outside.invalid/"))
+	_, err = api.AllDHCPHostRecords(context.Background(), "net", request.Query("__dhcp_owned_base_path", "https://outside.invalid/"))
 	if err != nil || len(calls) != before+1 || strings.Contains(calls[len(calls)-1].path, "outside") {
 		t.Fatal(err, calls)
 	}
@@ -77,11 +78,11 @@ func TestPythonDHCPHostsPagingLateFailureAndOwnedOptions(t *testing.T) {
 		t.Fatal(err, calls)
 	}
 	before := len(calls)
-	_, err = api.AllDHCPHostRecords(context.Background(), "net", func(v *agents.DHCPHostListOpts) error {
+	_, err = api.AllDHCPHostRecords(context.Background(), "net", request.Custom(func(v *agents.DHCPHostListOpts) error {
 		v.Query = map[string]json.RawMessage{"host": json.RawMessage(`"owned"`)}
 		*api = *agents.New(cloud.Client("network", "/changed/"))
 		return nil
-	})
+	}))
 	if !errors.Is(err, resource.ErrInvalidOption) || len(calls) != before {
 		t.Fatal(err, calls)
 	}

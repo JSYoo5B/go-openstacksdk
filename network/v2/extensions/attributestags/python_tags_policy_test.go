@@ -9,6 +9,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/attributestags"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -128,7 +129,7 @@ func TestPythonTagsRetryOwnsBulkJSONContentTypeAndOmissions(t *testing.T) {
 			}
 			options := []attributestags.TagOption{}
 			if tc.optionType != "" {
-				options = append(options, attributestags.WithTagHeader("Content-Type", tc.optionType))
+				options = append(options, request.Header("Content-Type", tc.optionType))
 			}
 			got, err := api.SetTags(context.Background(), pythonTagTarget(), []string{"caller"}, options...)
 			pythonTagPolicyRejected(t, got, err, calls)
@@ -156,7 +157,7 @@ func TestPythonTagsRetryOwnsBulkJSONContentTypeAndOmissions(t *testing.T) {
 		o.MoreHeaders["X-Retry"] = "second"
 		return nil
 	}
-	got, err := api.AddTags(context.Background(), pythonTagTarget(), []string{"caller"}, attributestags.WithTagHeader("Content-Type", "application/vnd.tags+json"))
+	got, err := api.AddTags(context.Background(), pythonTagTarget(), []string{"caller"}, request.Header("Content-Type", "application/vnd.tags+json"))
 	if err != nil || got == nil || attempts != 2 || len(*calls) != 2 || (*calls)[0].method != http.MethodPost || (*calls)[0].body != `{"tags":["caller"]}` || (*calls)[0].body != (*calls)[1].body || string(got.Body) != "bulk-ack" || !reflect.DeepEqual(got.Resource.Tags(), []string{"caller"}) {
 		t.Fatal(got, err, *calls)
 	}

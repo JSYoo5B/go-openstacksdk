@@ -217,14 +217,14 @@ func (s *Service) qosPolicyCloudRecords(ctx context.Context, op, identity string
 	}
 	leaf := make([]policies.RecordListOption, 0, len(ordered)+3)
 	for _, member := range ordered {
-		leaf = append(leaf, policies.WithRecordListQuery(member.Key, member.Value))
+		leaf = append(leaf, request.Query(member.Key, member.Value))
 	}
 	// These concrete Go conveniences apply after the Source raw filter kwargs.
 	if len(policy.Headers) > 0 {
-		leaf = append(leaf, policies.WithRecordListHeaders(policy.Headers))
+		leaf = append(leaf, request.Headers(policy.Headers))
 	}
 	if policy.Microversion != nil {
-		leaf = append(leaf, policies.WithRecordListMicroversion(*policy.Microversion))
+		leaf = append(leaf, request.Microversion(*policy.Microversion))
 	}
 	leaf = append(leaf, policies.WithOperationGuard(state.Check))
 	if err := state.Check(ctx); err != nil {

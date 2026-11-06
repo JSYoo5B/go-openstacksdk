@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/peers"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"io"
 	"net/http"
@@ -70,7 +71,7 @@ func TestBGPPeerListUsesLocalBodyFiltersAndCompleteMarkerPages(t *testing.T) {
 			return pythonBGPPeerWire(200, `{"bgp_peers":[]}`)
 		}
 	})
-	rows, err := api.AllRecords(context.Background(), peers.WithRecordListLimit(1), peers.WithRecordListQuery("name", "wanted"), peers.WithRecordListQuery("project_id", "tenant"), peers.WithRecordListQuery("unknown", make(chan int)))
+	rows, err := api.AllRecords(context.Background(), request.Limit(1), request.Query("name", "wanted"), request.Query("project_id", "tenant"), request.Query("unknown", make(chan int)))
 	if err != nil || len(rows) != 1 || len(*calls) != 3 {
 		t.Fatal(rows, err, *calls)
 	}
@@ -94,7 +95,7 @@ func TestBGPPeerFindGETSeedAndFilteredFallbackKeepProfilesSeparate(t *testing.T)
 				}
 				return pythonBGPPeerWire(200, `{"bgp_peers":[{"id":"actual","name":"wanted"}]}`)
 			})
-			row, err := api.FindRecord(context.Background(), "wanted", peers.WithRecordFindQuery("name", "wanted"), peers.WithRecordFindQuery("x_seed", "seed"))
+			row, err := api.FindRecord(context.Background(), "wanted", request.Query("name", "wanted"), request.Query("x_seed", "seed"))
 			expectedCalls := 1
 			if fallback {
 				expectedCalls = 2
@@ -134,7 +135,7 @@ func TestBGPPeerFindCompletesDuplicateMissingAndLiteralIDSearch(t *testing.T) {
 			if mode == "numeric id" {
 				identity = "7"
 			}
-			row, err := api.FindRecord(context.Background(), identity, peers.WithRecordFindIgnoreMissing(mode != "strict"))
+			row, err := api.FindRecord(context.Background(), identity, request.IgnoreMissing(mode != "strict"))
 			if row != nil || len(*calls) != 2 {
 				t.Fatal(row, err, *calls)
 			}
@@ -162,7 +163,7 @@ func TestBGPPeerFindFetchControlsKeepUnknownConstructorSeed(t *testing.T) {
 		}
 		return pythonBGPPeerWire(200, `{"selected":{"id":null,"tenant_id":"tenant"}}`)
 	})
-	row, err := api.FindRecord(context.Background(), "wanted", peers.WithRecordFindQuery("requires_id", false), peers.WithRecordFindQuery("base_path", "/custom"), peers.WithRecordFindQuery("resource_response_key", "selected"), peers.WithRecordFindQuery("headers", json.RawMessage(`{"X-Raw":7}`)))
+	row, err := api.FindRecord(context.Background(), "wanted", request.Query("requires_id", false), request.Query("base_path", "/custom"), request.Query("resource_response_key", "selected"), request.Query("headers", json.RawMessage(`{"X-Raw":7}`)))
 	if err != nil || row == nil || len(*calls) != 1 {
 		t.Fatal(row, err, *calls)
 	}

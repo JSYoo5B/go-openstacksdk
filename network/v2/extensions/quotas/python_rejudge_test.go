@@ -165,11 +165,11 @@ func TestPythonRejudgeQuotaDelete(t *testing.T) {
 		options []quotas.DeleteOption
 		check   func(*quotas.DeleteResponse, error) bool
 	}{
-		{"deleted", 204, []quotas.DeleteOption{quotas.WithDeleteIgnoreMissing(true)}, func(r *quotas.DeleteResponse, err error) bool {
+		{"deleted", 204, []quotas.DeleteOption{request.IgnoreMissing(true)}, func(r *quotas.DeleteResponse, err error) bool {
 			return err == nil && r != nil && r.StatusCode == 204
 		}},
-		{"404 ignored", 404, []quotas.DeleteOption{quotas.WithDeleteIgnoreMissing(true)}, func(r *quotas.DeleteResponse, err error) bool { return err == nil && r == nil }},
-		{"409 returned", 409, []quotas.DeleteOption{quotas.WithDeleteIgnoreMissing(true)}, func(_ *quotas.DeleteResponse, err error) bool {
+		{"404 ignored", 404, []quotas.DeleteOption{request.IgnoreMissing(true)}, func(r *quotas.DeleteResponse, err error) bool { return err == nil && r == nil }},
+		{"409 returned", 409, []quotas.DeleteOption{request.IgnoreMissing(true)}, func(_ *quotas.DeleteResponse, err error) bool {
 			return gophercloud.ResponseCodeIs(err, http.StatusConflict)
 		}},
 		{"ignore_missing=False raises 404", 404, nil, func(_ *quotas.DeleteResponse, err error) bool { return errors.Is(err, resource.ErrNotFound) }},

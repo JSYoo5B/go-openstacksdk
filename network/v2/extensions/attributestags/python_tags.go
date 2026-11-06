@@ -14,6 +14,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -76,16 +77,21 @@ type TagOpts struct{ SourceSecurityGroupRuleTags bool }
 // backend that supports it. Stock Neutron 27.0.0 has no SGR tag-controller
 // registration, so this compatibility capability is disabled by default.
 func WithSourceSecurityGroupRuleTags() TagOption {
-	return func(c *request.Config[TagOpts]) error { c.Options.SourceSecurityGroupRuleTags = true; return nil }
+	return request.Custom(func(c *request.Config[TagOpts]) error { c.Options.SourceSecurityGroupRuleTags = true; return nil })
 }
 
-type TagOption = request.Option[TagOpts]
+// TagOption is one option of the tag operations:
+// WithSourceSecurityGroupRuleTags, request.Header, request.Field (an optional
+// body extension for SetTags and AddTags; the tags field itself is owned by
+// the method argument and other methods are bodyless) or request.Custom over
+// *request.Config[TagOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type TagOption = request.WriteCall
 
-func WithTagHeader(key, value string) TagOption { return request.WithHeader[TagOpts](key, value) }
-
-// WithTagField snapshots an optional body extension for SetTags/AddTags. The
-// tags field itself is owned by the method argument; other methods are bodyless.
-func WithTagField(key string, value any) TagOption { return request.WithField[TagOpts](key, value) }
+var tagCalls = calls.Spec[request.Config[TagOpts]]{
+	Header: calls.ConfigHeader[TagOpts],
+	Field:  calls.ConfigField[TagOpts],
+}
 
 func tagInvalid(message string) error {
 	return fmt.Errorf("%w: %s", resource.ErrInvalidOption, message)
@@ -192,8 +198,8 @@ func (a *API) prepareTag(ctx context.Context, input TaggedResource, tag *string,
 	if err := guard(ctx); err != nil {
 		return nil, err
 	}
-	copied := slices.Clone(options)
-	guarded := make([]TagOption, len(copied))
+	copied := calls.Options(slices.Clone(options), tagCalls)
+	guarded := make([]request.Option[TagOpts], len(copied))
 	for index, option := range copied {
 		apply := option
 		guarded[index] = func(c *request.Config[TagOpts]) error {

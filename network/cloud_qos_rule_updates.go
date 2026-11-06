@@ -15,6 +15,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -147,7 +148,7 @@ func (s *Service) qosUpdateRule(ctx context.Context, identity, ruleID, kind, op 
 	ctx = rest.WithOperationGuard(ctx, state.Check)
 	lookupOptions := []policies.RecordFindOption{}
 	if kind == "minimum_bandwidth_rules" {
-		lookupOptions = append(lookupOptions, policies.WithRecordFindIgnoreMissing(false))
+		lookupOptions = append(lookupOptions, request.IgnoreMissing(false))
 	}
 	result.Policy, err = state.API.QoSPolicies.FindSourceRecord(ctx, identity, lookupOptions...)
 	if err = errors.Join(err, state.Check(ctx)); err != nil {

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"iter"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
@@ -17,31 +18,35 @@ type listOptions struct {
 }
 
 // ListOption configures SDK-side consumption of the single Neutron quota
-// collection. It does not add server query or pagination parameters.
-type ListOption func(*listOptions) error
+// collection: WithListProjectID or request.MaxItems, which stops consumption
+// after n matching rows (n must be positive). It does not limit the HTTP
+// response or decode rows after the limit has been reached, and adds no
+// server query or pagination parameters. Other shared calls fail with
+// resource.ErrInvalidOption.
+type ListOption = request.ListCall
+
+var listCalls = calls.Spec[listOptions]{
+	Paging: calls.Paging[listOptions]{
+		MaxItems: func(options *listOptions, n int) error {
+			if n <= 0 {
+				return fmt.Errorf("%w: local maximum items must be positive", resource.ErrInvalidOption)
+			}
+			options.maxItems = n
+			return nil
+		},
+	},
+}
 
 // WithListProjectID restricts yielded rows to this exact project ID locally.
 // Neutron still returns its whole quota override collection in one response.
 func WithListProjectID(id string) ListOption {
-	return func(options *listOptions) error {
+	return request.Custom(func(options *listOptions) error {
 		if err := resource.ID(id).Validate(); err != nil {
 			return err
 		}
 		options.projectID = id
 		return nil
-	}
-}
-
-// WithListMaxItems stops consumption after n matching rows. It does not limit
-// the HTTP response or decode rows after the limit has been reached.
-func WithListMaxItems(n int) ListOption {
-	return func(options *listOptions) error {
-		if n <= 0 {
-			return fmt.Errorf("%w: local maximum items must be positive", resource.ErrInvalidOption)
-		}
-		options.maxItems = n
-		return nil
-	}
+	})
 }
 
 // ListProjects lazily fetches quota rows for projects with quota overrides.
@@ -51,7 +56,7 @@ func WithListMaxItems(n int) ListOption {
 // Neutron's quota controller returns one array and supports no list query or
 // continuation. Each visited row is decoded before applying the local filter.
 func (a *API) ListProjects(ctx context.Context, options ...ListOption) iter.Seq2[*QuotaResource, error] {
-	options = append([]ListOption(nil), options...)
+	applies := calls.Translate(options, listCalls)
 	return func(yield func(*QuotaResource, error) bool) {
 		fail := func(err error) { yield(nil, request.Wrap("ListProjects", "network quota", err)) }
 		if err := a.validateQuotaClient(ctx); err != nil {
@@ -59,7 +64,7 @@ func (a *API) ListProjects(ctx context.Context, options ...ListOption) iter.Seq2
 			return
 		}
 		var config listOptions
-		for _, apply := range options {
+		for _, apply := range applies {
 			if apply == nil {
 				fail(fmt.Errorf("%w: nil list option", resource.ErrInvalidOption))
 				return

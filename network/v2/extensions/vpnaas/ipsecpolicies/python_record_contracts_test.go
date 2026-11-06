@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ipsecpolicies"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 	"net/http"
@@ -60,7 +61,7 @@ func TestVPNPolicyRecordsServerQueryAndLocalBodyFiltersAllPages(t *testing.T) {
 		}
 		return nativeVPNWire(200, `{"ipsecpolicies":[{"id":"skip","name":"policy","lifetime":{},"units":"octets","value":1}],"ipsecpolicies_links":[{"rel":"next","href":"?marker=later"}]}`)
 	})
-	seq := api.ListRecords(context.Background(), ipsecpolicies.WithRecordListQuery("name", "policy"), ipsecpolicies.WithRecordListQuery("phase1_negotiation_mode", "main"), ipsecpolicies.WithRecordListQuery("encapsulation_mode", "tunnel"), ipsecpolicies.WithRecordListQuery("fields", []string{"id"}), ipsecpolicies.WithRecordListQuery("units", "octets"), ipsecpolicies.WithRecordListQuery("value", 2), ipsecpolicies.WithRecordListQuery("lifetime", map[string]any{"units": "seconds", "value": 2}), ipsecpolicies.WithRecordListQuery("tenant_id", make(chan int)))
+	seq := api.ListRecords(context.Background(), request.Query("name", "policy"), request.Query("phase1_negotiation_mode", "main"), request.Query("encapsulation_mode", "tunnel"), request.Query("fields", []string{"id"}), request.Query("units", "octets"), request.Query("value", 2), request.Query("lifetime", map[string]any{"units": "seconds", "value": 2}), request.Query("tenant_id", make(chan int)))
 	if len(calls) != 0 {
 		t.Fatal("not lazy")
 	}
@@ -88,12 +89,12 @@ func TestVPNPolicyRecordsMarkerContinuationRawCapAndPaginationFlag(t *testing.T)
 			return nativeVPNWire(200, `{"ipsecpolicies":[{"id":"first"}]}`)
 		}
 	})
-	rows, err := api.AllRecords(context.Background(), ipsecpolicies.WithRecordListLimit(1))
+	rows, err := api.AllRecords(context.Background(), request.Limit(1))
 	if err != nil || len(rows) != 2 || len(calls) != 3 || calls[1].query != "limit=1&marker=first" || calls[2].query != "limit=1&marker=second" {
 		t.Fatal(rows, err, calls)
 	}
 	calls = nil
-	rows, err = api.AllRecords(context.Background(), ipsecpolicies.WithRecordListLimit(1), ipsecpolicies.WithRecordListPaginated(false))
+	rows, err = api.AllRecords(context.Background(), request.Limit(1), request.Paginated(false))
 	if err != nil || len(rows) != 1 || len(calls) != 1 {
 		t.Fatal(rows, err, calls)
 	}
@@ -104,7 +105,7 @@ func TestVPNPolicyRecordsMarkerContinuationRawCapAndPaginationFlag(t *testing.T)
 		}
 		return nativeVPNWire(200, `{"ipsecpolicies":[{"id":"skip","value":0},{"id":"wanted","value":2},{"cls":null}],"next":"https://foreign.invalid/never"}`)
 	})
-	rows, err = capped.AllRecords(context.Background(), ipsecpolicies.WithRecordListMaxItems(2), ipsecpolicies.WithRecordListQuery("value", 2))
+	rows, err = capped.AllRecords(context.Background(), request.MaxItems(2), request.Query("value", 2))
 	if err != nil || len(rows) != 1 || len(capcalls) != 1 {
 		t.Fatal(rows, err, capcalls)
 	}
@@ -183,9 +184,9 @@ func TestVPNPolicyRecordsPreflightAndProxyGenerator(t *testing.T) {
 		case "nil":
 			options = append(options, nil)
 		case "collision":
-			options = append(options, ipsecpolicies.WithRecordListQuery("cls", nil))
+			options = append(options, request.Query("cls", nil))
 		case "source":
-			options = append(options, func(*ipsecpolicies.RecordListOpts) error { api.RawClient().ResourceBase += "changed/"; return nil })
+			options = append(options, request.Custom(func(*ipsecpolicies.RecordListOpts) error { api.RawClient().ResourceBase += "changed/"; return nil }))
 		}
 		rows, err := api.AllRecords(context.Background(), options...)
 		if rows != nil || err == nil || len(calls) != 0 {

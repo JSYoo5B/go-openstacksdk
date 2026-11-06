@@ -27,9 +27,9 @@ func main() {
     provider.SetToken(os.Getenv("OS_TOKEN"))
     client := &gophercloud.ServiceClient{ProviderClient: provider, Type: "network", Endpoint: os.Getenv("OS_NETWORK_ENDPOINT")}
     row, err := policies.New(client).UpdateRecord(context.Background(), "policy-id",
-        policies.WithRecordUpdateAttribute("name", "gold"),
-        policies.WithRecordUpdateAttribute("is_shared", true),
-        policies.WithRecordUpdateAttribute("description", nil))
+        request.Field("name", "gold"),
+        request.Field("is_shared", true),
+        request.Field("description", nil))
     if err != nil { panic(err) }
     fmt.Println(string(row.Resource.Body["id"]), string(row.Resource.Body["is_shared"]))
 }

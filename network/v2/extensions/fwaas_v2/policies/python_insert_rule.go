@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -23,23 +24,30 @@ type InsertRuleRecordOpts struct {
 	InsertAfter  *string `json:"insert_after"`
 	InsertBefore *string `json:"insert_before"`
 }
-type InsertRuleRecordOption = request.Option[InsertRuleRecordOpts]
+
+// InsertRuleRecordOption is one option of InsertRuleRecord:
+// WithInsertRuleRecordOptions, WithInsertRuleRecordAfter,
+// WithInsertRuleRecordBefore, request.Header or request.Custom over
+// *request.Config[InsertRuleRecordOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type InsertRuleRecordOption = request.WriteCall
+
+var insertRuleRecordOptionCalls = calls.Spec[request.Config[InsertRuleRecordOpts]]{
+	Header: calls.ConfigHeader[InsertRuleRecordOpts],
+}
 
 func WithInsertRuleRecordOptions(value InsertRuleRecordOpts) InsertRuleRecordOption {
 	value = cloneInsertRuleRecordOpts(value)
-	return func(c *request.Config[InsertRuleRecordOpts]) error {
+	return request.Custom(func(c *request.Config[InsertRuleRecordOpts]) error {
 		c.Options = cloneInsertRuleRecordOpts(value)
 		return nil
-	}
+	})
 }
 func WithInsertRuleRecordAfter(ruleID string) InsertRuleRecordOption {
-	return func(c *request.Config[InsertRuleRecordOpts]) error { c.Options.InsertAfter = &ruleID; return nil }
+	return request.Custom(func(c *request.Config[InsertRuleRecordOpts]) error { c.Options.InsertAfter = &ruleID; return nil })
 }
 func WithInsertRuleRecordBefore(ruleID string) InsertRuleRecordOption {
-	return func(c *request.Config[InsertRuleRecordOpts]) error { c.Options.InsertBefore = &ruleID; return nil }
-}
-func WithInsertRuleRecordHeader(key, value string) InsertRuleRecordOption {
-	return request.WithHeader[InsertRuleRecordOpts](key, value)
+	return request.Custom(func(c *request.Config[InsertRuleRecordOpts]) error { c.Options.InsertBefore = &ruleID; return nil })
 }
 
 func cloneInsertRuleRecordOpts(v InsertRuleRecordOpts) InsertRuleRecordOpts {
@@ -91,7 +99,7 @@ func (a *API) InsertRuleRecord(ctx context.Context, policyID, ruleID string, opt
 	if err != nil {
 		return fail(nil, err)
 	}
-	config, err := cloudread.ApplyReadOptions(ctx, InsertRuleRecordOpts{}, options, ownInsertRuleRecordConfig, source.Guard)
+	config, err := cloudread.ApplyReadOptions(ctx, InsertRuleRecordOpts{}, calls.Options(options, insertRuleRecordOptionCalls), ownInsertRuleRecordConfig, source.Guard)
 	if err == nil {
 		err = request.ValidateCapabilities(config, false, false, true)
 	}

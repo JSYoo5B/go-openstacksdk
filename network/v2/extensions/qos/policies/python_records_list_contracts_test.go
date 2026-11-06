@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -30,12 +31,12 @@ func TestPythonQoSPolicyListRecordsLazyQueryClassificationAndMRODefaults(t *test
 		return response
 	})
 	api.RawClient().MoreHeaders = map[string]string{"Accept": "text/xml"}
-	sequence := api.ListRecords(context.Background(), policies.WithRecordListQuery("id", "literal/id"), policies.WithRecordListQuery("fields", []string{"is_shared", "tags", "x_new"}), policies.WithRecordListQuery("shared", true), policies.WithRecordListQuery("is_shared", false), policies.WithRecordListQuery("any_tags", []any{"a", nil, "b"}), policies.WithRecordListQuery("project_id", "owner"), policies.WithRecordListQuery("is_default", false), policies.WithRecordListQuery("sort_key", "name"), policies.WithRecordListQuery("sort_dir", "desc"), policies.WithRecordListQuery("ignored_function", func() {}), policies.WithRecordListOpts(policies.RecordListOpts{}))
+	sequence := api.ListRecords(context.Background(), request.Query("id", "literal/id"), request.Query("fields", []string{"is_shared", "tags", "x_new"}), request.Query("shared", true), request.Query("is_shared", false), request.Query("any_tags", []any{"a", nil, "b"}), request.Query("project_id", "owner"), request.Query("is_default", false), request.Query("sort_key", "name"), request.Query("sort_dir", "desc"), request.Query("ignored_function", func() {}), policies.WithRecordListOpts(policies.RecordListOpts{}))
 	// A bulk replacement clears earlier list kwargs without eagerly doing HTTP.
 	if len(calls) != 0 {
 		t.Fatal("list requested before consumption", calls)
 	}
-	sequence = api.ListRecords(context.Background(), policies.WithRecordListQuery("id", "literal/id"), policies.WithRecordListQuery("fields", []string{"is_shared", "tags", "x_new"}), policies.WithRecordListQuery("shared", true), policies.WithRecordListQuery("is_shared", false), policies.WithRecordListQuery("any_tags", []any{"a", nil, "b"}), policies.WithRecordListQuery("project_id", "owner"), policies.WithRecordListQuery("is_default", false), policies.WithRecordListQuery("sort_key", "name"), policies.WithRecordListQuery("sort_dir", "desc"), policies.WithRecordListQuery("ignored_function", func() {}), policies.WithRecordListQuery("status", "ignored"), policies.WithRecordListQuery("revision_number", 4), policies.WithRecordListQuery("created_at", "ignored"), policies.WithRecordListQuery("if_match", "ordinary-unknown"))
+	sequence = api.ListRecords(context.Background(), request.Query("id", "literal/id"), request.Query("fields", []string{"is_shared", "tags", "x_new"}), request.Query("shared", true), request.Query("is_shared", false), request.Query("any_tags", []any{"a", nil, "b"}), request.Query("project_id", "owner"), request.Query("is_default", false), request.Query("sort_key", "name"), request.Query("sort_dir", "desc"), request.Query("ignored_function", func() {}), request.Query("status", "ignored"), request.Query("revision_number", 4), request.Query("created_at", "ignored"), request.Query("if_match", "ordinary-unknown"))
 	var observed []*policies.PolicyRecord
 	for value, err := range sequence {
 		if err != nil {
@@ -98,7 +99,7 @@ func TestPythonQoSPolicyListRecordsRulesAndTenantLocalFilterSemantics(t *testing
 				r.Header.Set("X-Request-Id", "local-filter")
 				return r
 			})
-			values, err := api.AllRecords(context.Background(), policies.WithRecordListQuery(testcase.key, json.RawMessage(testcase.filter)))
+			values, err := api.AllRecords(context.Background(), request.Query(testcase.key, json.RawMessage(testcase.filter)))
 			if len(calls) != 1 {
 				t.Fatal(calls)
 			}
@@ -123,10 +124,10 @@ func TestPythonQoSPolicyListRecordsRawCapsFirstPageAndEarlyBreak(t *testing.T) {
 		wantRows, wantCalls int
 		wantLimit           string
 	}{
-		{"raw cap counts filtered row", []policies.RecordListOption{policies.WithRecordListMaxItems(1), policies.WithRecordListQuery("tenant_id", true)}, 0, 1, "1"},
-		{"false first page retains both rows", []policies.RecordListOption{policies.WithRecordListPaginated(false)}, 2, 1, ""},
-		{"float underflow pagination false", []policies.RecordListOption{policies.WithRecordListQuery("paginated", json.RawMessage(`1e-4000`))}, 2, 1, ""},
-		{"explicit zero limit stays zero", []policies.RecordListOption{policies.WithRecordListLimit(0), policies.WithRecordListPaginated(false)}, 2, 1, "0"},
+		{"raw cap counts filtered row", []policies.RecordListOption{request.MaxItems(1), request.Query("tenant_id", true)}, 0, 1, "1"},
+		{"false first page retains both rows", []policies.RecordListOption{request.Paginated(false)}, 2, 1, ""},
+		{"float underflow pagination false", []policies.RecordListOption{request.Query("paginated", json.RawMessage(`1e-4000`))}, 2, 1, ""},
+		{"explicit zero limit stays zero", []policies.RecordListOption{request.Limit(0), request.Paginated(false)}, 2, 1, "0"},
 		{"no cap follows empty second page", nil, 2, 2, ""},
 	} {
 		t.Run(testcase.name, func(t *testing.T) {
@@ -190,9 +191,9 @@ func TestPythonQoSPolicyListRecordsContinuationFormatsMarkerFallbackAndScope(t *
 				}
 				return r
 			})
-			options := []policies.RecordListOption{policies.WithRecordListQuery("is_shared", false)}
+			options := []policies.RecordListOption{request.Query("is_shared", false)}
 			if testcase.limit {
-				options = append(options, policies.WithRecordListLimit(3))
+				options = append(options, request.Limit(3))
 			}
 			values, err := api.AllRecords(context.Background(), options...)
 			if err != nil || len(values) != 1 || len(calls) != 2 {
@@ -206,7 +207,7 @@ func TestPythonQoSPolicyListRecordsContinuationFormatsMarkerFallbackAndScope(t *
 			raw, _ := json.Marshal(next)
 			body := `{"policies":[{"id":"first"}],"next":` + string(raw) + `}`
 			api := pythonPolicyFindAPI(t, &calls, func(*http.Request) *http.Response { return nativePolicyWire(200, body) })
-			values, err := api.AllRecords(context.Background(), policies.WithRecordListQuery("is_shared", false))
+			values, err := api.AllRecords(context.Background(), request.Query("is_shared", false))
 			var receipt *resource.ResponseError
 			if values != nil || err == nil || !errors.As(err, &receipt) || receipt.StatusCode != 200 || string(receipt.Body) != body || len(calls) != 1 {
 				t.Fatal(values, err, receipt, calls)
@@ -233,17 +234,17 @@ func TestPythonQoSPolicyListRecordsSnapshotsCallbacksAndPreflight(t *testing.T) 
 		escaped.Headers["X-Trace"] = "changed callback"
 		return nativePolicyWire(200, `{"policies":[{"id":"one"}]}`)
 	})
-	values, err := api.AllRecords(context.Background(), option, func(c *policies.RecordListOpts) error { escaped = c; return nil })
+	values, err := api.AllRecords(context.Background(), option, request.Custom(func(c *policies.RecordListOpts) error { escaped = c; return nil }))
 	if err != nil || len(values) != 1 || len(calls) != 1 {
 		t.Fatal(values, err, calls)
 	}
 	for _, options := range [][]policies.RecordListOption{
-		{nil}, {policies.WithRecordListMaxItems(-1)},
+		{nil}, {request.MaxItems(-1)},
 		{policies.WithRecordListOpts(policies.RecordListOpts{Query: map[string]json.RawMessage{"name": json.RawMessage(`[`)}})},
-		{policies.WithRecordListQuery("base_path", "/escape")},
-		{policies.WithRecordListQuery("location", nil)},
-		{policies.WithRecordListMicroversion("bad\r\nversion")},
-		{policies.WithRecordListHeaders(map[string]string{"Cookie": "secret"})},
+		{request.Query("base_path", "/escape")},
+		{request.Query("location", nil)},
+		{request.Microversion("bad\r\nversion")},
+		{request.Headers(map[string]string{"Cookie": "secret"})},
 	} {
 		var none []nativePolicyCall
 		invalid := pythonPolicyFindAPI(t, &none, func(*http.Request) *http.Response { t.Fatal("preflight HTTP"); return nil })
@@ -255,14 +256,14 @@ func TestPythonQoSPolicyListRecordsSnapshotsCallbacksAndPreflight(t *testing.T) 
 	for _, key := range []string{"base_path", "microversion", "connection", "resource_type", "list_base_path", "_synchronized", "__conflicting_attrs", "self", "requires_id", "error_message", "skip_cache", "resource_response_key", "session", "headers"} {
 		var none []nativePolicyCall
 		invalid := pythonPolicyFindAPI(t, &none, func(*http.Request) *http.Response { t.Fatal("control HTTP"); return nil })
-		values, err := invalid.AllRecords(context.Background(), policies.WithRecordListQuery(key, nil))
+		values, err := invalid.AllRecords(context.Background(), request.Query(key, nil))
 		if values != nil || !errors.Is(err, resource.ErrInvalidOption) || len(none) != 0 {
 			t.Fatal(key, values, err, none)
 		}
 	}
 	var none []nativePolicyCall
 	invalid := pythonPolicyFindAPI(t, &none, func(*http.Request) *http.Response { t.Fatal("source HTTP"); return nil })
-	values, err = invalid.AllRecords(context.Background(), func(*policies.RecordListOpts) error { invalid.RawClient().ResourceBase += "changed/"; return nil })
+	values, err = invalid.AllRecords(context.Background(), request.Custom(func(*policies.RecordListOpts) error { invalid.RawClient().ResourceBase += "changed/"; return nil }))
 	if values != nil || !errors.Is(err, resource.ErrInvalidOption) || len(none) != 0 {
 		t.Fatal(values, err, none)
 	}
@@ -468,7 +469,7 @@ func TestPythonQoSPolicyRecordsCanonicalVersionAliasSurvivesCleanRetriesAndPhase
 	source := api.RawClient()
 	source.Microversion = "2.0"
 	source.MoreHeaders = map[string]string{"Openstack-Api-Version": "network 2.0"}
-	value, err := api.FindRecord(context.Background(), "target", policies.WithRecordFindMicroversion("2.1"))
+	value, err := api.FindRecord(context.Background(), "target", request.Microversion("2.1"))
 	if err != nil || value == nil || !reflect.DeepEqual(versions, []string{"network 2.1", "network 2.0"}) || source.MoreHeaders["Openstack-Api-Version"] != "network 2.0" {
 		t.Fatal(value, err, versions, source)
 	}
@@ -541,7 +542,7 @@ func TestPythonQoSPolicyListRecordsOperationHeadersAndRetryOwnership(t *testing.
 		api.RawClient().MoreHeaders = map[string]string{"Accept": "text/xml"}
 		options := []policies.RecordListOption{}
 		if explicit {
-			options = append(options, policies.WithRecordListHeaders(map[string]string{"Accept": "text/plain"}))
+			options = append(options, request.Headers(map[string]string{"Accept": "text/plain"}))
 		}
 		values, err := api.AllRecords(context.Background(), options...)
 		if err != nil || len(values) != 0 || len(calls) != 1 || api.RawClient().MoreHeaders["Accept"] != "text/xml" {
@@ -566,7 +567,7 @@ func TestPythonQoSPolicyListRecordsLiveReauthenticationAndSourceContext(t *testi
 	source.MoreHeaders = map[string]string{"Openstack-Api-Version": "network 2.0"}
 	reauths := 0
 	source.ProviderClient.ReauthFunc = func(context.Context) error { reauths++; source.ProviderClient.SetToken("fresh"); return nil }
-	values, err := api.AllRecords(context.Background(), policies.WithRecordListMicroversion("2.1"))
+	values, err := api.AllRecords(context.Background(), request.Microversion("2.1"))
 	if err != nil || len(values) != 1 || len(calls) != 2 || reauths != 1 || !reflect.DeepEqual(versions, []string{"network 2.1", "network 2.1"}) || !reflect.DeepEqual(tokens, []string{"test-token", "fresh"}) || source.Microversion != "2.0" || source.MoreHeaders["Openstack-Api-Version"] != "network 2.0" {
 		t.Fatal(values, err, calls, reauths, versions, tokens, source)
 	}
@@ -576,7 +577,7 @@ func TestPythonQoSPolicyListRecordsLiveReauthenticationAndSourceContext(t *testi
 	ctx, cancel := context.WithCancelCause(context.Background())
 	cancel(cause)
 	ran := false
-	if values, err = api.AllRecords(ctx, func(*policies.RecordListOpts) error { ran = true; return nil }); values != nil || !errors.Is(err, cause) || !errors.Is(err, context.Canceled) || ran {
+	if values, err = api.AllRecords(ctx, request.Custom(func(*policies.RecordListOpts) error { ran = true; return nil })); values != nil || !errors.Is(err, cause) || !errors.Is(err, context.Canceled) || ran {
 		t.Fatal(values, err, ran)
 	}
 	for _, body := range []string{`{"policies":{"id":"singleton","shared":true}}`, `{"policies":[{"id":"ordered","is_shared":false,"shared":true,"rules":0,"tags":false}]}`} {

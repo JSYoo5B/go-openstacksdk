@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -60,7 +61,7 @@ func TestIPAvailabilityRecordsAllPagesServerQueriesAndLocalFilters(t *testing.T)
 		}
 		return nativeIPAvailabilityWire(200, `{"network_ip_availabilities":[{"id":"first","total_ips":1}],"network_ip_availabilities_links":[{"rel":"next","href":"?marker=p2"}]}`)
 	})
-	seq := api.ListRecords(context.Background(), networkipavailabilities.WithRecordListQuery("network_name", "public"), networkipavailabilities.WithRecordListQuery("ip_version", 6), networkipavailabilities.WithRecordListQuery("fields", []string{"network_id"}), networkipavailabilities.WithRecordListQuery("total_ips", 2), networkipavailabilities.WithRecordListQuery("unknown", make(chan int)))
+	seq := api.ListRecords(context.Background(), request.Query("network_name", "public"), request.Query("ip_version", 6), request.Query("fields", []string{"network_id"}), request.Query("total_ips", 2), request.Query("unknown", make(chan int)))
 	if len(calls) != 0 {
 		t.Fatal("not lazy")
 	}
@@ -113,7 +114,7 @@ func TestIPAvailabilityFindDirectSparseSeedAndNoFallback(t *testing.T) {
 		}
 		return nativeIPAvailabilityWire(200, `{"network_ip_availability":{"network_id":"server","used_ips":null,"x_new":false}}`)
 	})
-	got, err := api.FindRecord(context.Background(), "literal/id", networkipavailabilities.WithRecordFindQuery("network_name", "seed"))
+	got, err := api.FindRecord(context.Background(), "literal/id", request.Query("network_name", "seed"))
 	if err != nil || len(calls) != 1 {
 		t.Fatal(got, err, calls)
 	}
@@ -150,7 +151,7 @@ func TestIPAvailabilityFindMissingAmbiguityAndLateFailure(t *testing.T) {
 			})
 			var opts []networkipavailabilities.RecordFindOption
 			if lane == "required" {
-				opts = append(opts, networkipavailabilities.WithRecordFindIgnoreMissing(false))
+				opts = append(opts, request.IgnoreMissing(false))
 			}
 			got, err := api.FindRecord(context.Background(), "wanted", opts...)
 			if got != nil {
@@ -199,7 +200,7 @@ func TestIPAvailabilityRecordsCapsVersionsAndOwnedOptions(t *testing.T) {
 	opts := networkipavailabilities.WithRecordFindOpts(networkipavailabilities.RecordFindOpts{ListBasePath: &path, Headers: headers})
 	path = "/changed"
 	headers["X-Trace"] = "changed"
-	got, err := api.FindRecord(context.Background(), "wanted", opts, networkipavailabilities.WithRecordFindMicroversion("2.1"), networkipavailabilities.WithRecordFindQuery("max_items", 2), networkipavailabilities.WithRecordFindQuery("total_ips", 2))
+	got, err := api.FindRecord(context.Background(), "wanted", opts, request.Microversion("2.1"), request.Query("max_items", 2), request.Query("total_ips", 2))
 	if err != nil || got == nil || len(calls) != 2 || !reflect.DeepEqual(versions, []string{"network 2.1", "network 2.0"}) || api.RawClient().Microversion != "2.0" {
 		t.Fatal(got, err, calls, versions)
 	}
@@ -247,16 +248,16 @@ func TestIPAvailabilityRecordsPhysicalFailuresAndPreflight(t *testing.T) {
 		case "nil-option":
 			opts = append(opts, nil)
 		case "source":
-			opts = append(opts, func(*networkipavailabilities.RecordFindOpts) error {
+			opts = append(opts, request.Custom(func(*networkipavailabilities.RecordFindOpts) error {
 				api.RawClient().ResourceBase += "changed/"
 				return nil
-			})
+			}))
 		case "cancel":
 			var cancel context.CancelFunc
 			ctx, cancel = context.WithCancel(ctx)
 			cancel()
 		case "constructor":
-			opts = append(opts, networkipavailabilities.WithRecordFindQuery("id", "collision"))
+			opts = append(opts, request.Query("id", "collision"))
 		}
 		_, err := api.FindRecord(ctx, "wanted", opts...)
 		if err == nil || len(calls) != 0 {

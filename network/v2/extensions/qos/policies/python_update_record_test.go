@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
@@ -20,7 +21,7 @@ func TestQoSPolicyUpdateRecordRawWireAliasesAndDescriptorView(t *testing.T) {
 		}
 		return nativePolicyWire(203, `{"policy":{"id":7,"description":"actual","x_reply":9007199254740993}}`)
 	})
-	row, err := api.UpdateRecord(context.Background(), "policy/id", policies.WithRecordUpdateAttribute("is_shared", true), policies.WithRecordUpdateAttribute("shared", false), policies.WithRecordUpdateAttribute("is_default", "false"), policies.WithRecordUpdateAttribute("rules", map[string]any{"type": "unknown"}), policies.WithRecordUpdateAttribute("tags", "red"), policies.WithRecordUpdateAttribute("tenant_id", "owner"), policies.WithRecordUpdateAttribute("x_unknown", json.RawMessage(`9007199254740993`)))
+	row, err := api.UpdateRecord(context.Background(), "policy/id", request.Field("is_shared", true), request.Field("shared", false), request.Field("is_default", "false"), request.Field("rules", map[string]any{"type": "unknown"}), request.Field("tags", "red"), request.Field("tenant_id", "owner"), request.Field("x_unknown", json.RawMessage(`9007199254740993`)))
 	if err != nil || row == nil || len(calls) != 1 {
 		t.Fatal(row, err, calls)
 	}
@@ -47,7 +48,7 @@ func TestQoSPolicyUpdateRecordEmptyAndIgnoredRevisionDoNotSend(t *testing.T) {
 			api, _ := nativePolicyAPI(t, &calls, func(r *http.Request) *http.Response { return nativePolicyWire(200, `{}`) })
 			opts := []policies.RecordUpdateOption{}
 			if revision {
-				opts = append(opts, policies.WithRecordUpdateAttribute("if_revision", nil))
+				opts = append(opts, request.Field("if_revision", nil))
 			}
 			row, err := api.UpdateRecord(context.Background(), "id", opts...)
 			if err != nil || row == nil || len(calls) != 0 || row.StatusCode != 0 || row.Wire != nil || len(row.Envelope) != 0 {
@@ -67,7 +68,7 @@ func TestQoSPolicyUpdateRecordUnknownAndNullRemainDirtyWithoutConditionalHeader(
 		}
 		return nativePolicyWire(200, `{"policy":{"shared":null}}`)
 	})
-	row, err := api.UpdateRecord(context.Background(), "id", policies.WithRecordUpdateAttribute("shared", nil), policies.WithRecordUpdateAttribute("name", nil), policies.WithRecordUpdateAttribute("rules", nil), policies.WithRecordUpdateAttribute("x_unknown", nil), policies.WithRecordUpdateAttribute("if_match", "body-extension"), policies.WithRecordUpdateAttribute("if_revision", 42))
+	row, err := api.UpdateRecord(context.Background(), "id", request.Field("shared", nil), request.Field("name", nil), request.Field("rules", nil), request.Field("x_unknown", nil), request.Field("if_match", "body-extension"), request.Field("if_revision", 42))
 	if err != nil || row == nil || len(calls) != 1 {
 		t.Fatal(row, err, calls)
 	}
@@ -90,7 +91,7 @@ func TestQoSPolicyUpdateRecordResponseWireGetterPrecedenceAndEvidence(t *testing
 		response.Header.Set("X-Request-Id", "actual-update")
 		return response
 	})
-	row, err := api.UpdateRecord(context.Background(), "id", policies.WithRecordUpdateAttribute("shared", true), policies.WithRecordUpdateAttribute("tenant_id", "seed"))
+	row, err := api.UpdateRecord(context.Background(), "id", request.Field("shared", true), request.Field("tenant_id", "seed"))
 	if err != nil || row == nil || len(calls) != 1 || row.StatusCode != 199 || string(row.Envelope) != body || row.Header.Get("X-Request-Id") != "actual-update" {
 		t.Fatal(row, err, calls)
 	}
@@ -140,7 +141,7 @@ func TestQoSPolicyUpdateRecordConstructorCollisionsAndSourceGuardsPreflight(t *t
 		t.Run(key, func(t *testing.T) {
 			var calls []nativePolicyCall
 			api, _ := nativePolicyAPI(t, &calls, func(r *http.Request) *http.Response { return nativePolicyWire(200, `{}`) })
-			row, err := api.UpdateRecord(context.Background(), "id", policies.WithRecordUpdateAttribute(key, nil))
+			row, err := api.UpdateRecord(context.Background(), "id", request.Field(key, nil))
 			if row != nil || err == nil || len(calls) != 0 {
 				t.Fatal(row, err, calls)
 			}
@@ -156,16 +157,16 @@ func TestQoSPolicyUpdateRecordConstructorCollisionsAndSourceGuardsPreflight(t *t
 			api, cloud := nativePolicyAPI(t, &calls, func(r *http.Request) *http.Response { return nativePolicyWire(200, `{}`) })
 			var option policies.RecordUpdateOption
 			if mode != "nil option" {
-				option = func(*policies.RecordUpdateOpts) error {
+				option = request.Custom(func(*policies.RecordUpdateOpts) error {
 					if mode == "cancel" {
 						cancel(cause)
 					} else {
 						*api = *policies.New(cloud.Client("network", "/replacement/"))
 					}
 					return nil
-				}
+				})
 			}
-			_, err := api.UpdateRecord(ctx, "id", option, func(*policies.RecordUpdateOpts) error { later++; return nil })
+			_, err := api.UpdateRecord(ctx, "id", option, request.Custom(func(*policies.RecordUpdateOpts) error { later++; return nil }))
 			if err == nil || len(calls) != 0 || later != 0 {
 				t.Fatal(err, calls, later)
 			}
@@ -204,7 +205,7 @@ func TestQoSPolicyUpdateRecordActualRejectionsAndPhysicalFaultsNeverReplay(t *te
 				}
 				return response
 			})
-			_, err := api.UpdateRecord(ctx, "id", policies.WithRecordUpdateAttribute("name", "changed"))
+			_, err := api.UpdateRecord(ctx, "id", request.Field("name", "changed"))
 			if err == nil || len(calls) != 1 {
 				t.Fatal(err, calls)
 			}
@@ -229,7 +230,7 @@ func TestQoSPolicyUpdateRecordBindsExistingBorrowedNoopLane(t *testing.T) {
 	api, _ := nativePolicyAPI(t, &calls, func(r *http.Request) *http.Response {
 		return nativePolicyWire(200, `{"policy":{"id":"id","name":"gold","shared":true}}`)
 	})
-	row, err := api.UpdateRecord(context.Background(), "id", policies.WithRecordUpdateAttribute("name", "gold"), policies.WithRecordUpdateAttribute("shared", 1))
+	row, err := api.UpdateRecord(context.Background(), "id", request.Field("name", "gold"), request.Field("shared", 1))
 	if err != nil || row == nil {
 		t.Fatal(row, err)
 	}

@@ -18,7 +18,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/services.API.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/services.API.AllRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/services.API.ProxyListRecords`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/services.WithRecordListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/services.WithRecordListOpts`
 
 - List sends GET vpn/vpnservices with WithListOptions and request.Query values as query and follows the vpnservices_links next href.
@@ -77,7 +77,7 @@ func main() {
     service, err := conn.Network(ctx)
     if err != nil { log.Fatal(err) }
     values, err := service.API.VPNServices.AllRecords(ctx,
-        services.WithRecordListQuery("status", "ACTIVE"))
+        request.Query("status", "ACTIVE"))
     if err != nil { log.Fatal(err) }
     for _, value := range values {
         raw, err := json.MarshalIndent(value.Resource, "", "  ")

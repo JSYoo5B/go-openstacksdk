@@ -8,10 +8,10 @@ import (
 	"maps"
 	"net/http"
 	"net/url"
-	"slices"
 	"strings"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/responsejson"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
@@ -25,7 +25,18 @@ type RouterAssignmentOpts struct {
 	Headers      map[string]string
 	Microversion *string
 }
-type RouterAssignmentOption func(*RouterAssignmentOpts) error
+
+// RouterAssignmentOption is one option of UpdateRouterInAgent:
+// WithRouterAssignmentOpts, WithRouterAssignmentPriority,
+// WithRouterAssignmentPriorityJSON, request.Headers (replaces the headers),
+// request.Microversion or request.Custom over *RouterAssignmentOpts. Other
+// shared calls fail with resource.ErrInvalidOption before HTTP.
+type RouterAssignmentOption = request.WriteCall
+
+var routerAssignmentCalls = calls.Spec[RouterAssignmentOpts]{
+	Headers:      calls.Value(func(c *RouterAssignmentOpts) *map[string]string { return &c.Headers }),
+	Microversion: calls.Pointer(func(c *RouterAssignmentOpts) **string { return &c.Microversion }),
+}
 
 func cloneRouterAssignmentOpts(v RouterAssignmentOpts) RouterAssignmentOpts {
 	v.Priority = bytes.Clone(v.Priority)
@@ -38,7 +49,7 @@ func cloneRouterAssignmentOpts(v RouterAssignmentOpts) RouterAssignmentOpts {
 }
 func WithRouterAssignmentOpts(v RouterAssignmentOpts) RouterAssignmentOption {
 	own := cloneRouterAssignmentOpts(v)
-	return func(c *RouterAssignmentOpts) error { *c = cloneRouterAssignmentOpts(own); return nil }
+	return request.Custom(func(c *RouterAssignmentOpts) error { *c = cloneRouterAssignmentOpts(own); return nil })
 }
 func WithRouterAssignmentPriority(v int) RouterAssignmentOption {
 	raw, _ := json.Marshal(v)
@@ -46,14 +57,7 @@ func WithRouterAssignmentPriority(v int) RouterAssignmentOption {
 }
 func WithRouterAssignmentPriorityJSON(v json.RawMessage) RouterAssignmentOption {
 	own := bytes.Clone(v)
-	return func(c *RouterAssignmentOpts) error { c.Priority = bytes.Clone(own); return nil }
-}
-func WithRouterAssignmentHeaders(v map[string]string) RouterAssignmentOption {
-	own := maps.Clone(v)
-	return func(c *RouterAssignmentOpts) error { c.Headers = maps.Clone(own); return nil }
-}
-func WithRouterAssignmentMicroversion(v string) RouterAssignmentOption {
-	return func(c *RouterAssignmentOpts) error { x := v; c.Microversion = &x; return nil }
+	return request.Custom(func(c *RouterAssignmentOpts) error { c.Priority = bytes.Clone(own); return nil })
 }
 
 // RouterAssignmentResult preserves decoded JSON separately from actual bytes.
@@ -106,7 +110,7 @@ func (a *API) UpdateRouterInAgent(ctx context.Context, agentID, routerID string,
 		return errors.Join(observed, source.Guard(ctx), rest.CheckOperationGuard(ctx))
 	}
 	policy := RouterAssignmentOpts{}
-	for _, apply := range slices.Clone(options) {
+	for _, apply := range calls.Translate(options, routerAssignmentCalls) {
 		if err := guard(ctx); err != nil {
 			return nil, wrap(err)
 		}

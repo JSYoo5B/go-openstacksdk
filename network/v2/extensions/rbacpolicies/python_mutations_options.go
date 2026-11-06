@@ -1,13 +1,13 @@
 package rbacpolicies
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
-	"maps"
 	"slices"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/neutronfind"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 // RecordCreateOpts owns provided Source attributes. Missing attributes do not
@@ -18,7 +18,31 @@ type RecordCreateOpts struct {
 	Microversion *string
 	order        []string
 }
-type RecordCreateOption func(*RecordCreateOpts) error
+
+// RecordCreateOption is one option of CreateRecord: WithRecordCreateOpts,
+// request.Field (one Source attribute as JSON; later values replace earlier
+// ones), request.Headers (replaces the headers), request.Microversion or
+// request.Custom over *RecordCreateOpts. request.Header fails with
+// resource.ErrInvalidOption before HTTP.
+type RecordCreateOption = request.WriteCall
+
+var recordCreateCalls = calls.Spec[RecordCreateOpts]{
+	Field: func(c *RecordCreateOpts, entry request.CallEntry) error {
+		if entry.JSONErr != nil {
+			return errors.Join(rbacRecordInvalid("create attribute %q is not JSON", entry.Key), entry.JSONErr)
+		}
+		if c.Attrs == nil {
+			c.Attrs = make(map[string]json.RawMessage)
+		}
+		if !slices.Contains(c.order, entry.Key) {
+			c.order = append(c.order, entry.Key)
+		}
+		c.Attrs[entry.Key] = entry.JSON
+		return nil
+	},
+	Headers:      calls.Value(func(c *RecordCreateOpts) *map[string]string { return &c.Headers }),
+	Microversion: calls.Pointer(func(c *RecordCreateOpts) **string { return &c.Microversion }),
+}
 
 func rbacCreateMutationPolicy(v RecordCreateOpts) neutronfind.Options {
 	return neutronfind.Options{Query: v.Attrs, Headers: v.Headers, Microversion: v.Microversion, Order: v.order}
@@ -30,31 +54,7 @@ func copyRBACCreateMutation(v RecordCreateOpts) RecordCreateOpts {
 }
 func WithRecordCreateOpts(v RecordCreateOpts) RecordCreateOption {
 	owned := copyRBACCreateMutation(v)
-	return func(c *RecordCreateOpts) error { *c = copyRBACCreateMutation(owned); return nil }
-}
-func WithRecordCreateField(key string, value any) RecordCreateOption {
-	raw, err := json.Marshal(value)
-	owned := bytes.Clone(raw)
-	return func(c *RecordCreateOpts) error {
-		if err != nil {
-			return errors.Join(rbacRecordInvalid("create attribute %q is not JSON", key), err)
-		}
-		if c.Attrs == nil {
-			c.Attrs = make(map[string]json.RawMessage)
-		}
-		if !slices.Contains(c.order, key) {
-			c.order = append(c.order, key)
-		}
-		c.Attrs[key] = bytes.Clone(owned)
-		return nil
-	}
-}
-func WithRecordCreateHeaders(v map[string]string) RecordCreateOption {
-	owned := maps.Clone(v)
-	return func(c *RecordCreateOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
-func WithRecordCreateMicroversion(v string) RecordCreateOption {
-	return func(c *RecordCreateOpts) error { x := v; c.Microversion = &x; return nil }
+	return request.Custom(func(c *RecordCreateOpts) error { *c = copyRBACCreateMutation(owned); return nil })
 }
 
 // RecordUpdateOpts owns only changed attributes for an immutable literal-ID
@@ -66,7 +66,31 @@ type RecordUpdateOpts struct {
 	Microversion *string
 	order        []string
 }
-type RecordUpdateOption func(*RecordUpdateOpts) error
+
+// RecordUpdateOption is one option of UpdateRecord: WithRecordUpdateOpts,
+// request.Field (one Source attribute as JSON; later values replace earlier
+// ones), request.Headers (replaces the headers), request.Microversion or
+// request.Custom over *RecordUpdateOpts. request.Header fails with
+// resource.ErrInvalidOption before HTTP.
+type RecordUpdateOption = request.WriteCall
+
+var recordUpdateCalls = calls.Spec[RecordUpdateOpts]{
+	Field: func(c *RecordUpdateOpts, entry request.CallEntry) error {
+		if entry.JSONErr != nil {
+			return errors.Join(rbacRecordInvalid("update attribute %q is not JSON", entry.Key), entry.JSONErr)
+		}
+		if c.Attrs == nil {
+			c.Attrs = make(map[string]json.RawMessage)
+		}
+		if !slices.Contains(c.order, entry.Key) {
+			c.order = append(c.order, entry.Key)
+		}
+		c.Attrs[entry.Key] = entry.JSON
+		return nil
+	},
+	Headers:      calls.Value(func(c *RecordUpdateOpts) *map[string]string { return &c.Headers }),
+	Microversion: calls.Pointer(func(c *RecordUpdateOpts) **string { return &c.Microversion }),
+}
 
 func rbacUpdateMutationPolicy(v RecordUpdateOpts) neutronfind.Options {
 	return neutronfind.Options{Query: v.Attrs, Headers: v.Headers, Microversion: v.Microversion, Order: v.order}
@@ -78,31 +102,7 @@ func copyRBACUpdateMutation(v RecordUpdateOpts) RecordUpdateOpts {
 }
 func WithRecordUpdateOpts(v RecordUpdateOpts) RecordUpdateOption {
 	owned := copyRBACUpdateMutation(v)
-	return func(c *RecordUpdateOpts) error { *c = copyRBACUpdateMutation(owned); return nil }
-}
-func WithRecordUpdateField(key string, value any) RecordUpdateOption {
-	raw, err := json.Marshal(value)
-	owned := bytes.Clone(raw)
-	return func(c *RecordUpdateOpts) error {
-		if err != nil {
-			return errors.Join(rbacRecordInvalid("update attribute %q is not JSON", key), err)
-		}
-		if c.Attrs == nil {
-			c.Attrs = make(map[string]json.RawMessage)
-		}
-		if !slices.Contains(c.order, key) {
-			c.order = append(c.order, key)
-		}
-		c.Attrs[key] = bytes.Clone(owned)
-		return nil
-	}
-}
-func WithRecordUpdateHeaders(v map[string]string) RecordUpdateOption {
-	owned := maps.Clone(v)
-	return func(c *RecordUpdateOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
-func WithRecordUpdateMicroversion(v string) RecordUpdateOption {
-	return func(c *RecordUpdateOpts) error { x := v; c.Microversion = &x; return nil }
+	return request.Custom(func(c *RecordUpdateOpts) error { *c = copyRBACUpdateMutation(owned); return nil })
 }
 
 // RecordDeleteOpts defaults IgnoreMissing to true. Only a clean actual404 can
@@ -112,7 +112,18 @@ type RecordDeleteOpts struct {
 	Headers       map[string]string
 	Microversion  *string
 }
-type RecordDeleteOption func(*RecordDeleteOpts) error
+
+// RecordDeleteOption is one option of DeleteRecord: WithRecordDeleteOpts,
+// request.IgnoreMissing, request.Headers (replaces the headers),
+// request.Microversion or request.Custom over *RecordDeleteOpts.
+// request.Header fails with resource.ErrInvalidOption before HTTP.
+type RecordDeleteOption = request.DeleteCall
+
+var recordDeleteCalls = calls.Spec[RecordDeleteOpts]{
+	IgnoreMissing: calls.Pointer(func(c *RecordDeleteOpts) **bool { return &c.IgnoreMissing }),
+	Headers:       calls.Value(func(c *RecordDeleteOpts) *map[string]string { return &c.Headers }),
+	Microversion:  calls.Pointer(func(c *RecordDeleteOpts) **string { return &c.Microversion }),
+}
 
 func rbacDeleteMutationPolicy(v RecordDeleteOpts) neutronfind.Options {
 	return neutronfind.Options{IgnoreMissing: v.IgnoreMissing, Headers: v.Headers, Microversion: v.Microversion}
@@ -124,15 +135,5 @@ func copyRBACDeleteMutation(v RecordDeleteOpts) RecordDeleteOpts {
 }
 func WithRecordDeleteOpts(v RecordDeleteOpts) RecordDeleteOption {
 	owned := copyRBACDeleteMutation(v)
-	return func(c *RecordDeleteOpts) error { *c = copyRBACDeleteMutation(owned); return nil }
-}
-func WithRecordDeleteIgnoreMissing(v bool) RecordDeleteOption {
-	return func(c *RecordDeleteOpts) error { x := v; c.IgnoreMissing = &x; return nil }
-}
-func WithRecordDeleteHeaders(v map[string]string) RecordDeleteOption {
-	owned := maps.Clone(v)
-	return func(c *RecordDeleteOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
-func WithRecordDeleteMicroversion(v string) RecordDeleteOption {
-	return func(c *RecordDeleteOpts) error { x := v; c.Microversion = &x; return nil }
+	return request.Custom(func(c *RecordDeleteOpts) error { *c = copyRBACDeleteMutation(owned); return nil })
 }

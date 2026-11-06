@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	sdk "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -25,7 +26,7 @@ func TestPythonPortAssociationFindMemberProjectionAndOwnership(t *testing.T) {
 		}
 		return nativeBGPVPNWire(203, raw)
 	})
-	value, err := api.FindPortAssociationRecord(context.Background(), "vpn/parent", "lookup/id", sdk.WithPortAssociationFindQuery("port_id", "port"), sdk.WithPortAssociationFindQuery("x_seed", "kept"))
+	value, err := api.FindPortAssociationRecord(context.Background(), "vpn/parent", "lookup/id", request.Query("port_id", "port"), request.Query("x_seed", "kept"))
 	if err != nil || value == nil || len(calls) != 1 || value.StatusCode != 203 || string(value.Envelope) != raw {
 		t.Fatal(value, err, calls)
 	}
@@ -64,7 +65,7 @@ func TestPythonPortAssociationFindFallbackLocalFiltersAndLateDuplicates(t *testi
 				}
 				return nativeBGPVPNWire(200, `{"port_associations":[{"id":"skip","name":"wanted","port_id":"other"},{"id":"one","name":"wanted","port_id":"port"}],"port_associations_links":[{"rel":"next","href":"?marker=tail"}]}`)
 			})
-			value, err := api.FindPortAssociationRecord(context.Background(), "vpn", "wanted", sdk.WithPortAssociationFindQuery("port_id", "port"), sdk.WithPortAssociationFindQuery("x_seed", "get-only"))
+			value, err := api.FindPortAssociationRecord(context.Background(), "vpn", "wanted", request.Query("port_id", "port"), request.Query("x_seed", "get-only"))
 			if len(calls) != 3 {
 				t.Fatal(value, err, calls)
 			}
@@ -89,7 +90,7 @@ func TestPythonPortAssociationFindMissingAndStrictJSONIdentity(t *testing.T) {
 			}
 			return nativeBGPVPNWire(200, `{"port_associations":[{"id":7,"name":"other"}]}`)
 		})
-		value, err := api.FindPortAssociationRecord(context.Background(), "vpn", "7", sdk.WithPortAssociationFindIgnoreMissing(!strict))
+		value, err := api.FindPortAssociationRecord(context.Background(), "vpn", "7", request.IgnoreMissing(!strict))
 		if value != nil || len(calls) != 2 || strict && !errors.Is(err, resource.ErrNotFound) || !strict && err != nil {
 			t.Fatal(value, err, calls)
 		}
@@ -109,7 +110,7 @@ func TestPythonPortAssociationFindRawFetchControlsAndHeadersPhase(t *testing.T) 
 		}
 		return nativeBGPVPNWire(200, `{"port_associations":[{"id":"found","name":"lookup"}]}`)
 	})
-	value, err := api.FindPortAssociationRecord(context.Background(), "vpn", "lookup", sdk.WithPortAssociationFindQuery("headers", map[string]string{"X-Raw": "fallback"}))
+	value, err := api.FindPortAssociationRecord(context.Background(), "vpn", "lookup", request.Query("headers", map[string]string{"X-Raw": "fallback"}))
 	if err != nil || value == nil || len(calls) != 2 {
 		t.Fatal(value, err, calls)
 	}
@@ -119,7 +120,7 @@ func TestPythonPortAssociationFindRawFetchControlsAndHeadersPhase(t *testing.T) 
 		}
 		return nativeBGPVPNWire(200, `{"custom":{"id":"collection","routes":false}}`)
 	})
-	value, err = api.FindPortAssociationRecord(context.Background(), "vpn", "lookup", sdk.WithPortAssociationFindQuery("requires_id", false), sdk.WithPortAssociationFindQuery("resource_response_key", "custom"), sdk.WithPortAssociationFindQuery("skip_cache", true))
+	value, err = api.FindPortAssociationRecord(context.Background(), "vpn", "lookup", request.Query("requires_id", false), request.Query("resource_response_key", "custom"), request.Query("skip_cache", true))
 	if err != nil || value == nil || string(value.Resource.Body["id"]) != `"collection"` || string(value.Resource.Body["routes"]) != `[false]` {
 		t.Fatal(value, err)
 	}
@@ -140,7 +141,7 @@ func TestPythonPortAssociationFindOptionsGuardAndPreflight(t *testing.T) {
 	if _, err := api.FindPortAssociationRecord(context.Background(), "vpn", "lookup", own); err != nil || len(calls) != 1 {
 		t.Fatal(err, calls)
 	}
-	for _, opts := range [][]sdk.PortAssociationFindOption{{nil}, {sdk.WithPortAssociationFindQuery("bgpvpn_id", "foreign")}, {sdk.WithPortAssociationFindOpts(sdk.PortAssociationFindOpts{Query: map[string]json.RawMessage{"id": json.RawMessage(`"bad"`)}})}, {sdk.WithPortAssociationFindHeaders(map[string]string{"X-Auth-Token": "foreign"})}, {func(*sdk.PortAssociationFindOpts) error { api.RawClient().Endpoint += "changed/"; return nil }}} {
+	for _, opts := range [][]sdk.PortAssociationFindOption{{nil}, {request.Query("bgpvpn_id", "foreign")}, {sdk.WithPortAssociationFindOpts(sdk.PortAssociationFindOpts{Query: map[string]json.RawMessage{"id": json.RawMessage(`"bad"`)}})}, {request.Headers(map[string]string{"X-Auth-Token": "foreign"})}, {request.Custom(func(*sdk.PortAssociationFindOpts) error { api.RawClient().Endpoint += "changed/"; return nil })}} {
 		if _, err := api.FindPortAssociationRecord(context.Background(), "vpn", "lookup", opts...); err == nil || len(calls) != 1 {
 			t.Fatal(err, calls)
 		}

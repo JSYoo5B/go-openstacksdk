@@ -96,7 +96,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/quotas.ProjectQuotaScope.Delete`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/quotas.WithDeleteIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 
 - DELETE resets fixed-project overrides with no request body or follow-up GET and exposes actual native 202/204 status plus independent response headers.
   Tests: `api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaOperationsKeepTargetRawJSONAndMetadata`, `api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaSuccessCodesMatchNativePolicy`.
@@ -171,17 +171,17 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/quotas.ProjectQuotaScope.Delete`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/quotas.WithDeleteIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/quotas.API.InProject`
 
 - The scope supports explicit missing suppression, fixed-project deletion and native response status/header evidence.
   Tests: `api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaOperationsKeepTargetRawJSONAndMetadata`, `api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaHTTPFailuresAndStrictMissingPolicy`, `api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaSuccessCodesMatchNativePolicy`.
-- delete_quota(project) maps to ProjectQuotaScope.Delete with WithDeleteIgnoreMissing(true): DELETE /quotas/<project>, 404 returns nil, 409 is returned, and the default strict Delete raises resource.ErrNotFound like ignore_missing=False.
+- delete_quota(project) maps to ProjectQuotaScope.Delete with request.IgnoreMissing(true): DELETE /quotas/<project>, 404 returns nil, 409 is returned, and the default strict Delete raises resource.ErrNotFound like ignore_missing=False.
   Tests: `network/v2/extensions/quotas/python_rejudge_test.go:TestPythonRejudgeQuotaDelete`.
 
 Python/Go differences:
 
-- Go defaults to strict 404; Python defaults ignore_missing=True, represented by WithDeleteIgnoreMissing(true).
+- Go defaults to strict 404; Python defaults ignore_missing=True, represented by request.IgnoreMissing(true).
 - Go returns deletion metadata while Python returns None.
 - Python accepts a Quota Resource or a project ID; Go fixes the project once with API.InProject (resource.ID needs no request).
 - Python accepts any non-error status; Go accepts the native 202 and 204.
@@ -223,7 +223,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/quotas.API.ListProjects`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/quotas.API.AllProjects`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/quotas.WithListProjectID`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/quotas.WithListMaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
 
 - ListProjects performs no HTTP until consumed, fetches one /quotas array without query, and returns native limits plus validated project_id or legacy tenant_id, raw large/null/unknown fields and independent per-row/call headers and body snapshots.
   Tests: `api/neutron_quotas_list_test.go:TestNeutronQuotasListIsLazySinglePageAndKeepsProjectRawMetadata`.
@@ -246,7 +246,7 @@ Python/Go differences:
 - Pinned Proxy.quotas documents no supported quota query. Go provides local filter/consumption options and no server paging/filter/projection helpers or generic Resource.list limit/marker fallback.
 - Go requires safe unambiguous row identity and independent native/raw metadata; it does not return Python descriptor-backed Quota Resource objects. Recognized continuation is rejected rather than guessed or followed.
 - Python Resource.list would follow quotas_links, a Link header or limit/marker continuation if a server returned it; Neutron returns the quota list as one unpaginated array, and Go rejects recognized continuation metadata instead of following it.
-- Python quotas(**query) sends limit/marker to the server and filters other Quota Body attributes locally; Go offers only the local WithListProjectID and WithListMaxItems options, and the pinned proxy documents no supported query.
+- Python quotas(**query) sends limit/marker to the server and filters other Quota Body attributes locally; Go offers only the local WithListProjectID and request.MaxItems options, and the pinned proxy documents no supported query.
 - Go requires a valid project_id or tenant_id in every row; Neutron always returns them.
 - Python translates the response into a Quota Resource (descriptor type coercion, project_id alternate ID with tenant_id alias, unknown attributes kept through _allow_unknown_attrs_in_body); Go decodes the native typed limits, keeps every quota field as raw JSON in Body and fixes ProjectID to the requested project.
 - Neutron has no microversion, so neither side sends a version header.
@@ -303,7 +303,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk.Connection.NetworkProjectQuotas`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/quotas.ProjectQuotaScope.Delete`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/quotas.WithDeleteIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 
 - Named project lookup happens once through a separate Identity client; a missing named project fails before any Neutron request.
   Tests: `connectiontest/connection_project_quotas_test.go:TestConnectionServiceQuotaNamesUseSeparateIdentityClient`, `connectiontest/connection_network_project_quotas_test.go:TestPyCloudNetNetworkQuotasGetDetailAndNamedProjectLookup`, `connectiontest/connection_network_project_quotas_test.go:TestPyCloudNetNetworkQuotasMissingNamedProjectFailsBeforeNeutron`.
@@ -356,7 +356,7 @@ func manageQuotas(ctx context.Context, networkClient *gophercloud.ServiceClient)
 ```go
 func listQuotaOverrides(ctx context.Context, networkClient *gophercloud.ServiceClient) error {
     api := quotas.New(networkClient)
-    for quota, err := range api.ListProjects(ctx, quotas.WithListProjectID("project-id"), quotas.WithListMaxItems(1)) {
+    for quota, err := range api.ListProjects(ctx, quotas.WithListProjectID("project-id"), request.MaxItems(1)) {
         if err != nil { return err }
         fmt.Println(quota.ProjectID, quota.Network, quota.Port)
         fmt.Println(quota.Header.Get("X-Openstack-Request-Id"), quota.StatusCode)

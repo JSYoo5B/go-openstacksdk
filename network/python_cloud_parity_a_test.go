@@ -519,7 +519,7 @@ func TestPythonCloudQoSRequestsAfterExtensionGate(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	policy, err := qospolicies.New(client).FindRecord(ctx, "gold", qospolicies.WithRecordFindIgnoreMissing(true))
+	policy, err := qospolicies.New(client).FindRecord(ctx, "gold", request.IgnoreMissing(true))
 	if err != nil || pythonCloudAID(t, policy.Resource) != "qp" {
 		t.Fatal(policy, err)
 	}

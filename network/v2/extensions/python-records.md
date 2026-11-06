@@ -17,14 +17,14 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.API.AllRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.API.ProxyListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.WithRecordListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.WithRecordListQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.WithRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.WithRecordListMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.WithRecordListBasePath`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.WithRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.WithRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.WithRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.WithRecordListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.BasePath`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.WithRecordListJMESPath`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.WithRecordListConflictingAttrs`
 
@@ -64,10 +64,10 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.API.Get`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.WithRecordFindOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.WithRecordFindQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.WithRecordFindIgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.WithRecordFindMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.WithRecordFindHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.WithRecordFindListBasePath`
 
 - Get sends GET extensions/{name} and returns the 404 without listing extensions.
@@ -178,9 +178,9 @@ func main() {
     switch *mode {
     case "find":
         options := []extensions.RecordFindOption{
-            extensions.WithRecordFindIgnoreMissing(!*strict),
-            extensions.WithRecordFindQuery("skip_cache", true),
-            extensions.WithRecordFindQuery("error_message", "Extension lookup failed"),
+            request.IgnoreMissing(!*strict),
+            request.Query("skip_cache", true),
+            request.Query("error_message", "Extension lookup failed"),
         }
         if *listPath != "" {
             options = append(options, extensions.WithRecordFindListBasePath(*listPath))
@@ -191,7 +191,7 @@ func main() {
         printJSON(value.Resource)
     case "list":
         for value, err := range api.ListRecords(
-            ctx, extensions.WithRecordListQuery("alias", *identity),
+            ctx, request.Query("alias", *identity),
         ) {
             if err != nil { log.Fatal(err) }
             printJSON(value.Resource)

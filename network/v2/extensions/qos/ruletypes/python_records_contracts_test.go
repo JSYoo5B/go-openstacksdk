@@ -14,6 +14,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/ruletypes"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -61,7 +62,7 @@ func TestPythonQoSRuleTypeGetFieldsDefaultsAndOwnedActualEvidence(t *testing.T) 
 			if len(fields) > 0 {
 				fields[0] = "changed"
 			}
-			v, err := api.GetRecord(context.Background(), "literal/name %2F", option, ruletypes.WithRecordGetMicroversion("2.2"))
+			v, err := api.GetRecord(context.Background(), "literal/name %2F", option, request.Microversion("2.2"))
 			if err != nil || len(calls) != 1 || v.StatusCode != 203 || string(v.Envelope) != body || v.Header.Get("X-Request-Id") != "rule-type-proof" {
 				t.Fatal(v, err, calls)
 			}
@@ -102,7 +103,7 @@ func TestPythonQoSRuleTypeLiteralIDPriorityAndAlternateListID(t *testing.T) {
 	for _, body := range []string{`{"type":"bandwidth_limit"}`, `{"id":null,"type":"bandwidth_limit"}`, `{"id":false,"type":0}`, `{"id":"literal","type":"alternate"}`, `{"type":false}`, `{"drivers":{}}`} {
 		var calls []nativeRuleTypeCall
 		api := recordAPI(t, &calls, func(*http.Request, int) *http.Response { return recordWire(200, `{"rule_types":[`+body+`]}`) })
-		values, err := api.AllRecords(context.Background(), ruletypes.WithRecordListPaginated(false))
+		values, err := api.AllRecords(context.Background(), request.Paginated(false))
 		if err != nil || len(values) != 1 || len(calls) != 1 {
 			t.Fatal(values, err, calls)
 		}
@@ -163,7 +164,7 @@ func TestPythonQoSRuleTypeFindCleanFallbackDefaultsAndCompleteUniqueness(t *test
 			}
 			return recordWire(200, `{"rule_types":[]}`)
 		})
-		value, err := api.FindRecord(context.Background(), "missing", ruletypes.WithRecordFindIgnoreMissing(!strict))
+		value, err := api.FindRecord(context.Background(), "missing", request.IgnoreMissing(!strict))
 		if value != nil || len(calls) != 2 || (strict && !errors.Is(err, resource.ErrNotFound)) || (!strict && err != nil) {
 			t.Fatal(value, err, calls)
 		}
@@ -203,7 +204,7 @@ func TestPythonQoSRuleTypeFindGetOnlyVersionOverrideAndLiteralMemberSeed(t *test
 		return recordWire(200, `{"rule_types":[{"type":"bandwidth_limit"}]}`)
 	})
 	api.RawClient().Microversion = "2.1"
-	value, err := api.FindRecord(context.Background(), "bandwidth_limit", ruletypes.WithRecordFindMicroversion("2.2"))
+	value, err := api.FindRecord(context.Background(), "bandwidth_limit", request.Microversion("2.2"))
 	if err != nil || value == nil || len(calls) != 2 || api.RawClient().Microversion != "2.1" {
 		t.Fatal(value, err, calls)
 	}
@@ -236,7 +237,7 @@ func TestPythonQoSRuleTypeListQueryClassificationRawCapAndUnknownDiscard(t *test
 	query := map[string]json.RawMessage{"type": json.RawMessage(`"wanted"`), "drivers": json.RawMessage(`false`), "fields": json.RawMessage(`["type","drivers"]`), "all_rules": json.RawMessage(`true`), "all_supported": json.RawMessage(`0`), "marker": json.RawMessage(`"start"`), "name": json.RawMessage(`"wanted"`), "unknown": json.RawMessage(`invalid ignored`)}
 	option := ruletypes.WithRecordListOpts(ruletypes.RecordListOpts{Query: query})
 	query["type"] = json.RawMessage(`"changed"`)
-	values, err := api.AllRecords(context.Background(), option, ruletypes.WithRecordListMaxItems(2))
+	values, err := api.AllRecords(context.Background(), option, request.MaxItems(2))
 	if err != nil || len(values) != 1 || len(calls) != 1 {
 		t.Fatal(values, err, calls)
 	}
@@ -261,7 +262,7 @@ func TestPythonQoSRuleTypeListLocalIdentityUsesAlternateTypeAndExactJSONPolicy(t
 			}
 			return recordWire(200, tc.body)
 		})
-		values, err := api.AllRecords(context.Background(), ruletypes.WithRecordListOpts(ruletypes.RecordListOpts{Query: map[string]json.RawMessage{"id": tc.condition}}), ruletypes.WithRecordListPaginated(false))
+		values, err := api.AllRecords(context.Background(), ruletypes.WithRecordListOpts(ruletypes.RecordListOpts{Query: map[string]json.RawMessage{"id": tc.condition}}), request.Paginated(false))
 		if err != nil || len(values) != tc.want || len(calls) != 1 {
 			t.Fatal(values, err, calls)
 		}
@@ -287,7 +288,7 @@ func TestPythonQoSRuleTypeListPagingUsesAlternateAndLiteralWireIDPriority(t *tes
 			}
 			return recordWire(200, `{"rule_types":[]}`)
 		})
-		values, err := api.AllRecords(context.Background(), ruletypes.WithRecordListLimit(2))
+		values, err := api.AllRecords(context.Background(), request.Limit(2))
 		if err != nil || len(values) != 1 || len(calls) != 2 {
 			t.Fatal(values, err, calls)
 		}
@@ -296,7 +297,7 @@ func TestPythonQoSRuleTypeListPagingUsesAlternateAndLiteralWireIDPriority(t *tes
 	var calls []nativeRuleTypeCall
 	body := `{"rule_types":[{"id":null,"type":"must-not-route"}]}`
 	api := recordAPI(t, &calls, func(*http.Request, int) *http.Response { return recordWire(200, body) })
-	values, err := api.AllRecords(context.Background(), ruletypes.WithRecordListLimit(2))
+	values, err := api.AllRecords(context.Background(), request.Limit(2))
 	var receipt *resource.ResponseError
 	if values != nil || !errors.As(err, &receipt) || string(receipt.Body) != body || len(calls) != 1 {
 		t.Fatal(values, err, receipt, calls)
@@ -398,12 +399,12 @@ func TestPythonQoSRuleTypeRecordOptionsPreflightAndLazyCloneIsolation(t *testing
 	var calls []nativeRuleTypeCall
 	api := recordAPI(t, &calls, func(*http.Request, int) *http.Response { return recordWire(200, `{"rule_types":[]}`) })
 	for _, key := range []string{"cls", "location", "__conflicting_attrs", "connection", "microversion", "base_path"} {
-		rows, err := api.AllRecords(context.Background(), ruletypes.WithRecordListQuery(key, false))
+		rows, err := api.AllRecords(context.Background(), request.Query(key, false))
 		if rows != nil || !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
 			t.Fatal(key, rows, err, calls)
 		}
 	}
-	for _, opt := range []ruletypes.RecordFindOption{nil, ruletypes.WithRecordFindHeaders(map[string]string{"Authorization": "forged"}), ruletypes.WithRecordFindMicroversion("bad\nversion")} {
+	for _, opt := range []ruletypes.RecordFindOption{nil, request.Headers(map[string]string{"Authorization": "forged"}), request.Microversion("bad\nversion")} {
 		value, err := api.FindRecord(context.Background(), "one", opt)
 		if value != nil || !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
 			t.Fatal(value, err, calls)
@@ -419,7 +420,7 @@ func TestPythonQoSRuleTypeRecordOptionsPreflightAndLazyCloneIsolation(t *testing
 		o.Query = map[string]json.RawMessage{"type": json.RawMessage(`"original"`)}
 		return nil
 	}
-	seq := api.ListRecords(context.Background(), option)
+	seq := api.ListRecords(context.Background(), request.Custom(option))
 	if called != 0 || len(calls) != 0 {
 		t.Fatal("list evaluated eagerly", called, calls)
 	}
@@ -557,7 +558,7 @@ func TestPythonQoSRuleTypeNativeCleanRetryAndOwnedHeaderMutation(t *testing.T) {
 			}
 			return nil
 		}
-		value, err := api.GetRecord(context.Background(), "one", ruletypes.WithRecordGetMicroversion("2.2"))
+		value, err := api.GetRecord(context.Background(), "one", request.Microversion("2.2"))
 		if mutate {
 			if value != nil || !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 1 || retries != 1 {
 				t.Fatal(value, err, calls, retries)
@@ -586,7 +587,7 @@ func TestPythonQoSRuleTypeNestedDriverParametersRemainExactRawJSON(t *testing.T)
 			value, err = api.GetRecord(context.Background(), "bandwidth_limit")
 		} else {
 			var rows []*ruletypes.QoSRuleTypeRecord
-			rows, err = api.AllRecords(context.Background(), ruletypes.WithRecordListPaginated(false))
+			rows, err = api.AllRecords(context.Background(), request.Paginated(false))
 			if len(rows) == 1 {
 				value = rows[0]
 			}
@@ -629,13 +630,13 @@ func TestPythonQoSRuleTypeCustomCallbacksReceiveInitializedOwnedMaps(t *testing.
 					var options []ruletypes.RecordGetOption
 					switch mode {
 					case "nil reset":
-						options = append(options, func(o *ruletypes.RecordGetOpts) error { o.Headers = nil; return nil })
+						options = append(options, request.Custom(func(o *ruletypes.RecordGetOpts) error { o.Headers = nil; return nil }))
 					case "empty factory":
 						options = append(options, ruletypes.WithRecordGetOpts(ruletypes.RecordGetOpts{}))
 					case "nil header factory":
-						options = append(options, ruletypes.WithRecordGetHeaders(nil))
+						options = append(options, request.Headers(nil))
 					}
-					options = append(options, func(o *ruletypes.RecordGetOpts) error {
+					options = append(options, request.Custom(func(o *ruletypes.RecordGetOpts) error {
 						if o.Headers == nil {
 							t.Fatal("nil callback Header map")
 						}
@@ -643,7 +644,7 @@ func TestPythonQoSRuleTypeCustomCallbacksReceiveInitializedOwnedMaps(t *testing.
 						retainedHeaders = o.Headers
 						applied++
 						return nil
-					})
+					}))
 					value, err := api.GetRecord(context.Background(), "one", options...)
 					if err != nil || value == nil {
 						t.Fatal(err, value)
@@ -652,13 +653,13 @@ func TestPythonQoSRuleTypeCustomCallbacksReceiveInitializedOwnedMaps(t *testing.
 					var options []ruletypes.RecordFindOption
 					switch mode {
 					case "nil reset":
-						options = append(options, func(o *ruletypes.RecordFindOpts) error { o.Headers = nil; return nil })
+						options = append(options, request.Custom(func(o *ruletypes.RecordFindOpts) error { o.Headers = nil; return nil }))
 					case "empty factory":
 						options = append(options, ruletypes.WithRecordFindOpts(ruletypes.RecordFindOpts{}))
 					case "nil header factory":
-						options = append(options, ruletypes.WithRecordFindHeaders(nil))
+						options = append(options, request.Headers(nil))
 					}
-					options = append(options, func(o *ruletypes.RecordFindOpts) error {
+					options = append(options, request.Custom(func(o *ruletypes.RecordFindOpts) error {
 						if o.Headers == nil {
 							t.Fatal("nil callback Header map")
 						}
@@ -666,7 +667,7 @@ func TestPythonQoSRuleTypeCustomCallbacksReceiveInitializedOwnedMaps(t *testing.
 						retainedHeaders = o.Headers
 						applied++
 						return nil
-					})
+					}))
 					value, err := api.FindRecord(context.Background(), "one", options...)
 					if err != nil || value == nil {
 						t.Fatal(err, value)
@@ -675,13 +676,13 @@ func TestPythonQoSRuleTypeCustomCallbacksReceiveInitializedOwnedMaps(t *testing.
 					var options []ruletypes.RecordListOption
 					switch mode {
 					case "nil reset":
-						options = append(options, func(o *ruletypes.RecordListOpts) error { o.Headers = nil; o.Query = nil; return nil })
+						options = append(options, request.Custom(func(o *ruletypes.RecordListOpts) error { o.Headers = nil; o.Query = nil; return nil }))
 					case "empty factory":
 						options = append(options, ruletypes.WithRecordListOpts(ruletypes.RecordListOpts{}))
 					case "nil header factory":
-						options = append(options, ruletypes.WithRecordListHeaders(nil))
+						options = append(options, request.Headers(nil))
 					}
-					options = append(options, func(o *ruletypes.RecordListOpts) error {
+					options = append(options, request.Custom(func(o *ruletypes.RecordListOpts) error {
 						if o.Headers == nil || o.Query == nil {
 							t.Fatal("nil callback maps")
 						}
@@ -691,7 +692,7 @@ func TestPythonQoSRuleTypeCustomCallbacksReceiveInitializedOwnedMaps(t *testing.
 						retainedQuery = o.Query
 						applied++
 						return nil
-					})
+					}))
 					seq := api.ListRecords(context.Background(), options...)
 					if applied != 0 || len(calls) != 0 {
 						t.Fatal("eager option callback", applied, calls)

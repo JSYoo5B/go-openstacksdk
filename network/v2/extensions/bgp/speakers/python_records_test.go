@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/speakers"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"io"
 	"net/http"
@@ -70,7 +71,7 @@ func TestBGPSpeakerListUsesLocalBodyFiltersAndCompleteMarkerPages(t *testing.T) 
 			return pythonBGPSpeakerWire(200, `{"bgp_speakers":[]}`)
 		}
 	})
-	rows, err := api.AllRecords(context.Background(), speakers.WithRecordListLimit(1), speakers.WithRecordListQuery("name", "wanted"), speakers.WithRecordListQuery("project_id", "tenant"), speakers.WithRecordListQuery("unknown", make(chan int)))
+	rows, err := api.AllRecords(context.Background(), request.Limit(1), request.Query("name", "wanted"), request.Query("project_id", "tenant"), request.Query("unknown", make(chan int)))
 	if err != nil || len(rows) != 1 || len(*calls) != 3 {
 		t.Fatal(rows, err, *calls)
 	}
@@ -94,7 +95,7 @@ func TestBGPSpeakerFindGETSeedAndFilteredFallbackKeepProfilesSeparate(t *testing
 				}
 				return pythonBGPSpeakerWire(200, `{"bgp_speakers":[{"id":"actual","name":"wanted"}]}`)
 			})
-			row, err := api.FindRecord(context.Background(), "wanted", speakers.WithRecordFindQuery("name", "wanted"), speakers.WithRecordFindQuery("x_seed", "seed"))
+			row, err := api.FindRecord(context.Background(), "wanted", request.Query("name", "wanted"), request.Query("x_seed", "seed"))
 			expectedCalls := 1
 			if fallback {
 				expectedCalls = 2
@@ -134,7 +135,7 @@ func TestBGPSpeakerFindCompletesDuplicateMissingAndLiteralIDSearch(t *testing.T)
 			if mode == "numeric id" {
 				identity = "7"
 			}
-			row, err := api.FindRecord(context.Background(), identity, speakers.WithRecordFindIgnoreMissing(mode != "strict"))
+			row, err := api.FindRecord(context.Background(), identity, request.IgnoreMissing(mode != "strict"))
 			if row != nil || len(*calls) != 2 {
 				t.Fatal(row, err, *calls)
 			}
@@ -162,7 +163,7 @@ func TestBGPSpeakerFindFetchControlsKeepUnknownConstructorSeed(t *testing.T) {
 		}
 		return pythonBGPSpeakerWire(200, `{"selected":{"id":null,"tenant_id":"tenant"}}`)
 	})
-	row, err := api.FindRecord(context.Background(), "wanted", speakers.WithRecordFindQuery("requires_id", false), speakers.WithRecordFindQuery("base_path", "/custom"), speakers.WithRecordFindQuery("resource_response_key", "selected"), speakers.WithRecordFindQuery("headers", json.RawMessage(`{"X-Raw":7}`)))
+	row, err := api.FindRecord(context.Background(), "wanted", request.Query("requires_id", false), request.Query("base_path", "/custom"), request.Query("resource_response_key", "selected"), request.Query("headers", json.RawMessage(`{"X-Raw":7}`)))
 	if err != nil || row == nil || len(*calls) != 1 {
 		t.Fatal(row, err, *calls)
 	}

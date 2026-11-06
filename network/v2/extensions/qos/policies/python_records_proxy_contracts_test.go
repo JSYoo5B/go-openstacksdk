@@ -11,6 +11,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -40,7 +41,7 @@ func TestQoSPolicyProxyListRawFormalsGeneratorAndOpaqueJSON(t *testing.T) {
 			t.Fatal(result, err, count.Load())
 		}
 	}
-	result, err := api.ProxyListRecords(context.Background(), policies.WithRecordListJMESPath("to_array(@)"), policies.WithRecordListQuery("base_path", "/alternate-policies"), policies.WithRecordListQuery("__conflicting_attrs", json.RawMessage(`{"headers":{"X-Trace":"owned"},"microversion":"2.1","jmespath_filters":"[?"}`)))
+	result, err := api.ProxyListRecords(context.Background(), policies.WithRecordListJMESPath("to_array(@)"), request.Query("base_path", "/alternate-policies"), request.Query("__conflicting_attrs", json.RawMessage(`{"headers":{"X-Trace":"owned"},"microversion":"2.1","jmespath_filters":"[?"}`)))
 	if err != nil || result == nil || result.JSON != nil || count.Load() != 0 {
 		t.Fatal(result, err, count.Load())
 	}
@@ -68,7 +69,7 @@ func TestQoSPolicyProxySourceLinksLoadedEqualityAndGuardAreOptIn(t *testing.T) {
 	api, count := qosProxyAPI(t, func(w http.ResponseWriter, r *http.Request) {
 		testcloud.JSON(w, 203, `{"policies":[{"id":"one","rules":[9007199254740992],"tenant_id":1e-4000}],"links":[],"policies_links":[{"rel":"next","href":"?marker=ignored"}]}`)
 	})
-	result, err := api.ProxyListRecords(context.Background(), policies.WithRecordListQuery("rules", json.RawMessage(`[9007199254740993.0]`)), policies.WithRecordListQuery("tenant_id", 0))
+	result, err := api.ProxyListRecords(context.Background(), request.Query("rules", json.RawMessage(`[9007199254740993.0]`)), request.Query("tenant_id", 0))
 	if err != nil || result == nil {
 		t.Fatal(result, err)
 	}
@@ -107,7 +108,7 @@ func TestQoSPolicyProxyOptsSnapshotsFormalErrorsAndTypedBasePath(t *testing.T) {
 	if err != nil || len(rows) != 0 || count.Load() != 1 {
 		t.Fatal(rows, err, count.Load())
 	}
-	for _, options := range [][]policies.RecordListOption{{nil}, {policies.WithRecordListQuery("cls", nil)}, {policies.WithRecordListQuery("__conflicting_attrs", map[string]any{"paginated": false})}, {policies.WithRecordListQuery("headers", map[string]any{"X-Trace": 1})}, {policies.WithRecordListQuery("base_path", "https://foreign.invalid")}} {
+	for _, options := range [][]policies.RecordListOption{{nil}, {request.Query("cls", nil)}, {request.Query("__conflicting_attrs", map[string]any{"paginated": false})}, {request.Query("headers", map[string]any{"X-Trace": 1})}, {request.Query("base_path", "https://foreign.invalid")}} {
 		before := count.Load()
 		result, err := api.ProxyListRecords(context.Background(), options...)
 		// Paths are consumed by lazy Resource.list. Bind/formal errors are immediate.

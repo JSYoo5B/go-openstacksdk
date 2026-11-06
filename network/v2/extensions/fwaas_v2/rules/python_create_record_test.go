@@ -31,7 +31,7 @@ func TestPythonFirewallRuleCreateRecordSendsOnlyGivenAttributes(t *testing.T) {
 			Name: request.Present("ssh"), Description: request.Present(""), Protocol: request.Null[string](),
 			Enabled: request.Present(false), IPVersion: request.Present(4),
 		}),
-		rules.WithCreateRecordField("source_firewall_group_id", "g1"), rules.WithCreateRecordHeader("X-Trace", "t"))
+		request.Field("source_firewall_group_id", "g1"), request.Header("X-Trace", "t"))
 	if err != nil || got.StatusCode != 200 || got.Rule.ID != "fr-2" || got.Rule.Protocol != "" || string(got.Fields["protocol"]) != "null" || len(got.Fields) != 3 {
 		t.Fatal(got, err)
 	}
@@ -39,7 +39,7 @@ func TestPythonFirewallRuleCreateRecordSendsOnlyGivenAttributes(t *testing.T) {
 	// another JSON type through the extension when the typed field is omitted,
 	// and an empty 202 body leaves only the status and headers.
 	status, reply = http.StatusAccepted, ``
-	got, err = api.CreateRecord(ctx, rules.WithCreateRecordOptions(rules.CreateRecordOpts{Action: request.Present("deny")}), rules.WithCreateRecordField("protocol", 6))
+	got, err = api.CreateRecord(ctx, rules.WithCreateRecordOptions(rules.CreateRecordOpts{Action: request.Present("deny")}), request.Field("protocol", 6))
 	if err != nil || got.StatusCode != 202 || got.Rule != nil || got.Fields != nil {
 		t.Fatal(got, err)
 	}
@@ -57,9 +57,9 @@ func TestPythonFirewallRuleCreateRecordRejectsInputsAndErrorStatuses(t *testing.
 		return pythonFWRuleWire(http.StatusBadRequest, `{"NeutronError":{"type":"HTTPBadRequest","message":"bad"}}`)
 	})
 	for _, options := range [][]rules.CreateRecordOption{
-		{rules.WithCreateRecordField(" ", 1)},
+		{request.Field(" ", 1)},
 		{nil},
-		{rules.WithCreateRecordOptions(rules.CreateRecordOpts{Protocol: request.Present("tcp")}), rules.WithCreateRecordField("protocol", 6)},
+		{rules.WithCreateRecordOptions(rules.CreateRecordOpts{Protocol: request.Present("tcp")}), request.Field("protocol", 6)},
 	} {
 		var operation *resource.OperationError
 		if _, err := api.CreateRecord(ctx, options...); !errors.Is(err, resource.ErrInvalidOption) || !errors.As(err, &operation) || operation.Operation != "CreateRecord" {

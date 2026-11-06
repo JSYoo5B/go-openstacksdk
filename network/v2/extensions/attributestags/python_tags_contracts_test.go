@@ -257,9 +257,9 @@ func TestPythonTagsLiteralSegmentsExtensionsAndSourceHeaders(t *testing.T) {
 	client.MoreHeaders = map[string]string{"X-Source": "before"}
 	target := attributestags.NewTaggedResource(attributestags.PortResource, "a/b%2Fz")
 	values := map[string]any{"zero": 0, "null": nil, "false": false, "empty": []string{}}
-	field := attributestags.WithTagField("future", values)
+	field := request.Field("future", values)
 	values["zero"] = 7
-	got, err := api.SetTags(context.Background(), target, []string{"duplicate", "duplicate", ""}, field, attributestags.WithTagHeader("X-Test", "caller"))
+	got, err := api.SetTags(context.Background(), target, []string{"duplicate", "duplicate", ""}, field, request.Header("X-Test", "caller"))
 	if err != nil || got == nil || !reflect.DeepEqual(got.Resource.Tags(), []string{"duplicate", "duplicate", ""}) || got.ObservedTags || len(*calls) != 1 || (*calls)[0].path != "/neutron/v2.0/ports/a%2Fb%252Fz/tags" || (*calls)[0].body != `{"future":{"empty":[],"false":false,"null":null,"zero":0},"tags":["duplicate","duplicate",""]}` || string(got.Body) != `{"tags":["server"]}` {
 		t.Fatal(got, err, *calls)
 	}
@@ -267,7 +267,7 @@ func TestPythonTagsLiteralSegmentsExtensionsAndSourceHeaders(t *testing.T) {
 	if got.Header.Get("X-Tag-Proof") != "actual" || !reflect.DeepEqual(client.MoreHeaders, map[string]string{"X-Source": "before"}) {
 		t.Fatal(got.Header, client.MoreHeaders)
 	}
-	got, err = api.AddTag(context.Background(), target, "x/y%2Fz", attributestags.WithTagHeader("X-Test", "caller"))
+	got, err = api.AddTag(context.Background(), target, "x/y%2Fz", request.Header("X-Test", "caller"))
 	if err != nil || got == nil || len(*calls) != 2 || (*calls)[1].path != "/neutron/v2.0/ports/a%2Fb%252Fz/tags/x%2Fy%252Fz" || (*calls)[1].body != "" {
 		t.Fatal(got, err, *calls)
 	}
@@ -278,36 +278,36 @@ func TestPythonTagsPreflightAndSourceCapture(t *testing.T) {
 	count := 0
 	option := func(c *request.Config[attributestags.TagOpts]) error { count++; return nil }
 	var nilAPI *attributestags.API
-	if got, err := nilAPI.GetTags(context.Background(), pythonTagTarget(), option); got != nil || !errors.Is(err, resource.ErrInvalidOption) {
+	if got, err := nilAPI.GetTags(context.Background(), pythonTagTarget(), request.Custom(option)); got != nil || !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(got, err)
 	}
-	if got, err := api.GetTags(nil, pythonTagTarget(), option); got != nil || !errors.Is(err, resource.ErrInvalidOption) {
+	if got, err := api.GetTags(nil, pythonTagTarget(), request.Custom(option)); got != nil || !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(got, err)
 	}
 	cause := errors.New("preflight cancellation")
 	ctx, cancel := context.WithCancelCause(context.Background())
 	cancel(cause)
-	if got, err := api.GetTags(ctx, pythonTagTarget(), option); got != nil || !errors.Is(err, context.Canceled) || !errors.Is(err, cause) {
+	if got, err := api.GetTags(ctx, pythonTagTarget(), request.Custom(option)); got != nil || !errors.Is(err, context.Canceled) || !errors.Is(err, cause) {
 		t.Fatal(got, err)
 	}
 	for _, id := range []string{"", ".", "..", "bad\n", "\xff"} {
-		if got, err := api.GetTags(context.Background(), attributestags.NewTaggedResource(attributestags.NetworkResource, id), option); got != nil || !errors.Is(err, resource.ErrInvalidOption) {
+		if got, err := api.GetTags(context.Background(), attributestags.NewTaggedResource(attributestags.NetworkResource, id), request.Custom(option)); got != nil || !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(id, got, err)
 		}
 	}
-	if got, err := api.GetTags(context.Background(), attributestags.NewTaggedResource("address-group", "id"), option); got != nil || !errors.Is(err, resource.ErrUnsupported) {
+	if got, err := api.GetTags(context.Background(), attributestags.NewTaggedResource("address-group", "id"), request.Custom(option)); got != nil || !errors.Is(err, resource.ErrUnsupported) {
 		t.Fatal(got, err)
 	}
 	if count != 0 || len(*calls) != 0 {
 		t.Fatal(count, *calls)
 	}
-	options := []attributestags.TagOption{nil, attributestags.WithSourceSecurityGroupRuleTags(), attributestags.WithTagField("tags", nil), attributestags.WithTagHeader("X-Auth-Token", "foreign"), attributestags.WithTagHeader("Content-Length", "1"), attributestags.WithTagHeader("X-Test", "bad\n"), request.WithQuery[attributestags.TagOpts]("x", "1"), request.WithArgument[attributestags.TagOpts]("x", 1)}
+	options := []attributestags.TagOption{nil, attributestags.WithSourceSecurityGroupRuleTags(), request.Field("tags", nil), request.Header("X-Auth-Token", "foreign"), request.Header("Content-Length", "1"), request.Header("X-Test", "bad\n"), request.Custom(request.WithQuery[attributestags.TagOpts]("x", "1")), request.Custom(request.WithArgument[attributestags.TagOpts]("x", 1))}
 	for i, option := range options {
 		if got, err := api.SetTags(context.Background(), pythonTagTarget(), []string{}, option); got != nil || !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(i, got, err)
 		}
 	}
-	if got, err := api.AddTag(context.Background(), pythonTagTarget(), "a", attributestags.WithTagField("future", false)); got != nil || !errors.Is(err, resource.ErrInvalidOption) {
+	if got, err := api.AddTag(context.Background(), pythonTagTarget(), "a", request.Field("future", false)); got != nil || !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(got, err)
 	}
 	if got, err := api.SetTags(context.Background(), pythonTagTarget(), []string{"\xff"}); got != nil || !errors.Is(err, resource.ErrInvalidOption) {
@@ -316,10 +316,10 @@ func TestPythonTagsPreflightAndSourceCapture(t *testing.T) {
 	if len(*calls) != 0 {
 		t.Fatal(*calls)
 	}
-	got, err := api.GetTags(context.Background(), pythonTagTarget(), func(c *request.Config[attributestags.TagOpts]) error {
+	got, err := api.GetTags(context.Background(), pythonTagTarget(), request.Custom(func(c *request.Config[attributestags.TagOpts]) error {
 		client.ResourceBase = "https://changed.invalid/v2.0/"
 		return nil
-	})
+	}))
 	if got != nil || !errors.Is(err, resource.ErrInvalidOption) || len(*calls) != 0 {
 		t.Fatal(got, err, *calls)
 	}
@@ -489,12 +489,12 @@ func TestPythonTagsCallerSlicesAndRetainedOptionsAreSnapshots(t *testing.T) {
 		return pythonTagWire(200, `{"tags":["actual"]}`)
 	})
 	client.ProviderClient.RetryFunc = func(context.Context, string, string, *gophercloud.RequestOpts, error, uint) error { return nil }
-	got, err := api.SetTags(context.Background(), target, tags, attributestags.WithTagField("future", false), func(c *request.Config[attributestags.TagOpts]) error {
+	got, err := api.SetTags(context.Background(), target, tags, request.Field("future", false), request.Custom(func(c *request.Config[attributestags.TagOpts]) error {
 		retained = c
 		c.Headers["X-Test"] = "original"
 		tags[0] = "mutated inside option"
 		return nil
-	})
+	}))
 	want := `{"future":false,"tags":["input"]}`
 	if err != nil || got == nil || attempts != 2 || len(*calls) != 2 || (*calls)[0].body != want || (*calls)[1].body != want || !reflect.DeepEqual(got.Resource.Tags(), []string{"input"}) || !reflect.DeepEqual(target.Tags(), []string{"cache"}) || got.ObservedTags {
 		t.Fatal(got, err, *calls, target.Tags())

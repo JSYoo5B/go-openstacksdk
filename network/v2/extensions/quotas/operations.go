@@ -8,6 +8,7 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
@@ -118,13 +119,14 @@ func validateLimits(options UpdateOpts) error {
 
 type deleteOptions struct{ ignoreMissing bool }
 
-// DeleteOption changes the missing-project policy when resetting overrides.
-type DeleteOption func(*deleteOptions) error
+// DeleteOption changes the missing-project policy when resetting overrides:
+// request.IgnoreMissing suppresses only HTTP 404. The default is strict; later
+// options override earlier ones, including an explicit false. Other shared
+// calls fail with resource.ErrInvalidOption.
+type DeleteOption = request.DeleteCall
 
-// WithDeleteIgnoreMissing suppresses only HTTP 404. The default is strict;
-// later options override earlier ones, including an explicit false.
-func WithDeleteIgnoreMissing(ignore bool) DeleteOption {
-	return func(options *deleteOptions) error { options.ignoreMissing = ignore; return nil }
+var deleteCalls = calls.Spec[deleteOptions]{
+	IgnoreMissing: func(options *deleteOptions, ignore bool) error { options.ignoreMissing = ignore; return nil },
 }
 
 // Delete resets project overrides. It preserves native accepted 202/204 codes
@@ -134,7 +136,7 @@ func (s *ProjectQuotaScope) Delete(ctx context.Context, options ...DeleteOption)
 		return nil, quotaError("Delete", s.projectID, err)
 	}
 	var config deleteOptions
-	for _, apply := range options {
+	for _, apply := range calls.Translate(options, deleteCalls) {
 		if apply == nil {
 			return nil, quotaError("Delete", s.projectID, fmt.Errorf("%w: nil delete option", resource.ErrInvalidOption))
 		}

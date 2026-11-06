@@ -40,7 +40,7 @@ func TestPythonSiteConnectionUpdateRecordSendsEmptyValues(t *testing.T) {
 			LocalEPGroupID: request.Null[string](), PeerEPGroupID: request.Present(""), MTU: request.Present(0), Initiator: request.Present(""),
 			PSK: request.Present(""), DPD: request.Present(map[string]any{}), AdminStateUp: request.Present(false),
 		}),
-		siteconnections.WithUpdateRecordField("route_mode", "static"), siteconnections.WithUpdateRecordHeader("X-Trace", "t"))
+		request.Field("route_mode", "static"), request.Header("X-Trace", "t"))
 	if err != nil || got.StatusCode != 202 || got.Connection.MTU != 0 || got.Connection.AdminStateUp || got.Connection.PeerCIDRs == nil || len(got.Fields) != 5 {
 		t.Fatal(got, err)
 	}
@@ -64,9 +64,9 @@ func TestPythonSiteConnectionUpdateRecordRejectsInputsAndErrorStatuses(t *testin
 		return pythonSiteConnectionWire(http.StatusNotFound, `{"NeutronError":{"type":"IPsecSiteConnectionNotFound","message":"missing"}}`)
 	})
 	for _, option := range []siteconnections.UpdateRecordOption{
-		siteconnections.WithUpdateRecordField("local_id", ""),
-		siteconnections.WithUpdateRecordField("peer_cidrs", []string{}),
-		siteconnections.WithUpdateRecordField("id", "sc-2"),
+		request.Field("local_id", ""),
+		request.Field("peer_cidrs", []string{}),
+		request.Field("id", "sc-2"),
 		nil,
 	} {
 		var operation *resource.OperationError

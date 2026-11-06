@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"slices"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/neutronfind"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -110,10 +111,7 @@ func (a *API) FindRecord(ctx context.Context, identity string, options ...Record
 	if err != nil {
 		return nil, policyRecordWrap(ctx, "FindRecord", err)
 	}
-	callbacks := make([]func(*RecordFindOpts) error, len(options))
-	for i, apply := range slices.Clone(options) {
-		callbacks[i] = apply
-	}
+	callbacks := calls.Translate(options, recordFindCalls)
 	policy, err := applyPolicyRecordOptions(ctx, engine, RecordFindOpts{}, copyPolicyFind, callbacks)
 	if err != nil {
 		return nil, policyRecordWrap(ctx, "FindRecord", err)
@@ -133,10 +131,7 @@ func (a *API) ListRecords(ctx context.Context, options ...RecordListOption) iter
 			yield(nil, policyRecordWrap(ctx, "ListRecords", err))
 			return
 		}
-		callbacks := make([]func(*RecordListOpts) error, len(snapshot))
-		for i, apply := range snapshot {
-			callbacks[i] = apply
-		}
+		callbacks := calls.Translate(snapshot, recordListCalls)
 		policy, err := applyPolicyRecordOptions(ctx, engine, RecordListOpts{}, copyPolicyList, callbacks)
 		if err != nil {
 			yield(nil, policyRecordWrap(ctx, "ListRecords", err))

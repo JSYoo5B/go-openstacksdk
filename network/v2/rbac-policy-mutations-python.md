@@ -14,9 +14,9 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.API.CreateRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.WithRecordCreateOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.WithRecordCreateField`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.WithRecordCreateHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.WithRecordCreateMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - Concrete owned attrs/header/version options snapshot bytes/maps/pointers and callback output; nil/malformed/constructor/route/Source preflight avoids HTTP while original marshal/callback causes survive.
   Tests: `network/v2/extensions/rbacpolicies/python_mutations_contracts_test.go:TestPythonRBACMutationOptionsSnapshotAndMarshalCause`, `network/v2/extensions/rbacpolicies/python_mutations_contracts_test.go:TestPythonRBACMutationPreflightAndCallbackSourceGuard`, `network/v2/extensions/rbacpolicies/python_mutations_contracts_test.go:TestPythonRBACMutationResetOptionsAndDeterministicBulkAliases`.
@@ -53,9 +53,9 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.API.DeleteRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.WithRecordDeleteOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.WithRecordDeleteIgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.WithRecordDeleteHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.WithRecordDeleteMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - Concrete owned attrs/header/version options snapshot bytes/maps/pointers and callback output; nil/malformed/constructor/route/Source preflight avoids HTTP while original marshal/callback causes survive.
   Tests: `network/v2/extensions/rbacpolicies/python_mutations_contracts_test.go:TestPythonRBACMutationOptionsSnapshotAndMarshalCause`, `network/v2/extensions/rbacpolicies/python_mutations_contracts_test.go:TestPythonRBACMutationPreflightAndCallbackSourceGuard`, `network/v2/extensions/rbacpolicies/python_mutations_contracts_test.go:TestPythonRBACMutationResetOptionsAndDeterministicBulkAliases`.
@@ -91,9 +91,9 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.API.UpdateRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.WithRecordUpdateOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.WithRecordUpdateField`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.WithRecordUpdateHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.WithRecordUpdateMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - Concrete owned attrs/header/version options snapshot bytes/maps/pointers and callback output; nil/malformed/constructor/route/Source preflight avoids HTTP while original marshal/callback causes survive.
   Tests: `network/v2/extensions/rbacpolicies/python_mutations_contracts_test.go:TestPythonRBACMutationOptionsSnapshotAndMarshalCause`, `network/v2/extensions/rbacpolicies/python_mutations_contracts_test.go:TestPythonRBACMutationPreflightAndCallbackSourceGuard`, `network/v2/extensions/rbacpolicies/python_mutations_contracts_test.go:TestPythonRBACMutationResetOptionsAndDeterministicBulkAliases`.
@@ -180,16 +180,16 @@ func run(ctx context.Context, cloud, mode, policyID, objectID, target string) (a
     switch mode {
     case "create":
         value, err := network.RBACPolicies.CreateRecord(ctx,
-            rbacpolicies.WithRecordCreateField("object_type", "network"),
-            rbacpolicies.WithRecordCreateField("object_id", objectID),
-            rbacpolicies.WithRecordCreateField("action", "access_as_shared"),
-            rbacpolicies.WithRecordCreateField("target_project_id", target),
+            request.Field("object_type", "network"),
+            request.Field("object_id", objectID),
+            request.Field("action", "access_as_shared"),
+            request.Field("target_project_id", target),
         )
         if err != nil { return nil, err }
         return value.Resource, nil
     case "update":
         value, err := network.RBACPolicies.UpdateRecord(ctx, policyID,
-            rbacpolicies.WithRecordUpdateField("target_project_id", target),
+            request.Field("target_project_id", target),
         )
         if err != nil { return nil, err }
         return value.Resource, nil

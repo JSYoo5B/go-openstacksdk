@@ -6,9 +6,9 @@
 |---|---|
 | `vpn_ipsec_site_connections()` | `ListRecords(ctx)` lazy iterator |
 | `list(vpn_ipsec_site_connections())` | `AllRecords(ctx)` |
-| `status="ACTIVE", mtu=1500` | `WithRecordListQuery` sends declared server queries |
+| `status="ACTIVE", mtu=1500` | `request.Query` sends declared server queries |
 | `interval=30, peer_cidrs=["10.0.0.0/24"]` | same option applies local descriptor filters |
-| `paginated=False`, `max_items=10` | `WithRecordListPaginated(false)`, `WithRecordListMaxItems(10)` |
+| `paginated=False`, `max_items=10` | `request.Paginated(false)`, `request.MaxItems(10)` |
 | deprecated `jmespath_filters` | `ProxyListRecords` and `WithRecordListJMESPath` |
 
 Declared server queries are auth_mode, description, fields, ikepolicy_id, ipsecpolicy_id, initiator, local_ep_group_id, peer_address, local_id, mtu, name, peer_id, project_id, psk, peer_ep_group_id, route_mode, vpnservice_id, status, admin_state_up/is_admin_state_up, limit and marker. Declared Body attributes outside that table, including action, dpd, interval, peer_cidrs, timeout and id, filter the loaded descriptor view locally. Unknown keys are discarded before their values are JSON-marshaled. `tenant_id` is a fallback response alias for project_id, not a declared query or standalone local Body attribute; a tenant_id keyword is discarded.
@@ -57,8 +57,8 @@ func run(ctx context.Context, cloud string) error {
     service, err := conn.NetworkV2(ctx)
     if err != nil { return err }
     for row, err := range service.VPNSiteConnections.ListRecords(ctx,
-        siteconnections.WithRecordListQuery("status", "ACTIVE"),
-        siteconnections.WithRecordListQuery("interval", 30)) {
+        request.Query("status", "ACTIVE"),
+        request.Query("interval", 30)) {
         if err != nil { return err }
         if err := json.NewEncoder(os.Stdout).Encode(row.Resource.Body); err != nil { return err }
     }

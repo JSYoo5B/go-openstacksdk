@@ -38,7 +38,7 @@ func TestPythonBGPSpeakerUpdateRecordSendsOnlySuppliedFlags(t *testing.T) {
 	got, err = api.UpdateRecord(ctx, "bs-1",
 		speakers.WithUpdateRecordOptions(speakers.UpdateRecordOpts{Name: request.Present(""), AdvertiseTenantNetworks: request.Null[bool]()}),
 		speakers.WithUpdateRecordAdvertiseFloatingIPHostRoutes(request.Present(false)),
-		speakers.WithUpdateRecordField("networks", []string{}), speakers.WithUpdateRecordHeader("X-Trace", "t"))
+		request.Field("networks", []string{}), request.Header("X-Trace", "t"))
 	if err != nil || got.StatusCode != 202 || got.BGPSpeaker.Name != "" || got.BGPSpeaker.AdvertiseFloatingIPHostRoutes || len(got.Fields) != 3 {
 		t.Fatal(got, err)
 	}
@@ -62,8 +62,8 @@ func TestPythonBGPSpeakerUpdateRecordRejectsInputsAndErrorStatuses(t *testing.T)
 		return pythonBGPSpeakerWire(http.StatusBadRequest, `{"NeutronError":{"type":"HTTPBadRequest","message":"bad"}}`)
 	})
 	for _, option := range []speakers.UpdateRecordOption{
-		speakers.WithUpdateRecordField("advertise_tenant_networks", false),
-		speakers.WithUpdateRecordField("id", "bs-2"),
+		request.Field("advertise_tenant_networks", false),
+		request.Field("id", "bs-2"),
 		nil,
 	} {
 		var operation *resource.OperationError

@@ -16,6 +16,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
@@ -34,42 +35,42 @@ type DHCPNetworkRecordsOpts struct {
 	MaxItems   int
 	SinglePage bool
 }
-type DHCPNetworkRecordsOption = request.Option[DHCPNetworkRecordsOpts]
 
-func WithDHCPNetworkRecordsOptions(value DHCPNetworkRecordsOpts) DHCPNetworkRecordsOption {
-	value = cloneDHCPNetworkRecordsOpts(value)
-	return func(c *request.Config[DHCPNetworkRecordsOpts]) error {
-		c.Options = cloneDHCPNetworkRecordsOpts(value)
-		return nil
-	}
-}
+// DHCPNetworkRecordsOption is one option of ListDHCPNetworkRecords:
+// WithDHCPNetworkRecordsOptions, request.Query (one Python keyword argument
+// as JSON), request.MaxItems, request.Paginated (false reads only the first
+// page), request.Header or request.Custom over
+// *request.Config[DHCPNetworkRecordsOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type DHCPNetworkRecordsOption = request.ListCall
 
-// WithDHCPNetworkRecordsQuery adds one Python keyword argument. The value is
-// encoded with encoding/json when the option is built; a list becomes a
-// repeated query key and null omits a server query key, as in requests.
-func WithDHCPNetworkRecordsQuery(key string, value any) DHCPNetworkRecordsOption {
-	encoded, err := json.Marshal(value)
-	return func(c *request.Config[DHCPNetworkRecordsOpts]) error {
-		if err != nil {
-			return fmt.Errorf("%w: query %q: %v", resource.ErrInvalidOption, key, err)
+var dhcpNetworkRecordsCalls = calls.Spec[request.Config[DHCPNetworkRecordsOpts]]{
+	Header: calls.ConfigHeader[DHCPNetworkRecordsOpts],
+	Query: func(c *request.Config[DHCPNetworkRecordsOpts], entry request.CallEntry) error {
+		if entry.JSONErr != nil {
+			return fmt.Errorf("%w: query %q: %v", resource.ErrInvalidOption, entry.Key, entry.JSONErr)
 		}
 		if c.Options.Query == nil {
 			c.Options.Query = make(map[string]json.RawMessage)
 		}
-		c.Options.Query[key] = bytes.Clone(encoded)
+		c.Options.Query[entry.Key] = bytes.Clone(entry.JSON)
 		return nil
-	}
-}
-func WithDHCPNetworkRecordsMaxItems(value int) DHCPNetworkRecordsOption {
-	return func(c *request.Config[DHCPNetworkRecordsOpts]) error { c.Options.MaxItems = value; return nil }
+	},
+	Paging: calls.Paging[request.Config[DHCPNetworkRecordsOpts]]{
+		MaxItems: func(c *request.Config[DHCPNetworkRecordsOpts], n int) error { c.Options.MaxItems = n; return nil },
+		Paginated: func(c *request.Config[DHCPNetworkRecordsOpts], v bool) error {
+			c.Options.SinglePage = !v
+			return nil
+		},
+	},
 }
 
-// WithDHCPNetworkRecordsPaginated(false) reads only the first page.
-func WithDHCPNetworkRecordsPaginated(value bool) DHCPNetworkRecordsOption {
-	return func(c *request.Config[DHCPNetworkRecordsOpts]) error { c.Options.SinglePage = !value; return nil }
-}
-func WithDHCPNetworkRecordsHeader(key, value string) DHCPNetworkRecordsOption {
-	return request.WithHeader[DHCPNetworkRecordsOpts](key, value)
+func WithDHCPNetworkRecordsOptions(value DHCPNetworkRecordsOpts) DHCPNetworkRecordsOption {
+	value = cloneDHCPNetworkRecordsOpts(value)
+	return request.Custom(func(c *request.Config[DHCPNetworkRecordsOpts]) error {
+		c.Options = cloneDHCPNetworkRecordsOpts(value)
+		return nil
+	})
 }
 
 func cloneDHCPNetworkRecordsOpts(v DHCPNetworkRecordsOpts) DHCPNetworkRecordsOpts {
@@ -193,7 +194,7 @@ func (a *API) ListDHCPNetworkRecords(ctx context.Context, agentID string, option
 			fail(err)
 			return
 		}
-		config, err := cloudread.ApplyReadOptions(ctx, DHCPNetworkRecordsOpts{}, owned, ownDHCPNetworkRecordsConfig, source.Guard)
+		config, err := cloudread.ApplyReadOptions(ctx, DHCPNetworkRecordsOpts{}, calls.Options(owned, dhcpNetworkRecordsCalls), ownDHCPNetworkRecordsConfig, source.Guard)
 		if err == nil {
 			err = request.ValidateCapabilities(config, false, false, true)
 		}

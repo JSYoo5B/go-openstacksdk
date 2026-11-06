@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/services"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"net/http"
 	"testing"
@@ -19,7 +20,7 @@ func TestVPNServiceRecordsAllPagesServerQueryAndLocalFilter(t *testing.T) {
 		return pythonVPNServiceWire(200, `{"vpnservices":[{"id":"skip","status":"DOWN"},{"id":"first","status":"ACTIVE"}],"next":"`+base+`?marker=next"}`)
 	})
 	base = cloud.Server.URL + pythonVPNServiceBase
-	rows, err := api.AllRecords(context.Background(), services.WithRecordListQuery("status", json.RawMessage(`"ACTIVE"`)), services.WithRecordListQuery("is_admin_state_up", json.RawMessage(`false`)), services.WithRecordListQuery("tenant_id", "tenant"))
+	rows, err := api.AllRecords(context.Background(), request.Query("status", json.RawMessage(`"ACTIVE"`)), request.Query("is_admin_state_up", json.RawMessage(`false`)), request.Query("tenant_id", "tenant"))
 	if err != nil || len(rows) != 2 || calls.Len() != 2 || string(rows[0].Resource.Body["id"]) != `"first"` || string(rows[1].Resource.Body["id"]) != `"last"` {
 		t.Fatal(rows, err, calls.Calls())
 	}
@@ -38,7 +39,7 @@ func TestVPNServiceRecordsAllPagesServerQueryAndLocalFilter(t *testing.T) {
 		}
 		return pythonVPNServiceWire(200, `{"vpnservices":[]}`)
 	})
-	_, err = api.AllRecords(context.Background(), services.WithRecordListQuery("status", json.RawMessage(`"ACTIVE"`)), services.WithRecordListQuery("is_admin_state_up", json.RawMessage(`false`)), services.WithRecordListQuery("tenant_id", "tenant"))
+	_, err = api.AllRecords(context.Background(), request.Query("status", json.RawMessage(`"ACTIVE"`)), request.Query("is_admin_state_up", json.RawMessage(`false`)), request.Query("tenant_id", "tenant"))
 	if err != nil || calls.Len() != 1 {
 		t.Fatal(err, calls.Calls())
 	}
@@ -95,20 +96,20 @@ func TestVPNServiceRecordsOptionsCancellationAndFailures(t *testing.T) {
 		return pythonVPNServiceWire(200, `{"vpnservices":[{"id":"r","status":"ACTIVE"}]}`)
 	})
 	raw := json.RawMessage(`"ACTIVE"`)
-	option := services.WithRecordListQuery("status", raw)
+	option := request.Query("status", raw)
 	raw[0] = 'X'
-	rows, err := api.AllRecords(context.Background(), option, services.WithRecordListQuery("ignored_extension", make(chan int)))
+	rows, err := api.AllRecords(context.Background(), option, request.Query("ignored_extension", make(chan int)))
 	if err != nil || len(rows) != 1 || count != 1 {
 		t.Fatal(rows, err)
 	}
-	for _, options := range [][]services.RecordListOption{{nil}, {services.WithRecordListQuery("session", make(chan int))}, {services.WithRecordListMicroversion("2.1\r\nbad")}} {
+	for _, options := range [][]services.RecordListOption{{nil}, {request.Query("session", make(chan int))}, {request.Microversion("2.1\r\nbad")}} {
 		rows, err = api.AllRecords(context.Background(), options...)
 		if err == nil || rows != nil || calls.Len() != 1 {
 			t.Fatal(rows, err, calls.Calls())
 		}
 	}
 	ctx, cancel := context.WithCancel(context.Background())
-	rows, err = api.AllRecords(ctx, func(*services.RecordListOpts) error { cancel(); return nil })
+	rows, err = api.AllRecords(ctx, request.Custom(func(*services.RecordListOpts) error { cancel(); return nil }))
 	if !errors.Is(err, context.Canceled) || rows != nil || calls.Len() != 1 {
 		t.Fatal(rows, err, calls.Calls())
 	}

@@ -16,7 +16,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.WithInsertRuleRecordOptions`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.WithInsertRuleRecordAfter`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.WithInsertRuleRecordBefore`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.WithInsertRuleRecordHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 
 - InsertRuleRecord sends PUT fwaas/firewall_policies/{id}/insert_rule with an unwrapped body that always carries firewall_rule_id, insert_after and insert_before, sending null for an omitted position and an empty string when given, snapshots InsertRuleRecordOpts when the option is built, accepts 200 and 202, and decodes the unwrapped policy into the typed Policy and raw Fields.
   Tests: `network/v2/extensions/fwaas_v2/policies/python_insert_rule_test.go:TestPythonFirewallPolicyInsertRuleRecordSendsNullPositions`.

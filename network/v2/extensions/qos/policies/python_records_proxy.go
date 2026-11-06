@@ -7,6 +7,7 @@ import (
 	"iter"
 	"slices"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/jmespath"
@@ -139,10 +140,7 @@ func (a *API) policyProxyListEngine(ctx context.Context, extra func(context.Cont
 }
 
 func applyPolicyProxyListOptions(ctx context.Context, engine *neutronfind.Engine, options []RecordListOption) (RecordListOpts, json.RawMessage, error) {
-	callbacks := make([]func(*RecordListOpts) error, len(options))
-	for i, option := range options {
-		callbacks[i] = option
-	}
+	callbacks := calls.Translate(options, recordListCalls)
 	policy, err := applyPolicyRecordOptions(ctx, engine, RecordListOpts{}, copyPolicyList, callbacks)
 	if err != nil {
 		return policy, nil, err

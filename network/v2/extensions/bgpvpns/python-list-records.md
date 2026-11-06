@@ -31,7 +31,7 @@ func main() {
     }
     api := bgpvpns.New(client)
     for record, err := range api.ListRecords(context.Background(),
-        bgpvpns.WithRecordListQuery("project_id", "project-a")) {
+        request.Query("project_id", "project-a")) {
         if err != nil { panic(err) }
         fmt.Println(string(record.Resource.Body["id"]))
     }
@@ -51,7 +51,7 @@ kwargs are discarded before invoking a JSON marshaler. Unknown response Body
 extensions remain in Resource and Wire because these Source classes opt in to
 unknown Body attributes. HTTP envelope, headers and status remain independent.
 
-`WithRecordListLimit`, `Marker`, `MaxItems` and `Paginated` own paging controls;
+`request.Limit`, `request.Marker`, `request.MaxItems` and `request.Paginated` own paging controls;
 resource links, top-level next and HTTP Link continuations use the shared pager.
 Raw row caps apply before local Body filtering. Breaking an iterator avoids
 requesting later pages. Base paths stay inside the selected service, and options

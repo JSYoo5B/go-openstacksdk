@@ -5,8 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/JSYoo5B/go-openstacksdk/resource"
-	"maps"
 	"net/http"
 	"net/url"
 	"slices"
@@ -14,9 +12,11 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/neutronfind"
 	"github.com/JSYoo5B/go-openstacksdk/request"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 // PortAssociationFindOpts owns Source kwargs. Omitted IgnoreMissing defaults to true.
@@ -33,7 +33,15 @@ type PortAssociationFindOpts struct {
 	Query         map[string]json.RawMessage
 	Headers       map[string]string
 }
-type PortAssociationFindOption func(*PortAssociationFindOpts) error
+
+// PortAssociationFindOption is one option of the find:
+// WithPortAssociationFindOpts, WithPortAssociationFindListBasePath,
+// request.IgnoreMissing, request.Query (one Source kwarg as JSON; bound
+// Find/Resource argument names are rejected before the marshal error),
+// request.Microversion, request.Headers (replaces the headers) or
+// request.Custom over *PortAssociationFindOpts. request.Header fails with
+// resource.ErrInvalidOption before HTTP.
+type PortAssociationFindOption = request.FindCall
 
 func internalPortAssociationFindOpts(value PortAssociationFindOpts) neutronfind.Options {
 	return neutronfind.Options{IgnoreMissing: value.IgnoreMissing, Microversion: value.Microversion, ListBasePath: value.ListBasePath, Query: value.Query, Headers: value.Headers, Order: value.queryOrder}
@@ -50,78 +58,74 @@ func copyPortAssociationFindOpts(value PortAssociationFindOpts) PortAssociationF
 
 func WithPortAssociationFindOpts(value PortAssociationFindOpts) PortAssociationFindOption {
 	owned := copyPortAssociationFindOpts(value)
-	return func(c *PortAssociationFindOpts) error { *c = copyPortAssociationFindOpts(owned); return nil }
+	return request.Custom(func(c *PortAssociationFindOpts) error { *c = copyPortAssociationFindOpts(owned); return nil })
 }
-func WithPortAssociationFindIgnoreMissing(value bool) PortAssociationFindOption {
-	return func(c *PortAssociationFindOpts) error { x := value; c.IgnoreMissing = &x; return nil }
-}
-func WithPortAssociationFindQuery(key string, value any) PortAssociationFindOption {
+
+// portAssociationFindKeyword records one Source kwarg; bound Find/Resource argument
+// names fail before the value's marshal error.
+func portAssociationFindKeyword(c *PortAssociationFindOpts, key string, owned json.RawMessage, err error) error {
 	switch key {
 	case "bgpvpn_id", "id", "name_or_id", "ignore_missing", "cls", "session", "self", "resource_type", "connection", "_synchronized":
-		return func(*PortAssociationFindOpts) error {
-			return listRecordInvalid("%q collides with a bound Find/Resource constructor argument", key)
-		}
+		return listRecordInvalid("%q collides with a bound Find/Resource constructor argument", key)
 	}
-	raw, err := json.Marshal(value)
-	owned := bytes.Clone(raw)
-	return func(c *PortAssociationFindOpts) error {
+	if err != nil {
+		return err
+	}
+	switch key {
+	case "list_base_path", "microversion":
+		formalKey := key
+		if key == "list_base_path" {
+			formalKey = "base_path"
+		}
+		normalized, _, err := neutronfind.NormalizeProxyListOptions(neutronfind.Options{Query: map[string]json.RawMessage{formalKey: owned}})
 		if err != nil {
 			return err
 		}
-		switch key {
-		case "list_base_path", "microversion":
-			formalKey := key
-			if key == "list_base_path" {
-				formalKey = "base_path"
-			}
-			normalized, _, err := neutronfind.NormalizeProxyListOptions(neutronfind.Options{Query: map[string]json.RawMessage{formalKey: owned}})
-			if err != nil {
-				return err
-			}
-			if key == "list_base_path" {
-				c.ListBasePath = normalized.BasePath
-			} else {
-				c.Microversion = normalized.Microversion
-			}
-			delete(c.Query, key)
-			c.queryOrder = slices.DeleteFunc(c.queryOrder, func(existing string) bool { return existing == key })
-			return nil
+		if key == "list_base_path" {
+			c.ListBasePath = normalized.BasePath
+		} else {
+			c.Microversion = normalized.Microversion
 		}
-		if c.Query == nil {
-			c.Query = make(map[string]json.RawMessage)
-		}
-		c.Query[key] = bytes.Clone(owned)
-		if !slices.Contains(c.queryOrder, key) {
-			c.queryOrder = append(c.queryOrder, key)
-		}
+		delete(c.Query, key)
+		c.queryOrder = slices.DeleteFunc(c.queryOrder, func(existing string) bool { return existing == key })
 		return nil
 	}
-}
-func WithPortAssociationFindMicroversion(value string) PortAssociationFindOption {
-	return func(c *PortAssociationFindOpts) error {
-		x := value
-		c.Microversion = &x
-		delete(c.Query, "microversion")
-		c.queryOrder = slices.DeleteFunc(c.queryOrder, func(key string) bool { return key == "microversion" })
-		return nil
+	if c.Query == nil {
+		c.Query = make(map[string]json.RawMessage)
 	}
-}
-func WithPortAssociationFindHeaders(value map[string]string) PortAssociationFindOption {
-	owned := maps.Clone(value)
-	return func(c *PortAssociationFindOpts) error { c.Headers = maps.Clone(owned); return nil }
+	c.Query[key] = bytes.Clone(owned)
+	if !slices.Contains(c.queryOrder, key) {
+		c.queryOrder = append(c.queryOrder, key)
+	}
+	return nil
 }
 
 // WithPortAssociationFindListBasePath selects only the fallback list route. The member
 // GET keeps the default route or its raw base_path override. An empty list
 // path keeps the route selected by raw base_path or the parent port-association default.
 func WithPortAssociationFindListBasePath(path string) PortAssociationFindOption {
-	return func(c *PortAssociationFindOpts) error {
+	return request.Custom(func(c *PortAssociationFindOpts) error {
 		owned := path
 		c.ListBasePath = &owned
 		delete(c.Query, "list_base_path")
 		c.queryOrder = slices.DeleteFunc(c.queryOrder, func(key string) bool { return key == "list_base_path" })
 		return nil
-	}
+	})
+}
+
+// portAssociationFindCalls interprets the shared calls of the find.
+var portAssociationFindCalls = calls.Spec[PortAssociationFindOpts]{
+	IgnoreMissing: calls.Pointer(func(c *PortAssociationFindOpts) **bool { return &c.IgnoreMissing }),
+	Query: func(c *PortAssociationFindOpts, entry request.CallEntry) error {
+		return portAssociationFindKeyword(c, entry.Key, entry.JSON, entry.JSONErr)
+	},
+	Microversion: func(c *PortAssociationFindOpts, version string) error {
+		c.Microversion = &version
+		delete(c.Query, "microversion")
+		c.queryOrder = slices.DeleteFunc(c.queryOrder, func(key string) bool { return key == "microversion" })
+		return nil
+	},
+	Headers: calls.Value(func(c *PortAssociationFindOpts) *map[string]string { return &c.Headers }),
 }
 
 // FindPortAssociationRecord matches the pinned Source GET-first, complete ID-or-name search.
@@ -153,7 +157,7 @@ func (a *API) FindPortAssociationRecord(ctx context.Context, parent, identity st
 	}
 	guard := engine.Check
 	policy := PortAssociationFindOpts{}
-	for _, apply := range slices.Clone(options) {
+	for _, apply := range calls.Translate(options, portAssociationFindCalls) {
 		if err := guard(ctx); err != nil {
 			return nil, wrap(err)
 		}

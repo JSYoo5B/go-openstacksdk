@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -32,13 +33,13 @@ func pythonRBACMutationBody(t *testing.T, raw string, want map[string]any) {
 func pythonRBACMutationRun(ctx context.Context, api *rbacpolicies.API, op string) error {
 	switch op {
 	case "create":
-		_, err := api.CreateRecord(ctx, rbacpolicies.WithRecordCreateField("target_project_id", "project"))
+		_, err := api.CreateRecord(ctx, request.Field("target_project_id", "project"))
 		return err
 	case "update":
-		_, err := api.UpdateRecord(ctx, "target", rbacpolicies.WithRecordUpdateField("target_project_id", "project"))
+		_, err := api.UpdateRecord(ctx, "target", request.Field("target_project_id", "project"))
 		return err
 	default:
-		_, err := api.DeleteRecord(ctx, "target", rbacpolicies.WithRecordDeleteIgnoreMissing(false))
+		_, err := api.DeleteRecord(ctx, "target", request.IgnoreMissing(false))
 		return err
 	}
 }
@@ -54,7 +55,7 @@ func TestPythonRBACMutationCreateProvidedAttrsAndEmptyEnvelope(t *testing.T) {
 		r.Header.Set("X-Request-Id", "create-proof")
 		return r
 	})
-	value, err := api.CreateRecord(context.Background(), rbacpolicies.WithRecordCreateField("target_project_id", nil), rbacpolicies.WithRecordCreateField("action", false), rbacpolicies.WithRecordCreateField("object_id", 0), rbacpolicies.WithRecordCreateField("object_type", map[string]any{"extension": true}), rbacpolicies.WithRecordCreateField("x_ext", []any{nil, true, 0}), rbacpolicies.WithRecordCreateField("if_none_match", "body-value"))
+	value, err := api.CreateRecord(context.Background(), request.Field("target_project_id", nil), request.Field("action", false), request.Field("object_id", 0), request.Field("object_type", map[string]any{"extension": true}), request.Field("x_ext", []any{nil, true, 0}), request.Field("if_none_match", "body-value"))
 	if err != nil || value == nil || len(calls) != 1 || value.StatusCode != 203 || string(value.Envelope) != body || value.Header.Get("X-Request-Id") != "create-proof" {
 		t.Fatal(value, err, calls)
 	}
@@ -84,13 +85,13 @@ func TestPythonRBACMutationOrderedAliasesAndTenantFallback(t *testing.T) {
 	for _, reverse := range []bool{false, true} {
 		var calls []nativeRBACCall
 		api, _ := nativeRBACAPI(t, &calls, func(*http.Request) *http.Response { return nativeRBACWire(204, "") })
-		first, second := rbacpolicies.WithRecordCreateField("target_project_id", "canonical"), rbacpolicies.WithRecordCreateField("target_tenant", "wire")
+		first, second := request.Field("target_project_id", "canonical"), request.Field("target_tenant", "wire")
 		want := "wire"
 		if reverse {
 			first, second = second, first
 			want = "canonical"
 		}
-		value, err := api.CreateRecord(context.Background(), first, second, rbacpolicies.WithRecordCreateField("tenant_id", "owner"))
+		value, err := api.CreateRecord(context.Background(), first, second, request.Field("tenant_id", "owner"))
 		if err != nil || value.Wire != nil || len(calls) != 1 {
 			t.Fatal(value, err, calls)
 		}
@@ -101,7 +102,7 @@ func TestPythonRBACMutationOrderedAliasesAndTenantFallback(t *testing.T) {
 	}
 	var calls []nativeRBACCall
 	api, _ := nativeRBACAPI(t, &calls, func(*http.Request) *http.Response { return nativeRBACWire(202, "{not-json") })
-	value, err := api.CreateRecord(context.Background(), rbacpolicies.WithRecordCreateField("project_id", nil), rbacpolicies.WithRecordCreateField("tenant_id", "tenant"), rbacpolicies.WithRecordCreateField("id", false))
+	value, err := api.CreateRecord(context.Background(), request.Field("project_id", nil), request.Field("tenant_id", "tenant"), request.Field("id", false))
 	if err != nil || value.Wire != nil || string(value.Envelope) != "{not-json" {
 		t.Fatal(value, err)
 	}
@@ -113,7 +114,7 @@ func TestPythonRBACMutationOrderedAliasesAndTenantFallback(t *testing.T) {
 func TestPythonRBACMutationUpdateNoopAndExplicitNull(t *testing.T) {
 	var calls []nativeRBACCall
 	api, _ := nativeRBACAPI(t, &calls, func(*http.Request) *http.Response { return nativeRBACWire(204, "") })
-	for _, options := range [][]rbacpolicies.RecordUpdateOption{nil, {rbacpolicies.WithRecordUpdateField("microversion", map[string]any{"ignored": true})}, {rbacpolicies.WithRecordUpdateHeaders(map[string]string{"If-Match": "condition"}), rbacpolicies.WithRecordUpdateMicroversion("2.0")}} {
+	for _, options := range [][]rbacpolicies.RecordUpdateOption{nil, {request.Field("microversion", map[string]any{"ignored": true})}, {request.Headers(map[string]string{"If-Match": "condition"}), request.Microversion("2.0")}} {
 		value, err := api.UpdateRecord(context.Background(), "literal/id %2F", options...)
 		if err != nil || value == nil || value.Wire != nil || value.StatusCode != 0 || value.Header != nil && len(value.Header) != 0 || len(value.Envelope) != 0 || len(calls) != 0 {
 			t.Fatal(value, err, calls)
@@ -125,7 +126,7 @@ func TestPythonRBACMutationUpdateNoopAndExplicitNull(t *testing.T) {
 			t.Fatal(value.Resource.Body)
 		}
 	}
-	value, err := api.UpdateRecord(context.Background(), "literal/id %2F", rbacpolicies.WithRecordUpdateField("target_project_id", nil), rbacpolicies.WithRecordUpdateField("x_changed", false))
+	value, err := api.UpdateRecord(context.Background(), "literal/id %2F", request.Field("target_project_id", nil), request.Field("x_changed", false))
 	if err != nil || value == nil || len(calls) != 1 || calls[0].method != http.MethodPut || calls[0].query != "" {
 		t.Fatal(value, err, calls)
 	}
@@ -145,7 +146,7 @@ func TestPythonRBACMutationLiteralIdentityAndServerOwnedSchema(t *testing.T) {
 		r.Header.Set("X-Request-Id", "stock-schema")
 		return r
 	})
-	value, err := api.UpdateRecord(context.Background(), identity, rbacpolicies.WithRecordUpdateField("object_type", "network"), rbacpolicies.WithRecordUpdateField("action", "extension-action"))
+	value, err := api.UpdateRecord(context.Background(), identity, request.Field("object_type", "network"), request.Field("action", "extension-action"))
 	var native gophercloud.ErrUnexpectedResponseCode
 	if value != nil || !errors.As(err, &native) || native.Actual != 400 || native.Method != http.MethodPut || native.ResponseHeader.Get("X-Request-Id") != "stock-schema" || len(calls) != 1 {
 		t.Fatal(value, err, native, calls)
@@ -180,9 +181,9 @@ func TestPythonRBACMutationBodyHeaderAndVersionOwnership(t *testing.T) {
 		var err error
 		headers := map[string]string{"If-None-Match": "header-condition", "If-Match": "header-match"}
 		if op == "create" {
-			value, err = api.CreateRecord(context.Background(), rbacpolicies.WithRecordCreateField("if_none_match", nil), rbacpolicies.WithRecordCreateField("if_match", "body-condition"), rbacpolicies.WithRecordCreateField("microversion", false), rbacpolicies.WithRecordCreateHeaders(headers), rbacpolicies.WithRecordCreateMicroversion("2.1"))
+			value, err = api.CreateRecord(context.Background(), request.Field("if_none_match", nil), request.Field("if_match", "body-condition"), request.Field("microversion", false), request.Headers(headers), request.Microversion("2.1"))
 		} else {
-			value, err = api.UpdateRecord(context.Background(), "target", rbacpolicies.WithRecordUpdateField("if_none_match", nil), rbacpolicies.WithRecordUpdateField("if_match", "body-condition"), rbacpolicies.WithRecordUpdateField("microversion", false), rbacpolicies.WithRecordUpdateHeaders(headers), rbacpolicies.WithRecordUpdateMicroversion("2.1"))
+			value, err = api.UpdateRecord(context.Background(), "target", request.Field("if_none_match", nil), request.Field("if_match", "body-condition"), request.Field("microversion", false), request.Headers(headers), request.Microversion("2.1"))
 		}
 		if err != nil || value == nil || len(calls) != 1 || source.Microversion != "2.0" || source.MoreHeaders["Openstack-Api-Version"] != "network 2.0" {
 			t.Fatal(op, value, err, calls, source)
@@ -213,7 +214,7 @@ func TestPythonRBACMutationDeleteMissingDefaultsAndReceipt(t *testing.T) {
 			t.Fatal(value, err, calls)
 		}
 		calls = nil
-		value, err = api.DeleteRecord(context.Background(), "literal/id %2F", rbacpolicies.WithRecordDeleteIgnoreMissing(false))
+		value, err = api.DeleteRecord(context.Background(), "literal/id %2F", request.IgnoreMissing(false))
 		if status == 404 {
 			var native gophercloud.ErrUnexpectedResponseCode
 			if !errors.As(err, &native) || native.Actual != 404 || native.ResponseHeader.Get("X-Request-Id") != "delete-proof" {
@@ -459,7 +460,7 @@ func TestPythonRBACMutationOptionsSnapshotAndMarshalCause(t *testing.T) {
 		escaped.Headers["X-Trace"] = "late"
 		return nativeRBACWire(204, "")
 	})
-	value, err := api.CreateRecord(context.Background(), option, func(c *rbacpolicies.RecordCreateOpts) error { escaped = c; return nil })
+	value, err := api.CreateRecord(context.Background(), option, request.Custom(func(c *rbacpolicies.RecordCreateOpts) error { escaped = c; return nil }))
 	if err != nil || len(calls) != 1 {
 		t.Fatal(value, err, calls)
 	}
@@ -470,9 +471,9 @@ func TestPythonRBACMutationOptionsSnapshotAndMarshalCause(t *testing.T) {
 		before := len(calls)
 		var err error
 		if op == "create" {
-			_, err = api.CreateRecord(context.Background(), rbacpolicies.WithRecordCreateField("x_ext", pythonRBACMutationMarshalFailure{cause}))
+			_, err = api.CreateRecord(context.Background(), request.Field("x_ext", pythonRBACMutationMarshalFailure{cause}))
 		} else {
-			_, err = api.UpdateRecord(context.Background(), "target", rbacpolicies.WithRecordUpdateField("x_ext", pythonRBACMutationMarshalFailure{cause}))
+			_, err = api.UpdateRecord(context.Background(), "target", request.Field("x_ext", pythonRBACMutationMarshalFailure{cause}))
 		}
 		var marshal *json.MarshalerError
 		if !errors.Is(err, cause) || !errors.Is(err, resource.ErrInvalidOption) || !errors.As(err, &marshal) || len(calls) != before {
@@ -485,17 +486,17 @@ func TestPythonRBACMutationPreflightAndCallbackSourceGuard(t *testing.T) {
 	var calls []nativeRBACCall
 	api, _ := nativeRBACAPI(t, &calls, func(*http.Request) *http.Response { return nativeRBACWire(204, "") })
 	for _, key := range []string{"", "bad\n", string([]byte{255}), "base_path", "cls", "connection", "_synchronized", "self", "__conflicting_attrs", "location", "requires_id", "create_opts", "resource_key"} {
-		_, err := api.CreateRecord(context.Background(), rbacpolicies.WithRecordCreateField(key, nil))
+		_, err := api.CreateRecord(context.Background(), request.Field(key, nil))
 		if !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
 			t.Fatal(key, err, calls)
 		}
-		_, err = api.UpdateRecord(context.Background(), "target", rbacpolicies.WithRecordUpdateField(key, nil))
+		_, err = api.UpdateRecord(context.Background(), "target", request.Field(key, nil))
 		if !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
 			t.Fatal(key, err, calls)
 		}
 	}
 	for _, key := range []string{"id", "rbac_policy"} {
-		_, err := api.UpdateRecord(context.Background(), "target", rbacpolicies.WithRecordUpdateField(key, nil))
+		_, err := api.UpdateRecord(context.Background(), "target", request.Field(key, nil))
 		if !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
 			t.Fatal(key, err, calls)
 		}
@@ -504,7 +505,7 @@ func TestPythonRBACMutationPreflightAndCallbackSourceGuard(t *testing.T) {
 	if !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
 		t.Fatal(err, calls)
 	}
-	_, err = api.UpdateRecord(context.Background(), "target", rbacpolicies.WithRecordUpdateHeaders(map[string]string{"Authorization": "forged"}))
+	_, err = api.UpdateRecord(context.Background(), "target", request.Headers(map[string]string{"Authorization": "forged"}))
 	if !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
 		t.Fatal(err, calls)
 	}
@@ -523,11 +524,11 @@ func TestPythonRBACMutationPreflightAndCallbackSourceGuard(t *testing.T) {
 	cause := errors.New("callback cause")
 	source := api.RawClient()
 	original := source.ResourceBase
-	_, err = api.CreateRecord(context.Background(), func(c *rbacpolicies.RecordCreateOpts) error {
+	_, err = api.CreateRecord(context.Background(), request.Custom(func(c *rbacpolicies.RecordCreateOpts) error {
 		c.Attrs["target_project_id"] = json.RawMessage(`"project"`)
 		source.ResourceBase = original + "changed/"
 		return cause
-	})
+	}))
 	if !errors.Is(err, cause) || !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
 		t.Fatal(err, calls)
 	}
@@ -536,21 +537,21 @@ func TestPythonRBACMutationPreflightAndCallbackSourceGuard(t *testing.T) {
 func TestPythonRBACMutationResetOptionsAndDeterministicBulkAliases(t *testing.T) {
 	var calls []nativeRBACCall
 	api, _ := nativeRBACAPI(t, &calls, func(*http.Request) *http.Response { return nativeRBACWire(204, "") })
-	value, err := api.CreateRecord(context.Background(), func(c *rbacpolicies.RecordCreateOpts) error { c.Attrs = nil; c.Headers = nil; return nil }, func(c *rbacpolicies.RecordCreateOpts) error {
+	value, err := api.CreateRecord(context.Background(), request.Custom(func(c *rbacpolicies.RecordCreateOpts) error { c.Attrs = nil; c.Headers = nil; return nil }), request.Custom(func(c *rbacpolicies.RecordCreateOpts) error {
 		c.Attrs["target_project_id"] = json.RawMessage(`"canonical"`)
 		c.Attrs["target_tenant"] = json.RawMessage(`"wire"`)
 		return nil
-	})
+	}))
 	if err != nil || len(calls) != 1 {
 		t.Fatal(value, err, calls)
 	}
 	pythonRBACMutationBody(t, calls[0].body, map[string]any{"target_tenant": "wire"})
 	pythonRBACMutationField(t, value, "target_project_id", `"wire"`)
 	calls = nil
-	value, err = api.UpdateRecord(context.Background(), "target", func(c *rbacpolicies.RecordUpdateOpts) error { c.Attrs = nil; c.Headers = nil; return nil }, func(c *rbacpolicies.RecordUpdateOpts) error {
+	value, err = api.UpdateRecord(context.Background(), "target", request.Custom(func(c *rbacpolicies.RecordUpdateOpts) error { c.Attrs = nil; c.Headers = nil; return nil }), request.Custom(func(c *rbacpolicies.RecordUpdateOpts) error {
 		c.Attrs["target_project_id"] = json.RawMessage(`false`)
 		return nil
-	})
+	}))
 	if err != nil || len(calls) != 1 {
 		t.Fatal(value, err, calls)
 	}
@@ -599,21 +600,21 @@ func TestPythonRBACMutationVersionDefaultConstructorAndEmptyOverride(t *testing.
 			var err error
 			switch op {
 			case "create":
-				options := []rbacpolicies.RecordCreateOption{rbacpolicies.WithRecordCreateField("microversion", "9.9")}
+				options := []rbacpolicies.RecordCreateOption{request.Field("microversion", "9.9")}
 				if override {
-					options = append(options, rbacpolicies.WithRecordCreateMicroversion(""))
+					options = append(options, request.Microversion(""))
 				}
 				_, err = api.CreateRecord(context.Background(), options...)
 			case "update":
-				options := []rbacpolicies.RecordUpdateOption{rbacpolicies.WithRecordUpdateField("microversion", nil), rbacpolicies.WithRecordUpdateField("target_project_id", "project")}
+				options := []rbacpolicies.RecordUpdateOption{request.Field("microversion", nil), request.Field("target_project_id", "project")}
 				if override {
-					options = append(options, rbacpolicies.WithRecordUpdateMicroversion(""))
+					options = append(options, request.Microversion(""))
 				}
 				_, err = api.UpdateRecord(context.Background(), "target", options...)
 			default:
 				options := []rbacpolicies.RecordDeleteOption{}
 				if override {
-					options = append(options, rbacpolicies.WithRecordDeleteMicroversion(""))
+					options = append(options, request.Microversion(""))
 				}
 				_, err = api.DeleteRecord(context.Background(), "target", options...)
 			}

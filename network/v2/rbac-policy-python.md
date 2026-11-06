@@ -14,10 +14,10 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.WithRecordFindOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.WithRecordFindQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.WithRecordFindIgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.WithRecordFindHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.WithRecordFindMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - GET-first passes original kwargs to member query and constructor seed, then clean400/403/404 alone allow complete unique exact ID/name list search. No automatic name server hint exists for RBAC mapping. Default clean missing is nil and explicit strict missing is ErrNotFound.
   Tests: `network/v2/extensions/rbacpolicies/python_records_contracts_test.go:TestPythonRBACPolicyFindRecordFallbackQuerySeedsAndNoNameHint`, `network/v2/extensions/rbacpolicies/python_records_contracts_test.go:TestPythonRBACPolicyFindRecordCleanFallbackMissingAndCompleteUniqueness`, `network/v2/extensions/rbacpolicies/python_records_contracts_test.go:TestPythonRBACPolicyFindRecordNativeClean404RetryStillFallsBackOnce`.
@@ -53,8 +53,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.API.GetRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.WithRecordGetOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.WithRecordGetFields`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.WithRecordGetMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.WithRecordGetHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 
 - Literal member GET transposes nonempty public fields to wire target_tenant while preserving requested order/duplicates/unknown field names; nil/empty fields omit query and do not seed Resource. Received null/false/zero/untyped fields and unknown extensions/defaults remain independent actual proof.
   Tests: `network/v2/extensions/rbacpolicies/python_records_contracts_test.go:TestPythonRBACPolicyGetRecordFieldsAliasesDefaultsAndOwnedEvidence`, `network/v2/extensions/rbacpolicies/python_records_contracts_test.go:TestPythonRBACPolicyGetRecordEnvelopeAndMissingAreTerminal`.
@@ -84,13 +84,13 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.API.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.API.AllRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.WithRecordListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.WithRecordListQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.WithRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.WithRecordListMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.WithRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.WithRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.WithRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.WithRecordListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 
 - Lazy list uses exactly declared query aliases and local nonquery Body filters, preserved omission/null/false/zero, Source constructor defaults and raw unknown extensions; no name hint or inherited NetworkResource/TagMixin fields.
   Tests: `network/v2/extensions/rbacpolicies/python_records_contracts_test.go:TestPythonRBACPolicyListRecordQueriesDefaultsAndUnknownDiscard`, `network/v2/extensions/rbacpolicies/python_records_contracts_test.go:TestPythonRBACPolicyRecordsOrderedResponseAliasesAndNullPrecedence`, `network/v2/extensions/rbacpolicies/python_records_contracts_test.go:TestPythonRBACPolicyListRecordLocalFiltersExactEqualityAndFloatTruthiness`.
@@ -210,13 +210,13 @@ func main() {
         printPolicy(value)
     case "list":
         options := []rbacpolicies.RecordListOption{
-            rbacpolicies.WithRecordListQuery("object_type", *objectType),
+            request.Query("object_type", *objectType),
         }
         if len(selected) != 0 {
-            options = append(options, rbacpolicies.WithRecordListQuery("fields", selected))
+            options = append(options, request.Query("fields", selected))
         }
         if *targetProject != "" {
-            options = append(options, rbacpolicies.WithRecordListQuery("target_project_id", *targetProject))
+            options = append(options, request.Query("target_project_id", *targetProject))
         }
         for value, err := range api.ListRecords(ctx, options...) {
             if err != nil { log.Fatal(err) }
@@ -224,14 +224,14 @@ func main() {
         }
     case "find":
         options := []rbacpolicies.RecordFindOption{
-            rbacpolicies.WithRecordFindIgnoreMissing(!*strict),
-            rbacpolicies.WithRecordFindQuery("object_type", *objectType),
+            request.IgnoreMissing(!*strict),
+            request.Query("object_type", *objectType),
         }
         if len(selected) != 0 {
-            options = append(options, rbacpolicies.WithRecordFindQuery("fields", selected))
+            options = append(options, request.Query("fields", selected))
         }
         if *targetProject != "" {
-            options = append(options, rbacpolicies.WithRecordFindQuery("target_project_id", *targetProject))
+            options = append(options, request.Query("target_project_id", *targetProject))
         }
         value, err := api.FindRecord(ctx, *id, options...)
         if err != nil { log.Fatal(err) }

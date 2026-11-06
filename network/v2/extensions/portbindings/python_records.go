@@ -16,6 +16,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/neutronfind"
@@ -43,7 +44,34 @@ type Options struct {
 	IgnoreMissing *bool
 	order         []string
 }
-type Option func(*Options) error
+
+// Option is one option of the port binding operations: WithOptions,
+// WithAttribute (one create attribute as JSON), request.Query (one list query
+// value as JSON), request.IgnoreMissing, request.Headers (replaces the
+// headers), request.Microversion or request.Custom over *Options. No request
+// category admits both Field and IgnoreMissing, so create attributes stay
+// WithAttribute. request.Header fails with resource.ErrInvalidOption before
+// HTTP.
+type Option = request.FindCall
+
+var optionCalls = calls.Spec[Options]{
+	Query: func(c *Options, entry request.CallEntry) error {
+		if entry.JSONErr != nil {
+			return entry.JSONErr
+		}
+		if c.Query == nil {
+			c.Query = map[string]json.RawMessage{}
+		}
+		if _, ok := c.Query[entry.Key]; !ok {
+			c.order = append(c.order, entry.Key)
+		}
+		c.Query[entry.Key] = entry.JSON
+		return nil
+	},
+	IgnoreMissing: calls.Pointer(func(c *Options) **bool { return &c.IgnoreMissing }),
+	Headers:       calls.Value(func(c *Options) *map[string]string { return &c.Headers }),
+	Microversion:  calls.Pointer(func(c *Options) **string { return &c.Microversion }),
+}
 
 func copyOptions(v Options) Options {
 	v.Attributes = copyFields(v.Attributes)
@@ -69,12 +97,12 @@ func copyFields(v map[string]json.RawMessage) map[string]json.RawMessage {
 }
 func WithOptions(v Options) Option {
 	owned := copyOptions(v)
-	return func(c *Options) error { *c = copyOptions(owned); return nil }
+	return request.Custom(func(c *Options) error { *c = copyOptions(owned); return nil })
 }
 func WithAttribute(key string, value any) Option {
 	raw, err := json.Marshal(value)
 	owned := bytes.Clone(raw)
-	return func(c *Options) error {
+	return request.Custom(func(c *Options) error {
 		if err != nil {
 			return err
 		}
@@ -83,34 +111,7 @@ func WithAttribute(key string, value any) Option {
 		}
 		c.Attributes[key] = bytes.Clone(owned)
 		return nil
-	}
-}
-func WithQuery(key string, value any) Option {
-	raw, err := json.Marshal(value)
-	owned := bytes.Clone(raw)
-	return func(c *Options) error {
-		if err != nil {
-			return err
-		}
-		if c.Query == nil {
-			c.Query = map[string]json.RawMessage{}
-		}
-		if _, ok := c.Query[key]; !ok {
-			c.order = append(c.order, key)
-		}
-		c.Query[key] = bytes.Clone(owned)
-		return nil
-	}
-}
-func WithHeaders(v map[string]string) Option {
-	owned := maps.Clone(v)
-	return func(c *Options) error { c.Headers = maps.Clone(owned); return nil }
-}
-func WithMicroversion(v string) Option {
-	return func(c *Options) error { x := v; c.Microversion = &x; return nil }
-}
-func WithIgnoreMissing(v bool) Option {
-	return func(c *Options) error { x := v; c.IgnoreMissing = &x; return nil }
+	})
 }
 
 // Record distinguishes the projected Binding, raw row and physical response.
@@ -187,7 +188,7 @@ func (a *API) prepare(ctx context.Context, portID string, options []Option) (*pr
 		return errors.Join(observed, source.Guard(c), rest.CheckOperationGuard(c))
 	}
 	p := &prepared{api: a, source: source, guard: guard}
-	for _, apply := range slices.Clone(options) {
+	for _, apply := range calls.Translate(options, optionCalls) {
 		if err := guard(ctx); err != nil {
 			return nil, err
 		}

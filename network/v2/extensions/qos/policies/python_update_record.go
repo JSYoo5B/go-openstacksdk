@@ -13,8 +13,10 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/neutronfind"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -27,7 +29,31 @@ type RecordUpdateOpts struct {
 	Microversion *string
 	order        []string
 }
-type RecordUpdateOption func(*RecordUpdateOpts) error
+
+// RecordUpdateOption is one option of UpdateRecord: WithRecordUpdateOpts,
+// request.Field (one attribute as JSON; later values replace earlier ones),
+// request.Headers (replaces the headers), request.Microversion or
+// request.Custom over *RecordUpdateOpts. request.Header fails with
+// resource.ErrInvalidOption before HTTP.
+type RecordUpdateOption = request.WriteCall
+
+var recordUpdateCalls = calls.Spec[RecordUpdateOpts]{
+	Field: func(o *RecordUpdateOpts, entry request.CallEntry) error {
+		if entry.JSONErr != nil {
+			return entry.JSONErr
+		}
+		if o.Attributes == nil {
+			o.Attributes = map[string]json.RawMessage{}
+		}
+		if _, exists := o.Attributes[entry.Key]; !exists {
+			o.order = append(o.order, entry.Key)
+		}
+		o.Attributes[entry.Key] = entry.JSON
+		return nil
+	},
+	Headers:      calls.Value(func(o *RecordUpdateOpts) *map[string]string { return &o.Headers }),
+	Microversion: calls.Pointer(func(o *RecordUpdateOpts) **string { return &o.Microversion }),
+}
 
 func cloneRecordUpdate(v RecordUpdateOpts) RecordUpdateOpts {
 	v.Attributes = clonePolicyBody(v.Attributes)
@@ -41,30 +67,7 @@ func cloneRecordUpdate(v RecordUpdateOpts) RecordUpdateOpts {
 }
 func WithRecordUpdateOpts(v RecordUpdateOpts) RecordUpdateOption {
 	owned := cloneRecordUpdate(v)
-	return func(o *RecordUpdateOpts) error { *o = cloneRecordUpdate(owned); return nil }
-}
-func WithRecordUpdateAttribute(key string, value any) RecordUpdateOption {
-	raw, err := json.Marshal(value)
-	return func(o *RecordUpdateOpts) error {
-		if err != nil {
-			return err
-		}
-		if o.Attributes == nil {
-			o.Attributes = map[string]json.RawMessage{}
-		}
-		if _, exists := o.Attributes[key]; !exists {
-			o.order = append(o.order, key)
-		}
-		o.Attributes[key] = bytes.Clone(raw)
-		return nil
-	}
-}
-func WithRecordUpdateHeaders(v map[string]string) RecordUpdateOption {
-	owned := maps.Clone(v)
-	return func(o *RecordUpdateOpts) error { o.Headers = maps.Clone(owned); return nil }
-}
-func WithRecordUpdateMicroversion(v string) RecordUpdateOption {
-	return func(o *RecordUpdateOpts) error { x := v; o.Microversion = &x; return nil }
+	return request.Custom(func(o *RecordUpdateOpts) error { *o = cloneRecordUpdate(owned); return nil })
 }
 func recordUpdateBody(o RecordUpdateOpts) (map[string]json.RawMessage, error) {
 	keys := slices.Clone(o.order)
@@ -125,10 +128,7 @@ func (a *API) UpdateRecord(ctx context.Context, id string, options ...RecordUpda
 	if err != nil {
 		return nil, wrap(err)
 	}
-	callbacks := make([]func(*RecordUpdateOpts) error, len(options))
-	for i, apply := range slices.Clone(options) {
-		callbacks[i] = apply
-	}
+	callbacks := calls.Translate(options, recordUpdateCalls)
 	policy, err := applyPolicyRecordOptions(ctx, engine, RecordUpdateOpts{}, cloneRecordUpdate, callbacks)
 	if err != nil {
 		return nil, wrap(err)

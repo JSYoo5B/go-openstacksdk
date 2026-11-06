@@ -18,7 +18,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/endpointgroups.API.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/endpointgroups.API.AllRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/endpointgroups.API.ProxyListRecords`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/endpointgroups.WithRecordListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/endpointgroups.WithRecordListOpts`
 
 - List sends GET vpn/endpoint-groups with WithListOptions and request.Query values as query and follows the endpoint_groups_links next href.
@@ -77,7 +77,7 @@ func main() {
     service, err := conn.Network(ctx)
     if err != nil { log.Fatal(err) }
     values, err := service.API.VPNEndpointGroups.AllRecords(ctx,
-        endpointgroups.WithRecordListQuery("endpoints", []string{"10.0.0.0/24"}))
+        request.Query("endpoints", []string{"10.0.0.0/24"}))
     if err != nil { log.Fatal(err) }
     for _, value := range values {
         raw, err := json.MarshalIndent(value.Resource, "", "  ")

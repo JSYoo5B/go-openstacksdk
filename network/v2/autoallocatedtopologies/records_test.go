@@ -11,6 +11,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/autoallocatedtopologies"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 	tokens3 "github.com/gophercloud/gophercloud/v2/openstack/identity/v3/tokens"
@@ -88,7 +89,7 @@ func TestAutoTopologyDeleteDefaultStrict404AndExplicitIgnoreOwnActualProof(t *te
 	if got != nil || !errors.As(err, &native) || native.Actual != 404 {
 		t.Fatal(got, err)
 	}
-	got, err = api.DeleteRecord(context.Background(), explicit(), autoallocatedtopologies.WithIgnoreMissing(true))
+	got, err = api.DeleteRecord(context.Background(), explicit(), request.IgnoreMissing(true))
 	if err != nil || got == nil || !got.IgnoredMissing || got.StatusCode != 404 || string(got.Envelope) != `{"error":"missing"}` {
 		t.Fatal(got, err)
 	}
@@ -134,9 +135,9 @@ func TestAutoTopologyOptionsKeepHeadersVersionAndCapturedSource(t *testing.T) {
 	client.Microversion = "2.0"
 	client.MoreHeaders = map[string]string{"OpenStack-API-Version": "network 2.0"}
 	headers := map[string]string{"X-Probe": "owned"}
-	option := autoallocatedtopologies.WithHeaders(headers)
+	option := request.Headers(headers)
 	headers["X-Probe"] = "late"
-	_, err := api.ValidateRecord(context.Background(), explicit(), option, autoallocatedtopologies.WithMicroversion("2.9"))
+	_, err := api.ValidateRecord(context.Background(), explicit(), option, request.Microversion("2.9"))
 	if err != nil || calls != 1 || client.Microversion != "2.0" || client.MoreHeaders["OpenStack-API-Version"] != "network 2.0" {
 		t.Fatal(err, calls, client)
 	}
@@ -145,7 +146,7 @@ func TestAutoTopologyOptionsKeepHeadersVersionAndCapturedSource(t *testing.T) {
 		return nil
 	}
 	restore := func(*autoallocatedtopologies.Options) error { next++; client.ResourceBase = ""; return nil }
-	_, err = api.GetRecord(context.Background(), explicit(), change, restore)
+	_, err = api.GetRecord(context.Background(), explicit(), request.Custom(change), request.Custom(restore))
 	if !errors.Is(err, resource.ErrInvalidOption) || next != 0 || calls != 1 {
 		t.Fatal(err, next, calls)
 	}
@@ -156,7 +157,7 @@ func TestAutoTopologyInvalidOptionsAndAcceptedDecodeFailuresAreAtomic(t *testing
 		calls++
 		return topoWire(203, `{"auto_allocated_topology":null}`), nil
 	})
-	for _, option := range []autoallocatedtopologies.Option{nil, autoallocatedtopologies.WithProjectID(""), autoallocatedtopologies.WithIgnoreMissing(true), autoallocatedtopologies.WithHeaders(map[string]string{"X-Auth-Token": "replace"})} {
+	for _, option := range []autoallocatedtopologies.Option{nil, autoallocatedtopologies.WithProjectID(""), request.IgnoreMissing(true), request.Headers(map[string]string{"X-Auth-Token": "replace"})} {
 		_, err := api.GetRecord(context.Background(), explicit(), option)
 		if !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(err)
@@ -217,7 +218,7 @@ func TestAutoTopologyAllThreeOperationsFaultsPreserve401NativeFieldsAndZeroHooks
 				case "validate":
 					_, err = api.ValidateRecord(context.Background(), explicit())
 				case "delete":
-					_, err = api.DeleteRecord(context.Background(), explicit(), autoallocatedtopologies.WithIgnoreMissing(true))
+					_, err = api.DeleteRecord(context.Background(), explicit(), request.IgnoreMissing(true))
 				}
 				if !errors.Is(err, readCause) || !errors.Is(err, closeCause) || calls != 1 || body.closed != 1 || retries != 0 || reauth != 0 {
 					t.Fatal(err, calls, body.closed, retries, reauth)

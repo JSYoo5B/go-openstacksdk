@@ -17,14 +17,14 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/serviceproviders.API.AllRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/serviceproviders.API.ProxyListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/serviceproviders.WithRecordListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/serviceproviders.WithRecordListQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/serviceproviders.WithRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/serviceproviders.WithRecordListMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/serviceproviders.WithRecordListBasePath`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/serviceproviders.WithRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/serviceproviders.WithRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/serviceproviders.WithRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/serviceproviders.WithRecordListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.BasePath`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/serviceproviders.WithRecordListJMESPath`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/serviceproviders.WithRecordListConflictingAttrs`
 
@@ -114,12 +114,12 @@ func main() {
         serviceproviders.WithRecordListJMESPath(*expression),
     }
     if *serviceType != "" {
-        options = append(options, serviceproviders.WithRecordListQuery("service_type", *serviceType))
+        options = append(options, request.Query("service_type", *serviceType))
     }
     switch *defaultMode {
     case "any":
     case "yes", "no":
-        options = append(options, serviceproviders.WithRecordListQuery("is_default", *defaultMode == "yes"))
+        options = append(options, request.Query("is_default", *defaultMode == "yes"))
     default:
         log.Fatal("default must be any, yes or no")
     }

@@ -9,11 +9,11 @@ import (
 	"maps"
 	"net/http"
 	"net/url"
-	"slices"
 	"strings"
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/neutronfind"
 	"github.com/JSYoo5B/go-openstacksdk/internal/project"
@@ -53,7 +53,19 @@ type Options struct {
 	Headers       map[string]string
 	Microversion  *string
 }
-type Option func(*Options) error
+
+// Option is one option of GetRecord, DeleteRecord and ValidateRecord:
+// WithOptions, WithProjectID, request.IgnoreMissing (DeleteRecord only; the
+// other operations reject it), request.Headers (replaces the headers),
+// request.Microversion or request.Custom over *Options. request.Header fails
+// with resource.ErrInvalidOption before HTTP.
+type Option = request.DeleteCall
+
+var optionCalls = calls.Spec[Options]{
+	IgnoreMissing: calls.Pointer(func(c *Options) **bool { return &c.IgnoreMissing }),
+	Headers:       calls.Value(func(c *Options) *map[string]string { return &c.Headers }),
+	Microversion:  calls.Pointer(func(c *Options) **string { return &c.Microversion }),
+}
 
 func copyOptions(v Options) Options {
 	v.Headers = maps.Clone(v.Headers)
@@ -73,20 +85,10 @@ func copyOptions(v Options) Options {
 }
 func WithOptions(v Options) Option {
 	owned := copyOptions(v)
-	return func(c *Options) error { *c = copyOptions(owned); return nil }
+	return request.Custom(func(c *Options) error { *c = copyOptions(owned); return nil })
 }
 func WithProjectID(v string) Option {
-	return func(c *Options) error { x := v; c.ProjectID = &x; return nil }
-}
-func WithIgnoreMissing(v bool) Option {
-	return func(c *Options) error { x := v; c.IgnoreMissing = &x; return nil }
-}
-func WithHeaders(v map[string]string) Option {
-	owned := maps.Clone(v)
-	return func(c *Options) error { c.Headers = maps.Clone(owned); return nil }
-}
-func WithMicroversion(v string) Option {
-	return func(c *Options) error { x := v; c.Microversion = &x; return nil }
+	return request.Custom(func(c *Options) error { x := v; c.ProjectID = &x; return nil })
 }
 func invalid(format string, args ...any) error {
 	return fmt.Errorf("%w: %s", resource.ErrInvalidOption, fmt.Sprintf(format, args...))
@@ -115,7 +117,7 @@ func (a *API) engine(ctx context.Context, validate bool) (*neutronfind.Engine, e
 }
 func (a *API) prepare(ctx context.Context, engine *neutronfind.Engine, delete bool, options []Option) (string, Options, error) {
 	var c Options
-	for _, apply := range slices.Clone(options) {
+	for _, apply := range calls.Translate(options, optionCalls) {
 		if err := engine.Check(ctx); err != nil {
 			return "", c, err
 		}

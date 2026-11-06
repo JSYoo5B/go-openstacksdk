@@ -11,6 +11,7 @@ import (
 	networkv2 "github.com/JSYoo5B/go-openstacksdk/network/v2"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -134,7 +135,7 @@ func (s *qosReadState) policy(ctx context.Context, identity string, strict bool)
 	ctx = rest.WithOperationGuard(ctx, s.Check)
 	options := []policies.RecordFindOption{}
 	if strict {
-		options = append(options, policies.WithRecordFindIgnoreMissing(false))
+		options = append(options, request.IgnoreMissing(false))
 	}
 	record, err := s.API.QoSPolicies.FindRecord(ctx, identity, options...)
 	if err = errors.Join(err, s.Check(ctx)); err != nil {

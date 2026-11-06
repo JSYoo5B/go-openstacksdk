@@ -2,7 +2,7 @@
 
 `ListRecords` and `AllRecords` follow `network.bgp_speakers`. This class derives directly from Resource: only `limit` and `marker` are server query parameters. Declared Body filters such as `name` and `project_id` run locally; unknown list kwargs are ignored before encoding. No automatic name hint is sent.
 
-`FindRecord` follows `find_bgp_speaker`: one literal member GET, then list fallback only for a clean 400/403/404. Complete list traversal detects duplicates, including repeated IDs. Missing returns nil by default; `WithRecordFindIgnoreMissing(false)` returns an error. Numeric response IDs remain passive JSON and do not equal a string lookup identity.
+`FindRecord` follows `find_bgp_speaker`: one literal member GET, then list fallback only for a clean 400/403/404. Complete list traversal detects duplicates, including repeated IDs. Missing returns nil by default; `request.IgnoreMissing(false)` returns an error. Numeric response IDs remain passive JSON and do not equal a string lookup identity.
 
 `project_id` falls back to `tenant_id` when absent. Unknown Body extensions survive in the owned resource view. No tag/revision/header defaults are inferred from NetworkResource. Response fields retain Source's untyped values; `networks` alone receives its declared list cast. `Wire` and `Envelope` retain actual response data separately from projected aliases and constructor seed values.
 
@@ -30,9 +30,9 @@ func main() {
     provider.SetToken(os.Getenv("OS_TOKEN"))
     client := &gophercloud.ServiceClient{ProviderClient: provider, Type: "network", Endpoint: os.Getenv("OS_NETWORK_ENDPOINT")}
     api := speakers.New(client)
-    rows, err := api.AllRecords(context.Background(), speakers.WithRecordListQuery("name", "routing"), speakers.WithRecordListQuery("project_id", "project"))
+    rows, err := api.AllRecords(context.Background(), request.Query("name", "routing"), request.Query("project_id", "project"))
     if err != nil { panic(err) }
-    row, err := api.FindRecord(context.Background(), "routing", speakers.WithRecordFindIgnoreMissing(false))
+    row, err := api.FindRecord(context.Background(), "routing", request.IgnoreMissing(false))
     if err != nil { panic(err) }
     fmt.Println(len(rows), string(row.Resource.Body["id"]))
 }

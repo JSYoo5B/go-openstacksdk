@@ -15,12 +15,12 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.API.CreateRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.WithCreateRecordOptions`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.WithCreateRecordLocalPref`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.WithCreateRecordField`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.WithCreateRecordHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/request.Null`
 - `github.com/JSYoo5B/go-openstacksdk/request.Present`
 
-- CreateRecord sends POST bgpvpn/bgpvpns with only the supplied attributes in the bgpvpn envelope, including local_pref 0, vni 0, an empty name, an empty route_targets list, null import_targets and unknown body attributes through WithCreateRecordField, sends an empty envelope when no attribute is supplied, accepts any status below 400 and decodes enveloped, flat and empty responses.
+- CreateRecord sends POST bgpvpn/bgpvpns with only the supplied attributes in the bgpvpn envelope, including local_pref 0, vni 0, an empty name, an empty route_targets list, null import_targets and unknown body attributes through request.Field, sends an empty envelope when no attribute is supplied, accepts any status below 400 and decodes enveloped, flat and empty responses.
   Tests: `network/v2/extensions/bgpvpns/python_create_record_test.go:TestPythonBGPVPNCreateRecordSendsZeroLocalPref`.
 - Extension fields that collide with typed keys, blank extension keys and nil options fail before HTTP, and a 400 response is returned as the Gophercloud status error wrapped in resource.OperationError.
   Tests: `network/v2/extensions/bgpvpns/python_create_record_test.go:TestPythonBGPVPNCreateRecordRejectsInputsAndErrorStatuses`.

@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"slices"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/neutronfind"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
@@ -47,10 +48,7 @@ func (a *API) FindSourceRecord(ctx context.Context, identity string, options ...
 	if err != nil {
 		return nil, policyRecordWrap(ctx, "FindSourceRecord", err)
 	}
-	callbacks := make([]func(*RecordFindOpts) error, len(options))
-	for i, option := range slices.Clone(options) {
-		callbacks[i] = option
-	}
+	callbacks := calls.Translate(options, recordFindCalls)
 	policy, err := applyPolicyRecordOptions(ctx, engine, RecordFindOpts{}, copyPolicyFind, callbacks)
 	if err != nil {
 		return nil, policyRecordWrap(ctx, "FindSourceRecord", err)
@@ -115,7 +113,7 @@ func (a *API) DeleteSourceRecord(ctx context.Context, identity string, options .
 		return nil, policyRecordWrap(ctx, "DeleteSourceRecord", err)
 	}
 	policy := DeleteOpts{}
-	for _, apply := range slices.Clone(options) {
+	for _, apply := range calls.Translate(options, deleteCalls) {
 		if err := engine.Check(ctx); err != nil {
 			return nil, policyRecordWrap(ctx, "DeleteSourceRecord", err)
 		}

@@ -6,12 +6,12 @@ import (
 	"encoding/json"
 	"errors"
 	"iter"
-	"maps"
 	"slices"
 	"strings"
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/neutronfind"
@@ -42,7 +42,18 @@ type RecordListOpts struct {
 	expression   json.RawMessage
 	order        []string
 }
-type RecordListOption func(*RecordListOpts) error
+
+// RecordListOption is one option of ListRecords, AllRecords and
+// ProxyListRecords: WithRecordListOpts, WithRecordListConflictingAttrs,
+// WithRecordListJMESPath, request.Query (one Source list kwarg as JSON;
+// unknown names are discarded with their marshal error and Source runtime
+// controls fail by presence), request.Limit, request.Marker,
+// request.MaxItems, request.Paginated (the limit, marker, max_items and
+// paginated kwargs), request.Headers (replaces the headers),
+// request.Microversion, request.BasePath or request.Custom over
+// *RecordListOpts. request.Header fails with resource.ErrInvalidOption before
+// HTTP.
+type RecordListOption = request.ListBasePathCall
 
 func recordListOptions(v RecordListOpts) neutronfind.Options {
 	return neutronfind.Options{Query: v.Query, Headers: v.Headers, Microversion: v.Microversion, BasePath: v.BasePath, Order: v.order}
@@ -58,7 +69,7 @@ func copyRecordListOpts(v RecordListOpts) RecordListOpts {
 }
 func WithRecordListOpts(v RecordListOpts) RecordListOption {
 	owned := copyRecordListOpts(v)
-	return func(c *RecordListOpts) error { *c = copyRecordListOpts(owned); return nil }
+	return request.Custom(func(c *RecordListOpts) error { *c = copyRecordListOpts(owned); return nil })
 }
 
 // recordListIgnores reports kwargs that Source Resource.list discards before
@@ -92,111 +103,97 @@ func recordListControlError(key string) error {
 	return nil
 }
 
-// WithRecordListQuery snapshots known kwargs in insertion order; unknowns are
-// discarded before encoding their transport value, matching Source list.
-// Declared query names and wire names go to the server; other declared Body
-// attributes become local filters on each received row. Source runtime controls
-// fail by presence before invoking an application JSON marshaler.
-func WithRecordListQuery(key string, value any) RecordListOption {
+// recordListKeyword records one Source list kwarg in insertion order.
+// Unknown names are discarded together with their marshal error, matching
+// Source list. Declared query names and wire names go to the server; other
+// declared Body attributes become local filters on each received row. Source
+// runtime controls fail by presence before any marshal error.
+func recordListKeyword(c *RecordListOpts, key string, owned json.RawMessage, err error) error {
 	if recordListIgnores(key) {
-		return func(*RecordListOpts) error { return nil }
+		return nil
 	}
 	if controlErr := recordListControlError(key); controlErr != nil {
-		return func(*RecordListOpts) error { return controlErr }
+		return controlErr
 	}
-	var raw json.RawMessage
-	var err error
-	if key == "jmespath_filters" {
-		switch v := value.(type) {
-		case string:
-			raw, err = json.Marshal(v)
-		case json.RawMessage:
-			raw = bytes.Clone(v)
-		default:
-			raw = json.RawMessage("null") // Source ignores every non-string, even truthy values.
-		}
-	} else {
-		raw, err = json.Marshal(value)
+	if err != nil {
+		return err
 	}
-	owned := bytes.Clone(raw)
-	return func(c *RecordListOpts) error {
+	switch key {
+	case "headers", "microversion", "base_path":
+		formal, _, err := neutronfind.NormalizeProxyListOptions(neutronfind.Options{Query: map[string]json.RawMessage{key: owned}})
 		if err != nil {
 			return err
 		}
 		switch key {
-		case "headers", "microversion", "base_path":
-			formal, _, err := neutronfind.NormalizeProxyListOptions(neutronfind.Options{Query: map[string]json.RawMessage{key: owned}})
-			if err != nil {
-				return err
-			}
-			switch key {
-			case "headers":
-				c.Headers = formal.Headers
-			case "microversion":
-				c.Microversion = formal.Microversion
-			case "base_path":
-				c.BasePath = formal.BasePath
-			}
-			delete(c.Query, key)
-			c.order = slices.DeleteFunc(c.order, func(existing string) bool { return existing == key })
-			return nil
+		case "headers":
+			c.Headers = formal.Headers
+		case "microversion":
+			c.Microversion = formal.Microversion
+		case "base_path":
+			c.BasePath = formal.BasePath
 		}
-		if c.Query == nil {
-			c.Query = make(map[string]json.RawMessage)
-		}
-		if !slices.Contains(c.order, key) {
-			c.order = append(c.order, key)
-		}
-		c.Query[key] = bytes.Clone(owned)
+		delete(c.Query, key)
+		c.order = slices.DeleteFunc(c.order, func(existing string) bool { return existing == key })
 		return nil
 	}
-}
-func WithRecordListHeaders(v map[string]string) RecordListOption {
-	owned := maps.Clone(v)
-	return func(c *RecordListOpts) error {
-		c.Headers = maps.Clone(owned)
-		delete(c.Query, "headers")
-		c.order = slices.DeleteFunc(c.order, func(key string) bool { return key == "headers" })
-		return nil
+	if c.Query == nil {
+		c.Query = make(map[string]json.RawMessage)
 	}
-}
-func WithRecordListMicroversion(v string) RecordListOption {
-	return func(c *RecordListOpts) error {
-		x := v
-		c.Microversion = &x
-		delete(c.Query, "microversion")
-		c.order = slices.DeleteFunc(c.order, func(key string) bool { return key == "microversion" })
-		return nil
+	if !slices.Contains(c.order, key) {
+		c.order = append(c.order, key)
 	}
+	c.Query[key] = bytes.Clone(owned)
+	return nil
 }
 
-// WithRecordListBasePath uses a service-relative collection route while
-// retaining source, origin and continuation guards. Empty selects the default.
-func WithRecordListBasePath(path string) RecordListOption {
-	return func(c *RecordListOpts) error {
-		value := path
-		c.BasePath = &value
-		delete(c.Query, "base_path")
-		c.order = slices.DeleteFunc(c.order, func(key string) bool { return key == "base_path" })
+func dropRecordListKeyword(c *RecordListOpts, key string) {
+	delete(c.Query, key)
+	c.order = slices.DeleteFunc(c.order, func(existing string) bool { return existing == key })
+}
+
+// recordListCalls interprets the shared calls of the record list. Paging
+// calls are the Source limit, marker, max_items and paginated kwargs;
+// request.Headers replaces the headers; request.BasePath uses a
+// service-relative collection route while retaining source, origin and
+// continuation guards (empty selects the default).
+var recordListCalls = calls.Spec[RecordListOpts]{
+	Query: func(c *RecordListOpts, entry request.CallEntry) error {
+		raw, err := neutronfind.KeywordJSON(entry)
+		return recordListKeyword(c, entry.Key, raw, err)
+	},
+	Headers: func(c *RecordListOpts, values map[string]string) error {
+		c.Headers = values
+		dropRecordListKeyword(c, "headers")
 		return nil
-	}
+	},
+	Microversion: func(c *RecordListOpts, version string) error {
+		c.Microversion = &version
+		dropRecordListKeyword(c, "microversion")
+		return nil
+	},
+	BasePath: func(c *RecordListOpts, path string) error {
+		c.BasePath = &path
+		dropRecordListKeyword(c, "base_path")
+		return nil
+	},
+	Paging: calls.JSONPaging(recordListKeyword),
+}
+
+func recordListKeywordOption(key string, value any) RecordListOption {
+	raw, err := json.Marshal(value)
+	return request.Custom(func(c *RecordListOpts) error { return recordListKeyword(c, key, raw, err) })
 }
 
 // WithRecordListConflictingAttrs restores Source kwargs once, preserving JSON
 // object order. Duplicate bound paginated/base_path arguments remain errors.
 func WithRecordListConflictingAttrs(value json.RawMessage) RecordListOption {
-	return WithRecordListQuery("__conflicting_attrs", value)
+	return recordListKeywordOption("__conflicting_attrs", value)
 }
-
-func WithRecordListLimit(v int) RecordListOption      { return WithRecordListQuery("limit", v) }
-func WithRecordListMarker(v string) RecordListOption  { return WithRecordListQuery("marker", v) }
-func WithRecordListMaxItems(v int) RecordListOption   { return WithRecordListQuery("max_items", v) }
-func WithRecordListPaginated(v bool) RecordListOption { return WithRecordListQuery("paginated", v) }
 
 // WithRecordListJMESPath evaluates the deprecated Proxy expression through
 // ProxyListRecords. Empty expressions leave the lazy resource generator intact.
 func WithRecordListJMESPath(expression string) RecordListOption {
-	return WithRecordListQuery("jmespath_filters", expression)
+	return recordListKeywordOption("jmespath_filters", expression)
 }
 
 func (a *API) peerRecordEngine(ctx context.Context) (*neutronfind.Engine, error) {
@@ -222,7 +219,7 @@ func peerListRecord(value *neutronfind.Record) *PeerReadRecord {
 }
 func applyRecordListOptions(ctx context.Context, engine *neutronfind.Engine, options []RecordListOption) (RecordListOpts, error) {
 	policy := RecordListOpts{}
-	for _, apply := range options {
+	for _, apply := range calls.Translate(options, recordListCalls) {
 		if err := engine.Check(ctx); err != nil {
 			return policy, err
 		}

@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -60,11 +61,11 @@ func TestPythonDHCPNetworkRecordsQueryAndPaging(t *testing.T) {
 	})
 	var rows []*agents.DHCPNetworkRecord
 	for row, err := range api.ListDHCPNetworkRecords(ctx, "ag-1",
-		agents.WithDHCPNetworkRecordsQuery("is_shared", true),
-		agents.WithDHCPNetworkRecordsQuery("fields", []string{"id", "name"}),
-		agents.WithDHCPNetworkRecordsQuery("limit", 1),
-		agents.WithDHCPNetworkRecordsQuery("unknown_key", "dropped"),
-		agents.WithDHCPNetworkRecordsHeader("X-Trace", "t"),
+		request.Query("is_shared", true),
+		request.Query("fields", []string{"id", "name"}),
+		request.Query("limit", 1),
+		request.Query("unknown_key", "dropped"),
+		request.Header("X-Trace", "t"),
 	) {
 		if err != nil {
 			t.Fatal(err)
@@ -105,22 +106,22 @@ func TestPythonDHCPNetworkRecordsClientFiltersAndControls(t *testing.T) {
 	// dhcp_agent_hosting_networks(agent, mtu=1450, subnet_ids=["s1"]) filters
 	// Body attributes locally; the server sees no query.
 	if ids := pythonDHCPNetworkIDs(t, api.ListDHCPNetworkRecords(ctx, "ag-1",
-		agents.WithDHCPNetworkRecordsQuery("mtu", 1450), agents.WithDHCPNetworkRecordsQuery("subnet_ids", []string{"s1"}))); !reflect.DeepEqual(ids, []string{"net-2"}) {
+		request.Query("mtu", 1450), request.Query("subnet_ids", []string{"s1"}))); !reflect.DeepEqual(ids, []string{"net-2"}) {
 		t.Fatal(ids)
 	}
 	// dns_domain=None matches a missing or null attribute.
-	if ids := pythonDHCPNetworkIDs(t, api.ListDHCPNetworkRecords(ctx, "ag-1", agents.WithDHCPNetworkRecordsQuery("dns_domain", nil))); !reflect.DeepEqual(ids, []string{"net-1", "net-2", "net-3"}) {
+	if ids := pythonDHCPNetworkIDs(t, api.ListDHCPNetworkRecords(ctx, "ag-1", request.Query("dns_domain", nil))); !reflect.DeepEqual(ids, []string{"net-1", "net-2", "net-3"}) {
 		t.Fatal(ids)
 	}
 	// max_items=2 is sent as limit=2, counts the filtered-out net-1 and stops
 	// after two rows without another page.
 	if ids := pythonDHCPNetworkIDs(t, api.ListDHCPNetworkRecords(ctx, "ag-1",
-		agents.WithDHCPNetworkRecordsMaxItems(2), agents.WithDHCPNetworkRecordsQuery("mtu", 1450))); !reflect.DeepEqual(ids, []string{"net-2"}) {
+		request.MaxItems(2), request.Query("mtu", 1450))); !reflect.DeepEqual(ids, []string{"net-2"}) {
 		t.Fatal(ids)
 	}
 	// paginated=False with limit=3 reads only the first page.
 	if ids := pythonDHCPNetworkIDs(t, api.ListDHCPNetworkRecords(ctx, "ag-1",
-		agents.WithDHCPNetworkRecordsPaginated(false), agents.WithDHCPNetworkRecordsQuery("limit", 3))); len(ids) != 3 {
+		request.Paginated(false), request.Query("limit", 3))); len(ids) != 3 {
 		t.Fatal(ids)
 	}
 	want := []string{"", "", "limit=2", "limit=3"}
@@ -146,10 +147,10 @@ func TestPythonDHCPNetworkRecordsRejectsInputsAndErrorStatuses(t *testing.T) {
 	}{
 		{" ", nil},
 		{"ag-1", []agents.DHCPNetworkRecordsOption{nil}},
-		{"ag-1", []agents.DHCPNetworkRecordsOption{agents.WithDHCPNetworkRecordsQuery("max_items", 1)}},
-		{"ag-1", []agents.DHCPNetworkRecordsOption{agents.WithDHCPNetworkRecordsQuery(" ", 1)}},
-		{"ag-1", []agents.DHCPNetworkRecordsOption{agents.WithDHCPNetworkRecordsMaxItems(-1)}},
-		{"ag-1", []agents.DHCPNetworkRecordsOption{agents.WithDHCPNetworkRecordsQuery("bad", func() {})}},
+		{"ag-1", []agents.DHCPNetworkRecordsOption{request.Query("max_items", 1)}},
+		{"ag-1", []agents.DHCPNetworkRecordsOption{request.Query(" ", 1)}},
+		{"ag-1", []agents.DHCPNetworkRecordsOption{request.MaxItems(-1)}},
+		{"ag-1", []agents.DHCPNetworkRecordsOption{request.Query("bad", func() {})}},
 	}
 	for i, tc := range cases {
 		for _, err := range api.ListDHCPNetworkRecords(ctx, tc.agent, tc.options...) {

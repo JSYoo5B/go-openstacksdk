@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/serviceproviders"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -77,12 +78,12 @@ func TestServiceProviderListFullQueriesDefaultPresenceAndLocalID(t *testing.T) {
 		query = req.URL.Query()
 		testcloud.JSON(w, 200, `{"service_providers":[{"id":"keep","name":"other","default":false},{"id":"skip","name":"name","default":true}]}`)
 	})
-	rows, err := api.AllRecords(context.Background(), serviceproviders.WithRecordListLimit(0), serviceproviders.WithRecordListMarker("start"), serviceproviders.WithRecordListQuery("fields", []any{"name", nil, "default"}), serviceproviders.WithRecordListQuery("service_type", []string{"QOS", "FIREWALL"}), serviceproviders.WithRecordListQuery("name", "server-only"), serviceproviders.WithRecordListQuery("is_default", false), serviceproviders.WithRecordListQuery("default", true), serviceproviders.WithRecordListQuery("id", "keep"), serviceproviders.WithRecordListQuery("unknown", make(chan int)))
+	rows, err := api.AllRecords(context.Background(), request.Limit(0), request.Marker("start"), request.Query("fields", []any{"name", nil, "default"}), request.Query("service_type", []string{"QOS", "FIREWALL"}), request.Query("name", "server-only"), request.Query("is_default", false), request.Query("default", true), request.Query("id", "keep"), request.Query("unknown", make(chan int)))
 	want := map[string][]string{"limit": {"0"}, "marker": {"start"}, "fields": {"name", "default"}, "service_type": {"QOS", "FIREWALL"}, "name": {"server-only"}, "default": {"False"}}
 	if err != nil || len(rows) != 1 || count.Load() != 1 || !reflect.DeepEqual(query, want) || string(rows[0].Resource.Body["id"]) != `"keep"` {
 		t.Fatal(rows, err, query, count.Load())
 	}
-	rows, err = api.AllRecords(context.Background(), serviceproviders.WithRecordListQuery("is_default", nil), serviceproviders.WithRecordListQuery("default", true))
+	rows, err = api.AllRecords(context.Background(), request.Query("is_default", nil), request.Query("default", true))
 	if err != nil || len(rows) != 2 || query["default"] != nil {
 		t.Fatal(rows, err, query)
 	}
@@ -132,7 +133,7 @@ func TestServiceProviderListSourceControlsPagingAndActualErrors(t *testing.T) {
 		}
 		testcloud.JSON(w, 200, `{"service_providers":[{"name":"first","default":false}],"next":"/neutron/v2.0/other-providers?marker=second"}`)
 	})
-	rows, err := api.AllRecords(context.Background(), serviceproviders.WithRecordListBasePath("/other-providers"), serviceproviders.WithRecordListQuery("name", "old"), serviceproviders.WithRecordListConflictingAttrs(json.RawMessage(`{"name":"restored","headers":{"X-Trace":"owned"},"microversion":"2.1"}`)))
+	rows, err := api.AllRecords(context.Background(), request.BasePath("/other-providers"), request.Query("name", "old"), serviceproviders.WithRecordListConflictingAttrs(json.RawMessage(`{"name":"restored","headers":{"X-Trace":"owned"},"microversion":"2.1"}`)))
 	if err != nil || len(rows) != 1 || count.Load() != 2 || api.RawClient().Microversion != "" {
 		t.Fatal(rows, err, count.Load())
 	}
@@ -153,11 +154,11 @@ func TestServiceProviderListCapsAndOwnedCallbackMaps(t *testing.T) {
 		testcloud.JSON(w, 200, `{"service_providers":[{"id":"skip"},{"id":"keep"},{"cls":null}],"next":"https://foreign.invalid"}`)
 	})
 	var retained *serviceproviders.RecordListOpts
-	rows, err := api.AllRecords(context.Background(), serviceproviders.WithRecordListHeaders(nil), func(c *serviceproviders.RecordListOpts) error {
+	rows, err := api.AllRecords(context.Background(), request.Headers(nil), request.Custom(func(c *serviceproviders.RecordListOpts) error {
 		c.Headers["X-Trace"] = "owned"
 		retained = c
 		return nil
-	}, func(*serviceproviders.RecordListOpts) error { retained.Headers["X-Trace"] = "changed"; return nil }, serviceproviders.WithRecordListQuery("id", "keep"), serviceproviders.WithRecordListMaxItems(2))
+	}), request.Custom(func(*serviceproviders.RecordListOpts) error { retained.Headers["X-Trace"] = "changed"; return nil }), request.Query("id", "keep"), request.MaxItems(2))
 	if err != nil || len(rows) != 1 || count.Load() != 1 {
 		t.Fatal(rows, err, count.Load())
 	}

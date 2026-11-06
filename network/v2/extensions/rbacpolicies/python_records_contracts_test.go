@@ -13,6 +13,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -133,7 +134,7 @@ func TestPythonRBACPolicyFindRecordFallbackQuerySeedsAndNoNameHint(t *testing.T)
 		return nativeRBACWire(200, `{"rbac_policies":[{"id":"filtered","name":"target","tenant_id":2},{"id":"match","name":"target","tenant_id":1,"target_tenant":"*","x_new":null}]}`)
 	})
 	api.RawClient().Microversion = "2.1"
-	value, err := api.FindRecord(context.Background(), "target", rbacpolicies.WithRecordFindMicroversion("2.2"), rbacpolicies.WithRecordFindQuery("x_seed", map[string]any{"nested": nil}), rbacpolicies.WithRecordFindQuery("target_tenant", "wire"), rbacpolicies.WithRecordFindQuery("target_project_id", "canonical"), rbacpolicies.WithRecordFindQuery("fields", []string{"target_project_id", "id"}), rbacpolicies.WithRecordFindQuery("tenant_id", true), rbacpolicies.WithRecordFindQuery("action", false), rbacpolicies.WithRecordFindQuery("project_id", "owner"), rbacpolicies.WithRecordFindQuery("all_projects", true))
+	value, err := api.FindRecord(context.Background(), "target", request.Microversion("2.2"), request.Query("x_seed", map[string]any{"nested": nil}), request.Query("target_tenant", "wire"), request.Query("target_project_id", "canonical"), request.Query("fields", []string{"target_project_id", "id"}), request.Query("tenant_id", true), request.Query("action", false), request.Query("project_id", "owner"), request.Query("all_projects", true))
 	if err != nil || value == nil || len(calls) != 2 {
 		t.Fatal(value, err, calls)
 	}
@@ -146,7 +147,7 @@ func TestPythonRBACPolicyFindRecordFallbackQuerySeedsAndNoNameHint(t *testing.T)
 	}
 	var direct []nativeRBACCall
 	api = rbacRecordAPI(t, &direct, func(*http.Request) *http.Response { return nativeRBACWire(200, `{"rbac_policy":{}}`) })
-	value, err = api.FindRecord(context.Background(), "literal", rbacpolicies.WithRecordFindQuery("target_tenant", "first"), rbacpolicies.WithRecordFindQuery("target_project_id", nil), rbacpolicies.WithRecordFindQuery("x_seed", false), rbacpolicies.WithRecordFindQuery("name", 0))
+	value, err = api.FindRecord(context.Background(), "literal", request.Query("target_tenant", "first"), request.Query("target_project_id", nil), request.Query("x_seed", false), request.Query("name", 0))
 	if err != nil || len(direct) != 1 {
 		t.Fatal(value, err, direct)
 	}
@@ -165,7 +166,7 @@ func TestPythonRBACPolicyFindRecordCleanFallbackMissingAndCompleteUniqueness(t *
 				}
 				return nativeRBACWire(200, `{"rbac_policies":[]}`)
 			})
-			value, err := api.FindRecord(context.Background(), "none", rbacpolicies.WithRecordFindIgnoreMissing(!strict))
+			value, err := api.FindRecord(context.Background(), "none", request.IgnoreMissing(!strict))
 			if value != nil || len(calls) != 2 || strict != errors.Is(err, resource.ErrNotFound) {
 				t.Fatal(status, strict, value, err, calls)
 			}
@@ -202,7 +203,7 @@ func TestPythonRBACPolicyListRecordQueriesDefaultsAndUnknownDiscard(t *testing.T
 		return r
 	})
 	api.RawClient().MoreHeaders = map[string]string{"Accept": "text/xml"}
-	seq := api.ListRecords(context.Background(), rbacpolicies.WithRecordListQuery("action", false), rbacpolicies.WithRecordListQuery("fields", []string{"target_project_id", "x_new"}), rbacpolicies.WithRecordListQuery("object_id", []any{"n1", nil, "n2"}), rbacpolicies.WithRecordListQuery("object_type", "network"), rbacpolicies.WithRecordListQuery("project_id", ""), rbacpolicies.WithRecordListQuery("target_project_id", 0), rbacpolicies.WithRecordListQuery("target_tenant", true), rbacpolicies.WithRecordListQuery("unknown_function", func() {}), rbacpolicies.WithRecordListQuery("tags", []string{"ignored"}), rbacpolicies.WithRecordListQuery("sort_key", "ignored"), rbacpolicies.WithRecordListQuery("created_at", 1))
+	seq := api.ListRecords(context.Background(), request.Query("action", false), request.Query("fields", []string{"target_project_id", "x_new"}), request.Query("object_id", []any{"n1", nil, "n2"}), request.Query("object_type", "network"), request.Query("project_id", ""), request.Query("target_project_id", 0), request.Query("target_tenant", true), request.Query("unknown_function", func() {}), request.Query("tags", []string{"ignored"}), request.Query("sort_key", "ignored"), request.Query("created_at", 1))
 	if len(calls) != 0 {
 		t.Fatal("list eager", calls)
 	}
@@ -280,7 +281,7 @@ func TestPythonRBACPolicyListRecordLocalFiltersExactEqualityAndFloatTruthiness(t
 			}
 			return nativeRBACWire(200, body)
 		})
-		rows, err := api.AllRecords(context.Background(), rbacpolicies.WithRecordListQuery("tenant_id", json.RawMessage(tc.filter)))
+		rows, err := api.AllRecords(context.Background(), request.Query("tenant_id", json.RawMessage(tc.filter)))
 		if len(calls) != 1 {
 			t.Fatal(calls)
 		}
@@ -328,9 +329,9 @@ func TestPythonRBACPolicyListRecordPagingFormatsAndOriginalWireMarker(t *testing
 			}
 			return r
 		})
-		opts := []rbacpolicies.RecordListOption{rbacpolicies.WithRecordListQuery("action", "access_as_shared")}
+		opts := []rbacpolicies.RecordListOption{request.Query("action", "access_as_shared")}
 		if tc.limit {
-			opts = append(opts, rbacpolicies.WithRecordListLimit(3))
+			opts = append(opts, request.Limit(3))
 		}
 		rows, err := api.AllRecords(context.Background(), opts...)
 		if err != nil || len(rows) != 1 || len(calls) != 2 {
@@ -346,7 +347,7 @@ func TestPythonRBACPolicyListRecordRawCapsBreakAndConstructorCollisions(t *testi
 			var calls []nativeRBACCall
 			body := `{"rbac_policies":[{"id":"good"},{"id":"bad","` + key + `":` + raw + `}],"next":"https://unconsumed.invalid"}`
 			api := rbacRecordAPI(t, &calls, func(req *http.Request) *http.Response { return nativeRBACWire(200, body) })
-			rows, err := api.AllRecords(context.Background(), rbacpolicies.WithRecordListMaxItems(1))
+			rows, err := api.AllRecords(context.Background(), request.MaxItems(1))
 			if err != nil || len(rows) != 1 || len(calls) != 1 {
 				t.Fatal(rows, err, calls)
 			}
@@ -364,7 +365,7 @@ func TestPythonRBACPolicyListRecordRawCapsBreakAndConstructorCollisions(t *testi
 			return nativeRBACWire(200, `{"rbac_policies":[{"id":"one","tenant_id":false},{"id":"two","tenant_id":true}],"next":"https://unconsumed.invalid"}`)
 		})
 		if single {
-			rows, err := api.AllRecords(context.Background(), rbacpolicies.WithRecordListPaginated(false))
+			rows, err := api.AllRecords(context.Background(), request.Paginated(false))
 			if err != nil || len(rows) != 2 {
 				t.Fatal(rows, err)
 			}
@@ -387,7 +388,7 @@ func TestPythonRBACPolicyListRecordRawCapsBreakAndConstructorCollisions(t *testi
 		}
 		return nativeRBACWire(200, `{"rbac_policies":[{"id":"filtered","tenant_id":false},{"id":"match","tenant_id":true}],"next":"https://unconsumed.invalid"}`)
 	})
-	rows, err := api.AllRecords(context.Background(), rbacpolicies.WithRecordListMaxItems(1), rbacpolicies.WithRecordListQuery("tenant_id", true))
+	rows, err := api.AllRecords(context.Background(), request.MaxItems(1), request.Query("tenant_id", true))
 	if err != nil || len(rows) != 0 || len(calls) != 1 {
 		t.Fatal(rows, err, calls)
 	}
@@ -410,7 +411,7 @@ func TestPythonRBACPolicyListRecordLatePageAndContinuationErrorsKeepActualReceip
 		})
 		var observed int
 		var err error
-		for row, cause := range api.ListRecords(context.Background(), rbacpolicies.WithRecordListQuery("action", "fixed")) {
+		for row, cause := range api.ListRecords(context.Background(), request.Query("action", "fixed")) {
 			if cause != nil {
 				err = cause
 				break
@@ -454,7 +455,7 @@ func TestPythonRBACPolicyRecordOptionsOwnershipAndPreflight(t *testing.T) {
 		t.Fatal(row, err, calls)
 	}
 	rbacRecordField(t, row, "x_seed", `"original"`)
-	for _, option := range []rbacpolicies.RecordFindOption{nil, rbacpolicies.WithRecordFindQuery("cls", nil), rbacpolicies.WithRecordFindQuery("id", "other"), rbacpolicies.WithRecordFindQuery("location", nil), rbacpolicies.WithRecordFindQuery("base_path", "/ports"), rbacpolicies.WithRecordFindOpts(rbacpolicies.RecordFindOpts{Query: map[string]json.RawMessage{"object_id": json.RawMessage(`{bad`)}}), rbacpolicies.WithRecordFindHeaders(map[string]string{"Authorization": "forged"})} {
+	for _, option := range []rbacpolicies.RecordFindOption{nil, request.Query("cls", nil), request.Query("id", "other"), request.Query("location", nil), request.Query("base_path", "/ports"), rbacpolicies.WithRecordFindOpts(rbacpolicies.RecordFindOpts{Query: map[string]json.RawMessage{"object_id": json.RawMessage(`{bad`)}}), request.Headers(map[string]string{"Authorization": "forged"})} {
 		calls = nil
 		value, err := api.FindRecord(context.Background(), "literal", option)
 		if value != nil || !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
@@ -483,7 +484,7 @@ func TestPythonRBACPolicyRecordOptionsOwnershipAndPreflight(t *testing.T) {
 	if !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
-	rows, err := api.AllRecords(context.Background(), rbacpolicies.WithRecordListQuery("cls", false))
+	rows, err := api.AllRecords(context.Background(), request.Query("cls", false))
 	if rows != nil || !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
 		t.Fatal(rows, err, calls)
 	}
@@ -609,7 +610,7 @@ func TestPythonRBACPolicyRecordListHeaderAndNativeRetryOwnership(t *testing.T) {
 		source.ProviderClient.SetToken("fresh-token")
 		return nil
 	}
-	rows, err := api.AllRecords(context.Background(), rbacpolicies.WithRecordListMicroversion("2.3"), rbacpolicies.WithRecordListHeaders(map[string]string{"Accept": "custom/list"}))
+	rows, err := api.AllRecords(context.Background(), request.Microversion("2.3"), request.Headers(map[string]string{"Accept": "custom/list"}))
 	if err != nil || len(rows) != 1 || len(calls) != 2 || source.Microversion != "2.1" {
 		t.Fatal(rows, err, calls, source)
 	}
@@ -678,9 +679,9 @@ func TestPythonRBACPolicyMemberMicroversionAttributeUsesSelectedVersion(t *testi
 				var row *rbacpolicies.RBACPolicyRecord
 				var err error
 				if lane == "get" {
-					row, err = api.GetRecord(context.Background(), "one", rbacpolicies.WithRecordGetMicroversion(version))
+					row, err = api.GetRecord(context.Background(), "one", request.Microversion(version))
 				} else {
-					row, err = api.FindRecord(context.Background(), "one", rbacpolicies.WithRecordFindMicroversion(version))
+					row, err = api.FindRecord(context.Background(), "one", request.Microversion(version))
 				}
 				if err != nil || row == nil || len(calls) != 1 || string(row.Envelope) != body {
 					t.Fatal(row, err, calls)

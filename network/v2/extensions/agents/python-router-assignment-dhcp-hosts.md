@@ -37,7 +37,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.API.ListDHCPHostRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.API.AllDHCPHostRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.API.ProxyDHCPHostRecords`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.WithDHCPHostListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.WithDHCPHostListOpts`
 
 - The network-scoped DHCP agent list uses one escaped fixed parent route without parent GET. It inherits the actual Agent query declarations despite the Source subclass comment, applies Agent aliases/bool/int/default descriptors, preserves untyped configuration and unknown Body/Wire values, and does not synthesize undeclared network_id URI state.
@@ -109,7 +109,7 @@ func main() {
     switch *mode {
     case "list":
         for row, err := range api.ListDHCPHostRecords(ctx, *networkID,
-            agents.WithDHCPHostListQuery("is_alive", true), agents.WithDHCPHostListMaxItems(20)) {
+            request.Query("is_alive", true), request.MaxItems(20)) {
             if err != nil { log.Fatal(err) }
             printJSON(row.Resource)
         }

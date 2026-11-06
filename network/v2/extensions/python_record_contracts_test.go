@@ -15,6 +15,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -91,7 +92,7 @@ func TestExtensionListRecordsAllBodyFiltersAndQueryControlsAreLibraryOwned(t *te
 		}
 		testcloud.JSON(w, 200, `{"extensions":[{"alias":"qos","name":"Name","description":{"enabled":1,"extra":true},"updated_at":"old","updated":{"n":9007199254740992},"links":[null,{"href":"x"}]},{"alias":"skip","name":"Name","description":{},"links":[]}]}`)
 	})
-	rows, err := api.AllRecords(context.Background(), extensions.WithRecordListLimit(0), extensions.WithRecordListMarker("start"), extensions.WithRecordListQuery("id", "qos"), extensions.WithRecordListQuery("alias", "qos"), extensions.WithRecordListQuery("name", "Name"), extensions.WithRecordListQuery("description", map[string]any{"enabled": true}), extensions.WithRecordListQuery("updated_at", json.RawMessage(`{"n":9007199254740993.0}`)), extensions.WithRecordListQuery("links", []any{map[string]any{}, map[string]any{"href": "x"}}), extensions.WithRecordListQuery("fields", make(chan int)), extensions.WithRecordListQuery("unknown", make(chan int)))
+	rows, err := api.AllRecords(context.Background(), request.Limit(0), request.Marker("start"), request.Query("id", "qos"), request.Query("alias", "qos"), request.Query("name", "Name"), request.Query("description", map[string]any{"enabled": true}), request.Query("updated_at", json.RawMessage(`{"n":9007199254740993.0}`)), request.Query("links", []any{map[string]any{}, map[string]any{"href": "x"}}), request.Query("fields", make(chan int)), request.Query("unknown", make(chan int)))
 	if err != nil || len(rows) != 1 || count.Load() != 1 {
 		t.Fatal(rows, err, count.Load())
 	}
@@ -113,7 +114,7 @@ func TestExtensionFindMemberSeedExplicitNullAndPrivateActualEvidence(t *testing.
 		}
 		testcloud.JSON(w, 203, body)
 	})
-	value, err := api.FindRecord(context.Background(), "literal/name %2F", extensions.WithRecordFindQuery("name", "seed"), extensions.WithRecordFindQuery("x_seed", map[string]any{"key": nil}))
+	value, err := api.FindRecord(context.Background(), "literal/name %2F", request.Query("name", "seed"), request.Query("x_seed", map[string]any{"key": nil}))
 	if err != nil || count.Load() != 1 || value == nil || string(value.Envelope) != body || value.StatusCode != 203 {
 		t.Fatal(value, err, count.Load())
 	}
@@ -130,7 +131,7 @@ func TestExtensionFindMemberSeedExplicitNullAndPrivateActualEvidence(t *testing.
 	null, calls := recordExtensionAPI(t, func(w http.ResponseWriter, _ *http.Request) {
 		testcloud.JSON(w, 200, `{"extension":{"id":null,"alias":"wire","links":null}}`)
 	})
-	value, err = null.FindRecord(context.Background(), "requested", extensions.WithRecordFindQuery("name", nil))
+	value, err = null.FindRecord(context.Background(), "requested", request.Query("name", nil))
 	if err != nil || calls.Load() != 1 {
 		t.Fatal(value, err, calls.Load())
 	}
@@ -195,7 +196,7 @@ func TestExtensionFindMissingForbiddenAndLocalBodyFiltersPreserveTheirPhases(t *
 	if value != nil || err != nil || count.Load() != 2 {
 		t.Fatal(value, err, count.Load())
 	}
-	value, err = missing.FindRecord(context.Background(), "missing", extensions.WithRecordFindIgnoreMissing(false))
+	value, err = missing.FindRecord(context.Background(), "missing", request.IgnoreMissing(false))
 	if value != nil || !errors.Is(err, resource.ErrNotFound) || count.Load() != 4 {
 		t.Fatal(value, err, count.Load())
 	}
@@ -217,7 +218,7 @@ func TestExtensionFindMissingForbiddenAndLocalBodyFiltersPreserveTheirPhases(t *
 		}
 		testcloud.JSON(w, 200, `{"extensions":[{"alias":"qos","name":"Other","updated":"literal"},{"alias":"qos","name":"Wanted","updated":"literal"}]}`)
 	})
-	value, err = filtered.FindRecord(context.Background(), "qos", extensions.WithRecordFindQuery("name", "Wanted"), extensions.WithRecordFindQuery("updated_at", "literal"))
+	value, err = filtered.FindRecord(context.Background(), "qos", request.Query("name", "Wanted"), request.Query("updated_at", "literal"))
 	if err != nil || value == nil || calls.Load() != 2 {
 		t.Fatal(value, err, calls.Load())
 	}
@@ -245,12 +246,12 @@ func TestExtensionFindListBasePathAndGetOnlyVersionAreIndependent(t *testing.T) 
 	path := "/alternate-extensions"
 	options := extensions.WithRecordFindOpts(extensions.RecordFindOpts{ListBasePath: &path})
 	path = "/changed"
-	value, err := api.FindRecord(context.Background(), "qos", options, extensions.WithRecordFindMicroversion("2.1"), extensions.WithRecordFindHeaders(map[string]string{"X-Trace": "owned"}))
+	value, err := api.FindRecord(context.Background(), "qos", options, request.Microversion("2.1"), request.Headers(map[string]string{"X-Trace": "owned"}))
 	if err != nil || value == nil || count.Load() != 2 || !reflect.DeepEqual(paths, []string{"/neutron/v2.0/extensions/qos", "/neutron/v2.0/alternate-extensions"}) || !reflect.DeepEqual(versions, []string{"network 2.1", "network 2.0"}) || api.RawClient().Microversion != "2.0" {
 		t.Fatal(value, err, count.Load(), paths, versions)
 	}
 	callsBefore := count.Load()
-	value, err = api.FindRecord(context.Background(), "qos", extensions.WithRecordFindQuery("list_base_path", "/alternate-extensions"), extensions.WithRecordFindQuery("microversion", "2.1"), extensions.WithRecordFindHeaders(map[string]string{"X-Trace": "owned"}))
+	value, err = api.FindRecord(context.Background(), "qos", request.Query("list_base_path", "/alternate-extensions"), request.Query("microversion", "2.1"), request.Headers(map[string]string{"X-Trace": "owned"}))
 	if err != nil || value == nil || count.Load() != callsBefore+2 {
 		t.Fatal(value, err, count.Load())
 	}
@@ -269,7 +270,7 @@ func TestExtensionListAlternateMarkerPrivateProofAndRawCaps(t *testing.T) {
 			testcloud.JSON(w, 200, `{"extensions":[{"alias":"first"}]}`)
 		}
 	})
-	rows, err := api.AllRecords(context.Background(), extensions.WithRecordListLimit(1))
+	rows, err := api.AllRecords(context.Background(), request.Limit(1))
 	if err != nil || len(rows) != 2 || count.Load() != 3 || !reflect.DeepEqual(queries, []string{"limit=1", "limit=1&marker=first", "limit=1&marker=second"}) {
 		t.Fatal(rows, err, count.Load(), queries)
 	}
@@ -279,14 +280,14 @@ func TestExtensionListAlternateMarkerPrivateProofAndRawCaps(t *testing.T) {
 		}
 		testcloud.JSON(w, 203, `{"extensions":[{"alias":"skip"},{"alias":"keep"},{"cls":null}],"next":"https://foreign.invalid"}`)
 	})
-	rows, err = capped.AllRecords(context.Background(), extensions.WithRecordListMaxItems(2), extensions.WithRecordListQuery("alias", "keep"))
+	rows, err = capped.AllRecords(context.Background(), request.MaxItems(2), request.Query("alias", "keep"))
 	if err != nil || len(rows) != 1 || calls.Load() != 1 {
 		t.Fatal(rows, err, calls.Load())
 	}
 	for _, rawID := range []string{`null`, `""`} {
 		body := `{"extensions":[{"id":` + rawID + `,"alias":"fallback"}]}`
 		invalid, calls := recordExtensionAPI(t, func(w http.ResponseWriter, _ *http.Request) { testcloud.JSON(w, 203, body) })
-		rows, err := invalid.AllRecords(context.Background(), extensions.WithRecordListLimit(1))
+		rows, err := invalid.AllRecords(context.Background(), request.Limit(1))
 		if rows != nil || err == nil || calls.Load() != 1 {
 			t.Fatal(rows, err, calls.Load())
 		}
@@ -353,7 +354,7 @@ func TestExtensionProxyJMESGeneratorResultsAndSourceConflictControls(t *testing.
 	if result, err := api.ProxyListRecords(context.Background(), extensions.WithRecordListJMESPath("length(@)")); result != nil || err == nil || count.Load() != 0 {
 		t.Fatal(result, err, count.Load())
 	}
-	result, err := api.ProxyListRecords(context.Background(), extensions.WithRecordListJMESPath("to_array(@)"), extensions.WithRecordListBasePath("/alternate-extensions"), extensions.WithRecordListConflictingAttrs(json.RawMessage(`{"headers":{"X-Trace":"owned"},"microversion":"2.1","jmespath_filters":"[?"}`)))
+	result, err := api.ProxyListRecords(context.Background(), extensions.WithRecordListJMESPath("to_array(@)"), request.BasePath("/alternate-extensions"), extensions.WithRecordListConflictingAttrs(json.RawMessage(`{"headers":{"X-Trace":"owned"},"microversion":"2.1","jmespath_filters":"[?"}`)))
 	if err != nil || result == nil || result.JSON != nil || count.Load() != 0 {
 		t.Fatal(result, err, count.Load())
 	}
@@ -384,7 +385,7 @@ func TestExtensionRecordsSnapshotsNilMapsConcurrentReuseAndPreflight(t *testing.
 		testcloud.JSON(w, 200, `{"extensions":[{"alias":"qos"}]}`)
 	})
 	header := map[string]string{"X-Trace": "owned"}
-	option := extensions.WithRecordListHeaders(header)
+	option := request.Headers(header)
 	header["X-Trace"] = "changed"
 	var workers sync.WaitGroup
 	for i := 0; i < 4; i++ {
@@ -401,22 +402,22 @@ func TestExtensionRecordsSnapshotsNilMapsConcurrentReuseAndPreflight(t *testing.
 	if count.Load() != 4 {
 		t.Fatal(count.Load())
 	}
-	rows, err := api.AllRecords(context.Background(), extensions.WithRecordListHeaders(nil), func(c *extensions.RecordListOpts) error {
+	rows, err := api.AllRecords(context.Background(), request.Headers(nil), request.Custom(func(c *extensions.RecordListOpts) error {
 		c.Headers["X-Trace"] = "owned"
 		c.Query["alias"] = json.RawMessage(`"qos"`)
 		return nil
-	})
+	}))
 	if err != nil || len(rows) != 1 {
 		t.Fatal(rows, err)
 	}
-	for _, options := range [][]extensions.RecordFindOption{{nil}, {extensions.WithRecordFindQuery("id", make(chan int))}, {extensions.WithRecordFindQuery("ignore_missing", make(chan int))}, {extensions.WithRecordFindQuery("name_or_id", make(chan int))}, {extensions.WithRecordFindHeaders(map[string]string{"X-Auth-Token": "foreign"})}} {
+	for _, options := range [][]extensions.RecordFindOption{{nil}, {request.Query("id", make(chan int))}, {request.Query("ignore_missing", make(chan int))}, {request.Query("name_or_id", make(chan int))}, {request.Headers(map[string]string{"X-Auth-Token": "foreign"})}} {
 		before := count.Load()
 		value, err := api.FindRecord(context.Background(), "qos", options...)
 		if value != nil || !errors.Is(err, resource.ErrInvalidOption) || count.Load() != before {
 			t.Fatal(value, err, count.Load())
 		}
 	}
-	for _, options := range [][]extensions.RecordListOption{{nil}, {extensions.WithRecordListQuery("self", make(chan int))}, {extensions.WithRecordListConflictingAttrs(json.RawMessage(`{"paginated":false}`))}, {extensions.WithRecordListBasePath("https://foreign.invalid")}} {
+	for _, options := range [][]extensions.RecordListOption{{nil}, {request.Query("self", make(chan int))}, {extensions.WithRecordListConflictingAttrs(json.RawMessage(`{"paginated":false}`))}, {request.BasePath("https://foreign.invalid")}} {
 		before := count.Load()
 		rows, err := api.AllRecords(context.Background(), options...)
 		if rows != nil || !errors.Is(err, resource.ErrInvalidOption) || count.Load() != before {

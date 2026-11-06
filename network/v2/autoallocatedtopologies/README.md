@@ -42,7 +42,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/autoallocatedtopologies.API.DeleteRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/autoallocatedtopologies.WithProjectID`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/autoallocatedtopologies.WithOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/autoallocatedtopologies.WithIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 
 - Pinned ignore_missing default is false; only explicit true suppresses clean actual404 and retains literal receipt.
   Tests: `network/v2/autoallocatedtopologies/records_test.go:TestAutoTopologyDeleteDefaultStrict404AndExplicitIgnoreOwnActualProof`.

@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -21,7 +22,7 @@ import (
 // is not sent, Null sends JSON null and Present keeps empty strings, zero and
 // empty lists. Other declared VpnIPSecSiteConnection attributes such as
 // auth_mode, route_mode, ikepolicy_id or vpnservice_id use
-// WithUpdateRecordField; the server validates every value.
+// request.Field; the server validates every value.
 type UpdateRecordOpts struct {
 	Name           request.Optional[string]         `json:"name,omitzero"`
 	Description    request.Optional[string]         `json:"description,omitzero"`
@@ -38,20 +39,20 @@ type UpdateRecordOpts struct {
 	AdminStateUp   request.Optional[bool]           `json:"admin_state_up,omitzero"`
 }
 
-type UpdateRecordOption = request.Option[UpdateRecordOpts]
+// UpdateRecordOption is one option of UpdateRecord: WithUpdateRecordOptions,
+// request.Field (another attribute inside the ipsec_site_connection envelope;
+// keys owned by UpdateRecordOpts and the URI identity id are rejected),
+// request.Header or request.Custom over *request.Config[UpdateRecordOpts].
+// Other shared calls fail with resource.ErrInvalidOption before HTTP.
+type UpdateRecordOption = request.WriteCall
+
+var updateRecordOptionCalls = calls.Spec[request.Config[UpdateRecordOpts]]{
+	Header: calls.ConfigHeader[UpdateRecordOpts],
+	Field:  calls.ConfigField[UpdateRecordOpts],
+}
 
 func WithUpdateRecordOptions(value UpdateRecordOpts) UpdateRecordOption {
-	return request.WithOptions(value)
-}
-
-// WithUpdateRecordField adds another attribute inside the
-// ipsec_site_connection envelope.
-// Keys owned by UpdateRecordOpts and the URI identity id are rejected.
-func WithUpdateRecordField(key string, value any) UpdateRecordOption {
-	return request.WithField[UpdateRecordOpts](key, value)
-}
-func WithUpdateRecordHeader(key, value string) UpdateRecordOption {
-	return request.WithHeader[UpdateRecordOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 // ConnectionRecord is the committed Python VpnIPSecSiteConnection view.
@@ -88,7 +89,7 @@ func (a *API) UpdateRecord(ctx context.Context, id string, options ...UpdateReco
 	if err != nil {
 		return fail(nil, err)
 	}
-	config, err := cloudread.ApplyReadOptions(ctx, UpdateRecordOpts{}, options, cloudread.OwnReadConfig[UpdateRecordOpts], source.Guard)
+	config, err := cloudread.ApplyReadOptions(ctx, UpdateRecordOpts{}, calls.Options(options, updateRecordOptionCalls), cloudread.OwnReadConfig[UpdateRecordOpts], source.Guard)
 	if err == nil {
 		err = request.ValidateCapabilities(config, true, false, true)
 	}

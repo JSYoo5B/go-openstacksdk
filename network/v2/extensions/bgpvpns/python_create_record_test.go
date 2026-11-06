@@ -40,7 +40,7 @@ func TestPythonBGPVPNCreateRecordSendsZeroLocalPref(t *testing.T) {
 			Name: request.Present(""), Type: request.Present("l2"), VNI: request.Present(0), RouteTargets: request.Present([]string{}),
 			ImportTargets: request.Null[[]string](), ProjectID: request.Present("p"),
 		}),
-		bgpvpns.WithCreateRecordField("tenant_id", "p"), bgpvpns.WithCreateRecordHeader("X-Trace", "t"))
+		request.Field("tenant_id", "p"), request.Header("X-Trace", "t"))
 	if err != nil || got.StatusCode != 200 || got.BGPVPN.ID != "vpn-2" || got.BGPVPN.Type != "l2" || got.BGPVPN.LocalPref != nil || len(got.Fields) != 5 {
 		t.Fatal(got, err)
 	}
@@ -66,8 +66,8 @@ func TestPythonBGPVPNCreateRecordRejectsInputsAndErrorStatuses(t *testing.T) {
 		return pythonBGPVPNWire(http.StatusBadRequest, `{"NeutronError":{"type":"HTTPBadRequest","message":"bad"}}`)
 	})
 	for _, option := range []bgpvpns.CreateRecordOption{
-		bgpvpns.WithCreateRecordField("local_pref", 0),
-		bgpvpns.WithCreateRecordField(" ", 0),
+		request.Field("local_pref", 0),
+		request.Field(" ", 0),
 		nil,
 	} {
 		var operation *resource.OperationError

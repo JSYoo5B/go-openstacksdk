@@ -261,7 +261,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.DeleteWithOptions`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithDeleteOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithDeleteIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 
 - A literal ID is deleted directly at the pinned resource path with no lookup/query/body. Omitted or nil IgnoreMissing defaults to true; explicit false preserves a 404. Later options override earlier options, constructor pointer snapshots survive mutation and options are reusable. HTTP 200..399 successes do not decode an opaque body.
   Tests: `network/v2/extensions/qos/policies/python_mutations_contracts_test.go:TestPythonQoSPolicyDeleteDefaultsStrictOptionsAndSourceStatuses`.

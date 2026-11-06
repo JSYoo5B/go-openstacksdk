@@ -20,14 +20,14 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.API.AllRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.API.ProxyListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.WithRecordListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.WithRecordListQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.WithRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.WithRecordListMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.WithRecordListBasePath`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.WithRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.WithRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.WithRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.WithRecordListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.BasePath`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.WithRecordListJMESPath`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.WithRecordListConflictingAttrs`
 
@@ -60,10 +60,10 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.New`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.WithRecordFindOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.WithRecordFindQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.WithRecordFindIgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.WithRecordFindHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.WithRecordFindMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.WithRecordFindListBasePath`
 
 - GET-first clean400/403/404 fallback compares inherited actual id/name, not network_id/network_name, and adds no unsupported server name hint.
@@ -133,12 +133,12 @@ func run(ctx context.Context, cloud, identity, name string) error {
     if err != nil { return err }
     api := service.NetworkIPAvailabilities
     if identity != "" {
-        record, err := api.FindRecord(ctx, identity, networkipavailabilities.WithRecordFindIgnoreMissing(false))
+        record, err := api.FindRecord(ctx, identity, request.IgnoreMissing(false))
         if err != nil { return err }
         return json.NewEncoder(os.Stdout).Encode(record.Resource.Body)
     }
     var options []networkipavailabilities.RecordListOption
-    if name != "" { options = append(options, networkipavailabilities.WithRecordListQuery("network_name", name)) }
+    if name != "" { options = append(options, request.Query("network_name", name)) }
     for record, err := range api.ListRecords(ctx, options...) {
         if err != nil { return err }
         if err := json.NewEncoder(os.Stdout).Encode(record.Resource.Body); err != nil { return err }

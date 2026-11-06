@@ -108,10 +108,10 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.API.ListDHCPNetworkRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.WithDHCPNetworkRecordsOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.WithDHCPNetworkRecordsQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.WithDHCPNetworkRecordsMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.WithDHCPNetworkRecordsPaginated`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.WithDHCPNetworkRecordsHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 
 - ListDHCPNetworkRecords sends GET agents/{id}/dhcp-networks with Network query keys translated to wire names (is_shared as shared=True) and list values repeated, drops unknown keys, follows a /v2.0 relative networks_links next href, then continues with marker=<last id> after a page without links while a limit is present until an empty page, and yields the typed Network, raw Fields without self, AgentID and status.
   Tests: `network/v2/extensions/agents/python_dhcp_networks_test.go:TestPythonDHCPNetworkRecordsQueryAndPaging`.
@@ -215,14 +215,14 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.API.AllRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.API.ProxyListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.WithRecordListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.WithRecordListQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.WithRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.WithRecordListMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.WithRecordListBasePath`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.WithRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.WithRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.WithRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.WithRecordListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.BasePath`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.WithRecordListJMESPath`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.WithRecordListConflictingAttrs`
 
@@ -262,10 +262,10 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.API.Get`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.WithRecordFindOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.WithRecordFindQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.WithRecordFindIgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.WithRecordFindMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.WithRecordFindHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.WithRecordFindListBasePath`
 
 - Get sends GET extensions/{name} and returns the 404 without listing extensions.
@@ -309,14 +309,14 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.API.AllRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.API.ProxyListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.WithRecordListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.WithRecordListQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.WithRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.WithRecordListMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.WithRecordListBasePath`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.WithRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.WithRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.WithRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.WithRecordListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.BasePath`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.WithRecordListJMESPath`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.WithRecordListConflictingAttrs`
 
@@ -375,10 +375,10 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.New`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.WithRecordFindOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.WithRecordFindQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.WithRecordFindIgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.WithRecordFindHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.WithRecordFindMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.WithRecordFindListBasePath`
 
 - GET-first clean400/403/404 fallback compares inherited actual id/name, not network_id/network_name, and adds no unsupported server name hint.
@@ -830,14 +830,14 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/serviceproviders.API.AllRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/serviceproviders.API.ProxyListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/serviceproviders.WithRecordListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/serviceproviders.WithRecordListQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/serviceproviders.WithRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/serviceproviders.WithRecordListMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/serviceproviders.WithRecordListBasePath`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/serviceproviders.WithRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/serviceproviders.WithRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/serviceproviders.WithRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/serviceproviders.WithRecordListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.BasePath`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/serviceproviders.WithRecordListJMESPath`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/serviceproviders.WithRecordListConflictingAttrs`
 
@@ -899,7 +899,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/autoallocatedtopologies.API.DeleteRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/autoallocatedtopologies.WithProjectID`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/autoallocatedtopologies.WithOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/autoallocatedtopologies.WithIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 
 - Pinned ignore_missing default is false; only explicit true suppresses clean actual404 and retains literal receipt.
   Tests: `network/v2/autoallocatedtopologies/records_test.go:TestAutoTopologyDeleteDefaultStrict404AndExplicitIgnoreOwnActualProof`.

@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -19,31 +20,33 @@ import (
 // UpdateRecordOpts carries the Python update_bgp_peer attributes. An omitted
 // field is not sent, Null sends JSON null and Present keeps an empty string.
 // BgpPeer allows unknown body attributes, so other keys use
-// WithUpdateRecordField; the server validates every value.
+// request.Field; the server validates every value.
 type UpdateRecordOpts struct {
 	Name     request.Optional[string] `json:"name,omitzero"`
 	Password request.Optional[string] `json:"password,omitzero"`
 }
 
-type UpdateRecordOption = request.Option[UpdateRecordOpts]
+// UpdateRecordOption is one option of UpdateRecord: WithUpdateRecordOptions,
+// WithUpdateRecordName, WithUpdateRecordPassword, request.Field (another
+// attribute inside the bgp_peer envelope; keys owned by UpdateRecordOpts and
+// the URI identity id are rejected), request.Header or request.Custom over
+// *request.Config[UpdateRecordOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type UpdateRecordOption = request.WriteCall
+
+var updateRecordOptionCalls = calls.Spec[request.Config[UpdateRecordOpts]]{
+	Header: calls.ConfigHeader[UpdateRecordOpts],
+	Field:  calls.ConfigField[UpdateRecordOpts],
+}
 
 func WithUpdateRecordOptions(value UpdateRecordOpts) UpdateRecordOption {
-	return request.WithOptions(value)
+	return request.Custom(request.WithOptions(value))
 }
 func WithUpdateRecordName(value request.Optional[string]) UpdateRecordOption {
-	return func(config *request.Config[UpdateRecordOpts]) error { config.Options.Name = value; return nil }
+	return request.Custom(func(config *request.Config[UpdateRecordOpts]) error { config.Options.Name = value; return nil })
 }
 func WithUpdateRecordPassword(value request.Optional[string]) UpdateRecordOption {
-	return func(config *request.Config[UpdateRecordOpts]) error { config.Options.Password = value; return nil }
-}
-
-// WithUpdateRecordField adds another attribute inside the bgp_peer envelope.
-// Keys owned by UpdateRecordOpts and the URI identity id are rejected.
-func WithUpdateRecordField(key string, value any) UpdateRecordOption {
-	return request.WithField[UpdateRecordOpts](key, value)
-}
-func WithUpdateRecordHeader(key, value string) UpdateRecordOption {
-	return request.WithHeader[UpdateRecordOpts](key, value)
+	return request.Custom(func(config *request.Config[UpdateRecordOpts]) error { config.Options.Password = value; return nil })
 }
 
 // BGPPeerRecord is the committed Python BgpPeer view. BGPPeer is the native
@@ -78,7 +81,7 @@ func (a *API) UpdateRecord(ctx context.Context, bgpPeerID string, options ...Upd
 	if err != nil {
 		return fail(nil, err)
 	}
-	config, err := cloudread.ApplyReadOptions(ctx, UpdateRecordOpts{}, options, cloudread.OwnReadConfig[UpdateRecordOpts], source.Guard)
+	config, err := cloudread.ApplyReadOptions(ctx, UpdateRecordOpts{}, calls.Options(options, updateRecordOptionCalls), cloudread.OwnReadConfig[UpdateRecordOpts], source.Guard)
 	if err == nil {
 		err = request.ValidateCapabilities(config, true, false, true)
 	}

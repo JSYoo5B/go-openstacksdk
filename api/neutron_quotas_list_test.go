@@ -11,6 +11,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/quotas"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -90,7 +91,7 @@ func TestNeutronQuotasListBreakAndLocalOptionsDoNotSendServerPaging(t *testing.T
 	}
 	option := quotas.WithListProjectID("two")
 	for range 2 {
-		values, err := api.AllProjects(context.Background(), quotas.WithListProjectID("one"), option, quotas.WithListMaxItems(2), quotas.WithListMaxItems(1))
+		values, err := api.AllProjects(context.Background(), quotas.WithListProjectID("one"), option, request.MaxItems(2), request.MaxItems(1))
 		if err != nil || len(values) != 1 || values[0].ProjectID != "two" || values[0].Network != 20 {
 			t.Fatalf("filtered values=%+v error=%v", values, err)
 		}
@@ -98,7 +99,7 @@ func TestNeutronQuotasListBreakAndLocalOptionsDoNotSendServerPaging(t *testing.T
 	if calls.Load() != 3 {
 		t.Fatalf("local filter caused extra requests: %d", calls.Load())
 	}
-	options := []quotas.ListOption{quotas.WithListProjectID("one"), quotas.WithListMaxItems(1)}
+	options := []quotas.ListOption{quotas.WithListProjectID("one"), request.MaxItems(1)}
 	sequence := api.ListProjects(context.Background(), options...)
 	options[0] = quotas.WithListProjectID("two")
 	for value, err := range sequence {
@@ -198,7 +199,7 @@ func TestNeutronQuotasListPreflightOptionsAndHTTPFailures(t *testing.T) {
 		t.Errorf("invalid configuration made HTTP request: %s", r.URL)
 	})
 	api := quotas.New(cloud.Client("network", "/neutron/v2.0"))
-	for _, option := range []quotas.ListOption{nil, quotas.WithListProjectID(""), quotas.WithListProjectID("../path"), quotas.WithListMaxItems(0), quotas.WithListMaxItems(-1)} {
+	for _, option := range []quotas.ListOption{nil, quotas.WithListProjectID(""), quotas.WithListProjectID("../path"), request.MaxItems(0), request.MaxItems(-1)} {
 		sequence := api.ListProjects(context.Background(), option)
 		if calls.Load() != 0 {
 			t.Fatal("creating an invalid sequence made HTTP request")

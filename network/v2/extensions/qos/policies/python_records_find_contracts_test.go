@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 	"io"
@@ -46,7 +47,7 @@ func TestPythonQoSPolicyFindRecordMemberSeedDefaultsAndActualEvidence(t *testing
 			response.Header.Set("X-Request-Id", "receipt")
 			return response
 		})
-		got, err := api.FindRecord(context.Background(), "literal/id %2F", policies.WithRecordFindQuery("x_seed", map[string]any{"nested": nil}), policies.WithRecordFindQuery("name", "seed"), policies.WithRecordFindQuery("if_match", "seed-header"))
+		got, err := api.FindRecord(context.Background(), "literal/id %2F", request.Query("x_seed", map[string]any{"nested": nil}), request.Query("name", "seed"), request.Query("if_match", "seed-header"))
 		if err != nil || got == nil || len(calls) != 1 || calls[0].body != "" || got.StatusCode != 203 || string(got.Envelope) != body || got.Header.Get("X-Request-Id") != "receipt" {
 			t.Fatal(got, err, calls)
 		}
@@ -99,7 +100,7 @@ func TestPythonQoSPolicyFindRecordFallbackQueryMappingAndLocalFilters(t *testing
 		listed = req.URL.Query()
 		return nativePolicyWire(200, `{"policies":[{"id":"filtered","name":"target","tenant_id":2},{"id":"match","name":"target","tenant_id":1,"x_extension":null}]}`)
 	})
-	got, err := api.FindRecord(context.Background(), "target", policies.WithRecordFindQuery("x_unknown", "keep"), policies.WithRecordFindQuery("all_projects", true), policies.WithRecordFindQuery("fields", []string{"id", "name"}), policies.WithRecordFindQuery("tenant_id", true), policies.WithRecordFindQuery("is_shared", false), policies.WithRecordFindQuery("shared", true), policies.WithRecordFindQuery("any_tags", []string{"red", "blue"}), policies.WithRecordFindQuery("not_any_tags", "black"), policies.WithRecordFindQuery("sort_key", "name"), policies.WithRecordFindQuery("sort_dir", "asc"))
+	got, err := api.FindRecord(context.Background(), "target", request.Query("x_unknown", "keep"), request.Query("all_projects", true), request.Query("fields", []string{"id", "name"}), request.Query("tenant_id", true), request.Query("is_shared", false), request.Query("shared", true), request.Query("any_tags", []string{"red", "blue"}), request.Query("not_any_tags", "black"), request.Query("sort_key", "name"), request.Query("sort_dir", "asc"))
 	if err != nil || got == nil || len(calls) != 2 {
 		t.Fatal(got, err, calls)
 	}
@@ -136,7 +137,7 @@ func TestPythonQoSPolicyFindRecordNamePresenceMissingAndPassiveResponseID(t *tes
 				})
 				options := []policies.RecordFindOption{}
 				if testcase.supplied {
-					options = append(options, policies.WithRecordFindQuery("name", testcase.value))
+					options = append(options, request.Query("name", testcase.value))
 				}
 				got, err := api.FindRecord(context.Background(), "target", options...)
 				if err != nil || got != nil || len(calls) != 2 {
@@ -170,7 +171,7 @@ func TestPythonQoSPolicyFindRecordNamePresenceMissingAndPassiveResponseID(t *tes
 			}
 			return nativePolicyWire(status, body)
 		})
-		got, err := api.FindRecord(context.Background(), "target", policies.WithRecordFindIgnoreMissing(false))
+		got, err := api.FindRecord(context.Background(), "target", request.IgnoreMissing(false))
 		if got != nil || err == nil || (status == 200 && !errors.Is(err, resource.ErrNotFound)) || len(calls) != 2 {
 			t.Fatal(got, err, calls)
 		}
@@ -236,7 +237,7 @@ func TestPythonQoSPolicyFindRecordLateDuplicateErrorMarkerAndRawCap(t *testing.T
 			}
 			return nativePolicyWire(200, `{"policies":[{"id":7,"name":"target"}]}`)
 		})
-		got, err := api.FindRecord(context.Background(), "target", policies.WithRecordFindQuery("limit", 2), policies.WithRecordFindQuery("tags", []string{"a", "b"}))
+		got, err := api.FindRecord(context.Background(), "target", request.Query("limit", 2), request.Query("tags", []string{"a", "b"}))
 		if err != nil || got == nil || len(calls) != 3 {
 			t.Fatal(got, err, calls)
 		}
@@ -253,7 +254,7 @@ func TestPythonQoSPolicyFindRecordLateDuplicateErrorMarkerAndRawCap(t *testing.T
 			}
 			return nativePolicyWire(200, `{"policies":[{"id":"filtered","name":"target","tenant_id":2},{"id":"match","name":"target","tenant_id":1}],"policies_links":[{"rel":"next","href":"?marker=late"}]}`)
 		})
-		got, err := api.FindRecord(context.Background(), "target", policies.WithRecordFindQuery("max_items", 1), policies.WithRecordFindQuery("tenant_id", true))
+		got, err := api.FindRecord(context.Background(), "target", request.Query("max_items", 1), request.Query("tenant_id", true))
 		if err != nil || got != nil || len(calls) != 2 {
 			t.Fatal(got, err, calls)
 		}
@@ -270,7 +271,7 @@ func TestPythonQoSPolicyFindRecordOptionSnapshotsAndPreflightGuards(t *testing.T
 	delete(query, "x_seed")
 	headers["X-Trace"] = "changed"
 	ignore = true
-	fieldOption := policies.WithRecordFindQuery("fields", fields)
+	fieldOption := request.Query("fields", fields)
 	fields[0] = "changed"
 	var escaped *policies.RecordFindOpts
 	var calls []nativePolicyCall
@@ -282,7 +283,7 @@ func TestPythonQoSPolicyFindRecordOptionSnapshotsAndPreflightGuards(t *testing.T
 		escaped.Headers["X-Trace"] = "callback changed"
 		return nativePolicyWire(200, `{"policy":{}}`)
 	})
-	got, err := api.FindRecord(context.Background(), "target", options, fieldOption, func(c *policies.RecordFindOpts) error { escaped = c; return nil })
+	got, err := api.FindRecord(context.Background(), "target", options, fieldOption, request.Custom(func(c *policies.RecordFindOpts) error { escaped = c; return nil }))
 	if err != nil || got == nil || len(calls) != 1 {
 		t.Fatal(got, err, calls)
 	}
@@ -294,15 +295,15 @@ func TestPythonQoSPolicyFindRecordOptionSnapshotsAndPreflightGuards(t *testing.T
 	}{
 		{"nil", []policies.RecordFindOption{nil}, resource.ErrInvalidOption},
 		{"malformed JSON", []policies.RecordFindOption{policies.WithRecordFindOpts(policies.RecordFindOpts{Query: map[string]json.RawMessage{"fields": json.RawMessage(`[`)}})}, resource.ErrInvalidOption},
-		{"negative cap", []policies.RecordFindOption{policies.WithRecordFindQuery("max_items", -1)}, resource.ErrInvalidOption},
+		{"negative cap", []policies.RecordFindOption{request.Query("max_items", -1)}, resource.ErrInvalidOption},
 		{"bad page flag", []policies.RecordFindOption{policies.WithRecordFindOpts(policies.RecordFindOpts{Query: map[string]json.RawMessage{"paginated": json.RawMessage(`bad flag`)}})}, resource.ErrInvalidOption},
-		{"identity keyword collision", []policies.RecordFindOption{policies.WithRecordFindQuery("id", "different")}, resource.ErrInvalidOption},
-		{"route override", []policies.RecordFindOption{policies.WithRecordFindQuery("base_path", "/other")}, resource.ErrInvalidOption},
-		{"fetch requires_id control", []policies.RecordFindOption{policies.WithRecordFindQuery("requires_id", false)}, resource.ErrInvalidOption},
-		{"fetch error_message control", []policies.RecordFindOption{policies.WithRecordFindQuery("error_message", "changed")}, resource.ErrInvalidOption},
-		{"fetch cache control", []policies.RecordFindOption{policies.WithRecordFindQuery("skip_cache", true)}, resource.ErrInvalidOption},
-		{"fetch response envelope control", []policies.RecordFindOption{policies.WithRecordFindQuery("resource_response_key", "other")}, resource.ErrInvalidOption},
-		{"protected Header", []policies.RecordFindOption{policies.WithRecordFindHeaders(map[string]string{"X-Auth-Token": "different"})}, resource.ErrInvalidOption},
+		{"identity keyword collision", []policies.RecordFindOption{request.Query("id", "different")}, resource.ErrInvalidOption},
+		{"route override", []policies.RecordFindOption{request.Query("base_path", "/other")}, resource.ErrInvalidOption},
+		{"fetch requires_id control", []policies.RecordFindOption{request.Query("requires_id", false)}, resource.ErrInvalidOption},
+		{"fetch error_message control", []policies.RecordFindOption{request.Query("error_message", "changed")}, resource.ErrInvalidOption},
+		{"fetch cache control", []policies.RecordFindOption{request.Query("skip_cache", true)}, resource.ErrInvalidOption},
+		{"fetch response envelope control", []policies.RecordFindOption{request.Query("resource_response_key", "other")}, resource.ErrInvalidOption},
+		{"protected Header", []policies.RecordFindOption{request.Headers(map[string]string{"X-Auth-Token": "different"})}, resource.ErrInvalidOption},
 	} {
 		t.Run(testcase.name, func(t *testing.T) {
 			var calls []nativePolicyCall
@@ -316,7 +317,7 @@ func TestPythonQoSPolicyFindRecordOptionSnapshotsAndPreflightGuards(t *testing.T
 	t.Run("source mutation is sticky", func(t *testing.T) {
 		var calls []nativePolicyCall
 		api := pythonPolicyFindAPI(t, &calls, func(*http.Request) *http.Response { t.Fatal("unexpected HTTP"); return nil })
-		got, err := api.FindRecord(context.Background(), "target", func(*policies.RecordFindOpts) error { api.RawClient().ResourceBase += "changed/"; return nil })
+		got, err := api.FindRecord(context.Background(), "target", request.Custom(func(*policies.RecordFindOpts) error { api.RawClient().ResourceBase += "changed/"; return nil }))
 		if got != nil || !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
 			t.Fatal(got, err, calls)
 		}
@@ -506,7 +507,7 @@ func TestPythonQoSPolicyFindRecordMalformedPagesAndDetachedExtensionEvidence(t *
 	}
 	var calls []nativePolicyCall
 	api := pythonPolicyFindAPI(t, &calls, func(*http.Request) *http.Response { return nativePolicyWire(202, "not JSON") })
-	got, err := api.FindRecord(context.Background(), "target", policies.WithRecordFindQuery("x_extension", []any{nil, 9007199254740993}))
+	got, err := api.FindRecord(context.Background(), "target", request.Query("x_extension", []any{nil, 9007199254740993}))
 	if err != nil || got == nil || got.Wire != nil || string(got.Envelope) != "not JSON" || len(calls) != 1 {
 		t.Fatal(got, err, calls)
 	}
@@ -598,7 +599,7 @@ func TestPythonQoSPolicyFindRecordLiveReauthenticationAndMicroversionOwnership(t
 	}
 	var none []nativePolicyCall
 	invalid := pythonPolicyFindAPI(t, &none, func(*http.Request) *http.Response { t.Fatal("invalid version HTTP"); return nil })
-	got, err = invalid.FindRecord(context.Background(), "target", policies.WithRecordFindMicroversion("2.1\r\nchanged"))
+	got, err = invalid.FindRecord(context.Background(), "target", request.Microversion("2.1\r\nchanged"))
 	if got != nil || !errors.Is(err, resource.ErrInvalidOption) || len(none) != 0 {
 		t.Fatal(got, err, none)
 	}
@@ -628,7 +629,7 @@ func TestPythonQoSPolicyFindRecordDictionaryTruthinessShortCircuitAndFailureRece
 				response.Header.Set("X-Request-Id", "dict-filter")
 				return response
 			})
-			got, err := api.FindRecord(context.Background(), "target", policies.WithRecordFindQuery("tenant_id", json.RawMessage(testcase.filter)))
+			got, err := api.FindRecord(context.Background(), "target", request.Query("tenant_id", json.RawMessage(testcase.filter)))
 			if len(calls) != 2 {
 				t.Fatal(got, err, calls)
 			}
@@ -663,7 +664,7 @@ func TestPythonQoSPolicyFindRecordPaginationTruthiness(t *testing.T) {
 				}
 				return nativePolicyWire(200, `{"policies":[{"id":"match","name":"target"}],"next":"?marker=next"}`)
 			})
-			got, err := api.FindRecord(context.Background(), "target", policies.WithRecordFindQuery("paginated", testcase.flag))
+			got, err := api.FindRecord(context.Background(), "target", request.Query("paginated", testcase.flag))
 			if err != nil || got == nil || len(calls) != testcase.pages+1 {
 				t.Fatal(got, err, calls)
 			}
@@ -687,7 +688,7 @@ func TestPythonQoSPolicyFindRecordListAcceptAndRetryVersionPolicy(t *testing.T) 
 			options := []policies.RecordFindOption{}
 			want := []string{"text/xml", "application/json"}
 			if explicit {
-				options = append(options, policies.WithRecordFindHeaders(map[string]string{"Accept": "text/plain"}))
+				options = append(options, request.Headers(map[string]string{"Accept": "text/plain"}))
 				want = []string{"text/plain", "text/plain"}
 			}
 			got, err := api.FindRecord(context.Background(), "target", options...)
@@ -714,7 +715,7 @@ func TestPythonQoSPolicyFindRecordListAcceptAndRetryVersionPolicy(t *testing.T) 
 			}
 			options := []policies.RecordFindOption{}
 			if version != "" {
-				options = append(options, policies.WithRecordFindMicroversion(version))
+				options = append(options, request.Microversion(version))
 			}
 			got, err := api.FindRecord(context.Background(), "target", options...)
 			var native gophercloud.ErrUnexpectedResponseCode
@@ -803,7 +804,7 @@ func TestPythonQoSPolicyFindRecordFallbackUsesSelectedVersionAndSourceReceipt(t 
 		if selected != "" {
 			source.MoreHeaders["OpenStack-API-Version"] = "network " + selected
 		}
-		got, err := api.FindRecord(context.Background(), "target", policies.WithRecordFindMicroversion("2.1"))
+		got, err := api.FindRecord(context.Background(), "target", request.Microversion("2.1"))
 		wantList := ""
 		if selected != "" {
 			wantList = "network " + selected
@@ -866,7 +867,7 @@ func TestPythonQoSPolicyFindRecordSourceCancellationAndConstructorPreflight(t *t
 	var calls []nativePolicyCall
 	api := pythonPolicyFindAPI(t, &calls, func(*http.Request) *http.Response { t.Fatal("preflight made HTTP"); return nil })
 	for _, key := range []string{"connection", "session", "list_base_path", "microversion", "_synchronized", "resource_type", "self", "location", "__conflicting_attrs"} {
-		got, err := api.FindRecord(context.Background(), "target", policies.WithRecordFindQuery(key, nil))
+		got, err := api.FindRecord(context.Background(), "target", request.Query(key, nil))
 		if got != nil || !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
 			t.Fatal(key, got, err, calls)
 		}
@@ -899,7 +900,7 @@ func TestPythonQoSPolicyFindRecordConstructorAliasOrderIsSeparateFromListQueryPr
 			t.Run(testcase.name+reply.body, func(t *testing.T) {
 				var calls []nativePolicyCall
 				api := pythonPolicyFindAPI(t, &calls, func(*http.Request) *http.Response { return nativePolicyWire(200, reply.body) })
-				got, err := api.FindRecord(context.Background(), "target", policies.WithRecordFindQuery(testcase.first, json.RawMessage(testcase.firstValue)), policies.WithRecordFindQuery(testcase.second, json.RawMessage(testcase.secondValue)))
+				got, err := api.FindRecord(context.Background(), "target", request.Query(testcase.first, json.RawMessage(testcase.firstValue)), request.Query(testcase.second, json.RawMessage(testcase.secondValue)))
 				if err != nil || got == nil || len(calls) != 1 || string(got.Envelope) != reply.body {
 					t.Fatal(got, err, calls)
 				}
@@ -918,7 +919,7 @@ func TestPythonQoSPolicyFindRecordConstructorAliasOrderIsSeparateFromListQueryPr
 				}
 				return nativePolicyWire(200, `{"policies":[{"id":"match","name":"target","shared":true}]}`)
 			})
-			got, err := api.FindRecord(context.Background(), "target", policies.WithRecordFindQuery(testcase.first, json.RawMessage(testcase.firstValue)), policies.WithRecordFindQuery(testcase.second, json.RawMessage(testcase.secondValue)))
+			got, err := api.FindRecord(context.Background(), "target", request.Query(testcase.first, json.RawMessage(testcase.firstValue)), request.Query(testcase.second, json.RawMessage(testcase.secondValue)))
 			if err != nil || got == nil || len(calls) != 2 {
 				t.Fatal(got, err, calls)
 			}
@@ -956,7 +957,7 @@ func TestPythonQoSPolicyFindRecordFloatTruthinessKeepsWireAndExactComparisonBoun
 				}
 				return nativePolicyWire(200, body)
 			})
-			got, err := api.FindRecord(context.Background(), "target", policies.WithRecordFindQuery("tenant_id", map[string]any{}))
+			got, err := api.FindRecord(context.Background(), "target", request.Query("tenant_id", map[string]any{}))
 			if err != nil || (got != nil) != testcase.truth || len(calls) != 2 {
 				t.Fatal(testcase, got, err, calls)
 			}
@@ -979,7 +980,7 @@ func TestPythonQoSPolicyFindRecordFloatTruthinessKeepsWireAndExactComparisonBoun
 				}
 				return nativePolicyWire(200, `{"policies":[{"id":"match","name":"target"}],"next":"?marker=next"}`)
 			})
-			got, err := api.FindRecord(context.Background(), "target", policies.WithRecordFindQuery("paginated", json.RawMessage(testcase.raw)))
+			got, err := api.FindRecord(context.Background(), "target", request.Query("paginated", json.RawMessage(testcase.raw)))
 			expected := 2
 			if testcase.truth {
 				expected = 3
@@ -1005,7 +1006,7 @@ func TestPythonQoSPolicyFindRecordFloatTruthinessKeepsWireAndExactComparisonBoun
 				}
 				return nativePolicyWire(200, `{"policies":[{"id":"match","name":"target","tenant_id":`+testcase.actual+`}]}`)
 			})
-			got, err := api.FindRecord(context.Background(), "target", policies.WithRecordFindQuery("tenant_id", json.RawMessage(testcase.filter)))
+			got, err := api.FindRecord(context.Background(), "target", request.Query("tenant_id", json.RawMessage(testcase.filter)))
 			if err != nil || (got != nil) != testcase.match || len(calls) != 2 {
 				t.Fatal(testcase, got, err, calls)
 			}
@@ -1049,7 +1050,7 @@ func TestPythonQoSPolicyFindRecordBooleanDescriptorUsesFloatTruthiness(t *testin
 	}
 	var calls []nativePolicyCall
 	api := pythonPolicyFindAPI(t, &calls, func(*http.Request) *http.Response { return nativePolicyWire(200, `{"policy":{}}`) })
-	got, err := api.FindRecord(context.Background(), "target", policies.WithRecordFindQuery("is_shared", json.RawMessage(`1e-4000`)))
+	got, err := api.FindRecord(context.Background(), "target", request.Query("is_shared", json.RawMessage(`1e-4000`)))
 	if err != nil || got == nil || len(calls) != 1 {
 		t.Fatal(got, err, calls)
 	}

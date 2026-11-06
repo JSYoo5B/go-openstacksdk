@@ -11,6 +11,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	sdk "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/portbindings"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -87,7 +88,7 @@ func TestPortBindingListFiltersLocallyAndOwnsParentEvidence(t *testing.T) {
 		}
 		return wire(200, `{"bindings":[{"id":"one","host":"other"}],"bindings_links":[{"rel":"next","href":"?marker=one"}]}`)
 	})
-	sequence := service.List(context.Background(), "p", sdk.WithQuery("host", "h"), sdk.WithQuery("unknown", "ignored"))
+	sequence := service.List(context.Background(), "p", request.Query("host", "h"), request.Query("unknown", "ignored"))
 	if len(calls) != 0 {
 		t.Fatal("Go iterator must be lazy")
 	}
@@ -236,7 +237,7 @@ func TestPortBindingDeleteIgnoreMissingAppliesOnlyToSourceBranches(t *testing.T)
 			})
 			var options []sdk.Option
 			if strings.HasPrefix(mode, "strict") {
-				options = append(options, sdk.WithIgnoreMissing(false))
+				options = append(options, request.IgnoreMissing(false))
 			}
 			result, err := service.Delete(context.Background(), "p", "h", options...)
 			ignored := mode == "initial-port404" || mode == "empty"
@@ -276,11 +277,11 @@ func TestPortBindingActivationMissingAndCapturedOptions(t *testing.T) {
 	before := len(calls)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	_, err = service.Create(ctx, "p", func(c *sdk.Options) error { cancel(); return nil })
+	_, err = service.Create(ctx, "p", request.Custom(func(c *sdk.Options) error { cancel(); return nil }))
 	if !errors.Is(err, context.Canceled) || len(calls) != before {
 		t.Fatal(err, calls)
 	}
-	_, err = service.Create(context.Background(), "p", func(c *sdk.Options) error { service.RawClient().Endpoint += "changed/"; return nil })
+	_, err = service.Create(context.Background(), "p", request.Custom(func(c *sdk.Options) error { service.RawClient().Endpoint += "changed/"; return nil }))
 	if !errors.Is(err, resource.ErrInvalidOption) || len(calls) != before {
 		t.Fatal(err, calls)
 	}

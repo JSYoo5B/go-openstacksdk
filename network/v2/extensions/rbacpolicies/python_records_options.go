@@ -9,7 +9,9 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/neutronfind"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 // RecordFindOpts owns Source kwargs as JSON. Omitted IgnoreMissing is true.
@@ -21,7 +23,32 @@ type RecordFindOpts struct {
 	Headers       map[string]string
 	order         []string
 }
-type RecordFindOption func(*RecordFindOpts) error
+
+// RecordFindOption is one option of FindRecord: WithRecordFindOpts,
+// request.IgnoreMissing, request.Query (one Source kwarg as JSON),
+// request.Microversion, request.Headers (replaces the headers) or
+// request.Custom over *RecordFindOpts. request.Header fails with
+// resource.ErrInvalidOption before HTTP.
+type RecordFindOption = request.FindCall
+
+var recordFindCalls = calls.Spec[RecordFindOpts]{
+	IgnoreMissing: calls.Pointer(func(c *RecordFindOpts) **bool { return &c.IgnoreMissing }),
+	Query: func(c *RecordFindOpts, entry request.CallEntry) error {
+		if entry.JSONErr != nil {
+			return entry.JSONErr
+		}
+		if c.Query == nil {
+			c.Query = make(map[string]json.RawMessage)
+		}
+		if !slices.Contains(c.order, entry.Key) {
+			c.order = append(c.order, entry.Key)
+		}
+		c.Query[entry.Key] = entry.JSON
+		return nil
+	},
+	Microversion: calls.Pointer(func(c *RecordFindOpts) **string { return &c.Microversion }),
+	Headers:      calls.Value(func(c *RecordFindOpts) *map[string]string { return &c.Headers }),
+}
 
 func rbacFindOptions(v RecordFindOpts) neutronfind.Options {
 	return neutronfind.Options{IgnoreMissing: v.IgnoreMissing, Microversion: v.Microversion, Query: v.Query, Headers: v.Headers, Order: v.order}
@@ -33,34 +60,7 @@ func copyRBACFind(v RecordFindOpts) RecordFindOpts {
 }
 func WithRecordFindOpts(v RecordFindOpts) RecordFindOption {
 	owned := copyRBACFind(v)
-	return func(c *RecordFindOpts) error { *c = copyRBACFind(owned); return nil }
-}
-func WithRecordFindIgnoreMissing(v bool) RecordFindOption {
-	return func(c *RecordFindOpts) error { x := v; c.IgnoreMissing = &x; return nil }
-}
-func WithRecordFindQuery(key string, value any) RecordFindOption {
-	raw, err := json.Marshal(value)
-	owned := bytes.Clone(raw)
-	return func(c *RecordFindOpts) error {
-		if err != nil {
-			return err
-		}
-		if c.Query == nil {
-			c.Query = make(map[string]json.RawMessage)
-		}
-		if !slices.Contains(c.order, key) {
-			c.order = append(c.order, key)
-		}
-		c.Query[key] = bytes.Clone(owned)
-		return nil
-	}
-}
-func WithRecordFindMicroversion(v string) RecordFindOption {
-	return func(c *RecordFindOpts) error { x := v; c.Microversion = &x; return nil }
-}
-func WithRecordFindHeaders(v map[string]string) RecordFindOption {
-	owned := maps.Clone(v)
-	return func(c *RecordFindOpts) error { c.Headers = maps.Clone(owned); return nil }
+	return request.Custom(func(c *RecordFindOpts) error { *c = copyRBACFind(owned); return nil })
 }
 
 // RecordListOpts owns list kwargs. Query includes declared server fields,
@@ -71,7 +71,15 @@ type RecordListOpts struct {
 	Headers      map[string]string
 	order        []string
 }
-type RecordListOption func(*RecordListOpts) error
+
+// RecordListOption is one option of ListRecords and AllRecords:
+// WithRecordListOpts, request.Query (one Source kwarg as JSON; unknown names
+// are discarded with their marshal error), request.Limit, request.Marker,
+// request.MaxItems, request.Paginated (the limit, marker, max_items and
+// paginated kwargs), request.Microversion, request.Headers (replaces the
+// headers) or request.Custom over *RecordListOpts. Other shared calls fail
+// with resource.ErrInvalidOption before HTTP.
+type RecordListOption = request.ListCall
 
 func rbacListOptions(v RecordListOpts) neutronfind.Options {
 	return neutronfind.Options{Microversion: v.Microversion, Query: v.Query, Headers: v.Headers, Order: v.order}
@@ -83,7 +91,7 @@ func copyRBACList(v RecordListOpts) RecordListOpts {
 }
 func WithRecordListOpts(v RecordListOpts) RecordListOption {
 	owned := copyRBACList(v)
-	return func(c *RecordListOpts) error { *c = copyRBACList(owned); return nil }
+	return request.Custom(func(c *RecordListOpts) error { *c = copyRBACList(owned); return nil })
 }
 func rbacListIgnores(key string) bool {
 	if strings.TrimSpace(key) == "" || !utf8.ValidString(key) {
@@ -110,38 +118,32 @@ func rbacListIgnores(key string) bool {
 	}
 	return true
 }
-func WithRecordListQuery(key string, value any) RecordListOption {
-	// Source discards unknown kwargs before evaluating their transport value.
+
+// rbacListKeyword records one list kwarg. Source discards unknown kwargs
+// before evaluating their transport value, so their marshal error is dropped.
+func rbacListKeyword(c *RecordListOpts, key string, owned json.RawMessage, err error) error {
 	if rbacListIgnores(key) {
-		return func(*RecordListOpts) error { return nil }
-	}
-	raw, err := json.Marshal(value)
-	owned := bytes.Clone(raw)
-	return func(c *RecordListOpts) error {
-		if err != nil {
-			return err
-		}
-		if c.Query == nil {
-			c.Query = make(map[string]json.RawMessage)
-		}
-		if !slices.Contains(c.order, key) {
-			c.order = append(c.order, key)
-		}
-		c.Query[key] = bytes.Clone(owned)
 		return nil
 	}
+	if err != nil {
+		return err
+	}
+	if c.Query == nil {
+		c.Query = make(map[string]json.RawMessage)
+	}
+	if !slices.Contains(c.order, key) {
+		c.order = append(c.order, key)
+	}
+	c.Query[key] = bytes.Clone(owned)
+	return nil
 }
-func WithRecordListMicroversion(v string) RecordListOption {
-	return func(c *RecordListOpts) error { x := v; c.Microversion = &x; return nil }
+
+var recordListCalls = calls.Spec[RecordListOpts]{
+	Query:        calls.JSONQuery(rbacListKeyword),
+	Microversion: calls.Pointer(func(c *RecordListOpts) **string { return &c.Microversion }),
+	Headers:      calls.Value(func(c *RecordListOpts) *map[string]string { return &c.Headers }),
+	Paging:       calls.JSONPaging(rbacListKeyword),
 }
-func WithRecordListHeaders(v map[string]string) RecordListOption {
-	owned := maps.Clone(v)
-	return func(c *RecordListOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
-func WithRecordListLimit(v int) RecordListOption      { return WithRecordListQuery("limit", v) }
-func WithRecordListMarker(v string) RecordListOption  { return WithRecordListQuery("marker", v) }
-func WithRecordListMaxItems(v int) RecordListOption   { return WithRecordListQuery("max_items", v) }
-func WithRecordListPaginated(v bool) RecordListOption { return WithRecordListQuery("paginated", v) }
 
 // RecordGetOpts is the pinned get_rbac_policy fields selector plus explicit
 // owned transport settings. It does not accept constructor/query kwargs.
@@ -150,7 +152,17 @@ type RecordGetOpts struct {
 	Microversion *string
 	Headers      map[string]string
 }
-type RecordGetOption func(*RecordGetOpts) error
+
+// RecordGetOption is one option of GetRecord: WithRecordGetOpts,
+// WithRecordGetFields, request.Microversion, request.Headers (replaces the
+// headers) or request.Custom over *RecordGetOpts. request.Header fails with
+// resource.ErrInvalidOption before HTTP.
+type RecordGetOption = request.GetCall
+
+var recordGetCalls = calls.Spec[RecordGetOpts]{
+	Microversion: calls.Pointer(func(c *RecordGetOpts) **string { return &c.Microversion }),
+	Headers:      calls.Value(func(c *RecordGetOpts) *map[string]string { return &c.Headers }),
+}
 
 func copyRBACGet(v RecordGetOpts) RecordGetOpts {
 	v.Fields = slices.Clone(v.Fields)
@@ -163,18 +175,11 @@ func copyRBACGet(v RecordGetOpts) RecordGetOpts {
 }
 func WithRecordGetOpts(v RecordGetOpts) RecordGetOption {
 	owned := copyRBACGet(v)
-	return func(c *RecordGetOpts) error { *c = copyRBACGet(owned); return nil }
+	return request.Custom(func(c *RecordGetOpts) error { *c = copyRBACGet(owned); return nil })
 }
 func WithRecordGetFields(values ...string) RecordGetOption {
 	owned := slices.Clone(values)
-	return func(c *RecordGetOpts) error { c.Fields = slices.Clone(owned); return nil }
-}
-func WithRecordGetMicroversion(v string) RecordGetOption {
-	return func(c *RecordGetOpts) error { x := v; c.Microversion = &x; return nil }
-}
-func WithRecordGetHeaders(v map[string]string) RecordGetOption {
-	owned := maps.Clone(v)
-	return func(c *RecordGetOpts) error { c.Headers = maps.Clone(owned); return nil }
+	return request.Custom(func(c *RecordGetOpts) error { c.Fields = slices.Clone(owned); return nil })
 }
 func rbacGetOptions(v RecordGetOpts) (neutronfind.Options, error) {
 	prepared := neutronfind.Options{Microversion: v.Microversion, Headers: v.Headers}

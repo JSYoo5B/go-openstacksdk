@@ -14,10 +14,10 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.API.ListDHCPNetworkRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.WithDHCPNetworkRecordsOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.WithDHCPNetworkRecordsQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.WithDHCPNetworkRecordsMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.WithDHCPNetworkRecordsPaginated`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.WithDHCPNetworkRecordsHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 
 - ListDHCPNetworkRecords sends GET agents/{id}/dhcp-networks with Network query keys translated to wire names (is_shared as shared=True) and list values repeated, drops unknown keys, follows a /v2.0 relative networks_links next href, then continues with marker=<last id> after a page without links while a limit is present until an empty page, and yields the typed Network, raw Fields without self, AgentID and status.
   Tests: `network/v2/extensions/agents/python_dhcp_networks_test.go:TestPythonDHCPNetworkRecordsQueryAndPaging`.
@@ -40,9 +40,9 @@ Examples use the surrounding guide's service object and context unless they decl
 
 ```go
 for row, err := range api.ListDHCPNetworkRecords(ctx, agentID,
-	agents.WithDHCPNetworkRecordsQuery("is_shared", true),
-	agents.WithDHCPNetworkRecordsQuery("fields", []string{"id", "name"}),
-	agents.WithDHCPNetworkRecordsQuery("mtu", 1450),
+	request.Query("is_shared", true),
+	request.Query("fields", []string{"id", "name"}),
+	request.Query("mtu", 1450),
 ) {
 	...
 }

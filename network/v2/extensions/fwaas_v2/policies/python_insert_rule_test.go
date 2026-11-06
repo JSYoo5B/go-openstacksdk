@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -33,7 +34,7 @@ func TestPythonFirewallPolicyInsertRuleRecordSendsNullPositions(t *testing.T) {
 		t.Fatal(got, err)
 	}
 	// insert_rule_into_policy(policy, rule, insert_before="r2")
-	if _, err := api.InsertRuleRecord(ctx, "fp-1", "r3", policies.WithInsertRuleRecordBefore("r2"), policies.WithInsertRuleRecordHeader("X-Trace", "t")); err != nil {
+	if _, err := api.InsertRuleRecord(ctx, "fp-1", "r3", policies.WithInsertRuleRecordBefore("r2"), request.Header("X-Trace", "t")); err != nil {
 		t.Fatal(err)
 	}
 	pythonFWPolicyExpect(t, recorder.snapshot(), []pythonFWPolicyCall{

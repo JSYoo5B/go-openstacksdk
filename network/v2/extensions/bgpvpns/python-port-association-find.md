@@ -70,8 +70,8 @@ func main() {
     service, err := conn.Network(ctx)
     if err != nil { log.Fatal(err) }
     row, err := service.API.BGPVPNs.FindPortAssociationRecord(ctx, *vpn, *association,
-        bgpvpns.WithPortAssociationFindIgnoreMissing(false),
-        bgpvpns.WithPortAssociationFindQuery("port_id", *port))
+        request.IgnoreMissing(false),
+        request.Query("port_id", *port))
     if err != nil { log.Fatal(err) }
     data, err := json.MarshalIndent(row.Resource, "", "  ")
     if err != nil { log.Fatal(err) }

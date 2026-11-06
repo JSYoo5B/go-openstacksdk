@@ -176,7 +176,7 @@ func TestPythonQoSPolicyDeleteDefaultsStrictOptionsAndSourceStatuses(t *testing.
 				})
 				var options []policies.DeleteOption
 				if strict {
-					options = []policies.DeleteOption{policies.WithDeleteIgnoreMissing(false)}
+					options = []policies.DeleteOption{request.IgnoreMissing(false)}
 				}
 				err := api.DeleteWithOptions(context.Background(), "literal.id", options...)
 				if code < 400 || code == 404 && !strict {
@@ -207,10 +207,10 @@ func TestPythonQoSPolicyDeleteDefaultsStrictOptionsAndSourceStatuses(t *testing.
 				t.Fatal(err)
 			}
 		}
-		if err := api.DeleteWithOptions(context.Background(), "gone", option, policies.WithDeleteIgnoreMissing(true)); err != nil {
+		if err := api.DeleteWithOptions(context.Background(), "gone", option, request.IgnoreMissing(true)); err != nil {
 			t.Fatal(err)
 		}
-		if err := api.DeleteWithOptions(context.Background(), "gone", policies.WithDeleteIgnoreMissing(false), policies.WithDeleteOptions(policies.DeleteOpts{})); err != nil {
+		if err := api.DeleteWithOptions(context.Background(), "gone", request.IgnoreMissing(false), policies.WithDeleteOptions(policies.DeleteOpts{})); err != nil {
 			t.Fatal(err)
 		}
 		if len(calls) != 4 {
