@@ -13,7 +13,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.API.FindRecord`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithRecordFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithRecordFindQuery`
 
 - FindRecord with ignore-missing true and a filter query sends GET /{collection}/{name_or_id}?filters first, falls back to GET /{collection}?name=...&filters, returns the single match, and returns nil without error when nothing matches, for networks, routers, subnets and ports.
@@ -23,7 +23,7 @@ Python/Go differences:
 
 - Python returns a Network Resource or None; Go returns a record with Resource/Wire attribute views and the raw response, or nil.
 - The cloud filters dict maps to repeated WithRecordFindQuery options; the docstring's jmespath string form does not work in Python either because filters are expanded with **.
-- Python's ignore_missing=True is explicit here; Go callers pass WithRecordFindIgnoreMissing(true), which is also the FindRecord default.
+- Python's ignore_missing=True is explicit here; Go callers pass request.IgnoreMissing(true), which is also the FindRecord default.
 - Python negotiates the Neutron microversion per resource; Go sends the configured client version (Neutron v2.0 has no microversions in practice).
 
 ### `python:cloud/_network/NetworkCloudMixin/get_router`
@@ -33,7 +33,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.API.FindRecord`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRecordFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRecordFindQuery`
 
 - FindRecord with ignore-missing true and a filter query sends GET /{collection}/{name_or_id}?filters first, falls back to GET /{collection}?name=...&filters, returns the single match, and returns nil without error when nothing matches, for networks, routers, subnets and ports.
@@ -43,7 +43,7 @@ Python/Go differences:
 
 - Python returns a Router Resource or None; Go returns a record with Resource/Wire attribute views and the raw response, or nil.
 - The cloud filters dict maps to repeated WithRecordFindQuery options; the docstring's jmespath string form does not work in Python either because filters are expanded with **.
-- Python's ignore_missing=True is explicit here; Go callers pass WithRecordFindIgnoreMissing(true), which is also the FindRecord default.
+- Python's ignore_missing=True is explicit here; Go callers pass request.IgnoreMissing(true), which is also the FindRecord default.
 - Python negotiates the Neutron microversion per resource; Go sends the configured client version (Neutron v2.0 has no microversions in practice).
 
 ### `python:cloud/_network/NetworkCloudMixin/get_subnet`
@@ -53,7 +53,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.API.FindRecord`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordFindQuery`
 
 - FindRecord with ignore-missing true and a filter query sends GET /{collection}/{name_or_id}?filters first, falls back to GET /{collection}?name=...&filters, returns the single match, and returns nil without error when nothing matches, for networks, routers, subnets and ports.
@@ -63,7 +63,7 @@ Python/Go differences:
 
 - Python returns a Subnet Resource or None; Go returns a record with Resource/Wire attribute views and the raw response, or nil.
 - The cloud filters dict maps to repeated WithRecordFindQuery options; the docstring's jmespath string form does not work in Python either because filters are expanded with **.
-- Python's ignore_missing=True is explicit here; Go callers pass WithRecordFindIgnoreMissing(true), which is also the FindRecord default.
+- Python's ignore_missing=True is explicit here; Go callers pass request.IgnoreMissing(true), which is also the FindRecord default.
 - Python negotiates the Neutron microversion per resource; Go sends the configured client version (Neutron v2.0 has no microversions in practice).
 
 ### `python:cloud/_network/NetworkCloudMixin/get_port`
@@ -73,7 +73,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.FindRecord`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithRecordFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithRecordFindQuery`
 
 - FindRecord with ignore-missing true and a filter query sends GET /{collection}/{name_or_id}?filters first, falls back to GET /{collection}?name=...&filters, returns the single match, and returns nil without error when nothing matches, for networks, routers, subnets and ports.
@@ -83,7 +83,7 @@ Python/Go differences:
 
 - Python returns a Port Resource or None; Go returns a record with Resource/Wire attribute views and the raw response, or nil.
 - The cloud filters dict maps to repeated WithRecordFindQuery options; the docstring's jmespath string form does not work in Python either because filters are expanded with **.
-- Python's ignore_missing=True is explicit here; Go callers pass WithRecordFindIgnoreMissing(true), which is also the FindRecord default.
+- Python's ignore_missing=True is explicit here; Go callers pass request.IgnoreMissing(true), which is also the FindRecord default.
 - Python negotiates the Neutron microversion per resource; Go sends the configured client version (Neutron v2.0 has no microversions in practice).
 
 ### `python:cloud/_network/NetworkCloudMixin/get_network_by_id`
@@ -177,7 +177,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.FindRecord`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithRecordFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.DeleteWithOptions`
 
 - FindRecord with ignore-missing returns nil without any DELETE for an absent name; otherwise DeleteWithOptions on the found ID sends DELETE without a body, ignores a racing 404, and returns a 409 as an error, for ports, routers and subnets.
@@ -196,7 +196,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.API.FindRecord`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRecordFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.API.DeleteWithOptions`
 
 - FindRecord with ignore-missing returns nil without any DELETE for an absent name; otherwise DeleteWithOptions on the found ID sends DELETE without a body, ignores a racing 404, and returns a 409 as an error, for ports, routers and subnets.
@@ -215,7 +215,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.API.FindRecord`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.API.DeleteWithOptions`
 
 - FindRecord with ignore-missing returns nil without any DELETE for an absent name; otherwise DeleteWithOptions on the found ID sends DELETE without a body, ignores a racing 404, and returns a 409 as an error, for ports, routers and subnets.
@@ -245,7 +245,7 @@ Go API:
 Python/Go differences:
 
 - Python Resource.find falls back to the name list after a 400 or 403 member GET and matches rows by ID or name; Go Find(resource.ID) treats only 404 as absent and Find(resource.Name) uses the server-side name filter.
-- Gophercloud CreateOpts uses omitempty, so an empty name or an empty firewall_rules list is omitted rather than sent; WithCreateField cannot override these core fields.
+- Gophercloud CreateOpts uses omitempty, so an empty name or an empty firewall_rules list is omitted rather than sent; request.Field cannot override these core fields.
 - Python returns a FirewallPolicy Resource; Go returns the native Gophercloud Policy struct.
 
 ### `python:cloud/_network/NetworkCloudMixin/create_firewall_group`
@@ -259,7 +259,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.Name`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.FindRecord`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithRecordFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups.API.Create`
 
 - Ingress/egress policy names resolve through Find(ID) then Find(Name), each port resolves through ports FindRecord with ignore-missing false (ErrNotFound before POST when absent), and one POST /fwaas/firewall_groups carries ingress_firewall_policy_id, egress_firewall_policy_id and the port IDs.
@@ -279,12 +279,12 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.API.CreateRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.WithCreateRecordOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.WithCreateRecordField`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.WithCreateRecordHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/request.Present`
 - `github.com/JSYoo5B/go-openstacksdk/request.Null`
 
-- CreateRecord sends POST fwaas/firewall_rules with an empty firewall_rule object for no arguments and otherwise only the supplied attributes, including protocol null, enabled false, an empty description, extension keys and a declared key with another JSON type through WithCreateRecordField when the typed field is omitted, accepts 200, 201 and 202, and decodes enveloped, flat and empty responses.
+- CreateRecord sends POST fwaas/firewall_rules with an empty firewall_rule object for no arguments and otherwise only the supplied attributes, including protocol null, enabled false, an empty description, extension keys and a declared key with another JSON type through request.Field when the typed field is omitted, accepts 200, 201 and 202, and decodes enveloped, flat and empty responses.
   Tests: `network/v2/extensions/fwaas_v2/rules/python_create_record_test.go:TestPythonFirewallRuleCreateRecordSendsOnlyGivenAttributes`.
 - A blank extension key, a nil option, an extension that repeats a supplied typed key and a nil API fail before HTTP with resource.ErrInvalidOption, and a 400 response is returned as the Gophercloud status error wrapped in a rules resource.OperationError.
   Tests: `network/v2/extensions/fwaas_v2/rules/python_create_record_test.go:TestPythonFirewallRuleCreateRecordRejectsInputsAndErrorStatuses`.
@@ -292,7 +292,7 @@ Go API:
 Python/Go differences:
 
 - Python returns the FirewallRule Resource merged from request attributes and the response; Go returns RuleRecord with the typed Rule, the raw response object fields, headers and status.
-- Go rejects the same key supplied both in CreateRecordOpts and WithCreateRecordField, which Python keyword arguments cannot express.
+- Go rejects the same key supplied both in CreateRecordOpts and request.Field, which Python keyword arguments cannot express.
 - A response field that does not fit the Gophercloud Rule model, such as a string firewall_policy_id, fails the Go typed decode while Python keeps it.
 
 ### `python:cloud/_network/NetworkCloudMixin/create_router`
@@ -418,13 +418,13 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.FindRecord`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordFindQuery`
 - `github.com/JSYoo5B/go-openstacksdk/network.Service.GetQoSPolicyRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSPolicyFilters`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSPolicyReadOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSPolicyHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSPolicyMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.FindSourceRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordFindListBasePath`
 
@@ -510,7 +510,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.FindRecord`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.DeleteWithOptions`
 - `github.com/JSYoo5B/go-openstacksdk/network.Service.DeleteQoSPolicyRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.FindSourceRecord`
@@ -565,12 +565,12 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.FindRecord`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.GetBandwidthLimitRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network.Service.GetQoSBandwidthLimitRule`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSBandwidthLimitOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSBandwidthLimitHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSBandwidthLimitMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - After the cloud extension gate, Go sends the same GET /extensions, QoS policy GET-then-name-list find, rule GET/POST/DELETE, rule-type GET, policy POST and policy DELETE requests, while a rule DELETE 404 stays an error.
   Tests: `network/python_cloud_parity_a_test.go:TestPythonCloudQoSRequestsAfterExtensionGate`.
@@ -602,7 +602,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.FindRecord`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.CreateBandwidthLimitRule`
 - `github.com/JSYoo5B/go-openstacksdk/network.Service.CreateQoSBandwidthLimitRuleRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.CreateCloudBandwidthLimitRecord`
@@ -649,17 +649,14 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.FindRecord`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.DeleteBandwidthLimitRule`
 - `github.com/JSYoo5B/go-openstacksdk/network.Service.DeleteQoSBandwidthLimitRule`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleDeleteOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleDeleteHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleDeleteMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.DeleteBandwidthLimitRecord`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithQoSRuleDeleteOpts`
-- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.DeleteBandwidthLimitRecord`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithQoSRuleDeleteOpts`
 
 - After the cloud extension gate, Go sends the same GET /extensions, QoS policy GET-then-name-list find, rule GET/POST/DELETE, rule-type GET, policy POST and policy DELETE requests, while a rule DELETE 404 stays an error.
   Tests: `network/python_cloud_parity_a_test.go:TestPythonCloudQoSRequestsAfterExtensionGate`.
@@ -710,7 +707,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.FindRecord`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.GetDSCPMarkingRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network.Service.GetQoSDSCPMarkingRule`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithDSCPMarkingCloudOpts`
@@ -745,7 +742,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.FindRecord`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.CreateDSCPMarkingRule`
 - `github.com/JSYoo5B/go-openstacksdk/network.Service.CreateQoSDSCPMarkingRuleRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.CreateCloudDSCPMarkingRecord`
@@ -790,17 +787,14 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.FindRecord`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.DeleteDSCPMarkingRule`
 - `github.com/JSYoo5B/go-openstacksdk/network.Service.DeleteQoSDSCPMarkingRule`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleDeleteOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleDeleteHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleDeleteMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.DeleteDSCPMarkingRecord`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithQoSRuleDeleteOpts`
-- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.DeleteDSCPMarkingRecord`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithQoSRuleDeleteOpts`
 
 - After the cloud extension gate, Go sends the same GET /extensions, QoS policy GET-then-name-list find, rule GET/POST/DELETE, rule-type GET, policy POST and policy DELETE requests, while a rule DELETE 404 stays an error.
   Tests: `network/python_cloud_parity_a_test.go:TestPythonCloudQoSRequestsAfterExtensionGate`.
@@ -851,7 +845,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.FindRecord`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.GetMinimumBandwidthRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network.Service.GetQoSMinimumBandwidthRule`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithMinimumBandwidthCloudOpts`
@@ -886,7 +880,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.FindRecord`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.CreateMinimumBandwidthRule`
 - `github.com/JSYoo5B/go-openstacksdk/network.Service.CreateQoSMinimumBandwidthRuleRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.CreateCloudMinimumBandwidthRecord`
@@ -932,17 +926,14 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.FindRecord`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.DeleteMinimumBandwidthRule`
 - `github.com/JSYoo5B/go-openstacksdk/network.Service.DeleteQoSMinimumBandwidthRule`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleDeleteOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleDeleteHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleDeleteMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.DeleteMinimumBandwidthRecord`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithQoSRuleDeleteOpts`
-- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.DeleteMinimumBandwidthRecord`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithQoSRuleDeleteOpts`
 
 - After the cloud extension gate, Go sends the same GET /extensions, QoS policy GET-then-name-list find, rule GET/POST/DELETE, rule-type GET, policy POST and policy DELETE requests, while a rule DELETE 404 stays an error.
   Tests: `network/python_cloud_parity_a_test.go:TestPythonCloudQoSRequestsAfterExtensionGate`.

@@ -126,8 +126,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.Service.ListQoSBandwidthLimitRules`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSBandwidthLimitOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSBandwidthLimitFilters`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSBandwidthLimitHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSBandwidthLimitMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ProxyBandwidthLimitRecords`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/request.BasePath`
@@ -163,8 +163,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.Service.SearchQoSBandwidthLimitRules`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSBandwidthLimitOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSBandwidthLimitFilters`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSBandwidthLimitHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSBandwidthLimitMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ProxyBandwidthLimitRecords`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/request.BasePath`
@@ -207,8 +207,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.GetBandwidthLimitRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network.Service.GetQoSBandwidthLimitRule`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSBandwidthLimitOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSBandwidthLimitHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSBandwidthLimitMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - After the cloud extension gate, Go sends the same GET /extensions, QoS policy GET-then-name-list find, rule GET/POST/DELETE, rule-type GET, policy POST and policy DELETE requests, while a rule DELETE 404 stays an error.
   Tests: `network/python_cloud_parity_a_test.go:TestPythonCloudQoSRequestsAfterExtensionGate`.

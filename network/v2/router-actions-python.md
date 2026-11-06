@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.API.AddExternalGatewaysRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRouterActionOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRouterActionHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRouterActionSeed`
 
 - One PUT uses the literal router ID and the exact pinned action route, without prefetch or envelope/alias/body default synthesis. Complete positional JSON preserves omitted/null/false/zero/empty/nested unknown values and large integers; Python None corresponds to bodyless nil while explicit RawMessage null is a documented Go input.
@@ -48,7 +48,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.API.AddExtraRoutesRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRouterActionOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRouterActionHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRouterActionSeed`
 
 - One PUT uses the literal router ID and the exact pinned action route, without prefetch or envelope/alias/body default synthesis. Complete positional JSON preserves omitted/null/false/zero/empty/nested unknown values and large integers; Python None corresponds to bodyless nil while explicit RawMessage null is a documented Go input.
@@ -82,7 +82,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.API.RemoveExternalGatewaysRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRouterActionOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRouterActionHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRouterActionSeed`
 
 - One PUT uses the literal router ID and the exact pinned action route, without prefetch or envelope/alias/body default synthesis. Complete positional JSON preserves omitted/null/false/zero/empty/nested unknown values and large integers; Python None corresponds to bodyless nil while explicit RawMessage null is a documented Go input.
@@ -116,7 +116,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.API.RemoveExtraRoutesRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRouterActionOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRouterActionHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRouterActionSeed`
 
 - One PUT uses the literal router ID and the exact pinned action route, without prefetch or envelope/alias/body default synthesis. Complete positional JSON preserves omitted/null/false/zero/empty/nested unknown values and large integers; Python None corresponds to bodyless nil while explicit RawMessage null is a documented Go input.
@@ -150,7 +150,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.API.UpdateExternalGatewaysRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRouterActionOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRouterActionHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRouterActionSeed`
 
 - One PUT uses the literal router ID and the exact pinned action route, without prefetch or envelope/alias/body default synthesis. Complete positional JSON preserves omitted/null/false/zero/empty/nested unknown values and large integers; Python None corresponds to bodyless nil while explicit RawMessage null is a documented Go input.
@@ -269,7 +269,7 @@ cached := &resource.RawResource{Metadata: resource.Metadata{Body: map[string]jso
 }}}
 row, err := api.AddExtraRoutesRecord(ctx, "ROUTER_ID", json.RawMessage(`{"router":{"routes":[]}}`),
     routers.WithRouterActionSeed(cached),
-    routers.WithRouterActionHeaders(map[string]string{"X-Client-Trace": "router-action"}))
+    request.Headers(map[string]string{"X-Client-Trace": "router-action"}))
 ```
 
 ## References

@@ -15,7 +15,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.API.AddAddressesRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithAddressActionOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithAddressActionSeed`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithAddressActionHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 
 - One envelope-free PUT uses the fixed resource/action route; explicit null/false/zero/empty and nested unknown extension values are preserved without native required-field/default coercion. Trunk removal alone follows Source list(subports) for JSON arrays, ordered object keys and Unicode strings and rejects noniterables before HTTP.
   Tests: `network/v2/extensions/security/addressgroups/python_actions_contracts_test.go:TestPythonAddressActionsRoutesInputsAndEmptyValues`.
@@ -44,7 +44,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.API.AddSubportsRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithSubportActionOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithSubportActionSeed`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithSubportActionHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 
 - One envelope-free PUT uses the fixed resource/action route; explicit null/false/zero/empty and nested unknown extension values are preserved without native required-field/default coercion. Trunk removal alone follows Source list(subports) for JSON arrays, ordered object keys and Unicode strings and rejects noniterables before HTTP.
   Tests: `network/v2/extensions/trunks/python_actions_contracts_test.go:TestPythonTrunkActionsRoutesInputsAndEmptyValues`.
@@ -73,7 +73,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.API.RemoveSubportsRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithSubportActionOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithSubportActionSeed`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithSubportActionHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 
 - One envelope-free PUT uses the fixed resource/action route; explicit null/false/zero/empty and nested unknown extension values are preserved without native required-field/default coercion. Trunk removal alone follows Source list(subports) for JSON arrays, ordered object keys and Unicode strings and rejects noniterables before HTTP.
   Tests: `network/v2/extensions/trunks/python_actions_contracts_test.go:TestPythonTrunkActionsRoutesInputsAndEmptyValues`.
@@ -102,7 +102,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.API.RemoveAddressesRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithAddressActionOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithAddressActionSeed`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithAddressActionHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 
 - One envelope-free PUT uses the fixed resource/action route; explicit null/false/zero/empty and nested unknown extension values are preserved without native required-field/default coercion. Trunk removal alone follows Source list(subports) for JSON arrays, ordered object keys and Unicode strings and rejects noniterables before HTTP.
   Tests: `network/v2/extensions/security/addressgroups/python_actions_contracts_test.go:TestPythonAddressActionsRoutesInputsAndEmptyValues`.

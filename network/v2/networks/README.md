@@ -36,12 +36,12 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithRecordListOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithRecordListQuery`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithRecordListMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithRecordListBasePath`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithRecordListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithRecordListJMESPath`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithRecordListConflictingAttrs`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.API.ProxyCloudListRecords`

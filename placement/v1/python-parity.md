@@ -15,7 +15,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/placement/v1/allocationcandidates.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/placement/v1/allocationcandidates.WithListOptions`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
-- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/request.WithQueryValues`
 
 - At placement 1.34 List sends GET allocation_candidates with repeated required and member_of, single resources, limit and group_policy, and suffixed resources1, required1, member_of1 and in_tree1, and decodes every allocation request with its mappings and the provider summaries.
@@ -224,7 +223,7 @@ Go API:
 Python/Go differences:
 
 - Python negotiates min(Resource._max_microversion, server maximum) per call unless the session sets a default; Go sends the service client's Microversion string unchanged, so the caller builds a client with the matching value. Python pins 1.20.
-- Python id and parent_provider_id map to Go CreateOpts.UUID and ParentProviderUUID; Go always sends name, other Body keys need WithCreateField.
+- Python id and parent_provider_id map to Go CreateOpts.UUID and ParentProviderUUID; Go always sends name, other Body keys need request.Field.
 - Go accepts only 200, matching the 1.20 Python negotiation; below 1.20 the bodyless 201 is an error.
 
 ### `python:placement/v1/delete_resource_provider`
@@ -323,7 +322,7 @@ Go API:
 Python/Go differences:
 
 - Python negotiates min(Resource._max_microversion, server maximum) per call unless the session sets a default; Go sends the service client's Microversion string unchanged, so the caller builds a client with the matching value. Python pins 1.20.
-- Python maps id to uuid, drops unknown keys and filters other Body attributes locally; Go forwards extra keys with WithListQuery and leaves Body filtering to the caller except exact name via resource.WithName.
+- Python maps id to uuid, drops unknown keys and filters other Body attributes locally; Go forwards extra keys with request.Query and leaves Body filtering to the caller except exact name via resource.WithName.
 - Repeated member_of or required keys (1.24+/1.39) cannot be sent from Go; Python can send them only after raising the session microversion above its 1.20 default.
 
 ### `python:placement/v1/fetch_resource_provider_aggregates`
@@ -609,7 +608,7 @@ Go API:
 Python/Go differences:
 
 - Python negotiates min(Resource._max_microversion, server maximum) per call unless the session sets a default; Go sends the service client's Microversion string unchanged, so the caller builds a client with the matching value. Python pins 1.6.
-- Python sends only name and associated and passes values unchanged, so a Python bool is sent as True; Go encodes Associated as true or false and forwards extra keys via WithListQuery.
+- Python sends only name and associated and passes values unchanged, so a Python bool is sent as True; Go encodes Associated as true or false and forwards extra keys via request.Query.
 - Python yields Trait Resources; Go yields *string names.
 
 ### `python:placement/v1/get_resource_provider_trait`

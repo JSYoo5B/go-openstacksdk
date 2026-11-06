@@ -22,7 +22,7 @@ Go API:
 Python/Go differences:
 
 - Python accepts an ID or a Resource and returns a mutable Resource; Go takes an ID string and returns the Gophercloud v2.15.0 typed model, so response fields outside that model are dropped.
-- Python sends every supplied attribute, including empty strings and unknown keys; Go CreateOpts drops empty strings through omitempty and WithCreateField cannot rewrite a declared key, so an explicit empty or null value for a declared field cannot be sent on create.
+- Python sends every supplied attribute, including empty strings and unknown keys; Go CreateOpts drops empty strings through omitempty and request.Field cannot rewrite a declared key, so an explicit empty or null value for a declared field cannot be sent on create.
 
 ### `python:network/v2/update_firewall_group`
 
@@ -123,14 +123,14 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups.API.All`
 
-- List with WithListOptions(ListOpts{Name, Status, ProjectID, Ports}) and WithListQuery for shared and fields sends the Python query mapping keys, repeats ports per value, follows firewall_groups_links, and All sends no query for firewall_groups().
+- List with WithListOptions(ListOpts{Name, Status, ProjectID, Ports}) and request.Query for shared and fields sends the Python query mapping keys, repeats ports per value, follows firewall_groups_links, and All sends no query for firewall_groups().
   Tests: `network/v2/extensions/fwaas_v2/groups/python_parity_test.go:TestPythonFirewallGroupProxyParity`.
 
 Python/Go differences:
 
 - Python filters Body attributes that are not in its query mapping (such as admin_state_up) on the returned rows; Go ListOpts sends such fields to the server and leaves other local filtering to the caller.
-- Python encodes booleans as True/False; typed Go ListOpts booleans send true/false, so WithListQuery(key, "True") reproduces the exact string.
-- WithListQuery sends one value per key, so Python's repeated fields=[a, b] query cannot be sent; typed slice fields such as ListOpts.Ports do repeat.
+- Python encodes booleans as True/False; typed Go ListOpts booleans send true/false, so request.Query(key, "True") reproduces the exact string.
+- request.Query sends one value per key, so Python's repeated fields=[a, b] query cannot be sent; typed slice fields such as ListOpts.Ports do repeat.
 - Go follows the server _links next href; Python can also continue by marker after a page that fills limit.
 - Python accepts an ID or a Resource and returns a mutable Resource; Go takes an ID string and returns the Gophercloud v2.15.0 typed model, so response fields outside that model are dropped.
 
@@ -150,7 +150,7 @@ Go API:
 Python/Go differences:
 
 - Python accepts an ID or a Resource and returns a mutable Resource; Go takes an ID string and returns the Gophercloud v2.15.0 typed model, so response fields outside that model are dropped.
-- Python sends every supplied attribute, including empty strings and unknown keys; Go CreateOpts drops empty strings through omitempty and WithCreateField cannot rewrite a declared key, so an explicit empty or null value for a declared field cannot be sent on create.
+- Python sends every supplied attribute, including empty strings and unknown keys; Go CreateOpts drops empty strings through omitempty and request.Field cannot rewrite a declared key, so an explicit empty or null value for a declared field cannot be sent on create.
 
 ### `python:network/v2/update_firewall_policy`
 
@@ -248,14 +248,14 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.API.All`
 
-- List with WithListOptions(ListOpts{Name, ProjectID}) and WithListQuery for shared, firewall_rules and fields sends the Python query mapping keys, and All sends no query for firewall_policies().
+- List with WithListOptions(ListOpts{Name, ProjectID}) and request.Query for shared, firewall_rules and fields sends the Python query mapping keys, and All sends no query for firewall_policies().
   Tests: `network/v2/extensions/fwaas_v2/policies/python_parity_test.go:TestPythonFirewallPolicyProxyParity`.
 
 Python/Go differences:
 
 - Python filters Body attributes that are not in its query mapping (such as admin_state_up) on the returned rows; Go ListOpts sends such fields to the server and leaves other local filtering to the caller.
-- Python encodes booleans as True/False; typed Go ListOpts booleans send true/false, so WithListQuery(key, "True") reproduces the exact string.
-- WithListQuery sends one value per key, so Python's repeated fields=[a, b] query cannot be sent; typed slice fields such as ListOpts.Ports do repeat.
+- Python encodes booleans as True/False; typed Go ListOpts booleans send true/false, so request.Query(key, "True") reproduces the exact string.
+- request.Query sends one value per key, so Python's repeated fields=[a, b] query cannot be sent; typed slice fields such as ListOpts.Ports do repeat.
 - Go follows the server _links next href; Python can also continue by marker after a page that fills limit.
 - Python accepts an ID or a Resource and returns a mutable Resource; Go takes an ID string and returns the Gophercloud v2.15.0 typed model, so response fields outside that model are dropped.
 
@@ -275,7 +275,7 @@ Go API:
 Python/Go differences:
 
 - Python accepts an ID or a Resource and returns a mutable Resource; Go takes an ID string and returns the Gophercloud v2.15.0 typed model, so response fields outside that model are dropped.
-- Python sends every supplied attribute, including empty strings and unknown keys; Go CreateOpts drops empty strings through omitempty and WithCreateField cannot rewrite a declared key, so an explicit empty or null value for a declared field cannot be sent on create.
+- Python sends every supplied attribute, including empty strings and unknown keys; Go CreateOpts drops empty strings through omitempty and request.Field cannot rewrite a declared key, so an explicit empty or null value for a declared field cannot be sent on create.
 - Python may omit protocol and action and let Neutron default them to any (null) and deny; Go CreateOpts requires both before HTTP, so the caller passes ProtocolAny (sent as null) and ActionDeny to get the same rule.
 
 ### `python:network/v2/update_firewall_rule`
@@ -374,14 +374,14 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.API.All`
 
-- List with WithListOptions(ListOpts{Protocol, Action, IPVersion, FirewallPolicyID}) and WithListQuery for enabled sends the Python query mapping keys, and All sends no query for firewall_rules().
+- List with WithListOptions(ListOpts{Protocol, Action, IPVersion, FirewallPolicyID}) and request.Query for enabled sends the Python query mapping keys, and All sends no query for firewall_rules().
   Tests: `network/v2/extensions/fwaas_v2/rules/python_parity_test.go:TestPythonFirewallRuleProxyParity`.
 
 Python/Go differences:
 
 - Python filters Body attributes that are not in its query mapping (such as admin_state_up) on the returned rows; Go ListOpts sends such fields to the server and leaves other local filtering to the caller.
-- Python encodes booleans as True/False; typed Go ListOpts booleans send true/false, so WithListQuery(key, "True") reproduces the exact string.
-- WithListQuery sends one value per key, so Python's repeated fields=[a, b] query cannot be sent; typed slice fields such as ListOpts.Ports do repeat.
+- Python encodes booleans as True/False; typed Go ListOpts booleans send true/false, so request.Query(key, "True") reproduces the exact string.
+- request.Query sends one value per key, so Python's repeated fields=[a, b] query cannot be sent; typed slice fields such as ListOpts.Ports do repeat.
 - Go follows the server _links next href; Python can also continue by marker after a page that fills limit.
 - Python accepts an ID or a Resource and returns a mutable Resource; Go takes an ID string and returns the Gophercloud v2.15.0 typed model, so response fields outside that model are dropped.
 

@@ -33,11 +33,11 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithRecordListOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithRecordListQuery`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithRecordListMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithRecordListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 
 - SDK-owned Resources.List/All classify all14 canonical query attributes and18 accepted spellings and exactly two non-query Body properties from pinned Trunk. Effective10 descriptors use Resource+TagMixin C3 MRO6, not NetworkResource; sourceSHA6/AST35 independently anchor defaults/accessors/types and query classification. Native created_at/updated_at/revision_number do not become semantic attributes.
   Tests: `api/trunk_list_filters_test.go:TestTrunkListFiltersEntireQueryAndAliasDescriptor`, `internal/cmd/sdkgen/trunk_filters_test.go:TestTrunkPythonManifestSeparatesQuerySubportsFromIndependentJSONIdentity`, `internal/cmd/sdkgen/trunk_filters_test.go:TestTrunkPythonPinnedSourceRequiresLiveSixSHAAndThirtyFiveASTProof`.
@@ -133,6 +133,7 @@ for trunk in conn.network.trunks(**query):
 package main
 
 import (
+	"github.com/JSYoo5B/go-openstacksdk/request"
     "context"
     "encoding/json"
     "flag"
@@ -164,8 +165,8 @@ func main() {
     service, err := conn.NetworkV2(ctx)
     if err != nil { log.Fatal(err) }
     options := []trunks.RecordListOption{
-        trunks.WithRecordListMaxItems(*cap),
-        trunks.WithRecordListPaginated(!*single),
+        request.MaxItems(*cap),
+        request.Paginated(!*single),
     }
     if *name != "" { options = append(options, trunks.WithRecordListQuery("name", *name)) }
     if *port != "" { options = append(options, trunks.WithRecordListQuery("port_id", *port)) }

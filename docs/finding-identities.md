@@ -729,9 +729,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRecordFindOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRecordFindQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRecordFindHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRecordFindMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRecordFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 
 - Pinned direct find_router (openstack/network/v2/_proxy.py:5570) accepts a string, ignore_missing=True and query. Safe identities use native GET200 /routers/id with the router envelope and native nested model/timestamp extraction. GET203/204, accepted decode and missing result-ID errors remain terminal without fallback.
   Tests: `api/find_identity_network_extensions_test.go:TestNativeFindIdentityNetworkExtensionsGETModelsAndNativeCodes`.
@@ -789,14 +789,14 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithRecordFindOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithRecordFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithRecordFindQuery`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithRecordFindLimit`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithRecordFindMarker`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithRecordFindMaxItems`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithRecordFindPaginated`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithRecordFindHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithRecordFindMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - Pinned direct find_security_group (openstack/network/v2/_proxy.py:6598) accepts a string, ignore_missing=True and query. Safe identities use native GET200 /security-groups/id with the security_group envelope and native nested model/timestamp extraction. GET203/204, accepted decode and missing result-ID errors remain terminal without fallback.
   Tests: `api/find_identity_network_extensions_test.go:TestNativeFindIdentityNetworkExtensionsGETModelsAndNativeCodes`.
@@ -857,10 +857,10 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithRecordFindOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithRecordFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithRecordFindQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithRecordFindHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithRecordFindMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithRecordFindLimit`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithRecordFindMarker`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithRecordFindMaxItems`
@@ -923,10 +923,10 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithRecordFindOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithRecordFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithRecordFindQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithRecordFindMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithRecordFindHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 
 - Pinned direct find_trunk (openstack/network/v2/_proxy.py:7869) accepts a string, ignore_missing=True and query. Native GET200 /trunks/id and trunk envelope preserve canonical IDs and typed nested model/timestamp extraction; undeclared GET203/204 and accepted decode errors remain terminal without fallback or resend.
   Tests: `api/find_identity_network_pools_trunks_test.go:TestNativeFindIdentityNetworkPoolsTrunksGETModelsAndNativeCodes`.
@@ -969,7 +969,7 @@ Python/Go differences:
 - Native Trunk time.Time decoding requires RFC3339, without a custom old timestamp normalizer. Its default pager reads links.next rather than Python trunks_links, and the SDK does not synthesize another continuation format.
 - Go returns an owned concrete Source record and context/error rather than a mutable Python Resource. Resource default/seed view, received Wire object and full HTTP receipt remain distinct. Connection-derived location is null unless explicit literal state exists; Python dirty-state/session GET cache/full Resource lifetime remain separately tracked shared SDK work.
 - Go fixed literal UTF-8 routes escape slash/percent and reject empty/dot/control segments, arbitrary base_path/list_base_path, duplicate id and constructor/session/cache controls before HTTP. Safe route ownership and all origin/filter/cycle checks are explicit Go constraints rather than arbitrary caller builder responsibilities.
-- WithRecordFindHeaders is an explicit safe Go option applied in both phases; it does not infer Python headers kwargs, which fetch treats as query/constructor input while list treats as request headers. Caller version/auth/framing header conflicts are guarded. Explicit microversion remains Source GET-only.
+- request.Headers is an explicit safe Go option applied in both phases; it does not infer Python headers kwargs, which fetch treats as query/constructor input while list treats as request headers. Caller version/auth/framing header conflicts are guarded. Explicit microversion remains Source GET-only.
 - Go max_items accepts nonnegative Go integers and preserves JSON kwargs/query conversion without Python deprecation warnings. Invalid UTF-8/incompatible JSON values return actual response or preflight errors instead of invoking arbitrary user-defined descriptor behavior.
 - These classes inherit Resource directly, so no NetworkResource If-Match descriptor or custom timestamp normalization is invented. Native typed FindIdentity/Get/List remain separate callable APIs; this new record profile implements actual declared Source aliases/defaults/continuation semantics.
 - Scalar truthiness follows CPython JSON binary64 for fraction/exponent values, including underflow, overflow and signed zero, with arbitrary precision plain integers. Numeric equality deliberately uses exact-decimal JSON instead: 1e-4000 differs from 0, 1e4000 differs from 2e4000, and 9007199254740993.0 equals integer 9007199254740993. These comparisons may differ after Python float parsing; no full numeric equality parity is claimed. Wire/Envelope bytes remain unchanged.
@@ -988,10 +988,10 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordFindOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordFindQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordFindMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordFindHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 
 - Pinned direct find_qos_policy (openstack/network/v2/_proxy.py:5130) accepts a string, ignore_missing=True and query. Native GET200 /qos/policies/id and policy envelope preserve canonical IDs and typed model extraction; undeclared GET203/204 and accepted native decode errors remain terminal without fallback or resend.
   Tests: `api/find_identity_network_qos_addresses_test.go:TestNativeFindIdentityNetworkQoSAddressesGETModelsAndNativeCodes`.
@@ -1053,10 +1053,10 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithRecordFindOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithRecordFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithRecordFindQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithRecordFindMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithRecordFindHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 
 - Pinned direct find_address_group (openstack/network/v2/_proxy.py:346) accepts a string, ignore_missing=True and query. Native GET200 /address-groups/id and address_group envelope preserve canonical IDs and typed model extraction; undeclared GET203/204 and accepted native decode errors remain terminal without fallback or resend.
   Tests: `api/find_identity_network_qos_addresses_test.go:TestNativeFindIdentityNetworkQoSAddressesGETModelsAndNativeCodes`.
@@ -1099,7 +1099,7 @@ Python/Go differences:
 - Python addresses is a declared Body local filter; Go raw addresses remains a wire query and native Addresses is a string slice. Native extraction does not provide generic unknown outer Body attributes or seeded descriptor state.
 - Go returns an owned concrete Source record and context/error rather than a mutable Python Resource. Resource default/seed view, received Wire object and full HTTP receipt remain distinct. Connection-derived location is null unless explicit literal state exists; Python dirty-state/session GET cache/full Resource lifetime remain separately tracked shared SDK work.
 - Go fixed literal UTF-8 routes escape slash/percent and reject empty/dot/control segments, arbitrary base_path/list_base_path, duplicate id and constructor/session/cache controls before HTTP. Safe route ownership and all origin/filter/cycle checks are explicit Go constraints rather than arbitrary caller builder responsibilities.
-- WithRecordFindHeaders is an explicit safe Go option applied in both phases; it does not infer Python headers kwargs, which fetch treats as query/constructor input while list treats as request headers. Caller version/auth/framing header conflicts are guarded. Explicit microversion remains Source GET-only.
+- request.Headers is an explicit safe Go option applied in both phases; it does not infer Python headers kwargs, which fetch treats as query/constructor input while list treats as request headers. Caller version/auth/framing header conflicts are guarded. Explicit microversion remains Source GET-only.
 - Go max_items accepts nonnegative Go integers and preserves JSON kwargs/query conversion without Python deprecation warnings. Invalid UTF-8/incompatible JSON values return actual response or preflight errors instead of invoking arbitrary user-defined descriptor behavior.
 - These classes inherit Resource directly, so no NetworkResource If-Match descriptor or custom timestamp normalization is invented. Native typed FindIdentity/Get/List remain separate callable APIs; this new record profile implements actual declared Source aliases/defaults/continuation semantics.
 - Scalar truthiness follows CPython JSON binary64 for fraction/exponent values, including underflow, overflow and signed zero, with arbitrary precision plain integers. Numeric equality deliberately uses exact-decimal JSON instead: 1e-4000 differs from 0, 1e4000 differs from 2e4000, and 9007199254740993.0 equals integer 9007199254740993. These comparisons may differ after Python float parsing; no full numeric equality parity is claimed. Wire/Envelope bytes remain unchanged.
@@ -1471,7 +1471,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindIgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/peers.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/peers.WithRecordFindQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/peers.WithRecordFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 
 - Retained native API: find_bgp_peer sends GET /bgp-peers/{name_or_id} with the literal identity and returns that resource without listing when the GET succeeds.
   Tests: `api/find_identity_python_finds_test.go:TestPythonFindGETByIDReturnsWithoutList`.
@@ -1502,7 +1502,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindIgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/speakers.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/speakers.WithRecordFindQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/speakers.WithRecordFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 
 - Retained native API: find_bgp_speaker sends GET /bgp-speakers/{name_or_id} with the literal identity and returns that resource without listing when the GET succeeds.
   Tests: `api/find_identity_python_finds_test.go:TestPythonFindGETByIDReturnsWithoutList`.
@@ -1803,8 +1803,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.Service.DeleteFirewallRuleRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithFirewallDeleteOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithFirewallDeleteFilters`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithFirewallDeleteHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithFirewallDeleteMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithFirewallDeleteCurrentLocation`
 
 - The strict lookup of delete_firewall_rule sends the filters on GET /fwaas/firewall_rules/{name_or_id} and on the name list and reports a missing resource as resource.ErrNotFound before any DELETE.
@@ -1834,7 +1834,7 @@ Python/Go differences:
 - Python returns a Resource object; Go returns the native typed model.
 - SDK-R1: Go returns bool plus owned Lookup/Delete receipt views instead of mutable Python Resource/cache/lifecycle objects. All declared getter fields are projected before return, so an unused malformed field may fail earlier. Source informational status and empty/malformed fetch seed behavior are implemented only on this new closed profile; legacy typed/generated APIs keep their old contracts.
 - SDK-C1: JSON bytes retain large integers and Source untyped values without native bool/int coercion. Local equality uses shared CPython-loaded numeric policy and exact raw Wire/Envelope proof. Non-JSON custom objects and unrestricted Python runtime/representation/marshal behaviors remain separately tracked; structured Go errors keep actual native status and physical/context causes.
-- SDK-S1: Go captures the original Neutron service/client/route and uses safe escaped literal member IDs with fixed protocol/header/origin guards. Arbitrary adapter/class retargeting and URI percent-format are restricted. WithFirewallDeleteHeaders/Microversion are explicit Go transport extras (headers across phases, microversion on initial GET+DELETE while fallback LIST keeps captured default). The raw Source Find controls in filters are implemented separately; filters.microversion cannot be combined with WithFirewallDeleteMicroversion because they would select two initial GET versions.
+- SDK-S1: Go captures the original Neutron service/client/route and uses safe escaped literal member IDs with fixed protocol/header/origin guards. Arbitrary adapter/class retargeting and URI percent-format are restricted. request.Headers/Microversion are explicit Go transport extras (headers across phases, microversion on initial GET+DELETE while fallback LIST keeps captured default). The raw Source Find controls in filters are implemented separately; filters.microversion cannot be combined with request.Microversion because they would select two initial GET versions.
 - Source has no FWaaS extension/has_service pre-gate for these deletes, and neither does this workflow. Shared-reader access is not permission to delete: official FWaaS2025.2 sample gives owner project member/admin ordinary delete and separate admin-only shared deletion. SDK does not elevate RBAC or unlink attached rules/policies/groups; backend conflict remains actual409.
 - Actual pinned Source156cases, standalone Python AST/byte-exact Go+Python mains and prepared fixture groups are distinct evidence. Owner did not execute Go/Git or authenticate a live cloud.
 - Raw limit filter values in the Find fallback must be nonnegative integers for the marker-fallback decision; Python's truthiness of boolean, fractional or string limits, which Neutron rejects with HTTP 400, is not reproduced; see Deliberate runtime differences in docs/sdk-support-ledger.md.
@@ -1853,8 +1853,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.Service.DeleteFirewallPolicyRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithFirewallDeleteOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithFirewallDeleteFilters`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithFirewallDeleteHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithFirewallDeleteMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithFirewallDeleteCurrentLocation`
 
 - The strict lookup of delete_firewall_policy sends the filters on GET /fwaas/firewall_policies/{name_or_id} and on the name list and reports a missing resource as resource.ErrNotFound before any DELETE.
@@ -1884,7 +1884,7 @@ Python/Go differences:
 - Python returns a Resource object; Go returns the native typed model.
 - SDK-R1: Go returns bool plus owned Lookup/Delete receipt views instead of mutable Python Resource/cache/lifecycle objects. All declared getter fields are projected before return, so an unused malformed field may fail earlier. Source informational status and empty/malformed fetch seed behavior are implemented only on this new closed profile; legacy typed/generated APIs keep their old contracts.
 - SDK-C1: JSON bytes retain large integers and Source untyped values without native bool/int coercion. Local equality uses shared CPython-loaded numeric policy and exact raw Wire/Envelope proof. Non-JSON custom objects and unrestricted Python runtime/representation/marshal behaviors remain separately tracked; structured Go errors keep actual native status and physical/context causes.
-- SDK-S1: Go captures the original Neutron service/client/route and uses safe escaped literal member IDs with fixed protocol/header/origin guards. Arbitrary adapter/class retargeting and URI percent-format are restricted. WithFirewallDeleteHeaders/Microversion are explicit Go transport extras (headers across phases, microversion on initial GET+DELETE while fallback LIST keeps captured default). The raw Source Find controls in filters are implemented separately; filters.microversion cannot be combined with WithFirewallDeleteMicroversion because they would select two initial GET versions.
+- SDK-S1: Go captures the original Neutron service/client/route and uses safe escaped literal member IDs with fixed protocol/header/origin guards. Arbitrary adapter/class retargeting and URI percent-format are restricted. request.Headers/Microversion are explicit Go transport extras (headers across phases, microversion on initial GET+DELETE while fallback LIST keeps captured default). The raw Source Find controls in filters are implemented separately; filters.microversion cannot be combined with request.Microversion because they would select two initial GET versions.
 - Source has no FWaaS extension/has_service pre-gate for these deletes, and neither does this workflow. Shared-reader access is not permission to delete: official FWaaS2025.2 sample gives owner project member/admin ordinary delete and separate admin-only shared deletion. SDK does not elevate RBAC or unlink attached rules/policies/groups; backend conflict remains actual409.
 - Actual pinned Source156cases, standalone Python AST/byte-exact Go+Python mains and prepared fixture groups are distinct evidence. Owner did not execute Go/Git or authenticate a live cloud.
 - Raw limit filter values in the Find fallback must be nonnegative integers for the marker-fallback decision; Python's truthiness of boolean, fractional or string limits, which Neutron rejects with HTTP 400, is not reproduced; see Deliberate runtime differences in docs/sdk-support-ledger.md.
@@ -1903,8 +1903,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.Service.DeleteFirewallGroupRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithFirewallDeleteOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithFirewallDeleteFilters`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithFirewallDeleteHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithFirewallDeleteMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithFirewallDeleteCurrentLocation`
 
 - The strict lookup of delete_firewall_group sends the filters on GET /fwaas/firewall_groups/{name_or_id} and on the name list and reports a missing resource as resource.ErrNotFound before any DELETE.
@@ -1934,7 +1934,7 @@ Python/Go differences:
 - Python returns a Resource object; Go returns the native typed model.
 - SDK-R1: Go returns bool plus owned Lookup/Delete receipt views instead of mutable Python Resource/cache/lifecycle objects. All declared getter fields are projected before return, so an unused malformed field may fail earlier. Source informational status and empty/malformed fetch seed behavior are implemented only on this new closed profile; legacy typed/generated APIs keep their old contracts.
 - SDK-C1: JSON bytes retain large integers and Source untyped values without native bool/int coercion. Local equality uses shared CPython-loaded numeric policy and exact raw Wire/Envelope proof. Non-JSON custom objects and unrestricted Python runtime/representation/marshal behaviors remain separately tracked; structured Go errors keep actual native status and physical/context causes.
-- SDK-S1: Go captures the original Neutron service/client/route and uses safe escaped literal member IDs with fixed protocol/header/origin guards. Arbitrary adapter/class retargeting and URI percent-format are restricted. WithFirewallDeleteHeaders/Microversion are explicit Go transport extras (headers across phases, microversion on initial GET+DELETE while fallback LIST keeps captured default). The raw Source Find controls in filters are implemented separately; filters.microversion cannot be combined with WithFirewallDeleteMicroversion because they would select two initial GET versions.
+- SDK-S1: Go captures the original Neutron service/client/route and uses safe escaped literal member IDs with fixed protocol/header/origin guards. Arbitrary adapter/class retargeting and URI percent-format are restricted. request.Headers/Microversion are explicit Go transport extras (headers across phases, microversion on initial GET+DELETE while fallback LIST keeps captured default). The raw Source Find controls in filters are implemented separately; filters.microversion cannot be combined with request.Microversion because they would select two initial GET versions.
 - Source has no FWaaS extension/has_service pre-gate for these deletes, and neither does this workflow. Shared-reader access is not permission to delete: official FWaaS2025.2 sample gives owner project member/admin ordinary delete and separate admin-only shared deletion. SDK does not elevate RBAC or unlink attached rules/policies/groups; backend conflict remains actual409.
 - Actual pinned Source156cases, standalone Python AST/byte-exact Go+Python mains and prepared fixture groups are distinct evidence. Owner did not execute Go/Git or authenticate a live cloud.
 - Raw limit filter values in the Find fallback must be nonnegative integers for the marker-fallback decision; Python's truthiness of boolean, fractional or string limits, which Neutron rejects with HTTP 400, is not reproduced; see Deliberate runtime differences in docs/sdk-support-ledger.md.

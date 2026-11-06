@@ -32,12 +32,12 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
-- Update sends PUT servers/{id} with only the given name plus a WithUpdateField description inside the server envelope.
+- Update sends PUT servers/{id} with only the given name plus a request.Field description inside the server envelope.
   Tests: `compute/v2/servers/python_parity_test.go:TestPythonServerGetUpdateDeleteMatchProxyRequests`.
 
 Python/Go differences:
 
-- UpdateOpts carries name, access IPs and hostname; other attributes such as description go through WithUpdateField.
+- UpdateOpts carries name, access IPs and hostname; other attributes such as description go through request.Field.
 - UpdateOpts omits empty strings, so an explicit empty value Python would send cannot be expressed for those typed keys.
 - Python skips the request when no attribute changed; Go always sends the PUT.
 - Python sends min(resource _max_microversion 2.100, server maximum) discovered per request; Go sends the one microversion configured or negotiated on the Connection client.
@@ -564,7 +564,7 @@ Go API:
 Python/Go differences:
 
 - Python rewrites policies to policy at microversion 2.64 or later and policy to policies below it, and rejects rules below 2.64; the Go caller chooses Policy and Rules or Policies for the configured microversion.
-- Keys outside CreateOpts go through WithCreateField.
+- Keys outside CreateOpts go through request.Field.
 - Python sends min(resource _max_microversion 2.64, server maximum) discovered per request; Go sends the one microversion configured or negotiated on the Connection client.
 
 ### `python:compute/v2/get_server_group`
@@ -611,12 +611,12 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.WithListOptions`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
-- List sends GET os-server-groups without a query by default and carries all_projects=True, limit and marker through WithListQuery and ListOpts.
+- List sends GET os-server-groups without a query by default and carries all_projects=True, limit and marker through request.Query and ListOpts.
   Tests: `compute/v2/servergroups/python_parity_test.go:TestPythonServerGroupListAllProjectsAndQuery`.
 
 Python/Go differences:
 
-- Typed ListOpts.AllProjects sends all_projects=true; WithListQuery("all_projects", "True") reproduces Python's spelling.
+- Typed ListOpts.AllProjects sends all_projects=true; request.Query("all_projects", "True") reproduces Python's spelling.
 - Go reads one page; Python may request a further page with a marker after a page that fills limit.
 - Python sends min(resource _max_microversion 2.64, server maximum) discovered per request; Go sends the one microversion configured or negotiated on the Connection client.
 
@@ -629,12 +629,12 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/attachinterfaces.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
-- Create posts the interfaceAttachment envelope with port_id or net_id and fixed_ips, plus a WithCreateField tag, and decodes the interface.
+- Create posts the interfaceAttachment envelope with port_id or net_id and fixed_ips, plus a request.Field tag, and decodes the interface.
   Tests: `compute/v2/attachinterfaces/python_parity_test.go:TestPythonServerInterfaceCreateGetListDeleteMatchProxyRequests`.
 
 Python/Go differences:
 
-- tag is not a CreateOpts field and goes through WithCreateField.
+- tag is not a CreateOpts field and goes through request.Field.
 - The Go Interface model has no tag field, so the 2.70 tag in the response is dropped.
 - Python accepts a Server resource or ID; Go takes the server ID string.
 - Python sends min(resource _max_microversion 2.70, server maximum) discovered per request; Go sends the one microversion configured or negotiated on the Connection client.

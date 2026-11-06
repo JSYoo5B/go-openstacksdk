@@ -19,10 +19,10 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithRecordFindOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithRecordFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithRecordFindQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithRecordFindMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithRecordFindHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 
 - Pinned direct find_trunk (openstack/network/v2/_proxy.py:7869) accepts a string, ignore_missing=True and query. Native GET200 /trunks/id and trunk envelope preserve canonical IDs and typed nested model/timestamp extraction; undeclared GET203/204 and accepted decode errors remain terminal without fallback or resend.
   Tests: `api/find_identity_network_pools_trunks_test.go:TestNativeFindIdentityNetworkPoolsTrunksGETModelsAndNativeCodes`.
@@ -65,7 +65,7 @@ Python/Go differences:
 - Native Trunk time.Time decoding requires RFC3339, without a custom old timestamp normalizer. Its default pager reads links.next rather than Python trunks_links, and the SDK does not synthesize another continuation format.
 - Go returns an owned concrete Source record and context/error rather than a mutable Python Resource. Resource default/seed view, received Wire object and full HTTP receipt remain distinct. Connection-derived location is null unless explicit literal state exists; Python dirty-state/session GET cache/full Resource lifetime remain separately tracked shared SDK work.
 - Go fixed literal UTF-8 routes escape slash/percent and reject empty/dot/control segments, arbitrary base_path/list_base_path, duplicate id and constructor/session/cache controls before HTTP. Safe route ownership and all origin/filter/cycle checks are explicit Go constraints rather than arbitrary caller builder responsibilities.
-- WithRecordFindHeaders is an explicit safe Go option applied in both phases; it does not infer Python headers kwargs, which fetch treats as query/constructor input while list treats as request headers. Caller version/auth/framing header conflicts are guarded. Explicit microversion remains Source GET-only.
+- request.Headers is an explicit safe Go option applied in both phases; it does not infer Python headers kwargs, which fetch treats as query/constructor input while list treats as request headers. Caller version/auth/framing header conflicts are guarded. Explicit microversion remains Source GET-only.
 - Go max_items accepts nonnegative Go integers and preserves JSON kwargs/query conversion without Python deprecation warnings. Invalid UTF-8/incompatible JSON values return actual response or preflight errors instead of invoking arbitrary user-defined descriptor behavior.
 - These classes inherit Resource directly, so no NetworkResource If-Match descriptor or custom timestamp normalization is invented. Native typed FindIdentity/Get/List remain separate callable APIs; this new record profile implements actual declared Source aliases/defaults/continuation semantics.
 - Scalar truthiness follows CPython JSON binary64 for fraction/exponent values, including underflow, overflow and signed zero, with arbitrary precision plain integers. Numeric equality deliberately uses exact-decimal JSON instead: 1e-4000 differs from 0, 1e4000 differs from 2e4000, and 9007199254740993.0 equals integer 9007199254740993. These comparisons may differ after Python float parsing; no full numeric equality parity is claimed. Wire/Envelope bytes remain unchanged.
@@ -84,10 +84,10 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithRecordFindOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithRecordFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithRecordFindQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithRecordFindMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithRecordFindHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 
 - Pinned direct find_address_group (openstack/network/v2/_proxy.py:346) accepts a string, ignore_missing=True and query. Native GET200 /address-groups/id and address_group envelope preserve canonical IDs and typed model extraction; undeclared GET203/204 and accepted native decode errors remain terminal without fallback or resend.
   Tests: `api/find_identity_network_qos_addresses_test.go:TestNativeFindIdentityNetworkQoSAddressesGETModelsAndNativeCodes`.
@@ -130,7 +130,7 @@ Python/Go differences:
 - Python addresses is a declared Body local filter; Go raw addresses remains a wire query and native Addresses is a string slice. Native extraction does not provide generic unknown outer Body attributes or seeded descriptor state.
 - Go returns an owned concrete Source record and context/error rather than a mutable Python Resource. Resource default/seed view, received Wire object and full HTTP receipt remain distinct. Connection-derived location is null unless explicit literal state exists; Python dirty-state/session GET cache/full Resource lifetime remain separately tracked shared SDK work.
 - Go fixed literal UTF-8 routes escape slash/percent and reject empty/dot/control segments, arbitrary base_path/list_base_path, duplicate id and constructor/session/cache controls before HTTP. Safe route ownership and all origin/filter/cycle checks are explicit Go constraints rather than arbitrary caller builder responsibilities.
-- WithRecordFindHeaders is an explicit safe Go option applied in both phases; it does not infer Python headers kwargs, which fetch treats as query/constructor input while list treats as request headers. Caller version/auth/framing header conflicts are guarded. Explicit microversion remains Source GET-only.
+- request.Headers is an explicit safe Go option applied in both phases; it does not infer Python headers kwargs, which fetch treats as query/constructor input while list treats as request headers. Caller version/auth/framing header conflicts are guarded. Explicit microversion remains Source GET-only.
 - Go max_items accepts nonnegative Go integers and preserves JSON kwargs/query conversion without Python deprecation warnings. Invalid UTF-8/incompatible JSON values return actual response or preflight errors instead of invoking arbitrary user-defined descriptor behavior.
 - These classes inherit Resource directly, so no NetworkResource If-Match descriptor or custom timestamp normalization is invented. Native typed FindIdentity/Get/List remain separate callable APIs; this new record profile implements actual declared Source aliases/defaults/continuation semantics.
 - Scalar truthiness follows CPython JSON binary64 for fraction/exponent values, including underflow, overflow and signed zero, with arbitrary precision plain integers. Numeric equality deliberately uses exact-decimal JSON instead: 1e-4000 differs from 0, 1e4000 differs from 2e4000, and 9007199254740993.0 equals integer 9007199254740993. These comparisons may differ after Python float parsing; no full numeric equality parity is claimed. Wire/Envelope bytes remain unchanged.
@@ -161,6 +161,7 @@ with openstack.connect(cloud="devstack") as conn:
 package main
 
 import (
+	"github.com/JSYoo5B/go-openstacksdk/request"
     "context"
     "encoding/json"
     "flag"
@@ -182,7 +183,7 @@ func run(ctx context.Context, cloud, kind, identity, project string) (*resource.
     switch kind {
     case "trunk":
         options := []trunks.RecordFindOption{
-            trunks.WithRecordFindIgnoreMissing(false),
+            request.IgnoreMissing(false),
             trunks.WithRecordFindQuery("is_admin_state_up", false),
         }
         if project != "" { options = append(options, trunks.WithRecordFindQuery("project_id", project)) }
@@ -191,7 +192,7 @@ func run(ctx context.Context, cloud, kind, identity, project string) (*resource.
         return record.Resource, nil
     case "address-group":
         options := []addressgroups.RecordFindOption{
-            addressgroups.WithRecordFindIgnoreMissing(false),
+            request.IgnoreMissing(false),
         }
         if project != "" { options = append(options, addressgroups.WithRecordFindQuery("project_id", project)) }
         record, err := network.SecurityAddressGroups.FindRecord(ctx, identity, options...)

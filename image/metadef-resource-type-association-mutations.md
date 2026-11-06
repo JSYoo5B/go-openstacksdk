@@ -21,7 +21,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithCreatePropertiesTarget`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.NamespaceScope.CreateRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordCreateOpts`
-- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordCreateHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordCreateAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordCreateAttributes`
@@ -126,6 +125,7 @@ conn.image.delete_metadef_resource_type_association(
 package main
 
 import (
+	"github.com/JSYoo5B/go-openstacksdk/request"
     "context"
     "encoding/json"
     "errors"
@@ -207,14 +207,14 @@ func run(ctx context.Context, cloud, namespace, resourceType, action, prefix, ta
             types.WithRecordCreateAttributes(map[string]any{
                 "name": resourceType, "prefix": prefix, "properties_target": target,
             }),
-            types.WithRecordCreateHeader("X-Request-Source", "association-example"),
+            request.Header("X-Request-Source", "association-example"),
         )
         if createErr != nil { return errors.Join(createErr, printFailure(createErr)) }
         return printRecord(record)
     case "delete":
         ack, deleteErr := scope.DeleteRecord(ctx, types.RecordRequest{ID: resourceType},
             types.WithDeleteIgnoreMissing(!strictMissing),
-            types.WithDeleteHeader("X-Request-Source", "association-example"),
+            request.Header("X-Request-Source", "association-example"),
         )
         if ack != nil {
             if err := printJSON(ack); err != nil { return errors.Join(deleteErr, err) }
@@ -223,8 +223,8 @@ func run(ctx context.Context, cloud, namespace, resourceType, action, prefix, ta
         return nil
     default:
         records, readErr := scope.AllRecords(ctx,
-            types.WithRecordListPaginated(false),
-            types.WithRecordListHeader("X-Request-Source", "association-example"),
+            request.Paginated(false),
+            request.Header("X-Request-Source", "association-example"),
         )
         for _, record := range records {
             if err := printRecord(record); err != nil { return errors.Join(readErr, err) }

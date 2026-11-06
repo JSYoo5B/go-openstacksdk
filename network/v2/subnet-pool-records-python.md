@@ -19,10 +19,10 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithRecordFindOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithRecordFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithRecordFindQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithRecordFindHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithRecordFindMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithRecordFindLimit`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithRecordFindMarker`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithRecordFindMaxItems`
@@ -100,11 +100,11 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithRecordListOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithRecordListQuery`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithRecordListMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithRecordListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 
 - Ordinary SubnetPool.Resources.List/All classify the complete pinned declaration through SDK-owned WithFilter/WithFilters: sixteen canonical query fields and twenty accepted canonical/wire spellings, ten local Body properties and nine reserved list controls. SubnetPool inherits Resource+TagMixinNetwork, not NetworkResource. id remains local; queried name/project_id/default/shared/ip_version/address_scope/tags stay server-only even when returned fields differ. Generated leaf and cached Network/NetworkV2 facades share the descriptor without implicit detail GET, prefix mutation or caller builder.
   Tests: `api/subnet_pool_list_filters_test.go:TestSubnetPoolListFiltersEntireQueryAndAliasDescriptor`, `api/subnet_pool_list_filters_test.go:TestSubnetPoolListFiltersRawPresenceIntegersAndTimestamps`, `connectiontest/connection_subnet_pool_filters_test.go:TestConnectionSubnetPoolFiltersSharedFacadesAndRawDescriptors`.
@@ -171,8 +171,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.API.UpdateRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithRecordMutationOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithRecordAttribute`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithRecordMutationHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithRecordMutationMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - The concrete Go update for this operation emits exact revision_number=N for typed zero/positive/signed values, omits a nil generated condition and preserves the native route/body/response envelope. This all-nine Go matrix is evidence of Go behavior; Python conditional similarity or difference is established from the pinned class/helper sources.
   Tests: `api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsAllNativeUpdates`.

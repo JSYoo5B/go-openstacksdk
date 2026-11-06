@@ -14,8 +14,8 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.API.AddGatewayRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRouterGatewayOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRouterGatewayField`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRouterGatewayHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithSourceLegacyGatewayRoutes`
 
 - Default single-gateway intent uses stock PUT /routers/{id} external_gateway_info: addition nests preserved attrs and requires a nonblank string network_id to prevent accidental clearing; removal sends explicit null and rejects attributes rather than silently discarding them. The opt-in Source legacy routes send envelope-free kwargs without defaults; reserved proxy arguments are rejected.
@@ -51,7 +51,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRouterInterfaceSubnet`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRouterInterfacePortID`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRouterInterfaceSubnetID`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRouterInterfaceHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRouterInterfaceAdvertiseHost`
 
 - One exact Source interface PUT performs no prefetch/envelope synthesis. Truthy port wins subnet; defaults/falsy port fall back to subnet, including null. Cached Resource truthiness remains separate from its nullable ID. Deprecated port_id/subnet_id aliases override current names regardless of option order. Add emits advertise_host only when truthy; removal rejects that unsupported keyword.
@@ -81,8 +81,8 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.API.RemoveGatewayRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRouterGatewayOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRouterGatewayField`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRouterGatewayHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithSourceLegacyGatewayRoutes`
 
 - Default single-gateway intent uses stock PUT /routers/{id} external_gateway_info: addition nests preserved attrs and requires a nonblank string network_id to prevent accidental clearing; removal sends explicit null and rejects attributes rather than silently discarding them. The opt-in Source legacy routes send envelope-free kwargs without defaults; reserved proxy arguments are rejected.
@@ -118,7 +118,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRouterInterfaceSubnet`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRouterInterfacePortID`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRouterInterfaceSubnetID`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRouterInterfaceHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 
 - One exact Source interface PUT performs no prefetch/envelope synthesis. Truthy port wins subnet; defaults/falsy port fall back to subnet, including null. Cached Resource truthiness remains separate from its nullable ID. Deprecated port_id/subnet_id aliases override current names regardless of option order. Add emits advertise_host only when truthy; removal rejects that unsupported keyword.
   Tests: `network/v2/extensions/layer3/routers/python_interfaces_contracts_test.go:TestPythonRouterInterfacesSelectionDefaultsRenamedAliasesAndAdvertiseHost`.
@@ -152,7 +152,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.WithRouterInterfaceRemoveOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithRouterInterfaceRemoveSubnetID`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithRouterInterfaceRemovePortID`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithRouterInterfaceRemoveHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.API.RemoveCloudInterfaceRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRouterInterfaceOpts`
 
@@ -216,6 +216,7 @@ go run . -cloud dev -router ROUTER_ID -action remove-gateway
 package main
 
 import (
+	"github.com/JSYoo5B/go-openstacksdk/request"
     "context"
     "flag"
     "fmt"
@@ -268,7 +269,7 @@ func main() {
         }
     case "add-gateway", "remove-gateway":
         options := []routers.RouterGatewayOption{routers.WithSourceLegacyGatewayRoutes(*legacy)}
-        if *network != "" { options = append(options, routers.WithRouterGatewayField("network_id", *network)) }
+        if *network != "" { options = append(options, request.Field("network_id", *network)) }
         if *action == "add-gateway" {
             result, err = service.Routers.AddGatewayRecord(ctx, *id, options...)
         } else {

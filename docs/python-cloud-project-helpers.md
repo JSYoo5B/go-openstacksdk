@@ -28,7 +28,7 @@ ID with no lookup or to reuse one resolved project across several calls.
 - The Go helpers return the quota model (`Set`/`Get`) or the reset response (`Delete`);
   Python returns `None` for set and delete.
 - Python accepts arbitrary keyword quota names; Go uses the typed `UpdateOpts` plus
-  `WithUpdateField` for extension keys.
+  `request.Field` for extension keys.
 - Block storage in Go is Cinder v3 only; Python's helper also works against v2.
 
 ## `GetComputeLimits` and `GetComputeUsage`

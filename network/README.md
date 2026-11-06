@@ -20,9 +20,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRecordFindOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRecordFindQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRecordFindHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRecordFindMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRecordFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 
 - Pinned direct find_router (openstack/network/v2/_proxy.py:5570) accepts a string, ignore_missing=True and query. Safe identities use native GET200 /routers/id with the router envelope and native nested model/timestamp extraction. GET203/204, accepted decode and missing result-ID errors remain terminal without fallback.
   Tests: `api/find_identity_network_extensions_test.go:TestNativeFindIdentityNetworkExtensionsGETModelsAndNativeCodes`.
@@ -80,14 +80,14 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithRecordFindOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithRecordFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithRecordFindQuery`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithRecordFindLimit`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithRecordFindMarker`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithRecordFindMaxItems`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithRecordFindPaginated`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithRecordFindHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithRecordFindMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - Pinned direct find_security_group (openstack/network/v2/_proxy.py:6598) accepts a string, ignore_missing=True and query. Safe identities use native GET200 /security-groups/id with the security_group envelope and native nested model/timestamp extraction. GET203/204, accepted decode and missing result-ID errors remain terminal without fallback.
   Tests: `api/find_identity_network_extensions_test.go:TestNativeFindIdentityNetworkExtensionsGETModelsAndNativeCodes`.
@@ -148,10 +148,10 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithRecordFindOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithRecordFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithRecordFindQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithRecordFindHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithRecordFindMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithRecordFindLimit`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithRecordFindMarker`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithRecordFindMaxItems`
@@ -214,10 +214,10 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithRecordFindOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithRecordFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithRecordFindQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithRecordFindMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithRecordFindHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 
 - Pinned direct find_trunk (openstack/network/v2/_proxy.py:7869) accepts a string, ignore_missing=True and query. Native GET200 /trunks/id and trunk envelope preserve canonical IDs and typed nested model/timestamp extraction; undeclared GET203/204 and accepted decode errors remain terminal without fallback or resend.
   Tests: `api/find_identity_network_pools_trunks_test.go:TestNativeFindIdentityNetworkPoolsTrunksGETModelsAndNativeCodes`.
@@ -260,7 +260,7 @@ Python/Go differences:
 - Native Trunk time.Time decoding requires RFC3339, without a custom old timestamp normalizer. Its default pager reads links.next rather than Python trunks_links, and the SDK does not synthesize another continuation format.
 - Go returns an owned concrete Source record and context/error rather than a mutable Python Resource. Resource default/seed view, received Wire object and full HTTP receipt remain distinct. Connection-derived location is null unless explicit literal state exists; Python dirty-state/session GET cache/full Resource lifetime remain separately tracked shared SDK work.
 - Go fixed literal UTF-8 routes escape slash/percent and reject empty/dot/control segments, arbitrary base_path/list_base_path, duplicate id and constructor/session/cache controls before HTTP. Safe route ownership and all origin/filter/cycle checks are explicit Go constraints rather than arbitrary caller builder responsibilities.
-- WithRecordFindHeaders is an explicit safe Go option applied in both phases; it does not infer Python headers kwargs, which fetch treats as query/constructor input while list treats as request headers. Caller version/auth/framing header conflicts are guarded. Explicit microversion remains Source GET-only.
+- request.Headers is an explicit safe Go option applied in both phases; it does not infer Python headers kwargs, which fetch treats as query/constructor input while list treats as request headers. Caller version/auth/framing header conflicts are guarded. Explicit microversion remains Source GET-only.
 - Go max_items accepts nonnegative Go integers and preserves JSON kwargs/query conversion without Python deprecation warnings. Invalid UTF-8/incompatible JSON values return actual response or preflight errors instead of invoking arbitrary user-defined descriptor behavior.
 - These classes inherit Resource directly, so no NetworkResource If-Match descriptor or custom timestamp normalization is invented. Native typed FindIdentity/Get/List remain separate callable APIs; this new record profile implements actual declared Source aliases/defaults/continuation semantics.
 - Scalar truthiness follows CPython JSON binary64 for fraction/exponent values, including underflow, overflow and signed zero, with arbitrary precision plain integers. Numeric equality deliberately uses exact-decimal JSON instead: 1e-4000 differs from 0, 1e4000 differs from 2e4000, and 9007199254740993.0 equals integer 9007199254740993. These comparisons may differ after Python float parsing; no full numeric equality parity is claimed. Wire/Envelope bytes remain unchanged.
@@ -279,10 +279,10 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordFindOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordFindQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordFindMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordFindHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 
 - Pinned direct find_qos_policy (openstack/network/v2/_proxy.py:5130) accepts a string, ignore_missing=True and query. Native GET200 /qos/policies/id and policy envelope preserve canonical IDs and typed model extraction; undeclared GET203/204 and accepted native decode errors remain terminal without fallback or resend.
   Tests: `api/find_identity_network_qos_addresses_test.go:TestNativeFindIdentityNetworkQoSAddressesGETModelsAndNativeCodes`.
@@ -344,10 +344,10 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithRecordFindOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithRecordFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithRecordFindQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithRecordFindMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithRecordFindHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 
 - Pinned direct find_address_group (openstack/network/v2/_proxy.py:346) accepts a string, ignore_missing=True and query. Native GET200 /address-groups/id and address_group envelope preserve canonical IDs and typed model extraction; undeclared GET203/204 and accepted native decode errors remain terminal without fallback or resend.
   Tests: `api/find_identity_network_qos_addresses_test.go:TestNativeFindIdentityNetworkQoSAddressesGETModelsAndNativeCodes`.
@@ -390,7 +390,7 @@ Python/Go differences:
 - Python addresses is a declared Body local filter; Go raw addresses remains a wire query and native Addresses is a string slice. Native extraction does not provide generic unknown outer Body attributes or seeded descriptor state.
 - Go returns an owned concrete Source record and context/error rather than a mutable Python Resource. Resource default/seed view, received Wire object and full HTTP receipt remain distinct. Connection-derived location is null unless explicit literal state exists; Python dirty-state/session GET cache/full Resource lifetime remain separately tracked shared SDK work.
 - Go fixed literal UTF-8 routes escape slash/percent and reject empty/dot/control segments, arbitrary base_path/list_base_path, duplicate id and constructor/session/cache controls before HTTP. Safe route ownership and all origin/filter/cycle checks are explicit Go constraints rather than arbitrary caller builder responsibilities.
-- WithRecordFindHeaders is an explicit safe Go option applied in both phases; it does not infer Python headers kwargs, which fetch treats as query/constructor input while list treats as request headers. Caller version/auth/framing header conflicts are guarded. Explicit microversion remains Source GET-only.
+- request.Headers is an explicit safe Go option applied in both phases; it does not infer Python headers kwargs, which fetch treats as query/constructor input while list treats as request headers. Caller version/auth/framing header conflicts are guarded. Explicit microversion remains Source GET-only.
 - Go max_items accepts nonnegative Go integers and preserves JSON kwargs/query conversion without Python deprecation warnings. Invalid UTF-8/incompatible JSON values return actual response or preflight errors instead of invoking arbitrary user-defined descriptor behavior.
 - These classes inherit Resource directly, so no NetworkResource If-Match descriptor or custom timestamp normalization is invented. Native typed FindIdentity/Get/List remain separate callable APIs; this new record profile implements actual declared Source aliases/defaults/continuation semantics.
 - Scalar truthiness follows CPython JSON binary64 for fraction/exponent values, including underflow, overflow and signed zero, with arbitrary precision plain integers. Numeric equality deliberately uses exact-decimal JSON instead: 1e-4000 differs from 0, 1e4000 differs from 2e4000, and 9007199254740993.0 equals integer 9007199254740993. These comparisons may differ after Python float parsing; no full numeric equality parity is claimed. Wire/Envelope bytes remain unchanged.
@@ -423,11 +423,11 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordListOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordListQuery`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordListMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 
 - Ordinary QoSPolicy.Resources.List/All classify the complete pinned declaration through SDK-owned WithFilter/WithFilters: fifteen canonical query fields and nineteen accepted canonical/wire spellings, two local Body fields rules/tenant_id and nine reserved list controls. QoSPolicy inherits Resource+TagMixin, not NetworkResource. Queried id/name/description/project_id/is_default/shared/tags remain server-only even when returned values differ; no implicit GET, tag fetch or caller builder is added. Generated leaf and cached Network/NetworkV2 facades share this descriptor.
   Tests: `api/qos_policy_list_filters_test.go:TestQoSPolicyListFiltersEntireQueryAndAliasDescriptor`, `api/qos_policy_list_filters_test.go:TestQoSPolicyListFiltersRawRulesAndTenantPresence`, `connectiontest/connection_qos_policy_filters_test.go:TestConnectionQoSPolicyFiltersSharedFacadesAndExactRawRules`.
@@ -514,11 +514,11 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithRecordListOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithRecordListQuery`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithRecordListMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithRecordListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 
 - Ordinary AddressGroup.Resources.List/All now classify the entire pinned direct declaration through SDK-owned WithFilter/WithFilters: eight canonical and accepted query attributes, three non-query Body attributes id/tenant_id/addresses and nine reserved list controls. AddressGroup directly inherits Resource without NetworkResource or TagMixin. Query name/description/project_id are server-only; no exact local name/project predicate, implicit GET or caller builder is added. Generated leaf and cached Network/NetworkV2 facades share the descriptor.
   Tests: `api/address_group_list_filters_test.go:TestAddressGroupListFiltersEntireQueryDescriptor`, `api/address_group_list_filters_test.go:TestAddressGroupListFiltersRawBodyDescriptorAndPresence`, `connectiontest/connection_address_group_filters_test.go:TestConnectionAddressGroupFiltersSharedFacadesAndRawTenant`.
@@ -602,12 +602,12 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithRecordListOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithRecordListQuery`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithRecordListMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithRecordListBasePath`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithRecordListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithRecordListJMESPath`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithRecordListConflictingAttrs`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.API.ProxyCloudListRecords`
@@ -732,11 +732,11 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithRecordListOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithRecordListQuery`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithRecordListMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithRecordListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 
 - Ordinary SubnetPool.Resources.List/All classify the complete pinned declaration through SDK-owned WithFilter/WithFilters: sixteen canonical query fields and twenty accepted canonical/wire spellings, ten local Body properties and nine reserved list controls. SubnetPool inherits Resource+TagMixinNetwork, not NetworkResource. id remains local; queried name/project_id/default/shared/ip_version/address_scope/tags stay server-only even when returned fields differ. Generated leaf and cached Network/NetworkV2 facades share the descriptor without implicit detail GET, prefix mutation or caller builder.
   Tests: `api/subnet_pool_list_filters_test.go:TestSubnetPoolListFiltersEntireQueryAndAliasDescriptor`, `api/subnet_pool_list_filters_test.go:TestSubnetPoolListFiltersRawPresenceIntegersAndTimestamps`, `connectiontest/connection_subnet_pool_filters_test.go:TestConnectionSubnetPoolFiltersSharedFacadesAndRawDescriptors`.
@@ -815,13 +815,13 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListQuery`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListBasePath`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListConflictingAttrs`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListJMESPath`
 
 - All nine declared non-query Body fields are explicitly filterable in ordinary Resources.List/All through leaf and cached Connection.Network.API paths. Native extraction completes first, then original rows are paired by count and index without extra HTTP or ID lookup. The public native model alias is retained.

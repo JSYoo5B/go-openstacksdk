@@ -19,7 +19,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.WithRouterInterfaceRemoveOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithRouterInterfaceRemoveSubnetID`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithRouterInterfaceRemovePortID`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithRouterInterfaceRemoveHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.API.RemoveCloudInterfaceRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRouterInterfaceOpts`
 

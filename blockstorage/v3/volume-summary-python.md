@@ -30,7 +30,7 @@ Go API:
 
 Python/Go differences:
 
-- Python all_projects=True sends all_tenants=True; typed Go AllTenants sends all_tenants=true, so WithListQuery("all_tenants", "True") is needed for the identical string.
+- Python all_projects=True sends all_tenants=True; typed Go AllTenants sends all_tenants=true, so request.Query("all_tenants", "True") is needed for the identical string.
 - Python filters returned rows locally for Body attributes outside the query mapping; Go sends only query parameters and leaves local filtering to the caller.
 - Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud typed model, so response fields outside that model are dropped.
 - Python sends min(resource _max_microversion, server maximum) or the session default; Go sends the one microversion configured or negotiated on the Connection client.

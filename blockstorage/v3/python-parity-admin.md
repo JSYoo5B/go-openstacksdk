@@ -16,14 +16,14 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services.WithListOptions`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
-- Services.List sends GET os-services with no query by default, binary/host from ListOpts and limit/marker through WithListQuery exactly as the Service QueryParameters do, carries the configured microversion header, and decodes the service fields Python exposes.
+- Services.List sends GET os-services with no query by default, binary/host from ListOpts and limit/marker through request.Query exactly as the Service QueryParameters do, carries the configured microversion header, and decodes the service fields Python exposes.
   Tests: `blockstorage/v3/services/python_parity_test.go:TestPythonServicesListMatchesProxyQuery`.
 - Body attributes that Python filters locally (status, zone, ...) are applied by the Go caller over the unfiltered GET os-services rows.
   Tests: `blockstorage/v3/services/python_parity_test.go:TestPythonServicesListLocalFilterIsCallerSide`.
 
 Python/Go differences:
 
-- Python sends only binary, host, limit and marker as server query, filters other Service Body attributes locally and drops unknown keys; Go sends every ListOpts/WithListQuery value to the server and leaves local filtering to the caller.
+- Python sends only binary, host, limit and marker as server query, filters other Service Body attributes locally and drops unknown keys; Go sends every ListOpts/request.Query value to the server and leaves local filtering to the caller.
 - Python negotiates min(3.32, server maximum) for the list; Go sends the configured client microversion.
 - Python follows services_links if present; Go reads a single page (Cinder does not paginate os-services).
 - Go Service has no backend_state field and no name alias for binary, and decodes updated_at only in the zone-less layout; Python returns Service resources with every Body attribute.
@@ -38,12 +38,12 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/schedulerstats.WithListOptions`
 
-- SchedulerStats.List with WithListQuery("detail", "True") sends Python's exact GET scheduler-stats/get_pools?detail=True (ListOpts.Detail sends detail=true, the Go default omits detail), adds limit/marker as query, and decodes pool name and typed capabilities.
+- SchedulerStats.List with request.Query("detail", "True") sends Python's exact GET scheduler-stats/get_pools?detail=True (ListOpts.Detail sends detail=true, the Go default omits detail), adds limit/marker as query, and decodes pool name and typed capabilities.
   Tests: `blockstorage/v3/schedulerstats/python_parity_test.go:TestPythonBackendPoolsDetailQuery`.
 
 Python/Go differences:
 
-- Python always sends detail=True from Pools.base_path; the Go default omits detail and returns name-only pools unless WithListQuery("detail", "True") or ListOpts.Detail (lowercase true) is given.
+- Python always sends detail=True from Pools.base_path; the Go default omits detail and returns name-only pools unless request.Query("detail", "True") or ListOpts.Detail (lowercase true) is given.
 - Python sends only limit and marker as server query, filters name/capabilities locally and drops tenant_id; Go ListOpts.TenantID sends tenant_id to the server.
 - Python keeps the whole capabilities dict; Go Capabilities decodes only declared fields and converts infinite/unknown capacity strings.
 - Pools has no _max_microversion so Python uses the session default; Go sends the configured client microversion. Go reads a single page.

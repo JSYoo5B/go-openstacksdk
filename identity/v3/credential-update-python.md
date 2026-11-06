@@ -35,7 +35,7 @@ Go API:
 Python/Go differences:
 
 - The explicit Go profile accepts a literal string ID, owns copied concrete options and returns a fresh CredentialRecord; mutable Python Resource/Munch input, same-instance dirty comparison, Connection location and dynamic adapter/subclass/session hooks remain global Resource parity work.
-- Unknown Credential attrs are ignored because the pinned Resource does not allow unknown Body attrs; native Update with WithUpdateField remains available for explicit Gophercloud extension bodies.
+- Unknown Credential attrs are ignored because the pinned Resource does not allow unknown Body attrs; native Update with request.Field remains available for explicit Gophercloud extension bodies.
 - ID options are ignored to keep the explicit literal target immutable; duplicate Python literal-ID/id-kwarg TypeError is not reproduced. Go always validates ID/context/client/headers even for an otherwise empty commit.
 - WithRecordUpdateHeaders is an explicit Go request-policy extension rather than a Source dirty Header descriptor and does not alone trigger PATCH.
 - The Go fixed request policy escapes one literal member segment and retains physical rejected Read/Close/cancel/Source causes that native Gophercloud otherwise loses.
@@ -59,6 +59,7 @@ print(updated.id, updated.blob)
 package main
 
 import (
+	"github.com/JSYoo5B/go-openstacksdk/request"
     "context"
     "encoding/json"
     "flag"

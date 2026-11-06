@@ -16,7 +16,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.WithCreateOptions`
 - `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
-- Create POSTs {"region":{...}} to regions omitting empty fields (empty options send an empty envelope), spreads Extra and WithCreateField keys inside the envelope while rejecting core-tag or Extra key collisions and nil options before HTTP, decodes Extra from an explicit extra object or unknown keys, and accepts only 201.
+- Create POSTs {"region":{...}} to regions omitting empty fields (empty options send an empty envelope), spreads Extra and request.Field keys inside the envelope while rejecting core-tag or Extra key collisions and nil options before HTTP, decodes Extra from an explicit extra object or unknown keys, and accepts only 201.
   Tests: `identity/v3/regions/native_contracts_test.go:TestNativeRegionRoutesBodiesPagingAndDecode`, `identity/v3/regions/native_contracts_test.go:TestNativeRegionStatusesDecodeAndPreflight`.
 
 Python/Go differences:
@@ -50,7 +50,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.WithListOptions`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
-- List GETs regions with parent_region_id and WithListQuery parameters, follows the links.next string (null stops), accepts native pager 200/204/300 on the first page, returns io.EOF for a bodyless 204 and ends cleanly on an empty page, and rejects a nil option before HTTP.
+- List GETs regions with parent_region_id and request.Query parameters, follows the links.next string (null stops), accepts native pager 200/204/300 on the first page, returns io.EOF for a bodyless 204 and ends cleanly on an empty page, and rejects a nil option before HTTP.
   Tests: `identity/v3/regions/native_contracts_test.go:TestNativeRegionRoutesBodiesPagingAndDecode`, `identity/v3/regions/native_contracts_test.go:TestNativeRegionStatusesDecodeAndPreflight`.
 
 Python/Go differences:
@@ -68,7 +68,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.WithUpdateOptions`
 - `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
-- Update PATCHes {"region":{...}} to regions/{id} with the Description pointer able to send an empty string, no native Extra, WithUpdateField keys inside the envelope and core-key collisions or nil options rejected before HTTP, and accepts only 200.
+- Update PATCHes {"region":{...}} to regions/{id} with the Description pointer able to send an empty string, no native Extra, request.Field keys inside the envelope and core-key collisions or nil options rejected before HTTP, and accepts only 200.
   Tests: `identity/v3/regions/native_contracts_test.go:TestNativeRegionRoutesBodiesPagingAndDecode`, `identity/v3/regions/native_contracts_test.go:TestNativeRegionStatusesDecodeAndPreflight`.
 
 Python/Go differences:
@@ -102,7 +102,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.WithCreateOptions`
 - `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
-- Create POSTs {"service":{...}} to services always sending type (an empty string included) and the Enabled pointer, spreads Extra and WithCreateField keys inside the envelope while rejecting core-tag or Extra collisions and nil options before HTTP, decodes Extra with unknown keys plus name and description copies unless an extra object is present, and accepts only 201.
+- Create POSTs {"service":{...}} to services always sending type (an empty string included) and the Enabled pointer, spreads Extra and request.Field keys inside the envelope while rejecting core-tag or Extra collisions and nil options before HTTP, decodes Extra with unknown keys plus name and description copies unless an extra object is present, and accepts only 201.
   Tests: `identity/v3/services/native_contracts_test.go:TestNativeServiceRoutesBodiesPagingAndDecode`, `identity/v3/services/native_contracts_test.go:TestNativeServiceStatusesDecodeAndPreflight`.
 
 Python/Go differences:
@@ -136,7 +136,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.WithListOptions`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
-- List GETs services with type and name filters plus WithListQuery parameters, follows the links.next string (null stops), accepts native pager 200/204/300 on the first page, returns io.EOF for a bodyless 204 and ends cleanly on an empty page, and rejects a nil option before HTTP.
+- List GETs services with type and name filters plus request.Query parameters, follows the links.next string (null stops), accepts native pager 200/204/300 on the first page, returns io.EOF for a bodyless 204 and ends cleanly on an empty page, and rejects a nil option before HTTP.
   Tests: `identity/v3/services/native_contracts_test.go:TestNativeServiceRoutesBodiesPagingAndDecode`, `identity/v3/services/native_contracts_test.go:TestNativeServiceStatusesDecodeAndPreflight`.
 
 Python/Go differences:
@@ -154,7 +154,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.WithUpdateOptions`
 - `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
-- Update PATCHes {"service":{...}} to services/{id} with Name, Description and Enabled pointers able to send empty or false values, Extra and WithUpdateField keys inside the envelope, core-key collisions rejected before HTTP, and accepts only 200.
+- Update PATCHes {"service":{...}} to services/{id} with Name, Description and Enabled pointers able to send empty or false values, Extra and request.Field keys inside the envelope, core-key collisions rejected before HTTP, and accepts only 200.
   Tests: `identity/v3/services/native_contracts_test.go:TestNativeServiceRoutesBodiesPagingAndDecode`, `identity/v3/services/native_contracts_test.go:TestNativeServiceStatusesDecodeAndPreflight`.
 
 Python/Go differences:
@@ -188,7 +188,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.WithCreateOptions`
 - `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
-- Create POSTs {"endpoint":{...}} to endpoints requiring interface, url and service_id, sending the Enabled pointer and WithCreateField keys inside the envelope, rejecting missing fields, core-key collisions and nil options before HTTP, decoding region_id, and accepting the POST default 201 or 202.
+- Create POSTs {"endpoint":{...}} to endpoints requiring interface, url and service_id, sending the Enabled pointer and request.Field keys inside the envelope, rejecting missing fields, core-key collisions and nil options before HTTP, decoding region_id, and accepting the POST default 201 or 202.
   Tests: `identity/v3/endpoints/native_contracts_test.go:TestNativeEndpointRoutesBodiesPagingAndDecode`, `identity/v3/endpoints/native_contracts_test.go:TestNativeEndpointStatusesDecodeAndPreflight`.
 
 Python/Go differences:
@@ -241,7 +241,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.WithUpdateOptions`
 - `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
-- Update PATCHes {"endpoint":{...}} to endpoints/{id} omitting empty fields, sending the Enabled pointer and WithUpdateField keys inside the envelope, rejecting core-key collisions and nil options before HTTP, and accepts the PATCH default 200, 202 or 204 where a bodyless 204 returns a nil endpoint without an error.
+- Update PATCHes {"endpoint":{...}} to endpoints/{id} omitting empty fields, sending the Enabled pointer and request.Field keys inside the envelope, rejecting core-key collisions and nil options before HTTP, and accepts the PATCH default 200, 202 or 204 where a bodyless 204 returns a nil endpoint without an error.
   Tests: `identity/v3/endpoints/native_contracts_test.go:TestNativeEndpointRoutesBodiesPagingAndDecode`, `identity/v3/endpoints/native_contracts_test.go:TestNativeEndpointStatusesDecodeAndPreflight`.
 
 Python/Go differences:
@@ -309,7 +309,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/policies.WithListOptions`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
-- List GETs policies with type, TYPE__COMPARATOR Filters (also leaking a "-" Python dict parameter from the q:"-" map) and WithListQuery parameters, returns an unwrapped InvalidListFilter before HTTP for a malformed filter key, follows the links.next string (null stops), accepts native pager 200/204/300 on the first page, returns io.EOF for a bodyless 204 and ends cleanly on an empty page, and rejects a nil option before HTTP.
+- List GETs policies with type, TYPE__COMPARATOR Filters (also leaking a "-" Python dict parameter from the q:"-" map) and request.Query parameters, returns an unwrapped InvalidListFilter before HTTP for a malformed filter key, follows the links.next string (null stops), accepts native pager 200/204/300 on the first page, returns io.EOF for a bodyless 204 and ends cleanly on an empty page, and rejects a nil option before HTTP.
   Tests: `identity/v3/policies/native_contracts_test.go:TestNativePolicyRoutesBodiesPagingAndDecode`, `identity/v3/policies/native_contracts_test.go:TestNativePolicyStatusesDecodeAndPreflight`.
 
 Python/Go differences:
@@ -327,7 +327,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/policies.WithUpdateOptions`
 - `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
-- Update PATCHes {"policy":{...}} to policies/{id} omitting an empty type and blob so a WithUpdateField blob is accepted, rejecting a type over 255 characters, core-key collisions and nil options before HTTP, spreading Extra inside the envelope, and accepts only 200.
+- Update PATCHes {"policy":{...}} to policies/{id} omitting an empty type and blob so a request.Field blob is accepted, rejecting a type over 255 characters, core-key collisions and nil options before HTTP, spreading Extra inside the envelope, and accepts only 200.
   Tests: `identity/v3/policies/native_contracts_test.go:TestNativePolicyRoutesBodiesPagingAndDecode`, `identity/v3/policies/native_contracts_test.go:TestNativePolicyStatusesDecodeAndPreflight`.
 
 Python/Go differences:
@@ -411,7 +411,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/limits.WithListOptions`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
-- List GETs limits with region_id, project_id, domain_id, service_id and resource_name filters plus WithListQuery parameters, follows the links.next string (null stops), accepts native pager 200/204/300 on the first page, returns io.EOF for a bodyless 204 and ends cleanly on an empty page, and rejects a nil option before HTTP.
+- List GETs limits with region_id, project_id, domain_id, service_id and resource_name filters plus request.Query parameters, follows the links.next string (null stops), accepts native pager 200/204/300 on the first page, returns io.EOF for a bodyless 204 and ends cleanly on an empty page, and rejects a nil option before HTTP.
   Tests: `identity/v3/limits/native_contracts_test.go:TestNativeLimitRoutesBodiesPagingAndDecode`, `identity/v3/limits/native_contracts_test.go:TestNativeLimitStatusesDecodeAndPreflight`.
 
 Python/Go differences:
@@ -429,7 +429,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/limits.WithUpdateOptions`
 - `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
-- Update PATCHes {"limit":{...}} to limits/{id} with Description and ResourceLimit pointers able to send "" and 0, WithUpdateField keys inside the envelope, core-key collisions rejected before HTTP, and accepts only 200.
+- Update PATCHes {"limit":{...}} to limits/{id} with Description and ResourceLimit pointers able to send "" and 0, request.Field keys inside the envelope, core-key collisions rejected before HTTP, and accepts only 200.
   Tests: `identity/v3/limits/native_contracts_test.go:TestNativeLimitRoutesBodiesPagingAndDecode`, `identity/v3/limits/native_contracts_test.go:TestNativeLimitStatusesDecodeAndPreflight`.
 
 Python/Go differences:
@@ -497,7 +497,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.WithListOptions`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
-- List GETs registered_limits with region_id, service_id and resource_name filters plus WithListQuery parameters, follows the links.next string (null stops), accepts native pager 200/204/300 on the first page, returns io.EOF for a bodyless 204 and ends cleanly on an empty page, and rejects a nil option before HTTP.
+- List GETs registered_limits with region_id, service_id and resource_name filters plus request.Query parameters, follows the links.next string (null stops), accepts native pager 200/204/300 on the first page, returns io.EOF for a bodyless 204 and ends cleanly on an empty page, and rejects a nil option before HTTP.
   Tests: `identity/v3/registeredlimits/native_contracts_test.go:TestNativeRegisteredLimitRoutesBodiesPagingAndDecode`, `identity/v3/registeredlimits/native_contracts_test.go:TestNativeRegisteredLimitStatusesDecodeAndPreflight`.
 
 Python/Go differences:
@@ -515,7 +515,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.WithUpdateOptions`
 - `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
-- Update PATCHes {"registered_limit":{...}} to registered_limits/{id} with Description and DefaultLimit pointers able to send "" and 0, optional region_id, service_id and resource_name, WithUpdateField keys inside the envelope, core-key collisions and nil options rejected before HTTP, and accepts only 200.
+- Update PATCHes {"registered_limit":{...}} to registered_limits/{id} with Description and DefaultLimit pointers able to send "" and 0, optional region_id, service_id and resource_name, request.Field keys inside the envelope, core-key collisions and nil options rejected before HTTP, and accepts only 200.
   Tests: `identity/v3/registeredlimits/native_contracts_test.go:TestNativeRegisteredLimitRoutesBodiesPagingAndDecode`, `identity/v3/registeredlimits/native_contracts_test.go:TestNativeRegisteredLimitStatusesDecodeAndPreflight`.
 
 Python/Go differences:

@@ -33,14 +33,14 @@ type r2IronicAKind struct {
 	// create runs Create with explicit false/zero/empty values and one extension field.
 	create     func(context.Context, *gophercloud.ServiceClient) (string, error)
 	createBody string // exact expected JSON body of create
-	// createCollision tries each reserved extension name through WithCreateField.
+	// createCollision tries each reserved extension name through request.Field.
 	createCollision func(context.Context, *gophercloud.ServiceClient, string) error
 	reserved        []string
 	get             func(context.Context, *gophercloud.ServiceClient, string, ...string) (string, error)
 	update          func(context.Context, *gophercloud.ServiceClient, string, ...r2IronicAOp) (string, error)
 	del             func(context.Context, *gophercloud.ServiceClient, string) error
 	remove          func(context.Context, *gophercloud.ServiceClient, string, ...resource.LookupOption) error
-	// list returns uuids. limit and the typed filter are always set; extra adds WithListQuery.
+	// list returns uuids. limit and the typed filter are always set; extra adds request.Query.
 	list     func(ctx context.Context, c *gophercloud.ServiceClient, detail bool, limit int, filter string, fields []string, extra [][2]string) ([]string, error)
 	find     func(context.Context, *gophercloud.ServiceClient, string, ...resource.IdentityFindOption) (string, error)
 	rawKeep  func(context.Context, *gophercloud.ServiceClient, string) (bool, error) // Body/Header/StatusCode retained

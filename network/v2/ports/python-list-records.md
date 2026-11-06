@@ -23,11 +23,11 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithRecordListOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithRecordListQuery`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithRecordListMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithRecordListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithRecordListBasePath`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithRecordListJMESPath`
 
@@ -113,8 +113,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.ListSourceValues`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithSourceCloudListOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithSourceCloudListFilters`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithSourceCloudListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithSourceCloudListMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithSourceCloudListLocation`
 
 - Default bodyless /ports GET and Accept header, Source binding/DNS/security/QoS/unknown fields, missing defaults and actual page evidence.
@@ -220,8 +220,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.SearchRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithRecordSearchFilters`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithRecordSearchExpression`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithRecordSearchHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithRecordSearchMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithRecordSearchOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithRecordSearchLocation`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithRecordSearchCloudLocation`

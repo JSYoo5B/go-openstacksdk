@@ -57,7 +57,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
-- Create sends POST endpoints with only the given interface/enabled/service_id/url keys plus region_id through WithCreateField in the {"endpoint": {...}} envelope, the request Python create_endpoint sends, and decodes id, interface, region_id, service_id, url and enabled.
+- Create sends POST endpoints with only the given interface/enabled/service_id/url keys plus region_id through request.Field in the {"endpoint": {...}} envelope, the request Python create_endpoint sends, and decodes id, interface, region_id, service_id, url and enabled.
   Tests: `identity/v3/endpoints/python_parity_test.go:TestPythonEndpointCreateGetUpdateRequests`.
 
 Python/Go differences:
@@ -660,7 +660,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithQuery`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.ServiceRecord.Clone`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.WithRecordListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/request.BasePath`
@@ -737,7 +736,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
-- Update sends PATCH endpoints/{id} with only the changed keys in the {"endpoint": {...}} envelope, region_id through WithUpdateField, the request Python update_endpoint sends.
+- Update sends PATCH endpoints/{id} with only the changed keys in the {"endpoint": {...}} envelope, region_id through request.Field, the request Python update_endpoint sends.
   Tests: `identity/v3/endpoints/python_parity_test.go:TestPythonEndpointCreateGetUpdateRequests`.
 
 Python/Go differences:
@@ -747,7 +746,7 @@ Python/Go differences:
 - Keystone v3 catalog resources declare no microversion, so neither side negotiates or sends one.
 - Python commit sends no request when no attribute changed and never puts id in the PATCH body; Go Update always sends PATCH, with an empty envelope for empty options.
 - region_id is sent with request.Field("region_id", id) because UpdateOpts.Region sends the legacy region key.
-- Go UpdateOpts omits empty strings and WithUpdateField cannot override typed keys, so Python None or empty values for interface, url or service_id cannot be sent.
+- Go UpdateOpts omits empty strings and request.Field cannot override typed keys, so Python None or empty values for interface, url or service_id cannot be sent.
 
 ### `python:identity/v3/update_limit`
 
@@ -767,7 +766,7 @@ Python/Go differences:
 - Python takes an ID string or Resource and returns a mutable Resource; Go takes an ID string and returns the native Gophercloud model pointer.
 - Keystone v3 catalog resources declare no microversion, so neither side negotiates or sends one.
 - Python commit sends no request when no attribute changed and never puts id in the PATCH body; Go Update always sends PATCH, with an empty envelope for empty options.
-- Python can send any Limit attribute; Go UpdateOpts types only description and resource_limit, and other keys such as region_id go through WithUpdateField.
+- Python can send any Limit attribute; Go UpdateOpts types only description and resource_limit, and other keys such as region_id go through request.Field.
 
 ### `python:identity/v3/update_region`
 
@@ -787,7 +786,7 @@ Python/Go differences:
 - Python takes an ID string or Resource and returns a mutable Resource; Go takes an ID string and returns the native Gophercloud model pointer.
 - Keystone v3 catalog resources declare no microversion, so neither side negotiates or sends one.
 - Python commit sends no request when no attribute changed and never puts id in the PATCH body; Go Update always sends PATCH, with an empty envelope for empty options.
-- UpdateOpts.ParentRegionID omits empty values and WithUpdateField rejects parent_region_id, so Python update_region(parent_region_id=None) cannot be sent.
+- UpdateOpts.ParentRegionID omits empty values and request.Field rejects parent_region_id, so Python update_region(parent_region_id=None) cannot be sent.
 
 ### `python:identity/v3/update_registered_limit`
 
@@ -807,7 +806,7 @@ Python/Go differences:
 - Python takes an ID string or Resource and returns a mutable Resource; Go takes an ID string and returns the native Gophercloud model pointer.
 - Keystone v3 catalog resources declare no microversion, so neither side negotiates or sends one.
 - Python commit sends no request when no attribute changed and never puts id in the PATCH body; Go Update always sends PATCH, with an empty envelope for empty options.
-- UpdateOpts.RegionID, ServiceID and ResourceName omit empty values and WithUpdateField rejects those keys, so Python None values for them cannot be sent.
+- UpdateOpts.RegionID, ServiceID and ResourceName omit empty values and request.Field rejects those keys, so Python None values for them cannot be sent.
 
 ### `python:identity/v3/update_service`
 
@@ -827,7 +826,7 @@ Python/Go differences:
 - Python takes an ID string or Resource and returns a mutable Resource; Go takes an ID string and returns the native Gophercloud model pointer.
 - Keystone v3 catalog resources declare no microversion, so neither side negotiates or sends one.
 - Python commit sends no request when no attribute changed and never puts id in the PATCH body; Go Update always sends PATCH, with an empty envelope for empty options.
-- UpdateOpts.Type omits an empty value and WithUpdateField rejects type, so Python type=None cannot be sent.
+- UpdateOpts.Type omits an empty value and request.Field rejects type, so Python type=None cannot be sent.
 
 ### `python:identity/v3/wait_for_delete`
 

@@ -20,7 +20,7 @@ This guide compares the Go Octavia packages with the pinned Python `openstack.lo
 ## Shared differences
 
 - Python methods accept an ID string or a `Resource` and return mutable `Resource` objects with attribute descriptors, dirty-state tracking and an optional response cache. Go takes explicit `resource.Ref` values (`resource.ID` or `resource.Name`) or ID strings and returns the native typed model; the Resource view and the HTTP evidence stay separate.
-- Python `**attrs` and `**query` become concrete typed options plus the library-owned `WithCreateField`, `WithUpdateField` and `WithListQuery` extensions. Python-only wire keys, for example `vip_sg_ids` on load balancer create or `vip_qos_policy_id` on list, travel through those extensions.
+- Python `**attrs` and `**query` become concrete typed options plus the library-owned `request.Field`, `request.Field` and `request.Query` extensions. Python-only wire keys, for example `vip_sg_ids` on load balancer create or `vip_qos_policy_id` on list, travel through those extensions.
 - Python `find_*` tries a GET by ID, falls back to a list by name on 400/403/404 and defaults to `ignore_missing=True` (with a deprecation warning). Go `Find` is strict by default; add `resource.WithIgnoreMissing()` for the Python default. Duplicate names are an `AmbiguousError` (Python `DuplicateResource`). Amphorae and L7 rules have no name, so only ID lookup applies.
 - Python `delete_*` defaults to `ignore_missing=True`. `Remove` ignores a missing object by default; the native `API.Delete` keeps a 404 as a response error.
 - Python `update_*` sends a request only when an attribute is dirty. Go always sends the requested PUT, an empty envelope when no field is given.

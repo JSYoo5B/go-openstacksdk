@@ -166,7 +166,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
-- Create sends POST flavors with name, ram, vcpus, disk, id, os-flavor-access:is_public, OS-FLV-EXT-DATA:ephemeral and description, carries other keys through WithCreateField and decodes the flavor.
+- Create sends POST flavors with name, ram, vcpus, disk, id, os-flavor-access:is_public, OS-FLV-EXT-DATA:ephemeral and description, carries other keys through request.Field and decodes the flavor.
   Tests: `compute/v2/flavors/python_parity_test.go:TestPythonFlavorCreateDeleteMatchProxyRequests`.
 
 Python/Go differences:
@@ -540,7 +540,7 @@ Python/Go differences:
 
 - Go reads one page and does not follow migrations_links; the caller continues with Marker.
 - Python sends the caller's changes_since/changes_before strings; Go formats time.Time values as RFC3339.
-- Python filters non-query Body attributes locally; Go WithListQuery sends such keys to the server.
+- Python filters non-query Body attributes locally; Go request.Query sends such keys to the server.
 - Python sends min(Migration _max_microversion 2.80, server maximum) discovered per request; Go sends the one microversion configured or negotiated on the Connection client.
 
 ### `python:compute/v2/server_migrations`

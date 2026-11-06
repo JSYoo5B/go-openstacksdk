@@ -28,12 +28,12 @@ Go API:
   Tests: `api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsRawNativeHeaderEscapePolicy`.
 - Representative Network API exercises native307 redirect refusal or following with retained PUT/body/live auth and callback-overridden If-Match. This is one shared-path fixture, not per-API redirect coverage for the other eight.
   Tests: `api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeRedirectPolicy`.
-- Generator checks all nine current native source declarations and regenerated adapter declarations against stored facades, retaining RevisionNumber *int json:-/h:If-Match from final validated cfg.Options and existing Update/WithUpdateOptions/WithUpdateField without new helpers. Source/field/import drift mutations use Network as the representative case; owning-import/lexical alias-shadow and optional-builder/secondary-input tests are generic fixtures, not all-nine drift-case coverage.
+- Generator checks all nine current native source declarations and regenerated adapter declarations against stored facades, retaining RevisionNumber *int json:-/h:If-Match from final validated cfg.Options and existing Update/WithUpdateOptions/request.Field without new helpers. Source/field/import drift mutations use Network as the representative case; owning-import/lexical alias-shadow and optional-builder/secondary-input tests are generic fixtures, not all-nine drift-case coverage.
   Tests: `internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersActualNineNativeAdapters`, `internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersRejectNativeSourceAndRevisionDrift`, `internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersOwningImportsAndLexicalScope`, `internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersPreserveOptionalBuildersAndSecondaryInputs`.
 
 Python/Go differences:
 
-- The facade accepts native concrete UpdateOpts with library-owned private header/body adapter rather than requiring a caller UpdateOptsBuilder. Final WithUpdateOptions selects the original header-tagged concrete fields and body together, while WithUpdateField adds permitted body fields. Public signatures, aliases and extension capabilities are retained.
+- The facade accepts native concrete UpdateOpts with library-owned private header/body adapter rather than requiring a caller UpdateOptsBuilder. Final WithUpdateOptions selects the original header-tagged concrete fields and body together, while request.Field adds permitted body fields. Public signatures, aliases and extension capabilities are retained.
 - Native execution still formats If-Match from nil/non-nil signed revision pointers, preserves request/body/success/result behavior and raw MoreHeaders/OmitHeaders/native callbacks, and wraps errors in inspectable OperationError. The bridge preserves the header through adaptation; it does not protect it from native raw overrides or add unconditional conflict fallback.
 
 ### `python:network/v2/update_network`
@@ -96,12 +96,12 @@ Go API:
   Tests: `api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsAllNativeUpdates`, `api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeStatusesAndConflict`.
 - For all nine, native401 reauth,429 backoff and503 retry replay the prepared body and serialized revision through four physical requests with refreshed live auth and permitted native header addition. Caller revision mutation during reauth does not reselect the condition; the shared client remains intact.
   Tests: `api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeReplayKeepsSerializedCondition`.
-- Generator checks all nine current native source declarations and regenerated adapter declarations against stored facades, retaining RevisionNumber *int json:-/h:If-Match from final validated cfg.Options and existing Update/WithUpdateOptions/WithUpdateField without new helpers. Source/field/import drift mutations use Network as the representative case; owning-import/lexical alias-shadow and optional-builder/secondary-input tests are generic fixtures, not all-nine drift-case coverage.
+- Generator checks all nine current native source declarations and regenerated adapter declarations against stored facades, retaining RevisionNumber *int json:-/h:If-Match from final validated cfg.Options and existing Update/WithUpdateOptions/request.Field without new helpers. Source/field/import drift mutations use Network as the representative case; owning-import/lexical alias-shadow and optional-builder/secondary-input tests are generic fixtures, not all-nine drift-case coverage.
   Tests: `internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersActualNineNativeAdapters`, `internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersRejectNativeSourceAndRevisionDrift`, `internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersOwningImportsAndLexicalScope`, `internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersPreserveOptionalBuildersAndSecondaryInputs`.
 
 Python/Go differences:
 
-- The facade accepts native concrete UpdateOpts with library-owned private header/body adapter rather than requiring a caller UpdateOptsBuilder. Final WithUpdateOptions selects the original header-tagged concrete fields and body together, while WithUpdateField adds permitted body fields. Public signatures, aliases and extension capabilities are retained.
+- The facade accepts native concrete UpdateOpts with library-owned private header/body adapter rather than requiring a caller UpdateOptsBuilder. Final WithUpdateOptions selects the original header-tagged concrete fields and body together, while request.Field adds permitted body fields. Public signatures, aliases and extension capabilities are retained.
 - Native execution still formats If-Match from nil/non-nil signed revision pointers, preserves request/body/success/result behavior and raw MoreHeaders/OmitHeaders/native callbacks, and wraps errors in inspectable OperationError. The bridge preserves the header through adaptation; it does not protect it from native raw overrides or add unconditional conflict fallback.
 
 ### `python:network/v2/update_port`
@@ -160,12 +160,12 @@ Go API:
   Tests: `api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsAllNativeUpdates`, `api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeStatusesAndConflict`.
 - For all nine, native401 reauth,429 backoff and503 retry replay the prepared body and serialized revision through four physical requests with refreshed live auth and permitted native header addition. Caller revision mutation during reauth does not reselect the condition; the shared client remains intact.
   Tests: `api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeReplayKeepsSerializedCondition`.
-- Generator checks all nine current native source declarations and regenerated adapter declarations against stored facades, retaining RevisionNumber *int json:-/h:If-Match from final validated cfg.Options and existing Update/WithUpdateOptions/WithUpdateField without new helpers. Source/field/import drift mutations use Network as the representative case; owning-import/lexical alias-shadow and optional-builder/secondary-input tests are generic fixtures, not all-nine drift-case coverage.
+- Generator checks all nine current native source declarations and regenerated adapter declarations against stored facades, retaining RevisionNumber *int json:-/h:If-Match from final validated cfg.Options and existing Update/WithUpdateOptions/request.Field without new helpers. Source/field/import drift mutations use Network as the representative case; owning-import/lexical alias-shadow and optional-builder/secondary-input tests are generic fixtures, not all-nine drift-case coverage.
   Tests: `internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersActualNineNativeAdapters`, `internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersRejectNativeSourceAndRevisionDrift`, `internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersOwningImportsAndLexicalScope`, `internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersPreserveOptionalBuildersAndSecondaryInputs`.
 
 Python/Go differences:
 
-- The facade accepts native concrete UpdateOpts with library-owned private header/body adapter rather than requiring a caller UpdateOptsBuilder. Final WithUpdateOptions selects the original header-tagged concrete fields and body together, while WithUpdateField adds permitted body fields. Public signatures, aliases and extension capabilities are retained.
+- The facade accepts native concrete UpdateOpts with library-owned private header/body adapter rather than requiring a caller UpdateOptsBuilder. Final WithUpdateOptions selects the original header-tagged concrete fields and body together, while request.Field adds permitted body fields. Public signatures, aliases and extension capabilities are retained.
 - Native execution still formats If-Match from nil/non-nil signed revision pointers, preserves request/body/success/result behavior and raw MoreHeaders/OmitHeaders/native callbacks, and wraps errors in inspectable OperationError. The bridge preserves the header through adaptation; it does not protect it from native raw overrides or add unconditional conflict fallback.
 
 ### `python:network/v2/update_subnet`
@@ -224,12 +224,12 @@ Go API:
   Tests: `api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsAllNativeUpdates`, `api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeStatusesAndConflict`.
 - For all nine, native401 reauth,429 backoff and503 retry replay the prepared body and serialized revision through four physical requests with refreshed live auth and permitted native header addition. Caller revision mutation during reauth does not reselect the condition; the shared client remains intact.
   Tests: `api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeReplayKeepsSerializedCondition`.
-- Generator checks all nine current native source declarations and regenerated adapter declarations against stored facades, retaining RevisionNumber *int json:-/h:If-Match from final validated cfg.Options and existing Update/WithUpdateOptions/WithUpdateField without new helpers. Source/field/import drift mutations use Network as the representative case; owning-import/lexical alias-shadow and optional-builder/secondary-input tests are generic fixtures, not all-nine drift-case coverage.
+- Generator checks all nine current native source declarations and regenerated adapter declarations against stored facades, retaining RevisionNumber *int json:-/h:If-Match from final validated cfg.Options and existing Update/WithUpdateOptions/request.Field without new helpers. Source/field/import drift mutations use Network as the representative case; owning-import/lexical alias-shadow and optional-builder/secondary-input tests are generic fixtures, not all-nine drift-case coverage.
   Tests: `internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersActualNineNativeAdapters`, `internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersRejectNativeSourceAndRevisionDrift`, `internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersOwningImportsAndLexicalScope`, `internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersPreserveOptionalBuildersAndSecondaryInputs`.
 
 Python/Go differences:
 
-- The facade accepts native concrete UpdateOpts with library-owned private header/body adapter rather than requiring a caller UpdateOptsBuilder. Final WithUpdateOptions selects the original header-tagged concrete fields and body together, while WithUpdateField adds permitted body fields. Public signatures, aliases and extension capabilities are retained.
+- The facade accepts native concrete UpdateOpts with library-owned private header/body adapter rather than requiring a caller UpdateOptsBuilder. Final WithUpdateOptions selects the original header-tagged concrete fields and body together, while request.Field adds permitted body fields. Public signatures, aliases and extension capabilities are retained.
 - Native execution still formats If-Match from nil/non-nil signed revision pointers, preserves request/body/success/result behavior and raw MoreHeaders/OmitHeaders/native callbacks, and wraps errors in inspectable OperationError. The bridge preserves the header through adaptation; it does not protect it from native raw overrides or add unconditional conflict fallback.
 
 ### `python:network/v2/update_trunk`
@@ -248,7 +248,7 @@ Go API:
   Tests: `api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsReplacementChoosesBodyAndCondition`, `api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsPreflightRetainsExtensionCapabilities`.
 - Native accepted-code and412 policies remain inspectable with no SDK unconditional fallback; native401/429/503 replay retains the prepared condition/body and live auth despite caller pointer mutation. Python adapter/session retry/error semantics remain a documented difference.
   Tests: `api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeStatusesAndConflict`, `api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeReplayKeepsSerializedCondition`.
-- update_trunk(trunk, name=..., description="", is_admin_state_up=False, x_vendor=1) maps to Update with typed Name/Description/AdminStateUp pointers and WithUpdateField("x_vendor", 1), sending PUT /trunks/<id> {"trunk":{...}} with only those keys and no If-Match header, and decodes the updated trunk.
+- update_trunk(trunk, name=..., description="", is_admin_state_up=False, x_vendor=1) maps to Update with typed Name/Description/AdminStateUp pointers and request.Field("x_vendor", 1), sending PUT /trunks/<id> {"trunk":{...}} with only those keys and no If-Match header, and decodes the updated trunk.
   Tests: `network/v2/extensions/trunks/python_rejudge_test.go:TestPythonRejudgeTrunkUpdate`.
 
 Python/Go differences:
@@ -257,7 +257,7 @@ Python/Go differences:
 - Typed Go RevisionNumber nil/zero/signed semantics use the existing native conditional-header capability without a new public helper. This pinned Python resource does not inherit NetworkResource, so forwarded if_revision binds the helper but does not generate If-Match; the Go conditional capability is a native extension difference.
 - Go preserves raw native MoreHeaders/OmitHeaders/callback override and retry behavior and reports native412 without SDK unconditional fallback; generic Python adapter/session and mutable/dirty header behavior remain separate.
 - Python skips the PUT when no attribute is dirty; Go Update with empty UpdateOpts still sends PUT {"trunk":{}}.
-- Python attribute names (is_admin_state_up, project_id with tenant_id alias) map to the typed AdminStateUp field or WithUpdateField wire keys; Go cannot send JSON null for name, description or admin_state_up, which Neutron rejects.
+- Python attribute names (is_admin_state_up, project_id with tenant_id alias) map to the typed AdminStateUp field or request.Field wire keys; Go cannot send JSON null for name, description or admin_state_up, which Neutron rejects.
 - Go accepts only 200 for the update; Python accepts any non-error status.
 
 ### `gophercloud:networking/v2/extensions/subnetpools.Update`
@@ -278,12 +278,12 @@ Go API:
   Tests: `api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsAllNativeUpdates`, `api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeStatusesAndConflict`.
 - For all nine, native401 reauth,429 backoff and503 retry replay the prepared body and serialized revision through four physical requests with refreshed live auth and permitted native header addition. Caller revision mutation during reauth does not reselect the condition; the shared client remains intact.
   Tests: `api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeReplayKeepsSerializedCondition`.
-- Generator checks all nine current native source declarations and regenerated adapter declarations against stored facades, retaining RevisionNumber *int json:-/h:If-Match from final validated cfg.Options and existing Update/WithUpdateOptions/WithUpdateField without new helpers. Source/field/import drift mutations use Network as the representative case; owning-import/lexical alias-shadow and optional-builder/secondary-input tests are generic fixtures, not all-nine drift-case coverage.
+- Generator checks all nine current native source declarations and regenerated adapter declarations against stored facades, retaining RevisionNumber *int json:-/h:If-Match from final validated cfg.Options and existing Update/WithUpdateOptions/request.Field without new helpers. Source/field/import drift mutations use Network as the representative case; owning-import/lexical alias-shadow and optional-builder/secondary-input tests are generic fixtures, not all-nine drift-case coverage.
   Tests: `internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersActualNineNativeAdapters`, `internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersRejectNativeSourceAndRevisionDrift`, `internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersOwningImportsAndLexicalScope`, `internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersPreserveOptionalBuildersAndSecondaryInputs`.
 
 Python/Go differences:
 
-- The facade accepts native concrete UpdateOpts with library-owned private header/body adapter rather than requiring a caller UpdateOptsBuilder. Final WithUpdateOptions selects the original header-tagged concrete fields and body together, while WithUpdateField adds permitted body fields. Public signatures, aliases and extension capabilities are retained.
+- The facade accepts native concrete UpdateOpts with library-owned private header/body adapter rather than requiring a caller UpdateOptsBuilder. Final WithUpdateOptions selects the original header-tagged concrete fields and body together, while request.Field adds permitted body fields. Public signatures, aliases and extension capabilities are retained.
 - Native execution still formats If-Match from nil/non-nil signed revision pointers, preserves request/body/success/result behavior and raw MoreHeaders/OmitHeaders/native callbacks, and wraps errors in inspectable OperationError. The bridge preserves the header through adaptation; it does not protect it from native raw overrides or add unconditional conflict fallback.
 
 ### `python:network/v2/update_subnet_pool`
@@ -298,8 +298,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.API.UpdateRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithRecordMutationOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithRecordAttribute`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithRecordMutationHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithRecordMutationMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - The concrete Go update for this operation emits exact revision_number=N for typed zero/positive/signed values, omits a nil generated condition and preserves the native route/body/response envelope. This all-nine Go matrix is evidence of Go behavior; Python conditional similarity or difference is established from the pinned class/helper sources.
   Tests: `api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsAllNativeUpdates`.
@@ -355,12 +355,12 @@ Go API:
   Tests: `api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsAllNativeUpdates`, `api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeStatusesAndConflict`.
 - For all nine, native401 reauth,429 backoff and503 retry replay the prepared body and serialized revision through four physical requests with refreshed live auth and permitted native header addition. Caller revision mutation during reauth does not reselect the condition; the shared client remains intact.
   Tests: `api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeReplayKeepsSerializedCondition`.
-- Generator checks all nine current native source declarations and regenerated adapter declarations against stored facades, retaining RevisionNumber *int json:-/h:If-Match from final validated cfg.Options and existing Update/WithUpdateOptions/WithUpdateField without new helpers. Source/field/import drift mutations use Network as the representative case; owning-import/lexical alias-shadow and optional-builder/secondary-input tests are generic fixtures, not all-nine drift-case coverage.
+- Generator checks all nine current native source declarations and regenerated adapter declarations against stored facades, retaining RevisionNumber *int json:-/h:If-Match from final validated cfg.Options and existing Update/WithUpdateOptions/request.Field without new helpers. Source/field/import drift mutations use Network as the representative case; owning-import/lexical alias-shadow and optional-builder/secondary-input tests are generic fixtures, not all-nine drift-case coverage.
   Tests: `internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersActualNineNativeAdapters`, `internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersRejectNativeSourceAndRevisionDrift`, `internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersOwningImportsAndLexicalScope`, `internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersPreserveOptionalBuildersAndSecondaryInputs`.
 
 Python/Go differences:
 
-- The facade accepts native concrete UpdateOpts with library-owned private header/body adapter rather than requiring a caller UpdateOptsBuilder. Final WithUpdateOptions selects the original header-tagged concrete fields and body together, while WithUpdateField adds permitted body fields. Public signatures, aliases and extension capabilities are retained.
+- The facade accepts native concrete UpdateOpts with library-owned private header/body adapter rather than requiring a caller UpdateOptsBuilder. Final WithUpdateOptions selects the original header-tagged concrete fields and body together, while request.Field adds permitted body fields. Public signatures, aliases and extension capabilities are retained.
 - Native execution still formats If-Match from nil/non-nil signed revision pointers, preserves request/body/success/result behavior and raw MoreHeaders/OmitHeaders/native callbacks, and wraps errors in inspectable OperationError. The bridge preserves the header through adaptation; it does not protect it from native raw overrides or add unconditional conflict fallback.
 
 ### `python:network/v2/update_router`
@@ -419,12 +419,12 @@ Go API:
   Tests: `api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsAllNativeUpdates`, `api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeStatusesAndConflict`.
 - For all nine, native401 reauth,429 backoff and503 retry replay the prepared body and serialized revision through four physical requests with refreshed live auth and permitted native header addition. Caller revision mutation during reauth does not reselect the condition; the shared client remains intact.
   Tests: `api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeReplayKeepsSerializedCondition`.
-- Generator checks all nine current native source declarations and regenerated adapter declarations against stored facades, retaining RevisionNumber *int json:-/h:If-Match from final validated cfg.Options and existing Update/WithUpdateOptions/WithUpdateField without new helpers. Source/field/import drift mutations use Network as the representative case; owning-import/lexical alias-shadow and optional-builder/secondary-input tests are generic fixtures, not all-nine drift-case coverage.
+- Generator checks all nine current native source declarations and regenerated adapter declarations against stored facades, retaining RevisionNumber *int json:-/h:If-Match from final validated cfg.Options and existing Update/WithUpdateOptions/request.Field without new helpers. Source/field/import drift mutations use Network as the representative case; owning-import/lexical alias-shadow and optional-builder/secondary-input tests are generic fixtures, not all-nine drift-case coverage.
   Tests: `internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersActualNineNativeAdapters`, `internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersRejectNativeSourceAndRevisionDrift`, `internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersOwningImportsAndLexicalScope`, `internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersPreserveOptionalBuildersAndSecondaryInputs`.
 
 Python/Go differences:
 
-- The facade accepts native concrete UpdateOpts with library-owned private header/body adapter rather than requiring a caller UpdateOptsBuilder. Final WithUpdateOptions selects the original header-tagged concrete fields and body together, while WithUpdateField adds permitted body fields. Public signatures, aliases and extension capabilities are retained.
+- The facade accepts native concrete UpdateOpts with library-owned private header/body adapter rather than requiring a caller UpdateOptsBuilder. Final WithUpdateOptions selects the original header-tagged concrete fields and body together, while request.Field adds permitted body fields. Public signatures, aliases and extension capabilities are retained.
 - Native execution still formats If-Match from nil/non-nil signed revision pointers, preserves request/body/success/result behavior and raw MoreHeaders/OmitHeaders/native callbacks, and wraps errors in inspectable OperationError. The bridge preserves the header through adaptation; it does not protect it from native raw overrides or add unconditional conflict fallback.
 
 ### `python:network/v2/update_ip`
@@ -483,12 +483,12 @@ Go API:
   Tests: `api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsAllNativeUpdates`, `api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeStatusesAndConflict`.
 - For all nine, native401 reauth,429 backoff and503 retry replay the prepared body and serialized revision through four physical requests with refreshed live auth and permitted native header addition. Caller revision mutation during reauth does not reselect the condition; the shared client remains intact.
   Tests: `api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeReplayKeepsSerializedCondition`.
-- Generator checks all nine current native source declarations and regenerated adapter declarations against stored facades, retaining RevisionNumber *int json:-/h:If-Match from final validated cfg.Options and existing Update/WithUpdateOptions/WithUpdateField without new helpers. Source/field/import drift mutations use Network as the representative case; owning-import/lexical alias-shadow and optional-builder/secondary-input tests are generic fixtures, not all-nine drift-case coverage.
+- Generator checks all nine current native source declarations and regenerated adapter declarations against stored facades, retaining RevisionNumber *int json:-/h:If-Match from final validated cfg.Options and existing Update/WithUpdateOptions/request.Field without new helpers. Source/field/import drift mutations use Network as the representative case; owning-import/lexical alias-shadow and optional-builder/secondary-input tests are generic fixtures, not all-nine drift-case coverage.
   Tests: `internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersActualNineNativeAdapters`, `internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersRejectNativeSourceAndRevisionDrift`, `internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersOwningImportsAndLexicalScope`, `internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersPreserveOptionalBuildersAndSecondaryInputs`.
 
 Python/Go differences:
 
-- The facade accepts native concrete UpdateOpts with library-owned private header/body adapter rather than requiring a caller UpdateOptsBuilder. Final WithUpdateOptions selects the original header-tagged concrete fields and body together, while WithUpdateField adds permitted body fields. Public signatures, aliases and extension capabilities are retained.
+- The facade accepts native concrete UpdateOpts with library-owned private header/body adapter rather than requiring a caller UpdateOptsBuilder. Final WithUpdateOptions selects the original header-tagged concrete fields and body together, while request.Field adds permitted body fields. Public signatures, aliases and extension capabilities are retained.
 - Native execution still formats If-Match from nil/non-nil signed revision pointers, preserves request/body/success/result behavior and raw MoreHeaders/OmitHeaders/native callbacks, and wraps errors in inspectable OperationError. The bridge preserves the header through adaptation; it does not protect it from native raw overrides or add unconditional conflict fallback.
 
 ### `python:network/v2/update_qos_policy`
@@ -501,7 +501,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithUpdateOptions`
 - `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.UpdateRecord`
-- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordUpdateOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.UpdateCloudRecord`
 
@@ -542,12 +541,12 @@ Go API:
   Tests: `api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsAllNativeUpdates`, `api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeStatusesAndConflict`.
 - For all nine, native401 reauth,429 backoff and503 retry replay the prepared body and serialized revision through four physical requests with refreshed live auth and permitted native header addition. Caller revision mutation during reauth does not reselect the condition; the shared client remains intact.
   Tests: `api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeReplayKeepsSerializedCondition`.
-- Generator checks all nine current native source declarations and regenerated adapter declarations against stored facades, retaining RevisionNumber *int json:-/h:If-Match from final validated cfg.Options and existing Update/WithUpdateOptions/WithUpdateField without new helpers. Source/field/import drift mutations use Network as the representative case; owning-import/lexical alias-shadow and optional-builder/secondary-input tests are generic fixtures, not all-nine drift-case coverage.
+- Generator checks all nine current native source declarations and regenerated adapter declarations against stored facades, retaining RevisionNumber *int json:-/h:If-Match from final validated cfg.Options and existing Update/WithUpdateOptions/request.Field without new helpers. Source/field/import drift mutations use Network as the representative case; owning-import/lexical alias-shadow and optional-builder/secondary-input tests are generic fixtures, not all-nine drift-case coverage.
   Tests: `internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersActualNineNativeAdapters`, `internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersRejectNativeSourceAndRevisionDrift`, `internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersOwningImportsAndLexicalScope`, `internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersPreserveOptionalBuildersAndSecondaryInputs`.
 
 Python/Go differences:
 
-- The facade accepts native concrete UpdateOpts with library-owned private header/body adapter rather than requiring a caller UpdateOptsBuilder. Final WithUpdateOptions selects the original header-tagged concrete fields and body together, while WithUpdateField adds permitted body fields. Public signatures, aliases and extension capabilities are retained.
+- The facade accepts native concrete UpdateOpts with library-owned private header/body adapter rather than requiring a caller UpdateOptsBuilder. Final WithUpdateOptions selects the original header-tagged concrete fields and body together, while request.Field adds permitted body fields. Public signatures, aliases and extension capabilities are retained.
 - Native execution still formats If-Match from nil/non-nil signed revision pointers, preserves request/body/success/result behavior and raw MoreHeaders/OmitHeaders/native callbacks, and wraps errors in inspectable OperationError. The bridge preserves the header through adaptation; it does not protect it from native raw overrides or add unconditional conflict fallback.
 
 ### `python:network/v2/update_security_group`

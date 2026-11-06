@@ -13,7 +13,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.API.FindRecord`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.API.UpdateWithAttributes`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/network.Service.UpdateSubnetRecord`

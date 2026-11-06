@@ -80,10 +80,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/services.API.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/services.API.AllRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/services.API.ProxyListRecords`
-- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/services.WithRecordListOpts`
 
-- List sends GET vpn/vpnservices with WithListOptions and WithListQuery values as query and follows the vpnservices_links next href.
+- List sends GET vpn/vpnservices with WithListOptions and request.Query values as query and follows the vpnservices_links next href.
   Tests: `network/v2/extensions/vpnaas/services/python_parity_test.go:TestPythonVPNServiceListQueryAndLinks`.
 - SDK-owned record listing owns all-page iteration and classifies declared QueryParameters/aliases as server query versus declared Body-only local descriptor filters. Missing/null, project alias, raw unknown fields and class-specific boolean/list projection are separate from original page evidence.
   Tests: `network/v2/extensions/vpnaas/services/python_record_contracts_test.go:TestVPNServiceRecordsAllPagesServerQueryAndLocalFilter`, `network/v2/extensions/vpnaas/services/python_record_contracts_test.go:TestVPNServiceRecordsProjectionDefaultsAndUnknownFields`.
@@ -187,10 +186,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/endpointgroups.API.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/endpointgroups.API.AllRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/endpointgroups.API.ProxyListRecords`
-- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/endpointgroups.WithRecordListOpts`
 
-- List sends GET vpn/endpoint-groups with WithListOptions and WithListQuery values as query and follows the endpoint_groups_links next href.
+- List sends GET vpn/endpoint-groups with WithListOptions and request.Query values as query and follows the endpoint_groups_links next href.
   Tests: `network/v2/extensions/vpnaas/endpointgroups/python_parity_test.go:TestPythonEndpointGroupListQueryAndLinks`.
 - SDK-owned record listing owns all-page iteration and classifies declared QueryParameters/aliases as server query versus declared Body-only local descriptor filters. Missing/null, project alias, raw unknown fields and class-specific boolean/list projection are separate from original page evidence.
   Tests: `network/v2/extensions/vpnaas/endpointgroups/python_record_contracts_test.go:TestVPNEndpointGroupRecordsAllPagesServerQueryAndLocalFilter`, `network/v2/extensions/vpnaas/endpointgroups/python_record_contracts_test.go:TestVPNEndpointGroupRecordsProjectionDefaultsAndUnknownFields`.
@@ -296,7 +294,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ikepolicies.API.AllRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ikepolicies.API.ProxyListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ikepolicies.WithRecordListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/request.BasePath`
@@ -307,7 +304,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ikepolicies.WithRecordListJMESPath`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ikepolicies.WithRecordListConflictingAttrs`
 
-- List sends GET vpn/ikepolicies with WithListOptions and WithListQuery values as query and follows the ikepolicies_links next href.
+- List sends GET vpn/ikepolicies with WithListOptions and request.Query values as query and follows the ikepolicies_links next href.
   Tests: `network/v2/extensions/vpnaas/ikepolicies/python_parity_test.go:TestPythonIKEPolicyListQueryAndLinks`.
 - Owned nullable Source policy descriptors keep lifetime nested values raw, units separate and value integer; unknown/tenant/tag/revision fields do not leak into Resource while actual Wire/Envelope remain unmodified.
   Tests: `network/v2/extensions/vpnaas/ikepolicies/python_record_contracts_test.go:TestVPNPolicyRecordsDescriptorDefaultsAndActualProof`.
@@ -341,7 +338,7 @@ Go API:
 
 Python/Go differences:
 
-- UpdateOpts.Phase1NegotiationMode is sent as phase_1_negotiation_mode; Python's phase1_negotiation_mode is sent with WithUpdateField("phase1_negotiation_mode", value), which is not a reserved Opts key.
+- UpdateOpts.Phase1NegotiationMode is sent as phase_1_negotiation_mode; Python's phase1_negotiation_mode is sent with request.Field("phase1_negotiation_mode", value), which is not a reserved Opts key.
 - Python accepts a Resource or an ID string and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer with zero values for null or omitted fields.
 - Python sends no request when no attributes are given; Go Update always sends PUT with the envelope.
 - Empty algorithm strings and a zero lifetime value are omitted; Neutron rejects those values.
@@ -422,7 +419,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ipsecpolicies.API.AllRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ipsecpolicies.API.ProxyListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ipsecpolicies.WithRecordListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/request.BasePath`
@@ -433,7 +429,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ipsecpolicies.WithRecordListJMESPath`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ipsecpolicies.WithRecordListConflictingAttrs`
 
-- List sends GET vpn/ipsecpolicies with WithListOptions and WithListQuery values as query and follows the ipsecpolicies_links next href.
+- List sends GET vpn/ipsecpolicies with WithListOptions and request.Query values as query and follows the ipsecpolicies_links next href.
   Tests: `network/v2/extensions/vpnaas/ipsecpolicies/python_parity_test.go:TestPythonIPsecPolicyListQueryAndLinks`.
 - Owned nullable Source policy descriptors keep lifetime nested values raw, units separate and value integer; unknown/tenant/tag/revision fields do not leak into Resource while actual Wire/Envelope remain unmodified.
   Tests: `network/v2/extensions/vpnaas/ipsecpolicies/python_record_contracts_test.go:TestVPNPolicyRecordsDescriptorDefaultsAndActualProof`.
@@ -545,10 +541,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/siteconnections.API.AllRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/siteconnections.API.ProxyListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/siteconnections.WithRecordListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/siteconnections.WithRecordListJMESPath`
 
-- List sends GET vpn/ipsec-site-connections with WithListOptions and WithListQuery values as query and follows the ipsec_site_connections_links next href.
+- List sends GET vpn/ipsec-site-connections with WithListOptions and request.Query values as query and follows the ipsec_site_connections_links next href.
   Tests: `network/v2/extensions/vpnaas/siteconnections/python_parity_test.go:TestPythonSiteConnectionListQueryAndLinks`.
 - Owned Source profile classifies only declared query names/wires as server filters, applies non-query Body filters locally after descriptor conversion, discards unknown kwargs before marshaling, leaves missing fields null and separates descriptor view from physical raw response.
   Tests: `network/v2/extensions/vpnaas/siteconnections/python_record_list_test.go:TestVPNSiteRecordsDescriptorsDefaultsAndOwnedProof`, `network/v2/extensions/vpnaas/siteconnections/python_record_list_test.go:TestVPNSiteRecordsServerQueryAndLocalFiltersAcrossPages`.
@@ -576,7 +571,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.Null`
 - `github.com/JSYoo5B/go-openstacksdk/request.Present`
 
-- UpdateRecord sends PUT vpn/ipsec-site-connections/{id} with only the supplied attributes in the ipsec_site_connection envelope, including empty local_id, peer_address, peer_id, psk, initiator and names, an empty peer_cidrs list, mtu 0, an empty dpd object, admin_state_up false, a null endpoint group ID and other declared attributes through WithUpdateRecordField, accepts any status below 400, decodes enveloped and flat responses, and sends nothing when no attribute is supplied.
+- UpdateRecord sends PUT vpn/ipsec-site-connections/{id} with only the supplied attributes in the ipsec_site_connection envelope, including empty local_id, peer_address, peer_id, psk, initiator and names, an empty peer_cidrs list, mtu 0, an empty dpd object, admin_state_up false, a null endpoint group ID and other declared attributes through request.Field, accepts any status below 400, decodes enveloped and flat responses, and sends nothing when no attribute is supplied.
   Tests: `network/v2/extensions/vpnaas/siteconnections/python_update_record_test.go:TestPythonSiteConnectionUpdateRecordSendsEmptyValues`.
 - Extension fields that collide with typed keys or the id identity, nil options and blank or dot IDs fail before HTTP, and a 404 response is returned as the Gophercloud status error wrapped in resource.OperationError.
   Tests: `network/v2/extensions/vpnaas/siteconnections/python_update_record_test.go:TestPythonSiteConnectionUpdateRecordRejectsInputsAndErrorStatuses`.
@@ -585,7 +580,7 @@ Python/Go differences:
 
 - Python accepts a VpnIPSecSiteConnection Resource or an ID string; Go takes the ID string and rejects blank, '.' and '..' IDs before HTTP.
 - Python takes is_admin_state_up as the keyword name; Go uses the AdminStateUp field that serializes as admin_state_up.
-- Python drops undeclared keyword attributes because VpnIPSecSiteConnection does not allow unknown body attributes; WithUpdateRecordField sends any extension key except the typed keys and id.
+- Python drops undeclared keyword attributes because VpnIPSecSiteConnection does not allow unknown body attributes; request.Field sends any extension key except the typed keys and id.
 - Python converts values of typed attributes such as mtu before sending; Go serializes the Go value as given.
 - Python returns the Resource merged from request attributes and the response; Go returns ConnectionRecord with the native typed decode, the raw response object fields, headers and status, and Sent false when no request was needed.
 
@@ -658,7 +653,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.Null`
 - `github.com/JSYoo5B/go-openstacksdk/request.Present`
 
-- UpdateRecord sends PUT bgp-peers/{id} with only the supplied attributes in the bgp_peer envelope, including an empty name, a null name, an empty password and unknown body attributes through WithUpdateRecordField, accepts any status below 400, decodes enveloped, flat and empty responses, and sends nothing when no attribute is supplied.
+- UpdateRecord sends PUT bgp-peers/{id} with only the supplied attributes in the bgp_peer envelope, including an empty name, a null name, an empty password and unknown body attributes through request.Field, accepts any status below 400, decodes enveloped, flat and empty responses, and sends nothing when no attribute is supplied.
   Tests: `network/v2/extensions/bgp/peers/python_update_record_test.go:TestPythonBGPPeerUpdateRecordSendsEmptyName`.
 - Extension fields that collide with typed keys or the id identity, empty extension keys, nil options and blank or dot IDs fail before HTTP, and a 409 response is returned as the Gophercloud status error wrapped in resource.OperationError.
   Tests: `network/v2/extensions/bgp/peers/python_update_record_test.go:TestPythonBGPPeerUpdateRecordRejectsInputsAndErrorStatuses`.
@@ -666,7 +661,7 @@ Go API:
 Python/Go differences:
 
 - Python accepts a BgpPeer Resource or an ID string; Go takes the ID string and rejects blank, '.' and '..' IDs before HTTP.
-- Python silently discards an id attribute from the commit; WithUpdateRecordField rejects the id key before HTTP.
+- Python silently discards an id attribute from the commit; request.Field rejects the id key before HTTP.
 - Python returns the Resource merged from request attributes and the response; Go returns BGPPeerRecord with the native typed decode, the raw response object fields, headers and status, and Sent false when no request was needed.
 
 ### `python:network/v2/bgp_peers`
@@ -764,7 +759,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.Null`
 - `github.com/JSYoo5B/go-openstacksdk/request.Present`
 
-- UpdateRecord sends PUT bgp-speakers/{id} with only the supplied attributes in the bgp_speaker envelope, so a name-only update omits both advertise flags, while explicit false, null, an empty name and unknown body attributes through WithUpdateRecordField are sent; it accepts any status below 400, decodes enveloped and flat responses, and sends nothing when no attribute is supplied.
+- UpdateRecord sends PUT bgp-speakers/{id} with only the supplied attributes in the bgp_speaker envelope, so a name-only update omits both advertise flags, while explicit false, null, an empty name and unknown body attributes through request.Field are sent; it accepts any status below 400, decodes enveloped and flat responses, and sends nothing when no attribute is supplied.
   Tests: `network/v2/extensions/bgp/speakers/python_update_record_test.go:TestPythonBGPSpeakerUpdateRecordSendsOnlySuppliedFlags`.
 - Extension fields that collide with typed keys or the id identity, nil options and a blank ID fail before HTTP, and a 400 response is returned as the Gophercloud status error wrapped in resource.OperationError.
   Tests: `network/v2/extensions/bgp/speakers/python_update_record_test.go:TestPythonBGPSpeakerUpdateRecordRejectsInputsAndErrorStatuses`.
@@ -772,7 +767,7 @@ Go API:
 Python/Go differences:
 
 - Python accepts a BgpSpeaker Resource or an ID string; Go takes the ID string and rejects blank, '.' and '..' IDs before HTTP.
-- Python silently discards an id attribute from the commit; WithUpdateRecordField rejects the id key before HTTP.
+- Python silently discards an id attribute from the commit; request.Field rejects the id key before HTTP.
 - Python returns the Resource merged from request attributes and the response; Go returns BGPSpeakerRecord with the native typed decode, the raw response object fields, headers and status, and Sent false when no request was needed.
 
 ### `python:network/v2/bgp_speakers`
@@ -911,7 +906,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.Null`
 - `github.com/JSYoo5B/go-openstacksdk/request.Present`
 
-- CreateRecord sends POST bgpvpn/bgpvpns with only the supplied attributes in the bgpvpn envelope, including local_pref 0, vni 0, an empty name, an empty route_targets list, null import_targets and unknown body attributes through WithCreateRecordField, sends an empty envelope when no attribute is supplied, accepts any status below 400 and decodes enveloped, flat and empty responses.
+- CreateRecord sends POST bgpvpn/bgpvpns with only the supplied attributes in the bgpvpn envelope, including local_pref 0, vni 0, an empty name, an empty route_targets list, null import_targets and unknown body attributes through request.Field, sends an empty envelope when no attribute is supplied, accepts any status below 400 and decodes enveloped, flat and empty responses.
   Tests: `network/v2/extensions/bgpvpns/python_create_record_test.go:TestPythonBGPVPNCreateRecordSendsZeroLocalPref`.
 - Extension fields that collide with typed keys, blank extension keys and nil options fail before HTTP, and a 400 response is returned as the Gophercloud status error wrapped in resource.OperationError.
   Tests: `network/v2/extensions/bgpvpns/python_create_record_test.go:TestPythonBGPVPNCreateRecordRejectsInputsAndErrorStatuses`.
@@ -1059,7 +1054,7 @@ Go API:
 
 Python/Go differences:
 
-- Python's association QueryParameters only hold limit and marker, so other keywords such as network_id are local filters in Python; Go sends WithListQuery keys to the server.
+- Python's association QueryParameters only hold limit and marker, so other keywords such as network_id are local filters in Python; Go sends request.Query keys to the server.
 - Go builds the next page from the current URL and marker and ignores *_links; Python follows the links and falls back to the same marker request.
 
 ### `python:network/v2/create_bgpvpn_port_association`
@@ -1139,7 +1134,7 @@ Go API:
 
 Python/Go differences:
 
-- Python's association QueryParameters only hold limit and marker, so other keywords such as port_id are local filters in Python; Go sends WithListQuery keys to the server.
+- Python's association QueryParameters only hold limit and marker, so other keywords such as port_id are local filters in Python; Go sends request.Query keys to the server.
 - Go builds the next page from the current URL and marker and ignores *_links; Python follows the links and falls back to the same marker request.
 
 ### `python:network/v2/update_bgpvpn_port_association`
@@ -1236,7 +1231,7 @@ Go API:
 
 Python/Go differences:
 
-- Python's association QueryParameters only hold limit and marker, so other keywords such as router_id are local filters in Python; Go sends WithListQuery keys to the server.
+- Python's association QueryParameters only hold limit and marker, so other keywords such as router_id are local filters in Python; Go sends request.Query keys to the server.
 - Go builds the next page from the current URL and marker and ignores *_links; Python follows the links and falls back to the same marker request.
 
 ### `python:network/v2/update_bgpvpn_router_association`

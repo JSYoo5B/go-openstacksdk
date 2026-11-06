@@ -55,7 +55,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/portforwarding.API.DeleteRecord`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/portforwarding.WithRecordDeleteIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 
 - Delete sends one fixed scoped DELETE and defaults to suppressing only a clean 404; explicit ignore_missing=false retains it. Rejected-body read/close, retry, source changes and cancellation keep their original causes and native body/status proof.
   Tests: `network/v2/extensions/layer3/portforwarding/python_records_contracts_test.go:TestPythonPortForwardingCleanOnlyFindAndDeleteRejectedBodyCauses`, `network/v2/extensions/layer3/portforwarding/python_records_contracts_test.go:TestPythonPortForwardingAcceptedResponseCauseAndCleanRetryPolicy`.
@@ -75,7 +75,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/portforwarding.API.DeleteRecord`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/portforwarding.WithRecordDeleteIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 
 - Delete sends one fixed scoped DELETE and defaults to suppressing only a clean 404; explicit ignore_missing=false retains it. Rejected-body read/close, retry, source changes and cancellation keep their original causes and native body/status proof.
   Tests: `network/v2/extensions/layer3/portforwarding/python_records_contracts_test.go:TestPythonPortForwardingCleanOnlyFindAndDeleteRejectedBodyCauses`, `network/v2/extensions/layer3/portforwarding/python_records_contracts_test.go:TestPythonPortForwardingAcceptedResponseCauseAndCleanRetryPolicy`.
@@ -96,7 +96,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/portforwarding.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/portforwarding.WithRecordFindQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/portforwarding.WithRecordFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/portforwarding.WithRecordFindOpts`
 
 - Find first GETs a literal member including the Source floatingip_id query and supplied kwargs, falling back only for a clean 400/403/404 to the exact-ID-or-name scoped list. Fallback applies declared server/local query classification and fully observes later errors and duplicates; missing defaults to nil and strict missing reports ErrNotFound.
@@ -121,7 +121,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/portforwarding.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/portforwarding.WithRecordFindQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/portforwarding.WithRecordFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/portforwarding.WithRecordFindOpts`
 
 - Find first GETs a literal member including the Source floatingip_id query and supplied kwargs, falling back only for a clean 400/403/404 to the exact-ID-or-name scoped list. Fallback applies declared server/local query classification and fully observes later errors and duplicates; missing defaults to nil and strict missing reports ErrNotFound.
@@ -146,10 +146,10 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/portforwarding.API.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/portforwarding.WithRecordListQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/portforwarding.WithRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/portforwarding.WithRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/portforwarding.WithRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/portforwarding.WithRecordListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/portforwarding.WithRecordListHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/portforwarding.WithRecordListOpts`
 
@@ -215,10 +215,10 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/portforwarding.API.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/portforwarding.WithRecordListQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/portforwarding.WithRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/portforwarding.WithRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/portforwarding.WithRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/portforwarding.WithRecordListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/portforwarding.WithRecordListHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/portforwarding.WithRecordListOpts`
 
@@ -300,6 +300,7 @@ found = conn.network.find_floating_ip_port_forwarding(floating_ip_id, created.id
 package main
 
 import (
+	"github.com/JSYoo5B/go-openstacksdk/request"
     "context"
     "encoding/json"
     "flag"
@@ -340,7 +341,7 @@ func main() {
     api := service.PortForwarding
     for row, err := range api.ListRecords(ctx, *floatingIP,
         portforwarding.WithRecordListQuery("protocol", "tcp"),
-        portforwarding.WithRecordListMaxItems(100)) {
+        request.MaxItems(100)) {
         if err != nil { log.Fatal(err) }
         printForwarding(row)
     }
@@ -371,7 +372,7 @@ func main() {
     }
     if *remove != "" {
         if err := api.DeleteRecord(ctx, *floatingIP, *remove,
-            portforwarding.WithRecordDeleteIgnoreMissing(false)); err != nil { log.Fatal(err) }
+            request.IgnoreMissing(false)); err != nil { log.Fatal(err) }
     }
 }
 ```

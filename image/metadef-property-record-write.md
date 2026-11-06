@@ -24,7 +24,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithCreateAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.NamespaceScope.CreateRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordCreateOpts`
-- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordCreateHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordCreateAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordCreateAttributes`
@@ -82,7 +81,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithUpdateAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.NamespaceScope.UpdateRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordUpdateOpts`
-- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordUpdateHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordUpdateAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordUpdateAttributes`
@@ -149,6 +147,7 @@ print(created.to_dict(), updated.to_dict(), local.to_dict())
 package main
 
 import (
+	"github.com/JSYoo5B/go-openstacksdk/request"
     "context"
     "encoding/json"
     "errors"
@@ -221,16 +220,16 @@ func run(ctx context.Context, cloud, namespace, id, action, title, description s
     case "create":
         record, err = scope.CreateRecord(ctx,
             properties.WithRecordCreateAttributes(attributes),
-            properties.WithRecordCreateHeader("X-Request-Source", "metadef-property-write-example"),
+            request.Header("X-Request-Source", "metadef-property-write-example"),
         )
     case "update":
         record, err = scope.UpdateRecord(ctx, properties.RecordRequest{ID: id},
             properties.WithRecordUpdateAttributes(attributes),
-            properties.WithRecordUpdateHeader("X-Request-Source", "metadef-property-write-example"),
+            request.Header("X-Request-Source", "metadef-property-write-example"),
         )
     default:
         record, err = scope.UpdateRecord(ctx, properties.RecordRequest{ID: id},
-            properties.WithRecordUpdateHeader("X-Request-Source", "metadef-property-write-example"),
+            request.Header("X-Request-Source", "metadef-property-write-example"),
         )
     }
     if err != nil { return errors.Join(err, printFailure(err)) }

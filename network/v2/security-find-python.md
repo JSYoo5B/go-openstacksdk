@@ -19,14 +19,14 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithRecordFindOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithRecordFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithRecordFindQuery`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithRecordFindLimit`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithRecordFindMarker`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithRecordFindMaxItems`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithRecordFindPaginated`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithRecordFindHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithRecordFindMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - Pinned direct find_security_group (openstack/network/v2/_proxy.py:6598) accepts a string, ignore_missing=True and query. Safe identities use native GET200 /security-groups/id with the security_group envelope and native nested model/timestamp extraction. GET203/204, accepted decode and missing result-ID errors remain terminal without fallback.
   Tests: `api/find_identity_network_extensions_test.go:TestNativeFindIdentityNetworkExtensionsGETModelsAndNativeCodes`.
@@ -82,14 +82,14 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules.WithRecordFindOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules.WithRecordFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules.WithRecordFindQuery`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules.WithRecordFindLimit`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules.WithRecordFindMarker`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules.WithRecordFindMaxItems`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules.WithRecordFindPaginated`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules.WithRecordFindHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules.WithRecordFindMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - Member-first lookup preserves raw kwargs and Source constructor seed independently from actual HTTP row. Source successful statuses200..399 are supported; malformed/empty JSON retains seed, valid nonobjects and malformed UTF8 retain accepted response proof.
   Tests: `network/v2/extensions/security/rules/python_find_contracts_test.go:TestPythonSecurityRuleFindRecordGetFirstRawKwargsSeedAndWire`, `network/v2/extensions/security/rules/python_find_contracts_test.go:TestPythonSecurityRuleFindRecordEmptyMalformedAndWrongShapes`, `network/v2/extensions/security/rules/python_find_contracts_test.go:TestPythonSecurityRuleFindRecordNullableIdentityAndLiteralEscape`.
@@ -137,6 +137,7 @@ print(None if group is None else group.to_dict())
 package main
 
 import (
+	"github.com/JSYoo5B/go-openstacksdk/request"
     "context"
     "encoding/json"
     "flag"
@@ -173,7 +174,7 @@ func main() {
     service, err := conn.NetworkV2(ctx)
     if err != nil { log.Fatal(err) }
     if *group != "" {
-        options := []groups.RecordFindOption{groups.WithRecordFindIgnoreMissing(!*strict)}
+        options := []groups.RecordFindOption{request.IgnoreMissing(!*strict)}
         if *project != "" {
             options = append(options, groups.WithRecordFindQuery("project_id", *project))
         }
@@ -182,7 +183,7 @@ func main() {
         if value == nil { printJSON(nil) } else { printJSON(value.Resource) }
     }
     if *rule != "" {
-        options := []rules.RecordFindOption{rules.WithRecordFindIgnoreMissing(!*strict)}
+        options := []rules.RecordFindOption{request.IgnoreMissing(!*strict)}
         if *project != "" {
             options = append(options, rules.WithRecordFindQuery("project_id", *project))
         }

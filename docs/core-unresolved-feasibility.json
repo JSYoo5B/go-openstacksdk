@@ -115,7 +115,7 @@
   "op": "python:block_storage/v2/create_volume",
   "effort": "S",
   "shared_fix": "nullable-input",
-  "note": "Native v2 CreateOpts.Size has no omitempty and WithCreateField cannot override core fields, so Go cannot omit size; add an owned create body builder that omits unset size.",
+  "note": "Native v2 CreateOpts.Size has no omitempty and request.Field cannot override core fields, so Go cannot omit size; add an owned create body builder that omits unset size.",
   "category_raw": "INPUT",
   "category": "REMOVED_API"
  },
@@ -875,7 +875,7 @@
   "op": "python:block_storage/v3/get_quota_set",
   "effort": "S",
   "shared_fix": "query-passthrough",
-  "note": "ProjectQuotaScope.Get/Usage cannot forward Python's extra **query fetch parameters; add a scoped WithGetQuery option and contract tests for the remaining Resource audit items.",
+  "note": "ProjectQuotaScope.Get/Usage cannot forward Python's extra **query fetch parameters; add a scoped request.Query option and contract tests for the remaining Resource audit items.",
   "category_raw": "INPUT",
   "category": "INPUT"
  },
@@ -5283,7 +5283,7 @@
   "op": "python:network/v2/tap_mirrors",
   "effort": "S",
   "shared_fix": "repeated-query",
-  "note": "ListOpts lacks fields/sort_key/sort_dir and WithQuery/WithListQuery replace a key with one value, so Python repeated query keys cannot be sent; add a repeated-value query option.",
+  "note": "ListOpts lacks fields/sort_key/sort_dir and WithQuery/request.Query replace a key with one value, so Python repeated query keys cannot be sent; add a repeated-value query option.",
   "category_raw": "INPUT",
   "category": "INPUT"
  },
@@ -5435,7 +5435,7 @@
   "op": "python:network/v2/update_quota",
   "effort": "S",
   "shared_fix": "",
-  "note": "Update with typed options or raw WithUpdateField wire keys sends the same PUT; Python plural attribute aliases are API-shape only, so document the alias table, add contract tests and re-judge.",
+  "note": "Update with typed options or raw request.Field wire keys sends the same PUT; Python plural attribute aliases are API-shape only, so document the alias table, add contract tests and re-judge.",
   "category_raw": "AUDIT_ONLY",
   "category": "AUDIT_ONLY"
  },
@@ -5531,7 +5531,7 @@
   "op": "python:network/v2/update_vpn_ipsec_site_connection",
   "effort": "S",
   "shared_fix": "nullable-input",
-  "note": "UpdateOpts omits empty strings/zero/empty lists for local_id, peer_*, endpoint group IDs, psk and mtu and WithUpdateField cannot override core keys; add owned update options that preserve explicit empty values.",
+  "note": "UpdateOpts omits empty strings/zero/empty lists for local_id, peer_*, endpoint group IDs, psk and mtu and request.Field cannot override core keys; add owned update options that preserve explicit empty values.",
   "category_raw": "INPUT",
   "category": "INPUT"
  },
@@ -5731,7 +5731,7 @@
   "op": "python:placement/v1/allocation_candidates",
   "effort": "S",
   "shared_fix": "repeated-query",
-  "note": "ResourceGroup.MemberOf and WithListQuery cannot send a repeated (suffixed) member_of key; add an owned query builder that accepts multi-valued keys.",
+  "note": "ResourceGroup.MemberOf and request.Query cannot send a repeated (suffixed) member_of key; add an owned query builder that accepts multi-valued keys.",
   "category_raw": "INPUT",
   "category": "INPUT"
  },
@@ -5739,7 +5739,7 @@
   "op": "python:placement/v1/create_allocations",
   "effort": "S",
   "shared_fix": "extra-nested-key",
-  "note": "UpdateOpts cannot carry per-consumer keys such as mappings and WithManageField only sets top-level keys; add an owned per-consumer body option.",
+  "note": "UpdateOpts cannot carry per-consumer keys such as mappings and request.Field only sets top-level keys; add an owned per-consumer body option.",
   "category_raw": "INPUT",
   "category": "INPUT"
  },

@@ -10,7 +10,7 @@ implementing a resource builder. This comparison pins openstacksdk
 | --- | --- |
 | `network.get_address_scope(id, fields=["is_shared", "name"])` | `AddressScopes.GetRecord(ctx, id, addressscopes.WithRecordReadFields("is_shared", "name"))` |
 | `network.find_address_scope(name_or_id)` | `AddressScopes.FindRecord(ctx, nameOrID)` |
-| `ignore_missing=False` | `addressscopes.WithRecordFindIgnoreMissing(false)` |
+| `ignore_missing=False` | `request.IgnoreMissing(false)` |
 | `network.address_scopes(is_shared=False, tenant_id="project")` | `AddressScopes.ListRecords(ctx, addressscopes.WithRecordListQuery("is_shared", false), addressscopes.WithRecordListQuery("tenant_id", "project"))` |
 | `paginated=False`, `max_items=10` | `WithRecordListQuery("paginated", false)`, `WithRecordListQuery("max_items", 10)` |
 | `scope.to_dict()` | `json.MarshalIndent(scope.Resource, "", "  ")` |
@@ -65,6 +65,7 @@ The example calls the actual Connection binding with no manual client builder.
 package main
 
 import (
+	"github.com/JSYoo5B/go-openstacksdk/request"
     "context"
     "encoding/json"
     "flag"
@@ -105,7 +106,7 @@ func main() {
         printRecord(row)
     case "find":
         row, err := network.AddressScopes.FindRecord(ctx, *identity,
-            addressscopes.WithRecordFindIgnoreMissing(!*strict))
+            request.IgnoreMissing(!*strict))
         if err != nil { log.Fatal(err) }
         printRecord(row)
     case "list":
@@ -199,9 +200,9 @@ without causing duplicate constructor arguments.
 
 GET retains captured Accept; LIST defaults to `application/json` even if the
 selected source configured another value. Explicit operation Headers override
-that list default. `WithRecordReadMicroversion` overrides the dedicated GET;
-`WithRecordListMicroversion` overrides every standalone LIST page.
-`WithRecordFindMicroversion` overrides only the initial Find GET, matching
+that list default. `request.Microversion` overrides the dedicated GET;
+`request.Microversion` overrides every standalone LIST page.
+`request.Microversion` overrides only the initial Find GET, matching
 pinned `Resource.find`: fallback LIST pages use the original selected service
 version, including absence. An explicit empty Find override removes the GET
 version header while preserving the selected version on fallback LIST.

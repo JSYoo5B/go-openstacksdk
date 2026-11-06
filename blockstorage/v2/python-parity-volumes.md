@@ -38,7 +38,7 @@ Go API:
 Python/Go differences:
 
 - Python commit sends no request when no attribute is dirty; Go Update always sends PUT, even with an empty envelope.
-- Attributes outside UpdateOpts need WithUpdateField with the wire key.
+- Attributes outside UpdateOpts need request.Field with the wire key.
 - Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud v2 typed model, so response fields outside that model are dropped.
 - Cinder v2 has no microversions: Python sends no version header and the v2 client from BlockStorageV2 has no microversion, so Go sends none either.
 
@@ -78,12 +78,12 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
-- Volumes.Create posts the volume envelope with size, name, snapshot_id, imageRef and WithCreateField keys such as multiattach and OS-SCH-HNT:scheduler_hints inside it, but always sends size (0 when unset) and rejects a size override before HTTP.
+- Volumes.Create posts the volume envelope with size, name, snapshot_id, imageRef and request.Field keys such as multiattach and OS-SCH-HNT:scheduler_hints inside it, but always sends size (0 when unset) and rejects a size override before HTTP.
   Tests: `blockstorage/v2/volumes/python_parity_test.go:TestPythonVolumeCreateEnvelopeAlwaysSendsSize`.
 
 Python/Go differences:
 
-- The v2 Python Volume keeps scheduler_hints as a Body attribute inside the envelope; WithCreateHintOpts puts it outside, so WithCreateField must be used.
+- The v2 Python Volume keeps scheduler_hints as a Body attribute inside the envelope; WithCreateHintOpts puts it outside, so request.Field must be used.
 - Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud v2 typed model, so response fields outside that model are dropped.
 - Cinder v2 has no microversions: Python sends no version header and the v2 client from BlockStorageV2 has no microversion, so Go sends none either.
 
@@ -105,7 +105,7 @@ Go API:
 
 Python/Go differences:
 
-- Python all_projects=True becomes all_tenants=True; typed ListOpts.AllTenants sends all_tenants=true, so the exact string needs WithListQuery.
+- Python all_projects=True becomes all_tenants=True; typed ListOpts.AllTenants sends all_tenants=true, so the exact string needs request.Query.
 - Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud v2 typed model, so response fields outside that model are dropped.
 - Cinder v2 has no microversions: Python sends no version header and the v2 client from BlockStorageV2 has no microversion, so Go sends none either.
 

@@ -30,13 +30,13 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListQuery`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListBasePath`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListConflictingAttrs`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListJMESPath`
 
 - All nine declared non-query Body fields are explicitly filterable in ordinary Resources.List/All through leaf and cached Connection.Network.API paths. Native extraction completes first, then original rows are paired by count and index without extra HTTP or ID lookup. The public native model alias is retained.

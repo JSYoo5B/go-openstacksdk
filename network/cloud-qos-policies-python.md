@@ -15,8 +15,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.Service.ListQoSPolicyRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSPolicyReadOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSPolicyFilters`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSPolicyHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSPolicyMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.ProxyListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordListBasePath`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordListJMESPath`
@@ -51,8 +51,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.Service.SearchQoSPolicyRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSPolicyReadOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSPolicyFilters`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSPolicyHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSPolicyMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.ProxyListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordListBasePath`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordListJMESPath`

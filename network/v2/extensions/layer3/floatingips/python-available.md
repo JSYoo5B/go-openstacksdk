@@ -15,8 +15,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.API.FindAvailableIPRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.WithAvailableIPOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.WithAvailableIPHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.WithAvailableIPMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - List sends GET floatingips without a query, follows floatingips_links lazily and stops fetching when the caller breaks at the first row with an empty PortID; no row yields nil.
   Tests: `network/v2/extensions/layer3/floatingips/python_parity_core_test.go:TestPythonParityCoreFloatingIPFindAvailableStopsAtFirstFreeRow`.

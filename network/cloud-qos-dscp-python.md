@@ -88,7 +88,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.FindRecord`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.GetDSCPMarkingRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network.Service.GetQoSDSCPMarkingRule`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithDSCPMarkingCloudOpts`

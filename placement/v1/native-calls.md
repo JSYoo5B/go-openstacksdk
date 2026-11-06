@@ -50,7 +50,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.WithListOptions`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
-- List GETs resource_providers as one SinglePageBase page with name/uuid/member_of/resources/in_tree/required single-string filters percent-encoded (WithListQuery replaces a native key; ListOpts139 repeated keys are not reachable), yields the resource_providers rows, treats an empty or missing array as no rows, returns the native pager error unwrapped for 404 and io.EOF for a bodyless 204.
+- List GETs resource_providers as one SinglePageBase page with name/uuid/member_of/resources/in_tree/required single-string filters percent-encoded (request.Query replaces a native key; ListOpts139 repeated keys are not reachable), yields the resource_providers rows, treats an empty or missing array as no rows, returns the native pager error unwrapped for 404 and io.EOF for a bodyless 204.
   Tests: `placement/v1/resourceproviders/native_contracts_test.go:TestNativeResourceProvidersRoutesBodiesAndDecode`, `placement/v1/resourceproviders/native_contracts_test.go:TestNativeResourceProvidersStatusesAndPreflight`.
 
 Python/Go differences:

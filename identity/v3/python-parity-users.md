@@ -177,7 +177,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.CreateRecord`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordMutationOpts`
-- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordMutationLocation`
@@ -217,7 +216,7 @@ Python/Go differences:
 - Python accepts an ID string or a Resource instance and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer.
 - Python accepts any status below 400; the native Create accepts only 201.
 - groups.CreateOpts requires Name, so Go rejects before HTTP a Python create_group without a name.
-- Python attributes without a typed field go into groups.CreateOpts.Extra or WithCreateField inside the group envelope.
+- Python attributes without a typed field go into groups.CreateOpts.Extra or request.Field inside the group envelope.
 
 ### `python:identity/v3/create_project`
 
@@ -237,7 +236,7 @@ Python/Go differences:
 - Python accepts an ID string or a Resource instance and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer.
 - Python accepts any status below 400; the native Create accepts only 201 and 202.
 - projects.CreateOpts requires Name, so Go rejects before HTTP a Python create_project without a name.
-- Python attributes without a typed field go into projects.CreateOpts.Extra or WithCreateField inside the project envelope.
+- Python attributes without a typed field go into projects.CreateOpts.Extra or request.Field inside the project envelope.
 - Project allows unknown attributes in the Python body; Go sends them through CreateOpts.Extra, and the native Project keeps links and unknown response keys in Extra.
 
 ### `python:identity/v3/create_role`
@@ -258,7 +257,7 @@ Python/Go differences:
 - Python accepts an ID string or a Resource instance and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer.
 - Python accepts any status below 400; the native Create accepts only 201.
 - roles.CreateOpts requires Name, so Go rejects before HTTP a Python create_role without a name.
-- Python attributes without a typed field go into roles.CreateOpts.Extra or WithCreateField inside the role envelope.
+- Python attributes without a typed field go into roles.CreateOpts.Extra or request.Field inside the role envelope.
 
 ### `python:identity/v3/create_user`
 
@@ -278,7 +277,7 @@ Python/Go differences:
 - Python accepts an ID string or a Resource instance and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer.
 - Python accepts any status below 400; the native Create accepts only 201.
 - users.CreateOpts requires Name, so Go rejects before HTTP a Python create_user without a name.
-- Python attributes without a typed field go into users.CreateOpts.Extra or WithCreateField inside the user envelope.
+- Python attributes without a typed field go into users.CreateOpts.Extra or request.Field inside the user envelope.
 - The native User decodes email and federated into Extra and parses password_expires_at as a time without a zone, so a value ending in Z is a decode error where Python keeps the string.
 
 ### `python:identity/v3/delete_domain`
@@ -407,7 +406,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordListJMESPath`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordListLocation`
 
-- List sends the single GET domains that Python domains() sends without arguments, maps the Python query names name and enabled through ListOpts or WithListQuery, sends a limit without a marker follow-up, and rejects local Body filters before HTTP.
+- List sends the single GET domains that Python domains() sends without arguments, maps the Python query names name and enabled through ListOpts or request.Query, sends a limit without a marker follow-up, and rejects local Body filters before HTTP.
   Tests: `identity/v3/domains/python_parity_test.go:TestPythonDomainListRequests`.
 - Source Domain declares raw description/links/id/name, nullable CPython bool is_enabled from enabled and dict options (nonobject {}, null preserved), unknown Body discarded from declared view but complete Wire/Envelope/header/status retained; canonical server query alias is_enabled wins enabled presence and unknown kwargs are dropped before marshal.
   Tests: `identity/v3/domains/python_records_test.go:TestPythonDomainRecordsDeclaredDescriptorsQueryAliasesAndOwnedProof`.
@@ -431,8 +430,8 @@ Go API:
 Python/Go differences:
 
 - Python reads the Keystone links dict without a rel key and never follows links.next; the native pager follows links.next when Keystone sets it.
-- Python sends bool query values as True/False text; typed Go ListOpts send true/false, and WithListQuery reproduces the Python text.
-- Python drops unknown query names; Go sends every WithListQuery key to the server.
+- Python sends bool query values as True/False text; typed Go ListOpts send true/false, and request.Query reproduces the Python text.
+- Python drops unknown query names; Go sends every request.Query key to the server.
 - SDK-owned concrete record/options API preserves actual Wire/Envelope/metadata without builder interfaces; original native API is unchanged.
 - Already selected Keystone v3 API required; no implicit arbitrary-v2 ensure_service_version conversion or automatic Connection current-location bridge. Explicit CloudLocation is cloned and current project retained because Domain declares no project/zone.
 - Fixed origin/collection/query/headers/version bounds reject foreign route/traversal/cycles and malformed markers with actual receipt; amounts are nonnegative Go integers.
@@ -627,7 +626,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithRecordListJMESPath`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithRecordListLocation`
 
-- List sends the single GET groups that Python groups() sends without arguments, maps the Python query names domain_id and name through ListOpts or WithListQuery, sends a limit without a marker follow-up, and rejects local Body filters before HTTP.
+- List sends the single GET groups that Python groups() sends without arguments, maps the Python query names domain_id and name through ListOpts or request.Query, sends a limit without a marker follow-up, and rejects local Body filters before HTTP.
   Tests: `identity/v3/groups/python_parity_test.go:TestPythonGroupListRequests`.
 - Lazy Group records classify limit/marker/domain_id/name as server query, description/id as ordered local Body filters, discard unknown before marshaling and keep nullable raw Body separate from original independent Wire/Envelope/header/status.
   Tests: `identity/v3/groups/python_records_test.go:TestPythonGroupRecordsLazyUntypedDeclaredViewAndEvidence`.
@@ -649,8 +648,8 @@ Go API:
 Python/Go differences:
 
 - Python reads the Keystone links dict without a rel key and never follows links.next; the native pager follows links.next when Keystone sets it.
-- Python sends bool query values as True/False text; typed Go ListOpts send true/false, and WithListQuery reproduces the Python text.
-- Python drops unknown query names; Go sends every WithListQuery key to the server.
+- Python sends bool query values as True/False text; typed Go ListOpts send true/false, and request.Query reproduces the Python text.
+- Python drops unknown query names; Go sends every request.Query key to the server.
 - groups.ListOpts.Filters adds a stray "-" query key next to the comparator filters; Python cannot send comparator filters at all.
 - Concrete Go options own request/defaults, nullable raw Resource and independent actual response channels. Existing native List/Get/FindIdentity semantics are unchanged.
 - Already selected Keystone v3 API required; no automatic v2 ensure_service_version conversion or Connection current location inference. Explicit immutable CloudLocation retains current project because Group declares no project_id/zone.
@@ -673,11 +672,10 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.AllRecords`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.ProxyListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.WithRecordListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/request.BasePath`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.WithRecordListJMESPath`
 
-- List sends the single GET projects that Python projects() sends without arguments, maps the Python query names domain_id, enabled, is_domain, name, parent_id, tags, tags-any, not-tags and not-tags-any through ListOpts or WithListQuery, sends a limit without a marker follow-up, and rejects local Body filters before HTTP.
+- List sends the single GET projects that Python projects() sends without arguments, maps the Python query names domain_id, enabled, is_domain, name, parent_id, tags, tags-any, not-tags and not-tags-any through ListOpts or request.Query, sends a limit without a marker follow-up, and rejects local Body filters before HTTP.
   Tests: `identity/v3/projects/python_parity_test.go:TestPythonProjectListRequests`.
 - Default bodyless /projects GET, selected identity role, Source Body aliases/casts/defaults and explicit-null presence retain independent Resource/Wire/page/header/status evidence including large integer extensions.
   Tests: `identity/v3/projects/python_records_test.go:TestPythonProjectRecordsDeclaredViewKeepsPhysicalEvidenceAndPresence`.
@@ -697,8 +695,8 @@ Go API:
 Python/Go differences:
 
 - Python reads the Keystone links dict without a rel key and never follows links.next; the native pager follows links.next when Keystone sets it.
-- Python sends bool query values as True/False text; typed Go ListOpts send true/false, and WithListQuery reproduces the Python text.
-- Python drops unknown query names; Go sends every WithListQuery key to the server.
+- Python sends bool query values as True/False text; typed Go ListOpts send true/false, and request.Query reproduces the Python text.
+- Python drops unknown query names; Go sends every request.Query key to the server.
 - projects.ListOpts.Filters adds a stray "-" query key next to the comparator filters; Python cannot send comparator filters at all.
 - Concrete functional options own defaults and defensive copies. Runtime Resource class/session builders are SDK-owned; safe UTF-8 routes, nonnegative Go pagination caps, same-origin/path/filter continuation and stronger cycle bounds are deliberate Go policies.
 - Source-selected literal link precedence, ignored Keystone dictionary links and limit-on-short-page marker fallback are enabled for this new Project profile without changing existing native List or older engine profiles. Valid RFC HTTP Link remains a documented Go interoperability correction of the pinned Requests uri/url failure.
@@ -758,11 +756,10 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.ProxyListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.RoleRecord.Clone`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithRecordListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithRecordListLocation`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithRecordListJMESPath`
 
-- List sends the single GET roles that Python roles() sends without arguments, maps the Python query names domain_id and name through ListOpts or WithListQuery, sends a limit without a marker follow-up, and rejects local Body filters before HTTP.
+- List sends the single GET roles that Python roles() sends without arguments, maps the Python query names domain_id and name through ListOpts or request.Query, sends a limit without a marker follow-up, and rejects local Body filters before HTTP.
   Tests: `identity/v3/roles/python_parity_test.go:TestPythonRoleListRequests`.
 - Bodyless default roles GET and explicit SourceStatusPolicy accept actual199. Six Role Body descriptors/default/null/options-dict cast discard unknowns only from declared view and retain all actual Wire/page/header/status evidence; Clone channels are independent.
   Tests: `identity/v3/roles/python_records_test.go:TestPythonRoleRecordsDefaultProjectionPresenceAndIndependentPhysicalEvidence`.
@@ -782,8 +779,8 @@ Go API:
 Python/Go differences:
 
 - Python reads the Keystone links dict without a rel key and never follows links.next; the native pager follows links.next when Keystone sets it.
-- Python sends bool query values as True/False text; typed Go ListOpts send true/false, and WithListQuery reproduces the Python text.
-- Python drops unknown query names; Go sends every WithListQuery key to the server.
+- Python sends bool query values as True/False text; typed Go ListOpts send true/false, and request.Query reproduces the Python text.
+- Python drops unknown query names; Go sends every request.Query key to the server.
 - roles.ListOpts.Filters adds a stray "-" query key next to the comparator filters; Python cannot send comparator filters at all.
 - Existing native Role/List/All/Get/FindIdentity remain unchanged. Concrete functional options and SDK-owned profile descriptors/defaults/decoders avoid caller builders; declared Resource JSON and separate actual Wire/Envelope/header/status are defensively owned.
 - Selected Keystone v3 API is required; automatic v2 ensure_service_version conversion is not added. Standalone native client computed location is null; explicit immutable location supplies cloud/region/current project without inference. Role has no project_id/zone descriptors, unknown response facts do not replace that scope and the typed convenience normalizes zone to null.
@@ -926,12 +923,11 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.UpdateRecord`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordMutationOpts`
-- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordMutationLocation`
 
-- Legacy native Update sends PATCH domains/{id} with the {"domain": {...}} envelope and optional explicit WithUpdateField("id", id); the old fixture documents that opt-in native body, not pinned Resource.commit dirty-id behavior.
+- Legacy native Update sends PATCH domains/{id} with the {"domain": {...}} envelope and optional explicit request.Field("id", id); the old fixture documents that opt-in native body, not pinned Resource.commit dirty-id behavior.
   Tests: `identity/v3/domains/python_parity_test.go:TestPythonDomainCreateGetUpdateRequests`.
 - Owned scalar-ID UpdateRecord sends PATCH with explicit raw declared attributes including nullable description/enabled/options; constructor ID is seeded but never dirty or sent. Existing response overlays seed and retains options plus physical response proof; duplicate attrs id is rejected before HTTP.
   Tests: `identity/v3/domains/python_record_mutations_test.go:TestPythonDomainUpdateRecordPATCHPreservesSeedAndActualResponse`, `identity/v3/domains/python_record_mutations_test.go:TestPythonDomainUpdateRecordExplicitNullIsSentAsDirty`, `identity/v3/domains/python_record_mutations_test.go:TestPythonDomainRecordMutationsPreflightAndOptionLifecycle`.
@@ -944,7 +940,7 @@ Python/Go differences:
 
 - Legacy native Create/Update: Python accepts an ID string or a Resource instance and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer.
 - Legacy native Create/Update: Python accepts any status below 400; the native Update accepts only 200.
-- Legacy native Update permits an explicitly added id body field through WithUpdateField("id", id). The pinned Resource.commit actually discards dirty id before preparing PATCH; the new owned UpdateRecord follows that behavior instead of the older fixture comment.
+- Legacy native Update permits an explicitly added id body field through request.Field("id", id). The pinned Resource.commit actually discards dirty id before preparing PATCH; the new owned UpdateRecord follows that behavior instead of the older fixture comment.
 - New owned mutation APIs leave native Create/Update untouched. They take finite UTF-8 JSON attributes and safe string IDs in a freshly seeded Domain operation, return independent DomainRecord views plus physical Wire/Envelope/header/status, retain Domain.options and explicit null and drop unknown Body attributes. Request values remain raw; descriptor casts apply only to the returned view.
 - The fixed Domain collection/member route deliberately rejects raw base_path with ErrUnsupported/ErrInvalidOption rather than reproducing Source arbitrary URI overrides or formatter/runtime objects. Headers, Microversion and Location are explicit Go conveniences; configured location is copied, unknown server project_id/location is not trusted. Class/session/adapter injection and caller custom transport cache bypass are not claimed.
 - Ordered attribute helpers use last canonical/wire alias occurrence; bulk Attributes maps use sorted keys as a deterministic Go adaptation. Mutable existing Resource baseline/equality/recommit state is not modeled. SDK-R1/C1/S1, authenticated cloud acceptance and release verification remain separately tracked whole-SDK goals.
@@ -1072,7 +1068,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
 - `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 
-- List sends the single GET users that Python users() sends without arguments, maps the Python query names domain_id, enabled, idp_id, name, password_expires_at, protocol_id and unique_id through ListOpts or WithListQuery, sends a limit without a marker follow-up, and rejects local Body filters before HTTP.
+- List sends the single GET users that Python users() sends without arguments, maps the Python query names domain_id, enabled, idp_id, name, password_expires_at, protocol_id and unique_id through ListOpts or request.Query, sends a limit without a marker follow-up, and rejects local Body filters before HTTP.
   Tests: `identity/v3/users/python_parity_test.go:TestPythonUserListRequests`.
 - Pinned User nullable declarations/casts/defaults, canonical/wire response last-member order, untyped large password-expiration values, options missing{} vs explicitnull, federated scalar wrapping, unknown discard and independent view/wire/page/header/status/Clone match owned Source policy.
   Tests: `identity/v3/users/python_records_test.go:TestPythonUserListRecordsExactDescriptorDefaultsAndResponseAliasOrder`, `identity/v3/users/python_records_test.go:TestPythonUserListRecordsLazyQueryAndUntypedView`, `identity/v3/users/python_records_test.go:TestPythonUserListRecordsOptionsDefaultNullAndNestedLoadedLocal`.
@@ -1092,8 +1088,8 @@ Go API:
 Python/Go differences:
 
 - Python reads the Keystone links dict without a rel key and never follows links.next; the native pager follows links.next when Keystone sets it.
-- Python sends bool query values as True/False text; typed Go ListOpts send true/false, and WithListQuery reproduces the Python text.
-- Python drops unknown query names; Go sends every WithListQuery key to the server.
+- Python sends bool query values as True/False text; typed Go ListOpts send true/false, and request.Query reproduces the Python text.
+- Python drops unknown query names; Go sends every request.Query key to the server.
 - users.ListOpts.Filters adds a stray "-" query key next to the comparator filters; Python cannot send comparator filters at all.
 - Go owns immutable JSON descriptor records, fixed source/context/options, detached actual evidence and explicit polymorphic result instead of mutable Python Resource/session/subclass objects. Native User/List/All/membership APIs retain their current contracts.
 - Direct leaf/selected v3 factory has no Python Connection: computed location defaults null and immutable explicit CloudLocation is a Go convenience. No default_project_id authorization or automatic client/scope/name inference is introduced. Whole SDK-R1/C1/S1 mutable Resource/cache/session/Connection/version configuration remain tracked separately.

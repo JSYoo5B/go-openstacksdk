@@ -59,7 +59,7 @@ Go API:
 
 Python/Go differences:
 
-- The upstream CreateOptsBuilder interface is replaced by concrete CreateOpts/CreateOption and a library-owned serializer with WithCreateOptions/WithCreateField. API.Create returns the extracted native KeyPair and wraps failures with operation context. Native required Name, optional string fields, strict200/201 and partial/null extraction remain intact; source-shaped nullable attributes, view-only ssh and Resource/Wire belong to the independent Python CreateKeypair mapping.
+- The upstream CreateOptsBuilder interface is replaced by concrete CreateOpts/CreateOption and a library-owned serializer with WithCreateOptions/request.Field. API.Create returns the extracted native KeyPair and wraps failures with operation context. Native required Name, optional string fields, strict200/201 and partial/null extraction remain intact; source-shaped nullable attributes, view-only ssh and Resource/Wire belong to the independent Python CreateKeypair mapping.
 
 ### `python:compute/v2/get_server_console_url`
 

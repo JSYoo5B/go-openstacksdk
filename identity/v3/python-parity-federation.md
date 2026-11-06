@@ -103,13 +103,13 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/policies.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
-- Update sends PATCH policies/{id} with {"policy": {...}} holding only the given type, blob and Extra keys, including an empty blob via WithUpdateField and null via Extra, and decodes the updated policy.
+- Update sends PATCH policies/{id} with {"policy": {...}} holding only the given type, blob and Extra keys, including an empty blob via request.Field and null via Extra, and decodes the updated policy.
   Tests: `identity/v3/policies/python_parity_test.go:TestPythonPolicyCreateGetUpdate`.
 
 Python/Go differences:
 
 - Python skips the request when no attribute changed; Go always sends PATCH, with {"policy": {}} for empty options.
-- Empty Type and Blob are omitted by UpdateOpts; an empty blob is sent through WithUpdateField and an empty type through Extra.
+- Empty Type and Blob are omitted by UpdateOpts; an empty blob is sent through request.Field and an empty type through Extra.
 - Python accepts a Resource instance or an ID string; Go takes the ID string or a resource.Ref.
 - Python accepts any status below 400; the generated Go call accepts only the native codes (create 201, get/update 200, delete 202/204) and reports others as gophercloud.ErrUnexpectedResponseCode wrapped in resource.OperationError.
 

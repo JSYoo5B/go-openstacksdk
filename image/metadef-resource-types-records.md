@@ -22,11 +22,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.API.AllRecords`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.NewWithDependencies`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordListHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/request.Limit`
 - `github.com/JSYoo5B/go-openstacksdk/request.Marker`
-- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
 - `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordListFilter`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordListFilters`
@@ -76,7 +74,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithCreatePropertiesTarget`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.NamespaceScope.CreateRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordCreateOpts`
-- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordCreateHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordCreateAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordCreateAttributes`
@@ -174,11 +171,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.NamespaceScope.AllRecords`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.NewWithDependencies`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordListHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/request.Limit`
 - `github.com/JSYoo5B/go-openstacksdk/request.Marker`
-- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
 - `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordListFilter`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordListFilters`
@@ -238,6 +233,7 @@ for value in conn.image.metadef_resource_type_associations(
 package main
 
 import (
+	"github.com/JSYoo5B/go-openstacksdk/request"
     "context"
     "encoding/json"
     "errors"
@@ -289,8 +285,8 @@ func run(ctx context.Context, cloud, namespace, name string, limit, maxItems int
     api := service.API.MetadefResourceTypes
     options := []types.RecordListOption{
         types.WithRecordListOpts(types.RecordListOpts{Limit: limit, MaxItems: maxItems}),
-        types.WithRecordListHeader("X-Request-Source", "metadef-records-example"),
-        types.WithRecordListPaginated(paginated),
+        request.Header("X-Request-Source", "metadef-records-example"),
+        request.Paginated(paginated),
     }
     for record, readErr := range api.ListRecords(ctx, options...) {
         if readErr != nil { return readErr }
@@ -303,8 +299,8 @@ func run(ctx context.Context, cloud, namespace, name string, limit, maxItems int
             Limit: limit, MaxItems: maxItems,
             Filters: associationFilters(name),
         }),
-        types.WithRecordListHeader("X-Request-Source", "metadef-records-example"),
-        types.WithRecordListPaginated(paginated),
+        request.Header("X-Request-Source", "metadef-records-example"),
+        request.Paginated(paginated),
     }
     records, readErr := scope.AllRecords(ctx, scopedOptions...)
     for _, record := range records {

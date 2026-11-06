@@ -20,9 +20,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRecordFindOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRecordFindQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRecordFindHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRecordFindMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRecordFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 
 - Pinned direct find_router (openstack/network/v2/_proxy.py:5570) accepts a string, ignore_missing=True and query. Safe identities use native GET200 /routers/id with the router envelope and native nested model/timestamp extraction. GET203/204, accepted decode and missing result-ID errors remain terminal without fallback.
   Tests: `api/find_identity_network_extensions_test.go:TestNativeFindIdentityNetworkExtensionsGETModelsAndNativeCodes`.
@@ -94,11 +94,11 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRecordListOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRecordListQuery`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRecordListMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRecordListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 
 - Pinned direct Proxy.routers delegates query to Router Resource.list. Ordinary Routers.Resources.List/All and API.All provide SDK-owned WithFilter/WithFilters classification and explicit WithBodyFilter options without application builders or callback predicates. Leaf and cached Connection.Network().API/NetworkV2 facades share the native client/provider and preserve the existing returned Router model; no handwritten high-level Router collection or public ResourceAdapter is added.
   Tests: `api/router_list_filters_test.go:TestRouterListFiltersEntireQueryAndAliasDescriptor`, `api/router_list_filters_test.go:TestRouterListFiltersRawDescriptorsAndNativeProjection`, `connectiontest/connection_router_filters_test.go:TestConnectionRouterFiltersSharedClientAndRawRevision`, `internal/cmd/sdkgen/router_filters_test.go:TestRouterSemanticFilterEmissionKeepsPrivateCollectionAndPriorEightBindings`.
@@ -185,6 +185,7 @@ with openstack.connect(cloud=args.cloud) as conn:
 package main
 
 import (
+	"github.com/JSYoo5B/go-openstacksdk/request"
     "context"
     "encoding/json"
     "flag"
@@ -205,14 +206,14 @@ func run(ctx context.Context, cloud, mode, identity string) (any, error) {
     switch mode {
     case "find":
         value, err := network.Routers.FindRecord(
-            ctx, identity, routers.WithRecordFindIgnoreMissing(false),
+            ctx, identity, request.IgnoreMissing(false),
         )
         if err != nil || value == nil { return nil, err }
         return value.Resource, nil
     case "list":
         values, err := network.Routers.AllRecords(
             ctx, routers.WithRecordListQuery("name", identity),
-            routers.WithRecordListMaxItems(100),
+            request.MaxItems(100),
         )
         if err != nil { return nil, err }
         rows := make([]*resource.RawResource, 0, len(values))

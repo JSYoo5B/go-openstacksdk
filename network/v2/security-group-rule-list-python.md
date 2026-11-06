@@ -19,11 +19,11 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules.WithRecordListOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules.WithRecordListQuery`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules.WithRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules.WithRecordListMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules.WithRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules.WithRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules.WithRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules.WithRecordListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 
 - Pinned Source SecurityGroupRule MRO reuses existing SecurityGroupRuleRecord and canonical descriptor mapping:18 Body fields, NetworkResource row Header if_match list, TagMixin tags defaultempty and Computed location ownednull. Only port ranges/revision have Source int conversion; bool/null/rawexact/Unicode string/digit faults, ether canonical/wire orderedlastvalue and project absent-only tenant fallback remain distinct from Wire. Wholepage headers never overwrite row Header constructor attributes. Unknown/bodyIF_MATCH/self/forgedlocation are retained only in appropriate independent carriers and clones.
   Tests: `network/v2/extensions/security/rules/python_list_contracts_test.go:TestPythonSecurityRuleListSourceDescriptorsHeadersAndOwnedEvidence`, `network/v2/extensions/security/rules/python_list_contracts_test.go:TestPythonSecurityRuleListPagesEnvelopeAndConstructorProof`.
@@ -97,6 +97,7 @@ if __name__ == "__main__":
 package main
 
 import (
+	"github.com/JSYoo5B/go-openstacksdk/request"
     "context"
     "encoding/json"
     "flag"
@@ -128,10 +129,10 @@ func run(cloud, group, direction, name string, pageSize, maxItems int, single bo
     network, err := conn.NetworkV2(ctx)
     if err != nil { return err }
     options := []rules.RecordListOption{
-        rules.WithRecordListMaxItems(maxItems),
-        rules.WithRecordListPaginated(!single),
+        request.MaxItems(maxItems),
+        request.Paginated(!single),
     }
-    if pageSize >= 0 { options = append(options, rules.WithRecordListLimit(pageSize)) }
+    if pageSize >= 0 { options = append(options, request.Limit(pageSize)) }
     for _, filter := range []struct{ key, value string }{
         {"security_group_id", group}, {"direction", direction}, {"name", name},
     } {

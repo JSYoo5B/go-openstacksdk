@@ -32,11 +32,11 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithRecordListOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithRecordListQuery`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithRecordListMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithRecordListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 
 - Pinned direct Proxy.security_groups delegates query to SecurityGroup Resource.list. Ordinary SecurityGroups.Resources.List/All and API.All provide SDK-owned WithFilter/WithFilters classification and explicit WithBodyFilter predicates without caller builders or callbacks. Leaf and cached Connection.Network().API/NetworkV2 facades share the existing native service/provider client; no handwritten top-level SecurityGroup collection or public ResourceAdapter is added.
   Tests: `api/security_group_list_filters_test.go:TestSecurityGroupListFiltersEntireQueryAndAliasDescriptor`, `connectiontest/connection_security_group_filters_test.go:TestConnectionSecurityGroupFiltersSharedClientAndOriginalRules`, `internal/cmd/sdkgen/security_group_filters_test.go:TestSecurityGroupFilterEmissionPreservesOwnedFullQueryPagersAndPriorNineBindings`.
@@ -130,6 +130,7 @@ for group in conn.network.security_groups(**query):
 package main
 
 import (
+	"github.com/JSYoo5B/go-openstacksdk/request"
     "context"
     "encoding/json"
     "flag"
@@ -163,12 +164,12 @@ func run(cloud, name string, limit, maxItems int, paginated bool) error {
     network, err := conn.NetworkV2(ctx)
     if err != nil { return err }
     options := []groups.RecordListOption{
-        groups.WithRecordListMaxItems(maxItems),
-        groups.WithRecordListPaginated(paginated),
+        request.MaxItems(maxItems),
+        request.Paginated(paginated),
         groups.WithRecordListHeaders(map[string]string{"X-Request-Source": "security-group-list-example"}),
     }
     if name != "" { options = append(options, groups.WithRecordListQuery("name", name)) }
-    if limit >= 0 { options = append(options, groups.WithRecordListLimit(limit)) }
+    if limit >= 0 { options = append(options, request.Limit(limit)) }
     out := json.NewEncoder(os.Stdout)
     for record, readErr := range network.SecurityGroups.ListRecords(ctx, options...) {
         if readErr != nil { return readErr }

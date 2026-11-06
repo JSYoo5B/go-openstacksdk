@@ -14,13 +14,13 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.FindRecord`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordFindQuery`
 - `github.com/JSYoo5B/go-openstacksdk/network.Service.GetQoSPolicyRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSPolicyFilters`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSPolicyReadOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSPolicyHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSPolicyMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.FindSourceRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordFindListBasePath`
 
@@ -63,7 +63,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.FindRecord`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.DeleteWithOptions`
 - `github.com/JSYoo5B/go-openstacksdk/network.Service.DeleteQoSPolicyRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.FindSourceRecord`

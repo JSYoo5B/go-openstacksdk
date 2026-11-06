@@ -37,7 +37,7 @@ Go API:
 
 Python/Go differences:
 
-- Python attribute names (image_id, source_volume_id, is_multiattach, scheduler_hints) become CreateOpts fields or WithCreateField wire keys and WithCreateHintOpts in Go.
+- Python attribute names (image_id, source_volume_id, is_multiattach, scheduler_hints) become CreateOpts fields or request.Field wire keys and WithCreateHintOpts in Go.
 - Gophercloud validates scheduler hint fields such as same_host as UUIDs before sending; Python forwards the dict unchanged.
 - Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud typed model, so response fields outside that model are dropped.
 - Python sends min(resource _max_microversion, server maximum) or the session default; Go sends the one microversion configured or negotiated on the Connection client.
@@ -57,7 +57,7 @@ Go API:
 Python/Go differences:
 
 - Python commit sends no request when no attribute is dirty; Go Update always sends PUT, even with an empty envelope.
-- Attributes outside UpdateOpts need WithUpdateField with the wire key.
+- Attributes outside UpdateOpts need request.Field with the wire key.
 - Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud typed model, so response fields outside that model are dropped.
 - Python sends min(resource _max_microversion, server maximum) or the session default; Go sends the one microversion configured or negotiated on the Connection client.
 
@@ -113,7 +113,7 @@ Go API:
 
 Python/Go differences:
 
-- Python all_projects=True sends all_tenants=True; typed Go AllTenants sends all_tenants=true, so WithListQuery("all_tenants", "True") is needed for the identical string.
+- Python all_projects=True sends all_tenants=True; typed Go AllTenants sends all_tenants=true, so request.Query("all_tenants", "True") is needed for the identical string.
 - Python filters returned rows locally for Body attributes outside the query mapping; Go sends only query parameters and leaves local filtering to the caller.
 - Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud typed model, so response fields outside that model are dropped.
 - Python sends min(resource _max_microversion, server maximum) or the session default; Go sends the one microversion configured or negotiated on the Connection client.
@@ -198,7 +198,7 @@ Go API:
 
 Python/Go differences:
 
-- Python all_projects=True sends all_tenants=True; typed Go AllTenants sends all_tenants=true, so WithListQuery("all_tenants", "True") is needed for the identical string.
+- Python all_projects=True sends all_tenants=True; typed Go AllTenants sends all_tenants=true, so request.Query("all_tenants", "True") is needed for the identical string.
 - Python filters returned rows locally for Body attributes outside the query mapping; Go sends only query parameters and leaves local filtering to the caller.
 - Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud typed model, so response fields outside that model are dropped.
 - Python sends min(resource _max_microversion, server maximum) or the session default; Go sends the one microversion configured or negotiated on the Connection client.
@@ -325,7 +325,7 @@ Go API:
 Python/Go differences:
 
 - ListDetailOpts has no typed name, status or volume_id filters; request.Query adds them.
-- Python all_projects=True sends all_tenants=True; typed Go AllTenants sends all_tenants=true, so WithListQuery("all_tenants", "True") is needed for the identical string.
+- Python all_projects=True sends all_tenants=True; typed Go AllTenants sends all_tenants=true, so request.Query("all_tenants", "True") is needed for the identical string.
 - Python filters returned rows locally for Body attributes outside the query mapping; Go sends only query parameters and leaves local filtering to the caller.
 - Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud typed model, so response fields outside that model are dropped.
 - Python sends min(resource _max_microversion, server maximum) or the session default; Go sends the one microversion configured or negotiated on the Connection client.
@@ -729,7 +729,7 @@ Go API:
 Python/Go differences:
 
 - Python commit sends no request when no attribute is dirty; Go Update always sends PUT, even with an empty envelope.
-- Python sends is_public under os-volume-type-access:is_public while Go UpdateOpts.IsPublic sends is_public; WithUpdateField reproduces the Python key.
+- Python sends is_public under os-volume-type-access:is_public while Go UpdateOpts.IsPublic sends is_public; request.Field reproduces the Python key.
 - Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud typed model, so response fields outside that model are dropped.
 - Python sends min(resource _max_microversion, server maximum) or the session default; Go sends the one microversion configured or negotiated on the Connection client.
 
@@ -882,7 +882,7 @@ Go API:
 
 Python/Go differences:
 
-- Python spec keys are passed as extra keyword attributes; Go takes them in CreateOpts.Specs or WithCreateField.
+- Python spec keys are passed as extra keyword attributes; Go takes them in CreateOpts.Specs or request.Field.
 - Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud typed model, so response fields outside that model are dropped.
 - Python sends min(resource _max_microversion, server maximum) or the session default; Go sends the one microversion configured or negotiated on the Connection client.
 

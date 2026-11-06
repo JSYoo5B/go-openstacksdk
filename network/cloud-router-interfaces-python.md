@@ -18,8 +18,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.WithRouterInterfaceReadOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithRouterInterfaceType`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithRouterInterfaceTypeJSON`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithRouterInterfaceReadHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithRouterInterfaceReadMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithRouterInterfaceReadCurrentLocation`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.ListRecords`
 

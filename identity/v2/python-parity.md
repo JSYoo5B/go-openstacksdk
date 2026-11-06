@@ -212,14 +212,14 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v2/tenants.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
-- Update sends PUT tenants/{id} with the {"tenant": {...}} envelope including the id that Proxy._update leaves dirty when given WithUpdateField("id", id), the request Python update_tenant sends, and decodes the fields Python exposes.
+- Update sends PUT tenants/{id} with the {"tenant": {...}} envelope including the id that Proxy._update leaves dirty when given request.Field("id", id), the request Python update_tenant sends, and decodes the fields Python exposes.
   Tests: `identity/v2/tenants/python_parity_test.go:TestPythonTenantCreateGetUpdateRequests`.
 
 Python/Go differences:
 
 - Python accepts any status below 400 through raise_from_response; the native call accepts only its Gophercloud OkCodes listed in identity/v2/native-calls.md.
 - Python takes an ID string or Resource and returns a mutable Resource; Go takes an ID string and returns the native Gophercloud model pointer.
-- Go UpdateOpts omits an empty name and nil pointers and WithUpdateField cannot override typed fields, so Python name="" or description=None values cannot be sent.
+- Go UpdateOpts omits an empty name and nil pointers and request.Field cannot override typed fields, so Python name="" or description=None values cannot be sent.
 - The id body key is added explicitly with request.Field; Keystone ignores it.
 
 ### `python:identity/v2/create_user`
@@ -334,14 +334,14 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v2/users.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
-- Update sends PUT users/{id} with the {"user": {...}} envelope including the id that Proxy._update leaves dirty when given WithUpdateField("id", id), the request Python update_user sends, and decodes the fields Python exposes.
+- Update sends PUT users/{id} with the {"user": {...}} envelope including the id that Proxy._update leaves dirty when given request.Field("id", id), the request Python update_user sends, and decodes the fields Python exposes.
   Tests: `identity/v2/users/python_parity_test.go:TestPythonUserCreateGetUpdateRequests`.
 
 Python/Go differences:
 
 - Python accepts any status below 400 through raise_from_response; the native call accepts only its Gophercloud OkCodes listed in identity/v2/native-calls.md.
 - Python takes an ID string or Resource and returns a mutable Resource; Go takes an ID string and returns the native Gophercloud model pointer.
-- Go UpdateOpts omits empty strings and nil pointers and WithUpdateField cannot override typed fields, so Python empty or None attribute values cannot be sent.
+- Go UpdateOpts omits empty strings and nil pointers and request.Field cannot override typed fields, so Python empty or None attribute values cannot be sent.
 - The id body key is added explicitly with request.Field; Keystone ignores it.
 
 ### `python:identity/v2/wait_for_status`

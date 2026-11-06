@@ -24,7 +24,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithCreateAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.NamespaceScope.CreateRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordCreateOpts`
-- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordCreateHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordCreateAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordCreateAttributes`
@@ -79,11 +78,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.NamespaceScope.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.NamespaceScope.AllRecords`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordListHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordListFilter`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordListFilters`
-- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.NewWithDependencies`
 
 - Zero-HTTP InNamespace validates required literal namespace and captures API/client/original provider/type/endpoint/base/microversion for scope lifetime. Parent and child are nonempty validUTF8<=80runes with route-breaking/control/dot syntax rejected and colon/Unicode/space escaped once. No Ref/find/parentGET or response-driven routing. Each call copies latest ordinary source headers, uses live original authentication and rechecks scope/source/context before callbacks, after accepted body and consumed rows.
@@ -138,7 +135,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithUpdateAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.NamespaceScope.UpdateRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordUpdateOpts`
-- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordUpdateHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordUpdateAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordUpdateAttributes`
@@ -191,7 +187,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithDeleteHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithDeleteAllOpts`
-- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithDeleteAllHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.NamespaceScope.DeleteRecord`
 
@@ -276,6 +271,7 @@ for value in conn.image.metadef_properties(
 package main
 
 import (
+	"github.com/JSYoo5B/go-openstacksdk/request"
     "context"
     "encoding/json"
     "errors"
@@ -349,7 +345,7 @@ func run(ctx context.Context, cloud, namespace string, maxRows, minLength int) e
     records, readErr := scope.AllRecords(ctx,
         properties.WithRecordListOpts(properties.RecordListOpts{MaxItems: maxRows}),
         properties.WithRecordListFilter("min_length", minLength),
-        properties.WithRecordListHeader("X-Request-Source", "metadef-property-list-example"),
+        request.Header("X-Request-Source", "metadef-property-list-example"),
     )
     for _, record := range records {
         if err := printRecord(record); err != nil { return errors.Join(readErr, err) }

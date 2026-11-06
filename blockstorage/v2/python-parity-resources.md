@@ -78,7 +78,7 @@ Go API:
 
 Python/Go differences:
 
-- Go CreateOpts omits false and empty values that Python would send when passed explicitly; WithCreateField can send them.
+- Go CreateOpts omits false and empty values that Python would send when passed explicitly; request.Field can send them.
 - Python drops attributes not declared on the v2 Backup resource, such as metadata; Go sends CreateOpts.Metadata when set.
 - Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud typed model, so response fields outside that model are dropped.
 - Go accepts only 202.
@@ -405,7 +405,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/schedulerstats.WithListOptions`
 
-- List with WithListQuery("detail", "True") sends scheduler-stats/get_pools?detail=True, the typed Detail option sends detail=true, and pool names and typed capabilities decode.
+- List with request.Query("detail", "True") sends scheduler-stats/get_pools?detail=True, the typed Detail option sends detail=true, and pool names and typed capabilities decode.
   Tests: `blockstorage/v2/schedulerstats/python_parity_test.go:TestPythonBackendPoolsSendsDetailQuery`.
 
 Python/Go differences:

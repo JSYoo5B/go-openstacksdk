@@ -34,11 +34,11 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithRecordListOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithRecordListQuery`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithRecordListMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithRecordListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 
 - Ordinary AddressGroup.Resources.List/All now classify the entire pinned direct declaration through SDK-owned WithFilter/WithFilters: eight canonical and accepted query attributes, three non-query Body attributes id/tenant_id/addresses and nine reserved list controls. AddressGroup directly inherits Resource without NetworkResource or TagMixin. Query name/description/project_id are server-only; no exact local name/project predicate, implicit GET or caller builder is added. Generated leaf and cached Network/NetworkV2 facades share the descriptor.
   Tests: `api/address_group_list_filters_test.go:TestAddressGroupListFiltersEntireQueryDescriptor`, `api/address_group_list_filters_test.go:TestAddressGroupListFiltersRawBodyDescriptorAndPresence`, `connectiontest/connection_address_group_filters_test.go:TestConnectionAddressGroupFiltersSharedFacadesAndRawTenant`.
@@ -113,6 +113,7 @@ for row in rows:
 package main
 
 import (
+	"github.com/JSYoo5B/go-openstacksdk/request"
     "context"
     "encoding/json"
     "flag"
@@ -137,7 +138,7 @@ func main() {
     network, err := conn.NetworkV2(ctx)
     if err != nil { log.Fatal(err) }
     options := []addressgroups.RecordListOption{
-        addressgroups.WithRecordListMaxItems(*cap),
+        request.MaxItems(*cap),
     }
     if *project != "" {
         options = append(options, addressgroups.WithRecordListQuery("project_id", *project))

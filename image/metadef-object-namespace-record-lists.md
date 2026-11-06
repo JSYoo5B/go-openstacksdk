@@ -29,11 +29,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.API.AllRecords`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.NewWithDependencies`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithRecordListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
-- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
-- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
 - `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithRecordListFilter`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithRecordListFilters`
@@ -96,11 +92,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.NamespaceScope.AllRecords`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.NewWithDependencies`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithRecordListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithRecordListHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/request.Limit`
 - `github.com/JSYoo5B/go-openstacksdk/request.Marker`
-- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
 - `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithRecordListFilter`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithRecordListFilters`
@@ -167,6 +161,7 @@ for value in conn.image.metadef_objects(namespace):
 package main
 
 import (
+	"github.com/JSYoo5B/go-openstacksdk/request"
     "context"
     "encoding/json"
     "errors"
@@ -223,11 +218,11 @@ func run(ctx context.Context, cloud, namespace, namespaceFilter, owner,
     if err != nil { return err }
     namespaceOptions := []namespaces.RecordListOption{
         namespaces.WithRecordListOpts(namespaces.RecordListOpts{MaxItems: maxItems}),
-        namespaces.WithRecordListHeader("X-Request-Source", "metadef-record-lists-example"),
-        namespaces.WithRecordListPaginated(paginated),
+        request.Header("X-Request-Source", "metadef-record-lists-example"),
+        request.Paginated(paginated),
     }
     if limit > 0 {
-        namespaceOptions = append(namespaceOptions, namespaces.WithRecordListLimit(limit))
+        namespaceOptions = append(namespaceOptions, request.Limit(limit))
     }
     if visibility != "" {
         namespaceOptions = append(namespaceOptions, namespaces.WithRecordListVisibility(visibility))
@@ -246,8 +241,8 @@ func run(ctx context.Context, cloud, namespace, namespaceFilter, owner,
     if err != nil { return err }
     objectOptions := []objects.RecordListOption{
         objects.WithRecordListOpts(objects.RecordListOpts{Limit: limit, MaxItems: maxItems}),
-        objects.WithRecordListHeader("X-Request-Source", "metadef-record-lists-example"),
-        objects.WithRecordListPaginated(paginated),
+        request.Header("X-Request-Source", "metadef-record-lists-example"),
+        request.Paginated(paginated),
     }
     if objectName != "" {
         objectOptions = append(objectOptions, objects.WithRecordListFilter("name", objectName))

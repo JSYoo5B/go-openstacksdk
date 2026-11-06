@@ -62,9 +62,9 @@ Go API:
 Python/Go differences:
 
 - Python accepts a Resource or an ID string and returns a mutable Resource; Go takes an ID string and returns the native Gophercloud model.
-- Python maps is_admin_state_up to admin_state_up; Go UpdateOpts uses AdminStateUp and WithUpdateField carries other keys.
+- Python maps is_admin_state_up to admin_state_up; Go UpdateOpts uses AdminStateUp and request.Field carries other keys.
 - Python sends no request when no attribute changed; Go Update always sends PUT with the envelope.
-- Go option structs omit nil and empty core fields and WithUpdateField cannot replace a core key, so an explicit Python None cannot be sent as JSON null for those fields.
+- Go option structs omit nil and empty core fields and request.Field cannot replace a core key, so an explicit Python None cannot be sent as JSON null for those fields.
 
 ### `python:network/v2/add_dhcp_agent_to_network`
 
@@ -202,7 +202,7 @@ Python/Go differences:
 
 - Python accepts a Resource or an ID string and returns a mutable Resource; Go takes an ID string and returns the native Gophercloud model.
 - Python sends no request when no attribute changed; Go Update always sends PUT with the envelope.
-- Go option structs omit nil and empty core fields and WithUpdateField cannot replace a core key, so an explicit Python None cannot be sent as JSON null for those fields.
+- Go option structs omit nil and empty core fields and request.Field cannot replace a core key, so an explicit Python None cannot be sent as JSON null for those fields.
 
 ### `python:network/v2/extensions`
 
@@ -309,7 +309,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.API.AllRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.API.ProxyListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.WithRecordListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/request.BasePath`
@@ -414,11 +413,11 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithRecordListOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithRecordListQuery`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithRecordListMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithRecordListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithRecordListBasePath`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithRecordListJMESPath`
 
@@ -481,9 +480,9 @@ Go API:
 
 Python/Go differences:
 
-- Python transposes is_admin_state_up, is_port_security_enabled, security_group_ids and tenant_id; Go callers use the wire names through ListOpts or WithListQuery.
+- Python transposes is_admin_state_up, is_port_security_enabled, security_group_ids and tenant_id; Go callers use the wire names through ListOpts or request.Query.
 - Go ListOpts sends tags filters as one comma-separated value, while Python repeats list values.
-- Python filters keyword arguments that are Body attributes but not QueryParameters locally after each page; Go sends WithListQuery keys to the server and the caller filters the returned rows.
+- Python filters keyword arguments that are Body attributes but not QueryParameters locally after each page; Go sends request.Query keys to the server and the caller filters the returned rows.
 - The native ports.Port model has no binding:*, dns_*, extra_dhcp_opts, port_security_enabled, qos_*, resource_request, trunk_details or several other Python Body fields, so those values are not returned and cannot be filtered by the caller.
 - Python merges the next link's query into its own query parameters; Go requests the next href exactly as Neutron returned it.
 - Concrete Go records expose owned declared Resource view and independent actual Wire/Envelope/Header/StatusCode. Full mutable Python Resource/cache/dirty-state/runtime subclass handling remains tracked shared SDK-R1/C1/S1, not counted as generated transport parity.
@@ -506,8 +505,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.SubnetPortNative`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.SubnetPortFields`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithSubnetPortOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithSubnetPortHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithSubnetPortMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - All sends one unfiltered GET ports and the caller keeps the ports whose FixedIPs contain the subnet ID, matching Python's local selection.
   Tests: `network/v2/ports/python_parity_core_test.go:TestPythonParityCorePortSubnetPortsSelection`.
@@ -551,8 +550,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.BulkPortFields`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithBulkPortAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithBulkPortOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithBulkPortHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithBulkPortMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.BulkPortResult.All`
 
 - Exactly one eager flat POST {ports:[attrs1,attrs2]} owns canonical/wire alias order, raw request descriptor values, unknown Body names and consumes request microversion; collection iterator never resends.
@@ -627,8 +626,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.API.FindAvailableIPRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.WithAvailableIPOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.WithAvailableIPHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.WithAvailableIPMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - List sends GET floatingips without a query, follows floatingips_links lazily and stops fetching when the caller breaks at the first row with an empty PortID; no row yields nil.
   Tests: `network/v2/extensions/layer3/floatingips/python_parity_core_test.go:TestPythonParityCoreFloatingIPFindAvailableStopsAtFirstFreeRow`.

@@ -13,7 +13,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.FindRecord`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithRecordFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.UpdateWithAttributes`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/network.Service.UpdatePortRecord`

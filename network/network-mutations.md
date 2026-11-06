@@ -1042,7 +1042,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.WithNetworkProjectID`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithNetworkAvailabilityZoneHints`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithNetworkProvider`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithNetworkField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/network.Service.CreateNetworkDetail`
 
 - Create sends one network envelope with a literal name including empty and default admin_state_up=true. Explicit shared/external false, MTU0 and empty DNS are omitted; port-security false, empty description/project and provider nullable/string segmentation values plus extension false are preserved. Accepted201/202 return native typed ID/time/tag fields and refresh the primed configured default inventory.
@@ -1102,7 +1102,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.WithNetworkDNSDomainValue`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithNetworkDescription`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithNetworkProvider`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithNetworkField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithNetworkRevision`
 - `github.com/JSYoo5B/go-openstacksdk/network.Service.UpdateNetworkDetail`
 

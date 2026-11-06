@@ -19,8 +19,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.Service.DeleteFirewallRuleRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithFirewallDeleteOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithFirewallDeleteFilters`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithFirewallDeleteHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithFirewallDeleteMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithFirewallDeleteCurrentLocation`
 
 - The strict lookup of delete_firewall_rule sends the filters on GET /fwaas/firewall_rules/{name_or_id} and on the name list and reports a missing resource as resource.ErrNotFound before any DELETE.
@@ -50,7 +50,7 @@ Python/Go differences:
 - Python returns a Resource object; Go returns the native typed model.
 - SDK-R1: Go returns bool plus owned Lookup/Delete receipt views instead of mutable Python Resource/cache/lifecycle objects. All declared getter fields are projected before return, so an unused malformed field may fail earlier. Source informational status and empty/malformed fetch seed behavior are implemented only on this new closed profile; legacy typed/generated APIs keep their old contracts.
 - SDK-C1: JSON bytes retain large integers and Source untyped values without native bool/int coercion. Local equality uses shared CPython-loaded numeric policy and exact raw Wire/Envelope proof. Non-JSON custom objects and unrestricted Python runtime/representation/marshal behaviors remain separately tracked; structured Go errors keep actual native status and physical/context causes.
-- SDK-S1: Go captures the original Neutron service/client/route and uses safe escaped literal member IDs with fixed protocol/header/origin guards. Arbitrary adapter/class retargeting and URI percent-format are restricted. WithFirewallDeleteHeaders/Microversion are explicit Go transport extras (headers across phases, microversion on initial GET+DELETE while fallback LIST keeps captured default). The raw Source Find controls in filters are implemented separately; filters.microversion cannot be combined with WithFirewallDeleteMicroversion because they would select two initial GET versions.
+- SDK-S1: Go captures the original Neutron service/client/route and uses safe escaped literal member IDs with fixed protocol/header/origin guards. Arbitrary adapter/class retargeting and URI percent-format are restricted. request.Headers/Microversion are explicit Go transport extras (headers across phases, microversion on initial GET+DELETE while fallback LIST keeps captured default). The raw Source Find controls in filters are implemented separately; filters.microversion cannot be combined with request.Microversion because they would select two initial GET versions.
 - Source has no FWaaS extension/has_service pre-gate for these deletes, and neither does this workflow. Shared-reader access is not permission to delete: official FWaaS2025.2 sample gives owner project member/admin ordinary delete and separate admin-only shared deletion. SDK does not elevate RBAC or unlink attached rules/policies/groups; backend conflict remains actual409.
 - Actual pinned Source156cases, standalone Python AST/byte-exact Go+Python mains and prepared fixture groups are distinct evidence. Owner did not execute Go/Git or authenticate a live cloud.
 - Raw limit filter values in the Find fallback must be nonnegative integers for the marker-fallback decision; Python's truthiness of boolean, fractional or string limits, which Neutron rejects with HTTP 400, is not reproduced; see Deliberate runtime differences in docs/sdk-support-ledger.md.
@@ -69,8 +69,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.Service.DeleteFirewallPolicyRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithFirewallDeleteOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithFirewallDeleteFilters`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithFirewallDeleteHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithFirewallDeleteMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithFirewallDeleteCurrentLocation`
 
 - The strict lookup of delete_firewall_policy sends the filters on GET /fwaas/firewall_policies/{name_or_id} and on the name list and reports a missing resource as resource.ErrNotFound before any DELETE.
@@ -100,7 +100,7 @@ Python/Go differences:
 - Python returns a Resource object; Go returns the native typed model.
 - SDK-R1: Go returns bool plus owned Lookup/Delete receipt views instead of mutable Python Resource/cache/lifecycle objects. All declared getter fields are projected before return, so an unused malformed field may fail earlier. Source informational status and empty/malformed fetch seed behavior are implemented only on this new closed profile; legacy typed/generated APIs keep their old contracts.
 - SDK-C1: JSON bytes retain large integers and Source untyped values without native bool/int coercion. Local equality uses shared CPython-loaded numeric policy and exact raw Wire/Envelope proof. Non-JSON custom objects and unrestricted Python runtime/representation/marshal behaviors remain separately tracked; structured Go errors keep actual native status and physical/context causes.
-- SDK-S1: Go captures the original Neutron service/client/route and uses safe escaped literal member IDs with fixed protocol/header/origin guards. Arbitrary adapter/class retargeting and URI percent-format are restricted. WithFirewallDeleteHeaders/Microversion are explicit Go transport extras (headers across phases, microversion on initial GET+DELETE while fallback LIST keeps captured default). The raw Source Find controls in filters are implemented separately; filters.microversion cannot be combined with WithFirewallDeleteMicroversion because they would select two initial GET versions.
+- SDK-S1: Go captures the original Neutron service/client/route and uses safe escaped literal member IDs with fixed protocol/header/origin guards. Arbitrary adapter/class retargeting and URI percent-format are restricted. request.Headers/Microversion are explicit Go transport extras (headers across phases, microversion on initial GET+DELETE while fallback LIST keeps captured default). The raw Source Find controls in filters are implemented separately; filters.microversion cannot be combined with request.Microversion because they would select two initial GET versions.
 - Source has no FWaaS extension/has_service pre-gate for these deletes, and neither does this workflow. Shared-reader access is not permission to delete: official FWaaS2025.2 sample gives owner project member/admin ordinary delete and separate admin-only shared deletion. SDK does not elevate RBAC or unlink attached rules/policies/groups; backend conflict remains actual409.
 - Actual pinned Source156cases, standalone Python AST/byte-exact Go+Python mains and prepared fixture groups are distinct evidence. Owner did not execute Go/Git or authenticate a live cloud.
 - Raw limit filter values in the Find fallback must be nonnegative integers for the marker-fallback decision; Python's truthiness of boolean, fractional or string limits, which Neutron rejects with HTTP 400, is not reproduced; see Deliberate runtime differences in docs/sdk-support-ledger.md.
@@ -119,8 +119,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.Service.DeleteFirewallGroupRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithFirewallDeleteOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithFirewallDeleteFilters`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithFirewallDeleteHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithFirewallDeleteMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithFirewallDeleteCurrentLocation`
 
 - The strict lookup of delete_firewall_group sends the filters on GET /fwaas/firewall_groups/{name_or_id} and on the name list and reports a missing resource as resource.ErrNotFound before any DELETE.
@@ -150,7 +150,7 @@ Python/Go differences:
 - Python returns a Resource object; Go returns the native typed model.
 - SDK-R1: Go returns bool plus owned Lookup/Delete receipt views instead of mutable Python Resource/cache/lifecycle objects. All declared getter fields are projected before return, so an unused malformed field may fail earlier. Source informational status and empty/malformed fetch seed behavior are implemented only on this new closed profile; legacy typed/generated APIs keep their old contracts.
 - SDK-C1: JSON bytes retain large integers and Source untyped values without native bool/int coercion. Local equality uses shared CPython-loaded numeric policy and exact raw Wire/Envelope proof. Non-JSON custom objects and unrestricted Python runtime/representation/marshal behaviors remain separately tracked; structured Go errors keep actual native status and physical/context causes.
-- SDK-S1: Go captures the original Neutron service/client/route and uses safe escaped literal member IDs with fixed protocol/header/origin guards. Arbitrary adapter/class retargeting and URI percent-format are restricted. WithFirewallDeleteHeaders/Microversion are explicit Go transport extras (headers across phases, microversion on initial GET+DELETE while fallback LIST keeps captured default). The raw Source Find controls in filters are implemented separately; filters.microversion cannot be combined with WithFirewallDeleteMicroversion because they would select two initial GET versions.
+- SDK-S1: Go captures the original Neutron service/client/route and uses safe escaped literal member IDs with fixed protocol/header/origin guards. Arbitrary adapter/class retargeting and URI percent-format are restricted. request.Headers/Microversion are explicit Go transport extras (headers across phases, microversion on initial GET+DELETE while fallback LIST keeps captured default). The raw Source Find controls in filters are implemented separately; filters.microversion cannot be combined with request.Microversion because they would select two initial GET versions.
 - Source has no FWaaS extension/has_service pre-gate for these deletes, and neither does this workflow. Shared-reader access is not permission to delete: official FWaaS2025.2 sample gives owner project member/admin ordinary delete and separate admin-only shared deletion. SDK does not elevate RBAC or unlink attached rules/policies/groups; backend conflict remains actual409.
 - Actual pinned Source156cases, standalone Python AST/byte-exact Go+Python mains and prepared fixture groups are distinct evidence. Owner did not execute Go/Git or authenticate a live cloud.
 - Raw limit filter values in the Find fallback must be nonnegative integers for the marker-fallback decision; Python's truthiness of boolean, fractional or string limits, which Neutron rejects with HTTP 400, is not reproduced; see Deliberate runtime differences in docs/sdk-support-ledger.md.

@@ -122,8 +122,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity.ServiceReadCloud.GetService`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.WithRecordResolveOpts`
-- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
-- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.WithRecordResolveLocation`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.API.ResolveRecord`
 
@@ -189,7 +187,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
-- create_endpoint resolves the service by ID or name, then POSTs one /v3/endpoints body per URL with url, interface, service_id, enabled true and region_id (JSON null when region is not given) sent through WithCreateField("region_id", ...).
+- create_endpoint resolves the service by ID or name, then POSTs one /v3/endpoints body per URL with url, interface, service_id, enabled true and region_id (JSON null when region is not given) sent through request.Field("region_id", ...).
   Tests: `identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityEndpointHelpers`.
 
 Python/Go differences:
@@ -200,7 +198,7 @@ Python/Go differences:
 - Python expands public_url, internal_url and admin_url into one create per interface in that order and rejects url or interface combined with them before HTTP; Go callers issue one Create per interface.
 - Python raises SDKException when the service is missing; the Go chain returns a nil service.
 - Python sends interface null when url is given without interface; Go CreateOpts requires Availability, URL and ServiceID and rejects the request before HTTP.
-- CreateOpts.Region encodes the legacy region key, so the Python region_id key needs WithCreateField("region_id", ...).
+- CreateOpts.Region encodes the legacy region key, so the Python region_id key needs request.Field("region_id", ...).
 - Python returns a list of Endpoint Resources; Go returns one endpoint pointer per Create call.
 - Python returns openstacksdk identity Resource objects; Go returns the Gophercloud identity v3 model pointers (enabled is Enabled, and unknown Keystone fields are only in Extra where the model declares it).
 
@@ -213,7 +211,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
-- update_endpoint(endpoint_id, ...) is PATCH /v3/endpoints/<id> with service_name_or_id sent as service_id without lookup and region sent as region_id through WithUpdateField.
+- update_endpoint(endpoint_id, ...) is PATCH /v3/endpoints/<id> with service_name_or_id sent as service_id without lookup and region sent as region_id through request.Field.
   Tests: `identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityEndpointHelpers`.
 
 Python/Go differences:
@@ -673,7 +671,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity.NewRoleReadCloud`
 - `github.com/JSYoo5B/go-openstacksdk/identity.RoleReadCloud.ListRoles`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithRecordListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - Source cloud list_roles expands ordinary Proxy kwargs into the owned list classifier, preserves server name/domain and local options filter, and exposes independent JSON Value/Roles/actual Inventory with203 header/status.
   Tests: `identity/role_record_cloud_test.go:TestPythonRoleCloudListForwardsOwnedProxyQueryAndLocalBodyFilters`.
@@ -749,8 +746,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithRoleGetLocation`
 - `github.com/JSYoo5B/go-openstacksdk/identity.RoleReadCloud.GetRole`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithClosedLookupOpts`
-- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
-- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithClosedLookupLocation`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.ResolveRecord`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithClosedLookupDomainID`
@@ -1214,8 +1209,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithUserGetLocation`
 - `github.com/JSYoo5B/go-openstacksdk/identity.UserReadCloud.GetUser`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithClosedLookupOpts`
-- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
-- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithClosedLookupLocation`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.ResolveRecord`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithClosedLookupDomainID`

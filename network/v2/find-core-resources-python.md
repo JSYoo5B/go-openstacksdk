@@ -15,9 +15,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithRecordFindOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithRecordFindQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithRecordFindIgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithRecordFindHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithRecordFindMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - Safe string identities use the original native getter when query is absent and the audited query getter otherwise; both retain native success codes. Default logical absence is ignored, Compatible falls back only after GET400/403/404, with explicit 404-only/GET-only and strict missing options.
   Tests: `api/find_identity_native_test.go:TestNativeFindIdentitySafeGETReturnsImmediatelyWithNativeGetter`, `api/find_identity_native_test.go:TestNativeFindIdentityFallbackPoliciesAndMissingDefaults`.
@@ -72,9 +72,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithRecordFindOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithRecordFindQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithRecordFindIgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithRecordFindHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithRecordFindMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - Safe string identities use the original native getter when query is absent and the audited query getter otherwise; both retain native success codes. Default logical absence is ignored, Compatible falls back only after GET400/403/404, with explicit 404-only/GET-only and strict missing options.
   Tests: `api/find_identity_native_test.go:TestNativeFindIdentitySafeGETReturnsImmediatelyWithNativeGetter`, `api/find_identity_native_test.go:TestNativeFindIdentityFallbackPoliciesAndMissingDefaults`.
@@ -131,9 +131,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordFindOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordFindQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordFindIgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordFindHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordFindMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - Safe string identities use the original native getter when query is absent and the audited query getter otherwise; both retain native success codes. Default logical absence is ignored, Compatible falls back only after GET400/403/404, with explicit 404-only/GET-only and strict missing options.
   Tests: `api/find_identity_native_test.go:TestNativeFindIdentitySafeGETReturnsImmediatelyWithNativeGetter`, `api/find_identity_native_test.go:TestNativeFindIdentityFallbackPoliciesAndMissingDefaults`.
@@ -222,6 +222,7 @@ if __name__ == "__main__":
 package main
 
 import (
+	"github.com/JSYoo5B/go-openstacksdk/request"
     "context"
     "encoding/json"
     "flag"
@@ -259,21 +260,21 @@ func main() {
     service, err := conn.NetworkV2(ctx)
     if err != nil { log.Fatal(err) }
     if *networkName != "" {
-        options := []networks.RecordFindOption{networks.WithRecordFindIgnoreMissing(!*strict)}
+        options := []networks.RecordFindOption{request.IgnoreMissing(!*strict)}
         if *project != "" { options = append(options, networks.WithRecordFindQuery("project_id", *project)) }
         result, err := service.Networks.FindRecord(ctx, *networkName, options...)
         if err != nil { log.Fatal(err) }
         if result == nil { printResource("network", nil) } else { printResource("network", result.Resource) }
     }
     if *portName != "" {
-        options := []ports.RecordFindOption{ports.WithRecordFindIgnoreMissing(!*strict)}
+        options := []ports.RecordFindOption{request.IgnoreMissing(!*strict)}
         if *project != "" { options = append(options, ports.WithRecordFindQuery("project_id", *project)) }
         result, err := service.Ports.FindRecord(ctx, *portName, options...)
         if err != nil { log.Fatal(err) }
         if result == nil { printResource("port", nil) } else { printResource("port", result.Resource) }
     }
     if *subnetName != "" {
-        options := []subnets.RecordFindOption{subnets.WithRecordFindIgnoreMissing(!*strict)}
+        options := []subnets.RecordFindOption{request.IgnoreMissing(!*strict)}
         if *project != "" { options = append(options, subnets.WithRecordFindQuery("project_id", *project)) }
         result, err := service.Subnets.FindRecord(ctx, *subnetName, options...)
         if err != nil { log.Fatal(err) }

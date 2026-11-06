@@ -103,7 +103,7 @@ Python/Go differences:
 
 - Python member methods take the parent pool as an ID or Pool Resource and put pool_id into the URI; Go passes the pool ID per call or fixes it once in a pools.API.Members scope (an explicit ID needs no lookup request).
 - Python list methods return a generator of Resource objects; Go List is an iter.Seq2 and All collects it, with common paging controls and no inherited Resource.list link/limit/marker fallbacks beyond the native pager.
-- Python **attrs/**query become concrete typed options plus the library-owned WithCreateField/WithUpdateField/WithListQuery extensions; Python-only wire keys travel through those extensions and protected-field collisions fail before HTTP.
+- Python **attrs/**query become concrete typed options plus the library-owned request.Field/request.Query extensions; Python-only wire keys travel through those extensions and protected-field collisions fail before HTTP.
 - Go exposes these local controls through the common Collection or fixed-parent scope; existing native typed List option signatures remain unchanged. Zero means unlimited and negative values fail lazily before HTTP.
 - The native path does not infer a wire limit from max_items and stops exactly at the raw row cap. Native whole-page extraction or IsEmpty may still reject unused trailing rows; continuation retains the native pager and SDK cycle policy.
 
@@ -371,11 +371,11 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordListOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordListQuery`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordListMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 
 - Ordinary QoSPolicy.Resources.List/All classify the complete pinned declaration through SDK-owned WithFilter/WithFilters: fifteen canonical query fields and nineteen accepted canonical/wire spellings, two local Body fields rules/tenant_id and nine reserved list controls. QoSPolicy inherits Resource+TagMixin, not NetworkResource. Queried id/name/description/project_id/is_default/shared/tags remain server-only even when returned values differ; no implicit GET, tag fetch or caller builder is added. Generated leaf and cached Network/NetworkV2 facades share this descriptor.
   Tests: `api/qos_policy_list_filters_test.go:TestQoSPolicyListFiltersEntireQueryAndAliasDescriptor`, `api/qos_policy_list_filters_test.go:TestQoSPolicyListFiltersRawRulesAndTenantPresence`, `connectiontest/connection_qos_policy_filters_test.go:TestConnectionQoSPolicyFiltersSharedFacadesAndExactRawRules`.
@@ -462,11 +462,11 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithRecordListOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithRecordListQuery`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithRecordListMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithRecordListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 
 - Ordinary AddressGroup.Resources.List/All now classify the entire pinned direct declaration through SDK-owned WithFilter/WithFilters: eight canonical and accepted query attributes, three non-query Body attributes id/tenant_id/addresses and nine reserved list controls. AddressGroup directly inherits Resource without NetworkResource or TagMixin. Query name/description/project_id are server-only; no exact local name/project predicate, implicit GET or caller builder is added. Generated leaf and cached Network/NetworkV2 facades share the descriptor.
   Tests: `api/address_group_list_filters_test.go:TestAddressGroupListFiltersEntireQueryDescriptor`, `api/address_group_list_filters_test.go:TestAddressGroupListFiltersRawBodyDescriptorAndPresence`, `connectiontest/connection_address_group_filters_test.go:TestConnectionAddressGroupFiltersSharedFacadesAndRawTenant`.
@@ -550,12 +550,12 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithRecordListOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithRecordListQuery`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithRecordListMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithRecordListBasePath`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithRecordListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithRecordListJMESPath`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithRecordListConflictingAttrs`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.API.ProxyCloudListRecords`
@@ -680,11 +680,11 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithRecordListOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithRecordListQuery`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithRecordListMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithRecordListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 
 - Ordinary SubnetPool.Resources.List/All classify the complete pinned declaration through SDK-owned WithFilter/WithFilters: sixteen canonical query fields and twenty accepted canonical/wire spellings, ten local Body properties and nine reserved list controls. SubnetPool inherits Resource+TagMixinNetwork, not NetworkResource. id remains local; queried name/project_id/default/shared/ip_version/address_scope/tags stay server-only even when returned fields differ. Generated leaf and cached Network/NetworkV2 facades share the descriptor without implicit detail GET, prefix mutation or caller builder.
   Tests: `api/subnet_pool_list_filters_test.go:TestSubnetPoolListFiltersEntireQueryAndAliasDescriptor`, `api/subnet_pool_list_filters_test.go:TestSubnetPoolListFiltersRawPresenceIntegersAndTimestamps`, `connectiontest/connection_subnet_pool_filters_test.go:TestConnectionSubnetPoolFiltersSharedFacadesAndRawDescriptors`.
@@ -763,13 +763,13 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListQuery`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListBasePath`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListConflictingAttrs`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListJMESPath`
 
 - All nine declared non-query Body fields are explicitly filterable in ordinary Resources.List/All through leaf and cached Connection.Network.API paths. Native extraction completes first, then original rows are paired by count and index without extra HTTP or ID lookup. The public native model alias is retained.
@@ -1110,11 +1110,11 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRecordListOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRecordListQuery`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRecordListMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRecordListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 
 - Pinned direct Proxy.routers delegates query to Router Resource.list. Ordinary Routers.Resources.List/All and API.All provide SDK-owned WithFilter/WithFilters classification and explicit WithBodyFilter options without application builders or callback predicates. Leaf and cached Connection.Network().API/NetworkV2 facades share the native client/provider and preserve the existing returned Router model; no handwritten high-level Router collection or public ResourceAdapter is added.
   Tests: `api/router_list_filters_test.go:TestRouterListFiltersEntireQueryAndAliasDescriptor`, `api/router_list_filters_test.go:TestRouterListFiltersRawDescriptorsAndNativeProjection`, `connectiontest/connection_router_filters_test.go:TestConnectionRouterFiltersSharedClientAndRawRevision`, `internal/cmd/sdkgen/router_filters_test.go:TestRouterSemanticFilterEmissionKeepsPrivateCollectionAndPriorEightBindings`.
@@ -1199,11 +1199,11 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithRecordListOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithRecordListQuery`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithRecordListMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithRecordListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 
 - Pinned direct Proxy.security_groups delegates query to SecurityGroup Resource.list. Ordinary SecurityGroups.Resources.List/All and API.All provide SDK-owned WithFilter/WithFilters classification and explicit WithBodyFilter predicates without caller builders or callbacks. Leaf and cached Connection.Network().API/NetworkV2 facades share the existing native service/provider client; no handwritten top-level SecurityGroup collection or public ResourceAdapter is added.
   Tests: `api/security_group_list_filters_test.go:TestSecurityGroupListFiltersEntireQueryAndAliasDescriptor`, `connectiontest/connection_security_group_filters_test.go:TestConnectionSecurityGroupFiltersSharedClientAndOriginalRules`, `internal/cmd/sdkgen/security_group_filters_test.go:TestSecurityGroupFilterEmissionPreservesOwnedFullQueryPagersAndPriorNineBindings`.
@@ -1295,11 +1295,11 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithRecordListOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithRecordListQuery`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithRecordListMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithRecordListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 
 - SDK-owned Resources.List/All classify all14 canonical query attributes and18 accepted spellings and exactly two non-query Body properties from pinned Trunk. Effective10 descriptors use Resource+TagMixin C3 MRO6, not NetworkResource; sourceSHA6/AST35 independently anchor defaults/accessors/types and query classification. Native created_at/updated_at/revision_number do not become semantic attributes.
   Tests: `api/trunk_list_filters_test.go:TestTrunkListFiltersEntireQueryAndAliasDescriptor`, `internal/cmd/sdkgen/trunk_filters_test.go:TestTrunkPythonManifestSeparatesQuerySubportsFromIndependentJSONIdentity`, `internal/cmd/sdkgen/trunk_filters_test.go:TestTrunkPythonPinnedSourceRequiresLiveSixSHAAndThirtyFiveASTProof`.

@@ -106,7 +106,7 @@ Go API:
 
 Python/Go differences:
 
-- The upstream CreateOptsBuilder interface is replaced by concrete CreateOpts/CreateOption and a library-owned body serializer with WithCreateField extensions. API.Create returns extracted native RemoteConsole and wraps failures with operation context; native protocol/type requirements, strict200 status and partial/null extraction remain unchanged. Protocol derivation, selected-version gates and seeded Resource/Wire belong to the independent Python CreateConsole mapping.
+- The upstream CreateOptsBuilder interface is replaced by concrete CreateOpts/CreateOption and a library-owned body serializer with request.Field extensions. API.Create returns extracted native RemoteConsole and wraps failures with operation context; native protocol/type requirements, strict200 status and partial/null extraction remain unchanged. Protocol derivation, selected-version gates and seeded Resource/Wire belong to the independent Python CreateConsole mapping.
 
 ## Usage examples
 
@@ -125,6 +125,7 @@ conn.compute.delete_keypair("old-login-key")
 package main
 
 import (
+	"github.com/JSYoo5B/go-openstacksdk/request"
     "context"
     "encoding/json"
     "flag"

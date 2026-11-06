@@ -20,8 +20,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.SubnetPortNative`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.SubnetPortFields`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithSubnetPortOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithSubnetPortHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithSubnetPortMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - All sends one unfiltered GET ports and the caller keeps the ports whose FixedIPs contain the subnet ID, matching Python's local selection.
   Tests: `network/v2/ports/python_parity_core_test.go:TestPythonParityCorePortSubnetPortsSelection`.
@@ -65,8 +65,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.BulkPortFields`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithBulkPortAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithBulkPortOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithBulkPortHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithBulkPortMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.BulkPortResult.All`
 
 - Exactly one eager flat POST {ports:[attrs1,attrs2]} owns canonical/wire alias order, raw request descriptor values, unknown Body names and consumes request microversion; collection iterator never resends.
@@ -112,8 +112,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.ListSourceValues`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithSourceCloudListOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithSourceCloudListFilters`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithSourceCloudListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithSourceCloudListMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithSourceCloudListLocation`
 
 - Default bodyless /ports GET and Accept header, Source binding/DNS/security/QoS/unknown fields, missing defaults and actual page evidence.

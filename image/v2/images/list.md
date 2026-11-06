@@ -33,7 +33,7 @@ Examples use the surrounding guide's service object and context unless they decl
 ```go
 for image, err := range service.API.Images.List(ctx,
     images.WithListOptions(images.ListOpts{Status: images.ImageStatusActive, Limit: 50}),
-    images.WithListQuery("size_min", "1073741824")) {
+    request.Query("size_min", "1073741824")) {
     if err != nil {
         return err
     }
