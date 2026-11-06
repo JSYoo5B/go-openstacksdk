@@ -1,6 +1,9 @@
 package clusterpolicies
 
-import "github.com/JSYoo5B/go-openstacksdk/internal/senlin"
+import (
+	"github.com/JSYoo5B/go-openstacksdk/internal/senlin"
+	"github.com/JSYoo5B/go-openstacksdk/request"
+)
 
 // Body filters use the pinned response fields. cluster_id is a URI attribute
 // fixed by Scope, and URIClusterID is a Go-only value rather than a Body field.
@@ -17,5 +20,5 @@ var filterSpec = senlin.BodyFilterSpec{
 // locally, after row validation and pagination accounting. It does not send a
 // query or substitute a policy ID for a missing raw binding ID.
 func WithListFilter(key string, value any) ListOption {
-	return senlin.WithBodyFilter[ListOpts](filterSpec, key, value)
+	return request.Custom(senlin.WithBodyFilter[ListOpts](filterSpec, key, value))
 }

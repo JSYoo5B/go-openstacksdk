@@ -44,60 +44,83 @@ type ListOpts struct {
 	UserID        string
 }
 
-type CreateOption = request.Option[CreateOpts]
-type UpdateOption = request.Option[UpdateOpts]
-type ListOption = request.Option[ListOpts]
+// CreateOption is one option of Create: WithCreateOptions, the WithCreate
+// field options, request.Header, request.Field or request.Custom over
+// *request.Config[CreateOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type CreateOption = request.WriteCall
 
-func WithCreateOptions(value CreateOpts) CreateOption { return senlin.Snapshot(value) }
-func WithUpdateOptions(value UpdateOpts) UpdateOption { return senlin.Snapshot(value) }
-func WithListOptions(value ListOpts) ListOption       { return senlin.Snapshot(value) }
+var createCalls = senlin.WriteCalls[CreateOpts]()
+
+// UpdateOption is one option of Update, TrackedReceiver.Edit and
+// TrackedReceiver.Commit: WithUpdateOptions, the WithUpdate field options,
+// request.Header, request.Field or request.Custom over
+// *request.Config[UpdateOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type UpdateOption = request.WriteCall
+
+var updateCalls = senlin.WriteCalls[UpdateOpts]()
+
+// ListOption is one option of List and All: WithListOptions,
+// WithListGlobalProject, WithListUserID, WithListFilter, request.Header,
+// request.Microversion, request.Query (a string or []string value),
+// request.MaxItems, request.Paginated or request.Custom over
+// *request.Config[ListOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type ListOption = request.ListCall
+
+var listCalls = senlin.ListCalls(func(o *ListOpts) *int { return &o.MaxItems }, func(o *ListOpts) **bool { return &o.Paginated })
+
+func WithCreateOptions(value CreateOpts) CreateOption { return request.Custom(senlin.Snapshot(value)) }
+func WithUpdateOptions(value UpdateOpts) UpdateOption { return request.Custom(senlin.Snapshot(value)) }
+func WithListOptions(value ListOpts) ListOption       { return request.Custom(senlin.Snapshot(value)) }
 func WithCreateClusterID(value string) CreateOption {
-	return func(config *request.Config[CreateOpts]) error {
+	return request.Custom(func(config *request.Config[CreateOpts]) error {
 		config.Options.ClusterID = request.Present(value)
 		return nil
-	}
+	})
 }
 func WithCreateClusterIDNull() CreateOption {
-	return func(config *request.Config[CreateOpts]) error {
+	return request.Custom(func(config *request.Config[CreateOpts]) error {
 		config.Options.ClusterID = request.Null[string]()
 		return nil
-	}
+	})
 }
 func WithCreateAction(value string) CreateOption {
-	return func(config *request.Config[CreateOpts]) error {
+	return request.Custom(func(config *request.Config[CreateOpts]) error {
 		config.Options.Action = request.Present(value)
 		return nil
-	}
+	})
 }
 func WithCreateActionNull() CreateOption {
-	return func(config *request.Config[CreateOpts]) error {
+	return request.Custom(func(config *request.Config[CreateOpts]) error {
 		config.Options.Action = request.Null[string]()
 		return nil
-	}
+	})
 }
 func WithUpdateName(value string) UpdateOption {
-	return func(config *request.Config[UpdateOpts]) error {
+	return request.Custom(func(config *request.Config[UpdateOpts]) error {
 		config.Options.Name = request.Present(value)
 		return nil
-	}
+	})
 }
 func WithUpdateNameNull() UpdateOption {
-	return func(config *request.Config[UpdateOpts]) error {
+	return request.Custom(func(config *request.Config[UpdateOpts]) error {
 		config.Options.Name = request.Null[string]()
 		return nil
-	}
+	})
 }
 func WithUpdateAction(value string) UpdateOption {
-	return func(config *request.Config[UpdateOpts]) error {
+	return request.Custom(func(config *request.Config[UpdateOpts]) error {
 		config.Options.Action = request.Present(value)
 		return nil
-	}
+	})
 }
 func WithUpdateActionNull() UpdateOption {
-	return func(config *request.Config[UpdateOpts]) error {
+	return request.Custom(func(config *request.Config[UpdateOpts]) error {
 		config.Options.Action = request.Null[string]()
 		return nil
-	}
+	})
 }
 
 func withJSON[T any](value any, set func(*T, json.RawMessage)) request.Option[T] {
@@ -111,51 +134,24 @@ func withJSON[T any](value any, set func(*T, json.RawMessage)) request.Option[T]
 	}
 }
 func WithCreateActor(value any) CreateOption {
-	return withJSON(value, func(opts *CreateOpts, raw json.RawMessage) { opts.Actor = raw })
+	return request.Custom(withJSON(value, func(opts *CreateOpts, raw json.RawMessage) { opts.Actor = raw }))
 }
 func WithCreateParams(value any) CreateOption {
-	return withJSON(value, func(opts *CreateOpts, raw json.RawMessage) { opts.Params = raw })
+	return request.Custom(withJSON(value, func(opts *CreateOpts, raw json.RawMessage) { opts.Params = raw }))
 }
 func WithUpdateParams(value any) UpdateOption {
-	return withJSON(value, func(opts *UpdateOpts, raw json.RawMessage) { opts.Params = raw })
-}
-func WithCreateField(key string, value any) CreateOption {
-	return request.WithField[CreateOpts](key, value)
-}
-func WithUpdateField(key string, value any) UpdateOption {
-	return request.WithField[UpdateOpts](key, value)
-}
-func WithCreateHeader(key, value string) CreateOption {
-	return request.WithHeader[CreateOpts](key, value)
-}
-func WithUpdateHeader(key, value string) UpdateOption {
-	return request.WithHeader[UpdateOpts](key, value)
+	return request.Custom(withJSON(value, func(opts *UpdateOpts, raw json.RawMessage) { opts.Params = raw }))
 }
 
-// WithListMaxItems limits wire rows before local filtering. Zero is unlimited.
-func WithListMaxItems(value int) ListOption {
-	return func(config *request.Config[ListOpts]) error { config.Options.MaxItems = value; return nil }
-}
-
-// WithListPaginated controls continuation without changing server query fields.
-func WithListPaginated(value bool) ListOption {
-	return func(config *request.Config[ListOpts]) error {
-		copy := value
-		config.Options.Paginated = &copy
-		return nil
-	}
-}
-
-func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
 func WithListGlobalProject(value bool) ListOption {
-	return func(config *request.Config[ListOpts]) error {
+	return request.Custom(func(config *request.Config[ListOpts]) error {
 		copy := value
 		config.Options.GlobalProject = &copy
 		return nil
-	}
+	})
 }
 func WithListUserID(value string) ListOption {
-	return func(config *request.Config[ListOpts]) error { config.Options.UserID = value; return nil }
+	return request.Custom(func(config *request.Config[ListOpts]) error { config.Options.UserID = value; return nil })
 }
 
 func validateQuery(ctx context.Context, client *gophercloud.ServiceClient, query url.Values) error {

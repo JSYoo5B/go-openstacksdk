@@ -48,8 +48,8 @@ func TestClusteringProfilesUpdateSnapshotsHeadersBeforeLookupAndRechecksVersion(
 			})
 			name := "updated"
 			value, err := profiles.New(client).Update(context.Background(), resource.Name("match"), profiles.UpdateOpts{Name: &name},
-				profiles.WithUpdateHeader("X-Vendor", "original"), profiles.WithUpdateField("vendor", map[string]any{"enabled": false}),
-				func(config *request.Config[profiles.UpdateOpts]) error { captured = config; return nil })
+				request.Header("X-Vendor", "original"), request.Field("vendor", map[string]any{"enabled": false}),
+				request.Custom(func(config *request.Config[profiles.UpdateOpts]) error { captured = config; return nil }))
 			if invalidVersion {
 				if !errors.Is(err, resource.ErrUnsupported) || patches != 0 || value != nil {
 					t.Fatalf("changed version sent mutation: value=%v patches=%d err=%v", value, patches, err)

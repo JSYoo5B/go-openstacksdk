@@ -189,7 +189,7 @@ func TestClusteringClustersNamedDeleteFreezesHeadersForceAndRechecksSource(t *te
 				}))
 			}
 			capture := func(config *request.Config[clusters.DeleteOpts]) error { captured = config; return nil }
-			value, err := clusters.New(client).Delete(context.Background(), resource.Name("selected"), clusters.WithDeleteForce(true), clusters.WithDeleteHeader("X-Custom", "original"), capture)
+			value, err := clusters.New(client).Delete(context.Background(), resource.Name("selected"), clusters.WithDeleteForce(true), request.Header("X-Custom", "original"), request.Custom(capture))
 			if changeType {
 				if !errors.Is(err, resource.ErrInvalidOption) || lookups.Load() != 1 || deletes.Load() != 0 {
 					t.Fatal(value, err, lookups.Load(), deletes.Load())

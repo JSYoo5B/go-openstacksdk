@@ -16,7 +16,7 @@ func (a *API) AttachPolicy(ctx context.Context, ref resource.Ref, opts AttachPol
 	}, options...)
 }
 
-// DetachPolicy sends policy_id alone by default. WithDetachPolicyField can
+// DetachPolicy sends policy_id alone by default. request.Field can
 // supply deployment extensions beyond Python's policy_id-only request.
 func (a *API) DetachPolicy(ctx context.Context, ref resource.Ref, opts DetachPolicyOpts, options ...DetachPolicyOption) (*actions.Submission, error) {
 	return clusterCommand(ctx, a, ref, "DetachPolicy", "policy_detach", opts, func(value DetachPolicyOpts) (int, error) {

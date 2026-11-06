@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"regexp"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/internal/senlin"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -72,7 +73,7 @@ func (a *API) Delete(ctx context.Context, ref resource.Ref, options ...resource.
 func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Profile, error] {
 	options = append([]ListOption(nil), options...)
 	return func(yield func(*Profile, error) bool) {
-		config, err := request.Apply(ListOpts{}, options...)
+		config, err := calls.ApplyConfig(ListOpts{}, listCalls, options...)
 		var client *gophercloud.ServiceClient
 		if err == nil {
 			client, err = senlin.PrepareListClient(ctx, a.RawClient(), config)
@@ -128,7 +129,7 @@ func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOpti
 	if err := senlin.Validate(ctx, a.RawClient()); err != nil {
 		return nil, request.Wrap("Create", "clustering.profiles", err)
 	}
-	config, err := request.Apply(opts, options...)
+	config, err := calls.ApplyConfig(opts, createCalls, options...)
 	if err == nil {
 		err = validateName(config.Options.Name)
 	}
@@ -162,7 +163,7 @@ func (a *API) Update(ctx context.Context, ref resource.Ref, opts UpdateOpts, opt
 	if err := senlin.Validate(ctx, a.RawClient()); err != nil {
 		return nil, request.Wrap("Update", "clustering.profiles", err)
 	}
-	config, err := request.Apply(opts, options...)
+	config, err := calls.ApplyConfig(opts, updateCalls, options...)
 	if err == nil && config.Options.Name != nil {
 		err = validateName(*config.Options.Name)
 	}
@@ -197,7 +198,7 @@ func (a *API) Validate(ctx context.Context, opts ValidateOpts, options ...Valida
 	if err := senlin.RequireVersion(ctx, a.RawClient(), 2); err != nil {
 		return nil, request.Wrap("Validate", "clustering.profiles", err)
 	}
-	config, err := request.Apply(opts, options...)
+	config, err := calls.ApplyConfig(opts, validateCalls, options...)
 	if err == nil {
 		err = senlin.Object(config.Options.Spec, "spec")
 	}

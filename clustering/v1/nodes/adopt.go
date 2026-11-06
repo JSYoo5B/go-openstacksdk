@@ -6,6 +6,7 @@ import (
 	"maps"
 	"net/http"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/internal/senlin"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -19,7 +20,7 @@ func (a *API) Adopt(ctx context.Context, value AdoptOpts, options ...AdoptOption
 	if err := senlin.RequireVersion(ctx, client, 7); err != nil {
 		return nil, request.Wrap("Adopt", "clustering.nodes", err)
 	}
-	config, err := request.Apply(value, options...)
+	config, err := calls.ApplyConfig(value, adoptCalls, options...)
 	if err == nil {
 		err = senlin.Required(config.Options.Identity, config.Options.Type)
 	}
@@ -92,7 +93,7 @@ func (a *API) AdoptPreview(ctx context.Context, value AdoptPreviewOpts, options 
 	if err := senlin.RequireVersion(ctx, client, 7); err != nil {
 		return nil, request.Wrap("AdoptPreview", "clustering.nodes", err)
 	}
-	config, err := request.Apply(value, options...)
+	config, err := calls.ApplyConfig(value, adoptPreviewCalls, options...)
 	if err == nil {
 		err = request.ValidateCapabilities(config, false, false, true)
 	}

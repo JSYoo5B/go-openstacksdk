@@ -23,18 +23,15 @@ import (
 type catalogControlFixture struct {
 	path, key string
 	row       func(string) string
-	list      func(context.Context, *gophercloud.ServiceClient, ...senlin.ListOption) iter.Seq2[string, error]
-	max       func(int) senlin.ListOption
-	paginated func(bool) senlin.ListOption
-	snapshot  func(senlin.ListOpts) senlin.ListOption
-	query     func(string, string) senlin.ListOption
+	list      func(context.Context, *gophercloud.ServiceClient, ...request.ListCall) iter.Seq2[string, error]
+	snapshot  func(senlin.ListOpts) request.ListCall
 }
 
 func catalogControlFixtures() []catalogControlFixture {
 	return []catalogControlFixture{
 		{path: "profile-types", key: "profile_types", row: func(id string) string { return fmt.Sprintf(`{"name":%q}`, id) },
-			max: profiletypes.WithListMaxItems, paginated: profiletypes.WithListPaginated, snapshot: profiletypes.WithListOptions, query: profiletypes.WithListQuery,
-			list: func(ctx context.Context, client *gophercloud.ServiceClient, options ...senlin.ListOption) iter.Seq2[string, error] {
+			snapshot: profiletypes.WithListOptions,
+			list: func(ctx context.Context, client *gophercloud.ServiceClient, options ...request.ListCall) iter.Seq2[string, error] {
 				return func(yield func(string, error) bool) {
 					for value, err := range profiletypes.New(client).List(ctx, options...) {
 						id := ""
@@ -48,8 +45,8 @@ func catalogControlFixtures() []catalogControlFixture {
 				}
 			}},
 		{path: "policy-types", key: "policy_types", row: func(id string) string { return fmt.Sprintf(`{"name":%q}`, id) },
-			max: policytypes.WithListMaxItems, paginated: policytypes.WithListPaginated, snapshot: policytypes.WithListOptions, query: policytypes.WithListQuery,
-			list: func(ctx context.Context, client *gophercloud.ServiceClient, options ...senlin.ListOption) iter.Seq2[string, error] {
+			snapshot: policytypes.WithListOptions,
+			list: func(ctx context.Context, client *gophercloud.ServiceClient, options ...request.ListCall) iter.Seq2[string, error] {
 				return func(yield func(string, error) bool) {
 					for value, err := range policytypes.New(client).List(ctx, options...) {
 						id := ""
@@ -63,8 +60,8 @@ func catalogControlFixtures() []catalogControlFixture {
 				}
 			}},
 		{path: "services", key: "services", row: func(id string) string { return fmt.Sprintf(`{"id":%q,"status":"UP"}`, id) },
-			max: services.WithListMaxItems, paginated: services.WithListPaginated, snapshot: services.WithListOptions, query: services.WithListQuery,
-			list: func(ctx context.Context, client *gophercloud.ServiceClient, options ...senlin.ListOption) iter.Seq2[string, error] {
+			snapshot: services.WithListOptions,
+			list: func(ctx context.Context, client *gophercloud.ServiceClient, options ...request.ListCall) iter.Seq2[string, error] {
 				return func(yield func(string, error) bool) {
 					for value, err := range services.New(client).List(ctx, options...) {
 						id := ""
@@ -89,27 +86,27 @@ func TestClusteringCatalogListControlsHintsCapsAndSnapshots(t *testing.T) {
 				client.Microversion = "1.7"
 				var calls atomic.Int32
 				var captured *request.Config[senlin.ListOpts]
-				var options []senlin.ListOption
+				var options []request.ListCall
 				wantLimit, wantRows, wantCalls := "2", 2, int32(1)
 				switch mode {
 				case "cap-hint":
-					options = []senlin.ListOption{fixture.max(2)}
+					options = []request.ListCall{request.MaxItems(2)}
 				case "explicit-limit":
-					options = []senlin.ListOption{fixture.snapshot(senlin.ListOpts{Limit: 7, MaxItems: 2})}
+					options = []request.ListCall{fixture.snapshot(senlin.ListOpts{Limit: 7, MaxItems: 2})}
 					wantLimit = "7"
 				case "single-page-snapshot":
 					paginated := false
-					options = []senlin.ListOption{fixture.snapshot(senlin.ListOpts{Paginated: &paginated})}
+					options = []request.ListCall{fixture.snapshot(senlin.ListOpts{Paginated: &paginated})}
 					paginated = true
 					wantLimit, wantRows = "", 3
 				case "last-wins":
-					options = []senlin.ListOption{fixture.max(1), fixture.max(2), fixture.paginated(false), fixture.paginated(true)}
+					options = []request.ListCall{request.MaxItems(1), request.MaxItems(2), request.Paginated(false), request.Paginated(true)}
 					wantCalls = 2
 				case "zero-unbounded":
-					options = []senlin.ListOption{fixture.max(1), fixture.max(0)}
+					options = []request.ListCall{request.MaxItems(1), request.MaxItems(0)}
 					wantLimit, wantRows, wantCalls = "", 4, 2
 				}
-				options = append(options, fixture.query("vendor", "retained"), func(config *request.Config[senlin.ListOpts]) error { captured = config; return nil })
+				options = append(options, request.Query("vendor", "retained"), request.Custom(func(config *request.Config[senlin.ListOpts]) error { captured = config; return nil }))
 				cloud.Mux.HandleFunc("GET /senlin/v1/"+fixture.path, func(w http.ResponseWriter, r *http.Request) {
 					calls.Add(1)
 					query := r.URL.Query()
@@ -165,14 +162,14 @@ func TestClusteringCatalogListControlsStopBeforeUnusedRowsAndLinks(t *testing.T)
 				client.Microversion = "1.7"
 				var calls atomic.Int32
 				rows := fixture.row("first")
-				var options []senlin.ListOption
+				var options []request.ListCall
 				if mode == "cap-before-decode" || mode == "uncapped-decode" {
 					rows += ",false"
 				}
 				if mode == "cap-before-decode" {
-					options = []senlin.ListOption{fixture.max(1)}
+					options = []request.ListCall{request.MaxItems(1)}
 				} else if mode == "single-before-link" {
-					options = []senlin.ListOption{fixture.paginated(false)}
+					options = []request.ListCall{request.Paginated(false)}
 				} else if mode == "empty-with-next" {
 					rows = ""
 				}
@@ -224,7 +221,7 @@ func TestClusteringCatalogListControlsPreflightAndPageVersions(t *testing.T) {
 				w.Header().Set("Link", fmt.Sprintf(`</senlin/v1/%s?marker=next>; rel="next"`, fixture.path))
 				testcloud.JSON(w, 200, `{"`+fixture.key+`":[`+fixture.row("first")+`]}`)
 			})
-			for _, option := range []senlin.ListOption{fixture.max(-1), fixture.snapshot(senlin.ListOpts{Limit: -1}), fixture.query("max_items", "1"), fixture.query("paginated", "false")} {
+			for _, option := range []request.ListCall{request.MaxItems(-1), fixture.snapshot(senlin.ListOpts{Limit: -1}), request.Query("max_items", "1"), request.Query("paginated", "false")} {
 				var err error
 				for _, itemErr := range fixture.list(context.Background(), client, option) {
 					err = itemErr
@@ -279,31 +276,31 @@ func TestClusteringBindingListControlsStayLocalAndOwnSnapshots(t *testing.T) {
 			row := func(id string) string {
 				return fmt.Sprintf(`{"id":%q,"policy_id":"policy-%s","cluster_id":"canonical","enabled":false}`, id, id)
 			}
-			options := []clusterpolicies.ListOption{clusterpolicies.WithListEnabled(false), clusterpolicies.WithListQuery("vendor", "retained")}
+			options := []clusterpolicies.ListOption{clusterpolicies.WithListEnabled(false), request.Query("vendor", "retained")}
 			wantRows, wantCalls := 2, int32(1)
 			var captured *request.Config[clusterpolicies.ListOpts]
 			switch mode {
 			case "cap":
-				options = append(options, clusterpolicies.WithListMaxItems(2))
+				options = append(options, request.MaxItems(2))
 			case "single-page-snapshot":
 				paginated, enabled := false, false
-				options = []clusterpolicies.ListOption{clusterpolicies.WithListOptions(clusterpolicies.ListOpts{Enabled: &enabled, Paginated: &paginated}), clusterpolicies.WithListQuery("vendor", "retained")}
+				options = []clusterpolicies.ListOption{clusterpolicies.WithListOptions(clusterpolicies.ListOpts{Enabled: &enabled, Paginated: &paginated}), request.Query("vendor", "retained")}
 				paginated, enabled = true, true
 			case "last-wins":
-				options = append(options, clusterpolicies.WithListMaxItems(1), clusterpolicies.WithListMaxItems(2), clusterpolicies.WithListPaginated(false), clusterpolicies.WithListPaginated(true))
+				options = append(options, request.MaxItems(1), request.MaxItems(2), request.Paginated(false), request.Paginated(true))
 				wantCalls = 2
 			case "zero-unbounded":
-				options = append(options, clusterpolicies.WithListMaxItems(1), clusterpolicies.WithListMaxItems(0))
+				options = append(options, request.MaxItems(1), request.MaxItems(0))
 				wantRows, wantCalls = 3, 2
 			case "cap-before-decode":
-				options = append(options, clusterpolicies.WithListMaxItems(1))
+				options = append(options, request.MaxItems(1))
 				wantRows = 1
 			case "default-decode":
 				wantRows = 1
 			case "empty-with-next":
 				wantRows = 0
 			}
-			options = append(options, func(config *request.Config[clusterpolicies.ListOpts]) error { captured = config; return nil })
+			options = append(options, request.Custom(func(config *request.Config[clusterpolicies.ListOpts]) error { captured = config; return nil }))
 			cloud.Mux.HandleFunc("GET /senlin/v1/clusters/canonical/policies", func(w http.ResponseWriter, r *http.Request) {
 				lists.Add(1)
 				query := r.URL.Query()
@@ -340,7 +337,7 @@ func TestClusteringBindingListControlsStayLocalAndOwnSnapshots(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			for _, option := range []clusterpolicies.ListOption{clusterpolicies.WithListMaxItems(-1), clusterpolicies.WithListQuery("max_items", "1"), clusterpolicies.WithListQuery("paginated", "false"), clusterpolicies.WithListQuery("limit", "1"), clusterpolicies.WithListQuery("marker", "initial")} {
+			for _, option := range []clusterpolicies.ListOption{request.MaxItems(-1), request.Query("max_items", "1"), request.Query("paginated", "false"), request.Query("limit", "1"), request.Query("marker", "initial")} {
 				_, err := scope.All(context.Background(), option)
 				if err == nil || lists.Load() != 0 {
 					t.Fatal("invalid binding control reached HTTP", err, lists.Load())

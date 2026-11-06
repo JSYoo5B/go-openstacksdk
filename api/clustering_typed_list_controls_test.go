@@ -18,6 +18,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/clustering/v1/profiles"
 	"github.com/JSYoo5B/go-openstacksdk/clustering/v1/receivers"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -64,106 +65,106 @@ func typedListCases() []typedListControlCase {
 		{"profiles", "metadata", func(client *gophercloud.ServiceClient, input typedListControlInput) iter.Seq2[*resource.Metadata, error] {
 			options := []profiles.ListOption{profiles.WithListOptions(profiles.ListOpts{MaxItems: input.max, Paginated: input.paginated, Limit: input.limit})}
 			for _, value := range input.maxSequence {
-				options = append(options, profiles.WithListMaxItems(value))
+				options = append(options, request.MaxItems(value))
 			}
 			for _, value := range input.paginateSequence {
-				options = append(options, profiles.WithListPaginated(value))
+				options = append(options, request.Paginated(value))
 			}
 			if input.filter {
 				options = append(options, profiles.WithListFilter("metadata", map[string]any{"select": true}))
 			}
 			if input.queryKey != "" {
-				options = append(options, profiles.WithListQuery(input.queryKey, "override"))
+				options = append(options, request.Query(input.queryKey, "override"))
 			}
 			return typedListMetadata(profiles.New(client).List(typedListContext(input), options...), func(value *profiles.Profile) *resource.Metadata { return &value.Metadata })
 		}},
 		{"policies", "data", func(client *gophercloud.ServiceClient, input typedListControlInput) iter.Seq2[*resource.Metadata, error] {
 			options := []policies.ListOption{policies.WithListOptions(policies.ListOpts{MaxItems: input.max, Paginated: input.paginated, Limit: input.limit})}
 			for _, value := range input.maxSequence {
-				options = append(options, policies.WithListMaxItems(value))
+				options = append(options, request.MaxItems(value))
 			}
 			for _, value := range input.paginateSequence {
-				options = append(options, policies.WithListPaginated(value))
+				options = append(options, request.Paginated(value))
 			}
 			if input.filter {
 				options = append(options, policies.WithListFilter("data", map[string]any{"select": true}))
 			}
 			if input.queryKey != "" {
-				options = append(options, policies.WithListQuery(input.queryKey, "override"))
+				options = append(options, request.Query(input.queryKey, "override"))
 			}
 			return typedListMetadata(policies.New(client).List(typedListContext(input), options...), func(value *policies.Policy) *resource.Metadata { return &value.Metadata })
 		}},
 		{"clusters", "metadata", func(client *gophercloud.ServiceClient, input typedListControlInput) iter.Seq2[*resource.Metadata, error] {
 			options := []clusters.ListOption{clusters.WithListOptions(clusters.ListOpts{MaxItems: input.max, Paginated: input.paginated, Limit: input.limit})}
 			for _, value := range input.maxSequence {
-				options = append(options, clusters.WithListMaxItems(value))
+				options = append(options, request.MaxItems(value))
 			}
 			for _, value := range input.paginateSequence {
-				options = append(options, clusters.WithListPaginated(value))
+				options = append(options, request.Paginated(value))
 			}
 			if input.filter {
 				options = append(options, clusters.WithListFilter("metadata", map[string]any{"select": true}))
 			}
 			if input.queryKey != "" {
-				options = append(options, clusters.WithListQuery(input.queryKey, "override"))
+				options = append(options, request.Query(input.queryKey, "override"))
 			}
 			return typedListMetadata(clusters.New(client).List(typedListContext(input), options...), func(value *clusters.Cluster) *resource.Metadata { return &value.Metadata })
 		}},
 		{"nodes", "metadata", func(client *gophercloud.ServiceClient, input typedListControlInput) iter.Seq2[*resource.Metadata, error] {
 			options := []nodes.ListOption{nodes.WithListOptions(nodes.ListOpts{MaxItems: input.max, Paginated: input.paginated, Limit: input.limit})}
 			for _, value := range input.maxSequence {
-				options = append(options, nodes.WithListMaxItems(value))
+				options = append(options, request.MaxItems(value))
 			}
 			for _, value := range input.paginateSequence {
-				options = append(options, nodes.WithListPaginated(value))
+				options = append(options, request.Paginated(value))
 			}
 			if input.filter {
 				options = append(options, nodes.WithListFilter("metadata", map[string]any{"select": true}))
 			}
 			if input.queryKey != "" {
-				options = append(options, nodes.WithListQuery(input.queryKey, "override"))
+				options = append(options, request.Query(input.queryKey, "override"))
 			}
 			return typedListMetadata(nodes.New(client).List(typedListContext(input), options...), func(value *nodes.Node) *resource.Metadata { return &value.Metadata })
 		}},
 		{"receivers", "params", func(client *gophercloud.ServiceClient, input typedListControlInput) iter.Seq2[*resource.Metadata, error] {
 			options := []receivers.ListOption{receivers.WithListOptions(receivers.ListOpts{MaxItems: input.max, Paginated: input.paginated, Limit: input.limit})}
 			for _, value := range input.maxSequence {
-				options = append(options, receivers.WithListMaxItems(value))
+				options = append(options, request.MaxItems(value))
 			}
 			for _, value := range input.paginateSequence {
-				options = append(options, receivers.WithListPaginated(value))
+				options = append(options, request.Paginated(value))
 			}
 			if input.filter {
 				options = append(options, receivers.WithListFilter("params", map[string]any{"select": true}))
 			}
 			if input.queryKey != "" {
-				options = append(options, receivers.WithListQuery(input.queryKey, "override"))
+				options = append(options, request.Query(input.queryKey, "override"))
 			}
 			return typedListMetadata(receivers.New(client).List(typedListContext(input), options...), func(value *receivers.Receiver) *resource.Metadata { return &value.Metadata })
 		}},
 		{"actions", "", func(client *gophercloud.ServiceClient, input typedListControlInput) iter.Seq2[*resource.Metadata, error] {
 			options := []actions.ListOption{actions.WithListOptions(actions.ListOpts{MaxItems: input.max, Paginated: input.paginated, Limit: input.limit})}
 			for _, value := range input.maxSequence {
-				options = append(options, actions.WithListMaxItems(value))
+				options = append(options, request.MaxItems(value))
 			}
 			for _, value := range input.paginateSequence {
-				options = append(options, actions.WithListPaginated(value))
+				options = append(options, request.Paginated(value))
 			}
 			if input.queryKey != "" {
-				options = append(options, actions.WithListQuery(input.queryKey, "override"))
+				options = append(options, request.Query(input.queryKey, "override"))
 			}
 			return typedListMetadata(actions.New(client).List(typedListContext(input), options...), func(value *actions.Action) *resource.Metadata { return &value.Metadata })
 		}},
 		{"events", "", func(client *gophercloud.ServiceClient, input typedListControlInput) iter.Seq2[*resource.Metadata, error] {
 			options := []events.ListOption{events.WithListOptions(events.ListOpts{MaxItems: input.max, Paginated: input.paginated, Limit: input.limit})}
 			for _, value := range input.maxSequence {
-				options = append(options, events.WithListMaxItems(value))
+				options = append(options, request.MaxItems(value))
 			}
 			for _, value := range input.paginateSequence {
-				options = append(options, events.WithListPaginated(value))
+				options = append(options, request.Paginated(value))
 			}
 			if input.queryKey != "" {
-				options = append(options, events.WithListQuery(input.queryKey, "override"))
+				options = append(options, request.Query(input.queryKey, "override"))
 			}
 			return typedListMetadata(events.New(client).List(typedListContext(input), options...), func(value *events.Event) *resource.Metadata { return &value.Metadata })
 		}},

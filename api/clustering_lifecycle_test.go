@@ -74,7 +74,7 @@ func lifecycleProfileHandle(tracked *profiles.TrackedProfile) *clusteringLifecyc
 		editName:  func(name string) error { return tracked.Edit(profiles.UpdateOpts{}, profiles.WithUpdateName(name)) },
 		editEmpty: func() error { return tracked.Edit(profiles.UpdateOpts{}) },
 		editField: func(key string, value any) error {
-			return tracked.Edit(profiles.UpdateOpts{}, profiles.WithUpdateField(key, value))
+			return tracked.Edit(profiles.UpdateOpts{}, request.Field(key, value))
 		},
 		editMetadata:   func(value any) error { return tracked.Edit(profiles.UpdateOpts{}, profiles.WithUpdateMetadata(value)) },
 		removeName:     tracked.RemoveName,
@@ -82,7 +82,7 @@ func lifecycleProfileHandle(tracked *profiles.TrackedProfile) *clusteringLifecyc
 		commit: func(ctx context.Context, headers map[string]string) (clusteringLifecycleView, error) {
 			opts := []profiles.UpdateOption{}
 			for key, value := range headers {
-				opts = append(opts, profiles.WithUpdateHeader(key, value))
+				opts = append(opts, request.Header(key, value))
 			}
 			value, err := tracked.Commit(ctx, opts...)
 			return lifecycleProfileView(value), err
@@ -94,13 +94,13 @@ func lifecycleProfileHandle(tracked *profiles.TrackedProfile) *clusteringLifecyc
 		invalidEdit: func(mode string) error {
 			switch mode {
 			case "header":
-				return tracked.Edit(profiles.UpdateOpts{}, profiles.WithUpdateHeader("X-Vendor", "value"))
+				return tracked.Edit(profiles.UpdateOpts{}, request.Header("X-Vendor", "value"))
 			case "query":
-				return tracked.Edit(profiles.UpdateOpts{}, request.WithQuery[profiles.UpdateOpts]("vendor", "value"))
+				return tracked.Edit(profiles.UpdateOpts{}, request.Custom(request.WithQuery[profiles.UpdateOpts]("vendor", "value")))
 			case "nil":
 				return tracked.Edit(profiles.UpdateOpts{}, nil)
 			default:
-				return tracked.Edit(profiles.UpdateOpts{}, profiles.WithUpdateName("valid"), profiles.WithUpdateField(mode, false))
+				return tracked.Edit(profiles.UpdateOpts{}, profiles.WithUpdateName("valid"), request.Field(mode, false))
 			}
 		},
 		invalidCommit: func(ctx context.Context, mode string) error {
@@ -109,11 +109,11 @@ func lifecycleProfileHandle(tracked *profiles.TrackedProfile) *clusteringLifecyc
 			case "name":
 				option = profiles.WithUpdateName("valid")
 			case "field":
-				option = profiles.WithUpdateField("vendor", true)
+				option = request.Field("vendor", true)
 			case "query":
-				option = request.WithQuery[profiles.UpdateOpts]("vendor", "value")
+				option = request.Custom(request.WithQuery[profiles.UpdateOpts]("vendor", "value"))
 			case "auth":
-				option = profiles.WithUpdateHeader("X-Auth-Token", "override")
+				option = request.Header("X-Auth-Token", "override")
 			}
 			_, err := tracked.Commit(ctx, option)
 			return err
@@ -129,13 +129,13 @@ func lifecyclePolicyHandle(tracked *policies.TrackedPolicy) *clusteringLifecycle
 		editName:  func(name string) error { return tracked.Edit(policies.UpdateOpts{}, policies.WithUpdateName(name)) },
 		editEmpty: func() error { return tracked.Edit(policies.UpdateOpts{}) },
 		editField: func(key string, value any) error {
-			return tracked.Edit(policies.UpdateOpts{}, policies.WithUpdateField(key, value))
+			return tracked.Edit(policies.UpdateOpts{}, request.Field(key, value))
 		},
 		removeName: tracked.RemoveName,
 		commit: func(ctx context.Context, headers map[string]string) (clusteringLifecycleView, error) {
 			opts := []policies.UpdateOption{}
 			for key, value := range headers {
-				opts = append(opts, policies.WithUpdateHeader(key, value))
+				opts = append(opts, request.Header(key, value))
 			}
 			value, err := tracked.Commit(ctx, opts...)
 			return lifecyclePolicyView(value), err
@@ -147,13 +147,13 @@ func lifecyclePolicyHandle(tracked *policies.TrackedPolicy) *clusteringLifecycle
 		invalidEdit: func(mode string) error {
 			switch mode {
 			case "header":
-				return tracked.Edit(policies.UpdateOpts{}, policies.WithUpdateHeader("X-Vendor", "value"))
+				return tracked.Edit(policies.UpdateOpts{}, request.Header("X-Vendor", "value"))
 			case "query":
-				return tracked.Edit(policies.UpdateOpts{}, request.WithQuery[policies.UpdateOpts]("vendor", "value"))
+				return tracked.Edit(policies.UpdateOpts{}, request.Custom(request.WithQuery[policies.UpdateOpts]("vendor", "value")))
 			case "nil":
 				return tracked.Edit(policies.UpdateOpts{}, nil)
 			default:
-				return tracked.Edit(policies.UpdateOpts{}, policies.WithUpdateName("valid"), policies.WithUpdateField(mode, false))
+				return tracked.Edit(policies.UpdateOpts{}, policies.WithUpdateName("valid"), request.Field(mode, false))
 			}
 		},
 		invalidCommit: func(ctx context.Context, mode string) error {
@@ -162,11 +162,11 @@ func lifecyclePolicyHandle(tracked *policies.TrackedPolicy) *clusteringLifecycle
 			case "name":
 				option = policies.WithUpdateName("valid")
 			case "field":
-				option = policies.WithUpdateField("vendor", true)
+				option = request.Field("vendor", true)
 			case "query":
-				option = request.WithQuery[policies.UpdateOpts]("vendor", "value")
+				option = request.Custom(request.WithQuery[policies.UpdateOpts]("vendor", "value"))
 			case "auth":
-				option = policies.WithUpdateHeader("X-Auth-Token", "override")
+				option = request.Header("X-Auth-Token", "override")
 			}
 			_, err := tracked.Commit(ctx, option)
 			return err

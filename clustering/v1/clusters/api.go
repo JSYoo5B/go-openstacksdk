@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/internal/senlin"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -67,7 +68,7 @@ func (a *API) Find(ctx context.Context, ref resource.Ref, options ...resource.Lo
 func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Cluster, error] {
 	options = append([]ListOption(nil), options...)
 	return func(yield func(*Cluster, error) bool) {
-		config, err := request.Apply(ListOpts{}, options...)
+		config, err := calls.ApplyConfig(ListOpts{}, listCalls, options...)
 		var client *gophercloud.ServiceClient
 		if err == nil {
 			client, err = senlin.PrepareListClient(ctx, a.RawClient(), config)

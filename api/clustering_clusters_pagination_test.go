@@ -9,6 +9,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/clustering/v1/clusters"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -48,7 +49,7 @@ func TestClusteringClustersContinuationGuardsBreakAndCancellation(t *testing.T) 
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()
 			var resultErr error
-			for _, err := range clusters.New(cloud.Client("clustering", "/v1")).List(ctx, clusters.WithListOptions(clusters.ListOpts{Limit: 5}), clusters.WithListQuery("vendor", "retained")) {
+			for _, err := range clusters.New(cloud.Client("clustering", "/v1")).List(ctx, clusters.WithListOptions(clusters.ListOpts{Limit: 5}), request.Query("vendor", "retained")) {
 				if err != nil {
 					resultErr = err
 					break

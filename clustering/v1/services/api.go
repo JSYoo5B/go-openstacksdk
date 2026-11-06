@@ -6,6 +6,7 @@ import (
 	"iter"
 	"net/http"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/internal/senlin"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -59,17 +60,20 @@ func spec(client *gophercloud.ServiceClient) rest.CollectionSpec[Service] {
 }
 
 type ListOpts = senlin.ListOpts
-type ListOption = senlin.ListOption
 
-func WithListOptions(value ListOpts) ListOption  { return senlin.Snapshot(value) }
-func WithListMaxItems(value int) ListOption      { return senlin.WithMaxItems(value) }
-func WithListPaginated(value bool) ListOption    { return senlin.WithPaginated(value) }
-func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
+// ListOption is one option of List and All: WithListOptions, WithListFilter,
+// request.Header, request.Microversion, request.Query (a string or []string
+// value), request.MaxItems, request.Paginated or request.Custom over
+// *request.Config[ListOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type ListOption = request.ListCall
+
+func WithListOptions(value ListOpts) ListOption { return request.Custom(senlin.Snapshot(value)) }
 
 // List has no marker fallback: the official service list declares no paging
 // parameters. Numeric microversion >=1.7 is checked before each request.
 func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Service, error] {
-	return senlin.ListWithClientBodyFilters(ctx, a.RawClient(), spec, bodyFilterSpec(), options...)
+	return senlin.ListWithClientBodyFilters(ctx, a.RawClient(), spec, bodyFilterSpec(), calls.Options(options, senlin.SharedListCalls)...)
 }
 
 func (a *API) All(ctx context.Context, options ...ListOption) ([]*Service, error) {

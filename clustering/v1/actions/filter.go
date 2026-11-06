@@ -1,6 +1,9 @@
 package actions
 
-import "github.com/JSYoo5B/go-openstacksdk/internal/senlin"
+import (
+	"github.com/JSYoo5B/go-openstacksdk/internal/senlin"
+	"github.com/JSYoo5B/go-openstacksdk/request"
+)
 
 // These are the pinned Action Body fields and their Python attribute aliases.
 // The Go model's additional data field is not a pinned Body filter.
@@ -23,5 +26,5 @@ var filterSpec = senlin.BodyFilterSpec{
 // and in order. JSON numbers compare exactly, and booleans remain distinct.
 // Query-capable fields may also be selected explicitly for local filtering.
 func WithListFilter(key string, value any) ListOption {
-	return senlin.WithBodyFilter[ListOpts](filterSpec, key, value)
+	return request.Custom(senlin.WithBodyFilter[ListOpts](filterSpec, key, value))
 }

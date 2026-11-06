@@ -60,6 +60,7 @@ import (
 
     sdk "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/clustering/v1/receivers"
+    "github.com/JSYoo5B/go-openstacksdk/request"
     "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -74,7 +75,7 @@ func RenameTrackedReceiver(ctx context.Context, conn *sdk.Connection) (*receiver
         receivers.WithUpdateParams(map[string]any{"team": "platform"})); err != nil {
         return nil, err
     }
-    return tracked.Commit(ctx, receivers.WithUpdateHeader("X-Audit-Tag", "rename"))
+    return tracked.Commit(ctx, request.Header("X-Audit-Tag", "rename"))
 }
 ```
 

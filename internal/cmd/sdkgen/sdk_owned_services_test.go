@@ -58,7 +58,7 @@ func TestIndependentSDKOwnedServiceRegistryAndCapabilityDocs(t *testing.T) {
 	if strings.Contains(docs, "service.BuildInfo.Resources") || strings.Contains(docs, "service.ProfileTypes.Find(ctx") {
 		t.Fatal("documentation invented Collection or API method")
 	}
-	for _, part := range []string{"listing/README.md", "WithListMaxItems", "WithListPaginated", "resource.WithMaxItems", "resource.WithPaginated", "raw rows before local filtering", "ClusterPolicies apply the cap locally", "deployment behavior determines support for type catalog and Services hints", "do not establish full list parity"} {
+	for _, part := range []string{"listing/README.md", "request.MaxItems", "request.Paginated", "resource.WithMaxItems", "resource.WithPaginated", "raw rows before local filtering", "ClusterPolicies apply the cap locally", "deployment behavior determines support for type catalog and Services hints", "do not establish full list parity"} {
 		if !strings.Contains(docs, part) {
 			t.Fatalf("missing bounded Senlin list control contract %q: %s", part, docs)
 		}

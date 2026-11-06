@@ -87,16 +87,16 @@ func TestClusteringNodeCommandsRecoverNullableSnapshotAndReuse(t *testing.T) {
 	options := nodes.WithRecoverOptions(nodes.RecoverOpts{OperationParams: raw, Check: request.Present(false)})
 	raw[2] = 'X'
 	vendor := map[string]any{"zero": 0, "off": false}
-	extension := nodes.WithRecoverField("vendor", vendor)
+	extension := request.Field("vendor", vendor)
 	vendor["off"] = true
 	api := nodes.New(client)
 	for range 2 {
-		value, err := api.Recover(context.Background(), resource.ID("node-id"), nodes.RecoverOpts{}, options, nodes.WithRecoverOperation("reboot"), extension, nodes.WithRecoverHeader("X-Vendor", "retained"))
+		value, err := api.Recover(context.Background(), resource.ID("node-id"), nodes.RecoverOpts{}, options, nodes.WithRecoverOperation("reboot"), extension, request.Header("X-Vendor", "retained"))
 		if err != nil || value.ActionID != "recover-action" {
 			t.Fatal(value, err)
 		}
 	}
-	if _, err := api.Recover(context.Background(), resource.ID("node-id"), nodes.RecoverOpts{}, nodes.WithRecoverOperationParams(nil), nodes.WithRecoverCheckNull(), nodes.WithRecoverHeader("X-Vendor", "retained")); err != nil {
+	if _, err := api.Recover(context.Background(), resource.ID("node-id"), nodes.RecoverOpts{}, nodes.WithRecoverOperationParams(nil), nodes.WithRecoverCheckNull(), request.Header("X-Vendor", "retained")); err != nil {
 		t.Fatal(err)
 	}
 	if calls.Load() != 3 {
@@ -117,11 +117,11 @@ func TestClusteringNodeCommandsCheckParameterExtensionsSnapshot(t *testing.T) {
 		testcloud.JSON(w, 202, `{"action":"check-action"}`)
 	})
 	raw := json.RawMessage(`{"big":9007199254740993,"off":false}`)
-	option := nodes.WithCheckField("params", raw)
+	option := request.Field("params", raw)
 	raw[2] = 'X'
 	api := nodes.New(cloud.Client("clustering", "/senlin/v1"))
 	for range 2 {
-		value, err := api.Check(context.Background(), resource.ID("node-id"), option, nodes.WithCheckField("id", "plugin-id"), nodes.WithCheckField("unset", nil), nodes.WithCheckHeader("X-Vendor", "check-header"))
+		value, err := api.Check(context.Background(), resource.ID("node-id"), option, request.Field("id", "plugin-id"), request.Field("unset", nil), request.Header("X-Vendor", "check-header"))
 		if err != nil || value.ActionID != "check-action" {
 			t.Fatal(value, err)
 		}
@@ -180,16 +180,16 @@ func TestClusteringNodeCommandsPluginParametersDoNotReplaceTargetOrEnvelope(t *t
 		testcloud.JSON(w, 202, `{"action":"plugin-action"}`)
 	})
 	params := json.RawMessage(`{"big":9007199254740993,"style":"tango"}`)
-	option := nodes.WithPerformOperationField("params", params)
+	option := request.Field("params", params)
 	params[2] = 'X'
 	api := nodes.New(client)
 	for range 2 {
-		value, err := api.PerformOperation(context.Background(), resource.ID("node-id"), "dance", option, nodes.WithPerformOperationField("id", "plugin-identity"), nodes.WithPerformOperationField("status", false), nodes.WithPerformOperationField("action", nil), nodes.WithPerformOperationField("location", "plugin-location"), nodes.WithPerformOperationHeader("X-Vendor", "operation-header"))
+		value, err := api.PerformOperation(context.Background(), resource.ID("node-id"), "dance", option, request.Field("id", "plugin-identity"), request.Field("status", false), request.Field("action", nil), request.Field("location", "plugin-location"), request.Header("X-Vendor", "operation-header"))
 		if err != nil || value.ActionID != "plugin-action" {
 			t.Fatal(value, err)
 		}
 	}
-	if _, err := api.PerformOperation(context.Background(), resource.ID("node-id"), "reboot", nodes.WithPerformOperationHeader("X-Vendor", "operation-header")); err != nil {
+	if _, err := api.PerformOperation(context.Background(), resource.ID("node-id"), "reboot", request.Header("X-Vendor", "operation-header")); err != nil {
 		t.Fatal(err)
 	}
 	if calls.Load() != 3 {
@@ -225,7 +225,7 @@ func TestClusteringNodeCommandsNameLookupFreezesBodyHeadersAndGate(t *testing.T)
 		testcloud.JSON(w, 202, `{"action":"frozen-action"}`)
 	})
 	capture := func(config *request.Config[nodes.RecoverOpts]) error { captured = config; return nil }
-	value, err := nodes.New(client).Recover(context.Background(), resource.Name("selected"), nodes.RecoverOpts{OperationParams: json.RawMessage(`{"type":"soft"}`), Check: request.Present(false)}, nodes.WithRecoverOperation("reboot"), nodes.WithRecoverField("id", "plugin-id"), nodes.WithRecoverHeader("X-Vendor", "original"), capture)
+	value, err := nodes.New(client).Recover(context.Background(), resource.Name("selected"), nodes.RecoverOpts{OperationParams: json.RawMessage(`{"type":"soft"}`), Check: request.Present(false)}, nodes.WithRecoverOperation("reboot"), request.Field("id", "plugin-id"), request.Header("X-Vendor", "original"), request.Custom(capture))
 	if err != nil || value.ActionID != "frozen-action" || reads.Load() != 1 || posts.Load() != 1 {
 		t.Fatal(value, err, reads.Load(), posts.Load())
 	}
@@ -284,7 +284,7 @@ func TestClusteringNodeCommandsVersionPreflightAndRecheck(t *testing.T) {
 			var err error
 			if command == "Recover" {
 				capture := func(config *request.Config[nodes.RecoverOpts]) error { captured = config; return nil }
-				_, err = api.Recover(context.Background(), resource.Name("selected"), nodes.RecoverOpts{Check: request.Present(false)}, capture)
+				_, err = api.Recover(context.Background(), resource.Name("selected"), nodes.RecoverOpts{Check: request.Present(false)}, request.Custom(capture))
 			} else {
 				_, err = nodeCommandCall(context.Background(), api, command, resource.Name("selected"))
 			}
@@ -315,11 +315,11 @@ func TestClusteringNodeCommandsPreflightInvalidInput(t *testing.T) {
 		}
 	}
 	for _, key := range []string{"operation", "operation_params", "check"} {
-		if _, err := api.Recover(context.Background(), resource.Name("selected"), nodes.RecoverOpts{}, nodes.WithRecoverField(key, nil)); !errors.Is(err, resource.ErrInvalidOption) {
+		if _, err := api.Recover(context.Background(), resource.Name("selected"), nodes.RecoverOpts{}, request.Field(key, nil)); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(key, err)
 		}
 	}
-	for _, option := range []nodes.CheckOption{nil, nodes.WithCheckHeader("X-Auth-Token", "foreign"), nodes.WithCheckHeader("openstack-api-version", "clustering 1.6"), request.WithQuery[nodes.CheckOpts]("vendor", "unsupported"), request.WithArgument[nodes.CheckOpts]("vendor", false), nodes.WithCheckField("vendor", json.RawMessage(`{`))} {
+	for _, option := range []nodes.CheckOption{nil, request.Header("X-Auth-Token", "foreign"), request.Header("openstack-api-version", "clustering 1.6"), request.Custom(request.WithQuery[nodes.CheckOpts]("vendor", "unsupported")), request.Custom(request.WithArgument[nodes.CheckOpts]("vendor", false)), request.Field("vendor", json.RawMessage(`{`))} {
 		if _, err := api.Check(context.Background(), resource.Name("selected"), option); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(err)
 		}
@@ -348,7 +348,7 @@ func TestClusteringNodeCommandsPreflightInvalidInput(t *testing.T) {
 	}
 	client.MoreHeaders = nil
 	mutate := func(config *request.Config[nodes.RecoverOpts]) error { client.Type = "compute"; return nil }
-	if _, err := api.Recover(context.Background(), resource.Name("selected"), nodes.RecoverOpts{}, mutate); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := api.Recover(context.Background(), resource.Name("selected"), nodes.RecoverOpts{}, request.Custom(mutate)); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
 	if calls.Load() != 0 {

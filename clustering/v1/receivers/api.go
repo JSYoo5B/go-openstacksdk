@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/internal/senlin"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -102,7 +103,7 @@ func (a *API) Create(ctx context.Context, value CreateOpts, options ...CreateOpt
 	if err := senlin.Validate(ctx, client); err != nil {
 		return nil, request.Wrap("Create", "clustering.receivers", err)
 	}
-	config, err := request.Apply(value, options...)
+	config, err := calls.ApplyConfig(value, createCalls, options...)
 	if err == nil {
 		err = validateCreate(config.Options)
 	}
@@ -139,7 +140,7 @@ func (a *API) updateAt(ctx context.Context, ref resource.Ref, path string, value
 	if err := senlin.Validate(ctx, client); err != nil {
 		return nil, request.Wrap("Update", "clustering.receivers", err)
 	}
-	config, err := request.Apply(value, options...)
+	config, err := calls.ApplyConfig(value, updateCalls, options...)
 	if err == nil {
 		err = senlin.OptionalObject(config.Options.Params, "params")
 	}
@@ -184,7 +185,7 @@ func (a *API) Find(ctx context.Context, ref resource.Ref, options ...resource.Lo
 func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Receiver, error] {
 	options = append([]ListOption(nil), options...)
 	return func(yield func(*Receiver, error) bool) {
-		config, err := request.Apply(ListOpts{}, options...)
+		config, err := calls.ApplyConfig(ListOpts{}, listCalls, options...)
 		var client *gophercloud.ServiceClient
 		if err == nil {
 			client, err = senlin.PrepareListClient(ctx, a.RawClient(), config)

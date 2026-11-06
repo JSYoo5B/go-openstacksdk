@@ -179,7 +179,7 @@ if err := tracked.Edit(profiles.UpdateOpts{},
     profiles.WithUpdateMetadata(map[string]any{"team": "platform"})); err != nil {
     return err
 }
-profile, err := tracked.Commit(ctx, profiles.WithUpdateHeader("X-Audit-Tag", "rename"))
+profile, err := tracked.Commit(ctx, request.Header("X-Audit-Tag", "rename"))
 if err != nil { return err }
 fmt.Println(profile.Name, tracked.Dirty(), tracked.Response().Body)
 ```

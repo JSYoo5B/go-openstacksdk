@@ -11,6 +11,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/internal/senlin"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -175,7 +176,7 @@ func (tracked *TrackedCluster) Edit(opts UpdateOpts, options ...UpdateOption) er
 	if tracked == nil || tracked.state == nil {
 		return fmt.Errorf("%w: tracked cluster is required", resource.ErrInvalidOption)
 	}
-	config, err := request.Apply(opts, options...)
+	config, err := calls.ApplyConfig(opts, updateCalls, options...)
 	if err == nil {
 		err = request.ValidateCapabilities(config, true, false, false)
 	}
@@ -254,7 +255,7 @@ func (tracked *TrackedCluster) RemoveMetadata() error { return tracked.remove("m
 func (tracked *TrackedCluster) RemoveProfileOnly() error { return tracked.remove("profile_only") }
 
 func clusterCommitHeaders(options []UpdateOption) (map[string]string, error) {
-	config, err := request.Apply(UpdateOpts{}, options...)
+	config, err := calls.ApplyConfig(UpdateOpts{}, updateCalls, options...)
 	if err == nil {
 		err = request.ValidateCapabilities(config, false, false, true)
 	}

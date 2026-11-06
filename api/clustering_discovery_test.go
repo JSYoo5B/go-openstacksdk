@@ -13,6 +13,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/clustering/v1/policytypes"
 	"github.com/JSYoo5B/go-openstacksdk/clustering/v1/profiletypes"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -80,9 +81,9 @@ func TestClusteringDiscoveryCatalogLinksPreserveExtensionsAndNoMarkerFallback(t 
 		testcloud.JSON(w, 200, `{"profile_types":[{"name":"os.heat.stack","version":"1.0"}]}`)
 	})
 	api := profiletypes.New(cloud.Client("clustering", "/senlin/v1"))
-	options := []profiletypes.ListOption{profiletypes.WithListOptions(profiletypes.ListOpts{Limit: 1}), profiletypes.WithListQuery("vendor", "original")}
+	options := []profiletypes.ListOption{profiletypes.WithListOptions(profiletypes.ListOpts{Limit: 1}), request.Query("vendor", "original")}
 	iterator := api.List(context.Background(), options...)
-	options[1] = profiletypes.WithListQuery("vendor", "changed")
+	options[1] = request.Query("vendor", "changed")
 	if calls.Load() != 0 {
 		t.Fatal("list construction performed HTTP")
 	}
@@ -129,7 +130,7 @@ func TestClusteringDiscoveryHTTPLinksBreakAndTargetGuard(t *testing.T) {
 			})
 			api := policytypes.New(cloud.Client("clustering", "/senlin/v1"))
 			if mode == "break" {
-				for _, err := range api.List(context.Background(), policytypes.WithListQuery("vendor", "original")) {
+				for _, err := range api.List(context.Background(), request.Query("vendor", "original")) {
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -140,7 +141,7 @@ func TestClusteringDiscoveryHTTPLinksBreakAndTargetGuard(t *testing.T) {
 				}
 				return
 			}
-			values, err := api.All(context.Background(), policytypes.WithListQuery("vendor", "original"))
+			values, err := api.All(context.Background(), request.Query("vendor", "original"))
 			if mode == "follow" {
 				if err != nil || len(values) != 2 || calls.Load() != 2 {
 					t.Fatal(values, err, calls.Load())
@@ -230,7 +231,7 @@ func TestClusteringDiscoveryInvalidInputsCancelAndRedirectBeforeSecondRequest(t 
 	for _, options := range [][]profiletypes.ListOption{
 		{nil},
 		{profiletypes.WithListOptions(profiletypes.ListOpts{Limit: -1})},
-		{profiletypes.WithListQuery("limit", "1")},
+		{request.Query("limit", "1")},
 	} {
 		if _, err := api.All(context.Background(), options...); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(err)

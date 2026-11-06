@@ -138,7 +138,7 @@ func TestClusteringClusterProfileOnlyNullStatelessWireSnapshotsAndLastWins(t *te
 				opts.Name = request.Present("Bulk")
 				expected = map[string]string{"name": `"Bulk"`}
 			}
-			options = append(options, clusters.WithUpdateHeader("X-Request-Option", "original"))
+			options = append(options, request.Header("X-Request-Option", "original"))
 			var patches, gets atomic.Int32
 			cloud.Mux.HandleFunc("PATCH "+clusterProfileOnlyNullPrefix+"/clusters/fixed", func(w http.ResponseWriter, r *http.Request) {
 				patches.Add(1)
@@ -188,7 +188,7 @@ func TestClusteringClusterProfileOnlyNullStatelessWireSnapshotsAndLastWins(t *te
 		cloud, client := clusterProfileOnlyNullCloud(t)
 		var calls atomic.Int32
 		cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) { calls.Add(1); w.WriteHeader(500) })
-		for _, option := range []clusters.UpdateOption{clusters.WithUpdateField("profile_only", nil), clusters.WithUpdateField("is_profile_only", nil)} {
+		for _, option := range []clusters.UpdateOption{request.Field("profile_only", nil), request.Field("is_profile_only", nil)} {
 			if _, err := clusters.New(client).Update(context.Background(), resource.Name("not-looked-up"), clusters.UpdateOpts{}, clusters.WithUpdateProfileOnlyNull(), option); !errors.Is(err, resource.ErrInvalidOption) {
 				t.Fatal(err)
 			}

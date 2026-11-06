@@ -13,6 +13,7 @@ import (
 	"strconv"
 
 	"github.com/JSYoo5B/go-openstacksdk/clustering/v1/actions"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/internal/senlin"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -96,7 +97,7 @@ func (a *API) Create(ctx context.Context, value CreateOpts, options ...CreateOpt
 	if err := senlin.Validate(ctx, client); err != nil {
 		return nil, request.Wrap("Create", "clustering.nodes", err)
 	}
-	config, err := request.Apply(value, options...)
+	config, err := calls.ApplyConfig(value, createCalls, options...)
 	if err == nil {
 		err = validateName(config.Options.Name)
 	}
@@ -135,7 +136,7 @@ func (a *API) Get(ctx context.Context, identity string, options ...GetOption) (*
 	if err := senlin.Identifier(identity); err != nil {
 		return nil, request.Wrap("Get", "clustering.nodes", err)
 	}
-	config, err := request.Apply(GetOpts{}, options...)
+	config, err := calls.ApplyConfig(GetOpts{}, getCalls, options...)
 	if err == nil {
 		err = request.ValidateCapabilities(config, false, true, true)
 	}
@@ -181,7 +182,7 @@ func (a *API) Find(ctx context.Context, ref resource.Ref, options ...resource.Lo
 func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Node, error] {
 	options = append([]ListOption(nil), options...)
 	return func(yield func(*Node, error) bool) {
-		config, err := request.Apply(ListOpts{}, options...)
+		config, err := calls.ApplyConfig(ListOpts{}, listCalls, options...)
 		var client *gophercloud.ServiceClient
 		if err == nil {
 			client, err = senlin.PrepareListClient(ctx, a.RawClient(), config)
@@ -247,7 +248,7 @@ func (a *API) updateAt(ctx context.Context, ref resource.Ref, path string, value
 	if err := senlin.Validate(ctx, client); err != nil {
 		return nil, request.Wrap("Update", "clustering.nodes", err)
 	}
-	config, err := request.Apply(value, options...)
+	config, err := calls.ApplyConfig(value, updateCalls, options...)
 	if err == nil {
 		err = validateUpdate(ctx, client, config.Options)
 	}
@@ -291,7 +292,7 @@ func (a *API) Delete(ctx context.Context, ref resource.Ref, options ...DeleteOpt
 	if err := senlin.Validate(ctx, client); err != nil {
 		return nil, request.Wrap("Delete", "clustering.nodes", err)
 	}
-	config, err := request.Apply(DeleteOpts{}, options...)
+	config, err := calls.ApplyConfig(DeleteOpts{}, deleteCalls, options...)
 	if err == nil {
 		err = request.ValidateCapabilities(config, false, false, true)
 	}

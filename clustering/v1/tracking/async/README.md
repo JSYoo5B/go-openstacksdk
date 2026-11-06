@@ -102,6 +102,7 @@ import (
 
     sdk "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/clustering/v1/clusters"
+    "github.com/JSYoo5B/go-openstacksdk/request"
     "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -117,7 +118,7 @@ func UpdateTrackedCluster(ctx context.Context, conn *sdk.Connection) (*clusters.
         clusters.WithUpdateProfileOnlyNull()); err != nil {
         return nil, err
     }
-    accepted, err := tracked.Commit(ctx, clusters.WithUpdateHeader("X-Audit-Tag", "rename"))
+    accepted, err := tracked.Commit(ctx, request.Header("X-Audit-Tag", "rename"))
     if err != nil { return nil, err }
     if accepted.Operation != nil {
         fmt.Println(accepted.Operation.ActionID, accepted.Operation.Location)

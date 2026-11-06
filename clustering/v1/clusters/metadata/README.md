@@ -52,7 +52,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/clustering/v1/clusters.API.SetMetadata`
-- `github.com/JSYoo5B/go-openstacksdk/clustering/v1/clusters.WithMetadataHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/clustering/v1/clusters.API.PythonMetadata`
 - `github.com/JSYoo5B/go-openstacksdk/clustering/v1/clusters.PythonMetadataProfile.SetMetadata`
 - `github.com/JSYoo5B/go-openstacksdk/clustering/v1/clusters.PythonMetadataProfile.ReplaceMetadata`
@@ -79,7 +79,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/clustering/v1/clusters.API.DeleteMetadata`
-- `github.com/JSYoo5B/go-openstacksdk/clustering/v1/clusters.WithMetadataHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/clustering/v1/clusters.API.PythonMetadata`
 - `github.com/JSYoo5B/go-openstacksdk/clustering/v1/clusters.PythonMetadataProfile.DeleteMetadata`
 
@@ -123,7 +123,7 @@ result, err := service.Clusters.SetMetadata(ctx, resource.ID("CLUSTER_ID"),
         "team": "infra",
         "nullable": nil,
         "big": json.Number("9007199254740993"),
-    }, clusters.WithMetadataHeader("X-Request-Id", "metadata-change"))
+    }, request.Header("X-Request-Id", "metadata-change"))
 if err != nil { return err }
 fmt.Println(result.Changed, string(result.Previous["team"]), string(result.Requested["team"]))
 if result.Operation != nil { fmt.Println(result.Operation.ActionID) }

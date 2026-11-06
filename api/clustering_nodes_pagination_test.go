@@ -65,9 +65,9 @@ func TestClusteringNodesListWireOptionsAndRawMarkerSnapshots(t *testing.T) {
 	nested := map[string]any{"team": "infra"}
 	metadata := map[string]any{"quota": json.Number("9007199254740993"), "nested": nested}
 	options := []nodes.ListOption{
-		nodes.WithListOptions(typed), nodes.WithListQuery("vendor", "retained"),
+		nodes.WithListOptions(typed), request.Query("vendor", "retained"),
 		nodes.WithListFilter("project_id", "project-a"), nodes.WithListFilter("metadata", metadata),
-		func(config *request.Config[nodes.ListOpts]) error { captured = config; return nil },
+		request.Custom(func(config *request.Config[nodes.ListOpts]) error { captured = config; return nil }),
 	}
 	api := nodes.New(client)
 	stream := api.List(context.Background(), options...)
@@ -159,7 +159,7 @@ func TestClusteringNodesListPreflightAndSharedStatus(t *testing.T) {
 		})
 		api := nodes.New(cloud.Client("clustering", "/senlin/v1"))
 		for _, key := range []string{"limit", "marker", "name", "cluster_id", "status", "sort", "global_project", "show_details", "metadata", "project_id", "details"} {
-			if _, err := api.All(context.Background(), nodes.WithListQuery(key, "override")); !errors.Is(err, resource.ErrInvalidOption) {
+			if _, err := api.All(context.Background(), request.Query(key, "override")); !errors.Is(err, resource.ErrInvalidOption) {
 				t.Fatal("concrete/local query was not protected", key, err)
 			}
 		}
@@ -173,11 +173,11 @@ func TestClusteringNodesListPreflightAndSharedStatus(t *testing.T) {
 			{"invalid-sort", nodes.WithListOptions(nodes.ListOpts{Sort: "name:wrong"})},
 			{"unknown-filter", nodes.WithListFilter("vendor", true)},
 			{"filter-json-error", nodes.WithListFilter("metadata", make(chan int))},
-			{"unsupported-fields", request.WithField[nodes.ListOpts]("vendor", true)},
-			{"protected-header", request.WithHeader[nodes.ListOpts]("X-Auth-Token", "ignored")},
-			{"unsupported-argument", request.WithArgument[nodes.ListOpts]("vendor", true)},
-			{"wrong-filter-argument", request.WithArgument[nodes.ListOpts]("nodes.local_filters", true)},
-			{"invalid-filter-json", request.WithArgument[nodes.ListOpts]("nodes.local_filters", map[string]json.RawMessage{"metadata": json.RawMessage(`{`)})},
+			{"unsupported-fields", request.Custom(request.WithField[nodes.ListOpts]("vendor", true))},
+			{"protected-header", request.Custom(request.WithHeader[nodes.ListOpts]("X-Auth-Token", "ignored"))},
+			{"unsupported-argument", request.Custom(request.WithArgument[nodes.ListOpts]("vendor", true))},
+			{"wrong-filter-argument", request.Custom(request.WithArgument[nodes.ListOpts]("nodes.local_filters", true))},
+			{"invalid-filter-json", request.Custom(request.WithArgument[nodes.ListOpts]("nodes.local_filters", map[string]json.RawMessage{"metadata": json.RawMessage(`{`)}))},
 		}
 		for _, test := range cases {
 			t.Run(test.name, func(t *testing.T) {

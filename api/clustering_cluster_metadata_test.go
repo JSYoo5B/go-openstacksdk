@@ -117,7 +117,7 @@ func TestClusteringClusterMetadataShallowMergeSnapshotsAndQueuedResult(t *testin
 		w.Header().Set("X-Request-ID", "queued-proof")
 		testcloud.JSON(w, 202, responseBody)
 	})
-	result, err := clusters.New(client).SetMetadata(context.Background(), resource.ID("selected"), input, option)
+	result, err := clusters.New(client).SetMetadata(context.Background(), resource.ID("selected"), input, request.Custom(option))
 	if err != nil || !result.Changed || result.Operation == nil || result.Operation.ActionID != "queued" || result.Operation.StatusCode != 202 || string(result.Operation.Body) != responseBody || result.ResponseCluster.ID != "incidental-patch-id" || string(result.ResponseCluster.UserMetadata["response"]) != `"not requested state"` {
 		t.Fatal(result, err)
 	}
@@ -281,7 +281,7 @@ func TestClusteringClusterMetadataSelectedDeleteIsOneOwnedReplacement(t *testing
 		w.Header().Set("Location", "/reverse/senlin/v1/actions/queued")
 		testcloud.JSON(w, 202, `{"cluster":{"metadata":{}}}`)
 	})
-	result, err := clusters.New(clusterMetadataClient(cloud)).DeleteMetadata(context.Background(), resource.ID("selected"), keys, clusters.WithMetadataHeader("X-Trace", "batch"))
+	result, err := clusters.New(clusterMetadataClient(cloud)).DeleteMetadata(context.Background(), resource.ID("selected"), keys, request.Header("X-Trace", "batch"))
 	if err != nil || !result.Changed || len(result.Requested) != 1 || len(result.Previous) != 4 || gets.Load() != 1 || patches.Load() != 1 {
 		t.Fatal(result, err, gets.Load(), patches.Load())
 	}
@@ -298,18 +298,18 @@ func TestClusteringClusterMetadataPreflightRejectsUnsupportedInputs(t *testing.T
 	api := clusters.New(client)
 	options := []clusters.MetadataOption{
 		nil,
-		clusters.WithMetadataHeader("X-Auth-Token", "override"),
-		clusters.WithMetadataHeader("openstack-api-version", "clustering 1.13"),
-		clusters.WithMetadataHeader("Host", "other"),
-		clusters.WithMetadataHeader("Content-Type", "other"),
-		clusters.WithMetadataHeader("X-Trace", "bad\nvalue"),
-		request.WithField[clusters.MetadataOpts]("metadata", map[string]any{}),
-		request.WithQuery[clusters.MetadataOpts]("vendor", "value"),
-		request.WithArgument[clusters.MetadataOpts]("vendor", true),
-		func(config *request.Config[clusters.MetadataOpts]) error {
+		request.Header("X-Auth-Token", "override"),
+		request.Header("openstack-api-version", "clustering 1.13"),
+		request.Header("Host", "other"),
+		request.Header("Content-Type", "other"),
+		request.Header("X-Trace", "bad\nvalue"),
+		request.Custom(request.WithField[clusters.MetadataOpts]("metadata", map[string]any{})),
+		request.Custom(request.WithQuery[clusters.MetadataOpts]("vendor", "value")),
+		request.Custom(request.WithArgument[clusters.MetadataOpts]("vendor", true)),
+		request.Custom(func(config *request.Config[clusters.MetadataOpts]) error {
 			config.Headers["bad header"] = "value"
 			return nil
-		},
+		}),
 	}
 	for _, option := range options {
 		if _, err := api.SetMetadata(context.Background(), resource.ID("selected"), map[string]any{"key": true}, option); !errors.Is(err, resource.ErrInvalidOption) {
@@ -414,7 +414,7 @@ func TestClusteringClusterMetadataZeroHTTPDeleteRevalidatesOptionSideEffects(t *
 				}
 				return nil
 			}
-			result, err := clusters.New(client).DeleteMetadata(ctx, resource.Name("selected"), []string{}, option)
+			result, err := clusters.New(client).DeleteMetadata(ctx, resource.Name("selected"), []string{}, request.Custom(option))
 			if result != nil || mode == "source" && !errors.Is(err, resource.ErrInvalidOption) || mode == "context" && !errors.Is(err, context.Canceled) {
 				t.Fatal(result, err)
 			}

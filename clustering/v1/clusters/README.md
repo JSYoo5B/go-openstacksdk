@@ -61,7 +61,7 @@ Python/Go differences:
 - Documented singular envelopes and success codes are strict; raw HTTP/header/body evidence and exact JSON numbers are retained instead of Python permissive fallback decoding or cached Resource mutation.
 - The selected numeric microversion and protected field/query/header extensions are explicit; null field support remains deployment-defined and no unverified force version gate is invented.
 - Accepted Location must identify one action at the selected origin and collection, including reverse-proxy prefixes; missing required, empty, ambiguous, foreign or malformed references return ResponseError without following or resending. Submission holds action identity and original response, not an invented action status or completed result.
-- Go WithDeleteIgnoreMissing deliberately overrides either ordinary or force defaults. Shared Resources.Delete returns ErrUnsupported because its error-only signature would discard the asynchronous Submission.
+- Go request.IgnoreMissing deliberately overrides either ordinary or force defaults. Shared Resources.Delete returns ErrUnsupported because its error-only signature would discard the asynchronous Submission.
 
 ### `python:clustering/v1/update_cluster`
 
@@ -107,8 +107,8 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/clustering/v1/clusters.API.List`
-- `github.com/JSYoo5B/go-openstacksdk/clustering/v1/clusters.WithListHeader`
-- `github.com/JSYoo5B/go-openstacksdk/clustering/v1/clusters.WithListMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - Lazy owned query options retain explicit false, sort grammar, vendor query and selected filters across linked and short-page last-wire-ID continuation; constructor snapshots and consumer mutation cannot change raw markers, and local Body subsets/aliases/exact decimal filters do not become server query.
   Tests: `api/clustering_clusters_test.go:TestClusteringClustersListShortPageFiltersAndSnapshots`, `api/clustering_clusters_pagination_test.go:TestClusteringClustersLocalFilterJSONTypesAndNull`, `api/clustering_clusters_pagination_test.go:TestClusteringClustersContinuationGuardsBreakAndCancellation`, `api/clustering_clusters_pagination_test.go:TestClusteringClustersSharedStatusAndSortUseActualWireQuery`.
@@ -131,10 +131,10 @@ Python/Go differences:
 - Known local Body filters support recursive object subsets, arrays and exact decimal comparison while keeping JSON boolean and numeric types distinct; arbitrary vendor query keys are explicit server extensions.
 - Go list controls require a non-negative integer MaxItems and optional bool Paginated; max_items/paginated are local option names and cannot be emitted through raw query extensions. Caps count wire rows before local filters, own their state per iteration and do not turn an upper consumption bound into a guaranteed result count.
 - At an exact page boundary Python Resource.list may issue a continuation GET before checking max_items at the next raw row; the Go Senlin iterator terminates immediately after its cap and does not validate or request an unused continuation.
-- Go exposes WithListHeader and WithListMicroversion separately from query and Body inputs; it preserves SDK ownership of authentication, service-token, authorization and transport/version headers rather than copying an unrestricted Python caller header map.
+- Go exposes request.Header and request.Microversion separately from query and Body inputs; it preserves SDK ownership of authentication, service-token, authorization and transport/version headers rather than copying an unrestricted Python caller header map.
 - A numeric per-call selection is explicit and does not negotiate or mutate the shared client. Explicit empty selection resets to server-default1.0; a conflicting source MoreHeaders version is rejected instead of silently removed. Common Resources and parent resolution/Get/Wait do not accept these typed List options.
 - Python Proxy._list also accepts a per-call base_path and the deprecated jmespath_filters (it warns RemovedInSDK60Warning) among its keyword arguments; the Go routes are SDK-owned and neither option is exposed.
-- Python Resource.list validates keywords with allow_unknown_params=True: a keyword that is neither a declared query key nor a Body attribute is silently discarded, and a Body attribute that is not a query key becomes a client-side filter. Go sends explicit extension queries to the server through WithListQuery, applies Body filters only through the explicit WithListFilter with source-validated names, and rejects unknown filter names, reserved names and names owned by typed options before HTTP.
+- Python Resource.list validates keywords with allow_unknown_params=True: a keyword that is neither a declared query key nor a Body attribute is silently discarded, and a Body attribute that is not a query key becomes a client-side filter. Go sends explicit extension queries to the server through request.Query, applies Body filters only through the explicit WithListFilter with source-validated names, and rejects unknown filter names, reserved names and names owned by typed options before HTTP.
 - Python rows are rebuilt with Resource.existing, which applies descriptor coercion and defaults; Go keeps typed snapshots with the raw JSON and filters compare exact raw JSON values without coercion.
 - Python cluster query keys are name, status, sort and global_project.
 - The explicit-limit marker fallback, MaxItems limit hints and short-page continuation are verified with HTTP fixtures only; no live Senlin server default or maximum limit was observed.
@@ -148,10 +148,10 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/clustering/v1/clusters.API.FindIdentity`
 - `github.com/JSYoo5B/go-openstacksdk/clustering/v1/clusters.API.Find`
 - `github.com/JSYoo5B/go-openstacksdk/clustering/v1/clusters.WithFindOptions`
-- `github.com/JSYoo5B/go-openstacksdk/clustering/v1/clusters.WithFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/clustering/v1/clusters.WithFindFallback`
-- `github.com/JSYoo5B/go-openstacksdk/clustering/v1/clusters.WithFindHeader`
-- `github.com/JSYoo5B/go-openstacksdk/clustering/v1/clusters.WithFindMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - The declared string identity is sent to the direct controller GET without a UUID heuristic. A successful response returns immediately without a list and may resolve a name or short ID to a different canonical returned ID.
   Tests: `api/clustering_find_identity_test.go:TestClusteringFindIdentityFiveFacadesDirectGETAndCanonicalFields`.
@@ -596,10 +596,10 @@ fmt.Println(attached.ActionID, updated.ActionID, detached.ActionID)
 listingAPI := clusters.New(client)
 values, err := listingAPI.All(ctx,
     clusters.WithListOptions(clusters.ListOpts{Limit: 20}),
-    clusters.WithListMaxItems(50))
+    request.MaxItems(50))
 if err != nil { return err }
 fmt.Println(len(values))
-for value, err := range listingAPI.List(ctx, clusters.WithListPaginated(false)) {
+for value, err := range listingAPI.List(ctx, request.Paginated(false)) {
     if err != nil { return err }
     fmt.Println(value.ID)
 }
@@ -613,13 +613,14 @@ import (
 
     sdk "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/clustering/v1/clusters"
+    "github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 func FindClusterStrict(ctx context.Context, conn *sdk.Connection) (*clusters.Cluster, error) {
     service, err := conn.Clustering(ctx)
     if err != nil { return nil, err }
     return service.Clusters.FindIdentity(ctx, "workers",
-        clusters.WithFindIgnoreMissing(false))
+        request.IgnoreMissing(false))
 }
 ```
 

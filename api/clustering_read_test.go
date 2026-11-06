@@ -125,7 +125,7 @@ func TestClusteringReadActionListMarkersDefaultsAndOptionsSnapshot(t *testing.T)
 		return nil
 	}
 	api := actions.New(cloud.Client("clustering", "/senlin/v1"))
-	options := []actions.ListOption{option, capture, actions.WithListQuery("vendor", "retained")}
+	options := []actions.ListOption{option, request.Custom(capture), request.Query("vendor", "retained")}
 	iterator := api.List(context.Background(), options...)
 	options[0] = actions.WithListGlobalProject(false)
 	if calls.Load() != 0 {
@@ -170,7 +170,7 @@ func TestClusteringReadEventRepeatedFiltersSnapshotAndExactBody(t *testing.T) {
 	option := events.WithListOptions(input)
 	input.ObjectIDs[0], input.ObjectNames[0], input.ObjectTypes[0], input.Actions[0] = "changed", "changed", "changed", "changed"
 	global = true
-	values, err := events.New(cloud.Client("clustering", "/senlin/v1")).All(context.Background(), option, events.WithListQuery("vendor", "retained"))
+	values, err := events.New(cloud.Client("clustering", "/senlin/v1")).All(context.Background(), option, request.Query("vendor", "retained"))
 	if err != nil || len(values) != 1 || calls.Load() != 2 {
 		t.Fatal(values, err, calls.Load())
 	}
@@ -289,9 +289,9 @@ func TestClusteringReadDefaultsCoreExtensionsAndSortValidation(t *testing.T) {
 		nil,
 		actions.WithListOptions(actions.ListOpts{Sort: "name:sideways"}),
 		actions.WithListOptions(actions.ListOpts{Sort: "unknown:asc"}),
-		actions.WithListQuery("target", "hidden"),
-		actions.WithListQuery("global_project", "true"),
-		request.WithField[actions.ListOpts]("field", true),
+		request.Query("target", "hidden"),
+		request.Query("global_project", "true"),
+		request.Custom(request.WithField[actions.ListOpts]("field", true)),
 	} {
 		if _, err := api.All(context.Background(), option); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(err)
@@ -303,8 +303,8 @@ func TestClusteringReadDefaultsCoreExtensionsAndSortValidation(t *testing.T) {
 	eventAPI := events.New(api.RawClient())
 	for _, option := range []events.ListOption{
 		events.WithListOptions(events.ListOpts{ObjectIDs: []string{""}}),
-		events.WithListQuery("oid", "hidden"),
-		events.WithListQuery("obj_name", "hidden"),
+		request.Query("oid", "hidden"),
+		request.Query("obj_name", "hidden"),
 		events.WithListOptions(events.ListOpts{Sort: "created_at:asc"}),
 	} {
 		if _, err := eventAPI.All(context.Background(), option); !errors.Is(err, resource.ErrInvalidOption) {

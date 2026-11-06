@@ -28,17 +28,17 @@ func TestClusteringMutationsRecheckConfiguredSourceAfterOptions(t *testing.T) {
 			var err error
 			if operation == "profile_create" {
 				_, err = profiles.New(client).Create(context.Background(), profiles.CreateOpts{Name: "template", Spec: json.RawMessage(`{}`)},
-					func(config *request.Config[profiles.CreateOpts]) error { client.Type = "compute"; return nil })
+					request.Custom(func(config *request.Config[profiles.CreateOpts]) error { client.Type = "compute"; return nil }))
 				if !errors.Is(err, resource.ErrInvalidOption) {
 					t.Fatalf("changed service type accepted: %v", err)
 				}
 			} else {
 				if operation == "profile_validate" {
 					_, err = profiles.New(client).Validate(context.Background(), profiles.ValidateOpts{Spec: json.RawMessage(`{}`)},
-						func(config *request.Config[profiles.ValidateOpts]) error { client.Microversion = "1.1"; return nil })
+						request.Custom(func(config *request.Config[profiles.ValidateOpts]) error { client.Microversion = "1.1"; return nil }))
 				} else {
 					_, err = policies.New(client).Validate(context.Background(), policies.ValidateOpts{Spec: json.RawMessage(`{}`)},
-						func(config *request.Config[policies.ValidateOpts]) error { client.Microversion = "1.1"; return nil })
+						request.Custom(func(config *request.Config[policies.ValidateOpts]) error { client.Microversion = "1.1"; return nil }))
 				}
 				if !errors.Is(err, resource.ErrUnsupported) {
 					t.Fatalf("demoted validation version accepted: %v", err)

@@ -73,17 +73,17 @@ func TestClusteringNodeAdoptPresenceSnapshotsAndIndependentReuse(t *testing.T) {
 	snapshot := nodes.WithAdoptOptions(nodes.AdoptOpts{Identity: "physical", Type: "os.nova.server-1.0", Metadata: metadata})
 	metadata[2] = 'X'
 	vendor := map[string]any{"zero": 0}
-	extension := nodes.WithAdoptField("vendor", vendor)
+	extension := request.Field("vendor", vendor)
 	vendor["zero"] = 1
 	for range 2 {
-		value, err := api.Adopt(context.Background(), nodes.AdoptOpts{}, snapshot, nodes.WithAdoptName(""), nodes.WithAdoptRoleNull(), nodes.WithAdoptSnapshot(false), nodes.WithAdoptOverrides(map[string]any{}), extension, nodes.WithAdoptHeader("X-Vendor", "retained"))
+		value, err := api.Adopt(context.Background(), nodes.AdoptOpts{}, snapshot, nodes.WithAdoptName(""), nodes.WithAdoptRoleNull(), nodes.WithAdoptSnapshot(false), nodes.WithAdoptOverrides(map[string]any{}), extension, request.Header("X-Vendor", "retained"))
 		if err != nil || value.ID != "adopted" || value.Operation != nil || string(value.UserMetadata["big"]) != "9007199254740993" || value.Header.Get("X-Request-ID") != "owned-response" {
 			t.Fatal(value, err)
 		}
 		value.UserMetadata["big"][0] = 'X'
 		value.Header.Set("X-Request-ID", "consumer-change")
 	}
-	if _, err := api.Adopt(context.Background(), nodes.AdoptOpts{Identity: "physical", Type: "os.nova.server-1.0"}, nodes.WithAdoptNameNull(), nodes.WithAdoptRole(""), nodes.WithAdoptSnapshotNull(), nodes.WithAdoptMetadata(nil), nodes.WithAdoptOverrides(nil), nodes.WithAdoptHeader("X-Vendor", "retained")); err != nil {
+	if _, err := api.Adopt(context.Background(), nodes.AdoptOpts{Identity: "physical", Type: "os.nova.server-1.0"}, nodes.WithAdoptNameNull(), nodes.WithAdoptRole(""), nodes.WithAdoptSnapshotNull(), nodes.WithAdoptMetadata(nil), nodes.WithAdoptOverrides(nil), request.Header("X-Vendor", "retained")); err != nil {
 		t.Fatal(err)
 	}
 	if calls.Load() != 3 {
@@ -151,7 +151,7 @@ func TestClusteringNodeAdoptPreviewSnapshotsFalseNullAndEmptyObject(t *testing.T
 	option := nodes.WithAdoptPreviewOptions(nodes.AdoptPreviewOpts{Identity: "physical", Type: "os.nova.server-1.0", Overrides: overrides, Snapshot: request.Present(false)})
 	overrides[2] = 'X'
 	for range 2 {
-		value, err := api.AdoptPreview(context.Background(), nodes.AdoptPreviewOpts{}, option, nodes.WithAdoptPreviewHeader("X-Vendor", "retained"))
+		value, err := api.AdoptPreview(context.Background(), nodes.AdoptPreviewOpts{}, option, request.Header("X-Vendor", "retained"))
 		if err != nil || value.Spec.Version != nil || string(value.Body["node_preview"]) != `{"type":"os.nova.server","properties":{}}` {
 			t.Fatal(value, err)
 		}
@@ -160,7 +160,7 @@ func TestClusteringNodeAdoptPreviewSnapshotsFalseNullAndEmptyObject(t *testing.T
 		{nodes.WithAdoptPreviewOverrides(map[string]any{}), nodes.WithAdoptPreviewSnapshot(true)},
 		{nodes.WithAdoptPreviewOverrides(nil), nodes.WithAdoptPreviewSnapshotNull()},
 	} {
-		options = append(options, nodes.WithAdoptPreviewHeader("X-Vendor", "retained"))
+		options = append(options, request.Header("X-Vendor", "retained"))
 		if _, err := api.AdoptPreview(context.Background(), nodes.AdoptPreviewOpts{Identity: "physical", Type: "os.nova.server-1.0"}, options...); err != nil {
 			t.Fatal(err)
 		}
@@ -206,9 +206,9 @@ func TestClusteringNodeAdoptVersionTypeRecheckAndCanceledOptions(t *testing.T) {
 			}
 			var err error
 			if preview {
-				_, err = api.AdoptPreview(ctx, nodes.AdoptPreviewOpts{Identity: "physical", Type: "os.nova.server-1.0"}, func(config *request.Config[nodes.AdoptPreviewOpts]) error { changeSource(); return nil })
+				_, err = api.AdoptPreview(ctx, nodes.AdoptPreviewOpts{Identity: "physical", Type: "os.nova.server-1.0"}, request.Custom(func(config *request.Config[nodes.AdoptPreviewOpts]) error { changeSource(); return nil }))
 			} else {
-				_, err = api.Adopt(ctx, nodes.AdoptOpts{Identity: "physical", Type: "os.nova.server-1.0"}, func(config *request.Config[nodes.AdoptOpts]) error { changeSource(); return nil })
+				_, err = api.Adopt(ctx, nodes.AdoptOpts{Identity: "physical", Type: "os.nova.server-1.0"}, request.Custom(func(config *request.Config[nodes.AdoptOpts]) error { changeSource(); return nil }))
 			}
 			cancel()
 			want := resource.ErrInvalidOption
@@ -252,7 +252,7 @@ func TestClusteringNodeAdoptInputCapabilityAndOwnedFieldPreflight(t *testing.T) 
 		t.Fatal(err)
 	}
 	for _, key := range []string{"identity", "type", "name", "role", "snapshot", "metadata", "overrides"} {
-		if _, err := api.Adopt(context.Background(), nodes.AdoptOpts{Identity: "physical", Type: "os.nova.server-1.0"}, nodes.WithAdoptField(key, nil)); !errors.Is(err, resource.ErrInvalidOption) {
+		if _, err := api.Adopt(context.Background(), nodes.AdoptOpts{Identity: "physical", Type: "os.nova.server-1.0"}, request.Field(key, nil)); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(key, err)
 		}
 	}
@@ -269,12 +269,12 @@ func TestClusteringNodeAdoptInputCapabilityAndOwnedFieldPreflight(t *testing.T) 
 			t.Fatal(err)
 		}
 	}
-	for _, option := range []nodes.AdoptOption{nil, nodes.WithAdoptHeader("X-Auth-Token", "foreign"), nodes.WithAdoptHeader("oPeNsTaCk-ApI-vErSiOn", "clustering 1.99"), request.WithQuery[nodes.AdoptOpts]("vendor", "unsupported"), request.WithArgument[nodes.AdoptOpts]("vendor", false), nodes.WithAdoptField("vendor", json.RawMessage(`{`))} {
+	for _, option := range []nodes.AdoptOption{nil, request.Header("X-Auth-Token", "foreign"), request.Header("oPeNsTaCk-ApI-vErSiOn", "clustering 1.99"), request.Custom(request.WithQuery[nodes.AdoptOpts]("vendor", "unsupported")), request.Custom(request.WithArgument[nodes.AdoptOpts]("vendor", false)), request.Field("vendor", json.RawMessage(`{`))} {
 		if _, err := api.Adopt(context.Background(), nodes.AdoptOpts{Identity: "physical", Type: "os.nova.server-1.0"}, option); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(err)
 		}
 	}
-	for _, option := range []nodes.AdoptPreviewOption{nil, nodes.WithAdoptPreviewHeader("X-Auth-Token", "foreign"), nodes.WithAdoptPreviewHeader("OpenStack-API-Version", "clustering 1.99"), request.WithField[nodes.AdoptPreviewOpts]("vendor", false), request.WithField[nodes.AdoptPreviewOpts]("name", "ignored-by-Python"), request.WithField[nodes.AdoptPreviewOpts]("snapshot", false), request.WithQuery[nodes.AdoptPreviewOpts]("vendor", "unsupported"), request.WithArgument[nodes.AdoptPreviewOpts]("vendor", false)} {
+	for _, option := range []nodes.AdoptPreviewOption{nil, request.Header("X-Auth-Token", "foreign"), request.Header("OpenStack-API-Version", "clustering 1.99"), request.Custom(request.WithField[nodes.AdoptPreviewOpts]("vendor", false)), request.Custom(request.WithField[nodes.AdoptPreviewOpts]("name", "ignored-by-Python")), request.Custom(request.WithField[nodes.AdoptPreviewOpts]("snapshot", false)), request.Custom(request.WithQuery[nodes.AdoptPreviewOpts]("vendor", "unsupported")), request.Custom(request.WithArgument[nodes.AdoptPreviewOpts]("vendor", false))} {
 		if _, err := api.AdoptPreview(context.Background(), nodes.AdoptPreviewOpts{Identity: "physical", Type: "os.nova.server-1.0"}, option); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(err)
 		}

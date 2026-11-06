@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"sync"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/internal/senlin"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -105,7 +106,7 @@ func (tracked *TrackedPolicy) Edit(opts UpdateOpts, options ...UpdateOption) err
 	if tracked == nil || tracked.state == nil {
 		return fmt.Errorf("%w: tracked policy is required", resource.ErrInvalidOption)
 	}
-	config, err := request.Apply(opts, options...)
+	config, err := calls.ApplyConfig(opts, updateCalls, options...)
 	if err == nil {
 		err = request.ValidateCapabilities(config, true, false, false)
 	}
@@ -140,7 +141,7 @@ func (tracked *TrackedPolicy) RemoveName() error {
 }
 
 func policyCommitHeaders(options []UpdateOption) (map[string]string, error) {
-	config, err := request.Apply(UpdateOpts{}, options...)
+	config, err := calls.ApplyConfig(UpdateOpts{}, updateCalls, options...)
 	if err == nil {
 		err = request.ValidateCapabilities(config, false, false, true)
 	}

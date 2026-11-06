@@ -51,27 +51,26 @@ type clusteringFindIdentityAccess struct {
 	explicit func(context.Context, resource.Ref, ...resource.LookupOption) (*clusteringFindIdentityValue, error)
 }
 
-func clusteringFindIdentityAdapter[O, M any](
-	find func(context.Context, string, ...request.Option[O]) (*M, error),
+func clusteringFindIdentityAdapter[M any](
+	find func(context.Context, string, ...request.FindCall) (*M, error),
 	explicit func(context.Context, resource.Ref, ...resource.LookupOption) (*M, error),
-	missing func(bool) request.Option[O], fallback func(resource.FindFallbackPolicy) request.Option[O],
-	header func(string, string) request.Option[O], version func(string) request.Option[O],
+	fallback func(resource.FindFallbackPolicy) request.FindCall,
 	value func(*M) *clusteringFindIdentityValue,
 ) clusteringFindIdentityAccess {
 	return clusteringFindIdentityAccess{
 		find: func(ctx context.Context, identity string, input clusteringFindIdentityInput) (*clusteringFindIdentityValue, error) {
-			options := make([]request.Option[O], 0)
+			options := make([]request.FindCall, 0)
 			if input.missing != nil {
-				options = append(options, missing(*input.missing))
+				options = append(options, request.IgnoreMissing(*input.missing))
 			}
 			for _, policy := range input.fallbacks {
 				options = append(options, fallback(policy))
 			}
 			for _, pair := range input.headers {
-				options = append(options, header(pair[0], pair[1]))
+				options = append(options, request.Header(pair[0], pair[1]))
 			}
 			for _, selected := range input.versions {
-				options = append(options, version(selected))
+				options = append(options, request.Microversion(selected))
 			}
 			result, err := find(ctx, identity, options...)
 			if result == nil {
@@ -98,31 +97,31 @@ func clusteringFindIdentityFixtures() []clusteringFindIdentityFixture {
 	return []clusteringFindIdentityFixture{
 		{"profiles", "profile", "profiles", func(client *gophercloud.ServiceClient) clusteringFindIdentityAccess {
 			api := profiles.New(client)
-			return clusteringFindIdentityAdapter(api.FindIdentity, api.Find, profiles.WithFindIgnoreMissing, profiles.WithFindFallback, profiles.WithFindHeader, profiles.WithFindMicroversion, func(v *profiles.Profile) *clusteringFindIdentityValue {
+			return clusteringFindIdentityAdapter(api.FindIdentity, api.Find, profiles.WithFindFallback, func(v *profiles.Profile) *clusteringFindIdentityValue {
 				return &clusteringFindIdentityValue{v.ID, v.Name, &v.Metadata}
 			})
 		}},
 		{"policies", "policy", "policies", func(client *gophercloud.ServiceClient) clusteringFindIdentityAccess {
 			api := policies.New(client)
-			return clusteringFindIdentityAdapter(api.FindIdentity, api.Find, policies.WithFindIgnoreMissing, policies.WithFindFallback, policies.WithFindHeader, policies.WithFindMicroversion, func(v *policies.Policy) *clusteringFindIdentityValue {
+			return clusteringFindIdentityAdapter(api.FindIdentity, api.Find, policies.WithFindFallback, func(v *policies.Policy) *clusteringFindIdentityValue {
 				return &clusteringFindIdentityValue{v.ID, v.Name, &v.Metadata}
 			})
 		}},
 		{"clusters", "cluster", "clusters", func(client *gophercloud.ServiceClient) clusteringFindIdentityAccess {
 			api := clusters.New(client)
-			return clusteringFindIdentityAdapter(api.FindIdentity, api.Find, clusters.WithFindIgnoreMissing, clusters.WithFindFallback, clusters.WithFindHeader, clusters.WithFindMicroversion, func(v *clusters.Cluster) *clusteringFindIdentityValue {
+			return clusteringFindIdentityAdapter(api.FindIdentity, api.Find, clusters.WithFindFallback, func(v *clusters.Cluster) *clusteringFindIdentityValue {
 				return &clusteringFindIdentityValue{v.ID, v.Name, &v.Metadata}
 			})
 		}},
 		{"nodes", "node", "nodes", func(client *gophercloud.ServiceClient) clusteringFindIdentityAccess {
 			api := nodes.New(client)
-			return clusteringFindIdentityAdapter(api.FindIdentity, api.Find, nodes.WithFindIgnoreMissing, nodes.WithFindFallback, nodes.WithFindHeader, nodes.WithFindMicroversion, func(v *nodes.Node) *clusteringFindIdentityValue {
+			return clusteringFindIdentityAdapter(api.FindIdentity, api.Find, nodes.WithFindFallback, func(v *nodes.Node) *clusteringFindIdentityValue {
 				return &clusteringFindIdentityValue{v.ID, v.Name, &v.Metadata}
 			})
 		}},
 		{"receivers", "receiver", "receivers", func(client *gophercloud.ServiceClient) clusteringFindIdentityAccess {
 			api := receivers.New(client)
-			return clusteringFindIdentityAdapter(api.FindIdentity, api.Find, receivers.WithFindIgnoreMissing, receivers.WithFindFallback, receivers.WithFindHeader, receivers.WithFindMicroversion, func(v *receivers.Receiver) *clusteringFindIdentityValue {
+			return clusteringFindIdentityAdapter(api.FindIdentity, api.Find, receivers.WithFindFallback, func(v *receivers.Receiver) *clusteringFindIdentityValue {
 				return &clusteringFindIdentityValue{v.ID, v.Name, &v.Metadata}
 			})
 		}},
@@ -534,7 +533,7 @@ func TestClusteringFindIdentityOptionsSnapshotsLastWinsAndConcurrentReuse(t *tes
 		snapshot := profiles.WithFindOptions(input)
 		strict, input.Fallback = true, resource.FindFallbackCompatible
 		var captured map[string]string
-		options := []profiles.FindOption{snapshot, profiles.WithFindFallback(resource.FindFallbackNever), profiles.WithFindFallback(resource.FindFallbackCompatible), profiles.WithFindHeader("x-trace", "first"), profiles.WithFindHeader("X-TRACE", "last"), profiles.WithFindMicroversion("1.2"), profiles.WithFindMicroversion("1.7"), func(config *request.Config[profiles.FindOpts]) error { captured = config.Headers; return nil }}
+		options := []profiles.FindOption{snapshot, profiles.WithFindFallback(resource.FindFallbackNever), profiles.WithFindFallback(resource.FindFallbackCompatible), request.Header("x-trace", "first"), request.Header("X-TRACE", "last"), request.Microversion("1.2"), request.Microversion("1.7"), request.Custom(func(config *request.Config[profiles.FindOpts]) error { captured = config.Headers; return nil })}
 		native := cloud.Provider.HTTPClient.Transport
 		if native == nil {
 			native = http.DefaultTransport
@@ -555,7 +554,7 @@ func TestClusteringFindIdentityOptionsSnapshotsLastWinsAndConcurrentReuse(t *tes
 				t.Fatal("WithFindOptions pointer snapshot or reuse lost", value, err)
 			}
 		}
-		value, err := api.FindIdentity(context.Background(), "missing", append(options, profiles.WithFindIgnoreMissing(true))...)
+		value, err := api.FindIdentity(context.Background(), "missing", append(options, request.IgnoreMissing(true))...)
 		if value != nil || err != nil || gets.Load() != 3 || lists.Load() != 3 || client.Microversion != "1.13" || client.MoreHeaders["x-trace"] != "changed-source" {
 			t.Fatal(value, err, gets.Load(), lists.Load(), client.MoreHeaders)
 		}
@@ -592,7 +591,7 @@ func TestClusteringFindIdentityOptionsSnapshotsLastWinsAndConcurrentReuse(t *tes
 			go func() {
 				defer done.Done()
 				selected := map[string]string{"one": "1.7", "two": "1.13"}[caller]
-				value, err := profiles.New(client).FindIdentity(context.Background(), "input", profiles.WithFindHeader("X-Caller", caller), profiles.WithFindMicroversion(selected))
+				value, err := profiles.New(client).FindIdentity(context.Background(), "input", request.Header("X-Caller", caller), request.Microversion(selected))
 				if err != nil || value == nil || value.ID != "canonical" {
 					t.Error(value, err)
 				}
@@ -651,14 +650,14 @@ func TestClusteringFindIdentityPreflightProtectsIdentityAndRequestControls(t *te
 	cloud, client := clusteringFindIdentityCloud(t)
 	var calls atomic.Int32
 	cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) { calls.Add(1); w.WriteHeader(500) })
-	for _, option := range []profiles.FindOption{profiles.WithFindFallback(resource.FindFallbackPolicy(99)), request.WithQuery[profiles.FindOpts]("headers", "value"), request.WithQuery[profiles.FindOpts]("microversion", "1.7"), request.WithQuery[profiles.FindOpts]("base_path", "/other"), request.WithField[profiles.FindOpts]("name", "other"), request.WithArgument[profiles.FindOpts]("foreign.find", true)} {
+	for _, option := range []profiles.FindOption{profiles.WithFindFallback(resource.FindFallbackPolicy(99)), request.Custom(request.WithQuery[profiles.FindOpts]("headers", "value")), request.Custom(request.WithQuery[profiles.FindOpts]("microversion", "1.7")), request.Custom(request.WithQuery[profiles.FindOpts]("base_path", "/other")), request.Custom(request.WithField[profiles.FindOpts]("name", "other")), request.Custom(request.WithArgument[profiles.FindOpts]("foreign.find", true))} {
 		if value, err := profiles.New(client).FindIdentity(context.Background(), "input", option); value != nil || !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal("generic option bypass reached HTTP", value, err)
 		}
 	}
 	client.Microversion = "1.2"
 	client.MoreHeaders = map[string]string{"openstack-api-version": "clustering 1.2"}
-	if value, err := profiles.New(client).FindIdentity(context.Background(), "input", profiles.WithFindMicroversion("1.7")); value != nil || !errors.Is(err, resource.ErrInvalidOption) {
+	if value, err := profiles.New(client).FindIdentity(context.Background(), "input", request.Microversion("1.7")); value != nil || !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal("source version header silently removed", value, err)
 	}
 	if calls.Load() != 0 {
@@ -723,7 +722,7 @@ func TestClusteringFindIdentityPhasesFreezeSelectionAndReadLiveToken(t *testing.
 			}))
 			var options []profiles.FindOption
 			if selection != "inherited" {
-				options = []profiles.FindOption{profiles.WithFindHeader("X-Selected", "stable"), profiles.WithFindMicroversion(selection)}
+				options = []profiles.FindOption{request.Header("X-Selected", "stable"), request.Microversion(selection)}
 			}
 			value, err := profiles.New(client).FindIdentity(context.Background(), "input", options...)
 			if err != nil || value == nil || value.ID != "selected" || gets.Load() != 1 || lists.Load() != 2 || cloud.Provider.Token() != "rotated-second" || client.Microversion != "1.0" {
@@ -767,7 +766,7 @@ func TestClusteringFindIdentitySourceAndContextRecheckedBeforeFallbackAndContinu
 					}
 					return response, err
 				}))
-				value, err := profiles.New(client).FindIdentity(ctx, "input", profiles.WithFindHeader("X-Selected", "owned"), profiles.WithFindMicroversion("1.7"))
+				value, err := profiles.New(client).FindIdentity(ctx, "input", request.Header("X-Selected", "owned"), request.Microversion("1.7"))
 				want := resource.ErrInvalidOption
 				if invalid == "cancel" {
 					want = context.Canceled

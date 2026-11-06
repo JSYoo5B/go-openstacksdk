@@ -36,9 +36,9 @@ func TestClusteringClusterPolicyCommandsWireDefaultsPresenceAndSubmission(t *tes
 	ref := resource.ID("controller-name")
 	policyID := "policy/name ?#%"
 	plugin := map[string]any{"exact": json.Number("9007199254740993"), "off": false, "zero": 0}
-	attachPlugin := clusters.WithAttachPolicyField("plugin", plugin)
-	updatePlugin := clusters.WithUpdatePolicyField("plugin", plugin)
-	detachPlugin := clusters.WithDetachPolicyField("plugin", plugin)
+	attachPlugin := request.Field("plugin", plugin)
+	updatePlugin := request.Field("plugin", plugin)
+	detachPlugin := request.Field("plugin", plugin)
 	plugin["exact"], plugin["off"] = 0, true
 	tests := []struct {
 		name, body string
@@ -78,7 +78,7 @@ func TestClusteringClusterPolicyCommandsWireDefaultsPresenceAndSubmission(t *tes
 			return api.UpdatePolicy(ctx, ref, clusters.UpdatePolicyOpts{}, clusters.WithUpdatePolicyOptions(clusters.UpdatePolicyOpts{PolicyID: "named-policy", Enabled: request.Null[bool]()}))
 		}},
 		{"attach-plugin", `{"policy_attach":{"action":null,"id":"plugin-id","location":"plugin-location","plugin":{"exact":9007199254740993,"off":false,"zero":0},"policy_id":"named-policy","status":false}}`, func(api *clusters.API) (*actions.Submission, error) {
-			return api.AttachPolicy(ctx, ref, clusters.AttachPolicyOpts{}, clusters.WithAttachPolicyOptions(clusters.AttachPolicyOpts{PolicyID: "named-policy"}), attachPlugin, clusters.WithAttachPolicyField("id", "plugin-id"), clusters.WithAttachPolicyField("action", nil), clusters.WithAttachPolicyField("location", "plugin-location"), clusters.WithAttachPolicyField("status", false))
+			return api.AttachPolicy(ctx, ref, clusters.AttachPolicyOpts{}, clusters.WithAttachPolicyOptions(clusters.AttachPolicyOpts{PolicyID: "named-policy"}), attachPlugin, request.Field("id", "plugin-id"), request.Field("action", nil), request.Field("location", "plugin-location"), request.Field("status", false))
 		}},
 		{"update-plugin", `{"policy_update":{"plugin":{"exact":9007199254740993,"off":false,"zero":0},"policy_id":"named-policy"}}`, func(api *clusters.API) (*actions.Submission, error) {
 			return api.UpdatePolicy(ctx, ref, clusters.UpdatePolicyOpts{}, clusters.WithUpdatePolicyOptions(clusters.UpdatePolicyOpts{PolicyID: "named-policy"}), updatePlugin)
@@ -157,7 +157,7 @@ func TestClusteringClusterPolicyCommandsNameLookupFreezesBodyAndHeaders(t *testi
 			var err error
 			switch command {
 			case "AttachPolicy":
-				value, err = api.AttachPolicy(context.Background(), resource.Name("selected"), clusters.AttachPolicyOpts{PolicyID: "original-policy", Enabled: request.Present(false)}, clusters.WithAttachPolicyField("vendor", json.RawMessage(`{"exact":9007199254740993}`)), clusters.WithAttachPolicyHeader("X-Vendor", "original-header"), func(config *request.Config[clusters.AttachPolicyOpts]) error {
+				value, err = api.AttachPolicy(context.Background(), resource.Name("selected"), clusters.AttachPolicyOpts{PolicyID: "original-policy", Enabled: request.Present(false)}, request.Field("vendor", json.RawMessage(`{"exact":9007199254740993}`)), request.Header("X-Vendor", "original-header"), request.Custom(func(config *request.Config[clusters.AttachPolicyOpts]) error {
 					mutate = func() {
 						config.Options.PolicyID = "changed-policy"
 						config.Options.Enabled = request.Present(true)
@@ -165,18 +165,18 @@ func TestClusteringClusterPolicyCommandsNameLookupFreezesBodyAndHeaders(t *testi
 						config.Headers["X-Vendor"] = "changed-header"
 					}
 					return nil
-				})
+				}))
 			case "DetachPolicy":
-				value, err = api.DetachPolicy(context.Background(), resource.Name("selected"), clusters.DetachPolicyOpts{PolicyID: "original-policy"}, clusters.WithDetachPolicyField("vendor", json.RawMessage(`{"exact":9007199254740993}`)), clusters.WithDetachPolicyHeader("X-Vendor", "original-header"), func(config *request.Config[clusters.DetachPolicyOpts]) error {
+				value, err = api.DetachPolicy(context.Background(), resource.Name("selected"), clusters.DetachPolicyOpts{PolicyID: "original-policy"}, request.Field("vendor", json.RawMessage(`{"exact":9007199254740993}`)), request.Header("X-Vendor", "original-header"), request.Custom(func(config *request.Config[clusters.DetachPolicyOpts]) error {
 					mutate = func() {
 						config.Options.PolicyID = "changed-policy"
 						config.Fields["vendor"][2] = 'X'
 						config.Headers["X-Vendor"] = "changed-header"
 					}
 					return nil
-				})
+				}))
 			default:
-				value, err = api.UpdatePolicy(context.Background(), resource.Name("selected"), clusters.UpdatePolicyOpts{PolicyID: "original-policy", Enabled: request.Present(false)}, clusters.WithUpdatePolicyField("vendor", json.RawMessage(`{"exact":9007199254740993}`)), clusters.WithUpdatePolicyHeader("X-Vendor", "original-header"), func(config *request.Config[clusters.UpdatePolicyOpts]) error {
+				value, err = api.UpdatePolicy(context.Background(), resource.Name("selected"), clusters.UpdatePolicyOpts{PolicyID: "original-policy", Enabled: request.Present(false)}, request.Field("vendor", json.RawMessage(`{"exact":9007199254740993}`)), request.Header("X-Vendor", "original-header"), request.Custom(func(config *request.Config[clusters.UpdatePolicyOpts]) error {
 					mutate = func() {
 						config.Options.PolicyID = "changed-policy"
 						config.Options.Enabled = request.Present(true)
@@ -184,7 +184,7 @@ func TestClusteringClusterPolicyCommandsNameLookupFreezesBodyAndHeaders(t *testi
 						config.Headers["X-Vendor"] = "changed-header"
 					}
 					return nil
-				})
+				}))
 			}
 			if err != nil || value == nil || value.ActionID != "frozen-action" || lists.Load() != 1 || posts.Load() != 1 {
 				t.Fatal(value, err, lists.Load(), posts.Load())
@@ -237,11 +237,11 @@ func TestClusteringClusterPolicyCommandsInputPreflight(t *testing.T) {
 			var err error
 			switch command {
 			case "AttachPolicy":
-				_, err = api.AttachPolicy(context.Background(), resource.Name("selected"), clusters.AttachPolicyOpts{PolicyID: "policy"}, clusterPolicyInvalidOption[clusters.AttachPolicyOpts](mode))
+				_, err = api.AttachPolicy(context.Background(), resource.Name("selected"), clusters.AttachPolicyOpts{PolicyID: "policy"}, request.Custom(clusterPolicyInvalidOption[clusters.AttachPolicyOpts](mode)))
 			case "DetachPolicy":
-				_, err = api.DetachPolicy(context.Background(), resource.Name("selected"), clusters.DetachPolicyOpts{PolicyID: "policy"}, clusterPolicyInvalidOption[clusters.DetachPolicyOpts](mode))
+				_, err = api.DetachPolicy(context.Background(), resource.Name("selected"), clusters.DetachPolicyOpts{PolicyID: "policy"}, request.Custom(clusterPolicyInvalidOption[clusters.DetachPolicyOpts](mode)))
 			default:
-				_, err = api.UpdatePolicy(context.Background(), resource.Name("selected"), clusters.UpdatePolicyOpts{PolicyID: "policy"}, clusterPolicyInvalidOption[clusters.UpdatePolicyOpts](mode))
+				_, err = api.UpdatePolicy(context.Background(), resource.Name("selected"), clusters.UpdatePolicyOpts{PolicyID: "policy"}, request.Custom(clusterPolicyInvalidOption[clusters.UpdatePolicyOpts](mode)))
 			}
 			if !errors.Is(err, resource.ErrInvalidOption) {
 				t.Fatal(command, mode, err)
@@ -406,11 +406,11 @@ func TestClusteringClusterPolicyCommandsOptionErrorsRemainOriginal(t *testing.T)
 		var err error
 		switch command {
 		case "AttachPolicy":
-			_, err = api.AttachPolicy(context.Background(), resource.Name("selected"), clusters.AttachPolicyOpts{PolicyID: "policy"}, func(*request.Config[clusters.AttachPolicyOpts]) error { return cause })
+			_, err = api.AttachPolicy(context.Background(), resource.Name("selected"), clusters.AttachPolicyOpts{PolicyID: "policy"}, request.Custom(func(*request.Config[clusters.AttachPolicyOpts]) error { return cause }))
 		case "DetachPolicy":
-			_, err = api.DetachPolicy(context.Background(), resource.Name("selected"), clusters.DetachPolicyOpts{PolicyID: "policy"}, func(*request.Config[clusters.DetachPolicyOpts]) error { return cause })
+			_, err = api.DetachPolicy(context.Background(), resource.Name("selected"), clusters.DetachPolicyOpts{PolicyID: "policy"}, request.Custom(func(*request.Config[clusters.DetachPolicyOpts]) error { return cause }))
 		default:
-			_, err = api.UpdatePolicy(context.Background(), resource.Name("selected"), clusters.UpdatePolicyOpts{PolicyID: "policy"}, func(*request.Config[clusters.UpdatePolicyOpts]) error { return cause })
+			_, err = api.UpdatePolicy(context.Background(), resource.Name("selected"), clusters.UpdatePolicyOpts{PolicyID: "policy"}, request.Custom(func(*request.Config[clusters.UpdatePolicyOpts]) error { return cause }))
 		}
 		if !errors.Is(err, cause) || !strings.Contains(err.Error(), command) {
 			t.Fatal(command, err)

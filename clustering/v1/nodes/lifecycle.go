@@ -12,6 +12,7 @@ import (
 	"sync"
 
 	"github.com/JSYoo5B/go-openstacksdk/clustering/v1/actions"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/internal/senlin"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -173,7 +174,7 @@ func (tracked *TrackedNode) Edit(opts UpdateOpts, options ...UpdateOption) error
 	if tracked == nil || tracked.state == nil {
 		return fmt.Errorf("%w: tracked node is required", resource.ErrInvalidOption)
 	}
-	config, err := request.Apply(opts, options...)
+	config, err := calls.ApplyConfig(opts, updateCalls, options...)
 	if err == nil {
 		err = request.ValidateCapabilities(config, true, false, false)
 	}
@@ -239,7 +240,7 @@ func (tracked *TrackedNode) RemoveMetadata() error { return tracked.remove("meta
 func (tracked *TrackedNode) RemoveTainted() error { return tracked.remove("tainted") }
 
 func nodeCommitHeaders(options []UpdateOption) (map[string]string, error) {
-	config, err := request.Apply(UpdateOpts{}, options...)
+	config, err := calls.ApplyConfig(UpdateOpts{}, updateCalls, options...)
 	if err == nil {
 		err = request.ValidateCapabilities(config, false, false, true)
 	}

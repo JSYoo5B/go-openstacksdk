@@ -29,75 +29,82 @@ type AdoptPreviewOpts struct {
 	Snapshot  request.Optional[bool] `json:"snapshot"`
 }
 
-type AdoptOption = request.Option[AdoptOpts]
-type AdoptPreviewOption = request.Option[AdoptPreviewOpts]
+// AdoptOption is one option of Adopt: WithAdoptOptions, the WithAdopt field
+// options, request.Header, request.Field or request.Custom over
+// *request.Config[AdoptOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type AdoptOption = request.WriteCall
 
-func WithAdoptOptions(value AdoptOpts) AdoptOption { return senlin.Snapshot(value) }
+var adoptCalls = senlin.WriteCalls[AdoptOpts]()
+
+// AdoptPreviewOption is one option of AdoptPreview: WithAdoptPreviewOptions,
+// the WithAdoptPreview field options, request.Header or request.Custom over
+// *request.Config[AdoptPreviewOpts]. Preview never took extension fields, so
+// request.Field and the other shared calls fail with resource.ErrInvalidOption
+// before HTTP.
+type AdoptPreviewOption = request.WriteCall
+
+var adoptPreviewCalls = senlin.HeaderCalls[AdoptPreviewOpts]()
+
+func WithAdoptOptions(value AdoptOpts) AdoptOption { return request.Custom(senlin.Snapshot(value)) }
 func WithAdoptName(value string) AdoptOption {
-	return func(config *request.Config[AdoptOpts]) error {
+	return request.Custom(func(config *request.Config[AdoptOpts]) error {
 		config.Options.Name = request.Present(value)
 		return nil
-	}
+	})
 }
 func WithAdoptNameNull() AdoptOption {
-	return func(config *request.Config[AdoptOpts]) error {
+	return request.Custom(func(config *request.Config[AdoptOpts]) error {
 		config.Options.Name = request.Null[string]()
 		return nil
-	}
+	})
 }
 func WithAdoptRole(value string) AdoptOption {
-	return func(config *request.Config[AdoptOpts]) error {
+	return request.Custom(func(config *request.Config[AdoptOpts]) error {
 		config.Options.Role = request.Present(value)
 		return nil
-	}
+	})
 }
 func WithAdoptRoleNull() AdoptOption {
-	return func(config *request.Config[AdoptOpts]) error {
+	return request.Custom(func(config *request.Config[AdoptOpts]) error {
 		config.Options.Role = request.Null[string]()
 		return nil
-	}
+	})
 }
 func WithAdoptSnapshot(value bool) AdoptOption {
-	return func(config *request.Config[AdoptOpts]) error {
+	return request.Custom(func(config *request.Config[AdoptOpts]) error {
 		config.Options.Snapshot = request.Present(value)
 		return nil
-	}
+	})
 }
 func WithAdoptSnapshotNull() AdoptOption {
-	return func(config *request.Config[AdoptOpts]) error {
+	return request.Custom(func(config *request.Config[AdoptOpts]) error {
 		config.Options.Snapshot = request.Null[bool]()
 		return nil
-	}
+	})
 }
 func WithAdoptMetadata(value any) AdoptOption {
-	return withJSON(value, func(opts *AdoptOpts, raw json.RawMessage) { opts.Metadata = raw })
+	return request.Custom(withJSON(value, func(opts *AdoptOpts, raw json.RawMessage) { opts.Metadata = raw }))
 }
 func WithAdoptOverrides(value any) AdoptOption {
-	return withJSON(value, func(opts *AdoptOpts, raw json.RawMessage) { opts.Overrides = raw })
+	return request.Custom(withJSON(value, func(opts *AdoptOpts, raw json.RawMessage) { opts.Overrides = raw }))
 }
-func WithAdoptField(key string, value any) AdoptOption {
-	return request.WithField[AdoptOpts](key, value)
-}
-func WithAdoptHeader(key, value string) AdoptOption { return request.WithHeader[AdoptOpts](key, value) }
 
 func WithAdoptPreviewOptions(value AdoptPreviewOpts) AdoptPreviewOption {
-	return senlin.Snapshot(value)
+	return request.Custom(senlin.Snapshot(value))
 }
 func WithAdoptPreviewOverrides(value any) AdoptPreviewOption {
-	return withJSON(value, func(opts *AdoptPreviewOpts, raw json.RawMessage) { opts.Overrides = raw })
+	return request.Custom(withJSON(value, func(opts *AdoptPreviewOpts, raw json.RawMessage) { opts.Overrides = raw }))
 }
 func WithAdoptPreviewSnapshot(value bool) AdoptPreviewOption {
-	return func(config *request.Config[AdoptPreviewOpts]) error {
+	return request.Custom(func(config *request.Config[AdoptPreviewOpts]) error {
 		config.Options.Snapshot = request.Present(value)
 		return nil
-	}
+	})
 }
 func WithAdoptPreviewSnapshotNull() AdoptPreviewOption {
-	return func(config *request.Config[AdoptPreviewOpts]) error {
+	return request.Custom(func(config *request.Config[AdoptPreviewOpts]) error {
 		config.Options.Snapshot = request.Null[bool]()
 		return nil
-	}
-}
-func WithAdoptPreviewHeader(key, value string) AdoptPreviewOption {
-	return request.WithHeader[AdoptPreviewOpts](key, value)
+	})
 }

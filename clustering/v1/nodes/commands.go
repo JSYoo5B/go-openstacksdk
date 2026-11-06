@@ -8,6 +8,7 @@ import (
 	"net/url"
 
 	"github.com/JSYoo5B/go-openstacksdk/clustering/v1/actions"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/internal/senlin"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -22,7 +23,7 @@ func (a *API) Check(ctx context.Context, ref resource.Ref, options ...CheckOptio
 	if err := senlin.Validate(ctx, client); err != nil {
 		return nil, request.Wrap("Check", "clustering.nodes", err)
 	}
-	config, err := request.Apply(CheckOpts{}, options...)
+	config, err := calls.ApplyConfig(CheckOpts{}, checkCalls, options...)
 	var body json.RawMessage
 	if err == nil {
 		body, err = senlin.CommandBody(config, "check")
@@ -40,7 +41,7 @@ func (a *API) Recover(ctx context.Context, ref resource.Ref, value RecoverOpts, 
 	if err := senlin.Validate(ctx, client); err != nil {
 		return nil, request.Wrap("Recover", "clustering.nodes", err)
 	}
-	config, err := request.Apply(value, options...)
+	config, err := calls.ApplyConfig(value, recoverCalls, options...)
 	if err == nil {
 		err = senlin.OptionalObject(config.Options.OperationParams, "operation_params")
 	}
@@ -68,7 +69,7 @@ func (a *API) PerformOperation(ctx context.Context, ref resource.Ref, operation 
 	if err := senlin.Required(operation); err != nil {
 		return nil, request.Wrap("PerformOperation", "clustering.nodes", err)
 	}
-	config, err := request.Apply(PerformOperationOpts{}, options...)
+	config, err := calls.ApplyConfig(PerformOperationOpts{}, performOperationCalls, options...)
 	var body json.RawMessage
 	if err == nil {
 		body, err = senlin.CommandBody(config, operation)

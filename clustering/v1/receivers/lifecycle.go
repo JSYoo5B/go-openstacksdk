@@ -11,6 +11,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/internal/senlin"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -171,7 +172,7 @@ func (tracked *TrackedReceiver) Edit(opts UpdateOpts, options ...UpdateOption) e
 	if tracked == nil || tracked.state == nil {
 		return fmt.Errorf("%w: tracked receiver is required", resource.ErrInvalidOption)
 	}
-	config, err := request.Apply(opts, options...)
+	config, err := calls.ApplyConfig(opts, updateCalls, options...)
 	if err == nil {
 		err = request.ValidateCapabilities(config, true, false, false)
 	}
@@ -229,7 +230,7 @@ func (tracked *TrackedReceiver) RemoveAction() error { return tracked.remove("ac
 func (tracked *TrackedReceiver) RemoveParams() error { return tracked.remove("params") }
 
 func receiverCommitHeaders(options []UpdateOption) (map[string]string, error) {
-	config, err := request.Apply(UpdateOpts{}, options...)
+	config, err := calls.ApplyConfig(UpdateOpts{}, updateCalls, options...)
 	if err == nil {
 		err = request.ValidateCapabilities(config, false, false, true)
 	}

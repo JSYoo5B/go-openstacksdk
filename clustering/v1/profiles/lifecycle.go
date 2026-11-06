@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"sync"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/internal/senlin"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -77,11 +78,11 @@ func profileMetadata(value *Profile) *resource.Metadata { return &value.Metadata
 // WithUpdateName supplies the optional name without allocating a caller-owned
 // pointer. It can be reused by stateless Update and tracked Edit.
 func WithUpdateName(value string) UpdateOption {
-	return func(config *request.Config[UpdateOpts]) error {
+	return request.Custom(func(config *request.Config[UpdateOpts]) error {
 		copy := value
 		config.Options.Name = &copy
 		return nil
-	}
+	})
 }
 
 func (tracked *TrackedProfile) Value() *Profile {
@@ -114,7 +115,7 @@ func (tracked *TrackedProfile) Edit(opts UpdateOpts, options ...UpdateOption) er
 	if tracked == nil || tracked.state == nil {
 		return fmt.Errorf("%w: tracked profile is required", resource.ErrInvalidOption)
 	}
-	config, err := request.Apply(opts, options...)
+	config, err := calls.ApplyConfig(opts, updateCalls, options...)
 	if err == nil {
 		err = request.ValidateCapabilities(config, true, false, false)
 	}
@@ -162,7 +163,7 @@ func (tracked *TrackedProfile) RemoveMetadata() error {
 }
 
 func profileCommitHeaders(options []UpdateOption) (map[string]string, error) {
-	config, err := request.Apply(UpdateOpts{}, options...)
+	config, err := calls.ApplyConfig(UpdateOpts{}, updateCalls, options...)
 	if err == nil {
 		err = request.ValidateCapabilities(config, false, false, true)
 	}

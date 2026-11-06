@@ -58,7 +58,7 @@ func TestClusteringClustersCreateGetExactModelAndSubmission(t *testing.T) {
 			metadataOption := clusters.WithCreateMetadata(metadata)
 			metadata["large"] = "0"
 			api := clusters.New(client)
-			value, err := api.Create(context.Background(), clusters.CreateOpts{}, option, metadataOption, clusters.WithCreateField("vendor", map[string]json.Number{"count": "9007199254740995"}), clusters.WithCreateHeader("X-Custom", "captured"))
+			value, err := api.Create(context.Background(), clusters.CreateOpts{}, option, metadataOption, request.Field("vendor", map[string]json.Number{"count": "9007199254740995"}), request.Header("X-Custom", "captured"))
 			if err != nil || value.ID != "response-id" || value.ProfileID != "actual-profile" || value.ProfileName == nil || *value.ProfileName != "profile.name" || value.DesiredCapacity == nil || value.DesiredCapacity.String() != "9007199254740993" || value.Timeout == nil || value.Timeout.String() != "9007199254740995" || value.DomainID != nil || value.InitializedAt == nil || value.UpdatedAt != nil || string(value.UserMetadata["large"]) != "9007199254740997" || string(value.Data["ratio"]) != "1.0000000000000001" || string(value.Body["future"]) != "null" || value.StatusCode != 201 || value.Header.Get("X-Request-Id") != "create-cluster" || !reflect.DeepEqual(value.NodeIDs, []string{"node-id"}) || !reflect.DeepEqual(value.PolicyIDs, []string{"policy-id"}) {
 				t.Fatal(value, err)
 			}
@@ -123,7 +123,7 @@ func TestClusteringClustersUpdateNullableFieldsFalseAndAcceptedAction(t *testing
 	client.Microversion = "1.6"
 	api := clusters.New(client)
 	option := clusters.WithUpdateOptions(clusters.UpdateOpts{Name: request.Null[string](), ProfileID: request.Null[string](), Timeout: request.Null[int](), Metadata: json.RawMessage(`{}`)})
-	value, err := api.Update(context.Background(), resource.ID("direct-name"), clusters.UpdateOpts{}, option, clusters.WithUpdateConfig(nil), clusters.WithUpdateProfileOnly(false), clusters.WithUpdateField("vendor", false))
+	value, err := api.Update(context.Background(), resource.ID("direct-name"), clusters.UpdateOpts{}, option, clusters.WithUpdateConfig(nil), clusters.WithUpdateProfileOnly(false), request.Field("vendor", false))
 	if err != nil || value.ID != "response-id" || value.Operation == nil || value.Operation.ActionID != "update-action" || value.Operation.StatusCode != 202 || value.Operation.Location != "/v1/actions/update-action" || value.Operation.Header.Get("X-Request-Id") != "update-cluster" || calls.Load() != 1 {
 		t.Fatal(value, err, calls.Load())
 	}
@@ -195,7 +195,7 @@ func TestClusteringClustersNameUpdateFreezesBodyHeadersAndVersionGate(t *testing
 				}))
 			}
 			capture := func(config *request.Config[clusters.UpdateOpts]) error { captured = config; return nil }
-			value, err := clusters.New(client).Update(context.Background(), resource.Name("cluster.a"), clusters.UpdateOpts{Metadata: json.RawMessage(`{"label":"original"}`)}, clusters.WithUpdateProfileOnly(false), clusters.WithUpdateHeader("X-Custom", "original"), capture)
+			value, err := clusters.New(client).Update(context.Background(), resource.Name("cluster.a"), clusters.UpdateOpts{Metadata: json.RawMessage(`{"label":"original"}`)}, clusters.WithUpdateProfileOnly(false), request.Header("X-Custom", "original"), request.Custom(capture))
 			if changeVersion {
 				if !errors.Is(err, resource.ErrUnsupported) || lookups.Load() != 1 || updates.Load() != 0 {
 					t.Fatal(value, err, lookups.Load(), updates.Load())
@@ -226,7 +226,7 @@ func TestClusteringClustersDeleteNormalForceBodiesAndSubmission(t *testing.T) {
 				testcloud.JSON(w, 202, `{"message":"accepted","future":9007199254740993}`)
 			})
 			api := clusters.New(cloud.Client("clustering", "/v1"))
-			value, err := api.Delete(context.Background(), resource.ID("direct-name"), clusters.WithDeleteForce(force), clusters.WithDeleteHeader("X-Custom", "original"))
+			value, err := api.Delete(context.Background(), resource.ID("direct-name"), clusters.WithDeleteForce(force), request.Header("X-Custom", "original"))
 			if err != nil || value == nil || value.ActionID != "deleted-action" || value.StatusCode != 202 || value.Header.Get("X-Request-Id") != "delete-cluster" || string(value.Body) != `{"message":"accepted","future":9007199254740993}` || calls.Load() != 1 {
 				t.Fatal(value, err, calls.Load())
 			}
@@ -253,18 +253,18 @@ func TestClusteringClustersDeleteDefaultsIgnoreOnlyMissingAndForceIsStrict(t *te
 	if value, err := api.Delete(context.Background(), resource.ID("missing")); err != nil || value != nil {
 		t.Fatal(value, err)
 	}
-	if _, err := api.Delete(context.Background(), resource.ID("missing"), clusters.WithDeleteIgnoreMissing(false)); !errors.Is(err, resource.ErrNotFound) {
+	if _, err := api.Delete(context.Background(), resource.ID("missing"), request.IgnoreMissing(false)); !errors.Is(err, resource.ErrNotFound) {
 		t.Fatal(err)
 	}
 	if _, err := api.Delete(context.Background(), resource.ID("missing"), clusters.WithDeleteForce(true)); !errors.Is(err, resource.ErrNotFound) {
 		t.Fatal(err)
 	}
-	if value, err := api.Delete(context.Background(), resource.ID("missing"), clusters.WithDeleteForce(true), clusters.WithDeleteIgnoreMissing(true)); err != nil || value != nil {
+	if value, err := api.Delete(context.Background(), resource.ID("missing"), clusters.WithDeleteForce(true), request.IgnoreMissing(true)); err != nil || value != nil {
 		t.Fatal(value, err)
 	}
 	for identity, code := range map[string]int{"denied": 403, "used": 409} {
 		for _, force := range []bool{false, true} {
-			if _, err := api.Delete(context.Background(), resource.ID(identity), clusters.WithDeleteForce(force), clusters.WithDeleteIgnoreMissing(true)); !gophercloud.ResponseCodeIs(err, code) {
+			if _, err := api.Delete(context.Background(), resource.ID(identity), clusters.WithDeleteForce(force), request.IgnoreMissing(true)); !gophercloud.ResponseCodeIs(err, code) {
 				t.Fatal(identity, force, err)
 			}
 		}
@@ -356,7 +356,7 @@ func TestClusteringClustersListShortPageFiltersAndSnapshots(t *testing.T) {
 	metadata := map[string]any{"nested": map[string]any{"ratio": json.Number("1"), "flag": false}}
 	filter := clusters.WithListFilter("metadata", metadata)
 	global, metadata["nested"] = true, nil
-	options := []clusters.ListOption{option, filter, clusters.WithListFilter("project_id", "p"), clusters.WithListFilter("desired_capacity", json.Number("9007199254740993")), clusters.WithListQuery("vendor", "retained")}
+	options := []clusters.ListOption{option, filter, clusters.WithListFilter("project_id", "p"), clusters.WithListFilter("desired_capacity", json.Number("9007199254740993")), request.Query("vendor", "retained")}
 	iterator := clusters.New(cloud.Client("clustering", "/v1")).List(context.Background(), options...)
 	options[0] = clusters.WithListGlobalProject(true)
 	if calls.Load() != 0 {
@@ -393,7 +393,7 @@ func TestClusteringClustersDefaultsAndInvalidOptionsPreflight(t *testing.T) {
 	if err != nil || values == nil || len(values) != 0 || calls.Load() != 1 {
 		t.Fatal(values, err, calls.Load())
 	}
-	for _, option := range []clusters.ListOption{nil, clusters.WithListOptions(clusters.ListOpts{Limit: -1}), clusters.WithListOptions(clusters.ListOpts{Sort: "name:wrong"}), clusters.WithListOptions(clusters.ListOpts{Marker: "bad/marker"}), clusters.WithListQuery("name", "hidden"), clusters.WithListQuery("status", "hidden"), clusters.WithListQuery("metadata", "hidden"), clusters.WithListFilter("unknown", true), request.WithHeader[clusters.ListOpts]("X-Auth-Token", "value"), request.WithArgument[clusters.ListOpts]("unknown", true)} {
+	for _, option := range []clusters.ListOption{nil, clusters.WithListOptions(clusters.ListOpts{Limit: -1}), clusters.WithListOptions(clusters.ListOpts{Sort: "name:wrong"}), clusters.WithListOptions(clusters.ListOpts{Marker: "bad/marker"}), request.Query("name", "hidden"), request.Query("status", "hidden"), request.Query("metadata", "hidden"), clusters.WithListFilter("unknown", true), request.Custom(request.WithHeader[clusters.ListOpts]("X-Auth-Token", "value")), request.Custom(request.WithArgument[clusters.ListOpts]("unknown", true))} {
 		if _, err := api.All(context.Background(), option); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(err)
 		}
@@ -401,12 +401,12 @@ func TestClusteringClustersDefaultsAndInvalidOptionsPreflight(t *testing.T) {
 	if _, err := api.Update(context.Background(), resource.Name("lookup"), clusters.UpdateOpts{}); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
-	for _, option := range []clusters.UpdateOption{clusters.WithUpdateField("min_size", 0), clusters.WithUpdateField("max_size", -1), clusters.WithUpdateField("desired_capacity", 0), clusters.WithUpdateField("profile_only", false), clusters.WithUpdateField("name", nil), clusters.WithUpdateField("id", "hidden")} {
+	for _, option := range []clusters.UpdateOption{request.Field("min_size", 0), request.Field("max_size", -1), request.Field("desired_capacity", 0), request.Field("profile_only", false), request.Field("name", nil), request.Field("id", "hidden")} {
 		if _, err := api.Update(context.Background(), resource.Name("lookup"), clusters.UpdateOpts{Name: request.Present("valid")}, option); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(err)
 		}
 	}
-	for _, option := range []clusters.DeleteOption{nil, request.WithField[clusters.DeleteOpts]("force", true), request.WithQuery[clusters.DeleteOpts]("force", "true"), clusters.WithDeleteHeader("X-Auth-Token", "owned"), clusters.WithDeleteHeader("OpenStack-API-Version", "clustering 1.6"), request.WithArgument[clusters.DeleteOpts]("unknown", true)} {
+	for _, option := range []clusters.DeleteOption{nil, request.Custom(request.WithField[clusters.DeleteOpts]("force", true)), request.Custom(request.WithQuery[clusters.DeleteOpts]("force", "true")), request.Header("X-Auth-Token", "owned"), request.Header("OpenStack-API-Version", "clustering 1.6"), request.Custom(request.WithArgument[clusters.DeleteOpts]("unknown", true))} {
 		if _, err := api.Delete(context.Background(), resource.Name("lookup"), option); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(err)
 		}
@@ -427,7 +427,7 @@ func TestClusteringClustersMutationSchemasProtectCoreAndResponseFields(t *testin
 			t.Fatal(opts, err)
 		}
 	}
-	for _, option := range []clusters.CreateOption{clusters.WithCreateField("metadata", nil), clusters.WithCreateField("profile_id", "hidden"), clusters.WithCreateField("profile_only", false), clusters.WithCreateField("status", "ACTIVE"), clusters.WithCreateHeader("Content-Type", "text/plain"), request.WithQuery[clusters.CreateOpts]("query", "hidden")} {
+	for _, option := range []clusters.CreateOption{request.Field("metadata", nil), request.Field("profile_id", "hidden"), request.Field("profile_only", false), request.Field("status", "ACTIVE"), request.Header("Content-Type", "text/plain"), request.Custom(request.WithQuery[clusters.CreateOpts]("query", "hidden"))} {
 		if _, err := api.Create(context.Background(), base, option); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(err)
 		}

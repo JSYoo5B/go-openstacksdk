@@ -19,45 +19,37 @@ type ListOpts struct {
 	Paginated  *bool
 }
 
-type ListOption = request.Option[ListOpts]
+// ListOption is one option of List and All: WithListOptions, WithListEnabled,
+// WithListPolicyName, WithListPolicyType, WithListSort, WithListFilter,
+// request.Header, request.Microversion, request.Query (a string or []string
+// value), request.MaxItems, request.Paginated or request.Custom over
+// *request.Config[ListOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type ListOption = request.ListCall
 
-func WithListOptions(value ListOpts) ListOption { return senlin.Snapshot(value) }
+var listCalls = senlin.ListCalls(func(o *ListOpts) *int { return &o.MaxItems }, func(o *ListOpts) **bool { return &o.Paginated })
 
-func WithListMaxItems(value int) ListOption {
-	return func(config *request.Config[ListOpts]) error { config.Options.MaxItems = value; return nil }
-}
-
-func WithListPaginated(value bool) ListOption {
-	return func(config *request.Config[ListOpts]) error {
-		copy := value
-		config.Options.Paginated = &copy
-		return nil
-	}
-}
+func WithListOptions(value ListOpts) ListOption { return request.Custom(senlin.Snapshot(value)) }
 
 func WithListEnabled(value bool) ListOption {
-	return func(config *request.Config[ListOpts]) error {
+	return request.Custom(func(config *request.Config[ListOpts]) error {
 		copy := value
 		config.Options.Enabled = &copy
 		return nil
-	}
+	})
 }
 
 func WithListPolicyName(value string) ListOption {
-	return func(config *request.Config[ListOpts]) error { config.Options.PolicyName = value; return nil }
+	return request.Custom(func(config *request.Config[ListOpts]) error { config.Options.PolicyName = value; return nil })
 }
 
 func WithListPolicyType(value string) ListOption {
-	return func(config *request.Config[ListOpts]) error { config.Options.PolicyType = value; return nil }
+	return request.Custom(func(config *request.Config[ListOpts]) error { config.Options.PolicyType = value; return nil })
 }
 
 func WithListSort(value string) ListOption {
-	return func(config *request.Config[ListOpts]) error { config.Options.Sort = value; return nil }
+	return request.Custom(func(config *request.Config[ListOpts]) error { config.Options.Sort = value; return nil })
 }
-
-// WithListQuery snapshots a deployment query. Published concrete fields and
-// unsupported initial pagination controls cannot be replaced through it.
-func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
 
 func validateQuery(query url.Values) error {
 	if query.Has("max_items") || query.Has("paginated") {

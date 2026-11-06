@@ -15,8 +15,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/clustering/v1/actions.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/clustering/v1/actions.API.All`
 - `github.com/JSYoo5B/go-openstacksdk/clustering/v1/actions.WithListFilter`
-- `github.com/JSYoo5B/go-openstacksdk/clustering/v1/actions.WithListHeader`
-- `github.com/JSYoo5B/go-openstacksdk/clustering/v1/actions.WithListMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - Concrete/default query values and defensive snapshots preserve service-specific filters, raw responses and actual list capability.
   Tests: `api/clustering_read_test.go:TestClusteringReadActionListMarkersDefaultsAndOptionsSnapshot`.
@@ -49,10 +49,10 @@ Python/Go differences:
 - At an exact page boundary Python Resource.list may issue a continuation GET before checking max_items at the next raw row; the Go Senlin iterator terminates immediately after its cap and does not validate or request an unused continuation.
 - Go separates concrete server query inputs from explicit WithListFilter raw Body inputs rather than automatically partitioning Python keyword arguments. Query-capable fields can also be selected for local filtering; only known pinned fields and owned namespaces are accepted.
 - Raw JSON comparison keeps exact decimal numbers and distinguishes bool from number; object filters match recursive subsets of nonempty objects, while arrays remain ordered complete values. Missing scalar fields and explicit null compare as null without descriptor coercion or cached Resource mutation.
-- Go exposes WithListHeader and WithListMicroversion separately from query and Body inputs; it preserves SDK ownership of authentication, service-token, authorization and transport/version headers rather than copying an unrestricted Python caller header map.
+- Go exposes request.Header and request.Microversion separately from query and Body inputs; it preserves SDK ownership of authentication, service-token, authorization and transport/version headers rather than copying an unrestricted Python caller header map.
 - A numeric per-call selection is explicit and does not negotiate or mutate the shared client. Explicit empty selection resets to server-default1.0; a conflicting source MoreHeaders version is rejected instead of silently removed. Common Resources and parent resolution/Get/Wait do not accept these typed List options.
 - Python Proxy._list also accepts a per-call base_path and the deprecated jmespath_filters (it warns RemovedInSDK60Warning) among its keyword arguments; the Go routes are SDK-owned and neither option is exposed.
-- Python Resource.list validates keywords with allow_unknown_params=True: a keyword that is neither a declared query key nor a Body attribute is silently discarded, and a Body attribute that is not a query key becomes a client-side filter. Go sends explicit extension queries to the server through WithListQuery, applies Body filters only through the explicit WithListFilter with source-validated names, and rejects unknown filter names, reserved names and names owned by typed options before HTTP.
+- Python Resource.list validates keywords with allow_unknown_params=True: a keyword that is neither a declared query key nor a Body attribute is silently discarded, and a Body attribute that is not a query key becomes a client-side filter. Go sends explicit extension queries to the server through request.Query, applies Body filters only through the explicit WithListFilter with source-validated names, and rejects unknown filter names, reserved names and names owned by typed options before HTTP.
 - Python rows are rebuilt with Resource.existing, which applies descriptor coercion and defaults; Go keeps typed snapshots with the raw JSON and filters compare exact raw JSON values without coercion.
 - Python maps the keyword target_id to the wire key target (query keys: name, action, status, sort, global_project, cluster_id); Go uses the wire name target and applies no alias.
 - The explicit-limit marker fallback, MaxItems limit hints and short-page continuation are verified with HTTP fixtures only; no live Senlin server default or maximum limit was observed.
@@ -143,10 +143,10 @@ fmt.Println(action.ID, action.Status)
 listingAPI := actions.New(client)
 values, err := listingAPI.All(ctx,
     actions.WithListOptions(actions.ListOpts{Limit: 20}),
-    actions.WithListMaxItems(50))
+    request.MaxItems(50))
 if err != nil { return err }
 fmt.Println(len(values))
-for value, err := range listingAPI.List(ctx, actions.WithListPaginated(false)) {
+for value, err := range listingAPI.List(ctx, request.Paginated(false)) {
     if err != nil { return err }
     fmt.Println(value.ID)
 }
@@ -161,6 +161,7 @@ import (
 
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/clustering/v1/actions"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 func FilterActions(ctx context.Context, conn *sdk.Connection, ownerID string) error {
@@ -171,7 +172,7 @@ func FilterActions(ctx context.Context, conn *sdk.Connection, ownerID string) er
 	for action, err := range service.Actions.List(ctx,
 		actions.WithListFilter("owner_id", ownerID),
 		actions.WithListFilter("inputs", map[string]any{"region": "region-one"}),
-		actions.WithListMaxItems(50), actions.WithListPaginated(false)) {
+		request.MaxItems(50), request.Paginated(false)) {
 		if err != nil {
 			return err
 		}

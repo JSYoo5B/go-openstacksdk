@@ -51,24 +51,22 @@ type clusteringListRequestAccess struct {
 }
 
 func clusteringListRequestAdapter[O, M any](
-	list func(context.Context, ...request.Option[O]) iter.Seq2[*M, error],
-	header func(string, string) request.Option[O], version func(string) request.Option[O],
-	query func(string, string) request.Option[O], metadata func(*M) *resource.Metadata,
+	list func(context.Context, ...request.ListCall) iter.Seq2[*M, error], metadata func(*M) *resource.Metadata,
 ) clusteringListRequestAccess {
 	return clusteringListRequestAccess{list: func(ctx context.Context, input clusteringListRequestInput) iter.Seq2[*resource.Metadata, error] {
-		options := make([]request.Option[O], 0)
+		options := make([]request.ListCall, 0)
 		for _, pair := range input.headers {
-			options = append(options, header(pair[0], pair[1]))
+			options = append(options, request.Header(pair[0], pair[1]))
 		}
 		for _, value := range input.versions {
-			options = append(options, version(value))
+			options = append(options, request.Microversion(value))
 		}
 		for _, pair := range input.query {
 			if !input.injectQuery {
-				options = append(options, query(pair[0], pair[1]))
+				options = append(options, request.Query(pair[0], pair[1]))
 			}
 		}
-		options = append(options, func(config *request.Config[O]) error {
+		options = append(options, request.Custom(func(config *request.Config[O]) error {
 			if input.injectQuery {
 				for _, pair := range input.query {
 					config.Query[pair[0]] = []string{pair[1]}
@@ -84,7 +82,7 @@ func clusteringListRequestAdapter[O, M any](
 				config.Fields["vendor"] = json.RawMessage(`false`)
 			}
 			return nil
-		})
+		}))
 		values := list(ctx, options...)
 		return func(yield func(*resource.Metadata, error) bool) {
 			for value, err := range values {
@@ -109,41 +107,41 @@ type clusteringListRequestFixture struct {
 func clusteringListRequestFixtures() []clusteringListRequestFixture {
 	return []clusteringListRequestFixture{
 		{"profiles", "profiles", false, func(_ *testing.T, client *gophercloud.ServiceClient) clusteringListRequestAccess {
-			return clusteringListRequestAdapter(profiles.New(client).List, profiles.WithListHeader, profiles.WithListMicroversion, profiles.WithListQuery, func(v *profiles.Profile) *resource.Metadata { return &v.Metadata })
+			return clusteringListRequestAdapter[profiles.ListOpts](profiles.New(client).List, func(v *profiles.Profile) *resource.Metadata { return &v.Metadata })
 		}},
 		{"policies", "policies", false, func(_ *testing.T, client *gophercloud.ServiceClient) clusteringListRequestAccess {
-			return clusteringListRequestAdapter(policies.New(client).List, policies.WithListHeader, policies.WithListMicroversion, policies.WithListQuery, func(v *policies.Policy) *resource.Metadata { return &v.Metadata })
+			return clusteringListRequestAdapter[policies.ListOpts](policies.New(client).List, func(v *policies.Policy) *resource.Metadata { return &v.Metadata })
 		}},
 		{"clusters", "clusters", false, func(_ *testing.T, client *gophercloud.ServiceClient) clusteringListRequestAccess {
-			return clusteringListRequestAdapter(clusters.New(client).List, clusters.WithListHeader, clusters.WithListMicroversion, clusters.WithListQuery, func(v *clusters.Cluster) *resource.Metadata { return &v.Metadata })
+			return clusteringListRequestAdapter[clusters.ListOpts](clusters.New(client).List, func(v *clusters.Cluster) *resource.Metadata { return &v.Metadata })
 		}},
 		{"nodes", "nodes", false, func(_ *testing.T, client *gophercloud.ServiceClient) clusteringListRequestAccess {
-			return clusteringListRequestAdapter(nodes.New(client).List, nodes.WithListHeader, nodes.WithListMicroversion, nodes.WithListQuery, func(v *nodes.Node) *resource.Metadata { return &v.Metadata })
+			return clusteringListRequestAdapter[nodes.ListOpts](nodes.New(client).List, func(v *nodes.Node) *resource.Metadata { return &v.Metadata })
 		}},
 		{"receivers", "receivers", false, func(_ *testing.T, client *gophercloud.ServiceClient) clusteringListRequestAccess {
-			return clusteringListRequestAdapter(receivers.New(client).List, receivers.WithListHeader, receivers.WithListMicroversion, receivers.WithListQuery, func(v *receivers.Receiver) *resource.Metadata { return &v.Metadata })
+			return clusteringListRequestAdapter[receivers.ListOpts](receivers.New(client).List, func(v *receivers.Receiver) *resource.Metadata { return &v.Metadata })
 		}},
 		{"actions", "actions", false, func(_ *testing.T, client *gophercloud.ServiceClient) clusteringListRequestAccess {
-			return clusteringListRequestAdapter(actions.New(client).List, actions.WithListHeader, actions.WithListMicroversion, actions.WithListQuery, func(v *actions.Action) *resource.Metadata { return &v.Metadata })
+			return clusteringListRequestAdapter[actions.ListOpts](actions.New(client).List, func(v *actions.Action) *resource.Metadata { return &v.Metadata })
 		}},
 		{"events", "events", false, func(_ *testing.T, client *gophercloud.ServiceClient) clusteringListRequestAccess {
-			return clusteringListRequestAdapter(events.New(client).List, events.WithListHeader, events.WithListMicroversion, events.WithListQuery, func(v *events.Event) *resource.Metadata { return &v.Metadata })
+			return clusteringListRequestAdapter[events.ListOpts](events.New(client).List, func(v *events.Event) *resource.Metadata { return &v.Metadata })
 		}},
 		{"services", "services", false, func(_ *testing.T, client *gophercloud.ServiceClient) clusteringListRequestAccess {
-			return clusteringListRequestAdapter(services.New(client).List, services.WithListHeader, services.WithListMicroversion, services.WithListQuery, func(v *services.Service) *resource.Metadata { return &v.Metadata })
+			return clusteringListRequestAdapter[services.ListOpts](services.New(client).List, func(v *services.Service) *resource.Metadata { return &v.Metadata })
 		}},
 		{"profile-types", "profile_types", false, func(_ *testing.T, client *gophercloud.ServiceClient) clusteringListRequestAccess {
-			return clusteringListRequestAdapter(profiletypes.New(client).List, profiletypes.WithListHeader, profiletypes.WithListMicroversion, profiletypes.WithListQuery, func(v *profiletypes.ProfileType) *resource.Metadata { return &v.Metadata })
+			return clusteringListRequestAdapter[profiletypes.ListOpts](profiletypes.New(client).List, func(v *profiletypes.ProfileType) *resource.Metadata { return &v.Metadata })
 		}},
 		{"policy-types", "policy_types", false, func(_ *testing.T, client *gophercloud.ServiceClient) clusteringListRequestAccess {
-			return clusteringListRequestAdapter(policytypes.New(client).List, policytypes.WithListHeader, policytypes.WithListMicroversion, policytypes.WithListQuery, func(v *policytypes.PolicyType) *resource.Metadata { return &v.Metadata })
+			return clusteringListRequestAdapter[policytypes.ListOpts](policytypes.New(client).List, func(v *policytypes.PolicyType) *resource.Metadata { return &v.Metadata })
 		}},
 		{"clusters/canonical-parent/policies", "cluster_policies", true, func(t *testing.T, client *gophercloud.ServiceClient) clusteringListRequestAccess {
 			scope, err := clusterpolicies.New(client).InCluster(context.Background(), resource.ID("input-parent"))
 			if err != nil {
 				t.Fatal(err)
 			}
-			return clusteringListRequestAdapter(scope.List, clusterpolicies.WithListHeader, clusterpolicies.WithListMicroversion, clusterpolicies.WithListQuery, func(v *clusterpolicies.ClusterPolicy) *resource.Metadata { return &v.Metadata })
+			return clusteringListRequestAdapter[clusterpolicies.ListOpts](scope.List, func(v *clusterpolicies.ClusterPolicy) *resource.Metadata { return &v.Metadata })
 		}},
 	}
 }
@@ -274,9 +272,9 @@ func TestClusteringListRequestHeadersCasePrecedenceAndConfigSnapshot(t *testing.
 		}
 		testcloud.JSON(w, 200, `{"profiles":[{"id":"one"}]}`)
 	})
-	options := []profiles.ListOption{profiles.WithListHeader("X-Snapshot", "original")}
+	options := []profiles.ListOption{request.Header("X-Snapshot", "original")}
 	iterator := profiles.New(client2).List(context.Background(), options...)
-	options[0] = profiles.WithListHeader("X-Snapshot", "replaced")
+	options[0] = request.Header("X-Snapshot", "replaced")
 	for _, err := range iterator {
 		if err != nil {
 			t.Fatal(err)
@@ -299,8 +297,8 @@ func TestClusteringListRequestIteratorsReuseAndConcurrentSiblings(t *testing.T) 
 		testcloud.JSON(w, 200, fmt.Sprintf(`{"profiles":[{"id":%q}]}`, identity))
 	})
 	api := profiles.New(client)
-	one := api.List(context.Background(), profiles.WithListHeader("X-Sibling", "one"), profiles.WithListMicroversion("1.12"))
-	two := api.List(context.Background(), profiles.WithListHeader("X-Sibling", "two"), profiles.WithListMicroversion("1.13"))
+	one := api.List(context.Background(), request.Header("X-Sibling", "one"), request.Microversion("1.12"))
+	two := api.List(context.Background(), request.Header("X-Sibling", "two"), request.Microversion("1.13"))
 	var wg sync.WaitGroup
 	errorsFound := make(chan error, 2)
 	for _, iterator := range []iter.Seq2[*profiles.Profile, error]{one, two} {
@@ -351,7 +349,7 @@ func TestClusteringListRequestPagesFreezeSelectionAndReadLiveProviderToken(t *te
 		}
 	})
 	count := 0
-	for _, err := range profiles.New(client).List(context.Background(), profiles.WithListHeader("X-Page", "stable"), profiles.WithListMicroversion("1.7")) {
+	for _, err := range profiles.New(client).List(context.Background(), request.Header("X-Page", "stable"), request.Microversion("1.7")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -401,9 +399,9 @@ func TestClusteringListRequestEffectiveVersionGates(t *testing.T) {
 				})
 				var err error
 				if kind == "services" {
-					_, err = services.New(client).All(context.Background(), services.WithListMicroversion(tc.selected))
+					_, err = services.New(client).All(context.Background(), request.Microversion(tc.selected))
 				} else {
-					_, err = receivers.New(client).All(context.Background(), receivers.WithListUserID("owner"), receivers.WithListMicroversion(tc.selected))
+					_, err = receivers.New(client).All(context.Background(), receivers.WithListUserID("owner"), request.Microversion(tc.selected))
 				}
 				if tc.allowed {
 					if err != nil || calls.Load() != 1 {
@@ -428,7 +426,7 @@ func TestClusteringListRequestEffectiveVersionGates(t *testing.T) {
 		}
 		testcloud.JSON(w, 200, `{"profiles":[]}`)
 	})
-	if _, err := profiles.New(client).All(context.Background(), profiles.WithListMicroversion("")); err != nil || client.Microversion != "1.13" {
+	if _, err := profiles.New(client).All(context.Background(), request.Microversion("")); err != nil || client.Microversion != "1.13" {
 		t.Fatal(err, client.Microversion)
 	}
 }
@@ -455,7 +453,7 @@ func TestClusteringListRequestBindingScopeAndOtherOperationsUnchanged(t *testing
 	if err != nil {
 		t.Fatal(err)
 	}
-	rows, err := scope.All(context.Background(), clusterpolicies.WithListHeader("X-List-Only", "scoped"), clusterpolicies.WithListMicroversion("1.13"))
+	rows, err := scope.All(context.Background(), request.Header("X-List-Only", "scoped"), request.Microversion("1.13"))
 	if err != nil || len(rows) != 1 || rows[0].URIClusterID != "canonical-parent" || scope.ClusterID() != "canonical-parent" {
 		t.Fatal(rows, err, scope.ClusterID())
 	}
@@ -558,7 +556,7 @@ func TestClusteringListRequestSourceRecheckCancellationAndErrorEvidence(t *testi
 			defer cancel()
 			rows := 0
 			var failure error
-			for value, err := range profiles.New(client).List(ctx, profiles.WithListMicroversion("1.13"), profiles.WithListHeader("X-List", "owned")) {
+			for value, err := range profiles.New(client).List(ctx, request.Microversion("1.13"), request.Header("X-List", "owned")) {
 				if err != nil {
 					failure = err
 					continue
@@ -602,7 +600,7 @@ func TestClusteringListRequestSourceRecheckCancellationAndErrorEvidence(t *testi
 				w.Header().Set("X-Request-ID", "list-failure")
 				testcloud.JSON(w, code, body)
 			})
-			_, err := profiles.New(client).All(context.Background(), profiles.WithListMicroversion("1.13"), profiles.WithListHeader("X-List", "owned"))
+			_, err := profiles.New(client).All(context.Background(), request.Microversion("1.13"), request.Header("X-List", "owned"))
 			if err == nil || gets.Load() != 1 {
 				t.Fatal("failure missing or request resent", err, gets.Load())
 			}

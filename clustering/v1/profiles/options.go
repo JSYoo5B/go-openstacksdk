@@ -41,15 +41,46 @@ type ListOpts struct {
 	GlobalProject *bool
 }
 
-type CreateOption = request.Option[CreateOpts]
-type UpdateOption = request.Option[UpdateOpts]
-type ValidateOption = request.Option[ValidateOpts]
-type ListOption = request.Option[ListOpts]
+// CreateOption is one option of Create: WithCreateOptions, WithCreateSpec,
+// WithCreateMetadata, request.Header, request.Field or request.Custom over
+// *request.Config[CreateOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type CreateOption = request.WriteCall
 
-func WithCreateOptions(value CreateOpts) CreateOption       { return senlin.Snapshot(value) }
-func WithUpdateOptions(value UpdateOpts) UpdateOption       { return senlin.Snapshot(value) }
-func WithValidateOptions(value ValidateOpts) ValidateOption { return senlin.Snapshot(value) }
-func WithListOptions(value ListOpts) ListOption             { return senlin.Snapshot(value) }
+var createCalls = senlin.WriteCalls[CreateOpts]()
+
+// UpdateOption is one option of Update, TrackedProfile.Edit and
+// TrackedProfile.Commit: WithUpdateOptions, WithUpdateName,
+// WithUpdateMetadata, request.Header, request.Field or request.Custom over
+// *request.Config[UpdateOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type UpdateOption = request.WriteCall
+
+var updateCalls = senlin.WriteCalls[UpdateOpts]()
+
+// ValidateOption is one option of Validate: WithValidateOptions,
+// WithValidateSpec, request.Header, request.Field or request.Custom over
+// *request.Config[ValidateOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type ValidateOption = request.WriteCall
+
+var validateCalls = senlin.WriteCalls[ValidateOpts]()
+
+// ListOption is one option of List and All: WithListOptions,
+// WithListGlobalProject, WithListFilter, request.Header, request.Microversion,
+// request.Query (a string or []string value), request.MaxItems,
+// request.Paginated or request.Custom over *request.Config[ListOpts]. Other
+// shared calls fail with resource.ErrInvalidOption before HTTP.
+type ListOption = request.ListCall
+
+var listCalls = senlin.ListCalls(func(o *ListOpts) *int { return &o.MaxItems }, func(o *ListOpts) **bool { return &o.Paginated })
+
+func WithCreateOptions(value CreateOpts) CreateOption { return request.Custom(senlin.Snapshot(value)) }
+func WithUpdateOptions(value UpdateOpts) UpdateOption { return request.Custom(senlin.Snapshot(value)) }
+func WithValidateOptions(value ValidateOpts) ValidateOption {
+	return request.Custom(senlin.Snapshot(value))
+}
+func WithListOptions(value ListOpts) ListOption { return request.Custom(senlin.Snapshot(value)) }
 
 func withJSON[T any](value any, set func(*T, json.RawMessage)) request.Option[T] {
 	encoded, err := json.Marshal(value)
@@ -63,57 +94,24 @@ func withJSON[T any](value any, set func(*T, json.RawMessage)) request.Option[T]
 }
 
 func WithCreateSpec(value any) CreateOption {
-	return withJSON(value, func(opts *CreateOpts, raw json.RawMessage) { opts.Spec = raw })
+	return request.Custom(withJSON(value, func(opts *CreateOpts, raw json.RawMessage) { opts.Spec = raw }))
 }
 func WithCreateMetadata(value any) CreateOption {
-	return withJSON(value, func(opts *CreateOpts, raw json.RawMessage) { opts.Metadata = raw })
+	return request.Custom(withJSON(value, func(opts *CreateOpts, raw json.RawMessage) { opts.Metadata = raw }))
 }
 func WithUpdateMetadata(value any) UpdateOption {
-	return withJSON(value, func(opts *UpdateOpts, raw json.RawMessage) { opts.Metadata = raw })
+	return request.Custom(withJSON(value, func(opts *UpdateOpts, raw json.RawMessage) { opts.Metadata = raw }))
 }
 func WithValidateSpec(value any) ValidateOption {
-	return withJSON(value, func(opts *ValidateOpts, raw json.RawMessage) { opts.Spec = raw })
-}
-func WithCreateField(key string, value any) CreateOption {
-	return request.WithField[CreateOpts](key, value)
-}
-func WithUpdateField(key string, value any) UpdateOption {
-	return request.WithField[UpdateOpts](key, value)
-}
-func WithValidateField(key string, value any) ValidateOption {
-	return request.WithField[ValidateOpts](key, value)
-}
-func WithCreateHeader(key, value string) CreateOption {
-	return request.WithHeader[CreateOpts](key, value)
-}
-func WithUpdateHeader(key, value string) UpdateOption {
-	return request.WithHeader[UpdateOpts](key, value)
-}
-func WithValidateHeader(key, value string) ValidateOption {
-	return request.WithHeader[ValidateOpts](key, value)
+	return request.Custom(withJSON(value, func(opts *ValidateOpts, raw json.RawMessage) { opts.Spec = raw }))
 }
 
-// WithListMaxItems limits wire rows before local filtering. Zero is unlimited.
-func WithListMaxItems(value int) ListOption {
-	return func(config *request.Config[ListOpts]) error { config.Options.MaxItems = value; return nil }
-}
-
-// WithListPaginated controls continuation without changing server query fields.
-func WithListPaginated(value bool) ListOption {
-	return func(config *request.Config[ListOpts]) error {
-		copy := value
-		config.Options.Paginated = &copy
-		return nil
-	}
-}
-
-func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
 func WithListGlobalProject(value bool) ListOption {
-	return func(config *request.Config[ListOpts]) error {
+	return request.Custom(func(config *request.Config[ListOpts]) error {
 		copy := value
 		config.Options.GlobalProject = &copy
 		return nil
-	}
+	})
 }
 
 func listQuery(config request.Config[ListOpts]) (url.Values, error) {

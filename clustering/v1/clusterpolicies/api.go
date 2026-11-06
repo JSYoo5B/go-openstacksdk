@@ -10,6 +10,7 @@ import (
 	"net/url"
 
 	"github.com/JSYoo5B/go-openstacksdk/clustering/v1/clusters"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/internal/senlin"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -172,7 +173,7 @@ func (s *Scope) Get(ctx context.Context, policyIdentity string) (*ClusterPolicy,
 func (s *Scope) List(ctx context.Context, options ...ListOption) iter.Seq2[*ClusterPolicy, error] {
 	options = append([]ListOption(nil), options...)
 	return func(yield func(*ClusterPolicy, error) bool) {
-		config, err := request.Apply(ListOpts{}, options...)
+		config, err := calls.ApplyConfig(ListOpts{}, listCalls, options...)
 		var client *gophercloud.ServiceClient
 		if err == nil {
 			client, err = senlin.PrepareListClient(ctx, s.RawClient(), config)

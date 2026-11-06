@@ -15,10 +15,10 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/clustering/v1/profiles.API.FindIdentity`
 - `github.com/JSYoo5B/go-openstacksdk/clustering/v1/profiles.API.Find`
 - `github.com/JSYoo5B/go-openstacksdk/clustering/v1/profiles.WithFindOptions`
-- `github.com/JSYoo5B/go-openstacksdk/clustering/v1/profiles.WithFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/clustering/v1/profiles.WithFindFallback`
-- `github.com/JSYoo5B/go-openstacksdk/clustering/v1/profiles.WithFindHeader`
-- `github.com/JSYoo5B/go-openstacksdk/clustering/v1/profiles.WithFindMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - The declared string identity is sent to the direct controller GET without a UUID heuristic. A successful response returns immediately without a list and may resolve a name or short ID to a different canonical returned ID.
   Tests: `api/clustering_find_identity_test.go:TestClusteringFindIdentityFiveFacadesDirectGETAndCanonicalFields`.
@@ -48,10 +48,10 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/clustering/v1/policies.API.FindIdentity`
 - `github.com/JSYoo5B/go-openstacksdk/clustering/v1/policies.API.Find`
 - `github.com/JSYoo5B/go-openstacksdk/clustering/v1/policies.WithFindOptions`
-- `github.com/JSYoo5B/go-openstacksdk/clustering/v1/policies.WithFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/clustering/v1/policies.WithFindFallback`
-- `github.com/JSYoo5B/go-openstacksdk/clustering/v1/policies.WithFindHeader`
-- `github.com/JSYoo5B/go-openstacksdk/clustering/v1/policies.WithFindMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - The declared string identity is sent to the direct controller GET without a UUID heuristic. A successful response returns immediately without a list and may resolve a name or short ID to a different canonical returned ID.
   Tests: `api/clustering_find_identity_test.go:TestClusteringFindIdentityFiveFacadesDirectGETAndCanonicalFields`.
@@ -81,10 +81,10 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/clustering/v1/clusters.API.FindIdentity`
 - `github.com/JSYoo5B/go-openstacksdk/clustering/v1/clusters.API.Find`
 - `github.com/JSYoo5B/go-openstacksdk/clustering/v1/clusters.WithFindOptions`
-- `github.com/JSYoo5B/go-openstacksdk/clustering/v1/clusters.WithFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/clustering/v1/clusters.WithFindFallback`
-- `github.com/JSYoo5B/go-openstacksdk/clustering/v1/clusters.WithFindHeader`
-- `github.com/JSYoo5B/go-openstacksdk/clustering/v1/clusters.WithFindMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - The declared string identity is sent to the direct controller GET without a UUID heuristic. A successful response returns immediately without a list and may resolve a name or short ID to a different canonical returned ID.
   Tests: `api/clustering_find_identity_test.go:TestClusteringFindIdentityFiveFacadesDirectGETAndCanonicalFields`.
@@ -114,10 +114,10 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/clustering/v1/nodes.API.FindIdentity`
 - `github.com/JSYoo5B/go-openstacksdk/clustering/v1/nodes.API.Find`
 - `github.com/JSYoo5B/go-openstacksdk/clustering/v1/nodes.WithFindOptions`
-- `github.com/JSYoo5B/go-openstacksdk/clustering/v1/nodes.WithFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/clustering/v1/nodes.WithFindFallback`
-- `github.com/JSYoo5B/go-openstacksdk/clustering/v1/nodes.WithFindHeader`
-- `github.com/JSYoo5B/go-openstacksdk/clustering/v1/nodes.WithFindMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - The declared string identity is sent to the direct controller GET without a UUID heuristic. A successful response returns immediately without a list and may resolve a name or short ID to a different canonical returned ID.
   Tests: `api/clustering_find_identity_test.go:TestClusteringFindIdentityFiveFacadesDirectGETAndCanonicalFields`.
@@ -147,10 +147,10 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/clustering/v1/receivers.API.FindIdentity`
 - `github.com/JSYoo5B/go-openstacksdk/clustering/v1/receivers.API.Find`
 - `github.com/JSYoo5B/go-openstacksdk/clustering/v1/receivers.WithFindOptions`
-- `github.com/JSYoo5B/go-openstacksdk/clustering/v1/receivers.WithFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/clustering/v1/receivers.WithFindFallback`
-- `github.com/JSYoo5B/go-openstacksdk/clustering/v1/receivers.WithFindHeader`
-- `github.com/JSYoo5B/go-openstacksdk/clustering/v1/receivers.WithFindMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - The declared string identity is sent to the direct controller GET without a UUID heuristic. A successful response returns immediately without a list and may resolve a name or short ID to a different canonical returned ID.
   Tests: `api/clustering_find_identity_test.go:TestClusteringFindIdentityFiveFacadesDirectGETAndCanonicalFields`.
@@ -225,6 +225,7 @@ import (
 
     sdk "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/clustering/v1/clusters"
+    "github.com/JSYoo5B/go-openstacksdk/request"
     "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -232,10 +233,10 @@ func FindClusterStrict(ctx context.Context, conn *sdk.Connection) error {
     service, err := conn.Clustering(ctx)
     if err != nil { return err }
     value, err := service.Clusters.FindIdentity(ctx, "workers",
-        clusters.WithFindIgnoreMissing(false),
+        request.IgnoreMissing(false),
         clusters.WithFindFallback(resource.FindFallbackNotFoundOnly),
-        clusters.WithFindHeader("X-Vendor-Trace", "lookup"),
-        clusters.WithFindMicroversion("1.7"))
+        request.Header("X-Vendor-Trace", "lookup"),
+        request.Microversion("1.7"))
     if errors.Is(err, resource.ErrNotFound) { return fmt.Errorf("workers cluster: %w", err) }
     if err != nil { return err }
     fmt.Println(value.ID, value.Name, value.Header, value.StatusCode)

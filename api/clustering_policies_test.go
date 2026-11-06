@@ -41,11 +41,11 @@ func TestClusteringPolicyCreateEnvelopePrecisionAndOptionsSnapshot(t *testing.T)
 	option := policies.WithCreateOptions(policies.CreateOpts{Name: "scaling", Spec: raw})
 	raw[2] = 'X'
 	extension := map[string]any{"enabled": false}
-	field := policies.WithCreateField("vendor", extension)
+	field := request.Field("vendor", extension)
 	extension["enabled"] = true
 	api := policies.New(cloud.Client("clustering", "/senlin/v1"))
 	for range 2 {
-		value, err := api.Create(context.Background(), policies.CreateOpts{}, option, field, policies.WithCreateHeader("X-Vendor", "custom"))
+		value, err := api.Create(context.Background(), policies.CreateOpts{}, option, field, request.Header("X-Vendor", "custom"))
 		if err != nil || value.ID != "returned-policy" || value.Name != "scaling" || value.Type != "senlin.policy.scaling-1.0" || value.ProjectID != "project-1" || value.DomainID != "" || value.UserID != "user-1" {
 			t.Fatal(value, err)
 		}
@@ -115,7 +115,7 @@ func TestClusteringPolicyUpdateNameResolvedOnceAndInputsFrozen(t *testing.T) {
 	})
 	option := func(config *request.Config[policies.UpdateOpts]) error { captured = config; return nil }
 	api := policies.New(cloud.Client("clustering", "/senlin/v1"))
-	value, err := api.Update(context.Background(), resource.Name("old-name"), policies.UpdateOpts{Name: &name}, policies.WithUpdateField("vendor", false), policies.WithUpdateHeader("X-Vendor", "original"), option)
+	value, err := api.Update(context.Background(), resource.Name("old-name"), policies.UpdateOpts{Name: &name}, request.Field("vendor", false), request.Header("X-Vendor", "original"), request.Custom(option))
 	if err != nil || value.ID != "response-id" || lookups.Load() != 1 || updates.Load() != 1 {
 		t.Fatal(value, err, lookups.Load(), updates.Load())
 	}
@@ -169,7 +169,7 @@ func TestClusteringPolicyValidateVersionGateAndPrecision(t *testing.T) {
 		t.Fatal("version gate sent HTTP", calls.Load())
 	}
 	client.Microversion = "1.2"
-	value, err := api.Validate(context.Background(), policies.ValidateOpts{}, policies.WithValidateSpec(map[string]any{"number": json.Number("9007199254740993")}), policies.WithValidateField("vendor", false))
+	value, err := api.Validate(context.Background(), policies.ValidateOpts{}, policies.WithValidateSpec(map[string]any{"number": json.Number("9007199254740993")}), request.Field("vendor", false))
 	if err != nil || value.ID != "" || string(value.Spec["number"]) != "9007199254740993" || string(value.Body["id"]) != "null" || calls.Load() != 1 {
 		t.Fatal(value, err, calls.Load())
 	}
@@ -204,27 +204,27 @@ func TestClusteringPolicyMutationPreflightRejectsInvalidCoreAndExtensions(t *tes
 			return e
 		}},
 		{"core-name", func() error {
-			_, e := api.Create(context.Background(), base, policies.WithCreateField("name", "replacement"))
+			_, e := api.Create(context.Background(), base, request.Field("name", "replacement"))
 			return e
 		}},
 		{"core-spec", func() error {
-			_, e := api.Create(context.Background(), base, policies.WithCreateField("spec", map[string]any{}))
+			_, e := api.Create(context.Background(), base, request.Field("spec", map[string]any{}))
 			return e
 		}},
 		{"response-id", func() error {
-			_, e := api.Create(context.Background(), base, policies.WithCreateField("id", "unsafe"))
+			_, e := api.Create(context.Background(), base, request.Field("id", "unsafe"))
 			return e
 		}},
 		{"owned-version", func() error {
-			_, e := api.Create(context.Background(), base, policies.WithCreateHeader("openstack-api-version", "clustering 1.9"))
+			_, e := api.Create(context.Background(), base, request.Header("openstack-api-version", "clustering 1.9"))
 			return e
 		}},
 		{"owned-auth", func() error {
-			_, e := api.Create(context.Background(), base, policies.WithCreateHeader("X-Auth-Token", "override"))
+			_, e := api.Create(context.Background(), base, request.Header("X-Auth-Token", "override"))
 			return e
 		}},
 		{"query", func() error {
-			_, e := api.Create(context.Background(), base, request.WithQuery[policies.CreateOpts]("name", "other"))
+			_, e := api.Create(context.Background(), base, request.Custom(request.WithQuery[policies.CreateOpts]("name", "other")))
 			return e
 		}},
 		{"nil-option", func() error { _, e := api.Create(context.Background(), base, nil); return e }},
@@ -233,7 +233,7 @@ func TestClusteringPolicyMutationPreflightRejectsInvalidCoreAndExtensions(t *tes
 			return e
 		}},
 		{"update-spec", func() error {
-			_, e := api.Update(context.Background(), resource.Name("name"), policies.UpdateOpts{}, policies.WithUpdateField("spec", map[string]any{}))
+			_, e := api.Update(context.Background(), resource.Name("name"), policies.UpdateOpts{}, request.Field("spec", map[string]any{}))
 			return e
 		}},
 		{"empty-name", func() error {
@@ -318,7 +318,7 @@ func TestClusteringPolicyListShortPagesRetainFiltersAndSnapshot(t *testing.T) {
 	global := false
 	option := policies.WithListOptions(policies.ListOpts{Limit: 2, Name: "selected", Type: "senlin.policy.scaling-1.0", Sort: "created_at:desc,name", GlobalProject: &global})
 	global = true
-	options := []policies.ListOption{option, policies.WithListQuery("vendor", "retain")}
+	options := []policies.ListOption{option, request.Query("vendor", "retain")}
 	iterator := policies.New(cloud.Client("clustering", "/senlin/v1")).List(context.Background(), options...)
 	options[0] = policies.WithListGlobalProject(true)
 	if calls.Load() != 0 {
@@ -362,7 +362,7 @@ func TestClusteringPolicyListDefaultBreakAndInvalidExtensions(t *testing.T) {
 	if calls.Load() != 1 {
 		t.Fatal(calls.Load())
 	}
-	invalid := []policies.ListOption{policies.WithListQuery("name", "override"), policies.WithListOptions(policies.ListOpts{Limit: -1}), policies.WithListOptions(policies.ListOpts{Sort: "name:sideways"}), request.WithField[policies.ListOpts]("vendor", false), request.WithHeader[policies.ListOpts]("X-Auth-Token", "ignored")}
+	invalid := []policies.ListOption{request.Query("name", "override"), policies.WithListOptions(policies.ListOpts{Limit: -1}), policies.WithListOptions(policies.ListOpts{Sort: "name:sideways"}), request.Custom(request.WithField[policies.ListOpts]("vendor", false)), request.Custom(request.WithHeader[policies.ListOpts]("X-Auth-Token", "ignored"))}
 	for _, option := range invalid {
 		if _, err := api.All(context.Background(), option); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(err)
@@ -477,7 +477,7 @@ func TestClusteringPolicyLocalFiltersSnapshotExactNumbersAndNull(t *testing.T) {
 	if calls.Load() != 2 {
 		t.Fatal(calls.Load())
 	}
-	invalid := []policies.ListOption{policies.WithListFilter("unknown", 1), policies.WithListFilter("spec", make(chan int)), policies.WithListQuery("spec", "wire"), request.WithArgument[policies.ListOpts]("policies.local_filters", "wrong-type"), request.WithArgument[policies.ListOpts]("policies.local_filters", map[string]json.RawMessage{"spec": json.RawMessage(`{`)})}
+	invalid := []policies.ListOption{policies.WithListFilter("unknown", 1), policies.WithListFilter("spec", make(chan int)), request.Query("spec", "wire"), request.Custom(request.WithArgument[policies.ListOpts]("policies.local_filters", "wrong-type")), request.Custom(request.WithArgument[policies.ListOpts]("policies.local_filters", map[string]json.RawMessage{"spec": json.RawMessage(`{`)}))}
 	for _, option := range invalid {
 		if _, err := api.All(context.Background(), option); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(err)

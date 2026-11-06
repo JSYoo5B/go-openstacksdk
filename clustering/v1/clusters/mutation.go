@@ -11,6 +11,7 @@ import (
 	"regexp"
 
 	"github.com/JSYoo5B/go-openstacksdk/clustering/v1/actions"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/internal/senlin"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -58,7 +59,7 @@ func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOpti
 	if err := senlin.Validate(ctx, a.RawClient()); err != nil {
 		return nil, request.Wrap("Create", "clustering.clusters", err)
 	}
-	config, err := request.Apply(opts, options...)
+	config, err := calls.ApplyConfig(opts, createCalls, options...)
 	if err == nil {
 		err = validateName(config.Options.Name)
 	}
@@ -103,7 +104,7 @@ func (a *API) updateAt(ctx context.Context, ref resource.Ref, path string, opts 
 	if err := senlin.Validate(ctx, a.RawClient()); err != nil {
 		return nil, request.Wrap("Update", "clustering.clusters", err)
 	}
-	config, err := request.Apply(opts, options...)
+	config, err := calls.ApplyConfig(opts, updateCalls, options...)
 	if err == nil {
 		if name, set := config.Options.Name.Get(); set {
 			err = validateName(name)
@@ -161,7 +162,7 @@ func (a *API) Delete(ctx context.Context, ref resource.Ref, options ...DeleteOpt
 	if err := senlin.Validate(ctx, a.RawClient()); err != nil {
 		return nil, request.Wrap("Delete", "clustering.clusters", err)
 	}
-	config, err := request.Apply(DeleteOpts{}, options...)
+	config, err := calls.ApplyConfig(DeleteOpts{}, deleteCalls, options...)
 	if err == nil {
 		err = request.ValidateCapabilities(config, false, false, true)
 	}

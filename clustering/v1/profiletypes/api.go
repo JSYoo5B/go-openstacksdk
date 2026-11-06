@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/internal/senlin"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -79,17 +80,20 @@ func (a *API) Get(ctx context.Context, name string) (*ProfileType, error) {
 }
 
 type ListOpts = senlin.ListOpts
-type ListOption = senlin.ListOption
 
-func WithListOptions(value ListOpts) ListOption  { return senlin.Snapshot(value) }
-func WithListMaxItems(value int) ListOption      { return senlin.WithMaxItems(value) }
-func WithListPaginated(value bool) ListOption    { return senlin.WithPaginated(value) }
-func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
+// ListOption is one option of List and All: WithListOptions, WithListFilter,
+// request.Header, request.Microversion, request.Query (a string or []string
+// value), request.MaxItems, request.Paginated or request.Custom over
+// *request.Config[ListOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type ListOption = request.ListCall
+
+func WithListOptions(value ListOpts) ListOption { return request.Custom(senlin.Snapshot(value)) }
 
 // List follows advertised continuation links. It never fabricates a marker
 // from type names, because the type catalog documents no marker protocol.
 func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*ProfileType, error] {
-	return senlin.ListWithClientBodyFilters(ctx, a.RawClient(), spec, bodyFilterSpec(), options...)
+	return senlin.ListWithClientBodyFilters(ctx, a.RawClient(), spec, bodyFilterSpec(), calls.Options(options, senlin.SharedListCalls)...)
 }
 
 func (a *API) All(ctx context.Context, options ...ListOption) ([]*ProfileType, error) {

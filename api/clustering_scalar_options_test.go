@@ -45,7 +45,7 @@ func TestClusteringScalarOptionsPreserveExplicitValuesAndReuse(t *testing.T) {
 	}
 	clusterAPI, nodeAPI := clusters.New(client), nodes.New(client)
 	var captured *request.Config[clusters.CreateOpts]
-	createCluster := []clusters.CreateOption{clusters.WithCreateMinSize(0), clusters.WithCreateMaxSize(-1), clusters.WithCreateDesiredCapacity(0), clusters.WithCreateTimeoutNull(), func(config *request.Config[clusters.CreateOpts]) error { captured = config; return nil }}
+	createCluster := []clusters.CreateOption{clusters.WithCreateMinSize(0), clusters.WithCreateMaxSize(-1), clusters.WithCreateDesiredCapacity(0), clusters.WithCreateTimeoutNull(), request.Custom(func(config *request.Config[clusters.CreateOpts]) error { captured = config; return nil })}
 	updateCluster := []clusters.UpdateOption{clusters.WithUpdateNameNull(), clusters.WithUpdateProfileID("changed"), clusters.WithUpdateTimeout(0)}
 	createNode := []nodes.CreateOption{nodes.WithCreateClusterIDNull(), nodes.WithCreateRole("")}
 	updateNode := []nodes.UpdateOption{nodes.WithUpdateName("renamed"), nodes.WithUpdateProfileIDNull(), nodes.WithUpdateRoleNull(), nodes.WithUpdateTainted(false)}

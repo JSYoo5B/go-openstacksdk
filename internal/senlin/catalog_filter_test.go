@@ -13,6 +13,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/clustering/v1/profiletypes"
 	"github.com/JSYoo5B/go-openstacksdk/clustering/v1/services"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -67,7 +68,7 @@ func TestBodyFilterCatalogFacadesUseRawFieldsAndOwnNamespaces(t *testing.T) {
 	if types, err := profiles.All(context.Background(), profiletypes.WithListFilter("version", "go-extra")); !errors.Is(err, resource.ErrInvalidOption) || types != nil {
 		t.Fatal(types, err)
 	}
-	if pol, err := policies.All(context.Background(), policytypes.WithListQuery("name", "wire")); !errors.Is(err, resource.ErrInvalidOption) || pol != nil {
+	if pol, err := policies.All(context.Background(), request.Query("name", "wire")); !errors.Is(err, resource.ErrInvalidOption) || pol != nil {
 		t.Fatal(pol, err)
 	}
 	client.Microversion = "1.6"

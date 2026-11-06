@@ -129,8 +129,8 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/clustering/v1/profiles.API.List`
-- `github.com/JSYoo5B/go-openstacksdk/clustering/v1/profiles.WithListHeader`
-- `github.com/JSYoo5B/go-openstacksdk/clustering/v1/profiles.WithListMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - Lazy typed queries preserve selected filters and explicit false across links and last-wire-ID marker fallback, including short pages; local Body subsets, arrays, aliases and exact numeric filters never become server queries.
   Tests: `api/clustering_profiles_test.go:TestClusteringProfilesListShortPagesLocalFiltersAndSnapshot`, `api/clustering_profiles_test.go:TestClusteringProfilesLocalJSONFilterTypesArraysAndNull`, `api/clustering_profiles_test.go:TestClusteringProfilesPaginationGuardsAndConsumerControl`.
@@ -154,10 +154,10 @@ Python/Go differences:
 - Go keeps continuation links on the same collection origin/path, retains original filters and selected limits, and guards URL/marker cycles rather than following arbitrary Python next-link parameters.
 - Go list controls require a non-negative integer MaxItems and optional bool Paginated; max_items/paginated are local option names and cannot be emitted through raw query extensions. Caps count wire rows before local filters, own their state per iteration and do not turn an upper consumption bound into a guaranteed result count.
 - At an exact page boundary Python Resource.list may issue a continuation GET before checking max_items at the next raw row; the Go Senlin iterator terminates immediately after its cap and does not validate or request an unused continuation.
-- Go exposes WithListHeader and WithListMicroversion separately from query and Body inputs; it preserves SDK ownership of authentication, service-token, authorization and transport/version headers rather than copying an unrestricted Python caller header map.
+- Go exposes request.Header and request.Microversion separately from query and Body inputs; it preserves SDK ownership of authentication, service-token, authorization and transport/version headers rather than copying an unrestricted Python caller header map.
 - A numeric per-call selection is explicit and does not negotiate or mutate the shared client. Explicit empty selection resets to server-default1.0; a conflicting source MoreHeaders version is rejected instead of silently removed. Common Resources and parent resolution/Get/Wait do not accept these typed List options.
 - Python Proxy._list also accepts a per-call base_path and the deprecated jmespath_filters (it warns RemovedInSDK60Warning) among its keyword arguments; the Go routes are SDK-owned and neither option is exposed.
-- Python Resource.list validates keywords with allow_unknown_params=True: a keyword that is neither a declared query key nor a Body attribute is silently discarded, and a Body attribute that is not a query key becomes a client-side filter. Go sends explicit extension queries to the server through WithListQuery, applies Body filters only through the explicit WithListFilter with source-validated names, and rejects unknown filter names, reserved names and names owned by typed options before HTTP.
+- Python Resource.list validates keywords with allow_unknown_params=True: a keyword that is neither a declared query key nor a Body attribute is silently discarded, and a Body attribute that is not a query key becomes a client-side filter. Go sends explicit extension queries to the server through request.Query, applies Body filters only through the explicit WithListFilter with source-validated names, and rejects unknown filter names, reserved names and names owned by typed options before HTTP.
 - Python rows are rebuilt with Resource.existing, which applies descriptor coercion and defaults; Go keeps typed snapshots with the raw JSON and filters compare exact raw JSON values without coercion.
 - Python profile query keys are sort, global_project, type and name; unknown keywords such as the documented metadata are discarded or become client filters, while Go reports them as filters or extensions explicitly.
 - The explicit-limit marker fallback, MaxItems limit hints and short-page continuation are verified with HTTP fixtures only; no live Senlin server default or maximum limit was observed.
@@ -171,10 +171,10 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/clustering/v1/profiles.API.FindIdentity`
 - `github.com/JSYoo5B/go-openstacksdk/clustering/v1/profiles.API.Find`
 - `github.com/JSYoo5B/go-openstacksdk/clustering/v1/profiles.WithFindOptions`
-- `github.com/JSYoo5B/go-openstacksdk/clustering/v1/profiles.WithFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/clustering/v1/profiles.WithFindFallback`
-- `github.com/JSYoo5B/go-openstacksdk/clustering/v1/profiles.WithFindHeader`
-- `github.com/JSYoo5B/go-openstacksdk/clustering/v1/profiles.WithFindMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - The declared string identity is sent to the direct controller GET without a UUID heuristic. A successful response returns immediately without a list and may resolve a name or short ID to a different canonical returned ID.
   Tests: `api/clustering_find_identity_test.go:TestClusteringFindIdentityFiveFacadesDirectGETAndCanonicalFields`.
@@ -231,7 +231,7 @@ service, err := conn.Clustering(ctx)
 if err != nil { return err }
 updated, err := service.Profiles.Update(ctx, resource.Name("worker_template"), profiles.UpdateOpts{},
     profiles.WithUpdateMetadata(map[string]any{}),
-    profiles.WithUpdateHeader("X-Vendor-Mode", "explicit"))
+    request.Header("X-Vendor-Mode", "explicit"))
 if err != nil { return err }
 fmt.Println(updated.ID, updated.UserMetadata)
 ```
@@ -277,10 +277,10 @@ if found != nil { fmt.Println(found.ID) }
 listingAPI := profiles.New(client)
 values, err := listingAPI.All(ctx,
     profiles.WithListOptions(profiles.ListOpts{Limit: 20}),
-    profiles.WithListMaxItems(50))
+    request.MaxItems(50))
 if err != nil { return err }
 fmt.Println(len(values))
-for value, err := range listingAPI.List(ctx, profiles.WithListPaginated(false)) {
+for value, err := range listingAPI.List(ctx, request.Paginated(false)) {
     if err != nil { return err }
     fmt.Println(value.ID)
 }
@@ -294,13 +294,14 @@ import (
 
     sdk "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/clustering/v1/profiles"
+    "github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 func FindProfileStrict(ctx context.Context, conn *sdk.Connection) (*profiles.Profile, error) {
     service, err := conn.Clustering(ctx)
     if err != nil { return nil, err }
     return service.Profiles.FindIdentity(ctx, "worker_template",
-        profiles.WithFindIgnoreMissing(false))
+        request.IgnoreMissing(false))
 }
 ```
 

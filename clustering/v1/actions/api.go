@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"strconv"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/internal/senlin"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -115,7 +116,14 @@ type ListOpts struct {
 	ClusterID string
 }
 
-type ListOption = request.Option[ListOpts]
+// ListOption is one option of List and All: WithListOptions,
+// WithListGlobalProject, WithListFilter, request.Header, request.Microversion,
+// request.Query (a string or []string value), request.MaxItems,
+// request.Paginated or request.Custom over *request.Config[ListOpts]. Other
+// shared calls fail with resource.ErrInvalidOption before HTTP.
+type ListOption = request.ListCall
+
+var listCalls = senlin.ListCalls(func(o *ListOpts) *int { return &o.MaxItems }, func(o *ListOpts) **bool { return &o.Paginated })
 
 func cloneOptions(value ListOpts) ListOpts {
 	value.GlobalProject = senlin.Bool(value.GlobalProject)
@@ -125,35 +133,19 @@ func cloneOptions(value ListOpts) ListOpts {
 
 func WithListOptions(value ListOpts) ListOption {
 	value = cloneOptions(value)
-	return func(config *request.Config[ListOpts]) error {
+	return request.Custom(func(config *request.Config[ListOpts]) error {
 		config.Options = cloneOptions(value)
 		return nil
-	}
+	})
 }
 
 func WithListGlobalProject(value bool) ListOption {
-	return func(config *request.Config[ListOpts]) error {
+	return request.Custom(func(config *request.Config[ListOpts]) error {
 		copy := value
 		config.Options.GlobalProject = &copy
 		return nil
-	}
+	})
 }
-
-// WithListMaxItems limits wire rows before local filtering. Zero is unlimited.
-func WithListMaxItems(value int) ListOption {
-	return func(config *request.Config[ListOpts]) error { config.Options.MaxItems = value; return nil }
-}
-
-// WithListPaginated controls continuation without changing server query fields.
-func WithListPaginated(value bool) ListOption {
-	return func(config *request.Config[ListOpts]) error {
-		copy := value
-		config.Options.Paginated = &copy
-		return nil
-	}
-}
-
-func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
 
 func listQuery(config request.Config[ListOpts]) (url.Values, error) {
 	if err := senlin.ValidateListCapabilities(config, filterSpec.Namespace); err != nil {
@@ -197,7 +189,7 @@ func listQuery(config request.Config[ListOpts]) (url.Values, error) {
 func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Action, error] {
 	options = append([]ListOption(nil), options...)
 	return func(yield func(*Action, error) bool) {
-		config, err := request.Apply(ListOpts{}, options...)
+		config, err := calls.ApplyConfig(ListOpts{}, listCalls, options...)
 		var client *gophercloud.ServiceClient
 		if err == nil {
 			client, err = senlin.PrepareListClient(ctx, a.RawClient(), config)

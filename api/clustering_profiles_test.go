@@ -71,7 +71,7 @@ func TestClusteringProfilesCRUDExactPathsBodiesAndResponseEvidence(t *testing.T)
 	metadataOption := profiles.WithCreateMetadata(metadata)
 	spec[2], metadata["flag"] = 'X', true
 	api := profiles.New(client)
-	value, err := api.Create(context.Background(), profiles.CreateOpts{}, option, metadataOption, profiles.WithCreateHeader("X-Custom", "captured"), profiles.WithCreateField("vendor", map[string]json.Number{"count": "9007199254740997"}))
+	value, err := api.Create(context.Background(), profiles.CreateOpts{}, option, metadataOption, request.Header("X-Custom", "captured"), request.Field("vendor", map[string]json.Number{"count": "9007199254740997"}))
 	if err != nil || value.ID != "response-id" || value.Name != "returned-name" || value.DomainID != nil || value.ProjectID != "project-id" || value.UserID != "user-id" || string(value.Spec["version"]) != "1.0000000000000001" || string(value.UserMetadata["label"]) != `"original"` || string(value.Body["future"]) != "9007199254740995" || value.Header.Get("X-Request-Id") != "created-profile" || value.StatusCode != 201 || value.UpdatedAt != nil {
 		t.Fatal(value, err)
 	}
@@ -141,7 +141,7 @@ func TestClusteringProfilesMetadataPresenceAndOptionsReuse(t *testing.T) {
 	option := profiles.WithUpdateOptions(profiles.UpdateOpts{Name: &name})
 	capture := func(config *request.Config[profiles.UpdateOpts]) error { applied = config.Options.Name; return nil }
 	for range 2 {
-		if _, err := api.Update(context.Background(), resource.ID("profile"), profiles.UpdateOpts{}, option, capture); err != nil {
+		if _, err := api.Update(context.Background(), resource.ID("profile"), profiles.UpdateOpts{}, option, request.Custom(capture)); err != nil {
 			t.Fatal(err)
 		}
 		if applied == nil || *applied != "renamed" {
@@ -316,7 +316,7 @@ func TestClusteringProfilesListShortPagesLocalFiltersAndSnapshot(t *testing.T) {
 		applied = config.Options.GlobalProject
 		return nil
 	}
-	options := []profiles.ListOption{option, filterOption, profiles.WithListFilter("project_id", "p"), profiles.WithListQuery("vendor", "retained"), capture}
+	options := []profiles.ListOption{option, filterOption, profiles.WithListFilter("project_id", "p"), request.Query("vendor", "retained"), request.Custom(capture)}
 	api := profiles.New(cloud.Client("clustering", "/v1"))
 	iterator := api.List(context.Background(), options...)
 	options[0] = profiles.WithListGlobalProject(true)
@@ -385,9 +385,9 @@ func TestClusteringProfilesDefaultsInvalidOptionsAndEmptyUpdatePreflight(t *test
 	for _, option := range []profiles.ListOption{
 		nil, profiles.WithListOptions(profiles.ListOpts{Limit: -1}), profiles.WithListOptions(profiles.ListOpts{Marker: "bad/marker"}),
 		profiles.WithListOptions(profiles.ListOpts{Sort: "name:sideways"}), profiles.WithListOptions(profiles.ListOpts{Sort: "name,,type"}),
-		profiles.WithListQuery("metadata", "wire-filter"), profiles.WithListQuery("global_project", "true"), profiles.WithListQuery("name", "hidden"),
+		request.Query("metadata", "wire-filter"), request.Query("global_project", "true"), request.Query("name", "hidden"),
 		profiles.WithListFilter("unknown", true), profiles.WithListFilter("metadata", make(chan int)),
-		request.WithField[profiles.ListOpts]("vendor", true), request.WithHeader[profiles.ListOpts]("X-Auth-Token", "value"), request.WithArgument[profiles.ListOpts]("unknown", true),
+		request.Custom(request.WithField[profiles.ListOpts]("vendor", true)), request.Custom(request.WithHeader[profiles.ListOpts]("X-Auth-Token", "value")), request.Custom(request.WithArgument[profiles.ListOpts]("unknown", true)),
 	} {
 		if _, err := api.All(context.Background(), option); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(err)
@@ -424,16 +424,16 @@ func TestClusteringProfilesMutationSchemaAndProtectedExtensionsPreflight(t *test
 		}
 	}
 	for _, option := range []profiles.CreateOption{
-		nil, profiles.WithCreateField("metadata", nil), profiles.WithCreateField("spec", map[string]any{}), profiles.WithCreateField("id", "owned"), profiles.WithCreateField("project_id", "owned"),
-		profiles.WithCreateHeader("OpenStack-API-Version", "clustering 1.2"), profiles.WithCreateHeader("X-Auth-Token", "owned"), profiles.WithCreateHeader("Content-Type", "text/plain"),
-		request.WithQuery[profiles.CreateOpts]("query", "owned"), request.WithArgument[profiles.CreateOpts]("unknown", true),
+		nil, request.Field("metadata", nil), request.Field("spec", map[string]any{}), request.Field("id", "owned"), request.Field("project_id", "owned"),
+		request.Header("OpenStack-API-Version", "clustering 1.2"), request.Header("X-Auth-Token", "owned"), request.Header("Content-Type", "text/plain"),
+		request.Custom(request.WithQuery[profiles.CreateOpts]("query", "owned")), request.Custom(request.WithArgument[profiles.CreateOpts]("unknown", true)),
 	} {
 		if _, err := api.Create(context.Background(), base, option); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(err)
 		}
 	}
 	name := "renamed"
-	for _, option := range []profiles.UpdateOption{profiles.WithUpdateField("metadata", nil), profiles.WithUpdateField("spec", map[string]any{}), profiles.WithUpdateField("type", "newtype"), profiles.WithUpdateOptions(profiles.UpdateOpts{Metadata: json.RawMessage(`1`)})} {
+	for _, option := range []profiles.UpdateOption{request.Field("metadata", nil), request.Field("spec", map[string]any{}), request.Field("type", "newtype"), profiles.WithUpdateOptions(profiles.UpdateOpts{Metadata: json.RawMessage(`1`)})} {
 		if _, err := api.Update(context.Background(), resource.Name("needs-lookup"), profiles.UpdateOpts{Name: &name}, option); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(err)
 		}
@@ -441,7 +441,7 @@ func TestClusteringProfilesMutationSchemaAndProtectedExtensionsPreflight(t *test
 	if _, err := api.Validate(context.Background(), profiles.ValidateOpts{Spec: json.RawMessage(`null`)}); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
-	if _, err := api.Validate(context.Background(), profiles.ValidateOpts{Spec: json.RawMessage(`{}`)}, profiles.WithValidateField("spec", map[string]any{})); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := api.Validate(context.Background(), profiles.ValidateOpts{Spec: json.RawMessage(`{}`)}, request.Field("spec", map[string]any{})); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
 	if calls.Load() != 0 {
@@ -543,7 +543,7 @@ func TestClusteringProfilesPaginationGuardsAndConsumerControl(t *testing.T) {
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()
 			var resultErr error
-			for _, err := range api.List(ctx, profiles.WithListOptions(profiles.ListOpts{Limit: 5}), profiles.WithListQuery("vendor", "retained")) {
+			for _, err := range api.List(ctx, profiles.WithListOptions(profiles.ListOpts{Limit: 5}), request.Query("vendor", "retained")) {
 				if err != nil {
 					resultErr = err
 					break

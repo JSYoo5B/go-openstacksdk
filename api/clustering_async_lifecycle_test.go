@@ -94,7 +94,7 @@ func clusteringAsyncClusterHandle(tracked *clusters.TrackedCluster) *clusteringA
 				case "profile_only":
 					options = append(options, clusters.WithUpdateProfileOnly(value.(bool)))
 				default:
-					options = append(options, clusters.WithUpdateField(key, value))
+					options = append(options, request.Field(key, value))
 				}
 			}
 			return tracked.Edit(clusters.UpdateOpts{}, options...)
@@ -120,7 +120,7 @@ func clusteringAsyncClusterHandle(tracked *clusters.TrackedCluster) *clusteringA
 		commit: func(ctx context.Context, headers map[string]string) (clusteringAsyncTrackedView, error) {
 			options := []clusters.UpdateOption{}
 			for key, value := range headers {
-				options = append(options, clusters.WithUpdateHeader(key, value))
+				options = append(options, request.Header(key, value))
 			}
 			value, err := tracked.Commit(ctx, options...)
 			return clusteringAsyncClusterView(value), err
@@ -132,11 +132,11 @@ func clusteringAsyncClusterHandle(tracked *clusters.TrackedCluster) *clusteringA
 		badEdit: func(mode string) error {
 			switch mode {
 			case "header":
-				return tracked.Edit(clusters.UpdateOpts{}, clusters.WithUpdateHeader("X-Vendor", "value"))
+				return tracked.Edit(clusters.UpdateOpts{}, request.Header("X-Vendor", "value"))
 			case "query":
-				return tracked.Edit(clusters.UpdateOpts{}, request.WithQuery[clusters.UpdateOpts]("vendor", "value"))
+				return tracked.Edit(clusters.UpdateOpts{}, request.Custom(request.WithQuery[clusters.UpdateOpts]("vendor", "value")))
 			case "argument":
-				return tracked.Edit(clusters.UpdateOpts{}, request.WithArgument[clusters.UpdateOpts]("foreign", true))
+				return tracked.Edit(clusters.UpdateOpts{}, request.Custom(request.WithArgument[clusters.UpdateOpts]("foreign", true)))
 			case "nil":
 				return tracked.Edit(clusters.UpdateOpts{}, nil)
 			case "empty-name":
@@ -144,12 +144,12 @@ func clusteringAsyncClusterHandle(tracked *clusters.TrackedCluster) *clusteringA
 			case "bad-metadata":
 				return tracked.Edit(clusters.UpdateOpts{}, clusters.WithUpdateName("Valid"), clusters.WithUpdateMetadata([]any{}))
 			case "bad-json":
-				return tracked.Edit(clusters.UpdateOpts{}, clusters.WithUpdateName("Valid"), func(config *request.Config[clusters.UpdateOpts]) error {
+				return tracked.Edit(clusters.UpdateOpts{}, clusters.WithUpdateName("Valid"), request.Custom(func(config *request.Config[clusters.UpdateOpts]) error {
 					config.Fields["vendor"] = json.RawMessage(`{`)
 					return nil
-				})
+				}))
 			default:
-				return tracked.Edit(clusters.UpdateOpts{}, clusters.WithUpdateName("Valid"), clusters.WithUpdateField(mode, false))
+				return tracked.Edit(clusters.UpdateOpts{}, clusters.WithUpdateName("Valid"), request.Field(mode, false))
 			}
 		},
 		badCommit: func(ctx context.Context, mode string) error {
@@ -164,13 +164,13 @@ func clusteringAsyncClusterHandle(tracked *clusters.TrackedCluster) *clusteringA
 			case "metadata":
 				option = clusters.WithUpdateMetadata(nil)
 			case "field":
-				option = clusters.WithUpdateField("vendor", false)
+				option = request.Field("vendor", false)
 			case "query":
-				option = request.WithQuery[clusters.UpdateOpts]("vendor", "value")
+				option = request.Custom(request.WithQuery[clusters.UpdateOpts]("vendor", "value"))
 			case "argument":
-				option = request.WithArgument[clusters.UpdateOpts]("foreign", true)
+				option = request.Custom(request.WithArgument[clusters.UpdateOpts]("foreign", true))
 			case "auth":
-				option = clusters.WithUpdateHeader("X-Auth-Token", "override")
+				option = request.Header("X-Auth-Token", "override")
 			}
 			_, err := tracked.Commit(ctx, option)
 			return err
@@ -222,7 +222,7 @@ func clusteringAsyncNodeHandle(tracked *nodes.TrackedNode) *clusteringAsyncTrack
 				case "metadata":
 					options = append(options, nodes.WithUpdateMetadata(value))
 				default:
-					options = append(options, nodes.WithUpdateField(key, value))
+					options = append(options, request.Field(key, value))
 				}
 			}
 			return tracked.Edit(nodes.UpdateOpts{}, options...)
@@ -246,7 +246,7 @@ func clusteringAsyncNodeHandle(tracked *nodes.TrackedNode) *clusteringAsyncTrack
 		commit: func(ctx context.Context, headers map[string]string) (clusteringAsyncTrackedView, error) {
 			options := []nodes.UpdateOption{}
 			for key, value := range headers {
-				options = append(options, nodes.WithUpdateHeader(key, value))
+				options = append(options, request.Header(key, value))
 			}
 			value, err := tracked.Commit(ctx, options...)
 			return clusteringAsyncNodeView(value), err
@@ -258,11 +258,11 @@ func clusteringAsyncNodeHandle(tracked *nodes.TrackedNode) *clusteringAsyncTrack
 		badEdit: func(mode string) error {
 			switch mode {
 			case "header":
-				return tracked.Edit(nodes.UpdateOpts{}, nodes.WithUpdateHeader("X-Vendor", "value"))
+				return tracked.Edit(nodes.UpdateOpts{}, request.Header("X-Vendor", "value"))
 			case "query":
-				return tracked.Edit(nodes.UpdateOpts{}, request.WithQuery[nodes.UpdateOpts]("vendor", "value"))
+				return tracked.Edit(nodes.UpdateOpts{}, request.Custom(request.WithQuery[nodes.UpdateOpts]("vendor", "value")))
 			case "argument":
-				return tracked.Edit(nodes.UpdateOpts{}, request.WithArgument[nodes.UpdateOpts]("foreign", true))
+				return tracked.Edit(nodes.UpdateOpts{}, request.Custom(request.WithArgument[nodes.UpdateOpts]("foreign", true)))
 			case "nil":
 				return tracked.Edit(nodes.UpdateOpts{}, nil)
 			case "empty-name":
@@ -270,12 +270,12 @@ func clusteringAsyncNodeHandle(tracked *nodes.TrackedNode) *clusteringAsyncTrack
 			case "bad-metadata":
 				return tracked.Edit(nodes.UpdateOpts{}, nodes.WithUpdateName("Valid"), nodes.WithUpdateMetadata([]any{}))
 			case "bad-json":
-				return tracked.Edit(nodes.UpdateOpts{}, nodes.WithUpdateName("Valid"), func(config *request.Config[nodes.UpdateOpts]) error {
+				return tracked.Edit(nodes.UpdateOpts{}, nodes.WithUpdateName("Valid"), request.Custom(func(config *request.Config[nodes.UpdateOpts]) error {
 					config.Fields["vendor"] = json.RawMessage(`{`)
 					return nil
-				})
+				}))
 			default:
-				return tracked.Edit(nodes.UpdateOpts{}, nodes.WithUpdateName("Valid"), nodes.WithUpdateField(mode, false))
+				return tracked.Edit(nodes.UpdateOpts{}, nodes.WithUpdateName("Valid"), request.Field(mode, false))
 			}
 		},
 		badCommit: func(ctx context.Context, mode string) error {
@@ -290,13 +290,13 @@ func clusteringAsyncNodeHandle(tracked *nodes.TrackedNode) *clusteringAsyncTrack
 			case "metadata":
 				option = nodes.WithUpdateMetadata(nil)
 			case "field":
-				option = nodes.WithUpdateField("vendor", false)
+				option = request.Field("vendor", false)
 			case "query":
-				option = request.WithQuery[nodes.UpdateOpts]("vendor", "value")
+				option = request.Custom(request.WithQuery[nodes.UpdateOpts]("vendor", "value"))
 			case "argument":
-				option = request.WithArgument[nodes.UpdateOpts]("foreign", true)
+				option = request.Custom(request.WithArgument[nodes.UpdateOpts]("foreign", true))
 			case "auth":
-				option = nodes.WithUpdateHeader("X-Auth-Token", "override")
+				option = request.Header("X-Auth-Token", "override")
 			}
 			_, err := tracked.Commit(ctx, option)
 			return err

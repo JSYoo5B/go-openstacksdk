@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"strconv"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/internal/senlin"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -27,30 +28,32 @@ type UpdateOpts struct {
 	Status string `json:"status"`
 	Force  *bool  `json:"-"`
 }
-type UpdateOption = request.Option[UpdateOpts]
+
+// UpdateOption is one option of Update and Cancel: WithUpdateOptions,
+// WithUpdateForce, WithUpdateQuery, request.Header, request.Field or
+// request.Custom over *request.Config[UpdateOpts]. Other shared calls fail
+// with resource.ErrInvalidOption before HTTP. WithUpdateQuery stays because
+// the write category admits no query call.
+type UpdateOption = request.WriteCall
+
+var updateCalls = senlin.WriteCalls[UpdateOpts]()
 
 func WithUpdateOptions(value UpdateOpts) UpdateOption {
 	value.Force = senlin.Bool(value.Force)
-	return func(config *request.Config[UpdateOpts]) error {
+	return request.Custom(func(config *request.Config[UpdateOpts]) error {
 		config.Options = UpdateOpts{Status: value.Status, Force: senlin.Bool(value.Force)}
 		return nil
-	}
+	})
 }
 func WithUpdateForce(value bool) UpdateOption {
-	return func(config *request.Config[UpdateOpts]) error {
+	return request.Custom(func(config *request.Config[UpdateOpts]) error {
 		copy := value
 		config.Options.Force = &copy
 		return nil
-	}
-}
-func WithUpdateHeader(key, value string) UpdateOption {
-	return request.WithHeader[UpdateOpts](key, value)
+	})
 }
 func WithUpdateQuery(key, value string) UpdateOption {
-	return request.WithQuery[UpdateOpts](key, value)
-}
-func WithUpdateField(key string, value any) UpdateOption {
-	return request.WithField[UpdateOpts](key, value)
+	return request.Custom(request.WithQuery[UpdateOpts](key, value))
 }
 
 // Update accepts the published CANCELLED request at numeric microversion>=1.12.
@@ -61,7 +64,7 @@ func (a *API) Update(ctx context.Context, ref resource.Ref, value UpdateOpts, op
 	if err := senlin.RequireVersion(ctx, client, 12); err != nil {
 		return nil, request.Wrap("Update", "clustering.actions", err)
 	}
-	config, err := request.Apply(value, options...)
+	config, err := calls.ApplyConfig(value, updateCalls, options...)
 	if err == nil {
 		err = request.ValidateCapabilities(config, true, true, true)
 	}

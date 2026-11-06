@@ -37,11 +37,11 @@ func TestClusteringNodeCreateAcceptedEnvelopeSnapshotsAndSubmission(t *testing.T
 	option := nodes.WithCreateOptions(nodes.CreateOpts{Name: "worker", ProfileID: "profile-name", ClusterID: request.Null[string](), Role: request.Present(""), Metadata: metadata})
 	metadata[2] = 'X'
 	vendor := map[string]any{"off": false, "zero": 0}
-	extension := nodes.WithCreateField("vendor", vendor)
+	extension := request.Field("vendor", vendor)
 	vendor["off"] = true
 	api := nodes.New(cloud.Client("clustering", "/senlin/v1"))
 	for range 2 {
-		value, err := api.Create(context.Background(), nodes.CreateOpts{}, option, extension, nodes.WithCreateHeader("X-Vendor", "retained"))
+		value, err := api.Create(context.Background(), nodes.CreateOpts{}, option, extension, request.Header("X-Vendor", "retained"))
 		if err != nil || value.ID != "response-node" || value.ProfileID != "response-profile" || value.PhysicalID != "physical-node" || value.ClusterID != nil || value.Role != nil || value.DomainID != nil || value.Index == nil || value.Index.String() != "9007199254740993" || value.Tainted == nil || *value.Tainted {
 			t.Fatal(value, err)
 		}
@@ -102,7 +102,7 @@ func TestClusteringNodeGetDirectIdentityAndPhysicalDetails(t *testing.T) {
 		testcloud.JSON(w, 200, `{"node":{"id":"response-node","physical_id":"physical","cluster_id":"cluster","role":"worker","index":0,"details":{"capacity":9007199254740993},"metadata":{},"tainted":false}}`)
 	})
 	api := nodes.New(cloud.Client("clustering", "/senlin/v1"))
-	for _, options := range [][]nodes.GetOption{nil, {nodes.WithGetDetails(true), nodes.WithGetQuery("vendor", "retained"), nodes.WithGetHeader("X-Vendor", "custom")}, {nodes.WithGetDetails(false)}} {
+	for _, options := range [][]nodes.GetOption{nil, {nodes.WithGetDetails(true), request.Query("vendor", "retained"), request.Header("X-Vendor", "custom")}, {nodes.WithGetDetails(false)}} {
 		value, err := api.Get(context.Background(), "short-name", options...)
 		if err != nil || value.ID != "response-node" || value.ClusterID == nil || *value.ClusterID != "cluster" || value.Index == nil || value.Index.String() != "0" || string(value.Details["capacity"]) != "9007199254740993" || value.Header.Get("X-Request-ID") != "read-node" || value.Operation != nil {
 			t.Fatal(value, err)
@@ -144,7 +144,7 @@ func TestClusteringNodeUpdateNameResolutionFreezesNullableInputsAndHeaders(t *te
 	option := nodes.WithUpdateOptions(nodes.UpdateOpts{Name: request.Null[string](), ProfileID: request.Present("new-profile"), Role: request.Present(""), Metadata: metadata, Tainted: request.Present(false)})
 	metadata[2] = 'Y'
 	capture := func(config *request.Config[nodes.UpdateOpts]) error { captured = config; return nil }
-	value, err := nodes.New(client).Update(context.Background(), resource.Name("old-name"), nodes.UpdateOpts{}, option, nodes.WithUpdateField("vendor", false), nodes.WithUpdateHeader("X-Vendor", "original"), capture)
+	value, err := nodes.New(client).Update(context.Background(), resource.Name("old-name"), nodes.UpdateOpts{}, option, request.Field("vendor", false), request.Header("X-Vendor", "original"), request.Custom(capture))
 	if err != nil || value.ID != "response-node" || value.Operation == nil || value.Operation.ActionID != "update-action" || value.Tainted == nil || *value.Tainted || reads.Load() != 1 || updates.Load() != 1 {
 		t.Fatal(value, err, reads.Load(), updates.Load())
 	}
@@ -222,7 +222,7 @@ func TestClusteringNodeVersionRevalidatedAfterNameLookup(t *testing.T) {
 	})
 	cloud.Mux.HandleFunc("PATCH /senlin/v1/nodes/node-id", func(w http.ResponseWriter, r *http.Request) { writes.Add(1); t.Error("version-gated mutation sent") })
 	capture := func(config *request.Config[nodes.UpdateOpts]) error { captured = config; return nil }
-	_, err := nodes.New(client).Update(context.Background(), resource.Name("selected"), nodes.UpdateOpts{Tainted: request.Present(false)}, capture)
+	_, err := nodes.New(client).Update(context.Background(), resource.Name("selected"), nodes.UpdateOpts{Tainted: request.Present(false)}, request.Custom(capture))
 	if !errors.Is(err, resource.ErrUnsupported) || reads.Load() != 1 || writes.Load() != 0 {
 		t.Fatal(err, reads.Load(), writes.Load())
 	}
@@ -292,7 +292,7 @@ func TestClusteringNodeDeleteNameLookupDefaultsMissingAndConflict(t *testing.T) 
 	if value, err := api.Delete(context.Background(), resource.Name("missing")); value != nil || err != nil {
 		t.Fatal(value, err)
 	}
-	if _, err := api.Delete(context.Background(), resource.Name("missing"), nodes.WithDeleteIgnoreMissing(false)); !errors.Is(err, resource.ErrNotFound) {
+	if _, err := api.Delete(context.Background(), resource.Name("missing"), request.IgnoreMissing(false)); !errors.Is(err, resource.ErrNotFound) {
 		t.Fatal(err)
 	}
 	if _, err := api.Delete(context.Background(), resource.Name("no-id")); !errors.Is(err, resource.ErrInvalidOption) {
@@ -304,13 +304,13 @@ func TestClusteringNodeDeleteNameLookupDefaultsMissingAndConflict(t *testing.T) 
 	if _, err := api.Delete(context.Background(), resource.ID("missing"), nodes.WithDeleteForce(true)); !errors.Is(err, resource.ErrNotFound) {
 		t.Fatal(err)
 	}
-	if value, err := api.Delete(context.Background(), resource.ID("missing"), nodes.WithDeleteForce(true), nodes.WithDeleteIgnoreMissing(true)); value != nil || err != nil {
+	if value, err := api.Delete(context.Background(), resource.ID("missing"), nodes.WithDeleteForce(true), request.IgnoreMissing(true)); value != nil || err != nil {
 		t.Fatal(value, err)
 	}
 	if _, err := api.Delete(context.Background(), resource.Name("missing"), nodes.WithDeleteForce(true)); !errors.Is(err, resource.ErrNotFound) {
 		t.Fatal(err)
 	}
-	if _, err := api.Delete(context.Background(), resource.ID("missing"), nodes.WithDeleteIgnoreMissing(false)); !errors.Is(err, resource.ErrNotFound) {
+	if _, err := api.Delete(context.Background(), resource.ID("missing"), request.IgnoreMissing(false)); !errors.Is(err, resource.ErrNotFound) {
 		t.Fatal(err)
 	}
 	if lists.Load() != 5 || deletes.Load() != 4 {
@@ -465,15 +465,15 @@ func TestClusteringNodePreflightRejectsImmutableFieldsAndWrongOptions(t *testing
 			return e
 		}},
 		{"core-profile", func() error {
-			_, e := api.Create(context.Background(), base, nodes.WithCreateField("profile_id", "other"))
+			_, e := api.Create(context.Background(), base, request.Field("profile_id", "other"))
 			return e
 		}},
 		{"response-id", func() error {
-			_, e := api.Create(context.Background(), base, nodes.WithCreateField("id", "unsafe"))
+			_, e := api.Create(context.Background(), base, request.Field("id", "unsafe"))
 			return e
 		}},
 		{"create-tainted", func() error {
-			_, e := api.Create(context.Background(), base, nodes.WithCreateField("tainted", false))
+			_, e := api.Create(context.Background(), base, request.Field("tainted", false))
 			return e
 		}},
 		{"empty-update", func() error {
@@ -481,35 +481,35 @@ func TestClusteringNodePreflightRejectsImmutableFieldsAndWrongOptions(t *testing
 			return e
 		}},
 		{"update-cluster", func() error {
-			_, e := api.Update(context.Background(), resource.Name("selected"), nodes.UpdateOpts{}, nodes.WithUpdateField("cluster_id", "cluster"))
+			_, e := api.Update(context.Background(), resource.Name("selected"), nodes.UpdateOpts{}, request.Field("cluster_id", "cluster"))
 			return e
 		}},
 		{"update-status", func() error {
-			_, e := api.Update(context.Background(), resource.Name("selected"), nodes.UpdateOpts{}, nodes.WithUpdateField("status", "ACTIVE"))
+			_, e := api.Update(context.Background(), resource.Name("selected"), nodes.UpdateOpts{}, request.Field("status", "ACTIVE"))
 			return e
 		}},
 		{"auth-header", func() error {
-			_, e := api.Create(context.Background(), base, nodes.WithCreateHeader("X-Auth-Token", "replace"))
+			_, e := api.Create(context.Background(), base, request.Header("X-Auth-Token", "replace"))
 			return e
 		}},
 		{"version-header", func() error {
-			_, e := api.Get(context.Background(), "node-id", nodes.WithGetHeader("OpenStack-API-Version", "clustering 1.13"))
+			_, e := api.Get(context.Background(), "node-id", request.Header("OpenStack-API-Version", "clustering 1.13"))
 			return e
 		}},
 		{"details-query", func() error {
-			_, e := api.Get(context.Background(), "node-id", nodes.WithGetQuery("show_details", "true"))
+			_, e := api.Get(context.Background(), "node-id", request.Query("show_details", "true"))
 			return e
 		}},
 		{"mutation-query", func() error {
-			_, e := api.Create(context.Background(), base, request.WithQuery[nodes.CreateOpts]("vendor", "ignored"))
+			_, e := api.Create(context.Background(), base, request.Custom(request.WithQuery[nodes.CreateOpts]("vendor", "ignored")))
 			return e
 		}},
 		{"delete-fields", func() error {
-			_, e := api.Delete(context.Background(), resource.Name("selected"), request.WithField[nodes.DeleteOpts]("vendor", false))
+			_, e := api.Delete(context.Background(), resource.Name("selected"), request.Custom(request.WithField[nodes.DeleteOpts]("vendor", false)))
 			return e
 		}},
 		{"delete-version-header", func() error {
-			_, e := api.Delete(context.Background(), resource.Name("selected"), nodes.WithDeleteHeader("OpenStack-API-Version", "clustering 1.13"))
+			_, e := api.Delete(context.Background(), resource.Name("selected"), request.Header("OpenStack-API-Version", "clustering 1.13"))
 			return e
 		}},
 		{"nil-option", func() error { _, e := api.Get(context.Background(), "node-id", nil); return e }},

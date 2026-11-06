@@ -1,6 +1,9 @@
 package services
 
-import "github.com/JSYoo5B/go-openstacksdk/internal/senlin"
+import (
+	"github.com/JSYoo5B/go-openstacksdk/internal/senlin"
+	"github.com/JSYoo5B/go-openstacksdk/request"
+)
 
 func bodyFilterSpec() senlin.BodyFilterSpec {
 	return senlin.BodyFilterSpec{Namespace: "services.local_filters", Fields: map[string]string{
@@ -13,5 +16,5 @@ func bodyFilterSpec() senlin.BodyFilterSpec {
 // Objects match recursive subsets; arrays compare in order and numbers exactly.
 // Name and updated_at are retained raw fields even when no typed field exists.
 func WithListFilter(key string, value any) ListOption {
-	return senlin.WithBodyFilter[ListOpts](bodyFilterSpec(), key, value)
+	return request.Custom(senlin.WithBodyFilter[ListOpts](bodyFilterSpec(), key, value))
 }

@@ -9,6 +9,7 @@ import (
 	"net/url"
 
 	"github.com/JSYoo5B/go-openstacksdk/clustering/v1/actions"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/internal/senlin"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -17,16 +18,16 @@ import (
 
 // Cluster commands return the accepted action and its HTTP evidence. They do
 // not fetch or poll the action, and do not describe a completed cluster change.
-func clusterCommand[T any](ctx context.Context, a *API, ref resource.Ref, operation, key string, value T, validate func(T) (int, error), options ...request.Option[T]) (*actions.Submission, error) {
+func clusterCommand[T any](ctx context.Context, a *API, ref resource.Ref, operation, key string, value T, validate func(T) (int, error), options ...request.WriteCall) (*actions.Submission, error) {
 	return clusterCommandPath(ctx, a, ref, operation, "actions", key, value, validate, options...)
 }
 
-func clusterCommandPath[T any](ctx context.Context, a *API, ref resource.Ref, operation, path, key string, value T, validate func(T) (int, error), options ...request.Option[T]) (*actions.Submission, error) {
+func clusterCommandPath[T any](ctx context.Context, a *API, ref resource.Ref, operation, path, key string, value T, validate func(T) (int, error), options ...request.WriteCall) (*actions.Submission, error) {
 	client := a.RawClient()
 	if err := senlin.Validate(ctx, client); err != nil {
 		return nil, request.Wrap(operation, "clustering.clusters", err)
 	}
-	config, err := request.Apply(value, options...)
+	config, err := calls.ApplyConfig(value, senlin.WriteCalls[T](), options...)
 	minimum := 0
 	if err == nil && validate != nil {
 		minimum, err = validate(config.Options)

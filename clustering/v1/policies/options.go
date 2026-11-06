@@ -23,43 +23,34 @@ type ListOpts struct {
 	GlobalProject *bool
 }
 
-type ListOption = request.Option[ListOpts]
+// ListOption is one option of List and All: WithListOptions,
+// WithListGlobalProject, WithListFilter, request.Header, request.Microversion,
+// request.Query (a string or []string value), request.MaxItems,
+// request.Paginated or request.Custom over *request.Config[ListOpts]. Other
+// shared calls fail with resource.ErrInvalidOption before HTTP.
+type ListOption = request.ListCall
+
+var listCalls = senlin.ListCalls(func(o *ListOpts) *int { return &o.MaxItems }, func(o *ListOpts) **bool { return &o.Paginated })
 
 func WithListOptions(value ListOpts) ListOption {
 	value.GlobalProject = senlin.Bool(value.GlobalProject)
 	value.Paginated = senlin.Bool(value.Paginated)
-	return func(config *request.Config[ListOpts]) error {
+	return request.Custom(func(config *request.Config[ListOpts]) error {
 		copy := value
 		copy.GlobalProject = senlin.Bool(value.GlobalProject)
 		copy.Paginated = senlin.Bool(value.Paginated)
 		config.Options = copy
 		return nil
-	}
+	})
 }
 
 func WithListGlobalProject(value bool) ListOption {
-	return func(config *request.Config[ListOpts]) error {
+	return request.Custom(func(config *request.Config[ListOpts]) error {
 		copy := value
 		config.Options.GlobalProject = &copy
 		return nil
-	}
+	})
 }
-
-// WithListMaxItems limits wire rows before local filtering. Zero is unlimited.
-func WithListMaxItems(value int) ListOption {
-	return func(config *request.Config[ListOpts]) error { config.Options.MaxItems = value; return nil }
-}
-
-// WithListPaginated controls continuation without changing server query fields.
-func WithListPaginated(value bool) ListOption {
-	return func(config *request.Config[ListOpts]) error {
-		copy := value
-		config.Options.Paginated = &copy
-		return nil
-	}
-}
-
-func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
 
 // The API documents sort's grammar, while deployment policy determines the
 // supported attribute names. Validate syntax without inventing an allowlist.

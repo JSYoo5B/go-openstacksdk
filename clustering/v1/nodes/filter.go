@@ -30,7 +30,7 @@ func filterField(key string) (string, error) {
 func WithListFilter(key string, value any) ListOption {
 	field, fieldErr := filterField(key)
 	raw, encodeErr := json.Marshal(value)
-	return func(config *request.Config[ListOpts]) error {
+	return request.Custom(func(config *request.Config[ListOpts]) error {
 		if fieldErr != nil {
 			return fieldErr
 		}
@@ -47,7 +47,7 @@ func WithListFilter(key string, value any) ListOption {
 		values[field] = append(json.RawMessage(nil), raw...)
 		config.Arguments[localFiltersKey] = values
 		return nil
-	}
+	})
 }
 
 func prepareFilters(config request.Config[ListOpts]) (map[string]json.RawMessage, error) {

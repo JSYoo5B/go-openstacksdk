@@ -271,7 +271,7 @@ func TestClusteringClusterPoliciesLazyLinkedPagesSnapshotsAndNoFallback(t *testi
 	option := clusterpolicies.WithListOptions(clusterpolicies.ListOpts{Enabled: &enabled, PolicyName: "named-policy", PolicyType: "vendor.policy-1.0", Sort: "vendor_order:desc"})
 	enabled = true
 	capture := func(config *request.Config[clusterpolicies.ListOpts]) error { captured = config; return nil }
-	iterator := scope.List(context.Background(), option, clusterpolicies.WithListQuery("vendor", "retained"), capture)
+	iterator := scope.List(context.Background(), option, request.Query("vendor", "retained"), request.Custom(capture))
 	if lists.Load() != 0 {
 		t.Fatal("list was eager")
 	}
@@ -374,13 +374,13 @@ func TestClusteringClusterPoliciesPreflightAndScopedWaits(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, option := range []clusterpolicies.ListOption{nil, clusterpolicies.WithListQuery("enabled", "true"), clusterpolicies.WithListQuery("cluster_id", "foreign"), request.WithField[clusterpolicies.ListOpts]("vendor", true), request.WithHeader[clusterpolicies.ListOpts]("X-Auth-Token", "foreign"), request.WithArgument[clusterpolicies.ListOpts]("vendor", true), clusterpolicies.WithListSort("name:sideways")} {
+	for _, option := range []clusterpolicies.ListOption{nil, request.Query("enabled", "true"), request.Query("cluster_id", "foreign"), request.Custom(request.WithField[clusterpolicies.ListOpts]("vendor", true)), request.Custom(request.WithHeader[clusterpolicies.ListOpts]("X-Auth-Token", "foreign")), request.Custom(request.WithArgument[clusterpolicies.ListOpts]("vendor", true)), clusterpolicies.WithListSort("name:sideways")} {
 		if _, err := scope.All(context.Background(), option); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(err)
 		}
 	}
 	for _, key := range []string{"limit", "marker"} {
-		if _, err := scope.All(context.Background(), clusterpolicies.WithListQuery(key, "2")); !errors.Is(err, resource.ErrUnsupported) {
+		if _, err := scope.All(context.Background(), request.Query(key, "2")); !errors.Is(err, resource.ErrUnsupported) {
 			t.Fatal(key, err)
 		}
 		if _, err := scope.Resources.All(context.Background(), resource.WithQuery(key, "2")); !errors.Is(err, resource.ErrUnsupported) {

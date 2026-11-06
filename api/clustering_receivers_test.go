@@ -114,7 +114,7 @@ func TestClusteringReceiversMessagePresenceSnapshotsAndReuse(t *testing.T) {
 	options := receivers.WithCreateOptions(receivers.CreateOpts{Name: "message", Type: "message", Params: raw})
 	raw[2] = 'X'
 	vendor := map[string]any{"zero": 0}
-	extension := receivers.WithCreateField("vendor", vendor)
+	extension := request.Field("vendor", vendor)
 	vendor["zero"] = 1
 	for range 2 {
 		value, err := api.Create(context.Background(), receivers.CreateOpts{}, options, receivers.WithCreateClusterIDNull(), receivers.WithCreateActionNull(), receivers.WithCreateActor(nil), extension)
@@ -166,7 +166,7 @@ func TestClusteringReceiversUpdateNameLookupFreezesInputsAndRechecksSource(t *te
 			raw := json.RawMessage(`{"big":9007199254740993,"off":false}`)
 			option := receivers.WithUpdateOptions(receivers.UpdateOpts{Params: raw})
 			raw[2] = 'X'
-			value, err := receivers.New(client).Update(context.Background(), resource.Name("selected"), receivers.UpdateOpts{}, option, receivers.WithUpdateNameNull(), receivers.WithUpdateAction(""), receivers.WithUpdateField("vendor", false), receivers.WithUpdateHeader("X-Vendor", "original"), capture)
+			value, err := receivers.New(client).Update(context.Background(), resource.Name("selected"), receivers.UpdateOpts{}, option, receivers.WithUpdateNameNull(), receivers.WithUpdateAction(""), request.Field("vendor", false), request.Header("X-Vendor", "original"), request.Custom(capture))
 			if changed {
 				if value != nil || !errors.Is(err, resource.ErrInvalidOption) || patches.Load() != 0 {
 					t.Fatal(value, err, patches.Load())
@@ -206,7 +206,7 @@ func TestClusteringReceiversUserGateResourcesBypassAndPageRecheck(t *testing.T) 
 	}
 	client.Microversion = "1.4"
 	for _, key := range []string{"user", "user_id"} {
-		if _, err := api.All(context.Background(), receivers.WithListQuery(key, "owner")); !errors.Is(err, resource.ErrInvalidOption) {
+		if _, err := api.All(context.Background(), request.Query(key, "owner")); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(key, err)
 		}
 	}
@@ -273,7 +273,7 @@ func TestClusteringReceiversLazyPagingLocalFiltersAndWireMarkers(t *testing.T) {
 	filter := map[string]any{"big": json.Number("9007199254740993"), "off": false}
 	filterOption := receivers.WithListFilter("params", filter)
 	filter["big"] = json.Number("9007199254740992")
-	iterator := api.List(context.Background(), option, receivers.WithListQuery("vendor", "retained"), filterOption)
+	iterator := api.List(context.Background(), option, request.Query("vendor", "retained"), filterOption)
 	if calls.Load() != 0 {
 		t.Fatal("list was eager")
 	}
@@ -511,7 +511,7 @@ func TestClusteringReceiversPreflightOwnedFieldsOptionsAndContext(t *testing.T) 
 			t.Fatal(value, err)
 		}
 	}
-	for _, option := range []receivers.CreateOption{nil, receivers.WithCreateField("cluster_id", "override"), receivers.WithCreateField("channel", nil), receivers.WithCreateHeader("X-Auth-Token", "foreign"), receivers.WithCreateHeader("OpenStack-API-Version", "clustering 1.99"), request.WithQuery[receivers.CreateOpts]("vendor", "unsupported")} {
+	for _, option := range []receivers.CreateOption{nil, request.Field("cluster_id", "override"), request.Field("channel", nil), request.Header("X-Auth-Token", "foreign"), request.Header("OpenStack-API-Version", "clustering 1.99"), request.Custom(request.WithQuery[receivers.CreateOpts]("vendor", "unsupported"))} {
 		if _, err := api.Create(context.Background(), receivers.CreateOpts{Name: "message", Type: "message"}, option); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(err)
 		}
@@ -520,11 +520,11 @@ func TestClusteringReceiversPreflightOwnedFieldsOptionsAndContext(t *testing.T) 
 		t.Fatal("empty stateless update accepted", err)
 	}
 	for _, field := range []string{"type", "cluster_id", "actor", "channel", "id", "user", "name", "action", "params"} {
-		if _, err := api.Update(context.Background(), resource.Name("selected"), receivers.UpdateOpts{Name: request.Present("changed")}, receivers.WithUpdateField(field, nil)); !errors.Is(err, resource.ErrInvalidOption) {
+		if _, err := api.Update(context.Background(), resource.Name("selected"), receivers.UpdateOpts{Name: request.Present("changed")}, request.Field(field, nil)); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(field, err)
 		}
 	}
-	for _, option := range []receivers.ListOption{nil, receivers.WithListFilter("unknown", nil), receivers.WithListQuery("params", "local"), receivers.WithListOptions(receivers.ListOpts{Limit: -1}), receivers.WithListOptions(receivers.ListOpts{Sort: "invalid:desc"}), request.WithField[receivers.ListOpts]("vendor", false)} {
+	for _, option := range []receivers.ListOption{nil, receivers.WithListFilter("unknown", nil), request.Query("params", "local"), receivers.WithListOptions(receivers.ListOpts{Limit: -1}), receivers.WithListOptions(receivers.ListOpts{Sort: "invalid:desc"}), request.Custom(request.WithField[receivers.ListOpts]("vendor", false))} {
 		if _, err := api.All(context.Background(), option); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(err)
 		}
@@ -558,7 +558,7 @@ func TestClusteringReceiversPreflightOwnedFieldsOptionsAndContext(t *testing.T) 
 		t.Fatal(err)
 	}
 	change := func(config *request.Config[receivers.CreateOpts]) error { client.Type = "compute"; return nil }
-	if _, err := api.Create(context.Background(), receivers.CreateOpts{Name: "message", Type: "message"}, change); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := api.Create(context.Background(), receivers.CreateOpts{Name: "message", Type: "message"}, request.Custom(change)); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
 	if calls.Load() != 0 {

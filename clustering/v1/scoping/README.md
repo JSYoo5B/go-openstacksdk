@@ -99,6 +99,7 @@ import (
 
     sdk "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/clustering/v1/clusters"
+    "github.com/JSYoo5B/go-openstacksdk/request"
     "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -109,7 +110,7 @@ func UpdateScopedCluster(ctx context.Context, conn *sdk.Connection, collectionPa
     if err != nil { return nil, err }
     return scope.Update(ctx, resource.Name("workers"), clusters.UpdateOpts{},
         clusters.WithUpdateName("workers_renamed"),
-        clusters.WithUpdateHeader("X-Audit-Tag", "rename"))
+        request.Header("X-Audit-Tag", "rename"))
 }
 ```
 

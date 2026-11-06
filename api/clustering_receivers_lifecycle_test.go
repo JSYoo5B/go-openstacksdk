@@ -88,7 +88,7 @@ func TestClusteringReceiverTrackedCleanStickyDirtyShallowMergeAndActualResponse(
 			t.Fatal(err, tracked.Value())
 		}
 	}
-	if _, err := tracked.Commit(context.Background(), receivers.WithUpdateHeader("X-Vendor", "kept")); err != nil || calls.Load() != 0 {
+	if _, err := tracked.Commit(context.Background(), request.Header("X-Vendor", "kept")); err != nil || calls.Load() != 0 {
 		t.Fatal(err, calls.Load())
 	}
 	for _, name := range []string{"B", "A", "A"} {
@@ -99,7 +99,7 @@ func TestClusteringReceiverTrackedCleanStickyDirtyShallowMergeAndActualResponse(
 	if !tracked.Dirty() {
 		t.Fatal("reversion cleared sticky dirty state")
 	}
-	value, err := tracked.Commit(context.Background(), receivers.WithUpdateHeader("X-Vendor", "kept"))
+	value, err := tracked.Commit(context.Background(), request.Header("X-Vendor", "kept"))
 	if err != nil || tracked.Dirty() || value.ID != "fixed" || value.Name != "Server" || value.Type != "message" || len(value.Params) != 1 || string(value.Params["a"]) != "3" || value.Header.Get("Location") != "https://foreign.invalid/not-an-action#trace" {
 		t.Fatal(value, err)
 	}
@@ -107,10 +107,10 @@ func TestClusteringReceiverTrackedCleanStickyDirtyShallowMergeAndActualResponse(
 	if response.ID != "" || len(response.Body) != 2 || response.StatusCode != 200 || response.Header.Get("X-Request-ID") != "last-patch" {
 		t.Fatal("actual response invented cached fields", response)
 	}
-	if err := tracked.Edit(receivers.UpdateOpts{}, receivers.WithUpdateName("B"), receivers.WithUpdateParams(map[string]any{"big": json.Number("9007199254740993"), "off": false}), receivers.WithUpdateField("vendor", false)); err != nil {
+	if err := tracked.Edit(receivers.UpdateOpts{}, receivers.WithUpdateName("B"), receivers.WithUpdateParams(map[string]any{"big": json.Number("9007199254740993"), "off": false}), request.Field("vendor", false)); err != nil {
 		t.Fatal(err)
 	}
-	value, err = tracked.Commit(context.Background(), receivers.WithUpdateHeader("X-Vendor", "kept"))
+	value, err = tracked.Commit(context.Background(), request.Header("X-Vendor", "kept"))
 	if err != nil || tracked.Dirty() || value.Name != "B" || string(value.Params["big"]) != "9007199254740993" || string(value.Body["vendor"]) != "false" || len(tracked.Response().Body) != 1 || tracked.Response().Name != "" || calls.Load() != 2 {
 		t.Fatal("omitted response fields lost submitted cache", value, err, tracked.Response(), calls.Load())
 	}
@@ -182,28 +182,28 @@ func TestClusteringReceiverTrackedAtomicEditAndHeaderOnlyCommitProtection(t *tes
 	invalid := []receivers.UpdateOption{
 		nil,
 		receivers.WithUpdateParams([]any{}),
-		receivers.WithUpdateHeader("X-Vendor", "value"),
-		request.WithQuery[receivers.UpdateOpts]("vendor", "value"),
-		request.WithArgument[receivers.UpdateOpts]("foreign", true),
+		request.Header("X-Vendor", "value"),
+		request.Custom(request.WithQuery[receivers.UpdateOpts]("vendor", "value")),
+		request.Custom(request.WithArgument[receivers.UpdateOpts]("foreign", true)),
 	}
 	for _, key := range []string{"id", "ID", "Name", "ACTION", "PARAMS", "type", "TYPE", "cluster_id", "CLUSTER_ID", "actor", "channel", "USER_ID", "created_at", "links"} {
-		invalid = append(invalid, receivers.WithUpdateField(key, false))
+		invalid = append(invalid, request.Field(key, false))
 	}
 	for index, option := range invalid {
 		if err := tracked.Edit(receivers.UpdateOpts{}, receivers.WithUpdateName("WouldApply"), option); !errors.Is(err, resource.ErrInvalidOption) || tracked.Dirty() || tracked.Value().Name != "A" {
 			t.Fatalf("option %d partly applied: %v, %#v", index, err, tracked.Value())
 		}
 	}
-	if err := tracked.Edit(receivers.UpdateOpts{}, receivers.WithUpdateName("WouldApply"), func(config *request.Config[receivers.UpdateOpts]) error {
+	if err := tracked.Edit(receivers.UpdateOpts{}, receivers.WithUpdateName("WouldApply"), request.Custom(func(config *request.Config[receivers.UpdateOpts]) error {
 		config.Fields["vendor"] = json.RawMessage(`{`)
 		return nil
-	}); err == nil || tracked.Dirty() || tracked.Value().Name != "A" {
+	})); err == nil || tracked.Dirty() || tracked.Value().Name != "A" {
 		t.Fatal("invalid raw JSON partly applied", err, tracked.Value())
 	}
 	if err := tracked.Edit(receivers.UpdateOpts{}, receivers.WithUpdateName("Pending")); err != nil {
 		t.Fatal(err)
 	}
-	invalidCommit := []receivers.UpdateOption{nil, receivers.WithUpdateNameNull(), receivers.WithUpdateAction(""), receivers.WithUpdateParams(nil), receivers.WithUpdateField("vendor", false), request.WithQuery[receivers.UpdateOpts]("vendor", "value"), request.WithArgument[receivers.UpdateOpts]("foreign", true), receivers.WithUpdateHeader("X-Auth-Token", "override"), receivers.WithUpdateHeader("OpenStack-API-Version", "clustering 1.4")}
+	invalidCommit := []receivers.UpdateOption{nil, receivers.WithUpdateNameNull(), receivers.WithUpdateAction(""), receivers.WithUpdateParams(nil), request.Field("vendor", false), request.Custom(request.WithQuery[receivers.UpdateOpts]("vendor", "value")), request.Custom(request.WithArgument[receivers.UpdateOpts]("foreign", true)), request.Header("X-Auth-Token", "override"), request.Header("OpenStack-API-Version", "clustering 1.4")}
 	for index, option := range invalidCommit {
 		if _, err := tracked.Commit(context.Background(), option); !errors.Is(err, resource.ErrInvalidOption) || !tracked.Dirty() || tracked.Value().Name != "Pending" || calls.Load() != 0 {
 			t.Fatalf("commit option %d: %v, %#v, calls=%d", index, err, tracked.Value(), calls.Load())
@@ -622,7 +622,7 @@ func TestClusteringReceiverUpdateScopeRoutesSnapshotsLiveTokensAndIsolation(t *t
 	if _, err := loaded.Commit(context.Background()); err != nil {
 		t.Fatal(err)
 	}
-	_, err = right.Update(context.Background(), resource.Name("A"), receivers.UpdateOpts{}, receivers.WithUpdateNameNull(), receivers.WithUpdateAction(""), receivers.WithUpdateParams(map[string]json.Number{"large": "9007199254740993"}), receivers.WithUpdateHeader("X-Snapshot", "captured"), func(config *request.Config[receivers.UpdateOpts]) error { captured = config; return nil })
+	_, err = right.Update(context.Background(), resource.Name("A"), receivers.UpdateOpts{}, receivers.WithUpdateNameNull(), receivers.WithUpdateAction(""), receivers.WithUpdateParams(map[string]json.Number{"large": "9007199254740993"}), request.Header("X-Snapshot", "captured"), request.Custom(func(config *request.Config[receivers.UpdateOpts]) error { captured = config; return nil }))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -671,7 +671,7 @@ func TestClusteringReceiverTrackedAndUpdateScopeOfflineSourceAndCleanValidation(
 	if _, err := tracked.Refresh(ctx); !errors.Is(err, context.Canceled) || calls.Load() != 0 {
 		t.Fatal(err, calls.Load())
 	}
-	if _, err := tracked.Commit(context.Background(), receivers.WithUpdateHeader("X-Auth-Token", "override")); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := tracked.Commit(context.Background(), request.Header("X-Auth-Token", "override")); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
 	for _, version := range []string{"latest", "2.0", "1.01"} {
@@ -760,7 +760,7 @@ func TestClusteringReceiverTrackedAndUpdateScopeOfflineSourceAndCleanValidation(
 			testcloud.JSON(w, 200, `{"receivers":[{"id":"canonical","name":"A"}]}`)
 		})
 		lookupCloud.Mux.HandleFunc("PATCH /v1/alternate/receivers/canonical", func(w http.ResponseWriter, r *http.Request) { patches.Add(1); w.WriteHeader(500) })
-		_, err = scope.Update(context.Background(), resource.ID("canonical"), receivers.UpdateOpts{}, receivers.WithUpdateName("Updated"), func(config *request.Config[receivers.UpdateOpts]) error { lookupClient.Type = "compute"; return nil })
+		_, err = scope.Update(context.Background(), resource.ID("canonical"), receivers.UpdateOpts{}, receivers.WithUpdateName("Updated"), request.Custom(func(config *request.Config[receivers.UpdateOpts]) error { lookupClient.Type = "compute"; return nil }))
 		if !errors.Is(err, resource.ErrInvalidOption) || reads.Load() != 0 || patches.Load() != 0 {
 			t.Fatal(err, reads.Load(), patches.Load())
 		}

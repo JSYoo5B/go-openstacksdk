@@ -26,73 +26,74 @@ type PerformOperationOpts struct {
 	Params  json.RawMessage `json:"params,omitempty"`
 }
 
-type CheckOption = request.Option[CheckOpts]
-type RecoverOption = request.Option[RecoverOpts]
-type PerformOperationOption = request.Option[PerformOperationOpts]
+// CheckOption is one option of Check: WithCheckOptions, the WithCheck field
+// options, request.Header, request.Field or request.Custom over
+// *request.Config[CheckOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type CheckOption = request.WriteCall
 
-func WithCheckOptions(value CheckOpts) CheckOption       { return senlin.Snapshot(value) }
-func WithRecoverOptions(value RecoverOpts) RecoverOption { return senlin.Snapshot(value) }
+// RecoverOption is one option of Recover: WithRecoverOptions, the WithRecover
+// field options, request.Header, request.Field or request.Custom over
+// *request.Config[RecoverOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type RecoverOption = request.WriteCall
+
+// PerformOperationOption is one option of PerformOperation:
+// WithPerformOperationOptions, the WithPerformOperation field options,
+// request.Header, request.Field or request.Custom over
+// *request.Config[PerformOperationOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type PerformOperationOption = request.WriteCall
+
+func WithCheckOptions(value CheckOpts) CheckOption { return request.Custom(senlin.Snapshot(value)) }
+func WithRecoverOptions(value RecoverOpts) RecoverOption {
+	return request.Custom(senlin.Snapshot(value))
+}
 func WithPerformOperationOptions(value PerformOperationOpts) PerformOperationOption {
-	return senlin.Snapshot(value)
+	return request.Custom(senlin.Snapshot(value))
 }
 func WithRecoverOperation(value string) RecoverOption {
-	return func(config *request.Config[RecoverOpts]) error {
+	return request.Custom(func(config *request.Config[RecoverOpts]) error {
 		config.Options.Operation = request.Present(value)
 		return nil
-	}
+	})
 }
 func WithRecoverOperationNull() RecoverOption {
-	return func(config *request.Config[RecoverOpts]) error {
+	return request.Custom(func(config *request.Config[RecoverOpts]) error {
 		config.Options.Operation = request.Null[string]()
 		return nil
-	}
+	})
 }
 func WithRecoverOperationParams(value any) RecoverOption {
-	return withJSON(value, func(options *RecoverOpts, raw json.RawMessage) { options.OperationParams = raw })
+	return request.Custom(withJSON(value, func(options *RecoverOpts, raw json.RawMessage) { options.OperationParams = raw }))
 }
 func WithRecoverCheck(value bool) RecoverOption {
-	return func(config *request.Config[RecoverOpts]) error {
+	return request.Custom(func(config *request.Config[RecoverOpts]) error {
 		config.Options.Check = request.Present(value)
 		return nil
-	}
+	})
 }
 func WithRecoverCheckNull() RecoverOption {
-	return func(config *request.Config[RecoverOpts]) error {
+	return request.Custom(func(config *request.Config[RecoverOpts]) error {
 		config.Options.Check = request.Null[bool]()
 		return nil
-	}
+	})
 }
 func WithRecoverCheckCapacity(value bool) RecoverOption {
-	return func(config *request.Config[RecoverOpts]) error {
+	return request.Custom(func(config *request.Config[RecoverOpts]) error {
 		config.Options.CheckCapacity = request.Present(value)
 		return nil
-	}
+	})
 }
 func WithRecoverCheckCapacityNull() RecoverOption {
-	return func(config *request.Config[RecoverOpts]) error {
+	return request.Custom(func(config *request.Config[RecoverOpts]) error {
 		config.Options.CheckCapacity = request.Null[bool]()
 		return nil
-	}
+	})
 }
 func WithPerformOperationFilters(value any) PerformOperationOption {
-	return withJSON(value, func(options *PerformOperationOpts, raw json.RawMessage) { options.Filters = raw })
+	return request.Custom(withJSON(value, func(options *PerformOperationOpts, raw json.RawMessage) { options.Filters = raw }))
 }
 func WithPerformOperationParams(value any) PerformOperationOption {
-	return withJSON(value, func(options *PerformOperationOpts, raw json.RawMessage) { options.Params = raw })
-}
-func WithCheckField(key string, value any) CheckOption {
-	return request.WithField[CheckOpts](key, value)
-}
-func WithRecoverField(key string, value any) RecoverOption {
-	return request.WithField[RecoverOpts](key, value)
-}
-func WithPerformOperationField(key string, value any) PerformOperationOption {
-	return request.WithField[PerformOperationOpts](key, value)
-}
-func WithCheckHeader(key, value string) CheckOption { return request.WithHeader[CheckOpts](key, value) }
-func WithRecoverHeader(key, value string) RecoverOption {
-	return request.WithHeader[RecoverOpts](key, value)
-}
-func WithPerformOperationHeader(key, value string) PerformOperationOption {
-	return request.WithHeader[PerformOperationOpts](key, value)
+	return request.Custom(withJSON(value, func(options *PerformOperationOpts, raw json.RawMessage) { options.Params = raw }))
 }

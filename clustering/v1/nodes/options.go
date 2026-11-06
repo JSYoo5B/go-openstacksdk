@@ -51,22 +51,59 @@ type DeleteOpts struct {
 	IgnoreMissing *bool `json:"-"`
 }
 
-type CreateOption = request.Option[CreateOpts]
-type UpdateOption = request.Option[UpdateOpts]
-type GetOption = request.Option[GetOpts]
-type ListOption = request.Option[ListOpts]
-type DeleteOption = request.Option[DeleteOpts]
+// CreateOption is one option of Create: WithCreateOptions, the WithCreate
+// field options, request.Header, request.Field or request.Custom over
+// *request.Config[CreateOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type CreateOption = request.WriteCall
 
-func WithCreateOptions(value CreateOpts) CreateOption { return senlin.Snapshot(value) }
-func WithUpdateOptions(value UpdateOpts) UpdateOption { return senlin.Snapshot(value) }
-func WithGetOptions(value GetOpts) GetOption          { return senlin.Snapshot(value) }
-func WithListOptions(value ListOpts) ListOption       { return senlin.Snapshot(value) }
+var createCalls = senlin.WriteCalls[CreateOpts]()
+
+// UpdateOption is one option of Update, TrackedNode.Edit and
+// TrackedNode.Commit: WithUpdateOptions, the WithUpdate field options,
+// request.Header, request.Field or request.Custom over
+// *request.Config[UpdateOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type UpdateOption = request.WriteCall
+
+var updateCalls = senlin.WriteCalls[UpdateOpts]()
+
+// GetOption is one option of Get: WithGetOptions, WithGetDetails,
+// request.Header, request.Query (a string or []string value) or request.Custom
+// over *request.Config[GetOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type GetOption = request.GetQueryCall
+
+var getCalls = senlin.GetQueryCalls[GetOpts]()
+
+// ListOption is one option of List and All: WithListOptions,
+// WithListGlobalProject, WithListShowDetails, WithListFilter, request.Header,
+// request.Microversion, request.Query (a string or []string value),
+// request.MaxItems, request.Paginated or request.Custom over
+// *request.Config[ListOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type ListOption = request.ListCall
+
+var listCalls = senlin.ListCalls(func(o *ListOpts) *int { return &o.MaxItems }, func(o *ListOpts) **bool { return &o.Paginated })
+
+// DeleteOption is one option of Delete: WithDeleteOptions, WithDeleteForce,
+// request.IgnoreMissing, request.Header or request.Custom over
+// *request.Config[DeleteOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type DeleteOption = request.DeleteCall
+
+var deleteCalls = senlin.DeleteCalls(func(o *DeleteOpts) **bool { return &o.IgnoreMissing })
+
+func WithCreateOptions(value CreateOpts) CreateOption { return request.Custom(senlin.Snapshot(value)) }
+func WithUpdateOptions(value UpdateOpts) UpdateOption { return request.Custom(senlin.Snapshot(value)) }
+func WithGetOptions(value GetOpts) GetOption          { return request.Custom(senlin.Snapshot(value)) }
+func WithListOptions(value ListOpts) ListOption       { return request.Custom(senlin.Snapshot(value)) }
 func WithDeleteOptions(value DeleteOpts) DeleteOption {
 	value.IgnoreMissing = senlin.Bool(value.IgnoreMissing)
-	return func(config *request.Config[DeleteOpts]) error {
+	return request.Custom(func(config *request.Config[DeleteOpts]) error {
 		config.Options = DeleteOpts{Force: value.Force, IgnoreMissing: senlin.Bool(value.IgnoreMissing)}
 		return nil
-	}
+	})
 }
 
 func withJSON[T any](value any, set func(*T, json.RawMessage)) request.Option[T] {
@@ -81,74 +118,34 @@ func withJSON[T any](value any, set func(*T, json.RawMessage)) request.Option[T]
 }
 
 func WithCreateMetadata(value any) CreateOption {
-	return withJSON(value, func(opts *CreateOpts, raw json.RawMessage) { opts.Metadata = raw })
+	return request.Custom(withJSON(value, func(opts *CreateOpts, raw json.RawMessage) { opts.Metadata = raw }))
 }
 func WithUpdateMetadata(value any) UpdateOption {
-	return withJSON(value, func(opts *UpdateOpts, raw json.RawMessage) { opts.Metadata = raw })
+	return request.Custom(withJSON(value, func(opts *UpdateOpts, raw json.RawMessage) { opts.Metadata = raw }))
 }
-func WithCreateField(key string, value any) CreateOption {
-	return request.WithField[CreateOpts](key, value)
-}
-func WithUpdateField(key string, value any) UpdateOption {
-	return request.WithField[UpdateOpts](key, value)
-}
-func WithCreateHeader(key, value string) CreateOption {
-	return request.WithHeader[CreateOpts](key, value)
-}
-func WithUpdateHeader(key, value string) UpdateOption {
-	return request.WithHeader[UpdateOpts](key, value)
-}
-func WithDeleteHeader(key, value string) DeleteOption {
-	return request.WithHeader[DeleteOpts](key, value)
-}
-func WithGetHeader(key, value string) GetOption { return request.WithHeader[GetOpts](key, value) }
-func WithGetQuery(key, value string) GetOption  { return request.WithQuery[GetOpts](key, value) }
-
-// WithListMaxItems limits wire rows before local filtering. Zero is unlimited.
-func WithListMaxItems(value int) ListOption {
-	return func(config *request.Config[ListOpts]) error { config.Options.MaxItems = value; return nil }
-}
-
-// WithListPaginated controls continuation without changing server query fields.
-func WithListPaginated(value bool) ListOption {
-	return func(config *request.Config[ListOpts]) error {
-		copy := value
-		config.Options.Paginated = &copy
-		return nil
-	}
-}
-
-func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
 
 func WithGetDetails(value bool) GetOption {
-	return func(config *request.Config[GetOpts]) error { copy := value; config.Options.Details = &copy; return nil }
+	return request.Custom(func(config *request.Config[GetOpts]) error { copy := value; config.Options.Details = &copy; return nil })
 }
 func WithListGlobalProject(value bool) ListOption {
-	return func(config *request.Config[ListOpts]) error {
+	return request.Custom(func(config *request.Config[ListOpts]) error {
 		copy := value
 		config.Options.GlobalProject = &copy
 		return nil
-	}
+	})
 }
 func WithListShowDetails(value bool) ListOption {
-	return func(config *request.Config[ListOpts]) error {
+	return request.Custom(func(config *request.Config[ListOpts]) error {
 		copy := value
 		config.Options.ShowDetails = &copy
 		return nil
-	}
+	})
 }
 func WithDeleteForce(value bool) DeleteOption {
-	return func(config *request.Config[DeleteOpts]) error {
+	return request.Custom(func(config *request.Config[DeleteOpts]) error {
 		config.Options.Force = value
 		return nil
-	}
-}
-func WithDeleteIgnoreMissing(value bool) DeleteOption {
-	return func(config *request.Config[DeleteOpts]) error {
-		copy := value
-		config.Options.IgnoreMissing = &copy
-		return nil
-	}
+	})
 }
 
 func listQuery(config request.Config[ListOpts]) (url.Values, error) {

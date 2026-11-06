@@ -87,10 +87,10 @@ func TestClusteringActionUpdateFreezesBodyQueryAndHeadersBeforeNameLookup(t *tes
 		w.WriteHeader(202)
 	})
 	vendor := map[string]any{"big": json.Number("9007199254740993"), "off": false}
-	extension := actions.WithUpdateField("vendor", vendor)
+	extension := request.Field("vendor", vendor)
 	vendor["off"] = true
 	capture := func(config *request.Config[actions.UpdateOpts]) error { captured = config; return nil }
-	value, err := actions.New(client).Cancel(context.Background(), resource.Name("selected"), actions.WithUpdateForce(false), actions.WithUpdateQuery("vendor", "original"), actions.WithUpdateHeader("X-Vendor", "original"), extension, capture)
+	value, err := actions.New(client).Cancel(context.Background(), resource.Name("selected"), actions.WithUpdateForce(false), actions.WithUpdateQuery("vendor", "original"), request.Header("X-Vendor", "original"), extension, request.Custom(capture))
 	if err != nil || value == nil || value.StatusCode != 202 || reads.Load() != 1 || writes.Load() != 1 {
 		t.Fatal(value, err, reads.Load(), writes.Load())
 	}
@@ -117,7 +117,7 @@ func TestClusteringActionUpdatePreflightAndVersionRecheck(t *testing.T) {
 			t.Fatal(status, err)
 		}
 	}
-	for _, option := range []actions.UpdateOption{nil, actions.WithUpdateField("status", "RUNNING"), actions.WithUpdateField("force", true), actions.WithUpdateField("target", "changed"), actions.WithUpdateHeader("x-auth-token", "changed"), actions.WithUpdateQuery("force", "true"), actions.WithUpdateQuery("status", "RUNNING"), actions.WithUpdateField("vendor", make(chan int)), request.WithArgument[actions.UpdateOpts]("ignored", true)} {
+	for _, option := range []actions.UpdateOption{nil, request.Field("status", "RUNNING"), request.Field("force", true), request.Field("target", "changed"), request.Header("x-auth-token", "changed"), actions.WithUpdateQuery("force", "true"), actions.WithUpdateQuery("status", "RUNNING"), request.Field("vendor", make(chan int)), request.Custom(request.WithArgument[actions.UpdateOpts]("ignored", true))} {
 		if _, err := api.Cancel(context.Background(), resource.ID("selected"), option); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(err)
 		}

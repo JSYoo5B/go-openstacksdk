@@ -11,6 +11,7 @@ import (
 	"slices"
 
 	"github.com/JSYoo5B/go-openstacksdk/clustering/v1/actions"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/internal/senlin"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -42,11 +43,14 @@ type MetadataResult struct {
 
 // MetadataOpts has no body or query fields; metadata helpers accept headers only.
 type MetadataOpts struct{}
-type MetadataOption = request.Option[MetadataOpts]
 
-func WithMetadataHeader(key, value string) MetadataOption {
-	return request.WithHeader[MetadataOpts](key, value)
-}
+// MetadataOption is one option of the metadata helpers: request.Header or
+// request.Custom over *request.Config[MetadataOpts]. Metadata helpers take no
+// body or query input, so request.Field and the other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type MetadataOption = request.WriteCall
+
+var metadataCalls = senlin.HeaderCalls[MetadataOpts]()
 
 func cloneMetadata(values map[string]json.RawMessage) map[string]json.RawMessage {
 	if values == nil {
@@ -81,7 +85,7 @@ func metadataPreflight(ctx context.Context, client *gophercloud.ServiceClient, r
 	if err := ref.Validate(); err != nil {
 		return nil, err
 	}
-	config, err := request.Apply(MetadataOpts{}, options...)
+	config, err := calls.ApplyConfig(MetadataOpts{}, metadataCalls, options...)
 	if err == nil {
 		err = request.ValidateCapabilities(config, false, false, true)
 	}

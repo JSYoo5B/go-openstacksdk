@@ -1,6 +1,9 @@
 package profiletypes
 
-import "github.com/JSYoo5B/go-openstacksdk/internal/senlin"
+import (
+	"github.com/JSYoo5B/go-openstacksdk/internal/senlin"
+	"github.com/JSYoo5B/go-openstacksdk/request"
+)
 
 func bodyFilterSpec() senlin.BodyFilterSpec {
 	return senlin.BodyFilterSpec{Namespace: "profiletypes.local_filters", Fields: map[string]string{
@@ -12,5 +15,5 @@ func bodyFilterSpec() senlin.BodyFilterSpec {
 // Objects match recursive subsets; arrays compare in order and numbers exactly.
 // An id filter reads only returned Body id, without falling back to the name.
 func WithListFilter(key string, value any) ListOption {
-	return senlin.WithBodyFilter[ListOpts](bodyFilterSpec(), key, value)
+	return request.Custom(senlin.WithBodyFilter[ListOpts](bodyFilterSpec(), key, value))
 }

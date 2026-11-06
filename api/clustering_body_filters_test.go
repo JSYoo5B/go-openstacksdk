@@ -41,27 +41,25 @@ type clusteringBodyRequest struct {
 	capture func(map[string]any)
 }
 
-func clusteringBodyOptions[T any](input clusteringBodyRequest,
-	filter func(string, any) request.Option[T], maximum func(int) request.Option[T],
-	paginated func(bool) request.Option[T], query func(string, string) request.Option[T]) []request.Option[T] {
-	options := []request.Option[T]{maximum(input.maximum)}
+func clusteringBodyOptions[T any](input clusteringBodyRequest, filter func(string, any) request.ListCall) []request.ListCall {
+	options := []request.ListCall{request.MaxItems(input.maximum)}
 	if input.first {
-		options = append(options, paginated(false))
+		options = append(options, request.Paginated(false))
 	}
 	for _, value := range input.filters {
 		options = append(options, filter(value.key, value.value))
 	}
 	for _, value := range input.query {
-		options = append(options, query(value.key, fmt.Sprint(value.value)))
+		options = append(options, request.Query(value.key, fmt.Sprint(value.value)))
 	}
 	if input.foreign {
-		options = append(options, func(config *request.Config[T]) error {
+		options = append(options, request.Custom(func(config *request.Config[T]) error {
 			config.Arguments["other.local_filters"] = map[string]json.RawMessage{"name": json.RawMessage(`"ignored"`)}
 			return nil
-		})
+		}))
 	}
 	if input.capture != nil {
-		options = append(options, func(config *request.Config[T]) error { input.capture(config.Arguments); return nil })
+		options = append(options, request.Custom(func(config *request.Config[T]) error { input.capture(config.Arguments); return nil }))
 	}
 	return options
 }
@@ -76,27 +74,27 @@ func clusteringBodyFixtures() []clusteringBodyFixture {
 	return []clusteringBodyFixture{
 		{"actions", "actions", "user", "user_id", "inputs", "owner", "data", true, false,
 			func(_ *testing.T, ctx context.Context, client *gophercloud.ServiceClient, input clusteringBodyRequest) iter.Seq2[*resource.Metadata, error] {
-				options := clusteringBodyOptions(input, actions.WithListFilter, actions.WithListMaxItems, actions.WithListPaginated, actions.WithListQuery)
+				options := clusteringBodyOptions[actions.ListOpts](input, actions.WithListFilter)
 				return typedListMetadata(actions.New(client).List(ctx, options...), func(value *actions.Action) *resource.Metadata { return &value.Metadata })
 			}},
 		{"events", "events", "user", "user_id", "meta_data", "timestamp", "topic", true, false,
 			func(_ *testing.T, ctx context.Context, client *gophercloud.ServiceClient, input clusteringBodyRequest) iter.Seq2[*resource.Metadata, error] {
-				options := clusteringBodyOptions(input, events.WithListFilter, events.WithListMaxItems, events.WithListPaginated, events.WithListQuery)
+				options := clusteringBodyOptions[events.ListOpts](input, events.WithListFilter)
 				return typedListMetadata(events.New(client).List(ctx, options...), func(value *events.Event) *resource.Metadata { return &value.Metadata })
 			}},
 		{"services", "services", "host", "host", "", "disabled_reason", "topic", false, false,
 			func(_ *testing.T, ctx context.Context, client *gophercloud.ServiceClient, input clusteringBodyRequest) iter.Seq2[*resource.Metadata, error] {
-				options := clusteringBodyOptions(input, services.WithListFilter, services.WithListMaxItems, services.WithListPaginated, services.WithListQuery)
+				options := clusteringBodyOptions[services.ListOpts](input, services.WithListFilter)
 				return typedListMetadata(services.New(client).List(ctx, options...), func(value *services.Service) *resource.Metadata { return &value.Metadata })
 			}},
 		{"profile-types", "profile_types", "name", "name", "schema", "support_status", "version", false, false,
 			func(_ *testing.T, ctx context.Context, client *gophercloud.ServiceClient, input clusteringBodyRequest) iter.Seq2[*resource.Metadata, error] {
-				options := clusteringBodyOptions(input, profiletypes.WithListFilter, profiletypes.WithListMaxItems, profiletypes.WithListPaginated, profiletypes.WithListQuery)
+				options := clusteringBodyOptions[profiletypes.ListOpts](input, profiletypes.WithListFilter)
 				return typedListMetadata(profiletypes.New(client).List(ctx, options...), func(value *profiletypes.ProfileType) *resource.Metadata { return &value.Metadata })
 			}},
 		{"policy-types", "policy_types", "name", "name", "schema", "support_status", "version", false, false,
 			func(_ *testing.T, ctx context.Context, client *gophercloud.ServiceClient, input clusteringBodyRequest) iter.Seq2[*resource.Metadata, error] {
-				options := clusteringBodyOptions(input, policytypes.WithListFilter, policytypes.WithListMaxItems, policytypes.WithListPaginated, policytypes.WithListQuery)
+				options := clusteringBodyOptions[policytypes.ListOpts](input, policytypes.WithListFilter)
 				return typedListMetadata(policytypes.New(client).List(ctx, options...), func(value *policytypes.PolicyType) *resource.Metadata { return &value.Metadata })
 			}},
 		{"clusters/canonical-parent/policies", "cluster_policies", "policy_name", "policy_name", "data", "name", "cluster_id", false, true,
@@ -108,7 +106,7 @@ func clusteringBodyFixtures() []clusteringBodyFixture {
 				if scope.ClusterID() != "canonical-parent" {
 					t.Fatal(scope.ClusterID())
 				}
-				options := clusteringBodyOptions(input, clusterpolicies.WithListFilter, clusterpolicies.WithListMaxItems, clusterpolicies.WithListPaginated, clusterpolicies.WithListQuery)
+				options := clusteringBodyOptions[clusterpolicies.ListOpts](input, clusterpolicies.WithListFilter)
 				return typedListMetadata(scope.List(ctx, options...), func(value *clusterpolicies.ClusterPolicy) *resource.Metadata { return &value.Metadata })
 			}},
 	}

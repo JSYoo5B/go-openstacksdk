@@ -88,7 +88,7 @@ func TestConnectionSenlinMetadataSharesSourceAndLocksResolvedRoute(t *testing.T)
 	cloud.Provider.SetToken("read-token")
 	capture := func(config *request.Config[clusters.MetadataOpts]) error { prepared = config; return nil }
 	result, err := service.Clusters.SetMetadata(context.Background(), resource.Name("selected"), input,
-		clusters.WithMetadataHeader("X-Metadata-Trace", "prepared"), capture)
+		request.Header("X-Metadata-Trace", "prepared"), request.Custom(capture))
 	if err != nil || result == nil || !result.Changed || result.Operation == nil || result.Operation.ActionID != "metadata-action" || result.Operation.Location != "actions/metadata-action" || result.Operation.StatusCode != 202 || string(result.Operation.Body) != accepted || result.Operation.Header.Get("X-Request-ID") != "accepted-metadata" {
 		t.Fatal(result, err)
 	}
@@ -141,7 +141,7 @@ func TestConnectionSenlinMetadataReadAliasesAndOwnedDelete(t *testing.T) {
 			t.Fatal(view, err)
 		}
 	}
-	result, err := service.Clusters.DeleteMetadata(context.Background(), resource.ID("selected"), keys, clusters.WithMetadataHeader("X-Metadata-Trace", "delete"))
+	result, err := service.Clusters.DeleteMetadata(context.Background(), resource.ID("selected"), keys, request.Header("X-Metadata-Trace", "delete"))
 	if err != nil || result == nil || !result.Changed || len(result.Previous) != 2 || len(result.Requested) != 1 || result.Operation == nil || result.Operation.ActionID != "deletion-action" || gets.Load() != 3 || patches.Load() != 1 || unexpected.Load() != 0 {
 		t.Fatal(result, err, gets.Load(), patches.Load(), unexpected.Load())
 	}
@@ -241,7 +241,7 @@ func TestConnectionSenlinMetadataNoOpAndSourceRecheck(t *testing.T) {
 				cancel()
 				result, err = service.Clusters.DeleteMetadata(ctx, resource.Name("selected"), []string{})
 			} else if mode == "option-changed-type" {
-				result, err = service.Clusters.DeleteMetadata(ctx, resource.Name("selected"), []string{}, func(*request.Config[clusters.MetadataOpts]) error { client.Type = "compute"; return nil })
+				result, err = service.Clusters.DeleteMetadata(ctx, resource.Name("selected"), []string{}, request.Custom(func(*request.Config[clusters.MetadataOpts]) error { client.Type = "compute"; return nil }))
 			} else if mode == "empty-keys" {
 				result, err = service.Clusters.DeleteMetadata(ctx, resource.Name("selected"), []string{})
 			} else {

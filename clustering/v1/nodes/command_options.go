@@ -20,56 +20,59 @@ type RecoverOpts struct {
 }
 
 // PerformOperationOpts has no universal parameters. The profile type defines
-// its operation schema, supplied through WithPerformOperationField.
+// its operation schema, supplied through request.Field.
 type PerformOperationOpts struct{}
 
-type CheckOption = request.Option[CheckOpts]
-type RecoverOption = request.Option[RecoverOpts]
-type PerformOperationOption = request.Option[PerformOperationOpts]
+// CheckOption is one option of Check: request.Header, request.Field (sent
+// inside check) or request.Custom over *request.Config[CheckOpts]. Other
+// shared calls fail with resource.ErrInvalidOption before HTTP.
+type CheckOption = request.WriteCall
 
-func WithCheckField(key string, value any) CheckOption {
-	return request.WithField[CheckOpts](key, value)
+var checkCalls = senlin.WriteCalls[CheckOpts]()
+
+// RecoverOption is one option of Recover: WithRecoverOptions, the WithRecover
+// field options, request.Header, request.Field or request.Custom over
+// *request.Config[RecoverOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type RecoverOption = request.WriteCall
+
+var recoverCalls = senlin.WriteCalls[RecoverOpts]()
+
+// PerformOperationOption is one option of PerformOperation: request.Header,
+// request.Field (an operation parameter) or request.Custom over
+// *request.Config[PerformOperationOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type PerformOperationOption = request.WriteCall
+
+var performOperationCalls = senlin.WriteCalls[PerformOperationOpts]()
+
+func WithRecoverOptions(value RecoverOpts) RecoverOption {
+	return request.Custom(senlin.Snapshot(value))
 }
-func WithCheckHeader(key, value string) CheckOption {
-	return request.WithHeader[CheckOpts](key, value)
-}
-func WithRecoverOptions(value RecoverOpts) RecoverOption { return senlin.Snapshot(value) }
 func WithRecoverOperation(value string) RecoverOption {
-	return func(config *request.Config[RecoverOpts]) error {
+	return request.Custom(func(config *request.Config[RecoverOpts]) error {
 		config.Options.Operation = request.Present(value)
 		return nil
-	}
+	})
 }
 func WithRecoverOperationNull() RecoverOption {
-	return func(config *request.Config[RecoverOpts]) error {
+	return request.Custom(func(config *request.Config[RecoverOpts]) error {
 		config.Options.Operation = request.Null[string]()
 		return nil
-	}
+	})
 }
 func WithRecoverOperationParams(value any) RecoverOption {
-	return withJSON(value, func(opts *RecoverOpts, raw json.RawMessage) { opts.OperationParams = raw })
+	return request.Custom(withJSON(value, func(opts *RecoverOpts, raw json.RawMessage) { opts.OperationParams = raw }))
 }
 func WithRecoverCheck(value bool) RecoverOption {
-	return func(config *request.Config[RecoverOpts]) error {
+	return request.Custom(func(config *request.Config[RecoverOpts]) error {
 		config.Options.Check = request.Present(value)
 		return nil
-	}
+	})
 }
 func WithRecoverCheckNull() RecoverOption {
-	return func(config *request.Config[RecoverOpts]) error {
+	return request.Custom(func(config *request.Config[RecoverOpts]) error {
 		config.Options.Check = request.Null[bool]()
 		return nil
-	}
-}
-func WithRecoverField(key string, value any) RecoverOption {
-	return request.WithField[RecoverOpts](key, value)
-}
-func WithRecoverHeader(key, value string) RecoverOption {
-	return request.WithHeader[RecoverOpts](key, value)
-}
-func WithPerformOperationField(key string, value any) PerformOperationOption {
-	return request.WithField[PerformOperationOpts](key, value)
-}
-func WithPerformOperationHeader(key, value string) PerformOperationOption {
-	return request.WithHeader[PerformOperationOpts](key, value)
+	})
 }
