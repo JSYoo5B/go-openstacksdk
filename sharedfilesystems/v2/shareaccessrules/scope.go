@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/manilaversion"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -51,7 +52,7 @@ func (a *API) InShare(ctx context.Context, parent resource.Ref) (*AccessRuleScop
 		Status: func(value *AccessRule) string { return value.State },
 		Failed: func(state string) bool { return strings.EqualFold(state, "error") },
 		Delete: func(ctx context.Context, id string) error {
-			return maskParent(scope.Deny(ctx, id, WithDenyIgnoreMissing(false)))
+			return maskParent(scope.Deny(ctx, id, request.IgnoreMissing(false)))
 		},
 		IterateControlled: func(ctx context.Context, query url.Values, control resource.ListControl) iter.Seq2[*AccessRule, error] {
 			return func(yield func(*AccessRule, error) bool) {
@@ -135,7 +136,7 @@ func (s *AccessRuleScope) Get(ctx context.Context, id string, options ...GetOpti
 	if err := resource.ID(id).Validate(); err != nil {
 		return nil, err
 	}
-	cfg, err := request.Apply(GetOpts{}, options...)
+	cfg, err := calls.ApplyConfig(GetOpts{}, getCalls, options...)
 	if err == nil {
 		err = request.ValidateCapabilities(cfg, false, false, true)
 	}
@@ -185,8 +186,8 @@ func (s *AccessRuleScope) listWithControl(ctx context.Context, control resource.
 			yield(nil, err)
 			return
 		}
-		configured := append([]ListOption{request.WithArgument[ListOpts](listControlArgument, control)}, options...)
-		cfg, err := request.Apply(ListOpts{}, configured...)
+		configured := append([]ListOption{request.Custom(request.WithArgument[ListOpts](listControlArgument, control))}, options...)
+		cfg, err := calls.ApplyConfig(ListOpts{}, listCalls, configured...)
 		if err == nil {
 			err = request.ValidateCapabilities(cfg, false, true, true, listControlArgument, listBodyFiltersArgument)
 		}
@@ -339,7 +340,7 @@ func (s *AccessRuleScope) Allow(ctx context.Context, opts AllowOpts, options ...
 	if err := requireVersion(ctx, s.api.client, 45); err != nil {
 		return nil, err
 	}
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := calls.ApplyConfig(opts, allowCalls, options...)
 	if err == nil {
 		err = request.ValidateCapabilities(cfg, true, false, true)
 	}
@@ -400,7 +401,7 @@ func (s *AccessRuleScope) Deny(ctx context.Context, id string, options ...DenyOp
 	if err := resource.ID(id).Validate(); err != nil {
 		return err
 	}
-	cfg, err := request.Apply(DenyOpts{}, options...)
+	cfg, err := calls.ApplyConfig(DenyOpts{}, denyCalls, options...)
 	if err == nil {
 		err = request.ValidateCapabilities(cfg, true, false, true)
 	}

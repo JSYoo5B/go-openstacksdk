@@ -1,6 +1,10 @@
 package shareaccessrules
 
-import "github.com/JSYoo5B/go-openstacksdk/request"
+import (
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
+	"github.com/JSYoo5B/go-openstacksdk/internal/manilaown"
+	"github.com/JSYoo5B/go-openstacksdk/request"
+)
 
 // AllowOpts supplies access identity; an omitted access level uses Manila's default.
 // Optional pointer fields distinguish omission from explicit false or empty input.
@@ -14,33 +18,33 @@ type AllowOpts struct {
 	LockReason     *string            `json:"lock_reason,omitempty"`
 }
 
-type AllowOption = request.Option[AllowOpts]
+// AllowOption is one option of Allow and Create: WithAllowOptions, the typed
+// setters below, request.Header, request.Field or request.Custom over
+// *request.Config[AllowOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type AllowOption = request.WriteCall
 
-func WithAllowOptions(value AllowOpts) AllowOption { return request.WithOptions(value) }
-func WithAllowField(key string, value any) AllowOption {
-	return request.WithField[AllowOpts](key, value)
-}
-func WithAllowHeader(key, value string) AllowOption {
-	return request.WithHeader[AllowOpts](key, value)
-}
+var allowCalls = manilaown.HeaderFieldCalls[AllowOpts]()
+
+func WithAllowOptions(value AllowOpts) AllowOption { return request.Custom(request.WithOptions(value)) }
 func WithAccessLevel(value string) AllowOption {
-	return func(c *request.Config[AllowOpts]) error { c.Options.AccessLevel = value; return nil }
+	return request.Custom(func(c *request.Config[AllowOpts]) error { c.Options.AccessLevel = value; return nil })
 }
 func WithMetadata(value map[string]string) AllowOption {
 	copy := make(map[string]string, len(value))
 	for key, item := range value {
 		copy[key] = item
 	}
-	return func(c *request.Config[AllowOpts]) error { c.Options.Metadata = &copy; return nil }
+	return request.Custom(func(c *request.Config[AllowOpts]) error { c.Options.Metadata = &copy; return nil })
 }
 func WithLockVisibility(value bool) AllowOption {
-	return func(c *request.Config[AllowOpts]) error { c.Options.LockVisibility = &value; return nil }
+	return request.Custom(func(c *request.Config[AllowOpts]) error { c.Options.LockVisibility = &value; return nil })
 }
 func WithLockDeletion(value bool) AllowOption {
-	return func(c *request.Config[AllowOpts]) error { c.Options.LockDeletion = &value; return nil }
+	return request.Custom(func(c *request.Config[AllowOpts]) error { c.Options.LockDeletion = &value; return nil })
 }
 func WithLockReason(value string) AllowOption {
-	return func(c *request.Config[AllowOpts]) error { c.Options.LockReason = &value; return nil }
+	return request.Custom(func(c *request.Config[AllowOpts]) error { c.Options.LockReason = &value; return nil })
 }
 
 // DenyOpts configures access revocation. Nil IgnoreMissing means true.
@@ -49,29 +53,43 @@ type DenyOpts struct {
 	IgnoreMissing *bool `json:"-"`
 }
 
-type DenyOption = request.Option[DenyOpts]
+// DenyOption is one option of Deny: WithDenyOptions, WithUnrestrict,
+// WithDenyField, request.Header, request.IgnoreMissing or request.Custom over
+// *request.Config[DenyOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type DenyOption = request.DeleteCall
 
-func WithDenyOptions(value DenyOpts) DenyOption { return request.WithOptions(value) }
+var denyCalls = func() calls.Spec[request.Config[DenyOpts]] {
+	spec := manilaown.IgnoreMissingCalls(func(o *DenyOpts) **bool { return &o.IgnoreMissing })
+	spec.Header = calls.ConfigHeader[DenyOpts]
+	return spec
+}()
+
+func WithDenyOptions(value DenyOpts) DenyOption { return request.Custom(request.WithOptions(value)) }
+
+// WithDenyField adds an extension member to the deny_access body; access_id
+// and unrestrict are protected. No delete category admits request.Field, so
+// this option stays.
 func WithDenyField(key string, value any) DenyOption {
-	return request.WithField[DenyOpts](key, value)
-}
-func WithDenyHeader(key, value string) DenyOption {
-	return request.WithHeader[DenyOpts](key, value)
+	return request.Custom(request.WithField[DenyOpts](key, value))
 }
 func WithUnrestrict(value bool) DenyOption {
-	return func(c *request.Config[DenyOpts]) error { c.Options.Unrestrict = &value; return nil }
-}
-func WithDenyIgnoreMissing(value bool) DenyOption {
-	return func(c *request.Config[DenyOpts]) error { c.Options.IgnoreMissing = &value; return nil }
+	return request.Custom(func(c *request.Config[DenyOpts]) error { c.Options.Unrestrict = &value; return nil })
 }
 
 type GetOpts struct{}
-type GetOption = request.Option[GetOpts]
 
-func WithGetHeader(key, value string) GetOption { return request.WithHeader[GetOpts](key, value) }
+// GetOption is one option of Get: request.Header or request.Custom over
+// *request.Config[GetOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type GetOption = request.GetCall
+
+var getCalls = manilaown.HeaderCalls[GetOpts]()
 
 type ListOpts struct{}
-type ListOption = request.Option[ListOpts]
 
-func WithListQuery(key, value string) ListOption  { return request.WithQuery[ListOpts](key, value) }
-func WithListHeader(key, value string) ListOption { return request.WithHeader[ListOpts](key, value) }
+// ListOption is one option of List and All: request.Query (a string or
+// []string value), request.Header, request.MaxItems, request.Paginated,
+// WithListBodyFilter or request.Custom over *request.Config[ListOpts]. Other
+// shared calls fail with resource.ErrInvalidOption before HTTP.
+type ListOption = request.ListCall

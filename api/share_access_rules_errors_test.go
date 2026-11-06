@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/shareaccessrules"
 	"github.com/gophercloud/gophercloud/v2"
@@ -34,7 +35,7 @@ func TestShareAccessScopeParentMismatchIsNeverIgnored(t *testing.T) {
 					return err
 				},
 				func() error { return scope.Delete(ctx, resource.ID("rule-id")) },
-				func() error { return scope.Deny(ctx, "rule-id", shareaccessrules.WithDenyIgnoreMissing(true)) },
+				func() error { return scope.Deny(ctx, "rule-id", request.IgnoreMissing(true)) },
 				func() error { _, err := scope.Wait(ctx, resource.ID("rule-id"), "active"); return err },
 				func() error { return scope.WaitDeleted(ctx, resource.ID("rule-id")) },
 			} {
@@ -73,7 +74,7 @@ func TestShareAccessScopeMissingRulePoliciesRequireReadableParent(t *testing.T) 
 	for _, run := range []func() error{
 		func() error { return scope.Deny(ctx, "rule-id") },
 		func() error {
-			return scope.Deny(ctx, "rule-id", shareaccessrules.WithDenyIgnoreMissing(false), shareaccessrules.WithDenyIgnoreMissing(true))
+			return scope.Deny(ctx, "rule-id", request.IgnoreMissing(false), request.IgnoreMissing(true))
 		},
 		func() error { return scope.Delete(ctx, resource.ID("rule-id")) },
 		func() error { return scope.WaitDeleted(ctx, resource.ID("rule-id")) },
@@ -86,7 +87,7 @@ func TestShareAccessScopeMissingRulePoliciesRequireReadableParent(t *testing.T) 
 		func() error { _, err := scope.Get(ctx, "rule-id"); return err },
 		func() error { _, err := scope.Find(ctx, resource.ID("rule-id")); return err },
 		func() error {
-			return scope.Deny(ctx, "rule-id", shareaccessrules.WithDenyIgnoreMissing(true), shareaccessrules.WithDenyIgnoreMissing(false))
+			return scope.Deny(ctx, "rule-id", request.IgnoreMissing(true), request.IgnoreMissing(false))
 		},
 		func() error { return scope.Delete(ctx, resource.ID("rule-id"), resource.WithMissingError()) },
 		func() error { _, err := scope.Wait(ctx, resource.ID("rule-id"), "active"); return err },
@@ -174,7 +175,7 @@ func TestShareAccessScopeDenyMissingAfterGetDoesNotHideParentFailure(t *testing.
 				}
 			}
 			if parentCode == 200 {
-				if err := scope.Deny(ctx, "rule-id", shareaccessrules.WithDenyIgnoreMissing(false)); !errors.Is(err, resource.ErrNotFound) || !gophercloud.ResponseCodeIs(err, 404) {
+				if err := scope.Deny(ctx, "rule-id", request.IgnoreMissing(false)); !errors.Is(err, resource.ErrNotFound) || !gophercloud.ResponseCodeIs(err, 404) {
 					t.Fatalf("strict post-action 404=%v", err)
 				}
 			}

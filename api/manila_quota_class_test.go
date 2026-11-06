@@ -97,7 +97,7 @@ func TestManilaQuotaClassAllTypedLimitsKeepExactWireValuesAndSnapshots(t *testin
 	opts := quotaclasssets.UpdateOpts{Gigabytes: &limit, Snapshots: &limit, Shares: &limit, SnapshotGigabytes: &limit, ShareGroups: &limit, ShareGroupSnapshots: &limit, ShareNetworks: &limit, ShareReplicas: &limit, ReplicaGigabytes: &limit, PerShareGigabytes: &limit, Backups: &limit, BackupGigabytes: &limit, Extra: extra}
 	option := quotaclasssets.WithQuotaOptions(opts)
 	other := map[string]any{"mode": "old"}
-	field := quotaclasssets.WithUpdateField("other", other)
+	field := request.Field("other", other)
 	limit = 99
 	extra["vendor"].(map[string]any)["counter"] = 99
 	other["mode"] = "new"
@@ -138,7 +138,7 @@ func TestManilaQuotaClassInvalidOptionsAndMethodSetsPreventUnsupportedRequests(t
 	cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) { t.Errorf("invalid class request: %s", r.URL) })
 	scope := newManilaQuotaClassScope(t, cloud, "2.80")
 	for _, key := range []string{"shares", "force", "id", "class_name", "quota_class_name", "project_id", "user_id", "share_type", "usage", "reservation", "quota_class_set", " "} {
-		for _, option := range []quotaclasssets.UpdateOption{quotaclasssets.WithUpdateField(key, 1), quotaclasssets.WithQuotaOptions(quotaclasssets.UpdateOpts{Extra: map[string]any{key: 1}})} {
+		for _, option := range []quotaclasssets.UpdateOption{request.Field(key, 1), quotaclasssets.WithQuotaOptions(quotaclasssets.UpdateOpts{Extra: map[string]any{key: 1}})} {
 			if _, err := scope.Update(context.Background(), quotaclasssets.UpdateOpts{}, option); !errors.Is(err, resource.ErrInvalidOption) {
 				t.Fatalf("key=%s err=%v", key, err)
 			}
@@ -148,7 +148,7 @@ func TestManilaQuotaClassInvalidOptionsAndMethodSetsPreventUnsupportedRequests(t
 	if _, err := scope.Update(context.Background(), quotaclasssets.UpdateOpts{Shares: &bad}); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
-	for _, option := range []quotaclasssets.UpdateOption{nil, request.WithQuery[quotaclasssets.UpdateOpts]("project_id", "other"), request.WithArgument[quotaclasssets.UpdateOpts]("force", true), quotaclasssets.WithUpdateField("bad", make(chan int))} {
+	for _, option := range []quotaclasssets.UpdateOption{nil, request.Custom(request.WithQuery[quotaclasssets.UpdateOpts]("project_id", "other")), request.Custom(request.WithArgument[quotaclasssets.UpdateOpts]("force", true)), request.Field("bad", make(chan int))} {
 		if _, err := scope.Update(context.Background(), quotaclasssets.UpdateOpts{}, option); err == nil {
 			t.Fatal("unsupported class option accepted")
 		}

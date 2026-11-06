@@ -8,7 +8,9 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/fixedrequest"
+	"github.com/JSYoo5B/go-openstacksdk/internal/manilaown"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
@@ -34,13 +36,18 @@ type UpdateOpts struct {
 	Extra               map[string]any `json:"-"`
 }
 
-type UpdateOption = request.Option[UpdateOpts]
+// UpdateOption is one option of Update: WithQuotaOptions, WithUpdateForce, request.Field (an
+// extension captured as JSON; declared limits, scope selectors and
+// response-only metadata are protected) or request.Custom over
+// *request.Config[UpdateOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type UpdateOption = request.WriteCall
 
 // WithQuotaOptions snapshots pointers and nested Extra values when constructed.
 // Reusing the option cannot observe later changes to caller-owned data.
 func WithQuotaOptions(value UpdateOpts) UpdateOption {
 	snapshot, err := snapshotOptions(value)
-	return func(config *request.Config[UpdateOpts]) error {
+	return request.Custom(func(config *request.Config[UpdateOpts]) error {
 		if err != nil {
 			return err
 		}
@@ -50,21 +57,15 @@ func WithQuotaOptions(value UpdateOpts) UpdateOption {
 		}
 		config.Options = copy
 		return nil
-	}
+	})
 }
 
 func WithUpdateForce(force bool) UpdateOption {
-	return func(config *request.Config[UpdateOpts]) error {
+	return request.Custom(func(config *request.Config[UpdateOpts]) error {
 		copy := force
 		config.Options.Force = &copy
 		return nil
-	}
-}
-
-// WithUpdateField captures an extension value as JSON. Declared limits, scope
-// selectors and response-only metadata cannot be replaced through extensions.
-func WithUpdateField(key string, value any) UpdateOption {
-	return request.WithField[UpdateOpts](key, value)
+	})
 }
 
 type protectedFields struct {
@@ -113,7 +114,7 @@ func snapshotOptions(value UpdateOpts) (UpdateOpts, error) {
 }
 
 func prepareUpdate(opts UpdateOpts, options ...UpdateOption) (map[string]any, error) {
-	config, err := request.Apply(opts, options...)
+	config, err := calls.ApplyConfig(opts, manilaown.FieldCalls[UpdateOpts](), options...)
 	if err != nil {
 		return nil, err
 	}
@@ -187,16 +188,17 @@ func (s *ProjectQuotaScope) Update(ctx context.Context, opts UpdateOpts, options
 }
 
 type resetOptions struct{ ignoreMissing bool }
-type ResetOption func(*resetOptions) error
 
-// WithResetIgnoreMissing suppresses only HTTP 404. The default is strict.
-func WithResetIgnoreMissing(ignore bool) ResetOption {
-	return func(config *resetOptions) error { config.ignoreMissing = ignore; return nil }
-}
+// ResetOption is one option of Reset: request.IgnoreMissing, which suppresses
+// only HTTP 404 (the default is strict). Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type ResetOption = request.DeleteCall
+
+var resetCalls = calls.Spec[resetOptions]{IgnoreMissing: calls.Value(func(o *resetOptions) *bool { return &o.ignoreMissing })}
 
 func prepareReset(options ...ResetOption) (resetOptions, error) {
 	var config resetOptions
-	for _, apply := range options {
+	for _, apply := range calls.Translate(options, resetCalls) {
 		if apply == nil {
 			return config, fmt.Errorf("%w: nil reset option", resource.ErrInvalidOption)
 		}

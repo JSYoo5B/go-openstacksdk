@@ -41,8 +41,8 @@ Acknowledgement of Create, Extend, Shrink, Revert, ResetStatus, ForceDelete, Unm
 
 ## Summary list, manage, soft delete and resize
 
-`List` streams `GET /shares` (the summary view) with the same filters and offset paging as `ListDetail`; options are `WithListOptions` and `WithListQuery`. Summary rows carry only the fields the service returns, so other model fields are zero values.
+`List` streams `GET /shares` (the summary view) with the same filters and offset paging as `ListDetail`; options are `WithListOptions` and `request.Query`. Summary rows carry only the fields the service returns, so other model fields are zero values.
 
-`Manage(ctx, ManageOpts{Protocol, ExportPath, ServiceHost, ...})` posts to `/shares/manage` and returns the share echoed by the service (HTTP 200 or 202). `Name`, `Description`, `ShareType`, `ShareServerID` and `IsPublic` are pointers and `DriverOptions` is a map; they are omitted only when nil. `WithManageField` adds extension members and rejects core names. Required inputs fail before HTTP. The share is normally still managing, so wait on `status`.
+`Manage(ctx, ManageOpts{Protocol, ExportPath, ServiceHost, ...})` posts to `/shares/manage` and returns the share echoed by the service (HTTP 200 or 202). `Name`, `Description`, `ShareType`, `ShareServerID` and `IsPublic` are pointers and `DriverOptions` is a map; they are omitted only when nil. `request.Field` adds extension members and rejects core names. Required inputs fail before HTTP. The share is normally still managing, so wait on `status`.
 
 `SoftDelete` and `Restore` post `{"soft_delete":null}` and `{"restore":null}` (Manila 2.69 and later; only 202 succeeds). `Resize(ctx, id, newSize, ...ResizeOption)` reads the share, then sends at most one extend (`WithResizeForce` adds `"force":true`) or shrink action and returns `ResizeExtend`, `ResizeShrink` or `ResizeNone`; `WithResizeNoExtend` and `WithResizeNoShrink` disable a direction. The size read is not locked and acknowledgement does not mean the resize finished. None of these calls is replayed. See `../python-share-operations.md` for the Python comparison.

@@ -85,7 +85,11 @@ type ListOpts struct {
 	Offset     *int   `q:"offset"`
 }
 
-type ListOption = request.Option[ListOpts]
+// ListOption is one option of List: WithListOptions, WithListDetails,
+// request.Query, request.MaxItems or request.Custom over
+// *request.Config[ListOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type ListOption = request.ListCall
 
 func WithListOptions(value ListOpts) ListOption {
 	if value.Limit != nil {
@@ -96,13 +100,7 @@ func WithListOptions(value ListOpts) ListOption {
 		v := *value.Offset
 		value.Offset = &v
 	}
-	return request.WithOptions(value)
-}
-
-func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
-
-func WithListMaxItems(value int) ListOption {
-	return manilaown.WithListControl[ListOpts](func(c *resource.ListControl) { c.MaxItems = value })
+	return request.Custom(request.WithOptions(value))
 }
 
 const detailsArgument = "snapshotinstances.details"
@@ -110,7 +108,7 @@ const detailsArgument = "snapshotinstances.details"
 // WithListDetails selects /snapshot-instances/detail (true, the default, as
 // Python's details=True) or the summary route /snapshot-instances.
 func WithListDetails(value bool) ListOption {
-	return request.WithArgument[ListOpts](detailsArgument, value)
+	return request.Custom(request.WithArgument[ListOpts](detailsArgument, value))
 }
 
 func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*SnapshotInstance, error] {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/quotaclasssets"
 	"github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/quotasets"
@@ -28,7 +29,7 @@ func TestPyManilaBUpdateQuotaSetPutsOnlySuppliedLimits(t *testing.T) {
 	if err != nil || updated.Shares == nil || *updated.Shares != 5 || updated.ProjectID != "proj-1" {
 		t.Fatalf("updated=%+v error=%v", updated, err)
 	}
-	if _, err := scope.Update(ctx, quotasets.UpdateOpts{Shares: &five}, quotasets.WithUpdateForce(no), quotasets.WithUpdateField("vendor_limit", 3)); err != nil {
+	if _, err := scope.Update(ctx, quotasets.UpdateOpts{Shares: &five}, quotasets.WithUpdateForce(no), request.Field("vendor_limit", 3)); err != nil {
 		t.Fatal(err)
 	}
 	cloud.expect(
@@ -53,7 +54,7 @@ func TestPyManilaBUpdateQuotaSetPutsOnlySuppliedLimits(t *testing.T) {
 
 // Python revert_quota_set DELETEs /quota-sets/{project_id} through
 // Proxy._delete with ignore_missing=True, so a 404 returns None. Go Reset
-// requires 202 and reports a 404 unless WithResetIgnoreMissing(true) is set.
+// requires 202 and reports a 404 unless request.IgnoreMissing(true) is set.
 func TestPyManilaBRevertQuotaSetDeletesProjectOverridesAndIgnoresMissingOnRequest(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
@@ -73,7 +74,7 @@ func TestPyManilaBRevertQuotaSetDeletesProjectOverridesAndIgnoresMissingOnReques
 	if _, err := missingScope.Reset(ctx); err == nil || !gophercloud.ResponseCodeIs(err, 404) {
 		t.Fatalf("strict reset error=%v", err)
 	}
-	if result, err := missingScope.Reset(ctx, quotasets.WithResetIgnoreMissing(true)); err != nil || result != nil {
+	if result, err := missingScope.Reset(ctx, request.IgnoreMissing(true)); err != nil || result != nil {
 		t.Fatalf("ignore-missing result=%+v error=%v", result, err)
 	}
 	if len(missing.snapshot()) != 2 {
@@ -112,7 +113,7 @@ func TestPyManilaBUpdateQuotaClassSetPutsSuppliedLimitsForTheNamedClass(t *testi
 	if err != nil {
 		t.Fatal(err)
 	}
-	updated, err := scope.Update(ctx, quotaclasssets.UpdateOpts{Shares: &zero, Gigabytes: &unlimited}, quotaclasssets.WithUpdateField("vendor_limit", 3))
+	updated, err := scope.Update(ctx, quotaclasssets.UpdateOpts{Shares: &zero, Gigabytes: &unlimited}, request.Field("vendor_limit", 3))
 	if err != nil || updated.ClassName != "default" || updated.Shares == nil || *updated.Shares != 0 {
 		t.Fatalf("updated=%+v error=%v", updated, err)
 	}

@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/manilaown"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
@@ -116,16 +117,13 @@ func (s *Scope) call(method, target string, floor int, body any, ok ...int) mani
 }
 
 // ListOpts has no server filter in the pinned source; extension queries go
-// through WithListQuery.
+// through request.Query.
 type ListOpts struct{}
 
-type ListOption = request.Option[ListOpts]
-
-func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
-
-func WithListMaxItems(value int) ListOption {
-	return manilaown.WithListControl[ListOpts](func(c *resource.ListControl) { c.MaxItems = value })
-}
+// ListOption is one option of List: request.Query, request.MaxItems or
+// request.Custom over *request.Config[ListOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type ListOption = request.ListCall
 
 // List yields the subnets of one GET .../subnets response.
 func (s *Scope) List(ctx context.Context, options ...ListOption) iter.Seq2[*Subnet, error] {
@@ -160,7 +158,10 @@ type CreateOpts struct {
 	Metadata         map[string]string        `json:"metadata,omitzero"`
 }
 
-type CreateOption = request.Option[CreateOpts]
+// CreateOption is one option of Create: WithCreateOptions, request.Field or
+// request.Custom over *request.Config[CreateOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type CreateOption = request.WriteCall
 
 func WithCreateOptions(value CreateOpts) CreateOption {
 	if value.Metadata != nil {
@@ -170,11 +171,7 @@ func WithCreateOptions(value CreateOpts) CreateOption {
 		}
 		value.Metadata = copy
 	}
-	return request.WithOptions(value)
-}
-
-func WithCreateField(key string, value any) CreateOption {
-	return request.WithField[CreateOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 type protectedCreate struct {
@@ -192,7 +189,7 @@ func (s *Scope) Create(ctx context.Context, opts CreateOpts, options ...CreateOp
 	if err := s.check(ctx); err != nil {
 		return nil, wrap("Create", err)
 	}
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := calls.ApplyConfig(opts, manilaown.FieldCalls[CreateOpts](), options...)
 	if err == nil {
 		err = request.ValidateCapabilities(cfg, true, false, false)
 	}

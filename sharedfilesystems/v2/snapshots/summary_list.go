@@ -4,21 +4,24 @@ import (
 	"context"
 	"iter"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
+	"github.com/JSYoo5B/go-openstacksdk/internal/manilaown"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	upstream "github.com/gophercloud/gophercloud/v2/openstack/sharedfilesystems/v2/snapshots"
 	"github.com/gophercloud/gophercloud/v2/pagination"
 )
 
-// ListOption configures List.
-type ListOption = request.Option[ListOpts]
+// ListOption is one option of List: WithListOptions, request.Query (a string
+// or []string value; it replaces a typed filter with the same name) or
+// request.Custom over *request.Config[ListOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type ListOption = request.ListCall
 
 // WithListOptions replaces the typed List filters.
-func WithListOptions(value ListOpts) ListOption { return request.WithOptions(value) }
-
-// WithListQuery adds one raw query parameter, replacing a typed filter with
-// the same name.
-func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
+func WithListOptions(value ListOpts) ListOption {
+	return request.Custom(request.WithOptions(value))
+}
 
 type listOptsBuilder struct {
 	base   ListOpts
@@ -41,7 +44,7 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Snapsh
 		err = request.Wrap("List", "snapshots", err)
 		return func(yield func(*Snapshot, error) bool) { yield(nil, err) }
 	}
-	cfg, err := request.Apply(ListOpts{}, options...)
+	cfg, err := calls.ApplyConfig(ListOpts{}, manilaown.QueryCalls[ListOpts](), options...)
 	if err != nil {
 		return fail(err)
 	}

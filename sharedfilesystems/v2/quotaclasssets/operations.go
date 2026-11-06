@@ -8,7 +8,9 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/fixedrequest"
+	"github.com/JSYoo5B/go-openstacksdk/internal/manilaown"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
@@ -32,11 +34,16 @@ type UpdateOpts struct {
 	Extra               map[string]any `json:"-"`
 }
 
-type UpdateOption = request.Option[UpdateOpts]
+// UpdateOption is one option of Update: WithQuotaOptions, request.Field (an
+// extension captured as JSON; declared limits, scope selectors and
+// response-only metadata are protected) or request.Custom over
+// *request.Config[UpdateOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type UpdateOption = request.WriteCall
 
 func WithQuotaOptions(value UpdateOpts) UpdateOption {
 	snapshot, err := snapshotOptions(value)
-	return func(config *request.Config[UpdateOpts]) error {
+	return request.Custom(func(config *request.Config[UpdateOpts]) error {
 		if err != nil {
 			return err
 		}
@@ -46,11 +53,7 @@ func WithQuotaOptions(value UpdateOpts) UpdateOption {
 		}
 		config.Options = copy
 		return nil
-	}
-}
-
-func WithUpdateField(key string, value any) UpdateOption {
-	return request.WithField[UpdateOpts](key, value)
+	})
 }
 
 type protectedFields struct {
@@ -102,7 +105,7 @@ func snapshotOptions(value UpdateOpts) (UpdateOpts, error) {
 }
 
 func prepareUpdate(opts UpdateOpts, options ...UpdateOption) (map[string]any, error) {
-	config, err := request.Apply(opts, options...)
+	config, err := calls.ApplyConfig(opts, manilaown.FieldCalls[UpdateOpts](), options...)
 	if err != nil {
 		return nil, err
 	}

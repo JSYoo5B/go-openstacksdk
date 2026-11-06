@@ -33,7 +33,7 @@ func TestManilaMiscServicesListUsesQueryExtensionBecauseTypedFiltersAreNotEncode
 	api := services.New(newManilaSupportClient(cloud))
 	var got []services.Service
 	// Gophercloud's ListOpts fields carry json tags only, so the typed filters
-	// are not serialized; WithListQuery is the working filter path.
+	// are not serialized; request.Query is the working filter path.
 	for value, err := range api.List(context.Background(),
 		services.WithListOptions(services.ListOpts{Host: "typed-host", Binary: "typed-binary", State: "up"}),
 		request.Query("host", "h1@lvm")) {

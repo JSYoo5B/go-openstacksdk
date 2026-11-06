@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
+	"github.com/JSYoo5B/go-openstacksdk/internal/manilaown"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
@@ -24,16 +26,14 @@ type ManageOpts struct {
 	DriverOptions map[string]string
 }
 
-// ManageOption configures Manage.
-type ManageOption = request.Option[ManageOpts]
+// ManageOption is one option of Manage: WithManageOptions, request.Field or
+// request.Custom over *request.Config[ManageOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type ManageOption = request.WriteCall
 
 // WithManageOptions replaces the typed Manage input.
-func WithManageOptions(value ManageOpts) ManageOption { return request.WithOptions(value) }
-
-// WithManageField adds an extension member to the snapshot object. Core member
-// names are rejected.
-func WithManageField(key string, value any) ManageOption {
-	return request.WithField[ManageOpts](key, value)
+func WithManageOptions(value ManageOpts) ManageOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 var manageCoreKeys = []string{"share_id", "provider_location", "name", "description", "driver_options"}
@@ -68,7 +68,7 @@ func (o ManageOpts) body(fields map[string]json.RawMessage) (map[string]any, err
 // snapshot usually remains in a managing status, so wait with WaitFor. The call
 // is never replayed and local cancellation does not undo accepted work.
 func (a *API) Manage(ctx context.Context, opts ManageOpts, options ...ManageOption) (*Snapshot, error) {
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := calls.ApplyConfig(opts, manilaown.FieldCalls[ManageOpts](), options...)
 	if err != nil {
 		return nil, request.Wrap("Manage", "snapshots", err)
 	}

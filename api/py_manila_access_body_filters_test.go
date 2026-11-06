@@ -47,7 +47,7 @@ func TestManilaAccessListBodyFiltersStayLocalAndCountRawRows(t *testing.T) {
 		t.Fatalf("ids=%v err=%v", ids, err)
 	}
 	// Python counts excluded rows toward max_items: a and b are consumed, b is excluded.
-	ids, err = accessRuleIDs(t, scope, shareaccessrules.WithListBodyFilter("state", "active"), shareaccessrules.WithListBodyFilter("access_level", "rw"), shareaccessrules.WithListMaxItems(3))
+	ids, err = accessRuleIDs(t, scope, shareaccessrules.WithListBodyFilter("state", "active"), shareaccessrules.WithListBodyFilter("access_level", "rw"), request.MaxItems(3))
 	if err != nil || !reflect.DeepEqual(ids, []string{"a"}) {
 		t.Fatalf("raw cap ids=%v err=%v", ids, err)
 	}
@@ -66,7 +66,7 @@ func TestManilaAccessListBodyFiltersStayLocalAndCountRawRows(t *testing.T) {
 		"scope query attribute": shareaccessrules.WithListBodyFilter("share_id", "share-id"),
 		"unknown attribute":     shareaccessrules.WithListBodyFilter("vendor", 1),
 		"unserializable":        shareaccessrules.WithListBodyFilter("state", func() {}),
-		"forged argument":       request.WithArgument[shareaccessrules.ListOpts]("shareaccessrules.body_filters", "state=active"),
+		"forged argument":       request.Custom(request.WithArgument[shareaccessrules.ListOpts]("shareaccessrules.body_filters", "state=active")),
 	} {
 		if _, err := scope.All(context.Background(), option); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatalf("%s: %v", name, err)

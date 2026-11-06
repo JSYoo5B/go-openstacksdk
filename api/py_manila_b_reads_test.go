@@ -177,7 +177,7 @@ func TestPyManilaBListOperationsUsePythonRoutesAndFilterNames(t *testing.T) {
 	})
 	t.Run("share_snapshots details=False", func(t *testing.T) {
 		run(t, "/v2/snapshots", sum("snapshots"), func(c *gophercloud.ServiceClient) []string {
-			return pyManilaBIDs(t, snapshots.New(c).List(ctx, snapshots.WithListQuery("snapshot_id", "snap-9")), func(s *snapshots.Snapshot) string { return s.ID })
+			return pyManilaBIDs(t, snapshots.New(c).List(ctx, request.Query("snapshot_id", "snap-9")), func(s *snapshots.Snapshot) string { return s.ID })
 		}, "snapshot_id=snap-9")
 	})
 	t.Run("share_replicas", func(t *testing.T) {

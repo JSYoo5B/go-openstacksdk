@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
+	"github.com/JSYoo5B/go-openstacksdk/internal/manilaown"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
@@ -26,11 +28,13 @@ type AllowActionOpts struct {
 	LockReason     request.Optional[string]          `json:"lock_reason,omitzero"`
 }
 
-type AllowActionOption = request.Option[AllowActionOpts]
+// AllowActionOption is one option of AllowAccessAction: WithAllowActionOptions,
+// request.Field or request.Custom over *request.Config[AllowActionOpts]. Other
+// shared calls fail with resource.ErrInvalidOption before HTTP.
+type AllowActionOption = request.WriteCall
 
-func WithAllowActionOptions(opts AllowActionOpts) AllowActionOption { return request.WithOptions(opts) }
-func WithAllowActionField(key string, value any) AllowActionOption {
-	return request.WithField[AllowActionOpts](key, value)
+func WithAllowActionOptions(opts AllowActionOpts) AllowActionOption {
+	return request.Custom(request.WithOptions(opts))
 }
 
 // AllowAccessAction grants access through the share action route directly,
@@ -43,7 +47,7 @@ func (a *API) AllowAccessAction(ctx context.Context, shareID string, opts AllowA
 	if err := a.actionPreflight(ctx, shareID); err != nil {
 		return nil, request.Wrap(op, kind, err)
 	}
-	config, err := request.Apply(opts, options...)
+	config, err := calls.ApplyConfig(opts, manilaown.FieldCalls[AllowActionOpts](), options...)
 	if err == nil {
 		err = request.ValidateCapabilities(config, true, false, false)
 	}
@@ -67,15 +71,17 @@ type DenyActionOpts struct {
 	IgnoreMissing *bool
 	Unrestrict    *bool
 }
-type DenyActionOption = request.Option[DenyActionOpts]
+
+// DenyActionOption is one option of DenyAccessAction: WithDenyActionUnrestrict,
+// request.IgnoreMissing (Python's ignore_missing; the default is true) or
+// request.Custom over *request.Config[DenyActionOpts]. Other shared calls
+// fail with resource.ErrInvalidOption before HTTP.
+type DenyActionOption = request.DeleteCall
+
+var denyActionCalls = manilaown.IgnoreMissingCalls(func(o *DenyActionOpts) **bool { return &o.IgnoreMissing })
 
 func WithDenyActionUnrestrict(value bool) DenyActionOption {
-	return func(c *request.Config[DenyActionOpts]) error { c.Options.Unrestrict = &value; return nil }
-}
-
-// WithDenyActionIgnoreMissing selects Python's ignore_missing; the default is true.
-func WithDenyActionIgnoreMissing(value bool) DenyActionOption {
-	return func(c *request.Config[DenyActionOpts]) error { c.Options.IgnoreMissing = &value; return nil }
+	return request.Custom(func(c *request.Config[DenyActionOpts]) error { c.Options.Unrestrict = &value; return nil })
 }
 
 // DenyActionResult is the actual HTTP response of the accepted action, the
@@ -88,7 +94,7 @@ type DenyActionResult struct {
 
 // DenyAccessAction POSTs {"deny_access":{"access_id":...}} to the share action
 // route with no lookup, matching Python delete_access_rule. HTTP 200, 202 and
-// 204 succeed. A 404 returns nil, nil unless WithDenyActionIgnoreMissing(false)
+// 204 succeed. A 404 returns nil, nil unless request.IgnoreMissing(false)
 // is given; other errors are returned. Never replayed. Success only means the
 // request was accepted, not that the rule is gone.
 func (a *API) DenyAccessAction(ctx context.Context, shareID, accessID string, options ...DenyActionOption) (*DenyActionResult, error) {
@@ -99,7 +105,7 @@ func (a *API) DenyAccessAction(ctx context.Context, shareID, accessID string, op
 	if err := resource.ID(accessID).Validate(); err != nil {
 		return nil, request.Wrap(op, kind, err)
 	}
-	config, err := request.Apply(DenyActionOpts{}, options...)
+	config, err := calls.ApplyConfig(DenyActionOpts{}, denyActionCalls, options...)
 	if err == nil {
 		err = request.ValidateCapabilities(config, false, false, false)
 	}

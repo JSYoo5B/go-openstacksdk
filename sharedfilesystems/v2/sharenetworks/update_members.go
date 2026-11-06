@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"net/url"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
+	"github.com/JSYoo5B/go-openstacksdk/internal/manilaown"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
@@ -22,12 +24,11 @@ type UpdateMembersOpts struct {
 	NovaNetID       request.Optional[string] `json:"nova_net_id,omitzero"`
 }
 
-type UpdateMembersOption = request.Option[UpdateMembersOpts]
-
-// WithUpdateMembersField adds an extension member; declared members are protected.
-func WithUpdateMembersField(key string, value any) UpdateMembersOption {
-	return request.WithField[UpdateMembersOpts](key, value)
-}
+// UpdateMembersOption is one option of UpdateMembers: request.Field (an
+// extension member; declared members are protected) or request.Custom over
+// *request.Config[UpdateMembersOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type UpdateMembersOption = request.WriteCall
 
 // UpdateMembers PUTs /share-networks/{id} with exactly the members that are
 // set. It returns the complete response object, preserving unknown members,
@@ -44,7 +45,7 @@ func (a *API) UpdateMembers(ctx context.Context, id string, opts UpdateMembersOp
 	if err := resource.ID(id).Validate(); err != nil {
 		return nil, request.Wrap(op, kind, err)
 	}
-	config, err := request.Apply(opts, options...)
+	config, err := calls.ApplyConfig(opts, manilaown.FieldCalls[UpdateMembersOpts](), options...)
 	if err == nil {
 		err = request.ValidateCapabilities(config, true, false, false)
 	}

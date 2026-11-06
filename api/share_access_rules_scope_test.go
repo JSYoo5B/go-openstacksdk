@@ -116,12 +116,12 @@ func TestShareAccessScopeResolvesParentOnceAndPreservesModernResponse(t *testing
 		t.Fatalf("scope=%v err=%v", scope, err)
 	}
 	for range 2 {
-		values, err := scope.All(ctx, shareaccessrules.WithListQuery("vendor", "a&b"), shareaccessrules.WithListHeader("X-Vendor", "list"))
+		values, err := scope.All(ctx, request.Query("vendor", "a&b"), request.Header("X-Vendor", "list"))
 		if err != nil || len(values) != 1 || values[0].ShareID != "" || values[0].ParentShareID != "share-id" || values[0].Header.Get("X-Request-Id") != "list-request" {
 			t.Fatalf("list=%v err=%v", values, err)
 		}
 	}
-	value, err := scope.Get(ctx, "rule-id", shareaccessrules.WithGetHeader("X-Vendor", "get"))
+	value, err := scope.Get(ctx, "rule-id", request.Header("X-Vendor", "get"))
 	if err != nil || value.State != "active" || value.AccessKey != "credential" || value.Metadata["owner"] != "ops" || value.CreatedAt.Nanosecond() != 123456000 || !value.UpdatedAt.IsZero() || value.LockVisibility == nil || *value.LockVisibility || value.LockDeletion == nil || !*value.LockDeletion || value.LockReason == nil || *value.LockReason != "maintenance" || string(value.Body["vendor"]) != "null" || value.Header.Get("X-Request-Id") != "get-request" {
 		t.Fatalf("get=%+v err=%v", value, err)
 	}
@@ -129,11 +129,11 @@ func TestShareAccessScopeResolvesParentOnceAndPreservesModernResponse(t *testing
 	option := shareaccessrules.WithMetadata(metadata)
 	metadata["owner"] = "changed"
 	value, err = scope.Allow(ctx, shareaccessrules.AllowOpts{AccessType: "ip", AccessTo: "192.0.2.0/24"}, option,
-		shareaccessrules.WithAccessLevel("rw"), shareaccessrules.WithAccessLevel("ro"), shareaccessrules.WithLockVisibility(false), shareaccessrules.WithLockDeletion(true), shareaccessrules.WithLockReason("maintenance"), shareaccessrules.WithAllowField("vendor:enabled", false), shareaccessrules.WithAllowHeader("X-Vendor", "allow"))
+		shareaccessrules.WithAccessLevel("rw"), shareaccessrules.WithAccessLevel("ro"), shareaccessrules.WithLockVisibility(false), shareaccessrules.WithLockDeletion(true), shareaccessrules.WithLockReason("maintenance"), request.Field("vendor:enabled", false), request.Header("X-Vendor", "allow"))
 	if err != nil || value.ID != "rule-id" || value.ParentShareID != "share-id" || value.Header.Get("X-Request-Id") != "allow-request" {
 		t.Fatalf("allow=%+v err=%v", value, err)
 	}
-	if err := scope.Deny(ctx, "rule-id", shareaccessrules.WithUnrestrict(false), shareaccessrules.WithDenyField("vendor:enabled", false), shareaccessrules.WithDenyHeader("X-Vendor", "deny")); err != nil {
+	if err := scope.Deny(ctx, "rule-id", shareaccessrules.WithUnrestrict(false), shareaccessrules.WithDenyField("vendor:enabled", false), request.Header("X-Vendor", "deny")); err != nil {
 		t.Fatal(err)
 	}
 	if lookups.Load() != 1 || lists.Load() != 2 || actions.Load() != 2 || client.Microversion != "2.82" || client.Endpoint != cloud.Server.URL+shareAccessBase+"/" {
@@ -223,25 +223,25 @@ func TestShareAccessScopeRejectsPreflightInputsWithoutRequests(t *testing.T) {
 	}
 	valid := shareaccessrules.AllowOpts{AccessType: "ip", AccessTo: "192.0.2.1"}
 	for _, option := range []shareaccessrules.AllowOption{
-		nil, shareaccessrules.WithAllowField("access_type", "override"), shareaccessrules.WithAllowField("access_level", "ro"), shareaccessrules.WithAllowField("lock_visibility", false),
-		shareaccessrules.WithAllowHeader("x-auth-token", "override"), shareaccessrules.WithAllowHeader("openstack-api-version", "share 2.82"), shareaccessrules.WithAllowHeader("x-openstack-manila-api-version", "2.82"), shareaccessrules.WithAllowHeader("content-type", "text/plain"),
-		request.WithQuery[shareaccessrules.AllowOpts]("unsupported", "yes"), request.WithArgument[shareaccessrules.AllowOpts]("ignored", true),
+		nil, request.Field("access_type", "override"), request.Field("access_level", "ro"), request.Field("lock_visibility", false),
+		request.Header("x-auth-token", "override"), request.Header("openstack-api-version", "share 2.82"), request.Header("x-openstack-manila-api-version", "2.82"), request.Header("content-type", "text/plain"),
+		request.Custom(request.WithQuery[shareaccessrules.AllowOpts]("unsupported", "yes")), request.Custom(request.WithArgument[shareaccessrules.AllowOpts]("ignored", true)),
 	} {
 		if _, err := scope.Allow(ctx, valid, option); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Errorf("allow option err=%v", err)
 		}
 	}
-	for _, option := range []shareaccessrules.DenyOption{nil, shareaccessrules.WithDenyField("access_id", "other"), shareaccessrules.WithDenyField("unrestrict", false), shareaccessrules.WithDenyHeader("Accept", "override"), request.WithQuery[shareaccessrules.DenyOpts]("unsupported", "yes"), request.WithArgument[shareaccessrules.DenyOpts]("ignored", true)} {
+	for _, option := range []shareaccessrules.DenyOption{nil, shareaccessrules.WithDenyField("access_id", "other"), shareaccessrules.WithDenyField("unrestrict", false), request.Header("Accept", "override"), request.Custom(request.WithQuery[shareaccessrules.DenyOpts]("unsupported", "yes")), request.Custom(request.WithArgument[shareaccessrules.DenyOpts]("ignored", true))} {
 		if err := scope.Deny(ctx, "rule-id", option); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Errorf("deny option err=%v", err)
 		}
 	}
-	for _, option := range []shareaccessrules.GetOption{nil, request.WithField[shareaccessrules.GetOpts]("unsupported", true), request.WithQuery[shareaccessrules.GetOpts]("unsupported", "yes"), request.WithArgument[shareaccessrules.GetOpts]("ignored", true), shareaccessrules.WithGetHeader("X-Auth-Token", "other")} {
+	for _, option := range []shareaccessrules.GetOption{nil, request.Custom(request.WithField[shareaccessrules.GetOpts]("unsupported", true)), request.Custom(request.WithQuery[shareaccessrules.GetOpts]("unsupported", "yes")), request.Custom(request.WithArgument[shareaccessrules.GetOpts]("ignored", true)), request.Header("X-Auth-Token", "other")} {
 		if _, err := scope.Get(ctx, "rule-id", option); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Errorf("get option err=%v", err)
 		}
 	}
-	for _, option := range []shareaccessrules.ListOption{nil, shareaccessrules.WithListQuery("share_id", "share-id"), request.WithField[shareaccessrules.ListOpts]("unsupported", true), request.WithArgument[shareaccessrules.ListOpts]("ignored", true), shareaccessrules.WithListHeader("Accept", "override")} {
+	for _, option := range []shareaccessrules.ListOption{nil, request.Query("share_id", "share-id"), request.Custom(request.WithField[shareaccessrules.ListOpts]("unsupported", true)), request.Custom(request.WithArgument[shareaccessrules.ListOpts]("ignored", true)), request.Header("Accept", "override")} {
 		if _, err := scope.All(ctx, option); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Errorf("list option err=%v", err)
 		}

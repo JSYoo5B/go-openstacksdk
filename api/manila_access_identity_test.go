@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/shareaccessrules"
 )
@@ -48,7 +49,7 @@ func TestManilaAccessIdentityCanonicalFieldsAndRawAliases(t *testing.T) {
 			}
 			value, err := scope.Get(context.Background(), "rule-id")
 			check(value, err)
-			values, err := scope.All(context.Background(), shareaccessrules.WithListMaxItems(1))
+			values, err := scope.All(context.Background(), request.MaxItems(1))
 			if err != nil || len(values) != 1 {
 				t.Fatalf("list=%v err=%v", values, err)
 			}
@@ -86,11 +87,11 @@ func TestManilaAccessIdentityShadowCannotAuthorizeDeny(t *testing.T) {
 	for _, run := range []func() error{
 		func() error { _, err := scope.Get(context.Background(), "rule-id"); return err },
 		func() error {
-			_, err := scope.All(context.Background(), shareaccessrules.WithListMaxItems(1))
+			_, err := scope.All(context.Background(), request.MaxItems(1))
 			return err
 		},
 		func() error {
-			return scope.Deny(context.Background(), "rule-id", shareaccessrules.WithDenyIgnoreMissing(true))
+			return scope.Deny(context.Background(), "rule-id", request.IgnoreMissing(true))
 		},
 	} {
 		err := run()
@@ -167,7 +168,7 @@ func TestManilaAccessIdentityRejectsMissingInvalidCanonicalIDs(t *testing.T) {
 			if value, err := scope.Get(context.Background(), "route-id"); err == nil || value != nil {
 				t.Fatalf("invalid canonical GET identity accepted: value=%+v err=%v", value, err)
 			}
-			values, err := scope.All(context.Background(), shareaccessrules.WithListMaxItems(1))
+			values, err := scope.All(context.Background(), request.MaxItems(1))
 			var accepted *resource.ResponseError
 			if err == nil || values != nil || !errors.As(err, &accepted) || accepted.StatusCode != 200 || string(accepted.Body) != body || accepted.Header.Get("X-Request-Id") != "invalid-canonical-id" || accepted.Cause == nil || calls.Load() != 2 {
 				t.Fatalf("invalid list identity evidence lost: values=%v err=%v evidence=%+v calls=%d", values, err, accepted, calls.Load())

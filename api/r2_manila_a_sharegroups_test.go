@@ -57,7 +57,7 @@ func TestR2ManilaAShareGroupFloorProtectedFieldsAndNoReplay(t *testing.T) {
 	}
 	api := sharegroups.New(r2ManilaAClient(cloud, "2.55"))
 	for _, key := range []string{"name", "share_types", "id", "status", "project_id", "share_group"} {
-		if _, err := api.Create(ctx, sharegroups.CreateOpts{}, sharegroups.WithCreateField(key, "x")); !errors.Is(err, resource.ErrInvalidOption) {
+		if _, err := api.Create(ctx, sharegroups.CreateOpts{}, request.Field(key, "x")); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Errorf("%s: %v", key, err)
 		}
 	}
@@ -264,7 +264,7 @@ func TestR2ManilaAShareGroupSnapshotValidationErrorsAndPolicies(t *testing.T) {
 	if _, err := api.Create(ctx, sharegroupsnapshots.CreateOpts{}); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Error("share_group_id is required:", err)
 	}
-	if _, err := api.Create(ctx, sharegroupsnapshots.CreateOpts{ShareGroupID: "g"}, sharegroupsnapshots.WithCreateField("share_group_id", "h")); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := api.Create(ctx, sharegroupsnapshots.CreateOpts{ShareGroupID: "g"}, request.Field("share_group_id", "h")); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Error(err)
 	}
 	if err := api.ResetStatus(ctx, "s1", " "); !errors.Is(err, resource.ErrInvalidOption) {

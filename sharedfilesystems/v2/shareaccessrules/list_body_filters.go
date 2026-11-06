@@ -30,11 +30,11 @@ var accessRuleBodyFilterFields = map[string]bool{
 // subset of a nonempty response object, other values compare exactly and a
 // missing field compares as null (internal/jsonfilter.MatchFilters). Unknown
 // names and encoding errors fail before HTTP. Repeating a name replaces its
-// value. WithListMaxItems counts raw rows before filtering, as Python's
+// value. request.MaxItems counts raw rows before filtering, as Python's
 // max_items does.
 func WithListBodyFilter(name string, value any) ListOption {
 	encoded, err := json.Marshal(value)
-	return func(cfg *request.Config[ListOpts]) error {
+	return request.Custom(func(cfg *request.Config[ListOpts]) error {
 		if err != nil {
 			return invalid("access rule body filter %q: %v", name, err)
 		}
@@ -55,7 +55,7 @@ func WithListBodyFilter(name string, value any) ListOption {
 		}
 		cfg.Arguments[listBodyFiltersArgument] = owned
 		return nil
-	}
+	})
 }
 
 func accessRuleBodyFilters(cfg request.Config[ListOpts]) (map[string]json.RawMessage, error) {

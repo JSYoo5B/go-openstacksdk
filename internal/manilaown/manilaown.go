@@ -17,6 +17,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
@@ -365,34 +366,18 @@ func NotFound(kind, reference string, ctx context.Context, err error) error {
 	return err
 }
 
-// ControlArgument carries WithListMaxItems/WithListPaginated through request
-// options. Manila list routes return one response, so SinglePage changes nothing.
+// ControlArgument carries request.MaxItems through the request options of a
+// ListFor list. Manila list routes return one response.
 const ControlArgument = "manilaown.list_control"
 
-// WithListControl edits the local consumption control of a typed list.
-func WithListControl[O any](edit func(*resource.ListControl)) request.Option[O] {
-	return func(cfg *request.Config[O]) error {
-		control, _, err := request.Argument[resource.ListControl](*cfg, ControlArgument)
-		if err != nil {
-			return err
-		}
-		edit(&control)
-		if cfg.Arguments == nil {
-			cfg.Arguments = make(map[string]any)
-		}
-		cfg.Arguments[ControlArgument] = control
-		return nil
-	}
-}
-
-// ListFor builds a lazy typed list. route receives the applied options and
-// returns the path to GET (without query); extra names additional library
-// arguments the operation understands.
-func ListFor[T any, O any](ctx context.Context, client *gophercloud.ServiceClient, floor int, key string, route func(request.Config[O]) string, control resource.ListControl, options []request.Option[O], extra ...string) iter.Seq2[*T, error] {
-	options = append([]request.Option[O](nil), options...)
+// ListFor builds a lazy typed list. options are translated with ListCalls.
+// route receives the applied options and returns the path to GET (without
+// query); extra names additional library arguments the operation understands.
+func ListFor[T any, O any, C request.Call](ctx context.Context, client *gophercloud.ServiceClient, floor int, key string, route func(request.Config[O]) string, control resource.ListControl, options []C, extra ...string) iter.Seq2[*T, error] {
+	options = append([]C(nil), options...)
 	return func(yield func(*T, error) bool) {
 		var zero O
-		cfg, err := request.Apply(zero, options...)
+		cfg, err := calls.ApplyConfig(zero, ListCalls[O](), options...)
 		if err == nil {
 			err = request.ValidateCapabilities(cfg, false, true, false, append([]string{ControlArgument}, extra...)...)
 		}

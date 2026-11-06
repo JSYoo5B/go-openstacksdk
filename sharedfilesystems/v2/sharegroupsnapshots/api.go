@@ -13,6 +13,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/manilaown"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
@@ -119,7 +120,11 @@ type ListOpts struct {
 	SortDir      string `q:"sort_dir"`
 }
 
-type ListOption = request.Option[ListOpts]
+// ListOption is one option of List: WithListOptions, WithListDetails,
+// request.Query, request.MaxItems or request.Custom over
+// *request.Config[ListOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type ListOption = request.ListCall
 
 func WithListOptions(value ListOpts) ListOption {
 	if value.AllTenants != nil {
@@ -134,13 +139,7 @@ func WithListOptions(value ListOpts) ListOption {
 		v := *value.Offset
 		value.Offset = &v
 	}
-	return request.WithOptions(value)
-}
-
-func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
-
-func WithListMaxItems(value int) ListOption {
-	return manilaown.WithListControl[ListOpts](func(c *resource.ListControl) { c.MaxItems = value })
+	return request.Custom(request.WithOptions(value))
 }
 
 const detailsArgument = "sharegroupsnapshots.details"
@@ -148,7 +147,7 @@ const detailsArgument = "sharegroupsnapshots.details"
 // WithListDetails selects /share-group-snapshots/detail (true, the default,
 // like Python's details=True) or the summary route /share-group-snapshots.
 func WithListDetails(value bool) ListOption {
-	return request.WithArgument[ListOpts](detailsArgument, value)
+	return request.Custom(request.WithArgument[ListOpts](detailsArgument, value))
 }
 
 func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*ShareGroupSnapshot, error] {
@@ -188,12 +187,13 @@ type CreateOpts struct {
 	Description  request.Optional[string] `json:"description,omitzero"`
 }
 
-type CreateOption = request.Option[CreateOpts]
+// CreateOption is one option of Create: WithCreateOptions, request.Field or
+// request.Custom over *request.Config[CreateOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type CreateOption = request.WriteCall
 
-func WithCreateOptions(value CreateOpts) CreateOption { return request.WithOptions(value) }
-
-func WithCreateField(key string, value any) CreateOption {
-	return request.WithField[CreateOpts](key, value)
+func WithCreateOptions(value CreateOpts) CreateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type protectedCreate struct {
@@ -212,7 +212,7 @@ func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOpti
 	if err := a.check(ctx); err != nil {
 		return nil, wrap("Create", err)
 	}
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := calls.ApplyConfig(opts, manilaown.FieldCalls[CreateOpts](), options...)
 	if err == nil {
 		err = request.ValidateCapabilities(cfg, true, false, false)
 	}
@@ -239,12 +239,13 @@ type UpdateOpts struct {
 	Description request.Optional[string] `json:"description,omitzero"`
 }
 
-type UpdateOption = request.Option[UpdateOpts]
+// UpdateOption is one option of Update: WithUpdateOptions, request.Field or
+// request.Custom over *request.Config[UpdateOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type UpdateOption = request.WriteCall
 
-func WithUpdateOptions(value UpdateOpts) UpdateOption { return request.WithOptions(value) }
-
-func WithUpdateField(key string, value any) UpdateOption {
-	return request.WithField[UpdateOpts](key, value)
+func WithUpdateOptions(value UpdateOpts) UpdateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type protectedUpdate struct {
@@ -262,7 +263,7 @@ func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ..
 	if err := resource.ID(id).Validate(); err != nil {
 		return nil, wrap("Update", err)
 	}
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := calls.ApplyConfig(opts, manilaown.FieldCalls[UpdateOpts](), options...)
 	if err == nil {
 		err = request.ValidateCapabilities(cfg, true, false, false)
 	}

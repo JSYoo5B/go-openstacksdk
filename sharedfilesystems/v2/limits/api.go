@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/manilaown"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
@@ -52,9 +53,10 @@ func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 // GetOpts carries query extensions only; Manila's limits route has no filter.
 type GetOpts struct{}
 
-type GetOption = request.Option[GetOpts]
-
-func WithQuery(key, value string) GetOption { return request.WithQuery[GetOpts](key, value) }
+// GetOption is one option of Get: request.Query (a string or []string value)
+// or request.Custom over *request.Config[GetOpts]. Other shared calls fail
+// with resource.ErrInvalidOption before HTTP.
+type GetOption = request.GetQueryCall
 
 // Get reads GET /limits once; only HTTP 200 succeeds.
 func (a *API) Get(ctx context.Context, options ...GetOption) (*Limits, error) {
@@ -65,7 +67,7 @@ func (a *API) Get(ctx context.Context, options ...GetOption) (*Limits, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, wrap(err)
 	}
-	cfg, err := request.Apply(GetOpts{}, options...)
+	cfg, err := calls.ApplyConfig(GetOpts{}, manilaown.QueryCalls[GetOpts](), options...)
 	if err == nil {
 		err = request.ValidateCapabilities(cfg, false, true, false)
 	}

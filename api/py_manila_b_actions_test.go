@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/replicas"
 	"github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/shares"
 	"github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/snapshots"
@@ -186,7 +187,7 @@ func TestPyManilaBManageSharesAndSnapshotsSendBodiesAndKeepFalseAndEmpty(t *test
 	share, err := shares.New(client).Manage(ctx, shares.ManageOpts{
 		Protocol: "NFS", ExportPath: "10.0.0.1:/vol", ServiceHost: "host@backend#pool",
 		Name: str(""), IsPublic: &no, DriverOptions: map[string]string{},
-	}, shares.WithManageField("vendor", map[string]any{"tier": 1}))
+	}, request.Field("vendor", map[string]any{"tier": 1}))
 	if err != nil || share == nil || share.ID != "share-9" || share.Status != "manage_starting" {
 		t.Fatalf("share=%+v error=%v", share, err)
 	}
@@ -213,13 +214,13 @@ func TestPyManilaBManageSharesAndSnapshotsSendBodiesAndKeepFalseAndEmpty(t *test
 	if _, err := api.Manage(ctx, shares.ManageOpts{Protocol: "NFS", ExportPath: "p"}); err == nil {
 		t.Fatal("missing service host accepted")
 	}
-	if _, err := api.Manage(ctx, shares.ManageOpts{Protocol: "NFS", ExportPath: "p", ServiceHost: "h"}, shares.WithManageField("name", "x")); err == nil {
+	if _, err := api.Manage(ctx, shares.ManageOpts{Protocol: "NFS", ExportPath: "p", ServiceHost: "h"}, request.Field("name", "x")); err == nil {
 		t.Fatal("core extension accepted")
 	}
 	if _, err := snapshots.New(rejected.client(pyManilaBVersion)).Manage(ctx, snapshots.ManageOpts{ShareID: "s"}); err == nil {
 		t.Fatal("missing provider location accepted")
 	}
-	if _, err := snapshots.New(rejected.client(pyManilaBVersion)).Manage(ctx, snapshots.ManageOpts{ShareID: "s", ProviderLocation: "l"}, snapshots.WithManageField("share_id", "x")); err == nil {
+	if _, err := snapshots.New(rejected.client(pyManilaBVersion)).Manage(ctx, snapshots.ManageOpts{ShareID: "s", ProviderLocation: "l"}, request.Field("share_id", "x")); err == nil {
 		t.Fatal("core snapshot extension accepted")
 	}
 	rejected.expect()

@@ -6,7 +6,9 @@ import (
 	"net/url"
 	"strconv"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/manilafind"
+	"github.com/JSYoo5B/go-openstacksdk/internal/manilaown"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
@@ -17,20 +19,20 @@ type FindOpts struct {
 	AllProjects   *bool
 }
 
-type FindOption = request.Option[FindOpts]
-
-func WithFindIgnoreMissing(value bool) FindOption {
-	return func(c *request.Config[FindOpts]) error { c.Options.IgnoreMissing = &value; return nil }
-}
+// FindOption is one option of FindByNameOrID: WithFindAllProjects,
+// request.Query (a list-fallback filter, a string or []string value; a
+// supplied "name" replaces the default name=<identity> filter, as Python
+// does), request.IgnoreMissing or request.Custom over
+// *request.Config[FindOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type FindOption = request.FindCall
 
 // WithFindAllProjects sends all_tenants=true or false on the list fallback only.
 func WithFindAllProjects(value bool) FindOption {
-	return func(c *request.Config[FindOpts]) error { c.Options.AllProjects = &value; return nil }
+	return request.Custom(func(c *request.Config[FindOpts]) error { c.Options.AllProjects = &value; return nil })
 }
 
-// WithFindQuery adds a list-fallback filter. A supplied "name" replaces the
-// default name=<identity> filter, as Python does.
-func WithFindQuery(key, value string) FindOption { return request.WithQuery[FindOpts](key, value) }
+var findCalls = manilaown.FindCalls(func(o *FindOpts) **bool { return &o.IgnoreMissing })
 
 // FindByNameOrID reproduces Python Resource.find: GET /shares/{identity} when
 // the identity is a safe path segment; after HTTP 400, 403 or 404 (and for
@@ -38,7 +40,7 @@ func WithFindQuery(key, value string) FindOption { return request.WithQuery[Find
 // and match the exact ID or name. Two matches fail with resource.ErrAmbiguous.
 // Other GET errors are returned. No mutation is involved and nothing replays.
 func (a *API) FindByNameOrID(ctx context.Context, identity string, options ...FindOption) (*Share, error) {
-	config, err := request.Apply(FindOpts{}, options...)
+	config, err := calls.ApplyConfig(FindOpts{}, findCalls, options...)
 	if err == nil {
 		err = request.ValidateCapabilities(config, false, true, false)
 	}
@@ -57,7 +59,7 @@ func (a *API) FindByNameOrID(ctx context.Context, identity string, options ...Fi
 			options := make([]ListOption, 0, len(q))
 			for key, values := range q {
 				for _, v := range values {
-					options = append(options, WithListQuery(key, v))
+					options = append(options, request.Query(key, v))
 				}
 			}
 			return a.List(ctx, options...)

@@ -35,13 +35,13 @@ func TestManilaAccessListControlsSnapshotAndSingleCollection(t *testing.T) {
 		t.Fatal(err)
 	}
 	options := []shareaccessrules.ListOption{
-		shareaccessrules.WithListMaxItems(1), shareaccessrules.WithListMaxItems(2),
-		shareaccessrules.WithListPaginated(true), shareaccessrules.WithListPaginated(false),
-		shareaccessrules.WithListQuery("limit", "7"), shareaccessrules.WithListQuery("marker", "wire-marker"),
-		shareaccessrules.WithListQuery("vendor", "a&b"), shareaccessrules.WithListHeader("X-List", "owned"),
+		request.MaxItems(1), request.MaxItems(2),
+		request.Paginated(true), request.Paginated(false),
+		request.Query("limit", "7"), request.Query("marker", "wire-marker"),
+		request.Query("vendor", "a&b"), request.Header("X-List", "owned"),
 	}
 	sequence := scope.List(context.Background(), options...)
-	options[1] = shareaccessrules.WithListMaxItems(1)
+	options[1] = request.MaxItems(1)
 	if calls.Load() != 0 {
 		t.Fatal("List must remain lazy")
 	}
@@ -57,7 +57,7 @@ func TestManilaAccessListControlsSnapshotAndSingleCollection(t *testing.T) {
 			t.Fatalf("owned values=%+v", values)
 		}
 	}
-	values, err := scope.All(context.Background(), append(options[2:], shareaccessrules.WithListMaxItems(1), shareaccessrules.WithListMaxItems(0), shareaccessrules.WithListPaginated(true))...)
+	values, err := scope.All(context.Background(), append(options[2:], request.MaxItems(1), request.MaxItems(0), request.Paginated(true))...)
 	if err != nil || len(values) != 3 || calls.Load() != 3 || client.Microversion != "2.82" || client.Endpoint != cloud.Server.URL+shareAccessBase+"/" || !reflect.DeepEqual(client.MoreHeaders, map[string]string{"X-Configured": "source"}) {
 		t.Fatalf("all=%+v err=%v calls=%d source=%+v", values, err, calls.Load(), client)
 	}
@@ -77,12 +77,12 @@ func TestManilaAccessListControlsCapBeforeLaterDecode(t *testing.T) {
 	})
 	scope := shareAccessScope(t, cloud)
 	for _, paginated := range []bool{false, true} {
-		values, err := scope.All(context.Background(), shareaccessrules.WithListMaxItems(1), shareaccessrules.WithListPaginated(paginated))
+		values, err := scope.All(context.Background(), request.MaxItems(1), request.Paginated(paginated))
 		if err != nil || len(values) != 1 || values[0].ID != "first" {
 			t.Fatalf("paginated=%v values=%+v err=%v", paginated, values, err)
 		}
 	}
-	for _, options := range [][]shareaccessrules.ListOption{nil, {shareaccessrules.WithListPaginated(false)}, {shareaccessrules.WithListMaxItems(2)}} {
+	for _, options := range [][]shareaccessrules.ListOption{nil, {request.Paginated(false)}, {request.MaxItems(2)}} {
 		values, err := scope.All(context.Background(), options...)
 		var accepted *resource.ResponseError
 		if values != nil || !errors.As(err, &accepted) || string(accepted.Body) != body || accepted.StatusCode != 200 || accepted.Header.Get("X-Request-Id") != "later-decode" {
@@ -91,7 +91,7 @@ func TestManilaAccessListControlsCapBeforeLaterDecode(t *testing.T) {
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	for value, err := range scope.List(ctx, shareaccessrules.WithListMaxItems(1)) {
+	for value, err := range scope.List(ctx, request.MaxItems(1)) {
 		if err != nil || value.ID != "first" {
 			t.Fatalf("value=%+v err=%v", value, err)
 		}
@@ -109,11 +109,11 @@ func TestManilaAccessListControlsRejectBeforeHTTP(t *testing.T) {
 	cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) { calls.Add(1); testcloud.JSON(w, 500, `{}`) })
 	scope := shareAccessScope(t, cloud)
 	for _, option := range []shareaccessrules.ListOption{
-		nil, shareaccessrules.WithListMaxItems(-1), shareaccessrules.WithListQuery("max_items", "1"),
-		shareaccessrules.WithListQuery("paginated", "false"), shareaccessrules.WithListQuery("share_id", "other"),
-		shareaccessrules.WithListHeader("x-openstack-manila-api-version", "2.82"),
-		request.WithField[shareaccessrules.ListOpts]("field", true), request.WithArgument[shareaccessrules.ListOpts]("foreign", true),
-		request.WithArgument[shareaccessrules.ListOpts]("shareaccessrules.list_control", "wrong-type"),
+		nil, request.MaxItems(-1), request.Query("max_items", "1"),
+		request.Query("paginated", "false"), request.Query("share_id", "other"),
+		request.Header("x-openstack-manila-api-version", "2.82"),
+		request.Custom(request.WithField[shareaccessrules.ListOpts]("field", true)), request.Custom(request.WithArgument[shareaccessrules.ListOpts]("foreign", true)),
+		request.Custom(request.WithArgument[shareaccessrules.ListOpts]("shareaccessrules.list_control", "wrong-type")),
 	} {
 		if _, err := scope.All(context.Background(), option); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Errorf("option error=%v", err)
@@ -121,7 +121,7 @@ func TestManilaAccessListControlsRejectBeforeHTTP(t *testing.T) {
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
-	if _, err := scope.All(ctx, shareaccessrules.WithListMaxItems(1)); !errors.Is(err, context.Canceled) {
+	if _, err := scope.All(ctx, request.MaxItems(1)); !errors.Is(err, context.Canceled) {
 		t.Fatal(err)
 	}
 	if calls.Load() != 0 {
@@ -167,7 +167,7 @@ func TestManilaAccessListControlsStrictSourceVersion(t *testing.T) {
 				if err != nil {
 					t.Fatal(err)
 				}
-				values, err := scope.All(context.Background(), shareaccessrules.WithListMaxItems(1))
+				values, err := scope.All(context.Background(), request.MaxItems(1))
 				if err != nil || values == nil || len(values) != 0 || calls.Load() != 1 {
 					t.Fatalf("values=%v err=%v calls=%d", values, err, calls.Load())
 				}
@@ -191,16 +191,16 @@ func TestManilaAccessListControlsRecheckSourceAfterOptionsAndLookup(t *testing.T
 			}
 			switch method {
 			case "List":
-				_, err = scope.All(context.Background(), func(*request.Config[shareaccessrules.ListOpts]) error { client.Microversion = "2.44"; return nil })
+				_, err = scope.All(context.Background(), request.Custom(func(*request.Config[shareaccessrules.ListOpts]) error { client.Microversion = "2.44"; return nil }))
 			case "Get":
-				_, err = scope.Get(context.Background(), "rule-id", func(*request.Config[shareaccessrules.GetOpts]) error { client.Type = "compute"; return nil })
+				_, err = scope.Get(context.Background(), "rule-id", request.Custom(func(*request.Config[shareaccessrules.GetOpts]) error { client.Type = "compute"; return nil }))
 			case "Allow":
-				_, err = scope.Allow(context.Background(), shareaccessrules.AllowOpts{AccessType: "ip", AccessTo: "192.0.2.1"}, func(*request.Config[shareaccessrules.AllowOpts]) error {
+				_, err = scope.Allow(context.Background(), shareaccessrules.AllowOpts{AccessType: "ip", AccessTo: "192.0.2.1"}, request.Custom(func(*request.Config[shareaccessrules.AllowOpts]) error {
 					client.MoreHeaders = map[string]string{"x-openstack-manila-api-version": "2.44"}
 					return nil
-				})
+				}))
 			case "Deny":
-				err = scope.Deny(context.Background(), "rule-id", func(*request.Config[shareaccessrules.DenyOpts]) error { client.Microversion = "2.44"; return nil })
+				err = scope.Deny(context.Background(), "rule-id", request.Custom(func(*request.Config[shareaccessrules.DenyOpts]) error { client.Microversion = "2.44"; return nil }))
 			}
 			if err == nil || calls.Load() != 0 {
 				t.Fatalf("post-options guard err=%v calls=%d", err, calls.Load())
@@ -270,7 +270,7 @@ func TestManilaAccessListControlsAcceptedAndNativeErrors(t *testing.T) {
 				w.Header().Set("X-Request-Id", "original-error")
 				testcloud.JSON(w, tc.status, tc.body)
 			})
-			values, err := shareAccessScope(t, cloud).All(context.Background(), shareaccessrules.WithListMaxItems(1))
+			values, err := shareAccessScope(t, cloud).All(context.Background(), request.MaxItems(1))
 			if err == nil || values != nil || calls.Load() != 1 {
 				t.Fatalf("values=%v err=%v calls=%d", values, err, calls.Load())
 			}
@@ -302,7 +302,7 @@ func TestManilaAccessListControlsTerminalCancellation(t *testing.T) {
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()
 			var rows, failures int
-			for value, err := range shareAccessScope(t, cloud).List(ctx, shareaccessrules.WithListMaxItems(maximum)) {
+			for value, err := range shareAccessScope(t, cloud).List(ctx, request.MaxItems(maximum)) {
 				if value != nil {
 					rows++
 					cancel()
@@ -330,7 +330,7 @@ func TestManilaAccessListControlsTerminalCancellation(t *testing.T) {
 		defer cancel()
 		scope := shareAccessScope(t, cloud)
 		result := make(chan error, 1)
-		go func() { _, err := scope.All(ctx, shareaccessrules.WithListMaxItems(1)); result <- err }()
+		go func() { _, err := scope.All(ctx, request.MaxItems(1)); result <- err }()
 		<-started
 		cancel()
 		if err := <-result; !errors.Is(err, context.Canceled) {

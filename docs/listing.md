@@ -316,8 +316,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/shareaccessrules.API.InShare`
 - `github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/shareaccessrules.AccessRuleScope.List`
 - `github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/shareaccessrules.AccessRuleScope.All`
-- `github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/shareaccessrules.WithListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/shareaccessrules.WithListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 - `github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/shareaccessrules.WithListBodyFilter`
 - `github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/shareaccessrules.API.ListAccessAction`
 
@@ -340,7 +340,7 @@ Python/Go differences:
 - The reviewed modern Manila endpoint returns one collection with no server paging contract. Go does not infer Resource.list marker fallback or follow next links; both Paginated settings consume one GET and MaxItems is only a raw-row bound.
 - Known options protect fixed parent and local control keys, but explicitly supplied vendor query values reach the deployment rather than Python unknown-query omission. Only exact lowercase wire identities establish scope ownership; strict typed/parent validation and accepted-response evidence are deliberate Go policies.
 - Python classifies unknown keyword arguments automatically: Body attributes become client-side filters and other unknown keys are discarded. Go uses explicit WithListBodyFilter for local filters and rejects unknown filter names; filters compare the raw response JSON (shared jsonfilter policy) rather than Python descriptor-coerced values such as lock_reason's declared bool type.
-- Python forwards per-call base_path, microversion, headers and the deprecated jmespath_filters through Proxy._list. Go fixes the 2.45+ share-access-rules route, uses the client's configured microversion (select another client to change it), takes per-call headers through WithListHeader and provides no JMESPath; remaining Adapter/session controls are the shared SDK-R1/C1/S1 boundary (docs/sdk-support-ledger.md).
+- Python forwards per-call base_path, microversion, headers and the deprecated jmespath_filters through Proxy._list. Go fixes the 2.45+ share-access-rules route, uses the client's configured microversion (select another client to change it), takes per-call headers through request.Header and provides no JMESPath; remaining Adapter/session controls are the shared SDK-R1/C1/S1 boundary (docs/sdk-support-ledger.md).
 - Pinned Python access_rules has no pre-2.45 path. Go additionally exposes the legacy os-access_list/access_list share action through API.ListAccessAction (reviewed against Manila's v2 shares controller), gated by the selected microversion; it is a separate method and never a silent fallback for the scope List.
 
 ### `python:network/v2/qos_policies`

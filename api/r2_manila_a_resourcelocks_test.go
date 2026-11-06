@@ -56,12 +56,12 @@ func TestR2ManilaAResourceLockCreateExtensionsAndProtectedFields(t *testing.T) {
 	api := resourcelocks.New(r2ManilaAClient(cloud, "2.81"))
 	ctx := context.Background()
 	base := resourcelocks.CreateOpts{ResourceID: "s", ResourceType: "share"}
-	if _, err := api.Create(ctx, base, resourcelocks.WithCreateField("vendor", false)); err != nil {
+	if _, err := api.Create(ctx, base, request.Field("vendor", false)); err != nil {
 		t.Fatal(err)
 	}
 	calls := r2ManilaAGuard(t, cloud)
 	for _, key := range []string{"resource_id", "resource_action", "id", "lock_context", "user_id", "project_id", "created_at", "resource_lock"} {
-		if _, err := api.Create(ctx, base, resourcelocks.WithCreateField(key, "x")); !errors.Is(err, resource.ErrInvalidOption) {
+		if _, err := api.Create(ctx, base, request.Field(key, "x")); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Errorf("%s: err=%v", key, err)
 		}
 	}
@@ -138,7 +138,7 @@ func TestR2ManilaAResourceLockListQueriesPagingAndMalformedRows(t *testing.T) {
 	var ids []string
 	for value, err := range api.List(context.Background(),
 		resourcelocks.WithListOptions(resourcelocks.ListOpts{ResourceType: "share", Limit: &zero, WithCount: &no, LockReasonLike: "a b", SortDir: "desc"}),
-		resourcelocks.WithListQuery("vendor", "1")) {
+		request.Query("vendor", "1")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -148,7 +148,7 @@ func TestR2ManilaAResourceLockListQueriesPagingAndMalformedRows(t *testing.T) {
 		t.Fatalf("ids=%v query=%s", ids, raw)
 	}
 	capped := 0
-	for _, err := range api.List(context.Background(), resourcelocks.WithListMaxItems(2)) {
+	for _, err := range api.List(context.Background(), request.MaxItems(2)) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -157,14 +157,14 @@ func TestR2ManilaAResourceLockListQueriesPagingAndMalformedRows(t *testing.T) {
 	if capped != 2 {
 		t.Fatalf("capped=%d", capped)
 	}
-	for _, option := range []resourcelocks.ListOption{resourcelocks.WithListQuery("resource_type", "x"), resourcelocks.WithListMaxItems(-1)} {
+	for _, option := range []resourcelocks.ListOption{request.Query("resource_type", "x"), request.MaxItems(-1)} {
 		for _, err := range api.List(context.Background(), option) {
 			if !errors.Is(err, resource.ErrInvalidOption) {
 				t.Errorf("err=%v", err)
 			}
 		}
 	}
-	for _, err := range api.List(context.Background(), resourcelocks.WithListQuery("lock_reason~", "boom")) {
+	for _, err := range api.List(context.Background(), request.Query("lock_reason~", "boom")) {
 		if err == nil {
 			continue
 		}
@@ -195,7 +195,7 @@ func TestR2ManilaAResourceLockUpdateGetDeleteAndRemovePolicies(t *testing.T) {
 	if _, err := api.Update(ctx, "lock-1", resourcelocks.UpdateOpts{}); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Errorf("empty update: %v", err)
 	}
-	if _, err := api.Update(ctx, "lock-1", resourcelocks.UpdateOpts{LockReason: request.Present("x")}, resourcelocks.WithUpdateField("resource_id", "z")); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := api.Update(ctx, "lock-1", resourcelocks.UpdateOpts{LockReason: request.Present("x")}, request.Field("resource_id", "z")); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Errorf("protected: %v", err)
 	}
 	if v, err := api.Get(ctx, "lock-1"); err != nil || v.ProjectID != "p" {

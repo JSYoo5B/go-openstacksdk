@@ -38,11 +38,11 @@ func TestR2ManilaHeatShareNetworkUpdateMembersDistinguishesOmissionEmptyAndNull(
 	api := sharenetworks.New(cloud.Client("sharev2", "/manila/v2"))
 	value, err := api.UpdateMembers(context.Background(), r2ManilaID, sharenetworks.UpdateMembersOpts{
 		NeutronNetID: request.Null[string](), NeutronSubnetID: request.Present(""), Name: request.Present(""),
-	}, sharenetworks.WithUpdateMembersField("extra", 1))
+	}, request.Field("extra", 1))
 	if err != nil || string(value.Body["unknown"]) != "9007199254740993" || value.StatusCode != 200 {
 		t.Fatal(value, err)
 	}
-	for _, option := range []sharenetworks.UpdateMembersOption{sharenetworks.WithUpdateMembersField("name", "x"), sharenetworks.WithUpdateMembersField("nova_net_id", "x")} {
+	for _, option := range []sharenetworks.UpdateMembersOption{request.Field("name", "x"), request.Field("nova_net_id", "x")} {
 		if _, err := api.UpdateMembers(context.Background(), r2ManilaID, sharenetworks.UpdateMembersOpts{Name: request.Present("a")}, option); !errors.Is(err, resource.ErrInvalidOption) && err == nil {
 			t.Fatal("collision accepted")
 		}
@@ -104,15 +104,15 @@ func TestR2ManilaHeatFindByNameOrIDFollowsPythonFindFallbackAndDuplicates(t *tes
 	if v, err := api.FindByNameOrID(ctx, "nothing"); err != nil || v != nil {
 		t.Fatal(v, err)
 	}
-	if _, err := api.FindByNameOrID(ctx, "nothing", shares.WithFindIgnoreMissing(false)); !errors.Is(err, resource.ErrNotFound) {
+	if _, err := api.FindByNameOrID(ctx, "nothing", request.IgnoreMissing(false)); !errors.Is(err, resource.ErrNotFound) {
 		t.Fatal(err)
 	}
 	lists = nil
-	if _, err := api.FindByNameOrID(ctx, "nothing", shares.WithFindAllProjects(true), shares.WithFindQuery("project_id", "p")); err != nil || len(lists) != 1 || lists[0] != "all_tenants=true&name=nothing&project_id=p" {
+	if _, err := api.FindByNameOrID(ctx, "nothing", shares.WithFindAllProjects(true), request.Query("project_id", "p")); err != nil || len(lists) != 1 || lists[0] != "all_tenants=true&name=nothing&project_id=p" {
 		t.Fatal(err, lists)
 	}
 	lists = nil
-	if _, err := api.FindByNameOrID(ctx, "nothing", shares.WithFindQuery("name", "other")); err != nil || lists[0] != "name=other" {
+	if _, err := api.FindByNameOrID(ctx, "nothing", request.Query("name", "other")); err != nil || lists[0] != "name=other" {
 		t.Fatal(err, lists)
 	}
 }
@@ -176,7 +176,7 @@ func TestR2ManilaHeatAccessActionsSkipVersionFloorAndLookups(t *testing.T) {
 	if err != nil || string(value.Body["extra"]) != "null" || value.StatusCode != 200 {
 		t.Fatal(value, err)
 	}
-	for _, option := range []shareaccessrules.AllowActionOption{shareaccessrules.WithAllowActionField("access_type", "x"), shareaccessrules.WithAllowActionField("access_level", "rw")} {
+	for _, option := range []shareaccessrules.AllowActionOption{request.Field("access_type", "x"), request.Field("access_level", "rw")} {
 		if _, err := api.AllowAccessAction(ctx, r2ManilaID, shareaccessrules.AllowActionOpts{}, option); err == nil {
 			t.Fatal("collision accepted")
 		}
@@ -188,7 +188,7 @@ func TestR2ManilaHeatAccessActionsSkipVersionFloorAndLookups(t *testing.T) {
 	if result, err := api.DenyAccessAction(ctx, r2ManilaID, "gone"); err != nil || result != nil {
 		t.Fatal(result, err)
 	}
-	if _, err := api.DenyAccessAction(ctx, r2ManilaID, "gone", shareaccessrules.WithDenyActionIgnoreMissing(false)); err == nil {
+	if _, err := api.DenyAccessAction(ctx, r2ManilaID, "gone", request.IgnoreMissing(false)); err == nil {
 		t.Fatal("missing ignored")
 	}
 	before := posts.Load()

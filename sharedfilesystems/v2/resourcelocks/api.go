@@ -11,6 +11,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/manilaown"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
@@ -95,13 +96,16 @@ type ListOpts struct {
 	AllProjects    *bool  `q:"all_projects"`
 }
 
-type ListOption = request.Option[ListOpts]
+// ListOption is one option of List: WithListOptions, request.Query,
+// request.MaxItems or request.Custom over *request.Config[ListOpts]. Other
+// shared calls fail with resource.ErrInvalidOption before HTTP.
+type ListOption = request.ListCall
 
 func WithListOptions(value ListOpts) ListOption {
 	copy := value
 	copy.Limit, copy.Offset = clonePtr(value.Limit), clonePtr(value.Offset)
 	copy.WithCount, copy.AllProjects = clonePtr(value.WithCount), clonePtr(value.AllProjects)
-	return request.WithOptions(copy)
+	return request.Custom(request.WithOptions(copy))
 }
 
 func clonePtr[T any](p *T) *T {
@@ -110,15 +114,6 @@ func clonePtr[T any](p *T) *T {
 	}
 	v := *p
 	return &v
-}
-
-// WithListQuery adds a query parameter that no typed field owns.
-func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
-
-// WithListMaxItems caps consumed rows locally (zero is unlimited, negative is
-// rejected before HTTP). It never becomes a wire limit.
-func WithListMaxItems(value int) ListOption {
-	return manilaown.WithListControl[ListOpts](func(c *resource.ListControl) { c.MaxItems = value })
 }
 
 // List yields every lock of one GET /resource-locks response. No marker or
@@ -156,13 +151,13 @@ type CreateOpts struct {
 	LockReason     request.Optional[string] `json:"lock_reason,omitzero"`
 }
 
-type CreateOption = request.Option[CreateOpts]
+// CreateOption is one option of Create: WithCreateOptions, request.Field or
+// request.Custom over *request.Config[CreateOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type CreateOption = request.WriteCall
 
-func WithCreateOptions(value CreateOpts) CreateOption { return request.WithOptions(value) }
-
-// WithCreateField adds a JSON member the typed options do not own.
-func WithCreateField(key string, value any) CreateOption {
-	return request.WithField[CreateOpts](key, value)
+func WithCreateOptions(value CreateOpts) CreateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type protectedFields struct {
@@ -182,7 +177,7 @@ func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOpti
 	if err := a.check(ctx); err != nil {
 		return nil, wrap("Create", err)
 	}
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := calls.ApplyConfig(opts, manilaown.FieldCalls[CreateOpts](), options...)
 	if err == nil {
 		err = request.ValidateCapabilities(cfg, true, false, false)
 	}
@@ -210,12 +205,13 @@ type UpdateOpts struct {
 	LockReason     request.Optional[string] `json:"lock_reason,omitzero"`
 }
 
-type UpdateOption = request.Option[UpdateOpts]
+// UpdateOption is one option of Update: WithUpdateOptions, request.Field or
+// request.Custom over *request.Config[UpdateOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type UpdateOption = request.WriteCall
 
-func WithUpdateOptions(value UpdateOpts) UpdateOption { return request.WithOptions(value) }
-
-func WithUpdateField(key string, value any) UpdateOption {
-	return request.WithField[UpdateOpts](key, value)
+func WithUpdateOptions(value UpdateOpts) UpdateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type protectedUpdate struct {
@@ -240,7 +236,7 @@ func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ..
 	if err := resource.ID(id).Validate(); err != nil {
 		return nil, wrap("Update", err)
 	}
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := calls.ApplyConfig(opts, manilaown.FieldCalls[UpdateOpts](), options...)
 	if err == nil {
 		err = request.ValidateCapabilities(cfg, true, false, false)
 	}

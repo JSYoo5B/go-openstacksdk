@@ -9,7 +9,7 @@ Python is read from the pinned openstacksdk source; fixture tests are not deploy
 - Python accepts any status below 400 for most calls; Go accepts only the listed success codes (deletes and actions also accept 200/202/204).
 - Python `ignore_missing=True` delete default is the default of `Remove`; `resource.WithMissingError()` is `ignore_missing=False`. Only 404 is swallowed.
 - Python silently drops query keys that are not in a resource's query mapping and filters Body attributes client-side. Go sends typed server filters and rejects extension queries colliding with them; it never filters locally except through Collection options.
-- Python paginates with `marker` when a `limit` is given. Manila list routes here return one response; Go yields that response and never invents marker/offset continuation. Caps are local (`WithListMaxItems`).
+- Python paginates with `marker` when a `limit` is given. Manila list routes here return one response; Go yields that response and never invents marker/offset continuation. Caps are local (`request.MaxItems`).
 - Python update calls with no changed attribute send nothing; Go rejects an update that supplies nothing.
 - Python proxy calls that hit the adapter without `raise_from_response` (share-group-snapshot `reset_status` and `members`, `ensure_shares`) ignore error statuses; Go reports every non-success response.
 

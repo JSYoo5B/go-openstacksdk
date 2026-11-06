@@ -134,7 +134,7 @@ Conflicts and wrong service types fail before quota or name-lookup HTTP.
 
 Limits use exact `int64` values. Nil input is omitted, zero is sent, and -1 means
 unlimited; values below -1 fail before HTTP. `WithQuotaOptions` snapshots typed
-pointers and nested `Extra` JSON when constructed. `WithUpdateField` snapshots
+pointers and nested `Extra` JSON when constructed. `request.Field` snapshots
 an extension field without requiring a builder interface. Extensions cannot
 replace declared limits, `force`, scope selectors, or response-only metadata.
 The server validates extension schemas and microversion-specific quota fields.
@@ -146,7 +146,7 @@ JSON, including nulls and unknown nested fields. Typed usage fields expose
 
 Get/defaults/detail/update require HTTP 200; reset requires HTTP 202. Reset removes
 overrides, returns response metadata and does not fetch the result automatically.
-The default missing-project policy is strict. `WithResetIgnoreMissing(true)`
+The default missing-project policy is strict. `request.IgnoreMissing(true)`
 suppresses only HTTP 404. Context, HTTP and JSON decoding causes remain available
 through `errors.Is`/`errors.As`.
 

@@ -183,7 +183,7 @@ func TestManilaProjectQuotaUpdateSnapshotsPointersAndNestedExtensionsExactly(t *
 	extra := map[string]any{"vendor": map[string]any{"counter": int64(9007199254740995)}}
 	option := quotasets.WithQuotaOptions(quotasets.UpdateOpts{Shares: &shares, Snapshots: &snapshots, Gigabytes: &gigabytes, Extra: extra})
 	other := map[string]any{"mode": "old"}
-	field := quotasets.WithUpdateField("other", other)
+	field := request.Field("other", other)
 	shares, snapshots, gigabytes = 99, 99, 99
 	extra["vendor"].(map[string]any)["counter"] = 99
 	other["mode"] = "new"
@@ -208,13 +208,13 @@ func TestManilaProjectQuotaUpdateInvalidInputsMakeNoRequests(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, key := range []string{"shares", "force", "id", "project_id", "user_id", "share_type", "usage", "reservation", "quota_set", " "} {
-		for _, option := range []quotasets.UpdateOption{quotasets.WithUpdateField(key, 1), quotasets.WithQuotaOptions(quotasets.UpdateOpts{Extra: map[string]any{key: 1}})} {
+		for _, option := range []quotasets.UpdateOption{request.Field(key, 1), quotasets.WithQuotaOptions(quotasets.UpdateOpts{Extra: map[string]any{key: 1}})} {
 			if _, err := scope.Update(context.Background(), quotasets.UpdateOpts{}, option); !errors.Is(err, resource.ErrInvalidOption) {
 				t.Fatalf("key=%q err=%v", key, err)
 			}
 		}
 	}
-	for _, option := range []quotasets.UpdateOption{nil, request.WithQuery[quotasets.UpdateOpts]("user_id", "user"), request.WithArgument[quotasets.UpdateOpts]("other", 1), quotasets.WithUpdateField("bad", make(chan int))} {
+	for _, option := range []quotasets.UpdateOption{nil, request.Custom(request.WithQuery[quotasets.UpdateOpts]("user_id", "user")), request.Custom(request.WithArgument[quotasets.UpdateOpts]("other", 1)), request.Field("bad", make(chan int))} {
 		if _, err := scope.Update(context.Background(), quotasets.UpdateOpts{}, option); err == nil {
 			t.Fatal("invalid option accepted")
 		}
@@ -243,7 +243,7 @@ func TestManilaProjectQuotaStrictStatusResetAndHTTPDecodeCauses(t *testing.T) {
 			scope := newManilaQuotaScope(t, cloud, "2.80")
 			var err error
 			if tc.reset {
-				result, resetErr := scope.Reset(context.Background(), quotasets.WithResetIgnoreMissing(tc.ignore))
+				result, resetErr := scope.Reset(context.Background(), request.IgnoreMissing(tc.ignore))
 				err = resetErr
 				if tc.name == "reset202" && (err != nil || result.ProjectID != "quota-project" || result.StatusCode != 202 || result.Header.Get("X-Reset") != "accepted") {
 					t.Fatalf("result=%v err=%v", result, err)

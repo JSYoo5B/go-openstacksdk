@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/limits"
 	"github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/shareinstances"
@@ -150,7 +151,7 @@ func TestR2ManilaALimitsKeepsNestedAbsoluteNullAndEvidence(t *testing.T) {
 		testcloud.JSON(w, 200, `{"limits":{"rate":[{"verb":"GET"}],"absolute":{"maxTotalShares":50,"totalSharesUsed":0,"maxTotalShareGigabytes":null,"vendor":9007199254740993}}}`)
 	})
 	api := limits.New(r2ManilaAClient(cloud, ""))
-	v, err := api.Get(context.Background(), limits.WithQuery("x", "1"))
+	v, err := api.Get(context.Background(), request.Query("x", "1"))
 	if err != nil || *v.Absolute.MaxTotalShares != 50 || *v.Absolute.TotalSharesUsed != 0 || v.Absolute.MaxTotalShareGigabytes != nil || v.Absolute.MaxTotalSnapshotGigabytes != nil ||
 		len(v.Rate) != 1 || v.Evidence.Header.Get("X-L") != "k" || v.Evidence.StatusCode != 200 {
 		t.Fatalf("%+v %v", v, err)

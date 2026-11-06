@@ -62,7 +62,7 @@ filled by server defaults; the SDK does not synthesize quota defaults.
 Nil omits a field, zero sends zero, and -1 means unlimited; values below -1 fail
 before HTTP. The class input has no project/user selector or `force` field.
 `WithQuotaOptions` snapshots typed pointers and nested `Extra` JSON at option
-construction; `WithUpdateField` captures an extension field without a builder.
+construction; `request.Field` captures an extension field without a builder.
 Extensions cannot replace declared limits, fixed class names, scope selectors
 or response-only metadata. The server validates unknown extension fields and
 the microversions of individual newer limits.

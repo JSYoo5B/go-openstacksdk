@@ -17,7 +17,7 @@ Native API coverage and openstacksdk Resource/workflow coverage are tracked sepa
 
 `service.QuotaClassSets.InClass(ctx, "default")` fixes the class name for Get/Update, without project resolution or List/Reset. [Quota classes](quotaclasssets/README.md) covers Python mappings, typed limits, and extension inputs.
 
-Typed `ShareAccessRules.InShare(ctx, share)` lists accept `WithListMaxItems(n)` and `WithListPaginated(false)` consumption controls. Modern access endpoints return one collection, so no next links are followed and caps are not sent as wire limits. Calls recheck numeric version 2.45 or later and actual Manila service-type/version headers, preserving canonical lowercase response IDs and parents. [Access rules](shareaccessrules/README.md) covers Allow/Deny, waits, response evidence, and Python differences.
+Typed `ShareAccessRules.InShare(ctx, share)` lists accept `request.MaxItems(n)` and `request.Paginated(false)` consumption controls. Modern access endpoints return one collection, so no next links are followed and caps are not sent as wire limits. Calls recheck numeric version 2.45 or later and actual Manila service-type/version headers, preserving canonical lowercase response IDs and parents. [Access rules](shareaccessrules/README.md) covers Allow/Deny, waits, response evidence, and Python differences.
 
 ## Go usage
 

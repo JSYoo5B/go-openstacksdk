@@ -1,35 +1,29 @@
 package shareaccessrules
 
 import (
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
+	"github.com/JSYoo5B/go-openstacksdk/internal/manilaown"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 const listControlArgument = "shareaccessrules.list_control"
 
-// WithListMaxItems caps consumed access rules locally. Zero is unlimited; a
-// negative value is rejected before HTTP. It never adds a wire limit or marker.
-func WithListMaxItems(value int) ListOption {
-	return withListControl(func(control *resource.ListControl) { control.MaxItems = value })
-}
-
-// WithListPaginated selects one response when false. The modern access endpoint
-// already returns a single collection, so neither value follows advertised links.
-func WithListPaginated(value bool) ListOption {
-	return withListControl(func(control *resource.ListControl) { control.SinglePage = !value })
-}
-
-func withListControl(edit func(*resource.ListControl)) ListOption {
-	return func(cfg *request.Config[ListOpts]) error {
-		control, _, err := request.Argument[resource.ListControl](*cfg, listControlArgument)
-		if err != nil {
-			return err
-		}
-		edit(&control)
-		if cfg.Arguments == nil {
-			cfg.Arguments = make(map[string]any)
-		}
-		cfg.Arguments[listControlArgument] = control
-		return nil
-	}
+// listCalls handles request.Query, request.Header, request.MaxItems and
+// request.Paginated. MaxItems caps consumed access rules locally: zero is
+// unlimited and a negative value is rejected before HTTP; it never adds a wire
+// limit or marker. Paginated(false) selects one response; the modern access
+// endpoint already returns a single collection, so neither value follows
+// advertised links.
+var listCalls = calls.Spec[request.Config[ListOpts]]{
+	Header: calls.ConfigHeader[ListOpts],
+	Query:  calls.ConfigQuery[ListOpts],
+	Paging: calls.Paging[request.Config[ListOpts]]{
+		MaxItems: func(c *request.Config[ListOpts], n int) error {
+			return manilaown.EditControl(c, listControlArgument, func(control *resource.ListControl) { control.MaxItems = n })
+		},
+		Paginated: func(c *request.Config[ListOpts], paginated bool) error {
+			return manilaown.EditControl(c, listControlArgument, func(control *resource.ListControl) { control.SinglePage = !paginated })
+		},
+	},
 }

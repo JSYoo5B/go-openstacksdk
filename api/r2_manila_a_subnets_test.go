@@ -90,7 +90,7 @@ func TestR2ManilaASubnetLocalChecksSendNothing(t *testing.T) {
 	}
 	scope := r2ManilaAScope(t, cloud, "2.78")
 	for _, key := range []string{"neutron_net_id", "metadata", "id", "share_network_id", "share-network-subnet"} {
-		if _, err := scope.Create(ctx, sharenetworksubnets.CreateOpts{}, sharenetworksubnets.WithCreateField(key, 1)); !errors.Is(err, resource.ErrInvalidOption) {
+		if _, err := scope.Create(ctx, sharenetworksubnets.CreateOpts{}, request.Field(key, 1)); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Errorf("%s: %v", key, err)
 		}
 	}
@@ -259,7 +259,7 @@ func TestR2ManilaAServiceActionsFloorsErrorsAndNoReplay(t *testing.T) {
 		t.Error(err)
 	}
 	for _, key := range []string{"host", "binary", "disabled_reason"} {
-		if _, err := api.Disable(ctx, "h", "b", services.DisableOpts{DisabledReason: request.Present("r")}, services.WithDisableField(key, 1)); !errors.Is(err, resource.ErrInvalidOption) {
+		if _, err := api.Disable(ctx, "h", "b", services.DisableOpts{DisabledReason: request.Present("r")}, request.Field(key, 1)); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Errorf("%s: %v", key, err)
 		}
 	}

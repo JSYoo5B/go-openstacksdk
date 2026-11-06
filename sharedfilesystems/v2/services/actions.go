@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/manilaown"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
@@ -74,13 +75,13 @@ type DisableOpts struct {
 	DisabledReason request.Optional[string] `json:"disabled_reason,omitzero"`
 }
 
-type DisableOption = request.Option[DisableOpts]
+// DisableOption is one option of Disable: WithDisableOptions, request.Field or
+// request.Custom over *request.Config[DisableOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type DisableOption = request.WriteCall
 
-func WithDisableOptions(value DisableOpts) DisableOption { return request.WithOptions(value) }
-
-// WithDisableField adds a JSON member the typed options do not own.
-func WithDisableField(key string, value any) DisableOption {
-	return request.WithField[DisableOpts](key, value)
+func WithDisableOptions(value DisableOpts) DisableOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 type protectedDisable struct {
@@ -95,7 +96,7 @@ func (a *API) Disable(ctx context.Context, host, binary string, opts DisableOpts
 	if err := a.validateTarget(ctx, host, binary); err != nil {
 		return nil, stateWrap("Disable", err)
 	}
-	cfg, err := request.Apply(opts, options...)
+	cfg, err := calls.ApplyConfig(opts, manilaown.FieldCalls[DisableOpts](), options...)
 	if err == nil {
 		err = request.ValidateCapabilities(cfg, true, false, false)
 	}
