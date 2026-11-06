@@ -7,16 +7,17 @@ import (
 	"strings"
 
 	"github.com/JSYoo5B/go-openstacksdk/accelerator/v2/common"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cyborg"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
-type DeleteOption = request.Option[struct{}]
-
-func WithDeleteHeader(key, value string) DeleteOption {
-	return request.WithHeader[struct{}](key, value)
-}
+// DeleteOption is one option of DeleteMany and DeleteByInstance:
+// request.Header or request.Custom over *request.Config[struct{}]. These
+// batch deletes are strict, so request.IgnoreMissing and other shared calls
+// fail with resource.ErrInvalidOption before HTTP.
+type DeleteOption = request.DeleteCall
 
 // DeleteMany is strict: a 404 for one request must not silently skip deleting
 // the others. Single-resource Delete retains the shared ignore-missing default.
@@ -53,7 +54,7 @@ func (a *API) deleteQuery(ctx context.Context, query url.Values, options ...Dele
 	if err := cyborg.RequireMicroversion(a.client, 0); err != nil {
 		return nil, err
 	}
-	c, err := request.Apply(struct{}{}, options...)
+	c, err := calls.ApplyConfig(struct{}{}, cyborg.HeaderCalls, options...)
 	if err == nil {
 		err = request.ValidateCapabilities(c, false, false, true)
 	}

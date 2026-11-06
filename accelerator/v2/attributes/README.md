@@ -37,8 +37,8 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/accelerator/v2/attributes.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/accelerator/v2/attributes.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/accelerator/v2/attributes.WithCreateField`
-- `github.com/JSYoo5B/go-openstacksdk/accelerator/v2/attributes.WithCreateHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 
 - POST /attributes sends a flat object with explicit numeric deployable_id=0 and empty key/value, not an attribute envelope. Typed/extension options snapshot caller values and remain reusable; 201 response metadata and unknown null survive.
   Tests: `api/accelerator_attributes_test.go:TestAcceleratorAttributeCreateFlatBodyAndSnapshots`.

@@ -42,11 +42,11 @@ func TestAcceleratorRequestBindingCollectionURL(t *testing.T) {
 	client.Microversion = "2.10"
 	a := acceleratorrequests.New(client)
 	project := "project1"
-	meta, err := a.Bind(context.Background(), resource.ID("a1"), acceleratorrequests.BindOpts{Hostname: "host1", DeviceRPUUID: "rp1", InstanceUUID: "instance1", ProjectID: &project}, acceleratorrequests.WithBindingHeader("X-Service-Token", "service-token"))
+	meta, err := a.Bind(context.Background(), resource.ID("a1"), acceleratorrequests.BindOpts{Hostname: "host1", DeviceRPUUID: "rp1", InstanceUUID: "instance1", ProjectID: &project}, request.Header("X-Service-Token", "service-token"))
 	if err != nil || meta.StatusCode != 202 || meta.Header.Get("X-Request-Id") != "binding-accepted" || meta.Body != nil {
 		t.Fatalf("bind %+v/%v", meta, err)
 	}
-	if _, err := a.Unbind(context.Background(), resource.ID("a1"), acceleratorrequests.WithBindingHeader("X-Service-Token", "service-token")); err != nil || calls.Load() != 2 {
+	if _, err := a.Unbind(context.Background(), resource.ID("a1"), request.Header("X-Service-Token", "service-token")); err != nil || calls.Load() != 2 {
 		t.Fatalf("unbind %v/%d", err, calls.Load())
 	}
 }
@@ -117,7 +117,7 @@ func TestAcceleratorRequestBindingPreflightAndAuthorization(t *testing.T) {
 	if _, err := a.Bind(ctx, resource.ID("a1"), acceleratorrequests.BindOpts{Hostname: "host", DeviceRPUUID: "rp", InstanceUUID: "instance", ProjectID: &project}); !errors.Is(err, resource.ErrUnsupported) {
 		t.Fatal(err)
 	}
-	for _, opt := range []acceleratorrequests.BindingOption{nil, acceleratorrequests.WithBindingHeader("OpenStack-API-Version", "accelerator 2.10"), request.WithField[struct{}]("unknown", true), request.WithQuery[struct{}]("unknown", "value"), request.WithArgument[struct{}]("unknown", true)} {
+	for _, opt := range []acceleratorrequests.BindingOption{nil, request.Header("OpenStack-API-Version", "accelerator 2.10"), request.Custom(request.WithField[struct{}]("unknown", true)), request.Custom(request.WithQuery[struct{}]("unknown", "value")), request.Custom(request.WithArgument[struct{}]("unknown", true))} {
 		if _, err := a.Unbind(ctx, resource.ID("a1"), opt); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(err)
 		}
@@ -171,11 +171,11 @@ func TestAcceleratorRequestDeleteSelectorsAndPolicy(t *testing.T) {
 	if err := a.Delete(ctx, resource.ID("missing"), resource.WithMissingError()); !errors.Is(err, resource.ErrNotFound) || !gophercloud.ResponseCodeIs(err, 404) {
 		t.Fatal(err)
 	}
-	if _, err := a.DeleteMany(ctx, []string{"a1", "a2"}, acceleratorrequests.WithDeleteHeader("X-Service-Token", "service-token")); !gophercloud.ResponseCodeIs(err, 404) {
+	if _, err := a.DeleteMany(ctx, []string{"a1", "a2"}, request.Header("X-Service-Token", "service-token")); !gophercloud.ResponseCodeIs(err, 404) {
 		t.Fatal(err)
 	}
 	for i := 0; i < 2; i++ {
-		if meta, err := a.DeleteByInstance(ctx, "instance", acceleratorrequests.WithDeleteHeader("X-Service-Token", "service-token")); err != nil || meta.StatusCode != 204 {
+		if meta, err := a.DeleteByInstance(ctx, "instance", request.Header("X-Service-Token", "service-token")); err != nil || meta.StatusCode != 204 {
 			t.Fatalf("instance: %+v/%v", meta, err)
 		}
 	}

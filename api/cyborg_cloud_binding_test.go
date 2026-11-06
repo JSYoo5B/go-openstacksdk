@@ -10,6 +10,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/accelerator/v2/acceleratorrequests"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -75,7 +76,7 @@ func TestCyborgCloudPatchAcceptsOnlyAddOrRemoveOfBindingFieldsBeforeHTTP(t *test
 	if _, err := a.Patch(ctx, resource.ID("a1"), full, nil); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Errorf("nil option: %v", err)
 	}
-	if _, err := a.Patch(ctx, resource.ID("a1"), full, acceleratorrequests.WithBindingHeader("OpenStack-API-Version", "accelerator 2.9")); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := a.Patch(ctx, resource.ID("a1"), full, request.Header("OpenStack-API-Version", "accelerator 2.9")); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Errorf("reserved header: %v", err)
 	}
 	if _, err := a.Patch(ctx, resource.ID("a1,a2"), full); !errors.Is(err, resource.ErrInvalidOption) {

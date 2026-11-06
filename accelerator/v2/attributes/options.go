@@ -2,6 +2,9 @@ package attributes
 
 import (
 	"encoding/json"
+
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
+	"github.com/JSYoo5B/go-openstacksdk/internal/cyborg"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
@@ -13,18 +16,20 @@ type CreateOpts struct {
 	Value        string `json:"value"`
 }
 
-type CreateOption = request.Option[CreateOpts]
+// CreateOption is one option of Create: WithCreateOptions, request.Field (an
+// extension body member that cannot replace a typed one), request.Header or
+// request.Custom over *request.Config[CreateOpts]. Other shared calls fail
+// with resource.ErrInvalidOption before HTTP.
+type CreateOption = request.WriteCall
 
-func WithCreateOptions(value CreateOpts) CreateOption { return request.WithOptions(value) }
-func WithCreateField(key string, value any) CreateOption {
-	return request.WithField[CreateOpts](key, value)
-}
-func WithCreateHeader(key, value string) CreateOption {
-	return request.WithHeader[CreateOpts](key, value)
+var createCalls = cyborg.FieldHeaderCalls[CreateOpts]()
+
+func WithCreateOptions(value CreateOpts) CreateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 func prepareCreate(opts CreateOpts, options ...CreateOption) (json.RawMessage, map[string]string, error) {
-	config, err := request.Apply(opts, options...)
+	config, err := calls.ApplyConfig(opts, createCalls, options...)
 	if err != nil {
 		return nil, nil, err
 	}

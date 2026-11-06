@@ -27,7 +27,7 @@ func TestAcceleratorRequestCreateRetainsBatch(t *testing.T) {
 		testcloud.JSON(w, 201, `{"arqs":[{"uuid":"a1","state":"Initial","device_profile_group_id":0,"hostname":null,"future":9007199254740993},{"uuid":"a2","state":"Initial","device_profile_group_id":1,"hostname":""}],"future_envelope":null}`)
 	})
 	a := acceleratorrequests.New(cloud.Client("accelerator", "/v2"))
-	v, err := a.Create(context.Background(), acceleratorrequests.CreateOpts{DeviceProfileName: "fpga"}, acceleratorrequests.WithCreateField("future", map[string]any{"count": json.Number("9007199254740993")}), acceleratorrequests.WithCreateHeader("X-Custom", "create"))
+	v, err := a.Create(context.Background(), acceleratorrequests.CreateOpts{DeviceProfileName: "fpga"}, request.Field("future", map[string]any{"count": json.Number("9007199254740993")}), request.Header("X-Custom", "create"))
 	if err != nil || v.StatusCode != 201 || len(v.Requests) != 2 || v.Requests[0].UUID != "a1" || v.Requests[1].UUID != "a2" || v.Requests[0].Hostname != nil || v.Requests[1].Hostname == nil || *v.Requests[1].Hostname != "" || string(v.Requests[0].Body["future"]) != "9007199254740993" || string(v.Body["future_envelope"]) != "null" {
 		t.Fatalf("created: %+v/%v", v, err)
 	}
@@ -139,7 +139,7 @@ func TestAcceleratorRequestPreflight(t *testing.T) {
 	})
 	a := acceleratorrequests.New(cloud.Client("accelerator", "/v2"))
 	ctx := context.Background()
-	for _, opt := range []acceleratorrequests.CreateOption{nil, acceleratorrequests.WithCreateField("device_profile_name", "other"), acceleratorrequests.WithCreateHeader("x-auth-token", "token"), request.WithQuery[acceleratorrequests.CreateOpts]("ignored", "value"), request.WithArgument[acceleratorrequests.CreateOpts]("unknown", true)} {
+	for _, opt := range []acceleratorrequests.CreateOption{nil, request.Field("device_profile_name", "other"), request.Header("x-auth-token", "token"), request.Custom(request.WithQuery[acceleratorrequests.CreateOpts]("ignored", "value")), request.Custom(request.WithArgument[acceleratorrequests.CreateOpts]("unknown", true))} {
 		if _, err := a.Create(ctx, acceleratorrequests.CreateOpts{DeviceProfileName: "fpga"}, opt); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(err)
 		}

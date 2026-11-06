@@ -34,11 +34,11 @@ func TestAcceleratorDeviceActions(t *testing.T) {
 	client := cloud.Client("accelerator", "/v2")
 	client.Microversion = "2.10"
 	a := devices.New(client)
-	meta, err := a.Enable(context.Background(), resource.ID("d1"), devices.WithActionHeader("X-Custom", "value"))
+	meta, err := a.Enable(context.Background(), resource.ID("d1"), request.Header("X-Custom", "value"))
 	if err != nil || meta.StatusCode != 200 || meta.Header.Get("X-Request-Id") != "req-action" {
 		t.Fatalf("enable: %+v/%v", meta, err)
 	}
-	_, err = a.Disable(context.Background(), resource.ID("d1"), devices.WithActionHeader("X-Custom", "value"))
+	_, err = a.Disable(context.Background(), resource.ID("d1"), request.Header("X-Custom", "value"))
 	var response gophercloud.ErrUnexpectedResponseCode
 	if !errors.As(err, &response) || response.Actual != 403 || response.ResponseHeader.Get("X-Request-Id") != "req-action" {
 		t.Fatalf("disable: %v", err)
@@ -50,7 +50,7 @@ func TestAcceleratorDeviceActions(t *testing.T) {
 		}
 	}
 	client.Microversion = "2.10"
-	for _, option := range []devices.ActionOption{nil, devices.WithActionHeader("openstack-api-version", "accelerator 2.0"), request.WithField[struct{}]("field", true), request.WithQuery[struct{}]("query", "value"), request.WithArgument[struct{}]("argument", true)} {
+	for _, option := range []devices.ActionOption{nil, request.Header("openstack-api-version", "accelerator 2.0"), request.Custom(request.WithField[struct{}]("field", true)), request.Custom(request.WithQuery[struct{}]("query", "value")), request.Custom(request.WithArgument[struct{}]("argument", true))} {
 		if _, err := a.Enable(context.Background(), resource.ID("d1"), option); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatalf("invalid option: %v", err)
 		}
@@ -85,7 +85,7 @@ func TestAcceleratorProgrammingSnapshotAndURL(t *testing.T) {
 		testcloud.JSON(w, 200, `{"uuid":"p1","name":"fpga","bitstream_id":"image-before","future":"retained"}`)
 	})
 	a := deployables.New(cloud.Client("accelerator", "/v2"))
-	got, err := a.Patch(context.Background(), resource.Name("fpga"), patch, deployables.WithProgramHeader("X-Custom", "value"))
+	got, err := a.Patch(context.Background(), resource.Name("fpga"), patch, request.Header("X-Custom", "value"))
 	if err != nil || got.UUID != "p1" || got.Header.Get("X-Request-Id") != "req-program" || string(got.Body["future"]) != `"retained"` {
 		t.Fatalf("program: %+v/%v", got, err)
 	}

@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/JSYoo5B/go-openstacksdk/accelerator/v2/common"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cyborg"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
@@ -23,11 +24,12 @@ type BindOpts struct {
 	InstanceUUID string
 	ProjectID    *string
 }
-type BindingOption = request.Option[struct{}]
 
-func WithBindingHeader(key, value string) BindingOption {
-	return request.WithHeader[struct{}](key, value)
-}
+// BindingOption is one option of Bind, Unbind, Patch and PatchMany:
+// request.Header (for example a required service token) or request.Custom
+// over *request.Config[struct{}]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type BindingOption = request.WriteCall
 
 func (a *API) Bind(ctx context.Context, ref resource.Ref, opts BindOpts, options ...BindingOption) (*common.Metadata, error) {
 	patch := []BindingOperation{{Op: "add", Path: "/hostname", Value: &opts.Hostname}, {Op: "add", Path: "/device_rp_uuid", Value: &opts.DeviceRPUUID}, {Op: "add", Path: "/instance_uuid", Value: &opts.InstanceUUID}}
@@ -55,7 +57,7 @@ func (a *API) Patch(ctx context.Context, ref resource.Ref, patch []BindingOperat
 
 // PatchMany accepts the service's batch binding document. Operations in a
 // batch share one add/remove mode. The caller supplies any required service
-// token through WithBindingHeader; authorization errors remain server errors.
+// token through request.Header; authorization errors remain server errors.
 func (a *API) PatchMany(ctx context.Context, patches map[string][]BindingOperation, options ...BindingOption) (*common.Metadata, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err
@@ -110,7 +112,7 @@ func (a *API) PatchMany(ctx context.Context, patches map[string][]BindingOperati
 			return nil, fmt.Errorf("%w: binding requires hostname, device_rp_uuid and instance_uuid", resource.ErrInvalidOption)
 		}
 	}
-	c, err := request.Apply(struct{}{}, options...)
+	c, err := calls.ApplyConfig(struct{}{}, cyborg.HeaderCalls, options...)
 	if err == nil {
 		err = request.ValidateCapabilities(c, false, false, true)
 	}

@@ -4,11 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/url"
+
 	"github.com/JSYoo5B/go-openstacksdk/accelerator/v2/common"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cyborg"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
-	"net/url"
 )
 
 // ProgramOperation is the Cyborg program endpoint's JSON-Patch document. Value
@@ -22,11 +24,11 @@ type ProgramOperation struct {
 type ProgramImage struct {
 	ImageUUID string `json:"image_uuid"`
 }
-type ProgramOption = request.Option[struct{}]
 
-func WithProgramHeader(key, value string) ProgramOption {
-	return request.WithHeader[struct{}](key, value)
-}
+// ProgramOption is one option of Program and Patch: request.Header or
+// request.Custom over *request.Config[struct{}]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type ProgramOption = request.WriteCall
 
 // Program builds the valid replace /program patch for one bitstream image.
 // Resolving the deployable name is owned by the SDK; programming uses its UUID.
@@ -50,7 +52,7 @@ func (a *API) Patch(ctx context.Context, deployable resource.Ref, patch []Progra
 	if err := resource.ID(patch[0].Value[0].ImageUUID).Validate(); err != nil {
 		return nil, err
 	}
-	c, err := request.Apply(struct{}{}, options...)
+	c, err := calls.ApplyConfig(struct{}{}, cyborg.HeaderCalls, options...)
 	if err == nil {
 		err = request.ValidateCapabilities(c, false, false, true)
 	}

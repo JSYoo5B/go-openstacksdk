@@ -11,6 +11,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/accelerator/v2/acceleratorrequests"
 	"github.com/JSYoo5B/go-openstacksdk/accelerator/v2/deviceprofiles"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -29,7 +30,7 @@ func TestCyborgCloudProfileCreateSendsOneElementArrayAndKeepsEmptyDescription(t 
 	empty := ""
 	value, err := deviceprofiles.New(cloud.Client("accelerator", "/v2")).Create(context.Background(),
 		deviceprofiles.CreateOpts{Name: "fpga", Groups: []deviceprofiles.Group{{"resources:FPGA": "1"}}, Description: &empty},
-		deviceprofiles.WithCreateField("vendor", false))
+		request.Field("vendor", false))
 	if err != nil || value == nil || value.UUID != cyborgCloudProfileUUID || value.Description == nil || *value.Description != "" || value.StatusCode != 201 || calls.Load() != 1 {
 		t.Fatalf("value=%+v err=%v calls=%d", value, err, calls.Load())
 	}
@@ -74,15 +75,15 @@ func TestCyborgCloudProfileCreateRejectsInvalidInputBeforeHTTP(t *testing.T) {
 	for name, run := range map[string]func() error{
 		"nil option": func() error { _, err := a.Create(ctx, good, nil); return err },
 		"name collision": func() error {
-			_, err := a.Create(ctx, good, deviceprofiles.WithCreateField("name", "other"))
+			_, err := a.Create(ctx, good, request.Field("name", "other"))
 			return err
 		},
 		"groups override": func() error {
-			_, err := a.Create(ctx, good, deviceprofiles.WithCreateField("groups", []int{}))
+			_, err := a.Create(ctx, good, request.Field("groups", []int{}))
 			return err
 		},
 		"auth header": func() error {
-			_, err := a.Create(ctx, good, deviceprofiles.WithCreateHeader("X-Auth-Token", "t"))
+			_, err := a.Create(ctx, good, request.Header("X-Auth-Token", "t"))
 			return err
 		},
 		"empty name": func() error { _, err := a.Create(ctx, deviceprofiles.CreateOpts{Groups: good.Groups}); return err },
@@ -205,13 +206,13 @@ func TestCyborgCloudRequestCreateBodyAcceptsOnly201AndIsAcknowledgementOnly(t *t
 		testcloud.JSON(w, status, `{"arqs":[{"uuid":"a1","state":"Initial","hostname":null}]}`)
 	})
 	a := acceleratorrequests.New(cloud.Client("accelerator", "/v2"))
-	v, err := a.Create(context.Background(), acceleratorrequests.CreateOpts{DeviceProfileName: "fpga"}, acceleratorrequests.WithCreateField("extra", false))
+	v, err := a.Create(context.Background(), acceleratorrequests.CreateOpts{DeviceProfileName: "fpga"}, request.Field("extra", false))
 	if err != nil || len(v.Requests) != 1 || v.Requests[0].State != "Initial" || calls.Load() != 1 {
 		t.Fatalf("v=%+v err=%v calls=%d", v, err, calls.Load())
 	}
 	for _, code := range []int{200, 202, 500} {
 		status = code
-		v, err := a.Create(context.Background(), acceleratorrequests.CreateOpts{DeviceProfileName: "fpga"}, acceleratorrequests.WithCreateField("extra", false))
+		v, err := a.Create(context.Background(), acceleratorrequests.CreateOpts{DeviceProfileName: "fpga"}, request.Field("extra", false))
 		if v != nil || !cyborgCloudIsStatus(err, code) {
 			t.Fatalf("status %d: %+v %v", code, v, err)
 		}

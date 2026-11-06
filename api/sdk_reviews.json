@@ -1037,8 +1037,8 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/accelerator/v2/acceleratorrequests.API.Create",
         "github.com/JSYoo5B/go-openstacksdk/accelerator/v2/acceleratorrequests.WithCreateOptions",
-        "github.com/JSYoo5B/go-openstacksdk/accelerator/v2/acceleratorrequests.WithCreateField",
-        "github.com/JSYoo5B/go-openstacksdk/accelerator/v2/acceleratorrequests.WithCreateHeader"
+        "github.com/JSYoo5B/go-openstacksdk/request.Field",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header"
       ],
       "contracts": [
         {
@@ -1085,8 +1085,8 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/accelerator/v2/attributes.API.Create",
         "github.com/JSYoo5B/go-openstacksdk/accelerator/v2/attributes.WithCreateOptions",
-        "github.com/JSYoo5B/go-openstacksdk/accelerator/v2/attributes.WithCreateField",
-        "github.com/JSYoo5B/go-openstacksdk/accelerator/v2/attributes.WithCreateHeader"
+        "github.com/JSYoo5B/go-openstacksdk/request.Field",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header"
       ],
       "contracts": [
         {
@@ -1127,8 +1127,8 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/accelerator/v2/deviceprofiles.API.Create",
         "github.com/JSYoo5B/go-openstacksdk/accelerator/v2/deviceprofiles.WithCreateOptions",
-        "github.com/JSYoo5B/go-openstacksdk/accelerator/v2/deviceprofiles.WithCreateField",
-        "github.com/JSYoo5B/go-openstacksdk/accelerator/v2/deviceprofiles.WithCreateHeader"
+        "github.com/JSYoo5B/go-openstacksdk/request.Field",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header"
       ],
       "contracts": [
         {
@@ -1165,7 +1165,7 @@
         "github.com/JSYoo5B/go-openstacksdk/resource.Collection.Delete",
         "github.com/JSYoo5B/go-openstacksdk/accelerator/v2/acceleratorrequests.API.DeleteMany",
         "github.com/JSYoo5B/go-openstacksdk/accelerator/v2/acceleratorrequests.API.DeleteByInstance",
-        "github.com/JSYoo5B/go-openstacksdk/accelerator/v2/acceleratorrequests.WithDeleteHeader"
+        "github.com/JSYoo5B/go-openstacksdk/request.Header"
       ],
       "contracts": [
         {
@@ -1422,7 +1422,7 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/accelerator/v2/devices.API.Disable",
-        "github.com/JSYoo5B/go-openstacksdk/accelerator/v2/devices.WithActionHeader"
+        "github.com/JSYoo5B/go-openstacksdk/request.Header"
       ],
       "contracts": [
         {
@@ -1459,7 +1459,7 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/accelerator/v2/devices.API.Enable",
-        "github.com/JSYoo5B/go-openstacksdk/accelerator/v2/devices.WithActionHeader"
+        "github.com/JSYoo5B/go-openstacksdk/request.Header"
       ],
       "contracts": [
         {
@@ -1710,7 +1710,7 @@
         "github.com/JSYoo5B/go-openstacksdk/accelerator/v2/acceleratorrequests.API.PatchMany",
         "github.com/JSYoo5B/go-openstacksdk/accelerator/v2/acceleratorrequests.API.Bind",
         "github.com/JSYoo5B/go-openstacksdk/accelerator/v2/acceleratorrequests.API.Unbind",
-        "github.com/JSYoo5B/go-openstacksdk/accelerator/v2/acceleratorrequests.WithBindingHeader"
+        "github.com/JSYoo5B/go-openstacksdk/request.Header"
       ],
       "contracts": [
         {
@@ -1751,7 +1751,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/accelerator/v2/deployables.API.Patch",
         "github.com/JSYoo5B/go-openstacksdk/accelerator/v2/deployables.API.Program",
-        "github.com/JSYoo5B/go-openstacksdk/accelerator/v2/deployables.WithProgramHeader"
+        "github.com/JSYoo5B/go-openstacksdk/request.Header"
       ],
       "contracts": [
         {
@@ -124149,9 +124149,9 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/accelerator/v2/deviceprofiles.API.Create",
-        "github.com/JSYoo5B/go-openstacksdk/accelerator/v2/deviceprofiles.WithCreateField",
+        "github.com/JSYoo5B/go-openstacksdk/request.Field",
         "github.com/JSYoo5B/go-openstacksdk/accelerator/v2/deviceprofiles.WithCreateOptions",
-        "github.com/JSYoo5B/go-openstacksdk/accelerator/v2/deviceprofiles.WithCreateHeader"
+        "github.com/JSYoo5B/go-openstacksdk/request.Header"
       ],
       "contracts": [
         {
@@ -124241,9 +124241,9 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/accelerator/v2/acceleratorrequests.API.Create",
-        "github.com/JSYoo5B/go-openstacksdk/accelerator/v2/acceleratorrequests.WithCreateField",
+        "github.com/JSYoo5B/go-openstacksdk/request.Field",
         "github.com/JSYoo5B/go-openstacksdk/accelerator/v2/acceleratorrequests.WithCreateOptions",
-        "github.com/JSYoo5B/go-openstacksdk/accelerator/v2/acceleratorrequests.WithCreateHeader"
+        "github.com/JSYoo5B/go-openstacksdk/request.Header"
       ],
       "contracts": [
         {

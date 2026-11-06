@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/accelerator/v2/deviceprofiles"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -154,13 +155,13 @@ func TestAcceleratorProfileCreateContractAndSnapshots(t *testing.T) {
 	groups := []deviceprofiles.Group{{"resources:CUSTOM_FPGA": json.Number("1234567890123456789"), "trait:CUSTOM_ACCEL": "required"}}
 	typed := deviceprofiles.WithCreateOptions(deviceprofiles.CreateOpts{Name: "original", Groups: groups, Description: &description})
 	extension := map[string]any{"list": []string{"original"}}
-	field := deviceprofiles.WithCreateField("future", extension)
+	field := request.Field("future", extension)
 	groups[0]["trait:CUSTOM_ACCEL"] = "forbidden"
 	description = "changed"
 	extension["list"].([]string)[0] = "changed"
 	a := deviceprofiles.New(cloud.Client("accelerator", "/v2"))
 	for i := 0; i < 2; i++ {
-		value, err := a.Create(context.Background(), deviceprofiles.CreateOpts{}, typed, field, deviceprofiles.WithCreateHeader("X-Profile-Extension", "enabled"))
+		value, err := a.Create(context.Background(), deviceprofiles.CreateOpts{}, typed, field, request.Header("X-Profile-Extension", "enabled"))
 		if err != nil || value.UUID != profileUUID1 || value.Header.Get("X-Request-Id") != "req-create-profile" || value.StatusCode != 201 || string(value.Body["future"]) != "null" || value.Groups[0]["resources:CUSTOM_FPGA"].(json.Number).String() != "1234567890123456789" {
 			t.Fatalf("create: %+v/%v", value, err)
 		}
@@ -177,12 +178,12 @@ func TestAcceleratorProfileCreateValidationBeforeHTTP(t *testing.T) {
 	a := deviceprofiles.New(cloud.Client("accelerator", "/v2"))
 	valid := deviceprofiles.CreateOpts{Name: "valid", Groups: []deviceprofiles.Group{{"resources:CUSTOM_FPGA": "1"}}}
 	for _, key := range []string{"name", "groups", "uuid", "description"} {
-		if _, err := a.Create(context.Background(), valid, deviceprofiles.WithCreateField(key, "override")); !errors.Is(err, resource.ErrInvalidOption) {
+		if _, err := a.Create(context.Background(), valid, request.Field(key, "override")); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatalf("core %s: %v", key, err)
 		}
 	}
 	for _, header := range []string{"x-auth-token", "OpenStack-API-Version", "content-type", "Host"} {
-		if _, err := a.Create(context.Background(), valid, deviceprofiles.WithCreateHeader(header, "override")); !errors.Is(err, resource.ErrInvalidOption) {
+		if _, err := a.Create(context.Background(), valid, request.Header(header, "override")); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatalf("core header %s: %v", header, err)
 		}
 	}
@@ -192,7 +193,7 @@ func TestAcceleratorProfileCreateValidationBeforeHTTP(t *testing.T) {
 			t.Fatalf("invalid create: %+v/%v", opts, err)
 		}
 	}
-	if _, err := a.Create(context.Background(), valid, deviceprofiles.WithCreateField("future", make(chan int))); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := a.Create(context.Background(), valid, request.Field("future", make(chan int))); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
 	if _, err := a.Create(context.Background(), valid, nil); !errors.Is(err, resource.ErrInvalidOption) {

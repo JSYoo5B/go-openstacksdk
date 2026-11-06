@@ -14,8 +14,8 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/accelerator/v2/deviceprofiles.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/accelerator/v2/deviceprofiles.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/accelerator/v2/deviceprofiles.WithCreateField`
-- `github.com/JSYoo5B/go-openstacksdk/accelerator/v2/deviceprofiles.WithCreateHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 
 - POST /device_profiles sends a one-element array with original typed groups, original extension values, explicit empty description and omitted nil UUID. Options deeply snapshot nested groups/pointers/fields and remain reusable; 201 response metadata and large group numbers survive.
   Tests: `api/accelerator_profiles_test.go:TestAcceleratorProfileCreateContractAndSnapshots`.

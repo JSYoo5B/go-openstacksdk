@@ -39,8 +39,8 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/accelerator/v2/acceleratorrequests.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/accelerator/v2/acceleratorrequests.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/accelerator/v2/acceleratorrequests.WithCreateField`
-- `github.com/JSYoo5B/go-openstacksdk/accelerator/v2/acceleratorrequests.WithCreateHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 
 - POST /accelerator_requests sends flat device_profile_name and explicit extension/header values. A 201 arqs array preserves both created ARQs, raw large numbers, null versus empty hostname and unknown envelope fields; envelope/item headers are independent clones.
   Tests: `api/accelerator_requests_test.go:TestAcceleratorRequestCreateRetainsBatch`.
@@ -66,7 +66,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.Collection.Delete`
 - `github.com/JSYoo5B/go-openstacksdk/accelerator/v2/acceleratorrequests.API.DeleteMany`
 - `github.com/JSYoo5B/go-openstacksdk/accelerator/v2/acceleratorrequests.API.DeleteByInstance`
-- `github.com/JSYoo5B/go-openstacksdk/accelerator/v2/acceleratorrequests.WithDeleteHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 
 - Single DELETE uses the collection query arqs=a1 with no body. Missing single requests are ignored by default or return ErrNotFound/HTTP404 under WithMissingError; explicit batch arqs=a1,a2 preserves strict 404 and the service-token header.
   Tests: `api/accelerator_request_binding_test.go:TestAcceleratorRequestDeleteSelectorsAndPolicy`.
@@ -115,7 +115,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/accelerator/v2/acceleratorrequests.API.PatchMany`
 - `github.com/JSYoo5B/go-openstacksdk/accelerator/v2/acceleratorrequests.API.Bind`
 - `github.com/JSYoo5B/go-openstacksdk/accelerator/v2/acceleratorrequests.API.Unbind`
-- `github.com/JSYoo5B/go-openstacksdk/accelerator/v2/acceleratorrequests.WithBindingHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 
 - Bind sends a UUID-keyed object with hostname/device_rp_uuid/instance_uuid and optional project_id to collection PATCH /accelerator_requests, with accelerator 2.10 and X-Service-Token. Unbind sends remove operations without values; 202 yields HTTP metadata and no invented resource body.
   Tests: `api/accelerator_request_binding_test.go:TestAcceleratorRequestBindingCollectionURL`.
@@ -188,7 +188,7 @@ accel, err := conn.Accelerator(ctx)
 if err != nil { return err }
 created, err := accel.AcceleratorRequests.Create(ctx,
     acceleratorrequests.CreateOpts{DeviceProfileName: "fpga-profile"},
-    acceleratorrequests.WithCreateHeader("X-Custom", "example"))
+    request.Header("X-Custom", "example"))
 if err != nil { return err }
 for _, arq := range created.Requests {
     fmt.Println(arq.UUID, arq.State, arq.DeviceProfileGroupID)

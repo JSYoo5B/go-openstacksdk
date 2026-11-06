@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"regexp"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
+	"github.com/JSYoo5B/go-openstacksdk/internal/cyborg"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
@@ -18,13 +20,19 @@ type CreateOpts struct {
 	Description *string `json:"description,omitempty"`
 }
 
-type CreateOption = request.Option[CreateOpts]
+// CreateOption is one option of Create: WithCreateOptions, request.Field (an
+// extension body member that cannot replace a typed one), request.Header or
+// request.Custom over *request.Config[CreateOpts]. Other shared calls fail
+// with resource.ErrInvalidOption before HTTP.
+type CreateOption = request.WriteCall
+
+var createCalls = cyborg.FieldHeaderCalls[CreateOpts]()
 
 // WithCreateOptions snapshots nested typed inputs when the option is created.
 // Applying the option replaces the typed options with a fresh copy.
 func WithCreateOptions(options CreateOpts) CreateOption {
 	encoded, err := json.Marshal(options)
-	return func(config *request.Config[CreateOpts]) error {
+	return request.Custom(func(config *request.Config[CreateOpts]) error {
 		if err != nil {
 			return fmt.Errorf("%w: device profile options: %v", resource.ErrInvalidOption, err)
 		}
@@ -34,21 +42,13 @@ func WithCreateOptions(options CreateOpts) CreateOption {
 		}
 		config.Options = value
 		return nil
-	}
-}
-
-func WithCreateField(key string, value any) CreateOption {
-	return request.WithField[CreateOpts](key, value)
-}
-
-func WithCreateHeader(key, value string) CreateOption {
-	return request.WithHeader[CreateOpts](key, value)
+	})
 }
 
 var namePattern = regexp.MustCompile(`^[A-Za-z0-9_-]+$`)
 
 func prepareCreate(opts CreateOpts, options ...CreateOption) (json.RawMessage, map[string]string, error) {
-	config, err := request.Apply(opts, options...)
+	config, err := calls.ApplyConfig(opts, createCalls, options...)
 	if err != nil {
 		return nil, nil, err
 	}

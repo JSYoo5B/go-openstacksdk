@@ -2,18 +2,19 @@ package devices
 
 import (
 	"context"
+	"net/url"
+
 	"github.com/JSYoo5B/go-openstacksdk/accelerator/v2/common"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cyborg"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
-	"net/url"
 )
 
-type ActionOption = request.Option[struct{}]
-
-func WithActionHeader(key, value string) ActionOption {
-	return request.WithHeader[struct{}](key, value)
-}
+// ActionOption is one option of Enable and Disable: request.Header or
+// request.Custom over *request.Config[struct{}]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type ActionOption = request.WriteCall
 
 // Enable sets the device to enabled. The response contains no Device object;
 // use Wait with the same UUID when a refreshed status is needed.
@@ -34,7 +35,7 @@ func (a *API) action(ctx context.Context, device resource.Ref, action string, op
 	if err := cyborg.RequireMicroversion(a.client, 0); err != nil {
 		return nil, request.Wrap(action, "devices", err)
 	}
-	c, err := request.Apply(struct{}{}, options...)
+	c, err := calls.ApplyConfig(struct{}{}, cyborg.HeaderCalls, options...)
 	if err == nil {
 		err = request.ValidateCapabilities(c, false, false, true)
 	}

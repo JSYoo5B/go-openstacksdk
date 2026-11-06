@@ -14,6 +14,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/accelerator/v2/deviceprofiles"
 	"github.com/JSYoo5B/go-openstacksdk/accelerator/v2/devices"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -385,7 +386,7 @@ func TestPyHAAccelProgrammingStatusHeadersAndCancellation(t *testing.T) {
 	if _, err := a.Program(context.Background(), ref, pyHAAccelUUID); !cyborgCloudIsStatus(err, 202) || calls.Load() != 2 {
 		t.Fatalf("202: %v %d", err, calls.Load())
 	}
-	for _, opt := range []deployables.ProgramOption{deployables.WithProgramHeader("X-Auth-Token", "x"), deployables.WithProgramHeader("Content-Type", "text/plain"), deployables.WithProgramHeader("openstack-api-version", "accelerator 2.0")} {
+	for _, opt := range []deployables.ProgramOption{request.Header("X-Auth-Token", "x"), request.Header("Content-Type", "text/plain"), request.Header("openstack-api-version", "accelerator 2.0")} {
 		if _, err := a.Program(context.Background(), ref, pyHAAccelUUID, opt); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatalf("reserved header: %v", err)
 		}

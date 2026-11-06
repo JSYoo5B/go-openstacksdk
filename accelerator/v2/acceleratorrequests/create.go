@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/JSYoo5B/go-openstacksdk/accelerator/v2/common"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cyborg"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
@@ -17,14 +18,17 @@ import (
 type CreateOpts struct {
 	DeviceProfileName string `json:"device_profile_name"`
 }
-type CreateOption = request.Option[CreateOpts]
 
-func WithCreateOptions(opts CreateOpts) CreateOption { return request.WithOptions(opts) }
-func WithCreateField(key string, value any) CreateOption {
-	return request.WithField[CreateOpts](key, value)
-}
-func WithCreateHeader(key, value string) CreateOption {
-	return request.WithHeader[CreateOpts](key, value)
+// CreateOption is one option of Create: WithCreateOptions, request.Field (an
+// extension body member that cannot replace a typed one), request.Header or
+// request.Custom over *request.Config[CreateOpts]. Other shared calls fail
+// with resource.ErrInvalidOption before HTTP.
+type CreateOption = request.WriteCall
+
+var createCalls = cyborg.FieldHeaderCalls[CreateOpts]()
+
+func WithCreateOptions(opts CreateOpts) CreateOption {
+	return request.Custom(request.WithOptions(opts))
 }
 
 // CreateResponse retains every request created for the profile, including an
@@ -46,7 +50,7 @@ func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOpti
 	if err := cyborg.RequireMicroversion(a.client, 0); err != nil {
 		return nil, err
 	}
-	c, err := request.Apply(opts, options...)
+	c, err := calls.ApplyConfig(opts, createCalls, options...)
 	if err == nil {
 		err = request.ValidateCapabilities(c, true, false, true)
 	}

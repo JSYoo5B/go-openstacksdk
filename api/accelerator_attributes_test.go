@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/accelerator/v2/attributes"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -98,11 +99,11 @@ func TestAcceleratorAttributeCreateFlatBodyAndSnapshots(t *testing.T) {
 	typed := attributes.WithCreateOptions(opts)
 	opts.DeployableID, opts.Key, opts.Value = 42, "changed", "changed"
 	extension := map[string]any{"enabled": false, "tags": []string{"original"}}
-	field := attributes.WithCreateField("future", extension)
+	field := request.Field("future", extension)
 	extension["tags"].([]string)[0] = "changed"
 	a := attributes.New(cloud.Client("accelerator", "/v2"))
 	for i := 0; i < 2; i++ {
-		value, err := a.Create(context.Background(), opts, typed, field, attributes.WithCreateHeader("X-Attribute-Extension", "enabled"))
+		value, err := a.Create(context.Background(), opts, typed, field, request.Header("X-Attribute-Extension", "enabled"))
 		if err != nil || value.UUID != attributeUUID1 || value.StatusCode != 201 || value.Header.Get("X-Request-Id") != "req-create-attribute" || string(value.Body["future"]) != "null" {
 			t.Fatalf("create: %+v/%v", value, err)
 		}
@@ -152,16 +153,16 @@ func TestAcceleratorAttributeValidationAndHTTPFailures(t *testing.T) {
 	})
 	a := attributes.New(cloud.Client("accelerator", "/v2"))
 	for _, key := range []string{"deployable_id", "key", "value"} {
-		if _, err := a.Create(context.Background(), attributes.CreateOpts{}, attributes.WithCreateField(key, "override")); !errors.Is(err, resource.ErrInvalidOption) {
+		if _, err := a.Create(context.Background(), attributes.CreateOpts{}, request.Field(key, "override")); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatalf("core field %s: %v", key, err)
 		}
 	}
 	for _, header := range []string{"X-AUTH-TOKEN", "OpenStack-API-Version", "CONTENT-TYPE", "Host"} {
-		if _, err := a.Create(context.Background(), attributes.CreateOpts{}, attributes.WithCreateHeader(header, "override")); !errors.Is(err, resource.ErrInvalidOption) {
+		if _, err := a.Create(context.Background(), attributes.CreateOpts{}, request.Header(header, "override")); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatalf("core header %s: %v", header, err)
 		}
 	}
-	if _, err := a.Create(context.Background(), attributes.CreateOpts{}, attributes.WithCreateField("future", make(chan int))); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := a.Create(context.Background(), attributes.CreateOpts{}, request.Field("future", make(chan int))); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
 	if _, err := a.Get(context.Background(), "not-uuid"); !errors.Is(err, resource.ErrInvalidOption) {
