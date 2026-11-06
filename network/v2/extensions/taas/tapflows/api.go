@@ -78,7 +78,7 @@ func (a *API) Update(ctx context.Context, id string, options ...UpdateOption) (*
 }
 
 // Delete implements delete_tap_flow. A clean 404 returns nil unless
-// WithDeleteIgnoreMissing(false) is given.
+// request.IgnoreMissing(false) is given.
 func (a *API) Delete(ctx context.Context, id string, options ...DeleteOption) error {
 	return ownedrecord.Delete(ctx, a.binding(), "", id, options)
 }
@@ -109,7 +109,7 @@ func (a *API) All(ctx context.Context, options ...ListOption) ([]*TapFlow, error
 
 // Find implements find_tap_flow: GET by ID first and, after a clean 400, 403
 // or 404, the complete list with ?name= matched by exact ID or name. A
-// missing flow returns nil, nil unless WithFindIgnoreMissing(false).
+// missing flow returns nil, nil unless request.IgnoreMissing(false).
 func (a *API) Find(ctx context.Context, nameOrID string, options ...FindOption) (*TapFlow, error) {
 	return convert(ownedrecord.Find(ctx, a.binding(), "", nameOrID, options))
 }

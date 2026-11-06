@@ -12,7 +12,9 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/neutronfind"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -28,13 +30,13 @@ type DeleteResult struct {
 
 // Get implements get_*(value, fields=...): GET {path}/{id} with canonical
 // field names mapped to wire names. A 404 is an error, as in Python.
-func Get[O ~func(*GetOpts) error](ctx context.Context, t Target, id string, options []O) (*Record, error) {
+func Get[C request.Call](ctx context.Context, t Target, id string, options []C) (*Record, error) {
 	const op = "Get"
 	engine, err := t.Engine(ctx, t.Spec.Profile)
 	if err != nil {
 		return nil, t.Wrap(ctx, op, err)
 	}
-	policy, err := Apply(ctx, engine, GetOpts{}, CopyGet, slices.Clone(options))
+	policy, err := Apply(ctx, engine, GetOpts{}, CopyGet, calls.Translate(options, GetCalls))
 	if err != nil {
 		return nil, t.Wrap(ctx, op, err)
 	}
@@ -65,8 +67,8 @@ func Get[O ~func(*GetOpts) error](ctx context.Context, t Target, id string, opti
 
 // List implements the Python list generator lazily: declared server query,
 // local Body filters, unknown names dropped, *_links and marker paging.
-func List[O ~func(*ListOpts) error](ctx context.Context, t Target, options []O) iter.Seq2[*Record, error] {
-	snapshot := slices.Clone(options)
+func List[C request.Call](ctx context.Context, t Target, options []C) iter.Seq2[*Record, error] {
+	snapshot := calls.Translate(options, t.Spec.ListCalls())
 	return func(yield func(*Record, error) bool) {
 		const op = "List"
 		engine, err := t.Engine(ctx, t.Spec.Profile)
@@ -90,13 +92,13 @@ func List[O ~func(*ListOpts) error](ctx context.Context, t Target, options []O) 
 // Find implements find_*: GET by ID, then after a clean 400, 403 or 404 a
 // complete list matched on ID or name. Missing is nil unless IgnoreMissing
 // is false.
-func Find[O ~func(*FindOpts) error](ctx context.Context, t Target, nameOrID string, options []O) (*Record, error) {
+func Find[C request.Call](ctx context.Context, t Target, nameOrID string, options []C) (*Record, error) {
 	const op = "Find"
 	engine, err := t.Engine(ctx, t.Spec.Profile)
 	if err != nil {
 		return nil, t.Wrap(ctx, op, err)
 	}
-	policy, err := Apply(ctx, engine, FindOpts{}, CopyFind, slices.Clone(options))
+	policy, err := Apply(ctx, engine, FindOpts{}, CopyFind, calls.Translate(options, FindCalls))
 	if err != nil {
 		return nil, t.Wrap(ctx, op, err)
 	}
@@ -157,13 +159,13 @@ func transport(v WriteOpts) neutronfind.Options {
 }
 
 // Create implements create_*(**attrs): POST {path} with {singular: attrs}.
-func Create[O ~func(*WriteOpts) error](ctx context.Context, t Target, options []O) (*Record, error) {
+func Create[C request.Call](ctx context.Context, t Target, options []C) (*Record, error) {
 	const op = "Create"
 	engine, err := t.Engine(ctx, t.Spec.Profile)
 	if err != nil {
 		return nil, t.Wrap(ctx, op, err)
 	}
-	policy, err := Apply(ctx, engine, WriteOpts{}, CopyWrite, slices.Clone(options))
+	policy, err := Apply(ctx, engine, WriteOpts{}, CopyWrite, calls.Translate(options, WriteCalls))
 	if err != nil {
 		return nil, t.Wrap(ctx, op, err)
 	}
@@ -177,13 +179,13 @@ func Create[O ~func(*WriteOpts) error](ctx context.Context, t Target, options []
 
 // Update implements update_*(value, **attrs): PUT {path}/{id} with only the
 // given attributes. No attributes returns the seed view without HTTP.
-func Update[O ~func(*WriteOpts) error](ctx context.Context, t Target, id string, options []O) (*Record, error) {
+func Update[C request.Call](ctx context.Context, t Target, id string, options []C) (*Record, error) {
 	const op = "Update"
 	engine, err := t.Engine(ctx, t.Spec.Profile)
 	if err != nil {
 		return nil, t.Wrap(ctx, op, err)
 	}
-	policy, err := Apply(ctx, engine, WriteOpts{}, CopyWrite, slices.Clone(options))
+	policy, err := Apply(ctx, engine, WriteOpts{}, CopyWrite, calls.Translate(options, WriteCalls))
 	if err != nil {
 		return nil, t.Wrap(ctx, op, err)
 	}
@@ -206,13 +208,13 @@ func Update[O ~func(*WriteOpts) error](ctx context.Context, t Target, id string,
 
 // Delete implements delete_*(value, ignore_missing=True). Only a clean 404
 // is ignored, and only while IgnoreMissing is nil or true.
-func Delete[O ~func(*DeleteOpts) error](ctx context.Context, t Target, id string, options []O) (*DeleteResult, error) {
+func Delete[C request.Call](ctx context.Context, t Target, id string, options []C) (*DeleteResult, error) {
 	const op = "Delete"
 	engine, err := t.Engine(ctx, t.Spec.Profile)
 	if err != nil {
 		return nil, t.Wrap(ctx, op, err)
 	}
-	policy, err := Apply(ctx, engine, DeleteOpts{}, CopyDelete, slices.Clone(options))
+	policy, err := Apply(ctx, engine, DeleteOpts{}, CopyDelete, calls.Translate(options, DeleteCalls))
 	if err == nil {
 		err = ValidateID("ID", id)
 	}

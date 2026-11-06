@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"io"
 	"net/http"
 	"testing"
@@ -64,11 +65,11 @@ func TestPythonMeteringLabelRuleCreatePostsAttrsWithWireNames(t *testing.T) {
 	var calls []ruleCall
 	api := ruleAPI(t, &calls, func(*http.Request) (int, string) { return 201, `{"metering_label_rule":` + ruleRow + `}` })
 	v, err := api.Create(context.Background(),
-		rules.WithCreateField("metering_label_id", "ml1"),
-		rules.WithCreateField("direction", "egress"),
-		rules.WithCreateField("is_excluded", false),
-		rules.WithCreateField("source_ip_prefix", "10.0.0.0/24"),
-		rules.WithCreateField("destination_ip_prefix", "0.0.0.0/0"))
+		request.Field("metering_label_id", "ml1"),
+		request.Field("direction", "egress"),
+		request.Field("is_excluded", false),
+		request.Field("source_ip_prefix", "10.0.0.0/24"),
+		request.Field("destination_ip_prefix", "0.0.0.0/0"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -81,7 +82,7 @@ func TestPythonMeteringLabelRuleCreatePostsAttrsWithWireNames(t *testing.T) {
 		t.Run(fmt.Sprint(code), func(t *testing.T) {
 			var calls []ruleCall
 			api := ruleAPI(t, &calls, func(*http.Request) (int, string) { return code, `{}` })
-			_, err := api.Create(context.Background(), rules.WithCreateField("metering_label_id", "x"))
+			_, err := api.Create(context.Background(), request.Field("metering_label_id", "x"))
 			ruleFailure(t, err, "Create", code)
 		})
 	}
@@ -106,7 +107,7 @@ func TestPythonMeteringLabelRuleGetMapsFieldsAndReportsMissing(t *testing.T) {
 func TestPythonMeteringLabelRuleUpdatePutsOnlyGivenAttrs(t *testing.T) {
 	var calls []ruleCall
 	api := ruleAPI(t, &calls, func(*http.Request) (int, string) { return 200, `{"metering_label_rule":` + ruleRow + `}` })
-	v, err := api.Update(context.Background(), "r1", rules.WithUpdateField("excluded", false))
+	v, err := api.Update(context.Background(), "r1", request.Field("excluded", false))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -118,7 +119,7 @@ func TestPythonMeteringLabelRuleUpdatePutsOnlyGivenAttrs(t *testing.T) {
 	if v, err = api.Update(context.Background(), "r1"); err != nil || len(calls) != 0 || v.ID != "r1" {
 		t.Fatal(v, err, calls)
 	}
-	if _, err = api.Update(context.Background(), "r1", rules.WithUpdateField("metering_label_rule", "x")); !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
+	if _, err = api.Update(context.Background(), "r1", request.Field("metering_label_rule", "x")); !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
 		t.Fatal(err, calls)
 	}
 }
@@ -135,7 +136,7 @@ func TestPythonMeteringLabelRuleDeleteIgnoresMissingByDefault(t *testing.T) {
 			api := ruleAPI(t, &calls, func(*http.Request) (int, string) { return tc.code, "" })
 			var options []rules.DeleteOption
 			if tc.strict {
-				options = append(options, rules.WithDeleteIgnoreMissing(false))
+				options = append(options, request.IgnoreMissing(false))
 			}
 			result, err := api.Delete(context.Background(), "r1", options...)
 			if len(calls) != 1 || calls[0].method != http.MethodDelete || calls[0].path != ruleBase+"/r1" {
@@ -161,11 +162,11 @@ func TestPythonMeteringLabelRuleListMapsQueryAndFiltersBodyLocally(t *testing.T)
 		return 200, `{"metering_label_rules":[{"id":"a","excluded":false},{"id":"b","excluded":true}],"metering_label_rules_links":[{"rel":"next","href":"?marker=b"}]}`
 	})
 	values, err := api.All(context.Background(),
-		rules.WithListQuery("metering_label_id", "ml1"),
-		rules.WithListQuery("direction", "egress"),
-		rules.WithListQuery("remote_ip_prefix", "10.0.0.0/8"),
-		rules.WithListQuery("is_excluded", true),
-		rules.WithListQuery("excluded", "ignored"))
+		request.Query("metering_label_id", "ml1"),
+		request.Query("direction", "egress"),
+		request.Query("remote_ip_prefix", "10.0.0.0/8"),
+		request.Query("is_excluded", true),
+		request.Query("excluded", "ignored"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -186,7 +187,7 @@ func TestPythonMeteringLabelRuleFindListsWithoutNameHint(t *testing.T) {
 		}
 		return 200, `{"metering_label_rules":[{"id":"x"},` + ruleRow + `]}`
 	})
-	v, err := api.Find(context.Background(), "r1", rules.WithFindQuery("metering_label_id", "ml1"))
+	v, err := api.Find(context.Background(), "r1", request.Query("metering_label_id", "ml1"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -202,7 +203,7 @@ func TestPythonMeteringLabelRuleFindListsWithoutNameHint(t *testing.T) {
 			}
 			return 200, `{"metering_label_rules":[]}`
 		})
-		v, err = api.Find(context.Background(), "none", rules.WithFindIgnoreMissing(!strict))
+		v, err = api.Find(context.Background(), "none", request.IgnoreMissing(!strict))
 		if v != nil || len(calls) != 2 || strict != errors.Is(err, resource.ErrNotFound) {
 			t.Fatal(strict, v, err, calls)
 		}

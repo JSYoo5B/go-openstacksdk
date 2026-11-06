@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"io"
 	"net/http"
 	"reflect"
@@ -71,7 +72,7 @@ func TestPythonLocalIPAssociationCreatePostsUnderParent(t *testing.T) {
 	api := pythonLocalIPAssociationAPI(t, &calls, func(*http.Request) (int, string) {
 		return 201, `{"port_association":` + pythonLocalIPAssociationRow + `}`
 	})
-	value, err := api.Create(context.Background(), "lip1", localipassociations.WithCreateField("fixed_port_id", "port1"), localipassociations.WithCreateField("fixed_ip", nil))
+	value, err := api.Create(context.Background(), "lip1", request.Field("fixed_port_id", "port1"), request.Field("fixed_ip", nil))
 	if err != nil || len(calls) != 1 || calls[0].method != http.MethodPost || calls[0].path != pythonLocalIPAssociationBase || calls[0].query != "" || value.StatusCode != 201 {
 		t.Fatal(value, err, calls)
 	}
@@ -91,7 +92,7 @@ func TestPythonLocalIPAssociationCreatePostsUnderParent(t *testing.T) {
 	}
 	calls = nil
 	for _, key := range []string{"local_ip", "local_ip_id"} {
-		_, err = api.Create(context.Background(), "lip1", localipassociations.WithCreateField(key, "x"))
+		_, err = api.Create(context.Background(), "lip1", request.Field(key, "x"))
 		pythonLocalIPAssociationOperation(t, err, "Create")
 		if !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
 			t.Fatal(key, err, calls)
@@ -137,7 +138,7 @@ func TestPythonLocalIPAssociationDeleteIgnoresMissingByDefault(t *testing.T) {
 	}{
 		{204, nil, false},
 		{404, nil, false},
-		{404, []localipassociations.DeleteOption{localipassociations.WithDeleteIgnoreMissing(false)}, true},
+		{404, []localipassociations.DeleteOption{request.IgnoreMissing(false)}, true},
 		{409, nil, true},
 	} {
 		var calls []pythonLocalIPAssociationCall
@@ -165,7 +166,7 @@ func TestPythonLocalIPAssociationListQueryFiltersAndLinks(t *testing.T) {
 		}
 		return 200, `{"port_associations":[{"fixed_port_id":"c","local_ip_address":"10.0.0.5"}]}`
 	})
-	values, err := api.All(context.Background(), "lip1", localipassociations.WithListQuery("host", "h"), localipassociations.WithListQuery("local_ip_address", "10.0.0.5"), localipassociations.WithListQuery("unknown", 1))
+	values, err := api.All(context.Background(), "lip1", request.Query("host", "h"), request.Query("local_ip_address", "10.0.0.5"), request.Query("unknown", 1))
 	if err != nil || len(values) != 2 || *values[0].FixedPortID != "b" || *values[1].FixedPortID != "c" || values[0].LocalIPID != "lip1" || len(calls) != 2 {
 		t.Fatal(values, err, calls)
 	}
@@ -177,7 +178,7 @@ func TestPythonLocalIPAssociationListQueryFiltersAndLinks(t *testing.T) {
 	}
 	calls = nil
 	for _, key := range []string{"local_ip", "local_ip_id"} {
-		_, err = api.All(context.Background(), "lip1", localipassociations.WithListQuery(key, "x"))
+		_, err = api.All(context.Background(), "lip1", request.Query(key, "x"))
 		pythonLocalIPAssociationOperation(t, err, "List")
 		if !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
 			t.Fatal(key, err, calls)
@@ -191,13 +192,13 @@ func TestPythonLocalIPAssociationListMarkerNeedsID(t *testing.T) {
 		return 200, `{"port_associations":[{"fixed_port_id":"a"}]}`
 	})
 	// Python derives the marker from Resource.id, which port associations lack.
-	_, err := api.All(context.Background(), "lip1", localipassociations.WithListLimit(1))
+	_, err := api.All(context.Background(), "lip1", request.Limit(1))
 	pythonLocalIPAssociationOperation(t, err, "List")
 	if !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 1 || calls[0].query != "limit=1" {
 		t.Fatal(err, calls)
 	}
 	calls = nil
-	values, err := api.All(context.Background(), "lip1", localipassociations.WithListLimit(1), localipassociations.WithListPaginated(false))
+	values, err := api.All(context.Background(), "lip1", request.Limit(1), request.Paginated(false))
 	if err != nil || len(values) != 1 || len(calls) != 1 {
 		t.Fatal(values, err, calls)
 	}
@@ -220,18 +221,18 @@ func TestPythonLocalIPAssociationFindForwardsParent(t *testing.T) {
 	}
 
 	calls = nil
-	value, err = api.Find(context.Background(), "lip1", "port2", localipassociations.WithFindQuery("host", "h"))
+	value, err = api.Find(context.Background(), "lip1", "port2", request.Query("host", "h"))
 	if err != nil || value != nil || len(calls) != 2 || calls[0].query != "host=h&local_ip_id=lip1" || calls[1].query != "host=h" {
 		t.Fatal(value, err, calls)
 	}
-	_, err = api.Find(context.Background(), "lip1", "port2", localipassociations.WithFindIgnoreMissing(false))
+	_, err = api.Find(context.Background(), "lip1", "port2", request.IgnoreMissing(false))
 	var missing *resource.NotFoundError
 	if !errors.As(err, &missing) {
 		t.Fatal(err)
 	}
 	pythonLocalIPAssociationOperation(t, err, "Find")
 	calls = nil
-	_, err = api.Find(context.Background(), "lip1", "x", localipassociations.WithFindQuery("local_ip", "y"))
+	_, err = api.Find(context.Background(), "lip1", "x", request.Query("local_ip", "y"))
 	pythonLocalIPAssociationOperation(t, err, "Find")
 	if !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
 		t.Fatal(err, calls)

@@ -98,12 +98,6 @@ func listOptions(v ListOpts) neutronfind.Options {
 	return neutronfind.Options{Microversion: v.Microversion, Query: v.Query, Headers: v.Headers, Order: v.order}
 }
 
-// marshal snapshots one option value; a marshal error surfaces when applied.
-func marshal(value any) (json.RawMessage, error) {
-	raw, err := json.Marshal(value)
-	return bytes.Clone(raw), err
-}
-
 func setOrdered(target *map[string]json.RawMessage, order *[]string, key string, raw json.RawMessage) {
 	if *target == nil {
 		*target = make(map[string]json.RawMessage)
@@ -142,107 +136,25 @@ func GetFields(values ...string) func(*GetOpts) error {
 	owned := slices.Clone(values)
 	return func(c *GetOpts) error { c.Fields = slices.Clone(owned); return nil }
 }
-func GetHeaders(values map[string]string) func(*GetOpts) error {
-	owned := maps.Clone(values)
-	return func(c *GetOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
-func GetMicroversion(v string) func(*GetOpts) error {
-	return func(c *GetOpts) error { x := v; c.Microversion = &x; return nil }
-}
 
 func WriteSnapshot(v WriteOpts) func(*WriteOpts) error {
 	owned := CopyWrite(v)
 	return func(c *WriteOpts) error { *c = CopyWrite(owned); return nil }
 }
 
-// WriteField records one Python attribute; later values replace earlier ones.
-func WriteField(key string, value any) func(*WriteOpts) error {
-	raw, err := marshal(value)
-	return func(c *WriteOpts) error {
-		if err != nil {
-			return errors.Join(Invalid("attribute %q is not JSON", key), err)
-		}
-		setOrdered(&c.Attrs, &c.order, key, raw)
-		return nil
-	}
-}
-func WriteHeaders(values map[string]string) func(*WriteOpts) error {
-	owned := maps.Clone(values)
-	return func(c *WriteOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
-func WriteMicroversion(v string) func(*WriteOpts) error {
-	return func(c *WriteOpts) error { x := v; c.Microversion = &x; return nil }
-}
-
 func DeleteSnapshot(v DeleteOpts) func(*DeleteOpts) error {
 	owned := CopyDelete(v)
 	return func(c *DeleteOpts) error { *c = CopyDelete(owned); return nil }
-}
-func DeleteIgnoreMissing(v bool) func(*DeleteOpts) error {
-	return func(c *DeleteOpts) error { x := v; c.IgnoreMissing = &x; return nil }
-}
-func DeleteHeaders(values map[string]string) func(*DeleteOpts) error {
-	owned := maps.Clone(values)
-	return func(c *DeleteOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
-func DeleteMicroversion(v string) func(*DeleteOpts) error {
-	return func(c *DeleteOpts) error { x := v; c.Microversion = &x; return nil }
 }
 
 func FindSnapshot(v FindOpts) func(*FindOpts) error {
 	owned := CopyFind(v)
 	return func(c *FindOpts) error { *c = CopyFind(owned); return nil }
 }
-func FindIgnoreMissing(v bool) func(*FindOpts) error {
-	return func(c *FindOpts) error { x := v; c.IgnoreMissing = &x; return nil }
-}
-
-// FindQuery records one Python **query value for find.
-func FindQuery(key string, value any) func(*FindOpts) error {
-	raw, err := marshal(value)
-	return func(c *FindOpts) error {
-		if err != nil {
-			return errors.Join(Invalid("query %q is not JSON", key), err)
-		}
-		setOrdered(&c.Query, &c.order, key, raw)
-		return nil
-	}
-}
-func FindHeaders(values map[string]string) func(*FindOpts) error {
-	owned := maps.Clone(values)
-	return func(c *FindOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
-func FindMicroversion(v string) func(*FindOpts) error {
-	return func(c *FindOpts) error { x := v; c.Microversion = &x; return nil }
-}
 
 func ListSnapshot(v ListOpts) func(*ListOpts) error {
 	owned := CopyList(v)
 	return func(c *ListOpts) error { *c = CopyList(owned); return nil }
-}
-
-// ListQuery records one Python **query value. Names that are neither server
-// query names, Body names, list controls nor bound proxy arguments are
-// discarded before marshaling, as Resource.list discards them.
-func (s *Spec) ListQuery(key string, value any) func(*ListOpts) error {
-	if s.listIgnores(key) {
-		return func(*ListOpts) error { return nil }
-	}
-	raw, err := marshal(value)
-	return func(c *ListOpts) error {
-		if err != nil {
-			return errors.Join(Invalid("query %q is not JSON", key), err)
-		}
-		setOrdered(&c.Query, &c.order, key, raw)
-		return nil
-	}
-}
-func ListHeaders(values map[string]string) func(*ListOpts) error {
-	owned := maps.Clone(values)
-	return func(c *ListOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
-func ListMicroversion(v string) func(*ListOpts) error {
-	return func(c *ListOpts) error { x := v; c.Microversion = &x; return nil }
 }
 
 func (s *Spec) listIgnores(key string) bool {

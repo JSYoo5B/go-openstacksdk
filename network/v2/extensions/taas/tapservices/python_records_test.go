@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"io"
 	"net/http"
 	"reflect"
@@ -77,11 +78,11 @@ func TestPythonTapServiceCreatePostsGivenAttrs(t *testing.T) {
 	var calls []pythonTapServiceCall
 	api := pythonTapServiceAPI(t, &calls, func(*http.Request) (int, string) { return 201, `{"tap_service":` + pythonTapServiceRow + `}` })
 	value, err := api.Create(context.Background(),
-		tapservices.WithCreateField("name", "collector"),
-		tapservices.WithCreateField("port_id", "port1"),
-		tapservices.WithCreateField("description", "d"),
-		tapservices.WithCreateField("vlan_filter", nil),
-		tapservices.WithCreateField("microversion", "ignored"))
+		request.Field("name", "collector"),
+		request.Field("port_id", "port1"),
+		request.Field("description", "d"),
+		request.Field("vlan_filter", nil),
+		request.Field("microversion", "ignored"))
 	if err != nil || len(calls) != 1 || calls[0].method != http.MethodPost || calls[0].path != pythonTapServiceBase || calls[0].query != "" || value.StatusCode != 201 {
 		t.Fatal(value, err, calls)
 	}
@@ -106,13 +107,13 @@ func TestPythonTapServiceStatusesCarryOperationContext(t *testing.T) {
 	for _, code := range []int{400, 409, 500} {
 		var calls []pythonTapServiceCall
 		api := pythonTapServiceAPI(t, &calls, func(*http.Request) (int, string) { return code, `{"NeutronError":{}}` })
-		_, err := api.Create(context.Background(), tapservices.WithCreateField("name", "x"))
+		_, err := api.Create(context.Background(), request.Field("name", "x"))
 		pythonTapServiceOperation(t, err, "Create")
 		pythonTapServiceStatus(t, err, code)
 		_, err = api.Get(context.Background(), "ts1")
 		pythonTapServiceOperation(t, err, "Get")
 		pythonTapServiceStatus(t, err, code)
-		_, err = api.Update(context.Background(), "ts1", tapservices.WithUpdateField("name", "x"))
+		_, err = api.Update(context.Background(), "ts1", request.Field("name", "x"))
 		pythonTapServiceOperation(t, err, "Update")
 		pythonTapServiceStatus(t, err, code)
 	}
@@ -140,7 +141,7 @@ func TestPythonTapServiceGetMapsFields(t *testing.T) {
 func TestPythonTapServiceUpdatePutsDirtyAttrs(t *testing.T) {
 	var calls []pythonTapServiceCall
 	api := pythonTapServiceAPI(t, &calls, func(*http.Request) (int, string) { return 200, `{"tap_service":` + pythonTapServiceRow + `}` })
-	value, err := api.Update(context.Background(), "ts1", tapservices.WithUpdateField("name", "collector"), tapservices.WithUpdateField("description", ""))
+	value, err := api.Update(context.Background(), "ts1", request.Field("name", "collector"), request.Field("description", ""))
 	if err != nil || len(calls) != 1 || calls[0].method != http.MethodPut || calls[0].path != pythonTapServiceBase+"/ts1" {
 		t.Fatal(value, err, calls)
 	}
@@ -153,7 +154,7 @@ func TestPythonTapServiceUpdatePutsDirtyAttrs(t *testing.T) {
 		t.Fatal(value, err, calls)
 	}
 	for _, key := range []string{"id", "tap_service"} {
-		_, err = api.Update(context.Background(), "ts1", tapservices.WithUpdateField(key, "x"))
+		_, err = api.Update(context.Background(), "ts1", request.Field(key, "x"))
 		pythonTapServiceOperation(t, err, "Update")
 		if !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
 			t.Fatal(key, err, calls)
@@ -169,7 +170,7 @@ func TestPythonTapServiceDeleteIgnoresMissingByDefault(t *testing.T) {
 	}{
 		{204, nil, false},
 		{404, nil, false},
-		{404, []tapservices.DeleteOption{tapservices.WithDeleteIgnoreMissing(false)}, true},
+		{404, []tapservices.DeleteOption{request.IgnoreMissing(false)}, true},
 		{409, nil, true},
 	} {
 		var calls []pythonTapServiceCall
@@ -197,7 +198,7 @@ func TestPythonTapServiceListQueryFiltersAndLinks(t *testing.T) {
 		}
 		return 200, `{"tap_services":[{"id":"c","status":"ACTIVE"}]}`
 	})
-	values, err := api.All(context.Background(), tapservices.WithListQuery("name", "n"), tapservices.WithListQuery("status", "ACTIVE"), tapservices.WithListQuery("unknown", "dropped"))
+	values, err := api.All(context.Background(), request.Query("name", "n"), request.Query("status", "ACTIVE"), request.Query("unknown", "dropped"))
 	if err != nil || len(values) != 2 || values[0].ID != "b" || values[1].ID != "c" || len(calls) != 2 {
 		t.Fatal(values, err, calls)
 	}
@@ -217,7 +218,7 @@ func TestPythonTapServiceListMarkerContinuation(t *testing.T) {
 		}
 		return 200, `{"tap_services":[]}`
 	})
-	values, err := api.All(context.Background(), tapservices.WithListLimit(2), tapservices.WithListQuery("project_id", "p1"))
+	values, err := api.All(context.Background(), request.Limit(2), request.Query("project_id", "p1"))
 	if err != nil || len(values) != 3 || len(calls) != 3 {
 		t.Fatal(values, err, calls)
 	}
@@ -225,7 +226,7 @@ func TestPythonTapServiceListMarkerContinuation(t *testing.T) {
 		t.Fatal(calls)
 	}
 	calls = nil
-	values, err = api.All(context.Background(), tapservices.WithListLimit(2), tapservices.WithListPaginated(false))
+	values, err = api.All(context.Background(), request.Limit(2), request.Paginated(false))
 	if err != nil || len(values) != 2 || len(calls) != 1 {
 		t.Fatal(values, err, calls)
 	}
@@ -257,7 +258,7 @@ func TestPythonTapServiceFindFallsBackToNameList(t *testing.T) {
 		}
 		return 500, ""
 	})
-	value, err = api.Find(context.Background(), "ts1", tapservices.WithFindQuery("project_id", "p1"))
+	value, err = api.Find(context.Background(), "ts1", request.Query("project_id", "p1"))
 	if err != nil || len(calls) != 1 || calls[0].query != "project_id=p1" {
 		t.Fatal(value, err, calls)
 	}
@@ -276,7 +277,7 @@ func TestPythonTapServiceFindMissing(t *testing.T) {
 	if err != nil || value != nil || len(calls) != 2 {
 		t.Fatal(value, err, calls)
 	}
-	_, err = api.Find(context.Background(), "none", tapservices.WithFindIgnoreMissing(false))
+	_, err = api.Find(context.Background(), "none", request.IgnoreMissing(false))
 	pythonTapServiceOperation(t, err, "Find")
 	var missing *resource.NotFoundError
 	if !errors.As(err, &missing) {

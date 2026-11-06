@@ -75,7 +75,7 @@ func (a *API) Get(ctx context.Context, localIPID, id string, options ...GetOptio
 
 // Delete implements delete_local_ip_association(local_ip, fixed_port_id):
 // DELETE local_ips/{local_ip_id}/port_associations/{fixed_port_id}. A clean
-// 404 returns nil unless WithDeleteIgnoreMissing(false) is given.
+// 404 returns nil unless request.IgnoreMissing(false) is given.
 func (a *API) Delete(ctx context.Context, localIPID, fixedPortID string, options ...DeleteOption) error {
 	return ownedrecord.Delete(ctx, a.binding(), localIPID, fixedPortID, options)
 }
@@ -108,7 +108,7 @@ func (a *API) All(ctx context.Context, localIPID string, options ...ListOption) 
 // Find implements find_local_ip_association(name_or_id, local_ip): GET by
 // ID with ?local_ip_id= first and, after a clean 400, 403 or 404, the complete
 // association list matched by exact id or name Body value. A missing
-// association returns nil, nil unless WithFindIgnoreMissing(false).
+// association returns nil, nil unless request.IgnoreMissing(false).
 func (a *API) Find(ctx context.Context, localIPID, nameOrID string, options ...FindOption) (*LocalIPAssociation, error) {
 	return convert(ownedrecord.Find(ctx, a.binding(), localIPID, nameOrID, options))
 }

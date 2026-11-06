@@ -31,12 +31,12 @@ func TestPythonTapMirrorListRepeatedQueryValues(t *testing.T) {
 	var rows []*tapmirrors.TapMirror
 	for row, err := range api.List(ctx,
 		request.Query("name", "mirror"),
-		tapmirrors.WithListQueryValues("fields", "id", "name"),
-		tapmirrors.WithListQueryValues("sort_key", "project_id"),
-		tapmirrors.WithListQueryValues("sort_key", "name", "id"),
-		tapmirrors.WithListQueryValues("sort_dir", "asc", "desc"),
-		tapmirrors.WithListQueryValues("dropped", "x"),
-		tapmirrors.WithListQueryValues("dropped"),
+		request.Query("fields", []string{"id", "name"}),
+		request.Query("sort_key", []string{"project_id"}),
+		request.Query("sort_key", []string{"name", "id"}),
+		request.Query("sort_dir", []string{"asc", "desc"}),
+		request.Query("dropped", []string{"x"}),
+		request.Query("dropped", []string{}),
 		request.Query("limit", "1"),
 	) {
 		if err != nil {
@@ -54,7 +54,7 @@ func TestPythonTapMirrorListRepeatedQueryValues(t *testing.T) {
 	}
 	// A later single-value option for the key wins.
 	calls = nil
-	for range api.List(ctx, tapmirrors.WithListQueryValues("fields", "id", "name"), request.Query("fields", "id")) {
+	for range api.List(ctx, request.Query("fields", []string{"id", "name"}), request.Query("fields", "id")) {
 	}
 	if len(calls) != 2 || !reflect.DeepEqual(calls[0].query, url.Values{"fields": {"id"}}) || !reflect.DeepEqual(calls[1].query, url.Values{"fields": {"id"}, "marker": {"tm-1"}}) {
 		t.Fatalf("%+v", calls)
@@ -67,7 +67,7 @@ func TestPythonTapMirrorListRepeatedQueryRejectsInputAndStatus(t *testing.T) {
 	api, _ := pythonTapMirrorAPI(t, &calls, func(*http.Request) *http.Response {
 		return pythonTapMirrorWire(http.StatusBadRequest, `{"NeutronError":{"type":"HTTPBadRequest","message":"bad sort key"}}`)
 	})
-	for _, err := range api.List(ctx, tapmirrors.WithListQueryValues(" ", "id")) {
+	for _, err := range api.List(ctx, request.Query(" ", []string{"id"})) {
 		var operation *resource.OperationError
 		if !errors.Is(err, resource.ErrInvalidOption) || !errors.As(err, &operation) || operation.Operation != "List" {
 			t.Fatal(err)
@@ -77,7 +77,7 @@ func TestPythonTapMirrorListRepeatedQueryRejectsInputAndStatus(t *testing.T) {
 		t.Fatalf("%+v", calls)
 	}
 	seen := false
-	for _, err := range api.List(ctx, tapmirrors.WithListQueryValues("sort_key", "bogus", "id")) {
+	for _, err := range api.List(ctx, request.Query("sort_key", []string{"bogus", "id"})) {
 		seen = true
 		if !gophercloud.ResponseCodeIs(err, http.StatusBadRequest) {
 			t.Fatal(err)

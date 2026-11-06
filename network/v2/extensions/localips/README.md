@@ -34,11 +34,11 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/localips.API.Delete`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/localips.WithDeleteIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 
-- Delete sends a bodyless DELETE local_ips/{id}, returns nil for 204 and a clean 404 by default, and returns 404 with WithDeleteIgnoreMissing(false) and 409 as wrapped errors.
+- Delete sends a bodyless DELETE local_ips/{id}, returns nil for 204 and a clean 404 by default, and returns 404 with request.IgnoreMissing(false) and 409 as wrapped errors.
   Tests: `network/v2/extensions/localips/python_records_test.go:TestPythonLocalIPDeleteIgnoresMissingByDefault`.
-- Delete sends no If-Match header unless the caller supplies one with WithDeleteHeaders.
+- Delete sends no If-Match header unless the caller supplies one with request.Headers.
   Tests: `network/v2/extensions/localips/python_records_test.go:TestPythonLocalIPUpdateIgnoresRevisionPrecondition`.
 
 Python/Go differences:
@@ -56,10 +56,10 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/localips.API.Find`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/localips.WithFindIgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/localips.WithFindQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
-- Find sends GET local_ips/{name_or_id} with the find query first and, only after a clean 400, 403 or 404, lists local_ips?name={name_or_id} and matches exact ID or name; a miss returns nil by default and resource.NotFoundError with WithFindIgnoreMissing(false), duplicates and other statuses are wrapped errors.
+- Find sends GET local_ips/{name_or_id} with the find query first and, only after a clean 400, 403 or 404, lists local_ips?name={name_or_id} and matches exact ID or name; a miss returns nil by default and resource.NotFoundError with request.IgnoreMissing(false), duplicates and other statuses are wrapped errors.
   Tests: `network/v2/extensions/localips/python_records_test.go:TestPythonLocalIPFindFallsBackToNameList`.
 
 Python/Go differences:
@@ -101,7 +101,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/localips.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/localips.API.All`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/localips.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List sends GET local_ips with Accept: application/json, encodes declared server query names (sort_key, sort_dir, name, description, fields, project_id, network_id, local_port_id, local_ip_address, ip_mode, limit, marker), filters Body names (id, created_at, revision_number, updated_at) locally, ignores unknown names and follows local_ips_links next links. With a limit and no links it continues with the last row ID as marker until an empty page, and a failing page is a wrapped error.
   Tests: `network/v2/extensions/localips/python_records_test.go:TestPythonLocalIPListQueryFiltersAndLinks`.

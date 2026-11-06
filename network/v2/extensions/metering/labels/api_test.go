@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"io"
 	"net/http"
 	"testing"
@@ -64,9 +65,9 @@ func TestPythonMeteringLabelCreatePostsAttrsWithWireNames(t *testing.T) {
 	var calls []labelCall
 	api := labelAPI(t, &calls, func(*http.Request) (int, string) { return 201, `{"metering_label":` + labelRow + `}` })
 	v, err := api.Create(context.Background(),
-		labels.WithCreateField("name", "web"),
-		labels.WithCreateField("is_shared", true),
-		labels.WithCreateField("tenant_id", "p1"))
+		request.Field("name", "web"),
+		request.Field("is_shared", true),
+		request.Field("tenant_id", "p1"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -104,7 +105,7 @@ func TestPythonMeteringLabelGetMapsFieldsAndReportsMissing(t *testing.T) {
 func TestPythonMeteringLabelUpdatePutsOnlyGivenAttrs(t *testing.T) {
 	var calls []labelCall
 	api := labelAPI(t, &calls, func(*http.Request) (int, string) { return 200, `{"metering_label":` + labelRow + `}` })
-	v, err := api.Update(context.Background(), "ml1", labels.WithUpdateField("description", "http"))
+	v, err := api.Update(context.Background(), "ml1", request.Field("description", "http"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -116,7 +117,7 @@ func TestPythonMeteringLabelUpdatePutsOnlyGivenAttrs(t *testing.T) {
 	if v, err = api.Update(context.Background(), "ml1"); err != nil || len(calls) != 0 || v.ID != "ml1" {
 		t.Fatal(v, err, calls)
 	}
-	if _, err = api.Update(context.Background(), "ml1", labels.WithUpdateField("metering_label", "x")); !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
+	if _, err = api.Update(context.Background(), "ml1", request.Field("metering_label", "x")); !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
 		t.Fatal(err, calls)
 	}
 }
@@ -133,7 +134,7 @@ func TestPythonMeteringLabelDeleteIgnoresMissingByDefault(t *testing.T) {
 			api := labelAPI(t, &calls, func(*http.Request) (int, string) { return tc.code, "" })
 			var options []labels.DeleteOption
 			if tc.strict {
-				options = append(options, labels.WithDeleteIgnoreMissing(false))
+				options = append(options, request.IgnoreMissing(false))
 			}
 			result, err := api.Delete(context.Background(), "ml1", options...)
 			if len(calls) != 1 || calls[0].method != http.MethodDelete || calls[0].path != labelBase+"/ml1" {
@@ -159,11 +160,11 @@ func TestPythonMeteringLabelListMapsQueryAndFiltersBodyLocally(t *testing.T) {
 		return 200, `{"metering_labels":[{"id":"a","tenant_id":"p2"},{"id":"b","project_id":"p1","tenant_id":"p1"}],"metering_labels_links":[{"rel":"next","href":"?marker=b"}]}`
 	})
 	values, err := api.All(context.Background(),
-		labels.WithListQuery("is_shared", true),
-		labels.WithListQuery("project_id", "p1"),
-		labels.WithListQuery("sort_key", "name"),
-		labels.WithListQuery("tenant_id", "p1"),
-		labels.WithListQuery("driver", "ignored"))
+		request.Query("is_shared", true),
+		request.Query("project_id", "p1"),
+		request.Query("sort_key", "name"),
+		request.Query("tenant_id", "p1"),
+		request.Query("driver", "ignored"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -199,7 +200,7 @@ func TestPythonMeteringLabelFindFallsBackToNameList(t *testing.T) {
 			}
 			return 200, `{"metering_labels":[]}`
 		})
-		v, err = api.Find(context.Background(), "none", labels.WithFindIgnoreMissing(!strict))
+		v, err = api.Find(context.Background(), "none", request.IgnoreMissing(!strict))
 		if v != nil || len(calls) != 2 || strict != errors.Is(err, resource.ErrNotFound) {
 			t.Fatal(strict, v, err, calls)
 		}

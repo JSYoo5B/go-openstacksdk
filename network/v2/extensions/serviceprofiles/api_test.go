@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"io"
 	"net/http"
 	"testing"
@@ -68,10 +69,10 @@ func TestPythonServiceProfileCreatePostsAttrsWithWireNames(t *testing.T) {
 	var calls []profileCall
 	api := profileAPI(t, &calls, func(*http.Request) (int, string) { return 201, `{"service_profile":` + profileRow + `}` })
 	v, err := api.Create(context.Background(),
-		serviceprofiles.WithCreateField("driver", "neutron_lbaas.Driver"),
-		serviceprofiles.WithCreateField("meta_info", `{"k": 1}`),
-		serviceprofiles.WithCreateField("is_enabled", false),
-		serviceprofiles.WithCreateField("project_id", "p1"))
+		request.Field("driver", "neutron_lbaas.Driver"),
+		request.Field("meta_info", `{"k": 1}`),
+		request.Field("is_enabled", false),
+		request.Field("project_id", "p1"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -84,7 +85,7 @@ func TestPythonServiceProfileCreatePostsAttrsWithWireNames(t *testing.T) {
 		t.Run(fmt.Sprint(code), func(t *testing.T) {
 			var calls []profileCall
 			api := profileAPI(t, &calls, func(*http.Request) (int, string) { return code, `{}` })
-			_, err := api.Create(context.Background(), serviceprofiles.WithCreateField("driver", "d"))
+			_, err := api.Create(context.Background(), request.Field("driver", "d"))
 			profileFailure(t, err, "Create", code)
 		})
 	}
@@ -109,7 +110,7 @@ func TestPythonServiceProfileGetMapsFieldsAndReportsMissing(t *testing.T) {
 func TestPythonServiceProfileUpdatePutsOnlyGivenAttrs(t *testing.T) {
 	var calls []profileCall
 	api := profileAPI(t, &calls, func(*http.Request) (int, string) { return 200, `{"service_profile":` + profileRow + `}` })
-	v, err := api.Update(context.Background(), "sp1", serviceprofiles.WithUpdateField("is_enabled", false), serviceprofiles.WithUpdateField("description", "lbaas"))
+	v, err := api.Update(context.Background(), "sp1", request.Field("is_enabled", false), request.Field("description", "lbaas"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -121,7 +122,7 @@ func TestPythonServiceProfileUpdatePutsOnlyGivenAttrs(t *testing.T) {
 	if v, err = api.Update(context.Background(), "sp1"); err != nil || len(calls) != 0 || v.ID != "sp1" {
 		t.Fatal(v, err, calls)
 	}
-	if _, err = api.Update(context.Background(), "sp1", serviceprofiles.WithUpdateField("service_profile", "x")); !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
+	if _, err = api.Update(context.Background(), "sp1", request.Field("service_profile", "x")); !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
 		t.Fatal(err, calls)
 	}
 }
@@ -138,7 +139,7 @@ func TestPythonServiceProfileDeleteIgnoresMissingByDefault(t *testing.T) {
 			api := profileAPI(t, &calls, func(*http.Request) (int, string) { return tc.code, "" })
 			var options []serviceprofiles.DeleteOption
 			if tc.strict {
-				options = append(options, serviceprofiles.WithDeleteIgnoreMissing(false))
+				options = append(options, request.IgnoreMissing(false))
 			}
 			result, err := api.Delete(context.Background(), "sp1", options...)
 			if len(calls) != 1 || calls[0].method != http.MethodDelete || calls[0].path != profileBase+"/sp1" {
@@ -164,12 +165,12 @@ func TestPythonServiceProfileListMapsQueryAndFiltersBodyLocally(t *testing.T) {
 		return 200, `{"service_profiles":[{"id":"a","name":"lb","tenant_id":"p2"},{"id":"b","name":"other","tenant_id":"p1"}],"service_profiles_links":[{"rel":"next","href":"?marker=b"}]}`
 	})
 	values, err := api.All(context.Background(),
-		serviceprofiles.WithListQuery("project_id", "p1"),
-		serviceprofiles.WithListQuery("is_enabled", false),
-		serviceprofiles.WithListQuery("driver", "d"),
-		serviceprofiles.WithListQuery("name", "lb"),
-		serviceprofiles.WithListQuery("tenant_id", "p1"),
-		serviceprofiles.WithListQuery("sort_key", "id"))
+		request.Query("project_id", "p1"),
+		request.Query("is_enabled", false),
+		request.Query("driver", "d"),
+		request.Query("name", "lb"),
+		request.Query("tenant_id", "p1"),
+		request.Query("sort_key", "id"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -206,7 +207,7 @@ func TestPythonServiceProfileFindListsWithoutNameHint(t *testing.T) {
 			}
 			return 200, `{"service_profiles":[]}`
 		})
-		v, err = api.Find(context.Background(), "none", serviceprofiles.WithFindIgnoreMissing(!strict))
+		v, err = api.Find(context.Background(), "none", request.IgnoreMissing(!strict))
 		if v != nil || len(calls) != 2 || strict != errors.Is(err, resource.ErrNotFound) {
 			t.Fatal(strict, v, err, calls)
 		}

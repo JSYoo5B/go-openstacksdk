@@ -73,7 +73,7 @@ func (a *API) Update(ctx context.Context, id string, options ...UpdateOption) (*
 }
 
 // Delete implements delete_flavor(flavor, ignore_missing=True). A clean 404
-// returns a receipt with IgnoredMissing unless WithDeleteIgnoreMissing(false).
+// returns a receipt with IgnoredMissing unless request.IgnoreMissing(false).
 func (a *API) Delete(ctx context.Context, id string, options ...DeleteOption) (*DeleteResult, error) {
 	return ownedrecords.Delete(ctx, a.target(), id, options)
 }

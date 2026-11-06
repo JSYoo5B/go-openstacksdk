@@ -7,8 +7,8 @@ import (
 	"errors"
 	"net/http"
 	"net/url"
-	"slices"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/neutronfind"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/internal/ownedrecords"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
@@ -42,7 +42,7 @@ func (a *API) association(ctx context.Context, op, method, flavorID, serviceProf
 	if err != nil {
 		return nil, t.Wrap(ctx, op, err)
 	}
-	policy, err := ownedrecords.Apply(ctx, engine, AssociationOpts{}, ownedrecords.CopyAction, slices.Clone(options))
+	policy, err := ownedrecords.Apply(ctx, engine, AssociationOpts{}, ownedrecords.CopyAction, calls.Translate(options, ownedrecords.ActionCalls))
 	if err != nil {
 		return nil, t.Wrap(ctx, op, err)
 	}

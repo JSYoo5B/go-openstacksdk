@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"io"
 	"net/http"
 	"reflect"
@@ -78,11 +79,11 @@ func TestPythonLocalIPCreatePostsGivenAttrs(t *testing.T) {
 	var calls []pythonLocalIPCall
 	api := pythonLocalIPAPI(t, &calls, func(*http.Request) (int, string) { return 201, `{"local_ip":` + pythonLocalIPRow + `}` })
 	value, err := api.Create(context.Background(),
-		localips.WithCreateField("name", "edge"),
-		localips.WithCreateField("network_id", "net1"),
-		localips.WithCreateField("local_ip_address", "10.0.0.5"),
-		localips.WithCreateField("ip_mode", "translate"),
-		localips.WithCreateField("x_unknown", 0))
+		request.Field("name", "edge"),
+		request.Field("network_id", "net1"),
+		request.Field("local_ip_address", "10.0.0.5"),
+		request.Field("ip_mode", "translate"),
+		request.Field("x_unknown", 0))
 	if err != nil || len(calls) != 1 || calls[0].method != http.MethodPost || calls[0].path != pythonLocalIPBase || calls[0].query != "" || value.StatusCode != 201 {
 		t.Fatal(value, err, calls)
 	}
@@ -127,7 +128,7 @@ func TestPythonLocalIPGetMapsFields(t *testing.T) {
 func TestPythonLocalIPUpdateIgnoresRevisionPrecondition(t *testing.T) {
 	var calls []pythonLocalIPCall
 	api := pythonLocalIPAPI(t, &calls, func(*http.Request) (int, string) { return 200, `{"local_ip":` + pythonLocalIPRow + `}` })
-	value, err := api.Update(context.Background(), "lip1", localips.WithUpdateField("description", "d"))
+	value, err := api.Update(context.Background(), "lip1", request.Field("description", "d"))
 	if err != nil || len(calls) != 1 || calls[0].method != http.MethodPut || calls[0].path != pythonLocalIPBase+"/lip1" || calls[0].ifMatch != "" {
 		t.Fatal(value, err, calls)
 	}
@@ -136,11 +137,11 @@ func TestPythonLocalIPUpdateIgnoresRevisionPrecondition(t *testing.T) {
 
 	calls = nil
 	condition := map[string]string{"If-Match": "revision_number=3"}
-	_, err = api.Update(context.Background(), "lip1", localips.WithUpdateField("name", "n"), localips.WithUpdateHeaders(condition))
+	_, err = api.Update(context.Background(), "lip1", request.Field("name", "n"), request.Headers(condition))
 	if err != nil || len(calls) != 1 || calls[0].ifMatch != "revision_number=3" {
 		t.Fatal(err, calls)
 	}
-	if err = api.Delete(context.Background(), "lip1", localips.WithDeleteHeaders(condition)); err != nil || len(calls) != 2 || calls[1].ifMatch != "revision_number=3" {
+	if err = api.Delete(context.Background(), "lip1", request.Headers(condition)); err != nil || len(calls) != 2 || calls[1].ifMatch != "revision_number=3" {
 		t.Fatal(err, calls)
 	}
 
@@ -150,7 +151,7 @@ func TestPythonLocalIPUpdateIgnoresRevisionPrecondition(t *testing.T) {
 		t.Fatal(value, err, calls)
 	}
 	for _, key := range []string{"id", "local_ip", "if_revision"} {
-		_, err = api.Update(context.Background(), "lip1", localips.WithUpdateField(key, 1))
+		_, err = api.Update(context.Background(), "lip1", request.Field(key, 1))
 		pythonLocalIPOperation(t, err, "Update")
 		if !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
 			t.Fatal(key, err, calls)
@@ -166,7 +167,7 @@ func TestPythonLocalIPDeleteIgnoresMissingByDefault(t *testing.T) {
 	}{
 		{204, nil, false},
 		{404, nil, false},
-		{404, []localips.DeleteOption{localips.WithDeleteIgnoreMissing(false)}, true},
+		{404, []localips.DeleteOption{request.IgnoreMissing(false)}, true},
 		{409, nil, true},
 	} {
 		var calls []pythonLocalIPCall
@@ -194,7 +195,7 @@ func TestPythonLocalIPListQueryFiltersAndLinks(t *testing.T) {
 		}
 		return 200, `{"local_ips":[{"id":"c","revision_number":2}]}`
 	})
-	values, err := api.All(context.Background(), localips.WithListQuery("network_id", "net1"), localips.WithListQuery("revision_number", 2), localips.WithListQuery("if_revision", 1))
+	values, err := api.All(context.Background(), request.Query("network_id", "net1"), request.Query("revision_number", 2), request.Query("if_revision", 1))
 	if err != nil || len(values) != 2 || values[0].ID != "b" || values[1].ID != "c" || len(calls) != 2 {
 		t.Fatal(values, err, calls)
 	}
@@ -208,7 +209,7 @@ func TestPythonLocalIPListQueryFiltersAndLinks(t *testing.T) {
 		}
 		return 200, `{"local_ips":[]}`
 	})
-	values, err = api.All(context.Background(), localips.WithListLimit(1), localips.WithListQuery("ip_mode", "passthrough"), localips.WithListQuery("local_ip_address", "10.0.0.5"))
+	values, err = api.All(context.Background(), request.Limit(1), request.Query("ip_mode", "passthrough"), request.Query("local_ip_address", "10.0.0.5"))
 	if err != nil || len(values) != 1 || len(calls) != 2 || calls[0].query != "ip_mode=passthrough&limit=1&local_ip_address=10.0.0.5" || calls[1].query != "ip_mode=passthrough&limit=1&local_ip_address=10.0.0.5&marker=a" {
 		t.Fatal(values, err, calls)
 	}
@@ -246,7 +247,7 @@ func TestPythonLocalIPFindFallsBackToNameList(t *testing.T) {
 	if err != nil || value != nil {
 		t.Fatal(value, err)
 	}
-	_, err = api.Find(context.Background(), "none", localips.WithFindIgnoreMissing(false))
+	_, err = api.Find(context.Background(), "none", request.IgnoreMissing(false))
 	var missing *resource.NotFoundError
 	if !errors.As(err, &missing) {
 		t.Fatal(err)

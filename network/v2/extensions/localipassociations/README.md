@@ -33,9 +33,9 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/localipassociations.API.Delete`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/localipassociations.WithDeleteIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 
-- Delete sends a bodyless DELETE local_ips/{local_ip_id}/port_associations/{fixed_port_id}, ignores a clean 404 by default, and returns 404 with WithDeleteIgnoreMissing(false) and 409 as wrapped errors.
+- Delete sends a bodyless DELETE local_ips/{local_ip_id}/port_associations/{fixed_port_id}, ignores a clean 404 by default, and returns 404 with request.IgnoreMissing(false) and 409 as wrapped errors.
   Tests: `network/v2/extensions/localipassociations/python_records_test.go:TestPythonLocalIPAssociationDeleteIgnoresMissingByDefault`.
 
 Python/Go differences:
@@ -53,10 +53,10 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/localipassociations.API.Find`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/localipassociations.WithFindIgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/localipassociations.WithFindQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
-- Find sends GET local_ips/{local_ip_id}/port_associations/{name_or_id}?local_ip_id={local_ip_id} with the find query first and, only after a clean 400, 403 or 404, lists the associations without a name hint and matches exact id or name Body values; a miss returns nil by default and resource.NotFoundError with WithFindIgnoreMissing(false), and local_ip query names are rejected.
+- Find sends GET local_ips/{local_ip_id}/port_associations/{name_or_id}?local_ip_id={local_ip_id} with the find query first and, only after a clean 400, 403 or 404, lists the associations without a name hint and matches exact id or name Body values; a miss returns nil by default and resource.NotFoundError with request.IgnoreMissing(false), and local_ip query names are rejected.
   Tests: `network/v2/extensions/localipassociations/python_records_test.go:TestPythonLocalIPAssociationFindForwardsParent`.
 
 Python/Go differences:
@@ -96,7 +96,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/localipassociations.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/localipassociations.API.All`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/localipassociations.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List sends GET local_ips/{local_ip_id}/port_associations with Accept: application/json, encodes fixed_port_id, fixed_ip, host, fields, sort and paging query names, filters id, name and local_ip_address locally, follows port_associations_links, sets LocalIPID on rows without adding local_ip_id to the Body view, and rejects local_ip and local_ip_id query names.
   Tests: `network/v2/extensions/localipassociations/python_records_test.go:TestPythonLocalIPAssociationListQueryFiltersAndLinks`.
@@ -125,9 +125,9 @@ conn.network.delete_local_ip_association(lip, port.id)
 
 ```go
 api := localipassociations.New(networkClient)
-_, err := api.Create(ctx, lipID, localipassociations.WithCreateField("fixed_port_id", portID))
+_, err := api.Create(ctx, lipID, request.Field("fixed_port_id", portID))
 if err != nil { return err }
-for item, err := range api.List(ctx, lipID, localipassociations.WithListQuery("host", "compute-1")) {
+for item, err := range api.List(ctx, lipID, request.Query("host", "compute-1")) {
     if err != nil { return err }
     fmt.Println(*item.FixedIP)
 }

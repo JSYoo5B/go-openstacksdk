@@ -11,19 +11,21 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/neutronfind"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 // Create implements a Python create_* proxy call: POST {collection} with
 // {resource_key: attrs}. Only the given attributes are sent.
-func Create[O ~func(*WriteOpts) error](ctx context.Context, b Binding, parent string, options []O) (*Record, error) {
+func Create[C request.Call](ctx context.Context, b Binding, parent string, options []C) (*Record, error) {
 	const op = "Create"
 	engine, err := b.engine(ctx, parent)
 	if err != nil {
 		return nil, b.Wrap(ctx, op, err)
 	}
-	policy, err := Apply(ctx, engine.Check, WriteOpts{}, CopyWrite, slices.Clone(options))
+	policy, err := Apply(ctx, engine.Check, WriteOpts{}, CopyWrite, calls.Translate(options, WriteCalls))
 	if err != nil {
 		return nil, b.Wrap(ctx, op, err)
 	}
@@ -37,13 +39,13 @@ func Create[O ~func(*WriteOpts) error](ctx context.Context, b Binding, parent st
 
 // Get implements a Python get_* proxy call (Resource.fetch through
 // _get_with_fields): GET {collection}/{id} with fields mapped to wire names.
-func Get[O ~func(*GetOpts) error](ctx context.Context, b Binding, parent, id string, options []O) (*Record, error) {
+func Get[C request.Call](ctx context.Context, b Binding, parent, id string, options []C) (*Record, error) {
 	const op = "Get"
 	engine, err := b.engine(ctx, parent)
 	if err != nil {
 		return nil, b.Wrap(ctx, op, err)
 	}
-	policy, err := Apply(ctx, engine.Check, GetOpts{}, CopyGet, slices.Clone(options))
+	policy, err := Apply(ctx, engine.Check, GetOpts{}, CopyGet, calls.Translate(options, GetCalls))
 	if err != nil {
 		return nil, b.Wrap(ctx, op, err)
 	}
@@ -57,13 +59,13 @@ func Get[O ~func(*GetOpts) error](ctx context.Context, b Binding, parent, id str
 
 // Update implements a Python update_* proxy call (Resource.commit with PUT)
 // for a literal ID. No dirty attribute returns the seeded view without HTTP.
-func Update[O ~func(*WriteOpts) error](ctx context.Context, b Binding, parent, id string, options []O) (*Record, error) {
+func Update[C request.Call](ctx context.Context, b Binding, parent, id string, options []C) (*Record, error) {
 	const op = "Update"
 	engine, err := b.engine(ctx, parent)
 	if err != nil {
 		return nil, b.Wrap(ctx, op, err)
 	}
-	policy, err := Apply(ctx, engine.Check, WriteOpts{}, CopyWrite, slices.Clone(options))
+	policy, err := Apply(ctx, engine.Check, WriteOpts{}, CopyWrite, calls.Translate(options, WriteCalls))
 	if err != nil {
 		return nil, b.Wrap(ctx, op, err)
 	}
@@ -87,13 +89,13 @@ func Update[O ~func(*WriteOpts) error](ctx context.Context, b Binding, parent, i
 
 // Delete implements a Python delete_* proxy call. A clean 404 is nil unless
 // IgnoreMissing is false; every other failure is returned.
-func Delete[O ~func(*DeleteOpts) error](ctx context.Context, b Binding, parent, id string, options []O) error {
+func Delete[C request.Call](ctx context.Context, b Binding, parent, id string, options []C) error {
 	const op = "Delete"
 	engine, err := b.engine(ctx, parent)
 	if err != nil {
 		return b.Wrap(ctx, op, err)
 	}
-	policy, err := Apply(ctx, engine.Check, DeleteOpts{}, CopyDelete, slices.Clone(options))
+	policy, err := Apply(ctx, engine.Check, DeleteOpts{}, CopyDelete, calls.Translate(options, DeleteCalls))
 	if err == nil {
 		err = ValidateSegment("ID", id)
 	}
@@ -109,8 +111,8 @@ func Delete[O ~func(*DeleteOpts) error](ctx context.Context, b Binding, parent, 
 
 // List implements a Python list proxy call as a lazy iterator. Every
 // iteration captures the client and sends the requests again.
-func List[O ~func(*ListOpts) error](ctx context.Context, b Binding, parent string, options []O) iter.Seq2[*Record, error] {
-	owned := slices.Clone(options)
+func List[C request.Call](ctx context.Context, b Binding, parent string, options []C) iter.Seq2[*Record, error] {
+	owned := calls.Translate(options, b.Spec.ListCalls())
 	return func(yield func(*Record, error) bool) {
 		const op = "List"
 		engine, err := b.engine(ctx, parent)
@@ -137,13 +139,13 @@ func List[O ~func(*ListOpts) error](ctx context.Context, b Binding, parent strin
 // Find implements a Python find_* proxy call: GET by ID first and, after a
 // clean 400, 403 or 404 only, the complete list matched by exact ID or name.
 // A parented class forwards the parent URI attribute as Resource.find does.
-func Find[O ~func(*FindOpts) error](ctx context.Context, b Binding, parent, nameOrID string, options []O) (*Record, error) {
+func Find[C request.Call](ctx context.Context, b Binding, parent, nameOrID string, options []C) (*Record, error) {
 	const op = "Find"
 	engine, err := b.engine(ctx, parent)
 	if err != nil {
 		return nil, b.Wrap(ctx, op, err)
 	}
-	policy, err := Apply(ctx, engine.Check, FindOpts{}, CopyFind, slices.Clone(options))
+	policy, err := Apply(ctx, engine.Check, FindOpts{}, CopyFind, calls.Translate(options, FindCalls))
 	if err == nil {
 		err = b.Spec.rejectReserved(policy.order, b.Spec.ParentReserved())
 	}

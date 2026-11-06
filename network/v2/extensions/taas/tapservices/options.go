@@ -1,111 +1,89 @@
 package tapservices
 
-import "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/internal/ownedrecord"
+import (
+	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/internal/ownedrecord"
+	"github.com/JSYoo5B/go-openstacksdk/request"
+)
 
 // CreateOpts carries the Python **attrs of create_tap_service as raw JSON.
 // Keys are Python attribute names or wire names; unknown keys stay in the
 // body. Headers and Microversion are Go extensions.
 type CreateOpts = ownedrecord.WriteOpts
-type CreateOption func(*CreateOpts) error
+
+// CreateOption is one option of Create: WithCreateOpts, request.Field (one
+// Python attribute as JSON), request.Headers (replaces the headers),
+// request.Microversion or request.Custom over *CreateOpts. Other shared
+// calls fail with resource.ErrInvalidOption before HTTP.
+type CreateOption = request.WriteCall
 
 func WithCreateOpts(opts CreateOpts) CreateOption {
-	return CreateOption(ownedrecord.WriteSnapshot(opts))
-}
-func WithCreateField(key string, value any) CreateOption {
-	return CreateOption(ownedrecord.WriteField(key, value))
-}
-func WithCreateHeaders(values map[string]string) CreateOption {
-	return CreateOption(ownedrecord.WriteHeaders(values))
-}
-func WithCreateMicroversion(version string) CreateOption {
-	return CreateOption(ownedrecord.WriteMicroversion(version))
+	return request.Custom(ownedrecord.WriteSnapshot(opts))
 }
 
 // GetOpts carries the get_tap_service fields selector.
 type GetOpts = ownedrecord.GetOpts
-type GetOption func(*GetOpts) error
 
-func WithGetOpts(opts GetOpts) GetOption { return GetOption(ownedrecord.GetSnapshot(opts)) }
+// GetOption is one option of Get: WithGetOpts, WithGetFields,
+// request.Headers (replaces the headers), request.Microversion or
+// request.Custom over *GetOpts. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type GetOption = request.GetCall
+
+func WithGetOpts(opts GetOpts) GetOption { return request.Custom(ownedrecord.GetSnapshot(opts)) }
 func WithGetFields(fields ...string) GetOption {
-	return GetOption(ownedrecord.GetFields(fields...))
-}
-func WithGetHeaders(values map[string]string) GetOption {
-	return GetOption(ownedrecord.GetHeaders(values))
-}
-func WithGetMicroversion(version string) GetOption {
-	return GetOption(ownedrecord.GetMicroversion(version))
+	return request.Custom(ownedrecord.GetFields(fields...))
 }
 
 // UpdateOpts carries the Python **attrs of update_tap_service. The id and
 // tap_service names are bound arguments and are rejected.
 type UpdateOpts = ownedrecord.WriteOpts
-type UpdateOption func(*UpdateOpts) error
+
+// UpdateOption is one option of Update: WithUpdateOpts, request.Field (one
+// Python attribute as JSON), request.Headers (replaces the headers),
+// request.Microversion or request.Custom over *UpdateOpts. Other shared
+// calls fail with resource.ErrInvalidOption before HTTP.
+type UpdateOption = request.WriteCall
 
 func WithUpdateOpts(opts UpdateOpts) UpdateOption {
-	return UpdateOption(ownedrecord.WriteSnapshot(opts))
-}
-func WithUpdateField(key string, value any) UpdateOption {
-	return UpdateOption(ownedrecord.WriteField(key, value))
-}
-func WithUpdateHeaders(values map[string]string) UpdateOption {
-	return UpdateOption(ownedrecord.WriteHeaders(values))
-}
-func WithUpdateMicroversion(version string) UpdateOption {
-	return UpdateOption(ownedrecord.WriteMicroversion(version))
+	return request.Custom(ownedrecord.WriteSnapshot(opts))
 }
 
 // DeleteOpts selects ignore_missing; nil keeps the Python default true.
 type DeleteOpts = ownedrecord.DeleteOpts
-type DeleteOption func(*DeleteOpts) error
+
+// DeleteOption is one option of Delete: WithDeleteOpts,
+// request.IgnoreMissing, request.Headers (replaces the headers),
+// request.Microversion or request.Custom over *DeleteOpts. Other shared
+// calls fail with resource.ErrInvalidOption before HTTP.
+type DeleteOption = request.DeleteCall
 
 func WithDeleteOpts(opts DeleteOpts) DeleteOption {
-	return DeleteOption(ownedrecord.DeleteSnapshot(opts))
-}
-func WithDeleteIgnoreMissing(value bool) DeleteOption {
-	return DeleteOption(ownedrecord.DeleteIgnoreMissing(value))
-}
-func WithDeleteHeaders(values map[string]string) DeleteOption {
-	return DeleteOption(ownedrecord.DeleteHeaders(values))
-}
-func WithDeleteMicroversion(version string) DeleteOption {
-	return DeleteOption(ownedrecord.DeleteMicroversion(version))
+	return request.Custom(ownedrecord.DeleteSnapshot(opts))
 }
 
 // FindOpts selects ignore_missing (nil keeps true) and carries **query.
 type FindOpts = ownedrecord.FindOpts
-type FindOption func(*FindOpts) error
 
-func WithFindOpts(opts FindOpts) FindOption { return FindOption(ownedrecord.FindSnapshot(opts)) }
-func WithFindIgnoreMissing(value bool) FindOption {
-	return FindOption(ownedrecord.FindIgnoreMissing(value))
-}
-func WithFindQuery(key string, value any) FindOption {
-	return FindOption(ownedrecord.FindQuery(key, value))
-}
-func WithFindHeaders(values map[string]string) FindOption {
-	return FindOption(ownedrecord.FindHeaders(values))
-}
-func WithFindMicroversion(version string) FindOption {
-	return FindOption(ownedrecord.FindMicroversion(version))
-}
+// FindOption is one option of Find: WithFindOpts, request.IgnoreMissing,
+// request.Query (one Python **query value as JSON), request.Headers
+// (replaces the headers), request.Microversion or request.Custom over
+// *FindOpts. Other shared calls fail with resource.ErrInvalidOption before
+// HTTP.
+type FindOption = request.FindCall
+
+func WithFindOpts(opts FindOpts) FindOption { return request.Custom(ownedrecord.FindSnapshot(opts)) }
 
 // ListOpts carries Python **query: sort_key, sort_dir, fields, name,
 // project_id, limit and marker go to the server; id, description, tenant_id,
 // port_id and status filter locally; other names are ignored.
 type ListOpts = ownedrecord.ListOpts
-type ListOption func(*ListOpts) error
 
-func WithListOpts(opts ListOpts) ListOption { return ListOption(ownedrecord.ListSnapshot(opts)) }
-func WithListQuery(key string, value any) ListOption {
-	return ListOption(spec.ListQuery(key, value))
-}
-func WithListLimit(limit int) ListOption      { return WithListQuery("limit", limit) }
-func WithListMarker(marker string) ListOption { return WithListQuery("marker", marker) }
-func WithListMaxItems(count int) ListOption   { return WithListQuery("max_items", count) }
-func WithListPaginated(value bool) ListOption { return WithListQuery("paginated", value) }
-func WithListHeaders(values map[string]string) ListOption {
-	return ListOption(ownedrecord.ListHeaders(values))
-}
-func WithListMicroversion(version string) ListOption {
-	return ListOption(ownedrecord.ListMicroversion(version))
-}
+// ListOption is one option of List and All: WithListOpts, request.Query (one
+// Python **query value as JSON; names the list discards are dropped),
+// request.Limit, request.Marker, request.MaxItems, request.Paginated,
+// request.Headers (replaces the headers), request.Microversion or
+// request.Custom over *ListOpts. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type ListOption = request.ListCall
+
+func WithListOpts(opts ListOpts) ListOption { return request.Custom(ownedrecord.ListSnapshot(opts)) }

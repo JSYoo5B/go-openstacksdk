@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"io"
 	"net/http"
 	"reflect"
@@ -77,12 +78,12 @@ func TestPythonTapFlowCreatePostsGivenAttrs(t *testing.T) {
 	var calls []pythonTapFlowCall
 	api := pythonTapFlowAPI(t, &calls, func(*http.Request) (int, string) { return 201, `{"tap_flow":` + pythonTapFlowRow + `}` })
 	value, err := api.Create(context.Background(),
-		tapflows.WithCreateField("name", "mirror"),
-		tapflows.WithCreateField("tap_service_id", "ts1"),
-		tapflows.WithCreateField("source_port", "port1"),
-		tapflows.WithCreateField("direction", "BOTH"),
-		tapflows.WithCreateField("vlan_filter", nil),
-		tapflows.WithCreateField("microversion", "ignored"))
+		request.Field("name", "mirror"),
+		request.Field("tap_service_id", "ts1"),
+		request.Field("source_port", "port1"),
+		request.Field("direction", "BOTH"),
+		request.Field("vlan_filter", nil),
+		request.Field("microversion", "ignored"))
 	if err != nil || len(calls) != 1 || calls[0].method != http.MethodPost || calls[0].path != pythonTapFlowBase || calls[0].query != "" || value.StatusCode != 201 {
 		t.Fatal(value, err, calls)
 	}
@@ -107,13 +108,13 @@ func TestPythonTapFlowStatusesCarryOperationContext(t *testing.T) {
 	for _, code := range []int{400, 409, 500} {
 		var calls []pythonTapFlowCall
 		api := pythonTapFlowAPI(t, &calls, func(*http.Request) (int, string) { return code, `{"NeutronError":{}}` })
-		_, err := api.Create(context.Background(), tapflows.WithCreateField("name", "x"))
+		_, err := api.Create(context.Background(), request.Field("name", "x"))
 		pythonTapFlowOperation(t, err, "Create")
 		pythonTapFlowStatus(t, err, code)
 		_, err = api.Get(context.Background(), "tf1")
 		pythonTapFlowOperation(t, err, "Get")
 		pythonTapFlowStatus(t, err, code)
-		_, err = api.Update(context.Background(), "tf1", tapflows.WithUpdateField("name", "x"))
+		_, err = api.Update(context.Background(), "tf1", request.Field("name", "x"))
 		pythonTapFlowOperation(t, err, "Update")
 		pythonTapFlowStatus(t, err, code)
 	}
@@ -141,7 +142,7 @@ func TestPythonTapFlowGetMapsFields(t *testing.T) {
 func TestPythonTapFlowUpdatePutsDirtyAttrs(t *testing.T) {
 	var calls []pythonTapFlowCall
 	api := pythonTapFlowAPI(t, &calls, func(*http.Request) (int, string) { return 200, `{"tap_flow":` + pythonTapFlowRow + `}` })
-	value, err := api.Update(context.Background(), "tf1", tapflows.WithUpdateField("name", "mirror"), tapflows.WithUpdateField("description", ""))
+	value, err := api.Update(context.Background(), "tf1", request.Field("name", "mirror"), request.Field("description", ""))
 	if err != nil || len(calls) != 1 || calls[0].method != http.MethodPut || calls[0].path != pythonTapFlowBase+"/tf1" {
 		t.Fatal(value, err, calls)
 	}
@@ -154,7 +155,7 @@ func TestPythonTapFlowUpdatePutsDirtyAttrs(t *testing.T) {
 		t.Fatal(value, err, calls)
 	}
 	for _, key := range []string{"id", "tap_flow"} {
-		_, err = api.Update(context.Background(), "tf1", tapflows.WithUpdateField(key, "x"))
+		_, err = api.Update(context.Background(), "tf1", request.Field(key, "x"))
 		pythonTapFlowOperation(t, err, "Update")
 		if !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
 			t.Fatal(key, err, calls)
@@ -170,7 +171,7 @@ func TestPythonTapFlowDeleteIgnoresMissingByDefault(t *testing.T) {
 	}{
 		{204, nil, false},
 		{404, nil, false},
-		{404, []tapflows.DeleteOption{tapflows.WithDeleteIgnoreMissing(false)}, true},
+		{404, []tapflows.DeleteOption{request.IgnoreMissing(false)}, true},
 		{409, nil, true},
 	} {
 		var calls []pythonTapFlowCall
@@ -198,7 +199,7 @@ func TestPythonTapFlowListQueryFiltersAndLinks(t *testing.T) {
 		}
 		return 200, `{"tap_flows":[{"id":"c","direction":"OUT"}]}`
 	})
-	values, err := api.All(context.Background(), tapflows.WithListQuery("name", "n"), tapflows.WithListQuery("direction", "OUT"), tapflows.WithListQuery("unknown", "dropped"))
+	values, err := api.All(context.Background(), request.Query("name", "n"), request.Query("direction", "OUT"), request.Query("unknown", "dropped"))
 	if err != nil || len(values) != 2 || values[0].ID != "b" || values[1].ID != "c" || len(calls) != 2 {
 		t.Fatal(values, err, calls)
 	}
@@ -218,7 +219,7 @@ func TestPythonTapFlowListMarkerContinuation(t *testing.T) {
 		}
 		return 200, `{"tap_flows":[]}`
 	})
-	values, err := api.All(context.Background(), tapflows.WithListLimit(2), tapflows.WithListQuery("project_id", "p1"))
+	values, err := api.All(context.Background(), request.Limit(2), request.Query("project_id", "p1"))
 	if err != nil || len(values) != 3 || len(calls) != 3 {
 		t.Fatal(values, err, calls)
 	}
@@ -226,7 +227,7 @@ func TestPythonTapFlowListMarkerContinuation(t *testing.T) {
 		t.Fatal(calls)
 	}
 	calls = nil
-	values, err = api.All(context.Background(), tapflows.WithListLimit(2), tapflows.WithListPaginated(false))
+	values, err = api.All(context.Background(), request.Limit(2), request.Paginated(false))
 	if err != nil || len(values) != 2 || len(calls) != 1 {
 		t.Fatal(values, err, calls)
 	}
@@ -258,7 +259,7 @@ func TestPythonTapFlowFindFallsBackToNameList(t *testing.T) {
 		}
 		return 500, ""
 	})
-	value, err = api.Find(context.Background(), "tf1", tapflows.WithFindQuery("project_id", "p1"))
+	value, err = api.Find(context.Background(), "tf1", request.Query("project_id", "p1"))
 	if err != nil || len(calls) != 1 || calls[0].query != "project_id=p1" {
 		t.Fatal(value, err, calls)
 	}
@@ -277,7 +278,7 @@ func TestPythonTapFlowFindMissing(t *testing.T) {
 	if err != nil || value != nil || len(calls) != 2 {
 		t.Fatal(value, err, calls)
 	}
-	_, err = api.Find(context.Background(), "none", tapflows.WithFindIgnoreMissing(false))
+	_, err = api.Find(context.Background(), "none", request.IgnoreMissing(false))
 	pythonTapFlowOperation(t, err, "Find")
 	var missing *resource.NotFoundError
 	if !errors.As(err, &missing) {

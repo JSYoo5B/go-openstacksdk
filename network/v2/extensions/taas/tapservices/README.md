@@ -55,10 +55,10 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapservices.API.Find`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapservices.WithFindIgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapservices.WithFindQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
-- Find sends GET taas/tap_services/{name_or_id} with the find query first and, only after a clean 400, 403 or 404, lists taas/tap_services?name={name_or_id} and matches exact ID or name; a miss returns nil by default and resource.NotFoundError with WithFindIgnoreMissing(false), duplicates and other statuses are wrapped errors.
+- Find sends GET taas/tap_services/{name_or_id} with the find query first and, only after a clean 400, 403 or 404, lists taas/tap_services?name={name_or_id} and matches exact ID or name; a miss returns nil by default and resource.NotFoundError with request.IgnoreMissing(false), duplicates and other statuses are wrapped errors.
   Tests: `network/v2/extensions/taas/tapservices/python_records_test.go:TestPythonTapServiceFindFallsBackToNameList`, `network/v2/extensions/taas/tapservices/python_records_test.go:TestPythonTapServiceFindMissing`.
 
 Python/Go differences:
@@ -77,7 +77,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapservices.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapservices.API.All`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapservices.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - List sends GET taas/tap_services with Accept: application/json, encodes declared server query names (sort_key, sort_dir, fields, name, project_id, limit, marker), filters Body names (id, description, tenant_id, port_id, status) locally, ignores unknown names and follows tap_services_links next links.
   Tests: `network/v2/extensions/taas/tapservices/python_records_test.go:TestPythonTapServiceListQueryFiltersAndLinks`.
@@ -119,9 +119,9 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapservices.API.Delete`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapservices.WithDeleteIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 
-- Delete sends a bodyless DELETE taas/tap_services/{id}, returns nil for 204 and a clean 404 by default, and returns 404 with WithDeleteIgnoreMissing(false) and 409 as wrapped errors.
+- Delete sends a bodyless DELETE taas/tap_services/{id}, returns nil for 204 and a clean 404 by default, and returns 404 with request.IgnoreMissing(false) and 409 as wrapped errors.
   Tests: `network/v2/extensions/taas/tapservices/python_records_test.go:TestPythonTapServiceDeleteIgnoresMissingByDefault`.
 
 Python/Go differences:

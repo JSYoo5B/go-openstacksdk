@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"io"
 	"net/http"
 	"strings"
@@ -68,11 +69,11 @@ func TestPythonFlavorCreatePostsAttrsWithWireNames(t *testing.T) {
 	var calls []flavorCall
 	api := flavorAPI(t, &calls, func(*http.Request) (int, string) { return 201, `{"flavor":` + flavorRow + `}` })
 	v, err := api.Create(context.Background(),
-		flavors.WithCreateField("name", "gold"),
-		flavors.WithCreateField("is_enabled", true),
-		flavors.WithCreateField("service_type", "L3_ROUTER_NAT"),
-		flavors.WithCreateField("service_profile_ids", []string{"sp1", "sp2"}),
-		flavors.WithCreateField("x_ext", 7))
+		request.Field("name", "gold"),
+		request.Field("is_enabled", true),
+		request.Field("service_type", "L3_ROUTER_NAT"),
+		request.Field("service_profile_ids", []string{"sp1", "sp2"}),
+		request.Field("x_ext", 7))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -94,7 +95,7 @@ func TestPythonFlavorCreatePostsAttrsWithWireNames(t *testing.T) {
 		t.Run(fmt.Sprint(code), func(t *testing.T) {
 			var calls []flavorCall
 			api := flavorAPI(t, &calls, func(*http.Request) (int, string) { return code, `{"NeutronError":{}}` })
-			v, err := api.Create(context.Background(), flavors.WithCreateField("name", "x"))
+			v, err := api.Create(context.Background(), request.Field("name", "x"))
 			if v != nil || len(calls) != 1 {
 				t.Fatal(v, calls)
 			}
@@ -103,7 +104,7 @@ func TestPythonFlavorCreatePostsAttrsWithWireNames(t *testing.T) {
 	}
 	calls = nil
 	api = flavorAPI(t, &calls, func(*http.Request) (int, string) { return 201, `{}` })
-	_, err = api.Create(context.Background(), flavors.WithCreateField("base_path", "/other"))
+	_, err = api.Create(context.Background(), request.Field("base_path", "/other"))
 	if !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
 		t.Fatal(err, calls)
 	}
@@ -134,7 +135,7 @@ func TestPythonFlavorGetMapsFieldsAndReportsMissing(t *testing.T) {
 func TestPythonFlavorUpdatePutsOnlyGivenAttrs(t *testing.T) {
 	var calls []flavorCall
 	api := flavorAPI(t, &calls, func(*http.Request) (int, string) { return 200, `{"flavor":` + flavorRow + `}` })
-	v, err := api.Update(context.Background(), "f1", flavors.WithUpdateField("description", "fast"), flavors.WithUpdateField("enabled", false))
+	v, err := api.Update(context.Background(), "f1", request.Field("description", "fast"), request.Field("enabled", false))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -149,13 +150,13 @@ func TestPythonFlavorUpdatePutsOnlyGivenAttrs(t *testing.T) {
 		t.Fatal(v, err, calls)
 	}
 	for _, key := range []string{"id", "flavor"} {
-		_, err = api.Update(context.Background(), "f1", flavors.WithUpdateField(key, "other"))
+		_, err = api.Update(context.Background(), "f1", request.Field(key, "other"))
 		if !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
 			t.Fatal(key, err, calls)
 		}
 	}
 	api = flavorAPI(t, &calls, func(*http.Request) (int, string) { return 409, `{}` })
-	_, err = api.Update(context.Background(), "f1", flavors.WithUpdateField("name", "x"))
+	_, err = api.Update(context.Background(), "f1", request.Field("name", "x"))
 	flavorFailure(t, err, "Update", 409)
 }
 
@@ -168,8 +169,8 @@ func TestPythonFlavorDeleteIgnoresMissingByDefault(t *testing.T) {
 	}{
 		{204, nil, false, false},
 		{404, nil, true, false},
-		{404, []flavors.DeleteOption{flavors.WithDeleteIgnoreMissing(true)}, true, false},
-		{404, []flavors.DeleteOption{flavors.WithDeleteIgnoreMissing(false)}, false, true},
+		{404, []flavors.DeleteOption{request.IgnoreMissing(true)}, true, false},
+		{404, []flavors.DeleteOption{request.IgnoreMissing(false)}, false, true},
 		{409, nil, false, true},
 		{500, nil, false, true},
 	} {
@@ -203,11 +204,11 @@ func TestPythonFlavorListMapsQueryFiltersLocallyAndFollowsLinks(t *testing.T) {
 		return 200, `{"flavors":[{"id":"a","service_profiles":["sp1"]},{"id":"b","service_profiles":[]}],"flavors_links":[{"rel":"next","href":"?enabled=True&limit=2&marker=b&service_type=L3"}]}`
 	})
 	values, err := api.All(context.Background(),
-		flavors.WithListQuery("is_enabled", true),
-		flavors.WithListQuery("service_type", "L3"),
-		flavors.WithListQuery("service_profile_ids", []string{"sp1"}),
-		flavors.WithListQuery("unknown", make(chan int)),
-		flavors.WithListLimit(2))
+		request.Query("is_enabled", true),
+		request.Query("service_type", "L3"),
+		request.Query("service_profile_ids", []string{"sp1"}),
+		request.Query("unknown", make(chan int)),
+		request.Limit(2))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -256,7 +257,7 @@ func TestPythonFlavorFindFallsBackToNameList(t *testing.T) {
 			}
 			return 200, `{"flavors":[]}`
 		})
-		v, err = api.Find(context.Background(), "none", flavors.WithFindIgnoreMissing(!strict))
+		v, err = api.Find(context.Background(), "none", request.IgnoreMissing(!strict))
 		if v != nil || len(calls) != 2 || strict != errors.Is(err, resource.ErrNotFound) {
 			t.Fatal(strict, v, err, calls)
 		}
