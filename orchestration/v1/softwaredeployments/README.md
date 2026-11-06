@@ -20,7 +20,7 @@ is SDK-owned. It corresponds to the pinned openstacksdk
   `{}` are sent) or `Null`. `Update` sends only the members that are set, like
   Python's dirty-attribute commit; an update with no member fails before HTTP
   (Python sends nothing). `id`, `creation_time` and `updated_time` are
-  protected from `WithCreateField`/`WithUpdateField`.
+  protected from `request.Field`.
 - `input_values`/`output_values` keep exact JSON (large integers survive).
 - `Delete` ignores a missing deployment by default; use
   `resource.WithMissingError()` to report it.

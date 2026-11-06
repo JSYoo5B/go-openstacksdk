@@ -26,28 +26,33 @@ type ListOpts struct {
 	Marker *string `json:"marker,omitempty"`
 }
 
-type CreateOption = request.Option[CreateOpts]
-type ListOption = request.Option[ListOpts]
+// CreateOption is one option of Create: WithCreateOptions, the WithCreate*
+// member setters, request.Field (an additional body member; declared members
+// and response-only members such as id and creation_time are protected),
+// request.Header or request.Custom over *request.Config[CreateOpts]. Other
+// shared calls fail with resource.ErrInvalidOption before HTTP.
+type CreateOption = request.WriteCall
+
+// ListOption is one option of List and All: WithListOptions, request.Limit,
+// request.Marker, request.Query with a string or []string value (it cannot
+// replace limit or marker) or request.Custom over *request.Config[ListOpts].
+// Other shared calls fail with resource.ErrInvalidOption before HTTP.
+type ListOption = request.ListCall
+
+var (
+	createCalls = swcommon.WriteCalls[CreateOpts]()
+	listCalls   = swcommon.ListCalls(func(o *ListOpts) **int { return &o.Limit }, func(o *ListOpts) **string { return &o.Marker })
+)
 
 // WithCreateOptions snapshots a complete option struct.
-func WithCreateOptions(opts CreateOpts) CreateOption { return swcommon.Snapshot(opts) }
-func WithListOptions(opts ListOpts) ListOption       { return swcommon.Snapshot(opts) }
-
-// WithCreateField adds an additional body member. Declared members and
-// response-only members (id, creation_time) are protected.
-func WithCreateField(key string, value any) CreateOption {
-	return request.WithField[CreateOpts](key, value)
-}
-func WithCreateHeader(key, value string) CreateOption {
-	return request.WithHeader[CreateOpts](key, value)
-}
-func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
+func WithCreateOptions(opts CreateOpts) CreateOption { return request.Custom(swcommon.Snapshot(opts)) }
+func WithListOptions(opts ListOpts) ListOption       { return request.Custom(swcommon.Snapshot(opts)) }
 
 func WithCreateName(value string) CreateOption {
-	return func(c *request.Config[CreateOpts]) error { c.Options.Name = request.Present(value); return nil }
+	return request.Custom(func(c *request.Config[CreateOpts]) error { c.Options.Name = request.Present(value); return nil })
 }
 func WithCreateGroup(value string) CreateOption {
-	return func(c *request.Config[CreateOpts]) error { c.Options.Group = request.Present(value); return nil }
+	return request.Custom(func(c *request.Config[CreateOpts]) error { c.Options.Group = request.Present(value); return nil })
 }
 
 // WithCreateConfig sends any JSON-encodable value, such as a script string or
@@ -67,20 +72,13 @@ func WithCreateConfigOptions(value any) CreateOption {
 	return rawOption(value, func(c *request.Config[CreateOpts], v json.RawMessage) { c.Options.Options = request.Present(v) })
 }
 
-func WithListLimit(limit int) ListOption {
-	return func(c *request.Config[ListOpts]) error { c.Options.Limit = &limit; return nil }
-}
-func WithListMarker(marker string) ListOption {
-	return func(c *request.Config[ListOpts]) error { c.Options.Marker = &marker; return nil }
-}
-
 func rawOption(value any, set func(*request.Config[CreateOpts], json.RawMessage)) CreateOption {
 	encoded, err := swcommon.RawJSON("software config member", value)
-	return func(c *request.Config[CreateOpts]) error {
+	return request.Custom(func(c *request.Config[CreateOpts]) error {
 		if err != nil {
 			return err
 		}
 		set(c, append(json.RawMessage(nil), encoded...))
 		return nil
-	}
+	})
 }

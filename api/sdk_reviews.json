@@ -302,7 +302,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stackevents.StackEventScope.Get",
         "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stackevents.ResourceEventScope.Get",
-        "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stackevents.WithGetHeader"
+        "github.com/JSYoo5B/go-openstacksdk/request.Header"
       ],
       "contracts": [
         {
@@ -2591,7 +2591,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.API.FindNameOrID",
         "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.WithFindResolveOutputs",
-        "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.WithFindIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing",
         "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.API.Find",
         "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.StackResources.Find"
       ],
@@ -2603,7 +2603,7 @@
           ]
         },
         {
-          "behavior": "404, DELETE_COMPLETE and ADOPT_COMPLETE are reported as resource.ErrNotFound or nil with WithFindIgnoreMissing; DELETE_FAILED stays visible; 403 is never ignored; a missing stack envelope or identity, an empty reference, a nil option and a canceled context fail before a second request.",
+          "behavior": "404, DELETE_COMPLETE and ADOPT_COMPLETE are reported as resource.ErrNotFound or nil with request.IgnoreMissing(true); DELETE_FAILED stays visible; 403 is never ignored; a missing stack envelope or identity, an empty reference, a nil option and a canceled context fail before a second request.",
           "tests": [
             "api/py_heat_senlin_stacks_test.go:TestPyHeatSenlinFindNameOrIDUsesOneGETKeepsRawFieldsAndHidesDeleted"
           ]
@@ -2618,7 +2618,7 @@
         }
       ],
       "differences": [
-        "Python find_stack defaults ignore_missing=True and returns None; Go FindNameOrID returns resource.ErrNotFound by default and uses WithFindIgnoreMissing for nil.",
+        "Python find_stack defaults ignore_missing=True and returns None; Go FindNameOrID returns resource.ErrNotFound by default and uses request.IgnoreMissing(true) for nil.",
         "Python Stack.find fetches into a mutable Resource and falls back to the whole response body when the stack key is missing; Go requires a stack object with a complete canonical name and ID and returns a StackDetail value.",
         "Python resolve_outputs is a find_stack argument; Go uses WithFindResolveOutputs. Neither sends a list request or detects duplicates in this path, because Heat enforces unique names.",
         "Go returns typed values and errors instead of Python Resource objects or None; a Stack, Resource or ID argument is replaced by an explicit resource.Ref resolved once to a fixed name/ID scope."
@@ -140824,7 +140824,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/softwareconfigs.API.Create",
         "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/softwareconfigs.WithCreateConfig",
-        "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/softwareconfigs.WithCreateField"
+        "github.com/JSYoo5B/go-openstacksdk/request.Field"
       ],
       "contracts": [
         {
@@ -140906,7 +140906,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/softwareconfigs.API.List",
         "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/softwareconfigs.API.All",
-        "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/softwareconfigs.WithListLimit"
+        "github.com/JSYoo5B/go-openstacksdk/request.Limit"
       ],
       "contracts": [
         {
@@ -141200,18 +141200,18 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.API.FindNameOrID",
         "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.WithFindResolveOutputs",
-        "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.WithFindIgnoreMissing"
+        "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing"
       ],
       "contracts": [
         {
-          "behavior": "One GET (with the optional resolve_outputs=False) returns the stack; 404, DELETE_COMPLETE and ADOPT_COMPLETE are absent (nil with WithFindIgnoreMissing, the cloud method's None), other statuses such as 403 and a missing envelope are errors.",
+          "behavior": "One GET (with the optional resolve_outputs=False) returns the stack; 404, DELETE_COMPLETE and ADOPT_COMPLETE are absent (nil with request.IgnoreMissing(true), the cloud method's None), other statuses such as 403 and a missing envelope are errors.",
           "tests": [
             "api/py_heat_senlin_stacks_test.go:TestPyHeatSenlinFindNameOrIDUsesOneGETKeepsRawFieldsAndHidesDeleted"
           ]
         }
       ],
       "differences": [
-        "The cloud get_stack catches NotFoundException and returns None, also for a DELETE_COMPLETE stack, and then applies _filter_list([stack], name_or_id, filters); Go returns ErrNotFound by default and nil with WithFindIgnoreMissing, and offers no filters argument (a dictionary or JMESPath post-filter on the one exact result). Callers inspect the returned StackDetail instead.",
+        "The cloud get_stack catches NotFoundException and returns None, also for a DELETE_COMPLETE stack, and then applies _filter_list([stack], name_or_id, filters); Go returns ErrNotFound by default and nil with request.IgnoreMissing(true), and offers no filters argument (a dictionary or JMESPath post-filter on the one exact result). Callers inspect the returned StackDetail instead.",
         "Python returns a Stack Resource; Go returns StackDetail with the typed model and complete raw object."
       ],
       "documentation": [

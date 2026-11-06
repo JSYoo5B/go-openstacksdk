@@ -59,7 +59,7 @@ fields the native model does not declare (`deletion_time`, `stack_owner`,
 - `WithFindResolveOutputs(false)` appends `resolve_outputs=False` once.
 - A 404, `DELETE_COMPLETE` or `ADOPT_COMPLETE` is reported as
   `resource.ErrNotFound` (the same two states Python `Stack.fetch` treats as
-  missing). `WithFindIgnoreMissing()` returns `nil, nil` instead. `DELETE_FAILED`
+  missing). `request.IgnoreMissing(true)` returns `nil, nil` instead. `DELETE_FAILED`
   stays visible, and 403 or server errors are never ignored.
 - The response must contain a `stack` object with a complete canonical name and
   ID. Python falls back to the whole body when the `stack` key is absent; Go

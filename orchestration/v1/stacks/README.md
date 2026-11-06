@@ -207,20 +207,20 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.API.FindNameOrID`
 - `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.WithFindResolveOutputs`
-- `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.WithFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.API.Find`
 - `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.StackResources.Find`
 
 - One GET /stacks/{nameOrID} follows Heat's redirect to the canonical location, issues no list request, appends resolve_outputs=False exactly once when requested and returns the typed model plus the complete raw stack object (deletion_time, stack_owner, parent, stack_user_project_id, files_container, environment_files, files, template and extension fields, including an exact large integer).
   Tests: `api/py_heat_senlin_stacks_test.go:TestPyHeatSenlinFindNameOrIDUsesOneGETKeepsRawFieldsAndHidesDeleted`.
-- 404, DELETE_COMPLETE and ADOPT_COMPLETE are reported as resource.ErrNotFound or nil with WithFindIgnoreMissing; DELETE_FAILED stays visible; 403 is never ignored; a missing stack envelope or identity, an empty reference, a nil option and a canceled context fail before a second request.
+- 404, DELETE_COMPLETE and ADOPT_COMPLETE are reported as resource.ErrNotFound or nil with request.IgnoreMissing(true); DELETE_FAILED stays visible; 403 is never ignored; a missing stack envelope or identity, an empty reference, a nil option and a canceled context fail before a second request.
   Tests: `api/py_heat_senlin_stacks_test.go:TestPyHeatSenlinFindNameOrIDUsesOneGETKeepsRawFieldsAndHidesDeleted`.
 - The native single-identity Find keeps the same redirect and error behavior, and exact-name list resolution remains available through StackResources.Find with duplicate detection.
   Tests: `api/heat_native_stacks_test.go:TestHeatNativeStacksFindUsesSingleIdentityRedirectAndKeepsErrors`, `api/heat_stacks_contracts_test.go:TestHeatStackExactDuplicateNamesAcrossPagesAndMissingPolicies`, `api/heat_stacks_contracts_test.go:TestHeatStackIDRedirectPreservesCanonicalIDQueryAndHeaders`.
 
 Python/Go differences:
 
-- Python find_stack defaults ignore_missing=True and returns None; Go FindNameOrID returns resource.ErrNotFound by default and uses WithFindIgnoreMissing for nil.
+- Python find_stack defaults ignore_missing=True and returns None; Go FindNameOrID returns resource.ErrNotFound by default and uses request.IgnoreMissing(true) for nil.
 - Python Stack.find fetches into a mutable Resource and falls back to the whole response body when the stack key is missing; Go requires a stack object with a complete canonical name and ID and returns a StackDetail value.
 - Python resolve_outputs is a find_stack argument; Go uses WithFindResolveOutputs. Neither sends a list request or detects duplicates in this path, because Heat enforces unique names.
 - Go returns typed values and errors instead of Python Resource objects or None; a Stack, Resource or ID argument is replaced by an explicit resource.Ref resolved once to a fixed name/ID scope.

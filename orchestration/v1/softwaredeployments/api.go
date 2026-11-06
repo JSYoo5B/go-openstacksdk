@@ -7,6 +7,7 @@ import (
 	"iter"
 	"net/url"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/orchestration/v1/internal/swcommon"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -59,7 +60,7 @@ func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOpti
 	if err := a.validate(ctx); err != nil {
 		return nil, request.Wrap("Create", kind, err)
 	}
-	config, err := request.Apply(opts, options...)
+	config, err := calls.ApplyConfig(opts, createCalls, options...)
 	var body []byte
 	if err == nil {
 		body, err = swcommon.Body(config, "id", "creation_time", "updated_time")
@@ -86,7 +87,7 @@ func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ..
 	if err := resource.ID(id).Validate(); err != nil {
 		return nil, request.Wrap("Update", kind, err)
 	}
-	config, err := request.Apply(opts, options...)
+	config, err := calls.ApplyConfig(opts, updateCalls, options...)
 	var body []byte
 	if err == nil {
 		body, err = swcommon.Body(config, "id", "creation_time", "updated_time")
@@ -132,7 +133,7 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Softwa
 			yield(nil, request.Wrap("List", kind, err))
 			return
 		}
-		config, err := request.Apply(ListOpts{}, options...)
+		config, err := calls.ApplyConfig(ListOpts{}, listCalls, options...)
 		query := url.Values{}
 		if err == nil {
 			err = swcommon.Paging(query, config.Options.Limit, config.Options.Marker)

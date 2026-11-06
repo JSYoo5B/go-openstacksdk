@@ -11,7 +11,7 @@ config, err := api.Create(ctx, softwareconfigs.CreateOpts{Name: request.Present(
     softwareconfigs.WithCreateGroup("script"),
     softwareconfigs.WithCreateConfig("#!/bin/sh\necho hi\n"))
 got, err := api.Get(ctx, config.ID)
-for item, err := range api.List(ctx, softwareconfigs.WithListLimit(50)) { ... }
+for item, err := range api.List(ctx, request.Limit(50)) { ... }
 err = api.Delete(ctx, config.ID)
 ```
 
@@ -25,13 +25,13 @@ err = api.Delete(ctx, config.ID)
 - `CreateOpts` members (`name`, `group`, `config`, `inputs`, `outputs`,
   `options`) are `request.Optional`: omitted, `Present` (empty and false-like
   values are sent) or `Null`. `config`, `inputs`, `outputs` and `options` hold
-  exact JSON. `WithCreateField` adds extra members; declared members, `id` and
+  exact JSON. `request.Field` adds extra members; declared members, `id` and
   `creation_time` are protected, and SDK-owned headers cannot be overridden.
   An empty create sends `{}`; Heat decides whether that is valid.
 - Responses keep the raw members (`Metadata.Body`), headers and status.
 - `Delete` ignores a missing configuration by default (Python
   `ignore_missing=True`); pass `resource.WithMissingError()` to report it.
-- `List` reads one page without a limit; with `WithListLimit` it follows the
+- `List` reads one page without a limit; with `request.Limit` it follows the
   marker (last ID) until an empty page, like Python's Resource pagination.
   `limit` must be positive and `marker` non-empty (Python sends them as given).
 - Mutations are sent once and never replayed; a canceled context sends nothing.

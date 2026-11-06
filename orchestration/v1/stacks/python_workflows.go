@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 
@@ -113,19 +114,19 @@ type findOptions struct {
 	ignoreMissing  bool
 }
 
-// FindOption controls API.FindNameOrID.
-type FindOption func(*findOptions) error
+// FindOption is one option of API.FindNameOrID: WithFindResolveOutputs or
+// request.IgnoreMissing. request.IgnoreMissing(true) makes absence, including
+// a stack in DELETE_COMPLETE or ADOPT_COMPLETE, return nil, nil instead of
+// resource.ErrNotFound; the default is false. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type FindOption = request.FindCall
+
+var findCalls = calls.Spec[findOptions]{IgnoreMissing: calls.Value(func(o *findOptions) *bool { return &o.ignoreMissing })}
 
 // WithFindResolveOutputs sets Heat's resolve_outputs query. The default is true
 // and the query is omitted; false appends resolve_outputs=False to the URL.
 func WithFindResolveOutputs(value bool) FindOption {
-	return func(o *findOptions) error { o.resolveOutputs = value; return nil }
-}
-
-// WithFindIgnoreMissing makes absence, including a stack in DELETE_COMPLETE or
-// ADOPT_COMPLETE, return nil, nil instead of resource.ErrNotFound.
-func WithFindIgnoreMissing() FindOption {
-	return func(o *findOptions) error { o.ignoreMissing = true; return nil }
+	return request.Custom(func(o *findOptions) error { o.resolveOutputs = value; return nil })
 }
 
 // FindNameOrID performs one GET /stacks/{nameOrID}, the endpoint that Heat
@@ -138,7 +139,7 @@ func (a *API) FindNameOrID(ctx context.Context, nameOrID string, options ...Find
 		return nil, request.Wrap("find", "stacks", err)
 	}
 	config := findOptions{resolveOutputs: true}
-	for _, apply := range options {
+	for _, apply := range calls.Translate(options, findCalls) {
 		if apply == nil {
 			return nil, fmt.Errorf("%w: nil find option", resource.ErrInvalidOption)
 		}

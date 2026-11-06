@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 
 	"github.com/gophercloud/gophercloud/v2"
@@ -200,14 +201,14 @@ func TestPyHeatSenlinFindNameOrIDUsesOneGETKeepsRawFieldsAndHidesDeleted(t *test
 		if value, err := api.FindNameOrID(ctx, name); value != nil || !errors.Is(err, resource.ErrNotFound) {
 			t.Fatalf("%s strict: %v %v", name, value, err)
 		}
-		if value, err := api.FindNameOrID(ctx, name, stacks.WithFindIgnoreMissing()); value != nil || err != nil {
+		if value, err := api.FindNameOrID(ctx, name, request.IgnoreMissing(true)); value != nil || err != nil {
 			t.Fatalf("%s ignored: %v %v", name, value, err)
 		}
 	}
 	if value, err := api.FindNameOrID(ctx, "failed"); err != nil || value == nil || value.Status != "DELETE_FAILED" {
 		t.Fatalf("DELETE_FAILED stays visible: %v %v", value, err)
 	}
-	if _, err := api.FindNameOrID(ctx, "forbidden", stacks.WithFindIgnoreMissing()); !gophercloud.ResponseCodeIs(err, 403) {
+	if _, err := api.FindNameOrID(ctx, "forbidden", request.IgnoreMissing(true)); !gophercloud.ResponseCodeIs(err, 403) {
 		t.Fatalf("403 must not be ignored: %v", err)
 	}
 	for _, name := range []string{"noenvelope", "noidentity"} {

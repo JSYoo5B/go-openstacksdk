@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -242,7 +243,7 @@ func sleep(ctx context.Context, interval time.Duration) error {
 // ADOPT_COMPLETE) as nil, then _filter_list's exact or glob name-or-ID check
 // on the single result.
 func getStack(ctx context.Context, client *gophercloud.ServiceClient, nameOrID string, resolveOutputs bool) (*stacks.StackDetail, error) {
-	options := []stacks.FindOption{stacks.WithFindIgnoreMissing()}
+	options := []stacks.FindOption{request.IgnoreMissing(true)}
 	if !resolveOutputs {
 		options = append(options, stacks.WithFindResolveOutputs(false))
 	}

@@ -140,10 +140,10 @@ func TestHeatStackEventsGetUsesCompleteResourcePathAndPreservesRequestIdentity(t
 	bound := heatResourceEventScope(t, scope, "random")
 	for _, get := range []func() (*stackevents.EventResource, error){
 		func() (*stackevents.EventResource, error) {
-			return scope.Get(context.Background(), "random", "request-event", stackevents.WithGetHeader("X-Event", "detail"))
+			return scope.Get(context.Background(), "random", "request-event", request.Header("X-Event", "detail"))
 		},
 		func() (*stackevents.EventResource, error) {
-			return bound.Get(context.Background(), "request-event", stackevents.WithGetHeader("X-Event", "detail"))
+			return bound.Get(context.Background(), "request-event", request.Header("X-Event", "detail"))
 		},
 	} {
 		value, err := get()
@@ -222,7 +222,7 @@ func TestHeatStackEventsPreflightValidatesIdentityPathsAndOptions(t *testing.T) 
 			t.Error(err)
 		}
 	}
-	for _, option := range []stackevents.GetOption{nil, request.WithQuery[stackevents.GetOpts]("query", "unsupported"), request.WithField[stackevents.GetOpts]("field", false), request.WithArgument[stackevents.GetOpts]("arg", false), stackevents.WithGetHeader("x-auth-token", "override"), stackevents.WithGetHeader("accept", "override"), stackevents.WithGetHeader("openstack-api-version", "override")} {
+	for _, option := range []stackevents.GetOption{nil, request.Custom(request.WithQuery[stackevents.GetOpts]("query", "unsupported")), request.Custom(request.WithField[stackevents.GetOpts]("field", false)), request.Custom(request.WithArgument[stackevents.GetOpts]("arg", false)), request.Header("x-auth-token", "override"), request.Header("accept", "override"), request.Header("openstack-api-version", "override")} {
 		if _, err := bound.Get(ctx, "event-id", option); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Errorf("get option=%v", err)
 		}

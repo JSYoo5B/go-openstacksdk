@@ -89,15 +89,15 @@ func TestR2ManilaHeatSoftwareConfigCreateRejectsProtectedFieldsBeforeHTTPAndCanc
 	cloud.Mux.HandleFunc("/heat/v1/software_configs", func(w http.ResponseWriter, r *http.Request) { requests.Add(1) })
 	api := softwareconfigs.New(cloud.Client("orchestration", "/heat/v1"))
 	for _, option := range []softwareconfigs.CreateOption{
-		softwareconfigs.WithCreateField("id", "x"), softwareconfigs.WithCreateField("creation_time", "x"),
-		softwareconfigs.WithCreateField("config", "x"), softwareconfigs.WithCreateField("name", "x"),
-		softwareconfigs.WithCreateHeader("X-Auth-Token", "x"), softwareconfigs.WithCreateConfig(func() {}),
+		request.Field("id", "x"), request.Field("creation_time", "x"),
+		request.Field("config", "x"), request.Field("name", "x"),
+		request.Header("X-Auth-Token", "x"), softwareconfigs.WithCreateConfig(func() {}),
 	} {
 		if _, err := api.Create(context.Background(), softwareconfigs.CreateOpts{}, option); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatalf("err=%v", err)
 		}
 	}
-	if _, err := api.Create(context.Background(), softwareconfigs.CreateOpts{}, softwareconfigs.WithCreateField("custom", map[string]int{"a": 1})); err != nil {
+	if _, err := api.Create(context.Background(), softwareconfigs.CreateOpts{}, request.Field("custom", map[string]int{"a": 1})); err != nil {
 		// The fixture handler returns an empty 200, which is not a valid envelope; only HTTP use matters here.
 		if requests.Load() != 1 {
 			t.Fatal(err)
@@ -175,12 +175,12 @@ func TestR2ManilaHeatSoftwareConfigListQueryPagingAndErrors(t *testing.T) {
 		t.Fatalf("all=%v err=%v queries=%v", all, err, queries)
 	}
 	queries = nil
-	all, err = api.All(context.Background(), softwareconfigs.WithListLimit(2), softwareconfigs.WithListQuery("tenant_hint", "x"))
+	all, err = api.All(context.Background(), request.Limit(2), request.Query("tenant_hint", "x"))
 	if err != nil || len(all) != 3 || all[2].ID != "c" || len(queries) != 3 || !strings.Contains(queries[1], "marker=b") || !strings.Contains(queries[1], "limit=2") || !strings.Contains(queries[0], "tenant_hint=x") {
 		t.Fatalf("all=%v err=%v queries=%v", all, err, queries)
 	}
 	n := len(queries)
-	for _, option := range []softwareconfigs.ListOption{softwareconfigs.WithListLimit(0), softwareconfigs.WithListMarker(""), softwareconfigs.WithListQuery("limit", "1"), softwareconfigs.WithListQuery("marker", "1")} {
+	for _, option := range []softwareconfigs.ListOption{request.Limit(0), request.Marker(""), request.Query("limit", "1"), request.Query("marker", "1")} {
 		if _, err := api.All(context.Background(), option); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatalf("err=%v", err)
 		}
@@ -239,9 +239,9 @@ func TestR2ManilaHeatSoftwareDeploymentUpdateRejectsEmptyAndProtectedBeforeHTTP(
 		options []softwaredeployments.UpdateOption
 	}{
 		{r2ManilaHeatDeploymentID, nil},
-		{r2ManilaHeatDeploymentID, []softwaredeployments.UpdateOption{softwaredeployments.WithUpdateField("id", "x")}},
-		{r2ManilaHeatDeploymentID, []softwaredeployments.UpdateOption{softwaredeployments.WithUpdateField("updated_time", "x")}},
-		{r2ManilaHeatDeploymentID, []softwaredeployments.UpdateOption{softwaredeployments.WithUpdateStatus("a"), softwaredeployments.WithUpdateField("status", "b")}},
+		{r2ManilaHeatDeploymentID, []softwaredeployments.UpdateOption{request.Field("id", "x")}},
+		{r2ManilaHeatDeploymentID, []softwaredeployments.UpdateOption{request.Field("updated_time", "x")}},
+		{r2ManilaHeatDeploymentID, []softwaredeployments.UpdateOption{softwaredeployments.WithUpdateStatus("a"), request.Field("status", "b")}},
 		{"a/b", []softwaredeployments.UpdateOption{softwaredeployments.WithUpdateStatus("a")}},
 	}
 	for i, c := range cases {
@@ -291,7 +291,7 @@ func TestR2ManilaHeatSoftwareDeploymentGetDeleteListServerFilter(t *testing.T) {
 	if err != nil || len(rows) != 1 || len(queries) != 1 || queries[0] != "server_id=srv" {
 		t.Fatalf("rows=%v err=%v queries=%v", rows, err, queries)
 	}
-	for _, option := range []softwaredeployments.ListOption{softwaredeployments.WithListServerID(""), softwaredeployments.WithListQuery("server_id", "x")} {
+	for _, option := range []softwaredeployments.ListOption{softwaredeployments.WithListServerID(""), request.Query("server_id", "x")} {
 		if _, err := api.All(context.Background(), option); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(err)
 		}

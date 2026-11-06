@@ -30,7 +30,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stackevents.StackEventScope.Get`
 - `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stackevents.ResourceEventScope.Get`
-- `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stackevents.WithGetHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 
 - Both stack-scope and resource-scope GET use the complete stack name/ID/resource/event path, preserve request and wire identities separately, return native fields/properties/links with Detailed=true, and retain raw null/large integers and response headers.
   Tests: `api/heat_stackevents_scope_test.go:TestHeatStackEventsGetUsesCompleteResourcePathAndPreservesRequestIdentity`.

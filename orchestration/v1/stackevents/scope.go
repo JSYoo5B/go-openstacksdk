@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
@@ -88,9 +89,18 @@ func validateEventSegment(value string) error {
 }
 
 type GetOpts struct{}
-type GetOption = request.Option[GetOpts]
 
-func WithGetHeader(key, value string) GetOption { return request.WithHeader[GetOpts](key, value) }
+// GetOption is one option of Get: request.Header (an extension header; Accept,
+// X-Auth-Token and OpenStack-API-Version are owned by the SDK) or
+// request.Custom over *request.Config[GetOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type GetOption = request.GetCall
+
+var getCalls = calls.Spec[request.Config[GetOpts]]{Header: calls.ConfigHeader[GetOpts]}
+
+// WithListHeader and WithListResourceEventsHeader add an extension header to
+// the lists. They stay package options because the generated list option
+// category (request.NativeQueryCall) does not admit request.Header.
 func WithListHeader(key, value string) ListOption {
 	return request.Custom(request.WithHeader[ListOpts](key, value))
 }
@@ -123,7 +133,7 @@ func (s *ResourceEventScope) Get(ctx context.Context, eventID string, options ..
 	if err := validateEventSegment(eventID); err != nil {
 		return nil, err
 	}
-	cfg, err := request.Apply(GetOpts{}, options...)
+	cfg, err := calls.ApplyConfig(GetOpts{}, getCalls, options...)
 	if err == nil {
 		err = request.ValidateCapabilities(cfg, false, false, true)
 	}
