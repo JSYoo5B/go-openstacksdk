@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/url"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/masakari"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -25,17 +26,14 @@ type Attributes struct {
 	Enabled        request.Optional[bool]   `json:"enabled,omitzero"`
 }
 
-type AttributeOption = request.Option[Attributes]
+// AttributeOption is one option of CreateAttributes and UpdateAttributes:
+// request.Field (an extension member that is not a concrete attribute or a
+// protected identity/timestamp field), request.Header or request.Custom over
+// *request.Config[Attributes]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type AttributeOption = request.WriteCall
 
-// WithAttributeField adds a response-independent extension field that is not
-// one of the concrete attributes or a protected identity/timestamp field.
-func WithAttributeField(key string, value any) AttributeOption {
-	return request.WithField[Attributes](key, value)
-}
-
-func WithAttributeHeader(key, value string) AttributeOption {
-	return request.WithHeader[Attributes](key, value)
-}
+var attributeCalls = masakari.WriteCalls[Attributes]()
 
 var attributeProtected = []string{"id", "uuid", "created_at", "updated_at", "deleted_at", "deleted"}
 
@@ -43,7 +41,7 @@ func (a *API) attributeBody(ctx context.Context, attrs Attributes, options []Att
 	if err := masakari.Require(ctx, a.client, 0); err != nil {
 		return request.Config[Attributes]{}, nil, err
 	}
-	config, err := request.Apply(attrs, options...)
+	config, err := calls.ApplyConfig(attrs, attributeCalls, options...)
 	if err != nil {
 		return config, nil, err
 	}

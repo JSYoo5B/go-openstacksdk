@@ -11,6 +11,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/instanceha/v1/vmoves"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -111,7 +112,7 @@ func TestInstanceHAVMoveChangedVersionAndParentQueryCannotEscapeScope(t *testing
 		if _, err := scope.Resources.All(context.Background(), resource.WithQuery(key, otherSegmentUUID)); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatalf("%s: %v", key, err)
 		}
-		if _, err := scope.All(context.Background(), vmoves.WithListQuery(key, otherSegmentUUID)); !errors.Is(err, resource.ErrInvalidOption) {
+		if _, err := scope.All(context.Background(), request.Query(key, otherSegmentUUID)); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatalf("%s: %v", key, err)
 		}
 	}
@@ -222,7 +223,7 @@ func TestInstanceHAVMoveIteratorSnapshotsOptionSlice(t *testing.T) {
 	options := []vmoves.ListOption{vmoves.WithListOptions(vmoves.ListOpts{Status: &status})}
 	iterator := scope.List(context.Background(), options...)
 	status = "mutated"
-	options[0] = vmoves.WithListQuery("status", "mutated")
+	options[0] = request.Query("status", "mutated")
 	for value, err := range iterator {
 		if err != nil || value.Status != "ongoing" {
 			t.Fatalf("value=%+v err=%v", value, err)

@@ -33,7 +33,7 @@ links only.
 `hosts.SegmentScope.UpdateAttributes` take structs of `request.Optional` fields.
 The zero value is omitted, `request.Null` sends JSON `null` (Python sends
 `description=None` as `null`) and `request.Present` keeps `false`, zero and
-empty strings. Extension fields (`WithAttributeField`) cannot replace a concrete
+empty strings. Extension fields (`request.Field`) cannot replace a concrete
 attribute or the protected `id`, `uuid`, timestamp and parent fields; reserved
 headers are rejected. All validation happens before HTTP. `enabled` still needs
 microversion 1.2. Host `control_attributes` is arbitrary JSON because the

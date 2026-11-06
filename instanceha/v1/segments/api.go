@@ -5,6 +5,7 @@ import (
 	"iter"
 	"net/url"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/masakari"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -79,7 +80,7 @@ func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOpti
 	if err := masakari.Require(ctx, a.client, 0); err != nil {
 		return nil, request.Wrap("Create", "segments", err)
 	}
-	config, err := request.Apply(opts, options...)
+	config, err := calls.ApplyConfig(opts, createCalls, options...)
 	if err != nil {
 		return nil, request.Wrap("Create", "segments", err)
 	}
@@ -108,7 +109,7 @@ func (a *API) Update(ctx context.Context, ref resource.Ref, opts UpdateOpts, opt
 	if err := masakari.Require(ctx, a.client, 0); err != nil {
 		return nil, request.Wrap("Update", "segments", err)
 	}
-	config, err := request.Apply(opts, options...)
+	config, err := calls.ApplyConfig(opts, updateCalls, options...)
 	if err != nil {
 		return nil, request.Wrap("Update", "segments", err)
 	}

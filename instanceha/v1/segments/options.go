@@ -5,6 +5,7 @@ import (
 	"net/url"
 	"strconv"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/masakari"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
@@ -36,31 +37,42 @@ type ListOpts struct {
 	Enabled        *bool   `json:"enabled,omitempty"`
 }
 
-type CreateOption = request.Option[CreateOpts]
-type UpdateOption = request.Option[UpdateOpts]
-type ListOption = request.Option[ListOpts]
+// CreateOption is one option of Create: WithCreateOptions, request.Field (an
+// extension body member that cannot replace a concrete one), request.Header
+// or request.Custom over *request.Config[CreateOpts]. Other shared calls fail
+// with resource.ErrInvalidOption before HTTP.
+type CreateOption = request.WriteCall
 
-func WithCreateOptions(opts CreateOpts) CreateOption { return masakari.Snapshot(opts) }
-func WithUpdateOptions(opts UpdateOpts) UpdateOption { return masakari.Snapshot(opts) }
-func WithListOptions(opts ListOpts) ListOption       { return masakari.Snapshot(opts) }
-func WithCreateField(key string, value any) CreateOption {
-	return request.WithField[CreateOpts](key, value)
+// UpdateOption is one option of Update: WithUpdateOptions, request.Field,
+// request.Header or request.Custom over *request.Config[UpdateOpts]. Other
+// shared calls fail with resource.ErrInvalidOption before HTTP.
+type UpdateOption = request.WriteCall
+
+// ListOption is one option of List, All and the marker-fallback lists:
+// WithListOptions, request.Query with a string or []string value (it cannot
+// replace a concrete filter) or request.Custom over *request.Config[ListOpts].
+// Limit and marker are ListOpts members; request.Limit, request.Marker and
+// other shared calls fail with resource.ErrInvalidOption before HTTP.
+type ListOption = request.ListCall
+
+var (
+	createCalls = masakari.WriteCalls[CreateOpts]()
+	updateCalls = masakari.WriteCalls[UpdateOpts]()
+	listCalls   = masakari.ListCalls[ListOpts]()
+)
+
+func WithCreateOptions(opts CreateOpts) CreateOption {
+	return request.Custom(masakari.Snapshot(opts))
 }
-func WithUpdateField(key string, value any) UpdateOption {
-	return request.WithField[UpdateOpts](key, value)
+func WithUpdateOptions(opts UpdateOpts) UpdateOption {
+	return request.Custom(masakari.Snapshot(opts))
 }
-func WithCreateHeader(key, value string) CreateOption {
-	return request.WithHeader[CreateOpts](key, value)
-}
-func WithUpdateHeader(key, value string) UpdateOption {
-	return request.WithHeader[UpdateOpts](key, value)
-}
-func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
+func WithListOptions(opts ListOpts) ListOption { return request.Custom(masakari.Snapshot(opts)) }
 
 var listFields = []string{"limit", "marker", "sort_key", "sort_dir", "recovery_method", "service_type", "enabled"}
 
 func prepareList(options ...ListOption) (url.Values, error) {
-	config, err := request.Apply(ListOpts{}, options...)
+	config, err := calls.ApplyConfig(ListOpts{}, listCalls, options...)
 	if err != nil {
 		return nil, err
 	}

@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/instanceha/v1/segments"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -64,7 +65,7 @@ func TestInstanceHASegmentCRUDPreservesPrefixUUIDAndTypedBody(t *testing.T) {
 	option := segments.WithCreateOptions(segments.CreateOpts{Name: "compute-a", RecoveryMethod: "auto", ServiceType: "COMPUTE", Description: &description, Enabled: &disabled})
 	description, disabled = "mutated", true
 	api := segments.New(client)
-	value, err := api.Create(context.Background(), segments.CreateOpts{}, option, segments.WithCreateField("custom", map[string]json.Number{"large": "9007199254740997"}))
+	value, err := api.Create(context.Background(), segments.CreateOpts{}, option, request.Field("custom", map[string]json.Number{"large": "9007199254740997"}))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -227,14 +228,14 @@ func TestInstanceHASegmentProtectedExtensionsFailBeforeNameLookup(t *testing.T) 
 	api := segments.New(client)
 	name := "a"
 	for _, key := range []string{"name", "enabled", "uuid", "id", "created_at"} {
-		if _, err := api.Update(context.Background(), resource.Name("lookup"), segments.UpdateOpts{Name: &name}, segments.WithUpdateField(key, "override")); !errors.Is(err, resource.ErrInvalidOption) {
+		if _, err := api.Update(context.Background(), resource.Name("lookup"), segments.UpdateOpts{Name: &name}, request.Field(key, "override")); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatalf("%s: %v", key, err)
 		}
 	}
-	if _, err := api.Create(context.Background(), segments.CreateOpts{Name: "a", RecoveryMethod: "auto", ServiceType: "COMPUTE"}, segments.WithCreateHeader("OpenStack-API-Version", "instance-ha 1.0")); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := api.Create(context.Background(), segments.CreateOpts{Name: "a", RecoveryMethod: "auto", ServiceType: "COMPUTE"}, request.Header("OpenStack-API-Version", "instance-ha 1.0")); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
-	for _, err := range api.List(context.Background(), segments.WithListQuery("enabled", "false")) {
+	for _, err := range api.List(context.Background(), request.Query("enabled", "false")) {
 		if !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(err)
 		}

@@ -193,7 +193,7 @@ func TestR2SmallInstanceHASegmentAttributesPreserveNullFalseAndOmission(t *testi
 	api := segments.New(client)
 	_, err := api.CreateAttributes(context.Background(), segments.Attributes{
 		Name: request.Present("a"), Description: request.Null[string](), Enabled: request.Present(false),
-	}, segments.WithAttributeField("custom", 1))
+	}, request.Field("custom", 1))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -224,9 +224,9 @@ func TestR2SmallInstanceHASegmentAttributesRejectBeforeHTTP(t *testing.T) {
 		opts  []segments.AttributeOption
 	}{
 		{"empty", segments.Attributes{}, nil},
-		{"protected id", segments.Attributes{Name: request.Present("a")}, []segments.AttributeOption{segments.WithAttributeField("uuid", "x")}},
-		{"core collision", segments.Attributes{Name: request.Present("a")}, []segments.AttributeOption{segments.WithAttributeField("description", "x")}},
-		{"reserved header", segments.Attributes{Name: request.Present("a")}, []segments.AttributeOption{segments.WithAttributeHeader("X-Auth-Token", "x")}},
+		{"protected id", segments.Attributes{Name: request.Present("a")}, []segments.AttributeOption{request.Field("uuid", "x")}},
+		{"core collision", segments.Attributes{Name: request.Present("a")}, []segments.AttributeOption{request.Field("description", "x")}},
+		{"reserved header", segments.Attributes{Name: request.Present("a")}, []segments.AttributeOption{request.Header("X-Auth-Token", "x")}},
 		{"enabled below 1.2", segments.Attributes{Enabled: request.Present(true)}, nil},
 	}
 	for _, tc := range cases {
@@ -270,7 +270,7 @@ func TestR2SmallInstanceHAHostUpdateAttributes(t *testing.T) {
 	if _, err := scope.UpdateAttributes(context.Background(), resource.ID(r2SmallHost), hosts.UpdateAttributes{}); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatalf("empty update must fail before HTTP: %v", err)
 	}
-	if _, err := scope.UpdateAttributes(context.Background(), resource.ID(r2SmallHost), hosts.UpdateAttributes{Reserved: request.Present(true)}, hosts.WithAttributeField("segment_id", "x")); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := scope.UpdateAttributes(context.Background(), resource.ID(r2SmallHost), hosts.UpdateAttributes{Reserved: request.Present(true)}, request.Field("segment_id", "x")); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatalf("protected field: %v", err)
 	}
 }

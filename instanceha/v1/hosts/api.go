@@ -7,6 +7,7 @@ import (
 	"net/url"
 
 	"github.com/JSYoo5B/go-openstacksdk/instanceha/v1/segments"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/masakari"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -109,7 +110,7 @@ func (s *SegmentScope) Create(ctx context.Context, opts CreateOpts, options ...C
 	if err := s.validate(ctx); err != nil {
 		return nil, request.Wrap("Create", "hosts", err)
 	}
-	config, err := request.Apply(opts, options...)
+	config, err := calls.ApplyConfig(opts, createCalls, options...)
 	if err != nil {
 		return nil, request.Wrap("Create", "hosts", err)
 	}
@@ -132,7 +133,7 @@ func (s *SegmentScope) Update(ctx context.Context, ref resource.Ref, opts Update
 	if err := s.validate(ctx); err != nil {
 		return nil, request.Wrap("Update", "hosts", err)
 	}
-	config, err := request.Apply(opts, options...)
+	config, err := calls.ApplyConfig(opts, updateCalls, options...)
 	if err != nil {
 		return nil, request.Wrap("Update", "hosts", err)
 	}

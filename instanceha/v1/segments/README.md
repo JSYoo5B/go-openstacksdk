@@ -25,7 +25,7 @@ Accepted responses with invalid JSON/envelopes retain evidence in
 `resource.ResponseError`, so mutations are not silently retried.
 
 `ListOpts` provides limit/marker, sorting, recovery method, service type and
-enabled filters. Use `WithListOptions`; `WithListQuery` carries additional
+enabled filters. Use `WithListOptions`; `request.Query` carries additional
 server-validated filters and cannot overwrite concrete filters.
 `API.All(ctx, options...)` consumes the same typed iterator and options.
 `Resources.List/All` also support shared name/query/page-size options.
@@ -43,8 +43,8 @@ client with an explicit selection needs a matching `OpenStack-API-Version:
 instance-ha 1.N` header. No operation upgrades the source client.
 
 Optional pointer fields omit nil and preserve false/empty values. WithOptions
-helpers snapshot their inputs; WithField helpers snapshot extension JSON and
-protect core/read-only fields. Version and authentication headers are SDK-owned.
+helpers snapshot their inputs; `request.Field` snapshots extension JSON and
+cannot replace core/read-only fields. Version and authentication headers are SDK-owned.
 Segment has no status field. Shared deletion waits work; status waits require an
 explicit supported string attribute rather than an invented status.
 

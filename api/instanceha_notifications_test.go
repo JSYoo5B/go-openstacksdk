@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/instanceha/v1/notifications"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -108,7 +109,7 @@ func TestInstanceHANotificationRejectsNamesMutationsAndInvalidPayloadBeforeHTTP(
 		}
 	}
 	for _, key := range []string{"payload", "hostname", "notification_uuid", "status", "recovery_workflow_details"} {
-		if _, err := api.Create(context.Background(), notifications.CreateOpts{Type: "VM", Hostname: "host", GeneratedTime: "time", Payload: json.RawMessage(`{}`)}, notifications.WithCreateField(key, "override")); !errors.Is(err, resource.ErrInvalidOption) {
+		if _, err := api.Create(context.Background(), notifications.CreateOpts{Type: "VM", Hostname: "host", GeneratedTime: "time", Payload: json.RawMessage(`{}`)}, request.Field(key, "override")); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatalf("%s: %v", key, err)
 		}
 	}
@@ -183,7 +184,7 @@ func TestInstanceHANotificationIteratorSnapshotsOptionSlice(t *testing.T) {
 	status := "new"
 	options := []notifications.ListOption{notifications.WithListOptions(notifications.ListOpts{Status: &status})}
 	iterator := notifications.New(cloud.Client("instance-ha", "/v1")).List(context.Background(), options...)
-	options[0] = notifications.WithListQuery("status", "mutated")
+	options[0] = request.Query("status", "mutated")
 	status = "also-mutated"
 	for value, err := range iterator {
 		if err != nil || value.Status != "new" {

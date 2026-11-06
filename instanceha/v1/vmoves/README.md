@@ -33,7 +33,7 @@ attribute names. Models preserve raw fields, large IDs, null/omission, optional
 messages/host/timestamp strings and HTTP evidence.
 
 `List` and typed `All` accept limit/marker, sorting, type and status through
-`WithListOptions`. `WithListQuery` is an explicit server-validated extension that
+`WithListOptions`. `request.Query` is an explicit server-validated extension that
 cannot overwrite core filters or the parent. `Resources.All` accepts shared
 collection options. Iterator options are snapshotted at construction. Explicit
 server continuation links are followed while preserving parent, origin and

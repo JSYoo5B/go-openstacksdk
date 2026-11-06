@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/url"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/masakari"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -24,15 +25,13 @@ type UpdateAttributes struct {
 	Reserved          request.Optional[bool]            `json:"reserved,omitzero"`
 }
 
-type AttributeOption = request.Option[UpdateAttributes]
+// AttributeOption is one option of UpdateAttributes: request.Field (an
+// extension member that is not a concrete or protected one), request.Header or
+// request.Custom over *request.Config[UpdateAttributes]. Other shared calls
+// fail with resource.ErrInvalidOption before HTTP.
+type AttributeOption = request.WriteCall
 
-func WithAttributeField(key string, value any) AttributeOption {
-	return request.WithField[UpdateAttributes](key, value)
-}
-
-func WithAttributeHeader(key, value string) AttributeOption {
-	return request.WithHeader[UpdateAttributes](key, value)
-}
+var attributeCalls = masakari.WriteCalls[UpdateAttributes]()
 
 // UpdateAttributes PUTs {"host": <attributes>} to the resolved host UUID in
 // the fixed segment and requires 200. Only supplied attributes are sent. A
@@ -43,7 +42,7 @@ func (s *SegmentScope) UpdateAttributes(ctx context.Context, ref resource.Ref, a
 	if err := s.validate(ctx); err != nil {
 		return nil, request.Wrap(op, "hosts", err)
 	}
-	config, err := request.Apply(attrs, append([]AttributeOption(nil), options...)...)
+	config, err := calls.ApplyConfig(attrs, attributeCalls, options...)
 	if err != nil {
 		return nil, request.Wrap(op, "hosts", err)
 	}

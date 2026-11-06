@@ -28,7 +28,7 @@ protected from extensions. `Hostname` serializes as `hostname`, not the API
 reference's inconsistent `host_name` table label.
 
 `ListOpts` includes sorting, limit/marker, source host UUID, type, status and
-generated since. The last maps to `generated-since`. `WithListQuery` adds explicit
+generated since. The last maps to `generated-since`. `request.Query` adds explicit
 server-validated filters but cannot replace concrete fields. Shared options are
 available through `Resources.List/All`. Explicit body/HTTP continuation links
 retain collection, origin and filters; without a link iteration stops at the page.

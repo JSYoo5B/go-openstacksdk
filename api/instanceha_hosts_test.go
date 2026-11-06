@@ -11,6 +11,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/instanceha/v1/hosts"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -122,11 +123,11 @@ func TestInstanceHAHostScopeRejectsParentOverridesBeforeHTTP(t *testing.T) {
 		}
 	}
 	for _, key := range []string{"failover_segment_id", "segment_id", "uuid", "id", "reserved"} {
-		if _, err := scope.Create(context.Background(), hosts.CreateOpts{Name: "h", Type: "COMPUTE", ControlAttributes: "SSH"}, hosts.WithCreateField(key, "override")); !errors.Is(err, resource.ErrInvalidOption) {
+		if _, err := scope.Create(context.Background(), hosts.CreateOpts{Name: "h", Type: "COMPUTE", ControlAttributes: "SSH"}, request.Field(key, "override")); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatalf("%s: %v", key, err)
 		}
 	}
-	if _, err := scope.Update(context.Background(), resource.Name("looked-up"), hosts.UpdateOpts{}, hosts.WithUpdateField("segment_id", segmentUUID)); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := scope.Update(context.Background(), resource.Name("looked-up"), hosts.UpdateOpts{}, request.Field("segment_id", segmentUUID)); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
 }

@@ -5,6 +5,7 @@ import (
 	"iter"
 	"strings"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/masakari"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -73,7 +74,7 @@ func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOpti
 	if err := masakari.Require(ctx, a.client, 0); err != nil {
 		return nil, request.Wrap("Create", "notifications", err)
 	}
-	config, err := request.Apply(opts, options...)
+	config, err := calls.ApplyConfig(opts, createCalls, options...)
 	if err != nil {
 		return nil, request.Wrap("Create", "notifications", err)
 	}

@@ -30,11 +30,13 @@ ignores 404 by default; `resource.WithMissingError()` requires existence. Other
 HTTP failures and context causes are preserved.
 
 Nil optional pointers omit fields; false values are serialized. WithOptions
-snapshot typed inputs, and WithField snapshot extension JSON while protecting
-core/read-only/parent fields. Requests use the documented string control
+snapshot typed inputs, and `request.Field` snapshots extension JSON while
+protecting core/read-only/parent fields; creates and updates also take
+`request.Header`, and lists take `request.Query`. Other shared calls, including
+`request.Limit` and `request.Marker` (use `ListOpts`), fail before HTTP. Requests use the documented string control
 attributes. Responses retain `ControlAttributes` as raw JSON, including the
 object form present in pinned Python fixtures. The update schema for control
-attributes was not verified; `WithUpdateField("control_attributes", "SSH")`
+attributes was not verified; `request.Field("control_attributes", "SSH")`
 is an explicit server-validated escape hatch rather than a claimed typed update
 capability.
 
