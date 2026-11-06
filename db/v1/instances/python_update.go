@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/masakari"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -32,15 +33,14 @@ type UpdateAttributes struct {
 	UpdatedAt request.Optional[string]          `json:"updated,omitzero"`
 }
 
-type UpdateAttributeOption = request.Option[UpdateAttributes]
+// UpdateAttributeOption is one option of UpdateAttributes: request.Field (an
+// extension member that cannot replace a declared attribute or the instance
+// id), request.Header or request.Custom over
+// *request.Config[UpdateAttributes]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type UpdateAttributeOption = request.WriteCall
 
-func WithUpdateAttributeField(key string, value any) UpdateAttributeOption {
-	return request.WithField[UpdateAttributes](key, value)
-}
-
-func WithUpdateAttributeHeader(key, value string) UpdateAttributeOption {
-	return request.WithHeader[UpdateAttributes](key, value)
-}
+var updateAttributeCalls = calls.Spec[request.Config[UpdateAttributes]]{Field: calls.ConfigField[UpdateAttributes], Header: calls.ConfigHeader[UpdateAttributes]}
 
 // UpdateReceipt is the accepted HTTP response of UpdateAttributes. Trove
 // normally acknowledges with 202 and no body, so Body is usually empty and is
@@ -60,7 +60,7 @@ type UpdateReceipt struct {
 // that Trove did not apply the change.
 func (a *API) UpdateAttributes(ctx context.Context, ref resource.Ref, attrs UpdateAttributes, options ...UpdateAttributeOption) (*UpdateReceipt, error) {
 	const op = "UpdateAttributes"
-	config, err := request.Apply(attrs, append([]UpdateAttributeOption(nil), options...)...)
+	config, err := calls.ApplyConfig(attrs, updateAttributeCalls, options...)
 	if err != nil {
 		return nil, request.Wrap(op, "instances", err)
 	}

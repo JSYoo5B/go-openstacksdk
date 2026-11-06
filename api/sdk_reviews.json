@@ -140448,8 +140448,8 @@
         "github.com/JSYoo5B/go-openstacksdk/db/v1/instances.API.AttachConfigurationGroup",
         "github.com/JSYoo5B/go-openstacksdk/db/v1/instances.API.DetachConfigurationGroup",
         "github.com/JSYoo5B/go-openstacksdk/db/v1/instances.API.UpdateAttributes",
-        "github.com/JSYoo5B/go-openstacksdk/db/v1/instances.WithUpdateAttributeField",
-        "github.com/JSYoo5B/go-openstacksdk/db/v1/instances.WithUpdateAttributeHeader"
+        "github.com/JSYoo5B/go-openstacksdk/request.Field",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header"
       ],
       "contracts": [
         {

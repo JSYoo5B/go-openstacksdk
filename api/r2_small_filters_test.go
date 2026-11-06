@@ -88,7 +88,7 @@ func TestR2SmallTroveUpdateAttributes(t *testing.T) {
 	api := instances.New(client)
 	receipt, err := api.UpdateAttributes(context.Background(), resource.ID("i1"), instances.UpdateAttributes{
 		Name: request.Present(""), Hostname: request.Null[string](), Volume: request.Present(json.RawMessage(`{"size":2}`)),
-	}, instances.WithUpdateAttributeField("custom", false))
+	}, request.Field("custom", false))
 	if err != nil || receipt.StatusCode != 202 || len(receipt.Body) != 0 {
 		t.Fatalf("receipt=%v err=%v", receipt, err)
 	}
@@ -102,15 +102,15 @@ func TestR2SmallTroveUpdateAttributes(t *testing.T) {
 			return err
 		},
 		"core": func() error {
-			_, err := api.UpdateAttributes(context.Background(), resource.ID("i1"), instances.UpdateAttributes{Name: request.Present("x")}, instances.WithUpdateAttributeField("name", "y"))
+			_, err := api.UpdateAttributes(context.Background(), resource.ID("i1"), instances.UpdateAttributes{Name: request.Present("x")}, request.Field("name", "y"))
 			return err
 		},
 		"id": func() error {
-			_, err := api.UpdateAttributes(context.Background(), resource.ID("i1"), instances.UpdateAttributes{Name: request.Present("x")}, instances.WithUpdateAttributeField("id", "y"))
+			_, err := api.UpdateAttributes(context.Background(), resource.ID("i1"), instances.UpdateAttributes{Name: request.Present("x")}, request.Field("id", "y"))
 			return err
 		},
 		"auth hdr": func() error {
-			_, err := api.UpdateAttributes(context.Background(), resource.ID("i1"), instances.UpdateAttributes{Name: request.Present("x")}, instances.WithUpdateAttributeHeader("X-Auth-Token", "y"))
+			_, err := api.UpdateAttributes(context.Background(), resource.ID("i1"), instances.UpdateAttributes{Name: request.Present("x")}, request.Header("X-Auth-Token", "y"))
 			return err
 		},
 	} {
