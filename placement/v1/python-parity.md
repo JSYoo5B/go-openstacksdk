@@ -15,14 +15,14 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/placement/v1/allocationcandidates.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/placement/v1/allocationcandidates.WithListOptions`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
-- `github.com/JSYoo5B/go-openstacksdk/placement/v1/allocationcandidates.WithListQueryValues`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/request.WithQueryValues`
 
 - At placement 1.34 List sends GET allocation_candidates with repeated required and member_of, single resources, limit and group_policy, and suffixed resources1, required1, member_of1 and in_tree1, and decodes every allocation request with its mappings and the provider summaries.
   Tests: `placement/v1/allocationcandidates/python_parity_test.go:TestPythonAllocationCandidatesQueryAndCandidates`.
-- WithListQueryValues sends a key once per value in order, such as member_of1=agg-4&member_of1=agg-5 and same_subtree, replacing the ListOpts serialization of that key, while a later WithListQuery for the same key wins.
+- request.Query with a []string value sends a key once per value in order, such as member_of1=agg-4&member_of1=agg-5 and same_subtree, replacing the ListOpts serialization of that key, while a later request.Query for the same key wins.
   Tests: `placement/v1/allocationcandidates/python_list_query_test.go:TestPythonAllocationCandidatesRepeatedQueryValues`.
-- WithListQueryValues with a blank key fails before HTTP as resource.ErrInvalidOption wrapped in a List resource.OperationError, and a 400 response to a repeated query is returned as the Gophercloud status error.
+- request.Query with a []string value with a blank key fails before HTTP as resource.ErrInvalidOption wrapped in a List resource.OperationError, and a 400 response to a repeated query is returned as the Gophercloud status error.
   Tests: `placement/v1/allocationcandidates/python_list_query_test.go:TestPythonAllocationCandidatesRepeatedQueryRejections`.
 
 Python/Go differences:
@@ -75,7 +75,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/placement/v1/allocations.API.CreateRecord`
-- `github.com/JSYoo5B/go-openstacksdk/placement/v1/allocations.WithCreateRecordHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 
 - At placement 1.38 CreateRecord posts the caller's per-consumer objects unchanged to POST allocations, so mappings, null consumer_generation and an empty allocations map stay inside each consumer, sends {} for a nil or empty map and null for a nil consumer, and accepts 200 and 204.
   Tests: `placement/v1/allocations/python_create_record_test.go:TestPythonAllocationCreateRecordSendsPerConsumerKeys`.
@@ -158,7 +158,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceclasses.API.UpdateRecord`
 - `github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceclasses.WithUpdateRecordOptions`
 - `github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceclasses.WithUpdateRecordName`
-- `github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceclasses.WithUpdateRecordHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/request.Present`
 - `github.com/JSYoo5B/go-openstacksdk/request.Null`
 
@@ -387,8 +387,8 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.CreateInventory`
-- `github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.WithCreateInventoryField`
-- `github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.WithCreateInventoryHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.WithCreateInventoryOptions`
 
 - CreateInventory POSTs resource_class and total (zero preserved) plus optional fields and requires 201; extension fields and reserved headers cannot replace owned values.

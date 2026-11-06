@@ -15,7 +15,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceclasses.API.UpdateRecord`
 - `github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceclasses.WithUpdateRecordOptions`
 - `github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceclasses.WithUpdateRecordName`
-- `github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceclasses.WithUpdateRecordHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/request.Present`
 - `github.com/JSYoo5B/go-openstacksdk/request.Null`
 

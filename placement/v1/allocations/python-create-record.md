@@ -13,7 +13,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/placement/v1/allocations.API.CreateRecord`
-- `github.com/JSYoo5B/go-openstacksdk/placement/v1/allocations.WithCreateRecordHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 
 - At placement 1.38 CreateRecord posts the caller's per-consumer objects unchanged to POST allocations, so mappings, null consumer_generation and an empty allocations map stay inside each consumer, sends {} for a nil or empty map and null for a nil consumer, and accepts 200 and 204.
   Tests: `placement/v1/allocations/python_create_record_test.go:TestPythonAllocationCreateRecordSendsPerConsumerKeys`.

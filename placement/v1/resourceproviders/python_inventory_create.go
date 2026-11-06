@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/masakari"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -27,20 +28,17 @@ type CreateInventoryOpts struct {
 	AllocationRatio *float64 `json:"allocation_ratio,omitempty"`
 }
 
-type CreateInventoryOption = request.Option[CreateInventoryOpts]
+// CreateInventoryOption is one option of CreateInventory:
+// WithCreateInventoryOptions, request.Field (an extension body field;
+// resource_class and the concrete fields are owned by the SDK and rejected),
+// request.Header or request.Custom over *request.Config[CreateInventoryOpts].
+// Other shared calls fail with resource.ErrInvalidOption before HTTP.
+type CreateInventoryOption = request.WriteCall
+
+var createInventoryCalls = calls.Spec[request.Config[CreateInventoryOpts]]{Field: calls.ConfigField[CreateInventoryOpts], Header: calls.ConfigHeader[CreateInventoryOpts]}
 
 func WithCreateInventoryOptions(value CreateInventoryOpts) CreateInventoryOption {
-	return request.WithOptions(value)
-}
-
-// WithCreateInventoryField adds an extension body field. resource_class and
-// the concrete fields are owned by the SDK and rejected.
-func WithCreateInventoryField(key string, value any) CreateInventoryOption {
-	return request.WithField[CreateInventoryOpts](key, value)
-}
-
-func WithCreateInventoryHeader(key, value string) CreateInventoryOption {
-	return request.WithHeader[CreateInventoryOpts](key, value)
+	return request.Custom(request.WithOptions(value))
 }
 
 // InventoryRecord is the 201 response of CreateInventory. Metadata.Body keeps
@@ -89,7 +87,7 @@ func (a *API) CreateInventory(ctx context.Context, resourceProviderID, resourceC
 	if err := inventorySegment("resource class", resourceClass); err != nil {
 		return nil, wrap(err)
 	}
-	config, err := request.Apply(opts, append([]CreateInventoryOption(nil), options...)...)
+	config, err := calls.ApplyConfig(opts, createInventoryCalls, options...)
 	if err != nil {
 		return nil, wrap(err)
 	}

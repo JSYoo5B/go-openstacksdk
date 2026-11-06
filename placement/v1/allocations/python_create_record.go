@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -15,11 +16,13 @@ import (
 // CreateRecordOpts carries only request headers; the allocations body is the
 // CreateRecord argument.
 type CreateRecordOpts struct{}
-type CreateRecordOption = request.Option[CreateRecordOpts]
 
-func WithCreateRecordHeader(key, value string) CreateRecordOption {
-	return request.WithHeader[CreateRecordOpts](key, value)
-}
+// CreateRecordOption is one option of CreateRecord: request.Header or
+// request.Custom over *request.Config[CreateRecordOpts]. Other shared calls
+// fail with resource.ErrInvalidOption before HTTP.
+type CreateRecordOption = request.WriteCall
+
+var createRecordCalls = calls.Spec[request.Config[CreateRecordOpts]]{Header: calls.ConfigHeader[CreateRecordOpts]}
 
 // CreateRecordResult reports the accepted response; Python returns None.
 type CreateRecordResult struct {
@@ -55,7 +58,7 @@ func (a *API) CreateRecord(ctx context.Context, allocations map[string]any, opti
 	if err != nil {
 		return fail(err)
 	}
-	config, err := cloudread.ApplyReadOptions(ctx, CreateRecordOpts{}, options, cloudread.OwnReadConfig[CreateRecordOpts], source.Guard)
+	config, err := cloudread.ApplyReadOptions(ctx, CreateRecordOpts{}, calls.Options(options, createRecordCalls), cloudread.OwnReadConfig[CreateRecordOpts], source.Guard)
 	if err == nil {
 		err = request.ValidateCapabilities(config, false, false, true)
 	}

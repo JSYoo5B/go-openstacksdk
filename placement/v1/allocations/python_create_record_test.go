@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/placement/v1/allocations"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -31,7 +32,7 @@ func TestPythonAllocationCreateRecordSendsPerConsumerKeys(t *testing.T) {
 		"c2": map[string]any{"allocations": map[string]any{}, "project_id": "p", "user_id": "u", "consumer_generation": 3, "consumer_type": "MIGRATION"},
 		"c3": nil,
 	}
-	got, err := api.CreateRecord(ctx, consumers, allocations.WithCreateRecordHeader("X-Trace", "t"))
+	got, err := api.CreateRecord(ctx, consumers, request.Header("X-Trace", "t"))
 	if err != nil || got.StatusCode != 204 {
 		t.Fatal(got, err)
 	}

@@ -15,14 +15,14 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/placement/v1/allocationcandidates.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/placement/v1/allocationcandidates.WithListOptions`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
-- `github.com/JSYoo5B/go-openstacksdk/placement/v1/allocationcandidates.WithListQueryValues`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/request.WithQueryValues`
 
 - At placement 1.34 List sends GET allocation_candidates with repeated required and member_of, single resources, limit and group_policy, and suffixed resources1, required1, member_of1 and in_tree1, and decodes every allocation request with its mappings and the provider summaries.
   Tests: `placement/v1/allocationcandidates/python_parity_test.go:TestPythonAllocationCandidatesQueryAndCandidates`.
-- WithListQueryValues sends a key once per value in order, such as member_of1=agg-4&member_of1=agg-5 and same_subtree, replacing the ListOpts serialization of that key, while a later request.Query for the same key wins.
+- request.Query with a []string value sends a key once per value in order, such as member_of1=agg-4&member_of1=agg-5 and same_subtree, replacing the ListOpts serialization of that key, while a later request.Query for the same key wins.
   Tests: `placement/v1/allocationcandidates/python_list_query_test.go:TestPythonAllocationCandidatesRepeatedQueryValues`.
-- WithListQueryValues with a blank key fails before HTTP as resource.ErrInvalidOption wrapped in a List resource.OperationError, and a 400 response to a repeated query is returned as the Gophercloud status error.
+- request.Query with a []string value with a blank key fails before HTTP as resource.ErrInvalidOption wrapped in a List resource.OperationError, and a 400 response to a repeated query is returned as the Gophercloud status error.
   Tests: `placement/v1/allocationcandidates/python_list_query_test.go:TestPythonAllocationCandidatesRepeatedQueryRejections`.
 
 Python/Go differences:
@@ -41,7 +41,7 @@ for page, err := range api.List(ctx,
 	allocationcandidates.WithListOptions(allocationcandidates.ListOpts{
 		ResourceGroups: map[string]allocationcandidates.ResourceGroup{"1": {Resources: "VCPU:1"}},
 	}),
-	allocationcandidates.WithListQueryValues("member_of1", "agg-4", "agg-5"),
+	request.Query("member_of1", []string{"agg-4", "agg-5"}),
 ) {
 	...
 }

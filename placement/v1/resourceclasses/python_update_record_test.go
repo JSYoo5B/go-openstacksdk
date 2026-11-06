@@ -33,7 +33,7 @@ func TestPythonResourceClassUpdateRecordRenames(t *testing.T) {
 	}
 	// update_resource_class("CUSTOM_OLD", name=None)
 	status, reply = http.StatusCreated, `{"name":"CUSTOM_OLD"}`
-	if got, err := api.UpdateRecord(ctx, "CUSTOM_OLD", resourceclasses.WithUpdateRecordOptions(resourceclasses.UpdateRecordOpts{Name: request.Null[string]()}), resourceclasses.WithUpdateRecordHeader("X-Trace", "t")); err != nil || got.StatusCode != 201 {
+	if got, err := api.UpdateRecord(ctx, "CUSTOM_OLD", resourceclasses.WithUpdateRecordOptions(resourceclasses.UpdateRecordOpts{Name: request.Null[string]()}), request.Header("X-Trace", "t")); err != nil || got.StatusCode != 201 {
 		t.Fatal(got, err)
 	}
 	want := []pythonRCCall{
@@ -78,7 +78,7 @@ func TestPythonResourceClassUpdateRecordRejections(t *testing.T) {
 		func() error { _, err := api.UpdateRecord(ctx, "bad\nname"); return err },
 		func() error { _, err := api.UpdateRecord(ctx, "CUSTOM_OLD", nil); return err },
 		func() error {
-			_, err := api.UpdateRecord(ctx, "CUSTOM_OLD", resourceclasses.WithUpdateRecordHeader("OpenStack-API-Version", "placement 1.39"))
+			_, err := api.UpdateRecord(ctx, "CUSTOM_OLD", request.Header("OpenStack-API-Version", "placement 1.39"))
 			return err
 		},
 		func() error { _, err := nilAPI.UpdateRecord(ctx, "CUSTOM_OLD"); return err },

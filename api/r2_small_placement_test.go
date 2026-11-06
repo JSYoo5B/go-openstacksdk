@@ -12,6 +12,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders"
 	"github.com/JSYoo5B/go-openstacksdk/placement/v1/traits"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -30,7 +31,7 @@ func TestR2SmallPlacementCreateInventoryBodyAndStatus(t *testing.T) {
 	})
 	zero := 0
 	value, err := resourceproviders.New(client).CreateInventory(context.Background(), "rp-1", "VCPU",
-		resourceproviders.CreateInventoryOpts{Total: 8, Reserved: &zero}, resourceproviders.WithCreateInventoryField("custom", true))
+		resourceproviders.CreateInventoryOpts{Total: 8, Reserved: &zero}, request.Field("custom", true))
 	if err != nil || value.StatusCode != 201 || *value.ResourceProviderGeneration != 3 || *value.AllocationRatio != 1.5 {
 		t.Fatalf("value=%+v err=%v", value, err)
 	}
@@ -63,15 +64,15 @@ func TestR2SmallPlacementCreateInventoryRejectsBeforeHTTPAndKeepsServerErrors(t 
 			return err
 		},
 		"owned class": func() error {
-			_, err := api.CreateInventory(ctx, "rp", "VCPU", resourceproviders.CreateInventoryOpts{Total: 1}, resourceproviders.WithCreateInventoryField("resource_class", "X"))
+			_, err := api.CreateInventory(ctx, "rp", "VCPU", resourceproviders.CreateInventoryOpts{Total: 1}, request.Field("resource_class", "X"))
 			return err
 		},
 		"core collision": func() error {
-			_, err := api.CreateInventory(ctx, "rp", "VCPU", resourceproviders.CreateInventoryOpts{Total: 1}, resourceproviders.WithCreateInventoryField("total", 2))
+			_, err := api.CreateInventory(ctx, "rp", "VCPU", resourceproviders.CreateInventoryOpts{Total: 1}, request.Field("total", 2))
 			return err
 		},
 		"reserved header": func() error {
-			_, err := api.CreateInventory(ctx, "rp", "VCPU", resourceproviders.CreateInventoryOpts{Total: 1}, resourceproviders.WithCreateInventoryHeader("X-Auth-Token", "x"))
+			_, err := api.CreateInventory(ctx, "rp", "VCPU", resourceproviders.CreateInventoryOpts{Total: 1}, request.Header("X-Auth-Token", "x"))
 			return err
 		},
 	} {

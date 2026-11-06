@@ -13,6 +13,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -25,16 +26,20 @@ import (
 type UpdateRecordOpts struct {
 	Name request.Optional[string] `json:"name,omitzero"`
 }
-type UpdateRecordOption = request.Option[UpdateRecordOpts]
+
+// UpdateRecordOption is one option of UpdateRecord: WithUpdateRecordOptions,
+// WithUpdateRecordName, request.Header or request.Custom over
+// *request.Config[UpdateRecordOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type UpdateRecordOption = request.WriteCall
+
+var updateRecordCalls = calls.Spec[request.Config[UpdateRecordOpts]]{Header: calls.ConfigHeader[UpdateRecordOpts]}
 
 func WithUpdateRecordOptions(value UpdateRecordOpts) UpdateRecordOption {
-	return request.WithOptions(value)
+	return request.Custom(request.WithOptions(value))
 }
 func WithUpdateRecordName(value string) UpdateRecordOption {
-	return func(c *request.Config[UpdateRecordOpts]) error { c.Options.Name = request.Present(value); return nil }
-}
-func WithUpdateRecordHeader(key, value string) UpdateRecordOption {
-	return request.WithHeader[UpdateRecordOpts](key, value)
+	return request.Custom(func(c *request.Config[UpdateRecordOpts]) error { c.Options.Name = request.Present(value); return nil })
 }
 
 // ResourceClassRecord is the committed Python ResourceClass view.
@@ -73,7 +78,7 @@ func (a *API) UpdateRecord(ctx context.Context, name string, options ...UpdateRe
 	if err != nil {
 		return fail(nil, err)
 	}
-	config, err := cloudread.ApplyReadOptions(ctx, UpdateRecordOpts{}, options, cloudread.OwnReadConfig[UpdateRecordOpts], source.Guard)
+	config, err := cloudread.ApplyReadOptions(ctx, UpdateRecordOpts{}, calls.Options(options, updateRecordCalls), cloudread.OwnReadConfig[UpdateRecordOpts], source.Guard)
 	if err == nil {
 		err = request.ValidateCapabilities(config, false, false, true)
 	}

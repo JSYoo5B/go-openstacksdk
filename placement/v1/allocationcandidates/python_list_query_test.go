@@ -39,8 +39,8 @@ func TestPythonAllocationCandidatesRepeatedQueryValues(t *testing.T) {
 			Required:       []string{"CUSTOM_A", "!CUSTOM_B"},
 			ResourceGroups: map[string]allocationcandidates.ResourceGroup{"1": {Resources: "VCPU:1", MemberOf: "agg-old"}},
 		}),
-		allocationcandidates.WithListQueryValues("member_of1", "agg-4", "agg-5"),
-		allocationcandidates.WithListQueryValues("same_subtree", "_A", "_B"),
+		request.Query("member_of1", []string{"agg-4", "agg-5"}),
+		request.Query("same_subtree", []string{"_A", "_B"}),
 	) {
 		if err != nil {
 			t.Fatal(err)
@@ -60,7 +60,7 @@ func TestPythonAllocationCandidatesRepeatedQueryValues(t *testing.T) {
 	}
 	// A later request.Query for the key wins.
 	calls = nil
-	for range api.List(context.Background(), allocationcandidates.WithListQueryValues("member_of1", "agg-4", "agg-5"), request.Query("member_of1", "agg-6")) {
+	for range api.List(context.Background(), request.Query("member_of1", []string{"agg-4", "agg-5"}), request.Query("member_of1", "agg-6")) {
 	}
 	if len(calls) != 1 || calls[0].query != "member_of1=agg-6" {
 		t.Fatalf("%+v", calls)
@@ -70,7 +70,7 @@ func TestPythonAllocationCandidatesRepeatedQueryValues(t *testing.T) {
 func TestPythonAllocationCandidatesRepeatedQueryRejections(t *testing.T) {
 	var calls []pythonCandidateCall
 	api := pythonCandidateStatusAPI(t, &calls, http.StatusBadRequest, `{"errors":[{"status":400,"title":"Bad Request"}]}`)
-	for _, err := range api.List(context.Background(), allocationcandidates.WithListQueryValues(" ", "agg-4")) {
+	for _, err := range api.List(context.Background(), request.Query(" ", []string{"agg-4"})) {
 		var operation *resource.OperationError
 		if !errors.Is(err, resource.ErrInvalidOption) || !errors.As(err, &operation) || operation.Operation != "List" {
 			t.Fatal(err)
@@ -80,7 +80,7 @@ func TestPythonAllocationCandidatesRepeatedQueryRejections(t *testing.T) {
 		t.Fatalf("%+v", calls)
 	}
 	seen := false
-	for _, err := range api.List(context.Background(), allocationcandidates.WithListQueryValues("member_of1", "agg-4", "agg-5")) {
+	for _, err := range api.List(context.Background(), request.Query("member_of1", []string{"agg-4", "agg-5"})) {
 		seen = true
 		if !gophercloud.ResponseCodeIs(err, http.StatusBadRequest) {
 			t.Fatal(err)
