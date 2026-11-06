@@ -11,6 +11,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/identityproviders"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -71,12 +72,12 @@ func TestIdentityProviderCreatePutsMemberWithoutID(t *testing.T) {
 		return 201, `{"identity_provider":` + idpRow + `}`
 	})
 	v, err := api.Create(context.Background(), "idp1",
-		identityproviders.WithCreateField("is_enabled", true),
-		identityproviders.WithCreateField("description", "corp"),
-		identityproviders.WithCreateField("remote_ids", []string{"r1"}),
-		identityproviders.WithCreateField("name", "other"),
-		identityproviders.WithCreateField("id", "other"),
-		identityproviders.WithCreateField("unknown", make(chan int)))
+		request.Field("is_enabled", true),
+		request.Field("description", "corp"),
+		request.Field("remote_ids", []string{"r1"}),
+		request.Field("name", "other"),
+		request.Field("id", "other"),
+		request.Field("unknown", make(chan int)))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -91,7 +92,7 @@ func TestIdentityProviderCreatePutsMemberWithoutID(t *testing.T) {
 
 	calls = nil
 	api, _ = idpAPI(t, &calls, func(*http.Request) (int, string) { return 204, "" })
-	v, err = api.Create(context.Background(), "a/b", identityproviders.WithCreateField("domain_id", nil))
+	v, err = api.Create(context.Background(), "a/b", request.Field("domain_id", nil))
 	if err != nil || calls[0].path != idpBase+"/a%2Fb" || calls[0].body != `{"identity_provider":{"domain_id":null}}` {
 		t.Fatal(v, err, calls)
 	}
@@ -161,9 +162,9 @@ func TestIdentityProviderUpdatePatchesDirtyAttributes(t *testing.T) {
 		return 200, `{"identity_provider":` + idpRow + `}`
 	})
 	v, err := api.Update(context.Background(), "idp1",
-		identityproviders.WithUpdateField("enabled", false),
-		identityproviders.WithUpdateField("authorization_ttl", nil),
-		identityproviders.WithUpdateField("id", "ignored"))
+		request.Field("enabled", false),
+		request.Field("authorization_ttl", nil),
+		request.Field("id", "ignored"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -173,15 +174,15 @@ func TestIdentityProviderUpdatePatchesDirtyAttributes(t *testing.T) {
 	idpCheck(t, v)
 
 	calls = nil
-	v, err = api.Update(context.Background(), "idp1", identityproviders.WithUpdateField("name", "x"), identityproviders.WithUpdateField("unknown", 1))
+	v, err = api.Update(context.Background(), "idp1", request.Field("name", "x"), request.Field("unknown", 1))
 	if err != nil || len(calls) != 0 || v.ID != "idp1" || v.StatusCode != 0 {
 		t.Fatal("nothing dirty must not send PATCH", v, err, calls)
 	}
-	if _, err := api.Update(context.Background(), "idp1", identityproviders.WithUpdateField("is_enabled", true), identityproviders.WithUpdateField("enabled", false)); err == nil || len(calls) != 0 {
+	if _, err := api.Update(context.Background(), "idp1", request.Field("is_enabled", true), request.Field("enabled", false)); err == nil || len(calls) != 0 {
 		t.Fatal("conflicting aliases must fail before HTTP", err)
 	}
 	api, _ = idpAPI(t, &calls, func(*http.Request) (int, string) { return 403, `{}` })
-	_, err = api.Update(context.Background(), "idp1", identityproviders.WithUpdateField("description", "x"))
+	_, err = api.Update(context.Background(), "idp1", request.Field("description", "x"))
 	idpOperation(t, err, "Update")
 	idpStatus(t, err, 403)
 }
@@ -193,7 +194,7 @@ func TestIdentityProviderDeleteIgnoresMissingByDefault(t *testing.T) {
 		fails   bool
 	}{
 		{204, nil, false}, {202, nil, false}, {404, nil, false},
-		{404, []identityproviders.DeleteOption{identityproviders.WithDeleteIgnoreMissing(false)}, true},
+		{404, []identityproviders.DeleteOption{request.IgnoreMissing(false)}, true},
 		{409, nil, true},
 	} {
 		t.Run(fmt.Sprint(item.code, len(item.options)), func(t *testing.T) {
@@ -221,7 +222,7 @@ func TestIdentityProviderListQueryFiltersAndPaging(t *testing.T) {
 		return 200, `{"identity_providers":[` + idpRow + `,{"id":"idp2","description":"other","enabled":true}],"links":{"self":"x","next":null,"previous":null}}`
 	})
 	values, err := api.All(context.Background(), identityproviders.WithListEnabled(true), identityproviders.WithListID("idp1"),
-		identityproviders.WithListQuery("description", "corp"), identityproviders.WithListQuery("unknown", make(chan int)))
+		request.Query("description", "corp"), request.Query("unknown", make(chan int)))
 	if err != nil || len(values) != 1 || len(calls) != 1 {
 		t.Fatal(values, err, calls)
 	}
@@ -230,7 +231,7 @@ func TestIdentityProviderListQueryFiltersAndPaging(t *testing.T) {
 		t.Fatal(calls)
 	}
 	calls = nil
-	values, err = api.All(context.Background(), identityproviders.WithListQuery("name", "idp2"), identityproviders.WithListQuery("enabled", false), identityproviders.WithListQuery("is_enabled", true))
+	values, err = api.All(context.Background(), request.Query("name", "idp2"), request.Query("enabled", false), request.Query("is_enabled", true))
 	if err != nil || len(values) != 1 || values[0].ID != "idp2" || calls[0].query != "enabled=True" {
 		t.Fatal(values, err, calls)
 	}
@@ -245,17 +246,17 @@ func TestIdentityProviderListQueryFiltersAndPaging(t *testing.T) {
 		}
 		return 200, `{"identity_providers":[],"links":{"next":null}}`
 	})
-	values, err = api.All(context.Background(), identityproviders.WithListLimit(1))
+	values, err = api.All(context.Background(), request.Limit(1))
 	if err != nil || len(values) != 2 || len(calls) != 3 || calls[1].query != "limit=1&marker=a" || calls[2].query != "limit=1&marker=b" {
 		t.Fatal("limit continues with the last ID as marker until an empty page", values, err, calls)
 	}
 	calls = nil
-	values, err = api.All(context.Background(), identityproviders.WithListLimit(1), identityproviders.WithListPaginated(false))
+	values, err = api.All(context.Background(), request.Limit(1), request.Paginated(false))
 	if err != nil || len(values) != 1 || len(calls) != 1 {
 		t.Fatal(values, err, calls)
 	}
 	calls = nil
-	values, err = api.All(context.Background(), identityproviders.WithListMaxItems(1))
+	values, err = api.All(context.Background(), request.MaxItems(1))
 	if err != nil || len(values) != 1 || len(calls) != 1 || calls[0].query != "limit=1" {
 		t.Fatal(values, err, calls)
 	}
@@ -287,7 +288,7 @@ func TestIdentityProviderFindFallsBackToList(t *testing.T) {
 			if err != nil || v != nil || len(calls) != 2 {
 				t.Fatal("ignore_missing default returns nil", v, err, calls)
 			}
-			_, err = api.Find(context.Background(), "absent", identityproviders.WithFindIgnoreMissing(false))
+			_, err = api.Find(context.Background(), "absent", request.IgnoreMissing(false))
 			var missing *resource.NotFoundError
 			if !errors.As(err, &missing) {
 				t.Fatal(err)
@@ -334,9 +335,9 @@ func TestIdentityProviderRejectsInvalidInputBeforeHTTP(t *testing.T) {
 		"nil delete option": func() error { return api.Delete(ctx, "a", nil) },
 		"nil find option":   func() error { _, err := api.Find(ctx, "a", nil); return err },
 		"nil list option":   func() error { _, err := api.All(ctx, nil); return err },
-		"negative limit":    func() error { _, err := api.All(ctx, identityproviders.WithListLimit(-1)); return err },
+		"negative limit":    func() error { _, err := api.All(ctx, request.Limit(-1)); return err },
 		"owned header": func() error {
-			_, err := api.Get(ctx, "a", identityproviders.WithGetHeaders(map[string]string{"X-Auth-Token": "x"}))
+			_, err := api.Get(ctx, "a", request.Headers(map[string]string{"X-Auth-Token": "x"}))
 			return err
 		},
 		"nil API": func() error { _, err := (*identityproviders.API)(nil).Get(ctx, "a"); return err },
@@ -349,7 +350,7 @@ func TestIdentityProviderRejectsInvalidInputBeforeHTTP(t *testing.T) {
 	if len(calls) != 0 {
 		t.Fatal(calls)
 	}
-	if _, err := api.Get(ctx, "a", identityproviders.WithGetHeaders(map[string]string{"X-Trace": "1"})); err != nil || len(calls) != 1 {
+	if _, err := api.Get(ctx, "a", request.Headers(map[string]string{"X-Trace": "1"})); err != nil || len(calls) != 1 {
 		t.Fatal(err, calls)
 	}
 }

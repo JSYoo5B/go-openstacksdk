@@ -10,6 +10,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -70,12 +71,12 @@ func TestServiceProviderCreatePutsMemberWithoutID(t *testing.T) {
 		return 201, `{"service_provider":` + spRow + `}`
 	})
 	v, err := api.Create(context.Background(), "sp1",
-		serviceproviders.WithCreateField("is_enabled", true),
-		serviceproviders.WithCreateField("description", "corp"),
-		serviceproviders.WithCreateField("sp_url", "https://sp"),
-		serviceproviders.WithCreateField("name", "other"),
-		serviceproviders.WithCreateField("id", "other"),
-		serviceproviders.WithCreateField("unknown", make(chan int)))
+		request.Field("is_enabled", true),
+		request.Field("description", "corp"),
+		request.Field("sp_url", "https://sp"),
+		request.Field("name", "other"),
+		request.Field("id", "other"),
+		request.Field("unknown", make(chan int)))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -90,7 +91,7 @@ func TestServiceProviderCreatePutsMemberWithoutID(t *testing.T) {
 
 	calls = nil
 	api, _ = spAPI(t, &calls, func(*http.Request) (int, string) { return 204, "" })
-	v, err = api.Create(context.Background(), "a/b", serviceproviders.WithCreateField("relay_state_prefix", nil))
+	v, err = api.Create(context.Background(), "a/b", request.Field("relay_state_prefix", nil))
 	if err != nil || calls[0].path != spBase+"/a%2Fb" || calls[0].body != `{"service_provider":{"relay_state_prefix":null}}` {
 		t.Fatal(v, err, calls)
 	}
@@ -160,9 +161,9 @@ func TestServiceProviderUpdatePatchesDirtyAttributes(t *testing.T) {
 		return 200, `{"service_provider":` + spRow + `}`
 	})
 	v, err := api.Update(context.Background(), "sp1",
-		serviceproviders.WithUpdateField("enabled", false),
-		serviceproviders.WithUpdateField("auth_url", nil),
-		serviceproviders.WithUpdateField("id", "ignored"))
+		request.Field("enabled", false),
+		request.Field("auth_url", nil),
+		request.Field("id", "ignored"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -172,15 +173,15 @@ func TestServiceProviderUpdatePatchesDirtyAttributes(t *testing.T) {
 	spCheck(t, v)
 
 	calls = nil
-	v, err = api.Update(context.Background(), "sp1", serviceproviders.WithUpdateField("name", "x"), serviceproviders.WithUpdateField("unknown", 1))
+	v, err = api.Update(context.Background(), "sp1", request.Field("name", "x"), request.Field("unknown", 1))
 	if err != nil || len(calls) != 0 || v.ID != "sp1" || v.StatusCode != 0 {
 		t.Fatal("nothing dirty must not send PATCH", v, err, calls)
 	}
-	if _, err := api.Update(context.Background(), "sp1", serviceproviders.WithUpdateField("is_enabled", true), serviceproviders.WithUpdateField("enabled", false)); err == nil || len(calls) != 0 {
+	if _, err := api.Update(context.Background(), "sp1", request.Field("is_enabled", true), request.Field("enabled", false)); err == nil || len(calls) != 0 {
 		t.Fatal("conflicting aliases must fail before HTTP", err)
 	}
 	api, _ = spAPI(t, &calls, func(*http.Request) (int, string) { return 403, `{}` })
-	_, err = api.Update(context.Background(), "sp1", serviceproviders.WithUpdateField("description", "x"))
+	_, err = api.Update(context.Background(), "sp1", request.Field("description", "x"))
 	spOperation(t, err, "Update")
 	spStatus(t, err, 403)
 }
@@ -192,7 +193,7 @@ func TestServiceProviderDeleteIgnoresMissingByDefault(t *testing.T) {
 		fails   bool
 	}{
 		{204, nil, false}, {202, nil, false}, {404, nil, false},
-		{404, []serviceproviders.DeleteOption{serviceproviders.WithDeleteIgnoreMissing(false)}, true},
+		{404, []serviceproviders.DeleteOption{request.IgnoreMissing(false)}, true},
 		{409, nil, true},
 	} {
 		t.Run(fmt.Sprint(item.code, len(item.options)), func(t *testing.T) {
@@ -220,7 +221,7 @@ func TestServiceProviderListQueryFiltersAndPaging(t *testing.T) {
 		return 200, `{"service_providers":[` + spRow + `,{"id":"sp2","description":"other","enabled":true}],"links":{"self":"x","next":null,"previous":null}}`
 	})
 	values, err := api.All(context.Background(), serviceproviders.WithListEnabled(true), serviceproviders.WithListID("sp1"),
-		serviceproviders.WithListQuery("description", "corp"), serviceproviders.WithListQuery("unknown", make(chan int)))
+		request.Query("description", "corp"), request.Query("unknown", make(chan int)))
 	if err != nil || len(values) != 1 || len(calls) != 1 {
 		t.Fatal(values, err, calls)
 	}
@@ -229,7 +230,7 @@ func TestServiceProviderListQueryFiltersAndPaging(t *testing.T) {
 		t.Fatal(calls)
 	}
 	calls = nil
-	values, err = api.All(context.Background(), serviceproviders.WithListQuery("name", "sp2"), serviceproviders.WithListQuery("enabled", false), serviceproviders.WithListQuery("is_enabled", true))
+	values, err = api.All(context.Background(), request.Query("name", "sp2"), request.Query("enabled", false), request.Query("is_enabled", true))
 	if err != nil || len(values) != 1 || values[0].ID != "sp2" || calls[0].query != "enabled=True" {
 		t.Fatal(values, err, calls)
 	}
@@ -244,17 +245,17 @@ func TestServiceProviderListQueryFiltersAndPaging(t *testing.T) {
 		}
 		return 200, `{"service_providers":[],"links":{"next":null}}`
 	})
-	values, err = api.All(context.Background(), serviceproviders.WithListLimit(1))
+	values, err = api.All(context.Background(), request.Limit(1))
 	if err != nil || len(values) != 2 || len(calls) != 3 || calls[1].query != "limit=1&marker=a" || calls[2].query != "limit=1&marker=b" {
 		t.Fatal("limit continues with the last ID as marker until an empty page", values, err, calls)
 	}
 	calls = nil
-	values, err = api.All(context.Background(), serviceproviders.WithListLimit(1), serviceproviders.WithListPaginated(false))
+	values, err = api.All(context.Background(), request.Limit(1), request.Paginated(false))
 	if err != nil || len(values) != 1 || len(calls) != 1 {
 		t.Fatal(values, err, calls)
 	}
 	calls = nil
-	values, err = api.All(context.Background(), serviceproviders.WithListMaxItems(1))
+	values, err = api.All(context.Background(), request.MaxItems(1))
 	if err != nil || len(values) != 1 || len(calls) != 1 || calls[0].query != "limit=1" {
 		t.Fatal(values, err, calls)
 	}
@@ -286,7 +287,7 @@ func TestServiceProviderFindFallsBackToList(t *testing.T) {
 			if err != nil || v != nil || len(calls) != 2 {
 				t.Fatal("ignore_missing default returns nil", v, err, calls)
 			}
-			_, err = api.Find(context.Background(), "absent", serviceproviders.WithFindIgnoreMissing(false))
+			_, err = api.Find(context.Background(), "absent", request.IgnoreMissing(false))
 			var missing *resource.NotFoundError
 			if !errors.As(err, &missing) {
 				t.Fatal(err)
@@ -333,9 +334,9 @@ func TestServiceProviderRejectsInvalidInputBeforeHTTP(t *testing.T) {
 		"nil delete option": func() error { return api.Delete(ctx, "a", nil) },
 		"nil find option":   func() error { _, err := api.Find(ctx, "a", nil); return err },
 		"nil list option":   func() error { _, err := api.All(ctx, nil); return err },
-		"negative limit":    func() error { _, err := api.All(ctx, serviceproviders.WithListLimit(-1)); return err },
+		"negative limit":    func() error { _, err := api.All(ctx, request.Limit(-1)); return err },
 		"owned header": func() error {
-			_, err := api.Get(ctx, "a", serviceproviders.WithGetHeaders(map[string]string{"X-Auth-Token": "x"}))
+			_, err := api.Get(ctx, "a", request.Headers(map[string]string{"X-Auth-Token": "x"}))
 			return err
 		},
 		"nil API": func() error { _, err := (*serviceproviders.API)(nil).Get(ctx, "a"); return err },
@@ -348,7 +349,7 @@ func TestServiceProviderRejectsInvalidInputBeforeHTTP(t *testing.T) {
 	if len(calls) != 0 {
 		t.Fatal(calls)
 	}
-	if _, err := api.Get(ctx, "a", serviceproviders.WithGetHeaders(map[string]string{"X-Trace": "1"})); err != nil || len(calls) != 1 {
+	if _, err := api.Get(ctx, "a", request.Headers(map[string]string{"X-Trace": "1"})); err != nil || len(calls) != 1 {
 		t.Fatal(err, calls)
 	}
 }

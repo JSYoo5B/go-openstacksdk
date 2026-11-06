@@ -10,22 +10,55 @@ import (
 	"strconv"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 type RecordReadOpts struct{ Headers map[string]string }
-type RecordReadOption func(*RecordReadOpts) error
 
-func WithRecordReadHeaders(values map[string]string) RecordReadOption {
-	owned := maps.Clone(values)
-	return func(c *RecordReadOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
+// RecordReadOption is one option of GetCredentialRecord and
+// GetAccessRuleRecord: request.Headers (replaces the
+// headers) or request.Custom over *RecordReadOpts. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type RecordReadOption = request.GetCall
+
+var recordReadCalls = calls.Spec[RecordReadOpts]{Headers: calls.Value(func(c *RecordReadOpts) *map[string]string { return &c.Headers })}
 
 type RecordCreateOpts struct {
 	Headers map[string]string
 	Fields  map[string]json.RawMessage
 }
-type RecordCreateOption func(*RecordCreateOpts) error
+
+// RecordCreateOption is one option of CreateCredentialRecord:
+// WithRecordCreateOpts, request.Field (one declared ApplicationCredential
+// attribute; user_id is rejected when the call is applied, unknown attributes
+// are dropped with their marshal error and name is rejected after the marshal
+// check) or request.Custom over *RecordCreateOpts. Other shared calls,
+// including request.Headers, fail with resource.ErrInvalidOption before HTTP.
+type RecordCreateOption = request.WriteCall
+
+var recordCreateCalls = calls.Spec[RecordCreateOpts]{
+	Field: func(c *RecordCreateOpts, entry request.CallEntry) error {
+		if entry.Key == "user_id" {
+			return recordInvalid("user_id is the fixed create argument")
+		}
+		if !recordKnown(entry.Key, true) {
+			return nil
+		}
+		if entry.JSONErr != nil {
+			return entry.JSONErr
+		}
+		if entry.Key == "name" {
+			return recordInvalid("name is the explicit create argument")
+		}
+		if c.Fields == nil {
+			c.Fields = make(map[string]json.RawMessage)
+		}
+		c.Fields[entry.Key] = bytes.Clone(entry.JSON)
+		return nil
+	},
+}
 
 func copyRecordCreate(v RecordCreateOpts) RecordCreateOpts {
 	v.Headers = maps.Clone(v.Headers)
@@ -34,44 +67,24 @@ func copyRecordCreate(v RecordCreateOpts) RecordCreateOpts {
 }
 func WithRecordCreateOpts(v RecordCreateOpts) RecordCreateOption {
 	owned := copyRecordCreate(v)
-	return func(c *RecordCreateOpts) error { *c = copyRecordCreate(owned); return nil }
-}
-func WithRecordCreateField(key string, value any) RecordCreateOption {
-	if key == "user_id" {
-		return func(*RecordCreateOpts) error { return recordInvalid("user_id is the fixed create argument") }
-	}
-	if !recordKnown(key, true) {
-		return func(*RecordCreateOpts) error { return nil }
-	}
-	raw, err := json.Marshal(value)
-	owned := bytes.Clone(raw)
-	return func(c *RecordCreateOpts) error {
-		if err != nil {
-			return err
-		}
-		if key == "name" {
-			return recordInvalid("name is the explicit create argument")
-		}
-		if c.Fields == nil {
-			c.Fields = make(map[string]json.RawMessage)
-		}
-		c.Fields[key] = bytes.Clone(owned)
-		return nil
-	}
+	return request.Custom(func(c *RecordCreateOpts) error { *c = copyRecordCreate(owned); return nil })
 }
 
 type RecordDeleteOpts struct {
 	Headers       map[string]string
 	IgnoreMissing *bool
 }
-type RecordDeleteOption func(*RecordDeleteOpts) error
 
-func WithRecordDeleteIgnoreMissing(v bool) RecordDeleteOption {
-	return func(c *RecordDeleteOpts) error { x := v; c.IgnoreMissing = &x; return nil }
-}
-func WithRecordDeleteHeaders(v map[string]string) RecordDeleteOption {
-	owned := maps.Clone(v)
-	return func(c *RecordDeleteOpts) error { c.Headers = maps.Clone(owned); return nil }
+// RecordDeleteOption is one option of DeleteCredentialRecord and
+// DeleteAccessRuleRecord: request.IgnoreMissing,
+// request.Headers (replaces the headers) or request.Custom over
+// *RecordDeleteOpts. Other shared calls fail with resource.ErrInvalidOption
+// before HTTP.
+type RecordDeleteOption = request.DeleteCall
+
+var recordDeleteCalls = calls.Spec[RecordDeleteOpts]{
+	IgnoreMissing: calls.Pointer(func(c *RecordDeleteOpts) **bool { return &c.IgnoreMissing }),
+	Headers:       calls.Value(func(c *RecordDeleteOpts) *map[string]string { return &c.Headers }),
 }
 
 type RecordListOpts struct {
@@ -82,7 +95,24 @@ type RecordListOpts struct {
 	Paginated *bool
 	Filters   map[string]json.RawMessage
 }
-type RecordListOption func(*RecordListOpts) error
+
+// RecordListOption is one option of ListCredentialRecords and
+// ListAccessRuleRecords: WithRecordListOpts, WithRecordListFilter,
+// request.Limit, request.Marker, request.MaxItems, request.Paginated,
+// request.Headers (replaces the headers) or request.Custom over
+// *RecordListOpts. Other shared calls, including request.Query, fail with
+// resource.ErrInvalidOption before HTTP.
+type RecordListOption = request.ListCall
+
+var recordListCalls = calls.Spec[RecordListOpts]{
+	Headers: calls.Value(func(c *RecordListOpts) *map[string]string { return &c.Headers }),
+	Paging: calls.Paging[RecordListOpts]{
+		Limit:     calls.Pointer(func(c *RecordListOpts) **int { return &c.Limit }),
+		Marker:    calls.Value(func(c *RecordListOpts) *string { return &c.Marker }),
+		MaxItems:  calls.Value(func(c *RecordListOpts) *int { return &c.MaxItems }),
+		Paginated: calls.Pointer(func(c *RecordListOpts) **bool { return &c.Paginated }),
+	},
+}
 
 func copyRecordList(v RecordListOpts) RecordListOpts {
 	v.Headers = maps.Clone(v.Headers)
@@ -99,27 +129,15 @@ func copyRecordList(v RecordListOpts) RecordListOpts {
 }
 func WithRecordListOpts(v RecordListOpts) RecordListOption {
 	owned := copyRecordList(v)
-	return func(c *RecordListOpts) error { *c = copyRecordList(owned); return nil }
-}
-func WithRecordListLimit(v int) RecordListOption {
-	return func(c *RecordListOpts) error { x := v; c.Limit = &x; return nil }
-}
-func WithRecordListMarker(v string) RecordListOption {
-	return func(c *RecordListOpts) error { c.Marker = v; return nil }
-}
-func WithRecordListMaxItems(v int) RecordListOption {
-	return func(c *RecordListOpts) error { c.MaxItems = v; return nil }
-}
-func WithRecordListPaginated(v bool) RecordListOption {
-	return func(c *RecordListOpts) error { x := v; c.Paginated = &x; return nil }
+	return request.Custom(func(c *RecordListOpts) error { *c = copyRecordList(owned); return nil })
 }
 func WithRecordListFilter(key string, value any) RecordListOption {
 	if !recordKnown(key, true) && !recordKnown(key, false) {
-		return func(*RecordListOpts) error { return nil }
+		return request.Custom(func(*RecordListOpts) error { return nil })
 	}
 	raw, err := json.Marshal(value)
 	owned := bytes.Clone(raw)
-	return func(c *RecordListOpts) error {
+	return request.Custom(func(c *RecordListOpts) error {
 		if err != nil {
 			return err
 		}
@@ -128,11 +146,7 @@ func WithRecordListFilter(key string, value any) RecordListOption {
 		}
 		c.Filters[key] = bytes.Clone(owned)
 		return nil
-	}
-}
-func WithRecordListHeaders(v map[string]string) RecordListOption {
-	owned := maps.Clone(v)
-	return func(c *RecordListOpts) error { c.Headers = maps.Clone(owned); return nil }
+	})
 }
 
 func applyRecordOptions[T any, O ~func(*T) error](ctx context.Context, guard func(context.Context) error, value T, copyValue func(T) T, options []O) (T, error) {

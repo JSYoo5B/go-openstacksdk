@@ -16,6 +16,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -385,7 +386,7 @@ func TestPythonEndpointCloudOwnedHeadersOptionsAndConcurrentReuse(t *testing.T) 
 		workers.Add(1)
 		go func() {
 			defer workers.Done()
-			result, err := cloud.SearchEndpoints(context.Background(), "", option, identity.WithEndpointReadMicroversion("3.2"))
+			result, err := cloud.SearchEndpoints(context.Background(), "", option, request.Microversion("3.2"))
 			if err != nil || len(result.Endpoints) != 1 {
 				t.Error(result, err)
 			}
@@ -395,11 +396,11 @@ func TestPythonEndpointCloudOwnedHeadersOptionsAndConcurrentReuse(t *testing.T) 
 	if calls.Load() != 3 {
 		t.Fatal(calls.Load())
 	}
-	result, err := cloud.SearchEndpoints(context.Background(), "", identity.WithEndpointReadHeaders(nil), func(c *identity.EndpointReadOpts) error {
+	result, err := cloud.SearchEndpoints(context.Background(), "", request.Headers(nil), request.Custom(func(c *identity.EndpointReadOpts) error {
 		c.Headers["X-Trace"] = "owned"
 		client.MoreHeaders["X-Selected"] = "after"
 		return nil
-	}, identity.WithEndpointReadMicroversion("3.2"))
+	}), request.Microversion("3.2"))
 	if err != nil || len(result.Endpoints) != 1 || calls.Load() != 4 || client.Microversion != "" || client.MoreHeaders["X-Selected"] != "after" {
 		t.Fatal(result, err, calls.Load())
 	}
@@ -419,10 +420,10 @@ func TestPythonEndpointCloudPreflightSourceCancelAndOuterGuard(t *testing.T) {
 				case "nil":
 					options = append(options, nil)
 				case "source":
-					options = append(options, func(*identity.EndpointReadOpts) error {
+					options = append(options, request.Custom(func(*identity.EndpointReadOpts) error {
 						cloud.RawAPI().RawClient().ResourceBase += "changed/"
 						return nil
-					})
+					}))
 				case "cancel":
 					cancel(cause)
 				case "role":
@@ -430,10 +431,10 @@ func TestPythonEndpointCloudPreflightSourceCancelAndOuterGuard(t *testing.T) {
 				case "outer":
 					ctx = rest.WithOperationGuard(ctx, func(context.Context) error { return cause })
 				case "auth":
-					options = append(options, identity.WithEndpointReadHeaders(map[string]string{"X-Auth-Token": "foreign"}))
+					options = append(options, request.Headers(map[string]string{"X-Auth-Token": "foreign"}))
 				}
 				if lane != "auth" {
-					options = append(options, func(*identity.EndpointReadOpts) error { seen++; return nil })
+					options = append(options, request.Custom(func(*identity.EndpointReadOpts) error { seen++; return nil }))
 				}
 				var err error
 				if op == "search" {

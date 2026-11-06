@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"net/http"
 	"reflect"
 	"strings"
@@ -32,10 +33,10 @@ func TestPythonGroupFindRecordFetchControlsCollectionDeclaredSeedAndLocation(t *
 	cloudName := "configured"
 	location := resource.CloudLocation{Cloud: &cloudName, Project: resource.CloudProject{ID: json.RawMessage(`"scope"`)}}
 	row, err := api.FindRecord(context.Background(), "demo",
-		groups.WithRecordFindQuery("requires_id", false), groups.WithRecordFindQuery("base_path", "/alternate-groups"),
-		groups.WithRecordFindQuery("skip_cache", true), groups.WithRecordFindQuery("error_message", "custom missing"),
-		groups.WithRecordFindQuery("resource_response_key", "selected"), groups.WithRecordFindQuery("domain_id", "d"),
-		groups.WithRecordFindQuery("description", json.RawMessage(`{"seed":1}`)), groups.WithRecordFindHeaders(map[string]string{"X-Typed": "kept"}), groups.WithRecordFindLocation(location))
+		request.Query("requires_id", false), request.Query("base_path", "/alternate-groups"),
+		request.Query("skip_cache", true), request.Query("error_message", "custom missing"),
+		request.Query("resource_response_key", "selected"), request.Query("domain_id", "d"),
+		request.Query("description", json.RawMessage(`{"seed":1}`)), request.Headers(map[string]string{"X-Typed": "kept"}), groups.WithRecordFindLocation(location))
 	if err != nil || row == nil || calls != 1 || row.StatusCode != 203 || row.Header.Get("X-Request-Id") != "group-proof" || string(row.Envelope) != body {
 		t.Fatal(row, err, calls)
 	}
@@ -60,7 +61,7 @@ func TestPythonGroupFindRecordFetchControlsCustomEnvelopeFailureKeepsPhysicalEvi
 	calls := 0
 	body := `{"selected":[],"group":{"id":"wrong"}}`
 	api, _ := groupRecordAPI(t, func(r *http.Request) *http.Response { calls++; return groupRecordWire(202, body) })
-	row, err := api.FindRecord(context.Background(), "demo", groups.WithRecordFindQuery("resource_response_key", "selected"))
+	row, err := api.FindRecord(context.Background(), "demo", request.Query("resource_response_key", "selected"))
 	var proof *resource.ResponseError
 	if row != nil || calls != 1 || !errors.As(err, &proof) || proof.StatusCode != 202 || string(proof.Body) != body || proof.Header.Get("X-Request-Id") != "group-proof" {
 		t.Fatal(row, err, proof, calls)
@@ -85,7 +86,7 @@ func TestPythonGroupFindRecordFetchControlsHeadersAndListRouteAreStageSpecific(t
 		}
 		return groupRecordWire(200, `{"groups":[{"id":"g","name":"demo","description":false,"domain_id":3,"x_extension":7}]}`)
 	})
-	row, err := api.FindRecord(context.Background(), "demo", groups.WithRecordFindQuery("base_path", "/alternate-groups"), groups.WithRecordFindListBasePath("/list-groups"), groups.WithRecordFindQuery("headers", json.RawMessage(`{"Accept":"application/vnd.group+json","X-Raw":"raw"}`)), groups.WithRecordFindHeaders(map[string]string{"x-raw": "typed", "X-Typed": "kept"}), groups.WithRecordFindQuery("domain_id", "d"))
+	row, err := api.FindRecord(context.Background(), "demo", request.Query("base_path", "/alternate-groups"), groups.WithRecordFindListBasePath("/list-groups"), request.Query("headers", json.RawMessage(`{"Accept":"application/vnd.group+json","X-Raw":"raw"}`)), request.Headers(map[string]string{"x-raw": "typed", "X-Typed": "kept"}), request.Query("domain_id", "d"))
 	if err != nil || row == nil || calls != 2 {
 		t.Fatal(row, err, calls)
 	}
@@ -112,7 +113,7 @@ func TestPythonGroupFindRecordFetchControlsBadHeadersWaitForFallback(t *testing.
 				}
 				return groupRecordWire(200, `{"group":{"id":"g","description":null,"domain_id":null}}`)
 			})
-			row, err := api.FindRecord(context.Background(), "demo", groups.WithRecordFindQuery("headers", json.RawMessage(`{"X-Raw":7}`)))
+			row, err := api.FindRecord(context.Background(), "demo", request.Query("headers", json.RawMessage(`{"X-Raw":7}`)))
 			if calls != 1 {
 				t.Fatal(calls)
 			}
@@ -177,7 +178,7 @@ func TestPythonGroupFindRecordFetchControlsOwnOptionsRemainStatelessAndKeepError
 			}
 			return groupRecordWire(500, body)
 		})
-		row, err := api.FindRecord(context.Background(), "demo", groups.WithRecordFindQuery("error_message", "group lookup failed"))
+		row, err := api.FindRecord(context.Background(), "demo", request.Query("error_message", "group lookup failed"))
 		var native gophercloud.ErrUnexpectedResponseCode
 		if row != nil || calls != 1 || !errors.As(err, &native) || native.Actual != 500 || string(native.Body) != body || native.ResponseHeader.Get("X-Request-Id") != "group-proof" || !strings.Contains(err.Error(), "group lookup failed") {
 			t.Fatal(row, err, native, calls)
@@ -210,7 +211,7 @@ func TestPythonGroupFindRecordFetchControlsPhysicalFaultsNeverFallback(t *testin
 				response.Body = body
 				return response
 			})
-			row, err := api.FindRecord(ctx, "demo", groups.WithRecordFindQuery("requires_id", false), groups.WithRecordFindQuery("skip_cache", true), groups.WithRecordFindQuery("error_message", "controlled group lookup"))
+			row, err := api.FindRecord(ctx, "demo", request.Query("requires_id", false), request.Query("skip_cache", true), request.Query("error_message", "controlled group lookup"))
 			if row != nil || calls != 1 || closes != 1 || !errors.Is(err, cause) {
 				t.Fatal(row, err, calls, closes)
 			}

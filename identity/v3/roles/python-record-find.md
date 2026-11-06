@@ -19,10 +19,10 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithRecordFindOpts`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithRecordFindQuery`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithRecordFindIgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithRecordFindHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithRecordFindMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithRecordFindListBasePath`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithRecordFindLocation`
 
@@ -98,7 +98,7 @@ import (
     "time"
 
     sdk "github.com/JSYoo5B/go-openstacksdk"
-    "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles"
+    "github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 func main() {
@@ -114,10 +114,10 @@ func main() {
     service, err := conn.IdentityV3(ctx)
     if err != nil { log.Fatal(err) }
     row, err := service.Roles.FindRecord(ctx, *identity,
-        roles.WithRecordFindIgnoreMissing(false),
-        roles.WithRecordFindQuery("domain_id", *domain),
-        roles.WithRecordFindQuery("skip_cache", true),
-        roles.WithRecordFindQuery("error_message", "Role lookup failed"))
+        request.IgnoreMissing(false),
+        request.Query("domain_id", *domain),
+        request.Query("skip_cache", true),
+        request.Query("error_message", "Role lookup failed"))
     if err != nil { log.Fatal(err) }
     data, err := json.MarshalIndent(row.Resource, "", "  ")
     if err != nil { log.Fatal(err) }

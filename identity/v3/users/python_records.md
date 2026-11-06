@@ -22,15 +22,15 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.ProxyListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithRecordListOpts`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithRecordListQuery`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithRecordListMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithRecordListBasePath`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.BasePath`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithRecordListJMESPath`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithRecordListLocation`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithRecordListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 
 - List sends the single GET users that Python users() sends without arguments, maps the Python query names domain_id, enabled, idp_id, name, password_expires_at, protocol_id and unique_id through ListOpts or request.Query, sends a limit without a marker follow-up, and rejects local Body filters before HTTP.
   Tests: `identity/v3/users/python_parity_test.go:TestPythonUserListRequests`.
@@ -76,8 +76,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithUserListQuery`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithUserListDomainID`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithUserListName`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithUserListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithUserListMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithUserListLocation`
 
 - list_users() is GET /v3/users and list_users(domain_id=..., name=...) adds exactly those two query keys.
@@ -113,8 +113,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithUserSearchOpts`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithUserSearchDomainID`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithUserSearchFilters`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithUserSearchHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithUserSearchMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithUserSearchLocation`
 
 - search_users lists with GET /v3/users carrying name (only for a non-UUID name_or_id) and domain_id before filtering locally.
@@ -182,6 +182,7 @@ import (
 	openstack "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/identity"
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/users"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 func printJSON(value any) {
@@ -213,7 +214,7 @@ func main() {
 	rows, err := svc.Users.AllRecords(ctx,
 		users.WithRecordListQuery("domain_id", domain),
 		users.WithRecordListQuery("is_enabled", true),
-		users.WithRecordListMaxItems(10),
+		request.MaxItems(10),
 		users.WithRecordListLocation(location),
 	)
 	if err != nil {

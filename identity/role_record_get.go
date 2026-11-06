@@ -6,9 +6,9 @@ import (
 	"encoding/json"
 	"errors"
 	"maps"
-	"slices"
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/roles"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -25,7 +25,18 @@ type RoleGetOpts struct {
 	Microversion *string
 	Location     *resource.CloudLocation
 }
-type RoleGetOption func(*RoleGetOpts) error
+
+// RoleGetOption is one option of GetRole: WithRoleGetOpts,
+// WithRoleGetDomainID, WithRoleGetDomainIDJSON, WithRoleGetFilters,
+// WithRoleGetExpression, WithRoleGetLocation, request.Headers (replaces the
+// headers), request.Microversion or request.Custom over *RoleGetOpts. Other
+// shared calls fail with resource.ErrInvalidOption before HTTP.
+type RoleGetOption = request.GetCall
+
+var roleGetCalls = calls.Spec[RoleGetOpts]{
+	Headers:      calls.Value(func(c *RoleGetOpts) *map[string]string { return &c.Headers }),
+	Microversion: calls.Pointer(func(c *RoleGetOpts) **string { return &c.Microversion }),
+}
 
 func copyRoleGetOpts(v RoleGetOpts) RoleGetOpts {
 	v.DomainID = bytes.Clone(v.DomainID)
@@ -49,7 +60,7 @@ func copyRoleGetOpts(v RoleGetOpts) RoleGetOpts {
 }
 func WithRoleGetOpts(v RoleGetOpts) RoleGetOption {
 	owned := copyRoleGetOpts(v)
-	return func(c *RoleGetOpts) error { *c = copyRoleGetOpts(owned); return nil }
+	return request.Custom(func(c *RoleGetOpts) error { *c = copyRoleGetOpts(owned); return nil })
 }
 func WithRoleGetDomainID(v string) RoleGetOption {
 	raw, _ := json.Marshal(v)
@@ -57,33 +68,26 @@ func WithRoleGetDomainID(v string) RoleGetOption {
 }
 func WithRoleGetDomainIDJSON(v json.RawMessage) RoleGetOption {
 	owned := bytes.Clone(v)
-	return func(c *RoleGetOpts) error { c.DomainID = bytes.Clone(owned); return nil }
+	return request.Custom(func(c *RoleGetOpts) error { c.DomainID = bytes.Clone(owned); return nil })
 }
 func WithRoleGetFilters(v json.RawMessage) RoleGetOption {
 	owned := bytes.Clone(v)
-	return func(c *RoleGetOpts) error {
+	return request.Custom(func(c *RoleGetOpts) error {
 		c.Filters = nil
 		if owned != nil {
 			x := json.RawMessage(bytes.Clone(owned))
 			c.Filters = &x
 		}
 		return nil
-	}
+	})
 }
 func WithRoleGetExpression(v string) RoleGetOption {
 	raw, _ := json.Marshal(v)
 	return WithRoleGetFilters(raw)
 }
-func WithRoleGetHeaders(v map[string]string) RoleGetOption {
-	owned := maps.Clone(v)
-	return func(c *RoleGetOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
-func WithRoleGetMicroversion(v string) RoleGetOption {
-	return func(c *RoleGetOpts) error { x := v; c.Microversion = &x; return nil }
-}
 func WithRoleGetLocation(v resource.CloudLocation) RoleGetOption {
 	owned := v.Clone()
-	return func(c *RoleGetOpts) error { x := owned.Clone(); c.Location = &x; return nil }
+	return request.Custom(func(c *RoleGetOpts) error { x := owned.Clone(); c.Location = &x; return nil })
 }
 
 // RoleGetResult exposes actual rows/evidence independently of returned Value.
@@ -108,7 +112,7 @@ func (c *RoleReadCloud) GetRole(ctx context.Context, nameOrID string, options ..
 		return nil, wrap(err)
 	}
 	policy := copyRoleGetOpts(RoleGetOpts{})
-	for _, apply := range slices.Clone(options) {
+	for _, apply := range calls.Translate(options, roleGetCalls) {
 		if err = guard(); err != nil {
 			return nil, wrap(err)
 		}
@@ -133,9 +137,9 @@ func (c *RoleReadCloud) GetRole(ctx context.Context, nameOrID string, options ..
 		if domain == nil {
 			domain = json.RawMessage("null")
 		}
-		opts := []roles.RecordListOption{roles.WithRecordListQuery("domain_id", json.RawMessage(domain)), roles.WithRecordListHeaders(policy.Headers)}
+		opts := []roles.RecordListOption{request.Query("domain_id", json.RawMessage(domain)), request.Headers(policy.Headers)}
 		if policy.Microversion != nil {
-			opts = append(opts, roles.WithRecordListMicroversion(*policy.Microversion))
+			opts = append(opts, request.Microversion(*policy.Microversion))
 		}
 		if policy.Location != nil {
 			opts = append(opts, roles.WithRecordListLocation(*policy.Location))

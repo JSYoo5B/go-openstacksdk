@@ -173,7 +173,7 @@ func main() {
     for v, err := range api.ListRecords(ctx,
         credentials.WithRecordListType(*kind),
         credentials.WithRecordListUserID(*user),
-        credentials.WithRecordListMaxItems(100)) {
+        request.MaxItems(100)) {
         if err != nil { log.Fatal(err) }
         printRecord(v)
     }
@@ -187,16 +187,16 @@ func main() {
     }
     if *create {
         v, err := api.CreateRecord(ctx,
-            credentials.WithRecordCreateField("user_id", *user),
-            credentials.WithRecordCreateField("project_id", *project),
-            credentials.WithRecordCreateField("type", *kind),
-            credentials.WithRecordCreateField("blob", *blob))
+            request.Field("user_id", *user),
+            request.Field("project_id", *project),
+            request.Field("type", *kind),
+            request.Field("blob", *blob))
         if err != nil { log.Fatal(err) }
         printRecord(v)
     }
     if *remove != "" {
         if err := api.DeleteRecord(ctx, *remove,
-            credentials.WithRecordDeleteIgnoreMissing(false)); err != nil { log.Fatal(err) }
+            request.IgnoreMissing(false)); err != nil { log.Fatal(err) }
     }
 }
 ```

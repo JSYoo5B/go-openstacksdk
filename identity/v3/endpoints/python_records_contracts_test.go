@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"io"
 	"net/http"
 	"net/url"
@@ -124,7 +125,7 @@ func TestEndpointRecordsQueriesLocalBodyFiltersAndUnknownKwargs(t *testing.T) {
 		}
 		testcloud.JSON(w, 200, `{"endpoints":[{"id":"keep","name":"nova","enabled":1,"links":{"nested":{"flag":1,"extra":true},"n":9007199254740992},"url":"literal"},{"id":"skip","name":"nova","enabled":false,"links":{},"url":"literal"}]}`)
 	})
-	rows, err := api.AllRecords(context.Background(), endpoints.WithRecordListQuery("interface", "public"), endpoints.WithRecordListQuery("region_id", "RegionOne"), endpoints.WithRecordListQuery("service_id", "svc"), endpoints.WithRecordListLimit(0), endpoints.WithRecordListMarker("start"), endpoints.WithRecordListQuery("id", "keep"), endpoints.WithRecordListQuery("name", "nova"), endpoints.WithRecordListQuery("is_enabled", true), endpoints.WithRecordListQuery("url", "literal"), endpoints.WithRecordListQuery("links", json.RawMessage(`{"nested":{"flag":true},"n":9007199254740993.0}`)), endpoints.WithRecordListQuery("enabled", make(chan int)), endpoints.WithRecordListQuery("region", make(chan int)), endpoints.WithRecordListQuery("unknown", make(chan int)))
+	rows, err := api.AllRecords(context.Background(), endpoints.WithRecordListQuery("interface", "public"), endpoints.WithRecordListQuery("region_id", "RegionOne"), endpoints.WithRecordListQuery("service_id", "svc"), request.Limit(0), request.Marker("start"), endpoints.WithRecordListQuery("id", "keep"), endpoints.WithRecordListQuery("name", "nova"), endpoints.WithRecordListQuery("is_enabled", true), endpoints.WithRecordListQuery("url", "literal"), endpoints.WithRecordListQuery("links", json.RawMessage(`{"nested":{"flag":true},"n":9007199254740993.0}`)), endpoints.WithRecordListQuery("enabled", make(chan int)), endpoints.WithRecordListQuery("region", make(chan int)), endpoints.WithRecordListQuery("unknown", make(chan int)))
 	if err != nil || len(rows) != 1 || calls.Load() != 1 {
 		t.Fatal(rows, err, calls.Load())
 	}
@@ -152,7 +153,7 @@ func TestEndpointRecordsSourceDictionaryLinksAndMarkerFallback(t *testing.T) {
 			testcloud.JSON(w, 203, `{"endpoints":[{"id":"one"}],"links":{"next":"https://foreign.invalid/ignored"},"endpoints_links":[{"rel":"next","href":"?marker=wrong"}]}`)
 		}
 	})
-	rows, err := api.AllRecords(context.Background(), endpoints.WithRecordListLimit(1))
+	rows, err := api.AllRecords(context.Background(), request.Limit(1))
 	if err != nil || len(rows) != 2 || calls.Load() != 3 || !reflect.DeepEqual(queries, []string{"limit=1", "limit=1&marker=one", "limit=1&marker=two"}) {
 		t.Fatal(rows, err, calls.Load(), queries)
 	}
@@ -217,7 +218,7 @@ func TestEndpointRecordsRawCapLazyBreakAndCancellation(t *testing.T) {
 		}
 		testcloud.JSON(w, 203, `{"endpoints":[{"id":"skip"},{"id":"keep"},{"connection":null}],"next":"https://foreign.invalid/unused"}`)
 	})
-	rows, err := api.AllRecords(context.Background(), endpoints.WithRecordListMaxItems(2), endpoints.WithRecordListQuery("id", "keep"))
+	rows, err := api.AllRecords(context.Background(), request.MaxItems(2), endpoints.WithRecordListQuery("id", "keep"))
 	if err != nil || len(rows) != 1 || calls.Load() != 1 {
 		t.Fatal(rows, err, calls.Load())
 	}
@@ -231,7 +232,7 @@ func TestEndpointRecordsRawCapLazyBreakAndCancellation(t *testing.T) {
 			cause := errors.New("consumer cancel")
 			options := []endpoints.RecordListOption{}
 			if lane == "paginated" {
-				options = append(options, endpoints.WithRecordListPaginated(false))
+				options = append(options, request.Paginated(false))
 			}
 			seq := next.ListRecords(ctx, options...)
 			if count.Load() != 0 {
@@ -262,7 +263,7 @@ func TestEndpointRecordsRawCapLazyBreakAndCancellation(t *testing.T) {
 func TestEndpointRecordsMalformedAndLaterErrorDiscardPartialCollection(t *testing.T) {
 	for _, body := range []string{`{}`, `{"endpoints":null}`, `{"endpoints":[null]}`, `{"endpoints":[{"connection":null}]}`, `{"endpoints":[{"microversion":null}]}`, `{"endpoints":[{"id":null}]}`} {
 		api, _, calls := endpointRecordsAPI(t, func(w http.ResponseWriter, _ *http.Request) { testcloud.JSON(w, 203, body) })
-		rows, err := api.AllRecords(context.Background(), endpoints.WithRecordListLimit(1))
+		rows, err := api.AllRecords(context.Background(), request.Limit(1))
 		if rows != nil || err == nil || calls.Load() != 1 {
 			t.Fatal(body, rows, err, calls.Load())
 		}
@@ -346,14 +347,14 @@ func TestEndpointRecordsOwnOptionsFormalControlsAndIdentityVersion(t *testing.T)
 		testcloud.JSON(w, 200, `{"endpoints":[{"id":"one"}]}`)
 	})
 	headers := map[string]string{"X-Trace": "owned"}
-	option := endpoints.WithRecordListHeaders(headers)
+	option := request.Headers(headers)
 	headers["X-Trace"] = "changed"
 	var workers sync.WaitGroup
 	for i := 0; i < 3; i++ {
 		workers.Add(1)
 		go func() {
 			defer workers.Done()
-			rows, err := api.AllRecords(context.Background(), option, endpoints.WithRecordListBasePath("alternate-endpoints"), endpoints.WithRecordListMicroversion("3.2"))
+			rows, err := api.AllRecords(context.Background(), option, request.BasePath("alternate-endpoints"), request.Microversion("3.2"))
 			if err != nil || len(rows) != 1 {
 				t.Error(rows, err)
 			}
@@ -363,15 +364,15 @@ func TestEndpointRecordsOwnOptionsFormalControlsAndIdentityVersion(t *testing.T)
 	if calls.Load() != 3 || api.RawClient().Microversion != "" {
 		t.Fatal(calls.Load(), api.RawClient().Microversion)
 	}
-	rows, err := api.AllRecords(context.Background(), endpoints.WithRecordListHeaders(nil), func(c *endpoints.RecordListOpts) error {
+	rows, err := api.AllRecords(context.Background(), request.Headers(nil), request.Custom(func(c *endpoints.RecordListOpts) error {
 		c.Headers["X-Trace"] = "owned"
 		c.Query["id"] = json.RawMessage(`"one"`)
 		return nil
-	}, endpoints.WithRecordListBasePath("alternate-endpoints"), endpoints.WithRecordListConflictingAttrs(json.RawMessage(`{"microversion":"3.2"}`)))
+	}), request.BasePath("alternate-endpoints"), endpoints.WithRecordListConflictingAttrs(json.RawMessage(`{"microversion":"3.2"}`)))
 	if err != nil || len(rows) != 1 || calls.Load() != 4 {
 		t.Fatal(rows, err, calls.Load())
 	}
-	for _, options := range [][]endpoints.RecordListOption{{nil}, {endpoints.WithRecordListQuery("self", make(chan int))}, {endpoints.WithRecordListQuery("session", make(chan int))}, {endpoints.WithRecordListConflictingAttrs(json.RawMessage(`{"paginated":false}`))}, {endpoints.WithRecordListBasePath("https://foreign.invalid")}, {endpoints.WithRecordListHeaders(map[string]string{"X-Auth-Token": "foreign"})}} {
+	for _, options := range [][]endpoints.RecordListOption{{nil}, {endpoints.WithRecordListQuery("self", make(chan int))}, {endpoints.WithRecordListQuery("session", make(chan int))}, {endpoints.WithRecordListConflictingAttrs(json.RawMessage(`{"paginated":false}`))}, {request.BasePath("https://foreign.invalid")}, {request.Headers(map[string]string{"X-Auth-Token": "foreign"})}} {
 		before := calls.Load()
 		rows, err := api.AllRecords(context.Background(), options...)
 		if rows != nil || !errors.Is(err, resource.ErrInvalidOption) || calls.Load() != before {
@@ -401,7 +402,7 @@ func TestEndpointRecordsSourceGuardBeforeOptionsAndAfterGeneratorCapture(t *test
 			} else {
 				options := []endpoints.RecordListOption{}
 				if lane == "option" {
-					options = append(options, func(*endpoints.RecordListOpts) error { api.RawClient().ResourceBase += "changed/"; return nil })
+					options = append(options, request.Custom(func(*endpoints.RecordListOpts) error { api.RawClient().ResourceBase += "changed/"; return nil }))
 				}
 				if lane == "cancel" {
 					cancel(cause)
@@ -549,7 +550,7 @@ func TestEndpointRecordsCleanNativeRetryKeepsScopeQueryAndHeaders(t *testing.T) 
 					return nil
 				}
 			}
-			rows, err := api.AllRecords(context.Background(), endpoints.WithRecordListQuery("interface", "public"), endpoints.WithRecordListHeaders(map[string]string{"X-Trace": "owned"}), endpoints.WithRecordListMicroversion("3.2"))
+			rows, err := api.AllRecords(context.Background(), endpoints.WithRecordListQuery("interface", "public"), request.Headers(map[string]string{"X-Trace": "owned"}), request.Microversion("3.2"))
 			if err != nil || rows == nil || len(rows) != 0 || calls.Load() != 2 || hooks != 1 {
 				t.Fatal(rows, err, calls.Load(), hooks)
 			}

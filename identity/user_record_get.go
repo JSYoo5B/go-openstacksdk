@@ -9,6 +9,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/users"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -25,7 +26,18 @@ type UserGetOpts struct {
 	Microversion *string
 	Location     *resource.CloudLocation
 }
-type UserGetOption func(*UserGetOpts) error
+
+// UserGetOption is one option of GetUser: WithUserGetOpts,
+// WithUserGetDomainID, WithUserGetDomainIDJSON, WithUserGetFilters,
+// WithUserGetExpression, WithUserGetLocation, request.Headers (replaces the
+// headers), request.Microversion or request.Custom over *UserGetOpts. Other
+// shared calls fail with resource.ErrInvalidOption before HTTP.
+type UserGetOption = request.GetCall
+
+var userGetCalls = calls.Spec[UserGetOpts]{
+	Headers:      calls.Value(func(c *UserGetOpts) *map[string]string { return &c.Headers }),
+	Microversion: calls.Pointer(func(c *UserGetOpts) **string { return &c.Microversion }),
+}
 
 func copyUserGetOpts(v UserGetOpts) UserGetOpts {
 	v.DomainID = bytes.Clone(v.DomainID)
@@ -49,7 +61,7 @@ func copyUserGetOpts(v UserGetOpts) UserGetOpts {
 }
 func WithUserGetOpts(v UserGetOpts) UserGetOption {
 	owned := copyUserGetOpts(v)
-	return func(c *UserGetOpts) error { *c = copyUserGetOpts(owned); return nil }
+	return request.Custom(func(c *UserGetOpts) error { *c = copyUserGetOpts(owned); return nil })
 }
 func WithUserGetDomainID(v string) UserGetOption {
 	raw, _ := json.Marshal(v)
@@ -57,33 +69,26 @@ func WithUserGetDomainID(v string) UserGetOption {
 }
 func WithUserGetDomainIDJSON(v json.RawMessage) UserGetOption {
 	owned := bytes.Clone(v)
-	return func(c *UserGetOpts) error { c.DomainID = bytes.Clone(owned); return nil }
+	return request.Custom(func(c *UserGetOpts) error { c.DomainID = bytes.Clone(owned); return nil })
 }
 func WithUserGetFilters(v json.RawMessage) UserGetOption {
 	owned := bytes.Clone(v)
-	return func(c *UserGetOpts) error {
+	return request.Custom(func(c *UserGetOpts) error {
 		c.Filters = nil
 		if owned != nil {
 			x := json.RawMessage(bytes.Clone(owned))
 			c.Filters = &x
 		}
 		return nil
-	}
+	})
 }
 func WithUserGetExpression(v string) UserGetOption {
 	raw, _ := json.Marshal(v)
 	return WithUserGetFilters(raw)
 }
-func WithUserGetHeaders(v map[string]string) UserGetOption {
-	owned := maps.Clone(v)
-	return func(c *UserGetOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
-func WithUserGetMicroversion(v string) UserGetOption {
-	return func(c *UserGetOpts) error { x := v; c.Microversion = &x; return nil }
-}
 func WithUserGetLocation(v resource.CloudLocation) UserGetOption {
 	owned := v.Clone()
-	return func(c *UserGetOpts) error { x := owned.Clone(); c.Location = &x; return nil }
+	return request.Custom(func(c *UserGetOpts) error { x := owned.Clone(); c.Location = &x; return nil })
 }
 
 // UserGetResult exposes actual rows/evidence independently of returned Value.
@@ -108,7 +113,7 @@ func (c *UserReadCloud) GetUser(ctx context.Context, nameOrID string, options ..
 	if err != nil {
 		return nil, wrap(err)
 	}
-	policy, err := applyUserRead(p, UserGetOpts{}, copyUserGetOpts, options)
+	policy, err := applyUserRead(p, UserGetOpts{}, copyUserGetOpts, options, userGetCalls)
 	if err != nil {
 		return nil, wrap(err)
 	}

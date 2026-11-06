@@ -14,6 +14,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/identity"
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/projects"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -170,12 +171,12 @@ func TestPythonProjectCloudSourceHeaderSnapshotCallbackCancellationAndLatePageEv
 	})
 	cloud.RawAPI().RawClient().MoreHeaders = map[string]string{"X-Snapshot": "before"}
 	callbacks := 0
-	result, err := cloud.ListProjects(context.Background(), func(*identity.ProjectReadOpts) error {
+	result, err := cloud.ListProjects(context.Background(), request.Custom(func(*identity.ProjectReadOpts) error {
 		callbacks++
 		cloud.RawAPI().RawClient().MoreHeaders["X-Snapshot"] = "after"
 		cloud.RawAPI().RawClient().MoreHeaders["X-Late"] = "injected"
 		return nil
-	})
+	}))
 	var proof gophercloud.ErrUnexpectedResponseCode
 	if err == nil || result == nil || len(result.Inventory) != 1 || !errors.As(err, &proof) || proof.Actual != 503 || proof.ResponseHeader.Get("X-Request-Id") != "actual-failure" || string(proof.Body) != `{"error":"actual"}` || proof.Method != http.MethodGet || !strings.Contains(proof.URL, "/identity/v3/projects?marker=a") || calls != 2 || callbacks != 1 {
 		t.Fatal(result, err, proof, calls, callbacks)
@@ -183,7 +184,7 @@ func TestPythonProjectCloudSourceHeaderSnapshotCallbackCancellationAndLatePageEv
 	cause := errors.New("project callback cancellation")
 	ctx, cancel := context.WithCancelCause(context.Background())
 	before := calls
-	_, err = cloud.ListProjects(ctx, func(*identity.ProjectReadOpts) error { cancel(cause); return nil })
+	_, err = cloud.ListProjects(ctx, request.Custom(func(*identity.ProjectReadOpts) error { cancel(cause); return nil }))
 	if !errors.Is(err, cause) || !errors.Is(err, context.Canceled) || calls != before {
 		t.Fatal(err, calls)
 	}

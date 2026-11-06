@@ -5,12 +5,13 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"maps"
+
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/neutronfind"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
-	"maps"
-	"slices"
 )
 
 // RecordResolveOpts is the closed domain-scoped finder used by cloud get.
@@ -22,7 +23,18 @@ type RecordResolveOpts struct {
 	Microversion *string
 	Location     *resource.CloudLocation
 }
-type RecordResolveOption func(*RecordResolveOpts) error
+
+// RecordResolveOption is one option of ResolveRecord: WithRecordResolveOpts,
+// WithRecordResolveDomainID, WithRecordResolveRawDomainID,
+// WithRecordResolveLocation, request.Custom over *RecordResolveOpts,
+// request.Headers (replaces the headers) or request.Microversion.
+// request.Header fails with resource.ErrInvalidOption before HTTP.
+type RecordResolveOption = request.GetCall
+
+var recordResolveCalls = calls.Spec[RecordResolveOpts]{
+	Headers:      calls.Value(func(c *RecordResolveOpts) *map[string]string { return &c.Headers }),
+	Microversion: calls.Pointer(func(c *RecordResolveOpts) **string { return &c.Microversion }),
+}
 
 func copyResolveOptions(v RecordResolveOpts) RecordResolveOpts {
 	v.DomainID = bytes.Clone(v.DomainID)
@@ -42,7 +54,7 @@ func copyResolveOptions(v RecordResolveOpts) RecordResolveOpts {
 }
 func WithRecordResolveOpts(v RecordResolveOpts) RecordResolveOption {
 	owned := copyResolveOptions(v)
-	return func(c *RecordResolveOpts) error { *c = copyResolveOptions(owned); return nil }
+	return request.Custom(func(c *RecordResolveOpts) error { *c = copyResolveOptions(owned); return nil })
 }
 func WithRecordResolveDomainID(v string) RecordResolveOption {
 	raw, _ := json.Marshal(v)
@@ -50,18 +62,11 @@ func WithRecordResolveDomainID(v string) RecordResolveOption {
 }
 func WithRecordResolveRawDomainID(v json.RawMessage) RecordResolveOption {
 	owned := bytes.Clone(v)
-	return func(c *RecordResolveOpts) error { c.DomainID = bytes.Clone(owned); return nil }
-}
-func WithRecordResolveHeaders(v map[string]string) RecordResolveOption {
-	owned := maps.Clone(v)
-	return func(c *RecordResolveOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
-func WithRecordResolveMicroversion(v string) RecordResolveOption {
-	return func(c *RecordResolveOpts) error { x := v; c.Microversion = &x; return nil }
+	return request.Custom(func(c *RecordResolveOpts) error { c.DomainID = bytes.Clone(owned); return nil })
 }
 func WithRecordResolveLocation(v resource.CloudLocation) RecordResolveOption {
 	owned := v.Clone()
-	return func(c *RecordResolveOpts) error { x := owned.Clone(); c.Location = &x; return nil }
+	return request.Custom(func(c *RecordResolveOpts) error { x := owned.Clone(); c.Location = &x; return nil })
 }
 
 // ResolveRecord closes Source find to identity/domain_id and explicit Go
@@ -87,7 +92,7 @@ func (a *API) ResolveRecord(ctx context.Context, nameOrID string, options ...Rec
 		return nil, wrap(err)
 	}
 	policy := copyResolveOptions(RecordResolveOpts{})
-	for _, apply := range slices.Clone(options) {
+	for _, apply := range calls.Translate(options, recordResolveCalls) {
 		if err := engine.Check(ctx); err != nil {
 			return nil, wrap(err)
 		}

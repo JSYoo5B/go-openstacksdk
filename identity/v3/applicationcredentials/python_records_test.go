@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/applicationcredentials"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -52,7 +53,7 @@ func TestPythonApplicationCredentialCreateAndOwnedViews(t *testing.T) {
 	option := applicationcredentials.WithRecordCreateOpts(applicationcredentials.RecordCreateOpts{Fields: fields})
 	fields["description"][1] = 'x'
 	fields["roles"] = json.RawMessage(`"changed"`)
-	v, err := api.CreateCredentialRecord(context.Background(), "u1", "ci", option, applicationcredentials.WithRecordCreateField("unknown", make(chan int)))
+	v, err := api.CreateCredentialRecord(context.Background(), "u1", "ci", option, request.Field("unknown", make(chan int)))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -173,17 +174,17 @@ func TestPythonApplicationCredentialListFiltersRawCapAndPaging(t *testing.T) {
 				t.Fatal(ids, err, calls)
 			}
 			calls = nil
-			ids, err = recordIDs(t, api, rules, applicationcredentials.WithRecordListFilter("name", "ci"), applicationcredentials.WithRecordListMaxItems(1))
+			ids, err = recordIDs(t, api, rules, applicationcredentials.WithRecordListFilter("name", "ci"), request.MaxItems(1))
 			if err != nil || len(ids) != 0 || len(calls) != 1 || calls[0].query != "limit=1" {
 				t.Fatal("max_items counts observed rows before filtering", ids, err, calls)
 			}
 			calls = nil
-			ids, err = recordIDs(t, api, rules, applicationcredentials.WithRecordListPaginated(false), applicationcredentials.WithRecordListLimit(0), applicationcredentials.WithRecordListMarker("start"))
+			ids, err = recordIDs(t, api, rules, request.Paginated(false), request.Limit(0), request.Marker("start"))
 			if err != nil || !reflect.DeepEqual(ids, []string{"skip", "ac1"}) || len(calls) != 1 || calls[0].query != "limit=0&marker=start" {
 				t.Fatal(ids, err, calls)
 			}
 			calls = nil
-			ids, err = recordIDs(t, api, rules, applicationcredentials.WithRecordListMaxItems(1), applicationcredentials.WithRecordListLimit(0))
+			ids, err = recordIDs(t, api, rules, request.MaxItems(1), request.Limit(0))
 			if err != nil || !reflect.DeepEqual(ids, []string{"skip"}) || calls[0].query != "limit=1" {
 				t.Fatal(ids, err, calls)
 			}
@@ -207,7 +208,7 @@ func TestPythonApplicationCredentialListFiltersRawCapAndPaging(t *testing.T) {
 			}
 			return 200, `{"application_credentials":[{"id":"a"}]}`
 		})
-		ids, err := recordIDs(t, api, false, applicationcredentials.WithRecordListLimit(2))
+		ids, err := recordIDs(t, api, false, request.Limit(2))
 		if err != nil || !reflect.DeepEqual(ids, []string{"a"}) || len(calls) != 2 || calls[1].query != "limit=2&marker=a" {
 			t.Fatal(ids, err, calls)
 		}
@@ -225,7 +226,7 @@ func TestPythonApplicationCredentialListFiltersRawCapAndPaging(t *testing.T) {
 			t.Fatal(ids, err)
 		}
 		calls = nil
-		ids, err = recordIDs(t, api, false, applicationcredentials.WithRecordListMaxItems(1))
+		ids, err = recordIDs(t, api, false, request.MaxItems(1))
 		if err != nil || !reflect.DeepEqual(ids, []string{"a"}) || len(calls) != 1 {
 			t.Fatal(ids, err, calls)
 		}
@@ -315,7 +316,7 @@ func TestPythonApplicationCredentialDeleteDefaultAndMixedFailures(t *testing.T) 
 					t.Fatal(err, calls)
 				}
 				if code == 404 {
-					err = remove(context.Background(), "u1", "selected", applicationcredentials.WithRecordDeleteIgnoreMissing(false))
+					err = remove(context.Background(), "u1", "selected", request.IgnoreMissing(false))
 					var native gophercloud.ErrUnexpectedResponseCode
 					if !errors.As(err, &native) || native.Actual != 404 || string(native.Body) != "opaque body" {
 						t.Fatal(err, native)
@@ -481,16 +482,16 @@ func TestPythonApplicationCredentialOptionsOwnershipAndPreflight(t *testing.T) {
 	}
 	t.Run("retained option pointer cannot change applied policy", func(t *testing.T) {
 		var retained *applicationcredentials.RecordListOpts
-		ids, err := recordIDs(t, api, false, func(c *applicationcredentials.RecordListOpts) error {
+		ids, err := recordIDs(t, api, false, request.Custom(func(c *applicationcredentials.RecordListOpts) error {
 			retained = c
 			c.Headers = map[string]string{"X-Owned": "old"}
 			c.Filters = map[string]json.RawMessage{"name": json.RawMessage(`"ci"`)}
 			return nil
-		}, func(*applicationcredentials.RecordListOpts) error {
+		}), request.Custom(func(*applicationcredentials.RecordListOpts) error {
 			retained.Headers["X-Owned"] = "wrong"
 			retained.Filters["name"] = json.RawMessage(`"wrong"`)
 			return nil
-		})
+		}))
 		if err != nil || !reflect.DeepEqual(ids, []string{"a"}) {
 			t.Fatal(ids, err)
 		}
@@ -503,11 +504,11 @@ func TestPythonApplicationCredentialOptionsOwnershipAndPreflight(t *testing.T) {
 		{"nil list option", func() error { _, err := recordIDs(t, api, false, nil); return err }},
 		{"nil delete option", func() error { return api.DeleteCredentialRecord(context.Background(), "u1", "a", nil) }},
 		{"reserved name", func() error {
-			_, err := api.CreateCredentialRecord(context.Background(), "u1", "ci", applicationcredentials.WithRecordCreateField("name", "other"))
+			_, err := api.CreateCredentialRecord(context.Background(), "u1", "ci", request.Field("name", "other"))
 			return err
 		}},
 		{"fixed create user", func() error {
-			_, err := api.CreateCredentialRecord(context.Background(), "u1", "ci", applicationcredentials.WithRecordCreateField("user_id", "u2"))
+			_, err := api.CreateCredentialRecord(context.Background(), "u1", "ci", request.Field("user_id", "u2"))
 			return err
 		}},
 		{"bad JSON", func() error {
@@ -515,11 +516,11 @@ func TestPythonApplicationCredentialOptionsOwnershipAndPreflight(t *testing.T) {
 			return err
 		}},
 		{"negative max", func() error {
-			_, err := recordIDs(t, api, false, applicationcredentials.WithRecordListMaxItems(-1))
+			_, err := recordIDs(t, api, false, request.MaxItems(-1))
 			return err
 		}},
 		{"protected header", func() error {
-			_, err := api.GetCredentialRecord(context.Background(), "u1", "a", applicationcredentials.WithRecordReadHeaders(map[string]string{"X-Auth-Token": "wrong"}))
+			_, err := api.GetCredentialRecord(context.Background(), "u1", "a", request.Headers(map[string]string{"X-Auth-Token": "wrong"}))
 			return err
 		}},
 		{"fixed find id", func() error {
@@ -543,7 +544,7 @@ func TestPythonApplicationCredentialOptionsOwnershipAndPreflight(t *testing.T) {
 		cause := errors.New("caller cause")
 		callbackErr := errors.New("callback error")
 		before := len(calls)
-		_, err := api.GetCredentialRecord(ctx, "u1", "a", func(*applicationcredentials.RecordReadOpts) error { cancel(cause); return callbackErr })
+		_, err := api.GetCredentialRecord(ctx, "u1", "a", request.Custom(func(*applicationcredentials.RecordReadOpts) error { cancel(cause); return callbackErr }))
 		if !errors.Is(err, context.Canceled) || !errors.Is(err, cause) || !errors.Is(err, callbackErr) || len(calls) != before {
 			t.Fatal(err, calls)
 		}
@@ -554,10 +555,10 @@ func TestPythonApplicationCredentialOptionsOwnershipAndPreflight(t *testing.T) {
 		defer func() { client.Endpoint = original }()
 		cause := errors.New("callback error")
 		before := len(calls)
-		_, err := api.CreateCredentialRecord(context.Background(), "u1", "ci", func(*applicationcredentials.RecordCreateOpts) error {
+		_, err := api.CreateCredentialRecord(context.Background(), "u1", "ci", request.Custom(func(*applicationcredentials.RecordCreateOpts) error {
 			client.Endpoint = original + "different/"
 			return cause
-		})
+		}))
 		if !errors.Is(err, cause) || !errors.Is(err, resource.ErrInvalidOption) || len(calls) != before {
 			t.Fatal(err, calls)
 		}
@@ -743,7 +744,7 @@ func TestPythonApplicationCredentialRejectedResponseFailuresStopDeleteAndFind(t 
 							t.Fatal("faulty member rejection produced a lookup result", value, err)
 						}
 					} else if strings.Contains(operation, "strict") {
-						err = remove(ctx, "u1", "ci", applicationcredentials.WithRecordDeleteIgnoreMissing(false))
+						err = remove(ctx, "u1", "ci", request.IgnoreMissing(false))
 					} else {
 						err = remove(ctx, "u1", "ci")
 					}
@@ -820,7 +821,7 @@ func TestPythonApplicationCredentialCleanRejectionsRemainEligibleAfterNativeRetr
 				} else {
 					var err error
 					if strings.Contains(operation, "strict") {
-						err = remove(ctx, "u1", "ci", applicationcredentials.WithRecordDeleteIgnoreMissing(false))
+						err = remove(ctx, "u1", "ci", request.IgnoreMissing(false))
 					} else {
 						err = remove(ctx, "u1", "ci")
 					}

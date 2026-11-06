@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/projects"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -69,7 +70,7 @@ func TestPythonProjectRecordsQueryAliasesAndOrderedLoadedLocalFilters(t *testing
 		query = r.URL.Query()
 		return projectRecordWire(200, `{"projects":[{"id":"a","description":0.10000000000000001,"options":{"enabled":1.0}},{"id":"b","description":0.2,"options":{"enabled":false}}]}`)
 	})
-	records, err := api.AllRecords(context.Background(), projects.WithRecordListQuery("is_enabled", false), projects.WithRecordListQuery("enabled", true), projects.WithRecordListQuery("tags-any", []string{"a", "b"}), projects.WithRecordListQuery("description", json.RawMessage(`0.1`)), projects.WithRecordListQuery("options", map[string]any{"enabled": true}), projects.WithRecordListQuery("x_unknown", func() {}))
+	records, err := api.AllRecords(context.Background(), request.Query("is_enabled", false), request.Query("enabled", true), request.Query("tags-any", []string{"a", "b"}), request.Query("description", json.RawMessage(`0.1`)), request.Query("options", map[string]any{"enabled": true}), request.Query("x_unknown", func() {}))
 	if err != nil || len(records) != 1 {
 		t.Fatal(records, err)
 	}
@@ -80,7 +81,7 @@ func TestPythonProjectRecordsQueryAliasesAndOrderedLoadedLocalFilters(t *testing
 		api, _ := projectRecordAPI(t, func(*http.Request) *http.Response {
 			return projectRecordWire(200, `{"projects":[{"id":"a","links":`+raw+`}]}`)
 		})
-		rows, err := api.AllRecords(context.Background(), projects.WithRecordListQuery("links", map[string]any{}))
+		rows, err := api.AllRecords(context.Background(), request.Query("links", map[string]any{}))
 		if err != nil || len(rows) != 1 {
 			t.Fatal(raw, rows, err)
 		}
@@ -104,18 +105,18 @@ func TestPythonProjectRecordsLimitMarkerWithoutLinkRawCapAndBreak(t *testing.T) 
 			return projectRecordWire(200, `{"projects":[]}`)
 		}
 	})
-	rows, err := api.AllRecords(context.Background(), projects.WithRecordListLimit(2), projects.WithRecordListQuery("domain_id", "d"), projects.WithRecordListQuery("description", "keep"))
+	rows, err := api.AllRecords(context.Background(), request.Limit(2), request.Query("domain_id", "d"), request.Query("description", "keep"))
 	if err != nil || len(rows) != 2 || !reflect.DeepEqual(markers, []string{"", "b", "c"}) {
 		t.Fatal(rows, err, markers)
 	}
 	calls = 0
 	markers = nil
-	rows, err = api.AllRecords(context.Background(), projects.WithRecordListLimit(2), projects.WithRecordListQuery("domain_id", "d"), projects.WithRecordListQuery("description", "keep"), projects.WithRecordListMaxItems(2))
+	rows, err = api.AllRecords(context.Background(), request.Limit(2), request.Query("domain_id", "d"), request.Query("description", "keep"), request.MaxItems(2))
 	if err != nil || len(rows) != 1 || calls != 1 {
 		t.Fatal(rows, err, calls)
 	}
 	calls = 0
-	for row, err := range api.ListRecords(context.Background(), projects.WithRecordListLimit(2), projects.WithRecordListQuery("domain_id", "d")) {
+	for row, err := range api.ListRecords(context.Background(), request.Limit(2), request.Query("domain_id", "d")) {
 		if err != nil || row == nil {
 			t.Fatal(row, err)
 		}
@@ -146,7 +147,7 @@ func TestPythonProjectRecordsKeystoneDictionaryNextAndRouteGuards(t *testing.T) 
 				}
 				return projectRecordWire(200, `{"projects":[{"id":"a"}],"next":"`+next+`"}`)
 			})
-			rows, err := api.AllRecords(context.Background(), projects.WithRecordListQuery("domain_id", "d"))
+			rows, err := api.AllRecords(context.Background(), request.Query("domain_id", "d"))
 			if mode == "dictionary" {
 				if err != nil || len(rows) != 1 || calls != 1 {
 					t.Fatal(rows, err, calls)
@@ -174,7 +175,7 @@ func TestPythonProjectFindRecordsGETFirstSeedAliasAndCleanFallback(t *testing.T)
 				}
 				return projectRecordWire(200, `{"projects":[{"id":"a","name":"demo","description":"local","enabled":true}]}`)
 			})
-			row, err := api.FindRecord(context.Background(), "demo", projects.WithRecordFindQuery("domain_id", "d"), projects.WithRecordFindQuery("is_enabled", true), projects.WithRecordFindQuery("enabled", false), projects.WithRecordFindQuery("description", "local"), projects.WithRecordFindQuery("x_seed", map[string]any{"n": 1}))
+			row, err := api.FindRecord(context.Background(), "demo", request.Query("domain_id", "d"), request.Query("is_enabled", true), request.Query("enabled", false), request.Query("description", "local"), request.Query("x_seed", map[string]any{"n": 1}))
 			if err != nil || row == nil {
 				t.Fatal(row, err, urls)
 			}
@@ -221,7 +222,7 @@ func TestPythonProjectFindRecordsDefaultMissingAmbiguousAndLateHTTPProof(t *test
 			})
 			options := []projects.RecordFindOption{}
 			if mode == "strict missing" {
-				options = append(options, projects.WithRecordFindIgnoreMissing(false))
+				options = append(options, request.IgnoreMissing(false))
 			}
 			row, err := api.FindRecord(context.Background(), "demo", options...)
 			if mode == "default missing" {
@@ -314,10 +315,10 @@ func TestPythonProjectRecordsOptionsSnapshotAndSourceCancellationPreflight(t *te
 			}
 			if mode == "source changed" {
 				old := api.RawClient().Endpoint
-				options = append(options, func(*projects.RecordListOpts) error {
+				options = append(options, request.Custom(func(*projects.RecordListOpts) error {
 					api.RawClient().Endpoint = "https://changed.invalid/"
 					return nil
-				})
+				}))
 				defer func() { api.RawClient().Endpoint = old }()
 			}
 			if mode == "cancel" {
@@ -428,7 +429,7 @@ func TestPythonProjectRecordsCleanReauthenticationAndVersionHeaderAreIdentityOwn
 		return projectRecordWire(200, `{"projects":[]}`)
 	})
 	fixture.Provider.ReauthFunc = func(context.Context) error { reauth++; fixture.Provider.SetToken("renewed"); return nil }
-	_, err := api.AllRecords(context.Background(), projects.WithRecordListMicroversion("3.1"))
+	_, err := api.AllRecords(context.Background(), request.Microversion("3.1"))
 	if err != nil || calls != 2 || reauth != 1 {
 		t.Fatal(err, calls, reauth)
 	}
@@ -456,7 +457,7 @@ func TestPythonProjectFindRecordsListBasePathOnlyAfterFallbackAndVersionPhase(t 
 			if direct {
 				path = "https://unused.invalid/"
 			}
-			row, err := api.FindRecord(context.Background(), "demo", projects.WithRecordFindListBasePath(path), projects.WithRecordFindMicroversion("3.2"))
+			row, err := api.FindRecord(context.Background(), "demo", projects.WithRecordFindListBasePath(path), request.Microversion("3.2"))
 			if err != nil || row == nil || row.StatusCode != 199 || api.RawClient().Microversion != "3.1" {
 				t.Fatal(row, err, paths, versions)
 			}
@@ -477,7 +478,7 @@ func TestPythonProjectRecordsInvalidRepresentationRetainsActualHeaderAndPage(t *
 		api, _ := projectRecordAPI(t, func(*http.Request) *http.Response { return projectRecordWire(200, body) })
 		options := []projects.RecordListOption{}
 		if strings.Contains(body, `"links":3`) {
-			options = append(options, projects.WithRecordListQuery("links", map[string]any{"k": "v"}))
+			options = append(options, request.Query("links", map[string]any{"k": "v"}))
 		}
 		rows, err := api.AllRecords(context.Background(), options...)
 		var proof *resource.ResponseError

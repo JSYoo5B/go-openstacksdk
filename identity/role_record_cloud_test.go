@@ -13,6 +13,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/identity"
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/roles"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -185,7 +186,7 @@ func TestPythonRoleCloudOptionsGuardCallbacksAndSelectedSourceSnapshot(t *testin
 	})
 	client := cloud.RawAPI().RawClient()
 	client.MoreHeaders = map[string]string{"X-Snapshot": "before"}
-	_, err := cloud.SearchRoles(context.Background(), "", identity.RoleSearchOption(func(*identity.RoleSearchOpts) error {
+	_, err := cloud.SearchRoles(context.Background(), "", request.Custom(func(*identity.RoleSearchOpts) error {
 		client.MoreHeaders["X-Snapshot"] = "after"
 		client.MoreHeaders["X-Late"] = "after"
 		return nil
@@ -202,7 +203,7 @@ func TestPythonRoleCloudOptionsGuardCallbacksAndSelectedSourceSnapshot(t *testin
 			ctx, cancel := context.WithCancelCause(context.Background())
 			defer cancel(nil)
 			cause := errors.New("caller canceled role search")
-			first := identity.RoleSearchOption(func(*identity.RoleSearchOpts) error {
+			first := request.Custom(func(*identity.RoleSearchOpts) error {
 				if mode == "source" {
 					client.Endpoint += "changed"
 				} else {
@@ -213,7 +214,7 @@ func TestPythonRoleCloudOptionsGuardCallbacksAndSelectedSourceSnapshot(t *testin
 			if mode == "nil" {
 				first = nil
 			}
-			_, err := cloud.SearchRoles(ctx, "", first, identity.RoleSearchOption(func(*identity.RoleSearchOpts) error { seen++; client.Endpoint = endpoint; return nil }))
+			_, err := cloud.SearchRoles(ctx, "", first, request.Custom(func(*identity.RoleSearchOpts) error { seen++; client.Endpoint = endpoint; return nil }))
 			var proof *resource.ResponseError
 			if err == nil || seen != 0 || calls != before || errors.As(err, &proof) {
 				t.Fatal(err, seen, calls, proof)
@@ -245,7 +246,7 @@ func TestPythonRoleCloudListForwardsOwnedProxyQueryAndLocalBodyFilters(t *testin
 		w.Header().Set("X-Request-Id", "cloud-role-list")
 		testcloud.JSON(w, 203, `{"roles":[{"id":"a","name":"actual-server-name","options":{"flag":1.0}},{"id":"b","options":{"flag":false}}]}`)
 	})
-	result, err := cloud.ListRoles(context.Background(), roles.WithRecordListQuery("domain_id", "d"), roles.WithRecordListQuery("name", true), roles.WithRecordListQuery("options", map[string]any{"flag": true}), roles.WithRecordListQuery("unknown", func() {}))
+	result, err := cloud.ListRoles(context.Background(), request.Query("domain_id", "d"), request.Query("name", true), request.Query("options", map[string]any{"flag": true}), request.Query("unknown", func() {}))
 	if err != nil || result == nil || len(result.Roles) != 1 || len(result.Inventory) != 1 || len(result.Value) != 1 || result.JSON == nil || calls != 1 || result.Roles[0].StatusCode != 203 || result.Inventory[0].Header.Get("X-Request-Id") != "cloud-role-list" {
 		t.Fatal(result, err, calls)
 	}
@@ -296,12 +297,12 @@ func TestPythonRoleCloudListOptionCallbacksSnapshotSourceAndLateNativeProof(t *t
 		testcloud.JSON(w, 503, `{"error":"actual late"}`)
 	})
 	cloud.RawAPI().RawClient().MoreHeaders = map[string]string{"X-Selected": "before"}
-	result, err := cloud.ListRoles(context.Background(), func(*roles.RecordListOpts) error {
+	result, err := cloud.ListRoles(context.Background(), request.Custom(func(*roles.RecordListOpts) error {
 		callbacks++
 		cloud.RawAPI().RawClient().MoreHeaders["X-Selected"] = "after"
 		cloud.RawAPI().RawClient().MoreHeaders["X-Added"] = "injected"
 		return nil
-	})
+	}))
 	var proof gophercloud.ErrUnexpectedResponseCode
 	if result == nil || len(result.Inventory) != 1 || len(result.Roles) != 1 || !errors.As(err, &proof) || proof.Actual != 503 || string(proof.Body) != `{"error":"actual late"}` || proof.ResponseHeader.Get("X-Request-Id") != "late-role-native" || proof.Method != http.MethodGet || !strings.Contains(proof.URL, "/identity/v3/roles?marker=a") || calls != 2 || callbacks != 1 {
 		t.Fatal(result, err, proof, calls, callbacks)

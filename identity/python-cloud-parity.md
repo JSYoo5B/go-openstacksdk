@@ -77,8 +77,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity.ServiceReadCloud.RawAPI`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithServiceReadOpts`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithServiceReadFilters`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithServiceReadHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithServiceReadMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithServiceReadLocation`
 - `github.com/JSYoo5B/go-openstacksdk/identity.ServiceReadCloud.SearchServices`
 
@@ -116,14 +116,14 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity.ServiceReadCloud.RawAPI`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithServiceReadOpts`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithServiceReadFilters`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithServiceReadHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithServiceReadMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithServiceReadLocation`
 - `github.com/JSYoo5B/go-openstacksdk/identity.ServiceReadCloud.GetService`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.WithRecordResolveOpts`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.WithRecordResolveHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.WithRecordResolveMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.WithRecordResolveLocation`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.API.ResolveRecord`
 
@@ -398,8 +398,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadOpts`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadNameOrID`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadFilters`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadLocation`
 
 - Cloud list_domains expands arbitrary keyword mapping into Source query/local filters; enabled aliases and nested options survive local processing and actual yielded inventory preserves response fields.
@@ -435,8 +435,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadOpts`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadNameOrID`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadFilters`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadLocation`
 
 - name_or_id presence is preserved with a pointer: nil forwards mapping filters to list_domains; explicit empty/nonempty first materializes unfiltered domains and applies local exact/glob identifier plus mapping/JMESPath. Name/filters stay absent from server in that branch.
@@ -480,8 +480,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainGetID`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainGetNameOrID`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainGetFilters`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainGetHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainGetMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainGetLocation`
 
 - get_domain(domain_id=...) is a direct GET /v3/domains/<id>, and get_domain(name_or_id=...) maps to Domains FindIdentity which sends the GET then the name list.
@@ -541,8 +541,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithGroupSearchOpts`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithGroupSearchDomainID`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithGroupSearchFilters`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithGroupSearchHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithGroupSearchMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithGroupSearchLocation`
 
 - search_groups lists with the same GET /v3/groups (with domain_id when given) as list_groups before filtering locally.
@@ -673,7 +673,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity.NewRoleReadCloud`
 - `github.com/JSYoo5B/go-openstacksdk/identity.RoleReadCloud.ListRoles`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithRecordListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithRecordListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - Source cloud list_roles expands ordinary Proxy kwargs into the owned list classifier, preserves server name/domain and local options filter, and exposes independent JSON Value/Roles/actual Inventory with203 header/status.
   Tests: `identity/role_record_cloud_test.go:TestPythonRoleCloudListForwardsOwnedProxyQueryAndLocalBodyFilters`.
@@ -707,8 +707,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithRoleSearchDomainID`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithRoleSearchFilters`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithRoleSearchLocation`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithRoleSearchHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithRoleSearchMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - Search lists all pages with only domain query then exact/glob ID/name and ordered recursive loaded-JSON filters. Duplicate records stay in selection, selected records clone away from actual Inventory and203 header/status.
   Tests: `identity/role_record_cloud_test.go:TestPythonRoleCloudSearchDomainServerAndLocalGlobSubset`.
@@ -744,13 +744,13 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithRoleGetDomainIDJSON`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithRoleGetFilters`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithRoleGetExpression`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithRoleGetHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithRoleGetMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithRoleGetLocation`
 - `github.com/JSYoo5B/go-openstacksdk/identity.RoleReadCloud.GetRole`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithClosedLookupOpts`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithClosedLookupHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithClosedLookupMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithClosedLookupLocation`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.ResolveRecord`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithClosedLookupDomainID`
@@ -1129,8 +1129,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithUserListQuery`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithUserListDomainID`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithUserListName`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithUserListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithUserListMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithUserListLocation`
 
 - list_users() is GET /v3/users and list_users(domain_id=..., name=...) adds exactly those two query keys.
@@ -1166,8 +1166,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithUserSearchOpts`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithUserSearchDomainID`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithUserSearchFilters`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithUserSearchHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithUserSearchMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithUserSearchLocation`
 
 - search_users lists with GET /v3/users carrying name (only for a non-UUID name_or_id) and domain_id before filtering locally.
@@ -1209,13 +1209,13 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithUserGetDomainIDJSON`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithUserGetFilters`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithUserGetExpression`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithUserGetHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithUserGetMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithUserGetLocation`
 - `github.com/JSYoo5B/go-openstacksdk/identity.UserReadCloud.GetUser`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithClosedLookupOpts`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithClosedLookupHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithClosedLookupMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithClosedLookupLocation`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.ResolveRecord`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithClosedLookupDomainID`

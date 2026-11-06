@@ -1,78 +1,78 @@
 package federationprotocols
 
-import "github.com/JSYoo5B/go-openstacksdk/identity/v3/internal/osfederation"
+import (
+	"github.com/JSYoo5B/go-openstacksdk/identity/v3/internal/osfederation"
+	"github.com/JSYoo5B/go-openstacksdk/request"
+)
 
 // GetOpts carries per-request headers, a Go extension.
 type GetOpts = osfederation.ReadOpts
-type GetOption func(*GetOpts) error
 
-func WithGetHeaders(values map[string]string) GetOption {
-	return GetOption(osfederation.ReadHeaders(values))
-}
+// GetOption is one option of Get: request.Headers (replaces the headers) or
+// request.Custom over *GetOpts. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type GetOption = request.GetCall
 
 // CreateOpts carries the Python **attrs as raw JSON. Keys are Python
 // attribute names (name, mapping_id) or Body keys (id, mapping_id);
 // unknown keys are dropped and id/name never enter the body.
 type CreateOpts = osfederation.WriteOpts
-type CreateOption func(*CreateOpts) error
+
+// CreateOption is one option of Create: WithCreateOpts, request.Field (one
+// Python attribute; unknown names are dropped with their marshal error),
+// request.Headers (replaces the headers) or request.Custom over *CreateOpts.
+// Other shared calls fail with resource.ErrInvalidOption before HTTP.
+type CreateOption = request.WriteCall
 
 func WithCreateOpts(opts CreateOpts) CreateOption {
-	return CreateOption(osfederation.WriteSnapshot(opts))
-}
-func WithCreateField(key string, value any) CreateOption {
-	return CreateOption(spec.WriteField(key, value))
-}
-func WithCreateHeaders(values map[string]string) CreateOption {
-	return CreateOption(osfederation.WriteHeaders(values))
+	return request.Custom(osfederation.WriteSnapshot(opts))
 }
 
 // UpdateOpts carries the Python **attrs of update_federation_protocol.
 type UpdateOpts = osfederation.WriteOpts
-type UpdateOption func(*UpdateOpts) error
+
+// UpdateOption is one option of Update: WithUpdateOpts, request.Field (one
+// Python attribute; unknown names are dropped with their marshal error),
+// request.Headers (replaces the headers) or request.Custom over *UpdateOpts.
+// Other shared calls fail with resource.ErrInvalidOption before HTTP.
+type UpdateOption = request.WriteCall
 
 func WithUpdateOpts(opts UpdateOpts) UpdateOption {
-	return UpdateOption(osfederation.WriteSnapshot(opts))
-}
-func WithUpdateField(key string, value any) UpdateOption {
-	return UpdateOption(spec.WriteField(key, value))
-}
-func WithUpdateHeaders(values map[string]string) UpdateOption {
-	return UpdateOption(osfederation.WriteHeaders(values))
+	return request.Custom(osfederation.WriteSnapshot(opts))
 }
 
 // DeleteOpts selects ignore_missing; nil keeps the Python default true.
 type DeleteOpts = osfederation.DeleteOpts
-type DeleteOption func(*DeleteOpts) error
 
-func WithDeleteIgnoreMissing(value bool) DeleteOption {
-	return DeleteOption(osfederation.DeleteIgnoreMissing(value))
-}
-func WithDeleteHeaders(values map[string]string) DeleteOption {
-	return DeleteOption(osfederation.DeleteHeaders(values))
-}
+// DeleteOption is one option of Delete: request.IgnoreMissing,
+// request.Headers (replaces the headers) or request.Custom over *DeleteOpts.
+// Other shared calls fail with resource.ErrInvalidOption before HTTP.
+type DeleteOption = request.DeleteCall
 
 // FindOpts selects ignore_missing; nil keeps the Python default true.
 type FindOpts = osfederation.FindOpts
-type FindOption func(*FindOpts) error
 
-func WithFindIgnoreMissing(value bool) FindOption {
-	return FindOption(osfederation.FindIgnoreMissing(value))
-}
+// FindOption is one option of Find: request.IgnoreMissing or request.Custom
+// over *FindOpts. Other shared calls fail with resource.ErrInvalidOption
+// before HTTP.
+type FindOption = request.FindCall
 
 // ListOpts carries Python **query: id goes to the server; name and
 // mapping_id filter locally; other names are ignored.
 type ListOpts = osfederation.ListOpts
-type ListOption func(*ListOpts) error
 
-func WithListOpts(opts ListOpts) ListOption { return ListOption(osfederation.ListSnapshot(opts)) }
-func WithListQuery(key string, value any) ListOption {
-	return ListOption(spec.ListQuery(key, value))
-}
-func WithListID(id string) ListOption         { return WithListQuery("id", id) }
-func WithListLimit(limit int) ListOption      { return ListOption(osfederation.ListLimit(limit)) }
-func WithListMarker(marker string) ListOption { return ListOption(osfederation.ListMarker(marker)) }
-func WithListMaxItems(count int) ListOption   { return ListOption(osfederation.ListMaxItems(count)) }
-func WithListPaginated(value bool) ListOption { return ListOption(osfederation.ListPaginated(value)) }
-func WithListHeaders(values map[string]string) ListOption {
-	return ListOption(osfederation.ListHeaders(values))
-}
+// ListOption is one option of List and All: WithListOpts, WithListID,
+// request.Query (one Python **query name as JSON; unknown names are dropped
+// with their marshal error), request.Limit, request.Marker, request.MaxItems,
+// request.Paginated, request.Headers (replaces the headers) or request.Custom
+// over *ListOpts. Other shared calls fail with resource.ErrInvalidOption
+// before HTTP.
+type ListOption = request.ListCall
+
+func WithListOpts(opts ListOpts) ListOption { return request.Custom(osfederation.ListSnapshot(opts)) }
+func WithListID(id string) ListOption       { return request.Custom(spec.ListQuery("id", id)) }
+
+var (
+	writeCalls = spec.WriteCalls()
+	listCalls  = spec.ListCalls()
+)

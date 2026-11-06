@@ -15,11 +15,11 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/projectendpoints.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/projectendpoints.API.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/projectendpoints.API.AllRecords`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/projectendpoints.WithRecordListQuery`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/projectendpoints.WithRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/projectendpoints.WithRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/projectendpoints.WithRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/projectendpoints.WithRecordListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/projectendpoints.WithRecordListOpts`
 
 - ListRecords(projectID) sends GET OS-EP-FILTER/projects/{escaped project}/endpoints with Accept application/json, maps interface, region_id and service_id to Requests-encoded server query, filters id, name, is_enabled/enabled, links and url locally, ignores unknown names, and decodes enabled, region_id, links and the URI project_id on every row with raw Body and Wire.
@@ -41,8 +41,8 @@ Examples use the surrounding guide's service object and context unless they decl
 ```go
 api := projectendpoints.New(identityClient)
 values, err := api.AllRecords(ctx, projectID,
-    projectendpoints.WithRecordListQuery("interface", "public"),
-    projectendpoints.WithRecordListQuery("is_enabled", true))
+    request.Query("interface", "public"),
+    request.Query("is_enabled", true))
 ```
 
 ## References

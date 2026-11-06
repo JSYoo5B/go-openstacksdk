@@ -252,7 +252,7 @@ func main() {
     if err != nil { log.Fatal(err) }
     for v, err := range scope.ListRecords(ctx,
         applicationcredentials.WithRecordListFilter("name", *name),
-        applicationcredentials.WithRecordListMaxItems(100)) {
+        request.MaxItems(100)) {
         if err != nil { log.Fatal(err) }
         printRecord(v)
     }
@@ -275,9 +275,9 @@ func main() {
     }
     if *create {
         v, err := scope.CreateRecord(ctx, *name,
-            applicationcredentials.WithRecordCreateField("description", ""),
-            applicationcredentials.WithRecordCreateField("unrestricted", false),
-            applicationcredentials.WithRecordCreateField("roles", []map[string]string{{"name": "member"}}))
+            request.Field("description", ""),
+            request.Field("unrestricted", false),
+            request.Field("roles", []map[string]string{{"name": "member"}}))
         if err != nil { log.Fatal(err) }
         printRecord(v)
     }
@@ -286,7 +286,7 @@ func main() {
     }
     if *deleteRule != "" {
         if err := rules.DeleteRecord(ctx, *deleteRule,
-            applicationcredentials.WithRecordDeleteIgnoreMissing(false)); err != nil { log.Fatal(err) }
+            request.IgnoreMissing(false)); err != nil { log.Fatal(err) }
     }
 }
 ```

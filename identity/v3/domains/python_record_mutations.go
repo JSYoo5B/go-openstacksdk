@@ -13,7 +13,9 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/neutronfind"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -28,7 +30,32 @@ type RecordMutationOpts struct {
 	Location     *resource.CloudLocation
 	order        []string
 }
-type RecordMutationOption func(*RecordMutationOpts) error
+
+// RecordMutationOption is one option of CreateRecord and UpdateRecord:
+// WithRecordMutationOpts, WithRecordMutationLocation, request.Custom over
+// *RecordMutationOpts, request.Field (one Domain constructor attribute; the
+// value is sent as JSON), request.Headers (replaces the headers) or
+// request.Microversion. request.Header fails with resource.ErrInvalidOption
+// before HTTP.
+type RecordMutationOption = request.WriteCall
+
+var recordMutationCalls = calls.Spec[RecordMutationOpts]{
+	Field: func(c *RecordMutationOpts, entry request.CallEntry) error {
+		if entry.JSONErr != nil {
+			return entry.JSONErr
+		}
+		if c.Attributes == nil {
+			c.Attributes = map[string]json.RawMessage{}
+		}
+		if _, exists := c.Attributes[entry.Key]; !exists {
+			c.order = append(c.order, entry.Key)
+		}
+		c.Attributes[entry.Key] = entry.JSON
+		return nil
+	},
+	Headers:      calls.Value(func(c *RecordMutationOpts) *map[string]string { return &c.Headers }),
+	Microversion: calls.Pointer(func(c *RecordMutationOpts) **string { return &c.Microversion }),
+}
 
 func copyRecordMutationOpts(v RecordMutationOpts) RecordMutationOpts {
 	v.Attributes = maps.Clone(v.Attributes)
@@ -49,35 +76,11 @@ func copyRecordMutationOpts(v RecordMutationOpts) RecordMutationOpts {
 }
 func WithRecordMutationOpts(v RecordMutationOpts) RecordMutationOption {
 	owned := copyRecordMutationOpts(v)
-	return func(c *RecordMutationOpts) error { *c = copyRecordMutationOpts(owned); return nil }
-}
-func WithRecordMutationAttribute(key string, value any) RecordMutationOption {
-	raw, err := json.Marshal(value)
-	owned := bytes.Clone(raw)
-	return func(c *RecordMutationOpts) error {
-		if err != nil {
-			return err
-		}
-		if c.Attributes == nil {
-			c.Attributes = map[string]json.RawMessage{}
-		}
-		if _, exists := c.Attributes[key]; !exists {
-			c.order = append(c.order, key)
-		}
-		c.Attributes[key] = bytes.Clone(owned)
-		return nil
-	}
-}
-func WithRecordMutationHeaders(v map[string]string) RecordMutationOption {
-	owned := maps.Clone(v)
-	return func(c *RecordMutationOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
-func WithRecordMutationMicroversion(v string) RecordMutationOption {
-	return func(c *RecordMutationOpts) error { x := v; c.Microversion = &x; return nil }
+	return request.Custom(func(c *RecordMutationOpts) error { *c = copyRecordMutationOpts(owned); return nil })
 }
 func WithRecordMutationLocation(v resource.CloudLocation) RecordMutationOption {
 	owned := v.Clone()
-	return func(c *RecordMutationOpts) error { x := owned.Clone(); c.Location = &x; return nil }
+	return request.Custom(func(c *RecordMutationOpts) error { x := owned.Clone(); c.Location = &x; return nil })
 }
 
 func domainMutationFields(policy RecordMutationOpts, update bool) (body, seed map[string]json.RawMessage, err error) {
@@ -150,7 +153,7 @@ func (a *API) mutateRecord(ctx context.Context, method, id string, options []Rec
 	if err != nil {
 		return nil, wrap(err)
 	}
-	policy, err := applyDomainOptions(ctx, engine, RecordMutationOpts{}, copyRecordMutationOpts, slices.Clone(options))
+	policy, err := applyDomainOptions(ctx, engine, RecordMutationOpts{}, copyRecordMutationOpts, calls.Translate(options, recordMutationCalls))
 	if err == nil {
 		err = locationPreflight(policy.Location)
 	}

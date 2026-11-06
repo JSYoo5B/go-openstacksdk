@@ -6,8 +6,8 @@ import (
 	"encoding/json"
 	"errors"
 	"maps"
-	"slices"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/neutronfind"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -23,7 +23,18 @@ type ClosedLookupOpts struct {
 	Microversion *string
 	Location     *resource.CloudLocation
 }
-type ClosedLookupOption func(*ClosedLookupOpts) error
+
+// ClosedLookupOption is one option of ResolveRecord: WithClosedLookupOpts,
+// WithClosedLookupDomainID, WithClosedLookupDomainIDJSON,
+// WithClosedLookupLocation, request.Custom over *ClosedLookupOpts,
+// request.Headers (replaces the headers) or request.Microversion.
+// request.Header fails with resource.ErrInvalidOption before HTTP.
+type ClosedLookupOption = request.GetCall
+
+var closedLookupCalls = calls.Spec[ClosedLookupOpts]{
+	Headers:      calls.Value(func(c *ClosedLookupOpts) *map[string]string { return &c.Headers }),
+	Microversion: calls.Pointer(func(c *ClosedLookupOpts) **string { return &c.Microversion }),
+}
 
 func copyClosedLookupOpts(v ClosedLookupOpts) ClosedLookupOpts {
 	v.DomainID = bytes.Clone(v.DomainID)
@@ -43,18 +54,11 @@ func copyClosedLookupOpts(v ClosedLookupOpts) ClosedLookupOpts {
 }
 func WithClosedLookupOpts(v ClosedLookupOpts) ClosedLookupOption {
 	owned := copyClosedLookupOpts(v)
-	return func(c *ClosedLookupOpts) error { *c = copyClosedLookupOpts(owned); return nil }
-}
-func WithClosedLookupHeaders(v map[string]string) ClosedLookupOption {
-	owned := maps.Clone(v)
-	return func(c *ClosedLookupOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
-func WithClosedLookupMicroversion(v string) ClosedLookupOption {
-	return func(c *ClosedLookupOpts) error { x := v; c.Microversion = &x; return nil }
+	return request.Custom(func(c *ClosedLookupOpts) error { *c = copyClosedLookupOpts(owned); return nil })
 }
 func WithClosedLookupLocation(v resource.CloudLocation) ClosedLookupOption {
 	owned := v.Clone()
-	return func(c *ClosedLookupOpts) error { x := owned.Clone(); c.Location = &x; return nil }
+	return request.Custom(func(c *ClosedLookupOpts) error { x := owned.Clone(); c.Location = &x; return nil })
 }
 
 // ResolveRecord supplies only the fixed GET-first Role finder needed by the
@@ -69,7 +73,7 @@ func (a *API) ResolveRecord(ctx context.Context, nameOrID string, options ...Clo
 		return nil, wrap(err)
 	}
 	policy := ClosedLookupOpts{}
-	for _, apply := range slices.Clone(options) {
+	for _, apply := range calls.Translate(options, closedLookupCalls) {
 		if err = engine.Check(ctx); err != nil {
 			return nil, wrap(err)
 		}
@@ -110,7 +114,7 @@ func WithClosedLookupDomainID(v string) ClosedLookupOption {
 // Nil means Python None and is still forwarded to find's constructor/query.
 func WithClosedLookupDomainIDJSON(raw json.RawMessage) ClosedLookupOption {
 	owned := bytes.Clone(raw)
-	return func(c *ClosedLookupOpts) error { c.DomainID = bytes.Clone(owned); return nil }
+	return request.Custom(func(c *ClosedLookupOpts) error { c.DomainID = bytes.Clone(owned); return nil })
 }
 func (a *API) closedLookupEngine(ctx context.Context) (*neutronfind.Engine, error) {
 	if err := cloudread.Context(ctx); err != nil {

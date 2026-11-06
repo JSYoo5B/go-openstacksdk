@@ -3,13 +3,13 @@ package domains
 import (
 	"bytes"
 	"encoding/json"
-	"maps"
-	"slices"
 	"strings"
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/identity/v3/internal/keystonecalls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/neutronfind"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -22,7 +22,27 @@ type RecordListOpts struct {
 	order           []string
 	proxyExpression json.RawMessage
 }
-type RecordListOption func(*RecordListOpts) error
+
+// RecordListOption is one option of ListRecords, AllRecords and
+// ProxyListRecords: WithRecordListOpts, WithRecordListQuery,
+// WithRecordListJMESPath, WithRecordListLocation, request.Custom over
+// *RecordListOpts, request.Headers (replaces the headers),
+// request.Microversion, request.BasePath, request.Limit, request.Marker,
+// request.MaxItems or request.Paginated (each a Source keyword argument).
+// request.Header and request.Query fail with resource.ErrInvalidOption before
+// HTTP: WithRecordListQuery checks the key and drops unknown keys before
+// marshaling the value, which request.Query cannot.
+type RecordListOption = request.ListBasePathCall
+
+var recordList = keystonecalls.KnownList[RecordListOpts]{
+	State: func(c *RecordListOpts) keystonecalls.ListState {
+		return keystonecalls.ListState{Query: &c.Query, Headers: &c.Headers, Microversion: &c.Microversion, BasePath: &c.BasePath, Order: &c.order}
+	},
+	Key:   recordKey,
+	Known: domainListKnown,
+}
+
+var recordListCalls = recordList.Spec()
 
 func listPolicy(v RecordListOpts) neutronfind.Options {
 	return neutronfind.Options{Query: v.Query, Headers: v.Headers, Microversion: v.Microversion, BasePath: v.BasePath, Order: v.order}
@@ -42,33 +62,16 @@ func copyListOptions(v RecordListOpts) RecordListOpts {
 }
 func WithRecordListOpts(value RecordListOpts) RecordListOption {
 	owned := copyListOptions(value)
-	return func(c *RecordListOpts) error { *c = copyListOptions(owned); return nil }
+	return request.Custom(func(c *RecordListOpts) error { *c = copyListOptions(owned); return nil })
 }
-func WithRecordListHeaders(value map[string]string) RecordListOption {
-	owned := maps.Clone(value)
-	return func(c *RecordListOpts) error { c.Headers = maps.Clone(owned); delete(c.Query, "headers"); return nil }
-}
-func WithRecordListMicroversion(value string) RecordListOption {
-	return func(c *RecordListOpts) error {
-		v := value
-		c.Microversion = &v
-		delete(c.Query, "microversion")
-		return nil
-	}
-}
-func WithRecordListBasePath(value string) RecordListOption {
-	return func(c *RecordListOpts) error { v := value; c.BasePath = &v; delete(c.Query, "base_path"); return nil }
-}
-func WithRecordListLimit(value int) RecordListOption     { return WithRecordListQuery("limit", value) }
-func WithRecordListMarker(value string) RecordListOption { return WithRecordListQuery("marker", value) }
-func WithRecordListMaxItems(value int) RecordListOption {
-	return WithRecordListQuery("max_items", value)
-}
-func WithRecordListPaginated(value bool) RecordListOption {
-	return WithRecordListQuery("paginated", value)
+
+// WithRecordListQuery sets one Source keyword argument. The key is validated
+// first; unknown keys are dropped before their value is marshaled.
+func WithRecordListQuery(key string, value any) RecordListOption {
+	return recordList.Query(key, value)
 }
 func WithRecordListJMESPath(value string) RecordListOption {
-	return WithRecordListQuery("jmespath_filters", value)
+	return keystonecalls.Keyword(recordList.Apply, "jmespath_filters", value)
 }
 func recordKey(key string) error {
 	if strings.TrimSpace(key) == "" || !utf8.ValidString(key) || strings.IndexFunc(key, unicode.IsControl) >= 0 {
@@ -87,45 +90,6 @@ func domainListKnown(key string) bool {
 	}
 	return false
 }
-func WithRecordListQuery(key string, value any) RecordListOption {
-	if err := recordKey(key); err != nil {
-		return func(*RecordListOpts) error { return err }
-	}
-	if !domainListKnown(key) {
-		return func(*RecordListOpts) error { return nil }
-	}
-	raw, err := json.Marshal(value)
-	owned := bytes.Clone(raw)
-	return func(c *RecordListOpts) error {
-		if err != nil {
-			return err
-		}
-		if c.Query == nil {
-			c.Query = map[string]json.RawMessage{}
-		}
-		if key == "headers" || key == "microversion" || key == "base_path" {
-			normalized, _, cause := neutronfind.NormalizeProxyListOptions(neutronfind.Options{Query: map[string]json.RawMessage{key: bytes.Clone(owned)}})
-			if cause != nil {
-				return cause
-			}
-			switch key {
-			case "headers":
-				c.Headers = normalized.Headers
-			case "microversion":
-				c.Microversion = normalized.Microversion
-			case "base_path":
-				c.BasePath = normalized.BasePath
-			}
-			delete(c.Query, key)
-			return nil
-		}
-		c.Query[key] = bytes.Clone(owned)
-		if !slices.Contains(c.order, key) {
-			c.order = append(c.order, key)
-		}
-		return nil
-	}
-}
 func normalizeListOptions(value RecordListOpts) (RecordListOpts, error) {
 	normalized, expression, err := neutronfind.NormalizeProxyListOptions(listPolicy(value))
 	if err != nil {
@@ -138,5 +102,5 @@ func normalizeListOptions(value RecordListOpts) (RecordListOpts, error) {
 
 func WithRecordListLocation(value resource.CloudLocation) RecordListOption {
 	owned := value.Clone()
-	return func(c *RecordListOpts) error { v := owned.Clone(); c.Location = &v; return nil }
+	return request.Custom(func(c *RecordListOpts) error { v := owned.Clone(); c.Location = &v; return nil })
 }

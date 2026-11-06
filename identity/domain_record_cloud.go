@@ -11,6 +11,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/domains"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
@@ -40,7 +41,18 @@ type DomainReadOpts struct {
 	Microversion *string
 	Location     *resource.CloudLocation
 }
-type DomainReadOption func(*DomainReadOpts) error
+
+// DomainReadOption is one option of ListDomains and SearchDomains:
+// WithDomainReadOpts, WithDomainReadNameOrID, WithDomainReadFilters,
+// WithDomainReadLocation, request.Headers (replaces the headers),
+// request.Microversion or request.Custom over *DomainReadOpts. Other shared
+// calls fail with resource.ErrInvalidOption before HTTP.
+type DomainReadOption = request.GetCall
+
+var domainReadCalls = calls.Spec[DomainReadOpts]{
+	Headers:      calls.Value(func(c *DomainReadOpts) *map[string]string { return &c.Headers }),
+	Microversion: calls.Pointer(func(c *DomainReadOpts) **string { return &c.Microversion }),
+}
 
 func domainReadInvalid(format string, args ...any) error {
 	return fmt.Errorf("%w: %s", resource.ErrInvalidOption, fmt.Sprintf(format, args...))
@@ -67,32 +79,25 @@ func copyDomainReadOpts(v DomainReadOpts) DomainReadOpts {
 }
 func WithDomainReadOpts(v DomainReadOpts) DomainReadOption {
 	owned := copyDomainReadOpts(v)
-	return func(c *DomainReadOpts) error { *c = copyDomainReadOpts(owned); return nil }
+	return request.Custom(func(c *DomainReadOpts) error { *c = copyDomainReadOpts(owned); return nil })
 }
 func WithDomainReadNameOrID(v string) DomainReadOption {
-	return func(c *DomainReadOpts) error { x := v; c.NameOrID = &x; return nil }
+	return request.Custom(func(c *DomainReadOpts) error { x := v; c.NameOrID = &x; return nil })
 }
 func WithDomainReadFilters(v json.RawMessage) DomainReadOption {
 	owned := bytes.Clone(v)
-	return func(c *DomainReadOpts) error {
+	return request.Custom(func(c *DomainReadOpts) error {
 		c.Filters = nil
 		if owned != nil {
 			raw := json.RawMessage(bytes.Clone(owned))
 			c.Filters = &raw
 		}
 		return nil
-	}
-}
-func WithDomainReadHeaders(v map[string]string) DomainReadOption {
-	owned := maps.Clone(v)
-	return func(c *DomainReadOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
-func WithDomainReadMicroversion(v string) DomainReadOption {
-	return func(c *DomainReadOpts) error { x := v; c.Microversion = &x; return nil }
+	})
 }
 func WithDomainReadLocation(v resource.CloudLocation) DomainReadOption {
 	owned := v.Clone()
-	return func(c *DomainReadOpts) error { x := owned.Clone(); c.Location = &x; return nil }
+	return request.Custom(func(c *DomainReadOpts) error { x := owned.Clone(); c.Location = &x; return nil })
 }
 
 // DomainListResult preserves list()'s polymorphic Proxy result. Value is always
@@ -143,7 +148,7 @@ func (c *DomainReadCloud) prepare(ctx context.Context, options []DomainReadOptio
 	}
 	ctx = rest.WithOperationGuard(ctx, sourceGuard)
 	guard := func() error { return sourceGuard(ctx) }
-	for _, apply := range slices.Clone(options) {
+	for _, apply := range calls.Translate(options, domainReadCalls) {
 		if err := guard(); err != nil {
 			return ctx, nil, policy, guard, err
 		}
@@ -177,10 +182,10 @@ func domainReadListOptions(policy DomainReadOpts) ([]domains.RecordListOption, e
 		}
 	}
 	if policy.Headers != nil {
-		options = append(options, domains.WithRecordListHeaders(policy.Headers))
+		options = append(options, request.Headers(policy.Headers))
 	}
 	if policy.Microversion != nil {
-		options = append(options, domains.WithRecordListMicroversion(*policy.Microversion))
+		options = append(options, request.Microversion(*policy.Microversion))
 	}
 	if policy.Location != nil {
 		options = append(options, domains.WithRecordListLocation(*policy.Location))

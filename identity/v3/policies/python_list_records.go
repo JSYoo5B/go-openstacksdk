@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"iter"
 	"maps"
-	"slices"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/neutronfind"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -27,7 +27,30 @@ type RecordListOpts struct {
 	Filters   map[string]json.RawMessage
 	Headers   map[string]string
 }
-type RecordListOption func(*RecordListOpts) error
+
+// RecordListOption is one option of ListRecords and AllRecords:
+// WithRecordListOpts, WithRecordListFilter, request.Custom over
+// *RecordListOpts, request.Header (adds one header), request.Limit,
+// request.Marker, request.MaxItems or request.Paginated. Other shared calls,
+// including request.Headers, request.Query and request.Microversion, fail with
+// resource.ErrInvalidOption before HTTP.
+type RecordListOption = request.ListCall
+
+var recordListCalls = calls.Spec[RecordListOpts]{
+	Header: func(c *RecordListOpts, key, value string) error {
+		if c.Headers == nil {
+			c.Headers = map[string]string{}
+		}
+		c.Headers[key] = value
+		return nil
+	},
+	Paging: calls.Paging[RecordListOpts]{
+		Limit:     calls.Pointer(func(c *RecordListOpts) **int { return &c.Limit }),
+		Marker:    calls.Value(func(c *RecordListOpts) *string { return &c.Marker }),
+		MaxItems:  calls.Value(func(c *RecordListOpts) *int { return &c.MaxItems }),
+		Paginated: calls.Pointer(func(c *RecordListOpts) **bool { return &c.Paginated }),
+	},
+}
 
 func copyRecordList(v RecordListOpts) RecordListOpts {
 	if v.Limit != nil {
@@ -48,28 +71,7 @@ func copyRecordList(v RecordListOpts) RecordListOpts {
 }
 func WithRecordListOpts(v RecordListOpts) RecordListOption {
 	owned := copyRecordList(v)
-	return func(c *RecordListOpts) error { *c = copyRecordList(owned); return nil }
-}
-func WithRecordListLimit(v int) RecordListOption {
-	return func(c *RecordListOpts) error { x := v; c.Limit = &x; return nil }
-}
-func WithRecordListMarker(v string) RecordListOption {
-	return func(c *RecordListOpts) error { c.Marker = v; return nil }
-}
-func WithRecordListMaxItems(v int) RecordListOption {
-	return func(c *RecordListOpts) error { c.MaxItems = v; return nil }
-}
-func WithRecordListPaginated(v bool) RecordListOption {
-	return func(c *RecordListOpts) error { x := v; c.Paginated = &x; return nil }
-}
-func WithRecordListHeader(key, value string) RecordListOption {
-	return func(c *RecordListOpts) error {
-		if c.Headers == nil {
-			c.Headers = map[string]string{}
-		}
-		c.Headers[key] = value
-		return nil
-	}
+	return request.Custom(func(c *RecordListOpts) error { *c = copyRecordList(owned); return nil })
 }
 func policyFieldKnown(key string) bool {
 	switch key {
@@ -83,11 +85,11 @@ func policyFieldKnown(key string) bool {
 // projected. Unknown keys are ignored before invoking JSON marshaling.
 func WithRecordListFilter(key string, value any) RecordListOption {
 	if !policyFieldKnown(key) {
-		return func(*RecordListOpts) error { return nil }
+		return request.Custom(func(*RecordListOpts) error { return nil })
 	}
 	raw, err := json.Marshal(value)
 	owned := bytes.Clone(raw)
-	return func(c *RecordListOpts) error {
+	return request.Custom(func(c *RecordListOpts) error {
 		if err != nil {
 			return err
 		}
@@ -96,7 +98,7 @@ func WithRecordListFilter(key string, value any) RecordListOption {
 		}
 		c.Filters[key] = bytes.Clone(owned)
 		return nil
-	}
+	})
 }
 func policyListInvalid(format string, args ...any) error {
 	return fmt.Errorf("%w: %s", resource.ErrInvalidOption, fmt.Sprintf(format, args...))
@@ -113,7 +115,7 @@ func policyListProfile() neutronfind.Profile {
 // ListRecords implements the Policy list profile without changing native List
 // or All. Only limit/marker are server filters; all known Body keys are local.
 func (a *API) ListRecords(ctx context.Context, options ...RecordListOption) iter.Seq2[*PolicyRecord, error] {
-	owned := slices.Clone(options)
+	owned := calls.Translate(options, recordListCalls)
 	return func(yield func(*PolicyRecord, error) bool) {
 		fail := func(err error) { yield(nil, request.Wrap("ListRecords", "policies", cloudread.ContextError(ctx, err))) }
 		if err := cloudread.Context(ctx); err != nil {

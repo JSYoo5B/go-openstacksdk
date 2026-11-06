@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"net/http"
 	"strings"
 	"testing"
@@ -28,10 +29,10 @@ func TestPythonUserFindRecordFetchControlsCollectionAndEnvelope(t *testing.T) {
 		return reply
 	})
 	row, err := api.FindRecord(context.Background(), "alice",
-		sdk.WithRecordFindQuery("requires_id", false), sdk.WithRecordFindQuery("base_path", "/alternate-users"),
-		sdk.WithRecordFindQuery("skip_cache", true), sdk.WithRecordFindQuery("error_message", "custom missing"),
-		sdk.WithRecordFindQuery("resource_response_key", "selected"), sdk.WithRecordFindQuery("domain_id", "d"),
-		sdk.WithRecordFindHeaders(map[string]string{"X-Typed": "yes"}))
+		request.Query("requires_id", false), request.Query("base_path", "/alternate-users"),
+		request.Query("skip_cache", true), request.Query("error_message", "custom missing"),
+		request.Query("resource_response_key", "selected"), request.Query("domain_id", "d"),
+		request.Headers(map[string]string{"X-Typed": "yes"}))
 	if err != nil || row == nil || len(calls) != 1 || row.StatusCode != 203 || row.Header.Get("X-Request-Id") != "controlled-get" || string(row.Envelope) != body {
 		t.Fatal(row, err, calls)
 	}
@@ -65,7 +66,7 @@ func TestPythonUserFindRecordFetchControlsHeadersAreStageSpecific(t *testing.T) 
 		}
 		return recordUserWire(200, `{"users":[{"id":"u","name":"alice"}]}`)
 	})
-	row, err := api.FindRecord(context.Background(), "alice", sdk.WithRecordFindQuery("base_path", "/alternate-users"), sdk.WithRecordFindListBasePath("/list-users"), sdk.WithRecordFindQuery("headers", map[string]string{"X-Raw": "raw"}), sdk.WithRecordFindHeaders(map[string]string{"X-Raw": "typed", "X-Typed": "kept"}), sdk.WithRecordFindQuery("requires_id", true), sdk.WithRecordFindQuery("skip_cache", true), sdk.WithRecordFindQuery("error_message", "custom"), sdk.WithRecordFindQuery("resource_response_key", "selected"))
+	row, err := api.FindRecord(context.Background(), "alice", request.Query("base_path", "/alternate-users"), sdk.WithRecordFindListBasePath("/list-users"), request.Query("headers", map[string]string{"X-Raw": "raw"}), request.Headers(map[string]string{"X-Raw": "typed", "X-Typed": "kept"}), request.Query("requires_id", true), request.Query("skip_cache", true), request.Query("error_message", "custom"), request.Query("resource_response_key", "selected"))
 	if err != nil || row == nil || len(calls) != 2 {
 		t.Fatal(row, err, calls)
 	}
@@ -85,7 +86,7 @@ func TestPythonUserFindRecordFetchControlsBasePathAndFalseyEnvelope(t *testing.T
 				}
 				return recordUserWire(200, `{"users":[{"id":"u","name":"alice"}]}`)
 			})
-			row, err := api.FindRecord(context.Background(), "alice", sdk.WithRecordFindQuery("base_path", "/alternate-users"), sdk.WithRecordFindQuery("requires_id", false), sdk.WithRecordFindQuery("resource_response_key", key))
+			row, err := api.FindRecord(context.Background(), "alice", request.Query("base_path", "/alternate-users"), request.Query("requires_id", false), request.Query("resource_response_key", key))
 			if err != nil || row == nil || len(calls) != 2 {
 				t.Fatal(row, err, calls)
 			}
@@ -114,7 +115,7 @@ func TestPythonUserFindRecordFetchControlsHeadersValidateAtListStage(t *testing.
 				}
 				return recordUserWire(200, `{"user":{"id":"u"}}`)
 			})
-			row, err := api.FindRecord(context.Background(), "alice", sdk.WithRecordFindQuery("headers", "not-a-mapping"))
+			row, err := api.FindRecord(context.Background(), "alice", request.Query("headers", "not-a-mapping"))
 			if fallback {
 				if row != nil || !errors.Is(err, resource.ErrInvalidOption) {
 					t.Fatal(row, err)
@@ -179,7 +180,7 @@ func TestPythonUserFindRecordFetchControlsPhysicalFailuresNeverFallback(t *testi
 				reply.Body = body
 				return reply
 			})
-			row, err := api.FindRecord(ctx, "alice", sdk.WithRecordFindQuery("requires_id", false), sdk.WithRecordFindQuery("skip_cache", true), sdk.WithRecordFindQuery("error_message", "controlled failure"))
+			row, err := api.FindRecord(ctx, "alice", request.Query("requires_id", false), request.Query("skip_cache", true), request.Query("error_message", "controlled failure"))
 			if row != nil || !errors.Is(err, cause) || len(calls) != 1 || closed != 1 {
 				t.Fatal(row, err, calls, closed)
 			}

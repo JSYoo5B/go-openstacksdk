@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/groups"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 	"net/http"
@@ -21,7 +22,7 @@ func TestClosedGroupDomainSeedAndActualSourceEvidence(t *testing.T) {
 			}
 			return groupRecordWire(203, `{"group":{"name":"actual","unknown":1}}`)
 		})
-		row, err := api.ResolveRecord(context.Background(), "literal%name", groups.WithRecordResolveRawDomainID(json.RawMessage(tc.domain)), groups.WithRecordResolveMicroversion("3.2"))
+		row, err := api.ResolveRecord(context.Background(), "literal%name", groups.WithRecordResolveRawDomainID(json.RawMessage(tc.domain)), request.Microversion("3.2"))
 		if err != nil || row == nil || calls != 1 || row.StatusCode != 203 || row.Header.Get("X-Request-Id") != "group-proof" {
 			t.Fatal(tc, row, err, calls)
 		}
@@ -67,7 +68,7 @@ func TestClosedGroupFallbackVersionsExactIDNameAndDefaultMissing(t *testing.T) {
 				return groupRecordWire(200, `{"groups":[]}`)
 			})
 			api.RawClient().Microversion = "3.1"
-			row, err := api.ResolveRecord(context.Background(), "needle", groups.WithRecordResolveRawDomainID(json.RawMessage("false")), groups.WithRecordResolveMicroversion("3.9"))
+			row, err := api.ResolveRecord(context.Background(), "needle", groups.WithRecordResolveRawDomainID(json.RawMessage("false")), request.Microversion("3.9"))
 			if calls != 3 || api.RawClient().Microversion != "3.1" {
 				t.Fatal(row, err, calls)
 			}
@@ -92,7 +93,7 @@ func TestClosedGroupFallbackVersionsExactIDNameAndDefaultMissing(t *testing.T) {
 func TestClosedGroupOwnedCallbacksRawDomainAndPreflight(t *testing.T) {
 	calls := 0
 	api, _ := groupRecordAPI(t, func(*http.Request) *http.Response { calls++; return groupRecordWire(200, `{"group":{"id":"one"}}`) })
-	for _, options := range [][]groups.RecordResolveOption{{nil}, {groups.WithRecordResolveRawDomainID(json.RawMessage(`{bad`))}, {groups.WithRecordResolveHeaders(map[string]string{"X-Auth-Token": "foreign"})}} {
+	for _, options := range [][]groups.RecordResolveOption{{nil}, {groups.WithRecordResolveRawDomainID(json.RawMessage(`{bad`))}, {request.Headers(map[string]string{"X-Auth-Token": "foreign"})}} {
 		row, err := api.ResolveRecord(context.Background(), "one", options...)
 		if row != nil || err == nil || calls != 0 {
 			t.Fatal(row, err, calls)
@@ -100,7 +101,7 @@ func TestClosedGroupOwnedCallbacksRawDomainAndPreflight(t *testing.T) {
 	}
 	seen := 0
 	base := api.RawClient().ResourceBase
-	row, err := api.ResolveRecord(context.Background(), "one", func(*groups.RecordResolveOpts) error { api.RawClient().ResourceBase += "changed/"; return nil }, func(*groups.RecordResolveOpts) error { seen++; api.RawClient().ResourceBase = base; return nil })
+	row, err := api.ResolveRecord(context.Background(), "one", request.Custom(func(*groups.RecordResolveOpts) error { api.RawClient().ResourceBase += "changed/"; return nil }), request.Custom(func(*groups.RecordResolveOpts) error { seen++; api.RawClient().ResourceBase = base; return nil }))
 	if row != nil || !errors.Is(err, resource.ErrInvalidOption) || seen != 0 || calls != 0 {
 		t.Fatal(row, err, seen, calls)
 	}

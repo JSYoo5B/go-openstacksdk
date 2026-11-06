@@ -8,6 +8,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/roles"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -50,14 +51,14 @@ func TestPythonRoleAssignmentRecordsKeepScopeLinksAndQuery(t *testing.T) {
 
 	calls = nil
 	_, err = api.AllAssignmentRecords(context.Background(),
-		roles.WithAssignmentRecordListQuery("role_id", "r1"),
-		roles.WithAssignmentRecordListQuery("user.id", "ignored-server-name"),
-		roles.WithAssignmentRecordListQuery("user_id", "u1"),
-		roles.WithAssignmentRecordListQuery("scope_project_id", "p1"),
-		roles.WithAssignmentRecordListQuery("inherited_to", "projects"),
-		roles.WithAssignmentRecordListQuery("effective", true),
-		roles.WithAssignmentRecordListQuery("include_names", false),
-		roles.WithAssignmentRecordListQuery("unknown", "x"))
+		request.Query("role_id", "r1"),
+		request.Query("user.id", "ignored-server-name"),
+		request.Query("user_id", "u1"),
+		request.Query("scope_project_id", "p1"),
+		request.Query("inherited_to", "projects"),
+		request.Query("effective", true),
+		request.Query("include_names", false),
+		request.Query("unknown", "x"))
 	want := "effective=True&include_names=False&role.id=r1&scope.OS-INHERIT%3Ainherited_to=projects&scope.project.id=p1&user.id=u1"
 	if err != nil || calls[0].query != want {
 		t.Fatal(err, calls)
@@ -69,15 +70,15 @@ func TestPythonRoleAssignmentRecordsNestedLocalFiltersAndPaging(t *testing.T) {
 	api := pyAssignmentRecordAPI(t, &calls, func(*http.Request) (int, string) {
 		return 200, `{"role_assignments":[` + pyAssignmentRecordInherited + `,` + pyAssignmentRecordDirect + `]}`
 	})
-	values, err := api.AllAssignmentRecords(context.Background(), roles.WithAssignmentRecordListQuery("scope", map[string]any{"OS-INHERIT:inherited_to": "projects"}))
+	values, err := api.AllAssignmentRecords(context.Background(), request.Query("scope", map[string]any{"OS-INHERIT:inherited_to": "projects"}))
 	if err != nil || len(values) != 1 || string(values[0].User) != `{"id":"u1"}` || calls[0].query != "" {
 		t.Fatal(err, values, calls)
 	}
-	values, err = api.AllAssignmentRecords(context.Background(), roles.WithAssignmentRecordListQuery("group", map[string]any{"id": "g1"}), roles.WithAssignmentRecordListQuery("role", map[string]any{"id": "r1"}))
+	values, err = api.AllAssignmentRecords(context.Background(), request.Query("group", map[string]any{"id": "g1"}), request.Query("role", map[string]any{"id": "r1"}))
 	if err != nil || len(values) != 1 || string(values[0].Group) != `{"id":"g1"}` {
 		t.Fatal(err, values)
 	}
-	values, err = api.AllAssignmentRecords(context.Background(), roles.WithAssignmentRecordListQuery("user", map[string]any{"id": "u2"}))
+	values, err = api.AllAssignmentRecords(context.Background(), request.Query("user", map[string]any{"id": "u2"}))
 	if err != nil || len(values) != 0 {
 		t.Fatal(err, values)
 	}
@@ -87,7 +88,7 @@ func TestPythonRoleAssignmentRecordsNestedLocalFiltersAndPaging(t *testing.T) {
 	calls = nil
 	values = nil
 	failed := false
-	for value, err := range api.ListAssignmentRecords(context.Background(), roles.WithAssignmentRecordListLimit(5)) {
+	for value, err := range api.ListAssignmentRecords(context.Background(), request.Limit(5)) {
 		if err != nil {
 			var wrapped *resource.OperationError
 			if !errors.As(err, &wrapped) || wrapped.Operation != "List" || wrapped.Resource != "role_assignments" || !errors.Is(err, resource.ErrInvalidOption) {

@@ -10,6 +10,7 @@ import (
 	"net/url"
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/internal/osfederation"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
@@ -45,29 +46,29 @@ func (a *API) target(idpID string) osfederation.Target {
 // OS-FEDERATION/identity_providers/{idp_id}/protocols/{id} with
 // {"protocol": attrs} where id (or its alias name) is removed from the body.
 func (a *API) Create(ctx context.Context, idpID, id string, options ...CreateOption) (*FederationProtocol, error) {
-	return convert(idpID)(osfederation.Create(ctx, a.target(idpID), id, options))
+	return convert(idpID)(osfederation.Create(ctx, a.target(idpID), id, calls.Translate(options, writeCalls)))
 }
 
 // Get implements get_federation_protocol.
 func (a *API) Get(ctx context.Context, idpID, id string, options ...GetOption) (*FederationProtocol, error) {
-	return convert(idpID)(osfederation.Get(ctx, a.target(idpID), id, options))
+	return convert(idpID)(osfederation.Get(ctx, a.target(idpID), id, calls.Translate(options, osfederation.ReadCalls)))
 }
 
 // Update implements update_federation_protocol: PATCH with only the given
 // declared attributes. No declared attribute means no request.
 func (a *API) Update(ctx context.Context, idpID, id string, options ...UpdateOption) (*FederationProtocol, error) {
-	return convert(idpID)(osfederation.Update(ctx, a.target(idpID), id, options))
+	return convert(idpID)(osfederation.Update(ctx, a.target(idpID), id, calls.Translate(options, writeCalls)))
 }
 
 // Delete implements delete_federation_protocol. A clean 404 returns nil
-// unless WithDeleteIgnoreMissing(false) is given.
+// unless request.IgnoreMissing(false) is given.
 func (a *API) Delete(ctx context.Context, idpID, id string, options ...DeleteOption) error {
-	return osfederation.Delete(ctx, a.target(idpID), id, options)
+	return osfederation.Delete(ctx, a.target(idpID), id, calls.Translate(options, osfederation.DeleteCalls))
 }
 
 // List implements federation_protocols(idp, **query) as a lazy iterator.
 func (a *API) List(ctx context.Context, idpID string, options ...ListOption) iter.Seq2[*FederationProtocol, error] {
-	source := osfederation.List(ctx, a.target(idpID), options)
+	source := osfederation.List(ctx, a.target(idpID), calls.Translate(options, listCalls))
 	return func(yield func(*FederationProtocol, error) bool) {
 		for record, err := range source {
 			if !yield(fromRecord(record, idpID), err) || err != nil {
@@ -92,7 +93,7 @@ func (a *API) All(ctx context.Context, idpID string, options ...ListOption) ([]*
 // Find implements find_federation_protocol. Like Resource.find, the direct
 // GET carries the URI attribute as ?idp_id={idp_id}; after a clean 400, 403
 // or 404 the complete protocol list is matched by exact ID (name is the ID).
-// A missing protocol returns nil, nil unless WithFindIgnoreMissing(false).
+// A missing protocol returns nil, nil unless request.IgnoreMissing(false).
 func (a *API) Find(ctx context.Context, idpID, nameOrID string, options ...FindOption) (*FederationProtocol, error) {
-	return convert(idpID)(osfederation.Find(ctx, a.target(idpID), nameOrID, url.Values{"idp_id": {idpID}}, options))
+	return convert(idpID)(osfederation.Find(ctx, a.target(idpID), nameOrID, url.Values{"idp_id": {idpID}}, calls.Translate(options, osfederation.FindCalls)))
 }

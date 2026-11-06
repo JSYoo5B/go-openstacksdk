@@ -12,6 +12,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/identity"
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/users"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -263,23 +264,23 @@ func TestPythonUserCloudListOptionSnapshotsHeadersAndCallbacksOwnMaps(t *testing
 	config.Query["name"][1] = 'X'
 	config.Headers["X-Trace"] = "mutated"
 	var retained map[string]json.RawMessage
-	result, err := cloud.ListUsers(context.Background(), snapshot, identity.WithUserListMicroversion("3.9"), func(c *identity.UserListOpts) error {
+	result, err := cloud.ListUsers(context.Background(), snapshot, request.Microversion("3.9"), request.Custom(func(c *identity.UserListOpts) error {
 		c.Query["domain_id"] = json.RawMessage(`"d"`)
 		retained = c.Query
 		return nil
-	}, func(c *identity.UserListOpts) error { retained["name"][1] = 'Y'; return nil })
+	}), request.Custom(func(c *identity.UserListOpts) error { retained["name"][1] = 'Y'; return nil }))
 	if err != nil || result == nil || result.Users == nil || len(result.Users) != 0 || calls != 1 {
 		t.Fatal(result, err, calls)
 	}
 	// Default callback header/query maps are initialized and remain copied.
-	result, err = cloud.ListUsers(context.Background(), func(c *identity.UserListOpts) error {
+	result, err = cloud.ListUsers(context.Background(), request.Custom(func(c *identity.UserListOpts) error {
 		c.Query["domain_id"] = json.RawMessage(`"d"`)
 		c.Query["name"] = json.RawMessage(`"alice"`)
 		c.Headers["X-Trace"] = "owned"
 		v := "3.9"
 		c.Microversion = &v
 		return nil
-	})
+	}))
 	if err != nil || calls != 2 {
 		t.Fatal(result, err, calls)
 	}
@@ -304,9 +305,9 @@ func TestPythonUserCloudSelectedSourceCancellationAndPreflightCannotCreateReceip
 			}
 			var err error
 			if operation == "list" {
-				_, err = cloud.ListUsers(ctx, func(*identity.UserListOpts) error { return change() }, func(*identity.UserListOpts) error { later = true; return nil })
+				_, err = cloud.ListUsers(ctx, request.Custom(func(*identity.UserListOpts) error { return change() }), request.Custom(func(*identity.UserListOpts) error { later = true; return nil }))
 			} else {
-				_, err = cloud.SearchUsers(ctx, "", func(*identity.UserSearchOpts) error { return change() }, func(*identity.UserSearchOpts) error { later = true; return nil })
+				_, err = cloud.SearchUsers(ctx, "", request.Custom(func(*identity.UserSearchOpts) error { return change() }), request.Custom(func(*identity.UserSearchOpts) error { later = true; return nil }))
 			}
 			var receipt *resource.ResponseError
 			if !errors.Is(err, callback) || calls != 0 || later || errors.As(err, &receipt) || mode == "cancel" && (!errors.Is(err, cause) || !errors.Is(err, context.Canceled)) {

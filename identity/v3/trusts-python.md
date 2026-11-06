@@ -13,7 +13,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/trusts.API.CreateRecord`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/trusts.WithRecordCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/trusts.WithRecordCreateOpts`
 
 - POST /OS-TRUST/trusts sends declared raw attrs under trust, preserves omitted/null/false/zero/empty values and untyped roles/user/expiry/counts, normalizes is_impersonation/impersonation, ignores unknown attrs and imposes no native required-field validation.
@@ -38,8 +38,8 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/trusts.API.DeleteRecord`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/trusts.WithRecordDeleteIgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/trusts.WithRecordDeleteHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 
 - DELETE literal Trust member accepts actual 200..399 and defaults to ignoring clean404; strict missing preserves original native status/body while opaque successful responses need no JSON model.
   Tests: `identity/v3/trusts/python_records_test.go:TestPythonTrustDeleteMissingAndSourceStatusPolicies`.
@@ -61,7 +61,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/trusts.API.FindRecord`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/trusts.WithRecordFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 
 - GET-first lookup falls back only after clean 400/403/404, without a name server-query hint, scans all pages for exact ID/name, retains duplicates and late errors, and defaults missing to nil,nil with explicit strict NotFound.
   Tests: `identity/v3/trusts/python_records_test.go:TestPythonTrustFindGetFirstCleanFallbackFullSearchAndMissing`.
@@ -83,7 +83,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/trusts.API.GetRecord`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/trusts.WithRecordReadHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 
 - GET literal /OS-TRUST/trusts/{id} preserves singular/root translation, seeded ID, malformed/empty JSON tolerance, accepted nonobject proof, alias normalization and null/default/bool descriptor behavior.
   Tests: `identity/v3/trusts/python_records_test.go:TestPythonTrustGetResponseTranslationAndBoolDefaults`.
@@ -106,14 +106,14 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/trusts.API.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/trusts.WithRecordListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/trusts.WithRecordListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/trusts.WithRecordListTrustorUserID`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/trusts.WithRecordListTrusteeUserID`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/trusts.WithRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/trusts.WithRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/trusts.WithRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/trusts.WithRecordListPaginated`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/trusts.WithRecordListHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 
 - Lazy list classifies trustor/trustee fields as Requests-encoded server queries, canonical declared Body attrs as local descriptor filters, and unknown/wire-only aliases as ignored; max_items counts raw rows before filters.
   Tests: `identity/v3/trusts/python_records_test.go:TestPythonTrustListQueryClassificationLocalFiltersAndRawCap`.
@@ -189,7 +189,7 @@ func main() {
     service, err := conn.IdentityV3(ctx)
     if err != nil { log.Fatal(err) }
     api := service.Trusts
-    options := []trusts.RecordListOption{trusts.WithRecordListMaxItems(100)}
+    options := []trusts.RecordListOption{request.MaxItems(100)}
     if *trustor != "" {
         options = append(options, trusts.WithRecordListTrustorUserID(*trustor))
     }
@@ -201,23 +201,23 @@ func main() {
         value, err := api.GetRecord(ctx, *id)
         if err != nil { log.Fatal(err) }
         printTrust(value)
-        found, err := api.FindRecord(ctx, *id, trusts.WithRecordFindIgnoreMissing(false))
+        found, err := api.FindRecord(ctx, *id, request.IgnoreMissing(false))
         if err != nil { log.Fatal(err) }
         printTrust(found)
     }
     if *create {
         value, err := api.CreateRecord(ctx,
-            trusts.WithRecordCreateField("trustor_user_id", *trustor),
-            trusts.WithRecordCreateField("trustee_user_id", *trustee),
-            trusts.WithRecordCreateField("project_id", *project),
-            trusts.WithRecordCreateField("is_impersonation", false),
-            trusts.WithRecordCreateField("roles", []map[string]string{{"name": *role}}))
+            request.Field("trustor_user_id", *trustor),
+            request.Field("trustee_user_id", *trustee),
+            request.Field("project_id", *project),
+            request.Field("is_impersonation", false),
+            request.Field("roles", []map[string]string{{"name": *role}}))
         if err != nil { log.Fatal(err) }
         printTrust(value)
     }
     if *remove != "" {
         if err := api.DeleteRecord(ctx, *remove,
-            trusts.WithRecordDeleteIgnoreMissing(false)); err != nil { log.Fatal(err) }
+            request.IgnoreMissing(false)); err != nil { log.Fatal(err) }
     }
 }
 ```

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"io"
 	"net/http"
 	"net/url"
@@ -102,7 +103,7 @@ func TestPythonGroupFindRecordGETSeedAndPassiveNullID(t *testing.T) {
 				}
 				return groupRecordWire(203, body)
 			})
-			row, err := api.FindRecord(context.Background(), "alias", groups.WithRecordFindQuery("domain_id", "seed-domain"), groups.WithRecordFindQuery("description", "seed"), groups.WithRecordFindQuery("x_request", "unknown"))
+			row, err := api.FindRecord(context.Background(), "alias", request.Query("domain_id", "seed-domain"), request.Query("description", "seed"), request.Query("x_request", "unknown"))
 			if err != nil || calls != 1 || row == nil || row.StatusCode != 203 || row.Header.Get("X-Request-Id") != "group-proof" || string(row.Envelope) != body {
 				t.Fatal(row, err, calls)
 			}
@@ -133,9 +134,9 @@ func TestPythonGroupFindRecordCleanFallbackAndExplicitNamePresence(t *testing.T)
 					actual = r.URL.Query()
 					return groupRecordWire(200, `{"groups":[{"id":"alias","name":"different","description":"keep"}]}`)
 				})
-				opts := []groups.RecordFindOption{groups.WithRecordFindQuery("domain_id", "d"), groups.WithRecordFindQuery("description", "keep"), groups.WithRecordFindQuery("x_unknown", "GET-only")}
+				opts := []groups.RecordFindOption{request.Query("domain_id", "d"), request.Query("description", "keep"), request.Query("x_unknown", "GET-only")}
 				if explicit {
-					opts = append(opts, groups.WithRecordFindQuery("name", nil))
+					opts = append(opts, request.Query("name", nil))
 				}
 				row, err := api.FindRecord(context.Background(), "alias", opts...)
 				if err != nil || row == nil || calls != 2 || actual.Get("domain_id") != "d" || actual.Has("description") || actual.Has("x_unknown") {
@@ -175,7 +176,7 @@ func TestPythonGroupFindRecordMissingRepeatedIDAndLateFailure(t *testing.T) {
 			})
 			opts := []groups.RecordFindOption{}
 			if mode == "strict" {
-				opts = append(opts, groups.WithRecordFindIgnoreMissing(false))
+				opts = append(opts, request.IgnoreMissing(false))
 			}
 			row, err := api.FindRecord(context.Background(), "same", opts...)
 			switch mode {
@@ -239,9 +240,9 @@ func TestPythonGroupRecordsFilteredMarkerRawCapAndBreak(t *testing.T) {
 				}
 				return groupRecordWire(200, `{"groups":[]}`)
 			})
-			opts := []groups.RecordListOption{groups.WithRecordListLimit(5), groups.WithRecordListQuery("description", "keep")}
+			opts := []groups.RecordListOption{request.Limit(5), groups.WithRecordListQuery("description", "keep")}
 			if mode == "cap" {
-				opts = append(opts, groups.WithRecordListMaxItems(2))
+				opts = append(opts, request.MaxItems(2))
 			}
 			if mode == "break" {
 				for row, err := range api.ListRecords(context.Background(), opts...) {
@@ -378,7 +379,7 @@ func TestPythonGroupRecordsOwnedOptionsStickySourceAndCancellation(t *testing.T)
 			ctx, cancel := context.WithCancelCause(context.Background())
 			defer cancel(nil)
 			cause := errors.New("custom group cancel")
-			change := groups.RecordListOption(func(*groups.RecordListOpts) error {
+			change := request.Custom(func(*groups.RecordListOpts) error {
 				if mode == "source" {
 					client.Endpoint += "changed"
 				} else if mode == "cancel" {
@@ -389,7 +390,7 @@ func TestPythonGroupRecordsOwnedOptionsStickySourceAndCancellation(t *testing.T)
 			if mode == "nil" {
 				change = nil
 			}
-			restore := groups.RecordListOption(func(*groups.RecordListOpts) error { callbacks++; client.Endpoint = endpoint; return nil })
+			restore := request.Custom(func(*groups.RecordListOpts) error { callbacks++; client.Endpoint = endpoint; return nil })
 			_, err := api.AllRecords(ctx, change, restore)
 			var proof *resource.ResponseError
 			if err == nil || errors.As(err, &proof) || calls != before || callbacks != 0 {
@@ -440,12 +441,12 @@ func TestPythonGroupFindRecordsGETOnlyMicroversionAndListBasePath(t *testing.T) 
 		return groupRecordWire(200, `{"groups":[{"id":"a","name":"alias"}]}`)
 	})
 	api.RawClient().Microversion = "3.5"
-	row, err := api.FindRecord(context.Background(), "alias", groups.WithRecordFindMicroversion("3.9"), groups.WithRecordFindListBasePath("other_groups"))
+	row, err := api.FindRecord(context.Background(), "alias", request.Microversion("3.9"), groups.WithRecordFindListBasePath("other_groups"))
 	if err != nil || row == nil || !reflect.DeepEqual(paths, []string{"/keystone/v3/groups/alias", "/keystone/v3/other_groups"}) || !reflect.DeepEqual(versions, []string{"identity 3.9", "identity 3.5"}) {
 		t.Fatal(row, err, paths, versions)
 	}
 	before := calls
-	_, err = api.AllRecords(context.Background(), groups.WithRecordListBasePath("https://foreign.invalid/groups"))
+	_, err = api.AllRecords(context.Background(), request.BasePath("https://foreign.invalid/groups"))
 	if !errors.Is(err, resource.ErrInvalidOption) || calls != before {
 		t.Fatal(err, calls)
 	}

@@ -9,6 +9,7 @@ import (
 	"slices"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/jmespath"
 	"github.com/JSYoo5B/go-openstacksdk/internal/neutronfind"
@@ -41,7 +42,7 @@ func (a *API) prepareRecordList(ctx context.Context, options []RecordListOption)
 	if err != nil {
 		return nil, RecordListOpts{}, err
 	}
-	policy, err := applyRegionOptions(ctx, engine, RecordListOpts{}, copyListOptions, options)
+	policy, err := applyRegionOptions(ctx, engine, RecordListOpts{}, copyListOptions, calls.Translate(options, recordListCalls))
 	if err == nil {
 		policy, err = normalizeListOptions(policy)
 	}

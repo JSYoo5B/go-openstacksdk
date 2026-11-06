@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -78,8 +79,8 @@ func TestPythonEndpointGroupCreateSendsDeclaredAttrs(t *testing.T) {
 	api := pythonEndpointGroupAPI(t, &calls, func(*http.Request) (int, string) {
 		return 201, `{"endpoint_group":{"id":"eg1","name":"web","filters":{"interface":"public"},"links":{"self":"x"},"extra":1}}`
 	})
-	v, err := api.Create(context.Background(), endpointgroups.WithCreateField("name", "web"), endpointgroups.WithCreateField("filters", map[string]string{"interface": "public"}),
-		endpointgroups.WithCreateField("description", nil), endpointgroups.WithCreateField("unknown", make(chan int)))
+	v, err := api.Create(context.Background(), request.Field("name", "web"), request.Field("filters", map[string]string{"interface": "public"}),
+		request.Field("description", nil), request.Field("unknown", make(chan int)))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -102,7 +103,7 @@ func TestPythonEndpointGroupCreateSendsDeclaredAttrs(t *testing.T) {
 	}
 	calls = nil
 	api = pythonEndpointGroupAPI(t, &calls, func(*http.Request) (int, string) { return 409, `{"error":"conflict"}` })
-	_, err = api.Create(context.Background(), endpointgroups.WithCreateField("name", "web"))
+	_, err = api.Create(context.Background(), request.Field("name", "web"))
 	var native gophercloud.ErrUnexpectedResponseCode
 	if !errors.As(err, &native) || native.Actual != 409 {
 		t.Fatal(err)
@@ -162,8 +163,8 @@ func TestPythonEndpointGroupUpdatePatchesDirtyAttrs(t *testing.T) {
 	api := pythonEndpointGroupAPI(t, &calls, func(*http.Request) (int, string) {
 		return 200, `{"endpoint_group":{"id":"eg1","description":"new"}}`
 	})
-	v, err := api.Update(context.Background(), "eg1", endpointgroups.WithUpdateField("description", "new"), endpointgroups.WithUpdateField("filters", map[string]any{}),
-		endpointgroups.WithUpdateField("id", "other"), endpointgroups.WithUpdateField("unknown", 1))
+	v, err := api.Update(context.Background(), "eg1", request.Field("description", "new"), request.Field("filters", map[string]any{}),
+		request.Field("id", "other"), request.Field("unknown", 1))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -175,13 +176,13 @@ func TestPythonEndpointGroupUpdatePatchesDirtyAttrs(t *testing.T) {
 	pythonEndpointGroupField(t, v, "filters", `{}`)
 	pythonEndpointGroupField(t, v, "name", `null`)
 	calls = nil
-	v, err = api.Update(context.Background(), "eg1", endpointgroups.WithUpdateField("unknown", 1))
+	v, err = api.Update(context.Background(), "eg1", request.Field("unknown", 1))
 	if err != nil || len(calls) != 0 || v.StatusCode != 0 {
 		t.Fatal("no dirty attribute sends nothing", v, err, calls)
 	}
 	pythonEndpointGroupField(t, v, "id", `"eg1"`)
 	api = pythonEndpointGroupAPI(t, &calls, func(*http.Request) (int, string) { return 404, `missing` })
-	_, err = api.Update(context.Background(), "eg1", endpointgroups.WithUpdateField("name", "x"))
+	_, err = api.Update(context.Background(), "eg1", request.Field("name", "x"))
 	var native gophercloud.ErrUnexpectedResponseCode
 	if !errors.As(err, &native) || native.Actual != 404 {
 		t.Fatal(err)
@@ -202,7 +203,7 @@ func TestPythonEndpointGroupDeleteIgnoreMissing(t *testing.T) {
 				pythonEndpointGroupOperation(t, err, "Delete")
 			}
 			if code == 404 {
-				err = api.Delete(context.Background(), "eg1", endpointgroups.WithDeleteIgnoreMissing(false))
+				err = api.Delete(context.Background(), "eg1", request.IgnoreMissing(false))
 				var native gophercloud.ErrUnexpectedResponseCode
 				if !errors.As(err, &native) || native.Actual != 404 {
 					t.Fatal(err)
@@ -217,13 +218,13 @@ func TestPythonEndpointGroupListQueryFiltersAndPaging(t *testing.T) {
 	api := pythonEndpointGroupAPI(t, &calls, func(*http.Request) (int, string) {
 		return 200, `{"endpoint_groups":[{"id":"a","name":"web","description":"d","filters":{"interface":"public","region_id":"r1"}},{"id":"b","name":"web","filters":{"interface":"admin"}}],"links":{"next":null,"self":"x"}}`
 	})
-	ids, err := pythonEndpointGroupIDs(t, api.List(context.Background(), endpointgroups.WithListName("web"), endpointgroups.WithListLimit(5), endpointgroups.WithListMarker("m"),
-		endpointgroups.WithListQuery("filters", map[string]string{"interface": "public"}), endpointgroups.WithListQuery("unknown", 1)))
+	ids, err := pythonEndpointGroupIDs(t, api.List(context.Background(), endpointgroups.WithListName("web"), request.Limit(5), request.Marker("m"),
+		request.Query("filters", map[string]string{"interface": "public"}), request.Query("unknown", 1)))
 	if err != nil || !reflect.DeepEqual(ids, []string{"a"}) || len(calls) != 1 || calls[0].path != pythonEndpointGroupBase || calls[0].query != "name=web" || calls[0].header.Get("Accept") != "application/json" {
 		t.Fatal("name is wire query, limit and marker are dropped, filters is local", ids, err, calls)
 	}
 	calls = nil
-	ids, err = pythonEndpointGroupIDs(t, api.List(context.Background(), endpointgroups.WithListQuery("description", nil), endpointgroups.WithListQuery("id", "b")))
+	ids, err = pythonEndpointGroupIDs(t, api.List(context.Background(), request.Query("description", nil), request.Query("id", "b")))
 	if err != nil || !reflect.DeepEqual(ids, []string{"b"}) || calls[0].query != "" {
 		t.Fatal(ids, err, calls)
 	}
@@ -235,7 +236,7 @@ func TestPythonEndpointGroupListQueryFiltersAndPaging(t *testing.T) {
 			}
 			return 200, `{"endpoint_groups":[{"id":"a"}]}`
 		})
-		ids, err := pythonEndpointGroupIDs(t, api.List(context.Background(), endpointgroups.WithListMaxItems(2)))
+		ids, err := pythonEndpointGroupIDs(t, api.List(context.Background(), request.MaxItems(2)))
 		if err != nil || !reflect.DeepEqual(ids, []string{"a", "b"}) || len(calls) != 2 || calls[0].query != "limit=2" || calls[1].query != "limit=2&marker=a" {
 			t.Fatal(ids, err, calls)
 		}
@@ -245,7 +246,7 @@ func TestPythonEndpointGroupListQueryFiltersAndPaging(t *testing.T) {
 		api := pythonEndpointGroupAPI(t, &calls, func(*http.Request) (int, string) {
 			return 200, `{"endpoint_groups":[{"id":"a"}],"next":"?marker=a"}`
 		})
-		ids, err := pythonEndpointGroupIDs(t, api.List(context.Background(), endpointgroups.WithListPaginated(false)))
+		ids, err := pythonEndpointGroupIDs(t, api.List(context.Background(), request.Paginated(false)))
 		if err != nil || !reflect.DeepEqual(ids, []string{"a"}) || len(calls) != 1 {
 			t.Fatal(ids, err, calls)
 		}
@@ -318,7 +319,7 @@ func TestPythonEndpointGroupFindByIDThenName(t *testing.T) {
 				}
 				return 200, `{"endpoint_groups":` + item.list + `}`
 			})
-			v, err := api.Find(context.Background(), "web", endpointgroups.WithFindIgnoreMissing(!item.strict))
+			v, err := api.Find(context.Background(), "web", request.IgnoreMissing(!item.strict))
 			switch item.want {
 			case "":
 				if err != nil || v != nil {
@@ -362,8 +363,8 @@ func TestPythonEndpointGroupScopedLists(t *testing.T) {
 			}
 			return 200, `{"endpoints":[{"id":"e1","interface":"public","enabled":true,"url":"http://a","region_id":"r1","service_id":"s1"},{"id":"e2","enabled":false}],"links":{"next":null}}`
 		})
-		ids, err := pythonEndpointGroupIDs(t, api.ListEndpoints(context.Background(), "eg1", endpointgroups.WithListQuery("interface", "public"), endpointgroups.WithListQuery("region_id", "r1"),
-			endpointgroups.WithListQuery("service_id", "s1"), endpointgroups.WithListLimit(10), endpointgroups.WithListQuery("is_enabled", true)))
+		ids, err := pythonEndpointGroupIDs(t, api.ListEndpoints(context.Background(), "eg1", request.Query("interface", "public"), request.Query("region_id", "r1"),
+			request.Query("service_id", "s1"), request.Limit(10), request.Query("is_enabled", true)))
 		if err != nil || !reflect.DeepEqual(ids, []string{"e1"}) || len(calls) != 2 || calls[0].path != pythonEndpointGroupBase+"/eg1/endpoints" || calls[0].query != "interface=public&limit=10&region_id=r1&service_id=s1" || calls[1].query != "interface=public&limit=10&marker=e2&region_id=r1&service_id=s1" {
 			t.Fatal(ids, err, calls)
 		}
@@ -388,8 +389,8 @@ func TestPythonEndpointGroupScopedLists(t *testing.T) {
 		api := pythonEndpointGroupAPI(t, &calls, func(*http.Request) (int, string) {
 			return 200, `{"projects":[{"id":"p1","name":"demo","domain_id":"d","enabled":true,"description":"x","vendor":"v"},{"id":"p2","description":"y","tags":"t"}]}`
 		})
-		ids, err := pythonEndpointGroupIDs(t, api.ListProjects(context.Background(), "eg1", endpointgroups.WithListQuery("is_enabled", true), endpointgroups.WithListQuery("any_tags", []string{"a", "b"}),
-			endpointgroups.WithListQuery("domain_id", "d"), endpointgroups.WithListQuery("description", "x"), endpointgroups.WithListQuery("vendor", "v")))
+		ids, err := pythonEndpointGroupIDs(t, api.ListProjects(context.Background(), "eg1", request.Query("is_enabled", true), request.Query("any_tags", []string{"a", "b"}),
+			request.Query("domain_id", "d"), request.Query("description", "x"), request.Query("vendor", "v")))
 		if err != nil || !reflect.DeepEqual(ids, []string{"p1"}) || calls[0].path != pythonEndpointGroupBase+"/eg1/projects" || calls[0].query != "domain_id=d&enabled=True&tags-any=a&tags-any=b" {
 			t.Fatal(ids, err, calls)
 		}
@@ -413,7 +414,7 @@ func TestPythonEndpointGroupScopedLists(t *testing.T) {
 			return 200, `{"endpoint_groups":[{"id":"eg1","name":"web"}]}`
 		})
 		var got *endpointgroups.Record
-		for v, err := range api.ListProjectEndpointGroups(context.Background(), "p1", endpointgroups.WithListName("web"), endpointgroups.WithListLimit(3)) {
+		for v, err := range api.ListProjectEndpointGroups(context.Background(), "p1", endpointgroups.WithListName("web"), request.Limit(3)) {
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -431,7 +432,7 @@ func TestPythonEndpointGroupScopedLists(t *testing.T) {
 			return 200, `{"projects":[{"id":"p1","is_domain":false}]}`
 		})
 		var got *endpointgroups.Record
-		for v, err := range api.ListEndpointProjects(context.Background(), "e1", endpointgroups.WithListQuery("name", "demo"), endpointgroups.WithListMarker("m")) {
+		for v, err := range api.ListEndpointProjects(context.Background(), "e1", request.Query("name", "demo"), request.Marker("m")) {
 			if err != nil {
 				t.Fatal(err)
 			}

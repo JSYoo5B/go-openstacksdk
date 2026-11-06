@@ -2,7 +2,7 @@
 
 `service.Policies.ListRecords` and `AllRecords` provide the usable Go alternative for pinned openstacksdk `policies(**query)`. Policy declares only `limit` and `marker` as server query parameters. The SDK applies canonical Body filters (`id`, `name`, `blob`, `links`, `project_id`, `type`, `user_id`) locally after loading each Resource. Nested object filters use recursive subset matching. Unknown filter keys are ignored before JSON encoding.
 
-Each `PolicyRecord` owns a nullable, untyped declared `Resource` view, complete remote `Wire` fields, whole page `Envelope`, `Header` and `StatusCode`. Missing fields default to null; unknown response extensions remain in Wire. Return IDs and links are passive data. `WithRecordListLimit(0)` preserves explicit zero, while an omitted limit is absent. MaxItems counts raw rows before filtering, Paginated defaults true, and AllRecords preserves already consumed results on a later page/row error.
+Each `PolicyRecord` owns a nullable, untyped declared `Resource` view, complete remote `Wire` fields, whole page `Envelope`, `Header` and `StatusCode`. Missing fields default to null; unknown response extensions remain in Wire. Return IDs and links are passive data. `request.Limit(0)` preserves explicit zero, while an omitted limit is absent. MaxItems counts raw rows before filtering, Paginated defaults true, and AllRecords preserves already consumed results on a later page/row error.
 
 ## Standalone Python
 
@@ -36,6 +36,7 @@ import (
 
     identity "github.com/JSYoo5B/go-openstacksdk/identity/v3"
     "github.com/JSYoo5B/go-openstacksdk/identity/v3/policies"
+    "github.com/JSYoo5B/go-openstacksdk/request"
     "github.com/gophercloud/gophercloud/v2"
 )
 
@@ -46,7 +47,7 @@ func main() {
     client := &gophercloud.ServiceClient{ProviderClient: provider, Endpoint: gophercloud.NormalizeURL(endpoint), Type: "identity"}
     service := identity.New(client)
     for row, err := range service.Policies.ListRecords(context.Background(),
-        policies.WithRecordListLimit(100),
+        request.Limit(100),
         policies.WithRecordListFilter("project_id", "project-id"),
         policies.WithRecordListFilter("type", "application/json"),
     ) {

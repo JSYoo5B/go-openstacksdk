@@ -177,9 +177,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.CreateRecord`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordMutationOpts`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordMutationAttribute`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordMutationHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordMutationMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordMutationLocation`
 
 - Legacy native Create sends POST domains with the {"domain": {...}} envelope and decodes native model fields; Domain.options is omitted from that native model, rather than representing every Python Domain field.
@@ -397,13 +397,13 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.DomainRecord.Clone`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordListOpts`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordListQuery`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordListPaginated`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordListMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordListBasePath`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.BasePath`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordListJMESPath`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordListLocation`
 
@@ -452,8 +452,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.GetRecord`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.DomainRecord.Clone`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordGetOpts`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordGetHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordGetMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordGetLocation`
 
 - Get sends GET domains/{id} like Python get_domain and decodes the domain envelope.
@@ -561,13 +561,13 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.ProxyUsersInGroupRecords`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithGroupRecordListOpts`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithGroupRecordListQuery`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithGroupRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithGroupRecordListMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithGroupRecordListLocation`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithGroupRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithGroupRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithGroupRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithGroupRecordListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithGroupRecordListJMESPath`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.UserRecord.Clone`
 
@@ -617,13 +617,13 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.API.ProxyListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithRecordListOpts`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithRecordListQuery`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithRecordListPaginated`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithRecordListMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithRecordListBasePath`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.BasePath`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithRecordListJMESPath`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithRecordListLocation`
 
@@ -673,8 +673,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.AllRecords`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.ProxyListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.WithRecordListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.WithRecordListQuery`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.WithRecordListBasePath`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.BasePath`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.WithRecordListJMESPath`
 
 - List sends the single GET projects that Python projects() sends without arguments, maps the Python query names domain_id, enabled, is_domain, name, parent_id, tags, tags-any, not-tags and not-tags-any through ListOpts or WithListQuery, sends a limit without a marker follow-up, and rejects local Body filters before HTTP.
@@ -758,7 +758,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.ProxyListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.RoleRecord.Clone`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithRecordListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithRecordListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithRecordListLocation`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithRecordListJMESPath`
 
@@ -926,9 +926,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.UpdateRecord`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordMutationOpts`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordMutationAttribute`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordMutationHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordMutationMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordMutationLocation`
 
 - Legacy native Update sends PATCH domains/{id} with the {"domain": {...}} envelope and optional explicit WithUpdateField("id", id); the old fixture documents that opt-in native body, not pinned Resource.commit dirty-id behavior.
@@ -1062,15 +1062,15 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.ProxyListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithRecordListOpts`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithRecordListQuery`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithRecordListMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithRecordListBasePath`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.BasePath`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithRecordListJMESPath`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithRecordListLocation`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithRecordListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 
 - List sends the single GET users that Python users() sends without arguments, maps the Python query names domain_id, enabled, idp_id, name, password_expires_at, protocol_id and unique_id through ListOpts or WithListQuery, sends a limit without a marker follow-up, and rejects local Body filters before HTTP.
   Tests: `identity/v3/users/python_parity_test.go:TestPythonUserListRequests`.

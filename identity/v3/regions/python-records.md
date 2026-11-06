@@ -23,14 +23,14 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.RegionRecord.Clone`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.WithRecordListOpts`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.WithRecordListQuery`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.WithRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.WithRecordListMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.WithRecordListBasePath`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.BasePath`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.WithRecordListLocation`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.WithRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.WithRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.WithRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.WithRecordListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.WithRecordListJMESPath`
 
 - All with resource.WithQuery forwards parent_region_id, limit and marker to GET regions as Python regions(**query) does for mapped parameters and follows links.next.
@@ -94,6 +94,7 @@ import (
 
     openstack "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/identity/v3/regions"
+    "github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 func main() {
@@ -105,8 +106,8 @@ func main() {
     for row, err := range service.Regions.ListRecords(ctx,
         regions.WithRecordListQuery("parent_region_id", "Root"),
         regions.WithRecordListQuery("description", "operations"),
-        regions.WithRecordListLimit(100),
-        regions.WithRecordListMaxItems(100),
+        request.Limit(100),
+        request.MaxItems(100),
     ) {
         if err != nil { log.Fatal(err) }
         data, err := json.MarshalIndent(row.Resource.Body, "", "  ")

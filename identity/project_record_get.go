@@ -5,13 +5,14 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"maps"
+
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/projects"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
-	"maps"
-	"slices"
 )
 
 type ProjectGetOpts struct {
@@ -21,7 +22,18 @@ type ProjectGetOpts struct {
 	Microversion *string
 	Location     *resource.CloudLocation
 }
-type ProjectGetOption func(*ProjectGetOpts) error
+
+// ProjectGetOption is one option of GetProject: WithProjectGetOpts,
+// WithProjectGetDomainID, WithProjectGetRawDomainID, WithProjectGetFilters,
+// WithProjectGetLocation, request.Headers (replaces the headers),
+// request.Microversion or request.Custom over *ProjectGetOpts. Other shared
+// calls fail with resource.ErrInvalidOption before HTTP.
+type ProjectGetOption = request.GetCall
+
+var projectGetCalls = calls.Spec[ProjectGetOpts]{
+	Headers:      calls.Value(func(c *ProjectGetOpts) *map[string]string { return &c.Headers }),
+	Microversion: calls.Pointer(func(c *ProjectGetOpts) **string { return &c.Microversion }),
+}
 
 func copyProjectGetOpts(v ProjectGetOpts) ProjectGetOpts {
 	v.DomainID = bytes.Clone(v.DomainID)
@@ -45,7 +57,7 @@ func copyProjectGetOpts(v ProjectGetOpts) ProjectGetOpts {
 }
 func WithProjectGetOpts(v ProjectGetOpts) ProjectGetOption {
 	owned := copyProjectGetOpts(v)
-	return func(c *ProjectGetOpts) error { *c = copyProjectGetOpts(owned); return nil }
+	return request.Custom(func(c *ProjectGetOpts) error { *c = copyProjectGetOpts(owned); return nil })
 }
 func WithProjectGetDomainID(v string) ProjectGetOption {
 	raw, _ := json.Marshal(v)
@@ -53,29 +65,22 @@ func WithProjectGetDomainID(v string) ProjectGetOption {
 }
 func WithProjectGetRawDomainID(v json.RawMessage) ProjectGetOption {
 	owned := bytes.Clone(v)
-	return func(c *ProjectGetOpts) error { c.DomainID = bytes.Clone(owned); return nil }
+	return request.Custom(func(c *ProjectGetOpts) error { c.DomainID = bytes.Clone(owned); return nil })
 }
 func WithProjectGetFilters(v json.RawMessage) ProjectGetOption {
 	owned := bytes.Clone(v)
-	return func(c *ProjectGetOpts) error {
+	return request.Custom(func(c *ProjectGetOpts) error {
 		c.Filters = nil
 		if owned != nil {
 			x := json.RawMessage(bytes.Clone(owned))
 			c.Filters = &x
 		}
 		return nil
-	}
-}
-func WithProjectGetHeaders(v map[string]string) ProjectGetOption {
-	owned := maps.Clone(v)
-	return func(c *ProjectGetOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
-func WithProjectGetMicroversion(v string) ProjectGetOption {
-	return func(c *ProjectGetOpts) error { x := v; c.Microversion = &x; return nil }
+	})
 }
 func WithProjectGetLocation(v resource.CloudLocation) ProjectGetOption {
 	owned := v.Clone()
-	return func(c *ProjectGetOpts) error { x := owned.Clone(); c.Location = &x; return nil }
+	return request.Custom(func(c *ProjectGetOpts) error { x := owned.Clone(); c.Location = &x; return nil })
 }
 
 type ProjectGetResult struct {
@@ -226,7 +231,7 @@ func (c *ProjectReadCloud) GetProject(ctx context.Context, nameOrID string, opti
 		return nil, wrap(err)
 	}
 	policy := copyProjectGetOpts(ProjectGetOpts{})
-	for _, apply := range slices.Clone(options) {
+	for _, apply := range calls.Translate(options, projectGetCalls) {
 		if err := guard(); err != nil {
 			return nil, wrap(err)
 		}

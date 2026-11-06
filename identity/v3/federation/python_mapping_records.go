@@ -7,6 +7,8 @@ import (
 	"net/http"
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/internal/osfederation"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
@@ -66,23 +68,23 @@ func (a *API) mappingTarget() osfederation.Target {
 
 // GetMappingRecord implements get_mapping(mapping): GET OS-FEDERATION/mappings/{id}.
 func (a *API) GetMappingRecord(ctx context.Context, id string, options ...MappingRecordReadOption) (*MappingRecord, error) {
-	return mappingResult(osfederation.Get(ctx, a.mappingTarget(), id, options))
+	return mappingResult(osfederation.Get(ctx, a.mappingTarget(), id, calls.Translate(options, osfederation.ReadCalls)))
 }
 
 // UpdateMappingRecord implements update_mapping(mapping, **attrs): PATCH with
 // only the given declared attributes. No declared attribute means no request.
 func (a *API) UpdateMappingRecord(ctx context.Context, id string, options ...MappingRecordWriteOption) (*MappingRecord, error) {
-	return mappingResult(osfederation.Update(ctx, a.mappingTarget(), id, options))
+	return mappingResult(osfederation.Update(ctx, a.mappingTarget(), id, calls.Translate(options, mappingWriteCalls)))
 }
 
 // DeleteMappingRecord implements delete_mapping(mapping, ignore_missing=True).
 func (a *API) DeleteMappingRecord(ctx context.Context, id string, options ...MappingRecordDeleteOption) error {
-	return osfederation.Delete(ctx, a.mappingTarget(), id, options)
+	return osfederation.Delete(ctx, a.mappingTarget(), id, calls.Translate(options, osfederation.DeleteIgnoreMissingCalls))
 }
 
 // ListMappingRecords implements mappings(**query) as a lazy iterator.
 func (a *API) ListMappingRecords(ctx context.Context, options ...MappingRecordListOption) iter.Seq2[*MappingRecord, error] {
-	source := osfederation.List(ctx, a.mappingTarget(), options)
+	source := osfederation.List(ctx, a.mappingTarget(), calls.Translate(options, mappingListCalls))
 	return func(yield func(*MappingRecord, error) bool) {
 		for record, err := range source {
 			if !yield(mappingRecord(record), err) || err != nil {
@@ -108,72 +110,68 @@ func (a *API) AllMappingRecords(ctx context.Context, options ...MappingRecordLis
 // GET by ID first and, after a clean 400, 403 or 404, the complete list
 // matched by exact ID (name is the ID).
 func (a *API) FindMappingRecord(ctx context.Context, nameOrID string, options ...MappingRecordFindOption) (*MappingRecord, error) {
-	return mappingResult(osfederation.Find(ctx, a.mappingTarget(), nameOrID, nil, options))
+	return mappingResult(osfederation.Find(ctx, a.mappingTarget(), nameOrID, nil, calls.Translate(options, osfederation.FindCalls)))
 }
 
 // MappingRecordReadOpts carries per-request headers, a Go extension.
 type MappingRecordReadOpts = osfederation.ReadOpts
-type MappingRecordReadOption func(*MappingRecordReadOpts) error
 
-func WithMappingRecordReadHeaders(values map[string]string) MappingRecordReadOption {
-	return MappingRecordReadOption(osfederation.ReadHeaders(values))
-}
+// MappingRecordReadOption is one option of GetMappingRecord: request.Headers
+// (replaces the headers) or request.Custom over *MappingRecordReadOpts. Other
+// shared calls fail with resource.ErrInvalidOption before HTTP.
+type MappingRecordReadOption = request.GetCall
 
 // MappingRecordWriteOpts carries the Python **attrs of update_mapping as raw
 // JSON keyed by rules or schema_version; id and name never enter the body.
 type MappingRecordWriteOpts = osfederation.WriteOpts
-type MappingRecordWriteOption func(*MappingRecordWriteOpts) error
+
+// MappingRecordWriteOption is one option of UpdateMappingRecord:
+// WithMappingRecordWriteOpts, request.Field (one Python attribute; unknown
+// names are dropped with their marshal error), request.Headers (replaces the
+// headers) or request.Custom over *MappingRecordWriteOpts. Other shared calls
+// fail with resource.ErrInvalidOption before HTTP.
+type MappingRecordWriteOption = request.WriteCall
 
 func WithMappingRecordWriteOpts(opts MappingRecordWriteOpts) MappingRecordWriteOption {
-	return MappingRecordWriteOption(osfederation.WriteSnapshot(opts))
-}
-func WithMappingRecordField(key string, value any) MappingRecordWriteOption {
-	return MappingRecordWriteOption(mappingSpec.WriteField(key, value))
-}
-func WithMappingRecordWriteHeaders(values map[string]string) MappingRecordWriteOption {
-	return MappingRecordWriteOption(osfederation.WriteHeaders(values))
+	return request.Custom(osfederation.WriteSnapshot(opts))
 }
 
 // MappingRecordDeleteOpts selects ignore_missing; nil keeps the Python default true.
 type MappingRecordDeleteOpts = osfederation.DeleteOpts
-type MappingRecordDeleteOption func(*MappingRecordDeleteOpts) error
 
-func WithMappingRecordDeleteIgnoreMissing(value bool) MappingRecordDeleteOption {
-	return MappingRecordDeleteOption(osfederation.DeleteIgnoreMissing(value))
-}
+// MappingRecordDeleteOption is one option of DeleteMappingRecord:
+// request.IgnoreMissing or request.Custom over *MappingRecordDeleteOpts. Other
+// shared calls, including request.Header and request.Headers, fail with
+// resource.ErrInvalidOption before HTTP.
+type MappingRecordDeleteOption = request.DeleteCall
 
 // MappingRecordFindOpts selects ignore_missing; nil keeps the Python default true.
 type MappingRecordFindOpts = osfederation.FindOpts
-type MappingRecordFindOption func(*MappingRecordFindOpts) error
 
-func WithMappingRecordFindIgnoreMissing(value bool) MappingRecordFindOption {
-	return MappingRecordFindOption(osfederation.FindIgnoreMissing(value))
-}
+// MappingRecordFindOption is one option of FindMappingRecord:
+// request.IgnoreMissing or request.Custom over *MappingRecordFindOpts. Other
+// shared calls fail with resource.ErrInvalidOption before HTTP.
+type MappingRecordFindOption = request.FindCall
 
 // MappingRecordListOpts carries Python **query. Mapping maps no server query
 // besides limit and marker, so id, name, rules and schema_version filter rows
 // locally and other names are ignored.
 type MappingRecordListOpts = osfederation.ListOpts
-type MappingRecordListOption func(*MappingRecordListOpts) error
+
+// MappingRecordListOption is one option of ListMappingRecords and
+// AllMappingRecords: WithMappingRecordListOpts, request.Query (one Python
+// **query name as JSON; unknown names are dropped with their marshal error),
+// request.Limit, request.Marker, request.MaxItems, request.Paginated,
+// request.Headers (replaces the headers) or request.Custom over
+// *MappingRecordListOpts. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type MappingRecordListOption = request.ListCall
 
 func WithMappingRecordListOpts(opts MappingRecordListOpts) MappingRecordListOption {
-	return MappingRecordListOption(osfederation.ListSnapshot(opts))
+	return request.Custom(osfederation.ListSnapshot(opts))
 }
-func WithMappingRecordListQuery(key string, value any) MappingRecordListOption {
-	return MappingRecordListOption(mappingSpec.ListQuery(key, value))
-}
-func WithMappingRecordListLimit(limit int) MappingRecordListOption {
-	return MappingRecordListOption(osfederation.ListLimit(limit))
-}
-func WithMappingRecordListMarker(marker string) MappingRecordListOption {
-	return MappingRecordListOption(osfederation.ListMarker(marker))
-}
-func WithMappingRecordListMaxItems(count int) MappingRecordListOption {
-	return MappingRecordListOption(osfederation.ListMaxItems(count))
-}
-func WithMappingRecordListPaginated(value bool) MappingRecordListOption {
-	return MappingRecordListOption(osfederation.ListPaginated(value))
-}
-func WithMappingRecordListHeaders(values map[string]string) MappingRecordListOption {
-	return MappingRecordListOption(osfederation.ListHeaders(values))
-}
+
+var (
+	mappingWriteCalls = mappingSpec.WriteCalls()
+	mappingListCalls  = mappingSpec.ListCalls()
+)

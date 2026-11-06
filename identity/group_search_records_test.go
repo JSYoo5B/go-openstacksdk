@@ -13,6 +13,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/identity"
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/groups"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -185,7 +186,7 @@ func TestPythonGroupCloudOptionsGuardCallbacksAndSelectedSourceSnapshot(t *testi
 	})
 	client := cloud.RawAPI().RawClient()
 	client.MoreHeaders = map[string]string{"X-Snapshot": "before"}
-	_, err := cloud.SearchGroups(context.Background(), "", identity.GroupSearchOption(func(*identity.GroupSearchOpts) error {
+	_, err := cloud.SearchGroups(context.Background(), "", request.Custom(func(*identity.GroupSearchOpts) error {
 		client.MoreHeaders["X-Snapshot"] = "after"
 		client.MoreHeaders["X-Late"] = "after"
 		return nil
@@ -202,7 +203,7 @@ func TestPythonGroupCloudOptionsGuardCallbacksAndSelectedSourceSnapshot(t *testi
 			ctx, cancel := context.WithCancelCause(context.Background())
 			defer cancel(nil)
 			cause := errors.New("caller canceled group search")
-			first := identity.GroupSearchOption(func(*identity.GroupSearchOpts) error {
+			first := request.Custom(func(*identity.GroupSearchOpts) error {
 				if mode == "source" {
 					client.Endpoint += "changed"
 				} else {
@@ -213,7 +214,7 @@ func TestPythonGroupCloudOptionsGuardCallbacksAndSelectedSourceSnapshot(t *testi
 			if mode == "nil" {
 				first = nil
 			}
-			_, err := cloud.SearchGroups(ctx, "", first, identity.GroupSearchOption(func(*identity.GroupSearchOpts) error { seen++; client.Endpoint = endpoint; return nil }))
+			_, err := cloud.SearchGroups(ctx, "", first, request.Custom(func(*identity.GroupSearchOpts) error { seen++; client.Endpoint = endpoint; return nil }))
 			var proof *resource.ResponseError
 			if err == nil || seen != 0 || calls != before || errors.As(err, &proof) {
 				t.Fatal(err, seen, calls, proof)

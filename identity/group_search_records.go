@@ -7,9 +7,9 @@ import (
 	"errors"
 	"fmt"
 	"maps"
-	"slices"
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/groups"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
@@ -38,7 +38,18 @@ type GroupSearchOpts struct {
 	Microversion *string
 	Location     *resource.CloudLocation
 }
-type GroupSearchOption func(*GroupSearchOpts) error
+
+// GroupSearchOption is one option of SearchGroups: WithGroupSearchOpts,
+// WithGroupSearchDomainID, WithGroupSearchFilters, WithGroupSearchLocation,
+// request.Headers (replaces the headers), request.Microversion or
+// request.Custom over *GroupSearchOpts. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type GroupSearchOption = request.GetCall
+
+var groupSearchCalls = calls.Spec[GroupSearchOpts]{
+	Headers:      calls.Value(func(c *GroupSearchOpts) *map[string]string { return &c.Headers }),
+	Microversion: calls.Pointer(func(c *GroupSearchOpts) **string { return &c.Microversion }),
+}
 
 func copyGroupSearchOpts(v GroupSearchOpts) GroupSearchOpts {
 	v.Headers = maps.Clone(v.Headers)
@@ -62,32 +73,25 @@ func copyGroupSearchOpts(v GroupSearchOpts) GroupSearchOpts {
 }
 func WithGroupSearchOpts(v GroupSearchOpts) GroupSearchOption {
 	owned := copyGroupSearchOpts(v)
-	return func(c *GroupSearchOpts) error { *c = copyGroupSearchOpts(owned); return nil }
+	return request.Custom(func(c *GroupSearchOpts) error { *c = copyGroupSearchOpts(owned); return nil })
 }
 func WithGroupSearchDomainID(v string) GroupSearchOption {
-	return func(c *GroupSearchOpts) error { x := v; c.DomainID = &x; return nil }
+	return request.Custom(func(c *GroupSearchOpts) error { x := v; c.DomainID = &x; return nil })
 }
 func WithGroupSearchFilters(v json.RawMessage) GroupSearchOption {
 	owned := bytes.Clone(v)
-	return func(c *GroupSearchOpts) error {
+	return request.Custom(func(c *GroupSearchOpts) error {
 		c.Filters = nil
 		if owned != nil {
 			x := json.RawMessage(bytes.Clone(owned))
 			c.Filters = &x
 		}
 		return nil
-	}
-}
-func WithGroupSearchHeaders(v map[string]string) GroupSearchOption {
-	owned := maps.Clone(v)
-	return func(c *GroupSearchOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
-func WithGroupSearchMicroversion(v string) GroupSearchOption {
-	return func(c *GroupSearchOpts) error { x := v; c.Microversion = &x; return nil }
+	})
 }
 func WithGroupSearchLocation(v resource.CloudLocation) GroupSearchOption {
 	owned := v.Clone()
-	return func(c *GroupSearchOpts) error { x := owned.Clone(); c.Location = &x; return nil }
+	return request.Custom(func(c *GroupSearchOpts) error { x := owned.Clone(); c.Location = &x; return nil })
 }
 func groupSearchInvalid(format string, args ...any) error {
 	return fmt.Errorf("%w: %s", resource.ErrInvalidOption, fmt.Sprintf(format, args...))
@@ -131,7 +135,7 @@ func (c *GroupReadCloud) prepareGroupSearch(ctx context.Context, options []Group
 	}
 	ctx = rest.WithOperationGuard(ctx, sourceGuard)
 	guard := func() error { return sourceGuard(ctx) }
-	for _, apply := range slices.Clone(options) {
+	for _, apply := range calls.Translate(options, groupSearchCalls) {
 		if err := guard(); err != nil {
 			return ctx, nil, policy, guard, err
 		}
@@ -169,10 +173,10 @@ func (c *GroupReadCloud) SearchGroups(ctx context.Context, nameOrID string, opti
 	}
 	opts = append(opts, groups.WithRecordListQuery("domain_id", domain))
 	if policy.Headers != nil {
-		opts = append(opts, groups.WithRecordListHeaders(policy.Headers))
+		opts = append(opts, request.Headers(policy.Headers))
 	}
 	if policy.Microversion != nil {
-		opts = append(opts, groups.WithRecordListMicroversion(*policy.Microversion))
+		opts = append(opts, request.Microversion(*policy.Microversion))
 	}
 	if policy.Location != nil {
 		opts = append(opts, groups.WithRecordListLocation(*policy.Location))

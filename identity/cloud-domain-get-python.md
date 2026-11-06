@@ -17,8 +17,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.GetRecord`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.DomainRecord.Clone`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordGetOpts`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordGetHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordGetMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordGetLocation`
 
 - Get sends GET domains/{id} like Python get_domain and decodes the domain envelope.
@@ -57,8 +57,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainGetID`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainGetNameOrID`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainGetFilters`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainGetHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainGetMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainGetLocation`
 
 - get_domain(domain_id=...) is a direct GET /v3/domains/<id>, and get_domain(name_or_id=...) maps to Domains FindIdentity which sends the GET then the name list.

@@ -8,6 +8,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/projectendpoints"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -50,17 +51,17 @@ func TestPythonProjectEndpointRecordListQueryFiltersAndModel(t *testing.T) {
 
 	calls = nil
 	values, err = api.AllRecords(context.Background(), "p1",
-		projectendpoints.WithRecordListQuery("interface", "public"),
-		projectendpoints.WithRecordListQuery("region_id", "RegionOne"),
-		projectendpoints.WithRecordListQuery("service_id", "s1"),
-		projectendpoints.WithRecordListQuery("is_enabled", false),
-		projectendpoints.WithRecordListQuery("project_id", "other"))
+		request.Query("interface", "public"),
+		request.Query("region_id", "RegionOne"),
+		request.Query("service_id", "s1"),
+		request.Query("is_enabled", false),
+		request.Query("project_id", "other"))
 	if err != nil || len(values) != 1 || values[0].ID != "e2" || calls[0].query != "interface=public&region_id=RegionOne&service_id=s1" {
 		t.Fatal(err, values, calls)
 	}
 
 	calls = nil
-	values, err = api.AllRecords(context.Background(), "a/b", projectendpoints.WithRecordListQuery("url", "https://a"))
+	values, err = api.AllRecords(context.Background(), "a/b", request.Query("url", "https://a"))
 	if err != nil || len(values) != 1 || values[0].ID != "e1" || values[0].ProjectID != "a/b" || calls[0].path != "/keystone/v3/OS-EP-FILTER/projects/a%2Fb/endpoints" {
 		t.Fatal(err, values, calls)
 	}
@@ -79,14 +80,14 @@ func TestPythonProjectEndpointRecordListPagingAndStatuses(t *testing.T) {
 		pages = pages[1:]
 		return 200, page
 	})
-	values, err := api.AllRecords(context.Background(), "p1", projectendpoints.WithRecordListLimit(2))
+	values, err := api.AllRecords(context.Background(), "p1", request.Limit(2))
 	if err != nil || len(values) != 2 || len(calls) != 2 || calls[0].query != "limit=2" || calls[1].query != "limit=2&marker=e2" {
 		t.Fatal(err, values, calls)
 	}
 
 	calls = nil
 	pages = []string{`{"endpoints":[{"id":"e1"},{"id":"e2"}]}`}
-	values, err = api.AllRecords(context.Background(), "p1", projectendpoints.WithRecordListMaxItems(1))
+	values, err = api.AllRecords(context.Background(), "p1", request.MaxItems(1))
 	if err != nil || len(values) != 1 || len(calls) != 1 || calls[0].query != "limit=1" {
 		t.Fatal(err, values, calls)
 	}

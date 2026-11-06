@@ -5,13 +5,14 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"maps"
+
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/groups"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
-	"maps"
-	"slices"
 )
 
 type GroupGetOpts struct {
@@ -21,7 +22,18 @@ type GroupGetOpts struct {
 	Microversion *string
 	Location     *resource.CloudLocation
 }
-type GroupGetOption func(*GroupGetOpts) error
+
+// GroupGetOption is one option of GetGroup: WithGroupGetOpts,
+// WithGroupGetDomainID, WithGroupGetRawDomainID, WithGroupGetFilters,
+// WithGroupGetLocation, request.Headers (replaces the headers),
+// request.Microversion or request.Custom over *GroupGetOpts. Other shared
+// calls fail with resource.ErrInvalidOption before HTTP.
+type GroupGetOption = request.GetCall
+
+var groupGetCalls = calls.Spec[GroupGetOpts]{
+	Headers:      calls.Value(func(c *GroupGetOpts) *map[string]string { return &c.Headers }),
+	Microversion: calls.Pointer(func(c *GroupGetOpts) **string { return &c.Microversion }),
+}
 
 func copyGroupGetOpts(v GroupGetOpts) GroupGetOpts {
 	v.DomainID = bytes.Clone(v.DomainID)
@@ -45,7 +57,7 @@ func copyGroupGetOpts(v GroupGetOpts) GroupGetOpts {
 }
 func WithGroupGetOpts(v GroupGetOpts) GroupGetOption {
 	owned := copyGroupGetOpts(v)
-	return func(c *GroupGetOpts) error { *c = copyGroupGetOpts(owned); return nil }
+	return request.Custom(func(c *GroupGetOpts) error { *c = copyGroupGetOpts(owned); return nil })
 }
 func WithGroupGetDomainID(v string) GroupGetOption {
 	raw, _ := json.Marshal(v)
@@ -53,29 +65,22 @@ func WithGroupGetDomainID(v string) GroupGetOption {
 }
 func WithGroupGetRawDomainID(v json.RawMessage) GroupGetOption {
 	owned := bytes.Clone(v)
-	return func(c *GroupGetOpts) error { c.DomainID = bytes.Clone(owned); return nil }
+	return request.Custom(func(c *GroupGetOpts) error { c.DomainID = bytes.Clone(owned); return nil })
 }
 func WithGroupGetFilters(v json.RawMessage) GroupGetOption {
 	owned := bytes.Clone(v)
-	return func(c *GroupGetOpts) error {
+	return request.Custom(func(c *GroupGetOpts) error {
 		c.Filters = nil
 		if owned != nil {
 			x := json.RawMessage(bytes.Clone(owned))
 			c.Filters = &x
 		}
 		return nil
-	}
-}
-func WithGroupGetHeaders(v map[string]string) GroupGetOption {
-	owned := maps.Clone(v)
-	return func(c *GroupGetOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
-func WithGroupGetMicroversion(v string) GroupGetOption {
-	return func(c *GroupGetOpts) error { x := v; c.Microversion = &x; return nil }
+	})
 }
 func WithGroupGetLocation(v resource.CloudLocation) GroupGetOption {
 	owned := v.Clone()
-	return func(c *GroupGetOpts) error { x := owned.Clone(); c.Location = &x; return nil }
+	return request.Custom(func(c *GroupGetOpts) error { x := owned.Clone(); c.Location = &x; return nil })
 }
 
 type GroupGetResult struct {
@@ -90,9 +95,9 @@ func groupGetSearch(ctx context.Context, api *groups.API, id string, policy Grou
 	if domain == nil {
 		domain = json.RawMessage("null")
 	}
-	options := []groups.RecordListOption{groups.WithRecordListQuery("domain_id", domain), groups.WithRecordListHeaders(policy.Headers)}
+	options := []groups.RecordListOption{groups.WithRecordListQuery("domain_id", domain), request.Headers(policy.Headers)}
 	if policy.Microversion != nil {
-		options = append(options, groups.WithRecordListMicroversion(*policy.Microversion))
+		options = append(options, request.Microversion(*policy.Microversion))
 	}
 	if policy.Location != nil {
 		options = append(options, groups.WithRecordListLocation(*policy.Location))
@@ -139,7 +144,7 @@ func (c *GroupReadCloud) GetGroup(ctx context.Context, nameOrID string, options 
 		return nil, wrap(err)
 	}
 	policy := copyGroupGetOpts(GroupGetOpts{})
-	for _, apply := range slices.Clone(options) {
+	for _, apply := range calls.Translate(options, groupGetCalls) {
 		if err := guard(); err != nil {
 			return nil, wrap(err)
 		}

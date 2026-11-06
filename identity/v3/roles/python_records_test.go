@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/roles"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -81,7 +82,7 @@ func TestPythonRoleRecordsDeclaredQueryAndOrderedLoadedLocalFilters(t *testing.T
 		query = r.URL.Query()
 		return roleRecordWire(200, `{"roles":[{"id":"a","name":"server name","description":0.10000000000000001,"options":{"flag":1.0}},{"id":"b","description":0.2,"options":{"flag":false}}]}`)
 	})
-	rows, err := api.AllRecords(context.Background(), roles.WithRecordListQuery("domain_id", []string{"d1", "d2"}), roles.WithRecordListQuery("name", false), roles.WithRecordListQuery("description", json.RawMessage(`0.1`)), roles.WithRecordListQuery("options", map[string]any{"flag": true}), roles.WithRecordListQuery("unknown", func() {}))
+	rows, err := api.AllRecords(context.Background(), request.Query("domain_id", []string{"d1", "d2"}), request.Query("name", false), request.Query("description", json.RawMessage(`0.1`)), request.Query("options", map[string]any{"flag": true}), request.Query("unknown", func() {}))
 	if err != nil || !reflect.DeepEqual(roleRecordIDs(t, rows), []string{"a"}) || !reflect.DeepEqual(query, url.Values{"domain_id": {"d1", "d2"}, "name": {"False"}}) {
 		t.Fatal(rows, err, query)
 	}
@@ -89,7 +90,7 @@ func TestPythonRoleRecordsDeclaredQueryAndOrderedLoadedLocalFilters(t *testing.T
 		api, _ := roleRecordAPI(t, func(*http.Request) *http.Response {
 			return roleRecordWire(200, `{"roles":[{"id":"a","links":`+raw+`}]}`)
 		})
-		rows, err := api.AllRecords(context.Background(), roles.WithRecordListQuery("links", map[string]any{}))
+		rows, err := api.AllRecords(context.Background(), request.Query("links", map[string]any{}))
 		if err != nil || len(rows) != 1 {
 			t.Fatal(raw, rows, err)
 		}
@@ -113,13 +114,13 @@ func TestPythonRoleRecordsRawMarkerShortPagesCapBreakAndReusableIterator(t *test
 			return roleRecordWire(200, `{"roles":[]}`)
 		}
 	})
-	opts := []roles.RecordListOption{roles.WithRecordListLimit(2), roles.WithRecordListQuery("domain_id", "d"), roles.WithRecordListQuery("description", "keep")}
+	opts := []roles.RecordListOption{request.Limit(2), request.Query("domain_id", "d"), request.Query("description", "keep")}
 	rows, err := api.AllRecords(context.Background(), opts...)
 	if err != nil || !reflect.DeepEqual(roleRecordIDs(t, rows), []string{"b", "c"}) || !reflect.DeepEqual(markers, []string{"", "b", "c"}) {
 		t.Fatal(rows, err, markers)
 	}
 	calls = 0
-	rows, err = api.AllRecords(context.Background(), append(opts, roles.WithRecordListMaxItems(2))...)
+	rows, err = api.AllRecords(context.Background(), append(opts, request.MaxItems(2))...)
 	if err != nil || len(rows) != 1 || calls != 1 {
 		t.Fatal(rows, err, calls)
 	}
@@ -164,7 +165,7 @@ func TestPythonRoleRecordsSourceDictionaryRootPresenceAndActualContinuationGuard
 				}
 				return roleRecordWire(200, `{"roles":[{"id":"a"}]`+suffix+`}`)
 			})
-			rows, err := api.AllRecords(context.Background(), roles.WithRecordListQuery("domain_id", "d"))
+			rows, err := api.AllRecords(context.Background(), request.Query("domain_id", "d"))
 			if mode == "dictionary" || mode == "root masks plural" {
 				if err != nil || len(rows) != 1 || calls != 1 {
 					t.Fatal(rows, err, calls)
@@ -229,7 +230,7 @@ func TestPythonRoleRecordsOptionSnapshotsFormalsAndPreflightSourceGuards(t *test
 		t.Fatal(err, calls, query)
 	}
 	before := calls
-	for _, options := range [][]roles.RecordListOption{{nil}, {roles.WithRecordListQuery("self", func() {})}, {roles.WithRecordListQuery("__conflicting_attrs", map[string]any{"paginated": false})}, {roles.WithRecordListBasePath("https://foreign.invalid/")}, {roles.WithRecordListMaxItems(-1)}} {
+	for _, options := range [][]roles.RecordListOption{{nil}, {request.Query("self", func() {})}, {request.Query("__conflicting_attrs", map[string]any{"paginated": false})}, {request.BasePath("https://foreign.invalid/")}, {request.MaxItems(-1)}} {
 		rows, err := api.AllRecords(context.Background(), options...)
 		var proof *resource.ResponseError
 		if rows != nil || !errors.Is(err, resource.ErrInvalidOption) || errors.As(err, &proof) || calls != before {
@@ -238,12 +239,12 @@ func TestPythonRoleRecordsOptionSnapshotsFormalsAndPreflightSourceGuards(t *test
 	}
 	cause := errors.New("role callback canceled")
 	ctx, cancel := context.WithCancelCause(context.Background())
-	_, err = api.AllRecords(ctx, func(*roles.RecordListOpts) error { cancel(cause); return nil })
+	_, err = api.AllRecords(ctx, request.Custom(func(*roles.RecordListOpts) error { cancel(cause); return nil }))
 	if !errors.Is(err, cause) || !errors.Is(err, context.Canceled) || calls != before {
 		t.Fatal(err, calls)
 	}
 	old := api.RawClient().Endpoint
-	_, err = api.AllRecords(context.Background(), func(*roles.RecordListOpts) error { api.RawClient().Endpoint = "https://changed.invalid/"; return nil })
+	_, err = api.AllRecords(context.Background(), request.Custom(func(*roles.RecordListOpts) error { api.RawClient().Endpoint = "https://changed.invalid/"; return nil }))
 	api.RawClient().Endpoint = old
 	if !errors.Is(err, resource.ErrInvalidOption) || calls != before {
 		t.Fatal(err, calls)
@@ -275,7 +276,7 @@ func TestPythonRoleRecordsMalformedRowsAndLocalFilterFaultRetainAcceptedPage(t *
 		api, _ := roleRecordAPI(t, func(*http.Request) *http.Response { return roleRecordWire(203, body) })
 		opts := []roles.RecordListOption{}
 		if strings.Contains(body, `"links":3`) {
-			opts = append(opts, roles.WithRecordListQuery("links", map[string]any{"key": "value"}))
+			opts = append(opts, request.Query("links", map[string]any{"key": "value"}))
 		}
 		rows, err := api.AllRecords(context.Background(), opts...)
 		var proof *resource.ResponseError
@@ -393,7 +394,7 @@ func TestPythonRoleRecordsCleanReauthRetryAndBackoffKeepFrozenIdentityRequest(t 
 				return nil
 			}
 			api.RawClient().MoreHeaders = map[string]string{"X-Selected": "fixed"}
-			_, err := api.AllRecords(context.Background(), roles.WithRecordListQuery("domain_id", "d"), roles.WithRecordListMicroversion("3.1"))
+			_, err := api.AllRecords(context.Background(), request.Query("domain_id", "d"), request.Microversion("3.1"))
 			if err != nil || calls != 2 {
 				t.Fatal(err, calls, reauth, retries, backoff)
 			}

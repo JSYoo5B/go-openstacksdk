@@ -14,6 +14,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/identity"
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/services"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -184,7 +185,7 @@ func TestPythonServiceCloudOptionsGuardCallbacksAndSelectedSourceSnapshot(t *tes
 	})
 	client := cloud.RawAPI().RawClient()
 	client.MoreHeaders = map[string]string{"X-Snapshot": "before"}
-	_, err := cloud.SearchServices(context.Background(), "", identity.ServiceReadOption(func(*identity.ServiceReadOpts) error {
+	_, err := cloud.SearchServices(context.Background(), "", request.Custom(func(*identity.ServiceReadOpts) error {
 		client.MoreHeaders["X-Snapshot"] = "after"
 		client.MoreHeaders["X-Late"] = "after"
 		return nil
@@ -201,7 +202,7 @@ func TestPythonServiceCloudOptionsGuardCallbacksAndSelectedSourceSnapshot(t *tes
 			ctx, cancel := context.WithCancelCause(context.Background())
 			defer cancel(nil)
 			cause := errors.New("caller canceled service search")
-			first := identity.ServiceReadOption(func(*identity.ServiceReadOpts) error {
+			first := request.Custom(func(*identity.ServiceReadOpts) error {
 				if mode == "source" {
 					client.Endpoint += "changed"
 				} else {
@@ -212,7 +213,7 @@ func TestPythonServiceCloudOptionsGuardCallbacksAndSelectedSourceSnapshot(t *tes
 			if mode == "nil" {
 				first = nil
 			}
-			_, err := cloud.SearchServices(ctx, "", first, identity.ServiceReadOption(func(*identity.ServiceReadOpts) error { seen++; client.Endpoint = endpoint; return nil }))
+			_, err := cloud.SearchServices(ctx, "", first, request.Custom(func(*identity.ServiceReadOpts) error { seen++; client.Endpoint = endpoint; return nil }))
 			var proof *resource.ResponseError
 			if err == nil || seen != 0 || calls != before || errors.As(err, &proof) {
 				t.Fatal(err, seen, calls, proof)
@@ -442,12 +443,12 @@ func TestPythonServiceCloudGetOptionCallbackOnceCapturedSourceAndOwnedLocation(t
 	name = "changed"
 	for _, deprecated := range []bool{false, true} {
 		api.RawClient().MoreHeaders = map[string]string{"X-Before": "original"}
-		opts := []identity.ServiceReadOption{loc, func(*identity.ServiceReadOpts) error {
+		opts := []identity.ServiceReadOption{loc, request.Custom(func(*identity.ServiceReadOpts) error {
 			options++
 			api.RawClient().MoreHeaders["X-Before"] = "mutated"
 			api.RawClient().MoreHeaders["X-After"] = "late"
 			return nil
-		}}
+		})}
 		if deprecated {
 			opts = append(opts, identity.WithServiceReadFilters(json.RawMessage(`{}`)))
 		}

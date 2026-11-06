@@ -122,12 +122,12 @@ func main() {
             "remote": []any{map[string]any{"type": "REMOTE_USER", "any_one_of": []string{"alice"}}},
         }}
         row, err = service.Federation.CreateSourceMappingRecord(ctx,
-            federation.WithSourceMappingAttribute("id", *id),
-            federation.WithSourceMappingAttribute("rules", rules),
-            federation.WithSourceMappingAttribute("schema_version", "2.0"))
+            request.Field("id", *id),
+            request.Field("rules", rules),
+            request.Field("schema_version", "2.0"))
     case "update":
         row, err = service.Federation.UpdateSourceMappingRecord(ctx, *id,
-            federation.WithSourceMappingAttribute("schema_version", "2.0"))
+            request.Field("schema_version", "2.0"))
     case "find":
         row, err = service.Federation.FindSourceMappingRecord(ctx, *id)
     default:

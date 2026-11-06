@@ -10,6 +10,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/federation"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -101,12 +102,12 @@ func TestPythonMappingRecordListFiltersPagingFindUpdateDelete(t *testing.T) {
 	pyMappingRecordCheck(t, values[0])
 
 	calls = nil
-	values, err = api.AllMappingRecords(context.Background(), federation.WithMappingRecordListQuery("schema_version", "1.0"), federation.WithMappingRecordListQuery("unknown", 1))
+	values, err = api.AllMappingRecords(context.Background(), request.Query("schema_version", "1.0"), request.Query("unknown", 1))
 	if err != nil || len(values) != 1 || values[0].ID != "m2" || calls[0].query != "" {
 		t.Fatal(err, values, calls)
 	}
 	calls = nil
-	values, err = api.AllMappingRecords(context.Background(), federation.WithMappingRecordListQuery("name", "m1"))
+	values, err = api.AllMappingRecords(context.Background(), request.Query("name", "m1"))
 	if err != nil || len(values) != 1 || values[0].ID != "m1" || calls[0].query != "" {
 		t.Fatal(err, values, calls)
 	}
@@ -118,7 +119,7 @@ func TestPythonMappingRecordListFiltersPagingFindUpdateDelete(t *testing.T) {
 		pages = pages[1:]
 		return 200, page
 	})
-	values, err = api.AllMappingRecords(context.Background(), federation.WithMappingRecordListLimit(1), federation.WithMappingRecordListMarker("start"))
+	values, err = api.AllMappingRecords(context.Background(), request.Limit(1), request.Marker("start"))
 	if err != nil || len(values) != 1 || len(calls) != 2 || calls[0].query != "limit=1&marker=start" || calls[1].query != "limit=1&marker=a" {
 		t.Fatal(err, values, calls)
 	}
@@ -142,7 +143,7 @@ func TestPythonMappingRecordListFiltersPagingFindUpdateDelete(t *testing.T) {
 	pyMappingRecordCheck(t, v)
 
 	calls = nil
-	v, err = api.UpdateMappingRecord(context.Background(), "m1", federation.WithMappingRecordField("name", "x"), federation.WithMappingRecordField("schema_version", "2.0"), federation.WithMappingRecordField("rules", []any{}))
+	v, err = api.UpdateMappingRecord(context.Background(), "m1", request.Field("name", "x"), request.Field("schema_version", "2.0"), request.Field("rules", []any{}))
 	if err != nil || len(calls) != 1 || calls[0].method != http.MethodPatch || calls[0].body != `{"mapping":{"rules":[],"schema_version":"2.0"}}` {
 		t.Fatal(err, calls)
 	}
@@ -152,7 +153,7 @@ func TestPythonMappingRecordListFiltersPagingFindUpdateDelete(t *testing.T) {
 	if err := api.DeleteMappingRecord(context.Background(), "m1"); err != nil || calls[0].method != http.MethodDelete {
 		t.Fatal(err, calls)
 	}
-	err = api.DeleteMappingRecord(context.Background(), "m1", federation.WithMappingRecordDeleteIgnoreMissing(false))
+	err = api.DeleteMappingRecord(context.Background(), "m1", request.IgnoreMissing(false))
 	pyMappingRecordOperation(t, err, "Delete", 404)
 
 	calls = nil

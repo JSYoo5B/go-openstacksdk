@@ -15,6 +15,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/jsonfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
@@ -129,7 +130,7 @@ func (a *API) getRecord(ctx context.Context, userID, id string, credential bool,
 	if err != nil {
 		return nil, err
 	}
-	policy, err := applyRecordOptions(ctx, p.guard, RecordReadOpts{}, copyRead, slices.Clone(options))
+	policy, err := applyRecordOptions(ctx, p.guard, RecordReadOpts{}, copyRead, calls.Translate(options, recordReadCalls))
 	if err == nil {
 		err = p.headers(policy.Headers)
 	}
@@ -157,7 +158,7 @@ func (a *API) CreateCredentialRecord(ctx context.Context, userID, name string, o
 	if err != nil {
 		return nil, recordWrap(ctx, operation, err)
 	}
-	policy, err := applyRecordOptions(ctx, p.guard, RecordCreateOpts{}, copyRecordCreate, slices.Clone(options))
+	policy, err := applyRecordOptions(ctx, p.guard, RecordCreateOpts{}, copyRecordCreate, calls.Translate(options, recordCreateCalls))
 	if err == nil {
 		err = p.headers(policy.Headers)
 	}
@@ -202,7 +203,7 @@ func (a *API) deleteRecord(ctx context.Context, userID, id string, credential bo
 	if err != nil {
 		return err
 	}
-	policy, err := applyRecordOptions(ctx, p.guard, RecordDeleteOpts{}, copyDelete, slices.Clone(options))
+	policy, err := applyRecordOptions(ctx, p.guard, RecordDeleteOpts{}, copyDelete, calls.Translate(options, recordDeleteCalls))
 	if err == nil {
 		err = recordRouteID(id)
 	}
@@ -254,7 +255,7 @@ func (p *preparedRecord) list(credential bool, query url.Values, filters map[str
 	}
 }
 func (a *API) listRecords(ctx context.Context, userID string, credential bool, options []RecordListOption) iter.Seq2[*ApplicationCredentialRecord, error] {
-	owned := slices.Clone(options)
+	owned := calls.Translate(options, recordListCalls)
 	operation := "ListAccessRuleRecords"
 	if credential {
 		operation = "ListCredentialRecords"

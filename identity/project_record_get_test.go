@@ -5,16 +5,18 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/JSYoo5B/go-openstacksdk/identity"
-	"github.com/JSYoo5B/go-openstacksdk/identity/v3/projects"
-	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
-	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
-	"github.com/JSYoo5B/go-openstacksdk/resource"
-	"github.com/gophercloud/gophercloud/v2"
 	"io"
 	"net/http"
 	"sync/atomic"
 	"testing"
+
+	"github.com/JSYoo5B/go-openstacksdk/identity"
+	"github.com/JSYoo5B/go-openstacksdk/identity/v3/projects"
+	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
+	"github.com/gophercloud/gophercloud/v2"
 )
 
 func projectGetFixture(t *testing.T, reply func(http.ResponseWriter, *http.Request)) (*identity.ProjectReadCloud, *testcloud.Cloud, *atomic.Int32) {
@@ -115,10 +117,10 @@ func TestCloudGetProjectStickyOptionsCancelAndOuterGuard(t *testing.T) {
 			case "nil":
 				options = append(options, nil)
 			case "source":
-				options = append(options, func(*identity.ProjectGetOpts) error {
+				options = append(options, request.Custom(func(*identity.ProjectGetOpts) error {
 					cloud.RawAPI().RawClient().ResourceBase += "changed/"
 					return nil
-				})
+				}))
 			case "cancel":
 				cancel(cause)
 			case "outer":
@@ -126,10 +128,10 @@ func TestCloudGetProjectStickyOptionsCancelAndOuterGuard(t *testing.T) {
 			case "role":
 				cloud.RawAPI().RawClient().Type = "network"
 			case "headers":
-				options = append(options, identity.WithProjectGetHeaders(map[string]string{"X-Auth-Token": "foreign"}))
+				options = append(options, request.Headers(map[string]string{"X-Auth-Token": "foreign"}))
 			}
 			if lane != "headers" {
-				options = append(options, func(*identity.ProjectGetOpts) error { seen++; return nil })
+				options = append(options, request.Custom(func(*identity.ProjectGetOpts) error { seen++; return nil }))
 			}
 			result, err := cloud.GetProject(ctx, "one", options...)
 			if err == nil || result != nil && result.Project != nil || calls.Load() != 0 || seen != 0 {

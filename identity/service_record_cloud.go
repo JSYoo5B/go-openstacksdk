@@ -7,10 +7,10 @@ import (
 	"errors"
 	"fmt"
 	"maps"
-	"slices"
 	"unicode/utf8"
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/services"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
@@ -38,7 +38,18 @@ type ServiceReadOpts struct {
 	Microversion *string
 	Location     *resource.CloudLocation
 }
-type ServiceReadOption func(*ServiceReadOpts) error
+
+// ServiceReadOption is one option of GetService and SearchServices:
+// WithServiceReadOpts, WithServiceReadFilters, WithServiceReadLocation,
+// request.Headers (replaces the headers), request.Microversion or
+// request.Custom over *ServiceReadOpts. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type ServiceReadOption = request.GetCall
+
+var serviceReadCalls = calls.Spec[ServiceReadOpts]{
+	Headers:      calls.Value(func(c *ServiceReadOpts) *map[string]string { return &c.Headers }),
+	Microversion: calls.Pointer(func(c *ServiceReadOpts) **string { return &c.Microversion }),
+}
 
 func copyServiceReadOpts(v ServiceReadOpts) ServiceReadOpts {
 	v.Headers = maps.Clone(v.Headers)
@@ -59,29 +70,22 @@ func copyServiceReadOpts(v ServiceReadOpts) ServiceReadOpts {
 }
 func WithServiceReadOpts(v ServiceReadOpts) ServiceReadOption {
 	owned := copyServiceReadOpts(v)
-	return func(c *ServiceReadOpts) error { *c = copyServiceReadOpts(owned); return nil }
+	return request.Custom(func(c *ServiceReadOpts) error { *c = copyServiceReadOpts(owned); return nil })
 }
 func WithServiceReadFilters(v json.RawMessage) ServiceReadOption {
 	owned := bytes.Clone(v)
-	return func(c *ServiceReadOpts) error {
+	return request.Custom(func(c *ServiceReadOpts) error {
 		c.Filters = nil
 		if owned != nil {
 			x := json.RawMessage(bytes.Clone(owned))
 			c.Filters = &x
 		}
 		return nil
-	}
-}
-func WithServiceReadHeaders(v map[string]string) ServiceReadOption {
-	owned := maps.Clone(v)
-	return func(c *ServiceReadOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
-func WithServiceReadMicroversion(v string) ServiceReadOption {
-	return func(c *ServiceReadOpts) error { x := v; c.Microversion = &x; return nil }
+	})
 }
 func WithServiceReadLocation(v resource.CloudLocation) ServiceReadOption {
 	owned := v.Clone()
-	return func(c *ServiceReadOpts) error { x := owned.Clone(); c.Location = &x; return nil }
+	return request.Custom(func(c *ServiceReadOpts) error { x := owned.Clone(); c.Location = &x; return nil })
 }
 func serviceReadInvalid(format string, args ...any) error {
 	return fmt.Errorf("%w: %s", resource.ErrInvalidOption, fmt.Sprintf(format, args...))
@@ -125,7 +129,7 @@ func (c *ServiceReadCloud) prepareServiceRead(ctx context.Context, options []Ser
 	}
 	ctx = rest.WithOperationGuard(ctx, sourceGuard)
 	guard := func() error { return sourceGuard(ctx) }
-	for _, apply := range slices.Clone(options) {
+	for _, apply := range calls.Translate(options, serviceReadCalls) {
 		if err := guard(); err != nil {
 			return ctx, nil, policy, guard, err
 		}
@@ -167,10 +171,10 @@ func searchServicesPrepared(ctx context.Context, api *services.API, nameOrID str
 	opts := make([]services.RecordListOption, 0)
 
 	if policy.Headers != nil {
-		opts = append(opts, services.WithRecordListHeaders(policy.Headers))
+		opts = append(opts, request.Headers(policy.Headers))
 	}
 	if policy.Microversion != nil {
-		opts = append(opts, services.WithRecordListMicroversion(*policy.Microversion))
+		opts = append(opts, request.Microversion(*policy.Microversion))
 	}
 	if policy.Location != nil {
 		opts = append(opts, services.WithRecordListLocation(*policy.Location))

@@ -12,6 +12,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/identity"
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/domains"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -150,7 +151,7 @@ func TestPythonCloudDomainGetOwnOptionLocationHeadersAndSourceSnapshot(t *testin
 	})
 	client := cloud.RawAPI().RawClient()
 	client.MoreHeaders = map[string]string{"X-Snapshot": "before"}
-	result, err := cloud.GetDomain(context.Background(), opt, identity.DomainGetOption(func(*identity.DomainGetOpts) error {
+	result, err := cloud.GetDomain(context.Background(), opt, request.Custom(func(*identity.DomainGetOpts) error {
 		client.MoreHeaders["X-Snapshot"] = "after"
 		client.MoreHeaders["X-Late"] = "after"
 		return nil
@@ -178,7 +179,7 @@ func TestPythonCloudDomainGetOptionsStickySourceCancelAndNil(t *testing.T) {
 			defer cancel(nil)
 			cause := errors.New("cloud domain custom cancel")
 			seen := 0
-			first := identity.DomainGetOption(func(*identity.DomainGetOpts) error {
+			first := request.Custom(func(*identity.DomainGetOpts) error {
 				if mode == "source" {
 					client.Endpoint += "changed"
 				} else {
@@ -189,7 +190,7 @@ func TestPythonCloudDomainGetOptionsStickySourceCancelAndNil(t *testing.T) {
 			if mode == "nil" {
 				first = nil
 			}
-			result, err := cloud.GetDomain(ctx, identity.WithDomainGetID("direct"), first, identity.DomainGetOption(func(*identity.DomainGetOpts) error { seen++; client.Endpoint = endpoint; return nil }))
+			result, err := cloud.GetDomain(ctx, identity.WithDomainGetID("direct"), first, request.Custom(func(*identity.DomainGetOpts) error { seen++; client.Endpoint = endpoint; return nil }))
 			var proof *resource.ResponseError
 			if result != nil || err == nil || seen != 0 || calls != 0 || errors.As(err, &proof) {
 				t.Fatal(result, err, seen, calls, proof)

@@ -5,10 +5,11 @@ import (
 	"context"
 	"errors"
 	"maps"
-	"slices"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/neutronfind"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -19,7 +20,18 @@ type RecordGetOpts struct {
 	Microversion *string
 	Location     *resource.CloudLocation
 }
-type RecordGetOption func(*RecordGetOpts) error
+
+// RecordGetOption is one option of GetRecord and ResolveRecord:
+// WithRecordGetOpts, WithRecordGetLocation, request.Custom over
+// *RecordGetOpts, request.Headers (replaces the headers) or
+// request.Microversion. request.Header fails with resource.ErrInvalidOption
+// before HTTP.
+type RecordGetOption = request.GetCall
+
+var recordGetCalls = calls.Spec[RecordGetOpts]{
+	Headers:      calls.Value(func(c *RecordGetOpts) *map[string]string { return &c.Headers }),
+	Microversion: calls.Pointer(func(c *RecordGetOpts) **string { return &c.Microversion }),
+}
 
 func copyRecordGetOpts(v RecordGetOpts) RecordGetOpts {
 	v.Headers = maps.Clone(v.Headers)
@@ -35,18 +47,11 @@ func copyRecordGetOpts(v RecordGetOpts) RecordGetOpts {
 }
 func WithRecordGetOpts(v RecordGetOpts) RecordGetOption {
 	owned := copyRecordGetOpts(v)
-	return func(c *RecordGetOpts) error { *c = copyRecordGetOpts(owned); return nil }
-}
-func WithRecordGetHeaders(v map[string]string) RecordGetOption {
-	owned := maps.Clone(v)
-	return func(c *RecordGetOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
-func WithRecordGetMicroversion(v string) RecordGetOption {
-	return func(c *RecordGetOpts) error { x := v; c.Microversion = &x; return nil }
+	return request.Custom(func(c *RecordGetOpts) error { *c = copyRecordGetOpts(owned); return nil })
 }
 func WithRecordGetLocation(v resource.CloudLocation) RecordGetOption {
 	owned := v.Clone()
-	return func(c *RecordGetOpts) error { x := owned.Clone(); c.Location = &x; return nil }
+	return request.Custom(func(c *RecordGetOpts) error { x := owned.Clone(); c.Location = &x; return nil })
 }
 func (a *API) prepareRecordGet(ctx context.Context, options []RecordGetOption, resolve bool) (*neutronfind.Engine, RecordGetOpts, error) {
 	engine, err := a.recordEngine(ctx)
@@ -67,7 +72,7 @@ func (a *API) prepareRecordGet(ctx context.Context, options []RecordGetOption, r
 			return nil, RecordGetOpts{}, err
 		}
 	}
-	policy, err := applyDomainOptions(ctx, engine, RecordGetOpts{}, copyRecordGetOpts, slices.Clone(options))
+	policy, err := applyDomainOptions(ctx, engine, RecordGetOpts{}, copyRecordGetOpts, calls.Translate(options, recordGetCalls))
 	if err == nil {
 		err = locationPreflight(policy.Location)
 	}

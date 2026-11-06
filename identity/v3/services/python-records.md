@@ -19,16 +19,15 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithQuery`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.ServiceRecord.Clone`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.WithRecordListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.WithRecordListQuery`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.WithRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.WithRecordListMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.WithRecordListBasePath`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.BasePath`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.WithRecordListJMESPath`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.WithRecordListLocation`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.WithRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.WithRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.WithRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.WithRecordListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.API.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.API.AllRecords`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.RecordListGenerator.JMESPathIdentity`
@@ -72,8 +71,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity.ServiceReadCloud.RawAPI`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithServiceReadOpts`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithServiceReadFilters`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithServiceReadHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithServiceReadMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithServiceReadLocation`
 - `github.com/JSYoo5B/go-openstacksdk/identity.ServiceReadCloud.SearchServices`
 
@@ -111,14 +110,14 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity.ServiceReadCloud.RawAPI`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithServiceReadOpts`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithServiceReadFilters`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithServiceReadHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithServiceReadMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithServiceReadLocation`
 - `github.com/JSYoo5B/go-openstacksdk/identity.ServiceReadCloud.GetService`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.WithRecordResolveOpts`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.WithRecordResolveHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.WithRecordResolveMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.WithRecordResolveLocation`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.API.ResolveRecord`
 
@@ -195,6 +194,7 @@ import (
 	openstack "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/identity"
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/services"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 func printValue(value any) {
@@ -223,9 +223,9 @@ func main() {
 		log.Fatal("set IDENTITY_SERVICE_ID to a readable service ID or name")
 	}
 	rows, err := svc.Services.AllRecords(ctx,
-		services.WithRecordListQuery("type", "compute"),
-		services.WithRecordListQuery("is_enabled", true),
-		services.WithRecordListMaxItems(5),
+		request.Query("type", "compute"),
+		request.Query("is_enabled", true),
+		request.MaxItems(5),
 		services.WithRecordListLocation(location),
 	)
 	if err != nil {

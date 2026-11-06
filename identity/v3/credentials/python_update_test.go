@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/credentials"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -39,7 +40,7 @@ func TestPythonCredentialUpdateRawBodyAndResponseOverlay(t *testing.T) {
 	fields["user_id"] = json.RawMessage(`"mutated"`)
 	headers["X-Owned"] = "mutated"
 	value, err := api.UpdateRecord(context.Background(), "selected", owned,
-		credentials.WithRecordUpdateField("ignored", make(chan int)))
+		request.Field("ignored", make(chan int)))
 	if err != nil {
 		t.Fatal(value, err)
 	}
@@ -74,10 +75,10 @@ func TestPythonCredentialUpdateNoOpAndLiteralID(t *testing.T) {
 		options []credentials.RecordUpdateOption
 	}{
 		{"empty", nil},
-		{"unknown only", []credentials.RecordUpdateOption{credentials.WithRecordUpdateField("extension", make(chan int))}},
-		{"id only", []credentials.RecordUpdateOption{credentials.WithRecordUpdateField("id", "different")}},
+		{"unknown only", []credentials.RecordUpdateOption{request.Field("extension", make(chan int))}},
+		{"id only", []credentials.RecordUpdateOption{request.Field("id", "different")}},
 		{"raw ignored", []credentials.RecordUpdateOption{credentials.WithRecordUpdateOpts(credentials.RecordUpdateOpts{Fields: map[string]json.RawMessage{"id": json.RawMessage(`{broken`), "unknown": json.RawMessage(`{broken`)}})}},
-		{"policy header only", []credentials.RecordUpdateOption{credentials.WithRecordUpdateHeaders(map[string]string{"X-Custom": "value"})}},
+		{"policy header only", []credentials.RecordUpdateOption{request.Headers(map[string]string{"X-Custom": "value"})}},
 	}
 	for _, item := range cases {
 		t.Run(item.name, func(t *testing.T) {
@@ -93,8 +94,8 @@ func TestPythonCredentialUpdateNoOpAndLiteralID(t *testing.T) {
 		})
 	}
 	value, err := api.UpdateRecord(context.Background(), "folder/name%",
-		credentials.WithRecordUpdateField("blob", []any{}),
-		credentials.WithRecordUpdateField("type", map[string]any{}))
+		request.Field("blob", []any{}),
+		request.Field("type", map[string]any{}))
 	if err != nil || len(calls) != 1 || calls[0].body != `{"credential":{"blob":[],"type":{}}}` {
 		t.Fatal(value, err, calls)
 	}
@@ -115,7 +116,7 @@ func TestPythonCredentialUpdateTranslationAndStatuses(t *testing.T) {
 		t.Run(item.name, func(t *testing.T) {
 			var calls []nativeCredCall
 			api, _ := nativeCredAPI(t, &calls, func(*http.Request) (int, string) { return 200, item.body })
-			value, err := api.UpdateRecord(context.Background(), "selected", credentials.WithRecordUpdateField("blob", "requested"))
+			value, err := api.UpdateRecord(context.Background(), "selected", request.Field("blob", "requested"))
 			if (err == nil) != item.valid || len(calls) != 1 || value == nil || string(value.Envelope) != item.body || value.StatusCode != 200 {
 				t.Fatal(value, err, calls)
 			}
@@ -138,7 +139,7 @@ func TestPythonCredentialUpdateTranslationAndStatuses(t *testing.T) {
 		t.Run(fmt.Sprint(code), func(t *testing.T) {
 			var calls []nativeCredCall
 			api, _ := nativeCredAPI(t, &calls, func(*http.Request) (int, string) { return code, `{}` })
-			value, err := api.UpdateRecord(context.Background(), "selected", credentials.WithRecordUpdateField("blob", nil))
+			value, err := api.UpdateRecord(context.Background(), "selected", request.Field("blob", nil))
 			if len(calls) != 1 {
 				t.Fatal(calls)
 			}
@@ -169,17 +170,17 @@ func TestPythonCredentialUpdateOptionOwnershipAndPreflight(t *testing.T) {
 	})
 	var retained *credentials.RecordUpdateOpts
 	value, err := api.UpdateRecord(context.Background(), "selected",
-		func(policy *credentials.RecordUpdateOpts) error {
+		request.Custom(func(policy *credentials.RecordUpdateOpts) error {
 			retained = policy
 			policy.Fields = map[string]json.RawMessage{"blob": json.RawMessage(`"old"`)}
 			policy.Headers = map[string]string{"X-Owned": "old"}
 			return nil
-		},
-		func(*credentials.RecordUpdateOpts) error {
+		}),
+		request.Custom(func(*credentials.RecordUpdateOpts) error {
 			retained.Fields["blob"] = json.RawMessage(`"changed"`)
 			retained.Headers["X-Owned"] = "changed"
 			return nil
-		})
+		}))
 	if err != nil || len(calls) != 1 || calls[0].body != `{"credential":{"blob":"old"}}` {
 		t.Fatal(value, err, calls)
 	}
@@ -191,7 +192,7 @@ func TestPythonCredentialUpdateOptionOwnershipAndPreflight(t *testing.T) {
 		{"nil option", "a", []credentials.RecordUpdateOption{nil}},
 		{"bad JSON", "a", []credentials.RecordUpdateOption{credentials.WithRecordUpdateOpts(credentials.RecordUpdateOpts{Fields: map[string]json.RawMessage{"blob": json.RawMessage(`{bad`)}})}},
 		{"bad UTF8", "a", []credentials.RecordUpdateOption{credentials.WithRecordUpdateOpts(credentials.RecordUpdateOpts{Fields: map[string]json.RawMessage{"blob": json.RawMessage{'"', 0xff, '"'}}})}},
-		{"protected header", "a", []credentials.RecordUpdateOption{credentials.WithRecordUpdateHeaders(map[string]string{"X-Auth-Token": "replacement"})}},
+		{"protected header", "a", []credentials.RecordUpdateOption{request.Headers(map[string]string{"X-Auth-Token": "replacement"})}},
 		{"dot target", "..", nil}, {"blank target", "  ", nil},
 	} {
 		t.Run(item.name, func(t *testing.T) {
@@ -208,7 +209,7 @@ func TestPythonCredentialUpdateOptionOwnershipAndPreflight(t *testing.T) {
 		defer cancel(nil)
 		callbackCause, cancelCause := errors.New("callback"), errors.New("caller")
 		before := len(calls)
-		_, err := api.UpdateRecord(ctx, "a", func(*credentials.RecordUpdateOpts) error { cancel(cancelCause); return callbackCause })
+		_, err := api.UpdateRecord(ctx, "a", request.Custom(func(*credentials.RecordUpdateOpts) error { cancel(cancelCause); return callbackCause }))
 		if !errors.Is(err, callbackCause) || !errors.Is(err, cancelCause) || !errors.Is(err, context.Canceled) || len(calls) != before {
 			t.Fatal(err, calls)
 		}
@@ -219,7 +220,7 @@ func TestPythonCredentialUpdateOptionOwnershipAndPreflight(t *testing.T) {
 		defer func() { client.Endpoint = endpoint }()
 		cause := errors.New("callback")
 		before := len(calls)
-		_, err := api.UpdateRecord(context.Background(), "a", func(*credentials.RecordUpdateOpts) error { client.Endpoint += "changed/"; return cause })
+		_, err := api.UpdateRecord(context.Background(), "a", request.Custom(func(*credentials.RecordUpdateOpts) error { client.Endpoint += "changed/"; return cause }))
 		if !errors.Is(err, cause) || !errors.Is(err, resource.ErrInvalidOption) || len(calls) != before {
 			t.Fatal(err, calls)
 		}
@@ -272,7 +273,7 @@ func TestPythonCredentialUpdatePhysicalResponseFailures(t *testing.T) {
 					}
 					return testcloud.StreamResponse(status, body, http.Header{"X-Request-Id": {"physical-proof"}}), nil
 				}))
-				value, err := api.UpdateRecord(ctx, "a", credentials.WithRecordUpdateField("blob", "updated"))
+				value, err := api.UpdateRecord(ctx, "a", request.Field("blob", "updated"))
 				if err == nil || attempts != 1 || body.closes != 1 {
 					t.Fatal(value, err, attempts, body.closes)
 				}
@@ -319,7 +320,7 @@ func TestPythonCredentialUpdateNativeRetryPolicyAndOwnership(t *testing.T) {
 			retries++
 			return nil
 		}
-		value, err := api.UpdateRecord(context.Background(), "a", credentials.WithRecordUpdateField("blob", "new"))
+		value, err := api.UpdateRecord(context.Background(), "a", request.Field("blob", "new"))
 		if err != nil || len(calls) != 2 || retries != 1 || calls[0] != calls[1] {
 			t.Fatal(value, err, calls, retries)
 		}
@@ -346,7 +347,7 @@ func TestPythonCredentialUpdateNativeRetryPolicyAndOwnership(t *testing.T) {
 				}
 				return nil
 			}
-			value, err := api.UpdateRecord(ctx, "a", credentials.WithRecordUpdateField("blob", "new"))
+			value, err := api.UpdateRecord(ctx, "a", request.Field("blob", "new"))
 			var native gophercloud.ErrUnexpectedResponseCode
 			if value != nil || !errors.As(err, &native) || native.Actual != 503 || string(native.Body) != "retry proof" || len(calls) != 1 {
 				t.Fatal(value, err, native, calls)
@@ -368,7 +369,7 @@ func TestPythonCredentialUpdateNativeRetryPolicyAndOwnership(t *testing.T) {
 		cause := errors.New("physical transport")
 		attempts := 0
 		cloud.SetTransport(testcloud.LinkRequest(func(*http.Request) (*http.Response, error) { attempts++; return nil, cause }))
-		_, err := api.UpdateRecord(context.Background(), "a", credentials.WithRecordUpdateField("blob", "new"))
+		_, err := api.UpdateRecord(context.Background(), "a", request.Field("blob", "new"))
 		if !errors.Is(err, cause) || attempts != 1 {
 			t.Fatal(err, attempts)
 		}
@@ -383,7 +384,7 @@ func TestPythonCredentialUpdateEscapesMemberExactlyOnce(t *testing.T) {
 		}
 		return 200, `{}`
 	})
-	_, err := api.UpdateRecord(context.Background(), "folder/name%", credentials.WithRecordUpdateField("blob", "new"))
+	_, err := api.UpdateRecord(context.Background(), "folder/name%", request.Field("blob", "new"))
 	if err != nil || len(calls) != 1 {
 		t.Fatal(err, calls)
 	}

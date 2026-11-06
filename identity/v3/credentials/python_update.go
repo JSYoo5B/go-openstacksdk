@@ -8,10 +8,11 @@ import (
 	"maps"
 	"net/http"
 	"net/url"
-	"slices"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 // RecordUpdateOpts owns the literal-ID Credential update policy. Fields are
@@ -22,7 +23,29 @@ type RecordUpdateOpts struct {
 	Fields  map[string]json.RawMessage
 }
 
-type RecordUpdateOption func(*RecordUpdateOpts) error
+// RecordUpdateOption is one option of UpdateRecord: WithRecordUpdateOpts,
+// request.Field (one declared Credential attribute; unknown attributes and id
+// are dropped with their marshal error), request.Headers (replaces the
+// headers) or request.Custom over *RecordUpdateOpts. Other shared calls fail
+// with resource.ErrInvalidOption before HTTP.
+type RecordUpdateOption = request.WriteCall
+
+var recordUpdateCalls = calls.Spec[RecordUpdateOpts]{
+	Field: func(c *RecordUpdateOpts, entry request.CallEntry) error {
+		if !recordKnown(entry.Key) || entry.Key == "id" {
+			return nil
+		}
+		if entry.JSONErr != nil {
+			return entry.JSONErr
+		}
+		if c.Fields == nil {
+			c.Fields = make(map[string]json.RawMessage)
+		}
+		c.Fields[entry.Key] = bytes.Clone(entry.JSON)
+		return nil
+	},
+	Headers: calls.Value(func(c *RecordUpdateOpts) *map[string]string { return &c.Headers }),
+}
 
 func copyRecordUpdate(v RecordUpdateOpts) RecordUpdateOpts {
 	v.Headers = maps.Clone(v.Headers)
@@ -33,33 +56,7 @@ func copyRecordUpdate(v RecordUpdateOpts) RecordUpdateOpts {
 // WithRecordUpdateOpts snapshots the whole policy; later field options overlay it.
 func WithRecordUpdateOpts(v RecordUpdateOpts) RecordUpdateOption {
 	owned := copyRecordUpdate(v)
-	return func(c *RecordUpdateOpts) error { *c = copyRecordUpdate(owned); return nil }
-}
-
-// WithRecordUpdateField snapshots a declared Body value, including null, false,
-// zero and empty collections. Credential has no additional Body aliases.
-// Unknown attributes and id do not change the fixed literal member target.
-func WithRecordUpdateField(key string, value any) RecordUpdateOption {
-	if !recordKnown(key) || key == "id" {
-		return func(*RecordUpdateOpts) error { return nil }
-	}
-	raw, err := json.Marshal(value)
-	owned := bytes.Clone(raw)
-	return func(c *RecordUpdateOpts) error {
-		if err != nil {
-			return err
-		}
-		if c.Fields == nil {
-			c.Fields = make(map[string]json.RawMessage)
-		}
-		c.Fields[key] = bytes.Clone(owned)
-		return nil
-	}
-}
-
-func WithRecordUpdateHeaders(values map[string]string) RecordUpdateOption {
-	owned := maps.Clone(values)
-	return func(c *RecordUpdateOpts) error { c.Headers = maps.Clone(owned); return nil }
+	return request.Custom(func(c *RecordUpdateOpts) error { *c = copyRecordUpdate(owned); return nil })
 }
 
 func recordUpdateRejectedCodes() []int {
@@ -81,7 +78,7 @@ func (a *API) UpdateRecord(ctx context.Context, id string, options ...RecordUpda
 	if err != nil {
 		return nil, recordWrap(ctx, op, err)
 	}
-	policy, err := applyRecordOptions(ctx, p.guard, RecordUpdateOpts{}, copyRecordUpdate, slices.Clone(options))
+	policy, err := applyRecordOptions(ctx, p.guard, RecordUpdateOpts{}, copyRecordUpdate, calls.Translate(options, recordUpdateCalls))
 	if err == nil {
 		err = recordID(id)
 	}

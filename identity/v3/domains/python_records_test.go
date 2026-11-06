@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"io"
 	"net/http"
 	"reflect"
@@ -77,9 +78,9 @@ func TestPythonDomainRecordsFilteredMarkerRawCapAndBreak(t *testing.T) {
 				}
 				return domainRecordWire(200, `{"domains":[]}`)
 			})
-			opts := []domains.RecordListOption{domains.WithRecordListLimit(5), domains.WithRecordListQuery("description", "keep")}
+			opts := []domains.RecordListOption{request.Limit(5), domains.WithRecordListQuery("description", "keep")}
 			if mode == "cap" {
-				opts = append(opts, domains.WithRecordListMaxItems(2))
+				opts = append(opts, request.MaxItems(2))
 			}
 			if mode == "break" {
 				for row, err := range api.ListRecords(context.Background(), opts...) {
@@ -216,7 +217,7 @@ func TestPythonDomainRecordsOwnedOptionsStickySourceAndCancellation(t *testing.T
 			ctx, cancel := context.WithCancelCause(context.Background())
 			defer cancel(nil)
 			cause := errors.New("custom domain cancel")
-			change := domains.RecordListOption(func(*domains.RecordListOpts) error {
+			change := request.Custom(func(*domains.RecordListOpts) error {
 				if mode == "source" {
 					client.Endpoint += "changed"
 				} else if mode == "cancel" {
@@ -227,7 +228,7 @@ func TestPythonDomainRecordsOwnedOptionsStickySourceAndCancellation(t *testing.T
 			if mode == "nil" {
 				change = nil
 			}
-			restore := domains.RecordListOption(func(*domains.RecordListOpts) error { callbacks++; client.Endpoint = endpoint; return nil })
+			restore := request.Custom(func(*domains.RecordListOpts) error { callbacks++; client.Endpoint = endpoint; return nil })
 			_, err := api.AllRecords(ctx, change, restore)
 			var proof *resource.ResponseError
 			if err == nil || errors.As(err, &proof) || calls != before || callbacks != 0 {

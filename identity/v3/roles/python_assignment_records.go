@@ -7,6 +7,8 @@ import (
 	"net/http"
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/internal/osfederation"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
@@ -75,7 +77,7 @@ func (a *API) assignmentTarget() osfederation.Target {
 // ListAssignmentRecords implements role_assignments(**query) as a lazy
 // iterator over GET role_assignments.
 func (a *API) ListAssignmentRecords(ctx context.Context, options ...AssignmentRecordListOption) iter.Seq2[*AssignmentRecord, error] {
-	source := osfederation.List(ctx, a.assignmentTarget(), options)
+	source := osfederation.List(ctx, a.assignmentTarget(), calls.Translate(options, assignmentRecordListCalls))
 	return func(yield func(*AssignmentRecord, error) bool) {
 		for record, err := range source {
 			if !yield(assignmentRecord(record), err) || err != nil {
@@ -103,26 +105,19 @@ func (a *API) AllAssignmentRecords(ctx context.Context, options ...AssignmentRec
 // include_subtree go to the server encoded like Requests; id, name, links,
 // role, scope, user and group filter rows locally; other names are ignored.
 type AssignmentRecordListOpts = osfederation.ListOpts
-type AssignmentRecordListOption func(*AssignmentRecordListOpts) error
+
+// AssignmentRecordListOption is one option of ListAssignmentRecords and
+// AllAssignmentRecords: WithAssignmentRecordListOpts, request.Custom over
+// *AssignmentRecordListOpts, request.Query (a Python **query name; the value
+// is sent as JSON and names that are neither server query parameters nor
+// local filters are dropped), request.Headers (replaces the headers),
+// request.Limit, request.Marker, request.MaxItems or request.Paginated.
+// request.Header and request.Microversion fail with
+// resource.ErrInvalidOption before HTTP.
+type AssignmentRecordListOption = request.ListCall
+
+var assignmentRecordListCalls = assignmentSpec.ListCalls()
 
 func WithAssignmentRecordListOpts(opts AssignmentRecordListOpts) AssignmentRecordListOption {
-	return AssignmentRecordListOption(osfederation.ListSnapshot(opts))
-}
-func WithAssignmentRecordListQuery(key string, value any) AssignmentRecordListOption {
-	return AssignmentRecordListOption(assignmentSpec.ListQuery(key, value))
-}
-func WithAssignmentRecordListLimit(limit int) AssignmentRecordListOption {
-	return AssignmentRecordListOption(osfederation.ListLimit(limit))
-}
-func WithAssignmentRecordListMarker(marker string) AssignmentRecordListOption {
-	return AssignmentRecordListOption(osfederation.ListMarker(marker))
-}
-func WithAssignmentRecordListMaxItems(count int) AssignmentRecordListOption {
-	return AssignmentRecordListOption(osfederation.ListMaxItems(count))
-}
-func WithAssignmentRecordListPaginated(value bool) AssignmentRecordListOption {
-	return AssignmentRecordListOption(osfederation.ListPaginated(value))
-}
-func WithAssignmentRecordListHeaders(values map[string]string) AssignmentRecordListOption {
-	return AssignmentRecordListOption(osfederation.ListHeaders(values))
+	return request.Custom(osfederation.ListSnapshot(opts))
 }

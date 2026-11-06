@@ -280,13 +280,13 @@ func (c *Connection) projectReadFacade(ctx context.Context, options []identity.P
 	if _, err := location.ForResource(nil, nil); err != nil {
 		return nil, nil, err
 	}
-	owned := append(slices.Clone(options), func(cfg *identity.ProjectReadOpts) error {
+	owned := append(slices.Clone(options), request.Custom(func(cfg *identity.ProjectReadOpts) error {
 		if cfg.Location == nil {
 			copy := location.Clone()
 			cfg.Location = &copy
 		}
 		return nil
-	})
+	}))
 	return identity.NewProjectReadCloud(service.Projects), owned, nil
 }
 

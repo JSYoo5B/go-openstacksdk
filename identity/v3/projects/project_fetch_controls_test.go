@@ -11,6 +11,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/projects"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -31,10 +32,10 @@ func TestPythonProjectFindRecordFetchControlsCollectionProjectionAndConstructorS
 		return projectRecordWire(203, body)
 	})
 	row, err := api.FindRecord(context.Background(), "demo",
-		projects.WithRecordFindQuery("requires_id", false), projects.WithRecordFindQuery("base_path", "/alternate-projects"),
-		projects.WithRecordFindQuery("skip_cache", true), projects.WithRecordFindQuery("error_message", "custom missing"),
-		projects.WithRecordFindQuery("resource_response_key", "selected"), projects.WithRecordFindQuery("domain_id", "d"),
-		projects.WithRecordFindQuery("description", "seeded"), projects.WithRecordFindHeaders(map[string]string{"X-Typed": "kept"}))
+		request.Query("requires_id", false), request.Query("base_path", "/alternate-projects"),
+		request.Query("skip_cache", true), request.Query("error_message", "custom missing"),
+		request.Query("resource_response_key", "selected"), request.Query("domain_id", "d"),
+		request.Query("description", "seeded"), request.Headers(map[string]string{"X-Typed": "kept"}))
 	if err != nil || row == nil || calls != 1 || row.StatusCode != 203 || row.Header.Get("X-Request-Id") != "project-proof" || string(row.Envelope) != body {
 		t.Fatal(row, err, calls)
 	}
@@ -51,7 +52,7 @@ func TestPythonProjectFindRecordFetchControlsCustomEnvelopeFailureKeepsPhysicalE
 	calls := 0
 	body := `{"selected":[],"project":{"id":"wrong"}}`
 	api, _ := projectRecordAPI(t, func(r *http.Request) *http.Response { calls++; return projectRecordWire(202, body) })
-	row, err := api.FindRecord(context.Background(), "demo", projects.WithRecordFindQuery("resource_response_key", "selected"))
+	row, err := api.FindRecord(context.Background(), "demo", request.Query("resource_response_key", "selected"))
 	var proof *resource.ResponseError
 	if row != nil || calls != 1 || !errors.As(err, &proof) || proof.StatusCode != 202 || string(proof.Body) != body || proof.Header.Get("X-Request-Id") != "project-proof" {
 		t.Fatal(row, err, proof, calls)
@@ -76,7 +77,7 @@ func TestPythonProjectFindRecordFetchControlsHeadersAndListRouteAreStageSpecific
 		}
 		return projectRecordWire(200, `{"projects":[{"id":"p","name":"demo","enabled":0,"options":7,"tags":"blue"}]}`)
 	})
-	row, err := api.FindRecord(context.Background(), "demo", projects.WithRecordFindQuery("base_path", "/alternate-projects"), projects.WithRecordFindListBasePath("/list-projects"), projects.WithRecordFindQuery("headers", json.RawMessage(`{"Accept":"application/vnd.project+json","X-Raw":"raw"}`)), projects.WithRecordFindHeaders(map[string]string{"x-raw": "typed", "X-Typed": "kept"}), projects.WithRecordFindQuery("domain_id", "d"))
+	row, err := api.FindRecord(context.Background(), "demo", request.Query("base_path", "/alternate-projects"), projects.WithRecordFindListBasePath("/list-projects"), request.Query("headers", json.RawMessage(`{"Accept":"application/vnd.project+json","X-Raw":"raw"}`)), request.Headers(map[string]string{"x-raw": "typed", "X-Typed": "kept"}), request.Query("domain_id", "d"))
 	if err != nil || row == nil || calls != 2 {
 		t.Fatal(row, err, calls)
 	}
@@ -103,7 +104,7 @@ func TestPythonProjectFindRecordFetchControlsBadHeadersWaitForFallback(t *testin
 				}
 				return projectRecordWire(200, `{"project":{"id":"p","options":null,"tags":null}}`)
 			})
-			row, err := api.FindRecord(context.Background(), "demo", projects.WithRecordFindQuery("headers", json.RawMessage(`{"X-Raw":7}`)))
+			row, err := api.FindRecord(context.Background(), "demo", request.Query("headers", json.RawMessage(`{"X-Raw":7}`)))
 			if calls != 1 {
 				t.Fatal(calls)
 			}
@@ -164,7 +165,7 @@ func TestPythonProjectFindRecordFetchControlsOwnOptionsRemainStatelessAndKeepErr
 			}
 			return projectRecordWire(500, body)
 		})
-		row, err := api.FindRecord(context.Background(), "demo", projects.WithRecordFindQuery("error_message", "project lookup failed"))
+		row, err := api.FindRecord(context.Background(), "demo", request.Query("error_message", "project lookup failed"))
 		var native gophercloud.ErrUnexpectedResponseCode
 		if row != nil || calls != 1 || !errors.As(err, &native) || native.Actual != 500 || string(native.Body) != body || native.ResponseHeader.Get("X-Request-Id") != "project-proof" || !strings.Contains(err.Error(), "project lookup failed") {
 			t.Fatal(row, err, native, calls)
@@ -195,7 +196,7 @@ func TestPythonProjectFindRecordFetchControlsPhysicalFaultsNeverFallback(t *test
 				response.Body = body
 				return response
 			})
-			row, err := api.FindRecord(ctx, "demo", projects.WithRecordFindQuery("requires_id", false), projects.WithRecordFindQuery("skip_cache", true), projects.WithRecordFindQuery("error_message", "controlled project lookup"))
+			row, err := api.FindRecord(ctx, "demo", request.Query("requires_id", false), request.Query("skip_cache", true), request.Query("error_message", "controlled project lookup"))
 			if row != nil || calls != 1 || body.Closes() != 1 || !errors.Is(err, cause) {
 				t.Fatal(row, err, calls, body.Closes())
 			}

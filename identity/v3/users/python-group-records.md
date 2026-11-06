@@ -21,13 +21,13 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.ProxyUsersInGroupRecords`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithGroupRecordListOpts`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithGroupRecordListQuery`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithGroupRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithGroupRecordListMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithGroupRecordListLocation`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithGroupRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithGroupRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithGroupRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithGroupRecordListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithGroupRecordListJMESPath`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.UserRecord.Clone`
 
@@ -98,6 +98,7 @@ import (
 
     openstack "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/identity/v3/users"
+    "github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 func main() {
@@ -111,8 +112,8 @@ func main() {
     if err != nil { log.Fatal(err) }
     for row, err := range service.Users.ListUsersInGroupRecords(ctx, *groupID,
         users.WithGroupRecordListQuery("email", "member@example.com"),
-        users.WithGroupRecordListLimit(100),
-        users.WithGroupRecordListMaxItems(100),
+        request.Limit(100),
+        request.MaxItems(100),
     ) {
         if err != nil { log.Fatal(err) }
         data, err := json.MarshalIndent(row.Resource.Body, "", "  ")

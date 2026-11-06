@@ -10,6 +10,7 @@ import (
 	"slices"
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/roles"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
@@ -38,7 +39,18 @@ type RoleSearchOpts struct {
 	Microversion *string
 	Location     *resource.CloudLocation
 }
-type RoleSearchOption func(*RoleSearchOpts) error
+
+// RoleSearchOption is one option of SearchRoles: WithRoleSearchOpts,
+// WithRoleSearchDomainID, WithRoleSearchFilters, WithRoleSearchLocation,
+// request.Headers (replaces the headers), request.Microversion or
+// request.Custom over *RoleSearchOpts. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type RoleSearchOption = request.GetCall
+
+var roleSearchCalls = calls.Spec[RoleSearchOpts]{
+	Headers:      calls.Value(func(c *RoleSearchOpts) *map[string]string { return &c.Headers }),
+	Microversion: calls.Pointer(func(c *RoleSearchOpts) **string { return &c.Microversion }),
+}
 
 func copyRoleSearchOpts(v RoleSearchOpts) RoleSearchOpts {
 	v.Headers = maps.Clone(v.Headers)
@@ -62,32 +74,25 @@ func copyRoleSearchOpts(v RoleSearchOpts) RoleSearchOpts {
 }
 func WithRoleSearchOpts(v RoleSearchOpts) RoleSearchOption {
 	owned := copyRoleSearchOpts(v)
-	return func(c *RoleSearchOpts) error { *c = copyRoleSearchOpts(owned); return nil }
+	return request.Custom(func(c *RoleSearchOpts) error { *c = copyRoleSearchOpts(owned); return nil })
 }
 func WithRoleSearchDomainID(v string) RoleSearchOption {
-	return func(c *RoleSearchOpts) error { x := v; c.DomainID = &x; return nil }
+	return request.Custom(func(c *RoleSearchOpts) error { x := v; c.DomainID = &x; return nil })
 }
 func WithRoleSearchFilters(v json.RawMessage) RoleSearchOption {
 	owned := bytes.Clone(v)
-	return func(c *RoleSearchOpts) error {
+	return request.Custom(func(c *RoleSearchOpts) error {
 		c.Filters = nil
 		if owned != nil {
 			x := json.RawMessage(bytes.Clone(owned))
 			c.Filters = &x
 		}
 		return nil
-	}
-}
-func WithRoleSearchHeaders(v map[string]string) RoleSearchOption {
-	owned := maps.Clone(v)
-	return func(c *RoleSearchOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
-func WithRoleSearchMicroversion(v string) RoleSearchOption {
-	return func(c *RoleSearchOpts) error { x := v; c.Microversion = &x; return nil }
+	})
 }
 func WithRoleSearchLocation(v resource.CloudLocation) RoleSearchOption {
 	owned := v.Clone()
-	return func(c *RoleSearchOpts) error { x := owned.Clone(); c.Location = &x; return nil }
+	return request.Custom(func(c *RoleSearchOpts) error { x := owned.Clone(); c.Location = &x; return nil })
 }
 func roleSearchInvalid(format string, args ...any) error {
 	return fmt.Errorf("%w: %s", resource.ErrInvalidOption, fmt.Sprintf(format, args...))
@@ -131,7 +136,7 @@ func (c *RoleReadCloud) prepareRoleSearch(ctx context.Context, options []RoleSea
 	}
 	ctx = rest.WithOperationGuard(ctx, sourceGuard)
 	guard := func() error { return sourceGuard(ctx) }
-	for _, apply := range slices.Clone(options) {
+	for _, apply := range calls.Translate(options, roleSearchCalls) {
 		if err := guard(); err != nil {
 			return ctx, nil, policy, guard, err
 		}
@@ -167,12 +172,12 @@ func (c *RoleReadCloud) SearchRoles(ctx context.Context, nameOrID string, option
 	if policy.DomainID != nil {
 		domain = *policy.DomainID
 	}
-	opts = append(opts, roles.WithRecordListQuery("domain_id", domain))
+	opts = append(opts, request.Query("domain_id", domain))
 	if policy.Headers != nil {
-		opts = append(opts, roles.WithRecordListHeaders(policy.Headers))
+		opts = append(opts, request.Headers(policy.Headers))
 	}
 	if policy.Microversion != nil {
-		opts = append(opts, roles.WithRecordListMicroversion(*policy.Microversion))
+		opts = append(opts, request.Microversion(*policy.Microversion))
 	}
 	if policy.Location != nil {
 		opts = append(opts, roles.WithRecordListLocation(*policy.Location))

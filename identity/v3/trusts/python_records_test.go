@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/trusts"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -54,7 +55,7 @@ func TestPythonTrustCreateRawAttributesAliasesAndDescriptorViews(t *testing.T) {
 	owned := trusts.WithRecordCreateOpts(trusts.RecordCreateOpts{Fields: fields})
 	fields["roles"][8] = 'X'
 	fields["trustor_user_id"] = json.RawMessage(`"mutated"`)
-	value, err := api.CreateRecord(context.Background(), owned, trusts.WithRecordCreateField("unknown", make(chan int)))
+	value, err := api.CreateRecord(context.Background(), owned, request.Field("unknown", make(chan int)))
 	if err != nil {
 		t.Fatal(value, err)
 	}
@@ -81,7 +82,7 @@ func TestPythonTrustCreateRawAttributesAliasesAndDescriptorViews(t *testing.T) {
 		t.Fatal(err, calls)
 	}
 	calls = nil
-	value, err = api.CreateRecord(context.Background(), trusts.WithRecordCreateField("impersonation", true), trusts.WithRecordCreateField("is_impersonation", nil), trusts.WithRecordCreateField("roles", false))
+	value, err = api.CreateRecord(context.Background(), request.Field("impersonation", true), request.Field("is_impersonation", nil), request.Field("roles", false))
 	if err != nil || calls[0].body != `{"trust":{"impersonation":null,"roles":false}}` {
 		t.Fatal(value, err, calls)
 	}
@@ -89,7 +90,7 @@ func TestPythonTrustCreateRawAttributesAliasesAndDescriptorViews(t *testing.T) {
 	calls = nil
 	_, err = api.CreateRecord(context.Background(),
 		trusts.WithRecordCreateOpts(trusts.RecordCreateOpts{Fields: map[string]json.RawMessage{"is_impersonation": json.RawMessage(`true`)}}),
-		trusts.WithRecordCreateField("impersonation", false))
+		request.Field("impersonation", false))
 	if err != nil || calls[0].body != `{"trust":{"impersonation":false}}` {
 		t.Fatal(err, calls)
 	}
@@ -148,25 +149,25 @@ func TestPythonTrustListQueryClassificationLocalFiltersAndRawCap(t *testing.T) {
 		return 200, `{"trusts":[{"id":"skip","impersonation":true},{"id":"found","impersonation":false,"roles":{"nested":{"name":"member"}},"trustor_user_id":"alice"}],"next":"?marker=next"}`
 	})
 	options := []trusts.RecordListOption{
-		trusts.WithRecordListQuery("trustor_user_id", []any{"alice", true, nil}),
-		trusts.WithRecordListQuery("trustee_user_id", nil),
-		trusts.WithRecordListQuery("is_impersonation", false),
-		trusts.WithRecordListQuery("roles", map[string]any{"nested": map[string]any{"name": "member"}}),
-		trusts.WithRecordListQuery("impersonation", make(chan int)),
-		trusts.WithRecordListQuery("unknown", make(chan int)),
-		trusts.WithRecordListMaxItems(2),
+		request.Query("trustor_user_id", []any{"alice", true, nil}),
+		request.Query("trustee_user_id", nil),
+		request.Query("is_impersonation", false),
+		request.Query("roles", map[string]any{"nested": map[string]any{"name": "member"}}),
+		request.Query("impersonation", make(chan int)),
+		request.Query("unknown", make(chan int)),
+		request.MaxItems(2),
 	}
 	ids, err := trustRecordIDs(t, api, options...)
 	if err != nil || !reflect.DeepEqual(ids, []string{"found"}) || len(calls) != 1 || calls[0].query != "limit=2&trustor_user_id=alice&trustor_user_id=True" {
 		t.Fatal(ids, err, calls)
 	}
 	calls = nil
-	ids, err = trustRecordIDs(t, api, append(options, trusts.WithRecordListMaxItems(1))...)
+	ids, err = trustRecordIDs(t, api, append(options, request.MaxItems(1))...)
 	if err != nil || len(ids) != 0 || len(calls) != 1 || !strings.Contains(calls[0].query, "limit=1") {
 		t.Fatal("max_items must count raw rows before local filters", ids, err, calls)
 	}
 	calls = nil
-	ids, err = trustRecordIDs(t, api, trusts.WithRecordListPaginated(false), trusts.WithRecordListQuery("impersonation", false))
+	ids, err = trustRecordIDs(t, api, request.Paginated(false), request.Query("impersonation", false))
 	if err != nil || !reflect.DeepEqual(ids, []string{"skip", "found"}) || len(calls) != 1 || calls[0].query != "" {
 		t.Fatal("wire Body alias is not a Source local-filter name", ids, err, calls)
 	}
@@ -283,7 +284,7 @@ func TestPythonTrustFindGetFirstCleanFallbackFullSearchAndMissing(t *testing.T) 
 				}
 				return 200, `{"trusts":` + item.list + `}`
 			})
-			value, err := api.FindRecord(context.Background(), "ci", trusts.WithRecordFindIgnoreMissing(!item.strict))
+			value, err := api.FindRecord(context.Background(), "ci", request.IgnoreMissing(!item.strict))
 			switch item.expected {
 			case "missing":
 				if value != nil || err != nil {
@@ -363,7 +364,7 @@ func TestPythonTrustDeleteMissingAndSourceStatusPolicies(t *testing.T) {
 					}
 				}
 				if operation == "delete" && code == 404 {
-					err = api.DeleteRecord(context.Background(), "selected", trusts.WithRecordDeleteIgnoreMissing(false))
+					err = api.DeleteRecord(context.Background(), "selected", request.IgnoreMissing(false))
 					var native gophercloud.ErrUnexpectedResponseCode
 					if !errors.As(err, &native) || native.Actual != 404 {
 						t.Fatal(err, native)
@@ -383,16 +384,16 @@ func TestPythonTrustOptionsOwnershipPreflightAndJoinedCallbacks(t *testing.T) {
 		return 200, `{}`
 	})
 	var retained *trusts.RecordCreateOpts
-	value, err := api.CreateRecord(context.Background(), func(c *trusts.RecordCreateOpts) error {
+	value, err := api.CreateRecord(context.Background(), request.Custom(func(c *trusts.RecordCreateOpts) error {
 		retained = c
 		c.Fields = map[string]json.RawMessage{"roles": json.RawMessage(`[]`)}
 		c.Headers = map[string]string{"X-Owned": "old"}
 		return nil
-	}, func(*trusts.RecordCreateOpts) error {
+	}), request.Custom(func(*trusts.RecordCreateOpts) error {
 		retained.Fields["roles"] = json.RawMessage(`true`)
 		retained.Headers["X-Owned"] = "changed"
 		return nil
-	})
+	}))
 	if err != nil || len(calls) != 1 || calls[0].body != `{"trust":{"roles":[]}}` {
 		t.Fatal(value, err, calls)
 	}
@@ -413,9 +414,9 @@ func TestPythonTrustOptionsOwnershipPreflightAndJoinedCallbacks(t *testing.T) {
 			_, err := api.CreateRecord(context.Background(), trusts.WithRecordCreateOpts(trusts.RecordCreateOpts{Fields: map[string]json.RawMessage{"impersonation": json.RawMessage(`true`), "is_impersonation": json.RawMessage(`false`)}}))
 			return err
 		}},
-		{"negative limit", func() error { _, err := trustRecordIDs(t, api, trusts.WithRecordListLimit(-1)); return err }},
+		{"negative limit", func() error { _, err := trustRecordIDs(t, api, request.Limit(-1)); return err }},
 		{"protected header", func() error {
-			_, err := api.GetRecord(context.Background(), "a", trusts.WithRecordReadHeaders(map[string]string{"X-Auth-Token": "wrong"}))
+			_, err := api.GetRecord(context.Background(), "a", request.Headers(map[string]string{"X-Auth-Token": "wrong"}))
 			return err
 		}},
 		{"dot ID", func() error { _, err := api.GetRecord(context.Background(), ".."); return err }},
@@ -433,7 +434,7 @@ func TestPythonTrustOptionsOwnershipPreflightAndJoinedCallbacks(t *testing.T) {
 		defer cancel(nil)
 		cause, callback := errors.New("caller"), errors.New("callback")
 		before := len(calls)
-		_, err := api.CreateRecord(ctx, func(*trusts.RecordCreateOpts) error { cancel(cause); return callback })
+		_, err := api.CreateRecord(ctx, request.Custom(func(*trusts.RecordCreateOpts) error { cancel(cause); return callback }))
 		if !errors.Is(err, cause) || !errors.Is(err, callback) || !errors.Is(err, context.Canceled) || len(calls) != before {
 			t.Fatal(err, calls)
 		}
@@ -443,7 +444,7 @@ func TestPythonTrustOptionsOwnershipPreflightAndJoinedCallbacks(t *testing.T) {
 		defer func() { api.RawClient().Endpoint = endpoint }()
 		cause := errors.New("callback")
 		before := len(calls)
-		_, err := api.CreateRecord(context.Background(), func(*trusts.RecordCreateOpts) error { api.RawClient().Endpoint += "changed/"; return cause })
+		_, err := api.CreateRecord(context.Background(), request.Custom(func(*trusts.RecordCreateOpts) error { api.RawClient().Endpoint += "changed/"; return cause }))
 		if !errors.Is(err, cause) || !errors.Is(err, resource.ErrInvalidOption) || len(calls) != before {
 			t.Fatal(err, calls)
 		}
@@ -622,7 +623,7 @@ func TestPythonTrustNativeRetryAndFixedRequestOwnership(t *testing.T) {
 				}
 				return nil
 			}
-			value, err := api.CreateRecord(ctx, trusts.WithRecordCreateField("roles", []any{}))
+			value, err := api.CreateRecord(ctx, request.Field("roles", []any{}))
 			if kind == "success" {
 				if err != nil || len(calls) != 2 || calls[0] != calls[1] {
 					t.Fatal(value, err, calls)

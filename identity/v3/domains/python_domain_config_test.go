@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"io"
 	"net/http"
 	"reflect"
@@ -70,7 +71,7 @@ func TestPythonDomainConfigCreateUsesSingletonPUTAndRawChildPayload(t *testing.T
 		}
 		return domainRecordWire(201, `{"config":{"identity":{"driver":"actual","x_child":true},"ldap":{"url":"ldap://actual"},"x_unknown":1}}`)
 	})
-	row, err := api.CreateConfigRecord(context.Background(), "domain/id", domains.WithDomainConfigAttribute("identity", json.RawMessage(`{"driver":"ldap","x_child":9007199254740993}`)), domains.WithDomainConfigAttribute("ldap", map[string]any{"url": "ldap://local", "user_tree_dn": "ou=users"}), domains.WithDomainConfigAttribute("x_unknown", "drop"))
+	row, err := api.CreateConfigRecord(context.Background(), "domain/id", request.Field("identity", json.RawMessage(`{"driver":"ldap","x_child":9007199254740993}`)), request.Field("ldap", map[string]any{"url": "ldap://local", "user_tree_dn": "ou=users"}), request.Field("x_unknown", "drop"))
 	if err != nil || row == nil || calls != 1 || row.StatusCode != 201 {
 		t.Fatal(row, err, calls)
 	}
@@ -147,7 +148,7 @@ func TestPythonDomainConfigUpdatePATCHNullAndSeedOverlay(t *testing.T) {
 		}
 		return domainRecordWire(200, `{"config":{"ldap":{"url":"actual"}}}`)
 	})
-	row, err := api.UpdateConfigRecord(context.Background(), "fixed", domains.WithDomainConfigAttribute("identity", map[string]any{"driver": "seed"}), domains.WithDomainConfigAttribute("ldap", nil))
+	row, err := api.UpdateConfigRecord(context.Background(), "fixed", request.Field("identity", map[string]any{"driver": "seed"}), request.Field("ldap", nil))
 	if err != nil || row == nil || calls != 1 {
 		t.Fatal(row, err, calls)
 	}
@@ -162,10 +163,10 @@ func TestPythonDomainConfigUpdateEmptyAndUnknownAttributesAvoidHTTP(t *testing.T
 			api, _ := domainRecordAPI(t, func(r *http.Request) *http.Response { calls++; return domainRecordWire(200, `{}`) })
 			opts := []domains.DomainConfigOption{}
 			if mode == "unknown only" {
-				opts = append(opts, domains.WithDomainConfigAttribute("x_unknown", 1))
+				opts = append(opts, request.Field("x_unknown", 1))
 			}
 			if mode == "id only" {
-				opts = append(opts, domains.WithDomainConfigAttribute("id", "passive"))
+				opts = append(opts, request.Field("id", "passive"))
 			}
 			row, err := api.UpdateConfigRecord(context.Background(), "fixed", opts...)
 			if err != nil || row == nil || calls != 0 || row.StatusCode != 0 || len(row.Envelope) != 0 || row.Wire != nil {
@@ -274,7 +275,7 @@ func TestPythonDomainConfigPreflightGuardsAndReadMutationSeparation(t *testing.T
 			api, cloud := domainRecordAPI(t, func(r *http.Request) *http.Response { calls++; return domainRecordWire(200, `{}`) })
 			var option domains.DomainConfigOption
 			if mode != "nil option" {
-				option = func(*domains.DomainConfigOpts) error {
+				option = request.Custom(func(*domains.DomainConfigOpts) error {
 					switch mode {
 					case "callback error":
 						return cause
@@ -284,7 +285,7 @@ func TestPythonDomainConfigPreflightGuardsAndReadMutationSeparation(t *testing.T
 						cancel(cause)
 					}
 					return nil
-				}
+				})
 			}
 			id := "fixed"
 			if mode == "invalid id" {
@@ -292,11 +293,11 @@ func TestPythonDomainConfigPreflightGuardsAndReadMutationSeparation(t *testing.T
 			}
 			var err error
 			if mode == "get attributes" {
-				_, err = api.GetConfigRecord(ctx, id, domains.WithDomainConfigAttribute("identity", nil))
+				_, err = api.GetConfigRecord(ctx, id, request.Field("identity", nil))
 			} else if mode == "delete attributes" {
-				_, err = api.DeleteConfigRecord(ctx, id, domains.WithDomainConfigAttribute("ldap", nil))
+				_, err = api.DeleteConfigRecord(ctx, id, request.Field("ldap", nil))
 			} else {
-				_, err = api.CreateConfigRecord(ctx, id, option, func(*domains.DomainConfigOpts) error { later++; return nil })
+				_, err = api.CreateConfigRecord(ctx, id, option, request.Custom(func(*domains.DomainConfigOpts) error { later++; return nil }))
 			}
 			if err == nil || calls != 0 {
 				t.Fatal(err, calls)
@@ -342,11 +343,11 @@ func TestPythonDomainConfigPhysicalFaultsAndStrictReadErrorsNeverFallback(t *tes
 				var err error
 				switch op {
 				case "create":
-					_, err = api.CreateConfigRecord(ctx, "fixed", domains.WithDomainConfigAttribute("identity", nil))
+					_, err = api.CreateConfigRecord(ctx, "fixed", request.Field("identity", nil))
 				case "get":
 					_, err = api.GetConfigRecord(ctx, "fixed")
 				case "update":
-					_, err = api.UpdateConfigRecord(ctx, "fixed", domains.WithDomainConfigAttribute("ldap", nil))
+					_, err = api.UpdateConfigRecord(ctx, "fixed", request.Field("ldap", nil))
 				case "delete":
 					_, err = api.DeleteConfigRecord(ctx, "fixed", domains.WithDomainConfigIgnoreMissing(false))
 				}

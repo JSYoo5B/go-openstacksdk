@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/services"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -87,7 +88,7 @@ func TestPythonServiceRecordsDeclaredQueryAndOrderedLoadedLocalFilters(t *testin
 		query = r.URL.Query()
 		return serviceRecordWire(200, `{"services":[{"id":"a","description":0.10000000000000001,"enabled":true},{"id":"b","description":0.2,"enabled":false}]}`)
 	})
-	rows, err := api.AllRecords(context.Background(), services.WithRecordListQuery("type", []string{"compute", "image"}), services.WithRecordListQuery("name", false), services.WithRecordListQuery("description", json.RawMessage(`0.1`)), services.WithRecordListQuery("is_enabled", true), services.WithRecordListQuery("enabled", func() {}), services.WithRecordListQuery("unknown", func() {}))
+	rows, err := api.AllRecords(context.Background(), request.Query("type", []string{"compute", "image"}), request.Query("name", false), request.Query("description", json.RawMessage(`0.1`)), request.Query("is_enabled", true), request.Query("enabled", func() {}), request.Query("unknown", func() {}))
 	if err != nil || !reflect.DeepEqual(serviceRecordIDs(t, rows), []string{"a"}) || !reflect.DeepEqual(query, url.Values{"type": {"compute", "image"}, "name": {"False"}}) {
 		t.Fatal(rows, err, query)
 	}
@@ -95,7 +96,7 @@ func TestPythonServiceRecordsDeclaredQueryAndOrderedLoadedLocalFilters(t *testin
 		api, _ := serviceRecordAPI(t, func(*http.Request) *http.Response {
 			return serviceRecordWire(200, `{"services":[{"id":"a","links":`+raw+`}]}`)
 		})
-		rows, err := api.AllRecords(context.Background(), services.WithRecordListQuery("links", map[string]any{}))
+		rows, err := api.AllRecords(context.Background(), request.Query("links", map[string]any{}))
 		if err != nil || len(rows) != 1 {
 			t.Fatal(raw, rows, err)
 		}
@@ -119,13 +120,13 @@ func TestPythonServiceRecordsRawMarkerShortPagesCapBreakAndReusableIterator(t *t
 			return serviceRecordWire(200, `{"services":[]}`)
 		}
 	})
-	opts := []services.RecordListOption{services.WithRecordListLimit(2), services.WithRecordListQuery("type", "d"), services.WithRecordListQuery("description", "keep")}
+	opts := []services.RecordListOption{request.Limit(2), request.Query("type", "d"), request.Query("description", "keep")}
 	rows, err := api.AllRecords(context.Background(), opts...)
 	if err != nil || !reflect.DeepEqual(serviceRecordIDs(t, rows), []string{"b", "c"}) || !reflect.DeepEqual(markers, []string{"", "b", "c"}) {
 		t.Fatal(rows, err, markers)
 	}
 	calls = 0
-	rows, err = api.AllRecords(context.Background(), append(opts, services.WithRecordListMaxItems(2))...)
+	rows, err = api.AllRecords(context.Background(), append(opts, request.MaxItems(2))...)
 	if err != nil || len(rows) != 1 || calls != 1 {
 		t.Fatal(rows, err, calls)
 	}
@@ -170,7 +171,7 @@ func TestPythonServiceRecordsSourceDictionaryRootPresenceAndActualContinuationGu
 				}
 				return serviceRecordWire(200, `{"services":[{"id":"a"}]`+suffix+`}`)
 			})
-			rows, err := api.AllRecords(context.Background(), services.WithRecordListQuery("type", "d"))
+			rows, err := api.AllRecords(context.Background(), request.Query("type", "d"))
 			if mode == "dictionary" || mode == "root masks plural" {
 				if err != nil || len(rows) != 1 || calls != 1 {
 					t.Fatal(rows, err, calls)
@@ -238,7 +239,7 @@ func TestPythonServiceRecordsOptionSnapshotsFormalsAndPreflightSourceGuards(t *t
 		t.Fatal(err, calls, query)
 	}
 	before := calls
-	for _, options := range [][]services.RecordListOption{{nil}, {services.WithRecordListQuery("self", func() {})}, {services.WithRecordListQuery("__conflicting_attrs", map[string]any{"paginated": false})}, {services.WithRecordListBasePath("https://foreign.invalid/")}, {services.WithRecordListMaxItems(-1)}} {
+	for _, options := range [][]services.RecordListOption{{nil}, {request.Query("self", func() {})}, {request.Query("__conflicting_attrs", map[string]any{"paginated": false})}, {request.BasePath("https://foreign.invalid/")}, {request.MaxItems(-1)}} {
 		rows, err := api.AllRecords(context.Background(), options...)
 		var proof *resource.ResponseError
 		if rows != nil || !errors.Is(err, resource.ErrInvalidOption) || errors.As(err, &proof) || calls != before {
@@ -247,15 +248,15 @@ func TestPythonServiceRecordsOptionSnapshotsFormalsAndPreflightSourceGuards(t *t
 	}
 	cause := errors.New("service callback canceled")
 	ctx, cancel := context.WithCancelCause(context.Background())
-	_, err = api.AllRecords(ctx, func(*services.RecordListOpts) error { cancel(cause); return nil })
+	_, err = api.AllRecords(ctx, request.Custom(func(*services.RecordListOpts) error { cancel(cause); return nil }))
 	if !errors.Is(err, cause) || !errors.Is(err, context.Canceled) || calls != before {
 		t.Fatal(err, calls)
 	}
 	old := api.RawClient().Endpoint
-	_, err = api.AllRecords(context.Background(), func(*services.RecordListOpts) error {
+	_, err = api.AllRecords(context.Background(), request.Custom(func(*services.RecordListOpts) error {
 		api.RawClient().Endpoint = "https://changed.invalid/"
 		return nil
-	})
+	}))
 	api.RawClient().Endpoint = old
 	if !errors.Is(err, resource.ErrInvalidOption) || calls != before {
 		t.Fatal(err, calls)
@@ -287,7 +288,7 @@ func TestPythonServiceRecordsMalformedRowsAndLocalFilterFaultRetainAcceptedPage(
 		api, _ := serviceRecordAPI(t, func(*http.Request) *http.Response { return serviceRecordWire(203, body) })
 		opts := []services.RecordListOption{}
 		if strings.Contains(body, `"links":3`) {
-			opts = append(opts, services.WithRecordListQuery("links", map[string]any{"key": "value"}))
+			opts = append(opts, request.Query("links", map[string]any{"key": "value"}))
 		}
 		rows, err := api.AllRecords(context.Background(), opts...)
 		var proof *resource.ResponseError
@@ -405,7 +406,7 @@ func TestPythonServiceRecordsCleanReauthRetryAndBackoffKeepFrozenIdentityRequest
 				return nil
 			}
 			api.RawClient().MoreHeaders = map[string]string{"X-Selected": "fixed"}
-			_, err := api.AllRecords(context.Background(), services.WithRecordListQuery("type", "d"), services.WithRecordListMicroversion("3.1"))
+			_, err := api.AllRecords(context.Background(), request.Query("type", "d"), request.Microversion("3.1"))
 			if err != nil || calls != 2 {
 				t.Fatal(err, calls, reauth, retries, backoff)
 			}
@@ -435,7 +436,7 @@ func TestPythonServiceRecordsBoolAliasResponseOrderAndLocalCanonicalKey(t *testi
 			t.Fatal(rows[i])
 		}
 	}
-	rows, err = api.AllRecords(context.Background(), services.WithRecordListQuery("is_enabled", false))
+	rows, err = api.AllRecords(context.Background(), request.Query("is_enabled", false))
 	if err != nil || !reflect.DeepEqual(serviceRecordIDs(t, rows), []string{"a", "c"}) {
 		t.Fatal(rows, err)
 	}
@@ -450,9 +451,9 @@ func TestPythonServiceRecordsFormalRestoreHeaderVersionUnknownAndConstructorRece
 		return serviceRecordWire(200, `{"services":{"id":"one","links":{"keep":1}}}`)
 	})
 	raw := json.RawMessage(`{"name":"new","links":{"keep":1},"headers":{"X-Trace":"restored","Accept":"custom/json"},"microversion":"3.99","jmespath_filters":"length(@)","location":false,"__conflicting_attrs":{"name":"must-not-recurse"}}`)
-	restore := services.WithRecordListQuery("__conflicting_attrs", raw)
+	restore := request.Query("__conflicting_attrs", raw)
 	raw[1] = 'X'
-	rows, err := api.AllRecords(context.Background(), services.WithRecordListQuery("name", "old"), restore)
+	rows, err := api.AllRecords(context.Background(), request.Query("name", "old"), restore)
 	if err != nil || len(rows) != 1 || calls != 1 {
 		t.Fatal(rows, err, calls)
 	}
@@ -536,7 +537,7 @@ func TestPythonServiceResolveRecordMissingDuplicatesAndGetOnlyVersion(t *testing
 				return serviceRecordWire(200, `{"services":[]}`)
 			})
 			api.RawClient().Microversion = "3.1"
-			row, err := api.ResolveRecord(context.Background(), "nova", services.WithRecordResolveHeaders(map[string]string{"X-Select": "owned"}), services.WithRecordResolveMicroversion("3.8"))
+			row, err := api.ResolveRecord(context.Background(), "nova", request.Headers(map[string]string{"X-Select": "owned"}), request.Microversion("3.8"))
 			switch mode {
 			case "missing":
 				if err != nil || row != nil || calls != 2 {
@@ -607,21 +608,21 @@ func TestPythonServiceResolveRecordOptionsSnapshotCancellationAndExplicitLocatio
 			cause := errors.New("resolve cancellation")
 			old := api.RawClient().Endpoint
 			defer func() { api.RawClient().Endpoint = old }()
-			var first services.RecordResolveOption = func(*services.RecordResolveOpts) error {
+			var first services.RecordResolveOption = request.Custom(func(*services.RecordResolveOpts) error {
 				if mode == "source" {
 					api.RawClient().Endpoint = "https://changed.invalid/"
 				} else {
 					cancel(cause)
 				}
 				return nil
-			}
+			})
 			if mode == "nil" {
 				first = nil
 			}
 			if mode == "location" {
 				first = services.WithRecordResolveLocation(resource.CloudLocation{Project: resource.CloudProject{ID: json.RawMessage(`bad`)}})
 			}
-			row, err := api.ResolveRecord(ctx, "a", first, func(*services.RecordResolveOpts) error { seen++; return nil })
+			row, err := api.ResolveRecord(ctx, "a", first, request.Custom(func(*services.RecordResolveOpts) error { seen++; return nil }))
 			var proof *resource.ResponseError
 			if row != nil || err == nil || calls != before || errors.As(err, &proof) || (mode != "location" && seen != 0) {
 				t.Fatal(row, err, calls, seen, proof)

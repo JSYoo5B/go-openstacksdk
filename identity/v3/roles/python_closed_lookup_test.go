@@ -14,6 +14,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/roles"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -148,7 +149,7 @@ func TestPythonRoleClosedLookupMissingDuplicateLatePageAndGetOnlyMicroversion(t 
 				return closedRoleWire(200, `{"roles":[]}`)
 			})
 			api.RawClient().Microversion = "3.1"
-			row, err := api.ResolveRecord(context.Background(), "reader", roles.WithClosedLookupDomainID("domain"), roles.WithClosedLookupHeaders(map[string]string{"X-Owned": "owned"}), roles.WithClosedLookupMicroversion("3.8"))
+			row, err := api.ResolveRecord(context.Background(), "reader", roles.WithClosedLookupDomainID("domain"), request.Headers(map[string]string{"X-Owned": "owned"}), request.Microversion("3.8"))
 			switch mode {
 			case "missing":
 				if err != nil || row != nil || calls != 2 {
@@ -201,14 +202,14 @@ func TestPythonRoleClosedLookupImmutableOptsSourceCancellationAndExplicitLocatio
 			cause := errors.New("closed caller cause")
 			old := api.RawClient().Endpoint
 			defer func() { api.RawClient().Endpoint = old }()
-			var first roles.ClosedLookupOption = func(*roles.ClosedLookupOpts) error {
+			var first roles.ClosedLookupOption = request.Custom(func(*roles.ClosedLookupOpts) error {
 				if mode == "source" {
 					api.RawClient().Endpoint = "https://changed.invalid/"
 				} else {
 					cancel(cause)
 				}
 				return nil
-			}
+			})
 			if mode == "nil" {
 				first = nil
 			}
@@ -218,7 +219,7 @@ func TestPythonRoleClosedLookupImmutableOptsSourceCancellationAndExplicitLocatio
 			if mode == "location" {
 				first = roles.WithClosedLookupLocation(resource.CloudLocation{Project: resource.CloudProject{ID: json.RawMessage(`invalid`)}})
 			}
-			row, err := api.ResolveRecord(ctx, "a", first, func(*roles.ClosedLookupOpts) error { seen++; return nil })
+			row, err := api.ResolveRecord(ctx, "a", first, request.Custom(func(*roles.ClosedLookupOpts) error { seen++; return nil }))
 			var proof *resource.ResponseError
 			if row != nil || err == nil || calls != before || errors.As(err, &proof) || ((mode == "nil" || mode == "source" || mode == "cancel") && seen != 0) {
 				t.Fatal(row, err, calls, seen, proof)
@@ -321,7 +322,7 @@ func TestPythonRoleClosedLookupCleanAuthRetryKeepsFrozenRequest(t *testing.T) {
 				api.RawClient().MoreHeaders["If-Match"] = "injected"
 				return nil
 			}
-			row, err := api.ResolveRecord(context.Background(), "one", roles.WithClosedLookupDomainID("domain"), roles.WithClosedLookupMicroversion("3.2"))
+			row, err := api.ResolveRecord(context.Background(), "one", roles.WithClosedLookupDomainID("domain"), request.Microversion("3.2"))
 			if err != nil || row == nil || calls != 2 || callbacks != 1 {
 				t.Fatal(row, err, calls, callbacks)
 			}

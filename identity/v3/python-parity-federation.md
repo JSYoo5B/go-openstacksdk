@@ -76,11 +76,11 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/policies.API.AllRecords`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/policies.WithRecordListOpts`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/policies.WithRecordListFilter`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/policies.WithRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/policies.WithRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/policies.WithRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/policies.WithRecordListPaginated`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/policies.WithRecordListHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 
 - List sends GET policies without a query and follows links.next, All forwards type, limit and marker as wire query, and WithBodyFilter and WithName return resource.ErrUnsupported.
   Tests: `identity/v3/policies/python_parity_test.go:TestPythonPolicyListFilters`.

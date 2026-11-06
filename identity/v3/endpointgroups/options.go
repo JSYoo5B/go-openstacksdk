@@ -10,21 +10,25 @@ import (
 	"sort"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 // ReadOpts carries Go extension headers for calls whose Python method takes
 // no further arguments (get, associate, disassociate).
 type ReadOpts struct{ Headers map[string]string }
-type ReadOption func(*ReadOpts) error
+
+// ReadOption is one option of Get, AssociateProject, DisassociateProject and
+// CloudDelete: request.Headers (replaces the headers) or request.Custom over
+// *ReadOpts. Other shared calls fail with resource.ErrInvalidOption before
+// HTTP.
+type ReadOption = request.GetCall
+
+var readCalls = calls.Spec[ReadOpts]{Headers: calls.Value(func(c *ReadOpts) *map[string]string { return &c.Headers })}
 
 func copyRead(v ReadOpts) ReadOpts { v.Headers = maps.Clone(v.Headers); return v }
-
-func WithReadHeaders(values map[string]string) ReadOption {
-	owned := maps.Clone(values)
-	return func(c *ReadOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
 
 // CreateOpts holds Python create_endpoint_group **attrs. Fields are keyed by
 // declared EndpointGroup attribute; unknown attributes are dropped like the
@@ -33,7 +37,18 @@ type CreateOpts struct {
 	Headers map[string]string
 	Fields  map[string]json.RawMessage
 }
-type CreateOption func(*CreateOpts) error
+
+// CreateOption is one option of Create and CloudCreate: WithCreateOpts,
+// request.Field (one declared EndpointGroup attribute; unknown attributes are
+// dropped with their marshal error), request.Headers (replaces the headers) or
+// request.Custom over *CreateOpts. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type CreateOption = request.WriteCall
+
+var createCalls = calls.Spec[CreateOpts]{
+	Field:   fieldCall(false, func(c *CreateOpts) *map[string]json.RawMessage { return &c.Fields }),
+	Headers: calls.Value(func(c *CreateOpts) *map[string]string { return &c.Headers }),
+}
 
 func copyCreate(v CreateOpts) CreateOpts {
 	v.Headers = maps.Clone(v.Headers)
@@ -43,16 +58,7 @@ func copyCreate(v CreateOpts) CreateOpts {
 
 func WithCreateOpts(v CreateOpts) CreateOption {
 	owned := copyCreate(v)
-	return func(c *CreateOpts) error { *c = copyCreate(owned); return nil }
-}
-
-func WithCreateField(key string, value any) CreateOption {
-	return fieldOption(key, value, false, func(c *CreateOpts) *map[string]json.RawMessage { return &c.Fields })
-}
-
-func WithCreateHeaders(values map[string]string) CreateOption {
-	owned := maps.Clone(values)
-	return func(c *CreateOpts) error { c.Headers = maps.Clone(owned); return nil }
+	return request.Custom(func(c *CreateOpts) error { *c = copyCreate(owned); return nil })
 }
 
 // UpdateOpts holds Python update_endpoint_group **attrs. Unknown attributes
@@ -61,7 +67,18 @@ type UpdateOpts struct {
 	Headers map[string]string
 	Fields  map[string]json.RawMessage
 }
-type UpdateOption func(*UpdateOpts) error
+
+// UpdateOption is one option of Update: WithUpdateOpts, request.Field (one
+// declared EndpointGroup attribute; unknown attributes and id are dropped with
+// their marshal error), request.Headers (replaces the headers) or
+// request.Custom over *UpdateOpts. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type UpdateOption = request.WriteCall
+
+var updateCalls = calls.Spec[UpdateOpts]{
+	Field:   fieldCall(true, func(c *UpdateOpts) *map[string]json.RawMessage { return &c.Fields }),
+	Headers: calls.Value(func(c *UpdateOpts) *map[string]string { return &c.Headers }),
+}
 
 func copyUpdate(v UpdateOpts) UpdateOpts {
 	v.Headers = maps.Clone(v.Headers)
@@ -71,33 +88,24 @@ func copyUpdate(v UpdateOpts) UpdateOpts {
 
 func WithUpdateOpts(v UpdateOpts) UpdateOption {
 	owned := copyUpdate(v)
-	return func(c *UpdateOpts) error { *c = copyUpdate(owned); return nil }
+	return request.Custom(func(c *UpdateOpts) error { *c = copyUpdate(owned); return nil })
 }
 
-func WithUpdateField(key string, value any) UpdateOption {
-	return fieldOption(key, value, true, func(c *UpdateOpts) *map[string]json.RawMessage { return &c.Fields })
-}
-
-func WithUpdateHeaders(values map[string]string) UpdateOption {
-	owned := maps.Clone(values)
-	return func(c *UpdateOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
-
-func fieldOption[T any](key string, value any, update bool, target func(*T) *map[string]json.RawMessage) func(*T) error {
-	if !endpointGroupClass.known(key) || update && key == "id" {
-		return func(*T) error { return nil }
-	}
-	raw, err := json.Marshal(value)
-	owned := bytes.Clone(raw)
-	return func(c *T) error {
-		if err != nil {
-			return err
+// fieldCall records one declared EndpointGroup attribute. Unknown attributes
+// (and id on update) are dropped together with their marshal error.
+func fieldCall[T any](update bool, target func(*T) *map[string]json.RawMessage) func(*T, request.CallEntry) error {
+	return func(c *T, entry request.CallEntry) error {
+		if !endpointGroupClass.known(entry.Key) || update && entry.Key == "id" {
+			return nil
+		}
+		if entry.JSONErr != nil {
+			return entry.JSONErr
 		}
 		fields := target(c)
 		if *fields == nil {
 			*fields = make(map[string]json.RawMessage)
 		}
-		(*fields)[key] = bytes.Clone(owned)
+		(*fields)[entry.Key] = bytes.Clone(entry.JSON)
 		return nil
 	}
 }
@@ -107,7 +115,16 @@ type DeleteOpts struct {
 	Headers       map[string]string
 	IgnoreMissing *bool
 }
-type DeleteOption func(*DeleteOpts) error
+
+// DeleteOption is one option of Delete: request.IgnoreMissing, request.Headers
+// (replaces the headers) or request.Custom over *DeleteOpts. Other shared calls
+// fail with resource.ErrInvalidOption before HTTP.
+type DeleteOption = request.DeleteCall
+
+var deleteCalls = calls.Spec[DeleteOpts]{
+	IgnoreMissing: calls.Pointer(func(c *DeleteOpts) **bool { return &c.IgnoreMissing }),
+	Headers:       calls.Value(func(c *DeleteOpts) *map[string]string { return &c.Headers }),
+}
 
 func copyDelete(v DeleteOpts) DeleteOpts {
 	v.Headers = maps.Clone(v.Headers)
@@ -118,18 +135,15 @@ func copyDelete(v DeleteOpts) DeleteOpts {
 	return v
 }
 
-func WithDeleteIgnoreMissing(v bool) DeleteOption {
-	return func(c *DeleteOpts) error { x := v; c.IgnoreMissing = &x; return nil }
-}
-
-func WithDeleteHeaders(values map[string]string) DeleteOption {
-	owned := maps.Clone(values)
-	return func(c *DeleteOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
-
 // FindOpts selects find_endpoint_group's ignore_missing (nil is true).
 type FindOpts struct{ IgnoreMissing *bool }
-type FindOption func(*FindOpts) error
+
+// FindOption is one option of Find: request.IgnoreMissing or request.Custom
+// over *FindOpts. Other shared calls fail with resource.ErrInvalidOption before
+// HTTP.
+type FindOption = request.FindCall
+
+var findCalls = calls.Spec[FindOpts]{IgnoreMissing: calls.Pointer(func(c *FindOpts) **bool { return &c.IgnoreMissing })}
 
 func copyFind(v FindOpts) FindOpts {
 	if v.IgnoreMissing != nil {
@@ -137,10 +151,6 @@ func copyFind(v FindOpts) FindOpts {
 		v.IgnoreMissing = &x
 	}
 	return v
-}
-
-func WithFindIgnoreMissing(v bool) FindOption {
-	return func(c *FindOpts) error { x := v; c.IgnoreMissing = &x; return nil }
 }
 
 // ListOpts holds a Python list method's **query, keyed by attribute name or by
@@ -154,7 +164,45 @@ type ListOpts struct {
 	MaxItems  int
 	Paginated *bool
 }
-type ListOption func(*ListOpts) error
+
+// ListOption is one option of List, ListEndpoints, ListProjects,
+// ListProjectEndpointGroups and ListEndpointProjects: WithListOpts,
+// WithListName, request.Query (one Python keyword argument as JSON),
+// request.Limit and request.Marker (the limit and marker keywords, sent only by
+// classes whose QueryParameters keep the pagination defaults; EndpointGroup
+// drops them), request.MaxItems, request.Paginated, request.Headers (replaces
+// the headers) or request.Custom over *ListOpts. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type ListOption = request.ListCall
+
+var listCalls = calls.Spec[ListOpts]{
+	Query:   calls.JSONQuery(listKeyword),
+	Headers: calls.Value(func(c *ListOpts) *map[string]string { return &c.Headers }),
+	Paging: calls.Paging[ListOpts]{
+		Limit: func(c *ListOpts, n int) error {
+			raw, err := json.Marshal(n)
+			return listKeyword(c, "limit", raw, err)
+		},
+		Marker: func(c *ListOpts, marker string) error {
+			raw, err := json.Marshal(marker)
+			return listKeyword(c, "marker", raw, err)
+		},
+		MaxItems:  calls.Value(func(c *ListOpts) *int { return &c.MaxItems }),
+		Paginated: calls.Pointer(func(c *ListOpts) **bool { return &c.Paginated }),
+	},
+}
+
+// listKeyword records one Python keyword argument as JSON.
+func listKeyword(c *ListOpts, key string, raw json.RawMessage, err error) error {
+	if err != nil {
+		return err
+	}
+	if c.Query == nil {
+		c.Query = make(map[string]json.RawMessage)
+	}
+	c.Query[key] = bytes.Clone(raw)
+	return nil
+}
 
 func copyList(v ListOpts) ListOpts {
 	v.Headers = maps.Clone(v.Headers)
@@ -168,41 +216,12 @@ func copyList(v ListOpts) ListOpts {
 
 func WithListOpts(v ListOpts) ListOption {
 	owned := copyList(v)
-	return func(c *ListOpts) error { *c = copyList(owned); return nil }
+	return request.Custom(func(c *ListOpts) error { *c = copyList(owned); return nil })
 }
 
-// WithListQuery snapshots one Python keyword argument as JSON.
-func WithListQuery(key string, value any) ListOption {
-	raw, err := json.Marshal(value)
-	owned := bytes.Clone(raw)
-	return func(c *ListOpts) error {
-		if err != nil {
-			return err
-		}
-		if c.Query == nil {
-			c.Query = make(map[string]json.RawMessage)
-		}
-		c.Query[key] = bytes.Clone(owned)
-		return nil
-	}
-}
-
-func WithListName(v string) ListOption { return WithListQuery("name", v) }
-
-// WithListLimit and WithListMarker are sent only by classes whose
-// QueryParameters keep the pagination defaults; EndpointGroup drops them.
-func WithListLimit(v int) ListOption     { return WithListQuery("limit", v) }
-func WithListMarker(v string) ListOption { return WithListQuery("marker", v) }
-func WithListMaxItems(v int) ListOption {
-	return func(c *ListOpts) error { c.MaxItems = v; return nil }
-}
-func WithListPaginated(v bool) ListOption {
-	return func(c *ListOpts) error { x := v; c.Paginated = &x; return nil }
-}
-
-func WithListHeaders(values map[string]string) ListOption {
-	owned := maps.Clone(values)
-	return func(c *ListOpts) error { c.Headers = maps.Clone(owned); return nil }
+func WithListName(v string) ListOption {
+	raw, err := json.Marshal(v)
+	return request.Custom(func(c *ListOpts) error { return listKeyword(c, "name", raw, err) })
 }
 
 // SearchOpts holds the cloud search filters: a JSON object for nested
@@ -211,7 +230,14 @@ type SearchOpts struct {
 	Headers map[string]string
 	Filters *json.RawMessage
 }
-type SearchOption func(*SearchOpts) error
+
+// SearchOption is one option of CloudSearch: WithSearchFilters,
+// WithSearchExpression, request.Headers (replaces the headers) or
+// request.Custom over *SearchOpts. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type SearchOption = request.GetCall
+
+var searchCalls = calls.Spec[SearchOpts]{Headers: calls.Value(func(c *SearchOpts) *map[string]string { return &c.Headers })}
 
 func copySearch(v SearchOpts) SearchOpts {
 	v.Headers = maps.Clone(v.Headers)
@@ -224,24 +250,19 @@ func copySearch(v SearchOpts) SearchOpts {
 
 func WithSearchFilters(value json.RawMessage) SearchOption {
 	owned := bytes.Clone(value)
-	return func(c *SearchOpts) error {
+	return request.Custom(func(c *SearchOpts) error {
 		c.Filters = nil
 		if owned != nil {
 			raw := json.RawMessage(bytes.Clone(owned))
 			c.Filters = &raw
 		}
 		return nil
-	}
+	})
 }
 
 func WithSearchExpression(expression string) SearchOption {
 	raw, _ := json.Marshal(expression)
 	return WithSearchFilters(raw)
-}
-
-func WithSearchHeaders(values map[string]string) SearchOption {
-	owned := maps.Clone(values)
-	return func(c *SearchOpts) error { c.Headers = maps.Clone(owned); return nil }
 }
 
 func applyOptions[T any, O ~func(*T) error](ctx context.Context, guard func(context.Context) error, value T, copyValue func(T) T, options []O) (T, error) {

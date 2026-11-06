@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/federation.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/federation.API.GetMappingRecord`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/federation.WithMappingRecordReadHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 
 - GetMappingRecord sends GET OS-FEDERATION/mappings/{id} with the ID escaped as one segment, accepts every status from 200 through 399, reads the mapping envelope or root object and keeps schema_version and the raw rules JSON (including rule keys outside the native MappingRule structs) in typed fields, Body and Wire.
   Tests: `identity/v3/federation/python_mapping_records_test.go:TestPythonMappingRecordGetKeepsSchemaVersionAndRawRules`.
@@ -36,11 +36,11 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/federation.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/federation.API.ListMappingRecords`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/federation.API.AllMappingRecords`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/federation.WithMappingRecordListQuery`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/federation.WithMappingRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/federation.WithMappingRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/federation.WithMappingRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/federation.WithMappingRecordListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/federation.WithMappingRecordListOpts`
 
 - ListMappingRecords sends GET OS-FEDERATION/mappings with Accept application/json and no query by default, filters id, name, rules and schema_version locally because Mapping declares no server query, ignores unknown names, and keeps schema_version and raw rules per row.

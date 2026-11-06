@@ -22,13 +22,13 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.DomainRecord.Clone`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordListOpts`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordListQuery`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordListPaginated`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordListMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordListBasePath`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.BasePath`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordListJMESPath`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordListLocation`
 
@@ -81,8 +81,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadOpts`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadNameOrID`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadFilters`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadLocation`
 
 - Cloud list_domains expands arbitrary keyword mapping into Source query/local filters; enabled aliases and nested options survive local processing and actual yielded inventory preserves response fields.
@@ -118,8 +118,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadOpts`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadNameOrID`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadFilters`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadLocation`
 
 - name_or_id presence is preserved with a pointer: nil forwards mapping filters to list_domains; explicit empty/nonempty first materializes unfiltered domains and applies local exact/glob identifier plus mapping/JMESPath. Name/filters stay absent from server in that branch.
@@ -193,6 +193,7 @@ import (
     openstack "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/identity"
     "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains"
+    "github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 func printJSON(value any) {
@@ -210,8 +211,8 @@ func main() {
     for row, err := range service.Domains.ListRecords(ctx,
         domains.WithRecordListQuery("is_enabled", true),
         domains.WithRecordListQuery("description", "operations"),
-        domains.WithRecordListLimit(100),
-        domains.WithRecordListMaxItems(100),
+        request.Limit(100),
+        request.MaxItems(100),
     ) {
         if err != nil { log.Fatal(err) }
         printJSON(row.Resource.Body)

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -148,7 +149,7 @@ func TestPythonUserClosedLookupMissingDuplicateLatePageAndGetOnlyMicroversion(t 
 				return closedUserWire(200, `{"users":[]}`)
 			})
 			api.RawClient().Microversion = "3.1"
-			row, err := api.ResolveRecord(context.Background(), "reader", users.WithClosedLookupDomainID("domain"), users.WithClosedLookupHeaders(map[string]string{"X-Owned": "owned"}), users.WithClosedLookupMicroversion("3.8"))
+			row, err := api.ResolveRecord(context.Background(), "reader", users.WithClosedLookupDomainID("domain"), request.Headers(map[string]string{"X-Owned": "owned"}), request.Microversion("3.8"))
 			switch mode {
 			case "missing":
 				if err != nil || row != nil || calls != 2 {
@@ -201,14 +202,14 @@ func TestPythonUserClosedLookupImmutableOptsSourceCancellationAndExplicitLocatio
 			cause := errors.New("closed caller cause")
 			old := api.RawClient().Endpoint
 			defer func() { api.RawClient().Endpoint = old }()
-			var first users.ClosedLookupOption = func(*users.ClosedLookupOpts) error {
+			var first users.ClosedLookupOption = request.Custom(func(*users.ClosedLookupOpts) error {
 				if mode == "source" {
 					api.RawClient().Endpoint = "https://changed.invalid/"
 				} else {
 					cancel(cause)
 				}
 				return nil
-			}
+			})
 			if mode == "nil" {
 				first = nil
 			}
@@ -218,7 +219,7 @@ func TestPythonUserClosedLookupImmutableOptsSourceCancellationAndExplicitLocatio
 			if mode == "location" {
 				first = users.WithClosedLookupLocation(resource.CloudLocation{Project: resource.CloudProject{ID: json.RawMessage(`invalid`)}})
 			}
-			row, err := api.ResolveRecord(ctx, "a", first, func(*users.ClosedLookupOpts) error { seen++; return nil })
+			row, err := api.ResolveRecord(ctx, "a", first, request.Custom(func(*users.ClosedLookupOpts) error { seen++; return nil }))
 			var proof *resource.ResponseError
 			if row != nil || err == nil || calls != before || errors.As(err, &proof) || ((mode == "nil" || mode == "source" || mode == "cancel") && seen != 0) {
 				t.Fatal(row, err, calls, seen, proof)
@@ -321,7 +322,7 @@ func TestPythonUserClosedLookupCleanAuthRetryKeepsFrozenRequest(t *testing.T) {
 				api.RawClient().MoreHeaders["If-Match"] = "injected"
 				return nil
 			}
-			row, err := api.ResolveRecord(context.Background(), "one", users.WithClosedLookupDomainID("domain"), users.WithClosedLookupMicroversion("3.2"))
+			row, err := api.ResolveRecord(context.Background(), "one", users.WithClosedLookupDomainID("domain"), request.Microversion("3.2"))
 			if err != nil || row == nil || calls != 2 || callbacks != 1 {
 				t.Fatal(row, err, calls, callbacks)
 			}

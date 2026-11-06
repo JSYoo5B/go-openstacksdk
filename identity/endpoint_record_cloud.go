@@ -7,9 +7,9 @@ import (
 	"errors"
 	"fmt"
 	"maps"
-	"slices"
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/neutronfind"
@@ -40,7 +40,18 @@ type EndpointReadOpts struct {
 	Microversion *string
 	Location     *resource.CloudLocation
 }
-type EndpointReadOption func(*EndpointReadOpts) error
+
+// EndpointReadOption is one option of GetEndpoint and SearchEndpoints:
+// WithEndpointReadOpts, WithEndpointReadFilters, WithEndpointReadLocation,
+// request.Headers (replaces the headers), request.Microversion or
+// request.Custom over *EndpointReadOpts. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type EndpointReadOption = request.GetCall
+
+var endpointReadCalls = calls.Spec[EndpointReadOpts]{
+	Headers:      calls.Value(func(c *EndpointReadOpts) *map[string]string { return &c.Headers }),
+	Microversion: calls.Pointer(func(c *EndpointReadOpts) **string { return &c.Microversion }),
+}
 
 func endpointReadInvalid(format string, args ...any) error {
 	return fmt.Errorf("%w: %s", resource.ErrInvalidOption, fmt.Sprintf(format, args...))
@@ -66,29 +77,22 @@ func copyEndpointReadOpts(v EndpointReadOpts) EndpointReadOpts {
 }
 func WithEndpointReadOpts(v EndpointReadOpts) EndpointReadOption {
 	owned := copyEndpointReadOpts(v)
-	return func(c *EndpointReadOpts) error { *c = copyEndpointReadOpts(owned); return nil }
+	return request.Custom(func(c *EndpointReadOpts) error { *c = copyEndpointReadOpts(owned); return nil })
 }
 func WithEndpointReadFilters(v json.RawMessage) EndpointReadOption {
 	owned := bytes.Clone(v)
-	return func(c *EndpointReadOpts) error {
+	return request.Custom(func(c *EndpointReadOpts) error {
 		c.Filters = nil
 		if owned != nil {
 			x := json.RawMessage(bytes.Clone(owned))
 			c.Filters = &x
 		}
 		return nil
-	}
-}
-func WithEndpointReadHeaders(v map[string]string) EndpointReadOption {
-	owned := maps.Clone(v)
-	return func(c *EndpointReadOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
-func WithEndpointReadMicroversion(v string) EndpointReadOption {
-	return func(c *EndpointReadOpts) error { x := v; c.Microversion = &x; return nil }
+	})
 }
 func WithEndpointReadLocation(v resource.CloudLocation) EndpointReadOption {
 	owned := v.Clone()
-	return func(c *EndpointReadOpts) error { x := owned.Clone(); c.Location = &x; return nil }
+	return request.Custom(func(c *EndpointReadOpts) error { x := owned.Clone(); c.Location = &x; return nil })
 }
 
 // EndpointSearchResult associates only ordinary row selection with records.
@@ -147,7 +151,7 @@ func (c *EndpointReadCloud) prepareEndpointRead(ctx context.Context, options []E
 	}
 	ctx = rest.WithOperationGuard(ctx, sourceGuard)
 	p := &endpointReadPrepared{ctx: ctx, api: endpoints.New(&source.Client), client: source, guard: func() error { return sourceGuard(ctx) }}
-	for _, apply := range slices.Clone(options) {
+	for _, apply := range calls.Translate(options, endpointReadCalls) {
 		if err := p.guard(); err != nil {
 			return p, policy, err
 		}
@@ -187,10 +191,10 @@ func endpointReadLocation(record *endpoints.EndpointRecord, location *resource.C
 func (p *endpointReadPrepared) searchEndpoints(id string, policy EndpointReadOpts) (*EndpointSearchResult, error) {
 	opts := make([]endpoints.RecordListOption, 0, 2)
 	if len(policy.Headers) > 0 {
-		opts = append(opts, endpoints.WithRecordListHeaders(policy.Headers))
+		opts = append(opts, request.Headers(policy.Headers))
 	}
 	if policy.Microversion != nil {
-		opts = append(opts, endpoints.WithRecordListMicroversion(*policy.Microversion))
+		opts = append(opts, request.Microversion(*policy.Microversion))
 	}
 	result := &EndpointSearchResult{Inventory: make([]*endpoints.EndpointRecord, 0)}
 	rows := make([]json.RawMessage, 0)

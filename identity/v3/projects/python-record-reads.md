@@ -19,10 +19,10 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.WithRecordFindOpts`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.WithRecordFindIgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.WithRecordFindQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.WithRecordFindListBasePath`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.WithRecordFindMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - Safe string identities use the original native getter when query is absent and the audited query getter otherwise; both retain native success codes. Default logical absence is ignored, Compatible falls back only after GET400/403/404, with explicit 404-only/GET-only and strict missing options.
   Tests: `api/find_identity_native_test.go:TestNativeFindIdentitySafeGETReturnsImmediatelyWithNativeGetter`, `api/find_identity_native_test.go:TestNativeFindIdentityFallbackPoliciesAndMissingDefaults`.
@@ -87,8 +87,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.AllRecords`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.ProxyListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.WithRecordListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.WithRecordListQuery`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.WithRecordListBasePath`
+- `github.com/JSYoo5B/go-openstacksdk/request.BasePath`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.WithRecordListJMESPath`
 
 - List sends the single GET projects that Python projects() sends without arguments, maps the Python query names domain_id, enabled, is_domain, name, parent_id, tags, tags-any, not-tags and not-tags-any through ListOpts or request.Query, sends a limit without a marker follow-up, and rejects local Body filters before HTTP.
@@ -231,6 +230,7 @@ import (
     sdk "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/identity"
     "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects"
+    "github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 func printJSON(value any) {
@@ -248,15 +248,15 @@ func main() {
     domain := os.Getenv("OS_PROJECT_DOMAIN_ID")
 
     for project, err := range service.Projects.ListRecords(ctx,
-        projects.WithRecordListQuery("domain_id", domain),
-        projects.WithRecordListLimit(2), projects.WithRecordListMaxItems(2)) {
+        request.Query("domain_id", domain),
+        request.Limit(2), request.MaxItems(2)) {
         if err != nil { log.Fatal(err) }
         printJSON(project.Resource)
     }
     project, err := service.Projects.FindRecord(ctx, "demo",
-        projects.WithRecordFindQuery("domain_id", domain),
-        projects.WithRecordFindQuery("skip_cache", true),
-        projects.WithRecordFindQuery("error_message", "Project lookup failed"))
+        request.Query("domain_id", domain),
+        request.Query("skip_cache", true),
+        request.Query("error_message", "Project lookup failed"))
     if err != nil { log.Fatal(err) }
     if project != nil { printJSON(project.Resource) }
 

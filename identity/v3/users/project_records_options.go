@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
@@ -26,7 +27,44 @@ type ListProjectRecordsOpts struct {
 	Microversion *string
 }
 
-type ListProjectRecordsOption = request.Option[ListProjectRecordsOpts]
+// ListProjectRecordsOption is one option of ListProjectRecords and
+// AllProjectRecords: WithProjectListOptions, WithProjectListFilter,
+// WithProjectListFilters, request.Custom over
+// *request.Config[ListProjectRecordsOpts], request.Header,
+// request.Query (one raw wire query string without attribute classification;
+// it overrides the same typed query), request.Microversion (an
+// operation-local version, including an explicit empty value; the original
+// service client is never modified), request.MaxItems (caps raw rows before
+// local filtering; zero is unlimited) or request.Paginated (false consumes
+// only the first page). request.Headers, request.Limit, request.Marker and a
+// request.Query value other than a string fail with
+// resource.ErrInvalidOption before HTTP; use ListProjectRecordsOpts for
+// limit and marker.
+type ListProjectRecordsOption = request.ListCall
+
+var projectListCalls = calls.Spec[request.Config[ListProjectRecordsOpts]]{
+	Header: calls.ConfigHeader[ListProjectRecordsOpts],
+	Query: func(config *request.Config[ListProjectRecordsOpts], entry request.CallEntry) error {
+		if entry.Form != request.QueryText {
+			return fmt.Errorf("%w: query %q needs a string value for this operation", resource.ErrInvalidOption, entry.Key)
+		}
+		return calls.ConfigQuery(config, entry)
+	},
+	Microversion: func(config *request.Config[ListProjectRecordsOpts], value string) error {
+		config.Options.Microversion = &value
+		return nil
+	},
+	Paging: calls.Paging[request.Config[ListProjectRecordsOpts]]{
+		MaxItems: func(config *request.Config[ListProjectRecordsOpts], value int) error {
+			config.Options.MaxItems = value
+			return nil
+		},
+		Paginated: func(config *request.Config[ListProjectRecordsOpts], value bool) error {
+			config.Options.Paginated = &value
+			return nil
+		},
+	},
+}
 
 func copyProjectListOptions(value ListProjectRecordsOpts) ListProjectRecordsOpts {
 	if value.Paginated != nil {
@@ -44,47 +82,10 @@ func copyProjectListOptions(value ListProjectRecordsOpts) ListProjectRecordsOpts
 // queries and semantic filters. Pointer values are owned now and per iteration.
 func WithProjectListOptions(value ListProjectRecordsOpts) ListProjectRecordsOption {
 	owned := copyProjectListOptions(value)
-	return func(config *request.Config[ListProjectRecordsOpts]) error {
+	return request.Custom(func(config *request.Config[ListProjectRecordsOpts]) error {
 		config.Options = copyProjectListOptions(owned)
 		return nil
-	}
-}
-
-// WithProjectListMaxItems caps raw rows before local filtering. Zero is unlimited.
-func WithProjectListMaxItems(value int) ListProjectRecordsOption {
-	return func(config *request.Config[ListProjectRecordsOpts]) error {
-		config.Options.MaxItems = value
-		return nil
-	}
-}
-
-// WithProjectListPaginated(false) consumes only the first page.
-func WithProjectListPaginated(value bool) ListProjectRecordsOption {
-	return func(config *request.Config[ListProjectRecordsOpts]) error {
-		owned := value
-		config.Options.Paginated = &owned
-		return nil
-	}
-}
-
-// WithProjectListMicroversion selects an operation-local version, including an
-// explicit empty value. It never modifies the original service client.
-func WithProjectListMicroversion(value string) ListProjectRecordsOption {
-	return func(config *request.Config[ListProjectRecordsOpts]) error {
-		owned := value
-		config.Options.Microversion = &owned
-		return nil
-	}
-}
-
-func WithProjectListHeader(key, value string) ListProjectRecordsOption {
-	return request.WithHeader[ListProjectRecordsOpts](key, value)
-}
-
-// WithProjectListQuery passes a wire query without attribute classification.
-// It overrides the same typed query; local controls need dedicated options.
-func WithProjectListQuery(key, value string) ListProjectRecordsOption {
-	return request.WithQuery[ListProjectRecordsOpts](key, value)
+	})
 }
 
 const projectListFiltersArgument = "user_project_filters"
@@ -104,7 +105,7 @@ func capturedProjectListFilters(arguments map[string]any) ([]resource.ListOption
 }
 
 func projectListFilterOption(option resource.ListOption) ListProjectRecordsOption {
-	return func(config *request.Config[ListProjectRecordsOpts]) error {
+	return request.Custom(func(config *request.Config[ListProjectRecordsOpts]) error {
 		options, err := capturedProjectListFilters(config.Arguments)
 		if err != nil {
 			return err
@@ -114,7 +115,7 @@ func projectListFilterOption(option resource.ListOption) ListProjectRecordsOptio
 		}
 		config.Arguments[projectListFiltersArgument] = projectListFilterCapture{options: append(options, option)}
 		return nil
-	}
+	})
 }
 
 // WithProjectListFilter adds a declared query attribute or local Body filter.
@@ -172,8 +173,8 @@ type projectListParameters struct {
 }
 
 func prepareProjectList(ctx context.Context, guard func(context.Context) error, options []ListProjectRecordsOption) (projectListParameters, error) {
-	guarded := make([]ListProjectRecordsOption, len(options))
-	for index, option := range options {
+	guarded := make([]request.Option[ListProjectRecordsOpts], len(options))
+	for index, option := range calls.Options(options, projectListCalls) {
 		apply := option
 		guarded[index] = func(config *request.Config[ListProjectRecordsOpts]) error {
 			if err := guard(ctx); err != nil {

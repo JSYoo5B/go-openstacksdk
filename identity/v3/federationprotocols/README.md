@@ -14,9 +14,9 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols.API.Create`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols.WithCreateOpts`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols.WithCreateHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 
 - Create sends PUT OS-FEDERATION/identity_providers/{idp_id}/protocols/{id} with both IDs escaped, only mapping_id under protocol and without id, name or idp_id, accepts every status 200-399, overlays the response on the request seed and wraps 409 with Create operation context.
   Tests: `identity/v3/federationprotocols/api_test.go:TestFederationProtocolCreatePutsMemberWithoutID`, `identity/v3/federationprotocols/api_test.go:TestFederationProtocolRejectsInvalidInputBeforeHTTP`.
@@ -35,10 +35,10 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols.API.Delete`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols.WithDeleteIgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols.WithDeleteHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 
-- Delete sends DELETE OS-FEDERATION/identity_providers/{idp_id}/protocols/{id}, ignores a clean 404 by default, returns it with WithDeleteIgnoreMissing(false) and returns 500 with Delete operation context.
+- Delete sends DELETE OS-FEDERATION/identity_providers/{idp_id}/protocols/{id}, ignores a clean 404 by default, returns it with request.IgnoreMissing(false) and returns 500 with Delete operation context.
   Tests: `identity/v3/federationprotocols/api_test.go:TestFederationProtocolGetUpdateDelete`, `identity/v3/federationprotocols/api_test.go:TestFederationProtocolRejectsInvalidInputBeforeHTTP`.
 
 Python/Go differences:
@@ -55,9 +55,9 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols.API.Find`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols.WithFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 
-- Find sends GET OS-FEDERATION/identity_providers/{idp_id}/protocols/{name_or_id}?idp_id={idp_id} as Resource.find forwards the URI attribute to fetch, then after a clean 400, 403 or 404 lists the protocols without query matching the exact id; missing is nil by default or resource.NotFoundError with WithFindIgnoreMissing(false).
+- Find sends GET OS-FEDERATION/identity_providers/{idp_id}/protocols/{name_or_id}?idp_id={idp_id} as Resource.find forwards the URI attribute to fetch, then after a clean 400, 403 or 404 lists the protocols without query matching the exact id; missing is nil by default or resource.NotFoundError with request.IgnoreMissing(false).
   Tests: `identity/v3/federationprotocols/api_test.go:TestFederationProtocolFindSendsIdentityProviderQuery`, `identity/v3/federationprotocols/api_test.go:TestFederationProtocolRejectsInvalidInputBeforeHTTP`.
 
 Python/Go differences:
@@ -75,7 +75,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols.API.Get`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols.WithGetHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 
 - Get sends GET OS-FEDERATION/identity_providers/{idp_id}/protocols/{id} without query, decodes the protocol envelope into ID, MappingID and raw views and returns 4xx/5xx with Get operation context.
   Tests: `identity/v3/federationprotocols/api_test.go:TestFederationProtocolGetUpdateDelete`, `identity/v3/federationprotocols/api_test.go:TestFederationProtocolRejectsInvalidInputBeforeHTTP`.
@@ -95,14 +95,14 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols.API.All`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols.WithListOpts`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols.WithListID`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols.WithListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols.WithListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols.WithListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols.WithListPaginated`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols.WithListHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 
 - List sends GET OS-FEDERATION/identity_providers/{idp_id}/protocols with the identity provider escaped, Accept: application/json and only the id server query, filters name and mapping_id locally, ignores unknown names, sets IdentityProviderID on every row, follows limit-driven marker continuation on the escaped path and rejects a blank identity provider before HTTP.
   Tests: `identity/v3/federationprotocols/api_test.go:TestFederationProtocolListQueryFiltersAndPaging`, `identity/v3/federationprotocols/api_test.go:TestFederationProtocolRejectsInvalidInputBeforeHTTP`.
@@ -123,9 +123,9 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols.API.Update`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols.WithUpdateOpts`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols.WithUpdateHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 
 - Update sends PATCH OS-FEDERATION/identity_providers/{idp_id}/protocols/{id} with only mapping_id under protocol, ignores id, and sends nothing when no declared attribute is given.
   Tests: `identity/v3/federationprotocols/api_test.go:TestFederationProtocolGetUpdateDelete`, `identity/v3/federationprotocols/api_test.go:TestFederationProtocolRejectsInvalidInputBeforeHTTP`.
@@ -150,7 +150,7 @@ conn.identity.delete_federation_protocol("corp", "saml2")
 ```go
 api := federationprotocols.New(identityClient)
 _, err := api.Create(ctx, "corp", "saml2",
-    federationprotocols.WithCreateField("mapping_id", "corp-mapping"))
+    request.Field("mapping_id", "corp-mapping"))
 if err != nil { return err }
 protocol, err := api.Find(ctx, "corp", "saml2")
 if err != nil { return err }

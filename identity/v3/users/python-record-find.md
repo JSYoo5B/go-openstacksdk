@@ -19,8 +19,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithRecordFindOpts`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithRecordFindQuery`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithRecordFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 
 - Safe string identities use the original native getter when query is absent and the audited query getter otherwise; both retain native success codes. Default logical absence is ignored, Compatible falls back only after GET400/403/404, with explicit 404-only/GET-only and strict missing options.
   Tests: `api/find_identity_native_test.go:TestNativeFindIdentitySafeGETReturnsImmediatelyWithNativeGetter`, `api/find_identity_native_test.go:TestNativeFindIdentityFallbackPoliciesAndMissingDefaults`.
@@ -63,7 +63,7 @@ Python/Go differences:
 - Legacy native FindIdentity: Pinned declaration (openstack/identity/v3/_proxy.py:1379-1400) forwards **query into Resource.find/fetch. Go provides frozen wire query in both phases without silently inferring a domain or converting Body descriptors.
 - Legacy native FindIdentity: The audited common-list bridge now forwards explicit raw wire status instead of silently dropping it. This also affects ordinary Resources.List/All raw query, while a statusless model still rejects typed WithStatus before HTTP.
 - New owned FindRecord is separate from unchanged native FindIdentity and fixed-domain cloud ResolveRecord. It reuses pinned User record profile, Source status/link/paging and loaded JSON equality; User does not allow unknown Body fields, so only Wire/Envelope retain unknown response data. Go returns independent records and explicit JSON/safe-path options rather than mutable Python runtime/session state.
-- Owned FindRecord consumes the six raw Resource.fetch controls via WithRecordFindQuery/WithRecordFindOpts, using finite UTF-8 JSON and safe service-local routes. URI formatting is deliberately limited to %(id)s and %%; fallback HTTP headers require string-valued JSON objects, rather than arbitrary Python objects, formatters or external URLs.
+- Owned FindRecord consumes the six raw Resource.fetch controls via request.Query/WithRecordFindOpts, using finite UTF-8 JSON and safe service-local routes. URI formatting is deliberately limited to %(id)s and %%; fallback HTTP headers require string-valued JSON objects, rather than arbitrary Python objects, formatters or external URLs.
 - Owned FindRecord has no SDK response cache or mutable Python session/Resource state. skip_cache is consumed and each lookup invokes its HTTP reader without an invented cache header; bypassing caches in a caller custom transport is not claimed. error_message decorates and preserves Go HTTP causes rather than constructing Python exception classes; final fallback missing errors retain their own message.
 - Focused Source evidence executes AST-extracted actual find/fetch/list method bodies and response-envelope selection with bounded constructor/request/session/query/exception stubs. It is distinct from full Python runtime, Go local HTTP tests and unperformed live-cloud validation.
 
@@ -101,7 +101,7 @@ import (
     "time"
 
     sdk "github.com/JSYoo5B/go-openstacksdk"
-    "github.com/JSYoo5B/go-openstacksdk/identity/v3/users"
+    "github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 func main() {
@@ -117,10 +117,10 @@ func main() {
     service, err := conn.IdentityV3(ctx)
     if err != nil { log.Fatal(err) }
     row, err := service.Users.FindRecord(ctx, *identity,
-        users.WithRecordFindIgnoreMissing(false),
-        users.WithRecordFindQuery("domain_id", *domain),
-        users.WithRecordFindQuery("skip_cache", true),
-        users.WithRecordFindQuery("error_message", "User lookup failed"))
+        request.IgnoreMissing(false),
+        request.Query("domain_id", *domain),
+        request.Query("skip_cache", true),
+        request.Query("error_message", "User lookup failed"))
     if err != nil { log.Fatal(err) }
     data, err := json.MarshalIndent(row.Resource, "", "  ")
     if err != nil { log.Fatal(err) }

@@ -14,6 +14,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/neutronfind"
@@ -52,7 +53,31 @@ type SourceMappingOpts struct {
 	Microversion *string
 	order        []string
 }
-type SourceMappingOption func(*SourceMappingOpts) error
+
+// SourceMappingOption is one option of CreateSourceMappingRecord and
+// UpdateSourceMappingRecord: WithSourceMappingOpts, request.Field (one raw
+// Mapping attribute, written unchanged), request.Headers (replaces the
+// headers), request.Microversion or request.Custom over *SourceMappingOpts.
+// Other shared calls fail with resource.ErrInvalidOption before HTTP.
+type SourceMappingOption = request.WriteCall
+
+var sourceMappingCalls = calls.Spec[SourceMappingOpts]{
+	Field: func(c *SourceMappingOpts, entry request.CallEntry) error {
+		if entry.JSONErr != nil {
+			return entry.JSONErr
+		}
+		if c.Attributes == nil {
+			c.Attributes = map[string]json.RawMessage{}
+		}
+		if _, ok := c.Attributes[entry.Key]; !ok {
+			c.order = append(c.order, entry.Key)
+		}
+		c.Attributes[entry.Key] = entry.JSON
+		return nil
+	},
+	Headers:      calls.Value(func(c *SourceMappingOpts) *map[string]string { return &c.Headers }),
+	Microversion: calls.Pointer(func(c *SourceMappingOpts) **string { return &c.Microversion }),
+}
 
 func copySourceMappingOpts(v SourceMappingOpts) SourceMappingOpts {
 	v.Attributes = maps.Clone(v.Attributes)
@@ -69,31 +94,7 @@ func copySourceMappingOpts(v SourceMappingOpts) SourceMappingOpts {
 }
 func WithSourceMappingOpts(v SourceMappingOpts) SourceMappingOption {
 	owned := copySourceMappingOpts(v)
-	return func(c *SourceMappingOpts) error { *c = copySourceMappingOpts(owned); return nil }
-}
-func WithSourceMappingAttribute(key string, value any) SourceMappingOption {
-	raw, err := json.Marshal(value)
-	owned := bytes.Clone(raw)
-	return func(c *SourceMappingOpts) error {
-		if err != nil {
-			return err
-		}
-		if c.Attributes == nil {
-			c.Attributes = map[string]json.RawMessage{}
-		}
-		if _, ok := c.Attributes[key]; !ok {
-			c.order = append(c.order, key)
-		}
-		c.Attributes[key] = bytes.Clone(owned)
-		return nil
-	}
-}
-func WithSourceMappingHeaders(v map[string]string) SourceMappingOption {
-	owned := maps.Clone(v)
-	return func(c *SourceMappingOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
-func WithSourceMappingMicroversion(v string) SourceMappingOption {
-	return func(c *SourceMappingOpts) error { x := v; c.Microversion = &x; return nil }
+	return request.Custom(func(c *SourceMappingOpts) error { *c = copySourceMappingOpts(owned); return nil })
 }
 
 type SourceMappingFindOpts struct {
@@ -101,7 +102,19 @@ type SourceMappingFindOpts struct {
 	Headers       map[string]string
 	Microversion  *string
 }
-type SourceMappingFindOption func(*SourceMappingFindOpts) error
+
+// SourceMappingFindOption is one option of FindSourceMappingRecord:
+// WithSourceMappingFindOpts, request.IgnoreMissing, request.Headers (replaces
+// the headers), request.Microversion or request.Custom over
+// *SourceMappingFindOpts. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type SourceMappingFindOption = request.FindCall
+
+var sourceMappingFindCalls = calls.Spec[SourceMappingFindOpts]{
+	IgnoreMissing: calls.Pointer(func(c *SourceMappingFindOpts) **bool { return &c.IgnoreMissing }),
+	Headers:       calls.Value(func(c *SourceMappingFindOpts) *map[string]string { return &c.Headers }),
+	Microversion:  calls.Pointer(func(c *SourceMappingFindOpts) **string { return &c.Microversion }),
+}
 
 func copySourceMappingFindOpts(v SourceMappingFindOpts) SourceMappingFindOpts {
 	v.Headers = maps.Clone(v.Headers)
@@ -117,17 +130,7 @@ func copySourceMappingFindOpts(v SourceMappingFindOpts) SourceMappingFindOpts {
 }
 func WithSourceMappingFindOpts(v SourceMappingFindOpts) SourceMappingFindOption {
 	owned := copySourceMappingFindOpts(v)
-	return func(c *SourceMappingFindOpts) error { *c = copySourceMappingFindOpts(owned); return nil }
-}
-func WithSourceMappingFindIgnoreMissing(v bool) SourceMappingFindOption {
-	return func(c *SourceMappingFindOpts) error { x := v; c.IgnoreMissing = &x; return nil }
-}
-func WithSourceMappingFindHeaders(v map[string]string) SourceMappingFindOption {
-	owned := maps.Clone(v)
-	return func(c *SourceMappingFindOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
-func WithSourceMappingFindMicroversion(v string) SourceMappingFindOption {
-	return func(c *SourceMappingFindOpts) error { x := v; c.Microversion = &x; return nil }
+	return request.Custom(func(c *SourceMappingFindOpts) error { *c = copySourceMappingFindOpts(owned); return nil })
 }
 
 func sourceMappingString(raw json.RawMessage) (json.RawMessage, error) {
@@ -281,7 +284,7 @@ func (a *API) mutateSourceMapping(ctx context.Context, id string, update bool, o
 	if err != nil {
 		return nil, sourceMappingWrap(ctx, op, err)
 	}
-	policy, err := applySourceMappingOptions(ctx, engine, SourceMappingOpts{}, copySourceMappingOpts, options)
+	policy, err := applySourceMappingOptions(ctx, engine, SourceMappingOpts{}, copySourceMappingOpts, calls.Translate(options, sourceMappingCalls))
 	if err != nil {
 		return nil, sourceMappingWrap(ctx, op, err)
 	}
@@ -327,7 +330,7 @@ func (a *API) FindSourceMappingRecord(ctx context.Context, id string, options ..
 	if err != nil {
 		return nil, sourceMappingWrap(ctx, op, err)
 	}
-	policy, err := applySourceMappingOptions(ctx, engine, SourceMappingFindOpts{}, copySourceMappingFindOpts, options)
+	policy, err := applySourceMappingOptions(ctx, engine, SourceMappingFindOpts{}, copySourceMappingFindOpts, calls.Translate(options, sourceMappingFindCalls))
 	if err != nil {
 		return nil, sourceMappingWrap(ctx, op, err)
 	}

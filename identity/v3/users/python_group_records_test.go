@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"io"
 	"net/http"
 	"reflect"
@@ -88,9 +89,9 @@ func TestPythonGroupUserRecordsMarkerRawCapAndBreakKeepGroupRoute(t *testing.T) 
 					return groupUserWire(200, `{"users":[]}`)
 				}
 			})
-			opts := []sdk.GroupRecordListOption{sdk.WithGroupRecordListLimit(5), sdk.WithGroupRecordListQuery("email", "yes")}
+			opts := []sdk.GroupRecordListOption{request.Limit(5), sdk.WithGroupRecordListQuery("email", "yes")}
 			if mode == "cap" {
-				opts = append(opts, sdk.WithGroupRecordListMaxItems(2))
+				opts = append(opts, request.MaxItems(2))
 			}
 			if mode == "break" {
 				for row, err := range api.ListUsersInGroupRecords(context.Background(), "group-a", opts...) {
@@ -260,7 +261,7 @@ func TestPythonGroupUserRecordsOptionsCloneStickySourceAndCancel(t *testing.T) {
 			ctx, cancel := context.WithCancelCause(context.Background())
 			defer cancel(nil)
 			cause := errors.New("group member custom cancel")
-			first := sdk.GroupRecordListOption(func(*sdk.GroupRecordListOpts) error {
+			first := request.Custom(func(*sdk.GroupRecordListOpts) error {
 				if mode == "source" {
 					client.Endpoint += "changed"
 				} else {
@@ -271,7 +272,7 @@ func TestPythonGroupUserRecordsOptionsCloneStickySourceAndCancel(t *testing.T) {
 			if mode == "nil" {
 				first = nil
 			}
-			_, err := api.AllUsersInGroupRecords(ctx, "g", first, sdk.GroupRecordListOption(func(*sdk.GroupRecordListOpts) error { seen++; client.Endpoint = endpoint; return nil }))
+			_, err := api.AllUsersInGroupRecords(ctx, "g", first, request.Custom(func(*sdk.GroupRecordListOpts) error { seen++; client.Endpoint = endpoint; return nil }))
 			var proof *resource.ResponseError
 			if err == nil || seen != 0 || calls != before || errors.As(err, &proof) {
 				t.Fatal(err, seen, calls, proof)

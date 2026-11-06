@@ -53,7 +53,7 @@ func recordContext(ctx context.Context, deps Dependencies) (*identityv3.Service,
 // readRecord resolves the guarded Keystone service and Connection location,
 // appends an option that fills an unset Location with a copy of it, and runs
 // call. Failures are wrapped under operation with the "identity" kind.
-func readRecord[C any, O ~func(*C) error, R any](
+func readRecord[C any, O request.Call, R any](
 	ctx context.Context,
 	deps Dependencies,
 	operation string,
@@ -66,13 +66,15 @@ func readRecord[C any, O ~func(*C) error, R any](
 		var zero R
 		return zero, request.Wrap(operation, "identity", cloudread.ContextError(ctx, err))
 	}
-	owned := append(slices.Clone(options), O(func(cfg *C) error {
+	// Every option type here is a request category, which request.Custom
+	// (an AnyCall) implements, so the assertion cannot fail.
+	owned := append(slices.Clone(options), any(request.Custom(func(cfg *C) error {
 		if target := field(cfg); *target == nil {
 			copy := location.Clone()
 			*target = &copy
 		}
 		return nil
-	}))
+	})).(O))
 	value, err := call(service, owned)
 	return value, request.Wrap(operation, "identity", cloudread.ContextError(ctx, err))
 }

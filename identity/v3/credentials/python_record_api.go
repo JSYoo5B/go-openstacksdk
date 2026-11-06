@@ -8,11 +8,11 @@ import (
 	"iter"
 	"net/http"
 	"net/url"
-	"slices"
 	"strings"
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/jsonfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
@@ -97,7 +97,7 @@ func (a *API) GetRecord(ctx context.Context, id string, options ...RecordReadOpt
 	if err != nil {
 		return nil, recordWrap(ctx, op, err)
 	}
-	policy, err := applyRecordOptions(ctx, p.guard, RecordReadOpts{}, copyRecordRead, slices.Clone(options))
+	policy, err := applyRecordOptions(ctx, p.guard, RecordReadOpts{}, copyRecordRead, calls.Translate(options, recordReadCalls))
 	if err == nil {
 		err = p.headers(policy.Headers)
 	}
@@ -116,7 +116,7 @@ func (a *API) CreateRecord(ctx context.Context, options ...RecordCreateOption) (
 	if err != nil {
 		return nil, recordWrap(ctx, op, err)
 	}
-	policy, err := applyRecordOptions(ctx, p.guard, RecordCreateOpts{}, copyRecordCreate, slices.Clone(options))
+	policy, err := applyRecordOptions(ctx, p.guard, RecordCreateOpts{}, copyRecordCreate, calls.Translate(options, recordCreateCalls))
 	if err == nil {
 		err = p.headers(policy.Headers)
 	}
@@ -154,7 +154,7 @@ func (a *API) DeleteRecord(ctx context.Context, id string, options ...RecordDele
 	if err != nil {
 		return recordWrap(ctx, op, err)
 	}
-	policy, err := applyRecordOptions(ctx, p.guard, RecordDeleteOpts{}, copyRecordDelete, slices.Clone(options))
+	policy, err := applyRecordOptions(ctx, p.guard, RecordDeleteOpts{}, copyRecordDelete, calls.Translate(options, recordDeleteCalls))
 	if err == nil {
 		err = recordID(id)
 	}
@@ -199,7 +199,7 @@ func (p *preparedRecord) list(query url.Values, filters map[string]json.RawMessa
 
 // ListRecords splits Source type/user_id server query from other Body filters.
 func (a *API) ListRecords(ctx context.Context, options ...RecordListOption) iter.Seq2[*CredentialRecord, error] {
-	owned := slices.Clone(options)
+	owned := calls.Translate(options, recordListCalls)
 	return func(yield func(*CredentialRecord, error) bool) {
 		const op = "ListRecords"
 		p, err := a.captureRecord(ctx)
@@ -239,7 +239,7 @@ func (a *API) FindRecord(ctx context.Context, nameOrID string, options ...Record
 	if err != nil {
 		return nil, recordWrap(ctx, op, err)
 	}
-	policy, err := applyRecordOptions(ctx, p.guard, RecordFindOpts{}, copyRecordFind, slices.Clone(options))
+	policy, err := applyRecordOptions(ctx, p.guard, RecordFindOpts{}, copyRecordFind, calls.Translate(options, recordFindCalls))
 	if err != nil {
 		return nil, recordWrap(ctx, op, err)
 	}

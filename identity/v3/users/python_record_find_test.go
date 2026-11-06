@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"net/http"
 	"strings"
 	"testing"
@@ -22,7 +23,7 @@ func TestPythonUserFindRecordGETFirstSeedDescriptorsAndUnknownWire(t *testing.T)
 		reply.Header.Set("X-Request-Id", "member-proof")
 		return reply
 	})
-	row, err := api.FindRecord(context.Background(), "alice", sdk.WithRecordFindQuery("domain_id", "d"), sdk.WithRecordFindQuery("is_enabled", true), sdk.WithRecordFindQuery("description", "seed"), sdk.WithRecordFindQuery("x_seed", "unknown"))
+	row, err := api.FindRecord(context.Background(), "alice", request.Query("domain_id", "d"), request.Query("is_enabled", true), request.Query("description", "seed"), request.Query("x_seed", "unknown"))
 	if err != nil || row == nil || len(calls) != 1 || row.StatusCode != 203 || row.Header.Get("X-Request-Id") != "member-proof" {
 		t.Fatal(row, err, calls)
 	}
@@ -56,7 +57,7 @@ func TestPythonUserFindRecordFallbackClassifiesFiltersAliasesAndAllPages(t *test
 		}
 		return recordUserWire(200, `{"users":[{"id":"filtered","name":"alice","description":"other"}],"links":[{"rel":"next","href":"?domain_id=d&enabled=False&name=alice&marker=one"}]}`)
 	})
-	row, err := api.FindRecord(context.Background(), "alice", sdk.WithRecordFindQuery("domain_id", "d"), sdk.WithRecordFindQuery("description", "keep"), sdk.WithRecordFindQuery("is_enabled", false), sdk.WithRecordFindQuery("x_ignored", "sent-get"))
+	row, err := api.FindRecord(context.Background(), "alice", request.Query("domain_id", "d"), request.Query("description", "keep"), request.Query("is_enabled", false), request.Query("x_ignored", "sent-get"))
 	if err != nil || row == nil || len(calls) != 3 {
 		t.Fatal(row, err, calls)
 	}
@@ -83,7 +84,7 @@ func TestPythonUserFindRecordMissingDuplicatesAndLateFailures(t *testing.T) {
 			})
 			opts := []sdk.RecordFindOption{}
 			if mode == "strict" {
-				opts = append(opts, sdk.WithRecordFindIgnoreMissing(false))
+				opts = append(opts, request.IgnoreMissing(false))
 			}
 			row, err := api.FindRecord(context.Background(), "alice", opts...)
 			if mode == "missing" {
@@ -128,7 +129,7 @@ func TestPythonUserFindRecordOwnsOptionsAndNamesFallbackPath(t *testing.T) {
 		}
 		return recordUserWire(200, `{"users":[{"id":"alice","name":"explicit"}]}`)
 	})
-	row, err := api.FindRecord(context.Background(), "alice", opt, sdk.WithRecordFindListBasePath(path), sdk.WithRecordFindQuery("name", "explicit"))
+	row, err := api.FindRecord(context.Background(), "alice", opt, sdk.WithRecordFindListBasePath(path), request.Query("name", "explicit"))
 	if err != nil || row == nil || len(calls) != 2 {
 		t.Fatal(row, err, calls)
 	}
@@ -139,13 +140,13 @@ func TestPythonUserFindRecordPreflightAndReservedControls(t *testing.T) {
 	api := recordAPI(t, &calls, func(*http.Request) *http.Response { t.Fatal("unexpected HTTP"); return nil })
 	for _, key := range []string{"resource_type", "connection", "session", "_synchronized", "self"} {
 		t.Run(key, func(t *testing.T) {
-			row, err := api.FindRecord(context.Background(), "alice", sdk.WithRecordFindQuery(key, true))
+			row, err := api.FindRecord(context.Background(), "alice", request.Query(key, true))
 			if row != nil || !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
 				t.Fatal(row, err, calls)
 			}
 		})
 	}
-	for _, opts := range [][]sdk.RecordFindOption{{nil}, {sdk.WithRecordFindQuery("name", make(chan int))}} {
+	for _, opts := range [][]sdk.RecordFindOption{{nil}, {request.Query("name", make(chan int))}} {
 		row, err := api.FindRecord(context.Background(), "alice", opts...)
 		if row != nil || err == nil || len(calls) != 0 {
 			t.Fatal(row, err, calls)

@@ -14,9 +14,9 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.CreateConfigRecord`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithDomainConfigOpts`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithDomainConfigAttribute`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithDomainConfigHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithDomainConfigMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithDomainConfigIgnoreMissing`
 
 - CreateConfigRecord PUTs the selected Domain singleton with config envelope, raw identity/ldap payloads including unknown nested settings and nullable values, then overlays the actual response and projects declared child Resource views without fabricating physical fields.
@@ -38,9 +38,9 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.DeleteConfigRecord`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithDomainConfigOpts`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithDomainConfigAttribute`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithDomainConfigHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithDomainConfigMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithDomainConfigIgnoreMissing`
 
 - DeleteConfigRecord performs bodyless singleton DELETE, defaults to ignoring only clean404 and offers strict missing behavior. Accepted deletion and ignored404 retain independent actual response receipt; Python None becomes a Go Deleted/Response carrier.
@@ -63,9 +63,9 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.GetConfigRecord`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithDomainConfigOpts`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithDomainConfigAttribute`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithDomainConfigHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithDomainConfigMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithDomainConfigIgnoreMissing`
 
 - GetConfigRecord GETs the singleton without an extra resource ID, preserves absent/null/passive id and actual envelope/header/status, and projects declared child mapping/defaults independently from raw Wire. Null, nonmapping scalar and empty-object child values remain distinct.
@@ -89,9 +89,9 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.UpdateConfigRecord`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithDomainConfigOpts`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithDomainConfigAttribute`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithDomainConfigHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithDomainConfigMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithDomainConfigIgnoreMissing`
 
 - UpdateConfigRecord PATCHes raw explicit identity/ldap values and null in a config envelope, overlays actual response on seed and discards dirty id from wire while retaining the explicit seed id view. No recognized dirty fields yields no HTTP and no invented receipt.
@@ -147,6 +147,7 @@ import (
 
     sdk "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains"
+    "github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 func printJSON(value any) {

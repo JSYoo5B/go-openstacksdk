@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/users"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
@@ -43,7 +44,18 @@ type UserListOpts struct {
 	Location     *resource.CloudLocation
 	order        []string
 }
-type UserListOption func(*UserListOpts) error
+
+// UserListOption is one option of ListUsers: WithUserListOpts,
+// WithUserListQuery, WithUserListDomainID, WithUserListName,
+// WithUserListLocation, request.Headers (replaces the headers),
+// request.Microversion or request.Custom over *UserListOpts. Other shared
+// calls fail with resource.ErrInvalidOption before HTTP.
+type UserListOption = request.GetCall
+
+var userListCalls = calls.Spec[UserListOpts]{
+	Headers:      calls.Value(func(c *UserListOpts) *map[string]string { return &c.Headers }),
+	Microversion: calls.Pointer(func(c *UserListOpts) **string { return &c.Microversion }),
+}
 
 func copyUserListOpts(v UserListOpts) UserListOpts {
 	query := make(map[string]json.RawMessage, len(v.Query))
@@ -68,15 +80,19 @@ func copyUserListOpts(v UserListOpts) UserListOpts {
 }
 func WithUserListOpts(v UserListOpts) UserListOption {
 	owned := copyUserListOpts(v)
-	return func(c *UserListOpts) error { *c = copyUserListOpts(owned); return nil }
+	return request.Custom(func(c *UserListOpts) error { *c = copyUserListOpts(owned); return nil })
 }
+
+// WithUserListQuery records one Source list_users kwarg. Only name and
+// domain_id are valid; another key fails without marshaling the value.
+// request.Query is not accepted: it marshals the value when constructed.
 func WithUserListQuery(key string, value any) UserListOption {
 	if key != "name" && key != "domain_id" {
-		return func(*UserListOpts) error { return userReadInvalid("%q is not a Source list_users valid kwarg", key) }
+		return request.Custom(func(*UserListOpts) error { return userReadInvalid("%q is not a Source list_users valid kwarg", key) })
 	}
 	raw, err := json.Marshal(value)
 	owned := bytes.Clone(raw)
-	return func(c *UserListOpts) error {
+	return request.Custom(func(c *UserListOpts) error {
 		if err != nil {
 			return err
 		}
@@ -88,20 +104,13 @@ func WithUserListQuery(key string, value any) UserListOption {
 		}
 		c.Query[key] = bytes.Clone(owned)
 		return nil
-	}
+	})
 }
 func WithUserListDomainID(v string) UserListOption { return WithUserListQuery("domain_id", v) }
 func WithUserListName(v string) UserListOption     { return WithUserListQuery("name", v) }
-func WithUserListHeaders(v map[string]string) UserListOption {
-	owned := maps.Clone(v)
-	return func(c *UserListOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
-func WithUserListMicroversion(v string) UserListOption {
-	return func(c *UserListOpts) error { x := v; c.Microversion = &x; return nil }
-}
 func WithUserListLocation(v resource.CloudLocation) UserListOption {
 	owned := v.Clone()
-	return func(c *UserListOpts) error { x := owned.Clone(); c.Location = &x; return nil }
+	return request.Custom(func(c *UserListOpts) error { x := owned.Clone(); c.Location = &x; return nil })
 }
 
 // UserListResult associates Source declared JSON with only actually read rows.
@@ -147,9 +156,9 @@ func (c *UserReadCloud) captureUserRead(ctx context.Context) (*userReadPrepared,
 	ctx = rest.WithOperationGuard(ctx, guard)
 	return &userReadPrepared{ctx: ctx, api: users.New(&source.Client), guard: func() error { return guard(ctx) }}, guard(ctx)
 }
-func applyUserRead[T any, O ~func(*T) error](p *userReadPrepared, zero T, clone func(T) T, options []O) (T, error) {
+func applyUserRead[T any, O request.Call](p *userReadPrepared, zero T, clone func(T) T, options []O, spec calls.Spec[T]) (T, error) {
 	value := clone(zero)
-	for _, apply := range slices.Clone(options) {
+	for _, apply := range calls.Translate(options, spec) {
 		if err := p.guard(); err != nil {
 			return value, err
 		}
@@ -184,10 +193,10 @@ func userListOptions(v UserListOpts) ([]users.RecordListOption, error) {
 		}
 	}
 	if v.Headers != nil {
-		opts = append(opts, users.WithRecordListHeaders(v.Headers))
+		opts = append(opts, request.Headers(v.Headers))
 	}
 	if v.Microversion != nil {
-		opts = append(opts, users.WithRecordListMicroversion(*v.Microversion))
+		opts = append(opts, request.Microversion(*v.Microversion))
 	}
 	if v.Location != nil {
 		opts = append(opts, users.WithRecordListLocation(*v.Location))
@@ -238,7 +247,7 @@ func (c *UserReadCloud) ListUsers(ctx context.Context, options ...UserListOption
 	if err != nil {
 		return nil, wrap(err)
 	}
-	opts, err := applyUserRead(p, UserListOpts{}, copyUserListOpts, options)
+	opts, err := applyUserRead(p, UserListOpts{}, copyUserListOpts, options, userListCalls)
 	if err != nil {
 		return nil, wrap(err)
 	}
@@ -255,7 +264,18 @@ type UserSearchOpts struct {
 	Microversion *string
 	Location     *resource.CloudLocation
 }
-type UserSearchOption func(*UserSearchOpts) error
+
+// UserSearchOption is one option of SearchUsers: WithUserSearchOpts,
+// WithUserSearchDomainID, WithUserSearchFilters, WithUserSearchLocation,
+// request.Headers (replaces the headers), request.Microversion or
+// request.Custom over *UserSearchOpts. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type UserSearchOption = request.GetCall
+
+var userSearchCalls = calls.Spec[UserSearchOpts]{
+	Headers:      calls.Value(func(c *UserSearchOpts) *map[string]string { return &c.Headers }),
+	Microversion: calls.Pointer(func(c *UserSearchOpts) **string { return &c.Microversion }),
+}
 
 func copyUserSearchOpts(v UserSearchOpts) UserSearchOpts {
 	v.Headers = maps.Clone(v.Headers)
@@ -278,32 +298,25 @@ func copyUserSearchOpts(v UserSearchOpts) UserSearchOpts {
 }
 func WithUserSearchOpts(v UserSearchOpts) UserSearchOption {
 	owned := copyUserSearchOpts(v)
-	return func(c *UserSearchOpts) error { *c = copyUserSearchOpts(owned); return nil }
+	return request.Custom(func(c *UserSearchOpts) error { *c = copyUserSearchOpts(owned); return nil })
 }
 func WithUserSearchDomainID(v string) UserSearchOption {
-	return func(c *UserSearchOpts) error { c.DomainID = v; return nil }
+	return request.Custom(func(c *UserSearchOpts) error { c.DomainID = v; return nil })
 }
 func WithUserSearchFilters(v json.RawMessage) UserSearchOption {
 	owned := bytes.Clone(v)
-	return func(c *UserSearchOpts) error {
+	return request.Custom(func(c *UserSearchOpts) error {
 		c.Filters = nil
 		if owned != nil {
 			x := json.RawMessage(bytes.Clone(owned))
 			c.Filters = &x
 		}
 		return nil
-	}
-}
-func WithUserSearchHeaders(v map[string]string) UserSearchOption {
-	owned := maps.Clone(v)
-	return func(c *UserSearchOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
-func WithUserSearchMicroversion(v string) UserSearchOption {
-	return func(c *UserSearchOpts) error { x := v; c.Microversion = &x; return nil }
+	})
 }
 func WithUserSearchLocation(v resource.CloudLocation) UserSearchOption {
 	owned := v.Clone()
-	return func(c *UserSearchOpts) error { x := owned.Clone(); c.Location = &x; return nil }
+	return request.Custom(func(c *UserSearchOpts) error { x := owned.Clone(); c.Location = &x; return nil })
 }
 
 // UserSearchResult keeps arbitrary expression JSON separate from actual rows.
@@ -340,7 +353,7 @@ func (c *UserReadCloud) SearchUsers(ctx context.Context, nameOrID string, option
 	if err != nil {
 		return nil, wrap(err)
 	}
-	policy, err := applyUserRead(p, UserSearchOpts{}, copyUserSearchOpts, options)
+	policy, err := applyUserRead(p, UserSearchOpts{}, copyUserSearchOpts, options, userSearchCalls)
 	if err != nil {
 		return nil, wrap(err)
 	}

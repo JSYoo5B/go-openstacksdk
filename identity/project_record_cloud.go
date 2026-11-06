@@ -11,6 +11,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/projects"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
@@ -41,7 +42,18 @@ type ProjectReadOpts struct {
 	Microversion *string
 	Location     *resource.CloudLocation
 }
-type ProjectReadOption func(*ProjectReadOpts) error
+
+// ProjectReadOption is one option of ListProjects and SearchProjects:
+// WithProjectReadOpts, WithProjectReadDomainID, WithProjectReadNameOrID,
+// WithProjectReadFilters, WithProjectReadLocation, request.Headers (replaces
+// the headers), request.Microversion or request.Custom over *ProjectReadOpts.
+// Other shared calls fail with resource.ErrInvalidOption before HTTP.
+type ProjectReadOption = request.GetCall
+
+var projectReadCalls = calls.Spec[ProjectReadOpts]{
+	Headers:      calls.Value(func(c *ProjectReadOpts) *map[string]string { return &c.Headers }),
+	Microversion: calls.Pointer(func(c *ProjectReadOpts) **string { return &c.Microversion }),
+}
 
 func projectReadInvalid(format string, args ...any) error {
 	return fmt.Errorf("%w: %s", resource.ErrInvalidOption, fmt.Sprintf(format, args...))
@@ -64,35 +76,28 @@ func copyProjectReadOpts(v ProjectReadOpts) ProjectReadOpts {
 }
 func WithProjectReadOpts(v ProjectReadOpts) ProjectReadOption {
 	owned := copyProjectReadOpts(v)
-	return func(c *ProjectReadOpts) error { *c = copyProjectReadOpts(owned); return nil }
+	return request.Custom(func(c *ProjectReadOpts) error { *c = copyProjectReadOpts(owned); return nil })
 }
 func WithProjectReadDomainID(v string) ProjectReadOption {
-	return func(c *ProjectReadOpts) error { c.DomainID = v; return nil }
+	return request.Custom(func(c *ProjectReadOpts) error { c.DomainID = v; return nil })
 }
 func WithProjectReadNameOrID(v string) ProjectReadOption {
-	return func(c *ProjectReadOpts) error { c.NameOrID = v; return nil }
+	return request.Custom(func(c *ProjectReadOpts) error { c.NameOrID = v; return nil })
 }
 func WithProjectReadFilters(v json.RawMessage) ProjectReadOption {
 	owned := bytes.Clone(v)
-	return func(c *ProjectReadOpts) error {
+	return request.Custom(func(c *ProjectReadOpts) error {
 		c.Filters = nil
 		if owned != nil {
 			raw := json.RawMessage(bytes.Clone(owned))
 			c.Filters = &raw
 		}
 		return nil
-	}
-}
-func WithProjectReadHeaders(v map[string]string) ProjectReadOption {
-	owned := maps.Clone(v)
-	return func(c *ProjectReadOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
-func WithProjectReadMicroversion(v string) ProjectReadOption {
-	return func(c *ProjectReadOpts) error { x := v; c.Microversion = &x; return nil }
+	})
 }
 func WithProjectReadLocation(v resource.CloudLocation) ProjectReadOption {
 	owned := v.Clone()
-	return func(c *ProjectReadOpts) error { x := owned.Clone(); c.Location = &x; return nil }
+	return request.Custom(func(c *ProjectReadOpts) error { x := owned.Clone(); c.Location = &x; return nil })
 }
 
 // ProjectListResult preserves list()'s polymorphic Proxy result. Value is always
@@ -141,7 +146,7 @@ func (c *ProjectReadCloud) prepare(ctx context.Context, options []ProjectReadOpt
 	}
 	ctx = rest.WithOperationGuard(ctx, sourceGuard)
 	guard := func() error { return sourceGuard(ctx) }
-	for _, apply := range slices.Clone(options) {
+	for _, apply := range calls.Translate(options, projectReadCalls) {
 		if err := guard(); err != nil {
 			return ctx, nil, policy, guard, err
 		}
@@ -177,21 +182,21 @@ func projectReadListOptions(policy ProjectReadOpts, includeName bool) ([]project
 				return nil, errors.Join(projectReadInvalid("truthy project filters must be an object for dict(**filters)"), err)
 			}
 			for _, member := range members {
-				options = append(options, projects.WithRecordListQuery(member.Key, member.Value))
+				options = append(options, request.Query(member.Key, member.Value))
 			}
 		}
 	}
 	if includeName && policy.NameOrID != "" {
-		options = append(options, projects.WithRecordListQuery("name", policy.NameOrID))
+		options = append(options, request.Query("name", policy.NameOrID))
 	}
 	if policy.DomainID != "" {
-		options = append(options, projects.WithRecordListQuery("domain_id", policy.DomainID))
+		options = append(options, request.Query("domain_id", policy.DomainID))
 	}
 	if policy.Headers != nil {
-		options = append(options, projects.WithRecordListHeaders(policy.Headers))
+		options = append(options, request.Headers(policy.Headers))
 	}
 	if policy.Microversion != nil {
-		options = append(options, projects.WithRecordListMicroversion(*policy.Microversion))
+		options = append(options, request.Microversion(*policy.Microversion))
 	}
 	return options, nil
 }

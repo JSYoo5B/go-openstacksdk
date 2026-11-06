@@ -13,6 +13,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/jsonfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
@@ -149,7 +150,7 @@ func (a *API) Get(ctx context.Context, id string, options ...ReadOption) (*Recor
 	if err != nil {
 		return nil, wrap(ctx, op, err)
 	}
-	policy, err := applyOptions(ctx, p.guard, ReadOpts{}, copyRead, slices.Clone(options))
+	policy, err := applyOptions(ctx, p.guard, ReadOpts{}, copyRead, calls.Translate(options, readCalls))
 	if err == nil {
 		err = p.headers(policy.Headers)
 	}
@@ -185,7 +186,7 @@ func (a *API) create(ctx context.Context, op string, options []CreateOption) (*R
 	if err != nil {
 		return nil, wrap(ctx, op, err)
 	}
-	policy, err := applyOptions(ctx, p.guard, CreateOpts{}, copyCreate, options)
+	policy, err := applyOptions(ctx, p.guard, CreateOpts{}, copyCreate, calls.Translate(options, createCalls))
 	var fields map[string]json.RawMessage
 	if err == nil {
 		fields, err = declaredFields(policy.Fields, false)
@@ -210,7 +211,7 @@ func (a *API) Update(ctx context.Context, id string, options ...UpdateOption) (*
 	if err != nil {
 		return nil, wrap(ctx, op, err)
 	}
-	policy, err := applyOptions(ctx, p.guard, UpdateOpts{}, copyUpdate, slices.Clone(options))
+	policy, err := applyOptions(ctx, p.guard, UpdateOpts{}, copyUpdate, calls.Translate(options, updateCalls))
 	if err == nil {
 		err = validID(id)
 	}
@@ -238,14 +239,14 @@ func (a *API) Update(ctx context.Context, id string, options ...UpdateOption) (*
 }
 
 // Delete implements delete_endpoint_group. A clean 404 is ignored unless
-// WithDeleteIgnoreMissing(false) is given.
+// request.IgnoreMissing(false) is given.
 func (a *API) Delete(ctx context.Context, id string, options ...DeleteOption) error {
 	const op = "Delete"
 	p, err := a.capture(ctx)
 	if err != nil {
 		return wrap(ctx, op, err)
 	}
-	policy, err := applyOptions(ctx, p.guard, DeleteOpts{}, copyDelete, slices.Clone(options))
+	policy, err := applyOptions(ctx, p.guard, DeleteOpts{}, copyDelete, calls.Translate(options, deleteCalls))
 	if err == nil {
 		err = validID(id)
 	}
@@ -291,7 +292,7 @@ func (p *prepared) list(class descriptor, path []string, scope string, query url
 }
 
 func (a *API) listOperation(ctx context.Context, op string, class descriptor, scope string, path func(string) []string, options []ListOption) iter.Seq2[*Record, error] {
-	owned := slices.Clone(options)
+	owned := calls.Translate(options, listCalls)
 	return func(yield func(*Record, error) bool) {
 		p, err := a.capture(ctx)
 		if err != nil {
@@ -328,7 +329,7 @@ func (a *API) listOperation(ctx context.Context, op string, class descriptor, sc
 // List implements endpoint_groups(**query): GET OS-EP-FILTER/endpoint_groups.
 // name is the only wire query; id, description, filters and links filter
 // rows locally; limit and marker are dropped because EndpointGroup excludes
-// the pagination defaults, while WithListMaxItems still sends limit.
+// the pagination defaults, while request.MaxItems still sends limit.
 func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Record, error] {
 	return a.listOperation(ctx, "List", endpointGroupClass, "", func(string) []string {
 		return []string{"OS-EP-FILTER", "endpoint_groups"}
@@ -343,7 +344,7 @@ func (a *API) Find(ctx context.Context, nameOrID string, options ...FindOption) 
 	if err != nil {
 		return nil, wrap(ctx, op, err)
 	}
-	policy, err := applyOptions(ctx, p.guard, FindOpts{}, copyFind, slices.Clone(options))
+	policy, err := applyOptions(ctx, p.guard, FindOpts{}, copyFind, calls.Translate(options, findCalls))
 	if err != nil {
 		return nil, wrap(ctx, op, err)
 	}
@@ -402,7 +403,7 @@ func (a *API) projectAction(ctx context.Context, op, method, endpointGroupID, pr
 	if err != nil {
 		return wrap(ctx, op, err)
 	}
-	policy, err := applyOptions(ctx, p.guard, ReadOpts{}, copyRead, slices.Clone(options))
+	policy, err := applyOptions(ctx, p.guard, ReadOpts{}, copyRead, calls.Translate(options, readCalls))
 	if err == nil {
 		err = errors.Join(validID(endpointGroupID), validID(projectID))
 	}

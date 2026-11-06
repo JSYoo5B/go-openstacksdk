@@ -76,6 +76,7 @@ import (
 
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 func main() {
@@ -95,7 +96,7 @@ func main() {
 	}
 	options := []endpoints.RecordListOption{
 		endpoints.WithRecordListQuery("is_enabled", true),
-		endpoints.WithRecordListMaxItems(100),
+		request.MaxItems(100),
 	}
 	if *service != "" {
 		options = append(options, endpoints.WithRecordListQuery("service_id", *service))

@@ -15,6 +15,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/identity"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -260,12 +261,12 @@ func TestPythonCloudGetUserOptionsOnceOwnedFilterDomainLocationAndFrozenSource(t
 	})
 	client := cloud.RawAPI().RawClient()
 	client.MoreHeaders = map[string]string{"X-Selected": "before"}
-	result, err := cloud.GetUser(context.Background(), "reader", option, func(*identity.UserGetOpts) error {
+	result, err := cloud.GetUser(context.Background(), "reader", option, request.Custom(func(*identity.UserGetOpts) error {
 		callbacks++
 		client.MoreHeaders["X-Selected"] = "after"
 		client.MoreHeaders["X-Late"] = "after"
 		return nil
-	})
+	}))
 	if err != nil || result.User == nil || calls != 2 || callbacks != 1 || !strings.Contains(string(result.User.Resource.Body["location"]), `"cloud":"configured"`) || string(result.User.Wire.Body["location"]) != `{"cloud":"forged"}` {
 		t.Fatal(result, err, calls, callbacks)
 	}
@@ -282,21 +283,21 @@ func TestPythonCloudGetUserOptionCancellationOwnerAndPrivateGuardStopWork(t *tes
 			client := cloud.RawAPI().RawClient()
 			old := client.Endpoint
 			defer func() { client.Endpoint = old }()
-			var first identity.UserGetOption = func(*identity.UserGetOpts) error {
+			first := request.Custom(func(*identity.UserGetOpts) error {
 				if mode == "source" {
 					client.Endpoint = "https://changed.invalid/"
 				} else if mode == "cancel" {
 					cancel(cause)
 				}
 				return nil
-			}
+			})
 			if mode == "nil" {
 				first = nil
 			}
 			if mode == "private" {
 				ctx = rest.WithOperationGuard(ctx, func(context.Context) error { return cause })
 			}
-			result, err := cloud.GetUser(ctx, "one", first, func(*identity.UserGetOpts) error { seen++; client.Endpoint = old; return nil })
+			result, err := cloud.GetUser(ctx, "one", first, request.Custom(func(*identity.UserGetOpts) error { seen++; client.Endpoint = old; return nil }))
 			var proof *resource.ResponseError
 			if result != nil || err == nil || seen != 0 || calls != 0 || errors.As(err, &proof) {
 				t.Fatal(result, err, seen, calls, proof)

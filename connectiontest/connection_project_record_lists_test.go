@@ -10,6 +10,7 @@ import (
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/identity"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -37,7 +38,7 @@ func TestConnectionProjectReadsShareCachedIdentityAndInjectLocationBeforeSelecti
 		}
 		testcloud.JSON(w, 200, `{"projects":[{"id":"a","name":"team","location":{"cloud":"wire"}}]}`)
 	})
-	result, err := connection.SearchProjects(context.Background(), "team", identity.WithProjectReadFilters(json.RawMessage(`{"location":{"cloud":"configured","project":{"id":"scope","name":"current"}}}`)), func(cfg *identity.ProjectReadOpts) error { callbacks++; cfg.Location = nil; return nil })
+	result, err := connection.SearchProjects(context.Background(), "team", identity.WithProjectReadFilters(json.RawMessage(`{"location":{"cloud":"configured","project":{"id":"scope","name":"current"}}}`)), request.Custom(func(cfg *identity.ProjectReadOpts) error { callbacks++; cfg.Location = nil; return nil }))
 	if err != nil || result == nil || len(result.Projects) != 1 || len(result.Inventory) != 1 || locates != 1 || calls != 1 || callbacks != 1 || string(result.Projects[0].Wire.Body["location"]) != `{"cloud":"wire"}` {
 		t.Fatal(result, err, locates, calls, callbacks)
 	}
@@ -66,7 +67,7 @@ func TestConnectionProjectReadsPerCallLocationSnapshotAndNoNamePushdownForSearch
 	option := identity.WithProjectReadLocation(resource.CloudLocation{Cloud: &perCall})
 	perCall = "changed"
 	callbacks := 0
-	result, err := connection.SearchProjects(context.Background(), "team-*", identity.WithProjectReadDomainID("domain"), identity.WithProjectReadNameOrID("ignored-list-name"), option, func(*identity.ProjectReadOpts) error { callbacks++; return nil })
+	result, err := connection.SearchProjects(context.Background(), "team-*", identity.WithProjectReadDomainID("domain"), identity.WithProjectReadNameOrID("ignored-list-name"), option, request.Custom(func(*identity.ProjectReadOpts) error { callbacks++; return nil }))
 	if err != nil || result == nil || len(result.Projects) != 1 || len(result.Inventory) != 2 || callbacks != 1 {
 		t.Fatal(result, err, callbacks)
 	}

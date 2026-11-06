@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/credentials"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -48,7 +49,7 @@ func TestPythonCredentialCreateRawBodyAndOwnedViews(t *testing.T) {
 	option := credentials.WithRecordCreateOpts(credentials.RecordCreateOpts{Fields: fields})
 	fields["user_id"][1] = 'x'
 	fields["blob"] = json.RawMessage(`"changed"`)
-	v, err := api.CreateRecord(context.Background(), option, credentials.WithRecordCreateField("unused", make(chan int)))
+	v, err := api.CreateRecord(context.Background(), option, request.Field("unused", make(chan int)))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -82,7 +83,7 @@ func TestPythonCredentialCreateRawBodyAndOwnedViews(t *testing.T) {
 		t.Fatal("Source imposes no native required-field precheck", calls)
 	}
 	calls = nil
-	if _, err := api.CreateRecord(context.Background(), credentials.WithRecordCreateField("blob", false), credentials.WithRecordCreateField("project_id", ""), credentials.WithRecordCreateField("user_id", nil), credentials.WithRecordCreateField("type", []string{})); err != nil {
+	if _, err := api.CreateRecord(context.Background(), request.Field("blob", false), request.Field("project_id", ""), request.Field("user_id", nil), request.Field("type", []string{})); err != nil {
 		t.Fatal(err)
 	}
 	if calls[0].body != `{"credential":{"blob":false,"project_id":"","type":[],"user_id":null}}` {
@@ -147,27 +148,27 @@ func TestPythonCredentialListServerQueryAndLocalJSONFilters(t *testing.T) {
 	api, _ := nativeCredAPI(t, &calls, func(*http.Request) (int, string) {
 		return 200, `{"credentials":[{"id":"a","name":"ci","type":"cert","user_id":"server-value","blob":{"access":"x","count":9007199254740993}},{"id":"b","name":"other","blob":{"access":"y"}}],"links":{"next":null}}`
 	})
-	ids, err := credentialRecordIDs(t, api, credentials.WithRecordListType("ec2"), credentials.WithRecordListUserID("u1"), credentials.WithRecordListQuery("name", "ci"), credentials.WithRecordListQuery("blob", map[string]any{"access": "x"}), credentials.WithRecordListQuery("project_id", nil), credentials.WithRecordListQuery("unknown", make(chan int)))
+	ids, err := credentialRecordIDs(t, api, credentials.WithRecordListType("ec2"), credentials.WithRecordListUserID("u1"), request.Query("name", "ci"), request.Query("blob", map[string]any{"access": "x"}), request.Query("project_id", nil), request.Query("unknown", make(chan int)))
 	if err != nil || !reflect.DeepEqual(ids, []string{"a"}) || len(calls) != 1 || calls[0].query != "type=ec2&user_id=u1" {
 		t.Fatal(ids, err, calls)
 	}
 	calls = nil
-	ids, err = credentialRecordIDs(t, api, credentials.WithRecordListQuery("type", json.RawMessage(`["ec2",null,true,{"b":0,"a":false}]`)), credentials.WithRecordListQuery("user_id", nil))
+	ids, err = credentialRecordIDs(t, api, request.Query("type", json.RawMessage(`["ec2",null,true,{"b":0,"a":false}]`)), request.Query("user_id", nil))
 	if err != nil || !reflect.DeepEqual(ids, []string{"a", "b"}) || calls[0].query != "type=ec2&type=True&type=b&type=a" {
 		t.Fatal(ids, err, calls)
 	}
 	calls = nil
-	ids, err = credentialRecordIDs(t, api, credentials.WithRecordListQuery("name", "other"), credentials.WithRecordListMaxItems(1))
+	ids, err = credentialRecordIDs(t, api, request.Query("name", "other"), request.MaxItems(1))
 	if err != nil || len(ids) != 0 || len(calls) != 1 || calls[0].query != "limit=1" {
 		t.Fatal("raw-row cap precedes local filters", ids, err, calls)
 	}
 	calls = nil
-	ids, err = credentialRecordIDs(t, api, credentials.WithRecordListLimit(0), credentials.WithRecordListMaxItems(1))
+	ids, err = credentialRecordIDs(t, api, request.Limit(0), request.MaxItems(1))
 	if err != nil || !reflect.DeepEqual(ids, []string{"a"}) || calls[0].query != "limit=1" {
 		t.Fatal(ids, err, calls)
 	}
 	calls = nil
-	ids, err = credentialRecordIDs(t, api, credentials.WithRecordListLimit(0), credentials.WithRecordListMarker("start"), credentials.WithRecordListPaginated(false))
+	ids, err = credentialRecordIDs(t, api, request.Limit(0), request.Marker("start"), request.Paginated(false))
 	if err != nil || !reflect.DeepEqual(ids, []string{"a", "b"}) || calls[0].query != "limit=0&marker=start" {
 		t.Fatal(ids, err, calls)
 	}
@@ -224,7 +225,7 @@ func TestPythonCredentialListPagingLazinessAndWireMarker(t *testing.T) {
 			return 200, `{"credentials":[{"id":"a"}]}`
 		})
 		count := 0
-		for v, err := range api.ListRecords(context.Background(), credentials.WithRecordListType("ec2"), credentials.WithRecordListLimit(2)) {
+		for v, err := range api.ListRecords(context.Background(), credentials.WithRecordListType("ec2"), request.Limit(2)) {
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -249,7 +250,7 @@ func TestPythonCredentialListPagingLazinessAndWireMarker(t *testing.T) {
 			t.Fatal(ids, err)
 		}
 		calls = nil
-		ids, err = credentialRecordIDs(t, api, credentials.WithRecordListMaxItems(1))
+		ids, err = credentialRecordIDs(t, api, request.MaxItems(1))
 		if err != nil || !reflect.DeepEqual(ids, []string{"a"}) || len(calls) != 1 {
 			t.Fatal(ids, err, calls)
 		}
@@ -290,7 +291,7 @@ func TestPythonCredentialDeleteMissingPolicyAndMixedFailure(t *testing.T) {
 				t.Fatal(err, calls)
 			}
 			if code == 404 {
-				err = api.DeleteRecord(context.Background(), "selected", credentials.WithRecordDeleteIgnoreMissing(false))
+				err = api.DeleteRecord(context.Background(), "selected", request.IgnoreMissing(false))
 				var native gophercloud.ErrUnexpectedResponseCode
 				if !errors.As(err, &native) || native.Actual != 404 || string(native.Body) != "opaque" {
 					t.Fatal(err, native)
@@ -356,7 +357,7 @@ func TestPythonCredentialFindDefaultFallbackAndAllPages(t *testing.T) {
 				}
 				return 200, `{"credentials":` + item.list + `}`
 			})
-			v, err := api.FindRecord(context.Background(), "ci", credentials.WithRecordFindIgnoreMissing(!item.strict))
+			v, err := api.FindRecord(context.Background(), "ci", request.IgnoreMissing(!item.strict))
 			switch item.kind {
 			case "missing":
 				var target *resource.NotFoundError
@@ -441,16 +442,16 @@ func TestPythonCredentialOptionsOwnInputsAndRejectBeforeHTTP(t *testing.T) {
 	}
 	t.Run("retained callback pointer", func(t *testing.T) {
 		var retained *credentials.RecordListOpts
-		ids, err := credentialRecordIDs(t, api, func(c *credentials.RecordListOpts) error {
+		ids, err := credentialRecordIDs(t, api, request.Custom(func(c *credentials.RecordListOpts) error {
 			retained = c
 			c.Headers = map[string]string{"X-Owned": "old"}
 			c.Query = map[string]json.RawMessage{"name": json.RawMessage(`"ci"`)}
 			return nil
-		}, func(*credentials.RecordListOpts) error {
+		}), request.Custom(func(*credentials.RecordListOpts) error {
 			retained.Headers["X-Owned"] = "bad"
 			retained.Query["name"] = json.RawMessage(`"bad"`)
 			return nil
-		})
+		}))
 		if err != nil || !reflect.DeepEqual(ids, []string{"a"}) {
 			t.Fatal(ids, err)
 		}
@@ -468,9 +469,9 @@ func TestPythonCredentialOptionsOwnInputsAndRejectBeforeHTTP(t *testing.T) {
 			_, err := credentialRecordIDs(t, api, credentials.WithRecordListOpts(credentials.RecordListOpts{Query: map[string]json.RawMessage{"type": json.RawMessage(`{bad`)}}))
 			return err
 		}},
-		{"negative limit", func() error { _, err := credentialRecordIDs(t, api, credentials.WithRecordListLimit(-1)); return err }},
+		{"negative limit", func() error { _, err := credentialRecordIDs(t, api, request.Limit(-1)); return err }},
 		{"protected header", func() error {
-			_, err := api.GetRecord(context.Background(), "a", credentials.WithRecordReadHeaders(map[string]string{"X-Auth-Token": "wrong"}))
+			_, err := api.GetRecord(context.Background(), "a", request.Headers(map[string]string{"X-Auth-Token": "wrong"}))
 			return err
 		}},
 		{"invalid ID", func() error { _, err := api.GetRecord(context.Background(), ".."); return err }},
@@ -487,7 +488,7 @@ func TestPythonCredentialOptionsOwnInputsAndRejectBeforeHTTP(t *testing.T) {
 		ctx, cancel := context.WithCancelCause(context.Background())
 		cause, callbackErr := errors.New("caller cause"), errors.New("callback error")
 		before := len(calls)
-		_, err := api.FindRecord(ctx, "ci", func(*credentials.RecordFindOpts) error { cancel(cause); return callbackErr })
+		_, err := api.FindRecord(ctx, "ci", request.Custom(func(*credentials.RecordFindOpts) error { cancel(cause); return callbackErr }))
 		if !errors.Is(err, cause) || !errors.Is(err, callbackErr) || !errors.Is(err, context.Canceled) || len(calls) != before {
 			t.Fatal(err, calls)
 		}
@@ -498,7 +499,7 @@ func TestPythonCredentialOptionsOwnInputsAndRejectBeforeHTTP(t *testing.T) {
 		defer func() { client.Endpoint = original }()
 		cause := errors.New("callback error")
 		before := len(calls)
-		_, err := api.CreateRecord(context.Background(), func(*credentials.RecordCreateOpts) error { client.Endpoint = original + "changed/"; return cause })
+		_, err := api.CreateRecord(context.Background(), request.Custom(func(*credentials.RecordCreateOpts) error { client.Endpoint = original + "changed/"; return cause }))
 		if !errors.Is(err, cause) || !errors.Is(err, resource.ErrInvalidOption) || len(calls) != before {
 			t.Fatal(err, calls)
 		}
@@ -615,7 +616,7 @@ func TestPythonCredentialRejectedResponseFailuresStopDeleteAndFind(t *testing.T)
 							t.Fatal("faulty member rejection produced a lookup result", value, err)
 						}
 					} else if strings.Contains(operation, "strict") {
-						err = api.DeleteRecord(ctx, "ci", credentials.WithRecordDeleteIgnoreMissing(false))
+						err = api.DeleteRecord(ctx, "ci", request.IgnoreMissing(false))
 					} else {
 						err = api.DeleteRecord(ctx, "ci")
 					}
@@ -688,7 +689,7 @@ func TestPythonCredentialCleanRejectionsRemainEligibleAfterNativeRetryHook(t *te
 				} else {
 					var err error
 					if strings.Contains(operation, "strict") {
-						err = api.DeleteRecord(ctx, "ci", credentials.WithRecordDeleteIgnoreMissing(false))
+						err = api.DeleteRecord(ctx, "ci", request.IgnoreMissing(false))
 					} else {
 						err = api.DeleteRecord(ctx, "ci")
 					}

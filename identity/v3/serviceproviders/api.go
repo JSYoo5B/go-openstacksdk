@@ -8,6 +8,7 @@ import (
 	"iter"
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/internal/osfederation"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
@@ -46,29 +47,29 @@ func (a *API) target() osfederation.Target {
 // OS-FEDERATION/service_providers/{id} with {"service_provider": attrs}
 // where id (or its alias name) is removed from the body.
 func (a *API) Create(ctx context.Context, id string, options ...CreateOption) (*ServiceProvider, error) {
-	return convert(osfederation.Create(ctx, a.target(), id, options))
+	return convert(osfederation.Create(ctx, a.target(), id, calls.Translate(options, writeCalls)))
 }
 
 // Get implements get_service_provider: GET OS-FEDERATION/service_providers/{id}.
 func (a *API) Get(ctx context.Context, id string, options ...GetOption) (*ServiceProvider, error) {
-	return convert(osfederation.Get(ctx, a.target(), id, options))
+	return convert(osfederation.Get(ctx, a.target(), id, calls.Translate(options, osfederation.ReadCalls)))
 }
 
 // Update implements update_service_provider: PATCH with only the given
 // declared attributes. No declared attribute means no request.
 func (a *API) Update(ctx context.Context, id string, options ...UpdateOption) (*ServiceProvider, error) {
-	return convert(osfederation.Update(ctx, a.target(), id, options))
+	return convert(osfederation.Update(ctx, a.target(), id, calls.Translate(options, writeCalls)))
 }
 
 // Delete implements delete_service_provider. A clean 404 returns nil unless
-// WithDeleteIgnoreMissing(false) is given.
+// request.IgnoreMissing(false) is given.
 func (a *API) Delete(ctx context.Context, id string, options ...DeleteOption) error {
-	return osfederation.Delete(ctx, a.target(), id, options)
+	return osfederation.Delete(ctx, a.target(), id, calls.Translate(options, osfederation.DeleteCalls))
 }
 
 // List implements service_providers(**query) as a lazy iterator.
 func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*ServiceProvider, error] {
-	source := osfederation.List(ctx, a.target(), options)
+	source := osfederation.List(ctx, a.target(), calls.Translate(options, listCalls))
 	return func(yield func(*ServiceProvider, error) bool) {
 		for record, err := range source {
 			if !yield(fromRecord(record), err) || err != nil {
@@ -92,7 +93,7 @@ func (a *API) All(ctx context.Context, options ...ListOption) ([]*ServiceProvide
 
 // Find implements find_service_provider: GET by ID first and, after a clean
 // 400, 403 or 404, the complete list matched by exact ID (name is the ID).
-// A missing provider returns nil, nil unless WithFindIgnoreMissing(false).
+// A missing provider returns nil, nil unless request.IgnoreMissing(false).
 func (a *API) Find(ctx context.Context, nameOrID string, options ...FindOption) (*ServiceProvider, error) {
-	return convert(osfederation.Find(ctx, a.target(), nameOrID, nil, options))
+	return convert(osfederation.Find(ctx, a.target(), nameOrID, nil, calls.Translate(options, osfederation.FindCalls)))
 }

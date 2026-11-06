@@ -302,10 +302,10 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.WithRecordFindOpts`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.WithRecordFindIgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.WithRecordFindQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.WithRecordFindListBasePath`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.WithRecordFindMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - Safe string identities use the original native getter when query is absent and the audited query getter otherwise; both retain native success codes. Default logical absence is ignored, Compatible falls back only after GET400/403/404, with explicit 404-only/GET-only and strict missing options.
   Tests: `api/find_identity_native_test.go:TestNativeFindIdentitySafeGETReturnsImmediatelyWithNativeGetter`, `api/find_identity_native_test.go:TestNativeFindIdentityFallbackPoliciesAndMissingDefaults`.
@@ -369,8 +369,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithRecordFindOpts`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithRecordFindQuery`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithRecordFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 
 - Safe string identities use the original native getter when query is absent and the audited query getter otherwise; both retain native success codes. Default logical absence is ignored, Compatible falls back only after GET400/403/404, with explicit 404-only/GET-only and strict missing options.
   Tests: `api/find_identity_native_test.go:TestNativeFindIdentitySafeGETReturnsImmediatelyWithNativeGetter`, `api/find_identity_native_test.go:TestNativeFindIdentityFallbackPoliciesAndMissingDefaults`.
@@ -432,11 +432,11 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.GroupRecord.Clone`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithRecordFindOpts`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithRecordFindQuery`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithRecordFindIgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithRecordFindMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithRecordFindListBasePath`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithRecordFindHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithRecordFindLocation`
 
 - Safe string identities use the original native getter when query is absent and the audited query getter otherwise; both retain native success codes. Default logical absence is ignored, Compatible falls back only after GET400/403/404, with explicit 404-only/GET-only and strict missing options.
@@ -553,10 +553,10 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithRecordFindOpts`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithRecordFindQuery`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithRecordFindIgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithRecordFindHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithRecordFindMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithRecordFindListBasePath`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithRecordFindLocation`
 

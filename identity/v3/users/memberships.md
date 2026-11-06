@@ -63,11 +63,11 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.ListProjects`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.ListProjectRecords`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithProjectListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithProjectListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithProjectListPaginated`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithProjectListMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithProjectListHeader`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithProjectListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithProjectListFilter`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithProjectListFilters`
 
@@ -220,6 +220,7 @@ import (
 
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/users"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 func main() {

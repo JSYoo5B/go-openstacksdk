@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"net/http"
 	"reflect"
 	"strings"
@@ -176,7 +177,7 @@ func TestPythonDomainGetRecordOwnedOptionsLocationAndStickyGuard(t *testing.T) {
 			ctx, cancel := context.WithCancelCause(context.Background())
 			defer cancel(nil)
 			cause := errors.New("domain get custom cancel")
-			first := domains.RecordGetOption(func(*domains.RecordGetOpts) error {
+			first := request.Custom(func(*domains.RecordGetOpts) error {
 				if mode == "source" {
 					client.Endpoint += "changed"
 				} else {
@@ -187,7 +188,7 @@ func TestPythonDomainGetRecordOwnedOptionsLocationAndStickyGuard(t *testing.T) {
 			if mode == "nil" {
 				first = nil
 			}
-			_, err := api.GetRecord(ctx, "fixed", first, domains.RecordGetOption(func(*domains.RecordGetOpts) error { seen++; client.Endpoint = endpoint; return nil }))
+			_, err := api.GetRecord(ctx, "fixed", first, request.Custom(func(*domains.RecordGetOpts) error { seen++; client.Endpoint = endpoint; return nil }))
 			var proof *resource.ResponseError
 			if err == nil || seen != 0 || calls != before || errors.As(err, &proof) {
 				t.Fatal(err, seen, calls, proof)
@@ -209,7 +210,7 @@ func TestPythonDomainResolveRecordGetOnlyVersionAndProfileIsolation(t *testing.T
 		return domainRecordWire(200, `{"domains":[{"id":"one","name":"alias"}]}`)
 	})
 	api.RawClient().Microversion = "3.5"
-	row, err := api.ResolveRecord(context.Background(), "alias", domains.WithRecordGetMicroversion("3.9"))
+	row, err := api.ResolveRecord(context.Background(), "alias", request.Microversion("3.9"))
 	if err != nil || row == nil || !reflect.DeepEqual(versions, []string{"identity 3.9", "identity 3.5"}) {
 		t.Fatal(row, err, versions)
 	}

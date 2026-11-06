@@ -5,17 +5,19 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/JSYoo5B/go-openstacksdk/identity"
-	"github.com/JSYoo5B/go-openstacksdk/identity/v3/groups"
-	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
-	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
-	"github.com/JSYoo5B/go-openstacksdk/resource"
-	"github.com/gophercloud/gophercloud/v2"
 	"io"
 	"net/http"
 	"slices"
 	"sync/atomic"
 	"testing"
+
+	"github.com/JSYoo5B/go-openstacksdk/identity"
+	"github.com/JSYoo5B/go-openstacksdk/identity/v3/groups"
+	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
+	"github.com/gophercloud/gophercloud/v2"
 )
 
 func groupGetFixture(t *testing.T, reply func(http.ResponseWriter, *http.Request)) (*identity.GroupReadCloud, *testcloud.Cloud, *atomic.Int32) {
@@ -116,7 +118,7 @@ func TestCloudGetGroupStickyOptionsCancelAndOuterGuard(t *testing.T) {
 			case "nil":
 				options = append(options, nil)
 			case "source":
-				options = append(options, func(*identity.GroupGetOpts) error { cloud.RawAPI().RawClient().ResourceBase += "changed/"; return nil })
+				options = append(options, request.Custom(func(*identity.GroupGetOpts) error { cloud.RawAPI().RawClient().ResourceBase += "changed/"; return nil }))
 			case "cancel":
 				cancel(cause)
 			case "outer":
@@ -124,10 +126,10 @@ func TestCloudGetGroupStickyOptionsCancelAndOuterGuard(t *testing.T) {
 			case "role":
 				cloud.RawAPI().RawClient().Type = "network"
 			case "headers":
-				options = append(options, identity.WithGroupGetHeaders(map[string]string{"X-Auth-Token": "foreign"}))
+				options = append(options, request.Headers(map[string]string{"X-Auth-Token": "foreign"}))
 			}
 			if lane != "headers" {
-				options = append(options, func(*identity.GroupGetOpts) error { seen++; return nil })
+				options = append(options, request.Custom(func(*identity.GroupGetOpts) error { seen++; return nil }))
 			}
 			result, err := cloud.GetGroup(ctx, "one", options...)
 			if err == nil || result != nil && result.Group != nil || calls.Load() != 0 || seen != 0 {
@@ -258,7 +260,7 @@ func TestCloudGetGroupOwnedRawDomainLocationAndLoadedNestedFilter(t *testing.T) 
 	raw := json.RawMessage("0")
 	header := map[string]string{"X-Owned": "before"}
 	domainOption := identity.WithGroupGetRawDomainID(raw)
-	headerOption := identity.WithGroupGetHeaders(header)
+	headerOption := request.Headers(header)
 	header["X-Owned"] = "after"
 	raw[0] = '9'
 	result, err := cloud.GetGroup(context.Background(), "ops-*", domainOption, headerOption, identity.WithGroupGetFilters(json.RawMessage(`{"description":{"n":9007199254740993.0,"flag":true}}`)))

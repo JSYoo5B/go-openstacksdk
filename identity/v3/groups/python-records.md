@@ -21,11 +21,11 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.GroupRecord.Clone`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithRecordFindOpts`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithRecordFindQuery`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithRecordFindIgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithRecordFindMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithRecordFindListBasePath`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithRecordFindHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithRecordFindLocation`
 
 - Safe string identities use the original native getter when query is absent and the audited query getter otherwise; both retain native success codes. Default logical absence is ignored, Compatible falls back only after GET400/403/404, with explicit 404-only/GET-only and strict missing options.
@@ -101,13 +101,13 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.API.ProxyListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithRecordListOpts`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithRecordListQuery`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithRecordListPaginated`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithRecordListMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithRecordListBasePath`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.BasePath`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithRecordListJMESPath`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithRecordListLocation`
 
@@ -156,8 +156,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithGroupSearchOpts`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithGroupSearchDomainID`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithGroupSearchFilters`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithGroupSearchHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithGroupSearchMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithGroupSearchLocation`
 
 - search_groups lists with the same GET /v3/groups (with domain_id when given) as list_groups before filtering locally.
@@ -229,6 +229,7 @@ import (
     openstack "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/identity"
     "github.com/JSYoo5B/go-openstacksdk/identity/v3/groups"
+    "github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 func printJSON(value any) {
@@ -245,9 +246,9 @@ func main() {
     if err != nil { log.Fatal(err) }
 
     found, err := service.Groups.FindRecord(ctx, "ops",
-        groups.WithRecordFindQuery("domain_id", "domain-id"),
-        groups.WithRecordFindQuery("skip_cache", true),
-        groups.WithRecordFindQuery("error_message", "Group lookup failed"),
+        request.Query("domain_id", "domain-id"),
+        request.Query("skip_cache", true),
+        request.Query("error_message", "Group lookup failed"),
     )
     if err != nil { log.Fatal(err) }
     if found != nil { printJSON(found.Resource.Body) }
@@ -255,8 +256,8 @@ func main() {
     for row, err := range service.Groups.ListRecords(ctx,
         groups.WithRecordListQuery("domain_id", "domain-id"),
         groups.WithRecordListQuery("description", "operations"),
-        groups.WithRecordListLimit(100),
-        groups.WithRecordListMaxItems(100),
+        request.Limit(100),
+        request.MaxItems(100),
     ) {
         if err != nil { log.Fatal(err) }
         printJSON(row.Resource.Body)

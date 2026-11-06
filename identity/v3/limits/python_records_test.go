@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"net/http"
 	"reflect"
 	"strings"
@@ -128,12 +129,12 @@ func TestPythonLimitListRecordsFilteredMarkerAndRawMaxItems(t *testing.T) {
 				}
 				return nativeLimitWire(200, `{"limits":[{"id":"kept","domain_id":"yes"},{"id":"last-filtered","domain_id":"no"}],"links":{"next":"ignored.invalid"}}`)
 			})
-			opts := []sdk.RecordListOption{sdk.WithRecordListLimit(5), sdk.WithRecordListQuery("service_id", "svc"), sdk.WithRecordListQuery("domain_id", "yes")}
+			opts := []sdk.RecordListOption{request.Limit(5), sdk.WithRecordListQuery("service_id", "svc"), sdk.WithRecordListQuery("domain_id", "yes")}
 			if mode == "max_items" {
-				opts = append(opts, sdk.WithRecordListMaxItems(2))
+				opts = append(opts, request.MaxItems(2))
 			}
 			if mode == "single_page" {
-				opts = append(opts, sdk.WithRecordListPaginated(false))
+				opts = append(opts, request.Paginated(false))
 			}
 			rows, err := api.AllRecords(context.Background(), opts...)
 			if err != nil || !reflect.DeepEqual(recordIDs(t, rows), []string{"kept"}) {
@@ -161,7 +162,7 @@ func TestPythonLimitListRecordsFilteredMarkerAndRawMaxItems(t *testing.T) {
 			}
 			return nativeLimitWire(200, `{"limits":[{"id":"one"}]}`)
 		})
-		rows, err := api.AllRecords(context.Background(), sdk.WithRecordListMaxItems(max))
+		rows, err := api.AllRecords(context.Background(), request.MaxItems(max))
 		if err != nil || len(rows) != 1 || len(calls) != 1 {
 			t.Fatal(rows, err, calls)
 		}
@@ -345,14 +346,14 @@ func TestPythonLimitListRecordsGuardsOptionCancellationAndContextCauses(t *testi
 		ctx, cancel := context.WithCancelCause(context.Background())
 		cause := errors.New("caller canceled")
 		later := false
-		options := []sdk.RecordListOption{func(*sdk.RecordListOpts) error {
+		options := []sdk.RecordListOption{request.Custom(func(*sdk.RecordListOpts) error {
 			if mode == "context" {
 				cancel(cause)
 			} else {
 				api.RawClient().ResourceBase = "https://changed.invalid/v3/"
 			}
 			return nil
-		}, func(*sdk.RecordListOpts) error { later = true; return nil }}
+		}), request.Custom(func(*sdk.RecordListOpts) error { later = true; return nil })}
 		rows, err := api.AllRecords(ctx, options...)
 		if rows != nil || err == nil || len(calls) != 0 || later {
 			t.Fatal(mode, rows, err, calls, later)
@@ -370,7 +371,7 @@ func TestPythonLimitListRecordsGuardsOptionCancellationAndContextCauses(t *testi
 			t.Fatal(rows, err)
 		}
 	}
-	for _, options := range [][]sdk.RecordListOption{{nil}, {sdk.WithRecordListHeaders(map[string]string{"Authorization": "forbidden"})}, {sdk.WithRecordListBasePath("https://changed.invalid/limits")}} {
+	for _, options := range [][]sdk.RecordListOption{{nil}, {request.Headers(map[string]string{"Authorization": "forbidden"})}, {request.BasePath("https://changed.invalid/limits")}} {
 		rows, err := api.AllRecords(context.Background(), options...)
 		if rows != nil || !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
 			t.Fatal(rows, err, calls)
@@ -501,7 +502,7 @@ func TestPythonLimitListRecordsCleanReauthenticationAndRetryKeepPolicy(t *testin
 				c.MoreHeaders["X-Retry-Probe"] = "ordinary"
 				return nil
 			}
-			rows, err := api.AllRecords(context.Background(), sdk.WithRecordListMicroversion("2.1"), sdk.WithRecordListQuery("service_id", "n"))
+			rows, err := api.AllRecords(context.Background(), request.Microversion("2.1"), sdk.WithRecordListQuery("service_id", "n"))
 			if err != nil || len(rows) != 1 || len(calls) != 2 || status == 401 && (reauth != 1 || retries != 0 || !reflect.DeepEqual(tokens, []string{"test-token", "renewed"})) || status == 503 && (retries != 1 || reauth != 0) {
 				t.Fatal(rows, err, calls, tokens, retries, reauth)
 			}
@@ -593,7 +594,7 @@ func TestPythonLimitListRecordsSourceSuccessStatusAndHeaderNoDiscovery(t *testin
 			}
 			return nativeLimitWire(status, `{"limits":[{"id":"one"}]}`)
 		})
-		rows, err := api.AllRecords(context.Background(), sdk.WithRecordListMicroversion("3.5"))
+		rows, err := api.AllRecords(context.Background(), request.Microversion("3.5"))
 		if err != nil || len(rows) != 1 || rows[0].StatusCode != status || len(calls) != 1 {
 			t.Fatal(status, rows, err, calls)
 		}

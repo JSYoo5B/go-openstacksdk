@@ -21,7 +21,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.ProxyListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.RoleRecord.Clone`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithRecordListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithRecordListQuery`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithRecordListLocation`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithRecordListJMESPath`
 
@@ -66,7 +65,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity.NewRoleReadCloud`
 - `github.com/JSYoo5B/go-openstacksdk/identity.RoleReadCloud.ListRoles`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithRecordListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithRecordListQuery`
 
 - Source cloud list_roles expands ordinary Proxy kwargs into the owned list classifier, preserves server name/domain and local options filter, and exposes independent JSON Value/Roles/actual Inventory with203 header/status.
   Tests: `identity/role_record_cloud_test.go:TestPythonRoleCloudListForwardsOwnedProxyQueryAndLocalBodyFilters`.
@@ -100,8 +98,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithRoleSearchDomainID`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithRoleSearchFilters`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithRoleSearchLocation`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithRoleSearchHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithRoleSearchMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - Search lists all pages with only domain query then exact/glob ID/name and ordered recursive loaded-JSON filters. Duplicate records stay in selection, selected records clone away from actual Inventory and203 header/status.
   Tests: `identity/role_record_cloud_test.go:TestPythonRoleCloudSearchDomainServerAndLocalGlobSubset`.
@@ -160,6 +158,7 @@ import (
     sdk "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/identity"
     "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles"
+    "github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 func printJSON(value any) {
@@ -176,14 +175,14 @@ func main() {
     if err != nil { log.Fatal(err) }
 
     for role, err := range service.Roles.ListRecords(ctx,
-        roles.WithRecordListQuery("description", "operations"),
-        roles.WithRecordListLimit(2), roles.WithRecordListMaxItems(2)) {
+        request.Query("description", "operations"),
+        request.Limit(2), request.MaxItems(2)) {
         if err != nil { log.Fatal(err) }
         printJSON(role.Resource)
     }
     cloud := identity.NewRoleReadCloud(service.Roles)
     listed, err := cloud.ListRoles(ctx,
-        roles.WithRecordListQuery("description", "operations"))
+        request.Query("description", "operations"))
     if err != nil { log.Fatal(err) }
     printJSON(listed.JSON)
     selected, err := cloud.SearchRoles(ctx, "read*",

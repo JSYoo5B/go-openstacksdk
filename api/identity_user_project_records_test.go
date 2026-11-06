@@ -81,7 +81,7 @@ func TestIdentityUserProjectRecordsSemanticQueriesAliasesAndOwnedOptions(t *test
 				testcloud.JSON(w, 200, `{"projects":[{"id":"returned","name":"different","domain_id":"different","parent_id":"different","enabled":true,"is_domain":true,"tags":["different"]}]}`)
 			})
 			api := users.New(cloud.Client("identity", "/reverse/identity/v3"))
-			values, err := collectUserProjectRecords(t, api.ListProjectRecords(context.Background(), "user-id", users.WithProjectListFilter(key, input), users.WithProjectListPaginated(false)))
+			values, err := collectUserProjectRecords(t, api.ListProjectRecords(context.Background(), "user-id", users.WithProjectListFilter(key, input), request.Paginated(false)))
 			if err != nil || calls.Load() != 1 || !reflect.DeepEqual(userProjectRecordIDs(t, values), []string{"returned"}) {
 				t.Fatal(values, err, calls.Load())
 			}
@@ -131,11 +131,11 @@ func TestIdentityUserProjectRecordsSemanticQueriesAliasesAndOwnedOptions(t *test
 			testcloud.JSON(w, 200, `{"projects":[{"id":"owned"}]}`)
 		})
 		api := users.New(cloud.Client("identity", "/reverse/identity/v3"))
-		seq := api.ListProjectRecords(context.Background(), "user-id", frozen, users.WithProjectListFilter("is_enabled", false), users.WithProjectListFilter("enabled", true), users.WithProjectListMicroversion("3.13"), func(config *request.Config[users.ListProjectRecordsOpts]) error {
+		seq := api.ListProjectRecords(context.Background(), "user-id", frozen, users.WithProjectListFilter("is_enabled", false), users.WithProjectListFilter("enabled", true), request.Microversion("3.13"), request.Custom(func(config *request.Config[users.ListProjectRecordsOpts]) error {
 			callbacks.Add(1)
 			config.Headers["X-Trace"] = "callback"
 			return nil
-		})
+		}))
 		if calls.Load() != 0 || callbacks.Load() != 0 {
 			t.Fatal("iterator was not lazy")
 		}
@@ -214,7 +214,7 @@ func TestIdentityUserProjectRecordsLocalBodiesNormalizedViewAndIndependentWire(t
 			w.Header().Set("X-Record", "actual")
 			testcloud.JSON(w, 200, `{"projects":[{"id":"false","user_id":"response-user","options":false,"vendor":9007199254740993123},{"id":"array","options":[]},{"id":"null","options":null},{"id":"missing"},{"id":"object","options":{"immutable":false}}]}`)
 		})
-		values, err := collectUserProjectRecords(t, service.Users.ListProjectRecords(context.Background(), "user-id", users.WithProjectListHeader("X-Trace", "owned")))
+		values, err := collectUserProjectRecords(t, service.Users.ListProjectRecords(context.Background(), "user-id", request.Header("X-Trace", "owned")))
 		if err != nil || calls.Load() != 1 || len(values) != 5 {
 			t.Fatal(values, err, calls.Load())
 		}
@@ -313,7 +313,7 @@ func TestIdentityUserProjectRecordsContinuationFormsRawCapsAndSinglePage(t *test
 				options = append(options, users.WithProjectListOptions(users.ListProjectRecordsOpts{Limit: 5}))
 			}
 			if mode == "single page" {
-				options = append(options, users.WithProjectListPaginated(false))
+				options = append(options, request.Paginated(false))
 			}
 			values, err := collectUserProjectRecords(t, api.ListProjectRecords(context.Background(), "user-id", options...))
 			wantIDs, wantCalls := []string{"first", "second"}, int32(2)
@@ -349,7 +349,7 @@ func TestIdentityUserProjectRecordsContinuationFormsRawCapsAndSinglePage(t *test
 				testcloud.JSON(w, 200, body)
 			})
 			api := users.New(cloud.Client("identity", "/reverse/identity/v3"))
-			values, err := collectUserProjectRecords(t, api.ListProjectRecords(context.Background(), "user-id", users.WithProjectListMaxItems(cap), users.WithProjectListFilter("description", "target")))
+			values, err := collectUserProjectRecords(t, api.ListProjectRecords(context.Background(), "user-id", request.MaxItems(cap), users.WithProjectListFilter("description", "target")))
 			want := []string{}
 			if cap != 1 {
 				want = []string{"hit"}
@@ -393,17 +393,17 @@ func TestIdentityUserProjectRecordsPreflightOwnedFaultsAndPartialErrors(t *testi
 			case "user_id filter":
 				options = append(options, users.WithProjectListFilter("user_id", "other"))
 			case "user_id query":
-				options = append(options, users.WithProjectListQuery("user_id", "other"))
+				options = append(options, request.Query("user_id", "other"))
 			case "query collision":
-				options = append(options, users.WithProjectListFilter("is_enabled", false), users.WithProjectListQuery("enabled", "true"))
+				options = append(options, users.WithProjectListFilter("is_enabled", false), request.Query("enabled", "true"))
 			case "selected query object":
 				options = append(options, users.WithProjectListFilter("name", map[string]any{"invalid": true}))
 			case "source callback":
-				options = append(options, func(*request.Config[users.ListProjectRecordsOpts]) error {
+				options = append(options, request.Custom(func(*request.Config[users.ListProjectRecordsOpts]) error {
 					callbacks.Add(1)
 					client.ResourceBase = cloud.Server.URL + "/replaced/"
 					return nil
-				}, func(*request.Config[users.ListProjectRecordsOpts]) error { callbacks.Add(1); return nil })
+				}), request.Custom(func(*request.Config[users.ListProjectRecordsOpts]) error { callbacks.Add(1); return nil }))
 			case "cancel before":
 				var cancel context.CancelCauseFunc
 				ctx, cancel = context.WithCancelCause(ctx)

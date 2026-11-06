@@ -6,10 +6,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"maps"
 	"net/http"
-	"slices"
 
+	"github.com/JSYoo5B/go-openstacksdk/identity/v3/internal/keystonecalls"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/neutronfind"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -79,7 +79,19 @@ type RecordFindOpts struct {
 	Query         map[string]json.RawMessage
 	Headers       map[string]string
 }
-type RecordFindOption func(*RecordFindOpts) error
+
+// RecordFindOption is one option of FindRecord: WithRecordFindOpts, WithRecordFindListBasePath,
+// request.Custom over *RecordFindOpts, request.Query (a Source keyword
+// argument; the value is sent as JSON), request.Headers (replaces the
+// headers), request.Microversion or request.IgnoreMissing. Other shared
+// calls, including request.Header, fail with resource.ErrInvalidOption
+// before HTTP. The fallback list route stays WithRecordFindListBasePath:
+// finds do not accept the shared BasePath call.
+type RecordFindOption = request.FindCall
+
+var recordFindCalls = keystonecalls.FindSpec(func(c *RecordFindOpts) keystonecalls.FindState {
+	return keystonecalls.FindState{Query: &c.Query, Order: &c.queryOrder, Headers: &c.Headers, Microversion: &c.Microversion, IgnoreMissing: &c.IgnoreMissing}
+})
 
 func internalFindOpts(value RecordFindOpts) neutronfind.Options {
 	return neutronfind.Options{ListBasePath: value.ListBasePath, IgnoreMissing: value.IgnoreMissing, Microversion: value.Microversion, Query: value.Query, Headers: value.Headers, Order: value.queryOrder}
@@ -94,34 +106,7 @@ func copyFindOpts(value RecordFindOpts) RecordFindOpts {
 
 func WithRecordFindOpts(value RecordFindOpts) RecordFindOption {
 	owned := copyFindOpts(value)
-	return func(c *RecordFindOpts) error { *c = copyFindOpts(owned); return nil }
-}
-func WithRecordFindIgnoreMissing(value bool) RecordFindOption {
-	return func(c *RecordFindOpts) error { x := value; c.IgnoreMissing = &x; return nil }
-}
-func WithRecordFindQuery(key string, value any) RecordFindOption {
-	raw, err := json.Marshal(value)
-	owned := bytes.Clone(raw)
-	return func(c *RecordFindOpts) error {
-		if err != nil {
-			return err
-		}
-		if c.Query == nil {
-			c.Query = make(map[string]json.RawMessage)
-		}
-		c.Query[key] = bytes.Clone(owned)
-		if !slices.Contains(c.queryOrder, key) {
-			c.queryOrder = append(c.queryOrder, key)
-		}
-		return nil
-	}
-}
-func WithRecordFindMicroversion(value string) RecordFindOption {
-	return func(c *RecordFindOpts) error { x := value; c.Microversion = &x; return nil }
-}
-func WithRecordFindHeaders(value map[string]string) RecordFindOption {
-	owned := maps.Clone(value)
-	return func(c *RecordFindOpts) error { c.Headers = maps.Clone(owned); return nil }
+	return request.Custom(func(c *RecordFindOpts) error { *c = copyFindOpts(owned); return nil })
 }
 
 // FindRecord matches the pinned Source GET-first, complete ID-or-name search.
@@ -148,7 +133,7 @@ func (a *API) FindRecord(ctx context.Context, identity string, options ...Record
 	}
 	guard := engine.Check
 	policy := RecordFindOpts{}
-	for _, apply := range slices.Clone(options) {
+	for _, apply := range calls.Translate(options, recordFindCalls) {
 		if err := guard(ctx); err != nil {
 			return nil, wrap(err)
 		}
@@ -172,5 +157,5 @@ func (a *API) FindRecord(ctx context.Context, identity string, options ...Record
 
 // WithRecordFindListBasePath overrides only the clean-fallback LIST route.
 func WithRecordFindListBasePath(v string) RecordFindOption {
-	return func(c *RecordFindOpts) error { x := v; c.ListBasePath = &x; return nil }
+	return request.Custom(func(c *RecordFindOpts) error { x := v; c.ListBasePath = &x; return nil })
 }

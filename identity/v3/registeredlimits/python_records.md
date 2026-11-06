@@ -22,15 +22,15 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.API.ProxyListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.WithRecordListOpts`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.WithRecordListQuery`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.WithRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.WithRecordListMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.WithRecordListBasePath`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.BasePath`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.WithRecordListJMESPath`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.WithRecordListLocation`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.WithRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.WithRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.WithRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.WithRecordListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 
 - All with resource.WithQuery forwards service_id, resource_name and marker to GET registered_limits as Python registered_limits(**query) does for mapped parameters and follows links.next.
   Tests: `identity/v3/registeredlimits/python_parity_test.go:TestPythonRegisteredLimitListQueryAndPaging`.
@@ -94,6 +94,7 @@ import (
 
 	openstack "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 func main() {
@@ -112,7 +113,7 @@ func main() {
 		registeredlimits.WithRecordListQuery("service_id", "compute-service-id"),
 		registeredlimits.WithRecordListQuery("resource_name", "cores"),
 		registeredlimits.WithRecordListQuery("description", "team quota"),
-		registeredlimits.WithRecordListMaxItems(100),
+		request.MaxItems(100),
 	)
 	if err != nil {
 		log.Fatal(err)

@@ -17,9 +17,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.CreateRecord`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordMutationOpts`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordMutationAttribute`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordMutationHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordMutationMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordMutationLocation`
 
 - Legacy native Create sends POST domains with the {"domain": {...}} envelope and decodes native model fields; Domain.options is omitted from that native model, rather than representing every Python Domain field.
@@ -50,9 +49,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.UpdateRecord`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordMutationOpts`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordMutationAttribute`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordMutationHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordMutationMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordMutationLocation`
 
 - Legacy native Update sends PATCH domains/{id} with the {"domain": {...}} envelope and optional explicit request.Field("id", id); the old fixture documents that opt-in native body, not pinned Resource.commit dirty-id behavior.
@@ -115,6 +113,7 @@ import (
 
     sdk "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains"
+    "github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 func printJSON(value any) {
@@ -138,13 +137,13 @@ func main() {
     service, err := conn.IdentityV3(ctx)
     if err != nil { log.Fatal(err) }
     options := []domains.RecordMutationOption{
-        domains.WithRecordMutationAttribute("description", nil),
-        domains.WithRecordMutationAttribute("is_enabled", false),
-        domains.WithRecordMutationAttribute("options", map[string]any{"immutable": false}),
+        request.Field("description", nil),
+        request.Field("is_enabled", false),
+        request.Field("options", map[string]any{"immutable": false}),
     }
     var row *domains.DomainRecord
     if *mode == "create" {
-        options = append(options, domains.WithRecordMutationAttribute("name", *name))
+        options = append(options, request.Field("name", *name))
         row, err = service.Domains.CreateRecord(ctx, options...)
     } else {
         row, err = service.Domains.UpdateRecord(ctx, *id, options...)

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"io"
 	"net/http"
 	"reflect"
@@ -49,7 +50,7 @@ func TestPythonDomainCreateRecordNormalizesAliasesWithoutSendingDefaults(t *test
 		}
 		return domainRecordWire(201, `{"domain":{"id":"created","options":{"actual":9007199254740993},"x_unknown":true}}`)
 	})
-	row, err := api.CreateRecord(context.Background(), domains.WithRecordMutationAttribute("name", "demo"), domains.WithRecordMutationAttribute("is_enabled", true), domains.WithRecordMutationAttribute("enabled", 0), domains.WithRecordMutationAttribute("description", json.RawMessage(`{"n":9007199254740993}`)), domains.WithRecordMutationAttribute("options", 7), domains.WithRecordMutationAttribute("x_unknown", "discard"))
+	row, err := api.CreateRecord(context.Background(), request.Field("name", "demo"), request.Field("is_enabled", true), request.Field("enabled", 0), request.Field("description", json.RawMessage(`{"n":9007199254740993}`)), request.Field("options", 7), request.Field("x_unknown", "discard"))
 	if err != nil || row == nil || calls != 1 || row.StatusCode != 201 {
 		t.Fatal(row, err, calls)
 	}
@@ -79,7 +80,7 @@ func TestPythonDomainCreateRecordDistinguishesOmittedAndExplicitNull(t *testing.
 			})
 			options := []domains.RecordMutationOption{}
 			if explicit {
-				options = append(options, domains.WithRecordMutationAttribute("description", nil), domains.WithRecordMutationAttribute("options", nil))
+				options = append(options, request.Field("description", nil), request.Field("options", nil))
 			}
 			row, err := api.CreateRecord(context.Background(), options...)
 			if err != nil || row == nil || calls != 1 {
@@ -105,7 +106,7 @@ func TestPythonDomainUpdateRecordPATCHPreservesSeedAndActualResponse(t *testing.
 		}
 		return domainRecordWire(203, body)
 	})
-	row, err := api.UpdateRecord(context.Background(), "domain/id", domains.WithRecordMutationAttribute("description", "seed"), domains.WithRecordMutationAttribute("is_enabled", "yes"), domains.WithRecordMutationAttribute("options", map[string]any{"request": 1}))
+	row, err := api.UpdateRecord(context.Background(), "domain/id", request.Field("description", "seed"), request.Field("is_enabled", "yes"), request.Field("options", map[string]any{"request": 1}))
 	if err != nil || row == nil || calls != 1 || row.StatusCode != 203 || string(row.Envelope) != body || row.Header.Get("X-Request-Id") != "domain-proof" {
 		t.Fatal(row, err, calls)
 	}
@@ -124,10 +125,10 @@ func TestPythonDomainUpdateRecordEmptyOrUnknownAttrsAvoidHTTP(t *testing.T) {
 			api, _ := domainRecordAPI(t, func(r *http.Request) *http.Response { calls++; return domainRecordWire(200, `{}`) })
 			options := []domains.RecordMutationOption{}
 			if mode == "unknown only" {
-				options = append(options, domains.WithRecordMutationAttribute("x_unknown", 1))
+				options = append(options, request.Field("x_unknown", 1))
 			}
 			if mode == "id only" {
-				options = append(options, domains.WithRecordMutationAttribute("id", "fixed"))
+				options = append(options, request.Field("id", "fixed"))
 			}
 			row, err := api.UpdateRecord(context.Background(), "fixed", options...)
 			if mode == "id only" {
@@ -154,7 +155,7 @@ func TestPythonDomainUpdateRecordExplicitNullIsSentAsDirty(t *testing.T) {
 		}
 		return domainRecordWire(200, `{"domain":{}}`)
 	})
-	row, err := api.UpdateRecord(context.Background(), "fixed", domains.WithRecordMutationAttribute("description", nil), domains.WithRecordMutationAttribute("options", nil), domains.WithRecordMutationAttribute("is_enabled", nil))
+	row, err := api.UpdateRecord(context.Background(), "fixed", request.Field("description", nil), request.Field("options", nil), request.Field("is_enabled", nil))
 	if err != nil || row == nil || calls != 1 {
 		t.Fatal(row, err, calls)
 	}
@@ -207,7 +208,7 @@ func TestPythonDomainRecordMutationsPreflightAndOptionLifecycle(t *testing.T) {
 			api, fixture := domainRecordAPI(t, func(r *http.Request) *http.Response { calls++; return domainRecordWire(200, `{}`) })
 			var option domains.RecordMutationOption
 			if mode != "nil option" {
-				option = func(*domains.RecordMutationOpts) error {
+				option = request.Custom(func(*domains.RecordMutationOpts) error {
 					switch mode {
 					case "callback error":
 						return cause
@@ -217,13 +218,13 @@ func TestPythonDomainRecordMutationsPreflightAndOptionLifecycle(t *testing.T) {
 						cancel(cause)
 					}
 					return nil
-				}
+				})
 			}
 			id := "fixed"
 			if mode == "invalid id" {
 				id = ".."
 			}
-			row, err := api.UpdateRecord(ctx, id, option, func(*domains.RecordMutationOpts) error { later++; return nil })
+			row, err := api.UpdateRecord(ctx, id, option, request.Custom(func(*domains.RecordMutationOpts) error { later++; return nil }))
 			if row != nil || err == nil || calls != 0 {
 				t.Fatal(row, err, calls)
 			}
@@ -267,9 +268,9 @@ func TestPythonDomainRecordMutationsPhysicalFaultsAndRejectionsDoNotFallback(t *
 				})
 				var err error
 				if method == "create" {
-					_, err = api.CreateRecord(ctx, domains.WithRecordMutationAttribute("name", "n"))
+					_, err = api.CreateRecord(ctx, request.Field("name", "n"))
 				} else {
-					_, err = api.UpdateRecord(ctx, "fixed", domains.WithRecordMutationAttribute("description", "d"))
+					_, err = api.UpdateRecord(ctx, "fixed", request.Field("description", "d"))
 				}
 				if err == nil || calls != 1 {
 					t.Fatal(err, calls)

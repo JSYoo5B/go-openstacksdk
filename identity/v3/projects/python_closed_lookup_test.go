@@ -4,12 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/JSYoo5B/go-openstacksdk/identity/v3/projects"
-	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
-	"github.com/JSYoo5B/go-openstacksdk/resource"
-	"github.com/gophercloud/gophercloud/v2"
 	"net/http"
 	"testing"
+
+	"github.com/JSYoo5B/go-openstacksdk/identity/v3/projects"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
+	"github.com/gophercloud/gophercloud/v2"
 )
 
 func TestClosedProjectDomainSeedAndActualSourceEvidence(t *testing.T) {
@@ -22,7 +24,7 @@ func TestClosedProjectDomainSeedAndActualSourceEvidence(t *testing.T) {
 			}
 			return projectRecordWire(203, `{"project":{"name":"actual","unknown":1}}`)
 		})
-		row, err := api.ResolveRecord(context.Background(), "literal%name", projects.WithRecordResolveRawDomainID(json.RawMessage(tc.domain)), projects.WithRecordResolveMicroversion("3.2"))
+		row, err := api.ResolveRecord(context.Background(), "literal%name", projects.WithRecordResolveRawDomainID(json.RawMessage(tc.domain)), request.Microversion("3.2"))
 		if err != nil || row == nil || calls != 1 || row.StatusCode != 203 || row.Header.Get("X-Request-Id") != "project-proof" {
 			t.Fatal(tc, row, err, calls)
 		}
@@ -68,7 +70,7 @@ func TestClosedProjectFallbackVersionsExactIDNameAndDefaultMissing(t *testing.T)
 				return projectRecordWire(200, `{"projects":[]}`)
 			})
 			api.RawClient().Microversion = "3.1"
-			row, err := api.ResolveRecord(context.Background(), "needle", projects.WithRecordResolveRawDomainID(json.RawMessage("false")), projects.WithRecordResolveMicroversion("3.9"))
+			row, err := api.ResolveRecord(context.Background(), "needle", projects.WithRecordResolveRawDomainID(json.RawMessage("false")), request.Microversion("3.9"))
 			if calls != 3 || api.RawClient().Microversion != "3.1" {
 				t.Fatal(row, err, calls)
 			}
@@ -93,7 +95,7 @@ func TestClosedProjectFallbackVersionsExactIDNameAndDefaultMissing(t *testing.T)
 func TestClosedProjectOwnedCallbacksRawDomainAndPreflight(t *testing.T) {
 	calls := 0
 	api, _ := projectRecordAPI(t, func(*http.Request) *http.Response { calls++; return projectRecordWire(200, `{"project":{"id":"one"}}`) })
-	for _, options := range [][]projects.RecordResolveOption{{nil}, {projects.WithRecordResolveRawDomainID(json.RawMessage(`{bad`))}, {projects.WithRecordResolveHeaders(map[string]string{"X-Auth-Token": "foreign"})}} {
+	for _, options := range [][]projects.RecordResolveOption{{nil}, {projects.WithRecordResolveRawDomainID(json.RawMessage(`{bad`))}, {request.Headers(map[string]string{"X-Auth-Token": "foreign"})}} {
 		row, err := api.ResolveRecord(context.Background(), "one", options...)
 		if row != nil || err == nil || calls != 0 {
 			t.Fatal(row, err, calls)
@@ -101,7 +103,7 @@ func TestClosedProjectOwnedCallbacksRawDomainAndPreflight(t *testing.T) {
 	}
 	seen := 0
 	base := api.RawClient().ResourceBase
-	row, err := api.ResolveRecord(context.Background(), "one", func(*projects.RecordResolveOpts) error { api.RawClient().ResourceBase += "changed/"; return nil }, func(*projects.RecordResolveOpts) error { seen++; api.RawClient().ResourceBase = base; return nil })
+	row, err := api.ResolveRecord(context.Background(), "one", request.Custom(func(*projects.RecordResolveOpts) error { api.RawClient().ResourceBase += "changed/"; return nil }), request.Custom(func(*projects.RecordResolveOpts) error { seen++; api.RawClient().ResourceBase = base; return nil }))
 	if row != nil || !errors.Is(err, resource.ErrInvalidOption) || seen != 0 || calls != 0 {
 		t.Fatal(row, err, seen, calls)
 	}

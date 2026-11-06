@@ -14,9 +14,9 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.API.Create`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.WithCreateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.WithCreateOpts`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.WithCreateHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 
 - Create sends PUT OS-FEDERATION/service_providers/{id} with only the declared attributes (Python names and Body keys, is_enabled aliasing enabled) under service_provider and without id or name, keeps explicit null, drops unknown attributes, accepts every status 200-399, overlays the response object on the request seed and wraps 4xx/5xx with Create operation context.
   Tests: `identity/v3/serviceproviders/api_test.go:TestServiceProviderCreatePutsMemberWithoutID`, `identity/v3/serviceproviders/api_test.go:TestServiceProviderRejectsInvalidInputBeforeHTTP`.
@@ -36,10 +36,10 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.API.Delete`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.WithDeleteIgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.WithDeleteHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 
-- Delete sends DELETE OS-FEDERATION/service_providers/{id}, accepts 200-399, turns a clean 404 into nil by default as ignore_missing=True, returns the 404 with WithDeleteIgnoreMissing(false) and always returns other statuses such as 409 with Delete operation context.
+- Delete sends DELETE OS-FEDERATION/service_providers/{id}, accepts 200-399, turns a clean 404 into nil by default as ignore_missing=True, returns the 404 with request.IgnoreMissing(false) and always returns other statuses such as 409 with Delete operation context.
   Tests: `identity/v3/serviceproviders/api_test.go:TestServiceProviderDeleteIgnoresMissingByDefault`, `identity/v3/serviceproviders/api_test.go:TestServiceProviderRejectsInvalidInputBeforeHTTP`.
 
 Python/Go differences:
@@ -55,9 +55,9 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.API.Find`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.WithFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 
-- Find sends GET OS-FEDERATION/service_providers/{name_or_id} first and, after a clean 400, 403 or 404, lists the whole unfiltered collection matching the exact id (name is the id Body key); a missing resource is nil by default or resource.NotFoundError with WithFindIgnoreMissing(false), duplicates fail and other GET failures do not fall back.
+- Find sends GET OS-FEDERATION/service_providers/{name_or_id} first and, after a clean 400, 403 or 404, lists the whole unfiltered collection matching the exact id (name is the id Body key); a missing resource is nil by default or resource.NotFoundError with request.IgnoreMissing(false), duplicates fail and other GET failures do not fall back.
   Tests: `identity/v3/serviceproviders/api_test.go:TestServiceProviderFindFallsBackToList`, `identity/v3/serviceproviders/api_test.go:TestServiceProviderRejectsInvalidInputBeforeHTTP`.
 
 Python/Go differences:
@@ -75,7 +75,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.API.Get`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.WithGetHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 
 - Get sends GET OS-FEDERATION/service_providers/{id}, accepts every status 200-399, decodes the service_provider envelope or a root object into typed fields plus raw Body/Wire views, fails a non-object JSON body with resource.ResponseError and returns 404 as a native error with Get operation context.
   Tests: `identity/v3/serviceproviders/api_test.go:TestServiceProviderGetDecodesAndRejects`, `identity/v3/serviceproviders/api_test.go:TestServiceProviderRejectsInvalidInputBeforeHTTP`.
@@ -94,15 +94,15 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.API.All`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.WithListOpts`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.WithListID`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.WithListEnabled`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.WithListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.WithListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.WithListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.WithListPaginated`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.WithListHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 
 - List sends GET OS-FEDERATION/service_providers with Accept: application/json, Requests-encoded server query id and is_enabled/enabled (client name preferred over server name), filters name, auth_url, description, relay_state_prefix and sp_url locally after the raw row cap, ignores unknown names, follows limit-driven marker continuation until an empty page, honors max_items as a limit hint and paginated=False, and wraps errors with List operation context.
   Tests: `identity/v3/serviceproviders/api_test.go:TestServiceProviderListQueryFiltersAndPaging`, `identity/v3/serviceproviders/api_test.go:TestServiceProviderRejectsInvalidInputBeforeHTTP`.
@@ -123,9 +123,9 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.API.Update`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.WithUpdateOpts`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.WithUpdateHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 
 - Update sends PATCH OS-FEDERATION/service_providers/{id} with only the given declared attributes under service_provider, never id or name, sends nothing when no declared attribute is given, overlays the response on the seed and wraps errors with Update operation context.
   Tests: `identity/v3/serviceproviders/api_test.go:TestServiceProviderUpdatePatchesDirtyAttributes`, `identity/v3/serviceproviders/api_test.go:TestServiceProviderRejectsInvalidInputBeforeHTTP`.

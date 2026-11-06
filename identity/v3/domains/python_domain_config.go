@@ -11,7 +11,9 @@ import (
 	"sort"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/neutronfind"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -26,7 +28,34 @@ type DomainConfigOpts struct {
 	IgnoreMissing *bool
 	order         []string
 }
-type DomainConfigOption func(*DomainConfigOpts) error
+
+// DomainConfigOption is one option of CreateConfigRecord, GetConfigRecord,
+// UpdateConfigRecord and DeleteConfigRecord: WithDomainConfigOpts,
+// WithDomainConfigIgnoreMissing, request.Custom over *DomainConfigOpts,
+// request.Field (one DomainConfig attribute; the value is sent as JSON),
+// request.Headers (replaces the headers) or request.Microversion.
+// request.Header fails with resource.ErrInvalidOption before HTTP. No shared
+// category admits Field together with IgnoreMissing, so ignore_missing stays
+// the operation-specific WithDomainConfigIgnoreMissing.
+type DomainConfigOption = request.WriteCall
+
+var domainConfigCalls = calls.Spec[DomainConfigOpts]{
+	Field: func(c *DomainConfigOpts, entry request.CallEntry) error {
+		if entry.JSONErr != nil {
+			return entry.JSONErr
+		}
+		if c.Attributes == nil {
+			c.Attributes = map[string]json.RawMessage{}
+		}
+		if _, exists := c.Attributes[entry.Key]; !exists {
+			c.order = append(c.order, entry.Key)
+		}
+		c.Attributes[entry.Key] = entry.JSON
+		return nil
+	},
+	Headers:      calls.Value(func(c *DomainConfigOpts) *map[string]string { return &c.Headers }),
+	Microversion: calls.Pointer(func(c *DomainConfigOpts) **string { return &c.Microversion }),
+}
 
 func copyDomainConfigOpts(v DomainConfigOpts) DomainConfigOpts {
 	v.Attributes = maps.Clone(v.Attributes)
@@ -47,34 +76,10 @@ func copyDomainConfigOpts(v DomainConfigOpts) DomainConfigOpts {
 }
 func WithDomainConfigOpts(v DomainConfigOpts) DomainConfigOption {
 	owned := copyDomainConfigOpts(v)
-	return func(c *DomainConfigOpts) error { *c = copyDomainConfigOpts(owned); return nil }
-}
-func WithDomainConfigAttribute(key string, value any) DomainConfigOption {
-	raw, err := json.Marshal(value)
-	owned := bytes.Clone(raw)
-	return func(c *DomainConfigOpts) error {
-		if err != nil {
-			return err
-		}
-		if c.Attributes == nil {
-			c.Attributes = map[string]json.RawMessage{}
-		}
-		if _, exists := c.Attributes[key]; !exists {
-			c.order = append(c.order, key)
-		}
-		c.Attributes[key] = bytes.Clone(owned)
-		return nil
-	}
-}
-func WithDomainConfigHeaders(v map[string]string) DomainConfigOption {
-	owned := maps.Clone(v)
-	return func(c *DomainConfigOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
-func WithDomainConfigMicroversion(v string) DomainConfigOption {
-	return func(c *DomainConfigOpts) error { x := v; c.Microversion = &x; return nil }
+	return request.Custom(func(c *DomainConfigOpts) error { *c = copyDomainConfigOpts(owned); return nil })
 }
 func WithDomainConfigIgnoreMissing(v bool) DomainConfigOption {
-	return func(c *DomainConfigOpts) error { x := v; c.IgnoreMissing = &x; return nil }
+	return request.Custom(func(c *DomainConfigOpts) error { x := v; c.IgnoreMissing = &x; return nil })
 }
 
 func domainConfigFields(policy DomainConfigOpts, update bool) (body, seed map[string]json.RawMessage, err error) {
@@ -132,7 +137,7 @@ func (a *API) prepareDomainConfig(ctx context.Context, domainID string, options 
 	if err != nil {
 		return nil, DomainConfigOpts{}, err
 	}
-	policy, err := applyDomainOptions(ctx, engine, DomainConfigOpts{}, copyDomainConfigOpts, slices.Clone(options))
+	policy, err := applyDomainOptions(ctx, engine, DomainConfigOpts{}, copyDomainConfigOpts, calls.Translate(options, domainConfigCalls))
 	return engine, policy, err
 }
 func domainConfigResult(ctx context.Context, engine *neutronfind.Engine, value *neutronfind.Record, err error) (*DomainConfigRecord, error) {

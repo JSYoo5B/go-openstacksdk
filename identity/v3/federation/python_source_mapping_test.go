@@ -10,6 +10,7 @@ import (
 
 	sdk "github.com/JSYoo5B/go-openstacksdk/identity/v3/federation"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -39,7 +40,7 @@ func TestSourceMappingCreatePreservesRawRulesAndNullableDescriptorView(t *testin
 		}
 		return 203, `{"mapping":{"rules":{"actual":{"future":true}},"schema_version":false,"x_extension":1}}`
 	})
-	row, err := api.CreateSourceMappingRecord(context.Background(), sdk.WithSourceMappingAttribute("id", "a/b"), sdk.WithSourceMappingAttribute("rules", map[string]any{"unknown_rule": map[string]int{"keep": 1}}), sdk.WithSourceMappingAttribute("schema_version", false), sdk.WithSourceMappingAttribute("ignored", "unused"))
+	row, err := api.CreateSourceMappingRecord(context.Background(), request.Field("id", "a/b"), request.Field("rules", map[string]any{"unknown_rule": map[string]int{"keep": 1}}), request.Field("schema_version", false), request.Field("ignored", "unused"))
 	if err != nil || row == nil || len(calls) != 1 || row.StatusCode != 203 {
 		t.Fatal(row, err, calls)
 	}
@@ -65,7 +66,7 @@ func TestSourceMappingCreateIgnoresNameDefaultsAndStatusPolicy(t *testing.T) {
 				}
 				return code, `{}`
 			})
-			row, err := api.CreateSourceMappingRecord(context.Background(), sdk.WithSourceMappingAttribute("id", "first"), sdk.WithSourceMappingAttribute("name", "last"))
+			row, err := api.CreateSourceMappingRecord(context.Background(), request.Field("id", "first"), request.Field("name", "last"))
 			if err != nil || row == nil || len(calls) != 1 {
 				t.Fatal(row, err, calls)
 			}
@@ -96,15 +97,15 @@ func TestSourceMappingUpdateDirtyNoopNullAndIgnoredName(t *testing.T) {
 			var options []sdk.SourceMappingOption
 			switch mode {
 			case "schema-only":
-				options = append(options, sdk.WithSourceMappingAttribute("schema_version", 2))
+				options = append(options, request.Field("schema_version", 2))
 			case "explicit-null":
-				options = append(options, sdk.WithSourceMappingAttribute("rules", nil))
+				options = append(options, request.Field("rules", nil))
 			case "alias-route":
-				options = append(options, sdk.WithSourceMappingAttribute("name", "other"), sdk.WithSourceMappingAttribute("rules", []any{}))
+				options = append(options, request.Field("name", "other"), request.Field("rules", []any{}))
 			case "unknown-only":
-				options = append(options, sdk.WithSourceMappingAttribute("future", true))
+				options = append(options, request.Field("future", true))
 			case "alias-only":
-				options = append(options, sdk.WithSourceMappingAttribute("name", "other"))
+				options = append(options, request.Field("name", "other"))
 			}
 			row, err := api.UpdateSourceMappingRecord(context.Background(), "selected", options...)
 			if err != nil || row == nil {
@@ -159,7 +160,7 @@ func TestSourceMappingFindGETFirstFallbackPaginationAndDuplicate(t *testing.T) {
 			})
 			var options []sdk.SourceMappingFindOption
 			if mode == "strict" {
-				options = append(options, sdk.WithSourceMappingFindIgnoreMissing(false))
+				options = append(options, request.IgnoreMissing(false))
 			}
 			row, err := api.FindSourceMappingRecord(context.Background(), "needle", options...)
 			switch mode {
@@ -217,11 +218,11 @@ func TestSourceMappingOwnershipAndCallbackGuards(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	before := len(calls)
-	_, err = api.CreateSourceMappingRecord(ctx, func(c *sdk.SourceMappingOpts) error { cancel(); return nil })
+	_, err = api.CreateSourceMappingRecord(ctx, request.Custom(func(c *sdk.SourceMappingOpts) error { cancel(); return nil }))
 	if !errors.Is(err, context.Canceled) || len(calls) != before {
 		t.Fatal(err, calls)
 	}
-	_, err = api.FindSourceMappingRecord(context.Background(), "owned", func(c *sdk.SourceMappingFindOpts) error { api.RawClient().ResourceBase += "changed/"; return nil })
+	_, err = api.FindSourceMappingRecord(context.Background(), "owned", request.Custom(func(c *sdk.SourceMappingFindOpts) error { api.RawClient().ResourceBase += "changed/"; return nil }))
 	if !errors.Is(err, resource.ErrInvalidOption) || len(calls) != before {
 		t.Fatal(err, calls)
 	}
@@ -234,19 +235,19 @@ func TestSourceMappingPreflightCollisionsAndInvalidBodies(t *testing.T) {
 			var err error
 			switch mode {
 			case "missing-create-id":
-				_, err = api.CreateSourceMappingRecord(context.Background(), sdk.WithSourceMappingAttribute("rules", []any{}))
+				_, err = api.CreateSourceMappingRecord(context.Background(), request.Field("rules", []any{}))
 			case "name-only-create":
-				_, err = api.CreateSourceMappingRecord(context.Background(), sdk.WithSourceMappingAttribute("name", "ignored"))
+				_, err = api.CreateSourceMappingRecord(context.Background(), request.Field("name", "ignored"))
 			case "update-id", "update-value", "update-mapping":
-				_, err = api.UpdateSourceMappingRecord(context.Background(), "m", sdk.WithSourceMappingAttribute(strings.TrimPrefix(mode, "update-"), nil))
+				_, err = api.UpdateSourceMappingRecord(context.Background(), "m", request.Field(strings.TrimPrefix(mode, "update-"), nil))
 			case "base-path":
-				_, err = api.CreateSourceMappingRecord(context.Background(), sdk.WithSourceMappingAttribute("base_path", "/other"))
+				_, err = api.CreateSourceMappingRecord(context.Background(), request.Field("base_path", "/other"))
 			case "invalid-json":
 				_, err = api.CreateSourceMappingRecord(context.Background(), sdk.WithSourceMappingOpts(sdk.SourceMappingOpts{Attributes: map[string]json.RawMessage{"id": json.RawMessage(`"m"`), "rules": json.RawMessage(`invalid`)}}))
 			case "nil-option":
 				_, err = api.CreateSourceMappingRecord(context.Background(), nil)
 			case "invalid-id":
-				_, err = api.CreateSourceMappingRecord(context.Background(), sdk.WithSourceMappingAttribute("id", ".."))
+				_, err = api.CreateSourceMappingRecord(context.Background(), request.Field("id", ".."))
 			}
 			if err == nil || len(calls) != 0 {
 				t.Fatal(err, calls)

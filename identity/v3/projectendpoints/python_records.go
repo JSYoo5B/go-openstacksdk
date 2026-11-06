@@ -8,6 +8,8 @@ import (
 	"net/url"
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/internal/osfederation"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
@@ -76,7 +78,7 @@ func (a *API) recordTarget(projectID string) osfederation.Target {
 // ListRecords implements project_endpoints(project, **query) as a lazy
 // iterator over GET OS-EP-FILTER/projects/{project_id}/endpoints.
 func (a *API) ListRecords(ctx context.Context, projectID string, options ...RecordListOption) iter.Seq2[*EndpointRecord, error] {
-	source := osfederation.List(ctx, a.recordTarget(projectID), options)
+	source := osfederation.List(ctx, a.recordTarget(projectID), calls.Translate(options, recordListCalls))
 	return func(yield func(*EndpointRecord, error) bool) {
 		for record, err := range source {
 			if !yield(endpointRecord(record, projectID), err) || err != nil {
@@ -102,26 +104,18 @@ func (a *API) AllRecords(ctx context.Context, projectID string, options ...Recor
 // service_id go to the server; id, name, is_enabled (or enabled), links and
 // url filter rows locally; other names are ignored.
 type RecordListOpts = osfederation.ListOpts
-type RecordListOption func(*RecordListOpts) error
+
+// RecordListOption is one option of ListRecords and AllRecords:
+// WithRecordListOpts, request.Custom over *RecordListOpts, request.Query (a
+// Python **query name; the value is sent as JSON and names that are neither
+// server query parameters nor local filters are dropped), request.Headers
+// (replaces the headers), request.Limit, request.Marker, request.MaxItems or
+// request.Paginated. request.Header and request.Microversion fail with
+// resource.ErrInvalidOption before HTTP.
+type RecordListOption = request.ListCall
+
+var recordListCalls = recordSpec.ListCalls()
 
 func WithRecordListOpts(opts RecordListOpts) RecordListOption {
-	return RecordListOption(osfederation.ListSnapshot(opts))
-}
-func WithRecordListQuery(key string, value any) RecordListOption {
-	return RecordListOption(recordSpec.ListQuery(key, value))
-}
-func WithRecordListLimit(limit int) RecordListOption {
-	return RecordListOption(osfederation.ListLimit(limit))
-}
-func WithRecordListMarker(marker string) RecordListOption {
-	return RecordListOption(osfederation.ListMarker(marker))
-}
-func WithRecordListMaxItems(count int) RecordListOption {
-	return RecordListOption(osfederation.ListMaxItems(count))
-}
-func WithRecordListPaginated(value bool) RecordListOption {
-	return RecordListOption(osfederation.ListPaginated(value))
-}
-func WithRecordListHeaders(values map[string]string) RecordListOption {
-	return RecordListOption(osfederation.ListHeaders(values))
+	return request.Custom(osfederation.ListSnapshot(opts))
 }

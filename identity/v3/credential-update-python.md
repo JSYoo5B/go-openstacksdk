@@ -13,9 +13,9 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/credentials.API.UpdateRecord`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/credentials.WithRecordUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/credentials.WithRecordUpdateOpts`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/credentials.WithRecordUpdateHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 
 - PATCH on the literal generic /credentials member sends only declared name/blob/project_id/type/user_id under credential, preserves omitted/null/false/zero/empty JSON values, ignores unknown and id attrs, and overlays actual response fields on owned request/id seed while preserving unknown raw response fields and exact numbers.
   Tests: `identity/v3/credentials/python_update_test.go:TestPythonCredentialUpdateRawBodyAndResponseOverlay`.
@@ -84,10 +84,10 @@ func main() {
     service, err := conn.IdentityV3(ctx)
     if err != nil { log.Fatal(err) }
     options := []credentials.RecordUpdateOption{
-        credentials.WithRecordUpdateField("blob", *blob),
+        request.Field("blob", *blob),
     }
     if *clearProject {
-        options = append(options, credentials.WithRecordUpdateField("project_id", nil))
+        options = append(options, request.Field("project_id", nil))
     }
     updated, err := service.Credentials.UpdateRecord(ctx, *id, options...)
     if err != nil { log.Fatal(err) }

@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/policies"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -21,7 +22,7 @@ func TestPythonPolicyRecordsBodyFiltersStayLocal(t *testing.T) {
 		}
 		return pythonPolicyWire(203, reply)
 	})
-	rows, err := api.AllRecords(context.Background(), policies.WithRecordListLimit(0), policies.WithRecordListMarker("first"), policies.WithRecordListHeader("X-Trace", "owned"), policies.WithRecordListFilter("project_id", "p"), policies.WithRecordListFilter("user_id", "u"), policies.WithRecordListFilter("blob", map[string]any{"role": "reader"}), policies.WithRecordListFilter("unknown", func() {}))
+	rows, err := api.AllRecords(context.Background(), request.Limit(0), request.Marker("first"), request.Header("X-Trace", "owned"), policies.WithRecordListFilter("project_id", "p"), policies.WithRecordListFilter("user_id", "u"), policies.WithRecordListFilter("blob", map[string]any{"role": "reader"}), policies.WithRecordListFilter("unknown", func() {}))
 	if err != nil || len(rows) != 1 {
 		t.Fatal(rows, err)
 	}
@@ -47,7 +48,7 @@ func TestPythonPolicyRecordsPaginationPartialAndRawCap(t *testing.T) {
 	if len(rows) != 2 || !errors.As(err, &proof) || string(proof.Body) != broken || proof.StatusCode != 202 || len(recorder.snapshot()) != 2 {
 		t.Fatal(rows, err, proof, recorder.snapshot())
 	}
-	rows, err = api.AllRecords(context.Background(), policies.WithRecordListMaxItems(2), policies.WithRecordListFilter("project_id", "p"))
+	rows, err = api.AllRecords(context.Background(), request.MaxItems(2), policies.WithRecordListFilter("project_id", "p"))
 	if err != nil || len(rows) != 1 || len(recorder.snapshot()) != 3 || !strings.Contains(recorder.snapshot()[2].query, "limit=2") {
 		t.Fatal(rows, err, recorder.snapshot())
 	}
@@ -87,18 +88,18 @@ func TestPythonPolicyRecordsOwnReusableOptionsAndRemainLazy(t *testing.T) {
 func TestPythonPolicyRecordsGuardAndCancellation(t *testing.T) {
 	recorder := new(pythonPolicyRecorder)
 	api, _ := pythonPolicyAPI(t, recorder, func(*http.Request) *http.Response { return pythonPolicyWire(200, `{"policies":[]}`) })
-	bad := func(*policies.RecordListOpts) error {
+	bad := request.Custom(func(*policies.RecordListOpts) error {
 		client := *api.RawClient()
 		*api = *policies.New(&client)
 		return nil
-	}
+	})
 	if _, err := api.AllRecords(context.Background(), bad); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
 	if _, err := api.AllRecords(context.Background(), nil); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
-	if _, err := api.AllRecords(context.Background(), policies.WithRecordListLimit(-1)); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := api.AllRecords(context.Background(), request.Limit(-1)); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
 	ctx, cancel := context.WithCancelCause(context.Background())

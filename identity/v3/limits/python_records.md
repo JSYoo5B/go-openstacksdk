@@ -22,15 +22,15 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/limits.API.ProxyListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/limits.WithRecordListOpts`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/limits.WithRecordListQuery`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/limits.WithRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/limits.WithRecordListMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/limits.WithRecordListBasePath`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.BasePath`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/limits.WithRecordListJMESPath`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/limits.WithRecordListLocation`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/limits.WithRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/limits.WithRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/limits.WithRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/limits.WithRecordListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 
 - All with resource.WithQuery forwards service_id, project_id, domain_id and limit to GET limits as Python limits(**query) does for mapped parameters and follows links.next.
   Tests: `identity/v3/limits/python_parity_test.go:TestPythonLimitListQueryAndPaging`.
@@ -95,6 +95,7 @@ import (
 
 	openstack "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/limits"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 func main() {
@@ -113,7 +114,7 @@ func main() {
 		limits.WithRecordListQuery("service_id", "compute-service-id"),
 		limits.WithRecordListQuery("resource_name", "cores"),
 		limits.WithRecordListQuery("description", "team quota"),
-		limits.WithRecordListMaxItems(100),
+		request.MaxItems(100),
 	)
 	if err != nil {
 		log.Fatal(err)

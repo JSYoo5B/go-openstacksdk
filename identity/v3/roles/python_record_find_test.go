@@ -11,6 +11,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/roles"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -40,10 +41,10 @@ func TestPythonRoleFindRecordCollectionSeedProjectionAndLocation(t *testing.T) {
 	cloudName := "configured"
 	location := resource.CloudLocation{Cloud: &cloudName, Project: resource.CloudProject{ID: json.RawMessage(`"scope"`)}}
 	row, err := api.FindRecord(context.Background(), "demo",
-		roles.WithRecordFindQuery("requires_id", false), roles.WithRecordFindQuery("base_path", "/alternate-roles"),
-		roles.WithRecordFindQuery("skip_cache", true), roles.WithRecordFindQuery("error_message", "custom missing"),
-		roles.WithRecordFindQuery("resource_response_key", "selected"), roles.WithRecordFindQuery("domain_id", "d"),
-		roles.WithRecordFindQuery("description", json.RawMessage(`{"seed":1}`)), roles.WithRecordFindHeaders(map[string]string{"X-Typed": "kept"}), roles.WithRecordFindLocation(location))
+		request.Query("requires_id", false), request.Query("base_path", "/alternate-roles"),
+		request.Query("skip_cache", true), request.Query("error_message", "custom missing"),
+		request.Query("resource_response_key", "selected"), request.Query("domain_id", "d"),
+		request.Query("description", json.RawMessage(`{"seed":1}`)), request.Headers(map[string]string{"X-Typed": "kept"}), roles.WithRecordFindLocation(location))
 	if err != nil || row == nil || calls != 1 || row.StatusCode != 203 || row.Header.Get("X-Request-Id") != "role-proof" || string(row.Envelope) != body {
 		t.Fatal(row, err, calls)
 	}
@@ -68,7 +69,7 @@ func TestPythonRoleFindRecordCustomEnvelopeFailureKeepsPhysicalEvidence(t *testi
 	calls := 0
 	body := `{"selected":[],"role":{"id":"wrong"}}`
 	api, _ := roleRecordAPI(t, func(r *http.Request) *http.Response { calls++; return roleRecordWire(202, body) })
-	row, err := api.FindRecord(context.Background(), "demo", roles.WithRecordFindQuery("resource_response_key", "selected"))
+	row, err := api.FindRecord(context.Background(), "demo", request.Query("resource_response_key", "selected"))
 	var proof *resource.ResponseError
 	if row != nil || calls != 1 || !errors.As(err, &proof) || proof.StatusCode != 202 || string(proof.Body) != body || proof.Header.Get("X-Request-Id") != "role-proof" {
 		t.Fatal(row, err, proof, calls)
@@ -93,7 +94,7 @@ func TestPythonRoleFindRecordHeadersAndListRouteAreStageSpecific(t *testing.T) {
 		}
 		return roleRecordWire(200, `{"roles":[{"id":"g","name":"demo","description":false,"domain_id":3,"x_extension":7}]}`)
 	})
-	row, err := api.FindRecord(context.Background(), "demo", roles.WithRecordFindQuery("base_path", "/alternate-roles"), roles.WithRecordFindListBasePath("/list-roles"), roles.WithRecordFindQuery("headers", json.RawMessage(`{"Accept":"application/vnd.role+json","X-Raw":"raw"}`)), roles.WithRecordFindHeaders(map[string]string{"x-raw": "typed", "X-Typed": "kept"}), roles.WithRecordFindQuery("domain_id", "d"))
+	row, err := api.FindRecord(context.Background(), "demo", request.Query("base_path", "/alternate-roles"), roles.WithRecordFindListBasePath("/list-roles"), request.Query("headers", json.RawMessage(`{"Accept":"application/vnd.role+json","X-Raw":"raw"}`)), request.Headers(map[string]string{"x-raw": "typed", "X-Typed": "kept"}), request.Query("domain_id", "d"))
 	if err != nil || row == nil || calls != 2 {
 		t.Fatal(row, err, calls)
 	}
@@ -120,7 +121,7 @@ func TestPythonRoleFindRecordBadHeadersWaitForFallback(t *testing.T) {
 				}
 				return roleRecordWire(200, `{"role":{"id":"g","description":null,"domain_id":null}}`)
 			})
-			row, err := api.FindRecord(context.Background(), "demo", roles.WithRecordFindQuery("headers", json.RawMessage(`{"X-Raw":7}`)))
+			row, err := api.FindRecord(context.Background(), "demo", request.Query("headers", json.RawMessage(`{"X-Raw":7}`)))
 			if calls != 1 {
 				t.Fatal(calls)
 			}
@@ -185,7 +186,7 @@ func TestPythonRoleFindRecordOwnOptionsRemainStatelessAndKeepErrorCause(t *testi
 			}
 			return roleRecordWire(500, body)
 		})
-		row, err := api.FindRecord(context.Background(), "demo", roles.WithRecordFindQuery("error_message", "role lookup failed"))
+		row, err := api.FindRecord(context.Background(), "demo", request.Query("error_message", "role lookup failed"))
 		var native gophercloud.ErrUnexpectedResponseCode
 		if row != nil || calls != 1 || !errors.As(err, &native) || native.Actual != 500 || string(native.Body) != body || native.ResponseHeader.Get("X-Request-Id") != "role-proof" || !strings.Contains(err.Error(), "role lookup failed") {
 			t.Fatal(row, err, native, calls)
@@ -217,7 +218,7 @@ func TestPythonRoleFindRecordPhysicalFaultsNeverFallback(t *testing.T) {
 				response.Body = body
 				return response
 			})
-			row, err := api.FindRecord(ctx, "demo", roles.WithRecordFindQuery("requires_id", false), roles.WithRecordFindQuery("skip_cache", true), roles.WithRecordFindQuery("error_message", "controlled role lookup"))
+			row, err := api.FindRecord(ctx, "demo", request.Query("requires_id", false), request.Query("skip_cache", true), request.Query("error_message", "controlled role lookup"))
 			if row != nil || calls != 1 || body.Closes() != 1 || !errors.Is(err, cause) {
 				t.Fatal(row, err, calls, body.Closes())
 			}
@@ -240,7 +241,7 @@ func TestPythonRoleFindRecordGETSeedPresenceAndPhysicalIsolation(t *testing.T) {
 				}
 				return roleRecordWire(203, tc.body)
 			})
-			row, err := api.FindRecord(context.Background(), "alias", roles.WithRecordFindQuery("domain_id", "seed-domain"), roles.WithRecordFindQuery("description", "seed"), roles.WithRecordFindQuery("x_seed", "request-only"))
+			row, err := api.FindRecord(context.Background(), "alias", request.Query("domain_id", "seed-domain"), request.Query("description", "seed"), request.Query("x_seed", "request-only"))
 			if err != nil || row == nil || calls != 1 {
 				t.Fatal(row, err, calls)
 			}
@@ -277,7 +278,7 @@ func TestPythonRoleFindRecordCleanFallbackKeepsDeclaredQueriesAndLocalFilters(t 
 				}
 				return roleRecordWire(200, `{"roles":[{"id":"skip","name":"reader","description":0.2,"options":{"flag":1.0}},{"id":"wrong-link","name":"reader","description":0.10000000000000001,"options":{"flag":1.0},"links":{"self":"no"}},{"id":"kept","name":"reader","description":0.10000000000000001,"options":{"flag":1.0},"links":{"self":"yes"}}]}`)
 			})
-			row, err := api.FindRecord(context.Background(), "reader", roles.WithRecordFindQuery("domain_id", "d"), roles.WithRecordFindQuery("description", json.RawMessage(`0.1`)), roles.WithRecordFindQuery("options", map[string]any{"flag": true}), roles.WithRecordFindQuery("links", map[string]any{"self": "yes"}), roles.WithRecordFindQuery("x_unknown", "request-only"))
+			row, err := api.FindRecord(context.Background(), "reader", request.Query("domain_id", "d"), request.Query("description", json.RawMessage(`0.1`)), request.Query("options", map[string]any{"flag": true}), request.Query("links", map[string]any{"self": "yes"}), request.Query("x_unknown", "request-only"))
 			if err != nil || row == nil || calls != 2 {
 				t.Fatal(row, err, calls)
 			}
@@ -317,7 +318,7 @@ func TestPythonRoleFindRecordCompleteSearchAmbiguityLateFailureAndMissing(t *tes
 			})
 			options := []roles.RecordFindOption{}
 			if mode == "missing strict" {
-				options = append(options, roles.WithRecordFindIgnoreMissing(false))
+				options = append(options, request.IgnoreMissing(false))
 			}
 			row, err := api.FindRecord(context.Background(), "reader", options...)
 			switch mode {
@@ -372,7 +373,7 @@ func TestPythonRoleFindRecordOptionLifecycleVersionsAndPreflight(t *testing.T) {
 			}
 			return roleRecordWire(200, `{"roles":[{"id":"r","name":"reader"}]}`)
 		})
-		row, err := api.FindRecord(context.Background(), "reader", roles.WithRecordFindMicroversion("3.9"), roles.WithRecordFindHeaders(map[string]string{"X-Owned": "yes"}), roles.WithRecordFindListBasePath("fallback-roles"))
+		row, err := api.FindRecord(context.Background(), "reader", request.Microversion("3.9"), request.Headers(map[string]string{"X-Owned": "yes"}), roles.WithRecordFindListBasePath("fallback-roles"))
 		if err != nil || row == nil || calls != 2 {
 			t.Fatal(row, err, calls)
 		}
@@ -387,7 +388,7 @@ func TestPythonRoleFindRecordOptionLifecycleVersionsAndPreflight(t *testing.T) {
 			api, fixture := roleRecordAPI(t, func(r *http.Request) *http.Response { calls++; return roleRecordWire(200, `{"role":{}}`) })
 			var option roles.RecordFindOption
 			if mode != "nil option" {
-				option = func(*roles.RecordFindOpts) error {
+				option = request.Custom(func(*roles.RecordFindOpts) error {
 					switch mode {
 					case "callback error":
 						return cause
@@ -397,9 +398,9 @@ func TestPythonRoleFindRecordOptionLifecycleVersionsAndPreflight(t *testing.T) {
 						cancel(cause)
 					}
 					return nil
-				}
+				})
 			}
-			row, err := api.FindRecord(ctx, "reader", option, func(*roles.RecordFindOpts) error { later++; return nil })
+			row, err := api.FindRecord(ctx, "reader", option, request.Custom(func(*roles.RecordFindOpts) error { later++; return nil }))
 			if row != nil || err == nil || calls != 0 || later != 0 {
 				t.Fatal(row, err, calls, later)
 			}

@@ -15,11 +15,11 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.ListAssignmentRecords`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.AllAssignmentRecords`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithAssignmentRecordListQuery`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithAssignmentRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithAssignmentRecordListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithAssignmentRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithAssignmentRecordListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithAssignmentRecordListOpts`
 
 - ListAssignmentRecords sends GET role_assignments with Accept application/json, maps role_id, user_id, group_id, scope_project_id, scope_domain_id, scope_system, inherited_to (or their dotted server names, client name winning), effective, include_names and include_subtree to Requests-encoded server query, ignores unknown names, and keeps raw role, scope (including OS-INHERIT:inherited_to), user, group and links per row.
@@ -42,8 +42,8 @@ Examples use the surrounding guide's service object and context unless they decl
 ```go
 api := roles.New(identityClient)
 values, err := api.AllAssignmentRecords(ctx,
-    roles.WithAssignmentRecordListQuery("user_id", userID),
-    roles.WithAssignmentRecordListQuery("scope", map[string]any{"OS-INHERIT:inherited_to": "projects"}))
+    request.Query("user_id", userID),
+    request.Query("scope", map[string]any{"OS-INHERIT:inherited_to": "projects"}))
 ```
 
 ## References

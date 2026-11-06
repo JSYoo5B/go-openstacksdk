@@ -16,6 +16,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/roles"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -266,7 +267,7 @@ func TestPythonCloudGetRoleDefaultFinderFallbackMissingDuplicateAndVersion(t *te
 				return roleGetWire(200, `{"roles":[]}`)
 			})
 			cloud.RawAPI().RawClient().Microversion = "3.1"
-			result, err := cloud.GetRole(context.Background(), "reader", identity.WithRoleGetDomainID("domain"), identity.WithRoleGetMicroversion("3.8"))
+			result, err := cloud.GetRole(context.Background(), "reader", identity.WithRoleGetDomainID("domain"), request.Microversion("3.8"))
 			switch mode {
 			case "missing":
 				if err != nil || result.Role != nil || result.Lookup != nil || string(result.Value) != "null" || calls != 2 {
@@ -319,12 +320,12 @@ func TestPythonCloudGetRoleOptsOnceOwnValuesSourceSnapshotAndLocation(t *testing
 			})
 			client := cloud.RawAPI().RawClient()
 			client.MoreHeaders = map[string]string{"X-Selected": "before"}
-			result, err := cloud.GetRole(context.Background(), "reader", snapshot, func(*identity.RoleGetOpts) error {
+			result, err := cloud.GetRole(context.Background(), "reader", snapshot, request.Custom(func(*identity.RoleGetOpts) error {
 				callbacks++
 				client.MoreHeaders["X-Selected"] = "after"
 				client.MoreHeaders["X-Late"] = "after"
 				return nil
-			})
+			}))
 			if err != nil || result.Role == nil || calls != 1 || callbacks != 1 || !strings.Contains(string(result.Role.Resource.Body["location"]), `"cloud":"configured"`) || string(result.Role.Wire.Body["location"]) != `{"cloud":"wire"}` {
 				t.Fatal(result, err, calls, callbacks)
 			}
@@ -343,21 +344,21 @@ func TestPythonCloudGetRoleOwnerCancellationPrivateGuardAndPhysical401(t *testin
 			client := cloud.RawAPI().RawClient()
 			old := client.Endpoint
 			defer func() { client.Endpoint = old }()
-			var option identity.RoleGetOption = func(*identity.RoleGetOpts) error {
+			option := request.Custom(func(*identity.RoleGetOpts) error {
 				if mode == "source" {
 					client.Endpoint = "https://changed.invalid/"
 				} else if mode == "cancel" {
 					cancel(cause)
 				}
 				return nil
-			}
+			})
 			if mode == "nil" {
 				option = nil
 			}
 			if mode == "private" {
 				ctx = rest.WithOperationGuard(ctx, func(context.Context) error { return cause })
 			}
-			result, err := cloud.GetRole(ctx, "one", option, func(*identity.RoleGetOpts) error { seen++; client.Endpoint = old; return nil })
+			result, err := cloud.GetRole(ctx, "one", option, request.Custom(func(*identity.RoleGetOpts) error { seen++; client.Endpoint = old; return nil }))
 			var proof *resource.ResponseError
 			if result != nil || err == nil || seen != 0 || calls != 0 || errors.As(err, &proof) {
 				t.Fatal(result, err, seen, calls, proof)

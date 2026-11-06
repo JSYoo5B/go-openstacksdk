@@ -11,6 +11,8 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/identity/v3/internal/keystonecalls"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/neutronfind"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -20,7 +22,42 @@ import (
 // GroupRecordListOpts reuses User declarations while keeping the Group route
 // fixed. BasePath is rejected, including a present null raw base_path kwarg.
 type GroupRecordListOpts RecordListOpts
-type GroupRecordListOption func(*GroupRecordListOpts) error
+
+// GroupRecordListOption is one option of ListUsersInGroupRecords and
+// AllUsersInGroupRecords: WithGroupRecordListOpts, WithGroupRecordListQuery,
+// WithGroupRecordListLocation, WithGroupRecordListJMESPath, request.Custom
+// over *GroupRecordListOpts, request.Headers (replaces the headers),
+// request.Microversion, request.Limit, request.Marker, request.MaxItems or
+// request.Paginated (each a Source keyword argument). request.Header and
+// request.Query fail with resource.ErrInvalidOption before HTTP:
+// WithGroupRecordListQuery rejects the bound base_path and group arguments
+// and discards ignored kwargs before marshaling the value.
+type GroupRecordListOption = request.ListCall
+
+var groupRecordList = keystonecalls.SourceList[GroupRecordListOpts]{
+	State: func(c *GroupRecordListOpts) keystonecalls.ListState {
+		return keystonecalls.ListState{Query: &c.Query, Headers: &c.Headers, Microversion: &c.Microversion, BasePath: &c.BasePath, Order: &c.order}
+	},
+	Control: recordListControl,
+	Ignores: recordListIgnores,
+	Invalid: recordInvalid,
+}
+
+// applyGroupRecordListQuery rejects the bound group_users arguments before
+// applying a Source keyword argument.
+func applyGroupRecordListQuery(c *GroupRecordListOpts, key string, raw json.RawMessage, err error) error {
+	if key == "base_path" || key == "group" {
+		return recordInvalid("group_users argument %q is already bound", key)
+	}
+	return groupRecordList.Apply(c, key, raw, err)
+}
+
+var groupRecordListCalls = func() calls.Spec[GroupRecordListOpts] {
+	spec := groupRecordList.ControlSpec()
+	spec.Paging = calls.JSONPaging(applyGroupRecordListQuery)
+	spec.BasePath = nil
+	return spec
+}()
 
 func copyGroupRecordOpts(v GroupRecordListOpts) GroupRecordListOpts {
 	return GroupRecordListOpts(copyRecordListOpts(RecordListOpts(v)))
@@ -38,49 +75,27 @@ func groupFixedPath(v RecordListOpts) error {
 }
 func WithGroupRecordListOpts(v GroupRecordListOpts) GroupRecordListOption {
 	owned := copyGroupRecordOpts(v)
-	return func(c *GroupRecordListOpts) error {
+	return request.Custom(func(c *GroupRecordListOpts) error {
 		*c = copyGroupRecordOpts(owned)
 		return groupFixedPath(RecordListOpts(*c))
-	}
+	})
 }
-func groupListDelegated(apply RecordListOption) GroupRecordListOption {
-	return func(c *GroupRecordListOpts) error {
-		v := RecordListOpts(*c)
-		err := apply(&v)
-		*c = copyGroupRecordOpts(GroupRecordListOpts(v))
-		return err
-	}
-}
+
+// WithGroupRecordListQuery sets one Source keyword argument, as
+// WithRecordListQuery does; the group route binds base_path and group.
 func WithGroupRecordListQuery(key string, value any) GroupRecordListOption {
 	if key == "base_path" || key == "group" {
 		err := recordInvalid("group_users argument %q is already bound", key)
-		return func(*GroupRecordListOpts) error { return err }
+		return request.Custom(func(*GroupRecordListOpts) error { return err })
 	}
-	return groupListDelegated(WithRecordListQuery(key, value))
-}
-func WithGroupRecordListHeaders(v map[string]string) GroupRecordListOption {
-	return groupListDelegated(WithRecordListHeaders(v))
-}
-func WithGroupRecordListMicroversion(v string) GroupRecordListOption {
-	return groupListDelegated(WithRecordListMicroversion(v))
+	return groupRecordList.Query(key, value)
 }
 func WithGroupRecordListLocation(v resource.CloudLocation) GroupRecordListOption {
-	return groupListDelegated(WithRecordListLocation(v))
-}
-func WithGroupRecordListLimit(v int) GroupRecordListOption {
-	return WithGroupRecordListQuery("limit", v)
-}
-func WithGroupRecordListMarker(v string) GroupRecordListOption {
-	return WithGroupRecordListQuery("marker", v)
-}
-func WithGroupRecordListMaxItems(v int) GroupRecordListOption {
-	return WithGroupRecordListQuery("max_items", v)
-}
-func WithGroupRecordListPaginated(v bool) GroupRecordListOption {
-	return WithGroupRecordListQuery("paginated", v)
+	owned := v.Clone()
+	return request.Custom(func(c *GroupRecordListOpts) error { location := owned.Clone(); c.Location = &location; return nil })
 }
 func WithGroupRecordListJMESPath(v string) GroupRecordListOption {
-	return WithGroupRecordListQuery("jmespath_filters", v)
+	return keystonecalls.Keyword(applyGroupRecordListQuery, "jmespath_filters", v)
 }
 func groupIdentity(value string) error {
 	if strings.TrimSpace(value) == "" || value == "." || value == ".." || !utf8.ValidString(value) || strings.IndexFunc(value, unicode.IsControl) >= 0 {
@@ -109,8 +124,8 @@ func (a *API) groupRecordEngine(ctx context.Context, groupID string) (*neutronfi
 	})
 }
 func applyGroupRecordOptions(ctx context.Context, engine *neutronfind.Engine, options []GroupRecordListOption) (RecordListOpts, error) {
-	converted := make([]RecordListOption, 0, len(options))
-	for _, apply := range slices.Clone(options) {
+	converted := make([]func(*RecordListOpts) error, 0, len(options))
+	for _, apply := range calls.Translate(options, groupRecordListCalls) {
 		if apply == nil {
 			converted = append(converted, nil)
 			continue
@@ -128,7 +143,7 @@ func applyGroupRecordOptions(ctx context.Context, engine *neutronfind.Engine, op
 			return nil
 		})
 	}
-	return applyRecordListOptions(ctx, engine, converted)
+	return applyRecordListFuncs(ctx, engine, converted)
 }
 
 // ListUsersInGroupRecords mirrors Proxy.group_users using the complete User profile.

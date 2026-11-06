@@ -7,7 +7,9 @@ import (
 	"fmt"
 	"slices"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -16,9 +18,9 @@ import (
 // when it is nonempty. Further CreateOption values are applied first.
 func (a *API) CloudCreate(ctx context.Context, name string, filters any, description string, options ...CreateOption) (*Record, error) {
 	owned := slices.Clone(options)
-	owned = append(owned, WithCreateField("name", name), WithCreateField("filters", filters))
+	owned = append(owned, request.Field("name", name), request.Field("filters", filters))
 	if description != "" {
-		owned = append(owned, WithCreateField("description", description))
+		owned = append(owned, request.Field("description", description))
 	}
 	return a.create(ctx, "CloudCreate", owned)
 }
@@ -34,7 +36,7 @@ func (a *API) CloudDelete(ctx context.Context, id string, options ...ReadOption)
 	if err != nil {
 		return false, wrap(ctx, op, err)
 	}
-	policy, err := applyOptions(ctx, p.guard, ReadOpts{}, copyRead, slices.Clone(options))
+	policy, err := applyOptions(ctx, p.guard, ReadOpts{}, copyRead, calls.Translate(options, readCalls))
 	if err != nil {
 		return false, wrap(ctx, op, err)
 	}
@@ -46,7 +48,7 @@ func (a *API) CloudDelete(ctx context.Context, id string, options ...ReadOption)
 		return false, nil
 	}
 	// Python deletes the literal argument, not the ID of the found row.
-	if err := a.Delete(ctx, id, WithDeleteHeaders(policy.Headers)); err != nil {
+	if err := a.Delete(ctx, id, request.Headers(policy.Headers)); err != nil {
 		return false, wrap(ctx, op, err)
 	}
 	return true, nil
@@ -72,13 +74,13 @@ func (a *API) CloudSearch(ctx context.Context, nameOrID string, options ...Searc
 	if err != nil {
 		return nil, wrap(ctx, op, err)
 	}
-	policy, err := applyOptions(ctx, p.guard, SearchOpts{}, copySearch, slices.Clone(options))
+	policy, err := applyOptions(ctx, p.guard, SearchOpts{}, copySearch, calls.Translate(options, searchCalls))
 	if err != nil {
 		return nil, wrap(ctx, op, err)
 	}
 	result := &SearchResult{}
 	var rows []json.RawMessage
-	for v, err := range a.List(ctx, WithListHeaders(policy.Headers)) {
+	for v, err := range a.List(ctx, request.Headers(policy.Headers)) {
 		if err != nil {
 			return result, wrap(ctx, op, err)
 		}

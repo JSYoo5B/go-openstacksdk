@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 	"maps"
-	"slices"
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/domains"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
@@ -22,7 +22,18 @@ type DomainGetOpts struct {
 	Microversion      *string
 	Location          *resource.CloudLocation
 }
-type DomainGetOption func(*DomainGetOpts) error
+
+// DomainGetOption is one option of GetDomain: WithDomainGetOpts,
+// WithDomainGetID, WithDomainGetNameOrID, WithDomainGetFilters,
+// WithDomainGetLocation, request.Headers (replaces the headers),
+// request.Microversion or request.Custom over *DomainGetOpts. Other shared
+// calls fail with resource.ErrInvalidOption before HTTP.
+type DomainGetOption = request.GetCall
+
+var domainGetCalls = calls.Spec[DomainGetOpts]{
+	Headers:      calls.Value(func(c *DomainGetOpts) *map[string]string { return &c.Headers }),
+	Microversion: calls.Pointer(func(c *DomainGetOpts) **string { return &c.Microversion }),
+}
 
 func copyDomainGetOpts(v DomainGetOpts) DomainGetOpts {
 	if v.DomainID != nil {
@@ -46,28 +57,21 @@ func copyDomainGetOpts(v DomainGetOpts) DomainGetOpts {
 }
 func WithDomainGetOpts(v DomainGetOpts) DomainGetOption {
 	owned := copyDomainGetOpts(v)
-	return func(c *DomainGetOpts) error { *c = copyDomainGetOpts(owned); return nil }
+	return request.Custom(func(c *DomainGetOpts) error { *c = copyDomainGetOpts(owned); return nil })
 }
 func WithDomainGetID(v string) DomainGetOption {
-	return func(c *DomainGetOpts) error { x := v; c.DomainID = &x; return nil }
+	return request.Custom(func(c *DomainGetOpts) error { x := v; c.DomainID = &x; return nil })
 }
 func WithDomainGetNameOrID(v string) DomainGetOption {
-	return func(c *DomainGetOpts) error { x := v; c.NameOrID = &x; return nil }
+	return request.Custom(func(c *DomainGetOpts) error { x := v; c.NameOrID = &x; return nil })
 }
 func WithDomainGetFilters(v any) DomainGetOption {
 	present := v != nil
-	return func(c *DomainGetOpts) error { c.DeprecatedFilters = present; return nil }
-}
-func WithDomainGetHeaders(v map[string]string) DomainGetOption {
-	owned := maps.Clone(v)
-	return func(c *DomainGetOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
-func WithDomainGetMicroversion(v string) DomainGetOption {
-	return func(c *DomainGetOpts) error { x := v; c.Microversion = &x; return nil }
+	return request.Custom(func(c *DomainGetOpts) error { c.DeprecatedFilters = present; return nil })
 }
 func WithDomainGetLocation(v resource.CloudLocation) DomainGetOption {
 	owned := v.Clone()
-	return func(c *DomainGetOpts) error { x := owned.Clone(); c.Location = &x; return nil }
+	return request.Custom(func(c *DomainGetOpts) error { x := owned.Clone(); c.Location = &x; return nil })
 }
 
 // DomainGetResult carries the ignored-filter warning independently of actual
@@ -87,7 +91,7 @@ func (c *DomainReadCloud) GetDomain(ctx context.Context, options ...DomainGetOpt
 		return nil, wrap(err)
 	}
 	policy := DomainGetOpts{}
-	for _, apply := range slices.Clone(options) {
+	for _, apply := range calls.Translate(options, domainGetCalls) {
 		if err := guard(); err != nil {
 			return nil, wrap(err)
 		}
