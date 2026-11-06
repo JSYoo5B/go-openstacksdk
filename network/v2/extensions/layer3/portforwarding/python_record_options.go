@@ -11,15 +11,23 @@ import (
 	"strings"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
+	"github.com/JSYoo5B/go-openstacksdk/internal/neutronfind"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 // RecordMutationOpts owns only supplied Body changes. PortForwarding inherits
 // Resource, not NetworkResource: if_match/if_revision are ordinary unknown Body
 // extensions here. Neither option silently introduces conditional headers.
 type RecordMutationOpts struct{ Fields map[string]json.RawMessage }
-type RecordMutationOption func(*RecordMutationOpts) error
+
+// RecordMutationOption is one option of CreateRecord and UpdateRecord:
+// WithRecordMutationOpts, request.Field (one Body attribute; its marshal error
+// is returned when applied) or request.Custom over *RecordMutationOpts. Other
+// shared calls fail with resource.ErrInvalidOption before HTTP.
+type RecordMutationOption = request.WriteCall
 
 func copyForwardingMutation(v RecordMutationOpts) RecordMutationOpts {
 	v.Fields = forwardingClone(v.Fields)
@@ -27,10 +35,10 @@ func copyForwardingMutation(v RecordMutationOpts) RecordMutationOpts {
 }
 func WithRecordMutationOpts(v RecordMutationOpts) RecordMutationOption {
 	owned := copyForwardingMutation(v)
-	return func(c *RecordMutationOpts) error { *c = copyForwardingMutation(owned); return nil }
+	return request.Custom(func(c *RecordMutationOpts) error { *c = copyForwardingMutation(owned); return nil })
 }
-func WithRecordAttribute(key string, value any) RecordMutationOption {
-	raw, err := json.Marshal(value)
+
+func withRecordAttribute(key string, raw json.RawMessage, err error) func(*RecordMutationOpts) error {
 	owned := bytes.Clone(raw)
 	return func(c *RecordMutationOpts) error {
 		if err != nil {
@@ -76,7 +84,11 @@ func WithRecordFields(fields ...string) RecordReadOption {
 }
 
 type RecordDeleteOpts struct{ IgnoreMissing *bool }
-type RecordDeleteOption func(*RecordDeleteOpts) error
+
+// RecordDeleteOption is one option of DeleteRecord: request.IgnoreMissing or
+// request.Custom over *RecordDeleteOpts. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type RecordDeleteOption = request.DeleteCall
 
 func copyForwardingDelete(v RecordDeleteOpts) RecordDeleteOpts {
 	if v.IgnoreMissing != nil {
@@ -85,7 +97,7 @@ func copyForwardingDelete(v RecordDeleteOpts) RecordDeleteOpts {
 	}
 	return v
 }
-func WithRecordDeleteIgnoreMissing(v bool) RecordDeleteOption {
+func withRecordDeleteIgnoreMissing(v bool) func(*RecordDeleteOpts) error {
 	return func(c *RecordDeleteOpts) error { x := v; c.IgnoreMissing = &x; return nil }
 }
 
@@ -97,7 +109,14 @@ type RecordListOpts struct {
 	MaxItems  int
 	Paginated *bool
 }
-type RecordListOption func(*RecordListOpts) error
+
+// RecordListOption is one option of ListRecords: WithRecordListOpts,
+// WithRecordListQuery, request.Headers (replaces the headers), request.Limit,
+// request.Marker, request.MaxItems, request.Paginated or request.Custom over
+// *RecordListOpts. request.Query is rejected because WithRecordListQuery ignores
+// unknown kwargs before it marshals the value. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type RecordListOption = request.ListCall
 
 func copyForwardingList(v RecordListOpts) RecordListOpts {
 	v.Query = forwardingClone(v.Query)
@@ -114,12 +133,16 @@ func copyForwardingList(v RecordListOpts) RecordListOpts {
 }
 func WithRecordListOpts(v RecordListOpts) RecordListOption {
 	owned := copyForwardingList(v)
-	return func(c *RecordListOpts) error { *c = copyForwardingList(owned); return nil }
+	return request.Custom(func(c *RecordListOpts) error { *c = copyForwardingList(owned); return nil })
 }
 
 // WithRecordListQuery sends declared query parameters, filters other declared
 // Body fields locally, and ignores unknown kwargs exactly as Resource.list.
 func WithRecordListQuery(key string, value any) RecordListOption {
+	return request.Custom(withRecordListQuery(key, value))
+}
+
+func withRecordListQuery(key string, value any) func(*RecordListOpts) error {
 	if !forwardingKnown(key) && !forwardingServerQuery(key) {
 		return func(*RecordListOpts) error { return nil }
 	}
@@ -136,19 +159,19 @@ func WithRecordListQuery(key string, value any) RecordListOption {
 		return nil
 	}
 }
-func WithRecordListLimit(v int) RecordListOption {
+func withRecordListLimit(v int) func(*RecordListOpts) error {
 	return func(c *RecordListOpts) error { x := v; c.Limit = &x; return nil }
 }
-func WithRecordListMarker(v string) RecordListOption {
+func withRecordListMarker(v string) func(*RecordListOpts) error {
 	return func(c *RecordListOpts) error { c.Marker = v; return nil }
 }
-func WithRecordListMaxItems(v int) RecordListOption {
+func withRecordListMaxItems(v int) func(*RecordListOpts) error {
 	return func(c *RecordListOpts) error { c.MaxItems = v; return nil }
 }
-func WithRecordListPaginated(v bool) RecordListOption {
+func withRecordListPaginated(v bool) func(*RecordListOpts) error {
 	return func(c *RecordListOpts) error { x := v; c.Paginated = &x; return nil }
 }
-func WithRecordListHeaders(v map[string]string) RecordListOption {
+func withRecordListHeaders(v map[string]string) func(*RecordListOpts) error {
 	owned := maps.Clone(v)
 	return func(c *RecordListOpts) error { c.Headers = maps.Clone(owned); return nil }
 }
@@ -200,7 +223,12 @@ type RecordFindOpts struct {
 	IgnoreMissing *bool
 	Query         map[string]json.RawMessage
 }
-type RecordFindOption func(*RecordFindOpts) error
+
+// RecordFindOption is one option of FindRecord: WithRecordFindOpts,
+// request.IgnoreMissing, request.Query (one Python kwarg as JSON; its marshal
+// error is returned when applied) or request.Custom over *RecordFindOpts. Other
+// shared calls fail with resource.ErrInvalidOption before HTTP.
+type RecordFindOption = request.FindCall
 
 func copyForwardingFind(v RecordFindOpts) RecordFindOpts {
 	v.Query = forwardingClone(v.Query)
@@ -212,16 +240,15 @@ func copyForwardingFind(v RecordFindOpts) RecordFindOpts {
 }
 func WithRecordFindOpts(v RecordFindOpts) RecordFindOption {
 	owned := copyForwardingFind(v)
-	return func(c *RecordFindOpts) error { *c = copyForwardingFind(owned); return nil }
+	return request.Custom(func(c *RecordFindOpts) error { *c = copyForwardingFind(owned); return nil })
 }
-func WithRecordFindIgnoreMissing(v bool) RecordFindOption {
+func withRecordFindIgnoreMissing(v bool) func(*RecordFindOpts) error {
 	return func(c *RecordFindOpts) error { x := v; c.IgnoreMissing = &x; return nil }
 }
 
-// WithRecordFindQuery preserves the Source difference between its unfiltered
+// withRecordFindQuery preserves the Source difference between its unfiltered
 // fetch kwargs and the fallback's declared server/local query projections.
-func WithRecordFindQuery(key string, value any) RecordFindOption {
-	raw, err := json.Marshal(value)
+func withRecordFindQuery(key string, raw json.RawMessage, err error) func(*RecordFindOpts) error {
 	owned := bytes.Clone(raw)
 	return func(c *RecordFindOpts) error {
 		if err != nil {
@@ -295,4 +322,31 @@ func applyForwardingOptions[T any, O ~func(*T) error](ctx context.Context, guard
 		value = copyValue(next)
 	}
 	return value, guard(ctx)
+}
+
+// recordMutationCalls interprets the shared calls of RecordMutationOption.
+var recordMutationCalls = calls.Spec[RecordMutationOpts]{
+	Field: neutronfind.UseJSON(withRecordAttribute),
+}
+
+// recordDeleteCalls interprets the shared calls of RecordDeleteOption.
+var recordDeleteCalls = calls.Spec[RecordDeleteOpts]{
+	IgnoreMissing: neutronfind.Use(withRecordDeleteIgnoreMissing),
+}
+
+// recordListCalls interprets the shared calls of RecordListOption.
+var recordListCalls = calls.Spec[RecordListOpts]{
+	Headers: neutronfind.Use(withRecordListHeaders),
+	Paging: calls.Paging[RecordListOpts]{
+		Limit:     neutronfind.Use(withRecordListLimit),
+		Marker:    neutronfind.Use(withRecordListMarker),
+		MaxItems:  neutronfind.Use(withRecordListMaxItems),
+		Paginated: neutronfind.Use(withRecordListPaginated),
+	},
+}
+
+// recordFindCalls interprets the shared calls of RecordFindOption.
+var recordFindCalls = calls.Spec[RecordFindOpts]{
+	Query:         neutronfind.UseJSON(withRecordFindQuery),
+	IgnoreMissing: neutronfind.Use(withRecordFindIgnoreMissing),
 }

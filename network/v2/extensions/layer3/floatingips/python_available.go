@@ -7,8 +7,8 @@ import (
 	"errors"
 	"maps"
 	"net/http"
-	"slices"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/neutronfind"
@@ -23,7 +23,12 @@ type AvailableIPOpts struct {
 	Headers      map[string]string
 	Microversion *string
 }
-type AvailableIPOption func(*AvailableIPOpts) error
+
+// AvailableIPOption is one option of FindAvailableIPRecord: WithAvailableIPOpts,
+// request.Headers (replaces the headers), request.Microversion or
+// request.Custom over *AvailableIPOpts. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type AvailableIPOption = request.GetCall
 
 func copyAvailableIP(v AvailableIPOpts) AvailableIPOpts {
 	v.Headers = maps.Clone(v.Headers)
@@ -35,13 +40,13 @@ func copyAvailableIP(v AvailableIPOpts) AvailableIPOpts {
 }
 func WithAvailableIPOpts(v AvailableIPOpts) AvailableIPOption {
 	owned := copyAvailableIP(v)
-	return func(c *AvailableIPOpts) error { *c = copyAvailableIP(owned); return nil }
+	return request.Custom(func(c *AvailableIPOpts) error { *c = copyAvailableIP(owned); return nil })
 }
-func WithAvailableIPHeaders(v map[string]string) AvailableIPOption {
+func withAvailableIPHeaders(v map[string]string) func(*AvailableIPOpts) error {
 	owned := maps.Clone(v)
 	return func(c *AvailableIPOpts) error { c.Headers = maps.Clone(owned); return nil }
 }
-func WithAvailableIPMicroversion(v string) AvailableIPOption {
+func withAvailableIPMicroversion(v string) func(*AvailableIPOpts) error {
 	return func(c *AvailableIPOpts) error { x := v; c.Microversion = &x; return nil }
 }
 
@@ -101,7 +106,7 @@ func (a *API) FindAvailableIPRecord(ctx context.Context, options ...AvailableIPO
 		return nil, wrap(err)
 	}
 	cfg := AvailableIPOpts{}
-	for _, apply := range slices.Clone(options) {
+	for _, apply := range calls.Translate(options, availableIPCalls) {
 		if err := engine.Check(ctx); err != nil {
 			return nil, wrap(err)
 		}
@@ -169,4 +174,10 @@ func (a *API) FindAvailableIPRecord(ctx context.Context, options ...AvailableIPO
 		}
 	}
 	return nil, wrap(engine.Check(ctx))
+}
+
+// availableIPCalls interprets the shared calls of AvailableIPOption.
+var availableIPCalls = calls.Spec[AvailableIPOpts]{
+	Headers:      neutronfind.Use(withAvailableIPHeaders),
+	Microversion: neutronfind.Use(withAvailableIPMicroversion),
 }

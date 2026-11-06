@@ -13,6 +13,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/jmespath"
@@ -58,7 +59,16 @@ type RecordListOpts struct {
 	Microversion, BasePath *string
 	order                  []string
 }
-type RecordListOption func(*RecordListOpts) error
+
+// RecordListOption is one option of ListRecords, AllRecords and
+// ProxyListRecords: WithRecordListOpts, WithRecordListQuery,
+// WithRecordListJMESPath, request.Headers (replaces the headers),
+// request.Microversion, request.BasePath, request.Limit, request.Marker,
+// request.MaxItems, request.Paginated or request.Custom over *RecordListOpts.
+// request.Query is rejected because WithRecordListQuery checks the key before it
+// marshals the value. Other shared calls fail with resource.ErrInvalidOption
+// before HTTP.
+type RecordListOption = request.ListBasePathCall
 
 func listPolicy(v RecordListOpts) neutronfind.Options {
 	return neutronfind.Options{Query: v.Query, Headers: v.Headers, Microversion: v.Microversion, BasePath: v.BasePath, Order: v.order}
@@ -70,7 +80,7 @@ func copyRecordListOpts(v RecordListOpts) RecordListOpts {
 }
 func WithRecordListOpts(v RecordListOpts) RecordListOption {
 	own := copyRecordListOpts(v)
-	return func(c *RecordListOpts) error { *c = copyRecordListOpts(own); return nil }
+	return request.Custom(func(c *RecordListOpts) error { *c = copyRecordListOpts(own); return nil })
 }
 func recordListProfile() neutronfind.Profile {
 	p := availableIPProfile()
@@ -103,6 +113,10 @@ func recordListKnown(key string) bool {
 // WithRecordListQuery accepts Source list kwargs. Unknown ordinary values are
 // discarded before JSON encoding, as Resource.list does before filtering.
 func WithRecordListQuery(key string, value any) RecordListOption {
+	return request.Custom(withRecordListQuery(key, value))
+}
+
+func withRecordListQuery(key string, value any) func(*RecordListOpts) error {
 	if strings.TrimSpace(key) == "" || !utf8.ValidString(key) || strings.IndexFunc(key, unicode.IsControl) >= 0 {
 		return func(*RecordListOpts) error { return listInvalid("query name must be nonblank UTF-8 without controls") }
 	}
@@ -144,11 +158,11 @@ func WithRecordListQuery(key string, value any) RecordListOption {
 		return nil
 	}
 }
-func WithRecordListHeaders(v map[string]string) RecordListOption {
+func withRecordListHeaders(v map[string]string) func(*RecordListOpts) error {
 	own := maps.Clone(v)
 	return func(c *RecordListOpts) error { c.Headers = maps.Clone(own); delete(c.Query, "headers"); return nil }
 }
-func WithRecordListMicroversion(v string) RecordListOption {
+func withRecordListMicroversion(v string) func(*RecordListOpts) error {
 	return func(c *RecordListOpts) error {
 		x := v
 		c.Microversion = &x
@@ -156,13 +170,19 @@ func WithRecordListMicroversion(v string) RecordListOption {
 		return nil
 	}
 }
-func WithRecordListBasePath(v string) RecordListOption {
+func withRecordListBasePath(v string) func(*RecordListOpts) error {
 	return func(c *RecordListOpts) error { x := v; c.BasePath = &x; delete(c.Query, "base_path"); return nil }
 }
-func WithRecordListLimit(v int) RecordListOption      { return WithRecordListQuery("limit", v) }
-func WithRecordListMarker(v string) RecordListOption  { return WithRecordListQuery("marker", v) }
-func WithRecordListMaxItems(v int) RecordListOption   { return WithRecordListQuery("max_items", v) }
-func WithRecordListPaginated(v bool) RecordListOption { return WithRecordListQuery("paginated", v) }
+func withRecordListLimit(v int) func(*RecordListOpts) error { return withRecordListQuery("limit", v) }
+func withRecordListMarker(v string) func(*RecordListOpts) error {
+	return withRecordListQuery("marker", v)
+}
+func withRecordListMaxItems(v int) func(*RecordListOpts) error {
+	return withRecordListQuery("max_items", v)
+}
+func withRecordListPaginated(v bool) func(*RecordListOpts) error {
+	return withRecordListQuery("paginated", v)
+}
 func WithRecordListJMESPath(v string) RecordListOption {
 	return WithRecordListQuery("jmespath_filters", v)
 }
@@ -188,7 +208,7 @@ func (a *API) prepareRecordList(ctx context.Context, options []RecordListOption)
 		return nil, RecordListOpts{}, nil, err
 	}
 	policy := RecordListOpts{}
-	for _, apply := range slices.Clone(options) {
+	for _, apply := range calls.Translate(options, recordListCalls) {
 		if err := engine.Check(ctx); err != nil {
 			return nil, policy, nil, err
 		}
@@ -303,4 +323,17 @@ func (a *API) ProxyListRecords(ctx context.Context, options ...RecordListOption)
 		result.JSON = bytes.Clone(raw)
 	}
 	return result, nil
+}
+
+// recordListCalls interprets the shared calls of RecordListOption.
+var recordListCalls = calls.Spec[RecordListOpts]{
+	Headers:      neutronfind.Use(withRecordListHeaders),
+	Microversion: neutronfind.Use(withRecordListMicroversion),
+	BasePath:     neutronfind.Use(withRecordListBasePath),
+	Paging: calls.Paging[RecordListOpts]{
+		Limit:     neutronfind.Use(withRecordListLimit),
+		Marker:    neutronfind.Use(withRecordListMarker),
+		MaxItems:  neutronfind.Use(withRecordListMaxItems),
+		Paginated: neutronfind.Use(withRecordListPaginated),
+	},
 }

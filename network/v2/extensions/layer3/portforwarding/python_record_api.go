@@ -14,6 +14,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/jsonfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
@@ -152,7 +153,7 @@ func (a *API) CreateRecord(ctx context.Context, parent string, options ...Record
 	if err != nil {
 		return nil, forwardingWrap(ctx, op, err)
 	}
-	policy, err := applyForwardingOptions(ctx, p.guard, RecordMutationOpts{}, copyForwardingMutation, slices.Clone(options))
+	policy, err := applyForwardingOptions(ctx, p.guard, RecordMutationOpts{}, copyForwardingMutation, calls.Translate(options, recordMutationCalls))
 	if err != nil {
 		return nil, forwardingWrap(ctx, op, err)
 	}
@@ -182,7 +183,7 @@ func (a *API) UpdateRecord(ctx context.Context, parent, id string, options ...Re
 	if err != nil {
 		return nil, forwardingWrap(ctx, op, err)
 	}
-	policy, err := applyForwardingOptions(ctx, p.guard, RecordMutationOpts{}, copyForwardingMutation, slices.Clone(options))
+	policy, err := applyForwardingOptions(ctx, p.guard, RecordMutationOpts{}, copyForwardingMutation, calls.Translate(options, recordMutationCalls))
 	if err != nil {
 		return nil, forwardingWrap(ctx, op, err)
 	}
@@ -243,7 +244,7 @@ func (a *API) DeleteRecord(ctx context.Context, parent, id string, options ...Re
 	if err != nil {
 		return forwardingWrap(ctx, op, err)
 	}
-	policy, err := applyForwardingOptions(ctx, p.guard, RecordDeleteOpts{}, copyForwardingDelete, slices.Clone(options))
+	policy, err := applyForwardingOptions(ctx, p.guard, RecordDeleteOpts{}, copyForwardingDelete, calls.Translate(options, recordDeleteCalls))
 	if err != nil {
 		return forwardingWrap(ctx, op, err)
 	}
@@ -306,7 +307,7 @@ func (a *API) ListRecords(ctx context.Context, parent string, options ...RecordL
 			yield(nil, forwardingWrap(ctx, op, err))
 			return
 		}
-		policy, err := applyForwardingOptions(ctx, p.guard, RecordListOpts{}, copyForwardingList, owned)
+		policy, err := applyForwardingOptions(ctx, p.guard, RecordListOpts{}, copyForwardingList, calls.Translate(owned, recordListCalls))
 		if err == nil {
 			err = p.listHeaders(policy.Headers)
 		}
@@ -336,7 +337,7 @@ func (a *API) FindRecord(ctx context.Context, parent, nameOrID string, options .
 	if err != nil {
 		return nil, forwardingWrap(ctx, op, err)
 	}
-	policy, err := applyForwardingOptions(ctx, p.guard, RecordFindOpts{}, copyForwardingFind, slices.Clone(options))
+	policy, err := applyForwardingOptions(ctx, p.guard, RecordFindOpts{}, copyForwardingFind, calls.Translate(options, recordFindCalls))
 	if err != nil {
 		return nil, forwardingWrap(ctx, op, err)
 	}

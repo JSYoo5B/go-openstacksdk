@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"io"
 	"net/http"
 	"reflect"
@@ -111,7 +112,7 @@ func TestPythonAddressScopeListQueryAliasesLocalFiltersAndRawCap(t *testing.T) {
 		response.Header.Set("If-Match", "page-only")
 		return response
 	})
-	values, err := pythonScopeList(t, api, addressscopes.WithRecordListQuery("shared", true), addressscopes.WithRecordListQuery("is_shared", false), addressscopes.WithRecordListQuery("tenant_id", "tenant"), addressscopes.WithRecordListQuery("name", "scope"), addressscopes.WithRecordListQuery("fields", []string{"is_shared", "id"}), addressscopes.WithRecordListQuery("x_unknown", map[string]any{"anything": false}), addressscopes.WithRecordListQuery("all_projects", true), addressscopes.WithRecordListQuery("max_items", 2))
+	values, err := pythonScopeList(t, api, request.Query("shared", true), request.Query("is_shared", false), request.Query("tenant_id", "tenant"), request.Query("name", "scope"), request.Query("fields", []string{"is_shared", "id"}), request.Query("x_unknown", map[string]any{"anything": false}), request.Query("all_projects", true), request.Query("max_items", 2))
 	if err != nil || len(values) != 1 || len(calls) != 1 {
 		t.Fatal(values, err, calls)
 	}
@@ -131,7 +132,7 @@ func TestPythonAddressScopeListQueryAliasesLocalFiltersAndRawCap(t *testing.T) {
 		}
 		return nativeScopeWire(200, `{"address_scopes":{"id":"keep","name":"scope","is_shared":false,"shared":1,"x_unknown":7}}`)
 	})
-	rows, err := pythonScopeList(t, singleton, addressscopes.WithRecordListQuery("name", nil), addressscopes.WithRecordListQuery("id", "keep"), addressscopes.WithRecordListQuery("paginated", false))
+	rows, err := pythonScopeList(t, singleton, request.Query("name", nil), request.Query("id", "keep"), request.Query("paginated", false))
 	if err != nil || len(rows) != 1 || len(singletonCalls) != 1 {
 		t.Fatal(rows, err, singletonCalls)
 	}
@@ -158,7 +159,7 @@ func TestPythonAddressScopeListPagingTruthinessAndPassiveMarker(t *testing.T) {
 				}
 				return nativeScopeWire(200, `{"address_scopes":[{"id":123,"name":"raw-marker"}]}`)
 			})
-			rows, err := pythonScopeList(t, api, addressscopes.WithRecordListQuery("paginated", testcase.paginated), addressscopes.WithRecordListQuery("limit", 4), addressscopes.WithRecordListQuery("is_shared", true))
+			rows, err := pythonScopeList(t, api, request.Query("paginated", testcase.paginated), request.Query("limit", 4), request.Query("is_shared", true))
 			if err != nil || len(rows) != 1 || len(calls) != testcase.pages {
 				t.Fatal(rows, err, calls)
 			}
@@ -174,7 +175,7 @@ func TestPythonAddressScopeListPagingTruthinessAndPassiveMarker(t *testing.T) {
 		}
 		return nativeScopeWire(200, `{"address_scopes":[{"id":"wire"}]}`)
 	})
-	for value, err := range api.ListRecords(context.Background(), addressscopes.WithRecordListQuery("limit", 1)) {
+	for value, err := range api.ListRecords(context.Background(), request.Query("limit", 1)) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -219,7 +220,7 @@ func TestPythonAddressScopeFindGETSeedAndCleanFallback(t *testing.T) {
 				return nativeScopeWire(200, `{"address_scopes":[{"id":"target","name":"other","tenant_id":"tenant"}]}`)
 			})
 			api.RawClient().MoreHeaders = map[string]string{"Accept": "text/xml"}
-			value, err := api.FindRecord(context.Background(), "target", addressscopes.WithRecordFindQuery("shared", true), addressscopes.WithRecordFindQuery("is_shared", false), addressscopes.WithRecordFindQuery("tenant_id", "tenant"), addressscopes.WithRecordFindQuery("x_unknown", 7), addressscopes.WithRecordFindQuery("all_projects", true), addressscopes.WithRecordFindQuery("paginated", false))
+			value, err := api.FindRecord(context.Background(), "target", request.Query("shared", true), request.Query("is_shared", false), request.Query("tenant_id", "tenant"), request.Query("x_unknown", 7), request.Query("all_projects", true), request.Query("paginated", false))
 			if err != nil || value == nil || len(calls) != 2 {
 				t.Fatal(value, err, calls)
 			}
@@ -236,7 +237,7 @@ func TestPythonAddressScopeFindGETSeedAndCleanFallback(t *testing.T) {
 	api, _ := nativeScopeAPI(t, &calls, func(req *http.Request) *http.Response {
 		return nativeScopeWire(200, `{"address_scope":{"ip_version":6}}`)
 	})
-	value, err := api.FindRecord(context.Background(), "target", addressscopes.WithRecordFindQuery("is_shared", 0), addressscopes.WithRecordFindQuery("tenant_id", "tenant"), addressscopes.WithRecordFindQuery("x_unknown", nil))
+	value, err := api.FindRecord(context.Background(), "target", request.Query("is_shared", 0), request.Query("tenant_id", "tenant"), request.Query("x_unknown", nil))
 	if err != nil || len(calls) != 1 {
 		t.Fatal(value, err, calls)
 	}
@@ -258,7 +259,7 @@ func TestPythonAddressScopeFindMissingPassiveIdentityDuplicateAndLateFailure(t *
 			}
 			return nativeScopeWire(200, `{"address_scopes":[]}`)
 		})
-		value, err := api.FindRecord(context.Background(), "target", addressscopes.WithRecordFindIgnoreMissing(ignore), addressscopes.WithRecordFindQuery("name", nil))
+		value, err := api.FindRecord(context.Background(), "target", request.IgnoreMissing(ignore), request.Query("name", nil))
 		if value != nil || len(calls) != 2 || (ignore && err != nil) || (!ignore && !errors.Is(err, resource.ErrNotFound)) {
 			t.Fatal(value, err, calls)
 		}
@@ -285,9 +286,9 @@ func TestPythonAddressScopeFindMissingPassiveIdentityDuplicateAndLateFailure(t *
 					return nativeScopeWire(200, `{`)
 				}
 			})
-			opts := []addressscopes.RecordFindOption{addressscopes.WithRecordFindQuery("max_items", 10)}
+			opts := []addressscopes.RecordFindOption{request.Query("max_items", 10)}
 			if mode == "passive null ID" {
-				opts = append(opts, addressscopes.WithRecordFindQuery("paginated", false))
+				opts = append(opts, request.Query("paginated", false))
 			}
 			value, err := api.FindRecord(context.Background(), "target", opts...)
 			if value != nil {
@@ -340,12 +341,12 @@ func TestPythonAddressScopeRecordOptionSnapshotsConstructorPhaseAndPreflight(t *
 	seed["name"] = json.RawMessage(`"bad"`)
 	headers["X-Custom"] = "bad"
 	var retained *addressscopes.RecordReadOpts
-	value, err := api.GetRecord(context.Background(), "target", option, func(c *addressscopes.RecordReadOpts) error { retained = c; return nil }, func(*addressscopes.RecordReadOpts) error {
+	value, err := api.GetRecord(context.Background(), "target", option, request.Custom(func(c *addressscopes.RecordReadOpts) error { retained = c; return nil }), request.Custom(func(*addressscopes.RecordReadOpts) error {
 		retained.Fields[0] = "bad"
 		retained.Seed["name"][1] = 'x'
 		retained.Headers["X-Custom"] = "bad"
 		return nil
-	})
+	}))
 	if err != nil || len(calls) != 1 {
 		t.Fatal(value, err, calls)
 	}
@@ -357,23 +358,23 @@ func TestPythonAddressScopeRecordOptionSnapshotsConstructorPhaseAndPreflight(t *
 		{"nil get", func() error { _, err := api.GetRecord(context.Background(), "target", nil); return err }},
 		{"nil find", func() error { _, err := api.FindRecord(context.Background(), "target", nil); return err }},
 		{"find ID collision", func() error {
-			_, err := api.FindRecord(context.Background(), "target", addressscopes.WithRecordFindQuery("id", "other"))
+			_, err := api.FindRecord(context.Background(), "target", request.Query("id", "other"))
 			return err
 		}},
 		{"descriptor seed before HTTP", func() error {
-			_, err := api.FindRecord(context.Background(), "target", addressscopes.WithRecordFindQuery("ip_version", "²"))
+			_, err := api.FindRecord(context.Background(), "target", request.Query("ip_version", "²"))
 			return err
 		}},
 		{"reserved list control", func() error {
-			_, err := pythonScopeList(t, api, addressscopes.WithRecordListQuery("base_path", "foreign"))
+			_, err := pythonScopeList(t, api, request.Query("base_path", "foreign"))
 			return err
 		}},
 		{"invalid max items", func() error {
-			_, err := pythonScopeList(t, api, addressscopes.WithRecordListQuery("max_items", -1))
+			_, err := pythonScopeList(t, api, request.Query("max_items", -1))
 			return err
 		}},
 		{"auth header", func() error {
-			_, err := api.GetRecord(context.Background(), "target", addressscopes.WithRecordReadHeaders(map[string]string{"X-Auth-Token": "foreign"}))
+			_, err := api.GetRecord(context.Background(), "target", request.Headers(map[string]string{"X-Auth-Token": "foreign"}))
 			return err
 		}},
 		{"invalid fields UTF8", func() error {
@@ -393,10 +394,10 @@ func TestPythonAddressScopeRecordOptionSnapshotsConstructorPhaseAndPreflight(t *
 		var selectedCalls []nativeScopeCall
 		api, _ := nativeScopeAPI(t, &selectedCalls, func(*http.Request) *http.Response { t.Fatal("unexpected HTTP"); return nil })
 		endpoint := api.RawClient().Endpoint
-		_, err := api.GetRecord(context.Background(), "target", func(*addressscopes.RecordReadOpts) error {
+		_, err := api.GetRecord(context.Background(), "target", request.Custom(func(*addressscopes.RecordReadOpts) error {
 			api.RawClient().Endpoint = endpoint + "changed/"
 			return nil
-		})
+		}))
 		if !errors.Is(err, resource.ErrInvalidOption) || len(selectedCalls) != 0 {
 			t.Fatal(err, selectedCalls)
 		}
@@ -418,10 +419,10 @@ func TestPythonAddressScopeRecordListLazyReuseAndFiltersShortCircuit(t *testing.
 		return nativeScopeWire(200, `{"address_scopes":[{"id":"keep","tenant_id":"tenant","project_id":"project"}]}`)
 	})
 	count := 0
-	seq := api.ListRecords(context.Background(), func(c *addressscopes.RecordListOpts) error {
+	seq := api.ListRecords(context.Background(), request.Custom(func(*addressscopes.RecordListOpts) error {
 		count++
-		return addressscopes.WithRecordListQuery("paginated", false)(c)
-	})
+		return nil
+	}), request.Query("paginated", false))
 	if count != 0 || len(calls) != 0 {
 		t.Fatal("eager list")
 	}
@@ -447,7 +448,7 @@ func TestPythonAddressScopeRecordListLazyReuseAndFiltersShortCircuit(t *testing.
 			if firstMatches {
 				wanted = "keep"
 			}
-			values, err := pythonScopeList(t, api, addressscopes.WithRecordListQuery("id", wanted), addressscopes.WithRecordListQuery("tenant_id", map[string]any{"part": "v"}), addressscopes.WithRecordListQuery("paginated", false))
+			values, err := pythonScopeList(t, api, request.Query("id", wanted), request.Query("tenant_id", map[string]any{"part": "v"}), request.Query("paginated", false))
 			if len(values) != 0 || len(filterCalls) != 1 {
 				t.Fatal(values, err, filterCalls)
 			}
@@ -637,7 +638,7 @@ func TestPythonAddressScopeRecordCleanRetryVersionHeaderPolicyAndLiveToken(t *te
 	})
 	client = api.RawClient()
 	cloud.Provider.SetToken("old")
-	seq := api.ListRecords(context.Background(), addressscopes.WithRecordListMicroversion("2.4"), addressscopes.WithRecordListHeaders(map[string]string{"Accept": "text/plain"}))
+	seq := api.ListRecords(context.Background(), request.Microversion("2.4"), request.Headers(map[string]string{"Accept": "text/plain"}))
 	cloud.Provider.SetToken("current")
 	for _, err := range seq {
 		if err != nil {
@@ -723,28 +724,28 @@ func TestPythonAddressScopeRecordBoundarySourceAndCallbackFailures(t *testing.T)
 				case "GetRecord":
 					var opts []addressscopes.RecordReadOption
 					if mode == "bad version" {
-						opts = append(opts, addressscopes.WithRecordReadMicroversion("bad\nversion"))
+						opts = append(opts, request.Microversion("bad\nversion"))
 					}
 					if mode == "callback error" {
-						opts = append(opts, func(*addressscopes.RecordReadOpts) error { return callbackCause })
+						opts = append(opts, request.Custom(func(*addressscopes.RecordReadOpts) error { return callbackCause }))
 					}
 					_, err = api.GetRecord(ctx, "target", opts...)
 				case "FindRecord":
 					var opts []addressscopes.RecordFindOption
 					if mode == "bad version" {
-						opts = append(opts, addressscopes.WithRecordFindMicroversion("bad\nversion"))
+						opts = append(opts, request.Microversion("bad\nversion"))
 					}
 					if mode == "callback error" {
-						opts = append(opts, func(*addressscopes.RecordFindOpts) error { return callbackCause })
+						opts = append(opts, request.Custom(func(*addressscopes.RecordFindOpts) error { return callbackCause }))
 					}
 					_, err = api.FindRecord(ctx, "target", opts...)
 				case "ListRecords":
 					var opts []addressscopes.RecordListOption
 					if mode == "bad version" {
-						opts = append(opts, addressscopes.WithRecordListMicroversion("bad\nversion"))
+						opts = append(opts, request.Microversion("bad\nversion"))
 					}
 					if mode == "callback error" {
-						opts = append(opts, func(*addressscopes.RecordListOpts) error { return callbackCause })
+						opts = append(opts, request.Custom(func(*addressscopes.RecordListOpts) error { return callbackCause }))
 					}
 					for _, cause := range api.ListRecords(ctx, opts...) {
 						err = cause
@@ -834,11 +835,11 @@ func TestPythonAddressScopeFindGETOnlyVersionAndStandaloneListOverride(t *testin
 			}
 			callbacks := 0
 			opts := []addressscopes.RecordFindOption{
-				addressscopes.WithRecordFindHeaders(map[string]string{"X-Custom": "operation"}),
-				func(*addressscopes.RecordFindOpts) error { callbacks++; return nil },
+				request.Headers(map[string]string{"X-Custom": "operation"}),
+				request.Custom(func(*addressscopes.RecordFindOpts) error { callbacks++; return nil }),
 			}
 			if testcase.explicit {
-				opts = append(opts, addressscopes.WithRecordFindMicroversion(testcase.override))
+				opts = append(opts, request.Microversion(testcase.override))
 			}
 			value, err := api.FindRecord(context.Background(), "target", opts...)
 			if err != nil || value == nil || len(calls) != 3 || callbacks != 1 || client.Microversion != testcase.selected || !reflect.DeepEqual(client.MoreHeaders, before) {
@@ -868,9 +869,9 @@ func TestPythonAddressScopeFindGETOnlyVersionAndStandaloneListOverride(t *testin
 			var err error
 			wantCalls := 1
 			if op == "GetRecord" {
-				_, err = api.GetRecord(context.Background(), "target", addressscopes.WithRecordReadMicroversion("2.4"))
+				_, err = api.GetRecord(context.Background(), "target", request.Microversion("2.4"))
 			} else {
-				_, err = pythonScopeList(t, api, addressscopes.WithRecordListMicroversion("2.4"))
+				_, err = pythonScopeList(t, api, request.Microversion("2.4"))
 				wantCalls = 2
 			}
 			if err != nil || len(calls) != wantCalls || client.Microversion != "2.0" || client.MoreHeaders["OpenStack-API-Version"] != "network 2.0" {

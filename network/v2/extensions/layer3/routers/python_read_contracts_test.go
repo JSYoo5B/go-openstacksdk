@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -179,7 +180,7 @@ func TestPythonRouterReadFindCleanFallbackNamePresenceAndMissing(t *testing.T) {
 				t.Fatal(value, err, calls)
 			}
 			calls = nil
-			options = append(options, routers.WithRecordFindIgnoreMissing(false))
+			options = append(options, request.IgnoreMissing(false))
 			value, err = api.FindRecord(context.Background(), "target", options...)
 			if value != nil || !errors.Is(err, resource.ErrNotFound) || len(calls) != 2 {
 				t.Fatal(value, err, calls)
@@ -237,10 +238,10 @@ func TestPythonRouterReadListRawCapSinglePageAndEarlyStop(t *testing.T) {
 		})
 		options := []routers.RecordListOption{}
 		if mode == "cap" {
-			options = append(options, routers.WithRecordListLimit(0), routers.WithRecordListMaxItems(1), routers.WithRecordListQuery("revision_number", 1))
+			options = append(options, request.Limit(0), request.MaxItems(1), routers.WithRecordListQuery("revision_number", 1))
 		}
 		if mode == "single" {
-			options = append(options, routers.WithRecordListPaginated(false))
+			options = append(options, request.Paginated(false))
 		}
 		count := 0
 		for value, err := range api.ListRecords(context.Background(), options...) {
@@ -301,7 +302,7 @@ func TestPythonRouterReadListContinuationScopeAndRawMarkerOwnership(t *testing.T
 		return nativeRouterWire(200, `{"routers":[]}`)
 	})
 	count := 0
-	for value, err := range api.ListRecords(context.Background(), routers.WithRecordListLimit(3)) {
+	for value, err := range api.ListRecords(context.Background(), request.Limit(3)) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -442,7 +443,7 @@ func TestPythonRouterReadOwnedOptionsMarshalCausesAndPreflight(t *testing.T) {
 		escaped.Headers["X-Trace"] = "late"
 		return nativeRouterWire(200, `{"router":{}}`)
 	})
-	value, err := api.FindRecord(context.Background(), "target", option, func(c *routers.RecordFindOpts) error { escaped = c; return nil })
+	value, err := api.FindRecord(context.Background(), "target", option, request.Custom(func(c *routers.RecordFindOpts) error { escaped = c; return nil }))
 	if err != nil || value == nil {
 		t.Fatal(value, err)
 	}
@@ -496,7 +497,7 @@ func TestPythonRouterReadOwnedOptionsMarshalCausesAndPreflight(t *testing.T) {
 	if !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
-	_, err = api.FindRecord(context.Background(), "target", func(*routers.RecordFindOpts) error { api.RawClient().ResourceBase += "changed/"; return nil })
+	_, err = api.FindRecord(context.Background(), "target", request.Custom(func(*routers.RecordFindOpts) error { api.RawClient().ResourceBase += "changed/"; return nil }))
 	if !errors.Is(err, resource.ErrInvalidOption) || len(calls) != before {
 		t.Fatal(err, calls)
 	}
@@ -510,11 +511,11 @@ func TestPythonRouterReadListUnknownsDiscardedAndNilMapComposition(t *testing.T)
 		}
 		return nativeRouterWire(200, `{"routers":[{"id":"one"}]}`)
 	})
-	values, err := api.AllRecords(context.Background(), routers.WithRecordListQuery("x_unknown", pythonRouterReadMarshalFailure{errors.New("must not execute")}), routers.WithRecordListOpts(routers.RecordListOpts{Query: map[string]json.RawMessage{"unknown": json.RawMessage(`[`)}}), func(c *routers.RecordListOpts) error { c.Query = nil; c.Headers = nil; return nil }, func(c *routers.RecordListOpts) error {
+	values, err := api.AllRecords(context.Background(), routers.WithRecordListQuery("x_unknown", pythonRouterReadMarshalFailure{errors.New("must not execute")}), routers.WithRecordListOpts(routers.RecordListOpts{Query: map[string]json.RawMessage{"unknown": json.RawMessage(`[`)}}), request.Custom(func(c *routers.RecordListOpts) error { c.Query = nil; c.Headers = nil; return nil }), request.Custom(func(c *routers.RecordListOpts) error {
 		c.Query["name"] = json.RawMessage(`"edge"`)
 		c.Headers["X-Trace"] = "owned"
 		return nil
-	})
+	}))
 	if err != nil || len(values) != 1 || len(calls) != 1 {
 		t.Fatal(values, err, calls)
 	}
@@ -600,7 +601,7 @@ func TestPythonRouterReadFindVersionOverrideIsMemberOnly(t *testing.T) {
 		if selected != "" {
 			source.MoreHeaders = map[string]string{"Openstack-Api-Version": "network " + selected}
 		}
-		value, err := api.FindRecord(context.Background(), "target", routers.WithRecordFindMicroversion("2.1"))
+		value, err := api.FindRecord(context.Background(), "target", request.Microversion("2.1"))
 		fallback := ""
 		if selected != "" {
 			fallback = "network " + selected
@@ -801,7 +802,7 @@ func TestPythonRouterReadExplicitListVersionAppliesToEveryPage(t *testing.T) {
 		source := api.RawClient()
 		source.Microversion = "2.0"
 		source.MoreHeaders = map[string]string{"Openstack-Api-Version": "network 2.0", "Accept": "source/default"}
-		values, err := api.AllRecords(context.Background(), routers.WithRecordListMicroversion(override))
+		values, err := api.AllRecords(context.Background(), request.Microversion(override))
 		if err != nil || len(values) != 1 || len(calls) != 2 || source.Microversion != "2.0" || source.MoreHeaders["Openstack-Api-Version"] != "network 2.0" || source.MoreHeaders["Accept"] != "source/default" {
 			t.Fatal(values, err, calls, source)
 		}

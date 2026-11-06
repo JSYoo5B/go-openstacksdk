@@ -11,6 +11,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
@@ -164,7 +165,7 @@ func (a *API) routerInterface(ctx context.Context, operation, route, id string, 
 		return nil, wrap(err)
 	}
 	config := RouterInterfaceOpts{}
-	for _, option := range append([]RouterInterfaceOption(nil), options...) {
+	for _, option := range calls.Translate(append([]RouterInterfaceOption(nil), options...), routerInterfaceCalls) {
 		if err := guard(ctx); err != nil {
 			return nil, wrap(err)
 		}
@@ -238,7 +239,7 @@ func (a *API) routerGateway(ctx context.Context, operation, id string, add bool,
 		return nil, wrap(err)
 	}
 	config := RouterGatewayOpts{}
-	for _, option := range append([]RouterGatewayOption(nil), options...) {
+	for _, option := range calls.Translate(append([]RouterGatewayOption(nil), options...), routerGatewayCalls) {
 		if err := guard(ctx); err != nil {
 			return nil, wrap(err)
 		}

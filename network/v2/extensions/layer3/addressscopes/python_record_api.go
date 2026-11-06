@@ -14,6 +14,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
@@ -248,7 +249,7 @@ func (a *API) GetRecord(ctx context.Context, id string, options ...RecordReadOpt
 	if err != nil {
 		return nil, scopeRecordWrap(ctx, op, err)
 	}
-	policy, err := applyScopeRecordOptions(ctx, p.guard, RecordReadOpts{}, copyScopeRead, slices.Clone(options))
+	policy, err := applyScopeRecordOptions(ctx, p.guard, RecordReadOpts{}, copyScopeRead, calls.Translate(options, recordReadCalls))
 	if err != nil {
 		return nil, scopeRecordWrap(ctx, op, err)
 	}
@@ -342,7 +343,7 @@ func (a *API) ListRecords(ctx context.Context, options ...RecordListOption) iter
 			yield(nil, scopeRecordWrap(ctx, op, err))
 			return
 		}
-		policy, err := applyScopeRecordOptions(ctx, p.guard, RecordListOpts{}, copyScopeList, owned)
+		policy, err := applyScopeRecordOptions(ctx, p.guard, RecordListOpts{}, copyScopeList, calls.Translate(owned, recordListCalls))
 		if err == nil {
 			err = p.policy(policy.Microversion, policy.Headers, true)
 		}
@@ -376,7 +377,7 @@ func (a *API) FindRecord(ctx context.Context, identity string, options ...Record
 	// original selected list version/headers before any user callback runs.
 	listSource := *p.source
 	listSource.Client.MoreHeaders = maps.Clone(p.source.Client.MoreHeaders)
-	policy, err := applyScopeRecordOptions(ctx, p.guard, RecordFindOpts{}, copyScopeFind, slices.Clone(options))
+	policy, err := applyScopeRecordOptions(ctx, p.guard, RecordFindOpts{}, copyScopeFind, calls.Translate(options, recordFindCalls))
 	if err != nil {
 		return nil, scopeRecordWrap(ctx, op, err)
 	}

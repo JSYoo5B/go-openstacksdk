@@ -129,7 +129,7 @@ func TestPythonCloudNetworkGetHelpersFindByIDThenNameWithFilters(t *testing.T) {
 					}
 					return value.Resource, err
 				case "routers":
-					value, err := routers.New(client).FindRecord(ctx, identity, routers.WithRecordFindIgnoreMissing(true), routers.WithRecordFindQuery("project_id", "p"))
+					value, err := routers.New(client).FindRecord(ctx, identity, request.IgnoreMissing(true), routers.WithRecordFindQuery("project_id", "p"))
 					if value == nil {
 						return nil, err
 					}
@@ -255,7 +255,7 @@ func TestPythonCloudNetworkDeleteHelpersFindThenDelete(t *testing.T) {
 						err = ports.New(client).DeleteWithOptions(ctx, pythonCloudAID(t, found))
 					}
 				case "routers":
-					value, findErr := routers.New(client).FindRecord(ctx, test.identity, routers.WithRecordFindIgnoreMissing(true))
+					value, findErr := routers.New(client).FindRecord(ctx, test.identity, request.IgnoreMissing(true))
 					if err = findErr; value != nil {
 						found = value.Resource
 						err = routers.New(client).DeleteWithOptions(ctx, pythonCloudAID(t, found))

@@ -5,6 +5,9 @@ import (
 	"encoding/json"
 	"maps"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
+	"github.com/JSYoo5B/go-openstacksdk/internal/neutronfind"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -25,7 +28,15 @@ type RouterInterfaceOpts struct {
 	AdvertiseHost                  json.RawMessage
 	Headers                        map[string]string
 }
-type RouterInterfaceOption func(*RouterInterfaceOpts) error
+
+// RouterInterfaceOption is one option of AddInterfaceRecord,
+// RemoveInterfaceRecord and RemoveCloudInterfaceRecord: WithRouterInterfaceOpts,
+// WithRouterInterfacePort, WithRouterInterfaceSubnet,
+// WithRouterInterfacePortID, WithRouterInterfaceSubnetID,
+// WithRouterInterfaceAdvertiseHost, request.Headers (replaces the headers) or
+// request.Custom over *RouterInterfaceOpts. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type RouterInterfaceOption = request.WriteCall
 
 func copyRouterInterfaceRef(value *RouterInterfaceRef) *RouterInterfaceRef {
 	if value == nil {
@@ -61,11 +72,11 @@ func routerInterfaceRef(value any) (*RouterInterfaceRef, error) {
 }
 func WithRouterInterfaceOpts(value RouterInterfaceOpts) RouterInterfaceOption {
 	owned := copyRouterInterfaceOpts(value)
-	return func(config *RouterInterfaceOpts) error { *config = copyRouterInterfaceOpts(owned); return nil }
+	return request.Custom(func(config *RouterInterfaceOpts) error { *config = copyRouterInterfaceOpts(owned); return nil })
 }
 func routerInterfaceReferenceOption(key string, value any) RouterInterfaceOption {
 	owned, err := routerInterfaceRef(value)
-	return func(config *RouterInterfaceOpts) error {
+	return request.Custom(func(config *RouterInterfaceOpts) error {
 		if err != nil {
 			return err
 		}
@@ -80,7 +91,7 @@ func routerInterfaceReferenceOption(key string, value any) RouterInterfaceOption
 			config.SubnetID = copyRouterInterfaceRef(owned)
 		}
 		return nil
-	}
+	})
 }
 func WithRouterInterfacePort(value any) RouterInterfaceOption {
 	return routerInterfaceReferenceOption("port", value)
@@ -100,15 +111,15 @@ func WithRouterInterfaceSubnetID(value any) RouterInterfaceOption {
 func WithRouterInterfaceAdvertiseHost(value any) RouterInterfaceOption {
 	raw, err := json.Marshal(value)
 	owned := bytes.Clone(raw)
-	return func(config *RouterInterfaceOpts) error {
+	return request.Custom(func(config *RouterInterfaceOpts) error {
 		if err != nil {
 			return err
 		}
 		config.AdvertiseHost = bytes.Clone(owned)
 		return nil
-	}
+	})
 }
-func WithRouterInterfaceHeaders(values map[string]string) RouterInterfaceOption {
+func withRouterInterfaceHeaders(values map[string]string) func(*RouterInterfaceOpts) error {
 	owned := maps.Clone(values)
 	return func(config *RouterInterfaceOpts) error { config.Headers = maps.Clone(owned); return nil }
 }
@@ -122,7 +133,14 @@ type RouterGatewayOpts struct {
 	Headers            map[string]string
 	LegacySourceRoutes bool
 }
-type RouterGatewayOption func(*RouterGatewayOpts) error
+
+// RouterGatewayOption is one option of AddGatewayRecord and
+// RemoveGatewayRecord: WithRouterGatewayOpts, WithSourceLegacyGatewayRoutes,
+// request.Field (one gateway attribute; its marshal error is returned when
+// applied), request.Headers (replaces the headers) or request.Custom over
+// *RouterGatewayOpts. Other shared calls fail with resource.ErrInvalidOption
+// before HTTP.
+type RouterGatewayOption = request.WriteCall
 
 func copyRouterGatewayOpts(value RouterGatewayOpts) RouterGatewayOpts {
 	fields := make(map[string]json.RawMessage, len(value.Fields))
@@ -134,10 +152,10 @@ func copyRouterGatewayOpts(value RouterGatewayOpts) RouterGatewayOpts {
 }
 func WithRouterGatewayOpts(value RouterGatewayOpts) RouterGatewayOption {
 	owned := copyRouterGatewayOpts(value)
-	return func(config *RouterGatewayOpts) error { *config = copyRouterGatewayOpts(owned); return nil }
+	return request.Custom(func(config *RouterGatewayOpts) error { *config = copyRouterGatewayOpts(owned); return nil })
 }
-func WithRouterGatewayField(key string, value any) RouterGatewayOption {
-	raw, err := json.Marshal(value)
+
+func withRouterGatewayField(key string, raw json.RawMessage, err error) func(*RouterGatewayOpts) error {
 	owned := bytes.Clone(raw)
 	return func(config *RouterGatewayOpts) error {
 		if err != nil {
@@ -150,7 +168,7 @@ func WithRouterGatewayField(key string, value any) RouterGatewayOption {
 		return nil
 	}
 }
-func WithRouterGatewayHeaders(values map[string]string) RouterGatewayOption {
+func withRouterGatewayHeaders(values map[string]string) func(*RouterGatewayOpts) error {
 	owned := maps.Clone(values)
 	return func(config *RouterGatewayOpts) error { config.Headers = maps.Clone(owned); return nil }
 }
@@ -159,5 +177,16 @@ func WithRouterGatewayHeaders(values map[string]string) RouterGatewayOption {
 // remove_gateway_router paths only for deployments which implement them. It
 // does not turn HTTP failures into JSON success values as the Source bug does.
 func WithSourceLegacyGatewayRoutes(value bool) RouterGatewayOption {
-	return func(config *RouterGatewayOpts) error { config.LegacySourceRoutes = value; return nil }
+	return request.Custom(func(config *RouterGatewayOpts) error { config.LegacySourceRoutes = value; return nil })
+}
+
+// routerInterfaceCalls interprets the shared calls of RouterInterfaceOption.
+var routerInterfaceCalls = calls.Spec[RouterInterfaceOpts]{
+	Headers: neutronfind.Use(withRouterInterfaceHeaders),
+}
+
+// routerGatewayCalls interprets the shared calls of RouterGatewayOption.
+var routerGatewayCalls = calls.Spec[RouterGatewayOpts]{
+	Field:   neutronfind.UseJSON(withRouterGatewayField),
+	Headers: neutronfind.Use(withRouterGatewayHeaders),
 }

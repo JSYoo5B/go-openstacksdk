@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"net/http"
 	"testing"
 
@@ -92,7 +93,7 @@ func TestPythonAvailableIPAcceptedStatusAndFailures(t *testing.T) {
 func TestPythonAvailableIPOwnedTransportOptionsAndCancellation(t *testing.T) {
 	var calls []pythonParityCoreFloatingIPCall
 	headers := map[string]string{"X-Trace": "owned"}
-	opt := floatingips.WithAvailableIPHeaders(headers)
+	opt := request.Headers(headers)
 	headers["X-Trace"] = "changed"
 	api, _ := pythonParityCoreFloatingIPAPI(t, &calls, func(r *http.Request) string {
 		if r.Header.Get("X-Trace") != "owned" {
@@ -104,18 +105,18 @@ func TestPythonAvailableIPOwnedTransportOptionsAndCancellation(t *testing.T) {
 	if err != nil || result == nil || len(calls) != 1 {
 		t.Fatal(result, err, calls)
 	}
-	for _, opts := range [][]floatingips.AvailableIPOption{{nil}, {floatingips.WithAvailableIPMicroversion("2.1\r\nbad")}} {
+	for _, opts := range [][]floatingips.AvailableIPOption{{nil}, {request.Microversion("2.1\r\nbad")}} {
 		result, err = api.FindAvailableIPRecord(context.Background(), opts...)
 		if err == nil || result != nil || len(calls) != 1 {
 			t.Fatal(result, err, calls)
 		}
 	}
 	ctx, cancel := context.WithCancel(context.Background())
-	result, err = api.FindAvailableIPRecord(ctx, func(*floatingips.AvailableIPOpts) error { cancel(); return nil })
+	result, err = api.FindAvailableIPRecord(ctx, request.Custom(func(*floatingips.AvailableIPOpts) error { cancel(); return nil }))
 	if !errors.Is(err, context.Canceled) || result != nil || len(calls) != 1 {
 		t.Fatal(result, err, calls)
 	}
-	result, err = api.FindAvailableIPRecord(context.Background(), func(*floatingips.AvailableIPOpts) error { api.RawClient().ResourceBase += "changed/"; return nil })
+	result, err = api.FindAvailableIPRecord(context.Background(), request.Custom(func(*floatingips.AvailableIPOpts) error { api.RawClient().ResourceBase += "changed/"; return nil }))
 	if !errors.Is(err, resource.ErrInvalidOption) || result != nil || len(calls) != 1 {
 		t.Fatal(result, err, calls)
 	}

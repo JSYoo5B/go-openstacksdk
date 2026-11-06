@@ -10,6 +10,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -65,7 +66,7 @@ func (a *API) routerAction(ctx context.Context, operation, action, id string, bo
 		ownedBody = json.RawMessage(append([]byte(nil), raw...))
 	}
 	config := RouterActionOpts{}
-	for _, option := range append([]RouterActionOption(nil), options...) {
+	for _, option := range calls.Translate(append([]RouterActionOption(nil), options...), routerActionCalls) {
 		if err := guard(ctx); err != nil {
 			return nil, wrap(err)
 		}

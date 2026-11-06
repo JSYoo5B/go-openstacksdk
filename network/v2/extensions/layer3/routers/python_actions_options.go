@@ -1,6 +1,9 @@
 package routers
 
 import (
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
+	"github.com/JSYoo5B/go-openstacksdk/internal/neutronfind"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"maps"
 )
@@ -13,7 +16,12 @@ type RouterActionOpts struct {
 	Headers map[string]string
 	Seed    *resource.RawResource
 }
-type RouterActionOption func(*RouterActionOpts) error
+
+// RouterActionOption is one option of the extra route and external gateway
+// actions: WithRouterActionOpts, WithRouterActionSeed, request.Headers
+// (replaces the headers) or request.Custom over *RouterActionOpts. Other shared
+// calls fail with resource.ErrInvalidOption before HTTP.
+type RouterActionOption = request.WriteCall
 
 func copyRouterActionOpts(value RouterActionOpts) RouterActionOpts {
 	value.Headers = maps.Clone(value.Headers)
@@ -24,12 +32,12 @@ func copyRouterActionOpts(value RouterActionOpts) RouterActionOpts {
 // WithRouterActionOpts snapshots the concrete options and is safe to reuse.
 func WithRouterActionOpts(value RouterActionOpts) RouterActionOption {
 	owned := copyRouterActionOpts(value)
-	return func(config *RouterActionOpts) error { *config = copyRouterActionOpts(owned); return nil }
+	return request.Custom(func(config *RouterActionOpts) error { *config = copyRouterActionOpts(owned); return nil })
 }
 
-// WithRouterActionHeaders snapshots ordinary HTTP headers. It does not move
+// withRouterActionHeaders snapshots ordinary HTTP headers. It does not move
 // if_match or if_revision keys from the positional body into a header.
-func WithRouterActionHeaders(values map[string]string) RouterActionOption {
+func withRouterActionHeaders(values map[string]string) func(*RouterActionOpts) error {
 	owned := maps.Clone(values)
 	return func(config *RouterActionOpts) error { config.Headers = maps.Clone(owned); return nil }
 }
@@ -39,5 +47,10 @@ func WithRouterActionHeaders(values map[string]string) RouterActionOption {
 // The response overlays this view; fields absent from an empty ACK stay cached.
 func WithRouterActionSeed(value *resource.RawResource) RouterActionOption {
 	owned := value.Clone()
-	return func(config *RouterActionOpts) error { config.Seed = owned.Clone(); return nil }
+	return request.Custom(func(config *RouterActionOpts) error { config.Seed = owned.Clone(); return nil })
+}
+
+// routerActionCalls interprets the shared calls of RouterActionOption.
+var routerActionCalls = calls.Spec[RouterActionOpts]{
+	Headers: neutronfind.Use(withRouterActionHeaders),
 }

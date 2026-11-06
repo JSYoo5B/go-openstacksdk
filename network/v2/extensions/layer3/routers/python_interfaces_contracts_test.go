@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"io"
 	"net/http"
 	"reflect"
@@ -128,11 +129,11 @@ func TestPythonRouterGatewayStockBridgeAndExplicitLegacyBodies(t *testing.T) {
 		add     bool
 		options []routers.RouterGatewayOption
 	}{
-		{true, nil}, {true, []routers.RouterGatewayOption{routers.WithRouterGatewayField("network_id", nil)}},
-		{true, []routers.RouterGatewayOption{routers.WithRouterGatewayField("network_id", "")}},
-		{false, []routers.RouterGatewayOption{routers.WithRouterGatewayField("network_id", "external")}},
-		{true, []routers.RouterGatewayOption{routers.WithSourceLegacyGatewayRoutes(true), routers.WithRouterGatewayField("router", map[string]any{})}},
-		{false, []routers.RouterGatewayOption{routers.WithSourceLegacyGatewayRoutes(true), routers.WithRouterGatewayField("session", false)}},
+		{true, nil}, {true, []routers.RouterGatewayOption{request.Field("network_id", nil)}},
+		{true, []routers.RouterGatewayOption{request.Field("network_id", "")}},
+		{false, []routers.RouterGatewayOption{request.Field("network_id", "external")}},
+		{true, []routers.RouterGatewayOption{routers.WithSourceLegacyGatewayRoutes(true), request.Field("router", map[string]any{})}},
+		{false, []routers.RouterGatewayOption{routers.WithSourceLegacyGatewayRoutes(true), request.Field("session", false)}},
 	} {
 		var calls []nativeRouterCall
 		api := pythonCoreRouterAPI(t, &calls, func(*http.Request) *http.Response { return nativeRouterWire(200, `{}`) })
@@ -161,7 +162,7 @@ var pythonRouterJSONCalls = []pythonRouterJSONCall{
 		return a.RemoveInterfaceRecord(ctx, id, routers.WithRouterInterfacePort("port"))
 	}},
 	{"AddGatewayRecord", func(a *routers.API, ctx context.Context, id string) (*routers.RouterJSONResult, error) {
-		return a.AddGatewayRecord(ctx, id, routers.WithRouterGatewayField("network_id", "external"))
+		return a.AddGatewayRecord(ctx, id, request.Field("network_id", "external"))
 	}},
 	{"RemoveGatewayRecord", func(a *routers.API, ctx context.Context, id string) (*routers.RouterJSONResult, error) {
 		return a.RemoveGatewayRecord(ctx, id)
@@ -313,7 +314,7 @@ func TestPythonRouterInterfacesPhysicalReadCloseCancelAndSourceFaultsRemainTermi
 func TestPythonRouterInterfacesOptionsOwnSnapshotsAndContextSourcePreflight(t *testing.T) {
 	ref := map[string]any{"x_extension": []any{false, 0, nil}}
 	headers := map[string]string{"X-Interface": "owned"}
-	portOption, headerOption := routers.WithRouterInterfacePort(ref), routers.WithRouterInterfaceHeaders(headers)
+	portOption, headerOption := routers.WithRouterInterfacePort(ref), request.Headers(headers)
 	ref["x_extension"] = nil
 	headers["X-Interface"] = "changed"
 	var retained *routers.RouterInterfaceOpts
@@ -326,7 +327,7 @@ func TestPythonRouterInterfacesOptionsOwnSnapshotsAndContextSourcePreflight(t *t
 		retained.Headers["X-Interface"] = "retained mutation"
 		return nativeRouterWire(200, `{}`)
 	})
-	_, err := api.AddInterfaceRecord(context.Background(), "router", portOption, headerOption, func(config *routers.RouterInterfaceOpts) error { retained = config; return nil })
+	_, err := api.AddInterfaceRecord(context.Background(), "router", portOption, headerOption, request.Custom(func(config *routers.RouterInterfaceOpts) error { retained = config; return nil }))
 	if err != nil || len(calls) != 1 || strings.TrimSpace(calls[0].body) != `{"port_id":{"x_extension":[false,0,null]}}` {
 		t.Fatal(err, calls)
 	}
@@ -347,16 +348,16 @@ func TestPythonRouterInterfacesOptionsOwnSnapshotsAndContextSourcePreflight(t *t
 				cloud.SetTransport(testcloud.LinkRequest(func(*http.Request) (*http.Response, error) { calls++; return nativeRouterWire(200, `{}`), nil }))
 				var err error
 				if gateway {
-					options := []routers.RouterGatewayOption{routers.WithRouterGatewayField("network_id", "external")}
+					options := []routers.RouterGatewayOption{request.Field("network_id", "external")}
 					switch lane {
 					case "nil context":
 						actual = nil
 					case "canceled callback":
-						options = append(options, func(*routers.RouterGatewayOpts) error { cancel(cause); return cause })
+						options = append(options, request.Custom(func(*routers.RouterGatewayOpts) error { cancel(cause); return cause }))
 					case "source callback":
-						options = append(options, func(*routers.RouterGatewayOpts) error { client.Microversion = "changed"; return nil })
+						options = append(options, request.Custom(func(*routers.RouterGatewayOpts) error { client.Microversion = "changed"; return nil }))
 					case "protected header":
-						options = append(options, routers.WithRouterGatewayHeaders(map[string]string{"X-Auth-Token": "override"}))
+						options = append(options, request.Headers(map[string]string{"X-Auth-Token": "override"}))
 					case "nil option":
 						options = append(options, nil)
 					case "invalid body":
@@ -370,14 +371,14 @@ func TestPythonRouterInterfacesOptionsOwnSnapshotsAndContextSourcePreflight(t *t
 					case "nil context":
 						actual = nil
 					case "canceled callback":
-						options = []routers.RouterInterfaceOption{func(*routers.RouterInterfaceOpts) error { cancel(cause); return cause }}
+						options = []routers.RouterInterfaceOption{request.Custom(func(*routers.RouterInterfaceOpts) error { cancel(cause); return cause })}
 					case "source callback":
-						options = []routers.RouterInterfaceOption{func(*routers.RouterInterfaceOpts) error {
+						options = []routers.RouterInterfaceOption{request.Custom(func(*routers.RouterInterfaceOpts) error {
 							client.ResourceBase = cloud.Server.URL + "/changed/"
 							return nil
-						}}
+						})}
 					case "protected header":
-						options = []routers.RouterInterfaceOption{routers.WithRouterInterfaceHeaders(map[string]string{"Authorization": "override"})}
+						options = []routers.RouterInterfaceOption{request.Headers(map[string]string{"Authorization": "override"})}
 					case "nil option":
 						options = []routers.RouterInterfaceOption{nil}
 					case "invalid body":

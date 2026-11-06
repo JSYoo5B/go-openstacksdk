@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"io"
 	"net/http"
 	"reflect"
@@ -316,7 +317,7 @@ func TestPythonRouterActionsCaptureBeforeCallbacksAndRejectInvalidInputs(t *test
 	client.MoreHeaders = map[string]string{"X-Selected": "before"}
 	input := map[string]any{"router": map[string]any{"routes": []any{}, "x_extension": false}}
 	headers := map[string]string{"X-Action": "owned"}
-	owned := routers.WithRouterActionHeaders(headers)
+	owned := request.Headers(headers)
 	headers["X-Action"] = "later"
 	var retained *routers.RouterActionOpts
 	var seen http.Header
@@ -327,12 +328,12 @@ func TestPythonRouterActionsCaptureBeforeCallbacksAndRejectInvalidInputs(t *test
 		retained.Headers["X-Action"] = "late option mutation"
 		return nativeRouterWire(204, "")
 	})
-	value, err := routers.New(client).AddExtraRoutesRecord(context.Background(), "seed", input, owned, func(config *routers.RouterActionOpts) error {
+	value, err := routers.New(client).AddExtraRoutesRecord(context.Background(), "seed", input, owned, request.Custom(func(config *routers.RouterActionOpts) error {
 		retained = config
 		client.MoreHeaders["X-Selected"] = "after"
 		input["router"] = nil
 		return nil
-	})
+	}))
 	if err != nil || value.StatusCode != 204 || len(calls) != 1 || strings.TrimSpace(calls[0].body) != `{"router":{"routes":[],"x_extension":false}}` || seen.Get("X-Selected") != "before" || seen.Get("X-Action") != "owned" {
 		t.Fatal(value, err, calls, seen)
 	}
@@ -366,22 +367,22 @@ func TestPythonRouterActionsCaptureBeforeCallbacksAndRejectInvalidInputs(t *test
 			case "nil option":
 				options = []routers.RouterActionOption{nil}
 			case "invalid header":
-				options = []routers.RouterActionOption{routers.WithRouterActionHeaders(map[string]string{"X-Action": "bad\nvalue"})}
+				options = []routers.RouterActionOption{request.Headers(map[string]string{"X-Action": "bad\nvalue"})}
 			case "auth header":
-				options = []routers.RouterActionOption{routers.WithRouterActionHeaders(map[string]string{"X-Auth-Token": "external"})}
+				options = []routers.RouterActionOption{request.Headers(map[string]string{"X-Auth-Token": "external"})}
 			case "version header":
-				options = []routers.RouterActionOption{routers.WithRouterActionHeaders(map[string]string{"OpenStack-API-Version": "network 2.99"})}
+				options = []routers.RouterActionOption{request.Headers(map[string]string{"OpenStack-API-Version": "network 2.99"})}
 			case "option cause":
-				options = []routers.RouterActionOption{func(*routers.RouterActionOpts) error { cancel(cause); return cause }}
+				options = []routers.RouterActionOption{request.Custom(func(*routers.RouterActionOpts) error { cancel(cause); return cause })}
 			case "marshal cause":
 				body = pythonRouterActionMarshaler(func() ([]byte, error) { cancel(cause); return nil, cause })
 			case "marshal source":
 				body = pythonRouterActionMarshaler(func() ([]byte, error) { client.Microversion = "changed"; return []byte(`{}`), nil })
 			case "option source":
-				options = []routers.RouterActionOption{func(*routers.RouterActionOpts) error {
+				options = []routers.RouterActionOption{request.Custom(func(*routers.RouterActionOpts) error {
 					client.ResourceBase = cloud.Server.URL + "/changed/"
 					return nil
-				}}
+				})}
 			}
 			calls := 0
 			cloud.SetTransport(testcloud.LinkRequest(func(*http.Request) (*http.Response, error) { calls++; return nativeRouterWire(200, `{}`), nil }))

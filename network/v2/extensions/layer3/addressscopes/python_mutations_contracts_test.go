@@ -180,7 +180,7 @@ func TestPythonAddressScopeDeleteDefaultsStrictOptionsAndSourceStatuses(t *testi
 				})
 				var options []addressscopes.DeleteOption
 				if strict {
-					options = []addressscopes.DeleteOption{addressscopes.WithDeleteIgnoreMissing(false)}
+					options = []addressscopes.DeleteOption{request.IgnoreMissing(false)}
 				}
 				err := api.DeleteWithOptions(context.Background(), "literal.id", options...)
 				if code < 400 || code == 404 && !strict {
@@ -211,10 +211,10 @@ func TestPythonAddressScopeDeleteDefaultsStrictOptionsAndSourceStatuses(t *testi
 				t.Fatal(err)
 			}
 		}
-		if err := api.DeleteWithOptions(context.Background(), "gone", option, addressscopes.WithDeleteIgnoreMissing(true)); err != nil {
+		if err := api.DeleteWithOptions(context.Background(), "gone", option, request.IgnoreMissing(true)); err != nil {
 			t.Fatal(err)
 		}
-		if err := api.DeleteWithOptions(context.Background(), "gone", addressscopes.WithDeleteIgnoreMissing(false), addressscopes.WithDeleteOptions(addressscopes.DeleteOpts{})); err != nil {
+		if err := api.DeleteWithOptions(context.Background(), "gone", request.IgnoreMissing(false), addressscopes.WithDeleteOptions(addressscopes.DeleteOpts{})); err != nil {
 			t.Fatal(err)
 		}
 		if len(calls) != 4 {

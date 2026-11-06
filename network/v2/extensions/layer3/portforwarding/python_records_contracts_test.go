@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"io"
 	"net/http"
 	"net/url"
@@ -30,9 +31,9 @@ func TestPythonPortForwardingMutationsOwnAttributesDescriptorsAndParent(t *testi
 		return nativeForwardWire(201, `{"port_forwarding":{"id":"pf-1","external_port":"0022","internal_port":"-3","x_reply":{"ok":false},"self":"discard","floatingip_id":"untrusted"}}`)
 	})
 	supplied := map[string]any{"empty": []string{}, "huge": json.Number("9007199254740993")}
-	option := portforwarding.WithRecordAttribute("x_extension", supplied)
+	option := request.Field("x_extension", supplied)
 	supplied["empty"] = []string{"changed"}
-	created, err := api.CreateRecord(ctx, "fip-1", portforwarding.WithRecordAttribute("description", nil), portforwarding.WithRecordAttribute("internal_port", false), portforwarding.WithRecordAttribute("external_port", 0), option)
+	created, err := api.CreateRecord(ctx, "fip-1", request.Field("description", nil), request.Field("internal_port", false), request.Field("external_port", 0), option)
 	if err != nil || created.ParentID != "fip-1" || created.StatusCode != 201 || string(created.Wire.Body["external_port"]) != `"0022"` {
 		t.Fatal(created, err)
 	}
@@ -57,7 +58,7 @@ func TestPythonPortForwardingMutationsOwnAttributesDescriptorsAndParent(t *testi
 	forwardingRecordBody(t, unchanged, "id", `"pf-1"`)
 	forwardingRecordBody(t, unchanged, "description", "null")
 	// The Source type is Resource, not NetworkResource: these are Body attrs.
-	if _, err := api.UpdateRecord(ctx, "fip-1", "pf-1", portforwarding.WithRecordAttribute("description", ""), portforwarding.WithRecordAttribute("if_match", []string{}), portforwarding.WithRecordAttribute("if_revision", 0)); err != nil {
+	if _, err := api.UpdateRecord(ctx, "fip-1", "pf-1", request.Field("description", ""), request.Field("if_match", []string{}), request.Field("if_revision", 0)); err != nil {
 		t.Fatal(err)
 	}
 	if calls[1].method != http.MethodPut || calls[1].body != `{"port_forwarding":{"description":"","if_match":[],"if_revision":0}}` {
@@ -74,7 +75,7 @@ func TestPythonPortForwardingEmptyCreateBodylessAckAndIntegerErrors(t *testing.T
 		t.Fatal(created, err, calls)
 	}
 	forwardingRecordBody(t, created, "id", "null")
-	changed, err := api.UpdateRecord(ctx, "fip-1", "pf-1", portforwarding.WithRecordAttribute("internal_port", true), portforwarding.WithRecordAttribute("x_null", nil))
+	changed, err := api.UpdateRecord(ctx, "fip-1", "pf-1", request.Field("internal_port", true), request.Field("x_null", nil))
 	if err != nil || changed.StatusCode != 204 {
 		t.Fatal(changed, err)
 	}
@@ -154,7 +155,7 @@ func TestPythonPortForwardingListProjectsQueriesFiltersAndLazyPagination(t *test
 		return nativeForwardWire(200, `{"port_forwardings":[{"id":"one","description":"drop","internal_port":22}],"port_forwardings_links":[{"rel":"next","href":"?marker=one"}]}`)
 	})
 	protocol := []any{"tcp", nil, false}
-	options := []portforwarding.RecordListOption{portforwarding.WithRecordListQuery("protocol", protocol), portforwarding.WithRecordListQuery("external_port", 0), portforwarding.WithRecordListQuery("description", "keep"), portforwarding.WithRecordListQuery("internal_port", 22), portforwarding.WithRecordListQuery("x_unknown", 1), portforwarding.WithRecordListLimit(2), portforwarding.WithRecordListHeaders(map[string]string{"X-Trace": "owned"})}
+	options := []portforwarding.RecordListOption{portforwarding.WithRecordListQuery("protocol", protocol), portforwarding.WithRecordListQuery("external_port", 0), portforwarding.WithRecordListQuery("description", "keep"), portforwarding.WithRecordListQuery("internal_port", 22), portforwarding.WithRecordListQuery("x_unknown", 1), request.Limit(2), request.Headers(map[string]string{"X-Trace": "owned"})}
 	protocol[0] = "changed"
 	seq := api.ListRecords(ctx, "fip-1", options...)
 	if len(calls) != 0 {
@@ -198,8 +199,8 @@ func TestPythonPortForwardingListCapsBeforeFilterAndRejectsScopeEscape(t *testin
 		options  []portforwarding.RecordListOption
 		wantRows int
 	}{
-		{"raw cap", []portforwarding.RecordListOption{portforwarding.WithRecordListMaxItems(1), portforwarding.WithRecordListQuery("description", "keep")}, 0},
-		{"single page", []portforwarding.RecordListOption{portforwarding.WithRecordListPaginated(false)}, 2},
+		{"raw cap", []portforwarding.RecordListOption{request.MaxItems(1), portforwarding.WithRecordListQuery("description", "keep")}, 0},
+		{"single page", []portforwarding.RecordListOption{request.Paginated(false)}, 2},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			var calls []nativeForwardCall
@@ -252,7 +253,7 @@ func TestPythonPortForwardingFindKeepsSourceFetchKwargsAndCompleteFallback(t *te
 		}
 		return nativeForwardWire(200, `{"port_forwardings":[{"id":"one","name":"wanted","description":"keep"}],"next":"?marker=one"}`)
 	})
-	row, err := api.FindRecord(ctx, "fip-1", "wanted", portforwarding.WithRecordFindQuery("protocol", []string{"tcp", "udp"}), portforwarding.WithRecordFindQuery("description", "keep"), portforwarding.WithRecordFindQuery("x_unknown", false))
+	row, err := api.FindRecord(ctx, "fip-1", "wanted", request.Query("protocol", []string{"tcp", "udp"}), request.Query("description", "keep"), request.Query("x_unknown", false))
 	if err != nil || forwardingRecordID(row) != "one" || len(calls) != 3 {
 		t.Fatal(row, err, calls)
 	}
@@ -306,7 +307,7 @@ func TestPythonPortForwardingFindMissingDuplicateAndDirectSuccess(t *testing.T) 
 				}
 				return nativeForwardWire(200, test.body)
 			})
-			row, err := api.FindRecord(ctx, "fip-1", "wanted", portforwarding.WithRecordFindIgnoreMissing(!test.strict))
+			row, err := api.FindRecord(ctx, "fip-1", "wanted", request.IgnoreMissing(!test.strict))
 			if row != nil || !errors.Is(err, test.expected) || len(calls) != 2 {
 				t.Fatal(row, err, calls)
 			}
@@ -375,7 +376,7 @@ func TestPythonPortForwardingCleanOnlyFindAndDeleteRejectedBodyCauses(t *testing
 			} else {
 				var options []portforwarding.RecordDeleteOption
 				if phase == "delete-strict" {
-					options = append(options, portforwarding.WithRecordDeleteIgnoreMissing(false))
+					options = append(options, request.IgnoreMissing(false))
 				}
 				err = api.DeleteRecord(ctx, "fip-1", "pf-1", options...)
 			}
@@ -411,16 +412,16 @@ func TestPythonPortForwardingOptionsPreflightSnapshotsAndCancellation(t *testing
 	for _, err := range []error{
 		func() error { _, err := api.CreateRecord(ctx, "fip-1", nil); return err }(),
 		func() error {
-			_, err := api.UpdateRecord(ctx, "fip-1", "pf-1", portforwarding.WithRecordAttribute("id", "escape"))
+			_, err := api.UpdateRecord(ctx, "fip-1", "pf-1", request.Field("id", "escape"))
 			return err
 		}(),
 		func() error {
-			_, err := api.CreateRecord(ctx, "fip-1", portforwarding.WithRecordAttribute("floatingip_id", "escape"))
+			_, err := api.CreateRecord(ctx, "fip-1", request.Field("floatingip_id", "escape"))
 			return err
 		}(),
 		func() error { _, err := api.GetRecord(ctx, "..", "pf-1"); return err }(),
 		func() error {
-			_, err := api.FindRecord(ctx, "fip-1", "pf-1", portforwarding.WithRecordFindQuery("base_path", "/escape"))
+			_, err := api.FindRecord(ctx, "fip-1", "pf-1", request.Query("base_path", "/escape"))
 			return err
 		}(),
 		api.DeleteRecord(nil, "fip-1", "pf-1"),
@@ -429,7 +430,7 @@ func TestPythonPortForwardingOptionsPreflightSnapshotsAndCancellation(t *testing
 			t.Fatal(err)
 		}
 	}
-	for _, err := range api.ListRecords(ctx, "fip-1", portforwarding.WithRecordListLimit(-1)) {
+	for _, err := range api.ListRecords(ctx, "fip-1", request.Limit(-1)) {
 		if !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(err)
 		}
@@ -458,10 +459,10 @@ func TestPythonPortForwardingOptionsPreflightSnapshotsAndCancellation(t *testing
 	// A custom callback changing the selected route fails before dispatch.
 	source := api.RawClient()
 	before := len(calls)
-	_, err = api.UpdateRecord(ctx, "fip-1", "pf-1", func(*portforwarding.RecordMutationOpts) error {
+	_, err = api.UpdateRecord(ctx, "fip-1", "pf-1", request.Custom(func(*portforwarding.RecordMutationOpts) error {
 		source.Endpoint = "http://changed.invalid/"
 		return nil
-	})
+	}))
 	if !errors.Is(err, resource.ErrInvalidOption) || len(calls) != before {
 		t.Fatal(err, calls)
 	}

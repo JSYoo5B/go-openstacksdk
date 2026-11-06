@@ -5,6 +5,10 @@ import (
 	"encoding/json"
 	"maps"
 	"slices"
+
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
+	"github.com/JSYoo5B/go-openstacksdk/internal/neutronfind"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 // RecordReadOpts owns literal-ID fetch options. Seed is an immutable constructor
@@ -15,7 +19,12 @@ type RecordReadOpts struct {
 	Microversion *string
 	Headers      map[string]string
 }
-type RecordReadOption func(*RecordReadOpts) error
+
+// RecordReadOption is one option of GetRecord: WithRecordReadOpts,
+// WithRecordReadFields, WithRecordReadSeed, request.Headers (replaces the
+// headers), request.Microversion or request.Custom over *RecordReadOpts. Other
+// shared calls fail with resource.ErrInvalidOption before HTTP.
+type RecordReadOption = request.GetCall
 
 // RecordListOpts owns Source kwargs; Query retains null, booleans and arrays.
 // Omitted paginated means true; max_items counts raw rows before local filters.
@@ -25,7 +34,14 @@ type RecordListOpts struct {
 	Microversion *string
 	queryOrder   []string
 }
-type RecordListOption func(*RecordListOpts) error
+
+// RecordListOption is one option of ListRecords: WithRecordListOpts,
+// request.Query (one Python kwarg as JSON; its marshal error is returned when
+// applied), request.Headers (replaces the headers), request.Microversion or
+// request.Custom over *RecordListOpts. Paging is given as the limit, marker,
+// max_items and paginated kwargs with request.Query; the paging calls and other
+// shared calls fail with resource.ErrInvalidOption before HTTP.
+type RecordListOption = request.ListCall
 
 type RecordFindOpts struct {
 	Query         map[string]json.RawMessage
@@ -34,7 +50,13 @@ type RecordFindOpts struct {
 	IgnoreMissing *bool
 	queryOrder    []string
 }
-type RecordFindOption func(*RecordFindOpts) error
+
+// RecordFindOption is one option of FindRecord: WithRecordFindOpts,
+// request.IgnoreMissing, request.Query (one Python kwarg as JSON; its marshal
+// error is returned when applied), request.Headers (replaces the headers),
+// request.Microversion or request.Custom over *RecordFindOpts. Other shared
+// calls fail with resource.ErrInvalidOption before HTTP.
+type RecordFindOption = request.FindCall
 
 func scopeRecordOrder(query map[string]json.RawMessage, order []string) []string {
 	owned := make([]string, 0, len(query))
@@ -86,29 +108,29 @@ func copyScopeFind(value RecordFindOpts) RecordFindOpts {
 }
 func WithRecordReadOpts(value RecordReadOpts) RecordReadOption {
 	owned := copyScopeRead(value)
-	return func(c *RecordReadOpts) error { *c = copyScopeRead(owned); return nil }
+	return request.Custom(func(c *RecordReadOpts) error { *c = copyScopeRead(owned); return nil })
 }
 func WithRecordReadFields(fields ...string) RecordReadOption {
 	owned := slices.Clone(fields)
-	return func(c *RecordReadOpts) error { c.Fields = slices.Clone(owned); return nil }
+	return request.Custom(func(c *RecordReadOpts) error { c.Fields = slices.Clone(owned); return nil })
 }
 func WithRecordReadSeed(value map[string]json.RawMessage) RecordReadOption {
 	owned := scopeRecordFields(value)
-	return func(c *RecordReadOpts) error { c.Seed = scopeRecordFields(owned); return nil }
+	return request.Custom(func(c *RecordReadOpts) error { c.Seed = scopeRecordFields(owned); return nil })
 }
-func WithRecordReadHeaders(value map[string]string) RecordReadOption {
+func withRecordReadHeaders(value map[string]string) func(*RecordReadOpts) error {
 	owned := maps.Clone(value)
 	return func(c *RecordReadOpts) error { c.Headers = maps.Clone(owned); return nil }
 }
-func WithRecordReadMicroversion(value string) RecordReadOption {
+func withRecordReadMicroversion(value string) func(*RecordReadOpts) error {
 	return func(c *RecordReadOpts) error { owned := value; c.Microversion = &owned; return nil }
 }
 func WithRecordListOpts(value RecordListOpts) RecordListOption {
 	owned := copyScopeList(value)
-	return func(c *RecordListOpts) error { *c = copyScopeList(owned); return nil }
+	return request.Custom(func(c *RecordListOpts) error { *c = copyScopeList(owned); return nil })
 }
-func WithRecordListQuery(key string, value any) RecordListOption {
-	raw, err := json.Marshal(value)
+
+func withRecordListQuery(key string, raw json.RawMessage, err error) func(*RecordListOpts) error {
 	owned := bytes.Clone(raw)
 	return func(c *RecordListOpts) error {
 		if err != nil {
@@ -124,19 +146,19 @@ func WithRecordListQuery(key string, value any) RecordListOption {
 		return nil
 	}
 }
-func WithRecordListHeaders(value map[string]string) RecordListOption {
+func withRecordListHeaders(value map[string]string) func(*RecordListOpts) error {
 	owned := maps.Clone(value)
 	return func(c *RecordListOpts) error { c.Headers = maps.Clone(owned); return nil }
 }
-func WithRecordListMicroversion(value string) RecordListOption {
+func withRecordListMicroversion(value string) func(*RecordListOpts) error {
 	return func(c *RecordListOpts) error { owned := value; c.Microversion = &owned; return nil }
 }
 func WithRecordFindOpts(value RecordFindOpts) RecordFindOption {
 	owned := copyScopeFind(value)
-	return func(c *RecordFindOpts) error { *c = copyScopeFind(owned); return nil }
+	return request.Custom(func(c *RecordFindOpts) error { *c = copyScopeFind(owned); return nil })
 }
-func WithRecordFindQuery(key string, value any) RecordFindOption {
-	raw, err := json.Marshal(value)
+
+func withRecordFindQuery(key string, raw json.RawMessage, err error) func(*RecordFindOpts) error {
 	owned := bytes.Clone(raw)
 	return func(c *RecordFindOpts) error {
 		if err != nil {
@@ -152,13 +174,34 @@ func WithRecordFindQuery(key string, value any) RecordFindOption {
 		return nil
 	}
 }
-func WithRecordFindHeaders(value map[string]string) RecordFindOption {
+func withRecordFindHeaders(value map[string]string) func(*RecordFindOpts) error {
 	owned := maps.Clone(value)
 	return func(c *RecordFindOpts) error { c.Headers = maps.Clone(owned); return nil }
 }
-func WithRecordFindMicroversion(value string) RecordFindOption {
+func withRecordFindMicroversion(value string) func(*RecordFindOpts) error {
 	return func(c *RecordFindOpts) error { owned := value; c.Microversion = &owned; return nil }
 }
-func WithRecordFindIgnoreMissing(value bool) RecordFindOption {
+func withRecordFindIgnoreMissing(value bool) func(*RecordFindOpts) error {
 	return func(c *RecordFindOpts) error { owned := value; c.IgnoreMissing = &owned; return nil }
+}
+
+// recordReadCalls interprets the shared calls of RecordReadOption.
+var recordReadCalls = calls.Spec[RecordReadOpts]{
+	Headers:      neutronfind.Use(withRecordReadHeaders),
+	Microversion: neutronfind.Use(withRecordReadMicroversion),
+}
+
+// recordListCalls interprets the shared calls of RecordListOption.
+var recordListCalls = calls.Spec[RecordListOpts]{
+	Query:        neutronfind.UseJSON(withRecordListQuery),
+	Headers:      neutronfind.Use(withRecordListHeaders),
+	Microversion: neutronfind.Use(withRecordListMicroversion),
+}
+
+// recordFindCalls interprets the shared calls of RecordFindOption.
+var recordFindCalls = calls.Spec[RecordFindOpts]{
+	Query:         neutronfind.UseJSON(withRecordFindQuery),
+	IgnoreMissing: neutronfind.Use(withRecordFindIgnoreMissing),
+	Headers:       neutronfind.Use(withRecordFindHeaders),
+	Microversion:  neutronfind.Use(withRecordFindMicroversion),
 }

@@ -8,7 +8,9 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/neutronfind"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 // RecordFindOpts owns JSON kwargs/headers/version and defaults IgnoreMissing=true.
@@ -19,7 +21,14 @@ type RecordFindOpts struct {
 	IgnoreMissing *bool
 	queryOrder    []string
 }
-type RecordFindOption func(*RecordFindOpts) error
+
+// RecordFindOption is one option of FindRecord: WithRecordFindOpts,
+// WithRecordFindQuery, request.IgnoreMissing, request.Headers (replaces the
+// headers), request.Microversion or request.Custom over *RecordFindOpts.
+// request.Query is rejected because WithRecordFindQuery checks the key before it
+// marshals the value. Other shared calls fail with resource.ErrInvalidOption
+// before HTTP.
+type RecordFindOption = request.FindCall
 
 // RecordListOpts owns server/local JSON kwargs and max_items/paginated controls.
 type RecordListOpts struct {
@@ -28,7 +37,15 @@ type RecordListOpts struct {
 	Microversion *string
 	queryOrder   []string
 }
-type RecordListOption func(*RecordListOpts) error
+
+// RecordListOption is one option of ListRecords and AllRecords:
+// WithRecordListOpts, WithRecordListQuery, request.Headers (replaces the
+// headers), request.Microversion, request.Limit, request.Marker,
+// request.MaxItems, request.Paginated or request.Custom over *RecordListOpts.
+// request.Query is rejected because WithRecordListQuery discards unknown kwargs
+// before it marshals the value. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type RecordListOption = request.ListCall
 
 func routerReadFindOptions(v RecordFindOpts) neutronfind.Options {
 	return neutronfind.Options{Query: v.Query, Headers: v.Headers, Microversion: v.Microversion, IgnoreMissing: v.IgnoreMissing, Order: v.queryOrder}
@@ -95,16 +112,16 @@ func routerReadListKnown(key string) bool {
 }
 func WithRecordFindOpts(v RecordFindOpts) RecordFindOption {
 	owned := copyRouterReadFind(v)
-	return func(c *RecordFindOpts) error { *c = copyRouterReadFind(owned); return nil }
+	return request.Custom(func(c *RecordFindOpts) error { *c = copyRouterReadFind(owned); return nil })
 }
 func WithRecordFindQuery(key string, value any) RecordFindOption {
 	keyErr := routerReadKey(key, true)
 	if keyErr != nil {
-		return func(*RecordFindOpts) error { return keyErr }
+		return request.Custom(func(*RecordFindOpts) error { return keyErr })
 	}
 	raw, err := json.Marshal(value)
 	owned := bytes.Clone(raw)
-	return func(c *RecordFindOpts) error {
+	return request.Custom(func(c *RecordFindOpts) error {
 		if err != nil {
 			return errors.Join(routerActionInvalid("query %q must be JSON", key), err)
 		}
@@ -116,25 +133,29 @@ func WithRecordFindQuery(key string, value any) RecordFindOption {
 		}
 		c.Query[key] = bytes.Clone(owned)
 		return nil
-	}
+	})
 }
-func WithRecordFindHeaders(v map[string]string) RecordFindOption {
+func withRecordFindHeaders(v map[string]string) func(*RecordFindOpts) error {
 	owned := copyRouterReadFind(RecordFindOpts{Headers: v})
 	return func(c *RecordFindOpts) error { c.Headers = copyRouterReadFind(owned).Headers; return nil }
 }
-func WithRecordFindMicroversion(v string) RecordFindOption {
+func withRecordFindMicroversion(v string) func(*RecordFindOpts) error {
 	return func(c *RecordFindOpts) error { x := v; c.Microversion = &x; return nil }
 }
-func WithRecordFindIgnoreMissing(v bool) RecordFindOption {
+func withRecordFindIgnoreMissing(v bool) func(*RecordFindOpts) error {
 	return func(c *RecordFindOpts) error { x := v; c.IgnoreMissing = &x; return nil }
 }
 func WithRecordListOpts(v RecordListOpts) RecordListOption {
 	owned := copyRouterReadList(v)
-	return func(c *RecordListOpts) error { *c = copyRouterReadList(owned); return nil }
+	return request.Custom(func(c *RecordListOpts) error { *c = copyRouterReadList(owned); return nil })
 }
 
 // WithRecordListQuery discards unknown kwargs before evaluating MarshalJSON.
 func WithRecordListQuery(key string, value any) RecordListOption {
+	return request.Custom(withRecordListQuery(key, value))
+}
+
+func withRecordListQuery(key string, value any) func(*RecordListOpts) error {
 	keyErr := routerReadKey(key, false)
 	if keyErr != nil || !routerReadListKnown(key) {
 		return func(*RecordListOpts) error { return keyErr }
@@ -155,14 +176,39 @@ func WithRecordListQuery(key string, value any) RecordListOption {
 		return nil
 	}
 }
-func WithRecordListHeaders(v map[string]string) RecordListOption {
+func withRecordListHeaders(v map[string]string) func(*RecordListOpts) error {
 	owned := copyRouterReadList(RecordListOpts{Headers: v})
 	return func(c *RecordListOpts) error { c.Headers = copyRouterReadList(owned).Headers; return nil }
 }
-func WithRecordListMicroversion(v string) RecordListOption {
+func withRecordListMicroversion(v string) func(*RecordListOpts) error {
 	return func(c *RecordListOpts) error { x := v; c.Microversion = &x; return nil }
 }
-func WithRecordListLimit(v int) RecordListOption      { return WithRecordListQuery("limit", v) }
-func WithRecordListMarker(v string) RecordListOption  { return WithRecordListQuery("marker", v) }
-func WithRecordListMaxItems(v int) RecordListOption   { return WithRecordListQuery("max_items", v) }
-func WithRecordListPaginated(v bool) RecordListOption { return WithRecordListQuery("paginated", v) }
+func withRecordListLimit(v int) func(*RecordListOpts) error { return withRecordListQuery("limit", v) }
+func withRecordListMarker(v string) func(*RecordListOpts) error {
+	return withRecordListQuery("marker", v)
+}
+func withRecordListMaxItems(v int) func(*RecordListOpts) error {
+	return withRecordListQuery("max_items", v)
+}
+func withRecordListPaginated(v bool) func(*RecordListOpts) error {
+	return withRecordListQuery("paginated", v)
+}
+
+// recordFindCalls interprets the shared calls of RecordFindOption.
+var recordFindCalls = calls.Spec[RecordFindOpts]{
+	IgnoreMissing: neutronfind.Use(withRecordFindIgnoreMissing),
+	Headers:       neutronfind.Use(withRecordFindHeaders),
+	Microversion:  neutronfind.Use(withRecordFindMicroversion),
+}
+
+// recordListCalls interprets the shared calls of RecordListOption.
+var recordListCalls = calls.Spec[RecordListOpts]{
+	Headers:      neutronfind.Use(withRecordListHeaders),
+	Microversion: neutronfind.Use(withRecordListMicroversion),
+	Paging: calls.Paging[RecordListOpts]{
+		Limit:     neutronfind.Use(withRecordListLimit),
+		Marker:    neutronfind.Use(withRecordListMarker),
+		MaxItems:  neutronfind.Use(withRecordListMaxItems),
+		Paginated: neutronfind.Use(withRecordListPaginated),
+	},
+}

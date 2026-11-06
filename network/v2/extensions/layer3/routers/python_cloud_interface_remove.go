@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/responsejson"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
@@ -25,7 +26,7 @@ func (a *API) RemoveCloudInterfaceRecord(ctx context.Context, id string, options
 		return nil, wrap(err)
 	}
 	cfg := RouterInterfaceOpts{}
-	for _, apply := range append([]RouterInterfaceOption(nil), options...) {
+	for _, apply := range calls.Translate(append([]RouterInterfaceOption(nil), options...), routerInterfaceCalls) {
 		if err := guard(ctx); err != nil {
 			return nil, wrap(err)
 		}

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"net/http"
 	"strings"
 	"testing"
@@ -81,7 +82,7 @@ func TestPythonIPRecordsCapsBeforeFiltersAndLazyBreak(t *testing.T) {
 	api := pythonIPsAPI(t, &calls, func(*http.Request) (int, string) {
 		return 200, `{"floatingips":[{"id":"one","dns_name":"other"},{"id":"two","dns_name":"match"},false],"floatingips_links":[{"rel":"next","href":false}]}`
 	})
-	rows, err := api.AllRecords(context.Background(), floatingips.WithRecordListMaxItems(1), floatingips.WithRecordListQuery("dns_name", "match"))
+	rows, err := api.AllRecords(context.Background(), request.MaxItems(1), floatingips.WithRecordListQuery("dns_name", "match"))
 	if err != nil || len(rows) != 0 || len(calls) != 1 {
 		t.Fatal(rows, err, calls)
 	}
