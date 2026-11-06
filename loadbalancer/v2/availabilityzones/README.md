@@ -15,6 +15,6 @@ Availability zones are identified by **name**; there is no UUID. Create, update 
 
 Every returned `AvailabilityZone` keeps the declared view (`Name`, `Description`, `Enabled`, `AvailabilityZoneProfileID`) separate from `Body` (raw wire fields, so null and absent values stay distinguishable), `Header` and `StatusCode`.
 
-Extensions use `WithCreateField`, `WithUpdateField` and `WithListQuery`. A field or query extension that names a core input fails before any request. Success status codes are explicit: any other 2xx is an error. Mutations are sent once and never replayed; cancelling a context stops the local call and does not roll back remote work.
+Extensions use `request.Field` and `request.Query`. A field or query extension that names a core input fails before any request. Success status codes are explicit: any other 2xx is an error. Mutations are sent once and never replayed; cancelling a context stops the local call and does not roll back remote work.
 
 Python comparison: [python-parity.md](python-parity.md).

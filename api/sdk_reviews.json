@@ -4362,7 +4362,7 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/quotas.ProjectQuotaScope.Reset",
-        "github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/quotas.WithResetIgnoreMissing"
+        "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing"
       ],
       "contracts": [
         {
@@ -4386,7 +4386,7 @@
         }
       ],
       "differences": [
-        "Python delete_quota defaults ignore_missing=True; Go Reset defaults strict and requires WithResetIgnoreMissing(true) for suppression.",
+        "Python delete_quota defaults ignore_missing=True; Go Reset defaults strict and requires request.IgnoreMissing(true) for suppression.",
         "Go returns ResetResponse metadata and keeps native-compatible 202/204 success; Python returns None and official Octavia DELETE documents 204.",
         "The scope resets quota overrides through the corrected official route, while generated API.Delete retains its native /quotas path.",
         "Python Quota.project_id is the alternate ID, so a project ID string or Quota selects /lbaas/quotas/{project}; Go uses an explicit project reference (ID or exact Keystone name) or the recorded authentication scope.",
@@ -4613,7 +4613,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/quotas.API.Delete",
         "github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/quotas.ProjectQuotaScope.Reset",
-        "github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/quotas.WithResetIgnoreMissing"
+        "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing"
       ],
       "contracts": [
         {
@@ -4639,7 +4639,7 @@
       "differences": [
         "The SDK singleton exposes Reset to remove overrides and returns ResetResponse(ProjectID, Header, StatusCode), rather than returning a DeleteResult for caller extraction or fabricating updated limits.",
         "The scope deliberately uses official /lbaas/quotas while generated API.Delete retains the pinned native /quotas route.",
-        "Default strict missing handling preserves the native contract and additionally exposes ErrNotFound; optional WithResetIgnoreMissing changes only 404, with deterministic last-option precedence."
+        "Default strict missing handling preserves the native contract and additionally exposes ErrNotFound; optional request.IgnoreMissing changes only 404, with deterministic last-option precedence."
       ],
       "documentation": [
         "loadbalancer/v2/quotas/README.md"
@@ -138541,7 +138541,7 @@
         "github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2.Service.AvailabilityZones",
         "github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/availabilityzones.API.Create",
         "github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/availabilityzones.WithCreateOptions",
-        "github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/availabilityzones.WithCreateField"
+        "github.com/JSYoo5B/go-openstacksdk/request.Field"
       ],
       "contracts": [
         {
@@ -138611,7 +138611,7 @@
         "github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2.Service.AvailabilityZones",
         "github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/availabilityzones.API.Update",
         "github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/availabilityzones.WithUpdateOptions",
-        "github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/availabilityzones.WithUpdateField"
+        "github.com/JSYoo5B/go-openstacksdk/request.Field"
       ],
       "contracts": [
         {
@@ -138700,7 +138700,7 @@
         "github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/availabilityzones.API.List",
         "github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/availabilityzones.API.All",
         "github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/availabilityzones.WithListOptions",
-        "github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/availabilityzones.WithListQuery"
+        "github.com/JSYoo5B/go-openstacksdk/request.Query"
       ],
       "contracts": [
         {
@@ -138736,7 +138736,7 @@
         "github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2.Service.AvailabilityZoneProfiles",
         "github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/availabilityzoneprofiles.API.Create",
         "github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/availabilityzoneprofiles.WithCreateOptions",
-        "github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/availabilityzoneprofiles.WithCreateField"
+        "github.com/JSYoo5B/go-openstacksdk/request.Field"
       ],
       "contracts": [
         {
@@ -138792,7 +138792,7 @@
         "github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2.Service.AvailabilityZoneProfiles",
         "github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/availabilityzoneprofiles.API.Update",
         "github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/availabilityzoneprofiles.WithUpdateOptions",
-        "github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/availabilityzoneprofiles.WithUpdateField"
+        "github.com/JSYoo5B/go-openstacksdk/request.Field"
       ],
       "contracts": [
         {
@@ -138878,7 +138878,7 @@
         "github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/availabilityzoneprofiles.API.List",
         "github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/availabilityzoneprofiles.API.All",
         "github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/availabilityzoneprofiles.WithListOptions",
-        "github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/availabilityzoneprofiles.WithListQuery"
+        "github.com/JSYoo5B/go-openstacksdk/request.Query"
       ],
       "contracts": [
         {

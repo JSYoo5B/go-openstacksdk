@@ -9,6 +9,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/availabilityzoneprofiles"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -54,7 +55,7 @@ func TestR2OctAZProfileCreateBodyAndValidation(t *testing.T) {
 			return err
 		},
 		"core extension": func() error {
-			_, err := api.Create(context.Background(), availabilityzoneprofiles.CreateOpts{Name: "a", ProviderName: "a", AvailabilityZoneData: "{}"}, availabilityzoneprofiles.WithCreateField("name", "b"))
+			_, err := api.Create(context.Background(), availabilityzoneprofiles.CreateOpts{Name: "a", ProviderName: "a", AvailabilityZoneData: "{}"}, request.Field("name", "b"))
 			return err
 		},
 	} {
@@ -97,7 +98,7 @@ func TestR2OctAZProfileGetUpdateDelete(t *testing.T) {
 	if _, err := api.Update(context.Background(), id, availabilityzoneprofiles.UpdateOpts{}); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatalf("empty update: %v", err)
 	}
-	if _, err := api.Update(context.Background(), id, availabilityzoneprofiles.UpdateOpts{}, availabilityzoneprofiles.WithUpdateField("provider_name", "x")); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := api.Update(context.Background(), id, availabilityzoneprofiles.UpdateOpts{}, request.Field("provider_name", "x")); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatalf("core collision: %v", err)
 	}
 	if err := api.Delete(context.Background(), id); err == nil || deletes.Load() != 1 {

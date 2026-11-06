@@ -328,11 +328,11 @@ func TestOctaviaQuotaSuccessCodesAndStrictMissingPolicy(t *testing.T) {
 					t.Fatalf("response=%+v error=%v", response, err)
 				}
 				if operation == "Reset" {
-					value, err := scope.Reset(context.Background(), quotas.WithResetIgnoreMissing(true))
+					value, err := scope.Reset(context.Background(), request.IgnoreMissing(true))
 					if value != nil || (err == nil) != (status == 404) {
 						t.Fatal(value, err)
 					}
-					_, err = scope.Reset(context.Background(), quotas.WithResetIgnoreMissing(true), quotas.WithResetIgnoreMissing(false))
+					_, err = scope.Reset(context.Background(), request.IgnoreMissing(true), request.IgnoreMissing(false))
 					if !gophercloud.ResponseCodeIs(err, status) {
 						t.Fatal(err)
 					}

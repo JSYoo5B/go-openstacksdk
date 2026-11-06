@@ -10,6 +10,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/availabilityzones"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -40,7 +41,7 @@ func TestR2OctAZZoneCreateBodyAndResponse(t *testing.T) {
 	})
 	got, err := r2OctAZZonesAPI(t, cloud).Create(context.Background(), availabilityzones.CreateOpts{
 		Name: "az1", AvailabilityZoneProfileID: "p1", Description: r2OctAZStr(""), Enabled: r2OctAZBool(false),
-	}, availabilityzones.WithCreateField("vendor", map[string]int{"n": 0}))
+	}, request.Field("vendor", map[string]int{"n": 0}))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -80,7 +81,7 @@ func TestR2OctAZZoneCreateOmitsNilAndValidatesInputs(t *testing.T) {
 			return err
 		},
 		"core extension": func() error {
-			_, err := api.Create(context.Background(), availabilityzones.CreateOpts{Name: "a", AvailabilityZoneProfileID: "p"}, availabilityzones.WithCreateField("enabled", true))
+			_, err := api.Create(context.Background(), availabilityzones.CreateOpts{Name: "a", AvailabilityZoneProfileID: "p"}, request.Field("enabled", true))
 			return err
 		},
 		"nil option": func() error {
@@ -157,7 +158,7 @@ func TestR2OctAZZoneUpdateBodyAndEmpty(t *testing.T) {
 	if _, err := api.Update(context.Background(), "az1", availabilityzones.UpdateOpts{}); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatalf("empty update: %v", err)
 	}
-	if _, err := api.Update(context.Background(), "az1", availabilityzones.UpdateOpts{}, availabilityzones.WithUpdateField("enabled", true)); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := api.Update(context.Background(), "az1", availabilityzones.UpdateOpts{}, request.Field("enabled", true)); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatalf("core collision: %v", err)
 	}
 	if _, err := api.Update(context.Background(), "a/b", availabilityzones.UpdateOpts{Enabled: r2OctAZBool(true)}); !errors.Is(err, resource.ErrInvalidOption) {
@@ -166,7 +167,7 @@ func TestR2OctAZZoneUpdateBodyAndEmpty(t *testing.T) {
 	if calls.Load() != 0 {
 		t.Fatal("invalid update reached the server")
 	}
-	if _, err := api.Update(context.Background(), "az1", availabilityzones.UpdateOpts{}, availabilityzones.WithUpdateField("vendor", nil)); err != nil || body != `{"availability_zone":{"vendor":null}}` {
+	if _, err := api.Update(context.Background(), "az1", availabilityzones.UpdateOpts{}, request.Field("vendor", nil)); err != nil || body != `{"availability_zone":{"vendor":null}}` {
 		t.Fatalf("extension-only update: %v %s", err, body)
 	}
 }
@@ -217,7 +218,7 @@ func TestR2OctAZZoneListQueryPagingAndRaw(t *testing.T) {
 	var names []string
 	for z, err := range api.List(context.Background(), availabilityzones.WithListOptions(availabilityzones.ListOpts{
 		Enabled: r2OctAZBool(false), Description: r2OctAZStr(""), Limit: 1, Fields: []string{"name", "enabled"}, PageReverse: r2OctAZBool(false),
-	}), availabilityzones.WithListQuery("vendor", "x")) {
+	}), request.Query("vendor", "x")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -239,7 +240,7 @@ func TestR2OctAZZoneListQueryPagingAndRaw(t *testing.T) {
 	if _, err := availabilityzones.New(cloud.Client("load-balancer", "/v2")).All(context.Background(), resource.WithMaxItems(1)); err != nil {
 		t.Fatal(err)
 	}
-	for z, err := range api.List(context.Background(), availabilityzones.WithListQuery("enabled", "true")) {
+	for z, err := range api.List(context.Background(), request.Query("enabled", "true")) {
 		if err == nil || z != nil || !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatalf("core query collision: %v", err)
 		}

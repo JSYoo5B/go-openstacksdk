@@ -75,7 +75,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/quotas.ProjectQuotaScope.Reset`
-- `github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/quotas.WithResetIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 
 - Reset DELETE targets /lbaas/quotas/{project} with no body, retains the fixed project and 204 metadata, and issues no follow-up GET to infer defaults.
   Tests: `api/octavia_project_quotas_contracts_test.go:TestOctaviaProjectQuotasUseOfficialPathsAndGlobalDefaults`.
@@ -86,7 +86,7 @@ Go API:
 
 Python/Go differences:
 
-- Python delete_quota defaults ignore_missing=True; Go Reset defaults strict and requires WithResetIgnoreMissing(true) for suppression.
+- Python delete_quota defaults ignore_missing=True; Go Reset defaults strict and requires request.IgnoreMissing(true) for suppression.
 - Go returns ResetResponse metadata and keeps native-compatible 202/204 success; Python returns None and official Octavia DELETE documents 204.
 - The scope resets quota overrides through the corrected official route, while generated API.Delete retains its native /quotas path.
 - Python Quota.project_id is the alternate ID, so a project ID string or Quota selects /lbaas/quotas/{project}; Go uses an explicit project reference (ID or exact Keystone name) or the recorded authentication scope.
@@ -212,7 +212,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/quotas.API.Delete`
 - `github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/quotas.ProjectQuotaScope.Reset`
-- `github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/quotas.WithResetIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 
 - Reset sends a bodyless DELETE to the official fixed-project quota route, returns ProjectID with actual 204 response metadata and performs no follow-up GET to infer limits.
   Tests: `api/octavia_project_quotas_contracts_test.go:TestOctaviaProjectQuotasUseOfficialPathsAndGlobalDefaults`.
@@ -225,7 +225,7 @@ Python/Go differences:
 
 - The SDK singleton exposes Reset to remove overrides and returns ResetResponse(ProjectID, Header, StatusCode), rather than returning a DeleteResult for caller extraction or fabricating updated limits.
 - The scope deliberately uses official /lbaas/quotas while generated API.Delete retains the pinned native /quotas route.
-- Default strict missing handling preserves the native contract and additionally exposes ErrNotFound; optional WithResetIgnoreMissing changes only 404, with deterministic last-option precedence.
+- Default strict missing handling preserves the native contract and additionally exposes ErrNotFound; optional request.IgnoreMissing changes only 404, with deterministic last-option precedence.
 
 ## Usage examples
 

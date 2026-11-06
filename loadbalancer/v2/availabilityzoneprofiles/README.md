@@ -13,6 +13,6 @@ Profiles are identified by UUID (`id`). `AvailabilityZoneData` is a JSON documen
 | `List` / `All` | `GET .../availabilityzoneprofiles` | 200 | Filters `ID`, `Name`, `ProviderName`, `AvailabilityZoneData`, `Fields`, `Limit`, `Marker`, `PageReverse`; follows `availability_zone_profiles_links` and carries filters onto continuation pages. |
 | `Find` / `FindIdentity` / `Remove` | | | Shared `resource.Collection` policies. `FindIdentity` mirrors Python `find_availability_zone_profile` (GET by ID first, then exact-name list); duplicate names fail. `Remove` ignores a missing profile unless `resource.WithMissingError()` is given. |
 
-Returned profiles keep the declared view separate from `Body` (raw wire fields), `Header` and `StatusCode`. Extensions use `WithCreateField`, `WithUpdateField` and `WithListQuery`; a name that collides with a core input fails before any request. Mutations are sent once and never replayed, and context cancellation does not roll back remote work.
+Returned profiles keep the declared view separate from `Body` (raw wire fields), `Header` and `StatusCode`. Extensions use `request.Field` and `request.Query`; a name that collides with a core input fails before any request. Mutations are sent once and never replayed, and context cancellation does not roll back remote work.
 
 Python comparison: [python-parity.md](python-parity.md).

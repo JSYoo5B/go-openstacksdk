@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/octaviarest"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
@@ -23,15 +24,17 @@ type CreateOpts struct {
 	AvailabilityZoneData string `json:"availability_zone_data"`
 }
 
-type CreateOption = request.Option[CreateOpts]
+// CreateOption is one option of Create: WithCreateOptions, request.Field (an
+// extension body member that cannot replace a typed one) or request.Custom
+// over *request.Config[CreateOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type CreateOption = request.WriteCall
+
+var createCalls = calls.Spec[request.Config[CreateOpts]]{Field: calls.ConfigField[CreateOpts]}
 
 func WithCreateOptions(options CreateOpts) CreateOption {
 	snapshot := options
-	return func(c *request.Config[CreateOpts]) error { c.Options = snapshot; return nil }
-}
-
-func WithCreateField(key string, value any) CreateOption {
-	return request.WithField[CreateOpts](key, value)
+	return request.Custom(func(c *request.Config[CreateOpts]) error { c.Options = snapshot; return nil })
 }
 
 // Create sends POST .../availabilityzoneprofiles and expects 201. The request is
@@ -40,7 +43,7 @@ func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOpti
 	if err := a.check(ctx); err != nil {
 		return nil, wrap("Create", "", err)
 	}
-	config, err := request.Apply(opts, options...)
+	config, err := calls.ApplyConfig(opts, createCalls, options...)
 	if err == nil {
 		err = request.ValidateCapabilities(config, true, false, false)
 	}
@@ -66,11 +69,16 @@ type UpdateOpts struct {
 	AvailabilityZoneData *string `json:"availability_zone_data,omitempty"`
 }
 
-type UpdateOption = request.Option[UpdateOpts]
+// UpdateOption is one option of Update: WithUpdateOptions, request.Field or
+// request.Custom over *request.Config[UpdateOpts]. Other shared calls fail
+// with resource.ErrInvalidOption before HTTP.
+type UpdateOption = request.WriteCall
+
+var updateCalls = calls.Spec[request.Config[UpdateOpts]]{Field: calls.ConfigField[UpdateOpts]}
 
 func WithUpdateOptions(options UpdateOpts) UpdateOption {
 	snapshot := cloneUpdate(options)
-	return func(c *request.Config[UpdateOpts]) error { c.Options = cloneUpdate(snapshot); return nil }
+	return request.Custom(func(c *request.Config[UpdateOpts]) error { c.Options = cloneUpdate(snapshot); return nil })
 }
 
 func cloneUpdate(o UpdateOpts) UpdateOpts {
@@ -83,10 +91,6 @@ func cloneUpdate(o UpdateOpts) UpdateOpts {
 	return o
 }
 
-func WithUpdateField(key string, value any) UpdateOption {
-	return request.WithField[UpdateOpts](key, value)
-}
-
 // Update sends PUT .../availabilityzoneprofiles/{id} and expects 200.
 func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ...UpdateOption) (*AvailabilityZoneProfile, error) {
 	if err := a.check(ctx); err != nil {
@@ -95,7 +99,7 @@ func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ..
 	if err := validateID(id); err != nil {
 		return nil, wrap("Update", "", err)
 	}
-	config, err := request.Apply(opts, options...)
+	config, err := calls.ApplyConfig(opts, updateCalls, options...)
 	if err == nil {
 		err = request.ValidateCapabilities(config, true, false, false)
 	}
@@ -141,11 +145,18 @@ type ListOpts struct {
 	PageReverse          *bool
 }
 
-type ListOption = request.Option[ListOpts]
+// ListOption is one option of List: WithListOptions, request.Query with a
+// string or []string value (it cannot replace a core list option) or
+// request.Custom over *request.Config[ListOpts]. The page limit and marker are
+// ListOpts members; request.Limit, request.Marker and other shared calls fail
+// with resource.ErrInvalidOption before HTTP.
+type ListOption = request.ListCall
+
+var listCalls = calls.Spec[request.Config[ListOpts]]{Query: calls.ConfigQuery[ListOpts]}
 
 func WithListOptions(options ListOpts) ListOption {
 	snapshot := cloneList(options)
-	return func(c *request.Config[ListOpts]) error { c.Options = cloneList(snapshot); return nil }
+	return request.Custom(func(c *request.Config[ListOpts]) error { c.Options = cloneList(snapshot); return nil })
 }
 
 func cloneList(o ListOpts) ListOpts {
@@ -165,8 +176,6 @@ func cloneList(o ListOpts) ListOpts {
 	return o
 }
 
-func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
-
 var coreQuery = map[string]bool{"id": true, "name": true, "provider_name": true, "availability_zone_data": true, "fields": true, "limit": true, "marker": true, "page_reverse": true}
 
 // List streams profiles across pages (GET, 200), following availability_zone_profiles_links.
@@ -177,7 +186,7 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Availa
 			yield(nil, wrap("List", "", err))
 			return
 		}
-		config, err := request.Apply(ListOpts{}, options...)
+		config, err := calls.ApplyConfig(ListOpts{}, listCalls, options...)
 		if err == nil {
 			err = request.ValidateCapabilities(config, false, true, false)
 		}
