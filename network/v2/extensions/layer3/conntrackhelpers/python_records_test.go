@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"io"
 	"net/http"
 	"reflect"
@@ -68,8 +69,8 @@ func TestPythonConntrackCreateDropsUnknownAttrs(t *testing.T) {
 	api := pythonConntrackAPI(t, &calls, func(*http.Request) (int, string) {
 		return 201, `{"conntrack_helper":{"id":"h1","helper":"ftp","protocol":"tcp","port":21,"router_id":"r/1","project_id":"p"}}`
 	})
-	v, err := api.Create(context.Background(), "r/1", conntrackhelpers.WithCreateField("helper", "ftp"), conntrackhelpers.WithCreateField("protocol", "tcp"),
-		conntrackhelpers.WithCreateField("port", 21), conntrackhelpers.WithCreateField("x_unknown", true))
+	v, err := api.Create(context.Background(), "r/1", request.Field("helper", "ftp"), request.Field("protocol", "tcp"),
+		request.Field("port", 21), request.Field("x_unknown", true))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -85,7 +86,7 @@ func TestPythonConntrackCreateDropsUnknownAttrs(t *testing.T) {
 		t.Fatal("undeclared response members stay only in Wire", v.Resource.Body, v)
 	}
 	calls = nil
-	if _, err := api.Create(context.Background(), "r/1", conntrackhelpers.WithCreateField("router_id", "other")); !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
+	if _, err := api.Create(context.Background(), "r/1", request.Field("router_id", "other")); !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
 		t.Fatal("router_id duplicates the bound argument", err, calls)
 	}
 	if _, err := api.Create(context.Background(), " "); !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
@@ -112,18 +113,18 @@ func TestPythonConntrackGetUpdateDelete(t *testing.T) {
 	pythonConntrackField(t, v, "port", `"69"`)
 
 	calls = nil
-	v, err = api.Update(context.Background(), "r/1", "h1", conntrackhelpers.WithUpdateField("port", 2121), conntrackhelpers.WithUpdateField("if_revision", 3))
+	v, err = api.Update(context.Background(), "r/1", "h1", request.Field("port", 2121), request.Field("if_revision", 3))
 	if err != nil || len(calls) != 1 || calls[0].method != http.MethodPut || calls[0].path != pythonConntrackBase+"/h1" || calls[0].body != `{"conntrack_helper":{"port":2121}}` || calls[0].header.Get("If-Match") != "" {
 		t.Fatal("plain Resource ignores if_revision", err, calls)
 	}
 	calls = nil
-	if v, err = api.Update(context.Background(), "r/1", "h1", conntrackhelpers.WithUpdateField("unknown", 1)); err != nil || len(calls) != 0 || v.Text("id") != "h1" || v.RouterID != "r/1" {
+	if v, err = api.Update(context.Background(), "r/1", "h1", request.Field("unknown", 1)); err != nil || len(calls) != 0 || v.Text("id") != "h1" || v.RouterID != "r/1" {
 		t.Fatal("no declared attribute sends nothing", v, err, calls)
 	}
 	api = pythonConntrackAPI(t, &calls, func(*http.Request) (int, string) { return 404, `{}` })
 	_, err = api.Get(context.Background(), "r/1", "h1")
 	pythonConntrackFailure(t, err, "Get", 404)
-	_, err = api.Update(context.Background(), "r/1", "h1", conntrackhelpers.WithUpdateField("helper", "sip"))
+	_, err = api.Update(context.Background(), "r/1", "h1", request.Field("helper", "sip"))
 	pythonConntrackFailure(t, err, "Update", 404)
 
 	calls = nil
@@ -131,7 +132,7 @@ func TestPythonConntrackGetUpdateDelete(t *testing.T) {
 	if err != nil || !result.IgnoredMissing || len(calls) != 1 || calls[0].method != http.MethodDelete || calls[0].path != pythonConntrackBase+"/h1" {
 		t.Fatal(result, err, calls)
 	}
-	_, err = api.Delete(context.Background(), "r/1", "h1", conntrackhelpers.WithDeleteIgnoreMissing(false))
+	_, err = api.Delete(context.Background(), "r/1", "h1", request.IgnoreMissing(false))
 	pythonConntrackFailure(t, err, "Delete", 404)
 	api = pythonConntrackAPI(t, &calls, func(*http.Request) (int, string) { return 204, `` })
 	if result, err := api.Delete(context.Background(), "r/1", "h1"); err != nil || result.StatusCode != 204 {
@@ -151,7 +152,7 @@ func TestPythonConntrackListFiltersLocallyAndPages(t *testing.T) {
 		return 200, `{"conntrack_helpers":[]}`
 	})
 	var ids []string
-	for v, err := range api.List(context.Background(), "r/1", conntrackhelpers.WithListQuery("helper", "ftp"), conntrackhelpers.WithListLimit(2), conntrackhelpers.WithListQuery("project_id", "dropped")) {
+	for v, err := range api.List(context.Background(), "r/1", request.Query("helper", "ftp"), request.Limit(2), request.Query("project_id", "dropped")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -164,7 +165,7 @@ func TestPythonConntrackListFiltersLocallyAndPages(t *testing.T) {
 		t.Fatal(ids, calls)
 	}
 	calls = nil
-	if _, err := api.All(context.Background(), "r/1", conntrackhelpers.WithListQuery("router_id", "x")); !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
+	if _, err := api.All(context.Background(), "r/1", request.Query("router_id", "x")); !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
 		t.Fatal("router_id duplicates the bound argument", err, calls)
 	}
 	api = pythonConntrackAPI(t, &calls, func(*http.Request) (int, string) { return 404, `{}` })

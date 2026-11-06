@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"iter"
 	"net/http"
 	"slices"
@@ -167,10 +168,7 @@ func (a *API) Create(ctx context.Context, options ...CreateOption) (*Record, err
 	if err != nil {
 		return nil, wrap(ctx, op, err)
 	}
-	callbacks := make([]func(*CreateOpts) error, len(options))
-	for i, apply := range slices.Clone(options) {
-		callbacks[i] = apply
-	}
+	callbacks := calls.Translate(slices.Clone(options), createCalls)
 	policy, err := applyOptions(ctx, engine, CreateOpts{}, copyCreate, callbacks)
 	if err != nil {
 		return nil, wrap(ctx, op, err)
@@ -192,10 +190,7 @@ func (a *API) Get(ctx context.Context, id string, options ...GetOption) (*Record
 	if err != nil {
 		return nil, wrap(ctx, op, err)
 	}
-	callbacks := make([]func(*GetOpts) error, len(options))
-	for i, apply := range slices.Clone(options) {
-		callbacks[i] = apply
-	}
+	callbacks := calls.Translate(slices.Clone(options), getCalls)
 	policy, err := applyOptions(ctx, engine, GetOpts{}, copyGet, callbacks)
 	if err != nil {
 		return nil, wrap(ctx, op, err)
@@ -216,10 +211,7 @@ func (a *API) Delete(ctx context.Context, id string, options ...DeleteOption) (*
 	if err != nil {
 		return nil, wrap(ctx, op, err)
 	}
-	callbacks := make([]func(*DeleteOpts) error, len(options))
-	for i, apply := range slices.Clone(options) {
-		callbacks[i] = apply
-	}
+	callbacks := calls.Translate(slices.Clone(options), deleteCalls)
 	policy, err := applyOptions(ctx, engine, DeleteOpts{}, copyDelete, callbacks)
 	if err == nil {
 		err = validID(id)
@@ -254,10 +246,7 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Record
 			yield(nil, wrap(ctx, op, err))
 			return
 		}
-		callbacks := make([]func(*ListOpts) error, len(snapshot))
-		for i, apply := range snapshot {
-			callbacks[i] = apply
-		}
+		callbacks := calls.Translate(slices.Clone(snapshot), listCalls)
 		policy, err := applyOptions(ctx, engine, ListOpts{}, copyList, callbacks)
 		if err != nil {
 			yield(nil, wrap(ctx, op, err))
@@ -293,10 +282,7 @@ func (a *API) Find(ctx context.Context, nameOrID string, options ...FindOption) 
 	if err != nil {
 		return nil, wrap(ctx, op, err)
 	}
-	callbacks := make([]func(*FindOpts) error, len(options))
-	for i, apply := range slices.Clone(options) {
-		callbacks[i] = apply
-	}
+	callbacks := calls.Translate(slices.Clone(options), findCalls)
 	policy, err := applyOptions(ctx, engine, FindOpts{}, copyFind, callbacks)
 	if err != nil {
 		return nil, wrap(ctx, op, err)

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"io"
 	"net/http"
 	"reflect"
@@ -77,8 +78,8 @@ func TestPythonNDPProxyCreateSendsProvidedAttrs(t *testing.T) {
 	api := pythonNDPProxyAPI(t, &calls, func(*http.Request) (int, string) {
 		return 201, `{"ndp_proxy":{"id":"n1","router_id":"r1","port_id":"p1","ip_address":"2001:db8::10","revision_number":"0","tenant_id":"t"}}`
 	})
-	v, err := api.Create(context.Background(), ndpproxies.WithCreateField("router_id", "r1"), ndpproxies.WithCreateField("port_id", "p1"),
-		ndpproxies.WithCreateField("ip_address", "2001:db8::10"), ndpproxies.WithCreateField("description", nil), ndpproxies.WithCreateField("x_extension", 1))
+	v, err := api.Create(context.Background(), request.Field("router_id", "r1"), request.Field("port_id", "p1"),
+		request.Field("ip_address", "2001:db8::10"), request.Field("description", nil), request.Field("x_extension", 1))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -97,7 +98,7 @@ func TestPythonNDPProxyCreateSendsProvidedAttrs(t *testing.T) {
 		t.Fatal(v)
 	}
 	calls = nil
-	if _, err := api.Create(context.Background(), ndpproxies.WithCreateField("connection", "x")); !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
+	if _, err := api.Create(context.Background(), request.Field("connection", "x")); !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
 		t.Fatal("constructor control fails before HTTP", err, calls)
 	}
 	api = pythonNDPProxyAPI(t, &calls, func(*http.Request) (int, string) { return 400, `{"NeutronError":{}}` })
@@ -133,7 +134,7 @@ func TestPythonNDPProxyGetUpdateAndDelete(t *testing.T) {
 		api := pythonNDPProxyAPI(t, &calls, func(*http.Request) (int, string) {
 			return 200, `{"ndp_proxy":{"id":"n1","description":"new"}}`
 		})
-		v, err := api.Update(context.Background(), "n1", ndpproxies.WithUpdateField("description", "new"))
+		v, err := api.Update(context.Background(), "n1", request.Field("description", "new"))
 		if err != nil || len(calls) != 1 || calls[0].method != http.MethodPut || calls[0].path != pythonNDPProxyBase+"/n1" {
 			t.Fatal(err, calls)
 		}
@@ -144,7 +145,7 @@ func TestPythonNDPProxyGetUpdateAndDelete(t *testing.T) {
 			t.Fatal("no changed attribute sends nothing", v, err, calls)
 		}
 		api = pythonNDPProxyAPI(t, &calls, func(*http.Request) (int, string) { return 409, `{}` })
-		_, err = api.Update(context.Background(), "n1", ndpproxies.WithUpdateField("name", "x"))
+		_, err = api.Update(context.Background(), "n1", request.Field("name", "x"))
 		pythonNDPProxyFailure(t, err, "Update", 409)
 	})
 	t.Run("delete", func(t *testing.T) {
@@ -154,7 +155,7 @@ func TestPythonNDPProxyGetUpdateAndDelete(t *testing.T) {
 		if err != nil || !result.IgnoredMissing || len(calls) != 1 || calls[0].method != http.MethodDelete || calls[0].path != pythonNDPProxyBase+"/n1" {
 			t.Fatal(result, err, calls)
 		}
-		_, err = api.Delete(context.Background(), "n1", ndpproxies.WithDeleteIgnoreMissing(false))
+		_, err = api.Delete(context.Background(), "n1", request.IgnoreMissing(false))
 		pythonNDPProxyFailure(t, err, "Delete", 404)
 		api = pythonNDPProxyAPI(t, &calls, func(*http.Request) (int, string) { return 204, `` })
 		if result, err := api.Delete(context.Background(), "n1"); err != nil || result.StatusCode != 204 || result.IgnoredMissing {
@@ -169,7 +170,7 @@ func TestPythonNDPProxyListReadsOnlyTheFirstPage(t *testing.T) {
 		return 200, `{"ndp_proxies":[{"id":"a","router_id":"r1","ip_address":"x"},{"id":"b","router_id":"r1","ip_address":"y"}],"ndp_proxies_links":[{"rel":"next","href":"http://` + req.Host + `/neutron/v2.0/ndp_proxies?marker=b"}]}`
 	})
 	var ids []string
-	for v, err := range api.List(context.Background(), ndpproxies.WithListQuery("router_id", "r1"), ndpproxies.WithListQuery("revision_number", nil), ndpproxies.WithListLimit(2)) {
+	for v, err := range api.List(context.Background(), request.Query("router_id", "r1"), request.Query("revision_number", nil), request.Limit(2)) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -180,12 +181,12 @@ func TestPythonNDPProxyListReadsOnlyTheFirstPage(t *testing.T) {
 		t.Fatal(ids, calls)
 	}
 	calls = nil
-	values, err := api.All(context.Background(), ndpproxies.WithListQuery("ip_address", "y"), ndpproxies.WithListQuery("created_at", nil))
+	values, err := api.All(context.Background(), request.Query("ip_address", "y"), request.Query("created_at", nil))
 	if err != nil || len(values) != 2 || len(calls) != 1 || calls[0].query != "ip_address=y" {
 		t.Fatal(values, err, calls)
 	}
 	calls = nil
-	if _, err := api.All(context.Background(), ndpproxies.WithListQuery("paginated", true)); !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
+	if _, err := api.All(context.Background(), request.Query("paginated", true)); !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
 		t.Fatal("paginated duplicates the fixed proxy argument", err, calls)
 	}
 	api = pythonNDPProxyAPI(t, &calls, func(*http.Request) (int, string) { return 500, `{}` })
@@ -220,7 +221,7 @@ func TestPythonNDPProxyFindFallsBackToCompleteNameList(t *testing.T) {
 	if v, err := api.Find(context.Background(), "none"); v != nil || err != nil {
 		t.Fatal(v, err)
 	}
-	if _, err := api.Find(context.Background(), "none", ndpproxies.WithFindIgnoreMissing(false)); !errors.Is(err, resource.ErrNotFound) {
+	if _, err := api.Find(context.Background(), "none", request.IgnoreMissing(false)); !errors.Is(err, resource.ErrNotFound) {
 		t.Fatal(err)
 	}
 }

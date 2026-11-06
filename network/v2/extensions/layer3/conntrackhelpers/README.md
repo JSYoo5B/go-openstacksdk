@@ -15,13 +15,13 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/conntrackhelpers.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/conntrackhelpers.API.All`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/conntrackhelpers.WithListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/conntrackhelpers.WithListQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/conntrackhelpers.WithListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/conntrackhelpers.WithListMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/conntrackhelpers.WithListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/conntrackhelpers.WithListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/conntrackhelpers.WithListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/conntrackhelpers.WithListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 
 - List sends only limit/marker as server query, filters declared Body attrs locally, discards unknown kwargs, follows conntrack_helpers_links and marker continuation, tags rows with RouterID, rejects router_id before HTTP and reports 404 with List context.
   Tests: `network/v2/extensions/layer3/conntrackhelpers/python_records_test.go:TestPythonConntrackListFiltersLocallyAndPages`.
@@ -43,9 +43,9 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/conntrackhelpers.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/conntrackhelpers.WithCreateOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/conntrackhelpers.WithCreateField`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/conntrackhelpers.WithCreateHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/conntrackhelpers.WithCreateMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - POST /routers/{router_id}/conntrack_helpers sends only declared attrs (unknown attrs discarded because the class does not allow them), keeps undeclared response keys only in Wire, exposes RouterID, rejects router_id and blank router before HTTP and reports 409 with Create context.
   Tests: `network/v2/extensions/layer3/conntrackhelpers/python_records_test.go:TestPythonConntrackCreateDropsUnknownAttrs`.
@@ -65,8 +65,8 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/conntrackhelpers.API.Get`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/conntrackhelpers.WithGetHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/conntrackhelpers.WithGetMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - GET /routers/{router_id}/conntrack_helpers/{id} sends no query and reports 404 with Get context.
   Tests: `network/v2/extensions/layer3/conntrackhelpers/python_records_test.go:TestPythonConntrackGetUpdateDelete`.
@@ -87,9 +87,9 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/conntrackhelpers.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/conntrackhelpers.WithUpdateOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/conntrackhelpers.WithUpdateField`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/conntrackhelpers.WithUpdateHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/conntrackhelpers.WithUpdateMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - PUT sends only declared changed attrs, ignores if_revision without If-Match (not a NetworkResource), the unknown-only update sends nothing, and 404 keeps Update context.
   Tests: `network/v2/extensions/layer3/conntrackhelpers/python_records_test.go:TestPythonConntrackGetUpdateDelete`.
@@ -109,11 +109,11 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/conntrackhelpers.API.Delete`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/conntrackhelpers.WithDeleteIgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/conntrackhelpers.WithDeleteHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/conntrackhelpers.WithDeleteMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
-- Bodyless DELETE ignores a clean 404 by default, WithDeleteIgnoreMissing(false) returns it and 204 is a plain receipt.
+- Bodyless DELETE ignores a clean 404 by default, request.IgnoreMissing(false) returns it and 204 is a plain receipt.
   Tests: `network/v2/extensions/layer3/conntrackhelpers/python_records_test.go:TestPythonConntrackGetUpdateDelete`.
 
 Python/Go differences:
@@ -141,17 +141,17 @@ conn.network.delete_conntrack_helper(helper, router)
 ```go
 api := conntrackhelpers.New(networkClient)
 helper, err := api.Create(ctx, routerID,
-    conntrackhelpers.WithCreateField("helper", "ftp"),
-    conntrackhelpers.WithCreateField("protocol", "tcp"),
-    conntrackhelpers.WithCreateField("port", 21))
+    request.Field("helper", "ftp"),
+    request.Field("protocol", "tcp"),
+    request.Field("port", 21))
 if err != nil {
     return err
 }
 id := helper.Text("id")
-if _, err := api.Update(ctx, routerID, id, conntrackhelpers.WithUpdateField("port", 2121)); err != nil {
+if _, err := api.Update(ctx, routerID, id, request.Field("port", 2121)); err != nil {
     return err
 }
-for item, err := range api.List(ctx, routerID, conntrackhelpers.WithListQuery("helper", "ftp")) {
+for item, err := range api.List(ctx, routerID, request.Query("helper", "ftp")) {
     if err != nil {
         return err
     }

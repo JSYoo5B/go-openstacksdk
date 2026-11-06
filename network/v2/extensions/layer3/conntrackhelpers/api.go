@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"iter"
 	"net/http"
 	"net/url"
@@ -127,10 +128,7 @@ func (a *API) Create(ctx context.Context, routerID string, options ...CreateOpti
 	if err != nil {
 		return nil, wrap(ctx, op, err)
 	}
-	callbacks := make([]func(*CreateOpts) error, len(options))
-	for i, apply := range slices.Clone(options) {
-		callbacks[i] = apply
-	}
+	callbacks := calls.Translate(slices.Clone(options), createCalls)
 	policy, err := applyOptions(ctx, engine, CreateOpts{}, copyCreate, callbacks)
 	if err != nil {
 		return nil, wrap(ctx, op, err)
@@ -152,10 +150,7 @@ func (a *API) Get(ctx context.Context, routerID, id string, options ...GetOption
 	if err != nil {
 		return nil, wrap(ctx, op, err)
 	}
-	callbacks := make([]func(*GetOpts) error, len(options))
-	for i, apply := range slices.Clone(options) {
-		callbacks[i] = apply
-	}
+	callbacks := calls.Translate(slices.Clone(options), getCalls)
 	policy, err := applyOptions(ctx, engine, GetOpts{}, copyGet, callbacks)
 	if err != nil {
 		return nil, wrap(ctx, op, err)
@@ -172,10 +167,7 @@ func (a *API) Update(ctx context.Context, routerID, id string, options ...Update
 	if err != nil {
 		return nil, wrap(ctx, op, err)
 	}
-	callbacks := make([]func(*UpdateOpts) error, len(options))
-	for i, apply := range slices.Clone(options) {
-		callbacks[i] = apply
-	}
+	callbacks := calls.Translate(slices.Clone(options), updateCalls)
 	policy, err := applyOptions(ctx, engine, UpdateOpts{}, copyUpdate, callbacks)
 	if err != nil {
 		return nil, wrap(ctx, op, err)
@@ -206,10 +198,7 @@ func (a *API) Delete(ctx context.Context, routerID, id string, options ...Delete
 	if err != nil {
 		return nil, wrap(ctx, op, err)
 	}
-	callbacks := make([]func(*DeleteOpts) error, len(options))
-	for i, apply := range slices.Clone(options) {
-		callbacks[i] = apply
-	}
+	callbacks := calls.Translate(slices.Clone(options), deleteCalls)
 	policy, err := applyOptions(ctx, engine, DeleteOpts{}, copyDelete, callbacks)
 	if err == nil {
 		err = validID(id, "conntrack helper")
@@ -244,10 +233,7 @@ func (a *API) List(ctx context.Context, routerID string, options ...ListOption) 
 			yield(nil, wrap(ctx, op, err))
 			return
 		}
-		callbacks := make([]func(*ListOpts) error, len(snapshot))
-		for i, apply := range snapshot {
-			callbacks[i] = apply
-		}
+		callbacks := calls.Translate(slices.Clone(snapshot), listCalls)
 		policy, err := applyOptions(ctx, engine, ListOpts{}, copyList, callbacks)
 		if _, duplicate := policy.Query["router_id"]; err == nil && duplicate {
 			err = invalid("router_id duplicates the bound router argument")

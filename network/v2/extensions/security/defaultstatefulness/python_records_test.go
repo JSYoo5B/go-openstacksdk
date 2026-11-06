@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"io"
 	"net/http"
 	"reflect"
@@ -68,7 +69,7 @@ func TestPythonStatefulnessCreateAndGet(t *testing.T) {
 	api := pythonStatefulnessAPI(t, &calls, func(*http.Request) (int, string) {
 		return 201, `{"security_group_default_statefulness":{"id":"s1","project_id":"p","stateful":0,"revision_number":"1","tenant_id":"p"}}`
 	})
-	v, err := api.Create(context.Background(), defaultstatefulness.WithCreateField("project_id", "p"), defaultstatefulness.WithCreateField("stateful", false))
+	v, err := api.Create(context.Background(), request.Field("project_id", "p"), request.Field("stateful", false))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -80,7 +81,7 @@ func TestPythonStatefulnessCreateAndGet(t *testing.T) {
 	pythonStatefulnessField(t, v, "tenant_id", `"p"`)
 	pythonStatefulnessField(t, v, "if_match", `null`)
 	api = pythonStatefulnessAPI(t, &calls, func(*http.Request) (int, string) { return 409, `{}` })
-	_, err = api.Create(context.Background(), defaultstatefulness.WithCreateField("stateful", true))
+	_, err = api.Create(context.Background(), request.Field("stateful", true))
 	pythonStatefulnessFailure(t, err, "Create", 409)
 
 	calls = nil
@@ -103,7 +104,7 @@ func TestPythonStatefulnessUpdateRevisionAndNoop(t *testing.T) {
 	api := pythonStatefulnessAPI(t, &calls, func(*http.Request) (int, string) {
 		return 200, `{"security_group_default_statefulness":{"id":"s1","stateful":false,"revision_number":4}}`
 	})
-	v, err := api.Update(context.Background(), "s1", defaultstatefulness.WithUpdateRevision(3), defaultstatefulness.WithUpdateIfMatch("ignored"), defaultstatefulness.WithUpdateField("stateful", false))
+	v, err := api.Update(context.Background(), "s1", defaultstatefulness.WithUpdateRevision(3), defaultstatefulness.WithUpdateIfMatch("ignored"), request.Field("stateful", false))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -120,18 +121,18 @@ func TestPythonStatefulnessUpdateRevisionAndNoop(t *testing.T) {
 		t.Fatal(err, calls)
 	}
 	calls = nil
-	v, err = api.Update(context.Background(), "s1", defaultstatefulness.WithUpdateField("if_revision", nil))
+	v, err = api.Update(context.Background(), "s1", request.Field("if_revision", nil))
 	if err != nil || len(calls) != 0 || v.StatusCode != 0 {
 		t.Fatal("null if_revision and no attribute send nothing", v, err, calls)
 	}
 	pythonStatefulnessField(t, v, "id", `"s1"`)
-	for _, option := range []defaultstatefulness.UpdateOption{defaultstatefulness.WithUpdateField("id", "x"), defaultstatefulness.WithUpdateField("if_revision", 1.5)} {
+	for _, option := range []defaultstatefulness.UpdateOption{request.Field("id", "x"), request.Field("if_revision", 1.5)} {
 		if _, err := api.Update(context.Background(), "s1", option); !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
 			t.Fatal(err, calls)
 		}
 	}
 	api = pythonStatefulnessAPI(t, &calls, func(*http.Request) (int, string) { return 412, `{}` })
-	_, err = api.Update(context.Background(), "s1", defaultstatefulness.WithUpdateRevision(1), defaultstatefulness.WithUpdateField("stateful", true))
+	_, err = api.Update(context.Background(), "s1", defaultstatefulness.WithUpdateRevision(1), request.Field("stateful", true))
 	pythonStatefulnessFailure(t, err, "Update", 412)
 }
 
@@ -142,7 +143,7 @@ func TestPythonStatefulnessDeleteListAndFind(t *testing.T) {
 	if err != nil || !result.IgnoredMissing || len(calls) != 1 || calls[0].method != http.MethodDelete || calls[0].path != pythonStatefulnessBase+"/s1" {
 		t.Fatal(result, err, calls)
 	}
-	_, err = api.Delete(context.Background(), "s1", defaultstatefulness.WithDeleteIgnoreMissing(false))
+	_, err = api.Delete(context.Background(), "s1", request.IgnoreMissing(false))
 	pythonStatefulnessFailure(t, err, "Delete", 404)
 
 	calls = nil
@@ -158,7 +159,7 @@ func TestPythonStatefulnessDeleteListAndFind(t *testing.T) {
 		return 200, `{"security_groups_default_statefulness":[{"id":"b","project_id":"p","stateful":false,"name":"named"}]}`
 	})
 	var ids []string
-	for v, err := range api.List(context.Background(), defaultstatefulness.WithListQuery("project_id", "p"), defaultstatefulness.WithListQuery("revision_number", nil)) {
+	for v, err := range api.List(context.Background(), request.Query("project_id", "p"), request.Query("revision_number", nil)) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -172,7 +173,7 @@ func TestPythonStatefulnessDeleteListAndFind(t *testing.T) {
 	if err != nil || v.Text("id") != "b" || len(calls) != 3 || calls[0].path != pythonStatefulnessBase+"/named" || calls[1].query != "" {
 		t.Fatal("no name query hint", v, err, calls)
 	}
-	if _, err := api.Find(context.Background(), "none", defaultstatefulness.WithFindIgnoreMissing(false)); !errors.Is(err, resource.ErrNotFound) {
+	if _, err := api.Find(context.Background(), "none", request.IgnoreMissing(false)); !errors.Is(err, resource.ErrNotFound) {
 		t.Fatal(err)
 	}
 	api = pythonStatefulnessAPI(t, &calls, func(*http.Request) (int, string) { return 500, `{}` })

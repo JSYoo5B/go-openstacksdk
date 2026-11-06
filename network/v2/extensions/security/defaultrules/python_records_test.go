@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"io"
 	"net/http"
 	"reflect"
@@ -68,8 +69,8 @@ func TestPythonDefaultRuleCreateMapsEtherTypeAndIfMatch(t *testing.T) {
 	api := pythonDefaultRuleAPI(t, &calls, func(*http.Request) (int, string) {
 		return 201, `{"default_security_group_rule":{"id":"d1","direction":"ingress","ethertype":"IPv6","port_range_min":"22","port_range_max":22,"used_in_default_sg":1,"used_in_non_default_sg":false,"revision_number":3,"remote_ip_prefix":null}}`
 	})
-	v, err := api.Create(context.Background(), defaultrules.WithCreateField("direction", "ingress"), defaultrules.WithCreateField("ether_type", "IPv6"),
-		defaultrules.WithCreateField("protocol", "tcp"), defaultrules.WithCreateField("port_range_min", 22), defaultrules.WithCreateField("used_in_default_sg", true),
+	v, err := api.Create(context.Background(), request.Field("direction", "ingress"), request.Field("ether_type", "IPv6"),
+		request.Field("protocol", "tcp"), request.Field("port_range_min", 22), request.Field("used_in_default_sg", true),
 		defaultrules.WithCreateIfMatch("revision_number=1", "revision_number=2"))
 	if err != nil {
 		t.Fatal(err)
@@ -97,11 +98,11 @@ func TestPythonDefaultRuleCreateMapsEtherTypeAndIfMatch(t *testing.T) {
 	}
 
 	calls = nil
-	if _, err := api.Create(context.Background(), defaultrules.WithCreateField("if_match", 1)); !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
+	if _, err := api.Create(context.Background(), request.Field("if_match", 1)); !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
 		t.Fatal("non-string If-Match fails before HTTP", err, calls)
 	}
 	api = pythonDefaultRuleAPI(t, &calls, func(*http.Request) (int, string) { return 409, `{"NeutronError":{}}` })
-	_, err = api.Create(context.Background(), defaultrules.WithCreateField("direction", "egress"))
+	_, err = api.Create(context.Background(), request.Field("direction", "egress"))
 	if calls[0].header.Get("If-Match") != "" {
 		t.Fatal("no If-Match unless supplied", calls)
 	}
@@ -129,7 +130,7 @@ func TestPythonDefaultRuleGetAndDelete(t *testing.T) {
 	if err != nil || !result.IgnoredMissing || len(calls) != 1 || calls[0].method != http.MethodDelete || calls[0].path != pythonDefaultRuleBase+"/d1" || calls[0].body != "" {
 		t.Fatal(result, err, calls)
 	}
-	_, err = api.Delete(context.Background(), "d1", defaultrules.WithDeleteIgnoreMissing(false))
+	_, err = api.Delete(context.Background(), "d1", request.IgnoreMissing(false))
 	pythonDefaultRuleFailure(t, err, "Delete", 404)
 	api = pythonDefaultRuleAPI(t, &calls, func(*http.Request) (int, string) { return 204, `` })
 	if result, err := api.Delete(context.Background(), "d1"); err != nil || result.StatusCode != 204 || result.IgnoredMissing {
@@ -146,8 +147,8 @@ func TestPythonDefaultRuleListMapsQueryAliases(t *testing.T) {
 		return 200, `{"default_security_group_rules":[{"id":"c","ethertype":"IPv4"}]}`
 	})
 	var ids []string
-	for v, err := range api.List(context.Background(), defaultrules.WithListQuery("ether_type", "IPv4"), defaultrules.WithListQuery("used_in_default_sg", true),
-		defaultrules.WithListQuery("name", nil), defaultrules.WithListQuery("unknown", 1)) {
+	for v, err := range api.List(context.Background(), request.Query("ether_type", "IPv4"), request.Query("used_in_default_sg", true),
+		request.Query("name", nil), request.Query("unknown", 1)) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -161,7 +162,7 @@ func TestPythonDefaultRuleListMapsQueryAliases(t *testing.T) {
 		t.Fatal(calls)
 	}
 	api = pythonDefaultRuleAPI(t, &calls, func(*http.Request) (int, string) { return 401, `{}` })
-	_, err := api.All(context.Background(), defaultrules.WithListMaxItems(1))
+	_, err := api.All(context.Background(), request.MaxItems(1))
 	pythonDefaultRuleFailure(t, err, "List", 401)
 }
 
@@ -173,7 +174,7 @@ func TestPythonDefaultRuleFindHasNoNameHint(t *testing.T) {
 		}
 		return 200, `{"default_security_group_rules":[{"id":"a","name":"ssh"},{"id":"b","name":"web"}]}`
 	})
-	v, err := api.Find(context.Background(), "ssh", defaultrules.WithFindQuery("direction", "ingress"))
+	v, err := api.Find(context.Background(), "ssh", request.Query("direction", "ingress"))
 	if err != nil || v.Text("id") != "a" || len(calls) != 2 {
 		t.Fatal(v, err, calls)
 	}
@@ -183,7 +184,7 @@ func TestPythonDefaultRuleFindHasNoNameHint(t *testing.T) {
 	if v, err := api.Find(context.Background(), "none"); v != nil || err != nil {
 		t.Fatal(v, err)
 	}
-	if _, err := api.Find(context.Background(), "none", defaultrules.WithFindIgnoreMissing(false)); !errors.Is(err, resource.ErrNotFound) {
+	if _, err := api.Find(context.Background(), "none", request.IgnoreMissing(false)); !errors.Is(err, resource.ErrNotFound) {
 		t.Fatal(err)
 	}
 }

@@ -1,7 +1,6 @@
 package defaultrules
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -12,6 +11,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/neutronfind"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 // CreateOpts owns the provided Source attributes. Absent attributes are not
@@ -22,7 +22,13 @@ type CreateOpts struct {
 	Microversion *string
 	order        []string
 }
-type CreateOption func(*CreateOpts) error
+
+// CreateOption is one option of Create: WithCreateOpts, WithCreateIfMatch,
+// request.Field (one Source attribute; a marshal error fails when applied),
+// request.Headers (replaces the headers), request.Microversion or
+// request.Custom over *CreateOpts. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type CreateOption = request.WriteCall
 
 func createPolicy(v CreateOpts) neutronfind.Options {
 	return neutronfind.Options{Query: v.Fields, Headers: v.Headers, Microversion: v.Microversion, Order: v.order}
@@ -34,35 +40,13 @@ func copyCreate(v CreateOpts) CreateOpts {
 }
 func WithCreateOpts(v CreateOpts) CreateOption {
 	owned := copyCreate(v)
-	return func(c *CreateOpts) error { *c = copyCreate(owned); return nil }
+	return request.Custom(func(c *CreateOpts) error { *c = copyCreate(owned); return nil })
 }
 
 // WithCreateIfMatch sets the inherited if_match Header attribute. Values are
 // joined with ", " into one If-Match request header, as Source does.
 func WithCreateIfMatch(values ...string) CreateOption {
-	return WithCreateField("if_match", append([]string{}, values...))
-}
-
-// WithCreateField sets one Source attribute. Canonical attribute names map to
-// wire names (ether_type is sent as ethertype); unknown names stay in the Body
-// because the class allows them. if_match becomes the If-Match header.
-func WithCreateField(key string, value any) CreateOption {
-	raw, err := json.Marshal(value)
-	owned := bytes.Clone(raw)
-	return func(c *CreateOpts) error {
-		if err != nil {
-			return errors.Join(invalid("create attribute %q is not JSON", key), err)
-		}
-		c.Fields, c.order = setField(c.Fields, c.order, key, owned)
-		return nil
-	}
-}
-func WithCreateHeaders(v map[string]string) CreateOption {
-	owned := maps.Clone(v)
-	return func(c *CreateOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
-func WithCreateMicroversion(v string) CreateOption {
-	return func(c *CreateOpts) error { x := v; c.Microversion = &x; return nil }
+	return neutronfind.KeywordCall(createKeyword, "if_match", append([]string{}, values...))
 }
 
 // DeleteOpts defaults IgnoreMissing to true, as delete_default_security_group_rule.
@@ -71,7 +55,12 @@ type DeleteOpts struct {
 	Headers       map[string]string
 	Microversion  *string
 }
-type DeleteOption func(*DeleteOpts) error
+
+// DeleteOption is one option of Delete: request.IgnoreMissing,
+// request.Headers (replaces the headers), request.Microversion or
+// request.Custom over *DeleteOpts. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type DeleteOption = request.DeleteCall
 
 func deletePolicy(v DeleteOpts) neutronfind.Options {
 	return neutronfind.Options{IgnoreMissing: v.IgnoreMissing, Headers: v.Headers, Microversion: v.Microversion}
@@ -81,16 +70,6 @@ func copyDelete(v DeleteOpts) DeleteOpts {
 	v.IgnoreMissing, v.Headers, v.Microversion = owned.IgnoreMissing, owned.Headers, owned.Microversion
 	return v
 }
-func WithDeleteIgnoreMissing(v bool) DeleteOption {
-	return func(c *DeleteOpts) error { x := v; c.IgnoreMissing = &x; return nil }
-}
-func WithDeleteHeaders(v map[string]string) DeleteOption {
-	owned := maps.Clone(v)
-	return func(c *DeleteOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
-func WithDeleteMicroversion(v string) DeleteOption {
-	return func(c *DeleteOpts) error { x := v; c.Microversion = &x; return nil }
-}
 
 // GetOpts is the get_default_security_group_rule fields selector plus explicit
 // transport settings. Field attribute names map to wire names.
@@ -99,7 +78,11 @@ type GetOpts struct {
 	Headers      map[string]string
 	Microversion *string
 }
-type GetOption func(*GetOpts) error
+
+// GetOption is one option of Get: WithGetFields, request.Headers (replaces
+// the headers), request.Microversion or request.Custom over *GetOpts. Other
+// shared calls fail with resource.ErrInvalidOption before HTTP.
+type GetOption = request.GetCall
 
 func copyGet(v GetOpts) GetOpts {
 	v.Fields = slices.Clone(v.Fields)
@@ -112,14 +95,7 @@ func copyGet(v GetOpts) GetOpts {
 }
 func WithGetFields(values ...string) GetOption {
 	owned := slices.Clone(values)
-	return func(c *GetOpts) error { c.Fields = slices.Clone(owned); return nil }
-}
-func WithGetHeaders(v map[string]string) GetOption {
-	owned := maps.Clone(v)
-	return func(c *GetOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
-func WithGetMicroversion(v string) GetOption {
-	return func(c *GetOpts) error { x := v; c.Microversion = &x; return nil }
+	return request.Custom(func(c *GetOpts) error { c.Fields = slices.Clone(owned); return nil })
 }
 func getPolicy(v GetOpts) (neutronfind.Options, error) {
 	prepared := neutronfind.Options{Microversion: v.Microversion, Headers: v.Headers}
@@ -155,7 +131,14 @@ type ListOpts struct {
 	Microversion *string
 	order        []string
 }
-type ListOption func(*ListOpts) error
+
+// ListOption is one option of List: WithListOpts, request.Query (one list
+// kwarg as JSON; names Resource.list discards are dropped with their
+// marshal error), request.Limit, request.Marker, request.MaxItems,
+// request.Paginated, request.Headers (replaces the headers),
+// request.Microversion or request.Custom over *ListOpts. Other shared calls
+// fail with resource.ErrInvalidOption before HTTP.
+type ListOption = request.ListCall
 
 func listPolicy(v ListOpts) neutronfind.Options {
 	return neutronfind.Options{Query: v.Query, Headers: v.Headers, Microversion: v.Microversion, Order: v.order}
@@ -167,7 +150,7 @@ func copyList(v ListOpts) ListOpts {
 }
 func WithListOpts(v ListOpts) ListOption {
 	owned := copyList(v)
-	return func(c *ListOpts) error { *c = copyList(owned); return nil }
+	return request.Custom(func(c *ListOpts) error { *c = copyList(owned); return nil })
 }
 
 // listIgnores reports the unknown kwargs that Resource.list discards before
@@ -197,31 +180,6 @@ func listIgnores(key string) bool {
 	}
 	return true
 }
-func WithListQuery(key string, value any) ListOption {
-	if listIgnores(key) {
-		return func(*ListOpts) error { return nil }
-	}
-	raw, err := json.Marshal(value)
-	owned := bytes.Clone(raw)
-	return func(c *ListOpts) error {
-		if err != nil {
-			return errors.Join(invalid("list query %q is not JSON", key), err)
-		}
-		c.Query, c.order = setField(c.Query, c.order, key, owned)
-		return nil
-	}
-}
-func WithListHeaders(v map[string]string) ListOption {
-	owned := maps.Clone(v)
-	return func(c *ListOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
-func WithListMicroversion(v string) ListOption {
-	return func(c *ListOpts) error { x := v; c.Microversion = &x; return nil }
-}
-func WithListLimit(v int) ListOption      { return WithListQuery("limit", v) }
-func WithListMarker(v string) ListOption  { return WithListQuery("marker", v) }
-func WithListMaxItems(v int) ListOption   { return WithListQuery("max_items", v) }
-func WithListPaginated(v bool) ListOption { return WithListQuery("paginated", v) }
 
 // FindOpts owns find kwargs. Omitted IgnoreMissing is true. Query values go to
 // the member GET and, classified as for List, to the fallback list.
@@ -232,7 +190,12 @@ type FindOpts struct {
 	Microversion  *string
 	order         []string
 }
-type FindOption func(*FindOpts) error
+
+// FindOption is one option of Find: WithFindOpts, request.IgnoreMissing,
+// request.Query (one find kwarg as JSON), request.Headers (replaces the
+// headers), request.Microversion or request.Custom over *FindOpts. Other
+// shared calls fail with resource.ErrInvalidOption before HTTP.
+type FindOption = request.FindCall
 
 func findPolicy(v FindOpts) neutronfind.Options {
 	return neutronfind.Options{IgnoreMissing: v.IgnoreMissing, Query: v.Query, Headers: v.Headers, Microversion: v.Microversion, Order: v.order}
@@ -244,39 +207,7 @@ func copyFind(v FindOpts) FindOpts {
 }
 func WithFindOpts(v FindOpts) FindOption {
 	owned := copyFind(v)
-	return func(c *FindOpts) error { *c = copyFind(owned); return nil }
-}
-func WithFindIgnoreMissing(v bool) FindOption {
-	return func(c *FindOpts) error { x := v; c.IgnoreMissing = &x; return nil }
-}
-func WithFindQuery(key string, value any) FindOption {
-	raw, err := json.Marshal(value)
-	owned := bytes.Clone(raw)
-	return func(c *FindOpts) error {
-		if err != nil {
-			return errors.Join(invalid("find query %q is not JSON", key), err)
-		}
-		c.Query, c.order = setField(c.Query, c.order, key, owned)
-		return nil
-	}
-}
-func WithFindHeaders(v map[string]string) FindOption {
-	owned := maps.Clone(v)
-	return func(c *FindOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
-func WithFindMicroversion(v string) FindOption {
-	return func(c *FindOpts) error { x := v; c.Microversion = &x; return nil }
-}
-
-func setField(values map[string]json.RawMessage, order []string, key string, raw json.RawMessage) (map[string]json.RawMessage, []string) {
-	if values == nil {
-		values = make(map[string]json.RawMessage)
-	}
-	if !slices.Contains(order, key) {
-		order = append(order, key)
-	}
-	values[key] = bytes.Clone(raw)
-	return values, order
+	return request.Custom(func(c *FindOpts) error { *c = copyFind(owned); return nil })
 }
 
 func applyOptions[T any](ctx context.Context, engine *neutronfind.Engine, initial T, clone func(T) T, options []func(*T) error) (T, error) {

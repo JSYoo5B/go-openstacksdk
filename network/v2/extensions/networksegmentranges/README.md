@@ -14,9 +14,9 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.WithCreateOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.WithCreateField`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.WithCreateHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.WithCreateMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - POST /network_segment_ranges sends only provided attrs (explicit null/false kept, unknown attrs kept, microversion attr dropped) under network_segment_range, an empty create sends {}, and the response projects bool/int/dict/list casts with unknown keys and null defaults.
   Tests: `network/v2/extensions/networksegmentranges/python_records_test.go:TestPythonSegmentRangeCreateSendsProvidedAttrs`.
@@ -37,11 +37,11 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.API.Delete`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.WithDeleteIgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.WithDeleteHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.WithDeleteMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
-- Bodyless DELETE ignores a clean 404 by default, WithDeleteIgnoreMissing(false) returns it, and 409 stays an error with Delete context.
+- Bodyless DELETE ignores a clean 404 by default, request.IgnoreMissing(false) returns it, and 409 stays an error with Delete context.
   Tests: `network/v2/extensions/networksegmentranges/python_records_test.go:TestPythonSegmentRangeDeleteIgnoresMissingByDefault`.
 
 Python/Go differences:
@@ -60,10 +60,10 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.API.Find`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.WithFindOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.WithFindIgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.WithFindQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.WithFindHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.WithFindMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - Find GETs the literal ID first, falls back on clean 400/404 to a complete list with the name query hint plus find query, returns nil or ErrNotFound when missing, ErrAmbiguous for duplicates and never falls back on 500.
   Tests: `network/v2/extensions/networksegmentranges/python_records_test.go:TestPythonSegmentRangeFindFallsBackToNameList`.
@@ -85,8 +85,8 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.API.Get`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.WithGetFields`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.WithGetHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.WithGetMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - GET /network_segment_ranges/{id} with repeated fields query, escaped literal ID, 2xx decode with the ID seed and 400/403/404/500 native errors with Get context; blank IDs fail before HTTP.
   Tests: `network/v2/extensions/networksegmentranges/python_records_test.go:TestPythonSegmentRangeGetFieldsStatusesAndEscapedID`.
@@ -107,13 +107,13 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.API.All`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.WithListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.WithListQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.WithListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.WithListMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.WithListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.WithListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.WithListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.WithListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 
 - List sends declared query parameters, filters other declared Body attrs (id) locally, discards unknown kwargs, sends Accept: application/json, follows network_segment_ranges_links and limit/marker continuation to an empty page, and paginated=False reads one page.
   Tests: `network/v2/extensions/networksegmentranges/python_records_test.go:TestPythonSegmentRangeListQueryFiltersAndLinksPaging`.
@@ -134,9 +134,9 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.WithUpdateOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.WithUpdateField`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.WithUpdateHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.WithUpdateMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - PUT /network_segment_ranges/{id} sends only changed attrs; no attrs is the commit no-op without HTTP; id attr is rejected; 404 keeps native status with Update context.
   Tests: `network/v2/extensions/networksegmentranges/python_records_test.go:TestPythonSegmentRangeUpdatePutsChangedAttrs`.
@@ -165,20 +165,20 @@ conn.network.delete_network_segment_range(rng)
 ```go
 api := networksegmentranges.New(networkClient)
 rng, err := api.Create(ctx,
-    networksegmentranges.WithCreateField("name", "vlan-100"),
-    networksegmentranges.WithCreateField("network_type", "vlan"),
-    networksegmentranges.WithCreateField("physical_network", "physnet1"),
-    networksegmentranges.WithCreateField("minimum", 100),
-    networksegmentranges.WithCreateField("maximum", 199),
-    networksegmentranges.WithCreateField("shared", true))
+    request.Field("name", "vlan-100"),
+    request.Field("network_type", "vlan"),
+    request.Field("physical_network", "physnet1"),
+    request.Field("minimum", 100),
+    request.Field("maximum", 199),
+    request.Field("shared", true))
 if err != nil {
     return err
 }
 id := rng.Text("id")
-if _, err := api.Update(ctx, id, networksegmentranges.WithUpdateField("maximum", 299)); err != nil {
+if _, err := api.Update(ctx, id, request.Field("maximum", 299)); err != nil {
     return err
 }
-for item, err := range api.List(ctx, networksegmentranges.WithListQuery("network_type", "vlan")) {
+for item, err := range api.List(ctx, request.Query("network_type", "vlan")) {
     if err != nil {
         return err
     }

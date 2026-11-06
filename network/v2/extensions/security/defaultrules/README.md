@@ -14,9 +14,9 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultrules.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultrules.WithCreateOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultrules.WithCreateField`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultrules.WithCreateHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultrules.WithCreateMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultrules.WithCreateIfMatch`
 
 - POST /default-security-group-rules maps ether_type to ethertype, sends the if_match Header list joined with ', ' as If-Match, projects int/bool casts, revision_number and the if_match view, rejects non-string if_match before HTTP and reports 409 with Create context.
@@ -37,11 +37,11 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultrules.API.Delete`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultrules.WithDeleteIgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultrules.WithDeleteHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultrules.WithDeleteMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
-- Bodyless DELETE ignores a clean 404 by default, WithDeleteIgnoreMissing(false) returns it and 204 is a plain receipt.
+- Bodyless DELETE ignores a clean 404 by default, request.IgnoreMissing(false) returns it and 204 is a plain receipt.
   Tests: `network/v2/extensions/security/defaultrules/python_records_test.go:TestPythonDefaultRuleGetAndDelete`.
 
 Python/Go differences:
@@ -60,10 +60,10 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultrules.API.Find`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultrules.WithFindOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultrules.WithFindIgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultrules.WithFindQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultrules.WithFindHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultrules.WithFindMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - Find GETs the literal ID with the find query, falls back on a clean 404 to a complete list without a name hint (no name QueryParameter) and returns nil or ErrNotFound when missing.
   Tests: `network/v2/extensions/security/defaultrules/python_records_test.go:TestPythonDefaultRuleFindHasNoNameHint`.
@@ -85,8 +85,8 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultrules.API.Get`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultrules.WithGetFields`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultrules.WithGetHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultrules.WithGetMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - GET /default-security-group-rules/{id} maps fields attribute names to wire names (ether_type to ethertype) and reports 404 with Get context.
   Tests: `network/v2/extensions/security/defaultrules/python_records_test.go:TestPythonDefaultRuleGetAndDelete`.
@@ -107,13 +107,13 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultrules.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultrules.API.All`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultrules.WithListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultrules.WithListQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultrules.WithListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultrules.WithListMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultrules.WithListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultrules.WithListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultrules.WithListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultrules.WithListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 
 - List maps ether_type to the ethertype query, encodes bools as True, filters name locally, discards unknown kwargs, follows default_security_group_rules_links and reports 401 with List context.
   Tests: `network/v2/extensions/security/defaultrules/python_records_test.go:TestPythonDefaultRuleListMapsQueryAliases`.
@@ -142,16 +142,16 @@ conn.network.delete_default_security_group_rule(rule)
 ```go
 api := defaultrules.New(networkClient)
 rule, err := api.Create(ctx,
-    defaultrules.WithCreateField("direction", "ingress"),
-    defaultrules.WithCreateField("ether_type", "IPv4"),
-    defaultrules.WithCreateField("protocol", "tcp"),
-    defaultrules.WithCreateField("port_range_min", 22),
-    defaultrules.WithCreateField("port_range_max", 22),
-    defaultrules.WithCreateField("used_in_default_sg", true))
+    request.Field("direction", "ingress"),
+    request.Field("ether_type", "IPv4"),
+    request.Field("protocol", "tcp"),
+    request.Field("port_range_min", 22),
+    request.Field("port_range_max", 22),
+    request.Field("used_in_default_sg", true))
 if err != nil {
     return err
 }
-for item, err := range api.List(ctx, defaultrules.WithListQuery("ether_type", "IPv4")) {
+for item, err := range api.List(ctx, request.Query("ether_type", "IPv4")) {
     if err != nil {
         return err
     }

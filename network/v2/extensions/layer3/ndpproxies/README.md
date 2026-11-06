@@ -14,9 +14,9 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.WithCreateOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.WithCreateField`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.WithCreateHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.WithCreateMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - POST /ndp_proxies sends provided attrs (null and unknown attrs kept) under ndp_proxy, keeps the untyped revision_number and unknown tenant_id, rejects constructor controls before HTTP and reports 400 with Create context.
   Tests: `network/v2/extensions/layer3/ndpproxies/python_records_test.go:TestPythonNDPProxyCreateSendsProvidedAttrs`.
@@ -36,8 +36,8 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.API.Get`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.WithGetFields`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.WithGetHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.WithGetMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - GET /ndp_proxies/{id} sends repeated fields, escapes the literal ID and reports 404 with Get context.
   Tests: `network/v2/extensions/layer3/ndpproxies/python_records_test.go:TestPythonNDPProxyGetUpdateAndDelete`.
@@ -57,10 +57,10 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.API.Find`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.WithFindOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.WithFindIgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.WithFindQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.WithFindHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.WithFindMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - Find GETs the literal ID, falls back on clean 403/404 to a complete name-hinted list that follows ndp_proxies_links, and returns nil or ErrNotFound when missing.
   Tests: `network/v2/extensions/layer3/ndpproxies/python_records_test.go:TestPythonNDPProxyFindFallsBackToCompleteNameList`.
@@ -81,11 +81,11 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.API.Delete`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.WithDeleteIgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.WithDeleteHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.WithDeleteMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
-- Bodyless DELETE ignores a clean 404 by default, WithDeleteIgnoreMissing(false) returns it and 204 is a plain receipt.
+- Bodyless DELETE ignores a clean 404 by default, request.IgnoreMissing(false) returns it and 204 is a plain receipt.
   Tests: `network/v2/extensions/layer3/ndpproxies/python_records_test.go:TestPythonNDPProxyGetUpdateAndDelete`.
 
 Python/Go differences:
@@ -105,12 +105,12 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.API.All`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.WithListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.WithListQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.WithListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.WithListMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.WithListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.WithListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.WithListMaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
 
 - List reads only the first page despite ndp_proxies_links, sends declared query parameters, filters undeclared-query Body attrs locally, rejects a paginated kwarg before HTTP and reports 500 with List context.
   Tests: `network/v2/extensions/layer3/ndpproxies/python_records_test.go:TestPythonNDPProxyListReadsOnlyTheFirstPage`.
@@ -132,9 +132,9 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.WithUpdateOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.WithUpdateField`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.WithUpdateHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.WithUpdateMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - PUT /ndp_proxies/{id} sends only changed attrs, the empty update sends nothing and 409 keeps Update context.
   Tests: `network/v2/extensions/layer3/ndpproxies/python_records_test.go:TestPythonNDPProxyGetUpdateAndDelete`.
@@ -162,17 +162,17 @@ conn.network.delete_ndp_proxy(proxy)
 ```go
 api := ndpproxies.New(networkClient)
 proxy, err := api.Create(ctx,
-    ndpproxies.WithCreateField("router_id", routerID),
-    ndpproxies.WithCreateField("port_id", portID),
-    ndpproxies.WithCreateField("ip_address", "2001:db8::10"))
+    request.Field("router_id", routerID),
+    request.Field("port_id", portID),
+    request.Field("ip_address", "2001:db8::10"))
 if err != nil {
     return err
 }
 id := proxy.Text("id")
-if _, err := api.Update(ctx, id, ndpproxies.WithUpdateField("description", "web")); err != nil {
+if _, err := api.Update(ctx, id, request.Field("description", "web")); err != nil {
     return err
 }
-for item, err := range api.List(ctx, ndpproxies.WithListQuery("router_id", routerID)) {
+for item, err := range api.List(ctx, request.Query("router_id", routerID)) {
     if err != nil {
         return err
     }

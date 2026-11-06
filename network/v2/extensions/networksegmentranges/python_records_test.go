@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"io"
 	"net/http"
 	"reflect"
@@ -81,9 +82,9 @@ func TestPythonSegmentRangeCreateSendsProvidedAttrs(t *testing.T) {
 	api := pythonSegmentRangeAPI(t, &calls, func(*http.Request) (int, string) {
 		return 201, `{"network_segment_range":{"id":"r1","name":"vlan","network_type":"vlan","minimum":"100","maximum":200,"shared":1,"default":false,"used":{},"available":[100],"tenant_id":"p","revision_number":2}}`
 	})
-	v, err := api.Create(context.Background(), networksegmentranges.WithCreateField("name", "vlan"), networksegmentranges.WithCreateField("network_type", "vlan"),
-		networksegmentranges.WithCreateField("minimum", 100), networksegmentranges.WithCreateField("maximum", 200), networksegmentranges.WithCreateField("shared", false),
-		networksegmentranges.WithCreateField("project_id", nil), networksegmentranges.WithCreateField("x_extension", true), networksegmentranges.WithCreateField("microversion", "ignored"))
+	v, err := api.Create(context.Background(), request.Field("name", "vlan"), request.Field("network_type", "vlan"),
+		request.Field("minimum", 100), request.Field("maximum", 200), request.Field("shared", false),
+		request.Field("project_id", nil), request.Field("x_extension", true), request.Field("microversion", "ignored"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -109,11 +110,11 @@ func TestPythonSegmentRangeCreateSendsProvidedAttrs(t *testing.T) {
 		t.Fatal("Resource.create has no required-field precheck", err, calls)
 	}
 	calls = nil
-	if _, err := api.Create(context.Background(), networksegmentranges.WithCreateField("base_path", "/x")); !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
+	if _, err := api.Create(context.Background(), request.Field("base_path", "/x")); !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
 		t.Fatal("route control fails before HTTP", err, calls)
 	}
 	api = pythonSegmentRangeAPI(t, &calls, func(*http.Request) (int, string) { return 409, `{"NeutronError":{}}` })
-	_, err = api.Create(context.Background(), networksegmentranges.WithCreateField("name", "vlan"))
+	_, err = api.Create(context.Background(), request.Field("name", "vlan"))
 	pythonSegmentRangeStatus(t, err, 409)
 	pythonSegmentRangeOperation(t, err, "Create")
 }
@@ -159,7 +160,7 @@ func TestPythonSegmentRangeUpdatePutsChangedAttrs(t *testing.T) {
 	api := pythonSegmentRangeAPI(t, &calls, func(*http.Request) (int, string) {
 		return 200, `{"network_segment_range":{"id":"r1","name":"new","maximum":300}}`
 	})
-	v, err := api.Update(context.Background(), "r1", networksegmentranges.WithUpdateField("name", "new"), networksegmentranges.WithUpdateField("maximum", 300))
+	v, err := api.Update(context.Background(), "r1", request.Field("name", "new"), request.Field("maximum", 300))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -176,11 +177,11 @@ func TestPythonSegmentRangeUpdatePutsChangedAttrs(t *testing.T) {
 		t.Fatal("no changed attribute sends nothing", v, err, calls)
 	}
 	pythonSegmentRangeField(t, v, "id", `"r1"`)
-	if _, err := api.Update(context.Background(), "r1", networksegmentranges.WithUpdateField("id", "other")); !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
+	if _, err := api.Update(context.Background(), "r1", request.Field("id", "other")); !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
 		t.Fatal("id duplicates the update identity", err, calls)
 	}
 	api = pythonSegmentRangeAPI(t, &calls, func(*http.Request) (int, string) { return 404, `missing` })
-	_, err = api.Update(context.Background(), "r1", networksegmentranges.WithUpdateField("name", "x"))
+	_, err = api.Update(context.Background(), "r1", request.Field("name", "x"))
 	pythonSegmentRangeStatus(t, err, 404)
 	pythonSegmentRangeOperation(t, err, "Update")
 }
@@ -195,7 +196,7 @@ func TestPythonSegmentRangeDeleteIgnoresMissingByDefault(t *testing.T) {
 	}{
 		{"deleted", 204, nil, false, false},
 		{"missing ignored", 404, nil, true, false},
-		{"missing reported", 404, []networksegmentranges.DeleteOption{networksegmentranges.WithDeleteIgnoreMissing(false)}, false, true},
+		{"missing reported", 404, []networksegmentranges.DeleteOption{request.IgnoreMissing(false)}, false, true},
 		{"conflict", 409, nil, false, true},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
@@ -229,8 +230,8 @@ func TestPythonSegmentRangeListQueryFiltersAndLinksPaging(t *testing.T) {
 		return 200, `{"network_segment_ranges":[]}`
 	})
 	var ids []string
-	for v, err := range api.List(context.Background(), networksegmentranges.WithListQuery("network_type", "vlan"), networksegmentranges.WithListLimit(2),
-		networksegmentranges.WithListQuery("id", "c"), networksegmentranges.WithListQuery("unknown", "dropped")) {
+	for v, err := range api.List(context.Background(), request.Query("network_type", "vlan"), request.Limit(2),
+		request.Query("id", "c"), request.Query("unknown", "dropped")) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -248,7 +249,7 @@ func TestPythonSegmentRangeListQueryFiltersAndLinksPaging(t *testing.T) {
 	}
 
 	calls = nil
-	values, err := api.All(context.Background(), networksegmentranges.WithListPaginated(false))
+	values, err := api.All(context.Background(), request.Paginated(false))
 	if err != nil || len(values) != 2 || len(calls) != 1 || calls[0].query != "" {
 		t.Fatal("paginated=False reads one page", values, err, calls)
 	}
@@ -277,7 +278,7 @@ func TestPythonSegmentRangeFindFallsBackToNameList(t *testing.T) {
 			}
 			return 200, `{"network_segment_ranges":[{"id":"r1","name":"vlan","shared":true},{"id":"r2","name":"other"}]}`
 		})
-		v, err := api.Find(context.Background(), "vlan", networksegmentranges.WithFindQuery("shared", true))
+		v, err := api.Find(context.Background(), "vlan", request.Query("shared", true))
 		if err != nil || v.Text("id") != "r1" || len(calls) != 2 {
 			t.Fatal(v, err, calls)
 		}
@@ -296,7 +297,7 @@ func TestPythonSegmentRangeFindFallsBackToNameList(t *testing.T) {
 		if v, err := api.Find(context.Background(), "none"); v != nil || err != nil {
 			t.Fatal(v, err)
 		}
-		_, err := api.Find(context.Background(), "none", networksegmentranges.WithFindIgnoreMissing(false))
+		_, err := api.Find(context.Background(), "none", request.IgnoreMissing(false))
 		if !errors.Is(err, resource.ErrNotFound) {
 			t.Fatal(err)
 		}

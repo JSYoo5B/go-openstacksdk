@@ -14,9 +14,9 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.API.Create`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.WithCreateOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.WithCreateField`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.WithCreateHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.WithCreateMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.WithCreateIfMatch`
 
 - POST /security-groups-default-statefulness sends provided attrs under security_group_default_statefulness without If-Match, projects stateful/revision_number casts and unknown tenant_id, and reports 409 with Create context.
@@ -37,11 +37,11 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.API.Delete`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.WithDeleteIgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.WithDeleteHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.WithDeleteMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
-- Bodyless DELETE ignores a clean 404 by default and WithDeleteIgnoreMissing(false) returns it with Delete context.
+- Bodyless DELETE ignores a clean 404 by default and request.IgnoreMissing(false) returns it with Delete context.
   Tests: `network/v2/extensions/security/defaultstatefulness/python_records_test.go:TestPythonStatefulnessDeleteListAndFind`.
 
 Python/Go differences:
@@ -60,12 +60,12 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.API.Find`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.WithFindOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.WithFindIgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.WithFindQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.WithFindHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.WithFindMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
-- Find GETs the literal ID, falls back on a clean 404 to a complete list without a name hint and matches name, returning ErrNotFound with WithFindIgnoreMissing(false).
+- Find GETs the literal ID, falls back on a clean 404 to a complete list without a name hint and matches name, returning ErrNotFound with request.IgnoreMissing(false).
   Tests: `network/v2/extensions/security/defaultstatefulness/python_records_test.go:TestPythonStatefulnessDeleteListAndFind`.
 
 Python/Go differences:
@@ -85,8 +85,8 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.API.Get`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.WithGetFields`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.WithGetHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.WithGetMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - GET /security-groups-default-statefulness/{id} sends repeated fields and reports 404 with Get context.
   Tests: `network/v2/extensions/security/defaultstatefulness/python_records_test.go:TestPythonStatefulnessCreateAndGet`.
@@ -107,13 +107,13 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.API.All`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.WithListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.WithListQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.WithListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.WithListMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.WithListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.WithListMarker`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.WithListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.WithListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 
 - List sends declared query parameters, filters revision_number locally, follows security_groups_default_statefulness_links, sends Accept: application/json and reports 500 with List context.
   Tests: `network/v2/extensions/security/defaultstatefulness/python_records_test.go:TestPythonStatefulnessDeleteListAndFind`.
@@ -134,9 +134,9 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.WithUpdateOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.WithUpdateField`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.WithUpdateHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.WithUpdateMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.WithUpdateIfMatch`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.WithUpdateRevision`
 
@@ -169,8 +169,8 @@ conn.network.delete_security_groups_default_statefulness(setting)
 ```go
 api := defaultstatefulness.New(networkClient)
 setting, err := api.Create(ctx,
-    defaultstatefulness.WithCreateField("project_id", projectID),
-    defaultstatefulness.WithCreateField("stateful", false))
+    request.Field("project_id", projectID),
+    request.Field("stateful", false))
 if err != nil {
     return err
 }
@@ -178,11 +178,11 @@ id := setting.Text("id")
 var revision int64
 _ = json.Unmarshal(setting.Resource.Body["revision_number"], &revision)
 if _, err := api.Update(ctx, id,
-    defaultstatefulness.WithUpdateField("stateful", true),
+    request.Field("stateful", true),
     defaultstatefulness.WithUpdateRevision(revision)); err != nil {
     return err
 }
-for item, err := range api.List(ctx, defaultstatefulness.WithListQuery("project_id", projectID)) {
+for item, err := range api.List(ctx, request.Query("project_id", projectID)) {
     if err != nil {
         return err
     }
