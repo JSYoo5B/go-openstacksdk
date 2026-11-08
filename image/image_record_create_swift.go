@@ -95,7 +95,7 @@ func (p *preparedImageRecordCreateWorkflow) createUsingTask(root, properties map
 		result.Swift.Cleanup, cleanupErr = service.Objects.DeleteObject(p.ctx, container, p.input.Name, objects.WithDeleteObjectHeaders(p.policy.SwiftHeaders))
 		err = errors.Join(err, cleanupErr, p.check(p.ctx))
 	}()
-	result.TaskWait, err = waitCreatedImageRecordTask(p.preparedImageRecord, result.Task, p.policy.Timeout)
+	result.TaskWait, err = waitCreatedImageRecordTaskWithStrategy(p.preparedImageRecord, result.Task, p.policy.Timeout, imageRecordCreateTaskStrategy(p.policy))
 	if err != nil {
 		var failed *ImageRecordCreateTaskFailureError
 		if errors.As(err, &failed) {

@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
+	"github.com/JSYoo5B/go-openstacksdk/internal/pollschedule"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
@@ -82,10 +83,14 @@ func imageRecordCreateTaskBudget(raw json.RawMessage) (time.Duration, bool, erro
 }
 
 func imageRecordCreateTaskPause(ctx context.Context) error {
+	return imageRecordCreateTaskSleep(ctx, imageRecordCreateTaskInterval)
+}
+
+func imageRecordCreateTaskSleep(ctx context.Context, d time.Duration) error {
 	if err := ctx.Err(); err != nil {
 		return err
 	}
-	timer := time.NewTimer(imageRecordCreateTaskInterval)
+	timer := time.NewTimer(d)
 	defer timer.Stop()
 	select {
 	case <-ctx.Done():
@@ -115,6 +120,15 @@ func imageRecordCreateTaskWaitError(result *ImageRecordCreateTaskWaitResult, err
 
 func waitCreatedImageRecordTask(p *preparedImageRecord, task *ImageRecordCreateTask, timeout json.RawMessage) (*ImageRecordCreateTaskWaitResult, error) {
 	return waitCreatedImageRecordTaskWithPause(p, task, timeout, imageRecordCreateTaskPause)
+}
+
+// waitCreatedImageRecordTaskWithStrategy paces the Task wait by strategy; the
+// default policy is FixedWait of the Source two-second interval.
+func waitCreatedImageRecordTaskWithStrategy(p *preparedImageRecord, task *ImageRecordCreateTask, timeout json.RawMessage, strategy resource.WaitStrategy) (*ImageRecordCreateTaskWaitResult, error) {
+	pacer := pollschedule.NewPacer(strategy.Delay)
+	return waitCreatedImageRecordTaskWithPause(p, task, timeout, func(ctx context.Context) error {
+		return imageRecordCreateTaskSleep(ctx, pacer.Next())
+	})
 }
 
 // A private pause argument gives focused tests deterministic polling boundaries

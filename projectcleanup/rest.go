@@ -85,10 +85,10 @@ func restRemove(path, kind string, codes ...int) func(context.Context, *gophercl
 
 // restAbsent polls GET path/id with the shared resource wait engine until a
 // 404 or a deleted status. Polling errors are returned immediately.
-func restAbsent(path, single string) func(context.Context, *gophercloud.ServiceClient, Candidate, time.Duration, time.Duration) error {
-	return func(ctx context.Context, client *gophercloud.ServiceClient, c Candidate, timeout, interval time.Duration) error {
+func restAbsent(path, single string) func(context.Context, *gophercloud.ServiceClient, Candidate, time.Duration, resource.WaitOption) error {
+	return func(ctx context.Context, client *gophercloud.ServiceClient, c Candidate, timeout time.Duration, pacing resource.WaitOption) error {
 		collection := rest.Collection(restSpec(client, path, single, single, path))
-		return collection.WaitDeleted(ctx, resource.ID(c.ID), resource.WithTimeout(timeout), resource.WithPollInterval(interval))
+		return collection.WaitDeleted(ctx, resource.ID(c.ID), resource.WithTimeout(timeout), pacing)
 	}
 }
 

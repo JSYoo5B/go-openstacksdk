@@ -261,7 +261,7 @@ func (e *execution) wait(c Candidate) {
 		err = fmt.Errorf("%w: absence of %s cannot be observed", resource.ErrUnsupported, c.Ref.SkipName())
 	}
 	if err == nil {
-		err = spec.absent(e.ctx, client, c, e.options.wait, e.options.pollInterval)
+		err = spec.absent(e.ctx, client, c, e.options.wait, e.options.pacing())
 	}
 	e.mu.Lock()
 	outcome := *e.outcomes[c.Ref]

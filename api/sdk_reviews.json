@@ -21638,6 +21638,8 @@
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCreateAllowDuplicates",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCreateWait",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCreateTimeout",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCreateTaskPollInterval",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCreateTaskWaitStrategy",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCreateValidateChecksum",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCreateUseImport",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCreateSize",
@@ -22047,6 +22049,20 @@
           "tests": [
             "image/wait_strategy_test.go:TestImageWaitStrategyOptionsRejectedBeforeHTTP"
           ]
+        },
+        {
+          "behavior": "image.WithImageRecordCreateTaskPollInterval sets a positive fixed pause for the wait, which otherwise keeps the Python two-second interval; a nonpositive value fails with ErrInvalidOption before HTTP and the default is unchanged without it.",
+          "tests": [
+            "image/image_record_create_task_strategy_test.go:TestImageRecordCreateTaskWaitOptionsValidateAndLaterWins",
+            "image/image_record_create_task_strategy_test.go:TestImageRecordCreateTaskWaitStrategyPacesTaskPolls"
+          ]
+        },
+        {
+          "behavior": "image.WithImageRecordCreateTaskWaitStrategy rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, the interval option given before or after it.",
+          "tests": [
+            "image/image_record_create_task_strategy_test.go:TestImageRecordCreateTaskWaitOptionsValidateAndLaterWins",
+            "image/image_record_create_task_strategy_test.go:TestImageRecordCreateTaskWaitStrategyPacesTaskPolls"
+          ]
         }
       ],
       "documentation": [
@@ -22079,7 +22095,9 @@
         "Captured provider/origin/base/type/microversion and source-only nested guards preserve current operation. Full Adapter caching/conditional GET/invalidation/metrics/global request configuration remain SDK-C1; arbitrary session/adapter/response/microversion/base-path injection remains SDK-S1. The global shared objectives and standalone Swift/Task declaration rows are not promoted by this finite modern operation.",
         "Request-owned Task/HTTP timer expiry does not invalidate live parent-source invariants; caller cancellation or real binding/source drift, including joined timeout errors, stays sticky and cannot be bypassed by detached cleanup. Ordinary response closure can cancel native request timers without manufacturing failed Swift uploads.",
         "The modern import phase reuses the owned ImportImageRecord policy: configured legacy store headers are discarded from the copied request client, then an explicit singular selection supplies its fixed header. Source/shared header maps stay unchanged.",
-        "Python waits use a fixed poll interval. CreateImportWaitOpts.WaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and setting it together with the interval field fails with ErrInvalidOption before HTTP."
+        "Python waits use a fixed poll interval. CreateImportWaitOpts.WaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and setting it together with the interval field fails with ErrInvalidOption before HTTP.",
+        "Python pauses a fixed two seconds; image.WithImageRecordCreateTaskPollInterval is a Go-only extension that changes that interval for the call.",
+        "Python waits use a fixed poll interval. image.WithImageRecordCreateTaskWaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of the interval and strategy options wins."
       ],
       "remaining": []
     },
@@ -51435,6 +51453,13 @@
           "tests": [
             "connectiontest/connection_cloud_image_wait_strategy_test.go:TestConnectionCloudImageCreateWaitStrategy"
           ]
+        },
+        {
+          "behavior": "ImageRecordCreateOpts.TaskWaitStrategy (with TaskPollInterval) rejects an invalid or zero-value strategy, or one set together with the interval field, with ErrInvalidOption before HTTP and paces polls by the strategy's pause sequence.",
+          "tests": [
+            "image/image_record_create_task_strategy_test.go:TestImageRecordCreateTaskWaitOptionsValidateAndLaterWins",
+            "image/image_record_create_task_strategy_test.go:TestImageRecordCreateTaskWaitStrategyPacesTaskPolls"
+          ]
         }
       ],
       "documentation": [
@@ -51445,7 +51470,8 @@
       "differences": [
         "Python returns an Image or None and raises ResourceTimeout or the cleanup exception; Go returns CloudImageCreateResult with Created, Volume, wait and Cleanup evidence and joins the timeout with any cleanup failure.",
         "Python keyword arguments become the concrete ImageRecordCreateOption values; the volume is a literal VolumeID and PollInterval is a Go extension for the Cloud wait and its cleanup.",
-        "Python waits use a fixed poll interval. CloudImageCreateRequest.WaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and setting it together with the interval field fails with ErrInvalidOption before HTTP."
+        "Python waits use a fixed poll interval. CloudImageCreateRequest.WaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and setting it together with the interval field fails with ErrInvalidOption before HTTP.",
+        "Python waits use a fixed poll interval. ImageRecordCreateOpts.TaskWaitStrategy (with TaskPollInterval) accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and setting it together with the interval field fails with ErrInvalidOption before HTTP."
       ],
       "remaining": []
     },
@@ -114730,6 +114756,8 @@
         "github.com/JSYoo5B/go-openstacksdk/projectcleanup.WithSelector",
         "github.com/JSYoo5B/go-openstacksdk/projectcleanup.WithParallelism",
         "github.com/JSYoo5B/go-openstacksdk/projectcleanup.WithDeletionWait",
+        "github.com/JSYoo5B/go-openstacksdk/projectcleanup.WithPollInterval",
+        "github.com/JSYoo5B/go-openstacksdk/projectcleanup.WithWaitStrategy",
         "github.com/JSYoo5B/go-openstacksdk/projectcleanup.WithProgressCallback",
         "github.com/JSYoo5B/go-openstacksdk/projectcleanup.WithProgress",
         "github.com/JSYoo5B/go-openstacksdk/projectcleanup.WithAllowIncompletePlan"
@@ -114878,6 +114906,20 @@
             "connectiontest/connection_project_cleanup_progress_channel_test.go:TestProjectCleanupProgressChannelBlockedSendStopsOnCancellation",
             "connectiontest/connection_project_cleanup_progress_channel_test.go:TestProjectCleanupProgressChannelReceiverCancellationStopsLaterCandidates"
           ]
+        },
+        {
+          "behavior": "projectcleanup.WithPollInterval sets a positive fixed pause for the wait, which otherwise keeps the Python two-second interval; a nonpositive value fails with ErrInvalidOption before HTTP and the default is unchanged without it.",
+          "tests": [
+            "connectiontest/connection_project_cleanup_wait_strategy_test.go:TestProjectCleanupWaitStrategyRejectedBeforeAnyRequest",
+            "connectiontest/connection_project_cleanup_wait_strategy_test.go:TestProjectCleanupWaitStrategyPacesAbsenceWaits"
+          ]
+        },
+        {
+          "behavior": "projectcleanup.WithWaitStrategy rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, the interval option given before or after it.",
+          "tests": [
+            "connectiontest/connection_project_cleanup_wait_strategy_test.go:TestProjectCleanupWaitStrategyRejectedBeforeAnyRequest",
+            "connectiontest/connection_project_cleanup_wait_strategy_test.go:TestProjectCleanupWaitStrategyPacesAbsenceWaits"
+          ]
         }
       ],
       "differences": [
@@ -114920,7 +114962,9 @@
         "Python lists networks only after its load balancers are deleted and waited for (Octavia removes the VIP port it created), so a network that held only a deleted load balancer's VIP port is removed in the same run; Go plans networks before any load balancer is deleted, so it ignores the Octavia VIP port (device_owner Octavia, device_id lb-<id>) of a load balancer candidate and makes the network and its subnets depend on that load balancer: they are NotAttempted when the load balancer is not Deleted or AlreadyMissing, whereas Python proceeds after a failed load balancer wait and then skips the network only if the port is still listed.",
         "Python deletes every zone its unqueried list returns, including zones another project shares with the project; dns cleanup excludes zone rows whose project_id names another project or is not reported.",
         "Python deletes the network floating IPs after unsetting their PTR records whatever the unset result; Go does not send a floating IP DELETE while the PTR unset of the same floating IP is Failed, Uncertain or not attempted, so the PTR record is not left without its floating IP.",
-        "Like Python, dns cleanup neither waits for zone deletion (Designate answers 202 and deletes asynchronously) nor for PTR unsets, so DNS candidates are never Deleted; and like Python it unsets every listed PTR row, including rows whose ptrdname is already null, leaving the outcome to Designate's answer."
+        "Like Python, dns cleanup neither waits for zone deletion (Designate answers 202 and deletes asynchronously) nor for PTR unsets, so DNS candidates are never Deleted; and like Python it unsets every listed PTR row, including rows whose ptrdname is already null, leaving the outcome to Designate's answer.",
+        "Python pauses a fixed two seconds; projectcleanup.WithPollInterval is a Go-only extension that changes that interval for the call.",
+        "Python waits use a fixed poll interval. projectcleanup.WithWaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of the interval and strategy options wins."
       ],
       "documentation": [
         "projectcleanup/README.md",

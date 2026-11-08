@@ -81,7 +81,7 @@ func removeLoadBalancer(ctx context.Context, client *gophercloud.ServiceClient, 
 // loadBalancerAbsent polls GET lbaas/loadbalancers/{id} with the shared wait
 // engine. A 404 or provisioning_status DELETED is absence and ERROR fails at
 // once; PENDING_DELETE and every other state keep polling.
-func loadBalancerAbsent(ctx context.Context, client *gophercloud.ServiceClient, c Candidate, timeout, interval time.Duration) error {
+func loadBalancerAbsent(ctx context.Context, client *gophercloud.ServiceClient, c Candidate, timeout time.Duration, pacing resource.WaitOption) error {
 	api := loadbalancers.New(client)
 	collection := resource.NewCollection(resource.Adapter[loadbalancers.LoadBalancer]{
 		Kind: "loadbalancers",
@@ -100,5 +100,5 @@ func loadBalancerAbsent(ctx context.Context, client *gophercloud.ServiceClient, 
 			return value, nil
 		},
 	})
-	return collection.WaitDeleted(ctx, resource.ID(c.ID), resource.WithTimeout(timeout), resource.WithPollInterval(interval))
+	return collection.WaitDeleted(ctx, resource.ID(c.ID), resource.WithTimeout(timeout), pacing)
 }

@@ -10,15 +10,21 @@ import (
 	"maps"
 	"slices"
 	"strings"
+	"time"
 	"unicode/utf8"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 // ImageRecordCreateOpts owns Source-domain option values. Nil remains omitted
 // until the workflow applies its ordered defaults; explicit null, false, empty
 // data/store selections and arbitrary JSON values retain their presence. Meta
 // bypasses later property conversion; Attributes follows ordinary kwargs.
+// TaskPollInterval and TaskWaitStrategy are Go-only extensions for the Task
+// import wait, which otherwise pauses a fixed two seconds as in Python: a
+// positive fixed interval or a resource.WaitStrategy. Setting both, a
+// nonpositive interval or an invalid strategy fails before HTTP.
 type ImageRecordCreateOpts struct {
 	Container                                          *string
 	MD5, SHA256, DiskFormat, ContainerFormat, Tags     json.RawMessage
@@ -27,6 +33,8 @@ type ImageRecordCreateOpts struct {
 	Meta, Attributes                                   map[string]any
 	Import                                             ImageRecordImportOpts
 	Headers, SwiftHeaders                              map[string]string
+	TaskPollInterval                                   *time.Duration
+	TaskWaitStrategy                                   *resource.WaitStrategy
 	optionContext                                      context.Context
 	optionCheck                                        func(context.Context) error
 }
@@ -105,6 +113,40 @@ func WithImageRecordCreateUseImport(value any) ImageRecordCreateOption {
 func WithImageRecordCreateSize(value any) ImageRecordCreateOption {
 	return withImageRecordCreateValue(value, func(c *ImageRecordCreateOpts, r json.RawMessage) { c.Size = r })
 }
+
+// WithImageRecordCreateTaskPollInterval sets a fixed positive pause for the
+// Task import wait (default two seconds). It and
+// WithImageRecordCreateTaskWaitStrategy replace each other; the later one wins.
+func WithImageRecordCreateTaskPollInterval(value time.Duration) ImageRecordCreateOption {
+	return request.Custom(func(config *ImageRecordCreateOpts) error {
+		owned := value
+		config.TaskPollInterval, config.TaskWaitStrategy = &owned, nil
+		return nil
+	})
+}
+
+// WithImageRecordCreateTaskWaitStrategy replaces the fixed pause of the Task
+// import wait with value, a Go-only extension. An invalid strategy fails with
+// resource.ErrInvalidOption before HTTP.
+func WithImageRecordCreateTaskWaitStrategy(value resource.WaitStrategy) ImageRecordCreateOption {
+	return request.Custom(func(config *ImageRecordCreateOpts) error {
+		owned := value
+		config.TaskPollInterval, config.TaskWaitStrategy = nil, &owned
+		return nil
+	})
+}
+
+// imageRecordCreateTaskStrategy returns the Task wait pauses of a prepared policy.
+func imageRecordCreateTaskStrategy(config ImageRecordCreateOpts) resource.WaitStrategy {
+	if config.TaskWaitStrategy != nil {
+		return *config.TaskWaitStrategy
+	}
+	if config.TaskPollInterval != nil {
+		return resource.FixedWait(*config.TaskPollInterval)
+	}
+	return resource.FixedWait(imageRecordCreateTaskInterval)
+}
+
 func withImageRecordCreateValue(value any, set func(*ImageRecordCreateOpts, json.RawMessage)) ImageRecordCreateOption {
 	snapshot, captureErr := captureImageRecordImportJSON(nil, nil, value)
 	return request.Custom(func(config *ImageRecordCreateOpts) error {
@@ -240,6 +282,14 @@ func copyImageRecordCreateOpts(ctx context.Context, check func(context.Context) 
 	}
 	value.Headers = copyImageRecordHeaders(value.Headers)
 	value.SwiftHeaders = copyImageRecordHeaders(value.SwiftHeaders)
+	if value.TaskPollInterval != nil {
+		owned := *value.TaskPollInterval
+		value.TaskPollInterval = &owned
+	}
+	if value.TaskWaitStrategy != nil {
+		owned := *value.TaskWaitStrategy
+		value.TaskWaitStrategy = &owned
+	}
 	value.Meta, value.Attributes = maps.Clone(value.Meta), maps.Clone(value.Attributes)
 	var err error
 	value.Import, err = copyImageRecordImportOpts(ctx, check, value.Import)
@@ -282,6 +332,12 @@ func prepareImageRecordCreateOptions(ctx context.Context, check func(context.Con
 	config.Headers, err = imageMutationHeaders(config.Headers, false, "")
 	if err == nil {
 		config.SwiftHeaders, err = imageRecordCreateSwiftHeaders(config.SwiftHeaders)
+	}
+	if err == nil && config.TaskPollInterval != nil && *config.TaskPollInterval <= 0 {
+		err = uploadInvalid("image create task poll interval must be positive")
+	}
+	if err == nil {
+		err = validateImageWaitStrategy(config.TaskPollInterval, config.TaskWaitStrategy)
 	}
 	return config, errors.Join(err, imageRecordImportCheck(ctx, check))
 }

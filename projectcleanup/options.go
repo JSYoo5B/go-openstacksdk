@@ -28,6 +28,7 @@ type executeOptions struct {
 	progress     chan<- Event
 	allowPartial bool
 	pollInterval time.Duration
+	strategy     *resource.WaitStrategy
 }
 
 // DefaultDeletionWait is the per-candidate absence wait budget, matching the
@@ -121,6 +122,42 @@ func WithDeletionWait(d time.Duration) ExecuteOption {
 		o.wait = d
 		return nil
 	}
+}
+
+// WithPollInterval sets the fixed pause of each absence wait (default two
+// seconds, as in Python's wait_for_delete). It and WithWaitStrategy replace
+// each other; the later one wins. A nonpositive interval fails before any
+// request.
+func WithPollInterval(interval time.Duration) ExecuteOption {
+	return func(o *executeOptions) error {
+		if interval <= 0 {
+			return invalid("poll interval must be positive")
+		}
+		o.pollInterval, o.strategy = interval, nil
+		return nil
+	}
+}
+
+// WithWaitStrategy replaces the fixed pause of each absence wait with
+// strategy, a Go-only extension; every candidate's wait starts the strategy
+// from its first pause. An invalid strategy fails with
+// resource.ErrInvalidOption before any request.
+func WithWaitStrategy(strategy resource.WaitStrategy) ExecuteOption {
+	return func(o *executeOptions) error {
+		if err := strategy.Validate(); err != nil {
+			return err
+		}
+		o.strategy = &strategy
+		return nil
+	}
+}
+
+// pacing is the resource wait option that selects the absence wait pauses.
+func (o *executeOptions) pacing() resource.WaitOption {
+	if o.strategy != nil {
+		return resource.WithWaitStrategy(*o.strategy)
+	}
+	return resource.WithPollInterval(o.pollInterval)
 }
 
 // WithProgressCallback calls the callback for each candidate state change.

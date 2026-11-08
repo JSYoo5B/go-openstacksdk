@@ -800,6 +800,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/projectcleanup.WithSelector`
 - `github.com/JSYoo5B/go-openstacksdk/projectcleanup.WithParallelism`
 - `github.com/JSYoo5B/go-openstacksdk/projectcleanup.WithDeletionWait`
+- `github.com/JSYoo5B/go-openstacksdk/projectcleanup.WithPollInterval`
+- `github.com/JSYoo5B/go-openstacksdk/projectcleanup.WithWaitStrategy`
 - `github.com/JSYoo5B/go-openstacksdk/projectcleanup.WithProgressCallback`
 - `github.com/JSYoo5B/go-openstacksdk/projectcleanup.WithProgress`
 - `github.com/JSYoo5B/go-openstacksdk/projectcleanup.WithAllowIncompletePlan`
@@ -841,6 +843,11 @@ Go API:
 
 - WithProgress sends every candidate state change on a caller-owned channel in the callback order; sends never overlap and finish before Execute returns, and nothing is sent once the context is done or execution stopped. A context that ends while a send blocks stops new mutations like cancellation; a nil channel is invalid. With WithProgressCallback also set the callback runs first; its error stops new mutations and nothing is sent for that event.
   Tests: `connectiontest/connection_project_cleanup_progress_channel_test.go:TestProjectCleanupProgressChannelFollowsCallbackOrder`, `connectiontest/connection_project_cleanup_progress_channel_test.go:TestProjectCleanupProgressCallbackErrorSendsNothing`, `connectiontest/connection_project_cleanup_progress_channel_test.go:TestProjectCleanupProgressChannelBlockedSendStopsOnCancellation`, `connectiontest/connection_project_cleanup_progress_channel_test.go:TestProjectCleanupProgressChannelReceiverCancellationStopsLaterCandidates`.
+- projectcleanup.WithPollInterval sets a positive fixed pause for the wait, which otherwise keeps the Python two-second interval; a nonpositive value fails with ErrInvalidOption before HTTP and the default is unchanged without it.
+  Tests: `connectiontest/connection_project_cleanup_wait_strategy_test.go:TestProjectCleanupWaitStrategyRejectedBeforeAnyRequest`, `connectiontest/connection_project_cleanup_wait_strategy_test.go:TestProjectCleanupWaitStrategyPacesAbsenceWaits`.
+- projectcleanup.WithWaitStrategy rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, the interval option given before or after it.
+  Tests: `connectiontest/connection_project_cleanup_wait_strategy_test.go:TestProjectCleanupWaitStrategyRejectedBeforeAnyRequest`, `connectiontest/connection_project_cleanup_wait_strategy_test.go:TestProjectCleanupWaitStrategyPacesAbsenceWaits`.
+
 Python/Go differences:
 
 - Python's dry_run=True runs the cleanup code without deleting and dry_run=False discovers again while deleting; Go discovers once in PlanProjectCleanup and ExecuteProjectCleanup acts only on that plan, refusing modified plans and a different current project.
@@ -883,6 +890,8 @@ Python/Go differences:
 - Python deletes every zone its unqueried list returns, including zones another project shares with the project; dns cleanup excludes zone rows whose project_id names another project or is not reported.
 - Python deletes the network floating IPs after unsetting their PTR records whatever the unset result; Go does not send a floating IP DELETE while the PTR unset of the same floating IP is Failed, Uncertain or not attempted, so the PTR record is not left without its floating IP.
 - Like Python, dns cleanup neither waits for zone deletion (Designate answers 202 and deletes asynchronously) nor for PTR unsets, so DNS candidates are never Deleted; and like Python it unsets every listed PTR row, including rows whose ptrdname is already null, leaving the outcome to Designate's answer.
+- Python pauses a fixed two seconds; projectcleanup.WithPollInterval is a Go-only extension that changes that interval for the call.
+- Python waits use a fixed poll interval. projectcleanup.WithWaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of the interval and strategy options wins.
 
 ### `python:cloud/openstackcloud/_OpenStackCloudMixin/has_service`
 

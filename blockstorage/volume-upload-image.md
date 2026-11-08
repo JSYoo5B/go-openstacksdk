@@ -95,12 +95,15 @@ Go API:
   Tests: `connectiontest/connection_cloud_image_create_test.go:TestConnectionCloudImageCreateVolumeBodyAndPreflight`.
 - CloudImageCreateRequest.WaitStrategy rejects an invalid or zero-value strategy, or one set together with the interval field, with ErrInvalidOption before HTTP and paces polls by the strategy's pause sequence.
   Tests: `connectiontest/connection_cloud_image_wait_strategy_test.go:TestConnectionCloudImageCreateWaitStrategy`.
+- ImageRecordCreateOpts.TaskWaitStrategy (with TaskPollInterval) rejects an invalid or zero-value strategy, or one set together with the interval field, with ErrInvalidOption before HTTP and paces polls by the strategy's pause sequence.
+  Tests: `image/image_record_create_task_strategy_test.go:TestImageRecordCreateTaskWaitOptionsValidateAndLaterWins`, `image/image_record_create_task_strategy_test.go:TestImageRecordCreateTaskWaitStrategyPacesTaskPolls`.
 
 Python/Go differences:
 
 - Python returns an Image or None and raises ResourceTimeout or the cleanup exception; Go returns CloudImageCreateResult with Created, Volume, wait and Cleanup evidence and joins the timeout with any cleanup failure.
 - Python keyword arguments become the concrete ImageRecordCreateOption values; the volume is a literal VolumeID and PollInterval is a Go extension for the Cloud wait and its cleanup.
 - Python waits use a fixed poll interval. CloudImageCreateRequest.WaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and setting it together with the interval field fails with ErrInvalidOption before HTTP.
+- Python waits use a fixed poll interval. ImageRecordCreateOpts.TaskWaitStrategy (with TaskPollInterval) accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and setting it together with the interval field fails with ErrInvalidOption before HTTP.
 
 ## Usage examples
 

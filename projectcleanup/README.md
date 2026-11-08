@@ -59,6 +59,8 @@ for _, o := range result.Outcomes {
 |---|---|
 | `WithParallelism(n)` | Up to `n` mutations of the same stage at once. Default 1 (sequential). Stages never overlap. |
 | `WithDeletionWait(d)` | Budget of each absence wait (default 120 s, Python's `wait_for_delete` default). The context bounds the whole call. |
+| `WithPollInterval(d)` | Fixed pause between absence reads (default 2 s, Python's `wait_for_delete` interval). Must be positive. |
+| `WithWaitStrategy(s)` | Go-only: pauses between absence reads follow a `resource.WaitStrategy` (fixed, linear or exponential, optional jitter); each candidate's wait starts from the first pause. It and `WithPollInterval` replace each other, the later one winning; an invalid or zero-value strategy fails before any request. |
 | `WithProgressCallback(fn)` | Synchronous callback for every candidate state change. Calls never overlap and run on the goroutine that changed the state. A returned error stops new mutations like cancellation and is returned. |
 | `WithProgress(ch)` | Sends an `Event` on a caller-owned channel for every candidate state change, after the callback when both are set (nothing is sent for an event whose callback failed). Sends never overlap and block until received or the context ends, so drain the channel; the SDK never closes it, sends nothing once the context is done or execution stopped, and finishes every send before returning. A context that ends during a blocked send stops new mutations like cancellation. A nil channel is an invalid option. |
 | `WithAllowIncompletePlan()` | Executes a plan that has discovery errors. Without it such a plan is refused with `ErrIncompletePlan`. |

@@ -5,6 +5,8 @@ import (
 	"time"
 
 	"github.com/gophercloud/gophercloud/v2"
+
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 // serviceCleanup is one service's self-contained cleanup unit. An
@@ -35,7 +37,7 @@ type kindSpec struct {
 	remove func(ctx context.Context, client *gophercloud.ServiceClient, c Candidate) error
 	// absent polls until the resource is gone, within timeout and ctx.
 	// Required when wait is set.
-	absent func(ctx context.Context, client *gophercloud.ServiceClient, c Candidate, timeout, interval time.Duration) error
+	absent func(ctx context.Context, client *gophercloud.ServiceClient, c Candidate, timeout time.Duration, pacing resource.WaitOption) error
 }
 
 // implementations maps a Python service name to its registered cleanup.
