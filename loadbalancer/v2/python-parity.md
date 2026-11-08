@@ -13,7 +13,7 @@ This guide compares the Go Octavia packages with the pinned Python `openstack.lo
 | `configure_amphora` | `amphorae.API.Configure` (bodyless `PUT /octavia/amphorae/{id}/config`, 202 only) |
 | `create_member`, `get_member`, `update_member`, `delete_member`, `members`, `find_member` | `pools.API.CreateMember`, `GetMember`, `UpdateMember`, `DeleteMember`, `ListMembers`, or a `pools.API.Members` scope bound to one pool (`FindIdentity` mirrors Python's ID-then-name lookup) |
 | `create_l7_rule`, `get_l7_rule`, `update_l7_rule`, `delete_l7_rule`, `l7_rules`, `find_l7_rule` | `l7policies.API.CreateRule`, `GetRule`, `UpdateRule`, `DeleteRule`, `ListRules`, or an `l7policies.API.Rules` scope bound to one policy |
-| `wait_for_load_balancer`, `wait_for_status`, `wait_for_delete` | `API.WaitFor` / `API.WaitForDeletion` of the matching package; `resource.WithStatusAttribute`, `WithFailureStates`, `WithTimeout`, `WithUnlimitedWait` and `WithPollInterval` select the Python `attribute`, `failures`, `wait` and `interval` arguments |
+| `wait_for_load_balancer`, `wait_for_status`, `wait_for_delete` | `API.WaitFor` / `API.WaitForDeletion` of the matching package; `resource.WithStatusAttribute`, `WithFailureStates`, `WithTimeout`, `WithUnlimitedWait` and `WithPollInterval` select the Python `attribute`, `failures`, `wait` and `interval` arguments; the Go-only `WithWaitStrategy` replaces the fixed interval with a linear or exponential schedule and optional jitter |
 | `providers`, `provider_flavor_capabilities` | `providers.API.List`, `providers.API.ListFlavorCapabilities` |
 | `quotas`, `get_quota`, `get_quota_default`, `delete_quota` | `quotas.API.ListProjects`, `ProjectQuotaScope.Get`, `API.Defaults`, `ProjectQuotaScope.Reset` |
 

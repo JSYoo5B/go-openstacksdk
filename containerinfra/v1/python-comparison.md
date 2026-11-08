@@ -27,7 +27,7 @@ This page records how the pinned openstacksdk `container_infrastructure_manageme
 
 ## Waiting
 
-`WaitFor` resolves the reference once, then polls the same ID every two seconds (`resource.WithPollInterval` changes it). The target status is compared case-insensitively. Differences from `wait_for_status`:
+`WaitFor` resolves the reference once, then polls the same ID every two seconds (`resource.WithPollInterval` changes it, and `resource.WithWaitStrategy` selects a Go-only linear or exponential schedule with optional jitter). The target status is compared case-insensitively. Differences from `wait_for_status`:
 
 - The default Go timeout is five minutes; `resource.WithTimeout` changes it and `resource.WithUnlimitedWait()` removes it (Python defaults to waiting forever). Parent context deadlines always apply.
 - Python treats only the exact status `ERROR` as failure. The Go default also treats any status that starts with `error`, ends with `fail` or `failed`, or equals `killed` as a failure (for example `CREATE_FAILED`). `resource.WithFailureStates("ERROR")` reproduces the Python list; an empty list disables failure detection.

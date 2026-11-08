@@ -42,7 +42,7 @@ This example performs authenticated reads. [Create-server](examples/create-serve
 
 - Shared provider authentication, service caching, endpoint selection, TLS, and explicit or negotiated microversions.
 - Generated Gophercloud facades with concrete options and SDK-owned request builders; SDK-owned APIs extend selected services absent from the pinned dependency.
-- Resource collections with exact name matching, duplicate detection, missing-resource policies, context cancellation, lazy pagination, and resource-specific waits.
+- Resource collections with exact name matching, duplicate detection, missing-resource policies, context cancellation, lazy pagination, and resource-specific waits. Waits poll at a fixed interval by default; a per-call wait strategy selects a linear or exponential schedule with optional jitter.
 - Parent scopes for child resources, quotas, metadata, and compound identities.
 - Selected compute/network/storage/image workflows with ordered requests and partial-success evidence.
 - Owned record APIs preserve declared views, actual wire values, raw bodies, headers, and status according to each operation's contract.

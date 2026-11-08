@@ -15,6 +15,6 @@ Python `find_zone` first tries a GET by identifier and falls back to a name list
 
 Python `create_zone` silently drops `email` and `ttl` for `type == "SECONDARY"`. `CreateOpts` sends exactly what the caller sets; omit those fields for secondary zones.
 
-Python `wait_for_status` and `wait_for_delete` over zones correspond to `API.WaitFor` and `API.WaitForDeletion`: case-insensitive status comparison, `ERROR` ends the wait with `resource.ErrFailedState`, and deletion completes on a 404. Defaults differ (Go: five-minute timeout, two-second interval); tune them with `resource.WithTimeout` and `resource.WithPollInterval`.
+Python `wait_for_status` and `wait_for_delete` over zones correspond to `API.WaitFor` and `API.WaitForDeletion`: case-insensitive status comparison, `ERROR` ends the wait with `resource.ErrFailedState`, and deletion completes on a 404. Defaults differ (Go: five-minute timeout, two-second interval); tune them with `resource.WithTimeout` and `resource.WithPollInterval`, or replace the fixed interval with the Go-only `resource.WithWaitStrategy`.
 
 Tests: `api/py_dns_zones_test.go`, `api/py_dns_misc_test.go`.
