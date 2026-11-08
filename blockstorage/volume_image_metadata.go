@@ -2,55 +2,22 @@ package blockstorage
 
 import (
 	"context"
-	"encoding/json"
+	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cinderaction"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type VolumeImageMetadataOpts = cinderaction.ImageMetadataOptions
-type VolumeImageMetadataOption = cinderaction.ImageMetadataOption
+type VolumeImageMetadataOpts = volumes.VolumeImageMetadataOpts
+type VolumeImageMetadataOption = volumes.VolumeImageMetadataOption
 
-// WithVolumeImageMetadataOptions replaces the entire owned policy.
-func WithVolumeImageMetadataOptions(value VolumeImageMetadataOpts) VolumeImageMetadataOption {
-	return cinderaction.WithImageMetadataOptions(value)
-}
-
-// WithVolumeImageMetadata replaces the metadata object with string values.
-func WithVolumeImageMetadata(value map[string]string) VolumeImageMetadataOption {
-	return cinderaction.WithImageMetadata(value)
-}
-
-// WithVolumeImageMetadataValue adds or replaces one string value.
-func WithVolumeImageMetadataValue(key, value string) VolumeImageMetadataOption {
-	return cinderaction.WithImageMetadataValue(key, value)
-}
-
-// WithVolumeImageMetadataRaw replaces the object with owned JSON values.
-func WithVolumeImageMetadataRaw(value map[string]json.RawMessage) VolumeImageMetadataOption {
-	return cinderaction.WithImageMetadataRaw(value)
-}
 func PrepareVolumeImageMetadataOptions(ctx context.Context, options ...VolumeImageMetadataOption) (VolumeImageMetadataOpts, error) {
 	return cinderaction.PrepareImageMetadata(ctx, options...)
 }
 
-type VolumeImageMetadataDeleteOpts = cinderaction.ImageMetadataDeleteOptions
-type VolumeImageMetadataDeleteOption = cinderaction.ImageMetadataDeleteOption
+type VolumeImageMetadataDeleteOpts = volumes.VolumeImageMetadataDeleteOpts
+type VolumeImageMetadataDeleteOption = volumes.VolumeImageMetadataDeleteOption
 
-func WithVolumeImageMetadataDeleteOptions(value VolumeImageMetadataDeleteOpts) VolumeImageMetadataDeleteOption {
-	return cinderaction.WithImageMetadataDeleteOptions(value)
-}
-
-// WithVolumeImageMetadataDeleteKeys preserves order and duplicates. No keys
-// selects an explicit no-op, including when expanded from a nil slice.
-func WithVolumeImageMetadataDeleteKeys(keys ...string) VolumeImageMetadataDeleteOption {
-	return cinderaction.WithImageMetadataDeleteKeys(keys...)
-}
-
-// WithVolumeImageMetadataDeleteAll restores the default all-keys intent.
-func WithVolumeImageMetadataDeleteAll() VolumeImageMetadataDeleteOption {
-	return cinderaction.WithImageMetadataDeleteAll()
-}
 func PrepareVolumeImageMetadataDeleteOptions(ctx context.Context, options ...VolumeImageMetadataDeleteOption) (VolumeImageMetadataDeleteOpts, error) {
 	return cinderaction.PrepareImageMetadataDelete(ctx, options...)
 }

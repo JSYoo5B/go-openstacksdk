@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage"
+	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
@@ -76,7 +77,7 @@ func TestVolumeImageMetadataAcceptedFailuresRetainOnlyCurrentPhaseProofAndJoined
 				var current *rest.Response
 				var err error
 				if phase == "set" {
-					result, callErr := blockstorage.SetVolumeImageMetadata(ctx, client, blockstorage.VolumeActionRequest{VolumeID: "id"}, blockstorage.WithVolumeImageMetadataValue("name", "value"))
+					result, callErr := blockstorage.SetVolumeImageMetadata(ctx, client, blockstorage.VolumeActionRequest{VolumeID: "id"}, volumes.WithVolumeImageMetadataValue("name", "value"))
 					err = callErr
 					if result == nil || result.Completed || result.VolumeID != "id" || result.Microversion != "3.60" || len(result.Discovery) != 0 {
 						t.Fatal(result, err)
@@ -84,9 +85,9 @@ func TestVolumeImageMetadataAcceptedFailuresRetainOnlyCurrentPhaseProofAndJoined
 					current = result.Applied
 					vsaOperation(t, err, "SetVolumeImageMetadata")
 				} else {
-					option := blockstorage.WithVolumeImageMetadataDeleteAll()
+					option := volumes.WithVolumeImageMetadataDeleteAll()
 					if phase == "second explicit deletion" {
-						option = blockstorage.WithVolumeImageMetadataDeleteKeys("a", "b", "later")
+						option = volumes.WithVolumeImageMetadataDeleteKeys("a", "b", "later")
 					}
 					result, callErr := blockstorage.DeleteVolumeImageMetadata(ctx, client, blockstorage.VolumeActionRequest{VolumeID: "id"}, option)
 					err = callErr
@@ -255,16 +256,16 @@ func TestVolumeImageMetadataNativeRetriesAndPhysicalMutationGuardsKeepBatchPolic
 				var completed bool
 				var deleted *blockstorage.VolumeImageMetadataDeleteResult
 				if mode == "set" {
-					result, callErr := blockstorage.SetVolumeImageMetadata(vsaContext(t), client, blockstorage.VolumeActionRequest{VolumeID: "id"}, blockstorage.WithVolumeImageMetadataValue("name", "value"))
+					result, callErr := blockstorage.SetVolumeImageMetadata(vsaContext(t), client, blockstorage.VolumeActionRequest{VolumeID: "id"}, volumes.WithVolumeImageMetadataValue("name", "value"))
 					err = callErr
 					if result == nil || len(result.Discovery) != 0 || result.Microversion != "3.90" {
 						t.Fatal(result, err)
 					}
 					current, completed = result.Applied, result.Completed
 				} else {
-					option := blockstorage.WithVolumeImageMetadataDeleteKeys("a", "b")
+					option := volumes.WithVolumeImageMetadataDeleteKeys("a", "b")
 					if mode == "all batch" {
-						option = blockstorage.WithVolumeImageMetadataDeleteAll()
+						option = volumes.WithVolumeImageMetadataDeleteAll()
 					}
 					result, callErr := blockstorage.DeleteVolumeImageMetadata(vsaContext(t), client, blockstorage.VolumeActionRequest{VolumeID: "id"}, option)
 					err = callErr
@@ -396,9 +397,9 @@ func TestVolumeImageMetadataNativeRetriesAndPhysicalMutationGuardsKeepBatchPolic
 					}
 					current, completed = result.Applied, result.Completed
 				} else {
-					option := blockstorage.WithVolumeImageMetadataDeleteAll()
+					option := volumes.WithVolumeImageMetadataDeleteAll()
 					if mode == "explicit deletion" {
-						option = blockstorage.WithVolumeImageMetadataDeleteKeys("a", "later")
+						option = volumes.WithVolumeImageMetadataDeleteKeys("a", "later")
 					}
 					result, callErr := blockstorage.DeleteVolumeImageMetadata(vsaContext(t), client, blockstorage.VolumeActionRequest{VolumeID: "id"}, option)
 					err = callErr

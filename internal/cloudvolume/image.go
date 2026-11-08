@@ -8,6 +8,7 @@ import (
 	"fmt"
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage"
+	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes"
 	"github.com/JSYoo5B/go-openstacksdk/image"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cinderaction"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
@@ -39,7 +40,7 @@ func CreateVolumeImageRecord(ctx context.Context, deps Dependencies, input Image
 	if err := flagPreflight(ctx, deps); err != nil {
 		return fail(nil, err)
 	}
-	options := []blockstorage.VolumeImageUploadOption{blockstorage.WithVolumeImageUploadForce(input.AllowDuplicates)}
+	options := []blockstorage.VolumeImageUploadOption{volumes.WithVolumeImageUploadForce(input.AllowDuplicates)}
 	disk := input.DiskFormat
 	if disk == "" {
 		configured := deps.ImageFormat()
@@ -51,16 +52,16 @@ func CreateVolumeImageRecord(ctx context.Context, deps Dependencies, input Image
 			if err := json.Unmarshal(configured, &disk); err != nil {
 				return fail(nil, fmt.Errorf("%w: cloud image_format must be a string or null: %w", resource.ErrInvalidOption, err))
 			}
-			options = append(options, blockstorage.WithVolumeImageUploadDiskFormat(disk))
+			options = append(options, volumes.WithVolumeImageUploadDiskFormat(disk))
 		}
 	} else {
-		options = append(options, blockstorage.WithVolumeImageUploadDiskFormat(disk))
+		options = append(options, volumes.WithVolumeImageUploadDiskFormat(disk))
 	}
 	container := input.ContainerFormat
 	if container == "" {
 		container = "bare"
 	}
-	options = append(options, blockstorage.WithVolumeImageUploadContainerFormat(container))
+	options = append(options, volumes.WithVolumeImageUploadContainerFormat(container))
 	upload, err := UploadVolumeToImage(ctx, deps, blockstorage.VolumeActionRequest{VolumeID: input.VolumeID}, input.Name, options...)
 	result := &ImageCreateResult{Upload: upload}
 	if err != nil {

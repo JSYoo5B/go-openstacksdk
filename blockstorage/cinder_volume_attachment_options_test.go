@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage"
+	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
@@ -43,9 +44,9 @@ func TestCinderVolumeAttachmentOptionsFactoriesDefaultsAndReplacementOwnership(t
 	raw := json.RawMessage(`{"nested":[false,null,9007199254740993]}`)
 	original := string(raw)
 	connector := map[string]json.RawMessage{"payload": raw}
-	attachFactory := blockstorage.WithCinderVolumeAttachOptions(blockstorage.CinderVolumeAttachOpts{Instance: &instance, HostName: &host})
-	detachFactory := blockstorage.WithCinderVolumeDetachOptions(blockstorage.CinderVolumeDetachOpts{Force: &yes, Connector: connector})
-	connectorFactory := blockstorage.WithCinderVolumeDetachConnector(connector)
+	attachFactory := volumes.WithCinderVolumeAttachOptions(blockstorage.CinderVolumeAttachOpts{Instance: &instance, HostName: &host})
+	detachFactory := volumes.WithCinderVolumeDetachOptions(blockstorage.CinderVolumeDetachOpts{Force: &yes, Connector: connector})
+	connectorFactory := volumes.WithCinderVolumeDetachConnector(connector)
 	host, instance, yes = "caller changed host", "caller changed instance", false
 	raw[0] = '['
 	delete(connector, "payload")
@@ -58,7 +59,7 @@ func TestCinderVolumeAttachmentOptionsFactoriesDefaultsAndReplacementOwnership(t
 		if err != nil || detach.Force == nil || !*detach.Force || string(detach.Connector["payload"]) != original {
 			t.Fatal(detach, err)
 		}
-		fromConnector, err := blockstorage.PrepareCinderVolumeDetachOptions(ctx, connectorFactory, blockstorage.WithCinderVolumeDetachForce(true))
+		fromConnector, err := blockstorage.PrepareCinderVolumeDetachOptions(ctx, connectorFactory, volumes.WithCinderVolumeDetachForce(true))
 		if err != nil || string(fromConnector.Connector["payload"]) != original {
 			t.Fatal(fromConnector, err)
 		}
@@ -68,15 +69,15 @@ func TestCinderVolumeAttachmentOptionsFactoriesDefaultsAndReplacementOwnership(t
 		fromConnector.Connector["payload"][0] = '['
 	}
 	attach, err := blockstorage.PrepareCinderVolumeAttachOptions(ctx,
-		blockstorage.WithCinderVolumeAttachInstance("discarded"),
-		blockstorage.WithCinderVolumeAttachOptions(blockstorage.CinderVolumeAttachOpts{HostName: &host}),
-		blockstorage.WithCinderVolumeAttachInstance(""))
+		volumes.WithCinderVolumeAttachInstance("discarded"),
+		volumes.WithCinderVolumeAttachOptions(blockstorage.CinderVolumeAttachOpts{HostName: &host}),
+		volumes.WithCinderVolumeAttachInstance(""))
 	if err != nil || attach.Instance == nil || *attach.Instance != "" || attach.HostName == nil || *attach.HostName != "caller changed host" {
 		t.Fatal(attach, err)
 	}
 	detach, err := blockstorage.PrepareCinderVolumeDetachOptions(ctx,
-		blockstorage.WithCinderVolumeDetachForce(true), connectorFactory,
-		blockstorage.WithCinderVolumeDetachOptions(blockstorage.CinderVolumeDetachOpts{}))
+		volumes.WithCinderVolumeDetachForce(true), connectorFactory,
+		volumes.WithCinderVolumeDetachOptions(blockstorage.CinderVolumeDetachOpts{}))
 	if err != nil || detach.Force == nil || *detach.Force || detach.Connector != nil {
 		t.Fatal("full replacement must remove connector and restore owned false default", detach, err)
 	}
@@ -198,12 +199,12 @@ func TestCinderVolumeAttachmentPrepareValidatesFinalActiveValuesAndJoinsCauses(t
 		valid   bool
 	}{
 		{"no selector", nil, false},
-		{"empty instance ignores invalid host", []blockstorage.CinderVolumeAttachOption{blockstorage.WithCinderVolumeAttachHostName(bad), blockstorage.WithCinderVolumeAttachInstance("")}, true},
-		{"empty host valid", []blockstorage.CinderVolumeAttachOption{blockstorage.WithCinderVolumeAttachHostName("")}, true},
-		{"active host invalid", []blockstorage.CinderVolumeAttachOption{blockstorage.WithCinderVolumeAttachHostName(bad)}, false},
-		{"active instance invalid despite host", []blockstorage.CinderVolumeAttachOption{blockstorage.WithCinderVolumeAttachInstance(bad), blockstorage.WithCinderVolumeAttachHostName("valid host")}, false},
-		{"invalid instance replaced", []blockstorage.CinderVolumeAttachOption{blockstorage.WithCinderVolumeAttachInstance(bad), blockstorage.WithCinderVolumeAttachInstance("repaired")}, true},
-		{"replacement removes both selectors", []blockstorage.CinderVolumeAttachOption{blockstorage.WithCinderVolumeAttachHostName("host"), blockstorage.WithCinderVolumeAttachOptions(blockstorage.CinderVolumeAttachOpts{})}, false},
+		{"empty instance ignores invalid host", []blockstorage.CinderVolumeAttachOption{volumes.WithCinderVolumeAttachHostName(bad), volumes.WithCinderVolumeAttachInstance("")}, true},
+		{"empty host valid", []blockstorage.CinderVolumeAttachOption{volumes.WithCinderVolumeAttachHostName("")}, true},
+		{"active host invalid", []blockstorage.CinderVolumeAttachOption{volumes.WithCinderVolumeAttachHostName(bad)}, false},
+		{"active instance invalid despite host", []blockstorage.CinderVolumeAttachOption{volumes.WithCinderVolumeAttachInstance(bad), volumes.WithCinderVolumeAttachHostName("valid host")}, false},
+		{"invalid instance replaced", []blockstorage.CinderVolumeAttachOption{volumes.WithCinderVolumeAttachInstance(bad), volumes.WithCinderVolumeAttachInstance("repaired")}, true},
+		{"replacement removes both selectors", []blockstorage.CinderVolumeAttachOption{volumes.WithCinderVolumeAttachHostName("host"), volumes.WithCinderVolumeAttachOptions(blockstorage.CinderVolumeAttachOpts{})}, false},
 	}
 	for _, tc := range attachCases {
 		t.Run("attach/"+tc.name, func(t *testing.T) {
@@ -227,13 +228,13 @@ func TestCinderVolumeAttachmentPrepareValidatesFinalActiveValuesAndJoinsCauses(t
 		options []blockstorage.CinderVolumeDetachOption
 		valid   bool
 	}{
-		{"inactive invalid key and malformed member", []blockstorage.CinderVolumeDetachOption{blockstorage.WithCinderVolumeDetachConnector(map[string]json.RawMessage{bad: json.RawMessage(`{]`)})}, true},
-		{"active empty object", []blockstorage.CinderVolumeDetachOption{blockstorage.WithCinderVolumeDetachForce(true), blockstorage.WithCinderVolumeDetachConnector(map[string]json.RawMessage{})}, true},
-		{"active invalid key", []blockstorage.CinderVolumeDetachOption{blockstorage.WithCinderVolumeDetachForce(true), blockstorage.WithCinderVolumeDetachConnector(badKey)}, false},
-		{"active malformed JSON", []blockstorage.CinderVolumeDetachOption{blockstorage.WithCinderVolumeDetachForce(true), blockstorage.WithCinderVolumeDetachConnector(malformed)}, false},
-		{"active invalid UTF8", []blockstorage.CinderVolumeDetachOption{blockstorage.WithCinderVolumeDetachForce(true), blockstorage.WithCinderVolumeDetachConnector(badUTF8)}, false},
-		{"bad connector replaced", []blockstorage.CinderVolumeDetachOption{blockstorage.WithCinderVolumeDetachForce(true), blockstorage.WithCinderVolumeDetachConnector(malformed), blockstorage.WithCinderVolumeDetachConnector(map[string]json.RawMessage{"payload": json.RawMessage(`null`)})}, true},
-		{"later false makes connector inactive", []blockstorage.CinderVolumeDetachOption{blockstorage.WithCinderVolumeDetachForce(true), blockstorage.WithCinderVolumeDetachConnector(malformed), blockstorage.WithCinderVolumeDetachForce(false)}, true},
+		{"inactive invalid key and malformed member", []blockstorage.CinderVolumeDetachOption{volumes.WithCinderVolumeDetachConnector(map[string]json.RawMessage{bad: json.RawMessage(`{]`)})}, true},
+		{"active empty object", []blockstorage.CinderVolumeDetachOption{volumes.WithCinderVolumeDetachForce(true), volumes.WithCinderVolumeDetachConnector(map[string]json.RawMessage{})}, true},
+		{"active invalid key", []blockstorage.CinderVolumeDetachOption{volumes.WithCinderVolumeDetachForce(true), volumes.WithCinderVolumeDetachConnector(badKey)}, false},
+		{"active malformed JSON", []blockstorage.CinderVolumeDetachOption{volumes.WithCinderVolumeDetachForce(true), volumes.WithCinderVolumeDetachConnector(malformed)}, false},
+		{"active invalid UTF8", []blockstorage.CinderVolumeDetachOption{volumes.WithCinderVolumeDetachForce(true), volumes.WithCinderVolumeDetachConnector(badUTF8)}, false},
+		{"bad connector replaced", []blockstorage.CinderVolumeDetachOption{volumes.WithCinderVolumeDetachForce(true), volumes.WithCinderVolumeDetachConnector(malformed), volumes.WithCinderVolumeDetachConnector(map[string]json.RawMessage{"payload": json.RawMessage(`null`)})}, true},
+		{"later false makes connector inactive", []blockstorage.CinderVolumeDetachOption{volumes.WithCinderVolumeDetachForce(true), volumes.WithCinderVolumeDetachConnector(malformed), volumes.WithCinderVolumeDetachForce(false)}, true},
 	}
 	for _, tc := range detachCases {
 		t.Run("detach/"+tc.name, func(t *testing.T) {

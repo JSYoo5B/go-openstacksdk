@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage"
+	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
@@ -24,7 +25,7 @@ func TestVolumeFlagsAcceptedFaultsKeepOpaqueProofAndJoinedCauses(t *testing.T) {
 			return blockstorage.SetVolumeBootableStatus(ctx, c, in, false)
 		}},
 		{"SetVolumeReadonly", `{"os-update_readonly_flag":{"readonly":false}}`, func(ctx context.Context, c *gophercloud.ServiceClient, in blockstorage.VolumeActionRequest) (*blockstorage.VolumeActionResult, error) {
-			return blockstorage.SetVolumeReadonly(ctx, c, in, blockstorage.WithVolumeReadonly(false))
+			return blockstorage.SetVolumeReadonly(ctx, c, in, volumes.WithVolumeReadonly(false))
 		}},
 	} {
 		t.Run(tc.name, func(t *testing.T) {

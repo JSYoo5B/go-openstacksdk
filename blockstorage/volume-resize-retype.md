@@ -54,11 +54,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.RetypeVolume`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.RetypeVolume`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.RetypeVolume`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeRetypeMigrationPolicy`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeRetypeOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareVolumeRetypeOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithVolumeRetypeMigrationPolicy`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithVolumeRetypeOptions`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareVolumeRetypeOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.PrepareVolumeRetypeOptions`
 
 - RetypeVolume always includes literal new_type. Required UTF-8 text may be empty or contain whitespace, slash, query/percent/fragment characters or controls; it is neither route-validated nor resolved by Type GET. Nil MigrationPolicy defaults to Proxy never, explicit empty omits migration_policy, and arbitrary valid policy is accepted without enum validation.
@@ -105,11 +103,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.CompleteVolumeExtend`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.CompleteVolumeExtend`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.CompleteVolumeExtend`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeExtendCompletionError`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeExtendCompletionOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareVolumeExtendCompletionOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithVolumeExtendCompletionError`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithVolumeExtendCompletionOptions`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareVolumeExtendCompletionOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.PrepareVolumeExtendCompletionOptions`
 
 - CompleteVolumeExtend sends os-extend_volume_completion.error on every action. Omitted options/nil Error default to false; explicit false and true retain the supplied bool, and full empty replacement restores false. Error=true informs Cinder of an extend error; SDK performs no rollback or backend completion check.
@@ -161,6 +157,7 @@ import (
 
     sdk "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/blockstorage"
+    "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes"
     "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -212,7 +209,7 @@ func run() error {
         newType = text
         var originals []blockstorage.VolumeRetypeOption
         if policy, supplied := os.LookupEnv("MIGRATION_POLICY"); supplied {
-            originals = append(originals, blockstorage.WithVolumeRetypeMigrationPolicy(policy))
+            originals = append(originals, volumes.WithVolumeRetypeMigrationPolicy(policy))
         }
         prepared, err := blockstorage.PrepareVolumeRetypeOptions(ctx, originals...)
         if err != nil {
@@ -226,7 +223,7 @@ func run() error {
             if err != nil {
                 return fmt.Errorf("COMPLETION_ERROR: %w", err)
             }
-            originals = append(originals, blockstorage.WithVolumeExtendCompletionError(flag))
+            originals = append(originals, volumes.WithVolumeExtendCompletionError(flag))
         }
         prepared, err := blockstorage.PrepareVolumeExtendCompletionOptions(ctx, originals...)
         if err != nil {
@@ -245,8 +242,8 @@ func run() error {
 }
 
 func apply(ctx context.Context, conn *sdk.Connection, action, path string, input blockstorage.VolumeActionRequest, size int, newType string, retype blockstorage.VolumeRetypeOpts, completion blockstorage.VolumeExtendCompletionOpts) (*blockstorage.VolumeActionResult, error) {
-    r := blockstorage.WithVolumeRetypeOptions(retype)
-    c := blockstorage.WithVolumeExtendCompletionOptions(completion)
+    r := volumes.WithVolumeRetypeOptions(retype)
+    c := volumes.WithVolumeExtendCompletionOptions(completion)
     if path == "connection" {
         switch action {
         case "extend": return conn.ExtendVolume(ctx, input, size)

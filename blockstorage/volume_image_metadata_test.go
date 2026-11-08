@@ -44,13 +44,13 @@ func TestSetVolumeImageMetadataPreservesEmptyMapsRawValuesAndOwnedFactories(t *t
 		options    []blockstorage.VolumeImageMetadataOption
 	}{
 		{"omitted map", `{"os-set_image_metadata":{"metadata":{}}}`, nil},
-		{"typed nil map", `{"os-set_image_metadata":{"metadata":{}}}`, []blockstorage.VolumeImageMetadataOption{blockstorage.WithVolumeImageMetadata(nil)}},
+		{"typed nil map", `{"os-set_image_metadata":{"metadata":{}}}`, []blockstorage.VolumeImageMetadataOption{volumes.WithVolumeImageMetadata(nil)}},
 		{"empty HTTP204 acknowledgement", `{"os-set_image_metadata":{"metadata":{}}}`, nil},
-		{"raw nil map", `{"os-set_image_metadata":{"metadata":{}}}`, []blockstorage.VolumeImageMetadataOption{blockstorage.WithVolumeImageMetadataRaw(nil)}},
-		{"empty keys and literal text", `{"os-set_image_metadata":{"metadata":{"":"","image_name":" /?%#\n\u0000한글"}}}`, []blockstorage.VolumeImageMetadataOption{blockstorage.WithVolumeImageMetadata(map[string]string{"": "", "image_name": " /?%#\n\x00한글"})}},
-		{"raw precision and nested JSON", `{"os-set_image_metadata":{"metadata":{"bool":false,"large":9007199254740993,"nested":{"x":[null,"value"]},"null":null}}}`, []blockstorage.VolumeImageMetadataOption{blockstorage.WithVolumeImageMetadataRaw(map[string]json.RawMessage{"bool": json.RawMessage(`false`), "large": json.RawMessage(`9007199254740993`), "nested": json.RawMessage(`{"x":[null,"value"]}`), "null": json.RawMessage(`null`)})}},
-		{"replacement removes earlier fields; value merges", `{"os-set_image_metadata":{"metadata":{"next":"2","tail":"3"}}}`, []blockstorage.VolumeImageMetadataOption{blockstorage.WithVolumeImageMetadataValue("old", "1"), blockstorage.WithVolumeImageMetadata(map[string]string{"next": "2"}), blockstorage.WithVolumeImageMetadataValue("tail", "3")}},
-		{"full replacement clears earlier map", `{"os-set_image_metadata":{"metadata":{}}}`, []blockstorage.VolumeImageMetadataOption{blockstorage.WithVolumeImageMetadataValue("old", "1"), blockstorage.WithVolumeImageMetadataOptions(blockstorage.VolumeImageMetadataOpts{})}},
+		{"raw nil map", `{"os-set_image_metadata":{"metadata":{}}}`, []blockstorage.VolumeImageMetadataOption{volumes.WithVolumeImageMetadataRaw(nil)}},
+		{"empty keys and literal text", `{"os-set_image_metadata":{"metadata":{"":"","image_name":" /?%#\n\u0000한글"}}}`, []blockstorage.VolumeImageMetadataOption{volumes.WithVolumeImageMetadata(map[string]string{"": "", "image_name": " /?%#\n\x00한글"})}},
+		{"raw precision and nested JSON", `{"os-set_image_metadata":{"metadata":{"bool":false,"large":9007199254740993,"nested":{"x":[null,"value"]},"null":null}}}`, []blockstorage.VolumeImageMetadataOption{volumes.WithVolumeImageMetadataRaw(map[string]json.RawMessage{"bool": json.RawMessage(`false`), "large": json.RawMessage(`9007199254740993`), "nested": json.RawMessage(`{"x":[null,"value"]}`), "null": json.RawMessage(`null`)})}},
+		{"replacement removes earlier fields; value merges", `{"os-set_image_metadata":{"metadata":{"next":"2","tail":"3"}}}`, []blockstorage.VolumeImageMetadataOption{volumes.WithVolumeImageMetadataValue("old", "1"), volumes.WithVolumeImageMetadata(map[string]string{"next": "2"}), volumes.WithVolumeImageMetadataValue("tail", "3")}},
+		{"full replacement clears earlier map", `{"os-set_image_metadata":{"metadata":{}}}`, []blockstorage.VolumeImageMetadataOption{volumes.WithVolumeImageMetadataValue("old", "1"), volumes.WithVolumeImageMetadataOptions(blockstorage.VolumeImageMetadataOpts{})}},
 	}
 	for index, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -82,7 +82,7 @@ func TestSetVolumeImageMetadataPreservesEmptyMapsRawValuesAndOwnedFactories(t *t
 		client := vsaClient(cloud, "3.60")
 		raw := json.RawMessage(`9007199254740993`)
 		source := map[string]json.RawMessage{"large": raw}
-		factory := blockstorage.WithVolumeImageMetadataRaw(source)
+		factory := volumes.WithVolumeImageMetadataRaw(source)
 		raw[0] = '1'
 		source["late"] = json.RawMessage(`true`)
 		var retained *blockstorage.VolumeImageMetadataOpts
@@ -110,7 +110,7 @@ func TestDeleteVolumeImageMetadataExplicitKeysKeepOrderDuplicatesAndEagerValidat
 		cloud := testcloud.New(t)
 		client := vsaClient(cloud, "3.60")
 		keys := []string{"z", "", "z", " /?%#\n\x00한글"}
-		factory := blockstorage.WithVolumeImageMetadataDeleteKeys(keys...)
+		factory := volumes.WithVolumeImageMetadataDeleteKeys(keys...)
 		keys[0] = "mutated caller slice"
 		bodies := []string{`{"os-unset_image_metadata":{"key":"z"}}`, `{"os-unset_image_metadata":{"key":""}}`, `{"os-unset_image_metadata":{"key":"z"}}`, `{"os-unset_image_metadata":{"key":" /?%#\n\u0000한글"}}`}
 		wantKeys := []string{"z", "", "z", " /?%#\n\x00한글"}
@@ -152,13 +152,13 @@ func TestDeleteVolumeImageMetadataExplicitKeysKeepOrderDuplicatesAndEagerValidat
 				t.Error("empty explicit delete performed HTTP", req.URL)
 				w.WriteHeader(500)
 			})
-			option := blockstorage.WithVolumeImageMetadataDeleteKeys()
+			option := volumes.WithVolumeImageMetadataDeleteKeys()
 			if kind != "variadic zero keys" {
 				var keys []string
 				if kind == "explicit empty slice" {
 					keys = []string{}
 				}
-				option = blockstorage.WithVolumeImageMetadataDeleteOptions(blockstorage.VolumeImageMetadataDeleteOpts{Keys: &keys})
+				option = volumes.WithVolumeImageMetadataDeleteOptions(blockstorage.VolumeImageMetadataDeleteOpts{Keys: &keys})
 			}
 			result, err := blockstorage.DeleteVolumeImageMetadata(vsaContext(t), client, blockstorage.VolumeActionRequest{VolumeID: "id"}, option)
 			if err != nil || result == nil || !result.Completed || result.Observed != nil || result.Failed != nil || len(result.Deleted) != 0 || len(result.Discovery) != 0 || calls.Load() != 0 {
@@ -210,7 +210,7 @@ func TestDeleteVolumeImageMetadataExplicitKeysKeepOrderDuplicatesAndEagerValidat
 		client := vsaClient(cloud, "")
 		var calls atomic.Int32
 		cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) { calls.Add(1); w.WriteHeader(500) })
-		result, err := blockstorage.DeleteVolumeImageMetadata(vsaContext(t), client, blockstorage.VolumeActionRequest{VolumeID: "id"}, blockstorage.WithVolumeImageMetadataDeleteKeys("first", string([]byte{0xff})))
+		result, err := blockstorage.DeleteVolumeImageMetadata(vsaContext(t), client, blockstorage.VolumeActionRequest{VolumeID: "id"}, volumes.WithVolumeImageMetadataDeleteKeys("first", string([]byte{0xff})))
 		vsaOperation(t, err, "DeleteVolumeImageMetadata")
 		var proof *resource.ResponseError
 		if result != nil || !errors.Is(err, resource.ErrInvalidOption) || errors.As(err, &proof) || calls.Load() != 0 {
@@ -261,7 +261,7 @@ func TestDeleteVolumeImageMetadataAllReadsOnlyCanonicalImageFieldAndKeepsObserva
 				w.WriteHeader(399)
 				_, _ = w.Write([]byte{0xff, 0x00})
 			})
-			result, err := blockstorage.DeleteVolumeImageMetadata(vsaContext(t), client, blockstorage.VolumeActionRequest{VolumeID: "id"}, blockstorage.WithVolumeImageMetadataDeleteAll())
+			result, err := blockstorage.DeleteVolumeImageMetadata(vsaContext(t), client, blockstorage.VolumeActionRequest{VolumeID: "id"}, volumes.WithVolumeImageMetadataDeleteAll())
 			if result == nil || result.VolumeID != "id" || result.Observed == nil || result.Observed.StatusCode != 203 || string(result.Observed.Body) != tc.reply || result.Observed.Header.Get("X-Proof") != "actual member observation" || result.Failed != nil || len(result.Discovery) != 0 {
 				t.Fatal(result, err, calls.Load())
 			}
@@ -334,9 +334,9 @@ func TestVolumeImageMetadataNegotiatesOnceAndStopsAtCurrentNativeFailureWithoutB
 					testcloud.JSON(w, 400, `{"error":"second rejected"}`)
 				}
 			})
-			option := blockstorage.WithVolumeImageMetadataDeleteKeys("a", "b", "c")
+			option := volumes.WithVolumeImageMetadataDeleteKeys("a", "b", "c")
 			if all {
-				option = blockstorage.WithVolumeImageMetadataDeleteAll()
+				option = volumes.WithVolumeImageMetadataDeleteAll()
 			}
 			result, err := blockstorage.DeleteVolumeImageMetadata(vsaContext(t), client, blockstorage.VolumeActionRequest{VolumeID: "id"}, option)
 			vsaOperation(t, err, "DeleteVolumeImageMetadata")

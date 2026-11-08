@@ -11,6 +11,7 @@ import (
 
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage"
+	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
@@ -26,10 +27,10 @@ var vrcOperations = []vrcOperation{
 		return c.ExtendVolume(ctx, in, 0)
 	}},
 	{"RetypeVolume", `{"os-retype":{"new_type":""}}`, func(c *sdk.Connection, ctx context.Context, in blockstorage.VolumeActionRequest) (*blockstorage.VolumeActionResult, error) {
-		return c.RetypeVolume(ctx, in, "", blockstorage.WithVolumeRetypeMigrationPolicy(""))
+		return c.RetypeVolume(ctx, in, "", volumes.WithVolumeRetypeMigrationPolicy(""))
 	}},
 	{"CompleteVolumeExtend", `{"os-extend_volume_completion":{"error":true}}`, func(c *sdk.Connection, ctx context.Context, in blockstorage.VolumeActionRequest) (*blockstorage.VolumeActionResult, error) {
-		return c.CompleteVolumeExtend(ctx, in, blockstorage.WithVolumeExtendCompletionError(true))
+		return c.CompleteVolumeExtend(ctx, in, volumes.WithVolumeExtendCompletionError(true))
 	}},
 }
 
@@ -225,7 +226,7 @@ func TestConnectionVolumeResizePreflightAndGetterErrorsKeepCauses(t *testing.T) 
 			case "invalid type":
 				result, err = conn.RetypeVolume(ctx, input, string([]byte{0xff}))
 			case "invalid migration":
-				result, err = conn.RetypeVolume(ctx, input, "type", blockstorage.WithVolumeRetypeMigrationPolicy(string([]byte{0xff})))
+				result, err = conn.RetypeVolume(ctx, input, "type", volumes.WithVolumeRetypeMigrationPolicy(string([]byte{0xff})))
 			case "nil retype option":
 				result, err = conn.RetypeVolume(ctx, input, "type", nil)
 			case "nil completion option":

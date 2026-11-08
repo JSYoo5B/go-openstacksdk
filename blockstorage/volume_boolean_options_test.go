@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage"
+	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
@@ -49,12 +50,12 @@ func TestVolumeReadonlyOptionsDefaultsFalseReplacementAndFactoryCopies(t *testin
 		want    bool
 	}{
 		{"no options", nil, true},
-		{"empty complete config", []blockstorage.VolumeReadonlyOption{blockstorage.WithVolumeReadonlyOptions(blockstorage.VolumeReadonlyOpts{})}, true},
-		{"explicit false", []blockstorage.VolumeReadonlyOption{blockstorage.WithVolumeReadonly(false)}, false},
-		{"explicit true", []blockstorage.VolumeReadonlyOption{blockstorage.WithVolumeReadonly(true)}, true},
-		{"false complete config", []blockstorage.VolumeReadonlyOption{blockstorage.WithVolumeReadonlyOptions(blockstorage.VolumeReadonlyOpts{Readonly: &no})}, false},
-		{"replacement restores default", []blockstorage.VolumeReadonlyOption{blockstorage.WithVolumeReadonly(false), blockstorage.WithVolumeReadonlyOptions(blockstorage.VolumeReadonlyOpts{})}, true},
-		{"later false wins", []blockstorage.VolumeReadonlyOption{blockstorage.WithVolumeReadonlyOptions(blockstorage.VolumeReadonlyOpts{}), blockstorage.WithVolumeReadonly(false)}, false},
+		{"empty complete config", []blockstorage.VolumeReadonlyOption{volumes.WithVolumeReadonlyOptions(blockstorage.VolumeReadonlyOpts{})}, true},
+		{"explicit false", []blockstorage.VolumeReadonlyOption{volumes.WithVolumeReadonly(false)}, false},
+		{"explicit true", []blockstorage.VolumeReadonlyOption{volumes.WithVolumeReadonly(true)}, true},
+		{"false complete config", []blockstorage.VolumeReadonlyOption{volumes.WithVolumeReadonlyOptions(blockstorage.VolumeReadonlyOpts{Readonly: &no})}, false},
+		{"replacement restores default", []blockstorage.VolumeReadonlyOption{volumes.WithVolumeReadonly(false), volumes.WithVolumeReadonlyOptions(blockstorage.VolumeReadonlyOpts{})}, true},
+		{"later false wins", []blockstorage.VolumeReadonlyOption{volumes.WithVolumeReadonlyOptions(blockstorage.VolumeReadonlyOpts{}), volumes.WithVolumeReadonly(false)}, false},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -81,7 +82,7 @@ func TestVolumeReadonlyOptionsDefaultsFalseReplacementAndFactoryCopies(t *testin
 	t.Run("factory owns caller and every prepared result", func(t *testing.T) {
 		flag := false
 		value := blockstorage.VolumeReadonlyOpts{Readonly: &flag}
-		factory := blockstorage.WithVolumeReadonlyOptions(value)
+		factory := volumes.WithVolumeReadonlyOptions(value)
 		flag = true
 		value.Readonly = nil
 		for i := 0; i < 2; i++ {

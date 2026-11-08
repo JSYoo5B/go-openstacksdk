@@ -2080,11 +2080,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.SetVolumeReadonly`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.SetVolumeReadonly`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.SetVolumeReadonly`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeReadonly`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeReadonlyOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareVolumeReadonlyOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithVolumeReadonly`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithVolumeReadonlyOptions`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareVolumeReadonlyOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.PrepareVolumeReadonlyOptions`
 
 - SetVolumeReadonly sends exactly {"os-update_readonly_flag":{"readonly":value}}. Omitted options or a nil Readonly field default to true; WithVolumeReadonly(false) and a nonnil false pointer retain explicit false.
@@ -2170,11 +2168,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.RetypeVolume`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.RetypeVolume`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.RetypeVolume`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeRetypeMigrationPolicy`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeRetypeOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareVolumeRetypeOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithVolumeRetypeMigrationPolicy`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithVolumeRetypeOptions`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareVolumeRetypeOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.PrepareVolumeRetypeOptions`
 
 - RetypeVolume always includes literal new_type. Required UTF-8 text may be empty or contain whitespace, slash, query/percent/fragment characters or controls; it is neither route-validated nor resolved by Type GET. Nil MigrationPolicy defaults to Proxy never, explicit empty omits migration_policy, and arbitrary valid policy is accepted without enum validation.
@@ -2221,11 +2217,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.CompleteVolumeExtend`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.CompleteVolumeExtend`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.CompleteVolumeExtend`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeExtendCompletionError`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeExtendCompletionOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareVolumeExtendCompletionOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithVolumeExtendCompletionError`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithVolumeExtendCompletionOptions`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareVolumeExtendCompletionOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.PrepareVolumeExtendCompletionOptions`
 
 - CompleteVolumeExtend sends os-extend_volume_completion.error on every action. Omitted options/nil Error default to false; explicit false and true retain the supplied bool, and full empty replacement restores false. Error=true informs Cinder of an extend error; SDK performs no rollback or backend completion check.
@@ -2269,15 +2263,11 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.ResetVolumeStatus`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.ResetVolumeStatus`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.ResetVolumeStatus`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeStatusResetOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeStatusResetStatus`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeStatusResetAttachStatus`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeStatusResetMigrationStatus`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareVolumeStatusResetOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithVolumeStatusResetOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithVolumeStatusResetStatus`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithVolumeStatusResetAttachStatus`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithVolumeStatusResetMigrationStatus`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareVolumeStatusResetOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.PrepareVolumeStatusResetOptions`
 
 - Reset defaults all three statuses to omitted. Nil and empty typed strings are omitted, all nonempty UTF-8 strings are sent independently without enum/default injection; empty options still POST {os-reset_status:{}}.
@@ -2313,17 +2303,12 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.MigrateVolume`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.MigrateVolume`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.MigrateVolume`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeMigrationOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeMigrationHost`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeMigrationCluster`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeMigrationForceHostCopy`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeMigrationLockVolume`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareVolumeMigrationOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithVolumeMigrationOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithVolumeMigrationHost`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithVolumeMigrationCluster`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithVolumeMigrationForceHostCopy`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithVolumeMigrationLockVolume`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareVolumeMigrationOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.PrepareVolumeMigrationOptions`
 
 - Host/Cluster nil omission differs from explicit empty inclusion. False/default ForceHostCopy/LockVolume fields are omitted; true fields are included. No host/cluster resolver, requirement or mutual-exclusion check is added.
@@ -2360,11 +2345,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.CompleteVolumeMigration`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.CompleteVolumeMigration`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.CompleteVolumeMigration`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeMigrationCompletionOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeMigrationCompletionError`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareVolumeMigrationCompletionOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithVolumeMigrationCompletionOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithVolumeMigrationCompletionError`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareVolumeMigrationCompletionOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.PrepareVolumeMigrationCompletionOptions`
 
 - Required newVolume is a literal UTF-8 body string, including empty/route-like text; it is not resolved or validated as the current route ID. new_volume and error are always sent.
@@ -2464,14 +2447,11 @@ Status: `go_mapping`.
 
 Go API:
 
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCinderVolumeAttachOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCinderVolumeAttachInstance`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCinderVolumeAttachHostName`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareCinderVolumeAttachOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.AttachCinderVolume`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithCinderVolumeAttachOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithCinderVolumeAttachInstance`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithCinderVolumeAttachHostName`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareCinderVolumeAttachOptions`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage.AttachCinderVolume`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.PrepareCinderVolumeAttachOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.AttachCinderVolume`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.AttachCinderVolume`
@@ -2508,14 +2488,11 @@ Status: `go_mapping`.
 
 Go API:
 
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCinderVolumeDetachOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCinderVolumeDetachForce`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCinderVolumeDetachConnector`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareCinderVolumeDetachOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.DetachCinderVolume`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithCinderVolumeDetachOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithCinderVolumeDetachForce`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithCinderVolumeDetachConnector`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareCinderVolumeDetachOptions`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage.DetachCinderVolume`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.PrepareCinderVolumeDetachOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.DetachCinderVolume`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.DetachCinderVolume`
@@ -2553,16 +2530,12 @@ Status: `go_mapping`.
 
 Go API:
 
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeImageMetadataOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeImageMetadata`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeImageMetadataValue`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeImageMetadataRaw`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareVolumeImageMetadataOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.SetVolumeImageMetadata`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithVolumeImageMetadataOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithVolumeImageMetadata`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithVolumeImageMetadataValue`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithVolumeImageMetadataRaw`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareVolumeImageMetadataOptions`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage.SetVolumeImageMetadata`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.PrepareVolumeImageMetadataOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.SetVolumeImageMetadata`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.SetVolumeImageMetadata`
@@ -2597,14 +2570,11 @@ Status: `go_mapping`.
 
 Go API:
 
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeImageMetadataDeleteOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeImageMetadataDeleteKeys`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeImageMetadataDeleteAll`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareVolumeImageMetadataDeleteOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.DeleteVolumeImageMetadata`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithVolumeImageMetadataDeleteOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithVolumeImageMetadataDeleteKeys`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithVolumeImageMetadataDeleteAll`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareVolumeImageMetadataDeleteOptions`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage.DeleteVolumeImageMetadata`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.PrepareVolumeImageMetadataDeleteOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.DeleteVolumeImageMetadata`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.DeleteVolumeImageMetadata`
@@ -2641,20 +2611,14 @@ Status: `go_mapping`.
 
 Go API:
 
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeImageUploadOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeImageUploadForce`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeImageUploadDiskFormat`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeImageUploadContainerFormat`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeImageUploadVisibility`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeImageUploadProtected`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareVolumeImageUploadOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.UploadVolumeToImage`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithVolumeImageUploadOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithVolumeImageUploadForce`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithVolumeImageUploadDiskFormat`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithVolumeImageUploadContainerFormat`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithVolumeImageUploadVisibility`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithVolumeImageUploadProtected`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareVolumeImageUploadOptions`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage.UploadVolumeToImage`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.PrepareVolumeImageUploadOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.UploadVolumeToImage`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.UploadVolumeToImage`

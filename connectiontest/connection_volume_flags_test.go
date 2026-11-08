@@ -11,6 +11,7 @@ import (
 
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage"
+	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
@@ -26,7 +27,7 @@ var vcfOperations = []vcfOperation{
 		return c.SetVolumeBootableStatus(ctx, input, false)
 	}},
 	{"SetVolumeReadonly", "os-update_readonly_flag", func(c *sdk.Connection, ctx context.Context, input blockstorage.VolumeActionRequest) (*blockstorage.VolumeActionResult, error) {
-		return c.SetVolumeReadonly(ctx, input, blockstorage.WithVolumeReadonly(false))
+		return c.SetVolumeReadonly(ctx, input, volumes.WithVolumeReadonly(false))
 	}},
 }
 

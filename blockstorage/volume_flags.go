@@ -3,19 +3,14 @@ package blockstorage
 import (
 	"context"
 
+	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cinderaction"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
 // VolumeReadonlyOpts distinguishes omitted true from explicit false.
-type VolumeReadonlyOpts = cinderaction.ReadonlyOptions
-type VolumeReadonlyOption = cinderaction.ReadonlyOption
-
-// WithVolumeReadonlyOptions replaces the entire policy with an owned copy.
-func WithVolumeReadonlyOptions(value VolumeReadonlyOpts) VolumeReadonlyOption {
-	return cinderaction.WithReadonlyOptions(value)
-}
-func WithVolumeReadonly(value bool) VolumeReadonlyOption { return cinderaction.WithReadonly(value) }
+type VolumeReadonlyOpts = volumes.VolumeReadonlyOpts
+type VolumeReadonlyOption = volumes.VolumeReadonlyOption
 
 // PrepareVolumeReadonlyOptions executes original options without HTTP or service selection.
 func PrepareVolumeReadonlyOptions(ctx context.Context, options ...VolumeReadonlyOption) (VolumeReadonlyOpts, error) {
@@ -27,7 +22,7 @@ func SetVolumeBootableStatus(ctx context.Context, client *gophercloud.ServiceCli
 	return cinderaction.Bootable(ctx, client, input.VolumeID, bootable)
 }
 
-// SetVolumeReadonly defaults to true; WithVolumeReadonly(false) sends false.
+// SetVolumeReadonly defaults to true; volumes.WithVolumeReadonly(false) sends false.
 func SetVolumeReadonly(ctx context.Context, client *gophercloud.ServiceClient, input VolumeActionRequest, options ...VolumeReadonlyOption) (*VolumeActionResult, error) {
 	return cinderaction.Readonly(ctx, client, input.VolumeID, options...)
 }

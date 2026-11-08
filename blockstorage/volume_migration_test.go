@@ -29,49 +29,49 @@ func vmrCases() []vmrCase {
 			return blockstorage.ResetVolumeStatus(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id})
 		}},
 		{"reset explicit empty", "ResetVolumeStatus", `{"os-reset_status":{}}`, false, func(ctx context.Context, c *gophercloud.ServiceClient, id string) (*blockstorage.VolumeActionResult, error) {
-			return blockstorage.ResetVolumeStatus(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, blockstorage.WithVolumeStatusResetStatus(""), blockstorage.WithVolumeStatusResetAttachStatus(""), blockstorage.WithVolumeStatusResetMigrationStatus(""))
+			return blockstorage.ResetVolumeStatus(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, volumes.WithVolumeStatusResetStatus(""), volumes.WithVolumeStatusResetAttachStatus(""), volumes.WithVolumeStatusResetMigrationStatus(""))
 		}},
 		{"reset all named statuses", "ResetVolumeStatus", `{"os-reset_status":{"attach_status":"2","migration_status":"3","status":"1"}}`, false, func(ctx context.Context, c *gophercloud.ServiceClient, id string) (*blockstorage.VolumeActionResult, error) {
-			return blockstorage.ResetVolumeStatus(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, blockstorage.WithVolumeStatusResetStatus("1"), blockstorage.WithVolumeStatusResetAttachStatus("2"), blockstorage.WithVolumeStatusResetMigrationStatus("3"))
+			return blockstorage.ResetVolumeStatus(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, volumes.WithVolumeStatusResetStatus("1"), volumes.WithVolumeStatusResetAttachStatus("2"), volumes.WithVolumeStatusResetMigrationStatus("3"))
 		}},
 		{"reset mixed omission", "ResetVolumeStatus", `{"os-reset_status":{"attach_status":"server-defined"}}`, false, func(ctx context.Context, c *gophercloud.ServiceClient, id string) (*blockstorage.VolumeActionResult, error) {
-			return blockstorage.ResetVolumeStatus(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, blockstorage.WithVolumeStatusResetStatus(""), blockstorage.WithVolumeStatusResetAttachStatus("server-defined"))
+			return blockstorage.ResetVolumeStatus(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, volumes.WithVolumeStatusResetStatus(""), volumes.WithVolumeStatusResetAttachStatus("server-defined"))
 		}},
 		{"reset literal whitespace controls", "ResetVolumeStatus", `{"os-reset_status":{"status":" \n\u0000"}}`, false, func(ctx context.Context, c *gophercloud.ServiceClient, id string) (*blockstorage.VolumeActionResult, error) {
-			return blockstorage.ResetVolumeStatus(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, blockstorage.WithVolumeStatusResetStatus(" \n\x00"))
+			return blockstorage.ResetVolumeStatus(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, volumes.WithVolumeStatusResetStatus(" \n\x00"))
 		}},
 		{"reset replacement clears", "ResetVolumeStatus", `{"os-reset_status":{}}`, false, func(ctx context.Context, c *gophercloud.ServiceClient, id string) (*blockstorage.VolumeActionResult, error) {
-			return blockstorage.ResetVolumeStatus(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, blockstorage.WithVolumeStatusResetStatus("old"), blockstorage.WithVolumeStatusResetOptions(blockstorage.VolumeStatusResetOpts{}))
+			return blockstorage.ResetVolumeStatus(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, volumes.WithVolumeStatusResetStatus("old"), volumes.WithVolumeStatusResetOptions(blockstorage.VolumeStatusResetOpts{}))
 		}},
 		{"migration defaults", "MigrateVolume", `{"os-migrate_volume":{}}`, false, func(ctx context.Context, c *gophercloud.ServiceClient, id string) (*blockstorage.VolumeActionResult, error) {
 			return blockstorage.MigrateVolume(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id})
 		}},
 		{"migration host empty and false flags", "MigrateVolume", `{"os-migrate_volume":{"host":""}}`, false, func(ctx context.Context, c *gophercloud.ServiceClient, id string) (*blockstorage.VolumeActionResult, error) {
-			return blockstorage.MigrateVolume(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, blockstorage.WithVolumeMigrationHost(""), blockstorage.WithVolumeMigrationForceHostCopy(false), blockstorage.WithVolumeMigrationLockVolume(false))
+			return blockstorage.MigrateVolume(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, volumes.WithVolumeMigrationHost(""), volumes.WithVolumeMigrationForceHostCopy(false), volumes.WithVolumeMigrationLockVolume(false))
 		}},
 		{"migration literal host and true flags", "MigrateVolume", `{"os-migrate_volume":{"force_host_copy":true,"host":"host /?%#\n\u0000","lock_volume":true}}`, false, func(ctx context.Context, c *gophercloud.ServiceClient, id string) (*blockstorage.VolumeActionResult, error) {
-			return blockstorage.MigrateVolume(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, blockstorage.WithVolumeMigrationHost("host /?%#\n\x00"), blockstorage.WithVolumeMigrationForceHostCopy(true), blockstorage.WithVolumeMigrationLockVolume(true))
+			return blockstorage.MigrateVolume(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, volumes.WithVolumeMigrationHost("host /?%#\n\x00"), volumes.WithVolumeMigrationForceHostCopy(true), volumes.WithVolumeMigrationLockVolume(true))
 		}},
 		{"migration empty cluster", "MigrateVolume", `{"os-migrate_volume":{"cluster":""}}`, true, func(ctx context.Context, c *gophercloud.ServiceClient, id string) (*blockstorage.VolumeActionResult, error) {
-			return blockstorage.MigrateVolume(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, blockstorage.WithVolumeMigrationCluster(""))
+			return blockstorage.MigrateVolume(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, volumes.WithVolumeMigrationCluster(""))
 		}},
 		{"migration both targets and flags", "MigrateVolume", `{"os-migrate_volume":{"cluster":"cluster@backend","force_host_copy":true,"host":"host@backend","lock_volume":true}}`, true, func(ctx context.Context, c *gophercloud.ServiceClient, id string) (*blockstorage.VolumeActionResult, error) {
-			return blockstorage.MigrateVolume(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, blockstorage.WithVolumeMigrationHost("host@backend"), blockstorage.WithVolumeMigrationCluster("cluster@backend"), blockstorage.WithVolumeMigrationForceHostCopy(true), blockstorage.WithVolumeMigrationLockVolume(true))
+			return blockstorage.MigrateVolume(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, volumes.WithVolumeMigrationHost("host@backend"), volumes.WithVolumeMigrationCluster("cluster@backend"), volumes.WithVolumeMigrationForceHostCopy(true), volumes.WithVolumeMigrationLockVolume(true))
 		}},
 		{"migration replacement clears cluster and flags", "MigrateVolume", `{"os-migrate_volume":{}}`, false, func(ctx context.Context, c *gophercloud.ServiceClient, id string) (*blockstorage.VolumeActionResult, error) {
-			return blockstorage.MigrateVolume(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, blockstorage.WithVolumeMigrationCluster("old"), blockstorage.WithVolumeMigrationForceHostCopy(true), blockstorage.WithVolumeMigrationOptions(blockstorage.VolumeMigrationOpts{}))
+			return blockstorage.MigrateVolume(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, volumes.WithVolumeMigrationCluster("old"), volumes.WithVolumeMigrationForceHostCopy(true), volumes.WithVolumeMigrationOptions(blockstorage.VolumeMigrationOpts{}))
 		}},
 		{"completion default false and literal empty target", "CompleteVolumeMigration", `{"os-migrate_volume_completion":{"error":false,"new_volume":""}}`, false, func(ctx context.Context, c *gophercloud.ServiceClient, id string) (*blockstorage.VolumeActionResult, error) {
 			return blockstorage.CompleteVolumeMigration(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, "")
 		}},
 		{"completion explicit false", "CompleteVolumeMigration", `{"os-migrate_volume_completion":{"error":false,"new_volume":"new"}}`, false, func(ctx context.Context, c *gophercloud.ServiceClient, id string) (*blockstorage.VolumeActionResult, error) {
-			return blockstorage.CompleteVolumeMigration(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, "new", blockstorage.WithVolumeMigrationCompletionError(false))
+			return blockstorage.CompleteVolumeMigration(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, "new", volumes.WithVolumeMigrationCompletionError(false))
 		}},
 		{"completion true and literal body target", "CompleteVolumeMigration", `{"os-migrate_volume_completion":{"error":true,"new_volume":"new /?%#\n\u0000"}}`, false, func(ctx context.Context, c *gophercloud.ServiceClient, id string) (*blockstorage.VolumeActionResult, error) {
-			return blockstorage.CompleteVolumeMigration(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, "new /?%#\n\x00", blockstorage.WithVolumeMigrationCompletionError(true))
+			return blockstorage.CompleteVolumeMigration(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, "new /?%#\n\x00", volumes.WithVolumeMigrationCompletionError(true))
 		}},
 		{"completion replacement restores false", "CompleteVolumeMigration", `{"os-migrate_volume_completion":{"error":false,"new_volume":"new"}}`, false, func(ctx context.Context, c *gophercloud.ServiceClient, id string) (*blockstorage.VolumeActionResult, error) {
-			return blockstorage.CompleteVolumeMigration(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, "new", blockstorage.WithVolumeMigrationCompletionError(true), blockstorage.WithVolumeMigrationCompletionOptions(blockstorage.VolumeMigrationCompletionOpts{}))
+			return blockstorage.CompleteVolumeMigration(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, "new", volumes.WithVolumeMigrationCompletionError(true), volumes.WithVolumeMigrationCompletionOptions(blockstorage.VolumeMigrationCompletionOpts{}))
 		}},
 	}
 }
@@ -173,7 +173,7 @@ func TestMigrateVolumeRequiresAdvertisedSupportBeforeSelectedOrComputedVersion(t
 				w.WriteHeader(203)
 				_, _ = w.Write([]byte{0xff, 0x00})
 			})
-			result, err := blockstorage.MigrateVolume(vsaContext(t), client, blockstorage.VolumeActionRequest{VolumeID: "id"}, blockstorage.WithVolumeMigrationCluster(""))
+			result, err := blockstorage.MigrateVolume(vsaContext(t), client, blockstorage.VolumeActionRequest{VolumeID: "id"}, volumes.WithVolumeMigrationCluster(""))
 			if result == nil || result.VolumeID != "id" || len(result.Discovery) != 1 || result.Discovery[0] == nil || result.Discovery[0].StatusCode != 300 || string(result.Discovery[0].Body) != tc.reply || result.Discovery[0].Header.Get("X-Proof") != "current support" || client.Microversion != tc.selected {
 				t.Fatal(result, err, calls.Load(), client)
 			}
@@ -233,7 +233,7 @@ func TestMigrateVolumeFiniteDiscoveryKeepsCurrentProofAndNeverBorrowsRejectedPag
 				vmrRequest(t, req, "id", `{"os-migrate_volume":{"cluster":""}}`, "3.60")
 				return vsaResponse(req, 399, []byte{0xff, 0x00}, "action only"), nil
 			}))
-			result, err := blockstorage.MigrateVolume(vsaContext(t), client, blockstorage.VolumeActionRequest{VolumeID: "id"}, blockstorage.WithVolumeMigrationCluster(""))
+			result, err := blockstorage.MigrateVolume(vsaContext(t), client, blockstorage.VolumeActionRequest{VolumeID: "id"}, volumes.WithVolumeMigrationCluster(""))
 			expectedPages := 0
 			for i, code := range tc.codes {
 				if code == 200 || code == 300 {
@@ -304,7 +304,7 @@ func TestMigrateVolumeFiniteDiscoveryKeepsCurrentProofAndNeverBorrowsRejectedPag
 					response.ContentLength = int64(len(raw))
 					return response, nil
 				}))
-				result, err := blockstorage.MigrateVolume(vsaContext(t), client, blockstorage.VolumeActionRequest{VolumeID: "id"}, blockstorage.WithVolumeMigrationCluster(""))
+				result, err := blockstorage.MigrateVolume(vsaContext(t), client, blockstorage.VolumeActionRequest{VolumeID: "id"}, volumes.WithVolumeMigrationCluster(""))
 				vsaOperation(t, err, "MigrateVolume")
 				var proof *resource.ResponseError
 				var native gophercloud.ErrUnexpectedResponseCode
@@ -371,7 +371,7 @@ func TestVolumeMigrationOriginalOptionsOwnFactoryPointersRetainedConfigsAndCallb
 			switch kind {
 			case "reset":
 				status, attach, migration := "original status", "original attach", "original migration"
-				factory := blockstorage.WithVolumeStatusResetOptions(blockstorage.VolumeStatusResetOpts{Status: &status, AttachStatus: &attach, MigrationStatus: &migration})
+				factory := volumes.WithVolumeStatusResetOptions(blockstorage.VolumeStatusResetOpts{Status: &status, AttachStatus: &attach, MigrationStatus: &migration})
 				status, attach, migration = string([]byte{0xff}), "changed attach", "changed migration"
 				var retained *blockstorage.VolumeStatusResetOpts
 				var opts []blockstorage.VolumeStatusResetOption
@@ -396,7 +396,7 @@ func TestVolumeMigrationOriginalOptionsOwnFactoryPointersRetainedConfigsAndCallb
 			case "migration":
 				host, cluster := "original host", ""
 				force, lock := true, true
-				factory := blockstorage.WithVolumeMigrationOptions(blockstorage.VolumeMigrationOpts{Host: &host, Cluster: &cluster, ForceHostCopy: &force, LockVolume: &lock})
+				factory := volumes.WithVolumeMigrationOptions(blockstorage.VolumeMigrationOpts{Host: &host, Cluster: &cluster, ForceHostCopy: &force, LockVolume: &lock})
 				host, cluster, force, lock = string([]byte{0xff}), "late outer cluster", false, false
 				var retained *blockstorage.VolumeMigrationOpts
 				var opts []blockstorage.VolumeMigrationOption
@@ -421,7 +421,7 @@ func TestVolumeMigrationOriginalOptionsOwnFactoryPointersRetainedConfigsAndCallb
 				result, err = blockstorage.MigrateVolume(ctx, client, blockstorage.VolumeActionRequest{VolumeID: "id"}, opts...)
 			case "completion":
 				failed := true
-				factory := blockstorage.WithVolumeMigrationCompletionOptions(blockstorage.VolumeMigrationCompletionOpts{Error: &failed})
+				factory := volumes.WithVolumeMigrationCompletionOptions(blockstorage.VolumeMigrationCompletionOpts{Error: &failed})
 				failed = false
 				var retained *blockstorage.VolumeMigrationCompletionOpts
 				var opts []blockstorage.VolumeMigrationCompletionOption

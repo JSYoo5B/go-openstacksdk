@@ -25,7 +25,7 @@ type vfaCase struct {
 
 func vfaCases() []vfaCase {
 	no := false
-	factory := blockstorage.WithVolumeReadonlyOptions(blockstorage.VolumeReadonlyOpts{Readonly: &no})
+	factory := volumes.WithVolumeReadonlyOptions(blockstorage.VolumeReadonlyOpts{Readonly: &no})
 	no = true
 	return []vfaCase{
 		{"bootable false", "SetVolumeBootableStatus", `{"os-set_bootable":{"bootable":false}}`, func(ctx context.Context, client *gophercloud.ServiceClient, id string) (*blockstorage.VolumeActionResult, error) {
@@ -38,10 +38,10 @@ func vfaCases() []vfaCase {
 			return blockstorage.SetVolumeReadonly(ctx, client, blockstorage.VolumeActionRequest{VolumeID: id})
 		}},
 		{"readonly false", "SetVolumeReadonly", `{"os-update_readonly_flag":{"readonly":false}}`, func(ctx context.Context, client *gophercloud.ServiceClient, id string) (*blockstorage.VolumeActionResult, error) {
-			return blockstorage.SetVolumeReadonly(ctx, client, blockstorage.VolumeActionRequest{VolumeID: id}, blockstorage.WithVolumeReadonly(false))
+			return blockstorage.SetVolumeReadonly(ctx, client, blockstorage.VolumeActionRequest{VolumeID: id}, volumes.WithVolumeReadonly(false))
 		}},
 		{"readonly complete replacement", "SetVolumeReadonly", `{"os-update_readonly_flag":{"readonly":true}}`, func(ctx context.Context, client *gophercloud.ServiceClient, id string) (*blockstorage.VolumeActionResult, error) {
-			return blockstorage.SetVolumeReadonly(ctx, client, blockstorage.VolumeActionRequest{VolumeID: id}, blockstorage.WithVolumeReadonly(false), blockstorage.WithVolumeReadonlyOptions(blockstorage.VolumeReadonlyOpts{}))
+			return blockstorage.SetVolumeReadonly(ctx, client, blockstorage.VolumeActionRequest{VolumeID: id}, volumes.WithVolumeReadonly(false), volumes.WithVolumeReadonlyOptions(blockstorage.VolumeReadonlyOpts{}))
 		}},
 		{"readonly factory owns false", "SetVolumeReadonly", `{"os-update_readonly_flag":{"readonly":false}}`, func(ctx context.Context, client *gophercloud.ServiceClient, id string) (*blockstorage.VolumeActionResult, error) {
 			return blockstorage.SetVolumeReadonly(ctx, client, blockstorage.VolumeActionRequest{VolumeID: id}, factory)

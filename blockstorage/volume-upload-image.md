@@ -12,20 +12,14 @@ Status: `go_mapping`.
 
 Go API:
 
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeImageUploadOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeImageUploadForce`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeImageUploadDiskFormat`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeImageUploadContainerFormat`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeImageUploadVisibility`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeImageUploadProtected`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareVolumeImageUploadOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.UploadVolumeToImage`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithVolumeImageUploadOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithVolumeImageUploadForce`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithVolumeImageUploadDiskFormat`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithVolumeImageUploadContainerFormat`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithVolumeImageUploadVisibility`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithVolumeImageUploadProtected`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareVolumeImageUploadOptions`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage.UploadVolumeToImage`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.PrepareVolumeImageUploadOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.UploadVolumeToImage`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.UploadVolumeToImage`
@@ -123,6 +117,7 @@ import (
 
     sdk "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/blockstorage"
+    "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes"
     "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -147,21 +142,21 @@ func run() error {
     if text, supplied := os.LookupEnv("IMAGE_UPLOAD_FORCE"); supplied {
         value, err := strconv.ParseBool(text)
         if err != nil { return fmt.Errorf("IMAGE_UPLOAD_FORCE: %w", err) }
-        options = append(options, blockstorage.WithVolumeImageUploadForce(value))
+        options = append(options, volumes.WithVolumeImageUploadForce(value))
     }
     if text, supplied := os.LookupEnv("IMAGE_UPLOAD_DISK_FORMAT"); supplied {
-        options = append(options, blockstorage.WithVolumeImageUploadDiskFormat(text))
+        options = append(options, volumes.WithVolumeImageUploadDiskFormat(text))
     }
     if text, supplied := os.LookupEnv("IMAGE_UPLOAD_CONTAINER_FORMAT"); supplied {
-        options = append(options, blockstorage.WithVolumeImageUploadContainerFormat(text))
+        options = append(options, volumes.WithVolumeImageUploadContainerFormat(text))
     }
     if text, supplied := os.LookupEnv("IMAGE_UPLOAD_VISIBILITY"); supplied {
-        options = append(options, blockstorage.WithVolumeImageUploadVisibility(text))
+        options = append(options, volumes.WithVolumeImageUploadVisibility(text))
     }
     if text, supplied := os.LookupEnv("IMAGE_UPLOAD_PROTECTED"); supplied {
         value, err := strconv.ParseBool(text)
         if err != nil { return fmt.Errorf("IMAGE_UPLOAD_PROTECTED: %w", err) }
-        options = append(options, blockstorage.WithVolumeImageUploadProtected(value))
+        options = append(options, volumes.WithVolumeImageUploadProtected(value))
     }
     policy, err := blockstorage.PrepareVolumeImageUploadOptions(ctx, options...)
     if err != nil { return err }
@@ -174,7 +169,7 @@ func run() error {
 }
 
 func apply(ctx context.Context, conn *sdk.Connection, path string, input blockstorage.VolumeActionRequest, imageName string, policy blockstorage.VolumeImageUploadOpts) (*blockstorage.VolumeImageUploadResult, error) {
-    option := blockstorage.WithVolumeImageUploadOptions(policy)
+    option := volumes.WithVolumeImageUploadOptions(policy)
     if path == "connection" { return conn.UploadVolumeToImage(ctx, input, imageName, option) }
     cinder, err := conn.BlockStorageV3(ctx)
     if err != nil { return nil, err }

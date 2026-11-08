@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage"
+	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -18,7 +19,7 @@ func TestVolumeImageUploadOptionFactoriesOwnPointersDefaultsAndFullReplacement(t
 	force, protected := true, false
 	disk, container, visibility := "", "container /?%#\n\x00", ""
 	input := blockstorage.VolumeImageUploadOpts{Force: &force, DiskFormat: &disk, ContainerFormat: &container, Visibility: &visibility, Protected: &protected}
-	factory := blockstorage.WithVolumeImageUploadOptions(input)
+	factory := volumes.WithVolumeImageUploadOptions(input)
 	force, protected, disk, container, visibility = false, true, "caller disk", "caller container", "caller visibility"
 	first, err := blockstorage.PrepareVolumeImageUploadOptions(vsaContext(t), factory)
 	if err != nil || first.Force == nil || !*first.Force || first.DiskFormat == nil || *first.DiskFormat != "" || first.ContainerFormat == nil || *first.ContainerFormat != "container /?%#\n\x00" || first.Visibility == nil || *first.Visibility != "" || first.Protected == nil || *first.Protected {
@@ -41,22 +42,22 @@ func TestVolumeImageUploadOptionFactoriesOwnPointersDefaultsAndFullReplacement(t
 	if err != nil || secondDefault.Force == nil || secondDefault.Force == defaults.Force || *secondDefault.Force {
 		t.Fatal("default pointer is shared", defaults, secondDefault, err)
 	}
-	replaced, err := blockstorage.PrepareVolumeImageUploadOptions(vsaContext(t), factory, blockstorage.WithVolumeImageUploadOptions(blockstorage.VolumeImageUploadOpts{}))
+	replaced, err := blockstorage.PrepareVolumeImageUploadOptions(vsaContext(t), factory, volumes.WithVolumeImageUploadOptions(blockstorage.VolumeImageUploadOpts{}))
 	if err != nil || replaced.Force == nil || *replaced.Force || replaced.DiskFormat != nil || replaced.ContainerFormat != nil || replaced.Visibility != nil || replaced.Protected != nil {
 		t.Fatal("full replacement retained omitted fields", replaced, err)
 	}
 	ordered, err := blockstorage.PrepareVolumeImageUploadOptions(vsaContext(t),
-		blockstorage.WithVolumeImageUploadForce(true),
-		blockstorage.WithVolumeImageUploadOptions(blockstorage.VolumeImageUploadOpts{}),
-		blockstorage.WithVolumeImageUploadForce(false),
-		blockstorage.WithVolumeImageUploadDiskFormat(""),
-		blockstorage.WithVolumeImageUploadContainerFormat(""),
-		blockstorage.WithVolumeImageUploadVisibility(""),
-		blockstorage.WithVolumeImageUploadProtected(false))
+		volumes.WithVolumeImageUploadForce(true),
+		volumes.WithVolumeImageUploadOptions(blockstorage.VolumeImageUploadOpts{}),
+		volumes.WithVolumeImageUploadForce(false),
+		volumes.WithVolumeImageUploadDiskFormat(""),
+		volumes.WithVolumeImageUploadContainerFormat(""),
+		volumes.WithVolumeImageUploadVisibility(""),
+		volumes.WithVolumeImageUploadProtected(false))
 	if err != nil || ordered.Force == nil || *ordered.Force || ordered.DiskFormat == nil || *ordered.DiskFormat != "" || ordered.ContainerFormat == nil || *ordered.ContainerFormat != "" || ordered.Visibility == nil || *ordered.Visibility != "" || ordered.Protected == nil || *ordered.Protected {
 		t.Fatal("explicit empty or false presence lost", ordered, err)
 	}
-	factories := []blockstorage.VolumeImageUploadOption{blockstorage.WithVolumeImageUploadForce(false), blockstorage.WithVolumeImageUploadDiskFormat(""), blockstorage.WithVolumeImageUploadContainerFormat(""), blockstorage.WithVolumeImageUploadVisibility(""), blockstorage.WithVolumeImageUploadProtected(false)}
+	factories := []blockstorage.VolumeImageUploadOption{volumes.WithVolumeImageUploadForce(false), volumes.WithVolumeImageUploadDiskFormat(""), volumes.WithVolumeImageUploadContainerFormat(""), volumes.WithVolumeImageUploadVisibility(""), volumes.WithVolumeImageUploadProtected(false)}
 	reused, err := blockstorage.PrepareVolumeImageUploadOptions(vsaContext(t), factories...)
 	if err != nil {
 		t.Fatal(err)
@@ -139,9 +140,9 @@ func TestVolumeImageUploadPrepareValidatesOnlyFinalUTF8AndPreservesLiteralString
 		option func(string) blockstorage.VolumeImageUploadOption
 		get    func(blockstorage.VolumeImageUploadOpts) *string
 	}{
-		{"disk", blockstorage.WithVolumeImageUploadDiskFormat, func(v blockstorage.VolumeImageUploadOpts) *string { return v.DiskFormat }},
-		{"container", blockstorage.WithVolumeImageUploadContainerFormat, func(v blockstorage.VolumeImageUploadOpts) *string { return v.ContainerFormat }},
-		{"visibility", blockstorage.WithVolumeImageUploadVisibility, func(v blockstorage.VolumeImageUploadOpts) *string { return v.Visibility }},
+		{"disk", volumes.WithVolumeImageUploadDiskFormat, func(v blockstorage.VolumeImageUploadOpts) *string { return v.DiskFormat }},
+		{"container", volumes.WithVolumeImageUploadContainerFormat, func(v blockstorage.VolumeImageUploadOpts) *string { return v.ContainerFormat }},
+		{"visibility", volumes.WithVolumeImageUploadVisibility, func(v blockstorage.VolumeImageUploadOpts) *string { return v.Visibility }},
 	}
 	for _, field := range fields {
 		t.Run(field.name, func(t *testing.T) {
@@ -156,7 +157,7 @@ func TestVolumeImageUploadPrepareValidatesOnlyFinalUTF8AndPreservesLiteralString
 					t.Fatal("final repair or literal preservation failed", repaired, cause)
 				}
 			}
-			cleared, cause := blockstorage.PrepareVolumeImageUploadOptions(vsaContext(t), field.option(bad), blockstorage.WithVolumeImageUploadOptions(blockstorage.VolumeImageUploadOpts{}))
+			cleared, cause := blockstorage.PrepareVolumeImageUploadOptions(vsaContext(t), field.option(bad), volumes.WithVolumeImageUploadOptions(blockstorage.VolumeImageUploadOpts{}))
 			if cause != nil || field.get(cleared) != nil || cleared.Force == nil || *cleared.Force {
 				t.Fatal("overwritten invalid input was validated", cleared, cause)
 			}

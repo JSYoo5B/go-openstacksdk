@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage"
+	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
@@ -56,11 +57,11 @@ func TestVolumeResizeOptionsDefaultsEmptyReplacementAndFactoriesOwnValues(t *tes
 		options    []blockstorage.VolumeRetypeOption
 	}{
 		{"default never", vroDefaultRetype, nil},
-		{"explicit empty omitted", vroEmptyRetype, []blockstorage.VolumeRetypeOption{blockstorage.WithVolumeRetypeMigrationPolicy("")}},
-		{"arbitrary policy", `{"os-retype":{"migration_policy":"not an enum / %?#","new_type":"literal / % ?#"}}`, []blockstorage.VolumeRetypeOption{blockstorage.WithVolumeRetypeMigrationPolicy("not an enum / %?#")}},
-		{"empty then complete replacement", vroDefaultRetype, []blockstorage.VolumeRetypeOption{blockstorage.WithVolumeRetypeMigrationPolicy(""), blockstorage.WithVolumeRetypeOptions(blockstorage.VolumeRetypeOpts{})}},
-		{"later empty wins", vroEmptyRetype, []blockstorage.VolumeRetypeOption{blockstorage.WithVolumeRetypeOptions(blockstorage.VolumeRetypeOpts{}), blockstorage.WithVolumeRetypeMigrationPolicy("")}},
-		{"invalid earlier policy replaced", vroDefaultRetype, []blockstorage.VolumeRetypeOption{blockstorage.WithVolumeRetypeMigrationPolicy(string([]byte{0xff})), blockstorage.WithVolumeRetypeOptions(blockstorage.VolumeRetypeOpts{})}},
+		{"explicit empty omitted", vroEmptyRetype, []blockstorage.VolumeRetypeOption{volumes.WithVolumeRetypeMigrationPolicy("")}},
+		{"arbitrary policy", `{"os-retype":{"migration_policy":"not an enum / %?#","new_type":"literal / % ?#"}}`, []blockstorage.VolumeRetypeOption{volumes.WithVolumeRetypeMigrationPolicy("not an enum / %?#")}},
+		{"empty then complete replacement", vroDefaultRetype, []blockstorage.VolumeRetypeOption{volumes.WithVolumeRetypeMigrationPolicy(""), volumes.WithVolumeRetypeOptions(blockstorage.VolumeRetypeOpts{})}},
+		{"later empty wins", vroEmptyRetype, []blockstorage.VolumeRetypeOption{volumes.WithVolumeRetypeOptions(blockstorage.VolumeRetypeOpts{}), volumes.WithVolumeRetypeMigrationPolicy("")}},
+		{"invalid earlier policy replaced", vroDefaultRetype, []blockstorage.VolumeRetypeOption{volumes.WithVolumeRetypeMigrationPolicy(string([]byte{0xff})), volumes.WithVolumeRetypeOptions(blockstorage.VolumeRetypeOpts{})}},
 	}
 	for _, tc := range retypes {
 		t.Run("retype/"+tc.name, func(t *testing.T) {
@@ -75,10 +76,10 @@ func TestVolumeResizeOptionsDefaultsEmptyReplacementAndFactoriesOwnValues(t *tes
 		options    []blockstorage.VolumeExtendCompletionOption
 	}{
 		{"default false", vroFalseCompletion, nil},
-		{"explicit true", vroTrueCompletion, []blockstorage.VolumeExtendCompletionOption{blockstorage.WithVolumeExtendCompletionError(true)}},
-		{"explicit false", vroFalseCompletion, []blockstorage.VolumeExtendCompletionOption{blockstorage.WithVolumeExtendCompletionError(false)}},
-		{"true then replacement default", vroFalseCompletion, []blockstorage.VolumeExtendCompletionOption{blockstorage.WithVolumeExtendCompletionError(true), blockstorage.WithVolumeExtendCompletionOptions(blockstorage.VolumeExtendCompletionOpts{})}},
-		{"later true wins", vroTrueCompletion, []blockstorage.VolumeExtendCompletionOption{blockstorage.WithVolumeExtendCompletionOptions(blockstorage.VolumeExtendCompletionOpts{}), blockstorage.WithVolumeExtendCompletionError(true)}},
+		{"explicit true", vroTrueCompletion, []blockstorage.VolumeExtendCompletionOption{volumes.WithVolumeExtendCompletionError(true)}},
+		{"explicit false", vroFalseCompletion, []blockstorage.VolumeExtendCompletionOption{volumes.WithVolumeExtendCompletionError(false)}},
+		{"true then replacement default", vroFalseCompletion, []blockstorage.VolumeExtendCompletionOption{volumes.WithVolumeExtendCompletionError(true), volumes.WithVolumeExtendCompletionOptions(blockstorage.VolumeExtendCompletionOpts{})}},
+		{"later true wins", vroTrueCompletion, []blockstorage.VolumeExtendCompletionOption{volumes.WithVolumeExtendCompletionOptions(blockstorage.VolumeExtendCompletionOpts{}), volumes.WithVolumeExtendCompletionError(true)}},
 	}
 	for _, tc := range completions {
 		t.Run("completion/"+tc.name, func(t *testing.T) {
@@ -92,8 +93,8 @@ func TestVolumeResizeOptionsDefaultsEmptyReplacementAndFactoriesOwnValues(t *tes
 		policy, flag := "owned", true
 		rvalue := blockstorage.VolumeRetypeOpts{MigrationPolicy: &policy}
 		cvalue := blockstorage.VolumeExtendCompletionOpts{Error: &flag}
-		rfactory := blockstorage.WithVolumeRetypeOptions(rvalue)
-		cfactory := blockstorage.WithVolumeExtendCompletionOptions(cvalue)
+		rfactory := volumes.WithVolumeRetypeOptions(rvalue)
+		cfactory := volumes.WithVolumeExtendCompletionOptions(cvalue)
 		policy, flag = "caller changed", false
 		rvalue.MigrationPolicy, cvalue.Error = nil, nil
 		for i := 0; i < 2; i++ {

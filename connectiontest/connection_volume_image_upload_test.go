@@ -11,6 +11,7 @@ import (
 
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage"
+	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
@@ -84,8 +85,8 @@ func TestConnectionVolumeImageUploadUsesCachedCinderAndGatesOnlyOptionalPresence
 		option blockstorage.VolumeImageUploadOption
 		value  string
 	}{
-		{blockstorage.WithVolumeImageUploadVisibility(""), "null"},
-		{blockstorage.WithVolumeImageUploadProtected(false), `[false,9007199254740993]`},
+		{volumes.WithVolumeImageUploadVisibility(""), "null"},
+		{volumes.WithVolumeImageUploadProtected(false), `[false,9007199254740993]`},
 	}
 	for _, call := range calls {
 		result, err := conn.UploadVolumeToImage(vcmContext(t), input, "new image", call.option)
@@ -93,7 +94,7 @@ func TestConnectionVolumeImageUploadUsesCachedCinderAndGatesOnlyOptionalPresence
 			t.Fatal("explicit false/empty presence lost required-support proof or raw selected version", result, err)
 		}
 	}
-	failed, err := conn.UploadVolumeToImage(vcmContext(t), input, "new image", blockstorage.WithVolumeImageUploadProtected(false))
+	failed, err := conn.UploadVolumeToImage(vcmContext(t), input, "new image", volumes.WithVolumeImageUploadProtected(false))
 	vscError(t, "UploadVolumeToImage", err)
 	if err == nil || failed == nil || failed.Completed || failed.VolumeID != input.VolumeID || failed.Applied != nil || failed.Upload != nil || len(failed.Discovery) != 1 || failed.Discovery[0].StatusCode != 300 || failed.Discovery[0].Header.Get("X-Upload-Stage") != "gate" {
 		t.Fatal("selected3.90 bypassed fixed3.1 absent from server range", failed, err)

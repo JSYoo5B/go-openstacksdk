@@ -12,16 +12,12 @@ Status: `go_mapping`.
 
 Go API:
 
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeImageMetadataOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeImageMetadata`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeImageMetadataValue`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeImageMetadataRaw`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareVolumeImageMetadataOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.SetVolumeImageMetadata`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithVolumeImageMetadataOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithVolumeImageMetadata`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithVolumeImageMetadataValue`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithVolumeImageMetadataRaw`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareVolumeImageMetadataOptions`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage.SetVolumeImageMetadata`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.PrepareVolumeImageMetadataOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.SetVolumeImageMetadata`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.SetVolumeImageMetadata`
@@ -56,14 +52,11 @@ Status: `go_mapping`.
 
 Go API:
 
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeImageMetadataDeleteOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeImageMetadataDeleteKeys`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeImageMetadataDeleteAll`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareVolumeImageMetadataDeleteOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.DeleteVolumeImageMetadata`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithVolumeImageMetadataDeleteOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithVolumeImageMetadataDeleteKeys`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithVolumeImageMetadataDeleteAll`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareVolumeImageMetadataDeleteOptions`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage.DeleteVolumeImageMetadata`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.PrepareVolumeImageMetadataDeleteOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.DeleteVolumeImageMetadata`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.DeleteVolumeImageMetadata`
@@ -111,6 +104,7 @@ import (
 
     sdk "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/blockstorage"
+    "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes"
     "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -138,9 +132,9 @@ func run() error {
         if text, supplied := os.LookupEnv("IMAGE_METADATA_JSON"); supplied {
             if err := json.Unmarshal([]byte(text), &values); err != nil { return fmt.Errorf("IMAGE_METADATA_JSON: %w", err) }
         }
-        options := []blockstorage.VolumeImageMetadataOption{blockstorage.WithVolumeImageMetadataRaw(values)}
+        options := []blockstorage.VolumeImageMetadataOption{volumes.WithVolumeImageMetadataRaw(values)}
         if key, supplied := os.LookupEnv("IMAGE_METADATA_KEY"); supplied {
-            options = append(options, blockstorage.WithVolumeImageMetadataValue(key, os.Getenv("IMAGE_METADATA_VALUE")))
+            options = append(options, volumes.WithVolumeImageMetadataValue(key, os.Getenv("IMAGE_METADATA_VALUE")))
         }
         prepared, err := blockstorage.PrepareVolumeImageMetadataOptions(ctx, options...)
         if err != nil { return err }
@@ -150,7 +144,7 @@ func run() error {
         if text, supplied := os.LookupEnv("IMAGE_METADATA_KEYS_JSON"); supplied {
             var keys []string
             if err := json.Unmarshal([]byte(text), &keys); err != nil { return fmt.Errorf("IMAGE_METADATA_KEYS_JSON: %w", err) }
-            options = append(options, blockstorage.WithVolumeImageMetadataDeleteKeys(keys...))
+            options = append(options, volumes.WithVolumeImageMetadataDeleteKeys(keys...))
         }
         prepared, err := blockstorage.PrepareVolumeImageMetadataDeleteOptions(ctx, options...)
         if err != nil { return err }
@@ -171,7 +165,7 @@ func run() error {
 }
 
 func applySet(ctx context.Context, conn *sdk.Connection, path string, input blockstorage.VolumeActionRequest, policy blockstorage.VolumeImageMetadataOpts) (*blockstorage.VolumeActionResult, error) {
-    option := blockstorage.WithVolumeImageMetadataOptions(policy)
+    option := volumes.WithVolumeImageMetadataOptions(policy)
     if path == "connection" { return conn.SetVolumeImageMetadata(ctx, input, option) }
     cinder, err := conn.BlockStorageV3(ctx)
     if err != nil { return nil, err }
@@ -180,7 +174,7 @@ func applySet(ctx context.Context, conn *sdk.Connection, path string, input bloc
 }
 
 func applyDelete(ctx context.Context, conn *sdk.Connection, path string, input blockstorage.VolumeActionRequest, policy blockstorage.VolumeImageMetadataDeleteOpts) (*blockstorage.VolumeImageMetadataDeleteResult, error) {
-    option := blockstorage.WithVolumeImageMetadataDeleteOptions(policy)
+    option := volumes.WithVolumeImageMetadataDeleteOptions(policy)
     if path == "connection" { return conn.DeleteVolumeImageMetadata(ctx, input, option) }
     cinder, err := conn.BlockStorageV3(ctx)
     if err != nil { return nil, err }

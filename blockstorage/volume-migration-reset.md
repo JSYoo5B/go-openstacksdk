@@ -15,15 +15,11 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.ResetVolumeStatus`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.ResetVolumeStatus`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.ResetVolumeStatus`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeStatusResetOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeStatusResetStatus`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeStatusResetAttachStatus`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeStatusResetMigrationStatus`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareVolumeStatusResetOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithVolumeStatusResetOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithVolumeStatusResetStatus`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithVolumeStatusResetAttachStatus`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithVolumeStatusResetMigrationStatus`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareVolumeStatusResetOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.PrepareVolumeStatusResetOptions`
 
 - Reset defaults all three statuses to omitted. Nil and empty typed strings are omitted, all nonempty UTF-8 strings are sent independently without enum/default injection; empty options still POST {os-reset_status:{}}.
@@ -59,17 +55,12 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.MigrateVolume`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.MigrateVolume`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.MigrateVolume`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeMigrationOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeMigrationHost`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeMigrationCluster`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeMigrationForceHostCopy`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeMigrationLockVolume`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareVolumeMigrationOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithVolumeMigrationOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithVolumeMigrationHost`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithVolumeMigrationCluster`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithVolumeMigrationForceHostCopy`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithVolumeMigrationLockVolume`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareVolumeMigrationOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.PrepareVolumeMigrationOptions`
 
 - Host/Cluster nil omission differs from explicit empty inclusion. False/default ForceHostCopy/LockVolume fields are omitted; true fields are included. No host/cluster resolver, requirement or mutual-exclusion check is added.
@@ -106,11 +97,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.CompleteVolumeMigration`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.CompleteVolumeMigration`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.CompleteVolumeMigration`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeMigrationCompletionOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeMigrationCompletionError`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareVolumeMigrationCompletionOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithVolumeMigrationCompletionOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithVolumeMigrationCompletionError`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareVolumeMigrationCompletionOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.PrepareVolumeMigrationCompletionOptions`
 
 - Required newVolume is a literal UTF-8 body string, including empty/route-like text; it is not resolved or validated as the current route ID. new_volume and error are always sent.
@@ -154,6 +143,7 @@ import (
 
     sdk "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/blockstorage"
+    "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes"
     "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -188,13 +178,13 @@ func run() error {
     case "reset":
         var options []blockstorage.VolumeStatusResetOption
         if value, supplied := os.LookupEnv("RESET_STATUS"); supplied {
-            options = append(options, blockstorage.WithVolumeStatusResetStatus(value))
+            options = append(options, volumes.WithVolumeStatusResetStatus(value))
         }
         if value, supplied := os.LookupEnv("RESET_ATTACH_STATUS"); supplied {
-            options = append(options, blockstorage.WithVolumeStatusResetAttachStatus(value))
+            options = append(options, volumes.WithVolumeStatusResetAttachStatus(value))
         }
         if value, supplied := os.LookupEnv("RESET_MIGRATION_STATUS"); supplied {
-            options = append(options, blockstorage.WithVolumeStatusResetMigrationStatus(value))
+            options = append(options, volumes.WithVolumeStatusResetMigrationStatus(value))
         }
         prepared, err := blockstorage.PrepareVolumeStatusResetOptions(ctx, options...)
         if err != nil { return err }
@@ -202,17 +192,17 @@ func run() error {
     case "migrate":
         var options []blockstorage.VolumeMigrationOption
         if value, supplied := os.LookupEnv("MIGRATION_HOST"); supplied {
-            options = append(options, blockstorage.WithVolumeMigrationHost(value))
+            options = append(options, volumes.WithVolumeMigrationHost(value))
         }
         if value, supplied := os.LookupEnv("MIGRATION_CLUSTER"); supplied {
-            options = append(options, blockstorage.WithVolumeMigrationCluster(value))
+            options = append(options, volumes.WithVolumeMigrationCluster(value))
         }
         for _, control := range []struct {
             name string
             option func(bool) blockstorage.VolumeMigrationOption
         }{
-            {"MIGRATION_FORCE_HOST_COPY", blockstorage.WithVolumeMigrationForceHostCopy},
-            {"MIGRATION_LOCK_VOLUME", blockstorage.WithVolumeMigrationLockVolume},
+            {"MIGRATION_FORCE_HOST_COPY", volumes.WithVolumeMigrationForceHostCopy},
+            {"MIGRATION_LOCK_VOLUME", volumes.WithVolumeMigrationLockVolume},
         } {
             if text, supplied := os.LookupEnv(control.name); supplied {
                 value, err := strconv.ParseBool(text)
@@ -231,7 +221,7 @@ func run() error {
         if text, supplied := os.LookupEnv("MIGRATION_ERROR"); supplied {
             value, err := strconv.ParseBool(text)
             if err != nil { return fmt.Errorf("MIGRATION_ERROR: %w", err) }
-            options = append(options, blockstorage.WithVolumeMigrationCompletionError(value))
+            options = append(options, volumes.WithVolumeMigrationCompletionError(value))
         }
         prepared, err := blockstorage.PrepareVolumeMigrationCompletionOptions(ctx, options...)
         if err != nil { return err }
@@ -246,9 +236,9 @@ func run() error {
 }
 
 func apply(ctx context.Context, conn *sdk.Connection, path, action string, input blockstorage.VolumeActionRequest, newVolume string, reset blockstorage.VolumeStatusResetOpts, migration blockstorage.VolumeMigrationOpts, completion blockstorage.VolumeMigrationCompletionOpts) (*blockstorage.VolumeActionResult, error) {
-    r := blockstorage.WithVolumeStatusResetOptions(reset)
-    m := blockstorage.WithVolumeMigrationOptions(migration)
-    c := blockstorage.WithVolumeMigrationCompletionOptions(completion)
+    r := volumes.WithVolumeStatusResetOptions(reset)
+    m := volumes.WithVolumeMigrationOptions(migration)
+    c := volumes.WithVolumeMigrationCompletionOptions(completion)
     if path == "connection" {
         switch action {
         case "reset": return conn.ResetVolumeStatus(ctx, input, r)

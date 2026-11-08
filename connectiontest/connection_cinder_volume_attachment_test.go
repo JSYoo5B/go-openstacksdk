@@ -11,6 +11,7 @@ import (
 
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage"
+	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
@@ -62,13 +63,13 @@ func TestConnectionCinderVolumeAttachmentsUseCachedCinderAndIgnoreLocation(t *te
 	input := blockstorage.VolumeActionRequest{VolumeID: "literal-name"}
 	calls := []func() (*blockstorage.VolumeActionResult, error){
 		func() (*blockstorage.VolumeActionResult, error) {
-			return conn.AttachCinderVolume(vcmContext(t), input, "", blockstorage.WithCinderVolumeAttachHostName(bad), blockstorage.WithCinderVolumeAttachInstance(""))
+			return conn.AttachCinderVolume(vcmContext(t), input, "", volumes.WithCinderVolumeAttachHostName(bad), volumes.WithCinderVolumeAttachInstance(""))
 		},
 		func() (*blockstorage.VolumeActionResult, error) {
-			return conn.DetachCinderVolume(vcmContext(t), input, "", blockstorage.WithCinderVolumeDetachConnector(map[string]json.RawMessage{bad: json.RawMessage(`{]`)}))
+			return conn.DetachCinderVolume(vcmContext(t), input, "", volumes.WithCinderVolumeDetachConnector(map[string]json.RawMessage{bad: json.RawMessage(`{]`)}))
 		},
 		func() (*blockstorage.VolumeActionResult, error) {
-			return conn.DetachCinderVolume(vcmContext(t), input, "attachment / ?#", blockstorage.WithCinderVolumeDetachForce(true), blockstorage.WithCinderVolumeDetachConnector(map[string]json.RawMessage{"host": json.RawMessage(`""`), "multipath": json.RawMessage(`false`), "opaque": json.RawMessage(`null`)}))
+			return conn.DetachCinderVolume(vcmContext(t), input, "attachment / ?#", volumes.WithCinderVolumeDetachForce(true), volumes.WithCinderVolumeDetachConnector(map[string]json.RawMessage{"host": json.RawMessage(`""`), "multipath": json.RawMessage(`false`), "opaque": json.RawMessage(`null`)}))
 		},
 	}
 	for _, call := range calls {

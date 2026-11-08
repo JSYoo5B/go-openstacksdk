@@ -12,14 +12,11 @@ Status: `go_mapping`.
 
 Go API:
 
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCinderVolumeAttachOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCinderVolumeAttachInstance`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCinderVolumeAttachHostName`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareCinderVolumeAttachOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.AttachCinderVolume`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithCinderVolumeAttachOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithCinderVolumeAttachInstance`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithCinderVolumeAttachHostName`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareCinderVolumeAttachOptions`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage.AttachCinderVolume`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.PrepareCinderVolumeAttachOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.AttachCinderVolume`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.AttachCinderVolume`
@@ -56,14 +53,11 @@ Status: `go_mapping`.
 
 Go API:
 
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCinderVolumeDetachOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCinderVolumeDetachForce`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCinderVolumeDetachConnector`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareCinderVolumeDetachOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.DetachCinderVolume`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithCinderVolumeDetachOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithCinderVolumeDetachForce`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithCinderVolumeDetachConnector`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareCinderVolumeDetachOptions`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage.DetachCinderVolume`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.PrepareCinderVolumeDetachOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.DetachCinderVolume`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.DetachCinderVolume`
@@ -113,6 +107,7 @@ import (
 
     sdk "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/blockstorage"
+    "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes"
     "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -141,10 +136,10 @@ func run() error {
         bodyValue = value
         var options []blockstorage.CinderVolumeAttachOption
         if value, supplied := os.LookupEnv("CINDER_INSTANCE"); supplied {
-            options = append(options, blockstorage.WithCinderVolumeAttachInstance(value))
+            options = append(options, volumes.WithCinderVolumeAttachInstance(value))
         }
         if value, supplied := os.LookupEnv("CINDER_HOST_NAME"); supplied {
-            options = append(options, blockstorage.WithCinderVolumeAttachHostName(value))
+            options = append(options, volumes.WithCinderVolumeAttachHostName(value))
         }
         prepared, err := blockstorage.PrepareCinderVolumeAttachOptions(ctx, options...)
         if err != nil { return err }
@@ -159,11 +154,11 @@ func run() error {
             if err != nil { return fmt.Errorf("CINDER_FORCE: %w", err) }
             force = value
         }
-        options := []blockstorage.CinderVolumeDetachOption{blockstorage.WithCinderVolumeDetachForce(force)}
+        options := []blockstorage.CinderVolumeDetachOption{volumes.WithCinderVolumeDetachForce(force)}
         if text, supplied := os.LookupEnv("CINDER_CONNECTOR_JSON"); force && supplied {
             var connector map[string]json.RawMessage
             if err := json.Unmarshal([]byte(text), &connector); err != nil { return fmt.Errorf("CINDER_CONNECTOR_JSON: %w", err) }
-            options = append(options, blockstorage.WithCinderVolumeDetachConnector(connector))
+            options = append(options, volumes.WithCinderVolumeDetachConnector(connector))
         }
         prepared, err := blockstorage.PrepareCinderVolumeDetachOptions(ctx, options...)
         if err != nil { return err }
@@ -177,8 +172,8 @@ func run() error {
 }
 
 func apply(ctx context.Context, conn *sdk.Connection, path, action string, input blockstorage.VolumeActionRequest, bodyValue string, attach blockstorage.CinderVolumeAttachOpts, detach blockstorage.CinderVolumeDetachOpts) (*blockstorage.VolumeActionResult, error) {
-    a := blockstorage.WithCinderVolumeAttachOptions(attach)
-    d := blockstorage.WithCinderVolumeDetachOptions(detach)
+    a := volumes.WithCinderVolumeAttachOptions(attach)
+    d := volumes.WithCinderVolumeDetachOptions(detach)
     if path == "connection" {
         if action == "attach" { return conn.AttachCinderVolume(ctx, input, bodyValue, a) }
         return conn.DetachCinderVolume(ctx, input, bodyValue, d)

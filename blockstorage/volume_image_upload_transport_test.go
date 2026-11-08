@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage"
+	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
@@ -74,7 +75,7 @@ func TestUploadVolumeToImageAcceptedDiscoveryOrActionFailureKeepsCurrentProofAnd
 				}))
 				var options []blockstorage.VolumeImageUploadOption
 				if phase != "ordinary action" {
-					options = []blockstorage.VolumeImageUploadOption{blockstorage.WithVolumeImageUploadProtected(false)}
+					options = []blockstorage.VolumeImageUploadOption{volumes.WithVolumeImageUploadProtected(false)}
 				}
 				result, err := blockstorage.UploadVolumeToImage(ctx, client, blockstorage.VolumeActionRequest{VolumeID: "id"}, "", options...)
 				vsaOperation(t, err, "UploadVolumeToImage")
@@ -217,7 +218,7 @@ func TestUploadVolumeToImageLiveNativeRetriesAndPhysicalGuardsKeepBodyAndOrigina
 				})
 				var options []blockstorage.VolumeImageUploadOption
 				if required {
-					options = []blockstorage.VolumeImageUploadOption{blockstorage.WithVolumeImageUploadProtected(false)}
+					options = []blockstorage.VolumeImageUploadOption{volumes.WithVolumeImageUploadProtected(false)}
 				}
 				result, err := blockstorage.UploadVolumeToImage(vsaContext(t), client, blockstorage.VolumeActionRequest{VolumeID: "id"}, "", options...)
 				wantPages := 0
@@ -309,7 +310,7 @@ func TestUploadVolumeToImageLiveNativeRetriesAndPhysicalGuardsKeepBodyAndOrigina
 				}))
 				var options []blockstorage.VolumeImageUploadOption
 				if required {
-					options = []blockstorage.VolumeImageUploadOption{blockstorage.WithVolumeImageUploadProtected(false)}
+					options = []blockstorage.VolumeImageUploadOption{volumes.WithVolumeImageUploadProtected(false)}
 				}
 				result, err := blockstorage.UploadVolumeToImage(vsaContext(t), client, blockstorage.VolumeActionRequest{VolumeID: "id"}, "", options...)
 				vsaOperation(t, err, "UploadVolumeToImage")

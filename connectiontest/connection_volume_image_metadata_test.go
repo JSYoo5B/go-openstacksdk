@@ -12,6 +12,7 @@ import (
 
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage"
+	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
@@ -87,11 +88,11 @@ func TestConnectionVolumeImageMetadataUsesCachedCinderAndPreservesAllEmptyAndDup
 	if err != nil || set == nil || !set.Completed || set.VolumeID != input.VolumeID || set.Microversion != "3.90" || len(set.Discovery) != 0 || set.Applied == nil || set.Applied.StatusCode != 203 || !bytes.Equal(set.Applied.Body, ack) {
 		t.Fatal(set, err)
 	}
-	empty, err := conn.DeleteVolumeImageMetadata(vcmContext(t), input, blockstorage.WithVolumeImageMetadataDeleteKeys())
+	empty, err := conn.DeleteVolumeImageMetadata(vcmContext(t), input, volumes.WithVolumeImageMetadataDeleteKeys())
 	if err != nil || empty == nil || !empty.Completed || empty.VolumeID != input.VolumeID || empty.Microversion != "3.90" || len(empty.Discovery) != 0 || empty.Observed != nil || len(empty.Deleted) != 0 || empty.Failed != nil || posts.Load() != 1 || gets.Load() != 0 {
 		t.Fatal("explicit none performed HTTP or became all", empty, err, posts.Load(), gets.Load())
 	}
-	explicit, err := conn.DeleteVolumeImageMetadata(vcmContext(t), input, blockstorage.WithVolumeImageMetadataDeleteKeys("b", "", "b"))
+	explicit, err := conn.DeleteVolumeImageMetadata(vcmContext(t), input, volumes.WithVolumeImageMetadataDeleteKeys("b", "", "b"))
 	if err != nil || explicit == nil || !explicit.Completed || explicit.Observed != nil || explicit.Failed != nil || len(explicit.Discovery) != 0 || !reflect.DeepEqual(vimDeletedKeys(explicit), []string{"b", "", "b"}) || posts.Load() != 4 || gets.Load() != 0 {
 		t.Fatal(explicit, err, posts.Load(), gets.Load())
 	}

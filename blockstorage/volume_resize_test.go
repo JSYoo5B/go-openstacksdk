@@ -36,25 +36,25 @@ func vrrCases() []vrrCase {
 			return blockstorage.RetypeVolume(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, "")
 		}},
 		{"retype explicit empty policy omits", "RetypeVolume", `{"os-retype":{"new_type":"literal/type?%#"}}`, func(ctx context.Context, c *gophercloud.ServiceClient, id string) (*blockstorage.VolumeActionResult, error) {
-			return blockstorage.RetypeVolume(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, "literal/type?%#", blockstorage.WithVolumeRetypeMigrationPolicy(""))
+			return blockstorage.RetypeVolume(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, "literal/type?%#", volumes.WithVolumeRetypeMigrationPolicy(""))
 		}},
 		{"retype body controls and unknown policy", "RetypeVolume", `{"os-retype":{"migration_policy":"server-mode","new_type":"type /?%#\n\u0000"}}`, func(ctx context.Context, c *gophercloud.ServiceClient, id string) (*blockstorage.VolumeActionResult, error) {
-			return blockstorage.RetypeVolume(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, "type /?%#\n\x00", blockstorage.WithVolumeRetypeMigrationPolicy("server-mode"))
+			return blockstorage.RetypeVolume(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, "type /?%#\n\x00", volumes.WithVolumeRetypeMigrationPolicy("server-mode"))
 		}},
 		{"retype replacement restores never", "RetypeVolume", `{"os-retype":{"migration_policy":"never","new_type":"fast"}}`, func(ctx context.Context, c *gophercloud.ServiceClient, id string) (*blockstorage.VolumeActionResult, error) {
-			return blockstorage.RetypeVolume(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, "fast", blockstorage.WithVolumeRetypeMigrationPolicy(""), blockstorage.WithVolumeRetypeOptions(blockstorage.VolumeRetypeOpts{}))
+			return blockstorage.RetypeVolume(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, "fast", volumes.WithVolumeRetypeMigrationPolicy(""), volumes.WithVolumeRetypeOptions(blockstorage.VolumeRetypeOpts{}))
 		}},
 		{"completion omitted false", "CompleteVolumeExtend", `{"os-extend_volume_completion":{"error":false}}`, func(ctx context.Context, c *gophercloud.ServiceClient, id string) (*blockstorage.VolumeActionResult, error) {
 			return blockstorage.CompleteVolumeExtend(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id})
 		}},
 		{"completion explicit false", "CompleteVolumeExtend", `{"os-extend_volume_completion":{"error":false}}`, func(ctx context.Context, c *gophercloud.ServiceClient, id string) (*blockstorage.VolumeActionResult, error) {
-			return blockstorage.CompleteVolumeExtend(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, blockstorage.WithVolumeExtendCompletionError(false))
+			return blockstorage.CompleteVolumeExtend(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, volumes.WithVolumeExtendCompletionError(false))
 		}},
 		{"completion true", "CompleteVolumeExtend", `{"os-extend_volume_completion":{"error":true}}`, func(ctx context.Context, c *gophercloud.ServiceClient, id string) (*blockstorage.VolumeActionResult, error) {
-			return blockstorage.CompleteVolumeExtend(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, blockstorage.WithVolumeExtendCompletionError(true))
+			return blockstorage.CompleteVolumeExtend(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, volumes.WithVolumeExtendCompletionError(true))
 		}},
 		{"completion replacement restores false", "CompleteVolumeExtend", `{"os-extend_volume_completion":{"error":false}}`, func(ctx context.Context, c *gophercloud.ServiceClient, id string) (*blockstorage.VolumeActionResult, error) {
-			return blockstorage.CompleteVolumeExtend(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, blockstorage.WithVolumeExtendCompletionError(true), blockstorage.WithVolumeExtendCompletionOptions(blockstorage.VolumeExtendCompletionOpts{}))
+			return blockstorage.CompleteVolumeExtend(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, volumes.WithVolumeExtendCompletionError(true), volumes.WithVolumeExtendCompletionOptions(blockstorage.VolumeExtendCompletionOpts{}))
 		}},
 	}
 	if strconv.IntSize == 64 {

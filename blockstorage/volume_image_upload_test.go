@@ -44,14 +44,14 @@ func TestUploadVolumeToImageSerializesLiteralNamesDefaultsAndOptionalPresence(t 
 		options           []blockstorage.VolumeImageUploadOption
 	}{
 		{"required empty name and default false", "", vuiBody, false, nil},
-		{"explicit force false", "", vuiBody, false, []blockstorage.VolumeImageUploadOption{blockstorage.WithVolumeImageUploadForce(false)}},
-		{"literal control name and true force", " /?%#\n\x00한글", `{"os-volume_upload_image":{"force":true,"image_name":" /?%#\n\u0000한글"}}`, false, []blockstorage.VolumeImageUploadOption{blockstorage.WithVolumeImageUploadForce(true)}},
-		{"empty formats present without required gate", "", `{"os-volume_upload_image":{"container_format":"","disk_format":"","force":false,"image_name":""}}`, false, []blockstorage.VolumeImageUploadOption{blockstorage.WithVolumeImageUploadDiskFormat(""), blockstorage.WithVolumeImageUploadContainerFormat("")}},
-		{"unknown formats forwarded literal", "", `{"os-volume_upload_image":{"container_format":"container /?%#","disk_format":"server-format","force":false,"image_name":""}}`, false, []blockstorage.VolumeImageUploadOption{blockstorage.WithVolumeImageUploadDiskFormat("server-format"), blockstorage.WithVolumeImageUploadContainerFormat("container /?%#")}},
-		{"explicit empty visibility requires gate", "", `{"os-volume_upload_image":{"force":false,"image_name":"","visibility":""}}`, true, []blockstorage.VolumeImageUploadOption{blockstorage.WithVolumeImageUploadVisibility("")}},
-		{"explicit protected false requires gate", "", `{"os-volume_upload_image":{"force":false,"image_name":"","protected":false}}`, true, []blockstorage.VolumeImageUploadOption{blockstorage.WithVolumeImageUploadProtected(false)}},
-		{"all optional values present including unknown visibility", "", `{"os-volume_upload_image":{"container_format":"bare","disk_format":"qcow2","force":true,"image_name":"","protected":true,"visibility":"server-defined"}}`, true, []blockstorage.VolumeImageUploadOption{blockstorage.WithVolumeImageUploadForce(true), blockstorage.WithVolumeImageUploadDiskFormat("qcow2"), blockstorage.WithVolumeImageUploadContainerFormat("bare"), blockstorage.WithVolumeImageUploadVisibility("server-defined"), blockstorage.WithVolumeImageUploadProtected(true)}},
-		{"replacement clears required-gate fields and restores force default", "", vuiBody, false, []blockstorage.VolumeImageUploadOption{blockstorage.WithVolumeImageUploadVisibility("old"), blockstorage.WithVolumeImageUploadProtected(true), blockstorage.WithVolumeImageUploadForce(true), blockstorage.WithVolumeImageUploadOptions(blockstorage.VolumeImageUploadOpts{})}},
+		{"explicit force false", "", vuiBody, false, []blockstorage.VolumeImageUploadOption{volumes.WithVolumeImageUploadForce(false)}},
+		{"literal control name and true force", " /?%#\n\x00한글", `{"os-volume_upload_image":{"force":true,"image_name":" /?%#\n\u0000한글"}}`, false, []blockstorage.VolumeImageUploadOption{volumes.WithVolumeImageUploadForce(true)}},
+		{"empty formats present without required gate", "", `{"os-volume_upload_image":{"container_format":"","disk_format":"","force":false,"image_name":""}}`, false, []blockstorage.VolumeImageUploadOption{volumes.WithVolumeImageUploadDiskFormat(""), volumes.WithVolumeImageUploadContainerFormat("")}},
+		{"unknown formats forwarded literal", "", `{"os-volume_upload_image":{"container_format":"container /?%#","disk_format":"server-format","force":false,"image_name":""}}`, false, []blockstorage.VolumeImageUploadOption{volumes.WithVolumeImageUploadDiskFormat("server-format"), volumes.WithVolumeImageUploadContainerFormat("container /?%#")}},
+		{"explicit empty visibility requires gate", "", `{"os-volume_upload_image":{"force":false,"image_name":"","visibility":""}}`, true, []blockstorage.VolumeImageUploadOption{volumes.WithVolumeImageUploadVisibility("")}},
+		{"explicit protected false requires gate", "", `{"os-volume_upload_image":{"force":false,"image_name":"","protected":false}}`, true, []blockstorage.VolumeImageUploadOption{volumes.WithVolumeImageUploadProtected(false)}},
+		{"all optional values present including unknown visibility", "", `{"os-volume_upload_image":{"container_format":"bare","disk_format":"qcow2","force":true,"image_name":"","protected":true,"visibility":"server-defined"}}`, true, []blockstorage.VolumeImageUploadOption{volumes.WithVolumeImageUploadForce(true), volumes.WithVolumeImageUploadDiskFormat("qcow2"), volumes.WithVolumeImageUploadContainerFormat("bare"), volumes.WithVolumeImageUploadVisibility("server-defined"), volumes.WithVolumeImageUploadProtected(true)}},
+		{"replacement clears required-gate fields and restores force default", "", vuiBody, false, []blockstorage.VolumeImageUploadOption{volumes.WithVolumeImageUploadVisibility("old"), volumes.WithVolumeImageUploadProtected(true), volumes.WithVolumeImageUploadForce(true), volumes.WithVolumeImageUploadOptions(blockstorage.VolumeImageUploadOpts{})}},
 	}
 	for index, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -191,11 +191,11 @@ func TestUploadVolumeToImageConditional31GateUsesAdvertisedBoundsAndOrdinaryActi
 			var options []blockstorage.VolumeImageUploadOption
 			if tc.option == "protected" {
 				body = `{"os-volume_upload_image":{"force":false,"image_name":"","protected":false}}`
-				options = []blockstorage.VolumeImageUploadOption{blockstorage.WithVolumeImageUploadProtected(false)}
+				options = []blockstorage.VolumeImageUploadOption{volumes.WithVolumeImageUploadProtected(false)}
 			}
 			if tc.option == "visibility" {
 				body = `{"os-volume_upload_image":{"force":false,"image_name":"","visibility":""}}`
-				options = []blockstorage.VolumeImageUploadOption{blockstorage.WithVolumeImageUploadVisibility("")}
+				options = []blockstorage.VolumeImageUploadOption{volumes.WithVolumeImageUploadVisibility("")}
 			}
 			if tc.selected != "" {
 				client.MoreHeaders["OpenStack-API-Version"] = "volume " + tc.selected
@@ -309,7 +309,7 @@ func TestUploadVolumeToImageDirectPreflightAndOwnedOriginalsKeepFixedRequestPoli
 		client := vsaClient(cloud, "3.60")
 		disk := "server-format"
 		force := false
-		factory := blockstorage.WithVolumeImageUploadOptions(blockstorage.VolumeImageUploadOpts{DiskFormat: &disk, Force: &force})
+		factory := volumes.WithVolumeImageUploadOptions(blockstorage.VolumeImageUploadOpts{DiskFormat: &disk, Force: &force})
 		disk = "mutated factory input"
 		force = true
 		var retained *blockstorage.VolumeImageUploadOpts

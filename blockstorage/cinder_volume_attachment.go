@@ -2,40 +2,22 @@ package blockstorage
 
 import (
 	"context"
-	"encoding/json"
 
+	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cinderaction"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type CinderVolumeAttachOpts = cinderaction.DirectAttachOptions
-type CinderVolumeAttachOption = cinderaction.DirectAttachOption
+type CinderVolumeAttachOpts = volumes.CinderVolumeAttachOpts
+type CinderVolumeAttachOption = volumes.CinderVolumeAttachOption
 
-func WithCinderVolumeAttachOptions(value CinderVolumeAttachOpts) CinderVolumeAttachOption {
-	return cinderaction.WithDirectAttachOptions(value)
-}
-func WithCinderVolumeAttachInstance(value string) CinderVolumeAttachOption {
-	return cinderaction.WithDirectAttachInstance(value)
-}
-func WithCinderVolumeAttachHostName(value string) CinderVolumeAttachOption {
-	return cinderaction.WithDirectAttachHostName(value)
-}
 func PrepareCinderVolumeAttachOptions(ctx context.Context, options ...CinderVolumeAttachOption) (CinderVolumeAttachOpts, error) {
 	return cinderaction.PrepareDirectAttach(ctx, options...)
 }
 
-type CinderVolumeDetachOpts = cinderaction.DirectDetachOptions
-type CinderVolumeDetachOption = cinderaction.DirectDetachOption
+type CinderVolumeDetachOpts = volumes.CinderVolumeDetachOpts
+type CinderVolumeDetachOption = volumes.CinderVolumeDetachOption
 
-func WithCinderVolumeDetachOptions(value CinderVolumeDetachOpts) CinderVolumeDetachOption {
-	return cinderaction.WithDirectDetachOptions(value)
-}
-func WithCinderVolumeDetachForce(value bool) CinderVolumeDetachOption {
-	return cinderaction.WithDirectDetachForce(value)
-}
-func WithCinderVolumeDetachConnector(value map[string]json.RawMessage) CinderVolumeDetachOption {
-	return cinderaction.WithDirectDetachConnector(value)
-}
 func PrepareCinderVolumeDetachOptions(ctx context.Context, options ...CinderVolumeDetachOption) (CinderVolumeDetachOpts, error) {
 	return cinderaction.PrepareDirectDetach(ctx, options...)
 }

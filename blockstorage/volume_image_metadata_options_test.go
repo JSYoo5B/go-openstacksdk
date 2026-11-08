@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage"
+	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -16,10 +17,10 @@ func TestVolumeImageMetadataOptionFactoriesOwnInputsReturnedValuesAndReplacement
 	raw := json.RawMessage(`{"nested":[false,null,9007199254740993]}`)
 	original := string(raw)
 	values := map[string]json.RawMessage{"payload": raw}
-	whole := blockstorage.WithVolumeImageMetadataOptions(blockstorage.VolumeImageMetadataOpts{Metadata: values})
-	rawFactory := blockstorage.WithVolumeImageMetadataRaw(values)
+	whole := volumes.WithVolumeImageMetadataOptions(blockstorage.VolumeImageMetadataOpts{Metadata: values})
+	rawFactory := volumes.WithVolumeImageMetadataRaw(values)
 	strings := map[string]string{"literal": "owned"}
-	stringFactory := blockstorage.WithVolumeImageMetadata(strings)
+	stringFactory := volumes.WithVolumeImageMetadata(strings)
 	raw[0] = '['
 	delete(values, "payload")
 	strings["literal"] = "caller changed"
@@ -41,16 +42,16 @@ func TestVolumeImageMetadataOptionFactoriesOwnInputsReturnedValuesAndReplacement
 		got.Metadata["literal"][0] = '['
 	}
 	got, err := blockstorage.PrepareVolumeImageMetadataOptions(ctx,
-		blockstorage.WithVolumeImageMetadataValue("discarded", "first"),
-		blockstorage.WithVolumeImageMetadataRaw(map[string]json.RawMessage{"keep": json.RawMessage(`false`)}),
-		blockstorage.WithVolumeImageMetadataValue("literal / ?#\n\x00", ""),
-		blockstorage.WithVolumeImageMetadataValue("keep", "last"))
+		volumes.WithVolumeImageMetadataValue("discarded", "first"),
+		volumes.WithVolumeImageMetadataRaw(map[string]json.RawMessage{"keep": json.RawMessage(`false`)}),
+		volumes.WithVolumeImageMetadataValue("literal / ?#\n\x00", ""),
+		volumes.WithVolumeImageMetadataValue("keep", "last"))
 	if err != nil || len(got.Metadata) != 2 || string(got.Metadata["keep"]) != `"last"` || string(got.Metadata["literal / ?#\n\x00"]) != `""` {
 		t.Fatal("replace and merge order changed", got, err)
 	}
 	for _, replacement := range []blockstorage.VolumeImageMetadataOption{
-		blockstorage.WithVolumeImageMetadataOptions(blockstorage.VolumeImageMetadataOpts{}),
-		blockstorage.WithVolumeImageMetadata(nil), blockstorage.WithVolumeImageMetadataRaw(nil),
+		volumes.WithVolumeImageMetadataOptions(blockstorage.VolumeImageMetadataOpts{}),
+		volumes.WithVolumeImageMetadata(nil), volumes.WithVolumeImageMetadataRaw(nil),
 	} {
 		got, err := blockstorage.PrepareVolumeImageMetadataOptions(ctx, stringFactory, replacement)
 		if err != nil || got.Metadata == nil || len(got.Metadata) != 0 {
@@ -66,8 +67,8 @@ func TestVolumeImageMetadataOptionFactoriesOwnInputsReturnedValuesAndReplacement
 		empty.Metadata["changed result"] = json.RawMessage(`true`)
 	}
 	keys := []string{"b", "", "b"}
-	keyFactory := blockstorage.WithVolumeImageMetadataDeleteKeys(keys...)
-	wholeKeys := blockstorage.WithVolumeImageMetadataDeleteOptions(blockstorage.VolumeImageMetadataDeleteOpts{Keys: &keys})
+	keyFactory := volumes.WithVolumeImageMetadataDeleteKeys(keys...)
+	wholeKeys := volumes.WithVolumeImageMetadataDeleteOptions(blockstorage.VolumeImageMetadataDeleteOpts{Keys: &keys})
 	keys[0] = "caller changed"
 	keys = nil
 	for _, factory := range []blockstorage.VolumeImageMetadataDeleteOption{keyFactory, wholeKeys} {
@@ -80,17 +81,17 @@ func TestVolumeImageMetadataOptionFactoriesOwnInputsReturnedValuesAndReplacement
 			*got.Keys = nil
 		}
 	}
-	all, err := blockstorage.PrepareVolumeImageMetadataDeleteOptions(ctx, keyFactory, blockstorage.WithVolumeImageMetadataDeleteAll())
+	all, err := blockstorage.PrepareVolumeImageMetadataDeleteOptions(ctx, keyFactory, volumes.WithVolumeImageMetadataDeleteAll())
 	if err != nil || all.Keys != nil {
 		t.Fatal("all intent did not replace explicit keys", all, err)
 	}
 	var nilKeys []string
 	for _, factory := range []blockstorage.VolumeImageMetadataDeleteOption{
-		blockstorage.WithVolumeImageMetadataDeleteKeys(),
-		blockstorage.WithVolumeImageMetadataDeleteKeys(nilKeys...),
-		blockstorage.WithVolumeImageMetadataDeleteOptions(blockstorage.VolumeImageMetadataDeleteOpts{Keys: &nilKeys}),
+		volumes.WithVolumeImageMetadataDeleteKeys(),
+		volumes.WithVolumeImageMetadataDeleteKeys(nilKeys...),
+		volumes.WithVolumeImageMetadataDeleteOptions(blockstorage.VolumeImageMetadataDeleteOpts{Keys: &nilKeys}),
 	} {
-		empty, err := blockstorage.PrepareVolumeImageMetadataDeleteOptions(ctx, blockstorage.WithVolumeImageMetadataDeleteAll(), factory)
+		empty, err := blockstorage.PrepareVolumeImageMetadataDeleteOptions(ctx, volumes.WithVolumeImageMetadataDeleteAll(), factory)
 		if err != nil || empty.Keys == nil || len(*empty.Keys) != 0 {
 			t.Fatal("explicit none was changed into all", empty, err)
 		}
@@ -209,40 +210,40 @@ func TestVolumeImageMetadataPrepareValidatesOnlyFinalMapsAndPresentKeys(t *testi
 	}
 	for _, tc := range cases {
 		t.Run("set/"+tc.name, func(t *testing.T) {
-			got, err := blockstorage.PrepareVolumeImageMetadataOptions(vsaContext(t), blockstorage.WithVolumeImageMetadataRaw(tc.raw))
+			got, err := blockstorage.PrepareVolumeImageMetadataOptions(vsaContext(t), volumes.WithVolumeImageMetadataRaw(tc.raw))
 			if !errors.Is(err, resource.ErrInvalidOption) || got.Metadata != nil {
 				t.Fatal(got, err)
 			}
-			got, err = blockstorage.PrepareVolumeImageMetadataOptions(vsaContext(t), blockstorage.WithVolumeImageMetadataRaw(tc.raw), blockstorage.WithVolumeImageMetadataRaw(map[string]json.RawMessage{"": json.RawMessage(`null`), "literal / ?#\n\x00": json.RawMessage(`9007199254740993`)}))
+			got, err = blockstorage.PrepareVolumeImageMetadataOptions(vsaContext(t), volumes.WithVolumeImageMetadataRaw(tc.raw), volumes.WithVolumeImageMetadataRaw(map[string]json.RawMessage{"": json.RawMessage(`null`), "literal / ?#\n\x00": json.RawMessage(`9007199254740993`)}))
 			if err != nil || len(got.Metadata) != 2 || string(got.Metadata[""]) != `null` || string(got.Metadata["literal / ?#\n\x00"]) != `9007199254740993` {
 				t.Fatal("overwritten invalid metadata was validated too early", got, err)
 			}
 		})
 	}
 	for _, invalid := range []blockstorage.VolumeImageMetadataOption{
-		blockstorage.WithVolumeImageMetadata(map[string]string{"key": bad}),
-		blockstorage.WithVolumeImageMetadataValue("key", bad),
+		volumes.WithVolumeImageMetadata(map[string]string{"key": bad}),
+		volumes.WithVolumeImageMetadataValue("key", bad),
 	} {
 		got, err := blockstorage.PrepareVolumeImageMetadataOptions(vsaContext(t), invalid)
 		if !errors.Is(err, resource.ErrInvalidOption) || got.Metadata != nil {
 			t.Fatal("string factory silently replaced invalid UTF8", got, err)
 		}
-		got, err = blockstorage.PrepareVolumeImageMetadataOptions(vsaContext(t), invalid, blockstorage.WithVolumeImageMetadataValue("key", "repaired"))
+		got, err = blockstorage.PrepareVolumeImageMetadataOptions(vsaContext(t), invalid, volumes.WithVolumeImageMetadataValue("key", "repaired"))
 		if err != nil || string(got.Metadata["key"]) != `"repaired"` {
 			t.Fatal("later value did not repair invalid string", got, err)
 		}
 	}
 	for _, replacement := range []blockstorage.VolumeImageMetadataDeleteOption{
-		blockstorage.WithVolumeImageMetadataDeleteKeys("", "literal / ?#\n\x00", ""),
-		blockstorage.WithVolumeImageMetadataDeleteKeys(),
-		blockstorage.WithVolumeImageMetadataDeleteAll(),
+		volumes.WithVolumeImageMetadataDeleteKeys("", "literal / ?#\n\x00", ""),
+		volumes.WithVolumeImageMetadataDeleteKeys(),
+		volumes.WithVolumeImageMetadataDeleteAll(),
 	} {
-		got, err := blockstorage.PrepareVolumeImageMetadataDeleteOptions(vsaContext(t), blockstorage.WithVolumeImageMetadataDeleteKeys(bad), replacement)
+		got, err := blockstorage.PrepareVolumeImageMetadataDeleteOptions(vsaContext(t), volumes.WithVolumeImageMetadataDeleteKeys(bad), replacement)
 		if err != nil {
 			t.Fatal("overwritten invalid key was validated too early", got, err)
 		}
 	}
-	failed, err := blockstorage.PrepareVolumeImageMetadataDeleteOptions(vsaContext(t), blockstorage.WithVolumeImageMetadataDeleteKeys("valid", bad))
+	failed, err := blockstorage.PrepareVolumeImageMetadataDeleteOptions(vsaContext(t), volumes.WithVolumeImageMetadataDeleteKeys("valid", bad))
 	if !errors.Is(err, resource.ErrInvalidOption) || failed.Keys != nil {
 		t.Fatal(failed, err)
 	}

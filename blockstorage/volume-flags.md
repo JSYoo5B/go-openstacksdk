@@ -62,11 +62,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.SetVolumeReadonly`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.SetVolumeReadonly`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.SetVolumeReadonly`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeReadonly`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeReadonlyOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareVolumeReadonlyOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithVolumeReadonly`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithVolumeReadonlyOptions`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareVolumeReadonlyOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.PrepareVolumeReadonlyOptions`
 
 - SetVolumeReadonly sends exactly {"os-update_readonly_flag":{"readonly":value}}. Omitted options or a nil Readonly field default to true; WithVolumeReadonly(false) and a nonnil false pointer retain explicit false.
@@ -121,6 +119,7 @@ import (
 
     sdk "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/blockstorage"
+    "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes"
     "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -165,7 +164,7 @@ func run() error {
     if action == "readonly" {
         var originals []blockstorage.VolumeReadonlyOption
         if supplied {
-            originals = append(originals, blockstorage.WithVolumeReadonly(flag))
+            originals = append(originals, volumes.WithVolumeReadonly(flag))
         }
         prepared, err := blockstorage.PrepareVolumeReadonlyOptions(ctx, originals...)
         if err != nil {
@@ -184,7 +183,7 @@ func run() error {
 }
 
 func apply(ctx context.Context, conn *sdk.Connection, action, path string, input blockstorage.VolumeActionRequest, flag bool, policy blockstorage.VolumeReadonlyOpts) (*blockstorage.VolumeActionResult, error) {
-    options := []blockstorage.VolumeReadonlyOption{blockstorage.WithVolumeReadonlyOptions(policy)}
+    options := []blockstorage.VolumeReadonlyOption{volumes.WithVolumeReadonlyOptions(policy)}
     if path == "connection" {
         if action == "bootable" {
             return conn.SetVolumeBootableStatus(ctx, input, flag)

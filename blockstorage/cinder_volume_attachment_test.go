@@ -27,13 +27,13 @@ type cdaCase struct {
 func cdaActions() []cdaCase {
 	return []cdaCase{
 		{"attach", "AttachCinderVolume", `{"os-attach":{"instance_uuid":"instance","mountpoint":"/m"}}`, func(ctx context.Context, c *gophercloud.ServiceClient, id string) (*blockstorage.VolumeActionResult, error) {
-			return blockstorage.AttachCinderVolume(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, "/m", blockstorage.WithCinderVolumeAttachInstance("instance"))
+			return blockstorage.AttachCinderVolume(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, "/m", volumes.WithCinderVolumeAttachInstance("instance"))
 		}},
 		{"detach", "DetachCinderVolume", `{"os-detach":{"attachment_id":"attachment"}}`, func(ctx context.Context, c *gophercloud.ServiceClient, id string) (*blockstorage.VolumeActionResult, error) {
 			return blockstorage.DetachCinderVolume(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, "attachment")
 		}},
 		{"force detach", "DetachCinderVolume", `{"os-force_detach":{"attachment_id":"attachment","connector":{"host":"","large":9007199254740993,"multipath":false,"unknown":null}}}`, func(ctx context.Context, c *gophercloud.ServiceClient, id string) (*blockstorage.VolumeActionResult, error) {
-			return blockstorage.DetachCinderVolume(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, "attachment", blockstorage.WithCinderVolumeDetachForce(true), blockstorage.WithCinderVolumeDetachConnector(map[string]json.RawMessage{"host": json.RawMessage(`""`), "large": json.RawMessage(`9007199254740993`), "multipath": json.RawMessage(`false`), "unknown": json.RawMessage(`null`)}))
+			return blockstorage.DetachCinderVolume(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, "attachment", volumes.WithCinderVolumeDetachForce(true), volumes.WithCinderVolumeDetachConnector(map[string]json.RawMessage{"host": json.RawMessage(`""`), "large": json.RawMessage(`9007199254740993`), "multipath": json.RawMessage(`false`), "unknown": json.RawMessage(`null`)}))
 		}},
 	}
 }
@@ -65,25 +65,25 @@ func TestCinderVolumeAttachmentLiteralBranchesAcceptOpaqueAcknowledgementsWithou
 	bad := string([]byte{0xff})
 	cases := append(cdaActions(), []cdaCase{
 		{"empty instance wins nonempty host", "AttachCinderVolume", `{"os-attach":{"instance_uuid":"","mountpoint":""}}`, func(ctx context.Context, c *gophercloud.ServiceClient, id string) (*blockstorage.VolumeActionResult, error) {
-			return blockstorage.AttachCinderVolume(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, "", blockstorage.WithCinderVolumeAttachInstance(""), blockstorage.WithCinderVolumeAttachHostName("ignored"))
+			return blockstorage.AttachCinderVolume(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, "", volumes.WithCinderVolumeAttachInstance(""), volumes.WithCinderVolumeAttachHostName("ignored"))
 		}},
 		{"inactive invalid host is not consumed", "AttachCinderVolume", `{"os-attach":{"instance_uuid":"instance","mountpoint":"/m"}}`, func(ctx context.Context, c *gophercloud.ServiceClient, id string) (*blockstorage.VolumeActionResult, error) {
-			return blockstorage.AttachCinderVolume(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, "/m", blockstorage.WithCinderVolumeAttachInstance("instance"), blockstorage.WithCinderVolumeAttachHostName(bad))
+			return blockstorage.AttachCinderVolume(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, "/m", volumes.WithCinderVolumeAttachInstance("instance"), volumes.WithCinderVolumeAttachHostName(bad))
 		}},
 		{"empty host and literal control mountpoint", "AttachCinderVolume", `{"os-attach":{"host_name":"","mountpoint":" /?%#\n\u0000한글"}}`, func(ctx context.Context, c *gophercloud.ServiceClient, id string) (*blockstorage.VolumeActionResult, error) {
-			return blockstorage.AttachCinderVolume(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, " /?%#\n\x00한글", blockstorage.WithCinderVolumeAttachHostName(""))
+			return blockstorage.AttachCinderVolume(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, " /?%#\n\x00한글", volumes.WithCinderVolumeAttachHostName(""))
 		}},
 		{"normal detach ignores invalid connector", "DetachCinderVolume", `{"os-detach":{"attachment_id":""}}`, func(ctx context.Context, c *gophercloud.ServiceClient, id string) (*blockstorage.VolumeActionResult, error) {
-			return blockstorage.DetachCinderVolume(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, "", blockstorage.WithCinderVolumeDetachConnector(map[string]json.RawMessage{bad: nil, "invalid": json.RawMessage(`not JSON`)}))
+			return blockstorage.DetachCinderVolume(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, "", volumes.WithCinderVolumeDetachConnector(map[string]json.RawMessage{bad: nil, "invalid": json.RawMessage(`not JSON`)}))
 		}},
 		{"explicit false ignores invalid connector", "DetachCinderVolume", `{"os-detach":{"attachment_id":" /?%#\n\u0000한글"}}`, func(ctx context.Context, c *gophercloud.ServiceClient, id string) (*blockstorage.VolumeActionResult, error) {
-			return blockstorage.DetachCinderVolume(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, " /?%#\n\x00한글", blockstorage.WithCinderVolumeDetachForce(false), blockstorage.WithCinderVolumeDetachConnector(map[string]json.RawMessage{"invalid": json.RawMessage{0xff}}))
+			return blockstorage.DetachCinderVolume(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, " /?%#\n\x00한글", volumes.WithCinderVolumeDetachForce(false), volumes.WithCinderVolumeDetachConnector(map[string]json.RawMessage{"invalid": json.RawMessage{0xff}}))
 		}},
 		{"force nil connector omits connector", "DetachCinderVolume", `{"os-force_detach":{"attachment_id":""}}`, func(ctx context.Context, c *gophercloud.ServiceClient, id string) (*blockstorage.VolumeActionResult, error) {
-			return blockstorage.DetachCinderVolume(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, "", blockstorage.WithCinderVolumeDetachForce(true))
+			return blockstorage.DetachCinderVolume(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, "", volumes.WithCinderVolumeDetachForce(true))
 		}},
 		{"force empty connector omits connector", "DetachCinderVolume", `{"os-force_detach":{"attachment_id":""}}`, func(ctx context.Context, c *gophercloud.ServiceClient, id string) (*blockstorage.VolumeActionResult, error) {
-			return blockstorage.DetachCinderVolume(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, "", blockstorage.WithCinderVolumeDetachForce(true), blockstorage.WithCinderVolumeDetachConnector(map[string]json.RawMessage{}))
+			return blockstorage.DetachCinderVolume(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, "", volumes.WithCinderVolumeDetachForce(true), volumes.WithCinderVolumeDetachConnector(map[string]json.RawMessage{}))
 		}},
 	}...)
 	for index, tc := range cases {
@@ -264,19 +264,19 @@ func TestCinderVolumeAttachmentPreflightAndOwnedOriginalOptionsPrecedeHTTP(t *te
 			return blockstorage.AttachCinderVolume(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, "")
 		}},
 		{"invalid selected instance", "AttachCinderVolume", func(ctx context.Context, c *gophercloud.ServiceClient, id string) (*blockstorage.VolumeActionResult, error) {
-			return blockstorage.AttachCinderVolume(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, "", blockstorage.WithCinderVolumeAttachInstance(string([]byte{0xff})), blockstorage.WithCinderVolumeAttachHostName("valid inactive host"))
+			return blockstorage.AttachCinderVolume(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, "", volumes.WithCinderVolumeAttachInstance(string([]byte{0xff})), volumes.WithCinderVolumeAttachHostName("valid inactive host"))
 		}},
 		{"invalid selected host", "AttachCinderVolume", func(ctx context.Context, c *gophercloud.ServiceClient, id string) (*blockstorage.VolumeActionResult, error) {
-			return blockstorage.AttachCinderVolume(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, "", blockstorage.WithCinderVolumeAttachHostName(string([]byte{0xff})))
+			return blockstorage.AttachCinderVolume(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, "", volumes.WithCinderVolumeAttachHostName(string([]byte{0xff})))
 		}},
 		{"forced nil raw value", "DetachCinderVolume", func(ctx context.Context, c *gophercloud.ServiceClient, id string) (*blockstorage.VolumeActionResult, error) {
-			return blockstorage.DetachCinderVolume(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, "", blockstorage.WithCinderVolumeDetachForce(true), blockstorage.WithCinderVolumeDetachConnector(map[string]json.RawMessage{"nil": nil}))
+			return blockstorage.DetachCinderVolume(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, "", volumes.WithCinderVolumeDetachForce(true), volumes.WithCinderVolumeDetachConnector(map[string]json.RawMessage{"nil": nil}))
 		}},
 		{"forced trailing raw JSON", "DetachCinderVolume", func(ctx context.Context, c *gophercloud.ServiceClient, id string) (*blockstorage.VolumeActionResult, error) {
-			return blockstorage.DetachCinderVolume(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, "", blockstorage.WithCinderVolumeDetachForce(true), blockstorage.WithCinderVolumeDetachConnector(map[string]json.RawMessage{"invalid": json.RawMessage(`null true`)}))
+			return blockstorage.DetachCinderVolume(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, "", volumes.WithCinderVolumeDetachForce(true), volumes.WithCinderVolumeDetachConnector(map[string]json.RawMessage{"invalid": json.RawMessage(`null true`)}))
 		}},
 		{"forced invalid UTF8 key", "DetachCinderVolume", func(ctx context.Context, c *gophercloud.ServiceClient, id string) (*blockstorage.VolumeActionResult, error) {
-			return blockstorage.DetachCinderVolume(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, "", blockstorage.WithCinderVolumeDetachForce(true), blockstorage.WithCinderVolumeDetachConnector(map[string]json.RawMessage{string([]byte{0xff}): json.RawMessage(`null`)}))
+			return blockstorage.DetachCinderVolume(ctx, c, blockstorage.VolumeActionRequest{VolumeID: id}, "", volumes.WithCinderVolumeDetachForce(true), volumes.WithCinderVolumeDetachConnector(map[string]json.RawMessage{string([]byte{0xff}): json.RawMessage(`null`)}))
 		}},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
@@ -328,7 +328,7 @@ func TestCinderVolumeAttachmentPreflightAndOwnedOriginalOptionsPrecedeHTTP(t *te
 		client := vsaClient(cloud, "3.60")
 		raw := json.RawMessage(`9007199254740993`)
 		members := map[string]json.RawMessage{"large": raw}
-		owned := blockstorage.WithCinderVolumeDetachConnector(members)
+		owned := volumes.WithCinderVolumeDetachConnector(members)
 		raw[0] = '1'
 		members["late"] = json.RawMessage(`true`)
 		var retained *blockstorage.CinderVolumeDetachOpts
@@ -338,7 +338,7 @@ func TestCinderVolumeAttachmentPreflightAndOwnedOriginalOptionsPrecedeHTTP(t *te
 			cdaPost(t, req, "id", `{"os-force_detach":{"attachment_id":"attachment","connector":{"large":9007199254740993}}}`, "3.60", "test-token")
 			w.WriteHeader(203)
 		})
-		result, err := blockstorage.DetachCinderVolume(vsaContext(t), client, blockstorage.VolumeActionRequest{VolumeID: "id"}, "attachment", owned, blockstorage.WithCinderVolumeDetachForce(true), func(o *blockstorage.CinderVolumeDetachOpts) error { callbacks.Add(1); retained = o; return nil }, func(*blockstorage.CinderVolumeDetachOpts) error {
+		result, err := blockstorage.DetachCinderVolume(vsaContext(t), client, blockstorage.VolumeActionRequest{VolumeID: "id"}, "attachment", owned, volumes.WithCinderVolumeDetachForce(true), func(o *blockstorage.CinderVolumeDetachOpts) error { callbacks.Add(1); retained = o; return nil }, func(*blockstorage.CinderVolumeDetachOpts) error {
 			callbacks.Add(1)
 			retained.Connector["large"][0] = '2'
 			retained.Connector["late"] = json.RawMessage(`false`)

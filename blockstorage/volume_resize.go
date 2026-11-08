@@ -3,32 +3,21 @@ package blockstorage
 import (
 	"context"
 
+	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cinderaction"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type VolumeRetypeOpts = cinderaction.RetypeOptions
-type VolumeRetypeOption = cinderaction.RetypeOption
+type VolumeRetypeOpts = volumes.VolumeRetypeOpts
+type VolumeRetypeOption = volumes.VolumeRetypeOption
 
-func WithVolumeRetypeOptions(value VolumeRetypeOpts) VolumeRetypeOption {
-	return cinderaction.WithRetypeOptions(value)
-}
-func WithVolumeRetypeMigrationPolicy(value string) VolumeRetypeOption {
-	return cinderaction.WithRetypeMigrationPolicy(value)
-}
 func PrepareVolumeRetypeOptions(ctx context.Context, options ...VolumeRetypeOption) (VolumeRetypeOpts, error) {
 	return cinderaction.PrepareRetype(ctx, options...)
 }
 
-type VolumeExtendCompletionOpts = cinderaction.ExtendCompletionOptions
-type VolumeExtendCompletionOption = cinderaction.ExtendCompletionOption
+type VolumeExtendCompletionOpts = volumes.VolumeExtendCompletionOpts
+type VolumeExtendCompletionOption = volumes.VolumeExtendCompletionOption
 
-func WithVolumeExtendCompletionOptions(value VolumeExtendCompletionOpts) VolumeExtendCompletionOption {
-	return cinderaction.WithExtendCompletionOptions(value)
-}
-func WithVolumeExtendCompletionError(value bool) VolumeExtendCompletionOption {
-	return cinderaction.WithExtendCompletionError(value)
-}
 func PrepareVolumeExtendCompletionOptions(ctx context.Context, options ...VolumeExtendCompletionOption) (VolumeExtendCompletionOpts, error) {
 	return cinderaction.PrepareExtendCompletion(ctx, options...)
 }

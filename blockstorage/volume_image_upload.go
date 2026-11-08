@@ -2,34 +2,17 @@ package blockstorage
 
 import (
 	"context"
+	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cinderaction"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type VolumeImageUploadOpts = cinderaction.ImageUploadOptions
-type VolumeImageUploadOption = cinderaction.ImageUploadOption
+type VolumeImageUploadOpts = volumes.VolumeImageUploadOpts
+type VolumeImageUploadOption = volumes.VolumeImageUploadOption
 type VolumeImageUploadResult = cinderaction.ImageUploadResult
 type VolumeImageUploadResponse = rest.Response
 
-func WithVolumeImageUploadOptions(value VolumeImageUploadOpts) VolumeImageUploadOption {
-	return cinderaction.WithImageUploadOptions(value)
-}
-func WithVolumeImageUploadForce(value bool) VolumeImageUploadOption {
-	return cinderaction.WithImageUploadForce(value)
-}
-func WithVolumeImageUploadDiskFormat(value string) VolumeImageUploadOption {
-	return cinderaction.WithImageUploadDiskFormat(value)
-}
-func WithVolumeImageUploadContainerFormat(value string) VolumeImageUploadOption {
-	return cinderaction.WithImageUploadContainerFormat(value)
-}
-func WithVolumeImageUploadVisibility(value string) VolumeImageUploadOption {
-	return cinderaction.WithImageUploadVisibility(value)
-}
-func WithVolumeImageUploadProtected(value bool) VolumeImageUploadOption {
-	return cinderaction.WithImageUploadProtected(value)
-}
 func PrepareVolumeImageUploadOptions(ctx context.Context, options ...VolumeImageUploadOption) (VolumeImageUploadOpts, error) {
 	return cinderaction.PrepareImageUpload(ctx, options...)
 }

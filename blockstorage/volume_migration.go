@@ -2,70 +2,27 @@ package blockstorage
 
 import (
 	"context"
+	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cinderaction"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type VolumeStatusResetOpts = cinderaction.StatusResetOptions
-type VolumeStatusResetOption = cinderaction.StatusResetOption
-
-func WithVolumeStatusResetOptions(value VolumeStatusResetOpts) VolumeStatusResetOption {
-	return cinderaction.WithStatusResetOptions(value)
-}
-
-func WithVolumeStatusResetStatus(value string) VolumeStatusResetOption {
-	return cinderaction.WithStatusResetStatus(value)
-}
-
-func WithVolumeStatusResetAttachStatus(value string) VolumeStatusResetOption {
-	return cinderaction.WithStatusResetAttachStatus(value)
-}
-
-func WithVolumeStatusResetMigrationStatus(value string) VolumeStatusResetOption {
-	return cinderaction.WithStatusResetMigrationStatus(value)
-}
+type VolumeStatusResetOpts = volumes.VolumeStatusResetOpts
+type VolumeStatusResetOption = volumes.VolumeStatusResetOption
 
 func PrepareVolumeStatusResetOptions(ctx context.Context, options ...VolumeStatusResetOption) (VolumeStatusResetOpts, error) {
 	return cinderaction.PrepareStatusReset(ctx, options...)
 }
 
-type VolumeMigrationOpts = cinderaction.MigrationOptions
-type VolumeMigrationOption = cinderaction.MigrationOption
-
-func WithVolumeMigrationOptions(value VolumeMigrationOpts) VolumeMigrationOption {
-	return cinderaction.WithMigrationOptions(value)
-}
-
-func WithVolumeMigrationHost(value string) VolumeMigrationOption {
-	return cinderaction.WithMigrationHost(value)
-}
-
-func WithVolumeMigrationCluster(value string) VolumeMigrationOption {
-	return cinderaction.WithMigrationCluster(value)
-}
-
-func WithVolumeMigrationForceHostCopy(value bool) VolumeMigrationOption {
-	return cinderaction.WithMigrationForceHostCopy(value)
-}
-
-func WithVolumeMigrationLockVolume(value bool) VolumeMigrationOption {
-	return cinderaction.WithMigrationLockVolume(value)
-}
+type VolumeMigrationOpts = volumes.VolumeMigrationOpts
+type VolumeMigrationOption = volumes.VolumeMigrationOption
 
 func PrepareVolumeMigrationOptions(ctx context.Context, options ...VolumeMigrationOption) (VolumeMigrationOpts, error) {
 	return cinderaction.PrepareMigration(ctx, options...)
 }
 
-type VolumeMigrationCompletionOpts = cinderaction.MigrationCompletionOptions
-type VolumeMigrationCompletionOption = cinderaction.MigrationCompletionOption
-
-func WithVolumeMigrationCompletionOptions(value VolumeMigrationCompletionOpts) VolumeMigrationCompletionOption {
-	return cinderaction.WithMigrationCompletionOptions(value)
-}
-
-func WithVolumeMigrationCompletionError(value bool) VolumeMigrationCompletionOption {
-	return cinderaction.WithMigrationCompletionError(value)
-}
+type VolumeMigrationCompletionOpts = volumes.VolumeMigrationCompletionOpts
+type VolumeMigrationCompletionOption = volumes.VolumeMigrationCompletionOption
 
 func PrepareVolumeMigrationCompletionOptions(ctx context.Context, options ...VolumeMigrationCompletionOption) (VolumeMigrationCompletionOpts, error) {
 	return cinderaction.PrepareMigrationCompletion(ctx, options...)

@@ -13,6 +13,7 @@ import (
 
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage"
+	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
@@ -83,7 +84,7 @@ func TestConnectionVolumeMigrationUsesCachedCinderAndSelectedVersionStillRequire
 	calls := []func() (*blockstorage.VolumeActionResult, error){
 		func() (*blockstorage.VolumeActionResult, error) { return conn.ResetVolumeStatus(vcmContext(t), input) },
 		func() (*blockstorage.VolumeActionResult, error) {
-			return conn.MigrateVolume(vcmContext(t), input, blockstorage.WithVolumeMigrationCluster(""))
+			return conn.MigrateVolume(vcmContext(t), input, volumes.WithVolumeMigrationCluster(""))
 		},
 		func() (*blockstorage.VolumeActionResult, error) {
 			return conn.CompleteVolumeMigration(vcmContext(t), input, "new/name ?#\n\x00")
