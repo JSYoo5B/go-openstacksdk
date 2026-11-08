@@ -175,7 +175,7 @@ func TestProjectCleanupOrchestrationExecutesStacksThenCompute(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	result, err := cloud.conn.ExecuteProjectCleanup(context.Background(), plan, projectcleanup.WithDeletionWait(30*time.Second))
+	result, err := cloud.conn.ExecuteProjectCleanup(context.Background(), plan, projectcleanup.WithAbsenceWait(resource.WithTimeout(30*time.Second)))
 	if !errors.Is(err, projectcleanup.ErrIncomplete) || result == nil {
 		t.Fatalf("result %v err %v", result, err)
 	}
@@ -217,7 +217,7 @@ func TestProjectCleanupOrchestrationWaitTimeoutKeepsAcceptedStack(t *testing.T) 
 	if err != nil {
 		t.Fatal(err)
 	}
-	result, err := cloud.conn.ExecuteProjectCleanup(context.Background(), plan, projectcleanup.WithDeletionWait(100*time.Millisecond))
+	result, err := cloud.conn.ExecuteProjectCleanup(context.Background(), plan, projectcleanup.WithAbsenceWait(resource.WithTimeout(100*time.Millisecond)))
 	if !errors.Is(err, projectcleanup.ErrIncomplete) || len(result.Outcomes) != 1 {
 		t.Fatalf("result %v err %v", result, err)
 	}

@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
@@ -73,7 +72,7 @@ func removeStack(ctx context.Context, client *gophercloud.ServiceClient, c Candi
 // 404 or DELETE_COMPLETE is absence and DELETE_FAILED fails at once. Other
 // states, including a *_FAILED state of an earlier action that Heat has not
 // yet replaced with DELETE_IN_PROGRESS, keep polling.
-func stackAbsent(ctx context.Context, client *gophercloud.ServiceClient, c Candidate, timeout time.Duration, pacing resource.WaitOption) error {
+func stackAbsent(ctx context.Context, client *gophercloud.ServiceClient, c Candidate, wait resource.WaitOption) error {
 	scope, err := stacks.New(client).ForStack(stacks.StackIdentity{Name: c.Name, ID: c.ID})
 	if err != nil {
 		return err
@@ -98,5 +97,5 @@ func stackAbsent(ctx context.Context, client *gophercloud.ServiceClient, c Candi
 			return value, nil
 		},
 	})
-	return collection.WaitDeleted(ctx, resource.ID(c.ID), resource.WithTimeout(timeout), pacing)
+	return collection.WaitDeleted(ctx, resource.ID(c.ID), wait)
 }

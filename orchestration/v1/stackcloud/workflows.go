@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"time"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks"
@@ -24,35 +23,31 @@ import (
 var ErrDeleteFailed = errors.New("stack deletion failed")
 
 type options struct {
-	strategy resource.WaitStrategy
-	loader   *templateloader.Loader
+	waitOptions []resource.WaitOption
+	wait        resource.WaitSettings
+	loader      *templateloader.Loader
 }
 
 // Option configures the stack workflows.
 type Option func(*options) error
 
-// WithPollInterval replaces poll_for_events' five-second poll period. Zero
-// polls without sleeping; negative values are rejected. It and
-// WithWaitStrategy replace each other; the later one wins.
-func WithPollInterval(interval time.Duration) Option {
-	return func(o *options) error {
-		if interval < 0 {
-			return fmt.Errorf("%w: poll interval must not be negative", resource.ErrInvalidOption)
-		}
-		o.strategy = resource.FixedWait(interval)
-		return nil
-	}
-}
+// stackWaitDefaults keep poll_for_events' fixed five-second poll period and
+// its lack of an overall timeout. Event polls honor only the timeout,
+// unlimited and pacing controls.
+var stackWaitDefaults = resource.WaitDefaults{Unlimited: true, Strategy: resource.FixedWait(DefaultPollInterval)}
 
-// WithWaitStrategy replaces poll_for_events' fixed poll period with strategy,
-// a Go-only extension. Each event wait starts the strategy from its first
-// pause. An invalid strategy fails with resource.ErrInvalidOption before HTTP.
-func WithWaitStrategy(strategy resource.WaitStrategy) Option {
+// WithStackWait configures the event poll of the create, update and delete
+// waits with the shared wait options: resource.WithPollInterval (default
+// DefaultPollInterval), resource.WithWaitStrategy (a Go-only extension; each
+// event wait starts the strategy from its first pause), resource.WithTimeout
+// (an SDK deadline for the event poll only; by default, as in Python, ctx
+// alone bounds it) and resource.WithUnlimitedWait. Repeated calls append; the
+// later option wins per control. Failure states, a status attribute or
+// progress fail with resource.ErrInvalidOption before HTTP.
+func WithStackWait(opts ...resource.WaitOption) Option {
+	opts = append([]resource.WaitOption(nil), opts...)
 	return func(o *options) error {
-		if err := strategy.Validate(); err != nil {
-			return err
-		}
-		o.strategy = strategy
+		o.waitOptions = append(o.waitOptions, opts...)
 		return nil
 	}
 }
@@ -70,7 +65,7 @@ func WithTemplateLoader(loader *templateloader.Loader) Option {
 }
 
 func apply(ctx context.Context, client *gophercloud.ServiceClient, list []Option) (options, error) {
-	config := options{strategy: resource.FixedWait(DefaultPollInterval)}
+	config := options{}
 	if ctx == nil {
 		return config, fmt.Errorf("%w: context is required", resource.ErrInvalidOption)
 	}
@@ -85,6 +80,11 @@ func apply(ctx context.Context, client *gophercloud.ServiceClient, list []Option
 			return config, err
 		}
 	}
+	wait, err := resource.ResolveWait(stackWaitDefaults, config.waitOptions...)
+	if err != nil {
+		return config, err
+	}
+	config.wait = wait
 	return config, ctx.Err()
 }
 
@@ -229,7 +229,7 @@ func DeleteStack(ctx context.Context, client *gophercloud.ServiceClient, input D
 	if !input.Wait {
 		return result, nil
 	}
-	status, err := pollForEvents(ctx, client, input.NameOrID, "DELETE", result.Marker, config.strategy)
+	status, err := pollForEvents(ctx, client, input.NameOrID, "DELETE", result.Marker, config.wait)
 	if err != nil {
 		if !isHTTPError(err) {
 			return result, wrap(err)
@@ -405,7 +405,7 @@ func CreateStack(ctx context.Context, client *gophercloud.ServiceClient, input C
 		return result, wrap(err)
 	}
 	if input.Wait {
-		if result.WaitStatus, err = pollForEvents(ctx, client, input.Name, "CREATE", nil, config.strategy); err != nil {
+		if result.WaitStatus, err = pollForEvents(ctx, client, input.Name, "CREATE", nil, config.wait); err != nil {
 			return result, wrap(err)
 		}
 	}
@@ -455,7 +455,7 @@ func UpdateStack(ctx context.Context, client *gophercloud.ServiceClient, input U
 		return result, wrap(err)
 	}
 	if input.Wait {
-		if result.WaitStatus, err = pollForEvents(ctx, client, input.NameOrID, "UPDATE", result.Marker, config.strategy); err != nil {
+		if result.WaitStatus, err = pollForEvents(ctx, client, input.NameOrID, "UPDATE", result.Marker, config.wait); err != nil {
 			return result, wrap(err)
 		}
 	}

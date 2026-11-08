@@ -107,7 +107,9 @@ func heatEvent(id, resourceName, physical, status string) string {
 	return fmt.Sprintf(`{"id":%q,"resource_name":%q,"physical_resource_id":%q,"resource_status":%q,"links":[{"rel":"self","href":"x"},{"rel":"stack","href":"https://heat/stacks/app/%s"}]}`, id, resourceName, physical, status, heatStackID)
 }
 
-func heatFast() stackcloud.Option { return stackcloud.WithPollInterval(0) }
+func heatFast() stackcloud.Option {
+	return stackcloud.WithStackWait(resource.WithPollInterval(time.Nanosecond))
+}
 
 func TestHeatCloudSearchStacksFiltersPythonViewByGlobDictAndJMESPath(t *testing.T) {
 	t.Parallel()
@@ -357,7 +359,7 @@ func TestHeatCloudCreateStackKeepsAcceptedEvidenceAndNeverReplays(t *testing.T) 
 		heatStep{"GET", "/stacks/app/events?sort_dir=asc", "", 200, `{"events":[]}`})
 	result, err = stackcloud.CreateStack(ctx, client, stackcloud.CreateRequest{Name: "app", StackRequest: stackcloud.StackRequest{
 		Template: templateloader.StackInput{Template: templateloader.Source{File: path}}, Wait: true,
-	}}, stackcloud.WithPollInterval(time.Hour))
+	}}, stackcloud.WithStackWait(resource.WithPollInterval(time.Hour)))
 	if !errors.Is(err, context.DeadlineExceeded) || result.Accepted == nil {
 		t.Fatalf("deadline during wait: %+v %v", result, err)
 	}

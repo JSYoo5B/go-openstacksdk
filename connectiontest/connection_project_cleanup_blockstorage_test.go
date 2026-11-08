@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/projectcleanup"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func init() {
@@ -304,7 +305,7 @@ func TestProjectCleanupBlockStorageExecutesLevelsAndWaits(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	result, err := cloud.conn.ExecuteProjectCleanup(context.Background(), plan, projectcleanup.WithDeletionWait(30*time.Second))
+	result, err := cloud.conn.ExecuteProjectCleanup(context.Background(), plan, projectcleanup.WithAbsenceWait(resource.WithTimeout(30*time.Second)))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -348,7 +349,7 @@ func TestProjectCleanupBlockStorageReportsEveryOutcome(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	result, err := cloud.conn.ExecuteProjectCleanup(context.Background(), plan, projectcleanup.WithDeletionWait(30*time.Second))
+	result, err := cloud.conn.ExecuteProjectCleanup(context.Background(), plan, projectcleanup.WithAbsenceWait(resource.WithTimeout(30*time.Second)))
 	if !errors.Is(err, projectcleanup.ErrIncomplete) {
 		t.Fatalf("result error %v", err)
 	}

@@ -57,9 +57,15 @@ func cleanupGaps(t *testing.T, reads []time.Time, want ...time.Duration) {
 
 func TestProjectCleanupWaitStrategyRejectedBeforeAnyRequest(t *testing.T) {
 	for name, option := range map[string]projectcleanup.ExecuteOption{
-		"invalid":       projectcleanup.WithWaitStrategy(resource.LinearWait(time.Millisecond, -time.Millisecond, 0)),
-		"zero":          projectcleanup.WithWaitStrategy(resource.WaitStrategy{}),
-		"zero interval": projectcleanup.WithPollInterval(0),
+		"invalid":       projectcleanup.WithAbsenceWait(resource.WithWaitStrategy(resource.LinearWait(time.Millisecond, -time.Millisecond, 0))),
+		"zero":          projectcleanup.WithAbsenceWait(resource.WithWaitStrategy(resource.WaitStrategy{})),
+		"zero interval": projectcleanup.WithAbsenceWait(resource.WithPollInterval(0)),
+		"zero timeout":  projectcleanup.WithAbsenceWait(resource.WithTimeout(0)),
+		"nil option":    projectcleanup.WithAbsenceWait(nil),
+		"failures":      projectcleanup.WithAbsenceWait(resource.WithFailureStates("ERROR")),
+		"attribute":     projectcleanup.WithAbsenceWait(resource.WithStatusAttribute("status")),
+		"callback":      projectcleanup.WithAbsenceWait(resource.WithProgressCallback(func(int) error { return nil })),
+		"progress":      projectcleanup.WithAbsenceWait(resource.WithProgress(make(chan int))),
 	} {
 		cloud, plan, reads := cleanupServerAbsence(t, 0)
 		before := len(cloud.events())
@@ -76,7 +82,7 @@ func TestProjectCleanupWaitStrategyPacesAbsenceWaits(t *testing.T) {
 	ms := time.Millisecond
 	t.Run("strategy after interval", func(t *testing.T) {
 		cloud, plan, reads := cleanupServerAbsence(t, 3)
-		result, err := cloud.conn.ExecuteProjectCleanup(context.Background(), plan, projectcleanup.WithPollInterval(time.Hour), projectcleanup.WithWaitStrategy(resource.ExponentialWait(2*ms, 2, 0)))
+		result, err := cloud.conn.ExecuteProjectCleanup(context.Background(), plan, projectcleanup.WithAbsenceWait(resource.WithPollInterval(time.Hour)), projectcleanup.WithAbsenceWait(resource.WithWaitStrategy(resource.ExponentialWait(2*ms, 2, 0))))
 		if err != nil || len(result.Outcomes) != 1 || result.Outcomes[0].State != projectcleanup.Deleted {
 			t.Fatal(result, err)
 		}
@@ -84,8 +90,19 @@ func TestProjectCleanupWaitStrategyPacesAbsenceWaits(t *testing.T) {
 	})
 	t.Run("interval after strategy", func(t *testing.T) {
 		cloud, plan, reads := cleanupServerAbsence(t, 2)
-		result, err := cloud.conn.ExecuteProjectCleanup(context.Background(), plan, projectcleanup.WithWaitStrategy(resource.FixedWait(time.Hour)), projectcleanup.WithPollInterval(5*ms))
+		result, err := cloud.conn.ExecuteProjectCleanup(context.Background(), plan, projectcleanup.WithAbsenceWait(resource.WithWaitStrategy(resource.FixedWait(time.Hour))), projectcleanup.WithAbsenceWait(resource.WithPollInterval(5*ms)))
 		if err != nil || result.Outcomes[0].State != projectcleanup.Deleted {
+			t.Fatal(result, err)
+		}
+		cleanupGaps(t, reads(), 5*ms, 5*ms)
+	})
+	t.Run("later call wins per control", func(t *testing.T) {
+		cloud, plan, reads := cleanupServerAbsence(t, 2)
+		result, err := cloud.conn.ExecuteProjectCleanup(context.Background(), plan,
+			projectcleanup.WithAbsenceWait(resource.WithTimeout(time.Nanosecond), resource.WithPollInterval(time.Hour)),
+			projectcleanup.WithAbsenceWait(resource.WithTimeout(time.Minute)),
+			projectcleanup.WithAbsenceWait(resource.WithPollInterval(5*ms)))
+		if err != nil || result.Outcomes[0].State != projectcleanup.Deleted || result.Outcomes[0].WaitErr != nil {
 			t.Fatal(result, err)
 		}
 		cleanupGaps(t, reads(), 5*ms, 5*ms)

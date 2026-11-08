@@ -114672,9 +114672,10 @@
         "github.com/JSYoo5B/go-openstacksdk/projectcleanup.WithSkip",
         "github.com/JSYoo5B/go-openstacksdk/projectcleanup.WithSelector",
         "github.com/JSYoo5B/go-openstacksdk/projectcleanup.WithParallelism",
-        "github.com/JSYoo5B/go-openstacksdk/projectcleanup.WithDeletionWait",
-        "github.com/JSYoo5B/go-openstacksdk/projectcleanup.WithPollInterval",
-        "github.com/JSYoo5B/go-openstacksdk/projectcleanup.WithWaitStrategy",
+        "github.com/JSYoo5B/go-openstacksdk/projectcleanup.WithAbsenceWait",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithTimeout",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithPollInterval",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithWaitStrategy",
         "github.com/JSYoo5B/go-openstacksdk/projectcleanup.WithProgressCallback",
         "github.com/JSYoo5B/go-openstacksdk/projectcleanup.WithProgress",
         "github.com/JSYoo5B/go-openstacksdk/projectcleanup.WithAllowIncompletePlan"
@@ -114787,7 +114788,7 @@
           ]
         },
         {
-          "behavior": "orchestration project cleanup follows openstack/orchestration/v1/_proxy.py _service_cleanup: it lists stacks with Heat's default project-scoped query (top-level stacks only), excludes rows without a usable stack_name and id or reporting another project, applies creation_time/updated_time filters and the selector, is discovered and executed before compute and network, sends one DELETE per stack to stacks/{stack_name}/{id}, then waits for each accepted stack with the shared wait engine (404 or DELETE_COMPLETE is Deleted, DELETE_FAILED is an ErrFailedState wait error, other states keep polling until WithDeletionWait), reports AlreadyMissing for 404 and Failed with response evidence for refusals, lets compute run after a failed stack as Python's dependency walk does, and the orchestration.stack skip name prevents listing.",
+          "behavior": "orchestration project cleanup follows openstack/orchestration/v1/_proxy.py _service_cleanup: it lists stacks with Heat's default project-scoped query (top-level stacks only), excludes rows without a usable stack_name and id or reporting another project, applies creation_time/updated_time filters and the selector, is discovered and executed before compute and network, sends one DELETE per stack to stacks/{stack_name}/{id}, then waits for each accepted stack with the shared wait engine (404 or DELETE_COMPLETE is Deleted, DELETE_FAILED is an ErrFailedState wait error, other states keep polling until the WithAbsenceWait timeout, 120 seconds by default), reports AlreadyMissing for 404 and Failed with response evidence for refusals, lets compute run after a failed stack as Python's dependency walk does, and the orchestration.stack skip name prevents listing.",
           "tests": [
             "connectiontest/connection_project_cleanup_orchestration_test.go:TestProjectCleanupOrchestrationPlansTopLevelStacksBeforeCompute",
             "connectiontest/connection_project_cleanup_orchestration_test.go:TestProjectCleanupOrchestrationFiltersAndSkip",
@@ -114796,7 +114797,7 @@
           ]
         },
         {
-          "behavior": "load_balancer project cleanup follows openstack/load_balancer/v2/_proxy.py _service_cleanup: it lists lbaas/loadbalancers without a query as Python does, excludes rows without a usable id, reporting another project_id/tenant_id or not reporting project_id, applies created_at/updated_at filters and the selector, is discovered and executed after orchestration and before compute and network, sends one DELETE lbaas/loadbalancers/{id}?cascade=true per load balancer, then waits for each accepted load balancer with the shared wait engine (404 or provisioning_status DELETED is Deleted, ERROR is an ErrFailedState wait error, other states keep polling until WithDeletionWait), reports AlreadyMissing for 404, Failed with response evidence for refusals and Uncertain for a lost response, lets compute run after a failed load balancer as Python's dependency walk does, makes a network that holds the Octavia VIP port of a load balancer candidate (and its subnets) depend on that load balancer so it is NotAttempted unless the load balancer is Deleted or AlreadyMissing, and the load_balancer.load_balancer skip name prevents listing.",
+          "behavior": "load_balancer project cleanup follows openstack/load_balancer/v2/_proxy.py _service_cleanup: it lists lbaas/loadbalancers without a query as Python does, excludes rows without a usable id, reporting another project_id/tenant_id or not reporting project_id, applies created_at/updated_at filters and the selector, is discovered and executed after orchestration and before compute and network, sends one DELETE lbaas/loadbalancers/{id}?cascade=true per load balancer, then waits for each accepted load balancer with the shared wait engine (404 or provisioning_status DELETED is Deleted, ERROR is an ErrFailedState wait error, other states keep polling until the WithAbsenceWait timeout, 120 seconds by default), reports AlreadyMissing for 404, Failed with response evidence for refusals and Uncertain for a lost response, lets compute run after a failed load balancer as Python's dependency walk does, makes a network that holds the Octavia VIP port of a load balancer candidate (and its subnets) depend on that load balancer so it is NotAttempted unless the load balancer is Deleted or AlreadyMissing, and the load_balancer.load_balancer skip name prevents listing.",
           "tests": [
             "connectiontest/connection_project_cleanup_loadbalancer_test.go:TestProjectCleanupLoadBalancerPlansBeforeComputeAndNetwork",
             "connectiontest/connection_project_cleanup_loadbalancer_test.go:TestProjectCleanupLoadBalancerFiltersSelectorAndSkip",
@@ -114825,14 +114826,14 @@
           ]
         },
         {
-          "behavior": "projectcleanup.WithPollInterval sets a positive fixed pause for the wait, which otherwise keeps the Python two-second interval; a nonpositive value fails with ErrInvalidOption before HTTP and the default is unchanged without it.",
+          "behavior": "resource.WithPollInterval in projectcleanup.WithAbsenceWait sets a positive fixed pause for the wait, which otherwise keeps the Python two-second interval; a nonpositive value or a failure-state, status-attribute or progress control fails with ErrInvalidOption before HTTP and the default is unchanged without it.",
           "tests": [
             "connectiontest/connection_project_cleanup_wait_strategy_test.go:TestProjectCleanupWaitStrategyRejectedBeforeAnyRequest",
             "connectiontest/connection_project_cleanup_wait_strategy_test.go:TestProjectCleanupWaitStrategyPacesAbsenceWaits"
           ]
         },
         {
-          "behavior": "projectcleanup.WithWaitStrategy rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, the interval option given before or after it.",
+          "behavior": "resource.WithWaitStrategy in projectcleanup.WithAbsenceWait rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, a resource.WithPollInterval given before or after it.",
           "tests": [
             "connectiontest/connection_project_cleanup_wait_strategy_test.go:TestProjectCleanupWaitStrategyRejectedBeforeAnyRequest",
             "connectiontest/connection_project_cleanup_wait_strategy_test.go:TestProjectCleanupWaitStrategyPacesAbsenceWaits"
@@ -114871,17 +114872,17 @@
         "Go excludes a Barbican row that reports another project_id; Python relies only on Barbican's project-scoped lists.",
         "Key manager stages never produce Deleted, because neither Python nor Go waits for absence after a Barbican deletion.",
         "Python deletes a stack through /stacks/{id} and relies on Heat's redirect to the stack's name/ID location; orchestration cleanup sends the DELETE and the absence polls directly to stacks/{stack_name}/{id} from the listed row and excludes rows without a usable stack_name and id.",
-        "Python's wait_for_delete for stacks treats only absence (404, DELETE_COMPLETE or ADOPT_COMPLETE) as completion, keeps polling a DELETE_FAILED stack for its fixed 120 seconds and then abandons the waits of the remaining stacks with an exception; orchestration cleanup waits for every accepted stack within WithDeletionWait, reports DELETE_FAILED at once as an ErrFailedState wait error and does not treat ADOPT_COMPLETE as absence.",
+        "Python's wait_for_delete for stacks treats only absence (404, DELETE_COMPLETE or ADOPT_COMPLETE) as completion, keeps polling a DELETE_FAILED stack for its fixed 120 seconds and then abandons the waits of the remaining stacks with an exception; orchestration cleanup waits for every accepted stack within the WithAbsenceWait timeout, reports DELETE_FAILED at once as an ErrFailedState wait error and does not treat ADOPT_COMPLETE as absence.",
         "Go excludes a stack row whose project names another project; Python relies only on Heat's project-scoped list.",
         "Python lists compute and network resources only after its stacks are deleted; Go plans them before any stack is deleted, so a resource that Heat removed with its stack is reported AlreadyMissing. As in Python, compute and network cleanup does not depend on the outcome of stack deletion.",
         "Python deletes every load balancer its unqueried list returns, which for a token allowed to list all projects includes other projects' load balancers; Go sends the same unqueried list but excludes rows whose project_id or tenant_id names another project and rows without project_id.",
-        "Python's wait_for_delete for load balancers treats only 404 as completion (the resource has no status attribute), keeps polling a load balancer in provisioning_status DELETED or ERROR for its fixed 120 seconds and only logs a wait failure; Go treats DELETED as absence, reports ERROR at once as an ErrFailedState wait error and waits within WithDeletionWait.",
+        "Python's wait_for_delete for load balancers treats only 404 as completion (the resource has no status attribute), keeps polling a load balancer in provisioning_status DELETED or ERROR for its fixed 120 seconds and only logs a wait failure; Go treats DELETED as absence, reports ERROR at once as an ErrFailedState wait error and waits within the WithAbsenceWait timeout.",
         "Python lists networks only after its load balancers are deleted and waited for (Octavia removes the VIP port it created), so a network that held only a deleted load balancer's VIP port is removed in the same run; Go plans networks before any load balancer is deleted, so it ignores the Octavia VIP port (device_owner Octavia, device_id lb-<id>) of a load balancer candidate and makes the network and its subnets depend on that load balancer: they are NotAttempted when the load balancer is not Deleted or AlreadyMissing, whereas Python proceeds after a failed load balancer wait and then skips the network only if the port is still listed.",
         "Python deletes every zone its unqueried list returns, including zones another project shares with the project; dns cleanup excludes zone rows whose project_id names another project or is not reported.",
         "Python deletes the network floating IPs after unsetting their PTR records whatever the unset result; Go does not send a floating IP DELETE while the PTR unset of the same floating IP is Failed, Uncertain or not attempted, so the PTR record is not left without its floating IP.",
         "Like Python, dns cleanup neither waits for zone deletion (Designate answers 202 and deletes asynchronously) nor for PTR unsets, so DNS candidates are never Deleted; and like Python it unsets every listed PTR row, including rows whose ptrdname is already null, leaving the outcome to Designate's answer.",
-        "Python pauses a fixed two seconds; projectcleanup.WithPollInterval is a Go-only extension that changes that interval for the call.",
-        "Python waits use a fixed poll interval. projectcleanup.WithWaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of the interval and strategy options wins."
+        "Python pauses a fixed two seconds; resource.WithPollInterval in projectcleanup.WithAbsenceWait is a Go-only extension that changes that interval for the call.",
+        "Python waits use a fixed poll interval. projectcleanup.WithAbsenceWait accepts resource.WithWaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of resource.WithPollInterval and resource.WithWaitStrategy wins."
       ],
       "documentation": [
         "projectcleanup/README.md",
@@ -141795,8 +141796,9 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk.Connection.DeleteStack",
         "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stackcloud.DeleteStack",
-        "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stackcloud.WithPollInterval",
-        "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stackcloud.WithWaitStrategy"
+        "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stackcloud.WithStackWait",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithPollInterval",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithWaitStrategy"
       ],
       "contracts": [
         {
@@ -141814,7 +141816,7 @@
           ]
         },
         {
-          "behavior": "stackcloud.WithWaitStrategy rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, the interval option given before or after it.",
+          "behavior": "resource.WithWaitStrategy in stackcloud.WithStackWait rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, a resource.WithPollInterval given before or after it.",
           "tests": [
             "api/heat_cloud_wait_strategy_test.go:TestHeatCloudWaitStrategy"
           ]
@@ -141823,7 +141825,7 @@
       "differences": [
         "Python returns True/False and raises SDKException for DELETE_FAILED; Go returns DeleteResult.Deleted and wraps ErrDeleteFailed, keeping the lookup, marker, acknowledgement, swallowed polling HTTP error and final lookup.",
         "poll_for_events has no overall timeout in Python; in Go the context bounds the wait and WithPollInterval replaces the fixed five-second period. The stack reference is path-escaped as one segment and must be a valid identifier.",
-        "Python waits use a fixed poll interval. stackcloud.WithWaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of the interval and strategy options wins."
+        "Python waits use a fixed poll interval. stackcloud.WithStackWait accepts resource.WithWaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of resource.WithPollInterval and resource.WithWaitStrategy wins."
       ],
       "documentation": [
         "orchestration/v1/stackcloud/README.md",
@@ -141838,8 +141840,9 @@
         "github.com/JSYoo5B/go-openstacksdk.Connection.CreateStack",
         "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stackcloud.CreateStack",
         "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stackcloud.WithTemplateLoader",
-        "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stackcloud.WithPollInterval",
-        "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stackcloud.WithWaitStrategy",
+        "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stackcloud.WithStackWait",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithPollInterval",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithWaitStrategy",
         "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/templateloader.Loader.ReadEnvAndTemplates"
       ],
       "contracts": [
@@ -141857,7 +141860,7 @@
           ]
         },
         {
-          "behavior": "stackcloud.WithWaitStrategy rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, the interval option given before or after it.",
+          "behavior": "resource.WithWaitStrategy in stackcloud.WithStackWait rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, a resource.WithPollInterval given before or after it.",
           "tests": [
             "api/heat_cloud_wait_strategy_test.go:TestHeatCloudWaitStrategy"
           ]
@@ -141867,7 +141870,7 @@
         "TimeoutSeconds is an integer; Python also accepts float seconds and then sends a float timeout_mins. Parameters are a map instead of **kwargs.",
         "Results are typed records that keep every phase's evidence (attributes, marker, acknowledgement, wait status, final lookup) instead of a Stack Resource; an error after an accepted mutation is returned together with that evidence, the mutation is never replayed and cancellation does not roll back remote work.",
         "poll_for_events has no overall timeout in Python; in Go the context bounds the wait and WithPollInterval replaces the fixed five-second period. The stack reference is path-escaped as one segment and must be a valid identifier.",
-        "Python waits use a fixed poll interval. stackcloud.WithWaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of the interval and strategy options wins."
+        "Python waits use a fixed poll interval. stackcloud.WithStackWait accepts resource.WithWaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of resource.WithPollInterval and resource.WithWaitStrategy wins."
       ],
       "documentation": [
         "orchestration/v1/stackcloud/README.md",
@@ -141882,8 +141885,9 @@
         "github.com/JSYoo5B/go-openstacksdk.Connection.UpdateStack",
         "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stackcloud.UpdateStack",
         "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stackcloud.WithTemplateLoader",
-        "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stackcloud.WithPollInterval",
-        "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stackcloud.WithWaitStrategy",
+        "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stackcloud.WithStackWait",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithPollInterval",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithWaitStrategy",
         "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/templateloader.Loader.ReadEnvAndTemplates"
       ],
       "contracts": [
@@ -141895,7 +141899,7 @@
           ]
         },
         {
-          "behavior": "stackcloud.WithWaitStrategy rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, the interval option given before or after it.",
+          "behavior": "resource.WithWaitStrategy in stackcloud.WithStackWait rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, a resource.WithPollInterval given before or after it.",
           "tests": [
             "api/heat_cloud_wait_strategy_test.go:TestHeatCloudWaitStrategy"
           ]
@@ -141905,7 +141909,7 @@
         "TimeoutSeconds is an integer; Python also accepts float seconds. Parameters are a map instead of **kwargs.",
         "Results are typed records that keep every phase's evidence (attributes, marker, acknowledgement, wait status, final lookup) instead of a Stack Resource; an error after an accepted mutation is returned together with that evidence, the mutation is never replayed and cancellation does not roll back remote work.",
         "poll_for_events has no overall timeout in Python; in Go the context bounds the wait and WithPollInterval replaces the fixed five-second period. The stack reference is path-escaped as one segment and must be a valid identifier.",
-        "Python waits use a fixed poll interval. stackcloud.WithWaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of the interval and strategy options wins."
+        "Python waits use a fixed poll interval. stackcloud.WithStackWait accepts resource.WithWaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of resource.WithPollInterval and resource.WithWaitStrategy wins."
       ],
       "documentation": [
         "orchestration/v1/stackcloud/README.md",

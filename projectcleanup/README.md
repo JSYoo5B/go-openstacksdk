@@ -30,7 +30,7 @@ for _, u := range plan.Unavailable {
 }
 
 result, err := conn.ExecuteProjectCleanup(ctx, plan,
-	projectcleanup.WithDeletionWait(5*time.Minute),
+	projectcleanup.WithAbsenceWait(resource.WithTimeout(5*time.Minute)),
 	projectcleanup.WithProgressCallback(func(e projectcleanup.Event) error {
 		log.Println(e.Outcome.Candidate.Ref, e.Outcome.State)
 		return nil
@@ -58,9 +58,7 @@ for _, o := range result.Outcomes {
 | Option | Behavior |
 |---|---|
 | `WithParallelism(n)` | Up to `n` mutations of the same stage at once. Default 1 (sequential). Stages never overlap. |
-| `WithDeletionWait(d)` | Budget of each absence wait (default 120 s, Python's `wait_for_delete` default). The context bounds the whole call. |
-| `WithPollInterval(d)` | Fixed pause between absence reads (default 2 s, Python's `wait_for_delete` interval). Must be positive. |
-| `WithWaitStrategy(s)` | Go-only: pauses between absence reads follow a `resource.WaitStrategy` (fixed, linear or exponential, optional jitter); each candidate's wait starts from the first pause. It and `WithPollInterval` replace each other, the later one winning; an invalid or zero-value strategy fails before any request. |
+| `WithAbsenceWait(opts...)` | Shared wait options of each absence wait: `resource.WithTimeout` (budget, default 120 s, Python's `wait_for_delete` default), `resource.WithUnlimitedWait`, `resource.WithPollInterval` (fixed pause between absence reads, default 2 s, Python's `wait_for_delete` interval) and `resource.WithWaitStrategy` (Go-only: pauses follow a `resource.WaitStrategy`, fixed, linear or exponential with optional jitter; each candidate's wait starts from the first pause). Repeated calls append and the later option wins per control. The context bounds the whole call. Invalid options and the failure-state, status-attribute and progress wait controls fail with `resource.ErrInvalidOption` before any request. |
 | `WithProgressCallback(fn)` | Synchronous callback for every candidate state change. Calls never overlap and run on the goroutine that changed the state. A returned error stops new mutations like cancellation and is returned. |
 | `WithProgress(ch)` | Sends an `Event` on a caller-owned channel for every candidate state change, after the callback when both are set (nothing is sent for an event whose callback failed). Sends never overlap and block until received or the context ends, so drain the channel; the SDK never closes it, sends nothing once the context is done or execution stopped, and finishes every send before returning. A context that ends during a blocked send stops new mutations like cancellation. A nil channel is an invalid option. |
 | `WithAllowIncompletePlan()` | Executes a plan that has discovery errors. Without it such a plan is refused with `ErrIncompletePlan`. |
@@ -166,7 +164,7 @@ Follows `openstack/orchestration/v1/_proxy.py` `_service_cleanup`. Kind: `stack`
 - Discovery sends `GET /stacks` without a query, as Python does. Heat's default list contains only the project's top-level stacks; nested stacks are deleted by Heat with their parent and never become candidates. A row without a usable `stack_name` and `id` is excluded, and a row whose `project` names another project is excluded.
 - The time filters read `creation_time` and `updated_time` (Python's `created_at` and `updated_at`). Heat reports `updated_time` as null for a stack that was never updated, so `WithUpdatedBefore` excludes such a stack. The selector sees the stack name as `Name`.
 - Execution sends one `DELETE /stacks/{stack_name}/{id}` per candidate, the canonical route that Python reaches through Heat's redirect from `/stacks/{id}`. A 404 is `already_missing`; a refusal such as 409 is `failed` with the response evidence.
-- After all DELETEs of the stage, each accepted stack is polled with `GET /stacks/{stack_name}/{id}` through the shared wait engine, as Python's `wait_for_delete` does. A 404 or `DELETE_COMPLETE` is absence (`deleted`). `DELETE_FAILED` ends the wait at once with an `ErrFailedState` wait error. Any other state, including the earlier action's `*_FAILED` state before Heat reports `DELETE_IN_PROGRESS`, keeps polling until `WithDeletionWait` ends.
+- After all DELETEs of the stage, each accepted stack is polled with `GET /stacks/{stack_name}/{id}` through the shared wait engine, as Python's `wait_for_delete` does. A 404 or `DELETE_COMPLETE` is absence (`deleted`). `DELETE_FAILED` ends the wait at once with an `ErrFailedState` wait error. Any other state, including the earlier action's `*_FAILED` state before Heat reports `DELETE_IN_PROGRESS`, keeps polling until the `WithAbsenceWait` timeout ends.
 - Compute and network candidates do not depend on stacks. Python's dependency walk also runs compute and network after a failed orchestration cleanup. A resource that Heat already removed with its stack is reported as `already_missing`.
 
 ### Load balancer
@@ -177,7 +175,7 @@ Follows `openstack/load_balancer/v2/_proxy.py` `_service_cleanup`. Kind: `load_b
 - Discovery sends `GET /v2.0/lbaas/loadbalancers` without a query, as Python does, and follows `loadbalancers_links`. Octavia lists only the token project's load balancers unless the token may list every project; a row whose `project_id` or `tenant_id` names another project is excluded, and so is a row without `project_id` or without a usable `id`. Python deletes every listed row, including other projects' load balancers for such a token.
 - The time filters read `created_at` and `updated_at`. Octavia reports `updated_at` as null for a load balancer that was never updated, so `WithUpdatedBefore` excludes it. Load balancers in any provisioning status are evaluated, as in Python.
 - Execution sends one `DELETE /v2.0/lbaas/loadbalancers/{id}?cascade=true` per candidate, as Python's `delete_load_balancer(cascade=True)` does, so Octavia also removes the listeners, pools, members, health monitors and L7 policies. A 404 is `already_missing`; a refusal such as 409 for a load balancer in a `PENDING_*` state is `failed` with the response evidence; a lost response is `uncertain` and is never retried.
-- After all DELETEs of the stage, each accepted load balancer is polled with `GET /v2.0/lbaas/loadbalancers/{id}` through the shared wait engine, as Python's `wait_for_delete` does. A 404 or `provisioning_status` `DELETED` is absence (`deleted`). `ERROR` ends the wait at once with an `ErrFailedState` wait error. `PENDING_DELETE` and other states keep polling until `WithDeletionWait` ends. Python treats only 404 as absence and only logs a failed wait.
+- After all DELETEs of the stage, each accepted load balancer is polled with `GET /v2.0/lbaas/loadbalancers/{id}` through the shared wait engine, as Python's `wait_for_delete` does. A 404 or `provisioning_status` `DELETED` is absence (`deleted`). `ERROR` ends the wait at once with an `ErrFailedState` wait error. `PENDING_DELETE` and other states keep polling until the `WithAbsenceWait` timeout ends. Python treats only 404 as absence and only logs a failed wait.
 - Compute candidates do not depend on load balancers, and network candidates depend on one only through its VIP port. Python's dependency walk also runs compute and network after a failed load balancer cleanup.
 - Octavia creates the VIP port in the load balancer's project with `device_owner` `Octavia` and `device_id` `lb-<load balancer id>`, and deletes that port itself while deleting the load balancer. Python's real run lists networks only after its load balancers are deleted and waited for, so such a network can be cleaned in the same run. Discovery here runs once before any deletion, so the VIP port of a load balancer candidate is neither planned nor counted as a port in use; instead the network and its subnets depend on the load balancer and are `not_attempted` unless it is `deleted` or `already_missing` (for example after a failed DELETE or a wait that ended while it was still `PENDING_DELETE`). The VIP port of a load balancer that is not a candidate (another project's, filtered out, rejected by the selector or skipped) keeps its network, as in Python's dry run. Amphora VRRP ports are created in the Octavia service project, so the project-scoped port list does not return them.
 
@@ -205,7 +203,7 @@ Follows `openstack/dns/v2/_proxy.py` `_service_cleanup`. Kinds, in stage order: 
 
 ## Limitations
 
-- Each wait is bounded by `WithDeletionWait` and by the caller's context; a deletion that a service completes after the wait ends stays `Accepted` with `WaitErr`.
+- Each wait is bounded by the `WithAbsenceWait` timeout and by the caller's context; a deletion that a service completes after the wait ends stays `Accepted` with `WaitErr`.
 - Only the services and kinds listed above are cleaned. A service that Python cleans and this package did not implement would be reported as `NotYetSupported`, never as cleaned; no such service remains.
 
 ## Implementation notes

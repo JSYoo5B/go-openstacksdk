@@ -414,7 +414,7 @@ func TestProjectCleanupWaitsForServerAbsenceBeforeDependents(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	result, err := cloud.conn.ExecuteProjectCleanup(context.Background(), plan, projectcleanup.WithDeletionWait(30*time.Second))
+	result, err := cloud.conn.ExecuteProjectCleanup(context.Background(), plan, projectcleanup.WithAbsenceWait(resource.WithTimeout(30*time.Second)))
 	if !errors.Is(err, projectcleanup.ErrIncomplete) {
 		t.Fatalf("wait failure not reported: %v", err)
 	}

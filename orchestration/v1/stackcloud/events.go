@@ -170,11 +170,17 @@ func stopStatus(action, status string) bool {
 
 // pollForEvents ports event_utils.poll_for_events with a fixed action. It
 // returns the terminal status (action_COMPLETE or action_FAILED); reaching a
-// failed status is not an error, exactly as in Python. There is no overall
-// timeout: ctx bounds the loop.
-func pollForEvents(ctx context.Context, client *gophercloud.ServiceClient, stackName, action string, marker json.RawMessage, strategy resource.WaitStrategy) (string, error) {
+// failed status is not an error, exactly as in Python. By default there is
+// no overall timeout and ctx bounds the loop; a resolved timeout adds an SDK
+// deadline to the polls.
+func pollForEvents(ctx context.Context, client *gophercloud.ServiceClient, stackName, action string, marker json.RawMessage, wait resource.WaitSettings) (string, error) {
+	if !wait.Unlimited {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, wait.Timeout)
+		defer cancel()
+	}
 	noEventPolls := 0
-	pacer := pollschedule.NewPacer(strategy.Delay)
+	pacer := pollschedule.NewPacer(wait.Strategy.Delay)
 	for {
 		query, err := markerQuery(marker)
 		if err != nil {

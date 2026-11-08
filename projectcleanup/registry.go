@@ -2,7 +2,6 @@ package projectcleanup
 
 import (
 	"context"
-	"time"
 
 	"github.com/gophercloud/gophercloud/v2"
 
@@ -37,7 +36,7 @@ type kindSpec struct {
 	remove func(ctx context.Context, client *gophercloud.ServiceClient, c Candidate) error
 	// absent polls until the resource is gone, within timeout and ctx.
 	// Required when wait is set.
-	absent func(ctx context.Context, client *gophercloud.ServiceClient, c Candidate, timeout time.Duration, pacing resource.WaitOption) error
+	absent func(ctx context.Context, client *gophercloud.ServiceClient, c Candidate, wait resource.WaitOption) error
 }
 
 // implementations maps a Python service name to its registered cleanup.

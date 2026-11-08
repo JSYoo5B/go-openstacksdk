@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/projectcleanup"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 // networkFixture serves Networking lists keyed by "collection?query", router
@@ -251,7 +252,7 @@ func TestProjectCleanupNetworkExecutesInPythonOrder(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	result, err := f.conn.ExecuteProjectCleanup(context.Background(), plan, projectcleanup.WithDeletionWait(10*time.Second))
+	result, err := f.conn.ExecuteProjectCleanup(context.Background(), plan, projectcleanup.WithAbsenceWait(resource.WithTimeout(10*time.Second)))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -283,7 +284,7 @@ func TestProjectCleanupNetworkOutcomesBlockDependents(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	result, err := f.conn.ExecuteProjectCleanup(context.Background(), plan, projectcleanup.WithDeletionWait(10*time.Second))
+	result, err := f.conn.ExecuteProjectCleanup(context.Background(), plan, projectcleanup.WithAbsenceWait(resource.WithTimeout(10*time.Second)))
 	if !errors.Is(err, projectcleanup.ErrIncomplete) {
 		t.Fatalf("err %v", err)
 	}
