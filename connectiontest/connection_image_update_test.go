@@ -125,7 +125,7 @@ func TestConnectionImageUpdateFacadeOwnsPatchAndResponse(t *testing.T) {
 	headers := map[string]string{"X-Call": "owned"}
 	h := image.WithUpdateImageHeaders(headers)
 	headers["X-Call"] = "changed"
-	updated, err := upper.UpdateImage(ctx, resource.ID(id), h, image.WithUpdateImageName(""), image.WithUpdateImageProtected(false), image.WithUpdateImageMinDisk(0), image.WithUpdateImageTags(), image.WithUpdateImageFields(map[string]json.RawMessage{"null": json.RawMessage(`null`), "a/b~": json.RawMessage(`{"huge":1e1000}`)}), image.WithUpdateImageRemoveField("old~key"))
+	updated, err := upper.UpdateImage(ctx, resource.ID(id), h, image.WithUpdateImageField("name", ""), image.WithUpdateImageField("protected", false), image.WithUpdateImageField("min_disk", 0), image.WithUpdateImageTags(), image.WithUpdateImageFields(map[string]json.RawMessage{"null": json.RawMessage(`null`), "a/b~": json.RawMessage(`{"huge":1e1000}`)}), image.WithUpdateImageRemoveField("old~key"))
 	if err != nil || updated == nil || *updated.ID != "actual-id" || *updated.MinDisk != 0 || *updated.Protected || updated.Tags == nil || updated.StatusCode != 200 || calls != 1 {
 		t.Fatalf("image=%+v err=%v calls=%d", updated, err, calls)
 	}
@@ -144,7 +144,7 @@ func TestConnectionImageUpdateFacadeOwnsPatchAndResponse(t *testing.T) {
 	if err != nil || empty == nil || empty.Header.Get("X-Proof") != "2" || calls != 3 {
 		t.Fatal(empty, err, calls)
 	}
-	named, err := upper.UpdateImage(ctx, resource.Name("Ubuntu 24"), image.WithUpdateImageName("changed"), request.Header("X-Call", "named"))
+	named, err := upper.UpdateImage(ctx, resource.Name("Ubuntu 24"), image.WithUpdateImageField("name", "changed"), request.Header("X-Call", "named"))
 	if err != nil || named == nil || *named.ID != "passive-response" || named.Name != nil || string(named.Properties["properties"]) != "false" || calls != 5 {
 		t.Fatal(named, err, calls)
 	}

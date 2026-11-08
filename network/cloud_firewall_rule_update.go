@@ -82,21 +82,6 @@ func WithFirewallRuleUpdateJSON(raw json.RawMessage) FirewallRuleUpdateOption {
 		return nil
 	}
 }
-func WithFirewallRuleUpdateName(v string) FirewallRuleUpdateOption {
-	return WithFirewallRuleUpdateAttribute("name", v)
-}
-func WithFirewallRuleUpdateAction(v string) FirewallRuleUpdateOption {
-	return WithFirewallRuleUpdateAttribute("action", v)
-}
-func WithFirewallRuleUpdateEnabled(v bool) FirewallRuleUpdateOption {
-	return WithFirewallRuleUpdateAttribute("enabled", v)
-}
-func WithFirewallRuleUpdateShared(v bool) FirewallRuleUpdateOption {
-	return WithFirewallRuleUpdateAttribute("shared", v)
-}
-func WithFirewallRuleUpdateProtocol(v string) FirewallRuleUpdateOption {
-	return WithFirewallRuleUpdateAttribute("protocol", v)
-}
 
 // FirewallRuleUpdateResult retains the lookup's declared view and wire evidence.
 // Response is the owned receipt of the accepted PUT, and Rule is the native

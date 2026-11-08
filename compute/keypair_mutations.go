@@ -63,9 +63,9 @@ func (s *Service) CreateKeypair(ctx context.Context, name string, options ...Clo
 	if err = errors.Join(err, p.check(p.ctx)); err != nil {
 		return nil, keypairCloudFailure("CreateKeypair", err)
 	}
-	leaf := []keypairs.KeypairCreateOption{keypairs.WithKeypairCreateName(name)}
+	leaf := []keypairs.KeypairCreateOption{keypairs.WithKeypairCreateAttribute("name", name)}
 	if c.Options.PublicKey != "" {
-		leaf = append(leaf, keypairs.WithKeypairCreatePublicKey(c.Options.PublicKey))
+		leaf = append(leaf, keypairs.WithKeypairCreateAttribute("public_key", c.Options.PublicKey))
 	}
 	for key, value := range c.Headers {
 		leaf = append(leaf, request.Header(key, value))

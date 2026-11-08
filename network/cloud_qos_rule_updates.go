@@ -62,12 +62,6 @@ func WithQoSRuleUpdateJSON(raw json.RawMessage) QoSRuleUpdateOption {
 		return nil
 	}
 }
-func WithQoSRuleUpdateDirection(v string) QoSRuleUpdateOption {
-	return WithQoSRuleUpdateAttribute("direction", v)
-}
-func WithQoSRuleUpdateMaxBurstKBPS(v int) QoSRuleUpdateOption {
-	return WithQoSRuleUpdateAttribute("max_burst_kbps", v)
-}
 
 // QoSRuleUpdateResult separates policy, strict current GET and mutation evidence.
 // NoOp identifies Source empty kwargs or an equal raw update without PUT.
@@ -212,13 +206,4 @@ func (s *Service) UpdateQoSDSCPMarkingRuleRecord(ctx context.Context, policy, id
 }
 func (s *Service) UpdateQoSMinimumBandwidthRuleRecord(ctx context.Context, policy, id string, options ...QoSRuleUpdateOption) (*QoSRuleUpdateResult, error) {
 	return s.qosUpdateRule(ctx, policy, id, "minimum_bandwidth_rules", "UpdateQoSMinimumBandwidthRuleRecord", options)
-}
-func WithQoSRuleUpdateMaxKBPS(v int) QoSRuleUpdateOption {
-	return WithQoSRuleUpdateAttribute("max_kbps", v)
-}
-func WithQoSRuleUpdateMinKBPS(v int) QoSRuleUpdateOption {
-	return WithQoSRuleUpdateAttribute("min_kbps", v)
-}
-func WithQoSRuleUpdateDSCPMark(v int) QoSRuleUpdateOption {
-	return WithQoSRuleUpdateAttribute("dscp_mark", v)
 }

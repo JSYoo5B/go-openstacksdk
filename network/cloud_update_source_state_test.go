@@ -83,7 +83,7 @@ func TestCloudUpdateSourceStateCanonicalLookupDirtyComparison(t *testing.T) {
 				"GET /v2.0/routers/p": {status: http.StatusOK, body: `{"router":` + tc.lookup + `}`},
 				"PUT /v2.0/routers/p": {status: http.StatusOK, body: `{"router":{"id":"p","admin_state_up":false}}`},
 			})
-			result, err := network.New(client).UpdateRouterRecord(context.Background(), "p", network.WithRouterUpdateAdminStateUp(false))
+			result, err := network.New(client).UpdateRouterRecord(context.Background(), "p", network.WithRouterUpdateAttribute("admin_state_up", false))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -120,8 +120,8 @@ func TestCloudUpdateSourceStateListRowAndResponseMapping(t *testing.T) {
 		"PUT /v2.0/ports/p1":                 {status: http.StatusOK, body: `{"port":{"id":"p1","name":"web","is_admin_state_up":false,"binding_host_id":"h2","admin_state_up":false,"self":"y"}}`},
 	})
 	result, err := network.New(client).UpdatePortRecord(context.Background(), "web",
-		network.WithPortUpdatePortSecurityEnabled(true),
-		network.WithPortUpdateAdminStateUp(false),
+		network.WithPortUpdateAttribute("port_security_enabled", true),
+		network.WithPortUpdateAttribute("admin_state_up", false),
 		network.WithPortUpdateAttribute("binding:host_id", "h1"),
 	)
 	if err != nil {
@@ -172,7 +172,7 @@ func TestCloudUpdateSourceStateRouterRevisionAndSubnetAlias(t *testing.T) {
 		"GET /v2.0/routers/p": {status: http.StatusOK, body: `{"router":{"id":"p","name":"old","revision_number":3}}`},
 		"PUT /v2.0/routers/p": {status: http.StatusOK, body: `{"router":{"id":"p","name":"new","revision_number":4,"is_ha":true}}`},
 	})
-	router, err := network.New(client).UpdateRouterRecord(context.Background(), "p", network.WithRouterUpdateName("new"))
+	router, err := network.New(client).UpdateRouterRecord(context.Background(), "p", network.WithRouterUpdateAttribute("name", "new"))
 	if err != nil {
 		t.Fatal(err)
 	}

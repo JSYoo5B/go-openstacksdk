@@ -76,7 +76,6 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/volumeattach.API.UpdateRecord`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/volumeattach.VolumeAttachmentScope.UpdateRecord`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/volumeattach.WithAttachmentSwapTo`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/volumeattach.WithAttachmentAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/volumeattach.WithAttachmentUpdateOpts`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
@@ -176,7 +175,7 @@ func main() {
             volumeattach.WithAttachmentAttribute("delete_on_termination", false),
         }
         if *replacement != "" {
-            options = append(options, volumeattach.WithAttachmentSwapTo(*replacement))
+            options = append(options, volumeattach.WithAttachmentAttribute("volume_id", *replacement))
         }
         value, err := service.VolumeAttachments.UpdateRecord(ctx,
             *serverID, *updateVolume, options...)

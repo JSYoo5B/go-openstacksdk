@@ -74,7 +74,7 @@ func TestCloudQoSPolicyMutationValidKwargsBeforeGateAndOwnedOptions(t *testing.T
 	raw := json.RawMessage(`{"name":"first"}`)
 	option := network.WithQoSPolicyMutationJSON(raw)
 	raw[2] = 'X'
-	result, err := service.CreateQoSPolicyRecord(context.Background(), option, network.WithQoSPolicyName("last"))
+	result, err := service.CreateQoSPolicyRecord(context.Background(), option, network.WithQoSPolicyAttribute("name", "last"))
 	if err != nil || result == nil || result.Policy == nil || count.Load() != 2 {
 		t.Fatal(result, err, count.Load())
 	}
@@ -152,7 +152,7 @@ func TestCloudQoSPolicyUpdateEmptyAfterDefaultSkipsLookupAndMissingRaises(t *tes
 			testcloud.JSON(w, 404, `{}`)
 		}
 	})
-	result, err := missing.UpdateQoSPolicyRecord(context.Background(), "missing", network.WithQoSPolicyName("new"))
+	result, err := missing.UpdateQoSPolicyRecord(context.Background(), "missing", network.WithQoSPolicyAttribute("name", "new"))
 	if result == nil || result.Policy != nil || !errors.Is(err, resource.ErrNotFound) || count.Load() != 3 {
 		t.Fatal(result, err, count.Load())
 	}
@@ -233,9 +233,9 @@ func TestCloudQoSPolicyMutationRejectedStatusPreservesActualEvidence(t *testing.
 			var result *network.QoSPolicyMutation
 			var err error
 			if method == http.MethodPost {
-				result, err = service.CreateQoSPolicyRecord(context.Background(), network.WithQoSPolicyName("new"))
+				result, err = service.CreateQoSPolicyRecord(context.Background(), network.WithQoSPolicyAttribute("name", "new"))
 			} else {
-				result, err = service.UpdateQoSPolicyRecord(context.Background(), "actual", network.WithQoSPolicyName("new"))
+				result, err = service.UpdateQoSPolicyRecord(context.Background(), "actual", network.WithQoSPolicyAttribute("name", "new"))
 			}
 			expected := int32(2)
 			if method == http.MethodPut {
@@ -314,9 +314,9 @@ func TestCloudQoSPolicyMutationPhysicalFaultsPreserveActualEvidenceWithoutHooks(
 					var result *network.QoSPolicyMutation
 					var err error
 					if method == http.MethodPost {
-						result, err = service.CreateQoSPolicyRecord(ctx, network.WithQoSPolicyName("new"))
+						result, err = service.CreateQoSPolicyRecord(ctx, network.WithQoSPolicyAttribute("name", "new"))
 					} else {
-						result, err = service.UpdateQoSPolicyRecord(ctx, "actual", network.WithQoSPolicyName("new"))
+						result, err = service.UpdateQoSPolicyRecord(ctx, "actual", network.WithQoSPolicyAttribute("name", "new"))
 					}
 					want := int32(2)
 					if method == http.MethodPut {

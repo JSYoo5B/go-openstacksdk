@@ -20,14 +20,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.WithoutImageUploadSize`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadField`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadFields`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadDiskFormat`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadContainerFormat`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadVisibility`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadOwner`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadProtected`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadHidden`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadMinDisk`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadMinRAM`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadTags`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.UploadImageRecord`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.UploadImageRecord`
@@ -36,7 +28,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordUploadDiskFormat`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordUploadAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordUploadAttributes`
-- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordUploadHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordUploadSize`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithoutImageRecordUploadSize`
@@ -163,17 +154,17 @@ func uploadFile(ctx context.Context, service *image.Service, filename string,
             "build": json.RawMessage(`"release"`),
         }),
         image.WithImageUploadField("build", "2026-10-03"),
-        image.WithImageUploadDiskFormat("qcow2"),
-        image.WithImageUploadContainerFormat("bare"),
-        image.WithImageUploadVisibility(image.VisibilityPrivate),
-        image.WithImageUploadProtected(false),
-        image.WithImageUploadHidden(false),
-        image.WithImageUploadMinDisk(0),
-        image.WithImageUploadMinRAM(0),
+        image.WithImageUploadField("disk_format", "qcow2"),
+        image.WithImageUploadField("container_format", "bare"),
+        image.WithImageUploadField("visibility", image.VisibilityPrivate),
+        image.WithImageUploadField("protected", false),
+        image.WithImageUploadField("os_hidden", false),
+        image.WithImageUploadField("min_disk", 0),
+        image.WithImageUploadField("min_ram", 0),
         image.WithImageUploadTags("example"),
     }
     if owner != nil {
-        options = append(options, image.WithImageUploadOwner(*owner))
+        options = append(options, image.WithImageUploadField("owner", *owner))
     }
     if knownSize == nil {
         options = append(options, image.WithoutImageUploadSize())

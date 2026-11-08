@@ -45,8 +45,8 @@ type RecordListOpts struct {
 }
 
 // RecordListOption is one option of the record lists: WithRecordListOpts,
-// WithRecordListQuery, WithRecordListJMESPath, request.Headers (replaces the
-// headers), request.Microversion, request.BasePath, request.Limit,
+// WithRecordListQuery (including the "jmespath_filters" key), request.Headers
+// (replaces the headers), request.Microversion, request.BasePath, request.Limit,
 // request.Marker, request.MaxItems, request.Paginated or request.Custom over
 // *RecordListOpts. request.Query is rejected because WithRecordListQuery
 // classifies the key before it marshals the value. Other shared calls fail
@@ -153,6 +153,9 @@ func withRecordListRaw(key string, raw json.RawMessage, encodeErr error) func(*R
 // discarded before encoding their transport value, matching Source list.
 // Declared query names and wire names go to the server; other declared Body
 // attributes become local filters on each received row.
+// The "jmespath_filters" key supplies Source Proxy._list's polymorphic
+// expression; ProxyListRecords exposes its zero-HTTP value or lazy generator
+// result.
 func WithRecordListQuery(key string, value any) RecordListOption {
 	return request.Custom(withRecordListQuery(key, value))
 }
@@ -195,12 +198,6 @@ func withRecordListBasePath(value string) func(*RecordListOpts) error {
 		c.order = slices.DeleteFunc(c.order, func(k string) bool { return k == "base_path" })
 		return nil
 	}
-}
-
-// WithRecordListJMESPath supplies Source Proxy._list's polymorphic expression.
-// ProxyListRecords exposes its zero-HTTP value or lazy generator result.
-func WithRecordListJMESPath(expression string) RecordListOption {
-	return WithRecordListQuery("jmespath_filters", expression)
 }
 
 func (a *API) portListEngine(ctx context.Context) (*neutronfind.Engine, error) {

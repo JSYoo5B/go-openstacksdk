@@ -104,10 +104,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.API.CreateKeypair`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithKeypairCreateOptions`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithKeypairCreateAttribute`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithKeypairCreateName`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithKeypairCreatePublicKey`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithKeypairCreateType`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithKeypairCreateUserID`
 - `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 

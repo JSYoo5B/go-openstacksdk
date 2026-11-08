@@ -74,19 +74,6 @@ func WithRouterUpdateJSON(raw json.RawMessage) RouterUpdateOption {
 		return nil
 	}
 }
-func WithRouterUpdateName(v string) RouterUpdateOption { return WithRouterUpdateAttribute("name", v) }
-func WithRouterUpdateAdminStateUp(v bool) RouterUpdateOption {
-	return WithRouterUpdateAttribute("admin_state_up", v)
-}
-func WithRouterUpdateExternalGatewayNetworkID(v string) RouterUpdateOption {
-	return WithRouterUpdateAttribute("ext_gateway_net_id", v)
-}
-func WithRouterUpdateEnableSNAT(v bool) RouterUpdateOption {
-	return WithRouterUpdateAttribute("enable_snat", v)
-}
-func WithRouterUpdateRoutes(v []map[string]any) RouterUpdateOption {
-	return WithRouterUpdateAttribute("routes", v)
-}
 func routerUpdateBody(cfg RouterUpdateOpts) (map[string]json.RawMessage, bool, error) {
 	attrs := copyRouterUpdate(cfg).Attributes
 	routes, hasRoutes := attrs["routes"]

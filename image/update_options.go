@@ -64,31 +64,6 @@ func WithUpdateImageChanges(changes ...ImagePatch) UpdateImageOption {
 	snapshot := copyImagePatches(changes)
 	return request.Custom(func(config *UpdateImageOpts) error { config.Changes = copyImagePatches(snapshot); return nil })
 }
-func WithUpdateImageName(value string) UpdateImageOption { return WithUpdateImageField("name", value) }
-func WithUpdateImageVisibility(value string) UpdateImageOption {
-	return WithUpdateImageField("visibility", value)
-}
-func WithUpdateImageProtected(value bool) UpdateImageOption {
-	return WithUpdateImageField("protected", value)
-}
-func WithUpdateImageHidden(value bool) UpdateImageOption {
-	return WithUpdateImageField("os_hidden", value)
-}
-func WithUpdateImageOwner(value string) UpdateImageOption {
-	return WithUpdateImageField("owner", value)
-}
-func WithUpdateImageContainerFormat(value string) UpdateImageOption {
-	return WithUpdateImageField("container_format", value)
-}
-func WithUpdateImageDiskFormat(value string) UpdateImageOption {
-	return WithUpdateImageField("disk_format", value)
-}
-func WithUpdateImageMinDisk(value int64) UpdateImageOption {
-	return WithUpdateImageField("min_disk", value)
-}
-func WithUpdateImageMinRAM(value int64) UpdateImageOption {
-	return WithUpdateImageField("min_ram", value)
-}
 func WithUpdateImageTags(values ...string) UpdateImageOption {
 	snapshot := append([]string{}, values...)
 	return WithUpdateImageField("tags", snapshot)

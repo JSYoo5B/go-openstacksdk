@@ -19,12 +19,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.AddImageMemberRecord`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.AddImageMemberRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordWriteOpts`
-- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordWriteHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordWriteAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordWriteAttributes`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordMemberID`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordStatus`
 
 - Legacy typed AddImageMember profile only: All methods require an explicit parent image Ref; direct imageID has only fixed member endpoint, explicit parentName uses unchanged native exact-name resolver. No Member parent recovery, memberName/project lookup, response-ID synthesis or response-driven routes.
   Tests: `image/members_contracts_test.go:TestImageMembersFixedParentRoutesAndBodies`, `image/members_core_test.go:TestImageMembersCoreFixedRoutesAndActualEvidence`, `connectiontest/connection_image_members_test.go:TestConnectionImageMembersShareClientAndConcreteDefaults`, `internal/cmd/sdkgen/glance_members_test.go:TestGlanceMemberWorkflowsPreserveNativeScopeAndConcreteDefaults`.
@@ -130,12 +127,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.UpdateImageMemberRecord`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.UpdateImageMemberRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordWriteOpts`
-- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordWriteHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordWriteAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordWriteAttributes`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordMemberID`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordStatus`
 
 - Legacy typed UpdateImageMember profile only: All methods require an explicit parent image Ref; direct imageID has only fixed member endpoint, explicit parentName uses unchanged native exact-name resolver. No Member parent recovery, memberName/project lookup, response-ID synthesis or response-driven routes.
   Tests: `image/members_contracts_test.go:TestImageMembersFixedParentRoutesAndBodies`, `image/members_core_test.go:TestImageMembersCoreFixedRoutesAndActualEvidence`, `connectiontest/connection_image_members_test.go:TestConnectionImageMembersShareClientAndConcreteDefaults`, `internal/cmd/sdkgen/glance_members_test.go:TestGlanceMemberWorkflowsPreserveNativeScopeAndConcreteDefaults`.
@@ -321,7 +315,7 @@ func run(ctx context.Context, ownerCloud, memberCloud, imageID, memberID, status
     parent := resource.ID(imageID)
     input := image.ImageMemberRecordRequest{ID: memberID}
     created, err := owner.AddImageMemberRecord(ctx, parent,
-        image.WithImageMemberRecordMemberID(memberID),
+        image.WithImageMemberRecordWriteAttribute("member_id", memberID),
         request.Header("X-Request-Source", "member-record-example"))
     if err := showRecord("add", created, err); err != nil { return err }
     fetched, err := owner.GetImageMemberRecord(ctx, parent, input,
@@ -329,13 +323,13 @@ func run(ctx context.Context, ownerCloud, memberCloud, imageID, memberID, status
     if err := showRecord("get", fetched, err); err != nil { return err }
     updated, err := recipient.UpdateImageMemberRecord(ctx, parent,
         image.ImageMemberRecordRequest{Record: fetched},
-        image.WithImageMemberRecordStatus(status))
+        image.WithImageMemberRecordWriteAttribute("status", status))
     if err := showRecord("update", updated, err); err != nil { return err }
     service, err := recipient.Image(ctx)
     if err != nil { return err }
     repeated, err := service.UpdateImageMemberRecord(ctx, parent,
         image.ImageMemberRecordRequest{Record: updated},
-        image.WithImageMemberRecordStatus(status))
+        image.WithImageMemberRecordWriteAttribute("status", status))
     if err := showRecord("update-again", repeated, err); err != nil { return err }
     ack, err := owner.RemoveImageMemberRecord(ctx, parent, input,
         request.IgnoreMissing(false),

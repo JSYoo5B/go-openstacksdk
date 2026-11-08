@@ -20,9 +20,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleUpdateOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleUpdateJSON`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleUpdateAttribute`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleUpdateDirection`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleUpdateMaxKBPS`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleUpdateMaxBurstKBPS`
 
 - All named cloud kwargs are library-validated before HTTP, with concrete cloned JSON/map/primitive With options. Unknown/bound identity keys/nil or invalid JSON fail before qos gate. No caller builder/interface is needed; explicit null/zero remain present and later individual options replace prior bulk keys.
   Tests: `network/cloud_qos_rule_updates_test.go:TestCloudQoSRuleUpdateValidKwargsBeforeHTTPAndOwnedOptions`.
@@ -67,7 +64,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleUpdateOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleUpdateJSON`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleUpdateAttribute`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleUpdateDSCPMark`
 
 - All named cloud kwargs are library-validated before HTTP, with concrete cloned JSON/map/primitive With options. Unknown/bound identity keys/nil or invalid JSON fail before qos gate. No caller builder/interface is needed; explicit null/zero remain present and later individual options replace prior bulk keys.
   Tests: `network/cloud_qos_rule_updates_test.go:TestCloudQoSRuleUpdateValidKwargsBeforeHTTPAndOwnedOptions`.
@@ -112,8 +108,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleUpdateOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleUpdateJSON`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleUpdateAttribute`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleUpdateDirection`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleUpdateMinKBPS`
 
 - All named cloud kwargs are library-validated before HTTP, with concrete cloned JSON/map/primitive With options. Unknown/bound identity keys/nil or invalid JSON fail before qos gate. No caller builder/interface is needed; explicit null/zero remain present and later individual options replace prior bulk keys.
   Tests: `network/cloud_qos_rule_updates_test.go:TestCloudQoSRuleUpdateValidKwargsBeforeHTTPAndOwnedOptions`.

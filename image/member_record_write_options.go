@@ -67,12 +67,6 @@ func WithImageMemberRecordWriteAttributes(values map[string]any) ImageMemberReco
 		return nil
 	})
 }
-func WithImageMemberRecordMemberID(value any) ImageMemberRecordWriteOption {
-	return WithImageMemberRecordWriteAttribute("member_id", value)
-}
-func WithImageMemberRecordStatus(value any) ImageMemberRecordWriteOption {
-	return WithImageMemberRecordWriteAttribute("status", value)
-}
 
 func prepareImageMemberRecordWrite(ctx context.Context, check func(context.Context) error, options []ImageMemberRecordWriteOption, update bool) (map[string]json.RawMessage, map[string]string, error) {
 	config := copyImageMemberRecordWrite(ImageMemberRecordWriteOpts{})

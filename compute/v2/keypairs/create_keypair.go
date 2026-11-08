@@ -26,9 +26,8 @@ import (
 type KeypairCreateOpts struct{ Attributes map[string]any }
 
 // KeypairCreateOption is one option of CreateKeypair: WithKeypairCreateOptions,
-// WithKeypairCreateAttribute, WithKeypairCreateName,
-// WithKeypairCreatePublicKey, WithKeypairCreateType, WithKeypairCreateUserID,
-// request.Field (a vendor JSON field inside keypair; all declared attributes
+// WithKeypairCreateAttribute (for example "name", "public_key", "type" or
+// "user_id"), request.Field (a vendor JSON field inside keypair; all declared attributes
 // and aliases require their semantic options, even when omitted),
 // request.Header or request.Custom over *request.Config[KeypairCreateOpts].
 // Other shared calls fail with resource.ErrInvalidOption before HTTP.
@@ -91,19 +90,6 @@ func WithKeypairCreateAttribute(name string, value any) KeypairCreateOption {
 		maps.Copy(config.Options.Attributes, owned)
 		return nil
 	})
-}
-
-func WithKeypairCreateName(value string) KeypairCreateOption {
-	return WithKeypairCreateAttribute("name", value)
-}
-func WithKeypairCreatePublicKey(value string) KeypairCreateOption {
-	return WithKeypairCreateAttribute("public_key", value)
-}
-func WithKeypairCreateType(value string) KeypairCreateOption {
-	return WithKeypairCreateAttribute("type", value)
-}
-func WithKeypairCreateUserID(value string) KeypairCreateOption {
-	return WithKeypairCreateAttribute("user_id", value)
 }
 
 // CreateKeypair performs one fixed collection POST with owned attributes and

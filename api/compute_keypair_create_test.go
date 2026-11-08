@@ -276,8 +276,8 @@ func TestComputeKeypairCreateOwnedOptionsSourceAndAcceptedFailures(t *testing.T)
 			testcloud.JSON(w, 200, `{"keypair":{}}`)
 		})
 		options := []keypairs.KeypairCreateOption{
-			keypairs.WithKeypairCreateName("discarded"), keypairs.WithKeypairCreatePublicKey("discarded"), keypairs.WithKeypairCreateType("discarded"), bulk,
-			keypairs.WithKeypairCreateAttribute("id", "last"), keypairs.WithKeypairCreateAttribute("deleted", true), keypairs.WithKeypairCreateAttribute("is_deleted", false), keypairs.WithKeypairCreateUserID("owner"), extension,
+			keypairs.WithKeypairCreateAttribute("name", "discarded"), keypairs.WithKeypairCreateAttribute("public_key", "discarded"), keypairs.WithKeypairCreateAttribute("type", "discarded"), bulk,
+			keypairs.WithKeypairCreateAttribute("id", "last"), keypairs.WithKeypairCreateAttribute("deleted", true), keypairs.WithKeypairCreateAttribute("is_deleted", false), keypairs.WithKeypairCreateAttribute("user_id", "owner"), extension,
 			request.Header("X-Create-Extension", "kept"),
 			request.Custom(func(config *request.Config[keypairs.KeypairCreateOpts]) error {
 				callbacks.Add(1)
@@ -381,7 +381,7 @@ func TestComputeKeypairCreateOwnedOptionsSourceAndAcceptedFailures(t *testing.T)
 				retries.Add(1)
 				return err
 			}
-			value, err := keypairs.New(client).CreateKeypair(context.Background(), keypairs.WithKeypairCreateName("requested"))
+			value, err := keypairs.New(client).CreateKeypair(context.Background(), keypairs.WithKeypairCreateAttribute("name", "requested"))
 			var proof *resource.ResponseError
 			if value == nil || value.Resource != nil || value.StatusCode != 201 || string(value.Envelope) != body || value.Header.Get("X-Keypair-Proof") != mode || !errors.As(err, &proof) || proof.StatusCode != 201 || string(proof.Body) != body || proof.Header.Get("X-Keypair-Proof") != mode || calls.Load() != 1 || retries.Load() != 0 || errors.Is(err, resource.ErrNotFound) {
 				t.Fatal("accepted allocation failure replayed or receipt lost", value, err, proof, calls.Load(), retries.Load())
@@ -420,7 +420,7 @@ func TestComputeKeypairCreateOwnedOptionsSourceAndAcceptedFailures(t *testing.T)
 			client.ResourceBase = cloud.Server.URL + "/changed/"
 			return nil
 		}
-		value, err := keypairs.New(client).CreateKeypair(context.Background(), keypairs.WithKeypairCreateName("key"), request.Custom(func(_ *request.Config[keypairs.KeypairCreateOpts]) error { callbacks.Add(1); return nil }))
+		value, err := keypairs.New(client).CreateKeypair(context.Background(), keypairs.WithKeypairCreateAttribute("name", "key"), request.Custom(func(_ *request.Config[keypairs.KeypairCreateOpts]) error { callbacks.Add(1); return nil }))
 		var original gophercloud.ErrUnexpectedResponseCode
 		if value != nil || !errors.Is(err, resource.ErrInvalidOption) || !errors.As(err, &original) || original.Actual != 503 || original.Method != http.MethodPost || original.URL != cloud.Server.URL+computeKeypairCreatePath || string(original.Body) != body || original.ResponseHeader.Get("X-Keypair-Proof") != "retry" || calls.Load() != 1 || retries.Load() != 1 || callbacks.Load() != 1 {
 			t.Fatal("source mutation resent allocation/lost original HTTP", value, err, original, calls.Load(), retries.Load(), callbacks.Load())
@@ -440,7 +440,7 @@ func TestComputeKeypairCreateOwnedOptionsSourceAndAcceptedFailures(t *testing.T)
 			}
 			testcloud.JSON(w, 201, `{"keypair":{"name":"actual"}}`)
 		})
-		value, err := keypairs.New(client).CreateKeypair(context.Background(), keypairs.WithKeypairCreateName("key"), request.Custom(func(_ *request.Config[keypairs.KeypairCreateOpts]) error {
+		value, err := keypairs.New(client).CreateKeypair(context.Background(), keypairs.WithKeypairCreateAttribute("name", "key"), request.Custom(func(_ *request.Config[keypairs.KeypairCreateOpts]) error {
 			callbacks.Add(1)
 			cloud.Provider.SetToken("refreshed-create-token")
 			return nil

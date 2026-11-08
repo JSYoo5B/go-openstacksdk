@@ -69,7 +69,7 @@ func TestPythonUserCloudListDefaultAndOnlyDeclaredSourceKwargs(t *testing.T) {
 			})
 			var opts []identity.UserListOption
 			if mode == "typed" {
-				opts = []identity.UserListOption{identity.WithUserListDomainID("domain"), identity.WithUserListName("alice")}
+				opts = []identity.UserListOption{identity.WithUserListQuery("domain_id", "domain"), identity.WithUserListQuery("name", "alice")}
 			}
 			if mode == "raw" {
 				opts = []identity.UserListOption{identity.WithUserListQuery("domain_id", nil), identity.WithUserListQuery("name", []any{"alice", nil, false})}

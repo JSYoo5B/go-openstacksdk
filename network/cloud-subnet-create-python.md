@@ -25,21 +25,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.WithSubnetCreateJSON`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithSubnetCreateAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithSubnetCreateCurrentLocation`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithSubnetCreateCIDR`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithSubnetCreateIPVersion`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithSubnetCreateDHCP`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithSubnetCreateName`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithSubnetCreateTenantID`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithSubnetCreateGatewayIP`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithSubnetCreateDisableGateway`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithSubnetCreateAllocationPools`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithSubnetCreateDNSNameservers`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithSubnetCreateHostRoutes`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithSubnetCreateIPv6RAMode`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithSubnetCreateIPv6AddressMode`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithSubnetCreatePrefixLength`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithSubnetCreateDefaultSubnetPool`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithSubnetCreateSubnetPool`
 
 - subnets.API.CreateWithAttributes sends only explicit attributes, so ip_version, enable_dhcp and a null gateway_ip appear only when the caller sets them.
   Tests: `network/python_cloud_parity_a_test.go:TestPythonCloudNetworkCreateRouterSubnetSendOnlyExplicitAttributes`.

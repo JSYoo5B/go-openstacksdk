@@ -129,7 +129,7 @@ func TestConnectionImageUploadFacadeOwnsPhases(t *testing.T) {
 	field := image.WithImageUploadFields(fields)
 	fields["exact"][0] = '1'
 	reader := &imageUploadConnectionReader{reader: strings.NewReader("binary-data")}
-	result, e := upper.UploadImage(ctx, image.UploadImageRequest{Name: "requested-name", Data: reader}, header, field, image.WithImageUploadSize(0), image.WithImageUploadProtected(false), image.WithImageUploadMinDisk(0), image.WithImageUploadTags())
+	result, e := upper.UploadImage(ctx, image.UploadImageRequest{Name: "requested-name", Data: reader}, header, field, image.WithImageUploadSize(0), image.WithImageUploadField("protected", false), image.WithImageUploadField("min_disk", 0), image.WithImageUploadTags())
 	if e != nil || result == nil || result.Image == nil || result.ImageID != id || *result.Image.Name != "actual-name" || *result.Image.Size != 9007199254740995 || result.Image.StatusCode != 201 || result.Metadata.StatusCode != 201 || string(result.Metadata.Body) != created || result.Acknowledgement.StatusCode != 204 || string(result.Acknowledgement.Body) != "opaque acknowledgement" || calls != 2 {
 		t.Fatal(result, e, calls)
 	}

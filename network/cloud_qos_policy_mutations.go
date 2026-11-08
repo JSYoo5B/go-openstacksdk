@@ -76,21 +76,6 @@ func WithQoSPolicyMutationJSON(raw json.RawMessage) QoSPolicyMutationOption {
 		return nil
 	}
 }
-func WithQoSPolicyName(value string) QoSPolicyMutationOption {
-	return WithQoSPolicyAttribute("name", value)
-}
-func WithQoSPolicyDescription(value string) QoSPolicyMutationOption {
-	return WithQoSPolicyAttribute("description", value)
-}
-func WithQoSPolicyShared(value bool) QoSPolicyMutationOption {
-	return WithQoSPolicyAttribute("shared", value)
-}
-func WithQoSPolicyDefault(value bool) QoSPolicyMutationOption {
-	return WithQoSPolicyAttribute("default", value)
-}
-func WithQoSPolicyProjectID(value string) QoSPolicyMutationOption {
-	return WithQoSPolicyAttribute("project_id", value)
-}
 
 // QoSPolicyMutation separates lookup and mutation evidence. NoOp means Source's
 // empty-after-default or equal-dirty branch; it never creates PUT evidence.

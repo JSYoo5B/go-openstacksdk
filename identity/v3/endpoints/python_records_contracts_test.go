@@ -285,18 +285,18 @@ func TestEndpointRecordsMalformedAndLaterErrorDiscardPartialCollection(t *testin
 func TestEndpointRecordsOpaqueProxyJMESUsesActualGenerator(t *testing.T) {
 	api, _, calls := endpointRecordsAPI(t, func(w http.ResponseWriter, r *http.Request) { testcloud.JSON(w, 200, `{"endpoints":[{"id":"one"}]}`) })
 	for _, tc := range []struct{ expression, want string }{{"[].id", "null"}, {"[0]", "null"}, {"type(@)", "null"}, {"@ == @", "true"}, {"`{\"literal\":true}`", `{"literal":true}`}} {
-		value, err := api.ProxyListRecords(context.Background(), endpoints.WithRecordListJMESPath(tc.expression))
+		value, err := api.ProxyListRecords(context.Background(), endpoints.WithRecordListQuery("jmespath_filters", tc.expression))
 		if err != nil || value == nil || string(value.JSON) != tc.want || calls.Load() != 0 {
 			t.Fatal(tc, value, err, calls.Load())
 		}
 	}
 	for _, expression := range []string{"length(@)", "to_string(@)"} {
-		value, err := api.ProxyListRecords(context.Background(), endpoints.WithRecordListJMESPath(expression))
+		value, err := api.ProxyListRecords(context.Background(), endpoints.WithRecordListQuery("jmespath_filters", expression))
 		if err == nil || value != nil || calls.Load() != 0 {
 			t.Fatal(value, err, calls.Load())
 		}
 	}
-	value, err := api.ProxyListRecords(context.Background(), endpoints.WithRecordListJMESPath("to_array(@)"))
+	value, err := api.ProxyListRecords(context.Background(), endpoints.WithRecordListQuery("jmespath_filters", "to_array(@)"))
 	if err != nil || value == nil || value.JSON != nil || calls.Load() != 0 {
 		t.Fatal(value, err, calls.Load())
 	}
@@ -368,11 +368,11 @@ func TestEndpointRecordsOwnOptionsFormalControlsAndIdentityVersion(t *testing.T)
 		c.Headers["X-Trace"] = "owned"
 		c.Query["id"] = json.RawMessage(`"one"`)
 		return nil
-	}), request.BasePath("alternate-endpoints"), endpoints.WithRecordListConflictingAttrs(json.RawMessage(`{"microversion":"3.2"}`)))
+	}), request.BasePath("alternate-endpoints"), endpoints.WithRecordListQuery("__conflicting_attrs", json.RawMessage(`{"microversion":"3.2"}`)))
 	if err != nil || len(rows) != 1 || calls.Load() != 4 {
 		t.Fatal(rows, err, calls.Load())
 	}
-	for _, options := range [][]endpoints.RecordListOption{{nil}, {endpoints.WithRecordListQuery("self", make(chan int))}, {endpoints.WithRecordListQuery("session", make(chan int))}, {endpoints.WithRecordListConflictingAttrs(json.RawMessage(`{"paginated":false}`))}, {request.BasePath("https://foreign.invalid")}, {request.Headers(map[string]string{"X-Auth-Token": "foreign"})}} {
+	for _, options := range [][]endpoints.RecordListOption{{nil}, {endpoints.WithRecordListQuery("self", make(chan int))}, {endpoints.WithRecordListQuery("session", make(chan int))}, {endpoints.WithRecordListQuery("__conflicting_attrs", json.RawMessage(`{"paginated":false}`))}, {request.BasePath("https://foreign.invalid")}, {request.Headers(map[string]string{"X-Auth-Token": "foreign"})}} {
 		before := calls.Load()
 		rows, err := api.AllRecords(context.Background(), options...)
 		if rows != nil || !errors.Is(err, resource.ErrInvalidOption) || calls.Load() != before {

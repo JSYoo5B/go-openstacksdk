@@ -77,7 +77,7 @@ func TestConnectionOwnedImageMemberFamilySharesSourceLocationAndActualReceipts(t
 		t.Fatal("member family does not share connection binding")
 	}
 	parent := resource.ID("parent")
-	added, err := conn.AddImageMemberRecord(context.Background(), parent, image.WithImageMemberRecordMemberID("submitted"), image.WithImageMemberRecordStatus("future"), request.Header("X-Call", "member-family"))
+	added, err := conn.AddImageMemberRecord(context.Background(), parent, image.WithImageMemberRecordWriteAttribute("member_id", "submitted"), image.WithImageMemberRecordWriteAttribute("status", "future"), request.Header("X-Call", "member-family"))
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -91,7 +91,7 @@ func TestConnectionOwnedImageMemberFamilySharesSourceLocationAndActualReceipts(t
 	if fetched == nil || string(fetched.Resource.Body["id"]) != `"returned-get"` || string(fetched.Resource.Body["created_at"]) != `null` || string(fetched.Wire.Body["image_id"]) != `"foreign"` {
 		t.Fatal(fetched)
 	}
-	updated, err := conn.UpdateImageMemberRecord(context.Background(), parent, image.ImageMemberRecordRequest{Record: fetched}, image.WithImageMemberRecordStatus(nil), request.Header("X-Call", "member-family"))
+	updated, err := conn.UpdateImageMemberRecord(context.Background(), parent, image.ImageMemberRecordRequest{Record: fetched}, image.WithImageMemberRecordWriteAttribute("status", nil), request.Header("X-Call", "member-family"))
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

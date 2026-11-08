@@ -91,7 +91,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordImportAllStoresMustSucceed`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordImportStore`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordImportStores`
-- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordImportHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordImportField`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordImportFields`
@@ -474,7 +473,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordDeleteHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordDeleteStoreID`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordDeleteStoreRecord`
-- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 
 - Legacy typed DeleteImage profile only: DeleteImage defaults to whole-image DELETE and ignores clean missing resources. ID routes directly without metadata GET; nonnil store selects only /stores/{storeID}/{imageID}. Only actual204 constructs a result with fixed selected ImageID/StoreID, owned raw Body, cloned Header and actual StatusCode; no decoded model or fabricated response.
   Tests: `image/delete_contracts_test.go:TestDeleteImageWholeAndStoreRoutesAndEvidence`, `image/delete_core_test.go:TestDeleteCoreFixedScopeAndOwnedAcknowledgement`.
@@ -548,12 +546,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.API.ListStoreRecords`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.API.AllStoreRecords`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithStoreRecordListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithStoreRecordListHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/request.Limit`
 - `github.com/JSYoo5B/go-openstacksdk/request.Marker`
-- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithStoreRecordListFilter`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithStoreRecordListFilters`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithStoreRecordListDetails`
@@ -614,7 +609,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.NewWithDependencies`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.API.GetImportInfoRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithImportRecordOpts`
-- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithImportRecordHeaders`
 
 - GetImportInfo performs ID-free singleton GET info/import with actual200 only and no list/cache/capability gate. Flat root metadata carries actual Header/status/raw unknown fields. Original native ImageImport.Get still performs the same discovery wire route and retains its existing typed callable/model.
@@ -770,7 +764,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.DeactivateImageRecord`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.DeactivateImageRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordActionOpts`
-- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordActionHeaders`
 
 - Legacy typed strict204 profile only: DeactivateImage defaults to bodyless/query-free POST on the dedicated fixed-ID endpoint; only actual204 acknowledges the request. Direct ID causes no metadata GET/list/PATCH/discovery/wait. Missing image or tag is a strict error; there is no IgnoreMissing option or nested404 suppression.
@@ -831,7 +824,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.ReactivateImageRecord`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.ReactivateImageRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordActionOpts`
-- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordActionHeaders`
 
 - Legacy typed strict204 profile only: ReactivateImage defaults to bodyless/query-free POST on the dedicated fixed-ID endpoint; only actual204 acknowledges the request. Direct ID causes no metadata GET/list/PATCH/discovery/wait. Missing image or tag is a strict error; there is no IgnoreMissing option or nested404 suppression.
@@ -1811,14 +1803,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.WithoutImageUploadSize`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadField`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadFields`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadDiskFormat`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadContainerFormat`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadVisibility`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadOwner`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadProtected`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadHidden`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadMinDisk`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadMinRAM`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadTags`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.UploadImageRecord`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.UploadImageRecord`
@@ -1827,7 +1811,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordUploadDiskFormat`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordUploadAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordUploadAttributes`
-- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordUploadHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordUploadSize`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithoutImageRecordUploadSize`

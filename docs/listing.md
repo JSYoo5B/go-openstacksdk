@@ -556,8 +556,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.Marker`
 - `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
 - `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithRecordListJMESPath`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithRecordListConflictingAttrs`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.API.ProxyCloudListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithCloudRecordListQuery`
 
@@ -765,12 +763,10 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListBasePath`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListConflictingAttrs`
 - `github.com/JSYoo5B/go-openstacksdk/request.Limit`
 - `github.com/JSYoo5B/go-openstacksdk/request.Marker`
 - `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
 - `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListJMESPath`
 
 - All nine declared non-query Body fields are explicitly filterable in ordinary Resources.List/All through leaf and cached Connection.Network.API paths. Native extraction completes first, then original rows are paired by count and index without extra HTTP or ID lookup. The public native model alias is retained.
   Tests: `api/network_subnet_raw_body_filters_test.go:TestNetworkSubnetRawBodyFiltersNineFieldsAndOriginalValues`, `resource/body_record_test.go:TestBodyRecordPairingPreservesOriginalRowsAndOwnsFields`, `resource/body_record_test.go:TestBodyRecordPairingRejectsUnprovenShapeAndCount`.

@@ -97,7 +97,7 @@ func TestPythonSubnetListsProxyGeneratorJMESAndLazyResourceControls(t *testing.T
 	var calls []nativeSubnetCall
 	api := pythonCoreSubnetAPI(t, &calls, func(*http.Request) *http.Response { return subnetListResponse(200, `{"subnets":[{"id":"one"}]}`) })
 	for _, raw := range []json.RawMessage{json.RawMessage(`"bad"`), json.RawMessage(`[1]`)} {
-		result, err := api.ProxyListRecords(context.Background(), subnets.WithRecordListQuery("headers", raw), subnets.WithRecordListJMESPath("`[]`"))
+		result, err := api.ProxyListRecords(context.Background(), subnets.WithRecordListQuery("headers", raw), subnets.WithRecordListQuery("jmespath_filters", "`[]`"))
 		if err != nil || string(result.JSON) != "[]" || len(calls) != 0 {
 			t.Fatal(result, err, calls)
 		}
@@ -116,12 +116,12 @@ func TestPythonSubnetListsProxyGeneratorJMESAndLazyResourceControls(t *testing.T
 		}
 	}
 	for _, expr := range []string{"[0]", "[*].id", "[?id == 'one']", "type(@)"} {
-		result, err := api.ProxyListRecords(context.Background(), subnets.WithRecordListJMESPath(expr))
+		result, err := api.ProxyListRecords(context.Background(), subnets.WithRecordListQuery("jmespath_filters", expr))
 		if err != nil || string(result.JSON) != "null" || len(calls) != 0 {
 			t.Fatal(expr, result, err, calls)
 		}
 	}
-	result, err := api.ProxyListRecords(context.Background(), subnets.WithRecordListJMESPath("to_array(@)"))
+	result, err := api.ProxyListRecords(context.Background(), subnets.WithRecordListQuery("jmespath_filters", "to_array(@)"))
 	if err != nil || result.JSON != nil {
 		t.Fatal(result, err)
 	}
@@ -137,7 +137,7 @@ func TestPythonSubnetListsProxyGeneratorJMESAndLazyResourceControls(t *testing.T
 		t.Fatal(count, calls)
 	}
 	before := len(calls)
-	if _, err := api.ProxyListRecords(context.Background(), subnets.WithRecordListJMESPath("length(@)")); err == nil || len(calls) != before {
+	if _, err := api.ProxyListRecords(context.Background(), subnets.WithRecordListQuery("jmespath_filters", "length(@)")); err == nil || len(calls) != before {
 		t.Fatal(err, calls)
 	}
 }
@@ -164,7 +164,7 @@ func TestPythonSubnetListsEmptyPathOnlyNullDefaultAndDelayedCancellation(t *test
 		} else if !errors.Is(terminal, resource.ErrInvalidOption) || len(calls) != 0 {
 			t.Fatal(raw, terminal, calls)
 		}
-		result, err = api.ProxyListRecords(context.Background(), subnets.WithRecordListQuery("base_path", json.RawMessage(raw)), subnets.WithRecordListJMESPath("`[]`"))
+		result, err = api.ProxyListRecords(context.Background(), subnets.WithRecordListQuery("base_path", json.RawMessage(raw)), subnets.WithRecordListQuery("jmespath_filters", "`[]`"))
 		if err != nil || string(result.JSON) != "[]" {
 			t.Fatal(raw, result, err)
 		}
@@ -191,7 +191,7 @@ func TestPythonSubnetListsOneLevelRestorationBindingAndImmutableOptions(t *testi
 		var calls []nativeSubnetCall
 		api := pythonCoreSubnetAPI(t, &calls, func(*http.Request) *http.Response { return subnetListResponse(200, `{"subnets":[]}`) })
 		raw := json.RawMessage(fmt.Sprintf(`{%q:null}`, key))
-		result, err := api.ProxyListRecords(context.Background(), subnets.WithRecordListConflictingAttrs(raw), subnets.WithRecordListJMESPath("`[]`"))
+		result, err := api.ProxyListRecords(context.Background(), subnets.WithRecordListQuery("__conflicting_attrs", raw), subnets.WithRecordListQuery("jmespath_filters", "`[]`"))
 		if key == "self" || key == "resource_type" {
 			if err != nil || string(result.JSON) != "[]" {
 				t.Fatal(key, result, err)
@@ -206,7 +206,7 @@ func TestPythonSubnetListsOneLevelRestorationBindingAndImmutableOptions(t *testi
 	var calls []nativeSubnetCall
 	api := pythonCoreSubnetAPI(t, &calls, func(*http.Request) *http.Response { return subnetListResponse(200, `{"subnets":[]}`) })
 	raw := json.RawMessage(`{"name":"restored","__conflicting_attrs":{"name":"never"},"jmespath_filters":"length(@)"}`)
-	opt := subnets.WithRecordListConflictingAttrs(raw)
+	opt := subnets.WithRecordListQuery("__conflicting_attrs", raw)
 	raw[2] = 'X'
 	_, err := api.AllRecords(context.Background(), subnets.WithRecordListQuery("name", "first"), opt)
 	if err != nil || len(calls) != 1 {

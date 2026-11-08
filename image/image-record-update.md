@@ -18,17 +18,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.WithUpdateImageHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithUpdateImageChange`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithUpdateImageChanges`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithUpdateImageName`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithUpdateImageVisibility`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithUpdateImageProtected`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithUpdateImageHidden`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithUpdateImageOwner`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithUpdateImageContainerFormat`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithUpdateImageDiskFormat`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithUpdateImageMinDisk`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithUpdateImageMinRAM`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithUpdateImageTags`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithUpdateImageField`
+- `github.com/JSYoo5B/go-openstacksdk/image.WithUpdateImageTags`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithUpdateImageFields`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithUpdateImageRemoveField`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.UpdateImageRecord`
@@ -36,7 +27,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordOpts`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordAttributes`
-- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordHeaders`
 
 - Required Ref uses direct safe literal ID without GET or existing exact native Name resolution then fixed PATCH; values/options validate before Name HTTP. v2.1 media and Accept are set on private client after Name, source untouched, actual 200 only.

@@ -442,8 +442,8 @@ type AttachmentUpdateOpts struct {
 }
 
 // AttachmentUpdateOption is one option of UpdateRecord:
-// WithAttachmentUpdateOpts, WithAttachmentSwapTo, WithAttachmentAttribute,
-// request.Headers (replaces the headers) or request.Custom over
+// WithAttachmentUpdateOpts, WithAttachmentAttribute ("volume_id" swaps the
+// attached volume), request.Headers (replaces the headers) or request.Custom over
 // *AttachmentUpdateOpts. Other shared calls fail with
 // resource.ErrInvalidOption before HTTP.
 type AttachmentUpdateOption = request.WriteCall
@@ -458,9 +458,6 @@ func copyAttachmentUpdate(v AttachmentUpdateOpts) AttachmentUpdateOpts {
 func WithAttachmentUpdateOpts(value AttachmentUpdateOpts) AttachmentUpdateOption {
 	owned := copyAttachmentUpdate(value)
 	return request.Custom(func(v *AttachmentUpdateOpts) error { *v = copyAttachmentUpdate(owned); return nil })
-}
-func WithAttachmentSwapTo(volumeID string) AttachmentUpdateOption {
-	return WithAttachmentAttribute("volume_id", volumeID)
 }
 func WithAttachmentAttribute(key string, value any) AttachmentUpdateOption {
 	canonical, known := attachmentCanonical(key)

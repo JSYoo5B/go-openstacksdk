@@ -74,8 +74,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity.UserReadCloud.RawAPI`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithUserListOpts`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithUserListQuery`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithUserListDomainID`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithUserListName`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithUserListLocation`
@@ -226,7 +224,7 @@ func main() {
 
 	cloud := identity.NewUserReadCloud(svc.Users)
 	listed, err := cloud.ListUsers(ctx,
-		identity.WithUserListDomainID(domain),
+		identity.WithUserListQuery("domain_id", domain),
 		identity.WithUserListLocation(location),
 	)
 	if err != nil {

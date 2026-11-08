@@ -127,7 +127,7 @@ func TestCloudRouterUpdateNameFallbackAndMissing(t *testing.T) {
 				rows = `[{"id":"actual","name":"target"}]`
 			}
 			client, calls := pythonCloudBClient(t, map[string][]pythonCloudBReply{"GET /v2.0/routers/target": {{404, `{}`}}, "GET /v2.0/routers": {{200, `{"routers":` + rows + `}`}}, "PUT /v2.0/routers/actual": {{200, `{"router":{"id":"actual"}}`}}})
-			result, err := network.New(client).UpdateRouterRecord(context.Background(), "target", network.WithRouterUpdateName("new"))
+			result, err := network.New(client).UpdateRouterRecord(context.Background(), "target", network.WithRouterUpdateAttribute("name", "new"))
 			if found {
 				if err != nil || result.Router == nil || len(calls()) != 3 {
 					t.Fatal(result, err, calls())
@@ -162,14 +162,14 @@ func TestCloudRouterUpdateOwnedOptionsAndPreflight(t *testing.T) {
 	if result != nil || !errors.Is(err, context.Canceled) || len(calls()) != 1 {
 		t.Fatal(result, err)
 	}
-	result, err = service.UpdateRouterRecord(context.Background(), "p", network.WithRouterUpdateName("new"), func(*network.RouterUpdateOpts) error { service.API = nil; return nil })
+	result, err = service.UpdateRouterRecord(context.Background(), "p", network.WithRouterUpdateAttribute("name", "new"), func(*network.RouterUpdateOpts) error { service.API = nil; return nil })
 	if result != nil || !errors.Is(err, resource.ErrInvalidOption) || len(calls()) != 1 {
 		t.Fatal(result, err)
 	}
 }
 func TestCloudRouterUpdateConflictKeepsLookupAndSingleAttempt(t *testing.T) {
 	client, calls := pythonCloudBClient(t, map[string][]pythonCloudBReply{"GET /v2.0/routers/p": {{200, `{"router":{"id":"p","name":"old"}}`}}, "PUT /v2.0/routers/p": {{http.StatusConflict, `{"error":"conflict"}`}}})
-	result, err := network.New(client).UpdateRouterRecord(context.Background(), "p", network.WithRouterUpdateName("new"))
+	result, err := network.New(client).UpdateRouterRecord(context.Background(), "p", network.WithRouterUpdateAttribute("name", "new"))
 	if err == nil || result == nil || result.Lookup == nil || result.Router != nil || result.NoOp || len(calls()) != 2 {
 		t.Fatal(result, err, calls())
 	}

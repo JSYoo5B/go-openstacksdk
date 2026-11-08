@@ -63,7 +63,7 @@ func TestCloudFirewallRuleUpdateNameFallbackAndMissing(t *testing.T) {
 				rows = `[{"id":"actual","name":"target"}]`
 			}
 			client, calls := pythonCloudBClient(t, map[string][]pythonCloudBReply{"GET /v2.0/fwaas/firewall_rules/target": {{404, `{}`}}, "GET /v2.0/fwaas/firewall_rules": {{200, `{"firewall_rules":` + rows + `}`}}, "PUT /v2.0/fwaas/firewall_rules/actual": {{200, `{"firewall_rule":{"id":"actual"}}`}}})
-			result, err := network.New(client).UpdateFirewallRuleRecord(context.Background(), "target", network.WithFirewallRuleUpdateName("new"))
+			result, err := network.New(client).UpdateFirewallRuleRecord(context.Background(), "target", network.WithFirewallRuleUpdateAttribute("name", "new"))
 			if found {
 				if err != nil || result.Rule == nil || len(calls()) != 3 {
 					t.Fatal(result, err, calls())
@@ -105,7 +105,7 @@ func TestCloudFirewallRuleUpdateOwnedOptionsAndPreflight(t *testing.T) {
 }
 func TestCloudFirewallRuleUpdateConflictKeepsLookupAndSingleAttempt(t *testing.T) {
 	client, calls := pythonCloudBClient(t, map[string][]pythonCloudBReply{"GET /v2.0/fwaas/firewall_rules/p": {{200, `{"firewall_rule":{"id":"p","name":"old"}}`}}, "PUT /v2.0/fwaas/firewall_rules/p": {{http.StatusConflict, `{"error":"conflict"}`}}})
-	result, err := network.New(client).UpdateFirewallRuleRecord(context.Background(), "p", network.WithFirewallRuleUpdateName("new"))
+	result, err := network.New(client).UpdateFirewallRuleRecord(context.Background(), "p", network.WithFirewallRuleUpdateAttribute("name", "new"))
 	if err == nil || result == nil || result.Lookup == nil || result.Rule != nil || result.NoOp || len(calls()) != 2 {
 		t.Fatal(result, err, calls())
 	}

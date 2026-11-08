@@ -34,7 +34,7 @@ func TestConnectionRouterCreateOwnsDefaultLocationAndCachedService(t *testing.T)
 		testcloud.JSON(w, 201, `{"router":{"id":"new","name":"edge","project_id":"project"}}`)
 	})
 	callbacks := 0
-	options := []network.RouterCreateOption{network.WithRouterCreateName("edge"), func(cfg *network.RouterCreateOpts) error { callbacks++; return nil }}
+	options := []network.RouterCreateOption{network.WithRouterCreateAttribute("name", "edge"), func(cfg *network.RouterCreateOpts) error { callbacks++; return nil }}
 	value, err := conn.CreateRouterRecord(context.Background(), options...)
 	if err != nil || value == nil || value.Router == nil || value.StatusCode != 201 || value.Wire == nil || calls != 1 || locates != 1 || callbacks != 1 {
 		t.Fatal(value, err, calls, locates, callbacks)
@@ -143,7 +143,7 @@ func TestConnectionSubnetCreateSharesNetworkCacheAndLocation(t *testing.T) {
 		testcloud.JSON(w, 201, `{"subnet":{"id":"new","network_id":"net","cidr":"10.0.0.0/24","project_id":"project"}}`)
 	})
 	for range 2 {
-		value, err := conn.CreateSubnetRecord(context.Background(), "net", network.WithSubnetCreateCIDR("10.0.0.0/24"))
+		value, err := conn.CreateSubnetRecord(context.Background(), "net", network.WithSubnetCreateAttribute("cidr", "10.0.0.0/24"))
 		if err != nil || value == nil || value.Resource == nil || value.Network == nil || value.StatusCode != 201 || len(value.Resource.Body["location"]) == 0 || string(value.Resource.Body["location"]) == "null" {
 			t.Fatal(value, err)
 		}

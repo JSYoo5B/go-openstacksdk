@@ -252,12 +252,10 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListBasePath`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListConflictingAttrs`
 - `github.com/JSYoo5B/go-openstacksdk/request.Limit`
 - `github.com/JSYoo5B/go-openstacksdk/request.Marker`
 - `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
 - `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListJMESPath`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithSubnetReadOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithSubnetReadFiltersJSON`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
@@ -319,12 +317,10 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListBasePath`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListConflictingAttrs`
 - `github.com/JSYoo5B/go-openstacksdk/request.Limit`
 - `github.com/JSYoo5B/go-openstacksdk/request.Marker`
 - `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
 - `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListJMESPath`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithSubnetReadOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithSubnetReadFiltersJSON`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
@@ -864,11 +860,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSPolicyMutationJSON`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSPolicyMutationOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSPolicyAttribute`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSPolicyName`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSPolicyDescription`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSPolicyShared`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSPolicyDefault`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSPolicyProjectID`
 
 - Cloud valid_kwargs name/description/shared/default/project_id are validated before any extension HTTP. Complete JSON null/presence and concrete options are library-owned, nil/unknown cloud keys including is_shared/is_default are rejected with HTTP0 and later options overwrite prior keys from owned snapshots.
   Tests: `network/cloud_qos_policy_mutations_test.go:TestCloudQoSPolicyMutationValidKwargsBeforeGateAndOwnedOptions`.
@@ -987,9 +978,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleUpdateOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleUpdateJSON`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleUpdateAttribute`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleUpdateDirection`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleUpdateMaxKBPS`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleUpdateMaxBurstKBPS`
 
 - All named cloud kwargs are library-validated before HTTP, with concrete cloned JSON/map/primitive With options. Unknown/bound identity keys/nil or invalid JSON fail before qos gate. No caller builder/interface is needed; explicit null/zero remain present and later individual options replace prior bulk keys.
   Tests: `network/cloud_qos_rule_updates_test.go:TestCloudQoSRuleUpdateValidKwargsBeforeHTTPAndOwnedOptions`.
@@ -1108,7 +1096,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleUpdateOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleUpdateJSON`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleUpdateAttribute`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleUpdateDSCPMark`
 
 - All named cloud kwargs are library-validated before HTTP, with concrete cloned JSON/map/primitive With options. Unknown/bound identity keys/nil or invalid JSON fail before qos gate. No caller builder/interface is needed; explicit null/zero remain present and later individual options replace prior bulk keys.
   Tests: `network/cloud_qos_rule_updates_test.go:TestCloudQoSRuleUpdateValidKwargsBeforeHTTPAndOwnedOptions`.
@@ -1227,8 +1214,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleUpdateOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleUpdateJSON`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleUpdateAttribute`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleUpdateDirection`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleUpdateMinKBPS`
 
 - All named cloud kwargs are library-validated before HTTP, with concrete cloned JSON/map/primitive With options. Unknown/bound identity keys/nil or invalid JSON fail before qos gate. No caller builder/interface is needed; explicit null/zero remain present and later individual options replace prior bulk keys.
   Tests: `network/cloud_qos_rule_updates_test.go:TestCloudQoSRuleUpdateValidKwargsBeforeHTTPAndOwnedOptions`.

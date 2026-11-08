@@ -18,17 +18,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.WithUpdateImageHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithUpdateImageChange`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithUpdateImageChanges`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithUpdateImageName`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithUpdateImageVisibility`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithUpdateImageProtected`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithUpdateImageHidden`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithUpdateImageOwner`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithUpdateImageContainerFormat`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithUpdateImageDiskFormat`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithUpdateImageMinDisk`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithUpdateImageMinRAM`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithUpdateImageTags`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithUpdateImageField`
+- `github.com/JSYoo5B/go-openstacksdk/image.WithUpdateImageTags`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithUpdateImageFields`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithUpdateImageRemoveField`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.UpdateImageRecord`
@@ -36,7 +27,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordOpts`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordAttributes`
-- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordHeaders`
 
 - Required Ref uses direct safe literal ID without GET or existing exact native Name resolution then fixed PATCH; values/options validate before Name HTTP. v2.1 media and Accept are set on private client after Name, source untouched, actual 200 only.
@@ -92,7 +82,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.UpdateImagePropertiesRecord`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.UpdateImagePropertiesRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordPropertiesOpts`
-- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordPropertiesHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordProperty`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordProperties`
@@ -230,15 +219,15 @@ func updateQueuedImageExample(ctx context.Context, svc *image.Service, imageID, 
         image.WithUpdateImageChange(image.ImagePatch{
             Op: "replace", Path: "/build", Value: json.RawMessage(`"ready"`),
         }),
-        image.WithUpdateImageName("release-image"),
-        image.WithUpdateImageVisibility("private"),
-        image.WithUpdateImageProtected(false),
-        image.WithUpdateImageHidden(false),
-        image.WithUpdateImageOwner(ownerID),
-        image.WithUpdateImageContainerFormat("bare"),
-        image.WithUpdateImageDiskFormat("qcow2"),
-        image.WithUpdateImageMinDisk(0),
-        image.WithUpdateImageMinRAM(0),
+        image.WithUpdateImageField("name", "release-image"),
+        image.WithUpdateImageField("visibility", "private"),
+        image.WithUpdateImageField("protected", false),
+        image.WithUpdateImageField("os_hidden", false),
+        image.WithUpdateImageField("owner", ownerID),
+        image.WithUpdateImageField("container_format", "bare"),
+        image.WithUpdateImageField("disk_format", "qcow2"),
+        image.WithUpdateImageField("min_disk", 0),
+        image.WithUpdateImageField("min_ram", 0),
         image.WithUpdateImageTags("release", "ready"),
         image.WithUpdateImageField("build~origin", "ci"),
         image.WithUpdateImageFields(map[string]json.RawMessage{

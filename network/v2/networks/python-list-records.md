@@ -42,8 +42,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.Marker`
 - `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
 - `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithRecordListJMESPath`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithRecordListConflictingAttrs`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.API.ProxyCloudListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithCloudRecordListQuery`
 
@@ -201,7 +199,7 @@ func main() {
     if err != nil { log.Fatal(err) }
     options := []networks.RecordListOption{
         request.MaxItems(*maximum),
-        networks.WithRecordListJMESPath(*expression),
+        networks.WithRecordListQuery("jmespath_filters", *expression),
     }
     if *name != "" {
         options = append(options, networks.WithRecordListQuery("name", *name))

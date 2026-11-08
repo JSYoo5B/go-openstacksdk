@@ -87,7 +87,7 @@ func TestCloudQoSRuleCreateValidKwargsOwnedOptionsAndRequiredRawPresence(t *test
 				}
 			}
 			if kind.kind == "dscp_marking_rules" {
-				result, err := kind.create(context.Background(), service, "actual", 0, network.WithQoSRuleCreateDirection("egress"))
+				result, err := kind.create(context.Background(), service, "actual", 0, network.WithQoSRuleCreateAttribute("direction", "egress"))
 				if result != nil || !errors.Is(err, resource.ErrInvalidOption) || count.Load() != 0 {
 					t.Fatal(result, err, count.Load())
 				}
@@ -123,7 +123,7 @@ func TestCloudQoSRuleCreateValidKwargsOwnedOptionsAndRequiredRawPresence(t *test
 		posted = qosCloudCreateBody(t, r, "bandwidth_limit_rule")
 		testcloud.JSON(w, 201, `{"bandwidth_limit_rule":{"id":"new"}}`)
 	})
-	result, err := service.CreateQoSBandwidthLimitRuleRecord(context.Background(), "actual", 0, option, network.WithQoSRuleCreateMaxBurstKBPS(0))
+	result, err := service.CreateQoSBandwidthLimitRuleRecord(context.Background(), "actual", 0, option, network.WithQoSRuleCreateAttribute("max_burst_kbps", 0))
 	if err != nil || result == nil || string(posted["max_burst_kbps"]) != "0" || len(posted) != 2 {
 		t.Fatal(result, err, posted)
 	}
@@ -151,7 +151,7 @@ func TestCloudQoSRuleCreateBandwidthDirectionNonnullGateAfterPolicy(t *testing.T
 			json.Unmarshal([]byte(raw), &input)
 			direction, present := input["direction"]
 			extra := present && string(direction) != "null"
-			result, err := service.CreateQoSBandwidthLimitRuleRecord(context.Background(), "actual", 0, network.WithQoSRuleCreateJSON(json.RawMessage(raw)), network.WithQoSRuleCreateMaxBurstKBPS(0))
+			result, err := service.CreateQoSBandwidthLimitRuleRecord(context.Background(), "actual", 0, network.WithQoSRuleCreateJSON(json.RawMessage(raw)), network.WithQoSRuleCreateAttribute("max_burst_kbps", 0))
 			expected := []string{"gate", "policy", "create"}
 			if extra {
 				expected = []string{"gate", "policy", "gate", "create"}
@@ -185,7 +185,7 @@ func TestCloudQoSRuleCreateBandwidthDirectionNonnullGateAfterPolicy(t *testing.T
 		}
 		testcloud.JSON(w, 201, `{"minimum_bandwidth_rule":{"id":"new"}}`)
 	})
-	result, err := service.CreateQoSMinimumBandwidthRuleRecord(context.Background(), "actual", 0, network.WithQoSRuleCreateDirection("ingress"))
+	result, err := service.CreateQoSMinimumBandwidthRuleRecord(context.Background(), "actual", 0, network.WithQoSRuleCreateAttribute("direction", "ingress"))
 	if err != nil || result == nil || result.DirectionDropped || count.Load() != 3 {
 		t.Fatal(result, err, count.Load())
 	}
@@ -282,7 +282,7 @@ func TestCloudQoSRuleCreateCompleteGatesAndOptionalFailuresKeepStages(t *testing
 		}
 		testcloud.JSON(w, 200, `{"policy":{"id":"actual"}}`)
 	})
-	result, err := service.CreateQoSBandwidthLimitRuleRecord(context.Background(), "actual", 0, network.WithQoSRuleCreateDirection("ingress"))
+	result, err := service.CreateQoSBandwidthLimitRuleRecord(context.Background(), "actual", 0, network.WithQoSRuleCreateAttribute("direction", "ingress"))
 	if result == nil || result.Policy == nil || result.Rule != nil || result.DirectionDropped || !gophercloud.ResponseCodeIs(err, 403) || count.Load() != 3 {
 		t.Fatal(result, err, count.Load())
 	}

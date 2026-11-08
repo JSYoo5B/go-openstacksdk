@@ -166,7 +166,7 @@ func TestUpdateImageCoreExactNameAndSource(t *testing.T) {
 			return nil, nil
 		})
 		client.MoreHeaders = map[string]string{"X-Source": "captured", "Content-Type": "application/x-source", "Accept": "application/x-source"}
-		v, e := New(client).UpdateImage(context.Background(), resource.Name("Parent"), WithUpdateImageName("new"), request.Header("X-Fixed", "option"), request.Custom(func(*UpdateImageOpts) error {
+		v, e := New(client).UpdateImage(context.Background(), resource.Name("Parent"), WithUpdateImageField("name", "new"), request.Header("X-Fixed", "option"), request.Custom(func(*UpdateImageOpts) error {
 			client.MoreHeaders["X-Source"] = "changed"
 			client.ProviderClient.SetToken("later-token")
 			return nil

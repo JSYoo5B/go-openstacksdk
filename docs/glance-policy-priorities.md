@@ -235,7 +235,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordImportAllStoresMustSucceed`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordImportStore`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordImportStores`
-- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordImportHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordImportField`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordImportFields`
@@ -722,7 +721,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithCreatePropertiesTarget`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.NamespaceScope.CreateRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordCreateOpts`
-- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordCreateHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordCreateAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordCreateAttributes`
@@ -815,7 +813,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.WithGetImageHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.GetImageRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordOpts`
-- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordAttributes`
@@ -895,13 +892,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.ListImageRecords`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.AllImageRecords`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordListHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordListFilter`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordListFilters`
-- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
-- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
-- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
 - `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 
 - Concrete pointer query preserves nilomission versus explicitempty/0/false; emptyMarkeromitted, nonnegativeLimit/Size bounds withoutminmax inference; queryVALUEUTF8-only with escaped controls/no clientenum/date/UUID/length normalization/defaultserver injection.
@@ -962,14 +955,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.WithoutImageUploadSize`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadField`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadFields`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadDiskFormat`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadContainerFormat`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadVisibility`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadOwner`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadProtected`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadHidden`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadMinDisk`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadMinRAM`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadTags`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.UploadImageRecord`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.UploadImageRecord`
@@ -978,7 +963,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordUploadDiskFormat`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordUploadAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordUploadAttributes`
-- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordUploadHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordUploadSize`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithoutImageRecordUploadSize`

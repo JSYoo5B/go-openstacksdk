@@ -715,7 +715,7 @@ func TestPythonPortListRecordsNormalizeSourceFormalsAndConflictingAttrs(t *testi
 		t.Fatal(rows, err, calls)
 	}
 	n := len(calls)
-	result, err := api.ProxyListRecords(context.Background(), ports.WithRecordListJMESPath("[*].id"), ports.WithRecordListQuery("__conflicting_attrs", json.RawMessage(`{"jmespath_filters":"length(@)"}`)))
+	result, err := api.ProxyListRecords(context.Background(), ports.WithRecordListQuery("jmespath_filters", "[*].id"), ports.WithRecordListQuery("__conflicting_attrs", json.RawMessage(`{"jmespath_filters":"length(@)"}`)))
 	if err != nil || result == nil || string(result.JSON) != "null" || len(calls) != n {
 		t.Fatal(result, err, calls)
 	}

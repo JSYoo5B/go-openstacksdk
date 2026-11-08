@@ -61,8 +61,8 @@ type RecordListOpts struct {
 }
 
 // RecordListOption is one option of ListRecords, AllRecords and
-// ProxyListRecords: WithRecordListOpts, WithRecordListQuery,
-// WithRecordListJMESPath, request.Headers (replaces the headers),
+// ProxyListRecords: WithRecordListOpts, WithRecordListQuery (including the
+// "jmespath_filters" key), request.Headers (replaces the headers),
 // request.Microversion, request.BasePath, request.Limit, request.Marker,
 // request.MaxItems, request.Paginated or request.Custom over *RecordListOpts.
 // request.Query is rejected because WithRecordListQuery checks the key before it
@@ -112,6 +112,8 @@ func recordListKnown(key string) bool {
 
 // WithRecordListQuery accepts Source list kwargs. Unknown ordinary values are
 // discarded before JSON encoding, as Resource.list does before filtering.
+// The "jmespath_filters" key carries the deprecated Proxy expression that
+// ProxyListRecords evaluates.
 func WithRecordListQuery(key string, value any) RecordListOption {
 	return request.Custom(withRecordListQuery(key, value))
 }
@@ -182,9 +184,6 @@ func withRecordListMaxItems(v int) func(*RecordListOpts) error {
 }
 func withRecordListPaginated(v bool) func(*RecordListOpts) error {
 	return withRecordListQuery("paginated", v)
-}
-func WithRecordListJMESPath(v string) RecordListOption {
-	return WithRecordListQuery("jmespath_filters", v)
 }
 func listInvalid(text string) error { return errors.Join(resource.ErrInvalidOption, errors.New(text)) }
 func listWrap(ctx context.Context, op string, err error) error {

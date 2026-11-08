@@ -142,7 +142,7 @@ func TestCloudSubnetCreateFalseyFormalsTenantPresenceAndGatewayNull(t *testing.T
 		posted = qosCloudCreateBody(t, r, "subnet")
 		testcloud.JSON(w, 201, `{"subnet":{}}`)
 	})
-	result, err := service.CreateSubnetRecord(context.Background(), "requested", network.WithSubnetCreateCIDR("x"), network.WithSubnetCreateGatewayIP(""), network.WithSubnetCreateDisableGateway(true))
+	result, err := service.CreateSubnetRecord(context.Background(), "requested", network.WithSubnetCreateAttribute("cidr", "x"), network.WithSubnetCreateAttribute("gateway_ip", ""), network.WithSubnetCreateAttribute("disable_gateway_ip", true))
 	if err != nil || result == nil || string(posted["gateway_ip"]) != "null" || string(result.Resource.Body["gateway_ip"]) != "null" {
 		t.Fatal(result, err, posted)
 	}
@@ -159,7 +159,7 @@ func TestCloudSubnetCreateSubnetPoolLookupThenPythonStringIPConversion(t *testin
 			posted = qosCloudCreateBody(t, r, "subnet")
 			testcloud.JSON(w, 201, `{"subnet":{}}`)
 		})
-		result, err := service.CreateSubnetRecord(context.Background(), "requested", network.WithSubnetCreateSubnetPool("pool"), network.WithSubnetCreateIPVersion(json.RawMessage(tc.raw)))
+		result, err := service.CreateSubnetRecord(context.Background(), "requested", network.WithSubnetCreateAttribute("subnetpool_name_or_id", "pool"), network.WithSubnetCreateAttribute("ip_version", json.RawMessage(tc.raw)))
 		if err != nil || result == nil || result.SubnetPool == nil || count.Load() != 3 || paths[1] != "/neutron/v2.0/subnetpools/pool" {
 			t.Fatal(tc, result, err, paths)
 		}
@@ -173,7 +173,7 @@ func TestCloudSubnetCreateSubnetPoolLookupThenPythonStringIPConversion(t *testin
 				t.Fatal("bad IP posted", r.URL)
 			}
 		})
-		result, err := service.CreateSubnetRecord(context.Background(), "requested", network.WithSubnetCreateSubnetPool("pool"), network.WithSubnetCreateIPVersion(json.RawMessage(raw)))
+		result, err := service.CreateSubnetRecord(context.Background(), "requested", network.WithSubnetCreateAttribute("subnetpool_name_or_id", "pool"), network.WithSubnetCreateAttribute("ip_version", json.RawMessage(raw)))
 		if result == nil || result.SubnetPool == nil || !errors.Is(err, resource.ErrInvalidOption) || count.Load() != 2 {
 			t.Fatal(raw, result, err, count.Load())
 		}
@@ -187,7 +187,7 @@ func TestCloudSubnetCreateSubnetPoolLookupThenPythonStringIPConversion(t *testin
 			testcloud.JSON(w, 404, `{}`)
 		}
 	})
-	result, err := service.CreateSubnetRecord(context.Background(), "requested", network.WithSubnetCreateSubnetPool("missing"), network.WithSubnetCreateIPVersion("bad"))
+	result, err := service.CreateSubnetRecord(context.Background(), "requested", network.WithSubnetCreateAttribute("subnetpool_name_or_id", "missing"), network.WithSubnetCreateAttribute("ip_version", "bad"))
 	if result == nil || !errors.Is(err, resource.ErrNotFound) || strings.Contains(err.Error(), "ip_version must") || count.Load() != 3 {
 		t.Fatal(result, err, count.Load())
 	}
@@ -259,7 +259,7 @@ func TestCloudSubnetCreateResponseCanonicalAliasesDoNotLoseActualHeaderOrWire(t 
 		testcloud.JSON(w, 201, `{"subnet":{"id":null,"enable_dhcp":"False","is_dhcp_enabled":false,"network_id":null,"location":{"fake":true},"microversion":"foreign"}}`)
 	})
 	service.RawClient().Microversion = "2.1"
-	result, err := service.CreateSubnetRecord(context.Background(), "requested", network.WithSubnetCreateCIDR("x"), network.WithSubnetCreateAttribute("enable_dhcp", "False"), network.WithSubnetCreateAttribute("if_match", []string{"seed"}))
+	result, err := service.CreateSubnetRecord(context.Background(), "requested", network.WithSubnetCreateAttribute("cidr", "x"), network.WithSubnetCreateAttribute("enable_dhcp", "False"), network.WithSubnetCreateAttribute("if_match", []string{"seed"}))
 	if err != nil || result == nil {
 		t.Fatal(result, err)
 	}
@@ -309,9 +309,9 @@ func TestCloudSubnetCreateDefaultLookupsConsumeWholePagesAndKeepPartialFailure(t
 				testcloud.JSON(w, 203, fmt.Sprintf(`{"%s":[{"id":"first","name":%q}],"links":[{"rel":"next","href":%q}]}`, resourceName, target, next))
 				_ = member
 			})
-			options := []network.SubnetCreateOption{network.WithSubnetCreateCIDR("x")}
+			options := []network.SubnetCreateOption{network.WithSubnetCreateAttribute("cidr", "x")}
 			if stage == "pool" {
-				options = []network.SubnetCreateOption{network.WithSubnetCreateSubnetPool("pool")}
+				options = []network.SubnetCreateOption{network.WithSubnetCreateAttribute("subnetpool_name_or_id", "pool")}
 			}
 			result, err := service.CreateSubnetRecord(context.Background(), "requested", options...)
 			if result == nil || err == nil || posts.Load() != 0 || count.Load() < 3 {
@@ -416,7 +416,7 @@ func TestCloudSubnetCreatePhysicalFaultsKeepActualLookupOrMutationAndStopHooks(t
 						return errors.New("unexpected physical retry")
 					}
 					service.RawClient().ProviderClient.ReauthFunc = func(context.Context) error { reauth++; return errors.New("unexpected physical reauth") }
-					result, err := service.CreateSubnetRecord(ctx, "requested", network.WithSubnetCreateCIDR("x"))
+					result, err := service.CreateSubnetRecord(ctx, "requested", network.WithSubnetCreateAttribute("cidr", "x"))
 					wantCalls := int32(2)
 					if method == http.MethodGet {
 						wantCalls = 1
@@ -501,7 +501,7 @@ func TestCloudSubnetCreateCleanRetryRenewalSource199AndFixedHeaderCapture(t *tes
 				}
 				client.HTTPClient.Transport = subnetCreateObservedTransport{base: base, method: http.MethodPost, status: 199, closed: &atomic.Int32{}}
 			}
-			result, err := service.CreateSubnetRecord(context.Background(), "requested", network.WithSubnetCreateCIDR("x"), func(*network.SubnetCreateOpts) error { client.MoreHeaders["X-Trace"] = "later valid value"; return nil })
+			result, err := service.CreateSubnetRecord(context.Background(), "requested", network.WithSubnetCreateAttribute("cidr", "x"), func(*network.SubnetCreateOpts) error { client.MoreHeaders["X-Trace"] = "later valid value"; return nil })
 			if lane == "route" {
 				if result == nil || !errors.Is(err, resource.ErrInvalidOption) || attempts != 1 || hooks != 1 || result.StatusCode != 503 {
 					t.Fatal(result, err, attempts, hooks)
@@ -538,7 +538,7 @@ func TestCloudSubnetCreatePreflightBoundArgumentsCancellationAndImmutableService
 	ctx, cancel := context.WithCancelCause(context.Background())
 	cause := errors.New("early subnet cancel")
 	cancel(cause)
-	result, err := service.CreateSubnetRecord(ctx, "requested", network.WithSubnetCreateCIDR("x"))
+	result, err := service.CreateSubnetRecord(ctx, "requested", network.WithSubnetCreateAttribute("cidr", "x"))
 	if result != nil || !errors.Is(err, context.Canceled) || !errors.Is(err, cause) || count.Load() != 0 {
 		t.Fatal(result, err)
 	}
@@ -601,7 +601,7 @@ func TestCloudSubnetCreateAcceptedMutationInvalidatesOnlyPrivateSuccessfulRoleCa
 				}
 				service.RawClient().HTTPClient.Transport = observer
 			}
-			result, err := service.CreateSubnetRecord(ctx, "requested", network.WithSubnetCreateCIDR("x"))
+			result, err := service.CreateSubnetRecord(ctx, "requested", network.WithSubnetCreateAttribute("cidr", "x"))
 			if result == nil || (lane == "success" && err != nil) || (lane != "success" && err == nil) {
 				t.Fatal(result, err)
 			}

@@ -28,9 +28,9 @@ type RecordListOpts struct {
 }
 
 // RecordListOption is one option of the operation: WithRecordListOpts,
-// WithRecordListHeaders, WithRecordListFilter, WithRecordListFilters,
-// WithRecordListVisibility, WithRecordListResourceTypes,
-// WithRecordListSortKey, WithRecordListSortDir, request.Header,
+// WithRecordListHeaders, WithRecordListFilter (including the semantic
+// "visibility", "resource_types", "sort_key" and "sort_dir" queries, whose
+// validation the server owns), WithRecordListFilters, request.Header,
 // request.Limit, request.Marker, request.MaxItems, request.Paginated, or
 // request.Custom over *RecordListOpts. Other shared calls fail with
 // resource.ErrInvalidOption before HTTP.
@@ -67,20 +67,6 @@ func WithRecordListFilter(field string, value any) RecordListOption {
 func WithRecordListFilters(values map[string]any) RecordListOption {
 	owned := resource.WithFilters(values)
 	return request.Custom(func(c *RecordListOpts) error { c.Filters = append(c.Filters, owned); return nil })
-}
-
-// These helpers retain Source's semantic query values; the server owns their validation.
-func WithRecordListVisibility(value string) RecordListOption {
-	return WithRecordListFilter("visibility", value)
-}
-func WithRecordListResourceTypes(value string) RecordListOption {
-	return WithRecordListFilter("resource_types", value)
-}
-func WithRecordListSortKey(value string) RecordListOption {
-	return WithRecordListFilter("sort_key", value)
-}
-func WithRecordListSortDir(value string) RecordListOption {
-	return WithRecordListFilter("sort_dir", value)
 }
 
 func recordFilterDescriptor() *resource.FilterDescriptor {

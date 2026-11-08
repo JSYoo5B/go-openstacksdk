@@ -69,30 +69,6 @@ func WithImageUploadFields(values map[string]json.RawMessage) ImageUploadOption 
 	snapshot := copyImagePatchMap(values)
 	return request.Custom(func(config *ImageUploadOpts) error { config.Fields = copyImagePatchMap(snapshot); return nil })
 }
-func WithImageUploadDiskFormat(value string) ImageUploadOption {
-	return WithImageUploadField("disk_format", value)
-}
-func WithImageUploadContainerFormat(value string) ImageUploadOption {
-	return WithImageUploadField("container_format", value)
-}
-func WithImageUploadVisibility(value Visibility) ImageUploadOption {
-	return WithImageUploadField("visibility", value)
-}
-func WithImageUploadOwner(value string) ImageUploadOption {
-	return WithImageUploadField("owner", value)
-}
-func WithImageUploadProtected(value bool) ImageUploadOption {
-	return WithImageUploadField("protected", value)
-}
-func WithImageUploadHidden(value bool) ImageUploadOption {
-	return WithImageUploadField("os_hidden", value)
-}
-func WithImageUploadMinDisk(value int64) ImageUploadOption {
-	return WithImageUploadField("min_disk", value)
-}
-func WithImageUploadMinRAM(value int64) ImageUploadOption {
-	return WithImageUploadField("min_ram", value)
-}
 func WithImageUploadTags(values ...string) ImageUploadOption {
 	return WithImageUploadField("tags", append([]string{}, values...))
 }

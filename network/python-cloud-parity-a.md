@@ -309,12 +309,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.WithRouterCreateOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithRouterCreateJSON`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithRouterCreateAttribute`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithRouterCreateName`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithRouterCreateAdminStateUp`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithRouterCreateExternalGatewayNetworkID`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithRouterCreateEnableSNAT`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithRouterCreateExternalFixedIPs`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithRouterCreateProjectID`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithRouterCreateAvailabilityZoneHints`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithRouterCreateCurrentLocation`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.CreateRouterRecord`
@@ -364,21 +358,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.WithSubnetCreateJSON`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithSubnetCreateAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithSubnetCreateCurrentLocation`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithSubnetCreateCIDR`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithSubnetCreateIPVersion`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithSubnetCreateDHCP`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithSubnetCreateName`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithSubnetCreateTenantID`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithSubnetCreateGatewayIP`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithSubnetCreateDisableGateway`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithSubnetCreateAllocationPools`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithSubnetCreateDNSNameservers`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithSubnetCreateHostRoutes`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithSubnetCreateIPv6RAMode`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithSubnetCreateIPv6AddressMode`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithSubnetCreatePrefixLength`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithSubnetCreateDefaultSubnetPool`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithSubnetCreateSubnetPool`
 
 - subnets.API.CreateWithAttributes sends only explicit attributes, so ip_version, enable_dhcp and a null gateway_ip appear only when the caller sets them.
   Tests: `network/python_cloud_parity_a_test.go:TestPythonCloudNetworkCreateRouterSubnetSendOnlyExplicitAttributes`.
@@ -473,11 +452,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSPolicyMutationJSON`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSPolicyMutationOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSPolicyAttribute`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSPolicyName`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSPolicyDescription`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSPolicyShared`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSPolicyDefault`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSPolicyProjectID`
 
 - After the cloud extension gate, Go sends the same GET /extensions, QoS policy GET-then-name-list find, rule GET/POST/DELETE, rule-type GET, policy POST and policy DELETE requests, while a rule DELETE 404 stays an error.
   Tests: `network/python_cloud_parity_a_test.go:TestPythonCloudQoSRequestsAfterExtensionGate`.
@@ -610,8 +584,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleCreateOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleCreateAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleCreateJSON`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleCreateDirection`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleCreateMaxBurstKBPS`
 
 - After the cloud extension gate, Go sends the same GET /extensions, QoS policy GET-then-name-list find, rule GET/POST/DELETE, rule-type GET, policy POST and policy DELETE requests, while a rule DELETE 404 stays an error.
   Tests: `network/python_cloud_parity_a_test.go:TestPythonCloudQoSRequestsAfterExtensionGate`.
@@ -888,7 +860,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleCreateOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleCreateAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleCreateJSON`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleCreateDirection`
 
 - After the cloud extension gate, Go sends the same GET /extensions, QoS policy GET-then-name-list find, rule GET/POST/DELETE, rule-type GET, policy POST and policy DELETE requests, while a rule DELETE 404 stays an error.
   Tests: `network/python_cloud_parity_a_test.go:TestPythonCloudQoSRequestsAfterExtensionGate`.

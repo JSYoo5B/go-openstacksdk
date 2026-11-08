@@ -173,7 +173,7 @@ func TestPythonSubnetRawMaxItemsOpaqueJMESAndOwnedJSON(t *testing.T) {
 	api := pythonCoreSubnetAPI(t, &calls, func(*http.Request) *http.Response {
 		return nativeSubnetWire(200, `{"subnets":[{"id":"one"},{"id":"two"}]}`)
 	})
-	options := []sdk.RecordListOption{sdk.WithRecordListQuery("max_items", json.RawMessage(`"wrong"`)), sdk.WithRecordListJMESPath("`[]`")}
+	options := []sdk.RecordListOption{sdk.WithRecordListQuery("max_items", json.RawMessage(`"wrong"`)), sdk.WithRecordListQuery("jmespath_filters", "`[]`")}
 	proxy, err := api.ProxyListRecords(context.Background(), options...)
 	if err != nil || string(proxy.JSON) != "[]" || len(calls) != 0 {
 		t.Fatal(proxy, err, calls)

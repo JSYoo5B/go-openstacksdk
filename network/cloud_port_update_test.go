@@ -62,7 +62,7 @@ func TestCloudPortUpdateNameFallbackAndMissing(t *testing.T) {
 				rows = `[{"id":"actual","name":"target"}]`
 			}
 			client, calls := pythonCloudBClient(t, map[string][]pythonCloudBReply{"GET /v2.0/ports/target": {{404, `{}`}}, "GET /v2.0/ports": {{200, `{"ports":` + rows + `}`}}, "PUT /v2.0/ports/actual": {{200, `{"port":{"id":"actual"}}`}}})
-			result, err := network.New(client).UpdatePortRecord(context.Background(), "target", network.WithPortUpdateName("new"))
+			result, err := network.New(client).UpdatePortRecord(context.Background(), "target", network.WithPortUpdateAttribute("name", "new"))
 			if found {
 				if err != nil || result.Port == nil || len(calls()) != 3 {
 					t.Fatal(result, err, calls())
@@ -104,7 +104,7 @@ func TestCloudPortUpdateOwnedOptionsAndPreflight(t *testing.T) {
 }
 func TestCloudPortUpdateConflictKeepsLookupAndSingleAttempt(t *testing.T) {
 	client, calls := pythonCloudBClient(t, map[string][]pythonCloudBReply{"GET /v2.0/ports/p": {{200, `{"port":{"id":"p","name":"old"}}`}}, "PUT /v2.0/ports/p": {{http.StatusConflict, `{"error":"conflict"}`}}})
-	result, err := network.New(client).UpdatePortRecord(context.Background(), "p", network.WithPortUpdateName("new"))
+	result, err := network.New(client).UpdatePortRecord(context.Background(), "p", network.WithPortUpdateAttribute("name", "new"))
 	if err == nil || result == nil || result.Lookup == nil || result.Port != nil || result.NoOp || len(calls()) != 2 {
 		t.Fatal(result, err, calls())
 	}

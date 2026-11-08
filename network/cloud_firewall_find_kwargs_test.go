@@ -127,7 +127,7 @@ func TestCloudFirewallUpdateFindFetchControls(t *testing.T) {
 		"PUT /v2.0/fwaas/firewall_rules/r": {{status: http.StatusOK, body: `{"firewall_rule":{"id":"r","name":"new"}}`}},
 	})
 	filters := json.RawMessage(`{"base_path":"fwaas/custom_rules","resource_response_key":"rule","skip_cache":true}`)
-	result, err := network.New(client).UpdateFirewallRuleRecord(context.Background(), "r", network.WithFirewallRuleUpdateFilters(filters), network.WithFirewallRuleUpdateName("new"))
+	result, err := network.New(client).UpdateFirewallRuleRecord(context.Background(), "r", network.WithFirewallRuleUpdateFilters(filters), network.WithFirewallRuleUpdateAttribute("name", "new"))
 	if err != nil || result == nil || result.Response == nil {
 		t.Fatal(result, err)
 	}

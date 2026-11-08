@@ -19,12 +19,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.AddImageMemberRecord`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.AddImageMemberRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordWriteOpts`
-- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordWriteHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordWriteAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordWriteAttributes`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordMemberID`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordStatus`
 
 - Legacy typed AddImageMember profile only: All methods require an explicit parent image Ref; direct imageID has only fixed member endpoint, explicit parentName uses unchanged native exact-name resolver. No Member parent recovery, memberName/project lookup, response-ID synthesis or response-driven routes.
   Tests: `image/members_contracts_test.go:TestImageMembersFixedParentRoutesAndBodies`, `image/members_core_test.go:TestImageMembersCoreFixedRoutesAndActualEvidence`, `connectiontest/connection_image_members_test.go:TestConnectionImageMembersShareClientAndConcreteDefaults`, `internal/cmd/sdkgen/glance_members_test.go:TestGlanceMemberWorkflowsPreserveNativeScopeAndConcreteDefaults`.
@@ -130,12 +127,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.UpdateImageMemberRecord`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.UpdateImageMemberRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordWriteOpts`
-- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordWriteHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordWriteAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordWriteAttributes`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordMemberID`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordStatus`
 
 - Legacy typed UpdateImageMember profile only: All methods require an explicit parent image Ref; direct imageID has only fixed member endpoint, explicit parentName uses unchanged native exact-name resolver. No Member parent recovery, memberName/project lookup, response-ID synthesis or response-driven routes.
   Tests: `image/members_contracts_test.go:TestImageMembersFixedParentRoutesAndBodies`, `image/members_core_test.go:TestImageMembersCoreFixedRoutesAndActualEvidence`, `connectiontest/connection_image_members_test.go:TestConnectionImageMembersShareClientAndConcreteDefaults`, `internal/cmd/sdkgen/glance_members_test.go:TestGlanceMemberWorkflowsPreserveNativeScopeAndConcreteDefaults`.
@@ -238,9 +232,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.FindImageMemberRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithFindImageMemberRecordOpts`
-- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithFindImageMemberRecordHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 
 - All methods require an explicit parent image Ref; direct imageID has only fixed member endpoint, explicit parentName uses unchanged native exact-name resolver. No Member parent recovery, memberName/project lookup, response-ID synthesis or response-driven routes.
   Tests: `image/members_contracts_test.go:TestImageMembersFixedParentRoutesAndBodies`, `image/members_core_test.go:TestImageMembersCoreFixedRoutesAndActualEvidence`, `connectiontest/connection_image_members_test.go:TestConnectionImageMembersShareClientAndConcreteDefaults`, `internal/cmd/sdkgen/glance_members_test.go:TestGlanceMemberWorkflowsPreserveNativeScopeAndConcreteDefaults`.
@@ -291,11 +283,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.ListImageMemberRecords`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.AllImageMemberRecords`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordListHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/request.Limit`
 - `github.com/JSYoo5B/go-openstacksdk/request.Marker`
-- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
 - `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordListFilter`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageMemberRecordListFilters`

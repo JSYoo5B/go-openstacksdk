@@ -83,21 +83,6 @@ func WithFirewallGroupUpdateJSON(raw json.RawMessage) FirewallGroupUpdateOption 
 		return nil
 	}
 }
-func WithFirewallGroupUpdateName(v string) FirewallGroupUpdateOption {
-	return WithFirewallGroupUpdateAttribute("name", v)
-}
-func WithFirewallGroupUpdateAdminStateUp(v bool) FirewallGroupUpdateOption {
-	return WithFirewallGroupUpdateAttribute("admin_state_up", v)
-}
-func WithFirewallGroupUpdateShared(v bool) FirewallGroupUpdateOption {
-	return WithFirewallGroupUpdateAttribute("shared", v)
-}
-func WithFirewallGroupUpdateEgressPolicy(v string) FirewallGroupUpdateOption {
-	return WithFirewallGroupUpdateAttribute("egress_firewall_policy", v)
-}
-func WithFirewallGroupUpdateIngressPolicy(v string) FirewallGroupUpdateOption {
-	return WithFirewallGroupUpdateAttribute("ingress_firewall_policy", v)
-}
 func WithFirewallGroupUpdatePorts(v ...string) FirewallGroupUpdateOption {
 	return WithFirewallGroupUpdateAttribute("ports", append([]string{}, v...))
 }

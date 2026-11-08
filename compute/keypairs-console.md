@@ -15,10 +15,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.API.CreateKeypair`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithKeypairCreateOptions`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithKeypairCreateAttribute`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithKeypairCreateName`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithKeypairCreatePublicKey`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithKeypairCreateType`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithKeypairCreateUserID`
 - `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 
@@ -158,11 +154,11 @@ func run(ctx context.Context, name, publicKeyPath, owner, serverID, consoleType 
     service, err := conn.ComputeV2(ctx)
     if err != nil { return err }
     options := []keypairs.KeypairCreateOption{
-        keypairs.WithKeypairCreateName(name),
-        keypairs.WithKeypairCreatePublicKey(string(publicKey)),
+        keypairs.WithKeypairCreateAttribute("name", name),
+        keypairs.WithKeypairCreateAttribute("public_key", string(publicKey)),
     }
     if owner != "" {
-        options = append(options, keypairs.WithKeypairCreateUserID(owner))
+        options = append(options, keypairs.WithKeypairCreateAttribute("user_id", owner))
     }
     created, err := service.KeyPairs.CreateKeypair(ctx, options...)
     if err != nil { return fmt.Errorf("create keypair: %w", err) }

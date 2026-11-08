@@ -95,7 +95,7 @@ func TestPythonNetworkCloudListOpaqueProxyStaysLazyWithOwnedLocation(t *testing.
 	})
 	name := "before"
 	loc := resource.CloudLocation{Cloud: &name, Project: resource.CloudProject{ID: json.RawMessage(`"current"`), Name: &name}}
-	proxy, err := api.ProxyCloudListRecords(context.Background(), &loc, networks.WithRecordListJMESPath("to_array(@)"))
+	proxy, err := api.ProxyCloudListRecords(context.Background(), &loc, networks.WithRecordListQuery("jmespath_filters", "to_array(@)"))
 	if err != nil || len(calls) != 0 || proxy.JSON != nil {
 		t.Fatal(proxy, err, calls)
 	}

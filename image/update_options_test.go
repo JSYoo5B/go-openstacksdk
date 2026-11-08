@@ -97,7 +97,7 @@ func TestUpdateImageOptionsReplacementAppendAndTypedFields(t *testing.T) {
 		}
 		return taskCoreJSON(req, 200, "{}"), nil
 	}))
-	v, e := service.UpdateImage(context.Background(), resource.ID("id"), WithUpdateImageChange(ImagePatch{Op: "invalid"}), request.Header("X-Erased", "old"), WithUpdateImageOpts(UpdateImageOpts{}), WithUpdateImageHeaders(map[string]string{"x-policy": "first"}), request.Header("X-Policy", "last"), WithUpdateImageName(""), WithUpdateImageVisibility("future"), WithUpdateImageProtected(false), WithUpdateImageHidden(false), WithUpdateImageOwner(""), WithUpdateImageContainerFormat("future"), WithUpdateImageDiskFormat("future"), WithUpdateImageMinDisk(0), WithUpdateImageMinRAM(-1), WithUpdateImageTags(), WithUpdateImageFields(map[string]json.RawMessage{"z": json.RawMessage("[1]"), "a": json.RawMessage("null")}), WithUpdateImageField("a/b~", "literal"), WithUpdateImageRemoveField("name"))
+	v, e := service.UpdateImage(context.Background(), resource.ID("id"), WithUpdateImageChange(ImagePatch{Op: "invalid"}), request.Header("X-Erased", "old"), WithUpdateImageOpts(UpdateImageOpts{}), WithUpdateImageHeaders(map[string]string{"x-policy": "first"}), request.Header("X-Policy", "last"), WithUpdateImageField("name", ""), WithUpdateImageField("visibility", "future"), WithUpdateImageField("protected", false), WithUpdateImageField("os_hidden", false), WithUpdateImageField("owner", ""), WithUpdateImageField("container_format", "future"), WithUpdateImageField("disk_format", "future"), WithUpdateImageField("min_disk", 0), WithUpdateImageField("min_ram", -1), WithUpdateImageTags(), WithUpdateImageFields(map[string]json.RawMessage{"z": json.RawMessage("[1]"), "a": json.RawMessage("null")}), WithUpdateImageField("a/b~", "literal"), WithUpdateImageRemoveField("name"))
 	if v == nil || e != nil {
 		t.Fatal(v, e)
 	}
@@ -105,7 +105,7 @@ func TestUpdateImageOptionsReplacementAppendAndTypedFields(t *testing.T) {
 	if v == nil || e != nil || calls != 2 {
 		t.Fatal(v, e, calls)
 	}
-	p, err := parseUpdateImageOptions([]UpdateImageOption{WithUpdateImageName("erased"), WithUpdateImageChanges(ImagePatch{Op: "remove", Path: "/kept"}), WithUpdateImageChange(ImagePatch{Op: "add", Path: "/kept", Value: json.RawMessage("null")})})
+	p, err := parseUpdateImageOptions([]UpdateImageOption{WithUpdateImageField("name", "erased"), WithUpdateImageChanges(ImagePatch{Op: "remove", Path: "/kept"}), WithUpdateImageChange(ImagePatch{Op: "add", Path: "/kept", Value: json.RawMessage("null")})})
 	if err != nil || len(p.Changes) != 2 || p.Changes[0].Op != "remove" || p.Changes[1].Op != "add" {
 		t.Fatal(p, err)
 	}

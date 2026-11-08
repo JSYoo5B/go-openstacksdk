@@ -33,10 +33,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithRecordListFilter`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithRecordListFilters`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithRecordListVisibility`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithRecordListResourceTypes`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithRecordListSortKey`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithRecordListSortDir`
 
 - Literal namespace identity, fixed source capture and strict preflight: name is nonempty UTF8<=80runes; colon/Unicode/spaces remain, route-breaking/control/dot syntax rejected before callbacks/HTTP. No Find, Ref/name resolver, generic Resources or response-driven routing. Fixed original provider/prefix/header/microversion with live original auth; source checks after callbacks/body and before consumed rows/pages.
   Tests: `image/v2/metadefnamespaces/core_test.go:TestMetadefNamespacesCoreCompletePreflight`, `image/v2/metadefnamespaces/core_test.go:TestMetadefNamespacesCoreCapturedSourceAndNativeRetryBoundaries`, `image/v2/metadefnamespaces/options_test.go:TestMetadefNamespacesOptionsValidationAndDefaults`, `image/v2/metadefnamespaces/contracts_test.go:TestMetadefNamespacesOwnedPreparationAndSource`, `connectiontest/connection_image_metadef_namespaces_test.go:TestConnectionImageMetadefNamespacesShareClientAndPagingDefaults`.
@@ -225,7 +221,7 @@ func run(ctx context.Context, cloud, namespace, namespaceFilter, owner,
         namespaceOptions = append(namespaceOptions, request.Limit(limit))
     }
     if visibility != "" {
-        namespaceOptions = append(namespaceOptions, namespaces.WithRecordListVisibility(visibility))
+        namespaceOptions = append(namespaceOptions, namespaces.WithRecordListFilter("visibility", visibility))
     }
     if namespaceFilter != "" {
         namespaceOptions = append(namespaceOptions, namespaces.WithRecordListFilter("namespace", namespaceFilter))

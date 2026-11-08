@@ -63,7 +63,7 @@ func TestCloudFirewallGroupUpdateNameFallbackAndMissing(t *testing.T) {
 				rows = `[{"id":"actual","name":"target"}]`
 			}
 			client, calls := pythonCloudBClient(t, map[string][]pythonCloudBReply{"GET /v2.0/fwaas/firewall_groups/target": {{404, `{}`}}, "GET /v2.0/fwaas/firewall_groups": {{200, `{"firewall_groups":` + rows + `}`}}, "PUT /v2.0/fwaas/firewall_groups/actual": {{200, `{"firewall_group":{"id":"actual"}}`}}})
-			result, err := network.New(client).UpdateFirewallGroupRecord(context.Background(), "target", network.WithFirewallGroupUpdateName("new"))
+			result, err := network.New(client).UpdateFirewallGroupRecord(context.Background(), "target", network.WithFirewallGroupUpdateAttribute("name", "new"))
 			if found {
 				if err != nil || result.Group == nil || len(calls()) != 3 {
 					t.Fatal(result, err, calls())
@@ -105,7 +105,7 @@ func TestCloudFirewallGroupUpdateOwnedOptionsAndPreflight(t *testing.T) {
 }
 func TestCloudFirewallGroupUpdateConflictKeepsLookupAndSingleAttempt(t *testing.T) {
 	client, calls := pythonCloudBClient(t, map[string][]pythonCloudBReply{"GET /v2.0/fwaas/firewall_groups/p": {{200, `{"firewall_group":{"id":"p","name":"old"}}`}}, "PUT /v2.0/fwaas/firewall_groups/p": {{http.StatusConflict, `{"error":"conflict"}`}}})
-	result, err := network.New(client).UpdateFirewallGroupRecord(context.Background(), "p", network.WithFirewallGroupUpdateName("new"))
+	result, err := network.New(client).UpdateFirewallGroupRecord(context.Background(), "p", network.WithFirewallGroupUpdateAttribute("name", "new"))
 	if err == nil || result == nil || result.Lookup == nil || result.Group != nil || result.NoOp || len(calls()) != 2 {
 		t.Fatal(result, err, calls())
 	}
@@ -226,7 +226,7 @@ func TestCloudFirewallGroupUpdateResolvedEqualReferencesStillLookUp(t *testing.T
 		"GET /v2.0/fwaas/firewall_policies/out": {{200, `{"firewall_policy":{"id":"out-id"}}`}},
 		"GET /v2.0/ports/member":                {{200, `{"port":{"id":"p"}}`}},
 	})
-	result, err := network.New(client).UpdateFirewallGroupRecord(context.Background(), "g", network.WithFirewallGroupUpdateEgressPolicy("out"), network.WithFirewallGroupUpdatePorts("member"))
+	result, err := network.New(client).UpdateFirewallGroupRecord(context.Background(), "g", network.WithFirewallGroupUpdateAttribute("egress_firewall_policy", "out"), network.WithFirewallGroupUpdatePorts("member"))
 	if err != nil || result == nil || !result.NoOp || result.Group != nil || len(result.PolicyLookups) != 1 || len(result.PortLookups) != 1 || len(calls()) != 3 {
 		t.Fatal(result, err, calls())
 	}

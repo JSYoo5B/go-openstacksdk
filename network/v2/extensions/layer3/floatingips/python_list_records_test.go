@@ -170,11 +170,11 @@ func TestPythonIPRecordsOwnedOptionsHeadersAndCancellation(t *testing.T) {
 func TestPythonIPRecordsProxyGeneratorAndJMESPath(t *testing.T) {
 	var calls []pythonIPsCall
 	api := pythonIPsAPI(t, &calls, func(*http.Request) (int, string) { return 200, `{"floatingips":[{"id":"one"}]}` })
-	got, err := api.ProxyListRecords(context.Background(), floatingips.WithRecordListJMESPath("type(@)"))
+	got, err := api.ProxyListRecords(context.Background(), floatingips.WithRecordListQuery("jmespath_filters", "type(@)"))
 	if err != nil || string(got.JSON) != "null" || len(calls) != 0 {
 		t.Fatal(got, err, calls)
 	}
-	got, err = api.ProxyListRecords(context.Background(), floatingips.WithRecordListJMESPath("@"))
+	got, err = api.ProxyListRecords(context.Background(), floatingips.WithRecordListQuery("jmespath_filters", "@"))
 	if err != nil || got.JSON != nil {
 		t.Fatal(got, err)
 	}
@@ -193,10 +193,10 @@ func TestPythonIPRecordsProxyGeneratorAndJMESPath(t *testing.T) {
 		t.Fatal(count)
 	}
 	calls = nil
-	if _, err := api.ProxyListRecords(context.Background(), floatingips.WithRecordListJMESPath("length(@)")); err == nil || len(calls) != 0 {
+	if _, err := api.ProxyListRecords(context.Background(), floatingips.WithRecordListQuery("jmespath_filters", "length(@)")); err == nil || len(calls) != 0 {
 		t.Fatal(err, calls)
 	}
-	if _, err := api.AllRecords(context.Background(), floatingips.WithRecordListJMESPath("@")); !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
+	if _, err := api.AllRecords(context.Background(), floatingips.WithRecordListQuery("jmespath_filters", "@")); !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
 		t.Fatal(err, calls)
 	}
 }

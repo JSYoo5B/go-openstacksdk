@@ -48,8 +48,8 @@ type RecordListOpts struct {
 }
 
 // RecordListOption is one option of ListRecords, AllRecords and
-// ProxyListRecords: WithRecordListOpts, WithRecordListQuery,
-// WithRecordListConflictingAttrs, WithRecordListJMESPath, request.Headers
+// ProxyListRecords: WithRecordListOpts, WithRecordListQuery (including the
+// "__conflicting_attrs" and "jmespath_filters" keys), request.Headers
 // (replaces the headers), request.Microversion, request.BasePath,
 // request.Limit, request.Marker, request.MaxItems, request.Paginated or
 // request.Custom over *RecordListOpts. request.Query is rejected because
@@ -110,6 +110,11 @@ func recordListControlError(key string) error {
 // Declared query names and wire names go to the server; other declared Body
 // attributes become local filters on each received row. Source runtime controls
 // fail by presence before invoking an application JSON marshaler.
+// The "__conflicting_attrs" key restores Source kwargs once from a JSON object,
+// preserving its order; duplicate bound paginated/base_path arguments remain
+// errors. The "jmespath_filters" key carries the deprecated Proxy expression
+// that ProxyListRecords evaluates; an empty expression leaves the lazy resource
+// generator intact.
 func WithRecordListQuery(key string, value any) RecordListOption {
 	return request.Custom(withRecordListQuery(key, value))
 }
@@ -182,12 +187,6 @@ func withRecordListBasePath(path string) func(*RecordListOpts) error {
 	}
 }
 
-// WithRecordListConflictingAttrs restores Source kwargs once, preserving JSON
-// object order. Duplicate bound paginated/base_path arguments remain errors.
-func WithRecordListConflictingAttrs(value json.RawMessage) RecordListOption {
-	return WithRecordListQuery("__conflicting_attrs", value)
-}
-
 func withRecordListLimit(v int) func(*RecordListOpts) error { return withRecordListQuery("limit", v) }
 func withRecordListMarker(v string) func(*RecordListOpts) error {
 	return withRecordListQuery("marker", v)
@@ -197,12 +196,6 @@ func withRecordListMaxItems(v int) func(*RecordListOpts) error {
 }
 func withRecordListPaginated(v bool) func(*RecordListOpts) error {
 	return withRecordListQuery("paginated", v)
-}
-
-// WithRecordListJMESPath evaluates the deprecated Proxy expression through
-// ProxyListRecords. Empty expressions leave the lazy resource generator intact.
-func WithRecordListJMESPath(expression string) RecordListOption {
-	return WithRecordListQuery("jmespath_filters", expression)
 }
 
 func (a *API) subnetListEngine(ctx context.Context) (*neutronfind.Engine, error) {

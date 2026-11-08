@@ -44,8 +44,8 @@ type RecordListOpts struct {
 }
 
 // RecordListOption is one option of ListRecords, AllRecords and
-// ProxyListRecords: WithRecordListOpts, WithRecordListQuery,
-// WithRecordListConflictingAttrs, WithRecordListJMESPath, request.Custom over
+// ProxyListRecords: WithRecordListOpts, WithRecordListQuery (including the
+// "__conflicting_attrs" and "jmespath_filters" keys), request.Custom over
 // *RecordListOpts, request.Headers (replaces the headers),
 // request.Microversion, request.BasePath (a service-relative collection
 // route; empty selects the default), request.Limit, request.Marker,
@@ -133,6 +133,11 @@ func recordListControlError(key string) error {
 // Declared query names and wire names go to the server; other declared Body
 // attributes become local filters on each received row. Source runtime controls
 // fail by presence before invoking an application JSON marshaler.
+// The "__conflicting_attrs" key restores Source kwargs once from a JSON object,
+// preserving its order; duplicate bound paginated/base_path arguments remain
+// errors. The "jmespath_filters" key carries the deprecated Proxy expression
+// that ProxyListRecords evaluates; an empty expression leaves the lazy resource
+// generator intact.
 func WithRecordListQuery(key string, value any) RecordListOption {
 	if recordListIgnores(key) {
 		return request.Custom(func(*RecordListOpts) error { return nil })
@@ -197,18 +202,6 @@ func applyRecordListQuery(c *RecordListOpts, key string, owned json.RawMessage, 
 	}
 	c.Query[key] = bytes.Clone(owned)
 	return nil
-}
-
-// WithRecordListConflictingAttrs restores Source kwargs once, preserving JSON
-// object order. Duplicate bound paginated/base_path arguments remain errors.
-func WithRecordListConflictingAttrs(value json.RawMessage) RecordListOption {
-	return WithRecordListQuery("__conflicting_attrs", value)
-}
-
-// WithRecordListJMESPath evaluates the deprecated Proxy expression through
-// ProxyListRecords. Empty expressions leave the lazy resource generator intact.
-func WithRecordListJMESPath(expression string) RecordListOption {
-	return WithRecordListQuery("jmespath_filters", expression)
 }
 
 func (a *API) endpointRecordEngine(ctx context.Context) (*neutronfind.Engine, error) {

@@ -74,18 +74,6 @@ func WithSubnetUpdateJSON(raw json.RawMessage) SubnetUpdateOption {
 		return nil
 	}
 }
-func WithSubnetUpdateName(v string) SubnetUpdateOption {
-	return WithSubnetUpdateAttribute("subnet_name", v)
-}
-func WithSubnetUpdateEnableDHCP(v bool) SubnetUpdateOption {
-	return WithSubnetUpdateAttribute("enable_dhcp", v)
-}
-func WithSubnetUpdateGatewayIP(v string) SubnetUpdateOption {
-	return WithSubnetUpdateAttribute("gateway_ip", v)
-}
-func WithSubnetUpdateDisableGatewayIP(v bool) SubnetUpdateOption {
-	return WithSubnetUpdateAttribute("disable_gateway_ip", v)
-}
 func WithSubnetUpdateDNSNameservers(v ...string) SubnetUpdateOption {
 	return WithSubnetUpdateAttribute("dns_nameservers", append([]string{}, v...))
 }

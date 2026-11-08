@@ -205,7 +205,7 @@ func TestMetadefNamespaceRecordsGenericPaginationAndRawMarkers(t *testing.T) {
 				}
 				return resp, nil
 			}))
-			rows, err := api.AllRecords(context.Background(), WithRecordListVisibility("public"))
+			rows, err := api.AllRecords(context.Background(), WithRecordListFilter("visibility", "public"))
 			if err != nil || len(rows) != 1 || calls != 2 {
 				t.Fatalf("calls %d rows %d: %v", calls, len(rows), err)
 			}
@@ -264,7 +264,7 @@ func TestMetadefNamespaceRecordsGenericPaginationAndRawMarkers(t *testing.T) {
 				calls++
 				return namespaceCoreJSON(req, 200, body), nil
 			}))
-			rows, err := api.AllRecords(context.Background(), request.Marker("starting"), WithRecordListVisibility("public"))
+			rows, err := api.AllRecords(context.Background(), request.Marker("starting"), WithRecordListFilter("visibility", "public"))
 			if len(rows) != 1 || err == nil || calls != 1 {
 				t.Fatalf("calls %d rows %d: %v", calls, len(rows), err)
 			}

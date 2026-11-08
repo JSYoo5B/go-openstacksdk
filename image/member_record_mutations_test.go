@@ -52,9 +52,9 @@ func TestAddImageMemberRecordOwnsFlatDeclaredBodyAndIgnoresUnknown(t *testing.T)
 		{"seven raw fields only", `{"id":false,"name":["raw",null],"member":"project","created_at":900719925474099312345,"status":{"future":true},"schema":false,"updated_at":null}`, `"project"`, []ImageMemberRecordWriteOption{WithImageMemberRecordWriteAttributes(map[string]any{"id": false, "name": []any{"raw", nil}, "member_id": "project", "created_at": json.RawMessage(`900719925474099312345`), "status": map[string]any{"future": true}, "schema": false, "updated_at": nil, "vendor": make(chan int), "location": map[string]any{"foreign": true}})}},
 		{"canonical member wins wire", `{"member":null}`, `null`, []ImageMemberRecordWriteOption{WithImageMemberRecordWriteAttributes(map[string]any{"member": "wire", "member_id": nil})}},
 		{"wire alias alone", `{"member":false}`, `false`, []ImageMemberRecordWriteOption{WithImageMemberRecordWriteAttribute("member", false)}},
-		{"bulk replaces previous attrs", `{"status":null}`, `null`, []ImageMemberRecordWriteOption{WithImageMemberRecordMemberID("discarded"), WithImageMemberRecordWriteAttributes(map[string]any{"status": nil})}},
-		{"bulk clear posts empty object", `{}`, `null`, []ImageMemberRecordWriteOption{WithImageMemberRecordMemberID("discarded"), WithImageMemberRecordWriteAttributes(nil)}},
-		{"concrete helpers retain raw values", `{"member":[null,true],"status":"future state"}`, `[null,true]`, []ImageMemberRecordWriteOption{WithImageMemberRecordMemberID([]any{nil, true}), WithImageMemberRecordStatus("future state")}},
+		{"bulk replaces previous attrs", `{"status":null}`, `null`, []ImageMemberRecordWriteOption{WithImageMemberRecordWriteAttribute("member_id", "discarded"), WithImageMemberRecordWriteAttributes(map[string]any{"status": nil})}},
+		{"bulk clear posts empty object", `{}`, `null`, []ImageMemberRecordWriteOption{WithImageMemberRecordWriteAttribute("member_id", "discarded"), WithImageMemberRecordWriteAttributes(nil)}},
+		{"concrete helpers retain raw values", `{"member":[null,true],"status":"future state"}`, `[null,true]`, []ImageMemberRecordWriteOption{WithImageMemberRecordWriteAttribute("member_id", []any{nil, true}), WithImageMemberRecordWriteAttribute("status", "future state")}},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			calls := 0
@@ -107,11 +107,11 @@ func TestUpdateImageMemberRecordCreatesFreshBoundMemberAndRawBody(t *testing.T) 
 	}{
 		{"no attrs still commits bound member", `{"member":"selected"}`, "selected", `null`, nil},
 		{"unknown only still commits bound member", `{"member":"selected"}`, "selected", `null`, []ImageMemberRecordWriteOption{WithImageMemberRecordWriteAttribute("vendor", make(chan int))}},
-		{"future status", `{"member":"selected","status":"future"}`, "selected", `"future"`, []ImageMemberRecordWriteOption{WithImageMemberRecordStatus("future")}},
-		{"null status", `{"member":"selected","status":null}`, "selected", `null`, []ImageMemberRecordWriteOption{WithImageMemberRecordStatus(nil)}},
-		{"list status", `{"member":"selected","status":[false,null]}`, "selected", `[false,null]`, []ImageMemberRecordWriteOption{WithImageMemberRecordStatus([]any{false, nil})}},
+		{"future status", `{"member":"selected","status":"future"}`, "selected", `"future"`, []ImageMemberRecordWriteOption{WithImageMemberRecordWriteAttribute("status", "future")}},
+		{"null status", `{"member":"selected","status":null}`, "selected", `null`, []ImageMemberRecordWriteOption{WithImageMemberRecordWriteAttribute("status", nil)}},
+		{"list status", `{"member":"selected","status":[false,null]}`, "selected", `[false,null]`, []ImageMemberRecordWriteOption{WithImageMemberRecordWriteAttribute("status", []any{false, nil})}},
 		{"literal descriptors", `{"member":"selected","name":false,"created_at":{"literal":true},"updated_at":900719925474099312345,"schema":[null]}`, "selected", `null`, []ImageMemberRecordWriteOption{WithImageMemberRecordWriteAttributes(map[string]any{"name": false, "created_at": map[string]any{"literal": true}, "updated_at": json.RawMessage(`900719925474099312345`), "schema": []any{nil}})}},
-		{"id retarget excluded from body", `{"member":"selected","status":false}`, "after-한", `false`, []ImageMemberRecordWriteOption{WithImageMemberRecordWriteAttribute("id", "after-한"), WithImageMemberRecordStatus(false)}},
+		{"id retarget excluded from body", `{"member":"selected","status":false}`, "after-한", `false`, []ImageMemberRecordWriteOption{WithImageMemberRecordWriteAttribute("id", "after-한"), WithImageMemberRecordWriteAttribute("status", false)}},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			seed := memberRecordMutationSeed(map[string]json.RawMessage{"id": json.RawMessage(`"selected"`), "member_id": json.RawMessage(`"record alias"`), "status": json.RawMessage(`"old status"`), "name": json.RawMessage(`"old name"`), "created_at": json.RawMessage(`"old date"`)})
@@ -337,7 +337,7 @@ func TestImageMemberRecordWritesTranslateAcceptedStatusesAndPreserveDefaults(t *
 					retries++
 					return err
 				}
-				got, err := memberRecordMutationWrite(New(client), update, context.Background(), WithImageMemberRecordWriteAttribute("name", "submitted"), WithImageMemberRecordStatus(nil))
+				got, err := memberRecordMutationWrite(New(client), update, context.Background(), WithImageMemberRecordWriteAttribute("name", "submitted"), WithImageMemberRecordWriteAttribute("status", nil))
 				if got == nil || err != nil || calls != 1 || retries != 0 || body.closes != 1 || (got.Wire != nil) != test.parsed || got.StatusCode != test.code || string(got.Envelope) != test.raw || len(got.Resource.Body) != 9 || got.Resource.Header.Get("X-Task-Proof") != "actual" || got.ImageID == nil || *got.ImageID != memberRecordParent {
 					t.Fatal(got, err, calls, retries, body.closes)
 				}
@@ -921,7 +921,7 @@ func TestImageMemberRecordWritesNativeRetryRetainsBodyAndLiveAuth(t *testing.T) 
 				return nil
 			}
 			originalHook := reflect.ValueOf(client.RetryFunc).Pointer()
-			got, err := memberRecordMutationWrite(New(client), update, context.Background(), WithImageMemberRecordStatus([]any{nil, false}))
+			got, err := memberRecordMutationWrite(New(client), update, context.Background(), WithImageMemberRecordWriteAttribute("status", []any{nil, false}))
 			if got == nil || err != nil || got.StatusCode != 203 || calls != 2 || retries != 1 || reflect.ValueOf(client.RetryFunc).Pointer() != originalHook {
 				t.Fatal(got, err, calls, retries)
 			}
@@ -935,7 +935,7 @@ func TestImageMemberRecordMutationResultsDoNotAliasRequestOrPhysicalResponse(t *
 	client := taskCoreClient(func(req *http.Request) (*http.Response, error) {
 		return &http.Response{Request: req, StatusCode: 201, Header: header, Body: io.NopCloser(strings.NewReader(raw))}, nil
 	})
-	got, err := New(client).AddImageMemberRecord(context.Background(), resource.ID(memberRecordParent), WithImageMemberRecordMemberID("submitted"))
+	got, err := New(client).AddImageMemberRecord(context.Background(), resource.ID(memberRecordParent), WithImageMemberRecordWriteAttribute("member_id", "submitted"))
 	if got == nil || err != nil {
 		t.Fatal(got, err)
 	}

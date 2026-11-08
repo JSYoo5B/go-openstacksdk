@@ -99,49 +99,6 @@ func WithSubnetCreateCurrentLocation(v resource.CloudLocation) SubnetCreateOptio
 	owned := v.Clone()
 	return func(c *SubnetCreateOpts) error { x := owned.Clone(); c.CurrentLocation = &x; return nil }
 }
-func WithSubnetCreateCIDR(v string) SubnetCreateOption { return WithSubnetCreateAttribute("cidr", v) }
-func WithSubnetCreateIPVersion(v any) SubnetCreateOption {
-	return WithSubnetCreateAttribute("ip_version", v)
-}
-func WithSubnetCreateDHCP(v bool) SubnetCreateOption {
-	return WithSubnetCreateAttribute("enable_dhcp", v)
-}
-func WithSubnetCreateName(v string) SubnetCreateOption {
-	return WithSubnetCreateAttribute("subnet_name", v)
-}
-func WithSubnetCreateTenantID(v string) SubnetCreateOption {
-	return WithSubnetCreateAttribute("tenant_id", v)
-}
-func WithSubnetCreateGatewayIP(v string) SubnetCreateOption {
-	return WithSubnetCreateAttribute("gateway_ip", v)
-}
-func WithSubnetCreateDisableGateway(v bool) SubnetCreateOption {
-	return WithSubnetCreateAttribute("disable_gateway_ip", v)
-}
-func WithSubnetCreateAllocationPools(v any) SubnetCreateOption {
-	return WithSubnetCreateAttribute("allocation_pools", v)
-}
-func WithSubnetCreateDNSNameservers(v []string) SubnetCreateOption {
-	return WithSubnetCreateAttribute("dns_nameservers", v)
-}
-func WithSubnetCreateHostRoutes(v any) SubnetCreateOption {
-	return WithSubnetCreateAttribute("host_routes", v)
-}
-func WithSubnetCreateIPv6RAMode(v string) SubnetCreateOption {
-	return WithSubnetCreateAttribute("ipv6_ra_mode", v)
-}
-func WithSubnetCreateIPv6AddressMode(v string) SubnetCreateOption {
-	return WithSubnetCreateAttribute("ipv6_address_mode", v)
-}
-func WithSubnetCreatePrefixLength(v any) SubnetCreateOption {
-	return WithSubnetCreateAttribute("prefixlen", v)
-}
-func WithSubnetCreateDefaultSubnetPool(v bool) SubnetCreateOption {
-	return WithSubnetCreateAttribute("use_default_subnetpool", v)
-}
-func WithSubnetCreateSubnetPool(v string) SubnetCreateOption {
-	return WithSubnetCreateAttribute("subnetpool_name_or_id", v)
-}
 
 // SubnetCreateResult separates lookup observations from the actual subnet POST.
 // Failed response handling never invents Resource/Wire or a successful status.

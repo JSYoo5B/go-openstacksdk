@@ -82,18 +82,6 @@ func WithFirewallPolicyUpdateJSON(raw json.RawMessage) FirewallPolicyUpdateOptio
 		return nil
 	}
 }
-func WithFirewallPolicyUpdateName(v string) FirewallPolicyUpdateOption {
-	return WithFirewallPolicyUpdateAttribute("name", v)
-}
-func WithFirewallPolicyUpdateAudited(v bool) FirewallPolicyUpdateOption {
-	return WithFirewallPolicyUpdateAttribute("audited", v)
-}
-func WithFirewallPolicyUpdateShared(v bool) FirewallPolicyUpdateOption {
-	return WithFirewallPolicyUpdateAttribute("shared", v)
-}
-func WithFirewallPolicyUpdateDescription(v string) FirewallPolicyUpdateOption {
-	return WithFirewallPolicyUpdateAttribute("description", v)
-}
 func WithFirewallPolicyUpdateRules(v ...string) FirewallPolicyUpdateOption {
 	return WithFirewallPolicyUpdateAttribute("firewall_rules", append([]string{}, v...))
 }

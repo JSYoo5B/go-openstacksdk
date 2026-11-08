@@ -46,8 +46,7 @@ type UserListOpts struct {
 }
 
 // UserListOption is one option of ListUsers: WithUserListOpts,
-// WithUserListQuery, WithUserListDomainID, WithUserListName,
-// WithUserListLocation, request.Headers (replaces the headers),
+// WithUserListQuery ("domain_id" or "name"), WithUserListLocation, request.Headers (replaces the headers),
 // request.Microversion or request.Custom over *UserListOpts. Other shared
 // calls fail with resource.ErrInvalidOption before HTTP.
 type UserListOption = request.GetCall
@@ -106,8 +105,6 @@ func WithUserListQuery(key string, value any) UserListOption {
 		return nil
 	})
 }
-func WithUserListDomainID(v string) UserListOption { return WithUserListQuery("domain_id", v) }
-func WithUserListName(v string) UserListOption     { return WithUserListQuery("name", v) }
 func WithUserListLocation(v resource.CloudLocation) UserListOption {
 	owned := v.Clone()
 	return request.Custom(func(c *UserListOpts) error { x := owned.Clone(); c.Location = &x; return nil })

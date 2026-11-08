@@ -26,7 +26,7 @@ func TestPythonNetworkListRecordsConflictingAttrsFormalOverridesAndOriginalJMES(
 		return networkListResponse(200, `{"networks":[{"id":"one","mtu":2}]}`)
 	})
 	conflict := json.RawMessage(`{"name":"restored","mtu":2,"headers":{"X-Trace":"restored"},"microversion":"2.1","jmespath_filters":"[?","__conflicting_attrs":{"name":"never recurse"}}`)
-	result, err := api.ProxyListRecords(context.Background(), networks.WithRecordListQuery("name", "original"), request.Headers(map[string]string{"X-Trace": "original"}), request.Microversion("2.0"), networks.WithRecordListConflictingAttrs(conflict), networks.WithRecordListJMESPath("@"))
+	result, err := api.ProxyListRecords(context.Background(), networks.WithRecordListQuery("name", "original"), request.Headers(map[string]string{"X-Trace": "original"}), request.Microversion("2.0"), networks.WithRecordListQuery("__conflicting_attrs", conflict), networks.WithRecordListQuery("jmespath_filters", "@"))
 	conflict[0] = 'X'
 	if err != nil || result == nil || result.JSON != nil || len(calls) != 0 {
 		t.Fatal(result, err, calls)
@@ -48,7 +48,7 @@ func TestPythonNetworkListRecordsConflictingAttrsFormalOverridesAndOriginalJMES(
 	for _, raw := range []json.RawMessage{json.RawMessage(`null`), json.RawMessage(`false`), json.RawMessage(`0`), json.RawMessage(`1e-400`), json.RawMessage(`[]`), json.RawMessage(`{}`)} {
 		var untouched []nativeNetworkCall
 		empty := pythonCoreNetworkAPI(t, &untouched, func(*http.Request) *http.Response { return networkListResponse(200, `{"networks":[]}`) })
-		rows, err := empty.AllRecords(context.Background(), networks.WithRecordListConflictingAttrs(raw))
+		rows, err := empty.AllRecords(context.Background(), networks.WithRecordListQuery("__conflicting_attrs", raw))
 		if err != nil || rows == nil || len(rows) != 0 || len(untouched) != 1 {
 			t.Fatal(string(raw), rows, err, untouched)
 		}
@@ -56,7 +56,7 @@ func TestPythonNetworkListRecordsConflictingAttrsFormalOverridesAndOriginalJMES(
 	for _, raw := range []string{`{"paginated":false}`, `{"base_path":null}`, `{"cls":null}`, `{"session":null}`, `{"resource_type":null}`, `true`, `[1]`} {
 		var untouched []nativeNetworkCall
 		invalid := pythonCoreNetworkAPI(t, &untouched, func(*http.Request) *http.Response { t.Fatal("invalid restored control reached HTTP"); return nil })
-		rows, err := invalid.AllRecords(context.Background(), networks.WithRecordListConflictingAttrs(json.RawMessage(raw)))
+		rows, err := invalid.AllRecords(context.Background(), networks.WithRecordListQuery("__conflicting_attrs", json.RawMessage(raw)))
 		if rows != nil || !errors.Is(err, resource.ErrInvalidOption) || len(untouched) != 0 {
 			t.Fatal(raw, rows, err, untouched)
 		}

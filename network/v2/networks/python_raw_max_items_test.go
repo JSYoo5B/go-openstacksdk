@@ -173,7 +173,7 @@ func TestPythonNetworkRawMaxItemsOpaqueJMESAndOwnedJSON(t *testing.T) {
 	api := pythonCoreNetworkAPI(t, &calls, func(*http.Request) *http.Response {
 		return nativeNetworkWire(200, `{"networks":[{"id":"one"},{"id":"two"}]}`)
 	})
-	options := []sdk.RecordListOption{sdk.WithCloudRecordListQuery("max_items", json.RawMessage(`"wrong"`)), sdk.WithRecordListJMESPath("`[]`")}
+	options := []sdk.RecordListOption{sdk.WithCloudRecordListQuery("max_items", json.RawMessage(`"wrong"`)), sdk.WithRecordListQuery("jmespath_filters", "`[]`")}
 	proxy, err := api.ProxyCloudListRecords(context.Background(), nil, options...)
 	if err != nil || string(proxy.JSON) != "[]" || len(calls) != 0 {
 		t.Fatal(proxy, err, calls)

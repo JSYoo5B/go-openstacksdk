@@ -126,14 +126,14 @@ func TestCloudRouterCreateGatewayAssemblyAndOwnedConcreteOptions(t *testing.T) {
 	option := network.WithRouterCreateJSON(raw)
 	raw[2] = 'X'
 	ips := []map[string]any{{"subnet_id": "sub", "ip_address": "192.0.2.8"}}
-	fixed := network.WithRouterCreateExternalFixedIPs(ips)
+	fixed := network.WithRouterCreateAttribute("ext_fixed_ips", ips)
 	ips[0]["subnet_id"] = "modified"
 	var posted map[string]json.RawMessage
 	service, count := qosCloudMutationFixture(t, func(w http.ResponseWriter, r *http.Request) {
 		posted = qosCloudCreateBody(t, r, "router")
 		testcloud.JSON(w, 201, `{"router":{"id":"new"}}`)
 	})
-	result, _ := routerCloudReply(t, service, count, option, network.WithRouterCreateName("new"), network.WithRouterCreateAdminStateUp(false), fixed)
+	result, _ := routerCloudReply(t, service, count, option, network.WithRouterCreateAttribute("name", "new"), network.WithRouterCreateAttribute("admin_state_up", false), fixed)
 	if string(posted["name"]) != `"new"` || string(posted["admin_state_up"]) != "false" || string(posted["project_id"]) != `""` {
 		t.Fatal(posted)
 	}
@@ -247,7 +247,7 @@ func TestCloudRouterCreateResponseSourceDefaultsAliasesAndOwnedLocation(t *testi
 	current := network.WithRouterCreateCurrentLocation(location)
 	name = "changed"
 	project[1] = 'X'
-	result, _ := routerCloudReply(t, service, count, network.WithRouterCreateName("seed"), current)
+	result, _ := routerCloudReply(t, service, count, network.WithRouterCreateAttribute("name", "seed"), current)
 	for key, want := range map[string]string{"id": "null", "name": `"seed"`, "is_admin_state_up": "null", "project_id": `"foreign"`, "tenant_id": `"foreign"`, "external_gateway_info": "{}", "availability_zone_hints": `["z"]`, "tags": `["tag"]`, "revision_number": "7", "microversion": `"2.1"`, "if_match": `["first, second"]`, "x_new": "9007199254740993"} {
 		if string(result.Router.Body[key]) != want {
 			t.Fatal(key, string(result.Router.Body[key]), want)
@@ -324,7 +324,7 @@ func TestCloudRouterCreateRejectedStatusesAndInvalidResponsesKeepActualReceipt(t
 	}
 	for _, body := range []string{"", "broken", "{}", "null", "[]", `{"router":null}`, `{"router":[]}`} {
 		service, count := qosCloudMutationFixture(t, func(w http.ResponseWriter, r *http.Request) { testcloud.JSON(w, 202, body) })
-		result, e := service.CreateRouterRecord(context.Background(), network.WithRouterCreateName("seed"), network.WithRouterCreateAdminStateUp(false))
+		result, e := service.CreateRouterRecord(context.Background(), network.WithRouterCreateAttribute("name", "seed"), network.WithRouterCreateAttribute("admin_state_up", false))
 		bad := body == "null" || body == "[]" || body == `{"router":null}` || body == `{"router":[]}`
 		if result == nil || result.StatusCode != 202 || string(result.Envelope) != body || count.Load() != 1 || bad && (e == nil || result.Router != nil) || !bad && (e != nil || result.Router == nil || string(result.Router.Body["name"]) != `"seed"` || string(result.Router.Body["is_admin_state_up"]) != "false") {
 			t.Fatal(body, result, e, count.Load())
@@ -446,7 +446,7 @@ func TestCloudRouterCreateCleanRetryTokenRenewalAndHeaderVersionCapture(t *testi
 				service.RawClient().MoreHeaders["X-Owned"] = "after"
 				return nil
 			})
-			result, e := service.CreateRouterRecord(context.Background(), network.WithRouterCreateAvailabilityZoneHints(), network.WithRouterCreateName("owned"), option)
+			result, e := service.CreateRouterRecord(context.Background(), network.WithRouterCreateAvailabilityZoneHints(), network.WithRouterCreateAttribute("name", "owned"), option)
 			if mode == "route" {
 				if result == nil || result.Router != nil || result.StatusCode != 503 || !errors.Is(e, resource.ErrInvalidOption) || !gophercloud.ResponseCodeIs(e, 503) || count.Load() != 2 || callbacks != 1 {
 					t.Fatal(result, e, count.Load(), callbacks)

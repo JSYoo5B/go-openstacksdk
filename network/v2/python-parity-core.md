@@ -419,7 +419,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
 - `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithRecordListBasePath`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithRecordListJMESPath`
 
 - List sends GET ports with network_id, admin_state_up, repeated security_groups and fixed_ips and binding:host_id, and follows ports_links with the next href.
   Tests: `network/v2/ports/python_parity_core_test.go:TestPythonParityCorePortListQueryAndLinks`.

@@ -84,7 +84,7 @@ func TestCloudSubnetUpdateNameFallbackAndMissing(t *testing.T) {
 				rows = `[{"id":"actual","name":"target"}]`
 			}
 			client, calls := pythonCloudBClient(t, map[string][]pythonCloudBReply{"GET /v2.0/subnets/target": {{404, `{}`}}, "GET /v2.0/subnets": {{200, `{"subnets":` + rows + `}`}}, "PUT /v2.0/subnets/actual": {{200, `{"subnet":{"id":"actual"}}`}}})
-			result, err := network.New(client).UpdateSubnetRecord(context.Background(), "target", network.WithSubnetUpdateName("new"))
+			result, err := network.New(client).UpdateSubnetRecord(context.Background(), "target", network.WithSubnetUpdateAttribute("subnet_name", "new"))
 			if found {
 				if err != nil || result.Subnet == nil || len(calls()) != 3 {
 					t.Fatal(result, err, calls())
@@ -119,14 +119,14 @@ func TestCloudSubnetUpdateOwnedOptionsAndPreflight(t *testing.T) {
 	if result != nil || !errors.Is(err, context.Canceled) || len(calls()) != 1 {
 		t.Fatal(result, err)
 	}
-	result, err = service.UpdateSubnetRecord(context.Background(), "p", network.WithSubnetUpdateName("new"), func(*network.SubnetUpdateOpts) error { service.API = nil; return nil })
+	result, err = service.UpdateSubnetRecord(context.Background(), "p", network.WithSubnetUpdateAttribute("subnet_name", "new"), func(*network.SubnetUpdateOpts) error { service.API = nil; return nil })
 	if result != nil || !errors.Is(err, resource.ErrInvalidOption) || len(calls()) != 1 {
 		t.Fatal(result, err)
 	}
 }
 func TestCloudSubnetUpdateConflictKeepsLookupAndSingleAttempt(t *testing.T) {
 	client, calls := pythonCloudBClient(t, map[string][]pythonCloudBReply{"GET /v2.0/subnets/p": {{200, `{"subnet":{"id":"p","name":"old"}}`}}, "PUT /v2.0/subnets/p": {{http.StatusConflict, `{"error":"conflict"}`}}})
-	result, err := network.New(client).UpdateSubnetRecord(context.Background(), "p", network.WithSubnetUpdateName("new"))
+	result, err := network.New(client).UpdateSubnetRecord(context.Background(), "p", network.WithSubnetUpdateAttribute("subnet_name", "new"))
 	if err == nil || result == nil || result.Lookup == nil || result.Subnet != nil || result.NoOp || len(calls()) != 2 {
 		t.Fatal(result, err, calls())
 	}

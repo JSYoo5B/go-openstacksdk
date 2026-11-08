@@ -116,7 +116,7 @@ func TestPythonAttachmentRecordUpdateDefaultsSwapAndExplicitValues(t *testing.T)
 	if err != nil || value == nil || string(value.Resource.Body["id"]) != `"old"` || string(value.Resource.Body["volume_id"]) != `"returned"` || string(value.Resource.Body["device"]) != "null" || value.Header.Get("X-Request-Id") != "actual" || value.Wire.Body["id"] != nil {
 		t.Fatal(value, err)
 	}
-	_, err = api.UpdateRecord(context.Background(), "s1", "old", volumeattach.WithAttachmentSwapTo("new"), volumeattach.WithAttachmentAttribute("delete_on_termination", false), volumeattach.WithAttachmentAttribute("device", nil), volumeattach.WithAttachmentAttribute("tag", ""), volumeattach.WithAttachmentAttribute("bdm_id", 0), volumeattach.WithAttachmentAttribute("unknown", make(chan int)))
+	_, err = api.UpdateRecord(context.Background(), "s1", "old", volumeattach.WithAttachmentAttribute("volume_id", "new"), volumeattach.WithAttachmentAttribute("delete_on_termination", false), volumeattach.WithAttachmentAttribute("device", nil), volumeattach.WithAttachmentAttribute("tag", ""), volumeattach.WithAttachmentAttribute("bdm_id", 0), volumeattach.WithAttachmentAttribute("unknown", make(chan int)))
 	if err != nil || calls.Len() != 2 || calls.Calls()[0].Method != "PUT" || calls.Calls()[0].Path != pythonVolumeAttachBase+"/old" || calls.Calls()[0].Body != `{"volumeAttachment":{"volumeId":"old"}}` || calls.Calls()[1].Body != `{"volumeAttachment":{"bdm_uuid":0,"delete_on_termination":false,"device":null,"tag":"","volumeId":"new"}}` {
 		t.Fatal(err, pythonVolumeAttachCalls(calls))
 	}

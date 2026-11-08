@@ -82,22 +82,6 @@ func WithRouterCreateJSON(v json.RawMessage) RouterCreateOption {
 		return nil
 	}
 }
-func WithRouterCreateName(v string) RouterCreateOption { return WithRouterCreateAttribute("name", v) }
-func WithRouterCreateAdminStateUp(v bool) RouterCreateOption {
-	return WithRouterCreateAttribute("admin_state_up", v)
-}
-func WithRouterCreateExternalGatewayNetworkID(v string) RouterCreateOption {
-	return WithRouterCreateAttribute("ext_gateway_net_id", v)
-}
-func WithRouterCreateEnableSNAT(v bool) RouterCreateOption {
-	return WithRouterCreateAttribute("enable_snat", v)
-}
-func WithRouterCreateExternalFixedIPs(v []map[string]any) RouterCreateOption {
-	return WithRouterCreateAttribute("ext_fixed_ips", v)
-}
-func WithRouterCreateProjectID(v string) RouterCreateOption {
-	return WithRouterCreateAttribute("project_id", v)
-}
 func WithRouterCreateAvailabilityZoneHints(v ...string) RouterCreateOption {
 	// No arguments is an explicit empty list, distinct from omitted/null hints.
 	return WithRouterCreateAttribute("availability_zone_hints", append([]string{}, v...))

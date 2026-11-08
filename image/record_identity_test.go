@@ -208,7 +208,7 @@ func TestImageMemberRecordIdentityFromAcceptedResponseCannotSelectNewTarget(t *t
 					t.Fatal(got)
 				}
 			case "update":
-				got, failure := service.UpdateImageMemberRecord(context.Background(), resource.ID(memberRecordParent), ImageMemberRecordRequest{Record: seed}, WithImageMemberRecordStatus("accepted"))
+				got, failure := service.UpdateImageMemberRecord(context.Background(), resource.ID(memberRecordParent), ImageMemberRecordRequest{Record: seed}, WithImageMemberRecordWriteAttribute("status", "accepted"))
 				err = failure
 				if got != nil {
 					t.Fatal(got)

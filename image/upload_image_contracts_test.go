@@ -141,9 +141,9 @@ func TestImageUploadContractsWireAndOwnership(t *testing.T) {
 		})
 		result, e := image.New(c).UploadImage(context.Background(), uploadImageContractInput(reader),
 			request.Header("X-One", "one"), image.WithImageUploadHeaders(map[string]string{"X-Two": "two"}),
-			image.WithImageUploadFields(fields), image.WithImageUploadDiskFormat("future/disk"), image.WithImageUploadContainerFormat("future/container"),
-			image.WithImageUploadVisibility(image.Visibility("future/visibility")), image.WithImageUploadOwner(""), image.WithImageUploadProtected(false), image.WithImageUploadHidden(false),
-			image.WithImageUploadMinDisk(-1), image.WithImageUploadMinRAM(0), image.WithImageUploadTags("repeat", "repeat", "line\n", ""), image.WithImageUploadField("custom", map[string]any{"flag": false}), image.WithImageUploadSize(0))
+			image.WithImageUploadFields(fields), image.WithImageUploadField("disk_format", "future/disk"), image.WithImageUploadField("container_format", "future/container"),
+			image.WithImageUploadField("visibility", image.Visibility("future/visibility")), image.WithImageUploadField("owner", ""), image.WithImageUploadField("protected", false), image.WithImageUploadField("os_hidden", false),
+			image.WithImageUploadField("min_disk", -1), image.WithImageUploadField("min_ram", 0), image.WithImageUploadTags("repeat", "repeat", "line\n", ""), image.WithImageUploadField("custom", map[string]any{"flag": false}), image.WithImageUploadSize(0))
 		if e != nil || result == nil || result.ImageID != "observed" || result.Image.Name != nil || result.Image.DiskFormat != nil || result.Image.Status == nil || *result.Image.Status != "queued" || calls.Load() != 2 {
 			t.Fatal(result, e, calls.Load())
 		}
@@ -328,7 +328,7 @@ func TestImageUploadContractsPreflightAndSnapshots(t *testing.T) {
 			{"raw empty", image.WithImageUploadFields(map[string]json.RawMessage{"value": json.RawMessage{}})},
 			{"raw malformed", image.WithImageUploadFields(map[string]json.RawMessage{"value": json.RawMessage(`{`)})},
 			{"raw UTF8", image.WithImageUploadFields(map[string]json.RawMessage{"value": json.RawMessage{'"', 255, '"'}})},
-			{"format empty", image.WithImageUploadDiskFormat("")}, {"format null", image.WithImageUploadFields(map[string]json.RawMessage{"disk_format": json.RawMessage(`null`)})},
+			{"format empty", image.WithImageUploadField("disk_format", "")}, {"format null", image.WithImageUploadFields(map[string]json.RawMessage{"disk_format": json.RawMessage(`null`)})},
 			{"format numeric", image.WithImageUploadFields(map[string]json.RawMessage{"container_format": json.RawMessage(`1`)})},
 			{"protected auth", request.Header("x-auth-token", "override")}, {"protected media", request.Header("Accept", "x")},
 			{"protected size", request.Header("X-OpenStack-Image-Size", "1")}, {"protected length", request.Header("Content-Length", "1")},

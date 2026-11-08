@@ -19,11 +19,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSPolicyMutationJSON`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSPolicyMutationOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSPolicyAttribute`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSPolicyName`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSPolicyDescription`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSPolicyShared`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSPolicyDefault`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSPolicyProjectID`
 
 - Cloud valid_kwargs name/description/shared/default/project_id are validated before any extension HTTP. Complete JSON null/presence and concrete options are library-owned, nil/unknown cloud keys including is_shared/is_default are rejected with HTTP0 and later options overwrite prior keys from owned snapshots.
   Tests: `network/cloud_qos_policy_mutations_test.go:TestCloudQoSPolicyMutationValidKwargsBeforeGateAndOwnedOptions`.
@@ -64,11 +59,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSPolicyMutationJSON`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSPolicyMutationOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSPolicyAttribute`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSPolicyName`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSPolicyDescription`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSPolicyShared`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSPolicyDefault`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSPolicyProjectID`
 
 - After the cloud extension gate, Go sends the same GET /extensions, QoS policy GET-then-name-list find, rule GET/POST/DELETE, rule-type GET, policy POST and policy DELETE requests, while a rule DELETE 404 stays an error.
   Tests: `network/python_cloud_parity_a_test.go:TestPythonCloudQoSRequestsAfterExtensionGate`.

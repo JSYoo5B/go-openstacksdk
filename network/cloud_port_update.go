@@ -74,24 +74,8 @@ func WithPortUpdateJSON(raw json.RawMessage) PortUpdateOption {
 		return nil
 	}
 }
-func WithPortUpdateName(v string) PortUpdateOption { return WithPortUpdateAttribute("name", v) }
-func WithPortUpdateAdminStateUp(v bool) PortUpdateOption {
-	return WithPortUpdateAttribute("admin_state_up", v)
-}
 func WithPortUpdateSecurityGroups(v ...string) PortUpdateOption {
 	return WithPortUpdateAttribute("security_groups", append([]string{}, v...))
-}
-func WithPortUpdatePortSecurityEnabled(v bool) PortUpdateOption {
-	return WithPortUpdateAttribute("port_security_enabled", v)
-}
-func WithPortUpdateDeviceID(v string) PortUpdateOption {
-	return WithPortUpdateAttribute("device_id", v)
-}
-func WithPortUpdateDeviceOwner(v string) PortUpdateOption {
-	return WithPortUpdateAttribute("device_owner", v)
-}
-func WithPortUpdateQoSPolicyID(v string) PortUpdateOption {
-	return WithPortUpdateAttribute("qos_policy_id", v)
 }
 
 // PortUpdateResult retains the lookup's declared view and wire evidence.

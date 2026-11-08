@@ -22,8 +22,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleCreateOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleCreateAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleCreateJSON`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleCreateDirection`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleCreateMaxBurstKBPS`
 
 - After the cloud extension gate, Go sends the same GET /extensions, QoS policy GET-then-name-list find, rule GET/POST/DELETE, rule-type GET, policy POST and policy DELETE requests, while a rule DELETE 404 stays an error.
   Tests: `network/python_cloud_parity_a_test.go:TestPythonCloudQoSRequestsAfterExtensionGate`.
@@ -114,7 +112,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleCreateOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleCreateAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleCreateJSON`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleCreateDirection`
 
 - After the cloud extension gate, Go sends the same GET /extensions, QoS policy GET-then-name-list find, rule GET/POST/DELETE, rule-type GET, policy POST and policy DELETE requests, while a rule DELETE 404 stays an error.
   Tests: `network/python_cloud_parity_a_test.go:TestPythonCloudQoSRequestsAfterExtensionGate`.

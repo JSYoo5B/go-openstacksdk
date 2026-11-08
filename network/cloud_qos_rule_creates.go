@@ -63,12 +63,6 @@ func WithQoSRuleCreateJSON(raw json.RawMessage) QoSRuleCreateOption {
 		return nil
 	}
 }
-func WithQoSRuleCreateDirection(v string) QoSRuleCreateOption {
-	return WithQoSRuleCreateAttribute("direction", v)
-}
-func WithQoSRuleCreateMaxBurstKBPS(v int) QoSRuleCreateOption {
-	return WithQoSRuleCreateAttribute("max_burst_kbps", v)
-}
 
 // QoSRuleCreateResult preserves independent extension/policy/rule evidence.
 // DirectionDropped reports a nonnull BW direction removed by its optional gate.

@@ -21,7 +21,7 @@ func TestPythonNetworkProxyListRecordsJSONResultsDoNotReadGenerator(t *testing.T
 		t.Run(tc.expression, func(t *testing.T) {
 			var calls []nativeNetworkCall
 			api := pythonCoreNetworkAPI(t, &calls, func(*http.Request) *http.Response { t.Fatal("expression consumed generator"); return nil })
-			result, err := api.ProxyListRecords(context.Background(), networks.WithRecordListJMESPath(tc.expression))
+			result, err := api.ProxyListRecords(context.Background(), networks.WithRecordListQuery("jmespath_filters", tc.expression))
 			if err != nil || result == nil || string(result.JSON) != tc.expected || len(calls) != 0 {
 				t.Fatal(result, err, calls)
 			}
@@ -34,7 +34,7 @@ func TestPythonNetworkProxyListRecordsJMESRuntimeFailuresBeforeHTTP(t *testing.T
 		t.Run(expression, func(t *testing.T) {
 			var calls []nativeNetworkCall
 			api := pythonCoreNetworkAPI(t, &calls, func(*http.Request) *http.Response { t.Fatal("expression failure consumed generator"); return nil })
-			result, err := api.ProxyListRecords(context.Background(), networks.WithRecordListJMESPath(expression))
+			result, err := api.ProxyListRecords(context.Background(), networks.WithRecordListQuery("jmespath_filters", expression))
 			var operation *resource.OperationError
 			if result != nil || err == nil || !errors.As(err, &operation) || operation.Operation != "ProxyListRecords" || operation.Resource != "networks" || len(calls) != 0 {
 				t.Fatal(result, err, operation, calls)
@@ -53,7 +53,7 @@ func TestPythonNetworkProxyListRecordsGeneratorIdentityAndNestedResultsStayLazy(
 				}
 				return networkListResponse(200, `{"networks":[{"id":"one"}]}`)
 			})
-			result, err := api.ProxyListRecords(context.Background(), networks.WithRecordListJMESPath(expression), networks.WithRecordListQuery("name", "name"))
+			result, err := api.ProxyListRecords(context.Background(), networks.WithRecordListQuery("jmespath_filters", expression), networks.WithRecordListQuery("name", "name"))
 			if err != nil || result == nil || result.JSON != nil || len(calls) != 0 {
 				t.Fatal(result, err, calls)
 			}
