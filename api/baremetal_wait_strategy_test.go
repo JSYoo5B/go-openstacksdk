@@ -59,34 +59,34 @@ func TestBaremetalWaitStrategyRejectedBeforeHTTP(t *testing.T) {
 	nodeAPI := nodes.New(r2icClient(cloud, "1.99"))
 	allocationAPI := allocations.New(r2icClient(cloud, "1.99"))
 	machines := r2icService(cloud)
-	strategy := v1.WithMachineWaitStrategy(invalid)
+	strategy := v1.WithMachineWaitOptions(resource.WithWaitStrategy(invalid))
 	for name, call := range map[string]func() error{
 		"allocation wait": func() error {
-			_, err := allocationAPI.WaitForActive(ctx, "a", allocations.WithWaitStrategy(invalid))
+			_, err := allocationAPI.WaitForActive(ctx, "a", allocations.WithAllocationWait(resource.WithWaitStrategy(invalid)))
 			return err
 		},
 		"power wait": func() error {
-			_, err := nodeAPI.WaitForPowerState(ctx, "n1", "power on", nodes.WithWaitStrategy(invalid))
+			_, err := nodeAPI.WaitForPowerState(ctx, "n1", "power on", resource.WithWaitStrategy(invalid))
 			return err
 		},
 		"reservation wait without reservation": func() error {
-			_, err := nodeAPI.WaitForReservation(ctx, &nodes.Node{UUID: "n1"}, nodes.WithWaitStrategy(resource.WaitStrategy{}))
+			_, err := nodeAPI.WaitForReservation(ctx, &nodes.Node{UUID: "n1"}, resource.WithWaitStrategy(resource.WaitStrategy{}))
 			return err
 		},
 		"provision wait": func() error {
-			_, err := nodeAPI.AwaitProvisionState(ctx, "n1", "active", nodes.WithProvisionWaitStrategy(invalid))
+			_, err := nodeAPI.AwaitProvisionState(ctx, "n1", "active", nodes.WithProvisionWait(resource.WithWaitStrategy(invalid)))
 			return err
 		},
 		"provision waits": func() error {
-			_, err := nodeAPI.AwaitProvisionStates(ctx, []string{"n1"}, "active", nodes.WithProvisionWaitStrategy(invalid))
+			_, err := nodeAPI.AwaitProvisionStates(ctx, []string{"n1"}, "active", nodes.WithProvisionWait(resource.WithWaitStrategy(invalid)))
 			return err
 		},
 		"set provision state": func() error {
-			_, err := nodeAPI.SetProvisionState(ctx, "n1", nodes.ProvisionStateRequest{Target: "active"}, nodes.WithProvisionStateWait(nodes.WithProvisionWaitStrategy(invalid)))
+			_, err := nodeAPI.SetProvisionState(ctx, "n1", nodes.ProvisionStateRequest{Target: "active"}, nodes.WithProvisionStateWait(nodes.WithProvisionWait(resource.WithWaitStrategy(invalid))))
 			return err
 		},
 		"set power state": func() error {
-			return nodeAPI.SetPowerState(ctx, "n1", "power on", nodes.WithPowerStateWait(nodes.WithWaitStrategy(invalid)))
+			return nodeAPI.SetPowerState(ctx, "n1", "power on", nodes.WithPowerStateWait(resource.WithWaitStrategy(invalid)))
 		},
 		"machine provision": func() error {
 			_, err := machines.NodeSetProvisionState(ctx, "n1", "active", strategy)
@@ -121,7 +121,7 @@ func TestBaremetalWaitStrategyPacesPollsAndLaterOptionWins(t *testing.T) {
 		var gets strategyGets
 		gets.serve(cloud, "GET /v1/allocations/a", 4, `{"uuid":"a","state":"allocating"}`, `{"uuid":"a","state":"active"}`)
 		api := allocations.New(r2icClient(cloud, "1.99"))
-		if _, err := api.WaitForActive(context.Background(), "a", allocations.WithWaitStrategy(growing)); err != nil {
+		if _, err := api.WaitForActive(context.Background(), "a", allocations.WithAllocationWait(resource.WithWaitStrategy(growing))); err != nil {
 			t.Fatal(err)
 		}
 		gets.gaps(t, 2*ms, 4*ms, 8*ms)
@@ -131,8 +131,8 @@ func TestBaremetalWaitStrategyPacesPollsAndLaterOptionWins(t *testing.T) {
 		var gets strategyGets
 		gets.serve(cloud, "GET /v1/nodes/n1", 4, `{"uuid":"n1","power_state":"power off"}`, `{"uuid":"n1","power_state":"power on"}`)
 		api := nodes.New(r2icClient(cloud, "1.99"))
-		// A later strategy replaces an earlier invalid one.
-		if _, err := api.WaitForPowerState(context.Background(), "n1", "power on", nodes.WithWaitStrategy(resource.WaitStrategy{}), nodes.WithWaitStrategy(resource.LinearWait(2*ms, 3*ms, 0))); err != nil {
+		// A later strategy replaces an earlier one.
+		if _, err := api.WaitForPowerState(context.Background(), "n1", "power on", resource.WithWaitStrategy(resource.FixedWait(time.Hour)), resource.WithWaitStrategy(resource.LinearWait(2*ms, 3*ms, 0))); err != nil {
 			t.Fatal(err)
 		}
 		gets.gaps(t, 2*ms, 5*ms, 8*ms)
@@ -142,7 +142,7 @@ func TestBaremetalWaitStrategyPacesPollsAndLaterOptionWins(t *testing.T) {
 		var gets strategyGets
 		gets.serve(cloud, "GET /v1/nodes/n1", 4, `{"uuid":"n1","provision_state":"deploying"}`, `{"uuid":"n1","provision_state":"active"}`)
 		api := nodes.New(r2icClient(cloud, "1.99"))
-		result, err := api.AwaitProvisionStates(context.Background(), []string{"n1"}, "active", nodes.WithProvisionWaitInterval(time.Hour), nodes.WithProvisionWaitStrategy(growing))
+		result, err := api.AwaitProvisionStates(context.Background(), []string{"n1"}, "active", nodes.WithProvisionWait(resource.WithPollInterval(time.Hour)), nodes.WithProvisionWait(resource.WithWaitStrategy(growing)))
 		if err != nil || len(result.Success) != 1 {
 			t.Fatal(result, err)
 		}
@@ -153,7 +153,7 @@ func TestBaremetalWaitStrategyPacesPollsAndLaterOptionWins(t *testing.T) {
 		r2icServe(t, cloud, "PUT /v1/nodes/n1/states/provision", 202, "")
 		var gets strategyGets
 		gets.serve(cloud, "GET /v1/nodes/n1", 4, `{"uuid":"n1","provision_state":"deploying"}`, `{"uuid":"n1","provision_state":"active"}`)
-		node, err := r2icService(cloud).NodeSetProvisionState(context.Background(), "n1", "active", v1.WithMachineWait(true), v1.WithMachineWaitInterval(time.Hour), v1.WithMachineWaitStrategy(growing))
+		node, err := r2icService(cloud).NodeSetProvisionState(context.Background(), "n1", "active", v1.WithMachineWait(true), v1.WithMachineWaitOptions(resource.WithPollInterval(time.Hour)), v1.WithMachineWaitOptions(resource.WithWaitStrategy(growing)))
 		if err != nil || node.ProvisionState != "active" {
 			t.Fatal(node, err)
 		}

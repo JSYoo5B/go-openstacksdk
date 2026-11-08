@@ -176,20 +176,20 @@ func TestR2IronicCWaitForActiveAllocation(t *testing.T) {
 	r2icServe(t, cloud, "GET /v1/allocations/slow", 200, `{"uuid":"slow","state":"allocating"}`)
 	api := allocations.New(r2icClient(cloud, "1.99"))
 	ctx := context.Background()
-	if a, err := api.WaitForActive(ctx, "ok", allocations.WithWaitInterval(r2icFast)); err != nil || a.State != "active" {
+	if a, err := api.WaitForActive(ctx, "ok", allocations.WithAllocationWait(resource.WithPollInterval(r2icFast))); err != nil || a.State != "active" {
 		t.Fatal(a, err)
 	}
-	_, err := api.WaitForActive(ctx, "bad", allocations.WithWaitInterval(r2icFast))
+	_, err := api.WaitForActive(ctx, "bad", allocations.WithAllocationWait(resource.WithPollInterval(r2icFast)))
 	var failed *allocations.AllocationFailedError
 	if !errors.As(err, &failed) || !errors.Is(err, resource.ErrFailedState) || failed.LastError != "no node" {
 		t.Fatal(err)
 	}
-	if a, err := api.WaitForActive(ctx, "bad", allocations.WithWaitInterval(r2icFast), allocations.WithIgnoreError(true)); err != nil || a.State != "error" {
+	if a, err := api.WaitForActive(ctx, "bad", allocations.WithAllocationWait(resource.WithPollInterval(r2icFast)), allocations.WithIgnoreError(true)); err != nil || a.State != "error" {
 		t.Fatalf("ignore error returns the allocation: %v %v", a, err)
 	}
 	short, cancel := context.WithTimeout(ctx, 30*time.Millisecond)
 	defer cancel()
-	if _, err := api.WaitForActive(short, "slow", allocations.WithWaitInterval(5*time.Millisecond)); !errors.Is(err, context.DeadlineExceeded) {
+	if _, err := api.WaitForActive(short, "slow", allocations.WithAllocationWait(resource.WithPollInterval(5*time.Millisecond))); !errors.Is(err, context.DeadlineExceeded) {
 		t.Fatal(err)
 	}
 }

@@ -28,11 +28,9 @@ type MachineOption func(*machineConfig)
 
 type machineConfig struct {
 	wait       bool
-	timeout    *time.Duration
-	unlimited  bool
+	waitOpts   []resource.WaitOption
+	pacing     resource.WaitStrategy
 	lock       *time.Duration
-	interval   time.Duration
-	strategy   *resource.WaitStrategy
 	err        error
 	configDriv string
 	state      string
@@ -41,34 +39,26 @@ type machineConfig struct {
 // WithMachineWait makes the workflow wait for the final provision state.
 func WithMachineWait(wait bool) MachineOption { return func(c *machineConfig) { c.wait = wait } }
 
-// WithMachineTimeout bounds each provision-state wait. Each workflow documents
-// the pinned Python default (3600 s for node_set_provision_state, register and
-// inspect, 1200 s for activate and deactivate, 600 s for unregister).
-func WithMachineTimeout(d time.Duration) MachineOption {
-	return func(c *machineConfig) { c.timeout = &d; c.unlimited = false }
+// WithMachineWaitOptions sets the wait controls of the machine workflows. It
+// is named WithMachineWaitOptions because WithMachineWait is the wait toggle.
+// resource.WithTimeout bounds each provision-state wait; each workflow
+// documents the pinned Python default (3600 s for node_set_provision_state,
+// register and inspect, 1200 s for activate and deactivate, 600 s for
+// unregister) and resource.WithUnlimitedWait removes it, leaving only the
+// caller's context. resource.WithPollInterval (default two seconds) or
+// resource.WithWaitStrategy (a Go-only extension) sets the pause of the
+// provision-state and reservation-lock waits; each wait starts the strategy
+// from its first pause. Repeated calls append; the later option wins per
+// control. Failure states, a status attribute, progress and invalid options
+// fail with resource.ErrInvalidOption before any request.
+func WithMachineWaitOptions(options ...resource.WaitOption) MachineOption {
+	options = append([]resource.WaitOption(nil), options...)
+	return func(c *machineConfig) { c.waitOpts = append(c.waitOpts, options...) }
 }
-
-// WithMachineUnlimitedWait removes the default timeout; only the caller's context
-// bounds the wait.
-func WithMachineUnlimitedWait() MachineOption { return func(c *machineConfig) { c.unlimited = true } }
 
 // WithMachineLockTimeout bounds the wait for a reservation lock (default 600 s).
 func WithMachineLockTimeout(d time.Duration) MachineOption {
 	return func(c *machineConfig) { c.lock = &d }
-}
-
-// WithMachineWaitInterval sets the polling pause (default two seconds). It and
-// WithMachineWaitStrategy replace each other; the later one wins.
-func WithMachineWaitInterval(d time.Duration) MachineOption {
-	return func(c *machineConfig) { c.interval, c.strategy, c.err = d, nil, nil }
-}
-
-// WithMachineWaitStrategy replaces the fixed polling pause of the
-// provision-state and reservation-lock waits with strategy, a Go-only
-// extension. Each wait starts the strategy from its first pause. An invalid
-// strategy fails with resource.ErrInvalidOption before any request.
-func WithMachineWaitStrategy(strategy resource.WaitStrategy) MachineOption {
-	return func(c *machineConfig) { c.interval, c.strategy, c.err = 0, &strategy, strategy.Validate() }
 }
 
 // WithMachineConfigDrive sends a config drive string as the provisioning
@@ -83,6 +73,12 @@ func WithRegisterProvisionState(state string) MachineOption {
 	return func(c *machineConfig) { c.state = state }
 }
 
+// machineWaitDefaults resolves the machine wait options for a workflow whose
+// pinned provision-state timeout is timeout.
+func machineWaitDefaults(timeout time.Duration) resource.WaitDefaults {
+	return resource.WaitDefaults{Timeout: timeout, Strategy: resource.FixedWait(nodes.DefaultWaitInterval)}
+}
+
 func newMachineConfig(options []MachineOption) machineConfig {
 	var c machineConfig
 	for _, o := range options {
@@ -90,39 +86,28 @@ func newMachineConfig(options []MachineOption) machineConfig {
 			o(&c)
 		}
 	}
+	// The timeout default does not affect validation or pacing; each workflow
+	// resolves its own default timeout in bound.
+	settings, err := resource.ResolveWait(machineWaitDefaults(time.Hour), c.waitOpts...)
+	c.pacing, c.err = settings.Strategy, err
 	return c
 }
 
 func (c machineConfig) bound(ctx context.Context, def time.Duration) (context.Context, context.CancelFunc) {
-	if c.unlimited {
+	settings, err := resource.ResolveWait(machineWaitDefaults(def), c.waitOpts...)
+	if err != nil || settings.Unlimited {
 		return ctx, func() {}
 	}
-	d := def
-	if c.timeout != nil {
-		d = *c.timeout
-	}
-	return context.WithTimeout(ctx, d)
+	return context.WithTimeout(ctx, settings.Timeout)
 }
 
 func (c machineConfig) waitOptions() []nodes.ProvisionWaitOption {
-	if c.strategy != nil {
-		return []nodes.ProvisionWaitOption{nodes.WithProvisionWaitStrategy(*c.strategy)}
-	}
-	if c.interval > 0 {
-		return []nodes.ProvisionWaitOption{nodes.WithProvisionWaitInterval(c.interval)}
-	}
-	return nil
+	return []nodes.ProvisionWaitOption{nodes.WithProvisionWait(resource.WithWaitStrategy(c.pacing))}
 }
 
 // lockWaitOptions applies the selected pause to a reservation-lock wait.
-func (c machineConfig) lockWaitOptions() []nodes.WaitOption {
-	if c.strategy != nil {
-		return []nodes.WaitOption{nodes.WithWaitStrategy(*c.strategy)}
-	}
-	if c.interval > 0 {
-		return []nodes.WaitOption{nodes.WithWaitInterval(c.interval)}
-	}
-	return nil
+func (c machineConfig) lockWaitOptions() []resource.WaitOption {
+	return []resource.WaitOption{resource.WithWaitStrategy(c.pacing)}
 }
 
 func (c machineConfig) provision(ctx context.Context, s *Service, id, target string, def time.Duration, drive string) (*nodes.Node, error) {

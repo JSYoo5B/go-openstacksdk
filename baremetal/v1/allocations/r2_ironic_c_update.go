@@ -107,31 +107,24 @@ func (e *AllocationFailedError) Is(t error) bool {
 type WaitOption func(*waitConfig)
 
 type waitConfig struct {
-	interval time.Duration
-	strategy *resource.WaitStrategy
-	err      error
-	ignore   bool
+	wait   []resource.WaitOption
+	ignore bool
 }
 
-// WithWaitInterval sets the pause between reads (default two seconds).
-// Non-positive values are ignored. A positive interval and WithWaitStrategy
-// replace each other; the later one wins.
-func WithWaitInterval(d time.Duration) WaitOption {
-	return func(c *waitConfig) {
-		if d > 0 {
-			c.interval, c.strategy, c.err = d, nil, nil
-		}
-	}
-}
+// allocationWaitDefaults are the WaitForActive defaults: no SDK timeout (the
+// context is the deadline) and two seconds between reads. Failure states, a
+// status attribute and progress are not honored.
+var allocationWaitDefaults = resource.WaitDefaults{Unlimited: true, Strategy: resource.FixedWait(2 * time.Second)}
 
-// WithWaitStrategy replaces the fixed pause between reads with strategy, a
-// Go-only extension. An invalid strategy makes WaitForActive fail with
-// resource.ErrInvalidOption before the first read, unless a later
-// WithWaitInterval or WithWaitStrategy replaces it.
-func WithWaitStrategy(strategy resource.WaitStrategy) WaitOption {
-	return func(c *waitConfig) {
-		c.strategy, c.err = &strategy, strategy.Validate()
-	}
+// WithAllocationWait sets the wait controls of WaitForActive:
+// resource.WithPollInterval or resource.WithWaitStrategy (default two
+// seconds) and resource.WithTimeout or resource.WithUnlimitedWait (default: no
+// SDK timeout, the deadline is the context). Repeated calls append; the later
+// option wins per control. Failure states, a status attribute, progress and
+// invalid options fail with resource.ErrInvalidOption before the first read.
+func WithAllocationWait(options ...resource.WaitOption) WaitOption {
+	options = append([]resource.WaitOption(nil), options...)
+	return func(c *waitConfig) { c.wait = append(c.wait, options...) }
 }
 
 // WithIgnoreError makes the error state a normal end of the wait.
@@ -142,22 +135,24 @@ func WithIgnoreError(ignore bool) WaitOption { return func(c *waitConfig) { c.ig
 // reference. The state "error" returns *AllocationFailedError unless
 // WithIgnoreError(true) was given; every other state (including a null or
 // empty one) ends the wait and returns the allocation. The deadline is the
-// context.
+// context unless WithAllocationWait selects resource.WithTimeout.
 func (a *API) WaitForActive(ctx context.Context, id string, options ...WaitOption) (*Allocation, error) {
-	cfg := waitConfig{interval: 2 * time.Second}
+	var cfg waitConfig
 	for _, o := range options {
 		if o != nil {
 			o(&cfg)
 		}
 	}
-	if cfg.err != nil {
-		return nil, request.Wrap("WaitForActive", "allocations", cfg.err)
+	settings, err := resource.ResolveWait(allocationWaitDefaults, cfg.wait...)
+	if err != nil {
+		return nil, request.Wrap("WaitForActive", "allocations", err)
 	}
-	strategy := resource.FixedWait(cfg.interval)
-	if cfg.strategy != nil {
-		strategy = *cfg.strategy
+	if !settings.Unlimited {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, settings.Timeout)
+		defer cancel()
 	}
-	pacer := pollschedule.NewPacer(strategy.Delay)
+	pacer := pollschedule.NewPacer(settings.Strategy.Delay)
 	for {
 		value, err := a.Get(ctx, id)
 		if err != nil {

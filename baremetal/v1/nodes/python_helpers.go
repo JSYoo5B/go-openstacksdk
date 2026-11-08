@@ -146,52 +146,34 @@ func (a *API) UnsetMaintenanceAndGet(ctx context.Context, id string) (*Node, err
 	return a.getOrNil(ctx, "UnsetMaintenanceAndGet", id)
 }
 
-// WaitOption configures the polling helpers.
-type WaitOption func(*waitConfig)
+// nodeWaitDefaults are the defaults of the node polling helpers: no SDK
+// timeout (the context is the deadline) and DefaultWaitInterval between polls.
+// Failure states, a status attribute and progress are not honored.
+var nodeWaitDefaults = resource.WaitDefaults{Unlimited: true, Strategy: resource.FixedWait(DefaultWaitInterval)}
 
+// waitConfig is the resolved wait policy of one node polling helper.
 type waitConfig struct {
-	interval time.Duration
-	strategy *resource.WaitStrategy
+	settings resource.WaitSettings
 	err      error
-}
-
-// WithWaitInterval sets the pause between polls. Non-positive values keep
-// DefaultWaitInterval. A positive interval and WithWaitStrategy replace each
-// other; the later one wins.
-func WithWaitInterval(d time.Duration) WaitOption {
-	return func(c *waitConfig) {
-		if d > 0 {
-			c.interval, c.strategy, c.err = d, nil, nil
-		}
-	}
-}
-
-// WithWaitStrategy replaces the fixed pause between polls with strategy, a
-// Go-only extension. An invalid strategy makes the wait fail with
-// resource.ErrInvalidOption before the first read, unless a later
-// WithWaitInterval or WithWaitStrategy replaces it.
-func WithWaitStrategy(strategy resource.WaitStrategy) WaitOption {
-	return func(c *waitConfig) {
-		c.strategy, c.err = &strategy, strategy.Validate()
-	}
 }
 
 // pacer numbers the pauses of one wait under the selected strategy.
 func (c waitConfig) pacer() *pollschedule.Pacer {
-	if c.strategy != nil {
-		return pollschedule.NewPacer(c.strategy.Delay)
-	}
-	return pollschedule.NewPacer(resource.FixedWait(c.interval).Delay)
+	return pollschedule.NewPacer(c.settings.Strategy.Delay)
 }
 
-func waitConfigFrom(options []WaitOption) waitConfig {
-	cfg := waitConfig{interval: DefaultWaitInterval}
-	for _, o := range options {
-		if o != nil {
-			o(&cfg)
-		}
+// bound applies a caller-selected resource.WithTimeout; by default only ctx
+// bounds the wait.
+func (c waitConfig) bound(ctx context.Context) (context.Context, context.CancelFunc) {
+	if c.settings.Unlimited {
+		return ctx, func() {}
 	}
-	return cfg
+	return context.WithTimeout(ctx, c.settings.Timeout)
+}
+
+func waitConfigFrom(options []resource.WaitOption) waitConfig {
+	settings, err := resource.ResolveWait(nodeWaitDefaults, options...)
+	return waitConfig{settings: settings, err: err}
 }
 
 // poll reads the node immediately and then after each interval until done
@@ -201,6 +183,8 @@ func (a *API) poll(ctx context.Context, op, id string, cfg waitConfig, done func
 	if cfg.err != nil {
 		return nil, request.Wrap(op, "nodes", cfg.err)
 	}
+	ctx, cancel := cfg.bound(ctx)
+	defer cancel()
 	pacer := cfg.pacer()
 	for {
 		node, err := a.Get(ctx, id)
@@ -222,9 +206,12 @@ func (a *API) poll(ctx context.Context, op, id string, cfg waitConfig, done func
 
 // WaitForPowerState polls the node until PowerState equals expected. It reads
 // immediately, waits the configured interval between reads, and returns the
-// node that matched. The deadline is the context; there is no separate
-// timeout value.
-func (a *API) WaitForPowerState(ctx context.Context, id string, expected string, options ...WaitOption) (*Node, error) {
+// node that matched. It accepts resource.WithPollInterval or
+// resource.WithWaitStrategy (default DefaultWaitInterval) and
+// resource.WithTimeout or resource.WithUnlimitedWait (default: no SDK
+// timeout, the deadline is the context). Failure states, a status attribute
+// and progress fail with resource.ErrInvalidOption before any request.
+func (a *API) WaitForPowerState(ctx context.Context, id string, expected string, options ...resource.WaitOption) (*Node, error) {
 	return a.poll(ctx, "WaitForPowerState", id, waitConfigFrom(options), func(n *Node) bool { return n.PowerState == expected })
 }
 
@@ -234,7 +221,8 @@ func (a *API) WaitForPowerState(ctx context.Context, id string, expected string,
 // only consults the passed object. Otherwise the node is re-read until its
 // Reservation is empty. The release is best effort; a conductor may lock the
 // node again immediately.
-func (a *API) WaitForReservation(ctx context.Context, snapshot *Node, options ...WaitOption) (*Node, error) {
+// It takes the same wait options as WaitForPowerState.
+func (a *API) WaitForReservation(ctx context.Context, snapshot *Node, options ...resource.WaitOption) (*Node, error) {
 	if snapshot == nil {
 		return nil, request.Wrap("WaitForReservation", "nodes", errors.New("node snapshot is required"))
 	}

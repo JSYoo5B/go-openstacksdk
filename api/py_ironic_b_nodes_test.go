@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/baremetal/v1/nodes"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
@@ -137,7 +138,7 @@ func TestPyIronicBWaitForPowerStatePollsImmediatelyThenAtInterval(t *testing.T) 
 		}
 		testcloud.JSON(w, 200, `{"uuid":"n-1","power_state":"`+state+`"}`)
 	})
-	node, err := newIronicNodes(t, cloud).WaitForPowerState(context.Background(), "n-1", "power on", nodes.WithWaitInterval(time.Millisecond))
+	node, err := newIronicNodes(t, cloud).WaitForPowerState(context.Background(), "n-1", "power on", resource.WithPollInterval(time.Millisecond))
 	if err != nil || node.PowerState != "power on" || polls.Load() != 3 {
 		t.Fatalf("node=%v err=%v polls=%d", node, err, polls.Load())
 	}
@@ -151,7 +152,7 @@ func TestPyIronicBWaitForPowerStateStopsOnDeadlineAndReadErrors(t *testing.T) {
 	api := newIronicNodes(t, cloud)
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Millisecond)
 	defer cancel()
-	if _, err := api.WaitForPowerState(ctx, "stuck", "power on", nodes.WithWaitInterval(5*time.Millisecond)); !errors.Is(err, context.DeadlineExceeded) || stuck.count() < 2 {
+	if _, err := api.WaitForPowerState(ctx, "stuck", "power on", resource.WithPollInterval(5*time.Millisecond)); !errors.Is(err, context.DeadlineExceeded) || stuck.count() < 2 {
 		t.Fatalf("err=%v polls=%d", err, stuck.count())
 	}
 	var unexpected gophercloud.ErrUnexpectedResponseCode
@@ -177,7 +178,7 @@ func TestPyIronicBWaitForReservationUsesSnapshotAndPollsUntilReleased(t *testing
 	if got, err := api.WaitForReservation(ctx, free); err != nil || got != free || polls.Load() != 0 {
 		t.Fatalf("an unreserved snapshot must return without HTTP: err=%v polls=%d", err, polls.Load())
 	}
-	got, err := api.WaitForReservation(ctx, &nodes.Node{UUID: "n-1", Reservation: "conductor-1"}, nodes.WithWaitInterval(time.Millisecond))
+	got, err := api.WaitForReservation(ctx, &nodes.Node{UUID: "n-1", Reservation: "conductor-1"}, resource.WithPollInterval(time.Millisecond))
 	if err != nil || got.Reservation != "" || polls.Load() != 2 {
 		t.Fatalf("got=%v err=%v polls=%d", got, err, polls.Load())
 	}

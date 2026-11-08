@@ -110,7 +110,7 @@ func TestR2IronicCSetProvisionStateWaitDetectsFailure(t *testing.T) {
 	r2icServe(t, cloud, "PUT /v1/nodes/n1/states/provision", 202, "")
 	get := r2icServe(t, cloud, "GET /v1/nodes/n1", 200, `{"uuid":"n1","provision_state":"deploying"}`, 200, `{"uuid":"n1","provision_state":"deploy failed","last_error":"boom"}`)
 	api := nodes.New(r2icClient(cloud, "1.99"))
-	_, err := api.SetProvisionState(context.Background(), "n1", nodes.ProvisionStateRequest{Target: "active"}, nodes.WithProvisionStateWait(nodes.WithProvisionWaitInterval(r2icFast)))
+	_, err := api.SetProvisionState(context.Background(), "n1", nodes.ProvisionStateRequest{Target: "active"}, nodes.WithProvisionStateWait(nodes.WithProvisionWait(resource.WithPollInterval(r2icFast))))
 	var fail *nodes.ProvisionFailureError
 	if !errors.As(err, &fail) || !errors.Is(err, resource.ErrFailedState) || fail.LastError != "boom" || fail.State != "deploy failed" || len(get.all()) != 2 {
 		t.Fatalf("%v calls=%d", err, len(get.all()))
@@ -151,28 +151,28 @@ func TestR2IronicCAwaitProvisionStatesMultiNodeResults(t *testing.T) {
 	r2icServe(t, cloud, "GET /v1/nodes/stuck", 200, `{"uuid":"stuck","provision_state":"verifying"}`)
 	api := nodes.New(r2icClient(cloud, "1.99"))
 	ctx := context.Background()
-	res, err := api.AwaitProvisionStates(ctx, []string{"ok", "slow"}, "manageable", nodes.WithProvisionWaitInterval(r2icFast))
+	res, err := api.AwaitProvisionStates(ctx, []string{"ok", "slow"}, "manageable", nodes.WithProvisionWait(resource.WithPollInterval(r2icFast)))
 	if err != nil || len(res.Success) != 2 || res.Success[0].UUID != "ok" || res.Success[1].UUID != "slow" || len(slow.all()) != 2 {
 		t.Fatal(res, err)
 	}
-	res, err = api.AwaitProvisionStates(ctx, []string{"ok", "bad"}, "manageable", nodes.WithProvisionWaitInterval(r2icFast))
+	res, err = api.AwaitProvisionStates(ctx, []string{"ok", "bad"}, "manageable", nodes.WithProvisionWait(resource.WithPollInterval(r2icFast)))
 	var fail *nodes.ProvisionFailureError
 	if !errors.As(err, &fail) || !fail.Manage || len(res.Success) != 1 {
 		t.Fatalf("fail-fast: %v %+v", err, res)
 	}
-	res, err = api.AwaitProvisionStates(ctx, []string{"ok", "bad"}, "manageable", nodes.WithContinueOnFailure(), nodes.WithProvisionWaitInterval(r2icFast))
+	res, err = api.AwaitProvisionStates(ctx, []string{"ok", "bad"}, "manageable", nodes.WithContinueOnFailure(), nodes.WithProvisionWait(resource.WithPollInterval(r2icFast)))
 	if err != nil || len(res.Success) != 1 || len(res.Failure) != 1 || res.Failure[0].UUID != "bad" || len(res.Timeout) != 0 {
 		t.Fatalf("collect: %v %+v", err, res)
 	}
 	short, cancel := context.WithTimeout(ctx, 30*time.Millisecond)
 	defer cancel()
-	res, err = api.AwaitProvisionStates(short, []string{"ok", "stuck"}, "manageable", nodes.WithContinueOnFailure(), nodes.WithProvisionWaitInterval(5*time.Millisecond))
+	res, err = api.AwaitProvisionStates(short, []string{"ok", "stuck"}, "manageable", nodes.WithContinueOnFailure(), nodes.WithProvisionWait(resource.WithPollInterval(5*time.Millisecond)))
 	if err != nil || len(res.Success) != 1 || len(res.Timeout) != 1 || res.Timeout[0].UUID != "stuck" {
 		t.Fatalf("timeout: %v %+v", err, res)
 	}
 	short2, cancel2 := context.WithTimeout(ctx, 30*time.Millisecond)
 	defer cancel2()
-	if _, err = api.AwaitProvisionStates(short2, []string{"stuck"}, "manageable", nodes.WithProvisionWaitInterval(5*time.Millisecond)); !errors.Is(err, context.DeadlineExceeded) {
+	if _, err = api.AwaitProvisionStates(short2, []string{"stuck"}, "manageable", nodes.WithProvisionWait(resource.WithPollInterval(5*time.Millisecond))); !errors.Is(err, context.DeadlineExceeded) {
 		t.Fatalf("deadline as error: %v", err)
 	}
 }
@@ -183,7 +183,7 @@ func TestR2IronicCSetPowerStateWaitAndSoftVersion(t *testing.T) {
 	r2icServe(t, cloud, "GET /v1/nodes/n1", 200, `{"uuid":"n1","power_state":"power off"}`, 200, `{"uuid":"n1","power_state":"power on"}`)
 	api := nodes.New(r2icClient(cloud, "1.99"))
 	ctx := context.Background()
-	if err := api.SetPowerState(ctx, "n1", "rebooting", nodes.WithPowerStateWait(nodes.WithWaitInterval(r2icFast))); err != nil {
+	if err := api.SetPowerState(ctx, "n1", "rebooting", nodes.WithPowerStateWait(resource.WithPollInterval(r2icFast))); err != nil {
 		t.Fatal(err)
 	}
 	if put.all()[0].Body != `{"target":"rebooting"}` {

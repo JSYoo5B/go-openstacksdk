@@ -22,14 +22,14 @@ func TestR2IronicCMachineProvisionStateConfigDriveWaitAndDefaults(t *testing.T) 
 	r2icServe(t, cloud, "GET /v1/nodes/n1", 200, `{"uuid":"n1","provision_state":"deploying"}`, 200, `{"uuid":"n1","provision_state":"active"}`)
 	s := r2icService(cloud)
 	ctx := context.Background()
-	node, err := s.NodeSetProvisionState(ctx, "n1", "active", v1.WithMachineConfigDrive("QUJD"), v1.WithMachineWait(true), v1.WithMachineWaitInterval(r2icFast))
+	node, err := s.NodeSetProvisionState(ctx, "n1", "active", v1.WithMachineConfigDrive("QUJD"), v1.WithMachineWait(true), v1.WithMachineWaitOptions(resource.WithPollInterval(r2icFast)))
 	if err != nil || node.ProvisionState != "active" || put.all()[0].Body != `{"configdrive":"QUJD","target":"active"}` {
 		t.Fatalf("%v %+v", err, put.all())
 	}
 	if err := s.ActivateNode(ctx, "n1"); err != nil || put.all()[1].Body != `{"target":"active"}` {
 		t.Fatal(err)
 	}
-	if err := s.DeactivateNode(ctx, "n1", v1.WithMachineWait(true), v1.WithMachineWaitInterval(r2icFast), v1.WithMachineTimeout(time.Second)); err != nil || put.all()[2].Body != `{"target":"deleted"}` {
+	if err := s.DeactivateNode(ctx, "n1", v1.WithMachineWait(true), v1.WithMachineWaitOptions(resource.WithPollInterval(r2icFast)), v1.WithMachineWaitOptions(resource.WithTimeout(time.Second))); err != nil || put.all()[2].Body != `{"target":"deleted"}` {
 		t.Logf("deactivate waits for available: %v", err)
 	}
 	if _, err := s.NodeSetProvisionState(ctx, "n1", "clean", v1.WithMachineConfigDrive("x")); !errors.Is(err, resource.ErrInvalidOption) {
@@ -44,7 +44,7 @@ func TestR2IronicCMachineWaitTimeoutIsBoundedByOption(t *testing.T) {
 	cloud := testcloud.New(t)
 	r2icServe(t, cloud, "PUT /v1/nodes/n1/states/provision", 202, "")
 	r2icServe(t, cloud, "GET /v1/nodes/n1", 200, `{"uuid":"n1","provision_state":"deploying"}`)
-	_, err := r2icService(cloud).NodeSetProvisionState(context.Background(), "n1", "active", v1.WithMachineWait(true), v1.WithMachineTimeout(40*time.Millisecond), v1.WithMachineWaitInterval(5*time.Millisecond))
+	_, err := r2icService(cloud).NodeSetProvisionState(context.Background(), "n1", "active", v1.WithMachineWait(true), v1.WithMachineWaitOptions(resource.WithTimeout(40*time.Millisecond)), v1.WithMachineWaitOptions(resource.WithPollInterval(5*time.Millisecond)))
 	if !errors.Is(err, context.DeadlineExceeded) {
 		t.Fatal(err)
 	}
@@ -60,7 +60,7 @@ func TestR2IronicCInspectMachineWorkflowAndRefusals(t *testing.T) {
 	r2icServe(t, cloud, "PUT /v1/nodes/failed/states/provision", 202, "")
 	s := r2icService(cloud)
 	ctx := context.Background()
-	node, err := s.InspectMachine(ctx, "n1", v1.WithMachineWaitInterval(r2icFast))
+	node, err := s.InspectMachine(ctx, "n1", v1.WithMachineWaitOptions(resource.WithPollInterval(r2icFast)))
 	if err != nil || node.ProvisionState != "available" {
 		t.Fatal(node, err)
 	}
@@ -79,7 +79,7 @@ func TestR2IronicCInspectMachineWorkflowAndRefusals(t *testing.T) {
 	if len(put.all()) != 3 {
 		t.Fatal("refused machines must not be changed")
 	}
-	if _, err := s.InspectMachine(ctx, "failed", v1.WithMachineWaitInterval(r2icFast)); err != nil {
+	if _, err := s.InspectMachine(ctx, "failed", v1.WithMachineWaitOptions(resource.WithPollInterval(r2icFast))); err != nil {
 		t.Fatalf("inspect failed is accepted: %v", err)
 	}
 }
@@ -91,7 +91,7 @@ func TestR2IronicCRegisterMachineWorkflowAndPortOrdering(t *testing.T) {
 	r2icServe(t, cloud, "GET /v1/nodes/n1", 200, `{"uuid":"n1","provision_state":"manageable"}`, 200, `{"uuid":"n1","provision_state":"available"}`)
 	pp := r2icServe(t, cloud, "POST /v1/ports", 201, `{"uuid":"p1","address":"aa"}`)
 	s := r2icService(cloud)
-	node, err := s.RegisterMachine(context.Background(), nodes.CreateOpts{Driver: "fake"}, v1.NICAddresses("aa:bb", "cc:dd"), v1.WithMachineWaitInterval(r2icFast))
+	node, err := s.RegisterMachine(context.Background(), nodes.CreateOpts{Driver: "fake"}, v1.NICAddresses("aa:bb", "cc:dd"), v1.WithMachineWaitOptions(resource.WithPollInterval(r2icFast)))
 	if err != nil || node.ProvisionState != "available" {
 		t.Fatal(node, err)
 	}
@@ -123,7 +123,7 @@ func TestR2IronicCRegisterMachineRollsBackPortsAndNodeOnFailure(t *testing.T) {
 	s := r2icService(cloud)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	_, err := s.RegisterMachine(ctx, nodes.CreateOpts{}, v1.NICAddresses("a", "b"), v1.WithRegisterProvisionState("manageable"), v1.WithMachineWaitInterval(r2icFast))
+	_, err := s.RegisterMachine(ctx, nodes.CreateOpts{}, v1.NICAddresses("a", "b"), v1.WithRegisterProvisionState("manageable"), v1.WithMachineWaitOptions(resource.WithPollInterval(r2icFast)))
 	var reg *v1.RegisterError
 	if !errors.As(err, &reg) || !reg.RolledBack || !gophercloud.ResponseCodeIs(err, 400) || len(delPort.all()) != 1 || len(delNode.all()) != 1 {
 		t.Fatalf("%v %+v", err, reg)
@@ -158,7 +158,7 @@ func TestR2IronicCUnregisterMachineStatesPortsAndMissingDeletes(t *testing.T) {
 func TestR2IronicCUnregisterMachineLockTimeout(t *testing.T) {
 	cloud := testcloud.New(t)
 	r2icServe(t, cloud, "GET /v1/nodes/n1", 200, `{"uuid":"n1","provision_state":"available","reservation":"host-a"}`)
-	err := r2icService(cloud).UnregisterMachine(context.Background(), nil, "n1", v1.WithMachineLockTimeout(30*time.Millisecond), v1.WithMachineWaitInterval(5*time.Millisecond))
+	err := r2icService(cloud).UnregisterMachine(context.Background(), nil, "n1", v1.WithMachineLockTimeout(30*time.Millisecond), v1.WithMachineWaitOptions(resource.WithPollInterval(5*time.Millisecond)))
 	if !errors.Is(err, context.DeadlineExceeded) {
 		t.Fatal(err)
 	}

@@ -95,6 +95,7 @@ func StateReached(node *Node, expected string, abort bool) (bool, error) {
 
 type provisionWait struct {
 	waitConfig
+	wait  []resource.WaitOption
 	abort bool
 	keep  bool
 }
@@ -102,19 +103,15 @@ type provisionWait struct {
 // ProvisionWaitOption configures AwaitProvisionState and AwaitProvisionStates.
 type ProvisionWaitOption func(*provisionWait)
 
-// WithProvisionWaitInterval sets the pause between polls; non-positive values
-// keep DefaultWaitInterval. A positive interval and WithProvisionWaitStrategy
-// replace each other; the later one wins.
-func WithProvisionWaitInterval(d time.Duration) ProvisionWaitOption {
-	return func(c *provisionWait) { WithWaitInterval(d)(&c.waitConfig) }
-}
-
-// WithProvisionWaitStrategy replaces the fixed pause between polls with
-// strategy, a Go-only extension. An invalid strategy makes the wait fail with
-// resource.ErrInvalidOption before the first read, unless a later interval or
-// strategy option replaces it.
-func WithProvisionWaitStrategy(strategy resource.WaitStrategy) ProvisionWaitOption {
-	return func(c *provisionWait) { WithWaitStrategy(strategy)(&c.waitConfig) }
+// WithProvisionWait sets the wait controls: resource.WithPollInterval or
+// resource.WithWaitStrategy (default DefaultWaitInterval) and
+// resource.WithTimeout or resource.WithUnlimitedWait (default: no SDK
+// timeout, the deadline is the context). Repeated calls append; the later
+// option wins per control. Failure states, a status attribute, progress and
+// invalid options fail with resource.ErrInvalidOption before the first read.
+func WithProvisionWait(options ...resource.WaitOption) ProvisionWaitOption {
+	options = append([]resource.WaitOption(nil), options...)
+	return func(c *provisionWait) { c.wait = append(c.wait, options...) }
 }
 
 // WithAbortOnFailedState chooses whether a failure state ends the wait. The
@@ -129,12 +126,13 @@ func WithAbortOnFailedState(abort bool) ProvisionWaitOption {
 func WithContinueOnFailure() ProvisionWaitOption { return func(c *provisionWait) { c.keep = true } }
 
 func provisionWaitFrom(options []ProvisionWaitOption) provisionWait {
-	cfg := provisionWait{waitConfig: waitConfig{interval: DefaultWaitInterval}, abort: true}
+	cfg := provisionWait{abort: true}
 	for _, option := range options {
 		if option != nil {
 			option(&cfg)
 		}
 	}
+	cfg.waitConfig = waitConfigFrom(cfg.wait)
 	return cfg
 }
 
@@ -190,6 +188,8 @@ func (a *API) AwaitProvisionStates(ctx context.Context, ids []string, expected s
 	if cfg.err != nil {
 		return result, wrap(cfg.err)
 	}
+	ctx, cancel := cfg.bound(ctx)
+	defer cancel()
 	pacer := cfg.pacer()
 	for {
 		remaining = nil
@@ -432,12 +432,13 @@ type SetPowerStateOption func(*setPowerConfig)
 
 type setPowerConfig struct {
 	wait    bool
-	options []WaitOption
+	options []resource.WaitOption
 }
 
 // WithPowerStateWait waits for the power state expected for the target (see
-// ExpectedPowerState) after the request is acknowledged.
-func WithPowerStateWait(options ...WaitOption) SetPowerStateOption {
+// ExpectedPowerState) after the request is acknowledged. options are the wait
+// options of WaitForPowerState; repeated calls append.
+func WithPowerStateWait(options ...resource.WaitOption) SetPowerStateOption {
 	return func(c *setPowerConfig) { c.wait = true; c.options = append(c.options, options...) }
 }
 

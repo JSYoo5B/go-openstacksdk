@@ -132966,8 +132966,9 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/allocations.API.WaitForActive",
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/allocations.WithIgnoreError",
-        "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/allocations.WithWaitInterval",
-        "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/allocations.WithWaitStrategy"
+        "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/allocations.WithAllocationWait",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithPollInterval",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithWaitStrategy"
       ],
       "contracts": [
         {
@@ -132977,7 +132978,7 @@
           ]
         },
         {
-          "behavior": "allocations.WithWaitStrategy rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, the interval option given before or after it.",
+          "behavior": "resource.WithWaitStrategy in allocations.WithAllocationWait rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, a resource.WithPollInterval given before or after it.",
           "tests": [
             "api/baremetal_wait_strategy_test.go:TestBaremetalWaitStrategyRejectedBeforeHTTP",
             "api/baremetal_wait_strategy_test.go:TestBaremetalWaitStrategyPacesPollsAndLaterOptionWins"
@@ -132986,7 +132987,7 @@
       ],
       "differences": [
         "Python timeout becomes the context deadline; allocations are addressed by ID string, not by Resource.",
-        "Python waits use a fixed poll interval. allocations.WithWaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of the interval and strategy options wins."
+        "Python waits use a fixed poll interval. allocations.WithAllocationWait accepts resource.WithWaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of resource.WithPollInterval and resource.WithWaitStrategy wins."
       ],
       "documentation": [
         "baremetal/v1/python-operations-c.md"
@@ -133021,8 +133022,8 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/nodes.API.WaitForPowerState",
-        "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/nodes.WithWaitInterval",
-        "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/nodes.WithWaitStrategy"
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithPollInterval",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithWaitStrategy"
       ],
       "contracts": [
         {
@@ -133038,7 +133039,7 @@
           ]
         },
         {
-          "behavior": "nodes.WithWaitStrategy rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, the interval option given before or after it.",
+          "behavior": "resource.WithWaitStrategy in the node power-state wait options rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, a resource.WithPollInterval given before or after it.",
           "tests": [
             "api/baremetal_wait_strategy_test.go:TestBaremetalWaitStrategyRejectedBeforeHTTP",
             "api/baremetal_wait_strategy_test.go:TestBaremetalWaitStrategyPacesPollsAndLaterOptionWins"
@@ -133048,7 +133049,7 @@
       "differences": [
         "Nodes are addressed by name or UUID strings instead of Resource objects; the Ironic microversion comes from the wrapped ServiceClient, requests are never replayed (Python retries 409/503 on some calls), success codes are exact, and deadlines come from the context.",
         "Python ResourceTimeout and the timeout argument are replaced by the context deadline.",
-        "Python waits use a fixed poll interval. nodes.WithWaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of the interval and strategy options wins."
+        "Python waits use a fixed poll interval. the node power-state wait options accepts resource.WithWaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of resource.WithPollInterval and resource.WithWaitStrategy wins."
       ],
       "documentation": [
         "baremetal/v1/nodes/python-node-helpers.md"
@@ -133060,8 +133061,8 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/nodes.API.WaitForReservation",
-        "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/nodes.WithWaitInterval",
-        "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/nodes.WithWaitStrategy"
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithPollInterval",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithWaitStrategy"
       ],
       "contracts": [
         {
@@ -133071,7 +133072,7 @@
           ]
         },
         {
-          "behavior": "nodes.WithWaitStrategy rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, the interval option given before or after it.",
+          "behavior": "resource.WithWaitStrategy in the node power-state wait options rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, a resource.WithPollInterval given before or after it.",
           "tests": [
             "api/baremetal_wait_strategy_test.go:TestBaremetalWaitStrategyRejectedBeforeHTTP",
             "api/baremetal_wait_strategy_test.go:TestBaremetalWaitStrategyPacesPollsAndLaterOptionWins"
@@ -133081,7 +133082,7 @@
       "differences": [
         "Nodes are addressed by name or UUID strings instead of Resource objects; the Ironic microversion comes from the wrapped ServiceClient, requests are never replayed (Python retries 409/503 on some calls), success codes are exact, and deadlines come from the context.",
         "Like Python, only the passed node snapshot decides whether to wait, so callers wanting a fresh check must pass a fresh node; the timeout argument is replaced by the context deadline.",
-        "Python waits use a fixed poll interval. nodes.WithWaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of the interval and strategy options wins."
+        "Python waits use a fixed poll interval. the node power-state wait options accepts resource.WithWaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of resource.WithPollInterval and resource.WithWaitStrategy wins."
       ],
       "documentation": [
         "baremetal/v1/nodes/python-node-helpers.md"
@@ -133096,7 +133097,8 @@
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/nodes.API.AwaitProvisionState",
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/nodes.StateReached",
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/nodes.WithContinueOnFailure",
-        "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/nodes.WithProvisionWaitStrategy"
+        "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/nodes.WithProvisionWait",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithWaitStrategy"
       ],
       "contracts": [
         {
@@ -133112,7 +133114,7 @@
           ]
         },
         {
-          "behavior": "nodes.WithProvisionWaitStrategy rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, the interval option given before or after it.",
+          "behavior": "resource.WithWaitStrategy in nodes.WithProvisionWait rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, a resource.WithPollInterval given before or after it.",
           "tests": [
             "api/baremetal_wait_strategy_test.go:TestBaremetalWaitStrategyRejectedBeforeHTTP",
             "api/baremetal_wait_strategy_test.go:TestBaremetalWaitStrategyPacesPollsAndLaterOptionWins"
@@ -133122,7 +133124,7 @@
       "differences": [
         "Python ResourceTimeout and the timeout argument become the context deadline; WaitResult becomes ProvisionWaitResult; nodes are IDs not Resources.",
         "A deadline that interrupts a read in continue mode reports the last round's nodes (or bare references).",
-        "Python waits use a fixed poll interval. nodes.WithProvisionWaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of the interval and strategy options wins."
+        "Python waits use a fixed poll interval. nodes.WithProvisionWait accepts resource.WithWaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of resource.WithPollInterval and resource.WithWaitStrategy wins."
       ],
       "documentation": [
         "baremetal/v1/python-operations-c.md"
@@ -145162,8 +145164,9 @@
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1.Service.NodeSetProvisionState",
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1.WithMachineConfigDrive",
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1.WithMachineWait",
-        "github.com/JSYoo5B/go-openstacksdk/baremetal/v1.WithMachineTimeout",
-        "github.com/JSYoo5B/go-openstacksdk/baremetal/v1.WithMachineWaitStrategy"
+        "github.com/JSYoo5B/go-openstacksdk/baremetal/v1.WithMachineWaitOptions",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithTimeout",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithWaitStrategy"
       ],
       "contracts": [
         {
@@ -145174,7 +145177,7 @@
           ]
         },
         {
-          "behavior": "v1.WithMachineWaitStrategy rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, the interval option given before or after it.",
+          "behavior": "resource.WithWaitStrategy in v1.WithMachineWaitOptions rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, a resource.WithPollInterval given before or after it.",
           "tests": [
             "api/baremetal_wait_strategy_test.go:TestBaremetalWaitStrategyRejectedBeforeHTTP",
             "api/baremetal_wait_strategy_test.go:TestBaremetalWaitStrategyPacesPollsAndLaterOptionWins"
@@ -145185,7 +145188,7 @@
         "The config drive is passed through as a string; neither Python nor Go reads paths or builds images (the Python docstring claims otherwise).",
         "The timeout (default 3600 s) bounds the whole call in Go but only the wait in Python.",
         "Python retries HTTP 409/503 on this call by default; Go sends once and returns the status (tested), never replaying a mutation.",
-        "Python waits use a fixed poll interval. v1.WithMachineWaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of the interval and strategy options wins."
+        "Python waits use a fixed poll interval. v1.WithMachineWaitOptions accepts resource.WithWaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of resource.WithPollInterval and resource.WithWaitStrategy wins."
       ],
       "documentation": [
         "baremetal/v1/python-operations-c.md"
@@ -145197,7 +145200,8 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1.Service.ActivateNode",
-        "github.com/JSYoo5B/go-openstacksdk/baremetal/v1.WithMachineWaitStrategy"
+        "github.com/JSYoo5B/go-openstacksdk/baremetal/v1.WithMachineWaitOptions",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithWaitStrategy"
       ],
       "contracts": [
         {
@@ -145207,7 +145211,7 @@
           ]
         },
         {
-          "behavior": "v1.WithMachineWaitStrategy rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, the interval option given before or after it.",
+          "behavior": "resource.WithWaitStrategy in v1.WithMachineWaitOptions rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, a resource.WithPollInterval given before or after it.",
           "tests": [
             "api/baremetal_wait_strategy_test.go:TestBaremetalWaitStrategyRejectedBeforeHTTP",
             "api/baremetal_wait_strategy_test.go:TestBaremetalWaitStrategyPacesPollsAndLaterOptionWins"
@@ -145217,7 +145221,7 @@
       "differences": [
         "Returns only an error, like Python's None.",
         "Python retries HTTP 409/503 on this call by default; Go sends once and returns the status (tested), never replaying a mutation.",
-        "Python waits use a fixed poll interval. v1.WithMachineWaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of the interval and strategy options wins."
+        "Python waits use a fixed poll interval. v1.WithMachineWaitOptions accepts resource.WithWaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of resource.WithPollInterval and resource.WithWaitStrategy wins."
       ],
       "documentation": [
         "baremetal/v1/python-operations-c.md"
@@ -145252,7 +145256,8 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1.Service.InspectMachine",
-        "github.com/JSYoo5B/go-openstacksdk/baremetal/v1.WithMachineWaitStrategy"
+        "github.com/JSYoo5B/go-openstacksdk/baremetal/v1.WithMachineWaitOptions",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithWaitStrategy"
       ],
       "contracts": [
         {
@@ -145262,7 +145267,7 @@
           ]
         },
         {
-          "behavior": "v1.WithMachineWaitStrategy rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, the interval option given before or after it.",
+          "behavior": "resource.WithWaitStrategy in v1.WithMachineWaitOptions rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, a resource.WithPollInterval given before or after it.",
           "tests": [
             "api/baremetal_wait_strategy_test.go:TestBaremetalWaitStrategyRejectedBeforeHTTP",
             "api/baremetal_wait_strategy_test.go:TestBaremetalWaitStrategyPacesPollsAndLaterOptionWins"
@@ -145272,7 +145277,7 @@
       "differences": [
         "Python ignores its wait argument and always waits; Go offers no wait option and always waits.",
         "A failure in the middle leaves the machine in the intermediate state (not rolled back, as in Python).",
-        "Python waits use a fixed poll interval. v1.WithMachineWaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of the interval and strategy options wins."
+        "Python waits use a fixed poll interval. v1.WithMachineWaitOptions accepts resource.WithWaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of resource.WithPollInterval and resource.WithWaitStrategy wins."
       ],
       "documentation": [
         "baremetal/v1/python-operations-c.md"
@@ -145286,7 +145291,8 @@
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1.Service.RegisterMachine",
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1.NICAddresses",
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1.WithRegisterProvisionState",
-        "github.com/JSYoo5B/go-openstacksdk/baremetal/v1.WithMachineWaitStrategy"
+        "github.com/JSYoo5B/go-openstacksdk/baremetal/v1.WithMachineWaitOptions",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithWaitStrategy"
       ],
       "contracts": [
         {
@@ -145302,7 +145308,7 @@
           ]
         },
         {
-          "behavior": "v1.WithMachineWaitStrategy rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, the interval option given before or after it.",
+          "behavior": "resource.WithWaitStrategy in v1.WithMachineWaitOptions rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, a resource.WithPollInterval given before or after it.",
           "tests": [
             "api/baremetal_wait_strategy_test.go:TestBaremetalWaitStrategyRejectedBeforeHTTP",
             "api/baremetal_wait_strategy_test.go:TestBaremetalWaitStrategyPacesPollsAndLaterOptionWins"
@@ -145313,7 +145319,7 @@
         "Typed CreateOpts and port options replace **kwargs and MAC strings or dictionaries.",
         "Rollback runs on a detached context bounded to 30 s so cancellation does not leave a node behind, and its result is reported in RegisterError; Python hides it.",
         "Python retries HTTP 409/503 on this call by default; Go sends once and returns the status (tested), never replaying a mutation.",
-        "Python waits use a fixed poll interval. v1.WithMachineWaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of the interval and strategy options wins."
+        "Python waits use a fixed poll interval. v1.WithMachineWaitOptions accepts resource.WithWaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of resource.WithPollInterval and resource.WithWaitStrategy wins."
       ],
       "documentation": [
         "baremetal/v1/python-operations-c.md"
@@ -145326,7 +145332,8 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1.Service.UnregisterMachine",
         "github.com/JSYoo5B/go-openstacksdk/baremetal/v1.WithMachineLockTimeout",
-        "github.com/JSYoo5B/go-openstacksdk/baremetal/v1.WithMachineWaitStrategy"
+        "github.com/JSYoo5B/go-openstacksdk/baremetal/v1.WithMachineWaitOptions",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithWaitStrategy"
       ],
       "contracts": [
         {
@@ -145342,7 +145349,7 @@
           ]
         },
         {
-          "behavior": "v1.WithMachineWaitStrategy rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, the interval option given before or after it.",
+          "behavior": "resource.WithWaitStrategy in v1.WithMachineWaitOptions rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, a resource.WithPollInterval given before or after it.",
           "tests": [
             "api/baremetal_wait_strategy_test.go:TestBaremetalWaitStrategyRejectedBeforeHTTP",
             "api/baremetal_wait_strategy_test.go:TestBaremetalWaitStrategyPacesPollsAndLaterOptionWins"
@@ -145352,7 +145359,7 @@
       "differences": [
         "Python's deprecated wait argument is not offered.",
         "Nothing is rolled back if a later step fails.",
-        "Python waits use a fixed poll interval. v1.WithMachineWaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of the interval and strategy options wins."
+        "Python waits use a fixed poll interval. v1.WithMachineWaitOptions accepts resource.WithWaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of resource.WithPollInterval and resource.WithWaitStrategy wins."
       ],
       "documentation": [
         "baremetal/v1/python-operations-c.md"
