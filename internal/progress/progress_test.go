@@ -9,12 +9,20 @@ import (
 
 func TestSendDeliversAndBlocksUntilReceived(t *testing.T) {
 	ch := make(chan int)
+	blocked := make(chan struct{}, 1)
 	done := make(chan error, 1)
-	go func() { done <- Send(context.Background(), ch, 7) }()
+	go func() { done <- Send(NotifyBlocked(context.Background(), blocked), ch, 7) }()
+	select {
+	case <-blocked:
+	case err := <-done:
+		t.Fatalf("Send returned %v before the value was received", err)
+	case <-time.After(10 * time.Second):
+		t.Fatal("Send did not block on an unread channel")
+	}
 	select {
 	case err := <-done:
 		t.Fatalf("Send returned %v before the value was received", err)
-	case <-time.After(20 * time.Millisecond):
+	default:
 	}
 	if got := <-ch; got != 7 {
 		t.Fatalf("received %d, want 7", got)
