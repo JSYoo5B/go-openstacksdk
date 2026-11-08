@@ -3901,7 +3901,7 @@
           ]
         },
         {
-          "behavior": "delete_quota(project) maps to ProjectQuotaScope.Delete with WithDeleteIgnoreMissing(true): DELETE /quotas/<project>, 404 returns nil, 409 is returned, and the default strict Delete raises resource.ErrNotFound like ignore_missing=False.",
+          "behavior": "delete_quota(project) maps to ProjectQuotaScope.Delete with request.IgnoreMissing(true): DELETE /quotas/<project>, 404 returns nil, 409 is returned, and the default strict Delete raises resource.ErrNotFound like ignore_missing=False.",
           "tests": [
             "network/v2/extensions/quotas/python_rejudge_test.go:TestPythonRejudgeQuotaDelete"
           ]
@@ -3911,7 +3911,7 @@
         "network/v2/extensions/quotas/README.md"
       ],
       "differences": [
-        "Go defaults to strict 404; Python defaults ignore_missing=True, represented by WithDeleteIgnoreMissing(true).",
+        "Go defaults to strict 404; Python defaults ignore_missing=True, represented by request.IgnoreMissing(true).",
         "Go returns deletion metadata while Python returns None.",
         "Python accepts a Quota Resource or a project ID; Go fixes the project once with API.InProject (resource.ID needs no request).",
         "Python accepts any non-error status; Go accepts the native 202 and 204.",
@@ -87978,7 +87978,7 @@
       ],
       "contracts": [
         {
-          "behavior": "Delete sends DELETE OS-FEDERATION/identity_providers/{id}, accepts 200-399, turns a clean 404 into nil by default as ignore_missing=True, returns the 404 with WithDeleteIgnoreMissing(false) and always returns other statuses such as 409 with Delete operation context.",
+          "behavior": "Delete sends DELETE OS-FEDERATION/identity_providers/{id}, accepts 200-399, turns a clean 404 into nil by default as ignore_missing=True, returns the 404 with request.IgnoreMissing(false) and always returns other statuses such as 409 with Delete operation context.",
           "tests": [
             "identity/v3/identityproviders/api_test.go:TestIdentityProviderDeleteIgnoresMissingByDefault",
             "identity/v3/identityproviders/api_test.go:TestIdentityProviderRejectsInvalidInputBeforeHTTP"
@@ -88162,7 +88162,7 @@
       ],
       "contracts": [
         {
-          "behavior": "Delete sends DELETE OS-FEDERATION/identity_providers/{idp_id}/protocols/{id}, ignores a clean 404 by default, returns it with WithDeleteIgnoreMissing(false) and returns 500 with Delete operation context.",
+          "behavior": "Delete sends DELETE OS-FEDERATION/identity_providers/{idp_id}/protocols/{id}, ignores a clean 404 by default, returns it with request.IgnoreMissing(false) and returns 500 with Delete operation context.",
           "tests": [
             "identity/v3/federationprotocols/api_test.go:TestFederationProtocolGetUpdateDelete",
             "identity/v3/federationprotocols/api_test.go:TestFederationProtocolRejectsInvalidInputBeforeHTTP"
@@ -88348,7 +88348,7 @@
       ],
       "contracts": [
         {
-          "behavior": "Delete sends DELETE OS-FEDERATION/service_providers/{id}, accepts 200-399, turns a clean 404 into nil by default as ignore_missing=True, returns the 404 with WithDeleteIgnoreMissing(false) and always returns other statuses such as 409 with Delete operation context.",
+          "behavior": "Delete sends DELETE OS-FEDERATION/service_providers/{id}, accepts 200-399, turns a clean 404 into nil by default as ignore_missing=True, returns the 404 with request.IgnoreMissing(false) and always returns other statuses such as 409 with Delete operation context.",
           "tests": [
             "identity/v3/serviceproviders/api_test.go:TestServiceProviderDeleteIgnoresMissingByDefault",
             "identity/v3/serviceproviders/api_test.go:TestServiceProviderRejectsInvalidInputBeforeHTTP"
@@ -88953,7 +88953,7 @@
       ],
       "contracts": [
         {
-          "behavior": "Delete sends a bodyless DELETE /v2.0/flavors/{id}, treats a clean 404 as success by default (IgnoredMissing) like ignore_missing=True, returns the 404 error with WithDeleteIgnoreMissing(false) and always reports other 4xx/5xx statuses.",
+          "behavior": "Delete sends a bodyless DELETE /v2.0/flavors/{id}, treats a clean 404 as success by default (IgnoredMissing) like ignore_missing=True, returns the 404 error with request.IgnoreMissing(false) and always reports other 4xx/5xx statuses.",
           "tests": [
             "network/v2/extensions/flavors/api_test.go:TestPythonFlavorDeleteIgnoresMissingByDefault"
           ]
@@ -88967,7 +88967,7 @@
         "Python negotiates the microversion; Go sends the configured client microversion (none by default for Neutron), and the Headers/Microversion options are Go extensions.",
         "Python returns a Resource object; Go returns a typed struct whose typed fields are set only when the JSON type matches, plus Resource (Source view by Python name), Wire, Envelope, Header and StatusCode.",
         "Python returns None; Go returns a DeleteResult receipt with the actual status, headers and an IgnoredMissing flag.",
-        "ignore_missing=False is expressed as WithDeleteIgnoreMissing(false); omitting the option keeps the Python default True."
+        "ignore_missing=False is expressed as request.IgnoreMissing(false); omitting the option keeps the Python default True."
       ],
       "remaining": []
     },
@@ -89142,7 +89142,7 @@
       ],
       "contracts": [
         {
-          "behavior": "Delete sends a bodyless DELETE /v2.0/service_profiles/{id}, treats a clean 404 as success by default (IgnoredMissing) like ignore_missing=True, returns the 404 error with WithDeleteIgnoreMissing(false) and always reports other 4xx/5xx statuses.",
+          "behavior": "Delete sends a bodyless DELETE /v2.0/service_profiles/{id}, treats a clean 404 as success by default (IgnoredMissing) like ignore_missing=True, returns the 404 error with request.IgnoreMissing(false) and always reports other 4xx/5xx statuses.",
           "tests": [
             "network/v2/extensions/serviceprofiles/api_test.go:TestPythonServiceProfileDeleteIgnoresMissingByDefault"
           ]
@@ -89156,7 +89156,7 @@
         "Python negotiates the microversion; Go sends the configured client microversion (none by default for Neutron), and the Headers/Microversion options are Go extensions.",
         "Python returns a Resource object; Go returns a typed struct whose typed fields are set only when the JSON type matches, plus Resource (Source view by Python name), Wire, Envelope, Header and StatusCode.",
         "Python returns None; Go returns a DeleteResult receipt with the actual status, headers and an IgnoredMissing flag.",
-        "ignore_missing=False is expressed as WithDeleteIgnoreMissing(false); omitting the option keeps the Python default True."
+        "ignore_missing=False is expressed as request.IgnoreMissing(false); omitting the option keeps the Python default True."
       ],
       "remaining": []
     },
@@ -89331,7 +89331,7 @@
       ],
       "contracts": [
         {
-          "behavior": "Delete sends a bodyless DELETE /v2.0/metering/metering-labels/{id}, treats a clean 404 as success by default (IgnoredMissing) like ignore_missing=True, returns the 404 error with WithDeleteIgnoreMissing(false) and always reports other 4xx/5xx statuses.",
+          "behavior": "Delete sends a bodyless DELETE /v2.0/metering/metering-labels/{id}, treats a clean 404 as success by default (IgnoredMissing) like ignore_missing=True, returns the 404 error with request.IgnoreMissing(false) and always reports other 4xx/5xx statuses.",
           "tests": [
             "network/v2/extensions/metering/labels/api_test.go:TestPythonMeteringLabelDeleteIgnoresMissingByDefault"
           ]
@@ -89345,7 +89345,7 @@
         "Python negotiates the microversion; Go sends the configured client microversion (none by default for Neutron), and the Headers/Microversion options are Go extensions.",
         "Python returns a Resource object; Go returns a typed struct whose typed fields are set only when the JSON type matches, plus Resource (Source view by Python name), Wire, Envelope, Header and StatusCode.",
         "Python returns None; Go returns a DeleteResult receipt with the actual status, headers and an IgnoredMissing flag.",
-        "ignore_missing=False is expressed as WithDeleteIgnoreMissing(false); omitting the option keeps the Python default True."
+        "ignore_missing=False is expressed as request.IgnoreMissing(false); omitting the option keeps the Python default True."
       ],
       "remaining": []
     },
@@ -89520,7 +89520,7 @@
       ],
       "contracts": [
         {
-          "behavior": "Delete sends a bodyless DELETE /v2.0/metering/metering-label-rules/{id}, treats a clean 404 as success by default (IgnoredMissing) like ignore_missing=True, returns the 404 error with WithDeleteIgnoreMissing(false) and always reports other 4xx/5xx statuses.",
+          "behavior": "Delete sends a bodyless DELETE /v2.0/metering/metering-label-rules/{id}, treats a clean 404 as success by default (IgnoredMissing) like ignore_missing=True, returns the 404 error with request.IgnoreMissing(false) and always reports other 4xx/5xx statuses.",
           "tests": [
             "network/v2/extensions/metering/rules/api_test.go:TestPythonMeteringLabelRuleDeleteIgnoresMissingByDefault"
           ]
@@ -89534,7 +89534,7 @@
         "Python negotiates the microversion; Go sends the configured client microversion (none by default for Neutron), and the Headers/Microversion options are Go extensions.",
         "Python returns a Resource object; Go returns a typed struct whose typed fields are set only when the JSON type matches, plus Resource (Source view by Python name), Wire, Envelope, Header and StatusCode.",
         "Python returns None; Go returns a DeleteResult receipt with the actual status, headers and an IgnoredMissing flag.",
-        "ignore_missing=False is expressed as WithDeleteIgnoreMissing(false); omitting the option keeps the Python default True."
+        "ignore_missing=False is expressed as request.IgnoreMissing(false); omitting the option keeps the Python default True."
       ],
       "remaining": []
     },
@@ -90270,7 +90270,7 @@
       ],
       "contracts": [
         {
-          "behavior": "Delete sends a bodyless DELETE taas/tap_flows/{id}, returns nil for 204 and a clean 404 by default, and returns 404 with WithDeleteIgnoreMissing(false) and 409 as wrapped errors.",
+          "behavior": "Delete sends a bodyless DELETE taas/tap_flows/{id}, returns nil for 204 and a clean 404 by default, and returns 404 with request.IgnoreMissing(false) and 409 as wrapped errors.",
           "tests": [
             "network/v2/extensions/taas/tapflows/python_records_test.go:TestPythonTapFlowDeleteIgnoresMissingByDefault"
           ]
@@ -90456,7 +90456,7 @@
       ],
       "contracts": [
         {
-          "behavior": "Delete sends a bodyless DELETE taas/tap_services/{id}, returns nil for 204 and a clean 404 by default, and returns 404 with WithDeleteIgnoreMissing(false) and 409 as wrapped errors.",
+          "behavior": "Delete sends a bodyless DELETE taas/tap_services/{id}, returns nil for 204 and a clean 404 by default, and returns 404 with request.IgnoreMissing(false) and 409 as wrapped errors.",
           "tests": [
             "network/v2/extensions/taas/tapservices/python_records_test.go:TestPythonTapServiceDeleteIgnoresMissingByDefault"
           ]
@@ -90645,7 +90645,7 @@
       ],
       "contracts": [
         {
-          "behavior": "Delete sends DELETE /v2.0/sfc/flow_classifiers/{id}, accepts 200-399, turns a clean 404 into nil by default as ignore_missing=True, returns the 404 with WithDeleteIgnoreMissing(false) and always returns other statuses such as 409 with Delete operation context.",
+          "behavior": "Delete sends DELETE /v2.0/sfc/flow_classifiers/{id}, accepts 200-399, turns a clean 404 into nil by default as ignore_missing=True, returns the 404 with request.IgnoreMissing(false) and always returns other statuses such as 409 with Delete operation context.",
           "tests": [
             "network/v2/extensions/sfc/flowclassifiers/api_test.go:TestFlowClassifierDeleteIgnoresMissingByDefault",
             "network/v2/extensions/sfc/flowclassifiers/api_test.go:TestFlowClassifierRejectsInvalidInputBeforeHTTP"
@@ -90834,7 +90834,7 @@
       ],
       "contracts": [
         {
-          "behavior": "Delete sends DELETE /v2.0/sfc/port_chains/{id}, accepts 200-399, turns a clean 404 into nil by default as ignore_missing=True, returns the 404 with WithDeleteIgnoreMissing(false) and always returns other statuses such as 409 with Delete operation context.",
+          "behavior": "Delete sends DELETE /v2.0/sfc/port_chains/{id}, accepts 200-399, turns a clean 404 into nil by default as ignore_missing=True, returns the 404 with request.IgnoreMissing(false) and always returns other statuses such as 409 with Delete operation context.",
           "tests": [
             "network/v2/extensions/sfc/portchains/api_test.go:TestPortChainDeleteIgnoresMissingByDefault",
             "network/v2/extensions/sfc/portchains/api_test.go:TestPortChainRejectsInvalidInputBeforeHTTP"
@@ -91023,7 +91023,7 @@
       ],
       "contracts": [
         {
-          "behavior": "Delete sends DELETE /v2.0/sfc/port_pairs/{id}, accepts 200-399, turns a clean 404 into nil by default as ignore_missing=True, returns the 404 with WithDeleteIgnoreMissing(false) and always returns other statuses such as 409 with Delete operation context.",
+          "behavior": "Delete sends DELETE /v2.0/sfc/port_pairs/{id}, accepts 200-399, turns a clean 404 into nil by default as ignore_missing=True, returns the 404 with request.IgnoreMissing(false) and always returns other statuses such as 409 with Delete operation context.",
           "tests": [
             "network/v2/extensions/sfc/portpairs/api_test.go:TestPortPairDeleteIgnoresMissingByDefault",
             "network/v2/extensions/sfc/portpairs/api_test.go:TestPortPairRejectsInvalidInputBeforeHTTP"
@@ -91212,7 +91212,7 @@
       ],
       "contracts": [
         {
-          "behavior": "Delete sends DELETE /v2.0/sfc/port_pair_groups/{id}, accepts 200-399, turns a clean 404 into nil by default as ignore_missing=True, returns the 404 with WithDeleteIgnoreMissing(false) and always returns other statuses such as 409 with Delete operation context.",
+          "behavior": "Delete sends DELETE /v2.0/sfc/port_pair_groups/{id}, accepts 200-399, turns a clean 404 into nil by default as ignore_missing=True, returns the 404 with request.IgnoreMissing(false) and always returns other statuses such as 409 with Delete operation context.",
           "tests": [
             "network/v2/extensions/sfc/portpairgroups/api_test.go:TestPortPairGroupDeleteIgnoresMissingByDefault",
             "network/v2/extensions/sfc/portpairgroups/api_test.go:TestPortPairGroupRejectsInvalidInputBeforeHTTP"
@@ -91401,7 +91401,7 @@
       ],
       "contracts": [
         {
-          "behavior": "Delete sends DELETE /v2.0/sfc/service_graphs/{id}, accepts 200-399, turns a clean 404 into nil by default as ignore_missing=True, returns the 404 with WithDeleteIgnoreMissing(false) and always returns other statuses such as 409 with Delete operation context.",
+          "behavior": "Delete sends DELETE /v2.0/sfc/service_graphs/{id}, accepts 200-399, turns a clean 404 into nil by default as ignore_missing=True, returns the 404 with request.IgnoreMissing(false) and always returns other statuses such as 409 with Delete operation context.",
           "tests": [
             "network/v2/extensions/sfc/servicegraphs/api_test.go:TestServiceGraphDeleteIgnoresMissingByDefault",
             "network/v2/extensions/sfc/servicegraphs/api_test.go:TestServiceGraphRejectsInvalidInputBeforeHTTP"
@@ -93238,7 +93238,7 @@
       ],
       "contracts": [
         {
-          "behavior": "Delete sends DELETE OS-EP-FILTER/endpoint_groups/{id}, ignores a clean 404 by default like ignore_missing=True, returns the 404 with WithDeleteIgnoreMissing(false) and returns other 4xx/5xx with Delete operation context.",
+          "behavior": "Delete sends DELETE OS-EP-FILTER/endpoint_groups/{id}, ignores a clean 404 by default like ignore_missing=True, returns the 404 with request.IgnoreMissing(false) and returns other 4xx/5xx with Delete operation context.",
           "tests": [
             "identity/v3/endpointgroups/python_records_test.go:TestPythonEndpointGroupDeleteIgnoreMissing"
           ]
@@ -98865,7 +98865,7 @@
       ],
       "contracts": [
         {
-          "behavior": "Bodyless DELETE ignores a clean 404 by default, WithDeleteIgnoreMissing(false) returns it and 204 is a plain receipt.",
+          "behavior": "Bodyless DELETE ignores a clean 404 by default, request.IgnoreMissing(false) returns it and 204 is a plain receipt.",
           "tests": [
             "network/v2/extensions/layer3/conntrackhelpers/python_records_test.go:TestPythonConntrackGetUpdateDelete"
           ]
@@ -98988,7 +98988,7 @@
       ],
       "contracts": [
         {
-          "behavior": "Bodyless DELETE ignores a clean 404 by default, WithDeleteIgnoreMissing(false) returns it and 204 is a plain receipt.",
+          "behavior": "Bodyless DELETE ignores a clean 404 by default, request.IgnoreMissing(false) returns it and 204 is a plain receipt.",
           "tests": [
             "network/v2/extensions/layer3/ndpproxies/python_records_test.go:TestPythonNDPProxyGetUpdateAndDelete"
           ]
@@ -99116,7 +99116,7 @@
       ],
       "contracts": [
         {
-          "behavior": "Bodyless DELETE ignores a clean 404 by default, WithDeleteIgnoreMissing(false) returns it and 204 is a plain receipt.",
+          "behavior": "Bodyless DELETE ignores a clean 404 by default, request.IgnoreMissing(false) returns it and 204 is a plain receipt.",
           "tests": [
             "network/v2/extensions/security/defaultrules/python_records_test.go:TestPythonDefaultRuleGetAndDelete"
           ]
@@ -99276,7 +99276,7 @@
       ],
       "contracts": [
         {
-          "behavior": "Bodyless DELETE ignores a clean 404 by default and WithDeleteIgnoreMissing(false) returns it with Delete context.",
+          "behavior": "Bodyless DELETE ignores a clean 404 by default and request.IgnoreMissing(false) returns it with Delete context.",
           "tests": [
             "network/v2/extensions/security/defaultstatefulness/python_records_test.go:TestPythonStatefulnessDeleteListAndFind"
           ]
@@ -101536,7 +101536,7 @@
       ],
       "contracts": [
         {
-          "behavior": "Delete sends a bodyless DELETE local_ips/{id}, returns nil for 204 and a clean 404 by default, and returns 404 with WithDeleteIgnoreMissing(false) and 409 as wrapped errors.",
+          "behavior": "Delete sends a bodyless DELETE local_ips/{id}, returns nil for 204 and a clean 404 by default, and returns 404 with request.IgnoreMissing(false) and 409 as wrapped errors.",
           "tests": [
             "network/v2/extensions/localips/python_records_test.go:TestPythonLocalIPDeleteIgnoresMissingByDefault"
           ]
@@ -101724,7 +101724,7 @@
       ],
       "contracts": [
         {
-          "behavior": "Delete sends a bodyless DELETE local_ips/{local_ip_id}/port_associations/{fixed_port_id}, ignores a clean 404 by default, and returns 404 with WithDeleteIgnoreMissing(false) and 409 as wrapped errors.",
+          "behavior": "Delete sends a bodyless DELETE local_ips/{local_ip_id}/port_associations/{fixed_port_id}, ignores a clean 404 by default, and returns 404 with request.IgnoreMissing(false) and 409 as wrapped errors.",
           "tests": [
             "network/v2/extensions/localipassociations/python_records_test.go:TestPythonLocalIPAssociationDeleteIgnoresMissingByDefault"
           ]
@@ -101884,7 +101884,7 @@
       ],
       "contracts": [
         {
-          "behavior": "Bodyless DELETE ignores a clean 404 by default, WithDeleteIgnoreMissing(false) returns it, and 409 stays an error with Delete context.",
+          "behavior": "Bodyless DELETE ignores a clean 404 by default, request.IgnoreMissing(false) returns it, and 409 stays an error with Delete context.",
           "tests": [
             "network/v2/extensions/networksegmentranges/python_records_test.go:TestPythonSegmentRangeDeleteIgnoresMissingByDefault"
           ]

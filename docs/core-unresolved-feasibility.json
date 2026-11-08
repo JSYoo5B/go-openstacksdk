@@ -4283,7 +4283,7 @@
   "op": "python:network/v2/delete_quota",
   "effort": "S",
   "shared_fix": "",
-  "note": "Delete plus WithDeleteIgnoreMissing(true) reproduces the Python DELETE and 404 policy; only Resource/identity coercion audits remain, so add contract tests and re-judge.",
+  "note": "Delete plus request.IgnoreMissing(true) reproduces the Python DELETE and 404 policy; only Resource/identity coercion audits remain, so add contract tests and re-judge.",
   "category_raw": "AUDIT_ONLY",
   "category": "AUDIT_ONLY"
  },

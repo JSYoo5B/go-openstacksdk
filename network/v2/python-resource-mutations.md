@@ -60,7 +60,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.API.DeleteWithOptions`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithDeleteOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithDeleteIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 
 - A literal ID is deleted directly at the pinned resource path with no lookup/query/body. Omitted or nil IgnoreMissing defaults to true; explicit false preserves a 404. Later options override earlier options, constructor pointer snapshots survive mutation and options are reusable. HTTP 200..399 successes do not decode an opaque body.
   Tests: `network/v2/extensions/security/addressgroups/python_mutations_contracts_test.go:TestPythonAddressGroupDeleteDefaultsStrictOptionsAndSourceStatuses`.
@@ -127,7 +127,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/addressscopes.API.DeleteWithOptions`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/addressscopes.WithDeleteOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/addressscopes.WithDeleteIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 
 - A literal ID is deleted directly at the pinned resource path with no lookup/query/body. Omitted or nil IgnoreMissing defaults to true; explicit false preserves a 404. Later options override earlier options, constructor pointer snapshots survive mutation and options are reusable. HTTP 200..399 successes do not decode an opaque body.
   Tests: `network/v2/extensions/layer3/addressscopes/python_mutations_contracts_test.go:TestPythonAddressScopeDeleteDefaultsStrictOptionsAndSourceStatuses`.
@@ -172,7 +172,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.API.DeleteWithOptions`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithDeleteOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithDeleteIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 
 - A literal ID is deleted directly at the pinned resource path with no lookup/query/body. Omitted or nil IgnoreMissing defaults to true; explicit false preserves a 404. Later options override earlier options, constructor pointer snapshots survive mutation and options are reusable. HTTP 200..399 successes do not decode an opaque body.
   Tests: `network/v2/extensions/subnetpools/python_mutations_contracts_test.go:TestPythonSubnetPoolDeleteDefaultsStrictOptionsAndSourceStatuses`.
@@ -217,7 +217,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.API.DeleteWithOptions`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithDeleteOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithDeleteIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 
 - A literal ID is deleted directly at the pinned resource path with no lookup/query/body. Omitted or nil IgnoreMissing defaults to true; explicit false preserves a 404. Later options override earlier options, constructor pointer snapshots survive mutation and options are reusable. HTTP 200..399 successes do not decode an opaque body.
   Tests: `network/v2/extensions/trunks/python_mutations_contracts_test.go:TestPythonTrunkDeleteDefaultsStrictOptionsAndSourceStatuses`.
@@ -297,7 +297,7 @@ conn.network.delete_address_scope(scope.id, ignore_missing=False)
 
 ```go
 err := api.DeleteWithOptions(ctx, id)
-err = api.DeleteWithOptions(ctx, id, addressgroups.WithDeleteIgnoreMissing(false))
+err = api.DeleteWithOptions(ctx, id, request.IgnoreMissing(false))
 strict := false
 option := addressgroups.WithDeleteOptions(addressgroups.DeleteOpts{IgnoreMissing: &strict})
 ```
@@ -316,6 +316,7 @@ import (
     "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups"
     "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools"
     "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks"
+    "github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 func main() {
@@ -347,7 +348,7 @@ func main() {
             if _, err := api.UpdateWithAttributes(ctx, updateID, addressscopes.WithAttribute("is_shared", false)); err != nil { panic(err) }
         }
         if deleteID != "" {
-            if err := api.DeleteWithOptions(ctx, deleteID, addressscopes.WithDeleteIgnoreMissing(false)); err != nil { panic(err) }
+            if err := api.DeleteWithOptions(ctx, deleteID, request.IgnoreMissing(false)); err != nil { panic(err) }
         }
     case "subnet-pool":
         api := service.API.SubnetPools

@@ -213,7 +213,7 @@ func run(ctx context.Context, cloud, namespace, resourceType, action, prefix, ta
         return printRecord(record)
     case "delete":
         ack, deleteErr := scope.DeleteRecord(ctx, types.RecordRequest{ID: resourceType},
-            types.WithDeleteIgnoreMissing(!strictMissing),
+            request.IgnoreMissing(!strictMissing),
             request.Header("X-Request-Source", "association-example"),
         )
         if ack != nil {
