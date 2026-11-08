@@ -8,11 +8,13 @@ import (
 
 // DeleteVolumeWaitOpts defaults to unlimited waiting and two-second polling.
 // Timeout limits the post-mutation wait; the caller context bounds all phases.
-// ProgressCallback receives zero after nonterminal observations. Deletion has
+// ProgressCallback receives zero after nonterminal observations; a nonnil
+// Progress is then sent zero with the AttachVolumeWaitOpts rules. Deletion has
 // no failure-state policy: error and error_deleting may still become absent.
 type DeleteVolumeWaitOpts struct {
 	Timeout, PollInterval *time.Duration
 	ProgressCallback      func(int) error
+	Progress              chan<- int
 }
 
 // DeleteVolumeOpts owns the deletion policy. Wait nil selects true; Force false

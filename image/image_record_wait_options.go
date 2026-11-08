@@ -16,6 +16,8 @@ import (
 // means two seconds. Nil FailureStates uses ERROR; a nonnil empty slice disables
 // state failures. Attribute defaults to status; deletion always observes status.
 // Callback receives zero for Image, whose declared model has no progress field.
+// Progress, when set, is sent zero at the same steps after Callback returns;
+// see resource.WithProgress for the channel send semantics.
 type ImageRecordWaitOpts struct {
 	Headers               map[string]string
 	Timeout, PollInterval *time.Duration
@@ -23,11 +25,12 @@ type ImageRecordWaitOpts struct {
 	FailureStates         []string
 	Attribute             string
 	Callback              func(int)
+	Progress              chan<- int
 }
 
 // ImageRecordWaitOption is one option of the image record waits:
 // WithImageRecordWaitOpts, WithImageRecordWaitHeaders (merges), the timeout,
-// poll, failure state, attribute and callback options, request.Header (merges
+// poll, failure state, attribute, callback and progress options, request.Header (merges
 // one header) or request.Custom over *ImageRecordWaitOpts. Other shared calls,
 // including request.Headers, fail with resource.ErrInvalidOption before HTTP.
 type ImageRecordWaitOption = request.GetCall
@@ -99,6 +102,20 @@ func WithImageRecordWaitCallback(value func(int)) ImageRecordWaitOption {
 			return uploadInvalid("image wait callback must not be nil")
 		}
 		config.Callback = value
+		return nil
+	})
+}
+
+// WithImageRecordWaitProgress sends zero on value after each nonterminal
+// response. The wait blocks until the value is received or its context ends;
+// the caller owns and drains value, which is never closed. With
+// WithImageRecordWaitCallback also set, the callback runs first.
+func WithImageRecordWaitProgress(value chan<- int) ImageRecordWaitOption {
+	return request.Custom(func(config *ImageRecordWaitOpts) error {
+		if value == nil {
+			return uploadInvalid("image wait progress channel must not be nil")
+		}
+		config.Progress = value
 		return nil
 	})
 }
@@ -187,6 +204,10 @@ func imageRecordWaitPolicy(config ImageRecordWaitOpts, deleting bool) (resource.
 	if config.Callback != nil {
 		callback := config.Callback
 		options = append(options, resource.WithProgressCallback(func(int) { callback(0) }))
+	}
+	if config.Progress != nil {
+		// The observation model has no progress field, so the shared wait sends zero.
+		options = append(options, resource.WithProgress(config.Progress))
 	}
 	policy, err := resource.PrepareWaitOptionsFor[imageRecordWaitObservation](options...)
 	expired := config.Timeout != nil && !config.Unlimited && *config.Timeout == 0

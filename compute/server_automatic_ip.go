@@ -11,6 +11,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/progress"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/network"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
@@ -592,12 +593,21 @@ func (state *automaticIPState) observe(ctx context.Context, target string) error
 				}
 			}
 		}
-		if state.options.progress != nil {
-			progress, err := cloneAutomaticProgressServer(state.last)
+		if state.options.progressCallback != nil {
+			snapshot, err := cloneAutomaticProgressServer(state.last)
 			if err != nil {
 				return err
 			}
-			if err := state.options.progress(progress); err != nil {
+			if err := state.options.progressCallback(snapshot); err != nil {
+				return errors.Join(err, state.check(ctx))
+			}
+		}
+		if state.options.progress != nil {
+			snapshot, err := cloneAutomaticProgressServer(state.last)
+			if err != nil {
+				return err
+			}
+			if err := progress.Send(ctx, state.options.progress, snapshot); err != nil {
 				return errors.Join(err, state.check(ctx))
 			}
 		}

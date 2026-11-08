@@ -179,7 +179,7 @@ func TestServerIPDispatchOneDeadlineBoundsAllItemsAndPreflightsObservation(t *te
 				// second reached observation; no third lookup may start.
 				ctx, cancel = context.WithCancel(ctx)
 				defer cancel()
-				opts = append(opts, compute.WithAutomaticIPProgress(func(*compute.Server) error { cancel(); return nil }))
+				opts = append(opts, compute.WithAutomaticIPProgressCallback(func(*compute.Server) error { cancel(); return nil }))
 			} else {
 				f.service = compute.New(nil, compute.Dependencies{AddressNetworks: func(context.Context) (*network.Service, error) { return f.network, nil }})
 			}

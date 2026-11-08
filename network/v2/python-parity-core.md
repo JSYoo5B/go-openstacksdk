@@ -719,6 +719,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithTimeout`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithPollInterval`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithProgressCallback`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithProgress`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithStatusAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/network.WaitForStatus` and the wait collections listed in [Proxy waits](../../docs/python-proxy-waits.md#wait-collections)
 
@@ -729,6 +730,8 @@ Go API:
 - Records that keep their declared Resource view as raw JSON (segment ranges, default security group rules, default statefulness, NDP proxies, conntrack helpers and packet-rate rules) accept resource.WithStatusAttribute with an exact Python attribute name such as ether_type; wire spellings, absent, null and non-string values fail with resource.ErrUnsupported. See [raw JSON records](../../docs/python-proxy-waits.md#raw-json-records).
   Tests: `api/raw_record_wait_attributes_test.go:TestRawRecordWaitAttributesNeutron`, `resource/wait_raw_attributes_test.go:TestWaitRawAttributeRejectsMissingNullAndNonStringValues`.
 
+- resource.WithProgress sends the same integer progress as WithProgressCallback on a caller-owned channel after each nonterminal response, including the initial lookup. Each send blocks until it is received or the context ends; the SDK never closes the caller-owned channel and sends nothing after the operation returns, a context that ends during a send stops it through its cancellation path, and a nil channel option is invalid before HTTP. With both options set the callback runs first and the value is then sent.
+  Tests: `resource/wait_progress_channel_test.go:TestWaitProgressChannelSendsNonterminalValuesAndRejectsNil`, `resource/wait_progress_channel_test.go:TestWaitProgressChannelBlockedSendStopsOnCancellation`, `resource/wait_progress_channel_test.go:TestWaitProgressChannelReceiverCancellationStopsBeforeNextGET`, `resource/wait_progress_channel_test.go:TestWaitProgressCallbackRunsBeforeChannelSend`.
 Python/Go differences:
 
 - Python waits forever with failures=['ERROR'] by default; Go defaults to five minutes and a prefix/suffix failure predicate, which WithUnlimitedWait and WithFailureStates("ERROR") replace.

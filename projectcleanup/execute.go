@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/progress"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -85,7 +86,7 @@ type execution struct {
 	deps       Dependencies
 	options    *executeOptions
 	mu         sync.Mutex // outcomes, stop state and clients
-	progressMu sync.Mutex // serializes callbacks
+	progressMu sync.Mutex // serializes callbacks and channel sends
 	outcomes   map[Ref]*Outcome
 	clients    map[string]*gophercloud.ServiceClient
 	clientErrs map[string]error
@@ -107,19 +108,24 @@ func (e *execution) set(outcome Outcome) {
 	e.outcomes[outcome.Candidate.Ref] = &copy
 	stopped := e.stopped
 	e.mu.Unlock()
-	if e.options.progress == nil || stopped {
+	if (e.options.callback == nil && e.options.progress == nil) || stopped {
 		return
 	}
 	e.progressMu.Lock()
 	defer e.progressMu.Unlock()
-	if err := e.options.progress(Event{Outcome: outcome.clone()}); err != nil {
-		e.mu.Lock()
-		if !e.stopped {
-			e.stopped = true
-			e.stopErr = fmt.Errorf("project cleanup stopped by progress callback: %w", err)
+	if e.options.callback != nil {
+		if err := e.options.callback(Event{Outcome: outcome.clone()}); err != nil {
+			e.mu.Lock()
+			if !e.stopped {
+				e.stopped = true
+				e.stopErr = fmt.Errorf("project cleanup stopped by progress callback: %w", err)
+			}
+			e.mu.Unlock()
+			return
 		}
-		e.mu.Unlock()
 	}
+	// A send error is ctx.Err(); isStopped and Execute already report it.
+	_ = progress.Send(e.ctx, e.options.progress, Event{Outcome: outcome.clone()})
 }
 
 func (e *execution) client(service string) (*gophercloud.ServiceClient, error) {

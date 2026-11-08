@@ -199,7 +199,8 @@ func (o Outcome) clone() Outcome {
 	return o
 }
 
-// Event reports one candidate state change to a WithProgress callback.
+// Event reports one candidate state change to a WithProgressCallback
+// callback or on a WithProgress channel.
 type Event struct {
 	Outcome Outcome
 }

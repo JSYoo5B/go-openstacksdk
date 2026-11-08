@@ -104,7 +104,8 @@ type automaticFloatingIPOptions struct {
 	addresses         []ServerAddressOption
 	ips               []network.EnsureFloatingIPOption
 	timeout, interval time.Duration
-	progress          func(*Server) error
+	progressCallback  func(*Server) error
+	progress          chan<- *Server
 	pool              resource.Ref
 	requestedIPs      []string
 	forceExplicit     bool
@@ -186,12 +187,30 @@ func WithAutomaticIPPollInterval(interval time.Duration) AutomaticFloatingIPOpti
 	}
 }
 
-// WithAutomaticIPProgress runs after a valid Nova response that has not yet
-// converged. An error/cancellation/source change stops before another request.
-func WithAutomaticIPProgress(progress func(*Server) error) AutomaticFloatingIPOption {
+// WithAutomaticIPProgressCallback runs synchronously with an owned copy of a
+// valid Nova response that has not yet converged. An error/cancellation/source
+// change stops before another request. With WithAutomaticIPProgress also set,
+// the callback runs first; when it returns an error nothing is sent.
+func WithAutomaticIPProgressCallback(callback func(*Server) error) AutomaticFloatingIPOption {
+	return func(o *automaticFloatingIPOptions) error {
+		if callback == nil {
+			return invalid("automatic IP progress callback is required")
+		}
+		o.progressCallback = callback
+		return nil
+	}
+}
+
+// WithAutomaticIPProgress sends an owned copy of each valid Nova response that
+// has not yet converged on progress, after any progress callback. The workflow
+// sends from its own goroutine and blocks until the copy is received or ctx
+// ends; the caller owns and drains progress, which the SDK never closes, and
+// nothing is sent after the workflow returns. A ctx that ends during a send
+// stops the workflow like cancellation.
+func WithAutomaticIPProgress(progress chan<- *Server) AutomaticFloatingIPOption {
 	return func(o *automaticFloatingIPOptions) error {
 		if progress == nil {
-			return invalid("automatic IP progress callback is required")
+			return invalid("automatic IP progress channel is required")
 		}
 		o.progress = progress
 		return nil

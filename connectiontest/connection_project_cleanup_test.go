@@ -345,7 +345,7 @@ func TestProjectCleanupExecuteReportsEveryState(t *testing.T) {
 		t.Fatal(err)
 	}
 	var progress []string
-	result, err := cloud.conn.ExecuteProjectCleanup(context.Background(), plan, projectcleanup.WithProgress(func(e projectcleanup.Event) error {
+	result, err := cloud.conn.ExecuteProjectCleanup(context.Background(), plan, projectcleanup.WithProgressCallback(func(e projectcleanup.Event) error {
 		progress = append(progress, e.Outcome.Candidate.ID+"="+string(e.Outcome.State))
 		return nil
 	}))
@@ -449,7 +449,7 @@ func TestProjectCleanupStopsOnProgressErrorAndCancellation(t *testing.T) {
 	}
 	stop := errors.New("stop")
 	var calls int
-	result, err := cloud.conn.ExecuteProjectCleanup(context.Background(), plan, projectcleanup.WithProgress(func(projectcleanup.Event) error {
+	result, err := cloud.conn.ExecuteProjectCleanup(context.Background(), plan, projectcleanup.WithProgressCallback(func(projectcleanup.Event) error {
 		calls++
 		return stop
 	}))
@@ -460,7 +460,7 @@ func TestProjectCleanupStopsOnProgressErrorAndCancellation(t *testing.T) {
 		t.Fatalf("outcomes %+v", result.Outcomes)
 	}
 	ctx, cancel := context.WithCancel(context.Background())
-	result, err = cloud.conn.ExecuteProjectCleanup(ctx, plan, projectcleanup.WithProgress(func(e projectcleanup.Event) error {
+	result, err = cloud.conn.ExecuteProjectCleanup(ctx, plan, projectcleanup.WithProgressCallback(func(e projectcleanup.Event) error {
 		cancel()
 		return nil
 	}))
@@ -499,7 +499,7 @@ func TestProjectCleanupParallelismWithinStage(t *testing.T) {
 		t.Fatalf("invalid parallelism: %v", err)
 	}
 	var callbackActive atomic.Int32
-	result, err := cloud.conn.ExecuteProjectCleanup(context.Background(), plan, projectcleanup.WithParallelism(2), projectcleanup.WithProgress(func(projectcleanup.Event) error {
+	result, err := cloud.conn.ExecuteProjectCleanup(context.Background(), plan, projectcleanup.WithParallelism(2), projectcleanup.WithProgressCallback(func(projectcleanup.Event) error {
 		if callbackActive.Add(1) != 1 {
 			t.Error("concurrent progress callbacks")
 		}

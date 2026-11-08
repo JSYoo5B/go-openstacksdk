@@ -1,9 +1,12 @@
 package resource
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 	"strings"
+
+	"github.com/JSYoo5B/go-openstacksdk/internal/progress"
 )
 
 // ValidateWaitOptionsFor checks model attributes before a workflow performs a
@@ -28,7 +31,7 @@ func waitFields[T any](o waitOptions) (status, progress *reflect.StructField, er
 			return nil, nil, fmt.Errorf("%w: status attribute %q must be an exported string field", ErrUnsupported, o.statusAttribute)
 		}
 	}
-	if o.progressCallback != nil {
+	if o.progressCallback != nil || o.progress != nil {
 		progress, err = waitField(model, "progress")
 		if err != nil {
 			return nil, nil, err
@@ -113,27 +116,29 @@ func waitStatus[T any](value *T, field *reflect.StructField, service func(*T) st
 	return v.String(), nil
 }
 
-func reportWaitProgress[T any](o waitOptions, value *T, field *reflect.StructField) error {
-	if o.progressCallback == nil {
+func reportWaitProgress[T any](ctx context.Context, o waitOptions, value *T, field *reflect.StructField) error {
+	if o.progressCallback == nil && o.progress == nil {
 		return nil
 	}
-	progress := 0
+	current := 0
 	v := waitFieldValue(value, field)
 	if v.IsValid() {
 		if v.Kind() >= reflect.Int && v.Kind() <= reflect.Int64 {
 			n := v.Int()
-			progress = int(n)
-			if int64(progress) != n {
+			current = int(n)
+			if int64(current) != n {
 				return fmt.Errorf("%w: progress exceeds Go int range", ErrUnsupported)
 			}
 		} else {
 			n := v.Uint()
-			progress = int(n)
-			if progress < 0 || uint64(progress) != n {
+			current = int(n)
+			if current < 0 || uint64(current) != n {
 				return fmt.Errorf("%w: progress exceeds Go int range", ErrUnsupported)
 			}
 		}
 	}
-	o.progressCallback(progress)
-	return nil
+	if o.progressCallback != nil {
+		o.progressCallback(current)
+	}
+	return progress.Send(ctx, o.progress, current)
 }

@@ -21,10 +21,15 @@ type AttachVolumeOpts struct {
 // exact, case-insensitive error failure detection. Timeout applies after creation.
 // A non-nil empty FailureStates disables failure detection. ProgressCallback
 // receives zero after nonterminal polls and may return an error to stop waiting.
+// A nonnil Progress is then sent zero at the same step, unless the callback
+// failed; the caller owns and drains it. The wait blocks on each send until it
+// is received or the context ends, never closes Progress and sends nothing
+// after it returns.
 type AttachVolumeWaitOpts struct {
 	Timeout, PollInterval *time.Duration
 	FailureStates         []string
 	ProgressCallback      func(int) error
+	Progress              chan<- int
 }
 
 // AttachVolumeOption configures a concrete policy once before resource lookup.

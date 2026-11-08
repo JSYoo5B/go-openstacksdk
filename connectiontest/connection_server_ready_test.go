@@ -169,7 +169,7 @@ func TestConnectionReadyLazyComputeGuardSurvivesReadinessAndIPStages(t *testing.
 				opts = append(opts, compute.WithServerReadyWaitOptions(resource.WithProgressCallback(func(int) { change() })))
 			}
 			if scenario == "IP progress" {
-				opts = append(opts, compute.WithServerReadyAutomaticIPOptions(compute.WithAutomaticIPProgress(func(*compute.Server) error { change(); return nil })))
+				opts = append(opts, compute.WithServerReadyAutomaticIPOptions(compute.WithAutomaticIPProgressCallback(func(*compute.Server) error { change(); return nil })))
 			}
 			if scenario == "accepted close" {
 				base := cloud.Provider.HTTPClient.Transport

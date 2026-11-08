@@ -111,7 +111,7 @@ func TestNovaServerIPUpperObservationRequiresActualActiveServer(t *testing.T) {
 			}))
 			cause := errors.New("BUILD target is not ready")
 			progress := 0
-			common := []compute.AutomaticFloatingIPOption{compute.WithAutomaticAddressOptions(compute.WithFloatingIPSource(compute.FloatingIPNova), compute.WithAddressReachability(false)), compute.WithFloatingIPAddresses(dispatchAddresses["a"], dispatchAddresses["b"]), compute.WithAutomaticEnsureOptions(network.WithEnsureFixedAddress("10.0.0.10")), compute.WithAutomaticIPPollInterval(time.Millisecond), compute.WithAutomaticIPProgress(func(*compute.Server) error { progress++; return cause })}
+			common := []compute.AutomaticFloatingIPOption{compute.WithAutomaticAddressOptions(compute.WithFloatingIPSource(compute.FloatingIPNova), compute.WithAddressReachability(false)), compute.WithFloatingIPAddresses(dispatchAddresses["a"], dispatchAddresses["b"]), compute.WithAutomaticEnsureOptions(network.WithEnsureFixedAddress("10.0.0.10")), compute.WithAutomaticIPPollInterval(time.Millisecond), compute.WithAutomaticIPProgressCallback(func(*compute.Server) error { progress++; return cause })}
 			input := compute.AutomaticFloatingIPRequest{Server: automaticServer(t, autoFixed)}
 			ready := []compute.ServerReadyOption{compute.WithServerReadyAutomaticIPOptions(common...), compute.WithServerReadyWaitOptions(resource.WithPollInterval(time.Millisecond))}
 			var result *compute.AutomaticServerIPResult

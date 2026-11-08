@@ -23,7 +23,7 @@ func TestConnectionStandaloneAutomaticIPRetainsLazyComputeSourceGuard(t *testing
 			result, err := conn.EnsureServerFloatingIP(context.Background(), compute.AutomaticFloatingIPRequest{Server: server},
 				compute.WithAutomaticIPTimeout(time.Second), compute.WithAutomaticIPPollInterval(time.Millisecond),
 				compute.WithAutomaticEnsureOptions(network.WithEnsureReuse(false)),
-				compute.WithAutomaticIPProgress(func(*compute.Server) error {
+				compute.WithAutomaticIPProgressCallback(func(*compute.Server) error {
 					callbacks++
 					cached, err := conn.Compute(context.Background())
 					if err != nil {

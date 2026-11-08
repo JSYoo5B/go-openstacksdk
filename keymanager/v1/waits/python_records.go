@@ -114,13 +114,14 @@ type Options struct {
 	Failures          []string
 	Attribute         *string
 	Callback          func(int) error
+	Progress          chan<- int
 	Headers           map[string]string
 	Microversion      *string
 }
 
 // Option is one option of WaitForStatus and WaitForDelete: WithOptions,
 // WithInterval, WithTimeout, WithUnlimitedWait, WithFailures, WithAttribute,
-// WithProgressCallback, request.Custom over *Options, request.Header (adds one
+// WithProgressCallback, WithProgress, request.Custom over *Options, request.Header (adds one
 // header to every read) or request.Microversion. Other shared calls fail with
 // resource.ErrInvalidOption before HTTP.
 type Option = request.GetCall
@@ -181,6 +182,23 @@ func WithProgressCallback(v func(int) error) Option {
 			return invalid("callback is required")
 		}
 		c.Callback = v
+		return nil
+	})
+}
+
+// WithProgress sends the observed progress (zero for Key Manager records) on v
+// after each nonterminal response, including the first. The wait sends from
+// its own goroutine and blocks until v is received or ctx ends; the caller
+// owns and drains v, which the SDK never closes, and nothing is sent after the
+// wait returns. A ctx that ends during a send stops the wait with its error.
+// With WithProgressCallback also set, the callback runs first; when it returns
+// an error the wait stops and nothing is sent for that step.
+func WithProgress(v chan<- int) Option {
+	return request.Custom(func(c *Options) error {
+		if v == nil {
+			return invalid("progress channel is required")
+		}
+		c.Progress = v
 		return nil
 	})
 }

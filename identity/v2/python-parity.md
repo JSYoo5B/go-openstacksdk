@@ -381,10 +381,13 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithTimeout`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithPollInterval`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithProgressCallback`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithProgress`
 
 - Tenant and User WaitForDeletion with WithTimeout(120s) repeat GET on the fixed ID until 404, report progress 0 after each nonterminal observation and then succeed.
   Tests: `identity/v2/tenants/python_parity_test.go:TestPythonTenantWaitHelpers`, `identity/v2/users/python_parity_test.go:TestPythonUserWaitHelpers`.
 
+- resource.WithProgress sends the same integer progress as WithProgressCallback on a caller-owned channel after each nonterminal response, including the initial lookup. Each send blocks until it is received or the context ends; the SDK never closes the caller-owned channel and sends nothing after the operation returns, a context that ends during a send stops it through its cancellation path, and a nil channel option is invalid before HTTP. With both options set the callback runs first and the value is then sent.
+  Tests: `resource/wait_progress_channel_test.go:TestWaitProgressChannelSendsNonterminalValuesAndRejectsNil`, `resource/wait_progress_channel_test.go:TestWaitProgressChannelBlockedSendStopsOnCancellation`, `resource/wait_progress_channel_test.go:TestWaitProgressChannelReceiverCancellationStopsBeforeNextGET`, `resource/wait_progress_channel_test.go:TestWaitProgressCallbackRunsBeforeChannelSend`.
 Python/Go differences:
 
 - Go defaults to a five-minute timeout while the identity v2 Proxy default is wait=120; resource.WithTimeout reproduces it.

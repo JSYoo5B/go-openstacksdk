@@ -843,6 +843,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithTimeout`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithPollInterval`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithProgressCallback`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithProgress`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WaitForDelete`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/identityproviders.API.Resources`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.API.Resources`
@@ -859,6 +860,8 @@ Go API:
 - All 21 pinned fetchable identity/v3 Resources (access rules, application credentials, credentials, domains, domain configs, endpoints, endpoint groups, federation protocols, groups, identity providers, limits, mappings, policies, projects, regions, registered limits, roles, services, service providers, trusts, users) have SDK collections; each deletion wait polls the fixed member route until 404.
   Tests: `api/identity_proxy_waits_test.go:TestIdentityProxyWaitsDeleteEveryFetchableResource`.
 
+- resource.WithProgress sends the same integer progress as WithProgressCallback on a caller-owned channel after each nonterminal response, including the initial lookup. Each send blocks until it is received or the context ends; the SDK never closes the caller-owned channel and sends nothing after the operation returns, a context that ends during a send stops it through its cancellation path, and a nil channel option is invalid before HTTP. With both options set the callback runs first and the value is then sent.
+  Tests: `resource/wait_progress_channel_test.go:TestWaitProgressChannelSendsNonterminalValuesAndRejectsNil`, `resource/wait_progress_channel_test.go:TestWaitProgressChannelBlockedSendStopsOnCancellation`, `resource/wait_progress_channel_test.go:TestWaitProgressChannelReceiverCancellationStopsBeforeNextGET`, `resource/wait_progress_channel_test.go:TestWaitProgressCallbackRunsBeforeChannelSend`.
 Python/Go differences:
 
 - Go defaults to a five-minute timeout while the identity v3 Proxy default is wait=120; resource.WithTimeout reproduces it.

@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/JSYoo5B/go-openstacksdk/internal/progress"
 )
 
 func (p *preparedDeleteVolume) wait(ctx context.Context, result *DeleteVolumeResult) error {
@@ -61,12 +63,21 @@ func (p *preparedDeleteVolume) wait(ctx context.Context, result *DeleteVolumeRes
 		}
 		// Deletion has no failure-state predicate: error/error_deleting and
 		// nullable status remain observations until deleted or absent.
-		if progress := p.options.policy.WaitPolicy.ProgressCallback; progress != nil {
+		if callback := p.options.policy.WaitPolicy.ProgressCallback; callback != nil {
 			if err := p.guard(waitCtx); err != nil {
 				return response.Fail(err)
 			}
-			callbackErr := progress(0)
+			callbackErr := callback(0)
 			if err := errors.Join(callbackErr, p.guard(waitCtx)); err != nil {
+				return response.Fail(attachContextError(waitCtx, err))
+			}
+		}
+		if ch := p.options.policy.WaitPolicy.Progress; ch != nil {
+			if err := p.guard(waitCtx); err != nil {
+				return response.Fail(err)
+			}
+			sendErr := progress.Send(waitCtx, ch, 0)
+			if err := errors.Join(sendErr, p.guard(waitCtx)); err != nil {
 				return response.Fail(attachContextError(waitCtx, err))
 			}
 		}

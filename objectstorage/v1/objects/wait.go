@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/progress"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
@@ -82,6 +83,15 @@ func (a *API) waitForObject(ctx context.Context, container, object, status strin
 			}
 			callbackErr := callback(0)
 			if err = joinMetadataErrors(callbackErr, w.request.guard(ctx)); err != nil {
+				return result, objectCreateResponseError(response, err)
+			}
+		}
+		if ch := w.options.Progress; ch != nil {
+			if err := w.request.guard(ctx); err != nil {
+				return result, objectCreateResponseError(response, err)
+			}
+			sendErr := progress.Send(ctx, ch, 0)
+			if err = joinMetadataErrors(sendErr, w.request.guard(ctx)); err != nil {
 				return result, objectCreateResponseError(response, err)
 			}
 		}

@@ -245,7 +245,7 @@ func TestProjectCleanupDNSExecutesZoneDeletesThenPTRUnsets(t *testing.T) {
 		t.Fatal(err)
 	}
 	var progress []string
-	result, err := cloud.conn.ExecuteProjectCleanup(context.Background(), plan, projectcleanup.WithProgress(func(e projectcleanup.Event) error {
+	result, err := cloud.conn.ExecuteProjectCleanup(context.Background(), plan, projectcleanup.WithProgressCallback(func(e projectcleanup.Event) error {
 		progress = append(progress, e.Outcome.Candidate.ID+"="+string(e.Outcome.State))
 		return nil
 	}))

@@ -702,6 +702,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithTimeout`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithUnlimitedWait`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithProgressCallback`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithProgress`
 - `github.com/JSYoo5B/go-openstacksdk/placement/v1.WaitForStatus`
 - `github.com/JSYoo5B/go-openstacksdk/placement/v1/allocations.API.Resources`
 - `github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.TraitResources`
@@ -715,6 +716,8 @@ Go API:
 - All pinned fetchable Placement Resources have SDK collections. No Placement model declares status, so the default fails before HTTP; ResourceProvider name and Allocation project_id/user_id/consumer_type are selectable string attributes, while numeric inventory attributes are rejected before HTTP.
   Tests: `api/placement_proxy_waits_test.go:TestPlacementProxyWaitsStatusAttributesAndEmptyAllocations`, `api/placement_proxy_waits_test.go:TestPlacementProxyWaitsDeleteEveryFetchableResource`.
 
+- resource.WithProgress sends the same integer progress as WithProgressCallback on a caller-owned channel after each nonterminal response, including the initial lookup. Each send blocks until it is received or the context ends; the SDK never closes the caller-owned channel and sends nothing after the operation returns, a context that ends during a send stops it through its cancellation path, and a nil channel option is invalid before HTTP. With both options set the callback runs first and the value is then sent.
+  Tests: `resource/wait_progress_channel_test.go:TestWaitProgressChannelSendsNonterminalValuesAndRejectsNil`, `resource/wait_progress_channel_test.go:TestWaitProgressChannelBlockedSendStopsOnCancellation`, `resource/wait_progress_channel_test.go:TestWaitProgressChannelReceiverCancellationStopsBeforeNextGET`, `resource/wait_progress_channel_test.go:TestWaitProgressCallbackRunsBeforeChannelSend`.
 Python/Go differences:
 
 - Python accepts any Resource and attribute and returns immediately without HTTP when it already matches; Go waits by ID, always fetches first and returns the final model.

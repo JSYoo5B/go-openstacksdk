@@ -284,7 +284,7 @@ func TestServerIPPoolLaneWaitProgressAndBudget(t *testing.T) {
 			f := newLaneFixture(t)
 			f.free, f.shownAfter = reuse, 3
 			var seen []string
-			progress := compute.WithAutomaticIPProgress(func(server *compute.Server) error {
+			progress := compute.WithAutomaticIPProgressCallback(func(server *compute.Server) error {
 				seen = append(seen, server.Name)
 				return nil
 			})
@@ -299,7 +299,7 @@ func TestServerIPPoolLaneWaitProgressAndBudget(t *testing.T) {
 		f := newLaneFixture(t)
 		f.free, f.shownAfter = true, 3
 		stop := errors.New("stop polling")
-		options := laneOptions(compute.WithAutomaticIPProgress(func(*compute.Server) error { return stop }), compute.WithFloatingIPPool(resource.ID("pool-network")), compute.WithAutomaticEnsureOptions(network.WithEnsureProject("owner"), network.WithEnsurePort(resource.ID("port-p"))))
+		options := laneOptions(compute.WithAutomaticIPProgressCallback(func(*compute.Server) error { return stop }), compute.WithFloatingIPPool(resource.ID("pool-network")), compute.WithAutomaticEnsureOptions(network.WithEnsureProject("owner"), network.WithEnsurePort(resource.ID("port-p"))))
 		result, err := f.service.AddIPsToServer(context.Background(), compute.AutomaticFloatingIPRequest{Server: automaticServer(t, autoFixed)}, append(standaloneIPOptions(options...), compute.WithServerIPWait(true))...)
 		if !errors.Is(err, stop) || result == nil || result.Observed || result.Attempts[0].Completed || result.Assignment == nil || f.rawCalls.Load() != 1 {
 			t.Fatal(result, err, f.trace())
@@ -375,7 +375,7 @@ func TestServerIPAutomaticLaneDestinationSelectorsWaitAndProgress(t *testing.T) 
 		f := newLaneFixture(t)
 		f.shownAfter = 3
 		var seen []string
-		progress := compute.WithAutomaticIPProgress(func(server *compute.Server) error {
+		progress := compute.WithAutomaticIPProgressCallback(func(server *compute.Server) error {
 			seen = append(seen, server.Name)
 			return nil
 		})

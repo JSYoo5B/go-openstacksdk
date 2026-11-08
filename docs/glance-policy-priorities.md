@@ -73,6 +73,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitFailureStates`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitCallback`
+- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitProgress`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitHeaders`
 
@@ -107,6 +108,8 @@ Go API:
 - Only nonterminal owned observations invoke synchronous progress0, because Image has no declared progress descriptor. Cancellation, source changes and physical/processing errors stop before another poll; after a successful projection later errors return that latest owned record with the error. Newer physical failures keep their own receipt instead of being replaced by an earlier successful receipt; state404 is an error.
   Tests: `image/image_record_wait_test.go:TestImageRecordWaitCallbacksGuardBeforePauseOrNextGET`, `image/image_record_wait_test.go:TestImageRecordWaitHTTPFailuresAnd404HandlingFaultsAreTerminal`, `image/image_record_wait_test.go:TestImageRecordWaitAcceptedAndRejectedStickyPhysicalGuards`.
 
+- WithImageRecordWaitProgress and ImageRecordWaitOpts.Progress send zero on a caller-owned channel at the same nonterminal steps as the callback. Each send blocks until it is received or the context ends; the SDK never closes the caller-owned channel and sends nothing after the operation returns, a context that ends during a send stops it through its cancellation path, and a nil channel option is invalid before HTTP. With both set the callback runs first.
+  Tests: `image/image_record_wait_progress_test.go:TestImageRecordWaitProgressChannelSendsZeroAndRejectsNil`, `image/image_record_wait_progress_test.go:TestImageRecordWaitProgressChannelBlockedSendStopsOnCancellation`, `image/image_record_wait_progress_test.go:TestImageRecordWaitProgressChannelReceiverCancellation`, `image/image_record_wait_progress_test.go:TestImageRecordWaitProgressCallbackRunsBeforeChannelSend`.
 Python/Go differences:
 
 - Go accepts explicit resource.Ref and an SDK typed collection and returns a native-model pointer for state waits; Python accepts an existing Resource and may return it immediately from its cached target state without HTTP. Explicit ID performs a fresh lookup and Name retains the existing native resolver before fixing its ID.
@@ -137,6 +140,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitFailureStates`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitCallback`
+- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitProgress`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitHeaders`
 
@@ -171,6 +175,8 @@ Go API:
 - One owned deletion budget covers GET, progress and pause, supports timeout0, interval0 and explicit unlimited selection, and retains parent cancellation/deadline. Completion/errors omit progress. Opt-in common deletion guards check before GET, after read before completion and after progress, preserving fetch evidence and existing nil-guard behavior; later errors return the last successfully projected owned record.
   Tests: `image/image_record_wait_test.go:TestImageRecordWaitZeroIntervalsTimeoutAndParentBudget`, `image/image_record_wait_test.go:TestImageRecordWaitCallbacksGuardBeforePauseOrNextGET`, `resource/wait_deleted_guard_test.go:TestWaitDeletedOptInGuardProtectsEveryCompletionBoundary`, `resource/wait_deleted_guard_test.go:TestWaitDeletedGuardPreservesFetchFailureAndLegacyNilGuard`.
 
+- WithImageRecordWaitProgress and ImageRecordWaitOpts.Progress send zero on a caller-owned channel at the same nonterminal steps as the callback. Each send blocks until it is received or the context ends; the SDK never closes the caller-owned channel and sends nothing after the operation returns, a context that ends during a send stops it through its cancellation path, and a nil channel option is invalid before HTTP. With both set the callback runs first.
+  Tests: `image/image_record_wait_progress_test.go:TestImageRecordWaitProgressChannelSendsZeroAndRejectsNil`, `image/image_record_wait_progress_test.go:TestImageRecordWaitProgressChannelBlockedSendStopsOnCancellation`, `image/image_record_wait_progress_test.go:TestImageRecordWaitProgressChannelReceiverCancellation`, `image/image_record_wait_progress_test.go:TestImageRecordWaitProgressCallbackRunsBeforeChannelSend`.
 Python/Go differences:
 
 - Go accepts explicit resource.Ref and an SDK typed collection and returns a native-model pointer for state waits; Python accepts an existing Resource and may return it immediately from its cached target state without HTTP. Explicit ID performs a fresh lookup and Name retains the existing native resolver before fixing its ID.

@@ -77,7 +77,7 @@ func (c *Collection[T]) WaitDeleted(ctx context.Context, ref Ref, opts ...WaitOp
 				return nil
 			}
 		}
-		if err := reportWaitProgress(o, value, progressField); err != nil {
+		if err := reportWaitProgress(ctx, o, value, progressField); err != nil {
 			return c.wrap("wait deleted", err)
 		}
 		if c.binding.WaitGuard != nil {

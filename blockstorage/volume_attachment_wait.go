@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/progress"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
@@ -17,6 +18,7 @@ type volumeAttachmentWait struct {
 	timeout, interval time.Duration
 	failures          []string
 	progress          func(int) error
+	channel           chan<- int
 	guard             func(context.Context) error
 	exchange          func(context.Context) (*rest.Response, error)
 	lastAccepted      **AttachVolumeObservationResponse
@@ -75,12 +77,21 @@ func waitVolumeAttachment(ctx context.Context, policy volumeAttachmentWait) erro
 				return response.Fail(&resource.FailedStateError{Resource: "volume", ID: policy.volumeID, Status: status})
 			}
 		}
-		if progress := policy.progress; progress != nil {
+		if callback := policy.progress; callback != nil {
 			if err := policy.guard(waitCtx); err != nil {
 				return response.Fail(err)
 			}
-			callbackErr := progress(0)
+			callbackErr := callback(0)
 			if err := errors.Join(callbackErr, policy.guard(waitCtx)); err != nil {
+				return response.Fail(attachContextError(waitCtx, err))
+			}
+		}
+		if ch := policy.channel; ch != nil {
+			if err := policy.guard(waitCtx); err != nil {
+				return response.Fail(err)
+			}
+			sendErr := progress.Send(waitCtx, ch, 0)
+			if err := errors.Join(sendErr, policy.guard(waitCtx)); err != nil {
 				return response.Fail(attachContextError(waitCtx, err))
 			}
 		}

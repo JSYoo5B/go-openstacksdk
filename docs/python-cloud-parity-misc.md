@@ -800,6 +800,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/projectcleanup.WithSelector`
 - `github.com/JSYoo5B/go-openstacksdk/projectcleanup.WithParallelism`
 - `github.com/JSYoo5B/go-openstacksdk/projectcleanup.WithDeletionWait`
+- `github.com/JSYoo5B/go-openstacksdk/projectcleanup.WithProgressCallback`
 - `github.com/JSYoo5B/go-openstacksdk/projectcleanup.WithProgress`
 - `github.com/JSYoo5B/go-openstacksdk/projectcleanup.WithAllowIncompletePlan`
 
@@ -838,6 +839,8 @@ Go API:
 - dns project cleanup follows openstack/dns/v2/_proxy.py _service_cleanup: it lists zones and then floating IP PTR records (reverse/floatingips) without a query and without X-Auth-All-Projects or X-Auth-Sudo-Project-ID headers, follows Designate's links.next, excludes zones reporting another project_id (including zones shared with the project) or no project_id and rows without a usable id, applies created_at/updated_at filters to zones while any time filter excludes every PTR record (the Python resource has neither attribute), applies the selector, is discovered and executed after load_balancer and before compute and network, sends one DELETE zones/{id} without X-Designate-Delete-Shares per zone and then one PATCH reverse/floatingips/{region}:{id} with {"ptrdname": null} per PTR record without waiting for either, reports 202/200 as Accepted, 404 as AlreadyMissing, refusals as Failed with response evidence and a lost response as Uncertain, makes a network floating IP candidate depend on the PTR record candidate of the same floating IP so it is NotAttempted when the unset did not succeed, and the dns.zone and dns.floating_ip skip names each prevent their own list.
   Tests: `connectiontest/connection_project_cleanup_dns_test.go:TestProjectCleanupDNSPlansZonesAndPTRRecordsBeforeCompute`, `connectiontest/connection_project_cleanup_dns_test.go:TestProjectCleanupDNSFiltersSelectorAndSkip`, `connectiontest/connection_project_cleanup_dns_test.go:TestProjectCleanupDNSExecutesZoneDeletesThenPTRUnsets`, `connectiontest/connection_project_cleanup_dns_test.go:TestProjectCleanupDNSPTRFailureKeepsNetworkFloatingIP`.
 
+- WithProgress sends every candidate state change on a caller-owned channel in the callback order; sends never overlap and finish before Execute returns, and nothing is sent once the context is done or execution stopped. A context that ends while a send blocks stops new mutations like cancellation; a nil channel is invalid. With WithProgressCallback also set the callback runs first; its error stops new mutations and nothing is sent for that event.
+  Tests: `connectiontest/connection_project_cleanup_progress_channel_test.go:TestProjectCleanupProgressChannelFollowsCallbackOrder`, `connectiontest/connection_project_cleanup_progress_channel_test.go:TestProjectCleanupProgressCallbackErrorSendsNothing`, `connectiontest/connection_project_cleanup_progress_channel_test.go:TestProjectCleanupProgressChannelBlockedSendStopsOnCancellation`.
 Python/Go differences:
 
 - Python's dry_run=True runs the cleanup code without deleting and dry_run=False discovers again while deleting; Go discovers once in PlanProjectCleanup and ExecuteProjectCleanup acts only on that plan, refusing modified plans and a different current project.

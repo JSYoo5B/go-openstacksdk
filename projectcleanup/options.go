@@ -24,7 +24,8 @@ type planOptions struct {
 type executeOptions struct {
 	parallelism  int
 	wait         time.Duration
-	progress     func(Event) error
+	callback     func(Event) error
+	progress     chan<- Event
 	allowPartial bool
 	pollInterval time.Duration
 }
@@ -122,16 +123,35 @@ func WithDeletionWait(d time.Duration) ExecuteOption {
 	}
 }
 
-// WithProgress calls the callback for each candidate state change. Calls are
-// synchronous and never concurrent; they run on the goroutine that changed
-// the state. A returned error stops new mutations like cancellation does and
-// is returned by Execute.
-func WithProgress(callback func(Event) error) ExecuteOption {
+// WithProgressCallback calls the callback for each candidate state change.
+// Calls are synchronous and never concurrent; they run on the goroutine that
+// changed the state. A returned error stops new mutations like cancellation
+// does and is returned by Execute. With WithProgress also set, the callback
+// runs first and the event is sent only when it returned nil.
+func WithProgressCallback(callback func(Event) error) ExecuteOption {
 	return func(o *executeOptions) error {
 		if callback == nil {
 			return invalid("progress callback must not be nil")
 		}
-		o.progress = callback
+		o.callback = callback
+		return nil
+	}
+}
+
+// WithProgress sends an Event on progress for each candidate state change,
+// after any progress callback. Sends are never concurrent, even with
+// WithParallelism; each runs on the goroutine that changed the state and
+// blocks until the event is received or ctx ends. The caller owns and drains
+// progress. The SDK never closes it, sends nothing once ctx is done or
+// execution stopped, and finishes every send before Execute returns. A ctx
+// that ends while a send blocks stops new mutations like any cancellation;
+// Result still holds every outcome.
+func WithProgress(progress chan<- Event) ExecuteOption {
+	return func(o *executeOptions) error {
+		if progress == nil {
+			return invalid("progress channel must not be nil")
+		}
+		o.progress = progress
 		return nil
 	}
 }

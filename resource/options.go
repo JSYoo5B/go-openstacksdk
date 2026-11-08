@@ -123,6 +123,7 @@ type waitOptions struct {
 	failureStatesSet  bool
 	statusAttribute   string
 	progressCallback  func(int)
+	progress          chan<- int
 }
 type WaitOption func(*waitOptions) error
 
@@ -174,12 +175,32 @@ func WithStatusAttribute(attribute string) WaitOption {
 // WithProgressCallback reports model progress after each nonterminal response,
 // including the initial lookup. Missing or nil progress is reported as zero.
 // The callback runs synchronously and is not called for success or failure.
+// With WithProgress also set, the callback runs first and the value is then
+// sent on the channel.
 func WithProgressCallback(callback func(int)) WaitOption {
 	return func(o *waitOptions) error {
 		if callback == nil {
 			return invalid("progress callback must not be nil")
 		}
 		o.progressCallback = callback
+		return nil
+	}
+}
+
+// WithProgress sends model progress on progress after each nonterminal
+// response, including the initial lookup. Missing or nil progress is sent as
+// zero; nothing is sent for success or failure. The wait sends from its own
+// goroutine and blocks until the value is received or its context ends, so the
+// caller must drain progress; a context that ends during a send stops the wait
+// with its cancellation error. The SDK never closes progress and sends nothing
+// after the wait returns. With WithProgressCallback also set, the callback runs
+// first and the value is then sent.
+func WithProgress(progress chan<- int) WaitOption {
+	return func(o *waitOptions) error {
+		if progress == nil {
+			return invalid("progress channel must not be nil")
+		}
+		o.progress = progress
 		return nil
 	}
 }

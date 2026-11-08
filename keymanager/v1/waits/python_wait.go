@@ -13,6 +13,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
+	"github.com/JSYoo5B/go-openstacksdk/internal/progress"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
@@ -181,8 +182,20 @@ func (a *API) wait(ctx context.Context, target Target, status *string, deleting 
 		tokens[i] = stateToken(&v)
 	}
 	waitOptions = append(waitOptions, resource.WithFailureStates(tokens...))
-	if config.Callback != nil {
-		waitOptions = append(waitOptions, resource.WithProgressCallback(func(progress int) { observed = errors.Join(observed, config.Callback(progress)) }))
+	// pollCtx is the shared wait's per-poll context (it carries the SDK
+	// timeout); the progress step runs right after the Get that set it.
+	pollCtx := ctx
+	if config.Callback != nil || config.Progress != nil {
+		waitOptions = append(waitOptions, resource.WithProgressCallback(func(value int) {
+			if config.Callback != nil {
+				if err := config.Callback(value); err != nil {
+					// A callback error stops the wait; nothing is sent for this step.
+					observed = errors.Join(observed, err)
+					return
+				}
+			}
+			observed = errors.Join(observed, progress.Send(pollCtx, config.Progress, value))
+		}))
 	}
 	policy, err := resource.PrepareWaitOptionsFor[pollValue](waitOptions...)
 	if err != nil {
@@ -194,6 +207,7 @@ func (a *API) wait(ctx context.Context, target Target, status *string, deleting 
 		Kind: target.kind, ValidateID: validID, ID: func(v *pollValue) string { return target.id },
 		WaitGuard: guard, Status: func(v *pollValue) string { return v.State },
 		Get: func(ctx context.Context, id string) (*pollValue, error) {
+			pollCtx = ctx
 			value, err := fetch(ctx, source, guard, target.kind, id, current)
 			receipt = value
 			if err != nil {

@@ -399,7 +399,7 @@ func TestSourceIPListNeutronNotFoundFallsThroughAfterSelection(t *testing.T) {
 	})
 }
 
-// The raw poll calls WithAutomaticIPProgress between unconverged responses, and
+// The raw poll calls WithAutomaticIPProgressCallback between unconverged responses, and
 // the refresh, lookups and attachments of every item share one deadline.
 func TestSourceIPListRawPollProgressAndDeadlines(t *testing.T) {
 	t.Run("progress", func(t *testing.T) {
@@ -412,7 +412,7 @@ func TestSourceIPListRawPollProgressAndDeadlines(t *testing.T) {
 			return sourceAddresses(dispatchAddresses["a"])
 		}
 		var seen []string
-		progress := compute.WithAutomaticIPProgress(func(server *compute.Server) error {
+		progress := compute.WithAutomaticIPProgressCallback(func(server *compute.Server) error {
 			seen = append(seen, server.Name)
 			server.Name = "mutated"
 			return nil
@@ -426,7 +426,7 @@ func TestSourceIPListRawPollProgressAndDeadlines(t *testing.T) {
 		f := newSourceIPFixture(t)
 		f.ports = []string{sourcePortPrivate}
 		stop := errors.New("stop polling")
-		progress := compute.WithAutomaticIPProgress(func(*compute.Server) error { return stop })
+		progress := compute.WithAutomaticIPProgressCallback(func(*compute.Server) error { return stop })
 		result, err := f.service.AddIPList(context.Background(), automaticServer(t, autoFixed), []string{dispatchAddresses["a"], dispatchAddresses["b"]}, append(sourceIPOptions(progress), compute.WithServerIPWait(true))...)
 		if !errors.Is(err, stop) || len(result.Attempts) != 1 || result.Attempts[0].Completed || result.Assignment == nil || f.rawCalls.Load() != 1 || strings.Contains(f.trace(), "list:b") {
 			t.Fatal(result, err, f.trace())

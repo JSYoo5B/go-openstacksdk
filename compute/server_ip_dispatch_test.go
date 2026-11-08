@@ -269,7 +269,7 @@ func TestServerIPDispatchSecondFailureRetainsFirstCompletionAndCurrentPartial(t 
 				opts = append(opts, compute.WithAutomaticEnsureOptions(network.WithEnsureWait(resource.WithProgressCallback(func(int) { cancel(cause) }))))
 			}
 			if failure == "raw cancel" || failure == "raw source" {
-				opts = append(opts, compute.WithAutomaticIPProgress(func(*compute.Server) error {
+				opts = append(opts, compute.WithAutomaticIPProgressCallback(func(*compute.Server) error {
 					if failure == "raw source" {
 						f.service.API = nil
 					} else {

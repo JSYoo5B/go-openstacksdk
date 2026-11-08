@@ -547,6 +547,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithAutomaticIPTimeout`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithUnlimitedAutomaticIPTimeout`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithAutomaticIPPollInterval`
+- `github.com/JSYoo5B/go-openstacksdk/compute.WithAutomaticIPProgressCallback`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithAutomaticIPProgress`
 - `github.com/JSYoo5B/go-openstacksdk/network.FloatingIPs.NewPlanner`
 - `github.com/JSYoo5B/go-openstacksdk/network.FloatingIPPlanner.NetworkRoles`
@@ -690,7 +691,7 @@ Go API:
   Tests: `connectiontest/connection_add_ip_from_pool_test.go:TestAddIPFromPoolNovaSourceAssociatesWithFixedAddress`.
 - The pool selector forwards fixed address and NAT destination (by ID or name, alone or with a fixed address) to both lanes: with reuse the free pool IP is bound by one PUT, without reuse one allocation POST carries the pool network, and either body names the selected port_id and fixed_ip_address (port-n/10.1.0.20 or port-p/10.0.0.10). The decision Selection records the same tuple; the async call makes no raw GET.
   Tests: `compute/server_ip_lane_combinations_test.go:TestServerIPPoolLaneForwardsFixedAddressAndNATDestination`.
-- With WithServerIPWait the pool lane observes the exact address in raw Nova for reuse and allocation, calls WithAutomaticIPProgress with the unconverged raw-1 and raw-2 models and returns raw-3 with Observed; a progress error stops after one raw GET with the attempt incomplete. Every request shares one deadline: about 60 seconds by default, a 17-second override, an earlier 30-second parent, or the parent deadline when unlimited.
+- With WithServerIPWait the pool lane observes the exact address in raw Nova for reuse and allocation, calls WithAutomaticIPProgressCallback with the unconverged raw-1 and raw-2 models and returns raw-3 with Observed; a progress error stops after one raw GET with the attempt incomplete. Every request shares one deadline: about 60 seconds by default, a 17-second override, an earlier 30-second parent, or the parent deadline when unlimited.
   Tests: `compute/server_ip_lane_combinations_test.go:TestServerIPPoolLaneWaitProgressAndBudget`.
 - The automatic lane applies NAT destination by ID or name and a fixed address to the destination: reuse binds the free external IP by PUT and no reuse allocates by POST, both on port-n/10.1.0.20. Without a selector two candidate ports are ambiguous and the call fails with no PUT or POST. With wait it reports progress for unconverged raw models and observes the allocated address; requests share the default 60-second, parent or unlimited deadline.
   Tests: `compute/server_ip_lane_combinations_test.go:TestServerIPAutomaticLaneDestinationSelectorsWaitAndProgress`.
@@ -699,6 +700,8 @@ Go API:
 - AddIPsToServer with an address selector (and a zero pool Ref, which clears the pool) uses the AddIPList source steps: the supplied model's only floating address short-circuits the first item without a port lookup or PUT, a 404 from the second item's PUT is recorded in AttachmentNotFound with nil attempt Error, and the third item still attaches; nil is returned. An associated IP on a model without floating addresses refreshes the server once and short-circuits on the refreshed model.
   Tests: `compute/server_ip_lane_combinations_test.go:TestServerIPAddressSelectorFollowsSourceAttachSteps`.
 
+- WithAutomaticIPProgress sends an owned copy of each unconverged raw Server on a caller-owned channel, so receiver edits do not alter the result. Each send blocks until it is received or the context ends; the SDK never closes the caller-owned channel and sends nothing after the operation returns, a context that ends during a send stops it through its cancellation path, and a nil channel option is invalid before HTTP. With WithAutomaticIPProgressCallback also set the callback runs first; its error stops before another request and nothing is sent for that step.
+  Tests: `compute/server_automatic_ip_progress_channel_test.go:TestAutomaticIPProgressChannelSendsOwnedCopiesAndRejectsNil`, `compute/server_automatic_ip_progress_channel_test.go:TestAutomaticIPProgressChannelBlockedSendStopsOnCancellation`, `compute/server_automatic_ip_progress_channel_test.go:TestAutomaticIPProgressChannelReceiverCancellation`, `compute/server_automatic_ip_progress_channel_test.go:TestAutomaticIPProgressCallbackRunsBeforeChannelSend`.
 Python/Go differences:
 
 - The pinned public add_ips_to_server returns mutable Server Resource and dispatches pool > truthy ips > auto/needs. Independent typed Service/Connection AddIPsToServer now provides bounded Neutron and legacy Nova selected modes with async/whole60second defaults and structured Decision/Attempts/Server/Observed plus separate Neutron Assignment or NovaAssignment. Existing Plan/Ensure/ready/create keep their distinct default/readiness policies; Nova Plan is diagnostic and independent execution replans.

@@ -23,7 +23,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitStatusHeader`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitFailureStates`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitProgressCallback`
+- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitProgress`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithoutObjectWaitProgressCallback`
+- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithoutObjectWaitProgress`
 
 - Fresh bodyless HEAD addresses escaped literal container/object under captured ResourceBase. Clean physical404 alone sets Complete/Deleted, while200/204 continue; delete Status stays nil and valid status/failure choices do not determine completion. The waiter does not submit DELETE.
   Tests: `objectstorage/v1/objects/wait_core_test.go:TestObjectWaitCoreFreshPollingAndCallbacks`, `objectstorage/v1/objects/wait_contracts_test.go:TestObjectWaitContractsLiteralHEADAndDeletion`, `objectstorage/v1/objects/wait_options_test.go:TestObjectWaitOptionsPreflightAndCauses`.
@@ -44,6 +46,8 @@ Go API:
 - Generated Swift native/service/registry files remain byte-exact and accounts/containers/objects gain no generated Collections; the service guide references both concrete waiters, HEAD, delete120s and objects/wait.md.
   Tests: `internal/cmd/sdkgen/swift_object_wait_test.go:TestSwiftObjectWaitPreservesNativeAndSharedWaiters`.
 
+- WithObjectWaitProgress and ObjectWaitOpts.Progress send zero on a caller-owned channel after each clean nonterminal observation; WithoutObjectWaitProgress clears it. Each send blocks until it is received or the context ends; the SDK never closes the caller-owned channel and sends nothing after the operation returns, a context that ends during a send stops it through its cancellation path, and a nil channel option is invalid before HTTP. With a progress callback also set the callback runs first; its error stops the wait and nothing is sent for that step.
+  Tests: `objectstorage/v1/objects/wait_progress_channel_test.go:TestObjectWaitProgressChannelSendsZeroClearsAndRejectsNil`, `objectstorage/v1/objects/wait_progress_channel_test.go:TestObjectWaitProgressChannelBlockedSendStopsOnCancellation`, `objectstorage/v1/objects/wait_progress_channel_test.go:TestObjectWaitProgressChannelReceiverCancellation`, `objectstorage/v1/objects/wait_progress_channel_test.go:TestObjectWaitProgressCallbackRunsBeforeChannelSend`.
 Python/Go differences:
 
 - Go requires literal container/object and observes bodyless HEAD200/204/404; clean physical404 alone completes deletion. Python generic Resource fetch uses GET and can succeed on falsy resource, deleted status or caught NotFoundException; ordinary Swift Object declares no status. Neither waiter submits DELETE.
@@ -71,7 +75,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitStatusHeader`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitFailureStates`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitProgressCallback`
+- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitProgress`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithoutObjectWaitProgressCallback`
+- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithoutObjectWaitProgress`
 
 - Default/unknown/numeric/bool status attributes are unsupported before HTTP. All supported string attribute mappings and explicit response-header selectors perform fresh HEAD, including captured name/container literals; missing selected header returns unsupported with the real response and nil Status.
   Tests: `objectstorage/v1/objects/wait_core_test.go:TestObjectWaitCoreSelectorsAndUnsupported`, `objectstorage/v1/objects/wait_contracts_test.go:TestObjectWaitContractsSelectedStatusAndFailurePolicy`.
@@ -96,6 +102,8 @@ Go API:
 - Generated Swift native/service/registry files remain byte-exact and accounts/containers/objects gain no generated Collections; the service guide references both concrete waiters, HEAD, delete120s and objects/wait.md.
   Tests: `internal/cmd/sdkgen/swift_object_wait_test.go:TestSwiftObjectWaitPreservesNativeAndSharedWaiters`.
 
+- WithObjectWaitProgress and ObjectWaitOpts.Progress send zero on a caller-owned channel after each clean nonterminal observation; WithoutObjectWaitProgress clears it. Each send blocks until it is received or the context ends; the SDK never closes the caller-owned channel and sends nothing after the operation returns, a context that ends during a send stops it through its cancellation path, and a nil channel option is invalid before HTTP. With a progress callback also set the callback runs first; its error stops the wait and nothing is sent for that step.
+  Tests: `objectstorage/v1/objects/wait_progress_channel_test.go:TestObjectWaitProgressChannelSendsZeroClearsAndRejectsNil`, `objectstorage/v1/objects/wait_progress_channel_test.go:TestObjectWaitProgressChannelBlockedSendStopsOnCancellation`, `objectstorage/v1/objects/wait_progress_channel_test.go:TestObjectWaitProgressChannelReceiverCancellation`, `objectstorage/v1/objects/wait_progress_channel_test.go:TestObjectWaitProgressCallbackRunsBeforeChannelSend`.
 Python/Go differences:
 
 - Swift Object has no default status/progress descriptor. Python default getattr(status) raises AttributeError before fetch; Go default/unsupported selector returns ErrUnsupported before HTTP. Go accepts library-owned known string attributes or explicit response header, performs fresh HEAD even for captured name/container and does not implement the Python cached initial-match shortcut.

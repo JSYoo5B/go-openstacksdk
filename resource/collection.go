@@ -505,7 +505,7 @@ func (c *Collection[T]) Wait(ctx context.Context, ref Ref, status string, opts .
 		if o.failed(current, c.binding.Failed) {
 			return nil, &FailedStateError{Resource: c.binding.Kind, ID: id, Status: current}
 		}
-		if err := reportWaitProgress(o, v, progressField); err != nil {
+		if err := reportWaitProgress(ctx, o, v, progressField); err != nil {
 			return nil, c.wrap("wait", err)
 		}
 		if c.binding.WaitGuard != nil {

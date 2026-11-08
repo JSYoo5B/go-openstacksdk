@@ -225,7 +225,7 @@ func TestProjectCleanupKeyManagerExecuteReportsEveryState(t *testing.T) {
 		t.Fatal(err)
 	}
 	var progress []string
-	result, err := cloud.conn.ExecuteProjectCleanup(context.Background(), plan, projectcleanup.WithProgress(func(e projectcleanup.Event) error {
+	result, err := cloud.conn.ExecuteProjectCleanup(context.Background(), plan, projectcleanup.WithProgressCallback(func(e projectcleanup.Event) error {
 		progress = append(progress, e.Outcome.Candidate.Kind+":"+e.Outcome.Candidate.ID+"="+string(e.Outcome.State))
 		return nil
 	}))
@@ -262,7 +262,7 @@ func TestProjectCleanupKeyManagerExecuteReportsEveryState(t *testing.T) {
 	// not attempted and nothing is replayed.
 	deletes.Clear()
 	stop := errors.New("stop")
-	result, err = cloud.conn.ExecuteProjectCleanup(context.Background(), plan, projectcleanup.WithProgress(func(projectcleanup.Event) error { return stop }))
+	result, err = cloud.conn.ExecuteProjectCleanup(context.Background(), plan, projectcleanup.WithProgressCallback(func(projectcleanup.Event) error { return stop }))
 	if !errors.Is(err, stop) || result.Count(projectcleanup.NotAttempted) != 5 || result.Outcomes[0].State != projectcleanup.Accepted {
 		t.Fatalf("stop: %v %+v", err, result)
 	}

@@ -147,7 +147,7 @@ func TestAutomaticCreateSharesDeadlineAndKeepsAssignmentOnConvergenceCancel(t *t
 	defer cancel(nil)
 	cause := errors.New("stop convergence")
 	o := automaticCreateOptions()
-	o.AutomaticIP = append(o.AutomaticIP, compute.WithAutomaticIPTimeout(250*time.Millisecond), compute.WithAutomaticIPProgress(func(*compute.Server) error { cancel(cause); return nil }))
+	o.AutomaticIP = append(o.AutomaticIP, compute.WithAutomaticIPTimeout(250*time.Millisecond), compute.WithAutomaticIPProgressCallback(func(*compute.Server) error { cancel(cause); return nil }))
 	f.rawBody = func(int32) (int, string) {
 		return 200, `{"server":{"id":"server","status":"ACTIVE","addresses":` + autoFixed + `}}`
 	}

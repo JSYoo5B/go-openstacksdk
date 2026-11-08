@@ -8,12 +8,19 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
+// ObjectWaitOpts is the full object wait policy. ProgressCallback runs
+// synchronously with zero after each nonterminal observation and its error
+// stops the wait. A nonnil Progress is then sent zero at the same step (not
+// when the callback failed); the caller owns and drains it, the wait blocks
+// on each send until it is received or ctx ends, never closes Progress and
+// sends nothing after it returns.
 type ObjectWaitOpts struct {
 	Headers                       map[string]string
 	Interval, Timeout             *time.Duration
 	StatusAttribute, StatusHeader string
 	FailureStates                 []string
 	ProgressCallback              func(int) error
+	Progress                      chan<- int
 }
 
 // ObjectWaitOption is one option of WaitForStatus and WaitForDelete: the
@@ -91,6 +98,24 @@ func WithObjectWaitProgressCallback(callback func(int) error) ObjectWaitOption {
 }
 func WithoutObjectWaitProgressCallback() ObjectWaitOption {
 	return request.Custom(func(cfg *ObjectWaitOpts) error { cfg.ProgressCallback = nil; return nil })
+}
+
+// WithObjectWaitProgress sends zero on progress after each nonterminal
+// observation, after any progress callback. A nil channel is an invalid
+// option.
+func WithObjectWaitProgress(progress chan<- int) ObjectWaitOption {
+	return request.Custom(func(cfg *ObjectWaitOpts) error {
+		if progress == nil {
+			return metadataInvalid("object wait progress channel must not be nil")
+		}
+		cfg.Progress = progress
+		return nil
+	})
+}
+
+// WithoutObjectWaitProgress clears a progress channel installed earlier.
+func WithoutObjectWaitProgress() ObjectWaitOption {
+	return request.Custom(func(cfg *ObjectWaitOpts) error { cfg.Progress = nil; return nil })
 }
 func cloneObjectWaitOpts(value ObjectWaitOpts) ObjectWaitOpts {
 	value.Headers = cloneMetadataHeaders(value.Headers)

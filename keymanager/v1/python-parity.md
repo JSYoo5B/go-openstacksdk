@@ -131,6 +131,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithTimeout`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithStatusAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithProgressCallback`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithProgress`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.API.WaitForStatus`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.New`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.Container`
@@ -144,6 +145,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithTimeout`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithUnlimitedWait`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithProgressCallback`
+- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithProgress`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithFailures`
@@ -196,6 +198,10 @@ Go API:
 - ProjectQuota metadata merges prior fields through generic malformed JSON and explicit-null observations, while invalid shapes/numeric selected attributes retain response errors. Deletion polls GET and completes only on clean404, ignoring undeclared status:deleted; accepted/rejected Close faults cannot become absence or replay.
   Tests: `keymanager/v1/waits/python_project_quota_contracts_test.go:TestPythonProjectQuotaWaitMergeIgnoresMalformedJSONAndPreservesNull`, `keymanager/v1/waits/python_project_quota_contracts_test.go:TestPythonProjectQuotaWaitDeleteOnlyCleanGET404`, `keymanager/v1/waits/python_project_quota_contracts_test.go:TestPythonProjectQuotaWaitShapeNumericAndPhysicalFailures`.
 
+- resource.WithProgress sends the same integer progress as WithProgressCallback on a caller-owned channel after each nonterminal response, including the initial lookup. Each send blocks until it is received or the context ends; the SDK never closes the caller-owned channel and sends nothing after the operation returns, a context that ends during a send stops it through its cancellation path, and a nil channel option is invalid before HTTP. With both options set the callback runs first and the value is then sent.
+  Tests: `resource/wait_progress_channel_test.go:TestWaitProgressChannelSendsNonterminalValuesAndRejectsNil`, `resource/wait_progress_channel_test.go:TestWaitProgressChannelBlockedSendStopsOnCancellation`, `resource/wait_progress_channel_test.go:TestWaitProgressChannelReceiverCancellationStopsBeforeNextGET`, `resource/wait_progress_channel_test.go:TestWaitProgressCallbackRunsBeforeChannelSend`.
+- WithProgress and Options.Progress send zero on a caller-owned channel after each nonterminal response. Each send blocks until it is received or the context ends; the SDK never closes the caller-owned channel and sends nothing after the operation returns, a context that ends during a send stops it through its cancellation path, and a nil channel option is invalid before HTTP. With WithProgressCallback also set the callback runs first; its error stops the wait and nothing is sent for that step.
+  Tests: `keymanager/v1/waits/python_progress_channel_test.go:TestPythonKeymanagerWaitProgressChannelSendsZeroAndRejectsNil`, `keymanager/v1/waits/python_progress_channel_test.go:TestPythonKeymanagerWaitProgressChannelBlockedSendStopsOnCancellation`, `keymanager/v1/waits/python_progress_channel_test.go:TestPythonKeymanagerWaitProgressChannelReceiverCancellation`, `keymanager/v1/waits/python_progress_channel_test.go:TestPythonKeymanagerWaitProgressCallbackRunsBeforeChannelSend`.
 Python/Go differences:
 
 - Legacy generated collection waits retain their historical five-minute policy. The concrete waits.API lane defaults status to unlimited/ERROR and deletion120s with interval2s, matching the pinned helper defaults.
@@ -245,6 +251,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithTimeout`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithUnlimitedWait`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithProgressCallback`
+- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithProgress`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.SecretStore`
@@ -289,6 +296,8 @@ Go API:
 - ProjectQuota metadata merges prior fields through generic malformed JSON and explicit-null observations, while invalid shapes/numeric selected attributes retain response errors. Deletion polls GET and completes only on clean404, ignoring undeclared status:deleted; accepted/rejected Close faults cannot become absence or replay.
   Tests: `keymanager/v1/waits/python_project_quota_contracts_test.go:TestPythonProjectQuotaWaitMergeIgnoresMalformedJSONAndPreservesNull`, `keymanager/v1/waits/python_project_quota_contracts_test.go:TestPythonProjectQuotaWaitDeleteOnlyCleanGET404`, `keymanager/v1/waits/python_project_quota_contracts_test.go:TestPythonProjectQuotaWaitShapeNumericAndPhysicalFailures`.
 
+- WithProgress and Options.Progress send zero on a caller-owned channel after each nonterminal response. Each send blocks until it is received or the context ends; the SDK never closes the caller-owned channel and sends nothing after the operation returns, a context that ends during a send stops it through its cancellation path, and a nil channel option is invalid before HTTP. With WithProgressCallback also set the callback runs first; its error stops the wait and nothing is sent for that step.
+  Tests: `keymanager/v1/waits/python_progress_channel_test.go:TestPythonKeymanagerWaitProgressChannelSendsZeroAndRejectsNil`, `keymanager/v1/waits/python_progress_channel_test.go:TestPythonKeymanagerWaitProgressChannelBlockedSendStopsOnCancellation`, `keymanager/v1/waits/python_progress_channel_test.go:TestPythonKeymanagerWaitProgressChannelReceiverCancellation`, `keymanager/v1/waits/python_progress_channel_test.go:TestPythonKeymanagerWaitProgressCallbackRunsBeforeChannelSend`.
 Python/Go differences:
 
 - Legacy generated collection waits retain their historical five-minute policy. The concrete waits.API lane defaults status to unlimited/ERROR and deletion120s with interval2s, matching the pinned helper defaults.

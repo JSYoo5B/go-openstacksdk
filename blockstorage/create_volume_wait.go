@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/progress"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -58,12 +59,21 @@ func (p *preparedCreateVolume) wait(ctx context.Context, result *CreateVolumeRes
 				return response.Fail(&resource.FailedStateError{Resource: "volume", ID: p.volumeID, Status: status})
 			}
 		}
-		if progress := p.options.policy.WaitPolicy.ProgressCallback; progress != nil {
+		if callback := p.options.policy.WaitPolicy.ProgressCallback; callback != nil {
 			if err := p.guard(waitCtx); err != nil {
 				return response.Fail(err)
 			}
-			callbackErr := progress(0)
+			callbackErr := callback(0)
 			if err := errors.Join(callbackErr, p.guard(waitCtx)); err != nil {
+				return response.Fail(attachContextError(waitCtx, err))
+			}
+		}
+		if ch := p.options.policy.WaitPolicy.Progress; ch != nil {
+			if err := p.guard(waitCtx); err != nil {
+				return response.Fail(err)
+			}
+			sendErr := progress.Send(waitCtx, ch, 0)
+			if err := errors.Join(sendErr, p.guard(waitCtx)); err != nil {
 				return response.Fail(attachContextError(waitCtx, err))
 			}
 		}

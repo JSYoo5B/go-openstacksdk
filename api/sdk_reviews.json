@@ -20560,6 +20560,7 @@
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitFailureStates",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitAttribute",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitCallback",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitProgress",
         "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitHeaders"
       ],
@@ -20680,6 +20681,15 @@
             "image/image_record_wait_test.go:TestImageRecordWaitHTTPFailuresAnd404HandlingFaultsAreTerminal",
             "image/image_record_wait_test.go:TestImageRecordWaitAcceptedAndRejectedStickyPhysicalGuards"
           ]
+        },
+        {
+          "behavior": "WithImageRecordWaitProgress and ImageRecordWaitOpts.Progress send zero on a caller-owned channel at the same nonterminal steps as the callback. Each send blocks until it is received or the context ends; the SDK never closes the caller-owned channel and sends nothing after the operation returns, a context that ends during a send stops it through its cancellation path, and a nil channel option is invalid before HTTP. With both set the callback runs first.",
+          "tests": [
+            "image/image_record_wait_progress_test.go:TestImageRecordWaitProgressChannelSendsZeroAndRejectsNil",
+            "image/image_record_wait_progress_test.go:TestImageRecordWaitProgressChannelBlockedSendStopsOnCancellation",
+            "image/image_record_wait_progress_test.go:TestImageRecordWaitProgressChannelReceiverCancellation",
+            "image/image_record_wait_progress_test.go:TestImageRecordWaitProgressCallbackRunsBeforeChannelSend"
+          ]
         }
       ],
       "documentation": [
@@ -20719,6 +20729,7 @@
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitFailureStates",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitAttribute",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitCallback",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitProgress",
         "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitHeaders"
       ],
@@ -20842,6 +20853,15 @@
             "image/image_record_wait_test.go:TestImageRecordWaitCallbacksGuardBeforePauseOrNextGET",
             "resource/wait_deleted_guard_test.go:TestWaitDeletedOptInGuardProtectsEveryCompletionBoundary",
             "resource/wait_deleted_guard_test.go:TestWaitDeletedGuardPreservesFetchFailureAndLegacyNilGuard"
+          ]
+        },
+        {
+          "behavior": "WithImageRecordWaitProgress and ImageRecordWaitOpts.Progress send zero on a caller-owned channel at the same nonterminal steps as the callback. Each send blocks until it is received or the context ends; the SDK never closes the caller-owned channel and sends nothing after the operation returns, a context that ends during a send stops it through its cancellation path, and a nil channel option is invalid before HTTP. With both set the callback runs first.",
+          "tests": [
+            "image/image_record_wait_progress_test.go:TestImageRecordWaitProgressChannelSendsZeroAndRejectsNil",
+            "image/image_record_wait_progress_test.go:TestImageRecordWaitProgressChannelBlockedSendStopsOnCancellation",
+            "image/image_record_wait_progress_test.go:TestImageRecordWaitProgressChannelReceiverCancellation",
+            "image/image_record_wait_progress_test.go:TestImageRecordWaitProgressCallbackRunsBeforeChannelSend"
           ]
         }
       ],
@@ -33530,7 +33550,9 @@
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitStatusHeader",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitFailureStates",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitProgressCallback",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithoutObjectWaitProgressCallback"
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitProgress",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithoutObjectWaitProgressCallback",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithoutObjectWaitProgress"
       ],
       "documentation": [
         "objectstorage/v1/objects/wait.md"
@@ -33608,6 +33630,15 @@
           "tests": [
             "internal/cmd/sdkgen/swift_object_wait_test.go:TestSwiftObjectWaitPreservesNativeAndSharedWaiters"
           ]
+        },
+        {
+          "behavior": "WithObjectWaitProgress and ObjectWaitOpts.Progress send zero on a caller-owned channel after each clean nonterminal observation; WithoutObjectWaitProgress clears it. Each send blocks until it is received or the context ends; the SDK never closes the caller-owned channel and sends nothing after the operation returns, a context that ends during a send stops it through its cancellation path, and a nil channel option is invalid before HTTP. With a progress callback also set the callback runs first; its error stops the wait and nothing is sent for that step.",
+          "tests": [
+            "objectstorage/v1/objects/wait_progress_channel_test.go:TestObjectWaitProgressChannelSendsZeroClearsAndRejectsNil",
+            "objectstorage/v1/objects/wait_progress_channel_test.go:TestObjectWaitProgressChannelBlockedSendStopsOnCancellation",
+            "objectstorage/v1/objects/wait_progress_channel_test.go:TestObjectWaitProgressChannelReceiverCancellation",
+            "objectstorage/v1/objects/wait_progress_channel_test.go:TestObjectWaitProgressCallbackRunsBeforeChannelSend"
+          ]
         }
       ]
     },
@@ -33627,7 +33658,9 @@
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitStatusHeader",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitFailureStates",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitProgressCallback",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithoutObjectWaitProgressCallback"
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitProgress",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithoutObjectWaitProgressCallback",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithoutObjectWaitProgress"
       ],
       "documentation": [
         "objectstorage/v1/objects/wait.md"
@@ -33721,6 +33754,15 @@
           "behavior": "Generated Swift native/service/registry files remain byte-exact and accounts/containers/objects gain no generated Collections; the service guide references both concrete waiters, HEAD, delete120s and objects/wait.md.",
           "tests": [
             "internal/cmd/sdkgen/swift_object_wait_test.go:TestSwiftObjectWaitPreservesNativeAndSharedWaiters"
+          ]
+        },
+        {
+          "behavior": "WithObjectWaitProgress and ObjectWaitOpts.Progress send zero on a caller-owned channel after each clean nonterminal observation; WithoutObjectWaitProgress clears it. Each send blocks until it is received or the context ends; the SDK never closes the caller-owned channel and sends nothing after the operation returns, a context that ends during a send stops it through its cancellation path, and a nil channel option is invalid before HTTP. With a progress callback also set the callback runs first; its error stops the wait and nothing is sent for that step.",
+          "tests": [
+            "objectstorage/v1/objects/wait_progress_channel_test.go:TestObjectWaitProgressChannelSendsZeroClearsAndRejectsNil",
+            "objectstorage/v1/objects/wait_progress_channel_test.go:TestObjectWaitProgressChannelBlockedSendStopsOnCancellation",
+            "objectstorage/v1/objects/wait_progress_channel_test.go:TestObjectWaitProgressChannelReceiverCancellation",
+            "objectstorage/v1/objects/wait_progress_channel_test.go:TestObjectWaitProgressCallbackRunsBeforeChannelSend"
           ]
         }
       ]
@@ -35403,6 +35445,16 @@
             "blockstorage/attach_volume_contracts_test.go:TestAttachVolumeContractsExactWaitStatesTargetFirstAndCallback",
             "blockstorage/blockstorage_test.go:TestCinderFailurePrefixAndMicroversion"
           ]
+        },
+        {
+          "behavior": "The wait policy Progress channel is sent zero after each nonterminal observation, after ProgressCallback when both are set; a callback error stops the wait and nothing is sent for that step. Each send blocks until it is received or the context ends; the SDK never closes the caller-owned channel and sends nothing after the operation returns, a context that ends during a send stops it through its cancellation path; a nil field means no progress.",
+          "tests": [
+            "blockstorage/volume_progress_channel_test.go:TestDeleteVolumeProgressChannelSendsZeroPerNonterminalPoll",
+            "blockstorage/volume_progress_channel_test.go:TestDeleteVolumeProgressChannelBlockedSendStopsOnCancellation",
+            "blockstorage/volume_progress_channel_test.go:TestDeleteVolumeProgressChannelReceiverCancellation",
+            "blockstorage/volume_progress_channel_test.go:TestDeleteVolumeProgressCallbackRunsBeforeChannelSend",
+            "blockstorage/volume_progress_channel_test.go:TestAttachAndCreateVolumeProgressChannelSendZeroAfterCallback"
+          ]
         }
       ],
       "documentation": [
@@ -35564,6 +35616,16 @@
             "blockstorage/attach_volume_options_test.go:TestAttachVolumeOptionsConcreteDefaultsAndReplacementOrder",
             "blockstorage/attach_volume_models_test.go:TestAttachVolumeModelsRejectInvalidFieldsAtomically",
             "blockstorage/blockstorage_test.go:TestCinderFailurePrefixAndMicroversion"
+          ]
+        },
+        {
+          "behavior": "The wait policy Progress channel is sent zero after each nonterminal observation, after ProgressCallback when both are set; a callback error stops the wait and nothing is sent for that step. Each send blocks until it is received or the context ends; the SDK never closes the caller-owned channel and sends nothing after the operation returns, a context that ends during a send stops it through its cancellation path; a nil field means no progress.",
+          "tests": [
+            "blockstorage/volume_progress_channel_test.go:TestDeleteVolumeProgressChannelSendsZeroPerNonterminalPoll",
+            "blockstorage/volume_progress_channel_test.go:TestDeleteVolumeProgressChannelBlockedSendStopsOnCancellation",
+            "blockstorage/volume_progress_channel_test.go:TestDeleteVolumeProgressChannelReceiverCancellation",
+            "blockstorage/volume_progress_channel_test.go:TestDeleteVolumeProgressCallbackRunsBeforeChannelSend",
+            "blockstorage/volume_progress_channel_test.go:TestAttachAndCreateVolumeProgressChannelSendZeroAfterCallback"
           ]
         }
       ],
@@ -35757,6 +35819,16 @@
             "connectiontest/connection_create_volume_test.go:TestConnectionCreateVolumePreflightBeforeCallbacksAndServiceSelection",
             "connectiontest/connection_create_volume_test.go:TestConnectionCreateVolumeInitializationRetainsCancellationCause"
           ]
+        },
+        {
+          "behavior": "The wait policy Progress channel is sent zero after each nonterminal observation, after ProgressCallback when both are set; a callback error stops the wait and nothing is sent for that step. Each send blocks until it is received or the context ends; the SDK never closes the caller-owned channel and sends nothing after the operation returns, a context that ends during a send stops it through its cancellation path; a nil field means no progress.",
+          "tests": [
+            "blockstorage/volume_progress_channel_test.go:TestDeleteVolumeProgressChannelSendsZeroPerNonterminalPoll",
+            "blockstorage/volume_progress_channel_test.go:TestDeleteVolumeProgressChannelBlockedSendStopsOnCancellation",
+            "blockstorage/volume_progress_channel_test.go:TestDeleteVolumeProgressChannelReceiverCancellation",
+            "blockstorage/volume_progress_channel_test.go:TestDeleteVolumeProgressCallbackRunsBeforeChannelSend",
+            "blockstorage/volume_progress_channel_test.go:TestAttachAndCreateVolumeProgressChannelSendZeroAfterCallback"
+          ]
         }
       ],
       "documentation": [
@@ -35945,6 +36017,16 @@
             "connectiontest/connection_delete_volume_test.go:TestConnectionDeleteVolumePreflightSelectsNoService",
             "connectiontest/connection_delete_volume_test.go:TestConnectionDeleteVolumeInitializationRetainsCancellationCause",
             "blockstorage/create_volume_models_test.go:TestCreateVolumeModelsKnownFieldFailuresAreAtomicAndNullEmptyRemainDistinct"
+          ]
+        },
+        {
+          "behavior": "The wait policy Progress channel is sent zero after each nonterminal observation, after ProgressCallback when both are set; a callback error stops the wait and nothing is sent for that step. Each send blocks until it is received or the context ends; the SDK never closes the caller-owned channel and sends nothing after the operation returns, a context that ends during a send stops it through its cancellation path; a nil field means no progress.",
+          "tests": [
+            "blockstorage/volume_progress_channel_test.go:TestDeleteVolumeProgressChannelSendsZeroPerNonterminalPoll",
+            "blockstorage/volume_progress_channel_test.go:TestDeleteVolumeProgressChannelBlockedSendStopsOnCancellation",
+            "blockstorage/volume_progress_channel_test.go:TestDeleteVolumeProgressChannelReceiverCancellation",
+            "blockstorage/volume_progress_channel_test.go:TestDeleteVolumeProgressCallbackRunsBeforeChannelSend",
+            "blockstorage/volume_progress_channel_test.go:TestAttachAndCreateVolumeProgressChannelSendZeroAfterCallback"
           ]
         }
       ],
@@ -46082,6 +46164,7 @@
         "github.com/JSYoo5B/go-openstacksdk/compute.WithAutomaticIPTimeout",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithUnlimitedAutomaticIPTimeout",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithAutomaticIPPollInterval",
+        "github.com/JSYoo5B/go-openstacksdk/compute.WithAutomaticIPProgressCallback",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithAutomaticIPProgress",
         "github.com/JSYoo5B/go-openstacksdk/network.FloatingIPs.NewPlanner",
         "github.com/JSYoo5B/go-openstacksdk/network.FloatingIPPlanner.NetworkRoles",
@@ -46509,7 +46592,7 @@
           ]
         },
         {
-          "behavior": "With WithServerIPWait the pool lane observes the exact address in raw Nova for reuse and allocation, calls WithAutomaticIPProgress with the unconverged raw-1 and raw-2 models and returns raw-3 with Observed; a progress error stops after one raw GET with the attempt incomplete. Every request shares one deadline: about 60 seconds by default, a 17-second override, an earlier 30-second parent, or the parent deadline when unlimited.",
+          "behavior": "With WithServerIPWait the pool lane observes the exact address in raw Nova for reuse and allocation, calls WithAutomaticIPProgressCallback with the unconverged raw-1 and raw-2 models and returns raw-3 with Observed; a progress error stops after one raw GET with the attempt incomplete. Every request shares one deadline: about 60 seconds by default, a 17-second override, an earlier 30-second parent, or the parent deadline when unlimited.",
           "tests": [
             "compute/server_ip_lane_combinations_test.go:TestServerIPPoolLaneWaitProgressAndBudget"
           ]
@@ -46530,6 +46613,15 @@
           "behavior": "AddIPsToServer with an address selector (and a zero pool Ref, which clears the pool) uses the AddIPList source steps: the supplied model's only floating address short-circuits the first item without a port lookup or PUT, a 404 from the second item's PUT is recorded in AttachmentNotFound with nil attempt Error, and the third item still attaches; nil is returned. An associated IP on a model without floating addresses refreshes the server once and short-circuits on the refreshed model.",
           "tests": [
             "compute/server_ip_lane_combinations_test.go:TestServerIPAddressSelectorFollowsSourceAttachSteps"
+          ]
+        },
+        {
+          "behavior": "WithAutomaticIPProgress sends an owned copy of each unconverged raw Server on a caller-owned channel, so receiver edits do not alter the result. Each send blocks until it is received or the context ends; the SDK never closes the caller-owned channel and sends nothing after the operation returns, a context that ends during a send stops it through its cancellation path, and a nil channel option is invalid before HTTP. With WithAutomaticIPProgressCallback also set the callback runs first; its error stops before another request and nothing is sent for that step.",
+          "tests": [
+            "compute/server_automatic_ip_progress_channel_test.go:TestAutomaticIPProgressChannelSendsOwnedCopiesAndRejectsNil",
+            "compute/server_automatic_ip_progress_channel_test.go:TestAutomaticIPProgressChannelBlockedSendStopsOnCancellation",
+            "compute/server_automatic_ip_progress_channel_test.go:TestAutomaticIPProgressChannelReceiverCancellation",
+            "compute/server_automatic_ip_progress_channel_test.go:TestAutomaticIPProgressCallbackRunsBeforeChannelSend"
           ]
         }
       ]
@@ -47096,7 +47188,7 @@
           ]
         },
         {
-          "behavior": "Raw-wait polling calls WithAutomaticIPProgress with owned copies of each unconverged raw Server (raw-1, raw-2) and returns the third converged model; a progress error stops after one raw GET with the item incomplete and no second lookup. With a fixed-address selector and a refresh of an associated second IP, every request of both items shares one deadline: default about 60 seconds, an earlier 30-second parent, or the parent deadline when unlimited.",
+          "behavior": "Raw-wait polling calls WithAutomaticIPProgressCallback with owned copies of each unconverged raw Server (raw-1, raw-2) and returns the third converged model; a progress error stops after one raw GET with the item incomplete and no second lookup. With a fixed-address selector and a refresh of an associated second IP, every request of both items shares one deadline: default about 60 seconds, an earlier 30-second parent, or the parent deadline when unlimited.",
           "tests": [
             "compute/server_ip_source_attach_test.go:TestSourceIPListRawPollProgressAndDeadlines"
           ]
@@ -70856,6 +70948,7 @@
         "github.com/JSYoo5B/go-openstacksdk/resource.WithTimeout",
         "github.com/JSYoo5B/go-openstacksdk/resource.WithUnlimitedWait",
         "github.com/JSYoo5B/go-openstacksdk/resource.WithProgressCallback",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithProgress",
         "github.com/JSYoo5B/go-openstacksdk/placement/v1.WaitForStatus",
         "github.com/JSYoo5B/go-openstacksdk/placement/v1/allocations.API.Resources",
         "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.TraitResources",
@@ -70881,6 +70974,15 @@
           "tests": [
             "api/placement_proxy_waits_test.go:TestPlacementProxyWaitsStatusAttributesAndEmptyAllocations",
             "api/placement_proxy_waits_test.go:TestPlacementProxyWaitsDeleteEveryFetchableResource"
+          ]
+        },
+        {
+          "behavior": "resource.WithProgress sends the same integer progress as WithProgressCallback on a caller-owned channel after each nonterminal response, including the initial lookup. Each send blocks until it is received or the context ends; the SDK never closes the caller-owned channel and sends nothing after the operation returns, a context that ends during a send stops it through its cancellation path, and a nil channel option is invalid before HTTP. With both options set the callback runs first and the value is then sent.",
+          "tests": [
+            "resource/wait_progress_channel_test.go:TestWaitProgressChannelSendsNonterminalValuesAndRejectsNil",
+            "resource/wait_progress_channel_test.go:TestWaitProgressChannelBlockedSendStopsOnCancellation",
+            "resource/wait_progress_channel_test.go:TestWaitProgressChannelReceiverCancellationStopsBeforeNextGET",
+            "resource/wait_progress_channel_test.go:TestWaitProgressCallbackRunsBeforeChannelSend"
           ]
         }
       ],
@@ -71489,7 +71591,8 @@
         "github.com/JSYoo5B/go-openstacksdk/resource.Collection.WaitDeleted",
         "github.com/JSYoo5B/go-openstacksdk/resource.WithTimeout",
         "github.com/JSYoo5B/go-openstacksdk/resource.WithPollInterval",
-        "github.com/JSYoo5B/go-openstacksdk/resource.WithProgressCallback"
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithProgressCallback",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithProgress"
       ],
       "contracts": [
         {
@@ -71497,6 +71600,15 @@
           "tests": [
             "identity/v2/tenants/python_parity_test.go:TestPythonTenantWaitHelpers",
             "identity/v2/users/python_parity_test.go:TestPythonUserWaitHelpers"
+          ]
+        },
+        {
+          "behavior": "resource.WithProgress sends the same integer progress as WithProgressCallback on a caller-owned channel after each nonterminal response, including the initial lookup. Each send blocks until it is received or the context ends; the SDK never closes the caller-owned channel and sends nothing after the operation returns, a context that ends during a send stops it through its cancellation path, and a nil channel option is invalid before HTTP. With both options set the callback runs first and the value is then sent.",
+          "tests": [
+            "resource/wait_progress_channel_test.go:TestWaitProgressChannelSendsNonterminalValuesAndRejectsNil",
+            "resource/wait_progress_channel_test.go:TestWaitProgressChannelBlockedSendStopsOnCancellation",
+            "resource/wait_progress_channel_test.go:TestWaitProgressChannelReceiverCancellationStopsBeforeNextGET",
+            "resource/wait_progress_channel_test.go:TestWaitProgressCallbackRunsBeforeChannelSend"
           ]
         }
       ],
@@ -71886,6 +71998,7 @@
         "github.com/JSYoo5B/go-openstacksdk/resource.WithTimeout",
         "github.com/JSYoo5B/go-openstacksdk/resource.WithStatusAttribute",
         "github.com/JSYoo5B/go-openstacksdk/resource.WithProgressCallback",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithProgress",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.API.WaitForStatus",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.New",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.Container",
@@ -71899,6 +72012,7 @@
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithTimeout",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithUnlimitedWait",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithProgressCallback",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithProgress",
         "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithFailures",
@@ -72048,6 +72162,24 @@
             "keymanager/v1/waits/python_project_quota_contracts_test.go:TestPythonProjectQuotaWaitDeleteOnlyCleanGET404",
             "keymanager/v1/waits/python_project_quota_contracts_test.go:TestPythonProjectQuotaWaitShapeNumericAndPhysicalFailures"
           ]
+        },
+        {
+          "behavior": "resource.WithProgress sends the same integer progress as WithProgressCallback on a caller-owned channel after each nonterminal response, including the initial lookup. Each send blocks until it is received or the context ends; the SDK never closes the caller-owned channel and sends nothing after the operation returns, a context that ends during a send stops it through its cancellation path, and a nil channel option is invalid before HTTP. With both options set the callback runs first and the value is then sent.",
+          "tests": [
+            "resource/wait_progress_channel_test.go:TestWaitProgressChannelSendsNonterminalValuesAndRejectsNil",
+            "resource/wait_progress_channel_test.go:TestWaitProgressChannelBlockedSendStopsOnCancellation",
+            "resource/wait_progress_channel_test.go:TestWaitProgressChannelReceiverCancellationStopsBeforeNextGET",
+            "resource/wait_progress_channel_test.go:TestWaitProgressCallbackRunsBeforeChannelSend"
+          ]
+        },
+        {
+          "behavior": "WithProgress and Options.Progress send zero on a caller-owned channel after each nonterminal response. Each send blocks until it is received or the context ends; the SDK never closes the caller-owned channel and sends nothing after the operation returns, a context that ends during a send stops it through its cancellation path, and a nil channel option is invalid before HTTP. With WithProgressCallback also set the callback runs first; its error stops the wait and nothing is sent for that step.",
+          "tests": [
+            "keymanager/v1/waits/python_progress_channel_test.go:TestPythonKeymanagerWaitProgressChannelSendsZeroAndRejectsNil",
+            "keymanager/v1/waits/python_progress_channel_test.go:TestPythonKeymanagerWaitProgressChannelBlockedSendStopsOnCancellation",
+            "keymanager/v1/waits/python_progress_channel_test.go:TestPythonKeymanagerWaitProgressChannelReceiverCancellation",
+            "keymanager/v1/waits/python_progress_channel_test.go:TestPythonKeymanagerWaitProgressCallbackRunsBeforeChannelSend"
+          ]
         }
       ],
       "documentation": [
@@ -72107,6 +72239,7 @@
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithTimeout",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithUnlimitedWait",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithProgressCallback",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithProgress",
         "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.SecretStore",
@@ -72233,6 +72366,15 @@
             "keymanager/v1/waits/python_project_quota_contracts_test.go:TestPythonProjectQuotaWaitMergeIgnoresMalformedJSONAndPreservesNull",
             "keymanager/v1/waits/python_project_quota_contracts_test.go:TestPythonProjectQuotaWaitDeleteOnlyCleanGET404",
             "keymanager/v1/waits/python_project_quota_contracts_test.go:TestPythonProjectQuotaWaitShapeNumericAndPhysicalFailures"
+          ]
+        },
+        {
+          "behavior": "WithProgress and Options.Progress send zero on a caller-owned channel after each nonterminal response. Each send blocks until it is received or the context ends; the SDK never closes the caller-owned channel and sends nothing after the operation returns, a context that ends during a send stops it through its cancellation path, and a nil channel option is invalid before HTTP. With WithProgressCallback also set the callback runs first; its error stops the wait and nothing is sent for that step.",
+          "tests": [
+            "keymanager/v1/waits/python_progress_channel_test.go:TestPythonKeymanagerWaitProgressChannelSendsZeroAndRejectsNil",
+            "keymanager/v1/waits/python_progress_channel_test.go:TestPythonKeymanagerWaitProgressChannelBlockedSendStopsOnCancellation",
+            "keymanager/v1/waits/python_progress_channel_test.go:TestPythonKeymanagerWaitProgressChannelReceiverCancellation",
+            "keymanager/v1/waits/python_progress_channel_test.go:TestPythonKeymanagerWaitProgressCallbackRunsBeforeChannelSend"
           ]
         }
       ],
@@ -94280,6 +94422,7 @@
         "github.com/JSYoo5B/go-openstacksdk/resource.WithTimeout",
         "github.com/JSYoo5B/go-openstacksdk/resource.WithPollInterval",
         "github.com/JSYoo5B/go-openstacksdk/resource.WithProgressCallback",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithProgress",
         "github.com/JSYoo5B/go-openstacksdk/identity.WaitForDelete",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/identityproviders.API.Resources",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.API.Resources",
@@ -94307,6 +94450,15 @@
           "behavior": "All 21 pinned fetchable identity/v3 Resources (access rules, application credentials, credentials, domains, domain configs, endpoints, endpoint groups, federation protocols, groups, identity providers, limits, mappings, policies, projects, regions, registered limits, roles, services, service providers, trusts, users) have SDK collections; each deletion wait polls the fixed member route until 404.",
           "tests": [
             "api/identity_proxy_waits_test.go:TestIdentityProxyWaitsDeleteEveryFetchableResource"
+          ]
+        },
+        {
+          "behavior": "resource.WithProgress sends the same integer progress as WithProgressCallback on a caller-owned channel after each nonterminal response, including the initial lookup. Each send blocks until it is received or the context ends; the SDK never closes the caller-owned channel and sends nothing after the operation returns, a context that ends during a send stops it through its cancellation path, and a nil channel option is invalid before HTTP. With both options set the callback runs first and the value is then sent.",
+          "tests": [
+            "resource/wait_progress_channel_test.go:TestWaitProgressChannelSendsNonterminalValuesAndRejectsNil",
+            "resource/wait_progress_channel_test.go:TestWaitProgressChannelBlockedSendStopsOnCancellation",
+            "resource/wait_progress_channel_test.go:TestWaitProgressChannelReceiverCancellationStopsBeforeNextGET",
+            "resource/wait_progress_channel_test.go:TestWaitProgressCallbackRunsBeforeChannelSend"
           ]
         }
       ],
@@ -100492,6 +100644,7 @@
         "github.com/JSYoo5B/go-openstacksdk/resource.WithTimeout",
         "github.com/JSYoo5B/go-openstacksdk/resource.WithPollInterval",
         "github.com/JSYoo5B/go-openstacksdk/resource.WithProgressCallback",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithProgress",
         "github.com/JSYoo5B/go-openstacksdk/resource.WithStatusAttribute",
         "github.com/JSYoo5B/go-openstacksdk/network.WaitForStatus",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/localips.API.Resources",
@@ -100550,6 +100703,15 @@
             "resource/wait_raw_attributes_test.go:TestWaitRawAttributeComparesViewStringsLikeTypedFields",
             "resource/wait_raw_attributes_test.go:TestWaitRawAttributeRejectsMissingNullAndNonStringValues",
             "resource/wait_raw_attributes_test.go:TestWaitRawAttributeKeepsBindingStatusDefaultAndDeletion"
+          ]
+        },
+        {
+          "behavior": "resource.WithProgress sends the same integer progress as WithProgressCallback on a caller-owned channel after each nonterminal response, including the initial lookup. Each send blocks until it is received or the context ends; the SDK never closes the caller-owned channel and sends nothing after the operation returns, a context that ends during a send stops it through its cancellation path, and a nil channel option is invalid before HTTP. With both options set the callback runs first and the value is then sent.",
+          "tests": [
+            "resource/wait_progress_channel_test.go:TestWaitProgressChannelSendsNonterminalValuesAndRejectsNil",
+            "resource/wait_progress_channel_test.go:TestWaitProgressChannelBlockedSendStopsOnCancellation",
+            "resource/wait_progress_channel_test.go:TestWaitProgressChannelReceiverCancellationStopsBeforeNextGET",
+            "resource/wait_progress_channel_test.go:TestWaitProgressCallbackRunsBeforeChannelSend"
           ]
         }
       ],
@@ -114237,6 +114399,7 @@
         "github.com/JSYoo5B/go-openstacksdk/projectcleanup.WithSelector",
         "github.com/JSYoo5B/go-openstacksdk/projectcleanup.WithParallelism",
         "github.com/JSYoo5B/go-openstacksdk/projectcleanup.WithDeletionWait",
+        "github.com/JSYoo5B/go-openstacksdk/projectcleanup.WithProgressCallback",
         "github.com/JSYoo5B/go-openstacksdk/projectcleanup.WithProgress",
         "github.com/JSYoo5B/go-openstacksdk/projectcleanup.WithAllowIncompletePlan"
       ],
@@ -114374,6 +114537,14 @@
             "connectiontest/connection_project_cleanup_dns_test.go:TestProjectCleanupDNSFiltersSelectorAndSkip",
             "connectiontest/connection_project_cleanup_dns_test.go:TestProjectCleanupDNSExecutesZoneDeletesThenPTRUnsets",
             "connectiontest/connection_project_cleanup_dns_test.go:TestProjectCleanupDNSPTRFailureKeepsNetworkFloatingIP"
+          ]
+        },
+        {
+          "behavior": "WithProgress sends every candidate state change on a caller-owned channel in the callback order; sends never overlap and finish before Execute returns, and nothing is sent once the context is done or execution stopped. A context that ends while a send blocks stops new mutations like cancellation; a nil channel is invalid. With WithProgressCallback also set the callback runs first; its error stops new mutations and nothing is sent for that event.",
+          "tests": [
+            "connectiontest/connection_project_cleanup_progress_channel_test.go:TestProjectCleanupProgressChannelFollowsCallbackOrder",
+            "connectiontest/connection_project_cleanup_progress_channel_test.go:TestProjectCleanupProgressCallbackErrorSendsNothing",
+            "connectiontest/connection_project_cleanup_progress_channel_test.go:TestProjectCleanupProgressChannelBlockedSendStopsOnCancellation"
           ]
         }
       ],
@@ -138475,7 +138646,8 @@
         "github.com/JSYoo5B/go-openstacksdk/resource.WithTimeout",
         "github.com/JSYoo5B/go-openstacksdk/resource.WithUnlimitedWait",
         "github.com/JSYoo5B/go-openstacksdk/resource.WithPollInterval",
-        "github.com/JSYoo5B/go-openstacksdk/resource.WithProgressCallback"
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithProgressCallback",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithProgress"
       ],
       "contracts": [
         {
@@ -138489,6 +138661,15 @@
           "tests": [
             "api/py_lb_wait_test.go:TestPyLBWaitForLoadBalancerErrorFailureTimeoutAndOverrides",
             "api/py_lb_wait_test.go:TestPyLBWaitForLoadBalancerPollsProvisioningStatusAndResolvesNameOnce"
+          ]
+        },
+        {
+          "behavior": "resource.WithProgress sends the same integer progress as WithProgressCallback on a caller-owned channel after each nonterminal response, including the initial lookup. Each send blocks until it is received or the context ends; the SDK never closes the caller-owned channel and sends nothing after the operation returns, a context that ends during a send stops it through its cancellation path, and a nil channel option is invalid before HTTP. With both options set the callback runs first and the value is then sent.",
+          "tests": [
+            "resource/wait_progress_channel_test.go:TestWaitProgressChannelSendsNonterminalValuesAndRejectsNil",
+            "resource/wait_progress_channel_test.go:TestWaitProgressChannelBlockedSendStopsOnCancellation",
+            "resource/wait_progress_channel_test.go:TestWaitProgressChannelReceiverCancellationStopsBeforeNextGET",
+            "resource/wait_progress_channel_test.go:TestWaitProgressCallbackRunsBeforeChannelSend"
           ]
         }
       ],
@@ -142358,6 +142539,7 @@
         "github.com/JSYoo5B/go-openstacksdk/resource.WithFailureStates",
         "github.com/JSYoo5B/go-openstacksdk/resource.WithUnlimitedWait",
         "github.com/JSYoo5B/go-openstacksdk/resource.WithProgressCallback",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithProgress",
         "github.com/JSYoo5B/go-openstacksdk/resource.WithPollInterval"
       ],
       "contracts": [
@@ -142371,6 +142553,15 @@
           "behavior": "Without an explicit attribute, and for workflows and cron triggers that have no status, WaitFor refuses before HTTP with ErrUnsupported.",
           "tests": [
             "api/py_msg_wf_mistral_test.go:TestPyMsgWfWaitForRequiresExplicitStatusAttributeAndIsUnsupportedForWorkflowAndTrigger"
+          ]
+        },
+        {
+          "behavior": "resource.WithProgress sends the same integer progress as WithProgressCallback on a caller-owned channel after each nonterminal response, including the initial lookup. Each send blocks until it is received or the context ends; the SDK never closes the caller-owned channel and sends nothing after the operation returns, a context that ends during a send stops it through its cancellation path, and a nil channel option is invalid before HTTP. With both options set the callback runs first and the value is then sent.",
+          "tests": [
+            "resource/wait_progress_channel_test.go:TestWaitProgressChannelSendsNonterminalValuesAndRejectsNil",
+            "resource/wait_progress_channel_test.go:TestWaitProgressChannelBlockedSendStopsOnCancellation",
+            "resource/wait_progress_channel_test.go:TestWaitProgressChannelReceiverCancellationStopsBeforeNextGET",
+            "resource/wait_progress_channel_test.go:TestWaitProgressCallbackRunsBeforeChannelSend"
           ]
         }
       ],
