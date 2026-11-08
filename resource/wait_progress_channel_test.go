@@ -68,15 +68,10 @@ func TestWaitProgressChannelSendsNonterminalValuesAndRejectsNil(t *testing.T) {
 
 func TestWaitProgressChannelBlockedSendStopsOnCancellation(t *testing.T) {
 	for _, deletion := range []bool{false, true} {
-		ctx, cancel := context.WithCancelCause(context.Background())
-		defer cancel(nil)
 		cause := errors.New("stopped while progress blocked")
-		collection, gets := progressChannelCollection(func(_ context.Context, n int32) (*progressChannelEntry, error) {
-			if n == 1 {
-				// Nobody receives, so the send after this response blocks
-				// until the caller cancels.
-				time.AfterFunc(20*time.Millisecond, func() { cancel(cause) })
-			}
+		// Nobody receives; the context is cancelled once the send blocks.
+		ctx := testcloud.CancelWhenBlocked(t, context.Background(), cause)
+		collection, gets := progressChannelCollection(func(context.Context, int32) (*progressChannelEntry, error) {
 			return &progressChannelEntry{ID: "fixed", Status: "BUILD", Progress: 5}, nil
 		})
 		blocked := make(chan int)
@@ -92,7 +87,7 @@ func TestWaitProgressChannelBlockedSendStopsOnCancellation(t *testing.T) {
 			t.Fatal("progress sent after the wait returned", v)
 		default:
 		}
-		if !errors.Is(err, context.Canceled) || gets.Load() != 1 {
+		if !errors.Is(err, context.Canceled) || !errors.Is(context.Cause(ctx), cause) || gets.Load() != 1 {
 			t.Fatalf("deletion=%t err=%v gets=%d", deletion, err, gets.Load())
 		}
 	}

@@ -47,15 +47,12 @@ func TestObjectWaitProgressChannelSendsZeroClearsAndRejectsNil(t *testing.T) {
 }
 
 func TestObjectWaitProgressChannelBlockedSendStopsOnCancellation(t *testing.T) {
-	ctx, cancel := context.WithCancelCause(context.Background())
-	defer cancel(nil)
 	cause := errors.New("stopped while progress blocked")
+	// Nobody receives; the context is cancelled once the send blocks.
+	ctx := testcloud.CancelWhenBlocked(t, context.Background(), cause)
 	calls := 0
 	client := objectMetadataClient(func(*http.Request) (*http.Response, error) {
 		calls++
-		// Nobody receives, so the send after this response blocks until
-		// the caller cancels.
-		time.AfterFunc(20*time.Millisecond, func() { cancel(cause) })
 		return objectMetadataResponse(200, "blocked proof"), nil
 	})
 	blocked := make(chan int)

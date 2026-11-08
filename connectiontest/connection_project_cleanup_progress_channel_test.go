@@ -5,9 +5,8 @@ import (
 	"errors"
 	"net/http"
 	"slices"
-	"sync"
+	"strings"
 	"testing"
-	"time"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/projectcleanup"
@@ -77,20 +76,9 @@ func TestProjectCleanupProgressCallbackErrorSendsNothing(t *testing.T) {
 
 func TestProjectCleanupProgressChannelBlockedSendStopsOnCancellation(t *testing.T) {
 	cloud, plan := progressChannelCleanup(t)
-	ctx, cancel := context.WithCancelCause(context.Background())
-	defer cancel(nil)
 	stop := errors.New("stopped while progress blocked")
-	// Nobody receives, so the first send blocks until the caller cancels
-	// shortly after the first DELETE response.
-	base := cloud.Provider.HTTPClient.Transport
-	var once sync.Once
-	cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
-		response, err := base.RoundTrip(r)
-		if r.Method == http.MethodDelete {
-			once.Do(func() { time.AfterFunc(20*time.Millisecond, func() { cancel(stop) }) })
-		}
-		return response, err
-	}))
+	// Nobody receives; the context is cancelled once the first send blocks.
+	ctx := testcloud.CancelWhenBlocked(t, context.Background(), stop)
 	blocked := make(chan projectcleanup.Event)
 	result, err := cloud.conn.ExecuteProjectCleanup(ctx, plan, projectcleanup.WithProgress(blocked))
 	select {
@@ -103,5 +91,52 @@ func TestProjectCleanupProgressChannelBlockedSendStopsOnCancellation(t *testing.
 	}
 	if got := cloud.events(); !slices.Equal(got, []string{"list servers", "list groups", "delete a"}) {
 		t.Fatalf("events %v", got)
+	}
+}
+
+// The receiver cancels after the first event. To avoid racing that cancel
+// with the stop check before the next DELETE, the test forces the interleaving
+// in which execution runs ahead: the receiver waits until the second DELETE
+// reaches the transport, then cancels, and the transport answers that DELETE
+// with the request context error without reaching the server.
+func TestProjectCleanupProgressChannelReceiverCancellationStopsLaterCandidates(t *testing.T) {
+	cloud, plan := progressChannelCleanup(t)
+	ctx, cancel := context.WithCancelCause(context.Background())
+	defer cancel(nil)
+	stop := errors.New("receiver stopped")
+	arrived, cancelled := make(chan struct{}), make(chan struct{})
+	base := cloud.Provider.HTTPClient.Transport
+	cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
+		if r.Method == http.MethodDelete && strings.HasSuffix(r.URL.Path, "/servers/b") {
+			close(arrived)
+			<-cancelled
+			return nil, r.Context().Err()
+		}
+		return base.RoundTrip(r)
+	}))
+	var got []string
+	observer := testcloud.NewProgress(t, func(e projectcleanup.Event) {
+		got = append(got, cleanupEventName(e))
+		if len(got) == 1 {
+			<-arrived
+			cancel(stop)
+			close(cancelled)
+		}
+	})
+	result, err := cloud.conn.ExecuteProjectCleanup(ctx, plan, projectcleanup.WithProgress(observer.C))
+	observer.Done()
+	if !errors.Is(err, context.Canceled) || !errors.Is(err, projectcleanup.ErrIncomplete) || !errors.Is(context.Cause(ctx), stop) {
+		t.Fatalf("err %v", err)
+	}
+	states := []projectcleanup.State{result.Outcomes[0].State, result.Outcomes[1].State, result.Outcomes[2].State}
+	if !slices.Equal(states, []projectcleanup.State{projectcleanup.Accepted, projectcleanup.Uncertain, projectcleanup.NotAttempted}) || !errors.Is(result.Outcomes[1].Err, context.Canceled) {
+		t.Fatalf("outcomes %+v", result.Outcomes)
+	}
+	// Events after the cancellation are not sent; Result still has them.
+	if !slices.Equal(got, []string{"a=accepted"}) {
+		t.Fatalf("progress %v", got)
+	}
+	if events := cloud.events(); !slices.Equal(events, []string{"list servers", "list groups", "delete a"}) {
+		t.Fatalf("server events %v", events)
 	}
 }

@@ -114544,7 +114544,8 @@
           "tests": [
             "connectiontest/connection_project_cleanup_progress_channel_test.go:TestProjectCleanupProgressChannelFollowsCallbackOrder",
             "connectiontest/connection_project_cleanup_progress_channel_test.go:TestProjectCleanupProgressCallbackErrorSendsNothing",
-            "connectiontest/connection_project_cleanup_progress_channel_test.go:TestProjectCleanupProgressChannelBlockedSendStopsOnCancellation"
+            "connectiontest/connection_project_cleanup_progress_channel_test.go:TestProjectCleanupProgressChannelBlockedSendStopsOnCancellation",
+            "connectiontest/connection_project_cleanup_progress_channel_test.go:TestProjectCleanupProgressChannelReceiverCancellationStopsLaterCandidates"
           ]
         }
       ],

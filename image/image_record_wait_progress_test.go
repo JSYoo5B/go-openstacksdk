@@ -37,15 +37,12 @@ func TestImageRecordWaitProgressChannelSendsZeroAndRejectsNil(t *testing.T) {
 }
 
 func TestImageRecordWaitProgressChannelBlockedSendStopsOnCancellation(t *testing.T) {
-	ctx, cancel := context.WithCancelCause(context.Background())
-	defer cancel(nil)
 	cause := errors.New("stopped while progress blocked")
+	// Nobody receives; the context is cancelled once the send blocks.
+	ctx := testcloud.CancelWhenBlocked(t, context.Background(), cause)
 	calls := 0
 	client := taskCoreClient(func(req *http.Request) (*http.Response, error) {
 		calls++
-		// Nobody receives, so the send after this response blocks until
-		// the caller cancels.
-		time.AfterFunc(20*time.Millisecond, func() { cancel(cause) })
 		return taskCoreJSON(req, 203, `{"status":"pending"}`), nil
 	})
 	blocked := make(chan int)
@@ -55,7 +52,7 @@ func TestImageRecordWaitProgressChannelBlockedSendStopsOnCancellation(t *testing
 		t.Fatal("progress sent after the wait returned", v)
 	default:
 	}
-	if record == nil || record.StatusCode != 203 || !errors.Is(err, context.Canceled) || calls != 1 {
+	if record == nil || record.StatusCode != 203 || !errors.Is(err, context.Canceled) || !errors.Is(context.Cause(ctx), cause) || calls != 1 {
 		t.Fatal(record, err, calls)
 	}
 }

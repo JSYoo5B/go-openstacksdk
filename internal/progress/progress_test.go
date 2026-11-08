@@ -49,3 +49,45 @@ func TestSendStopsOnContext(t *testing.T) {
 		t.Fatalf("blocked Send = %v", err)
 	}
 }
+
+func TestSendNotifiesOnlyWhenBlocking(t *testing.T) {
+	blocked := make(chan struct{}, 1)
+	ctx, cancel := context.WithCancel(NotifyBlocked(context.Background(), blocked))
+	defer cancel()
+
+	ready := make(chan int, 1)
+	if err := Send(ctx, ready, 1); err != nil || len(blocked) != 0 {
+		t.Fatalf("ready receiver: err=%v notified=%d", err, len(blocked))
+	}
+
+	unread := make(chan int)
+	done := make(chan error, 1)
+	go func() { done <- Send(ctx, unread, 2) }()
+	select {
+	case <-blocked:
+	case <-time.After(10 * time.Second):
+		t.Fatal("blocked send was not notified")
+	}
+	cancel()
+	if err := <-done; !errors.Is(err, context.Canceled) {
+		t.Fatalf("blocked Send = %v", err)
+	}
+}
+
+func TestSendWithoutOrNilBlockedHook(t *testing.T) {
+	for _, ctx := range []context.Context{context.Background(), NotifyBlocked(context.Background(), nil)} {
+		ch := make(chan int)
+		go func() { <-ch }()
+		if err := Send(ctx, ch, 1); err != nil {
+			t.Fatalf("Send = %v", err)
+		}
+	}
+	// A full hook channel never blocks the send.
+	full := make(chan struct{}, 1)
+	full <- struct{}{}
+	ch := make(chan int)
+	go func() { <-ch }()
+	if err := Send(NotifyBlocked(context.Background(), full), ch, 1); err != nil {
+		t.Fatalf("Send with full hook = %v", err)
+	}
+}

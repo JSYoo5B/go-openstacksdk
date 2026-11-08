@@ -17,9 +17,8 @@ import (
 )
 
 // deleteVolumeProgressFixture answers lookup and DELETE, then deleting polls;
-// after absentAfter polls (0 never) it answers 404. onPoll runs on the requesting
-// goroutine after each poll response is built.
-func deleteVolumeProgressFixture(t *testing.T, absentAfter int32, onPoll func(int32)) (*atomic.Int32, func(context.Context, ...blockstorage.DeleteVolumeOption) (*blockstorage.DeleteVolumeResult, error)) {
+// after absentAfter polls (0 never) it answers 404.
+func deleteVolumeProgressFixture(t *testing.T, absentAfter int32) (*atomic.Int32, func(context.Context, ...blockstorage.DeleteVolumeOption) (*blockstorage.DeleteVolumeResult, error)) {
 	t.Helper()
 	cloud := testcloud.New(t)
 	client := deleteVolumeContractClient(cloud, "3.23")
@@ -34,11 +33,7 @@ func deleteVolumeProgressFixture(t *testing.T, absentAfter int32, onPoll func(in
 		case absentAfter > 0 && step-2 > absentAfter:
 			return deleteVolumeContractResponse(r, 404, io.NopCloser(strings.NewReader("")), "absent"), nil
 		}
-		response := deleteVolumeContractResponse(r, 200, io.NopCloser(strings.NewReader(deleteVolumeContractBody(`"deleting"`))), "poll")
-		if onPoll != nil {
-			onPoll(step - 2)
-		}
-		return response, nil
+		return deleteVolumeContractResponse(r, 200, io.NopCloser(strings.NewReader(deleteVolumeContractBody(`"deleting"`))), "poll"), nil
 	}))
 	run := func(ctx context.Context, options ...blockstorage.DeleteVolumeOption) (*blockstorage.DeleteVolumeResult, error) {
 		return blockstorage.DeleteVolume(ctx, client, blockstorage.DeleteVolumeRequest{Volume: resource.ID("volume-1")}, options...)
@@ -47,7 +42,7 @@ func deleteVolumeProgressFixture(t *testing.T, absentAfter int32, onPoll func(in
 }
 
 func TestDeleteVolumeProgressChannelSendsZeroPerNonterminalPoll(t *testing.T) {
-	calls, run := deleteVolumeProgressFixture(t, 2, nil)
+	calls, run := deleteVolumeProgressFixture(t, 2)
 	var got []int
 	observer := testcloud.NewProgress(t, func(v int) { got = append(got, v) })
 	interval := time.Millisecond
@@ -59,12 +54,10 @@ func TestDeleteVolumeProgressChannelSendsZeroPerNonterminalPoll(t *testing.T) {
 }
 
 func TestDeleteVolumeProgressChannelBlockedSendStopsOnCancellation(t *testing.T) {
-	ctx, cancel := context.WithCancelCause(context.Background())
-	defer cancel(nil)
 	cause := errors.New("stopped while progress blocked")
-	// Nobody receives, so the send after the first poll blocks until the
-	// caller cancels.
-	calls, run := deleteVolumeProgressFixture(t, 0, func(int32) { time.AfterFunc(20*time.Millisecond, func() { cancel(cause) }) })
+	// Nobody receives; the context is cancelled once the send blocks.
+	ctx := testcloud.CancelWhenBlocked(t, context.Background(), cause)
+	calls, run := deleteVolumeProgressFixture(t, 0)
 	blocked := make(chan int)
 	interval := time.Millisecond
 	result, err := run(ctx, blockstorage.WithDeleteVolumeWaitPolicy(blockstorage.DeleteVolumeWaitOpts{PollInterval: &interval, Progress: blocked}))
@@ -83,7 +76,7 @@ func TestDeleteVolumeProgressChannelReceiverCancellation(t *testing.T) {
 	ctx, cancel := context.WithCancelCause(context.Background())
 	defer cancel(nil)
 	cause := errors.New("receiver stopped")
-	calls, run := deleteVolumeProgressFixture(t, 0, nil)
+	calls, run := deleteVolumeProgressFixture(t, 0)
 	observer := testcloud.NewProgress(t, func(int) { cancel(cause) })
 	// The receiver cancels concurrently; the hour-long pause observes it.
 	interval := time.Hour
@@ -95,7 +88,7 @@ func TestDeleteVolumeProgressChannelReceiverCancellation(t *testing.T) {
 }
 
 func TestDeleteVolumeProgressCallbackRunsBeforeChannelSend(t *testing.T) {
-	_, run := deleteVolumeProgressFixture(t, 2, nil)
+	_, run := deleteVolumeProgressFixture(t, 2)
 	// A buffered channel shows what was already sent when each callback runs.
 	sent := make(chan int, 4)
 	var queuedAtCallback []int
@@ -106,7 +99,7 @@ func TestDeleteVolumeProgressCallbackRunsBeforeChannelSend(t *testing.T) {
 		t.Fatal(result, err, queuedAtCallback, len(sent))
 	}
 	// A callback error stops the wait and nothing is sent for that step.
-	calls, run := deleteVolumeProgressFixture(t, 0, nil)
+	calls, run := deleteVolumeProgressFixture(t, 0)
 	stop := errors.New("callback stop")
 	sent = make(chan int, 4)
 	result, err = run(context.Background(), blockstorage.WithDeleteVolumeWaitPolicy(blockstorage.DeleteVolumeWaitOpts{PollInterval: &interval, Progress: sent,

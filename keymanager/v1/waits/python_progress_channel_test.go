@@ -38,15 +38,10 @@ func TestPythonKeymanagerWaitProgressChannelSendsZeroAndRejectsNil(t *testing.T)
 
 func TestPythonKeymanagerWaitProgressChannelBlockedSendStopsOnCancellation(t *testing.T) {
 	for _, deleting := range []bool{false, true} {
-		ctx, cancel := context.WithCancelCause(context.Background())
-		defer cancel(nil)
 		cause := errors.New("stopped while progress blocked")
-		api, _, calls := fixture(t, func(*http.Request, int) *http.Response {
-			// Nobody receives, so the send after this response blocks until
-			// the caller cancels.
-			time.AfterFunc(20*time.Millisecond, func() { cancel(cause) })
-			return wire(200, `{"status":"BUILD"}`)
-		})
+		// Nobody receives; the context is cancelled once the send blocks.
+		ctx := testcloud.CancelWhenBlocked(t, context.Background(), cause)
+		api, _, calls := fixture(t, func(*http.Request, int) *http.Response { return wire(200, `{"status":"BUILD"}`) })
 		blocked := make(chan int)
 		var value *waits.Record
 		var err error

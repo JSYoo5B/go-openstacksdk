@@ -12,14 +12,11 @@ import (
 )
 
 // automaticProgressFixture converges on the second raw read unless converge
-// is false; onRaw runs in the HTTP handler for each raw read.
-func automaticProgressFixture(t *testing.T, converge bool, onRaw func(int32)) *automaticFixture {
+// is false.
+func automaticProgressFixture(t *testing.T, converge bool) *automaticFixture {
 	t.Helper()
 	f := newAutomaticFixture(t)
 	f.rawBody = func(n int32) (int, string) {
-		if onRaw != nil {
-			onRaw(n)
-		}
 		if converge && n >= 2 {
 			return 200, `{"server":{"id":"server","status":"ACTIVE","name":"latest","addresses":` + autoFloating + `}}`
 		}
@@ -29,7 +26,7 @@ func automaticProgressFixture(t *testing.T, converge bool, onRaw func(int32)) *a
 }
 
 func TestAutomaticIPProgressChannelSendsOwnedCopiesAndRejectsNil(t *testing.T) {
-	f := automaticProgressFixture(t, true, nil)
+	f := automaticProgressFixture(t, true)
 	var names []string
 	observer := testcloud.NewProgress(t, func(value *compute.Server) {
 		names = append(names, value.Name)
@@ -49,12 +46,10 @@ func TestAutomaticIPProgressChannelSendsOwnedCopiesAndRejectsNil(t *testing.T) {
 }
 
 func TestAutomaticIPProgressChannelBlockedSendStopsOnCancellation(t *testing.T) {
-	ctx, cancel := context.WithCancelCause(context.Background())
-	defer cancel(nil)
 	cause := errors.New("stopped while progress blocked")
-	// Nobody receives, so the send after the first raw read blocks until the
-	// caller cancels.
-	f := automaticProgressFixture(t, false, func(int32) { time.AfterFunc(20*time.Millisecond, func() { cancel(cause) }) })
+	// Nobody receives; the context is cancelled once the send blocks.
+	ctx := testcloud.CancelWhenBlocked(t, context.Background(), cause)
+	f := automaticProgressFixture(t, false)
 	blocked := make(chan *compute.Server)
 	result, err := f.service.EnsureServerFloatingIP(ctx, compute.AutomaticFloatingIPRequest{Server: automaticServer(t, autoFixed)}, append(automaticOptions(), compute.WithAutomaticIPProgress(blocked))...)
 	select {
@@ -71,7 +66,7 @@ func TestAutomaticIPProgressChannelReceiverCancellation(t *testing.T) {
 	ctx, cancel := context.WithCancelCause(context.Background())
 	defer cancel(nil)
 	cause := errors.New("receiver stopped")
-	f := automaticProgressFixture(t, false, nil)
+	f := automaticProgressFixture(t, false)
 	observer := testcloud.NewProgress(t, func(*compute.Server) { cancel(cause) })
 	// The receiver cancels concurrently; the hour-long pause observes it.
 	result, err := f.service.EnsureServerFloatingIP(ctx, compute.AutomaticFloatingIPRequest{Server: automaticServer(t, autoFixed)}, append(automaticOptions(), compute.WithAutomaticIPPollInterval(time.Hour), compute.WithAutomaticIPProgress(observer.C))...)
@@ -82,7 +77,7 @@ func TestAutomaticIPProgressChannelReceiverCancellation(t *testing.T) {
 }
 
 func TestAutomaticIPProgressCallbackRunsBeforeChannelSend(t *testing.T) {
-	f := automaticProgressFixture(t, true, nil)
+	f := automaticProgressFixture(t, true)
 	// A buffered channel shows what was already sent when the callback runs.
 	sent := make(chan *compute.Server, 4)
 	var queuedAtCallback []int
@@ -95,7 +90,7 @@ func TestAutomaticIPProgressCallbackRunsBeforeChannelSend(t *testing.T) {
 		t.Fatal(result, err, queuedAtCallback, len(sent))
 	}
 	// A callback error stops the workflow and nothing is sent for that step.
-	f = automaticProgressFixture(t, true, nil)
+	f = automaticProgressFixture(t, true)
 	stop := errors.New("callback stop")
 	sent = make(chan *compute.Server, 4)
 	options = append(automaticOptions(), compute.WithAutomaticIPProgress(sent), compute.WithAutomaticIPProgressCallback(func(*compute.Server) error { return stop }))
