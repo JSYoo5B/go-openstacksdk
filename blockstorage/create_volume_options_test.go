@@ -15,7 +15,7 @@ import (
 
 func TestCreateVolumeOptionsEffectiveDefaultsAndBootableForcesWaitAfterReplacement(t *testing.T) {
 	defaults, err := blockstorage.PrepareCreateVolumeOptions(context.Background())
-	if err != nil || defaults.Wait == nil || !*defaults.Wait || defaults.Bootable != nil || defaults.WaitPolicy.Timeout == nil || *defaults.WaitPolicy.Timeout != 0 || defaults.WaitPolicy.PollInterval == nil || *defaults.WaitPolicy.PollInterval != 2*time.Second || !reflect.DeepEqual(defaults.WaitPolicy.FailureStates, []string{"error"}) {
+	if err != nil || defaults.Wait == nil || !*defaults.Wait || defaults.Bootable != nil || !preparedWait(t, defaults.WaitOptions).Unlimited || preparedWait(t, defaults.WaitOptions).Strategy.Delay(1) != 2*time.Second || !reflect.DeepEqual(preparedWait(t, defaults.WaitOptions).FailureStates, []string{"error"}) {
 		t.Fatalf("defaults=%+v error=%v", defaults, err)
 	}
 	for _, bootable := range []bool{false, true} {
@@ -30,20 +30,22 @@ func TestCreateVolumeOptionsEffectiveDefaultsAndBootableForcesWaitAfterReplaceme
 			}
 		}
 	}
-	value, err := blockstorage.PrepareCreateVolumeOptions(context.Background(), blockstorage.WithCreateVolumeBootable(true), blockstorage.WithCreateVolumeOptions(blockstorage.CreateVolumeOpts{}), blockstorage.WithCreateVolumeWait(false), blockstorage.WithCreateVolumeWaitPolicy(blockstorage.CreateVolumeWaitOpts{FailureStates: []string{}}))
-	if err != nil || *value.Wait || value.Bootable != nil || value.WaitPolicy.FailureStates == nil || len(value.WaitPolicy.FailureStates) != 0 {
+	value, err := blockstorage.PrepareCreateVolumeOptions(context.Background(), blockstorage.WithCreateVolumeBootable(true), blockstorage.WithCreateVolumeOptions(blockstorage.CreateVolumeOpts{}), blockstorage.WithCreateVolumeWait(false), blockstorage.WithCreateVolumeWaitOptions(resource.WithFailureStates()))
+	if err != nil || *value.Wait || value.Bootable != nil || !preparedWait(t, value.WaitOptions).FailureStatesSet || len(preparedWait(t, value.WaitOptions).FailureStates) != 0 {
 		t.Fatalf("complete replacement=%+v error=%v", value, err)
 	}
 }
 
 func TestCreateVolumeOptionsFactoriesOwnPointersMapsRawValuesAndReusableSnapshots(t *testing.T) {
 	name, description, snapshot, volumeType := "worker", "description", "snapshot/literal", "fast"
-	disabled, timeout, interval := false, time.Duration(0), time.Millisecond
+	disabled := false
+	waitOptions := []resource.WaitOption{resource.WithUnlimitedWait(), resource.WithPollInterval(time.Millisecond), resource.WithFailureStates()}
 	metadata := map[string]string{"owner": "original"}
 	fields := map[string]json.RawMessage{"volume_image_metadata": json.RawMessage(`{"number":9007199254740993,"enabled":false}`), "metadata": json.RawMessage(`{"raw":"original"}`)}
 	hints := map[string]json.RawMessage{"same_host": json.RawMessage(`["server-original"]`)}
-	option := blockstorage.WithCreateVolumeOptions(blockstorage.CreateVolumeOpts{Wait: &disabled, Attributes: blockstorage.CreateVolumeAttributes{Name: &name, Description: &description, SnapshotID: &snapshot, VolumeType: &volumeType, Metadata: metadata, Fields: fields, SchedulerHints: hints}, WaitPolicy: blockstorage.CreateVolumeWaitOpts{Timeout: &timeout, PollInterval: &interval, FailureStates: []string{}}})
-	name, description, snapshot, volumeType, disabled, timeout, interval = "changed", "changed", "changed", "changed", true, time.Hour, time.Hour
+	option := blockstorage.WithCreateVolumeOptions(blockstorage.CreateVolumeOpts{Wait: &disabled, Attributes: blockstorage.CreateVolumeAttributes{Name: &name, Description: &description, SnapshotID: &snapshot, VolumeType: &volumeType, Metadata: metadata, Fields: fields, SchedulerHints: hints}, WaitOptions: waitOptions})
+	name, description, snapshot, volumeType, disabled = "changed", "changed", "changed", "changed", true
+	waitOptions[0], waitOptions[1], waitOptions[2] = resource.WithTimeout(time.Hour), resource.WithPollInterval(time.Hour), resource.WithFailureStates("changed")
 	metadata["owner"] = "changed"
 	fields["volume_image_metadata"][0] = '!'
 	hints["same_host"][0] = '!'
@@ -53,7 +55,7 @@ func TestCreateVolumeOptionsFactoriesOwnPointersMapsRawValuesAndReusableSnapshot
 		go func() {
 			defer wait.Done()
 			value, err := blockstorage.PrepareCreateVolumeOptions(context.Background(), option)
-			if err != nil || *value.Wait || *value.Attributes.Name != "worker" || *value.Attributes.Description != "description" || *value.Attributes.SnapshotID != "snapshot/literal" || *value.Attributes.VolumeType != "fast" || value.Attributes.Metadata["owner"] != "original" || string(value.Attributes.Fields["volume_image_metadata"]) != `{"number":9007199254740993,"enabled":false}` || string(value.Attributes.SchedulerHints["same_host"]) != `["server-original"]` || *value.WaitPolicy.Timeout != 0 || *value.WaitPolicy.PollInterval != time.Millisecond || value.WaitPolicy.FailureStates == nil {
+			if err != nil || *value.Wait || *value.Attributes.Name != "worker" || *value.Attributes.Description != "description" || *value.Attributes.SnapshotID != "snapshot/literal" || *value.Attributes.VolumeType != "fast" || value.Attributes.Metadata["owner"] != "original" || string(value.Attributes.Fields["volume_image_metadata"]) != `{"number":9007199254740993,"enabled":false}` || string(value.Attributes.SchedulerHints["same_host"]) != `["server-original"]` || !preparedWait(t, value.WaitOptions).Unlimited || preparedWait(t, value.WaitOptions).Strategy.Delay(1) != time.Millisecond || !preparedWait(t, value.WaitOptions).FailureStatesSet {
 				t.Errorf("owned policy=%+v error=%v", value, err)
 				return
 			}
@@ -106,7 +108,7 @@ func TestCreateVolumeOptionsCallbacksRunOnceAndPreparedStateDoesNotAliasRetained
 
 func TestCreateVolumeOptionsValidateKnownFieldBoundaryInactiveWaitAndCancellation(t *testing.T) {
 	negative, zero := -time.Second, time.Duration(0)
-	for _, option := range []blockstorage.CreateVolumeOption{nil, blockstorage.WithCreateVolumeWaitPolicy(blockstorage.CreateVolumeWaitOpts{Timeout: &negative}), blockstorage.WithCreateVolumeWaitPolicy(blockstorage.CreateVolumeWaitOpts{PollInterval: &zero}), blockstorage.WithCreateVolumeWaitPolicy(blockstorage.CreateVolumeWaitOpts{FailureStates: []string{" "}}), blockstorage.WithCreateVolumeFields(map[string]json.RawMessage{"unknown_vendor": json.RawMessage(`true`)}), blockstorage.WithCreateVolumeFields(map[string]json.RawMessage{"base_path": json.RawMessage(`"/other"`)}), blockstorage.WithCreateVolumeFields(map[string]json.RawMessage{"microversion": json.RawMessage(`"3.99"`)}), blockstorage.WithCreateVolumeFields(map[string]json.RawMessage{"volume_image_metadata": json.RawMessage(`{"unfinished":`)})} {
+	for _, option := range []blockstorage.CreateVolumeOption{nil, blockstorage.WithCreateVolumeWaitOptions(resource.WithTimeout(negative)), blockstorage.WithCreateVolumeWaitOptions(resource.WithPollInterval(zero)), blockstorage.WithCreateVolumeWaitOptions(resource.WithFailureStates(" ")), blockstorage.WithCreateVolumeFields(map[string]json.RawMessage{"unknown_vendor": json.RawMessage(`true`)}), blockstorage.WithCreateVolumeFields(map[string]json.RawMessage{"base_path": json.RawMessage(`"/other"`)}), blockstorage.WithCreateVolumeFields(map[string]json.RawMessage{"microversion": json.RawMessage(`"3.99"`)}), blockstorage.WithCreateVolumeFields(map[string]json.RawMessage{"volume_image_metadata": json.RawMessage(`{"unfinished":`)})} {
 		_, err := blockstorage.PrepareCreateVolumeOptions(context.Background(), blockstorage.WithCreateVolumeWait(false), option)
 		if !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatalf("preflight error=%v", err)

@@ -203,7 +203,7 @@ func TestDeleteVolumeTransportNestedNative404NeverBecomesLogicalAbsence(t *testi
 				ref = resource.Name("worker")
 			}
 			interval := time.Millisecond
-			result, err := blockstorage.DeleteVolume(context.Background(), client, blockstorage.DeleteVolumeRequest{Volume: ref}, blockstorage.WithDeleteVolumeWaitPolicy(blockstorage.DeleteVolumeWaitOpts{PollInterval: &interval}))
+			result, err := blockstorage.DeleteVolume(context.Background(), client, blockstorage.DeleteVolumeRequest{Volume: ref}, blockstorage.WithDeleteVolumeWaitOptions(resource.WithPollInterval(interval)))
 			var native gophercloud.ErrUnexpectedResponseCode
 			var accepted *resource.ResponseError
 			if result == nil || err == nil || !errors.As(err, &native) || native.Actual != 404 || native.URL != "https://nested.invalid/" || string(native.Body) != `{"error":"nested404"}` || errors.As(err, &accepted) || result.Deleted || result.Absent != nil || result.Ready != nil || calls.Load() != failStep {
@@ -326,7 +326,7 @@ func TestDeleteVolumeTransportCapturedHeadersLiveAuthAndSourceGuards(t *testing.
 					options = append(options, func(*blockstorage.DeleteVolumeOpts) error { change.mutate(client); return nil })
 				}
 				if during == "progress" {
-					options = append(options, blockstorage.WithDeleteVolumeWaitPolicy(blockstorage.DeleteVolumeWaitOpts{ProgressCallback: func(int) error { change.mutate(client); return nil }}))
+					options = append(options, blockstorage.WithDeleteVolumeWaitOptions(resource.WithProgressCallback(func(int) error { change.mutate(client); return nil })))
 				}
 				result, err := blockstorage.DeleteVolume(context.Background(), client, blockstorage.DeleteVolumeRequest{Volume: resource.ID("volume-1")}, options...)
 				if !errors.Is(err, resource.ErrInvalidOption) {
@@ -381,7 +381,7 @@ func TestDeleteVolumeTransportWaitBudgetStartsAfterLookupAndMutationAndZeroIsUnl
 		}
 	}))
 	timeout := 50 * time.Millisecond
-	result, err := blockstorage.DeleteVolume(context.Background(), client, blockstorage.DeleteVolumeRequest{Volume: resource.ID("volume-1")}, blockstorage.WithDeleteVolumeWaitPolicy(blockstorage.DeleteVolumeWaitOpts{Timeout: &timeout}))
+	result, err := blockstorage.DeleteVolume(context.Background(), client, blockstorage.DeleteVolumeRequest{Volume: resource.ID("volume-1")}, blockstorage.WithDeleteVolumeWaitOptions(resource.WithTimeout(timeout)))
 	deleteVolumeContractLocated(t, result, located)
 	if err != nil || !result.Deleted || result.Ready == nil || calls.Load() != 3 {
 		t.Fatal(result, err, calls.Load())
@@ -407,14 +407,14 @@ func TestDeleteVolumeTransportWaitBudgetStartsAfterLookupAndMutationAndZeroIsUnl
 				w.WriteHeader(500)
 			}
 		})
-		zero, interval := time.Duration(0), time.Millisecond
-		result, err := blockstorage.DeleteVolume(context.Background(), client, blockstorage.DeleteVolumeRequest{Volume: resource.ID("volume-1")}, blockstorage.WithDeleteVolumeWaitPolicy(blockstorage.DeleteVolumeWaitOpts{Timeout: &zero, PollInterval: &interval, ProgressCallback: func(progress int) error {
+		interval := time.Millisecond
+		result, err := blockstorage.DeleteVolume(context.Background(), client, blockstorage.DeleteVolumeRequest{Volume: resource.ID("volume-1")}, blockstorage.WithDeleteVolumeWaitOptions(resource.WithUnlimitedWait(), resource.WithPollInterval(interval), resource.WithProgressCallback(func(progress int) error {
 			callbacks.Add(1)
 			if progress != 0 {
 				t.Error(progress)
 			}
 			return nil
-		}}))
+		})))
 		deleteVolumeContractLocated(t, result, located)
 		if err != nil || !result.Deleted || result.Absent == nil || result.Ready != nil || calls.Load() != 4 || callbacks.Load() != 1 {
 			t.Fatal(result, err, calls.Load(), callbacks.Load())
@@ -461,18 +461,18 @@ func TestDeleteVolumeTransportWaitCancellationAndLaterRejectionsRetainPreviousPr
 				}
 			}))
 			interval, timeout := time.Hour, 200*time.Millisecond
-			policy := blockstorage.DeleteVolumeWaitOpts{Timeout: &timeout, PollInterval: &interval}
+			unlimited, callback := false, (func(int) error)(nil)
 			if mode == "callback cancel" {
-				policy.Timeout = nil
-				policy.ProgressCallback = func(int) error { cancel(cause); return callbackCause }
+				unlimited = true
+				callback = func(int) error { cancel(cause); return callbackCause }
 			}
 			if mode == "blocked" || mode == "native rejection" || mode == "transport cause" {
 				interval = time.Millisecond
 			}
 			if mode == "native rejection" || mode == "transport cause" {
-				policy.Timeout = nil
+				unlimited = true
 			}
-			result, err := blockstorage.DeleteVolume(ctx, client, blockstorage.DeleteVolumeRequest{Volume: resource.ID("volume-1")}, blockstorage.WithDeleteVolumeWaitPolicy(policy))
+			result, err := blockstorage.DeleteVolume(ctx, client, blockstorage.DeleteVolumeRequest{Volume: resource.ID("volume-1")}, blockstorage.WithDeleteVolumeWaitOptions(volumeWaitPolicy(interval, timeout, unlimited, callback)...))
 			deleteVolumeContractLocated(t, result, located)
 			var accepted *resource.ResponseError
 			var native gophercloud.ErrUnexpectedResponseCode

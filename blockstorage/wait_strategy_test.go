@@ -26,7 +26,7 @@ func TestVolumeWaitStrategyFieldsValidateAndSelect(t *testing.T) {
 	invalid := resource.ExponentialWait(ms, 0.5, 0)
 	interval := 3 * ms
 
-	prepared, err := applyAttachOptions([]AttachVolumeOption{WithAttachVolumeWaitPolicy(AttachVolumeWaitOpts{WaitStrategy: &growing})}, guard)
+	prepared, err := applyAttachOptions([]AttachVolumeOption{WithAttachVolumeWaitOptions(resource.WithWaitStrategy(growing))}, guard)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -36,66 +36,88 @@ func TestVolumeWaitStrategyFieldsValidateAndSelect(t *testing.T) {
 		t.Fatal(err)
 	}
 	strategySequence(t, defaults.strategy, 2*time.Second, 2*time.Second)
-	for name, policy := range map[string]AttachVolumeWaitOpts{
-		"invalid": {WaitStrategy: &invalid},
-		"zero":    {WaitStrategy: &resource.WaitStrategy{}},
-		"both":    {WaitStrategy: &growing, PollInterval: &interval},
+	// The interval and strategy controls replace each other; the later wins.
+	for name, option := range map[string]resource.WaitOption{
+		"invalid": resource.WithWaitStrategy(invalid),
+		"zero":    resource.WithWaitStrategy(resource.WaitStrategy{}),
 	} {
-		if _, err := applyAttachOptions([]AttachVolumeOption{WithAttachVolumeWaitPolicy(policy)}, guard); !errors.Is(err, resource.ErrInvalidOption) {
+		if _, err := applyAttachOptions([]AttachVolumeOption{WithAttachVolumeWaitOptions(option)}, guard); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Errorf("attach %s: %v", name, err)
 		}
-		if _, err := applyDetachOptions([]DetachVolumeOption{WithDetachVolumeWaitPolicy(policy)}, guard); !errors.Is(err, resource.ErrInvalidOption) {
+		if _, err := applyDetachOptions([]DetachVolumeOption{WithDetachVolumeWaitOptions(option)}, guard); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Errorf("detach %s: %v", name, err)
 		}
-		if _, err := applyCreateVolumeOptions([]CreateVolumeOption{WithCreateVolumeWaitPolicy(policy)}, guard); !errors.Is(err, resource.ErrInvalidOption) {
+		if _, err := applyCreateVolumeOptions([]CreateVolumeOption{WithCreateVolumeWaitOptions(option)}, guard); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Errorf("create %s: %v", name, err)
 		}
-		deletion := DeleteVolumeWaitOpts{WaitStrategy: policy.WaitStrategy, PollInterval: policy.PollInterval}
-		if _, err := applyDeleteVolumeOptions([]DeleteVolumeOption{WithDeleteVolumeWaitPolicy(deletion)}, guard); !errors.Is(err, resource.ErrInvalidOption) {
+		if _, err := applyDeleteVolumeOptions([]DeleteVolumeOption{WithDeleteVolumeWaitOptions(option)}, guard); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Errorf("delete %s: %v", name, err)
 		}
 	}
-	detach, err := applyDetachOptions([]DetachVolumeOption{WithDetachVolumeWaitPolicy(DetachVolumeWaitOpts{WaitStrategy: &growing})}, guard)
+	later, err := applyAttachOptions([]AttachVolumeOption{WithAttachVolumeWaitOptions(resource.WithWaitStrategy(growing)), WithAttachVolumeWaitOptions(resource.WithPollInterval(interval))}, guard)
+	if err != nil {
+		t.Fatal(err)
+	}
+	strategySequence(t, later.strategy, interval, interval)
+	detach, err := applyDetachOptions([]DetachVolumeOption{WithDetachVolumeWaitOptions(resource.WithWaitStrategy(growing))}, guard)
 	if err != nil {
 		t.Fatal(err)
 	}
 	strategySequence(t, detach.strategy, ms, 3*ms, 4*ms)
-	create, err := applyCreateVolumeOptions([]CreateVolumeOption{WithCreateVolumeWaitPolicy(CreateVolumeWaitOpts{WaitStrategy: &growing})}, guard)
+	create, err := applyCreateVolumeOptions([]CreateVolumeOption{WithCreateVolumeWaitOptions(resource.WithWaitStrategy(growing))}, guard)
 	if err != nil {
 		t.Fatal(err)
 	}
 	strategySequence(t, create.strategy, ms, 3*ms, 4*ms)
-	deletion, err := applyDeleteVolumeOptions([]DeleteVolumeOption{WithDeleteVolumeWaitPolicy(DeleteVolumeWaitOpts{WaitStrategy: &growing})}, guard)
+	deletion, err := applyDeleteVolumeOptions([]DeleteVolumeOption{WithDeleteVolumeWaitOptions(resource.WithWaitStrategy(growing))}, guard)
 	if err != nil {
 		t.Fatal(err)
 	}
 	strategySequence(t, deletion.strategy, ms, 3*ms, 4*ms)
 }
 
-func TestVolumeWaitStrategyPreparedPoliciesReportTheStrategy(t *testing.T) {
+func TestVolumeWaitStrategyPreparedPoliciesReplayTheStrategy(t *testing.T) {
 	ms := time.Millisecond
 	growing := resource.ExponentialWait(ms, 2, 8*ms)
 	ctx := context.Background()
-	detach, err := PrepareDetachVolumeOptions(ctx, WithDetachVolumeWaitPolicy(DetachVolumeWaitOpts{WaitStrategy: &growing}))
-	if err != nil || detach.WaitPolicy.PollInterval != nil || detach.WaitPolicy.WaitStrategy == nil || *detach.WaitPolicy.WaitStrategy != growing {
-		t.Fatal(detach.WaitPolicy, err)
+	guard := func() error { return nil }
+	detach, err := PrepareDetachVolumeOptions(ctx, WithDetachVolumeWaitOptions(resource.WithWaitStrategy(growing)))
+	if err != nil || len(detach.WaitOptions) != 1 {
+		t.Fatal(detach.WaitOptions, err)
 	}
-	if again, err := PrepareDetachVolumeOptions(ctx, WithDetachVolumeOptions(detach)); err != nil || *again.WaitPolicy.WaitStrategy != growing {
-		t.Fatal(again.WaitPolicy, err)
+	again, err := applyDetachOptions([]DetachVolumeOption{WithDetachVolumeOptions(detach)}, guard)
+	if err != nil {
+		t.Fatal(err)
 	}
-	create, err := PrepareCreateVolumeOptions(ctx, WithCreateVolumeWaitPolicy(CreateVolumeWaitOpts{WaitStrategy: &growing}))
-	if err != nil || create.WaitPolicy.PollInterval != nil || *create.WaitPolicy.WaitStrategy != growing {
-		t.Fatal(create.WaitPolicy, err)
+	strategySequence(t, again.strategy, ms, 2*ms, 4*ms, 8*ms, 8*ms)
+	create, err := PrepareCreateVolumeOptions(ctx, WithCreateVolumeWaitOptions(resource.WithWaitStrategy(growing)))
+	if err != nil {
+		t.Fatal(err)
 	}
-	deletion, err := PrepareDeleteVolumeOptions(ctx, WithDeleteVolumeWaitPolicy(DeleteVolumeWaitOpts{WaitStrategy: &growing}))
-	if err != nil || deletion.WaitPolicy.PollInterval != nil || *deletion.WaitPolicy.WaitStrategy != growing {
-		t.Fatal(deletion.WaitPolicy, err)
+	created, err := applyCreateVolumeOptions([]CreateVolumeOption{WithCreateVolumeOptions(create)}, guard)
+	if err != nil {
+		t.Fatal(err)
 	}
-	// Without a strategy the resolved fixed interval is still reported.
+	strategySequence(t, created.strategy, ms, 2*ms, 4*ms, 8*ms)
+	deletion, err := PrepareDeleteVolumeOptions(ctx, WithDeleteVolumeWaitOptions(resource.WithWaitStrategy(growing)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	deleted, err := applyDeleteVolumeOptions([]DeleteVolumeOption{WithDeleteVolumeOptions(deletion)}, guard)
+	if err != nil {
+		t.Fatal(err)
+	}
+	strategySequence(t, deleted.strategy, ms, 2*ms, 4*ms, 8*ms)
+	// Without a strategy the resolved fixed interval is replayed.
 	plain, err := PrepareDeleteVolumeOptions(ctx)
-	if err != nil || plain.WaitPolicy.WaitStrategy != nil || plain.WaitPolicy.PollInterval == nil || *plain.WaitPolicy.PollInterval != 2*time.Second {
-		t.Fatal(plain.WaitPolicy, err)
+	if err != nil {
+		t.Fatal(err)
 	}
+	replayed, err := applyDeleteVolumeOptions([]DeleteVolumeOption{WithDeleteVolumeOptions(plain)}, guard)
+	if err != nil || replayed.timeout != 0 {
+		t.Fatal(replayed, err)
+	}
+	strategySequence(t, replayed.strategy, 2*time.Second, 2*time.Second)
 }
 
 func TestVolumeAttachmentWaitPausesFollowTheStrategy(t *testing.T) {

@@ -52,7 +52,7 @@ func TestDeleteVolumeProgressChannelSendsZeroPerNonterminalPoll(t *testing.T) {
 	var got []int
 	observer := testcloud.NewProgress(t, func(v int) { got = append(got, v) })
 	interval := time.Millisecond
-	result, err := run(context.Background(), blockstorage.WithDeleteVolumeWaitPolicy(blockstorage.DeleteVolumeWaitOpts{PollInterval: &interval, Progress: observer.C}))
+	result, err := run(context.Background(), blockstorage.WithDeleteVolumeWaitOptions(resource.WithPollInterval(interval), resource.WithProgress(observer.C)))
 	observer.Done()
 	if err != nil || result == nil || !result.Deleted || calls.Load() != 5 || !reflect.DeepEqual(got, []int{0, 0}) {
 		t.Fatal(result, err, calls.Load(), got)
@@ -66,7 +66,7 @@ func TestDeleteVolumeProgressChannelBlockedSendStopsOnCancellation(t *testing.T)
 	calls, run := deleteVolumeProgressFixture(t, 0)
 	blocked := make(chan int)
 	interval := time.Millisecond
-	result, err := run(ctx, blockstorage.WithDeleteVolumeWaitPolicy(blockstorage.DeleteVolumeWaitOpts{PollInterval: &interval, Progress: blocked}))
+	result, err := run(ctx, blockstorage.WithDeleteVolumeWaitOptions(resource.WithPollInterval(interval), resource.WithProgress(blocked)))
 	select {
 	case v := <-blocked:
 		t.Fatal("progress sent after the wait returned", v)
@@ -94,7 +94,7 @@ func TestDeleteVolumeProgressChannelReceiverCancellation(t *testing.T) {
 		gate.AwaitThen(t, func() { cancel(cause) })
 	})
 	interval := time.Millisecond
-	result, err := run(ctx, blockstorage.WithDeleteVolumeWaitPolicy(blockstorage.DeleteVolumeWaitOpts{PollInterval: &interval, Progress: observer.C}))
+	result, err := run(ctx, blockstorage.WithDeleteVolumeWaitOptions(resource.WithPollInterval(interval), resource.WithProgress(observer.C)))
 	observer.Done()
 	var accepted *resource.ResponseError
 	if result == nil || result.Deleted || result.LastAccepted == nil || !errors.Is(err, context.Canceled) || !errors.Is(err, cause) || errors.As(err, &accepted) || calls.Load() != 3 || gate.Seen() != 4 || !reflect.DeepEqual(got, []int{0}) {
@@ -108,8 +108,7 @@ func TestDeleteVolumeProgressCallbackRunsBeforeChannelSend(t *testing.T) {
 	sent := make(chan int, 4)
 	var queuedAtCallback []int
 	interval := time.Millisecond
-	result, err := run(context.Background(), blockstorage.WithDeleteVolumeWaitPolicy(blockstorage.DeleteVolumeWaitOpts{PollInterval: &interval, Progress: sent,
-		ProgressCallback: func(int) error { queuedAtCallback = append(queuedAtCallback, len(sent)); return nil }}))
+	result, err := run(context.Background(), blockstorage.WithDeleteVolumeWaitOptions(resource.WithPollInterval(interval), resource.WithProgress(sent), resource.WithProgressCallback(func(int) error { queuedAtCallback = append(queuedAtCallback, len(sent)); return nil })))
 	if err != nil || result == nil || !result.Deleted || !reflect.DeepEqual(queuedAtCallback, []int{0, 1}) || len(sent) != 2 {
 		t.Fatal(result, err, queuedAtCallback, len(sent))
 	}
@@ -117,8 +116,7 @@ func TestDeleteVolumeProgressCallbackRunsBeforeChannelSend(t *testing.T) {
 	calls, run := deleteVolumeProgressFixture(t, 0)
 	stop := errors.New("callback stop")
 	sent = make(chan int, 4)
-	result, err = run(context.Background(), blockstorage.WithDeleteVolumeWaitPolicy(blockstorage.DeleteVolumeWaitOpts{PollInterval: &interval, Progress: sent,
-		ProgressCallback: func(int) error { return stop }}))
+	result, err = run(context.Background(), blockstorage.WithDeleteVolumeWaitOptions(resource.WithPollInterval(interval), resource.WithProgress(sent), resource.WithProgressCallback(func(int) error { return stop })))
 	if result == nil || result.Deleted || !errors.Is(err, stop) || calls.Load() != 3 || len(sent) != 0 {
 		t.Fatal(result, err, calls.Load(), len(sent))
 	}
@@ -144,8 +142,7 @@ func TestAttachAndCreateVolumeProgressChannelSendZeroAfterCallback(t *testing.T)
 		sent := make(chan int, 4)
 		var queuedAtCallback []int
 		interval := time.Millisecond
-		result, err := blockstorage.AttachVolume(context.Background(), nova, cinder, attachVolumeContractInput(), blockstorage.WithAttachVolumeWaitPolicy(blockstorage.AttachVolumeWaitOpts{PollInterval: &interval, Progress: sent,
-			ProgressCallback: func(int) error { queuedAtCallback = append(queuedAtCallback, len(sent)); return nil }}))
+		result, err := blockstorage.AttachVolume(context.Background(), nova, cinder, attachVolumeContractInput(), blockstorage.WithAttachVolumeWaitOptions(resource.WithPollInterval(interval), resource.WithProgress(sent), resource.WithProgressCallback(func(int) error { queuedAtCallback = append(queuedAtCallback, len(sent)); return nil })))
 		if err != nil || result.Ready == nil || calls.Load() != 4 || !reflect.DeepEqual(queuedAtCallback, []int{0}) || len(sent) != 1 || <-sent != 0 {
 			t.Fatal(result, err, calls.Load(), queuedAtCallback)
 		}
@@ -167,7 +164,7 @@ func TestAttachAndCreateVolumeProgressChannelSendZeroAfterCallback(t *testing.T)
 		var got []int
 		observer := testcloud.NewProgress(t, func(v int) { got = append(got, v) })
 		interval := time.Millisecond
-		result, err := blockstorage.CreateVolume(context.Background(), cinder, nil, blockstorage.CreateVolumeRequest{Size: 2}, blockstorage.WithCreateVolumeWaitPolicy(blockstorage.CreateVolumeWaitOpts{PollInterval: &interval, Progress: observer.C}))
+		result, err := blockstorage.CreateVolume(context.Background(), cinder, nil, blockstorage.CreateVolumeRequest{Size: 2}, blockstorage.WithCreateVolumeWaitOptions(resource.WithPollInterval(interval), resource.WithProgress(observer.C)))
 		observer.Done()
 		if err != nil || result.Ready == nil || calls.Load() != 3 || !reflect.DeepEqual(got, []int{0}) {
 			t.Fatal(result, err, calls.Load(), got)

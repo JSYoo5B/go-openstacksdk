@@ -65,7 +65,7 @@ func (p *preparedDeleteVolume) wait(ctx context.Context, result *DeleteVolumeRes
 		}
 		// Deletion has no failure-state predicate: error/error_deleting and
 		// nullable status remain observations until deleted or absent.
-		if callback := p.options.policy.WaitPolicy.ProgressCallback; callback != nil {
+		if callback := p.options.settings.ProgressCallback; callback != nil {
 			if err := p.guard(waitCtx); err != nil {
 				return response.Fail(err)
 			}
@@ -74,7 +74,7 @@ func (p *preparedDeleteVolume) wait(ctx context.Context, result *DeleteVolumeRes
 				return response.Fail(attachContextError(waitCtx, err))
 			}
 		}
-		if ch := p.options.policy.WaitPolicy.Progress; ch != nil {
+		if ch := p.options.settings.Progress; ch != nil {
 			if err := p.guard(waitCtx); err != nil {
 				return response.Fail(err)
 			}

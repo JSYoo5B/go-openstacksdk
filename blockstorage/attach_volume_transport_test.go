@@ -246,7 +246,7 @@ func TestAttachVolumeContractsRejectSourceChangesAtOptionsAndAfterMutation(t *te
 				return attachVolumeContractResponse(200, io.NopCloser(strings.NewReader(attachVolumeContractObservation("attaching", `[]`))), "poll"), nil
 			}
 		}))
-		result, err := blockstorage.AttachVolume(context.Background(), nova, cinder, attachVolumeContractInput(), blockstorage.WithAttachVolumeWaitPolicy(blockstorage.AttachVolumeWaitOpts{ProgressCallback: func(int) error { nova.Microversion = "2.99"; return nil }}))
+		result, err := blockstorage.AttachVolume(context.Background(), nova, cinder, attachVolumeContractInput(), blockstorage.WithAttachVolumeWaitOptions(resource.WithProgressCallback(func(int) error { nova.Microversion = "2.99"; return nil })))
 		attachVolumeContractCreatedProof(t, result)
 		if !errors.Is(err, resource.ErrInvalidOption) || calls.Load() != 3 || result.LastAccepted == nil || result.Ready != nil {
 			t.Fatalf("result=%+v error=%v calls=%d", result, err, calls.Load())
@@ -273,7 +273,7 @@ func TestAttachVolumeContractsWaitBudgetStartsAfterCreatedResponse(t *testing.T)
 		}
 	}))
 	timeout := 50 * time.Millisecond
-	result, err := blockstorage.AttachVolume(context.Background(), nova, cinder, attachVolumeContractInput(), blockstorage.WithAttachVolumeWaitPolicy(blockstorage.AttachVolumeWaitOpts{Timeout: &timeout}))
+	result, err := blockstorage.AttachVolume(context.Background(), nova, cinder, attachVolumeContractInput(), blockstorage.WithAttachVolumeWaitOptions(resource.WithTimeout(timeout)))
 	attachVolumeContractCreatedProof(t, result)
 	if err != nil || result.Ready == nil || calls.Load() != 3 {
 		t.Fatalf("result=%+v error=%v calls=%d", result, err, calls.Load())
@@ -300,8 +300,8 @@ func TestAttachVolumeContractsWaitBudgetStartsAfterCreatedResponse(t *testing.T)
 				w.WriteHeader(500)
 			}
 		})
-		zero, interval := time.Duration(0), time.Millisecond
-		result, err := blockstorage.AttachVolume(context.Background(), nova, cinder, attachVolumeContractInput(), blockstorage.WithAttachVolumeWaitPolicy(blockstorage.AttachVolumeWaitOpts{Timeout: &zero, PollInterval: &interval, ProgressCallback: func(int) error { callbacks.Add(1); return nil }}))
+		interval := time.Millisecond
+		result, err := blockstorage.AttachVolume(context.Background(), nova, cinder, attachVolumeContractInput(), blockstorage.WithAttachVolumeWaitOptions(resource.WithUnlimitedWait(), resource.WithPollInterval(interval), resource.WithProgressCallback(func(int) error { callbacks.Add(1); return nil })))
 		attachVolumeContractCreatedProof(t, result)
 		if err != nil || result.Ready == nil || calls.Load() != 4 || callbacks.Load() != 1 {
 			t.Fatalf("result=%+v error=%v calls=%d callbacks=%d", result, err, calls.Load(), callbacks.Load())

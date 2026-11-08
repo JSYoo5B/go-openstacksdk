@@ -246,8 +246,8 @@ func TestAttachVolumeContractsPreflightBeforeCallbacksOrHTTP(t *testing.T) {
 			c.MoreHeaders["OpenStack-API-Version"] = "volume 3.99"
 		}},
 		{name: "invalid device", option: blockstorage.WithAttachVolumeDevice("device\n"), callbacks: 1},
-		{name: "inactive negative timeout", option: blockstorage.WithAttachVolumeWaitPolicy(blockstorage.AttachVolumeWaitOpts{Timeout: &negative}), callbacks: 1},
-		{name: "inactive zero interval", option: blockstorage.WithAttachVolumeWaitPolicy(blockstorage.AttachVolumeWaitOpts{PollInterval: &zero}), callbacks: 1},
+		{name: "inactive negative timeout", option: blockstorage.WithAttachVolumeWaitOptions(resource.WithTimeout(negative)), callbacks: 1},
+		{name: "inactive zero interval", option: blockstorage.WithAttachVolumeWaitOptions(resource.WithPollInterval(zero)), callbacks: 1},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			cloud := testcloud.New(t)
@@ -462,13 +462,13 @@ func TestAttachVolumeContractsExactWaitStatesTargetFirstAndCallback(t *testing.T
 				testcloud.JSON(w, 200, attachVolumeContractObservation(tc.polls[index], `null`))
 			})
 			interval := time.Millisecond
-			result, err := blockstorage.AttachVolume(context.Background(), nova, cinder, attachVolumeContractInput(), blockstorage.WithAttachVolumeWaitPolicy(blockstorage.AttachVolumeWaitOpts{PollInterval: &interval, FailureStates: tc.states, ProgressCallback: func(progress int) error {
+			result, err := blockstorage.AttachVolume(context.Background(), nova, cinder, attachVolumeContractInput(), blockstorage.WithAttachVolumeWaitOptions(failureStates(tc.states)...), blockstorage.WithAttachVolumeWaitOptions(resource.WithPollInterval(interval), resource.WithProgressCallback(func(progress int) error {
 				callbacks.Add(1)
 				if progress != 0 {
 					t.Errorf("invented Cinder progress=%d", progress)
 				}
 				return tc.callbackError
-			}}))
+			})))
 			attachVolumeContractCreatedProof(t, result)
 			if calls.Load() != int32(2+len(tc.polls)) || callbacks.Load() != int32(tc.callbacks) || errors.Is(err, resource.ErrFailedState) || tc.callbackError == nil && (err != nil || result.Ready == nil) || tc.callbackError != nil && (!errors.Is(err, tc.callbackError) || result.Ready != nil) {
 				t.Fatalf("result=%+v error=%v calls=%d callbacks=%d", result, err, calls.Load(), callbacks.Load())
@@ -503,14 +503,13 @@ func TestAttachVolumeContractsWaitTimeoutAndCancellationKeepLastAccepted(t *test
 				}
 			})
 			interval, timeout := time.Hour, 200*time.Millisecond
-			policy := blockstorage.AttachVolumeWaitOpts{PollInterval: &interval, Timeout: &timeout}
+			policy := []resource.WaitOption{resource.WithPollInterval(interval), resource.WithTimeout(timeout)}
 			want := error(context.DeadlineExceeded)
 			if canceled {
-				policy.Timeout = nil
-				policy.ProgressCallback = func(int) error { cancel(cause); return nil }
+				policy = []resource.WaitOption{resource.WithPollInterval(interval), resource.WithProgressCallback(func(int) error { cancel(cause); return nil })}
 				want = context.Canceled
 			}
-			result, err := blockstorage.AttachVolume(ctx, nova, cinder, attachVolumeContractInput(), blockstorage.WithAttachVolumeWaitPolicy(policy))
+			result, err := blockstorage.AttachVolume(ctx, nova, cinder, attachVolumeContractInput(), blockstorage.WithAttachVolumeWaitOptions(policy...))
 			attachVolumeContractCreatedProof(t, result)
 			var accepted *resource.ResponseError
 			if !errors.Is(err, want) || canceled && !errors.Is(err, cause) || !errors.As(err, &accepted) || accepted.StatusCode != 200 || string(accepted.Body) != pollBody || result.LastAccepted == nil || result.LastAccepted.Volume == nil || string(result.LastAccepted.Body) != pollBody || result.LastAccepted.Header.Get("X-Proof") != "last-accepted" || result.Ready != nil || calls.Load() != 3 {
@@ -542,7 +541,7 @@ func TestAttachVolumeContractsWaitTimeoutAndCancellationKeepLastAccepted(t *test
 			}
 		})
 		interval := time.Millisecond
-		result, err := blockstorage.AttachVolume(context.Background(), nova, cinder, attachVolumeContractInput(), blockstorage.WithAttachVolumeWaitPolicy(blockstorage.AttachVolumeWaitOpts{PollInterval: &interval}))
+		result, err := blockstorage.AttachVolume(context.Background(), nova, cinder, attachVolumeContractInput(), blockstorage.WithAttachVolumeWaitOptions(resource.WithPollInterval(interval)))
 		attachVolumeContractCreatedProof(t, result)
 		var native gophercloud.ErrUnexpectedResponseCode
 		var accepted *resource.ResponseError

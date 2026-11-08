@@ -167,7 +167,7 @@ func TestConnectionDeleteVolumePreflightSelectsNoService(t *testing.T) {
 		})
 	}
 	negative, zero := -time.Second, time.Duration(0)
-	for _, invalid := range []blockstorage.DeleteVolumeOption{nil, blockstorage.WithDeleteVolumeWaitPolicy(blockstorage.DeleteVolumeWaitOpts{Timeout: &negative}), blockstorage.WithDeleteVolumeWaitPolicy(blockstorage.DeleteVolumeWaitOpts{PollInterval: &zero})} {
+	for _, invalid := range []blockstorage.DeleteVolumeOption{nil, blockstorage.WithDeleteVolumeWaitOptions(resource.WithTimeout(negative)), blockstorage.WithDeleteVolumeWaitOptions(resource.WithPollInterval(zero))} {
 		calls := 0
 		result, err := conn.DeleteVolume(context.Background(), blockstorage.DeleteVolumeRequest{Volume: resource.ID("volume")}, func(*blockstorage.DeleteVolumeOpts) error { calls++; return nil }, blockstorage.WithDeleteVolumeWait(false), invalid)
 		if result != nil || !errors.Is(err, resource.ErrInvalidOption) || calls != 1 || locates.Load() != 0 {

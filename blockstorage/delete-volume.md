@@ -18,7 +18,13 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithDeleteVolumeOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithDeleteVolumeWait`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithDeleteVolumeForce`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithDeleteVolumeWaitPolicy`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithDeleteVolumeWaitOptions`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithTimeout`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithUnlimitedWait`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithPollInterval`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithWaitStrategy`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithProgressCallback`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithProgress`
 
 - DeleteVolume maps the direct cloud name_or_id/wait/timeout/force controls using explicit Volume Ref, default enabled waiting, Forcefalse, unlimited SDK deadline and two-second polling. Explicit IDs always perform an initial fixed-ID GET200/404 before any deletion, even with Waitfalse; no other service is selected.
   Tests: `blockstorage/delete_volume_contracts_test.go:TestDeleteVolumeContractsDefaultFreshWaitAndIndependentPhaseEvidence`, `blockstorage/delete_volume_contracts_test.go:TestDeleteVolumeContractsNoWaitAlwaysLooksUpAndMutation404StillReturnsTrue`, `blockstorage/delete_volume_options_test.go:TestDeleteVolumeOptionsEffectiveDefaultsReplacementAndLastWins`.
@@ -57,8 +63,8 @@ Go API:
 
 - The wait policy Progress channel is sent zero after each nonterminal observation, after ProgressCallback when both are set; a callback error stops the wait and nothing is sent for that step. Each send blocks until it is received or the context ends; the SDK never closes the caller-owned channel and sends nothing after the operation returns, a context that ends during a send stops it through its cancellation path; a nil field means no progress.
   Tests: `blockstorage/volume_progress_channel_test.go:TestDeleteVolumeProgressChannelSendsZeroPerNonterminalPoll`, `blockstorage/volume_progress_channel_test.go:TestDeleteVolumeProgressChannelBlockedSendStopsOnCancellation`, `blockstorage/volume_progress_channel_test.go:TestDeleteVolumeProgressChannelReceiverCancellation`, `blockstorage/volume_progress_channel_test.go:TestDeleteVolumeProgressCallbackRunsBeforeChannelSend`, `blockstorage/volume_progress_channel_test.go:TestAttachAndCreateVolumeProgressChannelSendZeroAfterCallback`.
-- DeleteVolumeWaitOpts.WaitStrategy rejects an invalid or zero-value strategy, or one set together with the interval field, with ErrInvalidOption before HTTP and paces polls by the strategy's pause sequence.
-  Tests: `blockstorage/wait_strategy_test.go:TestVolumeWaitStrategyFieldsValidateAndSelect`, `blockstorage/wait_strategy_test.go:TestVolumeWaitStrategyPreparedPoliciesReportTheStrategy`, `blockstorage/wait_strategy_test.go:TestVolumeAttachmentWaitPausesFollowTheStrategy`.
+- resource.WithWaitStrategy in WithDeleteVolumeWaitOptions rejects an invalid or zero-value strategy, and a status attribute or failure states, with ErrInvalidOption before HTTP and paces polls by the strategy's pause sequence; the later of resource.WithPollInterval and resource.WithWaitStrategy wins.
+  Tests: `blockstorage/wait_strategy_test.go:TestVolumeWaitStrategyFieldsValidateAndSelect`, `blockstorage/wait_strategy_test.go:TestVolumeWaitStrategyPreparedPoliciesReplayTheStrategy`, `blockstorage/wait_strategy_test.go:TestVolumeAttachmentWaitPausesFollowTheStrategy`.
 
 Python/Go differences:
 
@@ -70,7 +76,7 @@ Python/Go differences:
 - Python returns one bool or raises. Go exposes Found/Deleted plus independently owned Located/Deletion/LastAccepted/Absent/Ready evidence even after accepted processing errors. Waitfalse Deletedtrue denotes completed request handling, not an observed absence. GET404 is independent absence evidence; mutation404 is retained only as Deletion proof. Error-returning callback0, raw nullable models and local option preparation are explicit Go extensions.
 - Go only treats a clean direct logical Name miss or clean admitted physical404 as absence/race. Nested transport/native/list/read/Close/context/source failures remain errors with original causes. Captured client settings and fixed request ownership preserve current native authentication/retry without claiming packet-level exactly-once, arbitrary provider mutation, cleanup or rollback.
 - This candidate maps only the direct cloud delete_volume declaration under its documented Go policies after implementation and meaningful QA. Separately inventoried Python find_volume/delete_volume/wait_for_delete and inherited Resource/session/cache/API-version behavior keep independent reviews. Cinder v3 selection does not assert full Cinder v2 Resource semantics or whole-SDK completion.
-- Python waits use a fixed poll interval. DeleteVolumeWaitOpts.WaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and setting it together with the interval field fails with ErrInvalidOption before HTTP.
+- Python waits use a fixed poll interval. WithDeleteVolumeWaitOptions accepts resource.WithWaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of resource.WithPollInterval and resource.WithWaitStrategy wins.
 
 ## Usage examples
 

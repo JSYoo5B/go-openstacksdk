@@ -19,7 +19,14 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeAttributes`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeWait`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeBootable`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeWaitPolicy`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeWaitOptions`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithTimeout`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithUnlimitedWait`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithPollInterval`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithWaitStrategy`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithFailureStates`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithProgressCallback`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithProgress`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeName`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeDescription`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeSnapshot`
@@ -65,8 +72,8 @@ Go API:
 
 - The wait policy Progress channel is sent zero after each nonterminal observation, after ProgressCallback when both are set; a callback error stops the wait and nothing is sent for that step. Each send blocks until it is received or the context ends; the SDK never closes the caller-owned channel and sends nothing after the operation returns, a context that ends during a send stops it through its cancellation path; a nil field means no progress.
   Tests: `blockstorage/volume_progress_channel_test.go:TestDeleteVolumeProgressChannelSendsZeroPerNonterminalPoll`, `blockstorage/volume_progress_channel_test.go:TestDeleteVolumeProgressChannelBlockedSendStopsOnCancellation`, `blockstorage/volume_progress_channel_test.go:TestDeleteVolumeProgressChannelReceiverCancellation`, `blockstorage/volume_progress_channel_test.go:TestDeleteVolumeProgressCallbackRunsBeforeChannelSend`, `blockstorage/volume_progress_channel_test.go:TestAttachAndCreateVolumeProgressChannelSendZeroAfterCallback`.
-- CreateVolumeWaitOpts.WaitStrategy rejects an invalid or zero-value strategy, or one set together with the interval field, with ErrInvalidOption before HTTP and paces polls by the strategy's pause sequence.
-  Tests: `blockstorage/wait_strategy_test.go:TestVolumeWaitStrategyFieldsValidateAndSelect`, `blockstorage/wait_strategy_test.go:TestVolumeWaitStrategyPreparedPoliciesReportTheStrategy`, `blockstorage/wait_strategy_test.go:TestVolumeAttachmentWaitPausesFollowTheStrategy`.
+- resource.WithWaitStrategy in WithCreateVolumeWaitOptions rejects an invalid or zero-value strategy, and a status attribute, with ErrInvalidOption before HTTP and paces polls by the strategy's pause sequence; the later of resource.WithPollInterval and resource.WithWaitStrategy wins.
+  Tests: `blockstorage/wait_strategy_test.go:TestVolumeWaitStrategyFieldsValidateAndSelect`, `blockstorage/wait_strategy_test.go:TestVolumeWaitStrategyPreparedPoliciesReplayTheStrategy`, `blockstorage/wait_strategy_test.go:TestVolumeAttachmentWaitPausesFollowTheStrategy`.
 
 Python/Go differences:
 
@@ -78,7 +85,7 @@ Python/Go differences:
 - Go returns Created/LastAccepted/Ready/BootableSet evidence and original errors after accepted side effects rather than Python returning one mutable Volume or raising without phase results. Error-returning progress callbacks, explicit failure controls and local preparation are Go extensions; no automatic delete or second logical create is added. Accepted phases are not a complete physical-attempt trace.
 - Connection prepares original callbacks once before cached service selection and chooses Glance only for image Name; package calls capture every supplied source before originals. Configured current authentication and native retry/reauthentication remain in place while source and request ownership are guarded. This is not a packet-level exactly-once promise or arbitrary mutable provider configuration contract.
 - This mapping closes only the directly declared cloud create_volume size/wait/timeout/image/bootable/known-kwargs workflow under documented Go policies. Separate Python Cinder create/wait/set_bootable, Glance find, inherited Resource/session/cache/API-version declarations retain independent reviews. Connection selects Cinder v3 and this row does not assert full Cinder v2 Resource object semantics or whole-SDK completion.
-- Python waits use a fixed poll interval. CreateVolumeWaitOpts.WaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and setting it together with the interval field fails with ErrInvalidOption before HTTP.
+- Python waits use a fixed poll interval. WithCreateVolumeWaitOptions accepts resource.WithWaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of resource.WithPollInterval and resource.WithWaitStrategy wins.
 
 ## Usage examples
 
@@ -118,7 +125,6 @@ func createBootableFromImage(ctx context.Context, conn *sdk.Connection) (*blocks
 }
 
 func createWithPolicy(ctx context.Context, conn *sdk.Connection, progress func(int) error) (*blockstorage.CreateVolumeResult, error) {
-    timeout, interval := 5*time.Minute, time.Second
     return conn.CreateVolume(ctx, blockstorage.CreateVolumeRequest{Size: 30},
         blockstorage.WithCreateVolumeSnapshot("snapshot-id"),
         blockstorage.WithCreateVolumeFields(map[string]json.RawMessage{
@@ -128,10 +134,10 @@ func createWithPolicy(ctx context.Context, conn *sdk.Connection, progress func(i
         blockstorage.WithCreateVolumeSchedulerHints(map[string]json.RawMessage{
             "same_host": json.RawMessage(`["source-volume-id"]`),
         }),
-        blockstorage.WithCreateVolumeWaitPolicy(blockstorage.CreateVolumeWaitOpts{
-            Timeout: &timeout, PollInterval: &interval,
-            ProgressCallback: progress,
-        }))
+        blockstorage.WithCreateVolumeWaitOptions(
+            resource.WithTimeout(5*time.Minute), resource.WithPollInterval(time.Second),
+            resource.WithProgressCallback(progress),
+        ))
 }
 ```
 

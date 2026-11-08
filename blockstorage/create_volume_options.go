@@ -27,14 +27,14 @@ type CreateVolumeAttributes struct {
 
 // CreateVolumeOpts owns creation and completion policy. Wait nil selects true.
 // Any nonnil Bootable forces waiting; only true adds a post-wait bootable action.
+// WaitOptions takes the shared resource wait options with the attachment wait
+// defaults and controls (see AttachVolumeOpts); a timeout applies after
+// creation acknowledgement. WaitOptions accumulates in order.
 type CreateVolumeOpts struct {
 	Wait, Bootable *bool
-	WaitPolicy     CreateVolumeWaitOpts
+	WaitOptions    []resource.WaitOption
 	Attributes     CreateVolumeAttributes
 }
-
-// CreateVolumeWaitOpts applies an optional timeout after creation acknowledgement.
-type CreateVolumeWaitOpts = AttachVolumeWaitOpts
 type CreateVolumeOption func(*CreateVolumeOpts) error
 
 func copyCreateVolumeRaw(values map[string]json.RawMessage) map[string]json.RawMessage {
@@ -71,7 +71,7 @@ func copyCreateVolumeAttributes(value CreateVolumeAttributes) CreateVolumeAttrib
 func copyCreateVolumeOptions(value CreateVolumeOpts) CreateVolumeOpts {
 	value.Wait = copyAttachPointer(value.Wait)
 	value.Bootable = copyAttachPointer(value.Bootable)
-	value.WaitPolicy = copyAttachWait(value.WaitPolicy)
+	value.WaitOptions = copyWaitOptions(value.WaitOptions)
 	value.Attributes = copyCreateVolumeAttributes(value.Attributes)
 	return value
 }
@@ -93,9 +93,15 @@ func WithCreateVolumeWait(value bool) CreateVolumeOption {
 func WithCreateVolumeBootable(value bool) CreateVolumeOption {
 	return func(config *CreateVolumeOpts) error { owned := value; config.Bootable = &owned; return nil }
 }
-func WithCreateVolumeWaitPolicy(value CreateVolumeWaitOpts) CreateVolumeOption {
-	owned := copyAttachWait(value)
-	return func(config *CreateVolumeOpts) error { config.WaitPolicy = copyAttachWait(owned); return nil }
+
+// WithCreateVolumeWaitOptions appends shared wait options to WaitOptions;
+// repeated calls accumulate and the later option wins per control.
+func WithCreateVolumeWaitOptions(options ...resource.WaitOption) CreateVolumeOption {
+	owned := copyWaitOptions(options)
+	return func(config *CreateVolumeOpts) error {
+		config.WaitOptions = append(copyWaitOptions(config.WaitOptions), owned...)
+		return nil
+	}
 }
 func WithCreateVolumeName(value string) CreateVolumeOption {
 	return func(config *CreateVolumeOpts) error { owned := value; config.Attributes.Name = &owned; return nil }
@@ -141,12 +147,13 @@ func WithCreateVolumeFields(value map[string]json.RawMessage) CreateVolumeOption
 }
 
 type preparedCreateVolumeOptions struct {
-	policy            CreateVolumeOpts
-	wait              bool
-	interval, timeout time.Duration
-	strategy          resource.WaitStrategy
-	failures          []string
-	body              map[string]json.RawMessage
+	policy   CreateVolumeOpts
+	wait     bool
+	timeout  time.Duration
+	strategy resource.WaitStrategy
+	failures []string
+	settings resource.WaitSettings
+	body     map[string]json.RawMessage
 }
 
 func applyCreateVolumeOptions(options []CreateVolumeOption, guard func() error) (preparedCreateVolumeOptions, error) {
@@ -165,7 +172,7 @@ func applyCreateVolumeOptions(options []CreateVolumeOption, guard func() error) 
 			return preparedCreateVolumeOptions{}, err
 		}
 	}
-	common, err := applyAttachOptions([]AttachVolumeOption{WithAttachVolumeOptions(AttachVolumeOpts{Wait: config.Wait, WaitPolicy: config.WaitPolicy})}, guard)
+	common, err := applyAttachOptions([]AttachVolumeOption{WithAttachVolumeOptions(AttachVolumeOpts{Wait: config.Wait, WaitOptions: config.WaitOptions})}, guard)
 	if err != nil {
 		return preparedCreateVolumeOptions{}, err
 	}
@@ -177,7 +184,7 @@ func applyCreateVolumeOptions(options []CreateVolumeOption, guard func() error) 
 	if config.Bootable != nil {
 		wait = true
 	}
-	return preparedCreateVolumeOptions{policy: copyCreateVolumeOptions(config), wait: wait, interval: common.interval, strategy: common.strategy, timeout: common.timeout, failures: common.failures, body: body}, guard()
+	return preparedCreateVolumeOptions{policy: copyCreateVolumeOptions(config), wait: wait, strategy: common.strategy, timeout: common.timeout, failures: common.failures, settings: common.settings, body: body}, guard()
 }
 
 // PrepareCreateVolumeOptions validates and owns all effective defaults locally.
@@ -193,9 +200,7 @@ func PrepareCreateVolumeOptions(ctx context.Context, options ...CreateVolumeOpti
 	}
 	config := copyCreateVolumeOptions(prepared.policy)
 	config.Wait = copyAttachPointer(&prepared.wait)
-	config.WaitPolicy.Timeout = copyAttachPointer(&prepared.timeout)
-	config.WaitPolicy.PollInterval, config.WaitPolicy.WaitStrategy = preparedWaitTiming(prepared.interval, prepared.policy.WaitPolicy.WaitStrategy)
-	config.WaitPolicy.FailureStates = append(make([]string, 0, len(prepared.failures)), prepared.failures...)
+	config.WaitOptions = resolvedWaitOptions(prepared.settings, prepared.failures)
 	return config, nil
 }
 

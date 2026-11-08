@@ -402,13 +402,13 @@ func TestDeleteVolumeContractsWaitHasNoFailureStatesAndFresh404OwnsAbsenceProof(
 				}
 			})
 			interval := time.Millisecond
-			result, err := blockstorage.DeleteVolume(context.Background(), client, blockstorage.DeleteVolumeRequest{Volume: resource.ID("volume-1")}, blockstorage.WithDeleteVolumeWaitPolicy(blockstorage.DeleteVolumeWaitOpts{PollInterval: &interval, ProgressCallback: func(progress int) error {
+			result, err := blockstorage.DeleteVolume(context.Background(), client, blockstorage.DeleteVolumeRequest{Volume: resource.ID("volume-1")}, blockstorage.WithDeleteVolumeWaitOptions(resource.WithPollInterval(interval), resource.WithProgressCallback(func(progress int) error {
 				callbacks.Add(1)
 				if progress != 0 {
 					t.Error(progress)
 				}
 				return nil
-			}}))
+			})))
 			deleteVolumeContractLocated(t, result, located)
 			if err != nil || !result.Deleted || result.Deletion == nil || result.Deletion.StatusCode != 404 || result.LastAccepted == nil || calls.Load() != int32(3+len(states)) || callbacks.Load() != int32(len(states)) {
 				t.Fatalf("result=%+v error=%v calls=%d callbacks=%d", result, err, calls.Load(), callbacks.Load())

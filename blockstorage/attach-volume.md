@@ -17,7 +17,14 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithAttachVolumeOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithAttachVolumeDevice`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithAttachVolumeWait`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithAttachVolumeWaitPolicy`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithAttachVolumeWaitOptions`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithTimeout`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithUnlimitedWait`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithPollInterval`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithWaitStrategy`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithFailureStates`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithProgressCallback`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithProgress`
 
 - AttachVolume defaults to omitted device, enabled waiting, no SDK wait deadline, two-second polling and exact case-insensitive error failure state. Explicit IDs perform fresh Cinder GET200, Nova POST200 with volumeAttachment.volumeId and optional nonempty device, then fresh fixed-ID Cinder waiting GET200; Wait(false) keeps the precondition GET and omits polling.
   Tests: `blockstorage/attach_volume_contracts_test.go:TestAttachVolumeContractsDefaultSequenceAndIndependentProof`, `blockstorage/attach_volume_contracts_test.go:TestAttachVolumeContractsExplicitNoWaitAndLiteralDevice`, `blockstorage/attach_volume_options_test.go:TestAttachVolumeOptionsConcreteDefaultsAndReplacementOrder`.
@@ -48,8 +55,8 @@ Go API:
 
 - The wait policy Progress channel is sent zero after each nonterminal observation, after ProgressCallback when both are set; a callback error stops the wait and nothing is sent for that step. Each send blocks until it is received or the context ends; the SDK never closes the caller-owned channel and sends nothing after the operation returns, a context that ends during a send stops it through its cancellation path; a nil field means no progress.
   Tests: `blockstorage/volume_progress_channel_test.go:TestDeleteVolumeProgressChannelSendsZeroPerNonterminalPoll`, `blockstorage/volume_progress_channel_test.go:TestDeleteVolumeProgressChannelBlockedSendStopsOnCancellation`, `blockstorage/volume_progress_channel_test.go:TestDeleteVolumeProgressChannelReceiverCancellation`, `blockstorage/volume_progress_channel_test.go:TestDeleteVolumeProgressCallbackRunsBeforeChannelSend`, `blockstorage/volume_progress_channel_test.go:TestAttachAndCreateVolumeProgressChannelSendZeroAfterCallback`.
-- AttachVolumeWaitOpts.WaitStrategy rejects an invalid or zero-value strategy, or one set together with the interval field, with ErrInvalidOption before HTTP and paces polls by the strategy's pause sequence.
-  Tests: `blockstorage/wait_strategy_test.go:TestVolumeWaitStrategyFieldsValidateAndSelect`, `blockstorage/wait_strategy_test.go:TestVolumeWaitStrategyPreparedPoliciesReportTheStrategy`, `blockstorage/wait_strategy_test.go:TestVolumeAttachmentWaitPausesFollowTheStrategy`.
+- resource.WithWaitStrategy in WithAttachVolumeWaitOptions rejects an invalid or zero-value strategy, and a status attribute, with ErrInvalidOption before HTTP and paces polls by the strategy's pause sequence; the later of resource.WithPollInterval and resource.WithWaitStrategy wins.
+  Tests: `blockstorage/wait_strategy_test.go:TestVolumeWaitStrategyFieldsValidateAndSelect`, `blockstorage/wait_strategy_test.go:TestVolumeWaitStrategyPreparedPoliciesReplayTheStrategy`, `blockstorage/wait_strategy_test.go:TestVolumeAttachmentWaitPausesFollowTheStrategy`.
 
 Python/Go differences:
 
@@ -60,7 +67,7 @@ Python/Go differences:
 - Go captures selected source clients and normal headers while using their original live provider authentication. Source configuration changes between phases are terminal; Connection may initialize or discover services before package callback application. Configured native retry/reauthentication remain in place and packet-level exactly-once is not claimed.
 - Go intentionally uses nil or numeric-zero Timeout as no SDK wait deadline and rejects negative Timeout before any name lookup or workflow mutation, including when Wait is false. Pinned Python forwards timeout to Resource waiting after the Nova mutation; utils.iterate_timeout treats numeric zero or negative timeout as immediate ResourceTimeout before its first poll unless an already-target Resource short-circuits first. Positive Go wait deadlines cancel HTTP and timers via context, whereas Python checks elapsed time between fetches and does not interrupt an in-flight fetch or sleep with that loop deadline.
 - This mapping closes the directly declared cloud attach_volume parameter/control-flow contract using the documented Go-native representation. It does not promote the separately inventoried Compute create_volume_attachment, Cinder get_volume or generic wait_for_status declarations or their inherited Resource/session/cache behavior; their full SDK reviews remain independent.
-- Python waits use a fixed poll interval. AttachVolumeWaitOpts.WaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and setting it together with the interval field fails with ErrInvalidOption before HTTP.
+- Python waits use a fixed poll interval. WithAttachVolumeWaitOptions accepts resource.WithWaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of resource.WithPollInterval and resource.WithWaitStrategy wins.
 
 ## Usage examples
 
@@ -93,12 +100,11 @@ func attachWithoutWaiting(ctx context.Context, conn *sdk.Connection, serverID, v
 }
 
 func attachWithDeadline(ctx context.Context, conn *sdk.Connection) (*blockstorage.AttachVolumeResult, error) {
-    timeout, interval := 5*time.Minute, time.Second
     return conn.AttachVolume(ctx, blockstorage.AttachVolumeRequest{
         Server: resource.Name("worker"), Volume: resource.Name("data"),
-    }, blockstorage.WithAttachVolumeWaitPolicy(blockstorage.AttachVolumeWaitOpts{
-        Timeout: &timeout, PollInterval: &interval,
-    }))
+    }, blockstorage.WithAttachVolumeWaitOptions(
+        resource.WithTimeout(5*time.Minute), resource.WithPollInterval(time.Second),
+    ))
 }
 
 func attachWithClients(ctx context.Context, nova, cinder *gophercloud.ServiceClient, input blockstorage.AttachVolumeRequest) (*blockstorage.AttachVolumeResult, error) {

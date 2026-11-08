@@ -11,60 +11,82 @@ import (
 )
 
 func TestAttachVolumeOptionsFactoriesOwnReusablePointersAndSlices(t *testing.T) {
-	disabled, timeout, interval := false, time.Duration(0), time.Millisecond
+	disabled := false
 	states := []string{"custom-error"}
-	full := WithAttachVolumeOptions(AttachVolumeOpts{Device: "/dev/vdb", Wait: &disabled, WaitPolicy: AttachVolumeWaitOpts{Timeout: &timeout, PollInterval: &interval, FailureStates: states}})
-	subtree := WithAttachVolumeWaitPolicy(AttachVolumeWaitOpts{FailureStates: []string{}})
-	disabled, timeout, interval, states[0] = true, time.Hour, time.Hour, "changed"
+	waitOptions := []resource.WaitOption{resource.WithUnlimitedWait(), resource.WithPollInterval(time.Millisecond), resource.WithFailureStates(states...)}
+	full := WithAttachVolumeOptions(AttachVolumeOpts{Device: "/dev/vdb", Wait: &disabled, WaitOptions: waitOptions})
+	appended := WithAttachVolumeWaitOptions(resource.WithFailureStates())
+	disabled, states[0] = true, "changed"
+	waitOptions[0], waitOptions[2] = resource.WithTimeout(time.Hour), resource.WithFailureStates("caller mutation")
 	var wait sync.WaitGroup
 	for range 8 {
 		wait.Add(1)
 		go func() {
 			defer wait.Done()
 			var value AttachVolumeOpts
-			if err := full(&value); err != nil || value.Device != "/dev/vdb" || value.Wait == nil || *value.Wait || value.WaitPolicy.Timeout == nil || *value.WaitPolicy.Timeout != 0 || value.WaitPolicy.PollInterval == nil || *value.WaitPolicy.PollInterval != time.Millisecond || !reflect.DeepEqual(value.WaitPolicy.FailureStates, []string{"custom-error"}) {
+			if err := full(&value); err != nil || value.Device != "/dev/vdb" || value.Wait == nil || *value.Wait || len(value.WaitOptions) != 3 {
 				t.Errorf("owned value=%+v error=%v", value, err)
 				return
 			}
+			settings, err := resource.ResolveWait(volumeWaitDefaults, value.WaitOptions...)
+			if err != nil || !settings.Unlimited || settings.Strategy.Delay(1) != time.Millisecond || !reflect.DeepEqual(settings.FailureStates, []string{"custom-error"}) {
+				t.Errorf("owned settings=%+v error=%v", settings, err)
+				return
+			}
 			*value.Wait = true
-			*value.WaitPolicy.Timeout = time.Hour
-			value.WaitPolicy.FailureStates[0] = "caller mutation"
-			if err := subtree(&value); err != nil || value.WaitPolicy.Timeout != nil || value.WaitPolicy.PollInterval != nil || value.WaitPolicy.FailureStates == nil || len(value.WaitPolicy.FailureStates) != 0 || value.Device != "/dev/vdb" {
-				t.Errorf("subtree replacement=%+v error=%v", value, err)
+			value.WaitOptions[0] = resource.WithTimeout(time.Hour)
+			if err := appended(&value); err != nil || len(value.WaitOptions) != 4 || value.Device != "/dev/vdb" {
+				t.Errorf("appended=%+v error=%v", value, err)
 			}
 		}()
 	}
 	wait.Wait()
+	var value AttachVolumeOpts
+	if err := full(&value); err != nil {
+		t.Fatal(err)
+	}
+	settings, err := resource.ResolveWait(volumeWaitDefaults, value.WaitOptions...)
+	if err != nil || !settings.Unlimited || !reflect.DeepEqual(settings.FailureStates, []string{"custom-error"}) {
+		t.Fatalf("caller mutation reached snapshot: settings=%+v error=%v", settings, err)
+	}
 }
 
 func TestAttachVolumeOptionsConcreteDefaultsAndReplacementOrder(t *testing.T) {
 	guard := func() error { return nil }
 	defaults, err := applyAttachOptions(nil, guard)
-	if err != nil || !defaults.wait || defaults.timeout != 0 || defaults.interval != 2*time.Second || !reflect.DeepEqual(defaults.failures, []string{"error"}) || defaults.policy.Wait != nil {
+	if err != nil || !defaults.wait || defaults.timeout != 0 || defaults.strategy.Delay(1) != 2*time.Second || !reflect.DeepEqual(defaults.failures, []string{"error"}) || defaults.policy.Wait != nil {
 		t.Fatalf("defaults=%+v error=%v", defaults, err)
 	}
 	interval, timeout := time.Millisecond, time.Minute
 	policy, err := applyAttachOptions([]AttachVolumeOption{
 		WithAttachVolumeDevice("discarded"), WithAttachVolumeWait(false),
-		WithAttachVolumeWaitPolicy(AttachVolumeWaitOpts{Timeout: &timeout, PollInterval: &interval, FailureStates: []string{"custom"}}),
+		WithAttachVolumeWaitOptions(resource.WithTimeout(timeout), resource.WithPollInterval(interval), resource.WithFailureStates("custom")),
 		WithAttachVolumeOptions(AttachVolumeOpts{}),
 		WithAttachVolumeDevice("/dev/vdc"), WithAttachVolumeWait(false),
-		WithAttachVolumeWaitPolicy(AttachVolumeWaitOpts{FailureStates: []string{}}),
+		WithAttachVolumeWaitOptions(resource.WithFailureStates()),
 	}, guard)
-	if err != nil || policy.wait || policy.policy.Device != "/dev/vdc" || policy.timeout != 0 || policy.interval != 2*time.Second || policy.failures == nil || len(policy.failures) != 0 {
+	if err != nil || policy.wait || policy.policy.Device != "/dev/vdc" || policy.timeout != 0 || policy.strategy.Delay(1) != 2*time.Second || policy.failures == nil || len(policy.failures) != 0 {
 		t.Fatalf("replacement=%+v error=%v", policy, err)
+	}
+	// Repeated wait options accumulate; the later option wins per control.
+	policy, err = applyAttachOptions([]AttachVolumeOption{
+		WithAttachVolumeWaitOptions(resource.WithTimeout(timeout), resource.WithPollInterval(interval), resource.WithFailureStates("custom")),
+		WithAttachVolumeWaitOptions(resource.WithPollInterval(time.Second)),
+	}, guard)
+	if err != nil || policy.timeout != timeout || policy.strategy.Delay(1) != time.Second || !reflect.DeepEqual(policy.failures, []string{"custom"}) {
+		t.Fatalf("accumulated=%+v error=%v", policy, err)
 	}
 }
 
 func TestAttachVolumeOptionsExternalCallbacksRunOnceAndRetainedConfigIsolated(t *testing.T) {
 	var retained *AttachVolumeOpts
-	disabled, timeout := false, time.Second
+	disabled := false
 	calls := 0
 	policy, err := applyAttachOptions([]AttachVolumeOption{
 		func(value *AttachVolumeOpts) error {
 			calls++
 			value.Device, value.Wait = "/dev/vdb", &disabled
-			value.WaitPolicy = AttachVolumeWaitOpts{Timeout: &timeout, FailureStates: []string{"original"}}
+			value.WaitOptions = []resource.WaitOption{resource.WithTimeout(time.Second), resource.WithFailureStates("original")}
 			retained = value
 			return nil
 		},
@@ -72,9 +94,9 @@ func TestAttachVolumeOptionsExternalCallbacksRunOnceAndRetainedConfigIsolated(t 
 			calls++
 			retained.Device = "late mutation"
 			*retained.Wait = true
-			*retained.WaitPolicy.Timeout = time.Hour
-			retained.WaitPolicy.FailureStates[0] = "late mutation"
-			if value.Device != "/dev/vdb" || *value.Wait || *value.WaitPolicy.Timeout != time.Second || value.WaitPolicy.FailureStates[0] != "original" {
+			retained.WaitOptions[0] = resource.WithTimeout(time.Hour)
+			retained.WaitOptions[1] = resource.WithFailureStates("late mutation")
+			if value.Device != "/dev/vdb" || *value.Wait || len(value.WaitOptions) != 2 {
 				t.Errorf("retained callback state aliased next callback: %+v", value)
 			}
 			return nil
@@ -97,10 +119,10 @@ func TestAttachVolumeOptionsValidateInactiveWaitPolicyAndStopOnGuardFailure(t *t
 		nil,
 		WithAttachVolumeDevice("device\nheader"),
 		WithAttachVolumeDevice(string([]byte{0xff})),
-		WithAttachVolumeWaitPolicy(AttachVolumeWaitOpts{Timeout: &negative}),
-		WithAttachVolumeWaitPolicy(AttachVolumeWaitOpts{PollInterval: &zero}),
-		WithAttachVolumeWaitPolicy(AttachVolumeWaitOpts{FailureStates: []string{" "}}),
-		WithAttachVolumeWaitPolicy(AttachVolumeWaitOpts{FailureStates: []string{"error\n"}}),
+		WithAttachVolumeWaitOptions(resource.WithTimeout(negative)),
+		WithAttachVolumeWaitOptions(resource.WithPollInterval(zero)),
+		WithAttachVolumeWaitOptions(resource.WithFailureStates(" ")),
+		WithAttachVolumeWaitOptions(resource.WithFailureStates("error\n")),
 	} {
 		_, err := applyAttachOptions([]AttachVolumeOption{WithAttachVolumeWait(false), option}, func() error { return nil })
 		if !errors.Is(err, resource.ErrInvalidOption) {

@@ -526,13 +526,13 @@ func TestCreateVolumeContractsInitialLiteralErrorAndExactFreshWaitStates(t *test
 				testcloud.JSON(w, 200, createVolumeContractBody(tc.polls[index]))
 			})
 			interval := time.Millisecond
-			options := []blockstorage.CreateVolumeOption{blockstorage.WithCreateVolumeWait(tc.wait), blockstorage.WithCreateVolumeWaitPolicy(blockstorage.CreateVolumeWaitOpts{PollInterval: &interval, FailureStates: tc.states, ProgressCallback: func(progress int) error {
+			options := []blockstorage.CreateVolumeOption{blockstorage.WithCreateVolumeWait(tc.wait), blockstorage.WithCreateVolumeWaitOptions(failureStates(tc.states)...), blockstorage.WithCreateVolumeWaitOptions(resource.WithPollInterval(interval), resource.WithProgressCallback(func(progress int) error {
 				callbacks.Add(1)
 				if progress != 0 {
 					t.Error(progress)
 				}
 				return tc.callbackCause
-			}})}
+			}))}
 			if tc.callbackCause != nil {
 				options = append(options, blockstorage.WithCreateVolumeBootable(true))
 			}

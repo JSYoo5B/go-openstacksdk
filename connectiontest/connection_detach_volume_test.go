@@ -164,7 +164,7 @@ func TestConnectionDetachVolumeValidatesBeforeClientDiscovery(t *testing.T) {
 		})
 	}
 	negative := -time.Second
-	result, err := conn.DetachVolume(context.Background(), input, blockstorage.WithDetachVolumeWait(false), blockstorage.WithDetachVolumeWaitPolicy(blockstorage.DetachVolumeWaitOpts{Timeout: &negative}))
+	result, err := conn.DetachVolume(context.Background(), input, blockstorage.WithDetachVolumeWait(false), blockstorage.WithDetachVolumeWaitOptions(resource.WithTimeout(negative)))
 	if result != nil || !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(result, err)
 	}

@@ -157,7 +157,7 @@ func TestConnectionCreateVolumePreflightBeforeCallbacksAndServiceSelection(t *te
 		})
 	}
 	negative := -time.Second
-	for _, option := range []blockstorage.CreateVolumeOption{nil, blockstorage.WithCreateVolumeWaitPolicy(blockstorage.CreateVolumeWaitOpts{Timeout: &negative}), blockstorage.WithCreateVolumeFields(map[string]json.RawMessage{"base_path": json.RawMessage(`"other"`)})} {
+	for _, option := range []blockstorage.CreateVolumeOption{nil, blockstorage.WithCreateVolumeWaitOptions(resource.WithTimeout(negative)), blockstorage.WithCreateVolumeFields(map[string]json.RawMessage{"base_path": json.RawMessage(`"other"`)})} {
 		result, err := conn.CreateVolume(context.Background(), blockstorage.CreateVolumeRequest{Size: 1}, blockstorage.WithCreateVolumeWait(false), option)
 		if result != nil || !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(result, err)

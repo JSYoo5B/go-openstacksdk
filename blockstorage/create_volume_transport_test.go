@@ -285,7 +285,7 @@ func TestCreateVolumeTransportWaitBudgetExcludesCreateAndBootableUsesParentConte
 		}
 	}))
 	timeout := 50 * time.Millisecond
-	result, err := blockstorage.CreateVolume(context.Background(), cinder, nil, blockstorage.CreateVolumeRequest{Size: 2}, blockstorage.WithCreateVolumeBootable(true), blockstorage.WithCreateVolumeWaitPolicy(blockstorage.CreateVolumeWaitOpts{Timeout: &timeout}))
+	result, err := blockstorage.CreateVolume(context.Background(), cinder, nil, blockstorage.CreateVolumeRequest{Size: 2}, blockstorage.WithCreateVolumeBootable(true), blockstorage.WithCreateVolumeWaitOptions(resource.WithTimeout(timeout)))
 	createVolumeContractCreated(t, result, createVolumeContractBody("creating"))
 	if err != nil || result.Ready == nil || result.BootableSet == nil || string(result.BootableSet.Body) != "opaque" || calls.Load() != 3 {
 		t.Fatalf("result=%+v error=%v calls=%d", result, err, calls.Load())
@@ -308,14 +308,14 @@ func TestCreateVolumeTransportWaitBudgetExcludesCreateAndBootableUsesParentConte
 				w.WriteHeader(500)
 			}
 		})
-		zero, interval := time.Duration(0), time.Millisecond
-		result, err := blockstorage.CreateVolume(context.Background(), cinder, nil, blockstorage.CreateVolumeRequest{Size: 2}, blockstorage.WithCreateVolumeWaitPolicy(blockstorage.CreateVolumeWaitOpts{Timeout: &zero, PollInterval: &interval, ProgressCallback: func(progress int) error {
+		interval := time.Millisecond
+		result, err := blockstorage.CreateVolume(context.Background(), cinder, nil, blockstorage.CreateVolumeRequest{Size: 2}, blockstorage.WithCreateVolumeWaitOptions(resource.WithUnlimitedWait(), resource.WithPollInterval(interval), resource.WithProgressCallback(func(progress int) error {
 			callbacks.Add(1)
 			if progress != 0 {
 				t.Error(progress)
 			}
 			return nil
-		}}))
+		})))
 		createVolumeContractCreated(t, result, createVolumeContractBody("creating"))
 		if err != nil || result.Ready == nil || calls.Load() != 3 || callbacks.Load() != 1 {
 			t.Fatalf("result=%+v error=%v calls=%d callbacks=%d", result, err, calls.Load(), callbacks.Load())
@@ -363,18 +363,18 @@ func TestCreateVolumeTransportWaitCancellationAndLaterFailuresRetainAcceptedCrea
 				}
 			}))
 			interval, timeout := time.Hour, 200*time.Millisecond
-			policy := blockstorage.CreateVolumeWaitOpts{PollInterval: &interval, Timeout: &timeout}
+			unlimited, callback := false, (func(int) error)(nil)
 			if mode == "callback cancel" {
-				policy.Timeout = nil
-				policy.ProgressCallback = func(int) error { cancel(cause); return callbackCause }
+				unlimited = true
+				callback = func(int) error { cancel(cause); return callbackCause }
 			}
 			if mode == "blocked timeout" || mode == "later native denial" || mode == "later transport cause" {
 				interval = time.Millisecond
 			}
 			if mode == "later native denial" || mode == "later transport cause" || mode == "invalid poll identity" {
-				policy.Timeout = nil
+				unlimited = true
 			}
-			result, err := blockstorage.CreateVolume(ctx, cinder, nil, blockstorage.CreateVolumeRequest{Size: 2}, blockstorage.WithCreateVolumeBootable(true), blockstorage.WithCreateVolumeWaitPolicy(policy))
+			result, err := blockstorage.CreateVolume(ctx, cinder, nil, blockstorage.CreateVolumeRequest{Size: 2}, blockstorage.WithCreateVolumeBootable(true), blockstorage.WithCreateVolumeWaitOptions(volumeWaitPolicy(interval, timeout, unlimited, callback)...))
 			createVolumeContractCreated(t, result, createVolumeContractBody("creating"))
 			var accepted *resource.ResponseError
 			var native gophercloud.ErrUnexpectedResponseCode

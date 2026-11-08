@@ -17,7 +17,14 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithAttachVolumeOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithAttachVolumeDevice`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithAttachVolumeWait`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithAttachVolumeWaitPolicy`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithAttachVolumeWaitOptions`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithTimeout`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithUnlimitedWait`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithPollInterval`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithWaitStrategy`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithFailureStates`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithProgressCallback`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithProgress`
 
 - AttachVolume defaults to omitted device, enabled waiting, no SDK wait deadline, two-second polling and exact case-insensitive error failure state. Explicit IDs perform fresh Cinder GET200, Nova POST200 with volumeAttachment.volumeId and optional nonempty device, then fresh fixed-ID Cinder waiting GET200; Wait(false) keeps the precondition GET and omits polling.
   Tests: `blockstorage/attach_volume_contracts_test.go:TestAttachVolumeContractsDefaultSequenceAndIndependentProof`, `blockstorage/attach_volume_contracts_test.go:TestAttachVolumeContractsExplicitNoWaitAndLiteralDevice`, `blockstorage/attach_volume_options_test.go:TestAttachVolumeOptionsConcreteDefaultsAndReplacementOrder`.
@@ -48,8 +55,8 @@ Go API:
 
 - The wait policy Progress channel is sent zero after each nonterminal observation, after ProgressCallback when both are set; a callback error stops the wait and nothing is sent for that step. Each send blocks until it is received or the context ends; the SDK never closes the caller-owned channel and sends nothing after the operation returns, a context that ends during a send stops it through its cancellation path; a nil field means no progress.
   Tests: `blockstorage/volume_progress_channel_test.go:TestDeleteVolumeProgressChannelSendsZeroPerNonterminalPoll`, `blockstorage/volume_progress_channel_test.go:TestDeleteVolumeProgressChannelBlockedSendStopsOnCancellation`, `blockstorage/volume_progress_channel_test.go:TestDeleteVolumeProgressChannelReceiverCancellation`, `blockstorage/volume_progress_channel_test.go:TestDeleteVolumeProgressCallbackRunsBeforeChannelSend`, `blockstorage/volume_progress_channel_test.go:TestAttachAndCreateVolumeProgressChannelSendZeroAfterCallback`.
-- AttachVolumeWaitOpts.WaitStrategy rejects an invalid or zero-value strategy, or one set together with the interval field, with ErrInvalidOption before HTTP and paces polls by the strategy's pause sequence.
-  Tests: `blockstorage/wait_strategy_test.go:TestVolumeWaitStrategyFieldsValidateAndSelect`, `blockstorage/wait_strategy_test.go:TestVolumeWaitStrategyPreparedPoliciesReportTheStrategy`, `blockstorage/wait_strategy_test.go:TestVolumeAttachmentWaitPausesFollowTheStrategy`.
+- resource.WithWaitStrategy in WithAttachVolumeWaitOptions rejects an invalid or zero-value strategy, and a status attribute, with ErrInvalidOption before HTTP and paces polls by the strategy's pause sequence; the later of resource.WithPollInterval and resource.WithWaitStrategy wins.
+  Tests: `blockstorage/wait_strategy_test.go:TestVolumeWaitStrategyFieldsValidateAndSelect`, `blockstorage/wait_strategy_test.go:TestVolumeWaitStrategyPreparedPoliciesReplayTheStrategy`, `blockstorage/wait_strategy_test.go:TestVolumeAttachmentWaitPausesFollowTheStrategy`.
 
 Python/Go differences:
 
@@ -60,7 +67,7 @@ Python/Go differences:
 - Go captures selected source clients and normal headers while using their original live provider authentication. Source configuration changes between phases are terminal; Connection may initialize or discover services before package callback application. Configured native retry/reauthentication remain in place and packet-level exactly-once is not claimed.
 - Go intentionally uses nil or numeric-zero Timeout as no SDK wait deadline and rejects negative Timeout before any name lookup or workflow mutation, including when Wait is false. Pinned Python forwards timeout to Resource waiting after the Nova mutation; utils.iterate_timeout treats numeric zero or negative timeout as immediate ResourceTimeout before its first poll unless an already-target Resource short-circuits first. Positive Go wait deadlines cancel HTTP and timers via context, whereas Python checks elapsed time between fetches and does not interrupt an in-flight fetch or sleep with that loop deadline.
 - This mapping closes the directly declared cloud attach_volume parameter/control-flow contract using the documented Go-native representation. It does not promote the separately inventoried Compute create_volume_attachment, Cinder get_volume or generic wait_for_status declarations or their inherited Resource/session/cache behavior; their full SDK reviews remain independent.
-- Python waits use a fixed poll interval. AttachVolumeWaitOpts.WaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and setting it together with the interval field fails with ErrInvalidOption before HTTP.
+- Python waits use a fixed poll interval. WithAttachVolumeWaitOptions accepts resource.WithWaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of resource.WithPollInterval and resource.WithWaitStrategy wins.
 
 ### `python:cloud/_block_storage/BlockStorageCloudMixin/detach_volume`
 
@@ -73,7 +80,14 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareDetachVolumeOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithDetachVolumeOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithDetachVolumeWait`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithDetachVolumeWaitPolicy`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithDetachVolumeWaitOptions`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithTimeout`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithUnlimitedWait`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithPollInterval`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithWaitStrategy`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithFailureStates`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithProgressCallback`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithProgress`
 
 - DetachVolume maps the directly declared cloud helper with fixed Server and Volume references, enabled wait by default, an unlimited SDK wait deadline, two-second polling and exact case-insensitive error failure state. Explicit IDs perform bodyless Nova DELETE accepted only at202/204 followed by an immediate fresh fixed-ID Cinder GET200; no pre-delete server, attachment or Cinder state GET is added.
   Tests: `blockstorage/detach_volume_contracts_test.go:TestDetachVolumeContractsDefaultDeleteThenFreshAvailableAndIndependentProof`, `blockstorage/detach_volume_contracts_test.go:TestDetachVolumeContractsNoWaitIDsNeedOnlyNovaAndOpaqueAcknowledgement`, `blockstorage/detach_volume_options_test.go:TestDetachVolumeOptionsPreparationOwnsEffectiveDefaultsAndReplacementOrder`, `blockstorage/detach_volume_contracts_test.go:TestDetachVolumeContractsAvailableBeforeExactFailuresAndStatusOnlyReadiness`.
@@ -104,8 +118,8 @@ Go API:
 
 - The wait policy Progress channel is sent zero after each nonterminal observation, after ProgressCallback when both are set; a callback error stops the wait and nothing is sent for that step. Each send blocks until it is received or the context ends; the SDK never closes the caller-owned channel and sends nothing after the operation returns, a context that ends during a send stops it through its cancellation path; a nil field means no progress.
   Tests: `blockstorage/volume_progress_channel_test.go:TestDeleteVolumeProgressChannelSendsZeroPerNonterminalPoll`, `blockstorage/volume_progress_channel_test.go:TestDeleteVolumeProgressChannelBlockedSendStopsOnCancellation`, `blockstorage/volume_progress_channel_test.go:TestDeleteVolumeProgressChannelReceiverCancellation`, `blockstorage/volume_progress_channel_test.go:TestDeleteVolumeProgressCallbackRunsBeforeChannelSend`, `blockstorage/volume_progress_channel_test.go:TestAttachAndCreateVolumeProgressChannelSendZeroAfterCallback`.
-- DetachVolumeWaitOpts.WaitStrategy rejects an invalid or zero-value strategy, or one set together with the interval field, with ErrInvalidOption before HTTP and paces polls by the strategy's pause sequence.
-  Tests: `blockstorage/wait_strategy_test.go:TestVolumeWaitStrategyFieldsValidateAndSelect`, `blockstorage/wait_strategy_test.go:TestVolumeWaitStrategyPreparedPoliciesReportTheStrategy`, `blockstorage/wait_strategy_test.go:TestVolumeAttachmentWaitPausesFollowTheStrategy`.
+- resource.WithWaitStrategy in WithDetachVolumeWaitOptions rejects an invalid or zero-value strategy, and a status attribute, with ErrInvalidOption before HTTP and paces polls by the strategy's pause sequence; the later of resource.WithPollInterval and resource.WithWaitStrategy wins.
+  Tests: `blockstorage/wait_strategy_test.go:TestVolumeWaitStrategyFieldsValidateAndSelect`, `blockstorage/wait_strategy_test.go:TestVolumeWaitStrategyPreparedPoliciesReplayTheStrategy`, `blockstorage/wait_strategy_test.go:TestVolumeAttachmentWaitPausesFollowTheStrategy`.
 
 Python/Go differences:
 
@@ -116,7 +130,7 @@ Python/Go differences:
 - Go provides a concrete owned policy and a local PrepareDetachVolumeOptions seam. Connection applies original option callbacks before service discovery and selects Cinder only for waiting or volume Name; package callers may use only Nova with wait false and a volume ID. Direct package calls capture required sources before original callbacks; both use frozen selected client settings and current authentication from original providers.
 - Go retains raw JSON precision, nullable canonical fields and literal timestamps in its reused volume observation models rather than reproducing mutable Python Resource descriptors, alternate identity, dirty state, cache and injected session/adapter objects. ProgressCallback and caller-selectable failure states are explicit Go extensions; this helper does not expose Cinder force/connector detach action controls.
 - This go_mapping closes only the directly declared cloud detach_volume parameter/control-flow contract and its documented Go adaptation. Separately inventoried Compute delete_volume_attachment, cloud get_volume, Cinder find/wait and inherited Resource declarations retain independent reviews; native leaves and other volume workflows are not promoted.
-- Python waits use a fixed poll interval. DetachVolumeWaitOpts.WaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and setting it together with the interval field fails with ErrInvalidOption before HTTP.
+- Python waits use a fixed poll interval. WithDetachVolumeWaitOptions accepts resource.WithWaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of resource.WithPollInterval and resource.WithWaitStrategy wins.
 
 ### `python:cloud/_block_storage/BlockStorageCloudMixin/create_volume`
 
@@ -131,7 +145,14 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeAttributes`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeWait`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeBootable`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeWaitPolicy`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeWaitOptions`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithTimeout`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithUnlimitedWait`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithPollInterval`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithWaitStrategy`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithFailureStates`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithProgressCallback`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithProgress`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeName`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeDescription`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeSnapshot`
@@ -177,8 +198,8 @@ Go API:
 
 - The wait policy Progress channel is sent zero after each nonterminal observation, after ProgressCallback when both are set; a callback error stops the wait and nothing is sent for that step. Each send blocks until it is received or the context ends; the SDK never closes the caller-owned channel and sends nothing after the operation returns, a context that ends during a send stops it through its cancellation path; a nil field means no progress.
   Tests: `blockstorage/volume_progress_channel_test.go:TestDeleteVolumeProgressChannelSendsZeroPerNonterminalPoll`, `blockstorage/volume_progress_channel_test.go:TestDeleteVolumeProgressChannelBlockedSendStopsOnCancellation`, `blockstorage/volume_progress_channel_test.go:TestDeleteVolumeProgressChannelReceiverCancellation`, `blockstorage/volume_progress_channel_test.go:TestDeleteVolumeProgressCallbackRunsBeforeChannelSend`, `blockstorage/volume_progress_channel_test.go:TestAttachAndCreateVolumeProgressChannelSendZeroAfterCallback`.
-- CreateVolumeWaitOpts.WaitStrategy rejects an invalid or zero-value strategy, or one set together with the interval field, with ErrInvalidOption before HTTP and paces polls by the strategy's pause sequence.
-  Tests: `blockstorage/wait_strategy_test.go:TestVolumeWaitStrategyFieldsValidateAndSelect`, `blockstorage/wait_strategy_test.go:TestVolumeWaitStrategyPreparedPoliciesReportTheStrategy`, `blockstorage/wait_strategy_test.go:TestVolumeAttachmentWaitPausesFollowTheStrategy`.
+- resource.WithWaitStrategy in WithCreateVolumeWaitOptions rejects an invalid or zero-value strategy, and a status attribute, with ErrInvalidOption before HTTP and paces polls by the strategy's pause sequence; the later of resource.WithPollInterval and resource.WithWaitStrategy wins.
+  Tests: `blockstorage/wait_strategy_test.go:TestVolumeWaitStrategyFieldsValidateAndSelect`, `blockstorage/wait_strategy_test.go:TestVolumeWaitStrategyPreparedPoliciesReplayTheStrategy`, `blockstorage/wait_strategy_test.go:TestVolumeAttachmentWaitPausesFollowTheStrategy`.
 
 Python/Go differences:
 
@@ -190,7 +211,7 @@ Python/Go differences:
 - Go returns Created/LastAccepted/Ready/BootableSet evidence and original errors after accepted side effects rather than Python returning one mutable Volume or raising without phase results. Error-returning progress callbacks, explicit failure controls and local preparation are Go extensions; no automatic delete or second logical create is added. Accepted phases are not a complete physical-attempt trace.
 - Connection prepares original callbacks once before cached service selection and chooses Glance only for image Name; package calls capture every supplied source before originals. Configured current authentication and native retry/reauthentication remain in place while source and request ownership are guarded. This is not a packet-level exactly-once promise or arbitrary mutable provider configuration contract.
 - This mapping closes only the directly declared cloud create_volume size/wait/timeout/image/bootable/known-kwargs workflow under documented Go policies. Separate Python Cinder create/wait/set_bootable, Glance find, inherited Resource/session/cache/API-version declarations retain independent reviews. Connection selects Cinder v3 and this row does not assert full Cinder v2 Resource object semantics or whole-SDK completion.
-- Python waits use a fixed poll interval. CreateVolumeWaitOpts.WaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and setting it together with the interval field fails with ErrInvalidOption before HTTP.
+- Python waits use a fixed poll interval. WithCreateVolumeWaitOptions accepts resource.WithWaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of resource.WithPollInterval and resource.WithWaitStrategy wins.
 
 ### `python:cloud/_block_storage/BlockStorageCloudMixin/delete_volume`
 
@@ -204,7 +225,13 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithDeleteVolumeOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithDeleteVolumeWait`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithDeleteVolumeForce`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithDeleteVolumeWaitPolicy`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithDeleteVolumeWaitOptions`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithTimeout`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithUnlimitedWait`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithPollInterval`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithWaitStrategy`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithProgressCallback`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithProgress`
 
 - DeleteVolume maps the direct cloud name_or_id/wait/timeout/force controls using explicit Volume Ref, default enabled waiting, Forcefalse, unlimited SDK deadline and two-second polling. Explicit IDs always perform an initial fixed-ID GET200/404 before any deletion, even with Waitfalse; no other service is selected.
   Tests: `blockstorage/delete_volume_contracts_test.go:TestDeleteVolumeContractsDefaultFreshWaitAndIndependentPhaseEvidence`, `blockstorage/delete_volume_contracts_test.go:TestDeleteVolumeContractsNoWaitAlwaysLooksUpAndMutation404StillReturnsTrue`, `blockstorage/delete_volume_options_test.go:TestDeleteVolumeOptionsEffectiveDefaultsReplacementAndLastWins`.
@@ -243,8 +270,8 @@ Go API:
 
 - The wait policy Progress channel is sent zero after each nonterminal observation, after ProgressCallback when both are set; a callback error stops the wait and nothing is sent for that step. Each send blocks until it is received or the context ends; the SDK never closes the caller-owned channel and sends nothing after the operation returns, a context that ends during a send stops it through its cancellation path; a nil field means no progress.
   Tests: `blockstorage/volume_progress_channel_test.go:TestDeleteVolumeProgressChannelSendsZeroPerNonterminalPoll`, `blockstorage/volume_progress_channel_test.go:TestDeleteVolumeProgressChannelBlockedSendStopsOnCancellation`, `blockstorage/volume_progress_channel_test.go:TestDeleteVolumeProgressChannelReceiverCancellation`, `blockstorage/volume_progress_channel_test.go:TestDeleteVolumeProgressCallbackRunsBeforeChannelSend`, `blockstorage/volume_progress_channel_test.go:TestAttachAndCreateVolumeProgressChannelSendZeroAfterCallback`.
-- DeleteVolumeWaitOpts.WaitStrategy rejects an invalid or zero-value strategy, or one set together with the interval field, with ErrInvalidOption before HTTP and paces polls by the strategy's pause sequence.
-  Tests: `blockstorage/wait_strategy_test.go:TestVolumeWaitStrategyFieldsValidateAndSelect`, `blockstorage/wait_strategy_test.go:TestVolumeWaitStrategyPreparedPoliciesReportTheStrategy`, `blockstorage/wait_strategy_test.go:TestVolumeAttachmentWaitPausesFollowTheStrategy`.
+- resource.WithWaitStrategy in WithDeleteVolumeWaitOptions rejects an invalid or zero-value strategy, and a status attribute or failure states, with ErrInvalidOption before HTTP and paces polls by the strategy's pause sequence; the later of resource.WithPollInterval and resource.WithWaitStrategy wins.
+  Tests: `blockstorage/wait_strategy_test.go:TestVolumeWaitStrategyFieldsValidateAndSelect`, `blockstorage/wait_strategy_test.go:TestVolumeWaitStrategyPreparedPoliciesReplayTheStrategy`, `blockstorage/wait_strategy_test.go:TestVolumeAttachmentWaitPausesFollowTheStrategy`.
 
 Python/Go differences:
 
@@ -256,7 +283,7 @@ Python/Go differences:
 - Python returns one bool or raises. Go exposes Found/Deleted plus independently owned Located/Deletion/LastAccepted/Absent/Ready evidence even after accepted processing errors. Waitfalse Deletedtrue denotes completed request handling, not an observed absence. GET404 is independent absence evidence; mutation404 is retained only as Deletion proof. Error-returning callback0, raw nullable models and local option preparation are explicit Go extensions.
 - Go only treats a clean direct logical Name miss or clean admitted physical404 as absence/race. Nested transport/native/list/read/Close/context/source failures remain errors with original causes. Captured client settings and fixed request ownership preserve current native authentication/retry without claiming packet-level exactly-once, arbitrary provider mutation, cleanup or rollback.
 - This candidate maps only the direct cloud delete_volume declaration under its documented Go policies after implementation and meaningful QA. Separately inventoried Python find_volume/delete_volume/wait_for_delete and inherited Resource/session/cache/API-version behavior keep independent reviews. Cinder v3 selection does not assert full Cinder v2 Resource semantics or whole-SDK completion.
-- Python waits use a fixed poll interval. DeleteVolumeWaitOpts.WaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and setting it together with the interval field fails with ErrInvalidOption before HTTP.
+- Python waits use a fixed poll interval. WithDeleteVolumeWaitOptions accepts resource.WithWaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of resource.WithPollInterval and resource.WithWaitStrategy wins.
 
 ### `python:cloud/_block_storage/BlockStorageCloudMixin/get_volume_attach_device`
 

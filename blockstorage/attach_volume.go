@@ -122,7 +122,7 @@ func (p *preparedAttach) wait(ctx context.Context, result *AttachVolumeResult) e
 	return waitVolumeAttachment(ctx, volumeAttachmentWait{
 		volumeID: p.volumeID, target: "in-use",
 		timeout: p.options.timeout, strategy: p.options.strategy,
-		failures: p.options.failures, progress: p.options.policy.WaitPolicy.ProgressCallback, channel: p.options.policy.WaitPolicy.Progress,
+		failures: p.options.failures, progress: p.options.settings.ProgressCallback, channel: p.options.settings.Progress,
 		guard: p.guard,
 		exchange: func(waitCtx context.Context) (*rest.Response, error) {
 			return p.exchange(waitCtx, http.MethodGet, p.volumeURL, nil)

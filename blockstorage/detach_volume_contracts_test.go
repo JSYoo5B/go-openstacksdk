@@ -133,7 +133,7 @@ func TestDetachVolumeContractsNoWaitIDsNeedOnlyNovaAndOpaqueAcknowledgement(t *t
 				w.WriteHeader(tc.code)
 				_, _ = w.Write(tc.body)
 			})
-			result, err := blockstorage.DetachVolume(context.Background(), nova, nil, detachVolumeContractInput(), blockstorage.WithDetachVolumeWait(false), blockstorage.WithDetachVolumeWaitPolicy(blockstorage.DetachVolumeWaitOpts{ProgressCallback: func(int) error { callbacks.Add(1); return nil }}))
+			result, err := blockstorage.DetachVolume(context.Background(), nova, nil, detachVolumeContractInput(), blockstorage.WithDetachVolumeWait(false), blockstorage.WithDetachVolumeWaitOptions(resource.WithProgressCallback(func(int) error { callbacks.Add(1); return nil })))
 			detachVolumeContractDeleted(t, result, tc.code, tc.body)
 			if err != nil || result.LastAccepted != nil || result.Ready != nil || calls.Load() != 1 || callbacks.Load() != 0 {
 				t.Fatalf("result=%+v error=%v HTTP=%d callbacks=%d", result, err, calls.Load(), callbacks.Load())
@@ -173,8 +173,8 @@ func TestDetachVolumeContractsPreflightAndRequiredCinderBeforeNameLookup(t *test
 		{name: "invalid server Name", change: func(_, _ *gophercloud.ServiceClient, i *blockstorage.DetachVolumeRequest) {
 			i.Server = resource.Name("name\n")
 		}},
-		{name: "inactive negative timeout", callbacks: 1, option: blockstorage.WithDetachVolumeWaitPolicy(blockstorage.DetachVolumeWaitOpts{Timeout: &negative})},
-		{name: "inactive zero interval", callbacks: 1, option: blockstorage.WithDetachVolumeWaitPolicy(blockstorage.DetachVolumeWaitOpts{PollInterval: &zero})},
+		{name: "inactive negative timeout", callbacks: 1, option: blockstorage.WithDetachVolumeWaitOptions(resource.WithTimeout(negative))},
+		{name: "inactive zero interval", callbacks: 1, option: blockstorage.WithDetachVolumeWaitOptions(resource.WithPollInterval(zero))},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			cloud := testcloud.New(t)
@@ -364,13 +364,13 @@ func TestDetachVolumeContractsAvailableBeforeExactFailuresAndStatusOnlyReadiness
 				testcloud.JSON(w, 200, detachVolumeContractObservation(tc.polls[index], ""))
 			})
 			interval := time.Millisecond
-			result, err := blockstorage.DetachVolume(context.Background(), nova, cinder, detachVolumeContractInput(), blockstorage.WithDetachVolumeWaitPolicy(blockstorage.DetachVolumeWaitOpts{PollInterval: &interval, FailureStates: tc.states, ProgressCallback: func(progress int) error {
+			result, err := blockstorage.DetachVolume(context.Background(), nova, cinder, detachVolumeContractInput(), blockstorage.WithDetachVolumeWaitOptions(failureStates(tc.states)...), blockstorage.WithDetachVolumeWaitOptions(resource.WithPollInterval(interval), resource.WithProgressCallback(func(progress int) error {
 				callbacks.Add(1)
 				if progress != 0 {
 					t.Errorf("invented progress=%d", progress)
 				}
 				return tc.callbackError
-			}}))
+			})))
 			detachVolumeContractDeleted(t, result, 204, nil)
 			if calls.Load() != int32(1+len(tc.polls)) || callbacks.Load() != tc.callbacks || errors.Is(err, resource.ErrFailedState) != tc.failed || tc.callbackError != nil && !errors.Is(err, tc.callbackError) || !tc.failed && tc.callbackError == nil && (err != nil || result.Ready == nil) || (tc.failed || tc.callbackError != nil) && result.Ready != nil {
 				t.Fatalf("result=%+v error=%v calls=%d callbacks=%d", result, err, calls.Load(), callbacks.Load())
@@ -456,16 +456,16 @@ func TestDetachVolumeContractsWaitTimeoutCancellationAndLaterRejectionKeepLastAc
 				}
 			})
 			interval, timeout := time.Hour, 200*time.Millisecond
-			policy := blockstorage.DetachVolumeWaitOpts{PollInterval: &interval, Timeout: &timeout}
+			unlimited, callback := false, (func(int) error)(nil)
 			if mode == "cancel" {
-				policy.Timeout = nil
-				policy.ProgressCallback = func(int) error { cancel(cause); return callbackCause }
+				unlimited = true
+				callback = func(int) error { cancel(cause); return callbackCause }
 			}
 			if mode == "later rejection" {
 				interval = time.Millisecond
-				policy.Timeout = nil
+				unlimited = true
 			}
-			result, err := blockstorage.DetachVolume(ctx, nova, cinder, detachVolumeContractInput(), blockstorage.WithDetachVolumeWaitPolicy(policy))
+			result, err := blockstorage.DetachVolume(ctx, nova, cinder, detachVolumeContractInput(), blockstorage.WithDetachVolumeWaitOptions(volumeWaitPolicy(interval, timeout, unlimited, callback)...))
 			detachVolumeContractDeleted(t, result, 204, nil)
 			if result.LastAccepted == nil || string(result.LastAccepted.Body) != pollBody || result.LastAccepted.Header.Get("X-Proof") != "last-accepted" || result.Ready != nil {
 				t.Fatalf("result=%+v error=%v", result, err)

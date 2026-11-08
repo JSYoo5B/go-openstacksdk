@@ -61,7 +61,7 @@ func (p *preparedCreateVolume) wait(ctx context.Context, result *CreateVolumeRes
 				return response.Fail(&resource.FailedStateError{Resource: "volume", ID: p.volumeID, Status: status})
 			}
 		}
-		if callback := p.options.policy.WaitPolicy.ProgressCallback; callback != nil {
+		if callback := p.options.settings.ProgressCallback; callback != nil {
 			if err := p.guard(waitCtx); err != nil {
 				return response.Fail(err)
 			}
@@ -70,7 +70,7 @@ func (p *preparedCreateVolume) wait(ctx context.Context, result *CreateVolumeRes
 				return response.Fail(attachContextError(waitCtx, err))
 			}
 		}
-		if ch := p.options.policy.WaitPolicy.Progress; ch != nil {
+		if ch := p.options.settings.Progress; ch != nil {
 			if err := p.guard(waitCtx); err != nil {
 				return response.Fail(err)
 			}
