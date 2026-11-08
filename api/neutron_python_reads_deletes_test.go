@@ -386,25 +386,25 @@ func neutronPythonDeleteFixtures() []neutronPythonDeleteFixture {
 	return []neutronPythonDeleteFixture{
 		{"networks", "networks", func(ctx context.Context, c *gophercloud.ServiceClient, id string, opts ...request.NeutronDeleteOption) error {
 			return networks.New(c).DeleteWithOptions(ctx, id, opts...)
-		}, networks.WithDeleteRevision, networks.WithDeleteIgnoreMissing, networks.WithDeleteOptions},
+		}, request.WithNeutronDeleteRevision, request.WithNeutronDeleteIgnoreMissing, request.WithNeutronDeleteOptions},
 		{"subnets", "subnets", func(ctx context.Context, c *gophercloud.ServiceClient, id string, opts ...request.NeutronDeleteOption) error {
 			return subnets.New(c).DeleteWithOptions(ctx, id, opts...)
-		}, subnets.WithDeleteRevision, subnets.WithDeleteIgnoreMissing, subnets.WithDeleteOptions},
+		}, request.WithNeutronDeleteRevision, request.WithNeutronDeleteIgnoreMissing, request.WithNeutronDeleteOptions},
 		{"ports", "ports", func(ctx context.Context, c *gophercloud.ServiceClient, id string, opts ...request.NeutronDeleteOption) error {
 			return ports.New(c).DeleteWithOptions(ctx, id, opts...)
-		}, ports.WithDeleteRevision, ports.WithDeleteIgnoreMissing, ports.WithDeleteOptions},
+		}, request.WithNeutronDeleteRevision, request.WithNeutronDeleteIgnoreMissing, request.WithNeutronDeleteOptions},
 		{"floatingips", "floatingips", func(ctx context.Context, c *gophercloud.ServiceClient, id string, opts ...request.NeutronDeleteOption) error {
 			return floatingips.New(c).DeleteWithOptions(ctx, id, opts...)
-		}, floatingips.WithDeleteRevision, floatingips.WithDeleteIgnoreMissing, floatingips.WithDeleteOptions},
+		}, request.WithNeutronDeleteRevision, request.WithNeutronDeleteIgnoreMissing, request.WithNeutronDeleteOptions},
 		{"routers", "routers", func(ctx context.Context, c *gophercloud.ServiceClient, id string, opts ...request.NeutronDeleteOption) error {
 			return routers.New(c).DeleteWithOptions(ctx, id, opts...)
-		}, routers.WithDeleteRevision, routers.WithDeleteIgnoreMissing, routers.WithDeleteOptions},
+		}, request.WithNeutronDeleteRevision, request.WithNeutronDeleteIgnoreMissing, request.WithNeutronDeleteOptions},
 		{"security-groups", "security-groups", func(ctx context.Context, c *gophercloud.ServiceClient, id string, opts ...request.NeutronDeleteOption) error {
 			return groups.New(c).DeleteWithOptions(ctx, id, opts...)
-		}, groups.WithDeleteRevision, groups.WithDeleteIgnoreMissing, groups.WithDeleteOptions},
+		}, request.WithNeutronDeleteRevision, request.WithNeutronDeleteIgnoreMissing, request.WithNeutronDeleteOptions},
 		{"security-group-rules", "security-group-rules", func(ctx context.Context, c *gophercloud.ServiceClient, id string, opts ...request.NeutronDeleteOption) error {
 			return rules.New(c).DeleteWithOptions(ctx, id, opts...)
-		}, rules.WithDeleteRevision, rules.WithDeleteIgnoreMissing, rules.WithDeleteOptions},
+		}, request.WithNeutronDeleteRevision, request.WithNeutronDeleteIgnoreMissing, request.WithNeutronDeleteOptions},
 	}
 }
 

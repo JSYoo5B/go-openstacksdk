@@ -12,14 +12,10 @@ import (
 type DeleteOpts = request.NeutronDeleteOpts
 type DeleteOption = request.NeutronDeleteOption
 
-func WithDeleteOptions(value DeleteOpts) DeleteOption { return request.WithNeutronDeleteOptions(value) }
-func WithDeleteRevision(value int64) DeleteOption     { return request.WithNeutronDeleteRevision(value) }
-func WithDeleteIgnoreMissing(value bool) DeleteOption {
-	return request.WithNeutronDeleteIgnoreMissing(value)
-}
-
-// DeleteWithOptions submits a conditional deletion. Missing resources are
-// ignored by default; WithDeleteIgnoreMissing(false) selects strict handling.
+// DeleteWithOptions submits a conditional deletion. Build options with
+// request.WithNeutronDeleteRevision, request.WithNeutronDeleteIgnoreMissing and
+// request.WithNeutronDeleteOptions. Missing resources are ignored by default;
+// request.WithNeutronDeleteIgnoreMissing(false) selects strict handling.
 // A zero revision is a real condition, and later options override earlier ones.
 func (a *API) DeleteWithOptions(ctx context.Context, id string, options ...DeleteOption) error {
 	if a == nil || a.client == nil {

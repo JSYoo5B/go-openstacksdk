@@ -252,7 +252,7 @@ func TestPythonCloudNetworkBSecurityGroupReads(t *testing.T) {
 func TestPythonCloudNetworkBDeleteSecurityGroupRule(t *testing.T) {
 	client, calls := pythonCloudBClient(t, map[string][]pythonCloudBReply{"DELETE /v2.0/security-group-rules/rule-1": {{204, ""}, {404, `{}`}, {409, `{}`}}})
 	api := secrules.New(client)
-	strict := secrules.WithDeleteIgnoreMissing(false)
+	strict := request.WithNeutronDeleteIgnoreMissing(false)
 	if err := api.DeleteWithOptions(context.Background(), "rule-1", strict); err != nil {
 		t.Fatal(err)
 	}

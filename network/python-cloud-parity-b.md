@@ -136,15 +136,15 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules.API.DeleteWithOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules.WithDeleteIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.WithNeutronDeleteIgnoreMissing`
 
-- delete_security_group_rule sends DELETE /v2.0/security-group-rules/{id} with no body; with WithDeleteIgnoreMissing(false) a 204 succeeds while 404 and 409 remain errors, matching ignore_missing=False.
+- delete_security_group_rule sends DELETE /v2.0/security-group-rules/{id} with no body; with request.WithNeutronDeleteIgnoreMissing(false) a 204 succeeds while 404 and 409 remain errors, matching ignore_missing=False.
   Tests: `network/python_parity_cloud_b_test.go:TestPythonCloudNetworkBDeleteSecurityGroupRule`.
 
 Python/Go differences:
 
 - Only the default secgroup_source=neutron path with a network service is mapped; the Nova /os-security-groups branch with its normalization and the OpenStackCloudUnavailableFeature raised when secgroup_source is unset are not reproduced. The Nova branch returns False on 404, which Go does not provide.
-- Python returns True on success; Go returns a nil error. DeleteWithOptions ignores 404 by default, so WithDeleteIgnoreMissing(false) is required.
+- Python returns True on success; Go returns a nil error. DeleteWithOptions ignores 404 by default, so request.WithNeutronDeleteIgnoreMissing(false) is required.
 
 ### `python:cloud/_network/NetworkCloudMixin/list_networks`
 

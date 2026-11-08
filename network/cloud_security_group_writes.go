@@ -100,7 +100,7 @@ func (c *SecurityGroupCloud) DeleteSecurityGroup(ctx context.Context, nameOrID s
 		return false, securityGroupWriteWrap(ctx, op, err)
 	}
 	if state.backend == "neutron" {
-		err = state.api.DeleteWithOptions(ctx, id, groups.WithDeleteIgnoreMissing(false))
+		err = state.api.DeleteWithOptions(ctx, id, request.WithNeutronDeleteIgnoreMissing(false))
 	} else {
 		client := state.source.Client
 		_, err = client.Delete(ctx, client.ServiceURL("os-security-groups", url.PathEscape(id)), &gophercloud.RequestOpts{OkCodes: securityGroupNovaStatus()})

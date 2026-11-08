@@ -234,9 +234,9 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.API.DeleteWithOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithDeleteOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithDeleteRevision`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithDeleteIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.WithNeutronDeleteOptions`
+- `github.com/JSYoo5B/go-openstacksdk/request.WithNeutronDeleteRevision`
+- `github.com/JSYoo5B/go-openstacksdk/request.WithNeutronDeleteIgnoreMissing`
 
 - DELETE uses the pinned member route and an empty body. Omitted revision adds no condition; explicit zero, negative and int64 bounds send If-Match: revision_number=N, overriding case-insensitive configured aliases without modifying the shared client.
   Tests: `api/neutron_python_reads_deletes_test.go:TestNeutronPythonDeleteRevisionMissingPolicyAndNativeRoutes`.
@@ -257,9 +257,9 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.API.DeleteWithOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithDeleteOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithDeleteRevision`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithDeleteIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.WithNeutronDeleteOptions`
+- `github.com/JSYoo5B/go-openstacksdk/request.WithNeutronDeleteRevision`
+- `github.com/JSYoo5B/go-openstacksdk/request.WithNeutronDeleteIgnoreMissing`
 
 - DELETE uses the pinned member route and an empty body. Omitted revision adds no condition; explicit zero, negative and int64 bounds send If-Match: revision_number=N, overriding case-insensitive configured aliases without modifying the shared client.
   Tests: `api/neutron_python_reads_deletes_test.go:TestNeutronPythonDeleteRevisionMissingPolicyAndNativeRoutes`.
@@ -280,9 +280,9 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.DeleteWithOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithDeleteOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithDeleteRevision`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithDeleteIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.WithNeutronDeleteOptions`
+- `github.com/JSYoo5B/go-openstacksdk/request.WithNeutronDeleteRevision`
+- `github.com/JSYoo5B/go-openstacksdk/request.WithNeutronDeleteIgnoreMissing`
 
 - DELETE uses the pinned member route and an empty body. Omitted revision adds no condition; explicit zero, negative and int64 bounds send If-Match: revision_number=N, overriding case-insensitive configured aliases without modifying the shared client.
   Tests: `api/neutron_python_reads_deletes_test.go:TestNeutronPythonDeleteRevisionMissingPolicyAndNativeRoutes`.
@@ -303,9 +303,9 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.API.DeleteWithOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.WithDeleteOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.WithDeleteRevision`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.WithDeleteIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.WithNeutronDeleteOptions`
+- `github.com/JSYoo5B/go-openstacksdk/request.WithNeutronDeleteRevision`
+- `github.com/JSYoo5B/go-openstacksdk/request.WithNeutronDeleteIgnoreMissing`
 
 - DELETE uses the pinned member route and an empty body. Omitted revision adds no condition; explicit zero, negative and int64 bounds send If-Match: revision_number=N, overriding case-insensitive configured aliases without modifying the shared client.
   Tests: `api/neutron_python_reads_deletes_test.go:TestNeutronPythonDeleteRevisionMissingPolicyAndNativeRoutes`.
@@ -326,9 +326,9 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.API.DeleteWithOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithDeleteOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithDeleteRevision`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithDeleteIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.WithNeutronDeleteOptions`
+- `github.com/JSYoo5B/go-openstacksdk/request.WithNeutronDeleteRevision`
+- `github.com/JSYoo5B/go-openstacksdk/request.WithNeutronDeleteIgnoreMissing`
 
 - DELETE uses the pinned member route and an empty body. Omitted revision adds no condition; explicit zero, negative and int64 bounds send If-Match: revision_number=N, overriding case-insensitive configured aliases without modifying the shared client.
   Tests: `api/neutron_python_reads_deletes_test.go:TestNeutronPythonDeleteRevisionMissingPolicyAndNativeRoutes`.
@@ -349,9 +349,9 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.API.DeleteWithOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithDeleteOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithDeleteRevision`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithDeleteIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.WithNeutronDeleteOptions`
+- `github.com/JSYoo5B/go-openstacksdk/request.WithNeutronDeleteRevision`
+- `github.com/JSYoo5B/go-openstacksdk/request.WithNeutronDeleteIgnoreMissing`
 
 - DELETE uses the pinned member route and an empty body. Omitted revision adds no condition; explicit zero, negative and int64 bounds send If-Match: revision_number=N, overriding case-insensitive configured aliases without modifying the shared client.
   Tests: `api/neutron_python_reads_deletes_test.go:TestNeutronPythonDeleteRevisionMissingPolicyAndNativeRoutes`.
@@ -372,9 +372,9 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules.API.DeleteWithOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules.WithDeleteOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules.WithDeleteRevision`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules.WithDeleteIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.WithNeutronDeleteOptions`
+- `github.com/JSYoo5B/go-openstacksdk/request.WithNeutronDeleteRevision`
+- `github.com/JSYoo5B/go-openstacksdk/request.WithNeutronDeleteIgnoreMissing`
 
 - DELETE uses the pinned member route and an empty body. Omitted revision adds no condition; explicit zero, negative and int64 bounds send If-Match: revision_number=N, overriding case-insensitive configured aliases without modifying the shared client.
   Tests: `api/neutron_python_reads_deletes_test.go:TestNeutronPythonDeleteRevisionMissingPolicyAndNativeRoutes`.
@@ -403,6 +403,7 @@ import (
 
     sdk "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/network/v2/networks"
+    "github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 func main() {
@@ -421,7 +422,7 @@ func main() {
         if value := os.Getenv("DELETE_NETWORK_REVISION"); value != "" {
             revision, err := strconv.ParseInt(value, 10, 64)
             if err != nil { panic(err) }
-            options = append(options, networks.WithDeleteRevision(revision))
+            options = append(options, request.WithNeutronDeleteRevision(revision))
         }
         if err := service.API.Networks.DeleteWithOptions(ctx, id, options...); err != nil { panic(err) }
     }
