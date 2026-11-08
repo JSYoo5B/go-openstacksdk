@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/pollschedule"
 	"github.com/JSYoo5B/go-openstacksdk/internal/progress"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
@@ -14,15 +15,16 @@ import (
 // Only the owning attach/detach workflows construct this fixed-ID loop. The
 // source exchange and guard retain their own exact method, route and HTTP codes.
 type volumeAttachmentWait struct {
-	volumeID, target  string
-	timeout, interval time.Duration
-	failures          []string
-	progress          func(int) error
-	channel           chan<- int
-	guard             func(context.Context) error
-	exchange          func(context.Context) (*rest.Response, error)
-	lastAccepted      **AttachVolumeObservationResponse
-	ready             **AttachVolumeObservation
+	volumeID, target string
+	timeout          time.Duration
+	strategy         resource.WaitStrategy
+	failures         []string
+	progress         func(int) error
+	channel          chan<- int
+	guard            func(context.Context) error
+	exchange         func(context.Context) (*rest.Response, error)
+	lastAccepted     **AttachVolumeObservationResponse
+	ready            **AttachVolumeObservation
 }
 
 func waitVolumeAttachment(ctx context.Context, policy volumeAttachmentWait) error {
@@ -32,6 +34,7 @@ func waitVolumeAttachment(ctx context.Context, policy volumeAttachmentWait) erro
 		waitCtx, cancel = context.WithTimeout(ctx, policy.timeout)
 		defer cancel()
 	}
+	pacer := pollschedule.NewPacer(policy.strategy.Delay)
 	for {
 		// Start with an immediate fresh observation after the owning mutation;
 		// no supplied model or earlier response can establish readiness.
@@ -98,7 +101,7 @@ func waitVolumeAttachment(ctx context.Context, policy volumeAttachmentWait) erro
 		if err := policy.guard(waitCtx); err != nil {
 			return response.Fail(err)
 		}
-		timer := time.NewTimer(policy.interval)
+		timer := time.NewTimer(pacer.Next())
 		select {
 		case <-waitCtx.Done():
 			timer.Stop()

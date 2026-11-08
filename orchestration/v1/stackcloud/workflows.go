@@ -24,7 +24,7 @@ import (
 var ErrDeleteFailed = errors.New("stack deletion failed")
 
 type options struct {
-	interval time.Duration
+	strategy resource.WaitStrategy
 	loader   *templateloader.Loader
 }
 
@@ -32,13 +32,27 @@ type options struct {
 type Option func(*options) error
 
 // WithPollInterval replaces poll_for_events' five-second poll period. Zero
-// polls without sleeping; negative values are rejected.
+// polls without sleeping; negative values are rejected. It and
+// WithWaitStrategy replace each other; the later one wins.
 func WithPollInterval(interval time.Duration) Option {
 	return func(o *options) error {
 		if interval < 0 {
 			return fmt.Errorf("%w: poll interval must not be negative", resource.ErrInvalidOption)
 		}
-		o.interval = interval
+		o.strategy = resource.FixedWait(interval)
+		return nil
+	}
+}
+
+// WithWaitStrategy replaces poll_for_events' fixed poll period with strategy,
+// a Go-only extension. Each event wait starts the strategy from its first
+// pause. An invalid strategy fails with resource.ErrInvalidOption before HTTP.
+func WithWaitStrategy(strategy resource.WaitStrategy) Option {
+	return func(o *options) error {
+		if err := strategy.Validate(); err != nil {
+			return err
+		}
+		o.strategy = strategy
 		return nil
 	}
 }
@@ -56,7 +70,7 @@ func WithTemplateLoader(loader *templateloader.Loader) Option {
 }
 
 func apply(ctx context.Context, client *gophercloud.ServiceClient, list []Option) (options, error) {
-	config := options{interval: DefaultPollInterval}
+	config := options{strategy: resource.FixedWait(DefaultPollInterval)}
 	if ctx == nil {
 		return config, fmt.Errorf("%w: context is required", resource.ErrInvalidOption)
 	}
@@ -215,7 +229,7 @@ func DeleteStack(ctx context.Context, client *gophercloud.ServiceClient, input D
 	if !input.Wait {
 		return result, nil
 	}
-	status, err := pollForEvents(ctx, client, input.NameOrID, "DELETE", result.Marker, config.interval)
+	status, err := pollForEvents(ctx, client, input.NameOrID, "DELETE", result.Marker, config.strategy)
 	if err != nil {
 		if !isHTTPError(err) {
 			return result, wrap(err)
@@ -391,7 +405,7 @@ func CreateStack(ctx context.Context, client *gophercloud.ServiceClient, input C
 		return result, wrap(err)
 	}
 	if input.Wait {
-		if result.WaitStatus, err = pollForEvents(ctx, client, input.Name, "CREATE", nil, config.interval); err != nil {
+		if result.WaitStatus, err = pollForEvents(ctx, client, input.Name, "CREATE", nil, config.strategy); err != nil {
 			return result, wrap(err)
 		}
 	}
@@ -441,7 +455,7 @@ func UpdateStack(ctx context.Context, client *gophercloud.ServiceClient, input U
 		return result, wrap(err)
 	}
 	if input.Wait {
-		if result.WaitStatus, err = pollForEvents(ctx, client, input.NameOrID, "UPDATE", result.Marker, config.interval); err != nil {
+		if result.WaitStatus, err = pollForEvents(ctx, client, input.NameOrID, "UPDATE", result.Marker, config.strategy); err != nil {
 			return result, wrap(err)
 		}
 	}

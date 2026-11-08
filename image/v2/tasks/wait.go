@@ -13,6 +13,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/pollschedule"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
@@ -103,6 +104,7 @@ func (a *API) WaitForTaskState(ctx context.Context, ref resource.Ref, target str
 		}
 		return response, err
 	}
+	pacer := pollschedule.NewPacer(taskWaitStrategy(policy).Delay)
 	for {
 		response, err := perform(http.MethodGet, collection+"/"+url.PathEscape(current), nil, http.StatusOK)
 		if err != nil {
@@ -166,7 +168,7 @@ func (a *API) WaitForTaskState(ctx context.Context, ref resource.Ref, target str
 			result.Recreated++
 			result.observed(created, newTask)
 		}
-		if err := taskWaitPause(budget, *policy.PollInterval); err != nil {
+		if err := taskWaitPause(budget, pacer.Next()); err != nil {
 			return result, wrap(err)
 		}
 	}

@@ -5,6 +5,9 @@ import (
 	"encoding/json"
 	"errors"
 	"time"
+
+	"github.com/JSYoo5B/go-openstacksdk/internal/pollschedule"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 var floatingIPCreateWaitDeadline = errors.New("SDK floating IP create wait deadline")
@@ -28,6 +31,11 @@ func (p *floatingIPQueryState) finishNeutronCreate(result *CreateFloatingIPResul
 		if interval == 0 {
 			interval = min(5*time.Second, policy.WaitTimeout)
 		}
+		strategy := resource.FixedWait(interval)
+		if policy.WaitStrategy != nil {
+			strategy = *policy.WaitStrategy
+		}
+		pacer := pollschedule.NewPacer(strategy.Delay)
 		var waitErr error
 		for {
 			if waitCtx.Err() != nil {
@@ -57,7 +65,7 @@ func (p *floatingIPQueryState) finishNeutronCreate(result *CreateFloatingIPResul
 					break
 				}
 			}
-			timer := time.NewTimer(interval)
+			timer := time.NewTimer(pacer.Next())
 			select {
 			case <-waitCtx.Done():
 				waitErr = errors.Join(waitCtx.Err(), context.Cause(waitCtx))

@@ -19,6 +19,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/image"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudvolume"
+	"github.com/JSYoo5B/go-openstacksdk/internal/pollschedule"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	objectapi "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -43,6 +44,7 @@ type CreateRequest struct {
 	Image        image.ImageRecordCreateRequest
 	VolumeID     string
 	PollInterval time.Duration
+	WaitStrategy *resource.WaitStrategy
 }
 
 // CreateResult mirrors the root CloudImageCreateResult field for field; V is
@@ -176,6 +178,14 @@ func Create[V any](ctx context.Context, deps Dependencies, createVolume CreateVo
 	if input.PollInterval < 0 {
 		return fail(nil, fmt.Errorf("%w: Cloud image create poll interval must not be negative", resource.ErrInvalidOption))
 	}
+	if input.WaitStrategy != nil {
+		if input.PollInterval != 0 {
+			return fail(nil, fmt.Errorf("%w: Cloud image create PollInterval and WaitStrategy are mutually exclusive", resource.ErrInvalidOption))
+		}
+		if err := input.WaitStrategy.Validate(); err != nil {
+			return fail(nil, err)
+		}
+	}
 	policy, err := image.PrepareImageRecordCreateOptions(ctx, options...)
 	if err != nil {
 		return fail(nil, err)
@@ -233,6 +243,11 @@ func Create[V any](ctx context.Context, deps Dependencies, createVolume CreateVo
 	if interval == 0 {
 		interval = 2 * time.Second
 	}
+	strategy := resource.FixedWait(interval)
+	if input.WaitStrategy != nil {
+		strategy = *input.WaitStrategy
+	}
+	pacer := pollschedule.NewPacer(strategy.Delay)
 	created := result.Image
 	deadline := time.Now().Add(timeout)
 	for {
@@ -254,7 +269,7 @@ func Create[V any](ctx context.Context, deps Dependencies, createVolume CreateVo
 				return result, nil
 			}
 		}
-		timer := time.NewTimer(interval)
+		timer := time.NewTimer(pacer.Next())
 		select {
 		case <-ctx.Done():
 			timer.Stop()
@@ -266,6 +281,9 @@ func Create[V any](ctx context.Context, deps Dependencies, createVolume CreateVo
 	cleanupOptions := []image.ImageRecordCloudDeleteOption{image.WithImageRecordCloudDeleteWait(true)}
 	if input.PollInterval != 0 {
 		cleanupOptions = append(cleanupOptions, image.WithImageRecordCloudDeletePollInterval(input.PollInterval))
+	}
+	if input.WaitStrategy != nil {
+		cleanupOptions = append(cleanupOptions, image.WithImageRecordCloudDeleteWaitStrategy(*input.WaitStrategy))
 	}
 	var cleanupErr error
 	result.Cleanup, cleanupErr = service.DeleteCloudImageRecord(ctx, id, cleanupOptions...)

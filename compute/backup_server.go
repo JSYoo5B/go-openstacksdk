@@ -12,6 +12,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/request"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 // BackupServerRequest contains the owned createBackup inputs. Nova validates
@@ -21,11 +22,15 @@ type BackupServerRequest = servers.BackupActionRequest
 // BackupServerOpts owns the optional Proxy wait controls. Timeout nil defaults
 // to 120 seconds here, rather than Cloud wait_for_image's standalone 3600.
 // ImageService is a concrete direct-client override; Connection binds it lazily.
+// WaitStrategy replaces the fixed poll interval with a resource.WaitStrategy (a
+// Go-only extension); with Wait set, both PollInterval and WaitStrategy, or an
+// invalid strategy, are rejected before HTTP.
 type BackupServerOpts struct {
 	Wait          bool
 	Timeout       *time.Duration
 	Unlimited     bool
 	PollInterval  *time.Duration
+	WaitStrategy  *resource.WaitStrategy
 	ActionOptions []servers.BackupActionOption
 	ImageService  *image.Service
 }
@@ -40,8 +45,25 @@ func WithBackupServerTimeout(value time.Duration) BackupServerOption {
 func WithBackupServerUnlimitedWait() BackupServerOption {
 	return func(c *BackupServerOpts) error { c.Timeout = nil; c.Unlimited = true; return nil }
 }
+
+// WithBackupServerPollInterval sets a fixed interval. It and
+// WithBackupServerWaitStrategy replace each other; the later one wins.
 func WithBackupServerPollInterval(value time.Duration) BackupServerOption {
-	return func(c *BackupServerOpts) error { owned := value; c.PollInterval = &owned; return nil }
+	return func(c *BackupServerOpts) error {
+		owned := value
+		c.PollInterval, c.WaitStrategy = &owned, nil
+		return nil
+	}
+}
+
+// WithBackupServerWaitStrategy replaces the fixed interval of the image wait
+// with value, a Go-only extension.
+func WithBackupServerWaitStrategy(value resource.WaitStrategy) BackupServerOption {
+	return func(c *BackupServerOpts) error {
+		owned := value
+		c.PollInterval, c.WaitStrategy = nil, &owned
+		return nil
+	}
 }
 func WithBackupServerActionOptions(values ...servers.BackupActionOption) BackupServerOption {
 	owned := slices.Clone(values)
@@ -62,6 +84,10 @@ func copyBackupServerOptions(value BackupServerOpts) BackupServerOpts {
 	if value.PollInterval != nil {
 		owned := *value.PollInterval
 		value.PollInterval = &owned
+	}
+	if value.WaitStrategy != nil {
+		owned := *value.WaitStrategy
+		value.WaitStrategy = &owned
 	}
 	value.ActionOptions = slices.Clone(value.ActionOptions)
 	return value
@@ -152,6 +178,14 @@ func (s *Service) BackupServer(ctx context.Context, serverID string, input Backu
 	if config.Wait && config.PollInterval != nil && *config.PollInterval <= 0 {
 		return fail(nil, invalid("backup poll interval must be positive"))
 	}
+	if config.Wait && config.WaitStrategy != nil {
+		if config.PollInterval != nil {
+			return fail(nil, invalid("backup PollInterval and WaitStrategy are mutually exclusive"))
+		}
+		if err := config.WaitStrategy.Validate(); err != nil {
+			return fail(nil, err)
+		}
+	}
 	selected := config.ImageService
 	var err error
 	if selected != nil {
@@ -199,6 +233,9 @@ func (s *Service) BackupServer(ctx context.Context, serverID string, input Backu
 	}
 	if config.PollInterval != nil {
 		waitOptions = append(waitOptions, image.WithImageRecordCloudWaitPollInterval(*config.PollInterval))
+	}
+	if config.WaitStrategy != nil {
+		waitOptions = append(waitOptions, image.WithImageRecordCloudWaitStrategy(*config.WaitStrategy))
 	}
 	result.Wait, err = selected.WaitForCloudImageRecord(opctx, result.Image, waitOptions...)
 	if result.Wait != nil && result.Wait.Last != nil {

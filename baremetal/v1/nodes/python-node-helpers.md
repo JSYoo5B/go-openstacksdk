@@ -45,6 +45,11 @@ change remains in effect remotely. `API.UnsetMaintenanceAndGet` sends
 `API.WaitForPowerState(ctx, id, expected, opts...)` reads the node immediately,
 then every `WithWaitInterval` (default two seconds), until `PowerState` equals
 `expected`, and returns the matching node. A read error ends the wait.
+`WithWaitStrategy` replaces the fixed interval with a `resource.WaitStrategy`
+(fixed, linear or exponential pauses with optional jitter), a Go-only
+extension; the later of the two options wins and an invalid strategy fails
+before the first read, also for `WaitForReservation` and the power and
+provision waits of `SetPowerState` and `SetProvisionState`.
 
 `API.WaitForReservation(ctx, snapshot, opts...)` mirrors the Python behavior of
 consulting only the object it is given: a snapshot without a `Reservation` is

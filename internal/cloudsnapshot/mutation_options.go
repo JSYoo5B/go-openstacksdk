@@ -12,8 +12,22 @@ import (
 // MutationWaitOptions keeps omission distinct from an explicit zero timeout.
 // Timeout nil means unlimited; a nonpositive explicit timeout permits no poll.
 // PollInterval nil selects two seconds. Interval is an SDK convenience option.
+// WaitStrategy replaces the fixed interval with a resource.WaitStrategy (a
+// Go-only extension); setting both PollInterval and WaitStrategy, or an
+// invalid strategy, is rejected before any request.
 type MutationWaitOptions struct {
 	Timeout, PollInterval *time.Duration
+	WaitStrategy          *resource.WaitStrategy
+}
+
+func (value MutationWaitOptions) validate() error {
+	if value.WaitStrategy == nil {
+		return nil
+	}
+	if value.PollInterval != nil {
+		return invalid("PollInterval and WaitStrategy are mutually exclusive")
+	}
+	return value.WaitStrategy.Validate()
 }
 
 // CreateAttributes supplies the four cloud-helper name/description aliases.
@@ -107,6 +121,7 @@ func PrepareDelete(ctx context.Context, options ...DeleteOption) (DeleteOptions,
 func cloneMutationWait(value MutationWaitOptions) MutationWaitOptions {
 	value.Timeout = clonePointer(value.Timeout)
 	value.PollInterval = clonePointer(value.PollInterval)
+	value.WaitStrategy = clonePointer(value.WaitStrategy)
 	return value
 }
 func cloneMutationFields(value map[string]json.RawMessage) map[string]json.RawMessage {

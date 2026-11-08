@@ -3,6 +3,7 @@ package compute
 import (
 	"time"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/pollschedule"
 	"github.com/JSYoo5B/go-openstacksdk/network"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
@@ -104,6 +105,7 @@ type automaticFloatingIPOptions struct {
 	addresses         []ServerAddressOption
 	ips               []network.EnsureFloatingIPOption
 	timeout, interval time.Duration
+	strategy          *resource.WaitStrategy
 	progressCallback  func(*Server) error
 	progress          chan<- *Server
 	pool              resource.Ref
@@ -177,14 +179,40 @@ func WithUnlimitedAutomaticIPTimeout() AutomaticFloatingIPOption {
 	return func(o *automaticFloatingIPOptions) error { o.timeout = 0; return nil }
 }
 
+// WithAutomaticIPPollInterval sets a fixed positive interval for the Nova
+// observation and deletion waits. It and WithAutomaticIPWaitStrategy replace
+// each other; the later one wins.
 func WithAutomaticIPPollInterval(interval time.Duration) AutomaticFloatingIPOption {
 	return func(o *automaticFloatingIPOptions) error {
 		if interval <= 0 {
 			return invalid("automatic IP poll interval must be positive")
 		}
-		o.interval = interval
+		o.interval, o.strategy = interval, nil
 		return nil
 	}
+}
+
+// WithAutomaticIPWaitStrategy replaces the fixed interval of the Nova
+// observation and deletion waits with strategy, a Go-only extension. Each
+// wait starts the strategy from its first pause. An invalid strategy fails
+// with resource.ErrInvalidOption before HTTP.
+func WithAutomaticIPWaitStrategy(strategy resource.WaitStrategy) AutomaticFloatingIPOption {
+	return func(o *automaticFloatingIPOptions) error {
+		if err := strategy.Validate(); err != nil {
+			return err
+		}
+		o.strategy = &strategy
+		return nil
+	}
+}
+
+// pacer numbers the pauses of one wait under the selected strategy, or the
+// given fixed interval.
+func (o automaticFloatingIPOptions) pacer(interval time.Duration) *pollschedule.Pacer {
+	if o.strategy != nil {
+		return pollschedule.NewPacer(o.strategy.Delay)
+	}
+	return pollschedule.NewPacer(resource.FixedWait(interval).Delay)
 }
 
 // WithAutomaticIPProgressCallback runs synchronously with an owned copy of a

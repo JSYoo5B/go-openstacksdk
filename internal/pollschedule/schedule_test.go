@@ -1,6 +1,7 @@
 package pollschedule
 
 import (
+	"math"
 	"math/rand/v2"
 	"testing"
 	"time"
@@ -85,5 +86,38 @@ func TestCenteredJitterKeepsTheMean(t *testing.T) {
 	}
 	if mean := sum / n; mean < 9900*time.Millisecond || mean > 10100*time.Millisecond {
 		t.Fatalf("centered jitter mean = %v, want about 10s", mean)
+	}
+}
+
+func TestProblem(t *testing.T) {
+	s := time.Second
+	bad := []Schedule{
+		Fixed(0), Linear(s, -s, 0), Linear(2*s, s, s), Exponential(s, 0.9, 0),
+		Exponential(s, math.NaN(), 0), Exponential(s, math.Inf(1), 0), Exponential(2*s, 2, s),
+		Fixed(s).WithJitter(Jitter(9)), {Initial: s, kind: kind(7)},
+	}
+	for _, sch := range bad {
+		if sch.Problem() == "" {
+			t.Errorf("%+v accepted", sch)
+		}
+	}
+	good := []Schedule{Fixed(s), Linear(s, 0, 0), Linear(s, s, s), Exponential(s, 1, 0), Exponential(s, 2, 10*s).WithJitter(FullJitter)}
+	for _, sch := range good {
+		if p := sch.Problem(); p != "" {
+			t.Errorf("%+v: %s", sch, p)
+		}
+	}
+}
+
+func TestPacerNumbersPausesFromOne(t *testing.T) {
+	var got []int
+	p := NewPacer(func(n int) time.Duration { got = append(got, n); return time.Duration(n) })
+	for want := 1; want <= 3; want++ {
+		if d := p.Next(); d != time.Duration(want) {
+			t.Fatalf("Next() = %v, want %v", d, want)
+		}
+	}
+	if len(got) != 3 || got[0] != 1 || got[2] != 3 {
+		t.Fatal(got)
 	}
 }

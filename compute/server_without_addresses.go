@@ -111,6 +111,7 @@ func (state *automaticIPState) deleteServer(ctx context.Context, wait bool) *Ser
 	if interval <= 0 {
 		interval = 2 * time.Second
 	}
+	pacer := state.options.pacer(interval)
 	for {
 		response, err := rest.DoJSONGuarded(ctx, client, state.check, http.MethodGet, target, nil, nil, 200, 203, 404)
 		if err != nil {
@@ -121,7 +122,7 @@ func (state *automaticIPState) deleteServer(ctx context.Context, wait bool) *Ser
 			deletion.Waited = true
 			return deletion
 		}
-		timer := time.NewTimer(interval)
+		timer := time.NewTimer(pacer.Next())
 		select {
 		case <-ctx.Done():
 			timer.Stop()

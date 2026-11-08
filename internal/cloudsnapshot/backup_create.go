@@ -20,6 +20,9 @@ func CreateBackup(ctx context.Context, client *gophercloud.ServiceClient, volume
 		return nil, wrapRead(ctx, backupReadSchema(), "CreateVolumeBackup", err)
 	}
 	policy, err := prepare(ctx, options, cloneBackupCreate, func() error { return p.source.Guard(ctx) })
+	if err == nil {
+		err = policy.WaitPolicy.validate()
+	}
 	if err != nil {
 		return nil, wrapRead(ctx, backupReadSchema(), "CreateVolumeBackup", err)
 	}

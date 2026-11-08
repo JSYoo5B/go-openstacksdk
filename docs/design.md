@@ -34,6 +34,10 @@ Successful service construction is cached under synchronization. Services share 
 
 Returned values are not an automatic persistence cache. Owned metadata preserves raw fields, null/omission, exact numbers, headers, and status as specified by the operation. Accepted response read/decode errors retain partial data and causes in `resource.ResponseError`. An ambiguous mutation result must not trigger automatic replay or rollback. A create can return a resource and a later wait error together; cancellation does not undo remote execution.
 
+### Wait strategies
+
+Every wait that exposes a poll interval option also accepts a per-call `resource.WaitStrategy` through a `...WaitStrategy` option or a `WaitStrategy` field next to the interval field: `resource.FixedWait`, `resource.LinearWait` or `resource.ExponentialWait`, each with optional `NoJitter`, `EqualJitter`, `FullJitter` or `CenteredJitter`. This is a Go-only extension; Python openstacksdk waits use a fixed interval. Without a strategy each wait keeps its documented fixed interval, so default timing and Python compatibility are unchanged. An interval option is equivalent to `FixedWait` with that interval and the later of the two options wins; setting both fields in one options struct, or passing an invalid or zero-value strategy, fails with `resource.ErrInvalidOption` before any request. A strategy changes only the pauses: timeouts, deadlines and cancellation keep their rules, and a pause still ends when the context ends. Waits whose interval is fixed and not configurable today do not take a strategy. The simulated comparison behind the defaults and trade-offs runs with `go test -run '^$' -bench PollSchedule -benchtime 1x ./internal/pollschedule`.
+
 ## SDK-owned APIs
 
 Senlin, Masakari, and other additions use internal transport helpers while declaring their own routes, envelopes, statuses, identifiers, and microversion gates. A common transport implementation does not establish completion of each service operation. Track support in the [ledger](sdk-support-ledger.md) and operation-specific guides.

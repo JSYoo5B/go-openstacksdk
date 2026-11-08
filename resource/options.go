@@ -119,6 +119,7 @@ func WithMissingError() LookupOption {
 
 type waitOptions struct {
 	timeout, interval time.Duration
+	strategy          WaitStrategy
 	failureStates     []string
 	failureStatesSet  bool
 	statusAttribute   string
@@ -205,12 +206,29 @@ func WithProgress(progress chan<- int) WaitOption {
 	}
 }
 
+// WithPollInterval pauses for interval before every poll. It is equivalent
+// to WithWaitStrategy(FixedWait(interval)); the later of the two wins.
 func WithPollInterval(interval time.Duration) WaitOption {
 	return func(o *waitOptions) error {
 		if interval <= 0 {
 			return invalid("poll interval must be positive")
 		}
 		o.interval = interval
+		o.strategy = WaitStrategy{}
+		return nil
+	}
+}
+
+// WithWaitStrategy chooses the pause before each poll for this call. Without
+// it the wait keeps its fixed interval. An invalid strategy fails with
+// ErrInvalidOption before any request. WithWaitStrategy and WithPollInterval
+// replace each other; the later one wins.
+func WithWaitStrategy(strategy WaitStrategy) WaitOption {
+	return func(o *waitOptions) error {
+		if err := strategy.Validate(); err != nil {
+			return err
+		}
+		o.strategy = strategy
 		return nil
 	}
 }

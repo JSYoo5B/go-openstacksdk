@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/ironicwire"
+	"github.com/JSYoo5B/go-openstacksdk/internal/pollschedule"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
@@ -107,15 +108,29 @@ type WaitOption func(*waitConfig)
 
 type waitConfig struct {
 	interval time.Duration
+	strategy *resource.WaitStrategy
+	err      error
 	ignore   bool
 }
 
 // WithWaitInterval sets the pause between reads (default two seconds).
+// Non-positive values are ignored. A positive interval and WithWaitStrategy
+// replace each other; the later one wins.
 func WithWaitInterval(d time.Duration) WaitOption {
 	return func(c *waitConfig) {
 		if d > 0 {
-			c.interval = d
+			c.interval, c.strategy, c.err = d, nil, nil
 		}
+	}
+}
+
+// WithWaitStrategy replaces the fixed pause between reads with strategy, a
+// Go-only extension. An invalid strategy makes WaitForActive fail with
+// resource.ErrInvalidOption before the first read, unless a later
+// WithWaitInterval or WithWaitStrategy replaces it.
+func WithWaitStrategy(strategy resource.WaitStrategy) WaitOption {
+	return func(c *waitConfig) {
+		c.strategy, c.err = &strategy, strategy.Validate()
 	}
 }
 
@@ -135,6 +150,14 @@ func (a *API) WaitForActive(ctx context.Context, id string, options ...WaitOptio
 			o(&cfg)
 		}
 	}
+	if cfg.err != nil {
+		return nil, request.Wrap("WaitForActive", "allocations", cfg.err)
+	}
+	strategy := resource.FixedWait(cfg.interval)
+	if cfg.strategy != nil {
+		strategy = *cfg.strategy
+	}
+	pacer := pollschedule.NewPacer(strategy.Delay)
 	for {
 		value, err := a.Get(ctx, id)
 		if err != nil {
@@ -146,7 +169,7 @@ func (a *API) WaitForActive(ctx context.Context, id string, options ...WaitOptio
 		if value.State != "allocating" {
 			return value, nil
 		}
-		timer := time.NewTimer(cfg.interval)
+		timer := time.NewTimer(pacer.Next())
 		select {
 		case <-ctx.Done():
 			timer.Stop()

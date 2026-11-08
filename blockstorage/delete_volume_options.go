@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"time"
+
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 // DeleteVolumeWaitOpts defaults to unlimited waiting and two-second polling.
@@ -11,8 +13,12 @@ import (
 // ProgressCallback receives zero after nonterminal observations; a nonnil
 // Progress is then sent zero with the AttachVolumeWaitOpts rules. Deletion has
 // no failure-state policy: error and error_deleting may still become absent.
+// WaitStrategy replaces the fixed interval with a resource.WaitStrategy (a
+// Go-only extension); setting both PollInterval and WaitStrategy is rejected
+// before any request.
 type DeleteVolumeWaitOpts struct {
 	Timeout, PollInterval *time.Duration
+	WaitStrategy          *resource.WaitStrategy
 	ProgressCallback      func(int) error
 	Progress              chan<- int
 }
@@ -31,6 +37,7 @@ type DeleteVolumeOption func(*DeleteVolumeOpts) error
 func copyDeleteVolumeWait(value DeleteVolumeWaitOpts) DeleteVolumeWaitOpts {
 	value.Timeout = copyAttachPointer(value.Timeout)
 	value.PollInterval = copyAttachPointer(value.PollInterval)
+	value.WaitStrategy = copyAttachPointer(value.WaitStrategy)
 	return value
 }
 func copyDeleteVolumeOptions(value DeleteVolumeOpts) DeleteVolumeOpts {
@@ -66,6 +73,7 @@ type preparedDeleteVolumeOptions struct {
 	policy            DeleteVolumeOpts
 	wait              bool
 	interval, timeout time.Duration
+	strategy          resource.WaitStrategy
 }
 
 func applyDeleteVolumeOptions(options []DeleteVolumeOption, guard func() error) (preparedDeleteVolumeOptions, error) {
@@ -92,6 +100,9 @@ func applyDeleteVolumeOptions(options []DeleteVolumeOption, guard func() error) 
 	if w.PollInterval != nil && *w.PollInterval <= 0 {
 		return preparedDeleteVolumeOptions{}, attachInvalid("volume deletion wait interval must be positive")
 	}
+	if err := validateWaitStrategyField(w.PollInterval, w.WaitStrategy); err != nil {
+		return preparedDeleteVolumeOptions{}, err
+	}
 	prepared := preparedDeleteVolumeOptions{policy: config, wait: true, interval: 2 * time.Second}
 	if config.Wait != nil {
 		prepared.wait = *config.Wait
@@ -102,6 +113,7 @@ func applyDeleteVolumeOptions(options []DeleteVolumeOption, guard func() error) 
 	if w.PollInterval != nil {
 		prepared.interval = *w.PollInterval
 	}
+	prepared.strategy = selectWaitStrategy(prepared.interval, w.WaitStrategy)
 	return prepared, guard()
 }
 
@@ -119,6 +131,6 @@ func PrepareDeleteVolumeOptions(ctx context.Context, options ...DeleteVolumeOpti
 	policy := copyDeleteVolumeOptions(prepared.policy)
 	policy.Wait = copyAttachPointer(&prepared.wait)
 	policy.WaitPolicy.Timeout = copyAttachPointer(&prepared.timeout)
-	policy.WaitPolicy.PollInterval = copyAttachPointer(&prepared.interval)
+	policy.WaitPolicy.PollInterval, policy.WaitPolicy.WaitStrategy = preparedWaitTiming(prepared.interval, prepared.policy.WaitPolicy.WaitStrategy)
 	return policy, nil
 }

@@ -143,6 +143,8 @@ Go API:
   Tests: `image/image_record_create_workflow_test.go:TestImageRecordCreateWorkflowIsPublicWarningBelongsToSelectedUploadOnly`, `image/image_record_create_upload_test.go:TestImageRecordCreateUploadImportMethodSpecificForwardingAndNoBinaryRead`, `image/image_record_create_upload_test.go:TestImageRecordCreateUploadNativeFailuresAndCleanMissingCleanupPreserveOriginalEvidence`, `image/image_record_create_task_test.go:TestImageRecordCreateTaskNativeRejectionsPreserveStatusWithoutResourceFailure`, `image/image_record_create_admin_test.go:TestImageRecordCreateWholeForwardsOwnerAndVisibilityToServerPolicy`, `image/image_record_create_admin_test.go:TestImageRecordCreateWholeNativeAdminDenialKeepsBranchCleanupBoundary`.
 - Preserve all12 legacy CreateAndImport contract objects/test refs and its explicit fresh-image/queued/post-stage/default/wait/no-cleanup profile; add the complete modern whole Service and Connection creation graph separately. Public whole-project/service guides and executable standalone/Connection examples must cover all modern routes and explicit differences. Promotion is allowed only after actual focused/full checks, generator zero drift, local/remote consumers and Source/contract/test inventories are verified; global SDK-R1/C1/S1 and standalone Swift/Task rows remain unresolved.
   Tests: `connectiontest/image_record_create_integration_test.go:TestConnectionOwnedImageCreateComposesPolicyAndKeepsSwiftLazy`, `connectiontest/image_record_create_integration_test.go:TestConnectionOwnedImageCreateRejectsInvalidInvocation`, `internal/cmd/sdkgen/glance_create_import_test.go:TestGlanceCreateImportKeepsNativeImageAPIAndDocumentsUpperService`, `internal/cmd/sdkgen/glance_create_import_test.go:TestGlanceCreateImportRejectsNativeMetadataAndResponseFieldDrift`.
+- CreateImportWaitOpts.WaitStrategy rejects an invalid or zero-value strategy, or one set together with the interval field, with ErrInvalidOption before HTTP and paces polls by the strategy's pause sequence.
+  Tests: `image/wait_strategy_test.go:TestImageWaitStrategyOptionsRejectedBeforeHTTP`.
 
 Python/Go differences:
 
@@ -166,6 +168,7 @@ Python/Go differences:
 - Captured provider/origin/base/type/microversion and source-only nested guards preserve current operation. Full Adapter caching/conditional GET/invalidation/metrics/global request configuration remain SDK-C1; arbitrary session/adapter/response/microversion/base-path injection remains SDK-S1. The global shared objectives and standalone Swift/Task declaration rows are not promoted by this finite modern operation.
 - Request-owned Task/HTTP timer expiry does not invalidate live parent-source invariants; caller cancellation or real binding/source drift, including joined timeout errors, stays sticky and cannot be bypassed by detached cleanup. Ordinary response closure can cancel native request timers without manufacturing failed Swift uploads.
 - The modern import phase reuses the owned ImportImageRecord policy: configured legacy store headers are discarded from the copied request client, then an explicit singular selection supplies its fixed header. Source/shared header maps stay unchanged.
+- Python waits use a fixed poll interval. CreateImportWaitOpts.WaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and setting it together with the interval field fails with ErrInvalidOption before HTTP.
 
 ### `python:cloud/_image/ImageCloudMixin/create_image`
 
@@ -185,11 +188,14 @@ Go API:
   Tests: `connectiontest/connection_cloud_image_create_test.go:TestConnectionCloudImageCreateBranchesAndWait`.
 - Truthy non-string volume formats, non-numeric timeouts with wait, nil options and negative poll intervals fail before HTTP.
   Tests: `connectiontest/connection_cloud_image_create_test.go:TestConnectionCloudImageCreateVolumeBodyAndPreflight`.
+- CloudImageCreateRequest.WaitStrategy rejects an invalid or zero-value strategy, or one set together with the interval field, with ErrInvalidOption before HTTP and paces polls by the strategy's pause sequence.
+  Tests: `connectiontest/connection_cloud_image_wait_strategy_test.go:TestConnectionCloudImageCreateWaitStrategy`.
 
 Python/Go differences:
 
 - Python returns an Image or None and raises ResourceTimeout or the cleanup exception; Go returns CloudImageCreateResult with Created, Volume, wait and Cleanup evidence and joins the timeout with any cleanup failure.
 - Python keyword arguments become the concrete ImageRecordCreateOption values; the volume is a literal VolumeID and PollInterval is a Go extension for the Cloud wait and its cleanup.
+- Python waits use a fixed poll interval. CloudImageCreateRequest.WaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and setting it together with the interval field fails with ErrInvalidOption before HTTP.
 
 ## Usage examples
 

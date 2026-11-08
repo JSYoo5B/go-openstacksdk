@@ -25,7 +25,9 @@ options last.
   an exact case-insensitive `ERROR` (Cinder: `error`), poll every two seconds
   and have no SDK timeout. `resource.WithFailureStates`,
   `resource.WithPollInterval`, `resource.WithTimeout` and
-  `resource.WithUnlimitedWait` replace these defaults.
+  `resource.WithUnlimitedWait` replace these defaults; the Go-only
+  `resource.WithWaitStrategy` replaces the fixed interval with growing or
+  jittered pauses (see [design](design.md#wait-strategies)).
 - The Neutron, Keystone, Placement and Inspector functions select the model's
   exported string `status` attribute when the model declares one. A model
   without it fails with `resource.ErrUnsupported` before any HTTP request,

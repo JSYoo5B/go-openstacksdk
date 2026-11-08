@@ -12,8 +12,10 @@ import (
 	"time"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
+	"github.com/JSYoo5B/go-openstacksdk/internal/pollschedule"
 	"github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks"
 	"github.com/JSYoo5B/go-openstacksdk/request"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -170,8 +172,9 @@ func stopStatus(action, status string) bool {
 // returns the terminal status (action_COMPLETE or action_FAILED); reaching a
 // failed status is not an error, exactly as in Python. There is no overall
 // timeout: ctx bounds the loop.
-func pollForEvents(ctx context.Context, client *gophercloud.ServiceClient, stackName, action string, marker json.RawMessage, interval time.Duration) (string, error) {
+func pollForEvents(ctx context.Context, client *gophercloud.ServiceClient, stackName, action string, marker json.RawMessage, strategy resource.WaitStrategy) (string, error) {
 	noEventPolls := 0
+	pacer := pollschedule.NewPacer(strategy.Delay)
 	for {
 		query, err := markerQuery(marker)
 		if err != nil {
@@ -218,7 +221,7 @@ func pollForEvents(ctx context.Context, client *gophercloud.ServiceClient, stack
 				noEventPolls = 0
 			}
 		}
-		if err := sleep(ctx, interval); err != nil {
+		if err := sleep(ctx, pacer.Next()); err != nil {
 			return "", err
 		}
 	}

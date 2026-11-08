@@ -355,6 +355,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.Collection.WaitDeleted`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithTimeout`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithPollInterval`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithWaitStrategy`
 
 - Stack deletion wait succeeds on HTTP 404 or DELETE_COMPLETE, rejects DELETE_FAILED and preserves 403 as an HTTP error.
   Tests: `api/heat_stacks_contracts_test.go:TestHeatStackScopeDeletionWaitRecognizesCompletionFailureAndHTTP`.
@@ -364,12 +365,15 @@ Go API:
   Tests: `resource/wait_attributes_test.go:TestWaitDeletedProgressStopsAtDeletedStatusOr404`, `resource/wait_attributes_test.go:TestWaitDeletedNilSuccessfulFetchIsTerminalWithoutCallback`, `resource/wait_attributes_test.go:TestWaitProgressCallbackCancellationStopsFurtherGETs`, `resource/wait_policy_test.go:TestWaitUnlimitedAndBoundedOptionsPreserveParentContext`.
 - Transient DELETE_IN_PROGRESS responses are polled until DELETE_COMPLETE, nonterminal responses report zero progress and the terminal one reports none; ADOPT_COMPLETE is not inferred as deletion and a bounded wait ends with context.DeadlineExceeded.
   Tests: `api/py_heat_senlin_stacks_test.go:TestPyHeatSenlinStackWaitDeletedTransientAdoptAndCallback`.
+- resource.WithWaitStrategy rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, the interval option given before or after it.
+  Tests: `resource/wait_strategy_test.go:TestWaitStrategyValidation`, `resource/wait_strategy_test.go:TestWaitStrategyAndPollIntervalLaterWins`, `resource/wait_strategy_test.go:TestWaitStrategyRejectedBeforeLookupAndPacesPolls`, `resource/wait_strategy_test.go:TestWaitStrategyPauseStillEndsAtCancellation`.
 
 Python/Go differences:
 
 - Go deletion wait returns error, uses a five-minute default and treats 404 or DELETE_COMPLETE as completion while ADOPT_COMPLETE is not inferred as deletion. Python returns the Resource and its Stack.fetch treats both complete states as NotFound.
 - Python wait_for_delete returns the original Resource, defaults to a 120 second wait and treats a NotFound from Stack.fetch (404, DELETE_COMPLETE or ADOPT_COMPLETE) or a status equal to deleted as completion; Go StackScope.WaitDeleted returns only an error, defaults to the shared five-minute policy and recognizes HTTP 404 and DELETE_COMPLETE but not ADOPT_COMPLETE.
 - Go returns ErrFailedState immediately for DELETE_FAILED, while Python keeps polling until its timeout.
+- Python waits use a fixed poll interval. resource.WithWaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of the interval and strategy options wins.
 
 ### `python:orchestration/v1/wait_for_status`
 
@@ -382,6 +386,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.Collection.Wait`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithTimeout`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithPollInterval`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithWaitStrategy`
 
 - Stack polling keeps the fixed name/ID, returns detailed CREATE_COMPLETE and terminates on CREATE_FAILED, UPDATE_FAILED or ROLLBACK_FAILED after exactly two requests.
   Tests: `api/heat_stacks_contracts_test.go:TestHeatStackScopeWaitUsesFixedPairAndDetectsFailedStates`.
@@ -391,6 +396,8 @@ Go API:
   Tests: `resource/wait_policy_test.go:TestWaitFailurePolicyReplacementAndTargetPrecedence`, `resource/wait_policy_test.go:TestWaitUnlimitedAndBoundedOptionsPreserveParentContext`, `resource/wait_attributes_test.go:TestWaitStatusAttributeSelectsNativeNodeFields`, `resource/wait_attributes_test.go:TestWaitProgressIncludesEachNonterminalNativeServerResponse`, `resource/wait_attributes_test.go:TestWaitProgressCallbackCancellationStopsFurtherGETs`.
 - Transient responses are polled until the target, callbacks receive 0 for every nonterminal response (Stack has no progress field), bounded waits end with context.DeadlineExceeded, WithFailureStates("ERROR") replaces the *_FAILED default so a CREATE_FAILED stack keeps polling, WithStatusAttribute waits on another string field and parent cancellation stops an unlimited wait in flight.
   Tests: `api/py_heat_senlin_stacks_test.go:TestPyHeatSenlinStackWaitTransientTimeoutCustomPolicyAndCancellation`.
+- resource.WithWaitStrategy rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, the interval option given before or after it.
+  Tests: `resource/wait_strategy_test.go:TestWaitStrategyValidation`, `resource/wait_strategy_test.go:TestWaitStrategyAndPollIntervalLaterWins`, `resource/wait_strategy_test.go:TestWaitStrategyRejectedBeforeLookupAndPacesPolls`, `resource/wait_strategy_test.go:TestWaitStrategyPauseStillEndsAtCancellation`.
 
 Python/Go differences:
 
@@ -399,6 +406,7 @@ Python/Go differences:
 - Python default failures are only ERROR, so a stack in CREATE_FAILED is polled until the timeout (forever when wait=None); the Go default also stops on any *_FAILED state and on ERROR, and WithFailureStates reproduces the Python list.
 - Python fetches with Stack.fetch, which raises NotFound for DELETE_COMPLETE and ADOPT_COMPLETE, so waiting for those targets raises instead of matching; Go returns the status as data.
 - Python raises ResourceTimeout and ResourceFailure and returns the updated mutable Resource; Go returns a StackResource and context/ErrFailedState errors. Attribute names are Go JSON tags or field names of the typed model, not Python descriptor names.
+- Python waits use a fixed poll interval. resource.WithWaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of the interval and strategy options wins.
 
 ## Usage examples
 

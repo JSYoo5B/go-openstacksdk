@@ -583,6 +583,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithAutomaticIPTimeout`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithUnlimitedAutomaticIPTimeout`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithAutomaticIPPollInterval`
+- `github.com/JSYoo5B/go-openstacksdk/compute.WithAutomaticIPWaitStrategy`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithAutomaticIPProgressCallback`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithAutomaticIPProgress`
 - `github.com/JSYoo5B/go-openstacksdk/network.FloatingIPs.NewPlanner`
@@ -738,6 +739,9 @@ Go API:
 
 - WithAutomaticIPProgress sends an owned copy of each unconverged raw Server on a caller-owned channel, so receiver edits do not alter the result. Each send blocks until it is received or the context ends; the SDK never closes the caller-owned channel and sends nothing after the operation returns, a context that ends during a send stops it through its cancellation path, and a nil channel option is invalid before HTTP. With WithAutomaticIPProgressCallback also set the callback runs first; its error stops before another request and nothing is sent for that step.
   Tests: `compute/server_automatic_ip_progress_channel_test.go:TestAutomaticIPProgressChannelSendsOwnedCopiesAndRejectsNil`, `compute/server_automatic_ip_progress_channel_test.go:TestAutomaticIPProgressChannelBlockedSendStopsOnCancellation`, `compute/server_automatic_ip_progress_channel_test.go:TestAutomaticIPProgressChannelReceiverCancellation`, `compute/server_automatic_ip_progress_channel_test.go:TestAutomaticIPProgressCallbackRunsBeforeChannelSend`.
+- compute.WithAutomaticIPWaitStrategy rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, the interval option given before or after it.
+  Tests: `compute/wait_strategy_test.go:TestComputeWaitStrategyOptionsRejectedBeforeHTTP`, `compute/wait_strategy_internal_test.go:TestAutomaticIPWaitStrategySelectsPauses`.
+
 Python/Go differences:
 
 - The pinned public add_ips_to_server returns mutable Server Resource and dispatches pool > truthy ips > auto/needs. Independent typed Service/Connection AddIPsToServer now provides bounded Neutron and legacy Nova selected modes with async/whole60second defaults and structured Decision/Attempts/Server/Observed plus separate Neutron Assignment or NovaAssignment. Existing Plan/Ensure/ready/create keep their distinct default/readiness policies; Nova Plan is diagnostic and independent execution replans.
@@ -756,6 +760,7 @@ Python/Go differences:
 - One context deadline bounds polling and the IP stage, where Python passes timeout - int(elapsed) to the IP stage and can allow up to about one more second.
 - Evidence is local HTTP fixtures and pinned-source comparison; authenticated deployment acceptance is a separate evidence class shared by every operation (see docs/sdk-support-ledger.md).
 - The pool and automatic lanes of AddIPsToServer deliberately keep the idempotent Ensure path: a server that already has a matching floating IP keeps it and no further IP is allocated or attached. Python's _add_ip_from_pool reuses the first unattached IP of the pool without looking at the server, re-reads the server after a new allocation and falls back to the Nova pool on a Neutron NotFound; its _add_auto_ip skips the attach after a Neutron allocation, falls back to Nova and deletes the IP it created when the wait times out. Those Python lanes are provided as AddIPFromPool and AddAutoIP (python:cloud/_network_common/NetworkCommonCloudMixin/add_auto_ip), which callers use when they need Python's behavior.
+- Python waits use a fixed poll interval. compute.WithAutomaticIPWaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of the interval and strategy options wins.
 
 ### `python:cloud/_compute/ComputeCloudMixin/get_active_server`
 

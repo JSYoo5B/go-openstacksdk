@@ -32,6 +32,9 @@ func DeleteBackup(ctx context.Context, client *gophercloud.ServiceClient, nameOr
 	}
 	policy, err := prepare(ctx, options, cloneBackupDelete, func() error { return p.source.Guard(ctx) })
 	if err == nil {
+		err = policy.WaitPolicy.validate()
+	}
+	if err == nil {
 		err = p.ownLocation(ctx, policy.Location)
 	}
 	if err != nil {

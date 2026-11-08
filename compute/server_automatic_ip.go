@@ -579,6 +579,7 @@ func cleanFloatingIPAbsence(err error) *network.FloatingIPPlanUnavailableError {
 }
 
 func (state *automaticIPState) observe(ctx context.Context, target string) error {
+	pacer := state.options.pacer(state.options.interval)
 	for {
 		view, err := state.rawServer(ctx)
 		if err != nil {
@@ -614,7 +615,7 @@ func (state *automaticIPState) observe(ctx context.Context, target string) error
 		if err := state.check(ctx); err != nil {
 			return err
 		}
-		timer := time.NewTimer(state.options.interval)
+		timer := time.NewTimer(pacer.Next())
 		select {
 		case <-ctx.Done():
 			timer.Stop()

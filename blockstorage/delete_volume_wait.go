@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/pollschedule"
 	"github.com/JSYoo5B/go-openstacksdk/internal/progress"
 )
 
@@ -17,6 +18,7 @@ func (p *preparedDeleteVolume) wait(ctx context.Context, result *DeleteVolumeRes
 		waitCtx, cancel = context.WithTimeout(ctx, p.options.timeout)
 		defer cancel()
 	}
+	pacer := pollschedule.NewPacer(p.options.strategy.Delay)
 	for {
 		// The timeout starts after lookup and mutation. Its first observation
 		// is an immediate fresh GET of the already fixed canonical volume ID.
@@ -84,7 +86,7 @@ func (p *preparedDeleteVolume) wait(ctx context.Context, result *DeleteVolumeRes
 		if err := p.guard(waitCtx); err != nil {
 			return response.Fail(err)
 		}
-		timer := time.NewTimer(p.options.interval)
+		timer := time.NewTimer(pacer.Next())
 		select {
 		case <-waitCtx.Done():
 			timer.Stop()

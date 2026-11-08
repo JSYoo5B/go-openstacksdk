@@ -32,6 +32,8 @@ type machineConfig struct {
 	unlimited  bool
 	lock       *time.Duration
 	interval   time.Duration
+	strategy   *resource.WaitStrategy
+	err        error
 	configDriv string
 	state      string
 }
@@ -55,9 +57,18 @@ func WithMachineLockTimeout(d time.Duration) MachineOption {
 	return func(c *machineConfig) { c.lock = &d }
 }
 
-// WithMachineWaitInterval sets the polling pause (default two seconds).
+// WithMachineWaitInterval sets the polling pause (default two seconds). It and
+// WithMachineWaitStrategy replace each other; the later one wins.
 func WithMachineWaitInterval(d time.Duration) MachineOption {
-	return func(c *machineConfig) { c.interval = d }
+	return func(c *machineConfig) { c.interval, c.strategy, c.err = d, nil, nil }
+}
+
+// WithMachineWaitStrategy replaces the fixed polling pause of the
+// provision-state and reservation-lock waits with strategy, a Go-only
+// extension. Each wait starts the strategy from its first pause. An invalid
+// strategy fails with resource.ErrInvalidOption before any request.
+func WithMachineWaitStrategy(strategy resource.WaitStrategy) MachineOption {
+	return func(c *machineConfig) { c.interval, c.strategy, c.err = 0, &strategy, strategy.Validate() }
 }
 
 // WithMachineConfigDrive sends a config drive string as the provisioning
@@ -94,8 +105,22 @@ func (c machineConfig) bound(ctx context.Context, def time.Duration) (context.Co
 }
 
 func (c machineConfig) waitOptions() []nodes.ProvisionWaitOption {
+	if c.strategy != nil {
+		return []nodes.ProvisionWaitOption{nodes.WithProvisionWaitStrategy(*c.strategy)}
+	}
 	if c.interval > 0 {
 		return []nodes.ProvisionWaitOption{nodes.WithProvisionWaitInterval(c.interval)}
+	}
+	return nil
+}
+
+// lockWaitOptions applies the selected pause to a reservation-lock wait.
+func (c machineConfig) lockWaitOptions() []nodes.WaitOption {
+	if c.strategy != nil {
+		return []nodes.WaitOption{nodes.WithWaitStrategy(*c.strategy)}
+	}
+	if c.interval > 0 {
+		return []nodes.WaitOption{nodes.WithWaitInterval(c.interval)}
 	}
 	return nil
 }
@@ -125,6 +150,9 @@ func (s *Service) NodeSetProvisionState(ctx context.Context, nameOrID, state str
 		return nil, err
 	}
 	c := newMachineConfig(options)
+	if c.err != nil {
+		return nil, request.Wrap("NodeSetProvisionState", "machines", c.err)
+	}
 	node, err := c.provision(ctx, s, nameOrID, state, time.Hour, c.configDriv)
 	return node, request.Wrap("NodeSetProvisionState", "machines", err)
 }
@@ -136,6 +164,9 @@ func (s *Service) ActivateNode(ctx context.Context, uuid string, options ...Mach
 		return err
 	}
 	c := newMachineConfig(options)
+	if c.err != nil {
+		return request.Wrap("ActivateNode", "machines", c.err)
+	}
 	_, err := c.provision(ctx, s, uuid, "active", 1200*time.Second, c.configDriv)
 	return request.Wrap("ActivateNode", "machines", err)
 }
@@ -147,6 +178,9 @@ func (s *Service) DeactivateNode(ctx context.Context, uuid string, options ...Ma
 		return err
 	}
 	c := newMachineConfig(options)
+	if c.err != nil {
+		return request.Wrap("DeactivateNode", "machines", c.err)
+	}
 	_, err := c.provision(ctx, s, uuid, "deleted", 1200*time.Second, "")
 	return request.Wrap("DeactivateNode", "machines", err)
 }
@@ -169,6 +203,9 @@ func (s *Service) InspectMachine(ctx context.Context, nameOrID string, options .
 	c := newMachineConfig(options)
 	c.wait = true
 	fail := func(err error) (*nodes.Node, error) { return nil, request.Wrap("InspectMachine", "machines", err) }
+	if c.err != nil {
+		return fail(c.err)
+	}
 	node, err := s.Nodes.Get(ctx, nameOrID)
 	if err != nil {
 		return fail(err)
@@ -235,6 +272,9 @@ func NICAddresses(addresses ...string) []ports.CreateOpts {
 func (s *Service) RegisterMachine(ctx context.Context, node nodes.CreateOpts, nics []ports.CreateOpts, options ...MachineOption) (*nodes.Node, error) {
 	const op = "RegisterMachine"
 	c := newMachineConfig(options)
+	if c.err != nil {
+		return nil, request.Wrap(op, "machines", c.err)
+	}
 	state := c.state
 	if state == "" {
 		state = "available"
@@ -277,10 +317,7 @@ func (s *Service) RegisterMachine(ctx context.Context, node nodes.CreateOpts, ni
 			return fail(err)
 		}
 		lockCtx, cancel := context.WithTimeout(ctx, durationOr(c.lock, 600*time.Second))
-		var wopts []nodes.WaitOption
-		if c.interval > 0 {
-			wopts = append(wopts, nodes.WithWaitInterval(c.interval))
-		}
+		wopts := c.lockWaitOptions()
 		machine, err = s.Nodes.WaitForReservation(lockCtx, machine, wopts...)
 		cancel()
 		if err != nil {
@@ -330,6 +367,9 @@ func (s *Service) UnregisterMachine(ctx context.Context, addresses []string, uui
 		return err
 	}
 	c := newMachineConfig(options)
+	if c.err != nil {
+		return request.Wrap(op, "machines", c.err)
+	}
 	rec, err := s.GetMachine(ctx, uuid)
 	if err != nil {
 		return request.Wrap(op, "machines", err)
@@ -343,10 +383,7 @@ func (s *Service) UnregisterMachine(ctx context.Context, addresses []string, uui
 	}
 	snapshot := &nodes.Node{UUID: recordString(rec, "id"), Reservation: recordString(rec, "reservation")}
 	lockCtx, cancel := context.WithTimeout(ctx, durationOr(c.lock, 600*time.Second))
-	var wopts []nodes.WaitOption
-	if c.interval > 0 {
-		wopts = append(wopts, nodes.WithWaitInterval(c.interval))
-	}
+	wopts := c.lockWaitOptions()
 	_, err = s.Nodes.WaitForReservation(lockCtx, snapshot, wopts...)
 	cancel()
 	if err != nil {

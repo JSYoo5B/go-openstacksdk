@@ -41,7 +41,21 @@ func WithPoolIPPollInterval(interval time.Duration) AddIPFromPoolOption {
 		if interval <= 0 {
 			return invalid("pool IP poll interval must be positive")
 		}
-		o.auto.interval = interval
+		o.auto.interval, o.auto.strategy = interval, nil
+		return nil
+	}
+}
+
+// WithPoolIPWaitStrategy replaces the poll interval of the server address wait
+// with strategy, a Go-only extension. It and WithPoolIPPollInterval replace
+// each other; the later one wins. An invalid strategy fails with
+// resource.ErrInvalidOption before HTTP.
+func WithPoolIPWaitStrategy(strategy resource.WaitStrategy) AddIPFromPoolOption {
+	return func(o *addIPFromPoolOptions) error {
+		if err := strategy.Validate(); err != nil {
+			return err
+		}
+		o.auto.interval, o.auto.strategy = 0, &strategy
 		return nil
 	}
 }

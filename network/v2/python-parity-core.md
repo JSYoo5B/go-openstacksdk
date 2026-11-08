@@ -718,6 +718,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithUnlimitedWait`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithTimeout`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithPollInterval`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithWaitStrategy`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithProgressCallback`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithProgress`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithStatusAttribute`
@@ -732,12 +733,16 @@ Go API:
 
 - resource.WithProgress sends the same integer progress as WithProgressCallback on a caller-owned channel after each nonterminal response, including the initial lookup. Each send blocks until it is received or the context ends; the SDK never closes the caller-owned channel and sends nothing after the operation returns, a context that ends during a send stops it through its cancellation path, and a nil channel option is invalid before HTTP. With both options set the callback runs first and the value is then sent.
   Tests: `resource/wait_progress_channel_test.go:TestWaitProgressChannelSendsNonterminalValuesAndRejectsNil`, `resource/wait_progress_channel_test.go:TestWaitProgressChannelBlockedSendStopsOnCancellation`, `resource/wait_progress_channel_test.go:TestWaitProgressChannelReceiverCancellationStopsBeforeNextGET`, `resource/wait_progress_channel_test.go:TestWaitProgressCallbackRunsBeforeChannelSend`.
+- resource.WithWaitStrategy rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, the interval option given before or after it.
+  Tests: `resource/wait_strategy_test.go:TestWaitStrategyValidation`, `resource/wait_strategy_test.go:TestWaitStrategyAndPollIntervalLaterWins`, `resource/wait_strategy_test.go:TestWaitStrategyRejectedBeforeLookupAndPacesPolls`, `resource/wait_strategy_test.go:TestWaitStrategyPauseStillEndsAtCancellation`.
+
 Python/Go differences:
 
 - Python waits forever with failures=['ERROR'] by default; Go defaults to five minutes and a prefix/suffix failure predicate, which WithUnlimitedWait and WithFailureStates("ERROR") replace.
 - Python returns immediately without HTTP when the given Resource already has the target status; Go always sends the first GET.
 - Neutron GET auto-allocated-topology/{project_id} may provision a topology, so Go deliberately provides no waiter for AutoAllocatedTopology.
 - For raw JSON records a selected attribute that the view does not carry, or a null or non-string value, fails with resource.ErrUnsupported after the first GET; Python keeps polling None. Status is not selected by default for them, and the router_id and qos_policy_id URI attributes are outside the view.
+- Python waits use a fixed poll interval. resource.WithWaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of the interval and strategy options wins.
 
 ### `python:network/v2/wait_for_delete`
 
@@ -749,6 +754,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.Collection.WaitDeleted`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithTimeout`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithPollInterval`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithWaitStrategy`
 - `github.com/JSYoo5B/go-openstacksdk/network.WaitForDelete`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/localips.API.Resources`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/localipassociations.API.Resources`
@@ -784,6 +790,8 @@ Go API:
   Tests: `internal/servicewait/proxy_test.go:TestServiceWaitProxyDefaultsDeadlinesIntervalAndStatusAttribute`, `api/network_proxy_waits_test.go:TestNetworkProxyWaitsStatusDefaultsAttributesAndTerminalErrors`.
 - Every pinned fetchable Neutron Resource without a generated collection now has a GET-bound collection (local IPs and associations, segment ranges, service profiles, flavors, metering labels/rules, tap flows/services, SFC port pairs/groups/chains/flow classifiers/service graphs, default security group rules, default statefulness, NDP proxies, conntrack helpers, quotas, IP availabilities, QoS rule types, minimum packet rate and packet rate limit rules, BGP VPN network/port/router associations and extensions); each deletion wait polls the fixed member route until 404.
   Tests: `api/network_proxy_waits_test.go:TestNetworkProxyWaitsDeleteForCollectionlessResources`.
+- resource.WithWaitStrategy rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, the interval option given before or after it.
+  Tests: `resource/wait_strategy_test.go:TestWaitStrategyValidation`, `resource/wait_strategy_test.go:TestWaitStrategyAndPollIntervalLaterWins`, `resource/wait_strategy_test.go:TestWaitStrategyRejectedBeforeLookupAndPacesPolls`, `resource/wait_strategy_test.go:TestWaitStrategyPauseStillEndsAtCancellation`.
 
 Python/Go differences:
 
@@ -794,6 +802,7 @@ Python/Go differences:
 - Python raises ResourceTimeout; Go returns the context deadline. Go requires positive intervals and timeouts.
 - Neutron GET auto-allocated-topology/{project_id} may provision a topology, so Go deliberately provides no waiter for AutoAllocatedTopology; polling would be a mutation. Neutron-LBaaS resources are unsupported separately (see their get_/find_ reviews).
 - Network Proxy wait=120 is now the WaitForDelete default; existing generated WaitForDeletion keeps its five-minute common default.
+- Python waits use a fixed poll interval. resource.WithWaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of the interval and strategy options wins.
 
 ### `python:network/v2/availability_zones`
 

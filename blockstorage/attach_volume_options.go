@@ -18,7 +18,9 @@ type AttachVolumeOpts struct {
 }
 
 // AttachVolumeWaitOpts defaults to unlimited waiting, a two-second interval and
-// exact, case-insensitive error failure detection. Timeout applies after creation.
+// exact, case-insensitive error failure detection. WaitStrategy replaces the
+// fixed interval with a resource.WaitStrategy (a Go-only extension); setting
+// both PollInterval and WaitStrategy is rejected before any request. Timeout applies after creation.
 // A non-nil empty FailureStates disables failure detection. ProgressCallback
 // receives zero after nonterminal polls and may return an error to stop waiting.
 // A nonnil Progress is then sent zero at the same step, unless the callback
@@ -27,6 +29,7 @@ type AttachVolumeOpts struct {
 // after it returns.
 type AttachVolumeWaitOpts struct {
 	Timeout, PollInterval *time.Duration
+	WaitStrategy          *resource.WaitStrategy
 	FailureStates         []string
 	ProgressCallback      func(int) error
 	Progress              chan<- int
@@ -45,6 +48,7 @@ func copyAttachPointer[T any](value *T) *T {
 func copyAttachWait(value AttachVolumeWaitOpts) AttachVolumeWaitOpts {
 	value.Timeout = copyAttachPointer(value.Timeout)
 	value.PollInterval = copyAttachPointer(value.PollInterval)
+	value.WaitStrategy = copyAttachPointer(value.WaitStrategy)
 	if value.FailureStates != nil {
 		owned := make([]string, len(value.FailureStates))
 		copy(owned, value.FailureStates)
@@ -84,6 +88,7 @@ type preparedAttachOptions struct {
 	policy            AttachVolumeOpts
 	wait              bool
 	interval, timeout time.Duration
+	strategy          resource.WaitStrategy
 	failures          []string
 }
 
@@ -134,6 +139,9 @@ func applyAttachOptions(options []AttachVolumeOption, guard func() error) (prepa
 	if w.PollInterval != nil && *w.PollInterval <= 0 {
 		return preparedAttachOptions{}, attachInvalid("attachment wait interval must be positive")
 	}
+	if err := validateWaitStrategyField(w.PollInterval, w.WaitStrategy); err != nil {
+		return preparedAttachOptions{}, err
+	}
 	for _, state := range w.FailureStates {
 		if !attachText(state) || strings.TrimSpace(state) == "" {
 			return preparedAttachOptions{}, attachInvalid("invalid attachment wait failure state")
@@ -149,8 +157,38 @@ func applyAttachOptions(options []AttachVolumeOption, guard func() error) (prepa
 	if w.PollInterval != nil {
 		prepared.interval = *w.PollInterval
 	}
+	prepared.strategy = selectWaitStrategy(prepared.interval, w.WaitStrategy)
 	if w.FailureStates != nil {
 		prepared.failures = append(make([]string, 0, len(w.FailureStates)), w.FailureStates...)
 	}
 	return prepared, guard()
+}
+
+// validateWaitStrategyField rejects an invalid strategy and a strategy set
+// together with a fixed poll interval in the same struct.
+func validateWaitStrategyField(interval *time.Duration, strategy *resource.WaitStrategy) error {
+	if strategy == nil {
+		return nil
+	}
+	if interval != nil {
+		return attachInvalid("PollInterval and WaitStrategy are mutually exclusive")
+	}
+	return strategy.Validate()
+}
+
+// selectWaitStrategy returns the caller strategy or the fixed interval.
+func selectWaitStrategy(interval time.Duration, strategy *resource.WaitStrategy) resource.WaitStrategy {
+	if strategy != nil {
+		return *strategy
+	}
+	return resource.FixedWait(interval)
+}
+
+// preparedWaitTiming reports the resolved timing of a prepared policy: the
+// strategy when the caller chose one, otherwise the fixed interval.
+func preparedWaitTiming(interval time.Duration, strategy *resource.WaitStrategy) (*time.Duration, *resource.WaitStrategy) {
+	if strategy != nil {
+		return nil, copyAttachPointer(strategy)
+	}
+	return copyAttachPointer(&interval), nil
 }

@@ -3,12 +3,15 @@ package cloudsnapshot
 import (
 	"context"
 	"time"
+
+	"github.com/JSYoo5B/go-openstacksdk/internal/pollschedule"
 )
 
 type mutationWait struct {
 	started  time.Time
 	timeout  *time.Duration
 	interval time.Duration
+	pacer    *pollschedule.Pacer
 }
 
 func newMutationWait(policy MutationWaitOptions) mutationWait {
@@ -22,7 +25,11 @@ func newMutationWait(policy MutationWaitOptions) mutationWait {
 			}
 		}
 	}
-	return mutationWait{started: time.Now(), timeout: clonePointer(policy.Timeout), interval: interval}
+	wait := mutationWait{started: time.Now(), timeout: clonePointer(policy.Timeout), interval: interval}
+	if policy.WaitStrategy != nil {
+		wait.pacer = pollschedule.NewPacer(policy.WaitStrategy.Delay)
+	}
+	return wait
 }
 
 func (w *mutationWait) boundary(ctx context.Context, p *reader) error {
@@ -45,7 +52,11 @@ func (w *mutationWait) sleep(ctx context.Context, p *reader) error {
 	if w.interval < 0 {
 		return invalid("%s poll interval must be nonnegative when sleeping", p.schema.singular)
 	}
-	timer := time.NewTimer(w.interval)
+	pause := w.interval
+	if w.pacer != nil {
+		pause = w.pacer.Next()
+	}
+	timer := time.NewTimer(pause)
 	defer timer.Stop()
 	select {
 	case <-ctx.Done():

@@ -20,6 +20,9 @@ func Create(ctx context.Context, client *gophercloud.ServiceClient, volumeID str
 		return nil, wrap(ctx, "CreateVolumeSnapshot", err)
 	}
 	policy, err := prepare(ctx, options, cloneCreateOptions, func() error { return p.source.Guard(ctx) })
+	if err == nil {
+		err = policy.WaitPolicy.validate()
+	}
 	if err != nil {
 		return nil, wrap(ctx, "CreateVolumeSnapshot", err)
 	}

@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
+	"github.com/JSYoo5B/go-openstacksdk/internal/pollschedule"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
@@ -18,17 +19,20 @@ import (
 // the Source default of 3600 seconds and Unlimited means Python None. A zero
 // or negative timeout expires before the first lookup. Nil PollInterval means
 // the fixed two-second iterate_timeout wait; a configured interval is a Go
-// extension and must be positive.
+// extension and must be positive. WaitStrategy replaces the fixed interval
+// with a resource.WaitStrategy, also a Go extension; setting both PollInterval
+// and WaitStrategy is rejected before HTTP.
 type ImageRecordCloudWaitOpts struct {
 	Headers      map[string]string
 	Timeout      *time.Duration
 	Unlimited    bool
 	PollInterval *time.Duration
+	WaitStrategy *resource.WaitStrategy
 }
 
 // ImageRecordCloudWaitOption is one option of the Cloud image waits:
 // WithImageRecordCloudWaitOpts, WithImageRecordCloudWaitHeaders (merges), the
-// timeout and poll options, request.Header (merges one header) or
+// timeout, poll interval and wait strategy options, request.Header (merges one header) or
 // request.Custom over *ImageRecordCloudWaitOpts. Other shared calls, including
 // request.Headers, fail with resource.ErrInvalidOption before HTTP.
 type ImageRecordCloudWaitOption = request.GetCall
@@ -46,6 +50,10 @@ func copyImageRecordCloudWait(value ImageRecordCloudWaitOpts) ImageRecordCloudWa
 	if value.PollInterval != nil {
 		owned := *value.PollInterval
 		value.PollInterval = &owned
+	}
+	if value.WaitStrategy != nil {
+		owned := *value.WaitStrategy
+		value.WaitStrategy = &owned
 	}
 	return value
 }
@@ -67,8 +75,26 @@ func WithImageRecordCloudWaitTimeout(value time.Duration) ImageRecordCloudWaitOp
 func WithImageRecordCloudWaitUnlimited() ImageRecordCloudWaitOption {
 	return request.Custom(func(config *ImageRecordCloudWaitOpts) error { config.Timeout, config.Unlimited = nil, true; return nil })
 }
+
+// WithImageRecordCloudWaitPollInterval sets a fixed positive interval. It and
+// WithImageRecordCloudWaitStrategy replace each other; the later one wins.
 func WithImageRecordCloudWaitPollInterval(value time.Duration) ImageRecordCloudWaitOption {
-	return request.Custom(func(config *ImageRecordCloudWaitOpts) error { owned := value; config.PollInterval = &owned; return nil })
+	return request.Custom(func(config *ImageRecordCloudWaitOpts) error {
+		owned := value
+		config.PollInterval, config.WaitStrategy = &owned, nil
+		return nil
+	})
+}
+
+// WithImageRecordCloudWaitStrategy replaces the fixed interval with value, a
+// Go extension. An invalid strategy fails with resource.ErrInvalidOption before
+// HTTP. It and WithImageRecordCloudWaitPollInterval replace each other.
+func WithImageRecordCloudWaitStrategy(value resource.WaitStrategy) ImageRecordCloudWaitOption {
+	return request.Custom(func(config *ImageRecordCloudWaitOpts) error {
+		owned := value
+		config.PollInterval, config.WaitStrategy = nil, &owned
+		return nil
+	})
 }
 
 func prepareImageRecordCloudWait(ctx context.Context, check func(context.Context) error, options []ImageRecordCloudWaitOption) (ImageRecordCloudWaitOpts, error) {
@@ -91,6 +117,9 @@ func prepareImageRecordCloudWait(ctx context.Context, check func(context.Context
 	}
 	if value.PollInterval != nil && *value.PollInterval <= 0 {
 		return value, uploadInvalid("image cloud wait poll interval must be positive")
+	}
+	if err := validateImageWaitStrategy(value.PollInterval, value.WaitStrategy); err != nil {
+		return value, err
 	}
 	headers, err := imageMutationHeaders(value.Headers, false, "")
 	value.Headers = headers
@@ -190,6 +219,7 @@ func cloudImageRecordPoll(p *preparedImageRecord, id string, policy ImageRecordC
 	if policy.PollInterval != nil {
 		interval = *policy.PollInterval
 	}
+	pacer := pollschedule.NewPacer(selectImageWaitStrategy(interval, policy.WaitStrategy).Delay)
 	deadline := time.Now().Add(timeout)
 	for {
 		if err := p.check(p.ctx); err != nil {
@@ -213,7 +243,7 @@ func cloudImageRecordPoll(p *preparedImageRecord, id string, policy ImageRecordC
 		if finished {
 			return lookups, last, nil
 		}
-		timer := time.NewTimer(interval)
+		timer := time.NewTimer(pacer.Next())
 		select {
 		case <-p.ctx.Done():
 			timer.Stop()
@@ -225,4 +255,24 @@ func cloudImageRecordPoll(p *preparedImageRecord, id string, policy ImageRecordC
 		case <-timer.C:
 		}
 	}
+}
+
+// validateImageWaitStrategy rejects an invalid strategy and a strategy set
+// together with a fixed poll interval.
+func validateImageWaitStrategy(interval *time.Duration, strategy *resource.WaitStrategy) error {
+	if strategy == nil {
+		return nil
+	}
+	if interval != nil {
+		return uploadInvalid("image wait PollInterval and WaitStrategy are mutually exclusive")
+	}
+	return strategy.Validate()
+}
+
+// selectImageWaitStrategy returns the caller strategy or the fixed interval.
+func selectImageWaitStrategy(interval time.Duration, strategy *resource.WaitStrategy) resource.WaitStrategy {
+	if strategy != nil {
+		return *strategy
+	}
+	return resource.FixedWait(interval)
 }

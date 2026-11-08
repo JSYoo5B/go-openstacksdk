@@ -17,6 +17,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitPollInterval`
+- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitStrategy`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitTimeout`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitUnlimitedWait`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitStatusAttribute`
@@ -48,6 +49,9 @@ Go API:
 
 - WithObjectWaitProgress and ObjectWaitOpts.Progress send zero on a caller-owned channel after each clean nonterminal observation; WithoutObjectWaitProgress clears it. Each send blocks until it is received or the context ends; the SDK never closes the caller-owned channel and sends nothing after the operation returns, a context that ends during a send stops it through its cancellation path, and a nil channel option is invalid before HTTP. With a progress callback also set the callback runs first; its error stops the wait and nothing is sent for that step.
   Tests: `objectstorage/v1/objects/wait_progress_channel_test.go:TestObjectWaitProgressChannelSendsZeroClearsAndRejectsNil`, `objectstorage/v1/objects/wait_progress_channel_test.go:TestObjectWaitProgressChannelBlockedSendStopsOnCancellation`, `objectstorage/v1/objects/wait_progress_channel_test.go:TestObjectWaitProgressChannelReceiverCancellation`, `objectstorage/v1/objects/wait_progress_channel_test.go:TestObjectWaitProgressCallbackRunsBeforeChannelSend`.
+- objects.WithObjectWaitStrategy rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, the interval option given before or after it.
+  Tests: `objectstorage/v1/objects/wait_strategy_test.go:TestObjectWaitStrategy`.
+
 Python/Go differences:
 
 - Go requires literal container/object and observes bodyless HEAD200/204/404; clean physical404 alone completes deletion. Python generic Resource fetch uses GET and can succeed on falsy resource, deleted status or caught NotFoundException; ordinary Swift Object declares no status. Neither waiter submits DELETE.
@@ -57,6 +61,7 @@ Python/Go differences:
 - Results are immutable owned snapshots rather than Python's mutable Resource with adapter, session, cache and dirty state (SDK-R1/C1/S1); see Deliberate runtime differences in docs/sdk-support-ledger.md.
 - Completion is a clean HEAD 404. An Object has no deleted status, so Python's deleted-status completion and generic progress callbacks have no equivalent, and Go keeps evidence of the last poll only.
 - A HEAD 404 observes absence on that route at that moment; replica races, middleware permissions, proxy caching and cluster-wide deletion are server concerns, and the waiter adds no X-Newest extension; see Server guarantees outside the SDK in docs/sdk-support-ledger.md.
+- Python waits use a fixed poll interval. objects.WithObjectWaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of the interval and strategy options wins.
 
 ### `python:object_store/v1/wait_for_status`
 
@@ -69,6 +74,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitPollInterval`
+- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitStrategy`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitTimeout`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitUnlimitedWait`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitStatusAttribute`
@@ -104,6 +110,9 @@ Go API:
 
 - WithObjectWaitProgress and ObjectWaitOpts.Progress send zero on a caller-owned channel after each clean nonterminal observation; WithoutObjectWaitProgress clears it. Each send blocks until it is received or the context ends; the SDK never closes the caller-owned channel and sends nothing after the operation returns, a context that ends during a send stops it through its cancellation path, and a nil channel option is invalid before HTTP. With a progress callback also set the callback runs first; its error stops the wait and nothing is sent for that step.
   Tests: `objectstorage/v1/objects/wait_progress_channel_test.go:TestObjectWaitProgressChannelSendsZeroClearsAndRejectsNil`, `objectstorage/v1/objects/wait_progress_channel_test.go:TestObjectWaitProgressChannelBlockedSendStopsOnCancellation`, `objectstorage/v1/objects/wait_progress_channel_test.go:TestObjectWaitProgressChannelReceiverCancellation`, `objectstorage/v1/objects/wait_progress_channel_test.go:TestObjectWaitProgressCallbackRunsBeforeChannelSend`.
+- objects.WithObjectWaitStrategy rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, the interval option given before or after it.
+  Tests: `objectstorage/v1/objects/wait_strategy_test.go:TestObjectWaitStrategy`.
+
 Python/Go differences:
 
 - Swift Object has no default status/progress descriptor. Python default getattr(status) raises AttributeError before fetch; Go default/unsupported selector returns ErrUnsupported before HTTP. Go accepts library-owned known string attributes or explicit response header, performs fresh HEAD even for captured name/container and does not implement the Python cached initial-match shortcut.
@@ -113,6 +122,7 @@ Python/Go differences:
 - Results are immutable owned snapshots rather than Python's mutable Resource with adapter, session, cache and dirty state (SDK-R1/C1/S1); see Deliberate runtime differences in docs/sdk-support-ledger.md.
 - An Object has no status attribute: Python's default raises AttributeError before any request and Go returns ErrUnsupported before HTTP. With an explicit selector Go compares HEAD metadata or headers using EqualFold where Python lowercases, which agree for ASCII values, and failures are typed Go errors rather than Python exception classes.
 - A matching observation is one HEAD response, not a lock or a consistency guarantee, and no Swift lifecycle status is invented; see Server guarantees outside the SDK in docs/sdk-support-ledger.md.
+- Python waits use a fixed poll interval. objects.WithObjectWaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of the interval and strategy options wins.
 
 ## Usage examples
 

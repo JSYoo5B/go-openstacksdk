@@ -196,6 +196,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudWaitTimeout`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudWaitUnlimited`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudWaitPollInterval`
+- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudWaitStrategy`
 
 - WaitForCloudImageRecord reads only the supplied record's string id and ignores its cached status. Each iteration repeats the owned Proxy find_image lookup with ignore_missing true and shared headers/location: a missing image, case-different status, null or non-string status keeps polling, exact active returns that record and exact error returns FailedStateError with the last actual receipt.
   Tests: `image/image_record_cloud_wait_test.go:TestCloudImageRecordWaitPollsFindUntilExactActive`, `image/image_record_cloud_wait_test.go:TestCloudImageRecordWaitFailuresKeepLastRecord`.
@@ -203,11 +204,14 @@ Go API:
   Tests: `image/image_record_cloud_wait_test.go:TestCloudImageRecordWaitFailuresKeepLastRecord`.
 - Nil, numeric or blank ids, nil options, nonpositive poll intervals and contradictory unlimited/timeout options fail before HTTP.
   Tests: `image/image_record_cloud_wait_test.go:TestCloudImageRecordWaitInputFailsBeforeHTTP`.
+- image.WithImageRecordCloudWaitStrategy rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, the interval option given before or after it.
+  Tests: `image/wait_strategy_test.go:TestImageWaitStrategyOptionsRejectedBeforeHTTP`, `image/wait_strategy_test.go:TestImageWaitStrategyLaterOptionWins`, `image/wait_strategy_test.go:TestImageCloudWaitStrategyPacesLookups`.
 
 Python/Go differences:
 
 - Python accepts any mapping with an id and raises ResourceTimeout or SDKException; Go accepts an owned ImageRecord with a nonblank string id and returns ImageRecordCloudWaitResult with context.DeadlineExceeded or FailedStateError plus the last actual receipt.
 - The fixed two-second Python interval is the default; a positive PollInterval and request headers are Go extensions. An in-flight lookup is not cancelled by the wait deadline, matching iterate_timeout, while caller context cancellation is observed during sleeps.
+- Python waits use a fixed poll interval. image.WithImageRecordCloudWaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of the interval and strategy options wins.
 
 ### `python:cloud/_image/ImageCloudMixin/download_image`
 
@@ -271,6 +275,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDeleteTimeout`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDeleteUnlimited`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDeletePollInterval`
+- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDeleteWaitStrategy`
 
 - DeleteCloudImageRecord finds the image with the ignore-missing Find graph; absence returns Deleted false without DELETE. A found record is deleted with the owned whole-image DeleteImageRecord, and a native delete failure returns Found under the Cloud operation before any Swift cleanup or wait.
   Tests: `image/image_record_cloud_delete_test.go:TestCloudImageRecordDeleteFindsDeletesCleansAndWaits`, `image/image_record_cloud_delete_test.go:TestCloudImageRecordDeleteLateFailuresKeepPhases`.
@@ -280,11 +285,14 @@ Go API:
   Tests: `image/image_record_cloud_delete_test.go:TestCloudImageRecordDeleteLateFailuresKeepPhases`, `image/image_record_cloud_delete_test.go:TestCloudImageRecordDeleteFindsDeletesCleansAndWaits`.
 - Blank identities, nil options, nonpositive intervals, invalid headers and invalid captured task configuration fail before HTTP.
   Tests: `image/image_record_cloud_delete_test.go:TestCloudImageRecordDeleteInputFailsBeforeHTTP`.
+- image.WithImageRecordCloudDeleteWaitStrategy rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, the interval option given before or after it.
+  Tests: `image/wait_strategy_test.go:TestImageWaitStrategyOptionsRejectedBeforeHTTP`, `image/wait_strategy_test.go:TestImageWaitStrategyLaterOptionWins`.
 
 Python/Go differences:
 
 - Python returns a bool and raises SDKException, TypeError, AttributeError, ValueError or ResourceTimeout; Go returns ImageRecordCloudDeleteResult with Deleted, Found, Delete, Object and wait evidence plus typed errors.
 - The pinned delete_objects argument is never read by the source body, so Go omits it. Wait polling intervals and request headers are Go extensions; headers apply to Glance requests only.
+- Python waits use a fixed poll interval. image.WithImageRecordCloudDeleteWaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of the interval and strategy options wins.
 
 ### `python:cloud/_image/ImageCloudMixin/create_image`
 
@@ -304,11 +312,14 @@ Go API:
   Tests: `connectiontest/connection_cloud_image_create_test.go:TestConnectionCloudImageCreateBranchesAndWait`.
 - Truthy non-string volume formats, non-numeric timeouts with wait, nil options and negative poll intervals fail before HTTP.
   Tests: `connectiontest/connection_cloud_image_create_test.go:TestConnectionCloudImageCreateVolumeBodyAndPreflight`.
+- CloudImageCreateRequest.WaitStrategy rejects an invalid or zero-value strategy, or one set together with the interval field, with ErrInvalidOption before HTTP and paces polls by the strategy's pause sequence.
+  Tests: `connectiontest/connection_cloud_image_wait_strategy_test.go:TestConnectionCloudImageCreateWaitStrategy`.
 
 Python/Go differences:
 
 - Python returns an Image or None and raises ResourceTimeout or the cleanup exception; Go returns CloudImageCreateResult with Created, Volume, wait and Cleanup evidence and joins the timeout with any cleanup failure.
 - Python keyword arguments become the concrete ImageRecordCreateOption values; the volume is a literal VolumeID and PollInterval is a Go extension for the Cloud wait and its cleanup.
+- Python waits use a fixed poll interval. CloudImageCreateRequest.WaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and setting it together with the interval field fails with ErrInvalidOption before HTTP.
 
 ## Usage examples
 

@@ -9,6 +9,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/pollschedule"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -16,6 +17,7 @@ type preparedObjectWait struct {
 	request           *preparedCreateObject
 	options           ObjectWaitOpts
 	interval, timeout time.Duration
+	pacer             *pollschedule.Pacer
 	header, literal   string
 	literalSelected   bool
 }
@@ -64,6 +66,13 @@ func (a *API) prepareObjectWait(ctx context.Context, container, object, status s
 	if err == nil && cfg.Interval != nil && *cfg.Interval <= 0 {
 		err = metadataInvalid("object polling interval must be positive")
 	}
+	if err == nil && cfg.WaitStrategy != nil {
+		if cfg.Interval != nil {
+			err = metadataInvalid("object wait Interval and WaitStrategy are mutually exclusive")
+		} else {
+			err = cfg.WaitStrategy.Validate()
+		}
+	}
 	if err == nil && cfg.Timeout != nil && *cfg.Timeout < 0 {
 		err = metadataInvalid("negative object wait timeout")
 	}
@@ -94,6 +103,11 @@ func (a *API) prepareObjectWait(ctx context.Context, container, object, status s
 	if cfg.Interval != nil {
 		w.interval = *cfg.Interval
 	}
+	strategy := resource.FixedWait(w.interval)
+	if cfg.WaitStrategy != nil {
+		strategy = *cfg.WaitStrategy
+	}
+	w.pacer = pollschedule.NewPacer(strategy.Delay)
 	if cfg.Timeout != nil {
 		w.timeout = *cfg.Timeout
 	}
@@ -171,7 +185,7 @@ func (w *preparedObjectWait) pause(ctx context.Context) error {
 	if err := w.request.guard(ctx); err != nil {
 		return err
 	}
-	timer := time.NewTimer(w.interval)
+	timer := time.NewTimer(w.pacer.Next())
 	defer timer.Stop()
 	select {
 	case <-timer.C:

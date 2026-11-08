@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	"github.com/JSYoo5B/go-openstacksdk/internal/pollschedule"
 )
 
 // WaitPolicy stores validated options without reapplying application closures.
@@ -68,11 +70,20 @@ func (o waitOptions) failed(state string, service func(string) bool) bool {
 	return false
 }
 
-func (o waitOptions) pause(ctx context.Context) error {
+// pacer numbers the pauses of one wait under the selected strategy, or the
+// fixed interval when no strategy was chosen.
+func (o waitOptions) pacer() *pollschedule.Pacer {
+	if o.strategy.built {
+		return pollschedule.NewPacer(o.strategy.Delay)
+	}
+	return pollschedule.NewPacer(FixedWait(o.interval).Delay)
+}
+
+func (o waitOptions) pause(ctx context.Context, d time.Duration) error {
 	if err := ctx.Err(); err != nil {
 		return err
 	}
-	timer := time.NewTimer(o.interval)
+	timer := time.NewTimer(d)
 	defer timer.Stop()
 	select {
 	case <-ctx.Done():

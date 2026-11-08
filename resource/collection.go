@@ -483,6 +483,7 @@ func (c *Collection[T]) Wait(ctx context.Context, ref Ref, status string, opts .
 	if err := c.validateID(id); err != nil {
 		return nil, c.wrap("wait", err)
 	}
+	pacer := o.pacer()
 	for {
 		if c.binding.WaitGuard != nil {
 			if err := c.binding.WaitGuard(ctx); err != nil {
@@ -513,7 +514,7 @@ func (c *Collection[T]) Wait(ctx context.Context, ref Ref, status string, opts .
 				return nil, c.wrap("wait", err)
 			}
 		}
-		if err := o.pause(ctx); err != nil {
+		if err := o.pause(ctx, pacer.Next()); err != nil {
 			return nil, c.wrap("wait", err)
 		}
 		v, err = c.Get(ctx, id)

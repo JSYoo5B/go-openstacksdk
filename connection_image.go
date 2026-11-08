@@ -47,11 +47,15 @@ func (c *Connection) imageCreateSwiftService(ctx context.Context) (*objectapi.Se
 // the Glance CreateImageRecord workflow with Image; otherwise the volume branch
 // uses Image.Name with the Cinder Proxy create_image. PollInterval is a Go
 // extension for the Cloud wait loop and its timeout cleanup; zero means the
-// fixed two-second iterate_timeout interval.
+// fixed two-second iterate_timeout interval. WaitStrategy replaces the fixed
+// interval in both loops with a resource.WaitStrategy, also a Go extension; a
+// nonzero PollInterval together with WaitStrategy, or an invalid strategy, is
+// rejected before HTTP.
 type CloudImageCreateRequest struct {
 	Image        image.ImageRecordCreateRequest
 	VolumeID     string
 	PollInterval time.Duration
+	WaitStrategy *resource.WaitStrategy
 }
 
 // CloudImageCreateResult keeps every Cloud create_image phase. Image is the

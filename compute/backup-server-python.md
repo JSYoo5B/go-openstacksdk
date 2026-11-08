@@ -131,7 +131,10 @@ are terminal and do not start image lookup or repeat the accepted action.
 and the Cloud polling interval defaults two seconds. A zero or negative timeout
 expires before the first wait lookup, after the unconditional initial lookup;
 its value is unused when wait=false. `WithBackupServerPollInterval` is a positive
-Go extension. Waiting reuses `image.Service.WaitForCloudImageRecord`, including
+Go extension; `WithBackupServerWaitStrategy` (or `BackupServerOpts.WaitStrategy`)
+replaces it with a `resource.WaitStrategy`, also Go-only. The later of the two
+options wins, and with wait=true an invalid strategy or both fields set fail
+before the backup action is sent. Waiting reuses `image.Service.WaitForCloudImageRecord`, including
 its missing-as-nil Find fallback, exact status comparison, full sleep interval,
 and timeout checks between requests rather than cancelling an in-flight lookup.
 Caller context cancellation still interrupts requests and waits.

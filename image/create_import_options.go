@@ -34,9 +34,13 @@ type CreateImportMetadataOpts struct {
 // CreateImportWaitOpts configures an optional active-state wait. Defaults are
 // five minutes, two seconds and killed/deleted failures. Timeout zero removes
 // the SDK deadline; a non-nil empty FailureStates disables state failures.
+// WaitStrategy replaces the fixed interval with a resource.WaitStrategy (a
+// Go-only extension); setting both PollInterval and WaitStrategy is rejected
+// before HTTP.
 type CreateImportWaitOpts struct {
 	Timeout       *time.Duration
 	PollInterval  *time.Duration
+	WaitStrategy  *resource.WaitStrategy
 	FailureStates []string
 }
 
@@ -162,6 +166,7 @@ func copyCreateImportMetadata(value CreateImportMetadataOpts) (CreateImportMetad
 func copyCreateImportWait(value CreateImportWaitOpts) CreateImportWaitOpts {
 	value.Timeout = copyCreateImportPointer(value.Timeout)
 	value.PollInterval = copyCreateImportPointer(value.PollInterval)
+	value.WaitStrategy = copyCreateImportPointer(value.WaitStrategy)
 	if value.FailureStates != nil {
 		value.FailureStates = append(make([]string, 0, len(value.FailureStates)), value.FailureStates...)
 	}
@@ -226,8 +231,14 @@ func prepareCreateImportWait(value *CreateImportWaitOpts) ([]resource.WaitOption
 			options = append(options, resource.WithTimeout(*value.Timeout))
 		}
 	}
+	if err := validateImageWaitStrategy(value.PollInterval, value.WaitStrategy); err != nil {
+		return nil, err
+	}
 	if value.PollInterval != nil {
 		options = append(options, resource.WithPollInterval(*value.PollInterval))
+	}
+	if value.WaitStrategy != nil {
+		options = append(options, resource.WithWaitStrategy(*value.WaitStrategy))
 	}
 	if value.FailureStates != nil {
 		options = append(options, resource.WithFailureStates(value.FailureStates...))

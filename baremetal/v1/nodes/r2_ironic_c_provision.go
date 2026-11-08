@@ -94,22 +94,27 @@ func StateReached(node *Node, expected string, abort bool) (bool, error) {
 }
 
 type provisionWait struct {
-	interval time.Duration
-	abort    bool
-	keep     bool
+	waitConfig
+	abort bool
+	keep  bool
 }
 
 // ProvisionWaitOption configures AwaitProvisionState and AwaitProvisionStates.
 type ProvisionWaitOption func(*provisionWait)
 
 // WithProvisionWaitInterval sets the pause between polls; non-positive values
-// keep DefaultWaitInterval.
+// keep DefaultWaitInterval. A positive interval and WithProvisionWaitStrategy
+// replace each other; the later one wins.
 func WithProvisionWaitInterval(d time.Duration) ProvisionWaitOption {
-	return func(c *provisionWait) {
-		if d > 0 {
-			c.interval = d
-		}
-	}
+	return func(c *provisionWait) { WithWaitInterval(d)(&c.waitConfig) }
+}
+
+// WithProvisionWaitStrategy replaces the fixed pause between polls with
+// strategy, a Go-only extension. An invalid strategy makes the wait fail with
+// resource.ErrInvalidOption before the first read, unless a later interval or
+// strategy option replaces it.
+func WithProvisionWaitStrategy(strategy resource.WaitStrategy) ProvisionWaitOption {
+	return func(c *provisionWait) { WithWaitStrategy(strategy)(&c.waitConfig) }
 }
 
 // WithAbortOnFailedState chooses whether a failure state ends the wait. The
@@ -124,7 +129,7 @@ func WithAbortOnFailedState(abort bool) ProvisionWaitOption {
 func WithContinueOnFailure() ProvisionWaitOption { return func(c *provisionWait) { c.keep = true } }
 
 func provisionWaitFrom(options []ProvisionWaitOption) provisionWait {
-	cfg := provisionWait{interval: DefaultWaitInterval, abort: true}
+	cfg := provisionWait{waitConfig: waitConfig{interval: DefaultWaitInterval}, abort: true}
 	for _, option := range options {
 		if option != nil {
 			option(&cfg)
@@ -149,7 +154,7 @@ type ProvisionWaitResult struct {
 func (a *API) AwaitProvisionState(ctx context.Context, id, expected string, options ...ProvisionWaitOption) (*Node, error) {
 	cfg := provisionWaitFrom(options)
 	var failure error
-	node, err := a.poll(ctx, "AwaitProvisionState", id, waitConfig{interval: cfg.interval}, func(n *Node) bool {
+	node, err := a.poll(ctx, "AwaitProvisionState", id, cfg.waitConfig, func(n *Node) bool {
 		reached, err := StateReached(n, expected, cfg.abort)
 		if err != nil {
 			failure = err
@@ -182,6 +187,10 @@ func (a *API) AwaitProvisionStates(ctx context.Context, ids []string, expected s
 	refs := append([]string(nil), ids...)
 	var remaining, last []*Node
 	wrap := func(err error) error { return request.Wrap("AwaitProvisionStates", "nodes", err) }
+	if cfg.err != nil {
+		return result, wrap(cfg.err)
+	}
+	pacer := cfg.pacer()
 	for {
 		remaining = nil
 		nodes := make([]*Node, 0, len(refs))
@@ -222,7 +231,7 @@ func (a *API) AwaitProvisionStates(ctx context.Context, ids []string, expected s
 			return result, nil
 		}
 		refs, last = next, remaining
-		timer := time.NewTimer(cfg.interval)
+		timer := time.NewTimer(pacer.Next())
 		select {
 		case <-ctx.Done():
 			timer.Stop()
@@ -396,6 +405,9 @@ func (a *API) SetProvisionState(ctx context.Context, id string, req ProvisionSta
 		if expected, ok = expectedProvisionStates[req.Target]; !ok {
 			return nil, nodeInvalid(op, "for target %q the expected state is not known, cannot wait for it", req.Target)
 		}
+		if err := provisionWaitFrom(cfg.options).err; err != nil {
+			return nil, request.Wrap(op, "nodes", err)
+		}
 	}
 	version, err := ironicwire.Assert(ctx, a.client, required, ironicwire.NodeCeiling, "")
 	if err == nil && req.Runbook != "" {
@@ -452,6 +464,9 @@ func (a *API) SetPowerState(ctx context.Context, id, target string, options ...S
 		var ok bool
 		if expected, ok = expectedPowerStates[target]; !ok {
 			return nodeInvalid(op, "cannot use target power state %q with wait, the expected state is not known", target)
+		}
+		if err := waitConfigFrom(cfg.options).err; err != nil {
+			return request.Wrap(op, "nodes", err)
 		}
 	}
 	client := a.client

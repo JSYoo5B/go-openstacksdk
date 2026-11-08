@@ -103,7 +103,9 @@ Behavior notes:
   Gophercloud has none; it needs microversion 1.57, which the client must carry.
 - `allocations.API.WaitForActive` reads immediately and then per interval until
   the state is not `allocating`; `error` fails with `*AllocationFailedError`
-  unless `WithIgnoreError(true)`.
+  unless `WithIgnoreError(true)`. `WithWaitInterval` sets a fixed interval and
+  `WithWaitStrategy` a `resource.WaitStrategy` (Go-only); the later one wins
+  and an invalid strategy fails before the first read.
 - `drivers.API.ListVendorPassthruRaw` reads the driver first (404 attribution)
   and then the method list.
 
@@ -113,7 +115,13 @@ Behavior notes:
   is passed through as a string; the SDK does not read paths or build images (the
   pinned code does not either, despite its docstring). Timeouts default to 3600 s
   (set state) and 1200 s (activate, deactivate) and apply to the whole call; use
-  `WithMachineTimeout` or `WithMachineUnlimitedWait`.
+  `WithMachineTimeout` or `WithMachineUnlimitedWait`. The polling pause is
+  `WithMachineWaitInterval` (two seconds by default) or, as a Go-only
+  extension, `WithMachineWaitStrategy` with a `resource.WaitStrategy`; it
+  applies to the provision-state and reservation-lock waits of every machine
+  helper, the later of the two options wins and an invalid strategy fails
+  before any request. `nodes.WithProvisionWaitStrategy` is the same choice for
+  `AwaitProvisionState(s)`.
 - `Service.InspectMachine` always waits (Python ignores its `wait` argument),
   moves an unassociated `available` machine through manage/inspect/provide and
   refuses associated or wrongly-staged machines with `ErrMachineState`.

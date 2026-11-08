@@ -8,6 +8,8 @@ import (
 	"maps"
 	"time"
 	"unicode/utf8"
+
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 // CreateVolumeAttributes provides common creation fields and known Cinder JSON
@@ -142,6 +144,7 @@ type preparedCreateVolumeOptions struct {
 	policy            CreateVolumeOpts
 	wait              bool
 	interval, timeout time.Duration
+	strategy          resource.WaitStrategy
 	failures          []string
 	body              map[string]json.RawMessage
 }
@@ -174,7 +177,7 @@ func applyCreateVolumeOptions(options []CreateVolumeOption, guard func() error) 
 	if config.Bootable != nil {
 		wait = true
 	}
-	return preparedCreateVolumeOptions{policy: copyCreateVolumeOptions(config), wait: wait, interval: common.interval, timeout: common.timeout, failures: common.failures, body: body}, guard()
+	return preparedCreateVolumeOptions{policy: copyCreateVolumeOptions(config), wait: wait, interval: common.interval, strategy: common.strategy, timeout: common.timeout, failures: common.failures, body: body}, guard()
 }
 
 // PrepareCreateVolumeOptions validates and owns all effective defaults locally.
@@ -191,7 +194,7 @@ func PrepareCreateVolumeOptions(ctx context.Context, options ...CreateVolumeOpti
 	config := copyCreateVolumeOptions(prepared.policy)
 	config.Wait = copyAttachPointer(&prepared.wait)
 	config.WaitPolicy.Timeout = copyAttachPointer(&prepared.timeout)
-	config.WaitPolicy.PollInterval = copyAttachPointer(&prepared.interval)
+	config.WaitPolicy.PollInterval, config.WaitPolicy.WaitStrategy = preparedWaitTiming(prepared.interval, prepared.policy.WaitPolicy.WaitStrategy)
 	config.WaitPolicy.FailureStates = append(make([]string, 0, len(prepared.failures)), prepared.failures...)
 	return config, nil
 }

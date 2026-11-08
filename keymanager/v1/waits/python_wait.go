@@ -112,6 +112,14 @@ func (a *API) wait(ctx context.Context, target Target, status *string, deleting 
 			return nil, wrap(err)
 		}
 	}
+	if config.WaitStrategy != nil {
+		if config.Interval != nil {
+			return nil, wrap(invalid("Interval and WaitStrategy are mutually exclusive"))
+		}
+		if err := config.WaitStrategy.Validate(); err != nil {
+			return nil, wrap(err)
+		}
+	}
 	if err := source.WithPolicy(ctx, config.Microversion, config.Headers); err != nil {
 		return nil, wrap(err)
 	}
@@ -168,6 +176,9 @@ func (a *API) wait(ctx context.Context, target Target, status *string, deleting 
 		}
 	}
 	waitOptions := []resource.WaitOption{resource.WithPollInterval(interval)}
+	if config.WaitStrategy != nil {
+		waitOptions = append(waitOptions, resource.WithWaitStrategy(*config.WaitStrategy))
+	}
 	if timeout == 0 {
 		waitOptions = append(waitOptions, resource.WithUnlimitedWait())
 	} else {

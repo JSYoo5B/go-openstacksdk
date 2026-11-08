@@ -107,9 +107,12 @@ func ForSecret(r *secrets.FoundSecretRecord) Target {
 // Options distinguishes omission from zero. Nil Interval defaults to two
 // seconds; explicit zero follows Source's short pause. Nil Timeout defaults to
 // unlimited status wait or 120-second deletion wait. Failures nil means ERROR,
-// while an explicit empty slice disables failure-state detection.
+// while an explicit empty slice disables failure-state detection. WaitStrategy
+// replaces the fixed Interval with a resource.WaitStrategy (a Go-only
+// extension); setting both Interval and WaitStrategy is rejected before HTTP.
 type Options struct {
 	Interval, Timeout *time.Duration
+	WaitStrategy      *resource.WaitStrategy
 	Unlimited         bool
 	Failures          []string
 	Attribute         *string
@@ -120,7 +123,7 @@ type Options struct {
 }
 
 // Option is one option of WaitForStatus and WaitForDelete: WithOptions,
-// WithInterval, WithTimeout, WithUnlimitedWait, WithFailures, WithAttribute,
+// WithInterval, WithWaitStrategy, WithTimeout, WithUnlimitedWait, WithFailures, WithAttribute,
 // WithProgressCallback, WithProgress, request.Custom over *Options, request.Header (adds one
 // header to every read) or request.Microversion. Other shared calls fail with
 // resource.ErrInvalidOption before HTTP.
@@ -142,6 +145,10 @@ func ownOptions(o Options) Options {
 		v := *o.Timeout
 		o.Timeout = &v
 	}
+	if o.WaitStrategy != nil {
+		v := *o.WaitStrategy
+		o.WaitStrategy = &v
+	}
 	if o.Attribute != nil {
 		v := *o.Attribute
 		o.Attribute = &v
@@ -160,8 +167,23 @@ func WithOptions(o Options) Option {
 	o = ownOptions(o)
 	return request.Custom(func(c *Options) error { *c = ownOptions(o); return nil })
 }
+
+// WithInterval sets a fixed interval. It and WithWaitStrategy replace each
+// other; the later one wins.
 func WithInterval(v time.Duration) Option {
-	return request.Custom(func(c *Options) error { c.Interval = &v; return nil })
+	return request.Custom(func(c *Options) error { c.Interval, c.WaitStrategy = &v, nil; return nil })
+}
+
+// WithWaitStrategy replaces the fixed interval with v, a Go-only extension. An
+// invalid strategy fails with resource.ErrInvalidOption before HTTP.
+func WithWaitStrategy(v resource.WaitStrategy) Option {
+	return request.Custom(func(c *Options) error {
+		if err := v.Validate(); err != nil {
+			return err
+		}
+		c.Interval, c.WaitStrategy = nil, &v
+		return nil
+	})
 }
 func WithTimeout(v time.Duration) Option {
 	return request.Custom(func(c *Options) error { c.Timeout = &v; c.Unlimited = false; return nil })

@@ -16,6 +16,7 @@ type addAutoIPOptions struct {
 	reuse     bool
 	cleanup   bool
 	interval  time.Duration
+	strategy  *resource.WaitStrategy
 	available []AvailableFloatingIPOption
 	create    []FloatingIPCreateOption
 	attach    []ServerIPOption
@@ -62,7 +63,21 @@ func WithAddAutoIPPollInterval(interval time.Duration) AddAutoIPOption {
 		if interval <= 0 {
 			return invalid("add auto IP poll interval must be positive")
 		}
-		o.interval = interval
+		o.interval, o.strategy = interval, nil
+		return nil
+	}
+}
+
+// WithAddAutoIPWaitStrategy replaces the poll interval of the server address
+// wait with strategy, a Go-only extension. It and WithAddAutoIPPollInterval
+// replace each other; the later one wins. An invalid strategy fails with
+// resource.ErrInvalidOption before HTTP.
+func WithAddAutoIPWaitStrategy(strategy resource.WaitStrategy) AddAutoIPOption {
+	return func(o *addAutoIPOptions) error {
+		if err := strategy.Validate(); err != nil {
+			return err
+		}
+		o.interval, o.strategy = 0, &strategy
 		return nil
 	}
 }
@@ -274,7 +289,11 @@ func (s *Service) autoIPObserver(ctx context.Context, server *Server, address st
 	if interval <= 0 {
 		interval = time.Nanosecond
 	}
-	return s.prepareServerIPWorkflow(ctx, AutomaticFloatingIPRequest{Server: server}, []AutomaticFloatingIPOption{WithAutomaticIPTimeout(budget), WithAutomaticIPPollInterval(interval)}, serverIPReadiness{observe: true, explicitList: true, addresses: []string{address}})
+	pacing := WithAutomaticIPPollInterval(interval)
+	if o.strategy != nil {
+		pacing = WithAutomaticIPWaitStrategy(*o.strategy)
+	}
+	return s.prepareServerIPWorkflow(ctx, AutomaticFloatingIPRequest{Server: server}, []AutomaticFloatingIPOption{WithAutomaticIPTimeout(budget), pacing}, serverIPReadiness{observe: true, explicitList: true, addresses: []string{address}})
 }
 
 func (s *Service) refreshAutoIPServer(ctx context.Context, server *Server, address string, remaining time.Duration, o addAutoIPOptions) (*Server, error) {

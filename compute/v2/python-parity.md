@@ -371,10 +371,13 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.ID`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithTimeout`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithPollInterval`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithWaitStrategy`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithFailureStates`
 
 - CreateImage posts createImage and reads image_id from the 2.45 body or the Location header below 2.45; FindIdentity then GETs the Glance image and WaitFor polls it to active, failing on error and on timeout.
   Tests: `compute/v2/servers/python_parity_test.go:TestPythonServerCreateImageFetchesAndWaitsForGlanceImage`.
+- resource.WithWaitStrategy rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, the interval option given before or after it.
+  Tests: `resource/wait_strategy_test.go:TestWaitStrategyValidation`, `resource/wait_strategy_test.go:TestWaitStrategyAndPollIntervalLaterWins`, `resource/wait_strategy_test.go:TestWaitStrategyRejectedBeforeLookupAndPacesPolls`, `resource/wait_strategy_test.go:TestWaitStrategyPauseStillEndsAtCancellation`.
 
 Python/Go differences:
 
@@ -383,6 +386,7 @@ Python/Go differences:
 - Python keeps waiting while the image lookup returns None; Go WaitFor returns the 404 error at once.
 - Python raises ResourceTimeout or SDKException; Go returns a context deadline error or resource.FailedStateError.
 - CreateImageOpts.Metadata holds string values and omits an empty map.
+- Python waits use a fixed poll interval. resource.WithWaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of the interval and strategy options wins.
 
 ### `python:compute/v2/set_server_metadata`
 

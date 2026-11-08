@@ -121,7 +121,7 @@ func (p *preparedAttach) validateCreated(attachment *VolumeAttachmentInfo) error
 func (p *preparedAttach) wait(ctx context.Context, result *AttachVolumeResult) error {
 	return waitVolumeAttachment(ctx, volumeAttachmentWait{
 		volumeID: p.volumeID, target: "in-use",
-		timeout: p.options.timeout, interval: p.options.interval,
+		timeout: p.options.timeout, strategy: p.options.strategy,
 		failures: p.options.failures, progress: p.options.policy.WaitPolicy.ProgressCallback, channel: p.options.policy.WaitPolicy.Progress,
 		guard: p.guard,
 		exchange: func(waitCtx context.Context) (*rest.Response, error) {

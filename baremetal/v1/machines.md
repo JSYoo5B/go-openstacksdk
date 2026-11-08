@@ -27,7 +27,7 @@
 - Power helpers send `power on`, `power off` and `rebooting`. Maintenance with a nil or empty reason sends no reason; the Python call sends an explicit null, which the service treats the same way. An explicit empty-string reason is not expressible.
 - `PatchMachine` sends the JSON Patch once. HTTP 409 is returned to the caller. Python retries conflicts and 503 by default; Go never replays a mutation.
 - `ValidateMachineInterfaces` fails with `*MachineValidationError` only for listed interfaces that are present in the response without a true result. Interfaces absent from the response are ignored, as in Python. Failures are listed in alphabetical order because Go maps are unordered.
-- `WaitForMachineReservation` always performs the first read and then polls with the shared wait options (`resource.WithPollInterval`, `resource.WithTimeout`). The lock is best effort.
+- `WaitForMachineReservation` always performs the first read and then polls with the shared wait options (`resource.WithPollInterval` or `resource.WithWaitStrategy`, `resource.WithTimeout`). The lock is best effort.
 - `AttachPortToMachine` finds the machine (missing fails with `resource.ErrNotFound`), finds the Network port by ID then exact name (must exist), then sends one POST. `DetachPortFromMachine` treats HTTP 400 as "not attached" and returns `false, nil`, like Python's default `ignore_missing=True`. `ListPortsAttachedToMachine` fails as a whole if any VIF cannot be found.
 
 ## Not provided

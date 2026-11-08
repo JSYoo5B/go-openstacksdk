@@ -45,6 +45,8 @@ Go API:
   Tests: `blockstorage/snapshot_mutation_wait_contract_test.go:TestCreateVolumeSnapshotExplicitNonpositiveTimeoutIsPostCreateAndPrePoll`, `blockstorage/snapshot_mutation_wait_contract_test.go:TestCreateVolumeSnapshotPositiveWaitBudgetBeginsAfterCreationAndDoesNotAbortSlowTargetGET`, `blockstorage/snapshot_mutation_wait_contract_test.go:TestCreateVolumeSnapshotPositiveTimeoutIsNoticedAtNextLoopBoundary`, `blockstorage/snapshot_mutation_wait_contract_test.go:TestCreateVolumeSnapshotPollIntervalsAreConsumedOnlyAtNonterminalSleep`.
 - Native retry cannot replace owned POST body, fixed route, method, decoder, retention, original status policy or captured source. Native auth is live but orchestration does not independently replay create or roll back accepted resources.
   Tests: `blockstorage/snapshot_mutation_transport_test.go:TestVolumeSnapshotMutationCreateRetryCannotReplaceOwnedBodyOrDecoder`.
+- SnapshotMutationWaitOpts.WaitStrategy rejects an invalid or zero-value strategy, or one set together with the interval field, with ErrInvalidOption before HTTP and paces polls by the strategy's pause sequence.
+  Tests: `blockstorage/snapshot_wait_strategy_test.go:TestSnapshotAndBackupWaitStrategyRejectedBeforeHTTP`, `blockstorage/snapshot_wait_strategy_test.go:TestSnapshotWaitStrategyPacesPolls`.
 
 Python/Go differences:
 
@@ -57,6 +59,7 @@ Python/Go differences:
 - Configured/authenticated location is captured and recomputed from project descriptors with null snapshot zone; raw location/availability_zone cannot replace it. Explicit selected Cinder microversion is preserved without automatic3.65 discovery/cap/upgrade or v2 selection.
 - Wait timeout is a nullable Go duration checked at source loop boundaries without an HTTP-derived context deadline. Parent contexts supply transport/sleep cancellation. Configurable poll interval is a Go extension; default2s and source zero100ms/smaller-timeout behavior are preserved.
 - Source creation default force=false/wait=true, four kwargs, merged request seed and initial available shortcut are preserved. No automatic native projection, generated names or metadata kwargs are added.
+- Python waits use a fixed poll interval. SnapshotMutationWaitOpts.WaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and setting it together with the interval field fails with ErrInvalidOption before HTTP.
 
 ### `python:cloud/_block_storage/BlockStorageCloudMixin/delete_volume_snapshot`
 
@@ -90,6 +93,8 @@ Go API:
   Tests: `blockstorage/snapshot_mutation_delete_contract_test.go:TestDeleteVolumeSnapshotErrorsAreNonterminalAndLatestMergedIDControlsNextPoll`, `blockstorage/snapshot_mutation_delete_contract_test.go:TestDeleteVolumeSnapshotNonpositiveWaitTimeoutIsCheckedAfterDELETEBeforeEvenCachedDeletedGET`, `blockstorage/snapshot_mutation_delete_contract_test.go:TestDeleteVolumeSnapshotPositiveBudgetStartsAfterDELETEAndAcceptsSlowFreshDeleted`, `blockstorage/snapshot_mutation_options_test.go:TestSnapshotMutationOptionsPreserveOmissionAndExplicitFalseZero`, `blockstorage/snapshot_mutation_options_test.go:TestSnapshotMutationOptionsPreparationIsPureAndDefersReachedValueValidation`.
 - Polling404 needs completed clean body Read/Close and source/context guards. Gophercloud v2.15.0 ignores unexpected-code read/Close errors, so the private observer preserves original rejection policy and joins all faults, including joined EOF/custom Read and Close EOF, preventing false absence. Wrapped native errors or expanded >=400 policy never complete. Native404 retry-to200 and401 reauth remain live with fixed request guards; clean404 has separate Absent proof rather than LastAccepted proof.
   Tests: `blockstorage/snapshot_mutation_transport_test.go:TestVolumeSnapshotMutationDelete404RequiresCleanReadCloseAndGuard`, `blockstorage/snapshot_mutation_transport_test.go:TestVolumeSnapshotMutationDeletePollingPreservesLiveAuthAndNative404Retry`, `blockstorage/snapshot_mutation_delete_contract_test.go:TestDeleteVolumeSnapshotCleanPolling404CompletesWithSeparateAbsenceProof`.
+- SnapshotMutationWaitOpts.WaitStrategy rejects an invalid or zero-value strategy, or one set together with the interval field, with ErrInvalidOption before HTTP and paces polls by the strategy's pause sequence.
+  Tests: `blockstorage/snapshot_wait_strategy_test.go:TestSnapshotAndBackupWaitStrategyRejectedBeforeHTTP`, `blockstorage/snapshot_wait_strategy_test.go:TestSnapshotWaitStrategyPacesPolls`.
 
 Python/Go differences:
 
@@ -102,6 +107,7 @@ Python/Go differences:
 - Configured/authenticated location is captured and recomputed from project descriptors with null snapshot zone; raw location/availability_zone cannot replace it. Explicit selected Cinder microversion is preserved without automatic3.65 discovery/cap/upgrade or v2 selection.
 - Wait timeout is a nullable Go duration checked at source loop boundaries without an HTTP-derived context deadline. Parent contexts supply transport/sleep cancellation. Configurable poll interval is a Go extension; default2s and source zero100ms/smaller-timeout behavior are preserved.
 - Source deletion default wait=false and empty input false are preserved with nullable bool Deleted. Mutation404 stays terminal; only a clean original concrete polling404 completes. Extra body-fault observation compensates for native ignored rejection Read/Close errors without bypassing native retry.
+- Python waits use a fixed poll interval. SnapshotMutationWaitOpts.WaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and setting it together with the interval field fails with ErrInvalidOption before HTTP.
 
 ## Usage examples
 

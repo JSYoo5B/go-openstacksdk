@@ -91,6 +91,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDeleteTimeout`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDeleteUnlimited`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDeletePollInterval`
+- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDeleteWaitStrategy`
 
 - DeleteCloudImageRecord finds the image with the ignore-missing Find graph; absence returns Deleted false without DELETE. A found record is deleted with the owned whole-image DeleteImageRecord, and a native delete failure returns Found under the Cloud operation before any Swift cleanup or wait.
   Tests: `image/image_record_cloud_delete_test.go:TestCloudImageRecordDeleteFindsDeletesCleansAndWaits`, `image/image_record_cloud_delete_test.go:TestCloudImageRecordDeleteLateFailuresKeepPhases`.
@@ -100,11 +101,14 @@ Go API:
   Tests: `image/image_record_cloud_delete_test.go:TestCloudImageRecordDeleteLateFailuresKeepPhases`, `image/image_record_cloud_delete_test.go:TestCloudImageRecordDeleteFindsDeletesCleansAndWaits`.
 - Blank identities, nil options, nonpositive intervals, invalid headers and invalid captured task configuration fail before HTTP.
   Tests: `image/image_record_cloud_delete_test.go:TestCloudImageRecordDeleteInputFailsBeforeHTTP`.
+- image.WithImageRecordCloudDeleteWaitStrategy rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, the interval option given before or after it.
+  Tests: `image/wait_strategy_test.go:TestImageWaitStrategyOptionsRejectedBeforeHTTP`, `image/wait_strategy_test.go:TestImageWaitStrategyLaterOptionWins`.
 
 Python/Go differences:
 
 - Python returns a bool and raises SDKException, TypeError, AttributeError, ValueError or ResourceTimeout; Go returns ImageRecordCloudDeleteResult with Deleted, Found, Delete, Object and wait evidence plus typed errors.
 - The pinned delete_objects argument is never read by the source body, so Go omits it. Wait polling intervals and request headers are Go extensions; headers apply to Glance requests only.
+- Python waits use a fixed poll interval. image.WithImageRecordCloudDeleteWaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of the interval and strategy options wins.
 
 ## Usage examples
 

@@ -147,3 +147,52 @@ func (s Schedule) Delay(n int, rng *rand.Rand) time.Duration {
 	}
 	return d
 }
+
+// Problem reports why s cannot be used, or "" when it is valid: the first
+// pause must be positive, a linear step must not be negative, an
+// exponential factor must be finite and at least 1, a cap must be zero (no
+// cap) or at least the first pause, and the jitter must be known.
+func (s Schedule) Problem() string {
+	if s.Initial <= 0 {
+		return "the first pause must be positive"
+	}
+	switch s.kind {
+	case fixed:
+	case linear:
+		if s.Step < 0 {
+			return "the linear step must not be negative"
+		}
+	case exponential:
+		if math.IsNaN(s.Factor) || math.IsInf(s.Factor, 0) || s.Factor < 1 {
+			return "the exponential factor must be finite and at least 1"
+		}
+	default:
+		return "unknown schedule"
+	}
+	if s.kind != fixed && s.Max != 0 && s.Max < s.Initial {
+		return "the maximum pause must be zero (no cap) or at least the first pause"
+	}
+	if s.Jitter < NoJitter || s.Jitter > CenteredJitter {
+		return "unknown jitter"
+	}
+	return ""
+}
+
+// Pacer numbers the pauses of one wait so loops do not keep their own
+// counter. Each Next call returns the pause after the next unsuccessful poll,
+// starting with n = 1.
+type Pacer struct {
+	delay func(n int) time.Duration
+	n     int
+}
+
+// NewPacer returns a Pacer that asks delay for each pause.
+func NewPacer(delay func(n int) time.Duration) *Pacer {
+	return &Pacer{delay: delay}
+}
+
+// Next returns the pause after the next unsuccessful poll.
+func (p *Pacer) Next() time.Duration {
+	p.n++
+	return p.delay(p.n)
+}

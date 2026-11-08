@@ -37,6 +37,7 @@ func (c *Collection[T]) WaitDeleted(ctx context.Context, ref Ref, opts ...WaitOp
 		}
 		id = c.binding.ID(value)
 	}
+	pacer := o.pacer()
 	for {
 		if err := ctx.Err(); err != nil {
 			return c.wrap("wait deleted", err)
@@ -85,7 +86,7 @@ func (c *Collection[T]) WaitDeleted(ctx context.Context, ref Ref, opts ...WaitOp
 				return c.wrap("wait deleted", err)
 			}
 		}
-		if err := o.pause(ctx); err != nil {
+		if err := o.pause(ctx, pacer.Next()); err != nil {
 			return c.wrap("wait deleted", err)
 		}
 	}

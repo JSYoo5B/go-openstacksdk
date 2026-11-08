@@ -99,7 +99,10 @@ entries, an unhashable `rel`, a non-string stack reference) are errors.
 ## Differences from Python
 
 - There is no overall wait timeout in Python; in Go the context bounds the
-  wait. `WithPollInterval` replaces the fixed five-second poll period.
+  wait. `WithPollInterval` replaces the fixed five-second poll period, and
+  `WithWaitStrategy` replaces it with a `resource.WaitStrategy` (fixed, linear
+  or exponential pauses with optional jitter), a Go-only extension; the later
+  of the two options wins and an invalid strategy fails before HTTP.
 - `TimeoutSeconds` is an integer; Python also accepts float seconds and then
   sends a float `timeout_mins`.
 - Results are typed records (`SearchResult`, `MutationResult`, `DeleteResult`)

@@ -699,6 +699,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithStatusAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithFailureStates`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithPollInterval`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithWaitStrategy`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithTimeout`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithUnlimitedWait`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithProgressCallback`
@@ -718,6 +719,9 @@ Go API:
 
 - resource.WithProgress sends the same integer progress as WithProgressCallback on a caller-owned channel after each nonterminal response, including the initial lookup. Each send blocks until it is received or the context ends; the SDK never closes the caller-owned channel and sends nothing after the operation returns, a context that ends during a send stops it through its cancellation path, and a nil channel option is invalid before HTTP. With both options set the callback runs first and the value is then sent.
   Tests: `resource/wait_progress_channel_test.go:TestWaitProgressChannelSendsNonterminalValuesAndRejectsNil`, `resource/wait_progress_channel_test.go:TestWaitProgressChannelBlockedSendStopsOnCancellation`, `resource/wait_progress_channel_test.go:TestWaitProgressChannelReceiverCancellationStopsBeforeNextGET`, `resource/wait_progress_channel_test.go:TestWaitProgressCallbackRunsBeforeChannelSend`.
+- resource.WithWaitStrategy rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, the interval option given before or after it.
+  Tests: `resource/wait_strategy_test.go:TestWaitStrategyValidation`, `resource/wait_strategy_test.go:TestWaitStrategyAndPollIntervalLaterWins`, `resource/wait_strategy_test.go:TestWaitStrategyRejectedBeforeLookupAndPacesPolls`, `resource/wait_strategy_test.go:TestWaitStrategyPauseStillEndsAtCancellation`.
+
 Python/Go differences:
 
 - Python accepts any Resource and attribute and returns immediately without HTTP when it already matches; Go waits by ID, always fetches first and returns the final model.
@@ -725,6 +729,7 @@ Python/Go differences:
 - Go accepts an explicit resource.Ref and a typed SDK collection and always starts with a fresh GET; Python accepts an existing Resource and returns it without HTTP when its cached attribute already equals the target.
 - Python raises ResourceTimeout, ResourceFailure or AttributeError; Go returns the context deadline, resource.ErrFailedState or resource.ErrUnsupported (before HTTP for a missing or non-string attribute). Go requires positive intervals and timeouts; WithUnlimitedWait expresses Python wait=None.
 - Go selects exported Go field names or JSON tags (Allocation uses project_id); inventory and trait-set attributes are numeric or lists, which Python's lower() call also rejects.
+- Python waits use a fixed poll interval. resource.WithWaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of the interval and strategy options wins.
 
 ### `python:placement/v1/wait_for_delete`
 
@@ -736,6 +741,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceclasses.API.WaitForDeletion`
 - `github.com/JSYoo5B/go-openstacksdk/resource.Collection.WaitDeleted`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithPollInterval`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithWaitStrategy`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithTimeout`
 - `github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.InventoryResources`
 - `github.com/JSYoo5B/go-openstacksdk/placement/v1/traits.API.Resources`
@@ -753,6 +759,8 @@ Go API:
   Tests: `internal/servicewait/proxy_test.go:TestServiceWaitProxyDefaultsDeadlinesIntervalAndStatusAttribute`, `api/placement_proxy_waits_test.go:TestPlacementProxyWaitsStatusAttributesAndEmptyAllocations`.
 - All pinned fetchable Placement Resources (resource providers, resource classes, inventories, traits, provider traits and allocations) have SDK collections; each deletion wait polls the fixed member route until 404. An empty allocation set is a successful observation, so an allocation deletion wait reaches its deadline as in Python.
   Tests: `api/placement_proxy_waits_test.go:TestPlacementProxyWaitsDeleteEveryFetchableResource`, `api/placement_proxy_waits_test.go:TestPlacementProxyWaitsStatusAttributesAndEmptyAllocations`.
+- resource.WithWaitStrategy rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, the interval option given before or after it.
+  Tests: `resource/wait_strategy_test.go:TestWaitStrategyValidation`, `resource/wait_strategy_test.go:TestWaitStrategyAndPollIntervalLaterWins`, `resource/wait_strategy_test.go:TestWaitStrategyRejectedBeforeLookupAndPacesPolls`, `resource/wait_strategy_test.go:TestWaitStrategyPauseStillEndsAtCancellation`.
 
 Python/Go differences:
 
@@ -762,6 +770,7 @@ Python/Go differences:
 - WaitForDelete returns only an error; Python returns the original Resource on 404 and the fetched Resource on a deleted status. Native HTTP, transport, decoder and context causes remain visible; a 403 is never treated as absence.
 - Python raises ResourceTimeout; Go returns the context deadline. Go requires positive intervals and timeouts.
 - The placement Proxy wait=120 is the placement/v1.WaitForDelete default; existing generated WaitForDeletion keeps its five-minute common default, which resource.WithTimeout adjusts.
+- Python waits use a fixed poll interval. resource.WithWaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of the interval and strategy options wins.
 
 ## References
 

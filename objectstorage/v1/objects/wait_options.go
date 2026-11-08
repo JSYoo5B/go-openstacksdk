@@ -6,6 +6,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/request"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 // ObjectWaitOpts is the full object wait policy. ProgressCallback runs
@@ -13,10 +14,13 @@ import (
 // stops the wait. A nonnil Progress is then sent zero at the same step (not
 // when the callback failed); the caller owns and drains it, the wait blocks
 // on each send until it is received or ctx ends, never closes Progress and
-// sends nothing after it returns.
+// sends nothing after it returns. WaitStrategy replaces the fixed Interval
+// with a resource.WaitStrategy (a Go-only extension); setting both Interval
+// and WaitStrategy is rejected before HTTP.
 type ObjectWaitOpts struct {
 	Headers                       map[string]string
 	Interval, Timeout             *time.Duration
+	WaitStrategy                  *resource.WaitStrategy
 	StatusAttribute, StatusHeader string
 	FailureStates                 []string
 	ProgressCallback              func(int) error
@@ -49,13 +53,30 @@ func WithObjectWaitHeaders(values map[string]string) ObjectWaitOption {
 		return mergeMetadataHeaders(cfg.Headers, snapshot)
 	})
 }
+
+// WithObjectWaitPollInterval sets a fixed positive interval. It and
+// WithObjectWaitStrategy replace each other; the later one wins.
 func WithObjectWaitPollInterval(value time.Duration) ObjectWaitOption {
 	return request.Custom(func(cfg *ObjectWaitOpts) error {
 		if value <= 0 {
 			return metadataInvalid("object polling interval must be positive")
 		}
 		owned := value
-		cfg.Interval = &owned
+		cfg.Interval, cfg.WaitStrategy = &owned, nil
+		return nil
+	})
+}
+
+// WithObjectWaitStrategy replaces the fixed interval with value, a Go-only
+// extension. An invalid strategy fails with resource.ErrInvalidOption before
+// HTTP.
+func WithObjectWaitStrategy(value resource.WaitStrategy) ObjectWaitOption {
+	return request.Custom(func(cfg *ObjectWaitOpts) error {
+		if err := value.Validate(); err != nil {
+			return err
+		}
+		owned := value
+		cfg.Interval, cfg.WaitStrategy = nil, &owned
 		return nil
 	})
 }
@@ -126,6 +147,10 @@ func cloneObjectWaitOpts(value ObjectWaitOpts) ObjectWaitOpts {
 	if value.Timeout != nil {
 		owned := *value.Timeout
 		value.Timeout = &owned
+	}
+	if value.WaitStrategy != nil {
+		owned := *value.WaitStrategy
+		value.WaitStrategy = &owned
 	}
 	if value.FailureStates != nil {
 		owned := make([]string, len(value.FailureStates))

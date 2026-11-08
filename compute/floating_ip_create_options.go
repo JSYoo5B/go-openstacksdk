@@ -18,11 +18,15 @@ type CreateFloatingIPRequest struct{ Network *string }
 // zero/negative timeout immediately expires a consumed Neutron wait. An absent
 // port or Nova backend ignores server/fixed/NAT/wait. Timeout is an optional
 // whole-operation cap, independent of the source's post-allocation wait budget.
+// WaitStrategy replaces the fixed WaitInterval with a resource.WaitStrategy (a
+// Go-only extension); a nonzero WaitInterval together with WaitStrategy, or an
+// invalid strategy, is rejected before HTTP.
 type FloatingIPCreateOpts struct {
 	Server                               resource.Ref
 	PortID, FixedAddress, NATDestination string
 	Wait                                 bool
 	WaitTimeout, WaitInterval            time.Duration
+	WaitStrategy                         *resource.WaitStrategy
 	Source                               *FloatingIPSource
 	Location                             *resource.CloudLocation
 	Strict, DirectGet                    bool
@@ -52,12 +56,29 @@ func WithFloatingIPCreateWait(value bool) FloatingIPCreateOption {
 func WithFloatingIPCreateWaitTimeout(value time.Duration) FloatingIPCreateOption {
 	return func(o *FloatingIPCreateOpts) error { o.WaitTimeout = value; return nil }
 }
+
+// WithFloatingIPCreateWaitInterval sets a fixed positive interval. It and
+// WithFloatingIPCreateWaitStrategy replace each other; the later one wins.
 func WithFloatingIPCreateWaitInterval(value time.Duration) FloatingIPCreateOption {
 	return func(o *FloatingIPCreateOpts) error {
 		if value <= 0 {
 			return invalid("floating IP create wait interval must be positive")
 		}
-		o.WaitInterval = value
+		o.WaitInterval, o.WaitStrategy = value, nil
+		return nil
+	}
+}
+
+// WithFloatingIPCreateWaitStrategy replaces the fixed wait interval with
+// value, a Go-only extension. An invalid strategy fails with
+// resource.ErrInvalidOption before HTTP.
+func WithFloatingIPCreateWaitStrategy(value resource.WaitStrategy) FloatingIPCreateOption {
+	return func(o *FloatingIPCreateOpts) error {
+		if err := value.Validate(); err != nil {
+			return err
+		}
+		owned := value
+		o.WaitInterval, o.WaitStrategy = 0, &owned
 		return nil
 	}
 }
@@ -108,6 +129,14 @@ func prepareFloatingIPCreateOptions(options []FloatingIPCreateOption, guard func
 	if value.WaitInterval < 0 {
 		return FloatingIPCreateOpts{}, invalid("negative floating IP create wait interval")
 	}
+	if value.WaitStrategy != nil {
+		if value.WaitInterval != 0 {
+			return FloatingIPCreateOpts{}, invalid("floating IP create WaitInterval and WaitStrategy are mutually exclusive")
+		}
+		if err := value.WaitStrategy.Validate(); err != nil {
+			return FloatingIPCreateOpts{}, err
+		}
+	}
 	if _, err := prepareFloatingIPQueryOptions([]FloatingIPQueryOption{WithFloatingIPQueryOptions(value.query())}, guard); err != nil {
 		return FloatingIPCreateOpts{}, err
 	}
@@ -125,6 +154,10 @@ func cloneFloatingIPCreateOptions(value FloatingIPCreateOpts) FloatingIPCreateOp
 	if value.Location != nil {
 		location := value.Location.Clone()
 		copy.Location = &location
+	}
+	if value.WaitStrategy != nil {
+		strategy := *value.WaitStrategy
+		copy.WaitStrategy = &strategy
 	}
 	return copy
 }

@@ -128,6 +128,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithUnlimitedWait`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithFailureStates`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithPollInterval`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithWaitStrategy`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithTimeout`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithStatusAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithProgressCallback`
@@ -142,6 +143,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.ForSecret`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithOptions`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithInterval`
+- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithWaitStrategy`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithTimeout`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithUnlimitedWait`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithProgressCallback`
@@ -202,6 +204,11 @@ Go API:
   Tests: `resource/wait_progress_channel_test.go:TestWaitProgressChannelSendsNonterminalValuesAndRejectsNil`, `resource/wait_progress_channel_test.go:TestWaitProgressChannelBlockedSendStopsOnCancellation`, `resource/wait_progress_channel_test.go:TestWaitProgressChannelReceiverCancellationStopsBeforeNextGET`, `resource/wait_progress_channel_test.go:TestWaitProgressCallbackRunsBeforeChannelSend`.
 - WithProgress and Options.Progress send zero on a caller-owned channel after each nonterminal response. Each send blocks until it is received or the context ends; the SDK never closes the caller-owned channel and sends nothing after the operation returns, a context that ends during a send stops it through its cancellation path, and a nil channel option is invalid before HTTP. With WithProgressCallback also set the callback runs first; its error stops the wait and nothing is sent for that step.
   Tests: `keymanager/v1/waits/python_progress_channel_test.go:TestPythonKeymanagerWaitProgressChannelSendsZeroAndRejectsNil`, `keymanager/v1/waits/python_progress_channel_test.go:TestPythonKeymanagerWaitProgressChannelBlockedSendStopsOnCancellation`, `keymanager/v1/waits/python_progress_channel_test.go:TestPythonKeymanagerWaitProgressChannelReceiverCancellation`, `keymanager/v1/waits/python_progress_channel_test.go:TestPythonKeymanagerWaitProgressCallbackRunsBeforeChannelSend`.
+- resource.WithWaitStrategy rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, the interval option given before or after it.
+  Tests: `resource/wait_strategy_test.go:TestWaitStrategyValidation`, `resource/wait_strategy_test.go:TestWaitStrategyAndPollIntervalLaterWins`, `resource/wait_strategy_test.go:TestWaitStrategyRejectedBeforeLookupAndPacesPolls`, `resource/wait_strategy_test.go:TestWaitStrategyPauseStillEndsAtCancellation`.
+- waits.WithWaitStrategy rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, the interval option given before or after it.
+  Tests: `keymanager/v1/waits/wait_strategy_test.go:TestKeymanagerWaitStrategy`.
+
 Python/Go differences:
 
 - Legacy generated collection waits retain their historical five-minute policy. The concrete waits.API lane defaults status to unlimited/ERROR and deletion120s with interval2s, matching the pinned helper defaults.
@@ -225,6 +232,8 @@ Python/Go differences:
 - ACL wait read projection follows Source getter dict coercion while existing native secretacls API uses its independent stock object validation. Strict UTF8, declared string/null wait attributes and owned-null computed location remain bounded SDK policies.
 - Admin ProjectQuota is a member route unlike effective Quota; its original project ID is seeded and immutable while response IDs remain passive. Like Quota/ACL it has no status descriptor and stock override reset can leave GET200, so absence waiting is not proof of settings deletion.
 - This mapping covers finite SDK-owned concrete target constructors rather than arbitrary Python Resource/runtime subclass/cache/location behavior. SDK-R1/C1/S1 and actual deployment/permission/release validation remain explicit whole-SDK gaps.
+- Python waits use a fixed poll interval. resource.WithWaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of the interval and strategy options wins.
+- Python waits use a fixed poll interval. waits.WithWaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of the interval and strategy options wins.
 
 ### `python:key_manager/v1/wait_for_delete`
 
@@ -238,6 +247,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.Collection.WaitDeleted`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithTimeout`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithPollInterval`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithWaitStrategy`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.API.WaitForDelete`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.New`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.Container`
@@ -248,6 +258,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.ForSecret`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithOptions`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithInterval`
+- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithWaitStrategy`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithTimeout`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithUnlimitedWait`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithProgressCallback`
@@ -298,6 +309,11 @@ Go API:
 
 - WithProgress and Options.Progress send zero on a caller-owned channel after each nonterminal response. Each send blocks until it is received or the context ends; the SDK never closes the caller-owned channel and sends nothing after the operation returns, a context that ends during a send stops it through its cancellation path, and a nil channel option is invalid before HTTP. With WithProgressCallback also set the callback runs first; its error stops the wait and nothing is sent for that step.
   Tests: `keymanager/v1/waits/python_progress_channel_test.go:TestPythonKeymanagerWaitProgressChannelSendsZeroAndRejectsNil`, `keymanager/v1/waits/python_progress_channel_test.go:TestPythonKeymanagerWaitProgressChannelBlockedSendStopsOnCancellation`, `keymanager/v1/waits/python_progress_channel_test.go:TestPythonKeymanagerWaitProgressChannelReceiverCancellation`, `keymanager/v1/waits/python_progress_channel_test.go:TestPythonKeymanagerWaitProgressCallbackRunsBeforeChannelSend`.
+- resource.WithWaitStrategy rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, the interval option given before or after it.
+  Tests: `resource/wait_strategy_test.go:TestWaitStrategyValidation`, `resource/wait_strategy_test.go:TestWaitStrategyAndPollIntervalLaterWins`, `resource/wait_strategy_test.go:TestWaitStrategyRejectedBeforeLookupAndPacesPolls`, `resource/wait_strategy_test.go:TestWaitStrategyPauseStillEndsAtCancellation`.
+- waits.WithWaitStrategy rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, the interval option given before or after it.
+  Tests: `keymanager/v1/waits/wait_strategy_test.go:TestKeymanagerWaitStrategy`.
+
 Python/Go differences:
 
 - Legacy generated collection waits retain their historical five-minute policy. The concrete waits.API lane defaults status to unlimited/ERROR and deletion120s with interval2s, matching the pinned helper defaults.
@@ -319,6 +335,8 @@ Python/Go differences:
 - ACL wait read projection follows Source getter dict coercion while existing native secretacls API uses its independent stock object validation. Strict UTF8, declared string/null wait attributes and owned-null computed location remain bounded SDK policies.
 - Admin ProjectQuota is a member route unlike effective Quota; its original project ID is seeded and immutable while response IDs remain passive. Like Quota/ACL it has no status descriptor and stock override reset can leave GET200, so absence waiting is not proof of settings deletion.
 - This mapping covers finite SDK-owned concrete target constructors rather than arbitrary Python Resource/runtime subclass/cache/location behavior. SDK-R1/C1/S1 and actual deployment/permission/release validation remain explicit whole-SDK gaps.
+- Python waits use a fixed poll interval. resource.WithWaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of the interval and strategy options wins.
+- Python waits use a fixed poll interval. waits.WithWaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of the interval and strategy options wins.
 
 ## Usage examples
 

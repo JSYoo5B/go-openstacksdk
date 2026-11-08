@@ -48,6 +48,9 @@ Go API:
 
 - The wait policy Progress channel is sent zero after each nonterminal observation, after ProgressCallback when both are set; a callback error stops the wait and nothing is sent for that step. Each send blocks until it is received or the context ends; the SDK never closes the caller-owned channel and sends nothing after the operation returns, a context that ends during a send stops it through its cancellation path; a nil field means no progress.
   Tests: `blockstorage/volume_progress_channel_test.go:TestDeleteVolumeProgressChannelSendsZeroPerNonterminalPoll`, `blockstorage/volume_progress_channel_test.go:TestDeleteVolumeProgressChannelBlockedSendStopsOnCancellation`, `blockstorage/volume_progress_channel_test.go:TestDeleteVolumeProgressChannelReceiverCancellation`, `blockstorage/volume_progress_channel_test.go:TestDeleteVolumeProgressCallbackRunsBeforeChannelSend`, `blockstorage/volume_progress_channel_test.go:TestAttachAndCreateVolumeProgressChannelSendZeroAfterCallback`.
+- DetachVolumeWaitOpts.WaitStrategy rejects an invalid or zero-value strategy, or one set together with the interval field, with ErrInvalidOption before HTTP and paces polls by the strategy's pause sequence.
+  Tests: `blockstorage/wait_strategy_test.go:TestVolumeWaitStrategyFieldsValidateAndSelect`, `blockstorage/wait_strategy_test.go:TestVolumeWaitStrategyPreparedPoliciesReportTheStrategy`, `blockstorage/wait_strategy_test.go:TestVolumeAttachmentWaitPausesFollowTheStrategy`.
+
 Python/Go differences:
 
 - Go accepts explicit Server/Volume resource.Ref values and resolves names once. Pinned cloud helper indexes caller Resource/dict values for IDs and passes strings into the Compute proxy; that proxy may find_server and reverse server/volume arguments through a compatibility heuristic. Go never guesses or swaps the caller roles and fixes deletion to the chosen volume ID, not attachment identity.
@@ -57,6 +60,7 @@ Python/Go differences:
 - Go provides a concrete owned policy and a local PrepareDetachVolumeOptions seam. Connection applies original option callbacks before service discovery and selects Cinder only for waiting or volume Name; package callers may use only Nova with wait false and a volume ID. Direct package calls capture required sources before original callbacks; both use frozen selected client settings and current authentication from original providers.
 - Go retains raw JSON precision, nullable canonical fields and literal timestamps in its reused volume observation models rather than reproducing mutable Python Resource descriptors, alternate identity, dirty state, cache and injected session/adapter objects. ProgressCallback and caller-selectable failure states are explicit Go extensions; this helper does not expose Cinder force/connector detach action controls.
 - This go_mapping closes only the directly declared cloud detach_volume parameter/control-flow contract and its documented Go adaptation. Separately inventoried Compute delete_volume_attachment, cloud get_volume, Cinder find/wait and inherited Resource declarations retain independent reviews; native leaves and other volume workflows are not promoted.
+- Python waits use a fixed poll interval. DetachVolumeWaitOpts.WaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and setting it together with the interval field fails with ErrInvalidOption before HTTP.
 
 ## Usage examples
 

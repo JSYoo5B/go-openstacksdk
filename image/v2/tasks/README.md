@@ -18,6 +18,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/tasks.WithTaskWaitTimeout`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/tasks.WithUnlimitedTaskWait`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/tasks.WithTaskWaitPollInterval`
+- `github.com/JSYoo5B/go-openstacksdk/image/v2/tasks.WithTaskWaitStrategy`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/tasks.WithTaskWaitFailureStates`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/tasks.WithTaskWaitHeaders`
@@ -46,6 +47,8 @@ Go API:
   Tests: `api/glance_task_wait_contracts_test.go:TestGlanceTaskWaitLiveSourceFixedRoutesAndReauthentication`.
 - Existing native Get/Create/List declarations, Task alias and generic collection wait boundary remain separate. Native Get/Create still expose their original float64 map projection, Name and Remove remain unsupported, and the new wait adds no cleanup requests. Generator metadata marks only the audited image-v2 Task collection with task_wait=WaitForTask; parent/payload drift and unrelated resource inference are rejected, without emitting the manual workflow as a native declaration.
   Tests: `api/glance_task_wait_contracts_test.go:TestGlanceTaskWaitNativeSurfacesAndCanonicalEvidenceStaySeparate`, `internal/cmd/sdkgen/glance_task_wait_test.go:TestGlanceTaskWaitBindsActualIDOnlyCollectionWithoutReplacingNativeCalls`, `internal/cmd/sdkgen/glance_task_wait_test.go:TestGlanceTaskWaitRejectsParentAndPayloadModelDrift`.
+- tasks.WithTaskWaitStrategy rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, the interval option given before or after it.
+  Tests: `image/v2/tasks/wait_strategy_test.go:TestTaskWaitStrategyRejectedBeforeHTTPAndLaterWins`, `image/v2/tasks/wait_strategy_test.go:TestTaskWaitStrategyPacesPolls`.
 
 Python/Go differences:
 
@@ -57,6 +60,7 @@ Python/Go differences:
 - SDK-owned explicit header options snapshot requests and preserve original Provider transport policy. Protected auth/transport/version headers and source/route gates are deliberate Go controls rather than arbitrary session/adapter injection. No guessed task type enum, cloud schema, access permission or minimum microversion is imposed.
 - Python returns the supplied Task without HTTP when its status already matches; Go always fetches the task first.
 - Go returns typed result values with copied raw response evidence instead of a mutable Python Resource, so there is no Resource descriptor coercion, dirty-attribute tracking or seeded-object merge.
+- Python waits use a fixed poll interval. tasks.WithTaskWaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of the interval and strategy options wins.
 
 ## Usage examples
 

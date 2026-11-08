@@ -13,7 +13,9 @@ import (
 
 // ImageRecordWaitOpts owns a finite Image descriptor wait policy. Nil Timeout
 // means unlimited state waiting or 120 seconds for deletion. Nil PollInterval
-// means two seconds. Nil FailureStates uses ERROR; a nonnil empty slice disables
+// means two seconds. WaitStrategy replaces the fixed interval with a
+// resource.WaitStrategy (a Go-only extension); setting both is rejected before
+// HTTP. Nil FailureStates uses ERROR; a nonnil empty slice disables
 // state failures. Attribute defaults to status; deletion always observes status.
 // Callback receives zero for Image, whose declared model has no progress field.
 // Progress, when set, is sent zero at the same steps after Callback returns;
@@ -21,6 +23,7 @@ import (
 type ImageRecordWaitOpts struct {
 	Headers               map[string]string
 	Timeout, PollInterval *time.Duration
+	WaitStrategy          *resource.WaitStrategy
 	Unlimited             bool
 	FailureStates         []string
 	Attribute             string
@@ -30,7 +33,7 @@ type ImageRecordWaitOpts struct {
 
 // ImageRecordWaitOption is one option of the image record waits:
 // WithImageRecordWaitOpts, WithImageRecordWaitHeaders (merges), the timeout,
-// poll, failure state, attribute, callback and progress options, request.Header (merges
+// poll interval, wait strategy, failure state, attribute, callback and progress options, request.Header (merges
 // one header) or request.Custom over *ImageRecordWaitOpts. Other shared calls,
 // including request.Headers, fail with resource.ErrInvalidOption before HTTP.
 type ImageRecordWaitOption = request.GetCall
@@ -48,6 +51,10 @@ func copyImageRecordWaitOpts(value ImageRecordWaitOpts) ImageRecordWaitOpts {
 	if value.PollInterval != nil {
 		owned := *value.PollInterval
 		value.PollInterval = &owned
+	}
+	if value.WaitStrategy != nil {
+		owned := *value.WaitStrategy
+		value.WaitStrategy = &owned
 	}
 	if value.FailureStates != nil {
 		owned := make([]string, len(value.FailureStates))
@@ -72,8 +79,26 @@ func WithImageRecordWaitTimeout(value time.Duration) ImageRecordWaitOption {
 		return nil
 	})
 }
+
+// WithImageRecordWaitPollInterval sets a fixed interval. It and
+// WithImageRecordWaitStrategy replace each other; the later one wins.
 func WithImageRecordWaitPollInterval(value time.Duration) ImageRecordWaitOption {
-	return request.Custom(func(config *ImageRecordWaitOpts) error { owned := value; config.PollInterval = &owned; return nil })
+	return request.Custom(func(config *ImageRecordWaitOpts) error {
+		owned := value
+		config.PollInterval, config.WaitStrategy = &owned, nil
+		return nil
+	})
+}
+
+// WithImageRecordWaitStrategy replaces the fixed interval with value, a Go-only
+// extension. An invalid strategy fails with resource.ErrInvalidOption before
+// HTTP.
+func WithImageRecordWaitStrategy(value resource.WaitStrategy) ImageRecordWaitOption {
+	return request.Custom(func(config *ImageRecordWaitOpts) error {
+		owned := value
+		config.PollInterval, config.WaitStrategy = nil, &owned
+		return nil
+	})
 }
 func WithImageRecordWaitUnlimited() ImageRecordWaitOption {
 	return request.Custom(func(config *ImageRecordWaitOpts) error { config.Timeout, config.Unlimited = nil, true; return nil })
@@ -159,6 +184,9 @@ func prepareImageRecordWait(ctx context.Context, check func(context.Context) err
 	if config.Timeout != nil && config.Unlimited {
 		return config, uploadInvalid("image wait timeout conflicts with unlimited waiting")
 	}
+	if err := validateImageWaitStrategy(config.PollInterval, config.WaitStrategy); err != nil {
+		return config, err
+	}
 	var err error
 	config.Headers, err = imageMutationHeaders(config.Headers, false, "")
 	return copyImageRecordWaitOpts(config), errors.Join(err, check(ctx))
@@ -198,6 +226,9 @@ func imageRecordWaitPolicy(config ImageRecordWaitOpts, deleting bool) (resource.
 		}
 	}
 	options := []resource.WaitOption{resource.WithUnlimitedWait(), resource.WithPollInterval(interval), resource.WithFailureStates()}
+	if config.WaitStrategy != nil {
+		options = append(options, resource.WithWaitStrategy(*config.WaitStrategy))
+	}
 	if timeout > 0 {
 		options = append(options, resource.WithTimeout(timeout))
 	}

@@ -8,7 +8,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/pollschedule"
 	"github.com/JSYoo5B/go-openstacksdk/request"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 	upstream "github.com/gophercloud/gophercloud/v2/openstack/baremetal/v1/nodes"
 )
@@ -147,16 +149,39 @@ func (a *API) UnsetMaintenanceAndGet(ctx context.Context, id string) (*Node, err
 // WaitOption configures the polling helpers.
 type WaitOption func(*waitConfig)
 
-type waitConfig struct{ interval time.Duration }
+type waitConfig struct {
+	interval time.Duration
+	strategy *resource.WaitStrategy
+	err      error
+}
 
 // WithWaitInterval sets the pause between polls. Non-positive values keep
-// DefaultWaitInterval.
+// DefaultWaitInterval. A positive interval and WithWaitStrategy replace each
+// other; the later one wins.
 func WithWaitInterval(d time.Duration) WaitOption {
 	return func(c *waitConfig) {
 		if d > 0 {
-			c.interval = d
+			c.interval, c.strategy, c.err = d, nil, nil
 		}
 	}
+}
+
+// WithWaitStrategy replaces the fixed pause between polls with strategy, a
+// Go-only extension. An invalid strategy makes the wait fail with
+// resource.ErrInvalidOption before the first read, unless a later
+// WithWaitInterval or WithWaitStrategy replaces it.
+func WithWaitStrategy(strategy resource.WaitStrategy) WaitOption {
+	return func(c *waitConfig) {
+		c.strategy, c.err = &strategy, strategy.Validate()
+	}
+}
+
+// pacer numbers the pauses of one wait under the selected strategy.
+func (c waitConfig) pacer() *pollschedule.Pacer {
+	if c.strategy != nil {
+		return pollschedule.NewPacer(c.strategy.Delay)
+	}
+	return pollschedule.NewPacer(resource.FixedWait(c.interval).Delay)
 }
 
 func waitConfigFrom(options []WaitOption) waitConfig {
@@ -173,6 +198,10 @@ func waitConfigFrom(options []WaitOption) waitConfig {
 // reports true. Context expiry ends the wait and stays observable through
 // errors.Is. A read error ends the wait unchanged.
 func (a *API) poll(ctx context.Context, op, id string, cfg waitConfig, done func(*Node) bool) (*Node, error) {
+	if cfg.err != nil {
+		return nil, request.Wrap(op, "nodes", cfg.err)
+	}
+	pacer := cfg.pacer()
 	for {
 		node, err := a.Get(ctx, id)
 		if err != nil {
@@ -181,7 +210,7 @@ func (a *API) poll(ctx context.Context, op, id string, cfg waitConfig, done func
 		if done(node) {
 			return node, nil
 		}
-		timer := time.NewTimer(cfg.interval)
+		timer := time.NewTimer(pacer.Next())
 		select {
 		case <-ctx.Done():
 			timer.Stop()
@@ -209,10 +238,14 @@ func (a *API) WaitForReservation(ctx context.Context, snapshot *Node, options ..
 	if snapshot == nil {
 		return nil, request.Wrap("WaitForReservation", "nodes", errors.New("node snapshot is required"))
 	}
+	cfg := waitConfigFrom(options)
+	if cfg.err != nil {
+		return nil, request.Wrap("WaitForReservation", "nodes", cfg.err)
+	}
 	if snapshot.Reservation == "" {
 		return snapshot, nil
 	}
-	return a.poll(ctx, "WaitForReservation", snapshot.UUID, waitConfigFrom(options), func(n *Node) bool { return n.Reservation == "" })
+	return a.poll(ctx, "WaitForReservation", snapshot.UUID, cfg, func(n *Node) bool { return n.Reservation == "" })
 }
 
 // getOrNil reads the node and returns a nil node together with any error.

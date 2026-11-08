@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"time"
+
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 // DetachVolumeOpts owns the removal policy. Wait nil selects the default true.
@@ -47,6 +49,7 @@ type preparedDetachOptions struct {
 	policy            DetachVolumeOpts
 	wait              bool
 	interval, timeout time.Duration
+	strategy          resource.WaitStrategy
 	failures          []string
 }
 
@@ -75,7 +78,7 @@ func applyDetachOptions(options []DetachVolumeOption, guard func() error) (prepa
 	}
 	return preparedDetachOptions{
 		policy: copyDetachOptions(config), wait: common.wait,
-		interval: common.interval, timeout: common.timeout, failures: common.failures,
+		interval: common.interval, strategy: common.strategy, timeout: common.timeout, failures: common.failures,
 	}, nil
 }
 
@@ -95,7 +98,7 @@ func PrepareDetachVolumeOptions(ctx context.Context, options ...DetachVolumeOpti
 	config := copyDetachOptions(prepared.policy)
 	config.Wait = copyAttachPointer(&prepared.wait)
 	config.WaitPolicy.Timeout = copyAttachPointer(&prepared.timeout)
-	config.WaitPolicy.PollInterval = copyAttachPointer(&prepared.interval)
+	config.WaitPolicy.PollInterval, config.WaitPolicy.WaitStrategy = preparedWaitTiming(prepared.interval, prepared.policy.WaitPolicy.WaitStrategy)
 	config.WaitPolicy.FailureStates = append(make([]string, 0, len(prepared.failures)), prepared.failures...)
 	return config, nil
 }

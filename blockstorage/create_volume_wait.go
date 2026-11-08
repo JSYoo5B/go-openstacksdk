@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/pollschedule"
 	"github.com/JSYoo5B/go-openstacksdk/internal/progress"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
@@ -17,6 +18,7 @@ func (p *preparedCreateVolume) wait(ctx context.Context, result *CreateVolumeRes
 		waitCtx, cancel = context.WithTimeout(ctx, p.options.timeout)
 		defer cancel()
 	}
+	pacer := pollschedule.NewPacer(p.options.strategy.Delay)
 	for {
 		// Even an available creation response requires this fresh immediate
 		// GET to establish readiness for the returned canonical identity.
@@ -80,7 +82,7 @@ func (p *preparedCreateVolume) wait(ctx context.Context, result *CreateVolumeRes
 		if err := p.guard(waitCtx); err != nil {
 			return response.Fail(err)
 		}
-		timer := time.NewTimer(p.options.interval)
+		timer := time.NewTimer(pacer.Next())
 		select {
 		case <-waitCtx.Done():
 			timer.Stop()

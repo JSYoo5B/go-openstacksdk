@@ -31,6 +31,9 @@ func Delete(ctx context.Context, client *gophercloud.ServiceClient, nameOrID str
 	}
 	policy, err := prepare(ctx, options, cloneDeleteOptions, func() error { return p.source.Guard(ctx) })
 	if err == nil {
+		err = policy.WaitPolicy.validate()
+	}
+	if err == nil {
 		err = p.ownLocation(ctx, policy.Location)
 	}
 	if err != nil {
