@@ -10,31 +10,31 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/pollschedule"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/internal/sourcewait"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-// ImageRecordCloudWaitOpts controls Cloud wait_for_image. Nil Timeout means
-// the Source default of 3600 seconds and Unlimited means Python None. A zero
-// or negative timeout expires before the first lookup. Nil PollInterval means
-// the fixed two-second iterate_timeout wait; a configured interval is a Go
-// extension and must be positive. WaitStrategy replaces the fixed interval
-// with a resource.WaitStrategy, also a Go extension; setting both PollInterval
-// and WaitStrategy is rejected before HTTP.
+// ImageRecordCloudWaitOpts controls Cloud wait_for_image. Timeout is the
+// Source timeout: nil means 3600 seconds and a zero or negative timeout
+// expires before the first lookup. Wait holds shared resource wait options
+// applied over it: WithTimeout and WithUnlimitedWait (Python None) override
+// Timeout, and WithPollInterval or WithWaitStrategy replace the fixed
+// two-second iterate_timeout pause, a Go extension. Other shared controls fail
+// with resource.ErrInvalidOption before HTTP.
 type ImageRecordCloudWaitOpts struct {
-	Headers      map[string]string
-	Timeout      *time.Duration
-	Unlimited    bool
-	PollInterval *time.Duration
-	WaitStrategy *resource.WaitStrategy
+	Headers map[string]string
+	Timeout *time.Duration
+	Wait    []resource.WaitOption
 }
 
 // ImageRecordCloudWaitOption is one option of the Cloud image waits:
-// WithImageRecordCloudWaitOpts, WithImageRecordCloudWaitHeaders (merges), the
-// timeout, poll interval and wait strategy options, request.Header (merges one header) or
-// request.Custom over *ImageRecordCloudWaitOpts. Other shared calls, including
-// request.Headers, fail with resource.ErrInvalidOption before HTTP.
+// WithImageRecordCloudWaitOpts, WithImageRecordCloudWaitHeaders (merges),
+// WithImageRecordCloudWaitTimeout, WithImageRecordCloudWait, request.Header
+// (merges one header) or request.Custom over *ImageRecordCloudWaitOpts. Other
+// shared calls, including request.Headers, fail with resource.ErrInvalidOption
+// before HTTP.
 type ImageRecordCloudWaitOption = request.GetCall
 
 var imageRecordCloudWaitCalls = calls.Spec[ImageRecordCloudWaitOpts]{
@@ -47,14 +47,7 @@ func copyImageRecordCloudWait(value ImageRecordCloudWaitOpts) ImageRecordCloudWa
 		owned := *value.Timeout
 		value.Timeout = &owned
 	}
-	if value.PollInterval != nil {
-		owned := *value.PollInterval
-		value.PollInterval = &owned
-	}
-	if value.WaitStrategy != nil {
-		owned := *value.WaitStrategy
-		value.WaitStrategy = &owned
-	}
+	value.Wait = slices.Clone(value.Wait)
 	return value
 }
 func WithImageRecordCloudWaitOpts(value ImageRecordCloudWaitOpts) ImageRecordCloudWaitOption {
@@ -65,65 +58,76 @@ func WithImageRecordCloudWaitHeaders(values map[string]string) ImageRecordCloudW
 	owned := copyImageRecordHeaders(values)
 	return request.Custom(func(config *ImageRecordCloudWaitOpts) error { return mergeImageRecordHeaders(&config.Headers, owned) })
 }
+
+// WithImageRecordCloudWaitTimeout sets the Source timeout; zero or negative
+// expires before the first lookup. A WithTimeout or WithUnlimitedWait in
+// WithImageRecordCloudWait overrides it.
 func WithImageRecordCloudWaitTimeout(value time.Duration) ImageRecordCloudWaitOption {
 	return request.Custom(func(config *ImageRecordCloudWaitOpts) error {
 		owned := value
-		config.Timeout, config.Unlimited = &owned, false
+		config.Timeout = &owned
 		return nil
 	})
 }
-func WithImageRecordCloudWaitUnlimited() ImageRecordCloudWaitOption {
-	return request.Custom(func(config *ImageRecordCloudWaitOpts) error { config.Timeout, config.Unlimited = nil, true; return nil })
-}
 
-// WithImageRecordCloudWaitPollInterval sets a fixed positive interval. It and
-// WithImageRecordCloudWaitStrategy replace each other; the later one wins.
-func WithImageRecordCloudWaitPollInterval(value time.Duration) ImageRecordCloudWaitOption {
+// WithImageRecordCloudWait appends shared resource wait options to Wait: the
+// timeout, unlimited, poll interval and wait strategy controls. Repeated calls
+// append; for each control the later option wins.
+func WithImageRecordCloudWait(options ...resource.WaitOption) ImageRecordCloudWaitOption {
+	owned := slices.Clone(options)
 	return request.Custom(func(config *ImageRecordCloudWaitOpts) error {
-		owned := value
-		config.PollInterval, config.WaitStrategy = &owned, nil
+		config.Wait = append(slices.Clone(config.Wait), owned...)
 		return nil
 	})
 }
 
-// WithImageRecordCloudWaitStrategy replaces the fixed interval with value, a
-// Go extension. An invalid strategy fails with resource.ErrInvalidOption before
-// HTTP. It and WithImageRecordCloudWaitPollInterval replace each other.
-func WithImageRecordCloudWaitStrategy(value resource.WaitStrategy) ImageRecordCloudWaitOption {
-	return request.Custom(func(config *ImageRecordCloudWaitOpts) error {
-		owned := value
-		config.PollInterval, config.WaitStrategy = nil, &owned
-		return nil
-	})
+// imageRecordCloudWaitPolicy is a validated Cloud wait policy.
+type imageRecordCloudWaitPolicy struct {
+	Headers   map[string]string
+	Timeout   time.Duration
+	Unlimited bool
+	Strategy  resource.WaitStrategy
 }
 
-func prepareImageRecordCloudWait(ctx context.Context, check func(context.Context) error, options []ImageRecordCloudWaitOption) (ImageRecordCloudWaitOpts, error) {
+// resolveImageRecordCloudWait resolves the Source timeout and shared options.
+func resolveImageRecordCloudWait(timeout *time.Duration, options []resource.WaitOption) (imageRecordCloudWaitPolicy, error) {
+	settings, err := sourcewait.Resolve(0, options)
+	if err != nil {
+		return imageRecordCloudWaitPolicy{}, err
+	}
+	policy := imageRecordCloudWaitPolicy{Timeout: 3600 * time.Second, Strategy: resource.FixedWait(2 * time.Second)}
+	if settings.TimeoutSet {
+		policy.Timeout, policy.Unlimited = settings.Timeout, settings.Unlimited
+	} else if timeout != nil {
+		policy.Timeout = *timeout
+	}
+	if settings.StrategySet {
+		policy.Strategy = settings.Strategy
+	}
+	return policy, nil
+}
+
+func prepareImageRecordCloudWait(ctx context.Context, check func(context.Context) error, options []ImageRecordCloudWaitOption) (imageRecordCloudWaitPolicy, error) {
 	value := copyImageRecordCloudWait(ImageRecordCloudWaitOpts{})
 	for _, apply := range calls.Translate(options, imageRecordCloudWaitCalls) {
 		if err := check(ctx); err != nil {
-			return value, err
+			return imageRecordCloudWaitPolicy{}, err
 		}
 		if apply == nil {
-			return value, uploadInvalid("nil image cloud wait option")
+			return imageRecordCloudWaitPolicy{}, uploadInvalid("nil image cloud wait option")
 		}
 		owned := copyImageRecordCloudWait(value)
 		if err := errors.Join(apply(&owned), check(ctx)); err != nil {
-			return value, err
+			return imageRecordCloudWaitPolicy{}, err
 		}
 		value = copyImageRecordCloudWait(owned)
 	}
-	if value.Unlimited && value.Timeout != nil {
-		return value, uploadInvalid("image cloud wait cannot be unlimited and have a timeout")
+	policy, err := resolveImageRecordCloudWait(value.Timeout, value.Wait)
+	if err != nil {
+		return policy, err
 	}
-	if value.PollInterval != nil && *value.PollInterval <= 0 {
-		return value, uploadInvalid("image cloud wait poll interval must be positive")
-	}
-	if err := validateImageWaitStrategy(value.PollInterval, value.WaitStrategy); err != nil {
-		return value, err
-	}
-	headers, err := imageMutationHeaders(value.Headers, false, "")
-	value.Headers = headers
-	return value, errors.Join(err, check(ctx))
+	policy.Headers, err = imageMutationHeaders(value.Headers, false, "")
+	return policy, errors.Join(err, check(ctx))
 }
 
 // ImageRecordCloudWaitResult retains the last found record and the number of
@@ -163,7 +167,7 @@ func (s *Service) WaitForCloudImageRecord(ctx context.Context, image *ImageRecor
 		return fail(nil, err)
 	}
 	owned := slices.Clone(options)
-	var policy ImageRecordCloudWaitOpts
+	var policy imageRecordCloudWaitPolicy
 	p, err := s.prepareImageRecord(ctx, func(opctx context.Context, check func(context.Context) error) (map[string]string, error) {
 		var err error
 		policy, err = prepareImageRecordCloudWait(opctx, check, owned)
@@ -197,7 +201,7 @@ func (s *Service) WaitForCloudImageRecord(ctx context.Context, image *ImageRecor
 // lookup, an in-flight lookup is not cancelled by it and the full interval is
 // slept after every unfinished lookup. Errors after a found record carry that
 // record's actual receipt unless they already hold newer response evidence.
-func cloudImageRecordPoll(p *preparedImageRecord, id string, policy ImageRecordCloudWaitOpts, purpose string, done func(*ImageRecord) (bool, error)) (int, *ImageRecord, error) {
+func cloudImageRecordPoll(p *preparedImageRecord, id string, policy imageRecordCloudWaitPolicy, purpose string, done func(*ImageRecord) (bool, error)) (int, *ImageRecord, error) {
 	lookups := 0
 	var last *ImageRecord
 	lastFailure := func(err error) (int, *ImageRecord, error) {
@@ -212,15 +216,8 @@ func cloudImageRecordPoll(p *preparedImageRecord, id string, policy ImageRecordC
 	if err != nil {
 		return lookups, last, err
 	}
-	timeout, interval := 3600*time.Second, 2*time.Second
-	if policy.Timeout != nil {
-		timeout = *policy.Timeout
-	}
-	if policy.PollInterval != nil {
-		interval = *policy.PollInterval
-	}
-	pacer := pollschedule.NewPacer(selectImageWaitStrategy(interval, policy.WaitStrategy).Delay)
-	deadline := time.Now().Add(timeout)
+	pacer := pollschedule.NewPacer(policy.Strategy.Delay)
+	deadline := time.Now().Add(policy.Timeout)
 	for {
 		if err := p.check(p.ctx); err != nil {
 			return lastFailure(err)
@@ -255,24 +252,4 @@ func cloudImageRecordPoll(p *preparedImageRecord, id string, policy ImageRecordC
 		case <-timer.C:
 		}
 	}
-}
-
-// validateImageWaitStrategy rejects an invalid strategy and a strategy set
-// together with a fixed poll interval.
-func validateImageWaitStrategy(interval *time.Duration, strategy *resource.WaitStrategy) error {
-	if strategy == nil {
-		return nil
-	}
-	if interval != nil {
-		return uploadInvalid("image wait PollInterval and WaitStrategy are mutually exclusive")
-	}
-	return strategy.Validate()
-}
-
-// selectImageWaitStrategy returns the caller strategy or the fixed interval.
-func selectImageWaitStrategy(interval time.Duration, strategy *resource.WaitStrategy) resource.WaitStrategy {
-	if strategy != nil {
-		return *strategy
-	}
-	return resource.FixedWait(interval)
 }

@@ -180,7 +180,7 @@ func newLaneFixture(t *testing.T) *laneFixture {
 }
 
 func laneOptions(extra ...compute.AutomaticFloatingIPOption) []compute.AutomaticFloatingIPOption {
-	return append([]compute.AutomaticFloatingIPOption{compute.WithAutomaticIPPollInterval(time.Millisecond), compute.WithAutomaticAddressOptions(compute.WithAddressReachability(false))}, extra...)
+	return append([]compute.AutomaticFloatingIPOption{compute.WithAutomaticIPWait(resource.WithPollInterval(time.Millisecond)), compute.WithAutomaticAddressOptions(compute.WithAddressReachability(false))}, extra...)
 }
 
 // The pool selector forwards fixed_address and nat_destination to both the
@@ -314,11 +314,11 @@ func TestServerIPPoolLaneWaitProgressAndBudget(t *testing.T) {
 			extra := []compute.AutomaticFloatingIPOption{compute.WithFloatingIPPool(resource.ID("pool-network")), compute.WithAutomaticEnsureOptions(network.WithEnsureProject("owner"), network.WithEnsurePort(resource.ID("port-p")))}
 			switch mode {
 			case "override":
-				extra = append(extra, compute.WithAutomaticIPTimeout(17*time.Second))
+				extra = append(extra, compute.WithAutomaticIPWait(resource.WithTimeout(17*time.Second)))
 			case "parent":
 				length = 30 * time.Second
 			case "unlimited":
-				extra = append(extra, compute.WithUnlimitedAutomaticIPTimeout())
+				extra = append(extra, compute.WithAutomaticIPWait(resource.WithUnlimitedWait()))
 			}
 			ctx, cancel := context.WithTimeout(context.Background(), length)
 			defer cancel()
@@ -395,7 +395,7 @@ func TestServerIPAutomaticLaneDestinationSelectorsWaitAndProgress(t *testing.T) 
 			case "parent":
 				length = 30 * time.Second
 			case "unlimited":
-				extra = append(extra, compute.WithUnlimitedAutomaticIPTimeout())
+				extra = append(extra, compute.WithAutomaticIPWait(resource.WithUnlimitedWait()))
 			}
 			ctx, cancel := context.WithTimeout(context.Background(), length)
 			defer cancel()

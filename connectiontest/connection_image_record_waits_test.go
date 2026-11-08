@@ -91,12 +91,13 @@ func TestConnectionImageRecordWaitsShareOwnedSourceAndLatestObservation(t *testi
 		request.Header("X-Call", "status"),
 		request.Custom(func(config *image.ImageRecordWaitOpts) error {
 			options++
-			config.Callback = func(progress int) {
+			config.Wait = append(config.Wait, resource.WithProgressCallback(func(progress int) error {
 				callbacks++
 				if progress != 0 {
 					t.Fatal(progress)
 				}
-			}
+				return nil
+			}))
 			return nil
 		}))
 	if err != nil {
@@ -113,12 +114,13 @@ func TestConnectionImageRecordWaitsShareOwnedSourceAndLatestObservation(t *testi
 		request.Header("X-Call", "delete"),
 		request.Custom(func(config *image.ImageRecordWaitOpts) error {
 			options++
-			config.Callback = func(progress int) {
+			config.Wait = append(config.Wait, resource.WithProgressCallback(func(progress int) error {
 				callbacks++
 				if progress != 0 {
 					t.Fatal(progress)
 				}
-			}
+				return nil
+			}))
 			return nil
 		}))
 	if err != nil {

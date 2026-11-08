@@ -3,6 +3,7 @@ package compute
 import (
 	"context"
 	"errors"
+	"slices"
 	"time"
 
 	"github.com/JSYoo5B/go-openstacksdk/network"
@@ -29,35 +30,18 @@ func WithPoolIPWait(enabled bool) AddIPFromPoolOption {
 	return func(o *addIPFromPoolOptions) error { o.auto.wait = enabled; return nil }
 }
 
-// WithPoolIPTimeout sets the wait budget. A new allocation's wait spends it
-// first and the remainder bounds the server address wait, as in Python.
-func WithPoolIPTimeout(timeout time.Duration) AddIPFromPoolOption {
-	return func(o *addIPFromPoolOptions) error { o.auto.timeout = timeout; return nil }
-}
-
-// WithPoolIPPollInterval overrides the min(5 seconds, remaining) interval.
-func WithPoolIPPollInterval(interval time.Duration) AddIPFromPoolOption {
-	return func(o *addIPFromPoolOptions) error {
-		if interval <= 0 {
-			return invalid("pool IP poll interval must be positive")
-		}
-		o.auto.interval, o.auto.strategy = interval, nil
-		return nil
-	}
-}
-
-// WithPoolIPWaitStrategy replaces the poll interval of the server address wait
-// with strategy, a Go-only extension. It and WithPoolIPPollInterval replace
-// each other; the later one wins. An invalid strategy fails with
-// resource.ErrInvalidOption before HTTP.
-func WithPoolIPWaitStrategy(strategy resource.WaitStrategy) AddIPFromPoolOption {
-	return func(o *addIPFromPoolOptions) error {
-		if err := strategy.Validate(); err != nil {
-			return err
-		}
-		o.auto.interval, o.auto.strategy = 0, &strategy
-		return nil
-	}
+// WithPoolIPWaitOptions tunes the waits with the shared resource wait options;
+// repeated calls append and the later option wins per control.
+// resource.WithTimeout replaces the 60-second budget: a new allocation's wait
+// spends it first and the remainder bounds the server address wait, as in
+// Python. resource.WithUnlimitedWait removes the budget; ctx still applies.
+// resource.WithPollInterval or resource.WithWaitStrategy (a Go-only extension)
+// replaces the server address wait's min(5 seconds, remaining) interval
+// (5 seconds when unlimited). Failure states, a status attribute and progress
+// are unsupported and fail with resource.ErrInvalidOption before HTTP.
+func WithPoolIPWaitOptions(options ...resource.WaitOption) AddIPFromPoolOption {
+	owned := slices.Clone(options)
+	return func(o *addIPFromPoolOptions) error { o.auto.waitOpts = append(o.auto.waitOpts, owned...); return nil }
 }
 
 // WithPoolIPFixedAddress selects the server port by this exact fixed address.
@@ -126,7 +110,7 @@ func (s *Service) AddIPFromPool(ctx context.Context, server *Server, pool resour
 	if err := resource.ID(snapshot.ID).Validate(); err != nil {
 		return nil, err
 	}
-	o := addIPFromPoolOptions{auto: addAutoIPOptions{timeout: 60 * time.Second, reuse: true}}
+	o := addIPFromPoolOptions{auto: addAutoIPOptions{reuse: true}}
 	for _, apply := range options {
 		if apply == nil {
 			return nil, invalid("nil pool IP option")
@@ -134,6 +118,9 @@ func (s *Service) AddIPFromPool(ctx context.Context, server *Server, pool resour
 		if err := apply(&o); err != nil {
 			return nil, err
 		}
+	}
+	if err := o.auto.resolveWait(); err != nil {
+		return nil, err
 	}
 	result := &AddAutoIPResult{Server: &snapshot}
 	start := time.Now()
@@ -150,7 +137,7 @@ func (s *Service) AddIPFromPool(ctx context.Context, server *Server, pool resour
 		port, _ = floatingIPRowString(available.FloatingIP, "port_id")
 	} else {
 		name := pool.String()
-		create := []FloatingIPCreateOption{WithFloatingIPCreateServer(resource.ID(snapshot.ID)), WithFloatingIPCreateWait(o.auto.wait), WithFloatingIPCreateWaitTimeout(o.auto.timeout)}
+		create := []FloatingIPCreateOption{WithFloatingIPCreateServer(resource.ID(snapshot.ID)), WithFloatingIPCreateWait(o.auto.wait), o.auto.createWaitBudget()}
 		if o.fixed != "" {
 			create = append(create, WithFloatingIPCreateFixedAddress(o.fixed))
 		}
@@ -167,7 +154,7 @@ func (s *Service) AddIPFromPool(ctx context.Context, server *Server, pool resour
 		result.FloatingIPID, _ = floatingIPRowString(created.FloatingIP, "id")
 		result.FloatingIPAddr, _ = floatingIPRowString(created.FloatingIP, "floating_ip_address")
 		port, _ = floatingIPRowString(created.FloatingIP, "port_id")
-		remaining = o.auto.timeout - time.Since(start)
+		remaining = o.auto.remainingAfter(start)
 		// Python reads the server again after every pool allocation.
 		refreshed, err := s.refreshAutoIPServer(ctx, &snapshot, result.FloatingIPAddr, remaining, o.auto)
 		if err != nil {

@@ -196,17 +196,11 @@ func WithCloudServerWait(wait bool) CloudServerActionOption {
 	return func(o *CloudServerActionOpts) error { o.Wait = wait; return nil }
 }
 
-// WithCloudServerTimeout replaces the 180-second wait budget.
-func WithCloudServerTimeout(timeout time.Duration) CloudServerActionOption {
-	return func(o *CloudServerActionOpts) error { o.Timeout, o.Unlimited = timeout, false; return nil }
-}
-
-// WithCloudServerUnlimitedWait maps a Python timeout of None.
-func WithCloudServerUnlimitedWait() CloudServerActionOption {
-	return func(o *CloudServerActionOpts) error { o.Unlimited = true; return nil }
-}
-
-// WithCloudServerWaitOptions appends wait options that apply after the timeout.
+// WithCloudServerWaitOptions appends shared resource wait options for the
+// server wait; repeated calls append and the later option wins per control.
+// resource.WithTimeout replaces the 180-second wait budget and
+// resource.WithUnlimitedWait maps a Python timeout of None. An invalid option
+// fails with resource.ErrInvalidOption before any request.
 func WithCloudServerWaitOptions(options ...resource.WaitOption) CloudServerActionOption {
 	owned := slices.Clone(options)
 	return func(o *CloudServerActionOpts) error { o.WaitOptions = append(o.WaitOptions, owned...); return nil }

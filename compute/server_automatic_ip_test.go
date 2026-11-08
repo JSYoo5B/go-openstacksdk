@@ -115,7 +115,7 @@ func automaticOptions() []compute.AutomaticFloatingIPOption {
 	return []compute.AutomaticFloatingIPOption{
 		compute.WithAutomaticAddressOptions(compute.WithAddressReachability(false)),
 		compute.WithAutomaticEnsureOptions(network.WithEnsureReuse(false), network.WithEnsureWait(resource.WithPollInterval(time.Millisecond))),
-		compute.WithAutomaticIPPollInterval(time.Millisecond), compute.WithAutomaticIPTimeout(time.Second),
+		compute.WithAutomaticIPWait(resource.WithPollInterval(time.Millisecond)), compute.WithAutomaticIPWait(resource.WithTimeout(time.Second)),
 	}
 }
 
@@ -411,7 +411,7 @@ func TestAutomaticIPColdRoleRetryChecksOuterComputeSource(t *testing.T) {
 
 func TestAutomaticIPStaticValidationAndDeadlineDoNotPermitMutation(t *testing.T) {
 	f := newAutomaticFixture(t)
-	for _, option := range []compute.AutomaticFloatingIPOption{nil, compute.WithAutomaticIPTimeout(0), compute.WithAutomaticIPPollInterval(0), compute.WithAutomaticIPProgressCallback(nil), compute.WithAutomaticEnsureOptions(network.WithEnsureWait(resource.WithTimeout(-time.Second)))} {
+	for _, option := range []compute.AutomaticFloatingIPOption{nil, compute.WithAutomaticIPWait(resource.WithTimeout(0)), compute.WithAutomaticIPWait(resource.WithPollInterval(0)), compute.WithAutomaticIPProgressCallback(nil), compute.WithAutomaticEnsureOptions(network.WithEnsureWait(resource.WithTimeout(-time.Second)))} {
 		result, err := f.service.EnsureServerFloatingIP(context.Background(), compute.AutomaticFloatingIPRequest{Server: automaticServer(t, autoFixed)}, option)
 		if result != nil || !errors.Is(err, resource.ErrInvalidOption) || f.posts.Load() != 0 || f.ports.Load() != 0 {
 			t.Fatal(result, err)
@@ -422,7 +422,7 @@ func TestAutomaticIPStaticValidationAndDeadlineDoNotPermitMutation(t *testing.T)
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
 	defer cancel()
-	options := append(automaticOptions(), compute.WithUnlimitedAutomaticIPTimeout(), compute.WithAutomaticIPPollInterval(time.Second))
+	options := append(automaticOptions(), compute.WithAutomaticIPWait(resource.WithUnlimitedWait()), compute.WithAutomaticIPWait(resource.WithPollInterval(time.Second)))
 	result, err := f.service.EnsureServerFloatingIP(ctx, compute.AutomaticFloatingIPRequest{Server: automaticServer(t, autoFixed)}, options...)
 	if result == nil || result.Assignment == nil || !errors.Is(err, context.DeadlineExceeded) || result.Observed || f.posts.Load() != 1 || f.raw.Load() != 1 {
 		t.Fatal(result, err)

@@ -2,7 +2,6 @@ package compute
 
 import (
 	"encoding/json"
-	"time"
 
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
 	"github.com/JSYoo5B/go-openstacksdk/internal/serverview"
@@ -96,12 +95,13 @@ func CloudServerResultView(result *CloudServerResult) (json.RawMessage, error) {
 }
 
 // CloudServerActionOpts owns the wait, address and floating-IP controls shared
-// by DeleteServer and RebuildServer. Timeout defaults to Python's 180 seconds.
+// by DeleteServer and RebuildServer.
 type CloudServerActionOpts struct {
-	Wait      bool
-	Timeout   time.Duration
-	Unlimited bool
-	// WaitOptions apply after the timeout (for example a poll interval).
+	Wait bool
+	// WaitOptions are the shared resource wait options of the server wait,
+	// applied after Python's 180-second timeout: resource.WithTimeout replaces
+	// it and resource.WithUnlimitedWait maps a Python timeout of None. They are
+	// validated before any request.
 	WaitOptions []resource.WaitOption
 
 	// DeleteIPs and DeleteIPRetry map delete_ips and delete_ip_retry

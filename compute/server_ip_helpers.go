@@ -80,7 +80,7 @@ func (s *Service) addServerIPs(ctx context.Context, input AutomaticFloatingIPReq
 		return nil, err
 	}
 	ctx = rest.WithOperationGuard(ctx, guard)
-	automatic := append([]AutomaticFloatingIPOption{WithAutomaticIPTimeout(60 * time.Second), WithAutomaticIPPollInterval(5 * time.Second)}, o.automatic...)
+	automatic := append([]AutomaticFloatingIPOption{WithAutomaticIPWait(resource.WithTimeout(60*time.Second), resource.WithPollInterval(5*time.Second))}, o.automatic...)
 	state, ctx, cancel, err := s.prepareServerIPWorkflow(ctx, input, automatic, serverIPReadiness{observe: o.wait, explicitList: explicitList, addresses: addresses})
 	if err != nil {
 		return nil, err

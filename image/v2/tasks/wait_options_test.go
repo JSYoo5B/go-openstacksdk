@@ -11,23 +11,22 @@ import (
 )
 
 func TestTaskWaitOptionsSnapshotCustomRetentionAndConcurrentReuse(t *testing.T) {
-	timeout, interval := time.Second, time.Millisecond
-	failures := []string{"ERROR"}
+	wait := []resource.WaitOption{resource.WithTimeout(time.Second), resource.WithPollInterval(time.Millisecond), resource.WithFailureStates("ERROR")}
 	headers := map[string]string{"x-proof": "original"}
-	option := WithTaskWaitOpts(TaskWaitOpts{Timeout: &timeout, PollInterval: &interval, FailureStates: failures, Headers: headers})
-	timeout, interval, failures[0], headers["x-proof"] = time.Hour, time.Hour, "wrong", "wrong"
+	option := WithTaskWaitOpts(TaskWaitOpts{Wait: wait, Headers: headers})
+	wait[0], wait[2], headers["x-proof"] = resource.WithTimeout(time.Hour), resource.WithFailureStates("wrong"), "wrong"
 	first, err := parseTaskWaitOpts([]TaskWaitOption{option})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if *first.Timeout != time.Second || *first.PollInterval != time.Millisecond || first.FailureStates[0] != "ERROR" || first.Headers["X-Proof"] != "original" {
+	if first.Timeout != time.Second || first.Strategy.Delay(1) != time.Millisecond || first.FailureStates[0] != "ERROR" || first.Headers["X-Proof"] != "original" {
 		t.Fatalf("creation snapshot lost: %#v", first)
 	}
-	*first.Timeout, first.FailureStates[0], first.Headers["X-Proof"] = 5*time.Hour, "mutated", "mutated"
+	first.FailureStates[0], first.Headers["X-Proof"] = "mutated", "mutated"
 	var retained *TaskWaitOpts
 	custom := TaskWaitOption(request.Custom(func(value *TaskWaitOpts) error {
 		retained = value
-		value.FailureStates = []string{"failure"}
+		value.Wait = []resource.WaitOption{resource.WithFailureStates("failure")}
 		value.Headers = map[string]string{"X-Proof": "custom"}
 		return nil
 	}))
@@ -35,7 +34,7 @@ func TestTaskWaitOptionsSnapshotCustomRetentionAndConcurrentReuse(t *testing.T) 
 	if err != nil {
 		t.Fatal(err)
 	}
-	retained.FailureStates[0], retained.Headers["X-Proof"] = "late", "late"
+	retained.Wait[0], retained.Headers["X-Proof"] = resource.WithFailureStates("late"), "late"
 	if parsed.FailureStates[0] != "failure" || parsed.Headers["X-Proof"] != "custom" {
 		t.Fatalf("custom captured config aliases parsed policy: %#v", parsed)
 	}
@@ -45,7 +44,7 @@ func TestTaskWaitOptionsSnapshotCustomRetentionAndConcurrentReuse(t *testing.T) 
 		go func() {
 			defer group.Done()
 			value, err := parseTaskWaitOpts([]TaskWaitOption{option})
-			if err != nil || *value.Timeout != time.Second || value.FailureStates[0] != "ERROR" || value.Headers["X-Proof"] != "original" {
+			if err != nil || value.Timeout != time.Second || value.FailureStates[0] != "ERROR" || value.Headers["X-Proof"] != "original" {
 				t.Errorf("reusable option lost owned values: %#v, %v", value, err)
 				return
 			}
@@ -56,7 +55,6 @@ func TestTaskWaitOptionsSnapshotCustomRetentionAndConcurrentReuse(t *testing.T) 
 }
 
 func TestTaskWaitOptionsDefaultsOrderingEmptyFailuresAndInvalidValues(t *testing.T) {
-	zero := time.Duration(0)
 	for _, tc := range []struct {
 		name     string
 		options  []TaskWaitOption
@@ -64,23 +62,41 @@ func TestTaskWaitOptionsDefaultsOrderingEmptyFailuresAndInvalidValues(t *testing
 		failures int
 	}{
 		{"defaults", nil, 120 * time.Second, 1},
-		{"unlimited-last", []TaskWaitOption{WithTaskWaitTimeout(time.Second), WithUnlimitedTaskWait()}, 0, 1},
-		{"bounded-last", []TaskWaitOption{WithUnlimitedTaskWait(), WithTaskWaitTimeout(time.Second)}, time.Second, 1},
-		{"bulk-zero", []TaskWaitOption{WithTaskWaitOpts(TaskWaitOpts{Timeout: &zero})}, 0, 1},
-		{"empty-failures", []TaskWaitOption{WithTaskWaitFailureStates()}, 120 * time.Second, 0},
-		{"bulk-reset", []TaskWaitOption{WithUnlimitedTaskWait(), WithTaskWaitFailureStates(), WithTaskWaitOpts(TaskWaitOpts{})}, 120 * time.Second, 1},
+		{"unlimited-last", []TaskWaitOption{WithTaskWait(resource.WithTimeout(time.Second)), WithTaskWait(resource.WithUnlimitedWait())}, 0, 1},
+		{"bounded-last", []TaskWaitOption{WithTaskWait(resource.WithUnlimitedWait()), WithTaskWait(resource.WithTimeout(time.Second))}, time.Second, 1},
+		{"bulk-unlimited", []TaskWaitOption{WithTaskWaitOpts(TaskWaitOpts{Wait: []resource.WaitOption{resource.WithUnlimitedWait()}})}, 0, 1},
+		{"empty-failures", []TaskWaitOption{WithTaskWait(resource.WithFailureStates())}, 120 * time.Second, 0},
+		{"bulk-reset", []TaskWaitOption{WithTaskWait(resource.WithUnlimitedWait(), resource.WithFailureStates()), WithTaskWaitOpts(TaskWaitOpts{})}, 120 * time.Second, 1},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			value, err := parseTaskWaitOpts(tc.options)
-			if err != nil || *value.Timeout != tc.timeout || len(value.FailureStates) != tc.failures || *value.PollInterval != 2*time.Second {
+			if err != nil || value.Timeout != tc.timeout || len(value.FailureStates) != tc.failures || value.Strategy.Delay(1) != 2*time.Second {
 				t.Fatalf("policy = %#v, %v", value, err)
 			}
 		})
 	}
-	negative := -time.Second
-	for _, options := range [][]TaskWaitOption{{nil}, {WithTaskWaitTimeout(0)}, {WithTaskWaitTimeout(-1)}, {WithTaskWaitPollInterval(0)}, {WithTaskWaitOpts(TaskWaitOpts{Timeout: &negative})}, {WithTaskWaitOpts(TaskWaitOpts{PollInterval: &zero})}, {WithTaskWaitFailureStates(" ")}} {
+	for _, options := range [][]TaskWaitOption{{nil}, {WithTaskWait(nil)}, {WithTaskWait(resource.WithTimeout(0))}, {WithTaskWait(resource.WithTimeout(-1))}, {WithTaskWait(resource.WithPollInterval(0))}, {WithTaskWait(resource.WithFailureStates(" "))}} {
 		if _, err := parseTaskWaitOpts(options); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatalf("invalid option accepted: %v", err)
+		}
+	}
+}
+
+func TestTaskWaitOptionsAppendLaterWinsAndRejectUnsupported(t *testing.T) {
+	value, err := parseTaskWaitOpts([]TaskWaitOption{
+		WithTaskWait(resource.WithTimeout(time.Second), resource.WithFailureStates("A")),
+		WithTaskWait(resource.WithFailureStates("B")),
+	})
+	if err != nil || value.Timeout != time.Second || len(value.FailureStates) != 1 || value.FailureStates[0] != "B" {
+		t.Fatalf("policy = %#v, %v", value, err)
+	}
+	for name, option := range map[string]resource.WaitOption{
+		"status attribute":  resource.WithStatusAttribute("status"),
+		"progress callback": resource.WithProgressCallback(func(int) error { return nil }),
+		"progress channel":  resource.WithProgress(make(chan int)),
+	} {
+		if _, err := parseTaskWaitOpts([]TaskWaitOption{WithTaskWait(option)}); !errors.Is(err, resource.ErrInvalidOption) {
+			t.Fatalf("%s accepted: %v", name, err)
 		}
 	}
 }

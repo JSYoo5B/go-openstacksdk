@@ -86,7 +86,7 @@ func TestTaskWaitCoreOneBudgetRawRecreationFixedRoutesAndLiveToken(t *testing.T)
 	parent, cancel := context.WithTimeout(context.WithValue(context.Background(), "task-proof", "context"), time.Second)
 	defer cancel()
 	parentDeadline, _ := parent.Deadline()
-	result, err := api.WaitForTask(parent, resource.ID("original"), WithTaskWaitPollInterval(time.Nanosecond), request.Header("x-proof", "caller"))
+	result, err := api.WaitForTask(parent, resource.ID("original"), WithTaskWait(resource.WithPollInterval(time.Nanosecond)), request.Header("x-proof", "caller"))
 	if err != nil || count != 5 || result.OriginalID != "original" || result.CurrentID != "new-two" || result.Recreated != 2 || result.Task.ID != "response-decoy" || result.StatusCode != 200 || result.Created.Task.Status != "pending" || result.Created.StatusCode != 201 {
 		t.Fatalf("workflow result=%#v count=%d err=%v", result, count, err)
 	}
@@ -123,7 +123,7 @@ func TestTaskWaitCoreFailedCreationRetainsLastTaskAndActualAcceptedProof(t *test
 				}
 				return taskWaitTestHTTP(tc.status, tc.post), nil
 			})
-			result, err := api.WaitForTask(context.Background(), resource.ID("original"), WithTaskWaitPollInterval(time.Nanosecond))
+			result, err := api.WaitForTask(context.Background(), resource.ID("original"), WithTaskWait(resource.WithPollInterval(time.Nanosecond)))
 			if err == nil || result == nil || result.Task.ID != "original" || result.CurrentID != "original" || result.Recreated != 0 || result.StatusCode != 200 || calls != 2 {
 				t.Fatalf("failure lost last actual task: %#v %v calls%d", result, err, calls)
 			}
@@ -153,8 +153,8 @@ func TestTaskWaitCoreTargetFailureSelectionDeadlineAndPreflight(t *testing.T) {
 		{"target-priority", "failure", "FAILURE", taskWaitImportError396, nil, false, 1},
 		{"ordinary-failure", "success", "failure", "other", nil, true, 1},
 		{"exact-message", "success", "failure", strings.ToLower(taskWaitImportError396), nil, true, 1},
-		{"empty-failures", "success", "failure", taskWaitImportError396, []TaskWaitOption{WithTaskWaitFailureStates()}, false, 2},
-		{"replaced-failures", "success", "failure", taskWaitImportError396, []TaskWaitOption{WithTaskWaitFailureStates("ERROR")}, false, 2},
+		{"empty-failures", "success", "failure", taskWaitImportError396, []TaskWaitOption{WithTaskWait(resource.WithFailureStates())}, false, 2},
+		{"replaced-failures", "success", "failure", taskWaitImportError396, []TaskWaitOption{WithTaskWait(resource.WithFailureStates("ERROR"))}, false, 2},
 		{"exact-not-prefix", "success", "failure-extra", "other", nil, false, 2},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
@@ -175,7 +175,7 @@ func TestTaskWaitCoreTargetFailureSelectionDeadlineAndPreflight(t *testing.T) {
 				}
 				return taskWaitTestHTTP(200, `{"status":"success"}`), nil
 			})
-			options := append([]TaskWaitOption{WithTaskWaitPollInterval(time.Nanosecond)}, tc.options...)
+			options := append([]TaskWaitOption{WithTaskWait(resource.WithPollInterval(time.Nanosecond))}, tc.options...)
 			result, err := api.WaitForTaskState(context.Background(), resource.ID("original"), tc.target, options...)
 			if result == nil || errors.Is(err, resource.ErrFailedState) != tc.failure || (err != nil && !tc.failure) || calls != tc.calls {
 				t.Fatalf("selection result=%#v err=%v calls%d", result, err, calls)
@@ -197,7 +197,7 @@ func TestTaskWaitCoreTargetFailureSelectionDeadlineAndPreflight(t *testing.T) {
 		{context.Background(), resource.ID("unsafe/path"), "success", nil},
 		{context.Background(), resource.ID("id"), " ", nil},
 		{context.Background(), resource.ID("id"), "success", []TaskWaitOption{nil}},
-		{context.Background(), resource.ID("id"), "success", []TaskWaitOption{WithTaskWaitTimeout(0)}},
+		{context.Background(), resource.ID("id"), "success", []TaskWaitOption{WithTaskWait(resource.WithTimeout(0))}},
 	} {
 		if result, err := api.WaitForTaskState(tc.ctx, tc.ref, tc.target, tc.options...); result != nil || err == nil {
 			t.Fatalf("preflight accepted: %#v %v", result, err)
@@ -237,7 +237,7 @@ func TestTaskWaitCoreInvalidUTF8NeverRecreatesOrAcceptsCreatedTask(t *testing.T)
 				}
 				return taskWaitTestHTTP(status, tc.invalid), nil
 			})
-			result, err := api.WaitForTask(context.Background(), resource.ID("original"), WithTaskWaitPollInterval(time.Nanosecond))
+			result, err := api.WaitForTask(context.Background(), resource.ID("original"), WithTaskWait(resource.WithPollInterval(time.Nanosecond)))
 			var evidence *resource.ResponseError
 			if !errors.As(err, &evidence) || string(evidence.Body) != tc.invalid || evidence.Header.Get("X-Actual") != "evidence" {
 				t.Fatalf("invalid UTF8 accepted or evidence repaired: %#v %v", result, err)

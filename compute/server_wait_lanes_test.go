@@ -165,7 +165,7 @@ func TestWaitForServerNovaNetworkFallbackLanes(t *testing.T) {
 				if source == "nova-source" {
 					address = append(address, compute.WithFloatingIPSource(compute.FloatingIPNova))
 				}
-				automatic := append([]compute.AutomaticFloatingIPOption{compute.WithAutomaticAddressOptions(address...), compute.WithAutomaticEnsureOptions(network.WithEnsureFixedAddress("10.0.0.10")), compute.WithAutomaticIPPollInterval(time.Millisecond)}, tc.extra...)
+				automatic := append([]compute.AutomaticFloatingIPOption{compute.WithAutomaticAddressOptions(address...), compute.WithAutomaticEnsureOptions(network.WithEnsureFixedAddress("10.0.0.10")), compute.WithAutomaticIPWait(resource.WithPollInterval(time.Millisecond))}, tc.extra...)
 				server := automaticServer(t, autoFixed)
 				server.Status = "BUILD"
 				result, err := f.service.WaitForServer(context.Background(), compute.AutomaticFloatingIPRequest{Server: server}, compute.WithServerReadyAutomaticIPOptions(automatic...), compute.WithServerReadyWaitOptions(resource.WithPollInterval(time.Millisecond)))

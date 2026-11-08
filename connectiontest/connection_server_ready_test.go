@@ -118,7 +118,7 @@ func connectionReadyFixture(t *testing.T, scenario string) (*testcloud.Cloud, *s
 
 func connectionReadyOptions() []compute.ServerReadyOption {
 	return []compute.ServerReadyOption{
-		compute.WithServerReadyAutomaticIPOptions(compute.WithAutomaticIPTimeout(time.Second), compute.WithAutomaticIPPollInterval(time.Millisecond), compute.WithAutomaticEnsureOptions(network.WithEnsureReuse(false), network.WithEnsureWait(resource.WithPollInterval(time.Millisecond)))),
+		compute.WithServerReadyAutomaticIPOptions(compute.WithAutomaticIPWait(resource.WithTimeout(time.Second)), compute.WithAutomaticIPWait(resource.WithPollInterval(time.Millisecond)), compute.WithAutomaticEnsureOptions(network.WithEnsureReuse(false), network.WithEnsureWait(resource.WithPollInterval(time.Millisecond)))),
 		compute.WithServerReadyWaitOptions(resource.WithPollInterval(time.Millisecond)),
 	}
 }

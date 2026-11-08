@@ -665,10 +665,10 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.Rebuild`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.RebuildServer`
 - `github.com/JSYoo5B/go-openstacksdk.WithCloudServerWait`
-- `github.com/JSYoo5B/go-openstacksdk.WithCloudServerTimeout`
-- `github.com/JSYoo5B/go-openstacksdk.WithCloudServerUnlimitedWait`
-- `github.com/JSYoo5B/go-openstacksdk.WithCloudServerAdminPassword`
 - `github.com/JSYoo5B/go-openstacksdk.WithCloudServerWaitOptions`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithTimeout`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithUnlimitedWait`
+- `github.com/JSYoo5B/go-openstacksdk.WithCloudServerAdminPassword`
 - `github.com/JSYoo5B/go-openstacksdk.WithCloudServerActionBare`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.WaitForServer`
 - `github.com/JSYoo5B/go-openstacksdk.WithCloudServerActionDetailed`
@@ -699,7 +699,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk.Connection.GetFloatingIP`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.DeleteFloatingIP`
 - `github.com/JSYoo5B/go-openstacksdk.WithCloudServerWait`
-- `github.com/JSYoo5B/go-openstacksdk.WithCloudServerTimeout`
+- `github.com/JSYoo5B/go-openstacksdk.WithCloudServerWaitOptions`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithTimeout`
 - `github.com/JSYoo5B/go-openstacksdk.WithCloudServerDeleteIPs`
 - `github.com/JSYoo5B/go-openstacksdk.WithCloudServerDeleteIPRetry`
 - `github.com/JSYoo5B/go-openstacksdk.WithCloudServerFloatingIPOptions`

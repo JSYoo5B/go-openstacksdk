@@ -301,9 +301,9 @@ func TestCreateAndImportCompletePreflight(t *testing.T) {
 		{"partial remote", image.CreateAndImportRequest{Name: "worker"}, []image.CreateImportOption{image.WithCreateImportImport(imageimport.ImportOpts{Method: imageimport.GlanceDownloadMethod, RemoteRegion: "region"})}},
 		{"copy existing-only", image.CreateAndImportRequest{Name: "worker"}, []image.CreateImportOption{image.WithCreateImportImport(imageimport.ImportOpts{Method: imageimport.CopyImageMethod})}},
 		{"unknown fresh method", image.CreateAndImportRequest{Name: "worker"}, []image.CreateImportOption{image.WithCreateImportImport(imageimport.ImportOpts{Method: "vendor-method"})}},
-		{"negative wait budget", image.CreateAndImportRequest{Name: "worker"}, []image.CreateImportOption{image.WithCreateImportWait(image.CreateImportWaitOpts{Timeout: func() *time.Duration { v := -time.Second; return &v }()})}},
-		{"zero wait interval", image.CreateAndImportRequest{Name: "worker"}, []image.CreateImportOption{image.WithCreateImportWait(image.CreateImportWaitOpts{PollInterval: new(time.Duration)})}},
-		{"blank wait failure state", image.CreateAndImportRequest{Name: "worker"}, []image.CreateImportOption{image.WithCreateImportWait(image.CreateImportWaitOpts{FailureStates: []string{" "}})}},
+		{"negative wait budget", image.CreateAndImportRequest{Name: "worker"}, []image.CreateImportOption{image.WithCreateImportWait(resource.WithTimeout(-time.Second))}},
+		{"zero wait interval", image.CreateAndImportRequest{Name: "worker"}, []image.CreateImportOption{image.WithCreateImportWait(resource.WithPollInterval(0))}},
+		{"blank wait failure state", image.CreateAndImportRequest{Name: "worker"}, []image.CreateImportOption{image.WithCreateImportWait(resource.WithFailureStates(" "))}},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			cloud := testcloud.New(t)
@@ -387,7 +387,7 @@ func TestCreateAndImportCompletePreflight(t *testing.T) {
 			func(*image.CreateImportOpts) error { workflow.Add(1); return nil },
 			image.WithCreateImportStageOptions(request.Custom(func(*imagedata.StageOpts) error { stage.Add(1); return nil })),
 			image.WithCreateImportImportOptions(request.Custom(func(*imageimport.ImportOpts) error { importing.Add(1); return nil })),
-			image.WithCreateImportWait(image.CreateImportWaitOpts{PollInterval: new(time.Duration)}))
+			image.WithCreateImportWait(resource.WithPollInterval(0)))
 		if v != nil || !errors.Is(err, resource.ErrInvalidOption) || calls.Load() != 0 || data.reads.Load() != 0 || workflow.Load() != 1 || stage.Load() != 1 || importing.Load() != 1 {
 			t.Fatal(v, err, calls.Load(), data.reads.Load(), workflow.Load(), stage.Load(), importing.Load())
 		}
@@ -762,16 +762,16 @@ func TestCreateAndImportExplicitWaitAndFailureRetention(t *testing.T) {
 	for _, tc := range []struct {
 		name     string
 		states   []string
-		policy   image.CreateImportWaitOpts
+		policy   []resource.WaitOption
 		want     error
 		deadline bool
 	}{
-		{"default active wait", []string{"active"}, image.CreateImportWaitOpts{}, nil, true},
-		{"default killed failure", []string{"killed"}, image.CreateImportWaitOpts{}, resource.ErrFailedState, true},
-		{"default deleted failure", []string{"deleted"}, image.CreateImportWaitOpts{}, resource.ErrFailedState, true},
-		{"empty failures disable", []string{"killed", "active"}, image.CreateImportWaitOpts{PollInterval: func() *time.Duration { v := time.Millisecond; return &v }(), FailureStates: []string{}}, nil, true},
-		{"target precedes failure", []string{"active"}, image.CreateImportWaitOpts{FailureStates: []string{"active"}}, nil, true},
-		{"explicit unlimited", []string{"active"}, image.CreateImportWaitOpts{Timeout: new(time.Duration)}, nil, false},
+		{"default active wait", []string{"active"}, nil, nil, true},
+		{"default killed failure", []string{"killed"}, nil, resource.ErrFailedState, true},
+		{"default deleted failure", []string{"deleted"}, nil, resource.ErrFailedState, true},
+		{"empty failures disable", []string{"killed", "active"}, []resource.WaitOption{resource.WithPollInterval(time.Millisecond), resource.WithFailureStates()}, nil, true},
+		{"target precedes failure", []string{"active"}, []resource.WaitOption{resource.WithFailureStates("active")}, nil, true},
+		{"explicit unlimited", []string{"active"}, []resource.WaitOption{resource.WithUnlimitedWait()}, nil, false},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			cloud := testcloud.New(t)
@@ -815,7 +815,7 @@ func TestCreateAndImportExplicitWaitAndFailureRetention(t *testing.T) {
 				}
 				return transport.RoundTrip(r)
 			}))
-			v, err := image.New(cloud.Client("image", createImportPrefix)).CreateAndImport(context.Background(), image.CreateAndImportRequest{Name: "worker", Data: strings.NewReader("payload")}, image.WithCreateImportWait(tc.policy))
+			v, err := image.New(cloud.Client("image", createImportPrefix)).CreateAndImport(context.Background(), image.CreateAndImportRequest{Name: "worker", Data: strings.NewReader("payload")}, image.WithCreateImportWait(tc.policy...))
 			if !errors.Is(err, tc.want) || v == nil || v.ImageID != "created" || v.Created == nil || v.Staged == nil || v.Imported == nil || v.Imported.StatusCode != 202 || string(v.Imported.Body) != `{"accepted":true}` || wrong.Load() != 0 || gets.Load() != int32(1+len(tc.states)) {
 				t.Fatal(v, err, gets.Load(), wrong.Load())
 			}
@@ -844,9 +844,9 @@ func TestCreateAndImportExplicitWaitAndFailureRetention(t *testing.T) {
 			}
 			cause := errors.New("caller canceled active wait")
 			var gets atomic.Int32
-			policy := image.CreateImportWaitOpts{Timeout: func() *time.Duration { v := 200 * time.Millisecond; return &v }()}
+			policy := resource.WithTimeout(200 * time.Millisecond)
 			if mode == "parent deadline" {
-				policy.Timeout = new(time.Duration)
+				policy = resource.WithUnlimitedWait()
 			}
 			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				if r.URL.Path == createImportPrefix+"images" {
@@ -902,7 +902,7 @@ func TestCreateAndImportExplicitWaitAndFailureRetention(t *testing.T) {
 			gets.Add(1)
 			return createImportHTTP(200, io.NopCloser(strings.NewReader(createImportJSON("created", "uploading")))), nil
 		}))
-		v, err := image.New(cloud.Client("image", createImportPrefix)).CreateAndImport(context.Background(), image.CreateAndImportRequest{Name: "worker", Data: strings.NewReader("payload")}, image.WithCreateImportWait(image.CreateImportWaitOpts{}), image.WithoutCreateImportWait())
+		v, err := image.New(cloud.Client("image", createImportPrefix)).CreateAndImport(context.Background(), image.CreateAndImportRequest{Name: "worker", Data: strings.NewReader("payload")}, image.WithCreateImportWait(), image.WithoutCreateImportWait())
 		if err != nil || v == nil || v.Imported == nil || v.Ready != nil || gets.Load() != 1 {
 			t.Fatal(v, err, gets.Load())
 		}
@@ -1027,7 +1027,7 @@ func TestCreateAndImportLiveProviderSourceBoundariesAndNativeIsolation(t *testin
 				}
 				return createImportHTTP(code, io.NopCloser(strings.NewReader(body))), nil
 			}))
-			v, err := image.New(client).CreateAndImport(context.Background(), image.CreateAndImportRequest{Name: "worker", Data: strings.NewReader("payload")}, image.WithCreateImportWait(image.CreateImportWaitOpts{}))
+			v, err := image.New(client).CreateAndImport(context.Background(), image.CreateAndImportRequest{Name: "worker", Data: strings.NewReader("payload")}, image.WithCreateImportWait())
 			want := []string{"create"}
 			if changedPhase != "create" {
 				want = append(want, "stage", "metadata")

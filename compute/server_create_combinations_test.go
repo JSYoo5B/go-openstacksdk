@@ -201,7 +201,7 @@ func TestAutomaticCreateIPLanesFollowPythonPrecedence(t *testing.T) {
 			f := newNovaIPFixture(t, "")
 			f.status = "ACTIVE"
 			capture := captureServerCreate(t, f.cloud, "/v2.1/servers", `{"server":{"id":"server"}}`)
-			ip := []compute.AutomaticFloatingIPOption{compute.WithAutomaticAddressOptions(compute.WithFloatingIPSource(compute.FloatingIPNova), compute.WithAddressReachability(false)), compute.WithAutomaticEnsureOptions(network.WithEnsureFixedAddress("10.0.0.10")), compute.WithAutomaticIPPollInterval(time.Millisecond)}
+			ip := []compute.AutomaticFloatingIPOption{compute.WithAutomaticAddressOptions(compute.WithFloatingIPSource(compute.FloatingIPNova), compute.WithAddressReachability(false)), compute.WithAutomaticEnsureOptions(network.WithEnsureFixedAddress("10.0.0.10")), compute.WithAutomaticIPWait(resource.WithPollInterval(time.Millisecond))}
 			mode, want := compute.ServerIPAutomatic, []string{"pools", "list", "get:2", "attach:" + dispatchAddresses["b"]}
 			switch lane {
 			case "Nova pool wins over addresses":

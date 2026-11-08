@@ -177,7 +177,7 @@ func TestServerReadyInvalidPolicyFailsBeforeIOForBothEntrypoints(t *testing.T) {
 				case "status":
 					opts = append(opts, compute.WithServerReadyWaitOptions(resource.WithStatusAttribute("Status")))
 				case "timeout":
-					opts = append(opts, compute.WithServerReadyAutomaticIPOptions(compute.WithAutomaticIPTimeout(0)))
+					opts = append(opts, compute.WithServerReadyAutomaticIPOptions(compute.WithAutomaticIPWait(resource.WithTimeout(0))))
 				case "unsafe ID":
 					input.Server.ID = "../unsafe"
 				case "unsafe network":

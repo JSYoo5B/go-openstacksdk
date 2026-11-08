@@ -170,7 +170,7 @@ func TestWaitForServerSharesWholeDeadlineAndRetainsAssignmentOnCancel(t *testing
 		deadlines = append(deadlines, deadline)
 		return base.RoundTrip(r)
 	}))
-	opts := append(serverReadyOptions(), compute.WithServerReadyAutomaticIPOptions(compute.WithAutomaticIPTimeout(250*time.Millisecond), compute.WithAutomaticIPProgressCallback(func(value *compute.Server) error {
+	opts := append(serverReadyOptions(), compute.WithServerReadyAutomaticIPOptions(compute.WithAutomaticIPWait(resource.WithTimeout(250*time.Millisecond)), compute.WithAutomaticIPProgressCallback(func(value *compute.Server) error {
 		value.ID, value.Name = "callback changed", "callback changed"
 		value.Addresses["private"] = []any{}
 		cancel(cause)

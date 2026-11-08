@@ -55,7 +55,9 @@ func glanceTaskHTTP(status int, body io.ReadCloser) *http.Response {
 	return testcloud.StreamResponse(status, body, http.Header{"Content-Type": {"application/json"}, "X-Evidence": {"actual"}})
 }
 
-func glanceTaskFast() tasks.TaskWaitOption { return tasks.WithTaskWaitPollInterval(time.Millisecond) }
+func glanceTaskFast() tasks.TaskWaitOption {
+	return tasks.WithTaskWait(resource.WithPollInterval(time.Millisecond))
+}
 
 func TestGlanceTaskWaitFreshReadsAndDefaults(t *testing.T) {
 	cloud := testcloud.New(t)
@@ -99,14 +101,14 @@ func TestGlanceTaskWaitFreshReadsAndDefaults(t *testing.T) {
 	// Options replace defaults; caller deadlines still bound an unlimited wait.
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
-	if _, err := a.WaitForTaskState(ctx, resource.ID("original"), "SUCCESS", tasks.WithTaskWaitTimeout(time.Second), tasks.WithUnlimitedTaskWait()); err != nil {
+	if _, err := a.WaitForTaskState(ctx, resource.ID("original"), "SUCCESS", tasks.WithTaskWait(resource.WithTimeout(time.Second)), tasks.WithTaskWait(resource.WithUnlimitedWait())); err != nil {
 		t.Fatal(err)
 	}
 	parentDeadline, _ := ctx.Deadline()
 	if !deadlines[3].Equal(parentDeadline) {
 		t.Fatal("unlimited option replaced caller deadline", deadlines[3], parentDeadline)
 	}
-	if _, err := a.WaitForTask(context.Background(), resource.ID("original"), tasks.WithTaskWaitOpts(tasks.TaskWaitOpts{Timeout: new(time.Duration)})); err != nil || deadlineSet[4] {
+	if _, err := a.WaitForTask(context.Background(), resource.ID("original"), tasks.WithTaskWaitOpts(tasks.TaskWaitOpts{Wait: []resource.WaitOption{resource.WithUnlimitedWait()}})); err != nil || deadlineSet[4] {
 		t.Fatal("zero explicit budget was not unlimited", err, deadlineSet)
 	}
 }
@@ -155,7 +157,7 @@ func TestGlanceTaskWaitSelected396AndExactFetchedInput(t *testing.T) {
 			})
 			opts := []tasks.TaskWaitOption{glanceTaskFast()}
 			if tc.failures != nil {
-				opts = append(opts, tasks.WithTaskWaitFailureStates(tc.failures...))
+				opts = append(opts, tasks.WithTaskWait(resource.WithFailureStates(tc.failures...)))
 			}
 			v, err := tasks.New(cloud.Client("image", glanceTaskPrefix)).WaitForTaskState(context.Background(), resource.ID("old"), tc.target, opts...)
 			if tc.wantFailure {
@@ -206,7 +208,7 @@ func TestGlanceTaskWaitRepeated396KeepsBudgetAndPausesAfterCreate(t *testing.T) 
 			id := fmt.Sprintf("new-%d", posts.Add(1))
 			testcloud.JSON(w, 201, glanceTaskJSON(id, "success", "", `{}`))
 		})
-		v, err := tasks.New(cloud.Client("image", glanceTaskPrefix)).WaitForTask(context.Background(), resource.ID("old"), tasks.WithTaskWaitTimeout(10*time.Second), glanceTaskFast())
+		v, err := tasks.New(cloud.Client("image", glanceTaskPrefix)).WaitForTask(context.Background(), resource.ID("old"), tasks.WithTaskWait(resource.WithTimeout(10*time.Second)), glanceTaskFast())
 		if err != nil || v == nil || v.CurrentID != "new-2" || v.OriginalID != "old" || v.Recreated != 2 || v.Created == nil || v.Created.Task.ID != "new-2" || calls.Load() != 3 || posts.Load() != 2 || len(deadlines) != 5 {
 			t.Fatal(v, err, calls.Load(), posts.Load(), deadlines)
 		}
@@ -231,7 +233,7 @@ func TestGlanceTaskWaitRepeated396KeepsBudgetAndPausesAfterCreate(t *testing.T) 
 			gets.Add(1)
 			testcloud.JSON(w, 200, glanceTaskJSON("new", "success", "", "null"))
 		})
-		v, err := tasks.New(cloud.Client("image", glanceTaskPrefix)).WaitForTask(context.Background(), resource.ID("old"), tasks.WithTaskWaitPollInterval(time.Hour), tasks.WithTaskWaitTimeout(2*time.Second))
+		v, err := tasks.New(cloud.Client("image", glanceTaskPrefix)).WaitForTask(context.Background(), resource.ID("old"), tasks.WithTaskWait(resource.WithPollInterval(time.Hour), resource.WithTimeout(2*time.Second)))
 		if !errors.Is(err, context.DeadlineExceeded) || v == nil || v.CurrentID != "new" || v.Task.Status != "success" || v.StatusCode != 201 || v.Created == nil || v.Recreated != 1 || gets.Load() != 1 || posts.Load() != 1 {
 			t.Fatal("POST shortcut or replay", v, err, gets.Load(), posts.Load())
 		}
@@ -488,8 +490,8 @@ func TestGlanceTaskWaitPreflightAndClosedOptions(t *testing.T) {
 		name   string
 		option tasks.TaskWaitOption
 	}{
-		{"nil option", nil}, {"zero timeout helper", tasks.WithTaskWaitTimeout(0)}, {"negative timeout", tasks.WithTaskWaitTimeout(-time.Second)},
-		{"zero poll", tasks.WithTaskWaitPollInterval(0)}, {"blank failure", tasks.WithTaskWaitFailureStates(" ")},
+		{"nil option", nil}, {"zero timeout helper", tasks.WithTaskWait(resource.WithTimeout(0))}, {"negative timeout", tasks.WithTaskWait(resource.WithTimeout(-time.Second))},
+		{"zero poll", tasks.WithTaskWait(resource.WithPollInterval(0))}, {"blank failure", tasks.WithTaskWait(resource.WithFailureStates(" "))},
 		{"auth", request.Header("X-Auth-Token", "forged")}, {"content type", request.Header("Content-Type", "text/plain")},
 		{"conflicting case aliases", tasks.WithTaskWaitHeaders(map[string]string{"X-Trace": "first", "x-trace": "second"})},
 	} {
@@ -540,11 +542,10 @@ func TestGlanceTaskWaitOptionSnapshotsAndConcurrentReuse(t *testing.T) {
 		w.Header().Set("X-Owned", "actual")
 		testcloud.JSON(w, 200, glanceTaskJSON("old", "failure", glanceTask396, `{"nested":{"value":1}}`))
 	})
-	timeout, interval := 10*time.Second, time.Millisecond
-	failures := []string{}
+	wait := []resource.WaitOption{resource.WithTimeout(10 * time.Second), resource.WithPollInterval(time.Millisecond), resource.WithFailureStates()}
 	headers := map[string]string{"X-Trace": "owned"}
-	option := tasks.WithTaskWaitOpts(tasks.TaskWaitOpts{Timeout: &timeout, PollInterval: &interval, FailureStates: failures, Headers: headers})
-	timeout, interval = -time.Second, 0
+	option := tasks.WithTaskWaitOpts(tasks.TaskWaitOpts{Wait: wait, Headers: headers})
+	wait[0], wait[1] = resource.WithTimeout(-time.Second), resource.WithPollInterval(0)
 	headers["X-Trace"] = "caller changed"
 	// Explicit empty failure states allow the exact 396 response to be the
 	// requested target without recreation, and the reusable option owns inputs.

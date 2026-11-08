@@ -80,10 +80,10 @@ func (a *API) WaitForTaskState(ctx context.Context, ref resource.Ref, target str
 		return nil, wrap(err)
 	}
 	var cancel context.CancelFunc
-	if *policy.Timeout == 0 {
+	if policy.Timeout == 0 {
 		budget, cancel = context.WithCancel(ctx)
 	} else {
-		budget, cancel = context.WithTimeout(ctx, *policy.Timeout)
+		budget, cancel = context.WithTimeout(ctx, policy.Timeout)
 	}
 	defer cancel()
 	current := ref.String()
@@ -104,7 +104,7 @@ func (a *API) WaitForTaskState(ctx context.Context, ref resource.Ref, target str
 		}
 		return response, err
 	}
-	pacer := pollschedule.NewPacer(taskWaitStrategy(policy).Delay)
+	pacer := pollschedule.NewPacer(policy.Strategy.Delay)
 	for {
 		response, err := perform(http.MethodGet, collection+"/"+url.PathEscape(current), nil, http.StatusOK)
 		if err != nil {

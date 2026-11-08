@@ -187,7 +187,7 @@ func (s *Service) prepareServerReady(ctx context.Context, input AutomaticFloatin
 		return nil, nil, nil, policy, err
 	}
 	ctx = rest.WithOperationGuard(ctx, guard)
-	automatic := append([]AutomaticFloatingIPOption{WithAutomaticIPTimeout(180 * time.Second), WithAutomaticIPPollInterval(5 * time.Second)}, o.automatic...)
+	automatic := append([]AutomaticFloatingIPOption{WithAutomaticIPWait(resource.WithTimeout(180*time.Second), resource.WithPollInterval(5*time.Second))}, o.automatic...)
 	state, ctx, cancel, err := s.prepareAutomaticIPReadiness(ctx, input, automatic, wait || o.waitIP)
 	if err != nil {
 		return nil, nil, nil, policy, err

@@ -21,35 +21,50 @@ func TestComputeWaitStrategyOptionsRejectedBeforeHTTP(t *testing.T) {
 	service := compute.New(cloud.Client("compute", "/nova/v2.1/"), compute.Dependencies{})
 	ctx := context.Background()
 	invalid := resource.ExponentialWait(time.Millisecond, 0, 0)
-	valid := resource.FixedWait(time.Millisecond)
+	valid := resource.WithPollInterval(time.Millisecond)
 	server := &compute.Server{ID: "server"}
 	for name, call := range map[string]func() error{
 		"backup": func() error {
-			_, err := service.BackupServer(ctx, "server", compute.BackupServerRequest{Name: "b"}, compute.WithBackupServerWait(true), compute.WithBackupServerWaitStrategy(invalid))
+			_, err := service.BackupServer(ctx, "server", compute.BackupServerRequest{Name: "b"}, compute.WithBackupServerWait(true), compute.WithBackupServerWaitOptions(resource.WithWaitStrategy(invalid)))
 			return err
 		},
-		"backup both": func() error {
-			interval := time.Millisecond
+		"backup failure states": func() error {
 			_, err := service.BackupServer(ctx, "server", compute.BackupServerRequest{Name: "b"}, func(o *compute.BackupServerOpts) error {
-				o.Wait, o.PollInterval, o.WaitStrategy = true, &interval, &valid
+				o.Wait, o.WaitOptions = true, []resource.WaitOption{valid, resource.WithFailureStates("error")}
 				return nil
 			})
 			return err
 		},
+		"floating IP create status attribute": func() error {
+			_, err := service.CreateFloatingIP(ctx, compute.CreateFloatingIPRequest{}, compute.WithFloatingIPCreateWaitOptions(resource.WithStatusAttribute("status")))
+			return err
+		},
+		"add auto IP progress": func() error {
+			_, err := service.AddAutoIP(ctx, server, compute.WithAddAutoIPWaitOptions(resource.WithProgress(make(chan int))))
+			return err
+		},
+		"pool IP failure states": func() error {
+			_, err := service.AddIPFromPool(ctx, server, resource.ID("pool"), compute.WithPoolIPWaitOptions(resource.WithFailureStates()))
+			return err
+		},
+		"automatic IP progress": func() error {
+			_, err := service.EnsureServerFloatingIP(ctx, compute.AutomaticFloatingIPRequest{Server: server}, compute.WithAutomaticIPWait(resource.WithProgressCallback(func(int) error { return nil })))
+			return err
+		},
 		"floating IP create": func() error {
-			_, err := service.CreateFloatingIP(ctx, compute.CreateFloatingIPRequest{}, compute.WithFloatingIPCreateWaitStrategy(invalid))
+			_, err := service.CreateFloatingIP(ctx, compute.CreateFloatingIPRequest{}, compute.WithFloatingIPCreateWaitOptions(resource.WithWaitStrategy(invalid)))
 			return err
 		},
 		"add auto IP": func() error {
-			_, err := service.AddAutoIP(ctx, server, compute.WithAddAutoIPWaitStrategy(invalid))
+			_, err := service.AddAutoIP(ctx, server, compute.WithAddAutoIPWaitOptions(resource.WithWaitStrategy(invalid)))
 			return err
 		},
 		"pool IP": func() error {
-			_, err := service.AddIPFromPool(ctx, server, resource.ID("pool"), compute.WithPoolIPWaitStrategy(resource.WaitStrategy{}))
+			_, err := service.AddIPFromPool(ctx, server, resource.ID("pool"), compute.WithPoolIPWaitOptions(resource.WithWaitStrategy(resource.WaitStrategy{})))
 			return err
 		},
 		"automatic IP": func() error {
-			_, err := service.EnsureServerFloatingIP(ctx, compute.AutomaticFloatingIPRequest{Server: server}, compute.WithAutomaticIPWaitStrategy(invalid))
+			_, err := service.EnsureServerFloatingIP(ctx, compute.AutomaticFloatingIPRequest{Server: server}, compute.WithAutomaticIPWait(resource.WithWaitStrategy(invalid)))
 			return err
 		},
 	} {
@@ -64,16 +79,26 @@ func TestComputeWaitStrategyOptionsRejectedBeforeHTTP(t *testing.T) {
 
 func TestFloatingIPCreateWaitStrategyOptions(t *testing.T) {
 	ms := time.Millisecond
-	growing := resource.ExponentialWait(ms, 2, 8*ms)
-	p, err := compute.PrepareFloatingIPCreateOptions(context.Background(), compute.WithFloatingIPCreateWaitInterval(5*ms), compute.WithFloatingIPCreateWaitStrategy(growing))
-	if err != nil || p.WaitInterval != 0 || p.WaitStrategy == nil || *p.WaitStrategy != growing {
+	growing := resource.WithWaitStrategy(resource.ExponentialWait(ms, 2, 8*ms))
+	variadic := []resource.WaitOption{resource.WithPollInterval(5 * ms)}
+	appended := compute.WithFloatingIPCreateWaitOptions(variadic...)
+	variadic[0] = nil
+	p, err := compute.PrepareFloatingIPCreateOptions(context.Background(), appended, compute.WithFloatingIPCreateWaitOptions(growing))
+	if err != nil || len(p.WaitOptions) != 2 || p.WaitOptions[0] == nil {
 		t.Fatal(p, err)
 	}
-	p, err = compute.PrepareFloatingIPCreateOptions(context.Background(), compute.WithFloatingIPCreateWaitStrategy(growing), compute.WithFloatingIPCreateWaitInterval(5*ms))
-	if err != nil || p.WaitInterval != 5*ms || p.WaitStrategy != nil {
+	field := []resource.WaitOption{resource.WithTimeout(time.Second)}
+	option := compute.WithFloatingIPCreateOptions(compute.FloatingIPCreateOpts{WaitOptions: field})
+	field[0] = resource.WithTimeout(0)
+	p, err = compute.PrepareFloatingIPCreateOptions(context.Background(), option)
+	if err != nil || len(p.WaitOptions) != 1 {
 		t.Fatal(p, err)
 	}
-	if _, err := compute.PrepareFloatingIPCreateOptions(context.Background(), compute.WithFloatingIPCreateOptions(compute.FloatingIPCreateOpts{WaitInterval: ms, WaitStrategy: &growing})); !errors.Is(err, resource.ErrInvalidOption) {
+	p.WaitOptions[0] = nil
+	if p, err = compute.PrepareFloatingIPCreateOptions(context.Background(), option); err != nil || len(p.WaitOptions) != 1 || p.WaitOptions[0] == nil {
+		t.Fatal(p, err)
+	}
+	if _, err := compute.PrepareFloatingIPCreateOptions(context.Background(), compute.WithFloatingIPCreateOptions(compute.FloatingIPCreateOpts{WaitOptions: []resource.WaitOption{nil}})); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
 }

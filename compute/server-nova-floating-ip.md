@@ -500,10 +500,11 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithAutomaticIPEnabled`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithAutomaticAddressOptions`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithAutomaticEnsureOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithAutomaticIPTimeout`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithUnlimitedAutomaticIPTimeout`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithAutomaticIPPollInterval`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithAutomaticIPWaitStrategy`
+- `github.com/JSYoo5B/go-openstacksdk/compute.WithAutomaticIPWait`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithTimeout`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithUnlimitedWait`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithPollInterval`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithWaitStrategy`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithAutomaticIPProgressCallback`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithAutomaticIPProgress`
 - `github.com/JSYoo5B/go-openstacksdk/network.FloatingIPs.NewPlanner`
@@ -532,7 +533,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk.Connection.AddIPFromPool`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithPoolIPReuse`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithPoolIPWait`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithPoolIPTimeout`
+- `github.com/JSYoo5B/go-openstacksdk/compute.WithPoolIPWaitOptions`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithPoolIPFixedAddress`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithPoolIPNATDestination`
 - `github.com/JSYoo5B/go-openstacksdk/compute.Service.AddAutoIP`
@@ -659,7 +660,7 @@ Go API:
 
 - WithAutomaticIPProgress sends an owned copy of each unconverged raw Server on a caller-owned channel, so receiver edits do not alter the result. Each send blocks until it is received or the context ends; the SDK never closes the caller-owned channel and sends nothing after the operation returns, a context that ends during a send stops it through its cancellation path, and a nil channel option is invalid before HTTP. With WithAutomaticIPProgressCallback also set the callback runs first; its error stops before another request and nothing is sent for that step.
   Tests: `compute/server_automatic_ip_progress_channel_test.go:TestAutomaticIPProgressChannelSendsOwnedCopiesAndRejectsNil`, `compute/server_automatic_ip_progress_channel_test.go:TestAutomaticIPProgressChannelBlockedSendStopsOnCancellation`, `compute/server_automatic_ip_progress_channel_test.go:TestAutomaticIPProgressChannelReceiverCancellation`, `compute/server_automatic_ip_progress_channel_test.go:TestAutomaticIPProgressCallbackRunsBeforeChannelSend`.
-- compute.WithAutomaticIPWaitStrategy rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, the interval option given before or after it.
+- resource.WithWaitStrategy in compute.WithAutomaticIPWait rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, a resource.WithPollInterval given before or after it.
   Tests: `compute/wait_strategy_test.go:TestComputeWaitStrategyOptionsRejectedBeforeHTTP`, `compute/wait_strategy_internal_test.go:TestAutomaticIPWaitStrategySelectsPauses`.
 
 Python/Go differences:
@@ -680,7 +681,7 @@ Python/Go differences:
 - One context deadline bounds polling and the IP stage, where Python passes timeout - int(elapsed) to the IP stage and can allow up to about one more second.
 - Evidence is local HTTP fixtures and pinned-source comparison; authenticated deployment acceptance is a separate evidence class shared by every operation (see docs/sdk-support-ledger.md).
 - The pool and automatic lanes of AddIPsToServer deliberately keep the idempotent Ensure path: a server that already has a matching floating IP keeps it and no further IP is allocated or attached. Python's _add_ip_from_pool reuses the first unattached IP of the pool without looking at the server, re-reads the server after a new allocation and falls back to the Nova pool on a Neutron NotFound; its _add_auto_ip skips the attach after a Neutron allocation, falls back to Nova and deletes the IP it created when the wait times out. Those Python lanes are provided as AddIPFromPool and AddAutoIP (python:cloud/_network_common/NetworkCommonCloudMixin/add_auto_ip), which callers use when they need Python's behavior.
-- Python waits use a fixed poll interval. compute.WithAutomaticIPWaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of the interval and strategy options wins.
+- Python waits use a fixed poll interval. compute.WithAutomaticIPWait accepts resource.WithWaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of resource.WithPollInterval and resource.WithWaitStrategy wins.
 
 ### `python:cloud/_compute/ComputeCloudMixin/get_active_server`
 
@@ -692,8 +693,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk.Connection.CreateWithAutomaticFloatingIP`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithWait`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithAutomaticIPEnabled`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithAutomaticIPTimeout`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithUnlimitedAutomaticIPTimeout`
+- `github.com/JSYoo5B/go-openstacksdk/compute.WithAutomaticIPWait`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithTimeout`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithUnlimitedWait`
 - `github.com/JSYoo5B/go-openstacksdk/resource.PrepareWaitOptionsFor`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WaitPolicy.ValidateFixedStatus`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithWaitPolicy`
@@ -762,7 +764,7 @@ Go API:
   Tests: `compute/server_get_active_combinations_test.go:TestGetActiveServerNullableStatusFaultAndModelCases`.
 - The address lane follows Python's add_ips_to_server ips branch (add_ip_list and _attach_ip_to_server) like AddIPList: the supplied model's only floating IPv4 short-circuits an item without observation, a Neutron 404 from the association PUT is recorded in AttachmentNotFound with the item incomplete before the next address, an unassociated IP is attached through the _nat_destination_port choice without refresh, and an associated IP on a model without floating addresses refreshes the server with one raw GET in both the asynchronous and the WithActiveServerWait lanes. The legacy Nova address lane short-circuits without refresh and attaches the next address with list, singular recheck and addFloatingIp.
   Tests: `compute/server_get_active_combinations_test.go:TestGetActiveServerAddressLaneFollowsSourceAttachSteps`.
-- One deadline covers every request of the IP stage in both the asynchronous and the WithActiveServerWait lanes: 180 seconds by default, a WithAutomaticIPTimeout override, an earlier parent deadline, or the parent alone with WithUnlimitedAutomaticIPTimeout. Unlimited under a parent without a deadline sends requests without a deadline, except the Neutron IP ACTIVE wait, which keeps its own prepared stage timeout.
+- One deadline covers every request of the IP stage in both the asynchronous and the WithActiveServerWait lanes: 180 seconds by default, a resource.WithTimeout override in WithAutomaticIPWait, an earlier parent deadline, or the parent alone with resource.WithUnlimitedWait in WithAutomaticIPWait. Unlimited under a parent without a deadline sends requests without a deadline, except the Neutron IP ACTIVE wait, which keeps its own prepared stage timeout.
   Tests: `compute/server_get_active_combinations_test.go:TestGetActiveServerTimeoutUnlimitedAndParentCombinations`.
 - A parent canceled before the call returns its cause before any request. A parent canceled with a cause after the accepted allocation returns the cause with the known Server and allocated Assignment, without IP readiness GET, raw observation, retry or cleanup.
   Tests: `compute/server_get_active_combinations_test.go:TestGetActiveServerParentContextCancellation`.
@@ -780,7 +782,7 @@ Python/Go differences:
 - A non-empty address map with only empty or null rows returns ServerAddressesUnavailableError with EmptyRows and is never deleted. Python treats that map as truthy and proceeds to add_ips_to_server; Go does not attempt IP assignment on a server with no address rows.
 - One context deadline covers raw polling and the IP stage. Python passes timeout - int(elapsed) to get_active_server, so truncation can give its IP stage up to one extra second; Go never exceeds the overall budget.
 - GetActiveServer inherits the AddIPsToServer lane choice. Its address lane follows Python's add_ip_list steps; its pool and automatic lanes keep the idempotent Ensure path, so a server that already has a matching floating IP keeps it, a Neutron failure does not fall back to the Nova pool and a timed-out created IP is not deleted. AddIPFromPool and AddAutoIP (python:cloud/_network_common/NetworkCommonCloudMixin/add_auto_ip) provide Python's _add_ip_from_pool and _add_auto_ip ordering and fallback for callers that need it.
-- WithUnlimitedAutomaticIPTimeout removes the overall Go budget and leaves only the parent context; Python always has a numeric timeout. The Neutron IP ACTIVE wait keeps its own prepared stage timeout inside the overall budget.
+- resource.WithUnlimitedWait in WithAutomaticIPWait removes the overall Go budget and leaves only the parent context; Python always has a numeric timeout. The Neutron IP ACTIVE wait keeps its own prepared stage timeout inside the overall budget.
 - Results are immutable owned snapshots rather than Python's mutable Resource with adapter, session, cache and dirty state (SDK-R1/C1/S1); see Deliberate runtime differences in docs/sdk-support-ledger.md.
 - Lookup errors while polling return immediately with their cause, following the Gophercloud WaitFor convention; Python's cloud wait_for_server ignores every exception and keeps polling until its timeout. Retries for transient HTTP failures belong to the ProviderClient retry settings; see Deliberate runtime differences in docs/sdk-support-ledger.md.
 - Evidence is local HTTP fixtures and pinned-source comparison; authenticated deployment acceptance is a separate evidence class shared by every operation (see docs/sdk-support-ledger.md).

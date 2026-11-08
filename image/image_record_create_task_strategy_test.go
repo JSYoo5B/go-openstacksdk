@@ -20,20 +20,22 @@ func TestImageRecordCreateTaskWaitOptionsValidateAndLaterWins(t *testing.T) {
 	if err != nil || imageRecordCreateTaskStrategy(defaults).Delay(3) != 2*time.Second {
 		t.Fatal(defaults, err)
 	}
-	config, err := prepareImageRecordCreateOptions(ctx, check, []ImageRecordCreateOption{WithImageRecordCreateTaskPollInterval(time.Second), WithImageRecordCreateTaskWaitStrategy(growing)})
-	if err != nil || config.TaskPollInterval != nil || imageRecordCreateTaskStrategy(config).Delay(3) != 3*time.Millisecond {
+	config, err := prepareImageRecordCreateOptions(ctx, check, []ImageRecordCreateOption{WithImageRecordCreateTaskWait(resource.WithPollInterval(time.Second)), WithImageRecordCreateTaskWait(resource.WithWaitStrategy(growing))})
+	if err != nil || imageRecordCreateTaskStrategy(config).Delay(3) != 3*time.Millisecond {
 		t.Fatal(config, err)
 	}
-	config, err = prepareImageRecordCreateOptions(ctx, check, []ImageRecordCreateOption{WithImageRecordCreateTaskWaitStrategy(growing), WithImageRecordCreateTaskPollInterval(time.Second)})
-	if err != nil || config.TaskWaitStrategy != nil || imageRecordCreateTaskStrategy(config).Delay(3) != time.Second {
+	config, err = prepareImageRecordCreateOptions(ctx, check, []ImageRecordCreateOption{WithImageRecordCreateTaskWait(resource.WithWaitStrategy(growing)), WithImageRecordCreateTaskWait(resource.WithPollInterval(time.Second))})
+	if err != nil || imageRecordCreateTaskStrategy(config).Delay(3) != time.Second {
 		t.Fatal(config, err)
 	}
-	interval := time.Second
 	for name, option := range map[string]ImageRecordCreateOption{
-		"zero interval":    WithImageRecordCreateTaskPollInterval(0),
-		"invalid strategy": WithImageRecordCreateTaskWaitStrategy(resource.ExponentialWait(time.Millisecond, 0.5, 0)),
-		"zero strategy":    WithImageRecordCreateTaskWaitStrategy(resource.WaitStrategy{}),
-		"both":             WithImageRecordCreateOpts(ImageRecordCreateOpts{TaskPollInterval: &interval, TaskWaitStrategy: &growing}),
+		"zero interval":          WithImageRecordCreateTaskWait(resource.WithPollInterval(0)),
+		"invalid strategy":       WithImageRecordCreateTaskWait(resource.WithWaitStrategy(resource.ExponentialWait(time.Millisecond, 0.5, 0))),
+		"zero strategy":          WithImageRecordCreateTaskWait(resource.WithWaitStrategy(resource.WaitStrategy{})),
+		"timeout owned by kwarg": WithImageRecordCreateTaskWait(resource.WithTimeout(time.Second)),
+		"unlimited":              WithImageRecordCreateTaskWait(resource.WithUnlimitedWait()),
+		"failure states":         WithImageRecordCreateTaskWait(resource.WithFailureStates()),
+		"struct field":           WithImageRecordCreateOpts(ImageRecordCreateOpts{TaskWait: []resource.WaitOption{resource.WithProgress(make(chan int))}}),
 	} {
 		routes := 0
 		service, _, _ := imageCreateTaskServices(t, func(req *http.Request) (*http.Response, error) {
@@ -75,7 +77,7 @@ func TestImageRecordCreateTaskWaitStrategyPacesTaskPolls(t *testing.T) {
 	})
 	ms := time.Millisecond
 	got, err := service.CreateImageRecord(context.Background(), ImageRecordCreateRequest{Name: "input", Data: ImageRecordCreateText("bytes")},
-		imageCreateTaskOptions(WithImageRecordCreateWait(true), WithImageRecordCreateTaskWaitStrategy(resource.ExponentialWait(2*ms, 2, 0)))...)
+		imageCreateTaskOptions(WithImageRecordCreateWait(true), WithImageRecordCreateTaskWait(resource.WithWaitStrategy(resource.ExponentialWait(2*ms, 2, 0))))...)
 	if err != nil || got == nil || got.TaskWait == nil || got.TaskWait.Fetches != 4 {
 		t.Fatal(got, err)
 	}

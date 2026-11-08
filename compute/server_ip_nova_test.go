@@ -147,7 +147,7 @@ func newNovaIPFixture(t *testing.T, fail string) *novaIPFixture {
 }
 
 func novaIPOptions(extra ...compute.AutomaticFloatingIPOption) []compute.ServerIPOption {
-	common := []compute.AutomaticFloatingIPOption{compute.WithAutomaticAddressOptions(compute.WithFloatingIPSource(compute.FloatingIPNova), compute.WithAddressReachability(false)), compute.WithAutomaticEnsureOptions(network.WithEnsureFixedAddress("10.0.0.10")), compute.WithAutomaticIPPollInterval(time.Millisecond)}
+	common := []compute.AutomaticFloatingIPOption{compute.WithAutomaticAddressOptions(compute.WithFloatingIPSource(compute.FloatingIPNova), compute.WithAddressReachability(false)), compute.WithAutomaticEnsureOptions(network.WithEnsureFixedAddress("10.0.0.10")), compute.WithAutomaticIPWait(resource.WithPollInterval(time.Millisecond))}
 	return []compute.ServerIPOption{compute.WithServerIPAutomaticOptions(append(common, extra...)...)}
 }
 

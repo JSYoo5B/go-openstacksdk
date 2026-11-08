@@ -57,7 +57,8 @@ nil), as Python's commit does.
 `RebuildServer` rejects an empty image ID before HTTP (Python raises
 `TypeError`), sends `imageRef` and a nonempty `adminPass`, and with
 `WithCloudServerWait(true)` polls until ACTIVE (ERROR fails) within the timeout
-(default 180 seconds, `WithCloudServerUnlimitedWait` for Python's `None`). The
+(default 180 seconds; `WithCloudServerWaitOptions(resource.WithTimeout(d))` changes it and
+`WithCloudServerWaitOptions(resource.WithUnlimitedWait())` maps Python's `None`). The
 returned admin password, else the supplied one, is restored on the waited
 server. The rebuild is never replayed; a failed wait returns the action result
 beside the error.

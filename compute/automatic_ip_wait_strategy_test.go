@@ -50,7 +50,7 @@ func TestAutomaticIPWaitStrategyPacesNovaObservation(t *testing.T) {
 		return 200, `{"server":{"id":"server","status":"ACTIVE","addresses":` + addresses + `}}`
 	}
 	ms := time.Millisecond
-	options := append(automaticOptions(), compute.WithAutomaticIPWaitStrategy(resource.ExponentialWait(2*ms, 2, 0)))
+	options := append(automaticOptions(), compute.WithAutomaticIPWait(resource.WithWaitStrategy(resource.ExponentialWait(2*ms, 2, 0))))
 	result, err := f.service.EnsureServerFloatingIP(context.Background(), compute.AutomaticFloatingIPRequest{Server: automaticServer(t, autoFixed)}, options...)
 	if err != nil || result == nil || !result.Observed || f.raw.Load() != 4 {
 		t.Fatal(result, err, f.raw.Load())
@@ -76,7 +76,7 @@ func TestAutomaticIPWaitStrategyPacesServerDeletionWait(t *testing.T) {
 		return 404, `{"itemNotFound":{"message":"gone"}}`
 	}
 	ms := time.Millisecond
-	opts := append(serverReadyOptions(), compute.WithServerReadyAutomaticIPOptions(compute.WithAutomaticIPEnabled(false), compute.WithAutomaticIPWaitStrategy(resource.LinearWait(2*ms, 3*ms, 0))),
+	opts := append(serverReadyOptions(), compute.WithServerReadyAutomaticIPOptions(compute.WithAutomaticIPEnabled(false), compute.WithAutomaticIPWait(resource.WithWaitStrategy(resource.LinearWait(2*ms, 3*ms, 0)))),
 		compute.WithServerWithoutAddressesPolicy(compute.DeleteServerWithoutAddresses))
 	_, err := f.service.WaitForServer(context.Background(), compute.AutomaticFloatingIPRequest{Server: automaticServer(t, autoFixed)}, opts...)
 	var unavailable *compute.ServerAddressesUnavailableError

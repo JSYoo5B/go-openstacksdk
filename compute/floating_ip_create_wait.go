@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/pollschedule"
-	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 var floatingIPCreateWaitDeadline = errors.New("SDK floating IP create wait deadline")
@@ -17,25 +16,25 @@ func (p *floatingIPQueryState) finishNeutronCreate(result *CreateFloatingIPResul
 		return result, p.state.check(p.ctx)
 	}
 	completionCtx, waitID := p.ctx, ""
+	var waitTimeout time.Duration
 	if policy.Wait {
 		id, err := floatingIPExecutableID(result.Allocation)
 		if err != nil {
 			return result, createResponseError(result.AllocationResponse, err)
 		}
-		waitCtx, cancel := context.WithTimeoutCause(p.ctx, policy.WaitTimeout, floatingIPCreateWaitDeadline)
+		wait, err := policy.resolveWait()
+		if err != nil {
+			return result, errors.Join(err, p.state.check(p.ctx))
+		}
+		waitCtx, cancel := context.WithCancel(p.ctx)
+		if !wait.Unlimited {
+			waitCtx, cancel = context.WithTimeoutCause(p.ctx, wait.Timeout, floatingIPCreateWaitDeadline)
+		}
 		defer cancel()
-		completionCtx, waitID = waitCtx, id
+		completionCtx, waitID, waitTimeout = waitCtx, id, wait.Timeout
 		child := *p
 		child.ctx = waitCtx
-		interval := policy.WaitInterval
-		if interval == 0 {
-			interval = min(5*time.Second, policy.WaitTimeout)
-		}
-		strategy := resource.FixedWait(interval)
-		if policy.WaitStrategy != nil {
-			strategy = *policy.WaitStrategy
-		}
-		pacer := pollschedule.NewPacer(strategy.Delay)
+		pacer := pollschedule.NewPacer(wait.Strategy.Delay)
 		var waitErr error
 		for {
 			if waitCtx.Err() != nil {
@@ -77,7 +76,7 @@ func (p *floatingIPQueryState) finishNeutronCreate(result *CreateFloatingIPResul
 			}
 		}
 		if waitErr != nil {
-			return p.failedCreateWait(result, policy, id, waitCtx, waitErr)
+			return p.failedCreateWait(result, waitTimeout, id, waitCtx, waitErr)
 		}
 	}
 	var port string
@@ -89,7 +88,7 @@ func (p *floatingIPQueryState) finishNeutronCreate(result *CreateFloatingIPResul
 	}
 	if err := p.state.check(completionCtx); err != nil {
 		if policy.Wait {
-			return p.failedCreateWait(result, policy, waitID, completionCtx, err)
+			return p.failedCreateWait(result, waitTimeout, waitID, completionCtx, err)
 		}
 		return result, err
 	}
@@ -97,13 +96,13 @@ func (p *floatingIPQueryState) finishNeutronCreate(result *CreateFloatingIPResul
 	return result, nil
 }
 
-func (p *floatingIPQueryState) failedCreateWait(result *CreateFloatingIPResult, policy FloatingIPCreateOpts, id string, waitCtx context.Context, waitErr error) (*CreateFloatingIPResult, error) {
+func (p *floatingIPQueryState) failedCreateWait(result *CreateFloatingIPResult, timeout time.Duration, id string, waitCtx context.Context, waitErr error) (*CreateFloatingIPResult, error) {
 	if errors.Is(context.Cause(waitCtx), floatingIPCreateWaitDeadline) {
 		var last *FloatingIPRecord
 		if len(result.Observations) > 0 {
 			last = result.Observations[len(result.Observations)-1].FloatingIP
 		}
-		waitErr = errors.Join(&FloatingIPCreateTimeoutError{ID: id, Timeout: policy.WaitTimeout, Last: last}, waitErr)
+		waitErr = errors.Join(&FloatingIPCreateTimeoutError{ID: id, Timeout: timeout, Last: last}, waitErr)
 		if err := p.state.check(p.ctx); err == nil {
 			result.Cleanup, result.CleanupError = p.deleteWithRetries(id, 1)
 		} else {

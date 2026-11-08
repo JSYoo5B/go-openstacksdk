@@ -14,6 +14,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"slices"
 	"time"
 
 	"github.com/JSYoo5B/go-openstacksdk/image"
@@ -21,6 +22,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudvolume"
 	"github.com/JSYoo5B/go-openstacksdk/internal/pollschedule"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/internal/sourcewait"
 	objectapi "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
@@ -41,10 +43,9 @@ type Dependencies struct {
 
 // CreateRequest mirrors the root CloudImageCreateRequest field for field.
 type CreateRequest struct {
-	Image        image.ImageRecordCreateRequest
-	VolumeID     string
-	PollInterval time.Duration
-	WaitStrategy *resource.WaitStrategy
+	Image    image.ImageRecordCreateRequest
+	VolumeID string
+	Wait     []resource.WaitOption
 }
 
 // CreateResult mirrors the root CloudImageCreateResult field for field; V is
@@ -175,16 +176,16 @@ func Create[V any](ctx context.Context, deps Dependencies, createVolume CreateVo
 	if ctx == nil {
 		return fail(nil, fmt.Errorf("%w: context is required", resource.ErrInvalidOption))
 	}
-	if input.PollInterval < 0 {
-		return fail(nil, fmt.Errorf("%w: Cloud image create poll interval must not be negative", resource.ErrInvalidOption))
+	settings, err := sourcewait.Resolve(0, slices.Clone(input.Wait))
+	if err != nil {
+		return fail(nil, err)
 	}
-	if input.WaitStrategy != nil {
-		if input.PollInterval != 0 {
-			return fail(nil, fmt.Errorf("%w: Cloud image create PollInterval and WaitStrategy are mutually exclusive", resource.ErrInvalidOption))
-		}
-		if err := input.WaitStrategy.Validate(); err != nil {
-			return fail(nil, err)
-		}
+	if settings.TimeoutSet {
+		return fail(nil, fmt.Errorf("%w: the Cloud image create wait timeout comes from the timeout option", resource.ErrInvalidOption))
+	}
+	strategy := resource.FixedWait(2 * time.Second)
+	if settings.StrategySet {
+		strategy = settings.Strategy
 	}
 	policy, err := image.PrepareImageRecordCreateOptions(ctx, options...)
 	if err != nil {
@@ -239,14 +240,6 @@ func Create[V any](ctx context.Context, deps Dependencies, createVolume CreateVo
 	if err := json.Unmarshal(result.Image.Resource.Body["id"], &id); err != nil || id == "" {
 		return fail(result, fmt.Errorf("%w: created image id must be a nonempty string", resource.ErrInvalidOption))
 	}
-	interval := input.PollInterval
-	if interval == 0 {
-		interval = 2 * time.Second
-	}
-	strategy := resource.FixedWait(interval)
-	if input.WaitStrategy != nil {
-		strategy = *input.WaitStrategy
-	}
 	pacer := pollschedule.NewPacer(strategy.Delay)
 	created := result.Image
 	deadline := time.Now().Add(timeout)
@@ -278,13 +271,7 @@ func Create[V any](ctx context.Context, deps Dependencies, createVolume CreateVo
 		}
 	}
 	timedOut := fmt.Errorf("%w: timeout waiting for the image %q to finish", context.DeadlineExceeded, id)
-	cleanupOptions := []image.ImageRecordCloudDeleteOption{image.WithImageRecordCloudDeleteWait(true)}
-	if input.PollInterval != 0 {
-		cleanupOptions = append(cleanupOptions, image.WithImageRecordCloudDeletePollInterval(input.PollInterval))
-	}
-	if input.WaitStrategy != nil {
-		cleanupOptions = append(cleanupOptions, image.WithImageRecordCloudDeleteWaitStrategy(*input.WaitStrategy))
-	}
+	cleanupOptions := []image.ImageRecordCloudDeleteOption{image.WithImageRecordCloudDeleteWait(true), image.WithImageRecordCloudDeleteWaitOptions(resource.WithWaitStrategy(strategy))}
 	var cleanupErr error
 	result.Cleanup, cleanupErr = service.DeleteCloudImageRecord(ctx, id, cleanupOptions...)
 	result.Image = created

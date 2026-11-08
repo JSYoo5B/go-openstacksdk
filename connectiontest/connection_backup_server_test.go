@@ -3,6 +3,7 @@ package connectiontest_test
 import (
 	"context"
 	"errors"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"io"
 	"net/http"
 	"strings"
@@ -71,7 +72,7 @@ func TestConnectionBackupServerBindsImageLazily(t *testing.T) {
 			if err != nil || computeLoads.Load() != 1 || imageLoads.Load() != 0 {
 				t.Fatal(err, computeLoads.Load(), imageLoads.Load())
 			}
-			result, err := service.BackupServer(context.Background(), "s1", compute.BackupServerRequest{Name: "backup", BackupType: "daily", Rotation: 3}, compute.WithBackupServerWait(true), compute.WithBackupServerPollInterval(time.Nanosecond))
+			result, err := service.BackupServer(context.Background(), "s1", compute.BackupServerRequest{Name: "backup", BackupType: "daily", Rotation: 3}, compute.WithBackupServerWait(true), compute.WithBackupServerWaitOptions(resource.WithPollInterval(time.Nanosecond)))
 			if status == 500 {
 				var native gophercloud.ErrUnexpectedResponseCode
 				if !errors.As(err, &native) || native.Actual != 500 || result == nil || result.Action == nil || imageLoads.Load() != 0 || imageGets.Load() != 0 {

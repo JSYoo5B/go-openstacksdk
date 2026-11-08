@@ -206,7 +206,7 @@ func newDispatchFixture(t *testing.T, fail string) *dispatchFixture {
 
 func dispatchOptions() []compute.AutomaticFloatingIPOption {
 	return []compute.AutomaticFloatingIPOption{
-		compute.WithAutomaticIPTimeout(time.Second), compute.WithAutomaticIPPollInterval(time.Millisecond),
+		compute.WithAutomaticIPWait(resource.WithTimeout(time.Second)), compute.WithAutomaticIPWait(resource.WithPollInterval(time.Millisecond)),
 		compute.WithAutomaticEnsureOptions(network.WithEnsureProject("owner"), network.WithEnsureWait(resource.WithPollInterval(time.Millisecond))),
 		compute.WithAutomaticAddressOptions(compute.WithAddressReachability(false)),
 	}

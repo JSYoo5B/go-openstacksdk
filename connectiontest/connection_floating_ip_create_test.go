@@ -290,7 +290,7 @@ func TestFloatingIPCreateWaitPublicGetSkipsErrorAndChecksFinalPort(t *testing.T)
 				}
 				return 200, fmt.Sprintf(`{"floatingips":[{"id":"new","status":"\u0041CTIVE","port_id":%q}]}`, port)
 			}
-			result, err := conn.CreateFloatingIP(context.Background(), floatingCreateInput("net"), compute.WithFloatingIPCreatePort("port"), compute.WithFloatingIPCreateWait(true), compute.WithFloatingIPCreateWaitTimeout(time.Second), compute.WithFloatingIPCreateWaitInterval(time.Millisecond))
+			result, err := conn.CreateFloatingIP(context.Background(), floatingCreateInput("net"), compute.WithFloatingIPCreatePort("port"), compute.WithFloatingIPCreateWait(true), compute.WithFloatingIPCreateWaitTimeout(time.Second), compute.WithFloatingIPCreateWaitOptions(resource.WithPollInterval(time.Millisecond)))
 			if !result.Allocated || result.Cleanup != nil || result.Backend != compute.FloatingIPNeutron {
 				t.Fatal(result, err)
 			}
@@ -336,7 +336,7 @@ func TestFloatingIPCreateSDKWaitTimeoutCleansWithLiveParent(t *testing.T) {
 			if mode == "real" {
 				duration = 20 * time.Millisecond
 			}
-			result, err := conn.CreateFloatingIP(context.Background(), floatingCreateInput("net"), compute.WithFloatingIPCreatePort("port"), compute.WithFloatingIPCreateWait(true), compute.WithFloatingIPCreateWaitTimeout(duration), compute.WithFloatingIPCreateWaitInterval(time.Millisecond))
+			result, err := conn.CreateFloatingIP(context.Background(), floatingCreateInput("net"), compute.WithFloatingIPCreatePort("port"), compute.WithFloatingIPCreateWait(true), compute.WithFloatingIPCreateWaitTimeout(duration), compute.WithFloatingIPCreateWaitOptions(resource.WithPollInterval(time.Millisecond)))
 			var timeout *compute.FloatingIPCreateTimeoutError
 			if !errors.As(err, &timeout) || !errors.Is(err, context.DeadlineExceeded) || !result.Allocated || result.Waited || result.Cleanup == nil || deletes != 1 || timeout.ID != "new" {
 				t.Fatal(result, err, state)

@@ -1,6 +1,7 @@
 package compute
 
 import (
+	"slices"
 	"time"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/pollschedule"
@@ -101,16 +102,17 @@ type AutomaticServerIPResult struct {
 }
 
 type automaticFloatingIPOptions struct {
-	enabled           bool
-	addresses         []ServerAddressOption
-	ips               []network.EnsureFloatingIPOption
-	timeout, interval time.Duration
-	strategy          *resource.WaitStrategy
-	progressCallback  func(*Server) error
-	progress          chan<- *Server
-	pool              resource.Ref
-	requestedIPs      []string
-	forceExplicit     bool
+	enabled          bool
+	addresses        []ServerAddressOption
+	ips              []network.EnsureFloatingIPOption
+	waitOpts         []resource.WaitOption
+	timeout          time.Duration
+	strategy         resource.WaitStrategy
+	progressCallback func(*Server) error
+	progress         chan<- *Server
+	pool             resource.Ref
+	requestedIPs     []string
+	forceExplicit    bool
 }
 
 type AutomaticFloatingIPOption func(*automaticFloatingIPOptions) error
@@ -163,56 +165,36 @@ func WithAutomaticEnsureOptions(options ...network.EnsureFloatingIPOption) Autom
 	return func(o *automaticFloatingIPOptions) error { o.ips = append(o.ips, options...); return nil }
 }
 
-// WithAutomaticIPTimeout bounds classification, selection, assignment and Nova
-// observation together. The default is five minutes; an earlier parent wins.
-func WithAutomaticIPTimeout(timeout time.Duration) AutomaticFloatingIPOption {
-	return func(o *automaticFloatingIPOptions) error {
-		if timeout <= 0 {
-			return invalid("automatic IP timeout must be positive")
-		}
-		o.timeout = timeout
-		return nil
-	}
+// WithAutomaticIPWait tunes the workflow with the shared resource wait
+// options; repeated calls append and the later option wins per control.
+// resource.WithTimeout bounds classification, selection, assignment and Nova
+// observation together; the default is five minutes and an earlier parent
+// wins. resource.WithUnlimitedWait removes that SDK limit. resource.
+// WithPollInterval or resource.WithWaitStrategy (a Go-only extension) paces
+// the Nova observation and deletion waits, which otherwise poll every two
+// seconds; each wait starts the strategy from its first pause. Failure states,
+// a status attribute and resource progress are unsupported and fail with
+// resource.ErrInvalidOption before HTTP; WithAutomaticIPProgressCallback and
+// WithAutomaticIPProgress report the observed servers instead.
+func WithAutomaticIPWait(options ...resource.WaitOption) AutomaticFloatingIPOption {
+	owned := slices.Clone(options)
+	return func(o *automaticFloatingIPOptions) error { o.waitOpts = append(o.waitOpts, owned...); return nil }
 }
 
-func WithUnlimitedAutomaticIPTimeout() AutomaticFloatingIPOption {
-	return func(o *automaticFloatingIPOptions) error { o.timeout = 0; return nil }
+// resolveWait resolves the wait options into the workflow timeout (zero when
+// unlimited) and the pacing of its waits.
+func (o *automaticFloatingIPOptions) resolveWait() error {
+	wait, err := resource.ResolveWait(resource.WaitDefaults{Timeout: 5 * time.Minute, Strategy: resource.FixedWait(2 * time.Second)}, o.waitOpts...)
+	if err != nil {
+		return err
+	}
+	o.timeout, o.strategy = wait.Timeout, wait.Strategy
+	return nil
 }
 
-// WithAutomaticIPPollInterval sets a fixed positive interval for the Nova
-// observation and deletion waits. It and WithAutomaticIPWaitStrategy replace
-// each other; the later one wins.
-func WithAutomaticIPPollInterval(interval time.Duration) AutomaticFloatingIPOption {
-	return func(o *automaticFloatingIPOptions) error {
-		if interval <= 0 {
-			return invalid("automatic IP poll interval must be positive")
-		}
-		o.interval, o.strategy = interval, nil
-		return nil
-	}
-}
-
-// WithAutomaticIPWaitStrategy replaces the fixed interval of the Nova
-// observation and deletion waits with strategy, a Go-only extension. Each
-// wait starts the strategy from its first pause. An invalid strategy fails
-// with resource.ErrInvalidOption before HTTP.
-func WithAutomaticIPWaitStrategy(strategy resource.WaitStrategy) AutomaticFloatingIPOption {
-	return func(o *automaticFloatingIPOptions) error {
-		if err := strategy.Validate(); err != nil {
-			return err
-		}
-		o.strategy = &strategy
-		return nil
-	}
-}
-
-// pacer numbers the pauses of one wait under the selected strategy, or the
-// given fixed interval.
-func (o automaticFloatingIPOptions) pacer(interval time.Duration) *pollschedule.Pacer {
-	if o.strategy != nil {
-		return pollschedule.NewPacer(o.strategy.Delay)
-	}
-	return pollschedule.NewPacer(resource.FixedWait(interval).Delay)
+// pacer numbers the pauses of one wait under the resolved strategy.
+func (o automaticFloatingIPOptions) pacer() *pollschedule.Pacer {
+	return pollschedule.NewPacer(o.strategy.Delay)
 }
 
 // WithAutomaticIPProgressCallback runs synchronously with an owned copy of a

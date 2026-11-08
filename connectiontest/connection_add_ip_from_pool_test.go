@@ -94,7 +94,7 @@ func TestAddIPFromPoolNonReuseRefreshesServerBeforeAttach(t *testing.T) {
 			conn, f := newR2CloudNetFixture(t, compute.FloatingIPNeutron, poolNeutronHandler(200, &shown))
 			options := []compute.AddIPFromPoolOption{compute.WithPoolIPReuse(false), poolProject()}
 			if scenario == "wait timeout" {
-				options = append(options, compute.WithPoolIPWait(true), compute.WithPoolIPTimeout(60*time.Millisecond), compute.WithPoolIPPollInterval(5*time.Millisecond))
+				options = append(options, compute.WithPoolIPWait(true), compute.WithPoolIPWaitOptions(resource.WithTimeout(60*time.Millisecond)), compute.WithPoolIPWaitOptions(resource.WithPollInterval(5*time.Millisecond)))
 			}
 			result, err := conn.AddIPFromPool(context.Background(), &compute.Server{ID: "srv-1", Status: "ACTIVE"}, resource.Name("public"), options...)
 			mutations := cloudNetMutations(f.keys())
@@ -140,7 +140,7 @@ func TestAddIPFromPoolNovaSourceAssociatesWithFixedAddress(t *testing.T) {
 	attached := false
 	body := func() string { return strings.Replace(poolServerShowing, "%s", "198.51.100.21", 1) }
 	conn, f := newR2CloudNetFixture(t, compute.FloatingIPNova, r2CloudNetNovaAutoHandler(&attached, body))
-	result, err := conn.AddIPFromPool(context.Background(), &compute.Server{ID: "srv-1", Status: "ACTIVE"}, resource.Name("public"), compute.WithPoolIPFixedAddress("10.0.0.8"), compute.WithPoolIPWait(true), compute.WithPoolIPPollInterval(time.Millisecond))
+	result, err := conn.AddIPFromPool(context.Background(), &compute.Server{ID: "srv-1", Status: "ACTIVE"}, resource.Name("public"), compute.WithPoolIPFixedAddress("10.0.0.8"), compute.WithPoolIPWait(true), compute.WithPoolIPWaitOptions(resource.WithPollInterval(time.Millisecond)))
 	if err != nil || result == nil || result.Backend != compute.FloatingIPNova || result.NeutronFloating || !result.Reused || result.Attach == nil || !result.Observed {
 		t.Fatal(result, err, f.keys())
 	}

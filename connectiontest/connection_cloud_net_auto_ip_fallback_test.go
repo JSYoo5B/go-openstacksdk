@@ -89,7 +89,7 @@ func TestCloudNetAddAutoIPReuseNovaFallbackRowAttachOutcomes(t *testing.T) {
 			switch scenario {
 			case "accepted and observed":
 				serverBody = func() string { return shown }
-				options = append(options, compute.WithAddAutoIPWait(true), compute.WithAddAutoIPPollInterval(time.Millisecond))
+				options = append(options, compute.WithAddAutoIPWait(true), compute.WithAddAutoIPWaitOptions(resource.WithPollInterval(time.Millisecond)))
 			case "ports not found":
 				ports, portsCode = cloudNetNeutronMissing, 404
 			case "no ports":
@@ -100,7 +100,7 @@ func TestCloudNetAddAutoIPReuseNovaFallbackRowAttachOutcomes(t *testing.T) {
 				put, putBody = 409, `{"NeutronError":{"type":"Conflict","message":"busy"}}`
 			case "wait timeout":
 				put, putBody = 404, cloudNetNeutronMissing
-				options = append(options, compute.WithAddAutoIPWait(true), compute.WithAddAutoIPTimeout(40*time.Millisecond), compute.WithAddAutoIPPollInterval(5*time.Millisecond))
+				options = append(options, compute.WithAddAutoIPWait(true), compute.WithAddAutoIPWaitOptions(resource.WithTimeout(40*time.Millisecond)), compute.WithAddAutoIPWaitOptions(resource.WithPollInterval(5*time.Millisecond)))
 			}
 			conn, f := newR2CloudNetFixture(t, compute.FloatingIPNeutron, cloudNetReuseFallbackHandler(ports, portsCode, put, putBody, serverBody))
 			result, err := conn.AddAutoIP(context.Background(), &compute.Server{ID: "srv-1", Status: "ACTIVE"}, options...)

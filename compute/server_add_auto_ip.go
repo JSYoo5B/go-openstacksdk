@@ -4,18 +4,21 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"slices"
 	"time"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/sourcewait"
 	"github.com/JSYoo5B/go-openstacksdk/network"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 type addAutoIPOptions struct {
 	wait      bool
-	timeout   time.Duration
+	waitOpts  []resource.WaitOption
 	reuse     bool
 	cleanup   bool
-	interval  time.Duration
+	timeout   time.Duration
+	unlimited bool
 	strategy  *resource.WaitStrategy
 	available []AvailableFloatingIPOption
 	create    []FloatingIPCreateOption
@@ -34,12 +37,21 @@ func WithAddAutoIPWait(enabled bool) AddAutoIPOption {
 	return func(o *addAutoIPOptions) error { o.wait = enabled; return nil }
 }
 
-// WithAddAutoIPTimeout sets the budget for waits. Like the pinned helper, the
-// budget is spent by the create wait first and the rest bounds the server
-// address wait; plain HTTP requests are bounded only by ctx. A zero or negative
-// remaining budget makes a requested wait expire before its first poll.
-func WithAddAutoIPTimeout(timeout time.Duration) AddAutoIPOption {
-	return func(o *addAutoIPOptions) error { o.timeout = timeout; return nil }
+// WithAddAutoIPWaitOptions tunes the waits with the shared resource wait
+// options; repeated calls append and the later option wins per control.
+// resource.WithTimeout replaces the 60-second budget for waits. Like the pinned
+// helper, the budget is spent by the create wait first and the rest bounds the
+// server address wait; plain HTTP requests are bounded only by ctx. A zero or
+// negative remaining budget makes a requested wait expire before its first
+// poll. resource.WithUnlimitedWait removes the budget; ctx still applies.
+// resource.WithPollInterval or resource.WithWaitStrategy (a Go-only extension)
+// replaces the server address wait's interval, which otherwise is
+// min(5 seconds, remaining budget) as in the pinned helper (5 seconds when
+// unlimited). Failure states, a status attribute and progress are unsupported
+// and fail with resource.ErrInvalidOption before HTTP.
+func WithAddAutoIPWaitOptions(options ...resource.WaitOption) AddAutoIPOption {
+	owned := slices.Clone(options)
+	return func(o *addAutoIPOptions) error { o.waitOpts = append(o.waitOpts, owned...); return nil }
 }
 
 // WithAddAutoIPReuse selects between choosing an available floating IP (the
@@ -54,32 +66,6 @@ func WithAddAutoIPReuse(reuse bool) AddAutoIPOption {
 // ignores the parent's cancellation; a failure is reported, never retried.
 func WithAddAutoIPCleanup(enabled bool) AddAutoIPOption {
 	return func(o *addAutoIPOptions) error { o.cleanup = enabled; return nil }
-}
-
-// WithAddAutoIPPollInterval overrides the poll interval, which otherwise is
-// min(5 seconds, remaining budget) as in the pinned helper.
-func WithAddAutoIPPollInterval(interval time.Duration) AddAutoIPOption {
-	return func(o *addAutoIPOptions) error {
-		if interval <= 0 {
-			return invalid("add auto IP poll interval must be positive")
-		}
-		o.interval, o.strategy = interval, nil
-		return nil
-	}
-}
-
-// WithAddAutoIPWaitStrategy replaces the poll interval of the server address
-// wait with strategy, a Go-only extension. It and WithAddAutoIPPollInterval
-// replace each other; the later one wins. An invalid strategy fails with
-// resource.ErrInvalidOption before HTTP.
-func WithAddAutoIPWaitStrategy(strategy resource.WaitStrategy) AddAutoIPOption {
-	return func(o *addAutoIPOptions) error {
-		if err := strategy.Validate(); err != nil {
-			return err
-		}
-		o.interval, o.strategy = 0, &strategy
-		return nil
-	}
 }
 
 // WithAddAutoIPAvailableOptions passes options to the reuse lookup.
@@ -126,6 +112,9 @@ func WithAddAutoIPAddressOptions(options ...ServerAddressOption) AddAutoIPOption
 // NeutronAttach is the Neutron port update sent for a reused row that came from
 // that Nova fallback, and NeutronNotFound the NotFound it produced, which the
 // helper ignores like Python.
+//
+// TimeoutRemaining is the wait budget left for the server address wait; it is
+// zero when resource.WithUnlimitedWait removed the budget.
 type AddAutoIPResult struct {
 	Backend          FloatingIPSource
 	NeutronFloating  bool
@@ -191,7 +180,7 @@ func (s *Service) AddAutoIP(ctx context.Context, server *Server, options ...AddA
 	if err := resource.ID(snapshot.ID).Validate(); err != nil {
 		return nil, err
 	}
-	o := addAutoIPOptions{timeout: 60 * time.Second, reuse: true, cleanup: true}
+	o := addAutoIPOptions{reuse: true, cleanup: true}
 	for _, apply := range options {
 		if apply == nil {
 			return nil, invalid("nil add auto IP option")
@@ -199,6 +188,9 @@ func (s *Service) AddAutoIP(ctx context.Context, server *Server, options ...AddA
 		if err := apply(&o); err != nil {
 			return nil, err
 		}
+	}
+	if err := o.resolveWait(); err != nil {
+		return nil, err
 	}
 	result := &AddAutoIPResult{Server: &snapshot}
 	start := time.Now()
@@ -214,7 +206,7 @@ func (s *Service) AddAutoIP(ctx context.Context, server *Server, options ...AddA
 		result.NeutronFloating = available.Backend == FloatingIPNeutron || available.FallbackError != nil
 		port, _ = floatingIPRowString(available.FloatingIP, "port_id")
 	} else {
-		create := append([]FloatingIPCreateOption{WithFloatingIPCreateServer(resource.ID(snapshot.ID)), WithFloatingIPCreateWait(o.wait), WithFloatingIPCreateWaitTimeout(o.timeout)}, o.create...)
+		create := append([]FloatingIPCreateOption{WithFloatingIPCreateServer(resource.ID(snapshot.ID)), WithFloatingIPCreateWait(o.wait), o.createWaitBudget()}, o.create...)
 		created, err := s.CreateFloatingIP(ctx, CreateFloatingIPRequest{}, create...)
 		result.Creation = created
 		if err != nil {
@@ -225,7 +217,7 @@ func (s *Service) AddAutoIP(ctx context.Context, server *Server, options ...AddA
 		result.FloatingIPID, _ = floatingIPRowString(created.FloatingIP, "id")
 		result.FloatingIPAddr, _ = floatingIPRowString(created.FloatingIP, "floating_ip_address")
 		port, _ = floatingIPRowString(created.FloatingIP, "port_id")
-		remaining = o.timeout - time.Since(start)
+		remaining = o.remainingAfter(start)
 	}
 	result.TimeoutRemaining = remaining
 	if result.FloatingIPAddr == "" {
@@ -278,22 +270,20 @@ func (s *Service) AddAutoIP(ctx context.Context, server *Server, options ...AddA
 }
 
 func (s *Service) autoIPObserver(ctx context.Context, server *Server, address string, remaining time.Duration, o addAutoIPOptions) (*automaticIPState, context.Context, context.CancelFunc, error) {
-	interval := o.interval
-	if interval <= 0 {
-		interval = min(5*time.Second, remaining)
-	}
-	budget := remaining
-	if budget <= 0 {
-		budget = time.Nanosecond
+	budget := resource.WithUnlimitedWait()
+	interval := 5 * time.Second
+	if !o.unlimited {
+		interval = min(interval, remaining)
+		budget = resource.WithTimeout(max(remaining, time.Nanosecond))
 	}
 	if interval <= 0 {
 		interval = time.Nanosecond
 	}
-	pacing := WithAutomaticIPPollInterval(interval)
+	pacing := resource.WithPollInterval(interval)
 	if o.strategy != nil {
-		pacing = WithAutomaticIPWaitStrategy(*o.strategy)
+		pacing = resource.WithWaitStrategy(*o.strategy)
 	}
-	return s.prepareServerIPWorkflow(ctx, AutomaticFloatingIPRequest{Server: server}, []AutomaticFloatingIPOption{WithAutomaticIPTimeout(budget), pacing}, serverIPReadiness{observe: true, explicitList: true, addresses: []string{address}})
+	return s.prepareServerIPWorkflow(ctx, AutomaticFloatingIPRequest{Server: server}, []AutomaticFloatingIPOption{WithAutomaticIPWait(budget, pacing)}, serverIPReadiness{observe: true, explicitList: true, addresses: []string{address}})
 }
 
 func (s *Service) refreshAutoIPServer(ctx context.Context, server *Server, address string, remaining time.Duration, o addAutoIPOptions) (*Server, error) {
@@ -312,7 +302,7 @@ func (s *Service) refreshAutoIPServer(ctx context.Context, server *Server, addre
 func (s *Service) waitAutoIPAddress(ctx context.Context, result *AddAutoIPResult, remaining time.Duration, o addAutoIPOptions) error {
 	expired := &AddAutoIPTimeoutError{Address: result.FloatingIPAddr, Timeout: o.timeout}
 	var err error
-	if remaining <= 0 {
+	if !o.unlimited && remaining <= 0 {
 		err = expired
 	} else {
 		state, waitCtx, cancel, prepareErr := s.autoIPObserver(ctx, result.Server, result.FloatingIPAddr, remaining, o)
@@ -365,4 +355,40 @@ func serverShowsFloatingAddress(server *Server, address string) (bool, error) {
 		}
 	}
 	return false, nil
+}
+
+// resolveWait resolves the wait options over the 60-second budget. The address
+// wait's pacing stays nil unless the options choose it, keeping the
+// min(5 seconds, remaining budget) default.
+func (o *addAutoIPOptions) resolveWait() error {
+	settings, err := sourcewait.Resolve(0, o.waitOpts)
+	if err != nil {
+		return err
+	}
+	o.timeout, o.unlimited, o.strategy = 60*time.Second, false, nil
+	if settings.TimeoutSet {
+		o.timeout, o.unlimited = settings.Timeout, settings.Unlimited
+	}
+	if settings.StrategySet {
+		strategy := settings.Strategy
+		o.strategy = &strategy
+	}
+	return nil
+}
+
+// createWaitBudget passes the whole budget to the allocation's wait.
+func (o addAutoIPOptions) createWaitBudget() FloatingIPCreateOption {
+	if o.unlimited {
+		return WithFloatingIPCreateWaitOptions(resource.WithUnlimitedWait())
+	}
+	return WithFloatingIPCreateWaitTimeout(o.timeout)
+}
+
+// remainingAfter is the budget left after a step that started at start; it is
+// zero (unused) when the budget is unlimited.
+func (o addAutoIPOptions) remainingAfter(start time.Time) time.Duration {
+	if o.unlimited {
+		return 0
+	}
+	return o.timeout - time.Since(start)
 }

@@ -30,7 +30,7 @@ type preparedImageRecordWait struct {
 	seed   *ImageRecord
 	body   map[string]json.RawMessage
 	id     string
-	config ImageRecordWaitOpts
+	config preparedImageRecordWaitOpts
 	last   *ImageRecord
 }
 
@@ -143,8 +143,8 @@ func (p *preparedImageRecordWait) fetch(ctx context.Context, target string, dele
 		return observed, nil
 	}
 	if !deleting && !null {
-		failures := p.config.FailureStates
-		if failures == nil {
+		failures := p.config.settings.FailureStates
+		if !p.config.settings.FailureStatesSet {
 			failures = []string{"ERROR"}
 		}
 		for _, failure := range failures {

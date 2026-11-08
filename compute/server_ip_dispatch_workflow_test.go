@@ -174,7 +174,7 @@ func TestServerIPDispatchOneDeadlineBoundsAllItemsAndPreflightsObservation(t *te
 					}
 					return base.RoundTrip(r)
 				}))
-				opts = append(opts, compute.WithAutomaticIPTimeout(500*time.Millisecond))
+				opts = append(opts, compute.WithAutomaticIPWait(resource.WithTimeout(500*time.Millisecond)))
 				// Expire the same parent after the first item completed and the
 				// second reached observation; no third lookup may start.
 				ctx, cancel = context.WithCancel(ctx)
@@ -219,7 +219,7 @@ func TestServerIPDispatchPinsSuppliedServerBeforeOptionsAndPreparesPolicyOnce(t 
 		wrappedEnsure := beforeDispatchOption(func() { ensure++ }, network.WithEnsureWait(wrappedWait))
 		wrappedAddresses := beforeDispatchOption(func() { address++ }, compute.WithAddressReachability(false))
 		wrappedList := beforeDispatchOption(func() { outer++; input.Server.ID, input.Server.Status = "caller-replaced", "SHUTOFF" }, compute.WithFloatingIPAddresses(dispatchAddresses["a"], dispatchAddresses["b"]))
-		opts := []compute.AutomaticFloatingIPOption{wrappedList, compute.WithAutomaticEnsureOptions(wrappedEnsure), compute.WithAutomaticAddressOptions(wrappedAddresses), compute.WithAutomaticIPTimeout(time.Second)}
+		opts := []compute.AutomaticFloatingIPOption{wrappedList, compute.WithAutomaticEnsureOptions(wrappedEnsure), compute.WithAutomaticAddressOptions(wrappedAddresses), compute.WithAutomaticIPWait(resource.WithTimeout(time.Second))}
 		if planOnly {
 			decision, err := f.service.PlanServerFloatingIP(context.Background(), input, opts...)
 			if err != nil || decision.Server.ID != "server" || len(decision.AttachmentSelections) != 2 {

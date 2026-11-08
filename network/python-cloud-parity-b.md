@@ -1618,7 +1618,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk.Connection.AddAutoIP`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithAddAutoIPWait`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithAddAutoIPReuse`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithAddAutoIPTimeout`
+- `github.com/JSYoo5B/go-openstacksdk/compute.WithAddAutoIPWaitOptions`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithTimeout`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithAddAutoIPCleanup`
 - `github.com/JSYoo5B/go-openstacksdk/network.FloatingIPs.AttachByID`
 - `github.com/JSYoo5B/go-openstacksdk.WithServiceLookupFailureAsUnavailable`

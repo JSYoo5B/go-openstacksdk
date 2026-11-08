@@ -3,44 +3,47 @@ package image
 import (
 	"context"
 	"errors"
+	"slices"
 	"time"
 	"unicode/utf8"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
+	"github.com/JSYoo5B/go-openstacksdk/internal/sourcewait"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
-// ImageRecordWaitOpts owns a finite Image descriptor wait policy. Nil Timeout
-// means unlimited state waiting or 120 seconds for deletion. Nil PollInterval
-// means two seconds. WaitStrategy replaces the fixed interval with a
-// resource.WaitStrategy (a Go-only extension); setting both is rejected before
-// HTTP. Nil FailureStates uses ERROR; a nonnil empty slice disables
-// state failures. Attribute defaults to status; deletion always observes status.
-// Callback receives zero for Image, whose declared model has no progress field.
-// Progress, when set, is sent zero at the same steps after Callback returns;
-// see resource.WithProgress for the channel send semantics.
+// ImageRecordWaitOpts owns a finite Image descriptor wait policy. Timeout and
+// PollInterval are Source values: nil Timeout means unlimited state waiting or
+// 120 seconds for deletion, and a zero Timeout expires before the first GET;
+// nil PollInterval means two seconds, and a zero PollInterval pauses 100ms or
+// a shorter positive timeout. Negative values fail before HTTP unless the
+// seed already matches. Wait holds shared resource wait options, applied in
+// order over those values: WithTimeout, WithUnlimitedWait, WithPollInterval,
+// WithWaitStrategy, WithFailureStates (default ERROR; no states disable
+// failure detection), WithStatusAttribute (a declared descriptor, default
+// status; deletion always observes status), WithProgressCallback and
+// WithProgress. Image has no progress field, so progress is reported as zero.
 type ImageRecordWaitOpts struct {
 	Headers               map[string]string
 	Timeout, PollInterval *time.Duration
-	WaitStrategy          *resource.WaitStrategy
-	Unlimited             bool
-	FailureStates         []string
-	Attribute             string
-	Callback              func(int)
-	Progress              chan<- int
+	Wait                  []resource.WaitOption
 }
 
 // ImageRecordWaitOption is one option of the image record waits:
-// WithImageRecordWaitOpts, WithImageRecordWaitHeaders (merges), the timeout,
-// poll interval, wait strategy, failure state, attribute, callback and progress options, request.Header (merges
-// one header) or request.Custom over *ImageRecordWaitOpts. Other shared calls,
-// including request.Headers, fail with resource.ErrInvalidOption before HTTP.
+// WithImageRecordWaitOpts, WithImageRecordWaitHeaders (merges),
+// WithImageRecordWaitTimeout, WithImageRecordWaitPollInterval,
+// WithImageRecordWait, request.Header (merges one header) or request.Custom
+// over *ImageRecordWaitOpts. Other shared calls, including request.Headers,
+// fail with resource.ErrInvalidOption before HTTP.
 type ImageRecordWaitOption = request.GetCall
 
 var imageRecordWaitCalls = calls.Spec[ImageRecordWaitOpts]{
 	Header: calls.MergeHeader[ImageRecordWaitOpts](WithImageRecordWaitHeaders),
 }
+
+// imageRecordWaitSupport lists the shared controls the image record waits honor.
+const imageRecordWaitSupport = resource.WaitSupportFailureStates | resource.WaitSupportStatusAttribute | resource.WaitSupportProgress
 
 func copyImageRecordWaitOpts(value ImageRecordWaitOpts) ImageRecordWaitOpts {
 	value.Headers = copyImageRecordHeaders(value.Headers)
@@ -52,15 +55,7 @@ func copyImageRecordWaitOpts(value ImageRecordWaitOpts) ImageRecordWaitOpts {
 		owned := *value.PollInterval
 		value.PollInterval = &owned
 	}
-	if value.WaitStrategy != nil {
-		owned := *value.WaitStrategy
-		value.WaitStrategy = &owned
-	}
-	if value.FailureStates != nil {
-		owned := make([]string, len(value.FailureStates))
-		copy(owned, value.FailureStates)
-		value.FailureStates = owned
-	}
+	value.Wait = slices.Clone(value.Wait)
 	return value
 }
 
@@ -72,75 +67,36 @@ func WithImageRecordWaitHeaders(values map[string]string) ImageRecordWaitOption 
 	owned := copyImageRecordHeaders(values)
 	return request.Custom(func(config *ImageRecordWaitOpts) error { return mergeImageRecordHeaders(&config.Headers, owned) })
 }
+
+// WithImageRecordWaitTimeout sets the Source timeout: zero expires before the
+// first GET. A WithTimeout or WithUnlimitedWait in WithImageRecordWait
+// overrides it.
 func WithImageRecordWaitTimeout(value time.Duration) ImageRecordWaitOption {
 	return request.Custom(func(config *ImageRecordWaitOpts) error {
 		owned := value
-		config.Timeout, config.Unlimited = &owned, false
+		config.Timeout = &owned
 		return nil
 	})
 }
 
-// WithImageRecordWaitPollInterval sets a fixed interval. It and
-// WithImageRecordWaitStrategy replace each other; the later one wins.
+// WithImageRecordWaitPollInterval sets the Source interval: zero pauses 100ms
+// or a shorter positive timeout. A WithPollInterval or WithWaitStrategy in
+// WithImageRecordWait overrides it.
 func WithImageRecordWaitPollInterval(value time.Duration) ImageRecordWaitOption {
 	return request.Custom(func(config *ImageRecordWaitOpts) error {
 		owned := value
-		config.PollInterval, config.WaitStrategy = &owned, nil
+		config.PollInterval = &owned
 		return nil
 	})
 }
 
-// WithImageRecordWaitStrategy replaces the fixed interval with value, a Go-only
-// extension. An invalid strategy fails with resource.ErrInvalidOption before
-// HTTP.
-func WithImageRecordWaitStrategy(value resource.WaitStrategy) ImageRecordWaitOption {
+// WithImageRecordWait appends shared resource wait options to Wait. Repeated
+// calls append; for each control the later option wins. Invalid options fail
+// with resource.ErrInvalidOption before HTTP.
+func WithImageRecordWait(options ...resource.WaitOption) ImageRecordWaitOption {
+	owned := slices.Clone(options)
 	return request.Custom(func(config *ImageRecordWaitOpts) error {
-		owned := value
-		config.PollInterval, config.WaitStrategy = nil, &owned
-		return nil
-	})
-}
-func WithImageRecordWaitUnlimited() ImageRecordWaitOption {
-	return request.Custom(func(config *ImageRecordWaitOpts) error { config.Timeout, config.Unlimited = nil, true; return nil })
-}
-func WithImageRecordWaitFailureStates(values ...string) ImageRecordWaitOption {
-	owned := make([]string, len(values))
-	copy(owned, values)
-	return request.Custom(func(config *ImageRecordWaitOpts) error {
-		config.FailureStates = make([]string, len(owned))
-		copy(config.FailureStates, owned)
-		return nil
-	})
-}
-func WithImageRecordWaitAttribute(value string) ImageRecordWaitOption {
-	return request.Custom(func(config *ImageRecordWaitOpts) error {
-		if value == "" {
-			return uploadInvalid("image wait attribute must not be empty")
-		}
-		config.Attribute = value
-		return nil
-	})
-}
-func WithImageRecordWaitCallback(value func(int)) ImageRecordWaitOption {
-	return request.Custom(func(config *ImageRecordWaitOpts) error {
-		if value == nil {
-			return uploadInvalid("image wait callback must not be nil")
-		}
-		config.Callback = value
-		return nil
-	})
-}
-
-// WithImageRecordWaitProgress sends zero on value after each nonterminal
-// response. The wait blocks until the value is received or its context ends;
-// the caller owns and drains value, which is never closed. With
-// WithImageRecordWaitCallback also set, the callback runs first.
-func WithImageRecordWaitProgress(value chan<- int) ImageRecordWaitOption {
-	return request.Custom(func(config *ImageRecordWaitOpts) error {
-		if value == nil {
-			return uploadInvalid("image wait progress channel must not be nil")
-		}
-		config.Progress = value
+		config.Wait = append(slices.Clone(config.Wait), owned...)
 		return nil
 	})
 }
@@ -157,90 +113,102 @@ func imageRecordWaitAttribute(value string) bool {
 	return false
 }
 
-func prepareImageRecordWait(ctx context.Context, check func(context.Context) error, options []ImageRecordWaitOption, deleting bool) (ImageRecordWaitOpts, error) {
+// preparedImageRecordWaitOpts is a validated image record wait policy.
+type preparedImageRecordWaitOpts struct {
+	ImageRecordWaitOpts
+	Attribute string
+	settings  sourcewait.Result
+}
+
+func prepareImageRecordWait(ctx context.Context, check func(context.Context) error, options []ImageRecordWaitOption, deleting bool) (preparedImageRecordWaitOpts, error) {
 	config := ImageRecordWaitOpts{}
+	prepared := preparedImageRecordWaitOpts{}
 	for _, apply := range calls.Translate(options, imageRecordWaitCalls) {
 		if err := check(ctx); err != nil {
-			return config, err
+			return prepared, err
 		}
 		if apply == nil {
-			return config, uploadInvalid("nil image record wait option")
+			return prepared, uploadInvalid("nil image record wait option")
 		}
 		err := apply(&config)
 		config = copyImageRecordWaitOpts(config)
 		if err = errors.Join(err, check(ctx)); err != nil {
-			return config, err
+			return prepared, err
 		}
 	}
-	if config.Attribute == "" {
-		config.Attribute = "status"
+	prepared.ImageRecordWaitOpts = config
+	settings, err := sourcewait.Resolve(imageRecordWaitSupport, config.Wait)
+	if err != nil {
+		return prepared, err
 	}
-	if !utf8.ValidString(config.Attribute) || !imageRecordWaitAttribute(config.Attribute) {
-		return config, errors.Join(resource.ErrUnsupported, uploadInvalid("image wait attribute %q is not declared", config.Attribute))
+	prepared.settings = settings
+	prepared.Attribute = settings.StatusAttribute
+	if prepared.Attribute == "" {
+		prepared.Attribute = "status"
 	}
-	if deleting && config.Attribute != "status" {
-		return config, errors.Join(resource.ErrUnsupported, uploadInvalid("image deletion wait observes status"))
+	if !utf8.ValidString(prepared.Attribute) || !imageRecordWaitAttribute(prepared.Attribute) {
+		return prepared, errors.Join(resource.ErrUnsupported, uploadInvalid("image wait attribute %q is not declared", prepared.Attribute))
 	}
-	if config.Timeout != nil && config.Unlimited {
-		return config, uploadInvalid("image wait timeout conflicts with unlimited waiting")
+	if deleting && prepared.Attribute != "status" {
+		return prepared, errors.Join(resource.ErrUnsupported, uploadInvalid("image deletion wait observes status"))
 	}
-	if err := validateImageWaitStrategy(config.PollInterval, config.WaitStrategy); err != nil {
-		return config, err
-	}
-	var err error
-	config.Headers, err = imageMutationHeaders(config.Headers, false, "")
-	return copyImageRecordWaitOpts(config), errors.Join(err, check(ctx))
+	prepared.Headers, err = imageMutationHeaders(config.Headers, false, "")
+	return prepared, errors.Join(err, check(ctx))
 }
 
 // The shared wait engine owns timers. Zero Source intervals become 100ms or a
 // shorter positive timeout; zero timeout is handled before the first GET.
-func imageRecordWaitPolicy(config ImageRecordWaitOpts, deleting bool) (resource.WaitPolicy, bool, error) {
+func imageRecordWaitPolicy(config preparedImageRecordWaitOpts, deleting bool) (resource.WaitPolicy, bool, error) {
+	settings := config.settings
 	timeout := time.Duration(0)
 	if deleting {
 		timeout = 120 * time.Second
 	}
-	if config.Unlimited {
-		timeout = 0
+	sourceTimeout := config.Timeout != nil && !settings.TimeoutSet
+	if settings.TimeoutSet {
+		timeout = settings.Timeout
 	} else if config.Timeout != nil {
 		timeout = *config.Timeout
 	}
-	if config.Timeout != nil && *config.Timeout < 0 {
+	if sourceTimeout && *config.Timeout < 0 {
 		return resource.WaitPolicy{}, false, uploadInvalid("image wait timeout must not be negative")
 	}
-	interval := 2 * time.Second
-	if config.PollInterval != nil {
-		interval = *config.PollInterval
-	}
-	if interval < 0 {
-		return resource.WaitPolicy{}, false, uploadInvalid("image wait poll interval must not be negative")
-	}
-	if interval == 0 {
-		interval = 100 * time.Millisecond
-		if timeout > 0 && timeout < interval {
-			interval = timeout
+	strategy := settings.Strategy
+	if !settings.StrategySet {
+		interval := 2 * time.Second
+		if config.PollInterval != nil {
+			interval = *config.PollInterval
 		}
+		if interval < 0 {
+			return resource.WaitPolicy{}, false, uploadInvalid("image wait poll interval must not be negative")
+		}
+		if interval == 0 {
+			interval = 100 * time.Millisecond
+			if timeout > 0 && timeout < interval {
+				interval = timeout
+			}
+		}
+		strategy = resource.FixedWait(interval)
 	}
-	for _, failure := range config.FailureStates {
+	for _, failure := range settings.FailureStates {
 		if !utf8.ValidString(failure) {
 			return resource.WaitPolicy{}, false, uploadInvalid("image failure state must be valid UTF-8")
 		}
 	}
-	options := []resource.WaitOption{resource.WithUnlimitedWait(), resource.WithPollInterval(interval), resource.WithFailureStates()}
-	if config.WaitStrategy != nil {
-		options = append(options, resource.WithWaitStrategy(*config.WaitStrategy))
-	}
+	// Failure states are matched by the image binding with Python lower(), so
+	// the shared wait itself never detects a failure state.
+	options := []resource.WaitOption{resource.WithUnlimitedWait(), resource.WithWaitStrategy(strategy), resource.WithFailureStates()}
 	if timeout > 0 {
 		options = append(options, resource.WithTimeout(timeout))
 	}
-	if config.Callback != nil {
-		callback := config.Callback
-		options = append(options, resource.WithProgressCallback(func(int) error { callback(0); return nil }))
+	if settings.ProgressCallback != nil {
+		options = append(options, resource.WithProgressCallback(settings.ProgressCallback))
 	}
-	if config.Progress != nil {
+	if settings.Progress != nil {
 		// The observation model has no progress field, so the shared wait sends zero.
-		options = append(options, resource.WithProgress(config.Progress))
+		options = append(options, resource.WithProgress(settings.Progress))
 	}
 	policy, err := resource.PrepareWaitOptionsFor[imageRecordWaitObservation](options...)
-	expired := config.Timeout != nil && !config.Unlimited && *config.Timeout == 0
+	expired := sourceTimeout && *config.Timeout == 0
 	return policy, expired, err
 }

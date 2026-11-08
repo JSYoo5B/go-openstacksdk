@@ -24,13 +24,13 @@ func TestImageRecordWaitProgressChannelSendsZeroAndRejectsNil(t *testing.T) {
 	})
 	var got []int
 	observer := testcloud.NewProgress(t, func(value int) { got = append(got, value) })
-	record, err := New(client).WaitForImageRecordStatus(context.Background(), imageRecordWaitSeed(json.RawMessage(`"pending"`)), "active", WithImageRecordWaitPollInterval(time.Nanosecond), WithImageRecordWaitProgress(observer.C))
+	record, err := New(client).WaitForImageRecordStatus(context.Background(), imageRecordWaitSeed(json.RawMessage(`"pending"`)), "active", WithImageRecordWaitPollInterval(time.Nanosecond), WithImageRecordWait(resource.WithProgress(observer.C)))
 	observer.Done()
 	if record == nil || err != nil || calls != 3 || !reflect.DeepEqual(got, []int{0, 0}) {
 		t.Fatal(record, err, calls, got)
 	}
 	calls = 0
-	record, err = New(client).WaitForImageRecordStatus(context.Background(), imageRecordWaitSeed(json.RawMessage(`"pending"`)), "active", WithImageRecordWaitProgress(nil))
+	record, err = New(client).WaitForImageRecordStatus(context.Background(), imageRecordWaitSeed(json.RawMessage(`"pending"`)), "active", WithImageRecordWait(resource.WithProgress(nil)))
 	if record != nil || !errors.Is(err, resource.ErrInvalidOption) || calls != 0 {
 		t.Fatal(record, err, calls)
 	}
@@ -46,7 +46,7 @@ func TestImageRecordWaitProgressChannelBlockedSendStopsOnCancellation(t *testing
 		return taskCoreJSON(req, 203, `{"status":"pending"}`), nil
 	})
 	blocked := make(chan int)
-	record, err := New(client).WaitForImageRecordStatus(ctx, imageRecordWaitSeed(json.RawMessage(`"pending"`)), "active", WithImageRecordWaitPollInterval(time.Nanosecond), WithImageRecordWaitProgress(blocked))
+	record, err := New(client).WaitForImageRecordStatus(ctx, imageRecordWaitSeed(json.RawMessage(`"pending"`)), "active", WithImageRecordWaitPollInterval(time.Nanosecond), WithImageRecordWait(resource.WithProgress(blocked)))
 	select {
 	case v := <-blocked:
 		t.Fatal("progress sent after the wait returned", v)
@@ -78,7 +78,7 @@ func TestImageRecordWaitProgressChannelReceiverCancellation(t *testing.T) {
 		got = append(got, value)
 		gate.AwaitThen(t, func() { cancel(cause) })
 	})
-	record, err := New(client).WaitForImageRecordDelete(ctx, imageRecordWaitSeed(json.RawMessage(`"pending"`)), WithImageRecordWaitPollInterval(time.Millisecond), WithImageRecordWaitProgress(observer.C))
+	record, err := New(client).WaitForImageRecordDelete(ctx, imageRecordWaitSeed(json.RawMessage(`"pending"`)), WithImageRecordWaitPollInterval(time.Millisecond), WithImageRecordWait(resource.WithProgress(observer.C)))
 	observer.Done()
 	if record == nil || record.StatusCode != 203 || !errors.Is(err, context.Canceled) || !errors.Is(context.Cause(ctx), cause) || calls != 1 || gate.Seen() != 2 || !reflect.DeepEqual(got, []int{0}) {
 		t.Fatal(record, err, calls, gate.Seen(), got)
@@ -98,7 +98,7 @@ func TestImageRecordWaitProgressCallbackRunsBeforeChannelSend(t *testing.T) {
 	sent := make(chan int, 4)
 	var queuedAtCallback []int
 	record, err := New(client).WaitForImageRecordStatus(context.Background(), imageRecordWaitSeed(json.RawMessage(`"pending"`)), "active", WithImageRecordWaitPollInterval(time.Nanosecond),
-		WithImageRecordWaitProgress(sent), WithImageRecordWaitCallback(func(int) { queuedAtCallback = append(queuedAtCallback, len(sent)) }))
+		WithImageRecordWait(resource.WithProgress(sent)), WithImageRecordWait(resource.WithProgressCallback(func(int) error { queuedAtCallback = append(queuedAtCallback, len(sent)); return nil })))
 	if record == nil || err != nil || !reflect.DeepEqual(queuedAtCallback, []int{0, 1}) || len(sent) != 2 {
 		t.Fatal(record, err, queuedAtCallback, len(sent))
 	}

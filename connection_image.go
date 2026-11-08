@@ -2,7 +2,6 @@ package openstack
 
 import (
 	"context"
-	"time"
 
 	"github.com/JSYoo5B/go-openstacksdk/image"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudimage"
@@ -45,17 +44,16 @@ func (c *Connection) imageCreateSwiftService(ctx context.Context) (*objectapi.Se
 
 // CloudImageCreateRequest mirrors Cloud create_image. An empty VolumeID uses
 // the Glance CreateImageRecord workflow with Image; otherwise the volume branch
-// uses Image.Name with the Cinder Proxy create_image. PollInterval is a Go
-// extension for the Cloud wait loop and its timeout cleanup; zero means the
-// fixed two-second iterate_timeout interval. WaitStrategy replaces the fixed
-// interval in both loops with a resource.WaitStrategy, also a Go extension; a
-// nonzero PollInterval together with WaitStrategy, or an invalid strategy, is
-// rejected before HTTP.
+// uses Image.Name with the Cinder Proxy create_image. Wait holds shared
+// resource wait options for the Cloud wait loop and its timeout cleanup, a Go
+// extension: resource.WithPollInterval or resource.WithWaitStrategy replace
+// the fixed two-second iterate_timeout pause in both loops. The timeout create
+// option owns the wait budget, so timeout and every other shared control, or
+// an invalid option, fail with resource.ErrInvalidOption before HTTP.
 type CloudImageCreateRequest struct {
-	Image        image.ImageRecordCreateRequest
-	VolumeID     string
-	PollInterval time.Duration
-	WaitStrategy *resource.WaitStrategy
+	Image    image.ImageRecordCreateRequest
+	VolumeID string
+	Wait     []resource.WaitOption
 }
 
 // CloudImageCreateResult keeps every Cloud create_image phase. Image is the

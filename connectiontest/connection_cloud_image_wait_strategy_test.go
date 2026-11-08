@@ -15,10 +15,11 @@ func TestConnectionCloudImageCreateWaitStrategy(t *testing.T) {
 	duplicates := image.WithImageRecordCreateAllowDuplicates(true)
 	wait := image.WithImageRecordCreateWait(true)
 	invalid := resource.LinearWait(0, time.Millisecond, 0)
-	valid := resource.FixedWait(time.Millisecond)
 	for name, request := range map[string]sdk.CloudImageCreateRequest{
-		"invalid": {Image: image.ImageRecordCreateRequest{Name: "image"}, WaitStrategy: &invalid},
-		"both":    {Image: image.ImageRecordCreateRequest{Name: "image"}, WaitStrategy: &valid, PollInterval: time.Millisecond},
+		"invalid":   {Image: image.ImageRecordCreateRequest{Name: "image"}, Wait: []resource.WaitOption{resource.WithWaitStrategy(invalid)}},
+		"timeout":   {Image: image.ImageRecordCreateRequest{Name: "image"}, Wait: []resource.WaitOption{resource.WithTimeout(time.Second)}},
+		"unlimited": {Image: image.ImageRecordCreateRequest{Name: "image"}, Wait: []resource.WaitOption{resource.WithUnlimitedWait()}},
+		"progress":  {Image: image.ImageRecordCreateRequest{Name: "image"}, Wait: []resource.WaitOption{resource.WithProgress(make(chan int))}},
 	} {
 		calls := 0
 		conn := cloudCreateConnection(t, nil, &calls)
@@ -37,7 +38,7 @@ func TestConnectionCloudImageCreateWaitStrategy(t *testing.T) {
 		{cloudCreateGet, 200, `{"id":"new","status":"active"}`},
 	}, &calls)
 	started := time.Now()
-	result, err := conn.CreateCloudImageRecord(context.Background(), sdk.CloudImageCreateRequest{Image: image.ImageRecordCreateRequest{Name: "image"}, WaitStrategy: &growing}, duplicates, wait)
+	result, err := conn.CreateCloudImageRecord(context.Background(), sdk.CloudImageCreateRequest{Image: image.ImageRecordCreateRequest{Name: "image"}, Wait: []resource.WaitOption{resource.WithPollInterval(time.Hour), resource.WithWaitStrategy(growing)}}, duplicates, wait)
 	// Three pauses of at least 2, 4 and 8 milliseconds precede the last lookup.
 	if err != nil || calls != 5 || result.WaitLookups != 4 || time.Since(started) < 14*ms {
 		t.Fatal(result, err, calls, time.Since(started))

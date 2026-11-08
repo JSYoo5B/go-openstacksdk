@@ -48,9 +48,9 @@ func TestCreateImportPreflightValidatesEveryPhaseBeforeCreationOrReading(t *test
 		{"import missing remote", []CreateImportOption{WithCreateImportImport(imageimport.ImportOpts{Method: imageimport.GlanceDownloadMethod, RemoteRegion: "region"})}},
 		{"unsupported copy", []CreateImportOption{WithCreateImportImport(imageimport.ImportOpts{Method: imageimport.CopyImageMethod})}},
 		{"unsupported extension method", []CreateImportOption{WithCreateImportImport(imageimport.ImportOpts{Method: "custom"})}},
-		{"wait interval", []CreateImportOption{WithCreateImportWait(CreateImportWaitOpts{PollInterval: &badInterval})}},
-		{"wait timeout", []CreateImportOption{WithCreateImportWait(CreateImportWaitOpts{Timeout: &badTimeout})}},
-		{"wait states", []CreateImportOption{WithCreateImportWait(CreateImportWaitOpts{FailureStates: []string{" "}})}},
+		{"wait interval", []CreateImportOption{WithCreateImportWait(resource.WithPollInterval(badInterval))}},
+		{"wait timeout", []CreateImportOption{WithCreateImportWait(resource.WithTimeout(badTimeout))}},
+		{"wait states", []CreateImportOption{WithCreateImportWait(resource.WithFailureStates(" "))}},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			cloud := testcloud.New(t)
@@ -229,7 +229,7 @@ func TestCreateImportOptionalWaitUsesPreparedDefaultBudgetAndFixedID(t *testing.
 		}
 		testcloud.JSON(w, 200, `{"id":"wait-decoy","status":"active"}`)
 	})
-	result, err := New(client).CreateAndImport(context.Background(), CreateAndImportRequest{Name: "image", Data: strings.NewReader("data")}, WithCreateImportWait(CreateImportWaitOpts{}))
+	result, err := New(client).CreateAndImport(context.Background(), CreateAndImportRequest{Name: "image", Data: strings.NewReader("data")}, WithCreateImportWait())
 	if err != nil || result == nil || result.Ready == nil || result.Ready.ID != "wait-decoy" || result.ImageID != "fixed" || gets.Load() != 2 || observedBudget < 4*time.Minute || observedBudget > 5*time.Minute {
 		t.Fatalf("result=%+v err=%v gets=%d budget=%v", result, err, gets.Load(), observedBudget)
 	}

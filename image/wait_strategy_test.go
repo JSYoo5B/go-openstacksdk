@@ -25,8 +25,6 @@ func imageStrategyGaps(t *testing.T, seen []time.Time, want ...time.Duration) {
 
 func TestImageWaitStrategyOptionsRejectedBeforeHTTP(t *testing.T) {
 	invalid := resource.ExponentialWait(time.Millisecond, 2, time.Microsecond)
-	valid := resource.FixedWait(time.Millisecond)
-	interval := time.Millisecond
 	ctx := context.Background()
 	calls := 0
 	service := cloudImageService(t, &calls, func(req *http.Request) *http.Response {
@@ -41,43 +39,39 @@ func TestImageWaitStrategyOptionsRejectedBeforeHTTP(t *testing.T) {
 	seed := imageRecordWaitSeed(json.RawMessage(`"queued"`))
 	for name, call := range map[string]func() error{
 		"cloud wait invalid": func() error {
-			_, err := service.WaitForCloudImageRecord(ctx, cloudWaitSeed(t, "img"), WithImageRecordCloudWaitStrategy(invalid))
+			_, err := service.WaitForCloudImageRecord(ctx, cloudWaitSeed(t, "img"), WithImageRecordCloudWait(resource.WithWaitStrategy(invalid)))
 			return err
 		},
 		"cloud wait zero": func() error {
-			_, err := service.WaitForCloudImageRecord(ctx, cloudWaitSeed(t, "img"), WithImageRecordCloudWaitStrategy(resource.WaitStrategy{}))
+			_, err := service.WaitForCloudImageRecord(ctx, cloudWaitSeed(t, "img"), WithImageRecordCloudWait(resource.WithWaitStrategy(resource.WaitStrategy{})))
 			return err
 		},
-		"cloud wait both": func() error {
-			_, err := service.WaitForCloudImageRecord(ctx, cloudWaitSeed(t, "img"), WithImageRecordCloudWaitOpts(ImageRecordCloudWaitOpts{PollInterval: &interval, WaitStrategy: &valid}))
+		"cloud wait unsupported failure states": func() error {
+			_, err := service.WaitForCloudImageRecord(ctx, cloudWaitSeed(t, "img"), WithImageRecordCloudWait(resource.WithFailureStates("error")))
 			return err
 		},
 		"cloud delete invalid": func() error {
-			_, err := deletes.DeleteCloudImageRecord(ctx, "img", WithImageRecordCloudDeleteWaitStrategy(invalid))
+			_, err := deletes.DeleteCloudImageRecord(ctx, "img", WithImageRecordCloudDeleteWaitOptions(resource.WithWaitStrategy(invalid)))
 			return err
 		},
-		"cloud delete both": func() error {
-			_, err := deletes.DeleteCloudImageRecord(ctx, "img", WithImageRecordCloudDeleteOpts(ImageRecordCloudDeleteOpts{Wait: true, PollInterval: &interval, WaitStrategy: &valid}))
+		"cloud delete unsupported progress": func() error {
+			_, err := deletes.DeleteCloudImageRecord(ctx, "img", WithImageRecordCloudDeleteWait(true), WithImageRecordCloudDeleteWaitOptions(resource.WithProgress(make(chan int))))
 			return err
 		},
 		"record wait invalid": func() error {
-			_, err := service.WaitForImageRecordStatus(ctx, seed, "active", WithImageRecordWaitStrategy(invalid))
-			return err
-		},
-		"record wait both": func() error {
-			_, err := service.WaitForImageRecordStatus(ctx, seed, "active", WithImageRecordWaitOpts(ImageRecordWaitOpts{PollInterval: &interval, WaitStrategy: &valid}))
+			_, err := service.WaitForImageRecordStatus(ctx, seed, "active", WithImageRecordWait(resource.WithWaitStrategy(invalid)))
 			return err
 		},
 		"record delete wait invalid": func() error {
-			_, err := service.WaitForImageRecordDelete(ctx, seed, WithImageRecordWaitStrategy(invalid))
+			_, err := service.WaitForImageRecordDelete(ctx, seed, WithImageRecordWait(resource.WithWaitStrategy(invalid)))
 			return err
 		},
 		"create import invalid": func() error {
-			_, err := prepareCreateImportWait(&CreateImportWaitOpts{WaitStrategy: &invalid})
+			_, err := prepareCreateImportWait(CreateImportOpts{Wait: true, WaitOptions: []resource.WaitOption{resource.WithWaitStrategy(invalid)}})
 			return err
 		},
-		"create import both": func() error {
-			_, err := prepareCreateImportWait(&CreateImportWaitOpts{WaitStrategy: &valid, PollInterval: &interval})
+		"create import unsupported status attribute": func() error {
+			_, err := prepareCreateImportWait(CreateImportOpts{Wait: true, WaitOptions: []resource.WaitOption{resource.WithStatusAttribute("status")}})
 			return err
 		},
 	} {
@@ -88,7 +82,7 @@ func TestImageWaitStrategyOptionsRejectedBeforeHTTP(t *testing.T) {
 	if calls != 0 || len(routes) != 0 {
 		t.Fatal(calls, routes)
 	}
-	if options, err := prepareCreateImportWait(&CreateImportWaitOpts{WaitStrategy: &valid}); err != nil || len(options) != 2 {
+	if options, err := prepareCreateImportWait(CreateImportOpts{Wait: true, WaitOptions: []resource.WaitOption{resource.WithWaitStrategy(resource.FixedWait(time.Millisecond))}}); err != nil || len(options) != 1 {
 		t.Fatal(len(options), err)
 	}
 }
@@ -97,24 +91,24 @@ func TestImageWaitStrategyLaterOptionWins(t *testing.T) {
 	ctx := context.Background()
 	check := func(context.Context) error { return nil }
 	growing := resource.LinearWait(time.Millisecond, time.Millisecond, 0)
-	wait, err := prepareImageRecordCloudWait(ctx, check, []ImageRecordCloudWaitOption{WithImageRecordCloudWaitPollInterval(time.Second), WithImageRecordCloudWaitStrategy(growing)})
-	if err != nil || wait.PollInterval != nil || wait.WaitStrategy == nil || *wait.WaitStrategy != growing {
+	wait, err := prepareImageRecordCloudWait(ctx, check, []ImageRecordCloudWaitOption{WithImageRecordCloudWait(resource.WithPollInterval(time.Second)), WithImageRecordCloudWait(resource.WithWaitStrategy(growing))})
+	if err != nil || wait.Strategy != growing {
 		t.Fatal(wait, err)
 	}
-	wait, err = prepareImageRecordCloudWait(ctx, check, []ImageRecordCloudWaitOption{WithImageRecordCloudWaitStrategy(growing), WithImageRecordCloudWaitPollInterval(time.Second)})
-	if err != nil || wait.WaitStrategy != nil || wait.PollInterval == nil || *wait.PollInterval != time.Second {
+	wait, err = prepareImageRecordCloudWait(ctx, check, []ImageRecordCloudWaitOption{WithImageRecordCloudWait(resource.WithWaitStrategy(growing)), WithImageRecordCloudWait(resource.WithPollInterval(time.Second))})
+	if err != nil || wait.Strategy.Delay(3) != time.Second {
 		t.Fatal(wait, err)
 	}
-	deletion, cloudWait, err := prepareImageRecordCloudDelete(ctx, check, []ImageRecordCloudDeleteOption{WithImageRecordCloudDeletePollInterval(time.Second), WithImageRecordCloudDeleteWaitStrategy(growing)})
-	if err != nil || deletion.PollInterval != nil || cloudWait.WaitStrategy == nil || *cloudWait.WaitStrategy != growing {
-		t.Fatal(deletion, cloudWait, err)
+	_, cloudWait, err := prepareImageRecordCloudDelete(ctx, check, []ImageRecordCloudDeleteOption{WithImageRecordCloudDeleteWaitOptions(resource.WithPollInterval(time.Second)), WithImageRecordCloudDeleteWaitOptions(resource.WithWaitStrategy(growing))})
+	if err != nil || cloudWait.Strategy != growing {
+		t.Fatal(cloudWait, err)
 	}
-	record, err := prepareImageRecordWait(ctx, check, []ImageRecordWaitOption{WithImageRecordWaitStrategy(growing), WithImageRecordWaitPollInterval(time.Second)}, false)
-	if err != nil || record.WaitStrategy != nil || record.PollInterval == nil {
+	record, err := prepareImageRecordWait(ctx, check, []ImageRecordWaitOption{WithImageRecordWait(resource.WithWaitStrategy(growing)), WithImageRecordWait(resource.WithPollInterval(time.Second))}, false)
+	if err != nil || !record.settings.StrategySet || record.settings.Strategy.Delay(3) != time.Second {
 		t.Fatal(record, err)
 	}
-	record, err = prepareImageRecordWait(ctx, check, []ImageRecordWaitOption{WithImageRecordWaitPollInterval(time.Second), WithImageRecordWaitStrategy(growing)}, false)
-	if err != nil || record.PollInterval != nil || record.WaitStrategy == nil {
+	record, err = prepareImageRecordWait(ctx, check, []ImageRecordWaitOption{WithImageRecordWait(resource.WithPollInterval(time.Second)), WithImageRecordWait(resource.WithWaitStrategy(growing))}, false)
+	if err != nil || record.settings.Strategy != growing {
 		t.Fatal(record, err)
 	}
 }
@@ -130,7 +124,7 @@ func TestImageCloudWaitStrategyPacesLookups(t *testing.T) {
 		return taskCoreJSON(req, 200, `{"id":"img","status":"queued"}`)
 	})
 	ms := time.Millisecond
-	result, err := service.WaitForCloudImageRecord(context.Background(), cloudWaitSeed(t, "img"), WithImageRecordCloudWaitStrategy(resource.ExponentialWait(2*ms, 2, 0)))
+	result, err := service.WaitForCloudImageRecord(context.Background(), cloudWaitSeed(t, "img"), WithImageRecordCloudWait(resource.WithWaitStrategy(resource.ExponentialWait(2*ms, 2, 0))))
 	if err != nil || result.Image == nil || result.Lookups != 4 {
 		t.Fatal(result, err, calls)
 	}
@@ -147,7 +141,7 @@ func TestImageRecordWaitStrategyPacesPolls(t *testing.T) {
 		return taskCoreJSON(req, 200, `{"status":"queued"}`), nil
 	})
 	ms := time.Millisecond
-	got, err := New(client).WaitForImageRecordStatus(context.Background(), imageRecordWaitSeed(json.RawMessage(`"queued"`)), "active", WithImageRecordWaitStrategy(resource.LinearWait(2*ms, 3*ms, 0)))
+	got, err := New(client).WaitForImageRecordStatus(context.Background(), imageRecordWaitSeed(json.RawMessage(`"queued"`)), "active", WithImageRecordWait(resource.WithWaitStrategy(resource.LinearWait(2*ms, 3*ms, 0))))
 	if err != nil || got == nil || len(seen) != 4 {
 		t.Fatal(got, err, len(seen))
 	}

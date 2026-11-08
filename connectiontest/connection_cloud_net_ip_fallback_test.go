@@ -167,7 +167,7 @@ func TestCloudNetAddAutoIPNeutronSourceNovaFallbackTimeoutCleansUp(t *testing.T)
 		deleted := false
 		conn, f := newR2CloudNetFixture(t, compute.FloatingIPNeutron, cloudNetNovaFallbackHandler("null", &deleted))
 		result, err := conn.AddAutoIP(context.Background(), &compute.Server{ID: "srv-1"}, compute.WithAddAutoIPReuse(false), compute.WithAddAutoIPWait(true),
-			compute.WithAddAutoIPTimeout(80*time.Millisecond), compute.WithAddAutoIPPollInterval(5*time.Millisecond), compute.WithAddAutoIPCleanup(cleanup))
+			compute.WithAddAutoIPWaitOptions(resource.WithTimeout(80*time.Millisecond)), compute.WithAddAutoIPWaitOptions(resource.WithPollInterval(5*time.Millisecond)), compute.WithAddAutoIPCleanup(cleanup))
 		var timeout *compute.AddAutoIPTimeoutError
 		if !errors.As(err, &timeout) || result == nil || !result.AttachSkipped || f.count("POST /compute/servers/srv-1/action") != 0 {
 			t.Fatal(cleanup, result, err, f.keys())

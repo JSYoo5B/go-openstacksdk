@@ -98,7 +98,7 @@ func newConnectionNovaIP(t *testing.T, source compute.FloatingIPSource) (*testcl
 }
 
 func connectionNovaIPOptions(wait bool) []compute.ServerIPOption {
-	return []compute.ServerIPOption{compute.WithServerIPAutomaticOptions(compute.WithAutomaticEnsureOptions(network.WithEnsureFixedAddress("10.0.0.10")), compute.WithAutomaticIPPollInterval(time.Millisecond)), compute.WithServerIPWait(wait)}
+	return []compute.ServerIPOption{compute.WithServerIPAutomaticOptions(compute.WithAutomaticEnsureOptions(network.WithEnsureFixedAddress("10.0.0.10")), compute.WithAutomaticIPWait(resource.WithPollInterval(time.Millisecond))), compute.WithServerIPWait(wait)}
 }
 
 func TestConnectionNovaIPBackendChoiceAndAsyncRawWait(t *testing.T) {

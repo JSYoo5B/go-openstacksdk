@@ -18,11 +18,13 @@ import (
 )
 
 func TestCreateImportOptionsOwnReplacementAndReusableSnapshots(t *testing.T) {
-	zero, disabled, duration := 0, false, time.Second
+	zero, disabled := 0, false
+	waitOptions := []resource.WaitOption{resource.WithTimeout(time.Second), resource.WithFailureStates()}
 	metadata := CreateImportMetadataOpts{MinDisk: &zero, Hidden: &disabled, Tags: []string{"original"}, Properties: map[string]any{"vendor": map[string]any{"large": json.Number("9007199254740993")}}, Headers: map[string]string{"X-Note": "before"}}
-	value := CreateImportOpts{Metadata: metadata, Stage: imagedata.StageOpts{Headers: map[string]string{"X-Stage": "before"}}, Import: imageimport.ImportOpts{Stores: []string{"fast"}}, Wait: &CreateImportWaitOpts{Timeout: &duration, FailureStates: []string{}}}
+	value := CreateImportOpts{Metadata: metadata, Stage: imagedata.StageOpts{Headers: map[string]string{"X-Stage": "before"}}, Import: imageimport.ImportOpts{Stores: []string{"fast"}}, Wait: true, WaitOptions: waitOptions}
 	option := WithCreateImportOpts(value)
-	zero, disabled, duration = 7, true, time.Hour
+	zero, disabled = 7, true
+	waitOptions[0], waitOptions[1] = resource.WithTimeout(time.Hour), resource.WithFailureStates("changed")
 	metadata.Tags[0] = "changed"
 	metadata.Properties["vendor"].(map[string]any)["large"] = 1
 	metadata.Headers["X-Note"] = "changed"
@@ -33,8 +35,8 @@ func TestCreateImportOptionsOwnReplacementAndReusableSnapshots(t *testing.T) {
 		wait.Add(1)
 		go func() {
 			defer wait.Done()
-			prepared, err := parseCreateImportOptions([]CreateImportOption{WithCreateImportWait(CreateImportWaitOpts{}), option})
-			if err != nil || *prepared.Metadata.MinDisk != 0 || *prepared.Metadata.Hidden || prepared.Metadata.Tags[0] != "original" || prepared.Import.Stores[0] != "fast" || *prepared.Wait.Timeout != time.Second || prepared.Wait.FailureStates == nil {
+			prepared, err := parseCreateImportOptions([]CreateImportOption{WithCreateImportWait(), option})
+			if err != nil || *prepared.Metadata.MinDisk != 0 || *prepared.Metadata.Hidden || prepared.Metadata.Tags[0] != "original" || prepared.Import.Stores[0] != "fast" || !createImportWaitIs(prepared, time.Second, 0) {
 				t.Errorf("prepared=%+v err=%v", prepared, err)
 				return
 			}
@@ -48,7 +50,7 @@ func TestCreateImportOptionsOwnReplacementAndReusableSnapshots(t *testing.T) {
 	}
 	wait.Wait()
 	prepared, err := parseCreateImportOptions([]CreateImportOption{option, WithCreateImportOpts(CreateImportOpts{})})
-	if err != nil || prepared.Wait != nil || prepared.Metadata.MinDisk != nil || len(prepared.Import.Stores) != 0 {
+	if err != nil || prepared.Wait || prepared.WaitOptions != nil || prepared.Metadata.MinDisk != nil || len(prepared.Import.Stores) != 0 {
 		t.Fatalf("replace=%+v err=%v", prepared, err)
 	}
 }
@@ -124,22 +126,44 @@ func TestCreateImportMetadataReusesUploadBuilderAndPreservesZeroFields(t *testin
 	}
 }
 
+// createImportWaitIs reports whether the prepared wait options resolve to
+// timeout and the given number of failure states.
+func createImportWaitIs(config CreateImportOpts, timeout time.Duration, failures int) bool {
+	options, err := prepareCreateImportWait(config)
+	if err != nil || len(options) != 1 {
+		return false
+	}
+	settings, err := resource.ResolveWait(resource.WaitDefaults{Timeout: time.Nanosecond, Strategy: resource.FixedWait(time.Nanosecond), Supports: createImportWaitSupport}, options...)
+	return err == nil && settings.Timeout == timeout && settings.FailureStatesSet && len(settings.FailureStates) == failures
+}
+
 func TestCreateImportWaitOptionsHaveConcretePreflightPolicy(t *testing.T) {
-	negative, zero, interval := -time.Second, time.Duration(0), time.Millisecond
-	for _, value := range []*CreateImportWaitOpts{{Timeout: &negative}, {PollInterval: &zero}, {FailureStates: []string{" "}}} {
-		_, err := prepareCreateImportWait(value)
+	for _, value := range [][]resource.WaitOption{{resource.WithTimeout(-time.Second)}, {resource.WithPollInterval(0)}, {resource.WithFailureStates(" ")}, {nil}, {resource.WithProgress(make(chan int))}, {resource.WithStatusAttribute("status")}} {
+		_, err := prepareCreateImportWait(CreateImportOpts{Wait: true, WaitOptions: value})
 		if !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatalf("value=%+v err=%v", value, err)
 		}
 	}
-	for _, value := range []*CreateImportWaitOpts{nil, {}, {Timeout: &zero, PollInterval: &interval, FailureStates: []string{}}} {
+	for _, value := range []CreateImportOpts{{}, {Wait: true}, {Wait: true, WaitOptions: []resource.WaitOption{resource.WithUnlimitedWait(), resource.WithPollInterval(time.Millisecond), resource.WithFailureStates()}}} {
 		options, err := prepareCreateImportWait(value)
 		if err != nil {
 			t.Fatal(err)
 		}
-		if value == nil && options != nil {
+		if !value.Wait && options != nil {
 			t.Fatal("wait-disabled generated policy")
 		}
+	}
+	// Defaults stay five minutes and killed/deleted; repeated options append.
+	if !createImportWaitIs(CreateImportOpts{Wait: true}, 5*time.Minute, 2) {
+		t.Fatal("default wait policy changed")
+	}
+	prepared, err := parseCreateImportOptions([]CreateImportOption{WithCreateImportWait(resource.WithTimeout(time.Second), resource.WithFailureStates("a")), WithCreateImportWait(resource.WithFailureStates())})
+	if err != nil || !createImportWaitIs(prepared, time.Second, 0) {
+		t.Fatal(prepared, err)
+	}
+	prepared, err = parseCreateImportOptions([]CreateImportOption{WithCreateImportWait(resource.WithTimeout(time.Second)), WithoutCreateImportWait()})
+	if err != nil || prepared.Wait || prepared.WaitOptions != nil {
+		t.Fatal(prepared, err)
 	}
 }
 

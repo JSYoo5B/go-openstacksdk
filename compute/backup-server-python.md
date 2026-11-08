@@ -11,7 +11,7 @@ lazily; applications do not implement a resolver or builder.
 | `backup_server(server_id, "backup", "daily", 3)` | `service.BackupServer(ctx, serverID, compute.BackupServerRequest{Name: "backup", BackupType: "daily", Rotation: 3})` |
 | `wait=True` | `compute.WithBackupServerWait(true)` |
 | `timeout=120` | library default; override with `compute.WithBackupServerTimeout(120*time.Second)` |
-| `timeout=None` runtime behavior | `compute.WithBackupServerUnlimitedWait()` |
+| `timeout=None` runtime behavior | `compute.WithBackupServerWaitOptions(resource.WithUnlimitedWait())` |
 | direct `Server.backup(...)` action only | `service.API.Servers.CreateBackupAction(ctx, serverID, request)` |
 
 The full workflow always looks up the resulting Glance image, even with the
@@ -130,11 +130,13 @@ are terminal and do not start image lookup or repeat the accepted action.
 `WithBackupServerWait` defaults false. The wait timeout defaults **120 seconds**
 and the Cloud polling interval defaults two seconds. A zero or negative timeout
 expires before the first wait lookup, after the unconditional initial lookup;
-its value is unused when wait=false. `WithBackupServerPollInterval` is a positive
-Go extension; `WithBackupServerWaitStrategy` (or `BackupServerOpts.WaitStrategy`)
-replaces it with a `resource.WaitStrategy`, also Go-only. The later of the two
-options wins, and with wait=true an invalid strategy or both fields set fail
-before the backup action is sent. Waiting reuses `image.Service.WaitForCloudImageRecord`, including
+its value is unused when wait=false. `WithBackupServerWaitOptions` (or
+`BackupServerOpts.WaitOptions`) takes the shared resource wait options:
+`resource.WithTimeout` or `resource.WithUnlimitedWait` replaces the timeout, and
+`resource.WithPollInterval` or `resource.WithWaitStrategy` replaces the fixed
+interval as a Go extension; repeated options append and the later one wins per
+control. With wait=true, an invalid option, failure states, a status attribute or
+progress fail with `resource.ErrInvalidOption` before the backup action is sent. Waiting reuses `image.Service.WaitForCloudImageRecord`, including
 its missing-as-nil Find fallback, exact status comparison, full sleep interval,
 and timeout checks between requests rather than cancelling an in-flight lookup.
 Caller context cancellation still interrupts requests and waits.

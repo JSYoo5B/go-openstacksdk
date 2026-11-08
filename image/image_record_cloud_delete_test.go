@@ -88,7 +88,7 @@ func TestCloudImageRecordDeleteFindsDeletesCleansAndWaits(t *testing.T) {
 				}
 				return cloudDeleteAbsent(route, req)
 			})
-			result, err := service.DeleteCloudImageRecord(context.Background(), "img", request.Header("X-Cloud", "delete"), WithImageRecordCloudDeleteWait(true), WithImageRecordCloudDeleteTimeout(5*time.Second), WithImageRecordCloudDeletePollInterval(time.Millisecond))
+			result, err := service.DeleteCloudImageRecord(context.Background(), "img", request.Header("X-Cloud", "delete"), WithImageRecordCloudDeleteWait(true), WithImageRecordCloudDeleteTimeout(5*time.Second), WithImageRecordCloudDeleteWaitOptions(resource.WithPollInterval(time.Millisecond)))
 			if err != nil || !result.Deleted || result.Found == nil || result.Delete == nil || result.WaitLookups != 1 || result.WaitLast != nil {
 				t.Fatal(result, err, routes)
 			}
@@ -187,7 +187,7 @@ func TestCloudImageRecordDeleteLateFailuresKeepPhases(t *testing.T) {
 			}
 			return taskCoreJSON(req, 200, `{"id":"img","status":"deleted"}`)
 		})
-		result, err := service.DeleteCloudImageRecord(context.Background(), "img", request.Header("X-Cloud", "delete"), WithImageRecordCloudDeleteWait(true), WithImageRecordCloudDeleteTimeout(15*time.Millisecond), WithImageRecordCloudDeletePollInterval(5*time.Millisecond))
+		result, err := service.DeleteCloudImageRecord(context.Background(), "img", request.Header("X-Cloud", "delete"), WithImageRecordCloudDeleteWait(true), WithImageRecordCloudDeleteTimeout(15*time.Millisecond), WithImageRecordCloudDeleteWaitOptions(resource.WithPollInterval(5*time.Millisecond)))
 		if !errors.Is(err, context.DeadlineExceeded) || result.Deleted || result.WaitLookups < 1 || result.WaitLast == nil {
 			t.Fatal(result, err, routes)
 		}
@@ -205,7 +205,7 @@ func TestCloudImageRecordDeleteInputFailsBeforeHTTP(t *testing.T) {
 		"blank identity": func() error { _, err := service.DeleteCloudImageRecord(ctx, " "); return err },
 		"nil option":     func() error { _, err := service.DeleteCloudImageRecord(ctx, "img", nil); return err },
 		"zero interval": func() error {
-			_, err := service.DeleteCloudImageRecord(ctx, "img", WithImageRecordCloudDeletePollInterval(0))
+			_, err := service.DeleteCloudImageRecord(ctx, "img", WithImageRecordCloudDeleteWaitOptions(resource.WithPollInterval(0)))
 			return err
 		},
 		"invalid header": func() error {

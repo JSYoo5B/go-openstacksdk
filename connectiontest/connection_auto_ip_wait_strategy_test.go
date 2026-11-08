@@ -50,7 +50,7 @@ func TestAddAutoIPWaitStrategyPacesServerPolls(t *testing.T) {
 	attached := false
 	conn, f := newR2CloudNetFixture(t, compute.FloatingIPNova, r2CloudNetNovaAutoHandler(&attached, reads.body(4)))
 	result, err := conn.AddAutoIP(context.Background(), &compute.Server{ID: "srv-1", Status: "ACTIVE"}, compute.WithAddAutoIPWait(true),
-		compute.WithAddAutoIPPollInterval(time.Hour), compute.WithAddAutoIPWaitStrategy(resource.ExponentialWait(2*ms, 2, 0)))
+		compute.WithAddAutoIPWaitOptions(resource.WithPollInterval(time.Hour)), compute.WithAddAutoIPWaitOptions(resource.WithWaitStrategy(resource.ExponentialWait(2*ms, 2, 0))))
 	if err != nil || result == nil || !result.Observed {
 		t.Fatal(result, err, f.keys())
 	}
@@ -63,7 +63,7 @@ func TestAddIPFromPoolWaitStrategyPacesServerPolls(t *testing.T) {
 	attached := false
 	conn, f := newR2CloudNetFixture(t, compute.FloatingIPNova, r2CloudNetNovaAutoHandler(&attached, reads.body(4)))
 	result, err := conn.AddIPFromPool(context.Background(), &compute.Server{ID: "srv-1", Status: "ACTIVE"}, resource.Name("public"), compute.WithPoolIPFixedAddress("10.0.0.8"),
-		compute.WithPoolIPWait(true), compute.WithPoolIPPollInterval(time.Hour), compute.WithPoolIPWaitStrategy(resource.LinearWait(2*ms, 3*ms, 0)))
+		compute.WithPoolIPWait(true), compute.WithPoolIPWaitOptions(resource.WithPollInterval(time.Hour)), compute.WithPoolIPWaitOptions(resource.WithWaitStrategy(resource.LinearWait(2*ms, 3*ms, 0))))
 	if err != nil || result == nil || !result.Observed {
 		t.Fatal(result, err, f.keys())
 	}

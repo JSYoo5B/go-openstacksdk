@@ -2,6 +2,7 @@ package connectiontest_test
 
 import (
 	"context"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"strings"
 	"testing"
 	"time"
@@ -88,7 +89,7 @@ func TestFloatingIPHelpersUseNovaWhenNetworkServiceDisabled(t *testing.T) {
 			switch helper {
 			case "AddAutoIP":
 				var result *compute.AddAutoIPResult
-				result, err = conn.AddAutoIP(context.Background(), server, compute.WithAddAutoIPWait(true), compute.WithAddAutoIPPollInterval(time.Millisecond))
+				result, err = conn.AddAutoIP(context.Background(), server, compute.WithAddAutoIPWait(true), compute.WithAddAutoIPWaitOptions(resource.WithPollInterval(time.Millisecond)))
 				if err == nil && (result.Backend != compute.FloatingIPNova || result.NeutronFloating || !result.Reused || !result.Observed) {
 					t.Fatal(result)
 				}

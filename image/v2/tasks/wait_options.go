@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"maps"
 	"net/http"
+	"slices"
 	"strings"
 	"time"
 
@@ -12,30 +13,29 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
-// TaskWaitOpts controls the SDK-owned task workflow. Nil Timeout selects 120
-// seconds; a zero duration removes the SDK deadline. Nil PollInterval selects
-// two seconds. WaitStrategy replaces the fixed interval with a
-// resource.WaitStrategy (a Go-only extension); setting both PollInterval and
-// WaitStrategy is rejected before HTTP. Nil FailureStates selects "failure"; a
-// nonnil empty slice disables failure detection. The parent context always
-// controls cancellation.
+// TaskWaitOpts controls the SDK-owned task workflow. Wait holds shared
+// resource wait options applied in order over the defaults of a 120-second
+// timeout, a two-second pause and the "failure" state: WithTimeout,
+// WithUnlimitedWait, WithPollInterval, WithWaitStrategy and WithFailureStates
+// (no states disable failure detection). Other shared controls fail with
+// resource.ErrInvalidOption before HTTP. The parent context always controls
+// cancellation.
 type TaskWaitOpts struct {
-	Timeout       *time.Duration
-	PollInterval  *time.Duration
-	WaitStrategy  *resource.WaitStrategy
-	FailureStates []string
-	Headers       map[string]string
+	Wait    []resource.WaitOption
+	Headers map[string]string
 }
 
-// TaskWaitOption configures the task waiter: WithTaskWaitOpts,
-// WithTaskWaitTimeout, WithUnlimitedTaskWait, WithTaskWaitPollInterval,
-// WithTaskWaitStrategy, WithTaskWaitFailureStates, WithTaskWaitHeaders (validates and merges the
-// map), request.Header (one request header; case-insensitive later options
-// win) or request.Custom over *TaskWaitOpts. Later options replace earlier
-// values. Other shared calls fail with resource.ErrInvalidOption before HTTP.
+// TaskWaitOption configures the task waiter: WithTaskWaitOpts, WithTaskWait,
+// WithTaskWaitHeaders (validates and merges the map), request.Header (one
+// request header; case-insensitive later options win) or request.Custom over
+// *TaskWaitOpts. Later options replace earlier values. Other shared calls fail
+// with resource.ErrInvalidOption before HTTP.
 type TaskWaitOption = request.GetCall
 
 var taskWaitCalls = calls.Spec[TaskWaitOpts]{Header: setTaskWaitHeader}
+
+// taskWaitSupport lists the shared controls the task wait honors.
+const taskWaitSupport = resource.WaitSupportFailureStates
 
 // WithTaskWaitOpts snapshots and replaces the complete task policy.
 func WithTaskWaitOpts(value TaskWaitOpts) TaskWaitOption {
@@ -43,55 +43,12 @@ func WithTaskWaitOpts(value TaskWaitOpts) TaskWaitOption {
 	return request.Custom(func(config *TaskWaitOpts) error { *config = copyTaskWaitOpts(snapshot); return nil })
 }
 
-func WithTaskWaitTimeout(value time.Duration) TaskWaitOption {
+// WithTaskWait appends shared resource wait options to Wait. Repeated calls
+// append; for each control the later option wins.
+func WithTaskWait(options ...resource.WaitOption) TaskWaitOption {
+	snapshot := slices.Clone(options)
 	return request.Custom(func(config *TaskWaitOpts) error {
-		if value <= 0 {
-			return taskWaitInvalid("timeout must be positive")
-		}
-		owned := value
-		config.Timeout = &owned
-		return nil
-	})
-}
-
-// WithUnlimitedTaskWait removes the SDK timeout while retaining the parent context.
-func WithUnlimitedTaskWait() TaskWaitOption {
-	return request.Custom(func(config *TaskWaitOpts) error { owned := time.Duration(0); config.Timeout = &owned; return nil })
-}
-
-// WithTaskWaitPollInterval sets a fixed positive interval. It and
-// WithTaskWaitStrategy replace each other; the later one wins.
-func WithTaskWaitPollInterval(value time.Duration) TaskWaitOption {
-	return request.Custom(func(config *TaskWaitOpts) error {
-		if value <= 0 {
-			return taskWaitInvalid("poll interval must be positive")
-		}
-		owned := value
-		config.PollInterval, config.WaitStrategy = &owned, nil
-		return nil
-	})
-}
-
-// WithTaskWaitStrategy replaces the fixed interval with value, a Go-only
-// extension. An invalid strategy fails with resource.ErrInvalidOption before
-// HTTP. It and WithTaskWaitPollInterval replace each other.
-func WithTaskWaitStrategy(value resource.WaitStrategy) TaskWaitOption {
-	return request.Custom(func(config *TaskWaitOpts) error {
-		if err := value.Validate(); err != nil {
-			return err
-		}
-		owned := value
-		config.PollInterval, config.WaitStrategy = nil, &owned
-		return nil
-	})
-}
-
-// WithTaskWaitFailureStates replaces failure detection with exact,
-// case-insensitive states. No arguments disable failure detection.
-func WithTaskWaitFailureStates(states ...string) TaskWaitOption {
-	snapshot := append(make([]string, 0, len(states)), states...)
-	return request.Custom(func(config *TaskWaitOpts) error {
-		config.FailureStates = append(make([]string, 0, len(snapshot)), snapshot...)
+		config.Wait = append(slices.Clone(config.Wait), snapshot...)
 		return nil
 	})
 }
@@ -136,71 +93,41 @@ func WithTaskWaitHeaders(headers map[string]string) TaskWaitOption {
 }
 
 func copyTaskWaitOpts(value TaskWaitOpts) TaskWaitOpts {
-	if value.Timeout != nil {
-		owned := *value.Timeout
-		value.Timeout = &owned
-	}
-	if value.PollInterval != nil {
-		owned := *value.PollInterval
-		value.PollInterval = &owned
-	}
-	if value.WaitStrategy != nil {
-		owned := *value.WaitStrategy
-		value.WaitStrategy = &owned
-	}
-	if value.FailureStates != nil {
-		value.FailureStates = append(make([]string, 0, len(value.FailureStates)), value.FailureStates...)
-	}
+	value.Wait = slices.Clone(value.Wait)
 	value.Headers = maps.Clone(value.Headers)
 	return value
 }
 
-func parseTaskWaitOpts(options []TaskWaitOption) (TaskWaitOpts, error) {
+// taskWaitPolicy is a parsed task wait policy. Timeout zero is unlimited.
+type taskWaitPolicy struct {
+	Headers       map[string]string
+	Timeout       time.Duration
+	Strategy      resource.WaitStrategy
+	FailureStates []string
+}
+
+func parseTaskWaitOpts(options []TaskWaitOption) (taskWaitPolicy, error) {
 	var value TaskWaitOpts
 	for _, apply := range calls.Translate(options, taskWaitCalls) {
 		if apply == nil {
-			return value, taskWaitInvalid("nil task wait option")
+			return taskWaitPolicy{}, taskWaitInvalid("nil task wait option")
 		}
 		if err := apply(&value); err != nil {
-			return value, err
+			return taskWaitPolicy{}, err
 		}
 	}
 	// Keep the option-owned config separate: custom options may retain its pointer.
 	snapshot := copyTaskWaitOpts(value)
-	if snapshot.Timeout == nil {
-		owned := 120 * time.Second
-		snapshot.Timeout = &owned
+	settings, err := resource.ResolveWait(resource.WaitDefaults{Timeout: 120 * time.Second, Strategy: resource.FixedWait(2 * time.Second), Supports: taskWaitSupport}, snapshot.Wait...)
+	if err != nil {
+		return taskWaitPolicy{}, err
 	}
-	if *snapshot.Timeout < 0 {
-		return snapshot, taskWaitInvalid("timeout must not be negative")
+	policy := taskWaitPolicy{Timeout: settings.Timeout, Strategy: settings.Strategy, FailureStates: settings.FailureStates}
+	if !settings.FailureStatesSet {
+		policy.FailureStates = []string{"failure"}
 	}
-	if snapshot.WaitStrategy != nil {
-		if snapshot.PollInterval != nil {
-			return snapshot, taskWaitInvalid("PollInterval and WaitStrategy are mutually exclusive")
-		}
-		if err := snapshot.WaitStrategy.Validate(); err != nil {
-			return snapshot, err
-		}
-	} else {
-		if snapshot.PollInterval == nil {
-			owned := 2 * time.Second
-			snapshot.PollInterval = &owned
-		}
-		if *snapshot.PollInterval <= 0 {
-			return snapshot, taskWaitInvalid("poll interval must be positive")
-		}
-	}
-	if snapshot.FailureStates == nil {
-		snapshot.FailureStates = []string{"failure"}
-	}
-	for _, state := range snapshot.FailureStates {
-		if strings.TrimSpace(state) == "" {
-			return snapshot, taskWaitInvalid("failure state must not be empty")
-		}
-	}
-	headers, err := taskWaitHeaders(snapshot.Headers, false, "")
-	snapshot.Headers = headers
-	return snapshot, err
+	policy.Headers, err = taskWaitHeaders(snapshot.Headers, false, "")
+	return policy, err
 }
 
 func taskWaitHeaders(headers map[string]string, source bool, version string) (map[string]string, error) {
@@ -239,12 +166,4 @@ func taskWaitHeaders(headers map[string]string, source bool, version string) (ma
 
 func taskWaitInvalid(format string, args ...any) error {
 	return fmt.Errorf("%w: %s", resource.ErrInvalidOption, fmt.Sprintf(format, args...))
-}
-
-// taskWaitStrategy returns the selected strategy of a parsed policy.
-func taskWaitStrategy(policy TaskWaitOpts) resource.WaitStrategy {
-	if policy.WaitStrategy != nil {
-		return *policy.WaitStrategy
-	}
-	return resource.FixedWait(*policy.PollInterval)
 }

@@ -21,7 +21,7 @@ func TestConnectionStandaloneAutomaticIPRetainsLazyComputeSourceGuard(t *testing
 			server.Status = "ACTIVE"
 			callbacks := 0
 			result, err := conn.EnsureServerFloatingIP(context.Background(), compute.AutomaticFloatingIPRequest{Server: server},
-				compute.WithAutomaticIPTimeout(time.Second), compute.WithAutomaticIPPollInterval(time.Millisecond),
+				compute.WithAutomaticIPWait(resource.WithTimeout(time.Second)), compute.WithAutomaticIPWait(resource.WithPollInterval(time.Millisecond)),
 				compute.WithAutomaticEnsureOptions(network.WithEnsureReuse(false)),
 				compute.WithAutomaticIPProgressCallback(func(*compute.Server) error {
 					callbacks++

@@ -82,7 +82,7 @@ func TestGetActiveServerNullableStatusFaultAndModelCases(t *testing.T) {
 // supplied model an already associated IP refreshes the server once even in
 // the asynchronous lane.
 func TestGetActiveServerAddressLaneFollowsSourceAttachSteps(t *testing.T) {
-	common := []compute.AutomaticFloatingIPOption{compute.WithAutomaticIPPollInterval(time.Millisecond), compute.WithAutomaticAddressOptions(compute.WithAddressReachability(false))}
+	common := []compute.AutomaticFloatingIPOption{compute.WithAutomaticIPWait(resource.WithPollInterval(time.Millisecond)), compute.WithAutomaticAddressOptions(compute.WithAddressReachability(false))}
 	ready := func(extra ...compute.AutomaticFloatingIPOption) compute.ServerReadyOption {
 		return compute.WithServerReadyAutomaticIPOptions(append(append([]compute.AutomaticFloatingIPOption(nil), common...), extra...)...)
 	}
@@ -108,7 +108,7 @@ func TestGetActiveServerAddressLaneFollowsSourceAttachSteps(t *testing.T) {
 			f.ports = []string{sourcePortPrivate}
 			f.bound["a"] = [2]string{"port-p", "10.0.0.10"}
 			f.raw = func(int32) string { return sourceAddresses(dispatchAddresses["a"]) }
-			result, err := f.service.GetActiveServer(context.Background(), compute.AutomaticFloatingIPRequest{Server: automaticServer(t, autoFixed)}, ready(compute.WithFloatingIPAddresses(dispatchAddresses["a"]), compute.WithAutomaticIPTimeout(5*time.Second)), compute.WithActiveServerWait(wait))
+			result, err := f.service.GetActiveServer(context.Background(), compute.AutomaticFloatingIPRequest{Server: automaticServer(t, autoFixed)}, ready(compute.WithFloatingIPAddresses(dispatchAddresses["a"]), compute.WithAutomaticIPWait(resource.WithTimeout(5*time.Second))), compute.WithActiveServerWait(wait))
 			if err != nil || f.trace() != "list:a,raw" || len(result.Attempts) != 1 || !result.Attempts[0].ShortCircuited || result.Observed || result.Server.Name != "raw-1" || len(f.puts) != 0 {
 				t.Fatal(result, err, f.trace())
 			}
@@ -126,7 +126,7 @@ func TestGetActiveServerAddressLaneFollowsSourceAttachSteps(t *testing.T) {
 		f := newNovaIPFixture(t, "")
 		server := automaticServer(t, sourceAddresses(dispatchAddresses["b"]))
 		nova := compute.WithAutomaticAddressOptions(compute.WithFloatingIPSource(compute.FloatingIPNova), compute.WithAddressReachability(false))
-		result, err := f.service.GetActiveServer(context.Background(), compute.AutomaticFloatingIPRequest{Server: server}, compute.WithServerReadyAutomaticIPOptions(nova, compute.WithAutomaticIPPollInterval(time.Millisecond), compute.WithFloatingIPAddresses(dispatchAddresses["b"], dispatchAddresses["c"])), compute.WithServerReadyAutomaticIPOptions(compute.WithAutomaticEnsureOptions(network.WithEnsureFixedAddress("10.0.0.10"))))
+		result, err := f.service.GetActiveServer(context.Background(), compute.AutomaticFloatingIPRequest{Server: server}, compute.WithServerReadyAutomaticIPOptions(nova, compute.WithAutomaticIPWait(resource.WithPollInterval(time.Millisecond)), compute.WithFloatingIPAddresses(dispatchAddresses["b"], dispatchAddresses["c"])), compute.WithServerReadyAutomaticIPOptions(compute.WithAutomaticEnsureOptions(network.WithEnsureFixedAddress("10.0.0.10"))))
 		trace := strings.Join(f.trace(), ",")
 		if err != nil || result == nil || len(result.Attempts) != 2 || !result.Attempts[0].ShortCircuited || result.Attempts[1].ShortCircuited || !result.Attempts[1].Completed || result.NovaAssignment == nil || !result.NovaAssignment.ActionAccepted || trace != "list,list,get:3,attach:"+dispatchAddresses["c"] {
 			t.Fatal(result, err, trace)
@@ -191,16 +191,16 @@ func TestGetActiveServerTimeoutUnlimitedAndParentCombinations(t *testing.T) {
 				options := []compute.AutomaticFloatingIPOption{
 					compute.WithAutomaticAddressOptions(compute.WithAddressReachability(false)),
 					compute.WithAutomaticEnsureOptions(network.WithEnsureReuse(false), network.WithEnsureWait(resource.WithPollInterval(time.Millisecond))),
-					compute.WithAutomaticIPPollInterval(time.Millisecond),
+					compute.WithAutomaticIPWait(resource.WithPollInterval(time.Millisecond)),
 				}
 				ctx, length := context.Background(), 4*time.Minute
 				switch mode {
 				case "override":
-					options = append(options, compute.WithAutomaticIPTimeout(17*time.Second))
+					options = append(options, compute.WithAutomaticIPWait(resource.WithTimeout(17*time.Second)))
 				case "parent":
 					length = 30 * time.Second
 				case "unlimited", "unlimited-no-parent":
-					options = append(options, compute.WithUnlimitedAutomaticIPTimeout())
+					options = append(options, compute.WithAutomaticIPWait(resource.WithUnlimitedWait()))
 				}
 				if mode != "unlimited-no-parent" {
 					var cancel context.CancelFunc

@@ -111,7 +111,7 @@ func TestNovaServerIPUpperObservationRequiresActualActiveServer(t *testing.T) {
 			}))
 			cause := errors.New("BUILD target is not ready")
 			progress := 0
-			common := []compute.AutomaticFloatingIPOption{compute.WithAutomaticAddressOptions(compute.WithFloatingIPSource(compute.FloatingIPNova), compute.WithAddressReachability(false)), compute.WithFloatingIPAddresses(dispatchAddresses["a"], dispatchAddresses["b"]), compute.WithAutomaticEnsureOptions(network.WithEnsureFixedAddress("10.0.0.10")), compute.WithAutomaticIPPollInterval(time.Millisecond), compute.WithAutomaticIPProgressCallback(func(*compute.Server) error { progress++; return cause })}
+			common := []compute.AutomaticFloatingIPOption{compute.WithAutomaticAddressOptions(compute.WithFloatingIPSource(compute.FloatingIPNova), compute.WithAddressReachability(false)), compute.WithFloatingIPAddresses(dispatchAddresses["a"], dispatchAddresses["b"]), compute.WithAutomaticEnsureOptions(network.WithEnsureFixedAddress("10.0.0.10")), compute.WithAutomaticIPWait(resource.WithPollInterval(time.Millisecond)), compute.WithAutomaticIPProgressCallback(func(*compute.Server) error { progress++; return cause })}
 			input := compute.AutomaticFloatingIPRequest{Server: automaticServer(t, autoFixed)}
 			ready := []compute.ServerReadyOption{compute.WithServerReadyAutomaticIPOptions(common...), compute.WithServerReadyWaitOptions(resource.WithPollInterval(time.Millisecond))}
 			var result *compute.AutomaticServerIPResult
@@ -282,10 +282,10 @@ func TestNovaServerIPOneHTTPBudgetAndOptionSnapshot(t *testing.T) {
 		inner, destination := 0, 0
 		extra := []compute.AutomaticFloatingIPOption{beforeDispatchOption(func() { inner++; server.ID = "changed"; addresses[0] = dispatchAddresses["c"] }, compute.WithAutomaticIPEnabled(false)), compute.WithAutomaticEnsureOptions(beforeDispatchOption(func() { destination++ }, network.WithEnsureFixedAddress("10.0.0.10")))}
 		if mode == "override" {
-			extra = append(extra, compute.WithAutomaticIPTimeout(17*time.Second))
+			extra = append(extra, compute.WithAutomaticIPWait(resource.WithTimeout(17*time.Second)))
 		}
 		if mode == "unlimited" {
-			extra = append(extra, compute.WithUnlimitedAutomaticIPTimeout())
+			extra = append(extra, compute.WithAutomaticIPWait(resource.WithUnlimitedWait()))
 		}
 		start := time.Now()
 		result, err := f.service.AddIPList(ctx, server, addresses, novaIPOptions(extra...)...)
@@ -349,7 +349,7 @@ func TestNovaServerIPRealDeadlineStopsAfterAcceptedFirstAction(t *testing.T) {
 		}
 		return base.RoundTrip(r)
 	}))
-	result, err := f.service.AddIPList(context.Background(), automaticServer(t, "null"), []string{dispatchAddresses["a"], dispatchAddresses["b"]}, append(novaIPOptions(compute.WithAutomaticIPTimeout(time.Second)), compute.WithServerIPWait(true))...)
+	result, err := f.service.AddIPList(context.Background(), automaticServer(t, "null"), []string{dispatchAddresses["a"], dispatchAddresses["b"]}, append(novaIPOptions(compute.WithAutomaticIPWait(resource.WithTimeout(time.Second))), compute.WithServerIPWait(true))...)
 	if !errors.Is(err, context.DeadlineExceeded) || result == nil || result.NovaAssignment == nil || !result.NovaAssignment.ActionAccepted || len(result.Attempts) != 1 || result.Attempts[0].Completed || result.Attempts[0].Error == nil || result.Observed || !reflect.DeepEqual(f.trace(), []string{"list", "get:9007199254740993", "attach:" + dispatchAddresses["a"], "blocked-raw"}) {
 		t.Fatal(result, err, f.trace())
 	}
@@ -389,7 +389,7 @@ func TestNovaServerIPReadinessAndCreationConsumeLegacyBackend(t *testing.T) {
 	for _, mode := range []string{"Ensure", "Get async", "Get sync", "Wait", "Create"} {
 		f := newNovaIPFixture(t, "")
 		f.status = "ACTIVE"
-		common := []compute.AutomaticFloatingIPOption{compute.WithAutomaticAddressOptions(compute.WithFloatingIPSource(compute.FloatingIPNova), compute.WithAddressReachability(false)), compute.WithFloatingIPAddresses(dispatchAddresses["a"], dispatchAddresses["b"]), compute.WithAutomaticEnsureOptions(network.WithEnsureFixedAddress("10.0.0.10")), compute.WithAutomaticIPPollInterval(time.Millisecond)}
+		common := []compute.AutomaticFloatingIPOption{compute.WithAutomaticAddressOptions(compute.WithFloatingIPSource(compute.FloatingIPNova), compute.WithAddressReachability(false)), compute.WithFloatingIPAddresses(dispatchAddresses["a"], dispatchAddresses["b"]), compute.WithAutomaticEnsureOptions(network.WithEnsureFixedAddress("10.0.0.10")), compute.WithAutomaticIPWait(resource.WithPollInterval(time.Millisecond))}
 		input := compute.AutomaticFloatingIPRequest{Server: automaticServer(t, autoFixed)}
 		ready := []compute.ServerReadyOption{compute.WithServerReadyAutomaticIPOptions(common...), compute.WithServerReadyWaitOptions(resource.WithPollInterval(time.Millisecond))}
 		var result *compute.AutomaticServerIPResult

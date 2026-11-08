@@ -124,7 +124,7 @@ func TestBackupServerWaitUsesCloudCaseAndFreshLookups(t *testing.T) {
 		statuses = statuses[1:]
 		return backupServerWire(200, `{"id":"img1","status":"`+status+`"}`, "image")
 	})
-	result, err := f.service.BackupServer(context.Background(), "s1", backupServerInput, compute.WithBackupServerWait(true), compute.WithBackupServerPollInterval(time.Nanosecond))
+	result, err := f.service.BackupServer(context.Background(), "s1", backupServerInput, compute.WithBackupServerWait(true), compute.WithBackupServerWaitOptions(resource.WithPollInterval(time.Nanosecond)))
 	assertBackupStage(t, f, result, err)
 	if result.Wait == nil || result.Wait.Lookups != 3 || result.Wait.Image == nil || result.Image != result.Wait.Image || string(result.Image.Resource.Body["status"]) != `"active"` || len(statuses) != 0 {
 		t.Fatal(result, statuses)
@@ -157,7 +157,7 @@ func TestBackupServerWaitFailureTimeoutAndMissingSeed(t *testing.T) {
 			})
 			options := []compute.BackupServerOption{}
 			if scenario != "missing no wait" {
-				options = append(options, compute.WithBackupServerWait(true), compute.WithBackupServerPollInterval(time.Nanosecond))
+				options = append(options, compute.WithBackupServerWait(true), compute.WithBackupServerWaitOptions(resource.WithPollInterval(time.Nanosecond)))
 			}
 			if scenario == "zero timeout" {
 				options = append(options, compute.WithBackupServerTimeout(0))
@@ -333,5 +333,27 @@ func TestBackupServerSourceAndOptionsFailBeforeWork(t *testing.T) {
 	_, err = f.service.BackupServer(context.Background(), "s1", backupServerInput, nil)
 	if !errors.Is(err, resource.ErrInvalidOption) || len(f.calls) != 0 {
 		t.Fatal(err, f.calls)
+	}
+}
+
+func TestBackupServerWaitOptionsSnapshotAndOverridePythonTimeout(t *testing.T) {
+	statuses := []string{"active", "queued", "active"}
+	f := newBackupServerFixture(t, func(req *http.Request) *http.Response {
+		if req.Method == http.MethodPost {
+			return backupServerWire(202, `{"image_id":"img1"}`, "action")
+		}
+		status := statuses[0]
+		statuses = statuses[1:]
+		return backupServerWire(200, `{"id":"img1","status":"`+status+`"}`, "image")
+	})
+	wait := []resource.WaitOption{resource.WithPollInterval(time.Nanosecond), resource.WithTimeout(time.Minute)}
+	option := compute.WithBackupServerWaitOptions(wait...)
+	wait[0], wait[1] = resource.WithPollInterval(0), nil
+	// The later WithTimeout replaces the zero Python timeout, which alone would
+	// expire before the first lookup.
+	result, err := f.service.BackupServer(context.Background(), "s1", backupServerInput, compute.WithBackupServerWait(true), compute.WithBackupServerTimeout(0), option)
+	assertBackupStage(t, f, result, err)
+	if result.Wait == nil || result.Wait.Lookups != 2 || len(statuses) != 0 {
+		t.Fatal(result, statuses)
 	}
 }

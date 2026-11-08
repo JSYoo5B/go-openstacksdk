@@ -43,7 +43,7 @@ func TestCloudImageRecordWaitPollsFindUntilExactActive(t *testing.T) {
 		return taskCoreJSON(req, response.code, response.body)
 	})
 	// The supplied record status is ignored; Cloud always looks the image up.
-	result, err := service.WaitForCloudImageRecord(context.Background(), cloudWaitSeed(t, "img"), request.Header("X-Cloud", "wait"), WithImageRecordCloudWaitPollInterval(time.Millisecond))
+	result, err := service.WaitForCloudImageRecord(context.Background(), cloudWaitSeed(t, "img"), request.Header("X-Cloud", "wait"), WithImageRecordCloudWait(resource.WithPollInterval(time.Millisecond)))
 	if err != nil || calls != len(responses) || result.Lookups != 6 || result.Image == nil || result.Image != result.Last || result.Image.StatusCode != 203 {
 		t.Fatal(result, err, calls)
 	}
@@ -62,7 +62,7 @@ func TestCloudImageRecordWaitFailuresKeepLastRecord(t *testing.T) {
 			}
 			return taskCoreJSON(req, 202, `{"id":"img","status":"error"}`)
 		})
-		result, err := service.WaitForCloudImageRecord(context.Background(), cloudWaitSeed(t, "img"), WithImageRecordCloudWaitPollInterval(time.Millisecond))
+		result, err := service.WaitForCloudImageRecord(context.Background(), cloudWaitSeed(t, "img"), WithImageRecordCloudWait(resource.WithPollInterval(time.Millisecond)))
 		var failed *resource.FailedStateError
 		var response *resource.ResponseError
 		if !errors.As(err, &failed) || failed.ID != "img" || !errors.As(err, &response) || response.StatusCode != 202 || calls != 2 || result.Image != nil || result.Last == nil || result.Lookups != 2 {
@@ -74,7 +74,7 @@ func TestCloudImageRecordWaitFailuresKeepLastRecord(t *testing.T) {
 		service := cloudImageService(t, &calls, func(req *http.Request) *http.Response {
 			return taskCoreJSON(req, 200, `{"id":"img","status":"saving"}`)
 		})
-		result, err := service.WaitForCloudImageRecord(context.Background(), cloudWaitSeed(t, "img"), WithImageRecordCloudWaitTimeout(20*time.Millisecond), WithImageRecordCloudWaitPollInterval(5*time.Millisecond))
+		result, err := service.WaitForCloudImageRecord(context.Background(), cloudWaitSeed(t, "img"), WithImageRecordCloudWaitTimeout(20*time.Millisecond), WithImageRecordCloudWait(resource.WithPollInterval(5*time.Millisecond)))
 		var response *resource.ResponseError
 		if !errors.Is(err, context.DeadlineExceeded) || !errors.As(err, &response) || response.StatusCode != 200 || calls < 2 || result.Last == nil || result.Image != nil || result.Lookups != calls {
 			t.Fatal(result, err, calls)
@@ -101,7 +101,7 @@ func TestCloudImageRecordWaitFailuresKeepLastRecord(t *testing.T) {
 			}
 			return taskCoreJSON(req, 500, `{"message":"server"}`)
 		})
-		result, err := service.WaitForCloudImageRecord(context.Background(), cloudWaitSeed(t, "img"), WithImageRecordCloudWaitUnlimited(), WithImageRecordCloudWaitPollInterval(time.Millisecond))
+		result, err := service.WaitForCloudImageRecord(context.Background(), cloudWaitSeed(t, "img"), WithImageRecordCloudWait(resource.WithUnlimitedWait()), WithImageRecordCloudWait(resource.WithPollInterval(time.Millisecond)))
 		if !gophercloud.ResponseCodeIs(err, http.StatusInternalServerError) || calls != 2 || result.Last == nil || result.Lookups != 2 {
 			t.Fatal(result, err, calls)
 		}
@@ -114,7 +114,7 @@ func TestCloudImageRecordWaitFailuresKeepLastRecord(t *testing.T) {
 			cancel(cause)
 			return taskCoreJSON(req, 200, `{"id":"img","status":"queued"}`)
 		})
-		result, err := service.WaitForCloudImageRecord(ctx, cloudWaitSeed(t, "img"), WithImageRecordCloudWaitPollInterval(time.Hour))
+		result, err := service.WaitForCloudImageRecord(ctx, cloudWaitSeed(t, "img"), WithImageRecordCloudWait(resource.WithPollInterval(time.Hour)))
 		if !errors.Is(err, cause) || calls != 1 || result == nil || result.Lookups != 1 {
 			t.Fatal(result, err, calls)
 		}
@@ -135,11 +135,11 @@ func TestCloudImageRecordWaitInputFailsBeforeHTTP(t *testing.T) {
 		"blank id":   func() error { _, err := service.WaitForCloudImageRecord(ctx, cloudWaitSeed(t, " ")); return err },
 		"nil option": func() error { _, err := service.WaitForCloudImageRecord(ctx, cloudWaitSeed(t, "img"), nil); return err },
 		"zero interval": func() error {
-			_, err := service.WaitForCloudImageRecord(ctx, cloudWaitSeed(t, "img"), WithImageRecordCloudWaitPollInterval(0))
+			_, err := service.WaitForCloudImageRecord(ctx, cloudWaitSeed(t, "img"), WithImageRecordCloudWait(resource.WithPollInterval(0)))
 			return err
 		},
-		"unlimited+timeout": func() error {
-			_, err := service.WaitForCloudImageRecord(ctx, cloudWaitSeed(t, "img"), WithImageRecordCloudWaitOpts(ImageRecordCloudWaitOpts{Unlimited: true, Timeout: new(time.Duration)}))
+		"unsupported progress": func() error {
+			_, err := service.WaitForCloudImageRecord(ctx, cloudWaitSeed(t, "img"), WithImageRecordCloudWait(resource.WithProgressCallback(func(int) error { return nil })))
 			return err
 		},
 	} {

@@ -23,8 +23,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPCreateNATDestination`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPCreateWait`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPCreateWaitTimeout`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPCreateWaitInterval`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPCreateWaitStrategy`
+- `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPCreateWaitOptions`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithPollInterval`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithWaitStrategy`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPCreateSource`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPCreateLocation`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPCreateStrict`
@@ -70,7 +71,7 @@ Go API:
   Tests: `connectiontest/connection_floating_ip_create_boundaries_test.go:TestFloatingIPCreateWholeBudgetSnapshotAndCachedService`, `connectiontest/connection_floating_ip_create_boundaries_test.go:TestFloatingIPCreateOptionsCannotReplaceCapturedService`.
 - The initial cloud allocation success policy cannot be expanded by a native retry callback: expanded404 remains a terminal failure after two physical POST attempts, without allocation acceptance or Nova fallback. Changing the cached endpoint in that callback stops before the second physical POST and retains ErrInvalidOption; original callbacks are invoked once.
   Tests: `connectiontest/connection_floating_ip_create_boundaries_test.go:TestFloatingIPCreateNativeRetryCannotExpandCodesOrChangeSource`.
-- compute.WithFloatingIPCreateWaitStrategy rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, the interval option given before or after it.
+- resource.WithWaitStrategy in compute.WithFloatingIPCreateWaitOptions rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, a resource.WithPollInterval given before or after it.
   Tests: `compute/wait_strategy_test.go:TestComputeWaitStrategyOptionsRejectedBeforeHTTP`, `compute/wait_strategy_test.go:TestFloatingIPCreateWaitStrategyOptions`, `connectiontest/connection_floating_ip_create_wait_strategy_test.go:TestFloatingIPCreateWaitStrategyPacesNeutronPolls`.
 
 Python/Go differences:
@@ -86,7 +87,7 @@ Python/Go differences:
 - Automatic destination selection keeps source-style created_at lexical reverse order and the first valid IPv4 while explicit fixed selection is literal and can be IPv6. Typed parsing and stable string order replace arbitrary Python malformed or mixed created_at/object comparison corners. Ordinary canonical HTTP/model behavior is mapped without reproducing every dynamic Resource descriptor/runtime case.
 - Owned allocation/compatibility transport accepts final HTTP200 through399, preserving actual status/body/header and guarded native retries. Source literal status<400 also includes informational1xx; normal net/http informational handling and redirect/session combinations are deliberate transport boundaries, not claims of exact Python session behavior. Standard query/lookup reads retain their documented typed status/envelope/paging rules.
 - Go exposes explicit per-call source/location/strict/direct-get options and existing immutable Connection configuration. Generic Python has_service negotiation, arbitrary mutable session/profile overrides and inherited Resource/cache/discovery facilities remain separate SDK goal scope, rather than an unimplemented declared Create argument.
-- Python waits use a fixed poll interval. compute.WithFloatingIPCreateWaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of the interval and strategy options wins.
+- Python waits use a fixed poll interval. compute.WithFloatingIPCreateWaitOptions accepts resource.WithWaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of resource.WithPollInterval and resource.WithWaitStrategy wins.
 
 ## Usage examples
 

@@ -167,7 +167,7 @@ func newSourceIPFixture(t *testing.T) *sourceIPFixture {
 }
 
 func sourceIPOptions(extra ...compute.AutomaticFloatingIPOption) []compute.ServerIPOption {
-	common := []compute.AutomaticFloatingIPOption{compute.WithAutomaticIPPollInterval(time.Millisecond), compute.WithAutomaticAddressOptions(compute.WithAddressReachability(false))}
+	common := []compute.AutomaticFloatingIPOption{compute.WithAutomaticIPWait(resource.WithPollInterval(time.Millisecond)), compute.WithAutomaticAddressOptions(compute.WithAddressReachability(false))}
 	return standaloneIPOptions(append(common, extra...)...)
 }
 
@@ -383,7 +383,7 @@ func TestSourceIPListNeutronNotFoundFallsThroughAfterSelection(t *testing.T) {
 		f := newSourceIPFixture(t)
 		f.ports = []string{sourcePortPrivate}
 		f.notFound["put:a"] = true
-		options := append(sourceIPOptions(compute.WithAutomaticIPTimeout(100*time.Millisecond)), compute.WithServerIPWait(true))
+		options := append(sourceIPOptions(compute.WithAutomaticIPWait(resource.WithTimeout(100*time.Millisecond))), compute.WithServerIPWait(true))
 		result, err := f.service.AddIPList(context.Background(), automaticServer(t, autoFixed), []string{dispatchAddresses["a"], dispatchAddresses["b"]}, options...)
 		if !errors.Is(err, context.DeadlineExceeded) || result == nil || len(result.Attempts) != 1 || result.Attempts[0].AttachmentNotFound == nil || result.Attempts[0].Error == nil || result.Observed || strings.Contains(f.trace(), "list:b") {
 			t.Fatal(result, err, f.trace())
@@ -457,7 +457,7 @@ func TestSourceIPListRawPollProgressAndDeadlines(t *testing.T) {
 			case "parent":
 				parent = 30 * time.Second
 			case "unlimited":
-				extra = append(extra, compute.WithUnlimitedAutomaticIPTimeout())
+				extra = append(extra, compute.WithAutomaticIPWait(resource.WithUnlimitedWait()))
 			}
 			ctx, cancel := context.WithTimeout(context.Background(), parent)
 			defer cancel()

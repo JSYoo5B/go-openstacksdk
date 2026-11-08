@@ -92,7 +92,7 @@ func (s *Service) CreateAndImport(ctx context.Context, input CreateAndImportRequ
 	if err != nil {
 		return nil, wrap(err)
 	}
-	waitOptions, err := prepareCreateImportWait(policy.Wait)
+	waitOptions, err := prepareCreateImportWait(policy)
 	if err != nil {
 		return nil, wrap(err)
 	}
@@ -175,7 +175,7 @@ func (s *Service) CreateAndImport(ctx context.Context, input CreateAndImportRequ
 	if err != nil {
 		return result, wrap(err)
 	}
-	if policy.Wait != nil {
+	if policy.Wait {
 		if err := check(); err != nil {
 			return result, wrap(err)
 		}

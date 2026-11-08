@@ -74,10 +74,10 @@ func ApplyReadOptions(options []compute.CloudServerReadOption) (compute.CloudSer
 	return cfg, nil
 }
 
-// applyActionOptions applies the action options over the 180-second default
-// and validates the wait budget.
+// applyActionOptions applies the action options and validates the wait
+// options over the 180-second default.
 func applyActionOptions(options []compute.CloudServerActionOption) (compute.CloudServerActionOpts, error) {
-	cfg := compute.CloudServerActionOpts{Timeout: 180 * time.Second}
+	var cfg compute.CloudServerActionOpts
 	for _, apply := range slices.Clone(options) {
 		if apply == nil {
 			return cfg, fmt.Errorf("%w: nil cloud server option", resource.ErrInvalidOption)
@@ -86,18 +86,15 @@ func applyActionOptions(options []compute.CloudServerActionOption) (compute.Clou
 			return cfg, err
 		}
 	}
-	if !cfg.Unlimited && cfg.Timeout <= 0 {
-		return cfg, fmt.Errorf("%w: server wait timeout must be positive", resource.ErrInvalidOption)
+	all := resource.WaitSupportFailureStates | resource.WaitSupportStatusAttribute | resource.WaitSupportProgress
+	if _, err := resource.ResolveWait(resource.WaitDefaults{Timeout: 180 * time.Second, Strategy: resource.FixedWait(2 * time.Second), Supports: all}, cfg.WaitOptions...); err != nil {
+		return cfg, err
 	}
 	return cfg, nil
 }
 
 func waitOptions(cfg compute.CloudServerActionOpts) []resource.WaitOption {
-	first := resource.WithTimeout(cfg.Timeout)
-	if cfg.Unlimited {
-		first = resource.WithUnlimitedWait()
-	}
-	return append([]resource.WaitOption{first}, cfg.WaitOptions...)
+	return append([]resource.WaitOption{resource.WithTimeout(180 * time.Second)}, cfg.WaitOptions...)
 }
 
 // recordString returns the string value of key in the record's Resource

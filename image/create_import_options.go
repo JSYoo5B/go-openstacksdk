@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"maps"
-	"strings"
+	"slices"
 	"time"
 	"unicode/utf8"
 
@@ -31,26 +31,19 @@ type CreateImportMetadataOpts struct {
 	Headers         map[string]string
 }
 
-// CreateImportWaitOpts configures an optional active-state wait. Defaults are
-// five minutes, two seconds and killed/deleted failures. Timeout zero removes
-// the SDK deadline; a non-nil empty FailureStates disables state failures.
-// WaitStrategy replaces the fixed interval with a resource.WaitStrategy (a
-// Go-only extension); setting both PollInterval and WaitStrategy is rejected
-// before HTTP.
-type CreateImportWaitOpts struct {
-	Timeout       *time.Duration
-	PollInterval  *time.Duration
-	WaitStrategy  *resource.WaitStrategy
-	FailureStates []string
-}
-
 // CreateImportOpts owns the distinct metadata, stage and import policies.
-// Wait nil leaves the asynchronous import acknowledgement as the final phase.
+// Wait false leaves the asynchronous import acknowledgement as the final
+// phase. WaitOptions holds shared resource wait options for the active-state
+// wait: defaults are five minutes, two seconds and killed/deleted failures;
+// WithTimeout, WithUnlimitedWait, WithPollInterval, WithWaitStrategy and
+// WithFailureStates (no states disable failure detection) apply in order.
+// Other shared controls fail with resource.ErrInvalidOption before HTTP.
 type CreateImportOpts struct {
-	Metadata CreateImportMetadataOpts
-	Stage    imagedata.StageOpts
-	Import   imageimport.ImportOpts
-	Wait     *CreateImportWaitOpts
+	Metadata    CreateImportMetadataOpts
+	Stage       imagedata.StageOpts
+	Import      imageimport.ImportOpts
+	Wait        bool
+	WaitOptions []resource.WaitOption
 
 	stageOptions  []imagedata.StageOption
 	importOptions []imageimport.ImportOption
@@ -123,17 +116,21 @@ func WithCreateImportImportOptions(options ...imageimport.ImportOption) CreateIm
 	}
 }
 
-func WithCreateImportWait(value CreateImportWaitOpts) CreateImportOption {
-	snapshot := copyCreateImportWait(value)
+// WithCreateImportWait enables the active-state wait and appends shared
+// resource wait options to WaitOptions. Repeated calls append; for each
+// control the later option wins.
+func WithCreateImportWait(options ...resource.WaitOption) CreateImportOption {
+	snapshot := slices.Clone(options)
 	return func(config *CreateImportOpts) error {
-		owned := copyCreateImportWait(snapshot)
-		config.Wait = &owned
+		config.Wait = true
+		config.WaitOptions = append(slices.Clone(config.WaitOptions), snapshot...)
 		return nil
 	}
 }
 
+// WithoutCreateImportWait disables the wait and drops its options.
 func WithoutCreateImportWait() CreateImportOption {
-	return func(config *CreateImportOpts) error { config.Wait = nil; return nil }
+	return func(config *CreateImportOpts) error { config.Wait, config.WaitOptions = false, nil; return nil }
 }
 
 func copyCreateImportMetadata(value CreateImportMetadataOpts) (CreateImportMetadataOpts, error) {
@@ -163,16 +160,6 @@ func copyCreateImportMetadata(value CreateImportMetadataOpts) (CreateImportMetad
 	return value, nil
 }
 
-func copyCreateImportWait(value CreateImportWaitOpts) CreateImportWaitOpts {
-	value.Timeout = copyCreateImportPointer(value.Timeout)
-	value.PollInterval = copyCreateImportPointer(value.PollInterval)
-	value.WaitStrategy = copyCreateImportPointer(value.WaitStrategy)
-	if value.FailureStates != nil {
-		value.FailureStates = append(make([]string, 0, len(value.FailureStates)), value.FailureStates...)
-	}
-	return value
-}
-
 func copyCreateImportPointer[T any](value *T) *T {
 	if value == nil {
 		return nil
@@ -193,10 +180,7 @@ func copyCreateImportOpts(value CreateImportOpts) (CreateImportOpts, error) {
 	if err = applyCustomCall(imageimport.WithImportOpts(value.Import), &value.Import); err != nil {
 		return value, err
 	}
-	if value.Wait != nil {
-		wait := copyCreateImportWait(*value.Wait)
-		value.Wait = &wait
-	}
+	value.WaitOptions = slices.Clone(value.WaitOptions)
 	value.stageOptions = append([]imagedata.StageOption(nil), value.stageOptions...)
 	value.importOptions = append([]imageimport.ImportOption(nil), value.importOptions...)
 	return value, nil
@@ -216,40 +200,28 @@ func parseCreateImportOptions(options []CreateImportOption) (CreateImportOpts, e
 	return copyCreateImportOpts(config)
 }
 
-func prepareCreateImportWait(value *CreateImportWaitOpts) ([]resource.WaitOption, error) {
-	if value == nil {
+// createImportWaitSupport lists the shared controls the active-state wait honors.
+const createImportWaitSupport = resource.WaitSupportFailureStates
+
+// prepareCreateImportWait validates the wait options and returns them over
+// the create/import defaults; nil means no wait.
+func prepareCreateImportWait(config CreateImportOpts) ([]resource.WaitOption, error) {
+	if !config.Wait {
 		return nil, nil
 	}
-	options := make([]resource.WaitOption, 0, 3)
-	if value.Timeout != nil {
-		if *value.Timeout < 0 {
-			return nil, uploadInvalid("wait timeout must not be negative")
-		}
-		if *value.Timeout == 0 {
-			options = append(options, resource.WithUnlimitedWait())
-		} else {
-			options = append(options, resource.WithTimeout(*value.Timeout))
-		}
-	}
-	if err := validateImageWaitStrategy(value.PollInterval, value.WaitStrategy); err != nil {
+	settings, err := resource.ResolveWait(resource.WaitDefaults{Timeout: 5 * time.Minute, Strategy: resource.FixedWait(2 * time.Second), Supports: createImportWaitSupport}, config.WaitOptions...)
+	if err != nil {
 		return nil, err
 	}
-	if value.PollInterval != nil {
-		options = append(options, resource.WithPollInterval(*value.PollInterval))
+	if !settings.FailureStatesSet {
+		settings.FailureStates, settings.FailureStatesSet = []string{"killed", "deleted"}, true
 	}
-	if value.WaitStrategy != nil {
-		options = append(options, resource.WithWaitStrategy(*value.WaitStrategy))
-	}
-	if value.FailureStates != nil {
-		options = append(options, resource.WithFailureStates(value.FailureStates...))
-	} else {
-		options = append(options, resource.WithFailureStates("killed", "deleted"))
-	}
-	for _, state := range value.FailureStates {
-		if !utf8.ValidString(state) || strings.TrimSpace(state) == "" {
+	for _, state := range settings.FailureStates {
+		if !utf8.ValidString(state) {
 			return nil, uploadInvalid("invalid wait failure state")
 		}
 	}
+	options := []resource.WaitOption{resource.WithWaitSettings(settings)}
 	return options, resource.ValidateWaitOptionsFor[Image](options...)
 }
 

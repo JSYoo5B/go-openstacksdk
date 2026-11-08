@@ -10,10 +10,10 @@ import (
 	"maps"
 	"slices"
 	"strings"
-	"time"
 	"unicode/utf8"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
+	"github.com/JSYoo5B/go-openstacksdk/internal/sourcewait"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -21,10 +21,11 @@ import (
 // until the workflow applies its ordered defaults; explicit null, false, empty
 // data/store selections and arbitrary JSON values retain their presence. Meta
 // bypasses later property conversion; Attributes follows ordinary kwargs.
-// TaskPollInterval and TaskWaitStrategy are Go-only extensions for the Task
-// import wait, which otherwise pauses a fixed two seconds as in Python: a
-// positive fixed interval or a resource.WaitStrategy. Setting both, a
-// nonpositive interval or an invalid strategy fails before HTTP.
+// TaskWait holds shared resource wait options for the Task import wait, which
+// otherwise pauses a fixed two seconds as in Python: WithPollInterval and
+// WithWaitStrategy are Go-only extensions. The Timeout value owns the Task
+// wait budget, so WithTimeout, WithUnlimitedWait and every other shared
+// control fail with resource.ErrInvalidOption before HTTP.
 type ImageRecordCreateOpts struct {
 	Container                                          *string
 	MD5, SHA256, DiskFormat, ContainerFormat, Tags     json.RawMessage
@@ -33,8 +34,7 @@ type ImageRecordCreateOpts struct {
 	Meta, Attributes                                   map[string]any
 	Import                                             ImageRecordImportOpts
 	Headers, SwiftHeaders                              map[string]string
-	TaskPollInterval                                   *time.Duration
-	TaskWaitStrategy                                   *resource.WaitStrategy
+	TaskWait                                           []resource.WaitOption
 	optionContext                                      context.Context
 	optionCheck                                        func(context.Context) error
 }
@@ -114,37 +114,40 @@ func WithImageRecordCreateSize(value any) ImageRecordCreateOption {
 	return withImageRecordCreateValue(value, func(c *ImageRecordCreateOpts, r json.RawMessage) { c.Size = r })
 }
 
-// WithImageRecordCreateTaskPollInterval sets a fixed positive pause for the
-// Task import wait (default two seconds). It and
-// WithImageRecordCreateTaskWaitStrategy replace each other; the later one wins.
-func WithImageRecordCreateTaskPollInterval(value time.Duration) ImageRecordCreateOption {
+// WithImageRecordCreateTaskWait appends shared resource wait options for the
+// Task import wait (default two-second pause): WithPollInterval or
+// WithWaitStrategy. Repeated calls append; the later pause option wins. Other
+// shared controls fail with resource.ErrInvalidOption before HTTP.
+func WithImageRecordCreateTaskWait(options ...resource.WaitOption) ImageRecordCreateOption {
+	owned := slices.Clone(options)
 	return request.Custom(func(config *ImageRecordCreateOpts) error {
-		owned := value
-		config.TaskPollInterval, config.TaskWaitStrategy = &owned, nil
+		config.TaskWait = append(slices.Clone(config.TaskWait), owned...)
 		return nil
 	})
 }
 
-// WithImageRecordCreateTaskWaitStrategy replaces the fixed pause of the Task
-// import wait with value, a Go-only extension. An invalid strategy fails with
-// resource.ErrInvalidOption before HTTP.
-func WithImageRecordCreateTaskWaitStrategy(value resource.WaitStrategy) ImageRecordCreateOption {
-	return request.Custom(func(config *ImageRecordCreateOpts) error {
-		owned := value
-		config.TaskPollInterval, config.TaskWaitStrategy = nil, &owned
-		return nil
-	})
+// resolveImageRecordCreateTaskWait returns the Task wait pauses of options.
+func resolveImageRecordCreateTaskWait(options []resource.WaitOption) (resource.WaitStrategy, error) {
+	settings, err := sourcewait.Resolve(0, options)
+	if err != nil {
+		return resource.WaitStrategy{}, err
+	}
+	if settings.TimeoutSet {
+		return resource.WaitStrategy{}, uploadInvalid("image create task wait timeout comes from the Timeout option")
+	}
+	if !settings.StrategySet {
+		return resource.FixedWait(imageRecordCreateTaskInterval), nil
+	}
+	return settings.Strategy, nil
 }
 
 // imageRecordCreateTaskStrategy returns the Task wait pauses of a prepared policy.
 func imageRecordCreateTaskStrategy(config ImageRecordCreateOpts) resource.WaitStrategy {
-	if config.TaskWaitStrategy != nil {
-		return *config.TaskWaitStrategy
+	strategy, err := resolveImageRecordCreateTaskWait(config.TaskWait)
+	if err != nil {
+		return resource.FixedWait(imageRecordCreateTaskInterval)
 	}
-	if config.TaskPollInterval != nil {
-		return resource.FixedWait(*config.TaskPollInterval)
-	}
-	return resource.FixedWait(imageRecordCreateTaskInterval)
+	return strategy
 }
 
 func withImageRecordCreateValue(value any, set func(*ImageRecordCreateOpts, json.RawMessage)) ImageRecordCreateOption {
@@ -282,14 +285,7 @@ func copyImageRecordCreateOpts(ctx context.Context, check func(context.Context) 
 	}
 	value.Headers = copyImageRecordHeaders(value.Headers)
 	value.SwiftHeaders = copyImageRecordHeaders(value.SwiftHeaders)
-	if value.TaskPollInterval != nil {
-		owned := *value.TaskPollInterval
-		value.TaskPollInterval = &owned
-	}
-	if value.TaskWaitStrategy != nil {
-		owned := *value.TaskWaitStrategy
-		value.TaskWaitStrategy = &owned
-	}
+	value.TaskWait = slices.Clone(value.TaskWait)
 	value.Meta, value.Attributes = maps.Clone(value.Meta), maps.Clone(value.Attributes)
 	var err error
 	value.Import, err = copyImageRecordImportOpts(ctx, check, value.Import)
@@ -333,11 +329,8 @@ func prepareImageRecordCreateOptions(ctx context.Context, check func(context.Con
 	if err == nil {
 		config.SwiftHeaders, err = imageRecordCreateSwiftHeaders(config.SwiftHeaders)
 	}
-	if err == nil && config.TaskPollInterval != nil && *config.TaskPollInterval <= 0 {
-		err = uploadInvalid("image create task poll interval must be positive")
-	}
 	if err == nil {
-		err = validateImageWaitStrategy(config.TaskPollInterval, config.TaskWaitStrategy)
+		_, err = resolveImageRecordCreateTaskWait(config.TaskWait)
 	}
 	return config, errors.Join(err, imageRecordImportCheck(ctx, check))
 }

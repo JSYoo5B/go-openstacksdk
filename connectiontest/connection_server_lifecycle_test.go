@@ -86,7 +86,7 @@ func TestR2CloudComputeDeleteServerWaitTimeoutKeepsAcceptedDelete(t *testing.T) 
 	cloud := r2CloudComputeNew(t)
 	cloud.JSON("GET "+r2CloudComputeBase+"/servers/s1", 200, `{"server":{"id":"s1","name":"web-1","status":"ACTIVE","addresses":{}}}`)
 	cloud.JSON("DELETE "+r2CloudComputeBase+"/servers/s1", 204, ``)
-	ok, err := cloud.Conn.DeleteServer(context.Background(), "s1", sdk.WithCloudServerWait(true), sdk.WithCloudServerTimeout(30*time.Millisecond), sdk.WithCloudServerWaitOptions(resource.WithPollInterval(5*time.Millisecond)))
+	ok, err := cloud.Conn.DeleteServer(context.Background(), "s1", sdk.WithCloudServerWait(true), sdk.WithCloudServerWaitOptions(resource.WithTimeout(30*time.Millisecond)), sdk.WithCloudServerWaitOptions(resource.WithPollInterval(5*time.Millisecond)))
 	if !ok || !errors.Is(err, context.DeadlineExceeded) || len(r2CloudComputeMethods(cloud.Calls(), http.MethodDelete)) != 1 {
 		t.Fatal(ok, err)
 	}
@@ -94,7 +94,7 @@ func TestR2CloudComputeDeleteServerWaitTimeoutKeepsAcceptedDelete(t *testing.T) 
 
 func TestR2CloudComputeDeleteServerRejectsNonPositiveTimeoutBeforeHTTP(t *testing.T) {
 	cloud := r2CloudComputeNew(t)
-	_, err := cloud.Conn.DeleteServer(context.Background(), "s1", sdk.WithCloudServerWait(true), sdk.WithCloudServerTimeout(0))
+	_, err := cloud.Conn.DeleteServer(context.Background(), "s1", sdk.WithCloudServerWait(true), sdk.WithCloudServerWaitOptions(resource.WithTimeout(0)))
 	if !errors.Is(err, resource.ErrInvalidOption) || len(cloud.Calls()) != 0 {
 		t.Fatal(err, cloud.Calls())
 	}

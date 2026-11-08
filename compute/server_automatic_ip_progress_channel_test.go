@@ -78,7 +78,7 @@ func TestAutomaticIPProgressChannelReceiverCancellation(t *testing.T) {
 		names = append(names, value.Name)
 		gate.AwaitThen(t, func() { cancel(cause) })
 	})
-	result, err := f.service.EnsureServerFloatingIP(ctx, compute.AutomaticFloatingIPRequest{Server: automaticServer(t, autoFixed)}, append(automaticOptions(), compute.WithAutomaticIPPollInterval(time.Millisecond), compute.WithAutomaticIPProgress(observer.C))...)
+	result, err := f.service.EnsureServerFloatingIP(ctx, compute.AutomaticFloatingIPRequest{Server: automaticServer(t, autoFixed)}, append(automaticOptions(), compute.WithAutomaticIPWait(resource.WithPollInterval(time.Millisecond)), compute.WithAutomaticIPProgress(observer.C))...)
 	observer.Done()
 	if !errors.Is(err, context.Canceled) || !errors.Is(err, cause) || result == nil || result.Observed || result.Assignment == nil || !result.Assignment.Allocated || f.raw.Load() != 1 || gate.Seen() != 2 || len(names) != 1 || names[0] != "raw" {
 		t.Fatal(result, err, f.raw.Load(), gate.Seen(), names)

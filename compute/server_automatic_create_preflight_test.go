@@ -54,7 +54,7 @@ func TestAutomaticCreatePreparesClosuresOnceAndCapturesSourceBeforeOptions(t *te
 					<-ctx.Done()
 					return "", ctx.Err()
 				}
-				o.AutomaticIP = append(o.AutomaticIP, WithAutomaticIPTimeout(10*time.Millisecond))
+				o.AutomaticIP = append(o.AutomaticIP, WithAutomaticIPWait(resource.WithTimeout(10*time.Millisecond)))
 			}
 			result, err := service.CreateWithAutomaticFloatingIP(context.Background(), request, o)
 			if scenario == "once" {

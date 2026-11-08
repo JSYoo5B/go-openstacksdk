@@ -290,7 +290,7 @@ func TestR2CloudNetAddAutoIPNovaReuseAttachesAndWaits(t *testing.T) {
 	}
 	conn, f := newR2CloudNetFixture(t, compute.FloatingIPNova, r2CloudNetNovaAutoHandler(&attached, body))
 	server := &compute.Server{ID: "srv-1", Status: "ACTIVE"}
-	result, err := conn.AddAutoIP(context.Background(), server, compute.WithAddAutoIPWait(true), compute.WithAddAutoIPPollInterval(time.Millisecond))
+	result, err := conn.AddAutoIP(context.Background(), server, compute.WithAddAutoIPWait(true), compute.WithAddAutoIPWaitOptions(resource.WithPollInterval(time.Millisecond)))
 	if err != nil {
 		t.Fatal(err, f.keys())
 	}
@@ -325,7 +325,7 @@ func TestR2CloudNetAddAutoIPWaitTimeoutOnNovaReportsDeadlineWithoutCleanup(t *te
 		return `{"server":{"id":"srv-1","status":"ACTIVE","addresses":{"private":[{"version":4,"addr":"10.0.0.8","OS-EXT-IPS:type":"fixed"}]}}}`
 	}
 	conn, f := newR2CloudNetFixture(t, compute.FloatingIPNova, r2CloudNetNovaAutoHandler(&attached, body))
-	result, err := conn.AddAutoIP(context.Background(), &compute.Server{ID: "srv-1"}, compute.WithAddAutoIPWait(true), compute.WithAddAutoIPTimeout(60*time.Millisecond), compute.WithAddAutoIPPollInterval(5*time.Millisecond))
+	result, err := conn.AddAutoIP(context.Background(), &compute.Server{ID: "srv-1"}, compute.WithAddAutoIPWait(true), compute.WithAddAutoIPWaitOptions(resource.WithTimeout(60*time.Millisecond)), compute.WithAddAutoIPWaitOptions(resource.WithPollInterval(5*time.Millisecond)))
 	var timeout *compute.AddAutoIPTimeoutError
 	if !errors.As(err, &timeout) || !errors.Is(err, context.DeadlineExceeded) || result.Observed || result.Cleanup != nil {
 		t.Fatal(result, err)
@@ -351,7 +351,7 @@ func TestR2CloudNetAddAutoIPValidation(t *testing.T) {
 	if _, err := conn.AddAutoIP(context.Background(), &compute.Server{ID: "s"}, nil); err == nil {
 		t.Fatal("nil option")
 	}
-	if _, err := conn.AddAutoIP(context.Background(), &compute.Server{ID: "s"}, compute.WithAddAutoIPPollInterval(0)); err == nil {
+	if _, err := conn.AddAutoIP(context.Background(), &compute.Server{ID: "s"}, compute.WithAddAutoIPWaitOptions(resource.WithPollInterval(0))); err == nil {
 		t.Fatal("interval")
 	}
 	ctx, cancel := context.WithCancel(context.Background())
@@ -407,7 +407,7 @@ func r2CloudNetNeutronCreateHandler(serverShowsIP *bool, deleted *bool) func(r2C
 func TestR2CloudNetAddAutoIPNeutronCreateSkipsAttachAndWaits(t *testing.T) {
 	show, deleted := true, false
 	conn, f := newR2CloudNetFixture(t, compute.FloatingIPNeutron, r2CloudNetNeutronCreateHandler(&show, &deleted))
-	result, err := conn.AddAutoIP(context.Background(), &compute.Server{ID: "srv-1"}, compute.WithAddAutoIPReuse(false), compute.WithAddAutoIPWait(true), compute.WithAddAutoIPPollInterval(time.Millisecond))
+	result, err := conn.AddAutoIP(context.Background(), &compute.Server{ID: "srv-1"}, compute.WithAddAutoIPReuse(false), compute.WithAddAutoIPWait(true), compute.WithAddAutoIPWaitOptions(resource.WithPollInterval(time.Millisecond)))
 	if err != nil || !result.Created || !result.AttachSkipped || !result.Observed || result.FloatingIPAddr != "198.51.100.40" || result.Attach != nil {
 		t.Fatal(result, err, f.keys())
 	}
@@ -420,7 +420,7 @@ func TestR2CloudNetAddAutoIPNeutronCreateTimeoutDeletesOnceUnlessDisabled(t *tes
 	for _, cleanup := range []bool{true, false} {
 		show, deleted := false, false
 		conn, f := newR2CloudNetFixture(t, compute.FloatingIPNeutron, r2CloudNetNeutronCreateHandler(&show, &deleted))
-		result, err := conn.AddAutoIP(context.Background(), &compute.Server{ID: "srv-1"}, compute.WithAddAutoIPReuse(false), compute.WithAddAutoIPWait(true), compute.WithAddAutoIPTimeout(80*time.Millisecond), compute.WithAddAutoIPPollInterval(5*time.Millisecond), compute.WithAddAutoIPCleanup(cleanup))
+		result, err := conn.AddAutoIP(context.Background(), &compute.Server{ID: "srv-1"}, compute.WithAddAutoIPReuse(false), compute.WithAddAutoIPWait(true), compute.WithAddAutoIPWaitOptions(resource.WithTimeout(80*time.Millisecond)), compute.WithAddAutoIPWaitOptions(resource.WithPollInterval(5*time.Millisecond)), compute.WithAddAutoIPCleanup(cleanup))
 		var timeout *compute.AddAutoIPTimeoutError
 		if !errors.As(err, &timeout) {
 			t.Fatal(cleanup, result, err, f.keys())

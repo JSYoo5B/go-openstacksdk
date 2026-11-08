@@ -118,10 +118,10 @@ func TestStandaloneServerIPDefaultsUseOneSixtySecondHTTPBudget(t *testing.T) {
 			}))
 			common := []compute.AutomaticFloatingIPOption{}
 			if mode == "override" {
-				common = append(common, compute.WithAutomaticIPTimeout(17*time.Second))
+				common = append(common, compute.WithAutomaticIPWait(resource.WithTimeout(17*time.Second)))
 			}
 			if mode == "unlimited" {
-				common = append(common, compute.WithUnlimitedAutomaticIPTimeout())
+				common = append(common, compute.WithAutomaticIPWait(resource.WithUnlimitedWait()))
 			}
 			result, err := f.service.AddIPList(ctx, automaticServer(t, "null"), []string{dispatchAddresses["a"], dispatchAddresses["b"]}, standaloneIPOptions(common...)...)
 			if err != nil || result == nil || len(result.Attempts) != 2 || requests < 8 {
@@ -337,7 +337,7 @@ func TestStandaloneServerIPExpiredObservationKeepsAssignmentAndStopsNextItem(t *
 		}
 		return base.RoundTrip(r)
 	}))
-	options := []compute.ServerIPOption{compute.WithServerIPWait(true), compute.WithServerIPAutomaticOptions(compute.WithAutomaticIPTimeout(time.Second))}
+	options := []compute.ServerIPOption{compute.WithServerIPWait(true), compute.WithServerIPAutomaticOptions(compute.WithAutomaticIPWait(resource.WithTimeout(time.Second)))}
 	result, err := f.service.AddIPList(context.Background(), automaticServer(t, "null"), []string{dispatchAddresses["a"], dispatchAddresses["b"]}, options...)
 	if !errors.Is(err, context.DeadlineExceeded) || result == nil || result.Assignment == nil || result.Assignment.FloatingIP.ID != "ip-a" || result.Observed || len(result.Attempts) != 1 || result.Attempts[0].Completed || result.Attempts[0].Error == nil || rawCalls != 1 || strings.Contains(strings.Join(f.trace(), ","), "list:b") {
 		t.Fatal(result, err, rawCalls, f.trace())

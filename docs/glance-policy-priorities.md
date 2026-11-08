@@ -69,12 +69,15 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitOpts`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitTimeout`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitPollInterval`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitStrategy`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitUnlimited`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitFailureStates`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitAttribute`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitCallback`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitProgress`
+- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWait`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithTimeout`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithUnlimitedWait`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithPollInterval`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithWaitStrategy`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithFailureStates`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithStatusAttribute`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithProgressCallback`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithProgress`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitHeaders`
 
@@ -100,7 +103,7 @@ Go API:
   Tests: `image/image_record_wait_test.go:TestImageRecordWaitStatusInitialTargetReturnsIndependentSeed`.
 - The owned profile uses locale-independent Unicode16 full lowercase for initial, fetched target and failure comparisons, including dotted-I expansion and contextual Final_Sigma. Target success precedes failure, nil failures means ERROR, empty failures disables failure checks, null state remains pending and nonstring selected state is an explicit processing error.
   Tests: `image/image_record_wait_test.go:TestImageRecordWaitStatusFreshSelectionFailureAndPending`, `image/image_record_wait_test.go:TestImageRecordWaitUnicodeStatusComparison`, `internal/cloudfilter/python_lower_test.go:TestPythonLowerFullUnicode16AndOriginalContext`.
-- Owned status waiting defaults to no SDK timeout and two-second polling. Explicit timeout0 stops without a GET after a nonmatching initial state; interval0 becomes100ms or the shorter positive timeout. A single budget covers GET, callback and pause while preserving the parent context; concrete timeout/unlimited helpers apply in caller order.
+- Owned status waiting defaults to no SDK timeout and two-second polling. Explicit timeout0 stops without a GET after a nonmatching initial state; interval0 becomes100ms or the shorter positive timeout. A single budget covers GET, callback and pause while preserving the parent context; resource.WithTimeout and resource.WithUnlimitedWait in WithImageRecordWait override the Source timeout helper.
   Tests: `image/image_record_wait_test.go:TestImageRecordWaitZeroIntervalsTimeoutAndParentBudget`, `image/image_record_wait_test.go:TestImageRecordWaitStatusOwnsOneBudgetLocationHeadersAndLiteralID`, `internal/servicewait/wait_test.go:TestServiceWaitDefaultTwoSecondIntervalAndCallerShortening`.
 - Owned preparation captures source/location once and independently snapshots seed channels, ordinary headers, duration pointers, failure lists and option slice before callbacks. Each option runs once; escaped input ID remains the route despite response-ID drift and Provider authentication remains live. Concrete replacement and invalid source/seed/attribute/header/config inputs fail before HTTP.
   Tests: `image/image_record_wait_test.go:TestImageRecordWaitStatusOwnsOneBudgetLocationHeadersAndLiteralID`, `image/image_record_wait_test.go:TestImageRecordWaitCompletePreflightAndConcreteReplacement`, `connectiontest/connection_image_record_waits_test.go:TestConnectionImageRecordWaitsShareOwnedSourceAndLatestObservation`.
@@ -109,9 +112,9 @@ Go API:
 - Only nonterminal owned observations invoke synchronous progress0, because Image has no declared progress descriptor. Cancellation, source changes and physical/processing errors stop before another poll; after a successful projection later errors return that latest owned record with the error. Newer physical failures keep their own receipt instead of being replaced by an earlier successful receipt; state404 is an error.
   Tests: `image/image_record_wait_test.go:TestImageRecordWaitCallbacksGuardBeforePauseOrNextGET`, `image/image_record_wait_test.go:TestImageRecordWaitHTTPFailuresAnd404HandlingFaultsAreTerminal`, `image/image_record_wait_test.go:TestImageRecordWaitAcceptedAndRejectedStickyPhysicalGuards`.
 
-- WithImageRecordWaitProgress and ImageRecordWaitOpts.Progress send zero on a caller-owned channel at the same nonterminal steps as the callback. Each send blocks until it is received or the context ends; the SDK never closes the caller-owned channel and sends nothing after the operation returns, a context that ends during a send stops it through its cancellation path, and a nil channel option is invalid before HTTP. With both set the callback runs first.
+- resource.WithProgress in WithImageRecordWait or ImageRecordWaitOpts.Wait sends zero on a caller-owned channel at the same nonterminal steps as the resource.WithProgressCallback callback. Each send blocks until it is received or the context ends; the SDK never closes the caller-owned channel and sends nothing after the operation returns, a context that ends during a send stops it through its cancellation path, and a nil channel option is invalid before HTTP. With both set the callback runs first.
   Tests: `image/image_record_wait_progress_test.go:TestImageRecordWaitProgressChannelSendsZeroAndRejectsNil`, `image/image_record_wait_progress_test.go:TestImageRecordWaitProgressChannelBlockedSendStopsOnCancellation`, `image/image_record_wait_progress_test.go:TestImageRecordWaitProgressChannelReceiverCancellation`, `image/image_record_wait_progress_test.go:TestImageRecordWaitProgressCallbackRunsBeforeChannelSend`.
-- image.WithImageRecordWaitStrategy rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, the interval option given before or after it.
+- resource.WithWaitStrategy in image.WithImageRecordWait rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, a resource.WithPollInterval given before or after it.
   Tests: `image/wait_strategy_test.go:TestImageWaitStrategyOptionsRejectedBeforeHTTP`, `image/wait_strategy_test.go:TestImageWaitStrategyLaterOptionWins`, `image/wait_strategy_test.go:TestImageRecordWaitStrategyPacesPolls`.
 
 Python/Go differences:
@@ -127,7 +130,7 @@ Python/Go differences:
 - Go keeps the escaped nonblank input ID fixed rather than following response-ID mutation into a later route. Initial-target/first404 return preserves seed location; each fresh poll projects the location captured for this operation, whereas Source Image fetch without project_id/availability_zone can retain its previous computed location. Options/source/descriptor preflight runs even for an initial-target shortcut.
 - The owned profile takes valid UTF-8 string targets and canonical declared Body64/location/image_import_methods attribute selectors; nullable targetNone, arbitrary Python attribute/progress objects, lone-surrogate JSON/string behavior and other parser/runtime domains are outside this finite profile. Comparisons pin Unicode16 full lowercase; other Python runtime Unicode databases are a documented boundary. Go rejects negative durations, uses monotonic context budgets and explicit unlimited helpers, and cannot interrupt a blocked synchronous callback.
 - Image-v1, wait_for_task and Cloud wait_for_image/wait_for_server are separate declarations and are not incidentally promoted by this operation. The existing legacy Ref name-resolution/typed decoder boundary remains preserved alongside literal owned ImageRecord input.
-- Python waits use a fixed poll interval. image.WithImageRecordWaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of the interval and strategy options wins.
+- Python waits use a fixed poll interval. image.WithImageRecordWait accepts resource.WithWaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of resource.WithPollInterval and resource.WithWaitStrategy wins.
 
 ### `python:image/v2/wait_for_delete`
 
@@ -141,12 +144,15 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitOpts`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitTimeout`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitPollInterval`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitStrategy`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitUnlimited`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitFailureStates`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitAttribute`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitCallback`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitProgress`
+- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWait`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithTimeout`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithUnlimitedWait`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithPollInterval`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithWaitStrategy`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithFailureStates`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithStatusAttribute`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithProgressCallback`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithProgress`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitHeaders`
 
@@ -181,9 +187,9 @@ Go API:
 - One owned deletion budget covers GET, progress and pause, supports timeout0, interval0 and explicit unlimited selection, and retains parent cancellation/deadline. Completion/errors omit progress. Opt-in common deletion guards check before GET, after read before completion and after progress, preserving fetch evidence and existing nil-guard behavior; later errors return the last successfully projected owned record.
   Tests: `image/image_record_wait_test.go:TestImageRecordWaitZeroIntervalsTimeoutAndParentBudget`, `image/image_record_wait_test.go:TestImageRecordWaitCallbacksGuardBeforePauseOrNextGET`, `resource/wait_deleted_guard_test.go:TestWaitDeletedOptInGuardProtectsEveryCompletionBoundary`, `resource/wait_deleted_guard_test.go:TestWaitDeletedGuardPreservesFetchFailureAndLegacyNilGuard`.
 
-- WithImageRecordWaitProgress and ImageRecordWaitOpts.Progress send zero on a caller-owned channel at the same nonterminal steps as the callback. Each send blocks until it is received or the context ends; the SDK never closes the caller-owned channel and sends nothing after the operation returns, a context that ends during a send stops it through its cancellation path, and a nil channel option is invalid before HTTP. With both set the callback runs first.
+- resource.WithProgress in WithImageRecordWait or ImageRecordWaitOpts.Wait sends zero on a caller-owned channel at the same nonterminal steps as the resource.WithProgressCallback callback. Each send blocks until it is received or the context ends; the SDK never closes the caller-owned channel and sends nothing after the operation returns, a context that ends during a send stops it through its cancellation path, and a nil channel option is invalid before HTTP. With both set the callback runs first.
   Tests: `image/image_record_wait_progress_test.go:TestImageRecordWaitProgressChannelSendsZeroAndRejectsNil`, `image/image_record_wait_progress_test.go:TestImageRecordWaitProgressChannelBlockedSendStopsOnCancellation`, `image/image_record_wait_progress_test.go:TestImageRecordWaitProgressChannelReceiverCancellation`, `image/image_record_wait_progress_test.go:TestImageRecordWaitProgressCallbackRunsBeforeChannelSend`.
-- image.WithImageRecordWaitStrategy rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, the interval option given before or after it.
+- resource.WithWaitStrategy in image.WithImageRecordWait rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, a resource.WithPollInterval given before or after it.
   Tests: `image/wait_strategy_test.go:TestImageWaitStrategyOptionsRejectedBeforeHTTP`, `image/wait_strategy_test.go:TestImageWaitStrategyLaterOptionWins`, `image/wait_strategy_test.go:TestImageRecordWaitStrategyPacesPolls`.
 
 Python/Go differences:
@@ -199,7 +205,7 @@ Python/Go differences:
 - Go keeps the escaped nonblank input ID fixed rather than following response-ID mutation into a later route. Initial-target/first404 return preserves seed location; each fresh poll projects the location captured for this operation, whereas Source Image fetch without project_id/availability_zone can retain its previous computed location. Options/source/descriptor preflight runs even for an initial-target shortcut.
 - The owned profile takes valid UTF-8 string targets and canonical declared Body64/location/image_import_methods attribute selectors; nullable targetNone, arbitrary Python attribute/progress objects, lone-surrogate JSON/string behavior and other parser/runtime domains are outside this finite profile. Comparisons pin Unicode16 full lowercase; other Python runtime Unicode databases are a documented boundary. Go rejects negative durations, uses monotonic context budgets and explicit unlimited helpers, and cannot interrupt a blocked synchronous callback.
 - Image-v1, wait_for_task and Cloud wait_for_image/wait_for_server are separate declarations and are not incidentally promoted by this operation. The existing legacy Ref name-resolution/typed decoder boundary remains preserved alongside literal owned ImageRecord input.
-- Python waits use a fixed poll interval. image.WithImageRecordWaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of the interval and strategy options wins.
+- Python waits use a fixed poll interval. image.WithImageRecordWait accepts resource.WithWaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of resource.WithPollInterval and resource.WithWaitStrategy wins.
 
 ### `python:image/v2/import_image`
 
@@ -346,8 +352,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCreateAllowDuplicates`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCreateWait`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCreateTimeout`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCreateTaskPollInterval`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCreateTaskWaitStrategy`
+- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCreateTaskWait`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithPollInterval`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithWaitStrategy`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCreateValidateChecksum`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCreateUseImport`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCreateSize`
@@ -454,11 +461,11 @@ Go API:
   Tests: `image/image_record_create_workflow_test.go:TestImageRecordCreateWorkflowIsPublicWarningBelongsToSelectedUploadOnly`, `image/image_record_create_upload_test.go:TestImageRecordCreateUploadImportMethodSpecificForwardingAndNoBinaryRead`, `image/image_record_create_upload_test.go:TestImageRecordCreateUploadNativeFailuresAndCleanMissingCleanupPreserveOriginalEvidence`, `image/image_record_create_task_test.go:TestImageRecordCreateTaskNativeRejectionsPreserveStatusWithoutResourceFailure`, `image/image_record_create_admin_test.go:TestImageRecordCreateWholeForwardsOwnerAndVisibilityToServerPolicy`, `image/image_record_create_admin_test.go:TestImageRecordCreateWholeNativeAdminDenialKeepsBranchCleanupBoundary`.
 - Preserve all12 legacy CreateAndImport contract objects/test refs and its explicit fresh-image/queued/post-stage/default/wait/no-cleanup profile; add the complete modern whole Service and Connection creation graph separately. Public whole-project/service guides and executable standalone/Connection examples must cover all modern routes and explicit differences. Promotion is allowed only after actual focused/full checks, generator zero drift, local/remote consumers and Source/contract/test inventories are verified; global SDK-R1/C1/S1 and standalone Swift/Task rows remain unresolved.
   Tests: `connectiontest/image_record_create_integration_test.go:TestConnectionOwnedImageCreateComposesPolicyAndKeepsSwiftLazy`, `connectiontest/image_record_create_integration_test.go:TestConnectionOwnedImageCreateRejectsInvalidInvocation`, `internal/cmd/sdkgen/glance_create_import_test.go:TestGlanceCreateImportKeepsNativeImageAPIAndDocumentsUpperService`, `internal/cmd/sdkgen/glance_create_import_test.go:TestGlanceCreateImportRejectsNativeMetadataAndResponseFieldDrift`.
-- CreateImportWaitOpts.WaitStrategy rejects an invalid or zero-value strategy, or one set together with the interval field, with ErrInvalidOption before HTTP and paces polls by the strategy's pause sequence.
+- resource.WithWaitStrategy in WithCreateImportWait rejects an invalid or zero-value strategy, and an unsupported control, with ErrInvalidOption before HTTP and paces polls by the strategy's pause sequence.
   Tests: `image/wait_strategy_test.go:TestImageWaitStrategyOptionsRejectedBeforeHTTP`.
-- image.WithImageRecordCreateTaskPollInterval sets a positive fixed pause for the wait, which otherwise keeps the Python two-second interval; a nonpositive value fails with ErrInvalidOption before HTTP and the default is unchanged without it.
+- resource.WithPollInterval in image.WithImageRecordCreateTaskWait sets a positive fixed pause for the wait, which otherwise keeps the Python two-second interval; a nonpositive value, a timeout control (the Timeout option owns the budget) or another unsupported control fails with ErrInvalidOption before HTTP and the default is unchanged without it.
   Tests: `image/image_record_create_task_strategy_test.go:TestImageRecordCreateTaskWaitOptionsValidateAndLaterWins`, `image/image_record_create_task_strategy_test.go:TestImageRecordCreateTaskWaitStrategyPacesTaskPolls`.
-- image.WithImageRecordCreateTaskWaitStrategy rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, the interval option given before or after it.
+- resource.WithWaitStrategy in image.WithImageRecordCreateTaskWait rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, a resource.WithPollInterval given before or after it.
   Tests: `image/image_record_create_task_strategy_test.go:TestImageRecordCreateTaskWaitOptionsValidateAndLaterWins`, `image/image_record_create_task_strategy_test.go:TestImageRecordCreateTaskWaitStrategyPacesTaskPolls`.
 
 Python/Go differences:
@@ -483,9 +490,9 @@ Python/Go differences:
 - Captured provider/origin/base/type/microversion and source-only nested guards preserve current operation. Full Adapter caching/conditional GET/invalidation/metrics/global request configuration remain SDK-C1; arbitrary session/adapter/response/microversion/base-path injection remains SDK-S1. The global shared objectives and standalone Swift/Task declaration rows are not promoted by this finite modern operation.
 - Request-owned Task/HTTP timer expiry does not invalidate live parent-source invariants; caller cancellation or real binding/source drift, including joined timeout errors, stays sticky and cannot be bypassed by detached cleanup. Ordinary response closure can cancel native request timers without manufacturing failed Swift uploads.
 - The modern import phase reuses the owned ImportImageRecord policy: configured legacy store headers are discarded from the copied request client, then an explicit singular selection supplies its fixed header. Source/shared header maps stay unchanged.
-- Python waits use a fixed poll interval. CreateImportWaitOpts.WaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and setting it together with the interval field fails with ErrInvalidOption before HTTP.
-- Python pauses a fixed two seconds; image.WithImageRecordCreateTaskPollInterval is a Go-only extension that changes that interval for the call.
-- Python waits use a fixed poll interval. image.WithImageRecordCreateTaskWaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of the interval and strategy options wins.
+- Python waits use a fixed poll interval. WithCreateImportWait accepts resource.WithWaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of resource.WithPollInterval and resource.WithWaitStrategy wins.
+- Python pauses a fixed two seconds; resource.WithPollInterval in image.WithImageRecordCreateTaskWait is a Go-only extension that changes that interval for the call.
+- Python waits use a fixed poll interval. image.WithImageRecordCreateTaskWait accepts resource.WithWaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of resource.WithPollInterval and resource.WithWaitStrategy wins.
 
 ### `python:image/v2/download_image`
 

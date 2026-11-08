@@ -63,7 +63,7 @@ const (
 
 func TestConnectionCloudImageCreateBranchesAndWait(t *testing.T) {
 	duplicates := image.WithImageRecordCreateAllowDuplicates(true)
-	request := sdk.CloudImageCreateRequest{Image: image.ImageRecordCreateRequest{Name: "image"}, PollInterval: time.Millisecond}
+	request := sdk.CloudImageCreateRequest{Image: image.ImageRecordCreateRequest{Name: "image"}, Wait: []resource.WaitOption{resource.WithPollInterval(time.Millisecond)}}
 	t.Run("glance branch without wait returns created record", func(t *testing.T) {
 		calls := 0
 		conn := cloudCreateConnection(t, []cloudCreateRoute{{cloudCreatePost, 201, `{"id":"new","status":"queued"}`}}, &calls)
@@ -183,7 +183,7 @@ func TestConnectionCloudImageCreateVolumeBodyAndPreflight(t *testing.T) {
 			}
 		})
 	}
-	if _, err := conn.CreateCloudImageRecord(context.Background(), sdk.CloudImageCreateRequest{PollInterval: -1}); !errors.Is(err, resource.ErrInvalidOption) || calls != 1 {
+	if _, err := conn.CreateCloudImageRecord(context.Background(), sdk.CloudImageCreateRequest{Wait: []resource.WaitOption{resource.WithPollInterval(-1)}}); !errors.Is(err, resource.ErrInvalidOption) || calls != 1 {
 		t.Fatal(err)
 	}
 }

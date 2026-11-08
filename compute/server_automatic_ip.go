@@ -180,7 +180,7 @@ func (s *Service) prepareServerIPWorkflow(ctx context.Context, input AutomaticFl
 	input.Server = &supplied
 	ctx = rest.WithOperationSources(ctx)
 	baseGuard := s.captureAutomaticComputeSource()
-	o := automaticFloatingIPOptions{enabled: true, timeout: 5 * time.Minute, interval: 2 * time.Second}
+	o := automaticFloatingIPOptions{enabled: true}
 	for _, apply := range options {
 		if apply == nil {
 			return nil, nil, nil, invalid("nil automatic floating IP option")
@@ -188,6 +188,9 @@ func (s *Service) prepareServerIPWorkflow(ctx context.Context, input AutomaticFl
 		if err := apply(&o); err != nil {
 			return nil, nil, nil, err
 		}
+	}
+	if err := o.resolveWait(); err != nil {
+		return nil, nil, nil, err
 	}
 	// A positional AddIPList owns its selection, including an empty no-op list.
 	// Options still prepare once but cannot replace it with a pool/automatic lane.
@@ -579,7 +582,7 @@ func cleanFloatingIPAbsence(err error) *network.FloatingIPPlanUnavailableError {
 }
 
 func (state *automaticIPState) observe(ctx context.Context, target string) error {
-	pacer := state.options.pacer(state.options.interval)
+	pacer := state.options.pacer()
 	for {
 		view, err := state.rawServer(ctx)
 		if err != nil {

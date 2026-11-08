@@ -19,7 +19,7 @@ import (
 )
 
 func connectionAutomaticCreateOptions() compute.AutomaticServerCreateOptions {
-	return compute.AutomaticServerCreateOptions{Server: []compute.CreateServerOption{compute.WithNetworks(resource.ID("private")), compute.WithWait(resource.WithPollInterval(time.Millisecond))}, AutomaticIP: []compute.AutomaticFloatingIPOption{compute.WithAutomaticIPEnabled(false), compute.WithAutomaticIPTimeout(time.Second)}}
+	return compute.AutomaticServerCreateOptions{Server: []compute.CreateServerOption{compute.WithNetworks(resource.ID("private")), compute.WithWait(resource.WithPollInterval(time.Millisecond))}, AutomaticIP: []compute.AutomaticFloatingIPOption{compute.WithAutomaticIPEnabled(false), compute.WithAutomaticIPWait(resource.WithTimeout(time.Second))}}
 }
 
 func TestConnectionAutomaticCreateOwnsNamedDependencyPagesAndLifetime(t *testing.T) {
@@ -161,7 +161,7 @@ func TestConnectionAutomaticCreateSharesConfiguredDefaultRoleSnapshot(t *testing
 	}
 	o := connectionAutomaticCreateOptions()
 	o.Server = o.Server[1:]
-	o.AutomaticIP = []compute.AutomaticFloatingIPOption{compute.WithAutomaticIPTimeout(time.Second)}
+	o.AutomaticIP = []compute.AutomaticFloatingIPOption{compute.WithAutomaticIPWait(resource.WithTimeout(time.Second))}
 	result, err := conn.CreateWithAutomaticFloatingIP(context.Background(), compute.CreateServerRequest{Name: "web", Image: resource.ID("image"), Flavor: resource.ID("flavor")}, o)
 	if err != nil || result == nil || result.Automatic.Decision.Reason != compute.AutomaticIPExistingFloating || roles.Load() != 1 || posts.Load() != 1 || gets.Load() != 1 {
 		t.Fatal(result, err, roles.Load(), posts.Load(), gets.Load())
