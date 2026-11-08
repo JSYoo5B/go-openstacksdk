@@ -17,13 +17,19 @@ import (
 )
 
 // deleteVolumeProgressFixture answers lookup and DELETE, then deleting polls;
-// after absentAfter polls (0 never) it answers 404.
-func deleteVolumeProgressFixture(t *testing.T, absentAfter int32) (*atomic.Int32, func(context.Context, ...blockstorage.DeleteVolumeOption) (*blockstorage.DeleteVolumeResult, error)) {
+// after absentAfter polls (0 never) it answers 404. A gated request is
+// answered by its gate and not counted.
+func deleteVolumeProgressFixture(t *testing.T, absentAfter int32, gates ...*testcloud.Gate) (*atomic.Int32, func(context.Context, ...blockstorage.DeleteVolumeOption) (*blockstorage.DeleteVolumeResult, error)) {
 	t.Helper()
 	cloud := testcloud.New(t)
 	client := deleteVolumeContractClient(cloud, "3.23")
 	var calls atomic.Int32
 	cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
+		for _, gate := range gates {
+			if handled, err := gate.Intercept(r); handled {
+				return nil, err
+			}
+		}
 		step := calls.Add(1)
 		switch {
 		case step == 1:
@@ -72,18 +78,27 @@ func TestDeleteVolumeProgressChannelBlockedSendStopsOnCancellation(t *testing.T)
 	}
 }
 
+// The receiver takes the first value and cancels only after the next poll
+// reaches the gate, which answers it with the request context error. This
+// forces the interleaving in which the wait already started its next poll.
 func TestDeleteVolumeProgressChannelReceiverCancellation(t *testing.T) {
 	ctx, cancel := context.WithCancelCause(context.Background())
 	defer cancel(nil)
 	cause := errors.New("receiver stopped")
-	calls, run := deleteVolumeProgressFixture(t, 0)
-	observer := testcloud.NewProgress(t, func(int) { cancel(cause) })
-	// The receiver cancels concurrently; the hour-long pause observes it.
-	interval := time.Hour
+	// Requests: lookup, DELETE, first poll, then the gated second poll.
+	gate := testcloud.NewGate(4, func(*http.Request) bool { return true })
+	calls, run := deleteVolumeProgressFixture(t, 0, gate)
+	var got []int
+	observer := testcloud.NewProgress(t, func(value int) {
+		got = append(got, value)
+		gate.AwaitThen(t, func() { cancel(cause) })
+	})
+	interval := time.Millisecond
 	result, err := run(ctx, blockstorage.WithDeleteVolumeWaitPolicy(blockstorage.DeleteVolumeWaitOpts{PollInterval: &interval, Progress: observer.C}))
 	observer.Done()
-	if result == nil || result.Deleted || !errors.Is(err, cause) || calls.Load() != 3 {
-		t.Fatal(result, err, calls.Load())
+	var accepted *resource.ResponseError
+	if result == nil || result.Deleted || result.LastAccepted == nil || !errors.Is(err, context.Canceled) || !errors.Is(err, cause) || errors.As(err, &accepted) || calls.Load() != 3 || gate.Seen() != 4 || !reflect.DeepEqual(got, []int{0}) {
+		t.Fatal(result, err, calls.Load(), gate.Seen(), got)
 	}
 }
 

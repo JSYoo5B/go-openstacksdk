@@ -3,6 +3,7 @@ package compute_test
 import (
 	"context"
 	"errors"
+	"net/http"
 	"testing"
 	"time"
 
@@ -62,17 +63,25 @@ func TestAutomaticIPProgressChannelBlockedSendStopsOnCancellation(t *testing.T) 
 	}
 }
 
+// The receiver takes the first value and cancels only after the next poll
+// reaches the gate, which answers it with the request context error. This
+// forces the interleaving in which the wait already started its next poll.
 func TestAutomaticIPProgressChannelReceiverCancellation(t *testing.T) {
 	ctx, cancel := context.WithCancelCause(context.Background())
 	defer cancel(nil)
 	cause := errors.New("receiver stopped")
 	f := automaticProgressFixture(t, false)
-	observer := testcloud.NewProgress(t, func(*compute.Server) { cancel(cause) })
-	// The receiver cancels concurrently; the hour-long pause observes it.
-	result, err := f.service.EnsureServerFloatingIP(ctx, compute.AutomaticFloatingIPRequest{Server: automaticServer(t, autoFixed)}, append(automaticOptions(), compute.WithAutomaticIPPollInterval(time.Hour), compute.WithAutomaticIPProgress(observer.C))...)
+	gate := testcloud.NewGate(2, func(r *http.Request) bool { return r.Method == http.MethodGet && r.URL.Path == "/v2.1/servers/server" })
+	f.cloud.SetTransport(gate.Wrap(f.cloud.Provider.HTTPClient.Transport))
+	var names []string
+	observer := testcloud.NewProgress(t, func(value *compute.Server) {
+		names = append(names, value.Name)
+		gate.AwaitThen(t, func() { cancel(cause) })
+	})
+	result, err := f.service.EnsureServerFloatingIP(ctx, compute.AutomaticFloatingIPRequest{Server: automaticServer(t, autoFixed)}, append(automaticOptions(), compute.WithAutomaticIPPollInterval(time.Millisecond), compute.WithAutomaticIPProgress(observer.C))...)
 	observer.Done()
-	if !errors.Is(err, cause) || result == nil || result.Observed || f.raw.Load() != 1 {
-		t.Fatal(result, err, f.raw.Load())
+	if !errors.Is(err, context.Canceled) || !errors.Is(err, cause) || result == nil || result.Observed || result.Assignment == nil || !result.Assignment.Allocated || f.raw.Load() != 1 || gate.Seen() != 2 || len(names) != 1 || names[0] != "raw" {
+		t.Fatal(result, err, f.raw.Load(), gate.Seen(), names)
 	}
 }
 

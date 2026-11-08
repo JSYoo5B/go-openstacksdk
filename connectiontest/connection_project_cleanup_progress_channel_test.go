@@ -104,23 +104,15 @@ func TestProjectCleanupProgressChannelReceiverCancellationStopsLaterCandidates(t
 	ctx, cancel := context.WithCancelCause(context.Background())
 	defer cancel(nil)
 	stop := errors.New("receiver stopped")
-	arrived, cancelled := make(chan struct{}), make(chan struct{})
-	base := cloud.Provider.HTTPClient.Transport
-	cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
-		if r.Method == http.MethodDelete && strings.HasSuffix(r.URL.Path, "/servers/b") {
-			close(arrived)
-			<-cancelled
-			return nil, r.Context().Err()
-		}
-		return base.RoundTrip(r)
-	}))
+	gate := testcloud.NewGate(1, func(r *http.Request) bool {
+		return r.Method == http.MethodDelete && strings.HasSuffix(r.URL.Path, "/servers/b")
+	})
+	cloud.SetTransport(gate.Wrap(cloud.Provider.HTTPClient.Transport))
 	var got []string
 	observer := testcloud.NewProgress(t, func(e projectcleanup.Event) {
 		got = append(got, cleanupEventName(e))
 		if len(got) == 1 {
-			<-arrived
-			cancel(stop)
-			close(cancelled)
+			gate.AwaitThen(t, func() { cancel(stop) })
 		}
 	})
 	result, err := cloud.conn.ExecuteProjectCleanup(ctx, plan, projectcleanup.WithProgress(observer.C))
@@ -136,7 +128,7 @@ func TestProjectCleanupProgressChannelReceiverCancellationStopsLaterCandidates(t
 	if !slices.Equal(got, []string{"a=accepted"}) {
 		t.Fatalf("progress %v", got)
 	}
-	if events := cloud.events(); !slices.Equal(events, []string{"list servers", "list groups", "delete a"}) {
+	if events := cloud.events(); gate.Seen() != 1 || !slices.Equal(events, []string{"list servers", "list groups", "delete a"}) {
 		t.Fatalf("server events %v", events)
 	}
 }

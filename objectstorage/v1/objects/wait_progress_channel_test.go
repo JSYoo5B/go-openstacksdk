@@ -68,17 +68,36 @@ func TestObjectWaitProgressChannelBlockedSendStopsOnCancellation(t *testing.T) {
 	}
 }
 
+// The receiver takes the first value and cancels only after the next poll
+// reaches the gate, which answers it with the request context error. This
+// forces the interleaving in which the wait already started its next poll.
 func TestObjectWaitProgressChannelReceiverCancellation(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+	ctx, cancel := context.WithCancelCause(context.Background())
+	defer cancel(nil)
+	cause := errors.New("receiver stopped")
+	gate := testcloud.NewGate(2, func(*http.Request) bool { return true })
 	calls := 0
-	client := objectMetadataClient(objectWaitProgressClient(&calls, 0))
-	observer := testcloud.NewProgress(t, func(int) { cancel() })
-	// The receiver cancels concurrently; the hour-long pause observes it.
-	result, err := objects.New(client).WaitForDelete(ctx, "c", "o", objects.WithObjectWaitPollInterval(time.Hour), objects.WithObjectWaitProgress(observer.C))
+	present := objectWaitProgressClient(&calls, 0)
+	client := objectMetadataClient(func(r *http.Request) (*http.Response, error) {
+		if handled, err := gate.Intercept(r); handled {
+			return nil, err
+		}
+		return present(r)
+	})
+	var got []int
+	observer := testcloud.NewProgress(t, func(value int) {
+		got = append(got, value)
+		gate.AwaitThen(t, func() { cancel(cause) })
+	})
+	result, err := objects.New(client).WaitForDelete(ctx, "c", "o", objects.WithObjectWaitPollInterval(time.Millisecond), objects.WithObjectWaitProgress(observer.C))
 	observer.Done()
-	if !errors.Is(err, context.Canceled) || result == nil || result.Complete || calls != 1 {
-		t.Fatal(result, err, calls)
+	if !errors.Is(err, context.Canceled) || !errors.Is(err, cause) || result == nil || result.Complete || calls != 1 || gate.Seen() != 2 || !reflect.DeepEqual(got, []int{0}) {
+		t.Fatal(result, err, calls, gate.Seen(), got)
+	}
+	// The gated poll started a physical attempt, so Last records it without
+	// an acknowledgement.
+	if result.Polls != 2 || result.Last == nil || result.Last.Acknowledgement != nil || len(result.Last.Attempts) != 1 || result.Last.Attempts[0].Response != nil {
+		t.Fatalf("last phase %+v", result)
 	}
 }
 

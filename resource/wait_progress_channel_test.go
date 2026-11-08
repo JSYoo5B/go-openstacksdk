@@ -93,18 +93,32 @@ func TestWaitProgressChannelBlockedSendStopsOnCancellation(t *testing.T) {
 	}
 }
 
+// The receiver takes the first value and cancels only after the next poll
+// reaches Get, which then returns the context error. This
+// forces the interleaving in which the wait already started its next poll.
 func TestWaitProgressChannelReceiverCancellationStopsBeforeNextGET(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-	collection, gets := progressChannelCollection(func(context.Context, int32) (*progressChannelEntry, error) {
+	ctx, cancel := context.WithCancelCause(context.Background())
+	defer cancel(nil)
+	cause := errors.New("receiver stopped")
+	arrived, cancelled := make(chan struct{}), make(chan struct{})
+	collection, gets := progressChannelCollection(func(ctx context.Context, n int32) (*progressChannelEntry, error) {
+		if n == 2 {
+			close(arrived)
+			<-cancelled
+			return nil, ctx.Err()
+		}
 		return &progressChannelEntry{ID: "fixed", Status: "BUILD", Progress: 9}, nil
 	})
 	var got []int
-	observer := testcloud.NewProgress(t, func(value int) { got = append(got, value); cancel() })
-	// The receiver cancels concurrently; the hour-long pause observes it.
-	_, err := collection.Wait(ctx, resource.ID("fixed"), "ACTIVE", resource.WithPollInterval(time.Hour), resource.WithProgress(observer.C))
+	observer := testcloud.NewProgress(t, func(value int) {
+		got = append(got, value)
+		<-arrived
+		cancel(cause)
+		close(cancelled)
+	})
+	_, err := collection.Wait(ctx, resource.ID("fixed"), "ACTIVE", resource.WithPollInterval(time.Millisecond), resource.WithProgress(observer.C))
 	observer.Done()
-	if !errors.Is(err, context.Canceled) || gets.Load() != 1 || !reflect.DeepEqual(got, []int{9}) {
+	if !errors.Is(err, context.Canceled) || !errors.Is(context.Cause(ctx), cause) || gets.Load() != 2 || !reflect.DeepEqual(got, []int{9}) {
 		t.Fatalf("err=%v gets=%d progress=%v", err, gets.Load(), got)
 	}
 }

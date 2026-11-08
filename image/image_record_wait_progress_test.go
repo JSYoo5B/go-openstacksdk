@@ -57,20 +57,31 @@ func TestImageRecordWaitProgressChannelBlockedSendStopsOnCancellation(t *testing
 	}
 }
 
+// The receiver takes the first value and cancels only after the next poll
+// reaches the gate, which answers it with the request context error. This
+// forces the interleaving in which the wait already started its next poll.
 func TestImageRecordWaitProgressChannelReceiverCancellation(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+	ctx, cancel := context.WithCancelCause(context.Background())
+	defer cancel(nil)
+	cause := errors.New("receiver stopped")
+	gate := testcloud.NewGate(2, func(*http.Request) bool { return true })
 	calls := 0
 	client := taskCoreClient(func(req *http.Request) (*http.Response, error) {
+		if handled, err := gate.Intercept(req); handled {
+			return nil, err
+		}
 		calls++
 		return taskCoreJSON(req, 203, `{"status":"pending"}`), nil
 	})
-	observer := testcloud.NewProgress(t, func(int) { cancel() })
-	// The receiver cancels concurrently; the hour-long pause observes it.
-	record, err := New(client).WaitForImageRecordDelete(ctx, imageRecordWaitSeed(json.RawMessage(`"pending"`)), WithImageRecordWaitPollInterval(time.Hour), WithImageRecordWaitProgress(observer.C))
+	var got []int
+	observer := testcloud.NewProgress(t, func(value int) {
+		got = append(got, value)
+		gate.AwaitThen(t, func() { cancel(cause) })
+	})
+	record, err := New(client).WaitForImageRecordDelete(ctx, imageRecordWaitSeed(json.RawMessage(`"pending"`)), WithImageRecordWaitPollInterval(time.Millisecond), WithImageRecordWaitProgress(observer.C))
 	observer.Done()
-	if record == nil || !errors.Is(err, context.Canceled) || calls != 1 {
-		t.Fatal(record, err, calls)
+	if record == nil || record.StatusCode != 203 || !errors.Is(err, context.Canceled) || !errors.Is(context.Cause(ctx), cause) || calls != 1 || gate.Seen() != 2 || !reflect.DeepEqual(got, []int{0}) {
+		t.Fatal(record, err, calls, gate.Seen(), got)
 	}
 }
 

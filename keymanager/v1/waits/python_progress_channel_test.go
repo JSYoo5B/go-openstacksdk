@@ -62,17 +62,28 @@ func TestPythonKeymanagerWaitProgressChannelBlockedSendStopsOnCancellation(t *te
 	}
 }
 
+// The receiver takes the first value and cancels only after the next poll
+// reaches the gate, which answers it with the request context error. This
+// forces the interleaving in which the wait already started its next poll.
 func TestPythonKeymanagerWaitProgressChannelReceiverCancellation(t *testing.T) {
 	ctx, cancel := context.WithCancelCause(context.Background())
 	defer cancel(nil)
 	cause := errors.New("receiver stopped")
-	api, _, calls := fixture(t, func(*http.Request, int) *http.Response { return wire(200, `{"status":"BUILD"}`) })
-	observer := testcloud.NewProgress(t, func(int) { cancel(cause) })
-	// The receiver cancels concurrently; the hour-long pause observes it.
-	value, err := api.WaitForStatus(ctx, waits.Container("c"), str("active"), waits.WithInterval(time.Hour), waits.WithProgress(observer.C))
+	api, client, calls := fixture(t, func(*http.Request, int) *http.Response { return wire(200, `{"status":"BUILD"}`) })
+	gate := testcloud.NewGate(2, func(*http.Request) bool { return true })
+	client.ProviderClient.HTTPClient.Transport = gate.Wrap(client.ProviderClient.HTTPClient.Transport)
+	var got []int
+	observer := testcloud.NewProgress(t, func(value int) {
+		got = append(got, value)
+		gate.AwaitThen(t, func() { cancel(cause) })
+	})
+	value, err := api.WaitForStatus(ctx, waits.Container("c"), str("active"), waits.WithInterval(time.Millisecond), waits.WithProgress(observer.C))
 	observer.Done()
-	if value == nil || !errors.Is(err, cause) || len(*calls) != 1 {
-		t.Fatal(value, err, *calls)
+	// The gated read failed without a response, so the wait returns no
+	// record and no accepted-response proof for it.
+	var proof *resource.ResponseError
+	if value != nil || !errors.Is(err, context.Canceled) || !errors.Is(err, cause) || errors.As(err, &proof) || len(*calls) != 1 || gate.Seen() != 2 || !reflect.DeepEqual(got, []int{0}) {
+		t.Fatal(value, err, *calls, gate.Seen(), got)
 	}
 }
 
