@@ -96,11 +96,12 @@ func TestInstanceHAWaitFourFacadesPreserveFixedRoutesAndHTTPBody(t *testing.T) {
 				testcloud.JSON(w, 200, fmt.Sprintf(`{%q:{"id":9007199254740993,"uuid":"%s","notification_uuid":"%s","status":%q,"name":%q,"vendor":9007199254740995,"nullable":null}}`, api.envelope, otherSegmentUUID, otherSegmentUUID, state, state))
 			})
 			cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) { t.Errorf("escaped route: %s %s", r.Method, r.URL) })
-			opts := []resource.WaitOption{resource.WithPollInterval(time.Millisecond), resource.WithProgressCallback(func(progress int) {
+			opts := []resource.WaitOption{resource.WithPollInterval(time.Millisecond), resource.WithProgressCallback(func(progress int) error {
 				callbacks.Add(1)
 				if progress != 0 {
 					t.Errorf("unexpected progress=%d", progress)
 				}
+				return nil
 			})}
 			if !api.hasStatus {
 				opts = append(opts, resource.WithStatusAttribute("name"))
@@ -295,7 +296,7 @@ func TestInstanceHAWaitRevalidatesVersionAndKeepsNativeAndDecodeFailures(t *test
 			})
 			opts := []resource.WaitOption{resource.WithPollInterval(time.Millisecond)}
 			if scenario == "cancelled" {
-				opts = append(opts, resource.WithProgressCallback(func(int) { cancel() }))
+				opts = append(opts, resource.WithProgressCallback(func(int) error { cancel(); return nil }))
 			}
 			value, err := api.status(ctx, resource.ID(api.uuid), "succeeded", opts...)
 			if value != nil || err == nil || calls.Load() != 1 {

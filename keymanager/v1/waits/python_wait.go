@@ -197,15 +197,16 @@ func (a *API) wait(ctx context.Context, target Target, status *string, deleting 
 	// timeout); the progress step runs right after the Get that set it.
 	pollCtx := ctx
 	if config.Callback != nil || config.Progress != nil {
-		waitOptions = append(waitOptions, resource.WithProgressCallback(func(value int) {
+		waitOptions = append(waitOptions, resource.WithProgressCallback(func(value int) error {
 			if config.Callback != nil {
 				if err := config.Callback(value); err != nil {
 					// A callback error stops the wait; nothing is sent for this step.
 					observed = errors.Join(observed, err)
-					return
+					return nil
 				}
 			}
 			observed = errors.Join(observed, progress.Send(pollCtx, config.Progress, value))
+			return nil
 		}))
 	}
 	policy, err := resource.PrepareWaitOptionsFor[pollValue](waitOptions...)

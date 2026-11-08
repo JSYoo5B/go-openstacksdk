@@ -130,7 +130,7 @@ err = service.Nodes.WaitForDelete(ctx, resource.ID("NODE_ID"),
     resource.WithTimeout(10*time.Minute),
     resource.WithUnlimitedWait(),
     resource.WithPollInterval(time.Second),
-    resource.WithProgressCallback(func(progress int) { fmt.Println(progress) }))
+    resource.WithProgressCallback(func(progress int) error { fmt.Println(progress); return nil }))
 if err != nil { return err }
 ```
 

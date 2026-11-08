@@ -21,13 +21,14 @@ func TestWaitForServerRawFailuresKeepLastMatchingModelAndCauses(t *testing.T) {
 			ctx, cancel := context.WithCancelCause(context.Background())
 			defer cancel(nil)
 			cause := errors.New("readiness canceled")
-			opts := append(serverReadyOptions(), compute.WithServerReadyAutomaticIPOptions(compute.WithAutomaticIPEnabled(false)), compute.WithServerReadyWaitOptions(resource.WithTimeout(20*time.Millisecond), resource.WithFailureStates(), resource.WithProgressCallback(func(int) {
+			opts := append(serverReadyOptions(), compute.WithServerReadyAutomaticIPOptions(compute.WithAutomaticIPEnabled(false)), compute.WithServerReadyWaitOptions(resource.WithTimeout(20*time.Millisecond), resource.WithFailureStates(), resource.WithProgressCallback(func(int) error {
 				if scenario == "progress source" {
 					f.service.API = nil
 				}
 				if scenario == "progress cancel" {
 					cancel(cause)
 				}
+				return nil
 			})))
 			f.rawBody = func(n int32) (int, string) {
 				switch scenario {

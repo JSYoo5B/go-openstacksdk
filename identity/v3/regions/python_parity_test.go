@@ -198,7 +198,7 @@ func TestPythonRegionWaitHelpers(t *testing.T) {
 			return 404, ""
 		})
 		var progress []int
-		err := api.WaitForDeletion(ctx, resource.ID("RegionOne"), resource.WithTimeout(120*time.Second), resource.WithPollInterval(time.Millisecond), resource.WithProgressCallback(func(p int) { progress = append(progress, p) }))
+		err := api.WaitForDeletion(ctx, resource.ID("RegionOne"), resource.WithTimeout(120*time.Second), resource.WithPollInterval(time.Millisecond), resource.WithProgressCallback(func(p int) error { progress = append(progress, p); return nil }))
 		get := pythonRegionCall{http.MethodGet, pythonRegionBase + "/RegionOne", "", ""}
 		if err != nil || !reflect.DeepEqual(calls, []pythonRegionCall{get, get}) || !reflect.DeepEqual(progress, []int{0}) {
 			t.Fatal(err, calls, progress)

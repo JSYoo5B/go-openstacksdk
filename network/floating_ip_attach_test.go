@@ -308,7 +308,7 @@ func TestFloatingIPAttachPreparedPolicyAndResultAreOwned(t *testing.T) {
 	})
 	attachUnexpected(t, cloud)
 	progress := 0
-	ensure, err := network.PrepareEnsureFloatingIPOptions(context.Background(), network.WithEnsurePort(resource.ID("port")), network.WithEnsureProject("irrelevant"), network.WithEnsureReuse(false), network.WithEnsureWait(resource.WithTimeout(time.Second), resource.WithPollInterval(time.Millisecond), resource.WithProgressCallback(func(int) { progress++ })))
+	ensure, err := network.PrepareEnsureFloatingIPOptions(context.Background(), network.WithEnsurePort(resource.ID("port")), network.WithEnsureProject("irrelevant"), network.WithEnsureReuse(false), network.WithEnsureWait(resource.WithTimeout(time.Second), resource.WithPollInterval(time.Millisecond), resource.WithProgressCallback(func(int) error { progress++; return nil })))
 	if err != nil {
 		t.Fatal(err)
 	}

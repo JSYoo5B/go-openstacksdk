@@ -120,7 +120,7 @@ func TestPyCOEDBWaitForClusterStatusComparesCaseInsensitivelyAndReportsZeroProgr
 	calls := pyCOEDBClusterSequence(cloud, "CREATE_IN_PROGRESS", "CREATE_IN_PROGRESS", "CREATE_COMPLETE")
 	var progress []int
 	value, err := newMagnumClusters(t, cloud, "").WaitFor(context.Background(), resource.ID("cl-1"), "create_complete",
-		resource.WithPollInterval(time.Millisecond), resource.WithProgressCallback(func(p int) { progress = append(progress, p) }))
+		resource.WithPollInterval(time.Millisecond), resource.WithProgressCallback(func(p int) error { progress = append(progress, p); return nil }))
 	if err != nil || value == nil || value.Status != "CREATE_COMPLETE" {
 		t.Fatalf("value=%+v err=%v", value, err)
 	}
@@ -179,7 +179,7 @@ func TestPyCOEDBWaitForClusterDeletionCompletesOnNotFoundOrDeletedStatus(t *test
 	calls := pyCOEDBClusterSequence(cloud, "DELETE_IN_PROGRESS", "DELETE_IN_PROGRESS", "404")
 	var progress []int
 	if err := newMagnumClusters(t, cloud, "").WaitForDeletion(context.Background(), resource.ID("cl-1"),
-		resource.WithPollInterval(time.Millisecond), resource.WithProgressCallback(func(p int) { progress = append(progress, p) })); err != nil {
+		resource.WithPollInterval(time.Millisecond), resource.WithProgressCallback(func(p int) error { progress = append(progress, p); return nil })); err != nil {
 		t.Fatal(err)
 	}
 	if calls.Load() != 3 || !reflect.DeepEqual(progress, []int{0, 0}) {

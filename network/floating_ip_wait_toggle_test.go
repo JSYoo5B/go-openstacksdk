@@ -33,7 +33,7 @@ func TestEnsureNoWaitPreservesPreparedPolicyForLaterActiveOverride(t *testing.T)
 		http.Error(w, "unexpected", 500)
 	})
 	progress := 0
-	policy, err := network.PrepareEnsureFloatingIPOptions(context.Background(), network.WithEnsureReuse(false), network.WithEnsureProject("owner"), network.WithEnsureWait(resource.WithTimeout(time.Second), resource.WithPollInterval(time.Millisecond), resource.WithProgressCallback(func(int) { progress++ })), network.WithEnsureNoWait())
+	policy, err := network.PrepareEnsureFloatingIPOptions(context.Background(), network.WithEnsureReuse(false), network.WithEnsureProject("owner"), network.WithEnsureWait(resource.WithTimeout(time.Second), resource.WithPollInterval(time.Millisecond), resource.WithProgressCallback(func(int) error { progress++; return nil })), network.WithEnsureNoWait())
 	if err != nil {
 		t.Fatal(err)
 	}

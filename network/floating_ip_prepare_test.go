@@ -49,7 +49,7 @@ func TestFloatingIPPrepareActiveBindsCopyAndPreservesWaitPolicy(t *testing.T) {
 		t.Fatal(err)
 	}
 	setOwner("first")
-	bound, err := service.FloatingIPs.PrepareEnsureActive(context.Background(), network.WithEnsureFloatingIPPolicy(plain), network.WithEnsureWait(resource.WithPollInterval(time.Millisecond), resource.WithTimeout(time.Second), resource.WithProgressCallback(func(int) { callbacks.Add(1) })))
+	bound, err := service.FloatingIPs.PrepareEnsureActive(context.Background(), network.WithEnsureFloatingIPPolicy(plain), network.WithEnsureWait(resource.WithPollInterval(time.Millisecond), resource.WithTimeout(time.Second), resource.WithProgressCallback(func(int) error { callbacks.Add(1); return nil })))
 	if err != nil {
 		t.Fatal(err)
 	}

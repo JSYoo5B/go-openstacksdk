@@ -227,7 +227,7 @@ func TestPythonTenantWaitHelpers(t *testing.T) {
 			return 404, ""
 		})
 		var progress []int
-		err := api.WaitForDeletion(ctx, resource.ID("t-1"), resource.WithTimeout(2*time.Minute), resource.WithPollInterval(time.Millisecond), resource.WithProgressCallback(func(value int) { progress = append(progress, value) }))
+		err := api.WaitForDeletion(ctx, resource.ID("t-1"), resource.WithTimeout(2*time.Minute), resource.WithPollInterval(time.Millisecond), resource.WithProgressCallback(func(value int) error { progress = append(progress, value); return nil }))
 		get := pythonTenantCall{http.MethodGet, pythonTenantBase + "/t-1", "", ""}
 		if err != nil || !reflect.DeepEqual(calls, []pythonTenantCall{get, get, get}) || !reflect.DeepEqual(progress, []int{0, 0}) {
 			t.Fatal(err, calls, progress)

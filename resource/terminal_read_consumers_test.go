@@ -51,7 +51,7 @@ func TestTerminalReadConsumersOrdinaryHTTP404RemainsMissing(t *testing.T) {
 		t.Fatal("explicit ignore missing changed", value, err)
 	}
 	var progress atomic.Int32
-	if err := collection.WaitDeleted(context.Background(), resource.ID("missing"), resource.WithProgressCallback(func(int) { progress.Add(1) })); err != nil || progress.Load() != 0 {
+	if err := collection.WaitDeleted(context.Background(), resource.ID("missing"), resource.WithProgressCallback(func(int) error { progress.Add(1); return nil })); err != nil || progress.Load() != 0 {
 		t.Fatal("ordinary missing no longer terminates delete wait", err, progress.Load())
 	}
 	value, err = collection.FindIdentity(context.Background(), "missing")
@@ -127,7 +127,7 @@ func TestTerminalReadConsumersNativeTransport404IsNeverMissing(t *testing.T) {
 			value, err = collection.Find(context.Background(), resource.ID("fixed"), resource.WithIgnoreMissing())
 			check(value, err)
 			var progress atomic.Int32
-			err = collection.WaitDeleted(context.Background(), resource.ID("fixed"), resource.WithProgressCallback(func(int) { progress.Add(1) }))
+			err = collection.WaitDeleted(context.Background(), resource.ID("fixed"), resource.WithProgressCallback(func(int) error { progress.Add(1); return nil }))
 			check(nil, err)
 			if progress.Load() != 0 {
 				t.Fatal("failed read invoked deletion progress", progress.Load())

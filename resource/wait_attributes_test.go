@@ -59,7 +59,7 @@ func TestWaitStatusAttributeUsesExtendedServerJSONTag(t *testing.T) {
 			})
 			var progress []int
 			value, err := servers.New(cloud.Client("compute", "/compute")).Resources.Wait(context.Background(), resource.ID("fixed"), "READY",
-				resource.WithStatusAttribute(attribute), resource.WithProgressCallback(func(value int) { progress = append(progress, value) }),
+				resource.WithStatusAttribute(attribute), resource.WithProgressCallback(func(value int) error { progress = append(progress, value); return nil }),
 				resource.WithPollInterval(time.Millisecond), resource.WithTimeout(time.Second))
 			if err != nil || value == nil || value.TaskState != "ready" || gets.Load() != 2 || !reflect.DeepEqual(progress, []int{25}) {
 				t.Fatalf("value=%v gets=%d progress=%v error=%v", value, gets.Load(), progress, err)
@@ -91,7 +91,7 @@ func TestWaitProgressIncludesEachNonterminalNativeServerResponse(t *testing.T) {
 	})
 	var progress []int
 	value, err := servers.New(cloud.Client("compute", "/compute")).Resources.Wait(context.Background(), resource.ID("fixed"), "ACTIVE",
-		resource.WithProgressCallback(func(value int) { progress = append(progress, value) }),
+		resource.WithProgressCallback(func(value int) error { progress = append(progress, value); return nil }),
 		resource.WithPollInterval(time.Millisecond), resource.WithTimeout(time.Second))
 	if err != nil || value == nil || gets.Load() != 4 || !reflect.DeepEqual(progress, []int{0, 25, 75}) {
 		t.Fatalf("value=%v gets=%d progress=%v error=%v", value, gets.Load(), progress, err)
@@ -117,7 +117,7 @@ func TestWaitProgressOmitsSuccessFailureAndHTTPError(t *testing.T) {
 				})
 				var progress []int
 				_, err := servers.New(cloud.Client("compute", "/compute")).Resources.Wait(context.Background(), resource.ID("fixed"), "ACTIVE",
-					resource.WithProgressCallback(func(value int) { progress = append(progress, value) }),
+					resource.WithProgressCallback(func(value int) error { progress = append(progress, value); return nil }),
 					resource.WithPollInterval(time.Millisecond), resource.WithTimeout(time.Second))
 				wantGets := int32(2)
 				wantProgress := []int{17}
@@ -147,7 +147,7 @@ func TestWaitProgressCallbackCancellationStopsFurtherGETs(t *testing.T) {
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()
 			var progress []int
-			options := []resource.WaitOption{resource.WithProgressCallback(func(value int) { progress = append(progress, value); cancel() }), resource.WithPollInterval(time.Hour)}
+			options := []resource.WaitOption{resource.WithProgressCallback(func(value int) error { progress = append(progress, value); cancel(); return nil }), resource.WithPollInterval(time.Hour)}
 			collection := servers.New(cloud.Client("compute", "/compute")).Resources
 			var err error
 			if deletion {
@@ -247,7 +247,7 @@ func TestWaitProgressDefaultsToZeroWithoutNativeProgress(t *testing.T) {
 	})
 	var progress []int
 	_, err := nodes.New(cloud.Client("baremetal", "/v1")).Resources.Wait(context.Background(), resource.ID("fixed"), "active",
-		resource.WithProgressCallback(func(value int) { progress = append(progress, value) }),
+		resource.WithProgressCallback(func(value int) error { progress = append(progress, value); return nil }),
 		resource.WithPollInterval(time.Millisecond), resource.WithTimeout(time.Second))
 	if err != nil || gets.Load() != 2 || !reflect.DeepEqual(progress, []int{0}) {
 		t.Fatalf("gets=%d progress=%v error=%v", gets.Load(), progress, err)
@@ -267,7 +267,7 @@ func TestWaitStatusAttributeAlsoSelectsFailureState(t *testing.T) {
 	var progress []int
 	_, err := nodes.New(cloud.Client("baremetal", "/v1")).Resources.Wait(context.Background(), resource.ID("fixed"), "power on",
 		resource.WithStatusAttribute("power_state"), resource.WithFailureStates("BROKEN"),
-		resource.WithProgressCallback(func(value int) { progress = append(progress, value) }),
+		resource.WithProgressCallback(func(value int) error { progress = append(progress, value); return nil }),
 		resource.WithPollInterval(time.Millisecond), resource.WithTimeout(time.Second))
 	var failure *resource.FailedStateError
 	if !errors.As(err, &failure) || failure.ID != "fixed" || failure.Status != "broken" || gets.Load() != 2 || !reflect.DeepEqual(progress, []int{0}) {
@@ -287,7 +287,7 @@ func TestWaitDeletedStatusAttributeUsesNativeNodeField(t *testing.T) {
 	})
 	var progress []int
 	err := nodes.New(cloud.Client("baremetal", "/v1")).Resources.WaitDeleted(context.Background(), resource.ID("fixed"),
-		resource.WithStatusAttribute("power_state"), resource.WithProgressCallback(func(value int) { progress = append(progress, value) }),
+		resource.WithStatusAttribute("power_state"), resource.WithProgressCallback(func(value int) error { progress = append(progress, value); return nil }),
 		resource.WithPollInterval(time.Millisecond), resource.WithTimeout(time.Second))
 	if err != nil || gets.Load() != 2 || !reflect.DeepEqual(progress, []int{0}) {
 		t.Fatalf("gets=%d progress=%v error=%v", gets.Load(), progress, err)
@@ -312,7 +312,7 @@ func TestWaitDeletedProgressStopsAtDeletedStatusOr404(t *testing.T) {
 			})
 			var progress []int
 			err := servers.New(cloud.Client("compute", "/compute")).Resources.WaitDeleted(context.Background(), resource.ID("fixed"),
-				resource.WithProgressCallback(func(value int) { progress = append(progress, value) }),
+				resource.WithProgressCallback(func(value int) error { progress = append(progress, value); return nil }),
 				resource.WithPollInterval(time.Millisecond), resource.WithTimeout(time.Second))
 			if err != nil || gets.Load() != 2 || !reflect.DeepEqual(progress, []int{44}) {
 				t.Fatalf("gets=%d progress=%v error=%v", gets.Load(), progress, err)
@@ -326,7 +326,7 @@ func TestWaitDeletedNilSuccessfulFetchIsTerminalWithoutCallback(t *testing.T) {
 	collection := resource.NewCollection(resource.Adapter[waitAttributeEntry]{
 		Kind: "entry", Get: func(context.Context, string) (*waitAttributeEntry, error) { calls++; return nil, nil },
 	})
-	err := collection.WaitDeleted(context.Background(), resource.ID("fixed"), resource.WithProgressCallback(func(int) { callbacks++ }), resource.WithTimeout(time.Second))
+	err := collection.WaitDeleted(context.Background(), resource.ID("fixed"), resource.WithProgressCallback(func(int) error { callbacks++; return nil }), resource.WithTimeout(time.Second))
 	if err != nil || calls != 1 || callbacks != 0 {
 		t.Fatalf("calls=%d callbacks=%d error=%v", calls, callbacks, err)
 	}

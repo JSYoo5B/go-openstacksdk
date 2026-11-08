@@ -1942,7 +1942,7 @@ node, err := service.Nodes.Resources.Wait(ctx, resource.ID("node-uuid"), "power 
     resource.WithStatusAttribute("power_state"),
     resource.WithFailureStates("error"),
     resource.WithUnlimitedWait(),
-    resource.WithProgressCallback(func(progress int) { fmt.Println(progress) }))
+    resource.WithProgressCallback(func(progress int) error { fmt.Println(progress); return nil }))
 if err != nil { return err }
 _ = node
 ```

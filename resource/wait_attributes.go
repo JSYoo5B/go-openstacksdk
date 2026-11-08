@@ -138,7 +138,9 @@ func reportWaitProgress[T any](ctx context.Context, o waitOptions, value *T, fie
 		}
 	}
 	if o.progressCallback != nil {
-		o.progressCallback(current)
+		if err := o.progressCallback(current); err != nil {
+			return err
+		}
 	}
 	return progress.Send(ctx, o.progress, current)
 }

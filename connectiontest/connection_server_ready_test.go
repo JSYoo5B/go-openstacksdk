@@ -166,7 +166,7 @@ func TestConnectionReadyLazyComputeGuardSurvivesReadinessAndIPStages(t *testing.
 			}
 			opts := connectionReadyOptions()
 			if scenario == "progress" {
-				opts = append(opts, compute.WithServerReadyWaitOptions(resource.WithProgressCallback(func(int) { change() })))
+				opts = append(opts, compute.WithServerReadyWaitOptions(resource.WithProgressCallback(func(int) error { change(); return nil })))
 			}
 			if scenario == "IP progress" {
 				opts = append(opts, compute.WithServerReadyAutomaticIPOptions(compute.WithAutomaticIPProgressCallback(func(*compute.Server) error { change(); return nil })))

@@ -396,7 +396,7 @@ func TestConnectionServerFloatingIPPollsServerBeforeStartingIP(t *testing.T) {
 		t.Fatal(err)
 	}
 	var callbacks atomic.Int32
-	result, err := service.Servers.CreateWithFloatingIP(context.Background(), serverFloatingIPRequest(), compute.WithServerOptions(compute.WithWait(resource.WithPollInterval(time.Millisecond), resource.WithProgressCallback(func(int) { callbacks.Add(1) }))))
+	result, err := service.Servers.CreateWithFloatingIP(context.Background(), serverFloatingIPRequest(), compute.WithServerOptions(compute.WithWait(resource.WithPollInterval(time.Millisecond), resource.WithProgressCallback(func(int) error { callbacks.Add(1); return nil }))))
 	if err != nil || result == nil || result.Server.Status != "ACTIVE" || result.Assignment == nil || counts.serverGets.Load() != 2 || callbacks.Load() != 1 || counts.ports.Load() != 1 {
 		t.Fatalf("result=%+v err=%v serverGETs=%d callbacks=%d ports=%d", result, err, counts.serverGets.Load(), callbacks.Load(), counts.ports.Load())
 	}

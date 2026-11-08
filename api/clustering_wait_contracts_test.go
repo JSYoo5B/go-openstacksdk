@@ -355,12 +355,13 @@ func TestClusteringWaitContractsNameOnceStableIDAndFreshAuth(t *testing.T) {
 			client := cloud.Client("clustering", "/reverse/senlin/v1")
 			client.Microversion = "1.13"
 			api := nodes.New(client)
-			opts := []resource.WaitOption{resource.WithPollInterval(time.Millisecond), resource.WithProgressCallback(func(value int) {
+			opts := []resource.WaitOption{resource.WithPollInterval(time.Millisecond), resource.WithProgressCallback(func(value int) error {
 				if value != 0 {
 					t.Error("invented Senlin progress", value)
 				}
 				progress.Add(1)
 				client.ProviderClient.SetToken("rotated-token")
+				return nil
 			})}
 			var err error
 			if deleted {
@@ -404,7 +405,7 @@ func TestClusteringWaitContractsSourceRecheckedBeforeEachPoll(t *testing.T) {
 				})
 				client := cloud.Client("clustering", "/senlin/v1")
 				api := nodes.New(client)
-				opts := []resource.WaitOption{resource.WithPollInterval(time.Millisecond), resource.WithProgressCallback(func(int) {
+				opts := []resource.WaitOption{resource.WithPollInterval(time.Millisecond), resource.WithProgressCallback(func(int) error {
 					switch mode {
 					case "type":
 						client.Type = "compute"
@@ -413,6 +414,7 @@ func TestClusteringWaitContractsSourceRecheckedBeforeEachPoll(t *testing.T) {
 					case "version-header":
 						client.MoreHeaders = map[string]string{"OpenStack-API-Version": "clustering 1.99"}
 					}
+					return nil
 				})}
 				var err error
 				if deleted {
@@ -462,12 +464,13 @@ func TestClusteringWaitContractsStatelessFirstGETAndCallbackCancellation(t *test
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()
 			nodeAPI := nodes.New(fixture.Client("clustering", "/senlin/v1"))
-			opts := []resource.WaitOption{resource.WithProgressCallback(func(value int) {
+			opts := []resource.WaitOption{resource.WithProgressCallback(func(value int) error {
 				callbacks.Add(1)
 				if value != 0 {
 					t.Error(value)
 				}
 				cancel()
+				return nil
 			})}
 			var err error
 			if deleted {
@@ -501,7 +504,7 @@ func TestClusteringWaitContractsHTTPFailuresAndAcceptedMalformedEvidence(t *test
 					testcloud.JSON(w, code, `{"error":{"message":"native-error"}}`)
 				})
 				api := nodes.New(cloud.Client("clustering", "/senlin/v1"))
-				opts := []resource.WaitOption{resource.WithProgressCallback(func(int) { callbacks.Add(1) })}
+				opts := []resource.WaitOption{resource.WithProgressCallback(func(int) error { callbacks.Add(1); return nil })}
 				var err error
 				if deleted {
 					err = api.WaitForDelete(context.Background(), resource.ID("fixed"), opts...)

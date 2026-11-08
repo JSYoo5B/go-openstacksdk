@@ -123,7 +123,7 @@ func TestPythonParityCorePortWaiters(t *testing.T) {
 		var progress []int
 		got, err := api.WaitFor(ctx, resource.ID("p-1"), "ACTIVE",
 			resource.WithFailureStates("ERROR"), resource.WithUnlimitedWait(),
-			resource.WithPollInterval(time.Millisecond), resource.WithProgressCallback(func(p int) { progress = append(progress, p) }))
+			resource.WithPollInterval(time.Millisecond), resource.WithProgressCallback(func(p int) error { progress = append(progress, p); return nil }))
 		if err != nil || got.Status != "active" || len(calls) != 3 || !reflect.DeepEqual(progress, []int{0, 0}) {
 			t.Fatal(got, err, calls, progress)
 		}

@@ -128,7 +128,7 @@ func TestWaitForServerAlwaysRefreshesAndWaitsForRawAddressRows(t *testing.T) {
 			server := automaticServer(t, autoFixed)
 			server.Status, server.Addresses = status, map[string]any{"malformed": true}
 			var progress []int
-			opts := append(serverReadyOptions(), compute.WithServerReadyWaitOptions(resource.WithProgressCallback(func(n int) { progress = append(progress, n); server.ID = "caller changed" })))
+			opts := append(serverReadyOptions(), compute.WithServerReadyWaitOptions(resource.WithProgressCallback(func(n int) error { progress = append(progress, n); server.ID = "caller changed"; return nil })))
 			result, err := f.service.WaitForServer(context.Background(), compute.AutomaticFloatingIPRequest{Server: server}, opts...)
 			if err != nil || result == nil || result.Server.ID != "server" || result.Server.Name != "latest" || result.Decision.Reason != compute.AutomaticIPExistingFloating || result.Assignment != nil || f.raw.Load() != 3 || f.posts.Load() != 0 || !reflect.DeepEqual(progress, []int{25, 0}) {
 				t.Fatal(result, err, f.raw.Load(), f.posts.Load(), progress)

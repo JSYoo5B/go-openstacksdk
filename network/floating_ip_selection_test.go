@@ -164,7 +164,7 @@ func TestFloatingIPEnsureWaitCancellationAndTimeoutPreserveAssignment(t *testing
 			wait := []resource.WaitOption{resource.WithTimeout(20 * time.Millisecond), resource.WithPollInterval(time.Second)}
 			want := context.DeadlineExceeded
 			if scenario == "cancel callback" {
-				wait = append(wait, resource.WithProgressCallback(func(int) { cancel() }))
+				wait = append(wait, resource.WithProgressCallback(func(int) error { cancel(); return nil }))
 				want = context.Canceled
 			}
 			result, err := network.New(cloud.Client("network", "/v2.0")).FloatingIPs.Ensure(ctx, ensureFloatingRequest(), network.WithEnsureProject("owner"), network.WithEnsureWait(wait...))

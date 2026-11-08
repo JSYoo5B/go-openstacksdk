@@ -19,7 +19,7 @@ func TestPreparedWaitPolicyDoesNotReapplyApplicationOptions(t *testing.T) {
 			return errors.New("applied twice")
 		}
 		o.interval = time.Millisecond
-		o.progressCallback = func(n int) { progress = n }
+		o.progressCallback = func(n int) error { progress = n; return nil }
 		return nil
 	})
 	if err != nil || policy.ValidateFixedStatus() != nil {
@@ -66,7 +66,7 @@ func TestWaitGuardStopsAfterProgressBeforeAnotherFetch(t *testing.T) {
 			return nil
 		},
 	})
-	_, err := c.Wait(context.Background(), ID("fixed"), "ACTIVE", WithPollInterval(time.Hour), WithProgressCallback(func(int) { changed = true }))
+	_, err := c.Wait(context.Background(), ID("fixed"), "ACTIVE", WithPollInterval(time.Hour), WithProgressCallback(func(int) error { changed = true; return nil }))
 	if !errors.Is(err, cause) || gets != 1 {
 		t.Fatal(err, gets)
 	}

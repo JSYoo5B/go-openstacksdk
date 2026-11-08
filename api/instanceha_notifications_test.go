@@ -128,7 +128,7 @@ func TestInstanceHANotificationWaitUsesRealStatusAndContext(t *testing.T) {
 				testcloud.JSON(w, 200, `{"notification":{"notification_uuid":"`+notificationUUID+`","status":"`+status+`","recovery_workflow_details":[{"progress":0.75}]}}`)
 			})
 			var progress []int
-			value, err := notifications.New(cloud.Client("instance-ha", "/v1")).Wait(context.Background(), resource.ID(notificationUUID), "finished", resource.WithPollInterval(time.Millisecond), resource.WithProgressCallback(func(value int) { progress = append(progress, value) }))
+			value, err := notifications.New(cloud.Client("instance-ha", "/v1")).Wait(context.Background(), resource.ID(notificationUUID), "finished", resource.WithPollInterval(time.Millisecond), resource.WithProgressCallback(func(value int) error { progress = append(progress, value); return nil }))
 			if state == "finished" {
 				if err != nil || value.Status != state {
 					t.Fatal(err)

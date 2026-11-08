@@ -123,7 +123,7 @@ type waitOptions struct {
 	failureStates     []string
 	failureStatesSet  bool
 	statusAttribute   string
-	progressCallback  func(int)
+	progressCallback  func(int) error
 	progress          chan<- int
 }
 type WaitOption func(*waitOptions) error
@@ -176,9 +176,10 @@ func WithStatusAttribute(attribute string) WaitOption {
 // WithProgressCallback reports model progress after each nonterminal response,
 // including the initial lookup. Missing or nil progress is reported as zero.
 // The callback runs synchronously and is not called for success or failure.
-// With WithProgress also set, the callback runs first and the value is then
-// sent on the channel.
-func WithProgressCallback(callback func(int)) WaitOption {
+// A returned error stops the wait and is returned, wrapped, by the wait. With
+// WithProgress also set, the callback runs first and the value is then sent
+// on the channel; nothing is sent for a step whose callback returned an error.
+func WithProgressCallback(callback func(int) error) WaitOption {
 	return func(o *waitOptions) error {
 		if callback == nil {
 			return invalid("progress callback must not be nil")

@@ -266,7 +266,7 @@ func TestServerIPDispatchSecondFailureRetainsFirstCompletionAndCurrentPartial(t 
 			}
 			opts := append(dispatchOptions(), compute.WithFloatingIPAddresses(dispatchAddresses["a"], dispatchAddresses["b"], dispatchAddresses["c"]))
 			if failure == "IP cancel" {
-				opts = append(opts, compute.WithAutomaticEnsureOptions(network.WithEnsureWait(resource.WithProgressCallback(func(int) { cancel(cause) }))))
+				opts = append(opts, compute.WithAutomaticEnsureOptions(network.WithEnsureWait(resource.WithProgressCallback(func(int) error { cancel(cause); return nil }))))
 			}
 			if failure == "raw cancel" || failure == "raw source" {
 				opts = append(opts, compute.WithAutomaticIPProgressCallback(func(*compute.Server) error {

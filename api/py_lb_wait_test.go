@@ -90,7 +90,7 @@ func TestPyLBGenericWaitSelectsAttributeAndAcceptsUnlimitedWait(t *testing.T) {
 	api := newOctaviaLoadBalancers(t, cloud)
 	value, err := api.WaitFor(context.Background(), resource.ID("lb-1"), "ONLINE",
 		resource.WithStatusAttribute("operating_status"), resource.WithUnlimitedWait(), resource.WithPollInterval(time.Millisecond),
-		resource.WithProgressCallback(func(n int) { progress = append(progress, n) }))
+		resource.WithProgressCallback(func(n int) error { progress = append(progress, n); return nil }))
 	if err != nil || value.OperatingStatus != "ONLINE" || gets.Load() != 2 || len(progress) != 1 {
 		t.Fatalf("value=%+v err=%v gets=%d progress=%v", value, err, gets.Load(), progress)
 	}

@@ -199,7 +199,7 @@ func TestInstanceHAVMoveMissingUUIDRemainsMissingAndWaitUsesRealStatus(t *testin
 		t.Fatalf("values=%+v err=%v", values, err)
 	}
 	var progress []int
-	value, err := scope.Wait(context.Background(), resource.ID(vmoveUUID), "succeeded", resource.WithPollInterval(time.Millisecond), resource.WithProgressCallback(func(p int) { progress = append(progress, p) }))
+	value, err := scope.Wait(context.Background(), resource.ID(vmoveUUID), "succeeded", resource.WithPollInterval(time.Millisecond), resource.WithProgressCallback(func(p int) error { progress = append(progress, p); return nil }))
 	if err != nil || value.Status != "succeeded" || polls.Load() != 2 || !reflect.DeepEqual(progress, []int{0}) {
 		t.Fatalf("value=%+v polls=%d progress=%v err=%v", value, polls.Load(), progress, err)
 	}

@@ -134,7 +134,7 @@ func TestWaitProgressCallbackRunsBeforeChannelSend(t *testing.T) {
 	sent := make(chan int, 4)
 	var queuedAtCallback []int
 	_, err := collection.Wait(context.Background(), resource.ID("fixed"), "ACTIVE", resource.WithPollInterval(time.Millisecond),
-		resource.WithProgress(sent), resource.WithProgressCallback(func(int) { queuedAtCallback = append(queuedAtCallback, len(sent)) }))
+		resource.WithProgress(sent), resource.WithProgressCallback(func(int) error { queuedAtCallback = append(queuedAtCallback, len(sent)); return nil }))
 	if err != nil || !reflect.DeepEqual(queuedAtCallback, []int{0, 1}) || len(sent) != 2 || <-sent != 1 || <-sent != 2 {
 		t.Fatalf("err=%v queued at callback=%v", err, queuedAtCallback)
 	}

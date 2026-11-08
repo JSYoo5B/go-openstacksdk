@@ -48,12 +48,13 @@ func TestWaitDeletedOptInGuardProtectsEveryCompletionBoundary(t *testing.T) {
 			})
 			err := collection.WaitDeleted(context.Background(), resource.ID("fixed"),
 				resource.WithPollInterval(time.Millisecond),
-				resource.WithProgressCallback(func(progress int) {
+				resource.WithProgressCallback(func(progress int) error {
 					callbacks++
 					if progress != 0 {
 						t.Fatal(progress)
 					}
 					changed = true
+					return nil
 				}))
 			wantGets, wantGuards, wantCallbacks := 1, 2, 0
 			if phase == "before fetch" {
@@ -113,11 +114,12 @@ func TestWaitDeletedGuardPreservesFetchFailureAndLegacyNilGuard(t *testing.T) {
 					}
 				},
 			})
-			err := collection.WaitDeleted(context.Background(), resource.ID("fixed"), resource.WithPollInterval(time.Millisecond), resource.WithProgressCallback(func(progress int) {
+			err := collection.WaitDeleted(context.Background(), resource.ID("fixed"), resource.WithPollInterval(time.Millisecond), resource.WithProgressCallback(func(progress int) error {
 				if progress != 0 {
 					t.Fatal(progress)
 				}
 				callbacks++
+				return nil
 			}))
 			if err != nil || gets != 2 || callbacks != 1 {
 				t.Fatal(err, gets, callbacks)

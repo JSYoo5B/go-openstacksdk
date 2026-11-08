@@ -63,7 +63,7 @@ func TestWaitRawAttributeComparesViewStringsLikeTypedFields(t *testing.T) {
 	// Progress is still read from the record struct, which has none.
 	var progress []int
 	collection, _ = rawWaitCollection(nil, `{"state":"a"}`, `{"state":"b"}`)
-	if _, err := collection.Wait(ctx, resource.ID("fixed"), "b", append(rawFast(), resource.WithStatusAttribute("state"), resource.WithProgressCallback(func(p int) { progress = append(progress, p) }))...); err != nil || len(progress) != 1 || progress[0] != 0 {
+	if _, err := collection.Wait(ctx, resource.ID("fixed"), "b", append(rawFast(), resource.WithStatusAttribute("state"), resource.WithProgressCallback(func(p int) error { progress = append(progress, p); return nil }))...); err != nil || len(progress) != 1 || progress[0] != 0 {
 		t.Fatalf("progress=%v err=%v", progress, err)
 	}
 }

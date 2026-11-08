@@ -234,7 +234,7 @@ func imageRecordWaitPolicy(config ImageRecordWaitOpts, deleting bool) (resource.
 	}
 	if config.Callback != nil {
 		callback := config.Callback
-		options = append(options, resource.WithProgressCallback(func(int) { callback(0) }))
+		options = append(options, resource.WithProgressCallback(func(int) error { callback(0); return nil }))
 	}
 	if config.Progress != nil {
 		// The observation model has no progress field, so the shared wait sends zero.

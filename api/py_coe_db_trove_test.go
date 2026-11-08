@@ -64,7 +64,7 @@ func TestPyCOEDBInstanceWaitForStatusMatchesCaseInsensitivelyWithZeroProgressAnd
 	calls := pyCOEDBInstanceSequence(cloud, "BUILD", "BUILD", "ACTIVE")
 	var progress []int
 	value, err := troveInstanceAPI(cloud).WaitFor(context.Background(), resource.ID("inst-1"), "active",
-		resource.WithPollInterval(time.Millisecond), resource.WithProgressCallback(func(p int) { progress = append(progress, p) }))
+		resource.WithPollInterval(time.Millisecond), resource.WithProgressCallback(func(p int) error { progress = append(progress, p); return nil }))
 	if err != nil || value == nil || value.Status != "ACTIVE" || calls.Load() != 3 || !reflect.DeepEqual(progress, []int{0, 0}) {
 		t.Fatalf("value=%+v err=%v calls=%d progress=%v", value, err, calls.Load(), progress)
 	}
@@ -114,7 +114,7 @@ func TestPyCOEDBInstanceWaitForDeletionCompletesOnNotFoundAndNeverDeletes(t *tes
 	calls := pyCOEDBInstanceSequence(cloud, "SHUTDOWN", "SHUTDOWN", "404")
 	var progress []int
 	if err := troveInstanceAPI(cloud).WaitForDeletion(context.Background(), resource.ID("inst-1"),
-		resource.WithPollInterval(time.Millisecond), resource.WithProgressCallback(func(p int) { progress = append(progress, p) })); err != nil {
+		resource.WithPollInterval(time.Millisecond), resource.WithProgressCallback(func(p int) error { progress = append(progress, p); return nil })); err != nil {
 		t.Fatal(err)
 	}
 	if calls.Load() != 3 || deletes.Load() != 0 || !reflect.DeepEqual(progress, []int{0, 0}) {

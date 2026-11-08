@@ -65,7 +65,7 @@ func TestPythonOrderWaitForStatus(t *testing.T) {
 			var calls []pythonOrderCall
 			api := pythonOrderAPI(t, &calls, tc.statuses...)
 			var progress []int
-			options := append(append([]resource.WaitOption(nil), tc.options...), resource.WithProgressCallback(func(value int) { progress = append(progress, value) }))
+			options := append(append([]resource.WaitOption(nil), tc.options...), resource.WithProgressCallback(func(value int) error { progress = append(progress, value); return nil }))
 			target := "active"
 			if tc.name == "attribute" {
 				target = "KEY"

@@ -44,7 +44,8 @@ options last.
   other than 404 (for example 403), transport, decoder and context errors end
   the wait with that error.
 - `resource.WithProgressCallback` reports an exported integer `progress`
-  field or zero after each nonterminal observation.
+  field or zero after each nonterminal observation. A returned error stops
+  the wait and is returned by it.
 
 ## Wait collections
 

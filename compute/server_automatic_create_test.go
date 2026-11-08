@@ -63,7 +63,7 @@ func TestAutomaticCreateWaitsForRawMetadataAndObservesAssignment(t *testing.T) {
 	}
 	o := automaticCreateOptions()
 	var progress []int
-	o.Server = append(o.Server, compute.WithWait(resource.WithPollInterval(time.Millisecond), resource.WithProgressCallback(func(n int) { progress = append(progress, n) })))
+	o.Server = append(o.Server, compute.WithWait(resource.WithPollInterval(time.Millisecond), resource.WithProgressCallback(func(n int) error { progress = append(progress, n); return nil })))
 	result, err := f.service.CreateWithAutomaticFloatingIP(context.Background(), automaticCreateRequest(), o)
 	if err != nil || result == nil || result.Creation.AdminPass != "initial-password" || result.Server.AdminPass != "initial-password" || result.Automatic.Server.AdminPass != "" || result.Server.Status != "ACTIVE" || result.Automatic == nil || !result.Automatic.Observed || result.Automatic.Assignment == nil || posts.Load() != 1 || f.posts.Load() != 1 || f.raw.Load() != 4 || !reflect.DeepEqual(progress, []int{25, 0}) {
 		t.Fatal(result, err, posts.Load(), f.posts.Load(), f.raw.Load(), progress)
@@ -124,13 +124,14 @@ func TestAutomaticCreateWaitErrorsKeepLastMatchingServer(t *testing.T) {
 			cause := errors.New("progress canceled")
 			o := automaticCreateOptions()
 			o.AutomaticIP = append(o.AutomaticIP, compute.WithAutomaticIPEnabled(false))
-			o.Server = append(o.Server, compute.WithWait(resource.WithPollInterval(time.Millisecond), resource.WithTimeout(20*time.Millisecond), resource.WithFailureStates(), resource.WithProgressCallback(func(int) {
+			o.Server = append(o.Server, compute.WithWait(resource.WithPollInterval(time.Millisecond), resource.WithTimeout(20*time.Millisecond), resource.WithFailureStates(), resource.WithProgressCallback(func(int) error {
 				if scenario == "progress source" {
 					f.service.API = nil
 				}
 				if scenario == "progress cancel" {
 					cancel(cause)
 				}
+				return nil
 			})))
 			f.rawBody = func(n int32) (int, string) {
 				switch scenario {

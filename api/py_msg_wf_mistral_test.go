@@ -313,7 +313,7 @@ func TestPyMsgWfExecutionWaitForStatePollsAndFailsOnError(t *testing.T) {
 			got, err := executions.New(mistralClient(cloud)).WaitFor(context.Background(), resource.ID("ex-1"), tc.target,
 				resource.WithStatusAttribute("state"), resource.WithFailureStates("ERROR"),
 				resource.WithPollInterval(time.Millisecond), resource.WithUnlimitedWait(),
-				resource.WithProgressCallback(func(p int) { progress = append(progress, p) }))
+				resource.WithProgressCallback(func(p int) error { progress = append(progress, p); return nil }))
 			if tc.failed == "" {
 				if err != nil || got == nil || !strings.EqualFold(got.State, tc.target) || calls.Load() != 3 {
 					t.Fatalf("got=%+v err=%v calls=%d", got, err, calls.Load())

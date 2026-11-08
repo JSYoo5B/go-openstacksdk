@@ -314,7 +314,7 @@ func TestPyHeatSenlinStackWaitTransientTimeoutCustomPolicyAndCancellation(t *tes
 	// Transient polling: nonterminal responses are polled until the target.
 	phase.Store(1)
 	var progress []int
-	value, err := scope.Wait(ctx, "create_complete", fast, resource.WithTimeout(5*time.Second), resource.WithProgressCallback(func(p int) { progress = append(progress, p) }))
+	value, err := scope.Wait(ctx, "create_complete", fast, resource.WithTimeout(5*time.Second), resource.WithProgressCallback(func(p int) error { progress = append(progress, p); return nil }))
 	if err != nil || value == nil || value.Status != "CREATE_COMPLETE" || gets.Load() != 4 {
 		t.Fatalf("transient wait=%v err=%v gets=%d", value, err, gets.Load())
 	}
@@ -382,7 +382,7 @@ func TestPyHeatSenlinStackWaitDeletedTransientAdoptAndCallback(t *testing.T) {
 	})
 	scope := heatScope(t, api, "app", "fixed")
 	var progress []int
-	if err := scope.WaitDeleted(context.Background(), resource.WithPollInterval(time.Millisecond), resource.WithTimeout(5*time.Second), resource.WithProgressCallback(func(p int) { progress = append(progress, p) })); err != nil {
+	if err := scope.WaitDeleted(context.Background(), resource.WithPollInterval(time.Millisecond), resource.WithTimeout(5*time.Second), resource.WithProgressCallback(func(p int) error { progress = append(progress, p); return nil })); err != nil {
 		t.Fatal(err)
 	}
 	if gets.Load() != 3 || len(progress) != 2 {

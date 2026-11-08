@@ -338,7 +338,7 @@ func TestServiceWaitContractsNameBindingLiveClientAndProgress(t *testing.T) {
 			var progress []int
 			options := []resource.WaitOption{resource.WithPollInterval(time.Millisecond)}
 			if f.progressSupported {
-				options = append(options, resource.WithProgressCallback(func(n int) { progress = append(progress, n) }))
+				options = append(options, resource.WithProgressCallback(func(n int) error { progress = append(progress, n); return nil }))
 			}
 			v, err := f.bind(client).state(context.WithValue(context.Background(), contextKey{}, "caller"), resource.Name("worker"), "ACTIVE", options...)
 			if err != nil || v == nil || v.ID != "changed-response-id" || v.Status != "ACTIVE" || lists.Load() != 1 || gets.Load() != 2 || wrong.Load() != 0 || middleware.Load() != 3 || client.ResourceBase != cloud.Server.URL+f.prefix {
@@ -381,7 +381,7 @@ func TestServiceWaitContractsDeletionOnlyObservesAndRejectsTerminalErrors(t *tes
 			var progress []int
 			options := []resource.WaitOption{resource.WithPollInterval(time.Millisecond)}
 			if f.progressSupported {
-				options = append(options, resource.WithProgressCallback(func(n int) { progress = append(progress, n) }))
+				options = append(options, resource.WithProgressCallback(func(n int) error { progress = append(progress, n); return nil }))
 			}
 			err := f.bind(cloud.Client(f.service, f.prefix)).delete(context.Background(), resource.Name("worker"), options...)
 			if err != nil || gets.Load() != 2 || lists.Load() != 1 || mutations.Load() != 0 {
@@ -458,7 +458,7 @@ func TestServiceWaitContractsStatusAttributesAndNativeProgressLimits(t *testing.
 				// The native string uses an extension tag, not canonical progress.
 				// The callback reports zero without interpreting that string.
 				var progress []int
-				v, err := bound.state(context.Background(), resource.ID("selected"), "ACTIVE", resource.WithPollInterval(time.Millisecond), resource.WithProgressCallback(func(value int) { progress = append(progress, value) }))
+				v, err := bound.state(context.Background(), resource.ID("selected"), "ACTIVE", resource.WithPollInterval(time.Millisecond), resource.WithProgressCallback(func(value int) error { progress = append(progress, value); return nil }))
 				if err != nil || v == nil || v.Status != "ACTIVE" || calls.Load() != 3 || !reflect.DeepEqual(progress, []int{0}) {
 					t.Fatal("native extension progress was interpreted as canonical progress", v, err, calls.Load(), progress)
 				}

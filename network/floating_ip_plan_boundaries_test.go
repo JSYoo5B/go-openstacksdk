@@ -179,7 +179,7 @@ func TestFloatingIPPlanWaitAndPreflightPreserveCancellationCause(t *testing.T) {
 	defer cancel(nil)
 	cause := errors.New("operator canceled observation")
 	ips := network.New(cloud.Client("network", "/v2.0")).FloatingIPs
-	plan, err := ips.PrepareEnsure(ctx, ensureFloatingRequest(), network.WithEnsureReuse(false), network.WithEnsureWait(resource.WithProgressCallback(func(int) { cancel(cause) }), resource.WithPollInterval(time.Hour)))
+	plan, err := ips.PrepareEnsure(ctx, ensureFloatingRequest(), network.WithEnsureReuse(false), network.WithEnsureWait(resource.WithProgressCallback(func(int) error { cancel(cause); return nil }), resource.WithPollInterval(time.Hour)))
 	if err != nil {
 		t.Fatal(err)
 	}

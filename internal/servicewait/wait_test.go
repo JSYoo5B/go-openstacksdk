@@ -218,7 +218,7 @@ func TestServiceWaitDeleteObservesAbsenceWithoutFailureOrMutation(t *testing.T) 
 					return &waitValue{ID: "another-decoy", Status: "DELETED", Progress: 100}, nil
 				}
 			}, &deletes)
-			err := servicewait.Delete(context.Background(), c, resource.ID("fixed"), resource.WithPollInterval(time.Millisecond), resource.WithFailureStates("ERROR"), resource.WithProgressCallback(func(value int) { progress = append(progress, value) }))
+			err := servicewait.Delete(context.Background(), c, resource.ID("fixed"), resource.WithPollInterval(time.Millisecond), resource.WithFailureStates("ERROR"), resource.WithProgressCallback(func(value int) error { progress = append(progress, value); return nil }))
 			if err != nil || gets != 2 || deletes != 0 || !reflect.DeepEqual(progress, []int{37}) {
 				t.Fatalf("err=%v gets=%d deletes=%d progress=%v", err, gets, deletes, progress)
 			}
@@ -298,7 +298,7 @@ func TestServiceWaitPreflightAndCallerCancellationBeforeAnotherFetch(t *testing.
 				return &waitValue{ID: "fixed", Status: "building", Progress: 9}, nil
 			}, nil)
 			callbacks := 0
-			_, err := run(kind, ctx, c, resource.WithProgressCallback(func(int) { callbacks++; cancel() }))
+			_, err := run(kind, ctx, c, resource.WithProgressCallback(func(int) error { callbacks++; cancel(); return nil }))
 			if !errors.Is(err, context.Canceled) || calls != 1 || callbacks != 1 {
 				t.Fatalf("callback cancellation err=%v calls=%d callbacks=%d", err, calls, callbacks)
 			}
