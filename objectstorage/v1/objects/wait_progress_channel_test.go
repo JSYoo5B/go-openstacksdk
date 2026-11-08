@@ -28,19 +28,19 @@ func TestObjectWaitProgressChannelSendsZeroClearsAndRejectsNil(t *testing.T) {
 	client := objectMetadataClient(objectWaitProgressClient(&calls, 3))
 	var got []int
 	observer := testcloud.NewProgress(t, func(v int) { got = append(got, v) })
-	result, err := objects.New(client).WaitForDelete(context.Background(), "c", "o", objects.WithObjectWaitPollInterval(time.Millisecond), objects.WithObjectWaitProgress(observer.C))
+	result, err := objects.New(client).WaitForDelete(context.Background(), "c", "o", objects.WithObjectWait(resource.WithPollInterval(time.Millisecond)), objects.WithObjectWait(resource.WithProgress(observer.C)))
 	observer.Done()
 	if err != nil || result == nil || !result.Deleted || calls != 3 || !reflect.DeepEqual(got, []int{0, 0}) {
 		t.Fatal(result, err, calls, got)
 	}
 	calls = 0
 	unused := make(chan int, 4)
-	result, err = objects.New(client).WaitForDelete(context.Background(), "c", "o", objects.WithObjectWaitPollInterval(time.Millisecond), objects.WithObjectWaitProgress(unused), objects.WithoutObjectWaitProgress())
+	result, err = objects.New(client).WaitForDelete(context.Background(), "c", "o", objects.WithObjectWait(resource.WithProgress(unused)), objects.WithObjectWaitOpts(objects.ObjectWaitOpts{}), objects.WithObjectWait(resource.WithPollInterval(time.Millisecond)))
 	if err != nil || result == nil || !result.Deleted || len(unused) != 0 {
 		t.Fatal(result, err, len(unused))
 	}
 	calls = 0
-	result, err = objects.New(client).WaitForDelete(context.Background(), "c", "o", objects.WithObjectWaitProgress(nil))
+	result, err = objects.New(client).WaitForDelete(context.Background(), "c", "o", objects.WithObjectWait(resource.WithProgress(nil)))
 	if result != nil || !errors.Is(err, resource.ErrInvalidOption) || calls != 0 {
 		t.Fatal(result, err, calls)
 	}
@@ -56,7 +56,7 @@ func TestObjectWaitProgressChannelBlockedSendStopsOnCancellation(t *testing.T) {
 		return objectMetadataResponse(200, "blocked proof"), nil
 	})
 	blocked := make(chan int)
-	result, err := objects.New(client).WaitForDelete(ctx, "c", "o", objects.WithObjectWaitPollInterval(time.Millisecond), objects.WithObjectWaitProgress(blocked))
+	result, err := objects.New(client).WaitForDelete(ctx, "c", "o", objects.WithObjectWait(resource.WithPollInterval(time.Millisecond)), objects.WithObjectWait(resource.WithProgress(blocked)))
 	select {
 	case v := <-blocked:
 		t.Fatal("progress sent after the wait returned", v)
@@ -89,7 +89,7 @@ func TestObjectWaitProgressChannelReceiverCancellation(t *testing.T) {
 		got = append(got, value)
 		gate.AwaitThen(t, func() { cancel(cause) })
 	})
-	result, err := objects.New(client).WaitForDelete(ctx, "c", "o", objects.WithObjectWaitPollInterval(time.Millisecond), objects.WithObjectWaitProgress(observer.C))
+	result, err := objects.New(client).WaitForDelete(ctx, "c", "o", objects.WithObjectWait(resource.WithPollInterval(time.Millisecond)), objects.WithObjectWait(resource.WithProgress(observer.C)))
 	observer.Done()
 	if !errors.Is(err, context.Canceled) || !errors.Is(err, cause) || result == nil || result.Complete || calls != 1 || gate.Seen() != 2 || !reflect.DeepEqual(got, []int{0}) {
 		t.Fatal(result, err, calls, gate.Seen(), got)
@@ -107,8 +107,8 @@ func TestObjectWaitProgressCallbackRunsBeforeChannelSend(t *testing.T) {
 	// A buffered channel shows what was already sent when each callback runs.
 	sent := make(chan int, 4)
 	var queuedAtCallback []int
-	result, err := objects.New(client).WaitForDelete(context.Background(), "c", "o", objects.WithObjectWaitPollInterval(time.Millisecond), objects.WithObjectWaitProgress(sent),
-		objects.WithObjectWaitProgressCallback(func(int) error { queuedAtCallback = append(queuedAtCallback, len(sent)); return nil }))
+	result, err := objects.New(client).WaitForDelete(context.Background(), "c", "o", objects.WithObjectWait(resource.WithPollInterval(time.Millisecond)), objects.WithObjectWait(resource.WithProgress(sent)),
+		objects.WithObjectWait(resource.WithProgressCallback(func(int) error { queuedAtCallback = append(queuedAtCallback, len(sent)); return nil })))
 	if err != nil || result == nil || !result.Deleted || !reflect.DeepEqual(queuedAtCallback, []int{0, 1}) || len(sent) != 2 {
 		t.Fatal(result, err, queuedAtCallback, len(sent))
 	}
@@ -116,8 +116,8 @@ func TestObjectWaitProgressCallbackRunsBeforeChannelSend(t *testing.T) {
 	calls = 0
 	stop := errors.New("callback stop")
 	sent = make(chan int, 4)
-	result, err = objects.New(client).WaitForDelete(context.Background(), "c", "o", objects.WithObjectWaitPollInterval(time.Millisecond), objects.WithObjectWaitProgress(sent),
-		objects.WithObjectWaitProgressCallback(func(int) error { return stop }))
+	result, err = objects.New(client).WaitForDelete(context.Background(), "c", "o", objects.WithObjectWait(resource.WithPollInterval(time.Millisecond)), objects.WithObjectWait(resource.WithProgress(sent)),
+		objects.WithObjectWait(resource.WithProgressCallback(func(int) error { return stop })))
 	if !errors.Is(err, stop) || result == nil || result.Complete || calls != 1 || len(sent) != 0 {
 		t.Fatal(result, err, calls, len(sent))
 	}

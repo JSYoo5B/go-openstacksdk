@@ -31,7 +31,8 @@ type WaitDefaults struct {
 
 // WaitSettings are the controls resolved from WaitDefaults and the caller's
 // options. Timeout is zero when Unlimited is set. FailureStatesSet reports an
-// explicit WithFailureStates, whose empty list disables failure detection.
+// explicit WithFailureStates; FailureStates is then non-nil, and an empty list
+// disables failure detection. FailureStates is nil when it was not set.
 // StatusAttribute is empty unless the caller selected one. The slice is owned
 // by the settings.
 type WaitSettings struct {
@@ -82,11 +83,15 @@ func ResolveWait(defaults WaitDefaults, opts ...WaitOption) (WaitSettings, error
 	if !strategy.built {
 		strategy = FixedWait(o.interval)
 	}
+	var failures []string
+	if o.failureStatesSet {
+		failures = append([]string{}, o.failureStates...)
+	}
 	return WaitSettings{
 		Timeout:          o.timeout,
 		Unlimited:        o.timeout == 0,
 		Strategy:         strategy,
-		FailureStates:    append([]string(nil), o.failureStates...),
+		FailureStates:    failures,
 		FailureStatesSet: o.failureStatesSet,
 		StatusAttribute:  o.statusAttribute,
 		ProgressCallback: o.progressCallback,

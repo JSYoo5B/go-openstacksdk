@@ -21,7 +21,7 @@ func TestPythonProjectQuotaWaitFixedRouteRawDescriptorsAndDefaults(t *testing.T)
 		}
 		return wire(203, body)
 	})
-	got, err := api.WaitForStatus(context.Background(), waits.ProjectQuota("project/id"), str("ready"), waits.WithAttribute("name"))
+	got, err := api.WaitForStatus(context.Background(), waits.ProjectQuota("project/id"), str("ready"), waits.WithWait(resource.WithStatusAttribute("name")))
 	if err != nil || got.Kind != "project-quotas" || got.RequestID != "project/id" || len(*calls) != 1 || got.StatusCode != 203 || string(got.Envelope) != body {
 		t.Fatal(got, err, *calls)
 	}
@@ -39,7 +39,7 @@ func TestPythonProjectQuotaWaitCachedRecordOwnsSnapshotsAndNoStatus(t *testing.T
 	original.Resource.Body["name"][1] = 'X'
 	original.Envelope[0] = '!'
 	api, _, calls := fixture(t, func(*http.Request, int) *http.Response { t.Fatal("cached GET"); return nil })
-	got, err := api.WaitForStatus(context.Background(), target, str("ready"), waits.WithAttribute("name"), waits.WithTimeout(0), waits.WithInterval(-time.Second))
+	got, err := api.WaitForStatus(context.Background(), target, str("ready"), waits.WithWait(resource.WithStatusAttribute("name")), waits.WithTimeout(0), waits.WithInterval(-time.Second))
 	if err != nil || got.RequestID != "fixed" || got.StatusCode != 202 || got.Header.Get("X-Proof") != "cached" {
 		t.Fatal(got, err)
 	}
@@ -47,7 +47,7 @@ func TestPythonProjectQuotaWaitCachedRecordOwnsSnapshotsAndNoStatus(t *testing.T
 	if _, err := api.WaitForStatus(context.Background(), waits.ProjectQuota("fixed"), str("active")); !errors.Is(err, resource.ErrUnsupported) {
 		t.Fatal(err)
 	}
-	got, err = api.WaitForStatus(context.Background(), waits.ProjectQuota("fixed"), nil, waits.WithAttribute("orders"))
+	got, err = api.WaitForStatus(context.Background(), waits.ProjectQuota("fixed"), nil, waits.WithWait(resource.WithStatusAttribute("orders")))
 	if err != nil || got.StatusCode != 0 || got.Wire != nil || got.Envelope != nil || len(*calls) != 0 {
 		t.Fatal(got, err, *calls)
 	}
@@ -62,13 +62,13 @@ func TestPythonProjectQuotaWaitMergeIgnoresMalformedJSONAndPreservesNull(t *test
 		return wire(202, bodies[n-1])
 	})
 	count := 0
-	got, err := api.WaitForStatus(context.Background(), waits.ProjectQuota("fixed"), str("ready"), waits.WithAttribute("name"), waits.WithInterval(time.Nanosecond), waits.WithProgressCallback(func(progress int) error {
+	got, err := api.WaitForStatus(context.Background(), waits.ProjectQuota("fixed"), str("ready"), waits.WithWait(resource.WithStatusAttribute("name")), waits.WithInterval(time.Nanosecond), waits.WithWait(resource.WithProgressCallback(func(progress int) error {
 		if progress != 0 {
 			t.Fatal(progress)
 		}
 		count++
 		return nil
-	}))
+	})))
 	if err != nil || len(*calls) != 3 || count != 2 || string(got.Envelope) != bodies[2] {
 		t.Fatal(got, err, count, *calls)
 	}
@@ -86,7 +86,7 @@ func TestPythonProjectQuotaWaitDeleteOnlyCleanGET404(t *testing.T) {
 		return wire(404, `{"missing":true}`)
 	})
 	callbacks := 0
-	got, err := api.WaitForDelete(context.Background(), waits.ProjectQuota("fixed"), waits.WithInterval(time.Nanosecond), waits.WithProgressCallback(func(int) error { callbacks++; return nil }))
+	got, err := api.WaitForDelete(context.Background(), waits.ProjectQuota("fixed"), waits.WithInterval(time.Nanosecond), waits.WithWait(resource.WithProgressCallback(func(int) error { callbacks++; return nil })))
 	if err != nil || len(*calls) != 2 || callbacks != 1 || got.StatusCode != 404 || got.RequestID != "fixed" {
 		t.Fatal(got, err, callbacks, *calls)
 	}
@@ -96,7 +96,7 @@ func TestPythonProjectQuotaWaitShapeNumericAndPhysicalFailures(t *testing.T) {
 	for _, body := range []string{`{"project_quotas":null}`, `[]`, `{"project_quotas":{"secrets":7}}`} {
 		t.Run(body, func(t *testing.T) {
 			api, _, calls := fixture(t, func(*http.Request, int) *http.Response { return wire(202, body) })
-			got, err := api.WaitForStatus(context.Background(), waits.ProjectQuota("fixed"), str("ready"), waits.WithAttribute("secrets"))
+			got, err := api.WaitForStatus(context.Background(), waits.ProjectQuota("fixed"), str("ready"), waits.WithWait(resource.WithStatusAttribute("secrets")))
 			var proof *resource.ResponseError
 			if got == nil || err == nil || !errors.As(err, &proof) || proof.StatusCode != 202 || string(proof.Body) != body || len(*calls) != 1 {
 				t.Fatal(got, err, proof, *calls)

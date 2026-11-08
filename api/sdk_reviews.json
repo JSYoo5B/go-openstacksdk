@@ -33590,17 +33590,16 @@
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitOpts",
         "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitPollInterval",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitStrategy",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitTimeout",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitUnlimitedWait",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitStatusAttribute",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWait",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithPollInterval",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithWaitStrategy",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithTimeout",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithUnlimitedWait",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithStatusAttribute",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitStatusHeader",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitFailureStates",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitProgressCallback",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitProgress",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithoutObjectWaitProgressCallback",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithoutObjectWaitProgress"
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithFailureStates",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithProgressCallback",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithProgress"
       ],
       "documentation": [
         "objectstorage/v1/objects/wait.md"
@@ -33609,11 +33608,11 @@
         "Go requires literal container/object and observes bodyless HEAD200/204/404; clean physical404 alone completes deletion. Python generic Resource fetch uses GET and can succeed on falsy resource, deleted status or caught NotFoundException; ordinary Swift Object declares no status. Neither waiter submits DELETE.",
         "Go returns bounded last physically-started poll attempts and independently owned raw acknowledgement/error proof plus logical Polls/Complete/Deleted, while Python returns the mutable Resource. Status remains nil for delete and status/failure selectors do not determine completion.",
         "Go keeps interval2s/deleteSDK120s with positive duration helpers, pointer0 or UnlimitedWait and caller context deadlines/cancellation; Python iterate_timeout uses wall-clock/numeric coercion, accepts None and rewrites zero interval. Existing Collection.WaitDeleted five-minute/default generic policy stays separate.",
-        "Go snapshots typed maps/pointers/slices and callbacks, guards fixed original source/body/status codes, preserves live auth and excludes Range/If-* plus existing X-Newest reservations. Python Resource.fetch does not forward prepared request headers to session.get. Go synchronous progress0 callbacks can return errors and clear via nil/Without.",
+        "Go snapshots typed maps/pointers/slices and callbacks, guards fixed original source/body/status codes, preserves live auth and excludes Range/If-* plus existing X-Newest reservations. Python Resource.fetch does not forward prepared request headers to session.get. Go synchronous progress0 callbacks can return errors.",
         "Results are immutable owned snapshots rather than Python's mutable Resource with adapter, session, cache and dirty state (SDK-R1/C1/S1); see Deliberate runtime differences in docs/sdk-support-ledger.md.",
         "Completion is a clean HEAD 404. An Object has no deleted status, so Python's deleted-status completion and generic progress callbacks have no equivalent, and Go keeps evidence of the last poll only.",
         "A HEAD 404 observes absence on that route at that moment; replica races, middleware permissions, proxy caching and cluster-wide deletion are server concerns, and the waiter adds no X-Newest extension; see Server guarantees outside the SDK in docs/sdk-support-ledger.md.",
-        "Python waits use a fixed poll interval. objects.WithObjectWaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of the interval and strategy options wins."
+        "Python waits use a fixed poll interval. objects.WithObjectWait with resource.WithWaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of the interval and strategy options wins."
       ],
       "contracts": [
         {
@@ -33639,7 +33638,7 @@
           ]
         },
         {
-          "behavior": "Full option factories snapshot maps, duration pointers, failure slices and callbacks; later caller or retained callback-option mutation cannot alter prepared polls. Canonical header overlays and reusable factories keep independent acknowledgement/attempt proof, including concurrent calls.",
+          "behavior": "Full option factories snapshot header maps and the Wait option slice; later caller or retained callback-option mutation cannot alter prepared polls. Canonical header overlays and reusable factories keep independent acknowledgement/attempt proof, including concurrent calls.",
           "tests": [
             "objectstorage/v1/objects/wait_options_test.go:TestObjectWaitOptionsSnapshots",
             "objectstorage/v1/objects/wait_options_test.go:TestObjectWaitOptionsDefaultsSelectorsAndResets",
@@ -33653,7 +33652,7 @@
           ]
         },
         {
-          "behavior": "A clean nonterminal observation calls the synchronous callback once with progress0; terminal observations do not. Callback error/cancellation/source faults preserve the actual response without committing that poll status. WithoutObjectWaitProgressCallback clears the callback.",
+          "behavior": "A clean nonterminal observation calls the synchronous callback once with progress0; terminal observations do not. Callback error/cancellation/source faults preserve the actual response without committing that poll status.",
           "tests": [
             "objectstorage/v1/objects/wait_core_test.go:TestObjectWaitCoreFreshPollingAndCallbacks",
             "objectstorage/v1/objects/wait_core_test.go:TestObjectWaitCoreFailureEvidenceAndCallbackCauses",
@@ -33681,7 +33680,7 @@
           ]
         },
         {
-          "behavior": "WithObjectWaitProgress and ObjectWaitOpts.Progress send zero on a caller-owned channel after each clean nonterminal observation; WithoutObjectWaitProgress clears it. Each send blocks until it is received or the context ends; the SDK never closes the caller-owned channel and sends nothing after the operation returns, a context that ends during a send stops it through its cancellation path, and a nil channel option is invalid before HTTP. With a progress callback also set the callback runs first; its error stops the wait and nothing is sent for that step.",
+          "behavior": "resource.WithProgress through WithObjectWait sends zero on a caller-owned channel after each clean nonterminal observation; WithObjectWaitOpts with an empty Wait clears it. Each send blocks until it is received or the context ends; the SDK never closes the caller-owned channel and sends nothing after the operation returns, a context that ends during a send stops it through its cancellation path, and a nil channel option is invalid before HTTP. With a progress callback also set the callback runs first; its error stops the wait and nothing is sent for that step.",
           "tests": [
             "objectstorage/v1/objects/wait_progress_channel_test.go:TestObjectWaitProgressChannelSendsZeroClearsAndRejectsNil",
             "objectstorage/v1/objects/wait_progress_channel_test.go:TestObjectWaitProgressChannelBlockedSendStopsOnCancellation",
@@ -33690,7 +33689,7 @@
           ]
         },
         {
-          "behavior": "objects.WithObjectWaitStrategy rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, the interval option given before or after it.",
+          "behavior": "objects.WithObjectWait with resource.WithWaitStrategy rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, resource.WithPollInterval given before or after it.",
           "tests": [
             "objectstorage/v1/objects/wait_strategy_test.go:TestObjectWaitStrategy"
           ]
@@ -33706,17 +33705,16 @@
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitOpts",
         "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitPollInterval",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitStrategy",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitTimeout",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitUnlimitedWait",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitStatusAttribute",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWait",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithPollInterval",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithWaitStrategy",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithTimeout",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithUnlimitedWait",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithStatusAttribute",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitStatusHeader",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitFailureStates",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitProgressCallback",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitProgress",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithoutObjectWaitProgressCallback",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithoutObjectWaitProgress"
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithFailureStates",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithProgressCallback",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithProgress"
       ],
       "documentation": [
         "objectstorage/v1/objects/wait.md"
@@ -33729,7 +33727,7 @@
         "Results are immutable owned snapshots rather than Python's mutable Resource with adapter, session, cache and dirty state (SDK-R1/C1/S1); see Deliberate runtime differences in docs/sdk-support-ledger.md.",
         "An Object has no status attribute: Python's default raises AttributeError before any request and Go returns ErrUnsupported before HTTP. With an explicit selector Go compares HEAD metadata or headers using EqualFold where Python lowercases, which agree for ASCII values, and failures are typed Go errors rather than Python exception classes.",
         "A matching observation is one HEAD response, not a lock or a consistency guarantee, and no Swift lifecycle status is invented; see Server guarantees outside the SDK in docs/sdk-support-ledger.md.",
-        "Python waits use a fixed poll interval. objects.WithObjectWaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of the interval and strategy options wins."
+        "Python waits use a fixed poll interval. objects.WithObjectWait with resource.WithWaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of the interval and strategy options wins."
       ],
       "contracts": [
         {
@@ -33748,7 +33746,7 @@
           ]
         },
         {
-          "behavior": "Target and failure comparisons ignore case and target wins over failure. Nil failures reset to ERROR; nonnil empty and no-argument failure helper disable failures. A clean failure keeps observed Status and typed failed-state proof; clean404 is a status-wait error. Selector helpers clear each other so the last selection wins, while conflicting full selectors reject.",
+          "behavior": "Target and failure comparisons ignore case and target wins over failure. Nil failures reset to ERROR; nonnil empty and no-argument failure helper disable failures. A clean failure keeps observed Status and typed failed-state proof; clean404 is a status-wait error. resource.WithStatusAttribute and WithObjectWaitStatusHeader clear each other so the last selection wins, while a full ObjectWaitOpts whose Wait selects an attribute next to StatusHeader rejects.",
           "tests": [
             "objectstorage/v1/objects/wait_core_test.go:TestObjectWaitCoreProjectionAndTerminalStates",
             "objectstorage/v1/objects/wait_options_test.go:TestObjectWaitOptionsDefaultsSelectorsAndResets",
@@ -33772,7 +33770,7 @@
           ]
         },
         {
-          "behavior": "Full option factories snapshot maps, duration pointers, failure slices and callbacks; later caller or retained callback-option mutation cannot alter prepared polls. Canonical header overlays and reusable factories keep independent acknowledgement/attempt proof, including concurrent calls.",
+          "behavior": "Full option factories snapshot header maps and the Wait option slice; later caller or retained callback-option mutation cannot alter prepared polls. Canonical header overlays and reusable factories keep independent acknowledgement/attempt proof, including concurrent calls.",
           "tests": [
             "objectstorage/v1/objects/wait_options_test.go:TestObjectWaitOptionsSnapshots",
             "objectstorage/v1/objects/wait_options_test.go:TestObjectWaitOptionsDefaultsSelectorsAndResets",
@@ -33786,7 +33784,7 @@
           ]
         },
         {
-          "behavior": "A clean nonterminal observation calls the synchronous callback once with progress0; terminal observations do not. Callback error/cancellation/source faults preserve the actual response without committing that poll status. WithoutObjectWaitProgressCallback clears the callback.",
+          "behavior": "A clean nonterminal observation calls the synchronous callback once with progress0; terminal observations do not. Callback error/cancellation/source faults preserve the actual response without committing that poll status.",
           "tests": [
             "objectstorage/v1/objects/wait_core_test.go:TestObjectWaitCoreFreshPollingAndCallbacks",
             "objectstorage/v1/objects/wait_core_test.go:TestObjectWaitCoreFailureEvidenceAndCallbackCauses",
@@ -33814,7 +33812,7 @@
           ]
         },
         {
-          "behavior": "WithObjectWaitProgress and ObjectWaitOpts.Progress send zero on a caller-owned channel after each clean nonterminal observation; WithoutObjectWaitProgress clears it. Each send blocks until it is received or the context ends; the SDK never closes the caller-owned channel and sends nothing after the operation returns, a context that ends during a send stops it through its cancellation path, and a nil channel option is invalid before HTTP. With a progress callback also set the callback runs first; its error stops the wait and nothing is sent for that step.",
+          "behavior": "resource.WithProgress through WithObjectWait sends zero on a caller-owned channel after each clean nonterminal observation; WithObjectWaitOpts with an empty Wait clears it. Each send blocks until it is received or the context ends; the SDK never closes the caller-owned channel and sends nothing after the operation returns, a context that ends during a send stops it through its cancellation path, and a nil channel option is invalid before HTTP. With a progress callback also set the callback runs first; its error stops the wait and nothing is sent for that step.",
           "tests": [
             "objectstorage/v1/objects/wait_progress_channel_test.go:TestObjectWaitProgressChannelSendsZeroClearsAndRejectsNil",
             "objectstorage/v1/objects/wait_progress_channel_test.go:TestObjectWaitProgressChannelBlockedSendStopsOnCancellation",
@@ -33823,7 +33821,7 @@
           ]
         },
         {
-          "behavior": "objects.WithObjectWaitStrategy rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, the interval option given before or after it.",
+          "behavior": "objects.WithObjectWait with resource.WithWaitStrategy rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, resource.WithPollInterval given before or after it.",
           "tests": [
             "objectstorage/v1/objects/wait_strategy_test.go:TestObjectWaitStrategy"
           ]
@@ -72187,15 +72185,10 @@
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.ForSecret",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithOptions",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithInterval",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithWaitStrategy",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithWait",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithTimeout",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithUnlimitedWait",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithProgressCallback",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithProgress",
         "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithFailures",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithAttribute",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.SecretStore",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.ForSecretStore",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.SecretACL",
@@ -72370,7 +72363,7 @@
           ]
         },
         {
-          "behavior": "waits.WithWaitStrategy rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, the interval option given before or after it.",
+          "behavior": "waits.WithWait with resource.WithWaitStrategy rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, the interval option given before or after it.",
           "tests": [
             "keymanager/v1/waits/wait_strategy_test.go:TestKeymanagerWaitStrategy"
           ]
@@ -72386,7 +72379,7 @@
       ],
       "differences": [
         "Legacy generated collection waits retain their historical five-minute policy. The concrete waits.API lane defaults status to unlimited/ERROR and deletion120s with interval2s, matching the pinned helper defaults.",
-        "Legacy resource.WithPollInterval requires positive durations; concrete waits.WithInterval(0) uses Source100ms/min-positive-timeout coercion.",
+        "resource.WithPollInterval and resource.WithTimeout through waits.WithWait require positive durations; the Python-parity waits.WithInterval(0) uses Source100ms/min-positive-timeout coercion and waits.WithTimeout(0) exhausts before the first observation.",
         "Timeouts and failures are Python ResourceTimeout and ResourceFailure; Go returns context deadline errors and resource.FailedStateError.",
         "Finite SDK-owned concrete Target constructors with immutable routes and independent record snapshots replace Python arbitrary Resource subclasses, same-object mutation and dynamic getattr. All known pinned fetchable concrete targets now include admin ProjectQuota; arbitrary class/subtyping remains SDK-R1 as a deliberate finite Go API boundary.",
         "Source normalized nullable/empty/string states use PythonLower and private exact comparison tokens, not broad Unicode EqualFold. Go failures accept strings only, callbacks are typed func(int)error, declared attributes must be nullable strings.",
@@ -72407,7 +72400,7 @@
         "Admin ProjectQuota is a member route unlike effective Quota; its original project ID is seeded and immutable while response IDs remain passive. Like Quota/ACL it has no status descriptor and stock override reset can leave GET200, so absence waiting is not proof of settings deletion.",
         "This mapping covers finite SDK-owned concrete target constructors rather than arbitrary Python Resource/runtime subclass/cache/location behavior. SDK-R1/C1/S1 and actual deployment/permission/release validation remain explicit whole-SDK gaps.",
         "Python waits use a fixed poll interval. resource.WithWaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of the interval and strategy options wins.",
-        "Python waits use a fixed poll interval. waits.WithWaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of the interval and strategy options wins."
+        "Python waits use a fixed poll interval. waits.WithWait with resource.WithWaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of the interval and strategy options wins."
       ],
       "remaining": []
     },
@@ -72433,11 +72426,11 @@
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.ForSecret",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithOptions",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithInterval",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithWaitStrategy",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithWait",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithTimeout",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithUnlimitedWait",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithProgressCallback",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithProgress",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithUnlimitedWait",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithProgressCallback",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithProgress",
         "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.SecretStore",
@@ -72585,7 +72578,7 @@
           ]
         },
         {
-          "behavior": "waits.WithWaitStrategy rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, the interval option given before or after it.",
+          "behavior": "waits.WithWait with resource.WithWaitStrategy rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, the interval option given before or after it.",
           "tests": [
             "keymanager/v1/waits/wait_strategy_test.go:TestKeymanagerWaitStrategy"
           ]
@@ -72620,7 +72613,7 @@
         "Admin ProjectQuota is a member route unlike effective Quota; its original project ID is seeded and immutable while response IDs remain passive. Like Quota/ACL it has no status descriptor and stock override reset can leave GET200, so absence waiting is not proof of settings deletion.",
         "This mapping covers finite SDK-owned concrete target constructors rather than arbitrary Python Resource/runtime subclass/cache/location behavior. SDK-R1/C1/S1 and actual deployment/permission/release validation remain explicit whole-SDK gaps.",
         "Python waits use a fixed poll interval. resource.WithWaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of the interval and strategy options wins.",
-        "Python waits use a fixed poll interval. waits.WithWaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of the interval and strategy options wins."
+        "Python waits use a fixed poll interval. waits.WithWait with resource.WithWaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of the interval and strategy options wins."
       ],
       "remaining": []
     },

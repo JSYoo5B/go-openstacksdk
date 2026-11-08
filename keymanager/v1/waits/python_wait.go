@@ -112,22 +112,22 @@ func (a *API) wait(ctx context.Context, target Target, status *string, deleting 
 			return nil, wrap(err)
 		}
 	}
-	if config.WaitStrategy != nil {
-		if config.Interval != nil {
-			return nil, wrap(invalid("Interval and WaitStrategy are mutually exclusive"))
-		}
-		if err := config.WaitStrategy.Validate(); err != nil {
-			return nil, wrap(err)
-		}
+	defaults := resource.WaitDefaults{Unlimited: true, Strategy: resource.FixedWait(2 * time.Second), Supports: resource.WaitSupportFailureStates | resource.WaitSupportStatusAttribute | resource.WaitSupportProgress}
+	if deleting {
+		defaults.Timeout, defaults.Unlimited = 120*time.Second, false
+	}
+	settings, err := resource.ResolveWait(defaults, config.Wait...)
+	if err != nil {
+		return nil, wrap(err)
 	}
 	if err := source.WithPolicy(ctx, config.Microversion, config.Headers); err != nil {
 		return nil, wrap(err)
 	}
 	attribute := "status"
-	if config.Attribute != nil {
-		attribute = *config.Attribute
+	if settings.StatusAttribute != "" {
+		attribute = settings.StatusAttribute
 	}
-	if deleting && (config.Attribute != nil || config.Failures != nil) {
+	if deleting && (settings.StatusAttribute != "" || settings.FailureStatesSet) {
 		return nil, wrap(fmt.Errorf("%w: deletion uses only the status descriptor", resource.ErrUnsupported))
 	}
 	statusDeclared := validAttribute(target.kind, "status")
@@ -147,46 +147,37 @@ func (a *API) wait(ctx context.Context, target Target, status *string, deleting 
 			return target.seed.Clone(), nil
 		}
 	}
-	interval := 2 * time.Second
+	strategy := settings.Strategy
 	if config.Interval != nil {
-		interval = *config.Interval
+		strategy = resource.FixedWait(*config.Interval)
 	}
-	timeout := time.Duration(0)
-	if deleting {
-		timeout = 120 * time.Second
-	}
+	timeout := settings.Timeout
 	if config.Timeout != nil {
 		timeout = *config.Timeout
 	}
-	if config.Unlimited {
-		timeout = 0
-	}
-	// Source timeout zero/negative exhausts before the first observation. A nil
-	// status timeout denotes infinity; Unlimited explicitly chooses it for delete.
-	if config.Timeout != nil && !config.Unlimited && timeout <= 0 {
+	// Source timeout zero/negative exhausts before the first observation.
+	if config.Timeout != nil && timeout <= 0 {
 		return nil, wrap(context.DeadlineExceeded)
 	}
-	if interval < 0 {
+	if config.Interval != nil && *config.Interval < 0 {
 		return nil, wrap(invalid("negative polling interval"))
 	}
-	if interval == 0 {
-		interval = 100 * time.Millisecond
+	if config.Interval != nil && *config.Interval == 0 {
+		interval := 100 * time.Millisecond
 		if timeout > 0 && timeout < interval {
 			interval = timeout
 		}
+		strategy = resource.FixedWait(interval)
 	}
-	waitOptions := []resource.WaitOption{resource.WithPollInterval(interval)}
-	if config.WaitStrategy != nil {
-		waitOptions = append(waitOptions, resource.WithWaitStrategy(*config.WaitStrategy))
-	}
+	waitOptions := []resource.WaitOption{resource.WithWaitStrategy(strategy)}
 	if timeout == 0 {
 		waitOptions = append(waitOptions, resource.WithUnlimitedWait())
 	} else {
 		waitOptions = append(waitOptions, resource.WithTimeout(timeout))
 	}
-	failures := config.Failures
-	if failures == nil {
-		failures = []string{"ERROR"}
+	failures := []string{"ERROR"}
+	if settings.FailureStatesSet {
+		failures = settings.FailureStates
 	}
 	tokens := make([]string, len(failures))
 	for i, v := range failures {
@@ -196,16 +187,16 @@ func (a *API) wait(ctx context.Context, target Target, status *string, deleting 
 	// pollCtx is the shared wait's per-poll context (it carries the SDK
 	// timeout); the progress step runs right after the Get that set it.
 	pollCtx := ctx
-	if config.Callback != nil || config.Progress != nil {
+	if settings.ProgressCallback != nil || settings.Progress != nil {
 		waitOptions = append(waitOptions, resource.WithProgressCallback(func(value int) error {
-			if config.Callback != nil {
-				if err := config.Callback(value); err != nil {
+			if settings.ProgressCallback != nil {
+				if err := settings.ProgressCallback(value); err != nil {
 					// A callback error stops the wait; nothing is sent for this step.
 					observed = errors.Join(observed, err)
 					return nil
 				}
 			}
-			observed = errors.Join(observed, progress.Send(pollCtx, config.Progress, value))
+			observed = errors.Join(observed, progress.Send(pollCtx, settings.Progress, value))
 			return nil
 		}))
 	}

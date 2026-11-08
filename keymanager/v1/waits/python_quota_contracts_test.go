@@ -25,7 +25,7 @@ func TestPythonKeymanagerQuotaWaitOwnsNoIDRouteAndEnvelopeRawDescriptors(t *test
 		}
 		return wire(203, body)
 	})
-	value, err := api.WaitForStatus(context.Background(), waits.Quota(), str("active"), waits.WithAttribute("name"))
+	value, err := api.WaitForStatus(context.Background(), waits.Quota(), str("active"), waits.WithWait(resource.WithStatusAttribute("name")))
 	if err != nil || value == nil || value.Kind != "quotas" || value.RequestID != "current-project" || value.StatusCode != 203 || string(value.Envelope) != body || len(*calls) != 1 {
 		t.Fatal(err, value, *calls)
 	}
@@ -54,7 +54,7 @@ func TestPythonKeymanagerQuotaWaitCachedSnapshotAndNullableDefaults(t *testing.T
 	native.Body["secrets"][1] = 'x'
 	native.Header.Set("X-Original", "changed")
 	api, _, calls := fixture(t, func(*http.Request, int) *http.Response { t.Fatal("cached HTTP"); return nil })
-	value, err := api.WaitForStatus(context.Background(), target, str("ready"), waits.WithAttribute("secrets"), waits.WithTimeout(0), waits.WithInterval(-time.Second))
+	value, err := api.WaitForStatus(context.Background(), target, str("ready"), waits.WithWait(resource.WithStatusAttribute("secrets")), waits.WithTimeout(0), waits.WithInterval(-time.Second))
 	if err != nil || value == nil || len(*calls) != 0 || value.Envelope != nil || value.StatusCode != 203 || value.Header.Get("X-Original") != "owned" {
 		t.Fatal(err, value, *calls)
 	}
@@ -63,12 +63,12 @@ func TestPythonKeymanagerQuotaWaitCachedSnapshotAndNullableDefaults(t *testing.T
 	value.Resource.Body["secrets"][1] = 'x'
 	value.Wire.Body["name"][1] = 'x'
 	value.Header.Set("X-Original", "consumer")
-	value, err = api.WaitForStatus(context.Background(), target, str("ready"), waits.WithAttribute("secrets"))
+	value, err = api.WaitForStatus(context.Background(), target, str("ready"), waits.WithWait(resource.WithStatusAttribute("secrets")))
 	if err != nil || value.Header.Get("X-Original") != "owned" {
 		t.Fatal(err, value)
 	}
 	field(t, value, "secrets", `"READY"`)
-	value, err = api.WaitForStatus(context.Background(), waits.Quota(), nil, waits.WithAttribute("orders"))
+	value, err = api.WaitForStatus(context.Background(), waits.Quota(), nil, waits.WithWait(resource.WithStatusAttribute("orders")))
 	if err != nil || value.StatusCode != 0 || value.Wire != nil || value.Envelope != nil || len(*calls) != 0 {
 		t.Fatal(err, value, *calls)
 	}
@@ -87,13 +87,13 @@ func TestPythonKeymanagerQuotaWaitMergesFlatFallbackAndNullPresence(t *testing.T
 	})
 	target := quotaTarget(t, `{"name":"BUILD","secrets":999,"orders":100,"containers":900719925474099312345,"id":"foreign"}`)
 	progress := 0
-	value, err := api.WaitForStatus(context.Background(), target, str("active"), waits.WithAttribute("name"), waits.WithInterval(time.Nanosecond), waits.WithProgressCallback(func(v int) error {
+	value, err := api.WaitForStatus(context.Background(), target, str("active"), waits.WithWait(resource.WithStatusAttribute("name")), waits.WithInterval(time.Nanosecond), waits.WithWait(resource.WithProgressCallback(func(v int) error {
 		if v != 0 {
 			t.Fatal(v)
 		}
 		progress++
 		return nil
-	}))
+	})))
 	if err != nil || len(*calls) != 3 || progress != 2 || string(value.Envelope) != bodies[2] || value.StatusCode != 202 {
 		t.Fatal(err, value, *calls, progress)
 	}
@@ -108,7 +108,7 @@ func TestPythonKeymanagerQuotaWaitMergesFlatFallbackAndNullPresence(t *testing.T
 func TestPythonKeymanagerQuotaWaitEnvelopeShapeAndNumericAttributesAreExplicitFailures(t *testing.T) {
 	for _, body := range []string{`{"quotas":null}`, `{"quotas":[]}`, `{"quotas":false}`, `{"quotas":1}`, `{"quotas":{"secrets":1}}`} {
 		api, _, calls := fixture(t, func(*http.Request, int) *http.Response { return wire(203, body) })
-		value, err := api.WaitForStatus(context.Background(), waits.Quota(), str("ready"), waits.WithAttribute("secrets"))
+		value, err := api.WaitForStatus(context.Background(), waits.Quota(), str("ready"), waits.WithWait(resource.WithStatusAttribute("secrets")))
 		var proof *resource.ResponseError
 		if value == nil || value.Resource != nil || !errors.As(err, &proof) || proof.StatusCode != 203 || string(proof.Body) != body || len(*calls) != 1 {
 			t.Fatal(err, value, proof, *calls)
@@ -121,7 +121,7 @@ func TestPythonKeymanagerQuotaWaitEnvelopeShapeAndNumericAttributesAreExplicitFa
 			t.Fatal(err, value, *calls)
 		}
 	}
-	value, err := api.WaitForStatus(context.Background(), quotaTarget(t, `{"secrets":900719925474099312345}`), str("ready"), waits.WithAttribute("secrets"))
+	value, err := api.WaitForStatus(context.Background(), quotaTarget(t, `{"secrets":900719925474099312345}`), str("ready"), waits.WithWait(resource.WithStatusAttribute("secrets")))
 	if value != nil || !errors.Is(err, resource.ErrInvalidOption) || len(*calls) != 0 {
 		t.Fatal(err, value, *calls)
 	}
@@ -129,7 +129,7 @@ func TestPythonKeymanagerQuotaWaitEnvelopeShapeAndNumericAttributesAreExplicitFa
 	if value != nil || !errors.Is(err, resource.ErrUnsupported) || len(*calls) != 0 {
 		t.Fatal(err, value, *calls)
 	}
-	value, err = api.WaitForStatus(context.Background(), waits.Quota(), nil, waits.WithAttribute("project_id"))
+	value, err = api.WaitForStatus(context.Background(), waits.Quota(), nil, waits.WithWait(resource.WithStatusAttribute("project_id")))
 	if value != nil || !errors.Is(err, resource.ErrUnsupported) || len(*calls) != 0 {
 		t.Fatal(err, value, *calls)
 	}

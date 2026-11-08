@@ -38,9 +38,10 @@ func TestObjectWaitStrategy(t *testing.T) {
 	interval := time.Millisecond
 	valid := resource.FixedWait(time.Millisecond)
 	for name, option := range map[string]objects.ObjectWaitOption{
-		"invalid": objects.WithObjectWaitStrategy(resource.LinearWait(time.Millisecond, -time.Millisecond, 0)),
-		"zero":    objects.WithObjectWaitStrategy(resource.WaitStrategy{}),
-		"both":    objects.WithObjectWaitOpts(objects.ObjectWaitOpts{Interval: &interval, WaitStrategy: &valid}),
+		"invalid":                     objects.WithObjectWait(resource.WithWaitStrategy(resource.LinearWait(time.Millisecond, -time.Millisecond, 0))),
+		"zero":                        objects.WithObjectWait(resource.WithWaitStrategy(resource.WaitStrategy{})),
+		"interval then zero strategy": objects.WithObjectWait(resource.WithPollInterval(interval), resource.WithWaitStrategy(resource.WaitStrategy{})),
+		"valid then zero":             objects.WithObjectWait(resource.WithWaitStrategy(valid), resource.WithPollInterval(0)),
 	} {
 		if _, err := api.WaitForDelete(context.Background(), "c", "o", option); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Errorf("%s: %v", name, err)
@@ -50,7 +51,7 @@ func TestObjectWaitStrategy(t *testing.T) {
 		t.Fatal("HTTP before validation", len(seen))
 	}
 	ms := time.Millisecond
-	result, err := api.WaitForDelete(context.Background(), "c", "o", objects.WithObjectWaitPollInterval(time.Hour), objects.WithObjectWaitStrategy(resource.ExponentialWait(2*ms, 2, 0)))
+	result, err := api.WaitForDelete(context.Background(), "c", "o", objects.WithObjectWait(resource.WithPollInterval(time.Hour)), objects.WithObjectWait(resource.WithWaitStrategy(resource.ExponentialWait(2*ms, 2, 0))))
 	if err != nil || result == nil || len(seen) != 4 {
 		t.Fatal(result, err, len(seen))
 	}

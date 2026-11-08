@@ -44,7 +44,7 @@ func TestObjectWaitCoreFreshPollingAndCallbacks(t *testing.T) {
 			h := http.Header{"X-Proof": {"kept"}, "X-Object-Meta-State": {state}, "Last-Modified": {"unrelated invalid date"}, "Content-Length": {"unrelated invalid size"}}
 			return objectMetadataWire(r, code, h, io.NopCloser(strings.NewReader("poll proof"))), nil
 		})
-		options := []ObjectWaitOption{WithObjectWaitPollInterval(time.Nanosecond), WithObjectWaitTimeout(time.Second), WithObjectWaitStatusHeader("X-Object-Meta-State"), WithObjectWaitProgressCallback(func(progress int) error {
+		options := []ObjectWaitOption{WithObjectWait(resource.WithPollInterval(time.Nanosecond)), WithObjectWait(resource.WithTimeout(time.Second)), WithObjectWaitStatusHeader("X-Object-Meta-State"), WithObjectWait(resource.WithProgressCallback(func(progress int) error {
 			callbacks++
 			if progress != 0 {
 				t.Error("Swift fabricated progress", progress)
@@ -52,7 +52,7 @@ func TestObjectWaitCoreFreshPollingAndCallbacks(t *testing.T) {
 			c.SetToken("fresh")
 			c.MoreHeaders["X-Source"] = "valid later drift"
 			return nil
-		})}
+		}))}
 		var result *ObjectWaitResult
 		var err error
 		if deletion {
@@ -102,7 +102,7 @@ func TestObjectWaitCoreSelectorsAndUnsupported(t *testing.T) {
 				}
 				return objectMetadataOK(r, 200, h), nil
 			})
-			result, err := New(c).WaitForStatus(context.Background(), "literal-box", "literal/key", strings.ToUpper(target), WithObjectWaitStatusAttribute(tc.attribute), WithObjectWaitTimeout(100*time.Millisecond))
+			result, err := New(c).WaitForStatus(context.Background(), "literal-box", "literal/key", strings.ToUpper(target), WithObjectWait(resource.WithStatusAttribute(tc.attribute)), WithObjectWait(resource.WithTimeout(100*time.Millisecond)))
 			if err != nil || result == nil || !result.Complete || result.Deleted || result.Status == nil || *result.Status != target || result.Polls != 1 || calls != 1 {
 				t.Fatal(result, err, calls)
 			}
@@ -115,7 +115,12 @@ func TestObjectWaitCoreSelectorsAndUnsupported(t *testing.T) {
 		return objectMetadataWire(r, 200, http.Header{"X-Proof": {"kept"}}, io.NopCloser(strings.NewReader("selected missing"))), nil
 	})
 	for _, attribute := range []string{"", "status", "content_length", "is_newest", "is_static_large_object", "delete_after", "range", "unknown"} {
-		result, err := New(c).WaitForStatus(context.Background(), "box", "key", "READY", WithObjectWaitStatusAttribute(attribute))
+		// The empty attribute is the default selection (status).
+		var options []ObjectWaitOption
+		if attribute != "" {
+			options = append(options, WithObjectWait(resource.WithStatusAttribute(attribute)))
+		}
+		result, err := New(c).WaitForStatus(context.Background(), "box", "key", "READY", options...)
 		if result != nil || !errors.Is(err, resource.ErrUnsupported) || calls != 0 {
 			t.Fatal("unsupported selector reached HTTP", attribute, result, err, calls)
 		}
@@ -153,7 +158,7 @@ func TestObjectWaitCoreProjectionAndTerminalStates(t *testing.T) {
 				h.Set("X-Proof", "kept")
 				return objectMetadataWire(r, tc.code, h, io.NopCloser(strings.NewReader("terminal proof"))), nil
 			})
-			result, err := New(c).WaitForStatus(context.Background(), "box", "key", tc.target, WithObjectWaitStatusHeader("X-State"), WithObjectWaitTimeout(time.Second), WithObjectWaitProgressCallback(func(int) error { callbacks++; return nil }))
+			result, err := New(c).WaitForStatus(context.Background(), "box", "key", tc.target, WithObjectWaitStatusHeader("X-State"), WithObjectWait(resource.WithTimeout(time.Second)), WithObjectWait(resource.WithProgressCallback(func(int) error { callbacks++; return nil })))
 			if result == nil || result.Complete != tc.complete || result.Deleted || calls != 1 || callbacks != 0 || result.Polls != 1 {
 				t.Fatal(result, err, calls, callbacks)
 			}
@@ -212,7 +217,7 @@ func TestObjectWaitCoreFailureEvidenceAndCallbackCauses(t *testing.T) {
 				}
 				return objectMetadataWire(r, code, http.Header{"X-Proof": {"kept"}}, body), nil
 			})
-			result, err := New(c).WaitForDelete(context.Background(), "box", "key", WithObjectWaitProgressCallback(func(int) error { callbacks++; return nil }))
+			result, err := New(c).WaitForDelete(context.Background(), "box", "key", WithObjectWait(resource.WithProgressCallback(func(int) error { callbacks++; return nil })))
 			if result == nil || result.Last == nil || len(result.Last.Attempts) != 1 || result.Complete || result.Deleted || result.Status != nil || result.Polls != 1 || calls != 1 || retries != 0 || callbacks != 0 || result.Last.Attempts[0].Error == nil {
 				t.Fatal("dirty response completed waiter", result, err, calls, retries, callbacks)
 			}
@@ -241,12 +246,12 @@ func TestObjectWaitCoreFailureEvidenceAndCallbackCauses(t *testing.T) {
 		calls++
 		return objectMetadataWire(r, 200, http.Header{"X-State": {"BUILD"}, "X-Proof": {"kept"}}, io.NopCloser(strings.NewReader("callback proof"))), nil
 	})
-	result, err := New(c).WaitForStatus(ctx, "box", "key", "READY", WithObjectWaitStatusHeader("X-State"), WithObjectWaitProgressCallback(func(progress int) error {
+	result, err := New(c).WaitForStatus(ctx, "box", "key", "READY", WithObjectWaitStatusHeader("X-State"), WithObjectWait(resource.WithProgressCallback(func(progress int) error {
 		callbacks++
 		c.MoreHeaders = map[string]string{"If-Match": "foreign"}
 		cancel(cancelCause)
 		return callbackCause
-	}))
+	})))
 	objectMetadataProof(t, err, 200, "callback proof")
 	if result == nil || result.Status != nil || result.Complete || result.Deleted || calls != 1 || callbacks != 1 || !errors.Is(err, callbackCause) || !errors.Is(err, cancelCause) || !errors.Is(err, context.Canceled) || !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(result, err, calls, callbacks)
@@ -272,11 +277,11 @@ func TestObjectWaitCoreTimersAndLastActualPhase(t *testing.T) {
 	c := objectMetadataClient()
 	api := New(c)
 	deleteDefaults, err := api.prepareObjectWait(context.Background(), "box", "key", "", true, nil)
-	if err != nil || deleteDefaults.interval != 2*time.Second || deleteDefaults.timeout != 120*time.Second {
+	if err != nil || deleteDefaults.pacer.Next() != 2*time.Second || deleteDefaults.timeout != 120*time.Second {
 		t.Fatal(deleteDefaults, err)
 	}
 	statusDefaults, err := api.prepareObjectWait(context.Background(), "box", "key", "READY", false, []ObjectWaitOption{WithObjectWaitStatusHeader("X-State")})
-	if err != nil || statusDefaults.interval != 2*time.Second || statusDefaults.timeout != 0 {
+	if err != nil || statusDefaults.pacer.Next() != 2*time.Second || statusDefaults.timeout != 0 {
 		t.Fatal(statusDefaults, err)
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
@@ -303,7 +308,7 @@ func TestObjectWaitCoreTimersAndLastActualPhase(t *testing.T) {
 		calls++
 		return objectMetadataWire(r, 200, http.Header{"X-State": {"BUILD"}, "X-Proof": {"kept"}}, io.NopCloser(strings.NewReader("actual first phase"))), nil
 	})
-	result, err = New(c).WaitForStatus(ctx, "box", "key", "READY", WithObjectWaitStatusHeader("X-State"), WithObjectWaitUnlimitedWait(), WithObjectWaitPollInterval(time.Nanosecond), WithObjectWaitProgressCallback(func(int) error { callbacks++; return nil }))
+	result, err = New(c).WaitForStatus(ctx, "box", "key", "READY", WithObjectWaitStatusHeader("X-State"), WithObjectWait(resource.WithUnlimitedWait()), WithObjectWait(resource.WithPollInterval(time.Nanosecond)), WithObjectWait(resource.WithProgressCallback(func(int) error { callbacks++; return nil })))
 	objectMetadataProof(t, err, 200, "actual first phase")
 	if result == nil || result.Polls != 2 || calls != 1 || callbacks != 1 || jar.calls != 2 || result.Last == nil || len(result.Last.Attempts) != 1 || result.Last.Attempts[0].LogicalAttempt != 1 || result.Status == nil || *result.Status != "BUILD" || !errors.Is(err, cause) || !errors.Is(err, context.Canceled) {
 		t.Fatal("empty exchange discarded actual last phase", result, err, calls, callbacks, jar.calls)

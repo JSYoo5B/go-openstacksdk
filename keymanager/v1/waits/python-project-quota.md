@@ -2,7 +2,7 @@
 
 `ProjectQuota(projectID)` and `ForProjectQuota(record)` add the missing concrete admin target to `WaitForStatus` and `WaitForDelete`. They reuse the existing guarded reader and prepared wait policy, polling only `GET /project-quotas/{originalProjectID}`. Response id/name/href are passive. Literal targets seed Resource.id with the requested project, all other declared fields with null, and no fake receipt. Cached records snapshot actual Resource/Wire/Envelope/header/status independently.
 
-ProjectQuota declares **no status field**. A default status wait fails unsupported before HTTP; select a declared string/null field using `WithAttribute`. Numeric quota values are not converted into status text. Cached matching string/null states return without polling. Status timeout is unlimited, deletion timeout120s, interval2s; explicit options preserve the existing Source-shaped timer/failure/callback policy.
+ProjectQuota declares **no status field**. A default status wait fails unsupported before HTTP; select a declared string/null field using `WithWait(resource.WithStatusAttribute(...))`. Numeric quota values are not converted into status text. Cached matching string/null states return without polling. Status timeout is unlimited, deletion timeout120s, interval2s; explicit options preserve the existing Source-shaped timer/failure/callback policy.
 
 WaitForDelete sends no DELETE. It ignores undeclared wire status=deleted and completes only when GET returns a clean404. A physical read/Close/context/source failure carrying404 is not absence. The result owns the original Resource snapshot plus actual absence receipt. Resetting a project override normally leaves effective/configuration GET available; observing deletion is not proof that quota settings were reset.
 
@@ -61,7 +61,7 @@ func main() {
     if err != nil { log.Fatal(err) }
     target := waits.ForProjectQuota(record)
     current, err := service.Waits.WaitForStatus(ctx, target, &projectID,
-        waits.WithAttribute("id"), waits.WithTimeout(120*time.Second))
+        waits.WithWait(resource.WithStatusAttribute("id"), resource.WithTimeout(120*time.Second)))
     if err != nil { log.Fatal(err) }
     log.Printf("id=%s status=%d", current.Resource.Body["id"], current.StatusCode)
     if os.Getenv("WAIT_ABSENCE") == "1" {

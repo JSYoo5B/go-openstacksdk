@@ -117,7 +117,7 @@ func TestPythonKeymanagerWaitSynchronizedSeedMergeAndGenericMalformedBody(t *tes
 	})
 	target := waits.ForOrder(&orders.FetchedOrder{RequestID: "fixed/id", Resource: raw(t, `{"status":"BUILD","name":"original","created_at":"old","meta":{"x":1},"id":"seed"}`)})
 	progress := []int{}
-	value, err := api.WaitForStatus(context.Background(), target, str("active"), waits.WithInterval(time.Nanosecond), waits.WithProgressCallback(func(v int) error { progress = append(progress, v); return nil }))
+	value, err := api.WaitForStatus(context.Background(), target, str("active"), waits.WithInterval(time.Nanosecond), waits.WithWait(resource.WithProgressCallback(func(v int) error { progress = append(progress, v); return nil })))
 	if err != nil || len(*calls) != 3 || !reflect.DeepEqual(progress, []int{0, 0}) || value.StatusCode != 202 || string(value.Envelope) != bodies[2] {
 		t.Fatal(value, err, *calls, progress)
 	}
@@ -168,9 +168,9 @@ func TestPythonKeymanagerWaitFailureDefaultsExplicitEmptyAndCustomAttribute(t *t
 		})
 		options := []waits.Option{waits.WithInterval(time.Nanosecond)}
 		progress := []int{}
-		options = append(options, waits.WithProgressCallback(func(v int) error { progress = append(progress, v); return nil }))
+		options = append(options, waits.WithWait(resource.WithProgressCallback(func(v int) error { progress = append(progress, v); return nil })))
 		if disabled {
-			options = append(options, waits.WithFailures())
+			options = append(options, waits.WithWait(resource.WithFailureStates()))
 		}
 		value, err := api.WaitForStatus(context.Background(), waits.Secret("s"), str("active"), options...)
 		if disabled {
@@ -185,7 +185,7 @@ func TestPythonKeymanagerWaitFailureDefaultsExplicitEmptyAndCustomAttribute(t *t
 		}
 	}
 	api, _, calls := fixture(t, func(*http.Request, int) *http.Response { return wire(200, `{"sub_status":"Ready"}`) })
-	value, err := api.WaitForStatus(context.Background(), waits.Order("o"), str("ready"), waits.WithAttribute("sub_status"))
+	value, err := api.WaitForStatus(context.Background(), waits.Order("o"), str("ready"), waits.WithWait(resource.WithStatusAttribute("sub_status")))
 	if err != nil || len(*calls) != 1 {
 		t.Fatal(value, err, *calls)
 	}
@@ -200,7 +200,7 @@ func TestPythonKeymanagerWaitOptionOwnershipAndPreflight(t *testing.T) {
 		want    error
 	}{
 		{waits.Target{}, nil, resource.ErrInvalidOption}, {waits.Secret(""), nil, resource.ErrInvalidOption}, {waits.Order("o"), []waits.Option{nil}, resource.ErrInvalidOption},
-		{waits.Container("c"), []waits.Option{waits.WithAttribute("unknown")}, resource.ErrUnsupported},
+		{waits.Container("c"), []waits.Option{waits.WithWait(resource.WithStatusAttribute("unknown"))}, resource.ErrUnsupported},
 		{waits.Order("o"), []waits.Option{request.Header("Authorization", "forged")}, resource.ErrInvalidOption},
 		{waits.Order("o"), []waits.Option{request.Microversion("bad\nversion")}, resource.ErrInvalidOption},
 		{waits.Order("o"), []waits.Option{waits.WithInterval(-time.Second)}, resource.ErrInvalidOption},
@@ -213,12 +213,13 @@ func TestPythonKeymanagerWaitOptionOwnershipAndPreflight(t *testing.T) {
 		}
 	}
 	interval, timeout := time.Nanosecond, time.Second
-	attribute, version := "status", "1.1"
+	version := "1.1"
 	headers := map[string]string{"X-Option": "original"}
-	option := waits.WithOptions(waits.Options{Interval: &interval, Timeout: &timeout, Attribute: &attribute, Microversion: &version, Headers: headers})
+	wait := []resource.WaitOption{resource.WithStatusAttribute("status")}
+	option := waits.WithOptions(waits.Options{Interval: &interval, Timeout: &timeout, Wait: wait, Microversion: &version, Headers: headers})
 	interval = -1
 	timeout = 0
-	attribute = "unknown"
+	wait[0] = resource.WithStatusAttribute("unknown")
 	version = "changed"
 	headers["X-Option"] = "changed"
 	api, client, calls := fixture(t, func(req *http.Request, n int) *http.Response {
@@ -387,13 +388,13 @@ func TestPythonKeymanagerWaitDefaultTimeoutsAndZeroIntervalPolicy(t *testing.T) 
 		polling = req.Context()
 		return wire(200, `{"status":"BUILD"}`)
 	})
-	value, err := api.WaitForStatus(context.Background(), waits.Container("c"), str("active"), waits.WithInterval(0), waits.WithTimeout(2*time.Second), waits.WithProgressCallback(func(progress int) error {
+	value, err := api.WaitForStatus(context.Background(), waits.Container("c"), str("active"), waits.WithInterval(0), waits.WithTimeout(2*time.Second), waits.WithWait(resource.WithProgressCallback(func(progress int) error {
 		if progress != 0 || polling == nil || polling.Err() != nil {
 			t.Fatal("first observation did not reach callback before deadline", progress, polling)
 		}
 		<-polling.Done()
 		return nil
-	}))
+	})))
 	var proof *resource.ResponseError
 	if value == nil || value.Resource != nil || !errors.Is(err, context.DeadlineExceeded) || !errors.As(err, &proof) || proof.StatusCode != 200 || len(*calls) != 1 {
 		t.Fatal(value, err, proof, *calls)
@@ -406,7 +407,7 @@ func TestPythonKeymanagerWaitCallbackFailureCancellationAndSourceAreTerminal(t *
 		callbackErr, cancelCause := errors.New("callback failed"), errors.New("callback cancelled")
 		ctx, cancel := context.WithCancelCause(context.Background())
 		defer cancel(nil)
-		value, err := api.WaitForStatus(ctx, waits.Container("c"), str("active"), waits.WithProgressCallback(func(progress int) error {
+		value, err := api.WaitForStatus(ctx, waits.Container("c"), str("active"), waits.WithWait(resource.WithProgressCallback(func(progress int) error {
 			if progress != 0 {
 				t.Fatal(progress)
 			}
@@ -419,7 +420,7 @@ func TestPythonKeymanagerWaitCallbackFailureCancellationAndSourceAreTerminal(t *
 				client.Endpoint += "changed/"
 			}
 			return nil
-		}))
+		})))
 		var proof *resource.ResponseError
 		if value == nil || value.Resource != nil || !errors.As(err, &proof) || proof.StatusCode != 200 || proof.Header.Get("X-Request-Id") != "wait-proof" || len(*calls) != 1 {
 			t.Fatal(value, err, proof, *calls)

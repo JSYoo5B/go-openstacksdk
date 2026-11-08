@@ -143,15 +143,10 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.ForSecret`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithOptions`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithInterval`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithWaitStrategy`
+- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithWait`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithTimeout`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithUnlimitedWait`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithProgressCallback`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithProgress`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithFailures`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.SecretStore`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.ForSecretStore`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.SecretACL`
@@ -206,13 +201,13 @@ Go API:
   Tests: `keymanager/v1/waits/python_progress_channel_test.go:TestPythonKeymanagerWaitProgressChannelSendsZeroAndRejectsNil`, `keymanager/v1/waits/python_progress_channel_test.go:TestPythonKeymanagerWaitProgressChannelBlockedSendStopsOnCancellation`, `keymanager/v1/waits/python_progress_channel_test.go:TestPythonKeymanagerWaitProgressChannelReceiverCancellation`, `keymanager/v1/waits/python_progress_channel_test.go:TestPythonKeymanagerWaitProgressCallbackRunsBeforeChannelSend`.
 - resource.WithWaitStrategy rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, the interval option given before or after it.
   Tests: `resource/wait_strategy_test.go:TestWaitStrategyValidation`, `resource/wait_strategy_test.go:TestWaitStrategyAndPollIntervalLaterWins`, `resource/wait_strategy_test.go:TestWaitStrategyRejectedBeforeLookupAndPacesPolls`, `resource/wait_strategy_test.go:TestWaitStrategyPauseStillEndsAtCancellation`.
-- waits.WithWaitStrategy rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, the interval option given before or after it.
+- waits.WithWait with resource.WithWaitStrategy rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, the interval option given before or after it.
   Tests: `keymanager/v1/waits/wait_strategy_test.go:TestKeymanagerWaitStrategy`.
 
 Python/Go differences:
 
 - Legacy generated collection waits retain their historical five-minute policy. The concrete waits.API lane defaults status to unlimited/ERROR and deletion120s with interval2s, matching the pinned helper defaults.
-- Legacy resource.WithPollInterval requires positive durations; concrete waits.WithInterval(0) uses Source100ms/min-positive-timeout coercion.
+- resource.WithPollInterval and resource.WithTimeout through waits.WithWait require positive durations; the Python-parity waits.WithInterval(0) uses Source100ms/min-positive-timeout coercion and waits.WithTimeout(0) exhausts before the first observation.
 - Timeouts and failures are Python ResourceTimeout and ResourceFailure; Go returns context deadline errors and resource.FailedStateError.
 - Finite SDK-owned concrete Target constructors with immutable routes and independent record snapshots replace Python arbitrary Resource subclasses, same-object mutation and dynamic getattr. All known pinned fetchable concrete targets now include admin ProjectQuota; arbitrary class/subtyping remains SDK-R1 as a deliberate finite Go API boundary.
 - Source normalized nullable/empty/string states use PythonLower and private exact comparison tokens, not broad Unicode EqualFold. Go failures accept strings only, callbacks are typed func(int)error, declared attributes must be nullable strings.
@@ -233,7 +228,7 @@ Python/Go differences:
 - Admin ProjectQuota is a member route unlike effective Quota; its original project ID is seeded and immutable while response IDs remain passive. Like Quota/ACL it has no status descriptor and stock override reset can leave GET200, so absence waiting is not proof of settings deletion.
 - This mapping covers finite SDK-owned concrete target constructors rather than arbitrary Python Resource/runtime subclass/cache/location behavior. SDK-R1/C1/S1 and actual deployment/permission/release validation remain explicit whole-SDK gaps.
 - Python waits use a fixed poll interval. resource.WithWaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of the interval and strategy options wins.
-- Python waits use a fixed poll interval. waits.WithWaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of the interval and strategy options wins.
+- Python waits use a fixed poll interval. waits.WithWait with resource.WithWaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of the interval and strategy options wins.
 
 ### `python:key_manager/v1/wait_for_delete`
 
@@ -258,11 +253,11 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.ForSecret`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithOptions`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithInterval`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithWaitStrategy`
+- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithWait`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithTimeout`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithUnlimitedWait`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithProgressCallback`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithProgress`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithUnlimitedWait`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithProgressCallback`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithProgress`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.SecretStore`
@@ -311,7 +306,7 @@ Go API:
   Tests: `keymanager/v1/waits/python_progress_channel_test.go:TestPythonKeymanagerWaitProgressChannelSendsZeroAndRejectsNil`, `keymanager/v1/waits/python_progress_channel_test.go:TestPythonKeymanagerWaitProgressChannelBlockedSendStopsOnCancellation`, `keymanager/v1/waits/python_progress_channel_test.go:TestPythonKeymanagerWaitProgressChannelReceiverCancellation`, `keymanager/v1/waits/python_progress_channel_test.go:TestPythonKeymanagerWaitProgressCallbackRunsBeforeChannelSend`.
 - resource.WithWaitStrategy rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, the interval option given before or after it.
   Tests: `resource/wait_strategy_test.go:TestWaitStrategyValidation`, `resource/wait_strategy_test.go:TestWaitStrategyAndPollIntervalLaterWins`, `resource/wait_strategy_test.go:TestWaitStrategyRejectedBeforeLookupAndPacesPolls`, `resource/wait_strategy_test.go:TestWaitStrategyPauseStillEndsAtCancellation`.
-- waits.WithWaitStrategy rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, the interval option given before or after it.
+- waits.WithWait with resource.WithWaitStrategy rejects an invalid or zero-value resource.WaitStrategy with ErrInvalidOption before HTTP, paces polls by the strategy's growing pause sequence and is replaced by, or replaces, the interval option given before or after it.
   Tests: `keymanager/v1/waits/wait_strategy_test.go:TestKeymanagerWaitStrategy`.
 
 Python/Go differences:
@@ -336,7 +331,7 @@ Python/Go differences:
 - Admin ProjectQuota is a member route unlike effective Quota; its original project ID is seeded and immutable while response IDs remain passive. Like Quota/ACL it has no status descriptor and stock override reset can leave GET200, so absence waiting is not proof of settings deletion.
 - This mapping covers finite SDK-owned concrete target constructors rather than arbitrary Python Resource/runtime subclass/cache/location behavior. SDK-R1/C1/S1 and actual deployment/permission/release validation remain explicit whole-SDK gaps.
 - Python waits use a fixed poll interval. resource.WithWaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of the interval and strategy options wins.
-- Python waits use a fixed poll interval. waits.WithWaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of the interval and strategy options wins.
+- Python waits use a fixed poll interval. waits.WithWait with resource.WithWaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of the interval and strategy options wins.
 
 ## Usage examples
 

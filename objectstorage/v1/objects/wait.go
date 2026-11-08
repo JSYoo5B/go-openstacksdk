@@ -70,14 +70,14 @@ func (a *API) waitForObject(ctx context.Context, container, object, status strin
 				result.Status, result.Complete = selected, true
 				return result, nil
 			}
-			for _, failure := range w.options.FailureStates {
+			for _, failure := range w.failures {
 				if strings.EqualFold(*selected, failure) {
 					result.Status = selected
 					return result, objectCreateResponseError(response, &resource.FailedStateError{Resource: "objects", ID: container + "/" + object, Status: *selected})
 				}
 			}
 		}
-		if callback := w.options.ProgressCallback; callback != nil {
+		if callback := w.callback; callback != nil {
 			if err := w.request.guard(ctx); err != nil {
 				return result, objectCreateResponseError(response, err)
 			}
@@ -86,7 +86,7 @@ func (a *API) waitForObject(ctx context.Context, container, object, status strin
 				return result, objectCreateResponseError(response, err)
 			}
 		}
-		if ch := w.options.Progress; ch != nil {
+		if ch := w.progress; ch != nil {
 			if err := w.request.guard(ctx); err != nil {
 				return result, objectCreateResponseError(response, err)
 			}

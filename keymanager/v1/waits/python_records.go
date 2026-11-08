@@ -104,29 +104,26 @@ func ForSecret(r *secrets.FoundSecretRecord) Target {
 	return fromRecord("secrets", r.RequestID, &Record{Resource: r.Resource, Wire: r.Wire, Envelope: r.Envelope, Header: r.Header, StatusCode: r.StatusCode, Payload: r.Payload})
 }
 
-// Options distinguishes omission from zero. Nil Interval defaults to two
-// seconds; explicit zero follows Source's short pause. Nil Timeout defaults to
-// unlimited status wait or 120-second deletion wait. Failures nil means ERROR,
-// while an explicit empty slice disables failure-state detection. WaitStrategy
-// replaces the fixed Interval with a resource.WaitStrategy (a Go-only
-// extension); setting both Interval and WaitStrategy is rejected before HTTP.
+// Options distinguishes omission from zero. Wait holds the shared wait
+// options (see WithWait). Interval and Timeout carry Python-source numeric
+// values that the shared options reject: a nil Interval keeps the Wait
+// pacing (two seconds by default), explicit zero follows Source's short
+// 100ms pause and a negative value is invalid; a nil Timeout keeps the Wait
+// timeout (unlimited status wait or 120-second deletion wait by default),
+// while an explicit zero or negative value exhausts before the first
+// observation. A set Interval or Timeout wins over the Wait options for its
+// control.
 type Options struct {
 	Interval, Timeout *time.Duration
-	WaitStrategy      *resource.WaitStrategy
-	Unlimited         bool
-	Failures          []string
-	Attribute         *string
-	Callback          func(int) error
-	Progress          chan<- int
+	Wait              []resource.WaitOption
 	Headers           map[string]string
 	Microversion      *string
 }
 
 // Option is one option of WaitForStatus and WaitForDelete: WithOptions,
-// WithInterval, WithWaitStrategy, WithTimeout, WithUnlimitedWait, WithFailures, WithAttribute,
-// WithProgressCallback, WithProgress, request.Custom over *Options, request.Header (adds one
-// header to every read) or request.Microversion. Other shared calls fail with
-// resource.ErrInvalidOption before HTTP.
+// WithWait, WithInterval, WithTimeout, request.Custom over *Options,
+// request.Header (adds one header to every read) or request.Microversion.
+// Other shared calls fail with resource.ErrInvalidOption before HTTP.
 type Option = request.GetCall
 
 var optionCalls = optionSpec()
@@ -145,20 +142,12 @@ func ownOptions(o Options) Options {
 		v := *o.Timeout
 		o.Timeout = &v
 	}
-	if o.WaitStrategy != nil {
-		v := *o.WaitStrategy
-		o.WaitStrategy = &v
-	}
-	if o.Attribute != nil {
-		v := *o.Attribute
-		o.Attribute = &v
-	}
 	if o.Microversion != nil {
 		v := *o.Microversion
 		o.Microversion = &v
 	}
-	if o.Failures != nil {
-		o.Failures = append([]string{}, o.Failures...)
+	if o.Wait != nil {
+		o.Wait = append([]resource.WaitOption(nil), o.Wait...)
 	}
 	o.Headers = maps.Clone(o.Headers)
 	return o
@@ -168,61 +157,59 @@ func WithOptions(o Options) Option {
 	return request.Custom(func(c *Options) error { *c = ownOptions(o); return nil })
 }
 
-// WithInterval sets a fixed interval. It and WithWaitStrategy replace each
-// other; the later one wins.
+// WithWait appends shared wait options; repeated calls append and the later
+// option wins per control. Both waits accept resource.WithTimeout,
+// WithUnlimitedWait, WithPollInterval, WithWaitStrategy, WithFailureStates
+// (status wait; default ERROR, none disables detection), WithStatusAttribute
+// (status wait; a declared record attribute, default status),
+// WithProgressCallback and WithProgress (both observe zero for Key Manager
+// records after each nonterminal response; the callback runs first and its
+// error stops the wait with nothing sent for that step). WaitForDelete
+// rejects failure states and a status attribute with
+// resource.ErrUnsupported. A timeout or pacing control here replaces an
+// earlier WithTimeout or WithInterval.
+func WithWait(opts ...resource.WaitOption) Option {
+	snapshot := append([]resource.WaitOption(nil), opts...)
+	timeout, pacing := waitControls(snapshot)
+	return request.Custom(func(c *Options) error {
+		c.Wait = append(append([]resource.WaitOption(nil), c.Wait...), snapshot...)
+		if timeout {
+			c.Timeout = nil
+		}
+		if pacing {
+			c.Interval = nil
+		}
+		return nil
+	})
+}
+
+// waitControls reports whether opts set the timeout and the pacing, by
+// resolving them over two distinct defaults. Invalid options report false
+// here and fail when the wait resolves them.
+func waitControls(opts []resource.WaitOption) (timeout, pacing bool) {
+	all := resource.WaitSupportFailureStates | resource.WaitSupportStatusAttribute | resource.WaitSupportProgress
+	a, errA := resource.ResolveWait(resource.WaitDefaults{Timeout: time.Hour, Strategy: resource.FixedWait(time.Hour), Supports: all}, opts...)
+	b, errB := resource.ResolveWait(resource.WaitDefaults{Timeout: 2 * time.Hour, Strategy: resource.FixedWait(2 * time.Hour), Supports: all}, opts...)
+	if errA != nil || errB != nil {
+		return false, false
+	}
+	timeout = a.Timeout != time.Hour || b.Timeout != 2*time.Hour
+	pacing = a.Strategy.Delay(1) != time.Hour || b.Strategy.Delay(1) != 2*time.Hour
+	return timeout, pacing
+}
+
+// WithInterval sets a Python-source fixed interval: zero follows Source's
+// short 100ms pause (capped by a shorter timeout) and a negative value is
+// invalid. It replaces earlier pacing from WithWait.
 func WithInterval(v time.Duration) Option {
-	return request.Custom(func(c *Options) error { c.Interval, c.WaitStrategy = &v, nil; return nil })
+	return request.Custom(func(c *Options) error { c.Interval = &v; return nil })
 }
 
-// WithWaitStrategy replaces the fixed interval with v, a Go-only extension. An
-// invalid strategy fails with resource.ErrInvalidOption before HTTP.
-func WithWaitStrategy(v resource.WaitStrategy) Option {
-	return request.Custom(func(c *Options) error {
-		if err := v.Validate(); err != nil {
-			return err
-		}
-		c.Interval, c.WaitStrategy = nil, &v
-		return nil
-	})
-}
+// WithTimeout sets a Python-source timeout: zero or negative exhausts before
+// the first observation. It replaces an earlier timeout or unlimited wait
+// from WithWait.
 func WithTimeout(v time.Duration) Option {
-	return request.Custom(func(c *Options) error { c.Timeout = &v; c.Unlimited = false; return nil })
-}
-func WithUnlimitedWait() Option {
-	return request.Custom(func(c *Options) error { c.Unlimited = true; c.Timeout = nil; return nil })
-}
-func WithFailures(v ...string) Option {
-	owned := append([]string{}, v...)
-	return request.Custom(func(c *Options) error { c.Failures = append([]string{}, owned...); return nil })
-}
-func WithAttribute(v string) Option {
-	return request.Custom(func(c *Options) error { c.Attribute = &v; return nil })
-}
-func WithProgressCallback(v func(int) error) Option {
-	return request.Custom(func(c *Options) error {
-		if v == nil {
-			return invalid("callback is required")
-		}
-		c.Callback = v
-		return nil
-	})
-}
-
-// WithProgress sends the observed progress (zero for Key Manager records) on v
-// after each nonterminal response, including the first. The wait sends from
-// its own goroutine and blocks until v is received or ctx ends; the caller
-// owns and drains v, which the SDK never closes, and nothing is sent after the
-// wait returns. A ctx that ends during a send stops the wait with its error.
-// With WithProgressCallback also set, the callback runs first; when it returns
-// an error the wait stops and nothing is sent for that step.
-func WithProgress(v chan<- int) Option {
-	return request.Custom(func(c *Options) error {
-		if v == nil {
-			return invalid("progress channel is required")
-		}
-		c.Progress = v
-		return nil
-	})
+	return request.Custom(func(c *Options) error { c.Timeout = &v; return nil })
 }
 func invalid(v string) error { return fmt.Errorf("%w: %s", resource.ErrInvalidOption, v) }
 

@@ -19,9 +19,10 @@ func TestKeymanagerWaitStrategy(t *testing.T) {
 	interval := time.Millisecond
 	valid := resource.FixedWait(time.Millisecond)
 	for name, option := range map[string]waits.Option{
-		"invalid": waits.WithWaitStrategy(resource.ExponentialWait(time.Millisecond, 2, time.Nanosecond)),
-		"zero":    waits.WithWaitStrategy(resource.WaitStrategy{}),
-		"both":    waits.WithOptions(waits.Options{Interval: &interval, WaitStrategy: &valid}),
+		"invalid":             waits.WithWait(resource.WithWaitStrategy(resource.ExponentialWait(time.Millisecond, 2, time.Nanosecond))),
+		"zero":                waits.WithWait(resource.WithWaitStrategy(resource.WaitStrategy{})),
+		"later zero strategy": waits.WithOptions(waits.Options{Wait: []resource.WaitOption{resource.WithWaitStrategy(valid), resource.WithWaitStrategy(resource.WaitStrategy{})}}),
+		"zero interval":       waits.WithWait(resource.WithPollInterval(interval - interval)),
 	} {
 		if _, err := api.WaitForStatus(context.Background(), waits.Container("c"), str("active"), option); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Errorf("status %s: %v", name, err)
@@ -43,7 +44,7 @@ func TestKeymanagerWaitStrategy(t *testing.T) {
 	})
 	ms := time.Millisecond
 	// The strategy given after an interval wins.
-	value, err := api.WaitForStatus(context.Background(), waits.Container("c"), str("active"), waits.WithInterval(time.Hour), waits.WithWaitStrategy(resource.ExponentialWait(2*ms, 2, 0)))
+	value, err := api.WaitForStatus(context.Background(), waits.Container("c"), str("active"), waits.WithInterval(time.Hour), waits.WithWait(resource.WithWaitStrategy(resource.ExponentialWait(2*ms, 2, 0))))
 	if err != nil || value == nil || len(*calls) != 4 {
 		t.Fatal(value, err, *calls)
 	}

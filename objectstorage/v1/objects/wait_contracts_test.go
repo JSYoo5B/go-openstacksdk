@@ -57,7 +57,7 @@ func TestObjectWaitContractsLiteralHEADAndDeletion(t *testing.T) {
 	provider.UseTokenLock()
 	provider.SetToken("wait-token")
 	client := &gophercloud.ServiceClient{ProviderClient: provider, Type: "object-store", Endpoint: server.URL + "/catalogue/v1/AUTH_other/", ResourceBase: server.URL + "/reverse/a%20b/v1/AUTH_wait/"}
-	result, err := objects.New(client).WaitForDelete(context.Background(), objectMetadataContainer, objectMetadataKey, request.Header("X-Wait", "literal"), objects.WithObjectWaitPollInterval(time.Millisecond), objects.WithObjectWaitProgressCallback(func(value int) error { progress = append(progress, value); return nil }))
+	result, err := objects.New(client).WaitForDelete(context.Background(), objectMetadataContainer, objectMetadataKey, request.Header("X-Wait", "literal"), objects.WithObjectWait(resource.WithPollInterval(time.Millisecond)), objects.WithObjectWait(resource.WithProgressCallback(func(value int) error { progress = append(progress, value); return nil })))
 	if err != nil || result == nil || !result.Complete || !result.Deleted || result.Status != nil || result.Polls != 3 || result.Last == nil || len(result.Last.Attempts) != 1 || calls.Load() != 3 || !reflect.DeepEqual(progress, []int{0, 0}) {
 		t.Fatalf("result=%+v err=%v calls=%d progress=%v", result, err, calls.Load(), progress)
 	}
@@ -84,13 +84,13 @@ func TestObjectWaitContractsSelectedStatusAndFailurePolicy(t *testing.T) {
 			response.Header["X-Unrelated"] = []string{"ignored\x7f"}
 			return response, nil
 		})
-		result, err := objects.New(client).WaitForStatus(context.Background(), objectMetadataContainer, objectMetadataKey, "ready", objects.WithObjectWaitStatusHeader("X-Object-Meta-State"), objects.WithObjectWaitPollInterval(time.Millisecond), objects.WithObjectWaitProgressCallback(func(value int) error {
+		result, err := objects.New(client).WaitForStatus(context.Background(), objectMetadataContainer, objectMetadataKey, "ready", objects.WithObjectWaitStatusHeader("X-Object-Meta-State"), objects.WithObjectWait(resource.WithPollInterval(time.Millisecond)), objects.WithObjectWait(resource.WithProgressCallback(func(value int) error {
 			callbacks++
 			if value != 0 {
 				t.Errorf("progress=%d", value)
 			}
 			return nil
-		}))
+		})))
 		objectWaitExternalLast(t, result, 2, 200, "status proof")
 		if err != nil || !result.Complete || result.Deleted || result.Status == nil || *result.Status != "Ready" || calls != 2 || callbacks != 1 {
 			t.Fatalf("result=%+v err=%v calls=%d callback=%d", result, err, calls, callbacks)
@@ -108,9 +108,9 @@ func TestObjectWaitContractsSelectedStatusAndFailurePolicy(t *testing.T) {
 				}
 				return response, nil
 			})
-			opts := []objects.ObjectWaitOption{objects.WithObjectWaitStatusHeader("X-Object-Meta-State"), objects.WithObjectWaitPollInterval(time.Millisecond), objects.WithObjectWaitProgressCallback(func(int) error { callbacks++; return nil })}
+			opts := []objects.ObjectWaitOption{objects.WithObjectWaitStatusHeader("X-Object-Meta-State"), objects.WithObjectWait(resource.WithPollInterval(time.Millisecond)), objects.WithObjectWait(resource.WithProgressCallback(func(int) error { callbacks++; return nil }))}
 			if disabled {
-				opts = append(opts, objects.WithObjectWaitFailureStates())
+				opts = append(opts, objects.WithObjectWait(resource.WithFailureStates()))
 			}
 			result, err := objects.New(client).WaitForStatus(context.Background(), "c", "o", "ready", opts...)
 			if disabled {
@@ -135,7 +135,7 @@ func TestObjectWaitContractsSelectedStatusAndFailurePolicy(t *testing.T) {
 			})
 			opts := []objects.ObjectWaitOption{}
 			if tc.attribute != "" {
-				opts = append(opts, objects.WithObjectWaitStatusAttribute(tc.attribute))
+				opts = append(opts, objects.WithObjectWait(resource.WithStatusAttribute(tc.attribute)))
 			} else {
 				opts = append(opts, objects.WithObjectWaitStatusHeader(tc.header))
 			}
@@ -177,7 +177,7 @@ func TestObjectWaitContractsProjectionIsAtomic(t *testing.T) {
 			}
 			return response, nil
 		})
-		result, err := objects.New(client).WaitForStatus(context.Background(), "c", "o", "ready", objects.WithObjectWaitStatusHeader("X-Object-Meta-State"), objects.WithObjectWaitProgressCallback(func(int) error { callbacks++; return nil }))
+		result, err := objects.New(client).WaitForStatus(context.Background(), "c", "o", "ready", objects.WithObjectWaitStatusHeader("X-Object-Meta-State"), objects.WithObjectWait(resource.WithProgressCallback(func(int) error { callbacks++; return nil })))
 		objectWaitExternalLast(t, result, 1, 200, "projection proof")
 		if err == nil || result.Complete || result.Status != nil || calls != 1 || callbacks != 0 {
 			t.Fatalf("header=%v result=%+v err=%v calls=%d callback=%d", header, result, err, calls, callbacks)
@@ -199,7 +199,7 @@ func TestObjectWaitContractsDirtyMissingAndAcceptedFaults(t *testing.T) {
 				}
 				calls, callbacks := 0, 0
 				client := objectMetadataClient(func(*http.Request) (*http.Response, error) { calls++; return objectMetadataWire(status, body), nil })
-				result, err := objects.New(client).WaitForDelete(context.Background(), "c", "o", objects.WithObjectWaitProgressCallback(func(int) error { callbacks++; return nil }))
+				result, err := objects.New(client).WaitForDelete(context.Background(), "c", "o", objects.WithObjectWait(resource.WithProgressCallback(func(int) error { callbacks++; return nil })))
 				objectWaitExternalLast(t, result, 1, status, "physical proof")
 				if !errors.Is(err, sentinel) || result.Complete || result.Deleted || calls != 1 || callbacks != 0 || body.closes.Load() != 1 {
 					t.Fatalf("result=%+v err=%v calls=%d callback=%d closes=%d", result, err, calls, callbacks, body.closes.Load())
@@ -261,8 +261,8 @@ func TestObjectWaitContractsDefaultsCallbacksAndCancellation(t *testing.T) {
 	}{
 		{name: "delete default", deadline: true, remaining: 120 * time.Second},
 		{name: "status unlimited", status: true},
-		{name: "delete unlimited", options: []objects.ObjectWaitOption{objects.WithObjectWaitUnlimitedWait()}},
-		{name: "caller timeout override", options: []objects.ObjectWaitOption{objects.WithObjectWaitTimeout(2 * time.Second)}, deadline: true, remaining: 2 * time.Second},
+		{name: "delete unlimited", options: []objects.ObjectWaitOption{objects.WithObjectWait(resource.WithUnlimitedWait())}},
+		{name: "caller timeout override", options: []objects.ObjectWaitOption{objects.WithObjectWait(resource.WithTimeout(2 * time.Second))}, deadline: true, remaining: 2 * time.Second},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			calls, callbacks := 0, 0
@@ -277,13 +277,13 @@ func TestObjectWaitContractsDefaultsCallbacksAndCancellation(t *testing.T) {
 				return response, nil
 			})
 			options := append([]objects.ObjectWaitOption{}, tc.options...)
-			options = append(options, objects.WithObjectWaitProgressCallback(func(progress int) error {
+			options = append(options, objects.WithObjectWait(resource.WithProgressCallback(func(progress int) error {
 				callbacks++
 				if progress != 0 {
 					t.Errorf("progress=%d", progress)
 				}
 				return stop
-			}))
+			})))
 			var result *objects.ObjectWaitResult
 			var err error
 			if tc.status {
@@ -306,7 +306,7 @@ func TestObjectWaitContractsDefaultsCallbacksAndCancellation(t *testing.T) {
 			calls++
 			return objectMetadataResponse(204, "before cancellation"), nil
 		})
-		result, err := objects.New(client).WaitForDelete(ctx, "c", "o", objects.WithObjectWaitPollInterval(time.Hour), objects.WithObjectWaitProgressCallback(func(int) error { cancel(); return nil }))
+		result, err := objects.New(client).WaitForDelete(ctx, "c", "o", objects.WithObjectWait(resource.WithPollInterval(time.Hour)), objects.WithObjectWait(resource.WithProgressCallback(func(int) error { cancel(); return nil })))
 		objectWaitExternalLast(t, result, 1, 204, "before cancellation")
 		if !errors.Is(err, context.Canceled) || result.Complete || calls != 1 {
 			t.Fatalf("result=%+v err=%v calls=%d", result, err, calls)
@@ -318,7 +318,7 @@ func TestObjectWaitContractsDefaultsCallbacksAndCancellation(t *testing.T) {
 			calls++
 			return objectMetadataResponse(200, "before timeout"), nil
 		})
-		result, err := objects.New(client).WaitForDelete(context.Background(), "c", "o", objects.WithObjectWaitTimeout(20*time.Millisecond), objects.WithObjectWaitPollInterval(time.Hour))
+		result, err := objects.New(client).WaitForDelete(context.Background(), "c", "o", objects.WithObjectWait(resource.WithTimeout(20*time.Millisecond)), objects.WithObjectWait(resource.WithPollInterval(time.Hour)))
 		objectWaitExternalLast(t, result, 1, 200, "before timeout")
 		if !errors.Is(err, context.DeadlineExceeded) || result.Complete || calls != 1 {
 			t.Fatalf("result=%+v err=%v calls=%d", result, err, calls)

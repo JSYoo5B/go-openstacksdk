@@ -104,7 +104,7 @@ func TestPythonKeymanagerSecretStoreWaitOrderedAliasesAndSynchronizedMerge(t *te
 	})
 	seed := nativeSecretStore(t, `{"status":"BUILD","name":"retained","secret_store_ref":"https://passive.invalid/seed","created":"old","global_default":true}`)
 	var progress []int
-	value, err := api.WaitForStatus(context.Background(), waits.ForSecretStore("fixed/id", seed), str("active"), waits.WithInterval(time.Nanosecond), waits.WithProgressCallback(func(v int) error { progress = append(progress, v); return nil }))
+	value, err := api.WaitForStatus(context.Background(), waits.ForSecretStore("fixed/id", seed), str("active"), waits.WithInterval(time.Nanosecond), waits.WithWait(resource.WithProgressCallback(func(v int) error { progress = append(progress, v); return nil })))
 	if err != nil || len(*calls) != 3 || !reflect.DeepEqual(progress, []int{0, 0}) || value.StatusCode != 202 || string(value.Envelope) != bodies[2] {
 		t.Fatal(err, value, *calls, progress)
 	}
@@ -152,12 +152,12 @@ func TestPythonKeymanagerSecretStoreWaitDescriptorAndShapeErrorsKeepActualPage(t
 	for _, body := range []string{"", "malformed JSON"} {
 		api, _, calls := fixture(t, func(*http.Request, int) *http.Response { return wire(204, body) })
 		stopped := errors.New("callback stop")
-		value, err := api.WaitForStatus(context.Background(), waits.SecretStore("one"), str("active"), waits.WithProgressCallback(func(v int) error {
+		value, err := api.WaitForStatus(context.Background(), waits.SecretStore("one"), str("active"), waits.WithWait(resource.WithProgressCallback(func(v int) error {
 			if v != 0 {
 				t.Fatal(v)
 			}
 			return stopped
-		}))
+		})))
 		var proof *resource.ResponseError
 		if value == nil || value.Resource != nil || !errors.Is(err, stopped) || !errors.As(err, &proof) || proof.StatusCode != 204 || string(proof.Body) != body || len(*calls) != 1 {
 			t.Fatal(err, value, proof, *calls)
@@ -210,7 +210,7 @@ func TestPythonKeymanagerSecretStoreWaitPreflightFailureAndCallbackPolicies(t *t
 			t.Fatal(err, value, *calls)
 		}
 	}
-	for _, option := range []waits.Option{waits.WithAttribute("progress"), waits.WithTimeout(0), waits.WithInterval(-time.Second)} {
+	for _, option := range []waits.Option{waits.WithWait(resource.WithStatusAttribute("progress")), waits.WithTimeout(0), waits.WithInterval(-time.Second)} {
 		value, err := api.WaitForStatus(context.Background(), waits.SecretStore("one"), str("active"), option)
 		if value != nil || err == nil || len(*calls) != 0 {
 			t.Fatal(err, value, *calls)
@@ -224,12 +224,12 @@ func TestPythonKeymanagerSecretStoreWaitPreflightFailureAndCallbackPolicies(t *t
 	}
 	api, _, calls = fixture(t, func(*http.Request, int) *http.Response { return wire(200, `{"status":"ERROR","progress":900}`) })
 	stop := errors.New("explicit no failures callback")
-	value, err = api.WaitForStatus(context.Background(), waits.SecretStore("one"), str("active"), waits.WithFailures(), waits.WithProgressCallback(func(v int) error {
+	value, err = api.WaitForStatus(context.Background(), waits.SecretStore("one"), str("active"), waits.WithWait(resource.WithFailureStates()), waits.WithWait(resource.WithProgressCallback(func(v int) error {
 		if v != 0 {
 			t.Fatal(v)
 		}
 		return stop
-	}))
+	})))
 	if value == nil || value.Resource != nil || !errors.Is(err, stop) || errors.As(err, &failed) || len(*calls) != 1 {
 		t.Fatal(err, value, *calls)
 	}

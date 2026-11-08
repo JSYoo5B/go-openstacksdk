@@ -9,26 +9,23 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
-// ObjectWaitOpts is the full object wait policy. ProgressCallback runs
-// synchronously with zero after each nonterminal observation and its error
-// stops the wait. A nonnil Progress is then sent zero at the same step (not
-// when the callback failed); the caller owns and drains it, the wait blocks
-// on each send until it is received or ctx ends, never closes Progress and
-// sends nothing after it returns. WaitStrategy replaces the fixed Interval
-// with a resource.WaitStrategy (a Go-only extension); setting both Interval
-// and WaitStrategy is rejected before HTTP.
+// ObjectWaitOpts is the full object wait policy. Wait holds the shared wait
+// options (see WithObjectWait); StatusHeader selects a response header as the
+// status instead of a resource.WithStatusAttribute attribute, and the later of
+// the two wins. A struct that sets StatusHeader while its own Wait selects a
+// status attribute is rejected before HTTP.
 type ObjectWaitOpts struct {
-	Headers                       map[string]string
-	Interval, Timeout             *time.Duration
-	WaitStrategy                  *resource.WaitStrategy
-	StatusAttribute, StatusHeader string
-	FailureStates                 []string
-	ProgressCallback              func(int) error
-	Progress                      chan<- int
+	Headers      map[string]string
+	Wait         []resource.WaitOption
+	StatusHeader string
+	// statusHeaderAt is len(Wait) when WithObjectWaitStatusHeader applied, so
+	// attributes selected earlier lose to the header.
+	statusHeaderAt int
 }
 
-// ObjectWaitOption is one option of WaitForStatus and WaitForDelete: the
-// WithObjectWait* options, request.Header (validated and merged like a
+// ObjectWaitOption is one option of WaitForStatus and WaitForDelete:
+// WithObjectWaitOpts, WithObjectWaitHeaders, WithObjectWait,
+// WithObjectWaitStatusHeader, request.Header (validated and merged like a
 // one-entry WithObjectWaitHeaders) or request.Custom over *ObjectWaitOpts.
 // Other shared calls, including request.Headers (the WithObjectWaitHeaders
 // map merges instead of replacing), fail with resource.ErrInvalidOption
@@ -54,108 +51,52 @@ func WithObjectWaitHeaders(values map[string]string) ObjectWaitOption {
 	})
 }
 
-// WithObjectWaitPollInterval sets a fixed positive interval. It and
-// WithObjectWaitStrategy replace each other; the later one wins.
-func WithObjectWaitPollInterval(value time.Duration) ObjectWaitOption {
+// WithObjectWait appends shared wait options; repeated calls append and the
+// later option wins per control. WaitForStatus defaults to no SDK timeout,
+// a fixed two-second interval and ERROR failure detection on the status
+// attribute; WaitForDelete defaults to a 120-second timeout and the same
+// interval. Both accept resource.WithTimeout, WithUnlimitedWait,
+// WithPollInterval, WithWaitStrategy, WithFailureStates, WithStatusAttribute
+// (a Swift object attribute; a single field name), WithProgressCallback and
+// WithProgress (both report zero after each nonterminal observation; the
+// callback runs first and its error stops the wait with nothing sent for
+// that step). WaitForDelete validates but ignores failure states and the
+// status attribute. A selected attribute replaces an earlier
+// WithObjectWaitStatusHeader.
+func WithObjectWait(opts ...resource.WaitOption) ObjectWaitOption {
+	snapshot := append([]resource.WaitOption(nil), opts...)
+	selects := objectWaitSelectsAttribute(snapshot)
 	return request.Custom(func(cfg *ObjectWaitOpts) error {
-		if value <= 0 {
-			return metadataInvalid("object polling interval must be positive")
+		cfg.Wait = append(append([]resource.WaitOption(nil), cfg.Wait...), snapshot...)
+		if selects {
+			cfg.StatusHeader = ""
 		}
-		owned := value
-		cfg.Interval, cfg.WaitStrategy = &owned, nil
 		return nil
 	})
 }
 
-// WithObjectWaitStrategy replaces the fixed interval with value, a Go-only
-// extension. An invalid strategy fails with resource.ErrInvalidOption before
-// HTTP.
-func WithObjectWaitStrategy(value resource.WaitStrategy) ObjectWaitOption {
-	return request.Custom(func(cfg *ObjectWaitOpts) error {
-		if err := value.Validate(); err != nil {
-			return err
-		}
-		owned := value
-		cfg.Interval, cfg.WaitStrategy = nil, &owned
-		return nil
-	})
-}
-func WithObjectWaitTimeout(value time.Duration) ObjectWaitOption {
-	return request.Custom(func(cfg *ObjectWaitOpts) error {
-		if value <= 0 {
-			return metadataInvalid("object wait timeout must be positive")
-		}
-		owned := value
-		cfg.Timeout = &owned
-		return nil
-	})
-}
-
-// WithObjectWaitUnlimitedWait removes the SDK timeout. The caller's context
-// still controls cancellation and deadlines.
-func WithObjectWaitUnlimitedWait() ObjectWaitOption {
-	return request.Custom(func(cfg *ObjectWaitOpts) error { owned := time.Duration(0); cfg.Timeout = &owned; return nil })
-}
-func WithObjectWaitStatusAttribute(value string) ObjectWaitOption {
-	return request.Custom(func(cfg *ObjectWaitOpts) error { cfg.StatusAttribute, cfg.StatusHeader = value, ""; return nil })
-}
+// WithObjectWaitStatusHeader selects a response header as the status. It
+// replaces a status attribute selected earlier through WithObjectWait.
 func WithObjectWaitStatusHeader(value string) ObjectWaitOption {
-	return request.Custom(func(cfg *ObjectWaitOpts) error { cfg.StatusHeader, cfg.StatusAttribute = value, ""; return nil })
-}
-
-// WithObjectWaitFailureStates replaces failure matching. Calling it without
-// states installs an explicit empty list; nil full options restore ERROR.
-func WithObjectWaitFailureStates(values ...string) ObjectWaitOption {
-	snapshot := make([]string, len(values))
-	copy(snapshot, values)
 	return request.Custom(func(cfg *ObjectWaitOpts) error {
-		cfg.FailureStates = make([]string, len(snapshot))
-		copy(cfg.FailureStates, snapshot)
-		return nil
-	})
-}
-func WithObjectWaitProgressCallback(callback func(int) error) ObjectWaitOption {
-	return request.Custom(func(cfg *ObjectWaitOpts) error { cfg.ProgressCallback = callback; return nil })
-}
-func WithoutObjectWaitProgressCallback() ObjectWaitOption {
-	return request.Custom(func(cfg *ObjectWaitOpts) error { cfg.ProgressCallback = nil; return nil })
-}
-
-// WithObjectWaitProgress sends zero on progress after each nonterminal
-// observation, after any progress callback. A nil channel is an invalid
-// option.
-func WithObjectWaitProgress(progress chan<- int) ObjectWaitOption {
-	return request.Custom(func(cfg *ObjectWaitOpts) error {
-		if progress == nil {
-			return metadataInvalid("object wait progress channel must not be nil")
-		}
-		cfg.Progress = progress
+		cfg.StatusHeader, cfg.statusHeaderAt = value, len(cfg.Wait)
 		return nil
 	})
 }
 
-// WithoutObjectWaitProgress clears a progress channel installed earlier.
-func WithoutObjectWaitProgress() ObjectWaitOption {
-	return request.Custom(func(cfg *ObjectWaitOpts) error { cfg.Progress = nil; return nil })
+// objectWaitSelectsAttribute reports whether opts select a status attribute.
+// Invalid options report false here and fail when the wait resolves them.
+func objectWaitSelectsAttribute(opts []resource.WaitOption) bool {
+	probe, err := resource.ResolveWait(resource.WaitDefaults{Timeout: time.Second, Strategy: resource.FixedWait(time.Second), Supports: objectWaitSupport}, opts...)
+	return err == nil && probe.StatusAttribute != ""
 }
+
+const objectWaitSupport = resource.WaitSupportFailureStates | resource.WaitSupportStatusAttribute | resource.WaitSupportProgress
+
 func cloneObjectWaitOpts(value ObjectWaitOpts) ObjectWaitOpts {
 	value.Headers = cloneMetadataHeaders(value.Headers)
-	if value.Interval != nil {
-		owned := *value.Interval
-		value.Interval = &owned
-	}
-	if value.Timeout != nil {
-		owned := *value.Timeout
-		value.Timeout = &owned
-	}
-	if value.WaitStrategy != nil {
-		owned := *value.WaitStrategy
-		value.WaitStrategy = &owned
-	}
-	if value.FailureStates != nil {
-		owned := make([]string, len(value.FailureStates))
-		copy(owned, value.FailureStates)
-		value.FailureStates = owned
+	if value.Wait != nil {
+		value.Wait = append([]resource.WaitOption(nil), value.Wait...)
 	}
 	return value
 }

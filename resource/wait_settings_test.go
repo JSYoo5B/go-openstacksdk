@@ -38,7 +38,7 @@ func TestResolveWaitLaterOptionWinsPerControl(t *testing.T) {
 		resource.WithFailureStates("A"), resource.WithFailureStates(),
 		resource.WithStatusAttribute("one"), resource.WithStatusAttribute("two"),
 		resource.WithProgress(progress))
-	if err != nil || !got.Unlimited || got.Timeout != 0 || got.Strategy.Delay(3) != 5*time.Second || !got.FailureStatesSet || len(got.FailureStates) != 0 || got.StatusAttribute != "two" || got.Progress != progress {
+	if err != nil || !got.Unlimited || got.Timeout != 0 || got.Strategy.Delay(3) != 5*time.Second || !got.FailureStatesSet || got.FailureStates == nil || len(got.FailureStates) != 0 || got.StatusAttribute != "two" || got.Progress != progress {
 		t.Fatalf("settings=%+v err=%v", got, err)
 	}
 	got, err = resource.ResolveWait(defaults, resource.WithUnlimitedWait(), resource.WithTimeout(time.Second), resource.WithPollInterval(time.Hour), resource.WithWaitStrategy(resource.FixedWait(time.Millisecond)))

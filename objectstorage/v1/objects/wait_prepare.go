@@ -14,12 +14,15 @@ import (
 )
 
 type preparedObjectWait struct {
-	request           *preparedCreateObject
-	options           ObjectWaitOpts
-	interval, timeout time.Duration
-	pacer             *pollschedule.Pacer
-	header, literal   string
-	literalSelected   bool
+	request         *preparedCreateObject
+	options         ObjectWaitOpts
+	timeout         time.Duration
+	failures        []string
+	callback        func(int) error
+	progress        chan<- int
+	pacer           *pollschedule.Pacer
+	header, literal string
+	literalSelected bool
 }
 
 func validateObjectWaitHeaders(values map[string]string) (map[string]string, error) {
@@ -63,30 +66,30 @@ func (a *API) prepareObjectWait(ctx context.Context, container, object, status s
 		return nil, metadataContextError(ctx, err)
 	}
 	cfg.Headers, err = validateObjectWaitHeaders(cfg.Headers)
-	if err == nil && cfg.Interval != nil && *cfg.Interval <= 0 {
-		err = metadataInvalid("object polling interval must be positive")
+	defaults := resource.WaitDefaults{Unlimited: true, Strategy: resource.FixedWait(2 * time.Second), Supports: objectWaitSupport}
+	if deletion {
+		defaults = resource.WaitDefaults{Timeout: 120 * time.Second, Strategy: resource.FixedWait(2 * time.Second), Supports: objectWaitSupport}
 	}
-	if err == nil && cfg.WaitStrategy != nil {
-		if cfg.Interval != nil {
-			err = metadataInvalid("object wait Interval and WaitStrategy are mutually exclusive")
-		} else {
-			err = cfg.WaitStrategy.Validate()
-		}
+	var settings resource.WaitSettings
+	if err == nil {
+		settings, err = resource.ResolveWait(defaults, cfg.Wait...)
 	}
-	if err == nil && cfg.Timeout != nil && *cfg.Timeout < 0 {
-		err = metadataInvalid("negative object wait timeout")
-	}
-	if err == nil && cfg.StatusAttribute != "" && (!metadataToken(cfg.StatusAttribute) || strings.ContainsAny(cfg.StatusAttribute, ". /\\")) {
+	attribute := settings.StatusAttribute
+	if err == nil && attribute != "" && (!metadataToken(attribute) || strings.ContainsAny(attribute, ". /\\")) {
 		err = metadataInvalid("object status attribute must be a single field name")
 	}
 	if err == nil && cfg.StatusHeader != "" && !metadataToken(cfg.StatusHeader) {
 		err = metadataInvalid("object status header must be a single HTTP token")
 	}
-	if err == nil && cfg.StatusAttribute != "" && cfg.StatusHeader != "" {
-		err = metadataInvalid("object status attribute and header conflict")
+	if err == nil && cfg.StatusHeader != "" {
+		at := min(max(cfg.statusHeaderAt, 0), len(cfg.Wait))
+		if objectWaitSelectsAttribute(cfg.Wait[at:]) {
+			err = metadataInvalid("object status attribute and header conflict")
+		}
+		attribute = ""
 	}
 	if err == nil {
-		for _, failure := range cfg.FailureStates {
+		for _, failure := range settings.FailureStates {
 			if !objectWaitText(failure) {
 				err = metadataInvalid("invalid object failure state")
 				break
@@ -96,32 +99,19 @@ func (a *API) prepareObjectWait(ctx context.Context, container, object, status s
 	if err = joinMetadataErrors(err, p.guard(ctx)); err != nil {
 		return nil, metadataContextError(ctx, err)
 	}
-	w := &preparedObjectWait{request: p, options: cfg, interval: 2 * time.Second}
-	if deletion {
-		w.timeout = 120 * time.Second
-	}
-	if cfg.Interval != nil {
-		w.interval = *cfg.Interval
-	}
-	strategy := resource.FixedWait(w.interval)
-	if cfg.WaitStrategy != nil {
-		strategy = *cfg.WaitStrategy
-	}
-	w.pacer = pollschedule.NewPacer(strategy.Delay)
-	if cfg.Timeout != nil {
-		w.timeout = *cfg.Timeout
-	}
+	w := &preparedObjectWait{request: p, options: cfg, timeout: settings.Timeout, callback: settings.ProgressCallback, progress: settings.Progress}
+	w.pacer = pollschedule.NewPacer(settings.Strategy.Delay)
 	if deletion {
 		return w, nil
 	}
-	if w.options.FailureStates == nil {
-		w.options.FailureStates = []string{"ERROR"}
+	w.failures = []string{"ERROR"}
+	if settings.FailureStatesSet {
+		w.failures = append([]string{}, settings.FailureStates...)
 	}
 	if cfg.StatusHeader != "" {
 		w.header = http.CanonicalHeaderKey(cfg.StatusHeader)
 		return w, nil
 	}
-	attribute := cfg.StatusAttribute
 	if attribute == "" {
 		attribute = "status"
 	}
