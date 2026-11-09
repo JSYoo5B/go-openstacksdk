@@ -46,7 +46,7 @@ func TestConnectionIdentityRecordReadsUseCachedServiceAndLocationBeforeSelection
 	if err != nil || role == nil || len(role.Roles) != 1 {
 		t.Fatal(role, err)
 	}
-	domain, err := conn.SearchDomainRecords(context.Background(), identity.WithDomainReadNameOrID("example"), identity.WithDomainReadFilters(filter))
+	domain, err := conn.SearchDomainRecords(context.Background(), request.Custom(func(c *identity.DomainReadOpts) error { v := "example"; c.NameOrID = &v; return nil }), identity.WithDomainReadFilters(filter))
 	if err != nil || domain == nil || len(domain.Domains) != 1 {
 		t.Fatal(domain, err)
 	}

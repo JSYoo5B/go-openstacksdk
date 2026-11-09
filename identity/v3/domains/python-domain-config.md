@@ -17,7 +17,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithDomainConfigIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 
 - CreateConfigRecord PUTs the selected Domain singleton with config envelope, raw identity/ldap payloads including unknown nested settings and nullable values, then overlays the actual response and projects declared child Resource views without fabricating physical fields.
   Tests: `identity/v3/domains/python_domain_config_test.go:TestPythonDomainConfigCreateUsesSingletonPUTAndRawChildPayload`, `identity/v3/domains/python_domain_config_test.go:TestPythonDomainConfigGetProjectsChildrenAndPreservesActualEvidence`.
@@ -41,7 +41,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithDomainConfigIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 
 - DeleteConfigRecord performs bodyless singleton DELETE, defaults to ignoring only clean404 and offers strict missing behavior. Accepted deletion and ignored404 retain independent actual response receipt; Python None becomes a Go Deleted/Response carrier.
   Tests: `identity/v3/domains/python_domain_config_test.go:TestPythonDomainConfigDeleteMissingDefaultAndStrictPolicy`, `identity/v3/domains/python_domain_config_test.go:TestPythonDomainConfigDeleteAcceptedResponseIsIndependentReceipt`.
@@ -66,7 +66,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithDomainConfigIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 
 - GetConfigRecord GETs the singleton without an extra resource ID, preserves absent/null/passive id and actual envelope/header/status, and projects declared child mapping/defaults independently from raw Wire. Null, nonmapping scalar and empty-object child values remain distinct.
   Tests: `identity/v3/domains/python_domain_config_test.go:TestPythonDomainConfigGetProjectsChildrenAndPreservesActualEvidence`, `identity/v3/domains/python_domain_config_test.go:TestPythonDomainConfigGetNullScalarAndEmptyChildrenHaveDistinctViews`.
@@ -92,7 +92,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithDomainConfigIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 
 - UpdateConfigRecord PATCHes raw explicit identity/ldap values and null in a config envelope, overlays actual response on seed and discards dirty id from wire while retaining the explicit seed id view. No recognized dirty fields yields no HTTP and no invented receipt.
   Tests: `identity/v3/domains/python_domain_config_test.go:TestPythonDomainConfigUpdatePATCHNullAndSeedOverlay`, `identity/v3/domains/python_domain_config_test.go:TestPythonDomainConfigUpdateEmptyAndUnknownAttributesAvoidHTTP`.
@@ -185,7 +185,7 @@ func main() {
     case "get":
         row, err = service.Domains.GetConfigRecord(ctx, *domain)
     case "delete":
-        result, err := service.Domains.DeleteConfigRecord(ctx, *domain, domains.WithDomainConfigIgnoreMissing(!*strict))
+        result, err := service.Domains.DeleteConfigRecord(ctx, *domain, request.Custom(func(c *domains.DomainConfigOpts) error { v := !*strict; c.IgnoreMissing = &v; return nil }))
         if err != nil { log.Fatal(err) }
         printJSON(result.Deleted)
         return

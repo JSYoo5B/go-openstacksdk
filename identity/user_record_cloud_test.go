@@ -133,7 +133,7 @@ func TestPythonUserCloudSearchExactSourceUUIDDetectionAndNameHint(t *testing.T) 
 				row, _ := json.Marshal(map[string]any{"id": tc.name, "name": tc.name})
 				return userCloudWire(200, `{"users":[`+string(row)+`]}`)
 			})
-			result, err := cloud.SearchUsers(context.Background(), tc.name, identity.WithUserSearchDomainID("d"))
+			result, err := cloud.SearchUsers(context.Background(), tc.name, request.Custom(func(c *identity.UserSearchOpts) error { c.DomainID = "d"; return nil }))
 			if err != nil || result == nil || len(result.Users) != 1 || len(result.Inventory) != 1 || calls != 1 {
 				t.Fatal(tc, result, err, calls)
 			}
@@ -150,7 +150,7 @@ func TestPythonUserCloudSearchGlobOrderedLoadedFiltersAndDeclaredMembership(t *t
 		}
 		return userCloudWire(200, `{"users":[{"id":"one","name":"team-alpha","enabled":true,"options":{"n":9007199254740992,"nested":{"ok":1},"extra":1}},{"id":"two","name":"other","enabled":true,"options":{"n":9007199254740992}}]}`)
 	})
-	result, err := cloud.SearchUsers(context.Background(), "team*", identity.WithUserSearchDomainID("d"), identity.WithUserSearchFilters(json.RawMessage(`{"is_enabled":true,"options":{"n":9007199254740993.0,"nested":{"ok":true}}}`)))
+	result, err := cloud.SearchUsers(context.Background(), "team*", request.Custom(func(c *identity.UserSearchOpts) error { c.DomainID = "d"; return nil }), identity.WithUserSearchFilters(json.RawMessage(`{"is_enabled":true,"options":{"n":9007199254740993.0,"nested":{"ok":true}}}`)))
 	if err != nil || result == nil || !reflect.DeepEqual(userCloudIDs(t, result.Users), []string{"one"}) || len(result.Inventory) != 2 || calls != 1 {
 		t.Fatal(result, err, calls)
 	}
@@ -159,7 +159,7 @@ func TestPythonUserCloudSearchGlobOrderedLoadedFiltersAndDeclaredMembership(t *t
 		t.Fatal(result.Inventory)
 	}
 	// The wire spelling is not a declared Resource member in the Cloud filter.
-	result, err = cloud.SearchUsers(context.Background(), "team*", identity.WithUserSearchDomainID("d"), identity.WithUserSearchFilters(json.RawMessage(`{"enabled":true}`)))
+	result, err = cloud.SearchUsers(context.Background(), "team*", request.Custom(func(c *identity.UserSearchOpts) error { c.DomainID = "d"; return nil }), identity.WithUserSearchFilters(json.RawMessage(`{"enabled":true}`)))
 	var receipt *resource.ResponseError
 	if result == nil || err == nil || result.Value != nil || len(result.Inventory) != 2 || errors.As(err, &receipt) {
 		t.Fatal(result, err, receipt)
@@ -232,7 +232,7 @@ func TestPythonUserCloudSearchAllPagesBeforeLocalFailureAndLateHTTPWins(t *testi
 			}
 			return userCloudWire(200, `{"users":[{"id":"two"}]}`)
 		})
-		result, err := cloud.SearchUsers(context.Background(), "", identity.WithUserSearchDomainID("d"), identity.WithUserSearchFilters(json.RawMessage(`"["`)))
+		result, err := cloud.SearchUsers(context.Background(), "", request.Custom(func(c *identity.UserSearchOpts) error { c.DomainID = "d"; return nil }), identity.WithUserSearchFilters(json.RawMessage(`"["`)))
 		if result == nil || err == nil || result.Value != nil || result.Users != nil || calls != 2 {
 			t.Fatal(result, err, calls)
 		}

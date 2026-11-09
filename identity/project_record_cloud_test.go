@@ -39,7 +39,7 @@ func TestPythonProjectCloudListTruthfulNameDomainOverrideAndLocalBodyFilter(t *t
 		w.Header().Set("X-Request-Id", "cloud-project")
 		testcloud.JSON(w, 203, `{"projects":[{"id":"a","name":"override-name","description":"keep","enabled":true},{"id":"b","description":"skip"}]}`)
 	})
-	result, err := cloud.ListProjects(context.Background(), identity.WithProjectReadDomainID("override-domain"), identity.WithProjectReadNameOrID("override-name"), identity.WithProjectReadFilters(json.RawMessage(`{"domain_id":"filter-domain","name":"filter-name","description":"keep","is_enabled":false}`)))
+	result, err := cloud.ListProjects(context.Background(), request.Custom(func(c *identity.ProjectReadOpts) error { c.DomainID = "override-domain"; return nil }), request.Custom(func(c *identity.ProjectReadOpts) error { c.NameOrID = "override-name"; return nil }), identity.WithProjectReadFilters(json.RawMessage(`{"domain_id":"filter-domain","name":"filter-name","description":"keep","is_enabled":false}`)))
 	if err != nil || result == nil || len(result.Projects) != 1 || len(result.Inventory) != 1 || calls != 1 {
 		t.Fatal(result, err, calls)
 	}
@@ -91,7 +91,7 @@ func TestPythonProjectCloudSearchGlobNestedLoadedEqualityAndWireAliasFailures(t 
 		}
 		testcloud.JSON(w, 200, `{"projects":[{"id":"a","name":"team-alpha","options":{"n":0.10000000000000001}},{"id":"b","name":"other","options":{"n":0.2}}]}`)
 	})
-	result, err := cloud.SearchProjects(context.Background(), "team-*", identity.WithProjectReadDomainID("domain"), identity.WithProjectReadFilters(json.RawMessage(`{"options":{"n":0.1}}`)))
+	result, err := cloud.SearchProjects(context.Background(), "team-*", request.Custom(func(c *identity.ProjectReadOpts) error { c.DomainID = "domain"; return nil }), identity.WithProjectReadFilters(json.RawMessage(`{"options":{"n":0.1}}`)))
 	if err != nil || result == nil || len(result.Projects) != 1 || len(result.Inventory) != 1 || string(result.Projects[0].Resource.Body["id"]) != `"a"` || calls != 1 {
 		t.Fatal(result, err, calls)
 	}

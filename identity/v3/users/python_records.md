@@ -109,7 +109,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity.NewUserReadCloud`
 - `github.com/JSYoo5B/go-openstacksdk/identity.UserReadCloud.SearchUsers`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithUserSearchOpts`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithUserSearchDomainID`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithUserSearchFilters`
 - `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
@@ -233,7 +232,7 @@ func main() {
 	printJSON(listed.Value)
 
 	searched, err := cloud.SearchUsers(ctx, "team*",
-		identity.WithUserSearchDomainID(domain),
+		request.Custom(func(c *identity.UserSearchOpts) error { c.DomainID = domain; return nil }),
 		identity.WithUserSearchFilters(json.RawMessage(`"length(@)"`)),
 		request.Custom(func(c *identity.UserSearchOpts) error { loc := location.Clone(); c.Location = &loc; return nil }),
 	)

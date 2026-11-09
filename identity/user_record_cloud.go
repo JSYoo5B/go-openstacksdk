@@ -260,9 +260,9 @@ type UserSearchOpts struct {
 }
 
 // UserSearchOption is one option of SearchUsers: WithUserSearchOpts,
-// WithUserSearchDomainID, WithUserSearchFilters, request.Headers (replaces the
-// headers), request.Microversion or request.Custom over *UserSearchOpts (for
-// example to set Location). Other shared calls fail with
+// WithUserSearchFilters, request.Headers (replaces the headers),
+// request.Microversion or request.Custom over *UserSearchOpts (for example to
+// set Location or DomainID). Other shared calls fail with
 // resource.ErrInvalidOption before HTTP.
 type UserSearchOption = request.GetCall
 
@@ -293,9 +293,6 @@ func copyUserSearchOpts(v UserSearchOpts) UserSearchOpts {
 func WithUserSearchOpts(v UserSearchOpts) UserSearchOption {
 	owned := copyUserSearchOpts(v)
 	return request.Custom(func(c *UserSearchOpts) error { *c = copyUserSearchOpts(owned); return nil })
-}
-func WithUserSearchDomainID(v string) UserSearchOption {
-	return request.Custom(func(c *UserSearchOpts) error { c.DomainID = v; return nil })
 }
 func WithUserSearchFilters(v json.RawMessage) UserSearchOption {
 	owned := bytes.Clone(v)

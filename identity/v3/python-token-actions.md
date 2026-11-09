@@ -14,8 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/tokens.API.ValidateToken`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/tokens.WithValidateTokenOpts`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/tokens.WithValidateTokenNoCatalog`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/tokens.WithValidateTokenAllowExpired`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 
 - GET auth/tokens sends an independent X-Subject-Token and only truthy nocatalog=True/allow_expired=True parameters while retaining provider authentication. The owned Token Resource, Wire, Envelope and Header channels are independent; thirteen Body descriptors, raw date values and response-only subject token follow pinned Source defaults and conversion.
   Tests: `identity/v3/tokens/token_actions_test.go:TestPythonTokenValidateQueriesHeadersAndOwnedRecord`, `identity/v3/tokens/token_actions_test.go:TestPythonTokenValidateDescriptorConversionsAndToleratedBodies`.
@@ -37,7 +36,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/tokens.API.CheckToken`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/tokens.WithCheckTokenOpts`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/tokens.WithCheckTokenAllowExpired`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 
 - HEAD auth/tokens returns true only for actual HTTP200; other statuses, including204/403/404/500, return false without status error. True allow_expired is encoded as allow_expired=True and false is omitted; the subject header remains separate from authentication.
   Tests: `identity/v3/tokens/token_actions_test.go:TestPythonTokenCheckAllHTTPStatusesAndExpiredQuery`.
@@ -105,14 +104,14 @@ func main() {
     service, err := conn.IdentityV3(ctx)
     if err != nil { log.Fatal(err) }
     record, err := service.Tokens.ValidateToken(ctx, *token,
-        tokens.WithValidateTokenNoCatalog(true),
-        tokens.WithValidateTokenAllowExpired(*allowExpired))
+        func(c *tokens.ValidateTokenOpts) error { c.NoCatalog = true; return nil },
+        func(c *tokens.ValidateTokenOpts) error { c.AllowExpired = *allowExpired; return nil })
     if err != nil { log.Fatal(err) }
     data, err := json.MarshalIndent(record.Resource, "", "  ")
     if err != nil { log.Fatal(err) }
     fmt.Println(string(data))
     valid, err := service.Tokens.CheckToken(ctx, *token,
-        tokens.WithCheckTokenAllowExpired(*allowExpired))
+        func(c *tokens.CheckTokenOpts) error { c.AllowExpired = *allowExpired; return nil })
     if err != nil { log.Fatal(err) }
     fmt.Printf("valid: %t\n", valid)
     if *revoke {

@@ -55,7 +55,7 @@ func TestPythonDomainCloudSearchIdentifierPresenceSelectsSourceBranch(t *testing
 		})
 		opts := []identity.DomainReadOption{identity.WithDomainReadFilters(json.RawMessage(`{"name":"alpha","description":"keep"}`))}
 		if explicit {
-			opts = append(opts, identity.WithDomainReadNameOrID(""))
+			opts = append(opts, request.Custom(func(c *identity.DomainReadOpts) error { v := ""; c.NameOrID = &v; return nil }))
 		}
 		result, err := cloud.SearchDomains(context.Background(), opts...)
 		want := 2
@@ -86,7 +86,7 @@ func TestPythonDomainCloudSearchAbsentKeywordMappingVersusPresentJMESPath(t *tes
 	}
 	for _, tc := range []struct{ name, filter, want string }{{"", "length(@)", "2"}, {"alpha", "[0].id", `"a"`}, {"missing", "length(@)", "0"}} {
 		raw, _ := json.Marshal(tc.filter)
-		result, err := cloud.SearchDomains(context.Background(), identity.WithDomainReadNameOrID(tc.name), identity.WithDomainReadFilters(raw))
+		result, err := cloud.SearchDomains(context.Background(), request.Custom(func(c *identity.DomainReadOpts) error { v := tc.name; c.NameOrID = &v; return nil }), identity.WithDomainReadFilters(raw))
 		if err != nil || result == nil || !result.Expression || string(result.Value) != tc.want || result.Domains != nil || len(result.Inventory) != 2 {
 			t.Fatal(tc, result, err)
 		}
@@ -95,7 +95,7 @@ func TestPythonDomainCloudSearchAbsentKeywordMappingVersusPresentJMESPath(t *tes
 		for _, raw := range []string{`null`, `{}`} {
 			opts := []identity.DomainReadOption{identity.WithDomainReadFilters(json.RawMessage(raw))}
 			if explicit {
-				opts = append(opts, identity.WithDomainReadNameOrID(""))
+				opts = append(opts, request.Custom(func(c *identity.DomainReadOpts) error { v := ""; c.NameOrID = &v; return nil }))
 			}
 			result, err := cloud.SearchDomains(context.Background(), opts...)
 			if err != nil || result == nil || len(result.Domains) != 2 {
@@ -138,7 +138,7 @@ func TestPythonDomainCloudLocalLoadedSubsetGlobAndIndependentRecord(t *testing.T
 		}
 		testcloud.JSON(w, 203, `{"domains":[{"id":"repeat","name":"ops-a","options":{"n":9007199254740993.0,"flag":true}},{"id":"repeat","name":"ops-b","options":{"n":9007199254740992,"flag":1}},{"id":"c","name":"other","options":{}}]}`)
 	})
-	result, err := cloud.SearchDomains(context.Background(), identity.WithDomainReadNameOrID("ops-*"), identity.WithDomainReadFilters(json.RawMessage(`{"options":{"n":9007199254740992,"flag":1}}`)))
+	result, err := cloud.SearchDomains(context.Background(), request.Custom(func(c *identity.DomainReadOpts) error { v := "ops-*"; c.NameOrID = &v; return nil }), identity.WithDomainReadFilters(json.RawMessage(`{"options":{"n":9007199254740992,"flag":1}}`)))
 	if err != nil || result == nil || len(result.Domains) != 2 || len(result.Inventory) != 3 || result.Expression {
 		t.Fatal(result, err)
 	}
@@ -158,7 +158,7 @@ func TestPythonDomainCloudLateHTTPPrecedesLocalFilterError(t *testing.T) {
 			testcloud.JSON(w, 503, `{"error":"late domain"}`)
 		}
 	})
-	result, err := cloud.SearchDomains(context.Background(), identity.WithDomainReadNameOrID(""), identity.WithDomainReadFilters(json.RawMessage(`"["`)))
+	result, err := cloud.SearchDomains(context.Background(), request.Custom(func(c *identity.DomainReadOpts) error { v := ""; c.NameOrID = &v; return nil }), identity.WithDomainReadFilters(json.RawMessage(`"["`)))
 	var proof gophercloud.ErrUnexpectedResponseCode
 	if !errors.As(err, &proof) || proof.Actual != 503 || proof.ResponseHeader.Get("X-Request-Id") != "domain-late" || string(proof.Body) != `{"error":"late domain"}` || proof.Method != "GET" || !strings.Contains(proof.URL, "/identity/v3/domains?marker=a") || result == nil || len(result.Inventory) != 1 || calls != 2 {
 		t.Fatal(result, err, proof, calls)
@@ -175,7 +175,7 @@ func TestPythonDomainCloudExplicitLocationOwnedBeforeLocalFiltering(t *testing.T
 	cloud, _ := domainCloudFixture(t, func(w http.ResponseWriter, r *http.Request) {
 		testcloud.JSON(w, 200, `{"domains":[{"id":"a","project_id":"foreign","location":{"cloud":"wire"}}]}`)
 	})
-	result, err := cloud.SearchDomains(context.Background(), identity.WithDomainReadNameOrID(""), opt, identity.WithDomainReadNameOrID(""))
+	result, err := cloud.SearchDomains(context.Background(), request.Custom(func(c *identity.DomainReadOpts) error { v := ""; c.NameOrID = &v; return nil }), opt, request.Custom(func(c *identity.DomainReadOpts) error { v := ""; c.NameOrID = &v; return nil }))
 	if err != nil || len(result.Domains) != 1 || len(result.Inventory) != 1 || string(result.Domains[0].Wire.Body["location"]) != `{"cloud":"wire"}` {
 		t.Fatal(result, err)
 	}

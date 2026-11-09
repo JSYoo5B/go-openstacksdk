@@ -72,7 +72,7 @@ func TestConnectionProjectReadsPerCallLocationSnapshotAndNoNamePushdownForSearch
 	})
 	perCall = "changed"
 	callbacks := 0
-	result, err := connection.SearchProjects(context.Background(), "team-*", identity.WithProjectReadDomainID("domain"), identity.WithProjectReadNameOrID("ignored-list-name"), option, request.Custom(func(*identity.ProjectReadOpts) error { callbacks++; return nil }))
+	result, err := connection.SearchProjects(context.Background(), "team-*", request.Custom(func(c *identity.ProjectReadOpts) error { c.DomainID = "domain"; return nil }), request.Custom(func(c *identity.ProjectReadOpts) error { c.NameOrID = "ignored-list-name"; return nil }), option, request.Custom(func(*identity.ProjectReadOpts) error { callbacks++; return nil }))
 	if err != nil || result == nil || len(result.Projects) != 1 || len(result.Inventory) != 2 || callbacks != 1 {
 		t.Fatal(result, err, callbacks)
 	}

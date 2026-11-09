@@ -24,10 +24,10 @@ type DomainGetOpts struct {
 }
 
 // DomainGetOption is one option of GetDomain: WithDomainGetOpts,
-// WithDomainGetID, WithDomainGetNameOrID, WithDomainGetFilters,
-// request.Headers (replaces the headers), request.Microversion or
-// request.Custom over *DomainGetOpts (for example to set Location). Other
-// shared calls fail with resource.ErrInvalidOption before HTTP.
+// WithDomainGetFilters, request.Headers (replaces the headers),
+// request.Microversion or request.Custom over *DomainGetOpts (for example to
+// set Location, DomainID or NameOrID). Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
 type DomainGetOption = request.GetCall
 
 var domainGetCalls = calls.Spec[DomainGetOpts]{
@@ -58,12 +58,6 @@ func copyDomainGetOpts(v DomainGetOpts) DomainGetOpts {
 func WithDomainGetOpts(v DomainGetOpts) DomainGetOption {
 	owned := copyDomainGetOpts(v)
 	return request.Custom(func(c *DomainGetOpts) error { *c = copyDomainGetOpts(owned); return nil })
-}
-func WithDomainGetID(v string) DomainGetOption {
-	return request.Custom(func(c *DomainGetOpts) error { x := v; c.DomainID = &x; return nil })
-}
-func WithDomainGetNameOrID(v string) DomainGetOption {
-	return request.Custom(func(c *DomainGetOpts) error { x := v; c.NameOrID = &x; return nil })
 }
 func WithDomainGetFilters(v any) DomainGetOption {
 	present := v != nil

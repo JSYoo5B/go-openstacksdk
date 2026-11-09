@@ -132,8 +132,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity.ProjectReadCloud.ListProjects`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.ListProjects`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithProjectReadOpts`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithProjectReadDomainID`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithProjectReadNameOrID`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithProjectReadFilters`
 
 - Concrete Keystone v3 Project facade expands filters in insertion order then truthy explicit name/domain override corresponding filter values; declared Body filters run in the leaf and actual203 record/header is retained.
@@ -167,7 +165,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity.ProjectReadCloud.SearchProjects`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.SearchProjects`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithProjectReadFilters`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithProjectReadDomainID`
+- `github.com/JSYoo5B/go-openstacksdk/identity.WithProjectReadOpts`
 - `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 
 - Search calls list_projects without a server name hint and then applies exact/glob ID/name plus ordered nested loaded-JSON filters. Wire enabled passes server query but fails local Source Resource membership; is_enabled is the owned attribute name.
@@ -262,11 +260,11 @@ func main() {
 
     filters := identity.WithProjectReadFilters(json.RawMessage(`{"is_enabled":true}`))
     listed, err := conn.ListProjects(ctx,
-        identity.WithProjectReadDomainID(domain), filters)
+        request.Custom(func(c *identity.ProjectReadOpts) error { c.DomainID = domain; return nil }), filters)
     if err != nil { log.Fatal(err) }
     printJSON(listed.JSON)
     searched, err := conn.SearchProjects(ctx, "demo*",
-        identity.WithProjectReadDomainID(domain), filters)
+        request.Custom(func(c *identity.ProjectReadOpts) error { c.DomainID = domain; return nil }), filters)
     if err != nil { log.Fatal(err) }
     printJSON(searched.Value)
 }

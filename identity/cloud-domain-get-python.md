@@ -54,8 +54,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity.NewDomainReadCloud`
 - `github.com/JSYoo5B/go-openstacksdk/identity.DomainReadCloud.GetDomain`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainGetOpts`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainGetID`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainGetNameOrID`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainGetFilters`
 - `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
@@ -127,6 +125,7 @@ import (
     "fmt"
     "log"
 
+    "github.com/JSYoo5B/go-openstacksdk/request"
     openstack "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/identity"
 )
@@ -153,14 +152,14 @@ func main() {
 
     cloud := identity.NewDomainReadCloud(service.Domains)
     result, err := cloud.GetDomain(ctx,
-        identity.WithDomainGetID(*id),
+        request.Custom(func(c *identity.DomainGetOpts) error { v := *id; c.DomainID = &v; return nil }),
         identity.WithDomainGetFilters(json.RawMessage(`{invalid-but-ignored`)),
     )
     if err != nil { log.Fatal(err) }
     printJSON(result.Record.Resource.Body)
     fmt.Println("deprecated filters ignored:", result.DeprecatedFilters)
     if *name != "" {
-        found, err := cloud.GetDomain(ctx, identity.WithDomainGetNameOrID(*name))
+        found, err := cloud.GetDomain(ctx, request.Custom(func(c *identity.DomainGetOpts) error { v := *name; c.NameOrID = &v; return nil }))
         if err != nil { log.Fatal(err) }
         if found.Record != nil { printJSON(found.Record.Resource.Body) }
     }

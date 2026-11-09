@@ -41,9 +41,9 @@ type RoleSearchOpts struct {
 }
 
 // RoleSearchOption is one option of SearchRoles: WithRoleSearchOpts,
-// WithRoleSearchDomainID, WithRoleSearchFilters, request.Headers (replaces the
-// headers), request.Microversion or request.Custom over *RoleSearchOpts (for
-// example to set Location). Other shared calls fail with
+// WithRoleSearchFilters, request.Headers (replaces the headers),
+// request.Microversion or request.Custom over *RoleSearchOpts (for example to
+// set Location or DomainID). Other shared calls fail with
 // resource.ErrInvalidOption before HTTP.
 type RoleSearchOption = request.GetCall
 
@@ -75,9 +75,6 @@ func copyRoleSearchOpts(v RoleSearchOpts) RoleSearchOpts {
 func WithRoleSearchOpts(v RoleSearchOpts) RoleSearchOption {
 	owned := copyRoleSearchOpts(v)
 	return request.Custom(func(c *RoleSearchOpts) error { *c = copyRoleSearchOpts(owned); return nil })
-}
-func WithRoleSearchDomainID(v string) RoleSearchOption {
-	return request.Custom(func(c *RoleSearchOpts) error { x := v; c.DomainID = &x; return nil })
 }
 func WithRoleSearchFilters(v json.RawMessage) RoleSearchOption {
 	owned := bytes.Clone(v)

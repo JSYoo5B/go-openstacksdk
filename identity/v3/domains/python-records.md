@@ -80,7 +80,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity.DomainReadCloud.ListDomains`
 - `github.com/JSYoo5B/go-openstacksdk/identity.DomainReadCloud.SearchDomains`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadOpts`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadNameOrID`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadFilters`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
@@ -116,7 +115,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity.DomainReadCloud.ListDomains`
 - `github.com/JSYoo5B/go-openstacksdk/identity.DomainReadCloud.SearchDomains`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadOpts`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadNameOrID`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadFilters`
 - `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
@@ -232,7 +230,7 @@ func main() {
     printJSON(serverFiltered.Value)
 
     locallyFiltered, err := cloud.SearchDomains(ctx,
-        identity.WithDomainReadNameOrID("team-*"),
+        request.Custom(func(c *identity.DomainReadOpts) error { v := "team-*"; c.NameOrID = &v; return nil }),
         identity.WithDomainReadFilters(json.RawMessage(`{"description":"operations"}`)),
     )
     if err != nil { log.Fatal(err) }

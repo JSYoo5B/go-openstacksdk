@@ -23,12 +23,12 @@ func TestPythonTokenValidateQueriesHeadersAndOwnedRecord(t *testing.T) {
 		options     []tokens.ValidateTokenOption
 	}{
 		{"defaults", "", nil},
-		{"false", "", []tokens.ValidateTokenOption{tokens.WithValidateTokenNoCatalog(false), tokens.WithValidateTokenAllowExpired(false)}},
-		{"catalog", "nocatalog=True", []tokens.ValidateTokenOption{tokens.WithValidateTokenNoCatalog(true)}},
-		{"expired", "allow_expired=True", []tokens.ValidateTokenOption{tokens.WithValidateTokenAllowExpired(true)}},
+		{"false", "", []tokens.ValidateTokenOption{func(c *tokens.ValidateTokenOpts) error { c.NoCatalog = false; return nil }, func(c *tokens.ValidateTokenOpts) error { c.AllowExpired = false; return nil }}},
+		{"catalog", "nocatalog=True", []tokens.ValidateTokenOption{func(c *tokens.ValidateTokenOpts) error { c.NoCatalog = true; return nil }}},
+		{"expired", "allow_expired=True", []tokens.ValidateTokenOption{func(c *tokens.ValidateTokenOpts) error { c.AllowExpired = true; return nil }}},
 		{"both", "allow_expired=True&nocatalog=True", []tokens.ValidateTokenOption{tokens.WithValidateTokenOpts(tokens.ValidateTokenOpts{NoCatalog: true, AllowExpired: true})}},
-		{"replace", "", []tokens.ValidateTokenOption{tokens.WithValidateTokenNoCatalog(true), tokens.WithValidateTokenOpts(tokens.ValidateTokenOpts{})}},
-		{"last wins", "allow_expired=True", []tokens.ValidateTokenOption{tokens.WithValidateTokenNoCatalog(true), tokens.WithValidateTokenNoCatalog(false), tokens.WithValidateTokenAllowExpired(true)}},
+		{"replace", "", []tokens.ValidateTokenOption{func(c *tokens.ValidateTokenOpts) error { c.NoCatalog = true; return nil }, tokens.WithValidateTokenOpts(tokens.ValidateTokenOpts{})}},
+		{"last wins", "allow_expired=True", []tokens.ValidateTokenOption{func(c *tokens.ValidateTokenOpts) error { c.NoCatalog = true; return nil }, func(c *tokens.ValidateTokenOpts) error { c.NoCatalog = false; return nil }, func(c *tokens.ValidateTokenOpts) error { c.AllowExpired = true; return nil }}},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -156,7 +156,7 @@ func TestPythonTokenCheckAllHTTPStatusesAndExpiredQuery(t *testing.T) {
 					}
 					return nativeTokenReply{code, nil, "not JSON"}
 				}))
-				got, err := api.CheckToken(context.Background(), "subject", tokens.WithCheckTokenAllowExpired(expired))
+				got, err := api.CheckToken(context.Background(), "subject", func(c *tokens.CheckTokenOpts) error { c.AllowExpired = expired; return nil })
 				if err != nil || got != (code == 200) || len(calls) != 1 || calls[0].method != http.MethodHead || calls[0].subjectToken != "subject" {
 					t.Fatal(got, err, calls)
 				}
@@ -170,7 +170,7 @@ func TestPythonTokenCheckAllHTTPStatusesAndExpiredQuery(t *testing.T) {
 		}
 		return nativeTokenReply{200, nil, ""}
 	}))
-	if got, err := api.CheckToken(context.Background(), "subject", tokens.WithCheckTokenAllowExpired(true), tokens.WithCheckTokenOpts(tokens.CheckTokenOpts{})); err != nil || !got {
+	if got, err := api.CheckToken(context.Background(), "subject", func(c *tokens.CheckTokenOpts) error { c.AllowExpired = true; return nil }, tokens.WithCheckTokenOpts(tokens.CheckTokenOpts{})); err != nil || !got {
 		t.Fatal(got, err)
 	}
 }

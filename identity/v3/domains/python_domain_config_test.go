@@ -194,7 +194,7 @@ func TestPythonDomainConfigDeleteMissingDefaultAndStrictPolicy(t *testing.T) {
 			})
 			options := []domains.DomainConfigOption{}
 			if strict {
-				options = append(options, domains.WithDomainConfigIgnoreMissing(false))
+				options = append(options, request.Custom(func(c *domains.DomainConfigOpts) error { v := false; c.IgnoreMissing = &v; return nil }))
 			}
 			result, err := api.DeleteConfigRecord(context.Background(), "fixed", options...)
 			if calls != 1 {
@@ -349,7 +349,7 @@ func TestPythonDomainConfigPhysicalFaultsAndStrictReadErrorsNeverFallback(t *tes
 				case "update":
 					_, err = api.UpdateConfigRecord(ctx, "fixed", request.Field("ldap", nil))
 				case "delete":
-					_, err = api.DeleteConfigRecord(ctx, "fixed", domains.WithDomainConfigIgnoreMissing(false))
+					_, err = api.DeleteConfigRecord(ctx, "fixed", request.Custom(func(c *domains.DomainConfigOpts) error { v := false; c.IgnoreMissing = &v; return nil }))
 				}
 				if err == nil || calls != 1 {
 					t.Fatal(err, calls)

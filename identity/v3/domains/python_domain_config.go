@@ -31,12 +31,12 @@ type DomainConfigOpts struct {
 
 // DomainConfigOption is one option of CreateConfigRecord, GetConfigRecord,
 // UpdateConfigRecord and DeleteConfigRecord: WithDomainConfigOpts,
-// WithDomainConfigIgnoreMissing, request.Custom over *DomainConfigOpts,
+// request.Custom over *DomainConfigOpts (for example to set IgnoreMissing),
 // request.Field (one DomainConfig attribute; the value is sent as JSON),
 // request.Headers (replaces the headers) or request.Microversion.
 // request.Header fails with resource.ErrInvalidOption before HTTP. No shared
 // category admits Field together with IgnoreMissing, so ignore_missing stays
-// the operation-specific WithDomainConfigIgnoreMissing.
+// the operation-specific DomainConfigOpts.IgnoreMissing.
 type DomainConfigOption = request.WriteCall
 
 var domainConfigCalls = calls.Spec[DomainConfigOpts]{
@@ -77,9 +77,6 @@ func copyDomainConfigOpts(v DomainConfigOpts) DomainConfigOpts {
 func WithDomainConfigOpts(v DomainConfigOpts) DomainConfigOption {
 	owned := copyDomainConfigOpts(v)
 	return request.Custom(func(c *DomainConfigOpts) error { *c = copyDomainConfigOpts(owned); return nil })
-}
-func WithDomainConfigIgnoreMissing(v bool) DomainConfigOption {
-	return request.Custom(func(c *DomainConfigOpts) error { x := v; c.IgnoreMissing = &x; return nil })
 }
 
 func domainConfigFields(policy DomainConfigOpts, update bool) (body, seed map[string]json.RawMessage, err error) {

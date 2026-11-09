@@ -154,7 +154,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity.NewGroupReadCloud`
 - `github.com/JSYoo5B/go-openstacksdk/identity.GroupReadCloud.SearchGroups`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithGroupSearchOpts`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithGroupSearchDomainID`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithGroupSearchFilters`
 - `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
@@ -265,7 +264,7 @@ func main() {
 
     cloud := identity.NewGroupReadCloud(service.Groups)
     selected, err := cloud.SearchGroups(ctx, "ops-*",
-        identity.WithGroupSearchDomainID("domain-id"),
+        request.Custom(func(c *identity.GroupSearchOpts) error { v := "domain-id"; c.DomainID = &v; return nil }),
         identity.WithGroupSearchFilters(json.RawMessage(`{"description":"operations"}`)),
     )
     if err != nil { log.Fatal(err) }

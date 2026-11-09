@@ -79492,8 +79492,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/tokens.API.ValidateToken",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/tokens.WithValidateTokenOpts",
-        "github.com/JSYoo5B/go-openstacksdk/identity/v3/tokens.WithValidateTokenNoCatalog",
-        "github.com/JSYoo5B/go-openstacksdk/identity/v3/tokens.WithValidateTokenAllowExpired"
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom"
       ],
       "contracts": [
         {
@@ -79535,7 +79534,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/tokens.API.CheckToken",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/tokens.WithCheckTokenOpts",
-        "github.com/JSYoo5B/go-openstacksdk/identity/v3/tokens.WithCheckTokenAllowExpired"
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom"
       ],
       "contracts": [
         {
@@ -92816,7 +92815,7 @@
         "github.com/JSYoo5B/go-openstacksdk/request.Field",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
-        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithDomainConfigIgnoreMissing"
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom"
       ],
       "contracts": [
         {
@@ -93027,7 +93026,7 @@
         "github.com/JSYoo5B/go-openstacksdk/request.Field",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
-        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithDomainConfigIgnoreMissing"
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom"
       ],
       "contracts": [
         {
@@ -93619,7 +93618,7 @@
         "github.com/JSYoo5B/go-openstacksdk/request.Field",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
-        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithDomainConfigIgnoreMissing"
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom"
       ],
       "contracts": [
         {
@@ -94301,7 +94300,7 @@
         "github.com/JSYoo5B/go-openstacksdk/request.Field",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
-        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithDomainConfigIgnoreMissing"
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom"
       ],
       "contracts": [
         {
@@ -115920,7 +115919,6 @@
         "github.com/JSYoo5B/go-openstacksdk/identity.DomainReadCloud.ListDomains",
         "github.com/JSYoo5B/go-openstacksdk/identity.DomainReadCloud.SearchDomains",
         "github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadOpts",
-        "github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadNameOrID",
         "github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadFilters",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion"
@@ -115972,7 +115970,6 @@
         "github.com/JSYoo5B/go-openstacksdk/identity.DomainReadCloud.ListDomains",
         "github.com/JSYoo5B/go-openstacksdk/identity.DomainReadCloud.SearchDomains",
         "github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadOpts",
-        "github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadNameOrID",
         "github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadFilters",
         "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
@@ -116048,8 +116045,6 @@
         "github.com/JSYoo5B/go-openstacksdk/identity.NewDomainReadCloud",
         "github.com/JSYoo5B/go-openstacksdk/identity.DomainReadCloud.GetDomain",
         "github.com/JSYoo5B/go-openstacksdk/identity.WithDomainGetOpts",
-        "github.com/JSYoo5B/go-openstacksdk/identity.WithDomainGetID",
-        "github.com/JSYoo5B/go-openstacksdk/identity.WithDomainGetNameOrID",
         "github.com/JSYoo5B/go-openstacksdk/identity.WithDomainGetFilters",
         "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
@@ -116151,7 +116146,6 @@
         "github.com/JSYoo5B/go-openstacksdk/identity.NewGroupReadCloud",
         "github.com/JSYoo5B/go-openstacksdk/identity.GroupReadCloud.SearchGroups",
         "github.com/JSYoo5B/go-openstacksdk/identity.WithGroupSearchOpts",
-        "github.com/JSYoo5B/go-openstacksdk/identity.WithGroupSearchDomainID",
         "github.com/JSYoo5B/go-openstacksdk/identity.WithGroupSearchFilters",
         "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
@@ -116418,7 +116412,6 @@
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithListOptions",
         "github.com/JSYoo5B/go-openstacksdk/identity.RoleReadCloud.SearchRoles",
         "github.com/JSYoo5B/go-openstacksdk/identity.WithRoleSearchOpts",
-        "github.com/JSYoo5B/go-openstacksdk/identity.WithRoleSearchDomainID",
         "github.com/JSYoo5B/go-openstacksdk/identity.WithRoleSearchFilters",
         "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
@@ -116813,8 +116806,6 @@
         "github.com/JSYoo5B/go-openstacksdk/identity.ProjectReadCloud.ListProjects",
         "github.com/JSYoo5B/go-openstacksdk.Connection.ListProjects",
         "github.com/JSYoo5B/go-openstacksdk/identity.WithProjectReadOpts",
-        "github.com/JSYoo5B/go-openstacksdk/identity.WithProjectReadDomainID",
-        "github.com/JSYoo5B/go-openstacksdk/identity.WithProjectReadNameOrID",
         "github.com/JSYoo5B/go-openstacksdk/identity.WithProjectReadFilters"
       ],
       "contracts": [
@@ -116875,7 +116866,7 @@
         "github.com/JSYoo5B/go-openstacksdk/identity.ProjectReadCloud.SearchProjects",
         "github.com/JSYoo5B/go-openstacksdk.Connection.SearchProjects",
         "github.com/JSYoo5B/go-openstacksdk/identity.WithProjectReadFilters",
-        "github.com/JSYoo5B/go-openstacksdk/identity.WithProjectReadDomainID",
+        "github.com/JSYoo5B/go-openstacksdk/identity.WithProjectReadOpts",
         "github.com/JSYoo5B/go-openstacksdk/request.Custom"
       ],
       "contracts": [
@@ -117148,7 +117139,6 @@
         "github.com/JSYoo5B/go-openstacksdk/identity.NewUserReadCloud",
         "github.com/JSYoo5B/go-openstacksdk/identity.UserReadCloud.SearchUsers",
         "github.com/JSYoo5B/go-openstacksdk/identity.WithUserSearchOpts",
-        "github.com/JSYoo5B/go-openstacksdk/identity.WithUserSearchDomainID",
         "github.com/JSYoo5B/go-openstacksdk/identity.WithUserSearchFilters",
         "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",

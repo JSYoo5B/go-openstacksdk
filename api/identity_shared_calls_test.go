@@ -99,7 +99,7 @@ func TestIdentitySharedCallsUnsupportedBeforeHTTP(t *testing.T) {
 	}
 
 	// Cloud-layer reads: Headers and Microversion only.
-	_, err = identity.NewDomainReadCloud(domains.New(client)).GetDomain(ctx, identity.WithDomainGetID("d"), request.Header("X-Test", "1"))
+	_, err = identity.NewDomainReadCloud(domains.New(client)).GetDomain(ctx, request.Custom(func(c *identity.DomainGetOpts) error { v := "d"; c.DomainID = &v; return nil }), request.Header("X-Test", "1"))
 	requireUnsupportedCall(t, err, "Header")
 	_, err = identity.NewUserReadCloud(users.New(client)).ListUsers(ctx, request.Header("X-Test", "1"))
 	requireUnsupportedCall(t, err, "Header")

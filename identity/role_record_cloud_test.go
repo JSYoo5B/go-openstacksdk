@@ -41,7 +41,7 @@ func TestPythonRoleCloudSearchDomainServerAndLocalGlobSubset(t *testing.T) {
 		w.Header().Set("X-Request-Id", "cloud-role")
 		testcloud.JSON(w, 203, `{"roles":[{"id":"a","name":"ops-alpha","description":{"n":0.10000000000000001,"active":true}},{"id":"b","name":"other","description":{"n":0.2}},{"id":"a","name":"ops-beta","description":{"n":0.1,"extra":1}}]}`)
 	})
-	result, err := cloud.SearchRoles(context.Background(), "ops-*", identity.WithRoleSearchDomainID("domain"), identity.WithRoleSearchFilters(json.RawMessage(`{"description":{"n":0.1}}`)))
+	result, err := cloud.SearchRoles(context.Background(), "ops-*", request.Custom(func(c *identity.RoleSearchOpts) error { v := "domain"; c.DomainID = &v; return nil }), identity.WithRoleSearchFilters(json.RawMessage(`{"description":{"n":0.1}}`)))
 	if err != nil || result == nil || len(result.Roles) != 2 || len(result.Inventory) != 3 || result.Expression || calls != 1 {
 		t.Fatal(result, err, calls)
 	}

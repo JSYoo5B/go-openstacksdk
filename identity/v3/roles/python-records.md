@@ -95,7 +95,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithListOptions`
 - `github.com/JSYoo5B/go-openstacksdk/identity.RoleReadCloud.SearchRoles`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithRoleSearchOpts`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithRoleSearchDomainID`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithRoleSearchFilters`
 - `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`

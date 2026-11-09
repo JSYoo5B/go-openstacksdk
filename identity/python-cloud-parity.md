@@ -394,7 +394,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity.DomainReadCloud.ListDomains`
 - `github.com/JSYoo5B/go-openstacksdk/identity.DomainReadCloud.SearchDomains`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadOpts`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadNameOrID`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadFilters`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
@@ -430,7 +429,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity.DomainReadCloud.ListDomains`
 - `github.com/JSYoo5B/go-openstacksdk/identity.DomainReadCloud.SearchDomains`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadOpts`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadNameOrID`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadFilters`
 - `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
@@ -474,8 +472,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity.NewDomainReadCloud`
 - `github.com/JSYoo5B/go-openstacksdk/identity.DomainReadCloud.GetDomain`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainGetOpts`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainGetID`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainGetNameOrID`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainGetFilters`
 - `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
@@ -536,7 +532,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity.NewGroupReadCloud`
 - `github.com/JSYoo5B/go-openstacksdk/identity.GroupReadCloud.SearchGroups`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithGroupSearchOpts`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithGroupSearchDomainID`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithGroupSearchFilters`
 - `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
@@ -700,7 +695,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithListOptions`
 - `github.com/JSYoo5B/go-openstacksdk/identity.RoleReadCloud.SearchRoles`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithRoleSearchOpts`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithRoleSearchDomainID`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithRoleSearchFilters`
 - `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
@@ -951,8 +945,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity.ProjectReadCloud.ListProjects`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.ListProjects`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithProjectReadOpts`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithProjectReadDomainID`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithProjectReadNameOrID`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithProjectReadFilters`
 
 - Concrete Keystone v3 Project facade expands filters in insertion order then truthy explicit name/domain override corresponding filter values; declared Body filters run in the leaf and actual203 record/header is retained.
@@ -986,7 +978,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity.ProjectReadCloud.SearchProjects`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.SearchProjects`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithProjectReadFilters`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithProjectReadDomainID`
+- `github.com/JSYoo5B/go-openstacksdk/identity.WithProjectReadOpts`
 - `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 
 - Search calls list_projects without a server name hint and then applies exact/glob ID/name plus ordered nested loaded-JSON filters. Wire enabled passes server query but fails local Source Resource membership; is_enabled is the owned attribute name.
@@ -1155,7 +1147,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity.NewUserReadCloud`
 - `github.com/JSYoo5B/go-openstacksdk/identity.UserReadCloud.SearchUsers`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithUserSearchOpts`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithUserSearchDomainID`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithUserSearchFilters`
 - `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`

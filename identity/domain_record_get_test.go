@@ -43,7 +43,7 @@ func TestPythonCloudDomainGetIDPresenceWinsAndFiltersAreNeverConsumed(t *testing
 		testcloud.JSON(w, 203, `{"domain":{"id":null,"name":"wire","options":{"keep":1}}}`)
 	})
 	for _, ignored := range []any{domainIgnoredFilters{&encoded}, json.RawMessage(`{invalid`), func() {}, false} {
-		result, err := cloud.GetDomain(context.Background(), identity.WithDomainGetID("direct"), identity.WithDomainGetNameOrID("ignored"), identity.WithDomainGetFilters(ignored))
+		result, err := cloud.GetDomain(context.Background(), request.Custom(func(c *identity.DomainGetOpts) error { v := "direct"; c.DomainID = &v; return nil }), request.Custom(func(c *identity.DomainGetOpts) error { v := "ignored"; c.NameOrID = &v; return nil }), identity.WithDomainGetFilters(ignored))
 		if err != nil || result == nil || !result.DeprecatedFilters || result.Record == nil || result.Record.StatusCode != 203 || result.Record.Header.Get("X-Request-Id") != "domain-direct" {
 			t.Fatal(result, err)
 		}
@@ -51,7 +51,7 @@ func TestPythonCloudDomainGetIDPresenceWinsAndFiltersAreNeverConsumed(t *testing
 			t.Fatal(result)
 		}
 	}
-	result, err := cloud.GetDomain(context.Background(), identity.WithDomainGetID("direct"), identity.WithDomainGetFilters(nil))
+	result, err := cloud.GetDomain(context.Background(), request.Custom(func(c *identity.DomainGetOpts) error { v := "direct"; c.DomainID = &v; return nil }), identity.WithDomainGetFilters(nil))
 	if err != nil || result.DeprecatedFilters || encoded != 0 || calls != 5 {
 		t.Fatal(result, err, encoded, calls)
 	}
@@ -70,9 +70,9 @@ func TestPythonCloudDomainGetDirectMissingVersusClosedFinderMissing(t *testing.T
 				testcloud.JSON(w, 200, `{"domains":[]}`)
 			}
 		})
-		var option identity.DomainGetOption = identity.WithDomainGetNameOrID("alias")
+		var option identity.DomainGetOption = request.Custom(func(c *identity.DomainGetOpts) error { v := "alias"; c.NameOrID = &v; return nil })
 		if direct {
-			option = identity.WithDomainGetID("direct")
+			option = request.Custom(func(c *identity.DomainGetOpts) error { v := "direct"; c.DomainID = &v; return nil })
 		}
 		result, err := cloud.GetDomain(context.Background(), option)
 		if direct {
@@ -93,7 +93,7 @@ func TestPythonCloudDomainGetBothOmittedMatchesActualNoIDPreflight(t *testing.T)
 	if !errors.Is(err, resource.ErrInvalidOption) || result == nil || !result.DeprecatedFilters || result.Record != nil || errors.As(err, &proof) || calls != 0 {
 		t.Fatal(result, err, proof, calls)
 	}
-	for _, option := range []identity.DomainGetOption{identity.WithDomainGetID(""), identity.WithDomainGetNameOrID("")} {
+	for _, option := range []identity.DomainGetOption{request.Custom(func(c *identity.DomainGetOpts) error { v := ""; c.DomainID = &v; return nil }), request.Custom(func(c *identity.DomainGetOpts) error { v := ""; c.NameOrID = &v; return nil })} {
 		result, err := cloud.GetDomain(context.Background(), option)
 		if !errors.Is(err, resource.ErrInvalidOption) || result == nil || result.Record != nil || calls != 0 {
 			t.Fatal(result, err, calls)
@@ -119,7 +119,7 @@ func TestPythonCloudDomainGetClosedFallbackDuplicatesAndLateHTTPProof(t *testing
 				}
 			}
 		})
-		result, err := cloud.GetDomain(context.Background(), identity.WithDomainGetNameOrID("alias"), identity.WithDomainGetFilters(json.RawMessage(`"["`)))
+		result, err := cloud.GetDomain(context.Background(), request.Custom(func(c *identity.DomainGetOpts) error { v := "alias"; c.NameOrID = &v; return nil }), identity.WithDomainGetFilters(json.RawMessage(`"["`)))
 		if result == nil || result.Record != nil || !result.DeprecatedFilters || calls != 3 {
 			t.Fatal(result, err, calls)
 		}
@@ -190,7 +190,7 @@ func TestPythonCloudDomainGetOptionsStickySourceCancelAndNil(t *testing.T) {
 			if mode == "nil" {
 				first = nil
 			}
-			result, err := cloud.GetDomain(ctx, identity.WithDomainGetID("direct"), first, request.Custom(func(*identity.DomainGetOpts) error { seen++; client.Endpoint = endpoint; return nil }))
+			result, err := cloud.GetDomain(ctx, request.Custom(func(c *identity.DomainGetOpts) error { v := "direct"; c.DomainID = &v; return nil }), first, request.Custom(func(*identity.DomainGetOpts) error { seen++; client.Endpoint = endpoint; return nil }))
 			var proof *resource.ResponseError
 			if result != nil || err == nil || seen != 0 || calls != 0 || errors.As(err, &proof) {
 				t.Fatal(result, err, seen, calls, proof)

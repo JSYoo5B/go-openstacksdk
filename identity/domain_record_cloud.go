@@ -43,10 +43,10 @@ type DomainReadOpts struct {
 }
 
 // DomainReadOption is one option of ListDomains and SearchDomains:
-// WithDomainReadOpts, WithDomainReadNameOrID, WithDomainReadFilters,
-// request.Headers (replaces the headers), request.Microversion or
-// request.Custom over *DomainReadOpts (for example to set Location). Other
-// shared calls fail with resource.ErrInvalidOption before HTTP.
+// WithDomainReadOpts, WithDomainReadFilters, request.Headers (replaces the
+// headers), request.Microversion or request.Custom over *DomainReadOpts (for
+// example to set Location or NameOrID). Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
 type DomainReadOption = request.GetCall
 
 var domainReadCalls = calls.Spec[DomainReadOpts]{
@@ -80,9 +80,6 @@ func copyDomainReadOpts(v DomainReadOpts) DomainReadOpts {
 func WithDomainReadOpts(v DomainReadOpts) DomainReadOption {
 	owned := copyDomainReadOpts(v)
 	return request.Custom(func(c *DomainReadOpts) error { *c = copyDomainReadOpts(owned); return nil })
-}
-func WithDomainReadNameOrID(v string) DomainReadOption {
-	return request.Custom(func(c *DomainReadOpts) error { x := v; c.NameOrID = &x; return nil })
 }
 func WithDomainReadFilters(v json.RawMessage) DomainReadOption {
 	owned := bytes.Clone(v)

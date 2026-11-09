@@ -23,24 +23,12 @@ func WithValidateTokenOpts(value ValidateTokenOpts) ValidateTokenOption {
 	return func(config *ValidateTokenOpts) error { *config = value; return nil }
 }
 
-func WithValidateTokenNoCatalog(value bool) ValidateTokenOption {
-	return func(config *ValidateTokenOpts) error { config.NoCatalog = value; return nil }
-}
-
-func WithValidateTokenAllowExpired(value bool) ValidateTokenOption {
-	return func(config *ValidateTokenOpts) error { config.AllowExpired = value; return nil }
-}
-
 // CheckTokenOpts selects the optional Python check_token query argument.
 type CheckTokenOpts struct{ AllowExpired bool }
 type CheckTokenOption func(*CheckTokenOpts) error
 
 func WithCheckTokenOpts(value CheckTokenOpts) CheckTokenOption {
 	return func(config *CheckTokenOpts) error { *config = value; return nil }
-}
-
-func WithCheckTokenAllowExpired(value bool) CheckTokenOption {
-	return func(config *CheckTokenOpts) error { config.AllowExpired = value; return nil }
 }
 
 func prepareTokenOptions[T any](ctx context.Context, check func(context.Context) error, options []func(*T) error) (T, error) {

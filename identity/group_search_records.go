@@ -40,9 +40,9 @@ type GroupSearchOpts struct {
 }
 
 // GroupSearchOption is one option of SearchGroups: WithGroupSearchOpts,
-// WithGroupSearchDomainID, WithGroupSearchFilters, request.Headers (replaces
-// the headers), request.Microversion or request.Custom over *GroupSearchOpts
-// (for example to set Location). Other shared calls fail with
+// WithGroupSearchFilters, request.Headers (replaces the headers),
+// request.Microversion or request.Custom over *GroupSearchOpts (for example to
+// set Location or DomainID). Other shared calls fail with
 // resource.ErrInvalidOption before HTTP.
 type GroupSearchOption = request.GetCall
 
@@ -74,9 +74,6 @@ func copyGroupSearchOpts(v GroupSearchOpts) GroupSearchOpts {
 func WithGroupSearchOpts(v GroupSearchOpts) GroupSearchOption {
 	owned := copyGroupSearchOpts(v)
 	return request.Custom(func(c *GroupSearchOpts) error { *c = copyGroupSearchOpts(owned); return nil })
-}
-func WithGroupSearchDomainID(v string) GroupSearchOption {
-	return request.Custom(func(c *GroupSearchOpts) error { x := v; c.DomainID = &x; return nil })
 }
 func WithGroupSearchFilters(v json.RawMessage) GroupSearchOption {
 	owned := bytes.Clone(v)

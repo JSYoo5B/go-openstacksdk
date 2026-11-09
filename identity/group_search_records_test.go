@@ -41,7 +41,7 @@ func TestPythonGroupCloudSearchDomainServerAndLocalGlobSubset(t *testing.T) {
 		w.Header().Set("X-Request-Id", "cloud-group")
 		testcloud.JSON(w, 203, `{"groups":[{"id":"a","name":"ops-alpha","description":{"n":0.10000000000000001,"active":true}},{"id":"b","name":"other","description":{"n":0.2}},{"id":"a","name":"ops-beta","description":{"n":0.1,"extra":1}}]}`)
 	})
-	result, err := cloud.SearchGroups(context.Background(), "ops-*", identity.WithGroupSearchDomainID("domain"), identity.WithGroupSearchFilters(json.RawMessage(`{"description":{"n":0.1}}`)))
+	result, err := cloud.SearchGroups(context.Background(), "ops-*", request.Custom(func(c *identity.GroupSearchOpts) error { v := "domain"; c.DomainID = &v; return nil }), identity.WithGroupSearchFilters(json.RawMessage(`{"description":{"n":0.1}}`)))
 	if err != nil || result == nil || len(result.Groups) != 2 || len(result.Inventory) != 3 || result.Expression || calls != 1 {
 		t.Fatal(result, err, calls)
 	}

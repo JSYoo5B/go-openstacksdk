@@ -107,7 +107,7 @@ func TestConnectionDomainProjectGroupGetsPreserveBranchAndLocationSelection(t *t
 		calls++
 		testcloud.JSON(w, 200, `{"groups":[{"id":"g","name":"group","location":{"cloud":"forged"}}]}`)
 	})
-	domain, err := conn.GetDomainRecord(context.Background(), identity.WithDomainGetID("d"), identity.WithDomainGetFilters(struct{ Ignore string }{"no serialization"}))
+	domain, err := conn.GetDomainRecord(context.Background(), request.Custom(func(c *identity.DomainGetOpts) error { v := "d"; c.DomainID = &v; return nil }), identity.WithDomainGetFilters(struct{ Ignore string }{"no serialization"}))
 	if err != nil || domain == nil || domain.Record == nil {
 		t.Fatal(domain, err)
 	}
