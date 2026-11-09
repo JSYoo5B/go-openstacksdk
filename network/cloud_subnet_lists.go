@@ -31,11 +31,11 @@ type SubnetReadOpts struct {
 }
 
 // SubnetReadOption is one option of ListSubnetRecords and SearchSubnetRecords:
-// WithSubnetReadOpts, WithSubnetReadFiltersJSON,
-// WithSubnetReadCurrentLocation, WithSubnetNetworkAvailable, request.Headers
-// (replaces the headers), request.Microversion, request.BasePath or
-// request.Custom over *SubnetReadOpts. Other shared calls fail with
-// resource.ErrInvalidOption before HTTP.
+// WithSubnetReadOpts, WithSubnetReadFiltersJSON, WithSubnetNetworkAvailable,
+// request.Headers (replaces the headers), request.Microversion,
+// request.BasePath or request.Custom over *SubnetReadOpts (for example to set
+// CurrentLocation). Other shared calls fail with resource.ErrInvalidOption
+// before HTTP.
 type SubnetReadOption = request.ListBasePathCall
 
 var subnetReadCalls = calls.Spec[SubnetReadOpts]{
@@ -89,10 +89,7 @@ func WithSubnetReadFiltersJSON(v json.RawMessage) SubnetReadOption {
 	owned := bytes.Clone(v)
 	return request.Custom(func(c *SubnetReadOpts) error { c.Filters = bytes.Clone(owned); return nil })
 }
-func WithSubnetReadCurrentLocation(v resource.CloudLocation) SubnetReadOption {
-	owned := v.Clone()
-	return request.Custom(func(c *SubnetReadOpts) error { x := owned.Clone(); c.CurrentLocation = &x; return nil })
-}
+
 func WithSubnetNetworkAvailable(v bool) SubnetReadOption {
 	return request.Custom(func(c *SubnetReadOpts) error { x := v; c.NetworkAvailable = &x; return nil })
 }

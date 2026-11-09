@@ -36,7 +36,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithContainerSearchName`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithContainerSearchFiltersJSON`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithContainerSearchExpression`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithContainerSearchLocation`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.SearchContainers`
 
 - ListRecords sends GET on the account root with Accept application/json, adds prefix only when WithRecordListPrefix is given, and follows the X-Account-Container-Count marker continuation with the prefix kept until an empty page.
@@ -352,7 +351,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithObjectSearchName`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithObjectSearchFiltersJSON`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithObjectSearchExpression`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithObjectSearchLocation`
 
 - SDK collects the full literal-container Objects.ListRecords sequence with format=json and account-independent actual page receipts before cloud name/id exact-or-fnmatch and ordered/nested mapping selection; filters never become server query/prefix and duplicate rows remain.
   Tests: `objectstorage/cloud_object_search_test.go:TestSwiftCloudObjectSearchCollectsEveryPageBeforeIdentifierAndMapping`, `objectstorage/cloud_object_search_test.go:TestSwiftCloudObjectSearchNameUsesFnmatchAndDeclaredAliases`.

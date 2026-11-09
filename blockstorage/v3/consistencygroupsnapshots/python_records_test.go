@@ -79,7 +79,12 @@ func TestPythonConsistencyGroupSnapshotGetOwnsUntypedDescriptorsEnvelopeAndLocat
 		api, calls := snapshotAPI(t, "3.80", func(*http.Request) *http.Response { return snapshotWire(203, body) })
 		cloud, project := "named-cloud", "current"
 		location := resource.CloudLocation{Cloud: &cloud, Project: resource.CloudProject{ID: json.RawMessage(`"current"`), Name: &project}}
-		value, err := api.GetRecord(context.Background(), "literal /%雪", consistencygroupsnapshots.WithRecordReadLocation(location))
+		ownedLocation := location.Clone()
+		value, err := api.GetRecord(context.Background(), "literal /%雪", request.Custom(func(c *consistencygroupsnapshots.RecordReadOpts) error {
+			loc := ownedLocation.Clone()
+			c.Location = &loc
+			return nil
+		}))
 		if err != nil || len(*calls) != 1 || (*calls)[0].escaped != snapshotBase+"/literal%20%2F%25%E9%9B%AA" || (*calls)[0].query != "" || (*calls)[0].body != "" || (*calls)[0].headers.Get("OpenStack-API-Version") != "volume 3.80" {
 			t.Fatal(value, err, *calls)
 		}
@@ -484,13 +489,28 @@ func TestPythonConsistencyGroupSnapshotOptionsPreflightOwnershipAndNilAPI(t *tes
 		}
 	}
 	location := resource.CloudLocation{Project: resource.CloudProject{ID: json.RawMessage(`not JSON`)}}
-	if _, err := api.GetRecord(context.Background(), "v", consistencygroupsnapshots.WithRecordReadLocation(location)); !errors.Is(err, resource.ErrInvalidOption) {
+	ownedLocation := location.Clone()
+	if _, err := api.GetRecord(context.Background(), "v", request.Custom(func(c *consistencygroupsnapshots.RecordReadOpts) error {
+		loc := ownedLocation.Clone()
+		c.Location = &loc
+		return nil
+	})); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
-	if _, err := api.CreateRecord(context.Background(), nil, consistencygroupsnapshots.WithRecordCreateLocation(location)); !errors.Is(err, resource.ErrInvalidOption) {
+	ownedLocation2 := location.Clone()
+	if _, err := api.CreateRecord(context.Background(), nil, request.Custom(func(c *consistencygroupsnapshots.RecordCreateOpts) error {
+		loc := ownedLocation2.Clone()
+		c.Location = &loc
+		return nil
+	})); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
-	if _, err := snapshotsCollect(api.ListRecords(context.Background(), consistencygroupsnapshots.WithRecordListLocation(location))); !errors.Is(err, resource.ErrInvalidOption) {
+	ownedLocation3 := location.Clone()
+	if _, err := snapshotsCollect(api.ListRecords(context.Background(), request.Custom(func(c *consistencygroupsnapshots.RecordListOpts) error {
+		loc := ownedLocation3.Clone()
+		c.Location = &loc
+		return nil
+	}))); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
 	if len(*calls) != 0 {

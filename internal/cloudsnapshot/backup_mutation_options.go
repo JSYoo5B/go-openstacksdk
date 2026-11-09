@@ -58,14 +58,7 @@ func WithBackupDeleteWaitPolicy(value MutationWaitOptions) BackupDeleteOption {
 	owned := cloneMutationWait(value)
 	return func(target *BackupDeleteOptions) error { target.WaitPolicy = cloneMutationWait(owned); return nil }
 }
-func WithBackupCreateLocation(value resource.CloudLocation) BackupCreateOption {
-	owned := value.Clone()
-	return func(target *BackupCreateOptions) error { target.Location = cloneLocation(&owned); return nil }
-}
-func WithBackupDeleteLocation(value resource.CloudLocation) BackupDeleteOption {
-	owned := value.Clone()
-	return func(target *BackupDeleteOptions) error { target.Location = cloneLocation(&owned); return nil }
-}
+
 func PrepareBackupCreate(ctx context.Context, options ...BackupCreateOption) (BackupCreateOptions, error) {
 	return prepare(ctx, options, cloneBackupCreate, nil)
 }

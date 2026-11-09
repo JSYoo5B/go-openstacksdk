@@ -145,9 +145,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.Service.ListNetworkRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithNetworkCloudListOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithNetworkCloudFilters`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithNetworkCloudCurrentLocation`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithNetworkCloudServiceAvailable`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.API.ProxyCloudListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithCloudRecordListQuery`
@@ -190,9 +190,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.Service.SearchNetworkRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithNetworkCloudListOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithNetworkCloudFilters`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithNetworkCloudCurrentLocation`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithNetworkCloudServiceAvailable`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.API.ProxyCloudListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithCloudRecordListQuery`
@@ -264,6 +264,7 @@ import (
 
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/network"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 func main() {
@@ -291,7 +292,7 @@ func main() {
 	}
 	options := []network.NetworkCloudListOption{
 		network.WithNetworkCloudFilters(json.RawMessage(*filters)),
-		network.WithNetworkCloudCurrentLocation(location),
+		request.Custom(func(c *network.NetworkCloudListOpts) error { loc := location.Clone(); c.CurrentLocation = &loc; return nil }),
 	}
 	var result *network.NetworkCloudRecords
 	if *mode == "search" {

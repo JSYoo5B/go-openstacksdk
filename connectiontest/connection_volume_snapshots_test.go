@@ -287,9 +287,24 @@ func TestConnectionVolumeSnapshotExplicitLocationIsOwnedAndZoneIgnoredWithoutCha
 			defaults := resource.CloudLocation{Cloud: &defaultCloud, Project: resource.CloudProject{ID: json.RawMessage(`"default-project"`), Name: &defaultName}}
 			cloudName, region, name, domain := "owned-cloud", "owned-region", "owned-name", "owned-domain"
 			owned := resource.CloudLocation{Cloud: &cloudName, RegionName: &region, Zone: json.RawMessage(`{"unused":"zone"}`), Project: resource.CloudProject{ID: json.RawMessage(`"owned-project"`), Name: &name, DomainName: &domain}}
-			list := []blockstorage.VolumeSnapshotListOption{blockstorage.WithVolumeSnapshotListLocation(owned)}
-			search := []blockstorage.VolumeSnapshotSearchOption{blockstorage.WithVolumeSnapshotSearchLocation(owned)}
-			read := []blockstorage.VolumeSnapshotReadOption{blockstorage.WithVolumeSnapshotReadLocation(owned)}
+			ownedLocation := owned.Clone()
+			list := []blockstorage.VolumeSnapshotListOption{request.Custom(func(c *blockstorage.VolumeSnapshotListOpts) error {
+				loc := ownedLocation.Clone()
+				c.Location = &loc
+				return nil
+			})}
+			ownedLocation2 := owned.Clone()
+			search := []blockstorage.VolumeSnapshotSearchOption{func(c *blockstorage.VolumeSnapshotSearchOpts) error {
+				loc := ownedLocation2.Clone()
+				c.Location = &loc
+				return nil
+			}}
+			ownedLocation3 := owned.Clone()
+			read := []blockstorage.VolumeSnapshotReadOption{func(c *blockstorage.VolumeSnapshotReadOpts) error {
+				loc := ownedLocation3.Clone()
+				c.Location = &loc
+				return nil
+			}}
 			var locates, reads atomic.Int32
 			cloud.Provider.EndpointLocator = func(opts gophercloud.EndpointOpts) (string, error) {
 				locates.Add(1)
@@ -436,9 +451,24 @@ func TestConnectionVolumeSnapshotPreflightOriginalAndGetterErrorsPreserveOuterOp
 					wantCallbacks = 1
 				case "invalid location":
 					invalid := resource.CloudLocation{Project: resource.CloudProject{ID: json.RawMessage(`invalid`)}}
-					list = append(list, blockstorage.WithVolumeSnapshotListLocation(invalid))
-					search = append(search, blockstorage.WithVolumeSnapshotSearchLocation(invalid))
-					read = append(read, blockstorage.WithVolumeSnapshotReadLocation(invalid))
+					ownedLocation := invalid.Clone()
+					list = append(list, request.Custom(func(c *blockstorage.VolumeSnapshotListOpts) error {
+						loc := ownedLocation.Clone()
+						c.Location = &loc
+						return nil
+					}))
+					ownedLocation2 := invalid.Clone()
+					search = append(search, func(c *blockstorage.VolumeSnapshotSearchOpts) error {
+						loc := ownedLocation2.Clone()
+						c.Location = &loc
+						return nil
+					})
+					ownedLocation3 := invalid.Clone()
+					read = append(read, func(c *blockstorage.VolumeSnapshotReadOpts) error {
+						loc := ownedLocation3.Clone()
+						c.Location = &loc
+						return nil
+					})
 					wantCallbacks = 1
 				default:
 					want = getterError

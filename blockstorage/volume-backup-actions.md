@@ -220,7 +220,7 @@ func run() error {
 	}
 	policy, err = blockstorage.PrepareRestoreVolumeBackupOptions(ctx,
 		blockstorage.WithRestoreVolumeBackupOptions(policy),
-		blockstorage.WithRestoreVolumeBackupLocation(location))
+		func(c *blockstorage.RestoreVolumeBackupOpts) error { loc := location.Clone(); c.Location = &loc; return nil })
 	if err != nil {
 		return err
 	}

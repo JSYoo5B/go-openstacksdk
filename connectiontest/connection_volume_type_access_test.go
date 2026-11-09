@@ -221,7 +221,12 @@ func TestConnectionVolumeTypeAccessOwnsLocationFactoriesAndOriginalCallbackSlice
 				first, second, injected := 0, 0, 0
 				switch factory {
 				case "location":
-					options = []blockstorage.VolumeTypeReadOption{blockstorage.WithVolumeTypeReadLocation(input)}
+					ownedLocation := input.Clone()
+					options = []blockstorage.VolumeTypeReadOption{func(c *blockstorage.VolumeTypeReadOpts) error {
+						loc := ownedLocation.Clone()
+						c.Location = &loc
+						return nil
+					}}
 				case "bulk":
 					options = []blockstorage.VolumeTypeReadOption{blockstorage.WithVolumeTypeReadOptions(blockstorage.VolumeTypeReadOpts{Location: &input})}
 				default:
@@ -536,7 +541,12 @@ func TestConnectionVolumeTypeAccessLocalResolutionFailuresRetainLookupWithoutSec
 				})
 				var options []blockstorage.VolumeTypeReadOption
 				if kind == "invalid owned location" {
-					options = append(options, blockstorage.WithVolumeTypeReadLocation(resource.CloudLocation{Zone: json.RawMessage("!")}))
+					ownedLocation := resource.CloudLocation{Zone: json.RawMessage("!")}.Clone()
+					options = append(options, func(c *blockstorage.VolumeTypeReadOpts) error {
+						loc := ownedLocation.Clone()
+						c.Location = &loc
+						return nil
+					})
 				}
 				project := "project"
 				if kind == "invalid project UTF8" {

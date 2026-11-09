@@ -129,7 +129,8 @@ func TestPythonImageTasksRecordsLocationUsesCurrentScopeNotOwner(t *testing.T) {
 	var calls []imageTasksCall
 	cloudName, region, name := "cloud", "region", "current-name"
 	location := resource.CloudLocation{Cloud: &cloudName, RegionName: &region, Zone: json.RawMessage(`"configured-zone"`), Project: resource.CloudProject{ID: json.RawMessage(`"current"`), Name: &name}}
-	option := images.WithTaskRecordsLocation(location)
+	ownedLocation := location.Clone()
+	option := request.Custom(func(c *images.TaskRecordsOpts) error { loc := ownedLocation.Clone(); c.Location = &loc; return nil })
 	location.Zone[1] = 'X'
 	*location.Project.Name = "changed"
 	api, _ := imageTasksAPI(t, &calls, func(*http.Request) *http.Response {

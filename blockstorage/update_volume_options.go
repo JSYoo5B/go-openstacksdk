@@ -73,10 +73,6 @@ func WithUpdateVolumeFields(value map[string]json.RawMessage) UpdateVolumeOption
 		return nil
 	}
 }
-func WithUpdateVolumeLocation(value resource.CloudLocation) UpdateVolumeOption {
-	owned := value.Clone()
-	return func(target *UpdateVolumeOpts) error { copy := owned.Clone(); target.Location = &copy; return nil }
-}
 
 func applyUpdateVolumeOptions(options []UpdateVolumeOption, guard func() error) (UpdateVolumeOpts, map[string]json.RawMessage, error) {
 	options = slices.Clone(options)

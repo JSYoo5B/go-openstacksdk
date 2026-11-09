@@ -217,7 +217,12 @@ func TestPythonUserClosedLookupImmutableOptsSourceCancellationAndExplicitLocatio
 				first = users.WithClosedLookupDomainIDJSON(json.RawMessage(`invalid`))
 			}
 			if mode == "location" {
-				first = users.WithClosedLookupLocation(resource.CloudLocation{Project: resource.CloudProject{ID: json.RawMessage(`invalid`)}})
+				ownedLocation := resource.CloudLocation{Project: resource.CloudProject{ID: json.RawMessage(`invalid`)}}.Clone()
+				first = request.Custom(func(c *users.ClosedLookupOpts) error {
+					loc := ownedLocation.Clone()
+					c.Location = &loc
+					return nil
+				})
 			}
 			row, err := api.ResolveRecord(ctx, "a", first, request.Custom(func(*users.ClosedLookupOpts) error { seen++; return nil }))
 			var proof *resource.ResponseError

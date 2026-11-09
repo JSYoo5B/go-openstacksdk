@@ -29,9 +29,10 @@ type UserGetOpts struct {
 
 // UserGetOption is one option of GetUser: WithUserGetOpts,
 // WithUserGetDomainID, WithUserGetDomainIDJSON, WithUserGetFilters,
-// WithUserGetExpression, WithUserGetLocation, request.Headers (replaces the
-// headers), request.Microversion or request.Custom over *UserGetOpts. Other
-// shared calls fail with resource.ErrInvalidOption before HTTP.
+// WithUserGetExpression, request.Headers (replaces the headers),
+// request.Microversion or request.Custom over *UserGetOpts (for example to set
+// Location). Other shared calls fail with resource.ErrInvalidOption before
+// HTTP.
 type UserGetOption = request.GetCall
 
 var userGetCalls = calls.Spec[UserGetOpts]{
@@ -85,10 +86,6 @@ func WithUserGetFilters(v json.RawMessage) UserGetOption {
 func WithUserGetExpression(v string) UserGetOption {
 	raw, _ := json.Marshal(v)
 	return WithUserGetFilters(raw)
-}
-func WithUserGetLocation(v resource.CloudLocation) UserGetOption {
-	owned := v.Clone()
-	return request.Custom(func(c *UserGetOpts) error { x := owned.Clone(); c.Location = &x; return nil })
 }
 
 // UserGetResult exposes actual rows/evidence independently of returned Value.

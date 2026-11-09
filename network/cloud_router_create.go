@@ -86,10 +86,6 @@ func WithRouterCreateAvailabilityZoneHints(v ...string) RouterCreateOption {
 	// No arguments is an explicit empty list, distinct from omitted/null hints.
 	return WithRouterCreateAttribute("availability_zone_hints", append([]string{}, v...))
 }
-func WithRouterCreateCurrentLocation(v resource.CloudLocation) RouterCreateOption {
-	owned := v.Clone()
-	return func(c *RouterCreateOpts) error { x := owned.Clone(); c.CurrentLocation = &x; return nil }
-}
 
 // RouterCreateResult separates the SDK Resource view, actual router response,
 // whole HTTP receipt and independent extension discovery. A gate failure cannot

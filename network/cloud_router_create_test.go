@@ -244,7 +244,12 @@ func TestCloudRouterCreateResponseSourceDefaultsAliasesAndOwnedLocation(t *testi
 	service.RawClient().Microversion = "2.1"
 	name, project := "configured", json.RawMessage(`"current"`)
 	location := resource.CloudLocation{Cloud: &name, Project: resource.CloudProject{ID: project, Name: &name}}
-	current := network.WithRouterCreateCurrentLocation(location)
+	ownedLocation := location.Clone()
+	current := func(c *network.RouterCreateOpts) error {
+		loc := ownedLocation.Clone()
+		c.CurrentLocation = &loc
+		return nil
+	}
 	name = "changed"
 	project[1] = 'X'
 	result, _ := routerCloudReply(t, service, count, network.WithRouterCreateAttribute("name", "seed"), current)
@@ -270,7 +275,12 @@ func TestCloudRouterCreateResponseSourceDefaultsAliasesAndOwnedLocation(t *testi
 }
 func TestCloudRouterCreatePreflightCancellationAndSelectedSourceGuards(t *testing.T) {
 	service, count := qosCloudMutationFixture(t, func(http.ResponseWriter, *http.Request) { t.Error("invalid preflight sent HTTP") })
-	for _, options := range [][]network.RouterCreateOption{{nil}, {network.WithRouterCreateJSON(json.RawMessage(`[]`))}, {network.WithRouterCreateJSON(json.RawMessage(`{bad`))}, {network.WithRouterCreateAttribute("tenant_id", make(chan int))}, {network.WithRouterCreateAttribute("is_admin_state_up", false)}, {network.WithRouterCreateAttribute("admin_state_up", make(chan int))}, {network.WithRouterCreateOpts(network.RouterCreateOpts{Attributes: map[string]json.RawMessage{"name": json.RawMessage(`bad`)}})}, {network.WithRouterCreateCurrentLocation(resource.CloudLocation{Project: resource.CloudProject{ID: json.RawMessage(`bad`)}})}} {
+	ownedLocation := resource.CloudLocation{Project: resource.CloudProject{ID: json.RawMessage(`bad`)}}.Clone()
+	for _, options := range [][]network.RouterCreateOption{{nil}, {network.WithRouterCreateJSON(json.RawMessage(`[]`))}, {network.WithRouterCreateJSON(json.RawMessage(`{bad`))}, {network.WithRouterCreateAttribute("tenant_id", make(chan int))}, {network.WithRouterCreateAttribute("is_admin_state_up", false)}, {network.WithRouterCreateAttribute("admin_state_up", make(chan int))}, {network.WithRouterCreateOpts(network.RouterCreateOpts{Attributes: map[string]json.RawMessage{"name": json.RawMessage(`bad`)}})}, {func(c *network.RouterCreateOpts) error {
+		loc := ownedLocation.Clone()
+		c.CurrentLocation = &loc
+		return nil
+	}}} {
 		result, e := service.CreateRouterRecord(context.Background(), options...)
 		if result != nil || !errors.Is(e, resource.ErrInvalidOption) || count.Load() != 0 {
 			t.Fatal(result, e, count.Load())

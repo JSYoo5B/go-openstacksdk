@@ -31,10 +31,7 @@ func WithBackupRestoreSeed(value json.RawMessage) BackupRestoreOption {
 	owned := bytes.Clone(value)
 	return func(target *BackupRestoreOptions) error { target.Seed = bytes.Clone(owned); return nil }
 }
-func WithBackupRestoreLocation(value resource.CloudLocation) BackupRestoreOption {
-	owned := value.Clone()
-	return func(target *BackupRestoreOptions) error { target.Location = cloneLocation(&owned); return nil }
-}
+
 func PrepareBackupRestore(ctx context.Context, options ...BackupRestoreOption) (BackupRestoreOptions, error) {
 	return prepare(ctx, options, cloneBackupRestore, nil)
 }

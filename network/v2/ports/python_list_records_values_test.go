@@ -59,7 +59,12 @@ func TestSourceCloudPortListReturnedGeneratorUsesActualRowsAndNoSeed(t *testing.
 	})
 	cloud, name := "fixture", "project"
 	loc := resource.CloudLocation{Cloud: &cloud, Project: resource.CloudProject{ID: json.RawMessage(`"scope"`), Name: &name}}
-	result, err := api.ListSourceValues(context.Background(), ports.WithSourceCloudListFilters(json.RawMessage(`{"jmespath_filters":"@","network_id":"n","headers":{"X-Trace":"source"}}`)), ports.WithSourceCloudListLocation(loc))
+	ownedLocation := loc.Clone()
+	result, err := api.ListSourceValues(context.Background(), ports.WithSourceCloudListFilters(json.RawMessage(`{"jmespath_filters":"@","network_id":"n","headers":{"X-Trace":"source"}}`)), request.Custom(func(c *ports.SourceCloudListOpts) error {
+		loc := ownedLocation.Clone()
+		c.CloudLocation = &loc
+		return nil
+	}))
 	if err != nil || result == nil || len(result.Ports) != 1 || len(result.Inventory) != 1 || len(result.Values) != 1 || result.Values[0] != result.Ports[0] || result.Ports[0] != result.Inventory[0] || len(calls) != 1 {
 		t.Fatal(result, err, calls)
 	}

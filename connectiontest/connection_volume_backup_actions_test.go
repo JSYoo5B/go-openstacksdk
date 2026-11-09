@@ -212,7 +212,12 @@ func TestConnectionBackupProxyActionRestoreCompleteLocationOverrideRemainsOwnedA
 	}
 	customCloud, customRegion, customName, customDomain, customDomainName := "owned-cloud", "owned-region", "owned-name", "owned-domain", "owned-domain-name"
 	custom := resource.CloudLocation{Cloud: &customCloud, RegionName: &customRegion, Zone: json.RawMessage(`"unused-override-zone"`), Project: resource.CloudProject{ID: json.RawMessage(`"owned-project"`), Name: &customName, DomainID: &customDomain, DomainName: &customDomainName}}
-	option := blockstorage.WithRestoreVolumeBackupLocation(custom)
+	ownedLocation := custom.Clone()
+	option := func(c *blockstorage.RestoreVolumeBackupOpts) error {
+		loc := ownedLocation.Clone()
+		c.Location = &loc
+		return nil
+	}
 	customCloud = "caller changed"
 	customRegion = "caller changed"
 	customName = "caller changed"
@@ -297,7 +302,12 @@ func TestConnectionBackupProxyActionResetDoesNotConsumeMalformedRecordedScope(t 
 	}
 	backupConnectionOperation(t, "RestoreVolumeBackup", err)
 	explicit := resource.CloudLocation{Project: resource.CloudProject{ID: json.RawMessage(`"explicit-project"`)}}
-	restore, err = backupProxyActionConnectionCall(backupProxyActionConnectionContext(t), conn, "restore", blockstorage.WithRestoreVolumeBackupLocation(explicit))
+	ownedLocation := explicit.Clone()
+	restore, err = backupProxyActionConnectionCall(backupProxyActionConnectionContext(t), conn, "restore", func(c *blockstorage.RestoreVolumeBackupOpts) error {
+		loc := ownedLocation.Clone()
+		c.Location = &loc
+		return nil
+	})
 	if err != nil || restore == nil || restore.value == nil || requests.Load() != 2 || locates.Load() != 1 {
 		t.Fatal(restore, err, requests.Load(), locates.Load())
 	}

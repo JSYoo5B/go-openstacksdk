@@ -285,8 +285,18 @@ func TestConnectionVolumeBackupExplicitLocationOwnsEveryFieldAndUsesBackupProjec
 			defaults := resource.CloudLocation{Cloud: &defaultCloud, Project: resource.CloudProject{ID: json.RawMessage(`"default-project"`), Name: &defaultName}}
 			cloudName, region, name, domain := "owned-cloud", "owned-region", "owned-name", "owned-domain"
 			location := resource.CloudLocation{Cloud: &cloudName, RegionName: &region, Zone: json.RawMessage(`invalid-unused-zone`), Project: resource.CloudProject{ID: json.RawMessage(`"owned-project"`), Name: &name, DomainName: &domain}}
-			list := []blockstorage.VolumeBackupListOption{blockstorage.WithVolumeBackupListLocation(location)}
-			search := []blockstorage.VolumeBackupSearchOption{blockstorage.WithVolumeBackupSearchLocation(location)}
+			ownedLocation := location.Clone()
+			list := []blockstorage.VolumeBackupListOption{request.Custom(func(c *blockstorage.VolumeBackupListOpts) error {
+				loc := ownedLocation.Clone()
+				c.Location = &loc
+				return nil
+			})}
+			ownedLocation2 := location.Clone()
+			search := []blockstorage.VolumeBackupSearchOption{func(c *blockstorage.VolumeBackupSearchOpts) error {
+				loc := ownedLocation2.Clone()
+				c.Location = &loc
+				return nil
+			}}
 			var reads atomic.Int32
 			cloud.Provider.EndpointLocator = func(opts gophercloud.EndpointOpts) (string, error) {
 				if opts.Type != "block-storage" || opts.Version != 3 {
@@ -448,8 +458,18 @@ func TestConnectionVolumeBackupPreflightAndGetterFailuresKeepBackupOperationAndJ
 					callbacks = 1
 				case "invalid location":
 					invalid := resource.CloudLocation{Project: resource.CloudProject{ID: json.RawMessage(`invalid`)}}
-					list = append(list, blockstorage.WithVolumeBackupListLocation(invalid))
-					search = append(search, blockstorage.WithVolumeBackupSearchLocation(invalid))
+					ownedLocation := invalid.Clone()
+					list = append(list, request.Custom(func(c *blockstorage.VolumeBackupListOpts) error {
+						loc := ownedLocation.Clone()
+						c.Location = &loc
+						return nil
+					}))
+					ownedLocation2 := invalid.Clone()
+					search = append(search, func(c *blockstorage.VolumeBackupSearchOpts) error {
+						loc := ownedLocation2.Clone()
+						c.Location = &loc
+						return nil
+					})
 					callbacks = 1
 				default:
 					want = getterErr

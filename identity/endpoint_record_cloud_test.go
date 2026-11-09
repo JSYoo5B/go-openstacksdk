@@ -299,7 +299,8 @@ func TestPythonEndpointCloudGetSeedAliasesWireAndExplicitLocation(t *testing.T) 
 	cloudName := "devstack"
 	location.Cloud = &cloudName
 	location.Project.ID = json.RawMessage(`"current"`)
-	option := identity.WithEndpointReadLocation(location)
+	ownedLocation := location.Clone()
+	option := request.Custom(func(c *identity.EndpointReadOpts) error { loc := ownedLocation.Clone(); c.Location = &loc; return nil })
 	cloudName = "changed"
 	location.Project.ID[1] = 'X'
 	result, err := cloud.GetEndpoint(context.Background(), "literal/name %2F", option)

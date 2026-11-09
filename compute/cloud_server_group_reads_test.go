@@ -237,7 +237,12 @@ func TestCloudServerGroupReadsOwnsOptionsRecordsHeadersAndCurrentLocation(t *tes
 	})
 	name, project := "cloud", json.RawMessage(`"current"`)
 	location := resource.CloudLocation{Cloud: &name, Project: resource.CloudProject{ID: project, Name: &name}}
-	loc := compute.WithServerGroupCloudCurrentLocation(location)
+	ownedLocation := location.Clone()
+	loc := request.Custom(func(c *compute.ServerGroupCloudReadOpts) error {
+		loc := ownedLocation.Clone()
+		c.CurrentLocation = &loc
+		return nil
+	})
 	name = "changed"
 	project[1] = 'X'
 	raw := json.RawMessage(`{"policy":"anti-affinity"}`)
@@ -273,7 +278,12 @@ func TestCloudServerGroupReadsOwnsOptionsRecordsHeadersAndCurrentLocation(t *tes
 }
 func TestCloudServerGroupReadsPreflightSelectedAPIOptionsAndCustomCancellation(t *testing.T) {
 	service, client, calls := serverGroupCloudFixture(t, func(*http.Request) *http.Response { return backupServerWire(200, serverGroupCloudRows, "unexpected") })
-	for _, options := range [][]compute.ServerGroupCloudReadOption{{nil}, {compute.WithServerGroupCloudFilters(json.RawMessage(`broken`))}, {request.Headers(map[string]string{"X-Auth-Token": "forged"})}, {compute.WithServerGroupCloudCurrentLocation(resource.CloudLocation{Project: resource.CloudProject{ID: json.RawMessage(`broken`)}})}} {
+	ownedLocation := resource.CloudLocation{Project: resource.CloudProject{ID: json.RawMessage(`broken`)}}.Clone()
+	for _, options := range [][]compute.ServerGroupCloudReadOption{{nil}, {compute.WithServerGroupCloudFilters(json.RawMessage(`broken`))}, {request.Headers(map[string]string{"X-Auth-Token": "forged"})}, {request.Custom(func(c *compute.ServerGroupCloudReadOpts) error {
+		loc := ownedLocation.Clone()
+		c.CurrentLocation = &loc
+		return nil
+	})}} {
 		result, e := service.SearchServerGroups(context.Background(), "", options...)
 		if result != nil || !errors.Is(e, resource.ErrInvalidOption) || len(*calls) != 0 {
 			t.Fatal(result, e, *calls)

@@ -344,7 +344,12 @@ func TestPythonServersListRowDescriptorsAndReceipts(t *testing.T) {
 	fixtureCloud := "fixture"
 	body := `{"servers":[{"id":"s1","accessIPv4":"192.0.2.10","OS-EXT-STS:power_state":1,"locked":"yes","tenant_id":"p1","OS-EXT-SRV-ATTR:host":"compute-a","os-extended-volumes:volumes_attached":[{"id":"v1"}],"flavor":{"original_name":"small","vcpus":"2"},"unknown":9007199254740993}],"servers_links":[]}`
 	api, _ := serverFindAPI(t, &calls, func(*http.Request) *http.Response { return nativeServerWire(200, body) })
-	rows, err := serverListCollect(t, api, servers.WithRecordFindLocation(resource.CloudLocation{Cloud: &fixtureCloud, Project: resource.CloudProject{ID: json.RawMessage(`"p1"`)}}))
+	ownedLocation := resource.CloudLocation{Cloud: &fixtureCloud, Project: resource.CloudProject{ID: json.RawMessage(`"p1"`)}}.Clone()
+	rows, err := serverListCollect(t, api, request.Custom(func(c *servers.RecordFindOpts) error {
+		loc := ownedLocation.Clone()
+		c.Location = &loc
+		return nil
+	}))
 	if err != nil || len(rows) != 1 {
 		t.Fatal(rows, err)
 	}

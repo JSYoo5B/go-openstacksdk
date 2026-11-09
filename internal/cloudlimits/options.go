@@ -58,18 +58,6 @@ func WithOptions(value Options) Option {
 	}
 }
 
-func WithLocation(value resource.CloudLocation) Option {
-	owned := value.Clone()
-	return func(target *Options) error {
-		if target == nil {
-			return fmt.Errorf("%w: limits options are required", resource.ErrInvalidOption)
-		}
-		copy := owned.Clone()
-		target.Location = &copy
-		return nil
-	}
-}
-
 func Prepare(ctx context.Context, options []Option, guard func(context.Context) error) (Options, error) {
 	if err := cloudread.Context(ctx); err != nil {
 		return Options{}, err

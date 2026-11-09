@@ -22,10 +22,9 @@ type RecordGetOpts struct {
 }
 
 // RecordGetOption is one option of GetRecord and ResolveRecord:
-// WithRecordGetOpts, WithRecordGetLocation, request.Custom over
-// *RecordGetOpts, request.Headers (replaces the headers) or
-// request.Microversion. request.Header fails with resource.ErrInvalidOption
-// before HTTP.
+// WithRecordGetOpts, request.Custom over *RecordGetOpts (for example to set
+// Location), request.Headers (replaces the headers) or request.Microversion.
+// request.Header fails with resource.ErrInvalidOption before HTTP.
 type RecordGetOption = request.GetCall
 
 var recordGetCalls = calls.Spec[RecordGetOpts]{
@@ -49,10 +48,7 @@ func WithRecordGetOpts(v RecordGetOpts) RecordGetOption {
 	owned := copyRecordGetOpts(v)
 	return request.Custom(func(c *RecordGetOpts) error { *c = copyRecordGetOpts(owned); return nil })
 }
-func WithRecordGetLocation(v resource.CloudLocation) RecordGetOption {
-	owned := v.Clone()
-	return request.Custom(func(c *RecordGetOpts) error { x := owned.Clone(); c.Location = &x; return nil })
-}
+
 func (a *API) prepareRecordGet(ctx context.Context, options []RecordGetOption, resolve bool) (*neutronfind.Engine, RecordGetOpts, error) {
 	engine, err := a.recordEngine(ctx)
 	if err != nil {

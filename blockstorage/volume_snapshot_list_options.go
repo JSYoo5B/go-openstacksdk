@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudsnapshot"
-	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 // VolumeSnapshotListOpts owns snapshot list policy; omission retains source defaults.
@@ -39,10 +38,6 @@ func WithVolumeSnapshotListAllowUnknownParams(value bool) VolumeSnapshotListOpti
 
 func WithVolumeSnapshotListConflictingAttrs(value json.RawMessage) VolumeSnapshotListOption {
 	return cloudsnapshot.WithListConflictingAttrs(value)
-}
-
-func WithVolumeSnapshotListLocation(value resource.CloudLocation) VolumeSnapshotListOption {
-	return cloudsnapshot.WithListLocation(value)
 }
 
 // PrepareVolumeSnapshotListOptions captures original callbacks once without service I/O.

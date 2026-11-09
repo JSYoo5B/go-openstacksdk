@@ -14,12 +14,12 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.Create`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.CreateRecord`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordMutationOpts`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordMutationLocation`
 
 - Legacy native Create sends POST domains with the {"domain": {...}} envelope and decodes native model fields; Domain.options is omitted from that native model, rather than representing every Python Domain field.
   Tests: `identity/v3/domains/python_parity_test.go:TestPythonDomainCreateGetUpdateRequests`.
@@ -46,12 +46,12 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.Update`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.UpdateRecord`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordMutationOpts`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordMutationLocation`
 
 - Legacy native Update sends PATCH domains/{id} with the {"domain": {...}} envelope and optional explicit request.Field("id", id); the old fixture documents that opt-in native body, not pinned Resource.commit dirty-id behavior.
   Tests: `identity/v3/domains/python_parity_test.go:TestPythonDomainCreateGetUpdateRequests`.

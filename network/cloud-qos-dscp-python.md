@@ -14,7 +14,6 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network.Service.ListQoSDSCPMarkingRules`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithDSCPMarkingCloudOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithDSCPMarkingCloudCurrentLocation`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithDSCPMarkingCloudFiltersJSON`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ProxyDSCPMarkingRecords`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
@@ -49,7 +48,6 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network.Service.SearchQoSDSCPMarkingRules`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithDSCPMarkingCloudOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithDSCPMarkingCloudCurrentLocation`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithDSCPMarkingCloudFiltersJSON`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ProxyDSCPMarkingRecords`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
@@ -92,7 +90,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.GetDSCPMarkingRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network.Service.GetQoSDSCPMarkingRule`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithDSCPMarkingCloudOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithDSCPMarkingCloudCurrentLocation`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.GetSourceDSCPMarkingRecord`
 
 - After the cloud extension gate, Go sends the same GET /extensions, QoS policy GET-then-name-list find, rule GET/POST/DELETE, rule-type GET, policy POST and policy DELETE requests, while a rule DELETE 404 stays an error.
@@ -186,7 +183,7 @@ func main() {
  if err!=nil{log.Fatal(err)}
  location,err:=conn.CurrentLocation()
  if err!=nil{log.Fatal(err)}
- options:=[]network.DSCPMarkingCloudOption{network.WithDSCPMarkingCloudCurrentLocation(location)}
+ options:=[]network.DSCPMarkingCloudOption{func(c *network.DSCPMarkingCloudOpts) error { loc := location.Clone(); c.CurrentLocation = &loc; return nil }}
  var result *network.DSCPMarkingCloudResult
  switch *mode {
  case "list":

@@ -314,12 +314,6 @@ func (s *Service) GetQoSMinimumBandwidthRule(ctx context.Context, policyNameOrID
 	return result, nil
 }
 
-// WithMinimumBandwidthCloudCurrentLocation snapshots connected Source location. Standalone
-// APIs keep the pinned unconnected Resource location (null).
-func WithMinimumBandwidthCloudCurrentLocation(value resource.CloudLocation) MinimumBandwidthCloudOption {
-	owned := value.Clone()
-	return func(c *MinimumBandwidthCloudOpts) error { x := owned.Clone(); c.CurrentLocation = &x; return nil }
-}
 func minimumBandwidthCloudRecord(v *rules.MinimumBandwidthRecord) *rules.MinimumBandwidthRecord {
 	if v == nil {
 		return nil

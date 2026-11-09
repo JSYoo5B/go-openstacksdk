@@ -15,6 +15,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.ImageTasks`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.AllImageTasks`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithListImageTasksOpts`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithListImageTasksHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
@@ -24,7 +25,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/images.WithTaskRecordsLocation`
 - `github.com/JSYoo5B/go-openstacksdk/request.Limit`
 - `github.com/JSYoo5B/go-openstacksdk/request.Marker`
 - `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`

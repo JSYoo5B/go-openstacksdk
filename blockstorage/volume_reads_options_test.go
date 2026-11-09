@@ -64,7 +64,12 @@ func TestPrepareVolumeReadOptionsOwnsFactoriesCallbacksAndOriginalSlice(t *testi
 			if kind == "complete options" {
 				factory = blockstorage.WithVolumeReadOptions(blockstorage.VolumeReadOpts{Location: &location})
 			} else {
-				factory = blockstorage.WithVolumeReadLocation(location)
+				ownedLocation := location.Clone()
+				factory = func(c *blockstorage.VolumeReadOpts) error {
+					loc := ownedLocation.Clone()
+					c.Location = &loc
+					return nil
+				}
 			}
 			cloudName, projectName = "caller-mutated", "caller-mutated"
 			location.Project.ID[1] = '!'
@@ -106,7 +111,12 @@ func TestVolumeReadsApplyOriginalOptionsOnceWithCapturedHeadersAndOwnedLocation(
 			client := volumeReadContractClient(cloud)
 			cloudName, projectName := "cloud-entry", "project-entry"
 			location := resource.CloudLocation{Cloud: &cloudName, Project: resource.CloudProject{ID: json.RawMessage(`"scope"`), Name: &projectName}}
-			factory := blockstorage.WithVolumeReadLocation(location)
+			ownedLocation := location.Clone()
+			factory := func(c *blockstorage.VolumeReadOpts) error {
+				loc := ownedLocation.Clone()
+				c.Location = &loc
+				return nil
+			}
 			cloudName, projectName = "outside-mutated", "outside-mutated"
 			location.Project.ID[1] = '!'
 			var callbacks, calls atomic.Int32
@@ -278,7 +288,12 @@ func TestVolumeReadLocationIsConsumedOnlyByActualRowsWithoutBorrowingResponseFai
 				testcloud.JSON(w, 200, body)
 			})
 			location := resource.CloudLocation{Project: resource.CloudProject{ID: json.RawMessage(`invalid JSON`)}}
-			prepared, err := blockstorage.PrepareVolumeReadOptions(context.Background(), blockstorage.WithVolumeReadLocation(location))
+			ownedLocation := location.Clone()
+			prepared, err := blockstorage.PrepareVolumeReadOptions(context.Background(), func(c *blockstorage.VolumeReadOpts) error {
+				loc := ownedLocation.Clone()
+				c.Location = &loc
+				return nil
+			})
 			if err != nil || prepared.Location == nil {
 				t.Fatal("options eagerly consumed caller location", prepared, err)
 			}

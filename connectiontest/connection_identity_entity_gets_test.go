@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"net/http"
 	"testing"
 
@@ -45,7 +46,12 @@ func TestConnectionIdentityEntityGetsUseCachedAPIAndOwnedLocation(t *testing.T) 
 		t.Fatal(user.User)
 	}
 	explicit := "explicit"
-	option := identity.WithRoleGetLocation(resource.CloudLocation{Cloud: &explicit})
+	ownedLocation := resource.CloudLocation{Cloud: &explicit}.Clone()
+	option := request.Custom(func(c *identity.RoleGetOpts) error {
+		loc := ownedLocation.Clone()
+		c.Location = &loc
+		return nil
+	})
 	explicit = "changed"
 	role, err = conn.GetRoleRecord(context.Background(), "r", option)
 	if err != nil || role == nil || role.Role == nil {

@@ -372,7 +372,8 @@ func TestPythonDomainRecordsDeclaredDescriptorsQueryAliasesAndOwnedProof(t *test
 func TestPythonDomainRecordsLocationBeforeLocalFilterAndStatusPolicy(t *testing.T) {
 	name, project := "configured", "current"
 	location := resource.CloudLocation{Cloud: &name, Project: resource.CloudProject{ID: json.RawMessage(`"scope"`), Name: &project}}
-	opt := domains.WithRecordListLocation(location)
+	ownedLocation := location.Clone()
+	opt := request.Custom(func(c *domains.RecordListOpts) error { loc := ownedLocation.Clone(); c.Location = &loc; return nil })
 	name = "changed"
 	project = "changed"
 	for _, code := range []int{100, 199, 203, 300, 399} {

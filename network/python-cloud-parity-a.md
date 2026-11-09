@@ -310,7 +310,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.WithRouterCreateJSON`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithRouterCreateAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithRouterCreateAvailabilityZoneHints`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithRouterCreateCurrentLocation`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.CreateRouterRecord`
 
 - routers.API.CreateWithAttributes sends only explicit attributes: no arguments produce {"router":{}}, and admin_state_up plus a caller-built external_gateway_info are sent as given.
@@ -357,7 +356,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.WithSubnetCreateOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithSubnetCreateJSON`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithSubnetCreateAttribute`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithSubnetCreateCurrentLocation`
 
 - subnets.API.CreateWithAttributes sends only explicit attributes, so ip_version, enable_dhcp and a null gateway_ip appear only when the caller sets them.
   Tests: `network/python_cloud_parity_a_test.go:TestPythonCloudNetworkCreateRouterSubnetSendOnlyExplicitAttributes`.
@@ -683,7 +681,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.GetDSCPMarkingRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network.Service.GetQoSDSCPMarkingRule`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithDSCPMarkingCloudOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithDSCPMarkingCloudCurrentLocation`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.GetSourceDSCPMarkingRecord`
 
 - After the cloud extension gate, Go sends the same GET /extensions, QoS policy GET-then-name-list find, rule GET/POST/DELETE, rule-type GET, policy POST and policy DELETE requests, while a rule DELETE 404 stays an error.
@@ -821,7 +818,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.GetMinimumBandwidthRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network.Service.GetQoSMinimumBandwidthRule`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithMinimumBandwidthCloudOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithMinimumBandwidthCloudCurrentLocation`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.GetSourceMinimumBandwidthRecord`
 
 - After the cloud extension gate, Go sends the same GET /extensions, QoS policy GET-then-name-list find, rule GET/POST/DELETE, rule-type GET, policy POST and policy DELETE requests, while a rule DELETE 404 stays an error.

@@ -18,7 +18,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPDeleteOptions`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPDeleteRetries`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPDeleteSource`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPDeleteLocation`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPDeleteStrict`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPDeleteDirectGet`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPDeleteTimeout`

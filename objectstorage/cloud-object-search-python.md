@@ -20,7 +20,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithObjectSearchName`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithObjectSearchFiltersJSON`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithObjectSearchExpression`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithObjectSearchLocation`
 
 - SDK collects the full literal-container Objects.ListRecords sequence with format=json and account-independent actual page receipts before cloud name/id exact-or-fnmatch and ordered/nested mapping selection; filters never become server query/prefix and duplicate rows remain.
   Tests: `objectstorage/cloud_object_search_test.go:TestSwiftCloudObjectSearchCollectsEveryPageBeforeIdentifierAndMapping`, `objectstorage/cloud_object_search_test.go:TestSwiftCloudObjectSearchNameUsesFnmatchAndDeclaredAliases`.

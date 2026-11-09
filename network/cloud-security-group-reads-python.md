@@ -20,9 +20,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.WithSecurityGroupReadOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithSecurityGroupReadFiltersJSON`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithSecurityGroupReadExpression`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithSecurityGroupReadCurrentLocation`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.API.ProxyListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithRecordProxyQuery`
 
@@ -60,9 +60,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.WithSecurityGroupReadOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithSecurityGroupReadFiltersJSON`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithSecurityGroupReadExpression`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithSecurityGroupReadCurrentLocation`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.API.ProxyListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithRecordProxyQuery`
 

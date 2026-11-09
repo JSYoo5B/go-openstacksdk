@@ -90,7 +90,12 @@ func TestCloudRouterInterfacesOwnedInputsLocationHeadersAndRawReceipt(t *testing
 	client.ResourceBase = cloud.Server.URL + "/v2.0/"
 	name, project, zone := "cloud", json.RawMessage(`"current"`), json.RawMessage(`"configured-zone"`)
 	location := resource.CloudLocation{Cloud: &name, Zone: zone, Project: resource.CloudProject{ID: project, Name: &name}}
-	loc := network.WithRouterInterfaceReadCurrentLocation(location)
+	ownedLocation := location.Clone()
+	loc := request.Custom(func(c *network.RouterInterfaceReadOpts) error {
+		loc := ownedLocation.Clone()
+		c.CurrentLocation = &loc
+		return nil
+	})
 	name = "mutated"
 	project[1] = 'X'
 	zone[1] = 'X'

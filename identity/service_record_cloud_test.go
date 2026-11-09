@@ -439,7 +439,8 @@ func TestPythonServiceCloudGetOptionCallbackOnceCapturedSourceAndOwnedLocation(t
 	cloud := identity.NewServiceReadCloud(api)
 	name := "configured"
 	location := resource.CloudLocation{Cloud: &name, Zone: json.RawMessage(`"az"`), Project: resource.CloudProject{ID: json.RawMessage(`"scope"`)}}
-	loc := identity.WithServiceReadLocation(location)
+	ownedLocation := location.Clone()
+	loc := request.Custom(func(c *identity.ServiceReadOpts) error { loc := ownedLocation.Clone(); c.Location = &loc; return nil })
 	name = "changed"
 	for _, deprecated := range []bool{false, true} {
 		api.RawClient().MoreHeaders = map[string]string{"X-Before": "original"}

@@ -25,9 +25,9 @@ type DomainGetOpts struct {
 
 // DomainGetOption is one option of GetDomain: WithDomainGetOpts,
 // WithDomainGetID, WithDomainGetNameOrID, WithDomainGetFilters,
-// WithDomainGetLocation, request.Headers (replaces the headers),
-// request.Microversion or request.Custom over *DomainGetOpts. Other shared
-// calls fail with resource.ErrInvalidOption before HTTP.
+// request.Headers (replaces the headers), request.Microversion or
+// request.Custom over *DomainGetOpts (for example to set Location). Other
+// shared calls fail with resource.ErrInvalidOption before HTTP.
 type DomainGetOption = request.GetCall
 
 var domainGetCalls = calls.Spec[DomainGetOpts]{
@@ -68,10 +68,6 @@ func WithDomainGetNameOrID(v string) DomainGetOption {
 func WithDomainGetFilters(v any) DomainGetOption {
 	present := v != nil
 	return request.Custom(func(c *DomainGetOpts) error { c.DeprecatedFilters = present; return nil })
-}
-func WithDomainGetLocation(v resource.CloudLocation) DomainGetOption {
-	owned := v.Clone()
-	return request.Custom(func(c *DomainGetOpts) error { x := owned.Clone(); c.Location = &x; return nil })
 }
 
 // DomainGetResult carries the ignored-filter warning independently of actual

@@ -71,10 +71,7 @@ func WithFloatingIPCreateWaitOptions(options ...resource.WaitOption) FloatingIPC
 func WithFloatingIPCreateSource(value FloatingIPSource) FloatingIPCreateOption {
 	return func(o *FloatingIPCreateOpts) error { copy := value; o.Source = &copy; return nil }
 }
-func WithFloatingIPCreateLocation(value resource.CloudLocation) FloatingIPCreateOption {
-	owned := value.Clone()
-	return func(o *FloatingIPCreateOpts) error { copy := owned.Clone(); o.Location = &copy; return nil }
-}
+
 func WithFloatingIPCreateStrict(value bool) FloatingIPCreateOption {
 	return func(o *FloatingIPCreateOpts) error { o.Strict = value; return nil }
 }

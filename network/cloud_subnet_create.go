@@ -95,10 +95,6 @@ func WithSubnetCreateJSON(raw json.RawMessage) SubnetCreateOption {
 		return nil
 	}
 }
-func WithSubnetCreateCurrentLocation(v resource.CloudLocation) SubnetCreateOption {
-	owned := v.Clone()
-	return func(c *SubnetCreateOpts) error { x := owned.Clone(); c.CurrentLocation = &x; return nil }
-}
 
 // SubnetCreateResult separates lookup observations from the actual subnet POST.
 // Failed response handling never invents Resource/Wire or a successful status.

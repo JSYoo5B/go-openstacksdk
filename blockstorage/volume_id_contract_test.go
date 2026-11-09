@@ -255,7 +255,12 @@ func TestGetVolumeIDOwnsOriginalOptionSliceLocationAndHeaders(t *testing.T) {
 	client := volumeReadContractClient(cloud)
 	cloudName := "cloud-entry"
 	location := resource.CloudLocation{Cloud: &cloudName, Project: resource.CloudProject{ID: json.RawMessage(`"scope"`)}}
-	factory := blockstorage.WithVolumeReadLocation(location)
+	ownedLocation := location.Clone()
+	factory := func(c *blockstorage.VolumeReadOpts) error {
+		loc := ownedLocation.Clone()
+		c.Location = &loc
+		return nil
+	}
 	cloudName = "caller-mutated"
 	location.Project.ID[1] = '!'
 	var callbacks, calls atomic.Int32

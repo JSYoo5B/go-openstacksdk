@@ -384,7 +384,12 @@ func TestGetVolumeLimitsNestedLocationPresenceAndTopLocationHaveDifferentOwnersh
 	location := resource.CloudLocation{Cloud: &cloudName, RegionName: &region, Zone: json.RawMessage(`{"zone":false}`), Project: resource.CloudProject{ID: json.RawMessage(`"current-project"`), Name: &projectName}}
 	body := `{"limits":{"location":"wire-top","absolute":{"location":false,"unknown":1},"rate":[{"location":{"raw":true}},{"location":"ignored","regex":null},{"limit":[{"location":[]},{"location":"ignored","remaining":null}]}]}}`
 	cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) { testcloud.JSON(w, 200, body) })
-	result, err := glCall(context.Background(), cinder, nil, "", blockstorage.WithGetVolumeLimitsLocation(location))
+	ownedLocation := location.Clone()
+	result, err := glCall(context.Background(), cinder, nil, "", func(c *blockstorage.GetVolumeLimitsOpts) error {
+		loc := ownedLocation.Clone()
+		c.Location = &loc
+		return nil
+	})
 	if err != nil {
 		t.Fatal(result, err)
 	}

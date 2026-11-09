@@ -126,6 +126,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.All`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.WithListOptions`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/identity.NewProjectReadCloud`
 - `github.com/JSYoo5B/go-openstacksdk/identity.ProjectReadCloud.ListProjects`
@@ -134,7 +135,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithProjectReadDomainID`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithProjectReadNameOrID`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithProjectReadFilters`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithProjectReadLocation`
 
 - Concrete Keystone v3 Project facade expands filters in insertion order then truthy explicit name/domain override corresponding filter values; declared Body filters run in the leaf and actual203 record/header is retained.
   Tests: `identity/project_record_cloud_test.go:TestPythonProjectCloudListTruthfulNameDomainOverrideAndLocalBodyFilter`.
@@ -168,7 +168,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk.Connection.SearchProjects`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithProjectReadFilters`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithProjectReadDomainID`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithProjectReadLocation`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 
 - Search calls list_projects without a server name hint and then applies exact/glob ID/name plus ordered nested loaded-JSON filters. Wire enabled passes server query but fails local Source Resource membership; is_enabled is the owned attribute name.
   Tests: `identity/project_record_cloud_test.go:TestPythonProjectCloudSearchGlobNestedLoadedEqualityAndWireAliasFailures`.

@@ -88,14 +88,13 @@ func WithRecordListQuery(key string, value any) RecordListOption {
 	return recordList.Query(key, value)
 }
 
-// WithRecordListJMESPath, WithRecordListLocation, request.Custom over
-// *RecordListOpts, request.Headers (replaces the headers),
-// request.Microversion, request.BasePath (an owned service-relative Source
-// list path), request.Limit, request.Marker, request.MaxItems or
-// request.Paginated (each a Source keyword argument). request.Header and
-// request.Query fail with resource.ErrInvalidOption before HTTP:
-// WithRecordListQuery discards ignored kwargs before marshaling the value,
-// which request.Query cannot.
+// WithRecordListJMESPath, request.Custom over *RecordListOpts (for example to
+// set Location), request.Headers (replaces the headers), request.Microversion,
+// request.BasePath (an owned service-relative Source list path),
+// request.Limit, request.Marker, request.MaxItems or request.Paginated (each a
+// Source keyword argument). request.Header and request.Query fail with
+// resource.ErrInvalidOption before HTTP: WithRecordListQuery discards ignored
+// kwargs before marshaling the value, which request.Query cannot.
 type RecordListOption = request.ListBasePathCall
 
 var recordList = keystonecalls.SourceList[RecordListOpts]{
@@ -168,13 +167,6 @@ func recordListControl(key string) error {
 // ProxyListRecords exposes its zero-HTTP value or lazy generator result.
 func WithRecordListJMESPath(expression string) RecordListOption {
 	return keystonecalls.Keyword(recordList.Apply, "jmespath_filters", expression)
-}
-
-// WithRecordListLocation supplies an immutable explicit connection view.
-// A standalone native client has no Python Connection; omission remains null.
-func WithRecordListLocation(value resource.CloudLocation) RecordListOption {
-	owned := value.Clone()
-	return request.Custom(func(c *RecordListOpts) error { location := owned.Clone(); c.Location = &location; return nil })
 }
 
 func (a *API) recordListEngine(ctx context.Context) (*neutronfind.Engine, error) {

@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudsnapshot"
-	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 type DeleteVolumeSnapshotRequest struct{ NameOrID string }
@@ -20,9 +19,7 @@ func WithDeleteVolumeSnapshotWait(value bool) DeleteVolumeSnapshotOption {
 func WithDeleteVolumeSnapshotWaitPolicy(value SnapshotMutationWaitOpts) DeleteVolumeSnapshotOption {
 	return cloudsnapshot.WithDeleteWaitPolicy(value)
 }
-func WithDeleteVolumeSnapshotLocation(value resource.CloudLocation) DeleteVolumeSnapshotOption {
-	return cloudsnapshot.WithDeleteLocation(value)
-}
+
 func PrepareDeleteVolumeSnapshotOptions(ctx context.Context, options ...DeleteVolumeSnapshotOption) (DeleteVolumeSnapshotOpts, error) {
 	return cloudsnapshot.PrepareDelete(ctx, options...)
 }

@@ -98,7 +98,12 @@ func TestListVolumeTypesCompletesQuerylessPagesAndOwnsSixFieldViewsAndWireProof(
 			w.WriteHeader(500)
 		}
 	})
-	result, err := blockstorage.ListVolumeTypes(context.Background(), client, blockstorage.WithVolumeTypeReadLocation(location))
+	ownedLocation := location.Clone()
+	result, err := blockstorage.ListVolumeTypes(context.Background(), client, func(c *blockstorage.VolumeTypeReadOpts) error {
+		loc := ownedLocation.Clone()
+		c.Location = &loc
+		return nil
+	})
 	if err != nil || result == nil || calls.Load() != 2 || len(result.Pages) != 2 || len(result.Types) != 3 || result.Types[0] == result.Types[1] {
 		t.Fatal(result, err, calls.Load())
 	}
@@ -140,7 +145,17 @@ func TestVolumeTypesEmptyCanonicalListIgnoresUnusedLinksAndLocation(t *testing.T
 				testcloud.JSON(w, 200, body)
 			})
 			location := resource.CloudLocation{Project: resource.CloudProject{ID: json.RawMessage(`invalid-unused`)}}
-			got := volumeTypeContractCall(context.Background(), client, operation, []blockstorage.VolumeTypeReadOption{blockstorage.WithVolumeTypeReadLocation(location)}, blockstorage.WithVolumeTypeSearchLocation(location))
+			ownedLocation2 := location.Clone()
+			ownedLocation := location.Clone()
+			got := volumeTypeContractCall(context.Background(), client, operation, []blockstorage.VolumeTypeReadOption{func(c *blockstorage.VolumeTypeReadOpts) error {
+				loc := ownedLocation.Clone()
+				c.Location = &loc
+				return nil
+			}}, func(c *blockstorage.VolumeTypeSearchOpts) error {
+				loc := ownedLocation2.Clone()
+				c.Location = &loc
+				return nil
+			})
 			if got.err != nil || got.nilResult || string(got.value) != "[]" || got.types == nil || len(got.types) != 0 || calls.Load() != 1 || len(got.pages) != 1 || string(got.pages[0].Body) != body {
 				t.Fatal(got, calls.Load())
 			}
@@ -168,7 +183,12 @@ func TestGetVolumeTypeOmittedAndNullFiltersKeepMemberQueryAndFreshCanonicalIdent
 					testcloud.JSON(w, 200, body)
 				})
 				location := resource.CloudLocation{Zone: json.RawMessage(`"owned"`)}
-				options := []blockstorage.VolumeTypeSearchOption{blockstorage.WithVolumeTypeSearchLocation(location)}
+				ownedLocation := location.Clone()
+				options := []blockstorage.VolumeTypeSearchOption{func(c *blockstorage.VolumeTypeSearchOpts) error {
+					loc := ownedLocation.Clone()
+					c.Location = &loc
+					return nil
+				}}
 				if null {
 					options = append(options, blockstorage.WithVolumeTypeSearchFilters(json.RawMessage(" null ")))
 				}

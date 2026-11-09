@@ -265,7 +265,8 @@ func TestPythonServiceRecordsOptionSnapshotsFormalsAndPreflightSourceGuards(t *t
 func TestPythonServiceRecordsExplicitLocationOwnsCurrentScopeWithoutUnknownProjectInference(t *testing.T) {
 	cloudName, projectName := "configured", "current"
 	location := resource.CloudLocation{Cloud: &cloudName, Project: resource.CloudProject{ID: json.RawMessage(`"scope"`), Name: &projectName}}
-	option := services.WithRecordListLocation(location)
+	ownedLocation := location.Clone()
+	option := request.Custom(func(c *services.RecordListOpts) error { loc := ownedLocation.Clone(); c.Location = &loc; return nil })
 	cloudName = "changed"
 	projectName = "changed"
 	api, _ := serviceRecordAPI(t, func(*http.Request) *http.Response {
@@ -620,7 +621,12 @@ func TestPythonServiceResolveRecordOptionsSnapshotCancellationAndExplicitLocatio
 				first = nil
 			}
 			if mode == "location" {
-				first = services.WithRecordResolveLocation(resource.CloudLocation{Project: resource.CloudProject{ID: json.RawMessage(`bad`)}})
+				ownedLocation := resource.CloudLocation{Project: resource.CloudProject{ID: json.RawMessage(`bad`)}}.Clone()
+				first = request.Custom(func(c *services.RecordResolveOpts) error {
+					loc := ownedLocation.Clone()
+					c.Location = &loc
+					return nil
+				})
 			}
 			row, err := api.ResolveRecord(ctx, "a", first, request.Custom(func(*services.RecordResolveOpts) error { seen++; return nil }))
 			var proof *resource.ResponseError

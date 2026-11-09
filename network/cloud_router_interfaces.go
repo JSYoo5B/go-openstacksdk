@@ -30,9 +30,9 @@ type RouterInterfaceReadOpts struct {
 
 // RouterInterfaceReadOption is one option of ListRouterInterfaces:
 // WithRouterInterfaceReadOpts, WithRouterInterfaceTypeJSON,
-// WithRouterInterfaceType, WithRouterInterfaceReadCurrentLocation,
-// request.Headers (replaces the headers), request.Microversion or
-// request.Custom over *RouterInterfaceReadOpts. Other shared calls fail with
+// WithRouterInterfaceType, request.Headers (replaces the headers),
+// request.Microversion or request.Custom over *RouterInterfaceReadOpts (for
+// example to set CurrentLocation). Other shared calls fail with
 // resource.ErrInvalidOption before HTTP.
 type RouterInterfaceReadOption = request.GetCall
 
@@ -75,10 +75,6 @@ func WithRouterInterfaceTypeJSON(v json.RawMessage) RouterInterfaceReadOption {
 func WithRouterInterfaceType(v string) RouterInterfaceReadOption {
 	raw, _ := json.Marshal(v)
 	return WithRouterInterfaceTypeJSON(raw)
-}
-func WithRouterInterfaceReadCurrentLocation(v resource.CloudLocation) RouterInterfaceReadOption {
-	owned := v.Clone()
-	return request.Custom(func(c *RouterInterfaceReadOpts) error { x := owned.Clone(); c.CurrentLocation = &x; return nil })
 }
 
 // RouterInterfaceRouterID constructs the Source router dictionary without a

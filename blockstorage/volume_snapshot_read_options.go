@@ -3,7 +3,6 @@ package blockstorage
 import (
 	"context"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudsnapshot"
-	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 type GetVolumeSnapshotByIDRequest struct{ ID string }
@@ -14,10 +13,6 @@ type VolumeSnapshotReadOption = cloudsnapshot.ReadOption
 
 func WithVolumeSnapshotReadOptions(value VolumeSnapshotReadOpts) VolumeSnapshotReadOption {
 	return cloudsnapshot.WithReadOptions(value)
-}
-
-func WithVolumeSnapshotReadLocation(value resource.CloudLocation) VolumeSnapshotReadOption {
-	return cloudsnapshot.WithReadLocation(value)
 }
 
 // PrepareVolumeSnapshotReadOptions captures original callbacks once without service I/O.

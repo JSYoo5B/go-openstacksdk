@@ -337,7 +337,12 @@ func TestConnectionGetVolumeLimitsOwnsFactoriesOriginalSliceAndRetainedLocation(
 			case "bulk":
 				options = []blockstorage.GetVolumeLimitsOption{blockstorage.WithGetVolumeLimitsOptions(blockstorage.GetVolumeLimitsOpts{Location: &location})}
 			case "location":
-				options = []blockstorage.GetVolumeLimitsOption{blockstorage.WithGetVolumeLimitsLocation(location)}
+				ownedLocation := location.Clone()
+				options = []blockstorage.GetVolumeLimitsOption{func(c *blockstorage.GetVolumeLimitsOpts) error {
+					loc := ownedLocation.Clone()
+					c.Location = &loc
+					return nil
+				}}
 			default:
 				options = make([]blockstorage.GetVolumeLimitsOption, 2)
 				options[0] = func(o *blockstorage.GetVolumeLimitsOpts) error {
@@ -570,7 +575,12 @@ func TestConnectionGetVolumeLimitsSeparatesLocalRejectedAndAcceptedFinalProof(t 
 			})
 			var options []blockstorage.GetVolumeLimitsOption
 			if kind == "invalid owned location" {
-				options = []blockstorage.GetVolumeLimitsOption{blockstorage.WithGetVolumeLimitsLocation(resource.CloudLocation{Zone: json.RawMessage(`not-json`)})}
+				ownedLocation := resource.CloudLocation{Zone: json.RawMessage(`not-json`)}.Clone()
+				options = []blockstorage.GetVolumeLimitsOption{func(c *blockstorage.GetVolumeLimitsOpts) error {
+					loc := ownedLocation.Clone()
+					c.Location = &loc
+					return nil
+				}}
 			}
 			result, err := conn.GetVolumeLimits(context.Background(), blockstorage.GetVolumeLimitsRequest{NameOrID: "input"}, options...)
 			if err == nil || projects.Load() != 1 {

@@ -120,7 +120,7 @@ func list(ctx context.Context, deps Dependencies, cfg compute.CloudServerReadOpt
 	if err != nil {
 		return nil, nil, err
 	}
-	options := append([]servers.RecordFindOption{servers.WithRecordFindLocation(location)}, cfg.List...)
+	options := append([]servers.RecordFindOption{request.Custom(func(c *servers.RecordFindOpts) error { loc := location.Clone(); c.Location = &loc; return nil })}, cfg.List...)
 	var rows []*servers.ServerFindRecord
 	for row, err := range service.Servers.ListCloudRecords(ctx, options...) {
 		if err != nil {
@@ -270,7 +270,7 @@ func Update(ctx context.Context, deps Dependencies, nameOrID string, update comp
 	if err != nil {
 		return nil, wrap(err)
 	}
-	found, err := service.Servers.FindRecord(ctx, nameOrID, request.IgnoreMissing(false), servers.WithRecordFindLocation(location))
+	found, err := service.Servers.FindRecord(ctx, nameOrID, request.IgnoreMissing(false), request.Custom(func(c *servers.RecordFindOpts) error { loc := location.Clone(); c.Location = &loc; return nil }))
 	if err != nil {
 		return nil, wrap(err)
 	}
@@ -335,7 +335,7 @@ func Get(ctx context.Context, deps Dependencies, nameOrID string, options []comp
 		if err != nil {
 			return nil, wrap(err)
 		}
-		find := append([]servers.RecordFindOption{servers.WithRecordFindLocation(location)}, cfg.List...)
+		find := append([]servers.RecordFindOption{request.Custom(func(c *servers.RecordFindOpts) error { loc := location.Clone(); c.Location = &loc; return nil })}, cfg.List...)
 		find = append(find, servers.WithRecordFindDetails(true))
 		record, err = service.Servers.FindRecord(ctx, nameOrID, find...)
 		if err != nil {
@@ -520,7 +520,7 @@ func Delete(ctx context.Context, deps Dependencies, nameOrID string, options []c
 	if err != nil {
 		return false, wrap(err)
 	}
-	record, err := service.Servers.FindRecord(ctx, nameOrID, servers.WithRecordFindLocation(location))
+	record, err := service.Servers.FindRecord(ctx, nameOrID, request.Custom(func(c *servers.RecordFindOpts) error { loc := location.Clone(); c.Location = &loc; return nil }))
 	if err != nil {
 		return false, wrap(err)
 	}

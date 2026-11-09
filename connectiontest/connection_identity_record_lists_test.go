@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"net/http"
 	"testing"
 
@@ -76,7 +77,12 @@ func TestConnectionIdentityRecordReadsRespectExplicitLocationAndPreflight(t *tes
 		testcloud.JSON(w, 200, `{"roles":[{"id":"r","name":"reader"}]}`)
 	})
 	explicit := "explicit"
-	option := roles.WithRecordListLocation(resource.CloudLocation{Cloud: &explicit})
+	ownedLocation := resource.CloudLocation{Cloud: &explicit}.Clone()
+	option := request.Custom(func(c *roles.RecordListOpts) error {
+		loc := ownedLocation.Clone()
+		c.Location = &loc
+		return nil
+	})
 	explicit = "changed"
 	result, err := conn.ListRoleRecords(context.Background(), option)
 	if err != nil || result == nil || len(result.Roles) != 1 {

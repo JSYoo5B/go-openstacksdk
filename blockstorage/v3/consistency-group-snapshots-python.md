@@ -15,9 +15,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.New`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.API.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordListOpts`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordListLocation`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordListDetails`
 - `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 - `github.com/JSYoo5B/go-openstacksdk/request.Limit`
@@ -65,9 +65,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.New`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.API.CreateRecord`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordCreateOpts`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordCreateLocation`
 
 - Fresh known dirty attrs sent once as cgsnapshot JSON wrapper, supplied ID retained, explicit null/false/zero/nested JSON preserved, nil attrs empty object. Unknown attrs are not marshaled; bound constructor reserved-key presence rejected before HTTP. Source does not prevalidate required consistencygroup_id: actual server400/body/header and native cause retained, no prefetch. JSON framing preflight occurs before POST.
   Tests: `blockstorage/v3/consistencygroupsnapshots/python_records_test.go:TestPythonConsistencyGroupSnapshotCreateDeclaredDirtyAttrsAndImmutableOptions`, `blockstorage/v3/consistencygroupsnapshots/python_records_test.go:TestPythonConsistencyGroupSnapshotCreateSourceCaptureMarshalAndConstructorCollisions`, `blockstorage/v3/consistencygroupsnapshots/python_records_test.go:TestPythonConsistencyGroupSnapshotBoundClsPresenceAndGetWireBoundary`, `blockstorage/v3/consistencygroupsnapshots/python_records_test.go:TestPythonConsistencyGroupSnapshotCreateMissingRequiredFieldKeepsServerRejection`, `blockstorage/v3/consistencygroupsnapshots/python_records_test.go:TestPythonConsistencyGroupSnapshotCreateJSONFramingPrecedesHTTP`.
@@ -141,11 +141,11 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.New`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordFindOpts`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordFindDetails`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordFindLocation`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordFindPaginated`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordFindMaxItems`
@@ -188,9 +188,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.New`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.API.GetRecord`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordReadOpts`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordReadLocation`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordReadSeed`
 
 - One escaped literal member GET, no query or prefetch. Exactly6 untyped Source Body fields plus recorded-auth/owned location, passive response ID/null/unknown Wire, independent raw/declared/envelope/header carriers. Missing fields are null; empty/malformed JSON tolerates constructor seed, parseable invalid root/wrapper retains actual failure proof.

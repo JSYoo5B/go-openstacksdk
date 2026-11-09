@@ -3,7 +3,6 @@ package blockstorage
 import (
 	"context"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudlimits"
-	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 // GetVolumeLimitsRequest optionally selects another project by exact name/ID.
@@ -27,10 +26,6 @@ type GetVolumeLimitsResult = cloudlimits.Result
 
 func WithGetVolumeLimitsOptions(value GetVolumeLimitsOpts) GetVolumeLimitsOption {
 	return cloudlimits.WithOptions(value)
-}
-
-func WithGetVolumeLimitsLocation(value resource.CloudLocation) GetVolumeLimitsOption {
-	return cloudlimits.WithLocation(value)
 }
 
 func PrepareGetVolumeLimitsOptions(ctx context.Context, options ...GetVolumeLimitsOption) (GetVolumeLimitsOpts, error) {

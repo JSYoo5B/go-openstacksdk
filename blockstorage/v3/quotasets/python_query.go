@@ -8,7 +8,6 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/quotafetch"
 	"github.com/JSYoo5B/go-openstacksdk/request"
-	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
@@ -19,9 +18,10 @@ type QuotaReadOpts = quotafetch.Options
 // QuotaReadOption is one option of GetRecord: WithQuotaReadOpts,
 // WithQuotaUsage, WithQuotaReadBasePath, WithQuotaReadRequiresID,
 // WithQuotaReadSkipCache, WithQuotaReadErrorMessage, WithQuotaReadResponseKey,
-// WithQuotaReadLocation, request.Query (a Source fetch keyword argument sent
-// as JSON), request.Microversion or request.Custom over *QuotaReadOpts. Other
-// shared calls fail with resource.ErrInvalidOption before HTTP.
+// request.Query (a Source fetch keyword argument sent as JSON),
+// request.Microversion or request.Custom over *QuotaReadOpts (for example to
+// set Location). Other shared calls fail with resource.ErrInvalidOption before
+// HTTP.
 //
 // WithQuotaReadBasePath stays operation-specific: GetQueryCall, the closest
 // shared category, does not admit request.BasePath.
@@ -99,8 +99,4 @@ func (s *ProjectQuotaScope) GetRecord(ctx context.Context, options ...QuotaReadO
 	}
 	value, err := quotafetch.Read(ctx, client, projectID, "", quotaReadProfile, quotaReadOptions(options)...)
 	return value, request.Wrap("GetRecord", "block storage quota", err)
-}
-
-func WithQuotaReadLocation(v resource.CloudLocation) QuotaReadOption {
-	return request.Custom(quotafetch.WithLocation(v))
 }

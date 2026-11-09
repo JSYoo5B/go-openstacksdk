@@ -20,13 +20,13 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindDetails`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindAllProjects`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.FindRecord`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordFindDetails`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordFindAllProjects`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordFindOpts`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordFindLocation`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordFindMaxItems`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordFindPaginated`
 
@@ -93,7 +93,7 @@ Python/Go differences:
 - Pinned find_volume (openstack/block_storage/v3/_proxy.py:855-893) declares details/all_projects rather than **query; Go wire Query is an extra capability and is not the Python list-only all_projects policy. The owned Details and AllProjects options now implement those typed defaults and explicit changes: summary/detail is fallback-only, true is LIST-only all_tenants=true, and false omits the automatic query field.
 - Typed mode options require explicit audited binding capabilities, including explicit false. The SDK rejects typed/raw cross-project conflicts and does not infer a details fetch for summary matches or modify ordinary List; this Go option-ownership policy makes ambiguous inputs fail before HTTP.
 - FindRecord supplements existing native typed APIs with an owned Python-shaped VolumeResourceRecord and independent raw HTTP evidence, not a mutable session-bound Resource or Python response/discovery cache.
-- Leaf location uses already recorded token scope and actual row project/zone; unavailable Connection cloud/region/configured names remain null unless WithRecordFindLocation supplies them. It reuses shared CloudLocation and CinderVolume translators without extra authentication I/O.
+- Leaf location uses already recorded token scope and actual row project/zone; unavailable Connection cloud/region/configured names remain null unless the caller sets RecordFindOpts.Location through request.Custom. It reuses shared CloudLocation and CinderVolume translators without extra authentication I/O.
 - Query/Headers/Location/MaxItems/Paginated expose underlying Resource policies as Go extensions beyond the pinned proxy missing/details/all_projects arguments. Typed/raw scope conflicts are rejected before HTTP.
 - Query descriptor seeds have canonical-attribute priority because a Go map has no kwargs order; incoming HTTP descriptor aliases still consume original JSON order. Non-object actual values fail object local matching without a Python type error.
 - Go fixes finite per-call service discovery/route/header policy and rejects unsafe continuation origin/path/filter changes, cycles and negative limits; dictionary links compatibility is a Go extension. Selected explicit client defaults bypass discovery unchanged.

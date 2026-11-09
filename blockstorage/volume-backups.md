@@ -18,6 +18,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupListOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupListFilters`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupListDetailed`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 - `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
@@ -25,7 +26,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupListExpression`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupListAllowUnknownParams`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupListConflictingAttrs`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupListLocation`
 
 - Library-owned list policy preserves omission and source defaults detailed=true and paginated=true. Default detailed GET/backups/detail and basic GET/backups return complete owned lists. Preparation is pure; original callbacks run once from a captured slice and each snapshot owns raw filters, headers, pointer controls and location. Connection validates reached binding policy before selecting only cached Cinder v3 without readiness I/O.
   Tests: `blockstorage/volume_backup_read_contract_test.go:TestVolumeBackupReadListDefaultDetailedAndBasicKeepCanonicalEmptyEOF`, `blockstorage/backup_read_transport_test.go:TestVolumeBackupReadOriginalOptionsOwnEveryPreparedValueAndSourceHeaders`, `connectiontest/connection_volume_backups_test.go:TestConnectionVolumeBackupOriginalOptionsRunOnceBeforeCachedCinderForEveryEntry`, `connectiontest/connection_volume_backups_test.go:TestConnectionVolumeBackupPreflightAndGetterFailuresKeepBackupOperationAndJoinedCauses`, `connectiontest/connection_volume_backups_test.go:TestConnectionVolumeBackupListBindingValidationPrecedesServiceSelection`, `connectiontest/connection_volume_backups_test.go:TestConnectionVolumeBackupCapturedOptionSliceAndRetainedPointersCannotReplacePreparedPolicy`, `internal/cloudsnapshot/backup_query_test.go:TestBackupListPolicyOwnsQueryLocalHeadersAndResourceSelectionAcrossReuse`, `internal/cloudsnapshot/backup_query_test.go:TestBackupListFalseyAndInvalidRawPoliciesHaveAtomicResourceSpecificCompilation`.
@@ -70,7 +70,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupSearchOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupSearchFilters`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupSearchExpression`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupSearchLocation`
 
 - Search always completes a queryless default-detailed backup list and every reached nullable descriptor before applying local identifier/filter selection. A matching first row cannot hide a later excluded malformed descriptor or later page failure; no partial Value/Backups is published. Search does not send a name hint or caller filter as list query.
   Tests: `blockstorage/volume_backup_read_selection_test.go:TestVolumeBackupReadSearchCompletesQuerylessPagesBeforeBackupExpression`, `blockstorage/volume_backup_read_selection_test.go:TestVolumeBackupReadSearchDoesNotHideExcludedLaterDescriptorFailure`, `blockstorage/volume_backup_read_contract_test.go:TestVolumeBackupReadInvalidIntegersAreEagerBeforeLocalExclusion`.
@@ -115,7 +114,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupSearchOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupSearchFilters`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupSearchExpression`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupSearchLocation`
 
 - Omitted or JSONnull filter uses ordinary exact member-first find. A physically absent member ID seeds only normalized logical id with RequestedID/SeededID evidence; raw Backup fields stay actual. Explicit null, false, zero, empty/container or a different returned ID is preserved passively. An actual empty object Resource remains present, distinct from completed lookup absence, which returns nil Value and Backup.
   Tests: `blockstorage/volume_backup_read_selection_test.go:TestVolumeBackupReadGetKeepsActualIDsAndSeparatesSeedFromPhysicalBody`, `blockstorage/volume_backup_read_selection_test.go:TestVolumeBackupReadGetAllowsPartialFlatMalformedAndSub400MemberResponses`, `internal/cloudsnapshot/backup_model_test.go:TestBackupModelMemberSeedsOnlyAbsentInheritedIDAndKeepsPhysicalBytes`, `connectiontest/connection_volume_backups_test.go:TestConnectionVolumeBackupMemberSeedsOnlyLogicalMissingIDAndCleanFallbackKeepsListProof`, `blockstorage/volume_backup_read_isolation_test.go:TestVolumeBackupReadSuccessfulAbsenceIsDistinctFromPresentEmptyMember`.
@@ -291,12 +289,12 @@ func Direct(ctx context.Context, cinder *gophercloud.ServiceClient) error {
         Project: resource.CloudProject{ID: json.RawMessage(`"project-id"`), Name: &projectName},
     }
     listed, err := blockstorage.ListVolumeBackups(ctx, cinder,
-        blockstorage.WithVolumeBackupListLocation(location))
+        request.Custom(func(c *blockstorage.VolumeBackupListOpts) error { loc := location.Clone(); c.Location = &loc; return nil }))
     if listed != nil { InspectPages(listed.Pages) }
     if err != nil { return err }
 
     policy, err := blockstorage.PrepareVolumeBackupSearchOptions(ctx,
-        blockstorage.WithVolumeBackupSearchLocation(location),
+        func(c *blockstorage.VolumeBackupSearchOpts) error { loc := location.Clone(); c.Location = &loc; return nil },
         blockstorage.WithVolumeBackupSearchFilters(json.RawMessage(`{"status":"available"}`)))
     if err != nil { return err }
     searched, err := blockstorage.SearchVolumeBackups(ctx, cinder,
@@ -307,7 +305,7 @@ func Direct(ctx context.Context, cinder *gophercloud.ServiceClient) error {
 
     selected, err := blockstorage.GetVolumeBackup(ctx, cinder,
         blockstorage.GetVolumeBackupRequest{NameOrID: "nightly"},
-        blockstorage.WithVolumeBackupSearchLocation(location))
+        func(c *blockstorage.VolumeBackupSearchOpts) error { loc := location.Clone(); c.Location = &loc; return nil })
     Inspect(selected)
     return err
 }

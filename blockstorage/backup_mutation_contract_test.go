@@ -153,7 +153,12 @@ func TestCreateVolumeBackupConcreteOptionsPreserveEmptyFalseAndLiteralSnapshot(t
 			case "SnapshotID":
 				options = append(options, blockstorage.WithCreateVolumeBackupSnapshotID(bad))
 			case "Location":
-				options = append(options, blockstorage.WithCreateVolumeBackupLocation(resource.CloudLocation{Project: resource.CloudProject{ID: json.RawMessage{}}}))
+				ownedLocation := resource.CloudLocation{Project: resource.CloudProject{ID: json.RawMessage{}}}.Clone()
+				options = append(options, func(c *blockstorage.CreateVolumeBackupOpts) error {
+					loc := ownedLocation.Clone()
+					c.Location = &loc
+					return nil
+				})
 			}
 			rejected, err := blockstorage.CreateVolumeBackup(bmwContext(t), invalidClient, input, options...)
 			var physical *resource.ResponseError

@@ -45,11 +45,6 @@ func WithVolumeSearchExpression(expression string) VolumeSearchOption {
 	return WithVolumeSearchFilters(raw)
 }
 
-func WithVolumeSearchLocation(value resource.CloudLocation) VolumeSearchOption {
-	owned := value.Clone()
-	return func(target *VolumeSearchOpts) error { copy := owned.Clone(); target.Location = &copy; return nil }
-}
-
 // PrepareVolumeSearchOptions applies original callbacks once without service
 // I/O, retaining JSON for lazy consumption by the eventual operation.
 func PrepareVolumeSearchOptions(ctx context.Context, options ...VolumeSearchOption) (VolumeSearchOpts, error) {

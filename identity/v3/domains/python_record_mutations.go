@@ -32,9 +32,9 @@ type RecordMutationOpts struct {
 }
 
 // RecordMutationOption is one option of CreateRecord and UpdateRecord:
-// WithRecordMutationOpts, WithRecordMutationLocation, request.Custom over
-// *RecordMutationOpts, request.Field (one Domain constructor attribute; the
-// value is sent as JSON), request.Headers (replaces the headers) or
+// WithRecordMutationOpts, request.Custom over *RecordMutationOpts (for example
+// to set Location), request.Field (one Domain constructor attribute; the value
+// is sent as JSON), request.Headers (replaces the headers) or
 // request.Microversion. request.Header fails with resource.ErrInvalidOption
 // before HTTP.
 type RecordMutationOption = request.WriteCall
@@ -77,10 +77,6 @@ func copyRecordMutationOpts(v RecordMutationOpts) RecordMutationOpts {
 func WithRecordMutationOpts(v RecordMutationOpts) RecordMutationOption {
 	owned := copyRecordMutationOpts(v)
 	return request.Custom(func(c *RecordMutationOpts) error { *c = copyRecordMutationOpts(owned); return nil })
-}
-func WithRecordMutationLocation(v resource.CloudLocation) RecordMutationOption {
-	owned := v.Clone()
-	return request.Custom(func(c *RecordMutationOpts) error { x := owned.Clone(); c.Location = &x; return nil })
 }
 
 func domainMutationFields(policy RecordMutationOpts, update bool) (body, seed map[string]json.RawMessage, err error) {

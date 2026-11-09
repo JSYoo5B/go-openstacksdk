@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudsnapshot"
-	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 type SearchVolumeSnapshotsRequest struct{ NameOrID string }
@@ -24,10 +23,6 @@ func WithVolumeSnapshotSearchFilters(value json.RawMessage) VolumeSnapshotSearch
 
 func WithVolumeSnapshotSearchExpression(value string) VolumeSnapshotSearchOption {
 	return cloudsnapshot.WithSearchExpression(value)
-}
-
-func WithVolumeSnapshotSearchLocation(value resource.CloudLocation) VolumeSnapshotSearchOption {
-	return cloudsnapshot.WithSearchLocation(value)
 }
 
 // PrepareVolumeSnapshotSearchOptions captures original callbacks once without service I/O.

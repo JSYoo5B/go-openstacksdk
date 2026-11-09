@@ -29,13 +29,13 @@ type RecordFindOpts struct {
 	Location      *resource.CloudLocation
 }
 
-// RecordFindOption is one option of FindRecord: WithRecordFindOpts, WithRecordFindListBasePath, WithRecordFindLocation,
-// request.Custom over *RecordFindOpts, request.Query (a Source keyword
-// argument; the value is sent as JSON), request.Headers (replaces the
-// headers), request.Microversion or request.IgnoreMissing. Other shared
-// calls, including request.Header, fail with resource.ErrInvalidOption
-// before HTTP. The fallback list route stays WithRecordFindListBasePath:
-// finds do not accept the shared BasePath call.
+// RecordFindOption is one option of FindRecord: WithRecordFindOpts,
+// WithRecordFindListBasePath, request.Custom over *RecordFindOpts (for example
+// to set Location), request.Query (a Source keyword argument; the value is
+// sent as JSON), request.Headers (replaces the headers), request.Microversion
+// or request.IgnoreMissing. Other shared calls, including request.Header, fail
+// with resource.ErrInvalidOption before HTTP. The fallback list route stays
+// WithRecordFindListBasePath: finds do not accept the shared BasePath call.
 type RecordFindOption = request.FindCall
 
 var recordFindCalls = keystonecalls.FindSpec(func(c *RecordFindOpts) keystonecalls.FindState {
@@ -119,10 +119,4 @@ func (a *API) FindRecord(ctx context.Context, identity string, options ...Record
 // WithRecordFindListBasePath overrides only the clean-fallback LIST route.
 func WithRecordFindListBasePath(v string) RecordFindOption {
 	return request.Custom(func(c *RecordFindOpts) error { x := v; c.ListBasePath = &x; return nil })
-}
-
-// WithRecordFindLocation supplies explicit immutable Connection facts.
-func WithRecordFindLocation(v resource.CloudLocation) RecordFindOption {
-	owned := v.Clone()
-	return request.Custom(func(c *RecordFindOpts) error { x := owned.Clone(); c.Location = &x; return nil })
 }

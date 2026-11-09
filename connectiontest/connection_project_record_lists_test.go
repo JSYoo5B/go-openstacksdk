@@ -64,7 +64,12 @@ func TestConnectionProjectReadsPerCallLocationSnapshotAndNoNamePushdownForSearch
 		testcloud.JSON(w, 200, `{"projects":[{"id":"a","name":"team-one"},{"id":"b","name":"other"}]}`)
 	})
 	perCall := "owned-per-call"
-	option := identity.WithProjectReadLocation(resource.CloudLocation{Cloud: &perCall})
+	ownedLocation := resource.CloudLocation{Cloud: &perCall}.Clone()
+	option := request.Custom(func(c *identity.ProjectReadOpts) error {
+		loc := ownedLocation.Clone()
+		c.Location = &loc
+		return nil
+	})
 	perCall = "changed"
 	callbacks := 0
 	result, err := connection.SearchProjects(context.Background(), "team-*", identity.WithProjectReadDomainID("domain"), identity.WithProjectReadNameOrID("ignored-list-name"), option, request.Custom(func(*identity.ProjectReadOpts) error { callbacks++; return nil }))

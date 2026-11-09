@@ -20,10 +20,10 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.UserQuotaScope.Detail`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.ProjectQuotaScope.GetRecord`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithQuotaReadOpts`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithQuotaUsage`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithQuotaReadLocation`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.UserQuotaScope.GetRecord`
 
 - Explicit project IDs bind without a lookup; exact names resolve once with a separate Keystone v3 client and do not replace the target with response quota IDs.

@@ -28,11 +28,11 @@ type RecordFindOpts struct {
 
 // RecordFindOption is one option of FindRecord: WithRecordFindOpts,
 // WithRecordFindDetails, WithRecordFindPaginated, WithRecordFindMaxItems,
-// WithRecordFindLocation, request.Custom over *RecordFindOpts, request.Query
-// (a GET query field as JSON, including unknown keys; reserved constructor
-// and control keys fail), request.IgnoreMissing, request.Microversion or
-// request.Headers (replaces the headers). Other shared calls fail with
-// resource.ErrInvalidOption before HTTP. Find paging stays
+// request.Custom over *RecordFindOpts (for example to set Location),
+// request.Query (a GET query field as JSON, including unknown keys; reserved
+// constructor and control keys fail), request.IgnoreMissing,
+// request.Microversion or request.Headers (replaces the headers). Other shared
+// calls fail with resource.ErrInvalidOption before HTTP. Find paging stays
 // operation-specific: no shared category admits IgnoreMissing with paging.
 type RecordFindOption = request.FindCall
 
@@ -78,10 +78,7 @@ func WithRecordFindPaginated(v bool) RecordFindOption {
 func WithRecordFindMaxItems(v int) RecordFindOption {
 	return request.Custom(func(c *RecordFindOpts) error { c.MaxItems = v; return nil })
 }
-func WithRecordFindLocation(v resource.CloudLocation) RecordFindOption {
-	owned := v.Clone()
-	return request.Custom(func(c *RecordFindOpts) error { c.Location = cloneLocation(&owned); return nil })
-}
+
 func findQueryKey(key string) error {
 	if strings.TrimSpace(key) == "" || !utf8.ValidString(key) {
 		return recordInvalid("find query key requires nonblank UTF-8")

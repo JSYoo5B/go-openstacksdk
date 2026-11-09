@@ -15,6 +15,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithListOptions`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.AllRecords`
@@ -30,7 +31,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/request.BasePath`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordListJMESPath`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordListLocation`
 
 - List sends the single GET domains that Python domains() sends without arguments, maps the Python query names name and enabled through ListOpts or request.Query, sends a limit without a marker follow-up, and rejects local Body filters before HTTP.
   Tests: `identity/v3/domains/python_parity_test.go:TestPythonDomainListRequests`.
@@ -74,6 +74,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.All`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.List`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/identity.NewDomainReadCloud`
 - `github.com/JSYoo5B/go-openstacksdk/identity.DomainReadCloud.ListDomains`
@@ -83,7 +84,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadFilters`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadLocation`
 
 - Cloud list_domains expands arbitrary keyword mapping into Source query/local filters; enabled aliases and nested options survive local processing and actual yielded inventory preserves response fields.
   Tests: `identity/domain_record_cloud_test.go:TestPythonDomainCloudListKeywordQueryAliasAndLocalFilters`.
@@ -118,9 +118,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadOpts`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadNameOrID`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadFilters`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadLocation`
 
 - name_or_id presence is preserved with a pointer: nil forwards mapping filters to list_domains; explicit empty/nonempty first materializes unfiltered domains and applies local exact/glob identifier plus mapping/JMESPath. Name/filters stay absent from server in that branch.
   Tests: `identity/domain_record_cloud_test.go:TestPythonDomainCloudSearchIdentifierPresenceSelectsSourceBranch`.

@@ -40,11 +40,12 @@ func TestPythonRoleFindRecordCollectionSeedProjectionAndLocation(t *testing.T) {
 	})
 	cloudName := "configured"
 	location := resource.CloudLocation{Cloud: &cloudName, Project: resource.CloudProject{ID: json.RawMessage(`"scope"`)}}
+	ownedLocation := location.Clone()
 	row, err := api.FindRecord(context.Background(), "demo",
 		request.Query("requires_id", false), request.Query("base_path", "/alternate-roles"),
 		request.Query("skip_cache", true), request.Query("error_message", "custom missing"),
 		request.Query("resource_response_key", "selected"), request.Query("domain_id", "d"),
-		request.Query("description", json.RawMessage(`{"seed":1}`)), request.Headers(map[string]string{"X-Typed": "kept"}), roles.WithRecordFindLocation(location))
+		request.Query("description", json.RawMessage(`{"seed":1}`)), request.Headers(map[string]string{"X-Typed": "kept"}), request.Custom(func(c *roles.RecordFindOpts) error { loc := ownedLocation.Clone(); c.Location = &loc; return nil }))
 	if err != nil || row == nil || calls != 1 || row.StatusCode != 203 || row.Header.Get("X-Request-Id") != "role-proof" || string(row.Envelope) != body {
 		t.Fatal(row, err, calls)
 	}

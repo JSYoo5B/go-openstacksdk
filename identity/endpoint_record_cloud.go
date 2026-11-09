@@ -42,9 +42,9 @@ type EndpointReadOpts struct {
 }
 
 // EndpointReadOption is one option of GetEndpoint and SearchEndpoints:
-// WithEndpointReadOpts, WithEndpointReadFilters, WithEndpointReadLocation,
-// request.Headers (replaces the headers), request.Microversion or
-// request.Custom over *EndpointReadOpts. Other shared calls fail with
+// WithEndpointReadOpts, WithEndpointReadFilters, request.Headers (replaces the
+// headers), request.Microversion or request.Custom over *EndpointReadOpts (for
+// example to set Location). Other shared calls fail with
 // resource.ErrInvalidOption before HTTP.
 type EndpointReadOption = request.GetCall
 
@@ -89,10 +89,6 @@ func WithEndpointReadFilters(v json.RawMessage) EndpointReadOption {
 		}
 		return nil
 	})
-}
-func WithEndpointReadLocation(v resource.CloudLocation) EndpointReadOption {
-	owned := v.Clone()
-	return request.Custom(func(c *EndpointReadOpts) error { x := owned.Clone(); c.Location = &x; return nil })
 }
 
 // EndpointSearchResult associates only ordinary row selection with records.

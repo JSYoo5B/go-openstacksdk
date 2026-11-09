@@ -67,10 +67,10 @@ type SecurityGroupReadOpts struct {
 // SecurityGroupReadOption is one option of SearchSecurityGroups and
 // GetSecurityGroup: WithSecurityGroupReadOpts,
 // WithSecurityGroupReadFiltersJSON, WithSecurityGroupReadExpression,
-// WithSecurityGroupReadCurrentLocation, request.Headers (replaces the
-// headers), request.Microversion or request.Custom over
-// *SecurityGroupReadOpts. Other shared calls fail with
-// resource.ErrInvalidOption before HTTP.
+// request.Headers (replaces the headers), request.Microversion or
+// request.Custom over *SecurityGroupReadOpts (for example to set
+// CurrentLocation). Other shared calls fail with resource.ErrInvalidOption
+// before HTTP.
 type SecurityGroupReadOption = request.GetCall
 
 var securityGroupReadCalls = calls.Spec[SecurityGroupReadOpts]{
@@ -115,10 +115,6 @@ func WithSecurityGroupReadFiltersJSON(raw json.RawMessage) SecurityGroupReadOpti
 func WithSecurityGroupReadExpression(v string) SecurityGroupReadOption {
 	raw, _ := json.Marshal(v)
 	return WithSecurityGroupReadFiltersJSON(raw)
-}
-func WithSecurityGroupReadCurrentLocation(v resource.CloudLocation) SecurityGroupReadOption {
-	owned := v.Clone()
-	return request.Custom(func(c *SecurityGroupReadOpts) error { x := owned.Clone(); c.CurrentLocation = &x; return nil })
 }
 
 // Groups/Group contain only actual HTTP or explicitly supplied existing records.

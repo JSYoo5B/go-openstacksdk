@@ -30,13 +30,12 @@ type RecordFindOpts struct {
 }
 
 // RecordFindOption is one option of FindRecord: WithRecordFindOpts,
-// WithRecordFindListBasePath, WithRecordFindLocation, request.Custom over
-// *RecordFindOpts, request.Query (a Source keyword argument; the value is
-// sent as JSON), request.Headers (replaces the headers),
-// request.Microversion or request.IgnoreMissing. Other shared calls,
-// including request.Header, fail with resource.ErrInvalidOption before HTTP.
-// The fallback list route stays WithRecordFindListBasePath: finds do not
-// accept the shared BasePath call.
+// WithRecordFindListBasePath, request.Custom over *RecordFindOpts (for example
+// to set Location), request.Query (a Source keyword argument; the value is
+// sent as JSON), request.Headers (replaces the headers), request.Microversion
+// or request.IgnoreMissing. Other shared calls, including request.Header, fail
+// with resource.ErrInvalidOption before HTTP. The fallback list route stays
+// WithRecordFindListBasePath: finds do not accept the shared BasePath call.
 type RecordFindOption = request.FindCall
 
 var recordFindCalls = calls.Spec[RecordFindOpts]{
@@ -62,13 +61,13 @@ type RecordListOpts struct {
 
 // RecordListOption is one option of ListRecords, AllRecords and
 // ProxyListRecords: WithRecordListOpts, WithRecordListQuery,
-// WithRecordListJMESPath, WithRecordListLocation, request.Custom over
-// *RecordListOpts, request.Headers (replaces the headers),
-// request.Microversion, request.BasePath, request.Limit, request.Marker,
-// request.MaxItems or request.Paginated (each a Source keyword argument).
-// request.Header and request.Query fail with resource.ErrInvalidOption before
-// HTTP: WithRecordListQuery checks the key and drops unknown keys before
-// marshaling the value, which request.Query cannot.
+// WithRecordListJMESPath, request.Custom over *RecordListOpts (for example to
+// set Location), request.Headers (replaces the headers), request.Microversion,
+// request.BasePath, request.Limit, request.Marker, request.MaxItems or
+// request.Paginated (each a Source keyword argument). request.Header and
+// request.Query fail with resource.ErrInvalidOption before HTTP:
+// WithRecordListQuery checks the key and drops unknown keys before marshaling
+// the value, which request.Query cannot.
 type RecordListOption = request.ListBasePathCall
 
 var recordList = keystonecalls.KnownList[RecordListOpts]{
@@ -205,13 +204,4 @@ func normalizeListOptions(value RecordListOpts) (RecordListOpts, error) {
 	value.Query, value.Headers, value.Microversion, value.BasePath, value.order = normalized.Query, normalized.Headers, normalized.Microversion, normalized.BasePath, normalized.Order
 	value.proxyExpression = bytes.Clone(expression)
 	return copyListOptions(value), nil
-}
-
-func WithRecordFindLocation(value resource.CloudLocation) RecordFindOption {
-	owned := value.Clone()
-	return request.Custom(func(c *RecordFindOpts) error { v := owned.Clone(); c.Location = &v; return nil })
-}
-func WithRecordListLocation(value resource.CloudLocation) RecordListOption {
-	owned := value.Clone()
-	return request.Custom(func(c *RecordListOpts) error { v := owned.Clone(); c.Location = &v; return nil })
 }

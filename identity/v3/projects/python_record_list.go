@@ -46,8 +46,8 @@ type RecordListOpts struct {
 
 // RecordListOption is one option of ListRecords, AllRecords and
 // ProxyListRecords: WithRecordListOpts, WithRecordListJMESPath,
-// WithRecordListLocation, request.Custom over *RecordListOpts, request.Query
-// (a Source keyword argument; the value is sent as JSON), request.Headers
+// request.Custom over *RecordListOpts, request.Query (a Source keyword
+// argument; the value is sent as JSON), request.Headers
 // (replaces the headers), request.Microversion, request.BasePath (an owned
 // service-relative Source list path), request.Limit, request.Marker,
 // request.MaxItems or request.Paginated (each a Source keyword argument).

@@ -46,9 +46,10 @@ type UserListOpts struct {
 }
 
 // UserListOption is one option of ListUsers: WithUserListOpts,
-// WithUserListQuery ("domain_id" or "name"), WithUserListLocation, request.Headers (replaces the headers),
-// request.Microversion or request.Custom over *UserListOpts. Other shared
-// calls fail with resource.ErrInvalidOption before HTTP.
+// WithUserListQuery ("domain_id" or "name"), request.Headers (replaces the
+// headers), request.Microversion or request.Custom over *UserListOpts (for
+// example to set Location). Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
 type UserListOption = request.GetCall
 
 var userListCalls = calls.Spec[UserListOpts]{
@@ -104,10 +105,6 @@ func WithUserListQuery(key string, value any) UserListOption {
 		c.Query[key] = bytes.Clone(owned)
 		return nil
 	})
-}
-func WithUserListLocation(v resource.CloudLocation) UserListOption {
-	owned := v.Clone()
-	return request.Custom(func(c *UserListOpts) error { x := owned.Clone(); c.Location = &x; return nil })
 }
 
 // UserListResult associates Source declared JSON with only actually read rows.
@@ -196,7 +193,7 @@ func userListOptions(v UserListOpts) ([]users.RecordListOption, error) {
 		opts = append(opts, request.Microversion(*v.Microversion))
 	}
 	if v.Location != nil {
-		opts = append(opts, users.WithRecordListLocation(*v.Location))
+		opts = append(opts, request.Custom(func(c *users.RecordListOpts) error { loc := (*v.Location).Clone(); c.Location = &loc; return nil }))
 	}
 	return opts, nil
 }
@@ -263,9 +260,9 @@ type UserSearchOpts struct {
 }
 
 // UserSearchOption is one option of SearchUsers: WithUserSearchOpts,
-// WithUserSearchDomainID, WithUserSearchFilters, WithUserSearchLocation,
-// request.Headers (replaces the headers), request.Microversion or
-// request.Custom over *UserSearchOpts. Other shared calls fail with
+// WithUserSearchDomainID, WithUserSearchFilters, request.Headers (replaces the
+// headers), request.Microversion or request.Custom over *UserSearchOpts (for
+// example to set Location). Other shared calls fail with
 // resource.ErrInvalidOption before HTTP.
 type UserSearchOption = request.GetCall
 
@@ -310,10 +307,6 @@ func WithUserSearchFilters(v json.RawMessage) UserSearchOption {
 		}
 		return nil
 	})
-}
-func WithUserSearchLocation(v resource.CloudLocation) UserSearchOption {
-	owned := v.Clone()
-	return request.Custom(func(c *UserSearchOpts) error { x := owned.Clone(); c.Location = &x; return nil })
 }
 
 // UserSearchResult keeps arbitrary expression JSON separate from actual rows.

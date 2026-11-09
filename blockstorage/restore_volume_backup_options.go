@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudsnapshot"
-	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 type RestoreVolumeBackupRequest struct{ BackupID string }
@@ -24,9 +23,7 @@ func WithRestoreVolumeBackupName(value string) RestoreVolumeBackupOption {
 func WithRestoreVolumeBackupSeed(value json.RawMessage) RestoreVolumeBackupOption {
 	return cloudsnapshot.WithBackupRestoreSeed(value)
 }
-func WithRestoreVolumeBackupLocation(value resource.CloudLocation) RestoreVolumeBackupOption {
-	return cloudsnapshot.WithBackupRestoreLocation(value)
-}
+
 func PrepareRestoreVolumeBackupOptions(ctx context.Context, options ...RestoreVolumeBackupOption) (RestoreVolumeBackupOpts, error) {
 	return cloudsnapshot.PrepareBackupRestore(ctx, options...)
 }

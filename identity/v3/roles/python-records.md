@@ -15,13 +15,13 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithListOptions`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.AllRecords`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.ProxyListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.RoleRecord.Clone`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithRecordListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithRecordListLocation`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithRecordListJMESPath`
 
 - List sends the single GET roles that Python roles() sends without arguments, maps the Python query names domain_id and name through ListOpts or request.Query, sends a limit without a marker follow-up, and rejects local Body filters before HTTP.
@@ -97,7 +97,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithRoleSearchOpts`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithRoleSearchDomainID`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithRoleSearchFilters`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithRoleSearchLocation`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 

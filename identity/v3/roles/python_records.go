@@ -82,13 +82,13 @@ type RecordListOpts struct {
 }
 
 // RecordListOption is one option of ListRecords, AllRecords and
-// ProxyListRecords: WithRecordListOpts, WithRecordListJMESPath,
-// WithRecordListLocation, request.Custom over *RecordListOpts, request.Query
-// (a Source keyword argument; the value is sent as JSON), request.Headers
-// (replaces the headers), request.Microversion, request.BasePath (an owned
-// service-relative Source list path), request.Limit, request.Marker,
-// request.MaxItems or request.Paginated (each a Source keyword argument).
-// request.Header fails with resource.ErrInvalidOption before HTTP.
+// ProxyListRecords: WithRecordListOpts, WithRecordListJMESPath, request.Custom
+// over *RecordListOpts (for example to set Location), request.Query (a Source
+// keyword argument; the value is sent as JSON), request.Headers (replaces the
+// headers), request.Microversion, request.BasePath (an owned service-relative
+// Source list path), request.Limit, request.Marker, request.MaxItems or
+// request.Paginated (each a Source keyword argument). request.Header fails
+// with resource.ErrInvalidOption before HTTP.
 //
 // request.Query keeps known kwargs in insertion order; kwargs Source list
 // ignores are discarded with their marshal error. Declared query names and
@@ -166,13 +166,6 @@ func recordListControl(key string) error {
 // ProxyListRecords exposes its zero-HTTP value or lazy generator result.
 func WithRecordListJMESPath(expression string) RecordListOption {
 	return keystonecalls.Keyword(recordList.Apply, "jmespath_filters", expression)
-}
-
-// WithRecordListLocation supplies an immutable explicit connection view.
-// A standalone native client has no Python Connection; omission remains null.
-func WithRecordListLocation(value resource.CloudLocation) RecordListOption {
-	owned := value.Clone()
-	return request.Custom(func(c *RecordListOpts) error { location := owned.Clone(); c.Location = &location; return nil })
 }
 
 func (a *API) recordListEngine(ctx context.Context) (*neutronfind.Engine, error) {

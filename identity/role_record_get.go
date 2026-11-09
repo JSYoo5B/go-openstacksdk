@@ -28,9 +28,10 @@ type RoleGetOpts struct {
 
 // RoleGetOption is one option of GetRole: WithRoleGetOpts,
 // WithRoleGetDomainID, WithRoleGetDomainIDJSON, WithRoleGetFilters,
-// WithRoleGetExpression, WithRoleGetLocation, request.Headers (replaces the
-// headers), request.Microversion or request.Custom over *RoleGetOpts. Other
-// shared calls fail with resource.ErrInvalidOption before HTTP.
+// WithRoleGetExpression, request.Headers (replaces the headers),
+// request.Microversion or request.Custom over *RoleGetOpts (for example to set
+// Location). Other shared calls fail with resource.ErrInvalidOption before
+// HTTP.
 type RoleGetOption = request.GetCall
 
 var roleGetCalls = calls.Spec[RoleGetOpts]{
@@ -85,10 +86,6 @@ func WithRoleGetExpression(v string) RoleGetOption {
 	raw, _ := json.Marshal(v)
 	return WithRoleGetFilters(raw)
 }
-func WithRoleGetLocation(v resource.CloudLocation) RoleGetOption {
-	owned := v.Clone()
-	return request.Custom(func(c *RoleGetOpts) error { x := owned.Clone(); c.Location = &x; return nil })
-}
 
 // RoleGetResult exposes actual rows/evidence independently of returned Value.
 // Inventory is the deprecated search observation; Lookup is only the actual
@@ -142,7 +139,7 @@ func (c *RoleReadCloud) GetRole(ctx context.Context, nameOrID string, options ..
 			opts = append(opts, request.Microversion(*policy.Microversion))
 		}
 		if policy.Location != nil {
-			opts = append(opts, roles.WithRecordListLocation(*policy.Location))
+			opts = append(opts, request.Custom(func(c *roles.RecordListOpts) error { loc := (*policy.Location).Clone(); c.Location = &loc; return nil }))
 		}
 		rows := make([]json.RawMessage, 0)
 		for record, err := range api.ListRecords(owned, opts...) {

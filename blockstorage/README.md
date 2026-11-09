@@ -413,7 +413,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSearchOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSearchFilters`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSearchExpression`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSearchLocation`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.CurrentLocation`
 - `github.com/JSYoo5B/go-openstacksdk.WithCloudLocation`
 
@@ -460,7 +459,7 @@ Python/Go differences:
 - Response aliases and duplicate exact response keys use textual last-consumed-wins. Python JSON dictionary duplicate collapse preserves first insertion position before Resource alias consumption, so duplicates interleaved with distinct aliases can produce a different value. This is an explicit ambiguous-wire Go policy, not an assertion of every possible duplicate-key Python response equivalence.
 - Volume size uses source int descriptor behavior: bool remains bool, JSON integers are arbitrary precision, finite float JSON truncates its actual float64 value, decimal digit strings convert, signed/padded/nondigit strings and nonnumeric containers become zero, and digit-only nondecimal strings fail. The volume descriptor uses audited Unicode16 tables and does not emulate CPython configurable decimal string digit limits. JMESPath numeric-string digits and identifier printability follow Go Unicode tables; ordinary UTF-8/JSON parser and byte syntax offsets differ from arbitrary Python Unicode objects.
 - Computed location never trusts HTTP location: Connection retains known selected cloud/region/auth name/domain facts and the provider recorded native token project scope; row project/zone are raw JSON values with foreign-project names cleared. Direct ServiceClient calls and FromProvider manual/custom auth results cannot reconstruct absent cloud/configuration facts and leave them null unless explicit owned options supply them. Recorded scope does not force authentication refresh; native HTTP reauthentication remains live.
-- Native clouds.Parse discards configured project-domain metadata when selecting project ID scope and collapses absent versus empty configuration strings. Go cannot reconstruct those facts from returned AuthOptions or token names; WithCloudLocation/WithVolumeSearchLocation are explicit complete owned overrides. This configuration parser representation boundary is independent from the direct helper body control flow.
+- Native clouds.Parse discards configured project-domain metadata when selecting project ID scope and collapses absent versus empty configuration strings. Go cannot reconstruct those facts from returned AuthOptions or token names; WithCloudLocation and a VolumeSearchOpts.Location set by a closure option are explicit complete overrides. This configuration parser representation boundary is independent from the direct helper body control flow.
 - The library owns concrete option callbacks/defaults rather than requiring caller builders. Direct calls capture source facts/header snapshot before original callbacks; Connection applies originals once before cached Cinder selection, then direct delegation snapshots the resulting source. Retained config pointers, callback-slice slot edits and ordinary MoreHeaders edits cannot change prepared owned options. Provider authentication stays live; source fact mutation/cancellation is terminal at checked boundaries.
 - Go retains only actually admitted response Body/Header/StatusCode in independent Pages/Observed. Accepted read/Close/schema/source/context errors keep that physical proof without SDK replay; rejected native HTTP/transport failures retain their own native error and never borrow an older accepted page. Safe same-origin/same escaped collection continuation and cycle checks intentionally reject unsafe routes instead of following Python session pagination beyond those guards. Empty arrays terminate before unused continuation links are inspected.
 - Go errors are OperationError with actual operation/resource and original causes; local consumed filter/selection errors wrap ErrInvalidOption, ambiguity wraps ErrAmbiguous, and no fabricated HTTP/NotFound evidence is attached. Python deprecation warnings and diagnostic log messages are not reproduced. Concurrent mutation of caller mutable source/config/model data is outside the race-safe contract; independent-result ownership does not claim such mutations are safe.
@@ -479,7 +478,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSearchOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSearchFilters`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSearchExpression`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSearchLocation`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.CurrentLocation`
 - `github.com/JSYoo5B/go-openstacksdk.WithCloudLocation`
 
@@ -518,7 +516,7 @@ Python/Go differences:
 - Response aliases and duplicate exact response keys use textual last-consumed-wins. Python JSON dictionary duplicate collapse preserves first insertion position before Resource alias consumption, so duplicates interleaved with distinct aliases can produce a different value. This is an explicit ambiguous-wire Go policy, not an assertion of every possible duplicate-key Python response equivalence.
 - Volume size uses source int descriptor behavior: bool remains bool, JSON integers are arbitrary precision, finite float JSON truncates its actual float64 value, decimal digit strings convert, signed/padded/nondigit strings and nonnumeric containers become zero, and digit-only nondecimal strings fail. The volume descriptor uses audited Unicode16 tables and does not emulate CPython configurable decimal string digit limits. JMESPath numeric-string digits and identifier printability follow Go Unicode tables; ordinary UTF-8/JSON parser and byte syntax offsets differ from arbitrary Python Unicode objects.
 - Computed location never trusts HTTP location: Connection retains known selected cloud/region/auth name/domain facts and the provider recorded native token project scope; row project/zone are raw JSON values with foreign-project names cleared. Direct ServiceClient calls and FromProvider manual/custom auth results cannot reconstruct absent cloud/configuration facts and leave them null unless explicit owned options supply them. Recorded scope does not force authentication refresh; native HTTP reauthentication remains live.
-- Native clouds.Parse discards configured project-domain metadata when selecting project ID scope and collapses absent versus empty configuration strings. Go cannot reconstruct those facts from returned AuthOptions or token names; WithCloudLocation/WithVolumeSearchLocation are explicit complete owned overrides. This configuration parser representation boundary is independent from the direct helper body control flow.
+- Native clouds.Parse discards configured project-domain metadata when selecting project ID scope and collapses absent versus empty configuration strings. Go cannot reconstruct those facts from returned AuthOptions or token names; WithCloudLocation and a VolumeSearchOpts.Location set by a closure option are explicit complete overrides. This configuration parser representation boundary is independent from the direct helper body control flow.
 - The library owns concrete option callbacks/defaults rather than requiring caller builders. Direct calls capture source facts/header snapshot before original callbacks; Connection applies originals once before cached Cinder selection, then direct delegation snapshots the resulting source. Retained config pointers, callback-slice slot edits and ordinary MoreHeaders edits cannot change prepared owned options. Provider authentication stays live; source fact mutation/cancellation is terminal at checked boundaries.
 - Go retains only actually admitted response Body/Header/StatusCode in independent Pages/Observed. Accepted read/Close/schema/source/context errors keep that physical proof without SDK replay; rejected native HTTP/transport failures retain their own native error and never borrow an older accepted page. Safe same-origin/same escaped collection continuation and cycle checks intentionally reject unsafe routes instead of following Python session pagination beyond those guards. Empty arrays terminate before unused continuation links are inspected.
 - Go errors are OperationError with actual operation/resource and original causes; local consumed filter/selection errors wrap ErrInvalidOption, ambiguity wraps ErrAmbiguous, and no fabricated HTTP/NotFound evidence is attached. Python deprecation warnings and diagnostic log messages are not reproduced. Concurrent mutation of caller mutable source/config/model data is outside the race-safe contract; independent-result ownership does not claim such mutations are safe.
@@ -538,7 +536,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.ListVolumes`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareVolumeReadOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeReadOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeReadLocation`
 
 - ListVolumes is the direct cloud complete detailed list. Its initial bodyless GET200 is /volumes/detail without identity/status/all-project/page/filter controls; complete materialization returns all source rows in order and never performs member GETs or name resolution. The deprecated Python cache argument is warning-only/no-op and is omitted in Go.
   Tests: `blockstorage/volume_reads_contract_test.go:TestListVolumesMaterializesAllPagesAndOwnsNormalizedAndWireRows`, `connectiontest/connection_volume_reads_test.go:TestConnectionVolumeReadsCachedCinderOriginalOptionsPrecedeSelection`.
@@ -575,7 +572,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.GetVolumeByID`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareVolumeReadOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeReadOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeReadLocation`
 
 - GetVolumeByIDRequest.ID is a literal direct member identifier, never a name or a Name Ref. Required UTF-8/control/Unicode-whitespace/single unescaped segment validation protects the fixed bodyless GET200 /volumes/{escaped-id}; no query/list/search/ref lookup is performed.
   Tests: `blockstorage/volume_reads_contract_test.go:TestGetVolumeByIDUsesOnlyLiteralMemberAndKeepsResponseIdentity`, `blockstorage/volume_reads_contract_test.go:TestGetVolumeByIDAcceptsUnicodeLiteralSingleSegment`, `blockstorage/volume_reads_options_test.go:TestGetVolumeByIDRejectsUnsafeIDsAfterOptionsWithoutHTTP`.
@@ -612,7 +608,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.VolumeExists`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareVolumeReadOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeReadOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeReadLocation`
 
 - VolumeExists performs default unfiltered exact GetVolume lookup and tests the returned resource identity against nil. Any successfully returned raw resource, including canonical empty volume {}, completes Exists=true independently of body truthiness or normalized ID presence. Successful completed absence completes Exists=false; every error leaves Exists=nil and no successful Value/Volume.
   Tests: `blockstorage/volume_reads_contract_test.go:TestVolumeExistsDistinguishesPresentResourceFromSuccessfulAbsence`, `connectiontest/connection_volume_reads_test.go:TestConnectionVolumeReadsMember404IsErrorButCompletedExistenceAbsenceIsFalse`.
@@ -994,7 +989,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.GetVolumeLimits`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareGetVolumeLimitsOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithGetVolumeLimitsOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithGetVolumeLimitsLocation`
 
 - Empty NameOrID skips Identity entirely, including unused invalid clients, and makes one bodyless unfiltered Cinder limits GET. Authenticated scope is captured only for location; it never becomes an implicit project_id query.
   Tests: `blockstorage/volume_limits_contract_test.go:TestGetVolumeLimitsDefaultSkipsIdentityAndDoesNotInferScopeQuery`, `connectiontest/connection_volume_limits_test.go:TestConnectionGetVolumeLimitsEmptyInputSkipsIdentityAndImplicitProjectFilter`.
@@ -1063,9 +1057,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.ListVolumeSnapshots`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareVolumeSnapshotListOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSnapshotListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSnapshotListLocation`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSnapshotListFilters`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSnapshotListDetailed`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 - `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
@@ -1140,7 +1134,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.SearchVolumeSnapshots`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareVolumeSnapshotSearchOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSnapshotSearchOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSnapshotSearchLocation`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSnapshotSearchFilters`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSnapshotSearchExpression`
 
@@ -1193,7 +1186,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.GetVolumeSnapshot`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareVolumeSnapshotSearchOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSnapshotSearchOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSnapshotSearchLocation`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSnapshotSearchFilters`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSnapshotSearchExpression`
 
@@ -1253,7 +1245,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.GetVolumeSnapshotByID`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareVolumeSnapshotReadOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSnapshotReadOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSnapshotReadLocation`
 
 - ByID performs only fixed literal member GET with no list/name fallback; source Proxy.get_snapshot raises rejected400/403/404 despite cloud docstring absent=None wording. Accepted actual arbitrary/mismatched ID is not checked against the requested safe path ID. Preflight uses the documented single unescaped UTF8 segment route domain and nil result before execution.
   Tests: `blockstorage/snapshot_read_selection_test.go:TestVolumeSnapshotReadByIDNeverFallsBackOnCleanNativeRejections`, `blockstorage/snapshot_read_selection_test.go:TestVolumeSnapshotReadMemberSeparatesSeededLogicalIDFromActualWireBody`, `connectiontest/connection_volume_snapshots_test.go:TestConnectionVolumeSnapshotPreflightOriginalAndGetterErrorsPreserveOuterOperationAndCause`, `connectiontest/connection_volume_snapshots_test.go:TestConnectionVolumeSnapshotMemberSeedPreservesRawShapeAndByID404NeverFallsBack`, `connectiontest/connection_snapshot_id_test.go:TestConnectionVolumeSnapshotByIDValidatesPathBeforeHTTPAndPreservesUnicodeProof`.
@@ -1306,7 +1297,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeSnapshotDisplayName`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeSnapshotDescription`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeSnapshotDisplayDescription`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeSnapshotLocation`
 
 - Concrete With/Prepare policy preserves omitted versus explicit false/zero, complete replacement and all raw nullable attributes/location/wait subtrees. Original callbacks run exactly once in captured slice order with an owned snapshot after each callback; factories support concurrent reuse. Preparation is pure and defers reached-value validation. Nil options/context, cancellation including custom causes and callback errors return no partial policy or HTTP.
   Tests: `blockstorage/snapshot_mutation_options_test.go:TestSnapshotMutationOptionsPreserveOmissionAndExplicitFalseZero`, `blockstorage/snapshot_mutation_options_test.go:TestSnapshotMutationOptionsCompleteFactoriesOwnEverySubtreeAcrossReuses`, `blockstorage/snapshot_mutation_options_test.go:TestSnapshotMutationOptionsFactoriesSupportConcurrentIndependentPreparedValues`, `blockstorage/snapshot_mutation_options_test.go:TestSnapshotMutationOptionsAttributeFactoriesRetainAllAliasesWithoutNormalizing`, `blockstorage/snapshot_mutation_options_test.go:TestSnapshotMutationOptionsRawFactoriesPreserveNilEmptyMapsAndExactByteShapes`, `blockstorage/snapshot_mutation_options_test.go:TestSnapshotMutationOptionsIndividualFactoriesOverrideOnlySelectedSubtrees`, `blockstorage/snapshot_mutation_options_test.go:TestSnapshotMutationOptionsCompleteReplacementClearsPriorPolicyAndSubtrees`, `blockstorage/snapshot_mutation_options_test.go:TestSnapshotMutationOptionsCaptureOriginalSliceAndIsolateRetainedCallbacks`, `blockstorage/snapshot_mutation_options_test.go:TestSnapshotMutationOptionsRejectMissingCanceledOrExpiredContextBeforeCallbacks`, `blockstorage/snapshot_mutation_options_test.go:TestSnapshotMutationOptionsStopOnNilErrorOrCancellationWithoutPartialPolicy`, `blockstorage/snapshot_mutation_options_test.go:TestSnapshotMutationOptionsPreparationIsPureAndDefersReachedValueValidation`.
@@ -1354,7 +1344,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithDeleteVolumeSnapshotOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithDeleteVolumeSnapshotWait`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithDeleteVolumeSnapshotWaitPolicy`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithDeleteVolumeSnapshotLocation`
 
 - Concrete With/Prepare policy preserves omitted versus explicit false/zero, complete replacement and all raw nullable attributes/location/wait subtrees. Original callbacks run exactly once in captured slice order with an owned snapshot after each callback; factories support concurrent reuse. Preparation is pure and defers reached-value validation. Nil options/context, cancellation including custom causes and callback errors return no partial policy or HTTP.
   Tests: `blockstorage/snapshot_mutation_options_test.go:TestSnapshotMutationOptionsPreserveOmissionAndExplicitFalseZero`, `blockstorage/snapshot_mutation_options_test.go:TestSnapshotMutationOptionsCompleteFactoriesOwnEverySubtreeAcrossReuses`, `blockstorage/snapshot_mutation_options_test.go:TestSnapshotMutationOptionsFactoriesSupportConcurrentIndependentPreparedValues`, `blockstorage/snapshot_mutation_options_test.go:TestSnapshotMutationOptionsAttributeFactoriesRetainAllAliasesWithoutNormalizing`, `blockstorage/snapshot_mutation_options_test.go:TestSnapshotMutationOptionsRawFactoriesPreserveNilEmptyMapsAndExactByteShapes`, `blockstorage/snapshot_mutation_options_test.go:TestSnapshotMutationOptionsIndividualFactoriesOverrideOnlySelectedSubtrees`, `blockstorage/snapshot_mutation_options_test.go:TestSnapshotMutationOptionsCompleteReplacementClearsPriorPolicyAndSubtrees`, `blockstorage/snapshot_mutation_options_test.go:TestSnapshotMutationOptionsCaptureOriginalSliceAndIsolateRetainedCallbacks`, `blockstorage/snapshot_mutation_options_test.go:TestSnapshotMutationOptionsRejectMissingCanceledOrExpiredContextBeforeCallbacks`, `blockstorage/snapshot_mutation_options_test.go:TestSnapshotMutationOptionsStopOnNilErrorOrCancellationWithoutPartialPolicy`, `blockstorage/snapshot_mutation_options_test.go:TestSnapshotMutationOptionsPreparationIsPureAndDefersReachedValueValidation`.
@@ -1402,6 +1391,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupListOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupListFilters`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupListDetailed`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 - `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
@@ -1409,7 +1399,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupListExpression`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupListAllowUnknownParams`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupListConflictingAttrs`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupListLocation`
 
 - Library-owned list policy preserves omission and source defaults detailed=true and paginated=true. Default detailed GET/backups/detail and basic GET/backups return complete owned lists. Preparation is pure; original callbacks run once from a captured slice and each snapshot owns raw filters, headers, pointer controls and location. Connection validates reached binding policy before selecting only cached Cinder v3 without readiness I/O.
   Tests: `blockstorage/volume_backup_read_contract_test.go:TestVolumeBackupReadListDefaultDetailedAndBasicKeepCanonicalEmptyEOF`, `blockstorage/backup_read_transport_test.go:TestVolumeBackupReadOriginalOptionsOwnEveryPreparedValueAndSourceHeaders`, `connectiontest/connection_volume_backups_test.go:TestConnectionVolumeBackupOriginalOptionsRunOnceBeforeCachedCinderForEveryEntry`, `connectiontest/connection_volume_backups_test.go:TestConnectionVolumeBackupPreflightAndGetterFailuresKeepBackupOperationAndJoinedCauses`, `connectiontest/connection_volume_backups_test.go:TestConnectionVolumeBackupListBindingValidationPrecedesServiceSelection`, `connectiontest/connection_volume_backups_test.go:TestConnectionVolumeBackupCapturedOptionSliceAndRetainedPointersCannotReplacePreparedPolicy`, `internal/cloudsnapshot/backup_query_test.go:TestBackupListPolicyOwnsQueryLocalHeadersAndResourceSelectionAcrossReuse`, `internal/cloudsnapshot/backup_query_test.go:TestBackupListFalseyAndInvalidRawPoliciesHaveAtomicResourceSpecificCompilation`.
@@ -1454,7 +1443,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupSearchOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupSearchFilters`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupSearchExpression`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupSearchLocation`
 
 - Search always completes a queryless default-detailed backup list and every reached nullable descriptor before applying local identifier/filter selection. A matching first row cannot hide a later excluded malformed descriptor or later page failure; no partial Value/Backups is published. Search does not send a name hint or caller filter as list query.
   Tests: `blockstorage/volume_backup_read_selection_test.go:TestVolumeBackupReadSearchCompletesQuerylessPagesBeforeBackupExpression`, `blockstorage/volume_backup_read_selection_test.go:TestVolumeBackupReadSearchDoesNotHideExcludedLaterDescriptorFailure`, `blockstorage/volume_backup_read_contract_test.go:TestVolumeBackupReadInvalidIntegersAreEagerBeforeLocalExclusion`.
@@ -1499,7 +1487,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupSearchOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupSearchFilters`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupSearchExpression`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupSearchLocation`
 
 - Omitted or JSONnull filter uses ordinary exact member-first find. A physically absent member ID seeds only normalized logical id with RequestedID/SeededID evidence; raw Backup fields stay actual. Explicit null, false, zero, empty/container or a different returned ID is preserved passively. An actual empty object Resource remains present, distinct from completed lookup absence, which returns nil Value and Backup.
   Tests: `blockstorage/volume_backup_read_selection_test.go:TestVolumeBackupReadGetKeepsActualIDsAndSeparatesSeedFromPhysicalBody`, `blockstorage/volume_backup_read_selection_test.go:TestVolumeBackupReadGetAllowsPartialFlatMalformedAndSub400MemberResponses`, `internal/cloudsnapshot/backup_model_test.go:TestBackupModelMemberSeedsOnlyAbsentInheritedIDAndKeepsPhysicalBytes`, `connectiontest/connection_volume_backups_test.go:TestConnectionVolumeBackupMemberSeedsOnlyLogicalMissingIDAndCleanFallbackKeepsListProof`, `blockstorage/volume_backup_read_isolation_test.go:TestVolumeBackupReadSuccessfulAbsenceIsDistinctFromPresentEmptyMember`.
@@ -1549,7 +1536,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeBackupSnapshotID`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeBackupWait`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeBackupWaitPolicy`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeBackupLocation`
 
 - All fixed six body fields are present: nullable name/description/snapshot_id plus literal volume_id, explicit forcefalse/incrementalfalse defaults. No generated name/description, Volume/Snapshot resolver or extra raw kwargs/native builder; empty/slashed body IDs are forwarded after stringUTF8 validation.
   Tests: `blockstorage/backup_mutation_contract_test.go:TestCreateVolumeBackupDefaultsSendSixLiteralFieldsWithoutResolvers`, `blockstorage/backup_mutation_contract_test.go:TestCreateVolumeBackupConcreteOptionsPreserveEmptyFalseAndLiteralSnapshot`, `connectiontest/connection_volume_backup_mutations_test.go:TestConnectionBackupMutationCreateTextValidationPrecedesCinderSelection`.
@@ -1607,7 +1593,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithDeleteVolumeBackupForce`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithDeleteVolumeBackupWait`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithDeleteVolumeBackupWaitPolicy`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithDeleteVolumeBackupLocation`
 
 - Empty string input returns completed Deletedfalse after valid context/original callbacks, selecting no client/location/service/waitpolicy and allowing nil direct client/nilConnection. Successful completed lookup absence is false; any lookup/operation error leaves Deletednil.
   Tests: `blockstorage/backup_mutation_contract_test.go:TestDeleteVolumeBackupEmptyInputRunsOriginalsWithoutServiceOrLocation`, `blockstorage/backup_mutation_contract_test.go:TestDeleteVolumeBackupLookupCompletionAndLogicalSeedControlMutation`, `connectiontest/connection_volume_backup_mutations_test.go:TestConnectionBackupMutationEmptyDeleteIsServiceFreeEvenForNilConnection`, `blockstorage/backup_mutation_options_test.go:TestBackupMutationOptionsJoinCancellationAndOriginalErrors`.

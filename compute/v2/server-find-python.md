@@ -21,13 +21,13 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindAllProjects`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindOpts`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindDetails`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindAllProjects`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindLocation`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindLimit`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindMarker`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindMaxItems`

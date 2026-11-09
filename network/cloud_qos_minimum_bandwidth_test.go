@@ -342,7 +342,12 @@ func TestCloudQoSMinimumBandwidthRawFilterLocationAndResultCarriersOwnAllData(t 
 	filter[2] = 'X'
 	name, zone := "configured", json.RawMessage(`"configured-zone"`)
 	location := resource.CloudLocation{Cloud: &name, Zone: zone, Project: resource.CloudProject{ID: json.RawMessage(`"current"`)}}
-	locationOption := network.WithMinimumBandwidthCloudCurrentLocation(location)
+	ownedLocation := location.Clone()
+	locationOption := func(c *network.MinimumBandwidthCloudOpts) error {
+		loc := ownedLocation.Clone()
+		c.CurrentLocation = &loc
+		return nil
+	}
 	name = "caller-mutated"
 	zone[1] = 'X'
 	callbacks := 0
@@ -505,7 +510,12 @@ func TestCloudQoSMinimumBandwidthPreflightAndInvalidLocationHaveHonestEvidence(t
 	replies := minimumBandwidthCloudReplies(`{"minimum_bandwidth_rules":[]}`)
 	replies["GET /v2.0/qos/policies/parent/minimum_bandwidth_rules/actual"] = []pythonCloudBReply{{203, `{"minimum_bandwidth_rule":{"id":"actual"}}`}}
 	client, calls = pythonCloudBClient(t, replies)
-	result, err = network.New(client).GetQoSMinimumBandwidthRule(context.Background(), "parent", "actual", network.WithMinimumBandwidthCloudCurrentLocation(location))
+	ownedLocation := location.Clone()
+	result, err = network.New(client).GetQoSMinimumBandwidthRule(context.Background(), "parent", "actual", func(c *network.MinimumBandwidthCloudOpts) error {
+		loc := ownedLocation.Clone()
+		c.CurrentLocation = &loc
+		return nil
+	})
 	var proof *resource.ResponseError
 	if result == nil || result.LastRule == nil || result.Rule != nil || result.Value != nil || !errors.As(err, &proof) || proof.StatusCode != 203 || len(calls()) != 3 {
 		t.Fatal(result, err, proof, calls())

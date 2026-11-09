@@ -524,7 +524,8 @@ func TestPythonLimitListRecordsLocationIsExplicitImmutableAndDeclared(t *testing
 	recordField(t, rows[0], "location", "null")
 	cloud, project, region := "recorded", "configured", "RegionOne"
 	location := resource.CloudLocation{Cloud: &cloud, RegionName: &region, Project: resource.CloudProject{ID: json.RawMessage(`"current"`), Name: &project}}
-	option := sdk.WithRecordListLocation(location)
+	ownedLocation := location.Clone()
+	option := request.Custom(func(c *sdk.RecordListOpts) error { loc := ownedLocation.Clone(); c.Location = &loc; return nil })
 	cloud = "mutated"
 	location.Project.ID[1] = 'X'
 	rows, err = api.AllRecords(context.Background(), option)
@@ -559,7 +560,12 @@ func TestPythonLimitListRecordsLocationIsExplicitImmutableAndDeclared(t *testing
 		t.Fatal(p)
 	}
 	n := len(calls)
-	rows, err = api.AllRecords(context.Background(), sdk.WithRecordListLocation(resource.CloudLocation{Project: resource.CloudProject{ID: json.RawMessage(`not JSON`)}}))
+	ownedLocation2 := resource.CloudLocation{Project: resource.CloudProject{ID: json.RawMessage(`not JSON`)}}.Clone()
+	rows, err = api.AllRecords(context.Background(), request.Custom(func(c *sdk.RecordListOpts) error {
+		loc := ownedLocation2.Clone()
+		c.Location = &loc
+		return nil
+	}))
 	if rows != nil || !errors.Is(err, resource.ErrInvalidOption) || len(calls) != n {
 		t.Fatal(rows, err, calls)
 	}

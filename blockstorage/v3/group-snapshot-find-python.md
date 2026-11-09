@@ -15,11 +15,11 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.New`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordFindOpts`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordFindDetails`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordFindLocation`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordFindPaginated`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordFindMaxItems`

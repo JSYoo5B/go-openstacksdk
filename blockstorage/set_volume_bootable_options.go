@@ -32,10 +32,6 @@ func WithSetVolumeBootableOptions(value SetVolumeBootableOpts) SetVolumeBootable
 func WithSetVolumeBootable(value bool) SetVolumeBootableOption {
 	return func(target *SetVolumeBootableOpts) error { owned := value; target.Bootable = &owned; return nil }
 }
-func WithSetVolumeBootableLocation(value resource.CloudLocation) SetVolumeBootableOption {
-	owned := value.Clone()
-	return func(target *SetVolumeBootableOpts) error { copy := owned.Clone(); target.Location = &copy; return nil }
-}
 
 func applySetVolumeBootableOptions(options []SetVolumeBootableOption, guard func() error) (SetVolumeBootableOpts, error) {
 	options = slices.Clone(options)

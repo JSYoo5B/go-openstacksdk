@@ -20,6 +20,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindOpts`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindDetails`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindAllProjects`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindPaginated`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindLimit`
@@ -27,7 +28,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindMaxItems`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindLocation`
 
 - The tested default detailed-server path preserves literal exact-name regex escaping, status query, explicit limit and arbitrary vendor query while applying raw consumption controls.
   Tests: `api/generated_list_controls_test.go:TestGeneratedListControlsPreserveFiltersFixedParentAndExplicitSize`, `api/generated_list_controls_test.go:TestGeneratedListControlsSinglePageAndConsumerBreakSkipUnusedNext`, `api/generated_list_controls_test.go:TestGeneratedListControlsAcrossPagesAndDefaultCycleGuard`, `api/generated_list_controls_test.go:TestGeneratedListControlsRetainWholePageDecodeAndCancellation`.

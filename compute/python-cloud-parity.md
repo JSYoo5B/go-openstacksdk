@@ -315,8 +315,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithServerGroupCloudReadOpts`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithServerGroupCloudFilters`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithServerGroupCloudExpression`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithServerGroupCloudCurrentLocation`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.API.ListCloudRecords`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.API.FindCloudRecord`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.SearchServerGroups`
@@ -362,8 +362,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithServerGroupCloudReadOpts`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithServerGroupCloudFilters`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithServerGroupCloudExpression`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithServerGroupCloudCurrentLocation`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.API.ListCloudRecords`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.API.FindCloudRecord`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.GetServerGroup`

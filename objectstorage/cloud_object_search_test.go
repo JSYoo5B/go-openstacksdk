@@ -124,7 +124,12 @@ func TestSwiftCloudObjectSearchLocationIsOwnedAndRemoteWireCannotReplaceIt(t *te
 	})
 	cloudName, region, project := "selected", "RegionOne", "project-name"
 	location := resource.CloudLocation{Cloud: &cloudName, RegionName: &region, Project: resource.CloudProject{ID: json.RawMessage(`"project-id"`), Name: &project}}
-	option := objectstorage.WithObjectSearchLocation(location)
+	ownedLocation := location.Clone()
+	option := func(c *objectstorage.ObjectSearchOpts) error {
+		loc := ownedLocation.Clone()
+		c.Location = &loc
+		return nil
+	}
 	cloudName = "caller"
 	location.Project.ID[1] = 'X'
 	result, err := objectstorage.New(fixture.Client("object-store", "/account/")).SearchObjects(context.Background(), "bucket", option, objectstorage.WithObjectSearchFiltersJSON(json.RawMessage(`{"location":{"cloud":"selected","project":{"id":"project-id"}}}`)))

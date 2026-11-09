@@ -33,13 +33,13 @@ type RecordFindOpts struct {
 }
 
 // RecordFindOption is one option of FindRecord: WithRecordFindOpts,
-// WithRecordFindDetails, WithRecordFindAllProjects, WithRecordFindLocation,
-// WithRecordFindMaxItems, WithRecordFindPaginated, request.Custom over
-// *RecordFindOpts, request.IgnoreMissing, request.Headers (replaces the
-// headers) or request.Query (a Resource.find keyword argument sent as JSON:
-// member GET sees ordinary Requests query values; the fallback list classifies
-// declared server filters and Body-local filters and drops unknown kwargs).
-// Other shared calls fail with resource.ErrInvalidOption before HTTP.
+// WithRecordFindDetails, WithRecordFindAllProjects, WithRecordFindMaxItems,
+// WithRecordFindPaginated, request.Custom over *RecordFindOpts (for example to
+// set Location), request.IgnoreMissing, request.Headers (replaces the headers)
+// or request.Query (a Resource.find keyword argument sent as JSON: member GET
+// sees ordinary Requests query values; the fallback list classifies declared
+// server filters and Body-local filters and drops unknown kwargs). Other
+// shared calls fail with resource.ErrInvalidOption before HTTP.
 type RecordFindOption = request.FindCall
 
 var recordFindCalls = calls.Spec[RecordFindOpts]{
@@ -96,12 +96,6 @@ func WithRecordFindAllProjects(value bool) RecordFindOption {
 	return request.Custom(func(c *RecordFindOpts) error { x := value; c.AllProjects = &x; return nil })
 }
 
-// WithRecordFindLocation supplies recorded connection location, copied once
-// at construction and again per call. Row project/zone remain authoritative.
-func WithRecordFindLocation(value resource.CloudLocation) RecordFindOption {
-	owned := value.Clone()
-	return request.Custom(func(c *RecordFindOpts) error { x := owned.Clone(); c.Location = &x; return nil })
-}
 func WithRecordFindMaxItems(value int) RecordFindOption {
 	return request.Custom(func(c *RecordFindOpts) error { c.MaxItems = value; return nil })
 }

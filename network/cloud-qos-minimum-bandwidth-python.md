@@ -14,7 +14,6 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network.Service.ListQoSMinimumBandwidthRules`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithMinimumBandwidthCloudOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithMinimumBandwidthCloudCurrentLocation`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithMinimumBandwidthCloudFiltersJSON`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ProxyMinimumBandwidthRecords`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
@@ -49,7 +48,6 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network.Service.SearchQoSMinimumBandwidthRules`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithMinimumBandwidthCloudOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithMinimumBandwidthCloudCurrentLocation`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithMinimumBandwidthCloudFiltersJSON`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ProxyMinimumBandwidthRecords`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
@@ -92,7 +90,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.GetMinimumBandwidthRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network.Service.GetQoSMinimumBandwidthRule`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithMinimumBandwidthCloudOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithMinimumBandwidthCloudCurrentLocation`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.GetSourceMinimumBandwidthRecord`
 
 - After the cloud extension gate, Go sends the same GET /extensions, QoS policy GET-then-name-list find, rule GET/POST/DELETE, rule-type GET, policy POST and policy DELETE requests, while a rule DELETE 404 stays an error.
@@ -186,7 +183,7 @@ func main() {
  if err!=nil{log.Fatal(err)}
  location,err:=conn.CurrentLocation()
  if err!=nil{log.Fatal(err)}
- options:=[]network.MinimumBandwidthCloudOption{network.WithMinimumBandwidthCloudCurrentLocation(location)}
+ options:=[]network.MinimumBandwidthCloudOption{func(c *network.MinimumBandwidthCloudOpts) error { loc := location.Clone(); c.CurrentLocation = &loc; return nil }}
  var result *network.MinimumBandwidthCloudResult
  switch *mode {
  case "list":

@@ -67,10 +67,7 @@ func WithContainerSearchExpression(value string) ContainerSearchOption {
 	raw, _ := json.Marshal(value)
 	return WithContainerSearchFiltersJSON(raw)
 }
-func WithContainerSearchLocation(value resource.CloudLocation) ContainerSearchOption {
-	owned := value.Clone()
-	return func(c *ContainerSearchOpts) error { snapshot := owned.Clone(); c.Location = &snapshot; return nil }
-}
+
 func WithContainerSearchHeaders(value map[string]string) ContainerSearchOption {
 	owned := maps.Clone(value)
 	return func(c *ContainerSearchOpts) error {

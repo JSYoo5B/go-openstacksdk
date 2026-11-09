@@ -242,8 +242,18 @@ func TestConnectionVolumeMutationsOwnFactoryAndRetainedCallbackState(t *testing.
 					update = []blockstorage.UpdateVolumeOption{blockstorage.WithUpdateVolumeOptions(blockstorage.UpdateVolumeOpts{Attributes: attrs, Location: &location})}
 					boot = []blockstorage.SetVolumeBootableOption{blockstorage.WithSetVolumeBootableOptions(blockstorage.SetVolumeBootableOpts{Bootable: &enabled, Location: &location})}
 				case "individual":
-					update = []blockstorage.UpdateVolumeOption{blockstorage.WithUpdateVolumeAttributes(attrs), blockstorage.WithUpdateVolumeLocation(location)}
-					boot = []blockstorage.SetVolumeBootableOption{blockstorage.WithSetVolumeBootable(enabled), blockstorage.WithSetVolumeBootableLocation(location)}
+					ownedLocation := location.Clone()
+					update = []blockstorage.UpdateVolumeOption{blockstorage.WithUpdateVolumeAttributes(attrs), func(c *blockstorage.UpdateVolumeOpts) error {
+						loc := ownedLocation.Clone()
+						c.Location = &loc
+						return nil
+					}}
+					ownedLocation2 := location.Clone()
+					boot = []blockstorage.SetVolumeBootableOption{blockstorage.WithSetVolumeBootable(enabled), func(c *blockstorage.SetVolumeBootableOpts) error {
+						loc := ownedLocation2.Clone()
+						c.Location = &loc
+						return nil
+					}}
 				default:
 					update = make([]blockstorage.UpdateVolumeOption, 2)
 					boot = make([]blockstorage.SetVolumeBootableOption, 2)
@@ -593,8 +603,18 @@ func TestConnectionVolumeMutationsLocalTargetAndLocationFailuresKeepLookupWithou
 				update, boot := connectionMutationContractOptions(func() error { return nil })
 				if kind == "invalid owned location" {
 					location := resource.CloudLocation{Project: resource.CloudProject{ID: json.RawMessage("!")}}
-					update = append(update, blockstorage.WithUpdateVolumeLocation(location))
-					boot = append(boot, blockstorage.WithSetVolumeBootableLocation(location))
+					ownedLocation := location.Clone()
+					update = append(update, func(c *blockstorage.UpdateVolumeOpts) error {
+						loc := ownedLocation.Clone()
+						c.Location = &loc
+						return nil
+					})
+					ownedLocation2 := location.Clone()
+					boot = append(boot, func(c *blockstorage.SetVolumeBootableOpts) error {
+						loc := ownedLocation2.Clone()
+						c.Location = &loc
+						return nil
+					})
 				}
 				result, err := connectionMutationContractCall(context.Background(), conn, operation, "volume", update, boot)
 				want := resource.ErrInvalidOption

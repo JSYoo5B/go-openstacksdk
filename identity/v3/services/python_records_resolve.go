@@ -22,7 +22,7 @@ type RecordResolveOpts struct {
 }
 
 // RecordResolveOption is one option of ResolveRecord: WithRecordResolveOpts,
-// WithRecordResolveLocation, request.Custom over *RecordResolveOpts,
+// request.Custom over *RecordResolveOpts (for example to set Location),
 // request.Headers (replaces the headers) or request.Microversion.
 // request.Header fails with resource.ErrInvalidOption before HTTP.
 type RecordResolveOption = request.GetCall
@@ -47,10 +47,6 @@ func copyRecordResolveOpts(v RecordResolveOpts) RecordResolveOpts {
 func WithRecordResolveOpts(v RecordResolveOpts) RecordResolveOption {
 	owned := copyRecordResolveOpts(v)
 	return request.Custom(func(c *RecordResolveOpts) error { *c = copyRecordResolveOpts(owned); return nil })
-}
-func WithRecordResolveLocation(v resource.CloudLocation) RecordResolveOption {
-	owned := v.Clone()
-	return request.Custom(func(c *RecordResolveOpts) error { x := owned.Clone(); c.Location = &x; return nil })
 }
 
 // ResolveRecord supplies the closed GET-first Service finder needed by the

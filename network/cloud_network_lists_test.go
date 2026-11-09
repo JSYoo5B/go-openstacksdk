@@ -23,7 +23,12 @@ import (
 func TestCloudNetworkListAbsentServicePrecedesFiltersAndSearchHasNoAbsenceGate(t *testing.T) {
 	for _, raw := range []string{`{bad`, `[1]`, `{"jmespath_filters":"length(@)"}`, `{"headers":"bad"}`} {
 		var service *network.Service
-		result, err := service.ListNetworkRecords(context.Background(), network.WithNetworkCloudServiceAvailable(false), network.WithNetworkCloudFilters(json.RawMessage(raw)), network.WithNetworkCloudCurrentLocation(resource.CloudLocation{Project: resource.CloudProject{ID: json.RawMessage(`bad`)}}))
+		ownedLocation := resource.CloudLocation{Project: resource.CloudProject{ID: json.RawMessage(`bad`)}}.Clone()
+		result, err := service.ListNetworkRecords(context.Background(), network.WithNetworkCloudServiceAvailable(false), network.WithNetworkCloudFilters(json.RawMessage(raw)), request.Custom(func(c *network.NetworkCloudListOpts) error {
+			loc := ownedLocation.Clone()
+			c.CurrentLocation = &loc
+			return nil
+		}))
 		if err != nil || result == nil || result.Networks == nil || result.Values == nil || string(result.JSON) != "[]" {
 			t.Fatal(raw, result, err)
 		}
@@ -190,7 +195,12 @@ func TestCloudNetworkListRawMicroversionTransportAndUnknownLocationZone(t *testi
 		service.RawClient().Microversion = "2.7"
 		n := "configured"
 		loc := resource.CloudLocation{Cloud: &n, Project: resource.CloudProject{ID: json.RawMessage(`true`), Name: &n}}
-		result, err := service.ListNetworkRecords(context.Background(), network.WithNetworkCloudFilters(json.RawMessage(`{"microversion":`+tc.raw+`}`)), network.WithNetworkCloudCurrentLocation(loc))
+		ownedLocation := loc.Clone()
+		result, err := service.ListNetworkRecords(context.Background(), network.WithNetworkCloudFilters(json.RawMessage(`{"microversion":`+tc.raw+`}`)), request.Custom(func(c *network.NetworkCloudListOpts) error {
+			loc := ownedLocation.Clone()
+			c.CurrentLocation = &loc
+			return nil
+		}))
 		if err != nil || result == nil || len(result.Networks) != 1 || count.Load() != 1 {
 			t.Fatal(tc, result, err, count.Load())
 		}

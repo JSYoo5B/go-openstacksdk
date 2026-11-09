@@ -21,7 +21,8 @@ func TestBackupProxyServiceActionsExposeOwnedLocalFactoriesAndCorrectOuterErrorL
 	location := resource.CloudLocation{Project: resource.CloudProject{ID: json.RawMessage(`"current"`)}}
 	whole := backups.WithRestoreBackupOptions(backups.RestoreBackupOpts{VolumeID: &volume, Name: &name, Seed: seed, Location: &location})
 	individualSeed := backups.WithRestoreBackupSeed(seed)
-	individualLocation := backups.WithRestoreBackupLocation(location)
+	ownedLocation := location.Clone()
+	individualLocation := func(c *backups.RestoreBackupOpts) error { loc := ownedLocation.Clone(); c.Location = &loc; return nil }
 	volume = "caller changed"
 	name = "caller changed"
 	seed[1] = '!'

@@ -55,7 +55,12 @@ func TestGetVolumeLimitsFactoriesAndPreparedOptionsOwnCompleteLocation(t *testin
 			if factory == "options" {
 				option = blockstorage.WithGetVolumeLimitsOptions(blockstorage.GetVolumeLimitsOpts{Location: &location})
 			} else {
-				option = blockstorage.WithGetVolumeLimitsLocation(location)
+				ownedLocation := location.Clone()
+				option = func(c *blockstorage.GetVolumeLimitsOpts) error {
+					loc := ownedLocation.Clone()
+					c.Location = &loc
+					return nil
+				}
 			}
 			*location.Cloud = "caller changed"
 			*location.RegionName = "caller changed"
@@ -262,7 +267,12 @@ func TestGetVolumeLimitsInvalidOwnedLocationFailsLocallyAfterProjectWithoutFinal
 		w.Header().Set("X-Proof", "project")
 		testcloud.JSON(w, 200, `{"project":{"id":"requested"}}`)
 	})
-	result, err := glCall(context.Background(), cinder, identity, "ref", blockstorage.WithGetVolumeLimitsLocation(location))
+	ownedLocation := location.Clone()
+	result, err := glCall(context.Background(), cinder, identity, "ref", func(c *blockstorage.GetVolumeLimitsOpts) error {
+		loc := ownedLocation.Clone()
+		c.Location = &loc
+		return nil
+	})
 	var physical *resource.ResponseError
 	if result == nil || result.Project == nil || result.Project.Project == nil || result.Project.Observed == nil || result.Project.Observed.Header.Get("X-Proof") != "project" || string(result.RequestedProjectID) != `"requested"` || result.Observed != nil || result.Limits != nil || result.Value != nil || calls.Load() != 1 || !errors.Is(err, resource.ErrInvalidOption) || errors.As(err, &physical) {
 		t.Fatal(result, err, calls.Load())

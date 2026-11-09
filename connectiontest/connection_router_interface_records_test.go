@@ -3,6 +3,7 @@ package connectiontest_test
 import (
 	"context"
 	"encoding/json"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"net/http"
 	"testing"
 
@@ -42,7 +43,12 @@ func TestConnectionRouterInterfacesClassifyCompletePortsWithConfiguredLocation(t
 		t.Fatal(result.Ports[0])
 	}
 	explicit := "explicit"
-	option := network.WithRouterInterfaceReadCurrentLocation(resource.CloudLocation{Cloud: &explicit})
+	ownedLocation := resource.CloudLocation{Cloud: &explicit}.Clone()
+	option := request.Custom(func(c *network.RouterInterfaceReadOpts) error {
+		loc := ownedLocation.Clone()
+		c.CurrentLocation = &loc
+		return nil
+	})
 	explicit = "changed"
 	result, err = conn.ListRouterInterfaces(context.Background(), network.RouterInterfaceRouterID("r"), option)
 	if err != nil || result == nil || len(result.Ports) != 2 {

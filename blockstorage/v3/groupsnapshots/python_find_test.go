@@ -469,7 +469,12 @@ func TestPythonGroupSnapshotFindPagingControlsOffsetAndRawCap(t *testing.T) {
 func TestPythonGroupSnapshotFindDeclaredLocationAndEvidenceDoNotAlias(t *testing.T) {
 	name := "cloud"
 	location := resource.CloudLocation{Cloud: &name, Project: resource.CloudProject{ID: json.RawMessage(`"current"`)}}
-	option := groupsnapshots.WithRecordFindLocation(location)
+	ownedLocation := location.Clone()
+	option := request.Custom(func(c *groupsnapshots.RecordFindOpts) error {
+		loc := ownedLocation.Clone()
+		c.Location = &loc
+		return nil
+	})
 	*location.Cloud = "changed"
 	body := `{"group_snapshot":{"id":"server","project_id":"other","unknown":9007199254740993}}`
 	api, calls := snapshotAPI(t, "3.29", func(*http.Request) *http.Response { return snapshotWire(200, body) })

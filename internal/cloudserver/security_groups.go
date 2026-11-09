@@ -41,7 +41,7 @@ func securityGroupNames(ctx context.Context, deps Dependencies, server string, g
 	if err != nil {
 		return "", nil, false, err
 	}
-	record, err := service.Servers.FindRecord(ctx, server, servers.WithRecordFindLocation(location))
+	record, err := service.Servers.FindRecord(ctx, server, request.Custom(func(c *servers.RecordFindOpts) error { loc := location.Clone(); c.Location = &loc; return nil }))
 	if err != nil || record == nil {
 		return "", nil, false, err
 	}

@@ -16,7 +16,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/neutronfind"
 	"github.com/JSYoo5B/go-openstacksdk/request"
-	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 // GroupRecordListOpts reuses User declarations while keeping the Group route
@@ -25,13 +24,13 @@ type GroupRecordListOpts RecordListOpts
 
 // GroupRecordListOption is one option of ListUsersInGroupRecords and
 // AllUsersInGroupRecords: WithGroupRecordListOpts, WithGroupRecordListQuery,
-// WithGroupRecordListLocation, WithGroupRecordListJMESPath, request.Custom
-// over *GroupRecordListOpts, request.Headers (replaces the headers),
+// WithGroupRecordListJMESPath, request.Custom over *GroupRecordListOpts (for
+// example to set Location), request.Headers (replaces the headers),
 // request.Microversion, request.Limit, request.Marker, request.MaxItems or
 // request.Paginated (each a Source keyword argument). request.Header and
 // request.Query fail with resource.ErrInvalidOption before HTTP:
-// WithGroupRecordListQuery rejects the bound base_path and group arguments
-// and discards ignored kwargs before marshaling the value.
+// WithGroupRecordListQuery rejects the bound base_path and group arguments and
+// discards ignored kwargs before marshaling the value.
 type GroupRecordListOption = request.ListCall
 
 var groupRecordList = keystonecalls.SourceList[GroupRecordListOpts]{
@@ -90,10 +89,7 @@ func WithGroupRecordListQuery(key string, value any) GroupRecordListOption {
 	}
 	return groupRecordList.Query(key, value)
 }
-func WithGroupRecordListLocation(v resource.CloudLocation) GroupRecordListOption {
-	owned := v.Clone()
-	return request.Custom(func(c *GroupRecordListOpts) error { location := owned.Clone(); c.Location = &location; return nil })
-}
+
 func WithGroupRecordListJMESPath(v string) GroupRecordListOption {
 	return keystonecalls.Keyword(applyGroupRecordListQuery, "jmespath_filters", v)
 }

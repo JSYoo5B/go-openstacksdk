@@ -263,7 +263,16 @@ func TestSnapshotMutationOptionsIndividualFactoriesOverrideOnlySelectedSubtrees(
 	fieldsFactory := blockstorage.WithCreateVolumeSnapshotFields(fields)
 	createWaitFactory := blockstorage.WithCreateVolumeSnapshotWaitPolicy(blockstorage.SnapshotMutationWaitOpts{Timeout: &timeout, PollInterval: &interval})
 	deleteWaitFactory := blockstorage.WithDeleteVolumeSnapshotWaitPolicy(blockstorage.SnapshotMutationWaitOpts{Timeout: &timeout, PollInterval: &interval})
-	createLocationFactory, deleteLocationFactory := blockstorage.WithCreateVolumeSnapshotLocation(location), blockstorage.WithDeleteVolumeSnapshotLocation(location)
+	createLocation, deleteLocation := location.Clone(), location.Clone()
+	createLocationFactory, deleteLocationFactory := func(c *blockstorage.CreateVolumeSnapshotOpts) error {
+		loc := createLocation.Clone()
+		c.Location = &loc
+		return nil
+	}, func(c *blockstorage.DeleteVolumeSnapshotOpts) error {
+		loc := deleteLocation.Clone()
+		c.Location = &loc
+		return nil
+	}
 	fields["display_name"][0] = '!'
 	timeout, interval = time.Hour, time.Hour
 	snapshotMutationOptionsDamageLocation(&location)

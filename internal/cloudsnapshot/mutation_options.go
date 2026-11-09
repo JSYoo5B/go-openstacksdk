@@ -100,14 +100,6 @@ func WithCreateDisplayDescription(value string) CreateOption {
 		return nil
 	}
 }
-func WithCreateLocation(value resource.CloudLocation) CreateOption {
-	owned := value.Clone()
-	return func(target *CreateOptions) error { target.Location = cloneLocation(&owned); return nil }
-}
-func WithDeleteLocation(value resource.CloudLocation) DeleteOption {
-	owned := value.Clone()
-	return func(target *DeleteOptions) error { target.Location = cloneLocation(&owned); return nil }
-}
 
 // Preparation owns policy and executes originals once without service I/O.
 // Runtime defaults and validation of reached fields belong to the workflow.

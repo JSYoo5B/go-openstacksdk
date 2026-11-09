@@ -16,9 +16,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.ListVolumeSnapshots`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareVolumeSnapshotListOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSnapshotListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSnapshotListLocation`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSnapshotListFilters`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSnapshotListDetailed`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 - `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
@@ -93,7 +93,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.SearchVolumeSnapshots`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareVolumeSnapshotSearchOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSnapshotSearchOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSnapshotSearchLocation`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSnapshotSearchFilters`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSnapshotSearchExpression`
 
@@ -146,7 +145,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.GetVolumeSnapshot`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareVolumeSnapshotSearchOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSnapshotSearchOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSnapshotSearchLocation`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSnapshotSearchFilters`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSnapshotSearchExpression`
 
@@ -206,7 +204,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.GetVolumeSnapshotByID`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareVolumeSnapshotReadOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSnapshotReadOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSnapshotReadLocation`
 
 - ByID performs only fixed literal member GET with no list/name fallback; source Proxy.get_snapshot raises rejected400/403/404 despite cloud docstring absent=None wording. Accepted actual arbitrary/mismatched ID is not checked against the requested safe path ID. Preflight uses the documented single unescaped UTF8 segment route domain and nil result before execution.
   Tests: `blockstorage/snapshot_read_selection_test.go:TestVolumeSnapshotReadByIDNeverFallsBackOnCleanNativeRejections`, `blockstorage/snapshot_read_selection_test.go:TestVolumeSnapshotReadMemberSeparatesSeededLogicalIDFromActualWireBody`, `connectiontest/connection_volume_snapshots_test.go:TestConnectionVolumeSnapshotPreflightOriginalAndGetterErrorsPreserveOuterOperationAndCause`, `connectiontest/connection_volume_snapshots_test.go:TestConnectionVolumeSnapshotMemberSeedPreservesRawShapeAndByID404NeverFallsBack`, `connectiontest/connection_snapshot_id_test.go:TestConnectionVolumeSnapshotByIDValidatesPathBeforeHTTPAndPreservesUnicodeProof`.
@@ -255,6 +252,7 @@ import (
     "github.com/gophercloud/gophercloud/v2"
     sdk "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/blockstorage"
+    "github.com/JSYoo5B/go-openstacksdk/request"
     "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -342,13 +340,13 @@ func FirstPage(ctx context.Context, conn *sdk.Connection) error {
 func Direct(ctx context.Context, cinder *gophercloud.ServiceClient) error {
     location := resource.CloudLocation{}
     listed, err := blockstorage.ListVolumeSnapshots(ctx, cinder,
-        blockstorage.WithVolumeSnapshotListLocation(location))
+        request.Custom(func(c *blockstorage.VolumeSnapshotListOpts) error { loc := location.Clone(); c.Location = &loc; return nil }))
     if listed != nil { InspectPages(listed.Pages) }
     if err != nil { return err }
 
     searched, err := blockstorage.SearchVolumeSnapshots(ctx, cinder,
         blockstorage.SearchVolumeSnapshotsRequest{NameOrID: "nightly*"},
-        blockstorage.WithVolumeSnapshotSearchLocation(location))
+        func(c *blockstorage.VolumeSnapshotSearchOpts) error { loc := location.Clone(); c.Location = &loc; return nil })
     if searched != nil { InspectPages(searched.Pages) }
     if err != nil { return err }
 

@@ -30,10 +30,10 @@ type ServerGroupCloudReadOpts struct {
 
 // ServerGroupCloudReadOption is one option of SearchServerGroups and
 // GetServerGroup: WithServerGroupCloudReadOpts, WithServerGroupCloudFilters,
-// WithServerGroupCloudExpression, WithServerGroupCloudCurrentLocation,
-// request.Headers (replaces the headers) or request.Custom over
-// *ServerGroupCloudReadOpts. Other shared calls fail with
-// resource.ErrInvalidOption before HTTP.
+// WithServerGroupCloudExpression, request.Headers (replaces the headers) or
+// request.Custom over *ServerGroupCloudReadOpts (for example to set
+// CurrentLocation). Other shared calls fail with resource.ErrInvalidOption
+// before HTTP.
 type ServerGroupCloudReadOption = request.GetCall
 
 var serverGroupCloudReadCalls = calls.Spec[ServerGroupCloudReadOpts]{Headers: calls.Value(func(c *ServerGroupCloudReadOpts) *map[string]string { return &c.Headers })}
@@ -68,10 +68,6 @@ func WithServerGroupCloudFilters(v json.RawMessage) ServerGroupCloudReadOption {
 func WithServerGroupCloudExpression(v string) ServerGroupCloudReadOption {
 	raw, _ := json.Marshal(v)
 	return WithServerGroupCloudFilters(raw)
-}
-func WithServerGroupCloudCurrentLocation(v resource.CloudLocation) ServerGroupCloudReadOption {
-	owned := v.Clone()
-	return request.Custom(func(c *ServerGroupCloudReadOpts) error { loc := owned.Clone(); c.CurrentLocation = &loc; return nil })
 }
 
 // Value is arbitrary Source JSON. Groups associate ordinary local matches with

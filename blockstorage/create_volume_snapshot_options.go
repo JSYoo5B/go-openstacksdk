@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudsnapshot"
-	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 type CreateVolumeSnapshotRequest struct{ VolumeID string }
@@ -44,9 +43,7 @@ func WithCreateVolumeSnapshotDescription(value string) CreateVolumeSnapshotOptio
 func WithCreateVolumeSnapshotDisplayDescription(value string) CreateVolumeSnapshotOption {
 	return cloudsnapshot.WithCreateDisplayDescription(value)
 }
-func WithCreateVolumeSnapshotLocation(value resource.CloudLocation) CreateVolumeSnapshotOption {
-	return cloudsnapshot.WithCreateLocation(value)
-}
+
 func PrepareCreateVolumeSnapshotOptions(ctx context.Context, options ...CreateVolumeSnapshotOption) (CreateVolumeSnapshotOpts, error) {
 	return cloudsnapshot.PrepareCreate(ctx, options...)
 }

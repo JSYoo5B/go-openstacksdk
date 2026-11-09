@@ -151,7 +151,12 @@ func TestConnectionGetVolumeIDLocationSnapshotsAndOwnedOverrides(t *testing.T) {
 	for _, factory := range []string{"location", "bulk"} {
 		name, cloudName := "owned-project", "owned-cloud"
 		locationInput := resource.CloudLocation{Cloud: &cloudName, Project: resource.CloudProject{ID: json.RawMessage(`"owned-scope"`), Name: &name}}
-		option := blockstorage.WithVolumeReadLocation(locationInput)
+		ownedLocation := locationInput.Clone()
+		option := func(c *blockstorage.VolumeReadOpts) error {
+			loc := ownedLocation.Clone()
+			c.Location = &loc
+			return nil
+		}
 		if factory == "bulk" {
 			option = blockstorage.WithVolumeReadOptions(blockstorage.VolumeReadOpts{Location: &locationInput})
 		}
@@ -359,7 +364,12 @@ func TestConnectionGetVolumeIDAbsenceUnsafeNamesAndLookupFailuresRemainDistinct(
 			})
 			options := []blockstorage.VolumeReadOption{}
 			if kind == "invalid caller location" {
-				options = append(options, blockstorage.WithVolumeReadLocation(resource.CloudLocation{Project: resource.CloudProject{ID: json.RawMessage(`not-json`)}}))
+				ownedLocation := resource.CloudLocation{Project: resource.CloudProject{ID: json.RawMessage(`not-json`)}}.Clone()
+				options = append(options, func(c *blockstorage.VolumeReadOpts) error {
+					loc := ownedLocation.Clone()
+					c.Location = &loc
+					return nil
+				})
 			}
 			result, err := conn.GetVolumeID(context.Background(), blockstorage.GetVolumeIDRequest{NameOrID: identity}, options...)
 			wantGets := int32(1)

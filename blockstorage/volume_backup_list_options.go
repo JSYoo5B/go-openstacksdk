@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudsnapshot"
-	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 // VolumeBackupListOpts owns backup list policy; omission retains source defaults.
@@ -39,10 +38,6 @@ func WithVolumeBackupListAllowUnknownParams(value bool) VolumeBackupListOption {
 
 func WithVolumeBackupListConflictingAttrs(value json.RawMessage) VolumeBackupListOption {
 	return cloudsnapshot.WithListConflictingAttrs(value)
-}
-
-func WithVolumeBackupListLocation(value resource.CloudLocation) VolumeBackupListOption {
-	return cloudsnapshot.WithListLocation(value)
 }
 
 // PrepareVolumeBackupListOptions captures original callbacks once without service I/O.

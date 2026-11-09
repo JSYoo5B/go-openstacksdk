@@ -76,7 +76,12 @@ func TestVolumeBackupReadListOwnsAllTwentyFourFieldsAndRawIndependentProofs(t *t
 		w.Header().Set("X-Proof", "raw")
 		testcloud.JSON(w, 203, body)
 	})
-	result, err := blockstorage.ListVolumeBackups(backupReadContractContext(t), client, blockstorage.WithVolumeBackupListLocation(location))
+	ownedLocation := location.Clone()
+	result, err := blockstorage.ListVolumeBackups(backupReadContractContext(t), client, request.Custom(func(c *blockstorage.VolumeBackupListOpts) error {
+		loc := ownedLocation.Clone()
+		c.Location = &loc
+		return nil
+	}))
 	if err != nil || result == nil || len(result.Backups) != 2 || result.Backups[0] == result.Backups[1] || len(result.Pages) != 1 || calls.Load() != 1 {
 		t.Fatal(result, err, calls.Load())
 	}

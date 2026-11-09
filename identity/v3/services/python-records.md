@@ -14,6 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.API.List`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.API.All`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithQuery`
@@ -23,7 +24,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/request.BasePath`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.WithRecordListJMESPath`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.WithRecordListLocation`
 - `github.com/JSYoo5B/go-openstacksdk/request.Limit`
 - `github.com/JSYoo5B/go-openstacksdk/request.Marker`
 - `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
@@ -71,9 +71,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity.ServiceReadCloud.RawAPI`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithServiceReadOpts`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithServiceReadFilters`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithServiceReadLocation`
 - `github.com/JSYoo5B/go-openstacksdk/identity.ServiceReadCloud.SearchServices`
 
 - search_services lists with the same GET /v3/services as list_services before filtering locally.
@@ -110,15 +110,14 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity.ServiceReadCloud.RawAPI`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithServiceReadOpts`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithServiceReadFilters`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithServiceReadLocation`
 - `github.com/JSYoo5B/go-openstacksdk/identity.ServiceReadCloud.GetService`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.WithRecordResolveOpts`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.WithRecordResolveLocation`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.API.ResolveRecord`
 
 - get_service(name_or_id) with the default filters=None sends GET /v3/services/<x>, falls back to GET /v3/services?name=<x> after 404 and returns nil when nothing matches.
@@ -226,7 +225,7 @@ func main() {
 		request.Query("type", "compute"),
 		request.Query("is_enabled", true),
 		request.MaxItems(5),
-		services.WithRecordListLocation(location),
+		request.Custom(func(c *services.RecordListOpts) error { loc := location.Clone(); c.Location = &loc; return nil }),
 	)
 	if err != nil {
 		log.Fatal(err)
@@ -242,20 +241,20 @@ func main() {
 	cloud := identity.NewServiceReadCloud(svc.Services)
 	found, err := cloud.SearchServices(ctx, "n*",
 		identity.WithServiceReadFilters(json.RawMessage(`"length(@)"`)),
-		identity.WithServiceReadLocation(location),
+		request.Custom(func(c *identity.ServiceReadOpts) error { loc := location.Clone(); c.Location = &loc; return nil }),
 	)
 	if err != nil {
 		log.Fatal(err)
 	}
 	printValue(found.Value)
-	direct, err := cloud.GetService(ctx, identifier, identity.WithServiceReadLocation(location))
+	direct, err := cloud.GetService(ctx, identifier, request.Custom(func(c *identity.ServiceReadOpts) error { loc := location.Clone(); c.Location = &loc; return nil }))
 	if err != nil {
 		log.Fatal(err)
 	}
 	printValue(direct.Value)
 	searched, err := cloud.GetService(ctx, identifier,
 		identity.WithServiceReadFilters(json.RawMessage(`{}`)),
-		identity.WithServiceReadLocation(location),
+		request.Custom(func(c *identity.ServiceReadOpts) error { loc := location.Clone(); c.Location = &loc; return nil }),
 	)
 	if err != nil {
 		log.Fatal(err)

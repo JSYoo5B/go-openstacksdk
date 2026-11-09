@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"net/http"
 	"testing"
 
@@ -68,7 +69,12 @@ func TestConnectionIdentityRecordLookupsPreflightAndExplicitLocation(t *testing.
 		testcloud.JSON(w, 200, `{"services":[{"id":"s","name":"compute"}]}`)
 	})
 	explicit := "explicit"
-	option := identity.WithServiceReadLocation(resource.CloudLocation{Cloud: &explicit})
+	ownedLocation := resource.CloudLocation{Cloud: &explicit}.Clone()
+	option := request.Custom(func(c *identity.ServiceReadOpts) error {
+		loc := ownedLocation.Clone()
+		c.Location = &loc
+		return nil
+	})
 	explicit = "changed"
 	services, err := conn.SearchServiceRecords(context.Background(), "", option, identity.WithServiceReadFilters(json.RawMessage(`{"location":{"cloud":"explicit"}}`)))
 	if err != nil || services == nil || len(services.Services) != 1 {

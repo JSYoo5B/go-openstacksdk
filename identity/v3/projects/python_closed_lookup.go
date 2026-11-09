@@ -25,10 +25,10 @@ type RecordResolveOpts struct {
 }
 
 // RecordResolveOption is one option of ResolveRecord: WithRecordResolveOpts,
-// WithRecordResolveDomainID, WithRecordResolveRawDomainID,
-// WithRecordResolveLocation, request.Custom over *RecordResolveOpts,
-// request.Headers (replaces the headers) or request.Microversion.
-// request.Header fails with resource.ErrInvalidOption before HTTP.
+// WithRecordResolveDomainID, WithRecordResolveRawDomainID, request.Custom over
+// *RecordResolveOpts (for example to set Location), request.Headers (replaces
+// the headers) or request.Microversion. request.Header fails with
+// resource.ErrInvalidOption before HTTP.
 type RecordResolveOption = request.GetCall
 
 var recordResolveCalls = calls.Spec[RecordResolveOpts]{
@@ -63,10 +63,6 @@ func WithRecordResolveDomainID(v string) RecordResolveOption {
 func WithRecordResolveRawDomainID(v json.RawMessage) RecordResolveOption {
 	owned := bytes.Clone(v)
 	return request.Custom(func(c *RecordResolveOpts) error { c.DomainID = bytes.Clone(owned); return nil })
-}
-func WithRecordResolveLocation(v resource.CloudLocation) RecordResolveOption {
-	owned := v.Clone()
-	return request.Custom(func(c *RecordResolveOpts) error { x := owned.Clone(); c.Location = &x; return nil })
 }
 
 // ResolveRecord closes Source find to identity/domain_id and explicit Go

@@ -19,9 +19,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.Service.DeleteFirewallRuleRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithFirewallDeleteOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithFirewallDeleteFilters`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithFirewallDeleteCurrentLocation`
 
 - The strict lookup of delete_firewall_rule sends the filters on GET /fwaas/firewall_rules/{name_or_id} and on the name list and reports a missing resource as resource.ErrNotFound before any DELETE.
   Tests: `api/find_identity_python_finds_test.go:TestPythonCloudGetFirewallForwardsFiltersToBothRequests`, `api/find_identity_python_finds_test.go:TestPythonFindMissingDefaultsToNilAndStrictIsNotFound`.
@@ -69,9 +69,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.Service.DeleteFirewallPolicyRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithFirewallDeleteOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithFirewallDeleteFilters`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithFirewallDeleteCurrentLocation`
 
 - The strict lookup of delete_firewall_policy sends the filters on GET /fwaas/firewall_policies/{name_or_id} and on the name list and reports a missing resource as resource.ErrNotFound before any DELETE.
   Tests: `api/find_identity_python_finds_test.go:TestPythonCloudGetFirewallForwardsFiltersToBothRequests`, `api/find_identity_python_finds_test.go:TestPythonFindMissingDefaultsToNilAndStrictIsNotFound`.
@@ -119,9 +119,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.Service.DeleteFirewallGroupRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithFirewallDeleteOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithFirewallDeleteFilters`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithFirewallDeleteCurrentLocation`
 
 - The strict lookup of delete_firewall_group sends the filters on GET /fwaas/firewall_groups/{name_or_id} and on the name list and reports a missing resource as resource.ErrNotFound before any DELETE.
   Tests: `api/find_identity_python_finds_test.go:TestPythonCloudGetFirewallForwardsFiltersToBothRequests`, `api/find_identity_python_finds_test.go:TestPythonFindMissingDefaultsToNilAndStrictIsNotFound`.
@@ -197,6 +197,7 @@ import (
 
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/network"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 func main() {
@@ -225,7 +226,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	opts := []network.FirewallDeleteOption{network.WithFirewallDeleteFilters(json.RawMessage(*filters)), network.WithFirewallDeleteCurrentLocation(location)}
+	opts := []network.FirewallDeleteOption{network.WithFirewallDeleteFilters(json.RawMessage(*filters)), request.Custom(func(c *network.FirewallDeleteOpts) error { loc := location.Clone(); c.CurrentLocation = &loc; return nil })}
 	var result *network.FirewallDeletion
 	switch *kind {
 	case "rule":

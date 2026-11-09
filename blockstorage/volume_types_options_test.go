@@ -224,7 +224,17 @@ func TestVolumeTypeInvalidOwnedLocationIsLazyAndNeverFabricatesResponseError(t *
 					testcloud.JSON(w, 200, body)
 				})
 				location := resource.CloudLocation{Project: resource.CloudProject{ID: json.RawMessage(`invalid-owned`)}}
-				got := volumeTypeContractCall(context.Background(), client, operation, []blockstorage.VolumeTypeReadOption{blockstorage.WithVolumeTypeReadLocation(location)}, blockstorage.WithVolumeTypeSearchLocation(location))
+				ownedLocation2 := location.Clone()
+				ownedLocation := location.Clone()
+				got := volumeTypeContractCall(context.Background(), client, operation, []blockstorage.VolumeTypeReadOption{func(c *blockstorage.VolumeTypeReadOpts) error {
+					loc := ownedLocation.Clone()
+					c.Location = &loc
+					return nil
+				}}, func(c *blockstorage.VolumeTypeSearchOpts) error {
+					loc := ownedLocation2.Clone()
+					c.Location = &loc
+					return nil
+				})
 				if got.nilResult || calls.Load() != 1 {
 					t.Fatal(got, calls.Load())
 				}

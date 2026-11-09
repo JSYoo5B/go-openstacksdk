@@ -26,7 +26,12 @@ func TestRestoreVolumeBackupPrepareOwnsFactoryValuesAndRemainsReusableWithoutHTT
 	value := blockstorage.RestoreVolumeBackupOpts{VolumeID: &volume, Name: &name, Seed: seed, Location: &location}
 	whole := blockstorage.WithRestoreVolumeBackupOptions(value)
 	seedFactory := blockstorage.WithRestoreVolumeBackupSeed(seed)
-	locationFactory := blockstorage.WithRestoreVolumeBackupLocation(location)
+	ownedLocation := location.Clone()
+	locationFactory := func(c *blockstorage.RestoreVolumeBackupOpts) error {
+		loc := ownedLocation.Clone()
+		c.Location = &loc
+		return nil
+	}
 	volume = "caller changed volume"
 	name = "caller changed name"
 	cloudName = "caller changed cloud"

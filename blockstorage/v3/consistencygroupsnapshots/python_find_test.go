@@ -462,7 +462,12 @@ func TestPythonConsistencyGroupSnapshotFindPagingControlsOffsetAndRawCap(t *test
 func TestPythonConsistencyGroupSnapshotFindDeclaredLocationAndEvidenceDoNotAlias(t *testing.T) {
 	name := "cloud"
 	location := resource.CloudLocation{Cloud: &name, Project: resource.CloudProject{ID: json.RawMessage(`"current"`)}}
-	option := consistencygroupsnapshots.WithRecordFindLocation(location)
+	ownedLocation := location.Clone()
+	option := request.Custom(func(c *consistencygroupsnapshots.RecordFindOpts) error {
+		loc := ownedLocation.Clone()
+		c.Location = &loc
+		return nil
+	})
 	*location.Cloud = "changed"
 	body := `{"cgsnapshot":{"id":"server","project_id":"other","unknown":9007199254740993}}`
 	api, calls := snapshotAPI(t, "3.29", func(*http.Request) *http.Response { return snapshotWire(200, body) })
@@ -493,7 +498,12 @@ func TestPythonConsistencyGroupSnapshotFindPreparationCannotBecomeMemberFallback
 		case "version":
 			options = append(options, request.Microversion("invalid"))
 		case "location":
-			options = append(options, consistencygroupsnapshots.WithRecordFindLocation(resource.CloudLocation{Project: resource.CloudProject{ID: json.RawMessage(`bad`)}}))
+			ownedLocation := resource.CloudLocation{Project: resource.CloudProject{ID: json.RawMessage(`bad`)}}.Clone()
+			options = append(options, request.Custom(func(c *consistencygroupsnapshots.RecordFindOpts) error {
+				loc := ownedLocation.Clone()
+				c.Location = &loc
+				return nil
+			}))
 		case "headers":
 			options = append(options, request.Headers(map[string]string{"X-Auth-Token": "wrong"}))
 		}

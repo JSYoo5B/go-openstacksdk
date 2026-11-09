@@ -159,7 +159,7 @@ func (s *Service) GetServerConsole(ctx context.Context, nameOrID string, options
 			if err := errors.Join(e, check()); err != nil {
 				return result, wrap(err)
 			}
-			findOptions = append(findOptions, servers.WithRecordFindLocation(location))
+			findOptions = append(findOptions, request.Custom(func(c *servers.RecordFindOpts) error { loc := location.Clone(); c.Location = &loc; return nil }))
 		}
 		result.Server, err = reader.FindRecord(ctx, nameOrID, findOptions...)
 		if err = errors.Join(err, check()); err != nil {

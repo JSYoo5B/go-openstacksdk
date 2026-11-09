@@ -253,7 +253,8 @@ func TestPythonRoleRecordsOptionSnapshotsFormalsAndPreflightSourceGuards(t *test
 func TestPythonRoleRecordsExplicitLocationOwnsCurrentScopeWithoutUnknownProjectInference(t *testing.T) {
 	cloudName, projectName := "configured", "current"
 	location := resource.CloudLocation{Cloud: &cloudName, Project: resource.CloudProject{ID: json.RawMessage(`"scope"`), Name: &projectName}}
-	option := roles.WithRecordListLocation(location)
+	ownedLocation := location.Clone()
+	option := request.Custom(func(c *roles.RecordListOpts) error { loc := ownedLocation.Clone(); c.Location = &loc; return nil })
 	cloudName = "changed"
 	projectName = "changed"
 	api, _ := roleRecordAPI(t, func(*http.Request) *http.Response {

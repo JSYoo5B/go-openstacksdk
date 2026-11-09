@@ -173,7 +173,12 @@ func TestCinderQuotaRecordLocationAndLiteralProjectURI(t *testing.T) {
 		t.Fatal(err)
 	}
 	name := "configured"
-	result, err := scope.GetRecord(context.Background(), quotasets.WithQuotaReadLocation(resource.CloudLocation{Cloud: &name, Project: resource.CloudProject{ID: json.RawMessage(`"current"`)}}))
+	ownedLocation := resource.CloudLocation{Cloud: &name, Project: resource.CloudProject{ID: json.RawMessage(`"current"`)}}.Clone()
+	result, err := scope.GetRecord(context.Background(), request.Custom(func(c *quotasets.QuotaReadOpts) error {
+		loc := ownedLocation.Clone()
+		c.Location = &loc
+		return nil
+	}))
 	if err != nil || string(result.Resource.Body["project_id"]) != `"project-literal-1"` || string(result.Wire.Body["project_id"]) != `"spoof"` || !strings.Contains(string(result.Resource.Body["location"]), `"id":"project-literal-1"`) {
 		t.Fatal(result, err)
 	}

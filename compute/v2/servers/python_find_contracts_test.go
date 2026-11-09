@@ -857,7 +857,8 @@ func TestPythonServerFindRecordLocationScopeAndFalseyProject(t *testing.T) {
 		var calls []nativeServerCall
 		name, cloudName, region := "project-name", "cloud", "region"
 		location := resource.CloudLocation{Cloud: &cloudName, RegionName: &region, Project: resource.CloudProject{ID: json.RawMessage(`"current"`), Name: &name}}
-		option := servers.WithRecordFindLocation(location)
+		ownedLocation := location.Clone()
+		option := request.Custom(func(c *servers.RecordFindOpts) error { loc := ownedLocation.Clone(); c.Location = &loc; return nil })
 		*location.Project.Name = "mutated"
 		api, _ := serverFindAPI(t, &calls, func(*http.Request) *http.Response {
 			return nativeServerWire(200, `{"server":{"tenant_id":`+item.project+`,"OS-EXT-AZ:availability_zone":false}}`)

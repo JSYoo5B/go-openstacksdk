@@ -70,7 +70,12 @@ func TestRestoreVolumeBackupMergesKnownSeedAndResponseWhileKeepingPhysicalObject
 	cloudName, region, projectName := "configured-cloud", "configured-region", "current-project-name"
 	location := resource.CloudLocation{Cloud: &cloudName, RegionName: &region, Zone: json.RawMessage(`"unused configured zone"`), Project: resource.CloudProject{ID: json.RawMessage(`"current"`), Name: &projectName}}
 	seedFactory := blockstorage.WithRestoreVolumeBackupSeed(seed)
-	locationFactory := blockstorage.WithRestoreVolumeBackupLocation(location)
+	ownedLocation := location.Clone()
+	locationFactory := func(c *blockstorage.RestoreVolumeBackupOpts) error {
+		loc := ownedLocation.Clone()
+		c.Location = &loc
+		return nil
+	}
 	seed[1] = '!'
 	cloudName = "caller changed"
 	location.Project.ID[1] = '!'

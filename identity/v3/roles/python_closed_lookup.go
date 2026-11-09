@@ -25,10 +25,10 @@ type ClosedLookupOpts struct {
 }
 
 // ClosedLookupOption is one option of ResolveRecord: WithClosedLookupOpts,
-// WithClosedLookupDomainID, WithClosedLookupDomainIDJSON,
-// WithClosedLookupLocation, request.Custom over *ClosedLookupOpts,
-// request.Headers (replaces the headers) or request.Microversion.
-// request.Header fails with resource.ErrInvalidOption before HTTP.
+// WithClosedLookupDomainID, WithClosedLookupDomainIDJSON, request.Custom over
+// *ClosedLookupOpts (for example to set Location), request.Headers (replaces
+// the headers) or request.Microversion. request.Header fails with
+// resource.ErrInvalidOption before HTTP.
 type ClosedLookupOption = request.GetCall
 
 var closedLookupCalls = calls.Spec[ClosedLookupOpts]{
@@ -55,10 +55,6 @@ func copyClosedLookupOpts(v ClosedLookupOpts) ClosedLookupOpts {
 func WithClosedLookupOpts(v ClosedLookupOpts) ClosedLookupOption {
 	owned := copyClosedLookupOpts(v)
 	return request.Custom(func(c *ClosedLookupOpts) error { *c = copyClosedLookupOpts(owned); return nil })
-}
-func WithClosedLookupLocation(v resource.CloudLocation) ClosedLookupOption {
-	owned := v.Clone()
-	return request.Custom(func(c *ClosedLookupOpts) error { x := owned.Clone(); c.Location = &x; return nil })
 }
 
 // ResolveRecord supplies only the fixed GET-first Role finder needed by the

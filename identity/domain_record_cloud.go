@@ -44,9 +44,9 @@ type DomainReadOpts struct {
 
 // DomainReadOption is one option of ListDomains and SearchDomains:
 // WithDomainReadOpts, WithDomainReadNameOrID, WithDomainReadFilters,
-// WithDomainReadLocation, request.Headers (replaces the headers),
-// request.Microversion or request.Custom over *DomainReadOpts. Other shared
-// calls fail with resource.ErrInvalidOption before HTTP.
+// request.Headers (replaces the headers), request.Microversion or
+// request.Custom over *DomainReadOpts (for example to set Location). Other
+// shared calls fail with resource.ErrInvalidOption before HTTP.
 type DomainReadOption = request.GetCall
 
 var domainReadCalls = calls.Spec[DomainReadOpts]{
@@ -94,10 +94,6 @@ func WithDomainReadFilters(v json.RawMessage) DomainReadOption {
 		}
 		return nil
 	})
-}
-func WithDomainReadLocation(v resource.CloudLocation) DomainReadOption {
-	owned := v.Clone()
-	return request.Custom(func(c *DomainReadOpts) error { x := owned.Clone(); c.Location = &x; return nil })
 }
 
 // DomainListResult preserves list()'s polymorphic Proxy result. Value is always
@@ -188,7 +184,11 @@ func domainReadListOptions(policy DomainReadOpts) ([]domains.RecordListOption, e
 		options = append(options, request.Microversion(*policy.Microversion))
 	}
 	if policy.Location != nil {
-		options = append(options, domains.WithRecordListLocation(*policy.Location))
+		options = append(options, request.Custom(func(c *domains.RecordListOpts) error {
+			loc := (*policy.Location).Clone()
+			c.Location = &loc
+			return nil
+		}))
 	}
 	return options, nil
 }

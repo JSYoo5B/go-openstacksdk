@@ -21,13 +21,13 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindAllProjects`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindOpts`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindDetails`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindAllProjects`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindLocation`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindLimit`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindMarker`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindMaxItems`
@@ -116,13 +116,13 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindDetails`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindAllProjects`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.FindRecord`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordFindDetails`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordFindAllProjects`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordFindOpts`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordFindLocation`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordFindMaxItems`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordFindPaginated`
 
@@ -189,7 +189,7 @@ Python/Go differences:
 - Pinned find_volume (openstack/block_storage/v3/_proxy.py:855-893) declares details/all_projects rather than **query; Go wire Query is an extra capability and is not the Python list-only all_projects policy. The owned Details and AllProjects options now implement those typed defaults and explicit changes: summary/detail is fallback-only, true is LIST-only all_tenants=true, and false omits the automatic query field.
 - Typed mode options require explicit audited binding capabilities, including explicit false. The SDK rejects typed/raw cross-project conflicts and does not infer a details fetch for summary matches or modify ordinary List; this Go option-ownership policy makes ambiguous inputs fail before HTTP.
 - FindRecord supplements existing native typed APIs with an owned Python-shaped VolumeResourceRecord and independent raw HTTP evidence, not a mutable session-bound Resource or Python response/discovery cache.
-- Leaf location uses already recorded token scope and actual row project/zone; unavailable Connection cloud/region/configured names remain null unless WithRecordFindLocation supplies them. It reuses shared CloudLocation and CinderVolume translators without extra authentication I/O.
+- Leaf location uses already recorded token scope and actual row project/zone; unavailable Connection cloud/region/configured names remain null unless the caller sets RecordFindOpts.Location through request.Custom. It reuses shared CloudLocation and CinderVolume translators without extra authentication I/O.
 - Query/Headers/Location/MaxItems/Paginated expose underlying Resource policies as Go extensions beyond the pinned proxy missing/details/all_projects arguments. Typed/raw scope conflicts are rejected before HTTP.
 - Query descriptor seeds have canonical-attribute priority because a Go map has no kwargs order; incoming HTTP descriptor aliases still consume original JSON order. Non-object actual values fail object local matching without a Python type error.
 - Go fixes finite per-call service discovery/route/header policy and rejects unsafe continuation origin/path/filter changes, cycles and negative limits; dictionary links compatibility is a Go extension. Selected explicit client defaults bypass discovery unchanged.
@@ -432,12 +432,12 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.GroupRecord.Clone`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithRecordFindOpts`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithRecordFindListBasePath`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithRecordFindLocation`
 
 - Safe string identities use the original native getter when query is absent and the audited query getter otherwise; both retain native success codes. Default logical absence is ignored, Compatible falls back only after GET400/403/404, with explicit 404-only/GET-only and strict missing options.
   Tests: `api/find_identity_native_test.go:TestNativeFindIdentitySafeGETReturnsImmediatelyWithNativeGetter`, `api/find_identity_native_test.go:TestNativeFindIdentityFallbackPoliciesAndMissingDefaults`.
@@ -553,12 +553,12 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithRecordFindOpts`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithRecordFindListBasePath`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithRecordFindLocation`
 
 - Safe string identities use the original native getter when query is absent and the audited query getter otherwise; both retain native success codes. Default logical absence is ignored, Compatible falls back only after GET400/403/404, with explicit 404-only/GET-only and strict missing options.
   Tests: `api/find_identity_native_test.go:TestNativeFindIdentitySafeGETReturnsImmediatelyWithNativeGetter`, `api/find_identity_native_test.go:TestNativeFindIdentityFallbackPoliciesAndMissingDefaults`.
@@ -1803,9 +1803,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.Service.DeleteFirewallRuleRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithFirewallDeleteOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithFirewallDeleteFilters`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithFirewallDeleteCurrentLocation`
 
 - The strict lookup of delete_firewall_rule sends the filters on GET /fwaas/firewall_rules/{name_or_id} and on the name list and reports a missing resource as resource.ErrNotFound before any DELETE.
   Tests: `api/find_identity_python_finds_test.go:TestPythonCloudGetFirewallForwardsFiltersToBothRequests`, `api/find_identity_python_finds_test.go:TestPythonFindMissingDefaultsToNilAndStrictIsNotFound`.
@@ -1853,9 +1853,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.Service.DeleteFirewallPolicyRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithFirewallDeleteOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithFirewallDeleteFilters`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithFirewallDeleteCurrentLocation`
 
 - The strict lookup of delete_firewall_policy sends the filters on GET /fwaas/firewall_policies/{name_or_id} and on the name list and reports a missing resource as resource.ErrNotFound before any DELETE.
   Tests: `api/find_identity_python_finds_test.go:TestPythonCloudGetFirewallForwardsFiltersToBothRequests`, `api/find_identity_python_finds_test.go:TestPythonFindMissingDefaultsToNilAndStrictIsNotFound`.
@@ -1903,9 +1903,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.Service.DeleteFirewallGroupRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithFirewallDeleteOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithFirewallDeleteFilters`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithFirewallDeleteCurrentLocation`
 
 - The strict lookup of delete_firewall_group sends the filters on GET /fwaas/firewall_groups/{name_or_id} and on the name list and reports a missing resource as resource.ErrNotFound before any DELETE.
   Tests: `api/find_identity_python_finds_test.go:TestPythonCloudGetFirewallForwardsFiltersToBothRequests`, `api/find_identity_python_finds_test.go:TestPythonFindMissingDefaultsToNilAndStrictIsNotFound`.

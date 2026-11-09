@@ -321,8 +321,18 @@ func TestConnectionVolumeTypesOwnedFactoriesAndOriginalOptionSliceSnapshots(t *t
 					read = []blockstorage.VolumeTypeReadOption{blockstorage.WithVolumeTypeReadOptions(blockstorage.VolumeTypeReadOpts{Location: &supplied})}
 					search = []blockstorage.VolumeTypeSearchOption{blockstorage.WithVolumeTypeSearchOptions(blockstorage.VolumeTypeSearchOpts{Location: &supplied})}
 				} else {
-					read = []blockstorage.VolumeTypeReadOption{blockstorage.WithVolumeTypeReadLocation(supplied)}
-					search = []blockstorage.VolumeTypeSearchOption{blockstorage.WithVolumeTypeSearchLocation(supplied)}
+					ownedLocation := supplied.Clone()
+					read = []blockstorage.VolumeTypeReadOption{func(c *blockstorage.VolumeTypeReadOpts) error {
+						loc := ownedLocation.Clone()
+						c.Location = &loc
+						return nil
+					}}
+					ownedLocation2 := supplied.Clone()
+					search = []blockstorage.VolumeTypeSearchOption{func(c *blockstorage.VolumeTypeSearchOpts) error {
+						loc := ownedLocation2.Clone()
+						c.Location = &loc
+						return nil
+					}}
 				}
 				callbacks, injected := 0, 0
 				if factory == "callbacks" {
@@ -621,8 +631,18 @@ func TestConnectionVolumeTypesInvalidRecordedScopePreventsSelectionButOwnedLocat
 			}
 			connectionTypeContractCheckOperation(t, operation, err)
 			owned := resource.CloudLocation{Project: resource.CloudProject{ID: json.RawMessage(`"owned-project"`)}}
-			read = append(read, blockstorage.WithVolumeTypeReadLocation(owned))
-			search = append(search, blockstorage.WithVolumeTypeSearchLocation(owned))
+			ownedLocation := owned.Clone()
+			read = append(read, func(c *blockstorage.VolumeTypeReadOpts) error {
+				loc := ownedLocation.Clone()
+				c.Location = &loc
+				return nil
+			})
+			ownedLocation2 := owned.Clone()
+			search = append(search, func(c *blockstorage.VolumeTypeSearchOpts) error {
+				loc := ownedLocation2.Clone()
+				c.Location = &loc
+				return nil
+			})
 			cloud.Mux.HandleFunc("GET /connection-types/v3/project/types", func(w http.ResponseWriter, r *http.Request) {
 				testcloud.JSON(w, 200, `{"volume_types":[{"id":"type"}]}`)
 			})

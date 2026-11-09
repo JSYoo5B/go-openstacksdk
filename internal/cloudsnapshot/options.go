@@ -64,18 +64,6 @@ func WithListOptions(value ListOptions) ListOption {
 	return request.Custom(withValue(value, cloneList))
 }
 
-func WithReadLocation(value resource.CloudLocation) ReadOption {
-	owned := value.Clone()
-	return func(target *ReadOptions) error { copy := owned.Clone(); target.Location = &copy; return nil }
-}
-func WithSearchLocation(value resource.CloudLocation) SearchOption {
-	owned := value.Clone()
-	return func(target *SearchOptions) error { copy := owned.Clone(); target.Location = &copy; return nil }
-}
-func WithListLocation(value resource.CloudLocation) ListOption {
-	owned := value.Clone()
-	return request.Custom(func(target *ListOptions) error { copy := owned.Clone(); target.Location = &copy; return nil })
-}
 func WithSearchFilters(value json.RawMessage) SearchOption {
 	owned := json.RawMessage(bytes.Clone(value))
 	return func(target *SearchOptions) error { target.Filters = cloneRaw(&owned); return nil }

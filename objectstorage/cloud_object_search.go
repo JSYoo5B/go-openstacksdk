@@ -67,10 +67,7 @@ func WithObjectSearchExpression(value string) ObjectSearchOption {
 	raw, _ := json.Marshal(value)
 	return WithObjectSearchFiltersJSON(raw)
 }
-func WithObjectSearchLocation(value resource.CloudLocation) ObjectSearchOption {
-	owned := value.Clone()
-	return func(c *ObjectSearchOpts) error { snapshot := owned.Clone(); c.Location = &snapshot; return nil }
-}
+
 func WithObjectSearchHeaders(value map[string]string) ObjectSearchOption {
 	owned := maps.Clone(value)
 	return func(c *ObjectSearchOpts) error {

@@ -195,7 +195,12 @@ func TestConnectionCloudLocationOverrideAndOperationLocationFactoriesOwnInputs(t
 	location.Project.ID[0] = '!'
 	overrideName := "per-call"
 	perCall := resource.CloudLocation{Project: resource.CloudProject{ID: json.RawMessage(`"owned-scope"`), Name: &overrideName}}
-	override := blockstorage.WithVolumeSearchLocation(perCall)
+	ownedLocation := perCall.Clone()
+	override := func(c *blockstorage.VolumeSearchOpts) error {
+		loc := ownedLocation.Clone()
+		c.Location = &loc
+		return nil
+	}
 	overrideName = "caller"
 	perCall.Project.ID[0] = '!'
 	cloud.Mux.HandleFunc("GET /connection-search/v3/p/volumes/detail", func(w http.ResponseWriter, r *http.Request) {

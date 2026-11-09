@@ -216,7 +216,8 @@ func TestPythonGroupUserRecordsOpaqueProxyAndStandaloneProfileIsolation(t *testi
 func TestPythonGroupUserRecordsLoadedLocalFilterAndExplicitLocation(t *testing.T) {
 	name, project := "configured", "current"
 	location := resource.CloudLocation{Cloud: &name, Project: resource.CloudProject{ID: json.RawMessage(`"scope"`), Name: &project}}
-	option := sdk.WithGroupRecordListLocation(location)
+	ownedLocation := location.Clone()
+	option := request.Custom(func(c *sdk.GroupRecordListOpts) error { loc := ownedLocation.Clone(); c.Location = &loc; return nil })
 	name = "changed"
 	project = "changed"
 	api, _ := groupUserAPI(t, func(*http.Request) *http.Response {

@@ -93,7 +93,7 @@ func ReadVolumeIDWithLocation(ctx context.Context, conn *sdk.Connection, nameOrI
     }
     result, err := conn.GetVolumeID(ctx,
         blockstorage.GetVolumeIDRequest{NameOrID: nameOrID},
-        blockstorage.WithVolumeReadLocation(location))
+        func(c *blockstorage.VolumeReadOpts) error { loc := location.Clone(); c.Location = &loc; return nil })
     if err != nil { return err }
     fmt.Println(string(result.ID))
     return nil

@@ -31,10 +31,10 @@ type FirewallDeleteOpts struct {
 
 // FirewallDeleteOption is one option of DeleteFirewallRuleRecord,
 // DeleteFirewallPolicyRecord and DeleteFirewallGroupRecord:
-// WithFirewallDeleteOpts, WithFirewallDeleteFilters,
-// WithFirewallDeleteCurrentLocation, request.Headers (replaces the headers),
-// request.Microversion or request.Custom over *FirewallDeleteOpts. Other
-// shared calls fail with resource.ErrInvalidOption before HTTP.
+// WithFirewallDeleteOpts, WithFirewallDeleteFilters, request.Headers (replaces
+// the headers), request.Microversion or request.Custom over
+// *FirewallDeleteOpts (for example to set CurrentLocation). Other shared calls
+// fail with resource.ErrInvalidOption before HTTP.
 type FirewallDeleteOption = request.GetCall
 
 var firewallDeleteCalls = calls.Spec[FirewallDeleteOpts]{
@@ -62,10 +62,6 @@ func WithFirewallDeleteOpts(v FirewallDeleteOpts) FirewallDeleteOption {
 func WithFirewallDeleteFilters(v json.RawMessage) FirewallDeleteOption {
 	owned := bytes.Clone(v)
 	return request.Custom(func(c *FirewallDeleteOpts) error { c.Filters = bytes.Clone(owned); return nil })
-}
-func WithFirewallDeleteCurrentLocation(v resource.CloudLocation) FirewallDeleteOption {
-	owned := v.Clone()
-	return request.Custom(func(c *FirewallDeleteOpts) error { x := owned.Clone(); c.CurrentLocation = &x; return nil })
 }
 
 // FirewallRecord contains the Source view and independent physical lookup proof.

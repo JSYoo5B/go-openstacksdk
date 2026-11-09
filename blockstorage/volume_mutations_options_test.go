@@ -68,7 +68,12 @@ func TestVolumeMutationOriginalOptionsOwnSlicesPointersFieldsAndHeadersAcrossBot
 			var bRetained *blockstorage.SetVolumeBootableOpts
 			var updates []blockstorage.UpdateVolumeOption
 			var boots []blockstorage.SetVolumeBootableOption
-			updates = []blockstorage.UpdateVolumeOption{blockstorage.WithUpdateVolumeLocation(location), blockstorage.WithUpdateVolumeDescription("requested"), func(next *blockstorage.UpdateVolumeOpts) error {
+			ownedLocation := location.Clone()
+			updates = []blockstorage.UpdateVolumeOption{func(c *blockstorage.UpdateVolumeOpts) error {
+				loc := ownedLocation.Clone()
+				c.Location = &loc
+				return nil
+			}, blockstorage.WithUpdateVolumeDescription("requested"), func(next *blockstorage.UpdateVolumeOpts) error {
 				uRetained = next
 				order = append(order, 1)
 				updates[3] = func(*blockstorage.UpdateVolumeOpts) error { return errors.New("replaced callback") }
@@ -85,7 +90,12 @@ func TestVolumeMutationOriginalOptionsOwnSlicesPointersFieldsAndHeadersAcrossBot
 				}
 				return nil
 			}}
-			boots = []blockstorage.SetVolumeBootableOption{blockstorage.WithSetVolumeBootableLocation(location), blockstorage.WithSetVolumeBootable(false), func(next *blockstorage.SetVolumeBootableOpts) error {
+			ownedLocation2 := location.Clone()
+			boots = []blockstorage.SetVolumeBootableOption{func(c *blockstorage.SetVolumeBootableOpts) error {
+				loc := ownedLocation2.Clone()
+				c.Location = &loc
+				return nil
+			}, blockstorage.WithSetVolumeBootable(false), func(next *blockstorage.SetVolumeBootableOpts) error {
 				bRetained = next
 				order = append(order, 1)
 				boots[3] = func(*blockstorage.SetVolumeBootableOpts) error { return errors.New("replaced callback") }

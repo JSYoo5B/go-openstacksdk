@@ -27,7 +27,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithPollInterval`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithWaitStrategy`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPCreateSource`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPCreateLocation`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPCreateStrict`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPCreateDirectGet`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPCreateTimeout`

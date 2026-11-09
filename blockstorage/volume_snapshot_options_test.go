@@ -138,35 +138,26 @@ func TestVolumeSnapshotPreparePreservesOmissionAndExplicitFalseZeroEmptyPolicies
 
 func TestVolumeSnapshotLocationFactoriesOwnEveryNullableComponentAndAreReusable(t *testing.T) {
 	for _, family := range []string{"read", "search", "list"} {
-		for _, factory := range []string{"options", "location"} {
+		for _, factory := range []string{"options"} {
 			t.Run(family+"/"+factory, func(t *testing.T) {
 				location := vsopLocation()
 				expected := vsopLocationJSON(t, &location)
 				var prepare func() (*resource.CloudLocation, error)
 				switch family {
 				case "read":
-					option := WithVolumeSnapshotReadLocation(location)
-					if factory == "options" {
-						option = WithVolumeSnapshotReadOptions(VolumeSnapshotReadOpts{Location: &location})
-					}
+					option := WithVolumeSnapshotReadOptions(VolumeSnapshotReadOpts{Location: &location})
 					prepare = func() (*resource.CloudLocation, error) {
 						value, err := PrepareVolumeSnapshotReadOptions(context.Background(), option)
 						return value.Location, err
 					}
 				case "search":
-					option := WithVolumeSnapshotSearchLocation(location)
-					if factory == "options" {
-						option = WithVolumeSnapshotSearchOptions(VolumeSnapshotSearchOpts{Location: &location})
-					}
+					option := WithVolumeSnapshotSearchOptions(VolumeSnapshotSearchOpts{Location: &location})
 					prepare = func() (*resource.CloudLocation, error) {
 						value, err := PrepareVolumeSnapshotSearchOptions(context.Background(), option)
 						return value.Location, err
 					}
 				case "list":
-					option := WithVolumeSnapshotListLocation(location)
-					if factory == "options" {
-						option = WithVolumeSnapshotListOptions(VolumeSnapshotListOpts{Location: &location})
-					}
+					option := WithVolumeSnapshotListOptions(VolumeSnapshotListOpts{Location: &location})
 					prepare = func() (*resource.CloudLocation, error) {
 						value, err := PrepareVolumeSnapshotListOptions(context.Background(), option)
 						return value.Location, err
@@ -300,11 +291,13 @@ func TestVolumeSnapshotIndividualListFactoriesRemainIndependentAndLaterOptionsOv
 
 func TestVolumeSnapshotWholeOptionsReplaceEarlierPolicyRatherThanMerging(t *testing.T) {
 	location := vsopLocation()
-	read, err := PrepareVolumeSnapshotReadOptions(context.Background(), WithVolumeSnapshotReadLocation(location), WithVolumeSnapshotReadOptions(VolumeSnapshotReadOpts{}))
+	ownedLocation := location.Clone()
+	read, err := PrepareVolumeSnapshotReadOptions(context.Background(), func(c *VolumeSnapshotReadOpts) error { loc := ownedLocation.Clone(); c.Location = &loc; return nil }, WithVolumeSnapshotReadOptions(VolumeSnapshotReadOpts{}))
 	if err != nil || read.Location != nil {
 		t.Fatal(read, err)
 	}
-	search, err := PrepareVolumeSnapshotSearchOptions(context.Background(), WithVolumeSnapshotSearchLocation(location), WithVolumeSnapshotSearchFilters(json.RawMessage(`false`)), WithVolumeSnapshotSearchOptions(VolumeSnapshotSearchOpts{}))
+	ownedLocation2 := location.Clone()
+	search, err := PrepareVolumeSnapshotSearchOptions(context.Background(), func(c *VolumeSnapshotSearchOpts) error { loc := ownedLocation2.Clone(); c.Location = &loc; return nil }, WithVolumeSnapshotSearchFilters(json.RawMessage(`false`)), WithVolumeSnapshotSearchOptions(VolumeSnapshotSearchOpts{}))
 	if err != nil || search.Location != nil || search.Filters != nil {
 		t.Fatal(search, err)
 	}

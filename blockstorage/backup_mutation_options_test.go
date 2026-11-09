@@ -133,8 +133,18 @@ func TestBackupMutationOptionsReuseFactoriesConcurrentlyWithOwnedLocations(t *te
 	name := "shared"
 	option := blockstorage.WithCreateVolumeBackupName(name)
 	location := resource.CloudLocation{Project: resource.CloudProject{ID: json.RawMessage(`"original"`)}}
-	createLocation := blockstorage.WithCreateVolumeBackupLocation(location)
-	deleteLocation := blockstorage.WithDeleteVolumeBackupLocation(location)
+	ownedLocation := location.Clone()
+	createLocation := func(c *blockstorage.CreateVolumeBackupOpts) error {
+		loc := ownedLocation.Clone()
+		c.Location = &loc
+		return nil
+	}
+	ownedLocation2 := location.Clone()
+	deleteLocation := func(c *blockstorage.DeleteVolumeBackupOpts) error {
+		loc := ownedLocation2.Clone()
+		c.Location = &loc
+		return nil
+	}
 	var wg sync.WaitGroup
 	for range 24 {
 		wg.Add(1)

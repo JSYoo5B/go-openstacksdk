@@ -65,7 +65,12 @@ func TestConnectionSwiftObjectSearchPerCallLocationRemainsOwnedAndCallbackRunsOn
 	fixture.Mux.HandleFunc("GET /swift/v1/AUTH_p/bucket", func(w http.ResponseWriter, r *http.Request) { testcloud.JSON(w, 200, `[{"name":"alpha"}]`) })
 	cloudName := "per-call"
 	location := resource.CloudLocation{Cloud: &cloudName}
-	option := objectstorage.WithObjectSearchLocation(location)
+	ownedLocation := location.Clone()
+	option := func(c *objectstorage.ObjectSearchOpts) error {
+		loc := ownedLocation.Clone()
+		c.Location = &loc
+		return nil
+	}
 	cloudName = "caller changed"
 	callbacks := 0
 	result, err := conn.SearchObjects(context.Background(), "bucket", option, func(*objectstorage.ObjectSearchOpts) error { callbacks++; return nil })

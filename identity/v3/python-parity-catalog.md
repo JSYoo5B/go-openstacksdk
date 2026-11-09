@@ -493,6 +493,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/limits.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/limits.API.List`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/limits.API.All`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithQuery`
@@ -505,7 +506,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/request.BasePath`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/limits.WithRecordListJMESPath`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/limits.WithRecordListLocation`
 - `github.com/JSYoo5B/go-openstacksdk/request.Limit`
 - `github.com/JSYoo5B/go-openstacksdk/request.Marker`
 - `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
@@ -535,7 +535,7 @@ Python/Go differences:
 - Python takes an ID string or Resource and returns a mutable Resource; Go takes an ID string and returns the native Gophercloud model pointer.
 - Python filters domain_id locally because Limit does not map it as a query parameter; Go WithQuery sends domain_id to Keystone as a server filter.
 - Source returns mutable Resource instances and polymorphic generator results. Go preserves typed native List/All separately and exposes owned ListRecords/AllRecords + ProxyListRecords with complete Source JSON view and original evidence; truthy JMESPath uses the explicit polymorphic method. Go iter.Seq2 can be iterated again to repeat the captured operation; Python generator consumption is one-shot.
-- A standalone native client has no Python Connection: default computed location is null, and WithRecordListLocation supplies immutable recorded facts as an explicit Go extension. No automatic cloud/project name inference, token lookup, auth scope change or SDK-R1/C1 closure is claimed.
+- A standalone native client has no Python Connection: default computed location is null, and setting RecordListOpts.Location through request.Custom supplies recorded facts as an explicit Go extension. No automatic cloud/project name inference, token lookup, auth scope change or SDK-R1/C1 closure is claimed.
 - Go validates functional options and JSON transport values before HTTP, requires safe fixed-origin service-relative paths, finite representable identifiers and nonnegative integer pagination amounts. Unsafe URLs/constructor collisions/malformed JSON become explicit receipt-bearing Go errors rather than Python exception classes or odd negative/noninteger pagination behavior.
 - This class has no maximum microversion/discovery profile. Go honors selected native default and typed per-call microversion/header options while guarding selected source and SDK-owned auth/route/protocol headers. Dynamic Connection/session/Resource dirty/cache/warning contracts remain tracked at whole SDK level.
 
@@ -547,6 +547,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.API.List`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.API.All`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithQuery`
@@ -559,7 +560,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/request.BasePath`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.WithRecordListLocation`
 - `github.com/JSYoo5B/go-openstacksdk/request.Limit`
 - `github.com/JSYoo5B/go-openstacksdk/request.Marker`
 - `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
@@ -602,6 +602,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.API.List`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.API.All`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithQuery`
@@ -614,7 +615,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/request.BasePath`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.WithRecordListJMESPath`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.WithRecordListLocation`
 - `github.com/JSYoo5B/go-openstacksdk/request.Limit`
 - `github.com/JSYoo5B/go-openstacksdk/request.Marker`
 - `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
@@ -643,7 +643,7 @@ Python/Go differences:
 
 - Python takes an ID string or Resource and returns a mutable Resource; Go takes an ID string and returns the native Gophercloud model pointer.
 - Source returns mutable Resource instances and polymorphic generator results. Go preserves typed native List/All separately and exposes owned ListRecords/AllRecords + ProxyListRecords with complete Source JSON view and original evidence; truthy JMESPath uses the explicit polymorphic method. Go iter.Seq2 can be iterated again to repeat the captured operation; Python generator consumption is one-shot.
-- A standalone native client has no Python Connection: default computed location is null, and WithRecordListLocation supplies immutable recorded facts as an explicit Go extension. No automatic cloud/project name inference, token lookup, auth scope change or SDK-R1/C1 closure is claimed.
+- A standalone native client has no Python Connection: default computed location is null, and setting RecordListOpts.Location through request.Custom supplies recorded facts as an explicit Go extension. No automatic cloud/project name inference, token lookup, auth scope change or SDK-R1/C1 closure is claimed.
 - Go validates functional options and JSON transport values before HTTP, requires safe fixed-origin service-relative paths, finite representable identifiers and nonnegative integer pagination amounts. Unsafe URLs/constructor collisions/malformed JSON become explicit receipt-bearing Go errors rather than Python exception classes or odd negative/noninteger pagination behavior.
 - This class has no maximum microversion/discovery profile. Go honors selected native default and typed per-call microversion/header options while guarding selected source and SDK-owned auth/route/protocol headers. Dynamic Connection/session/Resource dirty/cache/warning contracts remain tracked at whole SDK level.
 
@@ -655,6 +655,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.API.List`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.API.All`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithQuery`
@@ -664,7 +665,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/request.BasePath`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.WithRecordListJMESPath`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/services.WithRecordListLocation`
 - `github.com/JSYoo5B/go-openstacksdk/request.Limit`
 - `github.com/JSYoo5B/go-openstacksdk/request.Marker`
 - `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`

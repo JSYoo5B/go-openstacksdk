@@ -18,7 +18,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithContainerSearchName`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithContainerSearchFiltersJSON`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithContainerSearchExpression`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithContainerSearchLocation`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.SearchContainers`
 
 - ListRecords sends GET on the account root with Accept application/json, adds prefix only when WithRecordListPrefix is given, and follows the X-Account-Container-Count marker continuation with the prefix kept until an empty page.

@@ -40,9 +40,9 @@ type GroupSearchOpts struct {
 }
 
 // GroupSearchOption is one option of SearchGroups: WithGroupSearchOpts,
-// WithGroupSearchDomainID, WithGroupSearchFilters, WithGroupSearchLocation,
-// request.Headers (replaces the headers), request.Microversion or
-// request.Custom over *GroupSearchOpts. Other shared calls fail with
+// WithGroupSearchDomainID, WithGroupSearchFilters, request.Headers (replaces
+// the headers), request.Microversion or request.Custom over *GroupSearchOpts
+// (for example to set Location). Other shared calls fail with
 // resource.ErrInvalidOption before HTTP.
 type GroupSearchOption = request.GetCall
 
@@ -89,10 +89,7 @@ func WithGroupSearchFilters(v json.RawMessage) GroupSearchOption {
 		return nil
 	})
 }
-func WithGroupSearchLocation(v resource.CloudLocation) GroupSearchOption {
-	owned := v.Clone()
-	return request.Custom(func(c *GroupSearchOpts) error { x := owned.Clone(); c.Location = &x; return nil })
-}
+
 func groupSearchInvalid(format string, args ...any) error {
 	return fmt.Errorf("%w: %s", resource.ErrInvalidOption, fmt.Sprintf(format, args...))
 }
@@ -179,7 +176,7 @@ func (c *GroupReadCloud) SearchGroups(ctx context.Context, nameOrID string, opti
 		opts = append(opts, request.Microversion(*policy.Microversion))
 	}
 	if policy.Location != nil {
-		opts = append(opts, groups.WithRecordListLocation(*policy.Location))
+		opts = append(opts, request.Custom(func(c *groups.RecordListOpts) error { loc := (*policy.Location).Clone(); c.Location = &loc; return nil }))
 	}
 	result := &GroupSearchResult{Inventory: make([]*groups.GroupRecord, 0)}
 	rows := make([]json.RawMessage, 0)

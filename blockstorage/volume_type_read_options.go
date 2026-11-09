@@ -18,11 +18,6 @@ func WithVolumeTypeReadOptions(value VolumeTypeReadOpts) VolumeTypeReadOption {
 	return func(target *VolumeTypeReadOpts) error { *target = cloneVolumeTypeReadOptions(owned); return nil }
 }
 
-func WithVolumeTypeReadLocation(value resource.CloudLocation) VolumeTypeReadOption {
-	owned := value.Clone()
-	return func(target *VolumeTypeReadOpts) error { copy := owned.Clone(); target.Location = &copy; return nil }
-}
-
 // PrepareVolumeTypeReadOptions executes original callbacks once without selecting
 // a service. Each retained value and original callback slice is copied.
 func PrepareVolumeTypeReadOptions(ctx context.Context, options ...VolumeTypeReadOption) (VolumeTypeReadOpts, error) {

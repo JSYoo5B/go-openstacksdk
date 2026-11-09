@@ -19,12 +19,12 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithRecordFindOpts`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithRecordFindListBasePath`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithRecordFindLocation`
 
 - Safe string identities use the original native getter when query is absent and the audited query getter otherwise; both retain native success codes. Default logical absence is ignored, Compatible falls back only after GET400/403/404, with explicit 404-only/GET-only and strict missing options.
   Tests: `api/find_identity_native_test.go:TestNativeFindIdentitySafeGETReturnsImmediatelyWithNativeGetter`, `api/find_identity_native_test.go:TestNativeFindIdentityFallbackPoliciesAndMissingDefaults`.

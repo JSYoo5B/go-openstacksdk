@@ -21,12 +21,12 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.GroupRecord.Clone`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithRecordFindOpts`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithRecordFindListBasePath`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithRecordFindLocation`
 
 - Safe string identities use the original native getter when query is absent and the audited query getter otherwise; both retain native success codes. Default logical absence is ignored, Compatible falls back only after GET400/403/404, with explicit 404-only/GET-only and strict missing options.
   Tests: `api/find_identity_native_test.go:TestNativeFindIdentitySafeGETReturnsImmediatelyWithNativeGetter`, `api/find_identity_native_test.go:TestNativeFindIdentityFallbackPoliciesAndMissingDefaults`.
@@ -94,6 +94,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithListOptions`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.GroupRecord.Clone`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.API.ListRecords`
@@ -109,7 +110,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/request.BasePath`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithRecordListJMESPath`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithRecordListLocation`
 
 - List sends the single GET groups that Python groups() sends without arguments, maps the Python query names domain_id and name through ListOpts or request.Query, sends a limit without a marker follow-up, and rejects local Body filters before HTTP.
   Tests: `identity/v3/groups/python_parity_test.go:TestPythonGroupListRequests`.
@@ -156,9 +156,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithGroupSearchOpts`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithGroupSearchDomainID`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithGroupSearchFilters`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithGroupSearchLocation`
 
 - search_groups lists with the same GET /v3/groups (with domain_id when given) as list_groups before filtering locally.
   Tests: `identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityDomainGroupRoleHelpers`.

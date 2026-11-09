@@ -27,10 +27,10 @@ type SourceCloudListOpts struct {
 }
 
 // SourceCloudListOption is one option of ListSourceValues:
-// WithSourceCloudListOpts, WithSourceCloudListFilters,
-// WithSourceCloudListLocation, request.Headers (replaces the headers),
-// request.Microversion or request.Custom over *SourceCloudListOpts. Other shared
-// calls fail with resource.ErrInvalidOption before HTTP.
+// WithSourceCloudListOpts, WithSourceCloudListFilters, request.Headers
+// (replaces the headers), request.Microversion or request.Custom over
+// *SourceCloudListOpts (for example to set CloudLocation). Other shared calls
+// fail with resource.ErrInvalidOption before HTTP.
 type SourceCloudListOption = request.GetCall
 
 func copySourceCloudListOpts(value SourceCloudListOpts) SourceCloudListOpts {
@@ -74,10 +74,6 @@ func withSourceCloudListHeaders(value map[string]string) func(*SourceCloudListOp
 }
 func withSourceCloudListMicroversion(value string) func(*SourceCloudListOpts) error {
 	return func(c *SourceCloudListOpts) error { v := value; c.Microversion = &v; return nil }
-}
-func WithSourceCloudListLocation(value resource.CloudLocation) SourceCloudListOption {
-	owned := value.Clone()
-	return request.Custom(func(c *SourceCloudListOpts) error { v := owned.Clone(); c.CloudLocation = &v; return nil })
 }
 
 // SourceCloudListResult is the actual Python list() conversion. Values can

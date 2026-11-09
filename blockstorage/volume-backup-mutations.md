@@ -23,7 +23,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeBackupSnapshotID`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeBackupWait`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeBackupWaitPolicy`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeBackupLocation`
 
 - All fixed six body fields are present: nullable name/description/snapshot_id plus literal volume_id, explicit forcefalse/incrementalfalse defaults. No generated name/description, Volume/Snapshot resolver or extra raw kwargs/native builder; empty/slashed body IDs are forwarded after stringUTF8 validation.
   Tests: `blockstorage/backup_mutation_contract_test.go:TestCreateVolumeBackupDefaultsSendSixLiteralFieldsWithoutResolvers`, `blockstorage/backup_mutation_contract_test.go:TestCreateVolumeBackupConcreteOptionsPreserveEmptyFalseAndLiteralSnapshot`, `connectiontest/connection_volume_backup_mutations_test.go:TestConnectionBackupMutationCreateTextValidationPrecedesCinderSelection`.
@@ -81,7 +80,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithDeleteVolumeBackupForce`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithDeleteVolumeBackupWait`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithDeleteVolumeBackupWaitPolicy`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithDeleteVolumeBackupLocation`
 
 - Empty string input returns completed Deletedfalse after valid context/original callbacks, selecting no client/location/service/waitpolicy and allowing nil direct client/nilConnection. Successful completed lookup absence is false; any lookup/operation error leaves Deletednil.
   Tests: `blockstorage/backup_mutation_contract_test.go:TestDeleteVolumeBackupEmptyInputRunsOriginalsWithoutServiceOrLocation`, `blockstorage/backup_mutation_contract_test.go:TestDeleteVolumeBackupLookupCompletionAndLogicalSeedControlMutation`, `connectiontest/connection_volume_backup_mutations_test.go:TestConnectionBackupMutationEmptyDeleteIsServiceFreeEvenForNilConnection`, `blockstorage/backup_mutation_options_test.go:TestBackupMutationOptionsJoinCancellationAndOriginalErrors`.
@@ -279,7 +277,7 @@ func Direct(ctx context.Context, cinder *gophercloud.ServiceClient, volumeID str
     }
     result, err := blockstorage.CreateVolumeBackup(ctx, cinder,
         blockstorage.CreateVolumeBackupRequest{VolumeID: volumeID},
-        blockstorage.WithCreateVolumeBackupLocation(location),
+        func(c *blockstorage.CreateVolumeBackupOpts) error { loc := location.Clone(); c.Location = &loc; return nil },
         blockstorage.WithCreateVolumeBackupForce(false),
         blockstorage.WithCreateVolumeBackupWait(false))
     InspectCreate(result)

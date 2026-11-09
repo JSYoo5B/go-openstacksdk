@@ -229,7 +229,12 @@ func TestCreateVolumeSnapshotValidatesConsumedInputBeforePOSTButIgnoresShadowedA
 			case "invalid utf8 volume":
 				input.VolumeID = string([]byte{0xff})
 			case "invalid location":
-				options = append(options, blockstorage.WithCreateVolumeSnapshotLocation(resource.CloudLocation{Project: resource.CloudProject{ID: json.RawMessage{}}}))
+				ownedLocation := resource.CloudLocation{Project: resource.CloudProject{ID: json.RawMessage{}}}.Clone()
+				options = append(options, func(c *blockstorage.CreateVolumeSnapshotOpts) error {
+					loc := ownedLocation.Clone()
+					c.Location = &loc
+					return nil
+				})
 			case "shadowed invalid alias":
 				options = append(options, blockstorage.WithCreateVolumeSnapshotFields(map[string]json.RawMessage{"name": json.RawMessage("null"), "display_name": json.RawMessage{}}))
 			}

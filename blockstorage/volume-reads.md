@@ -16,7 +16,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.ListVolumes`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareVolumeReadOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeReadOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeReadLocation`
 
 - ListVolumes is the direct cloud complete detailed list. Its initial bodyless GET200 is /volumes/detail without identity/status/all-project/page/filter controls; complete materialization returns all source rows in order and never performs member GETs or name resolution. The deprecated Python cache argument is warning-only/no-op and is omitted in Go.
   Tests: `blockstorage/volume_reads_contract_test.go:TestListVolumesMaterializesAllPagesAndOwnsNormalizedAndWireRows`, `connectiontest/connection_volume_reads_test.go:TestConnectionVolumeReadsCachedCinderOriginalOptionsPrecedeSelection`.
@@ -53,7 +52,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.GetVolumeByID`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareVolumeReadOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeReadOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeReadLocation`
 
 - GetVolumeByIDRequest.ID is a literal direct member identifier, never a name or a Name Ref. Required UTF-8/control/Unicode-whitespace/single unescaped segment validation protects the fixed bodyless GET200 /volumes/{escaped-id}; no query/list/search/ref lookup is performed.
   Tests: `blockstorage/volume_reads_contract_test.go:TestGetVolumeByIDUsesOnlyLiteralMemberAndKeepsResponseIdentity`, `blockstorage/volume_reads_contract_test.go:TestGetVolumeByIDAcceptsUnicodeLiteralSingleSegment`, `blockstorage/volume_reads_options_test.go:TestGetVolumeByIDRejectsUnsafeIDsAfterOptionsWithoutHTTP`.
@@ -90,7 +88,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.VolumeExists`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareVolumeReadOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeReadOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeReadLocation`
 
 - VolumeExists performs default unfiltered exact GetVolume lookup and tests the returned resource identity against nil. Any successfully returned raw resource, including canonical empty volume {}, completes Exists=true independently of body truthiness or normalized ID presence. Successful completed absence completes Exists=false; every error leaves Exists=nil and no successful Value/Volume.
   Tests: `blockstorage/volume_reads_contract_test.go:TestVolumeExistsDistinguishesPresentResourceFromSuccessfulAbsence`, `connectiontest/connection_volume_reads_test.go:TestConnectionVolumeReadsMember404IsErrorButCompletedExistenceAbsenceIsFalse`.
@@ -291,7 +288,7 @@ func ListWithLocation(ctx context.Context, conn *sdk.Connection) error {
             ID: json.RawMessage(`"project-id"`), Name: &project,
         },
     }
-    result, err := conn.ListVolumes(ctx, blockstorage.WithVolumeReadLocation(location))
+    result, err := conn.ListVolumes(ctx, func(c *blockstorage.VolumeReadOpts) error { loc := location.Clone(); c.Location = &loc; return nil })
     if err != nil { return err }
     fmt.Println(string(result.Value))
     return nil

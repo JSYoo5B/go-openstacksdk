@@ -18,9 +18,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.WithRouterInterfaceReadOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithRouterInterfaceType`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithRouterInterfaceTypeJSON`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithRouterInterfaceReadCurrentLocation`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.ListRecords`
 
 - Library reads literal router dictionary id and sends only the declared device_id query without router member fetch/name lookup/response seeds. Null/bool/number/list/dict ID query behavior, missing/nonmapping input errors and real untyped owner values follow Source JSON-domain semantics.

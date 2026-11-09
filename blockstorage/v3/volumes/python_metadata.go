@@ -35,9 +35,10 @@ type RecordMetadataOpts struct {
 
 // RecordMetadataOption is one option of FetchMetadataRecord,
 // GetMetadataRecord, SetMetadataRecord and DeleteMetadataRecord:
-// WithRecordMetadataHeaders, WithRecordMetadataSeed, WithRecordMetadataLocation, request.Header (one header merged like
-// WithRecordMetadataHeaders) or request.Custom over *RecordMetadataOpts.
-// Other shared calls fail with resource.ErrInvalidOption before HTTP.
+// WithRecordMetadataHeaders, WithRecordMetadataSeed, request.Header (one
+// header merged like WithRecordMetadataHeaders) or request.Custom over
+// *RecordMetadataOpts (for example to set Location). Other shared calls fail
+// with resource.ErrInvalidOption before HTTP.
 type RecordMetadataOption = request.GetCall
 
 var recordMetadataCalls = calls.Spec[RecordMetadataOpts]{
@@ -64,10 +65,7 @@ func WithRecordMetadataSeed(seed *VolumeResourceRecord) RecordMetadataOption {
 	owned := cloneMetadataRecordSeed(seed)
 	return request.Custom(func(cfg *RecordMetadataOpts) error { cfg.Seed = cloneMetadataRecordSeed(owned); return nil })
 }
-func WithRecordMetadataLocation(value resource.CloudLocation) RecordMetadataOption {
-	owned := value.Clone()
-	return request.Custom(func(cfg *RecordMetadataOpts) error { copy := owned.Clone(); cfg.Location = &copy; return nil })
-}
+
 func cloneMetadataRecordSeed(seed *VolumeResourceRecord) *VolumeResourceRecord {
 	if seed == nil {
 		return nil

@@ -15,6 +15,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithListOptions`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.UserRecord.Clone`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.ListRecords`
@@ -26,7 +27,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/request.BasePath`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithRecordListJMESPath`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithRecordListLocation`
 - `github.com/JSYoo5B/go-openstacksdk/request.Limit`
 - `github.com/JSYoo5B/go-openstacksdk/request.Marker`
 - `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
@@ -74,9 +74,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity.UserReadCloud.RawAPI`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithUserListOpts`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithUserListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithUserListLocation`
 
 - list_users() is GET /v3/users and list_users(domain_id=..., name=...) adds exactly those two query keys.
   Tests: `identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityProjectUserHelpers`.
@@ -111,9 +111,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithUserSearchOpts`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithUserSearchDomainID`
 - `github.com/JSYoo5B/go-openstacksdk/identity.WithUserSearchFilters`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithUserSearchLocation`
 
 - search_users lists with GET /v3/users carrying name (only for a non-UUID name_or_id) and domain_id before filtering locally.
   Tests: `identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityProjectUserHelpers`.
@@ -213,7 +213,7 @@ func main() {
 		users.WithRecordListQuery("domain_id", domain),
 		users.WithRecordListQuery("is_enabled", true),
 		request.MaxItems(10),
-		users.WithRecordListLocation(location),
+		request.Custom(func(c *users.RecordListOpts) error { loc := location.Clone(); c.Location = &loc; return nil }),
 	)
 	if err != nil {
 		log.Fatal(err)
@@ -225,7 +225,7 @@ func main() {
 	cloud := identity.NewUserReadCloud(svc.Users)
 	listed, err := cloud.ListUsers(ctx,
 		identity.WithUserListQuery("domain_id", domain),
-		identity.WithUserListLocation(location),
+		request.Custom(func(c *identity.UserListOpts) error { loc := location.Clone(); c.Location = &loc; return nil }),
 	)
 	if err != nil {
 		log.Fatal(err)
@@ -235,7 +235,7 @@ func main() {
 	searched, err := cloud.SearchUsers(ctx, "team*",
 		identity.WithUserSearchDomainID(domain),
 		identity.WithUserSearchFilters(json.RawMessage(`"length(@)"`)),
-		identity.WithUserSearchLocation(location),
+		request.Custom(func(c *identity.UserSearchOpts) error { loc := location.Clone(); c.Location = &loc; return nil }),
 	)
 	if err != nil {
 		log.Fatal(err)

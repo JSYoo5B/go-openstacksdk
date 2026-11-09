@@ -370,7 +370,8 @@ func TestPythonRegionRecordsRawDefaultsLocalNameAndIndependentEvidence(t *testin
 func TestPythonRegionRecordsExplicitLocationStatusAndBooleanLimitBoundary(t *testing.T) {
 	name, project := "configured", "current"
 	location := resource.CloudLocation{Cloud: &name, Zone: json.RawMessage(`"caller-zone"`), Project: resource.CloudProject{ID: json.RawMessage(`"scope"`), Name: &project}}
-	option := regions.WithRecordListLocation(location)
+	ownedLocation := location.Clone()
+	option := request.Custom(func(c *regions.RecordListOpts) error { loc := ownedLocation.Clone(); c.Location = &loc; return nil })
 	name = "changed"
 	project = "changed"
 	for _, code := range []int{100, 199, 203, 300, 399} {

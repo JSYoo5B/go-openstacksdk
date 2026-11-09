@@ -34,11 +34,11 @@ type TaskRecordsOpts struct {
 }
 
 // TaskRecordsOption is one option of TaskRecords and AllTaskRecords:
-// WithTaskRecordsOpts, WithTaskRecordsLocation, request.Query (the value is
-// kept as JSON in caller order), request.Headers (replaces the headers),
-// request.Microversion, request.Limit, request.Marker, request.MaxItems,
-// request.Paginated or request.Custom over *TaskRecordsOpts. Other shared
-// calls fail with resource.ErrInvalidOption before HTTP.
+// WithTaskRecordsOpts, request.Query (the value is kept as JSON in caller
+// order), request.Headers (replaces the headers), request.Microversion,
+// request.Limit, request.Marker, request.MaxItems, request.Paginated or
+// request.Custom over *TaskRecordsOpts (for example to set Location). Other
+// shared calls fail with resource.ErrInvalidOption before HTTP.
 type TaskRecordsOption = request.ListCall
 
 var taskRecordsCalls = calls.Spec[TaskRecordsOpts]{
@@ -91,10 +91,7 @@ func WithTaskRecordsOpts(v TaskRecordsOpts) TaskRecordsOption {
 	owned := taskRecordCopy(v)
 	return request.Custom(func(c *TaskRecordsOpts) error { *c = taskRecordCopy(owned); return nil })
 }
-func WithTaskRecordsLocation(v resource.CloudLocation) TaskRecordsOption {
-	owned := v.Clone()
-	return request.Custom(func(c *TaskRecordsOpts) error { x := owned.Clone(); c.Location = &x; return nil })
-}
+
 func taskRecordKeys(v TaskRecordsOpts) []string {
 	keys := make([]string, 0, len(v.Query))
 	seen := make(map[string]bool)

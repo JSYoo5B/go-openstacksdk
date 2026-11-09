@@ -16,7 +16,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.GetVolumeLimits`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareGetVolumeLimitsOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithGetVolumeLimitsOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithGetVolumeLimitsLocation`
 
 - Empty NameOrID skips Identity entirely, including unused invalid clients, and makes one bodyless unfiltered Cinder limits GET. Authenticated scope is captured only for location; it never becomes an implicit project_id query.
   Tests: `blockstorage/volume_limits_contract_test.go:TestGetVolumeLimitsDefaultSkipsIdentityAndDoesNotInferScopeQuery`, `connectiontest/connection_volume_limits_test.go:TestConnectionGetVolumeLimitsEmptyInputSkipsIdentityAndImplicitProjectFilter`.
@@ -164,7 +163,7 @@ func Direct(ctx context.Context, cinder, identity *gophercloud.ServiceClient) er
     if err != nil { return err }
     selected, err := blockstorage.GetVolumeLimits(ctx, cinder, identity,
         blockstorage.GetVolumeLimitsRequest{NameOrID: "project-name-or-id"},
-        blockstorage.WithGetVolumeLimitsLocation(resource.CloudLocation{}))
+        func(c *blockstorage.GetVolumeLimitsOpts) error { c.Location = &resource.CloudLocation{}; return nil })
     Inspect(selected)
     return err
 }

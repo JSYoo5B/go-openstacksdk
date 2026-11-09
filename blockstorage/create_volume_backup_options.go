@@ -3,7 +3,6 @@ package blockstorage
 import (
 	"context"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudsnapshot"
-	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 type CreateVolumeBackupRequest struct{ VolumeID string }
@@ -34,9 +33,6 @@ func WithCreateVolumeBackupWait(value bool) CreateVolumeBackupOption {
 }
 func WithCreateVolumeBackupWaitPolicy(value BackupMutationWaitOpts) CreateVolumeBackupOption {
 	return cloudsnapshot.WithBackupCreateWaitPolicy(value)
-}
-func WithCreateVolumeBackupLocation(value resource.CloudLocation) CreateVolumeBackupOption {
-	return cloudsnapshot.WithBackupCreateLocation(value)
 }
 
 func PrepareCreateVolumeBackupOptions(ctx context.Context, options ...CreateVolumeBackupOption) (CreateVolumeBackupOpts, error) {

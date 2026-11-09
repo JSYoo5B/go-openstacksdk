@@ -188,7 +188,12 @@ func TestVolumeTypeAccessMalformedCallerLocationKeepsLookupProofWithoutPhysicalE
 				testcloud.JSON(w, 200, body)
 			})
 			location := resource.CloudLocation{Project: resource.CloudProject{ID: json.RawMessage(`invalid-local`)}}
-			got := volumeTypeAccessContractCall(context.Background(), client, operation, "target", "project", blockstorage.WithVolumeTypeReadLocation(location))
+			ownedLocation := location.Clone()
+			got := volumeTypeAccessContractCall(context.Background(), client, operation, "target", "project", func(c *blockstorage.VolumeTypeReadOpts) error {
+				loc := ownedLocation.Clone()
+				c.Location = &loc
+				return nil
+			})
 			var physical *resource.ResponseError
 			if got.nilResult || got.resolved == nil || got.resolved.Value != nil || got.resolved.Type != nil || got.resolved.Observed == nil || string(got.resolved.Observed.Body) != body || got.resolved.Observed.Header.Get("X-Proof") != "lookup-location" || got.phase != nil || calls.Load() != 1 || !errors.Is(got.err, resource.ErrInvalidOption) || errors.As(got.err, &physical) {
 				t.Fatal(got, calls.Load())

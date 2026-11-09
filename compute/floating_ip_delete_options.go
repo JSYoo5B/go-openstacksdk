@@ -35,10 +35,7 @@ func WithFloatingIPDeleteRetries(value int) FloatingIPDeleteOption {
 func WithFloatingIPDeleteSource(value FloatingIPSource) FloatingIPDeleteOption {
 	return func(o *FloatingIPDeleteOpts) error { copy := value; o.Source = &copy; return nil }
 }
-func WithFloatingIPDeleteLocation(value resource.CloudLocation) FloatingIPDeleteOption {
-	owned := value.Clone()
-	return func(o *FloatingIPDeleteOpts) error { copy := owned.Clone(); o.Location = &copy; return nil }
-}
+
 func WithFloatingIPDeleteStrict(value bool) FloatingIPDeleteOption {
 	return func(o *FloatingIPDeleteOpts) error { o.Strict = value; return nil }
 }

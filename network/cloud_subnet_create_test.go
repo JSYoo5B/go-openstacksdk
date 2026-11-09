@@ -332,7 +332,12 @@ func TestCloudSubnetCreateDefaultLookupsConsumeWholePagesAndKeepPartialFailure(t
 func TestCloudSubnetCreateOwnedLocationUsesActualProjectsWithoutForgedWire(t *testing.T) {
 	name := "dev"
 	location := resource.CloudLocation{Cloud: &name, Project: resource.CloudProject{ID: json.RawMessage(`"current"`)}}
-	option := network.WithSubnetCreateCurrentLocation(location)
+	ownedLocation := location.Clone()
+	option := func(c *network.SubnetCreateOpts) error {
+		loc := ownedLocation.Clone()
+		c.CurrentLocation = &loc
+		return nil
+	}
 	name = "changed"
 	location.Project.ID[1] = 'X'
 	service, _ := qosCloudMutationFixture(t, func(w http.ResponseWriter, r *http.Request) {

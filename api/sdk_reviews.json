@@ -2133,10 +2133,10 @@
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.UserQuotaScope.Detail",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.ProjectQuotaScope.GetRecord",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithQuotaReadOpts",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Query",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithQuotaUsage",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithQuotaReadLocation",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.UserQuotaScope.GetRecord"
       ],
       "contracts": [
@@ -3514,10 +3514,10 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.ProjectQuotaScope.Usage",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.ProjectQuotaScope.GetRecord",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaReadOpts",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Query",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaUsage",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaReadLocation",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaReadBasePath"
       ],
       "contracts": [
@@ -10109,14 +10109,14 @@
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindOpts",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindDetails",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindAllProjects",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Query",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindPaginated",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindLimit",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindMarker",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindMaxItems",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
-        "github.com/JSYoo5B/go-openstacksdk/request.Headers",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindLocation"
+        "github.com/JSYoo5B/go-openstacksdk/request.Headers"
       ],
       "contracts": [
         {
@@ -10758,13 +10758,13 @@
         "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindAllProjects",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.FindRecord",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindOpts",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindDetails",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindAllProjects",
         "github.com/JSYoo5B/go-openstacksdk/request.Query",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindLocation",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindLimit",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindMarker",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindMaxItems",
@@ -11018,13 +11018,13 @@
         "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindDetails",
         "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindAllProjects",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.FindRecord",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordFindDetails",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordFindAllProjects",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordFindOpts",
         "github.com/JSYoo5B/go-openstacksdk/request.Query",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordFindLocation",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordFindMaxItems",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordFindPaginated"
       ],
@@ -11244,7 +11244,7 @@
         "Pinned find_volume (openstack/block_storage/v3/_proxy.py:855-893) declares details/all_projects rather than **query; Go wire Query is an extra capability and is not the Python list-only all_projects policy. The owned Details and AllProjects options now implement those typed defaults and explicit changes: summary/detail is fallback-only, true is LIST-only all_tenants=true, and false omits the automatic query field.",
         "Typed mode options require explicit audited binding capabilities, including explicit false. The SDK rejects typed/raw cross-project conflicts and does not infer a details fetch for summary matches or modify ordinary List; this Go option-ownership policy makes ambiguous inputs fail before HTTP.",
         "FindRecord supplements existing native typed APIs with an owned Python-shaped VolumeResourceRecord and independent raw HTTP evidence, not a mutable session-bound Resource or Python response/discovery cache.",
-        "Leaf location uses already recorded token scope and actual row project/zone; unavailable Connection cloud/region/configured names remain null unless WithRecordFindLocation supplies them. It reuses shared CloudLocation and CinderVolume translators without extra authentication I/O.",
+        "Leaf location uses already recorded token scope and actual row project/zone; unavailable Connection cloud/region/configured names remain null unless the caller sets RecordFindOpts.Location through request.Custom. It reuses shared CloudLocation and CinderVolume translators without extra authentication I/O.",
         "Query/Headers/Location/MaxItems/Paginated expose underlying Resource policies as Go extensions beyond the pinned proxy missing/details/all_projects arguments. Typed/raw scope conflicts are rejected before HTTP.",
         "Query descriptor seeds have canonical-attribute priority because a Go map has no kwargs order; incoming HTTP descriptor aliases still consume original JSON order. Non-object actual values fail object local matching without a Python type error.",
         "Go fixes finite per-call service discovery/route/header policy and rejects unsafe continuation origin/path/filter changes, cycles and negative limits; dictionary links compatibility is a Go extension. Selected explicit client defaults bypass discovery unchanged.",
@@ -12287,12 +12287,12 @@
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.GroupRecord.Clone",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.API.FindRecord",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithRecordFindOpts",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Query",
         "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithRecordFindListBasePath",
-        "github.com/JSYoo5B/go-openstacksdk/request.Headers",
-        "github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithRecordFindLocation"
+        "github.com/JSYoo5B/go-openstacksdk/request.Headers"
       ],
       "contracts": [
         {
@@ -12570,12 +12570,12 @@
         "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.FindRecord",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithRecordFindOpts",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Query",
         "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
-        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithRecordFindListBasePath",
-        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithRecordFindLocation"
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithRecordFindListBasePath"
       ],
       "contracts": [
         {
@@ -18822,12 +18822,12 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.MetadataScope.DeleteKeys",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.MetadataScope.ID",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.MetadataScope.RawClient",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithMetadataHeaders",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.DeleteMetadataRecord",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordMetadataHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordMetadataSeed",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordMetadataLocation"
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordMetadataSeed"
       ],
       "contracts": [
         {
@@ -19100,12 +19100,12 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.MetadataScope.Get",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.MetadataScope.ID",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.MetadataScope.RawClient",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithMetadataHeaders",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.FetchMetadataRecord",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordMetadataHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordMetadataSeed",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordMetadataLocation"
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordMetadataSeed"
       ],
       "contracts": [
         {
@@ -19376,12 +19376,12 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.MetadataScope.Get",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.MetadataScope.ID",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.MetadataScope.RawClient",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithMetadataHeaders",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.GetMetadataRecord",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordMetadataHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordMetadataSeed",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordMetadataLocation"
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordMetadataSeed"
       ],
       "contracts": [
         {
@@ -19656,12 +19656,12 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.MetadataScope.Replace",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.MetadataScope.ID",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.MetadataScope.RawClient",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithMetadataHeaders",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.SetMetadataRecord",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordMetadataHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordMetadataSeed",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordMetadataLocation"
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordMetadataSeed"
       ],
       "contracts": [
         {
@@ -29973,6 +29973,7 @@
         "github.com/JSYoo5B/go-openstacksdk/image.Service.ImageTasks",
         "github.com/JSYoo5B/go-openstacksdk/image.Service.AllImageTasks",
         "github.com/JSYoo5B/go-openstacksdk/image.WithListImageTasksOpts",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image.WithListImageTasksHeaders",
         "github.com/JSYoo5B/go-openstacksdk/request.MaxItems",
@@ -29982,7 +29983,6 @@
         "github.com/JSYoo5B/go-openstacksdk/request.Query",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/images.WithTaskRecordsLocation",
         "github.com/JSYoo5B/go-openstacksdk/request.Limit",
         "github.com/JSYoo5B/go-openstacksdk/request.Marker",
         "github.com/JSYoo5B/go-openstacksdk/request.Paginated"
@@ -36508,7 +36508,6 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSearchOptions",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSearchFilters",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSearchExpression",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSearchLocation",
         "github.com/JSYoo5B/go-openstacksdk.Connection.CurrentLocation",
         "github.com/JSYoo5B/go-openstacksdk.WithCloudLocation"
       ],
@@ -36653,7 +36652,7 @@
         "Response aliases and duplicate exact response keys use textual last-consumed-wins. Python JSON dictionary duplicate collapse preserves first insertion position before Resource alias consumption, so duplicates interleaved with distinct aliases can produce a different value. This is an explicit ambiguous-wire Go policy, not an assertion of every possible duplicate-key Python response equivalence.",
         "Volume size uses source int descriptor behavior: bool remains bool, JSON integers are arbitrary precision, finite float JSON truncates its actual float64 value, decimal digit strings convert, signed/padded/nondigit strings and nonnumeric containers become zero, and digit-only nondecimal strings fail. The volume descriptor uses audited Unicode16 tables and does not emulate CPython configurable decimal string digit limits. JMESPath numeric-string digits and identifier printability follow Go Unicode tables; ordinary UTF-8/JSON parser and byte syntax offsets differ from arbitrary Python Unicode objects.",
         "Computed location never trusts HTTP location: Connection retains known selected cloud/region/auth name/domain facts and the provider recorded native token project scope; row project/zone are raw JSON values with foreign-project names cleared. Direct ServiceClient calls and FromProvider manual/custom auth results cannot reconstruct absent cloud/configuration facts and leave them null unless explicit owned options supply them. Recorded scope does not force authentication refresh; native HTTP reauthentication remains live.",
-        "Native clouds.Parse discards configured project-domain metadata when selecting project ID scope and collapses absent versus empty configuration strings. Go cannot reconstruct those facts from returned AuthOptions or token names; WithCloudLocation/WithVolumeSearchLocation are explicit complete owned overrides. This configuration parser representation boundary is independent from the direct helper body control flow.",
+        "Native clouds.Parse discards configured project-domain metadata when selecting project ID scope and collapses absent versus empty configuration strings. Go cannot reconstruct those facts from returned AuthOptions or token names; WithCloudLocation and a VolumeSearchOpts.Location set by a closure option are explicit complete overrides. This configuration parser representation boundary is independent from the direct helper body control flow.",
         "The library owns concrete option callbacks/defaults rather than requiring caller builders. Direct calls capture source facts/header snapshot before original callbacks; Connection applies originals once before cached Cinder selection, then direct delegation snapshots the resulting source. Retained config pointers, callback-slice slot edits and ordinary MoreHeaders edits cannot change prepared owned options. Provider authentication stays live; source fact mutation/cancellation is terminal at checked boundaries.",
         "Go retains only actually admitted response Body/Header/StatusCode in independent Pages/Observed. Accepted read/Close/schema/source/context errors keep that physical proof without SDK replay; rejected native HTTP/transport failures retain their own native error and never borrow an older accepted page. Safe same-origin/same escaped collection continuation and cycle checks intentionally reject unsafe routes instead of following Python session pagination beyond those guards. Empty arrays terminate before unused continuation links are inspected.",
         "Go errors are OperationError with actual operation/resource and original causes; local consumed filter/selection errors wrap ErrInvalidOption, ambiguity wraps ErrAmbiguous, and no fabricated HTTP/NotFound evidence is attached. Python deprecation warnings and diagnostic log messages are not reproduced. Concurrent mutation of caller mutable source/config/model data is outside the race-safe contract; independent-result ownership does not claim such mutations are safe.",
@@ -36673,7 +36672,6 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSearchOptions",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSearchFilters",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSearchExpression",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSearchLocation",
         "github.com/JSYoo5B/go-openstacksdk.Connection.CurrentLocation",
         "github.com/JSYoo5B/go-openstacksdk.WithCloudLocation"
       ],
@@ -36778,7 +36776,7 @@
         "Response aliases and duplicate exact response keys use textual last-consumed-wins. Python JSON dictionary duplicate collapse preserves first insertion position before Resource alias consumption, so duplicates interleaved with distinct aliases can produce a different value. This is an explicit ambiguous-wire Go policy, not an assertion of every possible duplicate-key Python response equivalence.",
         "Volume size uses source int descriptor behavior: bool remains bool, JSON integers are arbitrary precision, finite float JSON truncates its actual float64 value, decimal digit strings convert, signed/padded/nondigit strings and nonnumeric containers become zero, and digit-only nondecimal strings fail. The volume descriptor uses audited Unicode16 tables and does not emulate CPython configurable decimal string digit limits. JMESPath numeric-string digits and identifier printability follow Go Unicode tables; ordinary UTF-8/JSON parser and byte syntax offsets differ from arbitrary Python Unicode objects.",
         "Computed location never trusts HTTP location: Connection retains known selected cloud/region/auth name/domain facts and the provider recorded native token project scope; row project/zone are raw JSON values with foreign-project names cleared. Direct ServiceClient calls and FromProvider manual/custom auth results cannot reconstruct absent cloud/configuration facts and leave them null unless explicit owned options supply them. Recorded scope does not force authentication refresh; native HTTP reauthentication remains live.",
-        "Native clouds.Parse discards configured project-domain metadata when selecting project ID scope and collapses absent versus empty configuration strings. Go cannot reconstruct those facts from returned AuthOptions or token names; WithCloudLocation/WithVolumeSearchLocation are explicit complete owned overrides. This configuration parser representation boundary is independent from the direct helper body control flow.",
+        "Native clouds.Parse discards configured project-domain metadata when selecting project ID scope and collapses absent versus empty configuration strings. Go cannot reconstruct those facts from returned AuthOptions or token names; WithCloudLocation and a VolumeSearchOpts.Location set by a closure option are explicit complete overrides. This configuration parser representation boundary is independent from the direct helper body control flow.",
         "The library owns concrete option callbacks/defaults rather than requiring caller builders. Direct calls capture source facts/header snapshot before original callbacks; Connection applies originals once before cached Cinder selection, then direct delegation snapshots the resulting source. Retained config pointers, callback-slice slot edits and ordinary MoreHeaders edits cannot change prepared owned options. Provider authentication stays live; source fact mutation/cancellation is terminal at checked boundaries.",
         "Go retains only actually admitted response Body/Header/StatusCode in independent Pages/Observed. Accepted read/Close/schema/source/context errors keep that physical proof without SDK replay; rejected native HTTP/transport failures retain their own native error and never borrow an older accepted page. Safe same-origin/same escaped collection continuation and cycle checks intentionally reject unsafe routes instead of following Python session pagination beyond those guards. Empty arrays terminate before unused continuation links are inspected.",
         "Go errors are OperationError with actual operation/resource and original causes; local consumed filter/selection errors wrap ErrInvalidOption, ambiguity wraps ErrAmbiguous, and no fabricated HTTP/NotFound evidence is attached. Python deprecation warnings and diagnostic log messages are not reproduced. Concurrent mutation of caller mutable source/config/model data is outside the race-safe contract; independent-result ownership does not claim such mutations are safe.",
@@ -36798,8 +36796,7 @@
         "github.com/JSYoo5B/go-openstacksdk.Connection.ListVolumes",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.ListVolumes",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareVolumeReadOptions",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeReadOptions",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeReadLocation"
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeReadOptions"
       ],
       "contracts": [
         {
@@ -36894,8 +36891,7 @@
         "github.com/JSYoo5B/go-openstacksdk.Connection.GetVolumeByID",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.GetVolumeByID",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareVolumeReadOptions",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeReadOptions",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeReadLocation"
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeReadOptions"
       ],
       "contracts": [
         {
@@ -36992,8 +36988,7 @@
         "github.com/JSYoo5B/go-openstacksdk.Connection.VolumeExists",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.VolumeExists",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareVolumeReadOptions",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeReadOptions",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeReadLocation"
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeReadOptions"
       ],
       "contracts": [
         {
@@ -38038,8 +38033,7 @@
         "github.com/JSYoo5B/go-openstacksdk.Connection.GetVolumeLimits",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.GetVolumeLimits",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareGetVolumeLimitsOptions",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithGetVolumeLimitsOptions",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithGetVolumeLimitsLocation"
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithGetVolumeLimitsOptions"
       ],
       "contracts": [
         {
@@ -38258,9 +38252,9 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.ListVolumeSnapshots",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareVolumeSnapshotListOptions",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSnapshotListOptions",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSnapshotListLocation",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSnapshotListFilters",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSnapshotListDetailed",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Paginated",
         "github.com/JSYoo5B/go-openstacksdk/request.MaxItems",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
@@ -38482,7 +38476,6 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.SearchVolumeSnapshots",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareVolumeSnapshotSearchOptions",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSnapshotSearchOptions",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSnapshotSearchLocation",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSnapshotSearchFilters",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSnapshotSearchExpression"
       ],
@@ -38636,7 +38629,6 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.GetVolumeSnapshot",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareVolumeSnapshotSearchOptions",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSnapshotSearchOptions",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSnapshotSearchLocation",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSnapshotSearchFilters",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSnapshotSearchExpression"
       ],
@@ -38801,8 +38793,7 @@
         "github.com/JSYoo5B/go-openstacksdk.Connection.GetVolumeSnapshotByID",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.GetVolumeSnapshotByID",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareVolumeSnapshotReadOptions",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSnapshotReadOptions",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSnapshotReadLocation"
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeSnapshotReadOptions"
       ],
       "contracts": [
         {
@@ -38932,8 +38923,7 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeSnapshotName",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeSnapshotDisplayName",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeSnapshotDescription",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeSnapshotDisplayDescription",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeSnapshotLocation"
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeSnapshotDisplayDescription"
       ],
       "contracts": [
         {
@@ -39072,8 +39062,7 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareDeleteVolumeSnapshotOptions",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithDeleteVolumeSnapshotOptions",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithDeleteVolumeSnapshotWait",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithDeleteVolumeSnapshotWaitPolicy",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithDeleteVolumeSnapshotLocation"
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithDeleteVolumeSnapshotWaitPolicy"
       ],
       "contracts": [
         {
@@ -39209,14 +39198,14 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupListOptions",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupListFilters",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupListDetailed",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Paginated",
         "github.com/JSYoo5B/go-openstacksdk/request.MaxItems",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupListExpression",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupListAllowUnknownParams",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupListConflictingAttrs",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupListLocation"
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupListConflictingAttrs"
       ],
       "contracts": [
         {
@@ -39338,8 +39327,7 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareVolumeBackupSearchOptions",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupSearchOptions",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupSearchFilters",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupSearchExpression",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupSearchLocation"
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupSearchExpression"
       ],
       "contracts": [
         {
@@ -39454,8 +39442,7 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareVolumeBackupSearchOptions",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupSearchOptions",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupSearchFilters",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupSearchExpression",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupSearchLocation"
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithVolumeBackupSearchExpression"
       ],
       "contracts": [
         {
@@ -39575,8 +39562,7 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeBackupIncremental",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeBackupSnapshotID",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeBackupWait",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeBackupWaitPolicy",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeBackupLocation"
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeBackupWaitPolicy"
       ],
       "contracts": [
         {
@@ -39736,8 +39722,7 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithDeleteVolumeBackupOptions",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithDeleteVolumeBackupForce",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithDeleteVolumeBackupWait",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithDeleteVolumeBackupWaitPolicy",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithDeleteVolumeBackupLocation"
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithDeleteVolumeBackupWaitPolicy"
       ],
       "contracts": [
         {
@@ -47351,7 +47336,6 @@
         "github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPQueryOptions",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPQuerySource",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPQueryFilters",
-        "github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPQueryLocation",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPQueryStrict",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPQueryTimeout",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithUnlimitedFloatingIPQueryTimeout"
@@ -47479,7 +47463,6 @@
         "github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPQuerySource",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPQueryFilters",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPQueryExpression",
-        "github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPQueryLocation",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPQueryStrict",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPQueryTimeout",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithUnlimitedFloatingIPQueryTimeout"
@@ -47614,7 +47597,6 @@
         "github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPQuerySource",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPQueryFilters",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPQueryExpression",
-        "github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPQueryLocation",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPQueryStrict",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPQueryDirectGet",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPQueryTimeout",
@@ -47755,7 +47737,6 @@
         "github.com/JSYoo5B/go-openstacksdk/compute.PrepareFloatingIPQueryOptions",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPQueryOptions",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPQuerySource",
-        "github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPQueryLocation",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPQueryStrict",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPQueryTimeout",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithUnlimitedFloatingIPQueryTimeout"
@@ -47959,7 +47940,6 @@
         "github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPDeleteOptions",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPDeleteRetries",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPDeleteSource",
-        "github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPDeleteLocation",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPDeleteStrict",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPDeleteDirectGet",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPDeleteTimeout",
@@ -48137,7 +48117,6 @@
         "github.com/JSYoo5B/go-openstacksdk/resource.WithPollInterval",
         "github.com/JSYoo5B/go-openstacksdk/resource.WithWaitStrategy",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPCreateSource",
-        "github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPCreateLocation",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPCreateStrict",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPCreateDirectGet",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPCreateTimeout",
@@ -48306,7 +48285,6 @@
         "github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPDeleteOptions",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPDeleteRetries",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPDeleteSource",
-        "github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPDeleteLocation",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPDeleteStrict",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPDeleteDirectGet",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPDeleteTimeout",
@@ -83725,9 +83703,9 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.New",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.API.CreateRecord",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
-        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordCreateLocation"
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion"
       ],
       "contracts": [
         {
@@ -83928,9 +83906,9 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.New",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.API.GetRecord",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordReadOpts",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordReadLocation",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordReadSeed"
       ],
       "contracts": [
@@ -83990,9 +83968,9 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.New",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.API.ListRecords",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordListOpts",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordListLocation",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordListDetails",
         "github.com/JSYoo5B/go-openstacksdk/request.Paginated",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordListAllProjects",
@@ -84458,11 +84436,11 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.New",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.API.FindRecord",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordFindOpts",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordFindDetails",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordFindLocation",
         "github.com/JSYoo5B/go-openstacksdk/request.Query",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordFindPaginated",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordFindMaxItems"
@@ -85167,9 +85145,9 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.New",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.API.ListRecords",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordListOpts",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordListLocation",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordListDetails",
         "github.com/JSYoo5B/go-openstacksdk/request.Paginated",
         "github.com/JSYoo5B/go-openstacksdk/request.Limit",
@@ -85395,9 +85373,9 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.New",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.API.CreateRecord",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordCreateOpts",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
-        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordCreateLocation"
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion"
       ],
       "contracts": [
         {
@@ -85867,11 +85845,11 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.New",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.API.FindRecord",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordFindOpts",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordFindDetails",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordFindLocation",
         "github.com/JSYoo5B/go-openstacksdk/request.Query",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordFindPaginated",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordFindMaxItems"
@@ -86002,9 +85980,9 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.New",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.API.GetRecord",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordReadOpts",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordReadLocation",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordReadSeed"
       ],
       "contracts": [
@@ -93995,6 +93973,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/limits.New",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/limits.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Query",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/limits.API.All",
         "github.com/JSYoo5B/go-openstacksdk/resource.WithQuery",
@@ -94007,7 +93986,6 @@
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
         "github.com/JSYoo5B/go-openstacksdk/request.BasePath",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/limits.WithRecordListJMESPath",
-        "github.com/JSYoo5B/go-openstacksdk/identity/v3/limits.WithRecordListLocation",
         "github.com/JSYoo5B/go-openstacksdk/request.Limit",
         "github.com/JSYoo5B/go-openstacksdk/request.Marker",
         "github.com/JSYoo5B/go-openstacksdk/request.MaxItems",
@@ -94090,7 +94068,7 @@
         "Python takes an ID string or Resource and returns a mutable Resource; Go takes an ID string and returns the native Gophercloud model pointer.",
         "Python filters domain_id locally because Limit does not map it as a query parameter; Go WithQuery sends domain_id to Keystone as a server filter.",
         "Source returns mutable Resource instances and polymorphic generator results. Go preserves typed native List/All separately and exposes owned ListRecords/AllRecords + ProxyListRecords with complete Source JSON view and original evidence; truthy JMESPath uses the explicit polymorphic method. Go iter.Seq2 can be iterated again to repeat the captured operation; Python generator consumption is one-shot.",
-        "A standalone native client has no Python Connection: default computed location is null, and WithRecordListLocation supplies immutable recorded facts as an explicit Go extension. No automatic cloud/project name inference, token lookup, auth scope change or SDK-R1/C1 closure is claimed.",
+        "A standalone native client has no Python Connection: default computed location is null, and setting RecordListOpts.Location through request.Custom supplies recorded facts as an explicit Go extension. No automatic cloud/project name inference, token lookup, auth scope change or SDK-R1/C1 closure is claimed.",
         "Go validates functional options and JSON transport values before HTTP, requires safe fixed-origin service-relative paths, finite representable identifiers and nonnegative integer pagination amounts. Unsafe URLs/constructor collisions/malformed JSON become explicit receipt-bearing Go errors rather than Python exception classes or odd negative/noninteger pagination behavior.",
         "This class has no maximum microversion/discovery profile. Go honors selected native default and typed per-call microversion/header options while guarding selected source and SDK-owned auth/route/protocol headers. Dynamic Connection/session/Resource dirty/cache/warning contracts remain tracked at whole SDK level."
       ],
@@ -94175,6 +94153,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.New",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Query",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.API.All",
         "github.com/JSYoo5B/go-openstacksdk/resource.WithQuery",
@@ -94187,7 +94166,6 @@
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
         "github.com/JSYoo5B/go-openstacksdk/request.BasePath",
-        "github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.WithRecordListLocation",
         "github.com/JSYoo5B/go-openstacksdk/request.Limit",
         "github.com/JSYoo5B/go-openstacksdk/request.Marker",
         "github.com/JSYoo5B/go-openstacksdk/request.MaxItems",
@@ -94269,6 +94247,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.New",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Query",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.API.All",
         "github.com/JSYoo5B/go-openstacksdk/resource.WithQuery",
@@ -94281,7 +94260,6 @@
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
         "github.com/JSYoo5B/go-openstacksdk/request.BasePath",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.WithRecordListJMESPath",
-        "github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.WithRecordListLocation",
         "github.com/JSYoo5B/go-openstacksdk/request.Limit",
         "github.com/JSYoo5B/go-openstacksdk/request.Marker",
         "github.com/JSYoo5B/go-openstacksdk/request.MaxItems",
@@ -94363,7 +94341,7 @@
       "differences": [
         "Python takes an ID string or Resource and returns a mutable Resource; Go takes an ID string and returns the native Gophercloud model pointer.",
         "Source returns mutable Resource instances and polymorphic generator results. Go preserves typed native List/All separately and exposes owned ListRecords/AllRecords + ProxyListRecords with complete Source JSON view and original evidence; truthy JMESPath uses the explicit polymorphic method. Go iter.Seq2 can be iterated again to repeat the captured operation; Python generator consumption is one-shot.",
-        "A standalone native client has no Python Connection: default computed location is null, and WithRecordListLocation supplies immutable recorded facts as an explicit Go extension. No automatic cloud/project name inference, token lookup, auth scope change or SDK-R1/C1 closure is claimed.",
+        "A standalone native client has no Python Connection: default computed location is null, and setting RecordListOpts.Location through request.Custom supplies recorded facts as an explicit Go extension. No automatic cloud/project name inference, token lookup, auth scope change or SDK-R1/C1 closure is claimed.",
         "Go validates functional options and JSON transport values before HTTP, requires safe fixed-origin service-relative paths, finite representable identifiers and nonnegative integer pagination amounts. Unsafe URLs/constructor collisions/malformed JSON become explicit receipt-bearing Go errors rather than Python exception classes or odd negative/noninteger pagination behavior.",
         "This class has no maximum microversion/discovery profile. Go honors selected native default and typed per-call microversion/header options while guarding selected source and SDK-owned auth/route/protocol headers. Dynamic Connection/session/Resource dirty/cache/warning contracts remain tracked at whole SDK level."
       ],
@@ -94376,6 +94354,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/services.New",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/services.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Query",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/services.API.All",
         "github.com/JSYoo5B/go-openstacksdk/resource.WithQuery",
@@ -94385,7 +94364,6 @@
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
         "github.com/JSYoo5B/go-openstacksdk/request.BasePath",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/services.WithRecordListJMESPath",
-        "github.com/JSYoo5B/go-openstacksdk/identity/v3/services.WithRecordListLocation",
         "github.com/JSYoo5B/go-openstacksdk/request.Limit",
         "github.com/JSYoo5B/go-openstacksdk/request.Marker",
         "github.com/JSYoo5B/go-openstacksdk/request.MaxItems",
@@ -95862,12 +95840,12 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.New",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Field",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.CreateRecord",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordMutationOpts",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
-        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
-        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordMutationLocation"
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion"
       ],
       "contracts": [
         {
@@ -96169,6 +96147,7 @@
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.New",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.List",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Query",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.ListRecords",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.AllRecords",
@@ -96183,8 +96162,7 @@
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
         "github.com/JSYoo5B/go-openstacksdk/request.BasePath",
-        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordListJMESPath",
-        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordListLocation"
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordListJMESPath"
       ],
       "contracts": [
         {
@@ -96276,9 +96254,9 @@
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.GetRecord",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.DomainRecord.Clone",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordGetOpts",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
-        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
-        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordGetLocation"
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion"
       ],
       "contracts": [
         {
@@ -96437,6 +96415,7 @@
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.New",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.ListInGroup",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithListInGroupOptions",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Query",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.ListUsersInGroupRecords",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.AllUsersInGroupRecords",
@@ -96445,7 +96424,6 @@
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithGroupRecordListQuery",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
-        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithGroupRecordListLocation",
         "github.com/JSYoo5B/go-openstacksdk/request.Limit",
         "github.com/JSYoo5B/go-openstacksdk/request.Marker",
         "github.com/JSYoo5B/go-openstacksdk/request.MaxItems",
@@ -96531,6 +96509,7 @@
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.New",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.API.List",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Query",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.GroupRecord.Clone",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.API.ListRecords",
@@ -96545,8 +96524,7 @@
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
         "github.com/JSYoo5B/go-openstacksdk/request.BasePath",
-        "github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithRecordListJMESPath",
-        "github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithRecordListLocation"
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithRecordListJMESPath"
       ],
       "contracts": [
         {
@@ -96809,13 +96787,13 @@
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.New",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.List",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Query",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.ListRecords",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.AllRecords",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.ProxyListRecords",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.RoleRecord.Clone",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithRecordListOpts",
-        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithRecordListLocation",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithRecordListJMESPath"
       ],
       "contracts": [
@@ -97083,12 +97061,12 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.New",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Field",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.UpdateRecord",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordMutationOpts",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
-        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
-        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordMutationLocation"
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion"
       ],
       "contracts": [
         {
@@ -97280,6 +97258,7 @@
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.New",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.List",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Query",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.UserRecord.Clone",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.ListRecords",
@@ -97291,7 +97270,6 @@
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
         "github.com/JSYoo5B/go-openstacksdk/request.BasePath",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithRecordListJMESPath",
-        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithRecordListLocation",
         "github.com/JSYoo5B/go-openstacksdk/request.Limit",
         "github.com/JSYoo5B/go-openstacksdk/request.Marker",
         "github.com/JSYoo5B/go-openstacksdk/request.MaxItems",
@@ -106546,8 +106524,8 @@
         "github.com/JSYoo5B/go-openstacksdk/compute.WithServerGroupCloudReadOpts",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithServerGroupCloudFilters",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithServerGroupCloudExpression",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
-        "github.com/JSYoo5B/go-openstacksdk/compute.WithServerGroupCloudCurrentLocation",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.API.ListCloudRecords",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.API.FindCloudRecord",
         "github.com/JSYoo5B/go-openstacksdk.Connection.SearchServerGroups"
@@ -106648,8 +106626,8 @@
         "github.com/JSYoo5B/go-openstacksdk/compute.WithServerGroupCloudReadOpts",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithServerGroupCloudFilters",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithServerGroupCloudExpression",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
-        "github.com/JSYoo5B/go-openstacksdk/compute.WithServerGroupCloudCurrentLocation",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.API.ListCloudRecords",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.API.FindCloudRecord",
         "github.com/JSYoo5B/go-openstacksdk.Connection.GetServerGroup"
@@ -107826,9 +107804,9 @@
         "github.com/JSYoo5B/go-openstacksdk/network.Service.ListNetworkRecords",
         "github.com/JSYoo5B/go-openstacksdk/network.WithNetworkCloudListOpts",
         "github.com/JSYoo5B/go-openstacksdk/network.WithNetworkCloudFilters",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
-        "github.com/JSYoo5B/go-openstacksdk/network.WithNetworkCloudCurrentLocation",
         "github.com/JSYoo5B/go-openstacksdk/network.WithNetworkCloudServiceAvailable",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/networks.API.ProxyCloudListRecords",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithCloudRecordListQuery",
@@ -107922,9 +107900,9 @@
         "github.com/JSYoo5B/go-openstacksdk/network.Service.SearchNetworkRecords",
         "github.com/JSYoo5B/go-openstacksdk/network.WithNetworkCloudListOpts",
         "github.com/JSYoo5B/go-openstacksdk/network.WithNetworkCloudFilters",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
-        "github.com/JSYoo5B/go-openstacksdk/network.WithNetworkCloudCurrentLocation",
         "github.com/JSYoo5B/go-openstacksdk/network.WithNetworkCloudServiceAvailable",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/networks.API.ProxyCloudListRecords",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithCloudRecordListQuery",
@@ -108022,6 +108000,7 @@
         "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.RecordListGenerator.MarshalJSON",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListOpts",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
         "github.com/JSYoo5B/go-openstacksdk/request.BasePath",
@@ -108031,7 +108010,6 @@
         "github.com/JSYoo5B/go-openstacksdk/request.Paginated",
         "github.com/JSYoo5B/go-openstacksdk/network.WithSubnetReadOpts",
         "github.com/JSYoo5B/go-openstacksdk/network.WithSubnetReadFiltersJSON",
-        "github.com/JSYoo5B/go-openstacksdk/network.WithSubnetReadCurrentLocation",
         "github.com/JSYoo5B/go-openstacksdk/network.WithSubnetNetworkAvailable",
         "github.com/JSYoo5B/go-openstacksdk.Connection.ListSubnetRecords",
         "github.com/JSYoo5B/go-openstacksdk/network.Service.ListSubnetRecords"
@@ -108157,6 +108135,7 @@
         "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.RecordListGenerator.MarshalJSON",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListOpts",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
         "github.com/JSYoo5B/go-openstacksdk/request.BasePath",
@@ -108166,7 +108145,6 @@
         "github.com/JSYoo5B/go-openstacksdk/request.Paginated",
         "github.com/JSYoo5B/go-openstacksdk/network.WithSubnetReadOpts",
         "github.com/JSYoo5B/go-openstacksdk/network.WithSubnetReadFiltersJSON",
-        "github.com/JSYoo5B/go-openstacksdk/network.WithSubnetReadCurrentLocation",
         "github.com/JSYoo5B/go-openstacksdk/network.WithSubnetNetworkAvailable",
         "github.com/JSYoo5B/go-openstacksdk.Connection.SearchSubnetRecords",
         "github.com/JSYoo5B/go-openstacksdk/network.Service.SearchSubnetRecords"
@@ -108291,9 +108269,9 @@
         "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.ListSourceValues",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithSourceCloudListOpts",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithSourceCloudListFilters",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
-        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
-        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithSourceCloudListLocation"
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion"
       ],
       "contracts": [
         {
@@ -108775,9 +108753,9 @@
         "github.com/JSYoo5B/go-openstacksdk/network.WithRouterInterfaceReadOpts",
         "github.com/JSYoo5B/go-openstacksdk/network.WithRouterInterfaceType",
         "github.com/JSYoo5B/go-openstacksdk/network.WithRouterInterfaceTypeJSON",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
-        "github.com/JSYoo5B/go-openstacksdk/network.WithRouterInterfaceReadCurrentLocation",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.ListRecords"
       ],
       "contracts": [
@@ -109639,7 +109617,6 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/network.Service.ListQoSDSCPMarkingRules",
         "github.com/JSYoo5B/go-openstacksdk/network.WithDSCPMarkingCloudOpts",
-        "github.com/JSYoo5B/go-openstacksdk/network.WithDSCPMarkingCloudCurrentLocation",
         "github.com/JSYoo5B/go-openstacksdk/network.WithDSCPMarkingCloudFiltersJSON",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ProxyDSCPMarkingRecords",
         "github.com/JSYoo5B/go-openstacksdk/request.Query"
@@ -109720,7 +109697,6 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/network.Service.SearchQoSDSCPMarkingRules",
         "github.com/JSYoo5B/go-openstacksdk/network.WithDSCPMarkingCloudOpts",
-        "github.com/JSYoo5B/go-openstacksdk/network.WithDSCPMarkingCloudCurrentLocation",
         "github.com/JSYoo5B/go-openstacksdk/network.WithDSCPMarkingCloudFiltersJSON",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ProxyDSCPMarkingRecords",
         "github.com/JSYoo5B/go-openstacksdk/request.Query"
@@ -109910,7 +109886,6 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/network.Service.ListQoSMinimumBandwidthRules",
         "github.com/JSYoo5B/go-openstacksdk/network.WithMinimumBandwidthCloudOpts",
-        "github.com/JSYoo5B/go-openstacksdk/network.WithMinimumBandwidthCloudCurrentLocation",
         "github.com/JSYoo5B/go-openstacksdk/network.WithMinimumBandwidthCloudFiltersJSON",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ProxyMinimumBandwidthRecords",
         "github.com/JSYoo5B/go-openstacksdk/request.Query"
@@ -109991,7 +109966,6 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/network.Service.SearchQoSMinimumBandwidthRules",
         "github.com/JSYoo5B/go-openstacksdk/network.WithMinimumBandwidthCloudOpts",
-        "github.com/JSYoo5B/go-openstacksdk/network.WithMinimumBandwidthCloudCurrentLocation",
         "github.com/JSYoo5B/go-openstacksdk/network.WithMinimumBandwidthCloudFiltersJSON",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ProxyMinimumBandwidthRecords",
         "github.com/JSYoo5B/go-openstacksdk/request.Query"
@@ -110585,9 +110559,9 @@
         "github.com/JSYoo5B/go-openstacksdk/network.WithSecurityGroupReadOpts",
         "github.com/JSYoo5B/go-openstacksdk/network.WithSecurityGroupReadFiltersJSON",
         "github.com/JSYoo5B/go-openstacksdk/network.WithSecurityGroupReadExpression",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
-        "github.com/JSYoo5B/go-openstacksdk/network.WithSecurityGroupReadCurrentLocation",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.API.ProxyListRecords",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithRecordProxyQuery"
       ],
@@ -110665,9 +110639,9 @@
         "github.com/JSYoo5B/go-openstacksdk/network.WithSecurityGroupReadOpts",
         "github.com/JSYoo5B/go-openstacksdk/network.WithSecurityGroupReadFiltersJSON",
         "github.com/JSYoo5B/go-openstacksdk/network.WithSecurityGroupReadExpression",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
-        "github.com/JSYoo5B/go-openstacksdk/network.WithSecurityGroupReadCurrentLocation",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.API.ProxyListRecords",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithRecordProxyQuery"
       ],
@@ -111628,9 +111602,9 @@
         "github.com/JSYoo5B/go-openstacksdk/network.Service.DeleteFirewallRuleRecord",
         "github.com/JSYoo5B/go-openstacksdk/network.WithFirewallDeleteOpts",
         "github.com/JSYoo5B/go-openstacksdk/network.WithFirewallDeleteFilters",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
-        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
-        "github.com/JSYoo5B/go-openstacksdk/network.WithFirewallDeleteCurrentLocation"
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion"
       ],
       "contracts": [
         {
@@ -111725,9 +111699,9 @@
         "github.com/JSYoo5B/go-openstacksdk/network.Service.DeleteFirewallPolicyRecord",
         "github.com/JSYoo5B/go-openstacksdk/network.WithFirewallDeleteOpts",
         "github.com/JSYoo5B/go-openstacksdk/network.WithFirewallDeleteFilters",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
-        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
-        "github.com/JSYoo5B/go-openstacksdk/network.WithFirewallDeleteCurrentLocation"
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion"
       ],
       "contracts": [
         {
@@ -111822,9 +111796,9 @@
         "github.com/JSYoo5B/go-openstacksdk/network.Service.DeleteFirewallGroupRecord",
         "github.com/JSYoo5B/go-openstacksdk/network.WithFirewallDeleteOpts",
         "github.com/JSYoo5B/go-openstacksdk/network.WithFirewallDeleteFilters",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
-        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
-        "github.com/JSYoo5B/go-openstacksdk/network.WithFirewallDeleteCurrentLocation"
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion"
       ],
       "contracts": [
         {
@@ -111921,7 +111895,6 @@
         "github.com/JSYoo5B/go-openstacksdk/network.WithRouterCreateJSON",
         "github.com/JSYoo5B/go-openstacksdk/network.WithRouterCreateAttribute",
         "github.com/JSYoo5B/go-openstacksdk/network.WithRouterCreateAvailabilityZoneHints",
-        "github.com/JSYoo5B/go-openstacksdk/network.WithRouterCreateCurrentLocation",
         "github.com/JSYoo5B/go-openstacksdk.Connection.CreateRouterRecord"
       ],
       "contracts": [
@@ -112019,8 +111992,7 @@
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.API.FindSubnetSourceRecord",
         "github.com/JSYoo5B/go-openstacksdk/network.WithSubnetCreateOpts",
         "github.com/JSYoo5B/go-openstacksdk/network.WithSubnetCreateJSON",
-        "github.com/JSYoo5B/go-openstacksdk/network.WithSubnetCreateAttribute",
-        "github.com/JSYoo5B/go-openstacksdk/network.WithSubnetCreateCurrentLocation"
+        "github.com/JSYoo5B/go-openstacksdk/network.WithSubnetCreateAttribute"
       ],
       "contracts": [
         {
@@ -112689,7 +112661,6 @@
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.GetDSCPMarkingRecord",
         "github.com/JSYoo5B/go-openstacksdk/network.Service.GetQoSDSCPMarkingRule",
         "github.com/JSYoo5B/go-openstacksdk/network.WithDSCPMarkingCloudOpts",
-        "github.com/JSYoo5B/go-openstacksdk/network.WithDSCPMarkingCloudCurrentLocation",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.GetSourceDSCPMarkingRecord"
       ],
       "contracts": [
@@ -112982,7 +112953,6 @@
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.GetMinimumBandwidthRecord",
         "github.com/JSYoo5B/go-openstacksdk/network.Service.GetQoSMinimumBandwidthRule",
         "github.com/JSYoo5B/go-openstacksdk/network.WithMinimumBandwidthCloudOpts",
-        "github.com/JSYoo5B/go-openstacksdk/network.WithMinimumBandwidthCloudCurrentLocation",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.GetSourceMinimumBandwidthRecord"
       ],
       "contracts": [
@@ -113301,7 +113271,6 @@
         "github.com/JSYoo5B/go-openstacksdk/objectstorage.WithContainerSearchName",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage.WithContainerSearchFiltersJSON",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage.WithContainerSearchExpression",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage.WithContainerSearchLocation",
         "github.com/JSYoo5B/go-openstacksdk.Connection.SearchContainers"
       ],
       "contracts": [
@@ -113878,8 +113847,7 @@
         "github.com/JSYoo5B/go-openstacksdk/objectstorage.WithObjectSearchOpts",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage.WithObjectSearchName",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage.WithObjectSearchFiltersJSON",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage.WithObjectSearchExpression",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage.WithObjectSearchLocation"
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage.WithObjectSearchExpression"
       ],
       "contracts": [
         {
@@ -115439,9 +115407,9 @@
         "github.com/JSYoo5B/go-openstacksdk/identity.ServiceReadCloud.RawAPI",
         "github.com/JSYoo5B/go-openstacksdk/identity.WithServiceReadOpts",
         "github.com/JSYoo5B/go-openstacksdk/identity.WithServiceReadFilters",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
-        "github.com/JSYoo5B/go-openstacksdk/identity.WithServiceReadLocation",
         "github.com/JSYoo5B/go-openstacksdk/identity.ServiceReadCloud.SearchServices"
       ],
       "contracts": [
@@ -115507,13 +115475,12 @@
         "github.com/JSYoo5B/go-openstacksdk/identity.ServiceReadCloud.RawAPI",
         "github.com/JSYoo5B/go-openstacksdk/identity.WithServiceReadOpts",
         "github.com/JSYoo5B/go-openstacksdk/identity.WithServiceReadFilters",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
-        "github.com/JSYoo5B/go-openstacksdk/identity.WithServiceReadLocation",
         "github.com/JSYoo5B/go-openstacksdk/identity.ServiceReadCloud.GetService",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/services.New",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/services.WithRecordResolveOpts",
-        "github.com/JSYoo5B/go-openstacksdk/identity/v3/services.WithRecordResolveLocation",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/services.API.ResolveRecord"
       ],
       "contracts": [
@@ -116109,6 +116076,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.All",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Query",
         "github.com/JSYoo5B/go-openstacksdk/identity.NewDomainReadCloud",
         "github.com/JSYoo5B/go-openstacksdk/identity.DomainReadCloud.ListDomains",
@@ -116117,8 +116085,7 @@
         "github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadNameOrID",
         "github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadFilters",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
-        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
-        "github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadLocation"
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion"
       ],
       "contracts": [
         {
@@ -116169,9 +116136,9 @@
         "github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadOpts",
         "github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadNameOrID",
         "github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadFilters",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
-        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
-        "github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadLocation"
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion"
       ],
       "contracts": [
         {
@@ -116246,9 +116213,9 @@
         "github.com/JSYoo5B/go-openstacksdk/identity.WithDomainGetID",
         "github.com/JSYoo5B/go-openstacksdk/identity.WithDomainGetNameOrID",
         "github.com/JSYoo5B/go-openstacksdk/identity.WithDomainGetFilters",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
-        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
-        "github.com/JSYoo5B/go-openstacksdk/identity.WithDomainGetLocation"
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion"
       ],
       "contracts": [
         {
@@ -116348,9 +116315,9 @@
         "github.com/JSYoo5B/go-openstacksdk/identity.WithGroupSearchOpts",
         "github.com/JSYoo5B/go-openstacksdk/identity.WithGroupSearchDomainID",
         "github.com/JSYoo5B/go-openstacksdk/identity.WithGroupSearchFilters",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
-        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
-        "github.com/JSYoo5B/go-openstacksdk/identity.WithGroupSearchLocation"
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion"
       ],
       "contracts": [
         {
@@ -116615,7 +116582,7 @@
         "github.com/JSYoo5B/go-openstacksdk/identity.WithRoleSearchOpts",
         "github.com/JSYoo5B/go-openstacksdk/identity.WithRoleSearchDomainID",
         "github.com/JSYoo5B/go-openstacksdk/identity.WithRoleSearchFilters",
-        "github.com/JSYoo5B/go-openstacksdk/identity.WithRoleSearchLocation",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion"
       ],
@@ -116678,12 +116645,11 @@
         "github.com/JSYoo5B/go-openstacksdk/identity.WithRoleGetDomainIDJSON",
         "github.com/JSYoo5B/go-openstacksdk/identity.WithRoleGetFilters",
         "github.com/JSYoo5B/go-openstacksdk/identity.WithRoleGetExpression",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
-        "github.com/JSYoo5B/go-openstacksdk/identity.WithRoleGetLocation",
         "github.com/JSYoo5B/go-openstacksdk/identity.RoleReadCloud.GetRole",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithClosedLookupOpts",
-        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithClosedLookupLocation",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.ResolveRecord",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithClosedLookupDomainID",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithClosedLookupDomainIDJSON"
@@ -117003,6 +116969,7 @@
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.All",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.List",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Query",
         "github.com/JSYoo5B/go-openstacksdk/identity.NewProjectReadCloud",
         "github.com/JSYoo5B/go-openstacksdk/identity.ProjectReadCloud.ListProjects",
@@ -117010,8 +116977,7 @@
         "github.com/JSYoo5B/go-openstacksdk/identity.WithProjectReadOpts",
         "github.com/JSYoo5B/go-openstacksdk/identity.WithProjectReadDomainID",
         "github.com/JSYoo5B/go-openstacksdk/identity.WithProjectReadNameOrID",
-        "github.com/JSYoo5B/go-openstacksdk/identity.WithProjectReadFilters",
-        "github.com/JSYoo5B/go-openstacksdk/identity.WithProjectReadLocation"
+        "github.com/JSYoo5B/go-openstacksdk/identity.WithProjectReadFilters"
       ],
       "contracts": [
         {
@@ -117072,7 +117038,7 @@
         "github.com/JSYoo5B/go-openstacksdk.Connection.SearchProjects",
         "github.com/JSYoo5B/go-openstacksdk/identity.WithProjectReadFilters",
         "github.com/JSYoo5B/go-openstacksdk/identity.WithProjectReadDomainID",
-        "github.com/JSYoo5B/go-openstacksdk/identity.WithProjectReadLocation"
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom"
       ],
       "contracts": [
         {
@@ -117284,9 +117250,9 @@
         "github.com/JSYoo5B/go-openstacksdk/identity.UserReadCloud.RawAPI",
         "github.com/JSYoo5B/go-openstacksdk/identity.WithUserListOpts",
         "github.com/JSYoo5B/go-openstacksdk/identity.WithUserListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
-        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
-        "github.com/JSYoo5B/go-openstacksdk/identity.WithUserListLocation"
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion"
       ],
       "contracts": [
         {
@@ -117346,9 +117312,9 @@
         "github.com/JSYoo5B/go-openstacksdk/identity.WithUserSearchOpts",
         "github.com/JSYoo5B/go-openstacksdk/identity.WithUserSearchDomainID",
         "github.com/JSYoo5B/go-openstacksdk/identity.WithUserSearchFilters",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
-        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
-        "github.com/JSYoo5B/go-openstacksdk/identity.WithUserSearchLocation"
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion"
       ],
       "contracts": [
         {
@@ -117424,12 +117390,11 @@
         "github.com/JSYoo5B/go-openstacksdk/identity.WithUserGetDomainIDJSON",
         "github.com/JSYoo5B/go-openstacksdk/identity.WithUserGetFilters",
         "github.com/JSYoo5B/go-openstacksdk/identity.WithUserGetExpression",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
-        "github.com/JSYoo5B/go-openstacksdk/identity.WithUserGetLocation",
         "github.com/JSYoo5B/go-openstacksdk/identity.UserReadCloud.GetUser",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithClosedLookupOpts",
-        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithClosedLookupLocation",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.ResolveRecord",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithClosedLookupDomainID",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithClosedLookupDomainIDJSON"

@@ -263,7 +263,8 @@ func TestPythonVolumeFindRecordQueryClassesOwnedOptsAndRawCap(t *testing.T) {
 func TestPythonVolumeFindRecordOwnedLocationUsesRecordedScopeAndRowProjectZone(t *testing.T) {
 	cloudName, region, projectName := "source", "RegionOne", "configured"
 	location := resource.CloudLocation{Cloud: &cloudName, RegionName: &region, Project: resource.CloudProject{ID: json.RawMessage(`"scope"`), Name: &projectName}}
-	option := volumes.WithRecordFindLocation(location)
+	ownedLocation := location.Clone()
+	option := request.Custom(func(c *volumes.RecordFindOpts) error { loc := ownedLocation.Clone(); c.Location = &loc; return nil })
 	cloudName = "changed"
 	location.Project.ID[0] = '!'
 	for _, project := range []string{`"scope"`, `"foreign"`, `false`} {
@@ -448,6 +449,7 @@ func TestPythonVolumeFindRecordResponseCloseSourceChangeNeverFallsBack(t *testin
 
 func TestPythonVolumeFindRecordSelectionAndOptionFailures(t *testing.T) {
 	api, calls := volumeFindAPI(t, func(*http.Request) *http.Response { t.Fatal("preflight HTTP"); return nil })
+	ownedLocation := resource.CloudLocation{Project: resource.CloudProject{ID: json.RawMessage(`{bad`)}}.Clone()
 	cases := []struct {
 		identity string
 		options  []volumes.RecordFindOption
@@ -456,7 +458,11 @@ func TestPythonVolumeFindRecordSelectionAndOptionFailures(t *testing.T) {
 		{"data", []volumes.RecordFindOption{request.Query("id", "collision")}},
 		{"data", []volumes.RecordFindOption{volumes.WithRecordFindAllProjects(false), request.Query("all_tenants", nil)}},
 		{"data", []volumes.RecordFindOption{request.Query("all_projects", true), volumes.WithRecordFindAllProjects(true)}},
-		{"data", []volumes.RecordFindOption{volumes.WithRecordFindLocation(resource.CloudLocation{Project: resource.CloudProject{ID: json.RawMessage(`{bad`)}})}},
+		{"data", []volumes.RecordFindOption{request.Custom(func(c *volumes.RecordFindOpts) error {
+			loc := ownedLocation.Clone()
+			c.Location = &loc
+			return nil
+		})}},
 		{"data", []volumes.RecordFindOption{volumes.WithRecordFindOpts(volumes.RecordFindOpts{Query: map[string]json.RawMessage{"metadata": json.RawMessage(`{bad`)}})}},
 	}
 	for _, item := range cases {

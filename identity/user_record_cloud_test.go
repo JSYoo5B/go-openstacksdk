@@ -328,7 +328,8 @@ func TestPythonUserCloudSelectedSourceCancellationAndPreflightCannotCreateReceip
 func TestPythonUserCloudLocationBeforeFilteringIgnoresDefaultProjectAndRemoteForgery(t *testing.T) {
 	cloudName, projectName := "configured", "current"
 	location := resource.CloudLocation{Cloud: &cloudName, Project: resource.CloudProject{ID: json.RawMessage(`"scope"`), Name: &projectName}}
-	option := identity.WithUserSearchLocation(location)
+	ownedLocation := location.Clone()
+	option := request.Custom(func(c *identity.UserSearchOpts) error { loc := ownedLocation.Clone(); c.Location = &loc; return nil })
 	cloudName = "changed"
 	location.Project.ID[1] = 'X'
 	calls := 0
@@ -347,7 +348,12 @@ func TestPythonUserCloudLocationBeforeFilteringIgnoresDefaultProjectAndRemoteFor
 	if _, exists := row.Resource.Body["project_id"]; exists {
 		t.Fatal(row.Resource.Body)
 	}
-	result, err = cloud.SearchUsers(context.Background(), "", identity.WithUserSearchLocation(resource.CloudLocation{Project: resource.CloudProject{ID: json.RawMessage(`bad`)}}))
+	ownedLocation2 := resource.CloudLocation{Project: resource.CloudProject{ID: json.RawMessage(`bad`)}}.Clone()
+	result, err = cloud.SearchUsers(context.Background(), "", request.Custom(func(c *identity.UserSearchOpts) error {
+		loc := ownedLocation2.Clone()
+		c.Location = &loc
+		return nil
+	}))
 	if result == nil || !errors.Is(err, resource.ErrInvalidOption) || calls != 1 {
 		t.Fatal(result, err, calls)
 	}

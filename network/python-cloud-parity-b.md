@@ -155,9 +155,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.Service.ListNetworkRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithNetworkCloudListOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithNetworkCloudFilters`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithNetworkCloudCurrentLocation`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithNetworkCloudServiceAvailable`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.API.ProxyCloudListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithCloudRecordListQuery`
@@ -200,9 +200,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.Service.SearchNetworkRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithNetworkCloudListOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithNetworkCloudFilters`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithNetworkCloudCurrentLocation`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithNetworkCloudServiceAvailable`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.API.ProxyCloudListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithCloudRecordListQuery`
@@ -250,6 +250,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListQuery`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListBasePath`
 - `github.com/JSYoo5B/go-openstacksdk/request.Limit`
@@ -260,7 +261,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.WithSubnetReadFiltersJSON`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.BasePath`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithSubnetReadCurrentLocation`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithSubnetNetworkAvailable`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.ListSubnetRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network.Service.ListSubnetRecords`
@@ -315,6 +315,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListQuery`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListHeaders`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListBasePath`
 - `github.com/JSYoo5B/go-openstacksdk/request.Limit`
@@ -325,7 +326,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.WithSubnetReadFiltersJSON`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.BasePath`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithSubnetReadCurrentLocation`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithSubnetNetworkAvailable`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.SearchSubnetRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network.Service.SearchSubnetRecords`
@@ -378,9 +378,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.ListSourceValues`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithSourceCloudListOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithSourceCloudListFilters`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithSourceCloudListLocation`
 
 - Default bodyless /ports GET and Accept header, Source binding/DNS/security/QoS/unknown fields, missing defaults and actual page evidence.
   Tests: `network/v2/ports/python_list_records_test.go:TestPythonPortListRecordsDefaultRequestAndExtensionFields`.
@@ -574,9 +574,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.WithRouterInterfaceReadOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithRouterInterfaceType`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithRouterInterfaceTypeJSON`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithRouterInterfaceReadCurrentLocation`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.ListRecords`
 
 - Library reads literal router dictionary id and sends only the declared device_id query without router member fetch/name lookup/response seeds. Null/bool/number/list/dict ID query behavior, missing/nonmapping input errors and real untyped owner values follow Source JSON-domain semantics.
@@ -1016,7 +1016,6 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network.Service.ListQoSDSCPMarkingRules`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithDSCPMarkingCloudOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithDSCPMarkingCloudCurrentLocation`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithDSCPMarkingCloudFiltersJSON`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ProxyDSCPMarkingRecords`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
@@ -1051,7 +1050,6 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network.Service.SearchQoSDSCPMarkingRules`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithDSCPMarkingCloudOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithDSCPMarkingCloudCurrentLocation`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithDSCPMarkingCloudFiltersJSON`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ProxyDSCPMarkingRecords`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
@@ -1134,7 +1132,6 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network.Service.ListQoSMinimumBandwidthRules`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithMinimumBandwidthCloudOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithMinimumBandwidthCloudCurrentLocation`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithMinimumBandwidthCloudFiltersJSON`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ProxyMinimumBandwidthRecords`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
@@ -1169,7 +1166,6 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network.Service.SearchQoSMinimumBandwidthRules`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithMinimumBandwidthCloudOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithMinimumBandwidthCloudCurrentLocation`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithMinimumBandwidthCloudFiltersJSON`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ProxyMinimumBandwidthRecords`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
@@ -1472,9 +1468,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.WithSecurityGroupReadOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithSecurityGroupReadFiltersJSON`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithSecurityGroupReadExpression`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithSecurityGroupReadCurrentLocation`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.API.ProxyListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithRecordProxyQuery`
 
@@ -1512,9 +1508,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.WithSecurityGroupReadOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithSecurityGroupReadFiltersJSON`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithSecurityGroupReadExpression`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithSecurityGroupReadCurrentLocation`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.API.ProxyListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithRecordProxyQuery`
 

@@ -14,9 +14,9 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.New`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.API.CreateRecord`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordCreateLocation`
 
 - Fresh known attrs snapshot is wrapped under group_snapshot and posted once without Resource GET. Explicit id remains dirty in POST because GroupSnapshot has no allow_patch. Unknown attrs are discarded before Marshaler invocation; omitted/nil/empty attrs versus explicit null/false/zero/empty nested values and exact big integers retain distinct JSON. Parsed server descriptors overwrite matching seed values, unknown values remain Wire only.
   Tests: `blockstorage/v3/groupsnapshots/python_records_test.go:TestPythonGroupSnapshotCreateDeclaredDirtyAttrsAndImmutableOptions`.
@@ -76,9 +76,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.New`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.API.GetRecord`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordReadOpts`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordReadLocation`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordReadSeed`
 
 - One bodyless literal member GET without search/prefetch; wrapped group_snapshot and flat JSON object project exactly8 untyped known descriptors plus computed location. Nested attrs, null/false/zero/array/big integer and unknown HTTP fields survive in independent declared/Wire/Envelope/header carriers. A response id overrides required-ID seed only in the declared response view and never rewrites request route.
@@ -111,9 +111,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.New`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.API.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordListOpts`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordListLocation`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordListDetails`
 - `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordListAllProjects`

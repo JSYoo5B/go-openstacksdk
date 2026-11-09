@@ -309,7 +309,12 @@ func TestCloudSecurityGroupReadOwnsOptionsLocationAndExportedCarriers(t *testing
 	name := "cloud"
 	project := json.RawMessage(`"current"`)
 	location := resource.CloudLocation{Cloud: &name, Project: resource.CloudProject{ID: project, Name: &name}}
-	loc := network.WithSecurityGroupReadCurrentLocation(location)
+	ownedLocation := location.Clone()
+	loc := request.Custom(func(c *network.SecurityGroupReadOpts) error {
+		loc := ownedLocation.Clone()
+		c.CurrentLocation = &loc
+		return nil
+	})
 	name = "caller"
 	project[1] = 'X'
 	client, calls := securityReadClient(t, `{"security_groups":[{"id":"one","name":"web","project_id":1e-400,"location":{"fake":true}}]}`)

@@ -40,9 +40,9 @@ type ServiceReadOpts struct {
 }
 
 // ServiceReadOption is one option of GetService and SearchServices:
-// WithServiceReadOpts, WithServiceReadFilters, WithServiceReadLocation,
-// request.Headers (replaces the headers), request.Microversion or
-// request.Custom over *ServiceReadOpts. Other shared calls fail with
+// WithServiceReadOpts, WithServiceReadFilters, request.Headers (replaces the
+// headers), request.Microversion or request.Custom over *ServiceReadOpts (for
+// example to set Location). Other shared calls fail with
 // resource.ErrInvalidOption before HTTP.
 type ServiceReadOption = request.GetCall
 
@@ -83,10 +83,7 @@ func WithServiceReadFilters(v json.RawMessage) ServiceReadOption {
 		return nil
 	})
 }
-func WithServiceReadLocation(v resource.CloudLocation) ServiceReadOption {
-	owned := v.Clone()
-	return request.Custom(func(c *ServiceReadOpts) error { x := owned.Clone(); c.Location = &x; return nil })
-}
+
 func serviceReadInvalid(format string, args ...any) error {
 	return fmt.Errorf("%w: %s", resource.ErrInvalidOption, fmt.Sprintf(format, args...))
 }
@@ -177,7 +174,11 @@ func searchServicesPrepared(ctx context.Context, api *services.API, nameOrID str
 		opts = append(opts, request.Microversion(*policy.Microversion))
 	}
 	if policy.Location != nil {
-		opts = append(opts, services.WithRecordListLocation(*policy.Location))
+		opts = append(opts, request.Custom(func(c *services.RecordListOpts) error {
+			loc := (*policy.Location).Clone()
+			c.Location = &loc
+			return nil
+		}))
 	}
 	result := &ServiceSearchResult{Inventory: make([]*services.ServiceRecord, 0)}
 	rows := make([]json.RawMessage, 0)

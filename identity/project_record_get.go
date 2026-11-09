@@ -25,9 +25,9 @@ type ProjectGetOpts struct {
 
 // ProjectGetOption is one option of GetProject: WithProjectGetOpts,
 // WithProjectGetDomainID, WithProjectGetRawDomainID, WithProjectGetFilters,
-// WithProjectGetLocation, request.Headers (replaces the headers),
-// request.Microversion or request.Custom over *ProjectGetOpts. Other shared
-// calls fail with resource.ErrInvalidOption before HTTP.
+// request.Headers (replaces the headers), request.Microversion or
+// request.Custom over *ProjectGetOpts (for example to set Location). Other
+// shared calls fail with resource.ErrInvalidOption before HTTP.
 type ProjectGetOption = request.GetCall
 
 var projectGetCalls = calls.Spec[ProjectGetOpts]{
@@ -77,10 +77,6 @@ func WithProjectGetFilters(v json.RawMessage) ProjectGetOption {
 		}
 		return nil
 	})
-}
-func WithProjectGetLocation(v resource.CloudLocation) ProjectGetOption {
-	owned := v.Clone()
-	return request.Custom(func(c *ProjectGetOpts) error { x := owned.Clone(); c.Location = &x; return nil })
 }
 
 type ProjectGetResult struct {

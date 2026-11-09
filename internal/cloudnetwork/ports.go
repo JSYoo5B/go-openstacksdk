@@ -132,7 +132,7 @@ func ListPortValues(ctx context.Context, deps Dependencies, options ...ports.Sou
 	if err != nil {
 		return nil, wrap(err)
 	}
-	owned := append(slices.Clone(options), ports.WithSourceCloudListLocation(location))
+	owned := append(slices.Clone(options), request.Custom(func(c *ports.SourceCloudListOpts) error { loc := location.Clone(); c.CloudLocation = &loc; return nil }))
 	result, err := service.Ports.ListSourceValues(ctx, owned...)
 	return result, wrap(err)
 }

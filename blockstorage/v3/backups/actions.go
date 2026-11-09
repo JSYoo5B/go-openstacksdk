@@ -7,7 +7,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudbackup"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudsnapshot"
 	"github.com/JSYoo5B/go-openstacksdk/request"
-	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
@@ -28,9 +27,7 @@ func WithRestoreBackupName(value string) RestoreBackupOption {
 func WithRestoreBackupSeed(value json.RawMessage) RestoreBackupOption {
 	return cloudsnapshot.WithBackupRestoreSeed(value)
 }
-func WithRestoreBackupLocation(value resource.CloudLocation) RestoreBackupOption {
-	return cloudsnapshot.WithBackupRestoreLocation(value)
-}
+
 func PrepareRestoreBackupOptions(ctx context.Context, options ...RestoreBackupOption) (RestoreBackupOpts, error) {
 	return cloudsnapshot.PrepareBackupRestore(ctx, options...)
 }

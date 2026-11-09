@@ -45,9 +45,10 @@ type ProjectReadOpts struct {
 
 // ProjectReadOption is one option of ListProjects and SearchProjects:
 // WithProjectReadOpts, WithProjectReadDomainID, WithProjectReadNameOrID,
-// WithProjectReadFilters, WithProjectReadLocation, request.Headers (replaces
-// the headers), request.Microversion or request.Custom over *ProjectReadOpts.
-// Other shared calls fail with resource.ErrInvalidOption before HTTP.
+// WithProjectReadFilters, request.Headers (replaces the headers),
+// request.Microversion or request.Custom over *ProjectReadOpts (for example to
+// set Location). Other shared calls fail with resource.ErrInvalidOption before
+// HTTP.
 type ProjectReadOption = request.GetCall
 
 var projectReadCalls = calls.Spec[ProjectReadOpts]{
@@ -94,10 +95,6 @@ func WithProjectReadFilters(v json.RawMessage) ProjectReadOption {
 		}
 		return nil
 	})
-}
-func WithProjectReadLocation(v resource.CloudLocation) ProjectReadOption {
-	owned := v.Clone()
-	return request.Custom(func(c *ProjectReadOpts) error { x := owned.Clone(); c.Location = &x; return nil })
 }
 
 // ProjectListResult preserves list()'s polymorphic Proxy result. Value is always

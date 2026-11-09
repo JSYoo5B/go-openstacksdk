@@ -448,12 +448,12 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.MetadataScope.DeleteKeys`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.MetadataScope.ID`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.MetadataScope.RawClient`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithMetadataHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.DeleteMetadataRecord`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordMetadataHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordMetadataSeed`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordMetadataLocation`
 
 - DeleteKeys preserves the Python keys-is-None branch: nil sends one PUT with metadata:{} and returns its actual clear response; a nonnil empty slice validates without HTTP or fabricated body/header/status.
   Tests: `api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesEmptyMapsAndDeleteBranches`, `api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext`, `internal/cindermetadata/scope_test.go:TestMetadataMethodsKeepActualEvidenceExplicitEmptyAndInputSnapshots`.
@@ -560,12 +560,12 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.MetadataScope.Get`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.MetadataScope.ID`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.MetadataScope.RawClient`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithMetadataHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.FetchMetadataRecord`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordMetadataHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordMetadataSeed`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordMetadataLocation`
 
 - Get sends one GET to the fixed /volumes/{id}/metadata collection and accepts HTTP 200 with the actual exact lowercase metadata string object. No parent GET, implicit metadata fetch, name search for an explicit ID or synthesized parent Resource is added.
   Tests: `api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesRoutesAndOwnedResponse`, `internal/cindermetadata/scope_test.go:TestMetadataMethodsKeepActualEvidenceExplicitEmptyAndInputSnapshots`.
@@ -672,12 +672,12 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.MetadataScope.Get`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.MetadataScope.ID`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.MetadataScope.RawClient`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithMetadataHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.GetMetadataRecord`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordMetadataHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordMetadataSeed`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordMetadataLocation`
 
 - Get sends one GET to the fixed /volumes/{id}/metadata collection and accepts HTTP 200 with the actual exact lowercase metadata string object. No parent GET, implicit metadata fetch, name search for an explicit ID or synthesized parent Resource is added.
   Tests: `api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesRoutesAndOwnedResponse`, `internal/cindermetadata/scope_test.go:TestMetadataMethodsKeepActualEvidenceExplicitEmptyAndInputSnapshots`.
@@ -787,12 +787,12 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.MetadataScope.Replace`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.MetadataScope.ID`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.MetadataScope.RawClient`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithMetadataHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.SetMetadataRecord`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordMetadataHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordMetadataSeed`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordMetadataLocation`
 
 - Merge maps the declared Python set operation to POST /volumes/{id}/metadata with one explicit metadata object, including nil and empty input as metadata:{}. It returns the full actual server metadata map rather than caching the supplied delta; no read/merge/write or parent GET occurs.
   Tests: `api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesRoutesAndOwnedResponse`, `api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesEmptyMapsAndDeleteBranches`, `internal/cindermetadata/scope_test.go:TestMetadataMethodsKeepActualEvidenceExplicitEmptyAndInputSnapshots`.

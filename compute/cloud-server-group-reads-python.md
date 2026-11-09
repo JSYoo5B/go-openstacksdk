@@ -18,8 +18,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithServerGroupCloudReadOpts`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithServerGroupCloudFilters`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithServerGroupCloudExpression`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithServerGroupCloudCurrentLocation`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.API.ListCloudRecords`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.API.FindCloudRecord`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.SearchServerGroups`
@@ -65,8 +65,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithServerGroupCloudReadOpts`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithServerGroupCloudFilters`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithServerGroupCloudExpression`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithServerGroupCloudCurrentLocation`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.API.ListCloudRecords`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.API.FindCloudRecord`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.GetServerGroup`
@@ -149,6 +149,7 @@ import (
 
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/compute"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 func main() {
@@ -174,7 +175,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	options := []compute.ServerGroupCloudReadOption{compute.WithServerGroupCloudCurrentLocation(location)}
+	options := []compute.ServerGroupCloudReadOption{request.Custom(func(c *compute.ServerGroupCloudReadOpts) error { loc := location.Clone(); c.CurrentLocation = &loc; return nil })}
 	if *filters != "" {
 		options = append(options, compute.WithServerGroupCloudFilters(json.RawMessage(*filters)))
 	}

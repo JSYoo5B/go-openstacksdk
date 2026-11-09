@@ -21,7 +21,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.WithRouterCreateJSON`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithRouterCreateAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithRouterCreateAvailabilityZoneHints`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithRouterCreateCurrentLocation`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.CreateRouterRecord`
 
 - routers.API.CreateWithAttributes sends only explicit attributes: no arguments produce {"router":{}}, and admin_state_up plus a caller-built external_gateway_info are sent as given.

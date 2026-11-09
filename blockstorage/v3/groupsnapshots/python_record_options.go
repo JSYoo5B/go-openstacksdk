@@ -24,10 +24,9 @@ type RecordReadOpts struct {
 }
 
 // RecordReadOption is one option of GetRecord: WithRecordReadOpts,
-// WithRecordReadLocation, WithRecordReadSeed, request.Custom over
-// *RecordReadOpts, request.Microversion or request.Headers (replaces the
-// headers). Other shared calls fail with resource.ErrInvalidOption before
-// HTTP.
+// WithRecordReadSeed, request.Custom over *RecordReadOpts (for example to set
+// Location), request.Microversion or request.Headers (replaces the headers).
+// Other shared calls fail with resource.ErrInvalidOption before HTTP.
 type RecordReadOption = request.GetCall
 
 func recordHeaders(value map[string]string) map[string]string {
@@ -75,10 +74,7 @@ func WithRecordReadOpts(v RecordReadOpts) RecordReadOption {
 	owned := copyRead(v)
 	return request.Custom(func(c *RecordReadOpts) error { *c = copyRead(owned); return nil })
 }
-func WithRecordReadLocation(v resource.CloudLocation) RecordReadOption {
-	owned := v.Clone()
-	return request.Custom(func(c *RecordReadOpts) error { c.Location = cloneLocation(&owned); return nil })
-}
+
 func WithRecordReadSeed(v *GroupSnapshotRecord) RecordReadOption {
 	owned := cloneSeed(v)
 	return request.Custom(func(c *RecordReadOpts) error { c.Seed = cloneSeed(owned); return nil })
@@ -90,8 +86,8 @@ type RecordCreateOpts struct {
 	Location     *resource.CloudLocation
 }
 
-// RecordCreateOption is one option of CreateRecord: WithRecordCreateLocation,
-// request.Custom over *RecordCreateOpts, request.Microversion or
+// RecordCreateOption is one option of CreateRecord: request.Custom over
+// *RecordCreateOpts (for example to set Location), request.Microversion or
 // request.Headers (replaces the headers). Other shared calls fail with
 // resource.ErrInvalidOption before HTTP.
 type RecordCreateOption = request.WriteCall
@@ -101,10 +97,6 @@ func copyCreate(v RecordCreateOpts) RecordCreateOpts {
 	v.Microversion = cloneString(v.Microversion)
 	v.Location = cloneLocation(v.Location)
 	return v
-}
-func WithRecordCreateLocation(v resource.CloudLocation) RecordCreateOption {
-	owned := v.Clone()
-	return request.Custom(func(c *RecordCreateOpts) error { c.Location = cloneLocation(&owned); return nil })
 }
 
 type RecordDeleteOpts struct {
@@ -138,12 +130,13 @@ type RecordListOpts struct {
 }
 
 // RecordListOption is one option of ListRecords: WithRecordListOpts,
-// WithRecordListLocation, WithRecordListDetails, WithRecordListAllProjects,
-// request.Custom over *RecordListOpts, request.Query (a declared filter,
-// server query, paginated or max_items as JSON; other keys are ignored),
-// request.Limit, request.Marker, request.MaxItems, request.Paginated,
-// request.Microversion or request.Headers (replaces the headers). Other
-// shared calls fail with resource.ErrInvalidOption before HTTP.
+// WithRecordListDetails, WithRecordListAllProjects, request.Custom over
+// *RecordListOpts (for example to set Location), request.Query (a declared
+// filter, server query, paginated or max_items as JSON; other keys are
+// ignored), request.Limit, request.Marker, request.MaxItems,
+// request.Paginated, request.Microversion or request.Headers (replaces the
+// headers). Other shared calls fail with resource.ErrInvalidOption before
+// HTTP.
 type RecordListOption = request.ListCall
 
 var (
@@ -203,10 +196,7 @@ func WithRecordListOpts(v RecordListOpts) RecordListOption {
 	owned := copyList(v)
 	return request.Custom(func(c *RecordListOpts) error { *c = copyList(owned); return nil })
 }
-func WithRecordListLocation(v resource.CloudLocation) RecordListOption {
-	owned := v.Clone()
-	return request.Custom(func(c *RecordListOpts) error { c.Location = cloneLocation(&owned); return nil })
-}
+
 func WithRecordListDetails(v bool) RecordListOption {
 	return request.Custom(func(c *RecordListOpts) error { x := v; c.Details = &x; return nil })
 }

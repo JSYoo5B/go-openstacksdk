@@ -408,7 +408,8 @@ func TestPythonGroupRecordsSourceLocationIsExplicitAndOwned(t *testing.T) {
 	})
 	cloudName, projectName := "configured", "current"
 	location := resource.CloudLocation{Cloud: &cloudName, Project: resource.CloudProject{ID: json.RawMessage(`"scope"`), Name: &projectName}}
-	opt := groups.WithRecordFindLocation(location)
+	ownedLocation := location.Clone()
+	opt := request.Custom(func(c *groups.RecordFindOpts) error { loc := ownedLocation.Clone(); c.Location = &loc; return nil })
 	cloudName = "mutated"
 	projectName = "mutated"
 	row, err := api.FindRecord(context.Background(), "fixed", opt)

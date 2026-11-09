@@ -15,6 +15,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.ListInGroup`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithListInGroupOptions`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.ListUsersInGroupRecords`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.AllUsersInGroupRecords`
@@ -23,7 +24,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithGroupRecordListQuery`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithGroupRecordListLocation`
 - `github.com/JSYoo5B/go-openstacksdk/request.Limit`
 - `github.com/JSYoo5B/go-openstacksdk/request.Marker`
 - `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`

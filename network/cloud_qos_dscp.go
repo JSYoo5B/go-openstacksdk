@@ -314,12 +314,6 @@ func (s *Service) GetQoSDSCPMarkingRule(ctx context.Context, policyNameOrID, rul
 	return result, nil
 }
 
-// WithDSCPMarkingCloudCurrentLocation snapshots connected Source location. Standalone
-// APIs keep the pinned unconnected Resource location (null).
-func WithDSCPMarkingCloudCurrentLocation(value resource.CloudLocation) DSCPMarkingCloudOption {
-	owned := value.Clone()
-	return func(c *DSCPMarkingCloudOpts) error { x := owned.Clone(); c.CurrentLocation = &x; return nil }
-}
 func dscpMarkingCloudRecord(v *rules.DSCPMarkingRecord) *rules.DSCPMarkingRecord {
 	if v == nil {
 		return nil

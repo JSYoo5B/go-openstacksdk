@@ -19,10 +19,10 @@ type QuotaReadOpts = quotafetch.Options
 // QuotaReadOption is one option of the project and user GetRecord:
 // WithQuotaReadOpts, WithQuotaUsage, WithQuotaReadRequiresID,
 // WithQuotaReadSkipCache, WithQuotaReadErrorMessage, WithQuotaReadResponseKey,
-// WithQuotaReadLocation, request.Query (a Source fetch keyword argument sent as
-// JSON; base_path is supplied by Nova get_quota_set itself and rejected),
-// request.Microversion or request.Custom over *QuotaReadOpts. Other shared
-// calls fail with resource.ErrInvalidOption before HTTP.
+// request.Query (a Source fetch keyword argument sent as JSON; base_path is
+// supplied by Nova get_quota_set itself and rejected), request.Microversion or
+// request.Custom over *QuotaReadOpts (for example to set Location). Other
+// shared calls fail with resource.ErrInvalidOption before HTTP.
 type QuotaReadOption = request.GetQueryCall
 
 var quotaReadCalls = calls.Spec[QuotaReadOpts]{
@@ -109,8 +109,4 @@ func (s *UserQuotaScope) GetRecord(ctx context.Context, options ...QuotaReadOpti
 	}
 	value, err := quotafetch.Read(ctx, client, projectID, userID, quotaReadProfile, quotaReadOptions(options)...)
 	return value, request.Wrap("GetRecord", "compute quota", err)
-}
-
-func WithQuotaReadLocation(v resource.CloudLocation) QuotaReadOption {
-	return request.Custom(quotafetch.WithLocation(v))
 }

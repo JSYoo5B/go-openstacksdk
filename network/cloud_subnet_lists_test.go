@@ -102,7 +102,12 @@ func TestCloudSubnetListsNestedGeneratorCarriesLocationAndDelayedGuards(t *testi
 		testcloud.JSON(w, 200, `{"subnets":[{"id":"one","project_id":"foreign","availability_zone":false}]}`)
 	})
 	location := resource.CloudLocation{Project: resource.CloudProject{ID: json.RawMessage(`"current"`)}}
-	result, err := service.ListSubnetRecords(context.Background(), network.WithSubnetReadFiltersJSON(json.RawMessage(`{"jmespath_filters":"to_array(@)"}`)), network.WithSubnetReadCurrentLocation(location))
+	ownedLocation := location.Clone()
+	result, err := service.ListSubnetRecords(context.Background(), network.WithSubnetReadFiltersJSON(json.RawMessage(`{"jmespath_filters":"to_array(@)"}`)), request.Custom(func(c *network.SubnetReadOpts) error {
+		loc := ownedLocation.Clone()
+		c.CurrentLocation = &loc
+		return nil
+	}))
 	if err != nil || result.JSON != nil || len(result.Value) != 1 || count.Load() != 0 || len(result.Inventory) != 0 {
 		t.Fatal(result, err)
 	}
@@ -142,7 +147,12 @@ func TestCloudSubnetListsNestedGeneratorCarriesLocationAndDelayedGuards(t *testi
 	if count.Load() != before {
 		t.Fatal(count.Load())
 	}
-	result, err = service.ListSubnetRecords(context.Background(), network.WithSubnetReadFiltersJSON(json.RawMessage(`{"jmespath_filters":"to_array(@)"}`)), network.WithSubnetReadCurrentLocation(resource.CloudLocation{Project: resource.CloudProject{ID: json.RawMessage("[")}}))
+	ownedLocation2 := resource.CloudLocation{Project: resource.CloudProject{ID: json.RawMessage("[")}}.Clone()
+	result, err = service.ListSubnetRecords(context.Background(), network.WithSubnetReadFiltersJSON(json.RawMessage(`{"jmespath_filters":"to_array(@)"}`)), request.Custom(func(c *network.SubnetReadOpts) error {
+		loc := ownedLocation2.Clone()
+		c.CurrentLocation = &loc
+		return nil
+	}))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -167,7 +177,12 @@ func TestCloudSubnetListsSDKLocationRawZoneProjectsAndOwnedEvidence(t *testing.T
 		})
 		name := "configured"
 		location := resource.CloudLocation{Project: resource.CloudProject{ID: json.RawMessage(`"current"`), Name: &name}}
-		result, err := service.ListSubnetRecords(context.Background(), network.WithSubnetReadCurrentLocation(location))
+		ownedLocation := location.Clone()
+		result, err := service.ListSubnetRecords(context.Background(), request.Custom(func(c *network.SubnetReadOpts) error {
+			loc := ownedLocation.Clone()
+			c.CurrentLocation = &loc
+			return nil
+		}))
 		if err != nil || len(result.Subnets) != 1 || count.Load() != 1 {
 			t.Fatal(result, err)
 		}

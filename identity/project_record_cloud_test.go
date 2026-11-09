@@ -137,7 +137,8 @@ func TestPythonProjectCloudProxyLiteralAndOpaqueListResultsDoNotInventHTTP(t *te
 func TestPythonProjectCloudLocationBeforeLocalSelectionAndOwnedOverrides(t *testing.T) {
 	cloudName, projectName := "configured", "current"
 	location := resource.CloudLocation{Cloud: &cloudName, Project: resource.CloudProject{ID: json.RawMessage(`"scope"`), Name: &projectName}}
-	option := identity.WithProjectReadLocation(location)
+	ownedLocation := location.Clone()
+	option := request.Custom(func(c *identity.ProjectReadOpts) error { loc := ownedLocation.Clone(); c.Location = &loc; return nil })
 	cloudName = "caller changed"
 	projectName = "caller changed"
 	cloud, _ := projectCloudFixture(t, func(w http.ResponseWriter, r *http.Request) {

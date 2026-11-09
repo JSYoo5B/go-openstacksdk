@@ -112,9 +112,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.ListSourceValues`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithSourceCloudListOpts`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithSourceCloudListFilters`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithSourceCloudListLocation`
 
 - Default bodyless /ports GET and Accept header, Source binding/DNS/security/QoS/unknown fields, missing defaults and actual page evidence.
   Tests: `network/v2/ports/python_list_records_test.go:TestPythonPortListRecordsDefaultRequestAndExtensionFields`.

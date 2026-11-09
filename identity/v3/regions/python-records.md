@@ -14,6 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.New`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.API.List`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.API.All`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithQuery`
@@ -26,7 +27,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/request.BasePath`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.WithRecordListLocation`
 - `github.com/JSYoo5B/go-openstacksdk/request.Limit`
 - `github.com/JSYoo5B/go-openstacksdk/request.Marker`
 - `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`

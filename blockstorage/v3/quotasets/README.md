@@ -142,10 +142,10 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.ProjectQuotaScope.Usage`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.ProjectQuotaScope.GetRecord`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaReadOpts`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaUsage`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaReadLocation`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaReadBasePath`
 
 - The ordinary and usage=true Cinder endpoint forms have distinct Go methods preserving limit and allocation triples plus raw response data.

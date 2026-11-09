@@ -3,7 +3,6 @@ package blockstorage
 import (
 	"context"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudsnapshot"
-	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 type DeleteVolumeBackupRequest struct{ NameOrID string }
@@ -21,9 +20,6 @@ func WithDeleteVolumeBackupWait(value bool) DeleteVolumeBackupOption {
 }
 func WithDeleteVolumeBackupWaitPolicy(value BackupMutationWaitOpts) DeleteVolumeBackupOption {
 	return cloudsnapshot.WithBackupDeleteWaitPolicy(value)
-}
-func WithDeleteVolumeBackupLocation(value resource.CloudLocation) DeleteVolumeBackupOption {
-	return cloudsnapshot.WithBackupDeleteLocation(value)
 }
 
 func PrepareDeleteVolumeBackupOptions(ctx context.Context, options ...DeleteVolumeBackupOption) (DeleteVolumeBackupOpts, error) {

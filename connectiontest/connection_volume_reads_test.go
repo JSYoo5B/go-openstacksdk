@@ -170,7 +170,12 @@ func TestConnectionVolumeReadsLocationFactoriesOwnInputsAndLeaveConnectionDefaul
 					t.Fatal(err)
 				}
 				input := resource.CloudLocation{Cloud: &callCloud, Project: resource.CloudProject{ID: json.RawMessage(`"scope"`), Name: &callName}}
-				option := blockstorage.WithVolumeReadLocation(input)
+				ownedLocation := input.Clone()
+				option := func(c *blockstorage.VolumeReadOpts) error {
+					loc := ownedLocation.Clone()
+					c.Location = &loc
+					return nil
+				}
 				if factory == "bulk" {
 					option = blockstorage.WithVolumeReadOptions(blockstorage.VolumeReadOpts{Location: &input})
 				}
@@ -411,8 +416,13 @@ func TestConnectionVolumeReadsRecordedScopeFailurePrecedesGetterAndOwnedOverride
 			cloud.Mux.HandleFunc("GET /connection-reads/v3/project/volumes/", func(w http.ResponseWriter, r *http.Request) {
 				connectionReadRespond(w, r, `{"id":"volume","project_id":"owned-scope"}`)
 			})
+			ownedLocation := resource.CloudLocation{Project: resource.CloudProject{ID: json.RawMessage(`"owned-scope"`)}}.Clone()
 			result, err = connectionReadCall(context.Background(), conn, operation, callback,
-				blockstorage.WithVolumeReadLocation(resource.CloudLocation{Project: resource.CloudProject{ID: json.RawMessage(`"owned-scope"`)}}))
+				func(c *blockstorage.VolumeReadOpts) error {
+					loc := ownedLocation.Clone()
+					c.Location = &loc
+					return nil
+				})
 			if err != nil || result == nil || count != 2 || locates != 1 {
 				t.Fatal(result, err, count, locates)
 			}

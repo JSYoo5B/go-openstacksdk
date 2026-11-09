@@ -38,10 +38,10 @@ type RecordFindOpts struct {
 // RecordFindOption is one option of FindRecord and ListCloudRecords:
 // WithRecordFindOpts, WithRecordFindDetails, WithRecordFindAllProjects,
 // WithRecordFindPaginated, WithRecordFindLimit, WithRecordFindMarker,
-// WithRecordFindMaxItems, WithRecordFindLocation, request.Custom over
-// *RecordFindOpts, request.IgnoreMissing, request.Query (a JSON keyword
-// value), request.Microversion (an inherited Resource.find convenience: the
-// explicit value applies to member GET; fallback uses the captured default) or
+// WithRecordFindMaxItems, request.Custom over *RecordFindOpts (for example to
+// set Location), request.IgnoreMissing, request.Query (a JSON keyword value),
+// request.Microversion (an inherited Resource.find convenience: the explicit
+// value applies to member GET; fallback uses the captured default) or
 // request.Headers (replaces the headers). Other shared calls fail with
 // resource.ErrInvalidOption before HTTP.
 type RecordFindOption = request.FindCall
@@ -116,10 +116,6 @@ func WithRecordFindMaxItems(v int) RecordFindOption {
 	return request.Custom(func(c *RecordFindOpts) error { c.MaxItems = v; return nil })
 }
 
-func WithRecordFindLocation(v resource.CloudLocation) RecordFindOption {
-	owned := v.Clone()
-	return request.Custom(func(c *RecordFindOpts) error { x := owned.Clone(); c.Location = &x; return nil })
-}
 func serverFindKeys(v RecordFindOpts) []string {
 	keys := make([]string, 0, len(v.Query))
 	seen := make(map[string]bool)

@@ -53,10 +53,7 @@ func WithFloatingIPQueryExpression(expression string) FloatingIPQueryOption {
 	raw, _ := json.Marshal(expression)
 	return WithFloatingIPQueryFilters(raw)
 }
-func WithFloatingIPQueryLocation(value resource.CloudLocation) FloatingIPQueryOption {
-	owned := value.Clone()
-	return func(o *FloatingIPQueryOpts) error { copy := owned.Clone(); o.Location = &copy; return nil }
-}
+
 func WithFloatingIPQueryStrict(strict bool) FloatingIPQueryOption {
 	return func(o *FloatingIPQueryOpts) error { o.Strict = strict; return nil }
 }

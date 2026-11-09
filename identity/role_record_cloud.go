@@ -41,9 +41,9 @@ type RoleSearchOpts struct {
 }
 
 // RoleSearchOption is one option of SearchRoles: WithRoleSearchOpts,
-// WithRoleSearchDomainID, WithRoleSearchFilters, WithRoleSearchLocation,
-// request.Headers (replaces the headers), request.Microversion or
-// request.Custom over *RoleSearchOpts. Other shared calls fail with
+// WithRoleSearchDomainID, WithRoleSearchFilters, request.Headers (replaces the
+// headers), request.Microversion or request.Custom over *RoleSearchOpts (for
+// example to set Location). Other shared calls fail with
 // resource.ErrInvalidOption before HTTP.
 type RoleSearchOption = request.GetCall
 
@@ -90,10 +90,7 @@ func WithRoleSearchFilters(v json.RawMessage) RoleSearchOption {
 		return nil
 	})
 }
-func WithRoleSearchLocation(v resource.CloudLocation) RoleSearchOption {
-	owned := v.Clone()
-	return request.Custom(func(c *RoleSearchOpts) error { x := owned.Clone(); c.Location = &x; return nil })
-}
+
 func roleSearchInvalid(format string, args ...any) error {
 	return fmt.Errorf("%w: %s", resource.ErrInvalidOption, fmt.Sprintf(format, args...))
 }
@@ -180,7 +177,7 @@ func (c *RoleReadCloud) SearchRoles(ctx context.Context, nameOrID string, option
 		opts = append(opts, request.Microversion(*policy.Microversion))
 	}
 	if policy.Location != nil {
-		opts = append(opts, roles.WithRecordListLocation(*policy.Location))
+		opts = append(opts, request.Custom(func(c *roles.RecordListOpts) error { loc := (*policy.Location).Clone(); c.Location = &loc; return nil }))
 	}
 	result := &RoleSearchResult{Inventory: make([]*roles.RoleRecord, 0)}
 	rows := make([]json.RawMessage, 0)
