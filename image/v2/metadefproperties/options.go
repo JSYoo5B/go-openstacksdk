@@ -23,10 +23,10 @@ type CreateOpts struct {
 }
 
 // CreateOption is one option of the operation: WithCreateOpts,
-// WithCreateHeaders, WithCreateType, WithCreateTitle, WithCreateDescription,
-// WithCreateAttributes, WithCreateAttribute, request.Header, or
-// request.Custom over *CreateOpts. Other shared calls fail with
-// resource.ErrInvalidOption before HTTP.
+// WithCreateHeaders, WithCreateAttributes, WithCreateAttribute, request.Header,
+// or request.Custom over *CreateOpts (for example to set Type, Title or
+// Description). Other shared calls fail with resource.ErrInvalidOption before
+// HTTP.
 type CreateOption = request.WriteCall
 
 func copyCreate(value CreateOpts) CreateOpts {
@@ -55,15 +55,6 @@ func WithCreateHeaders(value map[string]string) CreateOption {
 		}
 		return nil
 	})
-}
-func WithCreateType(value string) CreateOption {
-	return request.Custom(func(config *CreateOpts) error { owned := value; config.Type = &owned; return nil })
-}
-func WithCreateTitle(value string) CreateOption {
-	return request.Custom(func(config *CreateOpts) error { owned := value; config.Title = &owned; return nil })
-}
-func WithCreateDescription(value string) CreateOption {
-	return request.Custom(func(config *CreateOpts) error { owned := value; config.Description = &owned; return nil })
 }
 
 // WithCreateAttributes snapshots JSON values at helper creation and replaces attributes.
@@ -108,10 +99,10 @@ type UpdateOpts struct {
 }
 
 // UpdateOption is one option of the operation: WithUpdateOpts,
-// WithUpdateHeaders, WithUpdateName, WithUpdateType, WithUpdateTitle,
-// WithUpdateDescription, WithUpdateAttributes, WithUpdateAttribute,
-// request.Header, or request.Custom over *UpdateOpts. Other shared calls fail
-// with resource.ErrInvalidOption before HTTP.
+// WithUpdateHeaders, WithUpdateAttributes, WithUpdateAttribute, request.Header,
+// or request.Custom over *UpdateOpts (for example to set Name, Type, Title or
+// Description). Other shared calls fail with resource.ErrInvalidOption before
+// HTTP.
 type UpdateOption = request.WriteCall
 
 func copyUpdate(value UpdateOpts) UpdateOpts {
@@ -141,18 +132,6 @@ func WithUpdateHeaders(value map[string]string) UpdateOption {
 		}
 		return nil
 	})
-}
-func WithUpdateName(value string) UpdateOption {
-	return request.Custom(func(config *UpdateOpts) error { owned := value; config.Name = &owned; return nil })
-}
-func WithUpdateType(value string) UpdateOption {
-	return request.Custom(func(config *UpdateOpts) error { owned := value; config.Type = &owned; return nil })
-}
-func WithUpdateTitle(value string) UpdateOption {
-	return request.Custom(func(config *UpdateOpts) error { owned := value; config.Title = &owned; return nil })
-}
-func WithUpdateDescription(value string) UpdateOption {
-	return request.Custom(func(config *UpdateOpts) error { owned := value; config.Description = &owned; return nil })
 }
 
 // WithUpdateAttributes snapshots JSON values at helper creation and replaces attributes.
@@ -193,8 +172,9 @@ type GetOpts struct {
 }
 
 // GetOption is one option of the operation: WithGetOpts, WithGetHeaders,
-// WithGetResourceType, request.Header, or request.Custom over *GetOpts. Other
-// shared calls fail with resource.ErrInvalidOption before HTTP.
+// request.Header, or request.Custom over *GetOpts (for example to set
+// ResourceType). Other shared calls fail with resource.ErrInvalidOption before
+// HTTP.
 type GetOption = request.GetCall
 
 func copyGet(value GetOpts) GetOpts {
@@ -220,9 +200,6 @@ func WithGetHeaders(value map[string]string) GetOption {
 		}
 		return nil
 	})
-}
-func WithGetResourceType(value string) GetOption {
-	return request.Custom(func(config *GetOpts) error { owned := value; config.ResourceType = &owned; return nil })
 }
 
 // DeleteOpts configures the bounded delete operation.

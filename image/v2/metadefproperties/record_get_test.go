@@ -616,7 +616,7 @@ func TestMetadefPropertyRecordLegacyGetRemainsRawAndStrict(t *testing.T) {
 		}
 		return propertyCoreJSON(req, 200, `{"minLength":"03","readonly":"false"}`), nil
 	})
-	value, err := propertyCoreScope(t, client, propertyRecordParent).Get(context.Background(), propertyRecordChild, WithGetResourceType("legacy extension"))
+	value, err := propertyCoreScope(t, client, propertyRecordParent).Get(context.Background(), propertyRecordChild, request.Custom(func(c *GetOpts) error { v := "legacy extension"; c.ResourceType = &v; return nil }))
 	if err != nil || value == nil || calls != 1 || string(value.Body["minLength"]) != `"03"` || string(value.Body["readonly"]) != `"false"` || value.Name != nil {
 		t.Fatal(value, err, calls)
 	}

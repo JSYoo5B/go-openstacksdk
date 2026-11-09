@@ -80,7 +80,7 @@ func TestImageUploadCoreFixedRoutesAndIndependentEvidence(t *testing.T) {
 		return taskCoreJSON(req, 204, "opaque acknowledgement"), nil
 	})
 	client.MoreHeaders = sourceHeaders
-	result, err := New(client).UploadImage(context.Background(), imageUploadCoreInput(reader), request.Header("x-policy", "option"), WithImageUploadSize(0))
+	result, err := New(client).UploadImage(context.Background(), imageUploadCoreInput(reader), request.Header("x-policy", "option"), request.Custom(func(c *ImageUploadOpts) error { v := int64(0); c.Size = &v; return nil }))
 	if err != nil || result == nil || result.ImageID != id || result.Image == nil || *result.Image.Status != "queued" || *result.Image.Size != 9007199254740993 || result.Image.Links != nil || result.Metadata.StatusCode != 201 || result.Acknowledgement.StatusCode != 204 || string(result.Metadata.Body) != metadata || string(result.Acknowledgement.Body) != "opaque acknowledgement" || calls != 2 || reader.closes.Load() != 0 || reader.seeks.Load() != 0 {
 		t.Fatal(result, err, calls, reader)
 	}
@@ -119,7 +119,7 @@ func TestImageUploadCoreCompletePreflight(t *testing.T) {
 	if v, e := service.UploadImage(ctx, imageUploadCoreInput(reader)); v != nil || !errors.Is(e, cause) || !errors.Is(e, context.Canceled) {
 		t.Fatal(v, e)
 	}
-	invalid := []ImageUploadOption{nil, WithImageUploadSize(-1), request.Header("Content-Type", "owned"), request.Header("X-OpenStack-Image-Size", "1"), WithImageUploadField("name", "rogue"), WithImageUploadField(" x", 1), WithImageUploadFields(map[string]json.RawMessage{"x": nil}), WithImageUploadFields(map[string]json.RawMessage{"x": json.RawMessage{}}), WithImageUploadFields(map[string]json.RawMessage{"x": json.RawMessage("no-json")}), WithImageUploadFields(map[string]json.RawMessage{"x": json.RawMessage{'"', 0xff, '"'}})}
+	invalid := []ImageUploadOption{nil, request.Custom(func(c *ImageUploadOpts) error { v := int64(-1); c.Size = &v; return nil }), request.Header("Content-Type", "owned"), request.Header("X-OpenStack-Image-Size", "1"), WithImageUploadField("name", "rogue"), WithImageUploadField(" x", 1), WithImageUploadFields(map[string]json.RawMessage{"x": nil}), WithImageUploadFields(map[string]json.RawMessage{"x": json.RawMessage{}}), WithImageUploadFields(map[string]json.RawMessage{"x": json.RawMessage("no-json")}), WithImageUploadFields(map[string]json.RawMessage{"x": json.RawMessage{'"', 0xff, '"'}})}
 	for _, raw := range []string{"null", "false", "1", `[]`, `{}`, `""`} {
 		invalid = append(invalid, WithImageUploadFields(map[string]json.RawMessage{"disk_format": json.RawMessage(raw)}), WithImageUploadFields(map[string]json.RawMessage{"container_format": json.RawMessage(raw)}))
 	}

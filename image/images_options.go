@@ -83,51 +83,6 @@ func WithListImagesHeaders(value map[string]string) ListImagesOption {
 	apply := mergeImageMutationHeaders(value)
 	return request.Custom(func(config *ListImagesOpts) error { return applyImageMemberHeader(&config.Headers, apply) })
 }
-func WithListImagesID(value string) ListImagesOption {
-	return request.Custom(func(config *ListImagesOpts) error { snapshot := value; config.ID = &snapshot; return nil })
-}
-func WithListImagesName(value string) ListImagesOption {
-	return request.Custom(func(config *ListImagesOpts) error { snapshot := value; config.Name = &snapshot; return nil })
-}
-func WithListImagesVisibility(value string) ListImagesOption {
-	return request.Custom(func(config *ListImagesOpts) error { snapshot := value; config.Visibility = &snapshot; return nil })
-}
-func WithListImagesMemberStatus(value string) ListImagesOption {
-	return request.Custom(func(config *ListImagesOpts) error { snapshot := value; config.MemberStatus = &snapshot; return nil })
-}
-func WithListImagesOwner(value string) ListImagesOption {
-	return request.Custom(func(config *ListImagesOpts) error { snapshot := value; config.Owner = &snapshot; return nil })
-}
-func WithListImagesStatus(value string) ListImagesOption {
-	return request.Custom(func(config *ListImagesOpts) error { snapshot := value; config.Status = &snapshot; return nil })
-}
-func WithListImagesSort(value string) ListImagesOption {
-	return request.Custom(func(config *ListImagesOpts) error { snapshot := value; config.Sort = &snapshot; return nil })
-}
-func WithListImagesCreatedAt(value string) ListImagesOption {
-	return request.Custom(func(config *ListImagesOpts) error { snapshot := value; config.CreatedAt = &snapshot; return nil })
-}
-func WithListImagesUpdatedAt(value string) ListImagesOption {
-	return request.Custom(func(config *ListImagesOpts) error { snapshot := value; config.UpdatedAt = &snapshot; return nil })
-}
-func WithListImagesContainerFormat(value string) ListImagesOption {
-	return request.Custom(func(config *ListImagesOpts) error { snapshot := value; config.ContainerFormat = &snapshot; return nil })
-}
-func WithListImagesDiskFormat(value string) ListImagesOption {
-	return request.Custom(func(config *ListImagesOpts) error { snapshot := value; config.DiskFormat = &snapshot; return nil })
-}
-func WithListImagesSizeMin(value int64) ListImagesOption {
-	return request.Custom(func(config *ListImagesOpts) error { snapshot := value; config.SizeMin = &snapshot; return nil })
-}
-func WithListImagesSizeMax(value int64) ListImagesOption {
-	return request.Custom(func(config *ListImagesOpts) error { snapshot := value; config.SizeMax = &snapshot; return nil })
-}
-func WithListImagesProtected(value bool) ListImagesOption {
-	return request.Custom(func(config *ListImagesOpts) error { snapshot := value; config.Protected = &snapshot; return nil })
-}
-func WithListImagesHidden(value bool) ListImagesOption {
-	return request.Custom(func(config *ListImagesOpts) error { snapshot := value; config.Hidden = &snapshot; return nil })
-}
 func WithListImagesTags(values ...string) ListImagesOption {
 	snapshot := append([]string(nil), values...)
 	return request.Custom(func(config *ListImagesOpts) error { config.Tags = append([]string(nil), snapshot...); return nil })
@@ -161,9 +116,6 @@ func WithListImagesFilter(key string, values ...string) ListImagesOption {
 func WithListImagesFilters(values url.Values) ListImagesOption {
 	snapshot := copyImageQuery(values)
 	return request.Custom(func(config *ListImagesOpts) error { config.Filters = copyImageQuery(snapshot); return nil })
-}
-func WithListImagesSinglePage(value bool) ListImagesOption {
-	return request.Custom(func(config *ListImagesOpts) error { config.SinglePage = value; return nil })
 }
 
 func copyGetImageOpts(value GetImageOpts) GetImageOpts {

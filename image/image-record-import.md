@@ -15,15 +15,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.API.ImportImage`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.API.ImportKnownImage`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithImportOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithImportMethod`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithImportURI`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithImportRemoteRegion`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithImportRemoteImageID`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithImportRemoteServiceInterface`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithImportStore`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithImportStores`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithImportAllStores`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithImportAllStoresMustSucceed`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithImportHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/request.Field`

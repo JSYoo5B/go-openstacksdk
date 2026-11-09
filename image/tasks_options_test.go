@@ -123,7 +123,7 @@ func TestTaskOptionsReplacementPresenceAndLastWins(t *testing.T) {
 	limit := 2
 	base := WithListTasksOpts(ListTasksOpts{Limit: &limit, Marker: "old", Type: "old", Status: "old", SortKey: "old", SortDir: "desc", MaxItems: 4, SinglePage: true})
 	limit = -1
-	_, err = service.AllTasks(context.Background(), base, request.Header("X-Erased", "old"), WithListTasksOpts(ListTasksOpts{}), request.Limit(0), request.Marker(""), WithListTasksType(""), WithListTasksStatus(""), WithListTasksSortKey(""), WithListTasksSortDir(""), request.MaxItems(0), WithListTasksSinglePage(false), WithListTasksHeaders(map[string]string{"x-policy": "first"}), request.Header("X-Policy", "last"))
+	_, err = service.AllTasks(context.Background(), base, request.Header("X-Erased", "old"), WithListTasksOpts(ListTasksOpts{}), request.Limit(0), request.Marker(""), request.Custom(func(c *ListTasksOpts) error { c.Type = ""; return nil }), request.Custom(func(c *ListTasksOpts) error { c.Status = ""; return nil }), request.Custom(func(c *ListTasksOpts) error { c.SortKey = ""; return nil }), request.Custom(func(c *ListTasksOpts) error { c.SortDir = ""; return nil }), request.MaxItems(0), request.Custom(func(c *ListTasksOpts) error { c.SinglePage = false; return nil }), WithListTasksHeaders(map[string]string{"x-policy": "first"}), request.Header("X-Policy", "last"))
 	if err != nil || calls != 3 {
 		t.Fatal(err, calls)
 	}

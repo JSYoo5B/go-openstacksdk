@@ -13,9 +13,9 @@ import (
 )
 
 // taskBodyFilterFields maps each pinned Python openstack/image/v2/task.py Body
-// attribute that Resource.list treats as a client-side filter (a Body
-// attribute that is not a query parameter) to its response field. type and
-// status are query parameters there and remain WithListTasksType/Status.
+// attribute that Resource.list treats as a client-side filter (a Body attribute
+// that is not a query parameter) to its response field. type and status are
+// query parameters there and remain ListTasksOpts.Type/Status.
 var taskBodyFilterFields = map[string]string{
 	"id": "id", "name": "name", "created_at": "created_at", "updated_at": "updated_at",
 	"expires_at": "expires_at", "input": "input", "message": "message",
@@ -50,19 +50,6 @@ func WithListTasksBodyFilter(name string, value any) ListTasksOption {
 		config.BodyFilters[name] = append(json.RawMessage(nil), encoded...)
 		return nil
 	})
-}
-
-// WithListTasksMarkerFallback enables pinned Python Resource.list's final
-// continuation rule: when a nonempty page has no usable next link and an
-// explicit positive request.Limit was given, request the same collection
-// again with the initial filters, the same limit and marker set to the last
-// raw row's id. Iteration ends at the first empty page, so a fully consumed
-// collection costs one extra request, exactly as in Python. A repeated marker
-// fails as a pagination cycle; a last row without a string id fails. Disabled
-// by default, and ignored without a positive limit, with SinglePage, or after
-// a MaxItems cap or caller break.
-func WithListTasksMarkerFallback(enabled bool) ListTasksOption {
-	return request.Custom(func(config *ListTasksOpts) error { config.MarkerFallback = enabled; return nil })
 }
 
 // WithListTasksLinkHeader lets an RFC 8288 HTTP Link header with rel="next"

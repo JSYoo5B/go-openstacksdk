@@ -217,7 +217,7 @@ func TestImageCacheFixedRoutesAndClearTargets(t *testing.T) {
 		name, header string
 		target       image.CacheTarget
 		options      []image.ClearCacheOption
-	}{{"default", "", image.CacheBoth, nil}, {"zero replacement", "", image.CacheBoth, []image.ClearCacheOption{image.WithClearCacheOpts(image.ClearCacheOpts{})}}, {"explicit both", "", image.CacheBoth, []image.ClearCacheOption{image.WithClearCacheTarget(image.CacheBoth)}}, {"cache", "cache", image.CacheOnly, []image.ClearCacheOption{image.WithClearCacheTarget(image.CacheOnly)}}, {"queue", "queue", image.QueueOnly, []image.ClearCacheOption{image.WithClearCacheTarget(image.QueueOnly)}}} {
+	}{{"default", "", image.CacheBoth, nil}, {"zero replacement", "", image.CacheBoth, []image.ClearCacheOption{image.WithClearCacheOpts(image.ClearCacheOpts{})}}, {"explicit both", "", image.CacheBoth, []image.ClearCacheOption{request.Custom(func(c *image.ClearCacheOpts) error { c.Target = image.CacheBoth; return nil })}}, {"cache", "cache", image.CacheOnly, []image.ClearCacheOption{request.Custom(func(c *image.ClearCacheOpts) error { c.Target = image.CacheOnly; return nil })}}, {"queue", "queue", image.QueueOnly, []image.ClearCacheOption{request.Custom(func(c *image.ClearCacheOpts) error { c.Target = image.QueueOnly; return nil })}}} {
 		t.Run("clear "+tc.name, func(t *testing.T) {
 			body := &cacheContractBody{Reader: bytes.NewReader([]byte{0, 255, 'x'})}
 			var calls atomic.Int32
@@ -503,7 +503,7 @@ func TestImageCachePreparedOptionsAndLiveSource(t *testing.T) {
 		t.Run(fmt.Sprint("invalid enum ", target), func(t *testing.T) {
 			var calls atomic.Int32
 			client := cacheContractClient(func(*http.Request) (*http.Response, error) { calls.Add(1); return nil, errors.New("unexpected") })
-			v, e := image.New(client).ClearCache(context.Background(), image.WithClearCacheTarget(target))
+			v, e := image.New(client).ClearCache(context.Background(), request.Custom(func(c *image.ClearCacheOpts) error { c.Target = target; return nil }))
 			if v != nil || !errors.Is(e, resource.ErrInvalidOption) || calls.Load() != 0 {
 				t.Fatal(v, e, calls.Load())
 			}
@@ -590,7 +590,7 @@ func TestImageCachePreparedOptionsAndLiveSource(t *testing.T) {
 			}
 			return cacheContractWire(204, io.NopCloser(strings.NewReader(""))), nil
 		})
-		v, e := image.New(client).ClearCache(context.Background(), request.Header("X-Dropped", "before"), helper, image.WithClearCacheHeaders(map[string]string{"X-Extra": "owned"}), request.Header("x-option", "last"), image.WithClearCacheTarget(image.QueueOnly))
+		v, e := image.New(client).ClearCache(context.Background(), request.Header("X-Dropped", "before"), helper, image.WithClearCacheHeaders(map[string]string{"X-Extra": "owned"}), request.Header("x-option", "last"), request.Custom(func(c *image.ClearCacheOpts) error { c.Target = image.QueueOnly; return nil }))
 		if e != nil || v == nil || v.Target == nil || *v.Target != image.QueueOnly {
 			t.Fatal(v, e)
 		}

@@ -110,14 +110,14 @@ func TestGlanceImportMethodsAndRootStoreControls(t *testing.T) {
 		method, root, store string
 	}{
 		{"default", nil, `{"name":"glance-direct"}`, `{}`, ""},
-		{"web", []imageimport.ImportOption{imageimport.WithImportMethod(imageimport.WebDownloadMethod), imageimport.WithImportURI("https://remote.invalid/image?q=%2F")}, `{"name":"web-download","uri":"https://remote.invalid/image?q=%2F"}`, `{}`, ""},
-		{"remote default interface", []imageimport.ImportOption{imageimport.WithImportMethod(imageimport.GlanceDownloadMethod), imageimport.WithImportRemoteRegion("RegionTwo"), imageimport.WithImportRemoteImageID("remote-id")}, `{"glance_image_id":"remote-id","glance_region":"RegionTwo","name":"glance-download"}`, `{}`, ""},
-		{"remote interface", []imageimport.ImportOption{imageimport.WithImportMethod(imageimport.GlanceDownloadMethod), imageimport.WithImportRemoteRegion("RegionTwo"), imageimport.WithImportRemoteImageID("remote-id"), imageimport.WithImportRemoteServiceInterface("internal")}, `{"glance_image_id":"remote-id","glance_region":"RegionTwo","glance_service_interface":"internal","name":"glance-download"}`, `{}`, ""},
-		{"copy", []imageimport.ImportOption{imageimport.WithImportMethod(imageimport.CopyImageMethod)}, `{"name":"copy-image"}`, `{}`, ""},
-		{"vendor server method", []imageimport.ImportOption{imageimport.WithImportMethod("vendor-method")}, `{"name":"vendor-method"}`, `{}`, ""},
-		{"singular header only", []imageimport.ImportOption{imageimport.WithImportStore("store-a"), imageimport.WithImportAllStores(false), imageimport.WithImportAllStoresMustSucceed(false)}, `{"name":"glance-direct"}`, `{"all_stores":false,"all_stores_must_succeed":false}`, "store-a"},
+		{"web", []imageimport.ImportOption{request.Custom(func(c *imageimport.ImportOpts) error { c.Method = imageimport.WebDownloadMethod; return nil }), request.Custom(func(c *imageimport.ImportOpts) error { c.URI = "https://remote.invalid/image?q=%2F"; return nil })}, `{"name":"web-download","uri":"https://remote.invalid/image?q=%2F"}`, `{}`, ""},
+		{"remote default interface", []imageimport.ImportOption{request.Custom(func(c *imageimport.ImportOpts) error { c.Method = imageimport.GlanceDownloadMethod; return nil }), request.Custom(func(c *imageimport.ImportOpts) error { c.RemoteRegion = "RegionTwo"; return nil }), request.Custom(func(c *imageimport.ImportOpts) error { c.RemoteImageID = "remote-id"; return nil })}, `{"glance_image_id":"remote-id","glance_region":"RegionTwo","name":"glance-download"}`, `{}`, ""},
+		{"remote interface", []imageimport.ImportOption{request.Custom(func(c *imageimport.ImportOpts) error { c.Method = imageimport.GlanceDownloadMethod; return nil }), request.Custom(func(c *imageimport.ImportOpts) error { c.RemoteRegion = "RegionTwo"; return nil }), request.Custom(func(c *imageimport.ImportOpts) error { c.RemoteImageID = "remote-id"; return nil }), request.Custom(func(c *imageimport.ImportOpts) error { c.RemoteServiceInterface = "internal"; return nil })}, `{"glance_image_id":"remote-id","glance_region":"RegionTwo","glance_service_interface":"internal","name":"glance-download"}`, `{}`, ""},
+		{"copy", []imageimport.ImportOption{request.Custom(func(c *imageimport.ImportOpts) error { c.Method = imageimport.CopyImageMethod; return nil })}, `{"name":"copy-image"}`, `{}`, ""},
+		{"vendor server method", []imageimport.ImportOption{request.Custom(func(c *imageimport.ImportOpts) error { c.Method = "vendor-method"; return nil })}, `{"name":"vendor-method"}`, `{}`, ""},
+		{"singular header only", []imageimport.ImportOption{request.Custom(func(c *imageimport.ImportOpts) error { v := "store-a"; c.Store = &v; return nil }), request.Custom(func(c *imageimport.ImportOpts) error { v := false; c.AllStores = &v; return nil }), request.Custom(func(c *imageimport.ImportOpts) error { v := false; c.AllStoresMustSucceed = &v; return nil })}, `{"name":"glance-direct"}`, `{"all_stores":false,"all_stores_must_succeed":false}`, "store-a"},
 		{"plural root only", []imageimport.ImportOption{imageimport.WithImportStores("store-a", "store-b")}, `{"name":"glance-direct"}`, `{"stores":["store-a","store-b"]}`, ""},
-		{"all stores", []imageimport.ImportOption{imageimport.WithImportAllStores(true)}, `{"name":"glance-direct"}`, `{"all_stores":true}`, ""},
+		{"all stores", []imageimport.ImportOption{request.Custom(func(c *imageimport.ImportOpts) error { v := true; c.AllStores = &v; return nil })}, `{"name":"glance-direct"}`, `{"all_stores":true}`, ""},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			cloud := testcloud.New(t)
@@ -146,14 +146,14 @@ func TestGlanceImportMethodsAndRootStoreControls(t *testing.T) {
 		})
 	}
 	for _, opts := range [][]imageimport.ImportOption{
-		{imageimport.WithImportMethod(imageimport.WebDownloadMethod)},
-		{imageimport.WithImportURI("https://remote.invalid/image")},
-		{imageimport.WithImportMethod(imageimport.GlanceDownloadMethod), imageimport.WithImportRemoteRegion("RegionTwo")},
-		{imageimport.WithImportMethod(imageimport.GlanceDownloadMethod), imageimport.WithImportRemoteImageID("remote-id")},
-		{imageimport.WithImportRemoteRegion("RegionTwo"), imageimport.WithImportRemoteImageID("remote-id")},
-		{imageimport.WithImportStore("a"), imageimport.WithImportStores("b")},
-		{imageimport.WithImportAllStores(true), imageimport.WithImportStore("a")},
-		{imageimport.WithImportAllStores(true), imageimport.WithImportStores("a")},
+		{request.Custom(func(c *imageimport.ImportOpts) error { c.Method = imageimport.WebDownloadMethod; return nil })},
+		{request.Custom(func(c *imageimport.ImportOpts) error { c.URI = "https://remote.invalid/image"; return nil })},
+		{request.Custom(func(c *imageimport.ImportOpts) error { c.Method = imageimport.GlanceDownloadMethod; return nil }), request.Custom(func(c *imageimport.ImportOpts) error { c.RemoteRegion = "RegionTwo"; return nil })},
+		{request.Custom(func(c *imageimport.ImportOpts) error { c.Method = imageimport.GlanceDownloadMethod; return nil }), request.Custom(func(c *imageimport.ImportOpts) error { c.RemoteImageID = "remote-id"; return nil })},
+		{request.Custom(func(c *imageimport.ImportOpts) error { c.RemoteRegion = "RegionTwo"; return nil }), request.Custom(func(c *imageimport.ImportOpts) error { c.RemoteImageID = "remote-id"; return nil })},
+		{request.Custom(func(c *imageimport.ImportOpts) error { v := "a"; c.Store = &v; return nil }), imageimport.WithImportStores("b")},
+		{request.Custom(func(c *imageimport.ImportOpts) error { v := true; c.AllStores = &v; return nil }), request.Custom(func(c *imageimport.ImportOpts) error { v := "a"; c.Store = &v; return nil })},
+		{request.Custom(func(c *imageimport.ImportOpts) error { v := true; c.AllStores = &v; return nil }), imageimport.WithImportStores("a")},
 	} {
 		cloud := testcloud.New(t)
 		var calls atomic.Int32
@@ -275,7 +275,7 @@ func TestGlanceImportOptionSnapshotsReplacementAndReuse(t *testing.T) {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			v, err := a.ImportKnownImage(context.Background(), glanceImportKnown(), imageimport.WithImportMethod(imageimport.WebDownloadMethod), option)
+			v, err := a.ImportKnownImage(context.Background(), glanceImportKnown(), request.Custom(func(c *imageimport.ImportOpts) error { c.Method = imageimport.WebDownloadMethod; return nil }), option)
 			if err != nil || v == nil {
 				errorsOut <- fmt.Errorf("result=%v error=%v", v, err)
 				return
@@ -338,7 +338,7 @@ func TestGlanceImportOptionSnapshotsReplacementAndReuse(t *testing.T) {
 			}
 			w.WriteHeader(202)
 		})
-		if v, err := imageimport.New(cloud.Client("image", glanceImportPrefix)).ImportKnownImage(context.Background(), glanceImportKnown(), imageimport.WithImportStore("old"), imageimport.WithImportURI("old"), request.Field("vendor", true), imageimport.WithImportOpts(imageimport.ImportOpts{})); err != nil || v == nil || calls.Load() != 1 {
+		if v, err := imageimport.New(cloud.Client("image", glanceImportPrefix)).ImportKnownImage(context.Background(), glanceImportKnown(), request.Custom(func(c *imageimport.ImportOpts) error { v := "old"; c.Store = &v; return nil }), request.Custom(func(c *imageimport.ImportOpts) error { c.URI = "old"; return nil }), request.Field("vendor", true), imageimport.WithImportOpts(imageimport.ImportOpts{})); err != nil || v == nil || calls.Load() != 1 {
 			t.Fatal(v, err, calls.Load())
 		}
 	})
@@ -374,7 +374,7 @@ func TestGlanceImportExtensionsAndPreflightAreSDKOwned(t *testing.T) {
 	client := cloud.Client("image", glanceImportPrefix)
 	a := imageimport.New(client)
 	for _, option := range []imageimport.ImportOption{
-		nil, imageimport.WithImportStore(""), imageimport.WithImportStores("valid", ""), request.Header("X-Auth-Token", "forged"), request.Header("X-Image-Meta-Store", "forged"), request.Header("OpenStack-API-Version", "image 2.8"), imageimport.WithImportHeaders(map[string]string{"X-Trace": "a", "x-trace": "b"}),
+		nil, request.Custom(func(c *imageimport.ImportOpts) error { v := ""; c.Store = &v; return nil }), imageimport.WithImportStores("valid", ""), request.Header("X-Auth-Token", "forged"), request.Header("X-Image-Meta-Store", "forged"), request.Header("OpenStack-API-Version", "image 2.8"), imageimport.WithImportHeaders(map[string]string{"X-Trace": "a", "x-trace": "b"}),
 		request.Field("method", true), request.Field("ALL-STORES", true), request.Field("stores", []string{"a"}), imageimport.WithImportMethodField("NAME", "copy-image"), imageimport.WithImportMethodField("glance-region", "remote"), imageimport.WithImportMethodField("URI", "https://remote.invalid"), request.Field("vendor", json.RawMessage(`{`)), request.Field("vendor", make(chan int)),
 	} {
 		if v, err := a.ImportImage(context.Background(), resource.ID("selected"), option); v != nil || !errors.Is(err, resource.ErrInvalidOption) || calls.Load() != 0 {
@@ -674,7 +674,7 @@ func TestGlanceImportLiveProviderFixedRoutesAndSourceRechecks(t *testing.T) {
 			}
 			w.WriteHeader(202)
 		})
-		if v, err := imageimport.New(client).ImportKnownImage(context.Background(), glanceImportKnown(), imageimport.WithImportStore("owned")); err != nil || v == nil || calls.Load() != 1 || client.MoreHeaders["x-image-meta-store"] != "source" {
+		if v, err := imageimport.New(client).ImportKnownImage(context.Background(), glanceImportKnown(), request.Custom(func(c *imageimport.ImportOpts) error { v := "owned"; c.Store = &v; return nil })); err != nil || v == nil || calls.Load() != 1 || client.MoreHeaders["x-image-meta-store"] != "source" {
 			t.Fatal(v, err, calls.Load(), client.MoreHeaders)
 		}
 	})

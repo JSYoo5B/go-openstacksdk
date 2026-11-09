@@ -70,8 +70,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithCreateOpts`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithCreateHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithCreatePrefix`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithCreatePropertiesTarget`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.NamespaceScope.CreateRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordCreateOpts`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordCreateHeaders`

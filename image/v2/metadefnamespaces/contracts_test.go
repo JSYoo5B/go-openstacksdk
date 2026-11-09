@@ -248,11 +248,11 @@ func TestMetadefNamespacesFixedRoutesAndPayloads(t *testing.T) {
 			return namespaceWire(code, io.NopCloser(strings.NewReader(namespaceObject))), nil
 		})
 		a := namespaces.New(client)
-		v, e := a.Create(context.Background(), namespaceName, namespaces.WithCreateDisplayName(""), namespaces.WithCreateDescription("line1\nline2"), namespaces.WithCreateVisibility("public"), namespaces.WithCreateOwner(""), namespaces.WithCreateProtected(false))
+		v, e := a.Create(context.Background(), namespaceName, request.Custom(func(c *namespaces.CreateOpts) error { v := ""; c.DisplayName = &v; return nil }), request.Custom(func(c *namespaces.CreateOpts) error { v := "line1\nline2"; c.Description = &v; return nil }), request.Custom(func(c *namespaces.CreateOpts) error { v := "public"; c.Visibility = &v; return nil }), request.Custom(func(c *namespaces.CreateOpts) error { v := ""; c.Owner = &v; return nil }), request.Custom(func(c *namespaces.CreateOpts) error { v := false; c.Protected = &v; return nil }))
 		if e != nil || v == nil {
 			t.Fatal(v, e)
 		}
-		v, e = a.Update(context.Background(), namespaceName, namespaces.WithUpdateNamespace("Renamed::Namespace"), namespaces.WithUpdateDisplayName(""), namespaces.WithUpdateDescription("line1\nline2"), namespaces.WithUpdateVisibility("private"), namespaces.WithUpdateOwner(""), namespaces.WithUpdateProtected(false))
+		v, e = a.Update(context.Background(), namespaceName, request.Custom(func(c *namespaces.UpdateOpts) error { v := "Renamed::Namespace"; c.Namespace = &v; return nil }), request.Custom(func(c *namespaces.UpdateOpts) error { v := ""; c.DisplayName = &v; return nil }), request.Custom(func(c *namespaces.UpdateOpts) error { v := "line1\nline2"; c.Description = &v; return nil }), request.Custom(func(c *namespaces.UpdateOpts) error { v := "private"; c.Visibility = &v; return nil }), request.Custom(func(c *namespaces.UpdateOpts) error { v := ""; c.Owner = &v; return nil }), request.Custom(func(c *namespaces.UpdateOpts) error { v := false; c.Protected = &v; return nil }))
 		if e != nil || v == nil || calls.Load() != 2 {
 			t.Fatal(v, e, calls.Load())
 		}
@@ -268,7 +268,7 @@ func TestMetadefNamespacesFixedRoutesAndPayloads(t *testing.T) {
 				}
 				return namespaceWire(200, io.NopCloser(strings.NewReader(`{"properties":{"hw:cpu":{"title":"CPU","type":"integer"}},"namespace":"foreign"}`))), nil
 			})
-			v, e := namespaces.New(client).Get(context.Background(), namespaceName, namespaces.WithGetResourceType(resourceType))
+			v, e := namespaces.New(client).Get(context.Background(), namespaceName, request.Custom(func(c *namespaces.GetOpts) error { v := resourceType; c.ResourceType = &v; return nil }))
 			if e != nil || v == nil || calls.Load() != 1 || !bytes.Contains(v.Body["properties"], []byte("hw:cpu")) {
 				t.Fatal(v, e, calls.Load())
 			}
@@ -472,7 +472,10 @@ func TestMetadefNamespacesAdvertisedPagingAndControls(t *testing.T) {
 				bodies = append(bodies, b)
 				return namespaceWire(200, b), nil
 			})
-			rows, e := namespaces.New(client).All(context.Background(), request.Limit(2), request.Marker("Start::Namespace"), namespaces.WithListVisibility("public"), namespaces.WithListSortKey("future_sort"), namespaces.WithListSortDir("asc"), namespaces.WithListResourceTypes("OS::Glance::Image, OS::Nova::Flavor"))
+			rows, e := namespaces.New(client).All(context.Background(), request.Limit(2), request.Marker("Start::Namespace"), request.Custom(func(c *namespaces.ListOpts) error { c.Visibility = "public"; return nil }), request.Custom(func(c *namespaces.ListOpts) error { c.SortKey = "future_sort"; return nil }), request.Custom(func(c *namespaces.ListOpts) error { c.SortDir = "asc"; return nil }), request.Custom(func(c *namespaces.ListOpts) error {
+				c.ResourceTypes = "OS::Glance::Image, OS::Nova::Flavor"
+				return nil
+			}))
 			if e != nil || len(rows) != 2 || calls.Load() != 2 {
 				t.Fatal(rows, e, calls.Load())
 			}
@@ -558,7 +561,7 @@ func TestMetadefNamespacesAdvertisedPagingAndControls(t *testing.T) {
 				}
 				return
 			}
-			opts := []namespaces.ListOption{namespaces.WithListSinglePage(true)}
+			opts := []namespaces.ListOption{request.Custom(func(c *namespaces.ListOpts) error { c.SinglePage = true; return nil })}
 			if mode == "cap skips bad row and next" {
 				opts = []namespaces.ListOption{request.MaxItems(1)}
 			}
@@ -599,7 +602,7 @@ func TestMetadefNamespacesAdvertisedPagingAndControls(t *testing.T) {
 			var calls atomic.Int32
 			b := &namespaceBody{Reader: strings.NewReader(raw)}
 			client := namespaceClient(func(*http.Request) (*http.Response, error) { calls.Add(1); return namespaceWire(200, b), nil })
-			rows, e := namespaces.New(client).All(context.Background(), request.Limit(2), namespaces.WithListVisibility("public"))
+			rows, e := namespaces.New(client).All(context.Background(), request.Limit(2), request.Custom(func(c *namespaces.ListOpts) error { c.Visibility = "public"; return nil }))
 			namespaceProof(t, e, 200, []byte(raw))
 			if rows != nil || calls.Load() != 1 || b.closes.Load() != 1 {
 				t.Fatal(rows, e, calls.Load(), b.closes.Load())
@@ -851,21 +854,21 @@ func TestMetadefNamespacesOwnedPreparationAndSource(t *testing.T) {
 		name string
 		o    namespaceOptions
 	}{
-		{"create display length", namespaceOptions{create: []namespaces.CreateOption{namespaces.WithCreateDisplayName(strings.Repeat("界", 81))}}},
-		{"create description length", namespaceOptions{create: []namespaces.CreateOption{namespaces.WithCreateDescription(strings.Repeat("界", 501))}}},
-		{"create owner length", namespaceOptions{create: []namespaces.CreateOption{namespaces.WithCreateOwner(strings.Repeat("界", 256))}}},
-		{"create visibility", namespaceOptions{create: []namespaces.CreateOption{namespaces.WithCreateVisibility("")}}},
-		{"create UTF8", namespaceOptions{create: []namespaces.CreateOption{namespaces.WithCreateDescription(string([]byte{255}))}}},
-		{"update rename", namespaceOptions{update: []namespaces.UpdateOption{namespaces.WithUpdateNamespace("bad/name")}}},
-		{"update visibility", namespaceOptions{update: []namespaces.UpdateOption{namespaces.WithUpdateVisibility("Public")}}},
-		{"get ResourceType control", namespaceOptions{get: []namespaces.GetOption{namespaces.WithGetResourceType("bad\nvalue")}}},
+		{"create display length", namespaceOptions{create: []namespaces.CreateOption{request.Custom(func(c *namespaces.CreateOpts) error { v := strings.Repeat("界", 81); c.DisplayName = &v; return nil })}}},
+		{"create description length", namespaceOptions{create: []namespaces.CreateOption{request.Custom(func(c *namespaces.CreateOpts) error { v := strings.Repeat("界", 501); c.Description = &v; return nil })}}},
+		{"create owner length", namespaceOptions{create: []namespaces.CreateOption{request.Custom(func(c *namespaces.CreateOpts) error { v := strings.Repeat("界", 256); c.Owner = &v; return nil })}}},
+		{"create visibility", namespaceOptions{create: []namespaces.CreateOption{request.Custom(func(c *namespaces.CreateOpts) error { v := ""; c.Visibility = &v; return nil })}}},
+		{"create UTF8", namespaceOptions{create: []namespaces.CreateOption{request.Custom(func(c *namespaces.CreateOpts) error { v := string([]byte{255}); c.Description = &v; return nil })}}},
+		{"update rename", namespaceOptions{update: []namespaces.UpdateOption{request.Custom(func(c *namespaces.UpdateOpts) error { v := "bad/name"; c.Namespace = &v; return nil })}}},
+		{"update visibility", namespaceOptions{update: []namespaces.UpdateOption{request.Custom(func(c *namespaces.UpdateOpts) error { v := "Public"; c.Visibility = &v; return nil })}}},
+		{"get ResourceType control", namespaceOptions{get: []namespaces.GetOption{request.Custom(func(c *namespaces.GetOpts) error { v := "bad\nvalue"; c.ResourceType = &v; return nil })}}},
 		{"negative limit", namespaceOptions{list: []namespaces.ListOption{request.Limit(-1)}}},
 		{"negative cap", namespaceOptions{list: []namespaces.ListOption{request.MaxItems(-1)}}},
 		{"bad marker", namespaceOptions{list: []namespaces.ListOption{request.Marker("bad/name")}}},
-		{"bad visibility", namespaceOptions{list: []namespaces.ListOption{namespaces.WithListVisibility("Public")}}},
-		{"bad sortdir", namespaceOptions{list: []namespaces.ListOption{namespaces.WithListSortDir("ASC")}}},
-		{"sort control", namespaceOptions{list: []namespaces.ListOption{namespaces.WithListSortKey("sort\nkey")}}},
-		{"ResourceTypes UTF8", namespaceOptions{list: []namespaces.ListOption{namespaces.WithListResourceTypes(string([]byte{255}))}}},
+		{"bad visibility", namespaceOptions{list: []namespaces.ListOption{request.Custom(func(c *namespaces.ListOpts) error { c.Visibility = "Public"; return nil })}}},
+		{"bad sortdir", namespaceOptions{list: []namespaces.ListOption{request.Custom(func(c *namespaces.ListOpts) error { c.SortDir = "ASC"; return nil })}}},
+		{"sort control", namespaceOptions{list: []namespaces.ListOption{request.Custom(func(c *namespaces.ListOpts) error { c.SortKey = "sort\nkey"; return nil })}}},
+		{"ResourceTypes UTF8", namespaceOptions{list: []namespaces.ListOption{request.Custom(func(c *namespaces.ListOpts) error { c.ResourceTypes = string([]byte{255}); return nil })}}},
 	}
 	for _, test := range invalidOptions {
 		t.Run(test.name, func(t *testing.T) {

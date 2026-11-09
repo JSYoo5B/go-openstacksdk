@@ -156,13 +156,13 @@ func manageNamespaceTags(ctx context.Context, service *image.Service, namespace,
         metadeftags.WithUpdateOpts(metadeftags.UpdateOpts{}),
         request.Header("X-Request-Source", "example"),
         metadeftags.WithUpdateHeaders(map[string]string{"X-Trace": "update"}),
-        metadeftags.WithUpdateName(replacement))
+        request.Custom(func(c *metadeftags.UpdateOpts) error { v := replacement; c.Name = &v; return nil }))
     if err != nil { return out, err }
     out.Set, err = scope.Set(ctx, setNames,
         metadeftags.WithSetOpts(metadeftags.SetOpts{}),
         request.Header("X-Request-Source", "example"),
         metadeftags.WithSetHeaders(map[string]string{"X-Trace": "set"}),
-        metadeftags.WithSetAppend(true))
+        request.Custom(func(c *metadeftags.SetOpts) error { v := true; c.Append = &v; return nil }))
     if err != nil { return out, err }
 
     listOptions := []metadeftags.ListOption{
@@ -171,8 +171,8 @@ func manageNamespaceTags(ctx context.Context, service *image.Service, namespace,
         metadeftags.WithListHeaders(map[string]string{"X-Trace": "list"}),
         request.Limit(2),
         request.Marker(""),
-        metadeftags.WithListSortKey("name"),
-        metadeftags.WithListSortDir("asc"),
+        request.Custom(func(c *metadeftags.ListOpts) error { v := "name"; c.SortKey = &v; return nil }),
+        request.Custom(func(c *metadeftags.ListOpts) error { v := "asc"; c.SortDir = &v; return nil }),
         request.MaxItems(20),
     }
     for row, listErr := range scope.List(ctx, listOptions...) {

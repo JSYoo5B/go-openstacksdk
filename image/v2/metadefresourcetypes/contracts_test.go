@@ -214,9 +214,9 @@ func TestMetadefResourceTypesFixedRoutesAndPayloads(t *testing.T) {
 		want string
 	}{
 		{"omitted", nil, `{"name":"OS::Compute::Server Extra"}`},
-		{"explicit empty", []rt.CreateOption{rt.WithCreatePrefix(""), rt.WithCreatePropertiesTarget("")}, `{"name":"OS::Compute::Server Extra","prefix":"","properties_target":""}`},
-		{"separatorless literal", []rt.CreateOption{rt.WithCreatePrefix("hw_"), rt.WithCreatePropertiesTarget("image\nmetadata")}, `{"name":"OS::Compute::Server Extra","prefix":"hw_","properties_target":"image\nmetadata"}`},
-		{"80 rune UTF8", []rt.CreateOption{rt.WithCreatePrefix(strings.Repeat("界", 80)), rt.WithCreatePropertiesTarget("\t\x00")}, ""},
+		{"explicit empty", []rt.CreateOption{request.Custom(func(c *rt.CreateOpts) error { v := ""; c.Prefix = &v; return nil }), request.Custom(func(c *rt.CreateOpts) error { v := ""; c.PropertiesTarget = &v; return nil })}, `{"name":"OS::Compute::Server Extra","prefix":"","properties_target":""}`},
+		{"separatorless literal", []rt.CreateOption{request.Custom(func(c *rt.CreateOpts) error { v := "hw_"; c.Prefix = &v; return nil }), request.Custom(func(c *rt.CreateOpts) error { v := "image\nmetadata"; c.PropertiesTarget = &v; return nil })}, `{"name":"OS::Compute::Server Extra","prefix":"hw_","properties_target":"image\nmetadata"}`},
+		{"80 rune UTF8", []rt.CreateOption{request.Custom(func(c *rt.CreateOpts) error { v := strings.Repeat("界", 80); c.Prefix = &v; return nil }), request.Custom(func(c *rt.CreateOpts) error { v := "\t\x00"; c.PropertiesTarget = &v; return nil })}, ""},
 	} {
 		t.Run("POST "+test.name, func(t *testing.T) {
 			var calls atomic.Int32
@@ -862,10 +862,10 @@ func TestMetadefResourceTypesOwnedPreparationAndSource(t *testing.T) {
 		o    rtOptions
 		op   string
 	}{
-		{"long prefix", rtOptions{create: []rt.CreateOption{rt.WithCreatePrefix(strings.Repeat("界", 81))}}, "Create"},
-		{"bad prefix UTF8", rtOptions{create: []rt.CreateOption{rt.WithCreatePrefix(string([]byte{255}))}}, "Create"},
-		{"long target", rtOptions{create: []rt.CreateOption{rt.WithCreatePropertiesTarget(strings.Repeat("界", 81))}}, "Create"},
-		{"bad target UTF8", rtOptions{create: []rt.CreateOption{rt.WithCreatePropertiesTarget(string([]byte{255}))}}, "Create"},
+		{"long prefix", rtOptions{create: []rt.CreateOption{request.Custom(func(c *rt.CreateOpts) error { v := strings.Repeat("界", 81); c.Prefix = &v; return nil })}}, "Create"},
+		{"bad prefix UTF8", rtOptions{create: []rt.CreateOption{request.Custom(func(c *rt.CreateOpts) error { v := string([]byte{255}); c.Prefix = &v; return nil })}}, "Create"},
+		{"long target", rtOptions{create: []rt.CreateOption{request.Custom(func(c *rt.CreateOpts) error { v := strings.Repeat("界", 81); c.PropertiesTarget = &v; return nil })}}, "Create"},
+		{"bad target UTF8", rtOptions{create: []rt.CreateOption{request.Custom(func(c *rt.CreateOpts) error { v := string([]byte{255}); c.PropertiesTarget = &v; return nil })}}, "Create"},
 		{"negative local cap", rtOptions{list: []rt.ListOption{request.MaxItems(-1)}}, "GlobalAll"},
 		{"alias conflict", rtOptions{create: []rt.CreateOption{rt.WithCreateHeaders(map[string]string{"X-Alias": "one", "x-alias": "two"})}}, "Create"},
 		{"header newline", rtOptions{deletion: []rt.DeleteOption{request.Header("X-Value", "one\ntwo")}}, "Delete"},
@@ -900,7 +900,7 @@ func TestMetadefResourceTypesOwnedPreparationAndSource(t *testing.T) {
 		})
 		c.MoreHeaders = map[string]string{"X-Source": "captured"}
 		_, s := rtScope(t, c)
-		v, e := s.Create(context.Background(), rtName, rt.WithCreatePrefix("discard"), owned, request.Custom(func(o *rt.CreateOpts) error {
+		v, e := s.Create(context.Background(), rtName, request.Custom(func(c *rt.CreateOpts) error { v := "discard"; c.Prefix = &v; return nil }), owned, request.Custom(func(o *rt.CreateOpts) error {
 			callbacks.Add(1)
 			escapedHeaders = o.Headers
 			escapedPrefix = o.Prefix
@@ -928,7 +928,7 @@ func TestMetadefResourceTypesOwnedPreparationAndSource(t *testing.T) {
 			return rtWire(201, &rtBody{Reader: strings.NewReader(rtJSON)}), nil
 		})
 		_, s := rtScope(t, c)
-		v, e := s.Create(context.Background(), rtName, rt.WithCreatePrefix("discard"), request.Header("X-Old", "discard"), rt.WithCreateOpts(rt.CreateOpts{}))
+		v, e := s.Create(context.Background(), rtName, request.Custom(func(c *rt.CreateOpts) error { v := "discard"; c.Prefix = &v; return nil }), request.Header("X-Old", "discard"), rt.WithCreateOpts(rt.CreateOpts{}))
 		if e != nil || v == nil {
 			t.Fatal(v, e)
 		}

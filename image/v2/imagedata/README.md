@@ -15,7 +15,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/imagedata.API.StageImage`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/imagedata.API.StageKnownImage`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/imagedata.WithStageOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/imagedata.WithStageSize`
 - `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/imagedata.WithStageHeaders`
@@ -187,7 +186,7 @@ import (
 
 func stageKnownImage(ctx context.Context, client *gophercloud.ServiceClient, image *images.Image, data io.Reader, remainingBytes int64) (*imagedata.StageImageResult, error) {
     return imagedata.New(client).StageKnownImage(ctx, image, data,
-        imagedata.WithStageSize(remainingBytes),
+        request.Custom(func(c *imagedata.StageOpts) error { v := remainingBytes; c.Size = &v; return nil }),
         request.Header("X-Trace", "stage-image"),
     )
 }

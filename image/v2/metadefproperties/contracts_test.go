@@ -87,11 +87,11 @@ func propertyCall(scope *properties.NamespaceScope, ctx context.Context, op, nam
 	var e error
 	switch op {
 	case "Create":
-		value, e = scope.Create(ctx, name, append([]properties.CreateOption{properties.WithCreateType("number"), properties.WithCreateTitle("")}, opts.create...)...)
+		value, e = scope.Create(ctx, name, append([]properties.CreateOption{request.Custom(func(c *properties.CreateOpts) error { v := "number"; c.Type = &v; return nil }), request.Custom(func(c *properties.CreateOpts) error { v := ""; c.Title = &v; return nil })}, opts.create...)...)
 	case "Get":
 		value, e = scope.Get(ctx, name, opts.get...)
 	case "Update":
-		value, e = scope.Update(ctx, name, append([]properties.UpdateOption{properties.WithUpdateType("number"), properties.WithUpdateTitle("")}, opts.update...)...)
+		value, e = scope.Update(ctx, name, append([]properties.UpdateOption{request.Custom(func(c *properties.UpdateOpts) error { v := "number"; c.Type = &v; return nil }), request.Custom(func(c *properties.UpdateOpts) error { v := ""; c.Title = &v; return nil })}, opts.update...)...)
 	case "Delete":
 		v, e := scope.Delete(ctx, name, opts.deletion...)
 		if v == nil {
@@ -255,8 +255,8 @@ func TestMetadefPropertiesFixedScopedRoutesAndPayloads(t *testing.T) {
 					nested := map[string]any{"amount": json.Number("9007199254740993")}
 					data := map[string]any{"default": nil, "readonly": false, "minItems": 0, "enum": []any{}, "items": nested}
 					single := json.RawMessage(`{"x":1}`)
-					opts.create = []properties.CreateOption{properties.WithCreateAttributes(data), properties.WithCreateAttribute("future", single), properties.WithCreateDescription(desc)}
-					opts.update = []properties.UpdateOption{properties.WithUpdateAttributes(data), properties.WithUpdateAttribute("future", single), properties.WithUpdateDescription(desc)}
+					opts.create = []properties.CreateOption{properties.WithCreateAttributes(data), properties.WithCreateAttribute("future", single), request.Custom(func(c *properties.CreateOpts) error { v := desc; c.Description = &v; return nil })}
+					opts.update = []properties.UpdateOption{properties.WithUpdateAttributes(data), properties.WithUpdateAttribute("future", single), request.Custom(func(c *properties.UpdateOpts) error { v := desc; c.Description = &v; return nil })}
 					expected["description"] = desc
 					expected["default"] = nil
 					expected["readonly"] = false
@@ -309,7 +309,7 @@ func TestMetadefPropertiesFixedScopedRoutesAndPayloads(t *testing.T) {
 			})
 			opts := []properties.GetOption{properties.WithGetOpts(properties.GetOpts{ResourceType: query})}
 			if query != nil {
-				opts = append(opts, properties.WithGetResourceType(*query))
+				opts = append(opts, request.Custom(func(c *properties.GetOpts) error { v := *query; c.ResourceType = &v; return nil }))
 			}
 			v, e := propertyScope(t, client, propertyParent).Get(context.Background(), "prefix:quota", opts...)
 			if v == nil || e != nil || v.Key != nil || calls.Load() != 1 {
@@ -403,7 +403,7 @@ func TestMetadefPropertiesCanonicalModelsAndRawOwnership(t *testing.T) {
 		t.Run("invalid201 "+string(raw), func(t *testing.T) {
 			b := &propertyBody{Reader: bytes.NewReader(raw)}
 			client := propertyClient(func(*http.Request) (*http.Response, error) { return propertyWire(201, b), nil })
-			v, e := propertyScope(t, client, propertyParent).Create(context.Background(), propertyName, properties.WithCreateType("number"), properties.WithCreateTitle(""))
+			v, e := propertyScope(t, client, propertyParent).Create(context.Background(), propertyName, request.Custom(func(c *properties.CreateOpts) error { v := "number"; c.Type = &v; return nil }), request.Custom(func(c *properties.CreateOpts) error { v := ""; c.Title = &v; return nil }))
 			if v != nil || e == nil || b.closes.Load() != 1 {
 				t.Fatal(v, e)
 			}
@@ -904,7 +904,7 @@ func TestMetadefPropertiesOwnedPreparationAndSource(t *testing.T) {
 		t.Run("invalid query "+query, func(t *testing.T) {
 			var calls atomic.Int32
 			client := propertyClient(func(*http.Request) (*http.Response, error) { calls.Add(1); return nil, errors.New("unexpectedHTTP") })
-			v, e := propertyScope(t, client, propertyParent).Get(context.Background(), propertyName, properties.WithGetResourceType(query))
+			v, e := propertyScope(t, client, propertyParent).Get(context.Background(), propertyName, request.Custom(func(c *properties.GetOpts) error { v := query; c.ResourceType = &v; return nil }))
 			if v != nil || !errors.Is(e, resource.ErrInvalidOption) || calls.Load() != 0 {
 				t.Fatal(v, e, calls.Load())
 			}
@@ -1028,7 +1028,7 @@ func TestMetadefPropertiesOwnedPreparationAndSource(t *testing.T) {
 		})
 		scope := propertyScope(t, client, propertyParent)
 		for range 2 {
-			v, e := scope.Create(context.Background(), propertyName, properties.WithCreateType("number"), properties.WithCreateTitle(""), option)
+			v, e := scope.Create(context.Background(), propertyName, request.Custom(func(c *properties.CreateOpts) error { v := "number"; c.Type = &v; return nil }), request.Custom(func(c *properties.CreateOpts) error { v := ""; c.Title = &v; return nil }), option)
 			if v == nil || e != nil {
 				t.Fatal(v, e)
 			}
@@ -1320,7 +1320,7 @@ func TestMetadefPropertiesResponseOwnershipAndNativeHooks(t *testing.T) {
 			bodies = append(bodies, b)
 			return propertyWire(codes[i], b), nil
 		})
-		v, e := scope.Create(context.Background(), propertyName, properties.WithCreateType("number"), properties.WithCreateTitle(""))
+		v, e := scope.Create(context.Background(), propertyName, request.Custom(func(c *properties.CreateOpts) error { v := "number"; c.Type = &v; return nil }), request.Custom(func(c *properties.CreateOpts) error { v := ""; c.Title = &v; return nil }))
 		if v == nil || e != nil || calls.Load() != 5 || reauth.Load() != 1 || backoff.Load() != 1 || retries.Load() != 2 || client.ProviderClient != originalProvider || reflect.ValueOf(client.RetryFunc).Pointer() != originalRetry {
 			t.Fatal(v, e, calls.Load(), reauth.Load(), backoff.Load(), retries.Load())
 		}
@@ -1374,7 +1374,7 @@ func TestMetadefPropertiesResponseOwnershipAndNativeHooks(t *testing.T) {
 				}
 				return callbackCause
 			}
-			v, e := propertyScope(t, client, propertyParent).Create(context.Background(), propertyName, properties.WithCreateType("number"), properties.WithCreateTitle(""))
+			v, e := propertyScope(t, client, propertyParent).Create(context.Background(), propertyName, request.Custom(func(c *properties.CreateOpts) error { v := "number"; c.Type = &v; return nil }), request.Custom(func(c *properties.CreateOpts) error { v := ""; c.Title = &v; return nil }))
 			var native gophercloud.ErrUnexpectedResponseCode
 			if v != nil || !errors.Is(e, resource.ErrInvalidOption) || !errors.Is(e, callbackCause) || !errors.As(e, &native) || native.Actual != 503 || string(native.Body) != "original503" || calls.Load() != 1 || hooks.Load() != 1 || b.closes.Load() != 1 || borrowedReads.Load() != 0 || borrowed.closes.Load() != 0 {
 				t.Fatal(v, e, native, calls.Load(), hooks.Load())
@@ -1526,7 +1526,7 @@ func TestMetadefPropertiesResponseOwnershipAndNativeHooks(t *testing.T) {
 				return wire, nil
 			})
 			client.HTTPClient.CheckRedirect = func(*http.Request, []*http.Request) error { redirects.Add(1); return nil }
-			v, e := propertyScope(t, client, propertyParent).Create(context.Background(), propertyName, properties.WithCreateType("number"), properties.WithCreateTitle(""))
+			v, e := propertyScope(t, client, propertyParent).Create(context.Background(), propertyName, request.Custom(func(c *properties.CreateOpts) error { v := "number"; c.Type = &v; return nil }), request.Custom(func(c *properties.CreateOpts) error { v := ""; c.Title = &v; return nil }))
 			if redirect == "same target" {
 				if v == nil || e != nil || calls.Load() != 2 || redirects.Load() != 1 {
 					t.Fatal(v, e, calls.Load(), redirects.Load())

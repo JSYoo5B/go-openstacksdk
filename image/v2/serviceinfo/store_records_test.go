@@ -582,7 +582,7 @@ func TestStoreRecordsPreflightAndLegacyDetailCompatibility(t *testing.T) {
 			}
 			return infoRecordJSON(req, 200, `{"stores":[{"id":"legacy","default":"false","type":"file","read-only":true,"weight":0}]}`), nil
 		})
-		rows, err := New(client).AllStores(context.Background(), WithListStoresDetails(true))
+		rows, err := New(client).AllStores(context.Background(), request.Custom(func(c *request.Config[ListStoresOpts]) error { c.Options.Details = true; return nil }))
 		if err != nil || len(rows) != 1 || calls != 1 || rows[0].IsDefault == nil || *rows[0].IsDefault || rows[0].Type == nil || *rows[0].Type != "file" || rows[0].ReadOnly == nil || !*rows[0].ReadOnly || rows[0].Weight == nil || *rows[0].Weight != 0 {
 			t.Fatal(rows, err, calls)
 		}

@@ -24,7 +24,7 @@ func TestStageOptionsOwnedSnapshotsReplacementAndConcurrentReuse(t *testing.T) {
 	if parsed.Size == nil || *parsed.Size != 0 || parsed.Headers["X-Note"] != "before" {
 		t.Fatalf("snapshot lost: %#v", parsed)
 	}
-	replaced, err := parseStageOpts([]StageOption{option, WithStageOpts(StageOpts{}), WithStageSize(-1), WithStageSize(7)})
+	replaced, err := parseStageOpts([]StageOption{option, WithStageOpts(StageOpts{}), request.Custom(func(c *StageOpts) error { v := int64(-1); c.Size = &v; return nil }), request.Custom(func(c *StageOpts) error { v := int64(7); c.Size = &v; return nil })})
 	if err != nil || replaced.Size == nil || *replaced.Size != 7 || len(replaced.Headers) != 0 {
 		t.Fatalf("replacement/last wins: %#v %v", replaced, err)
 	}
@@ -83,15 +83,15 @@ func TestStageOptionsSizeNilZeroAndInvalidConfiguration(t *testing.T) {
 		options []StageOption
 		want    *int64
 	}{
-		{nil, nil}, {[]StageOption{WithStageSize(0)}, stageTestSize(0)}, {[]StageOption{WithStageSize(12)}, stageTestSize(12)},
-		{[]StageOption{WithStageSize(12), WithStageOpts(StageOpts{})}, nil},
+		{nil, nil}, {[]StageOption{request.Custom(func(c *StageOpts) error { v := int64(0); c.Size = &v; return nil })}, stageTestSize(0)}, {[]StageOption{request.Custom(func(c *StageOpts) error { v := int64(12); c.Size = &v; return nil })}, stageTestSize(12)},
+		{[]StageOption{request.Custom(func(c *StageOpts) error { v := int64(12); c.Size = &v; return nil }), WithStageOpts(StageOpts{})}, nil},
 	} {
 		parsed, err := parseStageOpts(test.options)
 		if err != nil || (parsed.Size == nil) != (test.want == nil) || parsed.Size != nil && *parsed.Size != *test.want {
 			t.Fatalf("size %#v want%v err%v", parsed.Size, test.want, err)
 		}
 	}
-	for _, options := range [][]StageOption{{nil}, {WithStageSize(-1)}, {WithStageOpts(StageOpts{Size: stageTestSize(-1)})}} {
+	for _, options := range [][]StageOption{{nil}, {request.Custom(func(c *StageOpts) error { v := int64(-1); c.Size = &v; return nil })}, {WithStageOpts(StageOpts{Size: stageTestSize(-1)})}} {
 		if _, err := parseStageOpts(options); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatalf("invalid configuration: %v", err)
 		}

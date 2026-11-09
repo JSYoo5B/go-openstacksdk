@@ -15,6 +15,7 @@ const (
 // Nil ChunkSize selects 1 MiB; nil VerifyChecksum verifies available hashes.
 // Nil or empty StorePreferences leaves store selection to the server.
 type DownloadImageOpts struct {
+	// ChunkSize selects a positive copy buffer size, up to 64 MiB.
 	ChunkSize        *int
 	StorePreferences []string
 	VerifyChecksum   *bool
@@ -28,11 +29,6 @@ func WithDownloadImageOpts(value DownloadImageOpts) DownloadImageOption {
 	return func(config *DownloadImageOpts) error { *config = copyDownloadImageOpts(snapshot); return nil }
 }
 
-// WithDownloadChunkSize selects a positive copy buffer size, up to 64 MiB.
-func WithDownloadChunkSize(value int) DownloadImageOption {
-	return func(config *DownloadImageOpts) error { owned := value; config.ChunkSize = &owned; return nil }
-}
-
 // WithDownloadStorePreferences preserves the caller's order and repetitions.
 func WithDownloadStorePreferences(values ...string) DownloadImageOption {
 	snapshot := append(make([]string, 0, len(values)), values...)
@@ -40,10 +36,6 @@ func WithDownloadStorePreferences(values ...string) DownloadImageOption {
 		config.StorePreferences = append(make([]string, 0, len(snapshot)), snapshot...)
 		return nil
 	}
-}
-
-func WithDownloadChecksumVerification(value bool) DownloadImageOption {
-	return func(config *DownloadImageOpts) error { owned := value; config.VerifyChecksum = &owned; return nil }
 }
 
 func copyDownloadImageOpts(value DownloadImageOpts) DownloadImageOpts {

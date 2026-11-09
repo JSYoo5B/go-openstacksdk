@@ -23,7 +23,7 @@ func TestMetadefNamespacesOptionsSnapshotsReplacementAndLastWins(t *testing.T) {
 	create := WithCreateOpts(CreateOpts{Headers: headers, DisplayName: &display, Description: &description, Visibility: &visibility, Owner: &owner, Protected: &protected})
 	display, description, visibility, owner, protected = "mutated", "mutated", "public", "mutated", true
 	headers["X-Original"] = "after"
-	value, err := prepareCreate([]CreateOption{WithCreateDisplayName("superseded"), request.Header("X-Removed", "x"), create, request.Header("x-original", "last"), WithCreateProtected(false)})
+	value, err := prepareCreate([]CreateOption{request.Custom(func(c *CreateOpts) error { v := "superseded"; c.DisplayName = &v; return nil }), request.Header("X-Removed", "x"), create, request.Header("x-original", "last"), request.Custom(func(c *CreateOpts) error { v := false; c.Protected = &v; return nil })})
 	if err != nil || *value.DisplayName != "display" || *value.Description != "description" || *value.Visibility != "private" || *value.Owner != "owner" || *value.Protected || value.Headers["X-Original"] != "last" || value.Headers["X-Removed"] != "" {
 		t.Fatalf("create snapshot/lastwins %+v %v", value, err)
 	}
@@ -45,7 +45,7 @@ func TestMetadefNamespacesOptionsSnapshotsReplacementAndLastWins(t *testing.T) {
 	resourceType := "OS::thing"
 	get := WithGetOpts(GetOpts{ResourceType: &resourceType, Headers: map[string]string{"X-Get": "before"}})
 	resourceType = "changed"
-	fetched, err := prepareGet([]GetOption{get, WithGetResourceType("")})
+	fetched, err := prepareGet([]GetOption{get, request.Custom(func(c *GetOpts) error { v := ""; c.ResourceType = &v; return nil })})
 	if err != nil || fetched.ResourceType == nil || *fetched.ResourceType != "" {
 		t.Fatalf("explicit empty %+v %v", fetched, err)
 	}
@@ -173,7 +173,7 @@ func TestMetadefNamespacesOptionsValidationAndDefaults(t *testing.T) {
 	if err != nil || list.Limit != nil || list.MaxItems != 0 || list.SinglePage || len(query) != 0 {
 		t.Fatalf("list defaults %+v %s %v", list, query, err)
 	}
-	if _, _, err := prepareList([]ListOption{request.Limit(0), request.Marker(""), WithListSortKey("unknown_column"), WithListResourceTypes("OS::A, OS::A")}); err != nil {
+	if _, _, err := prepareList([]ListOption{request.Limit(0), request.Marker(""), request.Custom(func(c *ListOpts) error { c.SortKey = "unknown_column"; return nil }), request.Custom(func(c *ListOpts) error { c.ResourceTypes = "OS::A, OS::A"; return nil })}); err != nil {
 		t.Fatal(err)
 	}
 	if err := literal(strings.Repeat("界", 80)); err != nil {
@@ -184,7 +184,7 @@ func TestMetadefNamespacesOptionsValidationAndDefaults(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	if _, err := prepareCreate([]CreateOption{WithCreateDisplayName(strings.Repeat("界", 80)), WithCreateDescription(strings.Repeat("界", 500)), WithCreateOwner(strings.Repeat("界", 255))}); err != nil {
+	if _, err := prepareCreate([]CreateOption{request.Custom(func(c *CreateOpts) error { v := strings.Repeat("界", 80); c.DisplayName = &v; return nil }), request.Custom(func(c *CreateOpts) error { v := strings.Repeat("界", 500); c.Description = &v; return nil }), request.Custom(func(c *CreateOpts) error { v := strings.Repeat("界", 255); c.Owner = &v; return nil })}); err != nil {
 		t.Fatal(err)
 	}
 	checks := []func() error{

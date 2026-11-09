@@ -162,13 +162,13 @@ func TestMetadefTagsCoreFixedScopeAndRoutes(t *testing.T) {
 	if _, err = scope.Update(context.Background(), name); err != nil {
 		t.Fatal(err)
 	}
-	if _, err = scope.Update(context.Background(), name, WithUpdateName("renamed")); err != nil {
+	if _, err = scope.Update(context.Background(), name, request.Custom(func(c *UpdateOpts) error { v := "renamed"; c.Name = &v; return nil })); err != nil {
 		t.Fatal(err)
 	}
 	for _, names := range [][]string{nil, {}, {"", "line\n\x00", strings.Repeat("界", 81), "dup", "dup"}} {
 		var opts []SetOption
 		if len(names) > 0 {
-			opts = append(opts, WithSetAppend(true))
+			opts = append(opts, request.Custom(func(c *SetOpts) error { v := true; c.Append = &v; return nil }))
 		}
 		result, err := scope.Set(context.Background(), names, opts...)
 		if err != nil || result.Tags == nil || len(result.Tags) != 0 || result.StatusCode != 201 {
@@ -299,7 +299,7 @@ func TestMetadefTagsCoreCompletePreflight(t *testing.T) {
 	if _, err := scope.Get(context.Background(), "child", request.Custom(func(*GetOpts) error { callbacks++; return sentinel })); !errors.Is(err, sentinel) {
 		t.Fatal(err)
 	}
-	if _, err := scope.Update(context.Background(), "child", WithUpdateName("../unsafe")); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := scope.Update(context.Background(), "child", request.Custom(func(c *UpdateOpts) error { v := "../unsafe"; c.Name = &v; return nil })); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
 	if _, err := scope.Set(context.Background(), nil, request.Header("X-OpenStack-Append", "True")); !errors.Is(err, resource.ErrInvalidOption) {
@@ -352,7 +352,7 @@ func TestMetadefTagsCorePagedRawMarkersAndConsumption(t *testing.T) {
 		})
 		client.MoreHeaders = map[string]string{"X-Latest": "one"}
 		scope := tagCoreScope(t, client, "parent")
-		seq := scope.List(context.Background(), request.Limit(2), WithListSortKey("name"), WithListSortDir("asc"))
+		seq := scope.List(context.Background(), request.Limit(2), request.Custom(func(c *ListOpts) error { v := "name"; c.SortKey = &v; return nil }), request.Custom(func(c *ListOpts) error { v := "asc"; c.SortDir = &v; return nil }))
 		if calls != 0 {
 			t.Fatal("List eager")
 		}
@@ -388,7 +388,7 @@ func TestMetadefTagsCorePagedRawMarkersAndConsumption(t *testing.T) {
 			var options []ListOption
 			switch caseName {
 			case "zero limit":
-				options = []ListOption{request.Limit(0), request.Marker(""), WithListSortKey("")}
+				options = []ListOption{request.Limit(0), request.Marker(""), request.Custom(func(c *ListOpts) error { v := ""; c.SortKey = &v; return nil })}
 			case "cap":
 				options = []ListOption{request.Limit(1), request.MaxItems(1)}
 			case "break":

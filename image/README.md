@@ -66,15 +66,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.API.ImportImage`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.API.ImportKnownImage`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithImportOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithImportMethod`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithImportURI`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithImportRemoteRegion`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithImportRemoteImageID`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithImportRemoteServiceInterface`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithImportStore`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithImportStores`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithImportAllStores`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithImportAllStoresMustSucceed`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithImportHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/request.Field`
@@ -352,9 +345,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.DownloadTo`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithDownloadImageOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithDownloadChunkSize`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithDownloadStorePreferences`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithDownloadChecksumVerification`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.DownloadImageRecord`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.DownloadImageRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordDownloadOpts`
@@ -462,7 +453,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.DeleteImage`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithDeleteImageOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithDeleteImageStore`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.DeleteImageRecord`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.DeleteImageRecord`
@@ -535,7 +526,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.API.ListStores`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.API.AllStores`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithListStoresOptions`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithListStoresDetails`
 - `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
 - `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
@@ -1656,7 +1646,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.WithClearCacheOpts`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithClearCacheHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithClearCacheTarget`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 
 - ClearCache sends bodyless/query-free DELETE at captured base plus fixed cache, requiring original actual204 only. DirectID has only requested cache endpoint; explicit Name for per-ID calls uses unchanged native all-pages exact-name resolution, with no synthetic Ref/ID for singleton routes.
   Tests: `image/cache_contracts_test.go:TestImageCacheFixedRoutesAndClearTargets`, `image/cache_core_test.go:TestImageCacheCoreFixedRoutesAndActualEvidence`, `connectiontest/connection_image_cache_test.go:TestConnectionImageCacheSharesClientDefaultsAndPassiveMeasurements`, `internal/cmd/sdkgen/glance_cache_test.go:TestGlanceCacheManualMethodsPreserveNativeBindingsAndDocumentDefaults`.
@@ -1798,7 +1788,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadSize`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadField`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadFields`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadTags`

@@ -17,7 +17,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithGetOpts`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithGetHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithGetResourceType`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.NewWithDependencies`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.NamespaceScope.GetRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordGetOpts`
@@ -38,7 +38,7 @@ Go API:
   Tests: `image/v2/metadefproperties/core_test.go:TestMetadefPropertiesCoreLifetimeSourceAndNativeRetryBoundaries`, `image/v2/metadefproperties/core_test.go:TestMetadefPropertiesCoreAcceptedBodiesAndMissingPolicy`, `image/v2/metadefproperties/contracts_test.go:TestMetadefPropertiesResponseOwnershipAndNativeHooks`.
 - One fixed child GET200; ResourceType nil omits query, explicit empty sends resource_type= and nonempty is a literal validUTF8 control-free query. Actual server association prefix stripping is not reproduced locally. Passive returned Name/Key/self/schema cannot retarget scope; no cache reuse, selector, fallback, discovery or follow-up request.
   Tests: `image/v2/metadefproperties/core_test.go:TestMetadefPropertiesCoreFixedScopeAndCRUD`, `image/v2/metadefproperties/core_test.go:TestMetadefPropertiesCoreCompletePreflight`, `image/v2/metadefproperties/contracts_test.go:TestMetadefPropertiesFixedScopedRoutesAndPayloads`, `image/v2/metadefproperties/contracts_test.go:TestMetadefPropertiesOwnedPreparationAndSource`.
-- Named strict getter boundary audit distinguishes Python **query as _get controls or Resource seed attributes from an HTTP query. Existing strict200 fresh DTO retains actual descriptor keywords/default omission/aliases raw, rejects304 without cache reuse and independently decodes later success. WithGetResourceType remains a deliberate Go server-query extension; this raw getter itself does not implement Resource seeding/default/coercion/fetch translation. The additive owned GetRecord contracts below close that formerly unresolved named getter gap.
+- Named strict getter boundary audit distinguishes Python **query as _get controls or Resource seed attributes from an HTTP query. Existing strict200 fresh DTO retains actual descriptor keywords/default omission/aliases raw, rejects304 without cache reuse and independently decodes later success. GetOpts.ResourceType remains a deliberate Go server-query extension; this raw getter itself does not implement Resource seeding/default/coercion/fetch translation. The additive owned GetRecord contracts below close that formerly unresolved named getter gap.
   Tests: `image/v2/metadefproperties/get_mapping_test.go:TestMetadefPropertyGetMappingDescriptorKeywordsRemainRaw`, `image/v2/metadefproperties/get_mapping_test.go:TestMetadefPropertyGetMappingDoesNotReuseCachedOrSeededResults`.
 - GetRecord snapshots concrete ID-or-Resource input before dependency/options callbacks, retains recognized initial attributes, applies option attrs before selecting final ID or alternate name and never mutates the input. String+id attribute is a preflight collision; Resource id attr may retarget before HTTP. Required fixed literal parent/child and zero query/body GET reject unsafe or null/nonstring identity; response fields cannot retarget. Known seed descriptor errors and reserved route/cache/session/class/version controls fail preflight, while unknown ordinary attrs and superseded alias encoding failures are ignored.
   Tests: `image/v2/metadefproperties/record_get_test.go:TestMetadefPropertyRecordSeedAttributesAndResponseOverlay`, `image/v2/metadefproperties/record_get_test.go:TestMetadefPropertyRecordInputAndAttributesPreflight`, `image/v2/metadefproperties/record_get_test.go:TestMetadefPropertyRecordSupersededAliasDoesNotExposeEncodingFailure`.
@@ -58,7 +58,7 @@ Python/Go differences:
 - Go mapping uses an immutable owned concrete RecordRequest and fresh GET; Python mutates existing Resource/cache/dirty/session state and accepts broader dict/Munch/None parent inputs. Go requires fixed literal namespace and selected string child, explicitly rejects route/cache/class/session/version overrides, and does not add finder/discovery or conditional cached returns.
 - Resource view has21 fields: pinned Python default to_dict20 plus fixed namespace_name provenance. Unknown/self/schema/date fields remain only in actual Wire/Envelope; Source Body descriptor names, null/defaults, list/dict/bool/int projection and response overlay are owned. Response identity is passive, and canonical map aliases have deterministic precedence while Python kwargs use dictionary order.
 - Shared JSON integer projection preserves arbitrary integer JSON and bool, truncates IEEE754 float values, uses Unicode16 digit properties and omits CPython configurable digit-string limits. Bool numeric truthiness compares exact decimal zero, so underflow/JSON backend and nonfinite runtime behavior may differ. Arbitrary Go attributes use encoding/json snapshots, with deferred failures only for finally selected declared attrs.
-- Always-on fixed query-free owned fetch accepts actual200..399 and tolerates successful syntax-invalid JSON, but requires wholeUTF8 and parsed nonnull objects. Original strict200 raw typed Get remains a separate API, with WithGetResourceType as a deliberate Go server-query extension. Python public resource_type/value/namespace_name kwargs cause duplicate-binding TypeError beforeHTTP.
+- Always-on fixed query-free owned fetch accepts actual200..399 and tolerates successful syntax-invalid JSON, but requires wholeUTF8 and parsed nonnull objects. Original strict200 raw typed Get remains a separate API, with GetOpts.ResourceType as a deliberate Go server-query extension. Python public resource_type/value/namespace_name kwargs cause duplicate-binding TypeError beforeHTTP.
 - Connection current location including explicitly configured Zone is preserved; pinned Python current_location normally has zone=None. Direct New has null location, while NewWithDependencies supplies a concrete callback. Fixed namespace URI causes seed/response location to remain passive in Wire.
 - Local transport fixtures and compile/install builds establish the named getter Go contract; server schema/policy/DB defaults, authenticated side effects and live Python execution are not proven. This mapping does not claim whole Python Resource/session lifecycle parity or change the remaining metadata CRUD/list inventory.
 
@@ -92,7 +92,7 @@ value = conn.image.get_metadef_property(
 
 ```go
 value, err := scope.Get(ctx, "hw_cpu_policy",
-    metadefproperties.WithGetResourceType("OS::Nova::Server"))
+    request.Custom(func(c *metadefproperties.GetOpts) error { v := "OS::Nova::Server"; c.ResourceType = &v; return nil }))
 ```
 
 ```go

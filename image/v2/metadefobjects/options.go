@@ -21,9 +21,9 @@ type CreateOpts struct {
 }
 
 // CreateOption is one option of the operation: WithCreateOpts,
-// WithCreateHeaders, WithCreateDescription, WithCreateProperties,
-// WithCreateRequired, request.Header, or request.Custom over *CreateOpts.
-// Other shared calls fail with resource.ErrInvalidOption before HTTP.
+// WithCreateHeaders, WithCreateProperties, WithCreateRequired, request.Header,
+// or request.Custom over *CreateOpts (for example to set Description). Other
+// shared calls fail with resource.ErrInvalidOption before HTTP.
 type CreateOption = request.WriteCall
 
 func copyCreate(value CreateOpts) CreateOpts {
@@ -52,9 +52,6 @@ func WithCreateHeaders(value map[string]string) CreateOption {
 		return nil
 	})
 }
-func WithCreateDescription(value string) CreateOption {
-	return request.Custom(func(config *CreateOpts) error { owned := value; config.Description = &owned; return nil })
-}
 func WithCreateProperties(value map[string]json.RawMessage) CreateOption {
 	owned := copyProperties(value)
 	return request.Custom(func(config *CreateOpts) error { config.Properties = copyProperties(owned); return nil })
@@ -74,10 +71,9 @@ type UpdateOpts struct {
 }
 
 // UpdateOption is one option of the operation: WithUpdateOpts,
-// WithUpdateHeaders, WithUpdateName, WithUpdateDescription,
-// WithUpdateProperties, WithUpdateRequired, request.Header, request.Custom
-// over *UpdateOpts. Other shared calls fail with resource.ErrInvalidOption
-// before HTTP.
+// WithUpdateHeaders, WithUpdateProperties, WithUpdateRequired, request.Header,
+// request.Custom over *UpdateOpts (for example to set Name or Description).
+// Other shared calls fail with resource.ErrInvalidOption before HTTP.
 type UpdateOption = request.WriteCall
 
 func copyUpdate(value UpdateOpts) UpdateOpts {
@@ -106,12 +102,6 @@ func WithUpdateHeaders(value map[string]string) UpdateOption {
 		}
 		return nil
 	})
-}
-func WithUpdateName(value string) UpdateOption {
-	return request.Custom(func(config *UpdateOpts) error { owned := value; config.Name = &owned; return nil })
-}
-func WithUpdateDescription(value string) UpdateOption {
-	return request.Custom(func(config *UpdateOpts) error { owned := value; config.Description = &owned; return nil })
 }
 func WithUpdateProperties(value map[string]json.RawMessage) UpdateOption {
 	owned := copyProperties(value)

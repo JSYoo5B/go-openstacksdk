@@ -14,9 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.DownloadTo`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithDownloadImageOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithDownloadChunkSize`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithDownloadStorePreferences`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithDownloadChecksumVerification`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.DownloadImageRecord`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.DownloadImageRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordDownloadOpts`

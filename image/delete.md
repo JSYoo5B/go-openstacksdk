@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.DeleteImage`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithDeleteImageOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithDeleteImageStore`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.DeleteImageRecord`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.DeleteImageRecord`

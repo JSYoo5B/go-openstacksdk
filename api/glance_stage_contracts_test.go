@@ -121,7 +121,7 @@ func TestGlanceStageSizeAndOptionSnapshots(t *testing.T) {
 		name, payload, header string
 		options               []imagedata.StageOption
 	}{
-		{"absent", "bytes", "", nil}, {"explicit zero", "", "0", []imagedata.StageOption{imagedata.WithStageSize(0)}}, {"size does not trim or frame", "payload", "999", []imagedata.StageOption{imagedata.WithStageSize(999)}},
+		{"absent", "bytes", "", nil}, {"explicit zero", "", "0", []imagedata.StageOption{request.Custom(func(c *imagedata.StageOpts) error { v := int64(0); c.Size = &v; return nil })}}, {"size does not trim or frame", "payload", "999", []imagedata.StageOption{request.Custom(func(c *imagedata.StageOpts) error { v := int64(999); c.Size = &v; return nil })}},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			cloud := testcloud.New(t)
@@ -169,7 +169,7 @@ func TestGlanceStageSizeAndOptionSnapshots(t *testing.T) {
 		})
 		a := imagedata.New(cloud.Client("image", glanceStagePrefix))
 		for range 2 {
-			if v, err := a.StageKnownImage(context.Background(), glanceStageKnown(), strings.NewReader("payload"), imagedata.WithStageSize(99), option, request.Header("X-Trace", "earlier"), request.Header("x-trace", "final")); err != nil || v == nil {
+			if v, err := a.StageKnownImage(context.Background(), glanceStageKnown(), strings.NewReader("payload"), request.Custom(func(c *imagedata.StageOpts) error { v := int64(99); c.Size = &v; return nil }), option, request.Header("X-Trace", "earlier"), request.Header("x-trace", "final")); err != nil || v == nil {
 				t.Fatal(v, err)
 			}
 		}
@@ -756,7 +756,7 @@ func TestGlanceStageClosedOptionsAndPreflight(t *testing.T) {
 		name   string
 		values []imagedata.StageOption
 	}{
-		{"negative size", []imagedata.StageOption{imagedata.WithStageSize(-1)}}, {"nil option", []imagedata.StageOption{nil}},
+		{"negative size", []imagedata.StageOption{request.Custom(func(c *imagedata.StageOpts) error { v := int64(-1); c.Size = &v; return nil })}}, {"nil option", []imagedata.StageOption{nil}},
 		{"caller alias conflict", []imagedata.StageOption{imagedata.WithStageOpts(imagedata.StageOpts{Headers: map[string]string{"X-Trace": "first", "x-trace": "second"}})}},
 		{"bulk header alias conflict", []imagedata.StageOption{imagedata.WithStageHeaders(map[string]string{"X-Trace": "first", "x-trace": "second"})}},
 		{"bad header value", []imagedata.StageOption{request.Header("X-Trace", "bad\r\nvalue")}},

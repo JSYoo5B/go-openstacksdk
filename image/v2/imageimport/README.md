@@ -15,15 +15,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.API.ImportImage`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.API.ImportKnownImage`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithImportOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithImportMethod`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithImportURI`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithImportRemoteRegion`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithImportRemoteImageID`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithImportRemoteServiceInterface`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithImportStore`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithImportStores`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithImportAllStores`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithImportAllStoresMustSucceed`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithImportHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/request.Field`
@@ -190,14 +183,15 @@ import (
     "github.com/gophercloud/gophercloud/v2"
     "github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport"
     "github.com/JSYoo5B/go-openstacksdk/image/v2/images"
+    "github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 func importKnownFromWeb(ctx context.Context, client *gophercloud.ServiceClient, image *images.Image, uri string) (*imageimport.ImportResult, error) {
     return imageimport.New(client).ImportKnownImage(ctx, image,
-        imageimport.WithImportMethod("web-download"),
-        imageimport.WithImportURI(uri),
+        request.Custom(func(c *imageimport.ImportOpts) error { c.Method = "web-download"; return nil }),
+        request.Custom(func(c *imageimport.ImportOpts) error { c.URI = uri; return nil }),
         imageimport.WithImportStores("fast", "reliable"),
-        imageimport.WithImportAllStoresMustSucceed(false),
+        request.Custom(func(c *imageimport.ImportOpts) error { v := false; c.AllStoresMustSucceed = &v; return nil }),
     )
 }
 ```

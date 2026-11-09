@@ -235,7 +235,7 @@ func TestTaskContractsFixedRoutesAndInput(t *testing.T) {
 			}
 			return taskContractsWire(200, &taskContractsBody{Reader: strings.NewReader(`{"tasks":[]}`)}), nil
 		})
-		rows, err := image.New(client).AllTasks(context.Background(), request.Limit(0), request.Marker("not-uuid %#"), image.WithListTasksType("api_image_import"), image.WithListTasksStatus("future-status"), image.WithListTasksSortKey("future key"), image.WithListTasksSortDir("asc"))
+		rows, err := image.New(client).AllTasks(context.Background(), request.Limit(0), request.Marker("not-uuid %#"), request.Custom(func(c *image.ListTasksOpts) error { c.Type = "api_image_import"; return nil }), request.Custom(func(c *image.ListTasksOpts) error { c.Status = "future-status"; return nil }), request.Custom(func(c *image.ListTasksOpts) error { c.SortKey = "future key"; return nil }), request.Custom(func(c *image.ListTasksOpts) error { c.SortDir = "asc"; return nil }))
 		if err != nil || rows == nil || len(rows) != 0 || calls.Load() != 1 {
 			t.Fatal(rows, err, calls.Load())
 		}
@@ -247,7 +247,7 @@ func TestTaskContractsFixedRoutesAndInput(t *testing.T) {
 			}
 			return taskContractsWire(200, &taskContractsBody{Reader: strings.NewReader(taskContractsList)}), nil
 		})
-		rows, err := image.New(client).AllTasks(context.Background(), image.WithListTasksOpts(image.ListTasksOpts{}), request.Marker(""), image.WithListTasksType(""), image.WithListTasksStatus(""), image.WithListTasksSortKey(""), image.WithListTasksSortDir(""), request.MaxItems(1))
+		rows, err := image.New(client).AllTasks(context.Background(), image.WithListTasksOpts(image.ListTasksOpts{}), request.Marker(""), request.Custom(func(c *image.ListTasksOpts) error { c.Type = ""; return nil }), request.Custom(func(c *image.ListTasksOpts) error { c.Status = ""; return nil }), request.Custom(func(c *image.ListTasksOpts) error { c.SortKey = ""; return nil }), request.Custom(func(c *image.ListTasksOpts) error { c.SortDir = ""; return nil }), request.MaxItems(1))
 		if err != nil || len(rows) != 1 {
 			t.Fatal(rows, err)
 		}
@@ -365,7 +365,7 @@ func TestTaskContractsAdvertisedPagingAndLocalCaps(t *testing.T) {
 			return taskContractsWire(200, &taskContractsBody{Reader: strings.NewReader(`{"tasks":[{"id":"second"}]}`)}), nil
 		})
 		client.MoreHeaders = map[string]string{"X-Source": "first"}
-		rows, err := image.New(client).AllTasks(context.Background(), image.WithListTasksType("import"), request.Limit(2), request.Header("X-Fixed", "option"))
+		rows, err := image.New(client).AllTasks(context.Background(), request.Custom(func(c *image.ListTasksOpts) error { c.Type = "import"; return nil }), request.Limit(2), request.Header("X-Fixed", "option"))
 		if err != nil || len(rows) != 2 || *rows[0].ID != "first" || *rows[1].ID != "second" || calls.Load() != 2 {
 			t.Fatal(rows, err, calls.Load())
 		}
@@ -407,7 +407,7 @@ func TestTaskContractsAdvertisedPagingAndLocalCaps(t *testing.T) {
 				calls.Add(1)
 				return taskContractsWire(200, &taskContractsBody{Reader: bytes.NewReader(raw)}), nil
 			})
-			rows, err := image.New(client).AllTasks(context.Background(), image.WithListTasksType("import"))
+			rows, err := image.New(client).AllTasks(context.Background(), request.Custom(func(c *image.ListTasksOpts) error { c.Type = "import"; return nil }))
 			taskContractsProof(t, err, 200, raw)
 			if rows != nil || calls.Load() != 1 {
 				t.Fatal(rows, err, calls.Load())
@@ -453,7 +453,7 @@ func TestTaskContractsAdvertisedPagingAndLocalCaps(t *testing.T) {
 			} else {
 				var option image.ListTasksOption = request.MaxItems(1)
 				if mode == "single page" {
-					option = image.WithListTasksSinglePage(true)
+					option = request.Custom(func(c *image.ListTasksOpts) error { c.SinglePage = true; return nil })
 				}
 				rows, err := s.AllTasks(context.Background(), option)
 				if err != nil || len(rows) != 1 {
@@ -721,7 +721,7 @@ func TestTaskContractsOwnedOptionsAndSource(t *testing.T) {
 			}
 		})
 	}
-	for _, option := range []image.ListTasksOption{nil, request.Limit(-1), request.MaxItems(-1), image.WithListTasksSortDir("ASC"), request.Marker("line\n"), image.WithListTasksType(string([]byte{0xff})), request.Header("Authorization", "forged")} {
+	for _, option := range []image.ListTasksOption{nil, request.Limit(-1), request.MaxItems(-1), request.Custom(func(c *image.ListTasksOpts) error { c.SortDir = "ASC"; return nil }), request.Marker("line\n"), request.Custom(func(c *image.ListTasksOpts) error { c.Type = string([]byte{0xff}); return nil }), request.Header("Authorization", "forged")} {
 		t.Run("invalid list option", func(t *testing.T) {
 			var calls atomic.Int32
 			client := taskContractsClient(func(*http.Request) (*http.Response, error) { calls.Add(1); return nil, errors.New("unexpected wire") })

@@ -690,13 +690,13 @@ func TestMetadefPropertyRecordWritesNativeBodyOwnershipAndLegacyContracts(t *tes
 				if check.required {
 					value, err = scope.Update(context.Background(), propertyRecordChild)
 				} else {
-					value, err = scope.Update(context.Background(), propertyRecordChild, WithUpdateType("string"), WithUpdateTitle("title"))
+					value, err = scope.Update(context.Background(), propertyRecordChild, request.Custom(func(c *UpdateOpts) error { v := "string"; c.Type = &v; return nil }), request.Custom(func(c *UpdateOpts) error { v := "title"; c.Title = &v; return nil }))
 				}
 			} else {
 				if check.required {
 					value, err = scope.Create(context.Background(), propertyRecordChild)
 				} else {
-					value, err = scope.Create(context.Background(), propertyRecordChild, WithCreateType("string"), WithCreateTitle("title"))
+					value, err = scope.Create(context.Background(), propertyRecordChild, request.Custom(func(c *CreateOpts) error { v := "string"; c.Type = &v; return nil }), request.Custom(func(c *CreateOpts) error { v := "title"; c.Title = &v; return nil }))
 				}
 			}
 			if value != nil || err == nil {

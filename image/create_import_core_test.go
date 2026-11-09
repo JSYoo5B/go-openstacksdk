@@ -44,7 +44,7 @@ func TestCreateImportPreflightValidatesEveryPhaseBeforeCreationOrReading(t *test
 		{"metadata unserializable", []CreateImportOption{WithCreateImportMetadata(CreateImportMetadataOpts{Properties: map[string]any{"vendor": func() {}}})}},
 		{"stage negative size", []CreateImportOption{WithCreateImportStage(imagedata.StageOpts{Size: &negative})}},
 		{"stage callback", []CreateImportOption{WithCreateImportStageOptions(request.Header("Accept", "bad"))}},
-		{"import callback", []CreateImportOption{WithCreateImportImportOptions(imageimport.WithImportAllStores(true), imageimport.WithImportStore("conflict"))}},
+		{"import callback", []CreateImportOption{WithCreateImportImportOptions(request.Custom(func(c *imageimport.ImportOpts) error { v := true; c.AllStores = &v; return nil }), request.Custom(func(c *imageimport.ImportOpts) error { v := "conflict"; c.Store = &v; return nil }))}},
 		{"import missing remote", []CreateImportOption{WithCreateImportImport(imageimport.ImportOpts{Method: imageimport.GlanceDownloadMethod, RemoteRegion: "region"})}},
 		{"unsupported copy", []CreateImportOption{WithCreateImportImport(imageimport.ImportOpts{Method: imageimport.CopyImageMethod})}},
 		{"unsupported extension method", []CreateImportOption{WithCreateImportImport(imageimport.ImportOpts{Method: "custom"})}},

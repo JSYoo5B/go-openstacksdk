@@ -124,7 +124,7 @@ func TestMetadefResourceTypesCoreFixedRoutesAndPassiveModels(t *testing.T) {
 	if err != nil || len(types) != 3 || *types[0].Name != "two" || *types[1].Name != "one" || *types[2].Name != "two" || string(types[1].Body["protected"]) != "true" {
 		t.Fatalf("wire order %v %+v", err, types)
 	}
-	for _, opts := range [][]CreateOption{nil, {WithCreatePrefix(""), WithCreatePropertiesTarget("line\n\x00")}} {
+	for _, opts := range [][]CreateOption{nil, {request.Custom(func(c *CreateOpts) error { v := ""; c.Prefix = &v; return nil }), request.Custom(func(c *CreateOpts) error { v := "line\n\x00"; c.PropertiesTarget = &v; return nil })}} {
 		value, err := scope.Create(context.Background(), name, opts...)
 		if err != nil || *value.Name != "server-choice" || value.Prefix != nil || *value.CreatedAt != "not a parsed date" || value.Links != nil || string(value.Body["unknown"]) != "9007199254740993" {
 			t.Fatalf("passive create result %v %+v", err, value)
@@ -197,7 +197,7 @@ func TestMetadefResourceTypesCoreCompletePreflight(t *testing.T) {
 			t.Fatalf("invalid delete name %q %v", name, err)
 		}
 	}
-	for _, opts := range [][]CreateOption{{nil}, {WithCreatePrefix(strings.Repeat("界", 81))}, {WithCreatePropertiesTarget(string([]byte{0xff}))}, {request.Header("Content-Type", "text/plain")}} {
+	for _, opts := range [][]CreateOption{{nil}, {request.Custom(func(c *CreateOpts) error { v := strings.Repeat("界", 81); c.Prefix = &v; return nil })}, {request.Custom(func(c *CreateOpts) error { v := string([]byte{0xff}); c.PropertiesTarget = &v; return nil })}, {request.Header("Content-Type", "text/plain")}} {
 		if _, err := scope.Create(ctx, "child", opts...); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(err)
 		}

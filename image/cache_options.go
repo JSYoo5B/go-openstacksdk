@@ -46,9 +46,9 @@ type ClearCacheOpts struct {
 }
 
 // ClearCacheOption is one option of ClearCache: WithClearCacheOpts,
-// WithClearCacheHeaders (merges), WithClearCacheTarget, request.Header (merges
-// one header) or request.Custom over *ClearCacheOpts. Other shared calls,
-// including request.Headers and request.IgnoreMissing, fail with
+// WithClearCacheHeaders (merges), request.Header (merges one header) or
+// request.Custom over *ClearCacheOpts (for example to set Target). Other shared
+// calls, including request.Headers and request.IgnoreMissing, fail with
 // resource.ErrInvalidOption before HTTP.
 type ClearCacheOption = request.DeleteCall
 
@@ -93,9 +93,6 @@ func WithClearCacheHeaders(values map[string]string) ClearCacheOption {
 		config.Headers = value.Headers
 		return err
 	})
-}
-func WithClearCacheTarget(value CacheTarget) ClearCacheOption {
-	return request.Custom(func(config *ClearCacheOpts) error { config.Target = value; return nil })
 }
 
 func cacheHeaderOption(apply func(*ImageMutationOpts) error) func(*CacheOpts) error {

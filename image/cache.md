@@ -122,7 +122,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.WithClearCacheOpts`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithClearCacheHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithClearCacheTarget`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 
 - ClearCache sends bodyless/query-free DELETE at captured base plus fixed cache, requiring original actual204 only. DirectID has only requested cache endpoint; explicit Name for per-ID calls uses unchanged native all-pages exact-name resolution, with no synthetic Ref/ID for singleton routes.
   Tests: `image/cache_contracts_test.go:TestImageCacheFixedRoutesAndClearTargets`, `image/cache_core_test.go:TestImageCacheCoreFixedRoutesAndActualEvidence`, `connectiontest/connection_image_cache_test.go:TestConnectionImageCacheSharesClientDefaultsAndPassiveMeasurements`, `internal/cmd/sdkgen/glance_cache_test.go:TestGlanceCacheManualMethodsPreserveNativeBindingsAndDocumentDefaults`.
@@ -264,6 +264,7 @@ import (
     "context"
 
     "github.com/JSYoo5B/go-openstacksdk/image"
+    "github.com/JSYoo5B/go-openstacksdk/request"
     "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -305,7 +306,7 @@ func inspectAndManageCache(ctx context.Context, service *image.Service, ref reso
         }),
         request.Header("X-Cache-Request", "clear"),
         image.WithClearCacheHeaders(map[string]string{"X-Cache-Trace": "sample"}),
-        image.WithClearCacheTarget(target))
+        request.Custom(func(c *image.ClearCacheOpts) error { c.Target = target; return nil }))
     if err != nil { return out, err }
     out.Cleaned, err = service.CleanCache(ctx, options...)
     if err != nil { return out, err }

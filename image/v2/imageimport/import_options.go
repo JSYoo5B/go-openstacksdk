@@ -69,36 +69,12 @@ func WithImportOpts(value ImportOpts) ImportOption {
 	})
 }
 
-func WithImportMethod(value ImportMethod) ImportOption {
-	return request.Custom(func(config *ImportOpts) error { config.Method = value; return nil })
-}
-func WithImportURI(value string) ImportOption {
-	return request.Custom(func(config *ImportOpts) error { config.URI = value; return nil })
-}
-func WithImportRemoteRegion(value string) ImportOption {
-	return request.Custom(func(config *ImportOpts) error { config.RemoteRegion = value; return nil })
-}
-func WithImportRemoteImageID(value string) ImportOption {
-	return request.Custom(func(config *ImportOpts) error { config.RemoteImageID = value; return nil })
-}
-func WithImportRemoteServiceInterface(value string) ImportOption {
-	return request.Custom(func(config *ImportOpts) error { config.RemoteServiceInterface = value; return nil })
-}
-func WithImportStore(value string) ImportOption {
-	return request.Custom(func(config *ImportOpts) error { owned := value; config.Store = &owned; return nil })
-}
 func WithImportStores(values ...string) ImportOption {
 	snapshot := append(make([]string, 0, len(values)), values...)
 	return request.Custom(func(config *ImportOpts) error {
 		config.Stores = append(make([]string, 0, len(snapshot)), snapshot...)
 		return nil
 	})
-}
-func WithImportAllStores(value bool) ImportOption {
-	return request.Custom(func(config *ImportOpts) error { owned := value; config.AllStores = &owned; return nil })
-}
-func WithImportAllStoresMustSucceed(value bool) ImportOption {
-	return request.Custom(func(config *ImportOpts) error { owned := value; config.AllStoresMustSucceed = &owned; return nil })
 }
 
 // setImportHeader adds an ordinary header. Case-insensitive later options win.

@@ -17,9 +17,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithCreateOpts`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithCreateHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithCreateType`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithCreateTitle`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithCreateDescription`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithCreateAttributes`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithCreateAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.NamespaceScope.CreateRecord`
@@ -73,10 +71,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithUpdateOpts`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithUpdateHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithUpdateName`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithUpdateType`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithUpdateTitle`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithUpdateDescription`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithUpdateAttributes`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithUpdateAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.NamespaceScope.UpdateRecord`

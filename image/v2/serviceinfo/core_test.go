@@ -67,7 +67,7 @@ func TestServiceInfoCoreDiscoveryRoutesAndRawModels(t *testing.T) {
 	if err != nil || len(stores) != 1 || stores[0].ID != "safe data /?" || stores[0].IsDefault == nil || *stores[0].IsDefault || string(stores[0].Properties["precision"]) != "9007199254740993" || stores[0].StatusCode != 200 {
 		t.Fatalf("stores=%+v err=%v", stores, err)
 	}
-	details, err := api.AllStores(context.Background(), WithListStoresDetails(true))
+	details, err := api.AllStores(context.Background(), request.Custom(func(c *request.Config[ListStoresOpts]) error { c.Options.Details = true; return nil }))
 	if err != nil || len(details) != 1 || details[0].Type == nil || *details[0].Type != "file" || details[0].ReadOnly == nil || !*details[0].ReadOnly || details[0].Weight == nil || *details[0].Weight != 0 {
 		t.Fatalf("details=%+v err=%v", details, err)
 	}
@@ -166,7 +166,7 @@ func TestServiceInfoCoreServerIgnoresPaginationQueries(t *testing.T) {
 		options                   []ListStoresOption
 	}{
 		{"local cap three", "/info/stores", "", "", []ListStoresOption{request.MaxItems(3)}},
-		{"local cap twenty detail", "/info/stores/detail", "", "", []ListStoresOption{WithListStoresDetails(true), request.MaxItems(20)}},
+		{"local cap twenty detail", "/info/stores/detail", "", "", []ListStoresOption{request.Custom(func(c *request.Config[ListStoresOpts]) error { c.Options.Details = true; return nil }), request.MaxItems(20)}},
 		{"explicit typed inputs", "/info/stores", "1", "start", []ListStoresOption{WithListStoresOptions(ListStoresOpts{Limit: 1, Marker: "start"})}},
 		{"explicit raw inputs", "/info/stores", "1", "raw", []ListStoresOption{request.Query("limit", "1"), request.Query("marker", "raw")}},
 	} {

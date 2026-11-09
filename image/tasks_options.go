@@ -42,9 +42,9 @@ type GetTaskOption = request.GetCall
 // MaxItems is local only and never changes the server's requested limit.
 //
 // BodyFilters, MarkerFallback and LinkHeader are explicit opt-ins for pinned
-// Python Resource.list behaviors; see WithListTasksBodyFilter,
-// WithListTasksMarkerFallback and WithListTasksLinkHeader. BodyFilters is keyed
-// by Python Task attribute name and holds complete JSON values.
+// Python Resource.list behaviors; see WithListTasksBodyFilter, MarkerFallback
+// and WithListTasksLinkHeader. BodyFilters is keyed by Python Task attribute name
+// and holds complete JSON values.
 type ListTasksOpts struct {
 	Headers                                map[string]string
 	Limit                                  *int
@@ -52,16 +52,27 @@ type ListTasksOpts struct {
 	MaxItems                               int
 	SinglePage                             bool
 	BodyFilters                            map[string]json.RawMessage
-	MarkerFallback                         bool
-	LinkHeader                             bool
+	// MarkerFallback enables pinned Python Resource.list's final continuation
+	// rule: when a nonempty page has no usable next link and an explicit
+	// positive request.Limit was given, request the same collection again with
+	// the initial filters, the same limit and marker set to the last raw row's
+	// id. Iteration ends at the first empty page, so a fully consumed
+	// collection costs one extra request, exactly as in Python. A repeated
+	// marker fails as a pagination cycle; a last row without a string id
+	// fails. Disabled by default, and ignored without a positive limit, with
+	// SinglePage, or after a MaxItems cap or caller break.
+	MarkerFallback bool
+	LinkHeader     bool
 }
 
 // ListTasksOption is one option of ListTasks and AllTasks: WithListTasksOpts,
-// WithListTasksHeaders (merges), the typed filter, sort and Python paging
-// options, request.Header (merges one header), request.Limit,
-// request.Marker, request.MaxItems or request.Custom over *ListTasksOpts.
-// Other shared calls, including request.Headers, request.Query and
-// request.Paginated, fail with resource.ErrInvalidOption before HTTP.
+// WithListTasksHeaders (merges), WithListTasksBodyFilter,
+// WithListTasksLinkHeader, request.Header (merges one header), request.Limit,
+// request.Marker, request.MaxItems or request.Custom over *ListTasksOpts (for
+// example to set Type, Status, SortKey, SortDir, SinglePage or
+// MarkerFallback). Other shared calls, including request.Headers,
+// request.Query and request.Paginated, fail with resource.ErrInvalidOption
+// before HTTP.
 type ListTasksOption = request.ListCall
 
 var (
@@ -115,21 +126,6 @@ func WithListTasksOpts(value ListTasksOpts) ListTasksOption {
 func WithListTasksHeaders(value map[string]string) ListTasksOption {
 	apply := mergeImageMutationHeaders(value)
 	return request.Custom(func(config *ListTasksOpts) error { return applyImageMemberHeader(&config.Headers, apply) })
-}
-func WithListTasksType(value string) ListTasksOption {
-	return request.Custom(func(config *ListTasksOpts) error { config.Type = value; return nil })
-}
-func WithListTasksStatus(value string) ListTasksOption {
-	return request.Custom(func(config *ListTasksOpts) error { config.Status = value; return nil })
-}
-func WithListTasksSortKey(value string) ListTasksOption {
-	return request.Custom(func(config *ListTasksOpts) error { config.SortKey = value; return nil })
-}
-func WithListTasksSortDir(value string) ListTasksOption {
-	return request.Custom(func(config *ListTasksOpts) error { config.SortDir = value; return nil })
-}
-func WithListTasksSinglePage(value bool) ListTasksOption {
-	return request.Custom(func(config *ListTasksOpts) error { config.SinglePage = value; return nil })
 }
 
 func taskHeadersCopy(value map[string]string) map[string]string {

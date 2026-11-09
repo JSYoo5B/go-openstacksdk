@@ -111,7 +111,10 @@ func TestServiceInfoDefaultRoutesAndEvidence(t *testing.T) {
 					t.Fatal("metadata aliases wire")
 				}
 			} else {
-				v, err := api.AllStores(context.Background(), serviceinfo.WithListStoresDetails(mode == "details"), request.Header("X-Option", "ordinary"))
+				v, err := api.AllStores(context.Background(), request.Custom(func(c *request.Config[serviceinfo.ListStoresOpts]) error {
+					c.Options.Details = mode == "details"
+					return nil
+				}), request.Header("X-Option", "ordinary"))
 				if err != nil || v == nil || mode == "empty stores" && len(v) != 0 || mode != "empty stores" && (len(v) != 3 || v[0].ID != "second" || v[1].ID != "first" || v[2].ID != "second" || v[1].IsDefault == nil || !*v[1].IsDefault) {
 					t.Fatal(v, err)
 				}
@@ -383,7 +386,7 @@ func TestServiceInfoPreparedOptionsAndLazyParallelReuse(t *testing.T) {
 			}
 			return infoWire(200, io.NopCloser(strings.NewReader(`{"stores":[{"id":"unfiltered","name":"different"},{"id":12}],"next":"https://foreign.invalid/unused"}`))), nil
 		}))
-		options := []serviceinfo.ListStoresOption{serviceinfo.WithListStoresDetails(true), serviceinfo.WithListStoresOptions(serviceinfo.ListStoresOpts{MaxItems: 1}), request.Query("name", "wire-only"), request.Header("X-Option", "ordinary"), request.Custom(func(*request.Config[serviceinfo.ListStoresOpts]) error { callbacks.Add(1); return nil })}
+		options := []serviceinfo.ListStoresOption{request.Custom(func(c *request.Config[serviceinfo.ListStoresOpts]) error { c.Options.Details = true; return nil }), serviceinfo.WithListStoresOptions(serviceinfo.ListStoresOpts{MaxItems: 1}), request.Query("name", "wire-only"), request.Header("X-Option", "ordinary"), request.Custom(func(*request.Config[serviceinfo.ListStoresOpts]) error { callbacks.Add(1); return nil })}
 		list := serviceinfo.New(infoClient(cloud)).ListStores(context.Background(), options...)
 		var workers sync.WaitGroup
 		for i := 0; i < 4; i++ {
@@ -642,7 +645,7 @@ func TestServiceInfoAcceptedFailuresAndNativeCompatibility(t *testing.T) {
 				api := serviceinfo.New(infoClient(cloud))
 				var err error
 				if phase == "details" {
-					v, failure := api.AllStores(context.Background(), serviceinfo.WithListStoresDetails(true))
+					v, failure := api.AllStores(context.Background(), request.Custom(func(c *request.Config[serviceinfo.ListStoresOpts]) error { c.Options.Details = true; return nil }))
 					if v != nil {
 						t.Fatal(v)
 					}

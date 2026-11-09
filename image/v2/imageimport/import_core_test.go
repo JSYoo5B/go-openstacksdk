@@ -45,7 +45,7 @@ func TestImportCoreKnownSeedAndHTTPBodySnapshots(t *testing.T) {
 	}))
 	defer server.Close()
 	api := New(importCoreClient(server))
-	options := []ImportOption{WithImportStore("selected"), WithImportAllStoresMustSucceed(false),
+	options := []ImportOption{request.Custom(func(c *ImportOpts) error { v := "selected"; c.Store = &v; return nil }), request.Custom(func(c *ImportOpts) error { v := false; c.AllStoresMustSucceed = &v; return nil }),
 		request.Header("X-Note", "initial"), WithImportMethodField("vendor", json.Number("9007199254740993")),
 		request.Field("root", map[string]any{"nested": []string{"initial"}}), request.Custom(func(config *ImportOpts) error {
 			captured = config
@@ -132,7 +132,7 @@ func TestImportCorePreflightAndSourceBeforeEveryPhase(t *testing.T) {
 			return err
 		},
 		func() error {
-			_, err := api.ImportImage(context.Background(), resource.ID("id"), WithImportMethod(WebDownloadMethod))
+			_, err := api.ImportImage(context.Background(), resource.ID("id"), request.Custom(func(c *ImportOpts) error { c.Method = WebDownloadMethod; return nil }))
 			return err
 		},
 		func() error {

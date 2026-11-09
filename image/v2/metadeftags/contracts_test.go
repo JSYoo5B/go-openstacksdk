@@ -141,14 +141,14 @@ func TestMetadefTagsOwnedPreparationAndSource(t *testing.T) {
 			return tagWire(200, &tagBody{Reader: strings.NewReader(tagJSON)}), nil
 		})
 		s := tagScope(t, client, tagParent)
-		for _, o := range []tags.ListOption{nil, request.Limit(-1), request.MaxItems(-1), request.Marker("line\n"), tags.WithListSortKey("\xff"), tags.WithListSortDir(""), tags.WithListSortDir("ASC")} {
+		for _, o := range []tags.ListOption{nil, request.Limit(-1), request.MaxItems(-1), request.Marker("line\n"), request.Custom(func(c *tags.ListOpts) error { v := "\xff"; c.SortKey = &v; return nil }), request.Custom(func(c *tags.ListOpts) error { v := ""; c.SortDir = &v; return nil }), request.Custom(func(c *tags.ListOpts) error { v := "ASC"; c.SortDir = &v; return nil })} {
 			v, e := s.All(context.Background(), request.Custom(func(*tags.ListOpts) error { callbacks.Add(1); return nil }), o)
 			if v != nil || !errors.Is(e, resource.ErrInvalidOption) {
 				t.Fatal(v, e)
 			}
 		}
 		for _, name := range []string{"", "../other", "\xff"} {
-			v, e := s.Update(context.Background(), tagName, tags.WithUpdateName(name))
+			v, e := s.Update(context.Background(), tagName, request.Custom(func(c *tags.UpdateOpts) error { v := name; c.Name = &v; return nil }))
 			if v != nil || !errors.Is(e, resource.ErrInvalidOption) {
 				t.Fatal(v, e)
 			}
@@ -157,7 +157,7 @@ func TestMetadefTagsOwnedPreparationAndSource(t *testing.T) {
 		if v != nil || !errors.Is(e, resource.ErrInvalidOption) || calls.Load() != 0 || callbacks.Load() != 7 {
 			t.Fatal(v, e, calls.Load(), callbacks.Load())
 		}
-		v2, e := s.Update(context.Background(), tagName, tags.WithUpdateName("unsafe/name"), tags.WithUpdateOpts(tags.UpdateOpts{}))
+		v2, e := s.Update(context.Background(), tagName, request.Custom(func(c *tags.UpdateOpts) error { v := "unsafe/name"; c.Name = &v; return nil }), tags.WithUpdateOpts(tags.UpdateOpts{}))
 		if e != nil || v2 == nil || calls.Load() != 1 {
 			t.Fatal(v2, e, calls.Load())
 		}
@@ -459,7 +459,7 @@ func TestMetadefTagsFixedScopedRoutesAndPayloads(t *testing.T) {
 					}
 					return tagWire(200, &tagBody{Reader: strings.NewReader(tagJSON)}), nil
 				})
-				v, e := tagScope(t, client, parent).Update(context.Background(), name, tags.WithUpdateName("새 이름"))
+				v, e := tagScope(t, client, parent).Update(context.Background(), name, request.Custom(func(c *tags.UpdateOpts) error { v := "새 이름"; c.Name = &v; return nil }))
 				if e != nil || v == nil || calls.Load() != 1 {
 					t.Fatal(v, e, calls.Load())
 				}
@@ -497,7 +497,7 @@ func TestMetadefTagsFixedScopedRoutesAndPayloads(t *testing.T) {
 				})
 				var options []tags.SetOption
 				if mode != "nil" {
-					options = []tags.SetOption{tags.WithSetAppend(mode == "true")}
+					options = []tags.SetOption{request.Custom(func(c *tags.SetOpts) error { v := mode == "true"; c.Append = &v; return nil })}
 				}
 				v, e := tagScope(t, client, tagParent).Set(context.Background(), input, options...)
 				if e != nil || v == nil || v.Tags == nil || len(v.Tags) != 0 || calls.Load() != 1 {
@@ -1174,7 +1174,7 @@ func TestMetadefTagsListAndPagingControls(t *testing.T) {
 			})
 			s := tagScope(t, client, tagParent)
 			seen := 0
-			for v, e := range s.List(context.Background(), request.Limit(2), request.Marker("initial:?"), tags.WithListSortKey("name"), tags.WithListSortDir("asc")) {
+			for v, e := range s.List(context.Background(), request.Limit(2), request.Marker("initial:?"), request.Custom(func(c *tags.ListOpts) error { v := "name"; c.SortKey = &v; return nil }), request.Custom(func(c *tags.ListOpts) error { v := "asc"; c.SortDir = &v; return nil })) {
 				if e != nil {
 					t.Fatal(e)
 				}
@@ -1204,7 +1204,7 @@ func TestMetadefTagsListAndPagingControls(t *testing.T) {
 			}
 			return tagWire(200, &tagBody{Reader: strings.NewReader(`{"tags":[]}`)}), nil
 		})
-		v, e := tagScope(t, client, tagParent).All(context.Background(), request.Marker(""), tags.WithListSortKey(""), request.Limit(0))
+		v, e := tagScope(t, client, tagParent).All(context.Background(), request.Marker(""), request.Custom(func(c *tags.ListOpts) error { v := ""; c.SortKey = &v; return nil }), request.Limit(0))
 		if e != nil || v == nil {
 			t.Fatal(v, e)
 		}

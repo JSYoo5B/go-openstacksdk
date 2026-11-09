@@ -89,10 +89,10 @@ func TestImageOptionsReplacementExtensionsAndLastWins(t *testing.T) {
 	values, err := service.AllImages(context.Background(),
 		request.MaxItems(-1), request.Limit(-1), request.Header("X-Erased", "old"), WithListImagesFilter("old", "x"),
 		WithListImagesOpts(ListImagesOpts{}), WithListImagesHeaders(map[string]string{"x-policy": "first"}), request.Header("X-Policy", "last"),
-		WithListImagesID(""), WithListImagesName(""), WithListImagesVisibility("future"), WithListImagesMemberStatus("future"), WithListImagesOwner(""), WithListImagesStatus("future"),
-		WithListImagesSort(""), WithListImagesCreatedAt("literal\n"), WithListImagesUpdatedAt(""), WithListImagesContainerFormat("future"), WithListImagesDiskFormat("future"),
-		WithListImagesSizeMin(9), WithListImagesSizeMax(0), WithListImagesProtected(false), WithListImagesHidden(false), request.Limit(0), request.Marker(""),
-		WithListImagesFilters(url.Values{"erased": {"x"}, "kept": {"first"}}), WithListImagesFilter("kept", "last", "last"), WithListImagesFilter("erased"), request.MaxItems(1), request.MaxItems(0), WithListImagesSinglePage(true))
+		request.Custom(func(c *ListImagesOpts) error { v := ""; c.ID = &v; return nil }), request.Custom(func(c *ListImagesOpts) error { v := ""; c.Name = &v; return nil }), request.Custom(func(c *ListImagesOpts) error { v := "future"; c.Visibility = &v; return nil }), request.Custom(func(c *ListImagesOpts) error { v := "future"; c.MemberStatus = &v; return nil }), request.Custom(func(c *ListImagesOpts) error { v := ""; c.Owner = &v; return nil }), request.Custom(func(c *ListImagesOpts) error { v := "future"; c.Status = &v; return nil }),
+		request.Custom(func(c *ListImagesOpts) error { v := ""; c.Sort = &v; return nil }), request.Custom(func(c *ListImagesOpts) error { v := "literal\n"; c.CreatedAt = &v; return nil }), request.Custom(func(c *ListImagesOpts) error { v := ""; c.UpdatedAt = &v; return nil }), request.Custom(func(c *ListImagesOpts) error { v := "future"; c.ContainerFormat = &v; return nil }), request.Custom(func(c *ListImagesOpts) error { v := "future"; c.DiskFormat = &v; return nil }),
+		request.Custom(func(c *ListImagesOpts) error { v := int64(9); c.SizeMin = &v; return nil }), request.Custom(func(c *ListImagesOpts) error { v := int64(0); c.SizeMax = &v; return nil }), request.Custom(func(c *ListImagesOpts) error { v := false; c.Protected = &v; return nil }), request.Custom(func(c *ListImagesOpts) error { v := false; c.Hidden = &v; return nil }), request.Limit(0), request.Marker(""),
+		WithListImagesFilters(url.Values{"erased": {"x"}, "kept": {"first"}}), WithListImagesFilter("kept", "last", "last"), WithListImagesFilter("erased"), request.MaxItems(1), request.MaxItems(0), request.Custom(func(c *ListImagesOpts) error { c.SinglePage = true; return nil }))
 	if err != nil || len(values) != 2 {
 		t.Fatal(values, err)
 	}
@@ -169,11 +169,11 @@ func TestImageOptionsValidationAndParallelReusablePolicies(t *testing.T) {
 		t.Error("invalid option reached HTTP")
 		return taskCoreJSON(req, 200, `{"images":[]}`), nil
 	}))
-	invalid := []ListImagesOption{nil, request.Limit(-1), request.MaxItems(-1), WithListImagesSizeMin(-1), WithListImagesSizeMax(-1),
+	invalid := []ListImagesOption{nil, request.Limit(-1), request.MaxItems(-1), request.Custom(func(c *ListImagesOpts) error { v := int64(-1); c.SizeMin = &v; return nil }), request.Custom(func(c *ListImagesOpts) error { v := int64(-1); c.SizeMax = &v; return nil }),
 		request.Header("Accept", "owned"), request.Header("Host", "foreign"), request.Header("X-Auth-Token", "owned"),
 		WithListImagesFilters(url.Values{"limit": {"1"}}), WithListImagesFilters(url.Values{"deleted": {"true"}}), WithListImagesFilters(url.Values{"x": nil}),
 		WithListImagesFilter("", "value"), WithListImagesFilter("key\n", "value"), WithListImagesFilter(string([]byte{0xff}), "value"), WithListImagesFilter("key", string([]byte{0xff})),
-		WithListImagesName(string([]byte{0xff})), request.Marker(string([]byte{0xff})), WithListImagesTags(string([]byte{0xff})),
+		request.Custom(func(c *ListImagesOpts) error { v := string([]byte{0xff}); c.Name = &v; return nil }), request.Marker(string([]byte{0xff})), WithListImagesTags(string([]byte{0xff})),
 		request.Custom(func(o *ListImagesOpts) error {
 			o.Sort = taskOptionPointer("")
 			o.SortKeys = []string{"name"}

@@ -46,7 +46,7 @@ func TestGlanceServiceInfoRegistryAndNativeCompatibility(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, want := range []string{"serviceinfo/README.md", "serviceinfo/api.go", "ListStores/AllStores(ctx)", "GetImportInfo(ctx)", "GetUsageInfo(ctx)", "serviceinfo/usage.go", "serviceinfo/usage.md", "Native `ImageImport.Get`", "WithListStoresDetails(true)"} {
+	for _, want := range []string{"serviceinfo/README.md", "serviceinfo/api.go", "ListStores/AllStores(ctx)", "GetImportInfo(ctx)", "GetUsageInfo(ctx)", "serviceinfo/usage.go", "serviceinfo/usage.md", "Native `ImageImport.Get`", "ListStoresOpts.Details = true"} {
 		if !strings.Contains(string(docs), want) {
 			t.Fatalf("missing actual ServiceInfo contract: %s", want)
 		}

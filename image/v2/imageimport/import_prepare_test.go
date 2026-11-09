@@ -37,7 +37,7 @@ func TestPrepareImportOptionsFreezesJSONAndSourceConflictsWithoutRequests(t *tes
 	if !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatalf("source conflict err=%v", err)
 	}
-	prepared, err = api.PrepareImportOptions(context.Background(), WithImportStore("explicit"))
+	prepared, err = api.PrepareImportOptions(context.Background(), request.Custom(func(c *ImportOpts) error { v := "explicit"; c.Store = &v; return nil }))
 	if err != nil || *prepared.Store != "explicit" || client.MoreHeaders["x-image-meta-store"] != "legacy" {
 		t.Fatalf("explicit overlay prepared=%+v source=%v err=%v", prepared, client.MoreHeaders, err)
 	}

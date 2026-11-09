@@ -103,10 +103,10 @@ func TestConnectionImageMetadefPropertiesShareClientAndFixedScope(t *testing.T) 
 			t.Fatalf("property=%+v err=%v", value, err)
 		}
 	}
-	created, err := scope.Create(ctx, child, prop.WithCreateType("integer"), prop.WithCreateTitle(""), prop.WithCreateAttribute("default", json.Number("9007199254740993")))
+	created, err := scope.Create(ctx, child, request.Custom(func(c *prop.CreateOpts) error { v := "integer"; c.Type = &v; return nil }), request.Custom(func(c *prop.CreateOpts) error { v := ""; c.Title = &v; return nil }), prop.WithCreateAttribute("default", json.Number("9007199254740993")))
 	check(created, err, 201)
 	advance()
-	fetched, err := other.Get(ctx, child, prop.WithGetResourceType("OS::Nova::Server"))
+	fetched, err := other.Get(ctx, child, request.Custom(func(c *prop.GetOpts) error { v := "OS::Nova::Server"; c.ResourceType = &v; return nil }))
 	check(fetched, err, 200)
 	if created.Key != nil || fetched.Key != nil {
 		t.Fatal("CRUD synthesized dictionary key")
@@ -117,7 +117,7 @@ func TestConnectionImageMetadefPropertiesShareClientAndFixedScope(t *testing.T) 
 		t.Fatal("response ownership aliases")
 	}
 	advance()
-	updated, err := scope.Update(ctx, child, prop.WithUpdateName("renamed"), prop.WithUpdateType("integer"), prop.WithUpdateTitle(""))
+	updated, err := scope.Update(ctx, child, request.Custom(func(c *prop.UpdateOpts) error { v := "renamed"; c.Name = &v; return nil }), request.Custom(func(c *prop.UpdateOpts) error { v := "integer"; c.Type = &v; return nil }), request.Custom(func(c *prop.UpdateOpts) error { v := ""; c.Title = &v; return nil }))
 	check(updated, err, 200)
 	advance()
 	sequence := scope.List(ctx, request.MaxItems(1))

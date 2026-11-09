@@ -116,13 +116,13 @@ func TestMetadefNamespacesCoreFixedRoutesAndReplacementEvidence(t *testing.T) {
 	if err != nil || value.Namespace == nil || *value.Namespace != "server-name" || value.StatusCode != 201 || string(value.Body["unknown"]) != "9007199254740993" {
 		t.Fatalf("create result: %+v %v", value, err)
 	}
-	if _, err = api.Create(context.Background(), namespace, WithCreateDisplayName(""), WithCreateDescription("line1\nline2"), WithCreateVisibility("public"), WithCreateOwner(""), WithCreateProtected(false)); err != nil {
+	if _, err = api.Create(context.Background(), namespace, request.Custom(func(c *CreateOpts) error { v := ""; c.DisplayName = &v; return nil }), request.Custom(func(c *CreateOpts) error { v := "line1\nline2"; c.Description = &v; return nil }), request.Custom(func(c *CreateOpts) error { v := "public"; c.Visibility = &v; return nil }), request.Custom(func(c *CreateOpts) error { v := ""; c.Owner = &v; return nil }), request.Custom(func(c *CreateOpts) error { v := false; c.Protected = &v; return nil })); err != nil {
 		t.Fatal(err)
 	}
-	if _, err = api.Get(context.Background(), namespace, WithGetResourceType("OS::Thing,+&")); err != nil {
+	if _, err = api.Get(context.Background(), namespace, request.Custom(func(c *GetOpts) error { v := "OS::Thing,+&"; c.ResourceType = &v; return nil })); err != nil {
 		t.Fatal(err)
 	}
-	if _, err = api.Update(context.Background(), namespace, WithUpdateNamespace("renamed::名字")); err != nil {
+	if _, err = api.Update(context.Background(), namespace, request.Custom(func(c *UpdateOpts) error { v := "renamed::名字"; c.Namespace = &v; return nil })); err != nil {
 		t.Fatal(err)
 	}
 	if _, err = api.Update(context.Background(), namespace); err != nil {
@@ -204,26 +204,29 @@ func TestMetadefNamespacesCoreCompletePreflight(t *testing.T) {
 	checks := []func() error{
 		func() error { _, err := api.Create(context.Background(), "valid", nil); return err },
 		func() error {
-			_, err := api.Create(context.Background(), "valid", WithCreateVisibility(""))
+			_, err := api.Create(context.Background(), "valid", request.Custom(func(c *CreateOpts) error { v := ""; c.Visibility = &v; return nil }))
 			return err
 		},
 		func() error {
-			_, err := api.Create(context.Background(), "valid", WithCreateDisplayName(strings.Repeat("界", 81)))
+			_, err := api.Create(context.Background(), "valid", request.Custom(func(c *CreateOpts) error { v := strings.Repeat("界", 81); c.DisplayName = &v; return nil }))
 			return err
 		},
 		func() error {
-			_, err := api.Create(context.Background(), "valid", WithCreateDescription(strings.Repeat("x", 501)))
+			_, err := api.Create(context.Background(), "valid", request.Custom(func(c *CreateOpts) error { v := strings.Repeat("x", 501); c.Description = &v; return nil }))
 			return err
 		},
 		func() error {
-			_, err := api.Create(context.Background(), "valid", WithCreateOwner(strings.Repeat("界", 256)))
+			_, err := api.Create(context.Background(), "valid", request.Custom(func(c *CreateOpts) error { v := strings.Repeat("界", 256); c.Owner = &v; return nil }))
 			return err
 		},
 		func() error {
-			_, err := api.Update(context.Background(), "valid", WithUpdateNamespace("a/b"))
+			_, err := api.Update(context.Background(), "valid", request.Custom(func(c *UpdateOpts) error { v := "a/b"; c.Namespace = &v; return nil }))
 			return err
 		},
-		func() error { _, err := api.Get(context.Background(), "valid", WithGetResourceType("a\t")); return err },
+		func() error {
+			_, err := api.Get(context.Background(), "valid", request.Custom(func(c *GetOpts) error { v := "a\t"; c.ResourceType = &v; return nil }))
+			return err
+		},
 		func() error {
 			_, err := api.Delete(context.Background(), "valid", request.Header("Authorization", "x"))
 			return err
@@ -231,10 +234,16 @@ func TestMetadefNamespacesCoreCompletePreflight(t *testing.T) {
 		func() error { _, err := api.All(context.Background(), request.Limit(-1)); return err },
 		func() error { _, err := api.All(context.Background(), request.MaxItems(-1)); return err },
 		func() error { _, err := api.All(context.Background(), request.Marker("a/b")); return err },
-		func() error { _, err := api.All(context.Background(), WithListSortDir("DESC")); return err },
-		func() error { _, err := api.All(context.Background(), WithListSortKey("x\n")); return err },
 		func() error {
-			_, err := api.All(context.Background(), WithListResourceTypes(string([]byte{0xff})))
+			_, err := api.All(context.Background(), request.Custom(func(c *ListOpts) error { c.SortDir = "DESC"; return nil }))
+			return err
+		},
+		func() error {
+			_, err := api.All(context.Background(), request.Custom(func(c *ListOpts) error { c.SortKey = "x\n"; return nil }))
+			return err
+		},
+		func() error {
+			_, err := api.All(context.Background(), request.Custom(func(c *ListOpts) error { c.ResourceTypes = string([]byte{0xff}); return nil }))
 			return err
 		},
 	}
@@ -274,7 +283,7 @@ func TestMetadefNamespacesCoreAdvertisedPaginationAndCaps(t *testing.T) {
 			}
 			return namespaceCoreJSON(req, 200, `{"namespaces":[{"namespace":"last"}],"next":null}`), nil
 		})
-		values, err := New(client).All(context.Background(), request.Limit(0), WithListVisibility("public"), WithListSortKey("literal-column"), WithListSortDir("asc"), WithListResourceTypes("OS::A, OS::B"))
+		values, err := New(client).All(context.Background(), request.Limit(0), request.Custom(func(c *ListOpts) error { c.Visibility = "public"; return nil }), request.Custom(func(c *ListOpts) error { c.SortKey = "literal-column"; return nil }), request.Custom(func(c *ListOpts) error { c.SortDir = "asc"; return nil }), request.Custom(func(c *ListOpts) error { c.ResourceTypes = "OS::A, OS::B"; return nil }))
 		if err != nil || len(values) != 2 || calls != 2 {
 			t.Fatalf("values%d calls%d %v", len(values), calls, err)
 		}
@@ -349,7 +358,7 @@ func TestMetadefNamespacesCoreAdvertisedPaginationAndCaps(t *testing.T) {
 		namespaceCoreProof(t, err, 200, body)
 		singleBody := `{"namespaces":[{}],"next":false}`
 		api = New(namespaceCoreClient(func(req *http.Request) (*http.Response, error) { return namespaceCoreJSON(req, 200, singleBody), nil }))
-		if rows, err = api.All(context.Background(), WithListSinglePage(true)); err != nil || len(rows) != 1 {
+		if rows, err = api.All(context.Background(), request.Custom(func(c *ListOpts) error { c.SinglePage = true; return nil })); err != nil || len(rows) != 1 {
 			t.Fatal(err)
 		}
 		if rows, err = api.All(context.Background()); rows != nil || err == nil {

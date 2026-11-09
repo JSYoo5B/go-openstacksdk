@@ -143,7 +143,7 @@ func TestImageUploadContractsWireAndOwnership(t *testing.T) {
 			request.Header("X-One", "one"), image.WithImageUploadHeaders(map[string]string{"X-Two": "two"}),
 			image.WithImageUploadFields(fields), image.WithImageUploadField("disk_format", "future/disk"), image.WithImageUploadField("container_format", "future/container"),
 			image.WithImageUploadField("visibility", image.Visibility("future/visibility")), image.WithImageUploadField("owner", ""), image.WithImageUploadField("protected", false), image.WithImageUploadField("os_hidden", false),
-			image.WithImageUploadField("min_disk", -1), image.WithImageUploadField("min_ram", 0), image.WithImageUploadTags("repeat", "repeat", "line\n", ""), image.WithImageUploadField("custom", map[string]any{"flag": false}), image.WithImageUploadSize(0))
+			image.WithImageUploadField("min_disk", -1), image.WithImageUploadField("min_ram", 0), image.WithImageUploadTags("repeat", "repeat", "line\n", ""), image.WithImageUploadField("custom", map[string]any{"flag": false}), request.Custom(func(c *image.ImageUploadOpts) error { v := int64(0); c.Size = &v; return nil }))
 		if e != nil || result == nil || result.ImageID != "observed" || result.Image.Name != nil || result.Image.DiskFormat != nil || result.Image.Status == nil || *result.Image.Status != "queued" || calls.Load() != 2 {
 			t.Fatal(result, e, calls.Load())
 		}
@@ -172,7 +172,7 @@ func TestImageUploadContractsWireAndOwnership(t *testing.T) {
 						_ = uploadImageContractRead(t, r)
 						return uploadImageContractResponse(204, ""), nil
 					})
-					opts := []image.ImageUploadOption{image.WithImageUploadField("cleared", true), image.WithImageUploadFields(nil), image.WithImageUploadTags(), image.WithImageUploadSize(size)}
+					opts := []image.ImageUploadOption{image.WithImageUploadField("cleared", true), image.WithImageUploadFields(nil), image.WithImageUploadTags(), request.Custom(func(c *image.ImageUploadOpts) error { v := size; c.Size = &v; return nil })}
 					if reset {
 						opts = append(opts, request.Custom(func(c *image.ImageUploadOpts) error { c.Size = nil; return nil }))
 					}
@@ -319,7 +319,7 @@ func TestImageUploadContractsPreflightAndSnapshots(t *testing.T) {
 			name   string
 			option image.ImageUploadOption
 		}{
-			{"nil option", nil}, {"negative size", image.WithImageUploadSize(-1)},
+			{"nil option", nil}, {"negative size", request.Custom(func(c *image.ImageUploadOpts) error { v := int64(-1); c.Size = &v; return nil })},
 			{"name owned", image.WithImageUploadFields(map[string]json.RawMessage{"name": json.RawMessage(`"other"`)})},
 			{"empty key", image.WithImageUploadFields(map[string]json.RawMessage{"": json.RawMessage(`1`)})},
 			{"edge python whitespace", image.WithImageUploadFields(map[string]json.RawMessage{"\x1ckey": json.RawMessage(`1`)})},

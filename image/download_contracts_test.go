@@ -169,9 +169,9 @@ func TestDownloadToCompletePreflight(t *testing.T) {
 		opts []image.DownloadImageOption
 	}{
 		{"nil option", []image.DownloadImageOption{nil}},
-		{"zero chunk", []image.DownloadImageOption{image.WithDownloadChunkSize(0)}},
-		{"negative chunk", []image.DownloadImageOption{image.WithDownloadChunkSize(-1)}},
-		{"oversized chunk", []image.DownloadImageOption{image.WithDownloadChunkSize(67108865)}},
+		{"zero chunk", []image.DownloadImageOption{func(c *image.DownloadImageOpts) error { v := 0; c.ChunkSize = &v; return nil }}},
+		{"negative chunk", []image.DownloadImageOption{func(c *image.DownloadImageOpts) error { v := -1; c.ChunkSize = &v; return nil }}},
+		{"oversized chunk", []image.DownloadImageOption{func(c *image.DownloadImageOpts) error { v := 67108865; c.ChunkSize = &v; return nil }}},
 		{"empty store", []image.DownloadImageOption{image.WithDownloadStorePreferences("")}},
 		{"comma store", []image.DownloadImageOption{image.WithDownloadStorePreferences("fast,slow")}},
 		{"control store", []image.DownloadImageOption{image.WithDownloadStorePreferences("line\nbreak")}},
@@ -297,7 +297,7 @@ func TestDownloadToCanonicalIdentityAndIntegrity(t *testing.T) {
 			}))
 			var opts []image.DownloadImageOption
 			if tc.disabled {
-				opts = append(opts, image.WithDownloadChecksumVerification(false))
+				opts = append(opts, func(c *image.DownloadImageOpts) error { v := false; c.VerifyChecksum = &v; return nil })
 			}
 			v, err := image.New(cloud.Client("image", downloadPrefix)).DownloadTo(context.Background(), resource.ID("fixed"), sink, opts...)
 			if v == nil || v.Metadata == nil {
@@ -402,7 +402,7 @@ func TestDownloadToPreparedSnapshotsAndPreferences(t *testing.T) {
 		return downloadWire(200, "metadata", io.NopCloser(strings.NewReader(downloadMetadata(`,"os_hash_algo":"future-hash","os_hash_value":"wrong"`)))), nil
 	}))
 	sink := &downloadSink{}
-	v, err := image.New(cloud.Client("image", downloadPrefix)).DownloadTo(context.Background(), resource.ID("fixed"), sink, image.WithDownloadChunkSize(-1), bulk, func(opts *image.DownloadImageOpts) error { callbacks.Add(1); retained = opts; return nil })
+	v, err := image.New(cloud.Client("image", downloadPrefix)).DownloadTo(context.Background(), resource.ID("fixed"), sink, func(c *image.DownloadImageOpts) error { v := -1; c.ChunkSize = &v; return nil }, bulk, func(opts *image.DownloadImageOpts) error { callbacks.Add(1); retained = opts; return nil })
 	if err != nil || v == nil || v.Checksum != nil || sink.String() != "payload" || calls.Load() != 2 || callbacks.Load() != 1 || body.maxRead.Load() != 3 || sink.maxWrite.Load() > 3 {
 		t.Fatal(v, err, calls.Load(), callbacks.Load(), body.maxRead.Load(), sink.maxWrite.Load())
 	}
@@ -546,7 +546,7 @@ func TestDownloadToPartialTransferFailures(t *testing.T) {
 				}
 				return downloadWire(200, "metadata", io.NopCloser(strings.NewReader(downloadMetadata(fmt.Sprintf(`,"checksum":%q`, downloadDigest("md5", "payload")))))), nil
 			}))
-			v, err := image.New(cloud.Client("image", downloadPrefix)).DownloadTo(ctx, resource.ID("fixed"), sink, image.WithDownloadChunkSize(3))
+			v, err := image.New(cloud.Client("image", downloadPrefix)).DownloadTo(ctx, resource.ID("fixed"), sink, func(c *image.DownloadImageOpts) error { v := 3; c.ChunkSize = &v; return nil })
 			wantBytes := int64(3)
 			if strings.Contains(mode, "write") {
 				wantBytes = 2
@@ -785,7 +785,7 @@ func TestDownloadToBorrowedWriterCancellationAndClose(t *testing.T) {
 		}
 		finished := make(chan outcome, 1)
 		go func() {
-			v, err := image.New(cloud.Client("image", downloadPrefix)).DownloadTo(ctx, resource.ID("fixed"), sink, image.WithDownloadChunkSize(3))
+			v, err := image.New(cloud.Client("image", downloadPrefix)).DownloadTo(ctx, resource.ID("fixed"), sink, func(c *image.DownloadImageOpts) error { v := 3; c.ChunkSize = &v; return nil })
 			finished <- outcome{v, err}
 		}()
 		select {
@@ -827,7 +827,7 @@ func TestDownloadToBorrowedWriterCancellationAndClose(t *testing.T) {
 				return downloadWire(200, "metadata", io.NopCloser(strings.NewReader(downloadMetadata("")))), nil
 			}))
 			sink := &downloadSink{}
-			v, err := image.New(cloud.Client("image", downloadPrefix)).DownloadTo(ctx, resource.ID("fixed"), sink, image.WithDownloadChunkSize(3))
+			v, err := image.New(cloud.Client("image", downloadPrefix)).DownloadTo(ctx, resource.ID("fixed"), sink, func(c *image.DownloadImageOpts) error { v := 3; c.ChunkSize = &v; return nil })
 			if !errors.Is(err, context.DeadlineExceeded) || v == nil || v.Metadata == nil || v.StatusCode != 200 || v.BytesWritten != 3 || sink.String() != "abc" || body == nil || body.closes.Load() != 1 || sink.closes.Load() != 0 {
 				t.Fatal(v, err, sink.String(), body)
 			}

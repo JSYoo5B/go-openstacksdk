@@ -35,7 +35,7 @@ func TestGlanceDeletePreservesNativeAPIAndDocumentsStoreWorkflow(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, text := range []string{"image.Service.DeleteImage", "../delete.md", "WithDeleteImageStore", "actual204"} {
+	for _, text := range []string{"image.Service.DeleteImage", "../delete.md", "DeleteImageOpts.StoreID", "actual204"} {
 		if !strings.Contains(string(docs), text) {
 			t.Fatalf("missing upper image deletion documentation: %s", text)
 		}

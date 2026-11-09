@@ -17,12 +17,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithListHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/request.Limit`
 - `github.com/JSYoo5B/go-openstacksdk/request.Marker`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithListVisibility`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithListSortKey`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithListSortDir`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithListResourceTypes`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithListSinglePage`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.API.All`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.API.ListRecords`

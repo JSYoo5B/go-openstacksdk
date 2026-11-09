@@ -46,11 +46,11 @@ func TestImageCacheOptionsSnapshotReplacementAndLastWins(t *testing.T) {
 	clearInput := map[string]string{"X-A": "snapshot"}
 	clearFull := WithClearCacheOpts(ClearCacheOpts{Headers: clearInput, Target: QueueOnly})
 	clearInput["X-A"] = "changed"
-	cleared, err := parseClearCacheOptions([]ClearCacheOption{clearFull, request.Header("x-a", "last"), WithClearCacheHeaders(map[string]string{"X-B": "merged"}), WithClearCacheTarget(CacheOnly)})
+	cleared, err := parseClearCacheOptions([]ClearCacheOption{clearFull, request.Header("x-a", "last"), WithClearCacheHeaders(map[string]string{"X-B": "merged"}), request.Custom(func(c *ClearCacheOpts) error { c.Target = CacheOnly; return nil })})
 	if err != nil || cleared.Target != CacheOnly || cleared.Headers["X-A"] != "last" || cleared.Headers["X-B"] != "merged" {
 		t.Fatal(cleared, err)
 	}
-	cleared, err = parseClearCacheOptions([]ClearCacheOption{WithClearCacheTarget(QueueOnly), WithClearCacheOpts(ClearCacheOpts{})})
+	cleared, err = parseClearCacheOptions([]ClearCacheOption{request.Custom(func(c *ClearCacheOpts) error { c.Target = QueueOnly; return nil }), WithClearCacheOpts(ClearCacheOpts{})})
 	if err != nil || cleared.Target != CacheBoth || cleared.Headers == nil {
 		t.Fatal(cleared, err)
 	}
@@ -143,7 +143,7 @@ func TestImageCacheOptionsProtectedHeadersAndCompleteDefaults(t *testing.T) {
 	}
 	for _, target := range []CacheTarget{3, 255} {
 		client := deleteCoreClient(func(*http.Request) (*http.Response, error) { t.Fatal("HTTP invalid target"); return nil, nil })
-		if value, err := New(client).ClearCache(context.Background(), WithClearCacheTarget(target)); value != nil || !errors.Is(err, resource.ErrInvalidOption) {
+		if value, err := New(client).ClearCache(context.Background(), request.Custom(func(c *ClearCacheOpts) error { c.Target = target; return nil })); value != nil || !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(value, err)
 		}
 	}
@@ -158,7 +158,7 @@ func TestImageCacheOptionsParallelReusableHelpers(t *testing.T) {
 	missing := false
 	common := []CacheOption{WithCacheOpts(CacheOpts{Headers: input}), WithCacheHeaders(input), request.Header("X-B", "last")}
 	deleted := []CacheDeleteOption{WithCacheDeleteOpts(CacheDeleteOpts{Headers: input, IgnoreMissing: &missing}), WithCacheDeleteHeaders(input), request.Header("X-B", "last"), request.IgnoreMissing(false)}
-	cleared := []ClearCacheOption{WithClearCacheOpts(ClearCacheOpts{Headers: input, Target: CacheOnly}), WithClearCacheHeaders(input), request.Header("X-B", "last"), WithClearCacheTarget(QueueOnly)}
+	cleared := []ClearCacheOption{WithClearCacheOpts(ClearCacheOpts{Headers: input, Target: CacheOnly}), WithClearCacheHeaders(input), request.Header("X-B", "last"), request.Custom(func(c *ClearCacheOpts) error { c.Target = QueueOnly; return nil })}
 	input["X-A"] = "late"
 	missing = true
 	for i := 0; i < 12; i++ {

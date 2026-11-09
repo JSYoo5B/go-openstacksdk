@@ -315,7 +315,7 @@ func TestStageCorePreflightSourceAndCustomCancellationCauses(t *testing.T) {
 			return err
 		},
 		func() error {
-			_, err := api.StageImage(context.Background(), resource.ID("id"), strings.NewReader(""), WithStageSize(-1))
+			_, err := api.StageImage(context.Background(), resource.ID("id"), strings.NewReader(""), request.Custom(func(c *StageOpts) error { v := int64(-1); c.Size = &v; return nil }))
 			return err
 		},
 		func() error {

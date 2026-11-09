@@ -245,11 +245,11 @@ func TestMetadefObjectsFixedScopedRoutesAndPayloads(t *testing.T) {
 				}
 				opts := objectOptions{}
 				if mode != "nil omitted" {
-					opts.create = []objects.CreateOption{objects.WithCreateDescription(description), objects.WithCreateProperties(properties), objects.WithCreateRequired(required)}
-					opts.update = []objects.UpdateOption{objects.WithUpdateDescription(description), objects.WithUpdateProperties(properties), objects.WithUpdateRequired(required)}
+					opts.create = []objects.CreateOption{request.Custom(func(c *objects.CreateOpts) error { v := description; c.Description = &v; return nil }), objects.WithCreateProperties(properties), objects.WithCreateRequired(required)}
+					opts.update = []objects.UpdateOption{request.Custom(func(c *objects.UpdateOpts) error { v := description; c.Description = &v; return nil }), objects.WithUpdateProperties(properties), objects.WithUpdateRequired(required)}
 				}
 				if op == "Update" {
-					opts.update = append(opts.update, objects.WithUpdateName("renamed::object"))
+					opts.update = append(opts.update, request.Custom(func(c *objects.UpdateOpts) error { v := "renamed::object"; c.Name = &v; return nil }))
 				}
 				client := objectClient(func(r *http.Request) (*http.Response, error) {
 					calls.Add(1)
@@ -805,10 +805,10 @@ func TestMetadefObjectsOwnedPreparationAndSource(t *testing.T) {
 		name, op string
 		opts     objectOptions
 	}{
-		{"Description UTF8", "Create", objectOptions{create: []objects.CreateOption{objects.WithCreateDescription(string([]byte{255}))}}},
+		{"Description UTF8", "Create", objectOptions{create: []objects.CreateOption{request.Custom(func(c *objects.CreateOpts) error { v := string([]byte{255}); c.Description = &v; return nil })}}},
 		{"Property key UTF8", "Create", objectOptions{create: []objects.CreateOption{objects.WithCreateProperties(map[string]json.RawMessage{string([]byte{255}): json.RawMessage(`{}`)})}}},
 		{"Required UTF8", "Update", objectOptions{update: []objects.UpdateOption{objects.WithUpdateRequired([]string{string([]byte{255})})}}},
-		{"unsafe rename", "Update", objectOptions{update: []objects.UpdateOption{objects.WithUpdateName("bad/name")}}},
+		{"unsafe rename", "Update", objectOptions{update: []objects.UpdateOption{request.Custom(func(c *objects.UpdateOpts) error { v := "bad/name"; c.Name = &v; return nil })}}},
 		{"negative local cap", "All", objectOptions{list: []objects.ListOption{request.MaxItems(-1)}}},
 	}
 	for _, test := range invalidOpts {

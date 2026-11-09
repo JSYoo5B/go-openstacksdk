@@ -70,8 +70,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithCreateOpts`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithCreateHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithCreatePrefix`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithCreatePropertiesTarget`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.NamespaceScope.CreateRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordCreateOpts`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordCreateHeaders`
@@ -264,8 +263,8 @@ func manageResourceTypeAssociation(
         types.WithCreateOpts(types.CreateOpts{}),
         request.Header("X-Example", "association"),
         types.WithCreateHeaders(map[string]string{"X-Request-Group": "example"}),
-        types.WithCreatePrefix(prefix),
-        types.WithCreatePropertiesTarget(target),
+        request.Custom(func(c *types.CreateOpts) error { v := prefix; c.Prefix = &v; return nil }),
+        request.Custom(func(c *types.CreateOpts) error { v := target; c.PropertiesTarget = &v; return nil }),
     )
     if err != nil {
         return evidence, err

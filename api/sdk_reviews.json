@@ -21048,15 +21048,8 @@
         "github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.API.ImportImage",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.API.ImportKnownImage",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithImportOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithImportMethod",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithImportURI",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithImportRemoteRegion",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithImportRemoteImageID",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithImportRemoteServiceInterface",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithImportStore",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithImportStores",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithImportAllStores",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithImportAllStoresMustSucceed",
         "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithImportHeaders",
         "github.com/JSYoo5B/go-openstacksdk/request.Field",
@@ -21332,7 +21325,6 @@
         "github.com/JSYoo5B/go-openstacksdk/image/v2/imagedata.API.StageImage",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/imagedata.API.StageKnownImage",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/imagedata.WithStageOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/imagedata.WithStageSize",
         "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/imagedata.WithStageHeaders",
@@ -22085,9 +22077,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.DownloadTo",
         "github.com/JSYoo5B/go-openstacksdk/image.WithDownloadImageOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithDownloadChunkSize",
         "github.com/JSYoo5B/go-openstacksdk/image.WithDownloadStorePreferences",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithDownloadChecksumVerification",
         "github.com/JSYoo5B/go-openstacksdk/image.Service.DownloadImageRecord",
         "github.com/JSYoo5B/go-openstacksdk.Connection.DownloadImageRecord",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordDownloadOpts",
@@ -22446,7 +22436,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.DeleteImage",
         "github.com/JSYoo5B/go-openstacksdk/image.WithDeleteImageOpts",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithDeleteImageStore",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing",
         "github.com/JSYoo5B/go-openstacksdk/image.Service.DeleteImageRecord",
         "github.com/JSYoo5B/go-openstacksdk.Connection.DeleteImageRecord",
@@ -22627,7 +22617,6 @@
         "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.API.ListStores",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.API.AllStores",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithListStoresOptions",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithListStoresDetails",
         "github.com/JSYoo5B/go-openstacksdk/request.MaxItems",
         "github.com/JSYoo5B/go-openstacksdk/request.Paginated",
         "github.com/JSYoo5B/go-openstacksdk/request.Query",
@@ -25809,7 +25798,7 @@
         "github.com/JSYoo5B/go-openstacksdk/image.WithClearCacheOpts",
         "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image.WithClearCacheHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithClearCacheTarget"
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom"
       ],
       "contracts": [
         {
@@ -27003,11 +26992,7 @@
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithCreateOpts",
         "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithCreateHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithCreateDisplayName",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithCreateDescription",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithCreateVisibility",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithCreateOwner",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithCreateProtected",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithCreateProperties",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithCreateObjects",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithCreateTags",
@@ -27201,7 +27186,7 @@
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithGetOpts",
         "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithGetHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithGetResourceType"
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom"
       ],
       "contracts": [
         {
@@ -27294,12 +27279,8 @@
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithListHeaders",
         "github.com/JSYoo5B/go-openstacksdk/request.Limit",
         "github.com/JSYoo5B/go-openstacksdk/request.Marker",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithListVisibility",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithListSortKey",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithListSortDir",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithListResourceTypes",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.MaxItems",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithListSinglePage",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.API.List",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.API.All",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.API.ListRecords",
@@ -27466,12 +27447,7 @@
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithUpdateOpts",
         "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithUpdateHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithUpdateNamespace",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithUpdateDisplayName",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithUpdateDescription",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithUpdateVisibility",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithUpdateOwner",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithUpdateProtected"
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom"
       ],
       "contracts": [
         {
@@ -27568,7 +27544,7 @@
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithCreateOpts",
         "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithCreateHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithCreateDescription",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithCreateProperties",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithCreateRequired"
       ],
@@ -27892,8 +27868,7 @@
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithUpdateOpts",
         "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithUpdateHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithUpdateName",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithUpdateDescription",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithUpdateProperties",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithUpdateRequired"
       ],
@@ -27972,7 +27947,7 @@
         "Go returns typed result values with copied raw response evidence instead of a mutable Python Resource, so there is no Resource descriptor coercion, dirty-attribute tracking or seeded-object merge.",
         "Python raises openstack.exceptions classes; Go returns wrapped Gophercloud or SDK errors, with resource.NotFoundError or the native 404 cause where documented.",
         "Go validates literal route names and accepts only the documented 201/200/204 statuses; Python accepts any status below 400.",
-        "Python's commit leaves name out of the PUT body unless the caller passes name=..., and Glance rejects an object update without name; Go always sends the current name (WithUpdateName renames)."
+        "Python's commit leaves name out of the PUT body unless the caller passes name=..., and Glance rejects an object update without name; Go always sends the current name (UpdateOpts.Name renames)."
       ],
       "remaining": []
     },
@@ -28155,9 +28130,7 @@
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithCreateOpts",
         "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithCreateHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithCreateType",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithCreateTitle",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithCreateDescription",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithCreateAttributes",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithCreateAttribute",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.NamespaceScope.CreateRecord",
@@ -28297,7 +28270,7 @@
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithGetOpts",
         "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithGetHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithGetResourceType",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.NewWithDependencies",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.NamespaceScope.GetRecord",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordGetOpts",
@@ -28362,7 +28335,7 @@
           ]
         },
         {
-          "behavior": "Named strict getter boundary audit distinguishes Python **query as _get controls or Resource seed attributes from an HTTP query. Existing strict200 fresh DTO retains actual descriptor keywords/default omission/aliases raw, rejects304 without cache reuse and independently decodes later success. WithGetResourceType remains a deliberate Go server-query extension; this raw getter itself does not implement Resource seeding/default/coercion/fetch translation. The additive owned GetRecord contracts below close that formerly unresolved named getter gap.",
+          "behavior": "Named strict getter boundary audit distinguishes Python **query as _get controls or Resource seed attributes from an HTTP query. Existing strict200 fresh DTO retains actual descriptor keywords/default omission/aliases raw, rejects304 without cache reuse and independently decodes later success. GetOpts.ResourceType remains a deliberate Go server-query extension; this raw getter itself does not implement Resource seeding/default/coercion/fetch translation. The additive owned GetRecord contracts below close that formerly unresolved named getter gap.",
           "tests": [
             "image/v2/metadefproperties/get_mapping_test.go:TestMetadefPropertyGetMappingDescriptorKeywordsRemainRaw",
             "image/v2/metadefproperties/get_mapping_test.go:TestMetadefPropertyGetMappingDoesNotReuseCachedOrSeededResults"
@@ -28425,7 +28398,7 @@
         "Go mapping uses an immutable owned concrete RecordRequest and fresh GET; Python mutates existing Resource/cache/dirty/session state and accepts broader dict/Munch/None parent inputs. Go requires fixed literal namespace and selected string child, explicitly rejects route/cache/class/session/version overrides, and does not add finder/discovery or conditional cached returns.",
         "Resource view has21 fields: pinned Python default to_dict20 plus fixed namespace_name provenance. Unknown/self/schema/date fields remain only in actual Wire/Envelope; Source Body descriptor names, null/defaults, list/dict/bool/int projection and response overlay are owned. Response identity is passive, and canonical map aliases have deterministic precedence while Python kwargs use dictionary order.",
         "Shared JSON integer projection preserves arbitrary integer JSON and bool, truncates IEEE754 float values, uses Unicode16 digit properties and omits CPython configurable digit-string limits. Bool numeric truthiness compares exact decimal zero, so underflow/JSON backend and nonfinite runtime behavior may differ. Arbitrary Go attributes use encoding/json snapshots, with deferred failures only for finally selected declared attrs.",
-        "Always-on fixed query-free owned fetch accepts actual200..399 and tolerates successful syntax-invalid JSON, but requires wholeUTF8 and parsed nonnull objects. Original strict200 raw typed Get remains a separate API, with WithGetResourceType as a deliberate Go server-query extension. Python public resource_type/value/namespace_name kwargs cause duplicate-binding TypeError beforeHTTP.",
+        "Always-on fixed query-free owned fetch accepts actual200..399 and tolerates successful syntax-invalid JSON, but requires wholeUTF8 and parsed nonnull objects. Original strict200 raw typed Get remains a separate API, with GetOpts.ResourceType as a deliberate Go server-query extension. Python public resource_type/value/namespace_name kwargs cause duplicate-binding TypeError beforeHTTP.",
         "Connection current location including explicitly configured Zone is preserved; pinned Python current_location normally has zone=None. Direct New has null location, while NewWithDependencies supplies a concrete callback. Fixed namespace URI causes seed/response location to remain passive in Wire.",
         "Local transport fixtures and compile/install builds establish the named getter Go contract; server schema/policy/DB defaults, authenticated side effects and live Python execution are not proven. This mapping does not claim whole Python Resource/session lifecycle parity or change the remaining metadata CRUD/list inventory."
       ]
@@ -28581,10 +28554,7 @@
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithUpdateOpts",
         "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithUpdateHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithUpdateName",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithUpdateType",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithUpdateTitle",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithUpdateDescription",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithUpdateAttributes",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithUpdateAttribute",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.NamespaceScope.UpdateRecord",
@@ -29295,8 +29265,7 @@
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithCreateOpts",
         "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithCreateHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithCreatePrefix",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithCreatePropertiesTarget",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.NamespaceScope.CreateRecord",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordCreateOpts",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordCreateHeaders",
@@ -29834,14 +29803,9 @@
         "github.com/JSYoo5B/go-openstacksdk/image.WithListTasksHeaders",
         "github.com/JSYoo5B/go-openstacksdk/request.Limit",
         "github.com/JSYoo5B/go-openstacksdk/request.Marker",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithListTasksType",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithListTasksStatus",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithListTasksSortKey",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithListTasksSortDir",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.MaxItems",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithListTasksSinglePage",
         "github.com/JSYoo5B/go-openstacksdk/image.WithListTasksBodyFilter",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithListTasksMarkerFallback",
         "github.com/JSYoo5B/go-openstacksdk/image.WithListTasksLinkHeader"
       ],
       "contracts": [
@@ -29912,7 +29876,7 @@
           ]
         },
         {
-          "behavior": "WithListTasksMarkerFallback (default off, last wins) repeats the fixed collection with the initial query, the explicit positive limit and marker=last raw row id when a nonempty page has no next link, ending at the first empty page; a body next link wins, no positive limit/SinglePage/MaxItems stop it, and a repeated marker or id-less last row fails. WithListTasksLinkHeader follows an RFC 8288 rel=next Link only when the body has no next, under the same origin/path/filter/marker guard; malformed or foreign Links fail with the accepted response only when enabled.",
+          "behavior": "ListTasksOpts.MarkerFallback (default off, last wins) repeats the fixed collection with the initial query, the explicit positive limit and marker=last raw row id when a nonempty page has no next link, ending at the first empty page; a body next link wins, no positive limit/SinglePage/MaxItems stop it, and a repeated marker or id-less last row fails. WithListTasksLinkHeader follows an RFC 8288 rel=next Link only when the body has no next, under the same origin/path/filter/marker guard; malformed or foreign Links fail with the accepted response only when enabled.",
           "tests": [
             "image/tasks_python_paging_test.go:TestTaskPythonMarkerFallbackFollowsLimitAndLastRawRow",
             "image/tasks_python_paging_test.go:TestTaskPythonMarkerFallbackGuards",
@@ -29924,7 +29888,7 @@
         "Pinned Python mutable Resource/dirty body attributes/same-object returns and configured Adapter/cache/session/microversion/header machinery remain broader than fixed concrete function options and independently owned TaskInfo.",
         "Go TaskInfo exact canonical optional string/date pointers and nullable raw object Input/Result preserve raw precision and literal timestamps; native Task time.Time/map[string]any and pinned Python untyped result/date values differ. No type/status normalization or cached/input/ID seeding.",
         "Server policy/owner/expiry and deprecated tasks access remain server-owned; no discovery/Schema/authorization gate or authenticated cloud execution/full SDK parity claim.",
-        "Pinned Python Resource.list applies Body filters, HTTP Link continuation and limit/marker fallback automatically; Go makes them explicit opt-ins (WithListTasksBodyFilter, WithListTasksLinkHeader, WithListTasksMarkerFallback) and guards every continuation for origin, path, filters and cycles. Python also follows links/tasks_links arrays, turns max_items into a wire limit hint and strips self; Go follows only the canonical body next, never invents a wire limit from MaxItems and keeps self as raw data. Filters compare raw JSON under the shared jsonfilter policy rather than Python object equality.",
+        "Pinned Python Resource.list applies Body filters, HTTP Link continuation and limit/marker fallback automatically; Go makes them explicit opt-ins (WithListTasksBodyFilter, WithListTasksLinkHeader, ListTasksOpts.MarkerFallback) and guards every continuation for origin, path, filters and cycles. Python also follows links/tasks_links arrays, turns max_items into a wire limit hint and strips self; Go follows only the canonical body next, never invents a wire limit from MaxItems and keeps self as raw data. Filters compare raw JSON under the shared jsonfilter policy rather than Python object equality.",
         "Pinned server list Type filter accepts import only though Create Schema/domain supports3 types; facade no enum gate allows server rejection. Serverconfiguredlimit/default/clamp/owner/expiry remainserver-owned.",
         "Python discards unknown non-Body keyword arguments and accepts any Body attribute name as a filter; Go exposes the six documented query fields and rejects unknown filter names before HTTP. Mutable Resource/Adapter/session/JMESPath controls are the shared SDK-R1/C1/S1 boundary (docs/sdk-support-ledger.md)."
       ],
@@ -30269,28 +30233,13 @@
         "github.com/JSYoo5B/go-openstacksdk/image.WithListImagesHeaders",
         "github.com/JSYoo5B/go-openstacksdk/request.Limit",
         "github.com/JSYoo5B/go-openstacksdk/request.Marker",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithListImagesID",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithListImagesName",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithListImagesVisibility",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithListImagesMemberStatus",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithListImagesOwner",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithListImagesStatus",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithListImagesSizeMin",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithListImagesSizeMax",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithListImagesProtected",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithListImagesHidden",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithListImagesSort",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/image.WithListImagesSortKeys",
         "github.com/JSYoo5B/go-openstacksdk/image.WithListImagesSortDirs",
         "github.com/JSYoo5B/go-openstacksdk/image.WithListImagesTags",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithListImagesCreatedAt",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithListImagesUpdatedAt",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithListImagesContainerFormat",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithListImagesDiskFormat",
         "github.com/JSYoo5B/go-openstacksdk/image.WithListImagesFilter",
         "github.com/JSYoo5B/go-openstacksdk/image.WithListImagesFilters",
         "github.com/JSYoo5B/go-openstacksdk/request.MaxItems",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithListImagesSinglePage",
         "github.com/JSYoo5B/go-openstacksdk/image.Service.ListImageRecords",
         "github.com/JSYoo5B/go-openstacksdk/image.Service.AllImageRecords",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordListOpts",
@@ -30873,7 +30822,6 @@
         "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadSize",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadField",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadFields",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadTags",

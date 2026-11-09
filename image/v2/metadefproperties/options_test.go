@@ -41,7 +41,7 @@ func TestMetadefPropertiesOptionsSnapshotsReplacementAndLastWins(t *testing.T) {
 	*input.Description = "after"
 	input.Attributes["minimum"][0] = '2'
 	input.Headers["X-Original"] = "after"
-	config, err := prepareCreate([]CreateOption{request.Header("X-Removed", "yes"), option, WithCreateTitle(""), request.Header("x-original", "last")})
+	config, err := prepareCreate([]CreateOption{request.Header("X-Removed", "yes"), option, request.Custom(func(c *CreateOpts) error { v := ""; c.Title = &v; return nil }), request.Header("x-original", "last")})
 	if err != nil || *config.Type != "number" || *config.Title != "" || *config.Description != "before" || string(config.Attributes["minimum"]) != "1.25" || string(config.Attributes["default"]) != "null" || config.Headers["X-Original"] != "last" || config.Headers["X-Removed"] != "" {
 		t.Fatalf("fullsnapshot %+v %v", config, err)
 	}
@@ -63,7 +63,7 @@ func TestMetadefPropertiesOptionsSnapshotsReplacementAndLastWins(t *testing.T) {
 	resourceType := "OS::Type"
 	get := WithGetOpts(GetOpts{ResourceType: &resourceType})
 	resourceType = "changed"
-	fetched, err := prepareGet([]GetOption{get, WithGetResourceType("")})
+	fetched, err := prepareGet([]GetOption{get, request.Custom(func(c *GetOpts) error { v := ""; c.ResourceType = &v; return nil })})
 	if err != nil || fetched.ResourceType == nil || *fetched.ResourceType != "" {
 		t.Fatalf("get %+v %v", fetched, err)
 	}
@@ -90,7 +90,7 @@ func TestMetadefPropertiesOptionsSnapshotsReplacementAndLastWins(t *testing.T) {
 	literal := json.RawMessage(`{"n":1}`)
 	singular := WithCreateAttribute("custom", literal)
 	literal[5] = '2'
-	captured, err := prepareCreate([]CreateOption{WithCreateType("unknown"), WithCreateTitle(""), WithCreateAttribute("removed", 1), plural, singular, WithCreateAttribute("readonly", false)})
+	captured, err := prepareCreate([]CreateOption{request.Custom(func(c *CreateOpts) error { v := "unknown"; c.Type = &v; return nil }), request.Custom(func(c *CreateOpts) error { v := ""; c.Title = &v; return nil }), WithCreateAttribute("removed", 1), plural, singular, WithCreateAttribute("readonly", false)})
 	if err != nil || string(captured.Attributes["default"]) != `{"value":[9007199254740993]}` || string(captured.Attributes["custom"]) != `{"n":1}` || string(captured.Attributes["readonly"]) != "false" {
 		t.Fatalf("factory snapshots %+v %v", captured, err)
 	}
@@ -146,7 +146,7 @@ func TestMetadefPropertiesOptionsCallbackAndFactoryOwnership(t *testing.T) {
 		t.Fatalf("factory marshals%d", encodedCalls)
 	}
 	for i := 0; i < 2; i++ {
-		if _, err := prepareCreate([]CreateOption{WithCreateType("string"), WithCreateTitle(""), factory}); err != nil {
+		if _, err := prepareCreate([]CreateOption{request.Custom(func(c *CreateOpts) error { v := "string"; c.Type = &v; return nil }), request.Custom(func(c *CreateOpts) error { v := ""; c.Title = &v; return nil }), factory}); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -155,7 +155,7 @@ func TestMetadefPropertiesOptionsCallbackAndFactoryOwnership(t *testing.T) {
 	}
 	encodedCalls = 0
 	bad := WithCreateAttributes(map[string]any{string([]byte{0xff}): propertyOptionMarshaler{calls: &encodedCalls}})
-	if _, err := prepareCreate([]CreateOption{WithCreateType("string"), WithCreateTitle(""), bad}); !errors.Is(err, resource.ErrInvalidOption) || encodedCalls != 0 {
+	if _, err := prepareCreate([]CreateOption{request.Custom(func(c *CreateOpts) error { v := "string"; c.Type = &v; return nil }), request.Custom(func(c *CreateOpts) error { v := ""; c.Title = &v; return nil }), bad}); !errors.Is(err, resource.ErrInvalidOption) || encodedCalls != 0 {
 		t.Fatalf("badkey beforeMarshal calls%d %v", encodedCalls, err)
 	}
 	requests := 0
@@ -209,7 +209,7 @@ func TestMetadefPropertiesOptionsValidationAndDefaults(t *testing.T) {
 	if _, err := prepareUpdate(nil); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatalf("missing required update %v", err)
 	}
-	created, err := prepareCreate([]CreateOption{WithCreateType("arbitrary-type"), WithCreateTitle(""), WithCreateDescription(strings.Repeat("界", 1000) + "\n"), WithCreateAttributes(map[string]any{"default": nil, "minimum": json.Number("1.25"), "maximum": json.Number("9007199254740993"), "": true, "unknown-extension": []any{}})})
+	created, err := prepareCreate([]CreateOption{request.Custom(func(c *CreateOpts) error { v := "arbitrary-type"; c.Type = &v; return nil }), request.Custom(func(c *CreateOpts) error { v := ""; c.Title = &v; return nil }), request.Custom(func(c *CreateOpts) error { v := strings.Repeat("界", 1000) + "\n"; c.Description = &v; return nil }), WithCreateAttributes(map[string]any{"default": nil, "minimum": json.Number("1.25"), "maximum": json.Number("9007199254740993"), "": true, "unknown-extension": []any{}})})
 	if err != nil || created.Headers == nil || *created.Title != "" || string(created.Attributes["default"]) != "null" {
 		t.Fatalf("literaldefinition %+v %v", created, err)
 	}
@@ -230,11 +230,11 @@ func TestMetadefPropertiesOptionsValidationAndDefaults(t *testing.T) {
 		t.Fatalf("listdefault %+v %v", listed, err)
 	}
 	for _, key := range []string{"name", "type", "title", "description", "self", "schema", "created_at", "updated_at", "namespace_name"} {
-		if _, err := prepareCreate([]CreateOption{WithCreateType("string"), WithCreateTitle(""), WithCreateAttribute(key, nil)}); !errors.Is(err, resource.ErrInvalidOption) {
+		if _, err := prepareCreate([]CreateOption{request.Custom(func(c *CreateOpts) error { v := "string"; c.Type = &v; return nil }), request.Custom(func(c *CreateOpts) error { v := ""; c.Title = &v; return nil }), WithCreateAttribute(key, nil)}); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatalf("reserved%s %v", key, err)
 		}
 	}
-	if _, err := prepareCreate([]CreateOption{WithCreateType("string"), WithCreateTitle(""), WithCreateAttribute("Name", 1)}); err != nil {
+	if _, err := prepareCreate([]CreateOption{request.Custom(func(c *CreateOpts) error { v := "string"; c.Type = &v; return nil }), request.Custom(func(c *CreateOpts) error { v := ""; c.Title = &v; return nil }), WithCreateAttribute("Name", 1)}); err != nil {
 		t.Fatal("casefolded reserved attributes", err)
 	}
 	for _, raw := range []json.RawMessage{nil, json.RawMessage(`{`), json.RawMessage("\"\xff\"")} {
@@ -263,17 +263,17 @@ func TestMetadefPropertiesOptionsValidationAndDefaults(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, option := range []CreateOption{WithCreateAttributes(map[string]any{"default": make(chan int)}), WithCreateAttribute("default", make(chan int))} {
-		_, err := prepareCreate([]CreateOption{WithCreateType("string"), WithCreateTitle(""), option})
+		_, err := prepareCreate([]CreateOption{request.Custom(func(c *CreateOpts) error { v := "string"; c.Type = &v; return nil }), request.Custom(func(c *CreateOpts) error { v := ""; c.Title = &v; return nil }), option})
 		var encoding *json.UnsupportedTypeError
 		if !errors.Is(err, resource.ErrInvalidOption) || !errors.As(err, &encoding) {
 			t.Fatalf("factoryerrorcause %v", err)
 		}
 	}
-	empty, err := prepareCreate([]CreateOption{WithCreateType("string"), WithCreateTitle(""), WithCreateAttributes(map[string]any{})})
+	empty, err := prepareCreate([]CreateOption{request.Custom(func(c *CreateOpts) error { v := "string"; c.Type = &v; return nil }), request.Custom(func(c *CreateOpts) error { v := ""; c.Title = &v; return nil }), WithCreateAttributes(map[string]any{})})
 	if err != nil || empty.Attributes == nil {
 		t.Fatalf("emptyattrs %+v %v", empty, err)
 	}
-	nilAttrs, err := prepareCreate([]CreateOption{WithCreateType("string"), WithCreateTitle(""), WithCreateAttributes(nil)})
+	nilAttrs, err := prepareCreate([]CreateOption{request.Custom(func(c *CreateOpts) error { v := "string"; c.Type = &v; return nil }), request.Custom(func(c *CreateOpts) error { v := ""; c.Title = &v; return nil }), WithCreateAttributes(nil)})
 	if err != nil || nilAttrs.Attributes != nil {
 		t.Fatalf("nilattrs %+v %v", nilAttrs, err)
 	}

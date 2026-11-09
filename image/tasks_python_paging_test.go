@@ -95,16 +95,16 @@ func TestTaskPythonMarkerFallbackFollowsLimitAndLastRawRow(t *testing.T) {
 		return taskCoreJSON(req, 200, pages[query.Get("marker")]), nil
 	})
 	service := New(client)
-	ids, err := taskPythonIDs(t, service, request.Limit(2), WithListTasksType("import"), WithListTasksMarkerFallback(true), WithListTasksBodyFilter("owner_id", "p1"))
+	ids, err := taskPythonIDs(t, service, request.Limit(2), request.Custom(func(c *ListTasksOpts) error { c.Type = "import"; return nil }), request.Custom(func(c *ListTasksOpts) error { c.MarkerFallback = true; return nil }), WithListTasksBodyFilter("owner_id", "p1"))
 	want := []string{"limit=2&type=import", "limit=2&marker=b&type=import", "limit=2&marker=c&type=import"}
 	if err != nil || !reflect.DeepEqual(ids, []string{"a", "c"}) || !reflect.DeepEqual(requested, want) {
 		t.Fatalf("ids=%v err=%v requested=%v", ids, err, requested)
 	}
 	for name, options := range map[string][]ListTasksOption{
-		"disabled by default": {request.Limit(2), WithListTasksType("import")},
-		"last option wins":    {request.Limit(2), WithListTasksType("import"), WithListTasksMarkerFallback(true), WithListTasksMarkerFallback(false)},
-		"single page":         {request.Limit(2), WithListTasksType("import"), WithListTasksMarkerFallback(true), WithListTasksSinglePage(true)},
-		"max items":           {request.Limit(2), WithListTasksType("import"), WithListTasksMarkerFallback(true), request.MaxItems(2)},
+		"disabled by default": {request.Limit(2), request.Custom(func(c *ListTasksOpts) error { c.Type = "import"; return nil })},
+		"last option wins":    {request.Limit(2), request.Custom(func(c *ListTasksOpts) error { c.Type = "import"; return nil }), request.Custom(func(c *ListTasksOpts) error { c.MarkerFallback = true; return nil }), request.Custom(func(c *ListTasksOpts) error { c.MarkerFallback = false; return nil })},
+		"single page":         {request.Limit(2), request.Custom(func(c *ListTasksOpts) error { c.Type = "import"; return nil }), request.Custom(func(c *ListTasksOpts) error { c.MarkerFallback = true; return nil }), request.Custom(func(c *ListTasksOpts) error { c.SinglePage = true; return nil })},
+		"max items":           {request.Limit(2), request.Custom(func(c *ListTasksOpts) error { c.Type = "import"; return nil }), request.Custom(func(c *ListTasksOpts) error { c.MarkerFallback = true; return nil }), request.MaxItems(2)},
 	} {
 		requested = nil
 		ids, err := taskPythonIDs(t, service, options...)
@@ -141,7 +141,7 @@ func TestTaskPythonMarkerFallbackGuards(t *testing.T) {
 				}
 				return taskCoreJSON(req, 200, tc.second), nil
 			})
-			options := []ListTasksOption{WithListTasksMarkerFallback(true)}
+			options := []ListTasksOption{request.Custom(func(c *ListTasksOpts) error { c.MarkerFallback = true; return nil })}
 			if tc.limit > 0 {
 				options = append(options, request.Limit(tc.limit))
 			}

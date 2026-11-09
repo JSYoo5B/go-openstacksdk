@@ -17,7 +17,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithCreateOpts`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithCreateHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithCreateDescription`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithCreateProperties`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithCreateRequired`
 
@@ -149,8 +149,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithUpdateOpts`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithUpdateHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithUpdateName`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithUpdateDescription`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithUpdateProperties`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithUpdateRequired`
 
@@ -177,7 +176,7 @@ Python/Go differences:
 - Go returns typed result values with copied raw response evidence instead of a mutable Python Resource, so there is no Resource descriptor coercion, dirty-attribute tracking or seeded-object merge.
 - Python raises openstack.exceptions classes; Go returns wrapped Gophercloud or SDK errors, with resource.NotFoundError or the native 404 cause where documented.
 - Go validates literal route names and accepts only the documented 201/200/204 statuses; Python accepts any status below 400.
-- Python's commit leaves name out of the PUT body unless the caller passes name=..., and Glance rejects an object update without name; Go always sends the current name (WithUpdateName renames).
+- Python's commit leaves name out of the PUT body unless the caller passes name=..., and Glance rejects an object update without name; Go always sends the current name (UpdateOpts.Name renames).
 
 ### `python:image/v2/delete_metadef_object`
 
@@ -288,7 +287,7 @@ func manageObjects(ctx context.Context, service *image.Service, namespace, name,
         metadefobjects.WithCreateOpts(metadefobjects.CreateOpts{Description: &description}),
         request.Header("X-Request-Source", "example"),
         metadefobjects.WithCreateHeaders(map[string]string{"X-Trace": "create"}),
-        metadefobjects.WithCreateDescription(description),
+        request.Custom(func(c *metadefobjects.CreateOpts) error { v := description; c.Description = &v; return nil }),
         metadefobjects.WithCreateProperties(properties),
         metadefobjects.WithCreateRequired(required))
     if err != nil { return out, err }
@@ -316,8 +315,8 @@ func manageObjects(ctx context.Context, service *image.Service, namespace, name,
         metadefobjects.WithUpdateOpts(metadefobjects.UpdateOpts{}),
         request.Header("X-Request-Source", "example"),
         metadefobjects.WithUpdateHeaders(map[string]string{"X-Trace": "update"}),
-        metadefobjects.WithUpdateName(replacementName),
-        metadefobjects.WithUpdateDescription(description),
+        request.Custom(func(c *metadefobjects.UpdateOpts) error { v := replacementName; c.Name = &v; return nil }),
+        request.Custom(func(c *metadefobjects.UpdateOpts) error { v := description; c.Description = &v; return nil }),
         metadefobjects.WithUpdateProperties(properties),
         metadefobjects.WithUpdateRequired(required))
     if err != nil { return out, err }

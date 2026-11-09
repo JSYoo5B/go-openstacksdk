@@ -17,7 +17,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadSize`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadField`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadFields`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadTags`

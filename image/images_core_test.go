@@ -248,7 +248,7 @@ func TestImageCorePagingGuardsAndLocalConsumption(t *testing.T) {
 			calls++
 			return taskCoreJSON(req, 200, `{"images":[{}],"next":42}`), nil
 		})
-		if values, err := New(client).AllImages(context.Background(), WithListImagesSinglePage(true)); err != nil || len(values) != 1 || calls != 1 {
+		if values, err := New(client).AllImages(context.Background(), request.Custom(func(c *ListImagesOpts) error { c.SinglePage = true; return nil })); err != nil || len(values) != 1 || calls != 1 {
 			t.Fatal(values, err, calls)
 		}
 	})

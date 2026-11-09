@@ -18,9 +18,9 @@ type CreateOpts struct {
 }
 
 // CreateOption is one option of the operation: WithCreateOpts,
-// WithCreateHeaders, WithCreatePrefix, WithCreatePropertiesTarget,
-// request.Header, or request.Custom over *CreateOpts. Other shared calls fail
-// with resource.ErrInvalidOption before HTTP.
+// WithCreateHeaders, request.Header, or request.Custom over *CreateOpts (for
+// example to set Prefix or PropertiesTarget). Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
 type CreateOption = request.WriteCall
 
 func copyCreate(value CreateOpts) CreateOpts {
@@ -47,12 +47,6 @@ func WithCreateHeaders(value map[string]string) CreateOption {
 		}
 		return nil
 	})
-}
-func WithCreatePrefix(value string) CreateOption {
-	return request.Custom(func(config *CreateOpts) error { owned := value; config.Prefix = &owned; return nil })
-}
-func WithCreatePropertiesTarget(value string) CreateOption {
-	return request.Custom(func(config *CreateOpts) error { owned := value; config.PropertiesTarget = &owned; return nil })
 }
 
 // DeleteOpts configures the bounded delete operation.

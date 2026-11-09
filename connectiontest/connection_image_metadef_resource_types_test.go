@@ -110,7 +110,7 @@ func TestConnectionImageMetadefResourceTypesShareClientAndScopes(t *testing.T) {
 	if err != nil || len(all) != 1 || all[0].Header.Get("X-Proof") != "types-1" || calls != 2 {
 		t.Fatalf("global all=%+v err=%v", all, err)
 	}
-	created, err := scope.Create(ctx, child, rt.WithCreatePrefix(""), rt.WithCreatePropertiesTarget("image\n"))
+	created, err := scope.Create(ctx, child, request.Custom(func(c *rt.CreateOpts) error { v := ""; c.Prefix = &v; return nil }), request.Custom(func(c *rt.CreateOpts) error { v := "image\n"; c.PropertiesTarget = &v; return nil }))
 	if err != nil || created == nil || created.Name == nil || *created.Name != "passive-name" || created.Prefix == nil || *created.Prefix != "" || created.PropertiesTarget == nil || *created.PropertiesTarget != "image\n" || created.StatusCode != 201 {
 		t.Fatalf("created=%+v err=%v", created, err)
 	}

@@ -36,9 +36,6 @@ func WithImageUploadHeaders(values map[string]string) ImageUploadOption {
 	apply := mergeImageMutationHeaders(values)
 	return request.Custom(func(config *ImageUploadOpts) error { return applyImageMemberHeader(&config.Headers, apply) })
 }
-func WithImageUploadSize(value int64) ImageUploadOption {
-	return request.Custom(func(config *ImageUploadOpts) error { owned := value; config.Size = &owned; return nil })
-}
 
 // WithImageUploadField snapshots standard Go JSON once at factory time. It
 // replaces one literal field; name belongs exclusively to UploadImageRequest.

@@ -11,13 +11,14 @@ import (
 // Nil StoreID deletes the whole image. Nil IgnoreMissing ignores absence.
 // An explicitly empty StoreID is invalid and never expands the deletion scope.
 type DeleteImageOpts struct {
+	// StoreID deletes the image copy from the specified store.
 	StoreID       *string
 	IgnoreMissing *bool
 }
 
 // DeleteImageOption is one option of DeleteImage: WithDeleteImageOpts,
-// WithDeleteImageStore, request.IgnoreMissing or request.Custom over
-// *DeleteImageOpts. Other shared calls, including request.Header and
+// request.IgnoreMissing or request.Custom over *DeleteImageOpts (for example to
+// set StoreID). Other shared calls, including request.Header and
 // request.Headers, fail with resource.ErrInvalidOption before HTTP.
 type DeleteImageOption = request.DeleteCall
 
@@ -29,11 +30,6 @@ var deleteImageCalls = calls.Spec[DeleteImageOpts]{
 func WithDeleteImageOpts(value DeleteImageOpts) DeleteImageOption {
 	snapshot := copyDeleteImageOpts(value)
 	return request.Custom(func(config *DeleteImageOpts) error { *config = copyDeleteImageOpts(snapshot); return nil })
-}
-
-// WithDeleteImageStore deletes the image copy from the specified store.
-func WithDeleteImageStore(value string) DeleteImageOption {
-	return request.Custom(func(config *DeleteImageOpts) error { owned := value; config.StoreID = &owned; return nil })
 }
 
 func copyDeleteImageOpts(value DeleteImageOpts) DeleteImageOpts {

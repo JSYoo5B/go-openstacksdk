@@ -15,7 +15,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/imagedata.API.StageImage`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/imagedata.API.StageKnownImage`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/imagedata.WithStageOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/imagedata.WithStageSize`
 - `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/imagedata.WithStageHeaders`

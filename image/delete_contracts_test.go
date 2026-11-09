@@ -101,7 +101,7 @@ func TestDeleteImageWholeAndStoreRoutesAndEvidence(t *testing.T) {
 			var options []image.DeleteImageOption
 			if store != "" {
 				wantPath = deletePrefix + "stores/fast/fixed"
-				options = []image.DeleteImageOption{image.WithDeleteImageStore(store)}
+				options = []image.DeleteImageOption{request.Custom(func(c *image.DeleteImageOpts) error { v := store; c.StoreID = &v; return nil })}
 			}
 			cloud.SetTransport(testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 				calls.Add(1)
@@ -132,7 +132,7 @@ func TestDeleteImageCompletePreflight(t *testing.T) {
 				calls.Add(1)
 				return deleteWire(500, io.NopCloser(strings.NewReader("unexpected"))), nil
 			}))
-			v, err := image.New(cloud.Client("image", deletePrefix)).DeleteImage(context.Background(), resource.Name("needle"), image.WithDeleteImageStore(value))
+			v, err := image.New(cloud.Client("image", deletePrefix)).DeleteImage(context.Background(), resource.Name("needle"), request.Custom(func(c *image.DeleteImageOpts) error { v := value; c.StoreID = &v; return nil }))
 			if v != nil || !errors.Is(err, resource.ErrInvalidOption) || calls.Load() != 0 {
 				t.Fatal(v, err, calls.Load())
 			}
@@ -266,10 +266,10 @@ func TestDeleteImagePreparedSnapshotsAndSource(t *testing.T) {
 			switch mode {
 			case "bulk replaces invalid store":
 				store := "fast"
-				options = []image.DeleteImageOption{image.WithDeleteImageStore(""), image.WithDeleteImageOpts(image.DeleteImageOpts{StoreID: &store})}
+				options = []image.DeleteImageOption{request.Custom(func(c *image.DeleteImageOpts) error { v := ""; c.StoreID = &v; return nil }), image.WithDeleteImageOpts(image.DeleteImageOpts{StoreID: &store})}
 				path = deletePrefix + "stores/fast/fixed"
 			case "empty bulk resets store and ignore":
-				options = []image.DeleteImageOption{image.WithDeleteImageStore("fast"), request.IgnoreMissing(false), image.WithDeleteImageOpts(image.DeleteImageOpts{})}
+				options = []image.DeleteImageOption{request.Custom(func(c *image.DeleteImageOpts) error { v := "fast"; c.StoreID = &v; return nil }), request.IgnoreMissing(false), image.WithDeleteImageOpts(image.DeleteImageOpts{})}
 				code = 404
 			case "last explicit false wins":
 				options = []image.DeleteImageOption{request.IgnoreMissing(true), request.IgnoreMissing(false)}
@@ -350,7 +350,7 @@ func TestDeleteImageExactNameResolutionAndFailures(t *testing.T) {
 			if mode == "strict missing" {
 				options = []image.DeleteImageOption{request.IgnoreMissing(false)}
 			} else if mode == "one exact match across all pages" {
-				options = []image.DeleteImageOption{image.WithDeleteImageStore("fast")}
+				options = []image.DeleteImageOption{request.Custom(func(c *image.DeleteImageOpts) error { v := "fast"; c.StoreID = &v; return nil })}
 			}
 			cloud.SetTransport(testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 				sequence = append(sequence, r.Method+" "+r.URL.Path+"?"+r.URL.RawQuery)
@@ -455,7 +455,7 @@ func TestDeleteImageNotFoundPolicyAndClassification(t *testing.T) {
 				options := []image.DeleteImageOption{request.IgnoreMissing(ignore)}
 				if store != "" {
 					path = deletePrefix + "stores/fast/fixed"
-					options = append(options, image.WithDeleteImageStore(store))
+					options = append(options, request.Custom(func(c *image.DeleteImageOpts) error { v := store; c.StoreID = &v; return nil }))
 				}
 				cloud.SetTransport(testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 					calls.Add(1)
@@ -561,7 +561,7 @@ func TestDeleteImageAcceptedProofAndCancellation(t *testing.T) {
 				return errors.New("must not replay accepted DELETE")
 			}
 			cloud.SetTransport(testcloud.LinkRequest(func(*http.Request) (*http.Response, error) { calls.Add(1); return wire, nil }))
-			v, err := image.New(cloud.Client("image", deletePrefix)).DeleteImage(ctx, resource.ID("fixed"), image.WithDeleteImageStore("fast"))
+			v, err := image.New(cloud.Client("image", deletePrefix)).DeleteImage(ctx, resource.ID("fixed"), request.Custom(func(c *image.DeleteImageOpts) error { v := "fast"; c.StoreID = &v; return nil }))
 			var proof *resource.ResponseError
 			if v == nil || v.ImageID != "fixed" || v.StoreID != "fast" || v.StatusCode != 204 || string(v.Body) != wantBody || v.Header.Get("X-Request-Id") != "actual-delete" || !errors.As(err, &proof) || proof.StatusCode != 204 || string(proof.Body) != wantBody || proof.Header.Get("X-Request-Id") != "actual-delete" || calls.Load() != 1 || retries.Load() != 0 || body.closes.Load() != 1 {
 				t.Fatal(v, err, proof, calls.Load(), retries.Load(), body.closes.Load())
@@ -646,7 +646,7 @@ func TestDeleteImageProviderHooksAndRedirects(t *testing.T) {
 				bodies = append(bodies, body)
 				return deleteWire(codes[n], body), nil
 			}))
-			v, err := image.New(client).DeleteImage(context.Background(), resource.ID("fixed"), image.WithDeleteImageStore("fast"))
+			v, err := image.New(client).DeleteImage(context.Background(), resource.ID("fixed"), request.Custom(func(c *image.DeleteImageOpts) error { v := "fast"; c.StoreID = &v; return nil }))
 			if err != nil || v == nil || v.StatusCode != 204 || string(v.Body) != "204" || calls.Load() != 4 || reauth.Load() != 1 || backoff.Load() != 1 || retries.Load() != 1 || cloud.Provider.ReauthFunc == nil || cloud.Provider.RetryBackoffFunc == nil || cloud.Provider.RetryFunc == nil {
 				t.Fatal(v, err, calls.Load(), reauth.Load(), backoff.Load(), retries.Load())
 			}
@@ -795,7 +795,7 @@ func TestDeleteImageNativeDeleteCompatibility(t *testing.T) {
 				}
 				return deleteWire(code, body), nil
 			}))
-			v, err := image.New(cloud.Client("image", deletePrefix)).DeleteImage(context.Background(), resource.ID("fixed"), image.WithDeleteImageStore("fast"))
+			v, err := image.New(cloud.Client("image", deletePrefix)).DeleteImage(context.Background(), resource.ID("fixed"), request.Custom(func(c *image.DeleteImageOpts) error { v := "fast"; c.StoreID = &v; return nil }))
 			var native gophercloud.ErrUnexpectedResponseCode
 			if v != nil || !errors.As(err, &native) || native.Actual != code || string(native.Body) != "server-owned error or unexpected acknowledgement" || native.ResponseHeader.Get("X-Request-Id") != "actual-delete" || calls.Load() != 1 || body.closes.Load() != 1 {
 				t.Fatal(v, err, native, calls.Load(), body.closes.Load())

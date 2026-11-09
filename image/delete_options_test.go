@@ -15,13 +15,13 @@ func TestDeleteOptionsDefaultsAndExplicitStorePreflight(t *testing.T) {
 		t.Fatalf("defaults=%+v err=%v", defaults, err)
 	}
 	for _, store := range []string{"", " ", ".", "..", "a/b", "a\\b", "a?b", "a#b", "a%b", "a:b", "a\nb", "a\x00b", "a\u0085b", "a\u00a0b", string([]byte{255})} {
-		_, err := parseDeleteImageOptions([]DeleteImageOption{WithDeleteImageStore(store)})
+		_, err := parseDeleteImageOptions([]DeleteImageOption{request.Custom(func(c *DeleteImageOpts) error { v := store; c.StoreID = &v; return nil })})
 		if !errors.Is(err, resource.ErrInvalidOption) {
 			t.Errorf("store=%q err=%v", store, err)
 		}
 	}
 	for _, store := range []string{"fast", "store&=fast", "저장소"} {
-		value, err := parseDeleteImageOptions([]DeleteImageOption{WithDeleteImageStore(store), request.IgnoreMissing(false)})
+		value, err := parseDeleteImageOptions([]DeleteImageOption{request.Custom(func(c *DeleteImageOpts) error { v := store; c.StoreID = &v; return nil }), request.IgnoreMissing(false)})
 		if err != nil || value.StoreID == nil || *value.StoreID != store || *value.IgnoreMissing {
 			t.Errorf("store=%q value=%+v err=%v", store, value, err)
 		}
@@ -44,7 +44,7 @@ func TestDeleteOptionsFullReplacementAndConcurrentReuse(t *testing.T) {
 	var group sync.WaitGroup
 	for range 8 {
 		group.Go(func() {
-			value, err := parseDeleteImageOptions([]DeleteImageOption{WithDeleteImageStore(""), option})
+			value, err := parseDeleteImageOptions([]DeleteImageOption{request.Custom(func(c *DeleteImageOpts) error { v := ""; c.StoreID = &v; return nil }), option})
 			if err != nil || value.StoreID == nil || *value.StoreID != "fast" || *value.IgnoreMissing {
 				t.Errorf("value=%+v err=%v", value, err)
 				return
@@ -57,7 +57,7 @@ func TestDeleteOptionsFullReplacementAndConcurrentReuse(t *testing.T) {
 	if err != nil || defaults.StoreID != nil || !*defaults.IgnoreMissing {
 		t.Fatalf("replacement=%+v err=%v", defaults, err)
 	}
-	value, err := parseDeleteImageOptions([]DeleteImageOption{option, WithDeleteImageStore("last"), request.IgnoreMissing(true)})
+	value, err := parseDeleteImageOptions([]DeleteImageOption{option, request.Custom(func(c *DeleteImageOpts) error { v := "last"; c.StoreID = &v; return nil }), request.IgnoreMissing(true)})
 	if err != nil || *value.StoreID != "last" || !*value.IgnoreMissing {
 		t.Fatalf("last option=%+v err=%v", value, err)
 	}

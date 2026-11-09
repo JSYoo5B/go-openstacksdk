@@ -17,7 +17,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.API.ListStores`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.API.AllStores`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithListStoresOptions`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithListStoresDetails`
 - `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
 - `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`

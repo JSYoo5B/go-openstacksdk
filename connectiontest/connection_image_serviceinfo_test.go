@@ -10,6 +10,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport"
 	"github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
@@ -63,7 +64,7 @@ func TestConnectionImageServiceInfoSharesClientPrefixAndLiveAuthentication(t *te
 	if err != nil || len(stores) != 1 || stores[0].ID != "backend" || stores[0].IsDefault == nil || *stores[0].IsDefault || stores[0].Header.Get("X-Proof") != "actual" || stores[0].StatusCode != 200 || string(stores[0].Properties["vendor"]) != "9007199254740993" {
 		t.Fatalf("stores=%+v err=%v", stores, err)
 	}
-	details, err := upper.API.ServiceInfo.AllStores(ctx, serviceinfo.WithListStoresDetails(true))
+	details, err := upper.API.ServiceInfo.AllStores(ctx, request.Custom(func(c *request.Config[serviceinfo.ListStoresOpts]) error { c.Options.Details = true; return nil }))
 	if err != nil || len(details) != 1 || details[0].ReadOnly == nil || !*details[0].ReadOnly || details[0].Weight == nil || *details[0].Weight != 1 {
 		t.Fatalf("details=%+v err=%v", details, err)
 	}

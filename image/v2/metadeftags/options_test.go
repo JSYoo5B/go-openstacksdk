@@ -53,7 +53,7 @@ func TestMetadefTagsOptionsSnapshotsReplacementAndLastWins(t *testing.T) {
 	headerInput := map[string]string{"X-Map": "owned"}
 	headers := WithSetHeaders(headerInput)
 	headerInput["X-Map"] = "changed"
-	if _, err := scope.Set(context.Background(), nil, helper, request.Header("X-header", "first"), request.Header("x-HEADER", "last"), headers, WithSetAppend(false)); err != nil {
+	if _, err := scope.Set(context.Background(), nil, helper, request.Header("X-header", "first"), request.Header("x-HEADER", "last"), headers, request.Custom(func(c *SetOpts) error { v := false; c.Append = &v; return nil })); err != nil {
 		t.Fatal(err)
 	}
 	if calls != 4 {
@@ -62,7 +62,7 @@ func TestMetadefTagsOptionsSnapshotsReplacementAndLastWins(t *testing.T) {
 	name := tagOptionPointer("snapshot-name")
 	update := WithUpdateOpts(UpdateOpts{Name: name, Headers: map[string]string{"X-Update": "snapshot"}})
 	*name = "caller-change"
-	config, err := prepareUpdate([]UpdateOption{update, WithUpdateName("last-name"), request.Header("x-update", "last")})
+	config, err := prepareUpdate([]UpdateOption{update, request.Custom(func(c *UpdateOpts) error { v := "last-name"; c.Name = &v; return nil }), request.Header("x-update", "last")})
 	if err != nil || *config.Name != "last-name" || config.Headers["X-Update"] != "last" {
 		t.Fatalf("update last-wins %v %+v", err, config)
 	}
@@ -163,10 +163,10 @@ func TestMetadefTagsOptionsValidationAndDefaults(t *testing.T) {
 		{"negative cap", []ListOption{request.MaxItems(-1)}},
 		{"marker control", []ListOption{request.Marker("x\n")}},
 		{"marker utf8", []ListOption{request.Marker(string([]byte{255}))}},
-		{"key control", []ListOption{WithListSortKey("x\x00")}},
-		{"key utf8", []ListOption{WithListSortKey(string([]byte{255}))}},
-		{"direction", []ListOption{WithListSortDir("ASC")}},
-		{"empty direction", []ListOption{WithListSortDir("")}},
+		{"key control", []ListOption{request.Custom(func(c *ListOpts) error { v := "x\x00"; c.SortKey = &v; return nil })}},
+		{"key utf8", []ListOption{request.Custom(func(c *ListOpts) error { v := string([]byte{255}); c.SortKey = &v; return nil })}},
+		{"direction", []ListOption{request.Custom(func(c *ListOpts) error { v := "ASC"; c.SortDir = &v; return nil })}},
+		{"empty direction", []ListOption{request.Custom(func(c *ListOpts) error { v := ""; c.SortDir = &v; return nil })}},
 		{"nil", []ListOption{nil}},
 	}
 	for _, tc := range cases {
@@ -180,12 +180,12 @@ func TestMetadefTagsOptionsValidationAndDefaults(t *testing.T) {
 	if err != nil || defaults.Limit != nil || defaults.Marker != nil || defaults.SortKey != nil || defaults.SortDir != nil || defaults.MaxItems != 0 || len(query) != 0 || defaults.Headers == nil {
 		t.Fatalf("nil defaults %v %+v %v", err, defaults, query)
 	}
-	policy, query, err := prepareList([]ListOption{request.Limit(0), request.Marker(""), WithListSortKey(""), request.MaxItems(20)})
+	policy, query, err := prepareList([]ListOption{request.Limit(0), request.Marker(""), request.Custom(func(c *ListOpts) error { v := ""; c.SortKey = &v; return nil }), request.MaxItems(20)})
 	if err != nil || query.Encode() != "limit=0&marker=&sort_key=" || policy.MaxItems != 20 {
 		t.Fatalf("explicit values %v %v", err, query)
 	}
 	marker := strings.Repeat("界", 81) + "/?%# &"
-	_, query, err = prepareList([]ListOption{request.Marker(marker), WithListSortKey("custom-db-field")})
+	_, query, err = prepareList([]ListOption{request.Marker(marker), request.Custom(func(c *ListOpts) error { v := "custom-db-field"; c.SortKey = &v; return nil })})
 	if err != nil || query.Get("marker") != marker || query.Get("sort_key") != "custom-db-field" {
 		t.Fatalf("query literals %v %v", err, query)
 	}

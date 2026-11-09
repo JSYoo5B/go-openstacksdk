@@ -112,12 +112,12 @@ func TestConnectionImageMetadefNamespaceNestedCreateSharesClientAndOwnsInput(t *
 		t.Fatalf("independent response=%+v err=%v", value, err)
 	}
 	client.MoreHeaders["X-Source"] = "source-2"
-	value, err = version.MetadefNamespaces.Create(ctx, identity, propertyOption, ns.WithCreateProperties(nil), ns.WithCreateProtected(false))
+	value, err = version.MetadefNamespaces.Create(ctx, identity, propertyOption, ns.WithCreateProperties(nil), request.Custom(func(c *ns.CreateOpts) error { v := false; c.Protected = &v; return nil }))
 	if err != nil || value == nil {
 		t.Fatal(err)
 	}
 	client.MoreHeaders["X-Source"] = "source-3"
-	value, err = version.MetadefNamespaces.Update(ctx, identity, ns.WithUpdateNamespace("OS::Renamed"), ns.WithUpdateProtected(false))
+	value, err = version.MetadefNamespaces.Update(ctx, identity, request.Custom(func(c *ns.UpdateOpts) error { v := "OS::Renamed"; c.Namespace = &v; return nil }), request.Custom(func(c *ns.UpdateOpts) error { v := false; c.Protected = &v; return nil }))
 	if err != nil || value == nil || value.StatusCode != 200 {
 		t.Fatal(err)
 	}

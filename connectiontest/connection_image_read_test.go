@@ -111,7 +111,7 @@ func TestConnectionImageReadFacadeOwnsResponseAndPreservesFilters(t *testing.T) 
 	if string(fetched.Body["x-number"]) != "9007199254740995" || string(fetched.Properties["properties"]) != "[]" || string(fetched.Properties["metadata"]) != "true" {
 		t.Fatal("raw projection aliases or forces nested property shape")
 	}
-	rows, err := upper.AllImages(ctx, request.Limit(0), image.WithListImagesName(""), image.WithListImagesProtected(false), image.WithListImagesHidden(false), image.WithListImagesSizeMin(0), image.WithListImagesTags("first", "second"), request.Header("X-Call", "list"))
+	rows, err := upper.AllImages(ctx, request.Limit(0), request.Custom(func(c *image.ListImagesOpts) error { v := ""; c.Name = &v; return nil }), request.Custom(func(c *image.ListImagesOpts) error { v := false; c.Protected = &v; return nil }), request.Custom(func(c *image.ListImagesOpts) error { v := false; c.Hidden = &v; return nil }), request.Custom(func(c *image.ListImagesOpts) error { v := int64(0); c.SizeMin = &v; return nil }), image.WithListImagesTags("first", "second"), request.Header("X-Call", "list"))
 	if err != nil || len(rows) != 1 || *rows[0].ID != "actual-id" || rows[0].Header.Get("X-Proof") != "1" || calls != 3 {
 		t.Fatalf("restored repeat query=%+v err=%v calls=%d", rows, err, calls)
 	}

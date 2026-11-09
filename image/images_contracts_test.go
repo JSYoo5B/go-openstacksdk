@@ -334,7 +334,7 @@ func TestImageContractsPagingAndConsumption(t *testing.T) {
 			return nil, errors.New("extra page")
 		})
 		s := image.New(c)
-		opts := []image.ListImagesOption{image.WithListImagesName("line\n"), request.Limit(4), image.WithListImagesTags("first", "second", "first"), image.WithListImagesSortKeys("name", "size"), image.WithListImagesSortDirs("asc", "desc"), image.WithListImagesFilter("x-property", "one", "two"), request.Header("X-Fixed", "option")}
+		opts := []image.ListImagesOption{request.Custom(func(c *image.ListImagesOpts) error { v := "line\n"; c.Name = &v; return nil }), request.Limit(4), image.WithListImagesTags("first", "second", "first"), image.WithListImagesSortKeys("name", "size"), image.WithListImagesSortDirs("asc", "desc"), image.WithListImagesFilter("x-property", "one", "two"), request.Header("X-Fixed", "option")}
 		got := []string{}
 		for v, e := range s.ListImages(context.Background(), opts...) {
 			if e != nil {
@@ -377,7 +377,7 @@ func TestImageContractsPagingAndConsumption(t *testing.T) {
 			if mode == "single" {
 				raw = []byte(`{"images":[{"id":"first"}],"next":17}`)
 				body.Reader = bytes.NewReader(raw)
-				opts = append(opts, image.WithListImagesSinglePage(true))
+				opts = append(opts, request.Custom(func(c *image.ListImagesOpts) error { c.SinglePage = true; return nil }))
 			}
 			rows, e := s.AllImages(context.Background(), opts...)
 			if mode == "unlimited" {
@@ -496,7 +496,7 @@ func TestImageContractsConcreteQueriesAndSource(t *testing.T) {
 		headers := map[string]string{"X-Option": "owned"}
 		h := image.WithListImagesHeaders(headers)
 		headers["X-Option"] = "late"
-		rows, e := image.New(c).AllImages(context.Background(), h, request.Header("X-Last", "last"), image.WithListImagesID(""), image.WithListImagesName("line\nname"), image.WithListImagesVisibility("future"), image.WithListImagesMemberStatus(""), image.WithListImagesOwner("owner"), image.WithListImagesStatus("in:future,queued"), image.WithListImagesCreatedAt("not-ISO\r\n"), image.WithListImagesUpdatedAt(""), image.WithListImagesContainerFormat(""), image.WithListImagesDiskFormat("in:qcow2,iso"), request.Limit(0), image.WithListImagesSizeMin(0), image.WithListImagesSizeMax(0), image.WithListImagesProtected(false), image.WithListImagesHidden(false), request.Marker(""), image.WithListImagesSortKeys("", "size", "size"), image.WithListImagesSortDirs("future", "", "future"), image.WithListImagesTags("", "line\n", "repeat", "repeat"), image.WithListImagesFilter("metadata", "literal\x00data", ""), request.MaxItems(0), image.WithListImagesSinglePage(false))
+		rows, e := image.New(c).AllImages(context.Background(), h, request.Header("X-Last", "last"), request.Custom(func(c *image.ListImagesOpts) error { v := ""; c.ID = &v; return nil }), request.Custom(func(c *image.ListImagesOpts) error { v := "line\nname"; c.Name = &v; return nil }), request.Custom(func(c *image.ListImagesOpts) error { v := "future"; c.Visibility = &v; return nil }), request.Custom(func(c *image.ListImagesOpts) error { v := ""; c.MemberStatus = &v; return nil }), request.Custom(func(c *image.ListImagesOpts) error { v := "owner"; c.Owner = &v; return nil }), request.Custom(func(c *image.ListImagesOpts) error { v := "in:future,queued"; c.Status = &v; return nil }), request.Custom(func(c *image.ListImagesOpts) error { v := "not-ISO\r\n"; c.CreatedAt = &v; return nil }), request.Custom(func(c *image.ListImagesOpts) error { v := ""; c.UpdatedAt = &v; return nil }), request.Custom(func(c *image.ListImagesOpts) error { v := ""; c.ContainerFormat = &v; return nil }), request.Custom(func(c *image.ListImagesOpts) error { v := "in:qcow2,iso"; c.DiskFormat = &v; return nil }), request.Limit(0), request.Custom(func(c *image.ListImagesOpts) error { v := int64(0); c.SizeMin = &v; return nil }), request.Custom(func(c *image.ListImagesOpts) error { v := int64(0); c.SizeMax = &v; return nil }), request.Custom(func(c *image.ListImagesOpts) error { v := false; c.Protected = &v; return nil }), request.Custom(func(c *image.ListImagesOpts) error { v := false; c.Hidden = &v; return nil }), request.Marker(""), image.WithListImagesSortKeys("", "size", "size"), image.WithListImagesSortDirs("future", "", "future"), image.WithListImagesTags("", "line\n", "repeat", "repeat"), image.WithListImagesFilter("metadata", "literal\x00data", ""), request.MaxItems(0), request.Custom(func(c *image.ListImagesOpts) error { c.SinglePage = false; return nil }))
 		if rows == nil || e != nil || calls.Load() != 1 {
 			t.Fatal(rows, e, calls.Load())
 		}
@@ -515,7 +515,7 @@ func TestImageContractsConcreteQueriesAndSource(t *testing.T) {
 			return imageContractJSONResponse(`{"images":[]}`), nil
 		})
 		s := image.New(c)
-		for _, opts := range [][]image.ListImagesOption{nil, {image.WithListImagesSort("")}} {
+		for _, opts := range [][]image.ListImagesOption{nil, {request.Custom(func(c *image.ListImagesOpts) error { v := ""; c.Sort = &v; return nil })}} {
 			rows, e := s.AllImages(context.Background(), opts...)
 			if rows == nil || e != nil {
 				t.Fatal(rows, e)
@@ -547,7 +547,7 @@ func TestImageContractsConcreteQueriesAndSource(t *testing.T) {
 			}
 			return imageContractJSONResponse(`{"images":[]}`), nil
 		})
-		rows, e := image.New(c).AllImages(context.Background(), request.Header("X-Discard", "before replacement"), image.WithListImagesStatus("before"), full, f, image.WithListImagesFilter("deleted"), image.WithListImagesFilter("single", ""))
+		rows, e := image.New(c).AllImages(context.Background(), request.Header("X-Discard", "before replacement"), request.Custom(func(c *image.ListImagesOpts) error { v := "before"; c.Status = &v; return nil }), full, f, image.WithListImagesFilter("deleted"), image.WithListImagesFilter("single", ""))
 		if rows == nil || e != nil || calls.Load() != 1 {
 			t.Fatal(rows, e, calls.Load())
 		}
@@ -616,7 +616,7 @@ func TestImageContractsConcreteQueriesAndSource(t *testing.T) {
 			}
 		}
 		// The independent iterator is safe to invoke in parallel when no caller-owned options are mutated.
-		parallel := image.New(c).ListImages(context.Background(), request.Header("X-Owned", "owned"), image.WithListImagesName("owned"), image.WithListImagesFilter("x", "owned"))
+		parallel := image.New(c).ListImages(context.Background(), request.Header("X-Owned", "owned"), request.Custom(func(c *image.ListImagesOpts) error { v := "owned"; c.Name = &v; return nil }), image.WithListImagesFilter("x", "owned"))
 		var wg sync.WaitGroup
 		for n := 0; n < 4; n++ {
 			wg.Add(1)
@@ -638,7 +638,7 @@ func TestImageContractsConcreteQueriesAndSource(t *testing.T) {
 		name string
 		opts []image.ListImagesOption
 	}{
-		{"negative limit", []image.ListImagesOption{request.Limit(-1)}}, {"negative min", []image.ListImagesOption{image.WithListImagesSizeMin(-1)}}, {"negative max", []image.ListImagesOption{image.WithListImagesSizeMax(-1)}}, {"negative cap", []image.ListImagesOption{request.MaxItems(-1)}}, {"Sort presence classic conflict", []image.ListImagesOption{image.WithListImagesSort(""), image.WithListImagesSortKeys("name")}}, {"classic directions count", []image.ListImagesOption{image.WithListImagesSortKeys("name"), image.WithListImagesSortDirs("asc", "desc")}}, {"empty filter key", []image.ListImagesOption{image.WithListImagesFilter("", "x")}}, {"control filter key", []image.ListImagesOption{image.WithListImagesFilter("line\n", "x")}}, {"empty filter values", []image.ListImagesOption{image.WithListImagesFilters(url.Values{"x": nil})}}, {"invalid UTF8 query", []image.ListImagesOption{image.WithListImagesName(string([]byte{0xff}))}}, {"nil callback", []image.ListImagesOption{nil}}, {"protected header", []image.ListImagesOption{request.Header("X-Auth-Token", "override")}}, {"invalid header", []image.ListImagesOption{request.Header("X-Bad", "line\n")}},
+		{"negative limit", []image.ListImagesOption{request.Limit(-1)}}, {"negative min", []image.ListImagesOption{request.Custom(func(c *image.ListImagesOpts) error { v := int64(-1); c.SizeMin = &v; return nil })}}, {"negative max", []image.ListImagesOption{request.Custom(func(c *image.ListImagesOpts) error { v := int64(-1); c.SizeMax = &v; return nil })}}, {"negative cap", []image.ListImagesOption{request.MaxItems(-1)}}, {"Sort presence classic conflict", []image.ListImagesOption{request.Custom(func(c *image.ListImagesOpts) error { v := ""; c.Sort = &v; return nil }), image.WithListImagesSortKeys("name")}}, {"classic directions count", []image.ListImagesOption{image.WithListImagesSortKeys("name"), image.WithListImagesSortDirs("asc", "desc")}}, {"empty filter key", []image.ListImagesOption{image.WithListImagesFilter("", "x")}}, {"control filter key", []image.ListImagesOption{image.WithListImagesFilter("line\n", "x")}}, {"empty filter values", []image.ListImagesOption{image.WithListImagesFilters(url.Values{"x": nil})}}, {"invalid UTF8 query", []image.ListImagesOption{request.Custom(func(c *image.ListImagesOpts) error { v := string([]byte{0xff}); c.Name = &v; return nil })}}, {"nil callback", []image.ListImagesOption{nil}}, {"protected header", []image.ListImagesOption{request.Header("X-Auth-Token", "override")}}, {"invalid header", []image.ListImagesOption{request.Header("X-Bad", "line\n")}},
 	}
 	for _, key := range []string{"limit", "marker", "id", "name", "visibility", "member_status", "owner", "status", "size_min", "size_max", "protected", "os_hidden", "sort", "sort_key", "sort_dir", "tag", "created_at", "updated_at", "container_format", "disk_format", "deleted", "max_items", "single_page"} {
 		bad = append(bad, struct {

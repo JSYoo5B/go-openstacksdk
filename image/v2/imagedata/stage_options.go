@@ -15,15 +15,16 @@ import (
 // StageOpts owns staging headers. Size is the expected byte count sent as
 // X-OpenStack-Image-Size; it does not set HTTP Content-Length or inspect data.
 type StageOpts struct {
+	// Size sets the nonnegative expected byte count, including zero.
 	Size    *int64
 	Headers map[string]string
 }
 
-// StageOption configures a staging workflow: WithStageOpts, WithStageSize,
-// WithStageHeaders (validates and merges the map), request.Header (one
-// ordinary header; case-insensitive later options win) or request.Custom over
-// *StageOpts. Later options replace earlier values. Other shared calls fail
-// with resource.ErrInvalidOption before HTTP.
+// StageOption configures a staging workflow: WithStageOpts, WithStageHeaders
+// (validates and merges the map), request.Header (one ordinary header;
+// case-insensitive later options win) or request.Custom over *StageOpts (for
+// example to set Size). Later options replace earlier values. Other shared
+// calls fail with resource.ErrInvalidOption before HTTP.
 type StageOption = request.WriteCall
 
 var stageCalls = calls.Spec[StageOpts]{Header: setStageHeader}
@@ -32,11 +33,6 @@ var stageCalls = calls.Spec[StageOpts]{Header: setStageHeader}
 func WithStageOpts(value StageOpts) StageOption {
 	snapshot := copyStageOpts(value)
 	return request.Custom(func(config *StageOpts) error { *config = copyStageOpts(snapshot); return nil })
-}
-
-// WithStageSize sets the nonnegative expected byte count, including zero.
-func WithStageSize(value int64) StageOption {
-	return request.Custom(func(config *StageOpts) error { owned := value; config.Size = &owned; return nil })
 }
 
 // setStageHeader validates and adds one ordinary header, replacing earlier

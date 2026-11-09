@@ -131,7 +131,7 @@ func TestDeleteCoreOwnedMissingPreservesBodyAndContextFailures(t *testing.T) {
 				retries++
 				return errors.New("handled404 must bypass native retry")
 			}
-			result, err := New(client).DeleteImage(ctx, resource.ID("fixed"), WithDeleteImageStore("fast"), request.IgnoreMissing(!test.strict))
+			result, err := New(client).DeleteImage(ctx, resource.ID("fixed"), request.Custom(func(c *DeleteImageOpts) error { v := "fast"; c.StoreID = &v; return nil }), request.IgnoreMissing(!test.strict))
 			failedBody := test.readErr != nil || test.closeErr != nil || test.canceled
 			if result != nil || calls != 1 || retries != 0 || body.closes != 1 {
 				t.Fatalf("result=%+v err=%v calls=%d retries=%d closes=%d", result, err, calls, retries, body.closes)
@@ -240,7 +240,7 @@ func TestDeleteCoreNameAbsenceAndSourceFailureBoundaries(t *testing.T) {
 				}
 				return deleteCoreHTTP(200, io.NopCloser(strings.NewReader(`{"images":`+images+`}`)), http.Header{}), nil
 			})
-			result, err := New(client).DeleteImage(ctx, resource.Name("exact"), WithDeleteImageStore("fast"), request.IgnoreMissing(mode != "strict missing"))
+			result, err := New(client).DeleteImage(ctx, resource.Name("exact"), request.Custom(func(c *DeleteImageOpts) error { v := "fast"; c.StoreID = &v; return nil }), request.IgnoreMissing(mode != "strict missing"))
 			if mode == "unique" {
 				if err != nil || result == nil || gets != 2 || deletes != 1 {
 					t.Fatalf("result=%+v err=%v gets=%d deletes=%d", result, err, gets, deletes)

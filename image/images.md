@@ -73,28 +73,13 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.WithListImagesHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/request.Limit`
 - `github.com/JSYoo5B/go-openstacksdk/request.Marker`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithListImagesID`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithListImagesName`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithListImagesVisibility`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithListImagesMemberStatus`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithListImagesOwner`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithListImagesStatus`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithListImagesSizeMin`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithListImagesSizeMax`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithListImagesProtected`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithListImagesHidden`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithListImagesSort`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithListImagesSortKeys`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithListImagesSortDirs`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithListImagesTags`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithListImagesCreatedAt`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithListImagesUpdatedAt`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithListImagesContainerFormat`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithListImagesDiskFormat`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithListImagesFilter`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithListImagesFilters`
 - `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithListImagesSinglePage`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.ListImageRecords`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.AllImageRecords`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordListOpts`
@@ -163,6 +148,7 @@ import (
     "net/url"
 
     "github.com/JSYoo5B/go-openstacksdk/image"
+    "github.com/JSYoo5B/go-openstacksdk/request"
     "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -181,29 +167,29 @@ func classicImagesExample(ctx context.Context, svc *image.Service, imageName, ow
         request.Header("X-Request-Id", "image-list-example"),
         request.Limit(2),
         request.Marker(""),
-        image.WithListImagesName(imageName),
-        image.WithListImagesVisibility("private"),
-        image.WithListImagesMemberStatus("all"),
-        image.WithListImagesOwner(ownerID),
-        image.WithListImagesStatus("active"),
-        image.WithListImagesSizeMin(0),
-        image.WithListImagesSizeMax(1 << 40),
-        image.WithListImagesProtected(false),
-        image.WithListImagesHidden(false),
+        request.Custom(func(c *image.ListImagesOpts) error { v := imageName; c.Name = &v; return nil }),
+        request.Custom(func(c *image.ListImagesOpts) error { v := "private"; c.Visibility = &v; return nil }),
+        request.Custom(func(c *image.ListImagesOpts) error { v := "all"; c.MemberStatus = &v; return nil }),
+        request.Custom(func(c *image.ListImagesOpts) error { v := ownerID; c.Owner = &v; return nil }),
+        request.Custom(func(c *image.ListImagesOpts) error { v := "active"; c.Status = &v; return nil }),
+        request.Custom(func(c *image.ListImagesOpts) error { v := int64(0); c.SizeMin = &v; return nil }),
+        request.Custom(func(c *image.ListImagesOpts) error { v := int64(1 << 40); c.SizeMax = &v; return nil }),
+        request.Custom(func(c *image.ListImagesOpts) error { v := false; c.Protected = &v; return nil }),
+        request.Custom(func(c *image.ListImagesOpts) error { v := false; c.Hidden = &v; return nil }),
         image.WithListImagesSortKeys("name", "created_at"),
         image.WithListImagesSortDirs("asc", "desc"),
         image.WithListImagesTags("ready", "approved"),
-        image.WithListImagesCreatedAt("gte:2020-01-01T00:00:00Z"),
-        image.WithListImagesUpdatedAt("lte:2030-01-01T00:00:00Z"),
-        image.WithListImagesContainerFormat("bare"),
-        image.WithListImagesDiskFormat("qcow2"),
+        request.Custom(func(c *image.ListImagesOpts) error { v := "gte:2020-01-01T00:00:00Z"; c.CreatedAt = &v; return nil }),
+        request.Custom(func(c *image.ListImagesOpts) error { v := "lte:2030-01-01T00:00:00Z"; c.UpdatedAt = &v; return nil }),
+        request.Custom(func(c *image.ListImagesOpts) error { v := "bare"; c.ContainerFormat = &v; return nil }),
+        request.Custom(func(c *image.ListImagesOpts) error { v := "qcow2"; c.DiskFormat = &v; return nil }),
         image.WithListImagesFilters(url.Values{
             "os_distro": {"ubuntu"}, "unused": {"remove-me"},
         }),
         image.WithListImagesFilter("architecture", "x86_64"),
         image.WithListImagesFilter("unused"),
         request.MaxItems(20),
-        image.WithListImagesSinglePage(false),
+        request.Custom(func(c *image.ListImagesOpts) error { c.SinglePage = false; return nil }),
     }
     rows := make([]*image.ImageInfo, 0)
     for value, err := range svc.ListImages(ctx, options...) {
@@ -217,8 +203,8 @@ func classicImagesExample(ctx context.Context, svc *image.Service, imageName, ow
 
 func modernImagesExample(ctx context.Context, svc *image.Service, imageID string) ([]*image.ImageInfo, error) {
     return svc.AllImages(ctx,
-        image.WithListImagesID(imageID),
-        image.WithListImagesSort("name:asc,created_at:desc"),
+        request.Custom(func(c *image.ListImagesOpts) error { v := imageID; c.ID = &v; return nil }),
+        request.Custom(func(c *image.ListImagesOpts) error { v := "name:asc,created_at:desc"; c.Sort = &v; return nil }),
         request.MaxItems(20),
     )
 }

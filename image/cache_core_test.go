@@ -90,7 +90,7 @@ func TestImageCacheCoreFixedRoutesAndActualEvidence(t *testing.T) {
 				}
 				return deleteCoreHTTP(204, io.NopCloser(strings.NewReader("")), nil), nil
 			})
-			value, err := New(client).ClearCache(context.Background(), WithClearCacheTarget(target))
+			value, err := New(client).ClearCache(context.Background(), request.Custom(func(c *ClearCacheOpts) error { c.Target = target; return nil }))
 			if err != nil || value.Target == nil || *value.Target != target {
 				t.Fatal(value, err)
 			}

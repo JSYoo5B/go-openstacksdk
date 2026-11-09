@@ -36,7 +36,7 @@ func TestImportOptionsOwnedSnapshotsReplacementAndConcurrentReuse(t *testing.T) 
 	if err != nil || !strings.Contains(string(body), `9007199254740993`) || strings.Contains(string(body), "after") || strings.Contains(string(body), "captured") {
 		t.Fatalf("lost extension snapshot: %s, %v", body, err)
 	}
-	replaced, err := parseImportOpts([]ImportOption{option, WithImportOpts(ImportOpts{}), WithImportAllStores(false), WithImportURI("unused"), WithImportURI("")})
+	replaced, err := parseImportOpts([]ImportOption{option, WithImportOpts(ImportOpts{}), request.Custom(func(c *ImportOpts) error { v := false; c.AllStores = &v; return nil }), request.Custom(func(c *ImportOpts) error { c.URI = "unused"; return nil }), request.Custom(func(c *ImportOpts) error { c.URI = ""; return nil })})
 	if err != nil || replaced.Store != nil || len(replaced.Fields) != 0 || replaced.AllStores == nil || *replaced.AllStores || replaced.Method != GlanceDirectMethod {
 		t.Fatalf("replacement/last-wins: %#v, %v", replaced, err)
 	}
@@ -68,11 +68,11 @@ func TestImportOptionsMethodBodyAndOwnedNamespaces(t *testing.T) {
 		want string
 	}{
 		{"default", nil, `{"method":{"name":"glance-direct"}}`},
-		{"false-root", []ImportOption{WithImportAllStores(false), WithImportAllStoresMustSucceed(false)}, `{"all_stores":false,"all_stores_must_succeed":false,"method":{"name":"glance-direct"}}`},
-		{"remote-default-interface", []ImportOption{WithImportMethod(GlanceDownloadMethod), WithImportRemoteRegion("region"), WithImportRemoteImageID("not-a-route-id")}, `{"method":{"glance_image_id":"not-a-route-id","glance_region":"region","name":"glance-download"}}`},
-		{"unknown-method", []ImportOption{WithImportMethod("operator-method"), WithImportMethodField("vendor", json.Number("9007199254740993")), request.Field("root", nil)}, `{"method":{"name":"operator-method","vendor":9007199254740993},"root":null}`},
+		{"false-root", []ImportOption{request.Custom(func(c *ImportOpts) error { v := false; c.AllStores = &v; return nil }), request.Custom(func(c *ImportOpts) error { v := false; c.AllStoresMustSucceed = &v; return nil })}, `{"all_stores":false,"all_stores_must_succeed":false,"method":{"name":"glance-direct"}}`},
+		{"remote-default-interface", []ImportOption{request.Custom(func(c *ImportOpts) error { c.Method = GlanceDownloadMethod; return nil }), request.Custom(func(c *ImportOpts) error { c.RemoteRegion = "region"; return nil }), request.Custom(func(c *ImportOpts) error { c.RemoteImageID = "not-a-route-id"; return nil })}, `{"method":{"glance_image_id":"not-a-route-id","glance_region":"region","name":"glance-download"}}`},
+		{"unknown-method", []ImportOption{request.Custom(func(c *ImportOpts) error { c.Method = "operator-method"; return nil }), WithImportMethodField("vendor", json.Number("9007199254740993")), request.Field("root", nil)}, `{"method":{"name":"operator-method","vendor":9007199254740993},"root":null}`},
 		{"plural-stores", []ImportOption{WithImportStores("one", "two")}, `{"method":{"name":"glance-direct"},"stores":["one","two"]}`},
-		{"singular-no-body", []ImportOption{WithImportStore("one")}, `{"method":{"name":"glance-direct"}}`},
+		{"singular-no-body", []ImportOption{request.Custom(func(c *ImportOpts) error { v := "one"; c.Store = &v; return nil })}, `{"method":{"name":"glance-direct"}}`},
 	}
 	for _, test := range cases {
 		t.Run(test.name, func(t *testing.T) {
@@ -87,16 +87,16 @@ func TestImportOptionsMethodBodyAndOwnedNamespaces(t *testing.T) {
 		})
 	}
 	invalid := [][]ImportOption{
-		{nil}, {WithImportMethod(WebDownloadMethod)}, {WithImportURI("url")},
-		{WithImportMethod(GlanceDownloadMethod), WithImportRemoteRegion("one")},
-		{WithImportRemoteImageID("one")}, {WithImportRemoteServiceInterface("public")},
-		{WithImportStore("one"), WithImportStores("two")}, {WithImportStore("one"), WithImportAllStores(true)},
-		{WithImportStores("one"), WithImportAllStores(true)}, {request.Field("AllStores", false)},
+		{nil}, {request.Custom(func(c *ImportOpts) error { c.Method = WebDownloadMethod; return nil })}, {request.Custom(func(c *ImportOpts) error { c.URI = "url"; return nil })},
+		{request.Custom(func(c *ImportOpts) error { c.Method = GlanceDownloadMethod; return nil }), request.Custom(func(c *ImportOpts) error { c.RemoteRegion = "one"; return nil })},
+		{request.Custom(func(c *ImportOpts) error { c.RemoteImageID = "one"; return nil })}, {request.Custom(func(c *ImportOpts) error { c.RemoteServiceInterface = "public"; return nil })},
+		{request.Custom(func(c *ImportOpts) error { v := "one"; c.Store = &v; return nil }), WithImportStores("two")}, {request.Custom(func(c *ImportOpts) error { v := "one"; c.Store = &v; return nil }), request.Custom(func(c *ImportOpts) error { v := true; c.AllStores = &v; return nil })},
+		{WithImportStores("one"), request.Custom(func(c *ImportOpts) error { v := true; c.AllStores = &v; return nil })}, {request.Field("AllStores", false)},
 		{request.Field("METHOD", map[string]any{})}, {WithImportMethodField("remote_region", "x")},
 		{WithImportMethodField("Glance-Image-ID", "x")}, {request.Field("bad", func() {})},
 		{WithImportOpts(ImportOpts{Fields: map[string]any{"stores": nil}})},
-		{WithImportStore("one\r\nX-Auth-Token: other")}, {WithImportURI(string([]byte{255}))},
-		{WithImportStore("")}, {WithImportStores("valid", "")},
+		{request.Custom(func(c *ImportOpts) error { v := "one\r\nX-Auth-Token: other"; c.Store = &v; return nil })}, {request.Custom(func(c *ImportOpts) error { c.URI = string([]byte{255}); return nil })},
+		{request.Custom(func(c *ImportOpts) error { v := ""; c.Store = &v; return nil })}, {WithImportStores("valid", "")},
 	}
 	for index, opts := range invalid {
 		if _, err := parseImportOpts(opts); !errors.Is(err, resource.ErrInvalidOption) {

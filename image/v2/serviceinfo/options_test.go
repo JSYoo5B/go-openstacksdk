@@ -95,7 +95,7 @@ func TestServiceInfoOptionsRejectUnsupportedInputsBeforeHTTP(t *testing.T) {
 
 func TestServiceInfoOptionsConcurrentReusableSnapshots(t *testing.T) {
 	paginated := false
-	options := []ListStoresOption{WithListStoresOptions(ListStoresOpts{Paginated: &paginated}), WithListStoresDetails(true), request.MaxItems(5), request.Query("extension", "owned"), request.Header("X-Extra", "owned")}
+	options := []ListStoresOption{WithListStoresOptions(ListStoresOpts{Paginated: &paginated}), request.Custom(func(c *request.Config[ListStoresOpts]) error { c.Options.Details = true; return nil }), request.MaxItems(5), request.Query("extension", "owned"), request.Header("X-Extra", "owned")}
 	var group sync.WaitGroup
 	for range 12 {
 		group.Add(1)

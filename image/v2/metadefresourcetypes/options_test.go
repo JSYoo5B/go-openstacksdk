@@ -36,7 +36,7 @@ func TestMetadefResourceTypesOptionsSnapshotsReplacementAndLastWins(t *testing.T
 	if err != nil || *second.Prefix != "before" || second.Headers["X-Caller"] != "before" {
 		t.Fatal("reused helper changed", err)
 	}
-	value, err := prepareCreate([]CreateOption{WithCreatePrefix("one"), WithCreatePropertiesTarget("two"), request.Header("X-Caller", "old"), WithCreateOpts(CreateOpts{}), request.Header("x-caller", "final"), WithCreatePrefix("")})
+	value, err := prepareCreate([]CreateOption{request.Custom(func(c *CreateOpts) error { v := "one"; c.Prefix = &v; return nil }), request.Custom(func(c *CreateOpts) error { v := "two"; c.PropertiesTarget = &v; return nil }), request.Header("X-Caller", "old"), WithCreateOpts(CreateOpts{}), request.Header("x-caller", "final"), request.Custom(func(c *CreateOpts) error { v := ""; c.Prefix = &v; return nil })})
 	if err != nil || value.Prefix == nil || *value.Prefix != "" || value.PropertiesTarget != nil || !reflect.DeepEqual(value.Headers, map[string]string{"X-Caller": "final"}) {
 		t.Fatalf("whole replacement/last wins %v %+v", err, value)
 	}
@@ -201,9 +201,9 @@ func TestMetadefResourceTypesOptionsValidationAndDefaults(t *testing.T) {
 		for _, text := range []string{"", "line\n\x00", strings.Repeat("界", 80)} {
 			var option CreateOption
 			if field == "prefix" {
-				option = WithCreatePrefix(text)
+				option = request.Custom(func(c *CreateOpts) error { v := text; c.Prefix = &v; return nil })
 			} else {
-				option = WithCreatePropertiesTarget(text)
+				option = request.Custom(func(c *CreateOpts) error { v := text; c.PropertiesTarget = &v; return nil })
 			}
 			v, err := prepareCreate([]CreateOption{option})
 			if err != nil {
@@ -220,9 +220,9 @@ func TestMetadefResourceTypesOptionsValidationAndDefaults(t *testing.T) {
 		for _, text := range []string{strings.Repeat("界", 81), string([]byte{0xff})} {
 			var option CreateOption
 			if field == "prefix" {
-				option = WithCreatePrefix(text)
+				option = request.Custom(func(c *CreateOpts) error { v := text; c.Prefix = &v; return nil })
 			} else {
-				option = WithCreatePropertiesTarget(text)
+				option = request.Custom(func(c *CreateOpts) error { v := text; c.PropertiesTarget = &v; return nil })
 			}
 			if _, err := prepareCreate([]CreateOption{option}); !errors.Is(err, resource.ErrInvalidOption) {
 				t.Fatal(err)

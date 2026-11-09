@@ -90,14 +90,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.WithListTasksHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/request.Limit`
 - `github.com/JSYoo5B/go-openstacksdk/request.Marker`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithListTasksType`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithListTasksStatus`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithListTasksSortKey`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithListTasksSortDir`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithListTasksSinglePage`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithListTasksBodyFilter`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithListTasksMarkerFallback`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithListTasksLinkHeader`
 
 - Tasks is lazy reusable iter.Seq2 with construction-owned option slice and perexecution prepared headers/Limitpointer, FullOpts replacement/lastwins/callbackonce/causes. MaxItems0 unlimited, negativeinvalid; AllTasks returns nonnil empty or wholecollected results, nil/error without partialslice.
@@ -116,7 +111,7 @@ Go API:
   Tests: `image/tasks_core_test.go:TestTaskCoreAcceptedEvidenceAndStrictStatus`, `image/tasks_core_test.go:TestTaskCoreFixedSourceAndPrebodyPolicy`, `image/tasks_contracts_test.go:TestTaskContractsResponseOwnershipAndNativeHooks`, `internal/cmd/sdkgen/glance_tasks_test.go:TestGlanceTaskFacadePreservesNativeAndRegistry`.
 - WithListTasksBodyFilter keeps Python Task Body-attribute filters local (id, name, created_at, updated_at, expires_at, input, message, owner_id->owner, result, schema) with creation-time JSON snapshots, last-wins names, object subset/exact/null-as-missing matching, raw-row MaxItems counting and option replacement clearing; unknown names (including wire owner and query type/status), unserializable values and invalid raw filters fail before HTTP.
   Tests: `image/tasks_python_paging_test.go:TestTaskPythonBodyFiltersStayLocalAndCountRawRows`.
-- WithListTasksMarkerFallback (default off, last wins) repeats the fixed collection with the initial query, the explicit positive limit and marker=last raw row id when a nonempty page has no next link, ending at the first empty page; a body next link wins, no positive limit/SinglePage/MaxItems stop it, and a repeated marker or id-less last row fails. WithListTasksLinkHeader follows an RFC 8288 rel=next Link only when the body has no next, under the same origin/path/filter/marker guard; malformed or foreign Links fail with the accepted response only when enabled.
+- ListTasksOpts.MarkerFallback (default off, last wins) repeats the fixed collection with the initial query, the explicit positive limit and marker=last raw row id when a nonempty page has no next link, ending at the first empty page; a body next link wins, no positive limit/SinglePage/MaxItems stop it, and a repeated marker or id-less last row fails. WithListTasksLinkHeader follows an RFC 8288 rel=next Link only when the body has no next, under the same origin/path/filter/marker guard; malformed or foreign Links fail with the accepted response only when enabled.
   Tests: `image/tasks_python_paging_test.go:TestTaskPythonMarkerFallbackFollowsLimitAndLastRawRow`, `image/tasks_python_paging_test.go:TestTaskPythonMarkerFallbackGuards`, `image/tasks_python_paging_test.go:TestTaskPythonLinkHeaderContinuation`.
 
 Python/Go differences:
@@ -124,7 +119,7 @@ Python/Go differences:
 - Pinned Python mutable Resource/dirty body attributes/same-object returns and configured Adapter/cache/session/microversion/header machinery remain broader than fixed concrete function options and independently owned TaskInfo.
 - Go TaskInfo exact canonical optional string/date pointers and nullable raw object Input/Result preserve raw precision and literal timestamps; native Task time.Time/map[string]any and pinned Python untyped result/date values differ. No type/status normalization or cached/input/ID seeding.
 - Server policy/owner/expiry and deprecated tasks access remain server-owned; no discovery/Schema/authorization gate or authenticated cloud execution/full SDK parity claim.
-- Pinned Python Resource.list applies Body filters, HTTP Link continuation and limit/marker fallback automatically; Go makes them explicit opt-ins (WithListTasksBodyFilter, WithListTasksLinkHeader, WithListTasksMarkerFallback) and guards every continuation for origin, path, filters and cycles. Python also follows links/tasks_links arrays, turns max_items into a wire limit hint and strips self; Go follows only the canonical body next, never invents a wire limit from MaxItems and keeps self as raw data. Filters compare raw JSON under the shared jsonfilter policy rather than Python object equality.
+- Pinned Python Resource.list applies Body filters, HTTP Link continuation and limit/marker fallback automatically; Go makes them explicit opt-ins (WithListTasksBodyFilter, WithListTasksLinkHeader, ListTasksOpts.MarkerFallback) and guards every continuation for origin, path, filters and cycles. Python also follows links/tasks_links arrays, turns max_items into a wire limit hint and strips self; Go follows only the canonical body next, never invents a wire limit from MaxItems and keeps self as raw data. Filters compare raw JSON under the shared jsonfilter policy rather than Python object equality.
 - Pinned server list Type filter accepts import only though Create Schema/domain supports3 types; facade no enum gate allows server rejection. Serverconfiguredlimit/default/clamp/owner/expiry remainserver-owned.
 - Python discards unknown non-Body keyword arguments and accepts any Body attribute name as a filter; Go exposes the six documented query fields and rejects unknown filter names before HTTP. Mutable Resource/Adapter/session/JMESPath controls are the shared SDK-R1/C1/S1 boundary (docs/sdk-support-ledger.md).
 
@@ -140,6 +135,7 @@ import (
     "encoding/json"
 
     "github.com/JSYoo5B/go-openstacksdk/image"
+    "github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 func createTask(ctx context.Context, svc *image.Service) (*image.TaskInfo, error) {
@@ -172,12 +168,12 @@ func listTasks(ctx context.Context, svc *image.Service, marker string) ([]*image
         image.WithListTasksHeaders(map[string]string{"X-Example": "list"}),
         request.Limit(20),
         request.Marker(marker),
-        image.WithListTasksType("import"),
-        image.WithListTasksStatus("pending"),
-        image.WithListTasksSortKey("created_at"),
-        image.WithListTasksSortDir("desc"),
+        request.Custom(func(c *image.ListTasksOpts) error { c.Type = "import"; return nil }),
+        request.Custom(func(c *image.ListTasksOpts) error { c.Status = "pending"; return nil }),
+        request.Custom(func(c *image.ListTasksOpts) error { c.SortKey = "created_at"; return nil }),
+        request.Custom(func(c *image.ListTasksOpts) error { c.SortDir = "desc"; return nil }),
         request.MaxItems(40),
-        image.WithListTasksSinglePage(false),
+        request.Custom(func(c *image.ListTasksOpts) error { c.SinglePage = false; return nil }),
     }
     rows := make([]*image.TaskInfo, 0)
     for task, err := range svc.Tasks(ctx, options...) {
@@ -200,12 +196,12 @@ func allTasks(ctx context.Context, svc *image.Service) ([]*image.TaskInfo, error
 // MaxItems counts raw rows before filtering, as Python's max_items does.
 func pythonLikeTasks(ctx context.Context, svc *image.Service, owner string) ([]*image.TaskInfo, error) {
     return svc.AllTasks(ctx,
-        image.WithListTasksType("import"),
+        request.Custom(func(c *image.ListTasksOpts) error { c.Type = "import"; return nil }),
         request.Limit(20),
         image.WithListTasksBodyFilter("owner_id", owner),
         image.WithListTasksBodyFilter("input", map[string]any{"import_from_format": "qcow2"}),
         image.WithListTasksLinkHeader(true),
-        image.WithListTasksMarkerFallback(true))
+        request.Custom(func(c *image.ListTasksOpts) error { c.MarkerFallback = true; return nil }))
 }
 ```
 

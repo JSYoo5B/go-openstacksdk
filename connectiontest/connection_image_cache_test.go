@@ -93,7 +93,7 @@ func TestConnectionImageCacheSharesClientDefaultsAndPassiveMeasurements(t *testi
 		t.Fatalf("delete=%+v err=%v", deleted, err)
 	}
 	advance()
-	cleared, err := service.ClearCache(ctx, image.WithClearCacheOpts(image.ClearCacheOpts{Headers: map[string]string{"X-Call": "initial"}}), request.Header("X-Call", "intermediate"), image.WithClearCacheHeaders(map[string]string{"x-call": "cache"}), image.WithClearCacheTarget(image.QueueOnly))
+	cleared, err := service.ClearCache(ctx, image.WithClearCacheOpts(image.ClearCacheOpts{Headers: map[string]string{"X-Call": "initial"}}), request.Header("X-Call", "intermediate"), image.WithClearCacheHeaders(map[string]string{"x-call": "cache"}), request.Custom(func(c *image.ClearCacheOpts) error { c.Target = image.QueueOnly; return nil }))
 	if err != nil || cleared == nil || cleared.ImageID != "" || cleared.Target == nil || *cleared.Target != image.QueueOnly || cleared.StatusCode != 204 || string(cleared.Body) != "opaque clear" {
 		t.Fatalf("clear=%+v err=%v", cleared, err)
 	}

@@ -28,10 +28,9 @@ type CreateOpts struct {
 }
 
 // CreateOption is one option of the operation: WithCreateOpts,
-// WithCreateHeaders, WithCreateDisplayName, WithCreateDescription,
-// WithCreateVisibility, WithCreateOwner, WithCreateProtected, request.Header,
-// or request.Custom over *CreateOpts. Other shared calls fail with
-// resource.ErrInvalidOption before HTTP.
+// WithCreateHeaders, request.Header, or request.Custom over *CreateOpts (for
+// example to set DisplayName, Description, Visibility, Owner or Protected).
+// Other shared calls fail with resource.ErrInvalidOption before HTTP.
 type CreateOption = request.WriteCall
 
 func copyCreate(value CreateOpts) CreateOpts {
@@ -68,26 +67,6 @@ func WithCreateHeaders(value map[string]string) CreateOption {
 	})
 }
 
-func WithCreateDisplayName(value string) CreateOption {
-	return request.Custom(func(config *CreateOpts) error { owned := value; config.DisplayName = &owned; return nil })
-}
-
-func WithCreateDescription(value string) CreateOption {
-	return request.Custom(func(config *CreateOpts) error { owned := value; config.Description = &owned; return nil })
-}
-
-func WithCreateVisibility(value string) CreateOption {
-	return request.Custom(func(config *CreateOpts) error { owned := value; config.Visibility = &owned; return nil })
-}
-
-func WithCreateOwner(value string) CreateOption {
-	return request.Custom(func(config *CreateOpts) error { owned := value; config.Owner = &owned; return nil })
-}
-
-func WithCreateProtected(value bool) CreateOption {
-	return request.Custom(func(config *CreateOpts) error { owned := value; config.Protected = &owned; return nil })
-}
-
 // UpdateOpts configures the bounded namespace update operation.
 type UpdateOpts struct {
 	Headers     map[string]string
@@ -100,10 +79,10 @@ type UpdateOpts struct {
 }
 
 // UpdateOption is one option of the operation: WithUpdateOpts,
-// WithUpdateHeaders, WithUpdateNamespace, WithUpdateDisplayName,
-// WithUpdateDescription, WithUpdateVisibility, WithUpdateOwner,
-// WithUpdateProtected, request.Header, or request.Custom over *UpdateOpts.
-// Other shared calls fail with resource.ErrInvalidOption before HTTP.
+// WithUpdateHeaders, request.Header, or request.Custom over *UpdateOpts (for
+// example to set Namespace, DisplayName, Description, Visibility, Owner or
+// Protected). Other shared calls fail with resource.ErrInvalidOption before
+// HTTP.
 type UpdateOption = request.WriteCall
 
 func copyUpdate(value UpdateOpts) UpdateOpts {
@@ -137,30 +116,6 @@ func WithUpdateHeaders(value map[string]string) UpdateOption {
 	})
 }
 
-func WithUpdateNamespace(value string) UpdateOption {
-	return request.Custom(func(config *UpdateOpts) error { owned := value; config.Namespace = &owned; return nil })
-}
-
-func WithUpdateDisplayName(value string) UpdateOption {
-	return request.Custom(func(config *UpdateOpts) error { owned := value; config.DisplayName = &owned; return nil })
-}
-
-func WithUpdateDescription(value string) UpdateOption {
-	return request.Custom(func(config *UpdateOpts) error { owned := value; config.Description = &owned; return nil })
-}
-
-func WithUpdateVisibility(value string) UpdateOption {
-	return request.Custom(func(config *UpdateOpts) error { owned := value; config.Visibility = &owned; return nil })
-}
-
-func WithUpdateOwner(value string) UpdateOption {
-	return request.Custom(func(config *UpdateOpts) error { owned := value; config.Owner = &owned; return nil })
-}
-
-func WithUpdateProtected(value bool) UpdateOption {
-	return request.Custom(func(config *UpdateOpts) error { owned := value; config.Protected = &owned; return nil })
-}
-
 // GetOpts configures the bounded namespace get operation.
 type GetOpts struct {
 	Headers      map[string]string
@@ -168,8 +123,9 @@ type GetOpts struct {
 }
 
 // GetOption is one option of the operation: WithGetOpts, WithGetHeaders,
-// WithGetResourceType, request.Header, or request.Custom over *GetOpts. Other
-// shared calls fail with resource.ErrInvalidOption before HTTP.
+// request.Header, or request.Custom over *GetOpts (for example to set
+// ResourceType). Other shared calls fail with resource.ErrInvalidOption before
+// HTTP.
 type GetOption = request.GetCall
 
 func copyGet(value GetOpts) GetOpts {
@@ -196,10 +152,6 @@ func WithGetHeaders(value map[string]string) GetOption {
 		}
 		return nil
 	})
-}
-
-func WithGetResourceType(value string) GetOption {
-	return request.Custom(func(config *GetOpts) error { owned := value; config.ResourceType = &owned; return nil })
 }
 
 // DeleteOpts configures the bounded namespace delete operation.
@@ -254,10 +206,10 @@ type ListOpts struct {
 }
 
 // ListOption is one option of the operation: WithListOpts, WithListHeaders,
-// WithListVisibility, WithListSortKey, WithListSortDir,
-// WithListResourceTypes, WithListSinglePage, request.Header, request.Limit,
-// request.Marker, request.MaxItems, or request.Custom over *ListOpts. Other
-// shared calls fail with resource.ErrInvalidOption before HTTP.
+// request.Header, request.Limit, request.Marker, request.MaxItems, or
+// request.Custom over *ListOpts (for example to set Visibility, SortKey,
+// SortDir, ResourceTypes or SinglePage). Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
 type ListOption = request.ListCall
 
 func copyList(value ListOpts) ListOpts {
@@ -284,26 +236,6 @@ func WithListHeaders(value map[string]string) ListOption {
 		}
 		return nil
 	})
-}
-
-func WithListVisibility(value string) ListOption {
-	return request.Custom(func(config *ListOpts) error { config.Visibility = value; return nil })
-}
-
-func WithListSortKey(value string) ListOption {
-	return request.Custom(func(config *ListOpts) error { config.SortKey = value; return nil })
-}
-
-func WithListSortDir(value string) ListOption {
-	return request.Custom(func(config *ListOpts) error { config.SortDir = value; return nil })
-}
-
-func WithListResourceTypes(value string) ListOption {
-	return request.Custom(func(config *ListOpts) error { config.ResourceTypes = value; return nil })
-}
-
-func WithListSinglePage(value bool) ListOption {
-	return request.Custom(func(config *ListOpts) error { config.SinglePage = value; return nil })
 }
 
 func copyPointer[T any](value *T) *T {

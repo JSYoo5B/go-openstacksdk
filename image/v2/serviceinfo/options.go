@@ -26,11 +26,11 @@ type ListStoresOpts struct {
 }
 
 // ListStoresOption is one option of ListStores: WithListStoresOptions,
-// WithListStoresDetails, request.Query (an exact wire query given as a string
-// or []string; it overrides an identically named typed query and does not
-// enable Python local Body filtering), request.Header, request.MaxItems,
-// request.Paginated or request.Custom over *request.Config[ListStoresOpts].
-// Other shared calls fail with resource.ErrInvalidOption before HTTP.
+// request.Query (an exact wire query given as a string or []string; it
+// overrides an identically named typed query and does not enable Python local
+// Body filtering), request.Header, request.MaxItems, request.Paginated or
+// request.Custom over *request.Config[ListStoresOpts] (for example to set
+// Details). Other shared calls fail with resource.ErrInvalidOption before HTTP.
 type ListStoresOption = request.ListCall
 
 type GetImportInfoOpts struct{}
@@ -71,10 +71,6 @@ func WithListStoresOptions(value ListStoresOpts) ListStoresOption {
 		config.Options = copyListStoresOpts(owned)
 		return nil
 	})
-}
-
-func WithListStoresDetails(value bool) ListStoresOption {
-	return request.Custom(func(config *request.Config[ListStoresOpts]) error { config.Options.Details = value; return nil })
 }
 
 func copyConfig[T any](value request.Config[T], copyOptions func(T) T) request.Config[T] {

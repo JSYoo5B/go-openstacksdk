@@ -200,7 +200,7 @@ func TestTaskCoreCompletePreflight(t *testing.T) {
 			t.Fatal(value, err)
 		}
 	}
-	for _, opts := range []ListTasksOption{nil, request.Limit(-1), request.MaxItems(-1), WithListTasksSortDir("ASC"), request.Marker("\n"), WithListTasksType(string([]byte{0xff}))} {
+	for _, opts := range []ListTasksOption{nil, request.Limit(-1), request.MaxItems(-1), request.Custom(func(c *ListTasksOpts) error { c.SortDir = "ASC"; return nil }), request.Marker("\n"), request.Custom(func(c *ListTasksOpts) error { c.Type = string([]byte{0xff}); return nil })} {
 		if value, err := service.AllTasks(context.Background(), opts); value != nil || !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(value, err)
 		}
@@ -255,7 +255,7 @@ func TestTaskCoreAdvertisedPagesAndLocalConsumption(t *testing.T) {
 		client.Endpoint = "https://glance.example/reverse%20proxy/glance/v2/"
 		client.MoreHeaders = map[string]string{"X-Source": "first", "X-Fixed": "source"}
 		service := New(client)
-		seq := service.Tasks(context.Background(), request.Limit(1), request.Marker("start"), WithListTasksType("future-type"), WithListTasksStatus("future-status"), WithListTasksSortKey("future-key"), WithListTasksSortDir("asc"), request.Header("X-Fixed", "option"))
+		seq := service.Tasks(context.Background(), request.Limit(1), request.Marker("start"), request.Custom(func(c *ListTasksOpts) error { c.Type = "future-type"; return nil }), request.Custom(func(c *ListTasksOpts) error { c.Status = "future-status"; return nil }), request.Custom(func(c *ListTasksOpts) error { c.SortKey = "future-key"; return nil }), request.Custom(func(c *ListTasksOpts) error { c.SortDir = "asc"; return nil }), request.Header("X-Fixed", "option"))
 		if calls != 0 {
 			t.Fatal("not lazy")
 		}
@@ -294,7 +294,7 @@ func TestTaskCoreAdvertisedPagesAndLocalConsumption(t *testing.T) {
 				opts = append(opts, request.MaxItems(1))
 			}
 			if mode == "single" {
-				opts = append(opts, WithListTasksSinglePage(true))
+				opts = append(opts, request.Custom(func(c *ListTasksOpts) error { c.SinglePage = true; return nil }))
 			}
 			seen := 0
 			for value, err := range service.Tasks(context.Background(), opts...) {

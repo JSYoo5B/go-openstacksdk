@@ -88,8 +88,8 @@ type UpdateOpts struct {
 }
 
 // UpdateOption is one option of Update: WithUpdateOpts, WithUpdateHeaders
-// (validates and merges the map), WithUpdateName, request.Header or
-// request.Custom over *UpdateOpts. Other shared calls fail with
+// (validates and merges the map), request.Header or request.Custom over
+// *UpdateOpts (for example to set Name). Other shared calls fail with
 // resource.ErrInvalidOption before HTTP.
 type UpdateOption = request.WriteCall
 
@@ -116,9 +116,6 @@ func WithUpdateHeaders(value map[string]string) UpdateOption {
 		}
 		return nil
 	})
-}
-func WithUpdateName(value string) UpdateOption {
-	return request.Custom(func(config *UpdateOpts) error { owned := value; config.Name = &owned; return nil })
 }
 
 // DeleteOpts configures Delete.
@@ -198,8 +195,8 @@ type SetOpts struct {
 }
 
 // SetOption is one option of Set: WithSetOpts, WithSetHeaders (validates and
-// merges the map), WithSetAppend, request.Header or request.Custom over
-// *SetOpts. Other shared calls fail with resource.ErrInvalidOption before
+// merges the map), request.Header or request.Custom over *SetOpts (for example
+// to set Append). Other shared calls fail with resource.ErrInvalidOption before
 // HTTP.
 type SetOption = request.WriteCall
 
@@ -227,9 +224,6 @@ func WithSetHeaders(value map[string]string) SetOption {
 		return nil
 	})
 }
-func WithSetAppend(value bool) SetOption {
-	return request.Custom(func(config *SetOpts) error { owned := value; config.Append = &owned; return nil })
-}
 
 // ListOpts configures List.
 type ListOpts struct {
@@ -242,9 +236,9 @@ type ListOpts struct {
 }
 
 // ListOption is one option of List: WithListOpts, WithListHeaders (validates
-// and merges the map), WithListSortKey, WithListSortDir, request.Limit,
-// request.Marker, request.MaxItems, request.Header or request.Custom over
-// *ListOpts. Other shared calls fail with resource.ErrInvalidOption before
+// and merges the map), request.Limit, request.Marker, request.MaxItems,
+// request.Header or request.Custom over *ListOpts (for example to set SortKey
+// or SortDir). Other shared calls fail with resource.ErrInvalidOption before
 // HTTP.
 type ListOption = request.ListCall
 
@@ -274,12 +268,6 @@ func WithListHeaders(value map[string]string) ListOption {
 		}
 		return nil
 	})
-}
-func WithListSortKey(value string) ListOption {
-	return request.Custom(func(config *ListOpts) error { owned := value; config.SortKey = &owned; return nil })
-}
-func WithListSortDir(value string) ListOption {
-	return request.Custom(func(config *ListOpts) error { owned := value; config.SortDir = &owned; return nil })
 }
 
 var (

@@ -28,7 +28,7 @@ func TestMetadefObjectsOptionsSnapshotsReplacementAndLastWins(t *testing.T) {
 	properties["key"][9] = 'X'
 	required[0] = "after"
 	headers["X-Original"] = "after"
-	config, err := prepareCreate([]CreateOption{request.Header("X-Removed", "yes"), WithCreateDescription("removed"), option, request.Header("x-original", "last")})
+	config, err := prepareCreate([]CreateOption{request.Header("X-Removed", "yes"), request.Custom(func(c *CreateOpts) error { v := "removed"; c.Description = &v; return nil }), option, request.Header("x-original", "last")})
 	if err != nil || *config.Description != "before" || string(config.Properties["key"]) != `{"type":"before"}` || config.Required[0] != "key" || config.Headers["X-Original"] != "last" || config.Headers["X-Removed"] != "" {
 		t.Fatalf("full snapshot %+v %v", config, err)
 	}
@@ -45,7 +45,7 @@ func TestMetadefObjectsOptionsSnapshotsReplacementAndLastWins(t *testing.T) {
 	*updateInput.Name = "after"
 	updateInput.Properties["x"] = json.RawMessage(`null`)
 	updateInput.Headers["X-Update"] = "after"
-	updated, err := prepareUpdate([]UpdateOption{request.Header("X-Removed", "yes"), update, WithUpdateDescription("")})
+	updated, err := prepareUpdate([]UpdateOption{request.Header("X-Removed", "yes"), update, request.Custom(func(c *UpdateOpts) error { v := ""; c.Description = &v; return nil })})
 	if err != nil || *updated.Name != "new::name" || *updated.Description != "" || string(updated.Properties["x"]) != `{}` || updated.Required == nil || updated.Headers["X-Removed"] != "" {
 		t.Fatalf("update replacement %+v %v", updated, err)
 	}
@@ -201,7 +201,7 @@ func TestMetadefObjectsOptionsValidationAndDefaults(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	if _, err := prepareCreate([]CreateOption{WithCreateDescription(strings.Repeat("界", 1000) + "\n"), WithCreateProperties(map[string]json.RawMessage{"": json.RawMessage(`{}`), "comma,newline\n": json.RawMessage(`{"nonstandard":true}`)}), WithCreateRequired([]string{"", "x,y", "line\nnext", "x,y"})}); err != nil {
+	if _, err := prepareCreate([]CreateOption{request.Custom(func(c *CreateOpts) error { v := strings.Repeat("界", 1000) + "\n"; c.Description = &v; return nil }), WithCreateProperties(map[string]json.RawMessage{"": json.RawMessage(`{}`), "comma,newline\n": json.RawMessage(`{"nonstandard":true}`)}), WithCreateRequired([]string{"", "x,y", "line\nnext", "x,y"})}); err != nil {
 		t.Fatalf("literal payload overrestricted %v", err)
 	}
 	for _, raw := range []json.RawMessage{nil, json.RawMessage(`null`), json.RawMessage(`[]`), json.RawMessage(`false`), json.RawMessage(`"string"`), json.RawMessage(`1`), json.RawMessage(`{`), json.RawMessage("{\"x\":\"\xff\"}")} {
@@ -229,7 +229,7 @@ func TestMetadefObjectsOptionsValidationAndDefaults(t *testing.T) {
 	if _, err := prepareCreate([]CreateOption{request.Custom(func(*CreateOpts) error { return cause })}); err != cause {
 		t.Fatalf("lost cause identity %v", err)
 	}
-	explicit, err := prepareCreate([]CreateOption{WithCreateDescription(""), WithCreateProperties(map[string]json.RawMessage{}), WithCreateRequired([]string{})})
+	explicit, err := prepareCreate([]CreateOption{request.Custom(func(c *CreateOpts) error { v := ""; c.Description = &v; return nil }), WithCreateProperties(map[string]json.RawMessage{}), WithCreateRequired([]string{})})
 	if err != nil || !reflect.DeepEqual(objectBody("child", explicit.Description, explicit.Properties, explicit.Required), map[string]any{"name": "child", "description": "", "properties": map[string]json.RawMessage{}, "required": []string{}}) {
 		t.Fatalf("explicit nil/empty %+v %v", explicit, err)
 	}

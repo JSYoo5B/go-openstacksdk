@@ -109,7 +109,7 @@ func TestConnectionImageMetadefObjectsShareClientAndFixedScope(t *testing.T) {
 			t.Fatalf("object=%+v err=%v", value, err)
 		}
 	}
-	created, err := scope.Create(ctx, child, request.Header("X-Call", "objects"), obj.WithCreateDescription("first\nsecond"), obj.WithCreateProperties(map[string]json.RawMessage{"CPU": json.RawMessage(`{"type":"integer","precision":9007199254740993}`)}), obj.WithCreateRequired([]string{"CPU", "literal,comma"}))
+	created, err := scope.Create(ctx, child, request.Header("X-Call", "objects"), request.Custom(func(c *obj.CreateOpts) error { v := "first\nsecond"; c.Description = &v; return nil }), obj.WithCreateProperties(map[string]json.RawMessage{"CPU": json.RawMessage(`{"type":"integer","precision":9007199254740993}`)}), obj.WithCreateRequired([]string{"CPU", "literal,comma"}))
 	check(created, err, 201)
 	advanceHeader()
 	fetched, err := other.Get(ctx, child, request.Header("X-Call", "objects"))
@@ -121,7 +121,7 @@ func TestConnectionImageMetadefObjectsShareClientAndFixedScope(t *testing.T) {
 		t.Fatal("field/raw/separate response ownership aliases")
 	}
 	advanceHeader()
-	updated, err := scope.Update(ctx, child, request.Header("X-Call", "objects"), obj.WithUpdateName("renamed"), obj.WithUpdateProperties(map[string]json.RawMessage{}))
+	updated, err := scope.Update(ctx, child, request.Header("X-Call", "objects"), request.Custom(func(c *obj.UpdateOpts) error { v := "renamed"; c.Name = &v; return nil }), obj.WithUpdateProperties(map[string]json.RawMessage{}))
 	check(updated, err, 200)
 	advanceHeader()
 	sequence := scope.List(ctx, request.Header("X-Call", "objects"), request.MaxItems(1))

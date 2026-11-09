@@ -135,7 +135,7 @@ func TestConnectionImageMetadefTagsShareClientAndPaging(t *testing.T) {
 	if fetched.Header.Get("X-Proof") != "tag-1" || string(fetched.Body["precision"]) != "9007199254740993" {
 		t.Fatal("response ownership aliases")
 	}
-	updated, err := scope.Update(ctx, child, tag.WithUpdateName("renamed"))
+	updated, err := scope.Update(ctx, child, request.Custom(func(c *tag.UpdateOpts) error { v := "renamed"; c.Name = &v; return nil }))
 	check(updated, err, 200)
 	names := []string{"one", "two"}
 	set, err := scope.Set(ctx, names, request.Custom(func(*tag.SetOpts) error { names[0] = "mutated"; return nil }))
@@ -155,7 +155,7 @@ func TestConnectionImageMetadefTagsShareClientAndPaging(t *testing.T) {
 	if rows != 1 || calls != 5 {
 		t.Fatal("local cap", rows, calls)
 	}
-	all, err := other.All(ctx, request.Limit(1), tag.WithListSortKey("name"), tag.WithListSortDir("asc"))
+	all, err := other.All(ctx, request.Limit(1), request.Custom(func(c *tag.ListOpts) error { v := "name"; c.SortKey = &v; return nil }), request.Custom(func(c *tag.ListOpts) error { v := "asc"; c.SortDir = &v; return nil }))
 	if err != nil || len(all) != 2 || *all[0].Name != "raw-page1" || *all[1].Name != "raw-page2" || all[0].Header.Get("X-Proof") != "tag-5" || all[1].Header.Get("X-Proof") != "tag-6" || calls != 8 {
 		t.Fatalf("all=%+v err=%v calls=%d", all, err, calls)
 	}
@@ -180,7 +180,7 @@ func TestConnectionImageMetadefTagsShareClientAndPaging(t *testing.T) {
 	if err != nil || empty == nil || empty.Tags == nil || len(empty.Tags) != 0 || empty.StatusCode != 201 {
 		t.Fatalf("empty=%+v err=%v", empty, err)
 	}
-	appended, err := scope.Set(ctx, []string{"appended"}, tag.WithSetAppend(true))
+	appended, err := scope.Set(ctx, []string{"appended"}, request.Custom(func(c *tag.SetOpts) error { v := true; c.Append = &v; return nil }))
 	if err != nil || appended == nil || len(appended.Tags) != 1 || *appended.Tags[0].Name != "appended" || calls != 14 {
 		t.Fatalf("append=%+v err=%v calls=%d", appended, err, calls)
 	}

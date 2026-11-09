@@ -137,13 +137,13 @@ func TestMetadefObjectsCoreFixedScopeAndCRUD(t *testing.T) {
 	if err != nil || value.Name == nil || *value.Name != "passive-server-name" || value.StatusCode != 201 || string(value.Body["unknown"]) != "9007199254740993" {
 		t.Fatalf("create %+v %v", value, err)
 	}
-	if _, err = scope.Create(context.Background(), name, WithCreateDescription(""), WithCreateProperties(map[string]json.RawMessage{}), WithCreateRequired([]string{})); err != nil {
+	if _, err = scope.Create(context.Background(), name, request.Custom(func(c *CreateOpts) error { v := ""; c.Description = &v; return nil }), WithCreateProperties(map[string]json.RawMessage{}), WithCreateRequired([]string{})); err != nil {
 		t.Fatal(err)
 	}
 	if _, err = scope.Get(context.Background(), name); err != nil {
 		t.Fatal(err)
 	}
-	if _, err = scope.Update(context.Background(), name, WithUpdateName("new::object")); err != nil {
+	if _, err = scope.Update(context.Background(), name, request.Custom(func(c *UpdateOpts) error { v := "new::object"; c.Name = &v; return nil })); err != nil {
 		t.Fatal(err)
 	}
 	if _, err = scope.Update(context.Background(), name); err != nil {
@@ -236,7 +236,7 @@ func TestMetadefObjectsCoreCompletePreflight(t *testing.T) {
 			return e
 		},
 		func() error {
-			_, e := scope.Update(context.Background(), "child", WithUpdateName("invalid/path"))
+			_, e := scope.Update(context.Background(), "child", request.Custom(func(c *UpdateOpts) error { v := "invalid/path"; c.Name = &v; return nil }))
 			return e
 		},
 		func() error {

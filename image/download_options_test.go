@@ -15,7 +15,7 @@ func TestDownloadOptionsDefaultsAndBoundedPreflight(t *testing.T) {
 		t.Fatalf("defaults=%+v err=%v", defaults, err)
 	}
 	for _, size := range []int{-1, 0, 64*1024*1024 + 1} {
-		_, err := parseDownloadImageOptions([]DownloadImageOption{WithDownloadChunkSize(size)})
+		_, err := parseDownloadImageOptions([]DownloadImageOption{func(c *DownloadImageOpts) error { v := size; c.ChunkSize = &v; return nil }})
 		if !errors.Is(err, resource.ErrInvalidOption) {
 			t.Errorf("size=%d err=%v", size, err)
 		}
@@ -27,7 +27,7 @@ func TestDownloadOptionsDefaultsAndBoundedPreflight(t *testing.T) {
 		}
 	}
 	for _, size := range []int{1, 64 * 1024 * 1024} {
-		_, err := parseDownloadImageOptions([]DownloadImageOption{WithDownloadChunkSize(size), WithDownloadStorePreferences("a &/?=", "a &/?="), WithDownloadChecksumVerification(false)})
+		_, err := parseDownloadImageOptions([]DownloadImageOption{func(c *DownloadImageOpts) error { v := size; c.ChunkSize = &v; return nil }, WithDownloadStorePreferences("a &/?=", "a &/?="), func(c *DownloadImageOpts) error { v := false; c.VerifyChecksum = &v; return nil }})
 		if err != nil {
 			t.Errorf("valid boundary size=%d err=%v", size, err)
 		}
@@ -46,7 +46,7 @@ func TestDownloadOptionsOwnFullReplacementAndConcurrentReuse(t *testing.T) {
 	var group sync.WaitGroup
 	for range 8 {
 		group.Go(func() {
-			prepared, err := parseDownloadImageOptions([]DownloadImageOption{WithDownloadChunkSize(0), option})
+			prepared, err := parseDownloadImageOptions([]DownloadImageOption{func(c *DownloadImageOpts) error { v := 0; c.ChunkSize = &v; return nil }, option})
 			if err != nil || *prepared.ChunkSize != 3 || *prepared.VerifyChecksum || !reflect.DeepEqual(prepared.StorePreferences, []string{"fast", "fast", "slow"}) {
 				t.Errorf("prepared=%+v err=%v", prepared, err)
 				return

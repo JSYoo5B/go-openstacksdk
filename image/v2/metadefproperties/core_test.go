@@ -134,23 +134,23 @@ func TestMetadefPropertiesCoreFixedScopeAndCRUD(t *testing.T) {
 	if err != nil || calls != 0 || scope.NamespaceName() != parent || scope.RawClient() != client || api.RawClient() != client {
 		t.Fatalf("constructor %+v %v calls%d", scope, err, calls)
 	}
-	value, err := scope.Create(context.Background(), name, WithCreateType("custom-type"), WithCreateTitle(""))
+	value, err := scope.Create(context.Background(), name, request.Custom(func(c *CreateOpts) error { v := "custom-type"; c.Type = &v; return nil }), request.Custom(func(c *CreateOpts) error { v := ""; c.Title = &v; return nil }))
 	if err != nil || value.Key != nil || value.Name == nil || *value.Name != "passive" || value.StatusCode != 201 || string(value.Body["unknown"]) != "9007199254740993" {
 		t.Fatalf("create %+v %v", value, err)
 	}
-	if _, err = scope.Create(context.Background(), name, WithCreateType("number"), WithCreateTitle("title"), WithCreateDescription(""), WithCreateAttributes(map[string]any{"minimum": json.Number("1.25"), "maximum": json.Number("9007199254740993"), "readonly": false, "default": nil})); err != nil {
+	if _, err = scope.Create(context.Background(), name, request.Custom(func(c *CreateOpts) error { v := "number"; c.Type = &v; return nil }), request.Custom(func(c *CreateOpts) error { v := "title"; c.Title = &v; return nil }), request.Custom(func(c *CreateOpts) error { v := ""; c.Description = &v; return nil }), WithCreateAttributes(map[string]any{"minimum": json.Number("1.25"), "maximum": json.Number("9007199254740993"), "readonly": false, "default": nil})); err != nil {
 		t.Fatal(err)
 	}
-	if _, err = scope.Get(context.Background(), name, WithGetResourceType("OS::Type,+&")); err != nil {
+	if _, err = scope.Get(context.Background(), name, request.Custom(func(c *GetOpts) error { v := "OS::Type,+&"; c.ResourceType = &v; return nil })); err != nil {
 		t.Fatal(err)
 	}
-	if _, err = scope.Get(context.Background(), name, WithGetResourceType("")); err != nil {
+	if _, err = scope.Get(context.Background(), name, request.Custom(func(c *GetOpts) error { v := ""; c.ResourceType = &v; return nil })); err != nil {
 		t.Fatal(err)
 	}
-	if _, err = scope.Update(context.Background(), name, WithUpdateName("new::name"), WithUpdateType("string"), WithUpdateTitle("")); err != nil {
+	if _, err = scope.Update(context.Background(), name, request.Custom(func(c *UpdateOpts) error { v := "new::name"; c.Name = &v; return nil }), request.Custom(func(c *UpdateOpts) error { v := "string"; c.Type = &v; return nil }), request.Custom(func(c *UpdateOpts) error { v := ""; c.Title = &v; return nil })); err != nil {
 		t.Fatal(err)
 	}
-	if _, err = scope.Update(context.Background(), name, WithUpdateType("string"), WithUpdateTitle("")); err != nil {
+	if _, err = scope.Update(context.Background(), name, request.Custom(func(c *UpdateOpts) error { v := "string"; c.Type = &v; return nil }), request.Custom(func(c *UpdateOpts) error { v := ""; c.Title = &v; return nil })); err != nil {
 		t.Fatal(err)
 	}
 	ack, err := scope.Delete(context.Background(), name)
@@ -232,18 +232,24 @@ func TestMetadefPropertiesCoreCompletePreflight(t *testing.T) {
 	}
 	checks := []func() error{
 		func() error { _, e := scope.Create(context.Background(), "child"); return e },
-		func() error { _, e := scope.Create(context.Background(), "child", WithCreateType("string")); return e },
 		func() error {
-			_, e := scope.Create(context.Background(), "child", WithCreateType(""), WithCreateTitle(""))
-			return e
-		},
-		func() error { _, e := scope.Update(context.Background(), "child", WithUpdateTitle("title")); return e },
-		func() error {
-			_, e := scope.Update(context.Background(), "child", WithUpdateType("string"), WithUpdateTitle(""), WithUpdateName("a/b"))
+			_, e := scope.Create(context.Background(), "child", request.Custom(func(c *CreateOpts) error { v := "string"; c.Type = &v; return nil }))
 			return e
 		},
 		func() error {
-			_, e := scope.Get(context.Background(), "child", WithGetResourceType("line\n"))
+			_, e := scope.Create(context.Background(), "child", request.Custom(func(c *CreateOpts) error { v := ""; c.Type = &v; return nil }), request.Custom(func(c *CreateOpts) error { v := ""; c.Title = &v; return nil }))
+			return e
+		},
+		func() error {
+			_, e := scope.Update(context.Background(), "child", request.Custom(func(c *UpdateOpts) error { v := "title"; c.Title = &v; return nil }))
+			return e
+		},
+		func() error {
+			_, e := scope.Update(context.Background(), "child", request.Custom(func(c *UpdateOpts) error { v := "string"; c.Type = &v; return nil }), request.Custom(func(c *UpdateOpts) error { v := ""; c.Title = &v; return nil }), request.Custom(func(c *UpdateOpts) error { v := "a/b"; c.Name = &v; return nil }))
+			return e
+		},
+		func() error {
+			_, e := scope.Get(context.Background(), "child", request.Custom(func(c *GetOpts) error { v := "line\n"; c.ResourceType = &v; return nil }))
 			return e
 		},
 		func() error { _, e := scope.Delete(context.Background(), "child", nil); return e },
@@ -260,12 +266,12 @@ func TestMetadefPropertiesCoreCompletePreflight(t *testing.T) {
 	}
 	badKey := string([]byte{0xff})
 	for _, option := range []CreateOption{WithCreateAttributes(map[string]any{badKey: 1}), WithCreateAttribute(badKey, 1), WithCreateOpts(CreateOpts{Type: propertyOptionPointer("string"), Title: propertyOptionPointer(""), Attributes: map[string]json.RawMessage{badKey: json.RawMessage(`1`)}})} {
-		if _, err := scope.Create(context.Background(), "child", WithCreateType("string"), WithCreateTitle(""), option); !errors.Is(err, resource.ErrInvalidOption) {
+		if _, err := scope.Create(context.Background(), "child", request.Custom(func(c *CreateOpts) error { v := "string"; c.Type = &v; return nil }), request.Custom(func(c *CreateOpts) error { v := ""; c.Title = &v; return nil }), option); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatalf("malformed key sent %v", err)
 		}
 	}
 	marker := errors.New("marshal-cause")
-	if _, err := scope.Create(context.Background(), "child", WithCreateType("string"), WithCreateTitle(""), WithCreateAttribute("arbitrary", propertyOptionMarshaler{cause: marker})); !errors.Is(err, resource.ErrInvalidOption) || !errors.Is(err, marker) {
+	if _, err := scope.Create(context.Background(), "child", request.Custom(func(c *CreateOpts) error { v := "string"; c.Type = &v; return nil }), request.Custom(func(c *CreateOpts) error { v := ""; c.Title = &v; return nil }), WithCreateAttribute("arbitrary", propertyOptionMarshaler{cause: marker})); !errors.Is(err, resource.ErrInvalidOption) || !errors.Is(err, marker) {
 		t.Fatalf("encodingcause %v", err)
 	}
 	if requests != 0 {
@@ -371,7 +377,7 @@ func TestMetadefPropertiesCoreAcceptedBodiesAndMissingPolicy(t *testing.T) {
 		custom := errors.New("custom-context")
 		body := &propertyCoreBody{reader: &propertyCoreReader{data: `{"name":"partial"}`, err: readCause, after: func() { cancel(custom) }}, closeErr: closeCause}
 		scope := propertyCoreScope(t, propertyCoreClient(func(req *http.Request) (*http.Response, error) { return propertyCoreHTTP(req, 201, body), nil }), "parent")
-		value, err := scope.Create(ctx, "child", WithCreateType("string"), WithCreateTitle(""))
+		value, err := scope.Create(ctx, "child", request.Custom(func(c *CreateOpts) error { v := "string"; c.Type = &v; return nil }), request.Custom(func(c *CreateOpts) error { v := ""; c.Title = &v; return nil }))
 		if value != nil || body.closes != 1 || !errors.Is(err, readCause) || !errors.Is(err, closeCause) || !errors.Is(err, context.Canceled) || !errors.Is(err, custom) {
 			t.Fatalf("body ownership %+v %v closes%d", value, err, body.closes)
 		}
@@ -484,7 +490,7 @@ func TestMetadefPropertiesCoreLifetimeSourceAndNativeRetryBoundaries(t *testing.
 			o.JSONBody = map[string]string{"name": "changed"}
 			return nil
 		}
-		value, err := propertyCoreScope(t, client, "parent").Create(context.Background(), "child", WithCreateType("string"), WithCreateTitle(""))
+		value, err := propertyCoreScope(t, client, "parent").Create(context.Background(), "child", request.Custom(func(c *CreateOpts) error { v := "string"; c.Type = &v; return nil }), request.Custom(func(c *CreateOpts) error { v := ""; c.Title = &v; return nil }))
 		if value != nil || calls != 1 || !errors.Is(err, resource.ErrInvalidOption) || !gophercloud.ResponseCodeIs(err, 503) {
 			t.Fatalf("retry ownership %+v %v calls%d", value, err, calls)
 		}
@@ -502,7 +508,7 @@ func TestMetadefPropertiesCoreLifetimeSourceAndNativeRetryBoundaries(t *testing.
 			o.OkCodes = []int{202}
 			return nil
 		}
-		value, err := propertyCoreScope(t, client, "parent").Create(context.Background(), "child", WithCreateType("string"), WithCreateTitle(""))
+		value, err := propertyCoreScope(t, client, "parent").Create(context.Background(), "child", request.Custom(func(c *CreateOpts) error { v := "string"; c.Type = &v; return nil }), request.Custom(func(c *CreateOpts) error { v := ""; c.Title = &v; return nil }))
 		var native gophercloud.ErrUnexpectedResponseCode
 		if value != nil || calls != 2 || !errors.As(err, &native) || native.Actual != 202 || !reflect.DeepEqual(native.Expected, []int{201}) || string(native.Body) != `{"name":"unexpected"}` {
 			t.Fatalf("actual code gate %+v %v", native, err)

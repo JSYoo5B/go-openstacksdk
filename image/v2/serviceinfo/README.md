@@ -17,7 +17,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.API.ListStores`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.API.AllStores`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithListStoresOptions`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithListStoresDetails`
 - `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
 - `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
@@ -146,7 +145,7 @@ func discoverStores(ctx context.Context, conn *openstack.Connection) ([]*service
         return nil, err
     }
     return service.ServiceInfo.AllStores(ctx,
-        serviceinfo.WithListStoresDetails(true),
+        request.Custom(func(c *request.Config[serviceinfo.ListStoresOpts]) error { c.Options.Details = true; return nil }),
         request.MaxItems(20),
     )
 }

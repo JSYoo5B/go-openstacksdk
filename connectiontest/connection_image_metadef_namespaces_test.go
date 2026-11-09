@@ -110,18 +110,18 @@ func TestConnectionImageMetadefNamespacesShareClientAndPagingDefaults(t *testing
 			t.Fatalf("namespace=%+v err=%v", value, err)
 		}
 	}
-	created, err := upper.API.MetadefNamespaces.Create(ctx, identity, ns.WithCreateHeaders(map[string]string{"X-Call": "namespaces"}), ns.WithCreateProtected(false), ns.WithCreateDescription("first\nsecond"))
+	created, err := upper.API.MetadefNamespaces.Create(ctx, identity, ns.WithCreateHeaders(map[string]string{"X-Call": "namespaces"}), request.Custom(func(c *ns.CreateOpts) error { v := false; c.Protected = &v; return nil }), request.Custom(func(c *ns.CreateOpts) error { v := "first\nsecond"; c.Description = &v; return nil }))
 	check(created, err, 201)
-	fetched, err := version.MetadefNamespaces.Get(ctx, identity, request.Header("X-Call", "namespaces"), ns.WithGetResourceType("OS::Glance::Image"))
+	fetched, err := version.MetadefNamespaces.Get(ctx, identity, request.Header("X-Call", "namespaces"), request.Custom(func(c *ns.GetOpts) error { v := "OS::Glance::Image"; c.ResourceType = &v; return nil }))
 	check(fetched, err, 200)
 	created.Header.Set("X-Proof", "caller")
 	created.Body["namespace"][1] = '!'
 	if fetched.Header.Get("X-Proof") != "namespace-1" || *created.Namespace != "passive-other" || string(fetched.Body["namespace"]) != `"passive-other"` {
 		t.Fatal("separate responses alias raw/typed evidence")
 	}
-	updated, err := version.MetadefNamespaces.Update(ctx, identity, request.Header("X-Call", "namespaces"), ns.WithUpdateNamespace("OS::Renamed"), ns.WithUpdateProtected(false))
+	updated, err := version.MetadefNamespaces.Update(ctx, identity, request.Header("X-Call", "namespaces"), request.Custom(func(c *ns.UpdateOpts) error { v := "OS::Renamed"; c.Namespace = &v; return nil }), request.Custom(func(c *ns.UpdateOpts) error { v := false; c.Protected = &v; return nil }))
 	check(updated, err, 200)
-	listOpts := []ns.ListOption{request.Header("X-Call", "namespaces"), request.Limit(1), ns.WithListVisibility("public"), ns.WithListResourceTypes("OS::Glance::Image,OS::Nova::Flavor"), ns.WithListSortKey("namespace"), ns.WithListSortDir("asc")}
+	listOpts := []ns.ListOption{request.Header("X-Call", "namespaces"), request.Limit(1), request.Custom(func(c *ns.ListOpts) error { c.Visibility = "public"; return nil }), request.Custom(func(c *ns.ListOpts) error { c.ResourceTypes = "OS::Glance::Image,OS::Nova::Flavor"; return nil }), request.Custom(func(c *ns.ListOpts) error { c.SortKey = "namespace"; return nil }), request.Custom(func(c *ns.ListOpts) error { c.SortDir = "asc"; return nil })}
 	capOpts := append(append([]ns.ListOption(nil), listOpts...), request.MaxItems(1))
 	sequence := version.MetadefNamespaces.List(ctx, capOpts...)
 	if calls != 3 {
